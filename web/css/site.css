@@ -1,0 +1,504 @@
+html,
+body {
+    height: 100%;
+}
+
+.wrap {
+    min-height: 100%;
+    height: auto;
+    margin: 0 auto -60px;
+    padding: 0 0 60px;
+}
+
+.wrap > .container {
+    padding: 70px 15px 20px;
+}
+
+.footer {
+    height: 60px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+.jumbotron {
+    text-align: center;
+    background-color: transparent;
+}
+
+.jumbotron .btn {
+    font-size: 21px;
+    padding: 14px 24px;
+}
+
+.not-set {
+    color: #c55;
+    font-style: italic;
+}
+
+/* add sorting icons to gridview sort links */
+a.asc:after, a.desc:after {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    padding-left: 5px;
+}
+
+a.asc:after {
+    content: /*"\e113"*/ "\e151";
+}
+
+a.desc:after {
+    content: /*"\e114"*/ "\e152";
+}
+
+.sort-numerical a.asc:after {
+    content: "\e153";
+}
+
+.sort-numerical a.desc:after {
+    content: "\e154";
+}
+
+.sort-ordinal a.asc:after {
+    content: "\e155";
+}
+
+.sort-ordinal a.desc:after {
+    content: "\e156";
+}
+
+.grid-view th {
+    white-space: nowrap;
+}
+
+.hint-block {
+    display: block;
+    margin-top: 5px;
+    color: #999;
+}
+
+.error-summary {
+    color: #a94442;
+    background: #fdf7f7;
+    border-left: 3px solid #eed3d7;
+    padding: 10px 20px;
+    margin: 0 0 15px 0;
+}
+
+/* align the logout "link" (button in form) of the navbar */
+.nav li > form > button.logout {
+    padding: 15px;
+    border: none;
+}
+
+@media(max-width:767px) {
+    .nav li > form > button.logout {
+        display:block;
+        text-align: left;
+        width: 100%;
+        padding: 10px 15px;
+    }
+}
+
+.nav > li > form > button.logout:focus,
+.nav > li > form > button.logout:hover {
+    text-decoration: none;
+}
+
+.nav > li > form > button.logout:focus {
+    outline: none;
+}
+
+.comps-view .software_item .os-name {display: none;}
+.comps-view .software_item td {padding-right: 5px;}
+
+.hardware_item.excluded {color: lightgrey}
+
+.hardware_item h4 {display: inline;}
+.software_item .show-on-hover,      .hardware_item .show-on-hover {display: none;}
+.software_item:hover .show-on-hover,.hardware_item:hover .show-on-hover {display: inline-block;}
+
+
+
+/* ПАСПОРТ */
+
+div.arm_passport h3 {display: inline;}
+div.arm_passport div.header {text-align: center;}
+/* Табличка */
+div.arm_passport td {
+    border: black 1px solid;
+    border-collapse: collapse;
+    padding-left: 4px;
+}
+div.arm_passport th {
+    border: black 1px solid;
+    border-collapse: collapse;
+    padding-left: 4px;
+    font-weight: bold;
+}
+div.arm_passport table {width: 100%}
+div.soft_unagreed,
+div.soft_unknown,
+div.soft_ignored,
+div.soft_free,
+div.soft_agreed { margin-bottom: 30px;}
+div.arm_passport #unagreed_hdr, div.arm_passport #unknown_hdr, div.arm_passport #agreed_hdr {color: red; cursor: pointer;}
+div.arm_passport .hardware_item.saved-found,   div.arm_passport .software_item.saved-found {background-color: #ccffcc;}
+div.arm_passport .hardware_item.saved-missing, div.arm_passport .software_item.saved-missing {background-color: #ffffcc;}
+div.arm_passport .hardware_item.unsaved-found, div.arm_passport .software_item.saved-missing {background-color: #ffcccc;}
+
+div.arm_passport #unknown_items td.passport_tools,
+div.arm_passport #unknown_items th.passport_tools,
+div.arm_passport #ignored_items td.passport_tools,
+div.arm_passport #ignored_items th.passport_tools,
+div.arm_passport #free_items td.passport_tools,
+div.arm_passport #free_items th.passport_tools
+{display: none !important;}
+
+div.arm_passport td.os-name {
+    word-break: keep-all;
+    white-space: nowrap;
+}
+
+div.edit-hw-item td {width: 20%;}
+
+.underlined {text-decoration: underline;}
+
+@media print {
+    .wrap {padding: 0!important; margin: 0!important;}
+    .wrap .container {padding: 0 !important;}
+    #reformal_tab, .footer {display: none !important;}
+    div.arm_passport a:after{display: none !important;}
+    div.arm_passport #free_hdr,
+    div.arm_passport #ignored_hdr,
+    div.arm_passport #unagreed_hdr,
+    div.arm_passport #unknown_hdr {display: none !important;}
+    div.arms-view .arms-view-header {display: none !important;}
+    .breadcrumb, .passport_tools {display: none;}
+
+    div.arm_passport .glyphicon{display: none !important;}
+    div.arm_passport {font-size: 3mm !important;}
+    div.arm_passport .soft td {font-size: 2.5mm !important;}
+    div.arm_passport .header h3, div.arm_passport h3{font-size: 3.2mm !important; font-weight: bold !important;}
+    div.arm_passport .header h1{font-size: 5mm !important;  margin: 0 !important;}
+    div.arm_passport .excluded, div.arm_passport .hardware_item.unsaved-found {display: none;}
+    div.arm_passport .hardware_item.saved-found, div.arm_passport .hardware_item.saved-missing {background-color: white;}
+}
+
+
+
+/*
+ * Сканы документов
+ */
+iframe.scan-pdf-preview {width:100%; height:1000px;}
+
+/* внешний блок */
+div.scans-thumb-tiles{
+    text-align: left;
+    vertical-align: top;
+}
+
+/* плитка */
+div.scans-thumb-tile{
+    display: inline-block;
+    width: 180px;
+    height: 196px;
+    min-height: 220px;
+    padding: 3px;
+    text-align: center;
+    vertical-align: top;
+}
+
+/* картинка в плитке */
+div.scans-thumb-img{
+    display: inline-block;
+    width: 162px;
+    min-height: 162px;
+    height: 162px;
+    text-align: center;
+    border: lightgrey solid 1px;
+    border-radius: 3px;
+    position: relative;
+}
+div.scans-thumb-img > span.upload-scan {
+    font-size:24px;
+    margin-top:16px;
+}
+/* само изображение */
+div.scans-thumb-img img {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: -2px;
+}
+
+/* подпись к скану */
+div.scans-thumb-text{
+    font-size: 8px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* элементы управления */
+div.scans-thumb-ctrls{
+    position: absolute;
+    width: 100%;
+    text-align: right;
+    font-size: 12px;
+    text-shadow: 0 0 2px white ;
+    display: none;
+    cursor: pointer;
+    letter-spacing: 0;
+}
+
+/* показывать инструменты при наведении мыши */
+div.scans-thumb-img:hover > div.scans-thumb-ctrls {
+    display: block;
+}
+
+
+/***************************
+    КАРТА РАБОЧИХ МЕСТ
+****************************/
+
+/*Шапка помещения 1 уровня*/
+div.places-container-hdr-depth0
+{
+    background-color: yellow;
+}
+
+div.places-container-hdr-depth1
+{
+    background: none;
+    font-size: 10px;
+}
+
+div.places-container-hdr > div.places-addr,
+div.places-container-hdr > div.org-phones {
+    display: inline;
+    padding: 3px;
+}
+
+.places-container h1 {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Табличка кабинета */
+table.places-cabinet-container
+{
+    border: none;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-bottom: 8px;
+}
+
+/* ячейка названия кабинета */
+table.places-cabinet-container td.places-arms-cabinet {
+    width: 50px;
+    background-color: white;
+    border: solid 1px darkgray;
+    border-right: none;
+    text-overflow: clip;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* ячейка кабинета с таблицей АРМов */
+table.places-cabinet-container td.places-arms-list {
+    border: none;
+}
+
+/* табличка с АРМами внутри кабинета */
+table.places-arms-container
+{
+    border: none;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0;
+    padding: 0;
+}
+
+table.places-arms-container td {
+    text-overflow: clip;
+    overflow: hidden;
+    white-space: nowrap;
+    border: solid 1px darkgray;
+}
+
+table.places-arms-container td.arm_id {width: 120px; background-color: white}
+table.places-arms-container td.arm_uname {width: 220px; background-color: white}
+table.places-arms-container td.arm_servies {width: 320px; background-color: white}
+table.places-arms-container td.arm_hostname {width: 120px; background-color: white}
+table.places-arms-container td.tech_whitespace {width: 240px; background-color: white}
+table.places-arms-container td.arm_model {width: 220px;}
+table.places-arms-container td.tech_model {width: 280px;}
+table.places-arms-container td.arm_uphone {width: 100px;}
+table.places-arms-container td.hardware {width: 240px;}
+table.places-arms-container td.attachments {width: 70px;}
+table.places-arms-container td.item_status {width: 60px;}
+table.places-arms-container td.item_ip {width: 110px;}
+table.places-arms-container td.item_sn {width: 100px;}
+
+
+span.arms-comp-attach-selector,
+span.arms-num-selector {
+    cursor: pointer;
+}
+span.arms-comp-attach-selector:hover,
+span.arms-num-selector:hover {
+    text-decoration: underline;
+}
+
+/* Раскраска оборудования */
+
+/* Принтеры */
+table.places-arms-container tr.tech_printer_a4,
+table.places-arms-container tr.tech_printer_a3,
+table.places-arms-container tr.tech_printer_a3_ink,
+table.places-arms-container tr.tech_mfu_bw_a4,
+table.places-arms-container tr.tech_mfu_bw_a3,
+table.places-arms-container tr.tech_mfu_color_a4,
+table.places-arms-container tr.tech_mfu_color_a3
+{background-color: lightgrey}
+
+
+td.arm_uphone.tech_voip_phone,
+table.places-arms-container tr.tech_voip_gw,
+table.places-arms-container tr.tech_voip_phone
+{background-color: #ccffcc}
+
+table.places-arms-container tr.tech_net_switch,
+table.places-arms-container tr.tech_net_router
+{background-color: plum}
+
+table.places-arms-container tr.tech_wifi_ap
+{background-color: lightskyblue}
+
+
+/* Уволенные сотрудники */
+span.users-item.uvolen a {color: red;}
+
+/* Раскраска статусов */
+table.places-arms-container td.item_status.state_required {background-color: cyan}
+table.places-arms-container td.item_status.state_confirmed {background-color: #1da7ee}
+table.places-arms-container td.item_status.state_in_supply_service {background-color: cyan}
+table.places-arms-container td.item_status.state_in_warehouse {background-color: grey}
+table.places-arms-container td.item_status.state_operating {background-color: #5cb85c}
+table.places-arms-container td.item_status.state_malfunction {background-color: orange}
+table.places-arms-container td.item_status.state_broken {background-color: red}
+
+/* РАСКРАСКА ВОЗРАСТА ИНФОРМАЦИИ ОБ ОС */
+table.places-arms-container td.arm_hostname.hour_fresh {background-color: lightskyblue}
+table.places-arms-container td.arm_hostname.day_fresh {background-color: lightblue}
+table.places-arms-container td.arm_hostname.week_fresh {background-color: lightgreen}
+table.places-arms-container td.arm_hostname.month_fresh {background-color: lightgoldenrodyellow}
+table.places-arms-container td.arm_hostname.over_month_fresh {background-color: lightpink}
+
+/* СЕРВЕР */
+table.places-arms-container tr.server td {
+    background: linear-gradient(45deg, rgba(0, 0, 0, 0) 49.9%, rgba(0, 0, 0, 0.05) 49.9%, rgba(0, 0, 0, 0.05) 60%, rgba(0, 0, 0, 0) 60%)
+    fixed,
+    linear-gradient(45deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0) 10%)
+    fixed;
+    background-size: 0.5em 0.5em
+}
+
+
+/* ДОКУМЕНТЫ */
+
+/* выделенный на карте контракт */
+span.contracts_selected {font-weight: bold}
+span.contracts-item {display: inline-block}
+a.contract_inactive {color: gray; text-decoration: line-through}
+
+/* ТУЛТИПЫ */
+
+.ttip-card h1 {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+}
+
+.ttip-card p {
+    margin-bottom: 3px;
+}
+
+.ttip-card h3 {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+}
+
+.ttip-card h4 {
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+}
+
+.qtip-wide {
+    width: 500px;
+}
+
+
+/* РАСКРЫВАЮЩИЙСЯ СПИСОК ДЕРЕВО */
+
+/* ul-treefree */
+ul.ul-treefree { padding-left:25px; }
+ul.ul-treefree ul { margin:0; padding-left:6px; }
+ul.ul-treefree li { position:relative; list-style:none outside none; border-left:solid 1px #999; margin:0; padding:0 0 0 19px; line-height:23px; }
+ul.ul-treefree li:before { content:''; display:block; border-bottom:solid 1px #999; position:absolute; width:18px; height:11px; left:0; top:0; }
+ul.ul-treefree li:last-child { border-left:0 none; }
+ul.ul-treefree li:last-child:before { border-left:solid 1px #999; }
+ul.candrop li { border: none; margin:0; padding:0;}
+ul.candrop li:before {border: none;}
+ul.candrop li:last-child:before {border: none;}
+
+/* ul-dropfree */
+ul.ul-dropfree div.drop {
+    width:11px;
+    height:11px;
+    position:absolute;
+    z-index:10;
+    top:6px;
+    left:-6px;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAALCAIAAAD0nuopAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAE1JREFUeNpinDlzJgNlgAWI09LScEnPmjWLoAImrHpIAkwMFAMqGMGC6X44GzkIsHoQooAFTTVQKdbAwxOigyMsmIh3MC7ASHnqBAgwAD4CGeOiDhXRAAAAAElFTkSuQmCC');
+    background-position:-11px 0;
+    background-repeat:no-repeat;
+    cursor:pointer;
+}
+
+/* ПРОЧЕЕ */
+
+.href {
+    cursor: pointer;
+}
+
+
+.cursor-default {
+    cursor: default;
+}
+
+
+/* Корректировки BOOTSTRAP */
+
+@media (min-width: 1200px) {
+    .container-large {
+        width: 1600px;
+    }
+}
+
+.container-large {
+    max-width: 100%;
+}

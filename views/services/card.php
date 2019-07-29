@@ -1,0 +1,95 @@
+<?php
+
+use yii\helpers\Html;
+use yii\widgets\DetailView;
+
+/* @var $this yii\web\View */
+/* @var $model app\models\Services */
+
+if (!isset($static_view)) $static_view=false;
+$comps=$model->comps;
+$services=$model->depends;
+$dependants=$model->dependants;
+$deleteable=!count($comps)&&!count($services)&&!count($dependants);
+?>
+
+<h1>
+    <?= Html::encode($model->name) ?>
+    <?= $static_view?'':(Html::a('<span class="glyphicon glyphicon-pencil"></span>',['services/update','id'=>$model->id])) ?>
+    <?php if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['services/delete', 'id' => $model->id], [
+	    'data' => [
+		    'confirm' => 'Удалить этот сервис? Это действие необратимо!',
+		    'method' => 'post',
+	    ],
+    ]) ?>
+</h1>
+<h4>
+    (<?= $model->is_end_user?'Предоставляется пользователям':'Внутренний сервис' ?>)
+</h4>
+
+<?php if(!$static_view&&!$deleteable) { ?>
+    <p>
+        <span class="glyphicon glyphicon-warning-sign"></span> Невозможно в данный момент удалить этот сервис, т.к. присутствуют привязанные объекты: компьютеры или другие сервисы.
+    </p>
+<?php } ?>
+<br />
+<p>
+    <?= Yii::$app->formatter->asNtext($model->description) ?>
+</p>
+<br />
+
+<?php if (is_object($model->userGroup)) { ?>
+    <h4>
+        Ответственные: <?= $this->render('/user-groups/item',['model'=>$model->userGroup,'static_view'=>$static_view]) ?>
+    </h4>
+    <p>
+    <?php
+        foreach ($model->userGroup->users as $user)
+            echo $this->render('/users/item',['model'=>$user,'static_view'=>$static_view]).'<br />';
+    ?>
+    </p>
+    <br />
+<?php } ?>
+
+<?php if (count($comps)) { ?>
+    <h4>Выполняется на компьютерах:</h4>
+    <p>
+		<?php
+		foreach ($comps as $comp)
+			echo $this->render('/comps/item',['model'=>$comp,'static_view'=>$static_view]).'<br />';
+		?>
+    </p>
+    <br />
+<?php } ?>
+
+<?php if (count($services)) { ?>
+    <h4>Зависит от сервисов:</h4>
+    <p>
+		<?php
+		foreach ($services as $service)
+			echo $this->render('/services/item',['model'=>$service,'static_view'=>$static_view]).'<br />';
+		?>
+    </p>
+    <br />
+<?php } ?>
+
+<?php if (count($dependants)) { ?>
+    <h4>Зависимые сервисы:</h4>
+    <p>
+		<?php
+		foreach ($dependants as $service)
+			echo $this->render('/services/item',['model'=>$service,'static_view'=>$static_view]).'<br />';
+		?>
+    </p>
+    <br />
+<?php } ?>
+
+<?php if (!$static_view && strlen($model->notebook)) { ?>
+    <h4>Записная книжка:</h4>
+    <p>
+		<?= Yii::$app->formatter->asNtext($model->notebook) ?>
+    </p>
+    <br />
+<?php } ?>
+
+</div>

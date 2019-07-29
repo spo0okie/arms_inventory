@@ -1,0 +1,29 @@
+<?php
+
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+use kartik\select2\Select2;
+use kartik\date\DatePicker;
+
+/* @var $this yii\web\View */
+/* @var $model app\models\LicTypes */
+/* @var $form yii\widgets\ActiveForm */
+?>
+
+<div class="lic-types-form">
+
+    <?php $form = ActiveForm::begin(); ?>
+
+    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'comment')->textarea() ?>
+
+    <div class="form-group">
+        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+    </div>
+
+    <?php ActiveForm::end(); ?>
+
+</div>
