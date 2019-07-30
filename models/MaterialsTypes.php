@@ -66,4 +66,13 @@ class MaterialsTypes extends \yii\db\ActiveRecord
 			'comment' => 'Все что нужно знать про эту категорию материалов сверх уже внесенной информации',
 		];
 	}
+
+	public static function fetchNames(){
+		$list= static::find()->orderBy('name')
+			//->joinWith('place')
+			//->select(['id','name'])
+			->all();
+		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
+	}
+
 }
