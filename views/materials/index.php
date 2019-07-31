@@ -6,7 +6,7 @@ use yii\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\MaterialsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-
+$renderer=$this;
 $this->title = \app\models\Materials::$title;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -27,13 +27,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
             //'id',
             //'parent_id',
-            'date',
             //'type_id',
-            'model',
+	        [
+		        'attribute'=>'model',
+		        'format'=>'raw',
+		        'value' => function($data) use($renderer){
+			        return $renderer->render('/materials/item',['model'=>$data,'full'=>true]);
+		        }
+	        ],
+	        'comment:ntext',
+	        'date',
 	        'rest',
-            'places_id',
             //'it_staff_id',
-            //'comment:ntext',
             //'history:ntext',
 
             ['class' => 'yii\grid\ActionColumn'],

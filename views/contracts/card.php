@@ -11,6 +11,7 @@ use yii\bootstrap\Modal;
 $childs=    $model->childs;
 $arms=      $model->arms;
 $techs=     $model->techs;
+$materials= $model->materials;
 $lics=      $model->licItems;
 $inets=     $model->orgInets;
 $phones=    $model->orgPhones;
@@ -211,6 +212,16 @@ JS;
 				<?php
 			}
 			echo '<br/>';
+		} ?>
+    </p>
+    <br />
+<?php } ?>
+
+<?php if (count($materials)) { ?>
+    <h4>Прикреплен к поступлениям ЗиП и материалов:</h4>
+    <p>
+		<?php foreach ($materials as $material) {
+			echo $this->render('/materials/item',['model'=>$material]);
 		} ?>
     </p>
     <br />

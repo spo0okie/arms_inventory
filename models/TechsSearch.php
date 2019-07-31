@@ -12,14 +12,18 @@ use app\models\Techs;
  */
 class TechsSearch extends Techs
 {
-    /**
+
+	public $model;
+	public $place;
+
+	/**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
             [['id', 'model_id', 'arms_id', 'places_id'], 'integer'],
-            [['num', 'inv_num', 'sn', 'user_id', 'it_staff_id', 'ip', 'url', 'comment'], 'safe'],
+            [['num', 'inv_num', 'sn', 'user_id', 'it_staff_id', 'ip', 'url', 'comment','model','place'], 'safe'],
         ];
     }
 
@@ -41,12 +45,14 @@ class TechsSearch extends Techs
      */
     public function search($params)
     {
-        $query = Techs::find();
+        $query = Techs::find()
+            ->joinWith(['place','model','arm','arm.place','model.manufacturer']);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+	        'pagination' => ['pageSize' => 100,],
         ]);
 
         $this->load($params);
@@ -57,22 +63,14 @@ class TechsSearch extends Techs
             return $dataProvider;
         }
 
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'model_id' => $this->model_id,
-            'arms_id' => $this->arms_id,
-            'places_id' => $this->places_id,
-        ]);
-
-        $query->andFilterWhere(['like', 'num', $this->num])
-            ->andFilterWhere(['like', 'inv_num', $this->inv_num])
-            ->andFilterWhere(['like', 'sn', $this->sn])
-            ->andFilterWhere(['like', 'user_id', $this->user_id])
-            ->andFilterWhere(['like', 'it_staff_id', $this->it_staff_id])
-            ->andFilterWhere(['like', 'ip', $this->ip])
-            ->andFilterWhere(['like', 'url', $this->url])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query->andFilterWhere(['like', 'techs.num', $this->num])
+            ->andFilterWhere(['like', 'techs.inv_num', $this->inv_num])
+            ->andFilterWhere(['like', 'techs.sn', $this->sn])
+            ->andFilterWhere(['or',['like', 'getplacepath(places_techs.id)', $this->place],['like', 'getplacepath(places.id)', $this->place]])
+            ->andFilterWhere(['like', 'concat(manufacturers.name," ",tech_models.name)', $this->model])
+            ->andFilterWhere(['like', 'techs.ip', $this->ip]);
+            //->andFilterWhere(['like', 'url', $this->url])
+            //->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;
     }

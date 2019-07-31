@@ -51,7 +51,12 @@ class PlacesController extends Controller
     public function actionIndex()
     {
         return $this->render('index', [
-            'models' => Places::find()->orderBy('name')->all(),
+            'models' => Places::find()
+	            ->select([
+	            	'{{places}}.*',
+		            'getplacepath(id) AS path'
+	            ])
+	            ->orderBy('path')->all(),
         ]);
     }
 

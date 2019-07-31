@@ -40,7 +40,8 @@ class MaterialsSearch extends Materials
      */
     public function search($params)
     {
-        $query = Materials::find();
+        $query = Materials::find()
+            ->joinWith(['itStaff','materialType']);
 
         // add conditions that should always apply here
 
@@ -66,10 +67,8 @@ class MaterialsSearch extends Materials
             'places_id' => $this->places_id,
         ]);
 
-        $query->andFilterWhere(['like', 'model', $this->model])
-            ->andFilterWhere(['like', 'it_staff_id', $this->it_staff_id])
-            ->andFilterWhere(['like', 'comment', $this->comment])
-            ->andFilterWhere(['like', 'history', $this->history]);
+        $query->andFilterWhere(['like', 'concat( getplacepath(places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", model )', $this->model])
+            ->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;
     }

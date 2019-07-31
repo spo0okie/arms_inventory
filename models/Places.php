@@ -27,7 +27,48 @@ use Yii;
 class Places extends \yii\db\ActiveRecord
 {
 
+
+	/*
+	для рекурсивного запроса полного пути помещения в БД были добавлены хранимая процедура и функция ее вызывающая
+	уперто отсюда: https://stackoverflow.com/questions/20215744/how-to-create-a-mysql-hierarchical-recursive-query
+
+DROP PROCEDURE IF EXISTS getplacepath;
+DELIMITER $$
+CREATE PROCEDURE getplacepath(IN place_id INT, OUT path TEXT)
+BEGIN
+    DECLARE placename VARCHAR(20);
+    DECLARE temppath TEXT;
+    DECLARE tempparent INT;
+    SET max_sp_recursion_depth = 32;
+    SELECT short, parent_id FROM places WHERE id=place_id INTO placename, tempparent;
+    IF tempparent IS NULL
+    THEN
+        SET path = placename;
+    ELSE
+        CALL getplacepath(tempparent, temppath);
+        SET path = CONCAT(temppath, '/', placename);
+    END IF;
+END$$
+DELIMITER ;
+
+
+DROP FUNCTION IF EXISTS getplacepath;
+DELIMITER $$
+CREATE FUNCTION getplacepath(place_id INT) RETURNS TEXT DETERMINISTIC
+BEGIN
+    DECLARE res TEXT;
+    CALL getplacepath(place_id, res);
+    RETURN res;
+END$$
+DELIMITER ;
+
+	проверено вызовом
+	SELECT *,getplacepath(Id) as path FROM `places`
+	работает
+	 */
+
 	public static $title="Помещения";
+	//public $path;
 
 	private $phones_cache=null;
 	private $childs_cache=null;
@@ -175,7 +216,14 @@ class Places extends \yii\db\ActiveRecord
 	public static function fetchAll(){
 		if (!is_null(static::$all_items)) return static::$all_items;
 		static::$all_items=[];
-		foreach (static::find()->all() as $item) static::$all_items[$item['id']]=$item;
+		$tmp=static::find()
+			->select([
+				'{{places}}.*',
+				'getplacepath(id) AS path'
+			])
+			->orderBy('path')
+			->all();
+		foreach ($tmp as $item) static::$all_items[$item['id']]=$item;
 		return static::$all_items;
 	}
 
@@ -207,6 +255,7 @@ class Places extends \yii\db\ActiveRecord
 	}
 
 	public function getFullName(){
+		if (!empty($this->path)) return $this->path;
 		return self::fetchFullName($this->id);
 		//if (is_object($parent=$this->parent)) $name= $parent->fullName.'/'.$name;
 

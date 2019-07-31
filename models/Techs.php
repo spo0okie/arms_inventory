@@ -131,11 +131,13 @@ class Techs extends \yii\db\ActiveRecord
             'id' => 'Идентификатор',
             'num' => 'Инвентарный номер',
             'inv_num' => 'Бухг. инв. номер',
-            'model_id' => 'Модель оборудования',
+	        'model_id' => 'Модель оборудования',
+	        'model' => 'Модель оборудования',
             'sn' => 'Серийный номер',
 	        'state_id' => 'Состояние',
 	        'arms_id' => 'Рабочее место',
-            'places_id' => 'Помещение',
+	        'places_id' => 'Помещение',
+	        'place' => 'Помещение',
 	        'user_id' => 'Пользователь',
 	        'contracts_ids' => 'Связанные документы',
             'it_staff_id' => 'Сотрудник службы ИТ',
@@ -231,12 +233,21 @@ class Techs extends \yii\db\ActiveRecord
     }
 
 	/**
+	 * @return \app\models\Places;
+	 */
+	public function getEffectivePlace()
+	{
+		return ($this->arms_id)?$this->arm->place:$this->place;
+		//return $this->hasOne(Places::className(), ['id' => 'places_id']);
+	}
+
+	/**
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getPlace()
 	{
-		if ($this->arms_id) return $this->arm->place;
-		return $this->hasOne(Places::className(), ['id' => 'places_id']);
+		return $this->hasOne(Places::className(), ['id' => 'places_id'])
+			->from(['places_techs'=>Techs::tableName()]);
 	}
 
 	/**
@@ -338,11 +349,7 @@ class Techs extends \yii\db\ActiveRecord
 
 	public static function fetchNames(){
 		$list= static::find()
-			->joinWith('model')
-			->joinWith('model.type')
-			->joinWith('origPlace')
-			->joinWith('arm')
-			->joinWith('arm.place')
+			->joinWith(['model','model.type','origPlace','arm','arm.place'])
 			//->select(['id','name'])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');

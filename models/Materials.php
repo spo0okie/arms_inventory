@@ -23,7 +23,9 @@ use Yii;
  * @property \app\models\Places $place Помещение
  * @property \app\models\Users $itStaff Ответственный
  * @property \app\models\Materials $parent Источник
+ * @property \app\models\MaterialsTypes $materialType Категория
  * @property \app\models\Materials[] $childs Источник
+ * @property \app\models\Contracts[] $contracts Документы
  */
 class Materials extends \yii\db\ActiveRecord
 {
@@ -89,7 +91,7 @@ class Materials extends \yii\db\ActiveRecord
 			'used' => 'Использовано',
 			'rest' => 'Остаток',
 			'type_id' => 'Тип материалов',
-			'model' => 'Модель',
+			'model' => 'Наименование',
 			'places_id' => 'Помещение',
 			'it_staff_id' => 'Сотрудник службы ИТ',
 			'comment' => 'Комментарий',
@@ -110,7 +112,7 @@ class Materials extends \yii\db\ActiveRecord
 			'date' => 'Когда произошло поступление этого материала',
 			'count' => 'Сколько материала поступило',
 			//'type_id' => 'Тип материалов',
-			//'model' => 'Модель',
+			'model' => 'Желательно использовать наименование из уже использованных для возможности группировки и чтобы не плодить лишнюю номенклатуру',
 			'places_id' => 'Где хранятся поступившие материалы',
 			'it_staff_id' => 'Кто отвечает за хранение материалов',
 			'comment' => 'Все что нужно знать, но не влезло в остальные поля',

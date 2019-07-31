@@ -39,6 +39,7 @@ use yii\web\JsExpression;
  * @property Contracts $predecessor
  * @property Contracts[] $childs
  * @property Arms[] $arms
+ * @property Materials[] $materials
  * @property Techs[] $techs
  * @property LicItems[] $licItems
  * @property Arms[] $armsChain
@@ -103,7 +104,8 @@ class Contracts extends \yii\db\ActiveRecord
 					'partners_ids' => 'partners',
 					'lics_ids' => 'licItems',
 					'arms_ids' => 'arms',
-					'techs_ids' => 'techs'
+					'techs_ids' => 'techs',
+					'materials_ids' => 'materials'
 				]
 			]
 		];
@@ -327,6 +329,15 @@ class Contracts extends \yii\db\ActiveRecord
 	{
 		return static::hasMany(Arms::className(), ['id' => 'arms_id'])
 			->viaTable('{{%contracts_in_arms}}', ['contracts_id' => 'id']);
+	}
+
+	/**
+	 * Возвращает набор связанных Армов
+	 */
+	public function getMaterials()
+	{
+		return static::hasMany(Materials::className(), ['id' => 'materials_id'])
+			->viaTable('{{%contracts_in_materials}}', ['contracts_id' => 'id']);
 	}
 
 	/**
