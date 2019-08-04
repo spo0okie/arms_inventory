@@ -4,21 +4,24 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Materials;
+use app\models\MaterialsUsages;
 
 /**
- * MaterialsSearch represents the model behind the search form of `app\models\Materials`.
+ * MaterialsUsagesSearch represents the model behind the search form of `app\models\MaterialsUsages`.
  */
-class MaterialsSearch extends Materials
+class MaterialsUsagesSearch extends MaterialsUsages
 {
+
+	public $sname;
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['id', 'parent_id', 'count', 'type_id', 'places_id'], 'integer'],
-            [['date', 'model', 'it_staff_id', 'comment', 'history'], 'safe'],
+            [['id', 'materials_id', 'count', 'arms_id', 'techs_id'], 'integer'],
+            [['date', 'comment','sname'], 'safe'],
         ];
     }
 
@@ -40,8 +43,8 @@ class MaterialsSearch extends Materials
      */
     public function search($params)
     {
-        $query = Materials::find()
-            ->joinWith(['itStaff','type']);
+        $query = MaterialsUsages::find()
+        ->joinWith(['material','material.type','material.place','material.itStaff','arm','tech']);
 
         // add conditions that should always apply here
 
@@ -60,15 +63,28 @@ class MaterialsSearch extends Materials
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'parent_id' => $this->parent_id,
-            'date' => $this->date,
+            'materials_id' => $this->materials_id,
             'count' => $this->count,
-            'type_id' => $this->type_id,
-            'places_id' => $this->places_id,
+            'date' => $this->date,
+            'arms_id' => $this->arms_id,
+            'techs_id' => $this->techs_id,
         ]);
 
-        $query->andFilterWhere(['like', 'concat( getplacepath(places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", model )', $this->model])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query->andFilterWhere([
+        	'like',
+	        'CONCAT('.
+	        'getplacepath(places.id), '.
+	        '"(", ifnull(users.Ename,""), ") \ ", '.
+	        'materials_types.name, ":", '.
+	        'materials.model, " ", '.
+	        'materials_usages.count, '.
+	        'materials_types.units, " -> ", '.
+	        'ifnull(arms.num,""), " " ,'.
+	        'ifnull(techs.num,"") , " ",'.
+	        'materials_usages.comment , '.
+	        '" //", materials_usages.date)',
+	        $this->sname
+        ]);
 
         return $dataProvider;
     }

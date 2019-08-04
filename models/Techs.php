@@ -34,6 +34,7 @@ use Yii;
  * @property TechModels $model
  * @property TechTypes $type
  * @property Contracts[] $contracts
+ * @property MaterialsUsages[] $materialsUsages
  */
 
 class Techs extends \yii\db\ActiveRecord
@@ -211,8 +212,15 @@ class Techs extends \yii\db\ActiveRecord
 	 */
 	public function getModel()
 	{
-		if (!is_null($this->model_cache)) return $this->model_cache;
 		return $this->model_cache=$this->hasOne(TechModels::className(), ['id' => 'model_id']);
+	}
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getMaterialsUsages()
+	{
+		return $this->hasMany(MaterialsUsages::className(), ['techs_id' => 'id']);
 	}
 
 	/**

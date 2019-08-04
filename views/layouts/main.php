@@ -125,6 +125,7 @@ $this->beginBody()
 					    ['label' => \app\models\Techs::$title, 'url' => ['/techs/index']],
 					    ['label' => \app\models\MaterialsTypes::$title, 'url' => ['/materials-types/index']],
 					    ['label' => \app\models\Materials::$title, 'url' => ['/materials/index']],
+					    ['label' => \app\models\MaterialsUsages::$title, 'url' => ['/materials-usages/index']],
 					    ['label' => 'Производители', 'url' => ['/manufacturers/index']],
 					    ['label' => 'Игнорируемое', 'url' => ['/hw-ignore/index']],
 					    ['label' => 'Состояния', 'url' => ['/tech-states/index']],

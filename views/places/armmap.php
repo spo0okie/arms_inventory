@@ -16,7 +16,7 @@ echo $this->render('hdr_create_obj');
 
 <div class="places-index">
 
-	<?php foreach ($models as $model) if (!is_object($model->parent)) {
+	<?php foreach ($models as $model) if (!$model->parent_id) {
 		echo $this->render('container',['model'=>$model,'models'=>$models,'depth'=>0]);
 	} ?>
     <br />

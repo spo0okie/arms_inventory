@@ -113,4 +113,11 @@ JS;
 
     </p>
 
+    <h4>Использованные материалы:</h4>
+    <p>
+        <?php foreach($model->materialsUsages as $materialsUsage) {
+            echo $this->render('/materials-usages/item',['model'=>$materialsUsage,'material'=>true,'count'=>true]).'<br />';
+        } ?>
+    </p>
+
 </div>

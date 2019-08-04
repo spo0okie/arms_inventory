@@ -23,6 +23,7 @@ use Yii;
  * @property OrgPhones[] $phones
  * @property OrgPhones[] $phonesRecursive
  * @property Places[] $childs
+ * @property Materials[] $materials
  */
 class Places extends \yii\db\ActiveRecord
 {
@@ -188,6 +189,16 @@ DELIMITER ;
 			->from(['places_techs'=>Techs::tableName()])
 			->andWhere(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
 
+	}
+
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getMaterials()
+	{
+		return $this->hasMany(Materials::className(), ['places_id' => 'id'])
+			->from(['places_materials'=>Materials::tableName()]);
 	}
 
 	/**

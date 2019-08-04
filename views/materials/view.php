@@ -2,13 +2,14 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\bootstrap\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Materials */
 
 $deleteable=!count($model->childs);
 
-$this->title =  $model->materialType->name.': '. $model->model;
+$this->title =  $model->type->name.': '. $model->model;
 
 $this->params['breadcrumbs'][] = ['label' => \app\models\Materials::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
@@ -26,10 +27,15 @@ $this->params['breadcrumbs'][] = $this->title;
 		        'method' => 'post',
 	        ],
         ]):'' ?>
+
     </h1>
 
     <p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
-    <p>Поступило <?= $model->date?> <b><?= $model->count?><?= $model->materialType->units?></b>. Остаток <b><?= $model->rest?><?= $model->materialType->units?></b></p>
+    <p>
+        Поступило <?= $model->date?> <b><?= $model->count?><?= $model->type->units?></b>. Остаток <b><?= $model->rest?><?= $model->type->units?></b>
+	    <?php if ($model->rest >0) { ?> <a onclick="$('#material_new_usage_modal').modal('toggle')" class="href btn btn-primary">использовать</a> <?php } ?>
+    </p>
+
     <br>
 
 	<?php if (!empty($model->contracts_ids)) { ?>
@@ -61,11 +67,38 @@ $this->params['breadcrumbs'][] = $this->title;
         <h4>Частично перемещено в</h4>
         <p>
 	        <?php foreach ($model->childs as $child) { ?>
-	        <?= $this->render('/materials/item',['model'=>$child,'full'=>true]) ?> (<?= $child->count?><?= $model->materialType->units?>) <br />
+	        <?= $this->render('/materials/item',['model'=>$child,'from'=>true]) ?> (<?= $child->count?><?= $model->type->units?>) <br />
 	        <?php } ?>
         </p>
         <br/>
 	<?php } ?>
+
+	<?php if (!empty($model->usages)) { ?>
+        <h4>Частично израсходовано в</h4>
+        <p>
+			<?php foreach ($model->usages as $usage) { ?>
+				<?= $this->render('/materials-usages/item',['model'=>$usage,'count'=>true,'to'=>true]) ?>
+			<?php } ?>
+        </p>
+        <br/>
+	<?php } ?>
+
+    <?php
+    //моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
+    Modal::begin([
+        'id'=>'material_new_usage_modal',
+        'header' => '<h2>использовать материал</h2>',
+	    'size'=>Modal::SIZE_LARGE,
+    ]);
+        $usage=new \app\models\MaterialsUsages();
+        $usage->materials_id=[$model->id];
+        echo $this->render('/materials-usages/_form',['model'=>$usage]);
+    Modal::end();
+
+    //иначе не будет работать поиск в виджетах Select2
+    $this->registerJs("$('#material_new_usage_modal').removeAttr('tabindex');");
+    ?>
+
 
 
 </div>

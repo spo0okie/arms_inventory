@@ -23,8 +23,9 @@ use Yii;
  * @property \app\models\Places $place Помещение
  * @property \app\models\Users $itStaff Ответственный
  * @property \app\models\Materials $parent Источник
- * @property \app\models\MaterialsTypes $materialType Категория
+ * @property \app\models\MaterialsTypes $type Категория
  * @property \app\models\Materials[] $childs Источник
+ * @property \app\models\MaterialsUsages[] $usages Расходы
  * @property \app\models\Contracts[] $contracts Документы
  */
 class Materials extends \yii\db\ActiveRecord
@@ -155,6 +156,14 @@ class Materials extends \yii\db\ActiveRecord
 	}
 
 	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getUsages()
+	{
+		return $this->hasMany(MaterialsUsages::className(), ['materials_id' => 'id']);
+	}
+
+	/**
 	 * Возвращает расход материала
 	 * @return integer
 	 */
@@ -162,6 +171,7 @@ class Materials extends \yii\db\ActiveRecord
 		//на этом этапе еще не реализованы списания, поэтому учитываем только перемещения
 		$sum=0;
 		foreach ($this->childs as $child) $sum+=$child->count;
+		foreach ($this->usages as $usage) $sum+=$usage->count;
 		return $sum;
 	}
 
@@ -176,7 +186,7 @@ class Materials extends \yii\db\ActiveRecord
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
-	public function getMaterialType()
+	public function getType()
 	{
 		return $this->hasOne(MaterialsTypes::className(), ['id' => 'type_id']);
 	}
