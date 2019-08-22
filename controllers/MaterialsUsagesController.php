@@ -44,6 +44,19 @@ class MaterialsUsagesController extends Controller
         ]);
     }
 
+	/**
+	 * Displays a single model ttip.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionTtip($id)
+	{
+		return $this->renderPartial('ttip', [
+			'model' => $this->findModel($id),
+		]);
+	}
+
     /**
      * Displays a single MaterialsUsages model.
      * @param integer $id

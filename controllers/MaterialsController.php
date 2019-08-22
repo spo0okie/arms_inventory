@@ -70,8 +70,22 @@ class MaterialsController extends Controller
     }
 
 	/**
-	 * @param null $query
-	 * @param null $type_id
+	 * Displays a single model ttip.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionTtip($id)
+	{
+		return $this->renderPartial('ttip', [
+			'model' => $this->findModel($id),
+		]);
+	}
+
+	/**
+	 * @param null $name
+	 * @param null $type
+	 * @return mixed
 	 */
     public function actionSearchList($name = null,$type = null) {
     	if (empty($type)) return null;
@@ -90,6 +104,7 @@ class MaterialsController extends Controller
 	    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		return $out;
 	}
+
     /**
      * Displays a single Materials model.
      * @param integer $id
