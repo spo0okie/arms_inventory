@@ -10,10 +10,9 @@
 /* @var string $name */
 
 use yii\helpers\Html;
-
-if (!isset($name)) $name=$model->num;
-
-?>
+if (!empty($model)) {
+    if (!isset($name)) $name=$model->num;
+    ?>
 
 <span class="techs-item"
       qtip_ajxhrf="<?= \yii\helpers\Url::to(['/techs/ttip','id'=>$model->id])?>"
@@ -21,3 +20,4 @@ if (!isset($name)) $name=$model->num;
 	<?= Html::a($name,['techs/view','id'=>$model->id]) ?>
 	<?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',['techs/update','id'=>$model->id]) ?>
 </span>
+<?php }

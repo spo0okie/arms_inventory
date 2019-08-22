@@ -33,6 +33,14 @@ $renderer=$this;
 		        }
 	        ],
 	        [
+		        'attribute'=>'state_id',
+		        'filter'=>\app\models\ContractsStates::fetchNames(),
+		        'format'=>'raw',
+		        'value'=>function($data) use ($renderer) {
+			        return $renderer->render('/contracts/item-state',['model'=>$data]);
+		        }
+	        ],
+	        [
 		        'attribute'=>'docsAttached',
 		        'header'=>'<span class="glyphicon glyphicon-paperclip" title="Привязано документов"></span>',
 		        'format'=>'raw',

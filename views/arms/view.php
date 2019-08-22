@@ -45,14 +45,22 @@ $deletable = !count ($licItems) && !count($licGroups) && !count($comps) && !coun
             </div>
 
         </div>
+	    <?php if (!$deletable) { ?>
+            <p><span class="glyphicon glyphicon-warning-sign"></span> Нельзя удалить АРМ, к которму привязаны другие объекты. Для удаления сначала надо отвязать ОС, Лицензии и Документы</p>
+	    <?php } ?>
         <div class="row">
-            <div class="col-md-6">
-	            <?= $this->render('arm-status',['model'=>$model]) ?>
-	            <?php if (!$deletable) { ?>
-                    <p><span class="glyphicon glyphicon-warning-sign"></span> Нельзя удалить АРМ, к которму привязаны другие объекты. Для удаления сначала надо отвязать ОС, Лицензии и Документы</p>
-	            <?php } ?>
+            <div class="col-md-1">
+		        <?= $this->render('arm-status',['model'=>$model]) ?>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-2">
+                <h4>Помещение</h4>
+		        <?= $this->render('/places/item',['model'=>$model->place,'full'=>true]) ?>
+            </div>
+            <div class="col-md-4">
+                <h4>Материалы и ЗиП</h4>
+                <?php foreach ($model->materialsUsages as $usage) echo $this->render('/materials-usages/item',['model'=>$usage,'material'=>true,'count'=>true]).'<br />'; ?>
+            </div>
+            <div class="col-md-5">
 	            <?= $this->render('arm-history',['model'=>$model]) ?>
             </div>
         </div>

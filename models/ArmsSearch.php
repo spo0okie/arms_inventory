@@ -46,15 +46,13 @@ class ArmsSearch extends Arms
 	    $query = new \yii\db\Query();
 
         $query = Arms::find()
-	        ->joinWith('user')
-	        ->joinWith('techModel')
-	        ->joinWith('comp')
-		    ->joinWith('place');
+	        ->joinWith(['user','techModel','comp','place']);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+	        'pagination' => ['pageSize' => 100,],
         ]);
 
         $this->load($params);
@@ -65,6 +63,8 @@ class ArmsSearch extends Arms
             return $dataProvider;
         }
 
+        //$query->select(['getplacepath({{places}}.id) AS path']);
+
         $query->andFilterWhere(['like', 'num', $this->num])
             ->andFilterWhere(['like', 'model', $this->model])
             ->andFilterWhere(['like', 'sn', $this->sn])
@@ -72,7 +72,7 @@ class ArmsSearch extends Arms
 	        ->andFilterWhere(['like', 'comps.ip', $this->comp_ip])
 	        ->andFilterWhere(['like', 'comps.name', $this->comp_id])
 	        ->andFilterWhere(['like', 'arms_models.name', $this->model_id])
-	        ->andFilterWhere(['like', 'places.name', $this->places_id])
+	        ->andFilterWhere(['like', 'getplacepath({{places}}.id)', $this->places_id])
 		    ->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;

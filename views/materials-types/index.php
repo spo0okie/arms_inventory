@@ -28,7 +28,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'comment:ntext',
 	        'units',
 
-            //['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template'=>'{update}'
+            ],
         ],
     ]); ?>
 </div>

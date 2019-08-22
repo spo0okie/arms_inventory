@@ -23,11 +23,53 @@ use Yii;
  * @property OrgPhones[] $phones
  * @property OrgPhones[] $phonesRecursive
  * @property Places[] $childs
+ * @property Materials[] $materials
  */
 class Places extends \yii\db\ActiveRecord
 {
 
+
+	/*
+	для рекурсивного запроса полного пути помещения в БД были добавлены хранимая процедура и функция ее вызывающая
+	уперто отсюда: https://stackoverflow.com/questions/20215744/how-to-create-a-mysql-hierarchical-recursive-query
+
+DROP PROCEDURE IF EXISTS getplacepath;
+DELIMITER $$
+CREATE PROCEDURE getplacepath(IN place_id INT, OUT path TEXT)
+BEGIN
+    DECLARE placename VARCHAR(20);
+    DECLARE temppath TEXT;
+    DECLARE tempparent INT;
+    SET max_sp_recursion_depth = 32;
+    SELECT short, parent_id FROM places WHERE id=place_id INTO placename, tempparent;
+    IF tempparent IS NULL
+    THEN
+        SET path = placename;
+    ELSE
+        CALL getplacepath(tempparent, temppath);
+        SET path = CONCAT(temppath, '/', placename);
+    END IF;
+END$$
+DELIMITER ;
+
+
+DROP FUNCTION IF EXISTS getplacepath;
+DELIMITER $$
+CREATE FUNCTION getplacepath(place_id INT) RETURNS TEXT DETERMINISTIC
+BEGIN
+    DECLARE res TEXT;
+    CALL getplacepath(place_id, res);
+    RETURN res;
+END$$
+DELIMITER ;
+
+	проверено вызовом
+	SELECT *,getplacepath(Id) as path FROM `places`
+	работает
+	 */
+
 	public static $title="Помещения";
+	//public $path;
 
 	private $phones_cache=null;
 	private $childs_cache=null;
@@ -136,17 +178,28 @@ class Places extends \yii\db\ActiveRecord
 	 */
 	public function getTechs()
 	{
-		if (!is_null($this->techs_cache)) return $this->techs_cache;
+		//if (!is_null($this->techs_cache)) return $this->techs_cache;
 
 		/*$this->techs_cache=Techs::find()->where(['places_id' => $this->id])->andWhere(['is', 'arms_id', new \yii\db\Expression('null')])->all();
 		//foreach ($this->arms as $arm) if (count($techs=$arm->techs)) $this->techs_cache=array_merge($this->techs_cache,$techs);
 
 		return $this->techs_cache;*/
 
-		return $this->techs_cache=$this->hasMany(Techs::className(), ['places_id' => 'id'])
+		return $this->hasMany(Techs::className(), ['places_id' => 'id'])
 			->from(['places_techs'=>Techs::tableName()])
-			->andWhere(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
+		//	->andWhere(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
+			->andOnCondition(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
 
+	}
+
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getMaterials()
+	{
+		return $this->hasMany(Materials::className(), ['places_id' => 'id'])
+			->from(['places_materials'=>Materials::tableName()]);
 	}
 
 	/**
@@ -175,7 +228,14 @@ class Places extends \yii\db\ActiveRecord
 	public static function fetchAll(){
 		if (!is_null(static::$all_items)) return static::$all_items;
 		static::$all_items=[];
-		foreach (static::find()->all() as $item) static::$all_items[$item['id']]=$item;
+		$tmp=static::find()
+			->select([
+				'{{places}}.*',
+				'getplacepath(id) AS path'
+			])
+			->orderBy('path')
+			->all();
+		foreach ($tmp as $item) static::$all_items[$item['id']]=$item;
 		return static::$all_items;
 	}
 
@@ -207,6 +267,7 @@ class Places extends \yii\db\ActiveRecord
 	}
 
 	public function getFullName(){
+		if (!empty($this->path)) return $this->path;
 		return self::fetchFullName($this->id);
 		//if (is_object($parent=$this->parent)) $name= $parent->fullName.'/'.$name;
 

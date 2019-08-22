@@ -40,9 +40,37 @@ $tech->places_id=$places_id;
 echo $this->render('/techs/_form',	['model'=>$tech]);
 Modal::end();
 
+Modal::begin([
+	'id'=>'materials_add_modal',
+	'size' => 'modal-lg',
+	'header' => '<h2>Добавление ЗиП и материалов</h2>',
+	'toggleButton' => [
+		'label' => 'Новые ЗиП и материалы',
+		'tag' => 'button',
+		'class' => 'btn btn-success',
+	],
+]);
+$materials=new \app\models\Materials();
+$materials->places_id=$places_id;
+echo $this->render('/materials/_form',	['model'=>$materials]);
+Modal::end();
+
 $js = <<<JS
     $('#arms_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
     $('#techs_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
+    $('#materials_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
+
+    $('#materials-form').on('beforeSubmit', function(){
+        var data = $(this).serialize();
+        $.ajax({
+            url: '/web/materials/create',
+            type: 'POST',
+            data: data,
+            success: function(res){window.location.reload();},
+            error: function(){alert('Чтото пошло не так...');}
+        });
+        return false;
+    });
 
     $('#arms-form').on('beforeSubmit', function(){
         var data = $(this).serialize();

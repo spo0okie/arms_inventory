@@ -34,7 +34,18 @@ use kartik\file\FileInput;
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
     <div class="row">
-        <div class="col-md-6" >
+        <div class="col-md-4" >
+		    <?= $form->field($model, 'state_id')->widget(Select2::className(), [
+			    'data' => \app\models\ContractsStates::fetchNames(),
+			    'options' => ['placeholder' => 'Выберите статус документа',],
+			    'toggleAllSettings'=>['selectLabel'=>null],
+			    'pluginOptions' => [
+				    'allowClear' => true,
+				    'multiple' => false
+			    ]
+		    ]) ?>
+        </div>
+        <div class="col-md-4" >
             <?= $form->field($model, 'date')->widget(DatePicker::classname(), [
                 'options' => ['placeholder' => 'Введите дату ...'],
                 'pluginOptions' => [
@@ -43,7 +54,7 @@ use kartik\file\FileInput;
                 ]
             ]); ?>
         </div>
-        <div class="col-md-6" >
+        <div class="col-md-4" >
 		    <?= $form->field($model, 'end_date')->widget(DatePicker::classname(), [
 			    'options' => ['placeholder' => 'Введите дату ...'],
 			    'pluginOptions' => [

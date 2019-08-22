@@ -10,6 +10,7 @@ use yii\widgets\DetailView;
 
 $arms=$model->arms;
 $techs=$model->techs;
+$materials=$model->materials;
 $attached=0; //техника прикрепленная к АРМ
 foreach ($arms as $arm) foreach ($arm->techs as $tech)
     if (!$tech->isVoipPhone && !$tech->isUps) $attached++;
@@ -33,6 +34,7 @@ foreach ($arms as $arm) foreach ($arm->techs as $tech)
                 foreach ($techs as $tech )
                     echo $this->render('/techs/tdrow',['model'=>$tech]);
 
+                if (count($materials)) echo $this->render('/places/materials-list',['models'=>$materials]);
                 ?>
 
             </table>

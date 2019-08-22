@@ -53,6 +53,7 @@ use Yii;
  * @property LicKeys[] $licKeys
  * @property LicGroups[] $licGroups
  * @property HwList $hwList
+ * @property MaterialsUsages[] $materialsUsages
  */
 class Arms extends \yii\db\ActiveRecord
 {
@@ -264,7 +265,7 @@ class Arms extends \yii\db\ActiveRecord
 	public function getState()
 	{
 
-		return $this->hasOne(TechStates::className(),['id' => 'state_id']);
+		return $this->hasOne(TechStates::className(),['id' => 'state_id'])->from(['arms_states'=>TechStates::tableName()]);
 		//if (!is_null($this->state_cache)) return $this->state_cache;
 		//return $this->state_cache=TechStates::findOne($this->state_id);
 	}
@@ -303,6 +304,14 @@ class Arms extends \yii\db\ActiveRecord
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
+	public function getMaterialsUsages()
+	{
+		return $this->hasMany(MaterialsUsages::className(), ['arms_id' => 'id']);
+	}
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
 	public function getUps()
 	{
 		if (!is_null($this->ups_cache)) return $this->ups_cache;
@@ -316,7 +325,7 @@ class Arms extends \yii\db\ActiveRecord
 	 */
 	public function getContracts()
 	{
-		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])->from(['arms_contracts'=>Contracts::tableName()])
 			->viaTable('{{%contracts_in_arms}}', ['arms_id' => 'id']);
 	}
 

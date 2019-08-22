@@ -51,7 +51,12 @@ class PlacesController extends Controller
     public function actionIndex()
     {
         return $this->render('index', [
-            'models' => Places::find()->orderBy('name')->all(),
+            'models' => Places::find()
+	            ->select([
+	            	'{{places}}.*',
+		            'getplacepath(id) AS path'
+	            ])
+	            ->orderBy('path')->all(),
         ]);
     }
 
@@ -63,9 +68,10 @@ class PlacesController extends Controller
 	{
 		return $this->render('armmap', [
 			'models' => Places::find()
-				->leftJoin('techs','`techs`.`places_id` = `places`.`id` and `techs`.`arms_id` is NULL')
-				->leftJoin('tech_models','`tech_models`.`id` = `techs`.`model_id`')
-				->leftJoin('tech_types','`tech_types`.`id` = `tech_models`.`type_id`')
+				//->leftJoin('techs','`techs`.`places_id` = `places`.`id` and `techs`.`arms_id` is NULL')
+				//->leftJoin('tech_models','`tech_models`.`id` = `techs`.`model_id`')
+				//->leftJoin('tech_types','`tech_types`.`id` = `tech_models`.`type_id`')
+				//->leftJoin('tech_states','`tech_states`.`id` = `techs`.`state_id`')
 				->joinWith([
 					'arms.user',
 					'arms.techs',
@@ -76,8 +82,11 @@ class PlacesController extends Controller
 					'arms.licKeys',
 					'arms.licItems',
 					'arms.licGroups',
-					'arms.contracts'
-					//'techs.model.type'
+					'arms.contracts',
+					'techs',
+					'techs.contracts',
+					'techs.state',
+					'techs.model.type',
 					])->orderBy('short')
 				->all(),
 		]);

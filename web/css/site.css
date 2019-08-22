@@ -387,7 +387,7 @@ table.places-arms-container tr.tech_wifi_ap
 /* Уволенные сотрудники */
 span.users-item.uvolen a {color: red;}
 
-/* Раскраска статусов */
+/* Раскраска статусов оборудования */
 table.places-arms-container td.item_status.state_required {background-color: cyan}
 table.places-arms-container td.item_status.state_confirmed {background-color: #1da7ee}
 table.places-arms-container td.item_status.state_in_supply_service {background-color: cyan}
@@ -395,6 +395,14 @@ table.places-arms-container td.item_status.state_in_warehouse {background-color:
 table.places-arms-container td.item_status.state_operating {background-color: #5cb85c}
 table.places-arms-container td.item_status.state_malfunction {background-color: orange}
 table.places-arms-container td.item_status.state_broken {background-color: red}
+
+/* Раскраска статусов документов */
+span.state_required, span.state_paywait {background-color: yellow}
+span.state_paywait_confirmed {background-color: lightgreen}
+span.state_payed_partial {background-color: limegreen}
+span.state_paywait_full {background-color: green}
+span.state_payed {background-color: #1da7ee}
+span.state_revoked, span.state_fail {background-color: red}
 
 /* РАСКРАСКА ВОЗРАСТА ИНФОРМАЦИИ ОБ ОС */
 table.places-arms-container td.arm_hostname.hour_fresh {background-color: lightskyblue}

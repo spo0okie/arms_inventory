@@ -12,6 +12,7 @@ use app\models\Comps;
  */
 class CompsSearch extends Comps
 {
+
     /**
      * @inheritdoc
      */
@@ -42,12 +43,13 @@ class CompsSearch extends Comps
     public function search($params)
     {
         $query = Comps::find()
-	        ->joinWith('arm');
+	        ->joinWith(['arm']);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+	        'pagination' => ['pageSize' => 100,],
         ]);
 
         $this->load($params);

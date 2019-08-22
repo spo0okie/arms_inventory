@@ -18,7 +18,7 @@ use yii\widgets\DetailView;
     <p>
 		<?= $model->Doljnost ?>
         <br />
-		<?= $model->orgStruct->name ?>
+		<?= is_object($model->orgStruct)?$model->orgStruct->name:'- отдел не указан -' ?>
     </p>
 
     <br />
