@@ -41,7 +41,7 @@ $model_id=$model->id;
     <h4>Место установки и сотрудники:</h4>
     <p>
         АРМ: <?= $this->render('/arms/item',['model'=>$model->arm]) ?> <br />
-        Помещение: <?= $this->render('/places/item',['model'=>$model->place]) ?> <br />
+        Помещение: <?= $this->render('/places/item',['model'=>$model->effectivePlace]) ?> <br />
         Пользователь: <?= $this->render('/users/item',['model'=>$model->user]) ?> <br />
         Сотрудник ИТ: <?= $this->render('/users/item',['model'=>$model->itStaff]) ?> <br />
     </p>
@@ -116,7 +116,7 @@ JS;
     <h4>Использованные материалы:</h4>
     <p>
         <?php foreach($model->materialsUsages as $materialsUsage) {
-            echo $this->render('/materials-usages/item',['model'=>$materialsUsage,'material'=>true,'count'=>true]).'<br />';
+            echo $this->render('/materials-usages/item',['model'=>$materialsUsage,'material'=>true,'count'=>true,'date'=>true]).'<br />';
         } ?>
     </p>
 

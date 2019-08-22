@@ -83,7 +83,7 @@ class Contracts extends \yii\db\ActiveRecord
             [['name'], 'required'],
 	        [['lics_ids','partners_ids','arms_ids','techs_ids'], 'each', 'rule'=>['integer']],
 	        [['scanFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
-	        [['parent_id'], 'integer'],
+	        [['parent_id','state_id'], 'integer'],
 	        [['is_successor'], 'boolean'],
             [['comment'], 'string'],
             [['name','date','end_date'], 'string', 'max' => 128],
@@ -131,6 +131,7 @@ class Contracts extends \yii\db\ActiveRecord
 			'partnersNames' => 'Контрагент(ы)',
 			'arms_ids' => 'АРМы',
 			'scans_ids' => 'Сканы',
+			'state_id' => 'Статус',
 			'comment' => 'Комментарий',
 		];
 	}
@@ -150,6 +151,7 @@ class Contracts extends \yii\db\ActiveRecord
 			'partners_ids' => 'Если отсутствуют, значит документ внутренний',
 			'arms_ids' => 'С какими рабочими местами связан документ (если связан)',
 			'techs_ids' => 'С каким оборудованием связан документ (если связан)',
+			'state_id' => 'Для удобства контроля процессов оплаты',
 			'scans_ids' => 'Отсканированная версия документа',
 		];
 	}
@@ -313,6 +315,22 @@ class Contracts extends \yii\db\ActiveRecord
 		if (count($this->orgPhones)) $attaches.='<span class="glyphicon glyphicon-phone-alt" title="Привязаны услуги телефонии: '.(count($this->orgPhones)).'шт"></span>';
 		return $attaches;
 	}
+
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getState()
+	{
+		return $this->hasOne(ContractsStates::className(), ['id' => 'state_id']);
+	}
+
+	public function getStateName()
+	{
+		if (is_object($this->state)) return $this->state->name;
+		return '';
+	}
+
 
 	/**
 	 * Возвращает набор контрагентов в договоре
@@ -502,8 +520,9 @@ class Contracts extends \yii\db\ActiveRecord
 		if (!count($ids)) return $hint;
 		$arms=\app\models\Arms::find()
 			->joinWith('contracts')
-			->where(['contracts.id'=>$ids])
+			->where(['arms_contracts.id'=>$ids])
 			//->createCommand()->getRawSql();
+				//
 			->all();
 		if (!count($arms)) return $hint;
 

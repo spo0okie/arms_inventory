@@ -37,7 +37,7 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
      } ?>
 </h1>
 
-<h4>От: <?= $model->datePart ?></h4>
+<h4>От: <?= $model->datePart ?><?= $this->render('item-state',compact('model'))?></h4>
 
 <?php if (!is_null($parent=$model->parent) && $static_view) { ?>
     <h3>Основной документ: <?= Html::a($parent->name,['view','id'=>$parent->id]) ?></h3>
@@ -76,6 +76,13 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
         echo $this->render('/techs/_form',['model'=>$techModel]);
         Modal::end();
 
+        //создание связанного оборудования
+        Modal::begin(['id'=>'materials_add_modal','header' => '<h2>Добавление материалов</h2>','size'=>Modal::SIZE_LARGE]);
+        $materialsModel=new \app\models\Materials();
+        $materialsModel->contracts_ids=[$model_id];
+        echo $this->render('/materials/_form',['model'=>$materialsModel]);
+        Modal::end();
+
         //создание связанной лицензии
         Modal::begin(['id'=>'lic_add_modal','header' => '<h2>Добавление лицензии</h2>','size'=>Modal::SIZE_LARGE]);
         $licModel=new \app\models\LicItems();
@@ -103,6 +110,7 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
                 $('#inet_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
                 $('#phone_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
                 $('#lic_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
+                $('#materials_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
                 $('#contracts_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
                 $('#contracts-edit-form').on('afterSubmit', function(){window.location.reload();});
                 $('#inet-edit-form').on('afterSubmit', function(){window.location.reload();});
@@ -122,19 +130,21 @@ JS;
         $this->registerJs($js);
 
         ?>
-        Создать:
-        <a onclick="$('#contracts_add_modal').modal('toggle')" class="href">подчиненный документ</a>
+        Создать
+        <a onclick="$('#contracts_add_modal').modal('toggle')" class="href">Подчиненный документ</a>
         //
-        <a onclick="$('#arms_add_modal').modal('toggle')" class="href">АРМ на осн. документа</a>
+        <a onclick="$('#arms_add_modal').modal('toggle')" class="href">АРМ</a>
         //
         <a onclick="$('#techs_add_modal').modal('toggle')" class="href">Оборудование</a>
         //
+        <a onclick="$('#materials_add_modal').modal('toggle')" class="href">Материалы</a>
+        //
         <a onclick="$('#lic_add_modal').modal('toggle')" class="href">Лицензию</a>
         //
-        <a onclick="$('#inet_add_modal').modal('toggle')" class="href">Подключение интернет</a>
+        <a onclick="$('#inet_add_modal').modal('toggle')" class="href">Ввод интернет</a>
         //
         <a onclick="$('#phone_add_modal').modal('toggle')" class="href">Городской тел.</a>
-
+        :: на основании этого документа
     </p>
 <?php } ?>
 

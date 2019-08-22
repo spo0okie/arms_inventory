@@ -82,6 +82,7 @@ $this->beginBody()
 			    ['label' => 'Контрагенты',
 				    'items' => [
 					    ['label' => \app\models\Partners::$title, 'url' => ['/partners/index']],
+					    ['label' => \app\models\ContractsStates::$title, 'url' => ['/contracts-states/index']],
 					    ['label' => \app\models\Contracts::$title, 'url' => ['/contracts/index']],
 					    ['label' => \app\models\ProvTel::$title, 'url' => ['/prov-tel/index']],
 				    ]
@@ -118,7 +119,7 @@ $this->beginBody()
 					    ['label' => \app\models\LoginJournal::$title, 'url' => ['/login-journal/index']],
 				    ],
 			    ],
-                ['label' => \app\models\Techs::$title,
+			    ['label' => \app\models\Techs::$title,
 				    'items' => [
 					    ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index'], 'items'=>$techTypes],
 					    ['label' => \app\models\TechModels::$title, 'url' => ['/tech-models/index']],
@@ -129,6 +130,13 @@ $this->beginBody()
 					    ['label' => 'Производители', 'url' => ['/manufacturers/index']],
 					    ['label' => 'Игнорируемое', 'url' => ['/hw-ignore/index']],
 					    ['label' => 'Состояния', 'url' => ['/tech-states/index']],
+				    ],
+			    ],
+			    ['label' => \app\models\Materials::$title,
+				    'items' => [
+					    ['label' => \app\models\MaterialsTypes::$title, 'url' => ['/materials-types/index']],
+					    ['label' => \app\models\Materials::$title, 'url' => ['/materials/index']],
+					    ['label' => \app\models\MaterialsUsages::$title, 'url' => ['/materials-usages/index']],
 				    ],
 			    ],
 			    /*Yii::$app->user->isGuest ? (

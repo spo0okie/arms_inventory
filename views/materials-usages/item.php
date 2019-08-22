@@ -15,6 +15,7 @@ if (!isset($from)) $from=false;
 if (!isset($material)) $material=false;
 if (!isset($count)) $count=false;
 if (!isset($to)) $to=false;
+if (!isset($date)) $date=false;
 
 if (is_object($model)) {
 	?>
@@ -24,6 +25,7 @@ if (is_object($model)) {
 		qtip_ajxhrf="<?= \yii\helpers\Url::to(['/materials-usages/ttip','id'=>$model->id]) ?>"
 	>
         <?= \yii\helpers\Html::a(
+	        ($date?$model->date.' ':'').
             ($count?($model->count.$model->material->type->units):'').
             (($count&$to)?' -&gt; ':'').
             ($to?$model->to:''),

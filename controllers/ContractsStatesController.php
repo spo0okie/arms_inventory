@@ -3,20 +3,16 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Materials;
-use app\models\MaterialsSearch;
+use app\models\ContractsStates;
+use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\bootstrap\ActiveForm;
-use yii\web\Response;
-use yii\helpers\Url;
-
 
 /**
- * MaterialsController implements the CRUD actions for Materials model.
+ * ContractsStatesController implements the CRUD actions for ContractsStates model.
  */
-class MaterialsController extends Controller
+class ContractsStatesController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -33,65 +29,23 @@ class MaterialsController extends Controller
         ];
     }
 
-
-
-	/**
-	 * Validates  model on update.
-	 * @param null $id
-	 * @return mixed
-	 * @throws NotFoundHttpException
-	 */
-	public function actionValidate($id=null)
-	{
-		if (!is_null($id))
-			$model = $this->findModel($id);
-		else
-			$model = new Materials();
-
-		if ($model->load(Yii::$app->request->post())) {
-			Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-			return ActiveForm::validate($model);
-		}
-	}
-
     /**
-     * Lists all Materials models.
+     * Lists all ContractsStates models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new MaterialsSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = new ActiveDataProvider([
+            'query' => ContractsStates::find(),
+        ]);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
-	/**
-	 * @param null $query
-	 * @param null $type_id
-	 */
-    public function actionSearchList($name = null,$type = null) {
-    	if (empty($type)) return null;
-		$materials=\app\models\Materials::find()
-			->select('model')
-			->distinct()
-			->andFilterWhere(['type_id'=>$type])
-			->andFilterWhere(['like','model',$name])
-			->all();
-	    //echo Json::encode($materials);
-	    //return;
-		$out = [];
-		foreach ($materials as $d) {
-			$out[] = ['value' => $d->model];
-		}
-	    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-		return $out;
-	}
     /**
-     * Displays a single Materials model.
+     * Displays a single ContractsStates model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -104,21 +58,16 @@ class MaterialsController extends Controller
     }
 
     /**
-     * Creates a new Materials model.
+     * Creates a new ContractsStates model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Materials();
+        $model = new ContractsStates();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-	        if (Yii::$app->request->isAjax) {
-		        Yii::$app->response->format = Response::FORMAT_JSON;
-		        return [$model];
-	        }  else {
-		        return $this->redirect(['view', 'id' => $model->id]);
-	        }
+            return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('create', [
@@ -127,7 +76,7 @@ class MaterialsController extends Controller
     }
 
     /**
-     * Updates an existing Materials model.
+     * Updates an existing ContractsStates model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -147,7 +96,7 @@ class MaterialsController extends Controller
     }
 
     /**
-     * Deletes an existing Materials model.
+     * Deletes an existing ContractsStates model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -161,15 +110,15 @@ class MaterialsController extends Controller
     }
 
     /**
-     * Finds the Materials model based on its primary key value.
+     * Finds the ContractsStates model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Materials the loaded model
+     * @return ContractsStates the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Materials::findOne($id)) !== null) {
+        if (($model = ContractsStates::findOne($id)) !== null) {
             return $model;
         }
 

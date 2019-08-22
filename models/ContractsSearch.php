@@ -20,7 +20,7 @@ class ContractsSearch extends Contracts
     public function rules()
     {
         return [
-            [['id', 'parent'], 'integer'],
+            [['id', 'parent', 'state_id'], 'integer'],
             [['fullname', 'comment'], 'safe'],
         ];
     }
@@ -61,7 +61,9 @@ class ContractsSearch extends Contracts
         //}
 
 	    $query
-		    ->filterWhere(['like', new \yii\db\Expression("concat(`contracts`.`date`,' - ',`contracts`.`name`,' - ',`partners`.`uname`,' (', `partners`.`bname` , ')' )"), $this->fullname])
+		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
+	    $query
+		    ->filterWhere(['like', new \yii\db\Expression("concat(`contracts`.`date`,' - ',`contracts`.`name`,' - ',ifnull(`partners`.`uname`,''),' (', ifnull(`partners`.`bname`,'') , ')' )"), $this->fullname])
 		    ->orderBy(['date'=>SORT_DESC,'name'=>SORT_DESC]);
 
 	    $dataProvider = new ActiveDataProvider([

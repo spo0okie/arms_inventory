@@ -22,8 +22,9 @@
 	"rmrevin/yii2-fontawesome": "~3.3",
 	"kartik-v/yii2-widget-select2": "dev-master",
 	"kartik-v/yii2-widget-datepicker": "dev-master",
-	"kartik-v/yii2-widget-fileinput": "dev-master",
+	"kartik-v/yii2-widget-fileinput": "1.0.8",
 	"kartik-v/yii2-nav-x": "dev-master",
+	"kartik-v/yii2-widget-typeahead": "dev-master",
         "voskobovich/yii2-linker-behavior": "^4.0",
         "bower-asset/font-awesome": "^5.7"
     },

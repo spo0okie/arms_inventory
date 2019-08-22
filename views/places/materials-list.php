@@ -16,6 +16,7 @@ use yii\widgets\DetailView;
 /* @var $techs app\models\Techs[] */
 
 $materials=[];
+\yii\helpers\ArrayHelper::multisort($models,'typeName');
 foreach ($models as $model) {
 	if ($model->rest!=0) $materials[]=$model;
 }

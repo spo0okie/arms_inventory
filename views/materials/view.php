@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         Поступило <?= $model->date?> <b><?= $model->count?><?= $model->type->units?></b>. Остаток <b><?= $model->rest?><?= $model->type->units?></b>
 	    <?php if ($model->rest >0) { ?> <a onclick="$('#material_new_usage_modal').modal('toggle')" class="href btn btn-primary">использовать</a> <?php } ?>
+	    <?php if ($model->rest >1) { ?> <a onclick="$('#material_new_material_modal').modal('toggle')" class="href btn btn-primary">разделить</a> <?php } ?>
     </p>
 
     <br>
@@ -95,8 +96,22 @@ $this->params['breadcrumbs'][] = $this->title;
         echo $this->render('/materials-usages/_form',['model'=>$usage]);
     Modal::end();
 
+    Modal::begin([
+	    'id'=>'material_new_material_modal',
+	    'header' => '<h2>переместить часть</h2>',
+	    'size'=>Modal::SIZE_LARGE,
+    ]);
+        $material=new \app\models\Materials();
+        $material->parent_id=[$model->id];
+        echo $this->render('/materials/_form',['model'=>$material]);
+    Modal::end();
+
     //иначе не будет работать поиск в виджетах Select2
-    $this->registerJs("$('#material_new_usage_modal').removeAttr('tabindex');");
+    $this->registerJs(
+            "$('#material_new_usage_modal').removeAttr('tabindex');".
+            "$('#material_new_material_modal').removeAttr('tabindex');"
+
+    );
     ?>
 
 

@@ -325,7 +325,7 @@ class Arms extends \yii\db\ActiveRecord
 	 */
 	public function getContracts()
 	{
-		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])->from(['arms_contractss'=>Contracts::tableName()])
+		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])->from(['arms_contracts'=>Contracts::tableName()])
 			->viaTable('{{%contracts_in_arms}}', ['arms_id' => 'id']);
 	}
 

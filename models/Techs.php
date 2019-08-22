@@ -255,7 +255,7 @@ class Techs extends \yii\db\ActiveRecord
 	public function getPlace()
 	{
 		return $this->hasOne(Places::className(), ['id' => 'places_id'])
-			->from(['places_techs'=>Techs::tableName()]);
+			->from(['places_techs'=>Places::tableName()]);
 	}
 
 	/**

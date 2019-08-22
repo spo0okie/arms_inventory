@@ -17,6 +17,7 @@ use Yii;
  * @property string $it_staff_id Сотрудник службы ИТ
  * @property string $comment Комментарий
  * @property string $history Записная кинжка
+ * @property array $contracts_ids массив ссылок на документы
 
  * @property int $used Израсходовано
  * @property int $rest Остаток
@@ -86,7 +87,7 @@ class Materials extends \yii\db\ActiveRecord
 	{
 		return [
 			'id' => 'Идентификатор',
-			'parent_id' => 'Источник',
+			'parent_id' => 'Взято из',
 			'date' => 'Дата поступления',
 			'count' => 'Количество',
 			'used' => 'Использовано',
@@ -113,7 +114,7 @@ class Materials extends \yii\db\ActiveRecord
 			'date' => 'Когда произошло поступление этого материала',
 			'count' => 'Сколько материала поступило',
 			//'type_id' => 'Тип материалов',
-			'model' => 'Желательно использовать наименование из уже использованных для возможности группировки и чтобы не плодить лишнюю номенклатуру',
+			'model' => 'Желательно использовать обобщающее наименование из уже использованных для возможности группировки и чтобы не плодить лишнюю номенклатуру. Точное наименование модели можно вписать в коментарий',
 			'places_id' => 'Где хранятся поступившие материалы',
 			'it_staff_id' => 'Кто отвечает за хранение материалов',
 			'comment' => 'Все что нужно знать, но не влезло в остальные поля',
@@ -210,6 +211,15 @@ class Materials extends \yii\db\ActiveRecord
 		$tokens[] = is_null($this->place)?'(Нет помещения!)':'('.$this->place->fullName.')';
 		return implode(' ',$tokens);
 	}
+
+	/**
+	 * Имя для поиска материала
+	 */
+	public function getTypeName()
+	{
+		return $this->type->name.': '.$this->model;
+	}
+
 
 	public static function fetchNames(){
 		$list= static::find()
