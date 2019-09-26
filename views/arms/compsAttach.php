@@ -55,6 +55,7 @@ if (is_null($arm_id)) {
 				//пропускаем компы уже привязанные к этому арму
 
 				$comp=$login->comp;
+				if (!is_object($comp)) continue;
 				if (($arm_id==$comp->arm_id)) continue;
 
 				if ($comp->arm_id) { ?>

@@ -132,13 +132,14 @@ class Comps extends \yii\db\ActiveRecord
      */
     public function getDomainName()
     {
-        return $this->domain->name.'\\'.$this->name;
+        return (is_object($this->domain)?$this->domain->name:'').
+	        '\\'.$this->name;
     }
 
 
 	public function getFqdn()
 	{
-		return $this->name.'.'.$this->domain->fqdn;
+		return is_object($this->domain)?$this->name.'.'.$this->domain->fqdn:$this->name;
 	}
 
     /**
