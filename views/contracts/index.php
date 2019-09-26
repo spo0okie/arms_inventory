@@ -45,7 +45,7 @@ $renderer=$this;
 		        'header'=>'<span class="glyphicon glyphicon-paperclip" title="Привязано документов"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
-			        return count($data->childs)+($data->parent_id?1:0);
+			        return (count($data->childs)+($data->parent_id?1:0))?(count($data->childs)+($data->parent_id?1:0)):'';
 		        }
 	        ],
 	        [
@@ -53,7 +53,7 @@ $renderer=$this;
 		        'header'=>'<span class="fas fa-desktop" title="Привязано АРМов"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
-			        return count($data->arms);
+			        return count($data->arms)?count($data->arms):'';
 		        }
 	        ],
 	        [
@@ -61,7 +61,7 @@ $renderer=$this;
 		        'header'=>'<span class="fas fa-print" title="Привязано техники"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
-			        return count($data->techs);
+			        return count($data->techs)?count($data->techs):'';
 		        }
 	        ],
 	        [
@@ -69,7 +69,7 @@ $renderer=$this;
 		        'header'=>'<span class="fas fa-award" title="Привязано лицензий"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
-			        return count($data->licItems);
+			        return count($data->licItems)?count($data->licItems):'';
 		        }
 	        ],
 	        [
@@ -77,7 +77,7 @@ $renderer=$this;
 		        'header'=>'<span class="glyphicon glyphicon-globe" title="Привязано вводов интернет"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
-			        return count($data->orgInets);
+			        return count($data->orgInets)?count($data->orgInets):'';
 		        }
 	        ],
 	        [
@@ -85,7 +85,7 @@ $renderer=$this;
 		        'header'=>'<span class="glyphicon glyphicon-phone-alt" title="Привязано услуг телефонии"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
-			        return count($data->orgInets);
+			        return count($data->orgInets)?count($data->orgInets):'';
 		        }
 	        ],
         ],

@@ -404,6 +404,9 @@ span.state_paywait_full {background-color: green}
 span.state_payed {background-color: #1da7ee}
 span.state_revoked, span.state_fail {background-color: red}
 
+/*span.contract_history_preview {display: inline-block; white-space: nowrap; overflow: hidden; width: auto; height: 1.2em; max-width: 10em;}*/
+span.contract_state_cell {display: inline-block; white-space: nowrap; overflow: hidden; max-width: 25em;}
+
 /* РАСКРАСКА ВОЗРАСТА ИНФОРМАЦИИ ОБ ОС */
 table.places-arms-container td.arm_hostname.hour_fresh {background-color: lightskyblue}
 table.places-arms-container td.arm_hostname.day_fresh {background-color: lightblue}
