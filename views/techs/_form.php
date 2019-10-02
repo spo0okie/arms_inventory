@@ -21,15 +21,33 @@ switch (Yii::$app->request->get('type')) {
         break;
 }
 
-    $js = '
+    $js = <<<JS
     //меняем подсказку выбора арм в при смене списка документов
     function fetchArmsFromDocs(){
         docs=$("#techs-contracts_ids").val();
         console.log(docs);
         $.ajax({url: "/web/contracts/hint-arms?form=techs&ids="+docs})
-            .done(function(data) {$("#arms_id-hint").html(data);})
-            .fail(function () {console.log("Ошибка получения данных!")});
-        }';
+        .done(function(data) {
+            $("#arms_id-hint").html(data);
+        })
+        .fail(function () {console.log("Ошибка получения данных!")});
+    }
+
+    
+    //меняем подсказки для разных типов оборудования
+    function fetchCommentFromModel(){
+        model_id=$("#techs-model_id").val();
+        console.log(model_id);
+        $.ajax({url: "/web/tech-models/hint-comment?id="+model_id})
+        .done(function(data) {
+            $('label[for="techs-comment"]').text(data['name']);
+            $("#comment-hint").html(data['hint']);
+        })
+        .fail(function () {console.log("Ошибка получения данных!")});
+    }
+
+    
+JS;
     $this->registerJs($js, yii\web\View::POS_BEGIN);
 ?>
 
@@ -44,7 +62,7 @@ switch (Yii::$app->request->get('type')) {
 	    'validateOnSubmit' => true,
 	    'validationUrl' => $model->isNewRecord?['techs/validate']:['techs/validate','id'=>$model->id],
 	    //'options' => ['enctype' => 'multipart/form-data'],
-	    'action' => $model->isNewRecord?\yii\helpers\Url::to(['techs/create']):\yii\helpers\Url::to(['techs/update','id'=>$model->id]),
+	    'action' => $model->isNewRecord?\yii\helpers\Url::to(['techs/create']):\yii\helpers\Url::to(['techs/update','id'=>$model->id,'return'=>'previous']),
     ]); ?>
 
     <div class="row">
@@ -60,10 +78,13 @@ switch (Yii::$app->request->get('type')) {
     </div>
 
     <div class="row">
-        <div class="col-md-8" >
+        <div class="col-md-6" >
 			<?= $form->field($model, 'model_id')->widget(Select2::className(), [
 				'data' => $techModels,
-				'options' => ['placeholder' => 'Выберите модель',],
+				'options' => [
+			        'placeholder' => 'Выберите модель',
+					'onchange' => 'fetchCommentFromModel();'
+                ],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'allowClear' => false,
@@ -71,7 +92,7 @@ switch (Yii::$app->request->get('type')) {
 				]
 			]) ?>
         </div>
-        <div class="col-md-4" >
+        <div class="col-md-3" >
 			<?= $form->field($model, 'state_id')->widget(Select2::className(), [
 				'data' => \app\models\TechStates::fetchNames(),
 				'options' => ['placeholder' => 'Выберите состояние оборудования',],
@@ -81,6 +102,11 @@ switch (Yii::$app->request->get('type')) {
 					'multiple' => false
 				]
 			]) ?>
+        </div>
+        <div class="col-md-3" >
+		    <?= $form->field($model, 'comment')->textInput(['maxlength' => true])
+                ->hint(\app\models\TechModels::fetchTypeComment($model->model_id)['hint'],['id'=>'comment-hint'])
+                ->label(app\models\TechModels::fetchTypeComment($model->model_id)['name']) ?>
         </div>
     </div>
 
@@ -116,6 +142,7 @@ switch (Yii::$app->request->get('type')) {
 				]
 			])->hint(\app\models\Contracts::fetchArmsHint($model->contracts_ids,'techs'),['id'=>'arms_id-hint']) ?>
         </div>
+
         <div class="col-md-6" id="tech-place-selector" <?= ($model->arms_id)?$hidden:'' ?>>
 		    <?= $form->field($model, 'places_id')->widget(Select2::className(), [
 			    'data' => \app\models\Places::fetchNames(),
@@ -127,6 +154,7 @@ switch (Yii::$app->request->get('type')) {
 			    ]
 		    ]) ?>
         </div>
+
         <div class="col-md-6" id="tech-place-arm-hint" <?= ($model->arms_id)?'':$hidden ?>>
             <br />Когда оборудование прикреплено к АРМ, то место установки и ответственные сотрудники наследуются из этого АРМ
         </div>
@@ -200,7 +228,7 @@ JS;
 	<?php $this->registerJs("$('#techs-url').autoResize();"); ?>
 
 
-	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
+	<?= $form->field($model, 'history')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
 	<?php $this->registerJs("$('#techs-comment').autoResize();"); ?>
 
     <div class="form-group">

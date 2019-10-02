@@ -440,6 +440,12 @@ a.contract_inactive {color: gray; text-decoration: line-through}
     margin: 0;
 }
 
+.ttip-card h2 {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+}
 .ttip-card p {
     margin-bottom: 3px;
 }

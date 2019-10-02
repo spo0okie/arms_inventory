@@ -44,6 +44,13 @@ class TechModelsController extends Controller
 		]);
 	}
 
+
+	public function actionHintComment($id){
+		Yii::$app->response->format = Response::FORMAT_JSON;
+		$data=\app\models\TechModels::fetchTypeComment($id);
+		if (!is_array($data)) throw new NotFoundHttpException('The requested data does not exist.');
+		return $data;
+	}
     /**
      * Lists all TechModels models.
      * @return mixed

@@ -145,7 +145,7 @@ class Techs extends \yii\db\ActiveRecord
 	        'ip' => 'IP адрес',
 	        'mac' => 'MAC адрес',
             'url' => 'Ссылки',
-	        'comment' => 'Комментарий',
+	        'comment' => 'Примечание',
 	        'history' => 'Записная книжка',
         ];
     }

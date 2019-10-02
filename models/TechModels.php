@@ -186,4 +186,23 @@ class TechModels extends \yii\db\ActiveRecord
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}
+
+	/**
+	 * Возвращает описание поля комментарий для типа оборудования по модели
+	 */
+	public static function fetchTypeComment($id) {
+		$model=static::findOne($id);
+		$type=is_object($model)?$model->type:null;
+		$comment_name=is_object($type)?$type->comment_name:null;
+		$comment_hint=is_object($type)?$type->comment_hint:null;
+		$typeModel=new \app\models\Techs();
+		return [
+			'name'=>strlen($comment_name)?
+				$comment_name:
+				$typeModel->attributeLabels()['comment'],
+			'hint'=>strlen($comment_hint)?
+				$comment_hint:
+				$typeModel->attributeHints()['comment'],
+		];
+	}
 }

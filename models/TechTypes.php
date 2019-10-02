@@ -12,6 +12,8 @@ use Yii;
  * @property string $prefix Префикс
  * @property string $name Название
  * @property string $comment Комментарий
+ * @property string $comment_name override Комментарий
+ * @property string $comment_hint override Комментарий hint
  *
  * @property TechModels[] $techModels
  */
@@ -53,7 +55,9 @@ class TechTypes extends \yii\db\ActiveRecord
         return [
 	        [['code', 'name', 'prefix', 'comment'], 'required'],
             [['comment'], 'string'],
-            [['code', 'name'], 'string', 'max' => 128,'min'=>2],
+	        [['code', 'name'], 'string', 'max' => 128,'min'=>2],
+	        [['comment_hint'], 'string', 'max' => 128],
+	        [['comment_name'], 'string', 'max' => 32],
 	        [['prefix'], 'string', 'max' => 16,'min'=>2],
         ];
     }
@@ -71,6 +75,8 @@ class TechTypes extends \yii\db\ActiveRecord
 			'techModelsCount' => '# Моделей',
 			'usages' => '# Обор-я',
 			'comment' => 'Шаблон описаний',
+			'comment_name' => 'Замена комментария',
+			'comment_hint' => 'Пояснение поля комментария',
 		];
 	}
 
@@ -85,6 +91,8 @@ class TechTypes extends \yii\db\ActiveRecord
 			'name' => 'Понятное название типа техники: чб МФУ А4, VoIP Телефоны, ИБП, Радиостанции, WiFi AP, Маршрутизатор',
 			'prefix' => 'При формировании инвентарного номера будет использоваться дополнительный префикс типа техники',
 			'comment' => 'Те характеристики, которые нужно укаывзать при описании модели',
+			'comment_name' => 'Если заполнено, то у оборудования этого типа вместо поля "комменатрий" будет выводиться другое. Например №тел для телефонов или IMEI для модемов',
+			'comment_hint' => 'Если предыдущий параметр заполнен, то этим параметром можно сделать Hint для заполнения кастомного поля комментария. Как вот эта надпись под полем ввода.',
 		];
 	}
 

@@ -10,7 +10,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\bootstrap\ActiveForm;
 use yii\web\Response;
-
+use yii\helpers\Url;
 
 /**
  * TechsController implements the CRUD actions for Techs model.
@@ -125,6 +125,7 @@ class TechsController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+	        if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
             return $this->redirect(['view', 'id' => $model->id]);
         }
 

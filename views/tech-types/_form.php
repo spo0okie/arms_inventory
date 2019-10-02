@@ -21,10 +21,13 @@ use yii\widgets\ActiveForm;
 	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
 	<?php $this->registerJs("$('#techtypes-comment').autoResize();"); ?>
 
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-    </div>
+	<?= $form->field($model, 'comment_name')->textInput(['maxlength' => true]) ?>
 
+	<?= $form->field($model, 'comment_hint')->textInput(['maxlength' => true]) ?>
+    <div class="form-group">
+		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+    </div>
     <?php ActiveForm::end(); ?>
+
 
 </div>
