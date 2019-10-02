@@ -23,7 +23,7 @@ class TechsSearch extends Techs
     {
         return [
             [['id', 'model_id', 'arms_id', 'places_id'], 'integer'],
-            [['num', 'inv_num', 'sn', 'user_id', 'it_staff_id', 'ip', 'url', 'comment','model','place'], 'safe'],
+            [['num', 'inv_num', 'sn', 'user_id', 'user_id', 'it_staff_id', 'ip', 'url', 'comment','model','place','mac'], 'safe'],
         ];
     }
 
@@ -68,8 +68,9 @@ class TechsSearch extends Techs
             ->andFilterWhere(['like', 'techs.sn', $this->sn])
             ->andFilterWhere(['or',['like', 'getplacepath(places_techs.id)', $this->place],['like', 'getplacepath(places.id)', $this->place]])
             ->andFilterWhere(['like', 'concat(manufacturers.name," ",tech_models.name)', $this->model])
-            ->andFilterWhere(['like', 'techs.ip', $this->ip]);
-            //->andFilterWhere(['like', 'url', $this->url])
+            ->andFilterWhere(['like', 'techs.ip', $this->ip])
+	        ->andFilterWhere(['techs.model_id'=>$this->model_id])
+		    ->andFilterWhere(['techs.mac'=>$this->mac]);
             //->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;

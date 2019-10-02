@@ -29,7 +29,7 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
             echo ('<h2>Внутренний номер: '.Yii::$app->formatter->asNtext($model->comment).'</h2>');
         } else echo (Yii::$app->formatter->asNtext($model->comment).'<br />');
     } ?>
-    <?= \app\components\UrlListWidget::Widget(['list'=>$model->url]) ?>
+    <?= \app\components\UrlListWidget::Widget(['list'=>$model->url.(strlen($model->ip)?"\nhttp://{$model->ip}":'')]) ?>
 </p>
 
 

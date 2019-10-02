@@ -42,7 +42,6 @@ $this->params['breadcrumbs'][] = $this->title;
 	        ],
 	        'sn',
             'inv_num',
-            //'arms_id',
 	        [
 		        'attribute'=>'place',
 		        'format'=>'raw',
@@ -53,10 +52,11 @@ $this->params['breadcrumbs'][] = $this->title;
             //'user_id',
             //'it_staff_id',
             //'comment',
+	        'mac',
 	        'ip',
 	        //'url:ntext',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            //['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 </div>

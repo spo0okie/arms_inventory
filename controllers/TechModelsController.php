@@ -74,8 +74,16 @@ class TechModelsController extends Controller
      */
     public function actionView($id)
     {
+	    $searchModel = new \app\models\TechsSearch();
+	    $params=Yii::$app->request->queryParams;
+	    if (!isset($params['TechsSearch'])) $params['TechsSearch']=[];
+	    $params['TechsSearch']['model_id']=$id;
+	    $dataProvider = $searchModel->search($params);
+
         return $this->render('view', [
             'model' => $this->findModel($id),
+	        'searchModel' => $searchModel,
+	        'dataProvider' => $dataProvider,
         ]);
     }
 
