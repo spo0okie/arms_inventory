@@ -26,29 +26,6 @@ AppAsset::register($this);
 </head>
 <body>
 
-<!--
-убрано из виджета в iframe на главной
-<script type="text/javascript">
-    var reformalOptions = {
-        project_id: 980223,
-        project_host: "azimutinventory.reformal.ru",
-        tab_orientation: "left",
-        tab_indent: "50%",
-        tab_bg_color: "#34b389",
-        tab_border_color: "#FFFFFF",
-        tab_image_url: "http://tab.reformal.ru/T9GC0LfRi9Cy0Ysg0Lgg0L%252FRgNC10LTQu9C%252B0LbQtdC90LjRjw==/FFFFFF/4bfb34d91c8d7fb481972ca3c84aec38/left/0/tab.png",
-        tab_border_width: 2
-    };
-
-    (function() {
-        var script = document.createElement('script');
-        script.type = 'text/javascript'; script.async = true;
-        script.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'media.reformal.ru/widgets/v3/reformal.js';
-        document.getElementsByTagName('head')[0].appendChild(script);
-    })();
-</script><noscript><a href="http://reformal.ru"><img src="http://media.reformal.ru/reformal.png" /></a><a href="http://azimutinventory.reformal.ru">Oтзывы и предложения для База данных инвентаризации корпоративной сети</a></noscript>
--->
-
 <?php
 $techTypes=[];
 foreach (\app\models\TechTypes::fetchNames() as $idx=>$typeName)  $techTypes[]=['label'=>$typeName,'url' => ['/tech-types/view','id'=>$idx]];
@@ -124,9 +101,6 @@ $this->beginBody()
 					    ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index'], 'items'=>$techTypes],
 					    ['label' => \app\models\TechModels::$title, 'url' => ['/tech-models/index']],
 					    ['label' => \app\models\Techs::$title, 'url' => ['/techs/index']],
-					    ['label' => \app\models\MaterialsTypes::$title, 'url' => ['/materials-types/index']],
-					    ['label' => \app\models\Materials::$title, 'url' => ['/materials/index']],
-					    ['label' => \app\models\MaterialsUsages::$title, 'url' => ['/materials-usages/index']],
 					    ['label' => 'Производители', 'url' => ['/manufacturers/index']],
 					    ['label' => 'Игнорируемое', 'url' => ['/hw-ignore/index']],
 					    ['label' => 'Состояния', 'url' => ['/tech-states/index']],
