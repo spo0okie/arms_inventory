@@ -15,6 +15,7 @@ class TechsSearch extends Techs
 
 	public $model;
 	public $place;
+	public $type_id;
 
 	/**
      * {@inheritdoc}
@@ -22,7 +23,7 @@ class TechsSearch extends Techs
     public function rules()
     {
         return [
-            [['id', 'model_id', 'arms_id', 'places_id'], 'integer'],
+            [['id', 'model_id', 'arms_id', 'places_id','type_id'], 'integer'],
             [['num', 'inv_num', 'sn', 'user_id', 'user_id', 'it_staff_id', 'ip', 'url', 'comment','model','place','mac'], 'safe'],
         ];
     }
@@ -46,7 +47,8 @@ class TechsSearch extends Techs
     public function search($params)
     {
         $query = Techs::find()
-            ->joinWith(['place','model','arm','arm.place','model.manufacturer']);
+            ->joinWith(['place','model','arm.user','arm.place','model.manufacturer','techUser','state','contracts']);
+            //->leftJoin('contracts_in_techs',['contracts_in_techs.contracts_id'=>'techs.id']);
 
         // add conditions that should always apply here
 
@@ -70,6 +72,7 @@ class TechsSearch extends Techs
             ->andFilterWhere(['like', 'concat(manufacturers.name," ",tech_models.name)', $this->model])
             ->andFilterWhere(['like', 'techs.ip', $this->ip])
 	        ->andFilterWhere(['techs.model_id'=>$this->model_id])
+	        ->andFilterWhere(['tech_models.type_id'=>$this->type_id])
 		    ->andFilterWhere(['techs.mac'=>$this->mac]);
             //->andFilterWhere(['like', 'comment', $this->comment]);
 

@@ -388,13 +388,13 @@ table.places-arms-container tr.tech_wifi_ap
 span.users-item.uvolen a {color: red;}
 
 /* Раскраска статусов оборудования */
-table.places-arms-container td.item_status.state_required {background-color: cyan}
-table.places-arms-container td.item_status.state_confirmed {background-color: #1da7ee}
-table.places-arms-container td.item_status.state_in_supply_service {background-color: cyan}
-table.places-arms-container td.item_status.state_in_warehouse {background-color: grey}
-table.places-arms-container td.item_status.state_operating {background-color: #5cb85c}
-table.places-arms-container td.item_status.state_malfunction {background-color: orange}
-table.places-arms-container td.item_status.state_broken {background-color: red}
+span.item_status.state_required, td.item_status.state_required {background-color: cyan}
+span.item_status.state_confirmed, td.item_status.state_confirmed {background-color: #1da7ee}
+span.item_status.state_in_supply_service, td.item_status.state_in_supply_service {background-color: cyan}
+span.item_status.state_in_warehouse, td.item_status.state_in_warehouse {background-color: grey}
+span.item_status.state_operating, td.item_status.state_operating {background-color: #5cb85c}
+span.item_status.state_malfunction, td.item_status.state_malfunction {background-color: orange}
+span.item_status.state_broken, td.item_status.state_broken {background-color: red}
 
 /* Раскраска статусов документов */
 span.state_required, span.state_paywait {background-color: yellow}

@@ -4,8 +4,10 @@
  * User: Spookie
  * Date: 02.03.2018
  * Time: 14:14
- * @var \app\models\Techs $model
+ *
  */
+
+/* @var \app\models\Techs $model */
 ?>
 <tr class="tech tech_<?= $model->type->code ?>">
     <td class="tech_whitespace" colspan="2" ></td>
@@ -22,11 +24,7 @@
         <?= $this->render('/techs/item',['model'=>$model]) ?>
     </td>
     <td class="attachments">
-        <?php if ($docCount=count($model->contracts_ids)) { ?>
-            <span class="arm-att-count">
-                <?php if ($docCount) echo'<span class="glyphicon glyphicon-paperclip" title="Прикреплены документы"></span>×'.$docCount; ?>
-            </span>
-        <?php } ?>
+	    <?= $this->render('/techs/att-contracts',['model'=>$model]) ?>
     </td>
     <td class="item_status <?= strlen($model->stateName)?$model->state->code:'' ?>">
         <?= $model->stateName ?>

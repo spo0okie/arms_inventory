@@ -136,10 +136,13 @@ class Techs extends \yii\db\ActiveRecord
 	        'model' => 'Модель оборудования',
             'sn' => 'Серийный номер',
 	        'state_id' => 'Состояние',
+	        'state' => 'Статус',
+	        'attach' => 'Док.',
 	        'arms_id' => 'Рабочее место',
 	        'places_id' => 'Помещение',
 	        'place' => 'Помещение',
 	        'user_id' => 'Пользователь',
+	        'user' => 'Пользователь',
 	        'contracts_ids' => 'Связанные документы',
             'it_staff_id' => 'Сотрудник службы ИТ',
 	        'ip' => 'IP адрес',
@@ -195,9 +198,24 @@ class Techs extends \yii\db\ActiveRecord
     public function getUser()
     {
 	    if ($this->arms_id) return $this->arm->user;
-        return $this->hasOne(Users::className(), ['id' => 'user_id']);
+        return $this->techUser;
     }
 
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getTechUser()
+	{
+		return $this->hasOne(Users::className(), ['id' => 'user_id'])->from(['users_techs'=>Places::tableName()]);
+	}
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getArmUser()
+	{
+		return $this->arm->user;
+	}
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

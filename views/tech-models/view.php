@@ -7,12 +7,13 @@ use yii\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $model app\models\TechModels */
 
+\yii\helpers\Url::remember();
 $techs=$model->techs;
 $arms=$model->arms;
 $renderer=$this;
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index']];
-$this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['/tech-types/view','id'=>$model->type_id]];
 $this->params['breadcrumbs'][] = $this->title;
 $deletable=!count($arms)&&!count($techs);
 ?>
@@ -52,47 +53,11 @@ $deletable=!count($arms)&&!count($techs);
 
     <?php if (count($techs)) {?>
         <h4>Экземпляры оборудования:</h4>
-	    <?= GridView::widget([
+	    <?= $this->render('/techs/table', [
+		    'searchModel' => $searchModel,
 		    'dataProvider' => $dataProvider,
-		    'filterModel' => $searchModel,
-		    'columns' => [
-			    //['class' => 'yii\grid\SerialColumn'],
-
-			    //'id',
-			    [
-				    'attribute'=>'num',
-				    'format'=>'raw',
-				    'value' => function($data) use($renderer){
-					    return $renderer->render('/techs/item',['model'=>$data]);
-				    }
-			    ],
-			    /*[
-				    'attribute'=>'model',
-				    'format'=>'raw',
-				    'value' => function($data) use($renderer){
-					    return is_object($data->model)?$renderer->render('/tech-models/item',['model'=>$data->model,'long'=>true]):null;
-				    }
-			    ],*/
-			    'sn',
-			    'inv_num',
-			    [
-				    'attribute'=>'place',
-				    'format'=>'raw',
-				    'value' => function($data) use($renderer){
-					    return $renderer->render('/places/item',['model'=>$data->effectivePlace,'full'=>true]);
-				    }
-			    ],
-			    'user.Ename',
-			    //'it_staff_id',
-			    //'comment',
-			    'mac',
-			    'ip',
-			    //'url:ntext',
-
-			    //['class' => 'yii\grid\ActionColumn'],
-		    ],
-	    ]); ?>
-
+		    'columns'   => ['num','sn','mac','ip','state','user','place','inv_num'],
+	    ]) ?>
     <?php } ?>
 
 	<?php if (count($arms)) {?>

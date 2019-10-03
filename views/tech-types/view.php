@@ -114,7 +114,14 @@ JS;
         </div>
     </div>
 
+    <br />
+    <h4>Экземпляры оборудования</h4>
 
+    <?= $this->render('/techs/table', [
+        'searchModel' => $searchModel,
+        'dataProvider' => $dataProvider,
+        'columns'   => ['attach','num','model','sn','mac','ip','state','user','place','inv_num'],
+    ]) ?>
 
 
 
