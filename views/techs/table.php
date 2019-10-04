@@ -88,7 +88,6 @@ foreach ($columns as $column) {
 
 		case 'sn':
 		case 'inv_num':
-		case 'place':
 		case 'mac':
 		case 'ip':
 			$render_columns[] = $column;
@@ -96,12 +95,12 @@ foreach ($columns as $column) {
 	}
 }
 
-//try {
+try {
 	echo GridView::widget([
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 		'columns' => $render_columns,
 	]);
-//} catch (Exception $e) {
-//    echo 'Ошибка вывода виджета таблицы<br/>';
-//}
+} catch (Exception $e) {
+    echo 'Ошибка вывода виджета таблицы<br/>';
+}

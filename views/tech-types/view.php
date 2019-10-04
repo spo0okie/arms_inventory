@@ -6,6 +6,7 @@ use yii\bootstrap\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\TechTypes */
+\yii\helpers\Url::remember();
 
 $this->title = $model->name;
 $techModels=$model->techModels;
@@ -115,14 +116,23 @@ JS;
     </div>
 
     <br />
-    <h4>Экземпляры оборудования</h4>
 
-    <?= $this->render('/techs/table', [
-        'searchModel' => $searchModel,
-        'dataProvider' => $dataProvider,
-        'columns'   => ['attach','num','model','sn','mac','ip','state','user','place','inv_num'],
-    ]) ?>
+    <?php if (\app\models\TechTypes::isPC($model->id)) { ?>
+        <h4>Экземпляры рабочих мест</h4>
+	    <?= $this->render('/arms/table', [
+		    'searchModel' => $armsSearchModel,
+		    'dataProvider' => $armsDataProvider,
+		    //'columns'   => ['attach','num','model','sn','mac','ip','state','user','place','inv_num'],
+	    ]) ?>
+    <?php } else { ?>
+        <h4>Экземпляры оборудования</h4>
 
+        <?= $this->render('/techs/table', [
+            'searchModel' => $techsSearchModel,
+            'dataProvider' => $techsDataProvider,
+            'columns'   => ['attach','num','model','sn','mac','ip','state','user','place','inv_num'],
+        ]) ?>
+    <?php } ?>
 
 
 </div>

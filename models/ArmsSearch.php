@@ -13,6 +13,7 @@ use app\models\Arms;
 class ArmsSearch extends Arms
 {
 	public $comp_ip;
+	public $type_id;
 
     /**
      * @inheritdoc
@@ -21,7 +22,7 @@ class ArmsSearch extends Arms
     {
         return [
             [['id'], 'integer'],
-            [['num', 'model_id', 'sn', 'user_id', 'places_id', 'comp_ip', 'comp_id'], 'safe'],
+            [['num', 'model_id', 'sn', 'user_id', 'places_id', 'comp_ip', 'comp_id','model_id','type_id','model'], 'safe'],
         ];
     }
 
@@ -46,7 +47,7 @@ class ArmsSearch extends Arms
 	    $query = new \yii\db\Query();
 
         $query = Arms::find()
-	        ->joinWith(['user','techModel','comp','place']);
+	        ->joinWith(['user','techModel','comp','place','contracts','licItems','licGroups','licKeys']);
 
         // add conditions that should always apply here
 
@@ -66,13 +67,15 @@ class ArmsSearch extends Arms
         //$query->select(['getplacepath({{places}}.id) AS path']);
 
         $query->andFilterWhere(['like', 'num', $this->num])
-            ->andFilterWhere(['like', 'model', $this->model])
+            //->andFilterWhere(['like', 'model', $this->model])
             ->andFilterWhere(['like', 'sn', $this->sn])
 	        ->andFilterWhere(['like', 'users.Ename', $this->user_id])
 	        ->andFilterWhere(['like', 'comps.ip', $this->comp_ip])
 	        ->andFilterWhere(['like', 'comps.name', $this->comp_id])
-	        ->andFilterWhere(['like', 'arms_models.name', $this->model_id])
+	        ->andFilterWhere(['like', 'arms_models.name', $this->model])
 	        ->andFilterWhere(['like', 'getplacepath({{places}}.id)', $this->places_id])
+	        ->andFilterWhere(['arms.model_id'=>$this->model_id])
+	        ->andFilterWhere(['arms_models.type_id'=>$this->type_id])
 		    ->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;

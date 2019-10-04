@@ -52,17 +52,26 @@ class TechTypesController extends Controller
      */
     public function actionView($id)
     {
-	    $searchModel = new \app\models\TechsSearch();
 	    $params=Yii::$app->request->queryParams;
 	    if (!isset($params['TechsSearch'])) $params['TechsSearch']=[];
-	    $params['TechsSearch']['type_id']=$id;
-	    $dataProvider = $searchModel->search($params);
+	    if (!isset($params['ArmsSearch'])) $params['ArmsSearch']=[];
 
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-	        'searchModel' => $searchModel,
-	        'dataProvider' => $dataProvider,
-        ]);
+	    $params['TechsSearch']['type_id']=$id;
+	    $params['ArmsSearch']['type_id']=$id;
+
+	    $techSearchModel = new \app\models\TechsSearch();
+	    $techDataProvider = $techSearchModel->search($params);
+
+	    $armsSearchModel = new \app\models\ArmsSearch();
+	    $armsDataProvider = $armsSearchModel->search($params);
+
+	    return $this->render('view', [
+		    'model' => $this->findModel($id),
+		    'techSearchModel' => $techSearchModel,
+		    'techDataProvider' => $techDataProvider,
+		    'armsSearchModel' => $armsSearchModel,
+		    'armsDataProvider' => $armsDataProvider,
+	    ]);
     }
 
 

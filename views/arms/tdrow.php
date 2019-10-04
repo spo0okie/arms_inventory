@@ -88,16 +88,7 @@ for ($i=0; $i<count($comps); $i++) {
 
 	    <?php if (!$i) { ?>
             <td class="attachments" <?= $rowspan ?>>
-			    <?php
-			    $licCount=count($model->licItems)+count($model->licGroups)+count($model->licKeys);
-			    $docCount=count($model->contracts_ids);
-			    if ($licCount||$docCount) { ?>
-                    <span class="arm-att-count">
-                    <?php if ($licCount) echo'<span class="fas fa-award" title="Прикреплены лицензии"></span>×'.$licCount; ?>
-                    <?php if ($docCount) echo'<span class="glyphicon glyphicon-paperclip" title="Прикреплены документы"></span>×'.$docCount; ?>
-                </span>
-			    <?php }
-			    ?>
+			    <?= $this->render('/arms/item-attachments',compact('model'))?>
             </td>
 	    <?php }?>
 

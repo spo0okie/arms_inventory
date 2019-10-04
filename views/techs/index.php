@@ -19,44 +19,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
+	<?= $this->render('/techs/table', [
+		'searchModel' => $searchModel,
+		'dataProvider' => $dataProvider,
+		'columns'   => ['attach','num','model','sn','mac','ip','state','user','place','inv_num'],
+	]) ?>
 
-            //'id',
-	        [
-		        'attribute'=>'num',
-		        'format'=>'raw',
-		        'value' => function($data) use($renderer){
-			        return $renderer->render('/techs/item',['model'=>$data]);
-		        }
-	        ],
-	        [
-		        'attribute'=>'model',
-		        'format'=>'raw',
-		        'value' => function($data) use($renderer){
-			        return is_object($data->model)?$renderer->render('/tech-models/item',['model'=>$data->model,'long'=>true]):null;
-		        }
-	        ],
-	        'sn',
-            'inv_num',
-	        [
-		        'attribute'=>'place',
-		        'format'=>'raw',
-		        'value' => function($data) use($renderer){
-			        return $renderer->render('/places/item',['model'=>$data->effectivePlace,'full'=>true]);
-		        }
-	        ],
-            //'user_id',
-            //'it_staff_id',
-            //'comment',
-	        'mac',
-	        'ip',
-	        //'url:ntext',
-
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
 </div>
