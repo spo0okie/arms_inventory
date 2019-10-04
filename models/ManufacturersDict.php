@@ -15,6 +15,8 @@ use Yii;
  */
 class ManufacturersDict extends \yii\db\ActiveRecord
 {
+	static private $cache=[];
+
     /**
      * @inheritdoc
      */
@@ -71,12 +73,19 @@ class ManufacturersDict extends \yii\db\ActiveRecord
      * @throws \Throwable
      */
     public static function fetchManufacturer($word){
-        $item=ManufacturersDict::getDb()->cache(function ($db)use($word) {
-            return ManufacturersDict::find()->where(['word' => mb_strtolower($word,'utf-8')])->one();
-        },Manufacturers::$CACHE_TIME);
-        if (is_null($item)) return null;
-        //error_log('got word '.$word.' is equal to '.$item['word']);
-        return $item['manufacturers_id'];
+    	$word=mb_strtolower($word,'utf-8');
+
+    	if (!array_key_exists($word,static::$cache)) {
+    		//error_log('caching word '.$word.' //'.count(static::$cache));
+		    $item=static::find()
+			    ->where(['word' => $word])
+			    ->one()['manufacturers_id'];
+		    static::$cache[$word]=is_object($item)?$item->manufacturers_id:null;
+		    //error_log('cached  word '.$word.' //'.count(static::$cache));
+	    }
+
+        return static::$cache[$word];
+
     }
 
 }

@@ -73,8 +73,10 @@ class PlacesController extends Controller
 				//->leftJoin('tech_types','`tech_types`.`id` = `tech_models`.`type_id`')
 				//->leftJoin('tech_states','`tech_states`.`id` = `techs`.`state_id`')
 				->joinWith([
+					'phones',
+					'inets',
 					'arms.user',
-					'arms.techs',
+					'arms.techs.attachModel',
 					'arms.state',
 					'arms.comp.domain',
 					'arms.comps',
@@ -87,6 +89,8 @@ class PlacesController extends Controller
 					'techs.contracts',
 					'techs.state',
 					'techs.model.type',
+					'techs.techUser',
+					'materials'
 					])->orderBy('short')
 				->all(),
 		]);
