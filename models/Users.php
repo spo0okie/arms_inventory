@@ -70,15 +70,27 @@ class Users extends \yii\db\ActiveRecord
         return 'users';
     }
 
-    /**
+
+	public function extraFields()
+	{
+		$fields=parent::extraFields();
+		$fields[]='fn'; //first name
+		$fields[]='mn'; //middle name
+		$fields[]='ln'; //last name
+		$fields[]='orgStruct'; //department
+		$fields[]='org'; //org
+		return $fields;
+	}
+
+	/**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-	        [['id', 'Orgeh', 'Doljnost', 'Ename', 'Persg', 'Uvolen', ], 'required'],
-	        [['Persg', 'Uvolen', 'nosync'], 'integer'],
-	        [['id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
+	        [['employee_id', 'Orgeh', 'Doljnost', 'Ename', 'Persg', 'Uvolen', ], 'required'],
+	        [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
+	        [['employee_id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
 	        [['Doljnost', 'Ename', 'Login'], 'string', 'max' => 255],
 	        [['id'], 'unique'],
 	        [['Email'], 'string', 'max' => 64],
@@ -93,7 +105,8 @@ class Users extends \yii\db\ActiveRecord
 	public function attributeLabels()
 	{
 		return [
-			'id' => 'Табельный номер',
+			'employee_id' => 'Табельный номер',
+			'org_id' => 'Организация',
 			'Orgeh' => 'Подразделение',
 			'Doljnost' => 'Должность',
 			'Ename' => 'Полное имя',
@@ -174,6 +187,14 @@ class Users extends \yii\db\ActiveRecord
 	public function getOrgStruct()
 	{
 		return $this->hasOne(OrgStruct::className(), ['id'=>'Orgeh']);
+	}
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getOrg()
+	{
+		return $this->hasOne(\app\models\Orgs::className(), ['id'=>'org_id']);
 	}
 
 	/**
@@ -312,4 +333,33 @@ class Users extends \yii\db\ActiveRecord
 
 	}
 
+	/**
+	 * Get Last Name
+	 * @return string
+	 */
+	public function getLn() {
+		$tokens=explode(' ',$this->Ename);
+		if (!count ($tokens)) return '';
+		return $tokens[0];
+	}
+
+	/**
+	 * Get First Name
+	 * @return string
+	 */
+	public function getFn() {
+		$tokens=explode(' ',$this->Ename);
+		if (count($tokens)<2) return '';
+		return $tokens[1];
+	}
+
+	/**
+	 * Get First Name
+	 * @return string
+	 */
+	public function getMn() {
+		$tokens=explode(' ',$this->Ename);
+		if (count($tokens)<3) return '';
+		return $tokens[2];
+	}
 }

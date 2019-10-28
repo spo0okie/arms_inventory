@@ -26,7 +26,7 @@ $renderer=$this;
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
-            'id',
+            'employee_id',
 
             [
                 'attribute'=>'Ename',

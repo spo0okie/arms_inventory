@@ -12,14 +12,34 @@ use yii\widgets\DetailView;
 	    <?= Html::a($model->Ename,['/users/view', 'id' => $model->id]) ?>
     </h1>
     Табельный №
-	<?= $model->id ?>
+	<?= $model->employee_id ?> (<?= $model->Persg ?>)
     -
-	<?= $model->Uvolen?'Уволен':'Работает' ?>
+	<?php
+	if ($model->Uvolen) {
+		if (strlen($model->resign_date))
+			echo 'Уволен с '.$model->resign_date;
+		else
+			echo 'Уволен';
+	} else {
+		if (strlen($model->employ_date))
+			echo 'Работает с '.$model->employ_date;
+		else
+			echo 'Работает';
+	};
+	?>
     <p>
+		<?= $model->org->name ?>
+        //
 		<?= $model->Doljnost ?>
         <br />
-		<?= is_object($model->orgStruct)?$model->orgStruct->name:'- отдел не указан -' ?>
+		<?= (is_object($model->orgStruct))?$model->orgStruct->name:'- отдел не найден -' ?>
     </p>
+
+	<?php if (count($model->arms)) { ?>
+        Пользователь АРМ:
+		<?php foreach ($model->arms as $arm) echo $this->render('/arms/item',['model'=>$arm]) ?>
+        <br />
+	<?php } ?>
 
     <br />
 
