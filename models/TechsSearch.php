@@ -67,7 +67,8 @@ class TechsSearch extends Techs
 
         $query->andFilterWhere(['like', 'techs.num', $this->num])
             ->andFilterWhere(['like', 'techs.inv_num', $this->inv_num])
-            ->andFilterWhere(['like', 'techs.sn', $this->sn])
+	        ->andFilterWhere(['like', 'techs.sn', $this->sn])
+	        ->andFilterWhere(['like', 'techs.comment', $this->comment])
             ->andFilterWhere(['or',['like', 'getplacepath(places_techs.id)', $this->place],['like', 'getplacepath(places.id)', $this->place]])
             ->andFilterWhere(['like', 'concat(manufacturers.name," ",tech_models.name)', $this->model])
             ->andFilterWhere(['like', 'techs.ip', $this->ip])
