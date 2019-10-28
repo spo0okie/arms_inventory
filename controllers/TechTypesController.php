@@ -59,16 +59,16 @@ class TechTypesController extends Controller
 	    $params['TechsSearch']['type_id']=$id;
 	    $params['ArmsSearch']['type_id']=$id;
 
-	    $techSearchModel = new \app\models\TechsSearch();
-	    $techDataProvider = $techSearchModel->search($params);
+	    $techsSearchModel = new \app\models\TechsSearch();
+	    $techsDataProvider = $techsSearchModel->search($params);
 
 	    $armsSearchModel = new \app\models\ArmsSearch();
 	    $armsDataProvider = $armsSearchModel->search($params);
 
 	    return $this->render('view', [
 		    'model' => $this->findModel($id),
-		    'techSearchModel' => $techSearchModel,
-		    'techDataProvider' => $techDataProvider,
+		    'techsSearchModel' => $techsSearchModel,
+		    'techsDataProvider' => $techsDataProvider,
 		    'armsSearchModel' => $armsSearchModel,
 		    'armsDataProvider' => $armsDataProvider,
 	    ]);

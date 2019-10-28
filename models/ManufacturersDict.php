@@ -79,7 +79,7 @@ class ManufacturersDict extends \yii\db\ActiveRecord
     		//error_log('caching word '.$word.' //'.count(static::$cache));
 		    $item=static::find()
 			    ->where(['word' => $word])
-			    ->one()['manufacturers_id'];
+			    ->one();
 		    static::$cache[$word]=is_object($item)?$item->manufacturers_id:null;
 		    //error_log('cached  word '.$word.' //'.count(static::$cache));
 	    }

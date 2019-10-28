@@ -231,7 +231,7 @@ JS;
     <h4>Прикреплен к поступлениям ЗиП и материалов:</h4>
     <p>
 		<?php foreach ($materials as $material) {
-			echo $this->render('/materials/item',['model'=>$material]);
+			echo $this->render('/materials/item',['model'=>$material]).'<br />';
 		} ?>
     </p>
     <br />

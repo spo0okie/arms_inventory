@@ -233,7 +233,7 @@ class Comps extends \yii\db\ActiveRecord
 
 	public static function findByDomainName($domain_id,$name){
 		$name=mb_strtolower($name);
-		error_log("searching Domain Name: $domain_id $name");
+		//error_log("searching Domain Name: $domain_id $name");
 		$list = static::find()->select(['id','domain_id','name'])->asArray(true)->all();
 		//var_dump($list);
 		foreach ($list as $item) {
