@@ -7,8 +7,12 @@ use yii\helpers\Html;
 /* @var $model app\models\TechModels */
 
 $this->title = 'Новая модель';
-$this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index']];
-$this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['index']];
+if ($model->type_id){
+    $this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index']];
+    $this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['index']];
+} else {
+	$this->params['breadcrumbs'][] = ['label' => \app\models\TechModels::$title, 'url' => ['/tech-types/index']];
+}
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="tech-models-create">

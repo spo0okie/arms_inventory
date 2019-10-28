@@ -61,7 +61,7 @@ for ($i=0; $i<count($comps); $i++) {
             <td class="arm_uphone <?= count($model->voipPhones)?'tech_voip_phone':'' ?>" <?= $rowspan ?>>
 		        <?php if (count($model->voipPhones)) {
 		            $phones=[];
-		            foreach ($model->voipPhones as $tech) $phones[]=$this->render('/techs/item',['model'=>$tech,'name'=>strlen($tech->comment)?$tech->comment:$tech->model->shortest]);
+		            foreach ($model->voipPhones as $tech) $phones[]=$this->render('/techs/item',['model'=>$tech,'name'=>strlen($tech->comment)?$tech->comment:$tech->attachModel->shortest]);
 		            echo implode('<br />',$phones);
 		        } ?>
             </td>

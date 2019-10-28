@@ -13,7 +13,17 @@ use kartik\select2\Select2;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'id')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'employee_id')->textInput(['maxlength' => true]) ?>
+
+	<?= $form->field($model, 'org_id')->widget(Select2::className(), [
+		'data' => \app\models\Orgs::fetchNames(),
+		'options' => ['placeholder' => 'Организация',],
+		'toggleAllSettings'=>['selectLabel'=>null],
+		'pluginOptions' => [
+			'allowClear' => false,
+			'multiple' => false
+		]
+	]) ?>
 
 	<?= $form->field($model, 'Orgeh')->widget(Select2::className(), [
 		'data' => \app\models\OrgStruct::fetchNames(),

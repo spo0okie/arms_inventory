@@ -30,6 +30,9 @@ class TechModels extends \yii\db\ActiveRecord
 
 	private static $all_items=null;
 	private static $names_cache=null;
+	private static $phones_ids_cache=null;
+	private static $pcs_ids_cache=null;
+	private static $ups_ids_cache=null;
 
     /**
      * {@inheritdoc}
@@ -182,10 +185,79 @@ class TechModels extends \yii\db\ActiveRecord
 	{
 		$list = static::find()->joinWith('type')->joinWith('techs')->joinWith('manufacturer')
 			->where(['type_id'=>\app\models\TechTypes::fetchPhonesIds()])
-			//->select(['id', 'name'])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}
+
+	public static function fetchPhonesIds()
+	{
+		if (is_null(static::$phones_ids_cache)) {
+			$list = static::find()
+				//->select('id')
+				->joinWith('type')
+				->where(['type_id'=>\app\models\TechTypes::fetchPhonesIds()])
+				->all();
+			static::$phones_ids_cache=\yii\helpers\ArrayHelper::getColumn($list,'id');
+		}
+
+		return static::$phones_ids_cache;
+	}
+
+	public static function fetchPCsIds()
+	{
+		if (is_null(static::$pcs_ids_cache)) {
+			$list = static::find()
+				//->select('id')
+				->joinWith('type')
+				->where(['type_id'=>\app\models\TechTypes::fetchPCsIds()])
+				->all();
+			static::$pcs_ids_cache=\yii\helpers\ArrayHelper::getColumn($list,'id');
+		}
+
+		return static::$pcs_ids_cache;
+	}
+
+	public static function fetchUpsIds()
+	{
+		if (is_null(static::$ups_ids_cache)) {
+			$list = static::find()
+				//->select('id')
+				->joinWith('type')
+				->where(['type_id'=>\app\models\TechTypes::fetchUpsIds()])
+				->all();
+			static::$ups_ids_cache=\yii\helpers\ArrayHelper::getColumn($list,'id');
+		}
+
+		return static::$ups_ids_cache;
+	}
+
+	/**
+	 * Возвращает признак того, что это оборудование ПК
+	 * @param $id
+	 * @return bool
+	 */
+	public static function isPC($id){
+		return array_search($id,static::fetchPCsIds())!==false;
+	}
+
+	/**
+	 * Возвращает признак того, что это оборудование Телефон
+	 * @param $id
+	 * @return bool
+	 */
+	public static function getIsPhone($id) {
+		return array_search($id,static::fetchPhonesIds())!==false;
+	}
+
+	/**
+	 * Возвращает признак того, что это оборудование Телефон
+	 * @param $id
+	 * @return bool
+	 */
+	public static function getIsUps($id) {
+		return array_search($id,static::fetchUpsIds())!==false;
+	}
+
 
 	/**
 	 * Возвращает описание поля комментарий для типа оборудования по модели

@@ -19,7 +19,7 @@ class UsersSearch extends Users
     {
         return [
             [['Persg', 'Uvolen', 'nosync'], 'integer'],
-            [['id', 'Orgeh', 'Doljnost', 'Ename', 'Login', 'Email', 'Phone', 'Mobile', 'work_phone', 'Bday', 'manager_id'], 'safe'],
+            [['id', 'Orgeh', 'Doljnost', 'Ename', 'Login', 'Email', 'Phone', 'Mobile', 'work_phone', 'Bday', 'manager_id', 'employee_id'], 'safe'],
         ];
     }
 
@@ -66,7 +66,8 @@ class UsersSearch extends Users
         ]);
 
         $query->andFilterWhere(['like', 'id', $this->id])
-            ->andFilterWhere(['like', 'Orgeh', $this->Orgeh])
+	        ->andFilterWhere(['like', 'employee_id', $this->employee_id])
+	        ->andFilterWhere(['like', 'Orgeh', $this->Orgeh])
             ->andFilterWhere(['like', 'Doljnost', $this->Doljnost])
             ->andFilterWhere(['like', 'Ename', $this->Ename])
             ->andFilterWhere(['like', 'Login', $this->Login])

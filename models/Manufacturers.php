@@ -23,7 +23,7 @@ class Manufacturers extends \yii\db\ActiveRecord
 
 	private $all_names=[];
 
-    public static $CACHE_TIME=5;
+    public static $CACHE_TIME=15;
 
     private static $all_items=null;
     private static $names_cache=null;

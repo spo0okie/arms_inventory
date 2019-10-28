@@ -43,7 +43,7 @@ class Partners extends \yii\db\ActiveRecord
         return [
             [['inn', 'uname', 'bname'], 'required'],
             [['coment'], 'string'],
-            [['inn'], 'string', 'max' => 10],
+            [['inn'], 'string', 'max' => 12],
             [['kpp'], 'string', 'max' => 9],
             [['uname', 'bname'], 'string', 'max' => 255],
         ];

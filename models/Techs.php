@@ -230,7 +230,18 @@ class Techs extends \yii\db\ActiveRecord
 	 */
 	public function getModel()
 	{
+		//if (isset($this))
 		return $this->model_cache=$this->hasOne(TechModels::className(), ['id' => 'model_id']);
+	}
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getAttachModel()
+	{
+		return $this->model_cache=$this->hasOne(TechModels::className(), ['id' => 'model_id'])
+			->from(['attached_tech_models'=>TechModels::tableName()]);
+
 	}
 
 	/**
@@ -287,10 +298,12 @@ class Techs extends \yii\db\ActiveRecord
 	}
 
 	public function getIsVoipPhone() {
-    	return \app\models\TechTypes::getIsPhone($this->model->type_id);
+		return \app\models\TechModels::getIsPhone($this->model_id);
+		return \app\models\TechTypes::getIsPhone($this->model->type_id);
     }
 
 	public function getIsUps() {
+		return \app\models\TechModels::getIsUps($this->model_id);
 		return \app\models\TechTypes::getIsUps($this->model->type_id);
 	}
 

@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Users */
 
-$this->title = $model->id;
+$this->title = $model->Ename;
 $this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -25,7 +25,7 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
         ]) ?>
     </h1>
     Табельный №
-	<?= $model->id ?>
+	<?= $model->employee_id ?> (<?= $model->Persg ?>)
     -
 	<?php
         if ($model->Uvolen) {
@@ -41,6 +41,8 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
 	    };
 	?>
     <p>
+	    <?= $model->org->name ?>
+        //
         <?= $model->Doljnost ?>
         <br />
         <?= (is_object($model->orgStruct))?$model->orgStruct->name:'- отдел не найден -' ?>

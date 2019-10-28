@@ -67,6 +67,7 @@ $this->beginBody()
 			    ['label' => 'Организация',
 				    'items' => [
 					    ['label' => \app\models\Places::$title, 'url' => ['/places/index'], 'items'=>$places],
+					    ['label' => \app\models\Orgs::$title, 'url' => ['/orgs/index']],
 					    ['label' => \app\models\OrgPhones::$title, 'url' => ['/org-phones/index']],
 					    ['label' => \app\models\OrgInet::$title, 'url' => ['/org-inet/index']],
 					    ['label' => \app\models\Services::$title, 'url' => ['/services/index']],
@@ -75,7 +76,7 @@ $this->beginBody()
 			    ],
 			    ['label' => 'Люди',
 				    'items' => [
-					    ['label' => \app\models\OrgStruct::$title, 'url' => ['/org-struct/index']],
+					    //['label' => \app\models\OrgStruct::$title, 'url' => ['/org-struct/index']],
 					    ['label' => \app\models\Users::$title, 'url' => ['/users/index']],
 					    ['label' => 'Пользователи', 'url' => ['/users/logins']],
 					    ['label' => \app\models\UserGroups::$title, 'url' => ['/user-groups/index']],

@@ -3,16 +3,16 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\TechTypes;
+use app\models\Orgs;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * TechTypesController implements the CRUD actions for TechTypes model.
+ * OrgsController implements the CRUD actions for Orgs model.
  */
-class TechTypesController extends Controller
+class OrgsController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -30,13 +30,13 @@ class TechTypesController extends Controller
     }
 
     /**
-     * Lists all TechTypes models.
+     * Lists all Orgs models.
      * @return mixed
      */
     public function actionIndex()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => TechTypes::find()->orderBy('name'),
+            'query' => Orgs::find(),
         ]);
 
         return $this->render('index', [
@@ -45,55 +45,26 @@ class TechTypesController extends Controller
     }
 
     /**
-     * Displays a single TechTypes model.
+     * Displays a single Orgs model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id)
     {
-	    $params=Yii::$app->request->queryParams;
-	    if (!isset($params['TechsSearch'])) $params['TechsSearch']=[];
-	    if (!isset($params['ArmsSearch'])) $params['ArmsSearch']=[];
-
-	    $params['TechsSearch']['type_id']=$id;
-	    $params['ArmsSearch']['type_id']=$id;
-
-	    $techsSearchModel = new \app\models\TechsSearch();
-	    $techsDataProvider = $techsSearchModel->search($params);
-
-	    $armsSearchModel = new \app\models\ArmsSearch();
-	    $armsDataProvider = $armsSearchModel->search($params);
-
-	    return $this->render('view', [
-		    'model' => $this->findModel($id),
-		    'techsSearchModel' => $techsSearchModel,
-		    'techsDataProvider' => $techsDataProvider,
-		    'armsSearchModel' => $armsSearchModel,
-		    'armsDataProvider' => $armsDataProvider,
-	    ]);
+        return $this->render('view', [
+            'model' => $this->findModel($id),
+        ]);
     }
 
-
-	/**
-	 * Displays a single OrgPhones model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionHintTemplate($id)
-	{
-		$model=$this->findModel($id);
-		return Yii::$app->formatter->asNtext($model->comment);
-	}
     /**
-     * Creates a new TechTypes model.
+     * Creates a new Orgs model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new TechTypes();
+        $model = new Orgs();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -105,7 +76,7 @@ class TechTypesController extends Controller
     }
 
     /**
-     * Updates an existing TechTypes model.
+     * Updates an existing Orgs model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -125,7 +96,7 @@ class TechTypesController extends Controller
     }
 
     /**
-     * Deletes an existing TechTypes model.
+     * Deletes an existing Orgs model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -139,15 +110,15 @@ class TechTypesController extends Controller
     }
 
     /**
-     * Finds the TechTypes model based on its primary key value.
+     * Finds the Orgs model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return TechTypes the loaded model
+     * @return Orgs the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = TechTypes::findOne($id)) !== null) {
+        if (($model = Orgs::findOne($id)) !== null) {
             return $model;
         }
 

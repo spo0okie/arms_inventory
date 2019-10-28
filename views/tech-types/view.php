@@ -130,7 +130,7 @@ JS;
         <?= $this->render('/techs/table', [
             'searchModel' => $techsSearchModel,
             'dataProvider' => $techsDataProvider,
-            'columns'   => ['attach','num','model','sn','mac','ip','state','user','place','inv_num'],
+            'columns'   => ['attach','num','model','sn','mac','ip','state','user','place','inv_num','comment'],
         ]) ?>
     <?php } ?>
 
