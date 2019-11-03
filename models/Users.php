@@ -88,7 +88,7 @@ class Users extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-	        [['employee_id', 'Orgeh', 'Doljnost', 'Ename', 'Persg', 'Uvolen', ], 'required'],
+	        [['employee_id', 'Ename', 'Persg', 'Uvolen', ], 'required'],
 	        [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
 	        [['employee_id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
 	        [['Doljnost', 'Ename', 'Login'], 'string', 'max' => 255],

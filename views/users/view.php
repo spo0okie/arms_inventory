@@ -16,8 +16,8 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
 
     <h1>
         <?= Html::encode($model->Ename) ?>
-        <?= Html::a('<span class="glyphicon glyphicon-pencil">', ['update', 'id' => $model->id]) ?>
-        <?php if($deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['users/delete', 'id' => $model->id], [
+        <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['update', 'id' => $model->id]) ?>
+        <?php if($deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"></span>', ['users/delete', 'id' => $model->id], [
 	        'data' => [
 		        'confirm' => 'Удалить этого пользователя?',
 		        'method' => 'post',

@@ -101,7 +101,7 @@ class Arms extends \yii\db\ActiveRecord
     {
         return [
             [['num'], 'required'],
-            [['comp_id','places_id','model_id','state_id'], 'integer'],
+            [['comp_id','places_id','model_id','state_id','departments_id'], 'integer'],
 	        [['contracts_ids','lic_items_ids','lic_groups_ids'], 'each', 'rule'=>['integer']],
             [['hw', 'user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'string'],
             [['updated_at','history'], 'safe'],
@@ -139,6 +139,7 @@ class Arms extends \yii\db\ActiveRecord
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
             [['it_staff_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['it_staff_id' => 'id']],
 	        [['places_id'], 'exist', 'skipOnError' => true, 'targetClass' => Places::className(), 'targetAttribute' => ['places_id' => 'id']],
+	        [['departments_id'], 'exist', 'skipOnError' => true, 'targetClass' => Departments::className(), 'targetAttribute' => ['departments_id' => 'id']],
 	        [['state_id'], 'exist', 'skipOnError' => true, 'targetClass' => TechStates::className(), 'targetAttribute' => ['state_id' => 'id']],
 	        [['model_id'], 'exist', 'skipOnError' => true, 'targetClass' => TechModels::className(), 'targetAttribute' => ['model_id' => 'id']],
 
@@ -164,6 +165,7 @@ class Arms extends \yii\db\ActiveRecord
             'it_staff_id' => 'Сотрудник Дирекции ИТ',
 	        'user_id' => 'Пользователь',
 	        'places_id' => 'Помещение',
+	        'departments_id' => 'Подразделение',
             'responsible_id' => 'Ответственный',
             'head_id' => 'Руководитель отдела',
             'department_head' => 'Руководитель стр. подразделения',
@@ -191,6 +193,7 @@ class Arms extends \yii\db\ActiveRecord
 			'is_server' => 'Это оборудование формирует сервер, а не рабочее место',
 			'user_id' => 'Тот, кто работает за этим АРМ',
 			'places_id' => 'Помещение, куда установлен АРМ',
+			'departments_id' => 'Подразделение, к которому относится АРМ',
 			'it_staff_id' => 'Сотрудник службы ИТ, который отвечает за это рабочее место/сервер, если явно не указан другой ответственный',
 			'responsible_id' => 'Если указан, то ответственность за установленное ПО будет нести указанное ответственное лицо. В таком случае в паспорте появится дополнительный пункт, в котором ответственное лицо должно расписаться.',
 			'head_id' => 'Руководитель отдела сотрудника работающего на АРМ',
@@ -233,7 +236,7 @@ class Arms extends \yii\db\ActiveRecord
 	{
 		return $this->hasOne(Users::className(), ['id' => 'user_id']);
 	}
-
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -241,7 +244,15 @@ class Arms extends \yii\db\ActiveRecord
 	{
 		return $this->hasOne(Places::className(), ['id' => 'places_id']);
 	}
-
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getDepartment()
+	{
+		return $this->hasOne(Departments::className(), ['id' => 'departments_id']);
+	}
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

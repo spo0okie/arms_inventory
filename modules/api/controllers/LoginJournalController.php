@@ -8,26 +8,32 @@ class LoginJournalController extends \yii\rest\ActiveController
 {
     
     public $modelClass='app\models\LoginJournal';
-    /*
+
     public function actions()
     {
         $actions = parent::actions();
         $actions[]='search';
         return $actions;
     }
-    
-    public function actionSearch($domain,$name){
-        if (is_null($domainObj=Domains::find(['name'=>strtoupper($domain)])->one())) 
-            throw new \yii\web\NotFoundHttpException("Domain '$domain' not found");
-        $modelClass = $this->modelClass;
-        $model = $modelClass::find()->where([
-            'name' => strtoupper($name),
-            'domain_id' => $domainObj->id, 
-        ])->one();
-        if ($model === null)
-            throw new \yii\web\NotFoundHttpException("Comp with name '$name' not found in domain $domain");
-                
-            return $model;
+
+	/**
+	 * Ищет запись в бд по компу, логину и времени.
+	 * Это не для пользовательских запросов, т.к. время надо передать с точностью для секунды
+	 * Это для скриптов, чтобы можно было понять есть уже нужная запись в журнале или нет.
+	 * @param $user_login
+	 * @param $comp_name
+	 * @param $time
+	 * @return array|null|\yii\db\ActiveRecord
+	 * @throws \yii\web\NotFoundHttpException
+	 */
+    public function actionSearch($user_login,$comp_name,$time){
+	    $record = \app\models\LoginJournal::find()
+		    ->andFilterWhere(['comp_name' => $comp_name])
+		    ->andFilterWhere(['user_login' => $user_login])
+		    ->andFilterWhere(['time' => date('Y-m-d H:i:s',$time)])
+		    ->one();
+        if (is_null($record))
+            throw new \yii\web\NotFoundHttpException("Record not found");
+        return $record;
     }
-    */
 }
