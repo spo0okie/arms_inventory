@@ -173,7 +173,30 @@ JS;
         </div>
     </div>
 
-    <?= $form->field($model, 'places_id')->dropDownList($places) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $form->field($model, 'places_id')->widget(Select2::className(), [
+				'data' => $places,
+				'options' => ['placeholder' => 'Выберите помещение',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
+		<div class="col-md-6">
+			<?= $form->field($model, 'departments_id')->widget(Select2::className(), [
+				'data' => \app\models\Departments::fetchNames(),
+				'options' => ['placeholder' => 'Выберите подразделение',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
+	</div>
 
 
 

@@ -68,6 +68,7 @@ $this->beginBody()
 				    'items' => [
 					    ['label' => \app\models\Places::$title, 'url' => ['/places/index'], 'items'=>$places],
 					    ['label' => \app\models\Orgs::$title, 'url' => ['/orgs/index']],
+					    ['label' => \app\models\Departments::$title, 'url' => ['/departments/index']],
 					    ['label' => \app\models\OrgPhones::$title, 'url' => ['/org-phones/index']],
 					    ['label' => \app\models\OrgInet::$title, 'url' => ['/org-inet/index']],
 					    ['label' => \app\models\Services::$title, 'url' => ['/services/index']],

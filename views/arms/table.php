@@ -3,6 +3,13 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 
+/**
+ * Это рендер списка АРМов, вынесен отдельным файлом, т.к. нужен много где:
+ * в списке АРМов
+ *
+ */
+
+
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ArmsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -66,6 +73,17 @@ foreach ($columns as $column) {
 			];
 			break;
 
+		case 'user_position':
+			$render_columns[] = [
+				'attribute' => 'user_position',
+				'format' => 'raw',
+				'header' => 'Должность',
+				'value' => function ($data) use ($renderer) {
+					return is_object($data->user) ? $data->user->Doljnost : null;
+				}
+			];
+			break;
+		
 		case 'places_id':
 			$render_columns[] = [
 				'attribute' => 'places_id',
@@ -75,7 +93,17 @@ foreach ($columns as $column) {
 				}
 			];
 			break;
-
+		
+		case 'departments_id':
+			$render_columns[] = [
+				'attribute' => 'departments_id',
+				'format' => 'raw',
+				'value' => function ($data) {
+					return is_object($data->department) ? $data->department->name:null;
+				}
+			];
+			break;
+		
 		case 'attach':
 			$render_columns[] = [
 				'attribute' => 'attach',
@@ -108,8 +136,9 @@ foreach ($columns as $column) {
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 		'columns' => $render_columns,
+		'tableOptions' => ['class'=>'table-condensed table-striped table-bordered'],
 	]);
 //} catch (Exception $e) {
-	echo 'Ошибка вывода виджета таблицы<br/>';
+//	echo 'Ошибка вывода виджета таблицы<br/>';
 // }
 
