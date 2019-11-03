@@ -108,12 +108,18 @@ if (YII_ENV_DEV) {
         // uncomment the following to add your IP if you are not connecting from localhost.
         //'allowedIPs' => ['127.0.0.1', '::1'],
 	    'generators'=> [
-	    	'crud' => [
+		    'crud' => [
 			    'class' => 'yii\gii\generators\crud\Generator', // generator class
 			    'templates' => [ //setting for out templates
-				    'myCrud' => '@app/templates/crud/arms', // template name => path to template
+				    'arms' => '@app/templates/crud/arms', // template name => path to template
 			    ]
-		    ]
+		    ],
+	    	'model' => [
+				'class' => 'yii\gii\generators\model\Generator', // generator class
+				'templates' => [ //setting for out templates
+					'arms' => '@app/templates/model/arms', // template name => path to template
+				]
+			]
 	    ]
     ];
 }
