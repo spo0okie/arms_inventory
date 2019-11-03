@@ -57,9 +57,10 @@ class UsersController extends \yii\rest\ActiveController
     
     public function actions()
     {
-        //$actions = parent::actions();
-        //$actions['search'];
-        return ['search'];
+        $actions = parent::actions();
+        unset($actions['view']);
+	    return $actions;
+        //return ['view','update'];
     }
 
 	public function actionView($num='',$name='',$org='',$login=''){
@@ -87,7 +88,7 @@ class UsersController extends \yii\rest\ActiveController
 		}
 		throw new \yii\web\NotFoundHttpException("not found");
 	}
-
+/*
 	public function actionSearchByUser($id){
 		//ищем пользователя
 		$user = \app\models\Users::findOne($id);
@@ -114,5 +115,5 @@ class UsersController extends \yii\rest\ActiveController
 		}
 		throw new \yii\web\NotFoundHttpException("not found");
 	}
-
+*/
 }
