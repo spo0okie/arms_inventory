@@ -73,6 +73,13 @@ $config = [
 		            //'only' => ['index'],
 		            'prefix' => 'api'
 	            ],
+	            [
+		            'class' => 'yii\rest\UrlRule',
+		            'controller' => ['users' => 'api/users'],
+		            'pluralize' => false,
+		            //'only' => ['index'],
+		            'prefix' => 'api'
+	            ],
                 'api/domains/<id:\w+>' => 'api/domains/view',
                 'api/comps/<domain:\w+>/<name:[\w-]+>' => 'api/comps/search',
             ],
@@ -100,6 +107,14 @@ if (YII_ENV_DEV) {
         'class' => 'yii\gii\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
         //'allowedIPs' => ['127.0.0.1', '::1'],
+	    'generators'=> [
+	    	'crud' => [
+			    'class' => 'yii\gii\generators\crud\Generator', // generator class
+			    'templates' => [ //setting for out templates
+				    'myCrud' => '@app/templates/crud/arms', // template name => path to template
+			    ]
+		    ]
+	    ]
     ];
 }
 
