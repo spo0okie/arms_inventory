@@ -84,11 +84,18 @@ $config = [
                 'api/comps/<domain:\w+>/<name:[\w-]+>' => 'api/comps/search',
             ],
         ],
+	    'i18n' => [
+		    'translations' => [
+			    'kvgrid' => [
+				    'class' => 'yii\i18n\PhpMessageSource',
+				    'basePath' => '@vendor/kartik-v/yii2-grid/messages',
+			    ],
+		    ],
+	    ],
     ],
     'modules' => [
-        'api' => [
-            'class' => 'app\modules\api\Rest'
-        ]
+        'api'       => ['class' => 'app\modules\api\Rest'],
+		'gridview'  => ['class' => 'kartik\grid\Module'],
     ],
     'params' => $params,
 ];
