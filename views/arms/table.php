@@ -1,7 +1,6 @@
 <?php
 
-use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 
 /**
  * Это рендер списка АРМов, вынесен отдельным файлом, т.к. нужен много где:
@@ -16,6 +15,8 @@ use yii\grid\GridView;
 
 $renderer = $this;
 if (!isset($columns)) $columns=['attach','num','model','comp_id','comp_ip','sn','state','user_id','places_id'];
+
+$manufacturers=\app\models\Manufacturers::fetchNames();
 
 //формируем список столбцов для рендера
 $render_columns=[];
@@ -113,7 +114,7 @@ foreach ($columns as $column) {
 				}
 			];
 			break;
-
+		
 		case 'state':
 			$render_columns[] = [
 				'attribute' => 'state',
@@ -123,8 +124,26 @@ foreach ($columns as $column) {
 				}
 			];
 			break;
-
+		
+		case 'comp_hw':
+			$render_columns[] = [
+				'attribute' => 'comp_hw',
+				'format' => 'raw',
+				'value' => function ($data) use ($manufacturers) {
+					if (is_object($data->comp)) {
+						$render=[];
+						foreach ($data->comp->getHardArray() as $item) {
+							$render[]=$item->getName();
+						}
+						return implode('<br />',$render);
+					}
+					return null;
+				}
+			];
+			break;
+		
 		case 'sn':
+		case 'inv_num':
 			$render_columns[] = $column;
 
 

@@ -25,6 +25,7 @@
 	"kartik-v/yii2-widget-fileinput": "1.0.8",
 	"kartik-v/yii2-nav-x": "dev-master",
 	"kartik-v/yii2-widget-typeahead": "dev-master",
+        "kartik-v/yii2-grid": "dev-master",
         "voskobovich/yii2-linker-behavior": "^4.0",
         "bower-asset/font-awesome": "^5.7"
     },

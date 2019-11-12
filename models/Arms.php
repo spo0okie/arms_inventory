@@ -64,7 +64,7 @@ class Arms extends \yii\db\ActiveRecord
 	private $ups_cache=null;
 	private $comps_cache=null;
 	private $state_cache=null;
-
+	//private $hw=null;
     private static $num_str_pad=6; //количество знаков в цифровой части номера
 
 	/**
@@ -103,8 +103,8 @@ class Arms extends \yii\db\ActiveRecord
             [['num'], 'required'],
             [['comp_id','places_id','model_id','state_id','departments_id'], 'integer'],
 	        [['contracts_ids','lic_items_ids','lic_groups_ids'], 'each', 'rule'=>['integer']],
-            [['hw', 'user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'string'],
-            [['updated_at','history'], 'safe'],
+            [['user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'integer'],
+            [['updated_at','history','hw'], 'safe'],
 	        [['is_server'],'boolean'],
             [['num'], 'string', 'max' => 16],
 	        [['model', 'inv_num', 'sn', 'comment'], 'string', 'max' => 128],
@@ -443,11 +443,19 @@ class Arms extends \yii\db\ActiveRecord
      */
     public function beforeSave($insert)
     {
+	    //error_log('savin');
         if (parent::beforeSave($insert)) {
 
-            if (!is_null($this->hwList_obj))
-                $this->hw=$this->hwList->onlySaved()->saveJSON();
+            if (!is_null($this->hwList_obj)) {
+	            $this->hw=$this->hwList->onlySaved()->saveJSON();
+	            //error_log(print_r($this->hw,true));
+            	
+            } else {
+	            //error_log('null hw');
+            }
             return true;
+        } else {
+	        //error_log('uh oh');
         }
         return false;
     }

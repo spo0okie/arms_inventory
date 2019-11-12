@@ -12,6 +12,7 @@ use app\models\Arms;
  */
 class ArmsSearch extends Arms
 {
+	public $comp_hw;
 	public $comp_ip;
 	public $type_id;
 	public $user_position;
@@ -23,7 +24,7 @@ class ArmsSearch extends Arms
     {
         return [
             [['id'], 'integer'],
-            [['num', 'model_id', 'sn', 'user_id', 'places_id','departments_id', 'comp_ip', 'comp_id','model_id','type_id','model','user_position'], 'safe'],
+            [['num', 'inv_num', 'model_id', 'sn', 'user_id', 'places_id','departments_id', 'comp_ip', 'comp_id','model_id','type_id','model','user_position','comp_hw'], 'safe'],
         ];
     }
 
@@ -68,12 +69,13 @@ class ArmsSearch extends Arms
         //$query->select(['getplacepath({{places}}.id) AS path']);
 
         $query->andFilterWhere(['like', 'num', $this->num])
-            //->andFilterWhere(['like', 'model', $this->model])
+	        ->andFilterWhere(['like', 'inv_num', $this->inv_num])
             ->andFilterWhere(['like', 'sn', $this->sn])
 	        ->andFilterWhere(['like', 'users.Ename', $this->user_id])
 	        ->andFilterWhere(['like', 'users.Doljnost', $this->user_position])
 	        ->andFilterWhere(['like', 'comps.ip', $this->comp_ip])
 	        ->andFilterWhere(['like', 'comps.name', $this->comp_id])
+	        ->andFilterWhere(['like', 'comps.raw_hw', $this->comp_hw])
 	        ->andFilterWhere(['like', 'departments.name', $this->departments_id])
 	        ->andFilterWhere(['like', 'arms_models.name', $this->model])
 	        ->andFilterWhere(['like', 'getplacepath({{places}}.id)', $this->places_id])

@@ -40,7 +40,8 @@ class ArmsController extends Controller
     {
         $searchModel = new ArmsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
+	    
+        $this->view->params['layout-container'] = 'container-fluid';
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -256,13 +257,15 @@ class ArmsController extends Controller
         $uid=Yii::$app->request->get('uid',null);
         if (strlen($uid)) {
             if ($uid==='sign-all') { //специальная комманда на подпись всего оборудования
+	            //error_log('signin all');
                 $model->hwList->signAll();
             }else {
                 $newItem = new \app\models\HwListItem();
                 $newItem->loadArr($_GET);
                 $model->hwList->add($newItem);
             }
-            $model->save();
+            //error_log('savin');
+            if (!$model->save()) error_log(print_r($model->errors,true));
         }
 
         return $this->redirect(['view', 'id' => $model->id]);
