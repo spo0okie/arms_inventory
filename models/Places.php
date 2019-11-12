@@ -13,6 +13,7 @@ use Yii;
  * @property string $fullName Полное название
  * @property string $prefTree Префикс с резервированием родительским.
  * @property string $addr Адрес
+ * @property \app\models\Places $top помещение самого верхнего уровня над текущим
  * @property \yii\db\ActiveQuery $parent родительское помещения
  * @property \yii\db\ActiveQuery $arms АРМы размещенные в этом помещении
  * @property \yii\db\ActiveQuery $techs техника размещенная в этом помещении
@@ -163,7 +164,7 @@ DELIMITER ;
 	{
 		return $this->hasMany(OrgInet::className(), ['places_id' => 'id']);
 	}
-
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -171,6 +172,18 @@ DELIMITER ;
 	{
 		if (!is_null($this->arms_cache)) return $this->arms_cache;
 		return $this->arms_cache=$this->hasMany(Arms::className(), ['places_id' => 'id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getArmsRecursive()
+	{
+		$arms=$this->arms;
+		foreach ($this->childs as $child) {
+			$arms=array_merge($arms,$child->arms);
+		}
+		return $arms;
 	}
 
 	/**
@@ -201,7 +214,7 @@ DELIMITER ;
 		return $this->hasMany(Materials::className(), ['places_id' => 'id'])
 			->from(['places_materials'=>Materials::tableName()]);
 	}
-
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -209,6 +222,14 @@ DELIMITER ;
 	{
 		//return static::fetchItem($this->parent_id);
 		return $this->hasOne(Places::className(), ['id' => 'parent_id']);
+	}
+	
+	/**
+	 * @return \app\models\Places
+	 */
+	public function getTop()
+	{
+		return (is_null($this->parent_id))?$this:$this->parent->top;
 	}
 
 	/**
