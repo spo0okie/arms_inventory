@@ -21,7 +21,7 @@ class ContractsSearch extends Contracts
     {
         return [
             [['id', 'parent', 'state_id'], 'integer'],
-            [['fullname', 'comment'], 'safe'],
+            [['fullname', 'comment','total'], 'safe'],
         ];
     }
 
@@ -64,6 +64,7 @@ class ContractsSearch extends Contracts
 		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
 	    $query
 		    ->filterWhere(['like', new \yii\db\Expression("concat(`contracts`.`date`,' - ',`contracts`.`name`,' - ',ifnull(`partners`.`uname`,''),' (', ifnull(`partners`.`bname`,'') , ')' )"), $this->fullname])
+		    ->andFilterWhere(['total'=>$this->total])
 		    ->orderBy(['date'=>SORT_DESC,'name'=>SORT_DESC]);
 
 	    $dataProvider = new ActiveDataProvider([

@@ -83,15 +83,22 @@ use kartik\file\FileInput;
         </div>
     </div>
 
-	<?= $form->field($model, 'partners_ids')->widget(Select2::classname(), [
-		'data' => \app\models\Partners::fetchNames(),
-		'options' => ['placeholder' => 'Начните набирать название для поиска'],
-		'toggleAllSettings'=>['selectLabel'=>null],
-		'pluginOptions' => [
-			'allowClear' => true,
-			'multiple' => true
-		],
-	]) ?>
+	<div class="row">
+		<div class="col-md-9">
+			<?= $form->field($model, 'partners_ids')->widget(Select2::classname(), [
+				'data' => \app\models\Partners::fetchNames(),
+				'options' => ['placeholder' => 'Начните набирать название для поиска'],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => true
+				],
+			]) ?>
+		</div>
+		<div class="col-md-3">
+			<?= $form->field($model,'total')->textInput() ?>
+		</div>
+	</div>
 
 	<?php
 

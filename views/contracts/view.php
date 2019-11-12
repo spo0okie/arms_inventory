@@ -6,6 +6,8 @@ use dosamigos\selectize\SelectizeDropDownList;
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
 
+\yii\helpers\Url::remember();
+
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => \app\models\Contracts::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;

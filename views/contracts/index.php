@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ContractsSearch */
@@ -12,13 +12,6 @@ $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
 <div class="contracts-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -38,6 +31,14 @@ $renderer=$this;
 		        'format'=>'raw',
 		        'value'=>function($data) use ($renderer) {
 			        return $renderer->render('/contracts/item-state',['model'=>$data]);
+		        }
+	        ],
+	        [
+		        'attribute'=>'total',
+		        //'filter'=>\app\models\ContractsStates::fetchNames(),
+		        'format'=>'raw',
+		        'value'=>function($data)  {
+			        return $data->total?$data->total:'';
 		        }
 	        ],
 	        [
@@ -89,5 +90,19 @@ $renderer=$this;
 		        }
 	        ],
         ],
-    ]); ?>
+	    'toolbar' => [
+	    		Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		    '{export}'
+	    ],
+		'toolbarContainerOptions' => ['class'=>'btn-toolbar pull-left'],
+	    'export' => [
+		    'fontAwesome' => true
+	    ],
+	    'showFooter' => false,
+		'showPageSummary' => false,
+	    'panel' => [
+		    'type' => GridView::TYPE_DEFAULT,
+		    'heading' => $this->title,
+	    ]
+	]); ?>
 </div>
