@@ -54,7 +54,7 @@ class Departments extends \yii\db\ActiveRecord
      */
     public function getArms()
     {
-        return $this->hasMany(Arms::className(), ['department' => 'id']);
+        return $this->hasMany(Arms::className(), ['departments_id' => 'id']);
     }
 
 

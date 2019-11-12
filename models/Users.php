@@ -293,12 +293,21 @@ class Users extends \yii\db\ActiveRecord
 
         return \yii\helpers\ArrayHelper::map($query->all(), $keyField, $valueField);
     }
-
-	public static function fetchWorking()
+	
+	/**
+	 * Возвращает список неуволенных сотрудников
+	 * @param null $current если передан, то возвращает еще этого, независимо от состяния уволен или нет
+	 * @return array|null
+	 */
+	public static function fetchWorking($current=null)
 	{
 		if (!is_null(static::$working_cache)) return static::$working_cache;
 		$query = static::find()->filterWhere(['Uvolen'=>0])->orderBy('Ename');
-		return static::$working_cache = \yii\helpers\ArrayHelper::map($query->all(), 'id', 'Ename');
+		$list= (static::$working_cache = \yii\helpers\ArrayHelper::map($query->all(), 'id', 'Ename'));
+		if ($current && (!isset($list[$current]))) {
+			$list[$current]=static::findOne($current)->Ename;
+		}
+		return $list;
 	}
 
     public static function fetchNames(){

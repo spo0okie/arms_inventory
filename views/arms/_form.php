@@ -122,7 +122,7 @@ JS;
     <div class="row" id="arms-user_settings" <?= $model->is_server?'style="display:none"':'' ?>>
         <div class="col-md-6" >
 	        <?= $form->field($model, 'user_id')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchWorking(),
+		        'data' => \app\models\Users::fetchWorking($model->user_id),
 		        'options' => ['placeholder' => 'сотрудник не назначен',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
@@ -134,7 +134,7 @@ JS;
         </div>
         <div class="col-md-6" >
 	        <?= $form->field($model, 'head_id')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchWorking(),
+		        'data' => \app\models\Users::fetchWorking($model->it_staff_id),
 		        'options' => ['placeholder' => 'сотрудник не назначен',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
@@ -148,7 +148,7 @@ JS;
     <div class="row">
         <div class="col-md-6" >
 	        <?= $form->field($model, 'it_staff_id')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchWorking(),
+		        'data' => \app\models\Users::fetchWorking($model->it_staff_id),
 		        'options' => ['placeholder' => 'сотрудник не назначен',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
@@ -159,7 +159,7 @@ JS;
         </div>
         <div class="col-md-6" id="arms-responsible_settings_block" <?= $model->is_server?'style="display:none"':'' ?>>
             <?= $form->field($model, 'responsible_id')->widget(Select2::className(), [
-                'data' => \app\models\Users::fetchWorking(),
+                'data' => \app\models\Users::fetchWorking($model->responsible_id),
                 'options' => ['placeholder' => 'ответственным является сотрудник ИТ','id'=>'arms-responsible_settings'],
                 'toggleAllSettings'=>['selectLabel'=>null],
                 'pluginOptions' => [

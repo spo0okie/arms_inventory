@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Departments;
 use Codeception\Module\Yii2;
 use Yii;
 use app\models\Places;
@@ -59,7 +60,7 @@ class PlacesController extends Controller
 	            ->orderBy('path')->all(),
         ]);
     }
-
+	
 	/**
 	 * Lists all Places models.
 	 * @return mixed
@@ -91,12 +92,33 @@ class PlacesController extends Controller
 					'techs.model.type',
 					'techs.techUser',
 					'materials'
-					])->orderBy('short')
+				])->orderBy('short')
 				->all(),
 		]);
 	}
-
-    /**
+	/**
+	 * Lists all Places models.
+	 * @return mixed
+	 */
+	public function actionDepmap()
+	{
+		
+		$dataProvider = new ActiveDataProvider([
+			'query' => Places::find()
+				->joinWith(['arms'])
+				->where(['not',['arms.departments_id'=>null]])
+				->groupBy('getplacetop(places.id)'),
+				//->all()
+			'pagination'=>false
+		]);
+		
+		return $this->render('depmap', [
+			'dataProvider' => $dataProvider,
+		]);
+	}
+	
+	
+	/**
      * Displays a single Places model.
      * @param string $id
      * @return mixed
