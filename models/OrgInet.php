@@ -17,7 +17,8 @@ use Yii;
  * @property string $type Тип подключения
  * @property int $static Статический?
  * @property int $comment Дополнительно
- * @property int $history
+ * @property string $history
+ * @property int $cost
  * @property int $prov_tel_id Услуга связи
  * @property int $places_id Помещение
  *
@@ -43,7 +44,7 @@ class OrgInet extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['static', 'prov_tel_id', 'places_id','contracts_id'], 'integer'],
+            [['static', 'prov_tel_id', 'places_id','contracts_id','cost'], 'integer'],
             [['prov_tel_id','name'], 'required'],
             [['ip_addr', 'ip_mask', 'ip_gw', 'ip_dns1', 'ip_dns2'], 'string', 'max' => 15],
 	        [['comment','history'], 'safe'],
@@ -74,6 +75,7 @@ class OrgInet extends \yii\db\ActiveRecord
 			'places_id' => 'Помещение',
 			'prov_tel_id' => 'Оператор связи',
 			'contracts_id' => 'Договор',
+			'cost' => 'Стоимость',
 			'account' => 'Аккаунт / л/с',
 			'history' => 'Заметки',
 		];
@@ -95,6 +97,7 @@ class OrgInet extends \yii\db\ActiveRecord
 			'account' => 'Номер лицеового счета, аккаунта иного идентификатора услуги у оператора',
 			'comment' => 'Короткий комментарий',
 			'history' => 'Записная книжка этого подключения',
+			'cost' => 'Стоимость услуги в месяц (планируемая стоимость, если величина плавает)',
 		];
 	}
 

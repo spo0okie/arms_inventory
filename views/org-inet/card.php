@@ -34,8 +34,11 @@ if (!isset($static_view)) $static_view=false;
 </h1>
 
 <p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
+<?php if($model->cost) { ?>
+	<p>	<?= \Yii::$app->formatter->asInteger($model->cost) ?> Р/мес </p>
+<?php }
 
-<?php if ($model->static) { ?>
+if ($model->static) { ?>
 	<h4>Статический адрес:</h4>
 	<p>
 		Адрес: <?= $model->ip_addr ?> <br />

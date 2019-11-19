@@ -16,7 +16,14 @@ use kartik\select2\Select2;
     ]); ?>
     <div class="row">
         <div class="col-md-6">
-	        <?= $form->field($model, 'name')->textInput() ?>
+			<div class="row">
+				<div class="col-md-6">
+					<?= $form->field($model, 'name')->textInput() ?>
+				</div>
+				<div class="col-md-6">
+					<?= $form->field($model, 'cost')->textInput() ?>
+				</div>
+			</div>
 
 	        <?= $form->field($model, 'comment')->textarea(['rows' => max(2,count(explode("\n",$model->comment)))]) ?>
 	        <?php $this->registerJs("$('#orginet-comment').autoResize();"); ?>
