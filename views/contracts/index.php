@@ -10,6 +10,12 @@ use kartik\grid\GridView;
 $this->title = \app\models\Contracts::$title;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
+$filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'btn']).
+	\yii\helpers\Html::a('счета',['index','ContractsSearch[fullname]'=>'счет'],['class'=>'btn btn-default']).
+	\yii\helpers\Html::a('ТТН',['index','ContractsSearch[fullname]'=>'ттн'],['class'=>'btn btn-default']).
+	\yii\helpers\Html::a('УПД',['index','ContractsSearch[fullname]'=>'упд'],['class'=>'btn btn-default']).
+	\yii\helpers\Html::a('договоры',['index','ContractsSearch[fullname]'=>'договор'],['class'=>'btn btn-default']);
+
 ?>
 <div class="contracts-index">
 
@@ -87,7 +93,8 @@ $renderer=$this;
         ],
 	    'toolbar' => [
 	    		Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
-		    '{export}'
+		    '{export}',
+		    $filter
 	    ],
 		'toolbarContainerOptions' => ['class'=>'btn-toolbar pull-left'],
 	    'export' => [
