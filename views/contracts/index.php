@@ -16,7 +16,8 @@ $renderer=$this;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-        'columns' => [
+	    'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+	    'columns' => [
 	        [
 		        'attribute'=>'fullname',
 		        'header'=>'Документы',
@@ -33,14 +34,8 @@ $renderer=$this;
 			        return $renderer->render('/contracts/item-state',['model'=>$data]);
 		        }
 	        ],
-	        [
-		        'attribute'=>'total',
-		        //'filter'=>\app\models\ContractsStates::fetchNames(),
-		        'format'=>'raw',
-		        'value'=>function($data)  {
-			        return $data->total?$data->total:'';
-		        }
-	        ],
+	        'total',
+			'charge',
 	        [
 		        'attribute'=>'docsAttached',
 		        'header'=>'<span class="glyphicon glyphicon-paperclip" title="Привязано документов"></span>',

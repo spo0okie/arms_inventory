@@ -20,8 +20,11 @@ use kartik\select2\Select2;
 				<div class="col-md-6">
 					<?= $form->field($model, 'name')->textInput() ?>
 				</div>
-				<div class="col-md-6">
+				<div class="col-md-4">
 					<?= $form->field($model, 'cost')->textInput() ?>
+				</div>
+				<div class="col-md-2">
+					<?= $form->field($model, 'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('orginet','cost','charge')) ?>
 				</div>
 			</div>
 

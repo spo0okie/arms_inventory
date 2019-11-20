@@ -44,7 +44,8 @@ class OrgInet extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['static', 'prov_tel_id', 'places_id','contracts_id','cost'], 'integer'],
+	        [['static', 'prov_tel_id', 'places_id','contracts_id'], 'integer'],
+	        [['cost','charge'], 'number'],
             [['prov_tel_id','name'], 'required'],
             [['ip_addr', 'ip_mask', 'ip_gw', 'ip_dns1', 'ip_dns2'], 'string', 'max' => 15],
 	        [['comment','history'], 'safe'],
@@ -76,6 +77,7 @@ class OrgInet extends \yii\db\ActiveRecord
 			'prov_tel_id' => 'Оператор связи',
 			'contracts_id' => 'Договор',
 			'cost' => 'Стоимость',
+			'charge' => 'НДС',
 			'account' => 'Аккаунт / л/с',
 			'history' => 'Заметки',
 		];

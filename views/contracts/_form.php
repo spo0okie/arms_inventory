@@ -84,7 +84,7 @@ use kartik\file\FileInput;
     </div>
 
 	<div class="row">
-		<div class="col-md-9">
+		<div class="col-md-8">
 			<?= $form->field($model, 'partners_ids')->widget(Select2::classname(), [
 				'data' => \app\models\Partners::fetchNames(),
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
@@ -97,6 +97,9 @@ use kartik\file\FileInput;
 		</div>
 		<div class="col-md-3">
 			<?= $form->field($model,'total')->textInput() ?>
+		</div>
+		<div class="col-md-1">
+			<?= $form->field($model,'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('contracts','total','charge')) ?>
 		</div>
 	</div>
 

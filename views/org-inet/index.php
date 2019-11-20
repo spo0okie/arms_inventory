@@ -13,7 +13,9 @@ $this->params['breadcrumbs'][] = $this->title;
 	
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'columns' => [
+	    'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+	
+	    'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'name',
 	        'places.name:raw:Объект',
@@ -27,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'provTel.name:raw:Оператор связи',
 	        'account',
 	        'cost',
+	        'charge',
 	        'comment:ntext',
 
             ['class' => 'yii\grid\ActionColumn'],

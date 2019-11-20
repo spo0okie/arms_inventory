@@ -39,8 +39,18 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
 
 <h4>От: <?= $model->datePart ?><?= $this->render('item-state',compact('model'))?></h4>
 
+
+<?php if ($model->total) { ?>
+	<h4>
+		Сумма: <?= Yii::$app->formatter->asCurrency($model->total) ?>
+		<?php if ($model->charge){ ?>
+			(в т.ч. НДС: <?= Yii::$app->formatter->asCurrency($model->charge) ?>)
+		<?php } ?>
+	</h4>
+<?php } ?>
+
 <?php if (!is_null($parent=$model->parent) && $static_view) { ?>
-    <h3>Основной документ: <?= Html::a($parent->name,['view','id'=>$parent->id]) ?></h3>
+	<h3>Основной документ: <?= Html::a($parent->name,['view','id'=>$parent->id]) ?></h3>
 <?php } ?>
 
 <?php if (!is_null($sucessor=$model->successor) && $static_view) { ?>

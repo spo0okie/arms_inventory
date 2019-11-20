@@ -83,7 +83,8 @@ class Contracts extends \yii\db\ActiveRecord
             [['name'], 'required'],
 	        [['lics_ids','partners_ids','arms_ids','techs_ids'], 'each', 'rule'=>['integer']],
 	        [['scanFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
-	        [['parent_id','state_id','total'], 'integer'],
+	        [['parent_id','state_id'], 'integer'],
+	        [['total','charge'], 'number'],
 	        [['is_successor'], 'boolean'],
             [['comment'], 'string'],
             [['name','date','end_date'], 'string', 'max' => 128],
@@ -125,6 +126,7 @@ class Contracts extends \yii\db\ActiveRecord
 			'scanFile' => 'Скан документа',
 			'date' => 'Дата',
 			'total' => 'Сумма',
+			'charge' => 'НДС',
 			'end_date' => 'Окончание',
 			'partners_ids' => 'Контрагенты',
 			'lics_ids' => 'Лицензии',
@@ -550,5 +552,20 @@ class Contracts extends \yii\db\ActiveRecord
 		);*/
 		}
 		return $hint;
+	}
+	
+	/**
+	 * Код для подстановки НДС
+	 * @param $model
+	 * @param $total
+	 * @param $charge
+	 * @return string
+	 */
+	public static function chargeCalcHtml($model,$total,$charge) {
+		return <<<HTML
+		<span class="href" onclick="$('#{$model}-{$charge}').val($('#{$model}-{$total}').val()/1.2*0.2)">20%</span>
+		/
+		<span class="href" onclick="$('#{$model}-{$charge}').val('')">нет</span>
+HTML;
 	}
 }
