@@ -26,8 +26,18 @@ $config = [
             'enableAutoLogin' => true,
         ],
 	    'formatter' => [
+	    	'locale' => 'ru-RU',
 		    'dateFormat' => 'dd.MM.y',
-		    'datetimeFormat' => 'dd.MM.y HH:mm:ss'
+		    'datetimeFormat' => 'dd.MM.y HH:mm:ss',
+		    //'currencyCode' => 'RUR',
+		    'numberFormatterSymbols' => [
+			    NumberFormatter::CURRENCY_SYMBOL => '&#8381;',
+		    ],
+		    //'thousandSeparator' => '&nbsp;',
+		    'numberFormatterOptions' => [
+			    NumberFormatter::MIN_FRACTION_DIGITS => 0,
+			    NumberFormatter::MAX_FRACTION_DIGITS => 2,
+		    ]
 	    ],
 	    'errorHandler' => [
             'errorAction' => 'site/error',
