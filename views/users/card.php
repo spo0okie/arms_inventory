@@ -6,15 +6,11 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Users */
 
-$this->title = $model->Ename;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Users::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
-
 if (!isset($static_view)) $static_view=false;
 $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($model->armsIt) || count($model->armsResponsible) || count($model->techs) || count($model->techsIt));
 ?>
     <h1>
-		<?= $model->nosync?'<span class="glyphicon glyphicon-lock" alt="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
+		
 		<?= Html::a($model->Ename,['/users/view', 'id' => $model->id]) ?>
         <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['update', 'id' => $model->id]) ?>
         <?php if($deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"></span>', ['users/delete', 'id' => $model->id], [
@@ -24,6 +20,7 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
 	        ],
         ]) ?>
     </h1>
+	<?= $model->nosync?'<span class="glyphicon glyphicon-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
     Табельный №
 	<?= $model->employee_id ?> (<?= $model->Persg ?>)
     -
