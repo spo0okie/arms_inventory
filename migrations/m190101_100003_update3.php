@@ -3,7 +3,7 @@
 use yii\db\Migration;
 
 /**
- * Добавление лиц ключи
+ * Добавление организаций
  */
 class m190101_100003_update3 extends Migration
 {
@@ -20,6 +20,7 @@ class m190101_100003_update3 extends Migration
 			'comment'=>$this->text()->comment('Комментарий')->append(' COLLATE utf8mb4_unicode_ci')
 		],'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 		
+		$this->execute('insert into orgs VALUES (1,"Организация 1","Орг1","Переименуй меня")');
 	}
 	
 	/**

@@ -3,7 +3,7 @@
 use yii\db\Migration;
 
 /**
- * Добавление лиц ключи
+ * Добавление услуг ИТ
  */
 class m190101_100004_update4 extends Migration
 {
