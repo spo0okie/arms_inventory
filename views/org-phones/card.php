@@ -32,6 +32,13 @@ if (!isset($static_view)) $static_view=false;
 </h1>
 
 <p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
+<p>
+	Стоимость: <?= Yii::$app->formatter->asCurrency($model->cost) ?>
+	<?php if ($model->charge){ ?>
+		(в т.ч. НДС: <?= Yii::$app->formatter->asCurrency($model->charge) ?>)
+	<?php } ?>
+	/мес
+</p>
 
 
 <h4>Место подключения:</h4>

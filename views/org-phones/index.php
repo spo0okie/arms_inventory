@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -11,15 +11,10 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="org-phones-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'columns' => [
+	    'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+	    'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             //'id',
             'fullNum',
@@ -27,7 +22,24 @@ $this->params['breadcrumbs'][] = $this->title;
 	        'place.fullName',
 	        'provTel.name',
 	        'account',
+		    'cost',
+		    'charge',
             ['class' => 'yii\grid\ActionColumn'],
         ],
+	    'toolbar' => [
+		    Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		    '{export}'
+	    ],
+	    'toolbarContainerOptions' => ['class'=>'btn-toolbar pull-left'],
+	    'export' => [
+		    'fontAwesome' => true
+	    ],
+	    'showFooter' => false,
+	    'showPageSummary' => false,
+	    'panel' => [
+		    'type' => GridView::TYPE_DEFAULT,
+		    'heading' => $this->title,
+	    ]
+		
     ]); ?>
 </div>

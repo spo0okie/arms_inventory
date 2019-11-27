@@ -26,16 +26,26 @@ use kartik\select2\Select2;
     </div>
 
 
+	<div class="row">
+		<div class="col-md-6">
+			<?= $form->field($model, 'places_id')->widget(Select2::className(), [
+				'data' => \app\models\Places::fetchNames(),
+				'options' => ['placeholder' => 'Выберите помещение',],
+				//'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => false,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
+		<div class="col-md-4">
+			<?= $form->field($model, 'cost')->textInput() ?>
+		</div>
+		<div class="col-md-2">
+			<?= $form->field($model, 'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('orgphones','cost','charge')) ?>
+		</div>
 
-	<?= $form->field($model, 'places_id')->widget(Select2::className(), [
-		'data' => \app\models\Places::fetchNames(),
-		'options' => ['placeholder' => 'Выберите помещение',],
-		//'toggleAllSettings'=>['selectLabel'=>null],
-		'pluginOptions' => [
-			'allowClear' => false,
-			'multiple' => false
-		]
-	]) ?>
+	</div>
 
     <div class="row">
         <div class="col-md-6">

@@ -92,7 +92,7 @@ $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'b
 	        ],
         ],
 	    'toolbar' => [
-	    		Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+	    	Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
 		    '{export}',
 		    $filter
 	    ],
@@ -105,6 +105,8 @@ $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'b
 	    'panel' => [
 		    'type' => GridView::TYPE_DEFAULT,
 		    'heading' => $this->title,
-	    ]
+	    ],
+		'condensed'=>true,
+		'resizableColumns'=>false,
 	]); ?>
 </div>

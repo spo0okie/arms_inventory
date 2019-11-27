@@ -48,7 +48,6 @@ class ContractsSearch extends Contracts
 	        'arms',
 	        'techs',
 	        'licItems',
-	        //'childs',
 	        'orgPhones',
 	        'orgInets',
         ]);
@@ -63,7 +62,7 @@ class ContractsSearch extends Contracts
 	    $query
 		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
 	    $query
-		    ->filterWhere(['like', new \yii\db\Expression("concat(`contracts`.`date`,' - ',`contracts`.`name`,' - ',ifnull(`partners`.`uname`,''),' (', ifnull(`partners`.`bname`,'') , ')' )"), $this->fullname])
+		    ->andFilterWhere(['like', new \yii\db\Expression("concat(`contracts`.`date`,' - ',`contracts`.`name`,' - ',ifnull(`partners`.`uname`,''),' (', ifnull(`partners`.`bname`,'') , ')' )"), $this->fullname])
 		    ->andFilterWhere(['total'=>$this->total])
 		    ->orderBy(['date'=>SORT_DESC,'name'=>SORT_DESC]);
 
