@@ -16,7 +16,9 @@ use Yii;
  * @property string $fullNum Полный номер
  * @property int $prov_tel_id Услуга телефонии
  * @property string $comment Комментарий
- *
+ * @property float $cost
+ * @property float $charge
+ 
  * @property ProvTel $provTel
  * @property Contracts $contract
  * @property Places $place
@@ -39,6 +41,7 @@ class OrgPhones extends \yii\db\ActiveRecord
     {
         return [
             [['country_code', 'city_code', 'local_code', 'prov_tel_id', 'comment'], 'required'],
+	        [['cost','charge'], 'number'],
             [['prov_tel_id','places_id','contracts_id'], 'integer'],
             [['comment','account'], 'string'],
             [['country_code', 'city_code', 'local_code'], 'string', 'max' => 10],
@@ -63,6 +66,8 @@ class OrgPhones extends \yii\db\ActiveRecord
 	        'account' => 'Аккаунт, л/с',
 	        'sname' => 'Полный номер для поиска',
 	        'fullNum' => 'Полный номер',
+	        'cost' => 'Стоимость',
+	        'charge' => 'НДС',
             'comment' => 'Комментарий',
         ];
     }
@@ -79,6 +84,7 @@ class OrgPhones extends \yii\db\ActiveRecord
 			'places_id' => 'Где оказывается услуга связи',
 			'prov_tel_id' => 'Поставщик услуги',
 			'contracts_id' => 'Документ на основании которого подключена эта услуга',
+			'cost' => 'Стоимость услуги в месяц (планируемая стоимость, если величина плавает)',
 			//'account' => 'Аккаунт, л/с',
 			//'sname' => 'Полный номер для поиска',
 			//'fullNum' => 'Полный номер',

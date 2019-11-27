@@ -18,7 +18,8 @@ use Yii;
  * @property int $static Статический?
  * @property int $comment Дополнительно
  * @property string $history
- * @property int $cost
+ * @property float $cost
+ * @property float $charge
  * @property int $prov_tel_id Услуга связи
  * @property int $places_id Помещение
  *
