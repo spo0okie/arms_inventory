@@ -16,7 +16,7 @@ $renderer = $this;
 
     <h1>
         <?= Html::encode($this->title) ?>
-        <?= \app\components\HintIconWidget::widget(['object_id'=>'help_block','cssClass'=>'pull-right']) ?>
+        <?= \app\components\HintIconWidget::widget(['model'=>'\app\models\Arms','cssClass'=>'pull-right']) ?>
     </h1>
     Автоматизированные Рабочие Места. Оборудование и программное обеспечение, сгрупированные в один объект.
 
