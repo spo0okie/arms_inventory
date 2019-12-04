@@ -59,7 +59,7 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'header' => 'IP Адрес',
 				'value' => function ($data) {
-					return is_object($data->comp) ? $data->comp->filteredIpsStr : null;
+					return is_object($data->comp) ? str_replace(',','<br />',$data->comp->filteredIpsStr) : null;
 				}
 			];
 			break;
