@@ -62,7 +62,7 @@ class ContractsSearch extends Contracts
 	    $query
 		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
 	    $query
-		    ->andFilterWhere(['like', new \yii\db\Expression("concat(`contracts`.`date`,' - ',`contracts`.`name`,' - ',ifnull(`partners`.`uname`,''),' (', ifnull(`partners`.`bname`,'') , ')' )"), $this->fullname])
+		    ->andFilterWhere(['like', new \yii\db\Expression("concat(`contracts`.`date`,' - ',`contracts`.`name`,' - ',ifnull(`partners`.`uname`,''),' (', ifnull(`partners`.`bname`,'') , ')',`contracts`.`comment` )"), $this->fullname])
 		    ->andFilterWhere(['total'=>$this->total])
 		    ->orderBy(['date'=>SORT_DESC,'name'=>SORT_DESC]);
 
