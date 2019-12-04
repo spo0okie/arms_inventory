@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use Yii;
 
 /**
  * This is the model class for table "lic_keys".
@@ -70,6 +69,7 @@ class LicKeys extends \yii\db\ActiveRecord
 			'lic_items_id' => 'Закупка лицензий',
 			'arms_ids' => 'Привязанный(е) АРМ(ы)',
 			'key_text' => 'Ключ',
+			'lic_item' => 'Группа/Закупка',
 			'comment' => 'Комментарии',
 		];
 	}

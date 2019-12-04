@@ -2,9 +2,10 @@
 
 namespace app\controllers;
 
+
 use Yii;
 use app\models\LicKeys;
-use yii\data\ActiveDataProvider;
+use app\models\LicKeysSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -50,12 +51,12 @@ class LicKeysController extends Controller
      */
     public function actionIndex()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => LicKeys::find(),
-        ]);
+	    $searchModel = new LicKeysSearch();
+	    $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'dataProvider' => $dataProvider,
+	        'searchModel' => $searchModel,
+	        'dataProvider' => $dataProvider,
         ]);
     }
 

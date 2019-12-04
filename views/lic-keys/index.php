@@ -5,29 +5,48 @@ use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $searchModel app\models\LicKeysSearch */
 
-$this->title = 'Lic Keys';
+$this->title = \app\models\LicKeys::$title;
 $this->params['breadcrumbs'][] = $this->title;
+
+$renderer=$this;
 ?>
 <div class="lic-keys-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Lic Keys', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
+	    'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
 
-            'id',
-            'lic_items_id',
-            'key_text',
+            //'id',
+	        //'licItem.sname',
+	        [
+				'attribute' => 'lic_item',
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+					return  $renderer->render('/lic-items/item', ['model' => $data->licItem]);
+				}
+			],
+	        [
+		        'attribute' => 'key_text',
+		        'format' => 'raw',
+		        'value' => function ($data) use ($renderer) {
+			        return  $renderer->render('/lic-keys/item', ['model' => $data]);
+		        }
+	        ],
+	        //'licItem.licGroup.name',
+            //'key_text',
             'comment:ntext',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            //['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 </div>
