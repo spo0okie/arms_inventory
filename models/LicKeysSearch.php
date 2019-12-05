@@ -67,7 +67,7 @@ class LicKeysSearch extends LicKeys
 
         $query->andFilterWhere(['like', 'key_text', $this->key_text])
 	        ->andFilterWhere(['like', 'CONCAT(`lic_groups`.`descr`," / ",`lic_items`.`descr`)', $this->lic_item])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+            ->andFilterWhere(['like', '`lic_keys`.`comment`', $this->comment]);
 
         return $dataProvider;
     }
