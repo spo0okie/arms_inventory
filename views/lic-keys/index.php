@@ -42,6 +42,17 @@ $renderer=$this;
 			        return  $renderer->render('/lic-keys/item', ['model' => $data]);
 		        }
 	        ],
+	        [
+		        'attribute' => 'arms_ids',
+		        'format' => 'raw',
+		        'value' => function ($item) use ($renderer) {
+			        $output = '';
+			        foreach ($item->arms as $arm)
+				        $output .= ' ' . $renderer->render('/arms/item', ['model' => $arm]);
+			        return $output;
+		        }
+	        ],
+			
 	        //'licItem.licGroup.name',
             //'key_text',
             'comment:ntext',
