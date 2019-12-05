@@ -252,15 +252,27 @@ class Contracts extends \yii\db\ActiveRecord
 	}
 
 	/**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getChilds()
-    {
-        return $this->hasMany(Contracts::className(), ['parent_id' => 'id'])
-	        ->andWhere(['is_successor'=>false]);
-    }
-
-
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getChilds()
+	{
+		return $this->hasMany(Contracts::className(), ['parent_id' => 'id'])
+			->andWhere(['is_successor'=>false]);
+	}
+	
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getChainChilds()
+	{
+		$chain=$this->successorsChain;
+		$childs=[];
+		foreach ($chain as $item) $childs=array_merge($childs,$item->childs);
+		return $childs;
+	}
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
