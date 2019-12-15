@@ -409,10 +409,11 @@ class Contracts extends \yii\db\ActiveRecord
 		//кэшируем результат
 		return $this->arms_chain_cache=$chain;
 	}
-
+	
 	/**
 	 * набор всей техники привязанной к цепочке документов
-	 * @return \app\models\Techs[]
+	 * @return null|\yii\db\ActiveQuery
+	 * @throws \yii\base\InvalidConfigException
 	 */
 	public function getTechsChain()
 	{
@@ -497,10 +498,11 @@ class Contracts extends \yii\db\ActiveRecord
 		//кэшируем результат
 		return $this->lics_chain_cache=$chain;
 	}
-
+	
 	/**
 	 * Возвращает набор контрагентов в договоре
-	 * @return array
+	 * @return \yii\db\ActiveQuery
+	 * @throws \yii\base\InvalidConfigException
 	 */
 	public function getPartners()
 	{
