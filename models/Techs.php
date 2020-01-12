@@ -206,7 +206,7 @@ class Techs extends \yii\db\ActiveRecord
 	 */
 	public function getTechUser()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'user_id'])->from(['users_techs'=>Places::tableName()]);
+		return $this->hasOne(Users::className(), ['id' => 'user_id'])->from(['users_techs'=>Users::tableName()]);
 	}
 
 	/**
