@@ -52,6 +52,7 @@ class ServicesController extends Controller
     {
         $dataProvider = new ActiveDataProvider([
             'query' => Services::find(),
+	        'pagination' => ['pageSize' => 100,],
         ]);
 
         return $this->render('index', [

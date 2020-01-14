@@ -14,6 +14,7 @@ use Yii;
  * @property int $user_group_id
  * @property int $sla_id
  * @property string $notebook
+ * @property string $links
  * @property \app\models\Comps $comps
  * @property \app\models\Services $depends
  * @property \app\models\Services $dependants
