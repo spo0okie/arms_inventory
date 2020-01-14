@@ -5,7 +5,7 @@ use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $models[] \app\models\Services */
+/* @var $models \app\models\Services[] */
 
 $this->title = \app\models\Services::$title;
 $this->params['breadcrumbs'][] = $this->title;
@@ -58,6 +58,16 @@ foreach ($models as $service) {
 			'ttype'=>$service->is_end_user?'user':'tech',
 		];
 	}
+	foreach ($service->comps as $server) {
+		$links[]=[
+			'source'=>$server->name,
+			'target'=>$service->name,
+			'thref'=>\yii\helpers\Url::to(['view','id'=>$service->id]),
+			'shref'=>\yii\helpers\Url::to(['/comps/view','id'=>$server->id]),
+			'stype'=>'server',
+			'ttype'=>$service->is_end_user?'user':'tech',
+		];
+	}
 }
 if (count($links)) {
 //http://bl.ocks.org/mbostock/1153292
@@ -77,8 +87,14 @@ if (count($links)) {
 			stroke-width: 1px;
 		}
 
-		circle.tech {
+		circle.server {
 			fill: #ccc;
+			stroke: #333;
+			stroke-width: 1px;
+		}
+
+		circle.tech {
+			fill: yellow;
 			stroke: #333;
 			stroke-width: 1px;
 		}
@@ -102,7 +118,7 @@ if (count($links)) {
     });
 
     var width = 960,
-        height = 500;
+        height = 700;
 
     var force = d3.layout.force()
         .nodes(d3.values(nodes))
