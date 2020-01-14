@@ -8,6 +8,8 @@ use yii\grid\GridView;
 
 $this->title = \app\models\Services::$title;
 $this->params['breadcrumbs'][] = $this->title;
+
+$renderer=$this;
 ?>
 <div class="services-index">
 
@@ -21,16 +23,22 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-
-            //'id',
-            'name',
+	
+	        [
+		        'attribute'=>'name',
+		        'format'=>'raw',
+		        'value'=>function($data) use ($renderer) {
+			        return $renderer->render('/services/item',['model'=>$data]);
+		        }
+	        ],
+            //'name',
             //'description:ntext',
-            'is_end_user',
-            'user_group_id',
-            'sla_id',
+            //'is_end_user',
+	        'sla_id',
+            'userGroup.name',
             //'notebook:ntext',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            //['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 </div>
