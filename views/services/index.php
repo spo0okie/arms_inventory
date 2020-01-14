@@ -125,7 +125,7 @@ if (count($links)) {
         .links(links)
         .size([width, height])
         .linkDistance(90)
-        .charge(-400)
+        .charge(-300)
         .on("tick", tick)
         .start();
 
