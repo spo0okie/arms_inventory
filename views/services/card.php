@@ -36,6 +36,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants);
 <p>
     <?= Yii::$app->formatter->asNtext($model->description) ?>
 </p>
+<?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
 <br />
 
 <?php if (is_object($model->userGroup)) { ?>
