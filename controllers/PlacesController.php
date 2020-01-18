@@ -69,10 +69,6 @@ class PlacesController extends Controller
 	{
 		return $this->render('armmap', [
 			'models' => Places::find()
-				//->leftJoin('techs','`techs`.`places_id` = `places`.`id` and `techs`.`arms_id` is NULL')
-				//->leftJoin('tech_models','`tech_models`.`id` = `techs`.`model_id`')
-				//->leftJoin('tech_types','`tech_types`.`id` = `tech_models`.`type_id`')
-				//->leftJoin('tech_states','`tech_states`.`id` = `techs`.`state_id`')
 				->joinWith([
 					'phones',
 					'inets',
@@ -129,10 +125,13 @@ class PlacesController extends Controller
         return $this->render('view', [
             'model' => $this->findModel($id),
 	        'models' => Places::find()
-		        ->leftJoin('techs','`techs`.`places_id` = `places`.`id` and `techs`.`arms_id` is NULL')
-		        ->leftJoin('tech_models','`tech_models`.`id` = `techs`.`model_id`')
-		        ->leftJoin('tech_types','`tech_types`.`id` = `tech_models`.`type_id`')
+		        //->leftJoin('techs','`techs`.`places_id` = `places`.`id` and `techs`.`arms_id` is NULL')
+		        //->leftJoin('tech_models','`tech_models`.`id` = `techs`.`model_id`')
+		        //->leftJoin('tech_types','`tech_types`.`id` = `tech_models`.`type_id`')
 		        ->joinWith([
+		        	//'techs',
+			        'techs.model.type',
+			        'techs.state',
 			        'arms.user',
 			        'arms.techs',
 			        'arms.state',
@@ -197,9 +196,13 @@ class PlacesController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+    	$model=$this->findModel($id);
+    	$parent_id=$model->parent_id;
+        $model->delete();
+		if (is_null($parent_id))
+            return $this->redirect(['index']);
+		else
+			return $this->redirect(['view','id'=>$parent_id]);
     }
 
     /**
