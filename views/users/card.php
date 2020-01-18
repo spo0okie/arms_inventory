@@ -69,6 +69,7 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
     </p>
 
     <br />
+	<h4>ДР: <?= $model->Bday ?></h4>
 
 
     <?php if (!$static_view) {
