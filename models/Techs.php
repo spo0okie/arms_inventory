@@ -405,9 +405,9 @@ class Techs extends \yii\db\ActiveRecord
 			if (!is_null($this->arms_id)) {
 				//то отвязываемся от собственных помещения и пользователя
 				//т.к. теперь мы косвенно привязаны к помещению и пользователю АРМ
-				$this->places_id=null;
-				$this->user_id=null;
-				$this->it_staff_id=null;
+				$this->places_id=$this->arm->places_id;
+				$this->user_id=$this->arm->user_id;
+				$this->it_staff_id=$this->arm->it_staff_id;
 			}
 			
 			return true;

@@ -191,17 +191,11 @@ DELIMITER ;
 	 */
 	public function getTechs()
 	{
-		//if (!is_null($this->techs_cache)) return $this->techs_cache;
-
-		/*$this->techs_cache=Techs::find()->where(['places_id' => $this->id])->andWhere(['is', 'arms_id', new \yii\db\Expression('null')])->all();
-		//foreach ($this->arms as $arm) if (count($techs=$arm->techs)) $this->techs_cache=array_merge($this->techs_cache,$techs);
-
-		return $this->techs_cache;*/
 
 		return $this->hasMany(Techs::className(), ['places_id' => 'id'])
-			->from(['places_techs'=>Techs::tableName()])
+			->from(['places_techs'=>Techs::tableName()]);
 		//	->andWhere(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
-			->andOnCondition(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
+		//	->andOnCondition(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
 
 	}
 
