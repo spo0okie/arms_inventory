@@ -393,6 +393,25 @@ class Techs extends \yii\db\ActiveRecord
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}
-
-
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function beforeSave($insert)
+	{
+		if (parent::beforeSave($insert)) {
+			//fix: https://github.com/spo0okie/arms_inventory/issues/15
+			//если привязаны к АРМ,
+			if (!is_null($this->arms_id)) {
+				//то отвязываемся от собственных помещения и пользователя
+				//т.к. теперь мы косвенно привязаны к помещению и пользователю АРМ
+				$this->places_id=null;
+				$this->user_id=null;
+				$this->it_staff_id=null;
+			}
+			
+			return true;
+		}
+		return false;
+	}
 }
