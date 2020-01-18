@@ -50,6 +50,8 @@ class MaterialsUsagesSearch extends MaterialsUsages
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+	        'pagination' => ['pageSize' => 100,],
+	        'sort'=> ['defaultOrder' => ['date'=>SORT_DESC]]
         ]);
 
         $this->load($params);

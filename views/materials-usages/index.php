@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
 		        }
 	        ],
             //'count',
-            //'date',
+            'date',
             //['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
