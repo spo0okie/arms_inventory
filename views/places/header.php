@@ -19,14 +19,13 @@ if (count($phones)||count($inets)||strlen($addr)) {
         <?php if (count($phones)) {
             echo '<span class="glyphicon glyphicon-phone-alt"></span>';
             foreach ($phones as $phone)
-		        echo $this->render('/org-phones/item',['model'=>$phone]);
+		        echo $this->render('/org-phones/item',['model'=>$phone]).' ';
         }?>
     </span>
     <span class="org-phones">
         <?php if (count($inets)) {
-	        echo '<span class="glyphicon glyphicon-globe"></span>';
 	        foreach ($inets as $inet)
-		        echo $this->render('/org-inet/item',['model'=>$inet]);
+		        echo '<span class="glyphicon glyphicon-globe"></span>'.$this->render('/org-inet/item',['model'=>$inet]).' ';
         }?>
     </span>
     <?php if(strlen($addr)) { ?>
