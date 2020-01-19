@@ -82,7 +82,7 @@ class MaterialsSearch extends Materials
             'places_id' => $this->places_id,
         ]);
 
-        $query->andFilterWhere(['like', 'concat( getplacepath(places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", model )', $this->model])
+        $query->andFilterWhere(['like', 'concat( getplacepath(materials.places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", materials.model )', explode('|',$this->model)])
 	    ->andFilterWhere(['like', 'comment', $this->comment])
         ->groupBy('materials.id')
         ->having(['>=','(`materials`.`count` - ifnull(`usedCount`,0) - ifnull(`movedCount`,0))',$this->rest]);
