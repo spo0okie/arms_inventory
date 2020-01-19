@@ -14,7 +14,7 @@ namespace app\models;
  * @property string $comment Допольнительно
 
  * @property \app\models\LicItems $licItem закупка
- * @property \app\models\Arms $arms АРМы
+ * @property \app\models\Arms[] $arms АРМы
  */
 class LicKeys extends \yii\db\ActiveRecord
 {
@@ -121,5 +121,31 @@ class LicKeys extends \yii\db\ActiveRecord
 	public function getSname()
 	{
 		return $this->licItem->licGroup->descr.' /'.$this->licItem->fullDescr.' /'.$this->keyShort;
+	}
+	
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function beforeSave($insert)
+	{
+		if (parent::beforeSave($insert)) {
+			//fix: https://github.com/spo0okie/arms_inventory/issues/16
+			//если привязаны к АРМ,
+			if (is_array($this->arms_ids)&&count($this->arms_ids)) {
+				//то ищем эти АРМ в закупке и группе
+				if (count($licArms=array_intersect($this->arms_ids,$this->licItem->arms_ids))) {
+					$this->licItem->arms_ids=array_diff($this->licItem->arms_ids,$licArms);
+					$this->licItem->save();
+				}
+				if (count($groupArms=array_intersect($this->arms_ids,$this->licItem->licGroup->arms_ids))) {
+					$this->licItem->licGroup->arms_ids=array_diff($this->licItem->licGroup->arms_ids,$groupArms);
+					$this->licItem->licGroup->save();
+				}
+			}
+			
+			return true;
+		}
+		return false;
 	}
 }

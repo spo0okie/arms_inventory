@@ -27,6 +27,7 @@ use Yii;
  *
  * @property Arms[] $arms
  * @property Arms[] $keyArms
+ * @property array $keyArmsIds
  * @property LicKeys[] $keys
  * @property LicKeys[] $usedKeys
  * @property Contracts[] $contracts
@@ -187,9 +188,9 @@ class LicItems extends \yii\db\ActiveRecord
 			if (count($key->arms)) $keys[]=$key;
 		return $keys;
 	}
-
+	
 	/**
-	 * Возвращает набор контрагентов в договоре
+	 * Возвращает АРМы из ключей
 	 * @return array
 	 */
 	public function getKeyArms()
@@ -197,6 +198,19 @@ class LicItems extends \yii\db\ActiveRecord
 		$arms=[];
 		foreach ($this->keys as $key) if (count($key->arms)) {
 			$arms=array_merge($arms,$key->arms);
+		}
+		return $arms;
+	}
+
+	/**
+	 * Возвращает ИДы АРМов из ключей
+	 * @return array
+	 */
+	public function getKeyArmsIds()
+	{
+		$arms=[];
+		foreach ($this->keys as $key) if (count($key->arms)) {
+			$arms=array_merge($arms,$key->arms_ids);
 		}
 		return $arms;
 	}
@@ -239,4 +253,31 @@ class LicItems extends \yii\db\ActiveRecord
 			->all();
 		return yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}
+	
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function beforeSave($insert)
+	{
+		if (parent::beforeSave($insert)) {
+			//fix: https://github.com/spo0okie/arms_inventory/issues/16
+			//если привязаны к АРМ,
+			if (is_array($this->arms_ids)&&count($this->arms_ids)) {
+				//то сначала выкидываем из группы все армы привязанные к закупке
+				if (count($groupArms=array_intersect($this->arms_ids,$this->licGroup->arms_ids))) {
+					$this->licGroup->arms_ids=array_diff($this->licGroup->arms_ids,$groupArms);
+					$this->licGroup->save();
+				}
+				//а потом из закупки выкидываем все армы распределенные через ключи
+				if (count($keyArms=array_intersect($this->keyArmsIds,$this->arms_ids))) {
+					$this->arms_ids=array_diff($this->arms_ids,$keyArms);
+				}
+			}
+			
+			return true;
+		}
+		return false;
+	}
+	
 }

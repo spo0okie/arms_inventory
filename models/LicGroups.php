@@ -10,6 +10,8 @@ use Yii;
  * @property int $id Идентификатор
  * @property array $soft_ids Ссылка на софт
  * @property array $arms_ids Ссылка на софт
+ * @property array $keyArmsIds Ссылка на софт
+ * @property array $itemArmsIds Ссылка на софт
  * @property string $descr Описание
  * @property string $comment Комментарий
  * @property string $created_at Время создания
@@ -118,6 +120,63 @@ class LicGroups extends \yii\db\ActiveRecord
 	}
 
 	/**
+	 * Возвращает АРМы из закупок
+	 * @return array
+	 */
+	public function getItemArms()
+	{
+		$arms=[];
+		foreach ($this->licItems as $item) if (is_array($item->arms)&&count($item->arms)) {
+			$arms=array_merge($arms,$item->arms);
+		}
+		return $arms;
+	}
+	
+	/**
+	 * Возвращает ИД АРМов из закупок
+	 * @return array
+	 */
+	public function getItemArmsIds()
+	{
+		$arms=[];
+		foreach ($this->licItems as $item) if (is_array($item->arms_ids)&&count($item->arms_ids)) {
+			$arms=array_merge($arms,$item->arms_ids);
+		}
+		return $arms;
+	}
+	
+	
+	/**
+	 * Возвращает АРМы из ключей закупок
+	 * @return array
+	 */
+	public function getKeyArms()
+	{
+		$arms=[];
+		foreach ($this->licItems as $item) {
+			foreach ($item->keys as $key) if (count($key->arms)) {
+				$arms=array_merge($arms,$key->arms);
+			}
+		}
+		return $arms;
+	}
+	
+	/**
+	 * Возвращает ИДы АРМов из ключей закупок
+	 * @return array
+	 */
+	public function getKeyArmsIds()
+	{
+		$arms=[];
+		foreach ($this->licItems as $item) {
+			foreach ($item->keys as $key) if (count($key->arms_ids)) {
+				$arms=array_merge($arms,$key->arms_ids);
+			}
+		}
+		return $arms;
+	}
+	
+	/**
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getLicType()
@@ -166,4 +225,25 @@ class LicGroups extends \yii\db\ActiveRecord
 			->all();
 		return yii\helpers\ArrayHelper::map($list, 'id', 'descr');
 	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function beforeSave($insert)
+	{
+		if (parent::beforeSave($insert)) {
+			//fix: https://github.com/spo0okie/arms_inventory/issues/16
+			//если привязаны к АРМ,
+			if (is_array($this->arms_ids)&&count($this->arms_ids)) {
+				//то сначала выкидываем все армы привязанные к закупкам и ключам
+				if (count($keys=array_merge($this->keyArmsIds,$this->itemArmsIds))) {
+					$this->arms_ids=array_diff($this->arms_ids,$keys);
+				}
+			}
+			
+			return true;
+		}
+		return false;
+	}
+	
 }
