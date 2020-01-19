@@ -37,7 +37,10 @@ $this->params['breadcrumbs'][] = $this->title;
 	        ],
 	        'comment:ntext',
 	        'date',
-	        'rest',
+			[
+					'header'=>'<span title="Отображаются только материалы с остатком не меньше установленного в фильтр">Остаток</span>',
+					'attribute'=>'rest'
+			],
             //'it_staff_id',
             //'history:ntext',
 
