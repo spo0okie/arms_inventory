@@ -47,13 +47,12 @@ class MaterialsSearch extends Materials
 		        'sum(`moved`.`count`) as `movedCount`',
 		        'sum(`used`.`count`) as `usedCount`',
 	        ])
-	        //->from('materials as s0')
 	        ->leftjoin('materials as moved','`moved`.`parent_id`=`materials`.`id`')
 	        ->leftJoin('materials_usages as used','`used`.`materials_id`=`materials`.`id`')
             ->joinWith([
             	'itStaff',
 	            'type',
-	            'usages',
+	            //'usages'
             ]);
 
         // add conditions that should always apply here
@@ -67,6 +66,8 @@ class MaterialsSearch extends Materials
 
         $this->load($params);
 
+	    if (is_null($this->rest)||!strlen($this->rest)) $this->rest=1;
+	    
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
