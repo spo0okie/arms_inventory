@@ -18,8 +18,10 @@ use Yii;
  * @property string $comment Комментарий
  * @property string $history Записная кинжка
  * @property array $contracts_ids массив ссылок на документы
-
+ 
  * @property int $used Израсходовано
+ * @property int $movedCount Израсходовано
+ * @property int $usedCount Израсходовано
  * @property int $rest Остаток
  * @property \app\models\Places $place Помещение
  * @property \app\models\Users $itStaff Ответственный
@@ -174,6 +176,24 @@ class Materials extends \yii\db\ActiveRecord
 		foreach ($this->childs as $child) $sum+=$child->count;
 		foreach ($this->usages as $usage) $sum+=$usage->count;
 		return $sum;
+	}
+	
+	/**
+	 * Возвращает расход материала на перемещения
+	 * @return integer
+	 */
+	public function getMovedCount() {
+		//на этом этапе еще не реализованы списания, поэтому учитываем только перемещения
+		return $this->hasMany(Materials::className(), ['parent_id' => 'id'])->sum('count');
+	}
+
+	/**
+	 * Возвращает расход материала на ремонты
+	 * @return integer
+	 */
+	public function getUsedCount() {
+		//на этом этапе еще не реализованы списания, поэтому учитываем только перемещения
+		return $this->hasMany(\app\models\MaterialsUsages::className(), ['materials_id' => 'id'])->sum('count');
 	}
 
 	/**
