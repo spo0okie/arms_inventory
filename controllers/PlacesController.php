@@ -87,7 +87,7 @@ class PlacesController extends Controller
 					'techs.state',
 					'techs.model.type',
 					'techs.techUser',
-					'materials'
+					'materials.usages'
 				])->orderBy('short')
 				->all(),
 		]);
@@ -124,7 +124,7 @@ class PlacesController extends Controller
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
-	        'models' => Places::find()
+/*	        'models' => Places::find()
 		        //->leftJoin('techs','`techs`.`places_id` = `places`.`id` and `techs`.`arms_id` is NULL')
 		        //->leftJoin('tech_models','`tech_models`.`id` = `techs`.`model_id`')
 		        //->leftJoin('tech_types','`tech_types`.`id` = `tech_models`.`type_id`')
@@ -142,6 +142,29 @@ class PlacesController extends Controller
 			        'arms.licItems',
 			        'arms.licGroups',
 			        //'techs.model.type'
+		        ])->orderBy('short')
+		        ->all(),*/
+	
+	        'models' => Places::find()
+		        ->joinWith([
+			        'phones',
+			        'inets',
+			        'arms.user',
+			        'arms.techs.attachModel',
+			        'arms.state',
+			        'arms.comp.domain',
+			        'arms.comps',
+			        'arms.techModel',
+			        'arms.licKeys',
+			        'arms.licItems',
+			        'arms.licGroups',
+			        'arms.contracts',
+			        'techs',
+			        'techs.contracts',
+			        'techs.state',
+			        'techs.model.type',
+			        'techs.techUser',
+			        'materials.usages'
 		        ])->orderBy('short')
 		        ->all(),
         ]);

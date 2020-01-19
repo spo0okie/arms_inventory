@@ -431,6 +431,9 @@ span.contracts_selected {font-weight: bold}
 span.contracts-item {display: inline-block}
 a.contract_inactive {color: gray; text-decoration: line-through}
 
+
+
+
 /* ТУЛТИПЫ */
 
 .ttip-card h1 {
@@ -463,6 +466,16 @@ a.contract_inactive {color: gray; text-decoration: line-through}
     padding: 0;
     margin: 0;
 }
+
+.ttip-card hr {
+    padding: 0;
+    margin: 0;
+    color: black;
+    background-color: #222;
+    height: 1px;
+    border: none;
+}
+
 
 .qtip-wide {
     width: 500px;

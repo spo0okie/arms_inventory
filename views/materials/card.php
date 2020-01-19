@@ -20,7 +20,7 @@ $deleteable=!count($model->childs) && !count($model->usages);
 <div class="materials-view">
 
 	<h1>
-		<?= Html::encode($model->type->name.': '. $model->model) ?>
+		<?= Html::a($model->type->name.': '. $model->model,['/material/view','id'=>$model->id]) ?>
 		<?= Html::a('<span class="glyphicon glyphicon-pencil">', ['update', 'id' => $model->id]) ?>
 		<?= $deleteable?Html::a('<span class="glyphicon glyphicon-trash">', ['delete', 'id' => $model->id], [
 			'data' => [
@@ -44,7 +44,7 @@ $deleteable=!count($model->childs) && !count($model->usages);
 		<h4><?= $model->getAttributeLabel('contracts_ids')?> </h4>
 		<p>
 			<?php foreach ($model->contracts as $contract) { ?>
-				<?= $this->render('/contracts/item',['model'=>$contract]) ?>
+				<?= $this->render('/contracts/item',['model'=>$contract]) ?><br />
 			<?php } ?>
 		</p>
 		<br/>

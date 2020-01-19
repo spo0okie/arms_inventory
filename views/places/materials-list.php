@@ -32,8 +32,7 @@ if (count($materials)) {
     <tr>
         <td colspan="11">
             <div>
-	            <?php foreach ($materials as $item) echo $this->render('/materials/item',['model'=>$item,'material'=>true,'rest'=>true]).'<br />'; ?>
-				<hr>
+	            <?php /* foreach ($materials as $item) echo $this->render('/materials/item',['model'=>$item,'material'=>true,'rest'=>true]).'<br />';*/ ?>
 	            <?php foreach ($groups as $group) echo $this->render('/materials/group',['models'=>$group,'material'=>true,'rest'=>true]).'<br />'; ?>
             </div>
         </td>

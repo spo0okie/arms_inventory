@@ -68,7 +68,7 @@ class MaterialsController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
-
+	
 	/**
 	 * Displays a single model ttip.
 	 * @param integer $id
@@ -81,7 +81,20 @@ class MaterialsController extends Controller
 			'model' => $this->findModel($id),
 		]);
 	}
-
+	
+	/**
+	 * Displays a many models ttip.
+	 * @param string $ids
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionTtips($ids)
+	{
+		return $this->renderPartial('ttips', [
+			'models' => $this->findModels(explode(',',$ids)),
+		]);
+	}
+	
 	/**
 	 * @param null $name
 	 * @param null $type
@@ -190,4 +203,20 @@ class MaterialsController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+	
+	/**
+	 * Finds the Materials models based on its primary key values.
+	 * If the model is not found, a 404 HTTP exception will be thrown.
+	 * @param array $ids
+	 * @return Materials[] the loaded model
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	protected function findModels($ids)
+	{
+		if (count($models = Materials::findAll($ids))) {
+			return $models;
+		}
+		
+		throw new NotFoundHttpException('The requested page does not exist.');
+	}
 }
