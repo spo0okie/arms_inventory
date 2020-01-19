@@ -11,13 +11,14 @@ use app\models\Materials;
  */
 class MaterialsSearch extends Materials
 {
+	public $rest;
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['id', 'parent_id', 'count', 'type_id', 'places_id'], 'integer'],
+            [['id', 'parent_id', 'rest', 'type_id', 'places_id'], 'integer'],
             [['date', 'model', 'it_staff_id', 'comment', 'history'], 'safe'],
         ];
     }
@@ -41,12 +42,27 @@ class MaterialsSearch extends Materials
     public function search($params)
     {
         $query = Materials::find()
-            ->joinWith(['itStaff','type']);
+	        ->select([
+	        	'`materials`.*',
+		        'sum(`moved`.`count`) as `movedCount`',
+		        'sum(`used`.`count`) as `usedCount`',
+	        ])
+	        //->from('materials as s0')
+	        ->leftjoin('materials as moved','`moved`.`parent_id`=`materials`.`id`')
+	        ->leftJoin('materials_usages as used','`used`.`materials_id`=`materials`.`id`')
+            ->joinWith([
+            	'itStaff',
+	            'type',
+	            'usages',
+            ]);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+	        'pagination' => [
+		        'pageSize'=>100
+	        ]
         ]);
 
         $this->load($params);
@@ -62,13 +78,14 @@ class MaterialsSearch extends Materials
             'id' => $this->id,
             'parent_id' => $this->parent_id,
             'date' => $this->date,
-            'count' => $this->count,
             'type_id' => $this->type_id,
             'places_id' => $this->places_id,
         ]);
 
         $query->andFilterWhere(['like', 'concat( getplacepath(places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", model )', $this->model])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+	    ->andFilterWhere(['like', 'comment', $this->comment])
+        ->groupBy('materials.id')
+        ->having(['>=','(`materials`.`count` - ifnull(`usedCount`,0) - ifnull(`movedCount`,0))',$this->rest]);
 
         return $dataProvider;
     }
