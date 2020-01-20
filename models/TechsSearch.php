@@ -74,7 +74,7 @@ class TechsSearch extends Techs
             ->andFilterWhere(['like', 'techs.ip', $this->ip])
 	        ->andFilterWhere(['techs.model_id'=>$this->model_id])
 	        ->andFilterWhere(['tech_models.type_id'=>$this->type_id])
-		    ->andFilterWhere(['techs.mac'=>$this->mac]);
+		    ->andFilterWhere(['like','techs.mac',$this->mac]);
             //->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;
