@@ -402,7 +402,7 @@ class Techs extends \yii\db\ActiveRecord
 		if (parent::beforeSave($insert)) {
 			//fix: https://github.com/spo0okie/arms_inventory/issues/15
 			//если привязаны к АРМ,
-			if (!is_null($this->arms_id)) {
+			if (is_object($this->arm)) {
 				//то отвязываемся от собственных помещения и пользователя
 				//т.к. теперь мы косвенно привязаны к помещению и пользователю АРМ
 				$this->places_id=$this->arm->places_id;
