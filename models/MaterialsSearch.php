@@ -86,7 +86,11 @@ class MaterialsSearch extends Materials
         $query->andFilterWhere(['like', 'concat( getplacepath(materials.places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", materials.model )', explode('|',$this->model)])
 	    ->andFilterWhere(['like', 'comment', $this->comment])
         ->groupBy('materials.id')
-        ->having(['>=','(`materials`.`count` - ifnull(`usedCount`,0) - ifnull(`movedCount`,0))',$this->rest]);
+        //->having(['>=','(`materials`.`count` - ifnull(`usedCount`,0) - ifnull(`movedCount`,0))',$this->rest]);
+        //вот это вызывало ошибку неизвестный столбец в хэвинг условии
+        //The SQL standard requires that HAVING must reference only columns in the GROUP BY clause or columns used in aggregate functions. However, MySQL supports an extension to this behavior, and permits HAVING to refer to columns in the SELECT list and columns in outer subqueries as well.
+        //если по русски, то чтобы фильтровать через хэвинг, надо указывать столбцы из группировки или аггрегирования
+	    ->having(['>=','(`materials`.`count` - ifnull(sum(`moved`.`count`),0) - ifnull(sum(`used`.`count`),0))',$this->rest]);
 
         return $dataProvider;
     }
