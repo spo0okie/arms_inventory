@@ -32,6 +32,14 @@ if (is_array($models)) {
 	$ids=array_slice($ids,0,3); //берем первые три элемента для отображения тултипа
 	//var_dump($ids);
 	
+	if (count($ids)==1) {
+		//если у нас 1 материал то ссылка будет прямо на него
+		$link=['materials/view','id'=>$ids[0]];
+	} else {
+		//иначе на поиск
+		$link=['materials/index','MaterialsSearch[model]'=>$model->place->fullName.'|'.$model->model];
+	}
+	
 	if (is_object($model)) {
 	?>
 	<span
@@ -44,7 +52,7 @@ if (is_array($models)) {
 			($material?($model->type->name.':'.$model->model):'').
 			($rest?(' '.$restGroup.$model->type->units):'')
 			,
-			['materials/index','MaterialsSearch[model]'=>$model->place->fullName.'|'.$model->model]
+			$link
 		) ?>
 	</span>
 
