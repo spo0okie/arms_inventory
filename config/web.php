@@ -2,6 +2,7 @@
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
+$ldap = require __DIR__ . '/ldap.php';
 
 $config = [
     'id' => 'arms',
@@ -25,6 +26,9 @@ $config = [
             'identityClass' => 'app\models\Users',
             'enableAutoLogin' => true,
         ],
+	    'authManager' => [
+		    'class' => 'yii\rbac\DbManager',
+	    ],
 	    'formatter' => [
 	    	'locale' => 'ru-RU',
 		    'dateFormat' => 'dd.MM.y',
@@ -59,6 +63,7 @@ $config = [
             ],
         ],
         'db' => $db,
+	    'ldap' => $ldap,
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
@@ -106,6 +111,10 @@ $config = [
     'modules' => [
         'api'       => ['class' => 'app\modules\api\Rest'],
 		'gridview'  => ['class' => 'kartik\grid\Module'],
+	    'rbac'      => [
+		    'class' => 'johnitvn\rbacplus\Module',
+		    'userModelLoginField'=>'Login'
+	    ]
     ],
     'params' => $params,
 ];

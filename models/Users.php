@@ -32,7 +32,7 @@ use Yii;
  * @property Arms[] $armsResponsible
  * @property Materials[] $materials
  */
-class Users extends \yii\db\ActiveRecord
+class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
 
 
@@ -202,7 +202,9 @@ class Users extends \yii\db\ActiveRecord
      */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+	    return static::findOne(['id' => $id]);
+	
+	    //return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
     }
 
     /**
@@ -227,13 +229,13 @@ class Users extends \yii\db\ActiveRecord
      */
     public static function findByUsername($username)
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
+	    $login=mb_strtolower($username);
+	    //при поиске по логину предпочитаем сначала искать среди трудоустроенных
+	    $list = static::find()->select(['id','Login','Uvolen'])->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])->all();
+	    foreach ($list as $item) {
+		    if (!strcmp(mb_strtolower($item['Login']),$login)) return $item;
+	    }
+	    return null;
     }
 
     /**
@@ -370,5 +372,9 @@ class Users extends \yii\db\ActiveRecord
 		$tokens=explode(' ',$this->Ename);
 		if (count($tokens)<3) return '';
 		return $tokens[2];
+	}
+	
+	public static function isAdmin() {
+		return (empty(Yii::$app->params['useRBAC']) || Yii::$app->user->can('admin_access'));
 	}
 }

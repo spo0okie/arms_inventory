@@ -81,6 +81,7 @@ if (count($links)) {
 			stroke-width: 1px;
 		}
 
+		.shaded {opacity: 0.2;}
 		circle.user {
 			fill: cyan;
 			stroke: #333;
@@ -98,6 +99,11 @@ if (count($links)) {
 			stroke: #333;
 			stroke-width: 1px;
 		}
+		
+		circle.highlighted {
+			stroke: lime !important;
+			stroke-width: 3px !important;
+		}
 
 		text.d3js {
 			font: 10px sans-serif;
@@ -108,13 +114,54 @@ if (count($links)) {
 	</style>
 <script src="//d3js.org/d3.v3.min.js"></script>
 <script>
-	var links=<?= json_encode($links, JSON_UNESCAPED_UNICODE) ?>;
-    var nodes = {};
+	let links=<?= json_encode($links, JSON_UNESCAPED_UNICODE) ?>;
+    let nodes = {};
+    let idx=0;
 
-    // Compute the distinct nodes from the links.
+    //это почти оригинальный код, но я не жабаскриптер, читал его тяжело
+    //link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, type:link.stype, href:link.shref});
+    //link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, type:link.ttype, href:link.thref});
+
+    //перебираем Линки
     links.forEach(function(link) {
-        link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, type:link.stype, href:link.shref});
-        link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, type:link.ttype, href:link.thref});
+        //сорс и таркет вместо строк делаем объектами
+		//если сорс-нода создана
+		if (link.source in nodes) {
+            link.source = nodes[link.source];
+		} else {
+            nodes[link.source] = {
+                id:	idx++,			//id
+                name: link.source,	//источник
+				type:link.stype, 	//тип источника
+				href:link.shref,	//ссылка источника
+                sources: [],		//источники
+                targets: [],		//зависимые
+            };
+            link.source = nodes[link.source];
+		}
+
+        //если сорс-нода создана
+        if (link.target in nodes) {
+            link.target = nodes[link.target];
+        } else {
+            nodes[link.target] = {
+                id:	idx++,			//id
+                name: link.target,	//получатель (зависисимый)
+                type:link.ttype, 	//тип зависимого
+                href:link.thref,	//ссылка зависимого
+                sources: [],		//источники
+                targets: [],		//зависимые
+            };
+            link.target = nodes[link.target];
+        }
+
+        //console.log(link.source);
+        //console.log(nodes[link.source]);
+        //тут поперла самодеятельность. надо обозначит предков и потомков
+		if (! (link.target.id in link.source.targets)) {
+		    link.source.targets.push(link.target.id);
+        }
+        //if (! (link.source in nodes[link.target].sources)) nodes[link.target].sources[link.source]=nodes[link.source];
     });
 
     var width = 960,
@@ -149,27 +196,49 @@ if (count($links)) {
         .append("path")
         .attr("d", "M0,-5L10,0L0,5");
 
+    //связки
     var path = svg.append("g").selectAll("path")
         .data(force.links())
         .enter()
 		.append("path")
-        .attr("class", function(d) { return "link"})
+        .attr("class", function(d) {
+            return "link source_"+d.source.id+" target_"+d.target.id;
+        })
         .attr("marker-end", function(d) { return "url(#depend)"; });
 
     var circle = svg.append("g").selectAll("circle")
         .data(force.nodes())
         .enter().append("circle")
-        .attr("r", 6)
-        .attr("class", function(d) { return d.type; })
+        .attr("r", 4)
+        .attr("class", function(d) {
+            let circle_targets=[];
+            console.log(d.targets);
+            d.targets.forEach(function(item) {
+                circle_targets.push('targets_to_n'+item);
+			});
+            //console.log(circle_targets);
+            return d.type+" circle circle_"+d.id+" "+circle_targets.join(' ');
+        })
+		.attr("node_id",function (d) {
+			return d.id;
+        })
+		.on('mouseover',function(d){
+		    $('.link,.text,.circle').addClass('shaded');
+            highlightObject(d.id)
+		})
+        .on('mouseout',function(d){
+            $('.link,.text,.circle').removeClass('shaded');
+        })
         .call(force.drag);
+    
 
     var text = svg.append("g").selectAll("text")
         .data(force.nodes())
         .enter()
-			//.append("a")
-	        //.attr("xlink:href", function(d) { return d.href; })
 		.append("text")
-	        .attr("class", "d3js")
+	        .attr("class", function(d) {
+	            return "d3js text describes_"+d.id
+            })
 			.attr("x", 8)
         	.attr("y", ".31em")
 			.text(function(d) { return d.name; })
@@ -185,14 +254,19 @@ if (count($links)) {
     }
 
     function linkArc(d) {
-        var dx = d.target.x - d.source.x,
-            dy = d.target.y - d.source.y,
-            dr = Math.sqrt(dx * dx + dy * dy);
-        return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+        return "M" + d.source.x + "," + d.source.y + " L" + d.target.x + "," + d.target.y;
     }
 
     function transform(d) {
         return "translate(" + d.x + "," + d.y + ")";
+    }
+
+    function highlightObject(id) {
+        $('.circle_'+id+', .target_'+id+', .describes_'+id).removeClass('shaded');
+        $('.targets_to_n'+id).each(function () {
+            $(this).removeClass('shaded');
+            highlightObject($(this).attr('node_id'));
+        })
     }
 
 </script>

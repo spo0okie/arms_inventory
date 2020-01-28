@@ -78,7 +78,9 @@ class CompsController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Comps();
+	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	
+	    $model = new Comps();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -100,7 +102,9 @@ class CompsController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	
+	    $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 	        if (Yii::$app->request->isAjax) {
@@ -127,7 +131,9 @@ class CompsController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	
+	    $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
@@ -156,6 +162,8 @@ class CompsController extends Controller
 	 * @throws NotFoundHttpException
 	 */
 	public function actionAddsw($id){
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		
 		$model = $this->findModel($id);
 
 		//проверяем передан ли a
@@ -182,7 +190,9 @@ class CompsController extends Controller
      * @throws NotFoundHttpException
      */
     public function actionRmsw($id){
-        $model = $this->findModel($id);
+	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	
+	    $model = $this->findModel($id);
 
         //проверяем передан ли a
         $strItems=Yii::$app->request->get('items',null);
@@ -203,6 +213,8 @@ class CompsController extends Controller
 	 * @throws NotFoundHttpException
 	 */
 	public function actionIgnoreip($id,$ip){
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		
 		$model = $this->findModel($id);
 
 		$ignored=explode("\n",$model->ip_ignore);
@@ -221,6 +233,8 @@ class CompsController extends Controller
 	 * @throws NotFoundHttpException
 	 */
 	public function actionUnignoreip($id,$ip){
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		
 		$model = $this->findModel($id);
 
 		$ignored=explode("\n",$model->ip_ignore);

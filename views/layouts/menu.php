@@ -14,7 +14,7 @@ foreach (\app\models\TechTypes::fetchNames() as $idx=>$typeName)
 $places=[];
 foreach (\app\models\Places::fetchNames(1) as $idx=>$placeName)
 	$places[]=['label'=>$placeName,'url' => ['/places/view','id'=>$idx]];
-
+	
 
 NavBar::begin([
 	'brandLabel' => Yii::$app->name,
@@ -22,6 +22,7 @@ NavBar::begin([
 	'options' => [
 		'class' => 'navbar-inverse navbar-fixed-top',
 	],
+	'innerContainerOptions' => ['class' => 'container container-large'],
 ]);
 	echo NavX::widget([
 		'options' => ['class' => 'nav navbar-nav navbar-right'],
@@ -95,18 +96,28 @@ NavBar::begin([
 					['label' => \app\models\MaterialsUsages::$title, 'url' => ['/materials-usages/index']],
 				],
 			],
-			/*Yii::$app->user->isGuest ? (
-			['label' => 'Login', 'url' => ['/site/login']]
+			\app\models\Users::isAdmin()?
+				['label' => 'Администрирование',
+				'items' => [
+					['label' => 'Пользователи', 'url' => ['/users/index']],
+					['label' => 'Роли', 'url' => ['/rbac/role']],
+					['label' => 'Правила', 'url' => ['/rbac/rule']],
+					['label' => 'Разрешения', 'url' => ['/rbac/permission']],
+					//['label' => 'Назначение', 'url' => ['/rbac/assignment']],
+				],
+			]:'',
+			Yii::$app->user->isGuest ? (
+			['label' => 'Вход', 'url' => ['/site/login']]
 			) : (
 				'<li>'
-				. Html::beginForm(['/site/logout'], 'post')
-				. Html::submitButton(
-					'Logout (' . Yii::$app->user->identity->username . ')',
+				. \yii\helpers\Html::beginForm(['/site/logout'], 'post')
+				. \yii\helpers\Html::submitButton(
+					'Выход (' . Yii::$app->user->identity->Ename . ')',
 					['class' => 'btn btn-link logout']
 				)
-				. Html::endForm()
+				. \yii\helpers\Html::endForm()
 				. '</li>'
-			)*/
+			)
 		],
 	]);
 NavBar::end();

@@ -21,6 +21,7 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
         ]) ?>
     </h1>
 	<?= $model->nosync?'<span class="glyphicon glyphicon-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
+	Дата рождения: <?= $model->Bday ?> <br/>
     Табельный №
 	<?= $model->employee_id ?> (<?= $model->Persg ?>)
     -
@@ -69,7 +70,6 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
     </p>
 
     <br />
-	<h4>ДР: <?= $model->Bday ?></h4>
 
 
     <?php if (!$static_view) {
@@ -120,5 +120,3 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
     <?php if (is_array($model->lastThreeLogins)) foreach ($model->lastThreeLogins as $logon) { ?>
         <?= $this->render('/login-journal/item-comp',['model'=>$logon]); ?> <br />
     <?php } ?>
-
-</div>
