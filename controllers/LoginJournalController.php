@@ -13,7 +13,28 @@ use app\models\LoginJournalSearch;
  */
 class LoginJournalController extends Controller
 {
-
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function behaviors()
+	{
+		$behaviors=[];
+		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
+			'class' => \yii\filters\AccessControl::className(),
+			'rules' => [
+				['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['admin']],
+				['allow' => true, 'actions'=>['index','view','ttip'], 'roles'=>['@','?']],
+			],
+			'denyCallback' => function ($rule, $action) {
+				throw new  \yii\web\ForbiddenHttpException('Access denied');
+			}
+		];
+		return $behaviors;
+		
+	}
+	
+	
 	/**
 	 * Displays a single OrgPhones model.
 	 * @param integer $id

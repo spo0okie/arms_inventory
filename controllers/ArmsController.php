@@ -125,6 +125,8 @@ class ArmsController extends Controller
 	 */
 	public function actionCreate()
 	{
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+
 		$model = new Arms();
 
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -151,6 +153,8 @@ class ArmsController extends Controller
 	 */
 	public function actionCreateApply()
 	{
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+
 		$model = new Arms();
 
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -171,6 +175,8 @@ class ArmsController extends Controller
      */
     public function actionUpdate($id)
     {
+	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -198,6 +204,8 @@ class ArmsController extends Controller
 	 */
 	public function actionUpdateApply($id)
 	{
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+
 		$model = $this->findModel($id);
 
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -222,6 +230,8 @@ class ArmsController extends Controller
 	 */
     public function actionDelete($id)
     {
+	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+
         $this->findModel($id)->delete();
 
 	    if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
@@ -251,6 +261,8 @@ class ArmsController extends Controller
      * @throws NotFoundHttpException
      */
     public function actionUpdhw($id){
+	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+
         $model = $this->findModel($id);
 
         //проверяем передан ли uid
@@ -278,6 +290,8 @@ class ArmsController extends Controller
      * @throws NotFoundHttpException
      */
     public function actionRmhw($id){
+	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+
         $model = $this->findModel($id);
 
         //проверяем передан ли uid

@@ -137,8 +137,20 @@ class UsersController extends Controller
 
         return $this->redirect(['index']);
     }
-
-    /**
+    
+    public function actionAssignRole($id)
+    {
+	    if (Yii::$app->request->isAjax) {
+		    return $this->renderAjax('create', [
+			    'model' => $model,
+		    ]);
+	    } else {
+		    return $this->render('create', [
+			    'model' => $model,
+		    ]);
+	    }    }
+	
+	/**
      * Finds the Users model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id

@@ -130,7 +130,9 @@ class ContractsController extends Controller
 	 */
     public function actionCreate()
     {
-        $model = new Contracts();
+	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	
+	    $model = new Contracts();
 
 
         //обработка аякс запросов
@@ -178,6 +180,8 @@ class ContractsController extends Controller
 	 */
 	public function actionUpdate($id)
 	{
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		
 		$model = $this->findModel($id);
 
 		//обработка аякс запросов
@@ -232,7 +236,9 @@ class ContractsController extends Controller
 	 */
     public function actionDelete($id)
     {
-    	$model=$this->findModel($id);
+	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	
+	    $model=$this->findModel($id);
 
     	//ищем и удаляем все привязанные сканы
     	$scans=$model->scans;
@@ -266,7 +272,9 @@ class ContractsController extends Controller
 	 */
 	public function actionUnlinkArm($id,$arms_id)
 	{
-
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		
+		
 		$usage=false;
 		$usage_deleted=false;
 
@@ -300,7 +308,8 @@ class ContractsController extends Controller
 	 */
 	public function actionUnlinkTech($id,$techs_id)
 	{
-
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		
 		$usage=false;
 		$usage_deleted=false;
 
@@ -334,6 +343,8 @@ class ContractsController extends Controller
 	 */
 	public function actionLinkArm($id,$arms_id)
 	{
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		
 		$model=$this->findModel($id);
 		$arms_ids=$model->arms_ids;
 		if (array_search($arms_id,$arms_ids)===false) {
@@ -357,6 +368,8 @@ class ContractsController extends Controller
 	 */
 	public function actionLinkTech($id,$techs_id)
 	{
+		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		
 		$model=$this->findModel($id);
 		$techs_ids=$model->techs_ids;
 		if (array_search($techs_id,$techs_ids)===false) {
