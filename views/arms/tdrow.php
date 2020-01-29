@@ -111,8 +111,8 @@ for ($i=0; $i<count($comps); $i++) {
 <?php } ?>
 
 <?php
-foreach ($model->techs as $tech ) {
+/*foreach ($model->techs as $tech ) {
     //вываодим все привязанные к АРМу оборудвания
     if (!$tech->isVoipPhone && !$tech->isUps)
         echo $this->render('/techs/tdrow',['model'=>$tech]);
-}
+}*/
