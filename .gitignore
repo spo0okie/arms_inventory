@@ -33,3 +33,11 @@ tests/_support/_generated
 
 #private config
 config/db.php
+
+#yii
+yii.bat
+yii.bat
+/config
+
+#dynamic
+/web/scans
