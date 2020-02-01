@@ -2,8 +2,10 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
+/* @var $searchModel app\models\ServicesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $models \app\models\Services[] */
 
@@ -20,10 +22,12 @@ $renderer=$this;
     <p>
         <?= Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-
-    <?= GridView::widget([
+	
+	<?php Pjax::begin(); ?>
+	<?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'columns' => [
+		'filterModel' => $searchModel,
+		'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 	
 	        [
@@ -43,6 +47,9 @@ $renderer=$this;
             //['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
+	<?php Pjax::end();
+	
+	?>
 </div>
 
 <?php
@@ -212,7 +219,7 @@ if (count($links)) {
         .attr("r", 4)
         .attr("class", function(d) {
             let circle_targets=[];
-            console.log(d.targets);
+            //console.log(d.targets);
             d.targets.forEach(function(item) {
                 circle_targets.push('targets_to_n'+item);
 			});

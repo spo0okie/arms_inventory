@@ -8,6 +8,7 @@ use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\models\ServicesSearch;
 
 /**
  * ServicesController implements the CRUD actions for Services model.
@@ -61,15 +62,13 @@ class ServicesController extends Controller
      */
     public function actionIndex()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => Services::find(),
-	        'pagination' => ['pageSize' => 100,],
-	        'sort'=> ['defaultOrder' => ['name'=>SORT_ASC]]
-        ]);
-
-        return $this->render('index', [
-            'dataProvider' => $dataProvider,
-        ]);
+	
+	    $searchModel = new ServicesSearch();
+	    $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+	    return $this->render('index', [
+		    'searchModel' => $searchModel,
+		    'dataProvider' => $dataProvider,
+	    ]);
     }
 
     /**
