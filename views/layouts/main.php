@@ -3,19 +3,19 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-	use app\widgets\Alert;
-	use yii\widgets\Breadcrumbs;
-	use app\assets\AppAsset;
+use app\widgets\Alert;
+use yii\widgets\Breadcrumbs;
+use app\assets\AppAsset;
 use yii\helpers\Html;
 
 	
-	AppAsset::register($this);
+AppAsset::register($this);
 
-	if (isset($this->params['layout-container'])) {
-		$containerClass=$this->params['layout-container'];
-	} else {
-		$containerClass='container container-large';
-	}
+if (isset($this->params['layout-container'])) {
+	$containerClass=$this->params['layout-container'];
+} else {
+	$containerClass='container container-large';
+}
 $this->beginPage() ?>
 
 <!DOCTYPE html>
