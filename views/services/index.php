@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -40,16 +40,13 @@ $renderer=$this;
             //'name',
             //'description:ntext',
             //'is_end_user',
-	        'sla_id',
+	        //'sla.name',
             'userGroup.name',
             //'notebook:ntext',
 
             //['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
-	<?php Pjax::end();
-	
-	?>
 </div>
 
 <?php
@@ -279,3 +276,10 @@ if (count($links)) {
 </script>
 
 <?php }
+Pjax::end();
+
+$this->registerJs('$(document).on("pjax:complete", function(event) {
+			input=$("input[type=\'text\']:visible:first");
+			inputVal=input.val();
+			input.val("").focus().val(inputVal);
+		});');

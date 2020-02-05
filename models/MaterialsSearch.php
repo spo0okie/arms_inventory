@@ -84,7 +84,7 @@ class MaterialsSearch extends Materials
         ]);
 
         $query->andFilterWhere(['like', 'concat( getplacepath(materials.places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", materials.model )', explode('|',$this->model)])
-	    ->andFilterWhere(['like', 'comment', $this->comment])
+	    ->andFilterWhere(['like', 'materials.comment', $this->comment])
         ->groupBy('materials.id')
         //->having(['>=','(`materials`.`count` - ifnull(`usedCount`,0) - ifnull(`movedCount`,0))',$this->rest]);
         //вот это вызывало ошибку неизвестный столбец в хэвинг условии
