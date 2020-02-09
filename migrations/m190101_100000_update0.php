@@ -72,7 +72,6 @@ ALTER TABLE `soft_lists`
 
 -- changed table `tech_states`
 ALTER TABLE `tech_states`
-  CHANGE COLUMN `id` `id` int(11) NOT NULL COMMENT 'id' FIRST,
   CHANGE COLUMN `code` `code` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `id`,
   CHANGE COLUMN `name` `name` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `code`,
   CHANGE COLUMN `descr` `descr` text COLLATE utf8mb4_unicode_ci AFTER `name`,
