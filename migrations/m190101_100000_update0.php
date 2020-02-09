@@ -93,7 +93,7 @@ CREATE TABLE `contracts_in_materials` (
   `id` int(11) NOT NULL,
   `contracts_id` int(11) NOT NULL,
   `materials_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) DEFAULT CHARSET=utf8mb4;
 
 -- new table `contracts_states`
 
@@ -118,7 +118,7 @@ CREATE TABLE `manufacturers` (
   `full_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `comment` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Время создания'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Производители ПО и железа';
+) DEFAULT CHARSET=utf8mb4 COMMENT='Производители ПО и железа';
 
 -- new table `materials_types`
 
