@@ -79,7 +79,6 @@ ALTER TABLE `tech_states`
 
 -- new table `hw_ignore`
 ALTER TABLE `hw_ignore`
-  CHANGE COLUMN `id` `id` int(11) NOT NULL COMMENT 'ID',
   CHANGE COLUMN `fingerprint` `fingerprint` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   CHANGE COLUMN `comment` `comment` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   DEFAULT CHARSET=utf8mb4;
@@ -93,7 +92,6 @@ ALTER TABLE `manufacturers`
 
 -- new table `soft`
 ALTER TABLE `soft`
-  CHANGE COLUMN `id` `id` int(11) NOT NULL,
   CHANGE COLUMN `manufacturers_id` `manufacturers_id` int(11) NOT NULL,
   CHANGE COLUMN `descr` `descr` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   CHANGE COLUMN `comment` `comment` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
