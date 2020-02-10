@@ -13,7 +13,8 @@ REQUIREMENTS/ТРЕБОВАНИЯ
 ------------
 
 The minimum requirement by this project template that your Web server supports PHP 5.6.0.   
-Минимальная версия PHP 5.6.0, но это не точно. Я в основном сейчас кручу продуктивные версии на 7.1.
+Минимальная версия PHP 5.6.0, но это не точно. Я в основном сейчас кручу продуктивные версии на 7.1.  
+MySql 5.5.3
 
 
 INSTALLATION/УСТАНОВКА
