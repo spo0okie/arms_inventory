@@ -86,6 +86,27 @@ class UsersController extends \yii\rest\ActiveController
 			//$user['vorna']='test';
 			return $user;
 		}
+		//Допустим не нашли, но у нас есть имя состоящее из 3х токенов
+		//тогда мы можем предположить, что имена записаны не как ФИО, а ИОФ
+		if (strlen($name)) {
+			$tokens=explode(' ',$name);
+			$FIO=$tokens[2].' '.$tokens[0].' '.$tokens[1];
+			$user = \app\models\Users::find()
+				->andFilterWhere(['Ename' => $FIO])
+				->andFilterWhere(['employee_id' => $num])
+				->andFilterWhere(['login' => $login])
+				->andFilterWhere(['org_id' => $org])
+				->orderBy([
+					'Uvolen'=>SORT_ASC,
+					'Persg'=>SORT_ASC,
+				])
+				->one();
+			//если нашли
+			if (is_object($user)){
+				//$user['vorna']='test';
+				return $user;
+			}
+		}
 		throw new \yii\web\NotFoundHttpException("not found");
 	}
 /*
