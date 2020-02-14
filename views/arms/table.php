@@ -135,7 +135,10 @@ foreach ($columns as $column) {
 						foreach ($data->comp->getHardArray() as $item) {
 							$render[]=$item->getName();
 						}
-						return implode('<br />',$render);
+						//тут делаем следующее: выводим в одну строку, а в тултипе выводим по строкам
+						$single=implode(' ',$render);
+						$multi=implode('<br />',$render);
+						return "<span title='{$multi}'>$single</span>";
 					}
 					return null;
 				}
