@@ -408,19 +408,41 @@ span.state_revoked, span.state_fail {background-color: red}
 span.contract_state_cell {display: inline-block; white-space: nowrap; overflow: hidden; max-width: 25em;}
 
 /* РАСКРАСКА ВОЗРАСТА ИНФОРМАЦИИ ОБ ОС */
-table.places-arms-container td.arm_hostname.hour_fresh {background-color: lightskyblue}
-table.places-arms-container td.arm_hostname.day_fresh {background-color: lightblue}
-table.places-arms-container td.arm_hostname.week_fresh {background-color: lightgreen}
-table.places-arms-container td.arm_hostname.month_fresh {background-color: lightgoldenrodyellow}
-table.places-arms-container td.arm_hostname.over_month_fresh {background-color: lightpink}
+td.arm_hostname.hour_fresh {background-color: lightskyblue}
+td.arm_hostname.day_fresh {background-color: lightblue}
+td.arm_hostname.week_fresh {background-color: lightgreen}
+td.arm_hostname.month_fresh {background-color: lightgoldenrodyellow}
+td.arm_hostname.over_month_fresh {background-color: lightpink}
 
 /* СЕРВЕР */
 table.places-arms-container tr.server td {
-    background: linear-gradient(45deg, rgba(0, 0, 0, 0) 49.9%, rgba(0, 0, 0, 0.05) 49.9%, rgba(0, 0, 0, 0.05) 60%, rgba(0, 0, 0, 0) 60%)
-    fixed,
-    linear-gradient(45deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0) 10%)
-    fixed;
+    background:
+        linear-gradient(45deg, rgba(0, 0, 0, 0) 49.9%, rgba(0, 0, 0, 0.05) 49.9%, rgba(0, 0, 0, 0.05) 60%, rgba(0, 0, 0, 0) 60%) fixed,
+        linear-gradient(45deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0) 10%) fixed;
     background-size: 0.5em 0.5em
+}
+
+
+/************************************************/
+/******************* ТАБЛИЦЫ ********************/
+/************************************************/
+
+/* АРМы */
+table.arms_index td.comp_ip_col,
+table.arms_index td.sn_col,
+table.arms_index td.inv_num_col,
+table.arms_index td.num_col,
+table.arms_index td.comp_hw_col {
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: hidden;
+    width: 110px;
+    max-width: 110px;
+}
+
+span.arm_user_position {
+    max-width: 180px;
+    display: inline-block;
 }
 
 

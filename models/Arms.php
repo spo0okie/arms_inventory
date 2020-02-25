@@ -43,6 +43,7 @@ use Yii;
  * @property Users $user
  * @property Places $place
  * @property Users $itStaff
+ * @property Comps $comp
  * @property Comps[] $comps
  * @property Techs[] $techs
  * @property TechStates $state
@@ -513,6 +514,12 @@ class Arms extends \yii\db\ActiveRecord
 
 	public function getVoipPhonesCount(){
 		return count($this->voipPhones);
+	}
+	
+	public function getUpdatedRenderClass(){
+		if (is_object($this->comp)) {
+			return $this->comp->updatedRenderClass;
+		} else return '';
 	}
 
 }

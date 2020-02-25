@@ -26,10 +26,13 @@ foreach ($columns as $column) {
 		case 'num':
 			$render_columns[] = [
 				'attribute' => 'num',
+				'header' => 'Инв. номер',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return $renderer->render('/arms/item', ['model' => $data]);
-				}
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
 			];
 			break;
 
@@ -39,7 +42,9 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->techModel) ? $renderer->render('/tech-models/item', ['model' => $data->techModel, 'static' => true]) : null;
-				}
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
 			];
 			break;
 
@@ -49,7 +54,11 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->comp) ? $renderer->render('/comps/item', ['model' => $data->comp]) : null;
-				}
+				},
+				'contentOptions'=>function ($data) use ($column) {return [
+					'class'=>'arm_hostname '.$data->updatedRenderClass
+				];}
+			
 			];
 			break;
 
@@ -60,7 +69,9 @@ foreach ($columns as $column) {
 				'header' => 'IP Адрес',
 				'value' => function ($data) {
 					return is_object($data->comp) ? str_replace(',','<br />',$data->comp->filteredIpsStr) : null;
-				}
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
 			];
 			break;
 
@@ -70,7 +81,9 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->user) ? $renderer->render('/users/item', ['model' => $data->user]) : null;
-				}
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
 			];
 			break;
 
@@ -80,8 +93,12 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'header' => 'Должность',
 				'value' => function ($data) use ($renderer) {
-					return is_object($data->user) ? $data->user->Doljnost : null;
-				}
+					return is_object($data->user) ?
+						"<span class='arm_user_position'>{$data->user->Doljnost}</span>"
+						: null;
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
 			];
 			break;
 		
@@ -91,7 +108,9 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->place) ? $renderer->render('/places/item', ['model' => $data->place, 'full' => 1]) : null;
-				}
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
 			];
 			break;
 		
@@ -101,7 +120,9 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) {
 					return is_object($data->department) ? $data->department->name:null;
-				}
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
 			];
 			break;
 		
@@ -111,7 +132,9 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->place) ? $renderer->render('/arms/item-attachments',['model'=>$data]) : '';
-				}
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
 			];
 			break;
 		
@@ -121,33 +144,64 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return $renderer->render('/tech-states/item', ['model' => $data->state]);
-				}
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
 			];
 			break;
 		
 		case 'comp_hw':
 			$render_columns[] = [
 				'attribute' => 'comp_hw',
+				'header' => 'HW',
 				'format' => 'raw',
 				'value' => function ($data) use ($manufacturers) {
 					if (is_object($data->comp)) {
 						$render=[];
-						foreach ($data->comp->getHardArray() as $item) {
-							$render[]=$item->getName();
-						}
-						//тут делаем следующее: выводим в одну строку, а в тултипе выводим по строкам
-						$single=implode(' ',$render);
-						$multi=implode('<br />',$render);
-						return "<span title='{$multi}'>$single</span>";
+						foreach ($data->comp->getHardArray() as $item)
+							$render[]=$item->getName().' '.$item->getSN();
+						return implode(' ',$render);
 					}
 					return null;
+				},
+				'contentOptions'=>function ($data) use ($column) {
+					$render=[];
+					if (is_object($data->comp)) {
+						foreach ($data->comp->getHardArray() as $item)
+							$render[] = $item->getName() . ' ' . $item->getSN();
+					}
+					return [
+						'class'=>'comp_hw_col',
+						'qtip_ttip' => implode('<br />',$render)
+					];
 				}
 			];
 			break;
-		
+
 		case 'sn':
+			$render_columns[] = [
+				'attribute' => $column,
+				'format' => 'raw',
+				'header' => 'SN',
+				'contentOptions'=>function ($data) use ($column) {
+					$opts=['class'=>$column.'_col'];
+					if (isset($data->$column) && strlen($data->$column)) $opts['qtip_ttip']=$data->$column;
+					return $opts;
+				},
+			];
+			break;
 		case 'inv_num':
-			$render_columns[] = $column;
+			$render_columns[] = [
+				'attribute' => $column,
+				'format' => 'raw',
+				'header' => 'Бух. инв.',
+				'contentOptions'=>function ($data) use ($column) {
+					$opts=['class'=>$column.'_col'];
+					if (isset($data->$column) && strlen($data->$column)) $opts['qtip_ttip']=$data->$column;
+					return $opts;
+				},
+			];
+			break;
 
 
 	}
@@ -158,7 +212,8 @@ foreach ($columns as $column) {
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 		'columns' => $render_columns,
-		'tableOptions' => ['class'=>'table-condensed table-striped table-bordered'],
+		'tableOptions' => ['class'=>'table-condensed table-striped table-bordered arms_index'],
+		'resizableColumns'=>false,
 	]);
 //} catch (Exception $e) {
 //	echo 'Ошибка вывода виджета таблицы<br/>';

@@ -12,8 +12,8 @@ $arms=$model->arms;
 $techs=$model->techs;
 $materials=$model->materials;
 $attached=0; //техника прикрепленная к АРМ
-foreach ($arms as $arm) foreach ($arm->techs as $tech)
-    if (!$tech->isVoipPhone && !$tech->isUps) $attached++;
+//foreach ($arms as $arm) foreach ($arm->techs as $tech)
+    //if (!$tech->isVoipPhone && !$tech->isUps) $attached++;
 
 
 ?>

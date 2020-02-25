@@ -27,6 +27,7 @@ use Yii;
 
  * @property Arms $arm
  * @property Domains $domain
+ * @property string $updatedRenderClass
  * @property string $domainName
  * @property string $currentIp
  * @property string[] $ips
@@ -279,6 +280,17 @@ class Comps extends \yii\db\ActiveRecord
 	public function getCurrentIp() {
     	if (count($this->filteredIps)) return array_values($this->filteredIps)[0];
     	return '';
+	}
+	
+	public function getUpdatedRenderClass() {
+		if (strlen($this->updated_at)) {
+			$data_age=time()-strtotime($this->updated_at);
+			if ($data_age < 3600) return 'hour_fresh';
+			elseif ($data_age < 3600*24) return 'day_fresh';
+			elseif ($data_age < 3600*24*7) return 'week_fresh';
+			elseif ($data_age < 3600*24*30) return 'month_fresh';
+			else return 'over_month_fresh';
+		} else return '';
 	}
 
 	public static function fetchNames(){

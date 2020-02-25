@@ -28,17 +28,7 @@ for ($i=0; $i<count($comps); $i++) {
             <td class="arm_id" <?= $rowspan ?>><?= $this->render('/arms/item',['model'=>$model]) ?></td>
 	    <?php }
 	    //если у нас есть ОС
-	    if (is_object($comp)) {
-	        //если у нее есть дата обновления
-	        if (strlen($comp->updated_at)) {
-		        $data_age=time()-strtotime($comp->updated_at);
-		        if ($data_age < 3600) $age_class='hour_fresh';
-		        elseif ($data_age < 3600*24) $age_class='day_fresh';
-                elseif ($data_age < 3600*24*7) $age_class='week_fresh';
-                elseif ($data_age < 3600*24*30) $age_class='month_fresh';
-                else $age_class='over_month_fresh';
-            } else $age_class='';
-        } else $age_class=''
+	    $age_class=$comp->updatedRenderClass;
 
 	    ?>
 
