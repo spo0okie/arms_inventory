@@ -34,7 +34,13 @@ $renderer=$this;
                 'value' => function($data) use($renderer){return $renderer->render('/users/item',['model'=>$data]);}
             ],
             'Doljnost',
-	        'orgStruct.name',
+			[
+				'attribute'=>'orgStruct_name',
+				'format'=>'raw',
+				'header'=>$searchModel->getAttributeLabel('Orgeh'),
+				'value' => function($data) use($renderer){return $data->structName;}
+			],
+	        
             //'Persg',
             //'Uvolen',
             'Login',

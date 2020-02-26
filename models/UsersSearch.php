@@ -12,6 +12,7 @@ use app\models\Users;
  */
 class UsersSearch extends Users
 {
+	public $orgStruct_name;
     /**
      * @inheritdoc
      */
@@ -19,7 +20,7 @@ class UsersSearch extends Users
     {
         return [
             [['Persg', 'Uvolen', 'nosync'], 'integer'],
-            [['id', 'Orgeh', 'Doljnost', 'Ename', 'Login', 'Email', 'Phone', 'Mobile', 'work_phone', 'Bday', 'manager_id', 'employee_id'], 'safe'],
+            [['id', 'Orgeh', 'Doljnost', 'Ename', 'Login', 'Email', 'Phone', 'Mobile', 'work_phone', 'Bday', 'manager_id', 'employee_id', 'orgStruct_name'], 'safe'],
         ];
     }
 
@@ -41,7 +42,7 @@ class UsersSearch extends Users
      */
     public function search($params)
     {
-        $query = Users::find();
+        $query = Users::find()->joinWith('orgStruct');
 
         // add conditions that should always apply here
 
@@ -74,6 +75,7 @@ class UsersSearch extends Users
             ->andFilterWhere(['like', 'Email', $this->Email])
             ->andFilterWhere(['like', 'Phone', $this->Phone])
             ->andFilterWhere(['like', 'Mobile', $this->Mobile])
+            ->andFilterWhere(['like', 'org_struct.name', $this->orgStruct_name])
             ->andFilterWhere(['like', 'work_phone', $this->work_phone])
             ->andFilterWhere(['like', 'Bday', $this->Bday])
             ->andFilterWhere(['like', 'manager_id', $this->manager_id]);

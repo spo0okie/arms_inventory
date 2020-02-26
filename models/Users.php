@@ -247,7 +247,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
 	public function getFull_name() {return $this->Ename;}
-	public function getStruct_name() {return is_object($dep=$this->orgStruct)?$dep->name:'';}
+	public function getStructName() {return is_object($dep=$this->orgStruct)?$dep->name:null;}
 	public function getStruct_id() {return $this->Orgeh;}
 	public function getLogin() {return $this->Login;}
 
