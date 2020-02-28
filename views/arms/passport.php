@@ -88,13 +88,13 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
         <table>
             <tr>
                 <td>ФИО:</td>
-                <td><?= is_object($model->user)?$model->user->full_name:'-не назначен-' ?></td>
+                <td><?= is_object($model->user)?$model->user->fullName:'-не назначен-' ?></td>
                 <td>Учетная запись:</td>
                 <td><?= is_object($model->user)?$model->user->login:'-не назначен-'  ?></td>
             </tr>
             <tr>
                 <td>Подразделение:</td>
-                <td><?= is_object($model->user)?$model->user->struct_name:'-не назначен-'  ?></td>
+                <td><?= is_object($model->user)?$model->user->structName:'-не назначен-'  ?></td>
                 <td>Примечание:</td>
                 <td></td>
             </tr>
