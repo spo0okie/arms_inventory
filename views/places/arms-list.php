@@ -15,8 +15,21 @@ $attached=0; //техника прикрепленная к АРМ
 //foreach ($arms as $arm) foreach ($arm->techs as $tech)
     //if (!$tech->isVoipPhone && !$tech->isUps) $attached++;
 
+$content='';
+
+foreach ($arms as $arm )
+	$content.=$this->render('/arms/tdrow',['model'=>$arm]);
+
+foreach ($techs as $tech )
+	$content.=$this->render('/techs/tdrow',['model'=>$tech]);
+
+if (count($materials))
+	$content.=$this->render('/places/materials-list',['models'=>$materials]);
+
+if (strlen($content)) {
 
 ?>
+
 
 <table class="places-cabinet-container">
     <tr>
@@ -25,20 +38,10 @@ $attached=0; //техника прикрепленная к АРМ
         </td>
         <td class="places-arms-list">
             <table  class="places-arms-container">
-	            <?php
-                //АРМы
-                foreach ($arms as $arm )
-                    echo  $this->render('/arms/tdrow',['model'=>$arm]);
-
-                //оборудование
-                foreach ($techs as $tech )
-                    echo $this->render('/techs/tdrow',['model'=>$tech]);
-
-                if (count($materials)) echo $this->render('/places/materials-list',['models'=>$materials]);
-                ?>
-
+	            <?= $content ?>
             </table>
         </td>
     </tr>
 </table>
 
+<?php }

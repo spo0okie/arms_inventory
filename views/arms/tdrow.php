@@ -28,7 +28,7 @@ for ($i=0; $i<count($comps); $i++) {
             <td class="arm_id" <?= $rowspan ?>><?= $this->render('/arms/item',['model'=>$model]) ?></td>
 	    <?php }
 	    //если у нас есть ОС
-	    $age_class=$comp->updatedRenderClass;
+	    $age_class=is_object($comp)?$comp->updatedRenderClass:'';
 
 	    ?>
 
