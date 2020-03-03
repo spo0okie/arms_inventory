@@ -337,7 +337,7 @@ table.places-arms-container td {
 table.places-arms-container td.arm_id {width: 120px; background-color: white}
 table.places-arms-container td.arm_uname {width: 220px; background-color: white}
 table.places-arms-container td.arm_servies {width: 320px; background-color: white}
-table.places-arms-container td.arm_hostname {width: 120px; background-color: white}
+table.places-arms-container td.arm_hostname {width: 120px;}
 table.places-arms-container td.tech_whitespace {width: 240px; background-color: white}
 table.places-arms-container td.arm_model {width: 220px;}
 table.places-arms-container td.tech_model {width: 280px;}
