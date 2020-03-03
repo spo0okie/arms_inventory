@@ -12,7 +12,7 @@
 <tr class="tech tech_<?= $model->type->code ?>">
     <td class="tech_whitespace" colspan="2" ></td>
     <td class="arm_uname">
-        <?= is_object($model->user)?$model->user->full_name:'' ?>
+        <?= is_object($model->user)?$model->user->fullName:'' ?>
     </td>
     <td class="arm_uphone">
         <?= $this->render('/tech-types/item',['model'=>$model->model->type]) ?>
