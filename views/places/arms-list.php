@@ -17,8 +17,14 @@ $attached=0; //техника прикрепленная к АРМ
 
 $content='';
 
-foreach ($arms as $arm )
+foreach ($arms as $arm ) {
 	$content.=$this->render('/arms/tdrow',['model'=>$arm]);
+	//убираем из рендера оборудования в помещении то, что прилипло к АРМ
+	foreach ($arm->voipPhones as $phone)
+		foreach ($techs as $i=>$tech) if ($tech['id']==$phone['id']) unset($techs[$i]);
+	foreach ($arm->ups as $upsItem)
+		foreach ($techs as $i=>$tech) if ($tech['id']==$upsItem['id']) unset($techs[$i]);
+}
 
 foreach ($techs as $tech )
 	$content.=$this->render('/techs/tdrow',['model'=>$tech]);
