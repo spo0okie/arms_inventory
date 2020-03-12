@@ -70,33 +70,17 @@ $config = [
             'rules' => [
                 [
                     'class' => 'yii\rest\UrlRule',
-                    'controller' => ['comps' => 'api/comps'],
+                    'controller' => [
+                    	'comps'         => 'api/comps',
+	                    'domains'       => 'api/domains',
+	                    'login-journal' => 'api/login-journal',
+	                    'users'         => 'api/users'
+                    ],
                     'pluralize' => false,
                     'prefix' => 'api'
                 ],
-	            [
-		            'class' => 'yii\rest\UrlRule',
-		            'controller' => ['domains' => 'api/domains'],
-		            'pluralize' => false,
-		            //'only' => ['index'],
-		            'prefix' => 'api'
-	            ],
-	            [
-		            'class' => 'yii\rest\UrlRule',
-		            'controller' => ['login-journal' => 'api/login-journal'],
-		            'pluralize' => false,
-		            //'only' => ['index'],
-		            'prefix' => 'api'
-	            ],
-	            [
-		            'class' => 'yii\rest\UrlRule',
-		            'controller' => ['users' => 'api/users'],
-		            'pluralize' => false,
-		            //'only' => ['index'],
-		            'prefix' => 'api'
-	            ],
-                'api/domains/<id:\w+>' => 'api/domains/view',
-                'api/comps/<domain:\w+>/<name:[\w-]+>' => 'api/comps/search',
+                'api/domains/<id:[\w-]+>' => 'api/domains/view',
+                'api/comps/<domain:[\w-]+>/<name:[\w-]+>' => 'api/comps/search',
             ],
         ],
 	    'i18n' => [
