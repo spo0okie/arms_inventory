@@ -386,6 +386,7 @@ table.places-arms-container tr.tech_wifi_ap
 
 /* Уволенные сотрудники */
 span.users-item.uvolen a {color: red;}
+span.comps-item {font-variant: all-small-caps}
 
 /* Раскраска статусов оборудования */
 span.item_status.state_required, td.item_status.state_required {background-color: cyan}
@@ -415,10 +416,45 @@ td.arm_hostname.month_fresh {background-color: lightgoldenrodyellow}
 td.arm_hostname.over_month_fresh {background-color: lightpink}
 
 /* СЕРВЕР */
+/*
+Тут у нас ушлепский хак. вместе элегантного полупрозрачного градиента пришлось сделать непрозрачный с нужными оттенками
+Как основной берем те что выше, а как молоска - вариант на 5% темнее. брал из миксера ниже
+https://www.w3schools.com/colors/colors_mixer.asp
+*/
+tr.server td.arm_hostname.hour_fresh {
+    background: linear-gradient(45deg, lightskyblue 49.9%, #80c4ee 49.9%, #80c4ee 60%, lightskyblue 60%) fixed,
+                linear-gradient(45deg, #80c4ee 10%, lightskyblue 10%) fixed;
+    background-size: 0.5em 0.5em
+}
+
+tr.server td.arm_hostname.day_fresh {
+    background: linear-gradient(45deg, lightblue 49.9%, #a4cdda 49.9%, #a4cdda 60%, lightblue 60%) fixed,
+    linear-gradient(45deg, #a4cdda 10%, lightblue 10%) fixed;
+    background-size: 0.5em 0.5em
+}
+
+tr.server td.arm_hostname.week_fresh {
+    background: linear-gradient(45deg, lightgreen 49.9%, #89e289 49.9%, #89e289 60%, lightgreen 60%) fixed,
+    linear-gradient(45deg, #89e289 10%, lightgreen 10%) fixed;
+    background-size: 0.5em 0.5em
+}
+
+tr.server td.arm_hostname.month_fresh {
+    background: linear-gradient(45deg, lightgoldenrodyellow 49.9%, #eeeec8 49.9%, #eeeec8 60%, lightgoldenrodyellow 60%) fixed,
+    linear-gradient(45deg, #eeeec8 10%, lightgoldenrodyellow 10%) fixed;
+    background-size: 0.5em 0.5em
+}
+
+tr.server td.arm_hostname.over_month_fresh {
+    background: linear-gradient(45deg, lightpink 49.9%, #f2adb7 49.9%, #f2adb7 60%, lightpink 60%) fixed,
+    linear-gradient(45deg, #f2adb7 10%, lightpink 10%) fixed;
+    background-size: 0.5em 0.5em
+}
+
 table.places-arms-container tr.server td {
     background:
-        linear-gradient(45deg, rgba(0, 0, 0, 0) 49.9%, rgba(0, 0, 0, 0.05) 49.9%, rgba(0, 0, 0, 0.05) 60%, rgba(0, 0, 0, 0) 60%) fixed,
-        linear-gradient(45deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0) 10%) fixed;
+            linear-gradient(45deg, rgba(0, 0, 0, 0) 49.9%, rgba(0, 0, 0, 0.05) 49.9%, rgba(0, 0, 0, 0.05) 60%, rgba(0, 0, 0, 0) 60%) fixed,
+            linear-gradient(45deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0) 10%) fixed;
     background-size: 0.5em 0.5em
 }
 
