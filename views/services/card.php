@@ -10,7 +10,8 @@ if (!isset($static_view)) $static_view=false;
 $comps=$model->comps;
 $services=$model->depends;
 $dependants=$model->dependants;
-$deleteable=!count($comps)&&!count($services)&&!count($dependants);
+$support=$model->support;
+$deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($support);
 ?>
 
 <h1>
@@ -39,13 +40,14 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants);
 <?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
 <br />
 
-<?php if (is_object($model->userGroup)) { ?>
-    <h4>
-        Ответственные: <?= $this->render('/user-groups/item',['model'=>$model->userGroup,'static_view'=>$static_view]) ?>
-    </h4>
+<h4>
+	Ответственный: <?= $this->render('/users/item',['model'=>$model->responsible,'static_view'=>$static_view]) ?>
+</h4>
+<?php if (count($support)) { ?>
+	При поддержке:
     <p>
     <?php
-        foreach ($model->userGroup->users as $user)
+        foreach ($support as $user)
             echo $this->render('/users/item',['model'=>$user,'static_view'=>$static_view]).'<br />';
     ?>
     </p>

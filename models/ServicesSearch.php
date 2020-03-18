@@ -11,14 +11,16 @@ use app\models\Services;
  */
 class ServicesSearch extends Services
 {
+	
+	public $responsible;
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['id', 'is_end_user', 'user_group_id', 'sla_id'], 'integer'],
-            [['name', 'description', 'links', 'notebook'], 'safe'],
+	        [['id', 'is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
+            [['name', 'description', 'links', 'notebook','responsible'], 'safe'],
         ];
     }
 
@@ -40,7 +42,9 @@ class ServicesSearch extends Services
      */
     public function search($params)
     {
-        $query = Services::find();
+        $query = Services::find()
+            ->joinWith('support support')
+            ->joinWith('responsible responsible');
 
         // add conditions that should always apply here
 
@@ -62,13 +66,19 @@ class ServicesSearch extends Services
         $query->andFilterWhere([
             'id' => $this->id,
             'is_end_user' => $this->is_end_user,
-            'user_group_id' => $this->user_group_id,
-            'sla_id' => $this->sla_id,
+	        'responsible_id' => $this->responsible_id,
+	        'providing_schedule_id' => $this->providing_schedule_id,
+	        'support_schedule_id' => $this->support_schedule_id,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'description', $this->description])
-            ->andFilterWhere(['like', 'links', $this->links])
+	        ->andFilterWhere(['like', 'links', $this->links])
+	        ->andFilterWhere([
+	        	'or',
+		        ['like', 'responsible.Ename', $this->responsible],
+		        ['like', 'support.Ename', $this->responsible]
+	        ])
             ->andFilterWhere(['like', 'notebook', $this->notebook]);
 
         return $dataProvider;

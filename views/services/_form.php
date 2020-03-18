@@ -22,21 +22,56 @@ use kartik\select2\Select2;
         <div class="col-md-8">
 	        <?= $form->field($model, 'description')->textarea(['rows' => max(2,count(explode("\n",$model->description)))]) ?>
 	        <?php $this->registerJs("$('#services-description').autoResize();"); ?>
+	        <?= $form->field($model, 'links')->textarea(['rows' => max(2,count(explode("\n",$model->links)))]) ?>
+	        <?php $this->registerJs("$('#services-links').autoResize();"); ?>
 
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-6">
-	        <?= $form->field($model, 'user_group_id')->widget(Select2::className(), [
-		        'data' => \app\models\UserGroups::fetchNames(),
-		        'options' => ['placeholder' => 'Выберите группу',],
+	        <?= $form->field($model, 'providing_schedule_id')->widget(Select2::className(), [
+		        'data' => \app\models\Schedules::fetchNames(),
+		        'options' => ['placeholder' => 'Выберите расписание',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
 			        'allowClear' => true,
 			        'multiple' => false
 		        ]
 	        ]) ?>
+	
+	        <?= $form->field($model, 'responsible_id')->widget(Select2::className(), [
+		        'data' => \app\models\Users::fetchNames(),
+		        'options' => ['placeholder' => 'Выберите ответственного',],
+		        'toggleAllSettings'=>['selectLabel'=>null],
+		        'pluginOptions' => [
+			        'allowClear' => true,
+			        'multiple' => false
+		        ]
+	        ]) ?>
+	
+	        <?= $form->field($model, 'support_ids')->widget(Select2::className(), [
+		        'data' => \app\models\Users::fetchNames(),
+		        'options' => ['placeholder' => 'Выберите сотрудников',],
+		        'toggleAllSettings'=>['selectLabel'=>null],
+		        'pluginOptions' => [
+			        'allowClear' => true,
+			        'multiple' => true
+		        ]
+	        ]) ?>
+			
+        </div>
+        <div class="col-md-6">
+	        <?= $form->field($model, 'support_schedule_id')->widget(Select2::className(), [
+		        'data' => \app\models\Schedules::fetchNames(),
+		        'options' => ['placeholder' => 'Выберите расписание',],
+		        'toggleAllSettings'=>['selectLabel'=>null],
+		        'pluginOptions' => [
+			        'allowClear' => true,
+			        'multiple' => false
+		        ]
+	        ]) ?>
+	
 	        <?= $form->field($model, 'depends_ids')->widget(Select2::className(), [
 		        'data' => \app\models\Services::fetchNames(),
 		        'options' => ['placeholder' => 'Выберите сервисы',],
@@ -55,17 +90,11 @@ use kartik\select2\Select2;
 			        'multiple' => true
 		        ]
 	        ]) ?>
-        </div>
-        <div class="col-md-6">
-	        <?= $form->field($model, 'links')->textarea(['rows' => max(2,count(explode("\n",$model->links)))]) ?>
-	        <?php $this->registerJs("$('#services-links').autoResize();"); ?>
 
-	        <?php // $form->field($model, 'sla_id')->textInput() ?>
-
-	        <?= $form->field($model, 'notebook')->textarea(['rows' => max(5,count(explode("\n",$model->notebook)))]) ?>
-	        <?php $this->registerJs("$('#services-notebook').autoResize();"); ?>
         </div>
     </div>
+	<?= $form->field($model, 'notebook')->textarea(['rows' => max(5,count(explode("\n",$model->notebook)))]) ?>
+	<?php $this->registerJs("$('#services-notebook').autoResize();"); ?>
 
 
 

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\web\User;
 
 /**
  * This is the model class for table "services".
@@ -15,10 +16,18 @@ use Yii;
  * @property int $sla_id
  * @property string $notebook
  * @property string $links
+ * @property int $responsible_id
+ * @property int $providing_schedule_id
+ * @property int $support_schedule_id
+ 
  * @property \app\models\Comps $comps
  * @property \app\models\Services $depends
  * @property \app\models\Services $dependants
  * @property \app\models\UserGroups $userGroup
+ * @property Schedules $providingSchedule
+ * @property Users $responsible
+ * @property Users[] $support
+ * @property Schedules $supportSchedule
  */
 class Services extends \yii\db\ActiveRecord
 {
@@ -38,6 +47,7 @@ class Services extends \yii\db\ActiveRecord
 				'relations' => [
 					'depends_ids' => 'depends',
 					'comps_ids' => 'comps',
+					'support_ids' => 'support'
 				]
 			]
 		];
@@ -59,10 +69,13 @@ class Services extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'description', 'is_end_user'], 'required'],
-	        [['depends_ids','comps_ids'], 'each', 'rule'=>['integer']],
+	        [['depends_ids','comps_ids','support_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
-            [['is_end_user', 'user_group_id', 'sla_id'], 'integer'],
-            [['name'], 'string', 'max' => 64],
+	        [['is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
+	        [['name'], 'string', 'max' => 64],
+	        [['responsible_id'],        'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['responsible_id' => 'id']],
+	        [['providing_schedule_id'], 'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['providing_schedule_id' => 'id']],
+	        [['support_schedule_id'],   'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['support_schedule_id' => 'id']],
         ];
     }
 
@@ -80,7 +93,13 @@ class Services extends \yii\db\ActiveRecord
             'user_group_id' => 'Группа ответственных',
 	        'depends_ids' => 'Зависит от сервисов',
 	        'comps_ids' => 'Серверы',
-            'sla_id' => 'SLA',
+	        'providingSchedule' => 'Время предоставления',
+	        'providing_schedule_id' => 'Время предоставления',
+	        'supportSchedule' => 'Время поддержки',
+	        'support_schedule_id' => 'Время поддержки',
+	        'responsible' => 'Ответственный, поддержка',
+	        'responsible_id' => 'Ответственный',
+	        'support_ids' => 'Поддержка',
             'notebook' => 'Записная книжка',
         ];
     }
@@ -92,19 +111,45 @@ class Services extends \yii\db\ActiveRecord
 	{
 		return [
 			'id' => 'ID',
-			'name' => 'Короткое название сервиса',
-			'description' => 'Развернутое описание назначения этого сервиса',
-			'links' => \app\components\UrlListWidget::$hint,
+			'name' => 'Короткое уникальное название сервиса',
+			'description' => 'Развернутое название или краткое описание назначения этого сервиса. Все детали тут описывать не нужно. Нужно в поле ниже вставить ссылку на вики страничку с описанием',
+			'links' => \app\components\UrlListWidget::$hint.' Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
 			'is_end_user' => 'Предоставляется ли этот сервис пользователям (иначе используется другими сервисами)',
 			'user_group_id' => 'Группа сотрудников ответственных за работоспособность сервиса',
 			'depends_ids' => 'От работы каких сервисов зависит работа этого сервиса',
 			'comps_ids' => 'На каких серверах выполняется этот сервис',
 			'sla_id' => 'Выбор соглашения о качестве предоставления сервиса',
-			'notebook' => 'Записная книжка',
+			'notebook' => 'Устаревшее поле. Вся информация должна быть на вики страничке.',
+			'support_schedule_id' => 'Расписание, когда нужно реагировать на сбои в работе сервиса',
+			'providing_schedule_id' => 'Расписание, когда сервисом могут воспользоваться пользователи или другие сервисы',
+			'responsible_id' => 'Ответственный за работу сервиса',
+			'support_ids' => 'Дополнительные члены команды по поддержке сервиса',
 		];
 	}
-
-
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getSupportSchedule()
+	{
+		return $this->hasOne(Schedules::className(), ['id' => 'support_schedule_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getProvidingSchedule()
+	{
+		return $this->hasOne(Schedules::className(), ['id' => 'providing_schedule_id']);
+	}
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getResponsible()
+	{
+		return $this->hasOne(Users::className(), ['id' => 'responsible_id']);
+	}
+	
 	/**
 	 * Возвращает сервисы от которых зависит этот сервис
 	 */
@@ -113,7 +158,16 @@ class Services extends \yii\db\ActiveRecord
 		return static::hasMany(Services::className(), ['id' => 'depends_id'])
 			->viaTable('{{%services_depends}}', ['service_id' => 'id']);
 	}
-
+	
+	/**
+	 * Возвращает сервисы от которых зависит этот сервис
+	 */
+	public function getSupport()
+	{
+		return static::hasMany(Users::className(), ['id' => 'user_id'])
+			->viaTable('{{%users_in_services}}', ['service_id' => 'id']);
+	}
+	
 	/**
 	 * Возвращает сервисы зависимые от этого сервиса
 	 */

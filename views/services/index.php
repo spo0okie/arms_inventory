@@ -24,29 +24,7 @@ $renderer=$this;
     </p>
 	
 	<?php Pjax::begin(); ?>
-	<?= GridView::widget([
-        'dataProvider' => $dataProvider,
-		'filterModel' => $searchModel,
-		'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-	
-	        [
-		        'attribute'=>'name',
-		        'format'=>'raw',
-		        'value'=>function($data) use ($renderer) {
-			        return $renderer->render('/services/item',['model'=>$data]);
-		        }
-	        ],
-            //'name',
-            //'description:ntext',
-            //'is_end_user',
-	        //'sla.name',
-            'userGroup.name',
-            //'notebook:ntext',
-
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
+	<?= $this->render('table',compact('dataProvider','searchModel'))?>
 </div>
 
 <?php
@@ -73,6 +51,8 @@ foreach ($models as $service) {
 		];
 	}
 }
+Pjax::end();
+
 if (count($links)) {
 //http://bl.ocks.org/mbostock/1153292
 ?>
@@ -276,7 +256,6 @@ if (count($links)) {
 </script>
 
 <?php }
-Pjax::end();
 
 $this->registerJs('$(document).on("pjax:complete", function(event) {
 			input=$("input[type=\'text\']:visible:first");

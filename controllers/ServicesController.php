@@ -65,6 +65,8 @@ class ServicesController extends Controller
 	
 	    $searchModel = new ServicesSearch();
 	    $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+	    $this->view->params['layout-container'] = 'container-fluid';
+	
 	    return $this->render('index', [
 		    'searchModel' => $searchModel,
 		    'dataProvider' => $dataProvider,
