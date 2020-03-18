@@ -51,6 +51,7 @@ NavBar::begin([
 					['label' => \app\models\OrgPhones::$title, 'url' => ['/org-phones/index']],
 					['label' => \app\models\OrgInet::$title, 'url' => ['/org-inet/index']],
 					['label' => \app\models\Services::$title, 'url' => ['/services/index']],
+					['label' => \app\models\Schedules::$title, 'url' => ['/schedules/index']],
 					'<li class="divider"></li>',
 					['label' => 'Карта рабочих мест', 'url' => ['/places/armmap']],
 					['label' => 'По подразделениям', 'url' => ['/places/depmap']],
