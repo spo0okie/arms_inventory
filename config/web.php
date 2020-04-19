@@ -71,10 +71,11 @@ $config = [
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [
-                    	'comps'         => 'api/comps',
-	                    'domains'       => 'api/domains',
+                    	'comps'			=> 'api/comps',
+	                    'domains'		=> 'api/domains',
 	                    'login-journal' => 'api/login-journal',
-	                    'users'         => 'api/users'
+	                    'users'			=> 'api/users',
+	                //    'org-struct'	=> 'api/org-struct'
                     ],
                     'pluralize' => false,
                     'prefix' => 'api'
@@ -102,6 +103,8 @@ $config = [
     ],
     'params' => $params,
 ];
+
+\Yii::$container->set('yii\data\Pagination', ['pageSizeLimit' => [0, 9999]]);
 
 if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
