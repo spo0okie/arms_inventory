@@ -56,7 +56,7 @@ use kartik\select2\Select2;
 		        //'options' => ['placeholder' => 'Статус рабочего места',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
-			        'allowClear' => false,
+			        'allowClear' => true,
 			        'multiple' => false
 		        ]
 	        ]) ?>
