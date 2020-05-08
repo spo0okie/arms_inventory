@@ -17,7 +17,15 @@ use kartik\select2\Select2;
         <div class="col-md-4">
 	        <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 	        <?= $form->field($model, 'is_end_user')->checkbox() ?>
-
+			<?= $form->field($model, 'segment_id')->widget(Select2::className(), [
+				'data' => \app\models\Segments::fetchNames(),
+				'options' => ['placeholder' => 'Выберите сегмент ИТ инфраструктуры предприятия',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
         </div>
         <div class="col-md-8">
 	        <?= $form->field($model, 'description')->textarea(['rows' => max(2,count(explode("\n",$model->description)))]) ?>

@@ -12,7 +12,7 @@ use yii\widgets\Pjax;
 
 $renderer=$this;
 
-if (!isset($columns)) $columns=['name','providingSchedule','supportSchedule','responsible','description'];
+if (!isset($columns)) $columns=['name','segment','providingSchedule','supportSchedule','responsible','description'];
 
 //формируем список столбцов для рендера
 $render_columns=[];
@@ -62,6 +62,7 @@ foreach ($columns as $column) {
 		
 		case 'providingSchedule':
 		case 'supportSchedule':
+		case 'segment':
 			$render_columns[] = [
 				'attribute' => $column,
 				//'header' => 'Инв. номер',

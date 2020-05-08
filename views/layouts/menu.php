@@ -77,6 +77,7 @@ NavBar::begin([
 					['label' => 'АРМы', 'url' => ['/arms/index']],
 					['label' => 'ОС', 'url' => ['/comps/index']],
 					['label' => 'Домены', 'url' => ['/domains/index']],
+					['label' => \app\models\Segments::$title, 'url' => ['/segments/index']],
 					['label' => \app\models\LoginJournal::$title, 'url' => ['/login-journal/index']],
 				],
 			],

@@ -19,7 +19,8 @@ use yii\web\User;
  * @property int $responsible_id
  * @property int $providing_schedule_id
  * @property int $support_schedule_id
- 
+ * @property int $segment_id
+ *
  * @property \app\models\Comps $comps
  * @property \app\models\Services $depends
  * @property \app\models\Services $dependants
@@ -28,6 +29,7 @@ use yii\web\User;
  * @property Users $responsible
  * @property Users[] $support
  * @property Schedules $supportSchedule
+ * @property Segments $segment
  */
 class Services extends \yii\db\ActiveRecord
 {
@@ -76,6 +78,7 @@ class Services extends \yii\db\ActiveRecord
 	        [['responsible_id'],        'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['responsible_id' => 'id']],
 	        [['providing_schedule_id'], 'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['providing_schedule_id' => 'id']],
 	        [['support_schedule_id'],   'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['support_schedule_id' => 'id']],
+			[['segment_id'],			'exist', 'skipOnError' => true, 'targetClass' => Segments::className(), 'targetAttribute' => ['segment_id' => 'id']],
         ];
     }
 
@@ -101,6 +104,8 @@ class Services extends \yii\db\ActiveRecord
 	        'responsible_id' => 'Ответственный',
 	        'support_ids' => 'Поддержка',
             'notebook' => 'Записная книжка',
+			'segment_id' => 'Сегмент ИТ',
+			'segment' => 'Сегмент ИТ',
         ];
     }
 
@@ -124,6 +129,7 @@ class Services extends \yii\db\ActiveRecord
 			'providing_schedule_id' => 'Расписание, когда сервисом могут воспользоваться пользователи или другие сервисы',
 			'responsible_id' => 'Ответственный за работу сервиса',
 			'support_ids' => 'Дополнительные члены команды по поддержке сервиса',
+			'segment_id' => 'Сегмент ИТ инфраструктуры к которому относится этот сервис',
 		];
 	}
 	
@@ -150,6 +156,13 @@ class Services extends \yii\db\ActiveRecord
 		return $this->hasOne(Users::className(), ['id' => 'responsible_id']);
 	}
 	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getSegment()
+	{
+		return $this->hasOne(Segments::className(), ['id' => 'segment_id']);
+	}
 	/**
 	 * Возвращает сервисы от которых зависит этот сервис
 	 */

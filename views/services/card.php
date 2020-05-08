@@ -25,7 +25,10 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
     ]) ?>
 </h1>
 <h4>
-    (<?= $model->is_end_user?'Предоставляется пользователям':'Внутренний сервис' ?>)
+    (<?php
+		echo $model->is_end_user?'Предоставляется пользователям':'Внутренний сервис';
+		if (is_object($model->segment)) echo " // Сегмент ИТ: {$model->segment->name}"
+	?>)
 </h4>
 
 <?php if(!$static_view&&!$deleteable) { ?>

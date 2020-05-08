@@ -6,10 +6,10 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\UserGroups */
 
-$users=$model->users;
+$support=$model->support;
 $services=$model->services;
 if (!isset($static_view)) $static_view=false;
-$deleteable=!count($users)&&!count($services);
+$deleteable=!count($support)&&!count($services);
 ?>
 <h1>
     <?= Html::encode($model->name) ?>
