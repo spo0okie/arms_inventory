@@ -49,7 +49,7 @@ use kartik\select2\Select2;
 	        ]) ?>
 	
 	        <?= $form->field($model, 'responsible_id')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchNames(),
+		        'data' => \app\models\Users::fetchWorking(),
 		        'options' => ['placeholder' => 'Выберите ответственного',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
@@ -59,7 +59,7 @@ use kartik\select2\Select2;
 	        ]) ?>
 	
 	        <?= $form->field($model, 'support_ids')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchNames(),
+		        'data' => \app\models\Users::fetchWorking(),
 		        'options' => ['placeholder' => 'Выберите сотрудников',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [

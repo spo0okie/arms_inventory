@@ -304,7 +304,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	public static function fetchWorking($current=null)
 	{
 		if (!is_null(static::$working_cache)) return static::$working_cache;
-		$query = static::find()->filterWhere(['Uvolen'=>0])->orderBy('Ename');
+		$query = static::find()->filterWhere(['Uvolen'=>0])->orderBy(['Ename'=>'ASC','Persg'=>'ASC'])->groupBy('Ename');
 		$list= (static::$working_cache = \yii\helpers\ArrayHelper::map($query->all(), 'id', 'Ename'));
 		if ($current && (!isset($list[$current]))) {
 			$list[$current]=static::findOne($current)->Ename;
@@ -374,6 +374,9 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 		return $tokens[2];
 	}
 	
+	/**
+	 * @return bool
+	 */
 	public static function isAdmin() {
 		return (empty(Yii::$app->params['useRBAC']) || Yii::$app->user->can('admin_access'));
 	}
