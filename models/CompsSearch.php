@@ -20,7 +20,7 @@ class CompsSearch extends Comps
     {
         return [
             [['id', 'domain_id'], 'integer'],
-            [['name', 'os', 'raw_hw', 'raw_soft', 'comment', 'updated_at', 'arm_id','ip'], 'safe'],
+            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip'], 'safe'],
         ];
     }
 
@@ -72,6 +72,7 @@ class CompsSearch extends Comps
             ->andFilterWhere(['like', 'os', $this->os])
             ->andFilterWhere(['like', 'ip', $this->ip])
             ->andFilterWhere(['like', 'arms.num', $this->arm_id])
+            ->andFilterWhere(['like', 'raw_version', $this->raw_version])
             ->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;
