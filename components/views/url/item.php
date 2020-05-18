@@ -21,5 +21,8 @@ if (count($tokens)>1) {
 	$url=$item;
 	$descr=$item;
 }
-?>
-<?= Html::a($descr,$url) ?><br/>
+try {
+	echo Html::a($descr,$url);
+} catch (Exception $e) {
+	echo $descr.' (неверный URL)';
+} ?><br/>
