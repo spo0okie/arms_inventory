@@ -17,6 +17,14 @@ $isAdmin=(empty(Yii::$app->params['useRBAC']) || Yii::$app->user->can('admin_acc
 		</div>
 		<div class="col-md-6">
 			<?= $isAdmin?$this->render('roles',['model'=>$model,'static_view'=>false]):'' ?>
+			<br />
+			<br />
+			<?php if (count($model->services)) {
+				echo '<h4>Ответственный за сервисы</h4>';
+				foreach ($model->services as $service) {
+					echo $this->render('/services/item',['model'=>$service]);
+				}
+			} ?>
 		</div>
 	</div>
 </div>

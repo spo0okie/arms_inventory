@@ -31,6 +31,7 @@ use Yii;
  * @property Arms[] $armsIt
  * @property Arms[] $armsResponsible
  * @property Materials[] $materials
+ * @property Services[] $services
  */
 class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
@@ -188,7 +189,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	{
 		return $this->hasOne(OrgStruct::className(), ['id'=>'Orgeh']);
 	}
-
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -197,6 +198,16 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 		return $this->hasOne(\app\models\Orgs::className(), ['id'=>'org_id']);
 	}
 
+	/**
+	 * Возвращает сервисы, за которые отвечает пользователь
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getServices()
+	{
+		return $this->hasMany(Services::className(), ['responsible_id' => 'id']);
+	}
+	
+	
 	/**
      * @inheritdoc
      */
