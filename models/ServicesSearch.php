@@ -50,7 +50,7 @@ class ServicesSearch extends Services
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-	        'pagination' => ['pageSize' => 100,],
+	        'pagination' => ['pageSize' => 500,],
 	        'sort'=> ['defaultOrder' => ['name'=>SORT_ASC]]
         ]);
 	
