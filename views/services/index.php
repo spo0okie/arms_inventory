@@ -53,7 +53,8 @@ foreach ($models as $service) {
 }
 Pjax::end();
 
-if (count($links)) {
+//if (count($links)) {
+if (false) {
 //http://bl.ocks.org/mbostock/1153292
 ?>
 	<h2>Карта зависимостей</h2>
