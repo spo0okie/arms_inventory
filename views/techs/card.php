@@ -47,6 +47,15 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
     Сотрудник ИТ: <?= $this->render('/users/item',['model'=>$model->itStaff]) ?> <br />
 </p>
 
+<?php if (count($model->services)) { ?>
+	<h4>Учавствтует в работе сервисов:</h4>
+	<p>
+		<?php foreach ($model->services as $service) { ?>
+			<?= $this->render('/services/item',['model'=>$service]) ?><br />
+		<?php } ?>
+	</p>
+<?php } ?>
+
 <h4>Сеть:</h4>
 <p>
     IP: <?= Yii::$app->formatter->asNtext($model->ip) ?>

@@ -49,7 +49,8 @@ class Services extends \yii\db\ActiveRecord
 				'relations' => [
 					'depends_ids' => 'depends',
 					'comps_ids' => 'comps',
-					'support_ids' => 'support'
+					'support_ids' => 'support',
+					'techs_ids' => 'techs'
 				]
 			]
 		];
@@ -71,7 +72,7 @@ class Services extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'description', 'is_end_user'], 'required'],
-	        [['depends_ids','comps_ids','support_ids'], 'each', 'rule'=>['integer']],
+	        [['depends_ids','comps_ids','support_ids','techs_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
 	        [['is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 	        [['name'], 'string', 'max' => 64],
@@ -189,7 +190,7 @@ class Services extends \yii\db\ActiveRecord
 		return static::hasMany(Services::className(), ['id' => 'service_id'])
 			->viaTable('{{%services_depends}}', ['depends_id' => 'id']);
 	}
-
+	
 	/**
 	 * Возвращает серверы на которых живет этот сервис
 	 */
@@ -198,7 +199,16 @@ class Services extends \yii\db\ActiveRecord
 		return static::hasMany(Comps::className(), ['id' => 'comps_id'])
 			->viaTable('{{%comps_in_services}}', ['services_id' => 'id']);
 	}
-
+	
+	/**
+	 * Возвращает серверы на которых живет этот сервис
+	 */
+	public function getTechs()
+	{
+		return static::hasMany(Techs::className(), ['id' => 'tech_id'])
+			->viaTable('{{%techs_in_services}}', ['service_id' => 'id']);
+	}
+	
 	/**
 	 * Возвращает группу ответственных за сервис
 	 */

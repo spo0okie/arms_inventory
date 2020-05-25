@@ -34,6 +34,7 @@ use Yii;
  * @property TechModels $model
  * @property TechTypes $type
  * @property Contracts[] $contracts
+ * @property Services[] $services
  * @property MaterialsUsages[] $materialsUsages
  */
 
@@ -117,6 +118,7 @@ class Techs extends \yii\db\ActiveRecord
 				'class' => \voskobovich\linker\LinkerBehavior::className(),
 				'relations' => [
 					'contracts_ids' => 'contracts',
+					'services_ids' => 'services',
 				]
 			]
 		];
@@ -376,7 +378,7 @@ class Techs extends \yii\db\ActiveRecord
 		//или цепочка из префиксов или пусто
 		return count($tokens)?implode('-',$tokens):'';
 	}
-
+	
 	/**
 	 * Возвращает набор документов
 	 */
@@ -385,7 +387,16 @@ class Techs extends \yii\db\ActiveRecord
 		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
 			->viaTable('{{%contracts_in_techs}}', ['techs_id' => 'id']);
 	}
-
+	
+	/**
+	 * Возвращает сервисы
+	 */
+	public function getServices()
+	{
+		return static::hasMany(Services::className(), ['id' => 'service_id'])
+			->viaTable('{{%techs_in_services}}', ['tech_id' => 'id']);
+	}
+	
 	public static function fetchNames(){
 		$list= static::find()
 			->joinWith(['model','model.type','origPlace','arm','arm.place'])

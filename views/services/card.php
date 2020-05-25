@@ -8,10 +8,11 @@ use yii\widgets\DetailView;
 
 if (!isset($static_view)) $static_view=false;
 $comps=$model->comps;
+$techs=$model->techs;
 $services=$model->depends;
 $dependants=$model->dependants;
 $support=$model->support;
-$deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($support);
+$deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($support)&&!count($techs);
 ?>
 
 <h1>
@@ -58,14 +59,25 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 <?php } ?>
 
 <?php if (count($comps)) { ?>
-    <h4>Выполняется на компьютерах:</h4>
-    <p>
+	<h4>Выполняется на компьютерах:</h4>
+	<p>
 		<?php
 		foreach ($comps as $comp)
 			echo $this->render('/comps/item',['model'=>$comp,'static_view'=>$static_view]).'<br />';
 		?>
-    </p>
-    <br />
+	</p>
+	<br />
+<?php } ?>
+
+<?php if (count($techs)) { ?>
+	<h4>Выполняется на оборудовании:</h4>
+	<p>
+		<?php
+		foreach ($techs as $tech)
+			echo $this->render('/techs/item',['model'=>$tech,'static_view'=>$static_view]).'<br />';
+		?>
+	</p>
+	<br />
 <?php } ?>
 
 <?php if (count($services)) { ?>

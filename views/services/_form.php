@@ -89,15 +89,24 @@ use kartik\select2\Select2;
 			        'multiple' => true
 		        ]
 	        ]) ?>
-	        <?= $form->field($model, 'comps_ids')->widget(Select2::className(), [
-		        'data' => \app\models\Comps::fetchNames(),
-		        'options' => ['placeholder' => 'Выберите серверы',],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-			        'allowClear' => true,
-			        'multiple' => true
-		        ]
-	        ]) ?>
+			<?= $form->field($model, 'comps_ids')->widget(Select2::className(), [
+				'data' => \app\models\Comps::fetchNames(),
+				'options' => ['placeholder' => 'Выберите серверы',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+			<?= $form->field($model, 'techs_ids')->widget(Select2::className(), [
+				'data' => \app\models\Techs::fetchNames(),
+				'options' => ['placeholder' => 'Выберите оборудование',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
 
         </div>
     </div>
