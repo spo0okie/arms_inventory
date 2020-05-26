@@ -15,14 +15,14 @@ class m200508_160608_alter_table_services extends Migration
 		$table=$this->db->getTableSchema('services');
 	
 		if (!isset($table->columns['segment_id'])) {
-			$this->addColumn('{{%services}}','[[segment_id]]',$this->integer()->null());
-			$this->createIndex('{{%idx-services_segment}}', 		'{{%services}}', '[[segment_id]]');
+			$this->addColumn('services','segment_id',$this->integer()->null());
+			$this->createIndex('idx-services_segment','services', 'segment_id');
 			// add foreign key for table `{{%department}}`
 			$this->addForeignKey(
-				'{{%fk-services-segment}}',
-				'{{%services}}',
-				'[[segment_id]]',
-				'{{%segments}}',
+				'fk-services-segment',
+				'services',
+				'segment_id',
+				'segments',
 				'id',
 				'RESTRICT'
 			);
@@ -34,8 +34,9 @@ class m200508_160608_alter_table_services extends Migration
      */
     public function safeDown()
     {
-		if (isset($table->foreignKeys['fk-services-segment']))        $this->dropForeignKey('fk-services-segment','{{%services}}');
-		if (isset($table->columns['segment_id']))		  			  $this->dropColumn('{{%services}}','[[segment_id]]');
+		$table=$this->db->getTableSchema('services');
+		if (isset($table->foreignKeys['fk-services-segment']))        $this->dropForeignKey('fk-services-segment','services');
+		if (isset($table->columns['segment_id']))		  			  $this->dropColumn('services','segment_id');
     }
 
     /*

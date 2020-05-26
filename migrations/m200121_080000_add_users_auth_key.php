@@ -12,12 +12,12 @@ class m200121_080000_add_users_auth_key extends Migration
      */
     public function safeUp()
     {
-    	$table=$this->db->getTableSchema('{{%users}}');
+    	$table=$this->db->getTableSchema('users');
 	    if (!isset($table->columns['auth_key'])) {
-	    	$this->addColumn('{{%users}}','auth_key',$this->string(255)->null());
+	    	$this->addColumn('users','auth_key',$this->string(255)->null());
 	    }
 	    if (!isset($table->columns['access_token'])) {
-		    $this->addColumn('{{%users}}','access_token',$this->string(255)->null());
+		    $this->addColumn('users','access_token',$this->string(255)->null());
 	    }
     }
 
@@ -26,11 +26,12 @@ class m200121_080000_add_users_auth_key extends Migration
      */
     public function safeDown()
     {
+		$table=$this->db->getTableSchema('users');
 	    if (isset($table->columns['auth_key'])) {
-		    $this->dropColumn('{{%users}}','auth_key');
+		    $this->dropColumn('users','auth_key');
 	    }
 	    if (isset($table->columns['access_token'])) {
-		    $this->dropColumn('{{%users}}','access_token');
+		    $this->dropColumn('users','access_token');
 	    }
     }
 
