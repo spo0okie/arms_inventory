@@ -22,14 +22,25 @@ class ArmsController extends Controller
      */
     public function behaviors()
     {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
+		$behaviors=[
+			'verbs' => [
+				'class' => VerbFilter::className(),
+				'actions' => [
+					'delete' => ['POST'],
+				],
+			]
+		];
+		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
+			'class' => \yii\filters\AccessControl::className(),
+			'rules' => [
+				['allow' => true, 'actions'=>['create','create-apply','update','update-apply','delete','unlink','updhw','rmhw'], 'roles'=>['admin']],
+				['allow' => true, 'actions'=>['index','view','ttip','ttip-hw','validate','contracts'], 'roles'=>['@','?']],
+			],
+			'denyCallback' => function ($rule, $action) {
+				throw new  \yii\web\ForbiddenHttpException('Access denied');
+			}
+		];
+		return $behaviors;
     }
 
     /**
@@ -125,7 +136,7 @@ class ArmsController extends Controller
 	 */
 	public function actionCreate()
 	{
-		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		//if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 
 		$model = new Arms();
 
@@ -153,7 +164,7 @@ class ArmsController extends Controller
 	 */
 	public function actionCreateApply()
 	{
-		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		//if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 
 		$model = new Arms();
 
@@ -175,7 +186,7 @@ class ArmsController extends Controller
      */
     public function actionUpdate($id)
     {
-	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	    //if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 
         $model = $this->findModel($id);
 
@@ -204,7 +215,7 @@ class ArmsController extends Controller
 	 */
 	public function actionUpdateApply($id)
 	{
-		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		//if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 
 		$model = $this->findModel($id);
 
@@ -230,7 +241,7 @@ class ArmsController extends Controller
 	 */
     public function actionDelete($id)
     {
-	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	    //if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 
         $this->findModel($id)->delete();
 
@@ -261,7 +272,7 @@ class ArmsController extends Controller
      * @throws NotFoundHttpException
      */
     public function actionUpdhw($id){
-	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	    //if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 
         $model = $this->findModel($id);
 
@@ -290,7 +301,7 @@ class ArmsController extends Controller
      * @throws NotFoundHttpException
      */
     public function actionRmhw($id){
-	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	    //if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 
         $model = $this->findModel($id);
 

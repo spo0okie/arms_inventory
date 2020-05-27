@@ -23,14 +23,25 @@ class ContractsController extends Controller
      */
     public function behaviors()
     {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
+		$behaviors=[
+			'verbs' => [
+				'class' => VerbFilter::className(),
+				'actions' => [
+					'delete' => ['POST'],
+				],
+			]
+		];
+		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
+			'class' => \yii\filters\AccessControl::className(),
+			'rules' => [
+				['allow' => true, 'actions'=>['create','update','update-form','delete','unlink','unlink-arm','unlink-tech','link-arm','link-tech','scan-upload'], 'roles'=>['admin']],
+				['allow' => true, 'actions'=>['index','view','ttip','hint-arms','scans','validate'], 'roles'=>['@','?']],
+			],
+			'denyCallback' => function ($rule, $action) {
+				throw new  \yii\web\ForbiddenHttpException('Access denied');
+			}
+		];
+		return $behaviors;
     }
 
     /**
