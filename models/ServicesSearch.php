@@ -43,8 +43,16 @@ class ServicesSearch extends Services
     public function search($params)
     {
         $query = Services::find()
-            ->joinWith('support support')
-            ->joinWith('responsible responsible');
+			//->joinWith('techs')
+			->joinWith([
+				'comps.arm.place',
+				'techs.place',
+				'segment',
+				'support',
+				'responsible',
+				'supportSchedule',
+				'providingSchedule',
+			]);
 
         // add conditions that should always apply here
 

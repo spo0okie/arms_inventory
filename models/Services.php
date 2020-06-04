@@ -21,10 +21,15 @@ use yii\web\User;
  * @property int $support_schedule_id
  * @property int $segment_id
  *
- * @property \app\models\Comps $comps
- * @property \app\models\Services $depends
- * @property \app\models\Services $dependants
+ * @property \app\models\Comps[] $comps
+ * @property \app\models\Services[] $depends
+ * @property \app\models\Services[] $dependants
  * @property \app\models\UserGroups $userGroup
+ * @property \app\models\Techs[] $techs
+ * @property \app\models\Arms[] $arms
+ * @property \app\models\Places[] $armPlaces
+ * @property \app\models\Places[] $techPlaces
+ * @property \app\models\Places[] $sites
  * @property Schedules $providingSchedule
  * @property Users $responsible
  * @property Users[] $support
@@ -144,7 +149,8 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getSupportSchedule()
 	{
-		return $this->hasOne(Schedules::className(), ['id' => 'support_schedule_id']);
+		return $this->hasOne(Schedules::className(), ['id' => 'support_schedule_id'])
+			->from(['support_schedule'=>Schedules::tableName()]);
 	}
 	
 	/**
@@ -152,14 +158,15 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getProvidingSchedule()
 	{
-		return $this->hasOne(Schedules::className(), ['id' => 'providing_schedule_id']);
+		return $this->hasOne(Schedules::className(), ['id' => 'providing_schedule_id'])
+			->from(['providing_schedule'=>Schedules::tableName()]);
 	}
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getResponsible()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'responsible_id']);
+		return $this->hasOne(Users::className(), ['id' => 'responsible_id'])->from(['responsible'=>Users::tableName()]);
 	}
 	
 	/**
@@ -184,6 +191,7 @@ class Services extends \yii\db\ActiveRecord
 	public function getSupport()
 	{
 		return static::hasMany(Users::className(), ['id' => 'user_id'])
+			->from(['support'=>Users::tableName()])
 			->viaTable('{{%users_in_services}}', ['service_id' => 'id']);
 	}
 	
@@ -193,6 +201,7 @@ class Services extends \yii\db\ActiveRecord
 	public function getDependants()
 	{
 		return static::hasMany(Services::className(), ['id' => 'service_id'])
+			->from(['responsible'=>Services::tableName()])
 			->viaTable('{{%services_depends}}', ['depends_id' => 'id']);
 	}
 	
@@ -228,12 +237,30 @@ class Services extends \yii\db\ActiveRecord
 			->via('comps');
 	}
 	
-	public function getPlaces()
+	public function getArmPlaces()
 	{
 		return static::hasMany(Places::className(), ['id' => 'places_id'])
+			->from(['arms_places'=>Places::tableName()])
 			->via('arms');
 	}
-
+	
+	public function getTechPlaces()
+	{
+		return static::hasMany(Places::className(), ['id' => 'places_id'])
+			->from(['tech_places'=>Places::tableName()])
+			->via('techs');
+	}
+	
+	public function getSites(){
+		$sites=[];
+		foreach (array_merge($this->techPlaces,$this->armPlaces) as $place) {
+			$site=$place->top;
+			if (!array_key_exists($site->id,$sites))
+				$sites[$site->id]=$site;
+		}
+		return $sites;
+	}
+	
 	/**
 	 * @return array
 	 */

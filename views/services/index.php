@@ -28,6 +28,7 @@ $renderer=$this;
 </div>
 
 <?php
+/*
 $links=[];
 foreach ($models as $service) {
 	foreach ($service->depends as $parent) {
@@ -51,6 +52,7 @@ foreach ($models as $service) {
 		];
 	}
 }
+*/
 Pjax::end();
 
 //if (count($links)) {

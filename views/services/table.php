@@ -97,8 +97,8 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					$output = [];
-					if (is_array($data->places)) foreach ($data->places as $place)
-						$output[] = $renderer->render('/places/item', ['model' => $place->top,'short'=>true]);
+					if (is_array($data->sites)) foreach ($data->sites as $site)
+						$output[] = $renderer->render('/places/item', ['model' => $site,'short'=>true]);
 					return count($output) ? implode(' ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']

@@ -223,6 +223,8 @@ DELIMITER ;
 	 */
 	public function getTop()
 	{
+		//return Places::find(['id'=>'getplacetop('.$this->id.')']);
+		//return $this->hasOne(Places::className(), ['id' => new \yii\db\Expression('getplacetop(id)')]);
 		return (is_null($this->parent_id))?$this:$this->parent->top;
 	}
 
