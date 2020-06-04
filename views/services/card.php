@@ -23,7 +23,11 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		    'confirm' => 'Удалить этот сервис? Это действие необратимо!',
 		    'method' => 'post',
 	    ],
-    ]) ?>
+    ]); else { ?>
+		<span class="small">
+			<span class="glyphicon glyphicon-lock" title="Невозможно в данный момент удалить этот сервис, т.к. присутствуют привязанные объекты: привязанные пользователи, компьютеры или другие сервисы."></span>
+		</span>
+	<?php } ?>
 </h1>
 <h4>
     (<?php
@@ -31,15 +35,27 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		if (is_object($model->segment)) echo " // Сегмент ИТ: {$model->segment->name}"
 	?>)
 </h4>
+<?php
+$schedules=[];
+if (!empty($model->providingSchedule))
+	$schedules[]='<strong>Предоставляется:</strong> '.$model->providingSchedule->name;
+
+if (!empty($model->supportSchedule))
+	$schedules[]='<strong>Поддерживается:</strong> '.$model->supportSchedule->name;
+
+if (count($schedules)) {
+	echo implode('; ',$schedules).'<br />';
+}
+?>
 
 <?php if(!$static_view&&!$deleteable) { ?>
     <p>
-        <span class="glyphicon glyphicon-warning-sign"></span> Невозможно в данный момент удалить этот сервис, т.к. присутствуют привязанные объекты: компьютеры или другие сервисы.
+    
     </p>
 <?php } ?>
 <br />
 <p>
-    <?= Yii::$app->formatter->asNtext($model->description) ?>
+	<?= Yii::$app->formatter->asNtext($model->description) ?>
 </p>
 <?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
 <br />
