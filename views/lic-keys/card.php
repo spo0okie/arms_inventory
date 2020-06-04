@@ -21,14 +21,12 @@ $deleteable=!count($arms);
             'confirm' => 'Удалить этот лицензионный ключ? Убедись, что его есть где потом искать!',
             'method' => 'post',
         ],
-    ]) ?>
+    ]); else { ?>
+		<span class="small">
+			<span class="glyphicon glyphicon-lock"	title="Невозможно в данный момент удалить этот лицензионный ключ, т.к. он привязан к АРМам."></span>
+		</span>
+	<?php } ?>
 </h1>
-
-<?php if(!$static_view&&!$deleteable) { ?>
-    <p>
-        <span class="glyphicon glyphicon-warning-sign"></span> Невозможно в данный момент удалить этот лицензионный ключ, т.к. он привязан к АРМам.
-    </p>
-<?php } ?>
 
 <h4>Группа лицензий:</h4>
 <?= $this->render('/lic-groups/item',['model'=>$model->licItem->licGroup,'static_view'=>$static_view]) ?>

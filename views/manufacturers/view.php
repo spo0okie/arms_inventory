@@ -20,8 +20,8 @@ $dict=$model->dict;
     <h1>
         <?= Html::encode($this->title) ?>
 	    <?= Html::a('<span class="glyphicon glyphicon-pencil" />',['update','id'=>$model->id]) ?>
-        <?php if (!count($soft)&&!count($dict)) { ?>
-	        <?= Html::a('<span class="glyphicon glyphicon-trash" />',
+        <?php if (!count($soft)&&!count($dict))
+        	echo Html::a('<span class="glyphicon glyphicon-trash" />',
 		        [
 			        'delete',
 			        'id'=>$model->id,
@@ -30,9 +30,12 @@ $dict=$model->dict;
                         'method'=>'post',
                         'confirm'=>'Удалить этого производителя?',
                     ]
-		        ])
-	        ?>
-        <?php } ?>
+		        ]);
+        else { ?>
+			<span class="small">
+				<span class="glyphicon glyphicon-lock"	title="Невозможно в данный момент удалить этот лицензионный ключ, т.к. он привязан к АРМам."></span>
+			</span>
+		<?php } ?>
     </h1>
 
 	<?= Html::encode($model->full_name) ?>
@@ -40,14 +43,7 @@ $dict=$model->dict;
     <p>
 	    <?= Html::encode($model->comment) ?>
     </p>
-
-	<?php if (count($soft)||count($dict)) { ?>
-		<p>
-            <span class="glyphicon glyphicon-warning-sign"></span>
-            Невозможно в данный момент удалить этого производителя, т.к. у него есть варианты написания или продукты (см. ниже)
-        </p>
-	<?php } ?>
-
+	
     <br />
 
     <p>

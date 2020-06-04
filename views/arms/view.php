@@ -31,7 +31,11 @@ $deletable = !count ($licItems) && !count($licGroups) && !count($comps) && !coun
 		                    'confirm' => 'Удалить этот АРМ? Операция не обратима!',
 		                    'method' => 'post',
 	                    ],
-                    ]) ?>
+                    ]); else { ?>
+						<span class="small">
+							<span class="glyphicon glyphicon-lock" title="Нельзя удалить АРМ, к которму привязаны другие объекты. Для удаления сначала надо отвязать ОС, Лицензии и Документы."></span>
+						</span>
+					<?php } ?>
                 </h3>
 	            <?= $this->render('att-comps',['model'=>$model]) ?>
             </div>
@@ -45,9 +49,6 @@ $deletable = !count ($licItems) && !count($licGroups) && !count($comps) && !coun
             </div>
 
         </div>
-	    <?php if (!$deletable) { ?>
-            <p><span class="glyphicon glyphicon-warning-sign"></span> Нельзя удалить АРМ, к которму привязаны другие объекты. Для удаления сначала надо отвязать ОС, Лицензии и Документы</p>
-	    <?php } ?>
         <div class="row">
             <div class="col-md-1">
 		        <?= $this->render('arm-status',['model'=>$model]) ?>

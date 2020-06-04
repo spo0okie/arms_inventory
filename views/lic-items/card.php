@@ -31,7 +31,11 @@ $deleteable=!count($arms)&&!count($contracts);
                         'confirm' => 'Удалить эту закупку лицензий? Это действие необратимо!',
                         'method' => 'post',
                     ],
-                ]) ?>
+                ]); else { ?>
+					<span class="small">
+						<span class="glyphicon glyphicon-lock"	title="Невозможно в данный момент удалить эту закупку лицнзий, т.к. присутствуют привязанные объекты: документы или АРМы."></span>
+					</span>
+				<?php } ?>
             </h3>
 
     <?php if (!$static_view) { ?>
@@ -54,12 +58,6 @@ $deleteable=!count($arms)&&!count($contracts);
     <?php if (!$static_view) { ?>
         </div>
     </div>
-    <?php } ?>
-
-    <?php if(!$static_view&&!$deleteable) { ?>
-        <p>
-            <span class="glyphicon glyphicon-warning-sign"></span> Невозможно в данный момент удалить эту закупку лицнзий, т.к. присутствуют привязанные объекты: документы или АРМы.
-        </p>
     <?php } ?>
 
     <br />

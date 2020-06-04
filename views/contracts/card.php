@@ -26,15 +26,20 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
 <h1>
     <?= Html::encode($model->name) ?>
 	<?php if (!$static_view) {
-	    echo  Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['update', 'id' => $model->id], ['title' => 'Изменить',]);
-        if ($deletable) echo Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
-            'title' => 'Удалить',
-            'data' => [
-                'confirm' => 'Удалить этот документ и все его сканы? Данное действие необратимо.',
-                'method' => 'post',
-            ],
-        ]);
-     } ?>
+		echo Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['update', 'id' => $model->id], ['title' => 'Изменить',]);
+		if ($deletable) echo Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+			'title' => 'Удалить',
+			'data' => [
+				'confirm' => 'Удалить этот документ и все его сканы? Данное действие необратимо.',
+				'method' => 'post',
+			],
+		]); else { ?>
+			<span class="small">
+				<span class="glyphicon glyphicon-lock"
+					  title="Невозможно удалить этот документ, т.к. есть привязанные к нему объекты"></span>
+			</span>
+		<?php }
+	}?>
 </h1>
 
 <h4>От: <?= $model->datePart ?><?= $this->render('item-state',compact('model'))?></h4>
@@ -60,8 +65,6 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
 
 <?php if (!$static_view) { ?>
     <p>
-        <?= !$deletable?'<span class="glyphicon glyphicon-warning-sign"></span> Невозможно удалить этот документ, т.к. есть привязанные к нему объекты <br />':'' ?>
-
         <?php
 
         //создание связаного документа
