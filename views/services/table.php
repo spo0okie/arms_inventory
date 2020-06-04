@@ -12,7 +12,7 @@ use yii\widgets\Pjax;
 
 $renderer=$this;
 
-if (!isset($columns)) $columns=['name','segment','providingSchedule','supportSchedule','responsible','description'];
+if (!isset($columns)) $columns=['name','sites','segment','providingSchedule','supportSchedule','responsible','description'];
 
 //формируем список столбцов для рендера
 $render_columns=[];
@@ -53,6 +53,52 @@ foreach ($columns as $column) {
 					if (is_object($data->responsible)) $output[] = '<strong>'.$renderer->render('/users/item', ['model' => $data->responsible,'short'=>true]).'</strong>';
 					if (is_array($data->support)) foreach ($data->support as $user)
 						$output[] = $renderer->render('/users/item', ['model' => $user,'short'=>true]);
+					return count($output) ? implode(', ', $output) : null;
+				},
+				'contentOptions' => ['class' => $column . '_col']
+			];
+			break;
+		
+		
+		case 'arms':
+			$render_columns[] = [
+				'attribute' => $column,
+				//'header' => 'Инв. номер',
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+					$output = [];
+					if (is_array($data->arms)) foreach ($data->arms as $arm)
+						$output[] = $renderer->render('/arms/item', ['model' => $arm,'short'=>true]);
+					return count($output) ? implode(', ', $output) : null;
+				},
+				'contentOptions' => ['class' => $column . '_col']
+			];
+			break;
+		
+		case 'places':
+			$render_columns[] = [
+				'attribute' => $column,
+				//'header' => 'Инв. номер',
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+					$output = [];
+					if (is_array($data->places)) foreach ($data->places as $place)
+						$output[] = $renderer->render('/places/item', ['model' => $place]);
+					return count($output) ? implode(', ', $output) : null;
+				},
+				'contentOptions' => ['class' => $column . '_col']
+			];
+			break;
+		
+		case 'sites':
+			$render_columns[] = [
+				'attribute' => $column,
+				//'header' => 'Инв. номер',
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+					$output = [];
+					if (is_array($data->places)) foreach ($data->places as $place)
+						$output[] = $renderer->render('/places/item', ['model' => $place->top]);
 					return count($output) ? implode(', ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']

@@ -108,6 +108,9 @@ class Services extends \yii\db\ActiveRecord
             'notebook' => 'Записная книжка',
 			'segment_id' => 'Сегмент ИТ',
 			'segment' => 'Сегмент ИТ',
+			'arms' => 'Армы',
+			'places' => 'Помещения',
+			'sites' => 'Площадки',
         ];
     }
 
@@ -218,8 +221,22 @@ class Services extends \yii\db\ActiveRecord
 	{
 		return static::hasOne(UserGroups::className(), ['id' => 'user_group_id']);
 	}
+	
+	public function getArms()
+	{
+		return static::hasMany(Arms::className(), ['id' => 'arm_id'])
+			->via('comps');
+	}
+	
+	public function getPlaces()
+	{
+		return static::hasMany(Places::className(), ['id' => 'places_id'])
+			->via('arms');
+	}
 
-
+	/**
+	 * @return array
+	 */
 	public static function fetchNames(){
 		$list= static::find()
 			->select(['id','name'])
