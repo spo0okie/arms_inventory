@@ -73,6 +73,8 @@ echo GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
 	'columns' => $render_columns,
+	'floatHeader'=>true,
+	'floatHeaderOptions'=>['top'=>'50']
 ]);
 ?>
 
