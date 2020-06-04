@@ -12,15 +12,10 @@ use yii\helpers\Html;
 
 if (is_object($model)) {
 	
-	if (isset($short)) {
-		$name=explode(' ',$model->Ename);
-		$name[0]=$name[0].' ';
-		
-		for($i=1; $i<count($name); $i++)
-			$name[$i]=mb_substr($name[$i],0,1).'.';
-		
-		$title=implode('',$name);
-	} else $title=$model->Ename;
+	if (isset($short))
+		$title=$model->shortName;
+	else
+		$title=$model->Ename;
 ?>
 
 <span class="users-item<?= $model->Uvolen?' uvolen':'' ?>"

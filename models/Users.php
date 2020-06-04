@@ -24,6 +24,10 @@ use Yii;
  * @property string $resign_date Дата увольнения
  * @property string $manager_id Руководитель
  * @property int $nosync Отключить синхронизацию
+ * @property int $ln Last Name
+ * @property int $fn First Name
+ * @property int $mn Middle Name
+ * @property int $shortName Сокращенные И.О.
  *
  * @property Arms[] $arms
  * @property Techs[] $techs
@@ -40,9 +44,11 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	public static $users=[];
 	public static $working_cache=null;
 	public static $names_cache=null;
-
 	public static $title="Сотрудники";
-
+	
+	private $tokens_cache=null; //имя разбитое на токены
+	
+	
 	/** Тип трудоустройства
 	 * 1 - В штате,
 	 * 2 - Совместители внутрен,
@@ -354,14 +360,22 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 		return \app\models\LoginJournal::find(['users_id'=>$this->id,'!comp_id'=>null])->orderBy('id desc')->one();
 
 	}
-
+	
+	/**
+	 * Get First Name
+	 * @return array
+	 */
+	public function getTokens() {
+		if (!is_null($this->tokens_cache)) return $this->tokens_cache;
+		return $this->tokens_cache=explode(' ',$this->Ename);
+	}
+	
 	/**
 	 * Get Last Name
 	 * @return string
 	 */
 	public function getLn() {
-		$tokens=explode(' ',$this->Ename);
-		if (!count ($tokens)) return '';
+		if (!count($tokens=$this->getTokens())) return '';
 		return $tokens[0];
 	}
 
@@ -370,19 +384,29 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	 * @return string
 	 */
 	public function getFn() {
-		$tokens=explode(' ',$this->Ename);
-		if (count($tokens)<2) return '';
+		if (count($tokens=$this->getTokens())<2) return '';
 		return $tokens[1];
 	}
-
+	
 	/**
 	 * Get First Name
 	 * @return string
 	 */
 	public function getMn() {
-		$tokens=explode(' ',$this->Ename);
-		if (count($tokens)<3) return '';
+		if (count($tokens=$this->getTokens())<3) return '';
 		return $tokens[2];
+	}
+	
+	/**
+	 * Get First Name
+	 * @return string
+	 */
+	public function getShortName() {
+		if (($count=count($tokens=$this->getTokens()))<2) return $this->Ename;
+		for ($i=1;$i<$count;$i++) {
+			$tokens[$i]=mb_substr($tokens[$i],0,1).'.';
+		}
+		return implode(' ',$tokens);
 	}
 	
 	/**

@@ -54,26 +54,44 @@ class ServicesController extends Controller
 			'model' => $this->findModel($id),
 		]);
 	}
-
-
-    /**
-     * Lists all Services models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
 	
-	    $searchModel = new ServicesSearch();
-	    $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-	    $this->view->params['layout-container'] = 'container-fluid';
 	
-	    return $this->render('index', [
-		    'searchModel' => $searchModel,
-		    'dataProvider' => $dataProvider,
-	    ]);
-    }
-
-    /**
+	/**
+	 * Lists all Services models.
+	 * @return mixed
+	 */
+	public function actionIndex()
+	{
+		
+		$searchModel = new ServicesSearch();
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$this->view->params['layout-container'] = 'container-fluid';
+		
+		return $this->render('index', [
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
+		]);
+	}
+	
+	/**
+	 * Lists all Services models.
+	 * @return mixed
+	 */
+	public function actionIndexByUsers()
+	{
+		
+		$searchModel = new ServicesSearch();
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$this->view->params['layout-container'] = 'container-fluid';
+		
+		return $this->render('list-by-users', [
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
+		]);
+	}
+	
+	
+	/**
      * Displays a single Services model.
      * @param integer $id
      * @return mixed
