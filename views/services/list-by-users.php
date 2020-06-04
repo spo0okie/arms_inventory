@@ -34,7 +34,28 @@ $render_columns=[
 			return $renderer->render('/services/item', ['model' => $data]);
 		},
 		//'contentOptions' => ['class' => $column . '_col']
-	]
+	],
+	[
+		'attribute' => 'support',
+		'header' => '#',
+		'format' => 'raw',
+		'value' => function ($data) use ($renderer) {
+			return empty($data->responsible_id)?0:1+count($data->support_ids);
+		},
+		'contentOptions' => function ($data) use ($renderer) {
+			switch (empty($data->responsible_id)?0:1+count($data->support_ids)) {
+				case 0:
+					return ['class' => ['col_serviceSum','status_Alert']];
+					break;
+				case 1:
+					return ['class' => ['col_serviceSum','status_Warning']];
+					break;
+				default:
+					return ['class' => ['col_serviceSum','status_OK']];
+					break;
+			};
+		},
+	],
 ];
 
 $users=[];
