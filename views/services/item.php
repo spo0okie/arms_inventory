@@ -21,17 +21,22 @@ if (is_object($model)) {
 			//ищем полное имя
 			$pos_full=mb_strpos($name,$site->name);
 			$pos_short=mb_strpos($name,$site->short);
+			
 			if ($pos_full===0) {
 				$name=mb_substr($name,mb_strlen($site->name));
+				$name='{'.$name;
 				$cropped=true;
 			} elseif ($pos_full==(mb_strlen($name)-mb_strlen($site->name))) {
 				$name=mb_substr($name,0,mb_strlen($name)-mb_strlen($site->name));
+				$name=$name.'}';
 				$cropped=true;
 			} elseif ($pos_short===0) {
 				$name=mb_substr($name,mb_strlen($site->short));
+				$name='<'.$name;
 				$cropped=true;
 			} elseif ($pos_short==(mb_strlen($name)-mb_strlen($site->short))) {
 				$name=mb_substr($name,0,mb_strlen($name)-mb_strlen($site->short));
+				$name=$name.'>';
 				$cropped=true;
 			}
 			
