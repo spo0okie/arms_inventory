@@ -83,7 +83,7 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($renderer) {
 					$output = [];
 					if (is_array($data->places)) foreach ($data->places as $place)
-						$output[] = $renderer->render('/places/item', ['model' => $place]);
+						$output[] = $renderer->render('/places/item', ['model' => $place,'short'=>true]);
 					return count($output) ? implode(', ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
@@ -98,8 +98,8 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($renderer) {
 					$output = [];
 					if (is_array($data->places)) foreach ($data->places as $place)
-						$output[] = $renderer->render('/places/item', ['model' => $place->top]);
-					return count($output) ? implode(', ', $output) : null;
+						$output[] = $renderer->render('/places/item', ['model' => $place->top,'short'=>true]);
+					return count($output) ? implode(' ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
 			];
