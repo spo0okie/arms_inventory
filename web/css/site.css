@@ -460,8 +460,8 @@ table.places-arms-container tr.server td {
 
 
 /* РАСКРАСКА Ответственных за сервисы */
-td.col_serviceUser.col_support {background-color: lightgreen}
-td.col_serviceUser.col_responsible {background-color: lightgoldenrodyellow}
+td.col_serviceUser.col_responsible {background-color: lightgreen}
+td.col_serviceUser.col_support {background-color: lightgoldenrodyellow}
 
 
 /************************************************/

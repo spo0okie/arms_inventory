@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'inn',
             'kpp',
-//            'ogrn',
+			//'ogrn',
             'uname',
             'bname',
             'coment:ntext',
