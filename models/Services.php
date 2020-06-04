@@ -258,7 +258,7 @@ class Services extends \yii\db\ActiveRecord
 			if (!array_key_exists($site->id,$sites))
 				$sites[$site->id]=$site;
 		}
-		return $sites;
+		return array_values($sites);
 	}
 	
 	/**

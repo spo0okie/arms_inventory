@@ -25,7 +25,7 @@ foreach ($columns as $column) {
 				//'header' => 'Инв. номер',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('/services/item', ['model' => $data]);
+					return $renderer->render('/services/item', ['model' => $data,'crop_site'=>true]);
 				},
 				'contentOptions' => ['class' => $column . '_col']
 			];
