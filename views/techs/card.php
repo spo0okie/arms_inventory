@@ -59,7 +59,7 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 <h4>Сеть:</h4>
 <p>
     IP: <?= Yii::$app->formatter->asNtext($model->ip) ?>
-    MAC: <?= Yii::$app->formatter->asNtext($model->mac) ?>
+    MAC: <?= Yii::$app->formatter->asNtext($model->formattedMac) ?>
 </p>
 
 <h4>документы:</h4>

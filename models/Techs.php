@@ -19,6 +19,7 @@ use Yii;
  * @property string $it_staff_id Сотрудник службы ИТ
  * @property string $ip IP адрес
  * @property string $mac MAC адрес
+ * @property string $formattedMac MAC адрес с двоеточиями
  * @property string $url Ссылка
  * @property string $comment Комментарий
  * @property string $stateName статус
@@ -30,6 +31,8 @@ use Yii;
  * @property Users $itStaff
  * @property Arms $arm
  * @property Places $place
+ * @property Places $effectivePlace
+ * @property Places $origPlace
  * @property TechStates $state
  * @property TechModels $model
  * @property TechTypes $type
@@ -57,6 +60,14 @@ class Techs extends \yii\db\ActiveRecord
     {
         return 'techs';
     }
+    
+    public function extraFields()
+	{
+		return [
+			'site' //площадка - помещение верхнего уровня относительно помещения где размещено оборудование
+		];
+	}
+	
 
     /**
      * {@inheritdoc}
@@ -280,6 +291,12 @@ class Techs extends \yii\db\ActiveRecord
 		//return $this->hasOne(Places::className(), ['id' => 'places_id']);
 	}
 
+	public function getSite()
+	{
+		if (!is_object($place=$this->effectivePlace)) return null;
+		return $place->top;
+	}
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -310,6 +327,16 @@ class Techs extends \yii\db\ActiveRecord
 	}
 
 
+	public function getFormattedMac() {
+		$rawMac=preg_replace('/[^0-9A-F]/', '', mb_strtoupper($this->mac));
+		$macTokens=[];
+		for ($i=0;$i<mb_strlen($rawMac);$i++){
+			if (!isset($macTokens[(int)($i/2)])) $macTokens[(int)($i/2)]='';
+			$macTokens[(int)($i/2)].=mb_substr($rawMac,$i,1);
+		}
+		return implode(':',$macTokens);
+	}
+	
 	/**
 	 * Имя для поиска
 	 * @return string
@@ -420,6 +447,8 @@ class Techs extends \yii\db\ActiveRecord
 				$this->user_id=$this->arm->user_id;
 				$this->it_staff_id=$this->arm->it_staff_id;
 			}
+			
+			$this->mac=preg_replace('/[^0-9a-f]/', '', mb_strtolower($this->mac));
 			
 			return true;
 		}
