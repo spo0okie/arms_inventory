@@ -10,35 +10,34 @@ if (!isset($static_view)) $static_view=false;
 
 ?>
 
-    <div class="ip_addresses">
-        <h3>IP адрес(а)</h3>
+        <h4>IP адрес(а)</h4>
         <?php
+		$output=[];
         $ignored=explode("\n",$model->ip_ignore);
         foreach (explode("\n",$model->ip) as $ip) {
             $ip=trim($ip);
             if (strlen($ip)) {
-                $excluded=array_search($ip,$ignored)
-                ?>
-                <span class="<?= $excluded?'excluded':'inclded'?>">
-                    <?= $ip ?>
-                    <?php
+                $excluded=array_search($ip,$ignored);
+                $class=$excluded?'excluded':'included';
+                $current=
+					"<span class=\"$class\">".$ip.
+                    \yii\helpers\Html::a('<span class="glyphicon glyphicon-log-in"/>','remotecontrol://'.$ip).
+					' ';
 
-                    echo \yii\helpers\Html::a('<span class="glyphicon glyphicon-log-in"/>','remotecontrol://'.$ip).' ';
-
-                    if (!$static_view && $excluded) echo
+                    if (!$static_view && $excluded) $current.=
                         \yii\helpers\Html::a('<span class="glyphicon glyphicon-eye-open"/>',
                             ['comps/unignoreip', 'id'=>$model->id,'ip' => $ip],
                             ['title'=>'Вернуть отображение этого IP']
                         );
-                    if (!$static_view && !$excluded) echo
+                    
+                    if (!$static_view && !$excluded) $current.=
                         \yii\helpers\Html::a('<span class="glyphicon glyphicon-eye-close"/>',
                             ['comps/ignoreip', 'id'=>$model->id,'ip' => $ip],
                             ['title'=>'Скрыть этот IP как служебный/внутренний/ВПН']
                         );
-                    ?>
-                </span>
-                <br />
-        <?php }
-        } ?>
-
-    </div>
+				$current.='</span>';
+                $output[]=$current;
+        	}
+        }
+        echo implode('<br />',$output);
+		?>

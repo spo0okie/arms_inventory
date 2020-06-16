@@ -11,6 +11,7 @@ use Yii;
  * @property int $domain_id Домен
  * @property string $name Имя
  * @property string $os ОС
+ * @property string $fqdn FQDN
  * @property string $raw_hw Отпечаток железа
  * @property string $raw_soft Отпечаток софта
  * @property string $raw_version Версия скрипта отправившего данные
@@ -298,4 +299,7 @@ class Comps extends \yii\db\ActiveRecord
 			->select(['id','name'])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
-	}}
+	}
+	
+
+}
