@@ -32,7 +32,7 @@ class ServicesController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['admin']],
-			    ['allow' => true, 'actions'=>['index','index-by-users','view','ttip','validate'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','index-by-users','view','card','ttip','validate'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
