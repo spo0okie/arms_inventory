@@ -83,7 +83,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 			<p>
 				<?php
 				foreach ($comps as $comp)
-					echo $this->render('/comps/item',['model'=>$comp,'static_view'=>$static_view]).'<br />';
+					echo $this->render('/comps/item',['model'=>$comp,'static_view'=>$static_view,'fqdn'=>true]).'<br />';
 				?>
 			</p>
 			<br />
