@@ -79,7 +79,7 @@ class ServicesSearch extends Services
 	        'support_schedule_id' => $this->support_schedule_id,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
+        $query->andFilterWhere(['like', 'services.name', $this->name])
             ->andFilterWhere(['like', 'description', $this->description])
 	        ->andFilterWhere(['like', 'links', $this->links])
 	        ->andFilterWhere([

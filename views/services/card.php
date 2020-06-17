@@ -126,4 +126,3 @@ if (count($schedules)) {
     <br />
 <?php } ?>
 
-</div>

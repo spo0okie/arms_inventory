@@ -55,6 +55,19 @@ class ServicesController extends Controller
 		]);
 	}
 	
+	/**
+	 * Displays a tooltip for single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionCard($id)
+	{
+		return $this->renderPartial('card', [
+			'model' => $this->findModel($id),
+		]);
+	}
+	
 	
 	/**
 	 * Lists all Services models.
