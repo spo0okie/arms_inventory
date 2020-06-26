@@ -25,7 +25,7 @@ class UsersController extends Controller
 				'actions' => [
 					'delete' => ['POST'],
 				],
-			]
+			],
 		];
 		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 			'class' => \yii\filters\AccessControl::className(),
