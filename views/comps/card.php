@@ -9,8 +9,15 @@ if (!isset($static_view)) $static_view=false;
 $services=$model->services;
 $deleteable=!count($services);
 $fqdn=mb_strtolower($model->fqdn);
-$domain=$model->domain->name;
-	if (!mb_strlen($domain)) $domain='- не в домене -';
+
+if (is_object($model->domain))
+	$domain=$model->domain->name;
+else
+	$domain='- ошибочный домен -';
+
+if (!mb_strlen($domain))
+	$domain='- не в домене -';
+
 ?>
 <h1>
 	<abbr title="Операционная система">ОС</abbr>
