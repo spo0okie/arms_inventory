@@ -32,7 +32,7 @@ class ServicesController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['admin']],
-			    ['allow' => true, 'actions'=>['index','index-by-users','view','card','ttip','validate'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','index-by-users','view','card','card-support','ttip','validate'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -64,6 +64,19 @@ class ServicesController extends Controller
 	public function actionCard($id)
 	{
 		return $this->renderPartial('card', [
+			'model' => $this->findModel($id),
+		]);
+	}
+	
+	/**
+	 * Displays a tooltip for single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionCardSupport($id)
+	{
+		return $this->renderPartial('card-support', [
 			'model' => $this->findModel($id),
 		]);
 	}

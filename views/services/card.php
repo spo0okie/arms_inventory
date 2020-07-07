@@ -62,19 +62,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		<?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
 		<br />
 
-		<h4>
-			Ответственный: <?= $this->render('/users/item',['model'=>$model->responsible,'static_view'=>$static_view]) ?>
-		</h4>
-		<?php if (count($support)) { ?>
-			При поддержке:
-			<p>
-				<?php
-				foreach ($support as $user)
-					echo $this->render('/users/item',['model'=>$user,'static_view'=>$static_view]).'<br />';
-				?>
-			</p>
-			<br />
-		<?php } ?>
+		<?= $this->render('card-support',['model'=>$model,'static_view'=>$static_view]) ?>
 
 	</div>
 	<div class="col-md-6">
