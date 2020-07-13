@@ -16,6 +16,10 @@ if (isset($this->params['layout-container'])) {
 } else {
 	$containerClass='container container-large';
 }
+
+$request=Yii::$app->urlManager->parseRequest(Yii::$app->request);
+if (is_array($request)) $path=$request[0];
+
 $this->beginPage() ?>
 
 <!DOCTYPE html>
@@ -35,14 +39,15 @@ $this->beginPage() ?>
 <div class="wrap">
 
 <?= $this->render('menu') ?>
-
-    <div class="<?= $containerClass ?>">
-        <?= Breadcrumbs::widget([
-            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-        ]) ?>
-        <?= Alert::widget() ?>
-        <?= $content ?>
-    </div>
+<?php if ($path=='site/login' || \app\models\Users::isViewer()) { ?>
+	<div class="<?= $containerClass ?>">
+		<?= Breadcrumbs::widget([
+			'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+		]) ?>
+		<?= Alert::widget() ?>
+		<?= $content ?>
+	</div>
+<?php } else echo $this->render('/site/access-denied') ?>
 
 </div>
 

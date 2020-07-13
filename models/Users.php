@@ -413,6 +413,17 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	 * @return bool
 	 */
 	public static function isAdmin() {
-		return (empty(Yii::$app->params['useRBAC']) || Yii::$app->user->can('admin_access'));
+		return (empty(Yii::$app->params['useRBAC']) || Yii::$app->user->can('acl'));
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isViewer() {
+		return (
+			empty(Yii::$app->params['useRBAC']) ||
+			empty(Yii::$app->params['authorizedView']) ||
+			Yii::$app->user->can('view')
+		);
 	}
 }

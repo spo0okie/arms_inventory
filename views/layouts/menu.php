@@ -27,6 +27,7 @@ NavBar::begin([
 	echo NavX::widget([
 		'options' => ['class' => 'nav navbar-nav navbar-right'],
 		'items' => [
+			\app\models\Users::isViewer()?
 			['label' => 'Лицензии',
 				'items' => [
 					['label' => 'Типы', 'url' => ['/lic-types/index']],
@@ -34,7 +35,8 @@ NavBar::begin([
 					['label' => 'Закупки', 'url' => ['/lic-items/index']],
 					['label' => 'Ключи', 'url' => ['/lic-keys/index']],
 				]
-			],
+			]:'',
+			\app\models\Users::isViewer()?
 			['label' => 'Контрагенты',
 				'items' => [
 					['label' => \app\models\Partners::$title, 'url' => ['/partners/index']],
@@ -42,7 +44,8 @@ NavBar::begin([
 					['label' => \app\models\Contracts::$title, 'url' => ['/contracts/index']],
 					['label' => \app\models\ProvTel::$title, 'url' => ['/prov-tel/index']],
 				]
-			],
+			]:'',
+			\app\models\Users::isViewer()?
 			['label' => 'Организация',
 				'items' => [
 					['label' => \app\models\Places::$title, 'url' => ['/places/index'], 'items'=>$places],
@@ -56,7 +59,8 @@ NavBar::begin([
 					['label' => 'Карта рабочих мест', 'url' => ['/places/armmap']],
 					['label' => 'По подразделениям', 'url' => ['/places/depmap']],
 				]
-			],
+			]:'',
+			\app\models\Users::isViewer()?
 			['label' => 'Люди',
 				'items' => [
 					//['label' => \app\models\OrgStruct::$title, 'url' => ['/org-struct/index']],
@@ -64,14 +68,16 @@ NavBar::begin([
 					['label' => 'Пользователи', 'url' => ['/users/logins']],
 					['label' => \app\models\UserGroups::$title, 'url' => ['/user-groups/index']],
 				]
-			],
+			]:'',
+			\app\models\Users::isViewer()?
 			['label' => 'Софт',
 				'items' => [
 					['label' => 'Разработчики', 'url' => ['/manufacturers/index']],
 					['label' => 'Продукты', 'url' => ['/soft/index']],
 					['label' => 'Списки ПО', 'url' => ['/soft-lists/index']],
 				],
-			],
+			]:'',
+			\app\models\Users::isViewer()?
 			['label' => 'Компьютеры',
 				'items' => [
 					['label' => 'АРМы', 'url' => ['/arms/index']],
@@ -80,7 +86,8 @@ NavBar::begin([
 					['label' => \app\models\Segments::$title, 'url' => ['/segments/index']],
 					['label' => \app\models\LoginJournal::$title, 'url' => ['/login-journal/index']],
 				],
-			],
+			]:'',
+			\app\models\Users::isViewer()?
 			['label' => \app\models\Techs::$title,
 				'items' => [
 					['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index'], 'items'=>$techTypes],
@@ -90,14 +97,15 @@ NavBar::begin([
 					['label' => 'Игнорируемое', 'url' => ['/hw-ignore/index']],
 					['label' => 'Состояния', 'url' => ['/tech-states/index']],
 				],
-			],
+			]:'',
+			\app\models\Users::isViewer()?
 			['label' => \app\models\Materials::$title,
 				'items' => [
 					['label' => \app\models\MaterialsTypes::$title, 'url' => ['/materials-types/index']],
 					['label' => \app\models\Materials::$title, 'url' => ['/materials/index']],
 					['label' => \app\models\MaterialsUsages::$title, 'url' => ['/materials-usages/index']],
 				],
-			],
+			]:'',
 			\app\models\Users::isAdmin()?
 				['label' => 'Администрирование',
 				'items' => [
