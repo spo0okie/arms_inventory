@@ -7,8 +7,6 @@ $this->title = $model->Ename;
 $this->params['breadcrumbs'][] = ['label' => \app\models\Users::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
-$isAdmin=(empty(Yii::$app->params['useRBAC']) || Yii::$app->user->can('admin_access'));
-
 ?>
 <div class="users-view">
 	<div class="row">
@@ -16,7 +14,7 @@ $isAdmin=(empty(Yii::$app->params['useRBAC']) || Yii::$app->user->can('admin_acc
 			<?= $this->render('card',['model'=>$model,'static_view'=>false]) ?>
 		</div>
 		<div class="col-md-6">
-			<?= $isAdmin?$this->render('roles',['model'=>$model,'static_view'=>false]):'' ?>
+			<?= \app\models\Users::isAdmin()?$this->render('roles',['model'=>$model,'static_view'=>false]):'' ?>
 			<br />
 			<br />
 			<?php if (count($model->services)) {
