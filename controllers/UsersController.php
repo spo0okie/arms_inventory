@@ -68,7 +68,20 @@ class UsersController extends Controller
 			'dataProvider' => $dataProvider,
 		]);
 	}
-
+	
+	/**
+	 * Displays a item for single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionItem($id)
+	{
+		return $this->renderPartial('item', [
+			'model' => $this->findModel($id)
+		]);
+	}
+	
 	/**
 	 * Lists all Users models.
 	 * @return mixed
