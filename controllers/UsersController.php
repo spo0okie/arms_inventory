@@ -31,7 +31,7 @@ class UsersController extends Controller
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['admin']],
-				['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','view','ttip','validate','item','item-by-name','item-by-login'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -80,6 +80,24 @@ class UsersController extends Controller
 		return $this->renderPartial('item', [
 			'model' => $this->findModel($id)
 		]);
+	}
+	
+	public function actionItemByLogin($login)
+	{
+		if (($model = Users::findOne(['Login'=>$login])) !== null) {
+			return $this->renderPartial('item', ['model' => $model]);
+		}
+		
+		throw new NotFoundHttpException('The requested page does not exist.');
+	}
+	
+	public function actionItemByName($name)
+	{
+		if (($model = Users::findOne(['Ename'=>$name])) !== null) {
+			return $this->renderPartial('item', ['model' => $model]);
+		}
+		
+		throw new NotFoundHttpException('The requested page does not exist.');
 	}
 	
 	/**

@@ -32,7 +32,7 @@ class CompsController extends Controller
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','update','delete','unlink','addsw','rmsw','ignoreip','unignoreip'], 'roles'=>['admin']],
-				['allow' => true, 'actions'=>['index','view','ttip'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','view','ttip','item','item-by-name'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -67,6 +67,24 @@ class CompsController extends Controller
 		return $this->renderPartial('item', [
 			'model' => $this->findModel($id)
 		]);
+	}
+	
+	public function actionItemByName($name)
+	{
+		$tokens=explode('\\',$name);
+		if (count($tokens)==1) {
+			if (($model = Comps::findOne(['name'=>$name])) !== null) {
+				return $this->renderPartial('item', ['model' => $model	]);
+			}
+			throw new NotFoundHttpException('The requested page does not exist.');
+		} elseif (count($tokens)==2) {
+			if (($domain = \app\models\Domains::findOne(['name'=>$tokens[0]])) !== null) {
+				if (($model = Comps::findOne(['name'=>$tokens[1],'domain_id'=>$domain->id])) !== null) {
+					return $this->renderPartial('item', ['model' => $model	]);
+				}
+			}
+			throw new NotFoundHttpException('The requested page does not exist.');
+		}
 	}
 	
 	
