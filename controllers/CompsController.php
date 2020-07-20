@@ -71,6 +71,21 @@ class CompsController extends Controller
 	
 	public function actionItemByName($name)
 	{
+		//распарсиваем FQDN
+		if (strpos($name,'.')>0) {
+			$tokens=explode('.',$name);
+			$compname=$tokens[0];
+			unset ($tokens[0]);
+			$fqdn=implode('.',$tokens);
+			if (($domain = \app\models\Domains::findOne(['fqdn'=>$fqdn])) !== null) {
+				if (($model = Comps::findOne(['name'=>$compname,'domain_id'=>$domain->id])) !== null) {
+					return $this->renderPartial('item', ['model' => $model	]);
+				}
+			}
+			throw new NotFoundHttpException('The requested page does not exist.');
+		}
+		
+		//иначе в формате домен/имя
 		$tokens=explode('\\',$name);
 		if (count($tokens)==1) {
 			if (($model = Comps::findOne(['name'=>$name])) !== null) {
