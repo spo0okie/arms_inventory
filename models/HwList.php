@@ -181,17 +181,27 @@ class HwList {
 	    }
     	return implode(' ',$words);
     }
-    //возвращает короткое описание CPU
-    public function getCPUShort(){
-    	$cpus=[];
+	//возвращает короткое описание CPU
+	public function getCPUShort(){
+		$cpus=[];
 		foreach ($this->items as $item) if (!$item->hidden) {
 			if ($item->type == \app\models\HwListItem::$TYPE_CPU) $cpus[]=static::shortenCPUDescr($item->product);
 		}
 		if (count($cpus)) return $cpus[0];
 		return '';
-    }
-
-    public function getRAMShort(){
+	}
+	//возвращает короткое описание CPU
+	public function getCPUCount(){
+		$cpuCount=0;
+		foreach ($this->items as $item) if (!$item->hidden) {
+			if ($item->type == \app\models\HwListItem::$TYPE_CPU) $cpuCount++;
+		}
+		if ($cpuCount) return "$cpuCount cores";
+		return '';
+	}
+	
+	
+	public function getRAMShort(){
     	$ram=0;
 	    foreach ($this->items as $item) if (!$item->hidden) {
 		    if ($item->type == \app\models\HwListItem::$TYPE_RAM) $ram+=(int)substr($item->product,0,-3);

@@ -11,7 +11,14 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 //echo '<pre>'; var_dump($item); echo '</pre>'; die(0);
 
-$tokens=[
+if (!isset($vm)) $vm=false;
+
+
+$tokens=$vm?[
+	$model->getCPUCount(),
+	$model->getRAMShort(),
+	$model->getHDDShort(),
+]:[
 	$model->getCPUShort(),
 	$model->getRAMShort(),
 	$model->getHDDShort(),

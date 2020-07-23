@@ -14,10 +14,22 @@ $comps=$model->comps;
 if (!count($comps)) $comps=[0=>null];
 
 //если ОС больше одной, то готовим ROWSPAN для колонок не относящихся к ОС
+$physCount=0;
+$vmCount=0;
+if (count($comps)>1) {
+	foreach ($comps as $comp)
+		if ($comp->ignore_hw) $physCount++;
+		else $vmCount++;
+} else $rowspan='';
 $rowspan=(count($comps)>1)?'rowspan="'.count($comps).'"':'';
+$rowspanPhys=(count($physCount)>1)?'rowspan="'.count($physCount).'"':'';
 
 //может быть передан список столбцов, которые не нужно выводить
 if (!isset($skip)) $skip=[];
+
+$sortedComps=[];
+
+//if (iss)
 
 //поехали!
 for ($i=0; $i<count($comps); $i++) {
@@ -58,23 +70,36 @@ for ($i=0; $i<count($comps); $i++) {
 
         <?php } ?>
 
-	    <?php if (!$i&&(array_search('arm_model',$skip)===false)) { ?>
-            <td class="arm_model" <?= $rowspan ?>><?= $this->render('/tech-models/item',['model'=>$model->techModel,'short'=>true]) ?></td>
-        <?php } ?>
+	    <?php if (!is_object($comp) || !$comp->ignore_hw) {
+	    	if (!$i&&(array_search('arm_model',$skip)===false)) { ?>
+            <td class="arm_model" <?= $rowspanPhys ?>>
+				<?= $this->render('/tech-models/item',['model'=>$model->techModel,'short'=>true]) ?>
+			</td>
+        <?php }} else { ?>
+			<td class="arm_model">
+				<abbr title="Virtual Machine">VM</abbr>
+			</td>
+		<?php } ?>
 
-	    <?php if (!$i&&array_search('hardware',$skip)===false) { ?>
-            <td class="hardware" <?= $rowspan ?>>
+	    <?php if (!is_object($comp) || !$comp->ignore_hw) {
+			if (!$i&&array_search('hardware',$skip)===false) { ?>
+        	    <td class="hardware" <?= $rowspanPhys ?>>
 
-                <?= $this->render('/hwlist/shortlist',['model'=>$model->hwList,'arm_id'=>$model->id]) ?>
-	            <?php if (count($model->ups)) {
-                    echo ' / ';
-                    foreach ($model->ups as $tech) {
-                        echo $this->render('/techs/item', ['model' => $tech, 'name' => $tech->model->shortest]);
-                    }
-                }
-                ?>
-            </td>
-        <?php } ?>
+					<?= $this->render('/hwlist/shortlist',['model'=>$model->hwList,'arm_id'=>$model->id]) ?>
+					<?php if (count($model->ups)) {
+						echo ' / ';
+						foreach ($model->ups as $tech) {
+							echo $this->render('/techs/item', ['model' => $tech, 'name' => $tech->model->shortest]);
+						}
+					}
+					?>
+				</td>
+			<?php }
+	    } else { ?>
+			<td class="hardware">
+				<?= $this->render('/hwlist/shortlist',['model'=>$comp->hwList,'vm'=>true]) ?>
+			</td>
+		<?php } ?>
 
 	    <?php if (!$i) { ?>
             <td class="attachments" <?= $rowspan ?>>

@@ -289,7 +289,12 @@ class Arms extends \yii\db\ActiveRecord
 	public function getComps()
 	{
 		if (!is_null($this->comps_cache)) return $this->comps_cache;
-		return $this->comps_cache=$this->hasMany(Comps::className(), ['arm_id' => 'id'])->from(['arms_comps'=>Comps::tableName()]);
+		return $this->comps_cache=$this->hasMany(Comps::className(), ['arm_id' => 'id'])
+			->from(['arms_comps'=>Comps::tableName()])
+			->orderBy([
+				'arms_comps.ignore_hw'=>SORT_ASC,
+				'arms_comps.name'=>SORT_ASC
+			]);
 	}
 
 	/**
@@ -433,9 +438,8 @@ class Arms extends \yii\db\ActiveRecord
         if (!is_null($this->hwList_obj)) return $this->hwList_obj;
         $this->hwList_obj = new HwList();
         $this->hwList_obj->loadJSON($this->hw);
-        foreach ($this->comps as $comp) {
-            if (!$comp->ignore_hw) $this->hwList_obj->loadFound($comp->hwList);
-        }
+        if (is_object($this->comp) && !$this->comp->ignore_hw)
+        	$this->hwList_obj->loadFound($this->comp->hwList);
         return $this->hwList_obj;
     }
 
