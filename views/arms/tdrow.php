@@ -84,7 +84,6 @@ for ($i=0; $i<count($comps); $i++) {
 	    <?php if (!is_object($comp) || !$comp->ignore_hw) {
 			if (!$i&&array_search('hardware',$skip)===false) { ?>
         	    <td class="hardware" <?= $rowspanPhys ?>>
-
 					<?= $this->render('/hwlist/shortlist',['model'=>$model->hwList,'arm_id'=>$model->id]) ?>
 					<?php if (count($model->ups)) {
 						echo ' / ';

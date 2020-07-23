@@ -193,10 +193,15 @@ class HwList {
 	//возвращает короткое описание CPU
 	public function getCPUCount(){
 		$cpuCount=0;
+		$cpuDescr='';
 		foreach ($this->items as $item) if (!$item->hidden) {
-			if ($item->type == \app\models\HwListItem::$TYPE_CPU) $cpuCount++;
+			if ($item->type == \app\models\HwListItem::$TYPE_CPU) {
+				$cpuDescr=static::shortenCPUDescr($item->product);
+				$cpuCount++;
+			}
 		}
-		if ($cpuCount) return "$cpuCount cores";
+		if ($cpuCount == 1) return $cpuDescr;
+		if ($cpuCount>1) return "$cpuCount cores";
 		return '';
 	}
 	
