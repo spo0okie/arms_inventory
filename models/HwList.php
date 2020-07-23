@@ -200,12 +200,12 @@ class HwList {
 				$cpuCount++;
 			}
 		}
-		if ($cpuCount == 1) {
-			if (strpos($cpuDescr,'(x')===0) $cpuDescr=substr($cpuDescr,2);
-			if (strpos($cpuDescr,')')===strlen($cpuDescr)-1) $cpuDescr=substr($cpuDescr,0,strlen($cpuDescr)-1);
+		if ($cpuCount == 1 && strpos($cpuDescr,'(x')===0 && strpos($cpuDescr,')')===strlen($cpuDescr)-1) {
+			$cpuDescr=substr($cpuDescr,2);
+			$cpuDescr=substr($cpuDescr,0,strlen($cpuDescr)-1);
 			return $cpuDescr;
 		}
-		if ($cpuCount>1) return "$cpuCount cores";
+		if ($cpuCount) return "$cpuCount cores";
 		return '';
 	}
 	
