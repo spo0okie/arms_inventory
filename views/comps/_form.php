@@ -24,20 +24,40 @@ asort($domains);
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'domain_id')->dropDownList($domains) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $form->field($model, 'domain_id')->dropDownList($domains) ?>
+		</div>
+		<div class="col-md-6">
+			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $form->field($model, 'arm_id')->widget(Select2::className(), [
+				'data' => \app\models\Arms::fetchNames(),
+				'options' => ['placeholder' => 'Выберите АРМ',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
+		<div class="col-md-6">
+			<?= $form->field($model, 'user_id')->widget(Select2::className(), [
+				'data' => \app\models\Users::fetchWorking($model->user_id),
+				'options' => ['placeholder' => 'сотрудник не назначен',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
+	</div>
 
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-
-	<?= $form->field($model, 'arm_id')->widget(Select2::className(), [
-		'data' => \app\models\Arms::fetchNames(),
-		'options' => ['placeholder' => 'Выберите АРМ',],
-		'toggleAllSettings'=>['selectLabel'=>null],
-		'pluginOptions' => [
-			'allowClear' => true,
-			'multiple' => false
-		]
-	]) ?>
-
+	
     <?= $form->field($model, 'ignore_hw')->checkbox([]) ?>
 
     <?= $form->field($model, 'exclude_hw')->textarea(['rows' => 6]) ?>

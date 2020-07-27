@@ -20,13 +20,15 @@ use Yii;
  * @property string $ip IP адреса через перенос строки
  * @property string $ip_ignore Игнорировать IP адреса
  * @property int $arm_id Рабочее место
+ * @property int $user_id Пользователь
  * @property string $comment Комментарий
  * @property string $updated_at Время обновления
  * @property boolean $isIgnored Софт находится в списке игнорируемого ПО
  * @property array $soft_ids Массив ID ПО, которое установлено на компе
  * @property array $comps Массив объектов ПО, которое установлено на компе
-
+ 
  * @property Arms $arm
+ * @property Users $user
  * @property Domains $domain
  * @property string $updatedRenderClass
  * @property string $domainName
@@ -65,14 +67,15 @@ class Comps extends \yii\db\ActiveRecord
         return [
             [['soft_ids'], 'each', 'rule'=>['integer']],
             [['name', 'os'], 'required'],
-            [['domain_id', 'arm_id', 'ignore_hw'], 'integer'],
+            [['domain_id', 'arm_id', 'ignore_hw', 'user_id'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
             [['updated_at'], 'safe'],
             [['name','raw_version'], 'string', 'max' => 32],
             [['os', 'comment'], 'string', 'max' => 128],
 	        [['ip', 'ip_ignore'], 'string', 'max' => 255],
             [['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],
-            [['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arm_id' => 'id']],
+			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arm_id' => 'id']],
+			[['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
             [['domain_id'], 'exist', 'skipOnError' => true, 'targetClass' => Domains::className(), 'targetAttribute' => ['domain_id' => 'id']],
         ];
     }
@@ -85,7 +88,9 @@ class Comps extends \yii\db\ActiveRecord
         return [
 	        'id' => 'Идентификатор',
 	        'ip' => 'IP Адрес',
-            'domain_id' => 'Домен',
+			'domain_id' => 'Домен',
+			'user_id' => 'Пользователь',
+			'user' => 'Пользователь',
             'name' => 'Имя компьютера',
             'os' => 'Отпечаток версии ОС (заполняется скриптом)',
             'raw_hw' => 'Отпечаток железа (заполняется скриптом)',
@@ -111,17 +116,25 @@ class Comps extends \yii\db\ActiveRecord
             ]
         ];
     }
-
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getArm()
-    {
-        return $this->hasOne(Arms::className(), ['id' => 'arm_id']);
-    }
-
-    /**
+	
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getArm()
+	{
+		return $this->hasOne(Arms::className(), ['id' => 'arm_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getUser()
+	{
+		return $this->hasOne(Users::className(), ['id' => 'user_id']);
+	}
+	
+	/**
      * @return \yii\db\ActiveQuery
      */
     public function getDomain()

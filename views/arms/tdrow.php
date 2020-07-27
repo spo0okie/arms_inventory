@@ -50,6 +50,9 @@ for ($i=0; $i<count($comps); $i++) {
             <td colspan="2" class="arm_services">
                 <?php
                 $services=[];
+                
+                if (isset($comp->user)) $services[]=$this->render('/users/item',['model'=>$comp->user]);
+                
                 if (isset($comp->services)) foreach ($comp->services as $svc) $services[]=$this->render('/services/item',['model'=>$svc]);
                 echo implode('<br />',$services);
                 ?>
