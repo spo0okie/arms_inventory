@@ -69,10 +69,13 @@ class CompsSearch extends Comps
         ]);*/
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'os', $this->os])
+            ->andFilterWhere(['like', 'raw_version', $this->raw_version])
             ->andFilterWhere(['like', 'ip', $this->ip])
             ->andFilterWhere(['like', 'arms.num', $this->arm_id])
-            ->andFilterWhere(['like', 'raw_version', $this->raw_version])
+            ->andFilterWhere(['or',
+				['like', 'os', $this->os],
+				['like', 'raw_soft', $this->os],
+			])
             ->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;

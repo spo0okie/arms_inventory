@@ -41,7 +41,10 @@ $renderer=$this;
                 'value' => function($data) use($renderer) {return $renderer->render('/comps/item',['model'=>$data]);}
             ],
 	        'ip',
-            'os',
+            [
+           		'label'=>'Софт',
+           		'attribute'=>'os',
+			],
             'updated_at',
             [
                 'label'=>'АРМ',
