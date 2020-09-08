@@ -13,7 +13,8 @@ class CompsController extends \yii\rest\ActiveController
     public function actions()
     {
         $actions = parent::actions();
-        $actions[]='search';
+		unset($actions['index']);
+		$actions[]='search';
         return $actions;
     }
     

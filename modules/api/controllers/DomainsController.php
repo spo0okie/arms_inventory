@@ -11,6 +11,7 @@ class DomainsController extends \yii\rest\ActiveController
     public function actions()
     {
         $actions = parent::actions();
+		unset($actions['index']);
         unset($actions['view']);
         return $actions;
     }

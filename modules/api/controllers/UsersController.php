@@ -14,6 +14,7 @@ class UsersController extends \yii\rest\ActiveController
     {
         $actions = parent::actions();
         unset($actions['view']);
+		unset($actions['index']);
 	    return $actions;
         //return ['view','update'];
     }

@@ -12,6 +12,7 @@ class LoginJournalController extends \yii\rest\ActiveController
     public function actions()
     {
         $actions = parent::actions();
+		unset($actions['index']);
         $actions[]='search';
         return $actions;
     }
