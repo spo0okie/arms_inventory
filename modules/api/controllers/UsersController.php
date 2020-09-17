@@ -19,7 +19,7 @@ class UsersController extends \yii\rest\ActiveController
         //return ['view','update'];
     }
 
-	public function actionView($id='',$num='',$name='',$org='',$login=''){
+	public function actionView($id='',$num='',$name='',$org='',$login='',$mobile=''){
 		/**
 		 * ТЗ по поиску примерно следующее
 		 * нужно найти все записи о пользователе со всеми вариантами трудоустройства
@@ -33,6 +33,7 @@ class UsersController extends \yii\rest\ActiveController
 			->andFilterWhere(['employee_id' => $num])
 			->andFilterWhere(['login' => $login])
 			->andFilterWhere(['org_id' => $org])
+			->andFilterWhere(['like',['Mobile' => $mobile]])
 			->orderBy([
 				'Uvolen'=>SORT_ASC,
 				'Persg'=>SORT_ASC,
