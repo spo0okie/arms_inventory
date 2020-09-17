@@ -33,7 +33,7 @@ class UsersController extends \yii\rest\ActiveController
 			->andFilterWhere(['employee_id' => $num])
 			->andFilterWhere(['login' => $login])
 			->andFilterWhere(['org_id' => $org])
-			->andFilterWhere(['like',['Mobile' => $mobile]])
+			->andFilterWhere(['like',['Mobile',$mobile]])
 			->orderBy([
 				'Uvolen'=>SORT_ASC,
 				'Persg'=>SORT_ASC,
