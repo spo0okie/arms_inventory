@@ -314,5 +314,48 @@ class Comps extends \yii\db\ActiveRecord
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}
 	
-
+	/**
+	 * @inheritdoc
+	 */
+	public function beforeSave($insert)
+	{
+		if (parent::beforeSave($insert)) {
+			//грузим старые значения
+			$old=static::findOne($this->id);
+			
+			//если поменялся АРМ, то надо из старого АРМа выкинуть эту ОСь
+			if (!is_null($old->arm) && ($old->arm_id != $this->arm_id)) {
+				//если у старого АРМа не только эта операционка привязана - назначим основной другую
+				if (count($old->arm->comps)>1) {
+					foreach ($old->arm->comps as $comp) {
+						if ($comp->id != $this->id) {
+							$old->arm->comp_id=$comp->id;
+							break;
+						}
+					}
+				} else {
+					//иначе удаляем в старом АРМ основную ОС
+					$old->arm->comp_id=null;
+				}
+				//сохраняем старый арм
+				$old->arm->save();
+			}
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function afterSave($insert,$changedAttributes)
+	{
+		parent::afterSave($insert,$changedAttributes);
+		//если в новом арме не назначена основная ОС, то назначим эту
+		if (!is_null($this->arm_id) && empty($this->arm->comp_id)) {
+			$this->arm->comp_id=$this->id;
+			$this->arm->save();
+		}
+		return true;
+	}
 }
