@@ -324,7 +324,7 @@ class Comps extends \yii\db\ActiveRecord
 			$old=static::findOne($this->id);
 			
 			//если поменялся АРМ, то надо из старого АРМа выкинуть эту ОСь
-			if (!is_null($old->arm) && ($old->arm_id != $this->arm_id)) {
+			if (!is_null($old) && !is_null($old->arm) && ($old->arm_id != $this->arm_id)) {
 				//если у старого АРМа не только эта операционка привязана - назначим основной другую
 				if (count($old->arm->comps)>1) {
 					foreach ($old->arm->comps as $comp) {
