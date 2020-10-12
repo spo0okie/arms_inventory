@@ -162,15 +162,18 @@ class HwList {
     	unset($words[0]);
     	foreach ($words as $i=>$word) {
 		    if ($word=='CPU') unset($words[$i]);
-		    elseif ($word=='Processor') unset($words[$i]);
-		    elseif ($word=='Core(TM)') unset($words[$i]);
+			elseif ($word=='Processor') unset($words[$i]);
+			elseif ($word=='Intel') unset($words[$i]);
+			elseif ($word=='Core(TM)') unset($words[$i]);
+			elseif ($word=='Atom(TM)') unset($words[$i]);
 		    elseif ($word=='Xeon(R)') unset($words[$i]);
 		    elseif ($word=='Core') unset($words[$i]);
 		    elseif ($word=='Dual') unset($words[$i]);
 		    elseif ($word=='COMPUTE') unset($words[$i]);
 		    elseif ($word=='RADEON') unset($words[$i]);
 		    elseif ($word=='2C+2G') unset($words[$i]);
-		    elseif ($word=='Pentium(R)') $words[$i]="Pent";
+			elseif ($word=='Pentium') $words[$i]="Pent";
+			elseif ($word=='Pentium(R)') $words[$i]="Pent";
 		    elseif ($word=='Phenom(tm)') $words[$i]="Phnm";
 		    elseif ($word=='Athlon(tm)') $words[$i]="Athln";
 		    elseif ($word=='CORES') $words[$i]="cores";

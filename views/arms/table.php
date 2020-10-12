@@ -131,7 +131,7 @@ foreach ($columns as $column) {
 				'attribute' => 'attach',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return is_object($data->place) ? $renderer->render('/arms/item-attachments',['model'=>$data]) : '';
+					return $renderer->render('/arms/item-attachments',['model'=>$data]);
 				},
 				'contentOptions'=>['class'=>$column.'_col']
 			
