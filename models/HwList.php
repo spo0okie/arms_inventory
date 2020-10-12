@@ -177,6 +177,7 @@ class HwList {
 		    elseif ($word=='2C+2G') unset($words[$i]);
 			elseif ($word=='Pentium') unset($words[$i]);
 			elseif ($word=='Pentium(R)') unset($words[$i]);
+			elseif ($word=='Celeron(R)') unset($words[$i]);
 		    elseif ($word=='Phenom(tm)') unset($words[$i]);
 		    elseif ($word=='Athlon(tm)') unset($words[$i]);
 		    elseif ($word=='CORES') $words[$i]="cores";
