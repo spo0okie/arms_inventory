@@ -158,6 +158,9 @@ class HwList {
     }
 
     public static function shortenCPUDescr($descr) {
+		$descr=str_replace('Core(TM)2 Duo','С-2Duo',$descr);
+		$descr=str_replace('Pentium III Xeon','P3 Xeon',$descr);
+		
     	$words=explode(' ',$descr);
     	unset($words[0]);
     	foreach ($words as $i=>$word) {
@@ -172,10 +175,10 @@ class HwList {
 		    elseif ($word=='COMPUTE') unset($words[$i]);
 		    elseif ($word=='RADEON') unset($words[$i]);
 		    elseif ($word=='2C+2G') unset($words[$i]);
-			elseif ($word=='Pentium') $words[$i]="Pent";
-			elseif ($word=='Pentium(R)') $words[$i]="Pent";
-		    elseif ($word=='Phenom(tm)') $words[$i]="Phnm";
-		    elseif ($word=='Athlon(tm)') $words[$i]="Athln";
+			elseif ($word=='Pentium') unset($words[$i]);
+			elseif ($word=='Pentium(R)') unset($words[$i]);
+		    elseif ($word=='Phenom(tm)') unset($words[$i]);
+		    elseif ($word=='Athlon(tm)') unset($words[$i]);
 		    elseif ($word=='CORES') $words[$i]="cores";
 		    elseif ($word=='@') {
 			    if (isset($words[$i+1])) unset($words[$i+1]);
