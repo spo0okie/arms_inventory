@@ -204,7 +204,7 @@ class HwList {
 		foreach ($this->items as $item) if (!$item->hidden) {
 			if ($item->type == \app\models\HwListItem::$TYPE_CPU) {
 				$cpuDescr=static::shortenCPUDescr($item->product);
-				$cpuCount++;
+				$cpuCount+= $item->cores;
 			}
 		}
 		if ($cpuCount == 1 && strpos($cpuDescr,'(x')===0 && strpos($cpuDescr,')')===strlen($cpuDescr)-1) {

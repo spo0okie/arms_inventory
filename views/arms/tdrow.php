@@ -6,6 +6,7 @@
  * Time: 14:14
  * @var \app\models\Arms $model
  * @var yii\web\View $this
+ * @var string $cabinet_col первая колнка - название помещения
  */
 
 //подгружаем все ОС АРМа
@@ -13,16 +14,17 @@ $comps=$model->comps;
 //если ни одной не нашли, то создаем массив из пустого элемента чтобы вывести данные по АРМ без ОС
 if (!count($comps)) $comps=[0=>null];
 
+
 //если ОС больше одной, то готовим ROWSPAN для колонок не относящихся к ОС
 $physCount=0;
 $vmCount=0;
 if (count($comps)>1) {
 	foreach ($comps as $comp)
-		if ($comp->ignore_hw) $physCount++;
+		if (!$comp->ignore_hw) $physCount++;
 		else $vmCount++;
 } else $rowspan='';
 $rowspan=(count($comps)>1)?'rowspan="'.count($comps).'"':'';
-$rowspanPhys=(count($physCount)>1)?'rowspan="'.count($physCount).'"':'';
+$rowspanPhys=($physCount>1)?'rowspan="'.$physCount.'"':'';
 
 //может быть передан список столбцов, которые не нужно выводить
 if (!isset($skip)) $skip=[];
@@ -35,28 +37,35 @@ $sortedComps=[];
 for ($i=0; $i<count($comps); $i++) {
     $comp=$comps[$i]; ?>
     <tr <?= $model->is_server?'class="server"':''?>>
-
-	    <?php if (!$i) { ?>
+	
+		<?php //в самой первой строчке нужно вставить в начале колонку кабинета/помещения.
+		// вставить надо только один раз, т.к. у нее rowspan=0 и она идет сквозняком до конца таблицы
+		
+		if (isset($cabinet_col)) {
+			echo $cabinet_col;
+			unset ($cabinet_col);
+		}?>
+		
+		
+		<?php if (!$i) { ?>
             <td class="arm_id" <?= $rowspan ?>><?= $this->render('/arms/item',['model'=>$model]) ?></td>
-	    <?php }
-	    //если у нас есть ОС
-	    $age_class=is_object($comp)?$comp->updatedRenderClass:'';
-
+	    <?php } ?>
+	    
+	    <?php //если у нас есть ОС, то зададим ячейке класс свежести данных об этой ОС
+	    	$age_class=is_object($comp)?$comp->updatedRenderClass:'';
 	    ?>
-
         <td class="arm_hostname <?= $age_class ?>"><?= is_object($comp)?$this->render('/comps/item',['model'=>$comp]):$model->hostname ?></td>
 
-        <?php if ($model->is_server) { ?>
-            <td colspan="2" class="arm_services">
-                <?php
-                $services=[];
-                
-                if (isset($comp->user)) $services[]=$this->render('/users/item',['model'=>$comp->user]);
-                
-                if (isset($comp->services)) foreach ($comp->services as $svc) $services[]=$this->render('/services/item',['model'=>$svc]);
-                echo implode('<br />',$services);
-                ?>
-            </td>
+		
+        <?php if ($model->is_server) {
+        	$services=[];
+			if (isset($comp->user))
+				$services[]='Польз.:'.$this->render('/users/item',['model'=>$comp->user]);
+			if (isset($comp->services))
+				foreach ($comp->services as $svc)
+					$services[]=$this->render('/services/item',['model'=>$svc]);
+		?>
+            <td colspan="2" class="arm_services"><?= implode('<br />',$services); ?></td>
         <?php } else if (!$i) { ?>
 
             <td class="arm_uname" <?= $rowspan ?>>
@@ -115,21 +124,26 @@ for ($i=0; $i<count($comps); $i++) {
 
         <td class="item_ip"><?= is_object($comp)?$comp->currentIp:'' ?></td>
 
-        <?php if (!$i) { ?>
+        <?php /*if (!$i) { ?>
             <td class="item_sn"<?= $rowspan ?>><?= $model->sn ?></td>
 
-	    <?php }?>
-	    <?php if (!$i) { ?>
-            <td class="item_invnum"<?= $rowspan ?>><?= $model->inv_num ?></td>
+	    <?php }*/ ?>
+	    <?php if (!$i) {
+	    	$ttip="Серийный номер: ".($model->sn?$model->sn:' отсутствует '). '<br />'.
+				"Инвентарный номер (бухг.):".($model->inv_num?$model->inv_num:' отсутствует ');
+	    	$tokens=[];
+	    	if (strlen($model->sn)) $tokens[]=$model->sn;
+	    	if (strlen($model->inv_num)) $tokens[]=$model->inv_num;
+	    	?>
+            <td class="item_invnum"<?= $rowspan ?>>
+				<?php if (count($tokens)) { ?>
+					<span title="<?= $ttip ?>">
+						<?= implode(', ',$tokens) ?>
+					</span>
+				<?php } ?>
+			</td>
 
 	    <?php }?>
     </tr>
 
-<?php } ?>
-
-<?php
-/*foreach ($model->techs as $tech ) {
-    //вываодим все привязанные к АРМу оборудвания
-    if (!$tech->isVoipPhone && !$tech->isUps)
-        echo $this->render('/techs/tdrow',['model'=>$tech]);
-}*/
+<?php }

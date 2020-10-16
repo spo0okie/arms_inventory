@@ -10,6 +10,8 @@
 /* @var \app\models\Techs $model */
 ?>
 <tr class="tech tech_<?= $model->type->code ?>">
+	<?php if (isset($cabinet_col)) echo $cabinet_col; ?>
+	
     <td class="tech_whitespace" colspan="2" ></td>
     <td class="arm_uname">
         <?= is_object($model->user)?$model->user->fullName:'' ?>
@@ -32,10 +34,17 @@
     <td class="item_ip">
         <?= $model->ip ?>
     </td>
-    <td class="item_sn">
-        <?= $model->sn ?>
-    </td>
     <td class="item_invnum">
-        <?= $model->inv_num ?>
+        <?php
+		$ttip="Серийный номер: ".($model->sn?$model->sn:' отсутствует '). '<br />'.
+			"Инвентарный номер (бухг.):".($model->inv_num?$model->inv_num:' отсутствует ');
+		$tokens=[];
+		if (strlen($model->sn)) $tokens[]=$model->sn;
+		if (strlen($model->inv_num)) $tokens[]=$model->inv_num;
+		if (count($tokens)) { ?>
+			<span title="<?= $ttip ?>">
+				<?= implode(', ',$tokens) ?>
+			</span>
+		<?php } ?>
     </td>
 </tr>

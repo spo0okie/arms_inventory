@@ -30,7 +30,11 @@ if (count($materials)) {
 		
 		?>
     <tr>
-        <td colspan="11">
+		<?php if (isset($cabinet_col)) {
+			echo $cabinet_col;
+			unset ($cabinet_col);
+		}?>
+        <td colspan="10">
             <div>
 	            <?php /* foreach ($materials as $item) echo $this->render('/materials/item',['model'=>$item,'material'=>true,'rest'=>true]).'<br />';*/ ?>
 	            <?php foreach ($groups as $group) echo $this->render('/materials/group',['models'=>$group,'material'=>true,'rest'=>true]).'<br />'; ?>

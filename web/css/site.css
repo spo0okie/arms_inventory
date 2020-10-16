@@ -290,31 +290,8 @@ div.places-container-hdr > div.org-phones {
     font-weight: bold;
 }
 
-/* Табличка кабинета */
-table.places-cabinet-container
-{
-    border: none;
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    margin-bottom: 8px;
-}
 
-/* ячейка названия кабинета */
-table.places-cabinet-container td.places-arms-cabinet {
-    width: 50px;
-    background-color: white;
-    border: solid 1px darkgray;
-    border-right: none;
-    text-overflow: clip;
-    overflow: hidden;
-    white-space: nowrap;
-}
 
-/* ячейка кабинета с таблицей АРМов */
-table.places-cabinet-container td.places-arms-list {
-    border: none;
-}
 
 /* табличка с АРМами внутри кабинета */
 table.places-arms-container
@@ -323,8 +300,18 @@ table.places-arms-container
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    margin: 0;
+    margin: 0 0 8px 0;
     padding: 0;
+}
+
+/* ячейка названия кабинета */
+table.places-arms-container td.places-arms-cabinet {
+    background-color: white;
+    border: solid 1px darkgray;
+    border-right: none;
+    text-overflow: clip;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 table.places-arms-container td {
@@ -334,19 +321,19 @@ table.places-arms-container td {
     border: solid 1px darkgray;
 }
 
-table.places-arms-container td.arm_id {width: 120px; background-color: white}
-table.places-arms-container td.arm_uname {width: 220px; background-color: white}
-table.places-arms-container td.arm_servies {width: 320px; background-color: white}
-table.places-arms-container td.arm_hostname {width: 120px;}
-table.places-arms-container td.tech_whitespace {width: 240px; background-color: white}
-table.places-arms-container td.arm_model {width: 220px;}
-table.places-arms-container td.tech_model {width: 280px;}
-table.places-arms-container td.arm_uphone {width: 100px;}
-table.places-arms-container td.hardware {width: 240px;}
-table.places-arms-container td.attachments {width: 70px;}
-table.places-arms-container td.item_status {width: 60px;}
-table.places-arms-container td.item_ip {width: 110px;}
-table.places-arms-container td.item_sn {width: 100px;}
+table.places-arms-container col.arms_cabinet    {width: 50px;}
+table.places-arms-container col.arm_id          {width: 120px;}
+table.places-arms-container col.arm_hostname    {width: 120px;}
+table.places-arms-container col.arm_uname       {width: 220px}
+table.places-arms-container col.arm_uphone      {width: 100px;}
+table.places-arms-container col.arm_model       {width: 280px;}
+table.places-arms-container col.hardware        {width: 240px;}
+table.places-arms-container col.attachments     {width: 70px;}
+table.places-arms-container col.item_status     {width: 60px;}
+table.places-arms-container col.item_ip         {width: 110px;}
+table.places-arms-container col.item_invnum     {width: 120px;}
+
+
 
 
 span.arms-comp-attach-selector,

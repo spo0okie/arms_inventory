@@ -43,8 +43,9 @@ class HwListItem
     public $type;           //тип устройства
     public $manufacturer;   //производитель устройства
     public $product;        //наименование устройства
-    public $sn;             //серийный номер
-	public $capacity;        //наименование устройства
+	public $sn;             //серийный номер
+	public $cores;          //кол-во ядер для CPU
+	public $capacity;       //емкость для памяти/дисков
 
     /*
      * Вычисляемые непосредственно из исходных данных
@@ -138,13 +139,13 @@ class HwListItem
     {
         /*
          * Сюда на вход приходит чтото такое:
-         * array(1) {
-         *     ["motherboard"]=>  array(3) {
+         * [
+         *     ["motherboard"]=>  [
          *          ["manufacturer"]=>       string(21) "ASUSTeK COMPUTER INC."
          *          ["product"]=>            string(6)  "H61M-G"
          *          ["serial"]=>             string(15) "140222247102869"
-         *     }
-         * }
+         *     ]
+         * ]
          * т.е. это
          * [ $type => [ 'manufacturer'=>$manufacturer, 'product'=>$product, 'serial'=>$sn ]]
          * наша зада это разобрать по полочкам
@@ -155,20 +156,30 @@ class HwListItem
 	        switch ($this->type) {
 		        case static::$TYPE_CPU :
 			        /*
-					 * в случае процессора у нас есть поля
-					 * manufacturer
-					 * product
-					 * serial
+					 * это случай когда CPU записан одной строкой
 					 */
 			        $this->title = 'Процессор';
-			        $this->manufacturer = explode(' ', $item)[0];
-			        $this->product = $item;
-			        $this->sn = '';
+			        $this->manufacturer = explode(' ', $item)[0]; //первое слово - производитель
+			        $this->product = $item; //вся строка - сам проц
+			        $this->sn = ''; //отсутствует
+					$this->cores=1;
 			        break;
 	        }
         } else {
 	        foreach ($item as $idx=>$val) $item[$idx]=trim($val);
 	        switch ($this->type) {
+				case static::$TYPE_CPU :
+					/*
+					 * в случае процессора у нас есть поля
+					 * model
+					 * cores
+					 */
+					$this->title = 'Процессор';
+					$this->manufacturer = 'tst'; //explode(' ', $item['model'])[0];
+					$this->product = $item['model'];
+					$this->cores=isset($item['cores'])?$item['cores']:1;
+					$this->sn = '';
+					break;
 	            case static::$TYPE_MB :
 	                /*
 	                 * в случае материнской платы у нас есть поля
