@@ -175,7 +175,7 @@ class HwListItem
 					 * cores
 					 */
 					$this->title = 'Процессор';
-					$this->manufacturer = 'tst'; //explode(' ', $item['model'])[0];
+					$this->manufacturer = explode(' ', $item['model'])[0];
 					$this->product = $item['model'];
 					$this->cores=isset($item['cores'])?$item['cores']:1;
 					$this->sn = '';
