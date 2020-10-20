@@ -75,6 +75,7 @@ class CompsSearch extends Comps
             ->andFilterWhere(['or',
 				['like', 'os', $this->os],
 				['like', 'raw_soft', $this->os],
+				['like', 'raw_hw', $this->os],
 			])
             ->andFilterWhere(['like', 'comment', $this->comment]);
 

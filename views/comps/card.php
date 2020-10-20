@@ -45,8 +45,9 @@ if (!mb_strlen($domain))
 
 <p>
 	<?= $model->os ?><br />
-	<span class="update-timestamp">Последнее обновление данных <?= $model->updated_at ?></span>
+	<span class="update-timestamp">Последнее обновление данных <?= $model->updated_at ?> (v. <?= $model->raw_version ?>)</span>
 </p>
+<?= $model->comment ?>
 
 <h4>АРМ</h4>
 <p>
