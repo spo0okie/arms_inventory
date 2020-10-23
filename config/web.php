@@ -74,8 +74,9 @@ $config = [
                     	'comps'			=> 'api/comps',
 	                    'domains'		=> 'api/domains',
 	                    'login-journal' => 'api/login-journal',
-	                    'users'			=> 'api/users',
-	                //    'org-struct'	=> 'api/org-struct'
+						'users'			=> 'api/users',
+						'contracts'		=> 'api/contracts',
+						'scans'			=> 'api/scans',
                     ],
                     'pluralize' => false,
                     'prefix' => 'api'

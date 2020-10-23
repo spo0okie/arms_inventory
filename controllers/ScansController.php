@@ -118,7 +118,8 @@ class ScansController extends Controller
 		    if (!$model->upload()) return "{\"error\":\"не удалось загрузить\"}";
 		    if ($model->save(false)) {
 			    // тут у нас уже произошло успешное создание объекта и он уже в базе
-			    if ($contracts_id=Yii::$app->request->get('contracts_id')) {
+				// это очевидно какаято устаревшая дичь со времен many-2-many отношений с доками
+			    /* if ($contracts_id=Yii::$app->request->get('contracts_id')) {
 			    	//а тут мы обнаружили, что надо этот скан прикрутить к конрактам
 				    if (is_object($contract=\app\models\Contracts::findOne(['id'=>$contracts_id]))) {
 				    	$contract_scans=$contract->scans_ids;
@@ -126,13 +127,13 @@ class ScansController extends Controller
 				    	$contract->scans_ids=$contract_scans;
 				    	$contract->save();
 				    }
-			    }
+			    } */
 			    Yii::$app->response->format = Response::FORMAT_JSON;
 			    return [$model];
 		    }
-		    return "{\"error\":\"не прошло валидацию\"}";
+		    return '{"error":"ошибка сохранения модели"}';
 	    }
-	    return "{\"error\":\"не загружено\"}";
+	    return '{"error":"ошибка получения данных"}';
 
     }
 

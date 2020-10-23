@@ -11,6 +11,7 @@ use yii\imagine\Image;
  * This is the model class for table "scans".
  *
  * @property int $id id
+ * @property int $contracts_id contracts link
  * @property string $viewThumb
  * @property string $idxThumb
  * @property string $shortFname

@@ -82,7 +82,7 @@ class Contracts extends \yii\db\ActiveRecord
         return [
             [['name'], 'required'],
 	        [['lics_ids','partners_ids','arms_ids','techs_ids'], 'each', 'rule'=>['integer']],
-	        [['scanFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
+	        //[['scanFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
 	        [['parent_id','state_id'], 'integer'],
 	        [['total','charge'], 'number'],
 	        [['is_successor'], 'boolean'],
@@ -349,7 +349,7 @@ class Contracts extends \yii\db\ActiveRecord
 
 
 	/**
-	 * Возвращает набор контрагентов в договоре
+	 * Возвращает набор сканов в договоре
 	 */
 	public function getScans()
 	{
