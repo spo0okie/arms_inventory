@@ -9,6 +9,7 @@ use Yii;
  *
  * @property int $id id
  * @property int $type_id Тип оборудования
+ * @property bool $individual_specs Индивидуальные спеки
  * @property int $manufacturers_id Производитель
  * @property int $usages Количество экземпляров этой модели
  * @property string $name Модель
@@ -27,6 +28,8 @@ class TechModels extends \yii\db\ActiveRecord
 {
 	public static $title='Модели оборудования';
 	public static $descr='Ну модели и модели. Что про них особо сказать';
+	//подсказка которая передается через JSON если запрошена подсказка оформления спеки для моделей без спек
+	public static $no_specs_hint='NO_SPECS_USE';
 
 	private static $all_items=null;
 	private static $names_cache=null;
@@ -49,7 +52,7 @@ class TechModels extends \yii\db\ActiveRecord
     {
         return [
 	        [['type_id', 'manufacturers_id', 'name', 'comment'], 'required'],
-	        [['type_id', 'manufacturers_id'], 'integer'],
+	        [['type_id', 'manufacturers_id', 'individual_specs'], 'integer'],
 	        [['links', 'comment'], 'string'],
 	        [['name'], 'string', 'max' => 128],
 	        [['short'], 'string', 'max' => 24],
@@ -74,6 +77,7 @@ class TechModels extends \yii\db\ActiveRecord
 			'links' => 'Ссылки',
 			'comment' => 'Описание',
 			'usages' => 'Экз.',
+			'individual_specs' => 'Индив. спеки',
 		];
 	}
 
@@ -90,6 +94,7 @@ class TechModels extends \yii\db\ActiveRecord
 			'short' => 'Короткое название для вывода в плотных списках',
 			'links' => \app\components\UrlListWidget::$hint,
 			'comment' => 'Описание оборудования наиболее значимые параметры отличающие эту модель от других моделей того же типа оборудования',
+			'individual_specs' => 'Признак того что модель не полностью определяет спецификацию оборудования, и для каждого экземпляра ее нужно описывать индивидуально (сервера, СХД, самосборные ПК)',
 		];
 	}
 

@@ -51,7 +51,10 @@ if ($model->isNewRecord) {
 		    <?= $form->field($model, 'is_server')->checkbox() ?>
         </div>
 
-	    <?php
+	    <?php /*
+ 		ранее считал что у сервера не может быть пользователя
+ 		но это в идеальном мире, т.к. в качестве сервера для выполнения каких-либо сервисов
+ 		может использоваться и любой пользовательский АРМ
         $js = <<<JS
         $("#arms-is_server").on('change',function(){
         
@@ -65,10 +68,10 @@ if ($model->isNewRecord) {
                 $("#arms-server_hint_block").hide();
             }
         });
-JS;
+		JS;
 
 	    $this->registerJs($js, \yii\web\View::POS_READY);
-	    ?>
+	    */?>
     </div>
 	<?php if ($model->isNewRecord) { ?>
         <p>
@@ -82,13 +85,39 @@ JS;
 			<?php }
 			?>
         </p>
-	<?php } ?>
+	<?php }
+	
+	$js = '
+        //меняем подсказку описания модели в при смене типа оборудования
+        function techSwitchDescr(){
+            model_id=$("#arms-model_id").val();
+            $.ajax({url: "/web/tech-models/hint-template?id="+model_id})
+                .done(function(data) {
+                	if (data=="'.\app\models\TechModels::$no_specs_hint.'") {
+                		$("#arms-specs_settings").hide();
+                	} else {
+                		$("#specs-hint").html(data);
+                		$("#arms-specs_settings").show();
+                	}
+				})
+                .fail(function () {console.log("Ошибка получения данных!")});
+            $.ajax({url: "/web/tech-models/hint-description?id="+model_id})
+                .done(function(data) {$("#model-hint").html(data);})
+                .fail(function () {console.log("Ошибка получения данных!")});
+        }';
+	$this->registerJs($js, yii\web\View::POS_BEGIN);
+	
+	
+	?>
 
     <div class="row">
         <div class="col-md-4" >
 	        <?= $form->field($model, 'model_id')->widget(Select2::className(), [
 		        'data' => \app\models\TechModels::fetchPCs(),
-		        'options' => ['placeholder' => 'Выберите модель',],
+		        'options' => [
+					'placeholder' => 'Выберите модель',
+					'onchange' => 'techSwitchDescr();'
+				],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
 			        'allowClear' => false,
@@ -117,9 +146,43 @@ JS;
 		    <?= $form->field($model, 'comment')->textInput(['maxlength'=>true]) ?>
         </div>
     </div>
-
-
-    <div class="row" id="arms-user_settings" <?= $model->is_server?'style="display:none"':'' ?>>
+	
+	
+	<div class="row " id="arms-specs_settings"
+		<?= (is_object($model) && is_object($model->techModel) && $model->techModel->individual_specs)?'':'style="display:none"' ?>
+	>
+		<div class="col-md-4" >
+			<?= $form->field($model, 'specs')->textarea(['rows' => max(6,count(explode("\n",$model->history)))]) ?>
+		</div>
+		<div class="col-md-4" >
+			<label class="control-label" >
+				Подсказка для заполнения спеки
+			</label>
+			<br />
+			<div id="specs-hint" class="hint-block">
+				<?php
+				if(is_object($model) && is_object($model->techModel))
+					echo Yii::$app->formatter->asNtext($model->techModel->type->comment)
+				?>
+			</div>
+		</div>
+		<div class="col-md-4" >
+			<label class="control-label" >
+				Описание модели
+			</label>
+			
+			<div id="model-hint" class="hint-block">
+				Эти данные не нужно вносить в индивидуальную спеку:<br />
+				<?php
+				if(is_object($model) && is_object($model->techModel))
+					echo Yii::$app->formatter->asNtext($model->techModel->comment)
+				?>
+			</div>
+		</div>
+	</div>
+	
+	
+    <div class="row" id="arms-user_settings" >
         <div class="col-md-6" >
 	        <?= $form->field($model, 'user_id')->widget(Select2::className(), [
 		        'data' => \app\models\Users::fetchWorking($model->user_id),
@@ -130,6 +193,16 @@ JS;
 			        'multiple' => false
 		        ]
 	        ]) ?>
+
+			<?= $form->field($model, 'it_staff_id')->widget(Select2::className(), [
+				'data' => \app\models\Users::fetchWorking($model->it_staff_id),
+				'options' => ['placeholder' => 'сотрудник не назначен',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
 
         </div>
         <div class="col-md-6" >
@@ -142,34 +215,16 @@ JS;
 			        'multiple' => false
 		        ]
 	        ]) ?>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6" >
-	        <?= $form->field($model, 'it_staff_id')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchWorking($model->it_staff_id),
-		        'options' => ['placeholder' => 'сотрудник не назначен',],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-			        'allowClear' => true,
-			        'multiple' => false
-		        ]
-	        ]) ?>
-        </div>
-        <div class="col-md-6" id="arms-responsible_settings_block" <?= $model->is_server?'style="display:none"':'' ?>>
-            <?= $form->field($model, 'responsible_id')->widget(Select2::className(), [
-                'data' => \app\models\Users::fetchWorking($model->responsible_id),
-                'options' => ['placeholder' => 'ответственным является сотрудник ИТ','id'=>'arms-responsible_settings'],
-                'toggleAllSettings'=>['selectLabel'=>null],
-                'pluginOptions' => [
-                    'allowClear' => true,
-                    'multiple' => false
-                ]
-            ]) ?>
-        </div>
-        <div class="col-md-6" id="arms-server_hint_block" <?= $model->is_server?'':'style="display:none"' ?>>
-            <br /><span class="glyphicon glyphicon-exclamation-sign"></span> У сервера нет пользователя или иных ответственных кроме сотрудников ИТ отдела. У него есть сервисы, которые на нем вертятся.
+	
+			<?= $form->field($model, 'responsible_id')->widget(Select2::className(), [
+				'data' => \app\models\Users::fetchWorking($model->responsible_id),
+				'options' => ['placeholder' => 'ответственным является сотрудник ИТ','id'=>'arms-responsible_settings'],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
         </div>
     </div>
 
@@ -238,7 +293,7 @@ JS;
     </div>
 
 	<?= $form->field($model, 'history')->textarea(['rows' => max(10,count(explode("\n",$model->history)))]) ?>
-    <?php $this->registerJs("$('#arms-history').autoResize();"); ?>
+    <?php $this->registerJs("$('#arms-history,#arms-specs').autoResize();"); ?>
 
     <?php ActiveForm::end(); ?>
 

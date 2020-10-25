@@ -54,8 +54,36 @@ class TechModelsController extends Controller
 			'model' => $this->findModel($id),
 		]);
 	}
-
-
+	
+	/**
+	 * Подсказка по заполнению спеки (берется из типа модели)
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionHintTemplate($id)
+	{
+		$model=$this->findModel($id);
+		if ($model->individual_specs)
+			return Yii::$app->formatter->asNtext($model->type->comment);
+		else
+			return \app\models\TechModels::$no_specs_hint;
+	}
+	
+	/**
+	 * Информация о модели
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionHintDescription($id)
+	{
+		$model=$this->findModel($id);
+		return Yii::$app->formatter->asNtext($model->comment);
+	}
+	
+	
+	
 	public function actionHintComment($id){
 		Yii::$app->response->format = Response::FORMAT_JSON;
 		$data=\app\models\TechModels::fetchTypeComment($id);

@@ -18,6 +18,7 @@ use Yii;
  * @property int $model_id Модель оборудования
  * @property string $sn Серийный номер
  * @property string $hw Аппаратное обеспечение
+ * @property string $specs Спецификация оборудования (опц)
  * @property int $state_id Статус
  * @property int $places_id Помещение
  * @property int $user_id Пользователь
@@ -105,7 +106,7 @@ class Arms extends \yii\db\ActiveRecord
             [['comp_id','places_id','model_id','state_id','departments_id'], 'integer'],
 	        [['contracts_ids','lic_items_ids','lic_groups_ids'], 'each', 'rule'=>['integer']],
             [['user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'integer'],
-            [['updated_at','history','hw'], 'safe'],
+            [['updated_at','history','hw','specs'], 'safe'],
 	        [['is_server'],'boolean'],
             [['num'], 'string', 'max' => 16],
 	        [['model', 'inv_num', 'sn', 'comment'], 'string', 'max' => 128],
@@ -161,7 +162,8 @@ class Arms extends \yii\db\ActiveRecord
 	        'model' => 'Модель ПК',
 	        'model_id' => 'Модель ПК',
             'sn' => 'Серийный номер',
-            'hw' => 'Аппаратное обеспечение',
+			'hw' => 'Аппаратное обеспечение',
+			'specs' => 'Тех. спецификация',
 	        'is_server' => 'Сервер',
             'it_staff_id' => 'Сотрудник Дирекции ИТ',
 	        'user_id' => 'Пользователь',
@@ -191,7 +193,8 @@ class Arms extends \yii\db\ActiveRecord
 			'comp_id' => 'Какую ОС отображать в паспорте',
 			'model_id' => 'Модель системного блока / ноутбука.  Если нужная модель отустствует в списке, то нужно сначала завести в ее в соотв. категории оборудования',
 			'sn' => 'Серийный номер системного блока / ноутбука',
-			'is_server' => 'Это оборудование формирует сервер, а не рабочее место',
+			'specs' => 'Спецификация оборудования в случае, если модель оборудования не полностью определяет комплектацию каждого отдельного экземпляра',
+			'is_server' => 'Это оборудование формирует сервер, на котором выполняются какие-то сервисы (будет отмечено другим оформлением, возможно повесить сервисы)',
 			'user_id' => 'Тот, кто работает за этим АРМ',
 			'places_id' => 'Помещение, куда установлен АРМ',
 			'departments_id' => 'Подразделение, к которому относится АРМ',

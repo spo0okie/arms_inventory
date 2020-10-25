@@ -23,6 +23,13 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 
 <?= $this->render('/tech-models/item',['model'=>$model->model]) ?>
 
+<?php if ($model->model->individual_specs) { ?>
+	<h4>Спецификация:</h4>
+	<?= \Yii::$app->formatter->asNtext($model->specs) ?>
+	<br />
+<?php } ?>
+
+
 <p>
     <?php if (strlen($model->comment)){
         if ($model->isVoipPhone) {

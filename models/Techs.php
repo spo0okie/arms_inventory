@@ -12,6 +12,7 @@ use Yii;
  * @property string $inv_num Бухгалтерский инвентарный номер
  * @property int $model_id Модель оборудования
  * @property string $sn Серийный номер
+ * @property string $specs Тех. спецификация
  * @property int $arms_id Рабочее место
  * @property int $places_id Помещение
  * @property int $state_id Состояние
@@ -79,7 +80,7 @@ class Techs extends \yii\db\ActiveRecord
 	        [['model_id', 'arms_id', 'places_id', 'state_id'], 'integer'],
 	        [['contracts_ids'], 'each', 'rule'=>['integer']],
 	        [['url', 'comment'], 'string'],
-	        [['history'], 'safe'],
+	        [['history','specs'], 'safe'],
 	        [['num', 'user_id', 'it_staff_id', 'ip'], 'string', 'max' => 16],
 	        [['mac'], 'string', 'max' => 17],
             [['inv_num', 'sn'], 'string', 'max' => 128],
@@ -148,6 +149,7 @@ class Techs extends \yii\db\ActiveRecord
 	        'model_id' => 'Модель оборудования',
 	        'model' => 'Модель оборудования',
             'sn' => 'Серийный номер',
+			'specs' => 'Тех. спецификация',
 	        'state_id' => 'Состояние',
 	        'state' => 'Статус',
 	        'attach' => 'Док.',
@@ -180,6 +182,7 @@ class Techs extends \yii\db\ActiveRecord
 			'state_id' => 'Состояние, в котором в данный момент находится оборудование',
 			'arms_id' => 'Рабочее место, к которому прикреплено оборудование',
 			'user_id' => 'Сотрудник которому установлено',
+			'specs' => 'Спецификация оборудования в случае, если модель оборудования не полностью определяет комплектацию каждого отдельного экземпляра',
 			'places_id' => 'Помещение, куда установлено',
 			'it_staff_id' => 'Сотрудник службы ИТ, который отвечает за обслуживание оборудования',
 			'head_id' => 'Руководитель отдела сотрудника которому установлено',

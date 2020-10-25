@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Comps */
+/* @var $model app\models\Arms */
 $static_view=true;
 ?>
 
@@ -14,6 +14,12 @@ $static_view=true;
     Серийный номер:<?= $model->sn ?><br/>
     Инвентарный номер:<?= $model->inv_num ?><br />
     <br />
+	
+	<?php if ($model->techModel->individual_specs) { ?>
+	<h4>Спецификация:</h4>
+		<?= \Yii::$app->formatter->asNtext($model->specs) ?>
+		<br />
+	<?php } ?>
 
     <?= $this->render('att-comps',['model'=>$model,'static_view'=>$static_view]) ?>
     <br />

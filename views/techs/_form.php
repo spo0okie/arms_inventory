@@ -21,6 +21,7 @@ switch (Yii::$app->request->get('type')) {
         break;
 }
 
+	$no_specs_hint=\app\models\TechModels::$no_specs_hint;
     $js = <<<JS
     //меняем подсказку выбора арм в при смене списка документов
     function fetchArmsFromDocs(){
@@ -37,16 +38,35 @@ switch (Yii::$app->request->get('type')) {
     //меняем подсказки для разных типов оборудования
     function fetchCommentFromModel(){
         model_id=$("#techs-model_id").val();
-        console.log(model_id);
+        //console.log(model_id);
         $.ajax({url: "/web/tech-models/hint-comment?id="+model_id})
         .done(function(data) {
             $('label[for="techs-comment"]').text(data['name']);
             $("#comment-hint").html(data['hint']);
         })
         .fail(function () {console.log("Ошибка получения данных!")});
+		$.ajax({url: "/web/tech-models/hint-template?id="+model_id})
+			.done(function(data) {
+				if (data=="$no_specs_hint") {
+					$("#techs-specs_settings").hide();
+				} else {
+					$("#techs-hint").html(data);
+					$("#techs-specs_settings").show();
+				}
+			})
+			.fail(function () {console.log("Ошибка получения данных!")});
+		$.ajax({url: "/web/tech-models/hint-description?id="+model_id})
+			.done(function(data) {
+				$("#model-hint").html(data);
+			})
+			.fail(function () {console.log("Ошибка получения данных!")});
     }
 
-    
+    //меняем подсказку описания модели в при смене типа оборудования
+	function techSwitchDescr(){
+		model_id=$("#techs-model_id").val();
+	}
+
 JS;
     $this->registerJs($js, yii\web\View::POS_BEGIN);
 ?>
@@ -110,6 +130,41 @@ JS;
         </div>
     </div>
 
+	<div class="row " id="techs-specs_settings"
+		<?= (is_object($model) && is_object($model->model) && $model->model->individual_specs)?'':'style="display:none"' ?>
+	>
+		<div class="col-md-4" >
+			<?= $form->field($model, 'specs')->textarea(['rows' => max(6,count(explode("\n",$model->history)))]) ?>
+		</div>
+		<div class="col-md-4" >
+			<label class="control-label" >
+				Подсказка для заполнения спеки
+			</label>
+			<br />
+			<div id="specs-hint" class="hint-block">
+				<?php
+				if(is_object($model) && is_object($model->model))
+					echo Yii::$app->formatter->asNtext($model->model->type->comment)
+				?>
+			</div>
+		</div>
+		<div class="col-md-4" >
+			<label class="control-label" >
+				Описание модели
+			</label>
+
+			<div id="model-hint" class="hint-block">
+				Эти данные не нужно вносить в индивидуальную спеку:<br />
+				<?php
+				if(is_object($model) && is_object($model->model))
+					echo Yii::$app->formatter->asNtext($model->model->comment)
+				?>
+			</div>
+		</div>
+	</div>
+	
+	
+	
     <div class="row">
         <div class="col-md-6" >
 		    <?= $form->field($model, 'ip')->textInput(['maxlength' => true]) ?>

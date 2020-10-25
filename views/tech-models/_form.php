@@ -73,13 +73,28 @@ use kartik\select2\Select2;
         </div>
     </div>
 
-	<?= $form->field($model, 'comment')
-        ->textarea(['rows' => max(4,count(explode("\n",$model->comment)))])
-        ->hint(is_null($model->type_id)?
-            $model->getAttributeHint('comment'):
-	        Yii::$app->formatter->asNtext($model->type->comment),
-            ['id'=>'comment-hint']
-        ) ?>
+    <div class="row">
+        <div class="col-md-8" >
+			<?= $form->field($model, 'comment')
+				->textarea(['rows' => max(4,count(explode("\n",$model->comment)))])
+				->hint(false) ?>
+			<?= $form->field($model, 'individual_specs')->checkbox() ?>
+        </div>
+        <div class="col-md-4" >
+			<label class="control-label" >
+				Подсказка для описания модели
+			</label>
+			<br />
+			<div id="comment-hint" class="hint-block">
+				
+				<?= is_null($model->type_id)?
+					$model->getAttributeHint('comment'):
+					Yii::$app->formatter->asNtext($model->type->comment)
+				 ?>
+			</div>
+        </div>
+    </div>
+
 	<?php $this->registerJs("$('#techmodels-comment').autoResize();"); ?>
 
 	<?= $form->field($model, 'links')->textarea(['rows' => 3]) ?>
