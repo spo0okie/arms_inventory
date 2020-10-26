@@ -32,7 +32,7 @@ class CompsController extends Controller
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','update','delete','unlink','addsw','rmsw','ignoreip','unignoreip'], 'roles'=>['admin']],
-				['allow' => true, 'actions'=>['index','view','ttip','item','item-by-name'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','view','ttip','ttip-hw','item','item-by-name'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -115,6 +115,20 @@ class CompsController extends Controller
 			'model' => $this->findModel($id),
 		]);
 	}
+	
+	/**
+	 * Displays a tooltip for hw of single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionTtipHw($id)
+	{
+		return $this->renderPartial('/arms/ttip-hw', [
+			'model' => $this->findModel($id),
+		]);
+	}
+	
 
     /**
      * Displays a single Comps model.

@@ -16,22 +16,34 @@ if (!count($comps)) $comps=[0=>null];
 
 
 //если ОС больше одной, то готовим ROWSPAN для колонок не относящихся к ОС
-$physCount=0;
-$vmCount=0;
-if (count($comps)>1) {
-	foreach ($comps as $comp)
-		if (!$comp->ignore_hw) $physCount++;
-		else $vmCount++;
-} else $rowspan='';
+$hwComps=$model->hwComps;
+$vmComps=$model->vmComps;
+$hwCount=count($hwComps);
+$vmCount=count($vmComps);
+
+//объединение ячеек на все ОС
 $rowspan=(count($comps)>1)?'rowspan="'.count($comps).'"':'';
-$rowspanPhys=($physCount>1)?'rowspan="'.$physCount.'"':'';
+
+//объединение ячеек на физ ОС
+$rowspanPhys=($hwCount>1)?'rowspan="'.$hwCount.'"':'';
 
 //может быть передан список столбцов, которые не нужно выводить
 if (!isset($skip)) $skip=[];
 
-$sortedComps=[];
+$sortedComps=array_merge($hwComps,$vmComps);
 
-//if (iss)
+
+/*
+ * Вдруг откуда ни возьмись дока внутри пых-файла
+ * Как будем рисовать оборудования сервера. Учитывая что на один АРМ несколько ОС
+ * Модель оборудования очевидно растянется на все ОС, ибо железо 1.
+ * Затем все ос делим на HW и VM по признаку ignore_hw
+ *
+ * Оборудование фактическое (не модель и не спека) берем из списка железных ОС:
+ *  из основной (если она железная) или с наименьшим id (иначе)
+ *
+ *
+ */
 
 //поехали!
 for ($i=0; $i<count($comps); $i++) {
@@ -108,7 +120,7 @@ for ($i=0; $i<count($comps); $i++) {
 			<?php }
 	    } else { ?>
 			<td class="hardware">
-				<?= $this->render('/hwlist/shortlist',['model'=>$comp->hwList,'vm'=>true]) ?>
+				<?= $this->render('/hwlist/shortlist',['model'=>$comp->hwList,'vm'=>true,'comp_id'=>$comp->id]) ?>
 			</td>
 		<?php } ?>
 
@@ -137,7 +149,7 @@ for ($i=0; $i<count($comps); $i++) {
 	    	?>
             <td class="item_invnum"<?= $rowspan ?>>
 				<?php if (count($tokens)) { ?>
-					<span title="<?= $ttip ?>">
+					<span qtip_ttip="<?= $ttip ?>">
 						<?= implode(', ',$tokens) ?>
 					</span>
 				<?php } ?>

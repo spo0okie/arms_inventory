@@ -87,7 +87,7 @@ class ArmsController extends Controller
 	}
 
 	/**
-	 * Displays a tooltip for single model.
+	 * Displays a tooltip for hw of single model.
 	 * @param integer $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found

@@ -22,15 +22,13 @@ $model->swList->sortByName();
 
 		<div class="hardware_settings">
 			<h4>Железо</h4>
-			<?php if ($model->ignore_hw) echo "<p>Игнорируется.</p>"; else {
-				echo '<table>';
+			<table><?php
 				foreach ($model->getHardArray() as $item) {
 					echo $this->render('/hwlist/item',
 						compact('model','item', 'manufacturers')
 					);
-				}
-				echo '</table>';
-			} ?>
+				} ?>
+			</table>
 		</div>
 
 	</div>

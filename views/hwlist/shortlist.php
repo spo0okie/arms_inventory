@@ -28,6 +28,10 @@ if (isset($arm_id)) {
 	$options=[
 		'qtip_ajxhrf'=>\yii\helpers\Url::to(['/arms/ttip-hw','id'=>$arm_id])
 	];
+} elseif (isset($comp_id)) {
+	$options=[
+		'qtip_ajxhrf'=>\yii\helpers\Url::to(['/comps/ttip-hw','id'=>$comp_id])
+	];
 } else $options=[];
 
 foreach ($tokens as $i=>$val) if (!strlen($val)) unset ($tokens[$i]);

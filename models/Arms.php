@@ -45,7 +45,10 @@ use Yii;
  * @property Places $place
  * @property Users $itStaff
  * @property Comps $comp
+ * @property Comps $hwComp
  * @property Comps[] $comps
+ * @property Comps[] $hwComps
+ * @property Comps[] $vmComps
  * @property Techs[] $techs
  * @property TechStates $state
  * @property Techs[] $voipPhones
@@ -64,7 +67,9 @@ class Arms extends \yii\db\ActiveRecord
 	private $techs_cache=null;
 	private $voipPhones_cache=null;
 	private $ups_cache=null;
-	private $comps_cache=null;
+	private $hwComp_cache=null;  //тот комп с которого вытаскивать железо (если основная ОС - виртуальная)
+	private $hwComps_cache=null; //для методов вытащить только поставленные на железо
+	private $vmComps_cache=null; //и виртуальные ОС пригодится кэш (наверно)
 	private $state_cache=null;
 	//private $hw=null;
     private static $num_str_pad=6; //количество знаков в цифровой части номера
@@ -271,10 +276,6 @@ class Arms extends \yii\db\ActiveRecord
 	public function getComp()
 	{
 		return $this->hasOne(Comps::className(), ['id' => 'comp_id']);
-
-		//return static::find()->where(new \yii\db\Expression("CASE WHEN arms.comp_id>0 THEN ('comps.id'='arms.id') ELSE ('comps.arm_id'='arms.id') END"))->one();
-
-
 	}
 
 	public function getState()
@@ -287,19 +288,72 @@ class Arms extends \yii\db\ActiveRecord
 
 
 	/**
+	 * Возвращает все ОС привязанные к этому АРМ
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getComps()
 	{
-		if (!is_null($this->comps_cache)) return $this->comps_cache;
-		return $this->comps_cache=$this->hasMany(Comps::className(), ['arm_id' => 'id'])
+		//if (!is_null($this->comps_cache)) return $this->comps_cache;
+		//return $this->comps_cache=
+		return $this->hasMany(Comps::className(), ['arm_id' => 'id'])
 			->from(['arms_comps'=>Comps::tableName()])
 			->orderBy([
 				'arms_comps.ignore_hw'=>SORT_ASC,
 				'arms_comps.name'=>SORT_ASC
 			]);
 	}
+	
+	
+	public function buildHwAndVms() {
+		if (!is_null($this->hwComp_cache)) return;
+		$this->hwComps_cache=[];
+		$this->vmComps_cache=[];
+		$this->hwComp_cache=$this->comp;
+		if (count($this->comps)) foreach ($this->comps as $comp) {
+			if ($comp->ignore_hw)
+				$this->vmComps_cache[]=$comp;
+			else {
+				if (!is_object($this->hwComp_cache) || ($this->hwComp_cache->ignore_hw)) $this->hwComp_cache=$comp;
+				$this->hwComps_cache[]=$comp;
+			}
+		}
+		
+	}
 
+	
+	/**
+	 * Возвращает все не виртуальные ОС привязанные к этому АРМ
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getHwComps()
+	{
+		$this->buildHwAndVms();
+		return $this->hwComps_cache;
+	}
+	
+	
+	/**
+	 * Возвращает тот комп, с которого снимать железо АРМ
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getHwComp()
+	{
+		$this->buildHwAndVms();
+		return $this->hwComp_cache;
+	}
+	
+	
+	/**
+	 * Возвращает все виртуальные ОС привязанные к этому АРМ
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getVmComps()
+	{
+		$this->buildHwAndVms();
+		return $this->vmComps_cache;
+	}
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -441,8 +495,8 @@ class Arms extends \yii\db\ActiveRecord
         if (!is_null($this->hwList_obj)) return $this->hwList_obj;
         $this->hwList_obj = new HwList();
         $this->hwList_obj->loadJSON($this->hw);
-        if (is_object($this->comp) && !$this->comp->ignore_hw)
-        	$this->hwList_obj->loadFound($this->comp->hwList);
+        if (is_object($this->hwComp))
+        	$this->hwList_obj->loadFound($this->hwComp->hwList);
         return $this->hwList_obj;
     }
 

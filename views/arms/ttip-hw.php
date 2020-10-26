@@ -5,7 +5,9 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
+
 $static_view=true;
+
 ?>
 
 <div class="arms-ttip ttip-card">

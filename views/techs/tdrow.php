@@ -42,7 +42,7 @@
 		if (strlen($model->sn)) $tokens[]=$model->sn;
 		if (strlen($model->inv_num)) $tokens[]=$model->inv_num;
 		if (count($tokens)) { ?>
-			<span title="<?= $ttip ?>">
+			<span qtip_ttip="<?= $ttip ?>">
 				<?= implode(', ',$tokens) ?>
 			</span>
 		<?php } ?>
