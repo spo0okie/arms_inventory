@@ -38,7 +38,7 @@ switch (Yii::$app->request->get('type')) {
     //меняем подсказки для разных типов оборудования
     function fetchCommentFromModel(){
         model_id=$("#techs-model_id").val();
-        //console.log(model_id);
+        console.log(model_id);
         $.ajax({url: "/web/tech-models/hint-comment?id="+model_id})
         .done(function(data) {
             $('label[for="techs-comment"]').text(data['name']);
@@ -61,12 +61,7 @@ switch (Yii::$app->request->get('type')) {
 			})
 			.fail(function () {console.log("Ошибка получения данных!")});
     }
-
-    //меняем подсказку описания модели в при смене типа оборудования
-	function techSwitchDescr(){
-		model_id=$("#techs-model_id").val();
-	}
-
+    
 JS;
     $this->registerJs($js, yii\web\View::POS_BEGIN);
 ?>
