@@ -12,7 +12,7 @@ if (!isset($places_id)) $places_id=null;
 
 Modal::begin([
 	'id'=>'arms_add_modal',
-	'size' => 'modal-lg',
+	'size' => Modal::SIZE_LARGE,
 	'header' => '<h2>Добавление АРМ</h2>',
 	'toggleButton' => [
 		'label' => 'Новый АРМ',
@@ -27,7 +27,7 @@ Modal::end();
 
 Modal::begin([
 	'id'=>'techs_add_modal',
-	'size' => 'modal-lg',
+	'size' => Modal::SIZE_LARGE,
 	'header' => '<h2>Добавление оборудования</h2>',
 	'toggleButton' => [
 		'label' => 'Новое оборудование',
@@ -42,7 +42,7 @@ Modal::end();
 
 Modal::begin([
 	'id'=>'materials_add_modal',
-	'size' => 'modal-lg',
+	'size' => Modal::SIZE_LARGE,
 	'header' => '<h2>Добавление ЗиП и материалов</h2>',
 	'toggleButton' => [
 		'label' => 'Новые ЗиП и материалы',

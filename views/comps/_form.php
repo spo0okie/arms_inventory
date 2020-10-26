@@ -89,6 +89,7 @@ asort($domains);
         Modal::begin([
             'id'=>'arms_add_modal',
             'header' => '<h2>Добавление АРМ</h2>',
+			'size' => Modal::SIZE_LARGE,
             'toggleButton' => [
                 'label' => 'Создать АРМ',
                 'tag' => 'button',

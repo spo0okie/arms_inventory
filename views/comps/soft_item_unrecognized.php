@@ -94,6 +94,7 @@ if (
     //моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
     Modal::begin([
         'header' => 'Выберите продукт',
+		'size' => Modal::SIZE_LARGE,
         'toggleButton' => [
             'label' => '<span class="glyphicon glyphicon-wrench"/>',
             'tag' => 'a',

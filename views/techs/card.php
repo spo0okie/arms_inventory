@@ -82,6 +82,7 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
     //моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
         Modal::begin([
             'id'=>'tech_link_contract_modal',
+			'size' => Modal::SIZE_LARGE,
             'header' => 'Выберите связанный с оборудованием документ'
         ]);
         echo $this->render('/contracts/_linkform');
@@ -90,6 +91,7 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 
         Modal::begin([
             'id'=>'tech_new_contract_modal',
+			'size' => Modal::SIZE_LARGE,
             'header' => '<h2>Добавление документа к оборудованию</h2>',
         ]);
         $contract=new \app\models\Contracts();

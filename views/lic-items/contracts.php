@@ -18,6 +18,7 @@ $model_id=$model->id;
 
 Modal::begin([
 	'id'=>'lics_new_contract_modal',
+	'size' => Modal::SIZE_LARGE,
 	'header' => '<h2>Добавление документа к закупке лицензий</h2>',
 	'toggleButton' => [
 		'label' => 'Добавить новый документ',

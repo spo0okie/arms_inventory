@@ -104,6 +104,7 @@ $deleteable=!count($arms)&&!count($contracts);
 
 	    Modal::begin([
 			'id'=>'keys_add_modal',
+			'size' => Modal::SIZE_LARGE,
 			'header' => '<h2>Добавление лиц. ключа</h2>',
 			'toggleButton' => [
 				'label' => 'Добавить ключ',

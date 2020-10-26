@@ -58,6 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
 	        Modal::begin([
 		        'id'=>'tech_models-add',
 		        'header' => '<h2>Добавление модели оборудования</h2>',
+				'size' => Modal::SIZE_LARGE,
 		        'toggleButton' => [
 			        'label' => 'Добавить модель',
 			        'tag' => 'a',

@@ -30,6 +30,7 @@ use yii\bootstrap\Modal;
 
         Modal::begin([
             'header' => '<h2>Добавление производителя</h2>',
+			'size' => Modal::SIZE_LARGE,
             'toggleButton' => [
                 'label' => 'Создать нового производителя',
                 'tag' => 'button',

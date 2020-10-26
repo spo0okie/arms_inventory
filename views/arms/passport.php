@@ -224,6 +224,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
         Modal::begin([
             'id'=>'techs_add_modal',
 	        'header' => '<h2>Добавление оборудования</h2>',
+			'size' => Modal::SIZE_LARGE,
 	        'toggleButton' => [
 		        'label' => 'Внести доп. оборудование',
 		        'tag' => 'button',

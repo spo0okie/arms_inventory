@@ -26,7 +26,8 @@ $model_id=$model->id;
             //моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
             Modal::begin([
                 'id'=>'arm_link_contract_modal',
-                'header' => 'Выберите Документ'
+				'size' => Modal::SIZE_LARGE,
+				'header' => 'Выберите Документ'
             ]);
             echo $this->render('/contracts/_linkform');
             //закрываем форму
@@ -34,6 +35,7 @@ $model_id=$model->id;
 
             Modal::begin([
                 'id'=>'arm_new_contract_modal',
+				'size' => Modal::SIZE_LARGE,
                 'header' => '<h2>Добавление документа к АРМ</h2>',
             ]);
             $contract=new \app\models\Contracts();
