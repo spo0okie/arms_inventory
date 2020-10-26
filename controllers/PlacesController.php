@@ -98,7 +98,7 @@ class PlacesController extends Controller
 					'techs.state',
 					'techs.model.type',
 					'techs.techUser',
-					'materials.usages'
+					//'materials.usages' дико добавляет тормозов
 				])->orderBy('short')
 				->all(),
 		]);
@@ -154,7 +154,7 @@ class PlacesController extends Controller
 			        'techs.state',
 			        'techs.model.type',
 			        'techs.techUser',
-			        'materials.usages'
+			        //'materials.usages'
 		        ])->orderBy('short')
 		        ->all(),
         ]);
