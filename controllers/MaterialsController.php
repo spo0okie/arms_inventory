@@ -35,7 +35,7 @@ class MaterialsController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['admin']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','ttips','validate','searchList'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','view','ttip','ttips','validate','search-list'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
