@@ -375,7 +375,9 @@ table.places-arms-container tr.tech_nas {
     background-image: url(/web/img/diagonal-noise.png)
 }
 
-
+table.places-arms-container td.tech_whitespace {
+    background-color: white;
+}
 
 /* Уволенные сотрудники */
 span.users-item.uvolen a {color: red;}
