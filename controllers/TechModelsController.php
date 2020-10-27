@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Comps;
 use Yii;
 use app\models\TechModels;
 use app\models\TechModelsSearch;
@@ -33,7 +34,7 @@ class TechModelsController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['admin']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','validate','hint-comment','hint-template','hint-description'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','view','ttip','validate','hint-comment','hint-template','hint-description','item','item-by-name'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -41,7 +42,42 @@ class TechModelsController extends Controller
 	    ];
 	    return $behaviors;
     }
-
+	
+	
+	/**
+	 * Displays a item for single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionItem($id)
+	{
+		return $this->renderPartial('item', [
+			'model' => $this->findModel($id)
+		]);
+	}
+	
+	
+	public function actionItemByName($name,$manufacturer)
+	{
+		/// производитель
+		//ищем в словаре
+		if (is_null($man_id=\app\models\ManufacturersDict::fetchManufacturer($manufacturer))) {
+			//ищем в самих производителях
+			if (!is_onject($man_obj = \app\models\Manufacturers::findOne(['name'=>$manufacturer]))) {
+				throw new NotFoundHttpException('Requested manufacturer not found');
+			} else {
+				$man_id=$man_obj->id;
+			}
+		}
+		
+		if (($model = TechModels::findOne(['name'=>$name,'manufacturers_id'=>$man_id])) !== null) {
+			return $this->renderPartial('item', ['model' => $model	]);
+		}
+		throw new NotFoundHttpException('The requested model not found within that manufacturer');
+	}
+	
+	
 	/**
 	 * Displays a single OrgPhones model.
 	 * @param integer $id
