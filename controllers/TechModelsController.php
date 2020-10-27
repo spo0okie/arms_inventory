@@ -33,7 +33,7 @@ class TechModelsController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['admin']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','validate','hintComment','hintTemplate','hintDescription'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','view','ttip','validate','hint-comment','hint-template','hint-description'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
