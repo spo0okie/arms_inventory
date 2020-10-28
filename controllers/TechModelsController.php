@@ -50,15 +50,16 @@ class TechModelsController extends Controller
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionItem($id)
+	public function actionItem($id,$long=false)
 	{
 		return $this->renderPartial('item', [
-			'model' => $this->findModel($id)
+			'model'	=> $this->findModel($id),
+			'long'	=> $long,
 		]);
 	}
 	
 	
-	public function actionItemByName($name,$manufacturer)
+	public function actionItemByName($name,$manufacturer,$long=false)
 	{
 		/// производитель
 		//ищем в словаре
@@ -72,7 +73,10 @@ class TechModelsController extends Controller
 		}
 		
 		if (($model = TechModels::findOne(['name'=>$name,'manufacturers_id'=>$man_id])) !== null) {
-			return $this->renderPartial('item', ['model' => $model	]);
+			return $this->renderPartial('item', [
+				'model' => $model,
+				'long'	=> $long,
+			]);
 		}
 		throw new NotFoundHttpException('The requested model not found within that manufacturer');
 	}
