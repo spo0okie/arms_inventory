@@ -64,7 +64,7 @@ class TechModelsController extends Controller
 		//ищем в словаре
 		if (is_null($man_id=\app\models\ManufacturersDict::fetchManufacturer($manufacturer))) {
 			//ищем в самих производителях
-			if (!is_onject($man_obj = \app\models\Manufacturers::findOne(['name'=>$manufacturer]))) {
+			if (!is_object($man_obj = \app\models\Manufacturers::findOne(['name'=>$manufacturer]))) {
 				throw new NotFoundHttpException('Requested manufacturer not found');
 			} else {
 				$man_id=$man_obj->id;
