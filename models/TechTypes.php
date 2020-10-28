@@ -101,7 +101,7 @@ class TechTypes extends \yii\db\ActiveRecord
 	 */
 	public function getTechModels()
 	{
-		return $this->hasMany(TechModels::className(), ['type_id' => 'id'])->orderBy('name');
+		return $this->hasMany(TechModels::className(), ['type_id' => 'id'])->joinWith('manufacturer')->orderBy(['manufacturers.name'=>SORT_ASC,'name'=>SORT_ASC]);
 	}
 
 	/**
