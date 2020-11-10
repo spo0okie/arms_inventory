@@ -17,6 +17,7 @@ use yii\helpers\ArrayHelper;
  * @property ManufacturersDict[] $manufacturersDicts
  * @property ManufacturersDict[] $dict
  * @property Soft[] $soft
+ * @property TechModels[] $techModels
  */
 class Manufacturers extends \yii\db\ActiveRecord
 {
@@ -168,12 +169,17 @@ class Manufacturers extends \yii\db\ActiveRecord
 		//return $test;
 		return $cut;
     }
-
-    public function getSoft() {
-    	return \app\models\Soft::find()->where(['manufacturers_id' => $this->id])->orderBy('descr')->all();
-	    return $this->hasMany(Soft::className(), ['manufacturers_id' => 'id']);
-    }
-
+	
+	public function getSoft() {
+		return \app\models\Soft::find()->where(['manufacturers_id' => $this->id])->orderBy('descr')->all();
+		//return $this->hasMany(Soft::className(), ['manufacturers_id' => 'id']);
+	}
+	
+	public function getTechModels() {
+		return \app\models\TechModels::find()->where(['manufacturers_id' => $this->id])->orderBy('name')->all();
+		//return $this->hasMany(Soft::className(), ['manufacturers_id' => 'id']);
+	}
+	
 	public function getDict() {
 		return $this->hasMany(ManufacturersDict::className(), ['manufacturers_id' => 'id']);
 	}

@@ -5,7 +5,8 @@
  * Date: 17.02.2018
  * Time: 0:47
  *
- * @var \app\models\Comps $model
+ * @var $this yii\web\View
+ * @var $model app\models\SwList
  * @var array $item
  */
 
@@ -33,27 +34,10 @@ $dev=\app\models\Manufacturers::fetchItem($product->manufacturers_id);
 <tr class="software_item <?= implode(' ',$classes) ?>">
     <td class="os-name"><?= $model->name ?></td>
     <td class="manufacturer">
-        <?= \yii\helpers\Html::a($dev->name,
-            ['/manufacturers/view','id'=>$dev->id],
-            ['title' => 'Перейти к производителю']
-        ) ?>
-        <?= \yii\helpers\Html::a(
-            '<span class="glyphicon glyphicon-pencil"></span>',
-            ['/manufacturers/update','id'=>$dev->id],
-            ['class'=>'passport_tools','title'=>'Перейти к производителю']
-        ) ?>
+        <?= $this->render('/manufacturers/item',['model'=>$dev]) ?>
     </td>
     <td class="product">
-        <?= \yii\helpers\Html::a(
-            $product->descr,
-            ['/soft/view', 'id' => $product->id],
-            ['title' => is_null($hitlist)?'Перейти к программному продукту':$hitlist]
-        ) ?>
-        <?= \yii\helpers\Html::a(
-            '<span class="glyphicon glyphicon-pencil"></span>',
-            ['/soft/update', 'id' => $product->id,'return'=>'previous'],
-            ['class'=>'passport_tools','title'=>'Редактировать програмный продукт']
-        ) ?>
+		<?= $this->render('/soft/item',['model'=>$product,'hitlist'=>$hitlist]) ?>
     </td>
     <td class="passport_tools">
         <?php

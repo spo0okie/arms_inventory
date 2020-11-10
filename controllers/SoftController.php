@@ -55,21 +55,36 @@ class SoftController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
+	
+	/**
+	 * Displays a single Soft model ttip.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionTtip($id,$hitlist=null)
+	{
+		return $this->renderPartial('ttip', [
+			'model' => $this->findModel($id),
+			'hitlist' => $hitlist
+		]);
+	}
 
-    /**
-     * Displays a single Soft model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
-
-    /**
+	/**
+	 * Displays a single Soft model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionView($id)
+	{
+		return $this->render('view', [
+			'model' => $this->findModel($id),
+		]);
+	}
+	
+	
+	/**
      * Creates a new Soft model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed

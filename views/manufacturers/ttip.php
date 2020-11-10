@@ -11,9 +11,10 @@ $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => 'Производители', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
-?>
-<div class="manufacturers-view">
 
-    <?= $this->render('card',['model'=>$model]) ?>
+?>
+<div class="manufacturers-ttip ttip-card">
+
+    <?= $this->render('card',['model'=>$model,'static_view'=>true]) ?>
 
 </div>

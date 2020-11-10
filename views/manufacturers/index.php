@@ -9,6 +9,7 @@ use yii\grid\GridView;
 
 $this->title = 'Производители';
 $this->params['breadcrumbs'][] = $this->title;
+$renderer=$this;
 ?>
 <div class="manufacturers-index">
 
@@ -32,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute'=>'name',
                 'format'=>'raw',
-                'value' => function($data){return Html::a($data['name'],['view', 'id' => $data['id']]);}
+                'value' => function($data) use($renderer){return $renderer->render('item',['model'=>$data,'static_view'=>true]);}
             ],
             [
                 'attribute'=>'full_name',

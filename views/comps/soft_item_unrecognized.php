@@ -20,11 +20,7 @@ if (!isset($item['manufacturers_id'])) $item['manufacturers_id']=null;
 <?php if (!is_null($item['manufacturers_id'])){
     //если производитель определен, то выводим его из таблицы производителей в виде "кнопочки"
     $dev=\app\models\Manufacturers::fetchItem($item['manufacturers_id']);
-    echo \yii\helpers\Html::a(
-        $dev->name,
-        ['manufacturers/view', 'id' => $item['manufacturers_id'],'return'=>'previous'],
-        ['title'=>'Перейти к производителю']
-    );
+    echo $this->render('/manufacturers/item',['model'=>$dev]);
 } else {
     //иначе выводим производителя из отпечатка сканирования и предлагаем кнопочку чтобы его добавить в таблицу
     echo $item['publisher']; //название

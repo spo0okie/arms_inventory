@@ -10,12 +10,17 @@ use yii\helpers\Html;
 
 /* @var $model \app\models\Manufacturers */
 
+if (!isset($static_view)) $static_view=false;
+
 if (is_object($model)) {
 ?>
 
-<spam class="soft-item">
+<span class="manufacturers-item"
+	qtip_ajxhrf="<?= \yii\helpers\Url::to(['/manufacturers/ttip','id'=>$model->id])?>"
+>
 	<?= Html::a($model->name,['/manufacturers/view','id'=>$model->id]) ?>
-	<?= Html::a('<span class="glyphicon glyphicon-pencil"/>',['/manufacturers/update','id'=>$model->id]) ?>
-</spam>
+	
+	<?php if(!$static_view) echo Html::a('<span class="glyphicon glyphicon-pencil"/>',['/manufacturers/update','id'=>$model->id]) ?>
+</span>
 
 <?php } else echo "Отсутствует";
