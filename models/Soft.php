@@ -300,6 +300,34 @@ class Soft extends \yii\db\ActiveRecord
 	    asort ($list);
         return $list;
     }
-
-
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function beforeSave($insert)
+	{
+		//error_log('savin');
+		if (parent::beforeSave($insert)) {
+			
+			if (mb_strpos($this->descr,$this->manufacturer->name)===0) {
+				//название продукта начинается с имени производителя
+				$this->descr=trim(mb_substr($this->descr,mb_strlen($this->manufacturer->name)));
+				return true;
+			} else {
+				//проверяем все синонимы написания производителя
+				foreach ($this->manufacturer->manufacturersDicts as $dict) {
+					if (mb_strpos($this->descr,$dict->word)===0) {
+						$this->descr=trim(mb_substr($this->descr,mb_strlen($dict->word)));
+						return true;
+					}
+				}
+			}
+			return true;
+		} else {
+			//error_log('uh oh');
+		}
+		return false;
+	}
+	
+	
 }
