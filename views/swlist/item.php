@@ -34,7 +34,7 @@ $dev=\app\models\Manufacturers::fetchItem($product->manufacturers_id);
     <td class="os-name"><?= $model->name ?></td>
     <td class="manufacturer">
         <?= \yii\helpers\Html::a($dev->name,
-            ['/manufacturers','id'=>$dev->id],
+            ['/manufacturers/view','id'=>$dev->id],
             ['title' => 'Перейти к производителю']
         ) ?>
         <?= \yii\helpers\Html::a(
