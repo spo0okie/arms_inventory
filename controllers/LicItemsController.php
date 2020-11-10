@@ -34,7 +34,7 @@ class LicItemsController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['admin']],
-			    ['allow' => true, 'actions'=>['index','view','ttip'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
