@@ -36,7 +36,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'descr',
             'comment',
-            'items:ntext',
+			'items:ntext',
+			'additional:ntext',
             //'created_at',
         ],
     ]) ?>
