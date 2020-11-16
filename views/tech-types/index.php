@@ -21,7 +21,6 @@ $renderer=$this;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
-            //'code',
 	        [
 		        'attribute'=>'name',
 		        'format'=>'raw',
@@ -29,6 +28,7 @@ $renderer=$this;
 			        return $renderer->render('/tech-types/item',['model'=>$data]);
 		        }
 	        ],
+			'code',
 	        'techModelsCount',
 	        'usages',
 
