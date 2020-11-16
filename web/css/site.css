@@ -367,7 +367,8 @@ table.places-arms-container tr.tech_net_switch,
 table.places-arms-container tr.tech_net_router
 {background-color: plum}
 
-table.places-arms-container tr.tech_wifi_ap
+table.places-arms-container tr.tech_wifi_ap,
+table.places-arms-container tr.tech_wifi_router
 {background-color: lightskyblue}
 
 table.places-arms-container tr.tech_nas {
