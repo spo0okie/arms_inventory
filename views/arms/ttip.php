@@ -15,7 +15,7 @@ $static_view=true;
     Инвентарный номер:<?= $model->inv_num ?><br />
     <br />
 	
-	<?php if ($model->techModel->individual_specs) { ?>
+	<?php if (is_object($model->techModel) && $model->techModel->individual_specs) { ?>
 	<h4>Спецификация:</h4>
 		<?= \Yii::$app->formatter->asNtext($model->specs) ?>
 		<br />
