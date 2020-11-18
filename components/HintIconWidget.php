@@ -26,20 +26,19 @@ class HintIconWidget extends Widget
 	{
 		//по умолчанию домашняя
 		$search='';
-		//$obj= new \ReflectionClass($this->model);
-		//$const = $this->model->getConstants();
-		
-		//if (isset($const['helptitle'])) $search=$const['helptitle'];
-		
-		//\app\models\Comps::t
+
 		$title='$title';
 		$helptitle='$helptitle';
 		$model=$this->model;
+		
 		if (property_exists($this->model,'title')) $search=$model::$title;
 		if (property_exists($this->model,'helptitle')) $search=$model::$helptitle;
 		
-		$url=isset(\Yii::$app->params->wikiUrl)?\Yii::$app->params->wikiUrl:'https://github.com/spo0okie/arms_inventory/wiki';
-		if (strlen($search)) $url.='/'.$search;
+		if (isset(\Yii::$app->params['hintUrl'])) $url=\Yii::$app->params['hintUrl'];
+		elseif (isset(\Yii::$app->params['wikiUrl'])) $url=\Yii::$app->params['wikiUrl'];
+		else $url='https://github.com/spo0okie/arms_inventory/wiki';
+		
+		if (strlen($search)) $url.=$search;
 		return $this->render('hintIcon/icon', [
 			'hintText' => $this->hintText,
 			'href' => $url,
