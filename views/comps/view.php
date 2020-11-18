@@ -48,7 +48,7 @@ foreach ($model->swList->items as $item) {
 		<div class="hardware_settings">
 			<h4>Железо</h4>
 			<table><?php
-				foreach ($model->getHardArray() as $item) {
+				foreach ($model->getHardArray() as $item) if (!$item->globIgnored()){
 					echo $this->render('/hwlist/item',
 						compact('model','item', 'manufacturers')
 					);
