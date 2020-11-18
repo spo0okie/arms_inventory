@@ -60,8 +60,6 @@ asort($domains);
 	
     <?= $form->field($model, 'ignore_hw')->checkbox([]) ?>
 
-    <?= $form->field($model, 'exclude_hw')->textarea(['rows' => 6]) ?>
-
     <?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
 
     <p>
