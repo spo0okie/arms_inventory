@@ -25,26 +25,21 @@ if (count($filtered)) {
 ?>
 	<ul class="places_tree places_tree_lev_<?= $tree_level ?>">
 		<?php foreach ($filtered as $model) {
-			//рисуем элемнт ?>
+			//рисуем элемент ?>
 			<li>
                 <?= $this->render('item',['model'=>$model,'static_view'=>false]) ?>
+				<?= \yii\helpers\Html::a(
+					'<span class="glyphicon glyphicon-plus-sign"></span>',
+					['places/create','parent_id'=>$model->id],
+					['qtip_ttip'=>'Добавить дочернее помещение']
+				) ?>
                 <?= $subtree=$this->render('tree-list',[
                     'models'=>$models,
                     'parent_id'=>$model->id,
                     $tree_level+1
                 ]); ?>
-                <?php if (!strlen($subtree)) echo \yii\helpers\Html::a(
-                    '<span class="glyphicon glyphicon-plus-sign"></span>',
-                        ['places/create','parent_id'=>$model->id]
-                ) ?>
             </li>
 		<?php } ?>
-        <li>
-            <?= \yii\helpers\Html::a(
-	            'Добавить новое помещение',
-	            ['places/create','parent_id'=>$parent_id]
-            ) ?>
-        </li>
 	</ul>
 
 
