@@ -27,7 +27,7 @@ if (count($filtered)) {
 		<?php foreach ($filtered as $model) {
 			//рисуем элемнт ?>
 			<li>
-                <?= $this->render('item',['model'=>$model]) ?>
+                <?= $this->render('item',['model'=>$model,'static_view'=>false]) ?>
                 <?= $subtree=$this->render('tree-list',[
                     'models'=>$models,
                     'parent_id'=>$model->id,

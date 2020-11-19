@@ -9,6 +9,8 @@ use yii\helpers\Html;
 //qtip_class="qtip-wide"
 //	<?= Html::a('<span class="glyphicon glyphicon-pencil"/>',['/places/update','id'=>$model->id])
 
+if (!isset($static_view)) $static_view=true;
+
 if (is_object($model)) {
 
 ?>
@@ -31,6 +33,7 @@ if (is_object($model)) {
             ['/places/view','id'=>$model->id],
             ['qtip_ttip'=>$model->name,]
         );
+		if (!$static_view) echo Html::a('<span class="glyphicon glyphicon-pencil"/>',['/places/update','id'=>$model->id]);
     } ?>
 </span>
 
