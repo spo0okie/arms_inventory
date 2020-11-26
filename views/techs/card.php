@@ -18,7 +18,9 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
             'confirm' => 'Удалить оборудование из базы?',
             'method' => 'post',
         ],
-    ]):'' ?>
+    ]):'<span class="small">
+			<span class="glyphicon glyphicon-lock" title="Нельзя удалить оборудование, к которому привязаны другие объекты. Для удаления сначала надо отвязать Материалы и Документы. (Если материалы действительно израсходованы на оборудование, то удалять его нельзя, надо поставить ему статус списано)"></span>
+		</span>' ?>
 </h1>
 
 <?= $this->render('/tech-models/item',['model'=>$model->model]) ?>

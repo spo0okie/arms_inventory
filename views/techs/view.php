@@ -8,7 +8,7 @@ use yii\bootstrap\Modal;
 /* @var $model app\models\Techs */
 
 $this->title = $model->num;
-$this->params['breadcrumbs'][] = ['label' => 'Techs', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\Techs::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
