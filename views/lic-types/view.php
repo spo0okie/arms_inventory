@@ -6,34 +6,13 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicTypes */
 
-$this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Lic Types', 'url' => ['index']];
+$this->title = $model->descr;
+$this->params['breadcrumbs'][] = ['label' => \app\models\LicTypes::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="lic-types-view">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
-    </p>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'id',
-            'name',
-            'descr',
-            'comment',
-            'created_at',
-        ],
-    ]) ?>
-
+    <?= $this->render('card',compact('model')) ?>
+</div>
+<div class="wiki-render-area">
+	<?= \app\components\WikiPageWidget::Widget(['list'=>$model->links]) ?>
 </div>

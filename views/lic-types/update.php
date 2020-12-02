@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicTypes */
 
-$this->title = 'Редактирование лицензии: '.$model->descr;
-$this->params['breadcrumbs'][] = ['label' => 'Типы лицензирования', 'url' => ['index']];
+$this->title = 'Редактирование: '.$model->descr;
+$this->params['breadcrumbs'][] = ['label' => \app\models\LicTypes::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="lic-types-update">

@@ -6,8 +6,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicTypes */
 
-$this->title = 'Добавление типа лицензирования';
-$this->params['breadcrumbs'][] = ['label' => 'Типы лицензирования', 'url' => ['index']];
+$this->title = 'Добавление схемы лицензирования';
+$this->params['breadcrumbs'][] = ['label' => \app\models\LicTypes::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="lic-types-create">

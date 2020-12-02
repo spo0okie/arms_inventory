@@ -33,7 +33,7 @@ $deleteable=!count($arms)&&!count($contracts);
                     ],
                 ]); else { ?>
 					<span class="small">
-						<span class="glyphicon glyphicon-lock"	title="Невозможно в данный момент удалить эту закупку лицнзий, т.к. присутствуют привязанные объекты: документы или АРМы."></span>
+						<span class="glyphicon glyphicon-lock"	title="Невозможно в данный момент удалить эту закупку лицензий, т.к. присутствуют привязанные объекты: документы или АРМы."></span>
 					</span>
 				<?php } ?>
             </h3>

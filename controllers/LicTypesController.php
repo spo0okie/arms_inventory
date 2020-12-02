@@ -4,7 +4,7 @@ namespace app\controllers;
 
 use Yii;
 use app\models\LicTypes;
-use yii\data\ActiveDataProvider;
+use app\models\LicTypesSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -47,15 +47,28 @@ class LicTypesController extends Controller
      */
     public function actionIndex()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => LicTypes::find(),
-        ]);
-
-        return $this->render('index', [
-            'dataProvider' => $dataProvider,
-        ]);
+		$searchModel = new LicTypesSearch();
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+	
+		return $this->render('index', [
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
+		]);
     }
-
+	
+	/**
+	 * Displays a tooltip for single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionTtip($id)
+	{
+		return $this->renderPartial('ttip', [
+			'model' => $this->findModel($id),
+		]);
+	}
+	
     /**
      * Displays a single LicTypes model.
      * @param integer $id

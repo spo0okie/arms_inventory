@@ -11,12 +11,16 @@ use Yii;
  * @property string $name Служебное имя
  * @property string $descr Описание
  * @property string $comment Комментарий
+ * @property string $links Ссылки
  * @property string $created_at Время создания
  *
- * @property LicItems[] $licItems
+ * @property LicGroups[] $licGroups Группы лицензий по этой схеме
  */
 class LicTypes extends \yii\db\ActiveRecord
 {
+	
+	public static $title='Схемы лицензирования';
+	
     /**
      * @inheritdoc
      */
@@ -32,31 +36,47 @@ class LicTypes extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'descr', 'comment'], 'required'],
-            [['created_at'], 'safe'],
+            [['created_at','links'], 'safe'],
             [['name'], 'string', 'max' => 32],
             [['descr'], 'string', 'max' => 128],
             [['name'], 'unique'],
         ];
     }
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function attributeLabels()
+	{
+		return [
+			'id' => 'Идентификатор',
+			'name' => 'Служебное имя',
+			'descr' => 'Описание',
+			'comment' => 'Комментарий',
+			'links' => 'Ссылки',
+			'created_at' => 'Время создания',
+		];
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'Идентификатор',
-            'name' => 'Служебное имя',
-            'descr' => 'Описание',
-            'comment' => 'Комментарий',
-            'created_at' => 'Время создания',
-        ];
-    }
-
-    /**
+	/**
+	 * @inheritdoc
+	 */
+	public function attributeHints()
+	{
+		return [
+			'name' => 'Машинное название схемы латиницей, в нижнем регистре и без пробелов. Пока не используется ни для чего. Формально можно использовать в CSS оформлении, но не реализовано и это',
+			'descr' => 'Понятное для человека название схемы',
+			'comment' => 'Подробное описание схемы лицензирования. Если описание сложное, можно завести страничку в Вики а сюда добавить ссылку в соотв поле, можно добавить ссылку на официальную документацию',
+			'links' => \app\components\UrlListWidget::$hint.' Желательно указать ссылку на описание схемы лицензирования в интернете',
+			'created_at' => 'Время создания',
+		];
+	}
+	
+	
+	/**
      * @return \yii\db\ActiveQuery
      */
-    public function getGroups()
+    public function getLicGroups()
     {
         return $this->hasMany(LicGroups::className(), ['lic_types_id' => 'id']);
     }
