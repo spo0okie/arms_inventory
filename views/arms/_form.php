@@ -152,7 +152,7 @@ if ($model->isNewRecord) {
 		<?= (is_object($model) && is_object($model->techModel) && $model->techModel->individual_specs)?'':'style="display:none"' ?>
 	>
 		<div class="col-md-4" >
-			<?= $form->field($model, 'specs')->textarea(['rows' => max(6,count(explode("\n",$model->history)))]) ?>
+			<?= $form->field($model, 'specs')->textarea(['rows' => max(6,count(explode("\n",$model->specs)))]) ?>
 		</div>
 		<div class="col-md-4" >
 			<label class="control-label" >
