@@ -303,7 +303,8 @@ class ArmsController extends Controller
                 $model->hwList->add($newItem);
             }
             //error_log('savin');
-            if (!$model->save()) error_log(print_r($model->errors,true));
+			//сохраняем без проверки валидности, т.к. пользователь не может изменить данные
+            if (!$model->save(false)) error_log(print_r($model->errors,true));
         }
 
         return $this->redirect(['view', 'id' => $model->id]);
@@ -323,7 +324,8 @@ class ArmsController extends Controller
         //проверяем передан ли uid
         if (strlen(Yii::$app->request->get('uid',null))) {
             $model->hwList->del(Yii::$app->request->get('uid'));
-            $model->save();
+			//сохраняем без проверки валидности, т.к. пользователь не может изменить данные
+			$model->save(false);
         }
 
         return $this->redirect(['view', 'id' => $model->id]);

@@ -33,5 +33,6 @@ tests/_support/_generated
 
 #private config
 config/db.php
+config/params.php
 
 web/scans
