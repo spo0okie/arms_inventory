@@ -278,6 +278,7 @@ DELIMITER ;
 
 	public static function fetchFullName($id){
 		$item=self::fetchItem($id);
+		if (!is_object($item)) return "err: Place #".$id;
 		$name=$item->short;
 		if ($item->parent_id) $name=self::fetchFullName($item->parent_id).'/'.$name;
 		return $name;
