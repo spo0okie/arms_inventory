@@ -31,7 +31,7 @@ class CompsController extends Controller
 		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
-				['allow' => true, 'actions'=>['create','update','delete','unlink','addsw','rmsw','ignoreip','unignoreip'], 'roles'=>['admin']],
+				['allow' => true, 'actions'=>['create','update','delete','unlink','addsw','rmsw','ignoreip','unignoreip'], 'roles'=>['editor']],
 				['allow' => true, 'actions'=>['index','view','ttip','ttip-hw','item','item-by-name'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {

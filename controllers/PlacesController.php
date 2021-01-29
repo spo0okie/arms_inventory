@@ -32,7 +32,7 @@ class PlacesController extends Controller
 	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['admin']],
+			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
 			    ['allow' => true, 'actions'=>['index','view','ttip','validate','armmap','depmap'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {

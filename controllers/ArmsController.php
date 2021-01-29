@@ -33,7 +33,7 @@ class ArmsController extends Controller
 		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
-				['allow' => true, 'actions'=>['create','create-apply','update','update-apply','delete','unlink','updhw','rmhw'], 'roles'=>['admin']],
+				['allow' => true, 'actions'=>['create','create-apply','update','update-apply','delete','unlink','updhw','rmhw'], 'roles'=>['editor']],
 				['allow' => true, 'actions'=>['index','view','ttip','ttip-hw','validate','contracts'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
