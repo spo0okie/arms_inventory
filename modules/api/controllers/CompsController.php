@@ -26,7 +26,8 @@ class CompsController extends \yii\rest\ActiveController
 	
 		//добавляем фильтрацию по IP если он есть
 		if (!is_null($ip)) {
-			$query->andFilterWhere(['like','ip',$ip]);
+			//если передано несколько адресов (через пробел)
+			$query->andFilterWhere(['or like','ip',explode(' ',trim($ip))]);
 			$notFoundDescription.=" with IP $ip";
 		}
 	
