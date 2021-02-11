@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\Comps;
 use app\models\CompsSearch;
+use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -31,7 +32,7 @@ class CompsController extends Controller
 		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
-				['allow' => true, 'actions'=>['create','update','delete','unlink','addsw','rmsw','ignoreip','unignoreip'], 'roles'=>['editor']],
+				['allow' => true, 'actions'=>['create','update','delete','unlink','addsw','rmsw','ignoreip','unignoreip','dupes'], 'roles'=>['editor']],
 				['allow' => true, 'actions'=>['index','view','ttip','ttip-hw','item','item-by-name'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
@@ -53,6 +54,35 @@ class CompsController extends Controller
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+	
+    /**
+     * Lists all Comps models.
+     * @return mixed
+     */
+    public function actionDupes()
+    {
+		$dupes = (new \yii\db\Query())
+			->select(['GROUP_CONCAT(id) ids','name','COUNT(*) c'])
+			->from('comps')
+			->groupBy(['name'])
+			->having('c > 1')
+			->all();
+		$ids=[];
+		foreach ($dupes as $item) $ids=array_merge($ids , explode(',',$item['ids']));
+	
+		// add conditions that should always apply here
+		
+		$query=Comps::find()->where(['id'=>$ids]);
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+			'pagination' => ['pageSize' => 100,],
+		]);
+	
+        return $this->render('index', [
+            'dataProvider' => $dataProvider,
+			'searchModel' => null
         ]);
     }
 	

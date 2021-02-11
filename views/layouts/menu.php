@@ -85,6 +85,7 @@ NavBar::begin([
 					['label' => 'Домены', 'url' => ['/domains/index']],
 					['label' => \app\models\Segments::$title, 'url' => ['/segments/index']],
 					['label' => \app\models\LoginJournal::$title, 'url' => ['/login-journal/index']],
+					['label' => 'Дубликаты', 'url' => ['/comps/dupes']],
 				],
 			]:'',
 			\app\models\Users::isViewer()?
