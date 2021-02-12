@@ -72,11 +72,14 @@ for ($i=0; $i<count($comps); $i++) {
         <?php if ($model->is_server) {
         	$services=[];
 			if (isset($comp->user))
-				$services[]='Польз.:'.$this->render('/users/item',['model'=>$comp->user]);
+				$services[]='<span class="glyphicon glyphicon-user small"></span> '.$this->render('/users/item',['model'=>$comp->user]);
 			if (isset($comp->services))
 				foreach ($comp->services as $svc)
 					$services[]=$this->render('/services/item',['model'=>$svc]);
-		?>
+			if (!empty($comp->comment))
+				$services[]='<span class="glyphicon glyphicon-comment small"></span> '.$comp->comment;
+	
+			?>
             <td colspan="2" class="arm_services"><?= implode('<br />',$services); ?></td>
         <?php } else if (!$i) { ?>
 
