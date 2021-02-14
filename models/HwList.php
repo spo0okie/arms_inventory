@@ -223,7 +223,9 @@ class HwList {
 		    if ($item->type == \app\models\HwListItem::$TYPE_RAM) $ram+=(int)substr($item->product,0,-3);
 	    }
 	    if (!$ram) return '';
-	    return (int)($ram/1024).'GiB';
+	    return ((int)$ram < 1024)?
+			(int)($ram).'MiB'
+			:(int)($ram/1024).'GiB';
     }
 
 	public function getHDDShort(){
