@@ -575,6 +575,14 @@ ul.ul-dropfree div.drop {
     cursor: default;
 }
 
+.grayed-out {
+    color: dimgray;
+}
+
+.grayed-out:hover {
+    color: black;
+}
+
 
 /* Корректировки BOOTSTRAP */
 

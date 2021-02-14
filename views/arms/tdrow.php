@@ -71,13 +71,19 @@ for ($i=0; $i<count($comps); $i++) {
 		
         <?php if ($model->is_server) {
         	$services=[];
-			if (isset($comp->user))
-				$services[]='<span class="glyphicon glyphicon-user small"></span> '.$this->render('/users/item',['model'=>$comp->user]);
-			if (isset($comp->services))
-				foreach ($comp->services as $svc)
+			if (isset($comp->services)) {
+				$renderServices=$comp->services;
+				\yii\helpers\ArrayHelper::multisort($renderServices,['name']);
+				foreach ($renderServices as $svc)
 					$services[]=$this->render('/services/item',['model'=>$svc]);
+			}
+			
+				
+			if (isset($comp->user))
+				$services[]='<span class="glyphicon glyphicon-user small grayed-out href"></span> '.$this->render('/users/item',['model'=>$comp->user]);
+			
 			if (!empty($comp->comment))
-				$services[]='<span class="glyphicon glyphicon-comment small"></span> '.$comp->comment;
+				$services[]='<span class="grayed-out href"><span class="glyphicon glyphicon-comment small"></span> '.$comp->comment.'</span>';
 	
 			?>
             <td colspan="2" class="arm_services"><?= implode('<br />',$services); ?></td>
