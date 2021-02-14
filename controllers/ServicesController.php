@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\Services;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -153,8 +154,10 @@ class ServicesController extends Controller
         $model = new Services();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
+            //return $this->redirect(['view', 'id' => $model->id]);
+			return $this->redirect(Url::previous());
+	
+		}
 
         return $this->render('create', [
             'model' => $model,
@@ -173,7 +176,8 @@ class ServicesController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+			return $this->redirect(Url::previous());
+            //return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('update', [
@@ -194,8 +198,9 @@ class ServicesController extends Controller
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
+		return $this->redirect(Url::previous());
 
-        return $this->redirect(['index']);
+        //return $this->redirect(['index']);
     }
 
     /**
