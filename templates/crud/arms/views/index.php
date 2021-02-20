@@ -22,6 +22,7 @@ use <?= $generator->indexWidgetType === 'grid' ? "yii\\grid\\GridView" : "yii\\w
 
 $this->title = <?= $generator->modelClass ?>::$title;
 $this->params['breadcrumbs'][] = $this->title;
+$renderer=$this;
 ?>
 <div class="<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>-index">
 
@@ -39,31 +40,49 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= "<?= " ?>GridView::widget([
         'dataProvider' => $dataProvider,
         <?= !empty($generator->searchModelClass) ? "'filterModel' => \$searchModel,\n        'columns' => [\n" : "'columns' => [\n"; ?>
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
 
 <?php
 $count = 0;
 if (($tableSchema = $generator->getTableSchema()) === false) {
     foreach ($generator->getColumnNames() as $name) {
-        if (++$count < 6) {
-            echo "            '" . $name . "',\n";
-        } else {
-            echo "            //'" . $name . "',\n";
-        }
+		if (++$count < 6) {
+			echo "            '" . $name . "',\n";
+		} else {
+			echo "            //'" . $name . "',\n";
+		}
     }
 } else {
     foreach ($tableSchema->columns as $column) {
         $format = $generator->generateColumnFormat($column);
-        if (++$count < 6) {
-            echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
-        } else {
-            echo "            //'" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
-        }
+		switch ($column->name) {
+			case $nameAttribute:
+				echo "            [\n";
+				echo "                'attribute'=>'$nameAttribute',\n";
+				echo "                'format'=>'raw',\n";
+				echo "                'value'=>function(\$data) use (\$renderer){\n";
+				echo "                    return \$renderer->render('item',['model'=>\$data]);\n";
+				echo "                }\n";
+				echo "            ],\n";
+				break;
+			case 'comment';
+				echo "            '" . $column->name . ":ntext',\n";
+				break;
+			case 'id';
+				echo "            //'" . $column->name . "',\n";
+				break;
+			default:
+				if (++$count < 6) {
+					echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
+				} else {
+					echo "            //'" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
+				}
+		}
     }
 }
 ?>
 
-            ['class' => 'yii\grid\ActionColumn'],
+            //['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 <?php else: ?>

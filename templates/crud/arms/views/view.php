@@ -22,39 +22,7 @@ $this->params['breadcrumbs'][] = ['label' => <?= $generator->modelClass ?>::$tit
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 
-$deleteable=true; //тут переопределить возможность удаления элемента
 ?>
 <div class="<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>-view">
-
-    <h1>
-	    <?= "<?= " ?>Html::encode($this->title) ?>
-	    <?= "<?= " ?>Html::a('<span class=\"glyphicon glyphicon-pencil\"></span>', ['update', 'id' => $model->id]) ?>
-	    <?= "<?php " ?> if($deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"></span>', ['users/delete', 'id' => $model->id], [
-		    'data' => [
-			    'confirm' => 'Удалить этот элемент?',
-			    'method' => 'post',
-		    ],
-	    ]) ?>
-
-
-    </h1>
-
-    <?= "<?= " ?>DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-<?php
-if (($tableSchema = $generator->getTableSchema()) === false) {
-    foreach ($generator->getColumnNames() as $name) {
-        echo "            '" . $name . "',\n";
-    }
-} else {
-    foreach ($generator->getTableSchema()->columns as $column) {
-        $format = $generator->generateColumnFormat($column);
-        echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
-    }
-}
-?>
-        ],
-    ]) ?>
-
+	<?= "<?= " ?>$this->render('card',['model'=>$model]) ?>
 </div>

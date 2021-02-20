@@ -9,6 +9,7 @@ use Yii;
  *
  * @property int $id
  * @property string $name
+ * @property string $code
  * @property string $description
  */
 class Segments extends \yii\db\ActiveRecord
@@ -29,22 +30,36 @@ class Segments extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name'], 'string', 'max' => 32],
-            [['description'], 'string', 'max' => 255],
+			[['name'], 'string', 'max' => 32],
+            [['code','description'], 'string', 'max' => 255],
         ];
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'name' => 'Название',
-            'description' => 'Описание',
-        ];
-    }
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function attributeLabels()
+	{
+		return [
+			'id' => 'ID',
+			'code' => 'Код',
+			'name' => 'Название',
+			'description' => 'Описание',
+		];
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function attributeHints()
+	{
+		return [
+			'id' => 'ID',
+			'code' => 'Название класса CSS для раскраски. Нигде не видно в явном виде',
+			'name' => 'Понятное человеку название',
+			'description' => 'Подробное описание, если не ясно из названия',
+		];
+	}
 	
 	public static function fetchNames(){
 		$list= static::find()

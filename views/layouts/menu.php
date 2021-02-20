@@ -70,11 +70,11 @@ NavBar::begin([
 				]
 			]:'',
 			\app\models\Users::isViewer()?
-			['label' => 'Софт',
+			['label' => 'Сети',
 				'items' => [
-					['label' => 'Разработчики', 'url' => ['/manufacturers/index']],
-					['label' => 'Продукты', 'url' => ['/soft/index']],
-					['label' => 'Списки ПО', 'url' => ['/soft-lists/index']],
+					['label' => \app\models\Networks::$title, 'url' => ['/networks/index']],
+					['label' => \app\models\NetVlans::$title, 'url' => ['/net-vlans/index']],
+					['label' => \app\models\NetDomains::$title, 'url' => ['/net-domains/index']],
 				],
 			]:'',
 			\app\models\Users::isViewer()?
@@ -86,6 +86,13 @@ NavBar::begin([
 					['label' => \app\models\Segments::$title, 'url' => ['/segments/index']],
 					['label' => \app\models\LoginJournal::$title, 'url' => ['/login-journal/index']],
 					['label' => 'Дубликаты', 'url' => ['/comps/dupes']],
+					['label' => 'Софт',
+						'items' => [
+							['label' => 'Разработчики', 'url' => ['/manufacturers/index']],
+							['label' => 'Продукты', 'url' => ['/soft/index']],
+							['label' => 'Списки ПО', 'url' => ['/soft-lists/index']],
+						],
+					]
 				],
 			]:'',
 			\app\models\Users::isViewer()?

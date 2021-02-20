@@ -27,6 +27,7 @@ use Yii;
 <?php foreach ($properties as $property => $data): ?>
  * @property <?= "{$data['type']} \${$property}"  . ($data['comment'] ? ' ' . strtr($data['comment'], ["\n" => ' ']) : '') . "\n" ?>
 <?php endforeach; ?>
+ * @property string sname
 <?php if (!empty($relations)): ?>
  *
 <?php foreach ($relations as $name => $relation): ?>
@@ -101,12 +102,26 @@ class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . 
     }
 <?php endif; ?>
 
+	/**
+	 * Name for search
+	 * @return string
+	 */
+	public function getSname()
+	{
+		return $this->name;
+	}
 
+
+	/**
+	 * Возвращает список всех элементов
+	 * @return array|mixed|null
+	 */
     public static function fetchNames(){
         $list= static::find()
             //->joinWith('some_join')
             //->select(['id','name'])
+			->orderBy(['name'])
             ->all();
-        return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
+        return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
     }
 }

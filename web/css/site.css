@@ -411,6 +411,11 @@ td.arm_hostname.week_fresh {background-color: lightgreen}
 td.arm_hostname.month_fresh {background-color: lightgoldenrodyellow}
 td.arm_hostname.over_month_fresh {background-color: lightpink}
 
+/* РАСКРАСКА СЕГМЕНТОВ СЕТИ */
+span.segment_open {background-color: lightgreen; border-radius: 7px}
+span.segment_closed {background-color: pink; border-radius: 7px}
+span.segment_common {background-color: lightskyblue; border-radius: 7px}
+
 /* СЕРВЕР */
 /*
 Тут у нас ушлепский хак. вместе элегантного полупрозрачного градиента пришлось сделать непрозрачный с нужными оттенками
@@ -570,7 +575,6 @@ ul.ul-dropfree div.drop {
     cursor: pointer;
 }
 
-
 .cursor-default {
     cursor: default;
 }
@@ -594,4 +598,8 @@ ul.ul-dropfree div.drop {
 
 .container-large {
     max-width: 100%;
+}
+
+.text-monospace {
+    font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
 }

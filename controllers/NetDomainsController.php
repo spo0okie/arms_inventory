@@ -3,19 +3,17 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Segments;
+use app\models\NetDomains;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\Url;
-use yii\bootstrap\ActiveForm;
-
 
 /**
- * SegmentsController implements the CRUD actions for Segments model.
+ * NetDomainsController implements the CRUD actions for NetDomains model.
  */
-class SegmentsController extends Controller
+class NetDomainsController extends Controller
 {
 
 	/**
@@ -36,7 +34,7 @@ class SegmentsController extends Controller
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','update','delete',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','view','ttip'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -46,38 +44,19 @@ class SegmentsController extends Controller
 	}
 
     /**
-     * Lists all Segments models.
+     * Lists all NetDomains models.
      * @return mixed
      */
     public function actionIndex()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => Segments::find(),
+            'query' => NetDomains::find(),
         ]);
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
         ]);
     }
-
-	/**
-	* Validates  model on update.
-	* @param null $id
-	* @return mixed
-	* @throws NotFoundHttpException
-	*/
-	public function actionValidate($id=null)
-	{
-		if (!is_null($id))
-			$model = $this->findModel($id);
-		else
-			$model = new Segments();
-
-		if ($model->load(Yii::$app->request->post())) {
-			Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-			return ActiveForm::validate($model);
-		}
-	}
 
 
 	/**
@@ -109,7 +88,7 @@ class SegmentsController extends Controller
 
 
     /**
-     * Displays a single Segments model.
+     * Displays a single NetDomains model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -122,13 +101,13 @@ class SegmentsController extends Controller
     }
 
     /**
-     * Creates a new Segments model.
+     * Creates a new NetDomains model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Segments();
+        $model = new NetDomains();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
@@ -141,7 +120,7 @@ class SegmentsController extends Controller
     }
 
     /**
-     * Updates an existing Segments model.
+     * Updates an existing NetDomains model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -162,7 +141,7 @@ class SegmentsController extends Controller
     }
 
     /**
-     * Deletes an existing Segments model.
+     * Deletes an existing NetDomains model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -176,15 +155,15 @@ class SegmentsController extends Controller
     }
 
     /**
-     * Finds the Segments model based on its primary key value.
+     * Finds the NetDomains model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Segments the loaded model
+     * @return NetDomains the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Segments::findOne($id)) !== null) {
+        if (($model = NetDomains::findOne($id)) !== null) {
             return $model;
         }
 

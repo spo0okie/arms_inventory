@@ -41,7 +41,8 @@
         "bower-asset/font-awesome": "^5.7",
         "edvlerblog/yii2-adldap-module": "^6.0.0",
         "johnitvn/yii2-rbac-plus": "dev-master",
-        "loveorigami/yii2-modal-ajax": "@dev"
+        "loveorigami/yii2-modal-ajax": "@dev",
+        "rlanvin/php-ip": "^2.1"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

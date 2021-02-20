@@ -6,11 +6,11 @@ use yii\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = app\models\Segments::$title;
+$this->title = \app\models\NetDomains::$title;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
-<div class="segments-index">
+<div class="net-domains-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -31,8 +31,7 @@ $renderer=$this;
                     return $renderer->render('item',['model'=>$data]);
                 }
             ],
-            'description',
-            'code',
+            'comment:ntext',
 
             //['class' => 'yii\grid\ActionColumn'],
         ],
