@@ -4,12 +4,12 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Networks;
+use app\models\NetIps;
 
 /**
- * NetworksSearch represents the model behind the search form of `app\models\Networks`.
+ * NetIpsSearch represents the model behind the search form of `app\models\NetIps`.
  */
-class NetworksSearch extends Networks
+class NetIpsSearch extends NetIps
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,8 @@ class NetworksSearch extends Networks
     public function rules()
     {
         return [
-            [['id', 'vlan_id', 'addr', 'mask', 'router', 'dhcp'], 'integer'],
-            [['name', 'comment','domain'], 'safe'],
+            [['id', 'addr', 'mask'], 'integer'],
+            [['text_addr'], 'safe'],
         ];
     }
 
@@ -40,7 +40,7 @@ class NetworksSearch extends Networks
      */
     public function search($params)
     {
-        $query = Networks::find();
+        $query = NetIps::find();
 
         // add conditions that should always apply here
 
@@ -59,15 +59,11 @@ class NetworksSearch extends Networks
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'vlan_id' => $this->vlan_id,
             'addr' => $this->addr,
             'mask' => $this->mask,
-            'router' => $this->router,
-            'dhcp' => $this->dhcp,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query->andFilterWhere(['like', 'text_addr', $this->text_addr]);
 
         return $dataProvider;
     }

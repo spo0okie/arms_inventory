@@ -6,6 +6,7 @@ use yii\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\NetVlansSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+\yii\helpers\Url::remember();
 
 $this->title = \app\models\NetVlans::$title;
 $this->params['breadcrumbs'][] = $this->title;

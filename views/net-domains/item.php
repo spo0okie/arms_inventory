@@ -9,7 +9,7 @@ if (!empty($model)) {
 	if (!isset($name)) $name=$model->name;
 	?>
 
-	<span class="net-domains-item"
+	<span class="net-domains-item text-monospace net-domain-<?= $model->name ?>"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['net-domains/ttip','id'=>$model->id]) ?>"
 	>
 		<?=  Html::a($name,['net-domains/view','id'=>$model->id]) ?>

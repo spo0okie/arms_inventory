@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
 
-$deleteable=true; //тут переопределить возможность удаления элемента
+$deleteable=count($model->ips); //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
 
 ?>
@@ -23,15 +23,35 @@ if (!isset($static_view)) $static_view=false;
 </h1>
 <?= Yii::$app->formatter->asNtext($model->comment) ?>
 
-<?php if (!empty($model->vlan_id)) { ?>
-	<h4>VLAN: <?= $this->render('/net-vlans/item',['model'=>$model->netVlan]) ?></h4>
+<?php if (is_object($model->netVlan)) { ?>
+	<h4>
+		VLAN: <?= $this->render('/net-vlans/item',['model'=>$model->netVlan]) ?>
+		<?php if (is_object($model->netVlan->segment)) { ?>
+			→ Сегмент <?= $this->render('/segments/item',['model'=>$model->netVlan->segment]) ?>
+		<?php } ?>
+	</h4>
 <?php } ?>
-<br />
-<br />
-<h4>Шлюз</h4>
-<?= $model->readableRouter; ?>
-<br />
-<br />
-<h4>DHCP</h4>
-<?= $model->readableDhcp; ?>
 
+<?php if (is_object($model->netVlan)) { ?>
+	<h4>L2 Домен: <?= $this->render('/net-domains/item',['model'=>$model->netDomain]) ?></h4>
+<?php } ?>
+
+	<br />
+	<div class="row">
+		<div class="col-md-6">
+			<h4>Шлюз</h4>
+			<?= $model->readableRouter; ?>
+		</div>
+		<div class="col-md-6">
+			<h4>DHCP</h4>
+			<?= $model->readableDhcp; ?>
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-md-12">
+			<h4>Использовано:</h4>
+			<?= $this->render('used',['model'=>$model]) ?>
+		</div>
+	</div>
+<?php

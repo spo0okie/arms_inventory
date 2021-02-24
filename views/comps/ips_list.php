@@ -5,6 +5,8 @@
  * Date: 01.03.2019
  * Time: 19:18
  */
+/* @var $this yii\web\View */
+/* @var $model app\models\Comps */
 
 if (!isset($static_view)) $static_view=false;
 
@@ -13,7 +15,7 @@ if (!isset($static_view)) $static_view=false;
         <h4>IP адрес(а)</h4>
         <?php
 		$output=[];
-        $ignored=explode("\n",$model->ip_ignore);
+        /*$ignored=explode("\n",$model->ip_ignore);
         foreach (explode("\n",$model->ip) as $ip) {
             $ip=trim($ip);
             if (strlen($ip)) {
@@ -38,6 +40,9 @@ if (!isset($static_view)) $static_view=false;
 				$current.='</span>';
                 $output[]=$current;
         	}
-        }
-        echo implode('<br />',$output);
+        }*/
+		foreach ($model->netIps as $ip) {
+			$output[]=$this->render('/net-ips/item',['model'=>$ip]);
+		}
+		echo implode('<br />',$output);
 		?>

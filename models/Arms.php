@@ -393,7 +393,7 @@ class Arms extends \yii\db\ActiveRecord
 		foreach ($this->techs as $tech) if ($tech->isUps) $this->ups_cache[]=$tech;
 		return $this->ups_cache;
 	}
-
+	
 	/**
 	 * Возвращает набор документов
 	 */
@@ -402,7 +402,7 @@ class Arms extends \yii\db\ActiveRecord
 		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])->from(['arms_contracts'=>Contracts::tableName()])
 			->viaTable('{{%contracts_in_arms}}', ['arms_id' => 'id']);
 	}
-
+	
 	/**
 	 * Возвращает набор документов
 	 */

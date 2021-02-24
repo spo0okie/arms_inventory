@@ -27,6 +27,7 @@ use Yii;
  * @property bool $isVoipPhone Является IP телефоном
  * @property bool $isUps Является UPS
  * @property array $contracts_ids Список документов
+ * @property array $netIps_ids Список IP
  *
  * @property Users $user
  * @property Users $itStaff
@@ -84,6 +85,15 @@ class Techs extends \yii\db\ActiveRecord
 	        [['num', 'user_id', 'it_staff_id', 'ip'], 'string', 'max' => 16],
 	        [['mac'], 'string', 'max' => 17],
             [['inv_num', 'sn'], 'string', 'max' => 128],
+			['ip', 'filter', 'filter' => function ($value) {
+				if (count($items=explode("\n",$value))) {
+					$newValue=[];
+					foreach ($items as $item) if (NetIps::filterLocal(trim($item))) $newValue[]=trim($item);
+					return implode("\n",$newValue);
+				}
+				return '';
+			}],
+			['ip', 'ip','ipv6'=>false,'subnet'=>null],
 	        [['user_id', 'it_staff_id'], 'filter', 'filter' => function ($value) {
         	    //заменяем пустые значения табельных номеров на NULL
 		        return strlen($value)?$value:null;
@@ -131,6 +141,7 @@ class Techs extends \yii\db\ActiveRecord
 				'relations' => [
 					'contracts_ids' => 'contracts',
 					'services_ids' => 'services',
+					'netIps_ids' => 'netIps',
 				]
 			]
 		];
@@ -353,8 +364,34 @@ class Techs extends \yii\db\ActiveRecord
 					:''
 			);
 	}
-
-
+	
+	
+	/**
+	 * Имея текстовый список IP возвращает ids объектов IP адресов
+	 */
+	public function fetchIpIds() {
+		if (!count($items=explode("\n",$this->ip))) return[];
+		$ids=[];
+		foreach ($items as $item) {
+			if (strlen(trim($item)))
+				$ids[]=NetIps::fetchByTextAddr($item);
+		}
+		return $ids;
+	}
+	
+	
+	/**
+	 * Возвращает IP адреса
+	 */
+	public function getNetIps()
+	{
+		return static::hasMany(NetIps::className(), ['id' => 'ips_id'])->from(['techs_ip'=>NetIps::tableName()])
+			->viaTable('{{%ips_in_techs}}', ['techs_id' => 'id']);
+	}
+	
+	
+	
+	
 	/**
 	 * Возвращает первый свободный инвентарный номер с заданным инв. номером
 	 * @param $idx текущий инв. номер
@@ -427,6 +464,8 @@ class Techs extends \yii\db\ActiveRecord
 			->viaTable('{{%techs_in_services}}', ['tech_id' => 'id']);
 	}
 	
+	
+	
 	public static function fetchNames(){
 		$list= static::find()
 			->joinWith(['model','model.type','origPlace','arm','arm.place'])
@@ -453,6 +492,37 @@ class Techs extends \yii\db\ActiveRecord
 			
 			$this->mac=preg_replace('/[^0-9a-f]/', '', mb_strtolower($this->mac));
 			
+			/* взаимодействие с NetIPs */
+			$this->netIps_ids=$this->fetchIpIds();
+			
+			//грузим старые значения записи
+			$old=static::findOne($this->id);
+			if (!is_null($old)) {
+				//находим все IP адреса которые от этой ОС отвалились
+				$removed = array_diff($old->netIps_ids, $this->netIps_ids);
+				//если есть отвязанные от это ос адреса
+				if (count($removed)) foreach ($removed as $id) {
+					//если он есть в БД
+					if (is_object($ip = NetIps::findOne($id))) {
+						//если к нему привязан только один комп
+						if (
+							(
+								!is_array($ip->comps)    //у него нет привязанных компов
+								||                        //или
+								count($ip->comps) == 0    //привязан только один
+							) && (                        //и
+								!is_array($ip->techs)    //у него нет привязанных компов
+								||                        //или
+								count($ip->techs) == 1    //привязано 0
+							) && (
+								$ip->techs[0]->id == $this->id //к нему привязана именно эта ОС
+							)
+						) {
+							$ip->delete();
+						}
+					};
+				}
+			}
 			return true;
 		}
 		return false;

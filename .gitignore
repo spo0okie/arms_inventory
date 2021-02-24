@@ -36,3 +36,4 @@ config/db.php
 config/params.php
 
 web/scans
+/config/ldap.php

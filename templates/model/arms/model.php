@@ -38,7 +38,8 @@ use Yii;
 class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . "\n" ?>
 {
 
-    public static $title='Новые элементы';
+public static $title='<?= $className ?>';
+public static $titles='<?= $className ?>ы';
 
     /**
      * {@inheritdoc}

@@ -19,8 +19,9 @@ use <?= $generator->indexWidgetType === 'grid' ? "yii\\grid\\GridView" : "yii\\w
 /* @var $this yii\web\View */
 <?= !empty($generator->searchModelClass) ? "/* @var \$searchModel " . ltrim($generator->searchModelClass, '\\') . " */\n" : '' ?>
 /* @var $dataProvider yii\data\ActiveDataProvider */
+\yii\helpers\Url::remember();
 
-$this->title = <?= $generator->modelClass ?>::$title;
+$this->title = <?= $generator->modelClass ?>::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>

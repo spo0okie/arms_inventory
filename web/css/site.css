@@ -416,12 +416,14 @@ span.segment_open {background-color: lightgreen; border-radius: 7px}
 span.segment_closed {background-color: pink; border-radius: 7px}
 span.segment_common {background-color: lightskyblue; border-radius: 7px}
 
+span.net-domain-Chel_Networks {background-color: #96dce1; border-radius: 7px}
+span.net-domain-Msk_networks {background-color: #949494; border-radius: 7px}
+span.net-domain-Msk_networks a {color: black}
+
+
+td.usage_col > div.progress {margin-bottom: auto !important;}
+
 /* СЕРВЕР */
-/*
-Тут у нас ушлепский хак. вместе элегантного полупрозрачного градиента пришлось сделать непрозрачный с нужными оттенками
-Как основной берем те что выше, а как молоска - вариант на 5% темнее. брал из миксера ниже
-https://www.w3schools.com/colors/colors_mixer.asp
-*/
 tr.server td.arm_hostname.hour_fresh {
     background-color: lightskyblue;
     background-image: url(/web/img/diagonal-noise.png)

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\validators\IpValidator;
 
 /**
  * This is the model class for table "comps".
@@ -25,6 +26,7 @@ use Yii;
  * @property string $updated_at Время обновления
  * @property boolean $isIgnored Софт находится в списке игнорируемого ПО
  * @property array $soft_ids Массив ID ПО, которое установлено на компе
+ * @property array $netIps_ids Массив ID IP
  * @property array $comps Массив объектов ПО, которое установлено на компе
  
  * @property Arms $arm
@@ -37,6 +39,7 @@ use Yii;
  * @property string[] $ignoredIps
  * @property string[] $filteredIps
  * @property \app\models\LoginJournal[] $lastThreeLogins
+ * @property \app\models\NetIps[] $netIps
  * @property \app\models\HwList $hwList
  * @property \app\models\SwList $swList
  * @property \app\models\Services $services
@@ -65,7 +68,7 @@ class Comps extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['soft_ids'], 'each', 'rule'=>['integer']],
+            [['soft_ids','netIps_ids'], 'each', 'rule'=>['integer']],
             [['name', 'os'], 'required'],
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
@@ -73,7 +76,27 @@ class Comps extends \yii\db\ActiveRecord
             [['name','raw_version'], 'string', 'max' => 32],
             [['os', 'comment'], 'string', 'max' => 128],
 	        [['ip', 'ip_ignore'], 'string', 'max' => 255],
-            [['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],
+			['ip', 'filter', 'filter' => function ($value) {
+				if (count($items=explode("\n",$value))) {
+					$newValue=[];
+					foreach ($items as $item) if (NetIps::filterLocal(trim($item))) $newValue[]=trim($item);
+					return implode("\n",$newValue);
+				}
+				return '';
+			}],
+			['ip', function ($attribute, $params, $validator) {
+				if (count($items=explode("\n",$this->$attribute))) {
+					$validator = new IpValidator();
+					$validator->subnet = null;
+					$error = null;
+					foreach ($items as $item) {
+						if (!$validator->validate(trim($item), $error))
+							$this->addError($attribute, $item . ': ' . $error);
+					}
+				}
+			}],
+	
+			[['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],
 			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arm_id' => 'id']],
 			[['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
             [['domain_id'], 'exist', 'skipOnError' => true, 'targetClass' => Domains::className(), 'targetAttribute' => ['domain_id' => 'id']],
@@ -111,7 +134,8 @@ class Comps extends \yii\db\ActiveRecord
             [
                 'class' => \voskobovich\linker\LinkerBehavior::className(),
                 'relations' => [
-                    'soft_ids' => 'soft',
+					'soft_ids' => 'soft',
+					'netIps_ids' => 'netIps',
                 ]
             ]
         ];
@@ -296,6 +320,31 @@ class Comps extends \yii\db\ActiveRecord
     	return '';
 	}
 	
+	/**
+	 * Имея текстовый список IP возвращает ids объектов IP адресов
+	 */
+	public function fetchIpIds() {
+		if (!count($items=explode("\n",$this->ip))) return[];
+		$ids=[];
+		foreach ($items as $item) {
+			if (strlen(trim($item)))
+				$ids[]=NetIps::fetchByTextAddr($item);
+		}
+		return $ids;
+	}
+	
+	
+	/**
+	 * Возвращает IP адреса
+	 */
+	public function getNetIps()
+	{
+		return static::hasMany(NetIps::className(), ['id' => 'ips_id'])->from(['comps_ip'=>NetIps::tableName()])
+			->viaTable('{{%ips_in_comps}}', ['comps_id' => 'id']);
+	}
+	
+	
+	
 	public function getUpdatedRenderClass() {
 		if (strlen($this->updated_at)) {
 			$data_age=time()-strtotime($this->updated_at);
@@ -320,26 +369,61 @@ class Comps extends \yii\db\ActiveRecord
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
-			//грузим старые значения
-			$old=static::findOne($this->id);
 			
-			//если поменялся АРМ, то надо из старого АРМа выкинуть эту ОСь
-			if (!is_null($old) && !is_null($old->arm) && ($old->arm_id != $this->arm_id)) {
-				//если у старого АРМа не только эта операционка привязана - назначим основной другую
-				if (count($old->arm->comps)>1) {
-					foreach ($old->arm->comps as $comp) {
-						if ($comp->id != $this->id) {
-							$old->arm->comp_id=$comp->id;
-							break;
+			$this->netIps_ids=$this->fetchIpIds();
+
+			//грузим старые значения записи
+			$old=static::findOne($this->id);
+			if (!is_null($old)) {
+
+				/* Взаимодействие с АРМ */
+
+				//если поменялся АРМ, то надо из старого АРМа выкинуть эту ОСь
+				if (!is_null($old->arm) && ($old->arm_id != $this->arm_id)) {
+					
+					//если у старого АРМа не только эта операционка привязана - назначим основной другую
+					if (count($old->arm->comps) > 1) {
+						foreach ($old->arm->comps as $comp) {
+							if ($comp->id != $this->id) {
+								$old->arm->comp_id = $comp->id;
+								break;
+							}
 						}
+					} else {
+						//иначе удаляем в старом АРМ основную ОС
+						$old->arm->comp_id = null;
 					}
-				} else {
-					//иначе удаляем в старом АРМ основную ОС
-					$old->arm->comp_id=null;
+					//сохраняем старый арм
+					$old->arm->save();
 				}
-				//сохраняем старый арм
-				$old->arm->save();
+				
+				/* взаимодействие с NetIPs */
+				//находим все IP адреса которые от этой ОС отвалились
+				$removed=array_diff($old->netIps_ids,$this->netIps_ids);
+				//если есть отвязанные от это ос адреса
+				if (count($removed)) foreach ($removed as $id) {
+					//если он есть в БД
+					if (is_object($ip=NetIps::findOne($id))) {
+						//если к нему привязан только один комп
+						if (
+							(
+								!is_array($ip->comps)	//у него нет привязанных компов
+								||						//или
+								count($ip->comps)==1	//привязан только один
+							) && (						//и
+								!is_array($ip->techs)	//у него нет привязанных компов
+								||						//или
+								count($ip->techs)==0	//привязано 0
+							) && (
+								$ip->comps[0]->id == $this->id //к нему привязана именно эта ОС
+							)
+						) {
+							$ip->delete();
+						}
+					};
+				}
 			}
+
 		}
 		return true;
 	}
