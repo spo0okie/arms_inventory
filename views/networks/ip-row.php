@@ -22,6 +22,7 @@ use yii\helpers\Html;
 			echo $this->render('/comps/item',['model'=>$comp]);
 		if (is_array($ip->techs)) foreach ($ip->techs as $tech)
 			echo $this->render('/techs/item',['model'=>$tech]);
+		echo $ip->name;
 		?>
 	</td>
 	<td>

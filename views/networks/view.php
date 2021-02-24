@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				addr
 			</th>
 			<th>
-				obj
+				Name
 			</th>
 			<th>
 				comment
