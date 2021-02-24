@@ -138,7 +138,7 @@ class Networks extends \yii\db\ActiveRecord
 	 */
 	public function getReadableDhcp()
 	{
-		return long2ip($this->dhcp);
+		return empty($this->dhcp)?'':long2ip($this->dhcp);
 	}
 	
 	
@@ -148,7 +148,7 @@ class Networks extends \yii\db\ActiveRecord
 	 */
 	public function getReadableRouter()
 	{
-		return long2ip($this->router);
+		return empty($this->router)?'':long2ip($this->router);
 	}
 	
 	/**
@@ -178,7 +178,7 @@ class Networks extends \yii\db\ActiveRecord
 	public function getUsedPercent()
 	{
 		if (is_numeric($this->capacity) && ($this->capacity>2) && is_numeric($this->used)) {
-			return (int)(100 * $this->used / ($this->capacity - 2));
+			return (int)(100 * $this->used / ($this->capacity));
 		}
 		return null;
 	}

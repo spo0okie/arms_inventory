@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				comment
 			</th>
 		</tr>
-		<?php for ($i=1; $i<$model->capacity; $i++) { ?>
+		<?php for ($i=0; $i<$model->capacity; $i++) { ?>
 			<tr>
 				<?= $this->render('ip-row',['model'=>$model,'i'=>$i]) ?>
 			</tr>
