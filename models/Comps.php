@@ -78,13 +78,21 @@ class Comps extends \yii\db\ActiveRecord
 	        [['ip', 'ip_ignore'], 'string', 'max' => 255],
 			['ip', 'filter', 'filter' => function ($value) {
 				if (count($items=explode("\n",$value))) {
+					$validator = new IpValidator();
+					$validator->subnet = null;
+					$validator->ipv6 = false;
+					$error=null;
 					$newValue=[];
-					foreach ($items as $item) if (NetIps::filterLocal(trim($item))) $newValue[]=trim($item);
+					foreach ($items as $item) if (
+						$validator->validate(trim($item), $error)
+						&&
+						NetIps::filterLocal(trim($item))
+					) $newValue[]=trim($item);
 					return implode("\n",$newValue);
 				}
 				return '';
 			}],
-			['ip', function ($attribute, $params, $validator) {
+			/*['ip', function ($attribute, $params, $validator) {
 				if (count($items=explode("\n",$this->$attribute))) {
 					$validator = new IpValidator();
 					$validator->subnet = null;
@@ -94,7 +102,7 @@ class Comps extends \yii\db\ActiveRecord
 							$this->addError($attribute, $item . ': ' . $error);
 					}
 				}
-			}],
+			}],*/
 	
 			[['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],
 			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arm_id' => 'id']],
