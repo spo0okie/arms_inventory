@@ -17,8 +17,8 @@ class NetworksSearch extends Networks
     public function rules()
     {
         return [
-            [['id', 'vlan_id', 'addr', 'mask', 'router', 'dhcp'], 'integer'],
-            [['name', 'comment','domain'], 'safe'],
+            [['id',  'addr', 'mask', 'router', 'dhcp'], 'integer'],
+            [['name','vlan_id', 'domain', 'comment','domain'], 'safe'],
         ];
     }
 
@@ -40,7 +40,8 @@ class NetworksSearch extends Networks
      */
     public function search($params)
     {
-        $query = Networks::find();
+        $query = Networks::find()
+			->joinWith(['netVlan.segment','netVlan.netDomain']);
 
         // add conditions that should always apply here
 
@@ -59,16 +60,19 @@ class NetworksSearch extends Networks
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
-            'vlan_id' => $this->vlan_id,
-            'addr' => $this->addr,
-            'mask' => $this->mask,
-            'router' => $this->router,
-            'dhcp' => $this->dhcp,
+            //'id' => $this->id,
+            //'vlan_id' => $this->vlan_id,
+            //'addr' => $this->addr,
+            //'mask' => $this->mask,
+            //'router' => $this->router,
+            //'dhcp' => $this->dhcp,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query
+			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",networks.name)', $this->name])
+			->andFilterWhere(['like', 'concat(net_vlans.name," (",net_vlans.vlan)', $this->vlan_id])
+			->andFilterWhere(['like', 'net_domains.name', $this->domain])
+            ->andFilterWhere(['like', 'networks.comment', $this->comment]);
 
         return $dataProvider;
     }

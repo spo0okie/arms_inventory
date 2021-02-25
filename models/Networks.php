@@ -191,7 +191,10 @@ class Networks extends \yii\db\ActiveRecord
 	{
 		if (!is_null($this->ips_cache)) return $this->ips_cache;
 		
-		//return $this->hasMany(NetIps::className(), ['addr' => 'vlan_id']);
+		/*return $this->hasMany(NetIps::className(), []) ->where(['AND',
+			['>=','addr',$this->addr],
+			['<','addr',$this->addr+$this->capacity]
+		]);*/
 		return $this->ips_cache=NetIps::find()->where(['AND',
 			['>=','addr',$this->addr],
 			['<','addr',$this->addr+$this->capacity]

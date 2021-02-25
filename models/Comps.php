@@ -347,7 +347,7 @@ class Comps extends \yii\db\ActiveRecord
 	 */
 	public function getNetIps()
 	{
-		return static::hasMany(NetIps::className(), ['id' => 'ips_id'])->from(['comps_ip'=>NetIps::tableName()])
+		return static::hasMany(NetIps::className(), ['id' => 'ips_id'])->from(NetIps::tableName())
 			->viaTable('{{%ips_in_comps}}', ['comps_id' => 'id']);
 	}
 	

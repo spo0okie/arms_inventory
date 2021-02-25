@@ -49,7 +49,10 @@ class ArmsSearch extends Arms
 	    $query = new \yii\db\Query();
 
         $query = Arms::find()
-	        ->joinWith(['user','techModel','comp','place','contracts','licItems','licGroups','licKeys','department']);
+	        ->joinWith(['user','techModel','comp.netIps','place','contracts','licItems','licGroups','licKeys','department']);
+			/*->join('LEFT JOIN','networks','(comps_ip.addr >= networks.addr) and (comps_ip.addr < networks.addr+power(2,(32-networks.mask)))')
+			->join('LEFT JOIN','net_vlans','net_vlans.id=networks.vlan_id')
+			->join('LEFT JOIN','segments','segments.id=net_vlans.segment_id'); /**/
 
         // add conditions that should always apply here
 

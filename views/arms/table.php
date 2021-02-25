@@ -67,8 +67,14 @@ foreach ($columns as $column) {
 				'attribute' => 'comp_ip',
 				'format' => 'raw',
 				'header' => 'IP Адрес',
-				'value' => function ($data) {
-					return is_object($data->comp) ? str_replace(',','<br />',$data->comp->filteredIpsStr) : null;
+				'value' => function ($data) use ($renderer) {
+					if (is_object($data->comp)) {
+						$output=[];
+						foreach ($data->comp->netIps as $ip)
+							$output[]=$this->render('/net-ips/item',['model'=>$ip]);
+						return implode(' ',$output);
+					}
+					return null;
 				},
 				'contentOptions'=>['class'=>$column.'_col']
 			

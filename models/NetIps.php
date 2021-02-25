@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use PhpIP;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Exception;
 use yii\db\Expression;
@@ -114,9 +115,39 @@ class NetIps extends \yii\db\ActiveRecord
 		 * Украл я это все отсель: https://stackoverflow.com/questions/10001933/check-if-ip-is-in-subnet
 		 * Почему 33, а не 32 - я не понял, но работает
 		 */
-		return $this->network_cache=Networks::findOne(new Expression("((-1 << (32-`networks`.`mask`)) & `networks`.`addr`) = ((-1 << (32-`networks`.`mask`)) & :ip)",[':ip'=>$this->addr]));
+		return $this->network_cache= Networks::find()
+			->Where([
+				'and',
+				['<=','addr',$this->addr],
+				['>','addr+POWER(2,(32-`networks`.`mask`))',$this->addr],
+			]);
+		/*$query->multiple=false;
+		$query->o
+		return $query;/**/
+		
+		//return	Networks::findOne(new Expression("(`networks`.`addr` <= :ip ) AND ((`networks`.`addr` + POWER(2,(32-`networks`.`mask`)) > :ip))",[':ip'=>$this->addr]));
+		//return $this->hasOne(Networks::className(),['addr'=>new Expression('addr && ((power(2,32-networks.mask)) - 1)')]);
+		
+		/*return $this->hasOne(Networks::className(),['id'=>'id'])
+			->andOnCondition([
+				'and',
+				['<=','net_ips.addr',$this->addr],
+				['>','net_ips.addr+POWER(2,(32-`networks`.`mask`))',$this->addr],
+			]);
+		
+		return new ActiveQuery(Networks::className(),[
+			'link'=>[],
+			'on'=>"(`networks`.`addr` <= `net_ips`.`addr` ) AND ((`networks`.`addr` + POWER(2,(32-`networks`.`mask`)) > `net_ips`.`addr`))",
+			'multiple'=>false,
+		]);
+		
+		//return	$this->hasMany(Networks::className(),[])->where("(`networks`.`addr` <= `net_ips`.`addr` ) AND ((`networks`.`addr` + POWER(2,(32-`networks`.`mask`)) > `net_ips`.`addr`))");
+		
+		
+		
+		//return	Networks::findOne(new Expression("((-1 << (32-`networks`.`mask`)) & `networks`.`addr`) = ((-1 << (32-`networks`.`mask`)) & :ip)",[':ip'=>$this->addr]));
 		//$query="SELECT * FROM `networks` WHERE ((-1 << (33-`networks`.`mask`)) AND `networks`.`addr`) = ((-1 << (33-`networks`.`mask`)) AND {$this->addr})";
-		//return Networks::findBySql($query);
+		//return Networks::findBySql($query);/**/
 	}
 	
 	
