@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
 	</div>
 	<br />
 	<h4>Адреса:</h4>
-	<table class="table table-bordered table-striped">
+	<table class="table table-bordered table-striped table-condensed">
 		<tr>
 			<th>
 				#
