@@ -6,13 +6,16 @@ use yii\helpers\Html;
 /* @var $model app\models\Networks */
 /* @var $i integer */
 
+$addr=long2ip($model->addr+$i);
+
 ?>
 
 <td>
 	<?= $i ?>
 </td>
 
-<?php if (is_object($ip=$model->fetchIp($i))) { ?>
+<?php if (is_object($ip=$model->fetchIp($i))) {
+	?>
 	<td>
 		<?= $this->render('/net-ips/item',['model'=>$ip]) ?>
 	</td>
@@ -30,6 +33,8 @@ use yii\helpers\Html;
 	</td>
 	
 <?php } else { ?>
-	<td colspan="3"></td>
+	<td><?= Html::a($addr,['net-ips/create','return'=>'previous','text_addr'=>$addr]) ?></td>
+	<td></td>
+	<td></td>
 <?php }
 

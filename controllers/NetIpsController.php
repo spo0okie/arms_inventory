@@ -134,7 +134,8 @@ class NetIpsController extends Controller
 			if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
             return $this->redirect(['view', 'id' => $model->id]);
         }
-
+        
+		$model->text_addr=Yii::$app->request->get('text_addr',null);
         return $this->render('create', [
             'model' => $model,
         ]);

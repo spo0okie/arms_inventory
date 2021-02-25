@@ -54,4 +54,3 @@ if (!isset($static_view)) $static_view=false;
 			<?= $this->render('used',['model'=>$model]) ?>
 		</div>
 	</div>
-<?php

@@ -56,7 +56,7 @@ class NetIps extends \yii\db\ActiveRecord
         return [
             [['addr', 'mask'], 'integer'],
             [['text_addr'], 'ip', 'ipv6' => false, 'subnet'=>null],
-			[['comment'],'string']
+			[['comment','name'],'string']
         ];
     }
 	
@@ -69,6 +69,7 @@ class NetIps extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'addr' => 'Адрес',
 			'mask' => 'Маска',
+			'name' => 'Имя',
 			'network' => 'Сеть',
 			'attached' => 'Прикреплено к',
 			'text_addr' => 'Адрес',
@@ -85,6 +86,7 @@ class NetIps extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'addr' => 'Адрес',
 			'mask' => 'Маска',
+			'name' => 'Сюда можно записать имя узла для которого адрес зарезервирован',
 			'text_addr' => 'Также можно указать маску',
 			'comment' => 'Комментировать то можно что угодно. Чем IP адрес плох',
 		];

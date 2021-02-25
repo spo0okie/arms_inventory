@@ -28,7 +28,10 @@ use kartik\select2\Select2;
 		<div class="col-md-2">
 			<?= $form->field($model, 'text_addr')->textInput(['maxlength' => true]) ?>
 		</div>
-		<div class="col-md-10">
+		<div class="col-md-4">
+			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+		</div>
+		<div class="col-md-6">
 			<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
 		</div>
 	</div>

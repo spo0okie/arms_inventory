@@ -33,6 +33,7 @@ use yii\db\Expression;
 class Networks extends \yii\db\ActiveRecord
 {
 	
+	private $_IPv4Block=null;
 	private $ips_cache=null;
 	
 	public static $title='Сети';
@@ -159,6 +160,50 @@ class Networks extends \yii\db\ActiveRecord
 	{
 		if (is_numeric($this->mask)) return (int)pow(2,(32-$this->mask));
 		return null;
+	}
+	
+	/**
+	 * @return PhpIP\IPv4Block
+	 */
+	private function IPv4Block()
+	{
+		if (is_object($this->_IPv4Block)) return $this->_IPv4Block;
+		return $this->_IPv4Block=PhpIP\IPv4Block::create($this->text_addr);
+	}
+	
+	public function getReadableNetMask()
+	{
+		return $this->IPv4Block()->getMask()->humanReadable();
+	}
+	
+	public function getReadableWildcard()
+	{
+		return $this->IPv4Block()->getMask()->bit_negate()->humanReadable();
+	}
+	
+	public function getReadableNetworkIp()
+	{
+		return $this->IPv4Block()->getFirstIp()->humanReadable();
+	}
+	
+	public function getReadableFirstIp()
+	{
+		return $this->IPv4Block()->getFirstIp()->plus(1)->humanReadable();
+	}
+	
+	public function getReadableBroadcastIp()
+	{
+		return $this->IPv4Block()->getLastIp()->minus(1)->humanReadable();
+	}
+	
+	public function getReadableLastIp()
+	{
+		return $this->IPv4Block()->getLastIp()->minus(1)->humanReadable();
+	}
+
+	public function getMaxHosts()
+	{
+		return $this->capacity-2;
 	}
 	
 	/**
