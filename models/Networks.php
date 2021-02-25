@@ -193,7 +193,7 @@ class Networks extends \yii\db\ActiveRecord
 	
 	public function getReadableBroadcastIp()
 	{
-		return $this->IPv4Block()->getLastIp()->minus(1)->humanReadable();
+		return $this->IPv4Block()->getLastIp()->humanReadable();
 	}
 	
 	public function getReadableLastIp()
