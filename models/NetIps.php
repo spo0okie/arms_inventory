@@ -117,7 +117,7 @@ class NetIps extends \yii\db\ActiveRecord
 		 * Украл я это все отсель: https://stackoverflow.com/questions/10001933/check-if-ip-is-in-subnet
 		 * Почему 33, а не 32 - я не понял, но работает
 		 */
-		return $this->network_cache= Networks::find()
+		/*return $this->network_cache= Networks::find()
 			->Where([
 				'and',
 				['<=','addr',$this->addr],
@@ -144,10 +144,10 @@ class NetIps extends \yii\db\ActiveRecord
 		]);
 		
 		//return	$this->hasMany(Networks::className(),[])->where("(`networks`.`addr` <= `net_ips`.`addr` ) AND ((`networks`.`addr` + POWER(2,(32-`networks`.`mask`)) > `net_ips`.`addr`))");
+		/**/
 		
 		
-		
-		//return	Networks::findOne(new Expression("((-1 << (32-`networks`.`mask`)) & `networks`.`addr`) = ((-1 << (32-`networks`.`mask`)) & :ip)",[':ip'=>$this->addr]));
+		return	Networks::findOne(new Expression("((-1 << (32-`networks`.`mask`)) & `networks`.`addr`) = ((-1 << (32-`networks`.`mask`)) & :ip)",[':ip'=>$this->addr]));
 		//$query="SELECT * FROM `networks` WHERE ((-1 << (33-`networks`.`mask`)) AND `networks`.`addr`) = ((-1 << (33-`networks`.`mask`)) AND {$this->addr})";
 		//return Networks::findBySql($query);/**/
 	}
