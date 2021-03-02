@@ -119,6 +119,7 @@ JS;
 			<?= $form->field($model, 'link_ports_id')->widget(DepDrop::className(), [
 				//'data' => app\models\Ports::fetchNames(),
 				'type' => DepDrop::TYPE_SELECT2,
+				'data' => is_object($model->linkPort)?\yii\helpers\ArrayHelper::map($model->linkPort->tech->ddPortsList,'id','name'):null,
 				'options'=>[
 					'placeholder' => 'Выберите '.$model->getAttributeLabel('link_ports_id'),
 				],

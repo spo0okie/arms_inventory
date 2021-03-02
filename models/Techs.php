@@ -29,6 +29,7 @@ use Yii;
  * @property array $contracts_ids Список документов
  * @property array $netIps_ids Список IP
  * @property array $portsList
+ * @property array $ddPortsList
  *
  * @property Users $user
  * @property Users $itStaff
@@ -518,6 +519,18 @@ class Techs extends \yii\db\ActiveRecord
 		}
 		
 		return $model_ports;
+	}
+	
+	public function getDdPortsList()
+	{
+		$out=[];
+		foreach ($this->portsList as $name=>$port) {
+			$out[]=[
+				'id'=>is_object($port['port_link'])?$port['port_link']->id:"create:$name@{$this->id}",
+				'name'=>$name
+			];
+		}
+		return $out;
 	}
 	
 	

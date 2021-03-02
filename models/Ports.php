@@ -59,7 +59,7 @@ class Ports extends \yii\db\ActiveRecord
 			[['name'], 'string', 'max' => 32],
             [['comment'], 'string', 'max' => 255],
             [['link_arms_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['link_arms_id' => 'id']],
-            [['link_ports_id'], 'exist', 'skipOnError' => true, 'targetClass' => Ports::className(), 'targetAttribute' => ['link_ports_id' => 'id']],
+            //[['link_ports_id'], 'exist', 'skipOnError' => true, 'targetClass' => Ports::className(), 'targetAttribute' => ['link_ports_id' => 'id']],
             [['link_techs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::className(), 'targetAttribute' => ['link_techs_id' => 'id']],
             [['techs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::className(), 'targetAttribute' => ['techs_id' => 'id']],
         ];
@@ -172,6 +172,23 @@ class Ports extends \yii\db\ActiveRecord
 			if (!empty($this->link_ports_id)) {
 				$this->link_arms_id=null;
 				$this->link_techs_id=null;
+				
+				if (
+					(strlen($this->link_ports_id)>strlen('create:1@1'))
+					&&
+					(substr($this->link_ports_id,0,strlen('create:'))=='create:')
+				) {
+					$tokens=explode(':',$this->link_ports_id);
+					$subTokens=explode('@',$tokens[1]);
+					$newPort=new Ports();
+					$newPort->link_ports_id=$this->id;
+					$newPort->name=$subTokens[0];
+					$newPort->techs_id=$subTokens[1];
+					$newPort->save();
+					$newPort->refresh();
+					$this->link_ports_id=$newPort->id;
+				}
+				
 			} elseif (!empty($this->link_techs_id)) {
 				$this->link_ports_id=null;
 				$this->link_arms_id=null;
@@ -205,6 +222,7 @@ class Ports extends \yii\db\ActiveRecord
 
 		if (
 			!empty($this->link_ports_id)
+		
 			//&&
 			//is_object($this->linkPort)
 		){
