@@ -26,9 +26,14 @@ $renderer=$this;
         'filterModel' => $searchModel,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-
-            //'id',
-            'techs_id',
+	
+			[
+				'attribute'=>'techs_id',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer){
+					return $renderer->render('/techs/item',['model'=>$data->tech]);
+				}
+			],
             [
                 'attribute'=>'name',
                 'format'=>'raw',
@@ -37,9 +42,23 @@ $renderer=$this;
                 }
             ],
             'comment:ntext',
-            'link_techs_id',
-            'link_arms_id',
-            'link_ports_id',
+			[
+				'attribute'=>'link_techs_id',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer) {
+					if (is_object($data->linkPort)) {
+						return $renderer->render('/ports/item', [
+							'model' => $data->linkPort,
+							'include_tech' => true,
+							'reverse' => true,
+						]);
+					} elseif (is_object($data->linkTech)) {
+						return $renderer->render('/techs/item', ['model' => $data->linkTech]);
+					} elseif (is_object($data->linkArm)) {
+						return $renderer->render('/arms/item', ['model' => $data->linkArm]);
+					}
+				}
+			],
 
             //['class' => 'yii\grid\ActionColumn'],
         ],
