@@ -48,6 +48,24 @@ class NetVlansSearch extends NetVlans
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
 			'pagination' => ['pageSize' => 100,],
+			'sort'=> [
+				//'defaultOrder' => ['domains_id'=>SORT_ASC],
+				'attributes'=>[
+					'name'=>[
+						'asc'=>['vlan'=>SORT_ASC],
+						'desc'=>['vlan'=>SORT_DESC],
+					],
+					'domain_id'=>[
+						'asc'=>['net_domains.name'=>SORT_ASC],
+						'desc'=>['net_domains.name'=>SORT_DESC],
+					],
+					'segment_id'=>[
+						'asc'=>['segments.name'=>SORT_ASC],
+						'desc'=>['segments.name'=>SORT_DESC],
+					],
+					'comment'
+				]
+			],
         ]);
 
         $this->load($params);
@@ -64,7 +82,6 @@ class NetVlansSearch extends NetVlans
 			->andFilterWhere(['like', 'segments.name', $this->segment_id])
             ->andFilterWhere(['like', 'comment', $this->comment]);
 
-        $query->orderBy(['vlan'=>SORT_ASC]);
         return $dataProvider;
     }
 }
