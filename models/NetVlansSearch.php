@@ -17,8 +17,8 @@ class NetVlansSearch extends NetVlans
     public function rules()
     {
         return [
-            [['id', 'vlan', 'domain_id'], 'integer'],
-            [['name', 'comment'], 'safe'],
+            [['id', ], 'integer'],
+            [['name', 'comment','vlan', 'domain_id', 'segment_id'], 'safe'],
         ];
     }
 
@@ -40,7 +40,8 @@ class NetVlansSearch extends NetVlans
      */
     public function search($params)
     {
-        $query = NetVlans::find();
+        $query = NetVlans::find()
+		->joinWith(['netDomain','segment']);
 
         // add conditions that should always apply here
 
@@ -58,15 +59,12 @@ class NetVlansSearch extends NetVlans
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'vlan' => $this->vlan,
-            'domain_id' => $this->domain_id,
-        ]);
-
-        $query->andFilterWhere(['like', 'name', $this->name])
+        $query->andFilterWhere(['like', 'CONCAT(net_vlans.name," (",net_vlans.vlan)', $this->name])
+			->andFilterWhere(['like', 'net_domains.name', $this->domain_id])
+			->andFilterWhere(['like', 'segments.name', $this->segment_id])
             ->andFilterWhere(['like', 'comment', $this->comment]);
 
+        $query->orderBy(['vlan'=>SORT_ASC]);
         return $dataProvider;
     }
 }

@@ -20,7 +20,8 @@ class AppAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-	    'css/site.css',
+		'css/site.css',
+		'css/codes.private.css',
 	    'css/tooltip-yellow.css',
 	    'css/tooltipster.main.min.css',
 	    'css/tooltipster.bundle.min.css',

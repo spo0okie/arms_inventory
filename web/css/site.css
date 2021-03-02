@@ -411,20 +411,6 @@ td.arm_hostname.week_fresh {background-color: lightgreen}
 td.arm_hostname.month_fresh {background-color: lightgoldenrodyellow}
 td.arm_hostname.over_month_fresh {background-color: lightpink}
 
-/* РАСКРАСКА СЕГМЕНТОВ СЕТИ */
-span.segment_open {background-color: lightgreen; border-radius: 7px}
-span.segment_closed {background-color: pink; border-radius: 7px}
-span.segment_common {background-color: lightskyblue; border-radius: 7px}
-
-span.net-domain-Chel_VLAN {background-color: #96dce1; border-radius: 7px}
-span.net-domain-Moscow_VLAN {background-color: #949494; border-radius: 7px}
-span.net-domain-Moscow_VLAN a {color: black}
-span.net-domain-Kaluga_VLAN {background-color: #c9c9A3; border-radius: 7px}
-span.net-domain-Kaluga_VLAN a {color: black}
-span.net-domain-Makhachkala_VLAN {background-color: #ededb7; border-radius: 7px}
-span.net-domain-NN_VLAN {background-color: #9da1d7; border-radius: 7px}
-
-
 td.usage_col > div.progress {margin-bottom: auto !important;}
 
 /* СЕРВЕР */
