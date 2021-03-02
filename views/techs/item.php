@@ -10,6 +10,8 @@
 /* @var string $name */
 
 use yii\helpers\Html;
+if (!isset($static_view)) $static_view=false;
+
 if (!empty($model)) {
     if (!isset($name)) $name=$model->num;
     ?>
@@ -18,6 +20,7 @@ if (!empty($model)) {
       qtip_ajxhrf="<?= \yii\helpers\Url::to(['/techs/ttip','id'=>$model->id])?>"
 >
 	<?= Html::a($name,['techs/view','id'=>$model->id]) ?>
-	<?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',['techs/update','id'=>$model->id,'return'=>'previous']) ?>
+	<?= $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['techs/update','id'=>$model->id,'return'=>'previous']) ?>
+
 </span>
 <?php }

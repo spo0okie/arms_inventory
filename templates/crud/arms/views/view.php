@@ -18,7 +18,7 @@ use yii\widgets\DetailView;
 /* @var $model <?= ltrim($generator->modelClass, '\\') ?> */
 
 $this->title = $model-><?= $generator->getNameAttribute() ?>;
-$this->params['breadcrumbs'][] = ['label' => <?= $generator->modelClass ?>::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => <?= $generator->modelClass ?>::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 

@@ -12,7 +12,6 @@ $safeAttributes = $model->safeAttributes();
 if (empty($safeAttributes)) {
     $safeAttributes = $model->attributes();
 }
-
 echo "<?php\n";
 ?>
 
@@ -38,11 +37,17 @@ use kartik\select2\Select2;
 
 <?php foreach ($generator->getColumnNames() as $attribute) {
     if (in_array($attribute, $safeAttributes)) {
+		$relation=null;
     	if ((strlen($attribute)>3) && substr($attribute,strlen($attribute)-3,3)=='_id') {
+			//try {
+				$relation=$model->getRelation(Inflector::variablize(substr($attribute,0,strlen($attribute)-3)));
+			//} catch (Exception $e) {}
+		}
+    	if (is_object($relation)) {
 			echo "    <?= \$form->field(\$model, '$attribute')->widget(Select2::className(), [\n";
-			echo "        'data' => ".ltrim($generator->modelClass, '\\')."::fetchNames(),\n";
+			echo "        'data' => ".ltrim($relation->modelClass, '\\')."::fetchNames(),\n";
 			echo "        'options' => [\n";
-			echo "            'placeholder' => 'Выберите '.".ltrim($generator->modelClass, '\\')."::\$title,\n";
+			echo "            'placeholder' => 'Выберите '.\$model->getAttributeLabel('$attribute') \n";
 			echo "        ],\n";
 			echo "        'pluginOptions' => [\n";
 			echo "            'allowClear' => true,\n";

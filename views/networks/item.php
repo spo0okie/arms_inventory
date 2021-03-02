@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
 
-if (!empty($model)) {
+if (is_object($model)) {
 	if (!isset($name)) $name=$model->sname;
 	?>
 

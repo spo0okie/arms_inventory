@@ -4,6 +4,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
+/* @var $ip app\models\NetIps */
 /* @var $i integer */
 
 $addr=long2ip($model->addr+$i);
@@ -14,7 +15,9 @@ $addr=long2ip($model->addr+$i);
 	<?= $i ?>
 </td>
 
-<?php if (is_object($ip=$model->fetchIp($i))) {
+<?php
+//if (!isset($ip)||empty($ip)) $ip=$model->fetchIp($i);
+if (is_object($ip)) {
 	?>
 	<td>
 		<?= $this->render('/net-ips/item',['model'=>$ip]) ?>

@@ -59,7 +59,7 @@ class Networks extends \yii\db\ActiveRecord
 			[['text_addr'],'ip','ipv6'=>false,'subnet'=>true],
 			[['text_router','text_dhcp'], 'ip','ipv6'=>false],
             [['vlan_id', 'addr', 'mask', 'router', 'dhcp'], 'integer'],
-            [['name','domain'], 'string', 'max' => 255],
+            [['name'], 'string', 'max' => 255],
 			[['comment'], 'safe'],
         ];
     }
@@ -74,7 +74,9 @@ class Networks extends \yii\db\ActiveRecord
 			'name' => 'Название сети',
 			'vlan_id' => 'Vlan',
 			'netDomain' => 'L2 Домен',
+			'domain_id' => 'L2 Домен',
 			'addr' => 'Адрес',
+			'usage' => 'Исп.',
 			'text_addr' => 'Адрес и маска',
 			'mask' => 'Маска',
 			'router' => 'Шлюз',
@@ -207,6 +209,16 @@ class Networks extends \yii\db\ActiveRecord
 	}
 	
 	/**
+	 * Network
+	 * @return Networks
+	 */
+	public function getIps()
+	{
+		return static::hasMany(NetIps::className(), ['networks_id'=>'id'])->orderBy(['addr'=>SORT_ASC]);
+	}
+	
+	
+	/**
 	 * занято адресов
 	 * @return int|null
 	 */
@@ -232,37 +244,16 @@ class Networks extends \yii\db\ActiveRecord
 	 * Network
 	 * @return NetIps[]
 	 */
-	public function getIps()
+	public function findIps($addr=null,$mask=null)
 	{
-		if (!is_null($this->ips_cache)) return $this->ips_cache;
-		
-		/*return $this->hasMany(NetIps::className(), []) ->where(['AND',
-			['>=','addr',$this->addr],
-			['<','addr',$this->addr+$this->capacity]
-		]);*/
-		return $this->ips_cache=NetIps::find()->where(['AND',
-			['>=','addr',$this->addr],
-			['<','addr',$this->addr+$this->capacity]
+		if (is_null($addr)) $addr=$this->addr;
+		if (is_null($mask)) $mask=$this->mask;
+		return NetIps::find()->where(['AND',
+			['>=','addr',$addr],
+			['<','addr',$addr+(int)pow(2,(32-$mask))]
 			])->all();
-		
-		/*
-		 * Я Извиняюсь перед самим собой за эту дичь ниже.
-		 * короче смысл в том что мы бинарно сдвигаем влево (делим на два) и адрес сети и адрес IP
-		 * столько раз, сколько у нас нулей в маске сети. В итоге мы сравниваем только ту часть числа где в маске единички
-		 * Если получились одинаковые числа - значит адрес находится в искомой подсети
-		 * Украл я это все отсель: https://stackoverflow.com/questions/10001933/check-if-ip-is-in-subnet
-		 * Почему 33, а не 32 - я не понял, но работает
-		 */
-		/*return $this->ips_cache=NetIps::findAll(
-			new Expression(
-				"((-1 << (32-:netmask)) & :netaddr) = ((-1 << (32-:netmask)) & `net_ips`.`addr`)",
-				[
-					':netmask'=>$this->mask,
-					':netaddr'=>$this->addr,
-				]
-			)
-		);*/
 	}
+	
 	
 	public function fetchIp($i)
 	{
@@ -287,6 +278,28 @@ class Networks extends \yii\db\ActiveRecord
 			return true;
 		}
 		return false;
+	}
+	
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+		
+		//NetIps::updateAll([])
+		
+		if ($insert || isset($changedAttributes['addr']) || isset($changedAttributes['mask'])) {
+			$totalIps=[];
+			
+			//previous
+			foreach ($this->ips as $ip)
+				$totalIps[$ip->id]=$ip;
+			
+			//new
+			foreach ($this->findIps() as $ip)
+				$totalIps[$ip->id]=$ip;
+			
+			foreach ($totalIps as $ip) $ip->save();
+		}
+		
 	}
 	
 	

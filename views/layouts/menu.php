@@ -72,6 +72,7 @@ NavBar::begin([
 			\app\models\Users::isViewer()?
 			['label' => 'Сети',
 				'items' => [
+					['label' => \app\models\Ports::$titles, 'url' => ['/ports/index']],
 					['label' => \app\models\NetIps::$titles, 'url' => ['/net-ips/index']],
 					['label' => \app\models\Networks::$title, 'url' => ['/networks/index']],
 					['label' => \app\models\NetVlans::$title, 'url' => ['/net-vlans/index']],

@@ -3,8 +3,8 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Networks;
-use app\models\NetworksSearch;
+use app\models\Ports;
+use app\models\PortsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -13,9 +13,9 @@ use yii\bootstrap\ActiveForm;
 
 
 /**
- * NetworksController implements the CRUD actions for Networks model.
+ * PortsController implements the CRUD actions for Ports model.
  */
-class NetworksController extends Controller
+class PortsController extends Controller
 {
 
 	/**
@@ -46,12 +46,12 @@ class NetworksController extends Controller
 	}
 
     /**
-     * Lists all Networks models.
+     * Lists all Ports models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new NetworksSearch();
+        $searchModel = new PortsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -71,7 +71,7 @@ class NetworksController extends Controller
 		if (!is_null($id))
 			$model = $this->findModel($id);
 		else
-			$model = new Networks();
+			$model = new Ports();
 
 		if ($model->load(Yii::$app->request->post())) {
 			Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -109,38 +109,35 @@ class NetworksController extends Controller
 
 
     /**
-     * Displays a single Networks model.
+     * Displays a single Ports model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id)
-	{
-		$model=$this->findModel($id);
-		$ips=\app\models\NetIps::find()
-			->joinWith(['comps','techs','network.netVlan'])
-			->where(['networks_id'=>$model->id])
-			->orderBy(['addr'=>SORT_ASC])
-			->all();
-	
-		return $this->render('view',
-            compact('model','ips')
-        );
+    {
+        return $this->render('view', [
+            'model' => $this->findModel($id),
+        ]);
     }
 
     /**
-     * Creates a new Networks model.
+     * Creates a new Ports model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Networks();
+        $model = new Ports();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
             return $this->redirect(['view', 'id' => $model->id]);
         }
+	
+		$model->techs_id=Yii::$app->request->get('techs_id',null);
+		$model->name=Yii::$app->request->get('name',null);
+		$model->comment=Yii::$app->request->get('comment',null);
 
         return $this->render('create', [
             'model' => $model,
@@ -148,7 +145,7 @@ class NetworksController extends Controller
     }
 
     /**
-     * Updates an existing Networks model.
+     * Updates an existing Ports model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -169,7 +166,7 @@ class NetworksController extends Controller
     }
 
     /**
-     * Deletes an existing Networks model.
+     * Deletes an existing Ports model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -183,15 +180,15 @@ class NetworksController extends Controller
     }
 
     /**
-     * Finds the Networks model based on its primary key value.
+     * Finds the Ports model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Networks the loaded model
+     * @return Ports the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Networks::findOne($id)) !== null) {
+        if (($model = Ports::findOne($id)) !== null) {
             return $model;
         }
 

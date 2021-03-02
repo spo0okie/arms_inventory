@@ -41,4 +41,4 @@ if (count($objects)) echo '<h4>привязан к:'.implode(', ',$objects).'</h
 
 ?>
 <h4>Сеть:</h4>
-<?= $this->render('/networks/item',['model'=>$model->getNetwork()]) ?>
+<?= $this->render('/networks/item',['model'=>$model->network]) ?>

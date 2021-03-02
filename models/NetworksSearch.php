@@ -11,6 +11,9 @@ use app\models\Networks;
  */
 class NetworksSearch extends Networks
 {
+	public $domain_id;
+	
+	
     /**
      * {@inheritdoc}
      */
@@ -18,7 +21,7 @@ class NetworksSearch extends Networks
     {
         return [
             [['id',  'addr', 'mask', 'router', 'dhcp'], 'integer'],
-            [['name','vlan_id', 'domain', 'comment','domain'], 'safe'],
+            [['name','vlan_id', 'domain_id', 'comment',], 'safe'],
         ];
     }
 
@@ -41,13 +44,35 @@ class NetworksSearch extends Networks
     public function search($params)
     {
         $query = Networks::find()
-			->joinWith(['netVlan.segment','netVlan.netDomain']);
+			//->select(['*',''])
+			->joinWith([
+				'netVlan.segment',
+				'netVlan.netDomain',
+			]);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
 			'pagination' => ['pageSize' => 100,],
+			'sort'=> [
+				//'defaultOrder' => ['domains_id'=>SORT_ASC],
+				'attributes'=>[
+					'name'=>[
+						'asc'=>['text_addr'=>SORT_ASC],
+						'desc'=>['text_addr'=>SORT_DESC],
+					],
+					'domain_id'=>[
+						'asc'=>['net_domains.name'=>SORT_ASC],
+						'desc'=>['net_domains.name'=>SORT_DESC],
+					],
+					'vlan_id'=>[
+						'asc'=>['net_vlans.vlan'=>SORT_ASC],
+						'desc'=>['net_vlans.vlan'=>SORT_DESC],
+					],
+					'comment'
+				]
+			],
 		]);
 
         $this->load($params);
@@ -57,16 +82,6 @@ class NetworksSearch extends Networks
             // $query->where('0=1');
             return $dataProvider;
         }
-
-        // grid filtering conditions
-        $query->andFilterWhere([
-            //'id' => $this->id,
-            //'vlan_id' => $this->vlan_id,
-            //'addr' => $this->addr,
-            //'mask' => $this->mask,
-            //'router' => $this->router,
-            //'dhcp' => $this->dhcp,
-        ]);
 
         $query
 			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",networks.name)', $this->name])

@@ -18,6 +18,7 @@ use Yii;
  * @property string $sname Расширенное имя для поиска
  * @property string $links Ссылки
  * @property string $comment Комментарий
+ * @property string $ports Порты
  *
  * @property TechTypes $type
  * @property Techs[] $techs
@@ -53,7 +54,7 @@ class TechModels extends \yii\db\ActiveRecord
         return [
 	        [['type_id', 'manufacturers_id', 'name', 'comment'], 'required'],
 	        [['type_id', 'manufacturers_id', 'individual_specs'], 'integer'],
-	        [['links', 'comment'], 'string'],
+	        [['links', 'comment','ports'], 'string'],
 	        [['name'], 'string', 'max' => 128],
 	        [['short'], 'string', 'max' => 24],
 	        [['name'], 'unique'],
@@ -76,6 +77,7 @@ class TechModels extends \yii\db\ActiveRecord
 			'short' => 'Короткое имя',
 			'links' => 'Ссылки',
 			'comment' => 'Описание',
+			'ports' => 'Порты на устройстве',
 			'usages' => 'Экз.',
 			'individual_specs' => 'Индив. спеки',
 		];
@@ -94,6 +96,7 @@ class TechModels extends \yii\db\ActiveRecord
 			'short' => 'Короткое название для вывода в плотных списках',
 			'links' => \app\components\UrlListWidget::$hint,
 			'comment' => 'Описание оборудования наиболее значимые параметры отличающие эту модель от других моделей того же типа оборудования',
+			'ports' => 'Список Ethernet портов на устройстве, по строке на порт. Первое слово в строке - наименование порта (1/WAN/Lan_1/management), остальные слова - комментарий к порту',
 			'individual_specs' => 'Признак того что модель не полностью определяет спецификацию оборудования, и для каждого экземпляра ее нужно описывать индивидуально (сервера, СХД, самосборные ПК)',
 		];
 	}

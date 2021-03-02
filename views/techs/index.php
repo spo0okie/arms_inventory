@@ -9,6 +9,7 @@ use yii\grid\GridView;
 $renderer = $this;
 $this->title = \app\models\Techs::$title;
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
 <div class="techs-index">
 

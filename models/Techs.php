@@ -28,6 +28,7 @@ use Yii;
  * @property bool $isUps Является UPS
  * @property array $contracts_ids Список документов
  * @property array $netIps_ids Список IP
+ * @property array $portsList
  *
  * @property Users $user
  * @property Users $itStaff
@@ -40,6 +41,7 @@ use Yii;
  * @property TechTypes $type
  * @property Contracts[] $contracts
  * @property Services[] $services
+ * @property Ports[] $ports
  * @property MaterialsUsages[] $materialsUsages
  */
 
@@ -270,7 +272,7 @@ class Techs extends \yii\db\ActiveRecord
 			->from(['attached_tech_models'=>TechModels::tableName()]);
 
 	}
-
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -278,7 +280,15 @@ class Techs extends \yii\db\ActiveRecord
 	{
 		return $this->hasMany(MaterialsUsages::className(), ['techs_id' => 'id']);
 	}
-
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getPorts()
+	{
+		return $this->hasMany(Ports::className(), ['techs_id' => 'id']);
+	}
+	
 	/**
 	 * @return TechTypes
 	 */
@@ -464,6 +474,51 @@ class Techs extends \yii\db\ActiveRecord
 			->viaTable('{{%techs_in_services}}', ['tech_id' => 'id']);
 	}
 	
+	/**
+	 * Возвращает массив портов (фактически объявленных или потенциально возможных исходя из модели оборудования)
+	 */
+	public function getPortsList()
+	{
+		//Порты которые должны быть у этой модели оборудования
+		$model_ports=[];
+
+		//Порты которые объявлены в БД конкретно для этого устройства
+		$custom_ports=$this->ports;
+		if (!is_array($custom_ports)) $custom_ports=[];
+		
+		//если корректно пришита модель оборудования и у модели есть набор портов
+		if (is_object($this->model) && strlen($this->model->ports)) {
+			//распарсиваем порты
+			foreach (explode("\n",$this->model->ports) as $port) {
+				$tokens=explode(' ',$port);
+				
+				//вытаскиваем первое слово
+				$port_name=trim($tokens[0]);
+				unset ($tokens[0]);
+				
+				//остальные слова - комментарий
+				$port_comment=implode(' ',$tokens);
+				
+				//ищем есть ли порт-объект к этому порту
+				$port_link=null;
+				foreach ($custom_ports as $i=>$custom_port) if ($custom_port->name == $port_name) {
+					$port_link=$custom_port;
+					unset($custom_ports[$i]);
+				}
+				$model_ports[$port_name]=compact('port_name','port_comment','port_link');
+			}
+		}
+		
+		foreach ($custom_ports as $port_link) {
+			$model_ports[$port_link->name]=[
+				'port_name'=>$port_link->name,
+				'port_comment'=>$port_link->comment,
+				'port_link'=>$port_link
+			];
+		}
+		
+		return $model_ports;
+	}
 	
 	
 	public static function fetchNames(){

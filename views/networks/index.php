@@ -24,6 +24,7 @@ $renderer=$this;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+		'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
@@ -41,10 +42,13 @@ $renderer=$this;
 				'format'=>'raw',
 				'value'=>function($data) use ($renderer){
 					return $renderer->render('/net-vlans/item',['model'=>$data->netVlan]);
-				}
+				},
+				'contentOptions'=>[
+					'class'=>'text-right'
+				]
 			],
 			[
-				'attribute'=>'domain',
+				'attribute'=>'domain_id',
 				'format'=>'raw',
 				'value'=>function($data) use ($renderer){
 					if (is_object($data->netVlan) && is_object($data->netVlan->netDomain))
@@ -53,7 +57,7 @@ $renderer=$this;
 				}
 			],
 			[
-				'attribute'=>'Usage',
+				'attribute'=>'usage',
 				'format'=>'raw',
 				'value'=>function($data) use ($renderer){
 					return $renderer->render('used',['model'=>$data]);

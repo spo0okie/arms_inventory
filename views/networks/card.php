@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
 
-$deleteable=count($model->ips); //тут переопределить возможность удаления элемента
+$deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
 
 ?>
