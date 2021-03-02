@@ -50,7 +50,7 @@ class Ports extends \yii\db\ActiveRecord
 					if (
 						!(strlen($this->$attribute)>strlen('create:1@1'))
 						&&
-						!(substr($this->$attribute,0,))
+						!(substr($this->$attribute,0,strlen('create:'))=='create:')
 					)
 						$this->addError($attribute, "Неверный порт устройства");
 				}
