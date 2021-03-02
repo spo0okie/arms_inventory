@@ -59,8 +59,8 @@ class NetworksSearch extends Networks
 				//'defaultOrder' => ['domains_id'=>SORT_ASC],
 				'attributes'=>[
 					'name'=>[
-						'asc'=>['text_addr'=>SORT_ASC],
-						'desc'=>['text_addr'=>SORT_DESC],
+						'asc'=>['addr'=>SORT_ASC],
+						'desc'=>['addr'=>SORT_DESC],
 					],
 					'domain_id'=>[
 						'asc'=>['net_domains.name'=>SORT_ASC],
@@ -84,7 +84,7 @@ class NetworksSearch extends Networks
         }
 
         $query
-			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",networks.name)', $this->name])
+			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', $this->name])
 			->andFilterWhere(['like', 'concat(net_vlans.name," (",net_vlans.vlan)', $this->vlan_id])
 			->andFilterWhere(['like', 'net_domains.name', $this->domain])
             ->andFilterWhere(['like', 'networks.comment', $this->comment]);

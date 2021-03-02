@@ -9,7 +9,7 @@ $class='';
 
 if (!empty($model)) {
 	if (is_object($model->network)&&is_object($model->network->netVlan)&&is_object($model->network->netVlan->segment)) $class=$model->network->netVlan->segment->code;
-	if (!isset($name)) $name=$model->text_addr;
+	if (!isset($name)) $name=$model->sname;
 	?>
 
 	<span class="net-ips-item text-monospace <?= $class ?>"

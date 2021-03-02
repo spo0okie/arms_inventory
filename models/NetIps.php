@@ -17,6 +17,7 @@ use yii\db\Expression;
  * @property int $mask
  * @property int $networks_id
  * @property string $text_addr
+ * @property string $name
  * @property string $sname
  * @property string $comment
  * @property Comps[] $comps
@@ -99,7 +100,7 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getSname()
 	{
-		return $this->text_addr;
+		return $this->text_addr.(empty($this->name)?'':(' ('.$this->name.')'));
 	}
 	
 	/**
