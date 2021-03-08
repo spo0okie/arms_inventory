@@ -33,7 +33,7 @@ $renderer=$this;
                     return $renderer->render('item',['model'=>$data]);
                 }
             ],
-            'description',
+            'description:ntext',
             'code',
 
             //['class' => 'yii\grid\ActionColumn'],
