@@ -53,6 +53,10 @@ class SegmentsController extends Controller
     {
         $dataProvider = new ActiveDataProvider([
             'query' => Segments::find(),
+			'pagination' => ['pageSize' => 100,],
+			'sort'=> [
+				'defaultOrder' => ['name'=>SORT_ASC],
+			]
         ]);
 
         return $this->render('index', [

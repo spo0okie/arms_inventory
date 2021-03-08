@@ -27,6 +27,12 @@ for (
 
 JS;
 
+$formAction=$model->isNewRecord?
+	['tech-models/create']:
+	['tech-models/update','id'=>$model->id];
+
+if (Yii::$app->request->get('return'))
+	$formAction['return']=Yii::$app->request->get('return');
 
 ?>
 
@@ -41,7 +47,8 @@ JS;
 	    'validateOnSubmit' => true,
 	    'validationUrl' => $model->isNewRecord?['tech-models/validate']:['tech-models/validate','id'=>$model->id],
 	    //'options' => ['enctype' => 'multipart/form-data'],
-	    'action' => $model->isNewRecord?\yii\helpers\Url::to(['tech-models/create']):\yii\helpers\Url::to(['tech-models/update','id'=>$model->id]),
+		//Вот это вот снизу зачем интересно? видимо для вставки в качестве модального окна
+	    'action' => \yii\helpers\Url::to($formAction),
     ]); ?>
 
     <?php

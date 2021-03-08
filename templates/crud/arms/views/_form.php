@@ -33,6 +33,7 @@ use kartik\select2\Select2;
 		//'validationUrl' => $model->isNewRecord?	//URL валидации на стороне сервера
 			//['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/validate']:	//для новых моделей
 			//['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/validate','id'=>$model->id], //для существующих
+		//'action' => Yii::$app->request->getQueryString(),
 	]); ?>
 
 <?php foreach ($generator->getColumnNames() as $attribute) {

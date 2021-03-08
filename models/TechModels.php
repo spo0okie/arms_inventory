@@ -19,6 +19,7 @@ use Yii;
  * @property string $links Ссылки
  * @property string $comment Комментарий
  * @property string $ports Порты
+ * @property array $portsList Порты
  *
  * @property TechTypes $type
  * @property Techs[] $techs
@@ -132,12 +133,29 @@ class TechModels extends \yii\db\ActiveRecord
 	{
 		return $this->hasMany(Arms::className(), ['model_id' => 'id']);
 	}
-
+	
 	public function getUsages()
 	{
 		return count($this->techs)+count($this->arms);
 	}
-
+	
+	public function getPortsList()
+	{
+		if(!count($ports=explode("\n",$this->ports))) return [];
+		$model_ports=[];
+		foreach ($ports as $port) {
+			$tokens=explode(' ',$port);
+			
+			//вытаскиваем первое слово
+			$port_name=trim($tokens[0]);
+			unset ($tokens[0]);
+			
+			//остальные слова - комментарий
+			if (strlen($port_name)) $model_ports[$port_name]=implode(' ',$tokens);
+		}
+		return $model_ports;
+	}
+	
 	public function getSname()
 	{
 		return
@@ -177,7 +195,7 @@ class TechModels extends \yii\db\ActiveRecord
 			//->select(['id', 'name'])
 				//->orderBy('sname')
 			->all();
-		return static::$names_cache=\yii\helpers\ArrayHelper::map($list, 'id', 'sname');;
+		return static::$names_cache=\yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}
 
 	public static function fetchPCs()

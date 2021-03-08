@@ -9,63 +9,49 @@
 /* @var \app\models\Techs $model */
 /* @var $this yii\web\View */
 
-//Порты которые должны быть у этой модели оборудования
-$model_ports=[];
+if (!is_object($model->model) || !is_array($model->model->portsList) || !count($model->model->portsList)) { ?>
+	<div class="bg-warning">
+		Для этой модели оборудования не объявлено стандартных сетевых портов.
+		Если это неверно - <?= \yii\helpers\Html::a('отредактируйте модель оборудования.',[
+			'/tech-models/update',
+			'id'=>$model->model_id,
+			'return'=>'previous'
+		]) ?>
+	</div>
+	<br/>
+<?php }
 
-//Порты которые созданы для этой модели
-$custom_ports=$model->ports;
+if (count($model->portsList)) { ?>
 
-?>
+	<table class="table table-striped">
+		<tr>
+			<th>
+				Порт
+			</th>
+			<th>
+				Пояснение
+			</th>
+			<th colspan="3">
+				Соединение с
+			</th>
+		</tr>
 
-<table class="table table-striped">
-<tr>
-	<th>
-		Порт
-	</th>
-	<th>
-		Пояснение
-	</th>
-	<th colspan="3">
-		Соединение с
-	</th>
-</tr>
-
-<?php
-//если корректно пришита модель и у модели есть набор портов
-
-foreach ($model->portsList as $port) {
-	$port['model']=$model;
-	echo $this->render('port-row',$port);
-}
-/*
-if (is_object($model->model) && strlen($model->model->ports)) {
-	//распарсиваем порты
-	foreach (explode("\n",$model->model->ports) as $port) {
-		$tokens=explode(' ',$port);
-		
-		//вытаскиваем первое слово
-		$port_name=trim($tokens[0]);
-		unset ($tokens[0]);
-		
-		//остальные слова - комментарий
-		$port_comment=implode(' ',$tokens);
-		
-		//ищем есть ли порт-объект к этому порту
-		$port_link=null;
-		foreach ($custom_ports as $i=>$custom_port) if ($custom_port->name == $port_name) {
-			$port_link=$custom_port;
-			unset($custom_ports[$i]);
-		}
-		
-		echo $this->render('port-row',compact('model','port_name','port_comment','port_link'));
-	}
-}
-
-foreach ($custom_ports as $port_link)
-	echo $this->render('port-row',compact('model','port_link'));
-*/
-?>
+		<?php foreach ($model->portsList as $port) {
+			$port['model']=$model;
+			echo $this->render('port-row',$port);
+		}?>
+	</table>
+<?php }
 
 
-</table>
-
+echo \yii\helpers\Html::a(
+	'Добавить нестандартный порт',
+	[
+		'/ports/create',
+		'techs_id'=>$model->id,
+		'return'=>'previous'
+	],[
+		'class'=>'btn btn-info',
+		'title' => 'Стандартные порты редактируются в модели оборудования'
+	]
+) ?>

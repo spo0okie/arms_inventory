@@ -6,6 +6,7 @@ use yii\bootstrap\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
+
 \yii\helpers\Url::remember();
 
 $this->title = $model->num;

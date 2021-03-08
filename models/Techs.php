@@ -488,18 +488,9 @@ class Techs extends \yii\db\ActiveRecord
 		if (!is_array($custom_ports)) $custom_ports=[];
 		
 		//если корректно пришита модель оборудования и у модели есть набор портов
-		if (is_object($this->model) && strlen($this->model->ports)) {
-			//распарсиваем порты
-			foreach (explode("\n",$this->model->ports) as $port) {
-				$tokens=explode(' ',$port);
-				
-				//вытаскиваем первое слово
-				$port_name=trim($tokens[0]);
-				unset ($tokens[0]);
-				
-				//остальные слова - комментарий
-				$port_comment=implode(' ',$tokens);
-				
+		if (is_object($this->model) && count($this->model->portsList)) {
+			//перебираем распарсеные порты
+			foreach ($this->model->portsList as $port_name=>$port_comment) {
 				//ищем есть ли порт-объект к этому порту
 				$port_link=null;
 				foreach ($custom_ports as $i=>$custom_port) if ($custom_port->name == $port_name) {

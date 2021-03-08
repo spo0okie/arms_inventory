@@ -6,6 +6,7 @@ use app\models\Comps;
 use Yii;
 use app\models\TechModels;
 use app\models\TechModelsSearch;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -189,8 +190,10 @@ class TechModelsController extends Controller
 		        Yii::$app->response->format = Response::FORMAT_JSON;
 		        return $model;
 	        }
-
-		        return $this->redirect(['view', 'id' => $model->id]);
+	
+			if (Yii::$app->request->get('return')=='previous')
+				return $this->redirect(Url::previous());
+	        return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('create', [
@@ -210,6 +213,8 @@ class TechModelsController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (Yii::$app->request->get('return')=='previous')
+				return $this->redirect(Url::previous());
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
