@@ -22,13 +22,10 @@ if (!isset($static_view)) $static_view=false;
 	]) ?>
 </h1>
 
-<?= DetailView::widget([
-    'model' => $model,
-    'attributes' => [
-        'id',
-        'name',
-        'description',
-        'code',
-    ],
-]) ?>
+
+<p><?= $model->code ?></p>
+<br />
+
+<h4>Описание</h4>
+<?= Yii::$app->formatter->asNtext($model->description) ?>
 

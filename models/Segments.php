@@ -15,7 +15,8 @@ use Yii;
 class Segments extends \yii\db\ActiveRecord
 {
 	
-	static $title='Сегменты инфраструктуры';
+	static $titles='Сегменты инфраструктуры';
+	static $title='Сегмент инфраструктуры';
     /**
      * {@inheritdoc}
      */

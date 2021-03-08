@@ -12,6 +12,10 @@ $safeAttributes = $model->safeAttributes();
 if (empty($safeAttributes)) {
     $safeAttributes = $model->attributes();
 }
+
+$tableSchema = $model->getTableSchema();
+$text_areas=[];
+
 echo "<?php\n";
 ?>
 
@@ -37,6 +41,11 @@ use kartik\select2\Select2;
 	]); ?>
 
 <?php foreach ($generator->getColumnNames() as $attribute) {
+	if ($tableSchema === false || !isset($tableSchema->columns[$attribute])) {
+		$attribute_type=null;
+	} else {
+		$attribute_type=$tableSchema->columns[$attribute]->type;
+	}
     if (in_array($attribute, $safeAttributes)) {
 		$relation=null;
     	if ((strlen($attribute)>3) && substr($attribute,strlen($attribute)-3,3)=='_id') {
@@ -55,9 +64,26 @@ use kartik\select2\Select2;
 			echo "            'multiple' => false\n";
 			echo "        ]\n";
 			echo "    ]) ?>\n";
+		} elseif ($attribute_type=="text") {
+    		echo "<?= \$form->field(\$model, '$attribute')->textarea(['rows' => max(4, count(explode(\"\\n\", \$model->$attribute)))]) ?>";
+    		$text_areas[]=$attribute;
 		} else echo "    <?= " . $generator->generateActiveField($attribute) . " ?>\n\n";
-    }
+	
+	
+	}
 } ?>
+		
+	<?php
+		$text_areas_code=[];
+		foreach ($text_areas as $area) {
+			$text_areas_code[]="$('#". Inflector::camel2id(StringHelper::basename($generator->modelClass)) ."-$area').autoResize();";
+		}
+		if (count($text_areas_code)) {
+			echo '<?php $this->registerJs("'.implode(';',$text_areas_code).'"); ?>';
+		}
+	?>
+
+
     <div class="form-group">
         <?= "<?= " ?>Html::submitButton(<?= $generator->generateString('Save') ?>, ['class' => 'btn btn-success']) ?>
     </div>
