@@ -65,7 +65,7 @@ NavBar::begin([
 				'items' => [
 					//['label' => \app\models\OrgStruct::$title, 'url' => ['/org-struct/index']],
 					['label' => \app\models\Users::$title, 'url' => ['/users/index']],
-					['label' => 'Пользователи', 'url' => ['/users/logins']],
+					//['label' => 'Пользователи', 'url' => ['/users/logins']],
 					['label' => \app\models\UserGroups::$title, 'url' => ['/user-groups/index']],
 				]
 			]:'',
@@ -77,6 +77,7 @@ NavBar::begin([
 					['label' => \app\models\Networks::$title, 'url' => ['/networks/index']],
 					['label' => \app\models\NetVlans::$title, 'url' => ['/net-vlans/index']],
 					['label' => \app\models\NetDomains::$title, 'url' => ['/net-domains/index']],
+					['label' => \app\models\Segments::$title, 'url' => ['/segments/index']],
 				],
 			]:'',
 			\app\models\Users::isViewer()?
@@ -85,7 +86,6 @@ NavBar::begin([
 					['label' => 'АРМы', 'url' => ['/arms/index']],
 					['label' => 'ОС', 'url' => ['/comps/index']],
 					['label' => 'Домены', 'url' => ['/domains/index']],
-					['label' => \app\models\Segments::$title, 'url' => ['/segments/index']],
 					['label' => \app\models\LoginJournal::$title, 'url' => ['/login-journal/index']],
 					['label' => 'Дубликаты', 'url' => ['/comps/dupes']],
 					['label' => 'Софт',

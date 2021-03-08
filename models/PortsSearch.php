@@ -17,8 +17,8 @@ class PortsSearch extends Ports
     public function rules()
     {
         return [
-            [['id', 'techs_id', 'link_techs_id', 'link_arms_id', 'link_ports_id'], 'integer'],
-            [['name', 'comment'], 'safe'],
+            [['id'], 'integer'],
+            [['name', 'comment', 'techs_id', 'link_techs_id', 'link_arms_id', 'link_ports_id'], 'safe'],
         ];
     }
 
@@ -40,13 +40,32 @@ class PortsSearch extends Ports
      */
     public function search($params)
     {
-        $query = Ports::find();
+        $query = Ports::find()
+			->joinWith(['tech','linkTech','linkPort','linkArm']);
 
         // add conditions that should always apply here
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+	
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+			'pagination' => ['pageSize' => 100,],
+			'sort'=> [
+				//'defaultOrder' => ['domains_id'=>SORT_ASC],
+				'attributes'=>[
+					'name'=>[
+						'asc'=>['ports.name'=>SORT_ASC],
+						'desc'=>['ports.name'=>SORT_DESC],
+					],
+					'techs_id'=>[
+						'asc'=>['techs.num'=>SORT_ASC],
+						'desc'=>['techs.num'=>SORT_DESC],
+					],
+					'comment'=>[
+						'asc'=>['ports.comment'=>SORT_ASC],
+						'desc'=>['ports.comment'=>SORT_DESC],
+					],
+				]
+			]
+		]);
 
         $this->load($params);
 
@@ -56,17 +75,14 @@ class PortsSearch extends Ports
             return $dataProvider;
         }
 
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'techs_id' => $this->techs_id,
-            'link_techs_id' => $this->link_techs_id,
-            'link_arms_id' => $this->link_arms_id,
-            'link_ports_id' => $this->link_ports_id,
-        ]);
-
-        $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query->andFilterWhere(['like', 'ports.name', $this->name])
+			->andFilterWhere(['like', 'techs.num', $this->techs_id])
+			->andFilterWhere(['or',
+				['like', 'port_linked_techs.num', $this->link_techs_id],
+				['like', 'port_linked_arms.num', $this->link_techs_id],
+				['like', 'port_linked_ports.name', $this->link_techs_id],
+			])
+            ->andFilterWhere(['like', 'ports.comment', $this->comment]);
 
         return $dataProvider;
     }

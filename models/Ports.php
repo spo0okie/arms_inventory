@@ -102,7 +102,8 @@ class Ports extends \yii\db\ActiveRecord
      */
     public function getLinkArm()
     {
-        return $this->hasOne(Arms::className(), ['id' => 'link_arms_id']);
+        return $this->hasOne(Arms::className(), ['id' => 'link_arms_id'])
+			->from(['port_linked_arms'=>Arms::tableName()]);;;
     }
 
     /**
@@ -110,7 +111,8 @@ class Ports extends \yii\db\ActiveRecord
      */
     public function getLinkPort()
     {
-        return $this->hasOne(Ports::className(), ['id' => 'link_ports_id']);
+        return $this->hasOne(Ports::className(), ['id' => 'link_ports_id'])
+			->from(['port_linked_ports'=>Ports::tableName()]);;;
     }
 
     /**
@@ -118,7 +120,8 @@ class Ports extends \yii\db\ActiveRecord
      */
     public function getPort()
     {
-        return $this->hasOne(Ports::className(), ['link_ports_id' => 'id']);
+        return $this->hasOne(Ports::className(), ['link_ports_id' => 'id'])
+			->from(['port_parent_ports'=>Ports::tableName()]);;
     }
 
     /**
@@ -126,7 +129,8 @@ class Ports extends \yii\db\ActiveRecord
      */
     public function getLinkTech()
     {
-        return $this->hasOne(Techs::className(), ['id' => 'link_techs_id']);
+        return $this->hasOne(Techs::className(), ['id' => 'link_techs_id'])
+			->from(['port_linked_techs'=>Techs::tableName()]);
     }
 
     /**

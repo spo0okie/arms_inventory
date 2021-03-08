@@ -164,9 +164,11 @@ class NetIps extends \yii\db\ActiveRecord
 			$this->text_addr=$ip4->humanReadable();
 			if (!is_null($mask)) $this->text_addr.='/'.$mask;
 			
-			if (is_object($network=$this->findNetwork())) {
+			if (is_object($network=$this->findNetwork()))
 				$this->networks_id=$network->id;
-			}
+			else
+				$this->networks_id=null;
+
 			return true;
 			
 		}
