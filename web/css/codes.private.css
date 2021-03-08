@@ -3,6 +3,11 @@
 span.segment_open {background-color: lightgreen; border-radius: 7px}
 span.segment_closed {background-color: pink; border-radius: 7px}
 span.segment_common {background-color: lightskyblue; border-radius: 7px}
+span.segment_ext_dmz {background-color:yellow; border-radius: 7px; border: red dotted;}
+span.segment_int_dmz  {background-color:grey; border-radius: 7px; border: orange dotted;}
+span.segment_client_vpn  {background-color:coral; border-radius: 7px}
+span.segment_intersite_vpn  {background-color:cyan; border-radius: 7px}
+span.segment_it_lan  {background-color:orange; border-radius: 7px}
 
 /* РАСКРАСКА L2 ДОМЕНОВ */
 span.net-domain-Chel_VLAN {background-color: #96dce1; border-radius: 7px}
@@ -12,3 +17,4 @@ span.net-domain-KLG_VLAN {background-color: #c9c9A3; border-radius: 7px}
 span.net-domain-KLG_VLAN a {color: black}
 span.net-domain-MHK_VLAN {background-color: #ededb7; border-radius: 7px}
 span.net-domain-NN_VLAN {background-color: #9da1d7; border-radius: 7px}
+span.net-domain-SPB_VLAN {background-color: #c080c0; border-radius: 7px}
