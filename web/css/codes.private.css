@@ -3,8 +3,9 @@
 span.segment_open {background-color: lightgreen; border-radius: 7px}
 span.segment_closed {background-color: pink; border-radius: 7px}
 span.segment_common {background-color: lightskyblue; border-radius: 7px}
-span.segment_ext_dmz {background-color:yellow; border-radius: 7px; border: red dotted;}
-span.segment_int_dmz  {background-color:grey; border-radius: 7px; border: orange dotted;}
+span.segment_ext_dmz {background-color:yellow; border-radius: 7px; border: 1pt red dotted;}
+span.segment_int_dmz  {background-color:grey; border-radius: 7px; border: 1pt orange dotted;}
+span.segment_int_dmz a {color: black}
 span.segment_client_vpn  {background-color:coral; border-radius: 7px}
 span.segment_intersite_vpn  {background-color:cyan; border-radius: 7px}
 span.segment_it_lan  {background-color:orange; border-radius: 7px}
