@@ -7,9 +7,10 @@ use yii\grid\GridView;
 /* @var $searchModel app\models\SoftSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Програмное обеспечение';
-$this->params['breadcrumbs'][] = $this->title;
 
+$this->title = 'Программное обеспечение';
+$this->params['breadcrumbs'][] = $this->title;
+$renderer=$this;
 $manufacturers=\app\models\Manufacturers::fetchNames();
 ?>
 <div class="soft-index">
@@ -25,25 +26,34 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
 
             //'id',
-/*            [
+			/*[
                 'attribute'=>'manufacturers_id',
                 'format'=>'raw',
                 'value' => function($data) use ($manufacturers) {return isset($manufacturers[$data['manufacturers_id']])?$manufacturers[$data['manufacturers_id']]:'производитель не найден';}
-            ],*/
+            ],
             [
 	            'attribute' => 'manufacturers_id',
 	            'value' => 'manufacturer.name',
                 'filter' => \app\models\Manufacturers::fetchNames(),
-            ],
-            'descr',
+            ],*/
+			[
+				'attribute'=>'descr',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer){
+					return $renderer->render('/soft/item',[
+						'model'=>$data,
+						'name'=>$data->manufacturer->name.' '.$data->descr
+					]);
+				}
+			],
             'comment',
             //'items:ntext',
             //'created_at',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            //['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 </div>

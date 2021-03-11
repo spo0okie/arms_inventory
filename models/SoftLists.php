@@ -11,10 +11,14 @@ use Yii;
  * @property string $name Служебное имя
  * @property string $descr Описание
  * @property string $comment Комментарий
+ * @property Soft[] $soft
  */
 class SoftLists extends \yii\db\ActiveRecord
 {
-
+	
+	public static $title = 'Список ПО';
+	public static $titles = 'Списки ПО';
+	
 	protected static $soft_in_lists = null;
 
     protected static $names_list = null;

@@ -36,6 +36,13 @@ $renderer=$this;
                     return $renderer->render('item',['model'=>$data]);
                 }
             ],
+			[
+				'attribute'=>'segments_id',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer){
+					return $renderer->render('/segments/item',['model'=>$data->segment]);
+				}
+			],
 			'comment:ntext',
 			[
 				'attribute'=>'vlan_id',

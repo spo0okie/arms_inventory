@@ -8,7 +8,7 @@ use yii\helpers\Html;
 $class='';
 
 if (!empty($model)) {
-	if (is_object($model->network)&&is_object($model->network->netVlan)&&is_object($model->network->netVlan->segment)) $class=$model->network->netVlan->segment->code;
+	if (is_object($model->network)) $class=$model->network->segmentCode;
 	if (!isset($name)) $name=$model->sname;
 	?>
 

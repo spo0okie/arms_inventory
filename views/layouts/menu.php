@@ -77,7 +77,7 @@ NavBar::begin([
 					['label' => \app\models\Networks::$title, 'url' => ['/networks/index']],
 					['label' => \app\models\NetVlans::$title, 'url' => ['/net-vlans/index']],
 					['label' => \app\models\NetDomains::$title, 'url' => ['/net-domains/index']],
-					['label' => \app\models\Segments::$title, 'url' => ['/segments/index']],
+					['label' => \app\models\Segments::$titles, 'url' => ['/segments/index']],
 				],
 			]:'',
 			\app\models\Users::isViewer()?

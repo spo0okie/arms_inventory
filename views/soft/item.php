@@ -7,19 +7,25 @@
  */
 use yii\helpers\Html;
 
+/* @var $model \app\models\Soft */
+
 if (!isset($static_view)) $static_view=false;
+if (!isset($show_vendor)) $show_vendor=false;
 if (!isset($hitlist)) $hitlist=null;
 
-/* @var $model \app\models\Soft */
+
+if (is_object($model)) {
+if (!isset($name)) $name=$model->descr;
 ?>
 
-<spam class="soft-item"
-	qtip_ajxhrf="<?= \yii\helpers\Url::to([
-		'/soft/ttip',
-		'id'=>$model->id,
-		'hitlist'=>$hitlist
-	])?>"
->
-	<?= Html::a($model->descr,['/soft/view','id'=>$model->id]) ?>
-	<?php if(!$static_view) echo Html::a('<span class="glyphicon glyphicon-pencil"/>',['/soft/update','id'=>$model->id]) ?>
-</spam>
+	<span class="soft-item"
+		qtip_ajxhrf="<?= \yii\helpers\Url::to([
+			'/soft/ttip',
+			'id'=>$model->id,
+			'hitlist'=>$hitlist
+		])?>"
+	>
+		<?= Html::a($name,['/soft/view','id'=>$model->id]) ?>
+		<?= $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"/>',['/soft/update','id'=>$model->id]) ?>
+	</span>
+<?php }

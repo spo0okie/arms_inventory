@@ -14,46 +14,78 @@ use kartik\select2\Select2;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'manufacturers_id')->widget(Select2::className(), [
-	    'data' => \app\models\Manufacturers::fetchNames(),
-	    'options' => ['placeholder' => 'Выберите производителя',],
-	    'toggleAllSettings'=>['selectLabel'=>null],
-	    'pluginOptions' => [
-		    'allowClear' => false,
-		    'multiple' => false
-	    ]
-    ]) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $form->field($model, 'manufacturers_id')->widget(Select2::className(), [
+				'data' => \app\models\Manufacturers::fetchNames(),
+				'options' => ['placeholder' => 'Выберите производителя',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => false,
+					'multiple' => false
+				]
+			]) ?>
+			
+			<?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
+		</div>
+		<div class="col-md-6">
+			<?= $form->field($model, 'softLists_ids')->dropDownList(\app\models\SoftLists::listAll(), ['multiple' => true]) ?>
+		</div>
+	</div>
 
-    <?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
-
-    <p>
-        Внимание! Элементы, составляющие пакет ПО, вносятся как regexp выражения. Это означает что многие символы являются служебными и должны быть экранированы.<br />
-        Например \( \. \+ и т.п. Более подробно читать <?= html::a('тут','https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F') ?><br />
-
-    </p>
-
-    <?= $form->field($model, 'items')->textarea(['rows' => 6]) ?>
-
-    <p>
-        Если в списке ПО на компьютере обнаружатся основные компоненты продукта (те что выше), то из него вместе с основными будут также исключены и дополнительные (те что ниже).
-        В дополнительные надо включать разделяемые между несколькими продуктами компоненты, которые сами по себе полноценным продуктом не являются.
-        Например сервисы обновления.
-    </p>
-
-    <?= $form->field($model, 'additional')->textarea(['rows' => 6]) ?>
+	<h3>Распознавание установленного ПО</h3>
 
 
-    <?= $form->field($model, 'softLists_ids')->dropDownList(\app\models\SoftLists::listAll(), ['multiple' => true]) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $form->field($model, 'items')->textarea(['rows' => max(4,count(explode("\n",$model->items)))]) ?>
+		</div>
+		<div class="col-md-6">
+			<br/>
+				Внимание! Элементы, составляющие пакет ПО, вносятся как regexp выражения. Это означает что многие символы являются служебными и должны быть экранированы.<br />
+				Например \( \. \+ и т.п. Более подробно читать <?= html::a('тут','https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F') ?><br />
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $form->field($model, 'additional')->textarea(['rows' => max(4,count(explode("\n",$model->additional)))]) ?>
+		</div>
+		<div class="col-md-6">
+			<br />
+				Если в списке ПО на компьютере обнаружатся основные компоненты продукта (те что выше), то из него вместе с основными будут также исключены и дополнительные (те что ниже).
+				В дополнительные надо включать разделяемые между несколькими продуктами компоненты, которые сами по себе полноценным продуктом не являются.
+				Например сервисы обновления.
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+		</div>
+		<div class="col-md-6">
+		</div>
+	</div>
+
+
+	<div class="text-center">
+		<blockquote class="small">
+			<p>Некоторые люди, столкнувшись с проблемой, думают: «О, а использую-ка я регулярные выражения». Теперь у них есть две проблемы.</p>
+			<footer>Джейми Завински</footer>
+		</blockquote>
+	</div>
+
+
+	<h3>Описание ПО</h3>
+
+	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
 
     <div class="form-group">
 		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
+	
+	<?php $this->registerJs("$('#soft-items').autoResize();$('#soft-additional').autoResize();$('#soft-comment').autoResize();"); ?>
+	
+	<?php ActiveForm::end(); ?>
 
-    <?php ActiveForm::end(); ?>
 
-    <i>Некоторые люди, столкнувшись с проблемой, думают: «О, а использую-ка я регулярные выражения». Теперь у них есть две проблемы.<br />
-        Джейми Завински</i>
-
+	
 </div>

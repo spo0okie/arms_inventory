@@ -28,17 +28,6 @@ use kartik\select2\Select2;
 		]
 	]) ?>
 	
-	<?= $form->field($model, 'segment_id')->widget(Select2::className(), [
-		'data' => \app\models\Segments::fetchNames(),
-		'options' => [
-			'placeholder' => 'Выберите Сегмент ИТ',
-		],
-		'pluginOptions' => [
-			'allowClear' => true,
-			'multiple' => false
-		]
-	]) ?>
-
 	<?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
 
     <div class="form-group">

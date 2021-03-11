@@ -45,7 +45,7 @@ class NetIpsSearch extends NetIps
     public function search($params)
     {
         $query = NetIps::find()
-		->joinWith(['network.netVlan.segment','techs','comps']);
+		->joinWith(['network.netVlan','network.segment','techs','comps']);
 
         // add conditions that should always apply here
 

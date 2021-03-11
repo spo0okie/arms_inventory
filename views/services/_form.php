@@ -110,8 +110,11 @@ use kartik\select2\Select2;
 
         </div>
     </div>
-	<?= $form->field($model, 'notebook')->textarea(['rows' => max(5,count(explode("\n",$model->notebook)))]) ?>
-	<?php $this->registerJs("$('#services-notebook').autoResize();"); ?>
+	<?= $form->field($model, 'notebook')->widget(\kartik\markdown\MarkdownEditor::className(), [
+		'showExport'=>false
+	]) ?>
+
+	<?php $this->registerJs("$('#services-description').autoResize();"); ?>
 
 
 

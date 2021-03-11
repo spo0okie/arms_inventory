@@ -2,43 +2,49 @@
 
 namespace app\controllers;
 
+use app\models\SoftSearch;
 use Yii;
 use app\models\SoftLists;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\helpers\Url;
+use yii\bootstrap\ActiveForm;
+
 
 /**
  * SoftListsController implements the CRUD actions for SoftLists model.
  */
 class SoftListsController extends Controller
 {
-    /**
-     * @inheritdoc
-     */
-    public function behaviors()
-    {
-	    $behaviors=[
-		    'verbs' => [
-			    'class' => VerbFilter::className(),
-			    'actions' => [
-				    'delete' => ['POST'],
-			    ],
-		    ]
-	    ];
-	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-		    'class' => \yii\filters\AccessControl::className(),
-		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
-		    ],
-		    'denyCallback' => function ($rule, $action) {
-			    throw new  \yii\web\ForbiddenHttpException('Access denied');
-		    }
-	    ];
-	    return $behaviors;
-    }
+
+	/**
+	* {@inheritdoc}
+	*/
+	public function behaviors()
+	{
+		$behaviors=[
+			'verbs' => [
+				'class' => VerbFilter::className(),
+				'actions' => [
+					'delete' => ['POST'],
+				],
+			]
+		];
+
+		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
+			'class' => \yii\filters\AccessControl::className(),
+			'rules' => [
+				['allow' => true, 'actions'=>['create','update','delete',], 'roles'=>['editor']],
+				['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
+			],
+			'denyCallback' => function ($rule, $action) {
+				throw new  \yii\web\ForbiddenHttpException('Access denied');
+			}
+		];
+		return $behaviors;
+	}
 
     /**
      * Lists all SoftLists models.
@@ -55,6 +61,54 @@ class SoftListsController extends Controller
         ]);
     }
 
+	/**
+	* Validates  model on update.
+	* @param null $id
+	* @return mixed
+	* @throws NotFoundHttpException
+	*/
+	public function actionValidate($id=null)
+	{
+		if (!is_null($id))
+			$model = $this->findModel($id);
+		else
+			$model = new SoftLists();
+
+		if ($model->load(Yii::$app->request->post())) {
+			Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+			return ActiveForm::validate($model);
+		}
+	}
+
+
+	/**
+	* Displays a item for single model.
+	* @param integer $id
+	* @return mixed
+	* @throws NotFoundHttpException if the model cannot be found
+	*/
+	public function actionItem($id)
+	{
+		return $this->renderPartial('item', [
+			'model' => $this->findModel($id)
+		]);
+	}
+
+
+	/**
+	* Displays a tooltip for single model.
+	* @param integer $id
+	* @return mixed
+	* @throws NotFoundHttpException if the model cannot be found
+	*/
+	public function actionTtip($id)
+	{
+		return $this->renderPartial('ttip', [
+			'model' => $this->findModel($id),
+		]);
+	}
+
+
     /**
      * Displays a single SoftLists model.
      * @param integer $id
@@ -63,7 +117,15 @@ class SoftListsController extends Controller
      */
     public function actionView($id)
     {
+		$searchModel = new SoftSearch();
+		$searchModel->softLists_ids=[$id];
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+    	//$listSearch
+    	
+    	
         return $this->render('view', [
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
             'model' => $this->findModel($id),
         ]);
     }
@@ -78,6 +140,7 @@ class SoftListsController extends Controller
         $model = new SoftLists();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -98,6 +161,7 @@ class SoftListsController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
             return $this->redirect(['view', 'id' => $model->id]);
         }
 

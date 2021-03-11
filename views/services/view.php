@@ -5,6 +5,7 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
+\yii\helpers\Url::remember();
 
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => \app\models\Services::$title, 'url' => ['index']];

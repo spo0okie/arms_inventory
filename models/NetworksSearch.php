@@ -21,7 +21,7 @@ class NetworksSearch extends Networks
     {
         return [
             [['id',  'addr', 'mask', 'router', 'dhcp'], 'integer'],
-            [['name','vlan_id', 'domain_id', 'comment',], 'safe'],
+            [['name','vlan_id', 'domain_id', 'comment', 'segments_id',], 'safe'],
         ];
     }
 
@@ -46,7 +46,7 @@ class NetworksSearch extends Networks
         $query = Networks::find()
 			//->select(['*',''])
 			->joinWith([
-				'netVlan.segment',
+				'segment',
 				'netVlan.netDomain',
 			]);
 
@@ -70,6 +70,10 @@ class NetworksSearch extends Networks
 						'asc'=>['net_vlans.vlan'=>SORT_ASC],
 						'desc'=>['net_vlans.vlan'=>SORT_DESC],
 					],
+					'segments_id'=>[
+						'asc'=>['segments.name'=>SORT_ASC],
+						'desc'=>['segments.name'=>SORT_DESC],
+					],
 					'comment'
 				]
 			],
@@ -87,6 +91,7 @@ class NetworksSearch extends Networks
 			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', $this->name])
 			->andFilterWhere(['like', 'concat(net_vlans.name," (",net_vlans.vlan)', $this->vlan_id])
 			->andFilterWhere(['like', 'net_domains.name', $this->domain])
+			->andFilterWhere(['like', 'segments.name', $this->segments_id])
             ->andFilterWhere(['like', 'networks.comment', $this->comment]);
 
         return $dataProvider;

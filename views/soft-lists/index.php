@@ -8,6 +8,7 @@ use yii\grid\GridView;
 
 $this->title = 'Списки ПО';
 $this->params['breadcrumbs'][] = $this->title;
+$renderer=$this;
 ?>
 <div class="soft-lists-index">
 
@@ -24,14 +25,20 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
 
             //'id',
-            'name',
-            'descr',
+            //'name',
+			[
+				'attribute'=>'descr',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer){
+					return $renderer->render('item',['model'=>$data]);
+				}
+			],
             'comment:ntext',
 
-            ['class' => 'yii\grid\ActionColumn','template' => '{view} {update}'],
+            //['class' => 'yii\grid\ActionColumn','template' => '{view} {update}'],
         ],
     ]); ?>
 </div>

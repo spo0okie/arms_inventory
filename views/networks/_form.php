@@ -44,10 +44,22 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 	</div>
 
 	<div class="row">
-		<div class="col-md-6">
+		<div class="col-md-4">
+			<?= $form->field($model, 'segments_id')->widget(Select2::className(), [
+				'data' => \app\models\Segments::fetchNames(),
+				'options' => [
+					'placeholder' => 'Выберите Сегмент ИТ',
+				],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
+		<div class="col-md-4">
 			<?= $form->field($model, 'text_router')->textInput() ?>
 		</div>
-		<div class="col-md-6">
+		<div class="col-md-4">
 			<?= $form->field($model, 'text_dhcp')->textInput() ?>
 		</div>
 	</div>

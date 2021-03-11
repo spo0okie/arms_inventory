@@ -50,13 +50,6 @@ $renderer=$this;
 					'class'=>'text-center'
 				]
 			],
-			[
-				'attribute'=>'segment_id',
-				'format'=>'raw',
-				'value'=>function($data) use ($renderer){
-					return $renderer->render('/segments/item',['model'=>$data->segment]);
-				}
-			],
             'comment:ntext',
 
             //['class' => 'yii\grid\ActionColumn'],

@@ -15,19 +15,22 @@ use yii\db\Expression;
  * @property string $name
  * @property string $sname
  * @property string $text_addr
+ * @property string $segmentCode
+ * @property string $readableRouter
+ * @property string $readableDhcp
+ * @property string $comment
  * @property int $vlan_id
+ * @property int $segments_id
  * @property int $addr
  * @property int $mask
  * @property int $capacity
  * @property int $used
- * @property string $readableRouter
  * @property int $router
  * @property int $usedPercent
- * @property string $readableDhcp
  * @property int $dhcp
- * @property string $comment
  * @property NetVlans $netVlan
  * @property NetDomains $netDomain
+ * @property Segments $segment
  * @property NetIps[] $ips
  */
 class Networks extends \yii\db\ActiveRecord
@@ -58,10 +61,11 @@ class Networks extends \yii\db\ActiveRecord
         return [
 			[['text_addr'],'ip','ipv6'=>false,'subnet'=>true],
 			[['text_router','text_dhcp'], 'ip','ipv6'=>false],
-            [['vlan_id', 'addr', 'mask', 'router', 'dhcp'], 'integer'],
+            [['vlan_id', 'segments_id', 'addr', 'mask', 'router', 'dhcp'], 'integer'],
             [['name'], 'string', 'max' => 255],
 			[['comment'], 'safe'],
-        ];
+			[['segments_id'], 'exist', 'skipOnError' => true, 'targetClass' => Segments::className(), 'targetAttribute' => ['segments_id' => 'id']],
+		];
     }
 	
 	/**
@@ -73,6 +77,7 @@ class Networks extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'name' => 'Название сети',
 			'vlan_id' => 'Vlan',
+			'segments_id' => Segments::$title,
 			'netDomain' => 'L2 Домен',
 			'domain_id' => 'L2 Домен',
 			'addr' => 'Адрес',
@@ -97,7 +102,8 @@ class Networks extends \yii\db\ActiveRecord
 		return [
 			'id' => 'ID',
 			'name' => 'Короткое понятное название',
-			'vlan_id' => 'К какому Vlan относится эта сеть',
+			'vlan_id' => 'В каком Vlan находится эта сеть',
+			'segments_id' => 'К какому сегменту относится эта сеть',
 			'text_addr' => 'Адрес и маска сети (в десятичной нотации 192.168.1.0/24)',
 			'addr' => 'Адрес сети (в понятной нотации 192.168.0.0)',
 			'mask' => 'Маска сети (в понятной нотации 255.255.255.0)',
@@ -210,13 +216,30 @@ class Networks extends \yii\db\ActiveRecord
 	
 	/**
 	 * Network
-	 * @return Networks
+	 * @return \yii\db\ActiveQuery|Networks
 	 */
 	public function getIps()
 	{
-		return static::hasMany(NetIps::className(), ['networks_id'=>'id'])->orderBy(['addr'=>SORT_ASC]);
+		return $this->hasMany(NetIps::className(), ['networks_id'=>'id'])->orderBy(['addr'=>SORT_ASC]);
 	}
 	
+	/**
+	 * @return \yii\db\ActiveQuery|Segments
+	 */
+	public function getSegment()
+	{
+		return $this->hasOne(Segments::className(), ['id' => 'segments_id']);
+	}
+	
+	/**
+	 * CSS код сегмента к которому относится VLAN
+	 * @return string
+	 */
+	public function getSegmentCode()
+	{
+		if (is_object($segment=$this->segment)) return $segment->code;
+		return '';
+	}
 	
 	/**
 	 * занято адресов

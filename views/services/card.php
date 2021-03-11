@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
@@ -115,7 +116,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 <?php if (!$static_view && strlen($model->notebook)) { ?>
     <h4>Записная книжка:</h4>
     <p>
-		<?= Yii::$app->formatter->asNtext($model->notebook) ?>
+		<?= Markdown::convert($model->notebook) ?>
     </p>
     <br />
 <?php } ?>

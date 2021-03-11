@@ -11,7 +11,7 @@ use Yii;
  * @property string $code
  * @property string $name
  * @property string $sname
- * @property string $segmentCode
+ * @property string $domainCode
  * @property int $vlan
  * @property int $domain_id
  * @property int $segment_id
@@ -83,23 +83,17 @@ class NetVlans extends \yii\db\ActiveRecord
 	}
 	
 	
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getSegment()
-	{
-		return $this->hasOne(Segments::className(), ['id' => 'segment_id']);
-	}
 	
 	/**
 	 * CSS код сегмента к которому относится VLAN
 	 * @return string
 	 */
-	public function getSegmentCode()
+	public function getDomainCode()
 	{
-		if (is_object($segment=$this->segment)) return $segment->code;
+		if (is_object($domain=$this->netDomain)) return 'net-domain-'.$domain->name;
 		return '';
 	}
+	
 	
 	
 	/**

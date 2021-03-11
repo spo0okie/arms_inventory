@@ -12,13 +12,15 @@ use app\models\Soft;
  */
 class SoftSearch extends Soft
 {
+	public $softList_ids;
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['id', 'manufacturers_id'], 'integer'],
+            [['id', 'manufacturers_id','softList_ids'], 'integer'],
             [['descr', 'comment', 'items', 'created_at'], 'safe'],
         ];
     }
@@ -41,13 +43,33 @@ class SoftSearch extends Soft
      */
     public function search($params)
     {
-        $query = Soft::find();
+        $query = Soft::find()
+			->joinWith(['manufacturer','softLists']);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-        ]);
+			'pagination' => ['pageSize' => 500,],
+			'sort'=> [
+				'defaultOrder' => [
+					//'manufacturers_id'=>SORT_ASC,
+					'descr'=>SORT_ASC,
+				],
+				'attributes'=>[
+					'descr' => [
+						'asc'=>['CONCAT(manufacturers.name,soft.descr)'=>SORT_ASC],
+						'desc'=>['CONCAT(manufacturers.name,soft.descr)'=>SORT_DESC],
+					],
+					'manufacturers_id'=>[
+						'asc'=>['manufacturers.name'=>SORT_ASC],
+						'desc'=>['manufacturers.name'=>SORT_DESC],
+					],
+					'comment'
+				]
+			],
+
+		]);
 
         $this->load($params);
 
@@ -61,10 +83,11 @@ class SoftSearch extends Soft
         $query->andFilterWhere([
             'id' => $this->id,
             'manufacturers_id' => $this->manufacturers_id,
-            'created_at' => $this->created_at,
+			'created_at' => $this->created_at,
+			'soft_in_lists.list_id' => $this->softLists_ids,
         ]);
 
-        $query->andFilterWhere(['like', 'descr', $this->descr])
+        $query->andFilterWhere(['like', 'CONCAT(manufacturers.name,soft.descr)', $this->descr])
             ->andFilterWhere(['like', 'comment', $this->comment])
             ->andFilterWhere(['like', 'items', $this->items]);
 

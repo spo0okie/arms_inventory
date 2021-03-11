@@ -9,7 +9,7 @@ if (!empty($model)) {
 	if (!isset($name)) $name=$model->sname;
 	?>
 
-	<span class="net-vlans-item text-monospace <?= $model->segmentCode ?>"
+	<span class="net-vlans-item text-monospace <?= $model->domainCode ?>"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['net-vlans/ttip','id'=>$model->id]) ?>"
 	>
 		<?=  Html::a($name,['net-vlans/view','id'=>$model->id]) ?>

@@ -2,41 +2,57 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\SoftLists */
+/* @var $searchModel app\models\SoftSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = $model->descr;
 $this->params['breadcrumbs'][] = ['label' => 'Списки ПО', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+$renderer=$this;
 ?>
 <div class="soft-lists-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Изменить', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?php /* Html::a('Удалить', ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) */?>
-    </p>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            //'id',
-            'name',
-            'descr',
-            'comment:ntext',
-        ],
-    ]) ?>
+    <?= $this->render('card',['model'=>$model]) ?>
 
     <h3>Содержимое списка:</h3><p>
-        <?php if (is_array($model->soft)&&count($model->soft)) { ?>
+        <?php
+		echo GridView::widget([
+			'dataProvider' => $dataProvider,
+			'filterModel' => $searchModel,
+			'columns' => [
+				//['class' => 'yii\grid\SerialColumn'],
+		
+				//'id',
+				/*            [
+								'attribute'=>'manufacturers_id',
+								'format'=>'raw',
+								'value' => function($data) use ($manufacturers) {return isset($manufacturers[$data['manufacturers_id']])?$manufacturers[$data['manufacturers_id']]:'производитель не найден';}
+							],*/
+			
+				[
+					'attribute'=>'descr',
+					'format'=>'raw',
+					'value'=>function($data) use ($renderer){
+						return $renderer->render('/soft/item',[
+							'model'=>$data,
+							'name'=>$data->manufacturer->name.' '.$data->descr
+						]);
+					}
+				],
+				'comment',
+				//'items:ntext',
+				//'created_at',
+		
+				//['class' => 'yii\grid\ActionColumn'],
+			],
+		]);
+
+
+		/*if (is_array($model->soft)&&count($model->soft)) { ?>
             <table class="table table-bordered table-striped">
             <?php
             $sortlist=[];
@@ -68,7 +84,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </table>
         <?php } else { ?>
             Отсутствует
-        <?php } ?>
+        <?php } */ ?>
     </p>
 
 </div>

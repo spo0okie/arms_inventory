@@ -100,7 +100,15 @@ $config = [
 	    'rbac'      => [
 		    'class' => 'johnitvn\rbacplus\Module',
 		    'userModelLoginField'=>'Login'
-	    ]
+	    ],
+		'markdown' => [
+			'class' => 'kartik\markdown\Module',
+			'i18n' => [
+				'class' => 'yii\i18n\PhpMessageSource',
+				'basePath' => '@vendor/kartik-v/yii2-markdown/messages',
+				'forceTranslation' => true
+			],
+		],
     ],
     'params' => $params,
 ];
