@@ -23,14 +23,17 @@ if (!isset($static_view)) $static_view=false;
 </h1>
 <?= Yii::$app->formatter->asNtext($model->comment) ?>
 
-<?php if (is_object($model->netVlan)) { ?>
 	<h4>
+		<?php if (is_object($model->segment)) { ?>
+			Сегмент: <?= $this->render('/segments/item',['model'=>$model->segment]) ?>
+		<?php } ?>
+		
+		<?php if (is_object($model->segment) && is_object($model->netVlan)) echo ' // '; ?>
+
+		<?php if (is_object($model->netVlan)) { ?>
 		VLAN: <?= $this->render('/net-vlans/item',['model'=>$model->netVlan]) ?>
-		<?php if (is_object($model->netVlan->segment)) { ?>
-			→ Сегмент <?= $this->render('/segments/item',['model'=>$model->netVlan->segment]) ?>
 		<?php } ?>
 	</h4>
-<?php } ?>
 
 <?php if (is_object($model->netVlan)) { ?>
 	<h4>L2 Домен: <?= $this->render('/net-domains/item',['model'=>$model->netDomain]) ?></h4>
