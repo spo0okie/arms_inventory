@@ -27,7 +27,7 @@ class m210310_174301_move_vlans_link extends Migration
 
 			foreach (\app\models\Networks::find()->all() as $network){
 				if (is_object($network->netVlan)) {
-					$network->segments_id = $network->netVlan->segments_id;
+					$network->segments_id = $network->netVlan->segment_id;
 					$network->save();
 				}
 			} 
@@ -52,7 +52,7 @@ class m210310_174301_move_vlans_link extends Migration
 			
 			foreach (\app\models\Networks::find()->all() as $network){
 				if (is_object($network->netVlan)) {
-					$network->netVlan->segments_id = $network->segments_id;
+					$network->netVlan->segment_id = $network->segments_id;
 					$network->netVlan->save();
 				}
 			}
