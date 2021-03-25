@@ -9,6 +9,7 @@ span.segment_int_dmz a {color: black}
 span.segment_client_vpn  {background-color:coral; border-radius: 7px}
 span.segment_intersite_vpn  {background-color:cyan; border-radius: 7px}
 span.segment_it_lan  {background-color:orange; border-radius: 7px}
+span.segment_videoconf  {background-color:lightyellow; border: 1.5pt orange solid; border-radius: 7px}
 
 /* РАСКРАСКА L2 ДОМЕНОВ */
 span.net-domain-Chel_VLAN {background-color: #96dce1; border-radius: 7px}
