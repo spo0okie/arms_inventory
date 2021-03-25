@@ -31,6 +31,22 @@ foreach ($columns as $column) {
 			];
 			break;
 		
+		case 'segment':
+			$render_columns[] = [
+				'attribute' => 'segment',
+				//'header' => 'Инв. номер',
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+					return $renderer->render('/segments/item', ['model' => $data->segment,'crop_site'=>true]);
+					
+					/*return is_null($data->segment)?
+						'<span class="glyphicon glyphicon-ban-circle"></span>Без польз. доступа':
+						$renderer->render('/segments/item', ['model' => $data->segment,'crop_site'=>true]);*/
+				},
+				'contentOptions' => ['class' => $column . '_col']
+			];
+			break;
+		
 		case 'description':
 			$render_columns[] = [
 				'attribute' => $column,
@@ -108,7 +124,6 @@ foreach ($columns as $column) {
 		
 		case 'providingSchedule':
 		case 'supportSchedule':
-		case 'segment':
 			$render_columns[] = [
 				'attribute' => $column,
 				//'header' => 'Инв. номер',
