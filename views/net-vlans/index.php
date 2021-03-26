@@ -30,16 +30,32 @@ $renderer=$this;
 
             //'id',
 			//'vlan',
-            [
-                'attribute'=>'name',
-                'format'=>'raw',
-                'value'=>function($data) use ($renderer){
-                    return $renderer->render('item',['model'=>$data]);
-                },
+			[
+				'attribute'=>'networks_ids',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer){
+    				if (is_array($data->networks)) {
+    					$output=[];
+    					foreach ($data->networks as $network)
+    						$output[]=$renderer->render('/networks/item',['model'=>$network]);
+						return implode('<br />',$output);
+					}
+					return '';
+				},
 				'contentOptions'=>[
 					'class'=>'text-right'
 				]
-            ],
+			],
+			[
+				'attribute'=>'name',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer){
+					return $renderer->render('item',['model'=>$data]);
+				},
+				'contentOptions'=>[
+					'class'=>'text-right'
+				]
+			],
 			[
 				'attribute'=>'domain_id',
 				'format'=>'raw',

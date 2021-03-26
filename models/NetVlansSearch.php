@@ -11,6 +11,7 @@ use app\models\NetVlans;
  */
 class NetVlansSearch extends NetVlans
 {
+	public $networks_ids;
     /**
      * {@inheritdoc}
      */
@@ -18,7 +19,7 @@ class NetVlansSearch extends NetVlans
     {
         return [
             [['id', ], 'integer'],
-            [['name', 'comment','vlan', 'domain_id'], 'safe'],
+            [['name', 'comment','vlan', 'domain_id','networks_ids'], 'safe'],
         ];
     }
 
@@ -41,7 +42,7 @@ class NetVlansSearch extends NetVlans
     public function search($params)
     {
         $query = NetVlans::find()
-		->joinWith(['netDomain']);
+		->joinWith(['netDomain','networks']);
 
         // add conditions that should always apply here
 
@@ -75,6 +76,7 @@ class NetVlansSearch extends NetVlans
         // grid filtering conditions
         $query->andFilterWhere(['like', 'CONCAT(net_vlans.name," (",net_vlans.vlan)', $this->name])
 			->andFilterWhere(['like', 'net_domains.name', $this->domain_id])
+			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', $this->networks_ids])
             ->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;

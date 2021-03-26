@@ -18,6 +18,7 @@ use Yii;
  * @property string $comment
  * @property NetDomains $netDomain
  * @property Segments $segment
+ * @property Networks $networks
  */
 class NetVlans extends \yii\db\ActiveRecord
 {
@@ -51,7 +52,8 @@ class NetVlans extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'name' => 'Название',
+			'name' => 'Название',
+			'networks_ids' => 'Сети',
             'vlan' => 'Vlan ID',
 			'domain_id' => 'Домен L2',
 			'segment_id' => 'Сегмент ИТ',
@@ -94,7 +96,13 @@ class NetVlans extends \yii\db\ActiveRecord
 		return '';
 	}
 	
-	
+	/**
+	 * @return \yii\db\ActiveQuery|Networks
+	 */
+	public function getNetworks()
+	{
+		return $this->hasMany(Networks::className(), ['vlan_id' => 'id']);
+	}
 	
 	/**
 	 * Search name
