@@ -251,7 +251,7 @@ class Techs extends \yii\db\ActiveRecord
 	 */
 	public function getItStaff()
 	{
-		if ($this->arms_id) return $this->arm->itStaff;
+		if (is_object($this->arm))  return $this->arm->itStaff;
 		return $this->hasOne(Users::className(), ['id' => 'it_staff_id']);
 	}
 
@@ -312,7 +312,7 @@ class Techs extends \yii\db\ActiveRecord
 	 */
 	public function getEffectivePlace()
 	{
-		return ($this->arms_id)?$this->arm->place:$this->place;
+		return (is_object($this->arm)) ?$this->arm->place:$this->place;
 		//return $this->hasOne(Places::className(), ['id' => 'places_id']);
 	}
 
