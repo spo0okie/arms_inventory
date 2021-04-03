@@ -227,7 +227,7 @@ class Techs extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-	    if ($this->arms_id) return $this->arm->user;
+	    if (is_object($this->arm)) return $this->arm->user;
         return $this->techUser;
     }
 
