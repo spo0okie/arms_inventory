@@ -31,7 +31,7 @@ class OrgPhonesController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','view','ttip','item','validate'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -39,6 +39,19 @@ class OrgPhonesController extends Controller
 	    ];
 	    return $behaviors;
     }
+	
+	/**
+	 * Displays a item for single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionItem($id)
+	{
+		return $this->renderPartial('item', [
+			'model' => $this->findModel($id)
+		]);
+	}
 
     /**
      * Lists all OrgPhones models.
