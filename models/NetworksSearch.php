@@ -90,7 +90,7 @@ class NetworksSearch extends Networks
         $query
 			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', $this->name])
 			->andFilterWhere(['like', 'concat(net_vlans.name," (",net_vlans.vlan)', $this->vlan_id])
-			->andFilterWhere(['like', 'net_domains.name', $this->domain])
+			->andFilterWhere(['like', 'net_domains.name', $this->domain_id])
 			->andFilterWhere(['like', 'segments.name', $this->segments_id])
             ->andFilterWhere(['like', 'networks.comment', $this->comment]);
 
