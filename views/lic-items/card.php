@@ -96,6 +96,7 @@ $deleteable=!count($arms)&&!count($contracts);
 						    return $output;
 					    }
 				    ],
+					'comment'
 			    ],
 		    ]);
 	    } catch (Exception $e) {
