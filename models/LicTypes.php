@@ -51,8 +51,8 @@ class LicTypes extends \yii\db\ActiveRecord
 		return [
 			'id' => 'Идентификатор',
 			'name' => 'Служебное имя',
-			'descr' => 'Описание',
-			'comment' => 'Комментарий',
+			'descr' => 'Название',
+			'comment' => 'Описание',
 			'links' => 'Ссылки',
 			'created_at' => 'Время создания',
 		];

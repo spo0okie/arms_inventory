@@ -14,9 +14,15 @@ use kartik\date\DatePicker;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
+		</div>
+		<div class="col-md-6">
+			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+		</div>
+	</div>
 
-    <?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
 	
 	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
 
