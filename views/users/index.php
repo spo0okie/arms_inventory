@@ -49,15 +49,16 @@ $renderer=$this;
 	        [
 		        'attribute'=>'Arms',
 		        'format'=>'raw',
-		        'value' => function($data){
+		        'value' => function($data)use($renderer){
                     $arms=$data->arms;
                     if (is_array($arms)) {
-                        if (count($arms)==1) {
-                            return $arms[0]->name;
-                        } elseif (count($arms)==0) {
+                        if (count($arms)==0) {
 	                        return 'Не назначено';
                         } else {
-	                        return 'Несколько.';
+                        	$items=[];
+	                        foreach ($arms as $arm)
+	                        	$items[]=$renderer->render('/arms/item',['model'=>$arm,'static_view'=>true]);
+	                        return implode('<br /',$items);
                         }
                     }
                 }
