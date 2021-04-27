@@ -38,7 +38,7 @@ $renderer=$this;
 				'attribute'=>'orgStruct_name',
 				'format'=>'raw',
 				'header'=>$searchModel->getAttributeLabel('Orgeh'),
-				'value' => function($data) use($renderer){return $data->structName;}
+				'value' => function($data) use($renderer){return $renderer->render('/org-struct/item',['model'=>$data->orgStruct]);}
 			],
 	        
             //'Persg',
