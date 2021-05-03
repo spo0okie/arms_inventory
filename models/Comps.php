@@ -444,10 +444,13 @@ class Comps extends \yii\db\ActiveRecord
 	{
 		parent::afterSave($insert,$changedAttributes);
 		//если в новом арме не назначена основная ОС, то назначим эту
-		if (!is_null($this->arm_id) && empty($this->arm->comp_id)) {
-			$arm=$this->arm;
-			$arm->comp_id=$this->id;
-			$arm->save();
+		if (!is_null($this->arm_id)) {
+			if (is_object($arm=$this->arm)) {
+				if (empty($arm->comp_id)) {
+					$arm->comp_id=$this->id;
+					$arm->save();
+				}
+			}
 		}
 		return true;
 	}
