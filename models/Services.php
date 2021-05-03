@@ -101,6 +101,7 @@ class Services extends \yii\db\ActiveRecord
             'is_end_user' => 'Предоставляется пользователям',
             'user_group_id' => 'Группа ответственных',
 	        'depends_ids' => 'Зависит от сервисов',
+			'comps' => 'Серверы',
 			'comps_ids' => 'Серверы',
 			'techs_ids' => 'Оборудование',
 	        'providingSchedule' => 'Время предоставления',

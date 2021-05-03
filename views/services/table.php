@@ -12,7 +12,7 @@ use yii\widgets\Pjax;
 
 $renderer=$this;
 
-if (!isset($columns)) $columns=['name','sites','segment','providingSchedule','supportSchedule','responsible','description'];
+if (!isset($columns)) $columns=['name','sites','segment','providingSchedule','supportSchedule','responsible','comps'];
 
 //формируем список столбцов для рендера
 $render_columns=[];
@@ -62,7 +62,7 @@ foreach ($columns as $column) {
 		case 'responsible':
 			$render_columns[] = [
 				'attribute' => $column,
-				//'header' => 'Инв. номер',
+				'header' => 'Отв., поддержка.',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					$output = [];
@@ -85,6 +85,21 @@ foreach ($columns as $column) {
 					$output = [];
 					if (is_array($data->arms)) foreach ($data->arms as $arm)
 						$output[] = $renderer->render('/arms/item', ['model' => $arm,'short'=>true]);
+					return count($output) ? implode(', ', $output) : null;
+				},
+				'contentOptions' => ['class' => $column . '_col']
+			];
+			break;
+		
+		case 'comps':
+			$render_columns[] = [
+				'attribute' => $column,
+				//'header' => 'Инв. номер',
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+					$output = [];
+					if (is_array($data->comps)) foreach ($data->comps as $comp)
+						$output[] = $renderer->render('/comps/item', ['model' => $comp,'short'=>true]);
 					return count($output) ? implode(', ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
