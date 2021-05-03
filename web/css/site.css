@@ -585,6 +585,47 @@ ul.ul-dropfree div.drop {
 }
 
 
+/* Главная */
+div.site-index a {
+    color: inherit;
+}
+
+div.site-index div.search {
+    padding: 20px;
+    margin: 0 0;
+    background: #333;
+    color: white;
+    font: bold 20px monospace;
+    border-radius: 5px;
+}
+
+div.site-index div.search input,
+div.site-index div.search input:active,
+div.site-index div.search input:focus
+{
+    background: transparent;
+    border: none;
+    outline:none;
+    caret-color: lime;
+    width: 100%;
+}
+
+div.site-index div.search label {
+    float: left;
+}
+
+div.site-index div.search span.search-group {
+    overflow: hidden;
+    display: block;
+    padding: 0 4px 0 10px
+}
+
+div.site-index div.search span.search-group input {
+    width: 100%
+}
+
+
+
 /* Корректировки BOOTSTRAP */
 
 @media (min-width: 1200px) {

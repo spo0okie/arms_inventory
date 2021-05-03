@@ -7,27 +7,50 @@ use yii\helpers\Html;
 $this->title = 'Инвентаризация';
 ?>
 <div class="site-index">
+	<h1>⬢ инвентаризация</h1>
+	<p class="lead">База данных софта, железа и лицензий</p>
+	<ul>
+		<li><a href="https://github.com/spo0okie/arms_inventory">github repository</a> </li>
+		
+		<li><a href="https://github.com/spo0okie/arms_inventory/commits/master">dev history</a> </li>
+
+		<li><a href="https://github.com/spo0okie/arms_inventory/issues">issues list</a> </li>
+	</ul>
 
 	<div class="jumbotron">
-		<h1>инвентаризация</h1>
-		<p class="lead">⬢База данных софта, железа и лицензий</p>
-		<img src="/web/img/azimut_alfa.png">
-		<p>
-			⬢
-			<a href="https://github.com/spo0okie/arms_inventory">github repository</a>
-			⬢
-			<a href="https://github.com/spo0okie/arms_inventory/commits/master">dev history</a>
-			⬢
-			<a href="https://github.com/spo0okie/arms_inventory/issues">issues list</a>
-		</p>
 	</div>
 
-	<div class="search text-center">
-		<form>
-			<button>Компьютер</button>
-			<input type="text">
-			<button>Человек</button>
-		</form>
+	<div class="search">
+		Starting MS-DOS...<br />
+		Поиск:<br />
+		<p>
+			<label class="search-label" for="comps">Компьютеры:\&gt; </label>
+			<span class="search-group">
+				<input id="comps-search" type="text" class="search-input" onkeypress="onkeypress = function(e){
+					if (!e) e = window.event;
+					let keyCode = e.code || e.key;
+					if (keyCode == 'Enter'){
+						document.location.replace('<?= \yii\helpers\Url::to(['/comps/index']) ?>?CompsSearch[name]=' + $(this).val());
+						return false;
+					}
+				}">
+			</span>
+		</p>
+		
+		<p>
+			<label class="search-label" for="comps">Пользователи:\&gt; </label>
+			<span class="search-group">
+				<input id="users-search" type="text" class="search-input" onkeypress="onkeypress = function(e){
+					if (!e) e = window.event;
+					let keyCode = e.code || e.key;
+					if (keyCode == 'Enter'){
+						document.location.replace('<?= \yii\helpers\Url::to(['/users/index']) ?>?UsersSearch[Ename]=' + $(this).val());
+						return false;
+					}
+				}">
+			</span>
+
+		</p>
 	</div>
 	
 </div>
