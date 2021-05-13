@@ -12,7 +12,7 @@ use yii\widgets\Pjax;
 
 $renderer=$this;
 
-if (!isset($columns)) $columns=['name','sites','segment','providingSchedule','supportSchedule','responsible','comps'];
+if (!isset($columns)) $columns=['name','sites','segment','providingSchedule','supportSchedule','responsible','compsAndTechs'];
 
 //формируем список столбцов для рендера
 $render_columns=[];
@@ -106,6 +106,37 @@ foreach ($columns as $column) {
 			];
 			break;
 		
+		case 'techs':
+			$render_columns[] = [
+				'attribute' => $column,
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+					$output = [];
+					if (is_array($data->techs)) foreach ($data->techs as $tech)
+						$output[] = $renderer->render('/techs/item', ['model' => $tech,'short'=>true]);
+					return count($output) ? implode(', ', $output) : null;
+				},
+				'contentOptions' => ['class' => $column . '_col']
+			];
+			break;
+		
+		case 'compsAndTechs':
+			$render_columns[] = [
+				'attribute' => $column,
+				'header' => 'Оборуд./ПК',
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+					$output = [];
+					if (is_array($data->comps)) foreach ($data->comps as $comp)
+						$output[] = $renderer->render('/comps/item', ['model' => $comp,'short'=>true]);
+					if (is_array($data->techs)) foreach ($data->techs as $tech)
+						$output[] = $renderer->render('/techs/item', ['model' => $tech,'short'=>true]);
+					return count($output) ? implode(', ', $output) : null;
+				},
+				'contentOptions' => ['class' => $column . '_col']
+			];
+			break;
+
 		case 'places':
 			$render_columns[] = [
 				'attribute' => $column,

@@ -103,6 +103,7 @@ class Services extends \yii\db\ActiveRecord
 	        'depends_ids' => 'Зависит от сервисов',
 			'comps' => 'Серверы',
 			'comps_ids' => 'Серверы',
+			'techs' => 'Оборудование',
 			'techs_ids' => 'Оборудование',
 	        'providingSchedule' => 'Время предоставления',
 	        'providing_schedule_id' => 'Время предоставления',

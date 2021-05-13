@@ -11,8 +11,12 @@ use app\models\Services;
  */
 class ServicesSearch extends Services
 {
-	
+	public $sites;
+	public $segment;
 	public $responsible;
+	public $supportSchedule;
+	public $providingSchedule;
+
     /**
      * {@inheritdoc}
      */
@@ -20,7 +24,7 @@ class ServicesSearch extends Services
     {
         return [
 	        [['id', 'is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
-            [['name', 'description', 'links', 'notebook','responsible'], 'safe'],
+            [['name', 'description', 'segment', 'sites','responsible', 'providingSchedule', 'supportSchedule'], 'safe'],
         ];
     }
 
@@ -81,11 +85,18 @@ class ServicesSearch extends Services
 
         $query->andFilterWhere(['like', 'services.name', $this->name])
             ->andFilterWhere(['like', 'description', $this->description])
-	        ->andFilterWhere(['like', 'links', $this->links])
+			->andFilterWhere(['like', 'segments.name', $this->segment])
+			->andFilterWhere(['like', 'providing_schedule.name', $this->providingSchedule])
+			->andFilterWhere(['like', 'support_schedule.name', $this->supportSchedule])
 	        ->andFilterWhere([
 	        	'or',
 		        ['like', 'responsible.Ename', $this->responsible],
 		        ['like', 'support.Ename', $this->responsible]
+	        ])
+	        ->andFilterWhere([
+	        	'or',
+		        ['like', 'getplacepath(places.id)', $this->sites],
+		        ['like', 'getplacepath(places_techs.id)', $this->sites]
 	        ])
             ->andFilterWhere(['like', 'notebook', $this->notebook]);
 
