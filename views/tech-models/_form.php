@@ -123,7 +123,7 @@ if (Yii::$app->request->get('return'))
         </div>
     </div>
 
-	<?php $this->registerJs("$('#techmodels-comment').autoResize();"); ?>
+	<?php $this->registerJs("$('#techmodels-comment').autoResize().trigger('change.dynSiz');"); ?>
 
 	<?= $form->field($model, 'links')->textarea(['rows' => 3]) ?>
 

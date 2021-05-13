@@ -33,6 +33,6 @@ use kartik\date\DatePicker;
     </div>
 
     <?php ActiveForm::end(); ?>
-	<?php $this->registerJs("$('#lictypes-comment').autoResize();"); ?>
+	<?php $this->registerJs("$('#lictypes-comment').autoResize().trigger('change.dynSiz');"); ?>
 
 </div>

@@ -82,7 +82,7 @@ use kartik\select2\Select2;
 		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 	
-	<?php $this->registerJs("$('#soft-items').autoResize();$('#soft-additional').autoResize();$('#soft-comment').autoResize();"); ?>
+	<?php $this->registerJs("$('#soft-items').autoResize().trigger('change.dynSiz');$('#soft-additional').autoResize().trigger('change.dynSiz');$('#soft-comment').autoResize().trigger('change.dynSiz');"); ?>
 	
 	<?php ActiveForm::end(); ?>
 

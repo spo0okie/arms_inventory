@@ -96,7 +96,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	]) ?>
 
 	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
-	<?php $this->registerJs("$('#licitems-comment').autoResize();"); ?>
+	<?php $this->registerJs("$('#licitems-comment').autoResize().trigger('change.dynSiz');"); ?>
 
 
     <div class="form-group">

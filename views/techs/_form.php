@@ -275,11 +275,11 @@ JS;
 
 
 	<?= $form->field($model, 'url')->textarea(['rows' => max(3,count(explode("\n",$model->url)))]) ?>
-	<?php $this->registerJs("$('#techs-url').autoResize();"); ?>
+	<?php $this->registerJs("$('#techs-url').autoResize().trigger('change.dynSiz');"); ?>
 
 
 	<?= $form->field($model, 'history')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
-	<?php $this->registerJs("$('#techs-comment').autoResize();"); ?>
+	<?php $this->registerJs("$('#techs-comment').autoResize().trigger('change.dynSiz');"); ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

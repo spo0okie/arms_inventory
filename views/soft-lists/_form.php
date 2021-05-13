@@ -26,7 +26,7 @@ use kartik\select2\Select2;
     <?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
 
 <?= $form->field($model, 'comment')->textarea(['rows' => max(4, count(explode("\n", $model->comment)))]) ?>		
-	<?php $this->registerJs("$('#soft-lists-comment').autoResize();"); ?>
+	<?php $this->registerJs("$('#soft-lists-comment').autoResize().trigger('change.dynSiz');"); ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

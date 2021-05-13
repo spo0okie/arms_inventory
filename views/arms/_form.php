@@ -293,7 +293,7 @@ if ($model->isNewRecord) {
     </div>
 
 	<?= $form->field($model, 'history')->textarea(['rows' => max(10,count(explode("\n",$model->history)))]) ?>
-    <?php $this->registerJs("$('#arms-history,#arms-specs').autoResize();"); ?>
+    <?php $this->registerJs("$('#arms-history,#arms-specs').autoResize().trigger('change.dynSiz');"); ?>
 
     <?php ActiveForm::end(); ?>
 

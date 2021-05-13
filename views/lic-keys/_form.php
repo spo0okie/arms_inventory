@@ -40,7 +40,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	]) ?>
 
 	<?= $form->field($model, 'key_text')->textarea(['rows' => max(1,count(explode("\n",$model->key_text)))]) ?>
-	<?php $this->registerJs("$('#lickeys-key_text').autoResize();"); ?>
+	<?php $this->registerJs("$('#lickeys-key_text').autoResize().trigger('change.dynSiz');"); ?>
 
 	<?= $form->field($model, 'arms_ids')->widget(Select2::className(), [
 		'data' => \app\models\Arms::fetchNames(),
@@ -54,7 +54,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
 
 	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
-	<?php $this->registerJs("$('#lickeys-comment').autoResize();"); ?>
+	<?php $this->registerJs("$('#lickeys-comment').autoResize().trigger('change.dynSiz');"); ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

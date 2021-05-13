@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
 	</div>
 	
 	<?= $form->field($model, 'description')->textarea(['rows' => max(4,count(explode("\n",$model->description)))]) ?>
-	<?php $this->registerJs("$('#segments-description').autoResize();"); ?>
+	<?php $this->registerJs("$('#segments-description').autoResize().trigger('change.dynSiz');"); ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

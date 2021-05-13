@@ -195,7 +195,7 @@ use kartik\file\FileInput;
     ]) ?>
 
 	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
-	<?php $this->registerJs("$('#contracts-comment').autoResize();"); ?>
+	<?php $this->registerJs("$('#contracts-comment').autoResize().trigger('change.dynSiz');"); ?>
 
     <?php ActiveForm::end(); ?>
 

@@ -19,7 +19,7 @@ use yii\widgets\ActiveForm;
 	<?= $form->field($model, 'prefix')->textInput(['maxlength' => true]) ?>
 
 	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
-	<?php $this->registerJs("$('#techtypes-comment').autoResize();"); ?>
+	<?php $this->registerJs("$('#techtypes-comment').autoResize().trigger('change.dynSiz');"); ?>
 
 	<?= $form->field($model, 'comment_name')->textInput(['maxlength' => true]) ?>
 

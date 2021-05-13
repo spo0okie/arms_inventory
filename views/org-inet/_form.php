@@ -30,7 +30,7 @@ use kartik\select2\Select2;
 			</div>
 
 	        <?= $form->field($model, 'comment')->textarea(['rows' => max(2,count(explode("\n",$model->comment)))]) ?>
-	        <?php $this->registerJs("$('#orginet-comment').autoResize();"); ?>
+	        <?php $this->registerJs("$('#orginet-comment').autoResize().trigger('change.dynSiz');"); ?>
 
 	        <?= $form->field($model, 'places_id')->widget(Select2::className(), [
 		        'data' => \app\models\Places::fetchNames(),
@@ -84,7 +84,7 @@ use kartik\select2\Select2;
 	        <?= $form->field($model, 'ip_dns2')->textInput(['maxlength' => true]) ?>
 
 	        <?= $form->field($model, 'history')->textarea(['rows' => max(2,count(explode("\n",$model->history)))]) ?>
-	        <?php $this->registerJs("$('#orginet-history').autoResize();"); ?>
+	        <?php $this->registerJs("$('#orginet-history').autoResize().trigger('change.dynSiz');"); ?>
         </div>
     </div>
 
