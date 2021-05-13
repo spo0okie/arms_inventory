@@ -68,7 +68,7 @@ class CompsSearch extends Comps
             //'updated_at' => $this->updated_at,
         ]);*/
 
-        $query->andFilterWhere(['like', 'concat(domains.name,"\\\\",comps.name)', $this->name])
+        $query->andFilterWhere(['like', 'concat(IFNULL(domains.name,""),"\\\\",comps.name)', $this->name])
             ->andFilterWhere(['like', 'raw_version', $this->raw_version])
             ->andFilterWhere(['like', 'ip', $this->ip])
             ->andFilterWhere(['like', 'arms.num', $this->arm_id])
