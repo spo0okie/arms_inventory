@@ -1,10 +1,6 @@
 <?php
 
-use yii\grid\GridView;
-
-
-
-
+use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\TechsSearch */
@@ -87,8 +83,33 @@ foreach ($columns as $column) {
 			break;
 
 		case 'sn':
-		case 'comment':
 		case 'inv_num':
+			$render_columns[] = [
+				'attribute' => $column,
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+					return $renderer->render('/techs/sn', ['model' => $data]);
+				}
+			];
+			break;
+		case 'comment':
+			if (
+				!empty($searchModel->type_id)
+				&&
+				(is_object($type=\app\models\TechTypes::findOne($searchModel->type_id)))
+			) {
+				$comment=$type->comment_name;
+			} else {
+				$comment=$searchModel->attributeLabels()['comment'];
+			}
+			
+			$render_columns[] = [
+				'attribute' => $column,
+				'header'=> $comment,
+				'format' => 'ntext',
+				'value' => function ($data) use ($searchModel){return $data->comment.' '.$searchModel->model_id;}
+			];
+			break;
 		case 'mac':
 		case 'ip':
 			$render_columns[] = $column;
@@ -101,6 +122,8 @@ foreach ($columns as $column) {
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 		'columns' => $render_columns,
+		'tableOptions' => ['class'=>'table-condensed table-striped table-bordered arms_index'],
+		'resizableColumns'=>false,
 	]);
 //} catch (Exception $e) {
 //    echo 'Ошибка вывода виджета таблицы<br/>';

@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="col-md-6">
             <h4>Модели оборудования</h4>
-            <table class="table table-bordered">
+            <table class="table table-bordered table-condensed table-striped">
                 <tr>
                     <th>Модель</th>
                     <th>Кол-во экз.</th>
@@ -119,19 +119,19 @@ JS;
     <br />
 
     <?php if (\app\models\TechTypes::isPC($model->id)) { ?>
+
         <h4>Экземпляры рабочих мест</h4>
 	    <?= $this->render('/arms/table', [
 		    'searchModel' => $armsSearchModel,
 		    'dataProvider' => $armsDataProvider,
-		    //'columns'   => ['attach','num','model','sn','mac','ip','state','user','place','inv_num'],
 	    ]) ?>
     <?php } else { ?>
-        <h4>Экземпляры оборудования</h4>
 
+        <h4>Экземпляры оборудования</h4>
         <?= $this->render('/techs/table', [
             'searchModel' => $techsSearchModel,
             'dataProvider' => $techsDataProvider,
-            'columns'   => ['attach','num','model','sn','mac','ip','state','user','place','inv_num','comment'],
+            'columns'   => ['attach','num','model','mac','ip','state','user','place','inv_num','comment'],
         ]) ?>
     <?php } ?>
 

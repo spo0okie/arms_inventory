@@ -55,7 +55,7 @@ $deletable=!count($model->arms)&&!count($model->techs);
 	    <?= $this->render('/techs/table', [
 		    'searchModel'   => $techSearchModel,
 		    'dataProvider'  => $techDataProvider,
-		    'columns'       => ['num','sn','mac','ip','state','user','place','inv_num'],
+		    'columns'       => ['num','mac','ip','state','user','place','inv_num'],
 	    ]) ?>
     <?php } ?>
 

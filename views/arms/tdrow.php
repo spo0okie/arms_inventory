@@ -145,25 +145,10 @@ for ($i=0; $i<count($comps); $i++) {
 
         <td class="item_ip"><?= is_object($comp)?$comp->currentIp:'' ?></td>
 
-        <?php /*if (!$i) { ?>
-            <td class="item_sn"<?= $rowspan ?>><?= $model->sn ?></td>
-
-	    <?php }*/ ?>
-	    <?php if (!$i) {
-	    	$ttip="Серийный номер: ".($model->sn?$model->sn:' отсутствует '). '<br />'.
-				"Инвентарный номер (бухг.):".($model->inv_num?$model->inv_num:' отсутствует ');
-	    	$tokens=[];
-	    	if (strlen($model->sn)) $tokens[]=$model->sn;
-	    	if (strlen($model->inv_num)) $tokens[]=$model->inv_num;
-	    	?>
+        <?php if (!$i) { ?>
             <td class="item_invnum"<?= $rowspan ?>>
-				<?php if (count($tokens)) { ?>
-					<span qtip_ttip="<?= $ttip ?>">
-						<?= implode(', ',$tokens) ?>
-					</span>
-				<?php } ?>
+				<?= $this->render('/arms/sn',compact('model'))?>
 			</td>
-
 	    <?php }?>
     </tr>
 
