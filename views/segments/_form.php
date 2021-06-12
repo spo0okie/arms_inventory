@@ -21,8 +21,12 @@ use yii\widgets\ActiveForm;
 		</div>
 	</div>
 	
-	<?= $form->field($model, 'description')->textarea(['rows' => max(4,count(explode("\n",$model->description)))]) ?>
-	<?php $this->registerJs("$('#segments-description').autoResize().trigger('change.dynSiz');"); ?>
+	<?= \app\widgets\TextAutoResizeWidget::widget([
+		'form' => $form,
+		'model' => $model,
+		'attribute' => 'description',
+		'lines' => 4,
+	]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

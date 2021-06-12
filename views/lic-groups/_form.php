@@ -46,11 +46,15 @@ use kartik\date\DatePicker;
 			'multiple' => true
 		]
 	]) ?>
+	
+	<?= \app\widgets\TextAutoResizeWidget::widget([
+		'form' => $form,
+		'model' => $model,
+		'attribute' => 'comment',
+		'lines' => 10,
+	]) ?>
 
-	<?= $form->field($model, 'comment')->textarea(['rows' => max(10,count(explode("\n",$model->comment)))]) ?>
-	<?php $this->registerJs("$('#licitems-comment').autoResize().trigger('change.dynSiz');"); ?>
-
-    <div class="form-group">
+	<div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 

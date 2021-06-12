@@ -39,7 +39,13 @@ use kartik\select2\Select2;
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= $form->field($model, 'items')->textarea(['rows' => max(4,count(explode("\n",$model->items)))]) ?>
+			<?= \app\widgets\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
+				'attribute' => 'items',
+				'lines' => 4,
+			]) ?>
+
 		</div>
 		<div class="col-md-6">
 			<br/>
@@ -49,19 +55,19 @@ use kartik\select2\Select2;
 	</div>
 	<div class="row">
 		<div class="col-md-6">
-			<?= $form->field($model, 'additional')->textarea(['rows' => max(4,count(explode("\n",$model->additional)))]) ?>
+			<?= \app\widgets\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
+				'attribute' => 'additional',
+				'lines' => 4,
+			]) ?>
+
 		</div>
 		<div class="col-md-6">
 			<br />
 				Если в списке ПО на компьютере обнаружатся основные компоненты продукта (те что выше), то из него вместе с основными будут также исключены и дополнительные (те что ниже).
 				В дополнительные надо включать разделяемые между несколькими продуктами компоненты, которые сами по себе полноценным продуктом не являются.
 				Например сервисы обновления.
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-6">
-		</div>
-		<div class="col-md-6">
 		</div>
 	</div>
 
@@ -75,14 +81,17 @@ use kartik\select2\Select2;
 
 
 	<h3>Описание ПО</h3>
+	
+	<?= \app\widgets\TextAutoResizeWidget::widget([
+		'form' => $form,
+		'model' => $model,
+		'attribute' => 'comment',
+		'lines' => 4,
+	]) ?>
 
-	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
-
-    <div class="form-group">
+	<div class="form-group">
 		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
-	
-	<?php $this->registerJs("$('#soft-items').autoResize().trigger('change.dynSiz');$('#soft-additional').autoResize().trigger('change.dynSiz');$('#soft-comment').autoResize().trigger('change.dynSiz');"); ?>
 	
 	<?php ActiveForm::end(); ?>
 

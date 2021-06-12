@@ -28,11 +28,15 @@ use kartik\select2\Select2;
 					<?= $form->field($model, 'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('orginet','cost','charge')) ?>
 				</div>
 			</div>
+	
+			<?= \app\widgets\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
+				'attribute' => 'comment',
+				'lines' => 2,
+			]) ?>
 
-	        <?= $form->field($model, 'comment')->textarea(['rows' => max(2,count(explode("\n",$model->comment)))]) ?>
-	        <?php $this->registerJs("$('#orginet-comment').autoResize().trigger('change.dynSiz');"); ?>
-
-	        <?= $form->field($model, 'places_id')->widget(Select2::className(), [
+			<?= $form->field($model, 'places_id')->widget(Select2::className(), [
 		        'data' => \app\models\Places::fetchNames(),
 		        //'options' => ['placeholder' => 'Статус рабочего места',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
@@ -82,10 +86,15 @@ use kartik\select2\Select2;
 	        <?= $form->field($model, 'ip_dns1')->textInput(['maxlength' => true]) ?>
 
 	        <?= $form->field($model, 'ip_dns2')->textInput(['maxlength' => true]) ?>
+	
+			<?= \app\widgets\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
+				'attribute' => 'history',
+				'lines' => 2,
+			]) ?>
 
-	        <?= $form->field($model, 'history')->textarea(['rows' => max(2,count(explode("\n",$model->history)))]) ?>
-	        <?php $this->registerJs("$('#orginet-history').autoResize().trigger('change.dynSiz');"); ?>
-        </div>
+		</div>
     </div>
 
 

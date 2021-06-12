@@ -17,9 +17,13 @@ use yii\widgets\ActiveForm;
 	<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
 	<?= $form->field($model, 'prefix')->textInput(['maxlength' => true]) ?>
-
-	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
-	<?php $this->registerJs("$('#techtypes-comment').autoResize().trigger('change.dynSiz');"); ?>
+	
+	<?= \app\widgets\TextAutoResizeWidget::widget([
+		'form' => $form,
+		'model' => $model,
+		'attribute' => 'comment',
+		'lines' => 4,
+	]) ?>
 
 	<?= $form->field($model, 'comment_name')->textInput(['maxlength' => true]) ?>
 

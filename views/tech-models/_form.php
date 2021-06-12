@@ -103,9 +103,12 @@ if (Yii::$app->request->get('return'))
 
     <div class="row">
         <div class="col-md-8" >
-			<?= $form->field($model, 'comment')
-				->textarea(['rows' => max(4,count(explode("\n",$model->comment)))])
-				->hint(false) ?>
+			<?= \app\widgets\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
+				'attribute' => 'comment',
+				'lines' => 4,
+			]) ?>
 			<?= $form->field($model, 'individual_specs')->checkbox() ?>
         </div>
         <div class="col-md-4" >
@@ -122,9 +125,7 @@ if (Yii::$app->request->get('return'))
 			</div>
         </div>
     </div>
-
-	<?php $this->registerJs("$('#techmodels-comment').autoResize().trigger('change.dynSiz');"); ?>
-
+	
 	<?= $form->field($model, 'links')->textarea(['rows' => 3]) ?>
 
 	<div class="row">

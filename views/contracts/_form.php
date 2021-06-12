@@ -193,11 +193,15 @@ use kartik\file\FileInput;
             'multiple' => true
         ],
     ]) ?>
+	
+	<?= \app\widgets\TextAutoResizeWidget::widget([
+		'form' => $form,
+		'model' => $model,
+		'attribute' => 'comment',
+		'lines' => 4,
+	]) ?>
 
-	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
-	<?php $this->registerJs("$('#contracts-comment').autoResize().trigger('change.dynSiz');"); ?>
-
-    <?php ActiveForm::end(); ?>
+	<?php ActiveForm::end(); ?>
 
 
 

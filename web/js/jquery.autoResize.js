@@ -15,17 +15,19 @@
 				 
 			},
             animate : true,
-            animateDuration : 150,
+            animateDuration : 100,
             animateCallback : function(){},
             extraSpace : 20,
+            minLines : 1,
             limit: 1000
         }, options);
-        
+
+        console.log("got minLines " + settings.minLines)
         // Only textarea's auto-resize:
         this.filter('textarea').each(function(){
             
                 // Get rid of scrollbars and disable WebKit resizing:
-            var textarea = $(this).css({resize:'none','overflow-y':'hidden'}),
+            let textarea = $(this).css({resize:'none','overflow-y':'hidden'}),
             
                 // Cache original height, for use later:
                 origHeight = textarea.height(),
@@ -54,11 +56,21 @@
                 })(),
                 lastScrollTop = null,
                 updateSize = function() {
+                    //делаем так чтобы в тексте было не меньше minLines строк
+                    let $text=$(this).val();
+                    let $textLines=$text.split("\n");
+                    console.log("got " + $textLines.length + " lines with min of " + settings.minLines);
+                    for (let $i=$textLines.length; $i<settings.minLines; $i++) {
+                        $textLines.push('fake');
+                    }
+                    $text=$textLines.join("\n");
+
                     // Prepare the clone:
-                    clone.height(0).val($(this).val()).scrollTop(10000);
-					
+                    clone.height(0).val($text).scrollTop(10000);
+                    //clone.height(0).val($(this).val()).scrollTop(10000);
+
                     // Find the height of text:
-                    var scrollTop = Math.max(clone.scrollTop(), origHeight) + settings.extraSpace,
+                    let scrollTop = Math.max(clone.scrollTop(), origHeight) + settings.extraSpace,
                         toChange = $(this).add(clone);
 						
                     // Don't do anything if scrollTip hasen't changed:
@@ -74,7 +86,7 @@
                     settings.onResize.call(this);
 					
                     // Either animate or directly apply height:
-                   settings.animate && textarea.css('display') === 'block' ?
+                    settings.animate && textarea.css('display') === 'block' ?
                         toChange.stop().animate({height:scrollTop}, settings.animateDuration, settings.animateCallback)
                         : toChange.height(scrollTop);
 						

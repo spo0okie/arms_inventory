@@ -22,17 +22,26 @@ use kartik\date\DatePicker;
 			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 		</div>
 	</div>
-
 	
-	<?= $form->field($model, 'comment')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
-
-	<?= $form->field($model, 'links')->textarea(['rows' => max(4,count(explode("\n",$model->links)))]) ?>
+	
+	<?= \app\widgets\TextAutoResizeWidget::widget([
+		'form' => $form,
+		'model' => $model,
+		'attribute' => 'comment',
+		'lines' => 4,
+	]) ?>
+	
+	<?= \app\widgets\TextAutoResizeWidget::widget([
+		'form' => $form,
+		'model' => $model,
+		'attribute' => 'links',
+		'lines' => 4,
+	]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
-	<?php $this->registerJs("$('#lictypes-comment').autoResize().trigger('change.dynSiz');"); ?>
 
 </div>

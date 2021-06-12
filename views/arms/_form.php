@@ -152,7 +152,13 @@ if ($model->isNewRecord) {
 		<?= (is_object($model) && is_object($model->techModel) && $model->techModel->individual_specs)?'':'style="display:none"' ?>
 	>
 		<div class="col-md-4" >
-			<?= $form->field($model, 'specs')->textarea(['rows' => max(6,count(explode("\n",$model->specs)))]) ?>
+			<?= \app\widgets\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
+				'attribute' => 'specs',
+				'lines' => 6,
+			]) ?>
+
 		</div>
 		<div class="col-md-4" >
 			<label class="control-label" >
@@ -291,10 +297,14 @@ if ($model->isNewRecord) {
 	    <?= Html::submitButton('Применить', ['class' => 'btn btn-success','name' => 'apply','formaction' => $formActionApply,]) ?>
 	    <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success','name' => 'save', 'formaction' => $formActionSave,]) ?>
     </div>
+	
+	<?= \app\widgets\TextAutoResizeWidget::widget([
+		'form' => $form,
+		'model' => $model,
+		'attribute' => 'history',
+		'lines' => 10,
+	]) ?>
 
-	<?= $form->field($model, 'history')->textarea(['rows' => max(10,count(explode("\n",$model->history)))]) ?>
-    <?php $this->registerJs("$('#arms-history,#arms-specs').autoResize().trigger('change.dynSiz');"); ?>
-
-    <?php ActiveForm::end(); ?>
+	<?php ActiveForm::end(); ?>
 
 </div>

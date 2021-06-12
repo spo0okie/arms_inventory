@@ -28,10 +28,18 @@ use kartik\select2\Select2;
 			]) ?>
         </div>
         <div class="col-md-8">
-	        <?= $form->field($model, 'description')->textarea(['rows' => max(2,count(explode("\n",$model->description)))]) ?>
-	        <?php $this->registerJs("$('#services-description').autoResize().trigger('change.dynSiz');"); ?>
-	        <?= $form->field($model, 'links')->textarea(['rows' => max(2,count(explode("\n",$model->links)))]) ?>
-	        <?php $this->registerJs("$('#services-links').autoResize().trigger('change.dynSiz');"); ?>
+			<?= \app\widgets\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
+				'attribute' => 'description',
+				'lines' => 2,
+			]) ?>
+			<?= \app\widgets\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
+				'attribute' => 'links',
+				'lines' => 2,
+			]) ?>
 
         </div>
     </div>
@@ -114,7 +122,6 @@ use kartik\select2\Select2;
 		'showExport'=>false
 	]) ?>
 
-	<?php $this->registerJs("$('#services-description').autoResize().trigger('change.dynSiz');"); ?>
 
 
 

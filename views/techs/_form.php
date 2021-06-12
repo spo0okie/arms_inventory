@@ -162,10 +162,22 @@ JS;
 	
     <div class="row">
         <div class="col-md-6" >
-		    <?= $form->field($model, 'ip')->textInput(['maxlength' => true]) ?>
-        </div>
+			<?= \app\widgets\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
+				'attribute' => 'ip',
+				'lines' => 1,
+			]) ?>
+
+
+		</div>
         <div class="col-md-6" >
-		    <?= $form->field($model, 'mac')->textInput(['maxlength' => true]) ?>
+			<?= \app\widgets\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
+				'attribute' => 'mac',
+				'lines' => 1,
+			]) ?>
         </div>
     </div>
 
@@ -271,15 +283,23 @@ JS;
 			'multiple' => true
 		]
 	])?>
-
-
-
-	<?= $form->field($model, 'url')->textarea(['rows' => max(3,count(explode("\n",$model->url)))]) ?>
-	<?php $this->registerJs("$('#techs-url').autoResize().trigger('change.dynSiz');"); ?>
-
-
-	<?= $form->field($model, 'history')->textarea(['rows' => max(4,count(explode("\n",$model->comment)))]) ?>
-	<?php $this->registerJs("$('#techs-comment').autoResize().trigger('change.dynSiz');"); ?>
+	
+	
+	
+	<?= \app\widgets\TextAutoResizeWidget::widget([
+		'form' => $form,
+		'model' => $model,
+		'attribute' => 'url',
+		'lines' => 3,
+	]) ?>
+	
+	
+	<?= \app\widgets\TextAutoResizeWidget::widget([
+		'form' => $form,
+		'model' => $model,
+		'attribute' => 'history',
+		'lines' => 4,
+	]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
