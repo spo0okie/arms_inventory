@@ -110,6 +110,25 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($searchModel){return $data->comment.' '.$searchModel->model_id;}
 			];
 			break;
+		case 'ip':
+			$render_columns[] = [
+				'attribute' => $column,
+				'format' => 'raw',
+				'header' => 'IP Адрес',
+				'value' => function ($data) use ($renderer) {
+					if (is_object($data)) {
+						$output=[];
+						foreach ($data->netIps as $ip)
+							$output[]=$this->render('/net-ips/item',['model'=>$ip]);
+						return implode(' ',$output);
+					}
+					return null;
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
+			];
+			break;
+			
 		case 'mac':
 		case 'ip':
 			$render_columns[] = $column;

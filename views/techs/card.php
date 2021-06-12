@@ -38,7 +38,7 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
             echo ('<h2>Внутренний номер: '.Yii::$app->formatter->asNtext($model->comment).'</h2>');
         } else echo (Yii::$app->formatter->asNtext($model->comment).'<br />');
     } ?>
-    <?= \app\components\UrlListWidget::Widget(['list'=>$model->url.(strlen($model->ip)?"\nhttp://{$model->ip}":'')]) ?>
+    <?= \app\components\UrlListWidget::Widget(['list'=>$model->url,'ips'=>$model->ip]) ?>
 </p>
 
 
@@ -65,13 +65,15 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 	</p>
 <?php } ?>
 
-<h4>Сеть:</h4>
+
+<?= $this->render('ips_list',compact('model')) ?>
+
+<h4>MAC адрес(а)</h4>
 <p>
-    IP: <?= Yii::$app->formatter->asNtext($model->ip) ?>
-    MAC: <?= Yii::$app->formatter->asNtext($model->formattedMac) ?>
+	<?= Yii::$app->formatter->asNtext($model->formattedMac) ?>
 </p>
 
-<h4>документы:</h4>
+<h4>Документы:</h4>
 <p>
 
     <?php if(is_array($contracts = $model->contracts) && count($contracts)) foreach ($contracts as $contract) {

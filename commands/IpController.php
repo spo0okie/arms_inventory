@@ -32,15 +32,39 @@ class IpController extends Controller
 		return ExitCode::OK;
 	}
 	
-	public function actionRecalc()
+	private function reCalcComps()
 	{
 		if (is_array($comps=\app\models\Comps::find()->all())) {
 			foreach ($comps as $comp) $comp->save();
 		};
+	}
+	
+	private function reCalcTechs()
+	{
 		if (is_array($techs=\app\models\Techs::find()->all())) {
-			foreach ($techs as $tech) $tech->save();
+			foreach ($techs as $tech) {
+				echo "{$tech->num}: {$tech->ip}\n";
+				$tech->save(false);
+			}
 		};
-		
+	}
+	
+	public function actionRecalc()
+	{
+		$this->reCalcComps();
+		$this->reCalcTechs();
+		return ExitCode::OK;
+	}
+	
+	public function actionRecalcComps()
+	{
+		$this->reCalcComps();
+		return ExitCode::OK;
+	}
+
+	public function actionRecalcTechs()
+	{
+		$this->reCalcTechs();
 		return ExitCode::OK;
 	}
 }

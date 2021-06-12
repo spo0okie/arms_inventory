@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\validators\IpValidator;
 
 /**
  * This is the model class for table "techs".
@@ -44,6 +45,7 @@ use Yii;
  * @property Services[] $services
  * @property Ports[] $ports
  * @property MaterialsUsages[] $materialsUsages
+ * @property \app\models\NetIps[] $netIps
  */
 
 class Techs extends \yii\db\ActiveRecord
@@ -85,9 +87,19 @@ class Techs extends \yii\db\ActiveRecord
 	        [['contracts_ids'], 'each', 'rule'=>['integer']],
 	        [['url', 'comment'], 'string'],
 	        [['history','specs'], 'safe'],
-	        [['num', 'user_id', 'it_staff_id', 'ip'], 'string', 'max' => 16],
-	        [['mac'], 'string', 'max' => 17],
-            [['inv_num', 'sn'], 'string', 'max' => 128],
+	        [['num', 'user_id', 'it_staff_id'], 'string', 'max' => 16],
+			[['inv_num', 'sn'], 'string', 'max' => 128],
+			[['ip', 'mac'], 'string', 'max' => 255],
+			['ip', function ($attribute, $params, $validator) {
+				$items=explode("\n",$this->$attribute);
+				$ipValidator = new IpValidator(['ipv6'=>false,'subnet'=>null]);
+				foreach ($items as $item) {
+					if (!$ipValidator->validate(trim($item), $error)) {
+						$this->addError($attribute, $error.': '.$item);
+						return; // stop on first error
+					}
+				}
+			}],
 			['ip', 'filter', 'filter' => function ($value) {
 				if (count($items=explode("\n",$value))) {
 					$newValue=[];
@@ -96,7 +108,7 @@ class Techs extends \yii\db\ActiveRecord
 				}
 				return '';
 			}],
-			['ip', 'ip','ipv6'=>false,'subnet'=>null],
+			//['ip', 'ip','ipv6'=>false,'subnet'=>null],
 	        [['user_id', 'it_staff_id'], 'filter', 'filter' => function ($value) {
         	    //заменяем пустые значения табельных номеров на NULL
 		        return strlen($value)?$value:null;
@@ -174,8 +186,8 @@ class Techs extends \yii\db\ActiveRecord
 	        'user' => 'Пользователь',
 	        'contracts_ids' => 'Связанные документы',
             'it_staff_id' => 'Сотрудник службы ИТ',
-	        'ip' => 'IP адрес',
-	        'mac' => 'MAC адрес',
+	        'ip' => 'IP адреса',
+	        'mac' => 'MAC адреса',
             'url' => 'Ссылки',
 	        'comment' => 'Примечание',
 	        'history' => 'Записная книжка',
@@ -204,6 +216,8 @@ class Techs extends \yii\db\ActiveRecord
 			'url' => \app\components\UrlListWidget::$hint,
 			'comment' => 'Краткое пояснение по этому оборудованию',
 			'history' => 'Все важные и не очень заметки и примечания по жизненному циклу этого АРМ',
+			'ip' => 'По одному в строке',
+			'mac' => 'По одному в строке',
 		];
 	}
 
@@ -231,6 +245,7 @@ class Techs extends \yii\db\ActiveRecord
         return $this->techUser;
     }
 
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -353,13 +368,20 @@ class Techs extends \yii\db\ActiveRecord
 
 
 	public function getFormattedMac() {
-		$rawMac=preg_replace('/[^0-9A-F]/', '', mb_strtoupper($this->mac));
-		$macTokens=[];
-		for ($i=0;$i<mb_strlen($rawMac);$i++){
-			if (!isset($macTokens[(int)($i/2)])) $macTokens[(int)($i/2)]='';
-			$macTokens[(int)($i/2)].=mb_substr($rawMac,$i,1);
+		
+		$macs=explode("\n",$this->mac);
+		
+		foreach ($macs as $k=>$mac) {
+			$rawMac=preg_replace('/[^0-9A-F]/', '', mb_strtoupper($mac));
+			$macTokens=[];
+			for ($i=0;$i<mb_strlen($rawMac);$i++){
+				if (!isset($macTokens[(int)($i/2)])) $macTokens[(int)($i/2)]='';
+				$macTokens[(int)($i/2)].=mb_substr($rawMac,$i,1);
+			}
+			$macs[$k]=implode(':',$macTokens);
 		}
-		return implode(':',$macTokens);
+		
+		return implode("\n",$macs);
 	}
 	
 	/**
@@ -549,7 +571,12 @@ class Techs extends \yii\db\ActiveRecord
 				$this->it_staff_id=$this->arm->it_staff_id;
 			}
 			
-			$this->mac=preg_replace('/[^0-9a-f]/', '', mb_strtolower($this->mac));
+			/* убираем посторонние символы из MAC*/
+			$macs=explode("\n",$this->mac);
+			foreach ($macs as $i=>$mac) {
+				$macs[$i]=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
+			}
+			$this->mac=implode("\n",$macs);
 			
 			/* взаимодействие с NetIPs */
 			$this->netIps_ids=$this->fetchIpIds();

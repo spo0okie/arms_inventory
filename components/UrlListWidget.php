@@ -17,6 +17,7 @@ class UrlListWidget extends Widget
 	 * каждый урл может иметь описание отделенное пробелом таким образом, что последнее слово в строке - УРЛ
 	 */
 	public $list;
+	public $ips='';
 	public static $hint='Список ссылок (по одной в строке) с описанием. Последнее слово в строке - ссылка, все остальные - описание. Пример: "описание сервиса https://wiki.domain.local/services:inventory".';
 
 	public function run()
@@ -28,6 +29,13 @@ class UrlListWidget extends Widget
 			$item=trim($item);
 			if (!strlen($item)) continue;
 			$output.=$this->render('url/item',['item'=>$item]);
+		}
+
+		$items=explode("\n",$this->ips);
+		foreach ($items as $item) {
+			$item=trim($item);
+			if (!strlen($item)) continue;
+			$output.=$this->render('url/item',['item'=>'http://'.$item]);
 		}
 		return $output;
 	}
