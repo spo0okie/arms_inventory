@@ -93,7 +93,19 @@ DELIMITER ;
     public function rules()
     {
         return [
-            [['parent_id'], 'integer'],
+			[['parent_id'], 'integer'],
+			[['parent_id'], function ($attribute, $params, $validator) {
+				$children=[$this->id];
+				if (is_object($this->parent) && $this->parent->loopCheck($children)!==false) {
+					$chain=[];
+					foreach ($children as $id) {
+						$child=static::findOne($id);
+						$chain[]=$child->short;
+					}
+					//$chain[]=$this->short;
+					$this->addError($attribute,'Ссылка на самого себя: '.implode(' -> ',$chain));
+				}
+			}],
             [['name', 'short'], 'required'],
             [['name'], 'string', 'max' => 128],
             [['addr'], 'string', 'max' => 255],
@@ -132,6 +144,30 @@ DELIMITER ;
 			'phone' => 'Если для помещения предусмотрены прямые телефоны, укажите их здесь',
 			'prefix' => 'Будет использоваться для формирования инвентарных номеров при заведении нового оборудования в этом помещении. Если не задать - используется родительский префикс. Если изменить, то старые нивентарные номера останутся неизменны.',
 		];
+	}
+	
+	/**
+	 * Проверяем петлю по связи потомок-предок
+	 * @param $children integer[]
+	 * @return false|int
+	 */
+	public function loopCheck(&$children)
+	{
+		//если предок уже встречается среди потомков, то сообщаем его
+		if (($loop=array_search($this->id,$children))!==false) {
+			$children[]=$this->id;
+			return $this->id;
+		}
+		
+		//добавляем себя в цепочку потомков
+		$children[]=$this->id;
+
+		//если родителей нет - то нет и петли
+		if (empty($this->parent_id)) return false;
+		
+		//спрашиваем у предка
+		return $this->parent->loopCheck($children);
+		
 	}
 
 	/**
