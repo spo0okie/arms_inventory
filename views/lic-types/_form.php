@@ -24,14 +24,14 @@ use kartik\date\DatePicker;
 	</div>
 	
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'comment',
 		'lines' => 4,
 	]) ?>
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'links',

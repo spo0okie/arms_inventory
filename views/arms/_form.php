@@ -152,7 +152,7 @@ if ($model->isNewRecord) {
 		<?= (is_object($model) && is_object($model->techModel) && $model->techModel->individual_specs)?'':'style="display:none"' ?>
 	>
 		<div class="col-md-4" >
-			<?= \app\widgets\TextAutoResizeWidget::widget([
+			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'specs',
@@ -298,7 +298,7 @@ if ($model->isNewRecord) {
 	    <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success','name' => 'save', 'formaction' => $formActionSave,]) ?>
     </div>
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'history',

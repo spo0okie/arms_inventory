@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
 
 	<?= $form->field($model, 'prefix')->textInput(['maxlength' => true]) ?>
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'comment',

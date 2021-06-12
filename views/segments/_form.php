@@ -21,7 +21,7 @@ use yii\widgets\ActiveForm;
 		</div>
 	</div>
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'description',

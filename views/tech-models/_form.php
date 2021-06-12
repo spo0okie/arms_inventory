@@ -103,7 +103,7 @@ if (Yii::$app->request->get('return'))
 
     <div class="row">
         <div class="col-md-8" >
-			<?= \app\widgets\TextAutoResizeWidget::widget([
+			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'comment',

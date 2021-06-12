@@ -28,13 +28,13 @@ use kartik\select2\Select2;
 			]) ?>
         </div>
         <div class="col-md-8">
-			<?= \app\widgets\TextAutoResizeWidget::widget([
+			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'description',
 				'lines' => 2,
 			]) ?>
-			<?= \app\widgets\TextAutoResizeWidget::widget([
+			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'links',

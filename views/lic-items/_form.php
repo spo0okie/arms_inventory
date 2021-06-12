@@ -95,7 +95,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		]
 	]) ?>
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'comment',

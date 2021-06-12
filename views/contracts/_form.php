@@ -194,7 +194,7 @@ use kartik\file\FileInput;
         ],
     ]) ?>
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'comment',

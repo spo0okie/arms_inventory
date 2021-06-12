@@ -39,7 +39,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		]
 	]) ?>
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'key_text',
@@ -57,7 +57,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	])->hint(\app\models\Contracts::fetchArmsHint(is_object($model->licItem)?$model->licItem->contracts_ids:null ,'lickeys'),['id'=>'arms_id-hint']) ?>
 	
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'comment',

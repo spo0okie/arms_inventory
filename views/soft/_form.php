@@ -39,7 +39,7 @@ use kartik\select2\Select2;
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\widgets\TextAutoResizeWidget::widget([
+			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'items',
@@ -55,7 +55,7 @@ use kartik\select2\Select2;
 	</div>
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\widgets\TextAutoResizeWidget::widget([
+			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'additional',
@@ -82,7 +82,7 @@ use kartik\select2\Select2;
 
 	<h3>Описание ПО</h3>
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'comment',

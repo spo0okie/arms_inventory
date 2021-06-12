@@ -25,7 +25,7 @@ use kartik\select2\Select2;
 
     <?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'comment',

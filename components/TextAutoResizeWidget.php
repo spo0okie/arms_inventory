@@ -1,5 +1,5 @@
 <?php
-namespace app\widgets;
+namespace app\components;
 
 use yii\base\Widget;
 use yii\widgets\ActiveForm;

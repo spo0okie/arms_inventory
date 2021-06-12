@@ -162,7 +162,7 @@ JS;
 	
     <div class="row">
         <div class="col-md-6" >
-			<?= \app\widgets\TextAutoResizeWidget::widget([
+			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'ip',
@@ -172,7 +172,7 @@ JS;
 
 		</div>
         <div class="col-md-6" >
-			<?= \app\widgets\TextAutoResizeWidget::widget([
+			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'mac',
@@ -286,7 +286,7 @@ JS;
 	
 	
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'url',
@@ -294,7 +294,7 @@ JS;
 	]) ?>
 	
 	
-	<?= \app\widgets\TextAutoResizeWidget::widget([
+	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
 		'attribute' => 'history',

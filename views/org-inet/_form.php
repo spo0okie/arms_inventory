@@ -29,7 +29,7 @@ use kartik\select2\Select2;
 				</div>
 			</div>
 	
-			<?= \app\widgets\TextAutoResizeWidget::widget([
+			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'comment',
@@ -87,7 +87,7 @@ use kartik\select2\Select2;
 
 	        <?= $form->field($model, 'ip_dns2')->textInput(['maxlength' => true]) ?>
 	
-			<?= \app\widgets\TextAutoResizeWidget::widget([
+			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'history',
