@@ -533,8 +533,7 @@ a.contract_inactive {color: gray; text-decoration: line-through}
     border: none;
 }
 
-.qtip-wide,
-.ttip-card {
+.qtip-wide {
     width: 500px;
 }
 

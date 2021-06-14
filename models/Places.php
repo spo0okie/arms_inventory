@@ -167,7 +167,6 @@ DELIMITER ;
 		
 		//спрашиваем у предка
 		return $this->parent->loopCheck($children);
-		
 	}
 
 	/**

@@ -5,10 +5,10 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
 
-$this->title = 'Правка: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Schedules::$title, 'url' => ['index']];
+$this->title = 'Переименовать расписание: ' . $model->name;
+$this->params['breadcrumbs'][] = ['label' => 'Расписания', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Правка';
+$this->params['breadcrumbs'][] = 'Переименовать';
 ?>
 <div class="schedules-update">
 

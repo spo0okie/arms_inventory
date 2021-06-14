@@ -174,8 +174,10 @@ foreach ($columns as $column) {
 				'attribute' => $column,
 				//'header' => 'Инв. номер',
 				'format' => 'raw',
-				'value' => function ($data) use ($column) {
-					return is_object($data->$column) ? $data->$column->name : null;
+				'value' => function ($data) use ($column,$renderer) {
+					return is_object($data->$column)?
+						$renderer->render('/schedules/item',['model'=>$data->$column,'static_view'=>true])
+						:null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
 			];

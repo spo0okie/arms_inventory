@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Schedules */
 
 $this->title = 'Новое расписание';
-$this->params['breadcrumbs'][] = ['label' => \app\models\Schedules::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Расписания', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="schedules-create">
