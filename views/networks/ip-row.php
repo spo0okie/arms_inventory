@@ -9,11 +9,25 @@ use yii\helpers\Html;
 
 $addr=long2ip($model->addr+$i);
 
-?>
+if ($i==0){ //адрес сети  ?>
+	<td class="warning">
+		<?= $i ?> (net)
+	</td>
+	
+<?php } elseif ($i==$model->capacity-1) { ?>
+	<td class="warning">
+		<?= $i ?> (bcast)
+	</td>
+<?php } elseif ($model->addr+$i==$model->router) { ?>
+	<td class="success">
+		<?= $i ?> (router)
+	</td>
+<?php } else { ?>
+	<td>
+		<?= $i ?>
+	</td>
+<?php } ?>
 
-<td>
-	<?= $i ?>
-</td>
 
 <?php
 //if (!isset($ip)||empty($ip)) $ip=$model->fetchIp($i);
