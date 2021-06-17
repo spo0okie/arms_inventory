@@ -229,10 +229,5 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		return \app\models\Schedules::findOne($this->schedule_id);
 	}
 	
-	public function getDescription() {
-		if ($this->schedule=='-') return 'Выходной день';
-		return $this->schedule;
-	}
-
 	
 }

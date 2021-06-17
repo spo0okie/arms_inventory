@@ -11,6 +11,7 @@ use Yii;
  * @property int $parent_id
  * @property string $name
  * @property string $description
+ * @property array $weekWorkTime //массив строк, которые надо соединить (запятыми или переносами строк, чтобы получить график работы)
  *
  * @property Services[] $providingServices
  * @property Services[] $supportServices
@@ -141,14 +142,95 @@ class Schedules extends \yii\db\ActiveRecord
 		return $this->hasMany(Services::className(), ['support_schedule_id' => 'id']);
 	}
 	
+	/**
+	 * Пробуем вернуть коротко расписание работы на неделю
+	 * @return array
+	 */
+	public function getWeekWorkTime()
+	{
+		$days=['-','пн','вт','ср','чт','пт','сб','вс'];
+		
+		$description=[];		//итоговое описание расписания на неделю
+		$previousSchedule='-';	//расписание на предыдущий день
+		$previousDay=null;		//предыдущий день
+		$periodFirstDay=null;	//первый день периода с одинаковым расписанием
+		
+		for ($i=1;$i<=8;$i++) {
+			//описание строится по предыдущим дням, поэтому вылазим за воскресенье, чтобы закрыть описание воскресенья
+			$scheduleObj=($i===8)?
+				null
+				:
+				$this->getWeekDayScheduleRecursive($i);
+			
+			$schedule= is_object($scheduleObj)?
+				$scheduleObj->schedule
+				:
+				'-';
+				
+			
+			//если расписание на этот день отличается от расписания на предыдущий
+			if ($schedule!==$previousSchedule) {
+				//$description[]="$schedule!==$previousSchedule ($periodFirstDay-$previousDay)";
+				//если у нас есть и начало и конец предыдущего периода, и там есть рабочее время
+				if (!is_null($previousDay) && !is_null($periodFirstDay) && $previousSchedule!=='-') {
+					//то добавляем его в описание
+					
+					if ($periodFirstDay===$previousDay) {
+						$description[]="{$days[$periodFirstDay]}: $previousSchedule";	//пн: 8:00-17:00
+					} elseif ($periodFirstDay==1 && $previousDay==7) {
+						$description[]="$previousSchedule ежедн.";						//8:00-17:00 ежедневно
+					} else {
+						$description[]="{$days[$periodFirstDay]}-{$days[$previousDay]}: $previousSchedule";	//пн-чт: 8:00-17:00
+					}
+				}
+
+				//начинаем новый период
+				$periodFirstDay=$i;
+				
+			}
+			
+			//обновляем предыдущий день и его график для след итерации
+			$previousDay=$i;
+			$previousSchedule=$schedule;
+		}
+		return $description;
+	}
 	
+	
+	/**
+	 * Находим исключения в расписании в указанный период
+	 * @param $start integer
+	 * @param $end	integer
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function findExceptions($start,$end)
+	{
+		return SchedulesEntries::find()
+			->Where(['not',['in', 'date', ['1','2','3','4','5','6','7','def']]])
+			->andWhere(
+				['or',
+					['and',
+						['>=', 'UNIX_TIMESTAMP(date)', $start],
+						['<=', 'UNIX_TIMESTAMP(date)', $end]
+					],
+					['and',
+						['>=', 'UNIX_TIMESTAMP(date_end)', $start],
+						['<=', 'UNIX_TIMESTAMP(date_end)', $end]
+					]
+				
+				]
+			)
+			->all();
+
+		
+	}
 	
 	/**
 	 * Ищет эффективный день. если не задан конкретный - пытается сослаться на день по умолчанию
 	 * @param string $day
 	 * @return SchedulesEntries|null
 	 */
-	public function findEffectiveDay(string $day) {
+	public function findEffectiveDay($day) {
 		$schedule=\app\models\SchedulesEntries::findOne([
 			'schedule_id'=>$this->id,
 			'date'=>$day

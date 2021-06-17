@@ -49,6 +49,6 @@ $deleteable=!count($providingServices) && !count($supportServices);
 
 <p><?= $model->description ?></p>
 
-<h2>Базовое расписание на неделю</h2>
-<p>Без учета праздничных дней</p>
-<?= DetailView::widget(['model'=>$model,'attributes'=>$weekAttr]) ?>
+<h2><?= implode('<br/>',$model->weekWorkTime) ?></h2>
+
+<?php // DetailView::widget(['model'=>$model,'attributes'=>$weekAttr]) ?>

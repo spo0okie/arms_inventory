@@ -17,7 +17,7 @@ if (is_object($model)) { ?>
 <span class="schedules-entries-item"
 	  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules-entries/ttip','id'=>$model->id]) ?>"
 >
-	<?= \yii\helpers\Html::a($model->description,['/schedules/view/','id'=>$model->schedule_id,'date'=>$model->date,'#'=>'day-'.$model->date]) ?>
+	<?= \yii\helpers\Html::a($model->schedule,['/schedules/view/','id'=>$model->schedule_id,'date'=>$model->date,'#'=>'day-'.$model->date]) ?>
 </span>
 <?php } else
     echo ' - график не определен -';

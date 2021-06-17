@@ -27,7 +27,7 @@ $daysDataProvider = $daysSearchModel->search([]);
 		],
 		[
 			'attribute'=>'schedule',
-			'value'=>function($data){return $data->description;},
+			'value'=>function($data){return $data->schedule;},
 			'contentOptions' => function ($data) { return [
 				'class' => ($data->date==Yii::$app->request->get('date'))?'success':'',
 			];},

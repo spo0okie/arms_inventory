@@ -33,7 +33,7 @@ foreach (app\models\SchedulesEntries::$days as $day=>$name) {
 						'method' => 'post',
 					],
 				]);
-				return	$sched->description.' '.$update.' '.$delete;
+				return	$sched->schedule.' '.$update.' '.$delete;
 			}
 			
 			$delete=$static_view?'':Html::a('Задать', [
@@ -48,7 +48,7 @@ foreach (app\models\SchedulesEntries::$days as $day=>$name) {
 				$day=='def'?
 					'Не задано':
 					(
-					is_object($sched=$data->findDay('def'))?$sched->description.' (по умолч.)':'На задано'
+					is_object($sched=$data->findDay('def'))?$sched->schedule.' (по умолч.)':'На задано'
 					)
 				).' '.$delete;
 		},
