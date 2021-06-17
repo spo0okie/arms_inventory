@@ -12,7 +12,9 @@ use app\models\Networks;
 class NetworksSearch extends Networks
 {
 	public $domain_id;
-	
+	public $domain;
+	public $vlan;
+	public $segment;
 	
     /**
      * {@inheritdoc}
@@ -21,7 +23,7 @@ class NetworksSearch extends Networks
     {
         return [
             [['id',  'addr', 'mask', 'router', 'dhcp'], 'integer'],
-            [['name','vlan_id', 'domain_id', 'comment', 'segments_id',], 'safe'],
+            [['name','vlan_id','vlan', 'domain_id','domain', 'comment', 'segments_id','segment'], 'safe'],
         ];
     }
 
@@ -62,15 +64,15 @@ class NetworksSearch extends Networks
 						'asc'=>['addr'=>SORT_ASC],
 						'desc'=>['addr'=>SORT_DESC],
 					],
-					'domain_id'=>[
+					'domain'=>[
 						'asc'=>['net_domains.name'=>SORT_ASC],
 						'desc'=>['net_domains.name'=>SORT_DESC],
 					],
-					'vlan_id'=>[
+					'vlan'=>[
 						'asc'=>['net_vlans.vlan'=>SORT_ASC],
 						'desc'=>['net_vlans.vlan'=>SORT_DESC],
 					],
-					'segments_id'=>[
+					'segments'=>[
 						'asc'=>['segments.name'=>SORT_ASC],
 						'desc'=>['segments.name'=>SORT_DESC],
 					],
@@ -89,9 +91,10 @@ class NetworksSearch extends Networks
 
         $query
 			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', $this->name])
-			->andFilterWhere(['like', 'concat(net_vlans.name," (",net_vlans.vlan)', $this->vlan_id])
-			->andFilterWhere(['like', 'net_domains.name', $this->domain_id])
-			->andFilterWhere(['like', 'segments.name', $this->segments_id])
+			->andFilterWhere(['like', 'concat(net_vlans.name," (",net_vlans.vlan)', $this->vlan])
+			->andFilterWhere(['like', 'net_domains.name', $this->domain])
+			->andFilterWhere(['like', 'segments.name', $this->segment])
+			->andFilterWhere(['networks.segments_id'=>$this->segments_id])
             ->andFilterWhere(['like', 'networks.comment', $this->comment]);
 
         return $dataProvider;

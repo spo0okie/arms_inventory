@@ -5,6 +5,9 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Segments */
+/* @var $searchModel app\models\NetworksSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+
 
 //\yii\helpers\Url::remember();
 
@@ -16,4 +19,10 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="segments-view">
 	<?= $this->render('card',['model'=>$model]) ?>
+	<h2>Сети входящие в этот сегмент</h2>
+	<?= $this->render('/networks/table',[
+		'dataProvider'=>$dataProvider,
+		'searchModel'=>$searchModel,
+		'columns'=>['name','comment','vlan','domain','usage']
+	]) ?>
 </div>

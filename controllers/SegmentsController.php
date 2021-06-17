@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\NetworksSearch;
 use Yii;
 use app\models\Segments;
 use yii\data\ActiveDataProvider;
@@ -120,8 +121,14 @@ class SegmentsController extends Controller
      */
     public function actionView($id)
     {
-        return $this->render('view', [
+		$searchModel = new NetworksSearch();
+		$searchModel->segments_id=$id;
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+	
+		return $this->render('view', [
             'model' => $this->findModel($id),
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
         ]);
     }
 
