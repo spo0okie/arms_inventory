@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Segments */
@@ -26,6 +27,15 @@ if (!isset($static_view)) $static_view=false;
 <p><?= $model->code ?></p>
 <br />
 
-<h4>Описание</h4>
+<h4><?= $model->getAttributeLabel('description') ?></h4>
 <?= Yii::$app->formatter->asNtext($model->description) ?>
+
+<?php if (!$static_view && strlen($model->history)) { ?>
+	<hr/>
+	<h4><?= $model->getAttributeLabel('history') ?></h4>
+	<p>
+		<?= Markdown::convert($model->history) ?>
+	</p>
+	<br />
+<?php } ?>
 

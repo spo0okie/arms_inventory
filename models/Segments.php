@@ -11,6 +11,7 @@ use Yii;
  * @property string $name
  * @property string $code
  * @property string $description
+ * @property string $history
  */
 class Segments extends \yii\db\ActiveRecord
 {
@@ -33,6 +34,7 @@ class Segments extends \yii\db\ActiveRecord
         return [
 			[['name'], 'string', 'max' => 32],
             [['code','description'], 'string', 'max' => 255],
+			[['history'], 'safe'],
         ];
     }
 	
@@ -45,7 +47,8 @@ class Segments extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'code' => 'Код',
 			'name' => 'Название',
-			'description' => 'Описание',
+			'description' => 'Коротко',
+			'history' => 'Подробно',
 		];
 	}
 	
@@ -58,7 +61,8 @@ class Segments extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'code' => 'Название класса CSS для раскраски. Нигде не видно в явном виде',
 			'name' => 'Понятное человеку название',
-			'description' => 'Подробное описание, если не ясно из названия',
+			'description' => 'Короткое описание, выводится в общем списке',
+			'history' => 'Подробное описание, чтобы увидеть надо будет открыть описание сегмента',
 		];
 	}
 	
