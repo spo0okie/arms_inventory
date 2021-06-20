@@ -19,7 +19,7 @@ use yii\validators\DateValidator;
  * @property int $id
  * @property int|null $schedule_id
  * @property string|null $date
- * @property string|null $dateEnd
+ * @property string|null $date_end
  * @property string|null $schedule
  * @property string|null $description
  * @property string|null $comment
@@ -28,6 +28,7 @@ use yii\validators\DateValidator;
  * @property string|null $created_at
  * @property string|null $is_period
  * @property string|null $is_work
+ * @property array $interval
  *
  * @property Schedules $master
  */
@@ -229,5 +230,40 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		return \app\models\Schedules::findOne($this->schedule_id);
 	}
 	
+	/**
+	 * возвращает рабочие интервалы времени на указанную дату
+	 * или кусок периода попадающий в эту дату
+	 * или куски рабочего времени по графику
+	 * @param $date
+	 * @return array|null
+	 */
+	public function getIntervals($date) {
+		if ($this->is_period) {
+			return [\app\models\Schedules::intervalCut(
+				[strtotime($this->date),strtotime($this->date_end)],
+				[strtotime($date.' 00:00:00'),strtotime($date.' 23:59:59')]
+			)];
+		} elseif ($this->schedule!=='-') {
+			$intervals=[];
+			foreach (explode(',',$this->schedule) as $schedule) {
+				$intervals[]=\app\models\Schedules::schedule2Interval($schedule,$date);
+			};
+			return $intervals;
+			
+		}
+		return [];
+		
+	}
+	
+	public function getPeriodSchedule() {
+		if (!$this->is_period) return null;
+		
+		if (date('Y-m-d',strtotime($this->date)) == date('Y-m-d',strtotime($this->date_end ))) {
+			//начинается и кончается в один день
+			return date('Y-m-d',strtotime($this->date)).' '.date('H:i',strtotime($this->date)).'-'.date('H:i',strtotime($this->date));
+		} else {
+			return date('Y-m-d H:i',strtotime($this->date)).' - '.date('Y-m-d H:i',strtotime($this->date_end));
+		}
+	}
 	
 }

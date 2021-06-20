@@ -12,13 +12,51 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\SchedulesEntries */
 
-if (is_object($model)) { ?>
+if (is_object($model)) {
+	if (!isset($name)) {
+		if ($model->is_period) {
+			$name=$model->getPeriodSchedule();
+		} else {
+			$name=$model->schedule;
+		}
+	}
+	?>
 
-<span class="schedules-entries-item"
-	  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules-entries/ttip','id'=>$model->id]) ?>"
->
-	<?= \yii\helpers\Html::a($model->schedule,['/schedules/view/','id'=>$model->schedule_id,'date'=>$model->date,'#'=>'day-'.$model->date]) ?>
-</span>
+	<span class="schedules-entries-item"
+		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules-entries/ttip','id'=>$model->id]) ?>"
+	>
+		<?= \yii\helpers\Html::a($name,['/schedules/view/','id'=>$model->schedule_id,'date'=>$model->date,'#'=>'day-'.$model->date]) ?>
+	</span>
+<?php } elseif (is_array($model)) {
+	if (!isset($name)) {
+		$name=$model['schedule'];
+	}
+	if (count($model['posPeriods'])) {
+		$positive=[];
+		foreach ($model['posPeriods'] as $period)
+			$positive[]=$period->id;
+	} else $positive=null;
+	
+	if (count($model['negPeriods'])) {
+		$negative=[];
+		foreach ($model['negPeriods'] as $period)
+			$negative[]=$period->id;
+	} else $negative=null;
+
+	?>
+	<span class="schedules-entries-item"
+		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules-entries/ttip','id'=>$model['day']->id,'positive'=>$positive,'negative'=>$negative]) ?>"
+	>
+		<?= \yii\helpers\Html::a($name,[
+			'/schedules/view/',
+			'id'=>$model['day']->schedule_id,
+			'date'=>$model['day']->date,
+			'#'=>'day-'.$model['day']->date,
+			'positive'=>$positive,
+			'negative'=>$negative
+		]) ?>
+	</span>
+	
 <?php } else
     echo ' - график не определен -';
 

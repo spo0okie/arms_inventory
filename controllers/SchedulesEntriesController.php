@@ -55,6 +55,8 @@ class SchedulesEntriesController extends Controller
 	{
 		return $this->renderPartial('ttip', [
 			'model' => $this->findModel($id),
+			'positive' => Yii::$app->request->getQueryParam( 'positive',[]),
+			'negative' => Yii::$app->request->getQueryParam('negative',[]),
 		]);
 	}
 	
@@ -83,8 +85,9 @@ class SchedulesEntriesController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['/schedules/view', 'id' => $model->schedule_id]);
         }
-
-        if (isset($_GET['schedule_id'])) $model->schedule_id=$_GET['schedule_id'];
+	
+		if (isset($_GET['schedule_id'])) $model->schedule_id=$_GET['schedule_id'];
+		if (isset($_GET['is_period'])) $model->is_period=$_GET['is_period'];
         if (isset($_GET['date'])) $model->date=$_GET['date'];
 
         return $this->render('create', [

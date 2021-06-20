@@ -35,6 +35,28 @@ if (is_array($exceptions) && count($exceptions)) {
 
 <h2>В ближайшие <?= $days_forward ?> дней есть исключения</h2>
 <p>праздничные дни/ аварийные простои и т.п.<br> Посмотрите внимательно график на ближайшие <?= $days_forward ?> дней</p>
-<?= DetailView::widget(['model'=>$model,'attributes'=>$dateAttr]) ?>
+	<table class="table table-condensed table-striped">
+		<?php for ($i=0; $i<$days_forward; $i++) {
+			$day=$model->getDateSchedule(date('Y-m-d',time()+86400*$i));
+			if (is_object($day)) {
+				$comment=$day->comment;
+			} elseif (is_array($day)) {
+				$comment=$day['day']->comment.' + наложения';
+			} else $comment='';
+		?>
+			<tr>
+				<td>
+					<?= Yii::$app->formatter->asDate(time()+86400*$i,'full') ?>
+				</td>
+				<td>
+					<?= $this->render('/schedules-entries/item',['model'=>$day]) ?>
+				</td>
+				<td>
+					<?= $this->render('/schedules-entries/item',['model'=>$day,'name'=>$comment]) ?>
+				</td>
+			</tr>
+		<?php } ?>
+	</table>
+<?php //= DetailView::widget(['model'=>$model,'attributes'=>$dateAttr])
 
-<?php }
+}

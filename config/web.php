@@ -1,5 +1,9 @@
 <?php
 
+use kartik\datecontrol\Module;
+use kartik\date\DatePicker;
+
+
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 $ldap = require __DIR__ . '/ldap.php';
@@ -107,6 +111,25 @@ $config = [
 				'class' => 'yii\i18n\PhpMessageSource',
 				'basePath' => '@vendor/kartik-v/yii2-markdown/messages',
 				'forceTranslation' => true
+			],
+		],
+		'datecontrol' =>  [
+			'class' => 'kartik\datecontrol\Module',
+			'displaySettings' => [
+				Module::FORMAT_DATE => 'php:Y-m-d',
+				Module::FORMAT_TIME => 'php:H:i:s',
+				Module::FORMAT_DATETIME => 'php:Y-m-d H:i:s',
+			],
+			'saveSettings' => [
+				Module::FORMAT_DATE => 'php:Y-m-d',
+				Module::FORMAT_TIME => 'php:H:i:s',
+				Module::FORMAT_DATETIME => 'php:Y-m-d H:i:s',
+			],
+			'autoWidget' => true,
+			'autoWidgetSettings' => [
+				Module::FORMAT_DATE => ['type'=>2, 'pluginOptions'=>['autoclose'=>true]], // example
+				Module::FORMAT_DATETIME => [], // setup if needed
+				Module::FORMAT_TIME => [], // setup if needed
 			],
 		],
     ],

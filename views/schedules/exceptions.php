@@ -11,6 +11,24 @@ if (!isset($static_view)) $static_view=false;
 $daysSearchModel = new app\models\SchedulesEntriesSearch();
 $daysSearchModel->schedule_id = $model->id;
 $daysDataProvider = $daysSearchModel->search([]);
+$renderer=$this;
+
+function selectClass($model){
+	if ($model->date==Yii::$app->request->get('date'))
+		return 'success';
+	
+	if (is_array($negative=Yii::$app->request->get('negative'))) {
+		if (in_array($model->id,$negative))
+			return 'danger';
+	}
+	
+	if (is_array($positive=Yii::$app->request->get('positive'))) {
+		if (in_array($model->id,$positive))
+			return 'info';
+	}
+
+	return '';
+}
 
 ?>
 <h2>Праздничные / внеочередные рабочие дни</h2>
@@ -20,22 +38,34 @@ $daysDataProvider = $daysSearchModel->search([]);
 	'columns' => [
 		[
 			'attribute'=>'date',
+			'value'=>function($data)use($renderer){
+				return $data->is_period?
+					$data->date.' - '.$data->date_end
+					:
+					$data->date
+					;
+			},
 			'contentOptions' => function ($data) { return [
-				'class' => ($data->date==Yii::$app->request->get('date'))?'success':'',
+				'class' => selectClass($data),
 				'id'=>'day-'.$data->date
 			];},
 		],
 		[
 			'attribute'=>'schedule',
-			'value'=>function($data){return $data->schedule;},
+			'value' => function($data) {
+				return $data->is_period?
+					($data->is_work?'рабочий период':'нерабочий период')
+					:
+					$data->schedule;
+			},
 			'contentOptions' => function ($data) { return [
-				'class' => ($data->date==Yii::$app->request->get('date'))?'success':'',
+				'class' => selectClass($data),
 			];},
 		],
 		[
 			'attribute'=>'comment',
 			'contentOptions' => function ($data) { return [
-				'class' => ($data->date==Yii::$app->request->get('date'))?'success':'',
+				'class' => selectClass($data),
 			];},
 		],
 		
@@ -55,9 +85,18 @@ $daysDataProvider = $daysSearchModel->search([]);
 	],
 ]); ?>
 
-<?= Html::a('Добавить праздничный / нестандартный рабочий день', [
+<?= Html::a('Добавить нестандартный график', [
 	'/schedules-entries/create',
 	'schedule_id' => $model->id,
+	'is_period' => 0,
+], [
+	'class' => 'btn btn-success'
+]);?>
+
+<?= Html::a('Добавить раб/не раб. период', [
+	'/schedules-entries/create',
+	'schedule_id' => $model->id,
+	'is_period' => 1,
 ], [
 	'class' => 'btn btn-success'
 ]);?>
