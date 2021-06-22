@@ -13,7 +13,8 @@ $techs=$model->techs;
 $services=$model->depends;
 $dependants=$model->dependants;
 $support=$model->support;
-$deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($support)&&!count($techs);
+$children=$model->children;
+$deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($support)&&!count($techs)&&!count($children);
 ?>
 
 <h1>
@@ -35,16 +36,17 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		<h4>
 			(<?php
 			echo $model->is_end_user?'Предоставляется пользователям':'Внутренний сервис';
-			if (is_object($model->segment)) echo " // Сегмент ИТ: {$model->segment->name}"
+			if (is_object($model->segmentRecursive)) echo " // Сегмент ИТ: {$model->segmentRecursive->name}";
 			?>)
+			<?php if (is_object($model->parent))  echo "<br /> Входит в состав: {$this->render('item',['model'=>$model->parent])}"; ?>
 		</h4>
 		<?php
 		$schedules=[];
-		if (!empty($model->providingSchedule))
-			$schedules[]='<strong>Предоставляется:</strong> '.$model->providingSchedule->name;
+		if (!empty($model->providingScheduleRecursive))
+			$schedules[]='<strong>Предоставляется:</strong> '.$model->providingScheduleRecursive->name;
 		
-		if (!empty($model->supportSchedule))
-			$schedules[]='<strong>Поддерживается:</strong> '.$model->supportSchedule->name;
+		if (!empty($model->supportScheduleRecursive))
+			$schedules[]='<strong>Поддерживается:</strong> '.$model->supportScheduleRecursive->name;
 		
 		if (count($schedules)) {
 			echo implode('; ',$schedules).'<br />';
@@ -67,6 +69,17 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 
 	</div>
 	<div class="col-md-6">
+		<?php if (count($children)) { ?>
+			<h2>Содержит в составе:</h2>
+			<p>
+				<?php
+				foreach ($children as $service)
+					echo $this->render('/services/item',['model'=>$service,'static_view'=>$static_view]).'<br />';
+				?>
+			</p>
+			<br />
+		<?php } ?>
+
 		<?php if (count($comps)) { ?>
 			<h4>Выполняется на компьютерах:</h4>
 			<p>

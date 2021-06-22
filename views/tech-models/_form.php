@@ -69,9 +69,9 @@ if (Yii::$app->request->get('return'))
             <?= $form->field($model, 'type_id')->widget(Select2::className(), [
                 'data' => \app\models\TechTypes::fetchNames(),
                 'options' => [
-                        'placeholder' => 'Выберите тип оборудования',
-	                    'onchange' => 'techSwitchDescr();'
-                    ],
+					'placeholder' => 'Выберите тип оборудования',
+					'onchange' => 'techSwitchDescr();'
+				],
                 //'toggleAllSettings'=>['selectLabel'=>null],
                 'pluginOptions' => [
                     'allowClear' => false,

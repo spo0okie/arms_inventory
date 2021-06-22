@@ -9,6 +9,7 @@ use yii\web\User;
  * This is the model class for table "services".
  *
  * @property int $id
+ * @property int $parent_id
  * @property string $name
  * @property string $description
  * @property int $is_end_user
@@ -17,9 +18,13 @@ use yii\web\User;
  * @property string $notebook
  * @property string $links
  * @property int $responsible_id
+ * @property string $responsibleName
  * @property int $providing_schedule_id
  * @property int $support_schedule_id
+ * @property string $providingScheduleName
+ * @property string $supportScheduleName
  * @property int $segment_id
+ * @property string $segmentName
  *
  * @property \app\models\Comps[] $comps
  * @property \app\models\Services[] $depends
@@ -30,16 +35,29 @@ use yii\web\User;
  * @property \app\models\Places[] $armPlaces
  * @property \app\models\Places[] $techPlaces
  * @property \app\models\Places[] $sites
+ * @property \app\models\Services $parent
+ * @property \app\models\Services[] $children
  * @property Schedules $providingSchedule
+ * @property Schedules $providingScheduleRecursive
  * @property Users $responsible
+ * @property Users $responsibleRecursive
  * @property Users[] $support
+ * @property Users[] $supportRecursive
  * @property Schedules $supportSchedule
+ * @property Schedules $supportScheduleRecursive
  * @property Segments $segment
+ * @property Segments $segmentRecursive
  */
 class Services extends \yii\db\ActiveRecord
 {
 
 	public static $title='IT сервисы';
+	
+	private $segmentRecursiveCache=null;
+	private $supportRecursiveCache=null;
+	private $responsibleRecursiveCache=null;
+	private $providingScheduleRecursiveCache=null;
+	private $supportScheduleRecursiveCache=null;
 
 
 	/**
@@ -61,8 +79,18 @@ class Services extends \yii\db\ActiveRecord
 		];
 	}
 
-
-    /**
+	public function extraFields()
+	{
+		return [
+			'responsibleName',
+			'supportScheduleName',
+			'providingScheduleName',
+			'supportNames',
+			'segmentName',
+		];
+	}
+	
+	/**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -85,6 +113,7 @@ class Services extends \yii\db\ActiveRecord
 	        [['providing_schedule_id'], 'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['providing_schedule_id' => 'id']],
 	        [['support_schedule_id'],   'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['support_schedule_id' => 'id']],
 			[['segment_id'],			'exist', 'skipOnError' => true, 'targetClass' => Segments::className(), 'targetAttribute' => ['segment_id' => 'id']],
+			[['parent_id'],				'exist', 'skipOnError' => true, 'targetClass' => Services::className(), 'targetAttribute' => ['parent_id' => 'id']],
         ];
     }
 
@@ -95,7 +124,8 @@ class Services extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'name' => 'Название',
+			'name' => 'Название',
+			'parent_id' => 'Основной сервис',
 	        'description' => 'Описание',
 	        'links' => 'Ссылки',
             'is_end_user' => 'Предоставляется пользователям',
@@ -129,6 +159,7 @@ class Services extends \yii\db\ActiveRecord
 		return [
 			'id' => 'ID',
 			'name' => 'Короткое уникальное название сервиса',
+			'parent_id' => 'Здесь можно указать в состав какого, более крупного сервиса, входит этот сервис',
 			'description' => 'Развернутое название или краткое описание назначения этого сервиса. Все детали тут описывать не нужно. Нужно в поле ниже вставить ссылку на вики страничку с описанием',
 			'links' => \app\components\UrlListWidget::$hint.' Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
 			'is_end_user' => 'Предоставляется ли этот сервис пользователям (иначе используется другими сервисами)',
@@ -155,6 +186,20 @@ class Services extends \yii\db\ActiveRecord
 			->from(['support_schedule'=>Schedules::tableName()]);
 	}
 	
+	public function getSupportScheduleRecursive() {
+		if (is_object($this->supportScheduleRecursiveCache)) return $this->supportScheduleRecursiveCache;
+		if (is_object($this->supportScheduleRecursiveCache = $this->supportSchedule))
+			return $this->supportScheduleRecursiveCache;
+		if (is_object($this->parent))
+			return $this->supportScheduleRecursiveCache=$this->parent->supportScheduleRecursive;
+		return null;
+	}
+	
+	public function getSupportScheduleName() {
+		if (is_object($this->supportScheduleRecursive)) return $this->supportScheduleRecursive->name;
+		return null;
+	}
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -163,12 +208,59 @@ class Services extends \yii\db\ActiveRecord
 		return $this->hasOne(Schedules::className(), ['id' => 'providing_schedule_id'])
 			->from(['providing_schedule'=>Schedules::tableName()]);
 	}
+	
+	public function getProvidingScheduleRecursive() {
+		if (is_object($this->providingScheduleRecursiveCache)) return $this->providingScheduleRecursiveCache;
+		if (is_object($this->providingScheduleRecursiveCache = $this->providingSchedule))
+			return $this->providingScheduleRecursiveCache;
+		if (is_object($this->parent))
+			return $this->providingScheduleRecursiveCache = $this->parent->providingScheduleRecursive;
+		return null;
+	}
+	
+	public function getProvidingScheduleName() {
+		if (is_object($this->providingScheduleRecursive)) return $this->providingScheduleRecursive->name;
+		return null;
+	}
+	
+	/**
+	 * @return Segments|\yii\db\ActiveQuery
+	 */
+	public function getParent()
+	{
+		return $this->hasOne(Services::className(), ['id' => 'parent_id']);
+	}
+	
+	/**
+	 * Непосредственные потомки
+	 * @return Segments[]|\yii\db\ActiveQuery
+	 */
+	public function getChildren()
+	{
+		return $this->hasMany(Services::className(), ['parent_id' => 'id']);
+	}
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getResponsible()
 	{
 		return $this->hasOne(Users::className(), ['id' => 'responsible_id'])->from(['responsible'=>Users::tableName()]);
+	}
+	
+	public function getResponsibleRecursive() {
+		if (is_object($this->responsibleRecursiveCache)) return $this->responsibleRecursiveCache;
+		if (is_object($this->responsibleRecursiveCache = $this->responsible))
+			return $this->responsibleRecursiveCache;
+		if (is_object($this->parent))
+			return $this->responsibleRecursiveCache = $this->parent->responsibleRecursive;
+		return null;
+	}
+
+	public function getResponsibleName() {
+		if (is_object($this->responsibleRecursive)) return $this->responsibleRecursive->Ename;
+		return null;
 	}
 	
 	/**
@@ -178,6 +270,25 @@ class Services extends \yii\db\ActiveRecord
 	{
 		return $this->hasOne(Segments::className(), ['id' => 'segment_id']);
 	}
+	
+	/**
+	 * Возвращает сегмент сервиса с учетом родителей
+	 * @return string|null
+	 */
+	public function getSegmentRecursive() {
+		if (is_object($this->segmentRecursiveCache)) return $this->segmentRecursiveCache;
+		if (is_object($this->segmentRecursiveCache = $this->segment))
+			return $this->segmentRecursiveCache;
+		if (is_object($this->parent))
+			return $this->segmentRecursiveCache = $this->parent->segment;
+		return null;
+	}
+	
+	public function getSegmentName() {
+		if (is_object($this->supportRecursive)) return $this->segmentRecursive->name;
+		return null;
+	}
+	
 	/**
 	 * Возвращает сервисы от которых зависит этот сервис
 	 */
@@ -195,6 +306,29 @@ class Services extends \yii\db\ActiveRecord
 		return static::hasMany(Users::className(), ['id' => 'user_id'])
 			->from(['support'=>Users::tableName()])
 			->viaTable('{{%users_in_services}}', ['service_id' => 'id']);
+	}
+	
+	public function getSupportRecursive() {
+		if (is_array($this->supportRecursiveCache) && count($this->supportRecursiveCache)) {
+			return $this->supportRecursiveCache;
+		}
+		if (is_array($this->supportRecursiveCache = $this->support) && count($this->supportRecursiveCache)){
+			//var_dump($this->supportRecursiveCache);
+			return $this->supportRecursiveCache;
+			
+		}
+		if (is_object($this->parent))
+			return $this->supportRecursiveCache = array_merge($this->parent->supportRecursive);
+		return null;
+	}
+	
+	public function getSupportNames() {
+		$names=[];
+		foreach ($this->supportRecursive as $user)
+			if (is_object($user)) $names[]=$user->Ename;
+			
+		if (count($names)) return implode(',',$names);
+		return null;
 	}
 	
 	/**
@@ -268,7 +402,7 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public static function fetchNames(){
 		$list= static::find()
-			->select(['id','name'])
+			->select(['id','name'])->orderBy('name')
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}

@@ -9,14 +9,14 @@ use yii\widgets\DetailView;
 if (!isset($static_view)) $static_view=false;
 ?>
 		<h4>
-			Ответственный: <?= $this->render('/users/item',['model'=>$model->responsible,'static_view'=>$static_view]) ?>
+			Ответственный: <?= $this->render('/users/item',['model'=>$model->responsibleRecursive,'static_view'=>$static_view]) ?>
 		</h4>
-		<?php if (count($model->support)) { ?>
+		<?php if (count($model->supportRecursive)) { ?>
 			<p>
 				Поддержка:
 				<?php
 				$users=[];
-				foreach ($model->support as $user)
+				foreach ($model->supportRecursive as $user)
 					$users[]=$this->render('/users/item',['model'=>$user,'static_view'=>$static_view]);
 				echo implode(", ",$users);
 				?>

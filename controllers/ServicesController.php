@@ -33,7 +33,7 @@ class ServicesController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','index-by-users','view','card','card-support','ttip','validate','item'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','index-by-users','view','card','card-support','ttip','validate','item','json-preview'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -67,6 +67,23 @@ class ServicesController extends Controller
 		return $this->renderPartial('item', [
 			'model' => $this->findModel($id)
 		]);
+	}
+	
+	/**
+	 * Displays model fields in JSON.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionJsonPreview($id)
+	{
+		$model=$this->findModel($id);
+		$response=[];
+		foreach ($model->extraFields() as $field) {
+			$response[$field]=$model->$field;
+		}
+		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		return $response;
 	}
 	
 	/**
@@ -104,6 +121,10 @@ class ServicesController extends Controller
 	{
 		
 		$searchModel = new ServicesSearch();
+		if (Yii::$app->request->get('showChildren',false))
+			$searchModel->parent_id=null; //игнорировать
+		else
+			$searchModel->parent_id=false; //должен отсутствовать
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		$this->view->params['layout-container'] = 'container-fluid';
 		

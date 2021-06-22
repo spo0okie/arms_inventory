@@ -82,6 +82,10 @@ class ServicesSearch extends Services
 	        'providing_schedule_id' => $this->providing_schedule_id,
 	        'support_schedule_id' => $this->support_schedule_id,
         ]);
+        
+        if ($this->parent_id===false) {
+        	$query->andWhere(['services.parent_id'=>null]);
+		}
 
         $query->andFilterWhere(['like', 'services.name', $this->name])
             ->andFilterWhere(['like', 'description', $this->description])

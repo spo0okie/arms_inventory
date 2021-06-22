@@ -14,15 +14,25 @@ $this->title = \app\models\Services::$title;
 $this->params['breadcrumbs'][] = $this->title;
 $models=$dataProvider->models;
 
+$showChildren=Yii::$app->request->get('showChildren',false);
+$childrenLabel=$showChildren?'Скрыть дочерние сервисы':'Показать дочерние сервисы';
+$childrenUrl=array_merge(['index'],Yii::$app->request->get());
+$childrenUrl['showChildren']=!$showChildren;
+
 $renderer=$this;
 ?>
 <div class="services-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>
-        <?= Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
+	<p>
+		<?= Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']) ?>
+		<br />
+		<?= Html::a(
+			$childrenLabel,
+			$childrenUrl
+		) ?>
+	</p>
 	
 	<?php Pjax::begin(); ?>
 	<?= $this->render('table',compact('dataProvider','searchModel'))?>
