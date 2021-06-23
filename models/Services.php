@@ -318,7 +318,7 @@ class Services extends \yii\db\ActiveRecord
 			
 		}
 		if (is_object($this->parent))
-			return $this->supportRecursiveCache = array_merge($this->parent->supportRecursive);
+			return $this->supportRecursiveCache = $this->parent->supportRecursive;
 		return null;
 	}
 	
