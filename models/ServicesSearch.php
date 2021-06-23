@@ -59,9 +59,13 @@ class ServicesSearch extends Services
 			]);
 
         // add conditions that should always apply here
+		if ($this->parent_id===false) {
+			$query->andWhere(['services.parent_id'=>null]);
+		}
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+	        'totalCount' => $query->count('distinct(services.id)'),
 	        'pagination' => ['pageSize' => 500,],
 	        'sort'=> ['defaultOrder' => ['name'=>SORT_ASC]]
         ]);
@@ -83,10 +87,6 @@ class ServicesSearch extends Services
 	        'support_schedule_id' => $this->support_schedule_id,
         ]);
         
-        if ($this->parent_id===false) {
-        	$query->andWhere(['services.parent_id'=>null]);
-		}
-
         $query->andFilterWhere(['like', 'services.name', $this->name])
             ->andFilterWhere(['like', 'description', $this->description])
 			->andFilterWhere(['like', 'segments.name', $this->segment])
@@ -103,7 +103,8 @@ class ServicesSearch extends Services
 		        ['like', 'getplacepath(places_techs.id)', $this->sites]
 	        ])
             ->andFilterWhere(['like', 'notebook', $this->notebook]);
-
+		
+      
         return $dataProvider;
     }
 }
