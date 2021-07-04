@@ -207,15 +207,25 @@ class Schedules extends \yii\db\ActiveRecord
 	{
 		return SchedulesEntries::find()
 			->Where(['not',['in', 'date', ['1','2','3','4','5','6','7','def']]])
+			->andWhere([
+				'schedule_id'=>$this->id,
+				'is_period'=>0
+			])
 			->andWhere(['and',
-					['<=', 'UNIX_TIMESTAMP(date)', $end],
-					['>=', 'UNIX_TIMESTAMP(date_end)', $start]
+				['<=', 'UNIX_TIMESTAMP(date)', $end],
+				['>=', 'UNIX_TIMESTAMP(date)', $start],
 			])
 			->all();
 
 		
 	}
 	
+	/**
+	 * Ищем периоды в расписании в указанный период
+	 * @param $start
+	 * @param $end
+	 * @return array|\yii\db\ActiveRecord[]
+	 */
 	public function findPeriods($start,$end) {
 		return \app\models\SchedulesEntries::find()
 			->where([
@@ -223,8 +233,16 @@ class Schedules extends \yii\db\ActiveRecord
 				'is_period'=>1
 			])
 			->andWhere(['and',
-				['<=', 'UNIX_TIMESTAMP(date)', $end],
-				['>=', 'UNIX_TIMESTAMP(date_end)', $start]
+				[
+					'or',
+					['<=', 'UNIX_TIMESTAMP(date)', $end],
+					['date'=>null]
+				],
+				[
+					'or',
+					['>=', 'UNIX_TIMESTAMP(date_end)', $start],
+					['date_end'=>null],
+				],
 			])
 			->all();
 		
@@ -444,8 +462,17 @@ class Schedules extends \yii\db\ActiveRecord
 	 */
 	public static function intervalCut($interval,$range)
 	{
-		if ($interval[0]<$range[0]) $interval[0]=$range[0];
-		if ($interval[1]>$range[1]) $interval[1]=$range[1];
+		//граница NULL означает что с этого края интервал открыт
+		if (
+			$interval[0]<$range[0]
+			||
+			is_null($interval[0])
+		) $interval[0]=$range[0];
+		if (
+			$interval[1]>$range[1]
+			||
+			is_null($interval[1])
+		) $interval[1]=$range[1];
 		return $interval;
 	}
 	

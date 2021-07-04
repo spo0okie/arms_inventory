@@ -15,6 +15,7 @@ $today=strtotime(date('Y-m-d 00:00:00'));
 $periodEnd=$today+($days_forward+1)*60*60*24-1;
 
 $exceptions=$model->findExceptions($today,$periodEnd);
+$periods=$model->findPeriods($today,$periodEnd);
 
 $dateAttr=[];
 for ($i=0; $i<7; $i++) {
@@ -29,7 +30,11 @@ for ($i=0; $i<7; $i++) {
 	];
 }
 
-if (is_array($exceptions) && count($exceptions)) {
+if (
+	(is_array($exceptions) && count($exceptions))
+||
+	(is_array($periods) && count($periods))
+) {
 	?>
 
 

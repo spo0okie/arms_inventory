@@ -142,7 +142,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	public function rules()
 	{
 		return [
-			[['schedule_id','date'], 'required'],
+			[['schedule_id'], 'required'],
 			[['schedule_id','is_period','is_work'], 'integer'],
 			['is_period','default','value'=>0],
 			['is_work','default','value'=>1],
@@ -172,6 +172,11 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			
 			//если у нас период, а не расписание на день
 			//то нужно начало и конец периода в нужных форматах
+			[['date','date_end'],'required',
+				'message' => 'У периода должна быть хотя бы одна граница',
+				'when'=>function ($model) {return $model->is_period && empty($model->date) && empty($model->date_end);},
+				'enableClientValidation' => false,
+			],
 			[['date','date_end'],'date','format'=>'php:Y-m-d H:i:s', 'when'=>function ($model) {return $model->is_period;}],
 			
 			[['comment'], 'string', 'max' => 255],
@@ -240,7 +245,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	public function getIntervals($date) {
 		if ($this->is_period) {
 			return [\app\models\Schedules::intervalCut(
-				[strtotime($this->date),strtotime($this->date_end)],
+				[is_null($this->date)?null:strtotime($this->date),is_null($this->date_end)?null:strtotime($this->date_end)],
 				[strtotime($date.' 00:00:00'),strtotime($date.' 23:59:59')]
 			)];
 		} elseif ($this->schedule!=='-') {
@@ -262,8 +267,20 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			//начинается и кончается в один день
 			return date('Y-m-d',strtotime($this->date)).' '.date('H:i',strtotime($this->date)).'-'.date('H:i',strtotime($this->date));
 		} else {
-			return date('Y-m-d H:i',strtotime($this->date)).' - '.date('Y-m-d H:i',strtotime($this->date_end));
+			return
+				(is_null($this->date)?'нет начала':date('Y-m-d H:i',strtotime($this->date))).
+				' - '.
+				(is_null($this->date_end)?'нет конца':date('Y-m-d H:i',strtotime($this->date_end)));
 		}
+	}
+	
+	public function beforeSave($insert)
+	{
+		if (parent::beforeSave($insert)) {
+			if (!strlen($this->date)) $this->date=null;
+			if (!strlen($this->date_end)) $this->date_end=null;
+			return true;
+		} else return false;
 	}
 	
 }

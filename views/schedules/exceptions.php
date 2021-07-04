@@ -14,7 +14,7 @@ $daysDataProvider = $daysSearchModel->search([]);
 $renderer=$this;
 
 function selectClass($model){
-	if ($model->date==Yii::$app->request->get('date'))
+	if (!empty($model->date) && ($model->date == Yii::$app->request->get('date')))
 		return 'success';
 	
 	if (is_array($negative=Yii::$app->request->get('negative'))) {
@@ -40,14 +40,14 @@ function selectClass($model){
 			'attribute'=>'date',
 			'value'=>function($data)use($renderer){
 				return $data->is_period?
-					$data->date.' - '.$data->date_end
+					$data->periodSchedule
 					:
 					$data->date
 					;
 			},
 			'contentOptions' => function ($data) { return [
 				'class' => selectClass($data),
-				'id'=>'day-'.$data->date
+				'id'=>'day-'.$data->date.'-'.$data->date_end
 			];},
 		],
 		[

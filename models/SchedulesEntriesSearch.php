@@ -40,7 +40,10 @@ class SchedulesEntriesSearch extends SchedulesEntries
      */
     public function search($params)
     {
-        $query = SchedulesEntries::find();
+        $query = SchedulesEntries::find()->where(['or',
+			['not',['in', 'date', ['1','2','3','4','5','6','7','def']]],
+			['date'=>null]
+		]);
 
         // add conditions that should always apply here
 
@@ -68,8 +71,10 @@ class SchedulesEntriesSearch extends SchedulesEntries
             'created_at' => $this->created_at,
         ]);
 
-        $query->andFilterWhere(['like', 'date', $this->date])
-            ->andFilterWhere(['not',['in', 'date', ['1','2','3','4','5','6','7','def']]])
+        $query->andFilterWhere(['or',
+				['like', 'date', $this->date],
+				['like', 'date_end', $this->date]
+			])
             ->andFilterWhere(['like', 'schedule', $this->schedule])
             ->andFilterWhere(['like', 'comment', $this->comment]);
 
