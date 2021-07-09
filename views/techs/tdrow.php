@@ -20,7 +20,7 @@
         <?= $this->render('/tech-types/item',['model'=>$model->model->type]) ?>
     </td>
     <td class="arm_model">
-        <?= $this->render('/tech-models/item',['model'=>$model->model,'short'=>true]) ?>
+        <?= $this->render('/tech-models/item',['model'=>$model->model,'compact'=>true]) ?>
     </td>
     <td class="hardware">
         <?= $this->render('/techs/item',['model'=>$model]) ?>

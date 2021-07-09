@@ -14,8 +14,10 @@ if (is_object($model)) {
 		$name=(strlen($model->short))?$model->short:$model->name;
 	elseif (isset($long)&&$long)
 		$name=$model->manufacturer->name.' '.$model->name;
+	elseif (isset($compact)&&$compact)
+		$name=$model->manufacturer->name.' '.(strlen($model->short)?$model->short:$model->name);
     else
-        $name=$model->name;
+		$name=$model->name;
     ?>
 
 <span class="tech_model-item"

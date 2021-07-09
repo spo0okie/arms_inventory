@@ -106,7 +106,7 @@ for ($i=0; $i<count($comps); $i++) {
 	    <?php if (!is_object($comp) || !$comp->ignore_hw) {
 	    	if (!$i&&(array_search('arm_model',$skip)===false)) { ?>
             <td class="arm_model" <?= $rowspanPhys ?>>
-				<?= $this->render('/tech-models/item',['model'=>$model->techModel,'short'=>true]) ?>
+				<?= $this->render('/tech-models/item',['model'=>$model->techModel,'compact'=>true]) ?>
 			</td>
         <?php }} else { ?>
 			<td class="arm_model">

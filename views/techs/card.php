@@ -23,7 +23,7 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 		</span>' ?>
 </h1>
 
-<?= $this->render('/tech-models/item',['model'=>$model->model]) ?>
+<?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?>
 
 <?php if ($model->model->individual_specs) { ?>
 	<h4>Спецификация:</h4>
