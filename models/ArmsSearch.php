@@ -46,30 +46,18 @@ class ArmsSearch extends Arms
      */
     public function search($params)
     {
-	    $query = new \yii\db\Query();
-
         $query = Arms::find()
 	        ->joinWith(['user','techModel','comp.netIps','place','contracts','licItems','licGroups','licKeys','department']);
-			/*->join('LEFT JOIN','networks','(comps_ip.addr >= networks.addr) and (comps_ip.addr < networks.addr+power(2,(32-networks.mask)))')
-			->join('LEFT JOIN','net_vlans','net_vlans.id=networks.vlan_id')
-			->join('LEFT JOIN','segments','segments.id=net_vlans.segment_id'); /**/
-
-        // add conditions that should always apply here
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-	        'pagination' => ['pageSize' => 100,],
-        ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
+        	return new ActiveDataProvider([
+				'query' => $query,
+				'totalCount' => $query->count('distinct(arms.id)'),
+				'pagination' => ['pageSize' => 100,],
+			]);
         }
-
-        //$query->select(['getplacepath({{places}}.id) AS path']);
 
         $query->andFilterWhere(['like', 'num', $this->num])
 	        ->andFilterWhere(['like', 'inv_num', $this->inv_num])
@@ -85,7 +73,13 @@ class ArmsSearch extends Arms
 	        ->andFilterWhere(['arms.model_id'=>$this->model_id])
 	        ->andFilterWhere(['arms_models.type_id'=>$this->type_id])
 		    ->andFilterWhere(['like', 'comment', $this->comment]);
-
-        return $dataProvider;
+	
+		$totalQuery=clone $query;
+	
+		return new ActiveDataProvider([
+			'query' => $query->groupBy('arms.id'),
+			'totalCount' => $totalQuery->count('distinct(arms.id)'),
+			'pagination' => ['pageSize' => 100,],
+		]);
     }
 }

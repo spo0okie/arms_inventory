@@ -61,7 +61,7 @@ $this->beginPage() ?>
 
 <?php $this->endBody();
 $js = <<<JS
-    $('.modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
+$('.modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
 JS;
 $this->registerJs($js);
 ?>

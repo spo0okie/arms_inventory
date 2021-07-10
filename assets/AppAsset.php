@@ -32,7 +32,8 @@ class AppAsset extends AssetBundle
 	    'js/tooltipster.main.min.js',
 	    'js/tooltipster.bundle.min.js',
 	    'js/qtip_ajax.js',
-	    'js/scans.js',
+		'js/scans.js',
+		'js/tools.lib1.js',
 	    'js/jquery.autoResize.js',
     ];
     public $cssOptions = [];

@@ -48,21 +48,15 @@ class TechsSearch extends Techs
     {
         $query = Techs::find()
             ->joinWith(['place','model','arm.user','arm.place','model.manufacturer','techUser','state','contracts']);
-            //->leftJoin('contracts_in_techs',['contracts_in_techs.contracts_id'=>'techs.id']);
-
-        // add conditions that should always apply here
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-	        'pagination' => ['pageSize' => 100,],
-        ]);
 
         $this->load($params);
-
+	
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
+            return new ActiveDataProvider([
+				'query' => $query,
+				'totalCount' => $query->count('distinct(techs.id)'),
+				'pagination' => ['pageSize' => 100,],
+			]);
         }
 
         $query->andFilterWhere(['like', 'techs.num', $this->num])
@@ -75,8 +69,13 @@ class TechsSearch extends Techs
 	        ->andFilterWhere(['techs.model_id'=>$this->model_id])
 	        ->andFilterWhere(['tech_models.type_id'=>$this->type_id])
 		    ->andFilterWhere(['like','techs.mac',$this->mac]);
-            //->andFilterWhere(['like', 'comment', $this->comment]);
-
-        return $dataProvider;
+	
+		$totalQuery=clone $query;
+	
+		return new ActiveDataProvider([
+			'query' => $query->groupBy('techs.id'),
+			'totalCount' => $totalQuery->count('distinct(techs.id)'),
+			'pagination' => ['pageSize' => 100,],
+		]);
     }
 }

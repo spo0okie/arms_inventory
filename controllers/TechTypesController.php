@@ -64,25 +64,37 @@ class TechTypesController extends Controller
     public function actionView($id)
     {
 	    $params=Yii::$app->request->queryParams;
-	    if (!isset($params['TechsSearch'])) $params['TechsSearch']=[];
-	    if (!isset($params['ArmsSearch'])) $params['ArmsSearch']=[];
+	    
+	    $model=$this->findModel($id);
+			
+		if (\app\models\TechTypes::isPC($model->id)) {
+			
+			if (!isset($params['ArmsSearch'])) $params['ArmsSearch']=[];
+			$params['ArmsSearch']['type_id']=$id;
+			$armsSearchModel = new \app\models\ArmsSearch();
+			$armsDataProvider = $armsSearchModel->search($params);
+			return $this->render('view', [
+				'model' => $model,
+				'armsSearchModel' => $armsSearchModel,
+				'armsDataProvider' => $armsDataProvider,
+			]);
+			
+		} else {
+			
+			if (!isset($params['TechsSearch'])) $params['TechsSearch']=[];
+			$params['TechsSearch']['type_id']=$id;
+			$techsSearchModel = new \app\models\TechsSearch();
+			$techsDataProvider = $techsSearchModel->search($params);
+			return $this->render('view', [
+				'model' => $model,
+				'techsSearchModel' => $techsSearchModel,
+				'techsDataProvider' => $techsDataProvider,
+			]);
+			
+		}
+	    
 
-	    $params['TechsSearch']['type_id']=$id;
-	    $params['ArmsSearch']['type_id']=$id;
 
-	    $techsSearchModel = new \app\models\TechsSearch();
-	    $techsDataProvider = $techsSearchModel->search($params);
-
-	    $armsSearchModel = new \app\models\ArmsSearch();
-	    $armsDataProvider = $armsSearchModel->search($params);
-
-	    return $this->render('view', [
-		    'model' => $this->findModel($id),
-		    'techsSearchModel' => $techsSearchModel,
-		    'techsDataProvider' => $techsDataProvider,
-		    'armsSearchModel' => $armsSearchModel,
-		    'armsDataProvider' => $armsDataProvider,
-	    ]);
     }
 
 

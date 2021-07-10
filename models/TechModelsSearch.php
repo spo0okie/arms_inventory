@@ -70,6 +70,7 @@ class TechModelsSearch extends TechModels
 	        '`tech_types`.`name`'=>SORT_ASC,
 	        'name'=>SORT_ASC,
         ]);
+        
         return $dataProvider;
     }
 }
