@@ -53,6 +53,7 @@ foreach ($columns as $column) {
 		case 'arm_id':
 			$render_columns[] = [
 				'attribute' => 'arm_id',
+				'header' => 'АРМ',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->arm) ? $renderer->render('/arms/item', ['model' => $data->arm]) : null;
