@@ -8,7 +8,7 @@ use yii\grid\GridView;
 
 
 
-$this->title = \app\models\Places::$title;
+$this->title = \app\models\Places::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="places-index">

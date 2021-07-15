@@ -9,7 +9,7 @@ use yii\widgets\DetailView;
 
 \yii\helpers\Url::remember();
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Places::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\Places::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 $arms_cnt=count($model->arms);
 $techs_cnt=count($model->techs);

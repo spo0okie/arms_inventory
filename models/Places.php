@@ -68,8 +68,9 @@ DELIMITER ;
 	SELECT *,getplacepath(Id) as path FROM `places`
 	работает
 	 */
-
-	public static $title="Помещения";
+	
+	public static $title="Помещение";
+	public static $titles="Помещения";
 	//public $path;
 
 	private $phones_cache=null;

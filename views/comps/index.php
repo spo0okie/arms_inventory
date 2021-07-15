@@ -25,9 +25,16 @@ $renderer=$this;
     </div>
 
 	<?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success','title'=>'Еще раз обращаю внимание, что это делать надо только для тех компьютеров, на которых не запускается автоматический скрипт!']) ?>
-
-
-    <?= GridView::widget([
+	
+	
+	<?= $this->render('/comps/table', [
+		'searchModel' => $searchModel,
+		'dataProvider' => $dataProvider,
+		'columns'   => ['name','ip','os','updated_at','arm_id','place','raw_version'],
+	]) ?>
+	
+	
+    <?php /* GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
@@ -56,5 +63,5 @@ $renderer=$this;
 
             //['class' => 'yii\grid\ActionColumn'],
         ],
-    ]); ?>
+    ]);*/ ?>
 </div>

@@ -48,7 +48,7 @@ NavBar::begin([
 			\app\models\Users::isViewer()?
 			['label' => 'Организация',
 				'items' => [
-					['label' => \app\models\Places::$title, 'url' => ['/places/index'], 'items'=>$places],
+					['label' => \app\models\Places::$titles, 'url' => ['/places/index'], 'items'=>$places],
 					['label' => \app\models\Orgs::$title, 'url' => ['/orgs/index']],
 					['label' => \app\models\Departments::$title, 'url' => ['/departments/index']],
 					['label' => \app\models\OrgPhones::$title, 'url' => ['/org-phones/index']],
