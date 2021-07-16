@@ -75,7 +75,7 @@ class Comps extends \yii\db\ActiveRecord
             [['updated_at'], 'safe'],
             [['name','raw_version'], 'string', 'max' => 32],
             [['os', 'comment'], 'string', 'max' => 128],
-	        [['ip', 'ip_ignore'], 'string', 'max' => 255],
+	        [['ip', 'ip_ignore'], 'string', 'max' => 512],
 			['ip', 'filter', 'filter' => function ($value) {
 				if (count($items=explode("\n",$value))) {
 					$validator = new IpValidator();
