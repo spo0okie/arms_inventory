@@ -3,6 +3,7 @@
 span.segment_open {background-color: lightgreen; border-radius: 7px}
 span.segment_closed {background-color: pink; border-radius: 7px}
 span.segment_common {background-color: lightskyblue; border-radius: 7px}
+span.segment_ext {background-color:yellow; border-radius: 7px;}
 span.segment_ext_dmz {background-color:yellow; border-radius: 7px; border: 1.2pt red dashed;}
 span.segment_int_dmz  {background-color:lightgray; border-radius: 7px; border: 1.2pt orange dashed;}
 span.segment_guest_dmz  {background-color:#3c3c3c; border-radius: 7px;  border: 1.5pt orange solid; border-radius: 7px}
