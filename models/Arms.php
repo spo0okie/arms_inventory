@@ -515,6 +515,19 @@ class Arms extends \yii\db\ActiveRecord
             } else {
 	            //error_log('null hw');
             }
+			
+            //если ОС которая была назначена основной удалена или сменила АРМ
+            if (!is_object($this->comp) || $this->comp->arm_id != $this->id)
+            	$this->comp_id = null; //удаляем основную ОС
+            
+			//если основной ОС нет, но есть привязанные, то выбираем первую из привязанных как основную
+			if (is_null($this->comp_id) && is_array($comps=$this->comps) && count($comps)) {
+				foreach ($comps as $comp) {
+					$this->comp_id = $comp->id;
+					break;
+				}
+			}
+			
             return true;
         } else {
 	        //error_log('uh oh');
