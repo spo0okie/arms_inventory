@@ -65,7 +65,7 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
     </td>
     <td><?= $item->getName() ?></td>
 	<?php if (!$static_view) { ?>
-    <td><?= $item->getSN() ?></td>
+    <td><?= \yii\helpers\Html::a($item->getSN(),['comps/index','CompsSearch[os]'=>$item->getSN()]) ?></td>
     <td><?= $item->inv_num ?></td>
     <td class="passport_tools">
         <?php if(get_class($model) == \app\models\Arms::className()){ //если передан паспорт АРМ, то можем поредактировать железо
