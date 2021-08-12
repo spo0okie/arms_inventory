@@ -87,7 +87,7 @@ NavBar::begin([
 					['label' => 'ОС', 'url' => ['/comps/index']],
 					['label' => 'Домены', 'url' => ['/domains/index']],
 					['label' => \app\models\LoginJournal::$title, 'url' => ['/login-journal/index']],
-					['label' => 'Дубликаты', 'url' => ['/comps/dupes']],
+					['label' => 'Дубликаты', 'url' => ['/comps/dupes?sort=name']],
 					['label' => 'Софт',
 						'items' => [
 							['label' => 'Разработчики', 'url' => ['/manufacturers/index']],

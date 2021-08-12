@@ -25,6 +25,10 @@ use yii\web\User;
  * @property string $supportScheduleName
  * @property int $segment_id
  * @property string $segmentName
+ * @property int[] $depends_ids
+ * @property int[] $comps_ids
+ * @property int[] $support_ids
+ * @property int[] $techs_ids
  *
  * @property \app\models\Comps[] $comps
  * @property \app\models\Services[] $depends

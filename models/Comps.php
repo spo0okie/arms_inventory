@@ -30,6 +30,7 @@ use yii\validators\IpValidator;
  * @property array $comps Массив объектов ПО, которое установлено на компе
  
  * @property Arms $arm
+ * @property Comps[] $dupes
  * @property Users $user
  * @property Domains $domain
  * @property string $updatedRenderClass
@@ -39,6 +40,7 @@ use yii\validators\IpValidator;
  * @property string[] $ignoredIps
  * @property string[] $filteredIps
  * @property \app\models\LoginJournal[] $lastThreeLogins
+ * @property \app\models\LoginJournal[] $logins
  * @property \app\models\NetIps[] $netIps
  * @property \app\models\HwList $hwList
  * @property \app\models\SwList $swList
@@ -167,14 +169,23 @@ class Comps extends \yii\db\ActiveRecord
 	}
 	
 	/**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getDomain()
-    {
-        return $this->hasOne(Domains::className(), ['id' => 'domain_id']);
-    }
-
-    /**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getDomain()
+	{
+		return $this->hasOne(Domains::className(), ['id' => 'domain_id']);
+	}
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getDupes()
+	{
+		return $this->hasmany(Comps::className(), ['name' => 'name'])
+			->where(['not',['id'=>$this->id]]);
+	}
+	
+	
+	/**
      * @return string
      */
     public function getDomainName()
@@ -289,11 +300,15 @@ class Comps extends \yii\db\ActiveRecord
 		}
 		return null;
 	}
-
+	
 	public function getLastThreeLogins() {
 		return \app\models\LoginJournal::fetchUniqUsers($this->id);
 	}
-
+	
+	public function getLogins() {
+		return $this->hasmany(LoginJournal::className(), ['comps_id' => 'id']);
+	}
+	
 	//список адресов, которые вернул скрипт инвентаризации
 	public function getIps() {
 		if (!is_null($this->ip_cache)) return $this->ip_cache;
@@ -372,6 +387,61 @@ class Comps extends \yii\db\ActiveRecord
 	}
 	
 	/**
+	 * @param Comps $comp
+	 */
+	public function absorbComp($comp) {
+		$fields=[
+			'domain_id',
+			'os',
+			'fqdn',
+			'raw_hw',
+			'raw_soft',
+			'raw_version',
+			'exclude_hw',
+			'ignore_hw',
+			'ip',
+			'ip_ignore',
+			'arm_id',
+			'user_id',
+			'comment',
+			'updated_at',
+		];
+		foreach ($fields as $field) {
+			if ((empty($this->$field) || !$this->$field) && !empty($comp->$field)) {
+				//error_log("absorbing [$field] '{$comp->$field}' -> '{$this->$field}'");
+				$this->$field=$comp->$field;
+			} //else error_log(  "skipping  [$field] '{$comp->$field}' -> '{$this->$field}'");
+			
+		}
+		
+		foreach ($comp->logins as $login) {
+			$login->comps_id=$this->id;
+			$login->save(false);
+		}
+		
+		foreach ($comp->services as $service) {
+			$serviceComps=$service->comps_ids;
+			if (($key = array_search($comp->id, $serviceComps)) !== false) {
+				//отрываем поглощаемый комп
+				unset($serviceComps[$key]);
+			}
+			
+			if (($key = array_search($this->id, $serviceComps)) === false) {
+				//привязываем этот комп
+				$serviceComps[]=$this->id;
+			}
+
+			$service->comps_ids=$serviceComps;
+			//сохраняем изменения
+			$service->save();
+		}
+		
+		$comp->delete();
+		$this->save();
+	}
+	
+	
+	/**
 	 * @inheritdoc
 	 */
 	public function beforeSave($insert)
@@ -411,24 +481,7 @@ class Comps extends \yii\db\ActiveRecord
 				//если есть отвязанные от это ос адреса
 				if (count($removed)) foreach ($removed as $id) {
 					//если он есть в БД
-					if (is_object($ip=NetIps::findOne($id))) {
-						//если к нему привязан только один комп
-						if (
-							(
-								!is_array($ip->comps)	//у него нет привязанных компов
-								||						//или
-								count($ip->comps)==1	//привязан только один
-							) && (						//и
-								!is_array($ip->techs)	//у него нет привязанных компов
-								||						//или
-								count($ip->techs)==0	//привязано 0
-							) && (
-								$ip->comps[0]->id == $this->id //к нему привязана именно эта ОС
-							)
-						) {
-							$ip->delete();
-						}
-					};
+					if (is_object($ip=NetIps::findOne($id))) $ip->detachComp($this->id);
 				}
 			}
 
@@ -436,6 +489,22 @@ class Comps extends \yii\db\ActiveRecord
 		return true;
 	}
 	
+	/**
+	 * @inheritdoc
+	 */
+	public function beforeDelete()
+	{
+		if (!parent::beforeDelete()) {
+			return false;
+		}
+		
+		//отрываем IP от удаляемого компа
+		foreach ($this->netIps as $ip) {
+			$ip->detachComp($this->id);
+		}
+		
+		return true;
+	}
 	
 	/**
 	 * @inheritdoc

@@ -146,6 +146,23 @@ class CompsController extends Controller
 		]);
 	}
 	
+	
+	/**
+	 * Absorb other comp in this
+	 * @param integer $id
+	 * @param         $absorb_id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionAbsorb($id, $absorb_id)
+	{
+		$model = $this->findModel($id);
+		$absorb = $this->findModel($absorb_id);
+		
+		$model->absorbComp($absorb);
+		return $this->redirect(['view', 'id' => $model->id]);
+	}
+	
 	/**
 	 * Displays a tooltip for hw of single model.
 	 * @param integer $id

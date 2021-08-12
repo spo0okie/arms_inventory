@@ -39,7 +39,7 @@ foreach ($model->swList->items as $item) {
 	$soft['other'][]=$item;
 }
 
-
+	$absorbTitle="Связать(поглотить) клона с этой ОС: недостающие свойства и связанные объекты клона перейдут к этой ОС. Сам клон будет удален";
 ?>
 <div class="comps-view row">
 	<div class="col-md-6">
@@ -54,6 +54,18 @@ foreach ($model->swList->items as $item) {
 					);
 				} ?>
 			</table>
+		</div>
+		<div class="dupes">
+			<?php if (count($model->dupes)) { ?>
+				<h3>Подозрение на дубликаты в БД</h3>
+				<?php foreach ($model->dupes as $comp) { ?>
+					<?= $this->render('item',['model'=>$comp]) ?>
+					<?= yii\helpers\Html::a('<span class="glyphicon glyphicon-link" title="'.$absorbTitle.'"></span>',
+						['/comps/absorb','id'=>$model->id,'absorb_id'=>$comp->id]
+					) ?>
+					<br />
+				<?php } ?>
+			<?php } ?>
 		</div>
 
 	</div>

@@ -72,6 +72,7 @@ if (!mb_strlen($domain))
 <div class="login_journal">
 	<?php
 	$logons=$model->lastThreeLogins;
+	//$logons=$model->logins;
 	if (is_array($logons) && count($logons)) {
 		$items=[];
 		foreach ($logons as $logon) {

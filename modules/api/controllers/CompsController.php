@@ -35,19 +35,19 @@ class CompsController extends \yii\rest\ActiveController
 		
 		//добавляем фильтрацию по домену если он есть
     	if (!is_null($domain)) {
+    		
+    		//ищем домен
 			if (is_null($domainObj=Domains::find()
 				->where(['name'=>strtoupper($domain)])
 				->one()
-			))
-				throw new \yii\web\NotFoundHttpException("Domain '$domain' not found");
+			)) throw new \yii\web\NotFoundHttpException("Domain '$domain' not found");
+			
+			//добавляем домен к условию поиска
 			$query->andFilterWhere(['domain_id'=>$domainObj->id]);
 			$notFoundDescription.=" in domain $domain";
 		}
 	
-		
-		
         $model = $query->one();
-        
         
         if ($model === null)
             throw new \yii\web\NotFoundHttpException($notFoundDescription);

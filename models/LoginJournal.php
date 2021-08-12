@@ -141,7 +141,8 @@ class LoginJournal extends \yii\db\ActiveRecord
 	{
 		//error_log("dataIncom: beforeSave");
 		if (parent::beforeSave($insert)) {
-			$this->time = date('Y-m-d H:i:s',$this->time);
+			if (is_numeric($this->time))
+				$this->time = date('Y-m-d H:i:s',$this->time);
 
 			if (!isset($this->comps_id)) {
 				$comp_tokens=explode('\\',$this->comp_name);

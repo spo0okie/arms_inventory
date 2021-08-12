@@ -21,6 +21,8 @@ use yii\db\Expression;
  * @property string $sname
  * @property string $comment
  * @property Comps[] $comps
+ * @property int[] $comps_ids
+ * @property int[] $techs_ids
  * @property Techs[] $techs
  * @property Networks $network
  */
@@ -65,6 +67,23 @@ class NetIps extends \yii\db\ActiveRecord
 	/**
 	 * {@inheritdoc}
 	 */
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'relations' => [
+					'comps_ids' => 'comps',
+					'techs_ids' => 'techs',
+				]
+			]
+		];
+	}
+	
+	
+	/**
+	 * {@inheritdoc}
+	 */
 	public function attributeLabels()
 	{
 		return [
@@ -105,7 +124,7 @@ class NetIps extends \yii\db\ActiveRecord
 	
 	/**
 	 * Network
-	 * @return Networks
+	 * @return Networks|ActiveQuery
 	 */
 	public function getNetwork()
 	{
@@ -114,7 +133,7 @@ class NetIps extends \yii\db\ActiveRecord
 	
 	/**
 	 * Network
-	 * @return Networks
+	 * @return Networks|array|ActiveRecord
 	 */
 	public function findNetwork()
 	{
@@ -130,19 +149,97 @@ class NetIps extends \yii\db\ActiveRecord
 	}
 	
 	
+	/**
+	 * Возвращает привязанные ОС
+	 */
 	public function getComps()
 	{
 		return static::hasMany(Comps::className(), ['id' => 'comps_id'])->from(['ip_comps'=>Comps::tableName()])
 			->viaTable('{{%ips_in_comps}}', ['ips_id' => 'id']);
 	}
 	
+	/**
+	 * Возвращает привязанное оборудование
+	 */
 	public function getTechs()
 	{
 		return static::hasMany(Techs::className(), ['id' => 'techs_id'])->from(['ip_techs'=>Techs::tableName()])
 			->viaTable('{{%ips_in_techs}}', ['ips_id' => 'id']);
 	}
 	
+	/**
+	 * Отвязать ОС от этого IP и удалить IP если к нему более ничего не привязано
+	 * @param $comp_id
+	 * @throws \Throwable
+	 * @throws \yii\db\StaleObjectException
+	 */
+	public function detachComp($comp_id)
+	{
+		//если есть привязанные компы
+		if (is_array($comps=$this->comps_ids)) {
+			//если среди привязанных компов есть нужный
+			if (($key = array_search($comp_id, $comps)) !== false) {
+				//отрываем комп
+				unset($comps[$key]);
+				$this->comps_ids=$comps;
+				//сохраняем изменения
+				$this->save();
+			}
+		}
+		
+		$this->deleteIfEmpty();
+	}
 	
+	/**
+	 * Отвязать ОС от этого IP и удалить IP если к нему более ничего не привязано
+	 * @param $tech_id
+	 * @throws \Throwable
+	 * @throws \yii\db\StaleObjectException
+	 */
+	public function detachTech($tech_id)
+	{
+		//если есть привязанные компы
+		if (is_array($techs=$this->techs_ids)) {
+			//если среди привязанных компов есть нужный
+			if (($key = array_search($tech_id, $techs)) !== false) {
+				//отрываем комп
+				unset($techs[$key]);
+				$this->techs_ids=$techs;
+				//сохраняем изменения
+				$this->save();
+			}
+		}
+		
+		$this->deleteIfEmpty();
+	}
+	
+	/**
+	 * Удаляет IP если к нему ничего не привязано и нет комментария
+	 * @throws \Throwable
+	 * @throws \yii\db\StaleObjectException
+	 */
+	public function deleteIfEmpty()
+	{
+		//если к IP ничего не привязано
+		if (
+			(
+				!is_array($this->comps)	//у него нет привязанных компов
+				||						//или
+				count($this->comps)==0	//привязан только один
+			) && (						//и
+				!is_array($this->techs)	//у него нет привязанного оборудования
+				||						//или
+				count($this->techs)==0	//привязано 0
+			) && (						//и
+				empty($this->name)		//имени нет
+			) && (						//и
+				empty($this->comment)	//комментария нет
+			)
+		) {
+			//можно удалять этот IP
+			$this->delete();
+		}
+	}
 	
 	/**
 	 * @inheritdoc
