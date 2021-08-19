@@ -34,7 +34,7 @@ if (\app\models\TechTypes::isPC($model->id)) {
 			'searchModel' => $armsSearchModel,
 			'dataProvider' => $armsDataProvider,
 		]),
-		'active'=>is_array(Yii::$app->request->get('ArmsSearch'))||Yii::$app->request->get('page')
+		'active'=>is_array(Yii::$app->request->get('ArmsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')
 	];
 } else {
 	$tabs[] = [
@@ -45,7 +45,7 @@ if (\app\models\TechTypes::isPC($model->id)) {
 			'dataProvider' => $techsDataProvider,
 			'columns' => ['attach', 'num', 'model', 'mac', 'ip', 'state', 'user', 'place', 'inv_num', 'comment'],
 		]),
-		'active'=>is_array(Yii::$app->request->get('TechsSearch'))||Yii::$app->request->get('page')
+		'active'=>is_array(Yii::$app->request->get('TechsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')
 	];
 }
 
