@@ -7,6 +7,7 @@ use yii\bootstrap\Modal;
 /* @var $model app\models\Techs */
 $model_id=$model->id;
 if (!isset($static_view)) $static_view=false;
+if (!isset($no_model)) $no_model=false; //не выводить инфу о модели оборудования
 $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 
 ?>
@@ -23,12 +24,14 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 		</span>' ?>
 </h1>
 
-<?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?>
-
-<?php if ($model->model->individual_specs) { ?>
-	<h4>Спецификация:</h4>
-	<?= \Yii::$app->formatter->asNtext($model->specs) ?>
-	<br />
+<?php if (!$no_model) { ?>
+	<?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?>
+	
+	<?php if ($model->model->individual_specs) { ?>
+		<h4>Спецификация:</h4>
+		<?= \Yii::$app->formatter->asNtext($model->specs) ?>
+		<br />
+	<?php } ?>s
 <?php } ?>
 
 
@@ -137,6 +140,8 @@ JS;
     <?php } ?>
 
 </p>
+
+<?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 
 <h4>Использованные материалы:</h4>
 <p>

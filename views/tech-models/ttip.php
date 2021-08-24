@@ -9,6 +9,7 @@ use yii\widgets\DetailView;
 <div class="tech-models-ttip ttip-card">
 
 	<h1><?= Html::a($model->manufacturer->name.' '.$model->name,['/tech-models/view','id'=>$model->id]) ?></h1>
+	<?= $this->render('/scans/ttip',['model'=>$model->preview]) ?>
 	<?= $this->render('/tech-types/item',['model'=>$model->type]) ?>
 	<p>
 		<?= Yii::$app->formatter->asNtext($model->comment) ?>

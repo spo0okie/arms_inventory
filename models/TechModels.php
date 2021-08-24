@@ -9,6 +9,7 @@ use Yii;
  *
  * @property int $id id
  * @property int $type_id Тип оборудования
+ * @property int $scans_id Картинка - предпросмотр
  * @property bool $individual_specs Индивидуальные спеки
  * @property int $manufacturers_id Производитель
  * @property int $usages Количество экземпляров этой модели
@@ -24,6 +25,8 @@ use Yii;
  * @property TechTypes $type
  * @property Techs[] $techs
  * @property Arms[] $arms
+ * @property Scans[] $scans
+ * @property Scans $preview
  * @property Manufacturers $manufacturer
  */
 class TechModels extends \yii\db\ActiveRecord
@@ -54,7 +57,7 @@ class TechModels extends \yii\db\ActiveRecord
     {
         return [
 	        [['type_id', 'manufacturers_id', 'name', 'comment'], 'required'],
-	        [['type_id', 'manufacturers_id', 'individual_specs'], 'integer'],
+	        [['type_id', 'manufacturers_id', 'individual_specs', 'scans_id'], 'integer'],
 	        [['links', 'comment','ports'], 'string'],
 	        [['name'], 'string', 'max' => 128],
 	        [['short'], 'string', 'max' => 24],
@@ -109,7 +112,31 @@ class TechModels extends \yii\db\ActiveRecord
 	{
 		return $this->hasOne(Manufacturers::className(), ['id' => 'manufacturers_id']);
 	}
-
+	
+	/**
+	 * Возвращает набор сканов в договоре
+	 */
+	public function getScans()
+	{
+		//$scans=static::hasMany(Scans::className(), ['tech_models_id' => 'id']);
+		//if (!$this->scans_id) return $scans;
+		$scans=Scans::find()->where(['tech_models_id' => $this->id ])->all();
+		//var_dump($scans);
+		$scans_sorted=[];
+		foreach ($scans as $scan) if($scan->id == $this->scans_id) $scans_sorted[]=$scan;
+		foreach ($scans as $scan) if($scan->id != $this->scans_id) $scans_sorted[]=$scan;
+		return $scans_sorted;
+	}
+	
+	/**
+	 * Возвращает набор сканов в договоре
+	 */
+	public function getPreview()
+	{
+		if (!$this->scans_id) return null;
+		return Scans::find()->where(['id' => $this->scans_id ])->one();
+	}
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

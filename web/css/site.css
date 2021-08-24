@@ -267,6 +267,15 @@ div.scans-thumb-img:hover > div.scans-thumb-ctrls {
     display: block;
 }
 
+div.ttip-card a.scans-ttip {
+    float: left;
+    margin-right: 5px;
+}
+
+div.tech-model-view a.scans-ttip {
+    float: right;
+    margin-left: 5px;
+}
 
 /***************************
     КАРТА РАБОЧИХ МЕСТ
@@ -639,4 +648,8 @@ div.site-index div.search span.search-group input {
 
 .text-monospace {
     font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+}
+
+.dropdown-menu {
+    min-width: 200px !important;
 }

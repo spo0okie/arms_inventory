@@ -17,10 +17,11 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="techs-view">
 	<div class="row">
 		<div class="col-md-6">
-			<?= $this->render('card',['model'=>$model,'static_view'=>false]) ?>
+			<?= $this->render('card',['model'=>$model,'static_view'=>false,'no_model'=>true]) ?>
 		</div>
 		<div class="col-md-6">
 			<h1>&nbsp;</h1>
+			<?= $this->render('model',['model'=>$model]) ?>
 			<h3><?= \app\models\Ports::$titles ?></h3>
 			<?= $this->render('ports',['model'=>$model,'static_view'=>false]) ?>
 		</div>

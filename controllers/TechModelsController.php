@@ -34,7 +34,7 @@ class TechModelsController extends Controller
 	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
+			    ['allow' => true, 'actions'=>['create','update','uploads','delete','unlink'], 'roles'=>['editor']],
 			    ['allow' => true, 'actions'=>['index','view','ttip','validate','hint-comment','hint-template','hint-description','item','item-by-name'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
@@ -200,29 +200,51 @@ class TechModelsController extends Controller
             'model' => $model,
         ]);
     }
-
-    /**
-     * Updates an existing TechModels model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+	
+	/**
+	 * Updates an existing TechModels model.
+	 * If update is successful, the browser will be redirected to the 'view' page.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionUpdate($id)
+	{
+		$model = $this->findModel($id);
+		
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			if (Yii::$app->request->get('return')=='previous')
 				return $this->redirect(Url::previous());
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
-
+			return $this->redirect(['view', 'id' => $model->id]);
+		}
+		
+		return $this->render('update', [
+			'model' => $model,
+		]);
+	}
+	
+	/**
+	 * Updates an existing TechModels model.
+	 * If update is successful, the browser will be redirected to the 'view' page.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionUploads($id)
+	{
+		$model = $this->findModel($id);
+		
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (Yii::$app->request->get('return')=='previous')
+				return $this->redirect(Url::previous());
+			return $this->redirect(['view', 'id' => $model->id]);
+		}
+		
+		return $this->render('uploads', [
+			'model' => $model,
+		]);
+	}
+	
 	/**
 	 * Validates  model on update.
 	 * @param null $id

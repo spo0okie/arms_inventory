@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\TechModels;
 use Yii;
 use app\models\Scans;
 use app\models\ScansSearch;
@@ -33,7 +34,7 @@ class ScansController extends Controller
 	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
+			    ['allow' => true, 'actions'=>['create','update','delete','unlink','thumb'], 'roles'=>['editor']],
 			    ['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
@@ -136,30 +137,56 @@ class ScansController extends Controller
 	    return '{"error":"ошибка получения данных"}';
 
     }
-
-    /**
-     * Updates an existing Scans model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post())) {
-	        $model->scanFile = UploadedFile::getInstance($model, 'scanFile');
-	        if ($model->upload()&&$model->save())
-		        return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
+	
+	/**
+	 * Updates an existing Scans model.
+	 * If update is successful, the browser will be redirected to the 'view' page.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionUpdate($id)
+	{
+		$model = $this->findModel($id);
+		
+		if ($model->load(Yii::$app->request->post())) {
+			$model->scanFile = UploadedFile::getInstance($model, 'scanFile');
+			if ($model->upload()&&$model->save())
+				return $this->redirect(['view', 'id' => $model->id]);
+		}
+		
+		return $this->render('update', [
+			'model' => $model,
+		]);
+	}
+	/**
+	 * Updates an existing Scans model.
+	 * If update is successful, the browser will be redirected to the 'view' page.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionThumb($id,$link,$link_id)
+	{
+		switch ($link) {
+			case 'tech_models_id':
+				$model = TechModels::findOne($link_id);
+				break;
+			default:
+				$model=null;
+		}
+		if ($model === null)
+			throw new NotFoundHttpException('The requested page does not exist.');
+		
+		$model->scans_id=$id;
+		$model->save();
+		
+		Yii::$app->response->format = Response::FORMAT_JSON;
+		return (object)['code'=>'0'];
+	}
+	
+	
+	/**
      * Deletes an existing Scans model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id

@@ -56,7 +56,7 @@ class Scans extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['contracts_id'], 'required'],
+            [['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id'], 'integer'],
 	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
         ];
     }
@@ -69,8 +69,8 @@ class Scans extends \yii\db\ActiveRecord
         return [
             'id' => 'id',
 	        'file' => 'Место хранения загруженного файла',
-	        'scanFile' => 'Скан документа',
-            'descr' => 'Описание скана',
+	        //'scanFile' => 'Скан документа',
+            //'descr' => 'Описание скана',
         ];
     }
 
@@ -183,7 +183,8 @@ class Scans extends \yii\db\ActiveRecord
 		$w=$width?$width:'';
 		$h=$height?$height:'';
 		$x='x';
-		return '/web/scans/thumbs/'.$this->file."_thumb_$w$x$h.jpg";
+		$ext=strtolower($this->format)=='png'?'png':'jpg';
+		return '/web/scans/thumbs/'.$this->file."_thumb_$w$x$h.$ext";
 	}
 
 	/**
@@ -267,13 +268,53 @@ class Scans extends \yii\db\ActiveRecord
 			->all();
 		return yii\helpers\ArrayHelper::map($list, 'id', 'descr');
 	}
-
+	
 	/**
-	 * Возвращает договоры, в которых этот скан используется
+	 * Возвращает договор, в котором этот скан используется
 	 */
 	public function getContract()
 	{
 		return static::hasOne(Contracts::className(), ['id' => 'contracts_id']);
 	}
+	
+	/**
+	 * Возвращает помещение, в котором этот скан используется
+	 */
+	public function getPlace()
+	{
+		return static::hasOne(Places::className(), ['id' => 'places_id']);
+	}
+	
+	/**
+	 * Возвращает модель оборудования, в которой этот скан используется
+	 */
+	public function getTechModel()
+	{
+		return static::hasOne(TechModels::className(), ['id' => 'tech_models_id']);
+	}
+	
+	/**
+	 * Возвращает тип материалов, в котором этот скан используется
+	 */
+	public function getMaterialType()
+	{
+		return static::hasOne(MaterialsTypes::className(), ['id' => 'material_types_id']);
+	}
+	
+	/**
+	 * Возвращает тип лицензий, в котором этот скан используется
+	 */
 
+	public function getLicType()
+	{
+		return static::hasOne(LicTypes::className(), ['id' => 'lic_types_id']);
+	}
+	
+	/**
+	 * Возвращает лицензию, в которой этот скан используется
+	 */
+	public function getLicItem()
+	{
+		return static::hasOne(LicItems::className(), ['id' => 'lic_items_id']);
+	}
 }

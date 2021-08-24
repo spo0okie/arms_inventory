@@ -46,6 +46,7 @@ use yii\validators\IpValidator;
  * @property Ports[] $ports
  * @property MaterialsUsages[] $materialsUsages
  * @property \app\models\NetIps[] $netIps
+ * @property Acls[] $acls
  */
 
 class Techs extends \yii\db\ActiveRecord
@@ -91,22 +92,10 @@ class Techs extends \yii\db\ActiveRecord
 			[['inv_num', 'sn'], 'string', 'max' => 128],
 			[['ip', 'mac'], 'string', 'max' => 255],
 			['ip', function ($attribute, $params, $validator) {
-				$items=explode("\n",$this->$attribute);
-				$ipValidator = new IpValidator(['ipv6'=>false,'subnet'=>null]);
-				foreach ($items as $item) {
-					if (!$ipValidator->validate(trim($item), $error)) {
-						$this->addError($attribute, $error.': '.$item);
-						return; // stop on first error
-					}
-				}
+				\app\models\NetIps::validateInput($this,$attribute);
 			}],
 			['ip', 'filter', 'filter' => function ($value) {
-				if (count($items=explode("\n",$value))) {
-					$newValue=[];
-					foreach ($items as $item) if (NetIps::filterLocal(trim($item))) $newValue[]=trim($item);
-					return implode("\n",$newValue);
-				}
-				return '';
+				return \app\models\NetIps::filterInput($value);
 			}],
 			//['ip', 'ip','ipv6'=>false,'subnet'=>null],
 	        [['user_id', 'it_staff_id'], 'filter', 'filter' => function ($value) {
@@ -399,19 +388,6 @@ class Techs extends \yii\db\ActiveRecord
 	}
 	
 	
-	/**
-	 * Имея текстовый список IP возвращает ids объектов IP адресов
-	 */
-	public function fetchIpIds() {
-		if (!count($items=explode("\n",$this->ip))) return[];
-		$ids=[];
-		foreach ($items as $item) {
-			if (strlen(trim($item)))
-				$ids[]=NetIps::fetchByTextAddr($item);
-		}
-		return $ids;
-	}
-	
 	
 	/**
 	 * Возвращает IP адреса
@@ -498,6 +474,15 @@ class Techs extends \yii\db\ActiveRecord
 	}
 	
 	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getAcls()
+	{
+		return $this->hasMany(Acls::className(), ['techs_id' => 'id']);
+	}
+	
+	
+	/**
 	 * Возвращает массив портов (фактически объявленных или потенциально возможных исходя из модели оборудования)
 	 */
 	public function getPortsList()
@@ -579,7 +564,7 @@ class Techs extends \yii\db\ActiveRecord
 			$this->mac=implode("\n",$macs);
 			
 			/* взаимодействие с NetIPs */
-			$this->netIps_ids=$this->fetchIpIds();
+			$this->netIps_ids=NetIps::fetchIpIds($this->ip);
 			
 			//грузим старые значения записи
 			$old=static::findOne($this->id);
@@ -589,28 +574,30 @@ class Techs extends \yii\db\ActiveRecord
 				//если есть отвязанные от это ос адреса
 				if (count($removed)) foreach ($removed as $id) {
 					//если он есть в БД
-					if (is_object($ip = NetIps::findOne($id))) {
-						//если к нему привязан только один комп
-						if (
-							(
-								!is_array($ip->comps)    //у него нет привязанных компов
-								||                        //или
-								count($ip->comps) == 0    //привязан только один
-							) && (                        //и
-								!is_array($ip->techs)    //у него нет привязанных компов
-								||                        //или
-								count($ip->techs) == 1    //привязано 0
-							) && (
-								$ip->techs[0]->id == $this->id //к нему привязана именно эта ОС
-							)
-						) {
-							$ip->delete();
-						}
-					};
+					if (is_object($ip=NetIps::findOne($id))) $ip->detachTech($this->id);
 				}
 			}
 			return true;
 		}
 		return false;
 	}
+	
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function beforeDelete()
+	{
+		if (!parent::beforeDelete()) {
+			return false;
+		}
+		
+		//отрываем IP от удаляемого компа
+		foreach ($this->netIps as $ip) {
+			$ip->detachTech($this->id);
+		}
+		
+		return true;
+	}
+	
 }

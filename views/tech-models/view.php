@@ -15,6 +15,7 @@ $this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url
 $this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['/tech-types/view','id'=>$model->type_id]];
 $this->params['breadcrumbs'][] = $this->title;
 $deletable=!count($model->arms)&&!count($model->techs);
+$static_view=false;
 ?>
 <div class="tech-models-view">
 
@@ -36,19 +37,30 @@ $deletable=!count($model->arms)&&!count($model->techs);
         </p>
         <br />
     <?php } ?>
+	<div class="row">
+		<div class="col-md-6">
+			<p>
+				<?= Yii::$app->formatter->asNtext($model->comment) ?>
+			</p>
+			
+		</div>
+		<div class="col-md-6">
+			<h4><?= Html::a('Изображения',['uploads','id'=>$model->id]) ?></h4>
+			<?php
+			if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
+				echo $this->render('/scans/thumb',['model'=>$scan,'contracts_id'=>$model->id,'static_view'=>true]);
+			?>
+			<p>
+			<h4>Ссылки:</h4>
+			<?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
+			</p>
 
-    <p>
-	    <?= Yii::$app->formatter->asNtext($model->comment) ?>
-    </p>
+			<br />
 
-    <br />
+		</div>
+	</div>
+	
 
-    <p>
-        <h4>Ссылки:</h4>
-        <?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
-    </p>
-
-    <br />
 
     <?php if (count($model->techs)) {?>
         <h4>Экземпляры оборудования:</h4>
