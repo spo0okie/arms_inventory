@@ -34,14 +34,6 @@ class m210825_125020_create_table_access extends Migration
 			]);
 			$this->createIndex('{{%idx-aces_acl_id}}', '{{%aces}}', '[[acls_id]]');
 			// add foreign key for table `{{%acls}}`
-			$this->addForeignKey(
-				'{{%fk-aces-acl}}',
-				'{{%aces}}',
-				'acls_id',
-				'{{%acls}}',
-				'id',
-				'RESTRICT'
-			);
 			
 		}
 		if (is_null($table = $this->db->getTableSchema('access_in_aces'))) {
@@ -140,6 +132,15 @@ class m210825_125020_create_table_access extends Migration
 				'id',
 				'RESTRICT'
 			);
+			$this->addForeignKey(
+				'{{%fk-aces-acl}}',
+				'{{%aces}}',
+				'acls_id',
+				'{{%acls}}',
+				'id',
+				'RESTRICT'
+			);
+			
 		}
 		
 		//в связи с тем что расписание теперь может называться "расписание предоставления прав Пупкину В.А. на доступ к
