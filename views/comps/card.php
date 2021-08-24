@@ -68,6 +68,8 @@ if (!mb_strlen($domain))
 	echo "<h3>Размещенные сервисы</h3><p>".implode('<br />',$output)."</p>";
  } ?>
 
+<?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
+
 <h4>Журнал входов (3 посл)</h4>
 <div class="login_journal">
 	<?php

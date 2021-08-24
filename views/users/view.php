@@ -4,7 +4,7 @@
 /* @var $model app\models\Users */
 
 $this->title = $model->Ename;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Users::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\Users::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>

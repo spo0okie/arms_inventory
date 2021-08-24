@@ -44,7 +44,8 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	public static $users=[];
 	public static $working_cache=null;
 	public static $names_cache=null;
-	public static $title="Сотрудники";
+	public static $title="Сотрудник";
+	public static $titles="Сотрудники";
 	
 	private $tokens_cache=null; //имя разбитое на токены
 	

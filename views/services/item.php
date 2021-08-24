@@ -5,6 +5,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
 
+if (!isset($static_view)) $static_view=false;
+
 
 if (is_object($model)) {
 	$icon=$model->is_end_user?
@@ -48,6 +50,6 @@ if (is_object($model)) {
 	?>
 	<span class="services-item" qtip_ajxhrf="<?= \yii\helpers\Url::to(['/services/ttip','id'=>$model->id]) ?>">
 		<?= Html::a($icon.$name,['/services/view','id'=>$model->id]	) ?>
-    	<?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',['/services/update','id'=>$model->id]) ?>
+    	<?= $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['/services/update','id'=>$model->id]) ?>
 	</span>
 <?php }

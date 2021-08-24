@@ -8,11 +8,18 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
 /* @var $form yii\widgets\ActiveForm */
+
+if (!isset($acl_mode)) $acl_mode=false;
+
 ?>
 
 <div class="schedules-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php
+	$form = ActiveForm::begin();
+    if (!$acl_mode) {
+    
+    ?>
 
 	<div class="row">
 		<div class="col-md-6">
@@ -29,16 +36,23 @@ use kartik\select2\Select2;
 				]
 			]) ?>
 		</div>
+		<?= $form->field($model, 'description')->textInput(['maxlength' => true]) ?>
+		<?= $form->field($model, 'history')->widget(\kartik\markdown\MarkdownEditor::className(), [
+			'showExport'=>false
+		]) ?>
 	</div>
-    
-    <?= $form->field($model, 'description')->textInput(['maxlength' => true]) ?>
+ 
+	<?php } else { ?>
+		<?= $form->field($model, 'name')
+			->textInput(['maxlength' => true])
+			->hint(\app\models\Acls::$scheduleNameHint)
+		?>
+		<?= $form->field($model, 'history')->widget(\kartik\markdown\MarkdownEditor::className(), [
+			'showExport'=>false
+		])->hint(\app\models\Acls::$scheduleHistoryHint) ?>
+
+	<?php }?>
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'history',
-		'lines' => 4,
-	]) ?>
 
 	<div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

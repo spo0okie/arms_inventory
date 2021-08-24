@@ -5,6 +5,9 @@ use dosamigos\selectize\SelectizeDropDownList;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
+
+if (!isset($static_view)) $static_view=false;
+
 if (is_object($model)) {
 	if (!isset($fqdn)) $fqdn=false;
 	$name = $fqdn?mb_strtolower($model->fqdn):$model->name;
@@ -14,6 +17,6 @@ if (is_object($model)) {
 	    'qtip_ajxhrf'=>\yii\helpers\Url::to(['/comps/ttip','id'=>$model->id]),
 	    //'qtip_class'=>"qtip-wide",
     ]) ?>
-    <?= Html::a('<span class="glyphicon glyphicon-pencil"/>',['/comps/update','id'=>$model->id])?>
+    <?= $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"/>',['/comps/update','id'=>$model->id])?>
 </span>
 <?php } else echo "Отсутствует";

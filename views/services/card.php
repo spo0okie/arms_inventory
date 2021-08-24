@@ -66,6 +66,9 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		<br />
 
 		<?= $this->render('card-support',['model'=>$model,'static_view'=>$static_view]) ?>
+		
+		<?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
+		
 
 	</div>
 	<div class="col-md-6">

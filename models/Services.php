@@ -51,6 +51,7 @@ use yii\web\User;
  * @property Schedules $supportScheduleRecursive
  * @property Segments $segment
  * @property Segments $segmentRecursive
+ * @property Acls[] $acls
  */
 class Services extends \yii\db\ActiveRecord
 {
@@ -400,6 +401,16 @@ class Services extends \yii\db\ActiveRecord
 		}
 		return array_values($sites);
 	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getAcls()
+	{
+		return $this->hasMany(Acls::className(), ['services_id' => 'id']);
+	}
+	
+	
 	
 	/**
 	 * @return array

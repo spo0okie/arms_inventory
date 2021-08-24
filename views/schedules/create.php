@@ -5,8 +5,15 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
 
-$this->title = 'Новое расписание';
-$this->params['breadcrumbs'][] = ['label' => 'Расписания', 'url' => ['index']];
+if (!isset($acl_mode)) $acl_mode=false;
+
+if (!$acl_mode) {
+	$this->title = 'Новое '.mb_strtolower(\app\models\Schedules::$title);
+	$this->params['breadcrumbs'][] = ['label' => \app\models\Schedules::$titles, 'url' => ['index']];
+} else {
+	$this->title = 'Новый '.mb_strtolower(\app\models\Acls::$scheduleTitle);
+	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index-acl']];
+}
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="schedules-create">
@@ -15,6 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
+		'acl_mode'=>$acl_mode,
     ]) ?>
 
 </div>

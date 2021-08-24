@@ -7,7 +7,7 @@ use yii\grid\GridView;
 /* @var $searchModel app\models\SchedulesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Расписания';
+$this->title = \app\models\Schedules::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="schedules-index">

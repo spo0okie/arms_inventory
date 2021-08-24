@@ -15,12 +15,15 @@ use Yii;
  *
  * @property Services[] $providingServices
  * @property Services[] $supportServices
+ * @property Acls[] $acls
  * @property Schedules $parent
  */
 class Schedules extends \yii\db\ActiveRecord
 {
 	
-	public static $title = 'Расписания';
+	public static $titles = 'Расписания';
+	public static $title = 'Расписание';
+	
 	
     /**
      * {@inheritdoc}
@@ -36,8 +39,7 @@ class Schedules extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name'], 'string', 'max' => 32],
-            [['description'], 'string', 'max' => 255],
+            [['name','description'], 'string', 'max' => 255],
 			[['parent_id'], function ($attribute, $params, $validator) {
 				$children=[$this->id];
 				if (is_object($this->parent) && $this->parent->loopCheck($children)!==false) {
@@ -132,6 +134,14 @@ class Schedules extends \yii\db\ActiveRecord
 	public function getProvidingServices()
 	{
 		return $this->hasMany(Services::className(), ['providing_schedule_id' => 'id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getAcls()
+	{
+		return $this->hasMany(Acls::className(), ['schedules_id' => 'id']);
 	}
 	
 	/**

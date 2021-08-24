@@ -23,16 +23,19 @@ use yii\db\Expression;
  * @property Comps[] $comps
  * @property int[] $comps_ids
  * @property int[] $techs_ids
+ * @property int[] $aces_ids
  * @property Techs[] $techs
  * @property Networks $network
+ * @property Acls[] $acls
+ * @property Aces[] $aces
  */
 class NetIps extends \yii\db\ActiveRecord
 {
 
 	private $network_cache=null;
 	
-	public static $title='Сетевой адрес';
-	public static $titles='Сетевые адреса';
+	public static $title='IP адрес';
+	public static $titles='IP адреса';
 	
 	/**
 	 * @var PhpIP\IPv4Block
@@ -75,6 +78,7 @@ class NetIps extends \yii\db\ActiveRecord
 				'relations' => [
 					'comps_ids' => 'comps',
 					'techs_ids' => 'techs',
+					'aces_ids' => 'aces',
 				]
 			]
 		];
@@ -168,6 +172,25 @@ class NetIps extends \yii\db\ActiveRecord
 	}
 	
 	/**
+	 * Возвращает привязанное оборудование
+	 */
+	public function getAces()
+	{
+		return static::hasMany(Aces::className(), ['id' => 'aces_id'])->from(['ip_aces'=>Techs::tableName()])
+			->viaTable('{{%ips_in_aces}}', ['ips_id' => 'id']);
+	}
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getAcls()
+	{
+		return $this->hasMany(Acls::className(), ['ips_id' => 'id']);
+	}
+	
+	
+	
+	/**
 	 * Отвязать ОС от этого IP и удалить IP если к нему более ничего не привязано
 	 * @param $comp_id
 	 * @throws \Throwable
@@ -214,6 +237,29 @@ class NetIps extends \yii\db\ActiveRecord
 	}
 	
 	/**
+	 * Отвязать ОС от этого IP и удалить IP если к нему более ничего не привязано
+	 * @param $ace_id
+	 * @throws \Throwable
+	 * @throws \yii\db\StaleObjectException
+	 */
+	public function detachAce($ace_id)
+	{
+		//если есть привязанные ACE
+		if (is_array($aces=$this->aces_ids)) {
+			//если среди привязанных ACE есть нужный
+			if (($key = array_search($ace_id, $aces)) !== false) {
+				//отрываем ACE
+				unset($aces[$key]);
+				$this->techs_ids=$aces;
+				//сохраняем изменения
+				$this->save();
+			}
+		}
+		
+		$this->deleteIfEmpty();
+	}
+	
+	/**
 	 * Удаляет IP если к нему ничего не привязано и нет комментария
 	 * @throws \Throwable
 	 * @throws \yii\db\StaleObjectException
@@ -230,6 +276,14 @@ class NetIps extends \yii\db\ActiveRecord
 				!is_array($this->techs)	//у него нет привязанного оборудования
 				||						//или
 				count($this->techs)==0	//привязано 0
+			) && (						//и
+				!is_array($this->aces)	//у него нет привязанных ACEs
+				||						//или
+				count($this->aces)==0	//привязано 0
+			) && (						//и
+				!is_array($this->acls)	//у него нет привязанных ACLs
+				||						//или
+				count($this->acls)==0	//привязано 0
 			) && (						//и
 				empty($this->name)		//имени нет
 			) && (						//и
@@ -315,6 +369,22 @@ class NetIps extends \yii\db\ActiveRecord
 		return $item->id;
 	}
 	
+	
+	/**
+	 * Имея текстовый список IP возвращает ids объектов IP адресов
+	 * @param $text
+	 * @return int[]
+	 */
+	public static function fetchIpIds($text) {
+		if (!count($items=explode("\n",$text))) return[];
+		$ids=[];
+		foreach ($items as $item) {
+			if (strlen(trim($item)))
+				$ids[]=NetIps::fetchByTextAddr($item);
+		}
+		return $ids;
+	}
+	
 	public static function removeMask($text_addr)
 	{
 		if ($slash=strpos($text_addr,'/')) {
@@ -351,6 +421,40 @@ class NetIps extends \yii\db\ActiveRecord
 	
 	
 	/**
+	 * Фильтрует ввод "список IP по одному в строку"
+	 * удаляет некорректные значения
+	 * @param $value
+	 */
+	public static function filterInput($value) {
+		if (count($items=explode("\n",$value))) {
+			$validator = new \yii\validators\IpValidator();
+			$validator->subnet = null;
+			$validator->ipv6 = false;
+			$error=null;
+			$newValue=[];
+			foreach ($items as $item) if (
+				$validator->validate(trim($item), $error)
+				&&
+				NetIps::filterLocal(trim($item))
+			) $newValue[]=trim($item);
+			return implode("\n",$newValue);
+		}
+		return '';
+	}
+	
+	public static function validateInput(&$model,$attribute) {
+		$items=explode("\n",$model->$attribute);
+		$ipValidator = new \yii\validators\IpValidator(['ipv6'=>false,'subnet'=>null]);
+		$error=null;
+		foreach ($items as $item) if (strlen(trim($item))) {
+			if (!$ipValidator->validate(trim($item), $error)) {
+				$model->addError($attribute, $error.' : '.$item);
+				//return; // stop on first error
+			}
+		}
+	}
+	
+	/**
 	 * Возвращает список всех элементов
 	 * @return array|mixed|null
 	 */
@@ -358,7 +462,7 @@ class NetIps extends \yii\db\ActiveRecord
         $list= static::find()
             //->joinWith('some_join')
             //->select(['id','name'])
-			->orderBy(['name'])
+			->orderBy(['addr'=>SORT_ASC])
             ->all();
         return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
     }

@@ -11,7 +11,7 @@ if (!isset($static_view)) $static_view=false;
 		<h4>
 			Ответственный: <?= $this->render('/users/item',['model'=>$model->responsibleRecursive,'static_view'=>$static_view]) ?>
 		</h4>
-		<?php if (count($model->supportRecursive)) { ?>
+		<?php if (is_array($model->supportRecursive) && count($model->supportRecursive)) { ?>
 			<p>
 				Поддержка:
 				<?php

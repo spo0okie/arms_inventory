@@ -54,17 +54,24 @@ NavBar::begin([
 					['label' => \app\models\OrgPhones::$title, 'url' => ['/org-phones/index']],
 					['label' => \app\models\OrgInet::$title, 'url' => ['/org-inet/index']],
 					['label' => \app\models\Services::$title, 'url' => ['/services/index']],
-					['label' => \app\models\Schedules::$title, 'url' => ['/schedules/index']],
+					['label' => \app\models\Schedules::$titles, 'url' => ['/schedules/index']],
 					'<li class="divider"></li>',
 					['label' => 'Карта рабочих мест', 'url' => ['/places/armmap']],
 					['label' => 'По подразделениям', 'url' => ['/places/depmap']],
 				]
 			]:'',
 			\app\models\Users::isViewer()?
+			['label' => 'Доступы',
+				'items' => [
+					['label' => \app\models\Acls::$titles, 'url' => ['/acls/index']],
+					['label' => \app\models\Acls::$scheduleTitles, 'url' => ['/schedules/index-acl']],
+				]
+			]:'',
+			\app\models\Users::isViewer()?
 			['label' => 'Люди',
 				'items' => [
 					//['label' => \app\models\OrgStruct::$title, 'url' => ['/org-struct/index']],
-					['label' => \app\models\Users::$title, 'url' => ['/users/index']],
+					['label' => \app\models\Users::$titles, 'url' => ['/users/index']],
 					//['label' => 'Пользователи', 'url' => ['/users/logins']],
 					['label' => \app\models\UserGroups::$title, 'url' => ['/user-groups/index']],
 				]
@@ -100,20 +107,19 @@ NavBar::begin([
 			\app\models\Users::isViewer()?
 			['label' => \app\models\Techs::$title,
 				'items' => [
+					['label' => \app\models\Materials::$title,
+						'items' => [
+							['label' => \app\models\Materials::$title, 'url' => ['/materials/index']],
+							['label' => \app\models\MaterialsUsages::$title, 'url' => ['/materials-usages/index']],
+							['label' => \app\models\MaterialsTypes::$title, 'url' => ['/materials-types/index']],
+						],
+					],
 					['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index'], 'items'=>$techTypes],
 					['label' => \app\models\TechModels::$title, 'url' => ['/tech-models/index']],
 					['label' => \app\models\Techs::$title, 'url' => ['/techs/index']],
 					['label' => 'Производители', 'url' => ['/manufacturers/index']],
 					['label' => 'Игнорируемое', 'url' => ['/hw-ignore/index']],
 					['label' => 'Состояния', 'url' => ['/tech-states/index']],
-				],
-			]:'',
-			\app\models\Users::isViewer()?
-			['label' => \app\models\Materials::$title,
-				'items' => [
-					['label' => \app\models\MaterialsTypes::$title, 'url' => ['/materials-types/index']],
-					['label' => \app\models\Materials::$title, 'url' => ['/materials/index']],
-					['label' => \app\models\MaterialsUsages::$title, 'url' => ['/materials-usages/index']],
 				],
 			]:'',
 			\app\models\Users::isAdmin()?

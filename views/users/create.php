@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Users */
 
 $this->title = 'Заведение сотрудника';
-$this->params['breadcrumbs'][] = ['label' => \app\models\Users::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\Users::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="users-create">

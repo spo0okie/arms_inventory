@@ -49,9 +49,13 @@ use kartik\select2\Select2;
     if (in_array($attribute, $safeAttributes)) {
 		$relation=null;
     	if ((strlen($attribute)>3) && substr($attribute,strlen($attribute)-3,3)=='_id') {
-			//try {
+			try {
 				$relation=$model->getRelation(Inflector::variablize(substr($attribute,0,strlen($attribute)-3)));
-			//} catch (Exception $e) {}
+			} catch (Exception $e) {
+				try {
+					$relation=$model->getRelation(Inflector::variablize(substr($attribute,0,strlen($attribute)-4)));
+				} catch (Exception $e) {}
+			}
 		}
     	if (is_object($relation)) {
 			echo "    <?= \$form->field(\$model, '$attribute')->widget(Select2::className(), [\n";

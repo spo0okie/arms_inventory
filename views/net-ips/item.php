@@ -7,6 +7,8 @@ use yii\helpers\Html;
 
 $class='';
 
+if (!isset($static_view)) $static_view=false;
+
 if (!empty($model)) {
 	if (is_object($model->network)) $class=$model->network->segmentCode;
 	if (!isset($name)) $name=$model->sname;
@@ -16,6 +18,6 @@ if (!empty($model)) {
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['net-ips/ttip','id'=>$model->id]) ?>"
 	>
 		<?=  Html::a($name,['net-ips/view','id'=>$model->id]) ?>
-		<?=  Html::a('<span class="glyphicon glyphicon-pencil"></span>',['net-ips/update','id'=>$model->id,'return'=>'previous']) ?>
+		<?=  $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['net-ips/update','id'=>$model->id,'return'=>'previous']) ?>
 	</span>
 <?php } ?>

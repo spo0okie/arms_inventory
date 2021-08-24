@@ -3,7 +3,6 @@
 namespace app\models;
 
 use Yii;
-use yii\validators\IpValidator;
 
 /**
  * This is the model class for table "comps".
@@ -45,6 +44,7 @@ use yii\validators\IpValidator;
  * @property \app\models\HwList $hwList
  * @property \app\models\SwList $swList
  * @property \app\models\Services $services
+ * @property Acls[] $acls
  */
 class Comps extends \yii\db\ActiveRecord
 {
@@ -78,33 +78,15 @@ class Comps extends \yii\db\ActiveRecord
             [['name','raw_version'], 'string', 'max' => 32],
             [['os', 'comment'], 'string', 'max' => 128],
 	        [['ip', 'ip_ignore'], 'string', 'max' => 512],
-			['ip', 'filter', 'filter' => function ($value) {
-				if (count($items=explode("\n",$value))) {
-					$validator = new IpValidator();
-					$validator->subnet = null;
-					$validator->ipv6 = false;
-					$error=null;
-					$newValue=[];
-					foreach ($items as $item) if (
-						$validator->validate(trim($item), $error)
-						&&
-						NetIps::filterLocal(trim($item))
-					) $newValue[]=trim($item);
-					return implode("\n",$newValue);
-				}
-				return '';
+			/* Валидация отключена, т.к. ввод данных в основном автоматический (скриптами)
+			и если ее включить, данные просто не будут приниматься, что весьма плохо
+			['ip', function ($attribute, $params, $validator) {
+				\app\models\NetIps::validateInput($this,$attribute);
 			}],
-			/*['ip', function ($attribute, $params, $validator) {
-				if (count($items=explode("\n",$this->$attribute))) {
-					$validator = new IpValidator();
-					$validator->subnet = null;
-					$error = null;
-					foreach ($items as $item) {
-						if (!$validator->validate(trim($item), $error))
-							$this->addError($attribute, $item . ': ' . $error);
-					}
-				}
-			}],*/
+			вместо этого мы их фильтруем выкидывая неверные значения (ниже)*/
+			['ip', 'filter', 'filter' => function ($value) {
+				return \app\models\NetIps::filterInput($value);
+			}],
 	
 			[['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],
 			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arm_id' => 'id']],
@@ -309,6 +291,16 @@ class Comps extends \yii\db\ActiveRecord
 		return $this->hasmany(LoginJournal::className(), ['comps_id' => 'id']);
 	}
 	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getAcls()
+	{
+		return $this->hasMany(Acls::className(), ['comps_id' => 'id']);
+	}
+	
+	
+	
 	//список адресов, которые вернул скрипт инвентаризации
 	public function getIps() {
 		if (!is_null($this->ip_cache)) return $this->ip_cache;
@@ -341,19 +333,6 @@ class Comps extends \yii\db\ActiveRecord
 	public function getCurrentIp() {
     	if (count($this->filteredIps)) return array_values($this->filteredIps)[0];
     	return '';
-	}
-	
-	/**
-	 * Имея текстовый список IP возвращает ids объектов IP адресов
-	 */
-	public function fetchIpIds() {
-		if (!count($items=explode("\n",$this->ip))) return[];
-		$ids=[];
-		foreach ($items as $item) {
-			if (strlen(trim($item)))
-				$ids[]=NetIps::fetchByTextAddr($item);
-		}
-		return $ids;
 	}
 	
 	
@@ -448,7 +427,6 @@ class Comps extends \yii\db\ActiveRecord
 	{
 		if (parent::beforeSave($insert)) {
 			
-			$this->netIps_ids=$this->fetchIpIds();
 
 			//грузим старые значения записи
 			$old=static::findOne($this->id);
@@ -476,6 +454,7 @@ class Comps extends \yii\db\ActiveRecord
 				}
 				
 				/* взаимодействие с NetIPs */
+				$this->netIps_ids=NetIps::fetchIpIds($this->ip);
 				//находим все IP адреса которые от этой ОС отвалились
 				$removed=array_diff($old->netIps_ids,$this->netIps_ids);
 				//если есть отвязанные от это ос адреса

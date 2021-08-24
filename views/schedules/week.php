@@ -51,4 +51,3 @@ $deleteable=!count($providingServices) && !count($supportServices);
 
 <h2><?= implode('<br/>',$model->weekWorkTime) ?></h2>
 
-<?php // DetailView::widget(['model'=>$model,'attributes'=>$weekAttr]) ?>

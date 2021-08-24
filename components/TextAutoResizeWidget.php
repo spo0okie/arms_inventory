@@ -14,6 +14,7 @@ class TextAutoResizeWidget extends Widget
 	 * @var integer
      */
 	public $lines=1;
+	public $hint=null;
 	
 	
 	/**
@@ -38,10 +39,11 @@ class TextAutoResizeWidget extends Widget
 	{
 		
 		return $this->render('TextAutoResize', [
-			'form' => $this->form,
+			'form'	=> $this->form,
 			'model' => $this->model,
 			'field' => $this->attribute,
 			'lines' => $this->lines,
+			'hint'	=> $this->hint,
 		]);
 	}
 }
