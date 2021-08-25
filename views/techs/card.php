@@ -24,14 +24,16 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 		</span>' ?>
 </h1>
 
-<?php if (!$no_model) { ?>
+<?php if ($no_model) { ?>
+<?php } else { ?>
+	<?= $this->render('/scans/ttip',['model'=>$model->model->preview]) ?>
 	<?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?>
 	
 	<?php if ($model->model->individual_specs) { ?>
 		<h4>Спецификация:</h4>
 		<?= \Yii::$app->formatter->asNtext($model->specs) ?>
 		<br />
-	<?php } ?>s
+	<?php } ?>
 <?php } ?>
 
 

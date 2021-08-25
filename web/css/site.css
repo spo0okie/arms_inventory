@@ -268,8 +268,8 @@ div.scans-thumb-img:hover > div.scans-thumb-ctrls {
 }
 
 div.ttip-card a.scans-ttip {
-    float: left;
-    margin-right: 5px;
+    float: right;
+    margin-left: 5px;
 }
 
 div.tech-model-view a.scans-ttip {
