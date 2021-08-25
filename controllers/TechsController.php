@@ -33,7 +33,7 @@ class TechsController extends Controller
 	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','delete','unlink','port-list'], 'roles'=>['editor']],
+			    ['allow' => true, 'actions'=>['create','update','uploads','delete','unlink','port-list'], 'roles'=>['editor']],
 			    ['allow' => true, 'actions'=>['index','view','ttip','validate','inv-num'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
@@ -144,7 +144,21 @@ class TechsController extends Controller
             'model' => $model,
         ]);
     }
-
+	
+	/**
+	 * Updates an existing TechModels model.
+	 * If update is successful, the browser will be redirected to the 'view' page.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionUploads($id)
+	{
+		$model = $this->findModel($id);
+		return $this->render('uploads', [
+			'model' => $model,
+		]);
+	}
 
 	/**
 	 * Validates  model on update.

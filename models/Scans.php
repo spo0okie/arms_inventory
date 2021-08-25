@@ -56,7 +56,7 @@ class Scans extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id'], 'integer'],
+            [['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id','arms_id','techs_id'], 'integer'],
 	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
         ];
     }

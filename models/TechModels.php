@@ -9,7 +9,7 @@ use Yii;
  *
  * @property int $id id
  * @property int $type_id Тип оборудования
- * @property int $scans_id Картинка - предпросмотр
+ *
  * @property bool $individual_specs Индивидуальные спеки
  * @property int $manufacturers_id Производитель
  * @property int $usages Количество экземпляров этой модели
@@ -25,9 +25,10 @@ use Yii;
  * @property TechTypes $type
  * @property Techs[] $techs
  * @property Arms[] $arms
+ * @property Manufacturers $manufacturer
+ * @property int $scans_id Картинка - предпросмотр
  * @property Scans[] $scans
  * @property Scans $preview
- * @property Manufacturers $manufacturer
  */
 class TechModels extends \yii\db\ActiveRecord
 {
@@ -118,10 +119,7 @@ class TechModels extends \yii\db\ActiveRecord
 	 */
 	public function getScans()
 	{
-		//$scans=static::hasMany(Scans::className(), ['tech_models_id' => 'id']);
-		//if (!$this->scans_id) return $scans;
 		$scans=Scans::find()->where(['tech_models_id' => $this->id ])->all();
-		//var_dump($scans);
 		$scans_sorted=[];
 		foreach ($scans as $scan) if($scan->id == $this->scans_id) $scans_sorted[]=$scan;
 		foreach ($scans as $scan) if($scan->id != $this->scans_id) $scans_sorted[]=$scan;

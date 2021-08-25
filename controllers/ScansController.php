@@ -159,10 +159,13 @@ class ScansController extends Controller
 			'model' => $model,
 		]);
 	}
+	
 	/**
 	 * Updates an existing Scans model.
 	 * If update is successful, the browser will be redirected to the 'view' page.
 	 * @param integer $id
+	 * @param string  $link
+	 * @param integer $link_id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
@@ -170,7 +173,10 @@ class ScansController extends Controller
 	{
 		switch ($link) {
 			case 'tech_models_id':
-				$model = TechModels::findOne($link_id);
+				$model = \app\models\TechModels::findOne($link_id);
+				break;
+			case 'techs_id':
+				$model = \app\models\Techs::findOne($link_id);
 				break;
 			default:
 				$model=null;
@@ -179,7 +185,7 @@ class ScansController extends Controller
 			throw new NotFoundHttpException('The requested page does not exist.');
 		
 		$model->scans_id=$id;
-		$model->save();
+		$model->save(false);
 		
 		Yii::$app->response->format = Response::FORMAT_JSON;
 		return (object)['code'=>'0'];

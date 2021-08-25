@@ -233,13 +233,6 @@ class TechModelsController extends Controller
 	public function actionUploads($id)
 	{
 		$model = $this->findModel($id);
-		
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if (Yii::$app->request->get('return')=='previous')
-				return $this->redirect(Url::previous());
-			return $this->redirect(['view', 'id' => $model->id]);
-		}
-		
 		return $this->render('uploads', [
 			'model' => $model,
 		]);

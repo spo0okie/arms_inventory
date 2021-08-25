@@ -47,6 +47,11 @@ use yii\validators\IpValidator;
  * @property MaterialsUsages[] $materialsUsages
  * @property \app\models\NetIps[] $netIps
  * @property Acls[] $acls
+ *
+ * @property int $scans_id Картинка - предпросмотр
+ * @property Scans[] $scans
+ * @property Scans $preview
+ 
  */
 
 class Techs extends \yii\db\ActiveRecord
@@ -84,7 +89,7 @@ class Techs extends \yii\db\ActiveRecord
     {
         return [
             [['model_id'], 'required'],
-	        [['model_id', 'arms_id', 'places_id', 'state_id'], 'integer'],
+	        [['model_id', 'arms_id', 'places_id', 'state_id', 'scans_id'], 'integer'],
 	        [['contracts_ids'], 'each', 'rule'=>['integer']],
 	        [['url', 'comment'], 'string'],
 	        [['history','specs'], 'safe'],
@@ -224,7 +229,29 @@ class Techs extends \yii\db\ActiveRecord
 		if (is_object($this->state)) return $this->state->name;
 		return '';
 	}
-
+	
+	/**
+	 * Возвращает набор сканов в договоре
+	 */
+	public function getScans()
+	{
+		$scans=Scans::find()->where(['techs_id' => $this->id ])->all();
+		$scans_sorted=[];
+		foreach ($scans as $scan) if($scan->id == $this->scans_id) $scans_sorted[]=$scan;
+		foreach ($scans as $scan) if($scan->id != $this->scans_id) $scans_sorted[]=$scan;
+		return $scans_sorted;
+	}
+	
+	/**
+	 * Возвращает набор сканов в договоре
+	 */
+	public function getPreview()
+	{
+		if (!$this->scans_id) return null;
+		return Scans::find()->where(['id' => $this->scans_id ])->one();
+	}
+	
+	
 	/**
      * @return \yii\db\ActiveQuery
      */
