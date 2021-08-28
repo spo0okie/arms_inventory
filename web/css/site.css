@@ -522,6 +522,7 @@ a.contract_inactive {color: gray; text-decoration: line-through}
 .ttip-card {
     display: table-cell;
     vertical-align: top;
+    min-width: 250px;
     padding: 0;
     margin: 0;
 }
