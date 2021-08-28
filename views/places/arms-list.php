@@ -15,6 +15,10 @@ $attached=0; //техника прикрепленная к АРМ
 //foreach ($arms as $arm) foreach ($arm->techs as $tech)
     //if (!$tech->isVoipPhone && !$tech->isUps) $attached++;
 
+
+yii\helpers\ArrayHelper::multisort($arms,'num');
+yii\helpers\ArrayHelper::multisort($techs,'num');
+
 $content='';
 
 $cabinet_col='<td class="places-arms-cabinet" rowspan="0">'.$this->render('item',['model'=>$model,'short'=>true]).'</td>';
@@ -32,6 +36,7 @@ foreach ($arms as $arm ) {
 	foreach ($arm->ups as $upsItem)
 		foreach ($techs as $i=>$tech) if ($tech['id']==$upsItem['id']) unset($techs[$i]);
 }
+
 
 foreach ($techs as $tech )
 	$content.=$this->render(
