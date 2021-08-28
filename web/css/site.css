@@ -501,6 +501,30 @@ a.contract_inactive {color: gray; text-decoration: line-through}
 
 
 /* ТУЛТИПЫ */
+.tooltipster-base {
+    height: auto !important;
+}
+.ttip-row {
+    display: table-row;
+    vertical-align: top;
+    padding: 0;
+    margin: 0;
+}
+
+.ttip-preview {
+    width: 100px;
+    display: table-cell;
+    padding-top: 15px;
+    padding-right: 7px;
+    margin: 0;
+}
+
+.ttip-card {
+    display: table-cell;
+    vertical-align: top;
+    padding: 0;
+    margin: 0;
+}
 
 .ttip-card h1 {
     font-size: 14px;

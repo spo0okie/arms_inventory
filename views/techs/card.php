@@ -26,7 +26,6 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 
 <?php if ($no_model) { ?>
 <?php } else { ?>
-	<?= $this->render('/scans/ttip',['model'=>is_object($model->preview)?$model->preview:$model->model->preview]) ?>
 	<?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?>
 	
 	<?php if ($model->model->individual_specs) { ?>

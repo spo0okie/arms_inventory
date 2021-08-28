@@ -247,8 +247,14 @@ class Techs extends \yii\db\ActiveRecord
 	 */
 	public function getPreview()
 	{
-		if (!$this->scans_id) return null;
-		return Scans::find()->where(['id' => $this->scans_id ])->one();
+		//ищем собственную картинку
+		if ($this->scans_id && is_object($scan=Scans::find()->where(['id' => $this->scans_id ])->one())) return $scan;
+
+		//ищем картинку от модели
+		if (is_object($this->model)) return $this->model->preview;
+
+		//сдаемся
+		return null;
 	}
 	
 	

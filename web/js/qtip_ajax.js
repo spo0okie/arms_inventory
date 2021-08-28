@@ -15,6 +15,10 @@ function attach_qTip(el){
                 $.get($url, function(data) {
                     instance.content(data);
                     $origin.data('loaded', true);
+                    /*setTimeout(()=>{
+                        console.log('repositioning');
+                        $origin.tooltipster('reposition');
+                    },100);*/
                 });
             }
         }
