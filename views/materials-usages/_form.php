@@ -36,7 +36,8 @@ use kartik\date\DatePicker;
 		        'options' => ['placeholder' => 'Введите дату ...'],
 		        'pluginOptions' => [
 			        'autoclose'=>true,
-			        'format' => 'yyyy-mm-dd'
+			        'format' => 'yyyy-mm-dd',
+					'weekStart' => '1',
 		        ]
 	        ]); ?>
         </div>

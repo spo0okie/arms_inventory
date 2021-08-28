@@ -50,6 +50,7 @@ use kartik\file\FileInput;
                 'options' => ['placeholder' => 'Введите дату ...'],
                 'pluginOptions' => [
                     'autoclose'=>true,
+					'weekStart' => '1',
                     'format' => 'yyyy-mm-dd'
                 ]
             ]); ?>
@@ -59,6 +60,7 @@ use kartik\file\FileInput;
 			    'options' => ['placeholder' => 'Введите дату ...'],
 			    'pluginOptions' => [
 				    'autoclose'=>true,
+					'weekStart' => '1',
 				    'format' => 'yyyy-mm-dd'
 			    ]
 		    ]); ?>

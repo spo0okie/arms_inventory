@@ -94,6 +94,7 @@ $deleteable=!count($model->childs) && !count($model->usages);
 		]);
 		$usage = new \app\models\MaterialsUsages();
 		$usage->materials_id = [$model->id];
+		$usage->date=date('Y-m-d',time());
 		echo $this->render('/materials-usages/_form', ['model' => $usage]);
 		Modal::end();
 

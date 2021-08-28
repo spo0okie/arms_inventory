@@ -32,12 +32,18 @@ use kartik\datecontrol\DateControl;
 				<?= $form->field($model, 'date')->widget(DateControl::classname(), [
 					'options' => ['placeholder' => 'Начало периода'],
 					'type'=>DateControl::FORMAT_DATETIME,
+					'pluginOptions'=>[
+						'weekStart' => '1',
+					]
 				]); ?>
 			</div>
 			<div class="col-md-4">
 				<?= $form->field($model, 'date_end')->widget(DateControl::classname(), [
 					'options' => ['placeholder' => 'Конец периода'],
 					'type'=>DateControl::FORMAT_DATETIME,
+					'pluginOptions'=>[
+						'weekStart' => '1',
+					]
 				]); ?>
 			</div>
 			<div class="col-md-4">

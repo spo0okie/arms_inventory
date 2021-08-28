@@ -57,6 +57,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		        'options' => ['placeholder' => 'Введите дату ...'],
 		        'pluginOptions' => [
 			        'autoclose'=>true,
+					'weekStart' => '1',
 			        'format' => 'yyyy-mm-dd'
 		        ]
 	        ]); ?>
@@ -66,6 +67,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		        'options' => ['placeholder' => 'Введите дату ...'],
 		        'pluginOptions' => [
 			        'autoclose'=>true,
+					'weekStart' => '1',
 			        'format' => 'yyyy-mm-dd'
 		        ]
 	        ]); ?>
