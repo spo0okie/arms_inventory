@@ -27,8 +27,8 @@ use Yii;
 class Acls extends \yii\db\ActiveRecord
 {
 
-	public static $title='ACL';
-	public static $titles='ACLs';
+	public static $title='Список доступа';
+	public static $titles='Списки доступа';
 
 	/*
 	 * Если к расписанию прикрутить ACL - то нужно на него смотреть несколько иначе, это не просто расписание
@@ -106,7 +106,7 @@ class Acls extends \yii\db\ActiveRecord
 			return $this->comment;
 		
 		if (($this->comps_id) and is_object($this->comp))
-			return $this->comp->domainName;
+			return $this->comp->name;
 		
 		if (($this->techs_id) and is_object($this->tech))
 			return $this->tech->num;

@@ -12,6 +12,7 @@ use Yii;
  * @property string $name
  * @property string $description
  * @property array $weekWorkTime //массив строк, которые надо соединить (запятыми или переносами строк, чтобы получить график работы)
+ * @property boolean isAcl
  *
  * @property Services[] $providingServices
  * @property Services[] $supportServices
@@ -23,6 +24,8 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public static $titles = 'Расписания';
 	public static $title = 'Расписание';
+	
+	public $isAclCache=null;
 	
 	
     /**
@@ -118,6 +121,13 @@ class Schedules extends \yii\db\ActiveRecord
 			'schedule_id'=>$this->id,
 			'date'=>$day
 		]);
+	}
+	
+	public function getIsAcl() {
+		if (is_null($this->isAclCache)) {
+			$this->isAclCache=is_array($this->acls) && count($this->acls);
+		}
+		return $this->isAclCache;
 	}
 	
 	/**

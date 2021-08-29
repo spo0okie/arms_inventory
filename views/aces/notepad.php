@@ -1,7 +1,5 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
 use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */

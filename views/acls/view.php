@@ -17,4 +17,5 @@ $this->render('breadcrumbs',['model'=>$model,'static_view'=>true]);
 ?>
 <div class="acls-view">
 	<?= $this->render('card',['model'=>$model]) ?>
+	<?= $this->render('notepad',['model'=>$model]) ?>
 </div>

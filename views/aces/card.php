@@ -45,8 +45,8 @@ foreach ($model->accessTypes as $accessType) {
 }*/
 ?>
 
-<table>
+<table class="acls-table">
 	<tr>
-		<?= $this->render('tdrow',['model'=>$model]) ?>
+		<?= $this->render('tdrow',['model'=>$model,'static_view'=>$static_view]) ?>
 	</tr>
 </table>

@@ -28,7 +28,9 @@ use yii\validators\DateValidator;
  * @property string|null $created_at
  * @property string|null $is_period
  * @property string|null $is_work
+ * @property string|null $isWorkDescription
  * @property array $interval
+ * @property boolean isAcl
  *
  * @property Schedules $master
  */
@@ -45,6 +47,33 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		'6' => "Суб",
 		'7' => "Вск",
 	];
+	
+	public static $isWorkComment=[
+		'default'=>[
+			0=>'нерабочий период',
+			1=>'рабочий период',
+		],
+		'acl'=>[
+			0=>'доступ отозван',
+			1=>'доступ предоставляется',
+		]
+	];
+	
+	public $isAclCache=null;
+	
+	public function getIsAcl() {
+		if (is_null($this->isAclCache)) {
+			$this->isAclCache=is_object($this->master) && $this->master->isAcl;
+		}
+		return $this->isAclCache;
+	}
+	
+	public function getIsWorkDescription() {
+		if ($this->isAcl)
+			return static::$isWorkComment['acl'][$this->is_work];
+		return static::$isWorkComment['default'][$this->is_work];
+		
+	}
 	
 	/**
 	 * Возвращает описание даты записи
@@ -194,13 +223,11 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'schedule_id' => 'Расписание',
 			'is_period' => 'Период',
-			'is_work' => 'Рабочий/нерабочий период',
+			'is_work' => $this->isAcl?'Период предоставления/отзыва прав':'Рабочий/нерабочий период',
 			
-			'date' => 'День/Дата',
-			'date_begin' => 'Начало',
+			'date' => $this->is_period?'Начало':'День/Дата',
 			'date_end' => 'Окончание',
 			'schedule' => 'График',
-			//'description' => 'График',
 			
 			'comment' => 'Комментарий',
 			'history' => 'Дополнительные заметки',
@@ -217,10 +244,11 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			'id' => 'ID записи',
 			'schedule_id' => 'Расписание, к которому относится запись',
 			'is_period' => 'Запись - расписание на день, или более длительный период?',
-			'is_work' => 'Запись указывает рабочий период или нерабочий?',
+			'is_work' => $this->isAcl?'Если установлено - права предоставляются, иначе - отзываются':'Если установлено - период рабочий, иначе - нерабочий',
 			
-			'date' => 'День/Дата',
-			'date_begin' => 'Дата/время начала периода',
+			//'date' => 'День/Дата',
+			'date' => $this->is_period?'Дата/время начала периода':'День/Дата',
+			//'date_begin' => ,
 			'date_end' => 'Дата/время окончания периода',
 			'schedule' => 'График работы/отключения в формате "ЧЧ:ММ-ЧЧ:ММ,ЧЧ:ММ-ЧЧ:ММ" например 8:00-12:00,12:45-17:00, или прочерк (минус) для выходного',
 			//'description' => 'График',

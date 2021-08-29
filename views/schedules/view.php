@@ -34,17 +34,17 @@ if (!$acl_mode) { ?>
 			</div>
 		</div>
 	</div>
+<?php } else { ?>
 	<div class="schedules-view">
 
 		<div class="row">
 			<div class="col-md-6">
+				<?= $this->render('acl',['model'=>$model]) ?>
 			</div>
 			<div class="col-md-6">
+				<?= $this->render('exceptions',['model'=>$model]) ?>
 			</div>
 		</div>
 	</div>
-<?php } else { ?>
-	<?= $this->render('week',['model'=>$model]) ?>
 	
-	<?= $this->render('acl',['model'=>$model]) ?>
 <?php } ?>

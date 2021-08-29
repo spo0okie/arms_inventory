@@ -8,13 +8,13 @@ use yii\widgets\DetailView;
 
 //\yii\helpers\Url::remember();
 
-$this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Aces::$titles, 'url' => ['index']];
+$this->title = $model->sname;
+$this->render('/acls/breadcrumbs',['model'=>$model->acl,'static_view'=>false]);
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 
 ?>
 <div class="aces-view">
 	<?= $this->render('card',['model'=>$model]) ?>
-	<?= $this->render('notebook',['model'=>$model]) ?>
+	<?= $this->render('notepad',['model'=>$model]) ?>
 </div>

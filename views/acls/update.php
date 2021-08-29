@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
 
-$this->title = 'Редактирование ресурса доступа';
+$this->title = 'Редактирование списка доступа';
 
 $this->render('breadcrumbs',['model'=>$model]);
 
@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= $this->render('_form_resource', [
+    <?= $this->render('_form', [
         'model' => $model,
     ]) ?>
 

@@ -27,12 +27,13 @@ if (!count($items))
 $accessTypes=[];
 
 foreach ($model->accessTypes as $accessType)
-	$accessTypes[]=$this->render('/access-types/item',['model'=>$accessType,'static_view'=>true]);
+	$accessTypes[]=$accessType->name;
 
+if (!count($accessTypes)) $accessTypes[]=\app\models\Aces::$noAccessName;
 ?>
 
 <td class="ACE access">
-	<?= $this->render('item',['model'=>$model,'name'=>implode(', ',$accessTypes),'show_delete'=>true]) ?>
+	<?= $this->render('item',['model'=>$model,'name'=>implode(', ',$accessTypes),'show_delete'=>!$static_view]) ?>
 </td>
 
 <td class="ACE objects">

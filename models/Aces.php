@@ -29,6 +29,8 @@ class Aces extends \yii\db\ActiveRecord
 	
 	public static $title='доступ';
 	public static $titles='доступы';
+	
+	public static $noAccessName='нет доступа';
 
     /**
      * {@inheritdoc}

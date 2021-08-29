@@ -13,6 +13,9 @@ $daysSearchModel->schedule_id = $model->id;
 $daysDataProvider = $daysSearchModel->search([]);
 $renderer=$this;
 
+if (!isset($acl_mode)) $acl_mode=(count($model->acls));
+
+
 function selectClass($model){
 	if (!empty($model->date) && ($model->date == Yii::$app->request->get('date')))
 		return 'success';
@@ -30,9 +33,13 @@ function selectClass($model){
 	return '';
 }
 
-?>
-<h2>Праздничные / внеочередные рабочие дни</h2>
-<?= GridView::widget([
+if (!$acl_mode) {
+	echo '<h2>Праздничные / внеочередные рабочие дни</h2>';
+} else {
+	echo '<h2>Периоды предоставления / отзыва доступа</h2>';
+}
+
+echo GridView::widget([
 	'dataProvider' => $daysDataProvider,
 	'filterModel' => $daysSearchModel,
 	'columns' => [
@@ -54,7 +61,7 @@ function selectClass($model){
 			'attribute'=>'schedule',
 			'value' => function($data) {
 				return $data->is_period?
-					($data->is_work?'рабочий период':'нерабочий период')
+					($data->isWorkDescription)
 					:
 					$data->schedule;
 			},
@@ -83,20 +90,24 @@ function selectClass($model){
 			}
 		],
 	],
-]); ?>
+]);
 
-<?= Html::a('Добавить нестандартный график', [
-	'/schedules-entries/create',
-	'schedule_id' => $model->id,
-	'is_period' => 0,
-], [
-	'class' => 'btn btn-success'
-]);?>
-
-<?= Html::a('Добавить раб/не раб. период', [
-	'/schedules-entries/create',
-	'schedule_id' => $model->id,
-	'is_period' => 1,
-], [
-	'class' => 'btn btn-success'
-]);?>
+if (!$acl_mode) {
+	echo Html::a('Добавить нестандартный график', [
+		'/schedules-entries/create',
+		'schedule_id' => $model->id,
+		'is_period' => 0,
+	], ['class' => 'btn btn-success']);
+	
+	echo Html::a('Добавить раб/не раб. период', [
+		'/schedules-entries/create',
+		'schedule_id' => $model->id,
+		'is_period' => 1,
+	], ['class' => 'btn btn-success']);
+} else {
+	echo Html::a('Добавить период предоставления/отзыва доступа', [
+		'/schedules-entries/create',
+		'schedule_id' => $model->id,
+		'is_period' => 1,
+	], ['class' => 'btn btn-success']);
+}

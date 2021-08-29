@@ -658,6 +658,21 @@ div.site-index div.search span.search-group input {
 }
 
 
+/*ACLS*/
+
+table.acls-table {
+    border: solid 1px darkgray;
+    border-collapse: collapse;
+}
+table.acls-table td,
+table.acls-table th{
+    border: solid 1px darkgray;
+    border-collapse: collapse;
+    padding: 7px;
+    text-align: center;
+}
+
+
 
 /* Корректировки BOOTSTRAP */
 

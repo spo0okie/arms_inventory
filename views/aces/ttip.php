@@ -7,5 +7,8 @@ use yii\helpers\Html;
 
 ?>
 <div class="aces-ttip ttip-card">
-	<?= $this->render('card',['model'=>$model,'static_view'=>true]) ?>
+	<h1>
+		<?= Html::encode($model->sname) ?>
+	</h1>
+	<?= $this->render('notepad',['model'=>$model,'static_view'=>true]) ?>
 </div>

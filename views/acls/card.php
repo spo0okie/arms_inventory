@@ -22,15 +22,12 @@ if (!isset($static_view)) $static_view=false;
 </h1>
 
 
-<h2>
-	Ресурс:
-	<?= $this->render('resource',['model'=>$model]) ?>
-	<?= $static_view?'':(Html::a('<span class="glyphicon glyphicon-pencil"></span>',['acls/update','id'=>$model->id])) ?>
-</h2>
 
-<h2>Доступы к ресурсу</h2>
-<?php
-foreach ($model->aces as $ace) {
-	echo $this->render('/aces/item',['model'=>$ace]).'<br />';
-}
-echo \yii\helpers\Html::a('Добавить',['aces/create','acls_id'=>$model->id],['class'=>'btn btn-success']);
+
+<table class="acls-table">
+	<tr>
+		<?= $this->render('tdrow',['model'=>$model]) ?>
+	</tr>
+</table>
+
+
