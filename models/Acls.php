@@ -143,6 +143,15 @@ class Acls extends \yii\db\ActiveRecord
 		return $this->hasMany(Aces::className(), ['acls_id' => 'id']);
 	}
 	
+	public function beforeDelete()
+	{
+		if (count($this->aces))
+			foreach ($this->aces as $ace) {
+				$ace->delete();
+			}
+		return parent::beforeDelete();
+	}
+	
 	/**
 	 * Возвращает список всех элементов
 	 * @return array|mixed|null

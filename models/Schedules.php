@@ -11,6 +11,7 @@ use Yii;
  * @property int $parent_id
  * @property string $name
  * @property string $description
+ * @property string $history
  * @property array $weekWorkTime //массив строк, которые надо соединить (запятыми или переносами строк, чтобы получить график работы)
  * @property boolean isAcl
  *
@@ -43,6 +44,7 @@ class Schedules extends \yii\db\ActiveRecord
     {
         return [
             [['name','description'], 'string', 'max' => 255],
+			[['history'],'safe'],
 			[['parent_id'], function ($attribute, $params, $validator) {
 				$children=[$this->id];
 				if (is_object($this->parent) && $this->parent->loopCheck($children)!==false) {
@@ -395,6 +397,13 @@ class Schedules extends \yii\db\ActiveRecord
 	{
 		//рабочий график на день
 		$objSchedule=$this->getDateScheduleRecursive($date);
+		if (!is_object($objSchedule)) {
+			$objSchedule=new \app\models\SchedulesEntries([
+				'is_period'=>0,
+				'schedule'=>'-',
+				'date'=>'def'
+			]);
+		}
 		
 		//ищем периоды работы/отдыха перекрывающие этот день
 		$periods=$this->findPeriods(

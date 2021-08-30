@@ -129,7 +129,6 @@ class SchedulesController extends Controller
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			$acl=new \app\models\Acls();
 			$acl->schedules_id=$model->id;
-			$acl->comment=\app\models\Acls::$emptyComment;
 			$acl->save();
 			return $this->redirect(['view', 'id' => $model->id, 'acl_mode'=>1] );
 		}
