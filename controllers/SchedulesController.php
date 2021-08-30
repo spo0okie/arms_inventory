@@ -32,7 +32,7 @@ class SchedulesController extends Controller
 		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
-				['allow' => true, 'actions'=>['create','update','delete',], 'roles'=>['editor']],
+				['allow' => true, 'actions'=>['create','create-acl','update','delete',], 'roles'=>['editor']],
 				['allow' => true, 'actions'=>['index','index-acl','view','ttip','validate'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
