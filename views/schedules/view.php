@@ -24,7 +24,7 @@ $providingServices=$model->providingServices;
 $supportServices=$model->supportServices;
 $acls=$model->acls;
 
-$deleteable=!count($providingServices) && !count($supportServices) && !count($acls);
+$deleteable=!count($providingServices) && !count($supportServices) ;
 
 $schedule_id=$model->id;
 \yii\web\YiiAsset::register($this);
