@@ -296,9 +296,9 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			return date('Y-m-d',strtotime($this->date)).' '.date('H:i',strtotime($this->date)).'-'.date('H:i',strtotime($this->date));
 		} else {
 			return
-				(is_null($this->date)?'нет начала':date('Y-m-d H:i',strtotime($this->date))).
+				(is_null($this->date)?'нет начала':date('Y-m-d',strtotime($this->date))).
 				' - '.
-				(is_null($this->date_end)?'нет конца':date('Y-m-d H:i',strtotime($this->date_end)));
+				(is_null($this->date_end)?'нет конца':date('Y-m-d',strtotime($this->date_end)));
 		}
 	}
 	

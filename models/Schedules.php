@@ -78,6 +78,8 @@ class Schedules extends \yii\db\ActiveRecord
 			'friEffectiveDescription' => 'Пят.',
 			'satEffectiveDescription' => 'Суб.',
 			'sunEffectiveDescription' => 'Вск.',
+			'resources' => 'Ресурсы', //для ACLs
+			'objects' => 'Объекты', //для ACLs
 		];
 	}
 	
@@ -248,13 +250,15 @@ class Schedules extends \yii\db\ActiveRecord
 	 * @param $end
 	 * @return array|\yii\db\ActiveRecord[]
 	 */
-	public function findPeriods($start,$end) {
-		return \app\models\SchedulesEntries::find()
+	public function findPeriods($start=null,$end=null) {
+		$query=\app\models\SchedulesEntries::find()
 			->where([
 				'schedule_id'=>$this->id,
 				'is_period'=>1
-			])
-			->andWhere(['and',
+			]);
+		
+		if ($start || $end)
+			$query->andWhere(['and',
 				[
 					'or',
 					['<=', 'UNIX_TIMESTAMP(date)', $end],
@@ -265,8 +269,9 @@ class Schedules extends \yii\db\ActiveRecord
 					['>=', 'UNIX_TIMESTAMP(date_end)', $start],
 					['date_end'=>null],
 				],
-			])
-			->all();
+			]);
+
+		return $query->all();
 		
 	}
 	

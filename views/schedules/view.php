@@ -3,7 +3,6 @@
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\grid\GridView;
-
 use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */

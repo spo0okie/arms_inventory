@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\SchedulesSearch */
@@ -9,6 +10,8 @@ use yii\grid\GridView;
 
 $this->title = \app\models\Acls::$scheduleTitles;
 $this->params['breadcrumbs'][] = $this->title;
+
+$renderer=$this;
 ?>
 <div class="schedules-index">
 
@@ -34,17 +37,59 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Html::a($data->name,['view','id'=>$data->id]);
                 }
             ],
-
-            'description',
-            'monEffectiveDescription',
-            'tueEffectiveDescription',
-            'wedEffectiveDescription',
-            'thuEffectiveDescription',
-            'friEffectiveDescription',
-            'satEffectiveDescription',
-            'sunEffectiveDescription',
-
-            //['class' => 'yii\grid\ActionColumn'],
+			[
+				'attribute'=>'resources',
+                'format'=>'raw',
+                'value'=>function($data) use ($renderer) {
+    				$output=[];
+    				if (count($data->acls)) foreach ($data->acls as $acl) {
+    					$output[]=$renderer->render('/acls/item',['model'=>$acl,'static_view'=>true]);
+					}
+                    //return implode(',',$output);
+					return implode('<br />',$output);
+	
+				}
+			],
+			[
+				'attribute'=>'objects',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer) {
+					$output=[];
+					if (count($data->acls)) foreach ($data->acls as $acl) {
+						foreach ($acl->aces as $ace) {
+							//$output[]=$renderer->render('/aces/objects',['model'=>$ace,'glue'=>',']);
+							$output[]=$renderer->render('/aces/objects',['model'=>$ace,'glue'=>'<br />']);
+						}
+					}
+					//return implode(',',$output);
+					return implode('<br />',$output);
+				}
+			],
+			[
+				'attribute'=>'comments',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer) {
+					$output=[];
+					if ($data->description) $output[]=$data->description;
+					if ($data->history) $output[]=Markdown::convert($data->history);
+					return implode('<br />',$output);
+				}
+			],
+			[
+				'attribute'=>'periods',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer) {
+					$output=[];
+					if (is_array($periods=$data->findPeriods(null,null)) && count($periods))
+						foreach ($periods as $period) {
+							$output[]=$period->periodSchedule;
+							$output[]=$period->comment;
+						}
+						
+					
+					return implode('<br />',$output);
+				}
+			],
         ],
     ]); ?>
 
