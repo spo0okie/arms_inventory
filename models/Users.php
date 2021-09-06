@@ -100,6 +100,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	        [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
 	        [['employee_id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
 	        [['Doljnost', 'Ename', 'Login'], 'string', 'max' => 255],
+			[['notepad'],'safe'],
 	        [['id'], 'unique'],
 	        [['Email'], 'string', 'max' => 64],
 	        [['Phone', 'work_phone'], 'string', 'max' => 32],
