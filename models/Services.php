@@ -35,10 +35,13 @@ use yii\web\User;
  * @property \app\models\Services[] $dependants
  * @property \app\models\UserGroups $userGroup
  * @property \app\models\Techs[] $techs
+ * @property \app\models\Techs[] $techsRecursive
  * @property \app\models\Arms[] $arms
+ * @property \app\models\Arms[] $armsRecursive
  * @property \app\models\Places[] $armPlaces
  * @property \app\models\Places[] $techPlaces
  * @property \app\models\Places[] $sites
+ * @property \app\models\Places[] $sitesRecursive
  * @property \app\models\Services $parent
  * @property \app\models\Services[] $children
  * @property Schedules $providingSchedule
@@ -63,6 +66,10 @@ class Services extends \yii\db\ActiveRecord
 	private $responsibleRecursiveCache=null;
 	private $providingScheduleRecursiveCache=null;
 	private $supportScheduleRecursiveCache=null;
+	private $armsRecursiveCache=null;
+	private $techsRecursiveCache=null;
+	private $placesRecursiveCache=null;
+	private $sitesRecursiveCache=null;
 
 
 	/**
@@ -355,6 +362,15 @@ class Services extends \yii\db\ActiveRecord
 			->viaTable('{{%comps_in_services}}', ['services_id' => 'id']);
 	}
 	
+	public function getArmsRecursive()
+	{
+		if (is_array($this->armsRecursiveCache)) return $this->armsRecursiveCache;
+		$this->armsRecursiveCache=$this->getArms()->all();
+		if (is_object($this->parent)) {
+			array_push($this->armsRecursiveCache,$this->parent->armsRecursive);
+		}
+	}
+	
 	/**
 	 * Возвращает серверы на которых живет этот сервис
 	 */
@@ -400,6 +416,18 @@ class Services extends \yii\db\ActiveRecord
 				$sites[$site->id]=$site;
 		}
 		return array_values($sites);
+	}
+
+	public function getSitesRecursive(){
+		if (is_array($this->sitesRecursiveCache)) return $this->sitesRecursiveCache;
+		$sites=[];
+		foreach ($this->sites as $site)
+			$sites[$site->id]=$site;
+		foreach ($this->children as $service)
+			foreach ($service->sitesRecursive as $site)
+				$sites[$site->id]=$site;
+		
+		return $this->sitesRecursiveCache = array_values($sites);
 	}
 	
 	/**

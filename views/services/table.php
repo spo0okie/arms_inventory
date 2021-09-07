@@ -159,7 +159,7 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					$output = [];
-					if (is_array($data->sites)) foreach ($data->sites as $site)
+					if (is_array($data->sitesRecursive)) foreach ($data->sitesRecursive as $site)
 						$output[] = $renderer->render('/places/item', ['model' => $site,'short'=>true]);
 					return count($output) ? implode(' ', $output) : null;
 				},
