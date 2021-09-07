@@ -37,7 +37,7 @@ foreach ($columns as $column) {
 				//'header' => 'Инв. номер',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('/segments/item', ['model' => $data->segment,'crop_site'=>true]);
+					return $renderer->render('/segments/item', ['model' => $data->segmentRecursive,'crop_site'=>true]);
 					
 					/*return is_null($data->segment)?
 						'<span class="glyphicon glyphicon-ban-circle"></span>Без польз. доступа':
@@ -66,8 +66,8 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					$output = [];
-					if (is_object($data->responsible)) $output[] = '<strong>'.$renderer->render('/users/item', ['model' => $data->responsible,'short'=>true]).'</strong>';
-					if (is_array($data->support)) foreach ($data->support as $user)
+					if (is_object($data->responsibleRecursive)) $output[] = '<strong>'.$renderer->render('/users/item', ['model' => $data->responsibleRecursive,'short'=>true]).'</strong>';
+					if (is_array($data->supportRecursive)) foreach ($data->supportRecursive as $user)
 						$output[] = $renderer->render('/users/item', ['model' => $user,'short'=>true]);
 					return count($output) ? implode(', ', $output) : null;
 				},
@@ -175,8 +175,9 @@ foreach ($columns as $column) {
 				//'header' => 'Инв. номер',
 				'format' => 'raw',
 				'value' => function ($data) use ($column,$renderer) {
-					return is_object($data->$column)?
-						$renderer->render('/schedules/item',['model'=>$data->$column,'static_view'=>true])
+					$columnRecursive="${column}Recursive";
+					return is_object($data->$columnRecursive)?
+						$renderer->render('/schedules/item',['model'=>$data->$columnRecursive,'static_view'=>true])
 						:null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
