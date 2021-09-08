@@ -59,16 +59,21 @@ $render_columns=[
 ];
 
 $users=[];
+//собираем Какие пользователи сколько раз встречаются в сервисах
 foreach ($dataProvider->models as $model) {
-	$users=array_unique(
-		array_merge(
-			$users,
-			[$model->responsible_id],
-			$model->support_ids
-		)
-	);
+	foreach (array_merge([$model->responsible_id],$model->support_ids) as $user_id) {
+		if (isset($users[$user_id])) {
+			$users[$user_id]++;
+		} else {
+			$users[$user_id]=1;
+		}
+	}
 }
-foreach ($users as $user) {
+
+arsort($users);
+
+foreach ($users as $user=>$total) {
+	
 	if (!empty($user))	{
 		$objUser=\app\models\Users::findIdentity($user);
 		$render_columns[]=[

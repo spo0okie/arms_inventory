@@ -142,6 +142,7 @@ class ServicesController extends Controller
 	{
 		
 		$searchModel = new ServicesSearch();
+		$searchModel->directlySupported=true;
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		$this->view->params['layout-container'] = 'container-fluid';
 		
