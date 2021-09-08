@@ -331,7 +331,7 @@ class Services extends \yii\db\ActiveRecord
 		}
 		if (is_object($this->parent))
 			return $this->supportRecursiveCache = $this->parent->supportRecursive;
-		return null;
+		return [];
 	}
 	
 	public function getSupportNames() {
