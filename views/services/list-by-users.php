@@ -85,6 +85,7 @@ foreach ($users as $user=>$total) {
 				if (in_array($user,$data->support_ids)) return 'Поддержка';
 				return '';
 			},
+			'footer'=>$total,
 			'contentOptions' => function ($data) use ($user) {
 				if ($data->responsible_id == $user) return ['class' => ['col_serviceUser','col_responsible']];
 				if (in_array($user,$data->support_ids)) return ['class' => ['col_serviceUser','col_support']];
@@ -99,6 +100,7 @@ echo GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
 	'columns' => $render_columns,
+	'showFooter' => true,
 	'floatHeader'=>true,
 	'floatHeaderOptions'=>['top'=>'50']
 ]);
