@@ -16,13 +16,13 @@ span.segment_gw_close2open  {background-color:lightgreen; border-radius: 7px;  b
 span.segment_gw_open2close  {background-color:pink; border-radius: 7px;  border: 2pt lime solid;}
 span.segment_voip  {background-color: greenyellow;}
 span.segment_skud  {background-color: burlywood;}
-span.segment_control {background: repeating-linear-gradient(
-        45deg,
-        lightyellow,
-        lightyellow 10px,
-        darkgray 10px,
-        darkgray 20px
-);}
+span.segment_mgmt {background: repeating-linear-gradient(
+    45deg,
+    lightyellow,
+    lightyellow 5px,
+    lightgray 5px,
+    lightgray 10px
+); border-radius: 7px}
 
 
 /* РАСКРАСКА L2 ДОМЕНОВ */
