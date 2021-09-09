@@ -36,7 +36,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		<h4>
 			(<?php
 			echo $model->is_end_user?'Предоставляется пользователям':'Внутренний сервис';
-			if (is_object($model->segmentRecursive)) echo " // Сегмент ИТ: ".$this->render('/segments/item',['model'=>$model->segment,'static_view'=>true]);
+			if (is_object($model->segmentRecursive)) echo " // Сегмент ИТ: ".$this->render('/segments/item',['model'=>$model->segmentRecursive,'static_view'=>true]);
 			?>)
 			<?php if (is_object($model->parent))  echo "<br /> Входит в состав: {$this->render('item',['model'=>$model->parent])}"; ?>
 		</h4>

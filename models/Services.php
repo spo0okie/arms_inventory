@@ -297,7 +297,7 @@ class Services extends \yii\db\ActiveRecord
 	}
 	
 	public function getSegmentName() {
-		if (is_object($this->supportRecursive)) return $this->segmentRecursive->name;
+		if (is_object($this->segmentRecursive)) return $this->segmentRecursive->name;
 		return null;
 	}
 	
