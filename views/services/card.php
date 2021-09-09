@@ -75,10 +75,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		<?php if (count($children)) { ?>
 			<h2>Содержит в составе:</h2>
 			<p>
-				<?php
-				foreach ($children as $service)
-					echo $this->render('/services/item',['model'=>$service,'static_view'=>$static_view]).'<br />';
-				?>
+				<?= $this->render('/services/tree-list',['model'=>$model]); ?>
 			</p>
 			<br />
 		<?php } ?>
