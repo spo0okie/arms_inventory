@@ -69,6 +69,7 @@ class Segments extends \yii\db\ActiveRecord
 	public static function fetchNames(){
 		$list= static::find()
 			->select(['id','name'])
+			->orderBy(['name'=>SORT_ASC])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}
