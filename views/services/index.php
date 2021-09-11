@@ -34,6 +34,11 @@ $renderer=$this;
 	<?= Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']) ?>
 	<div class="pull-right">
 		<?= Html::a(
+			'Распределение по сотрудникам',
+			'index-by-users'
+		) ?>
+		//
+		<?= Html::a(
 			$childrenLabel,
 			$childrenUrl
 		) ?>
