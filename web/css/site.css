@@ -396,7 +396,6 @@ table.places-arms-container td.tech_whitespace {
 
 /* Уволенные сотрудники */
 span.users-item.uvolen a {color: red;}
-span.comps-item {font-variant: all-small-caps}
 
 /* Раскраска статусов оборудования */
 span.item_status.state_required, td.item_status.state_required {background-color: cyan}
@@ -465,6 +464,30 @@ td.col_serviceUser.col_support {background-color: lightgoldenrodyellow}
 td.col_serviceSum.status_OK {background-color: lightgreen}
 td.col_serviceSum.status_Warning {background-color: lightgoldenrodyellow}
 td.col_serviceSum.status_Alert {background-color: lightpink}
+
+
+span.net-ips-item,
+span.comps-item,
+span.techs-item,
+span.arms-item {
+    font-family: Consolas, monospace;
+}
+
+span.net-ips-item span.glyphicon,
+span.comps-item span.glyphicon,
+span.techs-item span.glyphicon,
+span.arms-item span.glyphicon{
+    padding-left: 2pt;
+}
+
+span.services-item a span.service-icon {
+    font-size: smaller;
+    padding-right: 1pt;
+}
+
+span.services-item.archived {
+    text-decoration: line-through;
+}
 
 
 /************************************************/
@@ -692,4 +715,8 @@ table.acls-table th{
 
 .dropdown-menu {
     min-width: 200px !important;
+}
+
+.glyphicon {
+    font-size: smaller;
 }

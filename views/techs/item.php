@@ -19,8 +19,11 @@ if (!empty($model)) {
 <span class="techs-item"
       qtip_ajxhrf="<?= \yii\helpers\Url::to(['/techs/ttip','id'=>$model->id])?>"
 >
-	<?= Html::a($name,['techs/view','id'=>$model->id]) ?>
-	<?= $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['techs/update','id'=>$model->id,'return'=>'previous']) ?>
+	<?=
+		Html::a($name,['techs/view','id'=>$model->id])
+	?><?=
+		$static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['techs/update','id'=>$model->id,'return'=>'previous'])
+	?>
 
 </span>
 <?php }

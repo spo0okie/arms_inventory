@@ -58,13 +58,17 @@ class ServicesSearch extends Services
 				'supportSchedule',
 				'providingSchedule',
 			]);
-
-        // add conditions that should always apply here
+	
 		if ($this->parent_id===false) {
 			$query->andWhere(['services.parent_id'=>null]);
 		}
 
-        $dataProvider = new ActiveDataProvider([
+		if ($this->archived===false) {
+			$query->andWhere(['services.archived'=>0]);
+		}
+	
+	
+		$dataProvider = new ActiveDataProvider([
             'query' => $query,
 	        'totalCount' => $query->count('distinct(services.id)'),
 	        'pagination' => ['pageSize' => 500,],

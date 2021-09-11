@@ -24,11 +24,16 @@ use yii\web\User;
  * @property string $providingScheduleName
  * @property string $supportScheduleName
  * @property int $segment_id
+ * @property int $places_id
+ * @property int $partners_id
+ * @property int $archived
+ * @property float $price
  * @property string $segmentName
  * @property int[] $depends_ids
  * @property int[] $comps_ids
  * @property int[] $support_ids
  * @property int[] $techs_ids
+ *
  *
  * @property \app\models\Comps[] $comps
  * @property \app\models\Services[] $depends
@@ -119,6 +124,8 @@ class Services extends \yii\db\ActiveRecord
             [['name', 'description', 'is_end_user'], 'required'],
 	        [['depends_ids','comps_ids','support_ids','techs_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
+			[['places_id','partners_id','archived'],'integer'],
+			[['cost','charge'], 'number'],
 	        [['is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 	        [['name'], 'string', 'max' => 64],
 	        [['responsible_id'],        'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['responsible_id' => 'id']],
@@ -158,6 +165,7 @@ class Services extends \yii\db\ActiveRecord
 			'segment_id' => 'Сегмент ИТ',
 			'segment' => 'Сегмент ИТ',
 			'arms' => 'Армы',
+			'archived' => 'Архивирован',
 			'places' => 'Помещения',
 			'sites' => 'Площадки',
         ];
@@ -186,6 +194,7 @@ class Services extends \yii\db\ActiveRecord
 			'responsible_id' => 'Ответственный за работу сервиса',
 			'support_ids' => 'Дополнительные члены команды по поддержке сервиса',
 			'segment_id' => 'Сегмент ИТ инфраструктуры к которому относится этот сервис',
+			'archived' => 'Если сервис более не используется, но для истории его описание лучше сохранить - то его можно просто заархивировать, чтобы не отсвечивал',
 		];
 	}
 	

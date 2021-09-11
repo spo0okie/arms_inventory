@@ -125,6 +125,11 @@ class ServicesController extends Controller
 			$searchModel->parent_id=null; //игнорировать
 		else
 			$searchModel->parent_id=false; //должен отсутствовать
+		
+		if (Yii::$app->request->get('showArchived',false))
+			$searchModel->archived=null; //игнорировать
+		else
+			$searchModel->archived=false; //должен отсутствовать
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		$this->view->params['layout-container'] = 'container-fluid';
 		
@@ -143,6 +148,7 @@ class ServicesController extends Controller
 		
 		$searchModel = new ServicesSearch();
 		$searchModel->directlySupported=true;
+		$searchModel->archived=false; //должен отсутствовать
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		$this->view->params['layout-container'] = 'container-fluid';
 		

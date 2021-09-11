@@ -16,7 +16,6 @@ if (is_object($model)) {
     <?= Html::a($name,['/comps/view','id'=>$model->id], [
 	    'qtip_ajxhrf'=>\yii\helpers\Url::to(['/comps/ttip','id'=>$model->id]),
 	    //'qtip_class'=>"qtip-wide",
-    ]) ?>
-    <?= $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"/>',['/comps/update','id'=>$model->id])?>
+    ]) ?><?= $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"/>',['/comps/update','id'=>$model->id])?>
 </span>
 <?php } else echo "Отсутствует";

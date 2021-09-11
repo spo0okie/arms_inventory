@@ -15,9 +15,15 @@ $this->params['breadcrumbs'][] = $this->title;
 $models=$dataProvider->models;
 
 $showChildren=Yii::$app->request->get('showChildren',false);
+$showArchived=Yii::$app->request->get('showArchived',false);
+
 $childrenLabel=$showChildren?'Скрыть дочерние сервисы':'Показать дочерние сервисы';
 $childrenUrl=array_merge(['index'],Yii::$app->request->get());
 $childrenUrl['showChildren']=!$showChildren;
+
+$archivedLabel=$showArchived?'Скрыть архивные':'Показать архивные';
+$archivedUrl=array_merge(['index'],Yii::$app->request->get());
+$archivedUrl['showArchived']=!$showArchived;
 
 $renderer=$this;
 ?>
@@ -25,14 +31,19 @@ $renderer=$this;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-	<p>
-		<?= Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']) ?>
-		<br />
+	<?= Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']) ?>
+	<div class="pull-right">
 		<?= Html::a(
 			$childrenLabel,
 			$childrenUrl
 		) ?>
-	</p>
+		//
+		<?= Html::a(
+			$archivedLabel,
+			$archivedUrl
+		) ?>
+		
+	</div>
 	
 	<?php Pjax::begin(); ?>
 	<?= $this->render('table',compact('dataProvider','searchModel'))?>

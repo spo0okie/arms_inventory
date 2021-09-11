@@ -164,7 +164,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			        'multiple' => true
 		        ]
 	        ]) ?>
-			
+	
+			<?= $form->field($model, 'archived')->checkbox() ?>
         </div>
         <div class="col-md-6">
 	        <?= $form->field($model, 'depends_ids')->widget(Select2::className(), [
