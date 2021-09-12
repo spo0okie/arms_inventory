@@ -10,7 +10,7 @@ if (!isset($static_view)) $static_view=false;
 
 if (is_object($model)) {
 	if (!isset($fqdn)) $fqdn=false;
-	$name = $fqdn?mb_strtolower($model->fqdn):$model->name;
+	$name = $fqdn?mb_strtolower($model->fqdn):mb_strtoupper($model->name);
 ?>
 <span class="comps-item">
     <?= Html::a($name,['/comps/view','id'=>$model->id], [
