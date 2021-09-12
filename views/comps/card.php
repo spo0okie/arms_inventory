@@ -23,7 +23,7 @@ if (!mb_strlen($domain))
 
 ?>
 
-<span class="unit-status <?= $model->updatedRenderClass ?> clickable" onclick="$('#comp-updated-info').toggle()"><?= $model->updatedText ?></span>
+<span class="unit-status <?= $model->updatedRenderClass ?> clickable" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()"><?= $model->updatedText ?></span>
 
 <h1>
 	<?php if (!$no_abbr) { ?> <abbr title="Операционная система">ОС</abbr> <?php } ?>
@@ -48,7 +48,7 @@ if (!mb_strlen($domain))
 
 <div>
 	<?= $model->os ?><br />
-	<span id="comp-updated-info" class="update-timestamp" style="display: none">Последнее обновление данных <?= $model->updated_at ?> (v. <?= $model->raw_version ?>)</span>
+	<span id="comp<?= $model->id ?>-updated-info" class="update-timestamp" style="display: none">Последнее обновление данных <?= $model->updated_at ?> (v. <?= $model->raw_version ?>)</span>
 </div>
 <div>
 	<?= $model->comment ?>

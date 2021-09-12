@@ -43,8 +43,8 @@ if (is_object($model->state)) {
 
 	<span class="divider1"></span>
 
-	<h4><span class="clickable" onclick="$('#arm-hw').slideToggle()">Оборудование: <?= $this->render('/hwlist/shortlist',['model'=>$model->hwList]) ?></span></h4>
-	<div id="arm-hw" class="data-block" style="display: none">
+	<h4><span class="clickable" onclick="$('#arm<?= $model->id ?>-hw').slideToggle()">Оборудование: <?= $this->render('/hwlist/shortlist',['model'=>$model->hwList]) ?></span></h4>
+	<div id="arm<?= $model->id ?>-hw" class="data-block" style="display: none">
 		<?= $this->render('hw',['model'=>$model,'static_view'=>$static_view]) ?>
 	</div>
 
