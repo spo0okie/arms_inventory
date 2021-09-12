@@ -17,6 +17,9 @@ class TechStates extends \yii\db\ActiveRecord
 
 	public static $title='Состояния';
 	public static $description='Состояния жизненного цикла оборудования и иных сущностей в предприятии';
+	
+	public static $unknown_code='state_unknown';
+	//public static $unknown_name='';
 
     /**
      * {@inheritdoc}

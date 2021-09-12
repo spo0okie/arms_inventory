@@ -6,6 +6,9 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
 if (!isset($static_view)) $static_view=false;
+if (!isset($no_arm)) $no_arm=false; //спрятать АРМ
+if (!isset($no_abbr)) $no_abbr=false; //спрятать АРМ
+if (!isset($ips_glue)) $ips_glue=null;
 $services=$model->services;
 $deleteable=!count($services);
 $fqdn=mb_strtolower($model->fqdn);
@@ -19,18 +22,18 @@ if (!mb_strlen($domain))
 	$domain='- не в домене -';
 
 ?>
+
+<span class="unit-status <?= $model->updatedRenderClass ?> clickable" onclick="$('#comp-updated-info').toggle()"><?= $model->updatedText ?></span>
+
 <h1>
-	<abbr title="Операционная система">ОС</abbr>
-	<span class="small">
-		<?= $domain ?>\
-	</span>
-	<?= $static_view?Html::a($model->name,['comps/view','id'=>$model->id]):$model->name ?>
+	<?php if (!$no_abbr) { ?> <abbr title="Операционная система">ОС</abbr> <?php } ?>
+	<span class="small"><?= $domain ?>\</span><?= $static_view?Html::a($model->name,['comps/view','id'=>$model->id]):$model->name ?>
 
 	<?= Html::a("<span class=\"glyphicon glyphicon-log-in\" title='Удаленное управление {$model->fqdn}' />",'remotecontrol://'.$model->fqdn) ?>
 
 	<?= $static_view?'':(Html::a('<span class="glyphicon glyphicon-pencil" title="Изменить"></span>',['comps/update','id'=>$model->id])) ?>
 
-	<?php if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash" title="Удалить"/>', ['comps/delete', 'id' => $model->id], [
+	<?php if(!$static_view) if($deleteable) echo Html::a('<span class="glyphicon glyphicon-trash" title="Удалить"/>', ['comps/delete', 'id' => $model->id], [
 		'data' => [
 			'confirm' => 'Удалить эту ОС? Это действие необратимо!',
 			'method' => 'post',
@@ -43,22 +46,27 @@ if (!mb_strlen($domain))
 	&nbsp;
 </h1>
 
-<p>
+<div>
 	<?= $model->os ?><br />
-	<span class="update-timestamp">Последнее обновление данных <?= $model->updated_at ?> (v. <?= $model->raw_version ?>)</span>
-</p>
-<?= $model->comment ?>
+	<span id="comp-updated-info" class="update-timestamp" style="display: none">Последнее обновление данных <?= $model->updated_at ?> (v. <?= $model->raw_version ?>)</span>
+</div>
+<div>
+	<?= $model->comment ?>
+</div>
+<?php if(!$no_arm) { ?>
+	<h4>АРМ</h4>
+	<p>
+		<?php if (is_object($model->arm)) { ?>
+			<?= $this->render('/arms/item',['model'=>$model->arm,'static_view'=>$static_view]) ?>
+		<?php } else { ?>
+			не назначен
+		<?php } ?>
+	</p>
+<?php } ?>
 
-<h4>АРМ</h4>
-<p>
-	<?php if (is_object($model->arm)) { ?>
-		<?= $this->render('/arms/item',['model'=>$model->arm,'static_view'=>$static_view]) ?>
-	<?php } else { ?>
-		не назначен
-	<?php } ?>
-</p>
-
-<?= $this->render('ips_list',['model'=>$model,'static_view'=>$static_view]) ?><br />
+<div>
+	<?= $this->render('ips_list',['model'=>$model,'static_view'=>$static_view,'glue'=>$ips_glue]) ?>
+</div>
 
 <?php if (count($services)) {
 	
@@ -70,8 +78,8 @@ if (!mb_strlen($domain))
 
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 
-<h4>Журнал входов (3 посл)</h4>
 <div class="login_journal">
+	<h4>Журнал входов (3 посл)</h4>
 	<?php
 	$logons=$model->lastThreeLogins;
 	//$logons=$model->logins;

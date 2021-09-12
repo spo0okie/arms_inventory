@@ -10,6 +10,7 @@ use yii\helpers\Html;
 //	<?= Html::a('<span class="glyphicon glyphicon-pencil"/>',['/places/update','id'=>$model->id])
 
 if (!isset($static_view)) $static_view=true;
+if (!isset($items_glue)) $items_glue='/';
 
 if (is_object($model)) {
 
@@ -26,7 +27,7 @@ if (is_object($model)) {
             );
             $item=\app\models\Places::fetchItem($item->parent_id);
         } while (is_object($item));
-        echo implode('/',array_reverse($tokens));
+        echo implode($items_glue,array_reverse($tokens));
     } else {
 	    echo Html::a(
 		    isset($short)?$model->short:$model->name,

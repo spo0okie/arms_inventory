@@ -9,6 +9,7 @@
 /* @var $model app\models\Comps */
 
 if (!isset($static_view)) $static_view=false;
+if (!isset($glue)) $glue='<br />';
 
 ?>
 
@@ -16,7 +17,7 @@ if (!isset($static_view)) $static_view=false;
         <?php
 		$output=[];
 		foreach ($model->netIps as $ip) {
-			$output[]=$this->render('/net-ips/item',['model'=>$ip]);
+			$output[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>$static_view]);
 		}
-		echo implode('<br />',$output);
+		echo implode($glue,$output);
 		?>

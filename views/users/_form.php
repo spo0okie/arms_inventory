@@ -40,7 +40,7 @@ use kartik\select2\Select2;
 			
 			<?= $form->field($model, 'Ename')->textInput(['maxlength' => true]) ?>
 			
-			<?= $form->field($model, 'Persg')->dropDownList(\app\models\Users::$WTypes) ?>
+			<?= $form->field($model, 'Persg')->dropDownList(\yii\helpers\ArrayHelper::getColumn(\app\models\Users::$WTypes,0)) ?>
 			
 			<?= $form->field($model, 'Login')->textInput(['maxlength' => true]) ?>
 			

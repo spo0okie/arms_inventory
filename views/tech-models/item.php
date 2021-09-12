@@ -8,6 +8,8 @@
 
 /* @var \app\models\TechModels $model */
 
+if (!isset($static_view)) $static_view=false;
+
 use yii\helpers\Html;
 if (is_object($model)) {
 	if (isset($short)&&$short)
@@ -24,7 +26,7 @@ if (is_object($model)) {
       qtip_ajxhrf="<?= \yii\helpers\Url::to(['/tech-models/ttip','id'=>$model->id])?>"
 >
 	<?= Html::a($name,['tech-models/view','id'=>$model->id]) ?>
-	<?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',['tech-models/update','id'=>$model->id]) ?>
+	<?= $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['tech-models/update','id'=>$model->id]) ?>
 </span>
 
 <?php }

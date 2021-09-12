@@ -33,6 +33,7 @@ use Yii;
  * @property Users $user
  * @property Domains $domain
  * @property string $updatedRenderClass
+ * @property string $updatedText
  * @property string $domainName
  * @property string $currentIp
  * @property string[] $ips
@@ -357,7 +358,16 @@ class Comps extends \yii\db\ActiveRecord
 			else return 'over_month_fresh';
 		} else return '';
 	}
-
+	
+	public function getUpdatedText() {
+		if (strlen($this->updated_at)) {
+			$data_age=time()-strtotime($this->updated_at);
+			if ($data_age < 3600) return (int)($data_age/60).' мин.';
+			elseif ($data_age < 3600*72) return (int)($data_age/3600).' ч.';
+			else return (int)($data_age/3600/24).' дн.';
+		} else return '';
+	}
+	
 	public static function fetchNames(){
 		$list= static::find()
 			->select(['id','name'])

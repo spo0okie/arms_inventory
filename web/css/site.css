@@ -3,6 +3,21 @@ body {
     height: 100%;
 }
 
+/*Шрифт для инв номеров*/
+@font-face {
+    font-family: 'Stencil';
+    src: url('../fonts/Aero_Matics_Stencil_bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Stencil';
+    src: url('../fonts/Aero_Matics_Stencil_bold_italic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
 .wrap {
     min-height: 100%;
     height: auto;
@@ -406,6 +421,12 @@ span.item_status.state_operating, td.item_status.state_operating {background-col
 span.item_status.state_malfunction, td.item_status.state_malfunction {background-color: orange}
 span.item_status.state_broken, td.item_status.state_broken {background-color: red}
 
+span.unit-status.state_in_supply_service {background: linear-gradient(45deg,transparent,transparent 15px,cyan 15px)}
+span.unit-status.state_in_warehouse {background: linear-gradient(45deg,transparent,transparent 15px,grey 15px)}
+span.unit-status.state_operating {background: linear-gradient(45deg,transparent,transparent 15px,limegreen 15px)}
+span.unit-status.state_malfunction {background: linear-gradient(45deg,transparent,transparent 15px,orange 15px)}
+span.unit-status.state_broken {background: linear-gradient(45deg,transparent,transparent 15px,red 15px)}
+
 /* Раскраска статусов документов */
 span.state_required, span.state_paywait {background-color: yellow}
 span.state_paywait_confirmed {background-color: lightgreen}
@@ -423,6 +444,12 @@ td.arm_hostname.day_fresh {background-color: lightblue}
 td.arm_hostname.week_fresh {background-color: lightgreen}
 td.arm_hostname.month_fresh {background-color: lightgoldenrodyellow}
 td.arm_hostname.over_month_fresh {background-color: lightpink}
+
+span.unit-status.hour_fresh {background: linear-gradient(45deg,transparent,transparent 15px, dodgerblue 15px)}
+span.unit-status.day_fresh {background: linear-gradient(45deg,transparent,transparent 15px, limegreen 15px)}
+span.unit-status.week_fresh {background: linear-gradient(45deg,transparent,transparent 15px, darkkhaki 15px)}
+span.unit-status.month_fresh {background: linear-gradient(45deg,transparent,transparent 15px, darkorange 15px)}
+span.unit-status.over_month_fresh {background: linear-gradient(45deg,transparent,transparent 15px, indianred 15px)}
 
 td.usage_col > div.progress {margin-bottom: auto !important;}
 
@@ -488,6 +515,80 @@ span.services-item a span.service-icon {
 span.services-item.archived {
     text-decoration: line-through;
 }
+
+/* КАРТОЧКА АРМА */
+/*Сама карточка*/
+div.users-view div.arms-card {
+    background-color: slategray;
+    border-radius: 2pt 12pt 2pt 12pt;
+    color: whitesmoke;
+    /*padding-left: 4pt;*/
+}
+/* номер АРМ */
+div.arms-card h3 {
+    font: bold 42px 'Stencil', Helvetica, sans-serif;
+    padding: 0;
+    margin: 1.5pt 0 0 1.5pt;
+}
+div.arms-card h3 span.arms-item { font-family: 'Stencil', Helvetica, sans-serif;}
+
+div.arms-card h4 {
+    width: 100%;
+    display: block;
+    margin: 0;
+    text-align: center;
+}
+
+div.arms-card div {margin-left: 4pt;}
+
+/* подсвечиваемый кликабельный блок */
+div.arms-card span.clickable {cursor: pointer; padding: 0 10pt}
+div.arms-card span.clickable:hover {background-color: darkgray}
+div.arms-card span.clickable:hover:before {content: '⌵   '}
+div.arms-card span.clickable:hover:after {content: '   ⌵'}
+
+/* ссылочки */
+div.arms-card a,
+div.arms-card a:visited { color: silver; text-decoration: none;}
+div.arms-card a:hover   { color: yellow; text-decoration: none;}
+
+/* ярлычок статуса */
+div.arms-card span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0 12pt 0 0;}
+span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0; color: white}
+
+div.arms-card span.it-staff {
+    width: 100%;
+    text-align: right;
+    display: block;
+    padding-right:4pt;
+    padding-bottom:2pt;
+}
+
+div.arms-card span.divider1 {
+    display: block; width: 100%; height: 10pt; margin: 2pt 0; padding: 0;
+    background: linear-gradient(to right, white ,white 1%,transparent 1%,transparent 99%,white 99%);
+}
+
+div.arms-card span.divider2 {
+    display: block; width: 100%; height: 15pt; margin: 2pt 0; padding: 0;
+    background: repeating-linear-gradient(120deg, transparent,transparent 5px,white 6px, white 10px, transparent 11px);
+}
+
+/* блок в рамочке */
+div.arms-card div.data-block {
+    margin: 4pt;
+    padding: 0 4pt;
+    border: solid silver 1px;
+}
+
+div.arms-card div.data-block.tree-level-2 div.comps-card {background-color: #7f8f9f; padding: 0; margin: 6pt 2pt;}
+div.arms-card div.data-block.tree-level-2 {font-size: 80%;}
+div.arms-card div.data-block.tree-level-2 h1 {font-size:16pt; margin: 2pt 0 0 2pt; padding: 0;}
+div.arms-card div.data-block.tree-level-2 h4 {font-size:10pt; margin: 0; padding: 0; text-align: left}
+div.arms-card div.data-block.tree-level-2 span.unit-status {float: right; width: 25%; text-align: center; border-radius: 0;}
+div.arms-card div.data-block.tree-level-2 div {margin: 2pt;}
+
+
 
 
 /************************************************/
