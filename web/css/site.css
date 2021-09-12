@@ -551,6 +551,7 @@ div.arms-card span.clickable:hover:after {content: '   ⌵'}
 div.arms-card a,
 div.arms-card a:visited { color: silver; text-decoration: none;}
 div.arms-card a:hover   { color: yellow; text-decoration: none;}
+div.arms-card span.net-ips-item a { color: white}
 
 /* ярлычок статуса */
 div.arms-card span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0 12pt 0 0;}
