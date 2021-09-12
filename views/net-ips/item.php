@@ -16,11 +16,9 @@ if (!empty($model)) {
 
 	<span class="net-ips-item <?= $class ?>"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['net-ips/ttip','id'=>$model->id]) ?>"
-	>
-		<?=
-			Html::a($name,['net-ips/view','id'=>$model->id])
-		?><?=
-			$static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['net-ips/update','id'=>$model->id,'return'=>'previous'])
-		?>
-	</span>
+	><?=
+		Html::a($name,['net-ips/view','id'=>$model->id])
+	?><?=
+		$static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['net-ips/update','id'=>$model->id,'return'=>'previous'])
+	?></span>
 <?php } ?>

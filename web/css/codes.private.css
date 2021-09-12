@@ -1,7 +1,9 @@
 
 /* РАСКРАСКА СЕГМЕНТОВ СЕТИ */
 span.segment_open {background-color: lightgreen; border-radius: 7px}
+div.arms-card div span.segment_open {background-color: seagreen;}
 span.segment_closed {background-color: pink; border-radius: 7px}
+div.arms-card div span.segment_closed {background-color: indianred}
 span.segment_common {background-color: lightskyblue; border-radius: 7px}
 span.segment_ext {background-color:yellow; border-radius: 7px;}
 span.segment_ext_dmz {background-color:yellow; border-radius: 7px; border: 1.2pt red dashed;}
@@ -11,6 +13,7 @@ span.segment_guest_dmz a {color: orange}
 span.segment_client_vpn  {background-color:coral; border-radius: 7px}
 span.segment_intersite_vpn  {background-color:cyan; border-radius: 7px}
 span.segment_it_lan  {background-color:orange; border-radius: 7px}
+div.arms-card div span.segment_it_lan  {background-color: darkorange;}
 span.segment_videoconf  {background-color:lightyellow;}
 span.segment_gw_close2open  {background-color:lightgreen; border-radius: 7px;  border: 2pt red solid;}
 span.segment_gw_open2close  {background-color:pink; border-radius: 7px;  border: 2pt lime solid;}
