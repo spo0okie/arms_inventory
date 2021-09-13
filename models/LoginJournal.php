@@ -173,14 +173,14 @@ class LoginJournal extends \yii\db\ActiveRecord
 			->where(['users_id'=>$user_id])
 			->andWhere(['not',['comps_id'=>NULL]])
 			->groupBy('comps_id')
-			//->orderBy('id desc')
+			->orderBy(['id'=>SORT_DESC])
 			->limit($limit)
 			->all();
 
 		if (!is_array($recs) || !count($recs)) return [];
 		$items=[];
 		foreach ($recs as $rec) $items[]=$rec['id'];
-		$result=static::find()->where(['id'=>$items])->orderBy('id desc')->all();
+		$result=static::find()->where(['id'=>$items])->all();
 		if (!is_array($result)) $result=[];
 		return $result;
 	}
