@@ -24,7 +24,7 @@ use kartik\select2\Select2;
 		<div class="col-md-6">
 			<h3>Кому предоставляется</h3>
 			<?= $form->field($model, 'users_ids')->widget(Select2::classname(), [
-				'data' => \app\models\Users::fetchNames(),
+				'data' => \app\models\Users::fetchWorking(),
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [

@@ -19,7 +19,7 @@ use yii\grid\GridView;
 				Тип доступа
 			</th>
 			<th>
-				Объект
+				Субъект
 			</th>
 		</tr>
 		<?php foreach ($model->acls as $acl) { ?>

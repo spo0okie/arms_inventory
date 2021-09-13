@@ -79,7 +79,7 @@ class Schedules extends \yii\db\ActiveRecord
 			'satEffectiveDescription' => 'Суб.',
 			'sunEffectiveDescription' => 'Вск.',
 			'resources' => 'Ресурсы', //для ACLs
-			'objects' => 'Объекты', //для ACLs
+			'objects' => 'Субъекты', //для ACLs
 		];
 	}
 	
