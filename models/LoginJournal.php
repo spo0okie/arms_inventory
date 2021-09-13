@@ -180,7 +180,7 @@ class LoginJournal extends \yii\db\ActiveRecord
 		if (!is_array($recs) || !count($recs)) return [];
 		$items=[];
 		foreach ($recs as $rec) $items[]=$rec['id'];
-		$result=static::find()->where(['id'=>$items])->all();
+		$result=static::find()->where(['id'=>$items])->orderBy(['id'=>SORT_DESC])->all();
 		if (!is_array($result)) $result=[];
 		return $result;
 	}
@@ -203,7 +203,7 @@ class LoginJournal extends \yii\db\ActiveRecord
 		if (!is_array($recs) || !count($recs)) return [];
 		$items=[];
 		foreach ($recs as $rec) $items[]=$rec['id'];
-		$result=static::find()->where(['id'=>$items])->all();
+		$result=static::find()->where(['id'=>$items])->orderBy(['id'=>SORT_DESC])->all();
 		if (!is_array($result)) $result=[];
 		return $result;
 	}
