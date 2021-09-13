@@ -196,7 +196,7 @@ class LoginJournal extends \yii\db\ActiveRecord
 			->where(['comps_id'=>$comp_id])
 			->andWhere(['not',['comps_id'=>NULL]])
 			->groupBy('comps_id')
-			->orderBy('id desc')
+			->orderBy(['id'=>SORT_DESC])
 			->limit($limit)
 			->all();
 
