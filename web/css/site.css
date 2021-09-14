@@ -551,6 +551,7 @@ div.arms-card h4 {width: 100%;  display: block; margin: 0; text-align: center;}
 
 div.arms-card div.row {margin-left: 8pt;}
 div.arms-card div.comment-block {font-weight: 150; text-align: center}
+div.arms-card div.comment-block img.exclamation-sign {width: 30pt; height: 30pt; filter: invert(100%)}
 
     /* подсвечиваемый кликабельный блок */
 div.arms-card span.clickable {cursor: pointer; padding: 0 10pt}

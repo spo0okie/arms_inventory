@@ -44,7 +44,7 @@ if (is_object($model->state)) {
 		<?php if (strlen($model->comment)) { ?>
 			<div class="col-md-6">
 				<div class="comment-block" >
-					<span class="glyphicon glyphicon-warning-sign"></span><br/>
+					<img class="exclamation-sign" src="/web/img/exclamation-mark.svg" /><br/>
 					<?= $model->comment ?>
 				</div>
 			</div>
