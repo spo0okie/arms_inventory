@@ -23,7 +23,7 @@ if (!mb_strlen($domain))
 
 ?>
 
-<span class="unit-status <?= $model->updatedRenderClass ?> clickable" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()"><?= $model->updatedText ?></span>
+<span class="unit-status <?= $model->updatedRenderClass ?> href" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()"><?= $model->updatedText ?></span>
 
 <h1>
 	<?php if (!$no_abbr) { ?> <abbr title="Операционная система">ОС</abbr> <?php } ?>

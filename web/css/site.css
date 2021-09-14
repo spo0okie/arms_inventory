@@ -18,6 +18,24 @@ body {
     font-style: italic;
 }
 
+@font-face {
+    font-family: 'Oswald';
+    src: url('../fonts/Oswald-VariableFont_wght.ttf') format('truetype');
+    font-weight: 125 950;
+}
+
+@font-face {
+    font-family: 'Roboto Condensed';
+    src: url('../fonts/RobotoCondensed-Regular.ttf') format('truetype');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Roboto Condensed';
+    src: url('../fonts/RobotoCondensed-Light.ttf') format('truetype');
+    font-weight: 100;
+}
+
 .wrap {
     min-height: 100%;
     height: auto;
@@ -523,26 +541,18 @@ div.users-view div.arms-card {
     background-color: slategray;
     border-radius: 2pt 12pt 2pt 12pt;
     color: whitesmoke;
-    /*padding-left: 4pt;*/
+    font-family: 'Roboto Condensed', sans-serif;
 }
 /* номер АРМ */
-div.arms-card h3 {
-    font: bold 42px 'Stencil', Helvetica, sans-serif;
-    padding: 0;
-    margin: 1.5pt 0 0 1.5pt;
-}
+div.arms-card h3 {font: bold 42px 'Stencil', Helvetica, sans-serif; padding: 10pt 0 0 20pt;}
 div.arms-card h3 span.arms-item { font-family: 'Stencil', Helvetica, sans-serif;}
 
-div.arms-card h4 {
-    width: 100%;
-    display: block;
-    margin: 0;
-    text-align: center;
-}
+div.arms-card h4 {width: 100%;  display: block; margin: 0; text-align: center;}
 
-div.arms-card div {margin-left: 4pt;}
+div.arms-card div.row {margin-left: 8pt;}
+div.arms-card div.comment-block {font-weight: 150; text-align: center}
 
-/* подсвечиваемый кликабельный блок */
+    /* подсвечиваемый кликабельный блок */
 div.arms-card span.clickable {cursor: pointer; padding: 0 10pt}
 div.arms-card span.clickable:hover {background-color: darkgray}
 div.arms-card span.clickable:hover:before {content: '⌵   '}
@@ -554,7 +564,8 @@ div.arms-card a:visited { color: silver; text-decoration: none;}
 div.arms-card a:hover   { color: yellow; text-decoration: none;}
 
 div.arms-card span.net-ips-item {border-radius: 0}
-div.arms-card span.net-ips-item a { color: white}
+div.arms-card span.net-ips-item a {color: white; font-family: 'Roboto Condensed',sans-serif; margin: 0 1.5pt}
+div.arms-card span.net-ips-item a:hover {color: yellow}
 
 /* ярлычок статуса */
 div.arms-card span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0 12pt 0 0;}
@@ -589,7 +600,7 @@ div.arms-card div.data-block.tree-level-2 div.comps-card {background-color: #7f8
 div.arms-card div.data-block.tree-level-2 {font-size: 80%;}
 div.arms-card div.data-block.tree-level-2 h1 {font-size:16pt; margin: 2pt 0 0 2pt; padding: 0;}
 div.arms-card div.data-block.tree-level-2 h4 {font-size:10pt; margin: 0; padding: 0; text-align: left}
-div.arms-card div.data-block.tree-level-2 span.unit-status {float: right; width: 25%; text-align: center; border-radius: 0;}
+div.arms-card div.data-block.tree-level-2 span.unit-status {float: right; width: 20%; text-align: right; border-radius: 0;}
 div.arms-card div.data-block.tree-level-2 div {margin: 2pt;}
 
 

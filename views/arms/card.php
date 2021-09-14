@@ -30,15 +30,25 @@ if (is_object($model->state)) {
 		])
 	?></h3>
 
-	<div>
-		<?php if (strlen($model->sn)) {?>
-			<span class="serial">S/N: <?= $model->sn ?></span><br/>
+	<div class="row">
+		<div class="col-md-<?= strlen($model->comment)?6:12 ?>">
+			<?php if (strlen($model->sn)) {?>
+				<span class="serial">S/N: <?= $model->sn ?></span><br/>
+			<?php } ?>
+			<?php if (strlen($model->inv_num)) {?>
+				<span class="serial">Инв.№: <?= $model->inv_num ?></span><br/>
+			<?php } ?>
+			Модель:<?= $this->render('/tech-models/item',['model'=>$model->techModel,'static_view'=>true]) ?><br />
+			Помещение:<?= $this->render('/places/item',['model'=>$model->place,'static_view'=>true,'full'=>true,'items_glue'=>' &gt; ']) ?><br />
+		</div>
+		<?php if (strlen($model->comment)) { ?>
+			<div class="col-md-6">
+				<div class="comment-block" >
+					<span class="glyphicon glyphicon-warning-sign"></span><br/>
+					<?= $model->comment ?>
+				</div>
+			</div>
 		<?php } ?>
-		<?php if (strlen($model->inv_num)) {?>
-			<span class="serial">Инв.№: <?= $model->inv_num ?></span><br/>
-		<?php } ?>
-		Модель:<?= $this->render('/tech-models/item',['model'=>$model->techModel,'static_view'=>true]) ?><br />
-		Помещение:<?= $this->render('/places/item',['model'=>$model->place,'static_view'=>true,'full'=>true,'items_glue'=>' &gt; ']) ?><br />
 	</div>
 
 	<span class="divider1"></span>
@@ -66,7 +76,7 @@ if (is_object($model->state)) {
 					'static_view'=>$static_view,
 					'no_arm'=>true,
 					'no_abbr'=>true,
-					'ips_glue'=>' ',
+					'ips_glue'=>' \\\\ ',
 				]) ?></div><br/>
 			<?php } } else { ?>
 			отсутствуют

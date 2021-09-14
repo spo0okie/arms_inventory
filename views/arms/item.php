@@ -10,11 +10,11 @@ if (!isset($static_view)) $static_view=false;
 
 $hrefProps=[];
 
-if (!isset($no_ttip)) $hrefProps['qtip_ajxhrf']=\yii\helpers\Url::to(['/arms/ttip','id'=>$model->id]);
 
 
-if (is_object($model)) { ?>
-
+if (is_object($model)) {
+	if (!isset($no_ttip)) $hrefProps['qtip_ajxhrf']=\yii\helpers\Url::to(['/arms/ttip','id'=>$model->id]);
+	?>
 <span class="arms-item">
     <?=
 		Html::a($model->num,['/arms/view','id'=>$model->id], $hrefProps)
