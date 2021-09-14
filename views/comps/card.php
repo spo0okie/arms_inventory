@@ -27,7 +27,7 @@ if (!mb_strlen($domain))
 
 <h1>
 	<?php if (!$no_abbr) { ?> <abbr title="Операционная система">ОС</abbr> <?php } ?>
-	<span class="small"><?= $domain ?>\</span><?= $static_view?Html::a($model->name,['comps/view','id'=>$model->id]):$model->name ?>
+	<span class="small"><?= $domain ?>\</span><?= $static_view?Html::a($model->renderName(),['comps/view','id'=>$model->id]):$model->name ?>
 
 	<?= Html::a("<span class=\"glyphicon glyphicon-log-in\" title='Удаленное управление {$model->fqdn}' />",'remotecontrol://'.$model->fqdn) ?>
 

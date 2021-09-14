@@ -69,15 +69,15 @@ if (is_object($model->state)) {
 
 	<h4>Привязанные ОС:</h4>
 	<div class="data-block tree-level-2">
-		<?php if (is_array($model->comps) && count ($model->comps)) {
-			foreach ($model->comps as $comp) { ?>
+		<?php if (is_array($comps=$model->comps) && count ($comps)) {
+			foreach ($model->sortedComps as $comp) { ?>
 				<div class="comps-card"> <?= $this->render('/comps/card',[
 					'model'=>$comp,
 					'static_view'=>$static_view,
 					'no_arm'=>true,
 					'no_abbr'=>true,
 					'ips_glue'=>' \\\\ ',
-				]) ?></div><br/>
+				]) ?></div>
 			<?php } } else { ?>
 			отсутствуют
 		<?php }?>

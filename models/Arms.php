@@ -47,6 +47,7 @@ use Yii;
  * @property Comps $comp
  * @property Comps $hwComp
  * @property Comps[] $comps
+ * @property Comps[] $sortedComps
  * @property Comps[] $hwComps
  * @property Comps[] $vmComps
  * @property Techs[] $techs
@@ -303,6 +304,18 @@ class Arms extends \yii\db\ActiveRecord
 			]);
 	}
 	
+	public function getSortedComps()
+	{
+		$comps=$this->comps;
+		if ($comps[0]->id!=$this->comp_id) {
+			foreach ($comps as $idx=>$comp)
+				if ($comp->id == $this->comp_id)
+					unset($comps[$idx]);
+				
+			array_unshift($comps,$this->comp);
+		}
+		return $comps;
+	}
 	
 	public function buildHwAndVms() {
 		if (!is_null($this->hwComp_cache)) return;

@@ -429,6 +429,11 @@ class Comps extends \yii\db\ActiveRecord
 		$this->save();
 	}
 	
+	public function renderName($fqdn=false)
+	{
+		return $fqdn?mb_strtolower($this->fqdn):mb_strtoupper($this->name);
+	}
+	
 	
 	/**
 	 * @inheritdoc
