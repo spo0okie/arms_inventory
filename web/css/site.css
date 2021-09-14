@@ -438,12 +438,14 @@ span.item_status.state_in_warehouse, td.item_status.state_in_warehouse {backgrou
 span.item_status.state_operating, td.item_status.state_operating {background-color: #5cb85c}
 span.item_status.state_malfunction, td.item_status.state_malfunction {background-color: orange}
 span.item_status.state_broken, td.item_status.state_broken {background-color: red}
+span.item_status.state_issued, td.item_status.state_broken {background-color: darkmagenta}
 
 span.unit-status.state_in_supply_service {background: linear-gradient(45deg,transparent,transparent 15px,cyan 15px)}
 span.unit-status.state_in_warehouse {background: linear-gradient(45deg,transparent,transparent 15px,grey 15px)}
 span.unit-status.state_operating {background: linear-gradient(45deg,transparent,transparent 15px,limegreen 15px)}
 span.unit-status.state_malfunction {background: linear-gradient(45deg,transparent,transparent 15px,orange 15px)}
 span.unit-status.state_broken {background: linear-gradient(45deg,transparent,transparent 15px,red 15px)}
+span.unit-status.state_issued {background: linear-gradient(45deg,transparent,transparent 15px,darkmagenta 15px)}
 span.unit-status.state_unknown {background: linear-gradient(45deg,transparent,transparent 15px,white 15px); border-radius: 0 !important;}
 
 /* Раскраска статусов документов */
