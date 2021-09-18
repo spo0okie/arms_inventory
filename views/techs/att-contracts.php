@@ -10,6 +10,6 @@
 
 if ($docCount=count($model->contracts)) { ?>
 	<span class="arm-att-count">
-	    <span class="glyphicon glyphicon-paperclip" title="Прикреплены документы"></span>×<?= $docCount ?>
+	    <span class="fas fa-paperclip" title="Прикреплены документы"></span>×<?= $docCount ?>
 	</span>
 <?php }

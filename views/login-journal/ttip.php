@@ -26,9 +26,9 @@ use yii\widgets\DetailView;
                 'format'=>'raw',
 				'value'=>function($data){
 					if (is_object($comp=$data->comp))
-						return Html::a($data->compName.'&nbsp;<span class="glyphicon glyphicon-eye-open"/>',['/comps/view','id'=>$comp->id]).
-							'&nbsp;'.Html::a('<span class="glyphicon glyphicon-pencil"/>',['/comps/update','id'=>$comp->id]).
-							'&nbsp;'.Html::a('<span class="glyphicon glyphicon-log-in"/>','remotecontrol://'.$data->compFqdn);
+						return Html::a($data->compName.'&nbsp;<span class="fas fa-eye-open"/>',['/comps/view','id'=>$comp->id]).
+							'&nbsp;'.Html::a('<span class="fas fa-pencil-alt"/>',['/comps/update','id'=>$comp->id]).
+							'&nbsp;'.Html::a('<span class="fas fa-log-in"/>','remotecontrol://'.$data->compFqdn);
 					return $data->compName;
 				}
 			],

@@ -16,14 +16,14 @@ $deleteable=!count($arms);
 <h1>
     <?= $this->render('/lic-keys/item',['model'=>$model,'static_view'=>$static_view]) ?>
 
-    <?php if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['delete', 'id' => $model->id], [
+    <?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
         'data' => [
             'confirm' => 'Удалить этот лицензионный ключ? Убедись, что его есть где потом искать!',
             'method' => 'post',
         ],
     ]); else { ?>
 		<span class="small">
-			<span class="glyphicon glyphicon-lock"	title="Невозможно в данный момент удалить этот лицензионный ключ, т.к. он привязан к АРМам."></span>
+			<span class="fas fa-lock"	title="Невозможно в данный момент удалить этот лицензионный ключ, т.к. он привязан к АРМам."></span>
 		</span>
 	<?php } ?>
 </h1>

@@ -19,7 +19,7 @@ if (is_object($model)) {
     <?=
 		Html::a($model->num,['/arms/view','id'=>$model->id], $hrefProps)
 	?><?=
-		$static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"/>',['/arms/update','id'=>$model->id,'return'=>'previous'])
+		$static_view?'':Html::a('<span class="fas fa-pencil-alt"/>',['/arms/update','id'=>$model->id,'return'=>'previous'])
 	?>
 </span>
 

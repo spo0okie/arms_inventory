@@ -15,6 +15,6 @@ if (!empty($model)) {
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['segments/ttip','id'=>$model->id]) ?>"
 	>
 		<?=  Html::a($name,['segments/view','id'=>$model->id]) ?>
-		<?=  $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['segments/update','id'=>$model->id,'return'=>'previous']) ?>
+		<?=  $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['segments/update','id'=>$model->id,'return'=>'previous']) ?>
 	</span>
 <?php } ?>

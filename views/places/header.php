@@ -17,7 +17,7 @@ if (count($phones)||count($inets)||strlen($addr)) {
 
     <span class="org-phones">
         <?php if (count($phones)) {
-            echo '<span class="glyphicon glyphicon-phone-alt"></span>';
+            echo '<i class="fas fa-phone"></i>';
             foreach ($phones as $phone)
 		        echo $this->render('/org-phones/item',['model'=>$phone]).' ';
         }?>
@@ -25,13 +25,13 @@ if (count($phones)||count($inets)||strlen($addr)) {
     <span class="org-phones">
         <?php if (count($inets)) {
 	        foreach ($inets as $inet)
-		        echo '<span class="glyphicon glyphicon-globe"></span>'.$this->render('/org-inet/item',['model'=>$inet]).' ';
+		        echo '<i class="fas fa-globe"></i>'.$this->render('/org-inet/item',['model'=>$inet]).' ';
         }?>
     </span>
     <?php if(strlen($addr)) { ?>
         <span class="places-addr">
-            <span class="glyphicon glyphicon-envelope"></span><?= Html::encode($addr) ?>
-            <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',['/places/update','id'=>$model->id],['title'=>'Редактировать помещение']) ?>
+            <span class="fas fa-envelope"></span><?= Html::encode($addr) ?>
+            <?= Html::a('<i class="fas fa-pencil-alt"></i>',['/places/update','id'=>$model->id],['title'=>'Редактировать помещение']) ?>
         </span>
     <?php } ?>
 </div>

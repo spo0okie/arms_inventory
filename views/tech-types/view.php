@@ -55,8 +55,8 @@ if (\app\models\TechTypes::isPC($model->id)) {
 
     <h1>
         <?= Html::encode($this->title) ?>
-        <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['update', 'id' => $model->id]) ?>
-        <?= !count($techModels)?Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+        <?= Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
+        <?= !count($techModels)?Html::a('<span class="fas fa-trash"></span>', ['delete', 'id' => $model->id], [
 	        'data' => [
 		        'confirm' => 'Удалить этот тип оборудования?',
 		        'method' => 'post',
@@ -66,7 +66,7 @@ if (\app\models\TechTypes::isPC($model->id)) {
 
     <?php if (count($techModels)) { ?>
         <p>
-            <span class="glyphicon glyphicon-warning-sign"></span> Невозможно удалить этот тип оборудования, т.к. заведены модели оборудования этого типа. (см ниже)
+            <span class="fas fa-warning-sign"></span> Невозможно удалить этот тип оборудования, т.к. заведены модели оборудования этого типа. (см ниже)
         </p>
     <?php } ?>
 	

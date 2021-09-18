@@ -24,8 +24,8 @@ if (!isset($static_view)) $static_view=false;
 
 <h1>
 	<?= "<?= " ?>Html::encode($model-><?= $generator->getNameAttribute() ?>) ?>
-	<?= "<?= " ?>$static_view?'':(Html::a('<span class="glyphicon glyphicon-pencil"></span>',['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/update','id'=>$model->id])) ?>
-	<?= "<?php " ?> if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/delete', 'id' => $model->id], [
+	<?= "<?= " ?>$static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/update','id'=>$model->id])) ?>
+	<?= "<?php " ?> if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/delete', 'id' => $model->id], [
 		'data' => [
 			'confirm' => 'Удалить этот элемент? Действие необратимо',
 			'method' => 'post',

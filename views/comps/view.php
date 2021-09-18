@@ -60,7 +60,7 @@ foreach ($model->swList->items as $item) {
 				<h3>Подозрение на дубликаты в БД</h3>
 				<?php foreach ($model->dupes as $comp) { ?>
 					<?= $this->render('item',['model'=>$comp]) ?>
-					<?= yii\helpers\Html::a('<span class="glyphicon glyphicon-link" title="'.$absorbTitle.'"></span>',
+					<?= yii\helpers\Html::a('<span class="fas fa-link" title="'.$absorbTitle.'"></span>',
 						['/comps/absorb','id'=>$model->id,'absorb_id'=>$comp->id]
 					) ?>
 					<br />
@@ -96,7 +96,7 @@ foreach ($model->swList->items as $item) {
 			<h4>Не распознанный:</h4>
 			<table>
 				<?php if (is_array($model->swList->data)) foreach ($model->swList->data as $item) { ?>
-					<?= $this->render('soft_item_unrecognized', compact('model','item')) ?>
+					<?= $this->render('/swlist/item_unrecognized', compact('model','item')) ?>
 				<?php } ?>
 			</table>
 		</div>

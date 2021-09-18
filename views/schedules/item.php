@@ -20,7 +20,7 @@ if (!empty($model)) {?>
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules/ttip','id'=>$model->id]) ?>"
 	>
 		<?=  Html::a($model->name,['schedules/view','id'=>$model->id]) ?>
-		<?=  $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['schedules/update','id'=>$model->id,'return'=>'previous']) ?>
+		<?=  $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['schedules/update','id'=>$model->id,'return'=>'previous']) ?>
 	</span>
 <?php } else {
 	echo '- расписание отсутствует -';

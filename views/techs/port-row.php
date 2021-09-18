@@ -31,7 +31,7 @@
 		<?= is_object($port_link)?$port_link->comment:$port_comment ?>
 	</td>
 	<?php if (is_object($port_link)) {
-		echo '<td><span class="glyphicon glyphicon-transfer"></span></td>';
+		echo '<td><span class="fas fa-transfer"></span></td>';
 		if (is_object($port_link->linkPort)) {
 			echo '<td>'.$port_link->linkPort->comment.'</td>';
 			echo '<td>'.$this->render('/ports/item',[

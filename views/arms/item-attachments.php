@@ -14,6 +14,6 @@ $docCount=count($model->contracts);
 if ($licCount||$docCount) { ?>
     <span class="arm-att-count">
 	    <?php if ($licCount) echo '<span class="fas fa-award" title="Прикреплены лицензии"></span>×'.$licCount; ?>
-	    <?php if ($docCount) echo '<span class="glyphicon glyphicon-paperclip" title="Прикреплены документы"></span>×'.$docCount; ?>
+	    <?php if ($docCount) echo '<span class="fas fa-paperclip" title="Прикреплены документы"></span>×'.$docCount; ?>
 	</span>
 <?php }

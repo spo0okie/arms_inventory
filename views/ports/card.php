@@ -14,8 +14,8 @@ if (!isset($static_view)) $static_view=false;
 <h1>
 	<?= $this->render('/techs/item', ['model'=>$model->tech,'static_view'=>true]) ?>
 	<?= \app\models\Ports::$tech_postfix.\app\models\Ports::$port_prefix.Html::encode($model->name) ?>
-	<?= $static_view?'':(Html::a('<span class="glyphicon glyphicon-pencil"></span>',['ports/update','id'=>$model->id])) ?>
-	<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['ports/delete', 'id' => $model->id], [
+	<?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['ports/update','id'=>$model->id])) ?>
+	<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['ports/delete', 'id' => $model->id], [
 		'data' => [
 			'confirm' => 'Удалить этот элемент? Действие необратимо',
 			'method' => 'post',
@@ -29,7 +29,7 @@ if (!isset($static_view)) $static_view=false;
 
 <?php
 if (is_object($model->linkPort)||is_object($model->linkTech)||is_object($model->linkArm))
-	echo '<h4><span class="glyphicon glyphicon-sort"></span></h4>';
+	echo '<h4><span class="fas fa-sort"></span></h4>';
 
 if (is_object($model->linkPort)) {
 	echo $this->render('/ports/item',['model'=>$model->linkPort,'static_view'=>$static_view,'include_tech'=>true]);

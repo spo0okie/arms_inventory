@@ -13,8 +13,8 @@ if (!isset($static_view)) $static_view=false;
 
 <h1 class="text-monospace">
 	<?= Html::encode($model->sname) ?>
-	<?= $static_view?'':(Html::a('<span class="glyphicon glyphicon-pencil"></span>',['net-ips/update','id'=>$model->id])) ?>
-	<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['net-ips/delete', 'id' => $model->id], [
+	<?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['net-ips/update','id'=>$model->id])) ?>
+	<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['net-ips/delete', 'id' => $model->id], [
 		'data' => [
 			'confirm' => 'Удалить этот элемент? Действие необратимо',
 			'method' => 'post',

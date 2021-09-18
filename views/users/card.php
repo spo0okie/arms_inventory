@@ -13,15 +13,15 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
     <h1>
 		
 		<?= Html::a($model->Ename,['/users/view', 'id' => $model->id]) ?>
-        <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['update', 'id' => $model->id]) ?>
-        <?php if($deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"></span>', ['users/delete', 'id' => $model->id], [
+        <?= Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
+        <?php if($deleteable) echo Html::a('<span class="fas fa-trash"></span>', ['users/delete', 'id' => $model->id], [
 	        'data' => [
 		        'confirm' => 'Удалить этого пользователя?',
 		        'method' => 'post',
 	        ],
         ]) ?>
     </h1>
-	<?= $model->nosync?'<span class="glyphicon glyphicon-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
+	<?= $model->nosync?'<span class="fas fa-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
 	Дата рождения: <?= $model->Bday ?> <br/>
     Табельный №
 	<?= $model->employee_id ?> (<?= $model->Persg ?>)

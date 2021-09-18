@@ -16,6 +16,6 @@ if (!empty($model)) {
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['acls/ttip','id'=>$model->id]) ?>"
 	>
 		<?=  Html::a($name,['acls/view','id'=>$model->id]) ?>
-		<?=  $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['acls/update','id'=>$model->id,'return'=>'previous']) ?>
+		<?=  $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['acls/update','id'=>$model->id,'return'=>'previous']) ?>
 	</span>
 <?php } ?>

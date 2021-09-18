@@ -27,7 +27,7 @@ if (is_object($model)) {
 		    'class'=>$active?"contract_active":"contract_inactive",
 	    ]) ?>
 	    <?= Html::a(
-		    '<span class="glyphicon glyphicon-pencil"/>',
+		    '<span class="fas fa-pencil-alt"/>',
 		    ['/contracts/update','id'=>$model->id],
 		    [
 		        'title'=>'Редактировать документ',

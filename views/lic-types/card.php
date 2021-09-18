@@ -12,14 +12,14 @@ $deleteable=!count($model->licGroups);
 <h1>
 	<?= $this->render('item',compact('model')) ?>
 
-	<?php if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['delete', 'id' => $model->id], [
+	<?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
 		'data' => [
 			'confirm' => 'Удалить эту схему лицензирования? Это действие необратимо!',
 			'method' => 'post',
 		],
 	]); else { ?>
 		<span class="small">
-			<span class="glyphicon glyphicon-lock"	title="Невозможно в данный момент удалить эту схему лицензирования, т.к. присутствуют группы лицензий с этой схемой лицензирования."></span>
+			<span class="fas fa-lock"	title="Невозможно в данный момент удалить эту схему лицензирования, т.к. присутствуют группы лицензий с этой схемой лицензирования."></span>
 		</span>
 	<?php } ?>
 </h1>

@@ -19,15 +19,15 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 
 <h1>
     <?= Html::encode($model->name) ?>
-    <?= $static_view?'':(Html::a('<span class="glyphicon glyphicon-pencil"></span>',['services/update','id'=>$model->id])) ?>
-    <?php if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['services/delete', 'id' => $model->id], [
+    <?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['services/update','id'=>$model->id])) ?>
+    <?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['services/delete', 'id' => $model->id], [
 	    'data' => [
 		    'confirm' => 'Удалить этот сервис? Это действие необратимо!',
 		    'method' => 'post',
 	    ],
     ]); else { ?>
 		<span class="small">
-			<span class="glyphicon glyphicon-lock" title="Невозможно в данный момент удалить этот сервис, т.к. присутствуют привязанные объекты: привязанные пользователи, компьютеры или другие сервисы."></span>
+			<span class="fas fa-lock" title="Невозможно в данный момент удалить этот сервис, т.к. присутствуют привязанные объекты: привязанные пользователи, компьютеры или другие сервисы."></span>
 		</span>
 	<?php } ?>
 </h1>

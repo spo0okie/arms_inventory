@@ -3,7 +3,7 @@
 /* Карточка документа Можно использовать во View можно в тултипе */
 
 use yii\helpers\Html;
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
@@ -26,8 +26,8 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
 <h1>
     <?= Html::encode($model->name) ?>
 	<?php if (!$static_view) {
-		echo Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['update', 'id' => $model->id], ['title' => 'Изменить',]);
-		if ($deletable) echo Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+		echo Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id], ['title' => 'Изменить',]);
+		if ($deletable) echo Html::a('<span class="fas fa-trash"></span>', ['delete', 'id' => $model->id], [
 			'title' => 'Удалить',
 			'data' => [
 				'confirm' => 'Удалить этот документ и все его сканы? Данное действие необратимо.',
@@ -35,7 +35,7 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
 			],
 		]); else { ?>
 			<span class="small">
-				<span class="glyphicon glyphicon-lock"
+				<span class="fas fa-lock"
 					  title="Невозможно удалить этот документ, т.к. есть привязанные к нему объекты"></span>
 			</span>
 		<?php }
@@ -68,7 +68,7 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
         <?php
 
         //создание связаного документа
-        Modal::begin(['id'=>'contracts_add_modal','header' => '<h2>Добавление документа</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['id'=>'contracts_add_modal','title' => '<h2>Добавление документа</h2>','size'=>Modal::SIZE_LARGE]);
             $contractModel=new \app\models\Contracts();
             $contractModel->parent_id=$model_id;
             $contractModel->partners_ids=$model->partners_ids;
@@ -76,42 +76,42 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
         Modal::end();
 
         //создание связанного АРМ
-        Modal::begin(['id'=>'arms_add_modal','header' => '<h2>Добавление АРМ</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['id'=>'arms_add_modal','title' => '<h2>Добавление АРМ</h2>','size'=>Modal::SIZE_LARGE]);
             $armModel=new \app\models\Arms();
             $armModel->contracts_ids=[$model_id];
             echo $this->render('/arms/_form',['model'=>$armModel]);
         Modal::end();
 
         //создание связанного оборудования
-        Modal::begin(['id'=>'techs_add_modal','header' => '<h2>Добавление оборудования</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['id'=>'techs_add_modal','title' => '<h2>Добавление оборудования</h2>','size'=>Modal::SIZE_LARGE]);
         $techModel=new \app\models\Techs();
         $techModel->contracts_ids=[$model_id];
         echo $this->render('/techs/_form',['model'=>$techModel]);
         Modal::end();
 
         //создание связанного оборудования
-        Modal::begin(['id'=>'materials_add_modal','header' => '<h2>Добавление материалов</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['id'=>'materials_add_modal','title' => '<h2>Добавление материалов</h2>','size'=>Modal::SIZE_LARGE]);
         $materialsModel=new \app\models\Materials();
         $materialsModel->contracts_ids=[$model_id];
         echo $this->render('/materials/_form',['model'=>$materialsModel]);
         Modal::end();
 
         //создание связанной лицензии
-        Modal::begin(['id'=>'lic_add_modal','header' => '<h2>Добавление лицензии</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['id'=>'lic_add_modal','title' => '<h2>Добавление лицензии</h2>','size'=>Modal::SIZE_LARGE]);
         $licModel=new \app\models\LicItems();
         $licModel->contracts_ids=[$model_id];
         echo $this->render('/lic-items/_form',['model'=>$licModel]);
         Modal::end();
 
         //создание связанного оборудования
-        Modal::begin(['id'=>'inet_add_modal','header' => '<h2>Добавление ввода интернет</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['id'=>'inet_add_modal','title' => '<h2>Добавление ввода интернет</h2>','size'=>Modal::SIZE_LARGE]);
         $inetModel=new \app\models\OrgInet();
         $inetModel->contracts_id=[$model_id];
         echo $this->render('/org-inet/_form',['model'=>$inetModel]);
         Modal::end();
 
         //создание связанного оборудования
-        Modal::begin(['id'=>'phone_add_modal','header' => '<h2>Добавление городского тел. номера</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['id'=>'phone_add_modal','title' => '<h2>Добавление городского тел. номера</h2>','size'=>Modal::SIZE_LARGE]);
         $phoneModel=new \app\models\OrgPhones();
         $phoneModel->contracts_id=[$model_id];
         echo $this->render('/org-phones/_form',['model'=>$phoneModel]);
@@ -199,7 +199,7 @@ JS;
 			echo $this->render('/arms/item',['model'=>$arm,'static_view'=>$static_view]);
 			if (!$static_view) { ?>
                 <a><span
-                            class="glyphicon glyphicon-remove href"
+                            class="fas fa-remove href"
                             title="Отвязать документ от этого АРМа"
                             onclick="if (confirm('Отвязать документ от этого АРМа?')) $.ajax({
                                     url: '/web/contracts/unlink-arm?id=<?= $model->id ?>&arms_id=<?= $arm->id ?>',
@@ -225,7 +225,7 @@ JS;
 			echo $this->render('/techs/item',['model'=>$tech,'static_view'=>$static_view]);
 			if (!$static_view) { ?>
                 <a><span
-                            class="glyphicon glyphicon-remove href"
+                            class="fas fa-remove href"
                             title="Отвязать документ от этого оборудования"
                             onclick="if (confirm('Отвязать документ от этого оборудования?')) $.ajax({
                                 url: '/web/contracts/unlink-tech?id=<?= $model->id ?>&techs_id=<?= $tech->id ?>',

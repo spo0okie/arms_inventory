@@ -26,8 +26,8 @@ $renderer=$this;
 <?php } ?>
         <h1>
 			<?= Html::encode($model->descr) ?>
-			<?= Html::a('<span class="glyphicon glyphicon-pencil"/>', ['update', 'id' => $model->id]) ?>
-			<?php if (!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['delete', 'id' => $model->id], [
+			<?= Html::a('<span class="fas fa-pencil-alt"/>', ['update', 'id' => $model->id]) ?>
+			<?php if (!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
 				'data' => [
 					'confirm' => 'Действительно удалить эту группу?',
 					'method' => 'post',

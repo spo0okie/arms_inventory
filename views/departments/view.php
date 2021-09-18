@@ -17,8 +17,8 @@ $deleteable=true; //тут переопределить возможность �
 
     <h1>
 	    <?= Html::encode($this->title) ?>
-	    <?= Html::a('<span class=\"glyphicon glyphicon-pencil\"></span>', ['update', 'id' => $model->id]) ?>
-	    <?php  if($deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"></span>', ['users/delete', 'id' => $model->id], [
+	    <?= Html::a('<span class=\"fas fa-pencil-alt\"></span>', ['update', 'id' => $model->id]) ?>
+	    <?php  if($deleteable) echo Html::a('<span class="fas fa-trash"></span>', ['users/delete', 'id' => $model->id], [
 		    'data' => [
 			    'confirm' => 'Удалить этот элемент?',
 			    'method' => 'post',

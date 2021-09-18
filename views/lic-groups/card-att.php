@@ -18,7 +18,7 @@ $soft=$model->soft;
 <h4>
     Тип лицензирования:
     <?= Html::a($model->licType->descr,['/lic-types/view','id'=>$model->lic_types_id]) ?>
-    <?= Html::a('<span class="glyphicon glyphicon-pencil"/>',['/lic-types/update','id'=>$model->lic_types_id]) ?>
+    <?= Html::a('<span class="fas fa-pencil-alt"/>',['/lic-types/update','id'=>$model->lic_types_id]) ?>
 </h4>
 <?php if (!$static_view) { ?>
     <p>
@@ -36,7 +36,7 @@ $soft=$model->soft;
         <p>
 		    <?php foreach ($soft as $item) { ?>
 			    <?= $this->render('/soft/item',['model'=>$item]) ?>
-			    <?php if (!$static_view) echo Html::a('<span class="glyphicon glyphicon-trash"/>',[
+			    <?php if (!$static_view) echo Html::a('<span class="fas fa-trash"/>',[
 			        '/lic-groups/unlink',
                     'id'=>$model->id,
                     'soft_id'=>$item->id,
@@ -56,7 +56,7 @@ $soft=$model->soft;
         <p>
 		    <?php foreach ($arms as $arm) { ?>
 			    <?= $this->render('/arms/item',['model'=>$arm]) ?>
-			    <?php if (!$static_view) echo Html::a('<span class="glyphicon glyphicon-trash"/>',array_merge(
+			    <?php if (!$static_view) echo Html::a('<span class="fas fa-trash"/>',array_merge(
                     ['arms_id'=>$arm->id],
                     $arms_href
                 ),

@@ -7,7 +7,7 @@ use yii\helpers\Html;
 
 //qtip_ajxhrf="<?= \yii\helpers\Url::to(['/org-phones/ttip','id'=>$model->id])
 //qtip_class="qtip-wide"
-//	<?= Html::a('<span class="glyphicon glyphicon-pencil"/>',['/places/update','id'=>$model->id])
+//	<?= Html::a('<span class="fas fa-pencil-alt"/>',['/places/update','id'=>$model->id])
 
 if (!isset($static_view)) $static_view=true;
 if (!isset($items_glue)) $items_glue='/';
@@ -34,7 +34,7 @@ if (is_object($model)) {
             ['/places/view','id'=>$model->id],
             ['qtip_ttip'=>$model->name,]
         );
-		if (!$static_view) echo Html::a('<span class="glyphicon glyphicon-pencil"/>',['/places/update','id'=>$model->id]);
+		if (!$static_view) echo Html::a('<span class="fas fa-pencil-alt"/>',['/places/update','id'=>$model->id]);
     } ?>
 </span>
 

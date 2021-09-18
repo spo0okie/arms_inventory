@@ -20,9 +20,9 @@ if (!empty($model)) {
 	<span class="ports-item"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['ports/ttip','id'=>$model->id]) ?>"
 	>
-		<?=  !$static_view&&$reverse?Html::a('<span class="glyphicon glyphicon-pencil"></span>',['ports/update','id'=>$model->id,'return'=>'previous']):'' ?>
+		<?=  !$static_view&&$reverse?Html::a('<span class="fas fa-pencil-alt"></span>',['ports/update','id'=>$model->id,'return'=>'previous']):'' ?>
 		<?=  Html::a(\app\models\Ports::$port_prefix.$name,['ports/view','id'=>$model->id]) ?>
-		<?=  !$static_view&&!$reverse?Html::a('<span class="glyphicon glyphicon-pencil"></span>',['ports/update','id'=>$model->id,'return'=>'previous']):'' ?>
+		<?=  !$static_view&&!$reverse?Html::a('<span class="fas fa-pencil-alt"></span>',['ports/update','id'=>$model->id,'return'=>'previous']):'' ?>
 	</span>
 <?php
 	if ($include_tech && $reverse) {

@@ -8,7 +8,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Materials */
@@ -21,8 +21,8 @@ $deleteable=!count($model->childs) && !count($model->usages);
 
 	<h1>
 		<?= Html::a($model->type->name.': '. $model->model,['/material/view','id'=>$model->id]) ?>
-		<?= Html::a('<span class="glyphicon glyphicon-pencil">', ['update', 'id' => $model->id]) ?>
-		<?= $deleteable?Html::a('<span class="glyphicon glyphicon-trash">', ['delete', 'id' => $model->id], [
+		<?= Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]) ?>
+		<?= $deleteable?Html::a('<span class="fas fa-trash">', ['delete', 'id' => $model->id], [
 			'data' => [
 				'confirm' => 'Are you sure you want to delete this item?',
 				'method' => 'post',
@@ -89,7 +89,7 @@ $deleteable=!count($model->childs) && !count($model->usages);
 		//моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
 		Modal::begin([
 			'id' => 'material_new_usage_modal',
-			'header' => '<h2>использовать материал</h2>',
+			'title' => '<h2>использовать материал</h2>',
 			'size' => Modal::SIZE_LARGE,
 		]);
 		$usage = new \app\models\MaterialsUsages();
@@ -100,7 +100,7 @@ $deleteable=!count($model->childs) && !count($model->usages);
 
 		Modal::begin([
 			'id' => 'material_new_material_modal',
-			'header' => '<h2>переместить часть</h2>',
+			'title' => '<h2>переместить часть</h2>',
 			'size' => Modal::SIZE_LARGE,
 		]);
 		$material = new \app\models\Materials();

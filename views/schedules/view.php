@@ -32,16 +32,16 @@ $schedule_id=$model->id;
 	<h1>
 		<?= $static_view?Html::a($model->name,['comps/view','id'=>$model->id]):$model->name ?>
 		
-		<?= $static_view?'':(Html::a('<span class="glyphicon glyphicon-pencil" title="Изменить"></span>',['schedules/update','id'=>$model->id])) ?>
+		<?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt" title="Изменить"></span>',['schedules/update','id'=>$model->id])) ?>
 		
-		<?php if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash" title="Удалить"/>', ['schedules/delete', 'id' => $model->id], [
+		<?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash" title="Удалить"/>', ['schedules/delete', 'id' => $model->id], [
 			'data' => [
 				'confirm' => 'Удалить это расписание? Это действие необратимо!',
 				'method' => 'post',
 			],
 		]); else { ?>
 			<span class="small">
-			<span class="glyphicon glyphicon-lock" title="Невозможно в данный момент удалить это расписание, удалить можно только пустое расписание не привязанное ни к каким объектам."></span>
+			<span class="fas fa-lock" title="Невозможно в данный момент удалить это расписание, удалить можно только пустое расписание не привязанное ни к каким объектам."></span>
 		</span>
 		<?php } ?>&nbsp;
 	</h1>

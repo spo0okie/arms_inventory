@@ -7,7 +7,7 @@
  * @var \app\models\Arms $model
  */
 
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 
 $manufacturers=\app\models\Manufacturers::fetchNames();
 ?>

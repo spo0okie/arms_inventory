@@ -13,5 +13,5 @@ use yii\helpers\Html;
 
 <span class="tech_type-item">
 	<?= Html::a($model->name,['tech-types/view','id'=>$model->id]) ?>
-	<?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',['tech-types/update','id'=>$model->id]) ?>
+	<?= Html::a('<span class="fas fa-pencil-alt"></span>',['tech-types/update','id'=>$model->id]) ?>
 </span>

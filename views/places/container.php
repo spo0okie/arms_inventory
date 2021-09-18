@@ -17,7 +17,7 @@ use yii\widgets\DetailView;
     <?php if (!$depth) { ?>
         <h1>
             <?= Html::encode($model->name) ?>
-            <?= Html::a('<span class="glyphicon glyphicon-plus-sign"></span>',['places/create','parent_id'=>$model->id]) ?>
+            <?= Html::a('<span class="fas fa-plus-circle"></span>',['places/create','parent_id'=>$model->id]) ?>
         </h1>
     <?php } ?>
 

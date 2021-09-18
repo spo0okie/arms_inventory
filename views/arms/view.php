@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Arms */
@@ -24,8 +24,8 @@ $deletable = !count ($licItems) && !count($licGroups) && !count($comps) && !coun
             <div class="col-md-2">
                 <h3>
                     <?= Html::encode($this->title) ?>
-                    <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['update', 'id' => $model->id]) ?>
-                    <?php if ($deletable) echo Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+                    <?= Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
+                    <?php if ($deletable) echo Html::a('<span class="fas fa-trash"></span>', ['delete', 'id' => $model->id], [
 	                    'class' => 'btn btn-danger',
 	                    'data' => [
 		                    'confirm' => 'Удалить этот АРМ? Операция не обратима!',
@@ -33,7 +33,7 @@ $deletable = !count ($licItems) && !count($licGroups) && !count($comps) && !coun
 	                    ],
                     ]); else { ?>
 						<span class="small">
-							<span class="glyphicon glyphicon-lock" title="Нельзя удалить АРМ, к которму привязаны другие объекты. Для удаления сначала надо отвязать ОС, Лицензии и Документы."></span>
+							<span class="fas fa-lock" title="Нельзя удалить АРМ, к которму привязаны другие объекты. Для удаления сначала надо отвязать ОС, Лицензии и Документы."></span>
 						</span>
 					<?php } ?>
                 </h3>

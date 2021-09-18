@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
@@ -13,14 +13,14 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 ?>
 <h1>
     <?= Html::encode($model->num) ?>
-    <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['update', 'id' => $model->id]) ?>
-    <?= $deleteable?Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+    <?= Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
+    <?= $deleteable?Html::a('<span class="fas fa-trash"></span>', ['delete', 'id' => $model->id], [
         'data' => [
             'confirm' => 'Удалить оборудование из базы?',
             'method' => 'post',
         ],
     ]):'<span class="small">
-			<span class="glyphicon glyphicon-lock" title="Нельзя удалить оборудование, к которому привязаны другие объекты. Для удаления сначала надо отвязать Материалы и Документы. (Если материалы действительно израсходованы на оборудование, то удалять его нельзя, надо поставить ему статус списано)"></span>
+			<span class="fas fa-lock" title="Нельзя удалить оборудование, к которому привязаны другие объекты. Для удаления сначала надо отвязать Материалы и Документы. (Если материалы действительно израсходованы на оборудование, то удалять его нельзя, надо поставить ему статус списано)"></span>
 		</span>' ?>
 </h1>
 
@@ -91,7 +91,7 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
         Modal::begin([
             'id'=>'tech_link_contract_modal',
 			'size' => Modal::SIZE_LARGE,
-            'header' => 'Выберите связанный с оборудованием документ'
+            'title' => 'Выберите связанный с оборудованием документ'
         ]);
         echo $this->render('/contracts/_linkform');
         //закрываем форму
@@ -100,7 +100,7 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
         Modal::begin([
             'id'=>'tech_new_contract_modal',
 			'size' => Modal::SIZE_LARGE,
-            'header' => '<h2>Добавление документа к оборудованию</h2>',
+            'title' => '<h2>Добавление документа к оборудованию</h2>',
         ]);
         $contract=new \app\models\Contracts();
         $contract->techs_ids=[$model->id];

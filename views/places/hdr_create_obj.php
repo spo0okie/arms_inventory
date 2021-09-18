@@ -6,14 +6,14 @@
  * Time: 16:24
  */
 
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 
 if (!isset($places_id)) $places_id=null;
 
 Modal::begin([
 	'id'=>'arms_add_modal',
 	'size' => Modal::SIZE_LARGE,
-	'header' => '<h2>Добавление АРМ</h2>',
+	'title' => '<h2>Добавление АРМ</h2>',
 	'toggleButton' => [
 		'label' => 'Новый АРМ',
 		'tag' => 'button',
@@ -28,7 +28,7 @@ Modal::end();
 Modal::begin([
 	'id'=>'techs_add_modal',
 	'size' => Modal::SIZE_LARGE,
-	'header' => '<h2>Добавление оборудования</h2>',
+	'title' => '<h2>Добавление оборудования</h2>',
 	'toggleButton' => [
 		'label' => 'Новое оборудование',
 		'tag' => 'button',
@@ -43,7 +43,7 @@ Modal::end();
 Modal::begin([
 	'id'=>'materials_add_modal',
 	'size' => Modal::SIZE_LARGE,
-	'header' => '<h2>Добавление ЗиП и материалов</h2>',
+	'title' => '<h2>Добавление ЗиП и материалов</h2>',
 	'toggleButton' => [
 		'label' => 'Новые ЗиП и материалы',
 		'tag' => 'button',

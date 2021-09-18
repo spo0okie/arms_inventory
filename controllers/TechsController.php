@@ -8,7 +8,7 @@ use app\models\TechsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\bootstrap\ActiveForm;
+use yii\bootstrap5\ActiveForm;
 use yii\web\Response;
 use yii\helpers\Url;
 

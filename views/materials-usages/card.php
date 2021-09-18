@@ -17,8 +17,8 @@ if (!isset($static_view)) $static_view=false;
 ?>
     <h1>
         <?= Html::encode($model->to) ?>
-        <?= Html::a('<span class="glyphicon glyphicon-pencil">', ['update', 'id' => $model->id]) ?>
-        <?= !$static_view?Html::a('<span class="glyphicon glyphicon-trash">', ['delete', 'id' => $model->id], [
+        <?= Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]) ?>
+        <?= !$static_view?Html::a('<span class="fas fa-trash">', ['delete', 'id' => $model->id], [
 	        'data' => [
 		        'confirm' => 'Are you sure you want to delete this item?',
 		        'method' => 'post',

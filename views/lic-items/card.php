@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
@@ -26,14 +26,14 @@ $deleteable=!count($arms)&&!count($contracts);
 
                 <?= $this->render('/lic-items/item',['model'=>$model,'static_view'=>$static_view,'name'=>$model->descr]) ?>
 
-                <?php if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['delete', 'id' => $model->id], [
+                <?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
                     'data' => [
                         'confirm' => 'Удалить эту закупку лицензий? Это действие необратимо!',
                         'method' => 'post',
                     ],
                 ]); else { ?>
 					<span class="small">
-						<span class="glyphicon glyphicon-lock"	title="Невозможно в данный момент удалить эту закупку лицензий, т.к. присутствуют привязанные объекты: документы или АРМы."></span>
+						<span class="fas fa-lock"	title="Невозможно в данный момент удалить эту закупку лицензий, т.к. присутствуют привязанные объекты: документы или АРМы."></span>
 					</span>
 				<?php } ?>
             </h3>
@@ -106,7 +106,7 @@ $deleteable=!count($arms)&&!count($contracts);
 	    Modal::begin([
 			'id'=>'keys_add_modal',
 			'size' => Modal::SIZE_LARGE,
-			'header' => '<h2>Добавление лиц. ключа</h2>',
+			'title' => '<h2>Добавление лиц. ключа</h2>',
 			'toggleButton' => [
 				'label' => 'Добавить ключ',
 				'tag' => 'button',

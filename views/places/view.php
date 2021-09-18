@@ -21,8 +21,8 @@ $deleteable=!($arms_cnt||$techs_cnt||$phones_cnt||$inets_cnt);
 
     <h1>
         <?= Html::encode($this->title) ?>
-        <?= Html::a('<span class="glyphicon glyphicon-pencil">', ['update', 'id' => $model->id]) ?>
-        <?= $deleteable?Html::a('<span class="glyphicon glyphicon-trash">', ['delete', 'id' => $model->id], [
+        <?= Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]) ?>
+        <?= $deleteable?Html::a('<span class="fas fa-trash">', ['delete', 'id' => $model->id], [
 	        'data' => [
 		        'confirm' => 'Are you sure you want to delete this item?',
 		        'method' => 'post',

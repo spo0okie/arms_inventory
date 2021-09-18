@@ -29,7 +29,7 @@ if (count($filtered)) {
 			<li>
                 <?= $this->render('item',['model'=>$model,'static_view'=>false]) ?>
 				<?= \yii\helpers\Html::a(
-					'<span class="glyphicon glyphicon-plus-sign"></span>',
+					'<span class="fas fa-plus-circle"></span>',
 					['places/create','parent_id'=>$model->id],
 					['qtip_ttip'=>'Добавить дочернее помещение']
 				) ?>

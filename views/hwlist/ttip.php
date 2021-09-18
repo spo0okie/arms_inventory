@@ -6,7 +6,7 @@
  * Time: 23:02
  * @var \app\models\HwList $model отображаемый элемент
  */
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 //echo '<pre>'; var_dump($item); echo '</pre>'; die(0);

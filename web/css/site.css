@@ -3,6 +3,8 @@ body {
     height: 100%;
 }
 
+a {text-decoration: none;}
+
 /*Шрифт для инв номеров*/
 @font-face {
     font-family: 'Stencil';
@@ -43,9 +45,9 @@ body {
     padding: 0 0 60px;
 }
 
-.wrap > .container {
+/*.wrap > .container {
     padding: 70px 15px 20px;
-}
+}*/
 
 .footer {
     height: 60px;
@@ -75,7 +77,7 @@ body {
 }
 
 /* add sorting icons to gridview sort links */
-a.asc:after, a.desc:after {
+/*a.asc:after, a.desc:after {
     position: relative;
     top: 1px;
     display: inline-block;
@@ -87,12 +89,12 @@ a.asc:after, a.desc:after {
 }
 
 a.asc:after {
-    content: /*"\e113"*/ "\e151";
+    content: /*"\e113" "\e151";
 }
 
 a.desc:after {
-    content: /*"\e114"*/ "\e152";
-}
+    content: /*"\e114" "\e152";
+}*/
 
 .sort-numerical a.asc:after {
     content: "\e153";
@@ -521,10 +523,10 @@ span.arms-item {
     font-family: Consolas, monospace;
 }
 
-span.net-ips-item span.glyphicon,
-span.comps-item span.glyphicon,
-span.techs-item span.glyphicon,
-span.arms-item span.glyphicon{
+span.net-ips-item svg.svg-inline--fa,
+span.comps-item svg.svg-inline--fa,
+span.techs-item svg.svg-inline--fa,
+span.arms-item svg.svg-inline--fa{
     padding-left: 2pt;
 }
 
@@ -782,11 +784,13 @@ div.site-index div.search input:focus
     border: none;
     outline:none;
     caret-color: lime;
+    color: white;
     width: 100%;
 }
 
 div.site-index div.search label {
     float: left;
+    font: bold 20px monospace;
 }
 
 div.site-index div.search span.search-group {

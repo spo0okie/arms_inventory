@@ -27,8 +27,8 @@ if (!isset($static_view)) $static_view=false;
 
         if (!$static_view) { ?>
             <div class="scans-thumb-ctrls">
-                <?php // Html::a('<span class="glyphicon glyphicon-pencil" title="Редактировать"/></a>',['scans/update','id'=>$model->id])?>
-                <span class="glyphicon glyphicon-trash"  title="Удалить" onclick="scansDeleteConfirm(<?= $model->id ?>)" />
+                <?php // Html::a('<span class="fas fa-pencil-alt" title="Редактировать"/></a>',['scans/update','id'=>$model->id])?>
+                <span class="fas fa-trash"  title="Удалить" onclick="scansDeleteConfirm(<?= $model->id ?>)" />
             </div>
         <?php } ?>
     </div>

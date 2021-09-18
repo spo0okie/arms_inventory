@@ -44,7 +44,7 @@ $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'b
 			'charge',
 	        [
 		        'attribute'=>'docsAttached',
-		        'header'=>'<span class="glyphicon glyphicon-paperclip" title="Привязано документов"></span>',
+		        'header'=>'<span class="fas fa-paperclip" title="Привязано документов"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
 			        return (count($data->childs)+($data->parent_id?1:0))?(count($data->childs)+($data->parent_id?1:0)):'';
@@ -76,7 +76,7 @@ $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'b
 	        ],
 	        [
 		        'attribute'=>'orgInetsAttached',
-		        'header'=>'<span class="glyphicon glyphicon-globe" title="Привязано вводов интернет"></span>',
+		        'header'=>'<span class="fas fa-globe" title="Привязано вводов интернет"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
 			        return count($data->orgInets)?count($data->orgInets):'';
@@ -84,7 +84,7 @@ $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'b
 	        ],
 	        [
 		        'attribute'=>'orgPhonesAttached',
-		        'header'=>'<span class="glyphicon glyphicon-phone-alt" title="Привязано услуг телефонии"></span>',
+		        'header'=>'<span class="fas fa-phone-alt" title="Привязано услуг телефонии"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
 			        return count($data->orgInets)?count($data->orgInets):'';

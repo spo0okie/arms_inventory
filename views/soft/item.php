@@ -26,6 +26,6 @@ if (!isset($name)) $name=$model->descr;
 		])?>"
 	>
 		<?= Html::a($name,['/soft/view','id'=>$model->id]) ?>
-		<?= $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"/>',['/soft/update','id'=>$model->id]) ?>
+		<?= $static_view?'':Html::a('<span class="fas fa-pencil-alt"/>',['/soft/update','id'=>$model->id]) ?>
 	</span>
 <?php }

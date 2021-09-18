@@ -20,7 +20,7 @@ if (is_object($model)) {
 >
 	<?= Html::a($model->name,['/manufacturers/view','id'=>$model->id]) ?>
 	
-	<?php if(!$static_view) echo Html::a('<span class="glyphicon glyphicon-pencil"/>',['/manufacturers/update','id'=>$model->id]) ?>
+	<?php if(!$static_view) echo Html::a('<span class="fas fa-pencil-alt"/>',['/manufacturers/update','id'=>$model->id]) ?>
 </span>
 
 <?php } else echo "Отсутствует";

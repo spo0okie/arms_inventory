@@ -17,15 +17,15 @@ $deleteable=!(count($org_inet)||count($org_phones));
 
     <h1>
         <?= Html::encode($model->name) ?>
-	    <?= Html::a('<span class="glyphicon glyphicon-pencil"/>', ['update', 'id' => $model->id]) ?>
-	    <?php if($deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['delete', 'id' => $model->id], [
+	    <?= Html::a('<span class="fas fa-pencil-alt"/>', ['update', 'id' => $model->id]) ?>
+	    <?php if($deleteable) echo Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
 		    'data' => [
 			    'confirm' => 'Удалить этого оператора связи? Это действие необратимо!',
 			    'method' => 'post',
 		    ],
 	    ]) ?>    </h1>
 
-	<?= !$deleteable?'<p><span class="glyphicon glyphicon-warning-sign"></span> Невозможно удалить этого оператора, т.к. есть привязанные к нему объекты </p>':'' ?>
+	<?= !$deleteable?'<p><span class="fas fa-warning-sign"></span> Невозможно удалить этого оператора, т.к. есть привязанные к нему объекты </p>':'' ?>
 
     <p>
         Добавить :

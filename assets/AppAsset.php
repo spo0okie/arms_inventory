@@ -20,6 +20,7 @@ class AppAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
+    	'css/custom.css',
 		'css/site.css',
 		'css/codes.private.css',
 	    'css/tooltip-yellow.css',
@@ -28,7 +29,6 @@ class AppAsset extends AssetBundle
 	    'css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-shadow.min.css',
     ];
     public $js = [
-	    //'js/qtip2.js',
 	    'js/tooltipster.main.min.js',
 	    'js/tooltipster.bundle.min.js',
 	    'js/qtip_ajax.js',
@@ -38,8 +38,7 @@ class AppAsset extends AssetBundle
     ];
     public $cssOptions = [];
     public $depends = [
-	    'rmrevin\yii\fontawesome\CdnFreeAssetBundle',
         'yii\web\YiiAsset',
-        'yii\bootstrap\BootstrapAsset',
+        'yii\bootstrap5\BootstrapAsset',
     ];
 }

@@ -38,18 +38,6 @@ foreach ($columns as $column) {
 			];
 			break;
 
-		/*case 'model':
-			$render_columns[] = [
-				'attribute' => 'model',
-				'format' => 'raw',
-				'value' => function ($data) use ($renderer) {
-					return is_object($data->techModel) ? $renderer->render('/tech-models/item', ['model' => $data->techModel, 'static' => true]) : null;
-				},
-				'contentOptions'=>['class'=>$column.'_col']
-			
-			];
-			break;*/
-
 		case 'arm_id':
 			$render_columns[] = [
 				'attribute' => 'arm_id',

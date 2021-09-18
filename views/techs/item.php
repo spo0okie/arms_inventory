@@ -22,7 +22,7 @@ if (!empty($model)) {
 	<?=
 		Html::a($name,['techs/view','id'=>$model->id])
 	?><?=
-		$static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['techs/update','id'=>$model->id,'return'=>'previous'])
+		$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['techs/update','id'=>$model->id,'return'=>'previous'])
 	?>
 
 </span>

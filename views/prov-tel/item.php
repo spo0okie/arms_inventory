@@ -15,5 +15,5 @@ use yii\helpers\Html;
       qtip_ajxhrf="<?= \yii\helpers\Url::to(['/prov-tel/ttip','id'=>$model->id])?>"
 >
 	<?= Html::a($model->name,['prov-tel/view','id'=>$model->id]) ?>
-	<?= Html::a('<span class="glyphicon glyphicon-pencil"></span>',['prov-tel/update','id'=>$model->id]) ?>
+	<?= Html::a('<span class="fas fa-pencil-alt"></span>',['prov-tel/update','id'=>$model->id]) ?>
 </span>

@@ -17,8 +17,8 @@ if (!empty($model)) {
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['aces/ttip','id'=>$model->id]) ?>"
 	>
 		<?=  Html::a($name,['aces/view','id'=>$model->id]) ?>
-		<?=  $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['aces/update','id'=>$model->id,'return'=>'previous']) ?>
-		<?=  $show_delete?Html::a('<span class="glyphicon glyphicon-trash"/>', ['aces/delete', 'id' => $model->id], [
+		<?=  $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['aces/update','id'=>$model->id,'return'=>'previous']) ?>
+		<?=  $show_delete?Html::a('<span class="fas fa-trash"/>', ['aces/delete', 'id' => $model->id], [
 			'data' => [
 				'confirm' => 'Удалить этот элемент? Действие необратимо',
 				'method' => 'post',

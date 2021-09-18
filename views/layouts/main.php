@@ -6,10 +6,12 @@
 use app\components\Alert;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
+use app\assets\FontAwesomeAsset;
 use yii\helpers\Html;
 
 	
 AppAsset::register($this);
+//FontAwesomeAsset::register($this);
 
 if (isset($this->params['layout-container'])) {
 	$containerClass=$this->params['layout-container'];
@@ -28,6 +30,7 @@ $this->beginPage() ?>
 	<meta charset="<?= Yii::$app->charset ?>">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js" crossorigin="anonymous"></script>
 	<?= Html::csrfMetaTags() ?>
 	<title><?= Html::encode($this->title) ?></title>
 	<?php $this->head() ?>
@@ -41,7 +44,7 @@ $this->beginPage() ?>
 <?= $this->render('menu') ?>
 <?php if ($path=='site/login' || \app\models\Users::isViewer()) { ?>
 	<div class="<?= $containerClass ?>">
-		<?= Breadcrumbs::widget([
+		<?= \yii\bootstrap5\Breadcrumbs::widget([
 			'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
 		]) ?>
 		<?= Alert::widget() ?>
@@ -53,9 +56,9 @@ $this->beginPage() ?>
 
 <footer class="footer">
 	<div class="container container-large">
-		<p class="pull-left">&copy; Инвентаризация <?= date('Y') ?></p>
+		<span class="float-start">&copy; Инвентаризация <?= date('Y') ?></span>
 
-		<p class="pull-right"><?= Yii::powered() ?></p>
+		<span class="float-end"><?= Yii::powered() ?></span>
 	</div>
 </footer>
 

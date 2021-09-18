@@ -4,8 +4,10 @@
 /* @var $content string */
 
 
-use yii\bootstrap\NavBar;
-use kartik\nav\NavX;
+//use kartik\nav\NavX;
+use yii\bootstrap5\NavBar;
+use yii\bootstrap5\Nav;
+use kartik\bs5dropdown\Dropdown;
 
 $techTypes=[];
 foreach (\app\models\TechTypes::fetchNames() as $idx=>$typeName)
@@ -20,12 +22,13 @@ NavBar::begin([
 	'brandLabel' => Yii::$app->name,
 	'brandUrl' => Yii::$app->homeUrl,
 	'options' => [
-		'class' => 'navbar-inverse navbar-fixed-top',
+		'class' => ['navbar-dark', 'bg-dark', 'navbar-expand-md'],
 	],
-	'innerContainerOptions' => ['class' => 'container container-large'],
+	//'innerContainerOptions' => ['class' => 'container container-large'],
 ]);
-	echo NavX::widget([
-		'options' => ['class' => 'nav navbar-nav navbar-right'],
+	echo Nav::widget([
+		'options' => ['class' => ['nav', 'navbar-nav', 'navbar-right']],
+		'dropdownClass' => Dropdown::classname(),
 		'items' => [
 			\app\models\Users::isViewer()?
 			['label' => 'Лицензии',
@@ -48,14 +51,17 @@ NavBar::begin([
 			\app\models\Users::isViewer()?
 			['label' => 'Организация',
 				'items' => [
-					['label' => \app\models\Places::$titles, 'url' => ['/places/index'], 'items'=>$places],
+					['label' => \app\models\Places::$titles,
+						'items'=>$places,
+						'class'=>'dropdown-menu dropdown-submenu'
+					],
 					['label' => \app\models\Orgs::$title, 'url' => ['/orgs/index']],
 					['label' => \app\models\Departments::$title, 'url' => ['/departments/index']],
 					['label' => \app\models\OrgPhones::$title, 'url' => ['/org-phones/index']],
 					['label' => \app\models\OrgInet::$title, 'url' => ['/org-inet/index']],
 					['label' => \app\models\Services::$title, 'url' => ['/services/index']],
 					['label' => \app\models\Schedules::$titles, 'url' => ['/schedules/index']],
-					'<li class="divider"></li>',
+					//'<li class="divider"></li>',
 					['label' => 'Карта рабочих мест', 'url' => ['/places/armmap']],
 					['label' => 'По подразделениям', 'url' => ['/places/depmap']],
 				]

@@ -40,7 +40,7 @@ foreach ($columns as $column) {
 					return $renderer->render('/segments/item', ['model' => $data->segmentRecursive,'crop_site'=>true]);
 					
 					/*return is_null($data->segment)?
-						'<span class="glyphicon glyphicon-ban-circle"></span>Без польз. доступа':
+						'<span class="fas fa-ban-circle"></span>Без польз. доступа':
 						$renderer->render('/segments/item', ['model' => $data->segment,'crop_site'=>true]);*/
 				},
 				'contentOptions' => ['class' => $column . '_col']

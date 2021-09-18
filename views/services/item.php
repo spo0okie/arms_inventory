@@ -10,8 +10,8 @@ if (!isset($static_view)) $static_view=false;
 
 if (is_object($model)) {
 	$icon=$model->is_end_user?
-		'<span class="glyphicon glyphicon-user service-icon"></span>':
-		'<span class="glyphicon glyphicon-cog service-icon"></span>';
+		'<span class="fas fa-user service-icon"></span>':
+		'<span class="fas fa-cog service-icon"></span>';
 	
 	$name=$model->name;
 	if (!empty($crop_site)) {
@@ -49,6 +49,6 @@ if (is_object($model)) {
 	?>
 	<span class="services-item <?= $model->archived?'archived':'' ?>" qtip_ajxhrf="<?= \yii\helpers\Url::to(['/services/ttip','id'=>$model->id]) ?>">
 		<?= Html::a($icon.$name,['/services/view','id'=>$model->id]) ?>
-    	<?= $static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['/services/update','id'=>$model->id]) ?>
+    	<?= $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['/services/update','id'=>$model->id]) ?>
 	</span>
 <?php }

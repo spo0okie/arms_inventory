@@ -17,8 +17,8 @@ if (is_object($model)) { ?>
 	<span class="manufacturers-dict-item">
 		<?= $model->word ?>
 		<?php if (!$static_view) { ?>
-			<?= Html::a('<span class="glyphicon glyphicon-pencil" />',['/manufacturers-dict/update','id'=>$model->id]) ?>
-			<?= Html::a('<span class="glyphicon glyphicon-trash" />',
+			<?= Html::a('<span class="fas fa-pencil-alt" />',['/manufacturers-dict/update','id'=>$model->id]) ?>
+			<?= Html::a('<span class="fas fa-trash" />',
 				[
 					'/manufacturers-dict/delete',
 					'id'=>$model->id,

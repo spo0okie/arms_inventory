@@ -29,18 +29,18 @@ if (!mb_strlen($domain))
 	<?php if (!$no_abbr) { ?> <abbr title="Операционная система">ОС</abbr> <?php } ?>
 	<span class="small"><?= $domain ?>\</span><?= $static_view?Html::a($model->renderName(),['comps/view','id'=>$model->id]):$model->name ?>
 
-	<?= Html::a("<span class=\"glyphicon glyphicon-log-in\" title='Удаленное управление {$model->fqdn}' />",'remotecontrol://'.$model->fqdn) ?>
+	<?= Html::a("<i class=\"fas fa-sign-in-alt\" title='Удаленное управление {$model->fqdn}' ></i>",'remotecontrol://'.$model->fqdn) ?>
 
-	<?= $static_view?'':(Html::a('<span class="glyphicon glyphicon-pencil" title="Изменить"></span>',['comps/update','id'=>$model->id])) ?>
+	<?= $static_view?'':(Html::a('<i class="fas fa-pencil-alt" title="Изменить"></i>',['comps/update','id'=>$model->id])) ?>
 
-	<?php if(!$static_view) if($deleteable) echo Html::a('<span class="glyphicon glyphicon-trash" title="Удалить"/>', ['comps/delete', 'id' => $model->id], [
+	<?php if(!$static_view) if($deleteable) echo Html::a('<i class="fas fa-trash" title="Удалить"></i>', ['comps/delete', 'id' => $model->id], [
 		'data' => [
 			'confirm' => 'Удалить эту ОС? Это действие необратимо!',
 			'method' => 'post',
 		],
 	]); else { ?>
 		<span class="small">
-			<span class="glyphicon glyphicon-lock" title="Невозможно в данный момент удалить эту операционную систему, т.к. присутствуют привязанные сервисы."></span>
+			<span class="fas fa-lock" title="Невозможно в данный момент удалить эту операционную систему, т.к. присутствуют привязанные сервисы."></span>
 		</span>
 	<?php } ?>
 	&nbsp;

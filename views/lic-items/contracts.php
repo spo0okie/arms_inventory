@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
@@ -19,7 +19,7 @@ $model_id=$model->id;
 Modal::begin([
 	'id'=>'lics_new_contract_modal',
 	'size' => Modal::SIZE_LARGE,
-	'header' => '<h2>Добавление документа к закупке лицензий</h2>',
+	'title' => '<h2>Добавление документа к закупке лицензий</h2>',
 	'toggleButton' => [
 		'label' => 'Добавить новый документ',
 		'tag' => 'a',

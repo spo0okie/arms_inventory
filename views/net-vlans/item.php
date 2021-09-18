@@ -13,6 +13,6 @@ if (!empty($model)) {
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['net-vlans/ttip','id'=>$model->id]) ?>"
 	>
 		<?=  Html::a($name,['net-vlans/view','id'=>$model->id]) ?>
-		<?=  Html::a('<span class="glyphicon glyphicon-pencil"></span>',['net-vlans/update','id'=>$model->id,'return'=>'previous']) ?>
+		<?=  Html::a('<span class="fas fa-pencil-alt"></span>',['net-vlans/update','id'=>$model->id,'return'=>'previous']) ?>
 	</span>
 <?php } ?>

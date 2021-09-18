@@ -15,6 +15,6 @@ if (!empty($model)) {
 		<?=  $name ?>
 		
 		<?php /*  Html::a($name,['org-struct/view','id'=>$model->id]) ?>
-		<?=  Html::a('<span class="glyphicon glyphicon-pencil"></span>',['org-struct/update','id'=>$model->id,'return'=>'previous']) */ ?>
+		<?=  Html::a('<span class="fas fa-pencil-alt"></span>',['org-struct/update','id'=>$model->id,'return'=>'previous']) */ ?>
 	</span>
 <?php } ?>

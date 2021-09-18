@@ -8,7 +8,7 @@
  * Рендер нераспознанного элемента софта
  * @var \app\models\Comps $model
  */
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 
 if (!isset($item['manufacturers_id'])) $item['manufacturers_id']=null;
 
@@ -27,7 +27,7 @@ if (!isset($item['manufacturers_id'])) $item['manufacturers_id']=null;
 
     //если производитель вообще имеется, то предлагаем его добавить в таблицу
     if (strlen($item['publisher'])) echo \yii\helpers\Html::a(
-        '<span class="glyphicon glyphicon-plus-sign"/>',
+        '<span class="fas fa-plus-circle"/>',
         ['manufacturers-dict/create', 'word' => $item['publisher'],'return'=>'previous'],
         ['title'=>'Добавить производителя в базу','class' => 'passport_tools',]
     );
@@ -82,17 +82,17 @@ if (
 
     // кнопочка создания продукта
     echo \yii\helpers\Html::a(
-        '<span class="glyphicon glyphicon-plus-sign"/>',
+        '<i class="fas fa-plus-circle"></i>',
         $btn_create,
         ['title'=>'Создать продукт из этого элемента','class'=>'passport_tools']
     );
 
     //моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
     Modal::begin([
-        'header' => 'Выберите продукт',
+        'title' => 'Выберите продукт',
 		'size' => Modal::SIZE_LARGE,
         'toggleButton' => [
-            'label' => '<span class="glyphicon glyphicon-wrench"/>',
+            'label' => '<i class="fas fa-wrench"></i>',
             'tag' => 'a',
             'class' => 'passport_tools',
             'title' => 'добавить к существующему продукту в базе'

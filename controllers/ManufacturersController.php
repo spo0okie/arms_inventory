@@ -11,7 +11,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\data\ActiveDataProvider;
 use yii\web\Response;
-use yii\bootstrap\ActiveForm;
+use yii\bootstrap5\ActiveForm;
 
 
 /**

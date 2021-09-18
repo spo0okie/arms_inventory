@@ -19,6 +19,6 @@ if (!empty($model)) {
 	><?=
 		Html::a($name,['net-ips/view','id'=>$model->id])
 	?><?=
-		$static_view?'':Html::a('<span class="glyphicon glyphicon-pencil"></span>',['net-ips/update','id'=>$model->id,'return'=>'previous'])
+		$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['net-ips/update','id'=>$model->id,'return'=>'previous'])
 	?></span>
 <?php } ?>

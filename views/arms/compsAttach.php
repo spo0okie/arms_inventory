@@ -38,7 +38,7 @@ use kartik\select2\Select2;
 if (is_null($arm_id)) {
 	?>
 	<span class="disabled">
-		<span class="glyphicon glyphicon-warning-sign"></span>
+		<span class="fas fa-warning-sign"></span>
 		Чтобы привязывать ОС к АРМ сначала надо сохранить АРМ, иначе не к чему привязываться
 	</span>
 

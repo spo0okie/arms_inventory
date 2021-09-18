@@ -44,13 +44,13 @@ $dev=\app\models\Manufacturers::fetchItem($product->manufacturers_id);
         if(!is_null($model->arm_id)) {
             if (!$item['saved']) {
 	            if ($item['agreed']) echo \yii\helpers\Html::a(
-                    '<span class="glyphicon glyphicon-plus-sign"></span>',
+                    '<i class="fas fa-plus-circle"></i>',
                     ['/comps/addsw', 'id' => $model->id, 'items' => $product->id],
                     ['title' => 'Вписать ПО в паспорт']
                 );
             } else {
                 echo \yii\helpers\Html::a(
-                    '<span class="glyphicon glyphicon-minus-sign"></span>',
+                    '<i class="fas fa-minus-circle"></i>',
                     ['/comps/rmsw', 'id' => $model->id, 'items' => $product->id],
                     ['title' => 'Убрать из паспорта']
                 );

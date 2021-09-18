@@ -22,8 +22,8 @@ $static_view=false;
     <h1>
         <?= $this->render('/tech-types/item',['model'=>$model->type]) ?>
         <?= Html::encode($this->title) ?>
-        <?= Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['update', 'id' => $model->id]) ?>
-        <?php if ($deletable) echo Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+        <?= Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
+        <?php if ($deletable) echo Html::a('<span class="fas fa-trash"></span>', ['delete', 'id' => $model->id], [
 	        'data' => [
 		        'confirm' => 'Действительно удалить описание этой модели оборудования?',
 		        'method' => 'post',
@@ -33,7 +33,7 @@ $static_view=false;
 
     <?php if (!$deletable) { ?>
         <p>
-            <span class="glyphicon glyphicon-warning-sign"></span> Описание этой модели оборудования нельзя удалить в настоящий момент, т.к. в БД есть экзепляры оборудования этой модели
+            <span class="fas fa-warning-sign"></span> Описание этой модели оборудования нельзя удалить в настоящий момент, т.к. в БД есть экзепляры оборудования этой модели
         </p>
         <br />
     <?php } ?>

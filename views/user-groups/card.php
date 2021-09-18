@@ -13,8 +13,8 @@ $deleteable=!count($support)&&!count($services);
 ?>
 <h1>
     <?= Html::encode($model->name) ?>
-    <?= $static_view?'':(Html::a('<span class="glyphicon glyphicon-pencil"></span>',['user-groups/update','id'=>$model->id])) ?>
-    <?php if(!$static_view&&$deleteable) echo Html::a('<span class="glyphicon glyphicon-trash"/>', ['user-groups/delete', 'id' => $model->id], [
+    <?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['user-groups/update','id'=>$model->id])) ?>
+    <?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['user-groups/delete', 'id' => $model->id], [
         'data' => [
             'confirm' => 'Удалить эту группу? Это действие необратимо!',
             'method' => 'post',
@@ -34,7 +34,7 @@ $deleteable=!count($support)&&!count($services);
 
 <?php if(!$static_view&&!$deleteable) { ?>
     <p>
-        <span class="glyphicon glyphicon-warning-sign"></span> Невозможно в данный момент удалить эту группу, т.к. в ней присутствуют сотрудники или привязаны сервисы.
+        <span class="fas fa-warning-sign"></span> Невозможно в данный момент удалить эту группу, т.к. в ней присутствуют сотрудники или привязаны сервисы.
     </p>
 <?php } ?>
 <br />

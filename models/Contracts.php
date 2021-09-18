@@ -323,12 +323,12 @@ class Contracts extends \yii\db\ActiveRecord
 	public function getSAttach()
 	{
 		$attaches='';
-		if (count($this->childs)) $attaches.='<span class="glyphicon glyphicon-paperclip" title="Привязаны документы: '.(count($this->childs)).'шт"></span>';
+		if (count($this->childs)) $attaches.='<span class="fas fa-paperclip" title="Привязаны документы: '.(count($this->childs)).'шт"></span>';
 		if (count($this->arms)) $attaches.='<span class="fas fa-desktop" title="Привязаны АРМы: '.(count($this->arms)).'шт"></span>';
 		if (count($this->techs)) $attaches.='<span class="fas fa-print" title="Привязана техника: '.(count($this->techs)).'шт"></span>';
 		if (count($this->licItems)) $attaches.='<span class="fas fa-award" title="Привязаны лицензии: '.(count($this->licItems)).'шт"></span>';
-		if (count($this->orgInets)) $attaches.='<span class="glyphicon glyphicon-globe" title="Привязаны услуги интернет: '.(count($this->orgInets)).'шт"></span>';
-		if (count($this->orgPhones)) $attaches.='<span class="glyphicon glyphicon-phone-alt" title="Привязаны услуги телефонии: '.(count($this->orgPhones)).'шт"></span>';
+		if (count($this->orgInets)) $attaches.='<span class="fas fa-globe" title="Привязаны услуги интернет: '.(count($this->orgInets)).'шт"></span>';
+		if (count($this->orgPhones)) $attaches.='<span class="fas fa-phone-alt" title="Привязаны услуги телефонии: '.(count($this->orgPhones)).'шт"></span>';
 		return $attaches;
 	}
 

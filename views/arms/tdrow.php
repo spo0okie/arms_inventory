@@ -80,10 +80,10 @@ for ($i=0; $i<count($comps); $i++) {
 			
 				
 			if (isset($comp->user))
-				$services[]='<span class="glyphicon glyphicon-user small grayed-out href"></span> '.$this->render('/users/item',['model'=>$comp->user]);
+				$services[]='<span class="fas fa-user small grayed-out href"></span> '.$this->render('/users/item',['model'=>$comp->user]);
 			
 			if (!empty($comp->comment))
-				$services[]='<span class="grayed-out href"><span class="glyphicon glyphicon-comment small"></span> '.$comp->comment.'</span>';
+				$services[]='<span class="grayed-out href"><span class="fas fa-comment small"></span> '.$comp->comment.'</span>';
 	
 			?>
             <td colspan="2" class="arm_services"><?= implode('<br />',$services); ?></td>

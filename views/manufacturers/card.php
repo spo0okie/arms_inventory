@@ -20,9 +20,9 @@ $techs=$model->techModels;
 <h1>
 	<?= Html::encode($model->name) ?>
 	<?php if (!$static_view) { ?>
-		<?= Html::a('<span class="glyphicon glyphicon-pencil" />',['update','id'=>$model->id]) ?>
+		<?= Html::a('<span class="fas fa-pencil-alt" />',['update','id'=>$model->id]) ?>
 		<?php if (!count($soft)&&!count($dict)&&!count($techs))
-			echo Html::a('<span class="glyphicon glyphicon-trash" />',
+			echo Html::a('<span class="fas fa-trash" />',
 				[
 					'delete',
 					'id'=>$model->id,
@@ -34,7 +34,7 @@ $techs=$model->techModels;
 				]);
 		else { ?>
 			<span class="small">
-				<span class="glyphicon glyphicon-lock"	title="Невозможно в данный момент удалить этого производителя, т.к. он привязан к софту, моделям оборудования или словарь написаний не пуст"></span>
+				<span class="fas fa-lock"	title="Невозможно в данный момент удалить этого производителя, т.к. он привязан к софту, моделям оборудования или словарь написаний не пуст"></span>
 			</span>
 		<?php }
 	} ?>

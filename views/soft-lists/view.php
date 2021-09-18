@@ -70,7 +70,7 @@ $renderer=$this;
 		                    ['title' => 'Перейти к программному продукту']
 	                    ) ?>
 	                    <?= \yii\helpers\Html::a(
-		                    '<span class="glyphicon glyphicon-pencil"></span>',
+		                    '<span class="fas fa-pencil-alt"></span>',
 		                    ['/soft/update', 'id' => $item->id],
 		                    ['class'=>'passport_tools','title'=>'Редактировать програмный продукт']
 	                    ) ?>

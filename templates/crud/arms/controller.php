@@ -40,7 +40,7 @@ use <?= ltrim($generator->baseControllerClass, '\\') ?>;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\Url;
-use yii\bootstrap\ActiveForm;
+use yii\bootstrap5\ActiveForm;
 
 
 /**

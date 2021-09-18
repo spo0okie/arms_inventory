@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\ManufacturersDict */
@@ -29,7 +29,7 @@ use yii\bootstrap\Modal;
         <?php
 
         Modal::begin([
-            'header' => '<h2>Добавление производителя</h2>',
+            'title' => '<h2>Добавление производителя</h2>',
 			'size' => Modal::SIZE_LARGE,
             'toggleButton' => [
                 'label' => 'Создать нового производителя',

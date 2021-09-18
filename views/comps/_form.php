@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use \app\models\Arms;
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 use kartik\select2\Select2;
 
 
@@ -86,7 +86,7 @@ asort($domains);
 
         Modal::begin([
             'id'=>'arms_add_modal',
-            'header' => '<h2>Добавление АРМ</h2>',
+            'title' => '<h2>Добавление АРМ</h2>',
 			'size' => Modal::SIZE_LARGE,
             'toggleButton' => [
                 'label' => 'Создать АРМ',

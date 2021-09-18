@@ -16,7 +16,7 @@ if (!$model->fileExists) {
  */
 ?>
 
-    <span class="glyphicon glyphicon-remove"></span>
+    <span class="fas fa-remove"></span>
     Ошибка: файл <?= $model->shortFname ?> не обнаружен!
 
 <?php
@@ -33,11 +33,11 @@ if (!$model->fileExists) {
             <?php } else { ?>
 
             <button type="button" class="btn btn-default" onclick="$('#scan-preview-pdf-<?= $model->id ?>').show().attr('src','<?= $model->fullFname ?>');">
-                <span class="glyphicon glyphicon-eye-open"></span>
+                <span class="fas fa-eye-open"></span>
                 Показать
             </button>
             <a class="btn btn-default" href="<?= $model->fullFname?>">
-                <span class="glyphicon glyphicon-floppy-save"></span>
+                <span class="fas fa-floppy-save"></span>
                 Скачать
             </a>
 
@@ -52,7 +52,7 @@ if (!$model->fileExists) {
 		 */
 		?>
         <a class="btn btn-default" href="<?= $model->fullFname?>">
-            <span class="glyphicon glyphicon-eye-open"></span>
+            <span class="fas fa-eye-open"></span>
             Открыть
         </a>
 

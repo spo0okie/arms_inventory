@@ -32,36 +32,4 @@ $renderer=$this;
 		'dataProvider' => $dataProvider,
 		'columns'   => ['name','ip','os','updated_at','arm_id','place','raw_version'],
 	]) ?>
-	
-	
-    <?php /* GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            //'id',
-            //'domain.name',
-            [
-                'attribute'=>'name',
-                'format'=>'raw',
-                'value' => function($data) use($renderer) {return $renderer->render('/comps/item',['model'=>$data]);}
-            ],
-	        'ip',
-            [
-           		'label'=>'Софт',
-           		'attribute'=>'os',
-			],
-            'updated_at',
-            [
-                'label'=>'АРМ',
-                'attribute'=>'arm_id',
-	            'format'=>'raw',
-	            'value' => function($data) use($renderer) {return (is_object($data->arm))?$renderer->render('/arms/item',['model'=>$data->arm]):null;}
-            ],
-            'raw_version'
-
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]);*/ ?>
 </div>

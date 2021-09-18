@@ -9,7 +9,7 @@
  * @var array $manufacturers список производителей
  * @var bool $addItem признак того, что это не настоящий элемент а пустышка для добавления элемента в паспорт
  */
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 //echo '<pre>'; var_dump($item); echo '</pre>'; die(0);
@@ -51,13 +51,13 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
                 ['/manufacturers/view','id'=>$item->manufacturer_id],
                 ['title' => 'Перейти к производителю']
             ) ?>
-            <?= $static_view?'':\yii\helpers\Html::a('<span class="glyphicon glyphicon-pencil"/>',
+            <?= $static_view?'':\yii\helpers\Html::a('<span class="fas fa-pencil-alt"/>',
                 ['/manufacturers/view', 'id' => $item->manufacturer_id,'return'=>'previous'],
                 ['title'=>'Редактировать производителя','class'=>'passport_tools']
             ) ?>
         <?php } else { ?>
             <?= $item->manufacturer ?>
-            <?= $static_view?'':strlen($item->manufacturer)?\yii\helpers\Html::a('<span class="glyphicon glyphicon-wrench"/>',
+            <?= $static_view?'':strlen($item->manufacturer)?\yii\helpers\Html::a('<span class="fas fa-wrench"/>',
                 ['/manufacturers-dict/create', 'word' => $item->manufacturer,'return'=>'previous'],
                 ['title'=>'Создать производителя','class'=>'passport_tools']
             ):'' ?>
@@ -75,9 +75,9 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
 
                 //кнопочка редактирования
                 Modal::begin([
-                    'header' => 'Редактирование элемента',
+                    'title' => 'Редактирование элемента',
                     'toggleButton' => [
-                        'label' => '<span class="glyphicon glyphicon-pencil"/>',
+                        'label' => '<span class="fas fa-pencil-alt"/>',
                         'tag' => 'a',
                         'class' => 'passport_tools',
                         'title' => 'Изменить элемент'
@@ -126,13 +126,13 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
                 </div>
                 <?php       //закрываем форму
                 Modal::end();
-                echo \yii\helpers\Html::a('<span class="glyphicon glyphicon-minus-sign"/>',
+                echo \yii\helpers\Html::a('<span class="fas fa-minus-sign"/>',
                     ['arms/rmhw', 'id'=>$model->id,'uid' => $item->uid],
                     ['title'=>'Убрать из паспорта этот элемент','class'=>'passport_tools']
                 );
 
             } else {
-                echo \yii\helpers\Html::a('<span class="glyphicon glyphicon-plus-sign"/>',
+                echo \yii\helpers\Html::a('<span class="fas fa-plus-circle"/>',
                     array_merge(['arms/updhw', 'id'=>$model->id],$item->toSave()),
                     [
                         'title'=>(isset($addItem)&&($addItem===true))?'Добавить новый элемент в паспорт':'Сохранить в паспорт этот элемент',
@@ -140,7 +140,7 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
                     ]
                 );
                 /*if (!(isset($addItem)&&($addItem===true)))
-                    echo \yii\helpers\Html::a('<span class="glyphicon glyphicon-exclamation-sign"/>',
+                    echo \yii\helpers\Html::a('<span class="fas fa-exclamation-sign"/>',
                     ['hw-ignore/create', 'fingerprint'=>$item->fingerprint],
                     [
                         'title'=>'Добавить позицию в список глобального скрытия',

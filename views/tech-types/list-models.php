@@ -1,6 +1,6 @@
 <?php
 
-use yii\bootstrap\Modal;
+use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\TechTypes */
@@ -29,7 +29,7 @@ use yii\bootstrap\Modal;
 		<?php
 		Modal::begin([
 			'id'=>'tech_models-add',
-			'header' => '<h2>Добавление модели оборудования</h2>',
+			'title' => '<h2>Добавление модели оборудования</h2>',
 			'size' => Modal::SIZE_LARGE,
 			'toggleButton' => [
 				'label' => 'Добавить модель',
