@@ -139,17 +139,12 @@ NavBar::begin([
 				],
 			]:'',
 			Yii::$app->user->isGuest ? (
-			['label' => 'Вход', 'url' => ['/site/login']]
+				['label' => 'Вход', 'url' => ['/site/login']]
 			) : (
-				'<li>'
-				. \yii\helpers\Html::beginForm(['/site/logout'], 'post')
-				. \yii\helpers\Html::submitButton(
-					'Выход (' . Yii::$app->user->identity->shortName . ')',
-					['class' => 'nav-link logout']
-				)
-				. \yii\helpers\Html::endForm()
-				. '</li>'
+				['label' => 'Выход (' . Yii::$app->user->identity->shortName . ')','linkOptions'=>['onclick'=>'$("#logout-form").submit();']]
 			)
 		],
 	]);
 NavBar::end();
+echo \yii\helpers\Html::beginForm(['/site/logout'], 'post',['id'=>'logout-form','style'=>'display:none']);
+echo \yii\helpers\Html::endForm();
