@@ -10,7 +10,12 @@
  * @var array $item
  */
 
-$classes=[];
+if (!isset($classes)) $classes=[];
+
+if (!isset($style))
+	$style='';
+else $style="style='$style'";
+
 
 if ($item['saved']) {
     if ($item['found']){
@@ -31,7 +36,7 @@ $dev=\app\models\Manufacturers::fetchItem($product->manufacturers_id);
 
 ?>
 
-<tr class="software_item <?= implode(' ',$classes) ?>">
+<tr class="software_item <?= implode(' ',$classes) ?>" <?= $style ?>>
     <td class="os-name"><?= $model->name ?></td>
     <td class="manufacturer">
         <?= $this->render('/manufacturers/item',['model'=>$dev]) ?>

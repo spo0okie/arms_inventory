@@ -145,7 +145,7 @@ NavBar::begin([
 				. \yii\helpers\Html::beginForm(['/site/logout'], 'post')
 				. \yii\helpers\Html::submitButton(
 					'Выход (' . Yii::$app->user->identity->shortName . ')',
-					['class' => 'btn btn-link logout']
+					['class' => 'nav-link logout']
 				)
 				. \yii\helpers\Html::endForm()
 				. '</li>'

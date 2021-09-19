@@ -24,9 +24,8 @@ if (!mb_strlen($domain))
 ?>
 
 <span class="unit-status <?= $model->updatedRenderClass ?> href" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()"><?= $model->updatedText ?></span>
-
+<br />
 <h1>
-	<?php if (!$no_abbr) { ?> <abbr title="Операционная система">ОС</abbr> <?php } ?>
 	<span class="small"><?= $domain ?>\</span><?= $static_view?Html::a($model->renderName(),['comps/view','id'=>$model->id]):$model->name ?>
 
 	<?= Html::a("<i class=\"fas fa-sign-in-alt\" title='Удаленное управление {$model->fqdn}' ></i>",'remotecontrol://'.$model->fqdn) ?>

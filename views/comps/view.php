@@ -73,28 +73,26 @@ foreach ($model->swList->items as $item) {
 		<div class="software_settings">
 			<h3>Софт</h3>
 			<?php // echo '<pre>'; var_dump($model->swList->items); echo '</pre>'; ?>
-			<h4 id="ignored_toggle">Игнорируемый</h4>
 			<table>
-				<?php foreach ($soft['ignored'] as $item) echo $this->render('/swlist/item', compact('item', 'model')); ?>
-			</table>
-
-			<h4 id="ignored_toggle">Бесплатный</h4>
-			<table>
-				<?php foreach ($soft['free'] as $item) echo $this->render('/swlist/item', compact('item', 'model')); ?>
-			</table>
-
-			<h4>Согласованный</h4>
-			<table>
+			<tr id="ignored_toggle">
+				<td colspan="4">
+					<h4 class="href" onclick="$('tr.ignored, span.ignored_hint').toggle()">Игнорируемый</h4>
+					<?php if (count($soft['ignored'])) { ?><span class="ignored_hint"><?= count($soft['ignored']) ?> элементов скрыто</span> <?php } ?>
+				</td>
+			</tr>
+				<?php foreach ($soft['ignored'] as $item) echo $this->render('/swlist/item', ['item'=>$item, 'model'=>$model,'classes'=>['ignored'],'style'=>'display:none']); ?>
+			<tr id="ignored_toggle">
+				<td colspan="4">
+					<h4 class="href" onclick="$('tr.free, span.free_hint').toggle()">Бесплатный</h4>
+					<?php if (count($soft['free'])) { ?><span class="free_hint"><?= count($soft['free']) ?> элементов скрыто</span> <?php } ?>
+				</td>
+			</tr>
+				<?php foreach ($soft['free'] as $item) echo $this->render('/swlist/item', ['item'=>$item, 'model'=>$model,'classes'=>['free'],'style'=>'display:none']); ?>
+			<tr id="ignored_toggle"><td><h4>Согласованный</h4></td></tr>
 				<?php foreach ($soft['agreed'] as $item) echo $this->render('/swlist/item', compact('item', 'model')); ?>
-			</table>
-
-			<h4>Требующий согласования</h4>
-			<table>
+			<tr id="ignored_toggle"><td><h4>Требующий согласования</h4></td></tr>
 				<?php foreach ($soft['other'] as $item)	echo $this->render('/swlist/item', compact('item', 'model')); ?>
-			</table>
-
-			<h4>Не распознанный:</h4>
-			<table>
+			<tr id="ignored_toggle"><td><h4>Не распознанный</h4></td></tr>
 				<?php if (is_array($model->swList->data)) foreach ($model->swList->data as $item) { ?>
 					<?= $this->render('/swlist/item_unrecognized', compact('model','item')) ?>
 				<?php } ?>
