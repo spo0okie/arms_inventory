@@ -67,7 +67,7 @@ if (\app\models\TechTypes::isPC($model->id)) {
 
     <?php if (count($techModels)) { ?>
         <p>
-            <span class="fas fa-warning-sign"></span> Невозможно удалить этот тип оборудования, т.к. заведены модели оборудования этого типа. (см ниже)
+            <span class="fas fa-exclamation-triangle"></span> Невозможно удалить этот тип оборудования, т.к. заведены модели оборудования этого типа. (см ниже)
         </p>
     <?php } ?>
 	
