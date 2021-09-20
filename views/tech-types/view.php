@@ -1,7 +1,8 @@
 <?php
 
 use yii\helpers\Html;
-use kartik\tabs\TabsX;
+//use kartik\tabs\TabsX;
+use yii\bootstrap5\Tabs;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\TechTypes */
@@ -70,14 +71,12 @@ if (\app\models\TechTypes::isPC($model->id)) {
         </p>
     <?php } ?>
 	
-	<?= TabsX::widget([
+	<?= Tabs::widget([
 		'items'=>$tabs,
-		'position'=>TabsX::POS_ABOVE,
+		//'position'=>TabsX::POS_ABOVE,
 		'encodeLabels'=>false,
-		'fade'=>false,
-		'pluginEvents' => [
-			//"tabsX:click" => "function(event) { setQueryStringParameter('currentTab', event.target.id); }",
-		],
+		//'fade'=>false,
+		//'dropDownClass' => 'kartik\bs5dropdown\Dropdown',
 	]); ?>
 
 </div>
