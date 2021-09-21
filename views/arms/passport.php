@@ -47,7 +47,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
             }
         }
         if (is_object($comp->swList) && is_array($comp->swList->data)) foreach ($comp->swList->data as $item) {
-            $unknown[] = $this->render('/comps/soft_item_unrecognized',
+            $unknown[] = $this->render('/swlist/item_unrecognized',
                 ['model' => $comp, 'item' => $item]
             );
         }
@@ -223,7 +223,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
 
         Modal::begin([
             'id'=>'techs_add_modal',
-	        'header' => '<h2>Добавление оборудования</h2>',
+	        'title' => '<h2>Добавление оборудования</h2>',
 			'size' => Modal::SIZE_LARGE,
 	        'toggleButton' => [
 		        'label' => 'Внести доп. оборудование',

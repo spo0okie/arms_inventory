@@ -27,7 +27,7 @@ $model_id=$model->id;
             Modal::begin([
                 'id'=>'arm_link_contract_modal',
 				'size' => Modal::SIZE_LARGE,
-				'header' => 'Выберите Документ'
+				'title' => 'Выберите Документ'
             ]);
             echo $this->render('/contracts/_linkform');
             //закрываем форму
@@ -36,7 +36,7 @@ $model_id=$model->id;
             Modal::begin([
                 'id'=>'arm_new_contract_modal',
 				'size' => Modal::SIZE_LARGE,
-                'header' => '<h2>Добавление документа к АРМ</h2>',
+                'title' => '<h2>Добавление документа к АРМ</h2>',
             ]);
             $contract=new \app\models\Contracts();
             $contract->arms_ids=[$model->id];
