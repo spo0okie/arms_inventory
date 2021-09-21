@@ -18,7 +18,7 @@ $right=($right_count)?array_slice($items,$left_count):null;
 ?>
 
 <div class="row">
-    <div class="col-xs-6"><?= $this->render('list',['items'=>$left]) ?></div>
-    <div class="col-xs-6"><?= ($right_count)?($this->render('list',['items'=>$right])):'' ?></div>
+    <div class="col-md-6"><?= $this->render('list',['items'=>$left]) ?></div>
+    <div class="col-md-6"><?= ($right_count)?($this->render('list',['items'=>$right])):'' ?></div>
 </div>
 
