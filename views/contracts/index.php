@@ -32,15 +32,24 @@ $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'b
 			        return $renderer->render('/contracts/item',['model'=>$data,'name'=>$data['sname']]);
 		        }
 	        ],
-	        [
-		        'attribute'=>'state_id',
-		        'filter'=>\app\models\ContractsStates::fetchNames(),
-		        'format'=>'raw',
-		        'value'=>function($data) use ($renderer) {
-			        return $renderer->render('/contracts/item-state',['model'=>$data]);
-		        }
-	        ],
-	        'total',
+			[
+				'attribute'=>'state_id',
+				'filter'=>\app\models\ContractsStates::fetchNames(),
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer) {
+					return $renderer->render('/contracts/item-state',['model'=>$data]);
+				}
+			],
+			[
+				'attribute'=>'total',
+				//'filter'=>\app\models\ContractsStates::fetchNames(),
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer) {
+    				if ($data->total) {
+						return $data->total.$data->currency->symbol;
+					} return '';
+				}
+			],
 			'charge',
 	        [
 		        'attribute'=>'docsAttached',

@@ -6,7 +6,7 @@ return [
 	'hintUrl'=>'https://wiki.azimuth.holding.local/инвентаризация:',
 	'wikiUser'=>'inventory_doku_ro',
     'wikiPass'=>'m8-W8CZSZ(wANqL+',
-	'bsVersion' => '5',
+	'bsVersion' => '5.x',
 
 	'useRBAC'=>false,   //включить RBAC и выдавать админа только тем кому назначено
 	'authorizedView'=>true

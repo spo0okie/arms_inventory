@@ -15,6 +15,7 @@ use yii\web\JsExpression;
  *
  * @property int $id id
  * @property int $parent_id Родительский договор
+ * @property int $currency_id Валюта
  * @property bool $is_successor Замещает родительский договор
  * @property string $date Дата документа
  * @property string $end_date Дата окончания действия документа
@@ -32,6 +33,7 @@ use yii\web\JsExpression;
  * @property array $scans_ids массив ссылок на сканы в договоре
  *
  * @property Contracts $parent
+ * @property Currency $currency
  * @property Contracts $successor
  * @property Contracts[] $successors
  * @property Contracts[] $successorsChain
@@ -83,7 +85,7 @@ class Contracts extends \yii\db\ActiveRecord
             [['name'], 'required'],
 	        [['lics_ids','partners_ids','arms_ids','techs_ids'], 'each', 'rule'=>['integer']],
 	        //[['scanFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
-	        [['parent_id','state_id'], 'integer'],
+	        [['parent_id','state_id','currency_id'], 'integer'],
 	        [['total','charge'], 'number'],
 	        [['is_successor'], 'boolean'],
             [['comment'], 'string'],
@@ -121,6 +123,7 @@ class Contracts extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'parent' => 'Основной документ',
 			'parent_id' => 'Основной документ',
+			'currency_id' => 'Валюта',
 			'is_successor' => 'Заменяет основной документ',
 			'name' => 'Название документа',
 			'scanFile' => 'Скан документа',
@@ -148,6 +151,7 @@ class Contracts extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'parent' => 'Если этот документ дополняет основной',
 			'parent_id' => 'Если этот документ дополняет основной',
+			'currency_id' => 'Ед. изм. суммы',
 			'name' => 'Полное название документа как в нем написано (Счет № / договор № / накладная / и т.д.).',
 			'date' => 'Дата документа / начало действия, если есть срок действия',
 			'total' => 'Если по документу предполагается оплата какойто суммы, то ее надо вписать сюда',
@@ -159,15 +163,23 @@ class Contracts extends \yii\db\ActiveRecord
 			'scans_ids' => 'Отсканированная версия документа',
 		];
 	}
-
+	
 	/**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getParent()
-    {
-        return $this->hasOne(Contracts::className(), ['id' => 'parent_id']);
-    }
-
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getCurrency()
+	{
+		return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getParent()
+	{
+		return $this->hasOne(Contracts::className(), ['id' => 'parent_id']);
+	}
+	
 	/**
 	 * ищет одного наследника (один уровень наследования + самый молодой)
 	 * @return \yii\db\ActiveQuery
