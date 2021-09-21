@@ -16,6 +16,34 @@ $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'b
 	\yii\helpers\Html::a('УПД',['index','ContractsSearch[fullname]'=>'упд'],['class'=>'btn btn-default']).
 	\yii\helpers\Html::a('договоры',['index','ContractsSearch[fullname]'=>'договор'],['class'=>'btn btn-default']);
 
+$users=[];
+
+//собираем суммы по валютам
+$totals=[];
+$charge=[];
+foreach ($dataProvider->models as $model) {
+	
+	if ($model->total) {
+		if (!isset($totals[$model->currency_id])) $totals[$model->currency_id]=0;
+		if (!isset($charge[$model->currency_id])) $charge[$model->currency_id]=0;
+		
+		$totals[$model->currency_id]+=$model->total;
+		$charge[$model->currency_id]+=$model->charge;
+	}
+	
+}
+
+$arrFooter=['total'=>[],'charge'=>[]];
+foreach (\app\models\Currency::find()->all() as $currency) {
+	if (isset($totals[$currency->id]) && $totals[$currency->id]) {
+		$arrFooter['total'][]=$totals[$currency->id].$currency->symbol;
+	}
+	if (isset($charge[$currency->id]) && $charge[$currency->id]) {
+		$arrFooter['charge'][]=$charge[$currency->id].$currency->symbol;
+	}
+}
+
+
 ?>
 <div class="contracts-index">
 
@@ -48,16 +76,27 @@ $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'b
     				if ($data->total) {
 						return $data->total.$data->currency->symbol;
 					} return '';
-				}
+				},
+				'footer'=>implode('<br />',$arrFooter['total']),
 			],
-			'charge',
+			[
+				'attribute'=>'charge',
+				//'filter'=>\app\models\ContractsStates::fetchNames(),
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer) {
+					if ($data->charge) {
+						return $data->charge.$data->currency->symbol;
+					} return '';
+				},
+				'footer'=>implode('<br />',$arrFooter['charge']),
+			],
 	        [
 		        'attribute'=>'docsAttached',
 		        'header'=>'<span class="fas fa-paperclip" title="Привязано документов"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
 			        return (count($data->childs)+($data->parent_id?1:0))?(count($data->childs)+($data->parent_id?1:0)):'';
-		        }
+		        },
 	        ],
 	        [
 		        'attribute'=>'armsAttached',
@@ -109,7 +148,7 @@ $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'b
 	    'export' => [
 		    'fontAwesome' => true
 	    ],
-	    'showFooter' => false,
+	    'showFooter' => true,
 		'showPageSummary' => false,
 	    'panel' => [
 		    'type' => GridView::TYPE_DEFAULT,
