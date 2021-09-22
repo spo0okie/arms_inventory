@@ -130,7 +130,6 @@ foreach ($columns as $column) {
 			break;
 			
 		case 'mac':
-		case 'ip':
 			$render_columns[] = $column;
 			break;
 	}
