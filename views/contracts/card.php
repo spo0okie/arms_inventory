@@ -47,9 +47,9 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
 
 <?php if ($model->total) { ?>
 	<h4>
-		Сумма: <?= Yii::$app->formatter->asCurrency($model->total) ?>
+		Сумма: <?= $model->total.''.$model->currency->symbol ?>
 		<?php if ($model->charge){ ?>
-			(в т.ч. НДС: <?= Yii::$app->formatter->asCurrency($model->charge) ?>)
+			(в т.ч. НДС: <?= $model->charge.''.$model->currency->symbol ?>)
 		<?php } ?>
 	</h4>
 <?php } ?>
