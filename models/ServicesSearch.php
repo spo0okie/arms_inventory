@@ -67,7 +67,7 @@ class ServicesSearch extends Services
 			$query->andWhere(['services.archived'=>0]);
 		}
 	
-	
+
 		$dataProvider = new ActiveDataProvider([
             'query' => $query,
 	        'totalCount' => $query->count('distinct(services.id)'),
@@ -107,17 +107,30 @@ class ServicesSearch extends Services
 			->andFilterWhere(['like', 'support_schedule.name', $this->supportSchedule])
 	        ->andFilterWhere([
 	        	'or',
-		        ['like', 'responsible.Ename', $this->responsible],
-		        ['like', 'support.Ename', $this->responsible]
-	        ])
-	        ->andFilterWhere([
-	        	'or',
 		        ['like', 'getplacepath(places.id)', $this->sites],
 		        ['like', 'getplacepath(places_techs.id)', $this->sites]
 	        ])
             ->andFilterWhere(['like', 'notebook', $this->notebook]);
-		
-      
-        return $dataProvider;
+	
+	
+        if ($this->responsible) {
+			$arrResponsible=explode('|',$this->responsible);
+			if (strpos($this->responsible,'|'))
+				$query->andWhere([
+					'or',
+					['or like', 'responsible.Ename', $arrResponsible],
+					['or like', 'support.Ename', $arrResponsible]
+				]);
+			else
+				$query->andWhere([
+					'or',
+					['like', 'responsible.Ename', $this->responsible],
+					['like', 'support.Ename', $this->responsible]
+				]);
+    
+		}
+  
+	
+		return $dataProvider;
     }
 }
