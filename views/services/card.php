@@ -72,13 +72,16 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 
 	</div>
 	<div class="col-md-6">
-		<?php if (count($children)) { ?>
 			<h2>Содержит в составе:</h2>
 			<p>
-				<?= $this->render('/services/tree-list',['model'=>$model]); ?>
+				<?php if (count($children)) { ?>
+					<?= $this->render('/services/tree-list',['model'=>$model]); ?>
+				<?php } else {?>
+					Нет суб-сервисов
+				<?php } ?>
 			</p>
+			<?= $static_view?'':Html::a('Добавить суб-сервис',['create','parent_id'=>$model->id],['class'=>'btn btn-success']).'<br />'?>
 			<br />
-		<?php } ?>
 
 		<?php if (count($comps)) { ?>
 			<h4>Выполняется на компьютерах:</h4>

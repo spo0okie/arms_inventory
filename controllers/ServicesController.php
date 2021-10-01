@@ -180,6 +180,9 @@ class ServicesController extends Controller
     public function actionCreate()
     {
         $model = new Services();
+        
+        if (Yii::$app->request->get('parent_id'))
+        	$model->parent_id=Yii::$app->request->get('parent_id');
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             //return $this->redirect(['view', 'id' => $model->id]);
