@@ -2,8 +2,6 @@
 namespace app\components;
 
 use yii\base\Widget;
-use yii\widgets\ActiveForm;
-
 
 class TextAutoResizeWidget extends Widget
 {

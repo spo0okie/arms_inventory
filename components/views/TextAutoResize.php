@@ -1,7 +1,7 @@
 <?php
 /* @var $this yii\web\View */
 
-/* @var $form yii\widgets\ActiveForm */
+/* @var $form yii\bootstrap5\ActiveForm */
 /* @var $model yii\db\ActiveRecord */
 /* @var $field string */
 /* @var $lines integer */
@@ -15,5 +15,5 @@ if (!isset($hint)) {
 		->hint($hint);
 }
 $fieldId=strtolower(yii\helpers\StringHelper::basename($model::className()).'-'.$field);
-$this->registerJs("$('#$fieldId').autoResize({extraSpace:15}).trigger('change.dynSiz');");
+$this->registerJs("$('#$fieldId').autoResize({extraSpace:25}).trigger('change.dynSiz');");
 

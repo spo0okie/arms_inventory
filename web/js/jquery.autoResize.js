@@ -37,7 +37,7 @@
                 clone = (function(){
 
                     // Properties which may effect space taken up by chracters:
-                    var props = ['height','width','lineHeight','textDecoration','letterSpacing'],
+                    var props = ['width','lineHeight','textDecoration','letterSpacing'],
                         propOb = {};
   
                     // Create object of styles to apply:
@@ -67,10 +67,9 @@
 
                     // Prepare the clone:
                     clone.height(0).val($text).scrollTop(10000);
-                    //clone.height(0).val($(this).val()).scrollTop(10000);
 
                     // Find the height of text:
-                    let scrollTop = Math.max(clone.scrollTop(), origHeight) + settings.extraSpace,
+                    let scrollTop = Math.max(clone.scrollTop()+clone.height(), origHeight) + settings.extraSpace,
                         toChange = $(this).add(clone);
 						
                     // Don't do anything if scrollTip hasen't changed:
