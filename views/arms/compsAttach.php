@@ -22,7 +22,7 @@ $this->registerJs($script, \yii\web\View::POS_HEAD);
         
 
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 
 /**

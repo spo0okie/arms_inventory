@@ -11,7 +11,7 @@
  */
 use yii\bootstrap5\Modal;
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use yii\bootstrap5\ActiveForm;
 //echo '<pre>'; var_dump($item); echo '</pre>'; die(0);
 if (!isset($static_view)) $static_view=false;
 
