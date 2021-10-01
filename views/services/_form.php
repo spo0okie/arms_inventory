@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
@@ -60,7 +60,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+			<?php echo $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+			<?php //echo $form->field($model, 'name')->widget(InputWidget::className(), []) ?>
 		</div>
 		<div class="col-md-6">
 			<?= $form->field($model, 'parent_id')->widget(Select2::className(), [
