@@ -181,7 +181,7 @@ class Services extends \yii\db\ActiveRecord
             'notebook' => 'Записная книжка',
 			'segment_id' => 'Сегмент ИТ',
 			'segment' => 'Сегмент ИТ',
-			'arms' => arms::$title,
+			'arms' => Arms::$title,
 			'archived' => 'Архивирован',
 			'places_id' => Places::$title,
 			'places' => Places::$titles,
