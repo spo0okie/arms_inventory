@@ -14,6 +14,7 @@ class ServicesSearch extends Services
 	public $sites;
 	public $segment;
 	public $responsible;
+	public $responsible_ids;
 	public $supportSchedule;
 	public $providingSchedule;
 	public $directlySupported; //поддержка объявлена явно для этого сервиса
@@ -25,6 +26,7 @@ class ServicesSearch extends Services
     {
         return [
 	        [['id', 'is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
+			[['responsible_ids'], 'each', 'rule'=>['integer']],
             [['name', 'description', 'segment', 'sites','responsible', 'providingSchedule', 'supportSchedule','directlySupported'], 'safe'],
         ];
     }
@@ -129,7 +131,15 @@ class ServicesSearch extends Services
 				]);
     
 		}
-  
+	
+		if (is_array($this->responsible_ids)) {
+			$query->andWhere([
+				'or',
+				['responsible.id'=> $this->responsible_ids],
+				['support.id'=> $this->responsible_ids]
+			]);
+		
+		}
 	
 		return $dataProvider;
     }

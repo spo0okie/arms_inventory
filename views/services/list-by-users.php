@@ -9,7 +9,7 @@ use yii\widgets\Pjax;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $models \app\models\Services[] */
 
-$this->title = \app\models\Services::$title;
+$this->title = \app\models\Services::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $models=$dataProvider->models;
 
@@ -37,12 +37,10 @@ $renderer=$this;
 $render_columns=[
 	[
 		'attribute' => 'name',
-		//'header' => 'Инв. номер',
 		'format' => 'raw',
 		'value' => function ($data) use ($renderer) {
 			return $renderer->render('/services/item', ['model' => $data]);
 		},
-		//'contentOptions' => ['class' => $column . '_col']
 	],
 	[
 		'attribute' => 'support',
@@ -81,6 +79,13 @@ foreach ($dataProvider->models as $model) {
 
 arsort($users);
 
+//если отфильтровали по пользователям, то из рендера убираем посторонних
+if (is_array($searchModel->responsible_ids) && count($searchModel->responsible_ids)) {
+	foreach ($users as $id=>$user) {
+		if (array_search($id,$searchModel->responsible_ids)===false) unset($users[$id]);
+	}
+}
+
 foreach ($users as $user=>$total) {
 	
 	if (!empty($user))	{
@@ -111,7 +116,7 @@ echo GridView::widget([
 	'columns' => $render_columns,
 	'showFooter' => true,
 	'floatHeader'=>true,
-	'floatHeaderOptions'=>['top'=>'50']
+	'floatHeaderOptions'=>['top'=>'0']
 ]);
 ?>
 
