@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Segments */
 
 $this->title = 'Правка: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => app\models\Segments::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => app\models\Segments::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Правка';
 ?>

@@ -15,6 +15,7 @@ use yii\web\User;
  * @property int $is_end_user
  * @property int $user_group_id
  * @property int $sla_id
+ * @property int $is_service
  * @property string $notebook
  * @property string $links
  * @property int $responsible_id
@@ -26,8 +27,10 @@ use yii\web\User;
  * @property int $segment_id
  * @property int $places_id
  * @property int $partners_id
+ * @property int $currency_id
  * @property int $archived
- * @property float $price
+ * @property float $cost
+ * @property float $charge
  * @property string $segmentName
  * @property int[] $depends_ids
  * @property int[] $comps_ids
@@ -60,11 +63,19 @@ use yii\web\User;
  * @property Segments $segment
  * @property Segments $segmentRecursive
  * @property Acls[] $acls
+ * @property Currency $currency
  */
 class Services extends \yii\db\ActiveRecord
 {
+	
+	public static $titles='Сервисы/услуги';
+	public static $title='Сервис/услуга';
 
-	public static $title='IT сервисы';
+	public static $user_service_title='Сервис для пользователей';
+	public static $tech_service_title='Служебный сервис';
+	public static $user_job_title='Услуга для пользователей';
+	public static $tech_job_title='Служебная услуга';
+	
 	
 	private $segmentRecursiveCache=null;
 	private $supportRecursiveCache=null;
@@ -90,6 +101,7 @@ class Services extends \yii\db\ActiveRecord
 					'depends_ids' => 'depends',
 					'comps_ids' => 'comps',
 					'support_ids' => 'support',
+					'contracts_ids' => 'contracts',
 					'techs_ids' => 'techs'
 				]
 			]
@@ -121,12 +133,13 @@ class Services extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+			[['currency_id'],'default','value'=>1],
             [['name', 'description', 'is_end_user'], 'required'],
-	        [['depends_ids','comps_ids','support_ids','techs_ids'], 'each', 'rule'=>['integer']],
+	        [['depends_ids','comps_ids','support_ids','techs_ids','contracts_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
-			[['places_id','partners_id','archived'],'integer'],
+			[['places_id','partners_id','places_id','archived','currency_id'],'integer'],
 			[['cost','charge'], 'number'],
-	        [['is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
+	        [['is_end_user', 'is_service', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 	        [['name'], 'string', 'max' => 64],
 	        [['responsible_id'],        'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['responsible_id' => 'id']],
 	        [['providing_schedule_id'], 'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['providing_schedule_id' => 'id']],
@@ -143,13 +156,15 @@ class Services extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
+			'currency_id' => 'Валюта',
 			'name' => 'Название',
-			'parent_id' => 'Основной сервис',
+			'parent_id' => 'Основной сервис/услуга',
 	        'description' => 'Описание',
 	        'links' => 'Ссылки',
-            'is_end_user' => 'Предоставляется пользователям',
+			'is_service' => 'Тип объекта',
+			'is_end_user' => 'Предоставляется пользователям',
             'user_group_id' => 'Группа ответственных',
-	        'depends_ids' => 'Зависит от сервисов',
+	        'depends_ids' => 'Зависит от сервисов/услуг',
 			'comps' => 'Серверы',
 			'comps_ids' => 'Серверы',
 			'techs' => 'Оборудование',
@@ -160,14 +175,20 @@ class Services extends \yii\db\ActiveRecord
 	        'support_schedule_id' => 'Время поддержки',
 	        'responsible' => 'Ответственный, поддержка',
 	        'responsible_id' => 'Ответственный',
-	        'support_ids' => 'Поддержка',
+			'support_ids' => 'Поддержка',
+			'contracts_ids' => Contracts::$titles,
             'notebook' => 'Записная книжка',
 			'segment_id' => 'Сегмент ИТ',
 			'segment' => 'Сегмент ИТ',
-			'arms' => 'Армы',
+			'arms' => arms::$title,
 			'archived' => 'Архивирован',
-			'places' => 'Помещения',
+			'places_id' => Places::$title,
+			'places' => Places::$titles,
+			'partners_id' => Partners::$title,
+			'partner' => Partners::$title,
 			'sites' => 'Площадки',
+			'cost' => 'Стоимость',
+			'charge' => 'НДС',
         ];
     }
 
@@ -178,24 +199,38 @@ class Services extends \yii\db\ActiveRecord
 	{
 		return [
 			'id' => 'ID',
-			'name' => 'Короткое уникальное название сервиса',
+			'currency_id' => 'Ед. изм. стоим.',
+			'name' => 'Короткое уникальное название сервиса или услуги',
 			'parent_id' => 'Здесь можно указать в состав какого, более крупного сервиса, входит этот сервис',
 			'description' => 'Развернутое название или краткое описание назначения этого сервиса. Все детали тут описывать не нужно. Нужно в поле ниже вставить ссылку на вики страничку с описанием',
 			'links' => \app\components\UrlListWidget::$hint.' Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
 			'is_end_user' => 'Предоставляется ли этот сервис пользователям (иначе используется другими сервисами)',
-			'user_group_id' => 'Группа сотрудников ответственных за работоспособность сервиса',
-			'depends_ids' => 'От работы каких сервисов зависит работа этого сервиса',
-			'comps_ids' => 'На каких серверах выполняется этот сервис',
+			'user_group_id' => 'Группа сотрудников ответственных за работоспособность сервиса/предоставление услуги',
+			'depends_ids' => 'От работы каких сервисов зависит работа этого сервиса/предоставление услуги',
+			'comps_ids' => 'На каких серверах выполняется этот сервис/услуге',
+			'contract_ids' => 'Документы привязанные к этому сервису/услуге',
 			'techs_ids' => 'На каком оборудовании выполняется этот сервис',
-			'sla_id' => 'Выбор соглашения о качестве предоставления сервиса',
+			'places_id' => 'Привязать сервис/услугу к помещению. Иначе помещение будет косвенно выясняться на основании расположения серверов и оборудования',
+			'partners_id' => 'Если услуга/сервис оказывается каким-либо контрагентом (иначе внутренняя)',
 			'notebook' => 'Устаревшее поле. Вся информация должна быть на вики страничке.',
 			'support_schedule_id' => 'Расписание, когда нужно реагировать на сбои в работе сервиса',
 			'providing_schedule_id' => 'Расписание, когда сервисом могут воспользоваться пользователи или другие сервисы',
-			'responsible_id' => 'Ответственный за работу сервиса',
-			'support_ids' => 'Дополнительные члены команды по поддержке сервиса',
+			'responsible_id' => 'Ответственный за работу сервиса/оказание услуги',
+			'support_ids' => 'Дополнительные члены команды по поддержке сервиса/оказанию услуги',
 			'segment_id' => 'Сегмент ИТ инфраструктуры к которому относится этот сервис',
-			'archived' => 'Если сервис более не используется, но для истории его описание лучше сохранить - то его можно просто заархивировать, чтобы не отсвечивал',
+			'archived' => 'Если сервис/услуга более не используется, но для истории его описание лучше сохранить - то его можно просто заархивировать, чтобы не отсвечивал',
+			'cost' => 'Стоимость услуги в месяц. (если понадобится другой период - обращайтесь к разработчику)',
+			'charge' => 'налог',
+			'contracts_ids' => 'Привязанные к услуге документы. Можно привязать только договор, а все счета/акты/доп.соглашения уже привязывать к договору',
 		];
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getCurrency()
+	{
+		return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
 	}
 	
 	/**
@@ -327,6 +362,16 @@ class Services extends \yii\db\ActiveRecord
 		return static::hasMany(Users::className(), ['id' => 'user_id'])
 			->from(['support'=>Users::tableName()])
 			->viaTable('{{%users_in_services}}', ['service_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает документы привязанные к сервису
+	 */
+	public function getContracts()
+	{
+		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
+			->from(['service_contracts'=>Contracts::tableName()])
+			->viaTable('{{%contracts_in_services}}', ['services_id' => 'id']);
 	}
 	
 	public function getSupportRecursive() {

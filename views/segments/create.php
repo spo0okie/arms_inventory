@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Segments */
 
 $this->title = 'Новый сегмент';
-$this->params['breadcrumbs'][] = ['label' => \app\models\Segments::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\Segments::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="segments-create">

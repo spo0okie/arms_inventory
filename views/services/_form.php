@@ -12,7 +12,9 @@ $segmentPlaceholder='Выберите сегмент ИТ инфраструкт
 $schedulePlaceholder='Выберите расписание';
 $responsiblePlaceholder='Выберите ответственного';
 $supportPlaceholder='Выберите сотрудников';
-$parentPlaceholder=' (насл. из основного сервиса)';
+$parentPlaceholder=' (насл. из основного сервиса/услуги)';
+
+if (!$model->is_service) $model->is_service=0;
 
 $changeParent= <<<JS
 Select2UpdatePlaceholder = function (field,newPlaceholder,defaultValue) {
@@ -59,15 +61,14 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
     <?php $form = ActiveForm::begin(); ?>
 
 	<div class="row">
-		<div class="col-md-6">
-			<?php echo $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-			<?php //echo $form->field($model, 'name')->widget(InputWidget::className(), []) ?>
+		<div class="col-md-5">
+			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 		</div>
-		<div class="col-md-6">
+		<div class="col-md-5">
 			<?= $form->field($model, 'parent_id')->widget(Select2::className(), [
 				'data' => \app\models\Services::fetchNames(),
 				'options' => [
-					'placeholder' => 'Выберите основной сервис',
+					'placeholder' => 'Выберите основной сервис/услугу',
 					'onchange' => 'changeServiceParent($(this).val());'
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -75,6 +76,17 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'allowClear' => true,
 					'multiple' => false
 				]
+			]) ?>
+		</div>
+		<div class="col-md-2">
+			<?= $form->field($model, 'is_service')->radioList([0=>'Услуга',1=>'Сервис'],[
+				'class'=>'input-group',
+				'item' => function ($index, $label, $name, $checked, $value) use ($model){
+					$id_prefix=Html::getInputId($model, 'is_service');
+					return
+						Html::radio($name, $checked, ['value' => $value, 'class' => 'btn-check','id'=>"{$id_prefix}_$index"]).
+						'<label class="btn btn-outline-secondary" for="'.$id_prefix.'_'.$index.'">' . $label . '</label>';
+				},
 			]) ?>
 		</div>
 	</div>
@@ -118,6 +130,54 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
+			<?= $form->field($model, 'responsible_id')->widget(Select2::className(), [
+				'data' => \app\models\Users::fetchWorking(),
+				'options' => [
+					'placeholder' => (is_object($model->parent) && strlen($model->parent->responsibleName))?
+						$model->parent->responsibleName.$parentPlaceholder:$responsiblePlaceholder,
+				],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
+			<?= $form->field($model, 'places_id')->widget(Select2::classname(), [
+				'data' => \app\models\Places::fetchNames(),
+				'options' => ['placeholder' => 'Начните набирать название для поиска'],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+				],
+			]) ?>
+			<?= $form->field($model, 'partners_id')->widget(Select2::classname(), [
+				'data' => \app\models\Partners::fetchNames(),
+				'options' => ['placeholder' => 'Начните набирать название для поиска'],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+				],
+			]) ?>
+			<div class="row">
+				<div class="col-md-3">
+					<?= $form->field($model, 'currency_id')->widget(Select2::classname(), [
+						'data' => \app\models\Currency::fetchNames(),
+						'options' => ['placeholder' => 'RUR'],
+						'toggleAllSettings'=>['selectLabel'=>null],
+						'pluginOptions' => [
+							'allowClear' => false,
+							'multiple' => false
+						],
+					]) ?>
+				</div>
+				<div class="col-md-6">
+					<?= $form->field($model,'cost')->textInput() ?>
+				</div>
+				<div class="col-md-3">
+					<?= $form->field($model,'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('services','cost','charge')) ?>
+				</div>
+			</div>
+
 
 		</div>
         <div class="col-md-8">
@@ -133,51 +193,28 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				'attribute' => 'links',
 				'lines' => 3,
 			]) ?>
-
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-	
-	        <?= $form->field($model, 'responsible_id')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchWorking(),
-				'options' => [
-					'placeholder' => (is_object($model->parent) && strlen($model->parent->responsibleName))?
-						$model->parent->responsibleName.$parentPlaceholder:$responsiblePlaceholder,
-				],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-			        'allowClear' => true,
-			        'multiple' => false
-		        ]
-	        ]) ?>
-	
-	        <?= $form->field($model, 'support_ids')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchWorking(),
+			
+			<?= $form->field($model, 'support_ids')->widget(Select2::className(), [
+				'data' => \app\models\Users::fetchWorking(),
 				'options' => [
 					'placeholder' => (is_object($model->parent) && strlen($model->parent->supportNames))?
 						$model->parent->supportNames.$parentPlaceholder:$supportPlaceholder,
 				],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-			        'allowClear' => true,
-			        'multiple' => true
-		        ]
-	        ]) ?>
-	
-			<?= $form->field($model, 'archived')->checkbox() ?>
-        </div>
-        <div class="col-md-6">
-	        <?= $form->field($model, 'depends_ids')->widget(Select2::className(), [
-		        'data' => \app\models\Services::fetchNames(),
-		        'options' => ['placeholder' => 'Выберите сервисы',],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-			        'allowClear' => true,
-			        'multiple' => true
-		        ]
-	        ]) ?>
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+			<?= $form->field($model, 'depends_ids')->widget(Select2::className(), [
+				'data' => \app\models\Services::fetchNames(),
+				'options' => ['placeholder' => 'Выберите сервисы',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
 			<?= $form->field($model, 'comps_ids')->widget(Select2::className(), [
 				'data' => \app\models\Comps::fetchNames(),
 				'options' => ['placeholder' => 'Выберите серверы',],
@@ -196,6 +233,26 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
+			<?= $form->field($model, 'contracts_ids')->widget(Select2::className(), [
+				'data' => \app\models\Contracts::fetchNames(),
+				'options' => ['placeholder' => 'Выберите документы',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+	
+	
+	
+			<?= $form->field($model, 'archived')->checkbox() ?>
+        </div>
+        <div class="col-md-6">
 
         </div>
     </div>

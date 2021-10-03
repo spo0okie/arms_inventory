@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Services */
 
 $this->title = 'Новый сервис';
-$this->params['breadcrumbs'][] = ['label' => \app\models\Services::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\Services::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="services-create">

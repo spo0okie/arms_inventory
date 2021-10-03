@@ -54,8 +54,9 @@ use yii\web\JsExpression;
  */
 class Contracts extends \yii\db\ActiveRecord
 {
-
+	
 	public static $title="Документы";
+	public static $titles="Документы";
 
 
 	public $scanFile;
@@ -589,8 +590,9 @@ class Contracts extends \yii\db\ActiveRecord
 	 * @return string
 	 */
 	public static function chargeCalcHtml($model,$total,$charge) {
+		//строка подсчета НДС в поле $charge из значения в поле $total в ActiveForm
 		return <<<HTML
-		<span class="href" onclick="$('#{$model}-{$charge}').val($('#{$model}-{$total}').val()/1.2*0.2)">20%</span>
+		<span class="href" onclick="$('#{$model}-{$charge}').val(($('#{$model}-{$total}').val()/1.2*0.2).toFixed(2))">20%</span>
 		/
 		<span class="href" onclick="$('#{$model}-{$charge}').val('')">нет</span>
 HTML;

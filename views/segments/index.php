@@ -8,7 +8,7 @@ use yii\grid\GridView;
 
 \yii\helpers\Url::remember();
 
-$this->title = app\models\Segments::$title;
+$this->title = app\models\Segments::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
