@@ -11,16 +11,39 @@ use yii\bootstrap5\ActiveForm;
 <div class="partners-form">
 
     <?php $form = ActiveForm::begin(); ?>
+	
+	<div class="row">
+		<div class="col-md-4">
+			<?= $form->field($model, 'bname')->textInput(['maxlength' => true]) ?>
+		</div>
+		<div class="col-md-8">
+			<?= $form->field($model, 'uname')->textInput(['maxlength' => true]) ?>
+		</div>
+	</div>
+	
 
-    <?= $form->field($model, 'inn')->textInput(['maxlength' => true]) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $form->field($model, 'inn')->textInput(['maxlength' => true]) ?>
+		</div>
+		<div class="col-md-6">
+			<?= $form->field($model, 'kpp')->textInput(['maxlength' => true]) ?>
+		</div>
+	</div>
 
-    <?= $form->field($model, 'kpp')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'uname')->textInput(['maxlength' => true]) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $form->field($model, 'cabinet_url')->textInput(['maxlength' => true]) ?>
+		</div>
+		<div class="col-md-6">
+			<?= $form->field($model, 'support_tel')->textInput(['maxlength' => true]) ?>
+		</div>
+	</div>
 
-    <?= $form->field($model, 'bname')->textInput(['maxlength' => true]) ?>
+	
 
-    <?= $form->field($model, 'coment')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

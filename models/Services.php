@@ -64,6 +64,7 @@ use yii\web\User;
  * @property Segments $segmentRecursive
  * @property Acls[] $acls
  * @property Currency $currency
+ * @property Partners $partner
  */
 class Services extends \yii\db\ActiveRecord
 {
@@ -231,6 +232,14 @@ class Services extends \yii\db\ActiveRecord
 	public function getCurrency()
 	{
 		return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+	}
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getPartner()
+	{
+		return $this->hasOne(Partners::className(), ['id' => 'partners_id']);
 	}
 	
 	/**

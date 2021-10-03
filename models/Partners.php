@@ -13,14 +13,18 @@ use Yii;
  * @property string $uname Юр. название
  * @property string $bname Бренд
  * @property string $sname Имя для поиска (юр название и бренд)
- * @property string $coment Комментарий
+ * @property string $comment Комментарий
+ * @property string $cabinet_url Урл личного кабинет
+ * @property string $support_tel Тел. тех. поддержки
  *
  * @property Contracts[] $contracts
+ * @property Services[] $services
  */
 class Partners extends \yii\db\ActiveRecord
 {
-
-	public static $title="Контрагенты";
+	
+	public static $title="Контрагент";
+	public static $titles="Контрагенты";
 
 
 	public static $all_items=null; //кэш всей таблицы
@@ -42,7 +46,7 @@ class Partners extends \yii\db\ActiveRecord
     {
         return [
             [['inn', 'uname', 'bname'], 'required'],
-            [['coment'], 'string'],
+            [['comment','support_tel','cabinet_url'], 'string'],
             [['inn'], 'string', 'max' => 12],
             [['kpp'], 'string', 'max' => 9],
             [['uname', 'bname'], 'string', 'max' => 255],
@@ -60,18 +64,32 @@ class Partners extends \yii\db\ActiveRecord
             'kpp' => 'КПП',
             'uname' => 'Юр. название',
             'bname' => 'Бренд',
-            'coment' => 'Комментарий',
+            'comment' => 'Комментарий',
+			'cabinet_url' => 'Ссылка на личный кабинет',
+			'support_tel' => 'Телефон тех.поддержки',
         ];
     }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getContracts()
-    {
-        return $this->hasMany(Contracts::className(), ['partner' => 'id']);
-    }
-
+	
+	
+	/**
+	 * Возвращает набор контрагентов в договоре
+	 * @return \yii\db\ActiveQuery
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function getContracts()
+	{
+		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
+			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getServices()
+	{
+		return $this->hasMany(Services::className(), ['partners_id' => 'id']);
+	}
+	
 	/**
 	 * Возвращает имя для поиска
 	 * @return string

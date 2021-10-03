@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\PartnersSearch */
@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'kpp',
             'uname',
             'bname',
-            'coment:ntext',
+            'comment:ntext',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

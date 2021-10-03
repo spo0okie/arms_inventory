@@ -58,6 +58,11 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 			</h4>
 		<?php } ?>
 
+		<?php if (is_object($partner=$model->partner)) { ?>
+			<strong>Контрагент:</strong> <?= $this->render('/partners/item',['model'=>$model->partner]) ?>
+			<br />
+		<?php } ?>
+		
 		<?php
 		$schedules=[];
 		if (!empty($model->providingScheduleRecursive))

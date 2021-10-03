@@ -19,7 +19,7 @@ class PartnersSearch extends Partners
     {
         return [
             [['id'], 'integer'],
-            [['inn', 'kpp', 'ogrn', 'uname', 'bname', 'coment'], 'safe'],
+            [['inn', 'kpp', 'ogrn', 'uname', 'bname', 'comment'], 'safe'],
         ];
     }
 
@@ -66,7 +66,9 @@ class PartnersSearch extends Partners
             ->andFilterWhere(['like', 'kpp', $this->kpp])
             ->andFilterWhere(['like', 'uname', $this->uname])
             ->andFilterWhere(['like', 'bname', $this->bname])
-            ->andFilterWhere(['like', 'coment', $this->coment]);
+			->andFilterWhere(['like', 'comment', $this->comment])
+			->andFilterWhere(['like', 'cabinet_url', $this->cabinet_url])
+			->andFilterWhere(['like', 'support_tel', $this->support_tel]);
 
         return $dataProvider;
     }

@@ -54,7 +54,7 @@ class ProvTel extends \yii\db\ActiveRecord
             'id' => 'ID',
             'name' => 'Название оператора',
             'cabinet_url' => 'Ссылка на личный кабинет',
-            'support_tel' => 'Телефон техподдержки',
+            'support_tel' => 'Телефон тех.поддержки',
             'comment' => 'Комментарий',
         ];
     }

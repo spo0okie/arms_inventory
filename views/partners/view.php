@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
@@ -11,30 +11,34 @@ $this->params['breadcrumbs'][] = ['label' => 'Контрагенты', 'url' => 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="partners-view">
+	<div class="row">
+		<div class="col-md-6">
+			<?= $this->render('card',['model'=>$model]) ?>
+		</div>
+		<div class="col-md-6">
+			<?php if (count($model->services)) { ?>
+				<h4><?= \app\models\Services::$titles ?></h4>
+				<p>
+					<?php
+					$items=[];
+					foreach ($model->services as $service)
+						$items[]=$this->render('/services/item',['model'=>$service]);
+					echo implode('<br />',$items);
+					?>
+				</p>
+			<?php } ?>
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
-    </p>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'inn',
-            'kpp',
-			//'ogrn',
-            'uname',
-            'bname',
-            'coment:ntext',
-        ],
-    ]) ?>
-
+			<?php if (count($model->contracts)) { ?>
+				<h4><?= \app\models\Contracts::$titles ?></h4>
+				<p>
+					<?php
+					$items=[];
+					foreach ($model->contracts as $contract)
+						$items[]=$this->render('/contracts/item',['model'=>$contract]);
+					echo implode('<br />',$items);
+					?>
+				</p>
+			<?php } ?>
+		</div>
+	</div>
 </div>
