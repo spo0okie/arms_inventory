@@ -6,33 +6,27 @@ use yii\bootstrap5\ActiveForm;
 /* @var $model app\models\Services */
 /* @var $form yii\widgets\ActiveForm */
 
-if (!isset($action))
+if (!isset($action)) $action='index';
 
 ?>
 
 <div class="services-search">
-	
 	<?php $form = ActiveForm::begin([
-		'action' => ['index'],
+		'action' => [$action],
 		'method' => 'get',
 	]); ?>
-	
-	<?= $form->field($model, 'id') ?>
-	
-	<?= $form->field($model, 'schedule_id') ?>
-	
-	<?= $form->field($model, 'date') ?>
-	
-	<?= $form->field($model, 'schedule') ?>
-	
-	<?= $form->field($model, 'comment') ?>
-	
-	<?php // echo $form->field($model, 'created_at') ?>
-	
-	<div class="form-group">
-		<?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-		<?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="input-group">
+				<?= $form->field($model, 'responsible',['options'=>['tag'=>null]])->label(false) ?>
+				<?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
+				<?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
+			</div>
+
+		</div>
+		
 	</div>
+	
 	
 	<?php ActiveForm::end(); ?>
 

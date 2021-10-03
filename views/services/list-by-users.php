@@ -19,12 +19,21 @@ $renderer=$this;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>
-        <?= Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-
+    <div class="row">
+		<div class="col-md-1">
+			<?= Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']) ?>
+		</div>
+		<div class="col-md-11">
+			<?php echo $this->render('_search', ['model' => $searchModel,'action'=>'index-by-users']); ?>
+		</div>
+    
+    </div>
+	
+	
 <?php
+
+
+
 $render_columns=[
 	[
 		'attribute' => 'name',
