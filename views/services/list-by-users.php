@@ -9,6 +9,8 @@ use yii\widgets\Pjax;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $models \app\models\Services[] */
 
+\yii\helpers\Url::remember();
+
 $this->title = \app\models\Services::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $models=$dataProvider->models;
