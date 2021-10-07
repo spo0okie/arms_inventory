@@ -10,7 +10,7 @@ span.segment_ext_dmz {background-color:yellow; border-radius: 7px; border: 1.2pt
 span.segment_int_dmz  {background-color:lightgray; border-radius: 7px; border: 1.2pt orange dashed;}
 span.segment_guest_dmz  {background-color:#3c3c3c; border-radius: 7px;  border: 1.5pt orange solid;}
 span.segment_guest_dmz a {color: orange}
-span.segment_client_vpn  {background-color:coral; border-radius: 7px}
+span.segment_client_vpn  {background-color:palegoldenrod; border-radius: 7px}
 span.segment_intersite_vpn  {background-color:cyan; border-radius: 7px}
 span.segment_it_lan  {background-color:orange; border-radius: 7px}
 div.arms-card div span.segment_it_lan  {background-color: darkorange;}
