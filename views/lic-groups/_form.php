@@ -8,6 +8,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicGroups */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="lic-groups-form">
@@ -19,6 +20,7 @@ use kartik\select2\Select2;
 		'options' => ['placeholder' => 'Набирайте название для поиска',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => false,
 			'multiple' => true,
 		]
@@ -29,6 +31,7 @@ use kartik\select2\Select2;
 		'options' => ['placeholder' => 'Выберите продукт',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => false,
 			'multiple' => false
 		]
@@ -42,6 +45,7 @@ use kartik\select2\Select2;
 		'options' => ['placeholder' => 'Выберите АРМы',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
 		]

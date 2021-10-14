@@ -10,6 +10,7 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $model app\models\Materials */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 $places=\app\models\Places::fetchNames();
 $places['']='- помещение не назначено -';
@@ -41,6 +42,7 @@ if ($model->isNewRecord) {
 			    'options' => ['placeholder' => 'Выберите тип',],
 			    'toggleAllSettings'=>['selectLabel'=>null],
 			    'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 				    'allowClear' => false,
 				    'multiple' => false
 			    ]
@@ -86,6 +88,7 @@ if ($model->isNewRecord) {
 		        'options' => ['placeholder' => 'Выберите источник этого материала',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => true,
 			        'multiple' => false
 		        ],
@@ -116,6 +119,7 @@ if ($model->isNewRecord) {
 		        'options' => ['placeholder' => 'сотрудник не назначен',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => true,
 			        'multiple' => false
 		        ]
@@ -131,6 +135,7 @@ if ($model->isNewRecord) {
 		'options' => ['placeholder' => 'Выберите документы о поступлении этого материала',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
 		]

@@ -7,6 +7,8 @@ use yii\bootstrap5\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicTypes */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
+
 ?>
 
 <div class="lic-types-form">

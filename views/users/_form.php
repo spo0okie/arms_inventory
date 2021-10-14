@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Users */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="users-form">
@@ -22,6 +23,7 @@ use kartik\select2\Select2;
 				'options' => ['placeholder' => 'Организация',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => false,
 					'multiple' => false
 				]
@@ -32,6 +34,7 @@ use kartik\select2\Select2;
 				'options' => ['placeholder' => 'Подразделение',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => false,
 					'multiple' => false
 				]

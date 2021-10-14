@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\file\FileInput;
+if (!isset($modalParent)) $modalParent=null;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */

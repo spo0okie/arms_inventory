@@ -11,6 +11,7 @@ use kartik\file\FileInput;
 /* @var $model app\models\Contracts */
 /* @var $form yii\widgets\ActiveForm */
 
+if (!isset($modalParent)) $modalParent=null;
 
 ?>
 
@@ -41,7 +42,8 @@ use kartik\file\FileInput;
 			    'toggleAllSettings'=>['selectLabel'=>null],
 			    'pluginOptions' => [
 				    'allowClear' => true,
-				    'multiple' => false
+				    'multiple' => false,
+					'dropdownParent' => $modalParent,
 			    ]
 		    ]) ?>
         </div>
@@ -74,6 +76,7 @@ use kartik\file\FileInput;
                 'options' => ['placeholder' => 'Основной документ не назначен',],
                 'toggleAllSettings'=>['selectLabel'=>null],
                 'pluginOptions' => [
+					'dropdownParent' => $modalParent,
                     'allowClear' => true,
                     'multiple' => false
                 ]
@@ -92,6 +95,7 @@ use kartik\file\FileInput;
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => true
 				],
@@ -103,6 +107,7 @@ use kartik\file\FileInput;
 				'options' => ['placeholder' => 'RUR'],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => false,
 					'multiple' => false
 				],
@@ -184,6 +189,7 @@ use kartik\file\FileInput;
 		'options' => ['placeholder' => 'Начните набирать название для поиска'],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
 		],
@@ -193,6 +199,7 @@ use kartik\file\FileInput;
 		'options' => ['placeholder' => 'Начните набирать название для поиска'],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
 		],
@@ -202,6 +209,7 @@ use kartik\file\FileInput;
         'options' => ['placeholder' => 'Начните набирать название для поиска'],
         'toggleAllSettings'=>['selectLabel'=>null],
         'pluginOptions' => [
+			'dropdownParent' => $modalParent,
             'allowClear' => true,
             'multiple' => true
         ],

@@ -8,6 +8,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Soft */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="soft-form">
@@ -21,6 +22,7 @@ use kartik\select2\Select2;
 				'options' => ['placeholder' => 'Выберите производителя',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => false,
 					'multiple' => false
 				]

@@ -26,6 +26,7 @@ if ($model->isNewRecord) {
 	$formActionApply=\yii\helpers\Url::to(['arms/update-apply','id'=>$model->id]);
 }
 
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="arms-form">
@@ -120,6 +121,7 @@ if ($model->isNewRecord) {
 				],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => false,
 			        'multiple' => false
 		        ]
@@ -137,6 +139,7 @@ if ($model->isNewRecord) {
 			    'options' => ['placeholder' => 'Статус рабочего места',],
 			    'toggleAllSettings'=>['selectLabel'=>null],
 			    'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 				    'allowClear' => false,
 				    'multiple' => false
 			    ]
@@ -195,6 +198,7 @@ if ($model->isNewRecord) {
 		        'options' => ['placeholder' => 'сотрудник не назначен',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => true,
 			        'multiple' => false
 		        ]
@@ -205,6 +209,7 @@ if ($model->isNewRecord) {
 				'options' => ['placeholder' => 'сотрудник не назначен',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -217,6 +222,7 @@ if ($model->isNewRecord) {
 		        'options' => ['placeholder' => 'сотрудник не назначен',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => true,
 			        'multiple' => false
 		        ]
@@ -227,6 +233,7 @@ if ($model->isNewRecord) {
 				'options' => ['placeholder' => 'ответственным является сотрудник ИТ','id'=>'arms-responsible_settings'],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -241,6 +248,7 @@ if ($model->isNewRecord) {
 				'options' => ['placeholder' => 'Выберите помещение',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -252,6 +260,7 @@ if ($model->isNewRecord) {
 				'options' => ['placeholder' => 'Выберите подразделение',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -268,6 +277,7 @@ if ($model->isNewRecord) {
 		'options' => ['placeholder' => 'Выберите документы',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
 		]
@@ -278,6 +288,7 @@ if ($model->isNewRecord) {
 		'options' => ['placeholder' => 'Выберите лицензии',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
 		]
@@ -288,6 +299,7 @@ if ($model->isNewRecord) {
 		'options' => ['placeholder' => 'Назначте группы',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
 		]

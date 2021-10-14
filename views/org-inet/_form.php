@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgInet */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 ?>
 
@@ -41,6 +42,7 @@ use kartik\select2\Select2;
 		        //'options' => ['placeholder' => 'Статус рабочего места',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => false,
 			        'multiple' => false
 		        ]
@@ -51,6 +53,7 @@ use kartik\select2\Select2;
 		        //'options' => ['placeholder' => 'Статус рабочего места',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => false,
 			        'multiple' => false
 		        ]
@@ -61,6 +64,7 @@ use kartik\select2\Select2;
 		        //'options' => ['placeholder' => 'Статус рабочего места',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => false,
 			        'multiple' => false
 		        ]

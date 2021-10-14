@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="acls-form">
@@ -34,6 +35,7 @@ use kartik\select2\Select2;
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false,
 				]
@@ -50,6 +52,7 @@ use kartik\select2\Select2;
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -66,6 +69,7 @@ use kartik\select2\Select2;
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -82,6 +86,7 @@ use kartik\select2\Select2;
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]

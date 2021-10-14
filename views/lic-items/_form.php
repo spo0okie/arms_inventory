@@ -8,6 +8,7 @@ use kartik\date\DatePicker;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 $js = '
     //меняем подсказку выбора арм в при смене списка документов
@@ -41,6 +42,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
                 'options' => ['placeholder' => 'Выберите группу',],
                 'toggleAllSettings'=>['selectLabel'=>null],
                 'pluginOptions' => [
+					'dropdownParent' => $modalParent,
                     'allowClear' => false,
                     'multiple' => false
                 ]
@@ -79,6 +81,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		'options' => ['placeholder' => 'Выберите АРМы',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
 		]
@@ -92,6 +95,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
 		]

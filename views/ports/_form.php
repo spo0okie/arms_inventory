@@ -8,6 +8,7 @@ use kartik\depdrop\DepDrop;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ports */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 if (!empty($model->link_ports_id) && is_object($model->linkPort))
 	$model->link_techs_id=$model->linkPort->techs_id;
@@ -60,6 +61,7 @@ JS;
 					'placeholder' => 'Выберите '.$model->getAttributeLabel('techs_id')
 				],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -97,6 +99,7 @@ JS;
 				'onchange'=>$armLinkSelected,
 			],
 			'pluginOptions' => [
+				'dropdownParent' => $modalParent,
 				'allowClear' => true,
 				'multiple' => false
 			]
@@ -111,6 +114,7 @@ JS;
 				'id'=>'link_techs_id',
 			],
 			'pluginOptions' => [
+				'dropdownParent' => $modalParent,
 				'allowClear' => true,
 				'multiple' => false
 			]

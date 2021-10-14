@@ -6,6 +6,7 @@ use yii\bootstrap5\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\models\Manufacturers */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="manufacturers-form">

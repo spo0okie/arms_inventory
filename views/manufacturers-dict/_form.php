@@ -7,6 +7,7 @@ use yii\bootstrap5\Modal;
 /* @var $this yii\web\View */
 /* @var $model app\models\ManufacturersDict */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="manufacturers-dict-form">

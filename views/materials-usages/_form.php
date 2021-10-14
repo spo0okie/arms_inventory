@@ -8,6 +8,7 @@ use kartik\date\DatePicker;
 /* @var $this yii\web\View */
 /* @var $model app\models\MaterialsUsages */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="materials-usages-form">
@@ -23,6 +24,7 @@ use kartik\date\DatePicker;
 		        'options' => ['placeholder' => 'Выберите расходуемый материал',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => true,
 			        'multiple' => false
 		        ],
@@ -52,6 +54,7 @@ use kartik\date\DatePicker;
 		        'options' => ['placeholder' => 'Выберите АРМ назначения',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => true,
 			        'multiple' => false
 		        ],
@@ -63,6 +66,7 @@ use kartik\date\DatePicker;
 		        'options' => ['placeholder' => 'Выберите оборудование назначения',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => true,
 			        'multiple' => false
 		        ],

@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Places */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 $places=\app\models\Places::fetchNames();
 $places['']='';
@@ -23,6 +24,7 @@ if ($model->parent_id)
 		'options' => ['placeholder' => 'Выберите родительское помещение',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => false
 		]

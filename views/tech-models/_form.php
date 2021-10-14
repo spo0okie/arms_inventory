@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\TechModels */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 $addPorts=<<<JS
 for (
@@ -74,6 +75,7 @@ if (Yii::$app->request->get('return'))
 				],
                 //'toggleAllSettings'=>['selectLabel'=>null],
                 'pluginOptions' => [
+					'dropdownParent' => $modalParent,
                     'allowClear' => false,
                     'multiple' => false
                 ]
@@ -85,6 +87,7 @@ if (Yii::$app->request->get('return'))
                 'options' => ['placeholder' => 'Выберите производителя',],
                 //'toggleAllSettings'=>['selectLabel'=>null],
                 'pluginOptions' => [
+					'dropdownParent' => $modalParent,
                     'allowClear' => false,
                     'multiple' => false
                 ]

@@ -11,6 +11,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 $arms=\yii\helpers\ArrayHelper::map(Arms::find()->all(),'id','num');
 $arms['']='-Отсутствует-';
@@ -39,6 +40,7 @@ asort($domains);
 				'options' => ['placeholder' => 'Выберите АРМ',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -50,6 +52,7 @@ asort($domains);
 				'options' => ['placeholder' => 'сотрудник не назначен',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]

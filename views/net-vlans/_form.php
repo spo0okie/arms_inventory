@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\NetVlans */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="net-vlans-form">
@@ -23,6 +24,7 @@ use kartik\select2\Select2;
 			'placeholder' => 'Выберите L2 Домен',
 		],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => false
 		]

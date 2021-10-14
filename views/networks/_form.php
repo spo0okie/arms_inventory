@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 if (!empty($model->dhcp)) $model->text_dhcp=(new PhpIP\IPv4($model->dhcp))->humanReadable();
 if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))->humanReadable();
@@ -36,6 +37,7 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 					'placeholder' => 'Выберите VLAN',
 				],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -51,6 +53,7 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 					'placeholder' => 'Выберите Сегмент ИТ',
 				],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]

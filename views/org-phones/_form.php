@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgPhones */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="org-phones-form">
@@ -33,6 +34,7 @@ use kartik\select2\Select2;
 				'options' => ['placeholder' => 'Выберите помещение',],
 				//'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => false,
 					'multiple' => false
 				]
@@ -61,6 +63,7 @@ use kartik\select2\Select2;
 		'options' => ['placeholder' => 'Выберите документ',],
 		//'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => false
 		]

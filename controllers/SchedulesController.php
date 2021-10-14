@@ -109,12 +109,29 @@ class SchedulesController extends Controller
 	{
 		$model = new Schedules();
 		
+		if (Yii::$app->request->get('parent_id'))
+			$model->parent_id=Yii::$app->request->get('parent_id');
+		
+		if (Yii::$app->request->get('attach_service')) {
+			$service=\app\models\Services::findOne(Yii::$app->request->get('attach_service'));
+			if (is_object($service)) {
+				$model->name=\app\models\Schedules::$title.' работы '.$service->name;
+			}
+		} else $service=null;
+		
+		
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (is_object($service)) {
+				$service->providing_schedule_id=$model->id;
+				$service->save();
+				return $this->redirect(['services/view', 'id' => $service->id]);
+			} else
 			return $this->redirect(['view', 'id' => $model->id]);
 		}
 		
 		return $this->render('create', [
 			'model' => $model,
+			'attach_service'=>Yii::$app->request->get('attach_service')
 		]);
 	}
 	/**

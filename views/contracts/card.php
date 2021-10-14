@@ -68,63 +68,77 @@ $deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($c
         <?php
 
         //создание связаного документа
-        Modal::begin(['id'=>'contracts_add_modal','title' => '<h2>Добавление документа</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['title' => '<h2>Добавление документа</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
+				'id'=>'contracts_add_modal',
+				'tabindex' => false
+			]]);
             $contractModel=new \app\models\Contracts();
             $contractModel->parent_id=$model_id;
             $contractModel->partners_ids=$model->partners_ids;
-            echo $this->render('/contracts/_form',['model'=>$contractModel]);
+            echo $this->render('/contracts/_form',['model'=>$contractModel,'modalParent'=>'#contracts_add_modal']);
         Modal::end();
 
         //создание связанного АРМ
-        Modal::begin(['id'=>'arms_add_modal','title' => '<h2>Добавление АРМ</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['title' => '<h2>Добавление АРМ</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
+			'id'=>'arms_add_modal',
+			'tabindex' => false
+		]]);
             $armModel=new \app\models\Arms();
             $armModel->contracts_ids=[$model_id];
-            echo $this->render('/arms/_form',['model'=>$armModel]);
+            echo $this->render('/arms/_form',['model'=>$armModel,'modalParent'=>'#arms_add_modal']);
         Modal::end();
 
         //создание связанного оборудования
-        Modal::begin(['id'=>'techs_add_modal','title' => '<h2>Добавление оборудования</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['title' => '<h2>Добавление оборудования</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
+			'id'=>'techs_add_modal',
+			'tabindex' => false
+		]]);
         $techModel=new \app\models\Techs();
         $techModel->contracts_ids=[$model_id];
-        echo $this->render('/techs/_form',['model'=>$techModel]);
+        echo $this->render('/techs/_form',['model'=>$techModel,'modalParent'=>'#techs_add_modal']);
         Modal::end();
 
         //создание связанного оборудования
-        Modal::begin(['id'=>'materials_add_modal','title' => '<h2>Добавление материалов</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['title' => '<h2>Добавление материалов</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
+			'id'=>'materials_add_modal',
+			'tabindex' => false
+		]]);
         $materialsModel=new \app\models\Materials();
         $materialsModel->contracts_ids=[$model_id];
-        echo $this->render('/materials/_form',['model'=>$materialsModel]);
+        echo $this->render('/materials/_form',['model'=>$materialsModel,'modalParent'=>'#materials_add_modal']);
         Modal::end();
 
         //создание связанной лицензии
-        Modal::begin(['id'=>'lic_add_modal','title' => '<h2>Добавление лицензии</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['title' => '<h2>Добавление лицензии</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
+			'id'=>'lic_add_modal',
+			'tabindex' => false
+		]]);
         $licModel=new \app\models\LicItems();
         $licModel->contracts_ids=[$model_id];
-        echo $this->render('/lic-items/_form',['model'=>$licModel]);
+        echo $this->render('/lic-items/_form',['model'=>$licModel,'modalParent'=>'#lic_add_modal']);
         Modal::end();
 
         //создание связанного оборудования
-        Modal::begin(['id'=>'inet_add_modal','title' => '<h2>Добавление ввода интернет</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['title' => '<h2>Добавление ввода интернет</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
+			'id'=>'inet_add_modal',
+			'tabindex' => false
+		]]);
         $inetModel=new \app\models\OrgInet();
         $inetModel->contracts_id=[$model_id];
-        echo $this->render('/org-inet/_form',['model'=>$inetModel]);
+        echo $this->render('/org-inet/_form',['model'=>$inetModel,'modalParent'=>'#inet_add_modal']);
         Modal::end();
 
         //создание связанного оборудования
-        Modal::begin(['id'=>'phone_add_modal','title' => '<h2>Добавление городского тел. номера</h2>','size'=>Modal::SIZE_LARGE]);
+        Modal::begin(['title' => '<h2>Добавление городского тел. номера</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
+			'id'=>'phone_add_modal',
+			'tabindex' => false
+		]]);
         $phoneModel=new \app\models\OrgPhones();
         $phoneModel->contracts_id=[$model_id];
-        echo $this->render('/org-phones/_form',['model'=>$phoneModel]);
+        echo $this->render('/org-phones/_form',['model'=>$phoneModel,'modalParent'=>'#phone_add_modal']);
         Modal::end();
 
         $js = <<<JS
-                $('#arms_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-                $('#techs_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-                $('#inet_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-                $('#phone_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-                $('#lic_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-                $('#materials_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-                $('#contracts_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
                 $('#contracts-edit-form').on('afterSubmit', function(){window.location.reload();});
                 $('#inet-edit-form').on('afterSubmit', function(){window.location.reload();});
                 $('#phone-edit-form').on('afterSubmit', function(){window.location.reload();});

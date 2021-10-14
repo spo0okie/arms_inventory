@@ -6,6 +6,8 @@ use yii\bootstrap5\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\models\ProvTel */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
+
 ?>
 
 <div class="prov-tel-form">

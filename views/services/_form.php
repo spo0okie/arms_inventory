@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 $segmentPlaceholder='Выберите сегмент ИТ инфраструктуры предприятия';
 $schedulePlaceholder='Выберите расписание';
@@ -73,6 +74,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -102,6 +104,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -114,6 +117,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -126,6 +130,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -138,6 +143,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -147,6 +153,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 				],
 			]) ?>
@@ -155,6 +162,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 				],
 			]) ?>
@@ -165,6 +173,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 						'options' => ['placeholder' => 'RUR'],
 						'toggleAllSettings'=>['selectLabel'=>null],
 						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
 							'allowClear' => false,
 							'multiple' => false
 						],
@@ -202,6 +211,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => true
 				]
@@ -211,6 +221,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				'options' => ['placeholder' => 'Выберите сервисы',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => true
 				]
@@ -220,6 +231,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				'options' => ['placeholder' => 'Выберите серверы',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => true
 				]
@@ -229,6 +241,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				'options' => ['placeholder' => 'Выберите оборудование',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => true
 				]
@@ -238,6 +251,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				'options' => ['placeholder' => 'Выберите документы',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => true
 				]

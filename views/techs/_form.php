@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 $hidden=' style="display:none" ';
 switch (Yii::$app->request->get('type')) {
@@ -102,6 +103,7 @@ JS;
                 ],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => false,
 					'multiple' => false
 				]
@@ -113,6 +115,7 @@ JS;
 				'options' => ['placeholder' => 'Выберите состояние оборудования',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -199,6 +202,7 @@ JS;
                     }'
                 ],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
@@ -211,6 +215,7 @@ JS;
 			    'options' => ['placeholder' => 'Выберите помещение',],
 			    'toggleAllSettings'=>['selectLabel'=>null],
 			    'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 				    'allowClear' => true,
 				    'multiple' => false
 			    ]
@@ -229,6 +234,7 @@ JS;
 		        'options' => ['placeholder' => 'Выберите сотрудника',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => true,
 			        'multiple' => false
 		        ]
@@ -241,6 +247,7 @@ JS;
 		        'options' => ['placeholder' => 'Выберите сотрудника',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => true,
 			        'multiple' => false
 		        ]

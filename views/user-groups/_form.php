@@ -7,6 +7,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\UserGroups */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 ?>
 
 <div class="user-groups-form">
@@ -28,6 +29,7 @@ use kartik\select2\Select2;
 		        'options' => ['placeholder' => 'Выберите сотрудников',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 			        'allowClear' => true,
 			        'multiple' => true
 		        ]

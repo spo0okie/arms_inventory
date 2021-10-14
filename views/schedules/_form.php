@@ -8,6 +8,7 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
 /* @var $form yii\widgets\ActiveForm */
+if (!isset($modalParent)) $modalParent=null;
 
 if (!isset($acl_mode)) $acl_mode=false;
 
@@ -31,6 +32,7 @@ if (!isset($acl_mode)) $acl_mode=false;
 				'options' => ['placeholder' => 'Выберите расписание',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
 					'allowClear' => true,
 					'multiple' => false
 				]
