@@ -166,6 +166,27 @@ class Schedules extends \yii\db\ActiveRecord
 		return $this->hasMany(Services::className(), ['support_schedule_id' => 'id']);
 	}
 	
+	public function getServicesArr()
+	{
+		$support=$this->supportServices;
+		$provide=$this->providingServices;
+		
+		if (count($provide) || count($support)) {
+			$services = [];
+			foreach ($provide as $service) {
+				$services[$service->id]['obj'] = $service;
+				$services[$service->id]['provide'] = true;
+			}
+			foreach ($support as $service) {
+				$services[$service->id]['obj'] = $service;
+				$services[$service->id]['support'] = true;
+			}
+			return $services;
+		} else {
+			return [];
+		}
+	}
+	
 	/**
 	 * Пробуем вернуть коротко расписание работы на неделю
 	 * @return array

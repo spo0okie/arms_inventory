@@ -52,6 +52,7 @@ $schedule_id=$model->id;
 			<div class="col-md-6">
 				<?= $this->render('week',['model'=>$model])?>
 				<?= $this->render('7days',['model'=>$model])?>
+				<?= $this->render('services',['model'=>$model])?>
 			</div>
 			<div class="col-md-6">
 				<?= $this->render('week-edit',['model'=>$model])?>
