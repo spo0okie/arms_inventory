@@ -72,7 +72,7 @@ class Comps extends \yii\db\ActiveRecord
     {
         return [
             [['soft_ids','netIps_ids'], 'each', 'rule'=>['integer']],
-            [['name', 'os'], 'required'],
+            [['domain_id','name', 'os'], 'required'],
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
             [['updated_at'], 'safe'],
