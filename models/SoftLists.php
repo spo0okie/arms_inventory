@@ -60,7 +60,8 @@ class SoftLists extends \yii\db\ActiveRecord
             'id' => 'ID',
             'name' => 'Служебное имя',
             'descr' => 'Описание',
-            'comment' => 'Комментарий',
+			'comment' => 'Комментарий',
+			'created_at' => 'Дата добавления',
         ];
     }
 

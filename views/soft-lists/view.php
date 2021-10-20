@@ -45,7 +45,7 @@ $renderer=$this;
 				],
 				'comment',
 				//'items:ntext',
-				//'created_at',
+				'created_at:date',
 		
 				//['class' => 'yii\grid\ActionColumn'],
 			],

@@ -113,7 +113,7 @@ class Soft extends \yii\db\ActiveRecord
             'items' => 'Основные элементы входящие в пакет ПО',
             'additional' => 'Дополнительные элементы входящие в пакет ПО',
 	        'softLists_ids' => 'В списках ПО',
-	        'created_at' => 'Время создания',
+	        'created_at' => 'Дата добавления',
         ];
     }
 
