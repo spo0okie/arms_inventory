@@ -47,15 +47,54 @@ class ArmsSearch extends Arms
     public function search($params)
     {
         $query = Arms::find()
-	        ->joinWith(['user','techModel','comp.netIps','place','contracts','licItems','licGroups','licKeys','department']);
+	        ->joinWith(['user.orgStruct','techModel','comp.netIps','place','contracts','licItems','licGroups','licKeys','department']);
 
         $this->load($params);
-
+		
+        $sort=[
+			//'defaultOrder' => ['num'=>SORT_ASC],
+			'attributes'=>[
+				'num',
+				'sn',
+				'state',
+				'inv_num',
+				'comp_id'=>[
+					'asc'=>['comps.name'=>SORT_ASC],
+					'desc'=>['comps.name'=>SORT_DESC],
+				],
+				'comp_ip'=>[
+					'asc'=>['comps.ip'=>SORT_ASC],
+					'desc'=>['comps.ip'=>SORT_DESC],
+				],
+				'user_id'=>[
+					'asc'=>['users.Ename'=>SORT_ASC],
+					'desc'=>['users.Ename'=>SORT_DESC],
+				],
+				'model'=>[
+					'asc'=>['arms_models.name'=>SORT_ASC],
+					'desc'=>['arms_models.name'=>SORT_DESC],
+				],
+				'departments_id'=>[
+					'asc'=>['org_struct.name'=>SORT_ASC],
+					'desc'=>['org_struct.name'=>SORT_DESC],
+				],
+				'user_position'=>[
+					'asc'=>['users.doljnost'=>SORT_ASC],
+					'desc'=>['users.doljnost'=>SORT_DESC],
+				],
+				'places_id'=>[
+					'asc'=>['getplacepath(arms.places_id)'=>SORT_ASC],
+					'desc'=>['getplacepath(arms.places_id)'=>SORT_DESC],
+				],
+			]
+		];
+        
         if (!$this->validate()) {
         	return new ActiveDataProvider([
 				'query' => $query,
 				'totalCount' => $query->count('distinct(arms.id)'),
 				'pagination' => ['pageSize' => 100,],
+				'sort'=> $sort,
 			]);
         }
 
@@ -80,6 +119,7 @@ class ArmsSearch extends Arms
 			'query' => $query->groupBy('arms.id'),
 			'totalCount' => $totalQuery->count('distinct(arms.id)'),
 			'pagination' => ['pageSize' => 100,],
+			'sort'=> $sort,
 		]);
     }
 }

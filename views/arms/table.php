@@ -25,8 +25,8 @@ foreach ($columns as $column) {
 	switch ($column) {
 		case 'num':
 			$render_columns[] = [
-				'attribute' => 'num',
-				'header' => 'Инв. номер',
+				'attribute' => $column,
+				'label' => 'Инв. номер',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return $renderer->render('/arms/item', ['model' => $data]);
@@ -38,7 +38,7 @@ foreach ($columns as $column) {
 
 		case 'model':
 			$render_columns[] = [
-				'attribute' => 'model',
+				'attribute' => $column,
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->techModel) ? $renderer->render('/tech-models/item', ['model' => $data->techModel, 'static' => true]) : null;
@@ -50,7 +50,7 @@ foreach ($columns as $column) {
 
 		case 'comp_id':
 			$render_columns[] = [
-				'attribute' => 'comp_id',
+				'attribute' => $column,
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->comp) ? $renderer->render('/comps/item', ['model' => $data->comp]) : null;
@@ -64,9 +64,9 @@ foreach ($columns as $column) {
 
 		case 'comp_ip':
 			$render_columns[] = [
-				'attribute' => 'comp_ip',
+				'attribute' => $column,
 				'format' => 'raw',
-				'header' => 'IP Адрес',
+				'label' => 'IP Адрес',
 				'value' => function ($data) use ($renderer) {
 					if (is_object($data->comp)) {
 						$output=[];
@@ -83,7 +83,7 @@ foreach ($columns as $column) {
 
 		case 'user_id':
 			$render_columns[] = [
-				'attribute' => 'user_id',
+				'attribute' => $column,
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->user) ? $renderer->render('/users/item', ['model' => $data->user]) : null;
@@ -95,9 +95,9 @@ foreach ($columns as $column) {
 
 		case 'user_position':
 			$render_columns[] = [
-				'attribute' => 'user_position',
+				'attribute' => $column,
 				'format' => 'raw',
-				'header' => 'Должность',
+				'label' => 'Должность',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->user) ?
 						"<span class='arm_user_position'>{$data->user->Doljnost}</span>"
@@ -110,7 +110,7 @@ foreach ($columns as $column) {
 		
 		case 'places_id':
 			$render_columns[] = [
-				'attribute' => 'places_id',
+				'attribute' => $column,
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->place) ? $renderer->render('/places/item', ['model' => $data->place, 'full' => 1]) : null;
@@ -122,10 +122,10 @@ foreach ($columns as $column) {
 		
 		case 'departments_id':
 			$render_columns[] = [
-				'attribute' => 'departments_id',
+				'attribute' => $column,
 				'format' => 'raw',
 				'value' => function ($data) {
-					return is_object($data->department) ? $data->department->name:null;
+					return (is_object($data->user) && is_object($data->user->orgStruct)) ? $data->user->orgStruct->name:null;
 				},
 				'contentOptions'=>['class'=>$column.'_col']
 			
@@ -134,7 +134,7 @@ foreach ($columns as $column) {
 		
 		case 'attach':
 			$render_columns[] = [
-				'attribute' => 'attach',
+				'attribute' => $column,
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return $renderer->render('/arms/item-attachments',['model'=>$data]);
@@ -146,7 +146,7 @@ foreach ($columns as $column) {
 		
 		case 'state':
 			$render_columns[] = [
-				'attribute' => 'state',
+				'attribute' => $column,
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return $renderer->render('/tech-states/item', ['model' => $data->state]);
@@ -158,8 +158,8 @@ foreach ($columns as $column) {
 		
 		case 'comp_hw':
 			$render_columns[] = [
-				'attribute' => 'comp_hw',
-				'header' => 'HW',
+				'attribute' => $column,
+				'label' => 'HW',
 				'format' => 'raw',
 				'value' => function ($data) use ($manufacturers) {
 					if (is_object($data->comp)) {
@@ -188,7 +188,7 @@ foreach ($columns as $column) {
 			$render_columns[] = [
 				'attribute' => $column,
 				'format' => 'raw',
-				'header' => 'SN',
+				'label' => 'SN',
 				'contentOptions'=>function ($data) use ($column) {
 					$opts=['class'=>$column.'_col'];
 					if (isset($data->$column) && strlen($data->$column)) $opts['qtip_ttip']=$data->$column;
@@ -200,7 +200,7 @@ foreach ($columns as $column) {
 			$render_columns[] = [
 				'attribute' => $column,
 				'format' => 'raw',
-				'header' => 'Бух. инв.',
+				'label' => 'Бух. инв.',
 				'contentOptions'=>function ($data) use ($column) {
 					$opts=['class'=>$column.'_col'];
 					if (isset($data->$column) && strlen($data->$column)) $opts['qtip_ttip']=$data->$column;

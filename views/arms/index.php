@@ -18,9 +18,6 @@ $renderer = $this;
         <?= Html::encode($this->title) ?>
         <?= \app\components\HintIconWidget::widget(['model'=>'\app\models\Arms','cssClass'=>'pull-right']) ?>
     </h1>
-    Автоматизированные Рабочие Места. Оборудование и программное обеспечение, сгрупированные в один объект.
-
-
 
     <p>
         <?= Html::a('Создать АРМ', ['create'], ['class' => 'btn btn-success']) ?>
