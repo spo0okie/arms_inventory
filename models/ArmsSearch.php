@@ -106,7 +106,7 @@ class ArmsSearch extends Arms
 	        ->andFilterWhere(['like', 'comps.ip', $this->comp_ip])
 	        ->andFilterWhere(['like', 'comps.name', $this->comp_id])
 	        ->andFilterWhere(['like', 'comps.raw_hw', $this->comp_hw])
-	        ->andFilterWhere(['like', 'departments.name', $this->departments_id])
+	        ->andFilterWhere(['like', 'org_struct.name', $this->departments_id])
 	        ->andFilterWhere(['like', 'arms_models.name', $this->model])
 	        ->andFilterWhere(['like', 'getplacepath({{places}}.id)', $this->places_id])
 	        ->andFilterWhere(['arms.model_id'=>$this->model_id])
