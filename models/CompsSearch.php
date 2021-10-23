@@ -67,17 +67,29 @@ class CompsSearch extends Comps
             //'arm_id' => $this->arm_id,
             //'updated_at' => $this->updated_at,
         ]);*/
+		
 
         $query->andFilterWhere(['like', 'concat(IFNULL(domains.name,""),"\\\\",comps.name)', $this->name])
             ->andFilterWhere(['like', 'raw_version', $this->raw_version])
             ->andFilterWhere(['like', 'ip', $this->ip])
             ->andFilterWhere(['like', 'arms.num', $this->arm_id])
-            ->andFilterWhere(['or',
+            ->andFilterWhere(['like', 'comment', $this->comment]);
+
+		if (strlen($this->os)) {
+			if (is_array($arrOs=explode('|',$this->os))){
+				$query->andFilterWhere(['or',
+					['or like', 'os', $arrOs],
+					['or like', 'raw_soft', $arrOs],
+					['or like', 'raw_hw', $arrOs],
+				]);
+			}
+		} else {
+			$query->andFilterWhere(['or',
 				['like', 'os', $this->os],
 				['like', 'raw_soft', $this->os],
 				['like', 'raw_hw', $this->os],
-			])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+			]);
+		}
 
         return $dataProvider;
     }
