@@ -41,7 +41,7 @@ foreach ($columns as $column) {
 		case 'arm_id':
 			$render_columns[] = [
 				'attribute' => 'arm_id',
-				'header' => 'АРМ',
+				'label' => 'АРМ',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->arm) ? $renderer->render('/arms/item', ['model' => $data->arm]) : null;
@@ -53,7 +53,7 @@ foreach ($columns as $column) {
 			$render_columns[] = [
 				'attribute' => 'ip',
 				'format' => 'raw',
-				'header' => 'IP Адрес',
+				'label' => 'IP Адрес',
 				'value' => function ($data) use ($renderer) {
 					if (is_object($data)) {
 						$output=[];
@@ -84,7 +84,7 @@ foreach ($columns as $column) {
 			$render_columns[] = [
 				'attribute' => 'user_position',
 				'format' => 'raw',
-				'header' => 'Должность',
+				'label' => 'Должность',
 				'value' => function ($data) use ($renderer) {
 					return is_object($data->user) ?
 						"<span class='arm_user_position'>{$data->user->Doljnost}</span>"
@@ -98,7 +98,7 @@ foreach ($columns as $column) {
 		case 'place':
 			$render_columns[] = [
 				'attribute' => 'place',
-				'header' => \app\models\Places::$title,
+				'label' => \app\models\Places::$title,
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					return (is_object($data->arm)&&is_object($data->arm->place)) ?
@@ -149,7 +149,7 @@ foreach ($columns as $column) {
 		case 'comp_hw':
 			$render_columns[] = [
 				'attribute' => 'comp_hw',
-				'header' => 'HW',
+				'label' => 'HW',
 				'format' => 'raw',
 				'value' => function ($data) use ($manufacturers) {
 					if (is_object($data->comp)) {
@@ -178,7 +178,7 @@ foreach ($columns as $column) {
 			$render_columns[] = [
 				'attribute' => $column,
 				'format' => 'raw',
-				'header' => 'SN',
+				'label' => 'SN',
 				'contentOptions'=>function ($data) use ($column) {
 					$opts=['class'=>$column.'_col'];
 					if (isset($data->$column) && strlen($data->$column)) $opts['qtip_ttip']=$data->$column;
@@ -190,7 +190,7 @@ foreach ($columns as $column) {
 			$render_columns[] = [
 				'attribute' => $column,
 				'format' => 'raw',
-				'header' => 'Бух. инв.',
+				'label' => 'Бух. инв.',
 				'contentOptions'=>function ($data) use ($column) {
 					$opts=['class'=>$column.'_col'];
 					if (isset($data->$column) && strlen($data->$column)) $opts['qtip_ttip']=$data->$column;
@@ -201,7 +201,7 @@ foreach ($columns as $column) {
 		
 		case 'os':
 			$render_columns[] = [
-				'header' => 'Софт',
+				'label' => 'Софт',
 				'attribute' => $column,
 				'contentOptions'=>[
 					'class'=>$column.'_col'

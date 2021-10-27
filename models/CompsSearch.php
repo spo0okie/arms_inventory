@@ -12,6 +12,7 @@ use app\models\Comps;
  */
 class CompsSearch extends Comps
 {
+	public $place;
 
     /**
      * @inheritdoc
@@ -20,7 +21,7 @@ class CompsSearch extends Comps
     {
         return [
             [['id', 'domain_id'], 'integer'],
-            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip'], 'safe'],
+            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','place'], 'safe'],
         ];
     }
 
@@ -46,10 +47,44 @@ class CompsSearch extends Comps
 			->joinWith(['arm','domain']);
 
         // add conditions that should always apply here
-
-        $dataProvider = new ActiveDataProvider([
+		$sort=[
+			'attributes'=>[
+				//'num',
+				'ip',
+				'os',
+				'name',
+				'raw_version',
+				'arm_id'=>[
+					'asc'=>['arms.num'=>SORT_ASC],
+					'desc'=>['arms.num'=>SORT_DESC],
+				],
+				'comp_ip'=>[
+					'asc'=>['comps.ip'=>SORT_ASC],
+					'desc'=>['comps.ip'=>SORT_DESC],
+				],
+				'user_id'=>[
+					'asc'=>['users.Ename'=>SORT_ASC],
+					'desc'=>['users.Ename'=>SORT_DESC],
+				],
+				'departments_id'=>[
+					'asc'=>['org_struct.name'=>SORT_ASC],
+					'desc'=>['org_struct.name'=>SORT_DESC],
+				],
+				'user_position'=>[
+					'asc'=>['users.doljnost'=>SORT_ASC],
+					'desc'=>['users.doljnost'=>SORT_DESC],
+				],
+				'place'=>[
+					'asc'=>['getplacepath(arms.places_id)'=>SORT_ASC],
+					'desc'=>['getplacepath(arms.places_id)'=>SORT_DESC],
+				],
+			]
+		];
+	
+		$dataProvider = new ActiveDataProvider([
             'query' => $query,
 	        'pagination' => ['pageSize' => 100,],
+			'sort'=>$sort,
         ]);
 
         $this->load($params);
