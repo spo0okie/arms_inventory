@@ -33,6 +33,7 @@
 	"kartik-v/yii2-widget-select2": "dev-master",
 	"kartik-v/yii2-widget-datepicker": "dev-master",
 	"kartik-v/yii2-widget-datetimepicker": "dev-master",
+	"kartik-v/yii2-bootstrap5-dropdown": "dev-master",
 	"kartik-v/bootstrap-fileinput": "dev-master",
 	"kartik-v/yii2-widget-fileinput": "dev-master",
 	"kartik-v/yii2-nav-x": "dev-master",
