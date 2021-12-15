@@ -73,7 +73,7 @@ class HwList {
      */
     public function loadJSON($data) {
         if (!strlen($data)) return; //если данных нет - выходим
-        $json = json_decode($data,true);
+        $json = json_decode($data,true,512,JSON_INVALID_UTF8_IGNORE);
         if (!is_array($json)) return; //если расшифровать не вышло - выходим.
         foreach ($json as $item) {
             $newItem = new HwListItem();
