@@ -222,11 +222,11 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
         <?php }
 
         Modal::begin([
-            'id'=>'techs_add_modal',
 	        'title' => '<h2>Добавление оборудования</h2>',
 			'size' => Modal::SIZE_LARGE,
 			'options'=>[
-				'tabindex' => false
+				'id'=>'techs_add_modal',
+				'tabindex' => false,
 			],
 	        'toggleButton' => [
 		        'label' => 'Внести доп. оборудование',
@@ -242,6 +242,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
 	        '/techs/_form',
 	        [
 		        'model'=>$tech,
+				'modalParent'=>'#techs_add_modal'
 	        ]
         );
         $js = <<<JS

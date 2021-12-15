@@ -28,9 +28,12 @@ use yii\bootstrap5\Modal;
 		
 		<?php
 		Modal::begin([
-			'id'=>'tech_models-add',
 			'title' => '<h2>Добавление модели оборудования</h2>',
 			'size' => Modal::SIZE_LARGE,
+			'options'=>[
+				'id'=>'tech_models-add',
+				'tabindex' => false,
+			],
 			'toggleButton' => [
 				'label' => 'Добавить модель',
 				'tag' => 'a',
@@ -45,6 +48,7 @@ use yii\bootstrap5\Modal;
 			'/tech-models/_form',
 			[
 				'model'=>$techModel,
+				'modalParent'=>'#tech_models-add'
 			]
 		);
 		
