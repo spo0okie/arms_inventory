@@ -143,8 +143,8 @@ if (!isset($modalParent)) $modalParent=null;
 			'language' => 'ru',
 			'options' => [
 				'accept' => 'image/*',
+				'multiple' => true,
 				'id' => 'contract_form_scans_input',
-				'multiple' => true
 			],
 			'pluginOptions' => [
                 'initialPreview' => $preview,
@@ -231,7 +231,7 @@ $js = <<<JS
 //переводим сабмит на голый аякс
 $('#contracts-edit-form').on('beforeSubmit', function(){
     var yiiform = $(this);
-    //console.log('contracts-submit: '+yiiform.attr('action'));
+    console.log('contracts-submit: '+yiiform.attr('action'));
     $.ajax({
         type: 'POST',
         url: yiiform.attr('action'),

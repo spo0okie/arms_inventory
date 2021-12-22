@@ -14,11 +14,11 @@ if (!isset($modalParent)) $modalParent=null;
     <?php $form = ActiveForm::begin(); ?>
 	
 	<div class="row">
-		<div class="col-md-4">
-			<?= $form->field($model, 'bname')->textInput(['maxlength' => true]) ?>
-		</div>
 		<div class="col-md-8">
 			<?= $form->field($model, 'uname')->textInput(['maxlength' => true]) ?>
+		</div>
+		<div class="col-md-4">
+			<?= $form->field($model, 'bname')->textInput(['maxlength' => true]) ?>
 		</div>
 	</div>
 	

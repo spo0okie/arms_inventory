@@ -128,7 +128,7 @@ function contractFromApplyChanges(data){
 
         let scans=$('#contract_form_scans_input');
         let pending_upload=scans.fileinput('getFileStack');
-        let pending_count=pending_upload.length;
+        let pending_count=Object.keys(pending_upload).length;
         console.log('pending upload : '+pending_count);
         if (pending_count >0 ) {
             scans.fileinput('upload');
