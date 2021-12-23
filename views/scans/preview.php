@@ -33,7 +33,7 @@ if (!$model->fileExists) {
             <?php } else { ?>
 
             <button type="button" class="btn btn-default" onclick="$('#scan-preview-pdf-<?= $model->id ?>').show().attr('src','<?= $model->fullFname ?>');">
-                <span class="fas fa-eye-open"></span>
+                <span class="far fa-eye"></span>
                 Показать
             </button>
             <a class="btn btn-default" href="<?= $model->fullFname?>">
@@ -51,8 +51,8 @@ if (!$model->fileExists) {
 		 * Скан документа в формате изображения
 		 */
 		?>
-        <a class="btn btn-default" href="<?= $model->fullFname?>">
-            <span class="fas fa-eye-open"></span>
+        <a class="btn btn-default" href="<?= $model->fullFname?>" target="_blank">
+            <span class="far fa-eye"></span>
             Открыть
         </a>
 

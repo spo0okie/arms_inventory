@@ -33,7 +33,7 @@
             ['comps/update', 'id'=>$model->id,'addExclusion' => $item['fingerprint']],
             ['title'=>'Убрать из паспорта этой машины','class'=>'show-on-hover-included']
         ) ?>
-        <?= \yii\helpers\Html::a('<span class="fas fa-eye-open"/>',
+        <?= \yii\helpers\Html::a('<span class="fas fa-eye"/>',
             ['comps/update', 'id'=>$model->id,'subExclusion' => $item['fingerprint']],
             ['title'=>'Вернуть в паспорт этой машины','class'=>'show-on-hover-excluded']
         ) ?>

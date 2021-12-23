@@ -35,6 +35,8 @@ class AppAsset extends AssetBundle
 		'js/scans.js',
 		'js/tools.lib1.js',
 	    'js/jquery.autoResize.js',
+		'js/fontawesome/all.min.js',
+		
     ];
     public $cssOptions = [];
     public $depends = [

@@ -78,6 +78,7 @@ class CompsSearch extends Comps
 					'asc'=>['getplacepath(arms.places_id)'=>SORT_ASC],
 					'desc'=>['getplacepath(arms.places_id)'=>SORT_DESC],
 				],
+				'updated_at'
 			]
 		];
 	

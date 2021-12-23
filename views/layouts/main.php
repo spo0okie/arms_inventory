@@ -6,7 +6,7 @@
 use app\components\Alert;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
-use app\assets\FontAwesomeAsset;
+//use app\assets\FontAwesomeAsset;
 use yii\helpers\Html;
 
 	
@@ -30,7 +30,6 @@ $this->beginPage() ?>
 	<meta charset="<?= Yii::$app->charset ?>">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js" crossorigin="anonymous"></script>
 	<?= Html::csrfMetaTags() ?>
 	<title><?= Html::encode($this->title) ?></title>
 	<?php $this->head() ?>
