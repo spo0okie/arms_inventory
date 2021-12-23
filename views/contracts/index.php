@@ -72,6 +72,7 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 				'attribute'=>'total',
 				//'filter'=>\app\models\ContractsStates::fetchNames(),
 				'format'=>'raw',
+				'contentOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
     				if ($data->total) {
 						return $data->total.$data->currency->symbol;
@@ -83,6 +84,7 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 				'attribute'=>'charge',
 				//'filter'=>\app\models\ContractsStates::fetchNames(),
 				'format'=>'raw',
+				'contentOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
 					if ($data->charge) {
 						return $data->charge.$data->currency->symbol;

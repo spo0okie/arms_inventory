@@ -37,11 +37,12 @@ function contractFormAfterScansUpload() {
     let yiiform = $('#contracts-edit-form');
     let scans=$('#contract_form_scans_input');
     let pending_upload = scans.fileinput('getFileStack');
-    if (pending_upload.length === 0 ) {
+    let pending_count=Object.keys(pending_upload).length;
+    if (pending_count === 0 ) {
         //обрабатываем окончание режима сохранения
         switch (save_mode) {
             case 'save':
-                //console.log('data saved, record id: ' + data.model.id);
+                console.log('scans uploaded, closing form');
                 //данные сохранились. обрабатываем завершение редактирования (разные сценарии в разных ситуациях)
                 yiiform.trigger('afterSubmit');
                 break;

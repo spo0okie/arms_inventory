@@ -640,6 +640,7 @@ span.arm_user_position {
 span.contracts_selected {font-weight: bold}
 span.contracts-item {display: inline-block}
 a.contract_inactive {color: gray; text-decoration: line-through}
+td.contracts-total-column {text-align: right}
 
 
 
