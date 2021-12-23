@@ -36,10 +36,10 @@ foreach ($dataProvider->models as $model) {
 $arrFooter=['total'=>[],'charge'=>[]];
 foreach (\app\models\Currency::find()->all() as $currency) {
 	if (isset($totals[$currency->id]) && $totals[$currency->id]) {
-		$arrFooter['total'][]=$totals[$currency->id].$currency->symbol;
+		$arrFooter['total'][]=number_format($totals[$currency->id],2,'.','&nbsp;').$currency->symbol;
 	}
 	if (isset($charge[$currency->id]) && $charge[$currency->id]) {
-		$arrFooter['charge'][]=$charge[$currency->id].$currency->symbol;
+		$arrFooter['charge'][]=number_format($charge[$currency->id],2,'.','&nbsp;').$currency->symbol;
 	}
 }
 
@@ -73,9 +73,10 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 				//'filter'=>\app\models\ContractsStates::fetchNames(),
 				'format'=>'raw',
 				'contentOptions' => ['class' => 'contracts-total-column'],
+				'footerOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
     				if ($data->total) {
-						return number_format($data->total,2,'.',' ').$data->currency->symbol;
+						return number_format($data->total,2,'.','&nbsp;').$data->currency->symbol;
 					} return '';
 				},
 				'footer'=>implode('<br />',$arrFooter['total']),
@@ -85,9 +86,10 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 				//'filter'=>\app\models\ContractsStates::fetchNames(),
 				'format'=>'raw',
 				'contentOptions' => ['class' => 'contracts-total-column'],
+				'footerOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
 					if ($data->charge) {
-						return number_format($data->charge,2,'.',' ').$data->currency->symbol;
+						return number_format($data->charge,2,'.','&nbsp;').$data->currency->symbol;
 					} return '';
 				},
 				'footer'=>implode('<br />',$arrFooter['charge']),
