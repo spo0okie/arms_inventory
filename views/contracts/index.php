@@ -75,7 +75,7 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 				'contentOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
     				if ($data->total) {
-						return $data->total.$data->currency->symbol;
+						return number_format($data->total,2,'.',' ').$data->currency->symbol;
 					} return '';
 				},
 				'footer'=>implode('<br />',$arrFooter['total']),
@@ -87,7 +87,7 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 				'contentOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
 					if ($data->charge) {
-						return $data->charge.$data->currency->symbol;
+						return number_format($data->charge,2,'.',' ').$data->currency->symbol;
 					} return '';
 				},
 				'footer'=>implode('<br />',$arrFooter['charge']),

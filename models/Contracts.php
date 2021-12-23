@@ -131,7 +131,7 @@ class Contracts extends \yii\db\ActiveRecord
 			'scanFile' => 'Скан документа',
 			'date' => 'Дата',
 			'total' => 'Сумма',
-			'charge' => 'НДС',
+			'charge' => 'в т.ч. НДС',
 			'end_date' => 'Окончание',
 			'partners_ids' => 'Контрагенты',
 			'lics_ids' => 'Лицензии',
