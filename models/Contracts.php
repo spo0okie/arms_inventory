@@ -335,7 +335,7 @@ class Contracts extends \yii\db\ActiveRecord
 		//var_dump($this->date);
 		$date=strtotime($this->date);
 		mb_regex_encoding('utf8');
-		$name=mb_eregi_replace('сч(ё|е)т( *на *оплату)?','Счёт',$this->name,'i');
+		$name=mb_eregi_replace('сч(ё|е)т(-оферта)?( *на *оплату)? *№ *','Счёт № ',$this->name,'i');
 		$name=mb_eregi_replace('(от *)?('.date('d.m.(Y|y)',$date).'|'.date('(Y|y).m.d',$date).') *(г(ода)?)?\.?','',$name,'i');
 		return $this->datePart.' - '.$name.' - '.$this->partnersNames;
 	}
