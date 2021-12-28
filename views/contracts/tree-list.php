@@ -18,7 +18,7 @@
 ) ?>
 
 	<ul class="ul-treefree ul-dropfree">
-		<?php foreach ($model->chainChilds as $child) if (!$model->is_successor) { ?>
+		<?php foreach ($model->chainChilds as $child) if (!$child->is_successor) { ?>
 			<li>
 				<?= $this->render('tree-list',[
 					'model'=>$child,

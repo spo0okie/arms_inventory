@@ -41,6 +41,7 @@ use yii\web\JsExpression;
  * @property Contracts[] $successorsRecursive
  * @property Contracts $predecessor
  * @property Contracts[] $childs
+ * @property Contracts[] $chainChilds
  * @property Arms[] $arms
  * @property Materials[] $materials
  * @property Techs[] $techs
@@ -277,6 +278,7 @@ class Contracts extends \yii\db\ActiveRecord
 	
 	
 	/**
+	 * Возвращает список всех потомков этого документа и его наследников
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getChainChilds()
