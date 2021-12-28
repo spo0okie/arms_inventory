@@ -52,6 +52,7 @@ class ContractsController extends Controller
     {
         $searchModel = new ContractsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$this->view->params['layout-container'] = 'container-fluid';
 
         return $this->render('index', [
             'searchModel' => $searchModel,
