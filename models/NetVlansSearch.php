@@ -74,10 +74,11 @@ class NetVlansSearch extends NetVlans
         }
 
         // grid filtering conditions
-        $query->andFilterWhere(['like', 'CONCAT(net_vlans.name," (",net_vlans.vlan)', $this->name])
-			->andFilterWhere(['like', 'net_domains.name', $this->domain_id])
-			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', $this->networks_ids])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query
+			->andFilterWhere(['or like', 'CONCAT(net_vlans.name," (",net_vlans.vlan)', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
+			->andFilterWhere(['or like', 'net_domains.name', \yii\helpers\StringHelper::explode($this->domain_id,'|',true,true)])
+			->andFilterWhere(['or like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', \yii\helpers\StringHelper::explode($this->networks_ids,'|',true,true)])
+            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }

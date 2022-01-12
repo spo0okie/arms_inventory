@@ -62,9 +62,9 @@ class TechModelsSearch extends TechModels
         }
 
 
-        $query->andFilterWhere(['like', '`tech_models`.`name`', $this->name])
-	        ->andFilterWhere(['like', '`tech_types`.`name`', $this->type])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query->andFilterWhere(['or like', '`tech_models`.`name`', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
+	        ->andFilterWhere(['or like', '`tech_types`.`name`', \yii\helpers\StringHelper::explode($this->type,'|',true,true)])
+            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 
         $query->orderBy([
 	        '`tech_types`.`name`'=>SORT_ASC,

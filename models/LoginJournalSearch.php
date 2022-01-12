@@ -66,10 +66,10 @@ class LoginJournalSearch extends LoginJournal
             'time' => $this->time,
         ]);
 
-        $query->andFilterWhere(['like', 'comp_name', $this->comp_name])
-            ->andFilterWhere(['like', 'user_login', $this->user_login])
-	        ->andFilterWhere(['like', 'users.Ename', $this->users_id])
-	        ->andFilterWhere(['like', 'comps.name', $this->comps_id]);
+        $query->andFilterWhere(['or like', 'comp_name', \yii\helpers\StringHelper::explode($this->comp_name,'|',true,true)])
+            ->andFilterWhere(['or like', 'user_login', \yii\helpers\StringHelper::explode($this->user_login,'|',true,true)])
+	        ->andFilterWhere(['or like', 'users.Ename', \yii\helpers\StringHelper::explode($this->users_id,'|',true,true)])
+	        ->andFilterWhere(['or like', 'comps.name', \yii\helpers\StringHelper::explode($this->comps_id,'|',true,true)]);
 
         return $dataProvider;
     }

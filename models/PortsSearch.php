@@ -75,14 +75,15 @@ class PortsSearch extends Ports
             return $dataProvider;
         }
 
-        $query->andFilterWhere(['like', 'ports.name', $this->name])
-			->andFilterWhere(['like', 'techs.num', $this->techs_id])
+        $query
+			->andFilterWhere(['or like', 'ports.name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
+			->andFilterWhere(['or like', 'techs.num', \yii\helpers\StringHelper::explode($this->techs_id,'|',true,true)])
 			->andFilterWhere(['or',
-				['like', 'port_linked_techs.num', $this->link_techs_id],
-				['like', 'port_linked_arms.num', $this->link_techs_id],
-				['like', 'port_linked_ports.name', $this->link_techs_id],
+				['or like', 'port_linked_techs.num', \yii\helpers\StringHelper::explode($this->link_techs_id,'|',true,true)],
+				['or like', 'port_linked_arms.num', \yii\helpers\StringHelper::explode($this->link_techs_id,'|',true,true)],
+				['or like', 'port_linked_ports.name', \yii\helpers\StringHelper::explode($this->link_techs_id,'|',true,true)],
 			])
-            ->andFilterWhere(['like', 'ports.comment', $this->comment]);
+            ->andFilterWhere(['or like', 'ports.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }

@@ -64,8 +64,9 @@ class LicGroupsSearch extends LicGroups
             'created_at' => $this->created_at,
         ]);
 
-        $query->andFilterWhere(['like', 'descr', $this->descr])
-            ->andFilterWhere(['like', 'comment', $this->comment])->orderBy('descr');
+        $query->andFilterWhere(['or like', 'descr', \yii\helpers\StringHelper::explode($this->descr,'|',true,true)])
+            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+			->orderBy('descr');
 
         return $dataProvider;
     }

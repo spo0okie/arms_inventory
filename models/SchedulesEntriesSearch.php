@@ -75,8 +75,8 @@ class SchedulesEntriesSearch extends SchedulesEntries
 				['like', 'date', $this->date],
 				['like', 'date_end', $this->date]
 			])
-            ->andFilterWhere(['like', 'schedule', $this->schedule])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+            ->andFilterWhere(['or like', 'schedule', \yii\helpers\StringHelper::explode($this->schedule,'|',true,true)])
+            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }

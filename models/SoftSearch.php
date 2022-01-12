@@ -87,9 +87,10 @@ class SoftSearch extends Soft
 			'soft_in_lists.list_id' => $this->softLists_ids,
         ]);
 
-        $query->andFilterWhere(['like', 'CONCAT(manufacturers.name,soft.descr)', $this->descr])
-            ->andFilterWhere(['like', 'comment', $this->comment])
-            ->andFilterWhere(['like', 'items', $this->items]);
+        $query
+			->andFilterWhere(['or like', 'CONCAT(manufacturers.name,soft.descr)', \yii\helpers\StringHelper::explode($this->descr,'|',true,true)])
+            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+            ->andFilterWhere(['or like', 'items', \yii\helpers\StringHelper::explode($this->items,'|',true,true)]);
 
         return $dataProvider;
     }

@@ -105,27 +105,16 @@ class CompsSearch extends Comps
         ]);*/
 		
 
-        $query->andFilterWhere(['like', 'concat(IFNULL(domains.name,""),"\\\\",comps.name)', $this->name])
-            ->andFilterWhere(['like', 'raw_version', $this->raw_version])
-            ->andFilterWhere(['like', 'ip', $this->ip])
-            ->andFilterWhere(['like', 'arms.num', $this->arm_id])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
-
-		if (strlen($this->os)) {
-			if (is_array($arrOs=explode('|',$this->os))){
-				$query->andFilterWhere(['or',
-					['or like', 'os', $arrOs],
-					['or like', 'raw_soft', $arrOs],
-					['or like', 'raw_hw', $arrOs],
-				]);
-			}
-		} else {
-			$query->andFilterWhere(['or',
-				['like', 'os', $this->os],
-				['like', 'raw_soft', $this->os],
-				['like', 'raw_hw', $this->os],
+        $query->andFilterWhere(['or like', 'concat(IFNULL(domains.name,""),"\\\\",comps.name)', yii\helpers\StringHelper::explode($this->name,'|',true,true)])
+            ->andFilterWhere(['or like', 'raw_version', \yii\helpers\StringHelper::explode($this->raw_version,'|',true,true)])
+            ->andFilterWhere(['or like', 'ip', \yii\helpers\StringHelper::explode($this->ip,'|',true,true)])
+            ->andFilterWhere(['or like', 'arms.num', \yii\helpers\StringHelper::explode($this->arm_id,'|',true,true)])
+            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+			->andFilterWhere(['or',
+				['or like', 'os', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
+				['or like', 'raw_soft', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
+				['or like', 'raw_hw', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
 			]);
-		}
 
         return $dataProvider;
     }

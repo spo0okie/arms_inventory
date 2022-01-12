@@ -59,16 +59,19 @@ class TechsSearch extends Techs
 			]);
         }
 
-        $query->andFilterWhere(['like', 'techs.num', $this->num])
-            ->andFilterWhere(['like', 'techs.inv_num', $this->inv_num])
-	        ->andFilterWhere(['like', 'techs.sn', $this->sn])
-	        ->andFilterWhere(['like', 'techs.comment', $this->comment])
-            ->andFilterWhere(['or',['like', 'getplacepath(places_techs.id)', $this->place],['like', 'getplacepath(places.id)', $this->place]])
-            ->andFilterWhere(['like', 'concat(manufacturers.name," ",tech_models.name)', $this->model])
-            ->andFilterWhere(['like', 'techs.ip', $this->ip])
-	        ->andFilterWhere(['techs.model_id'=>$this->model_id])
-	        ->andFilterWhere(['tech_models.type_id'=>$this->type_id])
-		    ->andFilterWhere(['like','techs.mac',$this->mac]);
+        $query->andFilterWhere(['or like', 'techs.num', \yii\helpers\StringHelper::explode($this->num,'|',true,true)])
+            ->andFilterWhere(['or like', 'techs.inv_num', \yii\helpers\StringHelper::explode($this->inv_num,'|',true,true)])
+	        ->andFilterWhere(['or like', 'techs.sn', \yii\helpers\StringHelper::explode($this->sn,'|',true,true)])
+	        ->andFilterWhere(['or like', 'techs.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+            ->andFilterWhere(['or',
+				['or like', 'getplacepath(places_techs.id)', \yii\helpers\StringHelper::explode($this->place,'|',true,true)],
+				['or like', 'getplacepath(places.id)', \yii\helpers\StringHelper::explode($this->place,'|',true,true)]
+			])
+            ->andFilterWhere(['or like', 'concat(manufacturers.name," ",tech_models.name)', \yii\helpers\StringHelper::explode($this->model,'|',true,true)])
+            ->andFilterWhere(['or like', 'techs.ip', \yii\helpers\StringHelper::explode($this->ip,'|',true,true)])
+		    ->andFilterWhere(['or like','techs.mac',\yii\helpers\StringHelper::explode($this->mac,'|',true,true)])
+			->andFilterWhere(['techs.model_id'=>$this->model_id])
+			->andFilterWhere(['tech_models.type_id'=>$this->type_id]);
 	
 		$totalQuery=clone $query;
 	

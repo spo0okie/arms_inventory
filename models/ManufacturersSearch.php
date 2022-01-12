@@ -63,9 +63,9 @@ class ManufacturersSearch extends Manufacturers
             'created_at' => $this->created_at,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'full_name', $this->full_name])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query->andFilterWhere(['or like', 'name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
+            ->andFilterWhere(['or like', 'full_name', \yii\helpers\StringHelper::explode($this->full_name,'|',true,true)])
+            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }

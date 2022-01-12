@@ -90,12 +90,12 @@ class NetworksSearch extends Networks
         }
 
         $query
-			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', $this->name])
-			->andFilterWhere(['like', 'concat(net_vlans.name," (",net_vlans.vlan)', $this->vlan])
-			->andFilterWhere(['like', 'net_domains.name', $this->domain])
-			->andFilterWhere(['like', 'segments.name', $this->segment])
+			->andFilterWhere(['or like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
+			->andFilterWhere(['or like', 'concat(net_vlans.name," (",net_vlans.vlan)', \yii\helpers\StringHelper::explode($this->vlan,'|',true,true)])
+			->andFilterWhere(['or like', 'net_domains.name', \yii\helpers\StringHelper::explode($this->domain,'|',true,true)])
+			->andFilterWhere(['or like', 'segments.name', \yii\helpers\StringHelper::explode($this->segment,'|',true,true)])
 			->andFilterWhere(['networks.segments_id'=>$this->segments_id])
-            ->andFilterWhere(['like', 'networks.comment', $this->comment]);
+            ->andFilterWhere(['or like', 'networks.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }

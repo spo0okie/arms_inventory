@@ -11,6 +11,7 @@ use app\models\Materials;
  */
 class MaterialsSearch extends Materials
 {
+	private static $modelSearch='concat( getplacepath(materials.places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", materials.model )';
 	public $rest;
     /**
      * {@inheritdoc}
@@ -82,9 +83,9 @@ class MaterialsSearch extends Materials
             'type_id' => $this->type_id,
             'places_id' => $this->places_id,
         ]);
-
-        $query->andFilterWhere(['like', 'concat( getplacepath(materials.places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", materials.model )', explode('|',$this->model)])
-	    ->andFilterWhere(['like', 'materials.comment', $this->comment])
+		
+        $query->andFilterWhere(['or like', static::$modelSearch, \yii\helpers\StringHelper::explode($this->model,'|',true,true)])
+	    ->andFilterWhere(['or like', 'materials.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
         ->groupBy('materials.id')
         //->having(['>=','(`materials`.`count` - ifnull(`usedCount`,0) - ifnull(`movedCount`,0))',$this->rest]);
         //вот это вызывало ошибку неизвестный столбец в хэвинг условии

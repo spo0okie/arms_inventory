@@ -65,9 +65,9 @@ class LicKeysSearch extends LicKeys
             'lic_items_id' => $this->lic_items_id,
         ]);
 
-        $query->andFilterWhere(['like', 'key_text', $this->key_text])
-	        ->andFilterWhere(['like', 'CONCAT(`lic_groups`.`descr`," / ",`lic_items`.`descr`)', $this->lic_item])
-            ->andFilterWhere(['like', '`lic_keys`.`comment`', $this->comment]);
+        $query->andFilterWhere(['or like', 'key_text', \yii\helpers\StringHelper::explode($this->key_text,'|',true,true)])
+	        ->andFilterWhere(['or like', 'CONCAT(`lic_groups`.`descr`," / ",`lic_items`.`descr`)', \yii\helpers\StringHelper::explode($this->lic_item,'|',true,true)])
+            ->andFilterWhere(['or like', '`lic_keys`.`comment`', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }

@@ -67,8 +67,8 @@ class LicItemsSearch extends LicItems
             'created_at' => $this->created_at,
         ]);
 
-        $query->andFilterWhere(['like', 'descr', $this->descr])
-            ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query->andFilterWhere(['or like', 'descr', \yii\helpers\StringHelper::explode($this->descr,'|',true,true)])
+			->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }

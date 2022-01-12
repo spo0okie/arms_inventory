@@ -73,7 +73,7 @@ class MaterialsUsagesSearch extends MaterialsUsages
         ]);
 
         $query->andFilterWhere([
-        	'like',
+        	'or like',
 	        'CONCAT('.
 	        'getplacepath(places.id), '.
 	        '"(", ifnull(users.Ename,""), ") \ ", '.
@@ -85,7 +85,7 @@ class MaterialsUsagesSearch extends MaterialsUsages
 	        'ifnull(techs.num,"") , " ",'.
 	        'materials_usages.comment , '.
 	        '" //", materials_usages.date)',
-	        $this->sname
+			\yii\helpers\StringHelper::explode($this->sname,'|',true,true)
         ]);
 
         return $dataProvider;

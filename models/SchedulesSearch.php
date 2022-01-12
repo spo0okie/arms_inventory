@@ -62,7 +62,7 @@ class SchedulesSearch extends Schedules
             //'created_at' => $this->created_at,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name]);
+        $query->andFilterWhere(['or like', 'name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
             //->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;

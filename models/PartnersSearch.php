@@ -62,13 +62,14 @@ class PartnersSearch extends Partners
             'id' => $this->id,
         ]);
 
-        $query->andFilterWhere(['like', 'inn', $this->inn])
-            ->andFilterWhere(['like', 'kpp', $this->kpp])
-            ->andFilterWhere(['like', 'uname', $this->uname])
-            ->andFilterWhere(['like', 'bname', $this->bname])
-			->andFilterWhere(['like', 'comment', $this->comment])
-			->andFilterWhere(['like', 'cabinet_url', $this->cabinet_url])
-			->andFilterWhere(['like', 'support_tel', $this->support_tel]);
+        $query
+			->andFilterWhere(['or like', 'inn', \yii\helpers\StringHelper::explode($this->inn,'|',true,true)])
+            ->andFilterWhere(['or like', 'kpp', \yii\helpers\StringHelper::explode($this->kpp,'|',true,true)])
+            ->andFilterWhere(['or like', 'uname', \yii\helpers\StringHelper::explode($this->uname,'|',true,true)])
+            ->andFilterWhere(['or like', 'bname', \yii\helpers\StringHelper::explode($this->bname,'|',true,true)])
+			->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+			->andFilterWhere(['or like', 'cabinet_url', \yii\helpers\StringHelper::explode($this->cabinet_url,'|',true,true)])
+			->andFilterWhere(['or like', 'support_tel', \yii\helpers\StringHelper::explode($this->support_tel,'|',true,true)]);
 
         return $dataProvider;
     }

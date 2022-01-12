@@ -98,20 +98,20 @@ class ArmsSearch extends Arms
 			]);
         }
 
-        $query->andFilterWhere(['like', 'num', $this->num])
-	        ->andFilterWhere(['like', 'inv_num', $this->inv_num])
-            ->andFilterWhere(['like', 'sn', $this->sn])
-	        ->andFilterWhere(['like', 'users.Ename', $this->user_id])
-	        ->andFilterWhere(['like', 'users.Doljnost', $this->user_position])
-	        ->andFilterWhere(['like', 'comps.ip', $this->comp_ip])
-	        ->andFilterWhere(['like', 'comps.name', $this->comp_id])
-	        ->andFilterWhere(['like', 'comps.raw_hw', $this->comp_hw])
-	        ->andFilterWhere(['like', 'org_struct.name', $this->departments_id])
-	        ->andFilterWhere(['like', 'arms_models.name', $this->model])
-	        ->andFilterWhere(['like', 'getplacepath({{places}}.id)', $this->places_id])
+        $query->andFilterWhere(['or like', 'num', \yii\helpers\StringHelper::explode($this->num,'|',true,true)])
+	        ->andFilterWhere(['or like', 'inv_num', \yii\helpers\StringHelper::explode($this->inv_num,'|',true,true)])
+            ->andFilterWhere(['or like', 'sn', \yii\helpers\StringHelper::explode($this->sn,'|',true,true)])
+	        ->andFilterWhere(['or like', 'users.Ename', \yii\helpers\StringHelper::explode($this->user_id,'|',true,true)])
+	        ->andFilterWhere(['or like', 'users.Doljnost', \yii\helpers\StringHelper::explode($this->user_position,'|',true,true)])
+	        ->andFilterWhere(['or like', 'comps.ip', \yii\helpers\StringHelper::explode($this->comp_ip,'|',true,true)])
+	        ->andFilterWhere(['or like', 'comps.name', \yii\helpers\StringHelper::explode($this->comp_id,'|',true,true)])
+	        ->andFilterWhere(['or like', 'comps.raw_hw', \yii\helpers\StringHelper::explode($this->comp_hw,'|',true,true)])
+	        ->andFilterWhere(['or like', 'org_struct.name', \yii\helpers\StringHelper::explode($this->departments_id,'|',true,true)])
+	        ->andFilterWhere(['or like', 'arms_models.name', \yii\helpers\StringHelper::explode($this->model,'|',true,true)])
+	        ->andFilterWhere(['or like', 'getplacepath({{places}}.id)', \yii\helpers\StringHelper::explode($this->places_id,'|',true,true)])
 	        ->andFilterWhere(['arms.model_id'=>$this->model_id])
 	        ->andFilterWhere(['arms_models.type_id'=>$this->type_id])
-		    ->andFilterWhere(['like', 'comment', $this->comment]);
+		    ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 	
 		$totalQuery=clone $query;
 	

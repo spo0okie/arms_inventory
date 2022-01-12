@@ -82,15 +82,14 @@ class NetIpsSearch extends NetIps
 
 
         $query
-			->andFilterWhere(['like', 'concat(net_ips.text_addr,"(",IFNULL(net_ips.name,""))', $this->text_addr])
-			//->andFilterWhere(['like', 'net_ips.text_addr', $this->text_addr])
-			->andFilterWhere(['like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', $this->network])
-			->andFilterWhere(['like', 'concat(net_vlans.name," (",net_vlans.vlan)', $this->vlan])
-			->andFilterWhere(['like', 'net_ips.comment', $this->comment])
+			->andFilterWhere(['or like', 'concat(net_ips.text_addr,"(",IFNULL(net_ips.name,""))', \yii\helpers\StringHelper::explode($this->text_addr,'|',true,true)])
+			->andFilterWhere(['or like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', \yii\helpers\StringHelper::explode($this->network,'|',true,true)])
+			->andFilterWhere(['or like', 'concat(net_vlans.name," (",net_vlans.vlan)', \yii\helpers\StringHelper::explode($this->vlan,'|',true,true)])
+			->andFilterWhere(['or like', 'net_ips.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
 			->andFilterWhere([
 				'OR',
-					['like', 'ip_comps.name', $this->attached],
-					['like', 'ip_techs.num', $this->attached]
+					['or like', 'ip_comps.name', \yii\helpers\StringHelper::explode($this->attached,'|',true,true)],
+					['or like', 'ip_techs.num', \yii\helpers\StringHelper::explode($this->attached,'|',true,true)],
 				]);
 
         return $dataProvider;

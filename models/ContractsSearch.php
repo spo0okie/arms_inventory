@@ -69,8 +69,6 @@ class ContractsSearch extends Contracts
         //    return $dataProvider;
         //}
 		
-		//параметр для поиска по имени (или ищем по одному значению или по нескольким)
-		$nameSearch=(count(explode('|',$this->fullname))>1)?explode('|',$this->fullname):$this->fullname;
 		//поисковый запрос в тексте повторяющем "шаблон вывода списка документов"
 		// дата - наименование - контрагент - комментарий
 		$nameExpression=new \yii\db\Expression("concat(".
@@ -83,7 +81,7 @@ class ContractsSearch extends Contracts
 	    $query
 		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
 	    $query
-		    ->andFilterWhere(['or like', $nameExpression, $nameSearch])
+		    ->andFilterWhere(['or like', $nameExpression, yii\helpers\StringHelper::explode($this->fullname,'|',true,true)])
 		    ->andFilterWhere(['total'=>$this->total])
 		    ->orderBy(['date'=>SORT_DESC,'name'=>SORT_DESC]);
 
