@@ -15,9 +15,18 @@ class ContractsSearch extends Contracts
     /**
      * {@inheritdoc}
      */
-
+	
+	/**
+	 * @var mixed|null
+	 */
     public $fullname;
-    public function rules()
+
+	/**
+	 * @var mixed|null
+	 */
+	public $total;
+	
+	public function rules()
     {
         return [
             [['id', 'parent', 'state_id'], 'integer'],
@@ -59,11 +68,22 @@ class ContractsSearch extends Contracts
             // $query->where('0=1');
         //    return $dataProvider;
         //}
+		
+		//параметр для поиска по имени (или ищем по одному значению или по нескольким)
+		$nameSearch=(count(explode('|',$this->fullname))>1)?explode('|',$this->fullname):$this->fullname;
+		//поисковый запрос в тексте повторяющем "шаблон вывода списка документов"
+		// дата - наименование - контрагент - комментарий
+		$nameExpression=new \yii\db\Expression("concat(".
+			"`contracts`.`date`,' - ',".
+			"`contracts`.`name`,' - ',".
+			"ifnull(`partners`.`uname`,'".static::$noPartnerSuffix."'),' (', ifnull(`partners`.`bname`,'') , ')',".
+			"ifnull(`contracts`.`comment`,'')".
+		")");
 
 	    $query
 		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
 	    $query
-		    ->andFilterWhere(['like', new \yii\db\Expression("concat(`contracts`.`date`,' - ',`contracts`.`name`,' - ',ifnull(`partners`.`uname`,''),' (', ifnull(`partners`.`bname`,'') , ')',`contracts`.`comment` )"), $this->fullname])
+		    ->andFilterWhere(['or like', $nameExpression, $nameSearch])
 		    ->andFilterWhere(['total'=>$this->total])
 		    ->orderBy(['date'=>SORT_DESC,'name'=>SORT_DESC]);
 

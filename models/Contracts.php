@@ -57,8 +57,9 @@ use yii\web\JsExpression;
 class Contracts extends \yii\db\ActiveRecord
 {
 	
-	public static $title="Документы";
-	public static $titles="Документы";
+	public static $title='Документы';
+	public static $titles='Документы';
+	public static $noPartnerSuffix='Внутр. документ';
 
 
 	public $scanFile;
@@ -317,7 +318,7 @@ class Contracts extends \yii\db\ActiveRecord
 			foreach ($partners as $partner) $names[]=$partner->sname;
 			return implode(',',$names);
 		} else {
-			return 'Внутр. документ';
+			return static::$noPartnerSuffix;
 		}
 	}
 
