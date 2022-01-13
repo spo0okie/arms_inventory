@@ -95,7 +95,7 @@ $deleteable=!count($model->childs) && !count($model->usages);
 		$usage = new \app\models\MaterialsUsages();
 		$usage->materials_id = [$model->id];
 		$usage->date=date('Y-m-d',time());
-		echo $this->render('/materials-usages/_form', ['model' => $usage]);
+		echo $this->render('/materials-usages/_form', ['model' => $usage,'modalParent'=>'#material_new_usage_modal']);
 		Modal::end();
 
 		Modal::begin([
@@ -105,14 +105,9 @@ $deleteable=!count($model->childs) && !count($model->usages);
 		]);
 		$material = new \app\models\Materials();
 		$material->parent_id = [$model->id];
-		echo $this->render('/materials/_form', ['model' => $material]);
+		echo $this->render('/materials/_form', ['model' => $material,'modalParent'=>'#material_new_material_modal']);
 		Modal::end();
 
-		//иначе не будет работать поиск в виджетах Select2
-		$this->registerJs(
-			"$('#material_new_usage_modal').removeAttr('tabindex');" .
-			"$('#material_new_material_modal').removeAttr('tabindex');"
-		);
 	} ?>
 
 
