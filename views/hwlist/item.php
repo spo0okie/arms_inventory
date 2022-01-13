@@ -126,7 +126,7 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
                 </div>
                 <?php       //закрываем форму
                 Modal::end();
-                echo \yii\helpers\Html::a('<span class="fas fa-minus-sign"/>',
+                echo \yii\helpers\Html::a('<span class="fas fa-minus-circle"/>',
                     ['arms/rmhw', 'id'=>$model->id,'uid' => $item->uid],
                     ['title'=>'Убрать из паспорта этот элемент','class'=>'passport_tools']
                 );
