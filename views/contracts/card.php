@@ -212,8 +212,8 @@ JS;
 			$arm_id=$arm->id;
 			echo $this->render('/arms/item',['model'=>$arm,'static_view'=>$static_view]);
 			if (!$static_view) { ?>
-                <a><span
-                            class="fas fa-remove href"
+                <a href="#"><span
+                            class="fas fa-unlink href"
                             title="Отвязать документ от этого АРМа"
                             onclick="if (confirm('Отвязать документ от этого АРМа?')) $.ajax({
                                     url: '/web/contracts/unlink-arm?id=<?= $model->id ?>&arms_id=<?= $arm->id ?>',
@@ -238,8 +238,8 @@ JS;
 			$tech_id=$tech->id;
 			echo $this->render('/techs/item',['model'=>$tech,'static_view'=>$static_view]);
 			if (!$static_view) { ?>
-                <a><span
-                            class="fas fa-remove href"
+                <a href="#"><span
+                            class="fas fa-unlink href"
                             title="Отвязать документ от этого оборудования"
                             onclick="if (confirm('Отвязать документ от этого оборудования?')) $.ajax({
                                 url: '/web/contracts/unlink-tech?id=<?= $model->id ?>&techs_id=<?= $tech->id ?>',

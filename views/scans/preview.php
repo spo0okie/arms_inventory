@@ -16,7 +16,7 @@ if (!$model->fileExists) {
  */
 ?>
 
-    <span class="fas fa-remove"></span>
+    <span class="fas fa-unlink"></span>
     Ошибка: файл <?= $model->shortFname ?> не обнаружен!
 
 <?php
