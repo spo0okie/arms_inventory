@@ -114,6 +114,17 @@ function scansFileNameChange(name){
     }
 }
 
+//изменение списка файлов в виджете сканов
+function scansFileListChange(scans){
+    let files = $(scans).fileinput('getFileList'); // returns file list selected
+    console.log(files);
+    let file=files[0];
+    if (file){
+        console.log(file.name);
+        scansFileNameChange(file.name);
+    }
+}
+
 
 //функция обработчик применения изменений в форме редактирования документа
 function contractFromApplyChanges(data){

@@ -159,20 +159,11 @@ if (!isset($modalParent)) $modalParent=null;
 			'pluginEvents' => [
 				'change' => 'function(event) {
 				    console.log("f_Input.change");
-                    var file = $(this)[0].files[0];
-                    if (file){
-                        console.log(file.name);
-                        scansFileNameChange(file.name);
-                    }
+				    scansFileListChange($(this)[0]);
                 }',
 				'filebatchselected' => 'function(event,files) {
 				    console.log("f_Input.filebatchselected");
-                    var file = files[0];
-                    //var file = $(this)[0].files[0];
-                    if (file){
-                        console.log(file.name);
-                        scansFileNameChange(file.name);
-                    }
+				    scansFileListChange($(this)[0]);
                 }',
                 'filebatchuploadcomplete' => 'function(event, files, extra) {
                     contractFormAfterScansUpload();
