@@ -54,12 +54,12 @@ class ServicesSearch extends Services
 			->joinWith([
 				'comps.arm.place',
 				'techs.place',
-				'segment',
 				'support',
 				'responsible',
 				'supportSchedule',
 				'providingSchedule',
-			]);
+			])
+			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)');
 	
 		if ($this->parent_id===false) {
 			$query->andWhere(['services.parent_id'=>null]);
