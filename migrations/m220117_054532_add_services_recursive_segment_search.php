@@ -16,7 +16,6 @@ class m220117_054532_add_services_recursive_segment_search extends Migration
     	set names utf8mb4;
 DROP FUNCTION IF EXISTS getServiceSegment;
 DROP PROCEDURE IF EXISTS getServiceSegment;
-DELIMITER //
 CREATE PROCEDURE getServiceSegment(IN itemId INT, OUT resultValue INT)
 COMMENT 'Recursive search of NOT NULL segment_id value'
 READS SQL DATA
@@ -27,15 +26,14 @@ BEGIN
   IF (resultValue IS NULL) and (NOT parentId IS NULL) THEN
     CALL getServiceSegment(parentId,resultValue);
   END IF;
-END//
+END;
 
 CREATE FUNCTION getServiceSegment(itemId INT) RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE res INT;
 	CALL getServiceSegment(itemId, res);
     RETURN res;
-END//
-DELIMITER ;
+END;
 SQL;
 	
 		$this->execute($sql);
