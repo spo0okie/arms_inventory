@@ -26,6 +26,8 @@ $archivedUrl=array_merge(['index'],Yii::$app->request->get());
 $archivedUrl['showArchived']=!$showArchived;
 
 $renderer=$this;
+
+
 ?>
 <div class="services-index">
 
