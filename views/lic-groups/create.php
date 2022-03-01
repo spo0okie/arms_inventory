@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicGroups */
 
-$this->title = 'Добавление группы лицензий';
+$this->title = 'Новый '.\app\models\LicGroups::$title;
 $this->params['breadcrumbs'][] = ['label' => \app\models\LicGroups::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

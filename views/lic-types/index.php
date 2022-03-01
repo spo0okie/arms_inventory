@@ -9,7 +9,7 @@ use yii\grid\GridView;
 
 $renderer=$this;
 
-$this->title = \app\models\LicTypes::$title;
+$this->title = \app\models\LicTypes::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="lic-types-index">
