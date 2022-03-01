@@ -33,8 +33,8 @@ NavBar::begin([
 			\app\models\Users::isViewer()?
 			['label' => 'Лицензии',
 				'items' => [
-					['label' => \app\models\LicTypes::$title, 'url' => ['/lic-types/index']],
-					['label' => 'Группы', 'url' => ['/lic-groups/index']],
+					['label' => \app\models\LicTypes::$titles, 'url' => ['/lic-types/index']],
+					['label' => \app\models\LicGroups::$titles, 'url' => ['/lic-groups/index']],
 					['label' => 'Закупки', 'url' => ['/lic-items/index']],
 					['label' => 'Ключи', 'url' => ['/lic-keys/index']],
 				]

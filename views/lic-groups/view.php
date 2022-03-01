@@ -5,7 +5,7 @@
 /* @var $model app\models\LicGroups */
 
 $this->title = $model->descr;
-$this->params['breadcrumbs'][] = ['label' => \app\models\LicGroups::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\LicGroups::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>

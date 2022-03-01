@@ -19,7 +19,8 @@ use Yii;
 class LicTypes extends \yii\db\ActiveRecord
 {
 	
-	public static $title='Схемы лицензирования';
+	public static $title='Схема лицензирования';
+	public static $titles='Схемы лицензирования';
 	
     /**
      * @inheritdoc

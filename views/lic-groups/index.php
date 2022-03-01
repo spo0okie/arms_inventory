@@ -7,7 +7,7 @@ use yii\grid\GridView;
 /* @var $searchModel app\models\LicGroupsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = \app\models\LicGroups::$title;
+$this->title = \app\models\LicGroups::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>

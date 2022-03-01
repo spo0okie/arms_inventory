@@ -16,7 +16,7 @@ $soft=$model->soft;
 
 ?>
 <h4>
-    Тип лицензирования:
+    <?= \app\models\LicTypes::$title ?>:
     <?= Html::a($model->licType->descr,['/lic-types/view','id'=>$model->lic_types_id]) ?>
     <?= Html::a('<span class="fas fa-pencil-alt"/>',['/lic-types/update','id'=>$model->lic_types_id]) ?>
 </h4>

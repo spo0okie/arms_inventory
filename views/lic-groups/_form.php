@@ -28,7 +28,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<?= $form->field($model, 'lic_types_id')->widget(Select2::className(), [
 		'data' => \app\models\LicTypes::fetchNames(),
-		'options' => ['placeholder' => 'Выберите продукт',],
+		'options' => ['placeholder' => 'Выберите схему',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,

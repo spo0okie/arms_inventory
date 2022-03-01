@@ -26,7 +26,8 @@ use Yii;
  */
 class LicGroups extends \yii\db\ActiveRecord
 {
-	public static $title='Группы лицензий';
+	public static $titles='Типы лицензий';
+	public static $title='Тип лицензий';
 
     /**
      * @inheritdoc

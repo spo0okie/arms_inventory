@@ -7,7 +7,7 @@ use yii\grid\GridView;
 /* @var $searchModel app\models\LicItemsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = \app\models\LicItems::$title;
+$this->title = \app\models\LicItems::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
@@ -37,7 +37,7 @@ $renderer=$this;
                 'attribute'=>'descr',
                 'format'=>'raw',
 	            'value'=>function($item) use ($renderer){
-		            return $renderer->render('item',['model'=>$item]);
+		            return $renderer->render('item',['model'=>$item,'name'=>$item->descr]);
 	            }
             ],
             //'count',
