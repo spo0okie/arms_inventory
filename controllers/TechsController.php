@@ -34,7 +34,7 @@ class TechsController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','uploads','delete','unlink','port-list'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','validate','inv-num'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','view','ttip','validate','inv-num','item','item-by-name'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -42,6 +42,30 @@ class TechsController extends Controller
 	    ];
 	    return $behaviors;
     }
+	
+	/**
+	 * Displays a item for single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionItem(int $id)
+	{
+		return $this->renderPartial('item', [
+			'model'	=> $this->findModel($id),
+		]);
+	}
+	
+	
+	public function actionItemByName($name)
+	{
+		if (($model = Techs::findOne(['num'=>$name])) !== null) {
+			return $this->renderPartial('item', [
+				'model' => $model,
+			]);
+		}
+		throw new NotFoundHttpException('The requested tech not found');
+	}
 
 	/**
 	 * Displays a single OrgPhones model.
