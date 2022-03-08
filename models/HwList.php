@@ -25,7 +25,8 @@ class HwList {
      */
     public function loadRaw($data)
     {
-        $this->rawData = '[' . $data . ']'; //дополняем до валидного JSON формата
+    	//убираем NULL символы из содержимого. такое бывало.
+        $this->rawData = '[' . str_replace("\0",'',$data) . ']'; //дополняем до валидного JSON формата
         $this->data = json_decode($this->rawData, true); //расшифровываем в array
         //$this->items = $this->data;
         //return;
