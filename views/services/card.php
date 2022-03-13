@@ -63,7 +63,9 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		<?php
 		$schedules=[];
 		if (!empty($model->providingScheduleRecursive)) {
-			echo '<strong>Предоставляется:</strong> '.$this->render('/schedules/item',['model'=>$model->providingScheduleRecursive]);
+			echo '<strong>Предоставляется: </strong>'
+				.$model->providingScheduleRecursive->weekWorkTimeDescription
+				.$this->render('/schedules/item',['model'=>$model->providingScheduleRecursive]);
 			if (count($model->providingScheduleRecursive->getServicesArr())>1) { ?>
 				<span onmouseenter="$('#private_schedule').show()" onmouseleave="$('#private_schedule').hide()">
 					<span qtip_ttip="Это расписание используется более чем для одного сервиса. <br> Невозможно добавлять периоды недоступности сервиса">
@@ -75,12 +77,19 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 						],[
 							'id'=>'private_schedule',
 							'style'=>'display:none'
-						]) ?>
+						]); ?>
 					</span>
 				</span>
 			<?php }
-			echo '<br />';
-		}
+		} else echo Html::a('Создать расписание предоставления сервиса/услуги',[
+			'schedules/create',
+			'attach_service'=>$model->id,
+		],[
+			'id'=>'private_schedule',
+			//'style'=>'display:none'
+		]);
+
+		echo '<br />';
 		
 		if (!empty($model->supportScheduleRecursive))
 			echo '<strong>Поддерживается:</strong> '.$this->render('/schedules/item',['model'=>$model->supportScheduleRecursive]).'<br />';

@@ -13,6 +13,7 @@ use Yii;
  * @property string $description
  * @property string $history
  * @property array $weekWorkTime //массив строк, которые надо соединить (запятыми или переносами строк, чтобы получить график работы)
+ * @property array $weekWorkTimeDescription //расписание через запятую
  * @property boolean isAcl
  *
  * @property Services[] $providingServices
@@ -24,7 +25,10 @@ class Schedules extends \yii\db\ActiveRecord
 {
 	
 	public static $titles = 'Расписания';
-	public static $title = 'Расписание';
+	public static $title  = 'Расписание';
+	public static $noData = 'не настроено';
+	public static $allDaysTitle = 'ежедн.';
+	public static $allDayTitle = 'круглосут.';
 	
 	public $isAclCache=null;
 	
@@ -223,7 +227,7 @@ class Schedules extends \yii\db\ActiveRecord
 					if ($periodFirstDay===$previousDay) {
 						$description[]="{$days[$periodFirstDay]}: $previousSchedule";	//пн: 8:00-17:00
 					} elseif ($periodFirstDay==1 && $previousDay==7) {
-						$description[]="$previousSchedule ежедн.";						//8:00-17:00 ежедневно
+						$description[]=$previousSchedule.' '.static::$allDaysTitle;						//8:00-17:00 ежедневно
 					} else {
 						$description[]="{$days[$periodFirstDay]}-{$days[$previousDay]}: $previousSchedule";	//пн-чт: 8:00-17:00
 					}
@@ -241,6 +245,13 @@ class Schedules extends \yii\db\ActiveRecord
 		return $description;
 	}
 	
+	public function getWeekWorkTimeDescription() {
+		
+		if (count($periods=$this->weekWorkTime))
+			return implode(',',$periods);
+		else
+			return static::$noData;
+	}
 	
 	/**
 	 * Находим исключения в расписании в указанный период

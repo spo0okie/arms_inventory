@@ -391,7 +391,7 @@ class Comps extends \yii\db\ActiveRecord
 						$rating[$service->responsible_id]++;
 				}
 			}
-			return $responsible[array_search(max($rating), $rating)];
+			if (count($rating)) return $responsible[array_search(max($rating), $rating)];
 		}
 		return null;
 	}
