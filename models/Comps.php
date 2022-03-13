@@ -383,12 +383,13 @@ class Comps extends \yii\db\ActiveRecord
 				/**
 				 * @var $service \app\models\Services
 				 */
-				if (is_object($service->responsible)) {
-					if (!isset($rating[$service->responsible_id])) {
-						$rating[$service->responsible_id]=1;
-						$responsible[$service->responsible_id]=$service->responsible;
+				if (is_object($service->responsibleRecursive)) {
+					$responsible_id=$service->responsibleRecursive->id;
+					if (!isset($rating[$responsible_id])) {
+						$rating[$responsible_id]=1;
+						$responsible[$responsible_id]=$service->responsible;
 					} else
-						$rating[$service->responsible_id]++;
+						$rating[$responsible_id]++;
 				}
 			}
 			if (count($rating)) return $responsible[array_search(max($rating), $rating)];
