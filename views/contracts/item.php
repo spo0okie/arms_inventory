@@ -29,7 +29,8 @@ if (is_object($model)) {
 		    'class'=>$active?"contract_active":"contract_inactive",
 	    ]) ?>
 		<?php if ($show_payment && $model->total) {
-			echo "<span class='{$model->state->code}'>{$model->total} {$model->currency->symbol}</span>";
+			$class=is_object($model->state)?$model->state->code:'';
+			echo "<span class='$class'>{$model->total} {$model->currency->symbol}</span>";
 		} ?>
 	    <?= Html::a(
 		    '<span class="fas fa-pencil-alt"/>',
