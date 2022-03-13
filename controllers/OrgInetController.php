@@ -61,8 +61,10 @@ class OrgInetController extends Controller
     {
         $dataProvider = new ActiveDataProvider([
             'query' => OrgInet::find(),
+			'pagination' => ['pageSize' => 100,],
         ]);
-
+	
+        
         return $this->render('index', [
             'dataProvider' => $dataProvider,
         ]);

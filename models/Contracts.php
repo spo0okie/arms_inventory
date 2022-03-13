@@ -15,7 +15,12 @@ use yii\web\JsExpression;
  *
  * @property int $id id
  * @property int $parent_id Родительский договор
+ * @property int $state_id ID статуса документа
  * @property int $currency_id Валюта
+ * @property int $total Сумма
+ * @property int $charge Налог
+ * @property bool $isPaid Оплачен
+ * @property bool $isUnpaid Не оплачен
  * @property bool $is_successor Замещает родительский договор
  * @property string $date Дата документа
  * @property string $datePart Часть имени документа с датами (дата или период начало-конец)
@@ -589,6 +594,14 @@ class Contracts extends \yii\db\ActiveRecord
 		);*/
 		}
 		return $hint;
+	}
+	
+	function getIsUnpaid() {
+		return ContractsStates::isUnpaid($this->state_id);
+	}
+
+	function getIsPaid() {
+		return ContractsStates::isPaid($this->state_id);
 	}
 	
 	/**

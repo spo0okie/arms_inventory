@@ -42,10 +42,11 @@ NavBar::begin([
 			\app\models\Users::isViewer()?
 			['label' => 'Контрагенты',
 				'items' => [
+					['label' => \app\models\Contracts::$titles, 'url' => ['/contracts/index']],
 					['label' => \app\models\Partners::$titles, 'url' => ['/partners/index']],
 					['label' => \app\models\ContractsStates::$title, 'url' => ['/contracts-states/index']],
-					['label' => \app\models\Contracts::$titles, 'url' => ['/contracts/index']],
-					['label' => \app\models\ProvTel::$title, 'url' => ['/prov-tel/index']],
+					['label' => \app\models\OrgPhones::$title, 'url' => ['/org-phones/index']],
+					['label' => \app\models\OrgInet::$title, 'url' => ['/org-inet/index']],
 				]
 			]:'',
 			\app\models\Users::isViewer()?
@@ -57,8 +58,6 @@ NavBar::begin([
 					],
 					['label' => \app\models\Orgs::$title, 'url' => ['/orgs/index']],
 					['label' => \app\models\Departments::$title, 'url' => ['/departments/index']],
-					['label' => \app\models\OrgPhones::$title, 'url' => ['/org-phones/index']],
-					['label' => \app\models\OrgInet::$title, 'url' => ['/org-inet/index']],
 					['label' => \app\models\Services::$titles, 'url' => ['/services/index']],
 					['label' => \app\models\Schedules::$titles, 'url' => ['/schedules/index']],
 					//'<li class="divider"></li>',

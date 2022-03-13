@@ -40,34 +40,31 @@ if (!isset($modalParent)) $modalParent=null;
 				]
 			]) ?>
 		</div>
-		<div class="col-md-4">
-			<?= $form->field($model, 'cost')->textInput() ?>
-		</div>
-		<div class="col-md-2">
-			<?= $form->field($model, 'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('orgphones','cost','charge')) ?>
+		<div class="col-md-6">
+			<?= $form->field($model, 'services_id')->widget(Select2::className(), [
+				'data' => \app\models\Services::fetchProviderNames(),
+				'options' => ['placeholder' => 'Выберите услугу предоставляющую номер',],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => false,
+					'multiple' => false
+				]
+			]) ?>
 		</div>
 
 	</div>
 
     <div class="row">
         <div class="col-md-6">
-	        <?= $form->field($model, 'prov_tel_id')->dropDownList(\app\models\ProvTel::fetchNames()) ?>
-        </div>
-        <div class="col-md-6">
 	        <?= $form->field($model, 'account')->textInput(['maxlength' => true]) ?>
         </div>
+		<div class="col-md-4">
+			<?= $form->field($model, 'cost')->textInput() ?>
+		</div>
+		<div class="col-md-2">
+			<?= $form->field($model, 'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('orgphones','cost','charge')) ?>
+		</div>
     </div>
-
-	<?= $form->field($model, 'contracts_id')->widget(Select2::className(), [
-		'data' => \app\models\Contracts::fetchNames(),
-		'options' => ['placeholder' => 'Выберите документ',],
-		//'toggleAllSettings'=>['selectLabel'=>null],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => true,
-			'multiple' => false
-		]
-	]) ?>
 
     <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
 

@@ -214,7 +214,7 @@ class Networks extends \yii\db\ActiveRecord
 
 	public function getMaxHosts()
 	{
-		return $this->capacity-2;
+		return max(1,$this->capacity-2);
 	}
 	
 	/**
@@ -336,7 +336,7 @@ class Networks extends \yii\db\ActiveRecord
 		$list= static::find()
 			//->joinWith('some_join')
 			//->select(['id','name'])
-			->orderBy(['name'])
+			->orderBy(['text_addr'=>SORT_ASC])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}

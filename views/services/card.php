@@ -14,6 +14,7 @@ $services=$model->depends;
 $dependants=$model->dependants;
 $support=$model->support;
 $children=$model->children;
+$contracts=$model->contracts;
 $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($support)&&!count($techs)&&!count($children);
 ?>
 
@@ -58,11 +59,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 			</h4>
 		<?php } ?>
 
-		<?php if (is_object($partner=$model->partner)) { ?>
-			<strong>Контрагент:</strong> <?= $this->render('/partners/item',['model'=>$model->partner]) ?>
-			<br />
-		<?php } ?>
-		
+	
 		<?php
 		$schedules=[];
 		if (!empty($model->providingScheduleRecursive)) {
@@ -106,9 +103,32 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		
 		<?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 		
+		<br />
+		
+		<?php if (is_array($model->orgInets) && count($model->orgInets)) { ?>
+			<h4>Предоставляет ввод(ы) интернет:</h4>
+			<p>
+				<?php foreach ($model->orgInets as $inet)
+					echo $this->render('/org-inet/item',['model'=>$inet,'static_view'=>$static_view]).'<br />';
+				?>
+			</p>
+			<br />
+		<?php }
+		
+		if (is_array($model->orgPhones) && count($model->orgPhones)) { ?>
+			<h4>Предоставляет телефонию:</h4>
+			<p>
+				<?php foreach ($model->orgPhones as $phone)
+					echo $this->render('/org-phones/item',['model'=>$phone,'static_view'=>$static_view,'href'=>true]).'<br />';
+				?>
+			</p>
+			<br />
+		<?php } ?>
+
 
 	</div>
 	<div class="col-md-6">
+		
 			<h2>Содержит в составе:</h2>
 			<p>
 				<?php if (count($children)) { ?>
@@ -162,6 +182,24 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 				?>
 			</p>
 			<br />
+		<?php } ?>
+
+
+		<?php if (is_object($model->partner)) { ?>
+			<hr/>
+			<h2>Контрагент: <?= $this->render('/partners/item',['model'=>$model->partner]) ?></h2>
+			
+			<?= $this->render('/partners/support',['model'=>$model->partner]) ?>
+		<?php } ?>
+		
+		<?php if (count($contracts)) { ?>
+			<h4>Карта связей документов</h4>
+			<p>
+				<?php foreach($contracts as $contract)
+					echo $this->render('/contracts/tree-map',['model'=>$contract,'show_payment'=>true])
+				?>
+			</p>
+			<br/>
 		<?php } ?>
 	</div>
 </div>

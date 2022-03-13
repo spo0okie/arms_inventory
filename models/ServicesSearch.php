@@ -58,6 +58,8 @@ class ServicesSearch extends Services
 				'responsible',
 				'supportSchedule',
 				'providingSchedule',
+				'orgPhones',
+				'orgInets',
 			])
 			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)');
 	

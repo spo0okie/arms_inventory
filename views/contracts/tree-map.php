@@ -19,6 +19,7 @@
  */
 
 if (!isset($map)) $map='full';
+if (!isset($show_payment)) $show_payment=false;
 
 if (is_object($model)) switch ($map) {
 	case 'full':
@@ -27,7 +28,7 @@ if (is_object($model)) switch ($map) {
 		$selected_id=$model->id;
 		//уходим в корень
 		while (is_object($model->parent)) $model=$model->parent;
-		echo $this->render('tree-list',['model'=>$model,'selected_id'=>$selected_id,]);
+		echo $this->render('tree-list',['model'=>$model,'selected_id'=>$selected_id,'show_payment'=>$show_payment]);
 		$js=<<<JS
 			$(".ul-dropfree").find("li:has(ul.candrop)").prepend('<div class="drop"></div>');
 			$(".ul-dropfree div.drop").click(function() {
@@ -45,10 +46,10 @@ JS;
 		break;
 	case 'chain-up':
 		//ЦЕПОЧКА ДО КОРНЯ
-		$output=$this->render('item',['model'=>$model]);
+		$output=$this->render('item',['model'=>$model,'show_payment'=>$show_payment]);
 		while (is_object($model->parent)) {
 			$model=$model->parent;
-			$output=$this->render('item',['model'=>$model]).'<ul class="contracts_tree tree"><li>'.$output.'</li></ul>';
+			$output=$this->render('item',['model'=>$model,'show_payment'=>$show_payment]).'<ul class="contracts_tree tree"><li>'.$output.'</li></ul>';
 		}
 		echo $output;
 		break;

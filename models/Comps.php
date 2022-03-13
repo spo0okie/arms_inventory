@@ -31,6 +31,7 @@ use Yii;
  * @property Arms $arm
  * @property Comps[] $dupes
  * @property Users $user
+ * @property Users $responsible
  * @property Domains $domain
  * @property string $updatedRenderClass
  * @property string $updatedText
@@ -367,6 +368,35 @@ class Comps extends \yii\db\ActiveRecord
 			else return (int)($data_age/3600/24).' дн.';
 		} else return '';
 	}
+	
+	/**
+	 * @return \app\models\Users
+	 */
+	public function getResponsible()
+	{
+		if (is_object($this->user)) return $this->user;
+		
+		if (is_array($this->services) && count($this->services)) {
+			$responsible=[];
+			$rating=[];
+			foreach ($this->services as $service) {
+				/**
+				 * @var $service \app\models\Services
+				 */
+				if (is_object($service->responsible)) {
+					if (!isset($rating[$service->responsible_id])) {
+						$rating[$service->responsible_id]=1;
+						$responsible[$service->responsible_id]=$service->responsible;
+					} else
+						$rating[$service->responsible_id]++;
+				}
+			}
+			return $responsible[array_search(max($rating), $rating)];
+		}
+		return null;
+	}
+	
+	
 	
 	public static function fetchNames(){
 		$list= static::find()

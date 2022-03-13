@@ -13,6 +13,8 @@ if (is_object($model)) {
         $attaches=$model->sAttach;
         $name=$model->sname.' - '.$model->sAttach.(strlen($attaches)?' - ':'');
     }
+    
+    if (!isset($show_payment)) $show_payment=false;
 
     //если явно не передано активный ли документ, то вычисляем
     //если у документа если наследник полномочий, то он считается неактивным
@@ -26,6 +28,9 @@ if (is_object($model)) {
 		    'qtip_ajxhrf'=>\yii\helpers\Url::to(['/contracts/ttip','id'=>$model->id]),
 		    'class'=>$active?"contract_active":"contract_inactive",
 	    ]) ?>
+		<?php if ($show_payment && $model->total) {
+			echo "<span class='{$model->state->code}'>{$model->total} {$model->currency->symbol}</span>";
+		} ?>
 	    <?= Html::a(
 		    '<span class="fas fa-pencil-alt"/>',
 		    ['/contracts/update','id'=>$model->id],

@@ -36,6 +36,7 @@ use yii\web\User;
  * @property int[] $comps_ids
  * @property int[] $support_ids
  * @property int[] $techs_ids
+ * @property int[] $contracts_ids
  *
  *
  * @property \app\models\Comps[] $comps
@@ -63,8 +64,13 @@ use yii\web\User;
  * @property Segments $segment
  * @property Segments $segmentRecursive
  * @property Acls[] $acls
+ * @property OrgPhones[] $orgPhones
+ * @property OrgInet[] $orgInets
  * @property Currency $currency
  * @property Partners $partner
+ * @property Contracts $contracts
+ * @property Contracts $docs
+ * @property Contracts $payments
  */
 class Services extends \yii\db\ActiveRecord
 {
@@ -77,7 +83,7 @@ class Services extends \yii\db\ActiveRecord
 	public static $user_job_title='Услуга для пользователей';
 	public static $tech_job_title='Служебная услуга';
 	
-	
+	private $docsCache=null;
 	private $segmentRecursiveCache=null;
 	private $supportRecursiveCache=null;
 	private $responsibleRecursiveCache=null;
@@ -501,6 +507,71 @@ class Services extends \yii\db\ActiveRecord
 		return $this->hasMany(Acls::className(), ['services_id' => 'id']);
 	}
 	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getOrgInets()
+	{
+		return $this->hasMany(OrgInet::className(), ['services_id' => 'id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getOrgPhones()
+	{
+		return $this->hasMany(OrgPhones::className(), ['services_id' => 'id']);
+	}
+	
+	/**
+	 * Список привязанных к сервису документов
+	 * @return Contracts[]
+	 */
+	public function getDocs()
+	{
+		if (!is_null($this->docsCache)) return $this->docsCache;
+		
+		$this->docsCache=[];
+		foreach ($this->contracts as $contract) {
+			/**
+			 * @var $contract Contracts
+			 */
+			foreach ($contract->chainChilds as $doc) {
+				$this->docsCache[]=$doc;
+			}
+		}
+		return $this->docsCache;
+	}
+	
+	/**
+	 * Список платежных документов
+	 * @return Contracts[]
+	 */
+	public function getPayments()
+	{
+		$payments=[];
+		foreach ($this->docs as $doc) {
+			/**
+			 * @var $doc Contracts
+			 */
+			if ($doc->total) $payments[]=$doc;
+		}
+		return $payments;
+	}
+	
+	
+	/**
+	 * Last unpaid
+	 * @return int
+	 */
+	public function getTotalUnpaid()
+	{
+		$total=0;
+		foreach ($this->payments as $doc)
+			$total+=$doc->total;
+		return $total;
+	}
+	
 	
 	
 	/**
@@ -509,6 +580,18 @@ class Services extends \yii\db\ActiveRecord
 	public static function fetchNames(){
 		$list= static::find()
 			->select(['id','name'])->orderBy('name')
+			->all();
+		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
+	}
+	
+	/**
+	 * @return array
+	 */
+	public static function fetchProviderNames(){
+		$list= static::find()
+			->select(['id','name'])
+			->where(['is_service'=>0])
+			->orderBy('name')
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}

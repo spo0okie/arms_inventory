@@ -13,6 +13,8 @@ use dosamigos\selectize\SelectizeDropDownList;
 /* @var $selected_id integer */
 
 if (!isset($selected_id)) $selected_id=-1;
+if (!isset($show_payment)) $show_payment=false;
+
 
 //рисуем в том случае, если это корневой предок
 if (is_object($model) && !is_object($model->predecessor)) {
@@ -24,7 +26,8 @@ if (is_object($model) && !is_object($model->predecessor)) {
 	echo $this->render('/contracts/item', [
 		'model' => $items[count($items)-1],
 		'active' => true,
-        'selected' => $selected_id==$items[count($items)-1]->id
+        'selected' => $selected_id==$items[count($items)-1]->id,
+		'show_payment'=>$show_payment
 	]);
 
 
@@ -39,7 +42,8 @@ if (is_object($model) && !is_object($model->predecessor)) {
 					<?= $this->render('/contracts/item', [
 						'model' => $items[$i],
 						'active' => false,
-                        'selected' => $selected_id==$items[$i]->id
+                        'selected' => $selected_id==$items[$i]->id,
+						'show_payment'=>$show_payment
 					]); ?>
 				</li>
 			<?php } ?>

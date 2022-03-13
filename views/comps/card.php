@@ -12,6 +12,7 @@ if (!isset($ips_glue)) $ips_glue=null;
 $services=$model->services;
 $deleteable=!count($services);
 $fqdn=mb_strtolower($model->fqdn);
+$responsible=$model->responsible;
 
 if (is_object($model->domain))
 	$domain=$model->domain->name;
@@ -50,8 +51,10 @@ if (!mb_strlen($domain))
 	<span id="comp<?= $model->id ?>-updated-info" class="update-timestamp" style="display: none">Последнее обновление данных <?= $model->updated_at ?> (v. <?= $model->raw_version ?>)</span>
 </div>
 <div>
+	<?= is_object($responsible)?'<strong>Ответственный:</strong>'.$this->render('/users/item',['model'=>$responsible,'static_view'=>$static_view]).'<br />':'' ?>
 	<?= $model->comment ?>
 </div>
+<br />
 <?php if(!$no_arm) { ?>
 	<h4>АРМ</h4>
 	<p>
@@ -74,6 +77,8 @@ if (!mb_strlen($domain))
 		$output[]=$this->render('/services/item',['model'=>$service,'static_view'=>$static_view]);
 	echo "<h3>Размещенные сервисы</h3><p>".implode('<br />',$output)."</p>";
  } ?>
+
+
 
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 

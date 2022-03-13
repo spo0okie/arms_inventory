@@ -44,14 +44,20 @@ if (!isset($static_view)) $static_view=false;
 <h4>Место подключения:</h4>
 <?= $this->render('/places/item',['model'=>$model->place ,'static_view'=>$static_view]) ?>
 
-<h4><?= $model->getAttributeLabel('contracts_id')?> </h4>
-<p><?= $this->render('/contracts/tree-map',['model'=>$model->contract,'static_view'=>$static_view,'map'=>$static_view?'chain-up':'full']) ?></p>
+<h4><?= $model->getAttributeLabel('services_id')?> </h4>
+<p><?= $this->render('/services/item',['model'=>$model->service]) ?></p>
+
+<h4>Документ(ы)-основание</h4>
+<p>
+	<?php
+	foreach ($model->contracts as $contract)
+		if (is_object($contract)) echo $this->render('/contracts/tree-map',['model'=>$contract,'static_view'=>$static_view,'map'=>$static_view?'chain-up':'full'])
+	?>
+</p>
 
 <h4><?= $model->getAttributeLabel('account')?> </h4>
 <p><?= $model->account ?></p>
 <hr />
 
-<h4>Оператор связи:</h4>
-<?= $this->render('/prov-tel/item',['model'=>$model->provTel ,'static_view'=>$static_view]) ?>
-
-<?= $this->render('/prov-tel/card',['model'=>$model->provTel,'static_view'=>$static_view]) ?>
+<h4>Поставщики услуги связи:</h4>
+<?= is_object($model->partner)?$this->render('/partners/card',['model'=>$model->partner,'static_view'=>$static_view]):'' ?>

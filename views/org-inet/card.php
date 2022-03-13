@@ -44,33 +44,26 @@ if (!isset($static_view)) $static_view=false;
 	</p>
 <?php }
 
-if ($model->static) { ?>
-	<h4>Статический адрес:</h4>
+if ($model->network) { ?>
+	<h4>Сетевые адреса:</h4>
 	<p>
-		Адрес: <?= $model->ip_addr ?> <br />
-		Маска: <?= $model->ip_mask ?> <br />
-		Шлюз:  <?= $model->ip_gw ?> <br />
-        <?php
-            $dnses=[];
-            if (strlen(trim($model->ip_dns1))) $dnses[]=trim($model->ip_dns1);
-            if (strlen(trim($model->ip_dns2))) $dnses[]=trim($model->ip_dns2);
-            if (count($dnses)) { ?>
-                DNS: <?= implode(",",$dnses) ?>
-            <?php }
-        ?>
+		<?= $this->render('/networks/item',['model'=>$model->network]) ?>
 	</p>
 <?php } else { ?>
 	<h4>Динамический адрес</h4>
 <?php } ?>
 
-<h4>Тип подключения</h4>
-<?= $model->type ?>
-
 <h4>Место подключения:</h4>
-<?= $this->render('/places/item',['model'=>$model->places ,'static_view'=>$static_view]) ?>
+<?= $this->render('/places/item',['model'=>$model->place ,'static_view'=>$static_view]) ?>
 
-<h4><?= $model->getAttributeLabel('contracts_id')?> </h4>
-<p><?= $this->render('/contracts/tree-map',['model'=>$model->contract,'static_view'=>$static_view,'map'=>$static_view?'chain-up':'full']) ?></p>
+<h4>Договор</h4>
+<p>
+	<?php
+	foreach ($model->contracts as $contract)
+		if (is_object($contract)) echo $this->render('/contracts/tree-map',['model'=>$contract,'static_view'=>$static_view,'map'=>$static_view?'chain-up':'full'])
+	?>
+</p>
+
 
 <h4><?= $model->getAttributeLabel('account')?> </h4>
 <p><?= $model->account ?></p>
@@ -78,7 +71,5 @@ if ($model->static) { ?>
 
 <hr />
 
-<h4>Оператор связи:</h4>
-<?= $this->render('/prov-tel/item',['model'=>$model->provTel ,'static_view'=>$static_view]) ?>
-
-<?= $this->render('/prov-tel/card',['model'=>$model->provTel,'static_view'=>$static_view]) ?>
+<h4>Поставщики услуги связи:</h4>
+<?= is_object($model->partner)?$this->render('/partners/card',['model'=>$model->partner,'static_view'=>$static_view]):'' ?>

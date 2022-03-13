@@ -61,6 +61,7 @@ class OrgPhonesController extends Controller
     {
         $dataProvider = new ActiveDataProvider([
             'query' => OrgPhones::find(),
+			'pagination' => ['pageSize' => 100,],
         ]);
 
         return $this->render('index', [

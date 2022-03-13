@@ -34,11 +34,4 @@ $deleteable=true; //тут переопределить возможность �
 		<?php } ?>
 	</p>
 
-	<h4><?= $model->getAttributeLabel('cabinet_url')?> </h4>
-	<?= \Yii::$app->formatter->asUrl($model->cabinet_url) ?>
-	<br />
-	<h4><?= $model->getAttributeLabel('support_tel')?> </h4>
-	<?= $model->support_tel ?>
-	<br /><br />
-	<h4><?= $model->getAttributeLabel('comment')?> </h4>
-	<?= \Yii::$app->formatter->asNtext($model->comment) ?>
+	<?= $this->render('support',['model'=>$model]) ?>

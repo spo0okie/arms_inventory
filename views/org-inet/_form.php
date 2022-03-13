@@ -19,78 +19,78 @@ if (!isset($modalParent)) $modalParent=null;
     <div class="row">
         <div class="col-md-6">
 			<div class="row">
-				<div class="col-md-6">
+				<div class="col-md-7">
 					<?= $form->field($model, 'name')->textInput() ?>
 				</div>
-				<div class="col-md-4">
+				<div class="col-md-5">
+					<?= $form->field($model, 'account')->textInput() ?>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-7">
+					<?= $form->field($model, 'services_id')->widget(Select2::className(), [
+						'data' => \app\models\Services::fetchProviderNames(),
+						'options' => ['placeholder' => 'Выберите услугу связи',],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => false,
+							'multiple' => false
+						]
+					]) ?>
+				</div>
+				<div class="col-md-3">
 					<?= $form->field($model, 'cost')->textInput() ?>
 				</div>
 				<div class="col-md-2">
 					<?= $form->field($model, 'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('orginet','cost','charge')) ?>
 				</div>
+				<?= \app\components\TextAutoResizeWidget::widget([
+					'form' => $form,
+					'model' => $model,
+					'attribute' => 'comment',
+					'lines' => 2,
+				]) ?>
 			</div>
-	
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'comment',
-				'lines' => 2,
-			]) ?>
 
-			<?= $form->field($model, 'places_id')->widget(Select2::className(), [
-		        'data' => \app\models\Places::fetchNames(),
-		        //'options' => ['placeholder' => 'Статус рабочего места',],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-			        'allowClear' => false,
-			        'multiple' => false
-		        ]
-	        ]) ?>
 
-	        <?= $form->field($model, 'prov_tel_id')->widget(Select2::className(), [
-		        'data' => \app\models\ProvTel::fetchNames(),
-		        //'options' => ['placeholder' => 'Статус рабочего места',],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-			        'allowClear' => false,
-			        'multiple' => false
-		        ]
-	        ]) ?>
 
-	        <?= $form->field($model, 'contracts_id')->widget(Select2::className(), [
-		        'data' => [null=>''] + \app\models\Contracts::fetchNames(),
-		        //'options' => ['placeholder' => 'Статус рабочего места',],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-			        'allowClear' => false,
-			        'multiple' => false
-		        ]
-	        ]) ?>
 
-	        <?= $form->field($model, 'account')->textInput() ?>
+			
+
 
             <div class="form-group">
 		        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
             </div>
         </div>
         <div class="col-md-6">
-	        <?= $form->field($model, 'type')->textInput(['maxlength' => true]) ?>
+			<div class="row">
+				<div class="col-md-6">
+					<?= $form->field($model, 'networks_id')->widget(Select2::className(), [
+						'data' => \app\models\Networks::fetchNames(),
+						'options' => ['placeholder' => 'Выберите предоставляемую подсеть',],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => false,
+							'multiple' => false
+						]
+					]) ?>
+				</div>
+				<div class="col-md-6">
+					<?= $form->field($model, 'places_id')->widget(Select2::className(), [
+						'data' => \app\models\Places::fetchNames(),
+						//'options' => ['placeholder' => 'Статус рабочего места',],
+						'toggleAllSettings'=>['selectLabel'=>null],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => false,
+							'multiple' => false
+						]
+					]) ?>
+				</div>
+			</div>
 
-	        <?= $form->field($model, 'static')->checkbox() ?>
-
-	        <?= $form->field($model, 'ip_addr')->textInput(['maxlength' => true]) ?>
-
-	        <?= $form->field($model, 'ip_mask')->textInput(['maxlength' => true]) ?>
-
-	        <?= $form->field($model, 'ip_gw')->textInput(['maxlength' => true]) ?>
-
-	        <?= $form->field($model, 'ip_dns1')->textInput(['maxlength' => true]) ?>
-
-	        <?= $form->field($model, 'ip_dns2')->textInput(['maxlength' => true]) ?>
-	
+			
 			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,

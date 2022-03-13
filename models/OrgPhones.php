@@ -20,7 +20,9 @@ use Yii;
  * @property float $charge
  
  * @property ProvTel $provTel
- * @property Contracts $contract
+ * @property Contracts $contracts
+ * @property Services $service
+ * @property Partners $partner
  * @property Places $place
  */
 class OrgPhones extends \yii\db\ActiveRecord
@@ -40,9 +42,9 @@ class OrgPhones extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['country_code', 'city_code', 'local_code', 'prov_tel_id', 'comment'], 'required'],
+            [['country_code', 'city_code', 'local_code', 'comment'], 'required'],
 	        [['cost','charge'], 'number'],
-            [['prov_tel_id','places_id','contracts_id'], 'integer'],
+            [['services_id','places_id','contracts_id'], 'integer'],
             [['comment','account'], 'string'],
             [['country_code', 'city_code', 'local_code'], 'string', 'max' => 10],
 	        [['prov_tel_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProvTel::className(), 'targetAttribute' => ['prov_tel_id' => 'id']],
@@ -62,12 +64,13 @@ class OrgPhones extends \yii\db\ActiveRecord
             'local_code' => 'Местный номер',
 	        'places_id' => 'Помещение',
 	        'prov_tel_id' => 'Поставщик услуги',
-	        'contracts_id' => 'Договор',
+			'contracts_id' => 'Договор',
+			'services_id' => 'Услуга связи',
 	        'account' => 'Аккаунт, л/с',
 	        'sname' => 'Полный номер для поиска',
 	        'fullNum' => 'Полный номер',
 	        'cost' => 'Стоимость',
-	        'charge' => 'НДС',
+	        'charge' => 'В т.ч. НДС',
             'comment' => 'Комментарий',
         ];
     }
@@ -81,10 +84,10 @@ class OrgPhones extends \yii\db\ActiveRecord
 			//'country_code' => '7 для РФ',
 			//'city_code' => 'Код города',
 			//'local_code' => '',
-			'places_id' => 'Где оказывается услуга связи',
+			'places_id' => 'Где подключен телефонный номер',
 			'prov_tel_id' => 'Поставщик услуги',
 			'contracts_id' => 'Документ на основании которого подключена эта услуга',
-			'cost' => 'Стоимость услуги в месяц (планируемая стоимость, если величина плавает)',
+			'cost' => 'Стоимость номера в месяц (планируемая стоимость, если величина плавает)',
 			//'account' => 'Аккаунт, л/с',
 			//'sname' => 'Полный номер для поиска',
 			//'fullNum' => 'Полный номер',
@@ -130,12 +133,33 @@ class OrgPhones extends \yii\db\ActiveRecord
 	{
 		return $this->hasOne(Places::className(), ['id' => 'places_id']);
 	}
-
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
-	public function getContract()
+	public function getContracts()
 	{
-		return $this->hasOne(Contracts::className(), ['id' => 'contracts_id']);
+		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
+			->viaTable('{{%contracts_in_services}}', ['services_id' => 'services_id']);
+	}
+	
+	
+	
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getPartner()
+	{
+		return $this->hasOne(Partners::className(), ['id' => 'partners_id'])
+			->viaTable(\app\models\Services::tableName(), ['id' => 'services_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getService()
+	{
+		return $this->hasOne(Services::className(), ['id' => 'services_id']);
 	}
 }
