@@ -5,6 +5,10 @@ namespace app\models;
 use Yii;
 
 /**
+ * Hint: В оформлении расписания надо придерживаться правила, что расписание отвечает на вопрос когда?
+ */
+
+/**
  * This is the model class for table "schedules".
  *
  * @property int $id
@@ -26,7 +30,7 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public static $titles = 'Расписания';
 	public static $title  = 'Расписание';
-	public static $noData = 'не настроено';
+	public static $noData = 'никогда';
 	public static $allDaysTitle = 'ежедн.';
 	public static $allDayTitle = 'круглосут.';
 	

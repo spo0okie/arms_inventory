@@ -56,20 +56,17 @@ if ($model->network) { ?>
 <h4>Место подключения:</h4>
 <?= $this->render('/places/item',['model'=>$model->place ,'static_view'=>$static_view]) ?>
 
-<h4>Договор</h4>
-<p>
-	<?php
-	foreach ($model->contracts as $contract)
-		if (is_object($contract)) echo $this->render('/contracts/tree-map',['model'=>$contract,'static_view'=>$static_view,'map'=>$static_view?'chain-up':'full'])
-	?>
-</p>
-
 
 <h4><?= $model->getAttributeLabel('account')?> </h4>
 <p><?= $model->account ?></p>
 
 
 <hr />
+<h4>Услуга связи</h4>
+<p>
+	<?= $this->render('/services/item',['model'=>$model->service ,'static_view'=>$static_view]) ?>
+</p>
 
-<h4>Поставщики услуги связи:</h4>
+
+<h4>Провайдер</h4>
 <?= is_object($model->partner)?$this->render('/partners/card',['model'=>$model->partner,'static_view'=>$static_view]):'' ?>

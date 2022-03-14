@@ -13,7 +13,7 @@ else
 	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index-acl']];
 
 if (is_object($model->master) && ($model->date)) {
-    $this->title = 'Добавить расписание '.$model->master->name.' / '.$model->day;
+    $this->title = 'Добавить график '.$model->dayFor;
 
     $this->params['breadcrumbs'][] = ['label' => $model->master->name, 'url' => ['/schedules/view', 'id'=>$model->schedule_id]];
     $this->params['breadcrumbs'][] = ['label' => 'Добавление '.$model->day];
@@ -38,6 +38,7 @@ if (is_object($model->master) && ($model->date)) {
 <div class="schedules-entries-create">
 
     <h1><?= Html::encode($this->title) ?></h1>
+	Для <?= $model->master->name ?>
 
     <?= $this->render('_form', [
         'model' => $model,

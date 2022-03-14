@@ -13,13 +13,14 @@ use yii\helpers\Html;
 /* @var $model app\models\Schedules */
 
 if (!isset($static_view)) $static_view=false;
+if (!isset($name)) $name=$model->name;
 
 if (!empty($model)) {?>
 	
 	<span class="schedules-item"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules/ttip','id'=>$model->id]) ?>"
 	>
-		<?=  Html::a($model->name,['schedules/view','id'=>$model->id]) ?>
+		<?=  Html::a($name,['schedules/view','id'=>$model->id]) ?>
 		<?=  $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['schedules/update','id'=>$model->id,'return'=>'previous']) ?>
 	</span>
 <?php } else {

@@ -10,6 +10,11 @@ use yii\validators\DateValidator;
  * из суммы всех периодов работы (сложение множеств)
  * вычитается (вычитание множеств)
  * сумма всех периодов отключения (сложение множеств)
+ *
+ * Для удобства вероятно надо завести словарь для Label-ов и Hint-ов полей для разных сценариев применения графика
+ *
+ * Известные сценарии:
+ * 
  */
 
 
@@ -25,6 +30,7 @@ use yii\validators\DateValidator;
  * @property string|null $comment
  * @property string|null $history
  * @property string|null $day
+ * @property string|null $dayFor
  * @property string|null $created_at
  * @property string|null $is_period
  * @property string|null $is_work
@@ -48,6 +54,17 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		'7' => "Вск",
 	];
 	
+	public static $daysFor=[
+		'def' => "по умолч.",
+		'1' => "на пон",
+		'2' => "на втр",
+		'3' => "на срд",
+		'4' => "на чтв",
+		'5' => "на птн",
+		'6' => "на суб",
+		'7' => "на вск",
+	];
+	
 	public static $isWorkComment=[
 		'default'=>[
 			0=>'нерабочий период',
@@ -61,7 +78,15 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	
 	public $isAclCache=null;
 	
-	public function getIsAcl() {
+	public static $scheduleSamplesHtml = <<<HTML
+		<span class="href" onclick="$('#schedulesentries-schedule').val('-')">отсутствует</span> /
+		<span class="href" onclick="$('#schedulesentries-schedule').val('00:00-23:59')">круглосуточно</span> /
+		<span class="href" onclick="$('#schedulesentries-schedule').val('08:00-17:00')">c 8 до 17</span> /
+		<span class="href" onclick="$('#schedulesentries-schedule').val('08:00-12:00,12:45-17:00')">с обедом в 12</span>
+HTML;
+		
+		
+		public function getIsAcl() {
 		if (is_null($this->isAclCache)) {
 			$this->isAclCache=is_object($this->master) && $this->master->isAcl;
 		}
@@ -77,10 +102,19 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	
 	/**
 	 * Возвращает описание даты записи
-	 * @return string|null
+	 * @return string
 	 */
 	public function getDay() {
 		if (isset(static::$days[$this->date])) return static::$days[$this->date];
+		return $this->date;
+	}
+	
+	/**
+	 * Возвращает описание даты записи
+	 * @return string
+	 */
+	public function getDayFor() {
+		if (isset(static::$daysFor[$this->date])) return static::$daysFor[$this->date];
 		return $this->date;
 	}
 	
