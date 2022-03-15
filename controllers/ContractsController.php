@@ -35,7 +35,7 @@ class ContractsController extends Controller
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','update','update-form','delete','unlink','unlink-arm','unlink-tech','link-arm','link-tech','scan-upload'], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','hint-arms','scans','validate'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','view','ttip','hint-arms','hint-parent','scans','validate'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -59,20 +59,29 @@ class ContractsController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
-
+	
 	/**
 	 * Возвращает IDs армов с переданными документами
 	 * @param $ids
+	 * @param $form
 	 * @return mixed
-	 * @throws \yii\base\InvalidConfigException
 	 */
 	public function actionHintArms($ids,$form)
 	{
-		//Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
 		return Yii::$app->formatter->asRaw(Contracts::fetchArmsHint($ids,$form));
 	}
-
+	
+	/**
+	 * Возвращает IDs армов с переданными документами
+	 * @param $ids
+	 * @param $form
+	 * @return mixed
+	 */
+	public function actionHintParent($ids,$form)
+	{
+		return Yii::$app->formatter->asRaw(Contracts::fetchParentHint($ids,$form));
+	}
+	
 	/**
 	 * Displays a single Contracts model.
 	 * @param integer $id

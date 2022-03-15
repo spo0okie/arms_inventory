@@ -27,6 +27,7 @@ use yii\web\JsExpression;
  * @property string $end_date Дата окончания действия документа
  * @property string $name Название документа
  * @property string $sname Полное наименование документа
+ * @property string $selfSname Полное наименование документа
  * @property string $sAttach строка с иконками приложений
  * @property string $comment Комментарий
  * @property string $partnersNames имена партнеров (ч/з запятую)
@@ -65,6 +66,11 @@ class Contracts extends \yii\db\ActiveRecord
 	public static $title='Документы';
 	public static $titles='Документы';
 	public static $noPartnerSuffix='Внутр. документ';
+	
+	public static $dictionary=[
+		'contract'=>['договор'],
+		'invoice'=>['счет']
+	];
 
 
 	public $scanFile;
@@ -303,7 +309,7 @@ class Contracts extends \yii\db\ActiveRecord
 	{
 		return $this->hasMany(OrgInet::className(), ['contracts_id' => 'id']);
 	}
-
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -311,7 +317,15 @@ class Contracts extends \yii\db\ActiveRecord
 	{
 		return $this->hasMany(OrgPhones::className(), ['contracts_id' => 'id']);
 	}
-
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getServices()
+	{
+		return $this->hasMany(Services::className(), ['contracts_id' => 'id']);
+	}
+	
 	/**
 	 * Возвращает набор контрагентов в договоре
 	 * @return string
@@ -338,16 +352,21 @@ class Contracts extends \yii\db\ActiveRecord
 		return 'нет даты';
 	}
 
-	public function getSname()
+	public function getSelfSname()
 	{
 		//var_dump($this->date);
 		$date=strtotime($this->date);
 		mb_regex_encoding('utf8');
 		$name=mb_eregi_replace('сч(ё|е)т(-оферта)?( *на *оплату)? *№ *','Счёт № ',$this->name,'i');
 		$name=mb_eregi_replace('(от *)?('.date('d.m.(Y|y)',$date).'|'.date('(Y|y).m.d',$date).') *(г(ода)?)?\.?\s*\-\s*','',$name,'i');
-		return $this->datePart.' - '.$name.' - '.$this->partnersNames;
+		return $name;
 	}
-
+	
+	public function getSname()
+	{
+		return $this->datePart.' - '.$this->selfSname.' - '.$this->partnersNames;
+	}
+	
 	public function getSAttach()
 	{
 		$attaches='';
@@ -558,7 +577,6 @@ class Contracts extends \yii\db\ActiveRecord
 	}
 
 	public static function fetchArmsHint($ids,$form='') {
-			//Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
 		if (!is_array($ids))
 			$ids=explode(',',$ids);
@@ -567,34 +585,61 @@ class Contracts extends \yii\db\ActiveRecord
 		$arms=\app\models\Arms::find()
 			->joinWith('contracts')
 			->where(['arms_contracts.id'=>$ids])
-			//->createCommand()->getRawSql();
-				//
 			->all();
 		if (!count($arms)) return $hint;
 
 		$hintTtip='В подсказке приведены АРМы из привязанных документов'.(strlen($form)?' (кликабельно)':'');
 		$hint="<span title=\"$hintTtip\">Подсказка</span>: ";
 		foreach ($arms as $arm) {
+			/**
+			 * @var $arm Arms
+			 */
 			$js=strlen($form)?(
 				"onclick=\"$('#$form-arms_id,#$form-arms_ids').val({$arm->id}).trigger('change');\""
 			):'';
 			$ttip=\yii\helpers\Url::to(['/arms/ttip','id'=>$arm->id]);
 			$hint.="<span class='href' qtip_ajxhrf='$ttip' $js>{$arm->num}</span> ";
-			/* В общем вся эта прелесть убрана, т.к. Yii2 делает encode всем полям Tag включая онклик в котором кавычки ломаются
-			я запарился искать как это починить
-			 * \yii\helpers\Html::tag(
-			'span',
-			$arm->num,
-			[
-				'class'=>'pointer',
-				'qtip_ajxhrf'=>\yii\helpers\Url::to(['/arms/ttip','id'=>$arm->id]),
-				'onclick'=>new \yii\web\JsExpression("$('#$form-arms_id').select2('data', {id:'{$arm->id}',text:'{$arm->num}'});"),
-				'options'=>['encode'=>false],
-			]
-		);*/
 		}
 		return $hint;
 	}
+	
+	public static function fetchParentHint($ids,$form='') {
+		
+		if (!is_array($ids))
+			$ids=explode(',',$ids);
+		
+		$hint='Выберите договор / документ-основание';
+		
+		if (!count($ids)) return $hint;
+		
+		$possibleParents=static::find()
+			->innerJoin('{{%partners_in_contracts}}', '`contracts_id` = `contracts`.`id`')
+			->where(['partners_id'=>$ids,])
+			->andWhere(['like','name',Contracts::$dictionary['contract']])
+			->orderBy(['date'=>SORT_DESC])
+			->limit(6)
+			->all();
+			//->prepare(Yii::$app->db->queryBuilder)->createCommand()->rawSql;
+		
+		if (!count($possibleParents)) return $hint;
+			//return var_dump($possibleParents);//
+		
+		$hintTtip='Быстрый выбор договора как основного документа';
+		$hint="<span title=\"$hintTtip\">Выбрать договор</span>: ";
+		foreach ($possibleParents as $doc) {
+			/**
+			 * @var $doc Contracts
+			 */
+			$js=strlen($form)?(
+			"onclick=\"$('#$form-parent_id').val({$doc->id}).trigger('change');\""
+			):'';
+			$ttip=\yii\helpers\Url::to(['/contracts/ttip','id'=>$doc->id]);
+			$hint.="<br /><span class='href' qtip_ajxhrf='$ttip' $js>{$doc->selfSname}</span>";
+		}
+	
+		return $hint;
+	}
+	
 	
 	function getIsUnpaid() {
 		return ContractsStates::isUnpaid($this->state_id);

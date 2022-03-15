@@ -12,6 +12,21 @@ use kartik\file\FileInput;
 /* @var $form yii\widgets\ActiveForm */
 
 if (!isset($modalParent)) $modalParent=null;
+$js = <<<JS
+    //меняем подсказку выбора родителя при смене списка контрагентов
+    function fetchContractsFromPartners(){
+        let partners=$("#contracts-partners_ids").val();
+        console.log(partners);
+        $.ajax({url: "/web/contracts/hint-parent?form=contracts&ids="+partners})
+            .done(function(data){
+            	$("#parent_id-hint").html(data);
+            })
+            .fail(function () {
+                console.log("Ошибка получения данных parents!")
+            });
+        }
+JS;
+$this->registerJs($js, yii\web\View::POS_BEGIN);
 
 ?>
 
@@ -80,7 +95,7 @@ if (!isset($modalParent)) $modalParent=null;
                     'allowClear' => true,
                     'multiple' => false
                 ]
-            ]) ?>
+            ])->hint(\app\models\Contracts::fetchParentHint($model->partners_ids,'contracts'),['id'=>'parent_id-hint'])  ?>
         </div>
         <div class="col-md-3" >
             <br/>
@@ -92,7 +107,10 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-md-7">
 			<?= $form->field($model, 'partners_ids')->widget(Select2::classname(), [
 				'data' => \app\models\Partners::fetchNames(),
-				'options' => ['placeholder' => 'Начните набирать название для поиска'],
+				'options' => [
+					'placeholder' => 'Начните набирать название для поиска',
+					'onchange' => 'fetchContractsFromPartners();'
+				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,

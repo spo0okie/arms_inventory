@@ -28,12 +28,12 @@ $this->params['breadcrumbs'][] = $this->title;
 				</p>
 			<?php } ?>
 
-			<?php if (count($model->contracts)) { ?>
+			<?php if (count($model->docs)) { ?>
 				<h4><?= \app\models\Contracts::$titles ?></h4>
 				<p>
 					<?php
 					$items=[];
-					foreach ($model->contracts as $contract)
+					foreach ($model->docs as $contract)
 						$items[]=$this->render('/contracts/item',['model'=>$contract]);
 					echo implode('<br />',$items);
 					?>

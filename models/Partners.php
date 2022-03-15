@@ -17,7 +17,9 @@ use Yii;
  * @property string $cabinet_url Урл личного кабинет
  * @property string $support_tel Тел. тех. поддержки
  *
+ * @property Contracts[] $docs
  * @property Contracts[] $contracts
+ * @property Contracts[] $invoices
  * @property Services[] $services
  */
 class Partners extends \yii\db\ActiveRecord
@@ -76,10 +78,22 @@ class Partners extends \yii\db\ActiveRecord
 	 * @return \yii\db\ActiveQuery
 	 * @throws \yii\base\InvalidConfigException
 	 */
-	public function getContracts()
+	public function getDocs()
 	{
 		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
 			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает набор контрагентов в договоре
+	 * @return \yii\db\ActiveQuery
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function getContracts()
+	{
+		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
+			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id'])
+			->where(['like','name',Contracts::$dictionary['contract']]);
 	}
 	
 	/**
