@@ -13,13 +13,13 @@ $arms=      $model->arms;
 $techs=     $model->techs;
 $materials= $model->materials;
 $lics=      $model->licItems;
-$inets=     $model->orgInets;
+$services=     $model->services;
 $phones=    $model->orgPhones;
 
 $model_id=$model->id;
 
 if (!isset($static_view)) $static_view=false;
-$deletable=!(count($arms)||count($inets)||count($phones)||count($lics)||count($childs)||count($techs));
+$deletable=!(count($arms)||count($services)||count($lics)||count($childs)||count($techs));
 
 ?>
 
@@ -168,9 +168,7 @@ JS;
         //
         <a onclick="$('#lic_add_modal').modal('toggle')" class="href">Лицензию</a>
         //
-        <a onclick="$('#inet_add_modal').modal('toggle')" class="href">Ввод интернет</a>
-        //
-        <a onclick="$('#phone_add_modal').modal('toggle')" class="href">Городской тел.</a>
+        <a onclick="$('#service_add_modal').modal('toggle')" class="href">Услугу</a>
         :: на основании этого документа
     </p>
 <?php } ?>
@@ -275,26 +273,15 @@ JS;
     <br />
 <?php } ?>
 
-<?php if (count($inets)) { ?>
-    <h4>Прикреплен к подключениям интернета:</h4>
+<?php if (count($services)) { ?>
+    <h4>Прикреплен к услугам:</h4>
     <p>
-		<?php foreach ($inets as $inet) {
-			echo $this->render('/org-inet/item',['model'=>$inet]);
+		<?php foreach ($services as $service) {
+			echo $this->render('/services/item',['model'=>$service]);
 		} ?>
     </p>
     <br />
 <?php } ?>
-
-<?php if (count($phones)) { ?>
-    <h4>Прикреплен к гор. телефонам:</h4>
-    <p>
-		<?php foreach ($phones as $phone) {
-			echo $this->render('/org-phones/item',['model'=>$phone]);
-		} ?>
-    </p>
-    <br />
-<?php } ?>
-
 
 <?php if (is_array($partners=$model->partners)&&count($partners)) { ?>
     <h4>Контрагенты:</h4>

@@ -59,6 +59,8 @@ use yii\web\JsExpression;
  * @property OrgPhones[] $phonesChain
  * @property OrgInets[] $orgInets
  * @property OrgInets[] $inetsChain
+ * @property Services[] $services
+ * @property Services[] $servicesChain
  */
 class Contracts extends \yii\db\ActiveRecord
 {
@@ -82,6 +84,7 @@ class Contracts extends \yii\db\ActiveRecord
 	private $inets_chain_cache=null;
 	private $phones_chain_cache=null;
 	private $lics_chain_cache=null;
+	private $services_chain_cache=null;
 
 	/**
      * {@inheritdoc}
@@ -323,7 +326,8 @@ class Contracts extends \yii\db\ActiveRecord
 	 */
 	public function getServices()
 	{
-		return $this->hasMany(Services::className(), ['contracts_id' => 'id']);
+		return $this->hasMany(Services::className(), ['id'=>'services_id'])
+			->viaTable('contracts_in_services',['contracts_id' => 'id']);
 	}
 	
 	/**
@@ -374,8 +378,7 @@ class Contracts extends \yii\db\ActiveRecord
 		if (count($this->arms)) $attaches.='<span class="fas fa-desktop" title="Привязаны АРМы: '.(count($this->arms)).'шт"></span>';
 		if (count($this->techs)) $attaches.='<span class="fas fa-print" title="Привязана техника: '.(count($this->techs)).'шт"></span>';
 		if (count($this->licItems)) $attaches.='<span class="fas fa-award" title="Привязаны лицензии: '.(count($this->licItems)).'шт"></span>';
-		if (count($this->orgInets)) $attaches.='<span class="fas fa-globe" title="Привязаны услуги интернет: '.(count($this->orgInets)).'шт"></span>';
-		if (count($this->orgPhones)) $attaches.='<span class="fas fa-phone-alt" title="Привязаны услуги телефонии: '.(count($this->orgPhones)).'шт"></span>';
+		if (count($this->services)) $attaches.='<span class="fas fa-cog" title="Привязаны услуги: '.(count($this->services)).'шт"></span>';
 		return $attaches;
 	}
 
@@ -524,7 +527,7 @@ class Contracts extends \yii\db\ActiveRecord
 		//кэшируем результат
 		return $this->phones_chain_cache=$chain;
 	}
-
+	
 	/**
 	 * набор всех лицензий привязанных к цепочке документов
 	 * @return \app\models\LicItems[]
@@ -533,7 +536,7 @@ class Contracts extends \yii\db\ActiveRecord
 	{
 		//пытаемся обратиться к кэшу
 		if (!is_null($this->lics_chain_cache)) return $this->lics_chain_cache;
-
+		
 		$chain=[];
 		//перебираем все документы
 		foreach ($this->successorsChain as $item) {
@@ -544,6 +547,27 @@ class Contracts extends \yii\db\ActiveRecord
 		}
 		//кэшируем результат
 		return $this->lics_chain_cache=$chain;
+	}
+	
+	/**
+	 * набор всех лицензий привязанных к цепочке документов
+	 * @return \app\models\Services[]
+	 */
+	public function getServicesChain()
+	{
+		//пытаемся обратиться к кэшу
+		if (!is_null($this->services_chain_cache)) return $this->services_chain_cache;
+		
+		$chain=[];
+		//перебираем все документы
+		foreach ($this->successorsChain as $item) {
+			//в них все армы
+			foreach ($item->services as $service)
+				//добавляем по ИД, чтобы исключить задвоения
+				$chain[$service->id] = $service;
+		}
+		//кэшируем результат
+		return $this->services_chain_cache=$chain;
 	}
 	
 	/**
