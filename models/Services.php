@@ -29,6 +29,8 @@ use yii\web\User;
  * @property int $partners_id
  * @property int $currency_id
  * @property int $archived
+ * @property int $sumTotals
+ * @property int $sumCharge
  * @property float $cost
  * @property float $charge
  * @property string $segmentName
@@ -93,8 +95,10 @@ class Services extends \yii\db\ActiveRecord
 	private $techsRecursiveCache=null;
 	private $placesRecursiveCache=null;
 	private $sitesRecursiveCache=null;
-
-
+	private $sumTotalsCache=null;
+	private $sumChargeCache=null;
+	
+	
 	/**
 	 * В списке поведений прикручиваем many-to-many contracts
 	 * @return array
@@ -498,6 +502,29 @@ class Services extends \yii\db\ActiveRecord
 		
 		return $this->sitesRecursiveCache = array_values($sites);
 	}
+	
+	public function getSumTotals()
+	{
+		if ($this->cost) return $this->cost;
+		if (!is_null($this->sumChargeCache)) return $this->sumChargeCache;
+		$this->sumChargeCache=0;
+		foreach ($this->orgPhones as $phone)	$this->sumChargeCache+=$phone->cost;
+		foreach ($this->orgInets as $inet)		$this->sumChargeCache+=$inet->cost;
+		foreach ($this->children as $service)	$this->sumChargeCache+=$service->sumTotals;
+		return $this->sumChargeCache;
+	}
+	
+	public function getSumCharge()
+	{
+		if ($this->charge) return $this->charge;
+		if (!is_null($this->sumTotalsCache)) return $this->sumTotalsCache;
+		$this->sumTotalsCache=0;
+		foreach ($this->orgPhones as $phone)	$this->sumTotalsCache+=$phone->charge;
+		foreach ($this->orgInets as $inet)		$this->sumTotalsCache+=$inet->charge;
+		foreach ($this->children as $service)	$this->sumTotalsCache+=$service->sumCharge;
+		return $this->sumTotalsCache;
+	}
+	
 	
 	/**
 	 * @return \yii\db\ActiveQuery

@@ -321,11 +321,6 @@ class Contracts extends \yii\db\ActiveRecord
 		return $this->hasMany(OrgPhones::className(), ['contracts_id' => 'id']);
 	}
 	
-	public function getSumTotals()
-	{
-		return 0;
-	}
-	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

@@ -33,7 +33,7 @@ if (!isset($static_view)) $static_view=false;
 
 <p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
 <p>
-	Стоимость: <?= Yii::$app->formatter->asCurrency($model->cost) ?>
+	Стоимость: <?= Yii::$app->formatter->asCurrency((int)$model->cost) ?>
 	<?php if ($model->charge){ ?>
 		(в т.ч. НДС: <?= Yii::$app->formatter->asCurrency($model->charge) ?>)
 	<?php } ?>

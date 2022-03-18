@@ -35,26 +35,23 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 <div class="row">
 	<div class="col-md-6">
 		<h4>
+			<?= $this->render('icon',compact('model')) ?>
 			<?php
-			if ($model->is_service) {
-				echo $model->is_end_user?
-					'<span class="fas fa-user service-icon"></span>'.\app\models\Services::$user_service_title:
-					'<span class="fas fa-cog service-icon"></span>'.\app\models\Services::$tech_service_title;
-			} else {
-				echo $model->is_end_user?
-					'<span class="fas fa-broom service-icon"></span>'.\app\models\Services::$user_job_title:
-					'<span class="fas fa-screwdriver service-icon"></span>'.\app\models\Services::$tech_job_title;
-			}
 			
-			if (is_object($model->segmentRecursive)) echo " // Сегмент ИТ: ".$this->render('/segments/item',['model'=>$model->segmentRecursive,'static_view'=>true]);
-			?>
+			if ($model->is_service) {
+				echo $model->is_end_user?\app\models\Services::$user_service_title:\app\models\Services::$tech_service_title;
+			} else {
+				echo $model->is_end_user?\app\models\Services::$user_job_title:\app\models\Services::$tech_job_title;
+			} ?>
+			
+			<?=	(is_object($model->segmentRecursive))?" // Сегмент ИТ: ".$this->render('/segments/item',['model'=>$model->segmentRecursive,'static_view'=>true]):'' ?>
 			<?php if (is_object($model->parent))  echo "<br /> Входит в состав: {$this->render('item',['model'=>$model->parent])}"; ?>
 		</h4>
-		<?php if ($model->cost) { ?>
+		<?php if ($model->sumTotals) { ?>
 			<h4>
-				Стоимость: <?= $model->cost.''.$model->currency->symbol ?>
-				<?php if ($model->charge){ ?>
-					(в т.ч. НДС: <?= $model->charge.''.$model->currency->symbol ?>)
+				Стоимость: <?= $model->sumTotals.''.$model->currency->symbol ?>
+				<?php if ($model->sumCharge){ ?>
+					(в т.ч. НДС: <?= $model->sumCharge.''.$model->currency->symbol ?>)
 				<?php } ?> / мес.
 			</h4>
 		<?php } ?>
