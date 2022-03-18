@@ -74,48 +74,48 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
 
 
     <?php if (!$static_view) {
-    if (count($model->arms) || count($model->armsHead) || count($model->armsIt) || count($model->armsResponsible) || count($model->techs) || count($model->techsIt)) { ?>
-		<h4>Привязанное оборудование</h4>
-	    <?php if (count($model->arms)) { ?>
-			Пользователь АРМ:
-		    <?php foreach ($model->arms as $arm) echo $this->render('/arms/item',['model'=>$arm]) ?>
-			<br />
-	    <?php } ?>
-	    <?php if (count($model->armsHead)) { ?>
-			АРМ числящиеся за подчиненными:
-		    <?php foreach ($model->armsHead as $arm) echo $this->render('/arms/item',['model'=>$arm]) ?>
-			<br />
-	    <?php } ?>
-	    <?php if (count($model->armsIt)) { ?>
-			Обслуживаемые АРМ через отдел IT:
-		    <?php foreach ($model->armsIt as $arm) echo $this->render('/arms/item',['model'=>$arm]) ?>
-			<br />
-	    <?php } ?>
-	    <?php if (count($model->armsResponsible)) { ?>
-			АРМ в ответственности:
-		    <?php foreach ($model->armsResponsible as $arm) echo $this->render('/arms/item',['model'=>$arm]) ?>
-			<br />
-	    <?php } ?>
-	    <?php if (count($model->techs)) { ?>
-			Пользователь техники:
-		    <?php foreach ($model->techs as $tech) echo $this->render('/techs/item',['model'=>$tech]) ?>
-			<br />
-	    <?php } ?>
-	    <?php if (count($model->techsIt)) { ?>
-			Обслуживает технику:
-		    <?php foreach ($model->techsIt as $tech) echo $this->render('/techs/item',['model'=>$tech]) ?>
-			<br />
-	    <?php } ?>
-
-		<br />
-
-	    <?php if (count($model->materials)) { ?>
-			<h4>Материалы:</h4>
-		    <?php foreach ($model->materials as $material) echo $this->render('/materials/item',['model'=>$material]).'<br />' ?>
-			<br />
-	    <?php } ?>
-    <?php }
-    } ?>
+		if (
+				count($model->arms) ||
+				count($model->armsHead) ||
+				count($model->armsIt) ||
+				count($model->armsResponsible) ||
+				count($model->techs) ||
+				count($model->techsIt)
+		) { ?>
+			<h4>Привязанное оборудование</h4>
+			<?php if (count($model->arms)) { ?>
+				Пользователь АРМ:
+				<?php foreach ($model->arms as $arm) echo $this->render('/arms/item',['model'=>$arm]) ?>
+				<br />
+			<?php } ?>
+			<?php if (count($model->armsHead)) { ?>
+				АРМ числящиеся за подчиненными:
+				<?php foreach ($model->armsHead as $arm) echo $this->render('/arms/item',['model'=>$arm]) ?>
+				<br />
+			<?php } ?>
+			<?php if (count($model->armsIt)) { ?>
+				Обслуживаемые АРМ через отдел IT:
+				<?php foreach ($model->armsIt as $arm) echo $this->render('/arms/item',['model'=>$arm]) ?>
+				<br />
+			<?php } ?>
+			<?php if (count($model->armsResponsible)) { ?>
+				АРМ в ответственности:
+				<?php foreach ($model->armsResponsible as $arm) echo $this->render('/arms/item',['model'=>$arm]) ?>
+				<br />
+			<?php } ?>
+			<?php if (count($model->techs)) { ?>
+				Пользователь техники:
+				<?php foreach ($model->techs as $tech) echo $this->render('/techs/item',['model'=>$tech]) ?>
+				<br />
+			<?php } ?>
+			<?php if (count($model->techsIt)) { ?>
+				Обслуживает технику:
+				<?php foreach ($model->techsIt as $tech) echo $this->render('/techs/item',['model'=>$tech]) ?>
+				<br />
+			<?php } ?>
+			
+		<?php }
+		} ?>
 
     <h4>Входы в комп</h4>
     <?php if (is_array($model->lastThreeLogins)) foreach ($model->lastThreeLogins as $logon) { ?>

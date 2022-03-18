@@ -29,6 +29,9 @@ use Yii;
  * @property int $mn Middle Name
  * @property int $shortName Сокращенные И.О.
  *
+ * @property Comps[] $comps
+ * @property Comps[] $compsFromServices
+ * @property Comps[] $compsTotal
  * @property Arms[] $arms
  * @property Techs[] $techs
  * @property Arms[] $armsHead
@@ -205,7 +208,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	{
 		return $this->hasOne(\app\models\Orgs::className(), ['id'=>'org_id']);
 	}
-
+	
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
 	 * @return \yii\db\ActiveQuery
@@ -215,6 +218,37 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 		return $this->hasMany(Services::className(), ['responsible_id' => 'id']);
 	}
 	
+	/**
+	 * Возвращает компы, за которые отвечает пользователь (явно через прямое назначение)
+	 * @return Comps[]
+	 */
+	public function getCompsFromServices()
+	{
+		$result=[];
+		foreach ($this->services as $service)
+			foreach ($service->comps as $comp)
+				if ($comp->responsible->id == $this->id)
+					$result[$comp->id]=$comp;
+		return $result;
+	}
+	
+	public function getCompsTotal() {
+		$result=[];
+		foreach ($this->comps as $comp)
+			$result[$comp->id]=$comp;
+		foreach ($this->compsFromServices as $comp)
+			$result[$comp->id]=$comp;
+		return $result;
+	}
+	
+	/**
+	 * Возвращает сервисы, за которые отвечает пользователь
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getComps()
+	{
+		return $this->hasMany(Comps::className(), ['user_id' => 'id']);
+	}
 	
 	/**
      * @inheritdoc
@@ -381,6 +415,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 		return $tokens[0];
 	}
 
+	
 	/**
 	 * Get First Name
 	 * @return string
