@@ -2,14 +2,18 @@
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Materials */
-if (!isset($from)&!isset($material)&!isset($rest)) {
+
+if (!isset($from)&!isset($material)&!isset($rest)&!isset($responsible)) {
 	$from=true;
 	$material=true;
+	$responsible=true;
 	$rest=false;
 }
+
 if (!isset($from)) $from=false;
-if (!isset($material)) $material=false;
+if (!isset($material)) $material=true;
 if (!isset($rest)) $rest=false;
+if (!isset($responsible)) $responsible=false;
 
 
 if (is_object($model)) {
@@ -19,7 +23,7 @@ if (is_object($model)) {
 		qtip_ajxhrf="<?= \yii\helpers\Url::to(['/materials/ttip','id'=>$model->id]) ?>"
 	>
     <?= \yii\helpers\Html::a(
-        ($from?($model->place->fullName.'('.$model->itStaff->Ename.')'):'').
+        ($from?($model->place->fullName.($responsible?'('.$model->itStaff->Ename.')':'')):'').
         (($from&&$material)?' \ ':'').
         ($material?($model->type->name.':'.$model->model):'').
         ($rest?(' '.$model->rest.$model->type->units):'')
