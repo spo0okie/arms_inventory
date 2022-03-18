@@ -546,6 +546,7 @@ div.users-view div.arms-card {
     border-radius: 2pt 12pt 2pt 12pt;
     color: whitesmoke;
     font-family: 'Roboto Condensed', sans-serif;
+    margin-bottom: 5px;
 }
 /* номер АРМ */
 div.arms-card h3 {font: bold 42px 'Stencil', Helvetica, sans-serif; padding: 10pt 0 0 20pt;}
