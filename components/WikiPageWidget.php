@@ -35,13 +35,13 @@ class WikiPageWidget extends Widget
 					if ($page = $cache->get($url)) return '<h1>Wiki:</h1>'.$page;
 					$arrContextOptions = [
 						"http" => [
-							"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['wikiUser'] . ":" . \Yii::$app->params['wikiPass'])
+							"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['wikiUser'] . ":" . \Yii::$app->params['wikiPass']),
+							'timeout' => 5,
 						],
 						"ssl" => [
 							"verify_peer" => false,
 							"verify_peer_name" => false,
 						],
-						'timeout' => 5
 					];
 					$page = @file_get_contents($url, false, stream_context_create($arrContextOptions));
 					if ($page===false) return "Ошибка получения детального описания из Wiki";
