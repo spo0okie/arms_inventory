@@ -16,6 +16,7 @@ use Yii;
  * @property string $name
  * @property string $description
  * @property string $history
+ * @property string $providingMode
  * @property array $weekWorkTime //массив строк, которые надо соединить (запятыми или переносами строк, чтобы получить график работы)
  * @property array $weekWorkTimeDescription //расписание через запятую
  * @property boolean isAcl
@@ -32,7 +33,28 @@ class Schedules extends \yii\db\ActiveRecord
 	public static $title  = 'Расписание';
 	public static $noData = 'никогда';
 	public static $allDaysTitle = 'ежедн.';
-	public static $allDayTitle = 'круглосут.';
+	public static $allDayTitle = 'круглосуточно.';
+	
+	public static $dictionary=[
+		'usage'=>[
+			'acl'=>'Доступ предоставляется',
+			'providing'=>'Услуга/сервис предоставляется',
+			'support'=>'Услуга/сервис поддерживается',
+			'working'=>'Рабочее время'
+		],
+		'nodata'=>[
+			'acl'=>'Доступ не предоставляется никогда',
+			'providing'=>'Услуга/сервис не предоставляется никогда',
+			'support'=>'Услуга/сервис не поддерживается никогда',
+			'working'=>'Рабочее время отсутствует (не работает никогда)'
+		],
+		'usage'=>[
+			'acl'=>'Доступ предоставляется всегда',
+			'providing'=>'Услуга/сервис предоставляется 24/7 без перерывов',
+			'support'=>'Услуга/сервис поддерживается 24/7 без перерывов',
+			'working'=>'Рабочее время всегда (работает 24/7)'
+		],
+	];
 	
 	public $isAclCache=null;
 	
@@ -251,10 +273,27 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public function getWeekWorkTimeDescription() {
 		
-		if (count($periods=$this->weekWorkTime))
-			return implode(',',$periods);
-		else
-			return static::$noData;
+		if (count($periods=$this->weekWorkTime)) {
+			$description=$this->getDictionary('usage').' '.implode(',',$periods);
+			if ($description=='00:00-23:59 '.static::$allDaysTitle) $description=$this->getDictionary('always');
+			return $description;
+		} else
+			return $this->getDictionary('nodata');
+	}
+	
+	/**
+	 * Возвращает кодовое слово режима использования расписания
+	 * @return string
+	 */
+	public function getProvidingMode() {
+		if ($this->isAcl) return 'acl';	//доступ предоставляется
+		if (count($this->providingServices)) return 'providing'; //услуга предоставляется
+		if (count($this->supportServices)) return 'support'; //услуга поддерживается
+		return 'working'; //рабочее время
+	}
+	
+	public function getDictionary($word) {
+		return static::$dictionary[$word][$this->providingMode];
 	}
 	
 	/**

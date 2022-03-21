@@ -60,7 +60,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		<?php
 		$schedules=[];
 		if (!empty($model->providingScheduleRecursive)) {
-			echo '<strong>Предоставляется: </strong>'
+			echo '<strong>Время предоставления: </strong>'
 				.$this->render('/schedules/item',[
 					'model'=>$model->providingScheduleRecursive,
 					'name'=>$model->providingScheduleRecursive->weekWorkTimeDescription
@@ -91,7 +91,8 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		echo '<br />';
 		
 		if (!empty($model->supportScheduleRecursive))
-			echo '<strong>Поддерживается:</strong> '.$this->render('/schedules/item',['model'=>$model->supportScheduleRecursive]).'<br />';
+			echo '<strong>Время поддержки:</strong> '.$this->render('/schedules/item',['model'=>$model->supportScheduleRecursive]).'<br />';
+		
 		
 		?>
 		

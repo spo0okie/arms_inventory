@@ -78,12 +78,6 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	
 	public $isAclCache=null;
 	
-	public static $scheduleSamplesHtml = <<<HTML
-		<span class="href" onclick="$('#schedulesentries-schedule').val('-')">отсутствует</span> /
-		<span class="href" onclick="$('#schedulesentries-schedule').val('00:00-23:59')">круглосуточно</span> /
-		<span class="href" onclick="$('#schedulesentries-schedule').val('08:00-17:00')">c 8 до 17</span> /
-		<span class="href" onclick="$('#schedulesentries-schedule').val('08:00-12:00,12:45-17:00')">с обедом в 12</span>
-HTML;
 		
 		
 		public function getIsAcl() {
@@ -345,4 +339,13 @@ HTML;
 		} else return false;
 	}
 	
+	public static function scheduleSamplesHtml($form) {
+		return <<<HTML
+		<span class="href" onclick="$('#$form-schedule').val('-')">отсутствует</span> /
+		<span class="href" onclick="$('#$form-schedule').val('00:00-23:59')">круглосуточно</span> /
+		<span class="href" onclick="$('#$form-schedule').val('08:00-17:00')">c 8 до 17</span> /
+		<span class="href" onclick="$('#$form-schedule').val('08:00-12:00,12:45-17:00')">с обедом в 12</span>
+HTML;
+	}
+
 }

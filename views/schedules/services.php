@@ -12,16 +12,16 @@ $services=$model->getServicesArr();
 if (count($services)) {
 ?>
 	<div class="schedules-services">
-		<h2>Используется для сервисов/услуг</h2>
+		<h3>Используется для</h3>
 		<p>
 			<?php
 				$render=[];
 				foreach ($services as $service) {
 					$mode=[];
-					if (isset($service['provide'])) $mode[]='Предоставление';
-					if (isset($service['support'])) $mode[]='Поддержка';
+					if (isset($service['provide'])) $mode[]='предоставление';
+					if (isset($service['support'])) $mode[]='поддержка';
 					
-					$render[]=$this->render('/services/item',['model'=>$service['obj'],'static_view'=>$static_view]).' - '.implode(',',$mode);
+					$render[]=$this->render('/services/item',['model'=>$service['obj'],'static_view'=>$static_view]).' - '.implode(', ',$mode);
 				}
 				echo implode('<br />',$render);
 			?>

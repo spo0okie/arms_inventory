@@ -111,13 +111,20 @@ class SchedulesController extends Controller
 		
 		if (Yii::$app->request->get('parent_id'))
 			$model->parent_id=Yii::$app->request->get('parent_id');
-		
+		$support_service=null;
+		$service=null;
 		if (Yii::$app->request->get('attach_service')) {
 			$service=\app\models\Services::findOne(Yii::$app->request->get('attach_service'));
 			if (is_object($service)) {
 				$model->name=\app\models\Schedules::$title.' работы '.$service->name;
 			}
-		} else $service=null;
+		} elseif (Yii::$app->request->get('support_service')) {
+			$support_service=\app\models\Services::findOne(Yii::$app->request->get('support_service'));
+			if (is_object($service)) {
+				$model->name=\app\models\Schedules::$title.' поддержки '.$support_service->name;
+			}
+		}
+		
 		
 		
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -125,8 +132,12 @@ class SchedulesController extends Controller
 				$service->providing_schedule_id=$model->id;
 				$service->save();
 				return $this->redirect(['services/view', 'id' => $service->id]);
+			} elseif (is_object($support_service)) {
+				$support_service->providing_schedule_id=$model->id;
+				$support_service->save();
+				return $this->redirect(['services/view', 'id' => $support_service->id]);
 			} else
-			return $this->redirect(['view', 'id' => $model->id]);
+				return $this->redirect(['view', 'id' => $model->id]);
 		}
 		
 		return $this->render('create', [
