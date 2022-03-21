@@ -276,7 +276,7 @@ class Schedules extends \yii\db\ActiveRecord
 		if (count($periods=$this->weekWorkTime)) {
 			$description=implode(',',$periods);
 			if ($description=='00:00-23:59 '.static::$allDaysTitle)
-				$description=$this->getDictionary('always');
+				return $this->getDictionary('always');
 			return $this->getDictionary('usage').' '.$description;
 		} else
 			return $this->getDictionary('nodata');
