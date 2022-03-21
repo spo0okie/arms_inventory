@@ -40,7 +40,8 @@ class SchedulesSearch extends Schedules
      */
     public function search($params)
     {
-        $query = Schedules::find();
+        $query = Schedules::find()
+			->joinWith('providingServices');
 
         // add conditions that should always apply here
 

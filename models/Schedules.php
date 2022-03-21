@@ -48,7 +48,7 @@ class Schedules extends \yii\db\ActiveRecord
 			'support'=>'Услуга/сервис не поддерживается никогда',
 			'working'=>'Рабочее время отсутствует (не работает никогда)'
 		],
-		'usage'=>[
+		'always'=>[
 			'acl'=>'Доступ предоставляется всегда',
 			'providing'=>'Услуга/сервис предоставляется 24/7 без перерывов',
 			'support'=>'Услуга/сервис поддерживается 24/7 без перерывов',
@@ -274,9 +274,10 @@ class Schedules extends \yii\db\ActiveRecord
 	public function getWeekWorkTimeDescription() {
 		
 		if (count($periods=$this->weekWorkTime)) {
-			$description=$this->getDictionary('usage').' '.implode(',',$periods);
-			if ($description=='00:00-23:59 '.static::$allDaysTitle) $description=$this->getDictionary('always');
-			return $description;
+			$description=implode(',',$periods);
+			if ($description=='00:00-23:59 '.static::$allDaysTitle)
+				$description=$this->getDictionary('always');
+			return $this->getDictionary('usage').' '.$description;
 		} else
 			return $this->getDictionary('nodata');
 	}

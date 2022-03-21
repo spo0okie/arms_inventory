@@ -36,13 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             'description',
-            'monEffectiveDescription',
-            'tueEffectiveDescription',
-            'wedEffectiveDescription',
-            'thuEffectiveDescription',
-            'friEffectiveDescription',
-            'satEffectiveDescription',
-            'sunEffectiveDescription',
+            'weekWorkTimeDescription',
 
             //['class' => 'yii\grid\ActionColumn'],
         ],
