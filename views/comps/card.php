@@ -9,6 +9,7 @@ if (!isset($static_view)) $static_view=false;
 if (!isset($no_arm)) $no_arm=false; //спрятать АРМ
 if (!isset($no_abbr)) $no_abbr=false; //спрятать АРМ
 if (!isset($ips_glue)) $ips_glue=null;
+if (is_object($model)) {
 $services=$model->services;
 $deleteable=!count($services);
 $fqdn=mb_strtolower($model->fqdn);
@@ -94,3 +95,4 @@ if (!mb_strlen($domain))
 		}
 	}?>
 </div>
+<?php }
