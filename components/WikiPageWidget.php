@@ -41,8 +41,10 @@ class WikiPageWidget extends Widget
 							"verify_peer" => false,
 							"verify_peer_name" => false,
 						],
+						'timeout' => 5
 					];
-					$page = file_get_contents($url, false, stream_context_create($arrContextOptions));
+					$page = @file_get_contents($url, false, stream_context_create($arrContextOptions));
+					if ($page===false) return "Ошибка получения детального описания из Wiki";
 					$startCode = '<div class="dw-content">';
 					$endCode = '<div class="comment_wrapper" id="comment_wrapper">';
 					if ($startPos = strpos($page, $startCode)) {
