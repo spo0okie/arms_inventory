@@ -208,6 +208,15 @@ foreach ($columns as $column) {
 				],
 			];
 			break;
+		case 'mac':
+			$render_columns[] = [
+				'format' => 'raw',
+				'attribute' => $column,
+				'contentOptions'=>[
+					'class'=>$column.'_col'
+				],
+			];
+			break;
 		default:
 			$render_columns[] = [
 				'attribute' => $column,
