@@ -14,6 +14,7 @@ class ArmsSearch extends Arms
 {
 	public $comp_hw;
 	public $comp_ip;
+	public $comp_mac;
 	public $type_id;
 	public $user_position;
 
@@ -24,7 +25,7 @@ class ArmsSearch extends Arms
     {
         return [
             [['id'], 'integer'],
-            [['num', 'inv_num', 'model_id', 'sn', 'user_id', 'places_id','departments_id', 'comp_ip', 'comp_id','model_id','type_id','model','user_position','comp_hw'], 'safe'],
+            [['num', 'inv_num', 'model_id', 'sn', 'user_id', 'places_id','departments_id', 'comp_ip','comp_mac', 'comp_id','model_id','type_id','model','user_position','comp_hw'], 'safe'],
         ];
     }
 
@@ -66,6 +67,10 @@ class ArmsSearch extends Arms
 					'asc'=>['comps.ip'=>SORT_ASC],
 					'desc'=>['comps.ip'=>SORT_DESC],
 				],
+				'comp_mac'=>[
+					'asc'=>['comps.mac'=>SORT_ASC],
+					'desc'=>['comps.mac'=>SORT_DESC],
+				],
 				'user_id'=>[
 					'asc'=>['users.Ename'=>SORT_ASC],
 					'desc'=>['users.Ename'=>SORT_DESC],
@@ -103,7 +108,8 @@ class ArmsSearch extends Arms
             ->andFilterWhere(['or like', 'sn', \yii\helpers\StringHelper::explode($this->sn,'|',true,true)])
 	        ->andFilterWhere(['or like', 'users.Ename', \yii\helpers\StringHelper::explode($this->user_id,'|',true,true)])
 	        ->andFilterWhere(['or like', 'users.Doljnost', \yii\helpers\StringHelper::explode($this->user_position,'|',true,true)])
-	        ->andFilterWhere(['or like', 'comps.ip', \yii\helpers\StringHelper::explode($this->comp_ip,'|',true,true)])
+			->andFilterWhere(['or like', 'comps.ip', \yii\helpers\StringHelper::explode($this->comp_ip,'|',true,true)])
+			->andFilterWhere(['or like', 'comps.mac', \yii\helpers\StringHelper::explode($this->comp_mac,'|',true,true)])
 	        ->andFilterWhere(['or like', 'comps.name', \yii\helpers\StringHelper::explode($this->comp_id,'|',true,true)])
 	        ->andFilterWhere(['or like', 'comps.raw_hw', \yii\helpers\StringHelper::explode($this->comp_hw,'|',true,true)])
 	        ->andFilterWhere(['or like', 'org_struct.name', \yii\helpers\StringHelper::explode($this->departments_id,'|',true,true)])

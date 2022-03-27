@@ -30,6 +30,6 @@ $renderer=$this;
 	<?= $this->render('/comps/table', [
 		'searchModel' => $searchModel,
 		'dataProvider' => $dataProvider,
-		'columns'   => ['name','ip','os','updated_at','arm_id','place','raw_version'],
+		'columns'   => ['name','ip','mac','os','updated_at','arm_id','place','raw_version'],
 	]) ?>
 </div>

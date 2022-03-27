@@ -17,6 +17,7 @@ use Yii;
  * @property string $raw_version Версия скрипта отправившего данные
  * @property string $exclude_hw Скрытое из паспорта железо
  * @property string $ignore_hw Игнорировать железо на машине
+ * @property string $mac MAC адреса через перенос строки
  * @property string $ip IP адреса через перенос строки
  * @property string $ip_ignore Игнорировать IP адреса
  * @property int $arm_id Рабочее место
@@ -79,7 +80,7 @@ class Comps extends \yii\db\ActiveRecord
             [['updated_at'], 'safe'],
             [['name','raw_version'], 'string', 'max' => 32],
             [['os', 'comment'], 'string', 'max' => 128],
-	        [['ip', 'ip_ignore'], 'string', 'max' => 512],
+	        [['ip', 'ip_ignore','mac'], 'string', 'max' => 512],
 			/* Валидация отключена, т.к. ввод данных в основном автоматический (скриптами)
 			и если ее включить, данные просто не будут приниматься, что весьма плохо
 			['ip', function ($attribute, $params, $validator) {
@@ -104,7 +105,8 @@ class Comps extends \yii\db\ActiveRecord
     {
         return [
 	        'id' => 'Идентификатор',
-	        'ip' => 'IP Адрес',
+			'mac' => 'MAC Адрес',
+			'ip' => 'IP Адрес',
 			'domain_id' => 'Домен',
 			'user_id' => 'Пользователь',
 			'user' => 'Пользователь',
@@ -500,6 +502,13 @@ class Comps extends \yii\db\ActiveRecord
 					$old->arm->save();
 				}
 				
+				/* убираем посторонние символы из MAC*/
+				$macs=explode("\n",$this->mac);
+				foreach ($macs as $i=>$mac) {
+					$macs[$i]=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
+				}
+				$this->mac=implode("\n",$macs);
+				
 				/* взаимодействие с NetIPs */
 				$this->netIps_ids=NetIps::fetchIpIds($this->ip);
 				//находим все IP адреса которые от этой ОС отвалились
@@ -513,6 +522,11 @@ class Comps extends \yii\db\ActiveRecord
 
 		}
 		return true;
+	}
+
+	public function getFormattedMac() {
+		
+		return \app\models\Techs::formatMacs($this->mac);
 	}
 	
 	/**

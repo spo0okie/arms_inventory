@@ -26,7 +26,7 @@ $renderer = $this;
 	<?= $this->render('/arms/table', [
 		'searchModel' => $searchModel,
 		'dataProvider' => $dataProvider,
-		'columns'   => ['attach','num','model','comp_id','comp_hw','comp_ip','sn','mac','state','user_id','user_position','departments_id','places_id','inv_num'],
+		'columns'   => ['attach','num','model','comp_id','comp_hw','comp_ip','comp_mac','sn','mac','state','user_id','user_position','places_id','inv_num'],
 	]) ?>
 
 </div>

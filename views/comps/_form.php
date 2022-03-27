@@ -70,7 +70,14 @@ asort($domains);
     </p>
     <div id="comps_advanced_settings" style="display: none">
         <?= $form->field($model, 'os')->textInput(['maxlength' => true]) ?>
-        <?= $form->field($model, 'ip')->textarea(['rows' => 2]) ?>
+		<div class="row">
+			<div class="col-md-6">
+				<?= $form->field($model, 'ip')->textarea(['rows' => 2]) ?>
+			</div>
+			<div class="col-md-6">
+				<?= $form->field($model, 'mac')->textarea(['rows' => 2]) ?>
+			</div>
+		</div>
         <?= $form->field($model, 'raw_hw')->textarea(['rows' => 10]) ?>
         <?= $form->field($model, 'raw_soft')->textarea(['rows' => 10]) ?>
     </div>

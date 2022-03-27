@@ -61,7 +61,7 @@ foreach ($columns as $column) {
 			
 			];
 			break;
-
+		
 		case 'comp_ip':
 			$render_columns[] = [
 				'attribute' => $column,
@@ -80,7 +80,23 @@ foreach ($columns as $column) {
 			
 			];
 			break;
-
+		
+		case 'comp_mac':
+			$render_columns[] = [
+				'attribute' => $column,
+				'format' => 'ntext',
+				'label' => 'MAC адрес',
+				'value' => function ($data) use ($renderer) {
+					if (is_object($data->comp)) {
+						return $data->comp->formattedMac;
+					}
+					return null;
+				},
+				'contentOptions'=>['class'=>$column.'_col']
+			
+			];
+			break;
+		
 		case 'user_id':
 			$render_columns[] = [
 				'attribute' => $column,

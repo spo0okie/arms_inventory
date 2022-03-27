@@ -9,5 +9,19 @@ return [
 	'bsVersion' => '5.x',
 
 	'useRBAC'=>false,   //включить RBAC и выдавать админа только тем кому назначено
-	'authorizedView'=>true
+	'authorizedView'=>true,
+	'userSyncFields'=>[
+		'Orgeh' => 'SAP',
+		'Doljnost' => 'SAP',
+		'Ename' => 'SAP',
+		'Persg' => 'SAP',
+		'Uvolen' => 'SAP',
+		'Login' => 'AD',
+		'Email' => 'AD',
+		'Phone' => 'AD',
+		'Mobile' => 'AD',
+		'work_phone' => 'AD',
+		'Bday' => 'SAP',
+		'manager_id' => 'SAP',
+	],
 ];

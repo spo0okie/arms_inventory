@@ -387,11 +387,11 @@ class Techs extends \yii\db\ActiveRecord
 		return \app\models\TechModels::getIsUps($this->model_id);
 		return \app\models\TechTypes::getIsUps($this->model->type_id);
 	}
-
-
-	public function getFormattedMac() {
+	
+	
+	public static function formatMacs($raw) {
 		
-		$macs=explode("\n",$this->mac);
+		$macs=explode("\n",$raw);
 		
 		foreach ($macs as $k=>$mac) {
 			$rawMac=preg_replace('/[^0-9A-F]/', '', mb_strtoupper($mac));
@@ -404,6 +404,11 @@ class Techs extends \yii\db\ActiveRecord
 		}
 		
 		return implode("\n",$macs);
+	}
+	
+	public function getFormattedMac() {
+		
+		return static::formatMacs($this->mac);
 	}
 	
 	/**

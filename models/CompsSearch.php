@@ -21,7 +21,7 @@ class CompsSearch extends Comps
     {
         return [
             [['id', 'domain_id'], 'integer'],
-            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','place'], 'safe'],
+            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','place'], 'safe'],
         ];
     }
 
@@ -51,6 +51,7 @@ class CompsSearch extends Comps
 			'attributes'=>[
 				//'num',
 				'ip',
+				'mac',
 				'os',
 				'name',
 				'raw_version',
@@ -107,7 +108,8 @@ class CompsSearch extends Comps
 
         $query->andFilterWhere(['or like', 'concat(IFNULL(domains.name,""),"\\\\",comps.name)', yii\helpers\StringHelper::explode($this->name,'|',true,true)])
             ->andFilterWhere(['or like', 'raw_version', \yii\helpers\StringHelper::explode($this->raw_version,'|',true,true)])
-            ->andFilterWhere(['or like', 'ip', \yii\helpers\StringHelper::explode($this->ip,'|',true,true)])
+			->andFilterWhere(['or like', 'ip', \yii\helpers\StringHelper::explode($this->ip,'|',true,true)])
+			->andFilterWhere(['or like', 'mac', \yii\helpers\StringHelper::explode($this->mac,'|',true,true)])
             ->andFilterWhere(['or like', 'arms.num', \yii\helpers\StringHelper::explode($this->arm_id,'|',true,true)])
             ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
 			->andFilterWhere(['or',
