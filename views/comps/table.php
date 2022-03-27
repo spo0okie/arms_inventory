@@ -210,7 +210,7 @@ foreach ($columns as $column) {
 			break;
 		case 'mac':
 			$render_columns[] = [
-				'format' => 'raw',
+				'format' => 'ntext',
 				'attribute' => $column,
 				'contentOptions'=>[
 					'class'=>$column.'_col'
