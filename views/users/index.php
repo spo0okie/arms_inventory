@@ -58,7 +58,7 @@ $renderer=$this;
                         	$items=[];
 	                        foreach ($arms as $arm)
 	                        	$items[]=$renderer->render('/arms/item',['model'=>$arm,'static_view'=>true]);
-	                        return implode('<br /',$items);
+	                        return implode('<br />',$items);
                         }
                     }
                 }
