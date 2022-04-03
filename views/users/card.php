@@ -66,7 +66,8 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
     <h4>Телефоны</h4>
     <p>
         Внутренний: <?= $model->Phone ?><br />
-        Сотовый: <?= $model->Mobile ?><br />
+		Сотовый: <?= $model->Mobile ?><br />
+		<?= strlen($model->private_phone)?"Личный: {$model->private_phone} <br />":'' ?>
         Городской: <?= $model->work_phone ?><br />
     </p>
 

@@ -19,6 +19,7 @@ use Yii;
  * @property string $Phone Внутренний тел
  * @property string $Mobile Мобильный тел
  * @property string $work_phone Городской рабочий тел
+ * @property string $private_phone Личный сотовый, домашний и всякое такое
  * @property string $Bday День рождения
  * @property string $employ_date Дата приема
  * @property string $resign_date Дата увольнения
@@ -102,12 +103,11 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	        [['employee_id', 'Ename', 'Persg', 'Uvolen', ], 'required'],
 	        [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
 	        [['employee_id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
-	        [['Doljnost', 'Ename', 'Login'], 'string', 'max' => 255],
+	        [['Doljnost', 'Ename', 'Login','Mobile','private_phone'], 'string', 'max' => 255],
 			[['notepad'],'safe'],
 	        [['id'], 'unique'],
 	        [['Email'], 'string', 'max' => 64],
 	        [['Phone', 'work_phone'], 'string', 'max' => 32],
-	        [['Mobile'], 'string', 'max' => 128],
         ];
     }
 
@@ -129,6 +129,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 			'Phone' => 'Внутренний тел',
 			'Mobile' => 'Мобильный тел',
 			'work_phone' => 'Городской рабочий тел',
+			'private_phone' => 'Личный тел',
 			'Bday' => 'День рождения',
 			'manager_id' => 'Руководитель',
 			'nosync' => 'Отключить синхронизацию',
