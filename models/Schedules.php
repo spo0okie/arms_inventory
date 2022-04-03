@@ -13,6 +13,7 @@ use Yii;
  *
  * @property int $id
  * @property int $parent_id
+ * @property int $override_id
  * @property string $name
  * @property string $description
  * @property string $history
@@ -54,6 +55,20 @@ class Schedules extends \yii\db\ActiveRecord
 			'support'=>'Услуга/сервис поддерживается 24/7 без перерывов',
 			'working'=>'Рабочее время всегда (работает 24/7)'
 		],
+		'period_start'=>[
+			'acl'=>'Начало периода предоставления доступа (если есть)',
+			'providing'=>'Дата начала предоставления услуги (если есть)',
+			'support'=>'Дата начала поддержки услуги (если есть)',
+			'working'=>'Дата начала действия расписания (если есть)'
+		],
+		'period_end'=>[
+			'acl'=>'Конец периода предоставления доступа (если есть)',
+			'providing'=>'Дата окончания предоставления услуги (если есть)',
+			'support'=>'Дата окончания поддержки услуги (если есть)',
+			'working'=>'Дата окончания действия расписания (если есть)'
+		],
+		'override_start'=>'Дата начала действия другого расписания (обязательно)',
+		'override_end'=>'Дата возвращения расписания к исходному (не обязательно)',
 	];
 	
 	public $isAclCache=null;
@@ -73,8 +88,10 @@ class Schedules extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name','description'], 'string', 'max' => 255],
+			[['name','description'], 'string', 'max' => 255],
+			[['start_date','end_date'], 'string', 'max' => 64],
 			[['history'],'safe'],
+			[['override_id'],'integer'],
 			[['parent_id'], function ($attribute, $params, $validator) {
 				$children=[$this->id];
 				if (is_object($this->parent) && $this->parent->loopCheck($children)!==false) {
@@ -101,6 +118,8 @@ class Schedules extends \yii\db\ActiveRecord
 			'name' => 'Наименование',
 			'description' => 'Пояснение',
 			'history' => 'Заметки',
+			'start_date'=>'Дата начала',
+			'end_date'=>'Дата окончания',
 			'monEffectiveDescription' => 'Пон.',
 			'tueEffectiveDescription' => 'Втр.',
 			'wedEffectiveDescription' => 'Срд.',
@@ -238,7 +257,7 @@ class Schedules extends \yii\db\ActiveRecord
 				$this->getWeekDayScheduleRecursive($i);
 			
 			$schedule= is_object($scheduleObj)?
-				$scheduleObj->schedule
+				$scheduleObj->mergedSchedule
 				:
 				'-';
 				
@@ -294,7 +313,11 @@ class Schedules extends \yii\db\ActiveRecord
 	}
 	
 	public function getDictionary($word) {
-		return static::$dictionary[$word][$this->providingMode];
+		if (!isset(static::$dictionary[$word]))
+			return $word;
+		if (is_array(static::$dictionary[$word]))
+			return static::$dictionary[$word][$this->providingMode];
+		return static::$dictionary[$word];
 	}
 	
 	/**
@@ -419,13 +442,15 @@ class Schedules extends \yii\db\ActiveRecord
 	 */
 	public function getDayScheduleRecursive($day)
 	{
-		
 		//ищем расписание на этот день недели
 		if (!is_null($daySchedule=\app\models\SchedulesEntries::findOne([
 			'schedule_id'=>$this->id,
 			'is_period'=>0,
 			'date'=>$day
-		]))) return $daySchedule;
+		]))) {
+			//var_dump($daySchedule);
+			return $daySchedule;
+		}
 		
 		if (is_object($this->parent)) {
 			return $this->parent->getDayScheduleRecursive($day);
@@ -547,6 +572,33 @@ class Schedules extends \yii\db\ActiveRecord
 		];
 	}
 	
+	public function isWorkTime($date,$time)
+	{
+		$schedule=$this->getDateScheduleRecursive($date);
+		$periods=$schedule->schedulePeriods;
+		$now=\app\models\SchedulesEntries::strTimestampToMinutes($time);
+		foreach ($periods as $period) {
+			$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
+			if (self::intervalCheck($interval,$now)) return	1;
+		}
+		return 0;
+	}
+	
+	public function metaAtTime($date,$time)
+	{
+		$schedule=$this->getDateScheduleRecursive($date);
+		$periods=$schedule->schedulePeriods;
+		$now=\app\models\SchedulesEntries::strTimestampToMinutes($time);
+		foreach ($periods as $period) {
+			$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
+			if (self::intervalCheck($interval,$now)) {
+				if ($interval['meta']===false) return '{}';
+				else return $interval['meta'];
+			};
+		}
+		return '{}';
+	}
+	
 	
 	// МАТЕМАТИКА ИНТЕРВАЛОВ //
 	public static function interval2Schedule($interval)
@@ -587,6 +639,17 @@ class Schedules extends \yii\db\ActiveRecord
 	}
 	
 	/**
+	 * проверка попадания в интервал
+	 * @param $interval array
+	 * @param $value int
+	 * @return bool
+	 */
+	public static function intervalCheck($interval,$value)
+	{
+		return $interval[0]<=$value && $interval[1]>=$value;
+	}
+	
+	/**
 	 * проверка пересечения интервалов
 	 * @param $interval1 array
 	 * @param $interval2 array
@@ -602,7 +665,7 @@ class Schedules extends \yii\db\ActiveRecord
 		}
 		//далее у нас точно интервал 1 начинается не позже 2го (одновременно или раньше)
 		//значит если второй начинается раньше чем первый заканчивается => они пересекаются
-		return $interval2[0]<$interval1[1];
+		return $interval2[0]<=$interval1[1];
 	}
 	
 	/**
@@ -737,5 +800,7 @@ class Schedules extends \yii\db\ActiveRecord
 		}
 		return parent::beforeDelete(); // TODO: Change the autogenerated stub
 	}
+	
+	
 	
 }

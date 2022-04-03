@@ -793,6 +793,11 @@ div.site-index div.search input:focus
 div.site-index div.search label {
     float: left;
     font: bold 20px monospace;
+    cursor:pointer;
+}
+
+div.site-index div.search label:hover {
+    color:lime;
 }
 
 div.site-index div.search span.search-group {
@@ -804,6 +809,7 @@ div.site-index div.search span.search-group {
 div.site-index div.search span.search-group input {
     width: 100%
 }
+
 
 
 /*ACLS*/

@@ -26,6 +26,8 @@ use yii\validators\DateValidator;
  * @property string|null $date
  * @property string|null $date_end
  * @property string|null $schedule
+ * @property string|null $mergedSchedule
+ * @property string|null $scheduleWithoutMetadata
  * @property string|null $description
  * @property string|null $comment
  * @property string|null $history
@@ -35,7 +37,9 @@ use yii\validators\DateValidator;
  * @property string|null $is_period
  * @property string|null $is_work
  * @property string|null $isWorkDescription
- * @property array $interval
+ * @property string|null $cellClass
+ * @property array $schedulePeriods
+ * @property array $minuteIntervals
  * @property boolean isAcl
  *
  * @property Schedules $master
@@ -76,6 +80,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		]
 	];
 	
+
 	public $isAclCache=null;
 	
 		
@@ -143,8 +148,20 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		return true;
 	}
 	
+	public static function scheduleWithoutMetadata($schedule)
+	{
+		return preg_replace('/\{[^\}]*\}/','',$schedule);
+	}
+	
+	public static function periodMetadata($period)
+	{
+		preg_match('/\{.*\}/',$period,$matches);
+		if (count($matches)) return $matches[0];
+		return false;
+	}
+	
 	/**
-	 * Проверка валидности записи времени на формат ЧЧ:ММ-ЧЧ:ММ
+	 * Проверка валидности записи времени на формат ЧЧ:ММ-ЧЧ:ММ{some_metadata}
 	 * @param $schedule
 	 * @return boolean
 	 */
@@ -153,6 +170,10 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		$schedule=trim($schedule);
 		
 		if (!strlen($schedule)) return false; //пустое расписание
+		
+		//удаляем метаданные из валидации
+		// (нет у меня пока понимания что там может быть, потому считаем что там может быть что угодно)
+		$schedule=static::scheduleWithoutMetadata($schedule);
 		
 		//далее проверяем что расписание вида ЧЧ:MM-ЧЧ:ММ
 		
@@ -278,7 +299,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			'date' => $this->is_period?'Дата/время начала периода':'День/Дата',
 			//'date_begin' => ,
 			'date_end' => 'Дата/время окончания периода',
-			'schedule' => 'График работы/отключения в формате "ЧЧ:ММ-ЧЧ:ММ,ЧЧ:ММ-ЧЧ:ММ" например 8:00-12:00,12:45-17:00, или прочерк (минус) для выходного',
+			'schedule' => 'График работы/отключения в формате "ЧЧ:ММ-ЧЧ:ММ,ЧЧ:ММ-ЧЧ:ММ", или прочерк (минус) для выходного.<br />Примеры/заготовки: '.static::scheduleSamplesHtml(),
 			//'description' => 'График',
 			
 			'comment' => 'Отображается в общем списке',
@@ -306,7 +327,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			)];
 		} elseif ($this->schedule!=='-') {
 			$intervals=[];
-			foreach (explode(',',$this->schedule) as $schedule) {
+			foreach (explode(',',$this->scheduleWithoutMetadata) as $schedule) {
 				$intervals[]=\app\models\Schedules::schedule2Interval($schedule,$date);
 			};
 			return $intervals;
@@ -314,6 +335,99 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		}
 		return [];
 		
+	}
+	
+	/**
+	 * считает сколько минут от начала суток в записи HH:MM
+	 * @param $timestamp
+	 * @return false|int
+	 */
+	public static function strTimestampToMinutes($timestamp) {
+		if (count($tokens=explode(':',$timestamp))!==2) return false;
+		return 60*(int)$tokens[0]+(int)$tokens[1];
+	}
+	
+	/**
+	 * конвертирует минуты в запись HH:MM
+	 * @param $minutes
+	 * @return string
+	 */
+	public static function intMinutesToStrTimestamp($minutes)
+	{
+		return
+			str_pad(intdiv($minutes,60),2,'0',STR_PAD_LEFT).
+			':'.
+			str_pad($minutes % 60,2,'0',STR_PAD_LEFT);
+	}
+	
+	/**
+	 * Конвертирует HH:MM-HH:MM в [минуты начала,минуты окончания]
+	 * @param $schedule
+	 * @return false|int[]
+	 */
+	public static function scheduleToMinuteInterval($schedule) {
+		//var_dump($schedule);
+		//синтаксические ошибки в периоде
+		if (count($tokens=explode('-',$schedule))!==2) return false;
+		if (
+			($start=static::strTimestampToMinutes($tokens[0]))===false
+			||
+			($end=static::strTimestampToMinutes($tokens[1]))===false
+		) return false; //синтаксические ошибки во временных отметках
+		
+		return [$start,$end];
+	}
+	
+	/**
+	 * Конвертирует HH:MM-HH:MM в [минуты начала,минуты окончания,{metadata}]
+	 * @param $schedule
+	 * @return false|array
+	 */
+	public static function scheduleExToMinuteInterval($schedule) {
+		//var_dump($schedule);
+		//синтаксические ошибки в периоде
+		$metadata=self::periodMetadata($schedule);
+		$schedule=self::scheduleWithoutMetadata($schedule);
+		if (count($tokens=explode('-',$schedule))!==2) return false;
+		if (
+			($start=static::strTimestampToMinutes($tokens[0]))===false
+			||
+			($end=static::strTimestampToMinutes($tokens[1]))===false
+		) return false; //синтаксические ошибки во временных отметках
+		
+		return [$start,$end,'meta'=>$metadata];
+	}
+	
+	/**
+	 * Конвертирует HH:MM-HH:MM в [минуты начала,минуты окончания]
+	 * @param $interval array
+	 * @return string
+	 */
+	public static function minuteIntervalToSchedule(array $interval) {
+		//синтаксические ошибки в периоде
+		if (count($interval)!==2) return '';
+		
+		return
+			self::intMinutesToStrTimestamp($interval[0])
+			.'-'
+			.self::intMinutesToStrTimestamp($interval[1]);
+	}
+	
+	public function getSchedulePeriods() {
+		if ($this->schedule==='-') return [];
+		return explode(',',$this->schedule);
+	}
+	
+	public function getMinuteIntervals() {
+		$tokens=explode(',',$this->scheduleWithoutMetadata);
+		$intervals=[];
+		foreach ($tokens as $token) {
+			$interval=static::scheduleToMinuteInterval($token);
+			//var_dump($interval);
+			if ($interval!==false)
+				$intervals[]=$interval;
+		}
+		return $intervals;
 	}
 	
 	public function getPeriodSchedule() {
@@ -330,6 +444,20 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		}
 	}
 	
+	public function getScheduleWithoutMetadata() {
+		return static::scheduleWithoutMetadata($this->schedule);
+	}
+	
+	public function getMergedSchedule() {
+		if ($this->schedule === '-') return '-';
+		$intervals=\app\models\Schedules::intervalMerge($this->minuteIntervals);
+		//var_dump($intervals);
+		$timestamps=[];
+		foreach ($intervals as $interval)
+			$timestamps[]=static::minuteIntervalToSchedule($interval);
+		return implode(',',$timestamps);
+	}
+	
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
@@ -339,13 +467,31 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		} else return false;
 	}
 	
-	public static function scheduleSamplesHtml($form) {
+	public static function scheduleSamplesHtml() {
 		return <<<HTML
-		<span class="href" onclick="$('#$form-schedule').val('-')">отсутствует</span> /
-		<span class="href" onclick="$('#$form-schedule').val('00:00-23:59')">круглосуточно</span> /
-		<span class="href" onclick="$('#$form-schedule').val('08:00-17:00')">c 8 до 17</span> /
-		<span class="href" onclick="$('#$form-schedule').val('08:00-12:00,12:45-17:00')">с обедом в 12</span>
+		<span class="href" onclick="$('#schedulesentries-schedule').val('-')">отсутствует</span> /
+		<span class="href" onclick="$('#schedulesentries-schedule').val('00:00-23:59')">круглосуточно</span> /
+		<span class="href" onclick="$('#schedulesentries-schedule').val('08:00-17:00')">c 8 до 17</span> /
+		<span class="href" onclick="$('#schedulesentries-schedule').val('08:00-12:00,12:45-17:00')">с обедом в 12</span>
 HTML;
 	}
-
+	
+	function getCellClass(){
+		if (!empty($this->date) && ($this->date == Yii::$app->request->get('date')))
+			return 'table-success';
+		
+		if (is_array($negative=Yii::$app->request->get('negative'))) {
+			if (in_array($this->id,$negative))
+				return 'table-danger';
+		}
+		
+		if (is_array($positive=Yii::$app->request->get('positive'))) {
+			if (in_array($this->id,$positive))
+				return 'table-info';
+		}
+		
+		return '';
+	}
+	
+	
 }

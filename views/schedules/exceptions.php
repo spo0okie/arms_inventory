@@ -18,23 +18,23 @@ if (!isset($acl_mode)) $acl_mode=(count($model->acls));
 
 function selectClass($model){
 	if (!empty($model->date) && ($model->date == Yii::$app->request->get('date')))
-		return 'success';
+		return 'table-success';
 	
 	if (is_array($negative=Yii::$app->request->get('negative'))) {
 		if (in_array($model->id,$negative))
-			return 'danger';
+			return 'table-danger';
 	}
 	
 	if (is_array($positive=Yii::$app->request->get('positive'))) {
 		if (in_array($model->id,$positive))
-			return 'info';
+			return 'table-info';
 	}
 
 	return '';
 }
 
 if (!$acl_mode) {
-	echo '<h2>Праздничные / внеочередные рабочие дни</h2>';
+	echo '<h2>Исключения в расписании</h2>';
 } else {
 	echo '<h2>Периоды предоставления / отзыва доступа</h2>';
 }
@@ -53,7 +53,7 @@ echo GridView::widget([
 					;
 			},
 			'contentOptions' => function ($data) { return [
-				'class' => selectClass($data),
+				'class' => $data->cellClass,
 				'id'=>'day-'.$data->date.'-'.$data->date_end
 			];},
 		],
@@ -63,16 +63,16 @@ echo GridView::widget([
 				return $data->is_period?
 					($data->isWorkDescription)
 					:
-					$data->schedule;
+					$data->mergedSchedule;
 			},
 			'contentOptions' => function ($data) { return [
-				'class' => selectClass($data),
+				'class' => $data->cellClass,
 			];},
 		],
 		[
 			'attribute'=>'comment',
 			'contentOptions' => function ($data) { return [
-				'class' => selectClass($data),
+				'class' => $data->cellClass,
 			];},
 		],
 		
@@ -93,7 +93,7 @@ echo GridView::widget([
 ]);
 
 if (!$acl_mode) {
-	echo Html::a('Добавить нестандартный график', [
+	echo Html::a('Добавить нестандартный график на дату', [
 		'/schedules-entries/create',
 		'schedule_id' => $model->id,
 		'is_period' => 0,

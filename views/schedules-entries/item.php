@@ -17,7 +17,7 @@ if (is_object($model)) {
 		if ($model->is_period) {
 			$name=$model->getPeriodSchedule();
 		} else {
-			$name=$model->schedule;
+			$name=$model->mergedSchedule;
 		}
 	}
 	?>

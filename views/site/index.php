@@ -22,7 +22,7 @@ $this->title = 'Инвентаризация';
 		Starting MS-DOS...<br />
 		Поиск:<br />
 		<p>
-			<label class="search-label" for="comps">Компьютеры:\&gt; </label>
+			<label class="search-label" for="comps" onclick="document.location.replace('<?= \yii\helpers\Url::to(['/comps/index']) ?>');">Компьютеры:\&gt; </label>
 			<span class="search-group">
 				<input id="comps-search" type="text" class="search-input" onkeypress="onkeypress = function(e){
 					if (!e) e = window.event;
@@ -36,7 +36,7 @@ $this->title = 'Инвентаризация';
 		</p>
 		
 		<p>
-			<label class="search-label" for="comps">Пользователи:\&gt; </label>
+			<label class="search-label" for="comps" onclick="document.location.replace('<?= \yii\helpers\Url::to(['/users/index']) ?>');">Пользователи:\&gt; </label>
 			<span class="search-group">
 				<input id="users-search" type="text" class="search-input" onkeypress="onkeypress = function(e){
 					if (!e) e = window.event;

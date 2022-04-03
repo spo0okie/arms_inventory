@@ -33,7 +33,7 @@ class SchedulesController extends Controller
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','create-acl','update','delete',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','index-acl','view','ttip','validate'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','index-acl','view','ttip','validate','status','meta-status'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -83,6 +83,30 @@ class SchedulesController extends Controller
 		return $this->renderPartial('ttip', [
 			'model' => $this->findModel($id),
 		]);
+	}
+	
+	/**
+	 * Displays a single model status
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionStatus($id)
+	{
+		$model=$this->findModel($id);
+		return $model->isWorkTime(date('Y-m-d',time()),date('H:i',time()));
+	}
+	
+	/**
+	 * Displays a single model status
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionMetaStatus($id)
+	{
+		$model=$this->findModel($id);
+		return $model->metaAtTime(date('Y-m-d',time()),date('H:i',time()));
 	}
 	
 	/**

@@ -10,11 +10,14 @@ use kartik\datecontrol\DateControl;
 /* @var $model app\models\SchedulesEntries */
 /* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
+if (!isset($formId)) $formId='scheduleEntityForm';
 ?>
 
 <div class="schedules-days-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin([
+		'id'=>$formId
+	]); ?>
 	
 	<?= $form->field($model, 'is_period')->hiddenInput()->label(false)->hint(false); ?>
 	
