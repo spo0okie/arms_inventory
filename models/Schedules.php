@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\data\ArrayDataProvider;
 
 /**
  * Hint: В оформлении расписания надо придерживаться правила, что расписание отвечает на вопрос когда?
@@ -26,6 +27,7 @@ use Yii;
  * @property Services[] $supportServices
  * @property Acls[] $acls
  * @property Schedules $parent
+ * @property ArrayDataProvider $WeekDataProvider
  */
 class Schedules extends \yii\db\ActiveRecord
 {
@@ -35,6 +37,7 @@ class Schedules extends \yii\db\ActiveRecord
 	public static $noData = 'никогда';
 	public static $allDaysTitle = 'ежедн.';
 	public static $allDayTitle = 'круглосуточно.';
+	
 	
 	public static $dictionary=[
 		'usage'=>[
@@ -73,6 +76,7 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public $isAclCache=null;
 	
+	public $metaClasses=[];
 	
     /**
      * {@inheritdoc}
@@ -290,6 +294,21 @@ class Schedules extends \yii\db\ActiveRecord
 		return $description;
 	}
 	
+	/**
+	 * Пробуем вернуть dataProvider расписания на неделю
+	 * @return \yii\data\ArrayDataProvider
+	 */
+	public function getWeekDataProvider()
+	{
+		$models=[];
+		foreach (\app\models\SchedulesEntries::$days as $day=>$name) {
+			$models[$day]=$this->getWeekDayScheduleRecursive($day);
+		}
+		return new \yii\data\ArrayDataProvider([
+			'allModels'=>$models
+		]);
+	}
+	
 	public function getWeekWorkTimeDescription() {
 		
 		if (count($periods=$this->weekWorkTime)) {
@@ -430,7 +449,9 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public static function fetchNames(){
 		$list= static::find()
-			->select(['id','name'])
+			->joinWith('acls')
+			->select(['schedules.id','name'])
+			->where(['acls.schedules_id'=>null])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}

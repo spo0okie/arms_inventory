@@ -40,6 +40,7 @@ use yii\validators\DateValidator;
  * @property string|null $cellClass
  * @property array $schedulePeriods
  * @property array $minuteIntervals
+ * @property array $minuteIntervalsEx
  * @property boolean isAcl
  *
  * @property Schedules $master
@@ -423,6 +424,18 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		$intervals=[];
 		foreach ($tokens as $token) {
 			$interval=static::scheduleToMinuteInterval($token);
+			//var_dump($interval);
+			if ($interval!==false)
+				$intervals[]=$interval;
+		}
+		return $intervals;
+	}
+	
+	public function getMinuteIntervalsEx() {
+		$tokens=explode(',',$this->schedule);
+		$intervals=[];
+		foreach ($tokens as $token) {
+			$interval=static::scheduleExToMinuteInterval($token);
 			//var_dump($interval);
 			if ($interval!==false)
 				$intervals[]=$interval;

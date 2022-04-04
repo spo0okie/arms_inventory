@@ -41,12 +41,13 @@ class SchedulesSearch extends Schedules
     public function search($params)
     {
         $query = Schedules::find()
-			->joinWith('providingServices');
+			->with('providingServices');
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+			'totalCount' => $query->count('distinct(schedules.id)'),
         ]);
 
         $this->load($params);
@@ -56,12 +57,7 @@ class SchedulesSearch extends Schedules
             // $query->where('0=1');
             return $dataProvider;
         }
-
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            //'created_at' => $this->created_at,
-        ]);
+        
 
         $query->andFilterWhere(['or like', 'name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
             //->andFilterWhere(['like', 'comment', $this->comment]);

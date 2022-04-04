@@ -810,7 +810,9 @@ div.site-index div.search span.search-group input {
     width: 100%
 }
 
+/* SCHEDULES*/
 
+td.schedule_graph {width:50%}
 
 /*ACLS*/
 

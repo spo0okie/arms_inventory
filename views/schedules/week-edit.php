@@ -7,61 +7,80 @@ use yii\widgets\DetailView;
 /* @var $model app\models\Schedules */
 
 if (!isset($static_view)) $static_view=false;
+$renderer=$this;
 
 
-$attr=[];
-
-foreach (app\models\SchedulesEntries::$days as $day=>$name) {
-	$attr[]=[
-		'attribute'=>$name,
-		'format'=>'raw',
-		'value'=>function ($data) use ($day,$name,$static_view) {
-			//Если задано явно, то рисуем явно заданное с возможностью править и удалить
-			if (is_object($schedule=$data->findDay($day))) {
-				$update=$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>', [
-					'/schedules-entries/update',
-					'id' => $schedule->id,
-				]);
-				$delete=$static_view?'':Html::a('<span class="fas fa-trash"></span>', [
-					'/schedules-entries/delete',
-					'id' => $schedule->id,
-				], [
-					'data' => [
-						'confirm' => 'Удалить этот день в расписании?',
-						'method' => 'post',
-					],
-				]);
-				$text='<span title="Расписание на этот день задано явно">'.$schedule->mergedSchedule.'</span>';
-				return	'<strong>'.$text.' '.$update.' '.$delete.'</strong>';
-			}
-			
-			$create=$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>', [
-				'/schedules-entries/create',
-				'schedule_id' => $data->id,
-				'date' => $day,
-			]);
-			
-			$schedule=$data->getWeekDayScheduleRecursive($day);
-			
-			return (
-					is_object($schedule)?
-						$text='<span title="Расписание на этот день наследуется">'.$schedule->mergedSchedule.'</span>'
-						:
-						$data->getDictionary('nodata')
-				).' '.$create;
-		},
-		'contentOptions' => [
-			'class' => ($day==Yii::$app->request->get('date'))?'table-success':'',
-			'id'=>'day-'.$day
-		],
-	];
-}
 ?>
 
 <h2>Изменить рабочую неделю</h2>
 
-<?= DetailView::widget([
-	'model' => $model,
-	'attributes' => $attr
+
+<?= \yii\grid\GridView::widget([
+	'dataProvider' => $model->getWeekDataProvider(),
+	'columns' => [
+		[
+			'attribute'=>'day',
+			'value'=>function($data,$day) {
+				return \app\models\SchedulesEntries::$days[$day];
+			},
+			'contentOptions' => function($data,$day){return[
+				'class' => ($day==Yii::$app->request->get('date'))?'table-success':'',
+				'id'=>'day-'.$day
+			];},
+		],
+		[
+			'attribute'=>'schedule',
+			'format'=>'raw',
+			'value'=>function ($data,$day) use ($static_view,$model) {
+				//Если задано явно, то рисуем явно заданное с возможностью править и удалить
+				/**
+				 * @var \app\models\SchedulesEntries $data
+				 */
+				if (is_object($data) && ($data->date == $day) && ($data->schedule_id==$model->id)) {
+					$update=$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>', [
+						'/schedules-entries/update',
+						'id' => $data->id,
+					]);
+					$delete=$static_view?'':Html::a('<span class="fas fa-trash"></span>', [
+						'/schedules-entries/delete',
+						'id' => $data->id,
+					], [
+						'data' => [
+							'confirm' => 'Удалить этот день в расписании?',
+							'method' => 'post',
+						],
+					]);
+					$text='<span title="Расписание на этот день задано явно">'.$data->mergedSchedule.'</span>';
+					return	'<strong>'.$text.' '.$update.' '.$delete.'</strong>';
+				} else {
+					$create=$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>', [
+						'/schedules-entries/create',
+						'schedule_id' => $model->id,
+						'date' => $day,
+					]);
+					return (
+						is_object($data)?
+							$text='<span title="Расписание на этот день наследуется">'.$data->mergedSchedule.'</span>'
+							:
+							$data->getDictionary('nodata')
+						).' '.$create;
+				}
+			},
+			'contentOptions' => function($data,$day){return[
+				'class' => ($day==Yii::$app->request->get('date'))?'table-success':'',
+			];},
+		],
+		[
+			'attribute'=>'graph',
+			'value'=>function($data,$day) use ($renderer,$model) {
+				return $renderer->render('/schedules-entries/stripe',['model'=>$data,'schedule'=>$model]);
+			},
+			'format'=>'raw',
+			'contentOptions' => function($data,$day){return[
+				'class' => ($day==Yii::$app->request->get('date'))?'table-success schedule_graph':'schedule_graph',
+			];},
+		]
+	]
 ]) ?>
 
+<?php //var_dump($model->metaClasses);

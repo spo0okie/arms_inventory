@@ -51,13 +51,16 @@ if (
 		?>
 			<tr>
 				<td>
-					<?= Yii::$app->formatter->asDate(time()+86400*$i,'full') ?>
+					<?= Yii::$app->formatter->asDate(time()+86400*$i,'dd.MM.yyyy (E)') ?>
 				</td>
 				<td>
 					<?= $this->render('/schedules-entries/item',['model'=>$day]) ?>
 				</td>
 				<td>
 					<?= $this->render('/schedules-entries/item',['model'=>$day,'name'=>$comment]) ?>
+				</td>
+				<td width="33%">
+					<?= $this->render('/schedules-entries/stripe',['model'=>$day,'schedule'=>$model]) ?>
 				</td>
 			</tr>
 		<?php } ?>

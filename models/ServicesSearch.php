@@ -51,7 +51,7 @@ class ServicesSearch extends Services
     {
         $query = Services::find()
 			//->joinWith('techs')
-			->joinWith([
+			->with([
 				'comps.arm.place',
 				'techs.place',
 				'support',

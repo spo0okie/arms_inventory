@@ -92,6 +92,7 @@ echo GridView::widget([
 	],
 ]);
 
+echo '<div class="btn-group">';
 if (!$acl_mode) {
 	echo Html::a('Добавить нестандартный график на дату', [
 		'/schedules-entries/create',
@@ -111,3 +112,4 @@ if (!$acl_mode) {
 		'is_period' => 1,
 	], ['class' => 'btn btn-success']);
 }
+echo '</div>';
