@@ -20,16 +20,8 @@ class m220402_185406_alter_table_schedules extends Migration
 		if (!isset($table->columns['override_id']))
 			$this->addColumn('schedules', 'override_id', $this->integer()->null());
 		
-		if (is_null($table = $this->db->getTableSchema('users_in_schedules_entries'))) {
-			$this->createTable('users_in_schedules_entries', [
-				'[[id]]'					=> $this->primaryKey(),		//ключ
-				'[[users_id]]'				=> $this->integer(),		//users
-				'[[schedules_entries_id]]'	=> $this->integer(),		//schedule entry
-			],'ENGINE=InnoDB');
-			
-			$this->createIndex('{{%idx-users_in_schedules_entries-users}}', 	'{{%users_in_schedules_entries}}', '[[users_id]]');
-			$this->createIndex('{{%idx-users_in_schedules_entries-entries}}', '{{%users_in_schedules_entries}}', '[[schedules_entries_id]]');
-		}
+		$this->alterColumn('schedules_entries', 'users_id',$this->string(255));
+		
 	}
 	
 	/**
@@ -44,6 +36,8 @@ class m220402_185406_alter_table_schedules extends Migration
 			$this->dropColumn('schedules', 'end_date');
 		if (isset($table->columns['override_id']))
 			$this->dropColumn('schedules', 'override_id');
+
+		$this->alterColumn('schedules_entries', 'users_id',$this->string(64));
 		
 		$table = $this->db->getTableSchema('schedules_entries');
 		if (isset($table->columns['users_id']))
