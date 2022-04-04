@@ -62,7 +62,7 @@ $renderer=$this;
 						is_object($data)?
 							$text='<span title="Расписание на этот день наследуется">'.$data->mergedSchedule.'</span>'
 							:
-							$data->getDictionary('nodata')
+							$model->getDictionary('nodata')
 						).' '.$create;
 				}
 			},
