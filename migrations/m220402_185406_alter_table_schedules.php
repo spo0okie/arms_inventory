@@ -20,7 +20,7 @@ class m220402_185406_alter_table_schedules extends Migration
 		if (!isset($table->columns['override_id']))
 			$this->addColumn('schedules', 'override_id', $this->integer()->null());
 		
-		$this->alterColumn('schedules_entries', 'users_id',$this->string(255));
+		$this->alterColumn('schedules_entries', 'schedule',$this->string(255));
 		
 	}
 	
@@ -37,7 +37,7 @@ class m220402_185406_alter_table_schedules extends Migration
 		if (isset($table->columns['override_id']))
 			$this->dropColumn('schedules', 'override_id');
 
-		$this->alterColumn('schedules_entries', 'users_id',$this->string(64));
+		$this->alterColumn('schedules_entries', 'schedule',$this->string(64));
 		
 		$table = $this->db->getTableSchema('schedules_entries');
 		if (isset($table->columns['users_id']))
