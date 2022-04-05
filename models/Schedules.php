@@ -27,6 +27,7 @@ use yii\data\ArrayDataProvider;
  * @property Services[] $supportServices
  * @property Acls[] $acls
  * @property Schedules $parent
+ * @property SchedulesEntries $entries
  * @property ArrayDataProvider $WeekDataProvider
  */
 class Schedules extends \yii\db\ActiveRecord
@@ -77,6 +78,7 @@ class Schedules extends \yii\db\ActiveRecord
 	public $isAclCache=null;
 	
 	public $metaClasses=[];
+	private $weekDaysCache=null;
 	
     /**
      * {@inheritdoc}
@@ -124,13 +126,6 @@ class Schedules extends \yii\db\ActiveRecord
 			'history' => 'Заметки',
 			'start_date'=>'Дата начала',
 			'end_date'=>'Дата окончания',
-			'monEffectiveDescription' => 'Пон.',
-			'tueEffectiveDescription' => 'Втр.',
-			'wedEffectiveDescription' => 'Срд.',
-			'thuEffectiveDescription' => 'Чтв.',
-			'friEffectiveDescription' => 'Пят.',
-			'satEffectiveDescription' => 'Суб.',
-			'sunEffectiveDescription' => 'Вск.',
 			'resources' => 'Ресурсы', //для ACLs
 			'objects' => 'Субъекты', //для ACLs
 		];
@@ -174,10 +169,18 @@ class Schedules extends \yii\db\ActiveRecord
 	}
 	
 	public function findDay($day) {
-		return \app\models\SchedulesEntries::findOne([
+		if (is_null($this->weekDaysCache)) {
+			$this->weekDaysCache=['def'=>null,'1'=>null,'2'=>null,'3'=>null,'4'=>null,'5'=>null,'6'=>null,'7'=>null];
+			foreach ($this->entries as $entry)
+				if (!$entry->is_period)
+					$this->weekDaysCache[$entry->date]=$entry;
+		}
+		if (isset($this->weekDaysCache[$day])) return $this->weekDaysCache[$day];
+		return null;
+		/*return \app\models\SchedulesEntries::findOne([
 			'schedule_id'=>$this->id,
 			'date'=>$day
-		]);
+		]);*/
 	}
 	
 	public function getIsAcl() {
@@ -393,58 +396,37 @@ class Schedules extends \yii\db\ActiveRecord
 		
 	}
 	
+	public function getEntries() {
+		return $this->hasMany(SchedulesEntries::className(), ['schedule_id' => 'id']);
+		
+	}
+	
 	/**
 	 * Ищет эффективный день. если не задан конкретный - пытается сослаться на день по умолчанию
 	 * @param string $day
 	 * @return SchedulesEntries|null
 	 */
 	public function findEffectiveDay($day) {
-		$schedule=\app\models\SchedulesEntries::findOne([
+		/*$schedule=\app\models\SchedulesEntries::findOne([
 			'is_period'=>0,
 			'schedule_id'=>$this->id,
 			'date'=>$day
 		]);
-		if (is_object($schedule)) return $schedule;
+		if (is_object($schedule)) return $schedule;*/
 		
-		return \app\models\SchedulesEntries::findOne([
+		if (!is_null($schedule=$this->findDay($day))) return $schedule;
+		return $this->findDay('def');
+		/*return \app\models\SchedulesEntries::findOne([
 			'is_period'=>0,
 			'schedule_id'=>$this->id,
 			'date'=>'def'
-		]);
+		]);*/
 	}
 	
 	public function findEffectiveDescription($day) {
 		if (is_object($schedule=$this->findEffectiveDay($day))) {
 			return $schedule->description;
 		} return 'не задано';
-	}
-	
-	public function getMonEffectiveDescription() {
-		return $this->findEffectiveDescription('1');
-	}
-	
-	public function getTueEffectiveDescription() {
-		return $this->findEffectiveDescription('2');
-	}
-	
-	public function getWedEffectiveDescription() {
-		return $this->findEffectiveDescription('3');
-	}
-	
-	public function getThuEffectiveDescription() {
-		return $this->findEffectiveDescription('4');
-	}
-	
-	public function getFriEffectiveDescription() {
-		return $this->findEffectiveDescription('5');
-	}
-	
-	public function getSatEffectiveDescription() {
-		return $this->findEffectiveDescription('6');
-	}
-	
-	public function getSunEffectiveDescription() {
-		return $this->findEffectiveDescription('7');
 	}
 	
 	public static function fetchNames(){
@@ -464,11 +446,7 @@ class Schedules extends \yii\db\ActiveRecord
 	public function getDayScheduleRecursive($day)
 	{
 		//ищем расписание на этот день недели
-		if (!is_null($daySchedule=\app\models\SchedulesEntries::findOne([
-			'schedule_id'=>$this->id,
-			'is_period'=>0,
-			'date'=>$day
-		]))) {
+		if (!is_null($daySchedule=$this->findDay($day))) {
 			//var_dump($daySchedule);
 			return $daySchedule;
 		}

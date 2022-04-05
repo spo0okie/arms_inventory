@@ -40,13 +40,15 @@ class SchedulesSearch extends Schedules
      */
     public function search($params)
     {
-        $query = Schedules::find()
-			->with('providingServices');
-
-        // add conditions that should always apply here
+		$query = Schedules::find()
+			->joinWith(['providingServices','acls','entries'])
+			->where(['acls.schedules_id'=>null]);
+	
+		// add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+			'pagination' => false,
 			'totalCount' => $query->count('distinct(schedules.id)'),
         ]);
 
@@ -57,11 +59,15 @@ class SchedulesSearch extends Schedules
             // $query->where('0=1');
             return $dataProvider;
         }
-        
-
-        $query->andFilterWhere(['or like', 'name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
+	
+	
+		$query->andFilterWhere(['or like', 'name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
             //->andFilterWhere(['like', 'comment', $this->comment]);
 
-        return $dataProvider;
+        return new ActiveDataProvider([
+			'query' => $query,
+			'pagination' => false,
+			'totalCount' => $query->count('distinct(schedules.id)'),
+		]);
     }
 }

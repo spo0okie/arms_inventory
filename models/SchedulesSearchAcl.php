@@ -48,7 +48,8 @@ class SchedulesSearchAcl extends Schedules
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-        ]);
+			'totalCount' => $query->count('distinct(schedules.id)'),
+		]);
 
         $this->load($params);
 
@@ -67,6 +68,9 @@ class SchedulesSearchAcl extends Schedules
         $query->andFilterWhere(['or like', 'name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
             //->andFilterWhere(['like', 'comment', $this->comment]);
 
-        return $dataProvider;
+        return new ActiveDataProvider([
+			'query' => $query,
+			'totalCount' => $query->count('distinct(schedules.id)'),
+		]);
     }
 }
