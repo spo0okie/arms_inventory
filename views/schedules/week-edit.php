@@ -17,6 +17,7 @@ $renderer=$this;
 
 <?= \yii\grid\GridView::widget([
 	'dataProvider' => $model->getWeekDataProvider(),
+	'summary' => false,
 	'columns' => [
 		[
 			'attribute'=>'day',

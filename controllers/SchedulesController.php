@@ -94,7 +94,11 @@ class SchedulesController extends Controller
 	public function actionStatus($id)
 	{
 		$model=$this->findModel($id);
-		return $model->isWorkTime(date('Y-m-d',time()),date('H:i',time()));
+
+		return $model->isWorkTime(
+			gmdate('Y-m-d',time()+Yii::$app->params['schedulesTZShift']),
+			gmdate('H:i',time()+Yii::$app->params['schedulesTZShift'])
+		);
 	}
 	
 	/**
@@ -106,7 +110,10 @@ class SchedulesController extends Controller
 	public function actionMetaStatus($id)
 	{
 		$model=$this->findModel($id);
-		return $model->metaAtTime(date('Y-m-d',time()),date('H:i',time()));
+		return $model->metaAtTime(
+			gmdate('Y-m-d',time()+Yii::$app->params['schedulesTZShift']),
+			gmdate('H:i',time()+Yii::$app->params['schedulesTZShift'])
+		);
 	}
 	
 	/**

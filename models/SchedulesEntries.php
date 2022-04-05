@@ -276,8 +276,10 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			'is_work' => $this->isAcl?'Период предоставления/отзыва прав':'Рабочий/нерабочий период',
 			
 			'date' => $this->is_period?'Начало':'День/Дата',
+			'day' => 'День',
 			'date_end' => 'Окончание',
 			'schedule' => 'График',
+			'graph' => 'Картина дня',
 			
 			'comment' => 'Комментарий',
 			'history' => 'Дополнительные заметки',
