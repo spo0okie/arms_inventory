@@ -54,12 +54,14 @@ class ServicesSearch extends Services
 			->with([
 				'comps.arm.place',
 				'techs.place',
-				'support',
 				'responsible',
 				'supportSchedule',
 				'providingSchedule',
 				'orgPhones',
 				'orgInets',
+			])
+			->joinWith([
+				'support',
 			])
 			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)');
 	
@@ -131,6 +133,11 @@ class ServicesSearch extends Services
 		
 		}
 	
-		return $dataProvider;
+		return new ActiveDataProvider([
+			'query' => $query,
+			'totalCount' => $query->count('distinct(services.id)'),
+			'pagination' => ['pageSize' => 500,],
+			'sort'=> ['defaultOrder' => ['name'=>SORT_ASC]]
+		]);
     }
 }
