@@ -1,14 +1,16 @@
 function attach_qTip(el){
     if (el.hasClass('tooltipstered')) return;
-    var $url=el.attr('qtip_ajxhrf');
-    //var $title=el.attr('qtip_title');
-    //var $classes=el.attr('qtip_class');
-    var $text=el.attr('qtip_ttip');
-    //console.log(typeof $text);
-    if (typeof $text == 'undefined') {
-        $text='Подгрузка...';
+    let $url=el.attr('qtip_ajxhrf');
+    let $text=el.attr('qtip_ttip');
+    let $b64text=el.attr('qtip_b64ttip');
+    if (typeof $b64text !== 'undefined') {
+        //console.log(typeof $b64text);
+        $text=atob($b64text);
+        //console.log($text);
     }
+    let $load=undefined;
     if (typeof $url != 'undefined') {
+        if (typeof $text == 'undefined') $text='Загрузка...';
         $load=function(instance, helper) {
             var $origin = $(helper.origin);
             if ($origin.data('loaded') !== true) {
@@ -22,9 +24,6 @@ function attach_qTip(el){
                 });
             }
         }
-
-    } else {
-        $load=undefined;
     }
     el.tooltipster({
         animationDuration: 100,
@@ -43,6 +42,7 @@ function attach_qTip(el){
 function attachAllTTips(){
     $('[qtip_ajxhrf]').not(".tooltipstered").each(function(){attach_qTip($(this));});
     $('[qtip_ttip]').not(".tooltipstered").each(function(){attach_qTip($(this));});
+    $('[qtip_b64ttip]').not(".tooltipstered").each(function(){attach_qTip($(this));});
 }
 
 $(document).ready(function(){

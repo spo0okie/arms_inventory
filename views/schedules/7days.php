@@ -11,8 +11,9 @@ if (!isset($days_forward)) $days_forward=7;
 
 if (!isset($static_view)) $static_view=false;
 
-$today=strtotime(gmdate('Y-m-d 00:00:00'));
+$today=strtotime(date('Y-m-d 00:00:00+0000'));
 $periodEnd=$today+($days_forward+1)*60*60*24-1;
+var_dump($today);
 
 $exceptions=$model->findExceptions($today,$periodEnd);
 $periods=$model->findPeriods($today,$periodEnd);
