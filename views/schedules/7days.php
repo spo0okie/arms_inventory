@@ -19,7 +19,7 @@ $periods=$model->findPeriods($today,$periodEnd);
 
 $dateAttr=[];
 for ($i=0; $i<7; $i++) {
-	$dateDay=date('Y-m-d',time()+86400*$i);
+	$dateDay=gmdate('Y-m-d',$today+86400*$i+Yii::$app->params['schedulesTZShift']);
 	$dateLabel='График на '.Yii::$app->formatter->asDate(time()+86400*$i,'full');
 	$dateAttr[]=[
 		'label' => $dateLabel,
