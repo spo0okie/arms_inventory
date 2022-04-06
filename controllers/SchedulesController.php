@@ -33,7 +33,7 @@ class SchedulesController extends Controller
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','create-acl','update','delete',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','index-acl','view','ttip','validate','status','meta-status'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','index-acl','view','ttip','validate','status','meta-status','next-meta'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -116,6 +116,21 @@ class SchedulesController extends Controller
 		);
 	}
 	
+	/**
+	 * Displays a single model status
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionNextMeta($id)
+	{
+		$model=$this->findModel($id);
+		return $model->nextWorkingMeta(
+			gmdate('Y-m-d',time()+Yii::$app->params['schedulesTZShift']),
+			gmdate('H:i',time()+Yii::$app->params['schedulesTZShift'])
+		);
+	}
+
 	/**
 	 * Displays a single Schedules model.
 	 * @param integer $id

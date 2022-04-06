@@ -348,7 +348,7 @@ class Schedules extends \yii\db\ActiveRecord
 	 * @param $end    integer
 	 * @return array|\yii\db\ActiveRecord[]
 	 */
-	public function findExceptions($start,$end)
+	public function findExceptions($start,$end=null)
 	{
 		return SchedulesEntries::find()
 			->Where(['not',['in', 'date', ['1','2','3','4','5','6','7','def']]])
@@ -356,7 +356,11 @@ class Schedules extends \yii\db\ActiveRecord
 				'schedule_id'=>$this->id,
 				'is_period'=>0
 			])
-			->andWhere(['and',
+			->andWhere(is_null($end)?
+			[
+				'>=', 'UNIX_TIMESTAMP(date)', $start
+			]:
+			['and',
 				['<=', 'UNIX_TIMESTAMP(date)', $end],
 				['>=', 'UNIX_TIMESTAMP(date)', $start],
 			])
@@ -496,7 +500,7 @@ class Schedules extends \yii\db\ActiveRecord
 	/**
 	 * формирует расписание на день исходя из графика на день + перекрытия рабочими интервалами + нерабочими
 	 * @param $date
-	 * @return string
+	 * @return array|object
 	 */
 	public function getDateSchedule($date)
 	{
@@ -595,6 +599,49 @@ class Schedules extends \yii\db\ActiveRecord
 				else return $interval['meta'];
 			};
 		}
+		return '{}';
+	}
+	
+	public function nextExclusionRecursive($date,$time)
+	{
+		$testTimestamp=strtotime(date($date.' '.$time.':00+0000'));
+		
+	}
+	
+	public function nextWorkingMeta($date,$time)
+	{
+		//если прямо сейчас уже рабочий период, то возвращаем его метаданные
+		//if (($meta=$this->metaAtTime($date,$time))!=='{}') return $meta;
+		
+		//что мы собственно делаем дальше
+		//перебираем 8 дней начиная с текущего в поисках дня, в котором есть рабочие периоды
+		//почему 8, потому что если в неделе есть всего один рабочий период, и он сегодня уже прошел,
+		//то он повторится через 7 дней на 8й
+		$testDate=strtotime(date($date.' 00:00:00+0000'));
+		$testTimestamp=strtotime(date($date.' '.$time.':00+0000'));
+		for ($i=0;$i<=7;$i++) {
+			$day=gmdate('Y-m-d',$testDate+86400*$i);
+			$schedule=$this->getDateScheduleRecursive($day);
+			if (count($periods=$schedule->schedulePeriods)) {
+				foreach ($periods as $period) {
+					$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
+					if ($interval[0]*60+$testDate+86400*$i >= $testTimestamp) {
+						if ($interval['meta']!==false) return $interval['meta'];
+					}
+				}
+			}
+		}
+		
+		//дошли до сюда, значит в расписании на неделю ничего не нашли
+		//ищем только по исключениям теперь
+		/*$now=\app\models\SchedulesEntries::strTimestampToMinutes($time);
+		foreach ($periods as $period) {
+			$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
+			if (self::intervalCheck($interval,$now)) {
+				if ($interval['meta']===false) return '{}';
+				else return $interval['meta'];
+			};
+		}*/
 		return '{}';
 	}
 	
