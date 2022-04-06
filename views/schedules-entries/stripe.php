@@ -31,11 +31,11 @@ if (
 	$end=1439;
 	$bars=[];
 	foreach ($periods as $period) {
-		$hint=\app\models\SchedulesEntries::intMinutesToStrTimestamp($period[0]).
-			'-'.
-			\app\models\SchedulesEntries::intMinutesToStrTimestamp($period[1]);
 		if ($period[0]-1>$start) { //период отодвинут от предыдущего, значит между ними промежуток
-			$bars[]=['type'=>'off', 'size'=>((float)$period[0]-$start)/$end,'hint'=>$hint,];
+			$bars[]=['type'=>'off', 'size'=>((float)$period[0]-$start)/$end,
+				'hint'=>\app\models\SchedulesEntries::intMinutesToStrTimestamp($start).
+				'-'.
+				\app\models\SchedulesEntries::intMinutesToStrTimestamp($period[0])];
 		}
 		if (!isset($schedule->metaClasses[$period['meta']]))
 			$schedule->metaClasses[$period['meta']]=count($schedule->metaClasses);
@@ -44,7 +44,9 @@ if (
 			'size'=>($period[1]-$period[0])/$end,
 			'meta'=>$period['meta'],
 			'class'=>$schedule->metaClasses[$period['meta']],
-			'hint'=>$hint,
+			'hint'=>\app\models\SchedulesEntries::intMinutesToStrTimestamp($period[0]).
+				'-'.
+				\app\models\SchedulesEntries::intMinutesToStrTimestamp($period[1]),
 		];
 		$start=$period[1]+1;
 	}
