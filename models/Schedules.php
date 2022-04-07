@@ -611,7 +611,7 @@ class Schedules extends \yii\db\ActiveRecord
 	public function nextWorkingMeta($date,$time)
 	{
 		//если прямо сейчас уже рабочий период, то возвращаем его метаданные
-		//if (($meta=$this->metaAtTime($date,$time))!=='{}') return $meta;
+		if (($meta=$this->metaAtTime($date,$time))!=='{}') return $meta;
 		
 		//что мы собственно делаем дальше
 		//перебираем 8 дней начиная с текущего в поисках дня, в котором есть рабочие периоды
