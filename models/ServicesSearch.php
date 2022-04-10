@@ -107,7 +107,10 @@ class ServicesSearch extends Services
         ]);
         
         $query
-			->andFilterWhere(['or like', 'services.name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
+			->andFilterWhere(['or',
+				['or like', 'services.name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)],
+				['or like', 'services.search_text', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]
+			])
             ->andFilterWhere(['or like', 'description', \yii\helpers\StringHelper::explode($this->description,'|',true,true)])
 			->andFilterWhere(['or like', 'segments.name', \yii\helpers\StringHelper::explode($this->segment,'|',true,true)])
 			->andFilterWhere(['or like', 'providing_schedule.name', \yii\helpers\StringHelper::explode($this->providingSchedule,'|',true,true)])

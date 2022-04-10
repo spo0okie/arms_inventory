@@ -193,6 +193,12 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\components\TextAutoResizeWidget::widget([
 				'form' => $form,
 				'model' => $model,
+				'attribute' => 'search_text',
+				'lines' => 1,
+			]) ?>
+			<?= \app\components\TextAutoResizeWidget::widget([
+				'form' => $form,
+				'model' => $model,
 				'attribute' => 'description',
 				'lines' => 3,
 			]) ?>
