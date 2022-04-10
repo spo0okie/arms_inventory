@@ -19,7 +19,7 @@ if (!isset($show_payment)) $show_payment=false;
 ]) ?>
 
 	<ul class="ul-treefree ul-dropfree">
-		<?php foreach ($model->chainChilds as $child) if (!$child->is_successor) { ?>
+		<?php foreach ($model->chainChildren as $child) if (!$child->is_successor) { ?>
 			<li>
 				<?= $this->render('tree-list',[
 					'model'=>$child,

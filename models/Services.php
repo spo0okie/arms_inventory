@@ -39,6 +39,8 @@ use yii\web\User;
  * @property int[] $support_ids
  * @property int[] $techs_ids
  * @property int[] $contracts_ids
+ * @property int $totalUnpaid
+ * @property string $firstUnpaid
  *
  *
  * @property \app\models\Comps[] $comps
@@ -560,11 +562,12 @@ class Services extends \yii\db\ActiveRecord
 		
 		$this->docsCache=[];
 		foreach ($this->contracts as $contract) {
+			$this->docsCache[]=$contract;
 			/**
 			 * @var $contract Contracts
 			 */
-			foreach ($contract->chainChilds as $doc) {
-				$this->docsCache[]=$doc;
+			foreach ($contract->allChildren as $child) {
+				$this->docsCache[]=$child;
 			}
 		}
 		return $this->docsCache;
@@ -588,15 +591,45 @@ class Services extends \yii\db\ActiveRecord
 	
 	
 	/**
-	 * Last unpaid
-	 * @return int
+	 * Сумма неоплаченных документов
+	 * @return array
 	 */
 	public function getTotalUnpaid()
 	{
-		$total=0;
+		$total=[];
 		foreach ($this->payments as $doc)
-			$total+=$doc->total;
+			/**
+			 * @var $doc Contracts
+			 */
+			if ($doc->isUnpaid) {
+				$currency=$doc->currency->symbol;
+				if (!isset($total[$currency])) $total[$currency]=0;
+				$total[$currency]+=$doc->total;
+			}
+			
 		return $total;
+	}
+	
+	/**
+	 * Сумма неоплаченных документов
+	 * @return int
+	 */
+	public function getFirstUnpaid()
+	{
+		$iFirst=0;
+		$strFirst=null;
+		foreach ($this->payments as $doc)
+			/**
+			 * @var $doc Contracts
+			 */
+			if ($doc->isUnpaid) {
+				if (!$iFirst || strtotime($doc->date)<$iFirst) {
+					$strFirst=$doc->date;
+					$iFirst=strtotime($iFirst);
+				}
+			}
+	
+		return $strFirst;
 	}
 	
 	

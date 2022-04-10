@@ -46,8 +46,11 @@ use yii\web\JsExpression;
  * @property Contracts[] $successorsChain
  * @property Contracts[] $successorsRecursive
  * @property Contracts $predecessor
+ * @property Contracts $firstPredecessor
  * @property Contracts[] $childs
- * @property Contracts[] $chainChilds
+ * @property Contracts[] $chainChildren
+ * @property Contracts[] $childrenRecursive
+ * @property Contracts[] $allChildren
  * @property Arms[] $arms
  * @property Materials[] $materials
  * @property Techs[] $techs
@@ -85,7 +88,10 @@ class Contracts extends \yii\db\ActiveRecord
 	private $phones_chain_cache=null;
 	private $lics_chain_cache=null;
 	private $services_chain_cache=null;
-
+	private $recursive_children_cache=null;
+	private $all_children_cache=null;
+	private $first_predecessor_cache=null;
+	
 	/**
      * {@inheritdoc}
      */
@@ -222,7 +228,7 @@ class Contracts extends \yii\db\ActiveRecord
 	}
 
 	/**
-	 * Ищет всех непосредственных наследников (один уровень наследования)
+	 * Ищет всех наследников
 	 * @return \app\models\Contracts[]
 	 */
 	public function getSuccessorsRecursive()
@@ -239,6 +245,7 @@ class Contracts extends \yii\db\ActiveRecord
 	}
 
 	/**
+	 * Предшественник документа (если есть)
 	 * @return \app\models\Contracts
 	 */
 	public function getPredecessor()
@@ -246,42 +253,53 @@ class Contracts extends \yii\db\ActiveRecord
 		if ($this->is_successor) return $this->parent;
 		return null;
 	}
-
+	
 	/**
-	 * Цепь предшественников (не родителей)
-	 * @return \yii\db\ActiveQuery[]
+	 * Первый предшественник документа
+	 * (тот, который актуален на текущий момент, а все остальные устарели)
+	 * @return \app\models\Contracts
 	 */
-	public function getPredecessorChain()
+	public function getFirstPredecessor()
 	{
-		$chain=[];
-		$doc=$this;
-		while (is_object($doc->predecessor)) {
-			$doc=$doc->predecessor;
-			$chain[]=$doc;
+		//cache
+		if (!is_null($this->first_predecessor_cache)) return $this->first_predecessor_cache;
+		//---
+		$this->first_predecessor_cache=$this;
+		while (is_object($predecessor=$this->first_predecessor_cache->predecessor)) {
+			$this->first_predecessor_cache=$predecessor;
 		}
-		return $chain;
+		return $this->first_predecessor_cache;
 	}
-
+	
+	
 	/**
-	 * Цепь всех наследников (не просто потомков) отсортированная по дате
+	 * Цепь всех наследников
+	 * не привязанных к документу других документов, а по сути версий договоров заменяющих друг друга в разные периоды времени
+	 * отсортированная по дате
+	 * начиная с самого последнего, даже если этот документ не крайний наследник
 	 * @return \app\models\Contracts[]
 	 */
 	public function getSuccessorsChain()
 	{
+		//CACHE
 		if (!is_null($this->successors_chain_cache)) return $this->successors_chain_cache;
+		//---
+		
+		//ищем действующего наследника
+		$root=$this->firstPredecessor;
 
-		$root=$this;
-		while (is_object($root->predecessor)) $root=$root->predecessor;
 		//составляем цепочку из всех потомков и их потомков
 		$chain=$root->getSuccessorsRecursive();
+
 		//и себя
 		$chain[]=$root;
+
 		//надо отсортировать по дате
 		usort($chain,function($a,$b){if ($a->date==$b->date) return 0; return ($a->date<$b->date)?-1:1;});
 		//кэшируем
 		return $this->successors_chain_cache=$chain;
 	}
-
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -291,17 +309,47 @@ class Contracts extends \yii\db\ActiveRecord
 			->andWhere(['is_successor'=>false]);
 	}
 	
+	public function getChildrenRecursive()
+	{
+		if (!is_null($this->recursive_children_cache))
+			return $this->recursive_children_cache;
+		
+		$this->recursive_children_cache=[];
+		foreach ($this->childs as $child) {
+			$this->recursive_children_cache[]=$child;
+			if (count($recursive=$child->childrenRecursive))
+				$this->recursive_children_cache=array_merge($this->recursive_children_cache,$recursive);
+		}
+		return $this->recursive_children_cache;
+	}
 	
 	/**
-	 * Возвращает список всех потомков этого документа и его наследников
+	 * Возвращает список всех потомков этого документа и его наследников (новых версий этого же документа)
+	 * только первый уровень
 	 * @return \yii\db\ActiveQuery
 	 */
-	public function getChainChilds()
+	public function getChainChildren()
 	{
 		$chain=$this->successorsChain;
-		$childs=[];
-		foreach ($chain as $item) $childs=array_merge($childs,$item->childs);
-		return $childs;
+		$children=[];
+		foreach ($chain as $item) $children=array_merge($children,$item->childs);
+		return $children;
+	}
+	
+	public function getAllChildren()
+	{
+		if (!is_null($this->all_children_cache))
+			return $this->all_children_cache; //CACHE
+		//----
+		
+		$docs=[];
+		$firstLevel=$this->chainChildren;
+		foreach ($firstLevel as $child) {
+			$docs[]=$child;
+			if (count($secondLevel=$child->allChildren))
+				$docs=array_merge($docs,$secondLevel);
+		}
+		return $this->all_children_cache=$docs;
 	}
 	
 	
@@ -688,4 +736,22 @@ class Contracts extends \yii\db\ActiveRecord
 		<span class="href" onclick="$('#{$model}-{$charge}').val('')">нет</span>
 HTML;
 	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function beforeSave($insert)
+	{
+		if (parent::beforeSave($insert)) {
+			
+			if ($this->is_successor) {
+				//Если этот документ заменяет предыдущую версию договора,
+				//то мы его пришиваем именно к последней версии, чтобы не было
+				//двух документов заменяющих один (это нарушает логику)
+				$this->parent_id=$this->firstPredecessor->id;
+			}
+		}
+		return true;
+	}
+	
 }

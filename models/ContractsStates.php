@@ -17,6 +17,10 @@ class ContractsStates extends \yii\db\ActiveRecord
 
 	public static $title='Состояния док-ов';
 	public static $description='Состояния жизненного цикла оборудования и иных сущностей в предприятии';
+	//состояния неоплаты документа
+	public static $unpaidStates=['state_paywait_full','state_payed_partial'];
+	//состояния полной оплаты документа
+	public static $paidStates=['state_payed_full'];
 	
 	private static $cache=null;
 	private static $unpaidIds=null;
@@ -60,7 +64,7 @@ class ContractsStates extends \yii\db\ActiveRecord
     public static function fetchStatuses() {
     	if (!is_null(static::$cache)) return static::$cache;
     	return static::$cache=static::find()
-			->select(['id','name'])
+			->select(['id','name','code'])
 			->orderBy('name')
 			->all();
 	}
@@ -76,10 +80,11 @@ class ContractsStates extends \yii\db\ActiveRecord
 			/**
 			 * @var $status ContractsStates
 			 */
-			error_log($status->code);
+			//var_dump($status);
+			//echo($status->code.' vs ['.implode(',',$filter).']<br>');
 			if (array_search($status->code,$filter)!==false) $result[]=$status->id;
 		}
-		error_log(implode(',',$filter).' => '.implode(',',$result));
+		//error_log(implode(',',$filter).' => '.implode(',',$result));
 		return $result;
 	}
 	
@@ -88,9 +93,8 @@ class ContractsStates extends \yii\db\ActiveRecord
 	 * @return array
 	 */
 	public static function fetchUnpaidIds() {
-		if (!is_null(static::$unpaidIds)) return static::$unpaidIds;
-		error_log(implode(',',static::filterStatesIds(['state_paywait_full','state_payed_partial'])));
-		return static::$unpaidIds=static::filterStatesIds(['state_paywait_full','state_payed_partial']);
+		if (!is_null(static::$unpaidIds)) return static::$unpaidIds; //cache
+		return static::$unpaidIds=static::filterStatesIds(Self::$unpaidStates);
 	}
 	
 	/**
@@ -98,9 +102,8 @@ class ContractsStates extends \yii\db\ActiveRecord
 	 * @return array
 	 */
 	public static function fetchPaidIds() {
-		if (!is_null(static::$paidIds)) return static::$paidIds;
-		
-		return static::$paidIds=static::filterStatesIds(['state_payed_full']);
+		if (!is_null(static::$paidIds)) return static::$paidIds;	//cache
+		return static::$paidIds=static::filterStatesIds(self::$paidIds);
 	}
 	
 	

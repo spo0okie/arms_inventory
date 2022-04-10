@@ -54,7 +54,15 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 					(в т.ч. НДС: <?= $model->sumCharge.''.$model->currency->symbol ?>)
 				<?php } ?> / мес.
 			</h4>
-		<?php } ?>
+		<?php }
+		//var_dump(\app\models\ContractsStates::fetchUnpaidIds());
+		//var_dump($model->docs[0]->allChildren);
+		if (count($model->totalUnpaid)) {
+			$debt=[];
+			foreach ($model->totalUnpaid as $currency=>$total)
+				$debt[]=$total.''.$currency;
+			echo 'Долг (с '.$model->firstUnpaid.'): '.implode(', ',$debt).'<br />';
+		} ?>
 
 	
 		<?php
