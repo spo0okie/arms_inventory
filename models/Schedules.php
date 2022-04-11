@@ -76,9 +76,10 @@ class Schedules extends \yii\db\ActiveRecord
 	];
 	
 	public $isAclCache=null;
-	
-	public $metaClasses=[];
+	public $metaClasses=[]; //список классов метаданных привязанных к этому расписанию
 	private $weekDaysCache=null;
+	
+	public $defaultItemSchedule;
 	
     /**
      * {@inheritdoc}
@@ -94,7 +95,7 @@ class Schedules extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-			[['name','description'], 'string', 'max' => 255],
+			[['name','description','defaultItemSchedule'], 'string', 'max' => 255],
 			[['start_date','end_date'], 'string', 'max' => 64],
 			[['history'],'safe'],
 			[['override_id'],'integer'],
@@ -122,6 +123,7 @@ class Schedules extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'parent_id' => 'Исходное расписание',
 			'name' => 'Наименование',
+			'defaultItemSchedule' => 'Расписание на день',
 			'description' => 'Пояснение',
 			'history' => 'Заметки',
 			'start_date'=>'Дата начала',
@@ -138,8 +140,9 @@ class Schedules extends \yii\db\ActiveRecord
 	{
 		return [
 			'id' => 'ID',
-			'parent_id' => 'Если указать, то расписание будет повторять исходное, а внесенные дни недели и нестандартные дни будут вносить правки поверх исходного. (т.е. в текущее расписание надо будет внести только отличия от исходного)',
+			'parent_id' => 'Если указать, то расписание будет повторять исходное, а внесенные дни будут правками поверх исходного. (т.е. в текущее расписание надо будет вносить только отличия от исходного)',
 			'name' => 'Как-то надо назвать это расписание',
+			'defaultItemSchedule' => 'Позже можно будет уточнить дни недели и отдельные даты',
 			'description' => 'Пояснение выводится в списке расписаний',
 			'history' => 'В списке расписаний не видны. Чтобы прочитать надо будет проваливаться в расписание',
 		];

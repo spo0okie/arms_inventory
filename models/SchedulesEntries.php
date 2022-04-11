@@ -482,13 +482,26 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		} else return false;
 	}
 	
-	public static function scheduleSamplesHtml() {
+	/**
+	 * Формирует кусок кода для Hint поля $field где должно быть расписание
+	 * @param $field
+	 * @return string
+	 */
+	public static function scheduleSamplesHtmlFor($field) {
 		return <<<HTML
-		<span class="href" onclick="$('#schedulesentries-schedule').val('-')">отсутствует</span> /
-		<span class="href" onclick="$('#schedulesentries-schedule').val('00:00-23:59')">круглосуточно</span> /
-		<span class="href" onclick="$('#schedulesentries-schedule').val('08:00-17:00')">c 8 до 17</span> /
-		<span class="href" onclick="$('#schedulesentries-schedule').val('08:00-12:00,12:45-17:00')">с обедом в 12</span>
+		<span class="href" onclick="$('#$field').val('-')">отсутствует</span> /
+		<span class="href" onclick="$('#$field').val('00:00-23:59')">круглосуточно</span> /
+		<span class="href" onclick="$('#$field').val('08:00-17:00')">c 8 до 17</span> /
+		<span class="href" onclick="$('#$field').val('08:00-12:00,12:45-17:00')">с обедом в 12ч</span>
 HTML;
+	}
+	
+	/**
+	 * то же что выше, но для стандартной формы редактирования SchedulesItem
+	 * @return string
+	 */
+	public static function scheduleSamplesHtml() {
+		return self::scheduleSamplesHtmlFor('schedulesentries-schedule');
 	}
 	
 	function getCellClass(){

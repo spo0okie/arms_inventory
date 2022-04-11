@@ -22,25 +22,65 @@ if (!isset($acl_mode)) $acl_mode=false;
 	$form = ActiveForm::begin();
     if (!$acl_mode) {
     
-    ?>
+    	if ($model->isNewRecord) { ?>
+			<div class="row">
+				<div class="col-md-4">
+					<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+				</div>
+				<div class="col-md-4">
+					<?= $form->field($model, 'parent_id')->widget(Select2::className(), [
+						'data' => \app\models\Schedules::fetchNames(),
+						'options' => [
+							'placeholder' => 'Выберите расписание',
+							//'onchange' => 'if($(this).val()){$("#schedules-defaultitemschedule").prop("disabled",true)} else {$("#schedules-defaultitemschedule").prop("disabled",false)};',
+							'onchange' => '$("#schedules-defaultitemschedule").prop("disabled",($(this).val()))',
+						],
+						'toggleAllSettings'=>['selectLabel'=>null],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => true,
+							'multiple' => false
+						]
+					]) ?>
+				</div>
+				<div class="col-md-4">
+					<?= $form->field($model, 'defaultItemSchedule')
+						->textInput([
+							'maxlength' => true,
+							'onchange' => '$("#schedules-parent_id").prop("disabled",($(this).val()))',
+							'onkeypress' => "this.onchange();",
+   							'onpaste'    => "this.onchange();",
+   							'oninput'    => "this.onchange();",
+						])
+						->hint(
+							$model->getAttributeHint('defaultItemSchedule').'<br />Примеры расписаний: '.
+							\app\models\SchedulesEntries::scheduleSamplesHtmlFor('schedules-defaultitemschedule')
+						)
+					?>
+				</div>
+			</div>
+   
+		<?php } else { ?>
+			<div class="row">
+				<div class="col-md-6">
+					<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+				</div>
+				<div class="col-md-6">
+					<?= $form->field($model, 'parent_id')->widget(Select2::className(), [
+						'data' => \app\models\Schedules::fetchNames(),
+						'options' => ['placeholder' => 'Выберите расписание',],
+						'toggleAllSettings'=>['selectLabel'=>null],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => true,
+							'multiple' => false
+						]
+					]) ?>
+				</div>
+			</div>
+   
+		<?php } ?>
 
-	<div class="row">
-		<div class="col-md-6">
-			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-		</div>
-		<div class="col-md-6">
-			<?= $form->field($model, 'parent_id')->widget(Select2::className(), [
-				'data' => \app\models\Schedules::fetchNames(),
-				'options' => ['placeholder' => 'Выберите расписание',],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-		</div>
-	</div>
 	<div class="row">
 		<div class="col-md-6">
 			<?= $form->field($model, 'description')->textInput(['maxlength' => true]) ?>
