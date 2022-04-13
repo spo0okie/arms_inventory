@@ -66,6 +66,11 @@ class Comps extends \yii\db\ActiveRecord
     {
         return 'comps';
     }
+    
+    public function extraFields()
+	{
+		return ['responsible'];
+	}
 
     /**
      * @inheritdoc
