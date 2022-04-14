@@ -24,5 +24,4 @@ return [
 		'Bday' => 'SAP',
 		'manager_id' => 'SAP',
 	],
-	'schedulesTZShift'=>3600*3,
 ];
