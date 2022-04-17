@@ -37,6 +37,8 @@ $deleteable=!count($arms)&&!count($contracts);
 					</span>
 				<?php } ?>
             </h3>
+			<hr/>
+			<?= $this->render('/lic-types/descr',['model'=>$model->licGroup->licType]) ?>
 
     <?php if (!$static_view) { ?>
         </div>
@@ -45,9 +47,15 @@ $deleteable=!count($arms)&&!count($contracts);
             <h4>Статус:</h4>
             <h3><?= $model->status ?></h3>
             (<?= $model->datePart ?>)
-
-            <?php if (count($model->arms_ids)) { ?>
-                <br />Привязано к АРМ: <?= count($model->arms_ids) ?>
+	
+			<?php if (count($model->arms_ids)) { ?>
+				<br />Привязано к АРМ: <?= count($model->arms_ids) ?>
+			<?php } ?>
+			<?php if (count($model->comps_ids)) { ?>
+				<br />Привязано к ОС: <?= count($model->comps_ids) ?>
+			<?php } ?>
+			<?php if (count($model->users_ids)) { ?>
+				<br />Привязано к Польз: <?= count($model->users_ids) ?>
             <?php } ?>
 	        <?php if (count($model->keys)) { ?>
                 <br/>Внесено ключей: <?= count($model->keys) ?>
@@ -63,10 +71,10 @@ $deleteable=!count($arms)&&!count($contracts);
     <br />
 
     <?= $this->render('/lic-groups/card-att',[
-        'model'=>$model->licGroup,
+        'model'=>$model,
         'static_view'=>$static_view,
-        'arms'=>$arms,
-        'arms_href'=>['/lic-items/unlink','id'=>$model->id]
+		'licGroup'=>$model->licGroup,
+        'unlink_href'=>['/lic-items/unlink','id'=>$model->id]
     ]) ?>
 
 
@@ -74,34 +82,34 @@ $deleteable=!count($arms)&&!count($contracts);
 
     <h4>Лицензионные ключи:</h4>
     <?php
-	    try {
-		    echo GridView::widget([
-			    'dataProvider' => $keys,
-			    'columns' => [
-				    ['class' => 'yii\grid\SerialColumn'],
-				    [
-					    'attribute' => 'key_text',
-					    'format' => 'raw',
-					    'value' => function ($item) use ($renderer, $static_view) {
-						    return $renderer->render('/lic-keys/item', ['model' => $item, 'static_view' => $static_view]);
-					    }
-				    ],
-				    [
-					    'attribute' => 'arms_ids',
-					    'format' => 'raw',
-					    'value' => function ($item) use ($renderer) {
-						    $output = '';
-						    foreach ($item->arms as $arm)
-						        $output .= ' ' . $renderer->render('/arms/item', ['model' => $arm]);
-						    return $output;
-					    }
-				    ],
-					'comment'
-			    ],
-		    ]);
-	    } catch (Exception $e) {
-	        echo 'GridView render error!';
-	    }
+		echo GridView::widget([
+			'dataProvider' => $keys,
+			'columns' => [
+				['class' => 'yii\grid\SerialColumn'],
+				[
+					'attribute' => 'key_text',
+					'format' => 'raw',
+					'value' => function ($item) use ($renderer, $static_view) {
+						return $renderer->render('/lic-keys/item', ['model' => $item, 'static_view' => $static_view]);
+					}
+				],
+				[
+					'attribute' => 'links',
+					'format' => 'raw',
+					'value' => function ($item) use ($renderer) {
+						$output = '';
+						foreach ($item->arms as $arm)
+							$output .= ' ' . $renderer->render('/arms/item', ['model' => $arm,'icon'=>true,'static_view'=>true]);
+						foreach ($item->comps as $comp)
+							$output .= ' ' . $renderer->render('/comps/item', ['model' => $comp,'icon'=>true,'static_view'=>true]);
+						foreach ($item->users as $user)
+							$output .= ' ' . $renderer->render('/users/item', ['model' => $user,'icon'=>true,'static_view'=>true]);
+						return $output;
+					}
+				],
+				'comment'
+			],
+		]);
 
 	    Modal::begin([
 			'id'=>'keys_add_modal',

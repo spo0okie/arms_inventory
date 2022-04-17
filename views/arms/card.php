@@ -99,6 +99,13 @@ if (is_object($model->state)) {
 
 	<span class="divider2"></span>
 	
+	<?php if (strlen($licList=$this->render('/comps/lics_list',['model'=>$model,'static_view'=>$static_view]))) { ?>
+		<div class="data-block tree-level-2">
+			<?= $licList ?>
+		</div>
+	<?php } ?>
+	
+	
     <?= $this->render('arm-history',['model'=>$model,'static_view'=>$static_view]) ?>
 	
 	<?php if (is_object($model->itStaff)) { ?>

@@ -29,7 +29,7 @@ foreach ($columns as $column) {
 				//'header' => 'Инв. номер',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('/comps/item', ['model' => $data]);
+					return $renderer->render('/comps/item', ['model' => $data,'icon'=>true]);
 				},
 				'contentOptions'=>function ($data) use ($column) {return [
 					'class'=>'arm_hostname '.$data->updatedRenderClass

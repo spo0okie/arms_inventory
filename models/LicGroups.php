@@ -9,9 +9,11 @@ use Yii;
  *
  * @property int $id Идентификатор
  * @property array $soft_ids Ссылка на софт
- * @property array $arms_ids Ссылка на софт
- * @property array $keyArmsIds Ссылка на софт
- * @property array $itemArmsIds Ссылка на софт
+ * @property array $arms_ids Ссылка на АРМы
+ * @property array $comps_ids Ссылка на ОСи
+ * @property array $users_ids Ссылка на пользователей
+ * @property array $keyArmsIds Ссылка на АРМы через ключи
+ * @property array $itemArmsIds Ссылка на АРМы через закупки
  * @property string $descr Описание
  * @property string $comment Комментарий
  * @property string $created_at Время создания
@@ -22,7 +24,10 @@ use Yii;
  *
  * @property Soft $soft
  * @property LicItems[] $licItems
+ * @property LicTypes $licType
  * @property Arms[] $arms
+ * @property Comps[] $comps
+ * @property Users[] $users
  */
 class LicGroups extends \yii\db\ActiveRecord
 {
@@ -44,7 +49,7 @@ class LicGroups extends \yii\db\ActiveRecord
     {
         return [
             [['soft_ids', 'lic_types_id', 'descr'], 'required'],
-	        [['soft_ids','arms_ids'], 'each', 'rule'=>['integer']],
+	        [['soft_ids','arms_ids','comps_ids','users_ids'], 'each', 'rule'=>['integer']],
             [['lic_types_id'], 'integer'],
             [['created_at','comment'], 'safe'],
             [['descr',], 'string', 'max' => 255],
@@ -60,7 +65,9 @@ class LicGroups extends \yii\db\ActiveRecord
         return [
             'id' => 'Идентификатор',
 	        'soft_ids' => 'Программные продукты',
-	        'arms_ids' => 'АРМы, куда распределять лицензии',
+			'arms_ids' => 'АРМы, куда распределять лицензии',
+			'comps_ids' => 'ОС, куда распределять лицензии',
+			'users_ids' => 'Пользователи, на которых распределять лицензии',
 	        'lic_types_id' => 'Схема лицензирования',
             'descr' => 'Описание',
             'comment' => 'Комментарий',
@@ -95,31 +102,49 @@ class LicGroups extends \yii\db\ActiveRecord
 				'relations' => [
 					'soft_ids' => 'soft',
 					'arms_ids' => 'arms',
+					'comps_ids' => 'comps',
+					'users_ids' => 'users',
 				]
 			]
 		];
 	}
 
 	/**
-	 * Возвращает набор контрагентов в договоре
-	 * @return array
+	 * @return \yii\db\ActiveQuery
 	 */
 	public function getSoft()
 	{
 		return static::hasMany(Soft::className(), ['id' => 'soft_id'])
 			->viaTable('{{%soft_in_lics}}', ['lics_id' => 'id']);
 	}
-
+	
 	/**
-	 * Возвращает набор контрагентов в договоре
-	 * @return array
+	 * @return \yii\db\ActiveQuery
 	 */
 	public function getArms()
 	{
 		return static::hasMany(Arms::className(), ['id' => 'arms_id'])
 			->viaTable('{{%lic_groups_in_arms}}', ['lics_id' => 'id']);
 	}
-
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getComps()
+	{
+		return static::hasMany(Comps::className(), ['id' => 'comps_id'])
+			->viaTable('{{%lic_groups_in_comps}}', ['lic_groups_id' => 'id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getUsers()
+	{
+		return static::hasMany(Users::className(), ['id' => 'users_id'])
+			->viaTable('{{%lic_groups_in_users}}', ['lic_groups_id' => 'id']);
+	}
+	
 	/**
 	 * Возвращает АРМы из закупок
 	 * @return array

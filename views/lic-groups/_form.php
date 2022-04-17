@@ -14,32 +14,36 @@ if (!isset($modalParent)) $modalParent=null;
 <div class="lic-groups-form">
 
     <?php $form = ActiveForm::begin(); ?>
+	
+	<?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
 
-	<?= $form->field($model, 'soft_ids')->widget(Select2::className(), [
-		'data' => \app\models\Soft::listItemsWithPublisher(),
-		'options' => ['placeholder' => 'Набирайте название для поиска',],
-		'toggleAllSettings'=>['selectLabel'=>null],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => false,
-			'multiple' => true,
-		]
-	]) ?>
-
-	<?= $form->field($model, 'lic_types_id')->widget(Select2::className(), [
-		'data' => \app\models\LicTypes::fetchNames(),
-		'options' => ['placeholder' => 'Выберите схему',],
-		'toggleAllSettings'=>['selectLabel'=>null],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => false,
-			'multiple' => false
-		]
-	]) ?>
-
-    <?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
-
-
+	<div class="row">
+		<div class="col-md-8">
+			<?= $form->field($model, 'soft_ids')->widget(Select2::className(), [
+				'data' => \app\models\Soft::listItemsWithPublisher(),
+				'options' => ['placeholder' => 'Набирайте название для поиска',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => false,
+					'multiple' => true,
+				]
+			]) ?>
+		</div>
+		<div class="col-md-4">
+			<?= $form->field($model, 'lic_types_id')->widget(Select2::className(), [
+				'data' => \app\models\LicTypes::fetchNames(),
+				'options' => ['placeholder' => 'Выберите схему',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => false,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
+	</div>
+	
 	<?= $form->field($model, 'arms_ids')->widget(Select2::className(), [
 		'data' => \app\models\Arms::fetchNames(),
 		'options' => ['placeholder' => 'Выберите АРМы',],
@@ -51,6 +55,28 @@ if (!isset($modalParent)) $modalParent=null;
 		]
 	]) ?>
 	
+	<?= $form->field($model, 'users_ids')->widget(Select2::className(), [
+		'data' => \app\models\Users::fetchWorking(),
+		'options' => ['placeholder' => 'Выберите пользователей',],
+		'toggleAllSettings'=>['selectLabel'=>null],
+		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
+			'allowClear' => true,
+			'multiple' => true
+		]
+	]) ?>
+	
+	<?= $form->field($model, 'comps_ids')->widget(Select2::className(), [
+		'data' => \app\models\Comps::fetchNames(),
+		'options' => ['placeholder' => 'Выберите операционные системы',],
+		'toggleAllSettings'=>['selectLabel'=>null],
+		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
+			'allowClear' => true,
+			'multiple' => true
+		]
+	]) ?>
+
 	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,

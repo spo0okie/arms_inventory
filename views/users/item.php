@@ -9,6 +9,7 @@
 /* @var \app\models\Users $model */
 
 use yii\helpers\Html;
+if (!isset($icon)) $icon=false;
 
 if (is_object($model)) {
 	
@@ -16,9 +17,11 @@ if (is_object($model)) {
 		$title=$model->shortName;
 	else
 		$title=$model->Ename;
+	
+	if ($icon) $title='<span class="fas fa-user"></span>'.$title;
 ?>
 
-<span class="users-item<?= $model->Uvolen?' uvolen':'' ?>"
+<span class="users-item object-item <?= $model->Uvolen?'uvolen':'' ?>"
       qtip_ajxhrf="<?= \yii\helpers\Url::to(['/users/ttip','id'=>$model->id])?>"
 >
 	<?= Html::a($title,['users/view','id'=>$model->id]) ?>

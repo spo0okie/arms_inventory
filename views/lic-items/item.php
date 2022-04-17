@@ -23,7 +23,8 @@ if (is_object($model)) {
             'qtip_ajxhrf'=>$static_view?null:\yii\helpers\Url::to(['/lic-items/ttip','id'=>$model->id]),
 		    //'class'=>$active?"contract_active":"contract_inactive",
         ]
-    ) ?>
-	<?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['lic-items/update','id'=>$model->id])) ?>
+    )
+	?><?=
+	$static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['lic-items/update','id'=>$model->id])) ?>
 </span>
 <?php } else echo "Отсутствует";

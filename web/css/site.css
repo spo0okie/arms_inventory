@@ -523,12 +523,11 @@ span.arms-item {
     font-family: Consolas, monospace;
 }
 
-span.net-ips-item svg.svg-inline--fa,
-span.comps-item svg.svg-inline--fa,
-span.techs-item svg.svg-inline--fa,
-span.arms-item svg.svg-inline--fa{
-    padding-left: 2pt;
+span.object-item svg.svg-inline--fa {
+    margin-left: 1pt;
+    margin-right: 1pt;
 }
+
 
 span.services-item a span.service-icon {
     font-size: x-small;

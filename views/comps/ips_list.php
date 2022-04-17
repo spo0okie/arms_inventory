@@ -24,5 +24,5 @@ if (!isset($glue)) $glue='<br />';
 
 		<h4>MAC адрес(а)</h4>
 		<p>
-			<?= Yii::$app->formatter->asNtext($model->formattedMac) ?>
+			<?= implode($glue,explode("\n",$model->formattedMac)) ?>
 		</p>

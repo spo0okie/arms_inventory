@@ -10,27 +10,19 @@ if (!isset($static_view)) $static_view=false;
 //если не передать отдельно набор привязанных армов, то отрендерятся те что привязаны к группе
 //можно передать АРМы конкретной закупки
 if (!isset($arms)) $arms=$model->arms;
-if (!isset($arms_href)) $arms_href=['/lic-groups/unlink','id'=>$model->id];
+if (!isset($comps)) $comps=$model->comps;
+if (!isset($users)) $users=$model->users;
+if (!isset($licGroup)) $licGroup=$model;
+if (!isset($unlink_href)) $unlink_href=['/lic-groups/unlink','id'=>$model->id];
 
-$soft=$model->soft;
+$soft=$licGroup->soft;
 
 ?>
-<h4>
-    <?= \app\models\LicTypes::$title ?>:
-    <?= Html::a($model->licType->descr,['/lic-types/view','id'=>$model->lic_types_id]) ?>
-    <?= Html::a('<span class="fas fa-pencil-alt"/>',['/lic-types/update','id'=>$model->lic_types_id]) ?>
-</h4>
-<?php if (!$static_view) { ?>
-    <p>
-    	<?= Yii::$app->formatter->asNtext($model->licType->comment) ?>
-    </p>
-<?php } else echo '<br />' ?>
 
-<br />
 <?php if (!$static_view) { ?>
 <div class="row">
     <div class="col-md-6">
-<?php }  ?>
+		<?php }  ?>
 
         <h4>Лицензируемые продукты:</h4>
         <p>
@@ -47,23 +39,46 @@ $soft=$model->soft;
 		    <?php } ?>
         </p>
 
-<?php if (!$static_view) { ?>
+		<?php if (!$static_view) { ?>
     </div>
     <div class="col-md-6">
-<?php } else echo '<br />' ?>
+		<?php } else echo '<br />' ?>
 
-        <h4>Привязанные АРМы:</h4>
+        <h4>Привязки:</h4>
         <p>
-		    <?php foreach ($arms as $arm) { ?>
-			    <?= $this->render('/arms/item',['model'=>$arm]) ?>
-			    <?php if (!$static_view) echo Html::a('<span class="fas fa-trash"/>',array_merge(
-                    ['arms_id'=>$arm->id],
-                    $arms_href
-                ),
-                    ['data'=>['confirm' => 'Отвязать лицензию от АРМ '.$arm->num.'?',]]
-			    ) ?>
-                <br />
-		    <?php } ?>
+			<?php foreach ($arms as $arm) {
+				echo $this->render('/arms/item',['model'=>$arm,'icon'=>true,'static_view'=>true]);
+				if (!$static_view) echo Html::a('<span class="fas fa-trash"/>',
+					array_merge(
+						['arms_id'=>$arm->id],
+						$unlink_href
+					),
+					['data'=>['confirm' => 'Отвязать лицензию от АРМ '.$arm->num.'?',]]
+				);
+				echo '<br />';
+			}
+			foreach ($comps as $comp) {
+				echo $this->render('/comps/item',['model'=>$comp,'icon'=>true,'static_view'=>true]);
+				if (!$static_view) echo Html::a('<span class="fas fa-trash"/>',
+					array_merge(
+						['comps_id'=>$comp->id],
+						$unlink_href
+					),
+					['data'=>['confirm' => 'Отвязать лицензию от OC '.$comp->name.'?',]]
+				);
+				echo '<br />';
+			}
+			foreach ($users as $user) {
+				echo $this->render('/users/item',['model'=>$user,'icon'=>true,'static_view'=>true]);
+				if (!$static_view) echo Html::a('<span class="fas fa-trash"/>',
+					array_merge(
+						['users_id'=>$user->id],
+						$unlink_href
+					),
+					['data'=>['confirm' => 'Отвязать лицензию от пользователя '.$user->Ename.'?',]]
+				);
+				echo '<br />';
+			} ?>
         </p>
 
 <?php if (!$static_view) { ?>

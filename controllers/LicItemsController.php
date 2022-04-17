@@ -195,7 +195,7 @@ class LicItemsController extends Controller
 	 * @return string|\yii\web\Response
 	 * @throws NotFoundHttpException
 	 */
-	public function actionUnlink($id,$soft_id=null,$arms_id=null){
+	public function actionUnlink($id,$soft_id=null,$arms_id=null,$users_id=null,$comps_id=null){
 		$model = $this->findModel($id);
 		$updated = false;
 
@@ -204,13 +204,25 @@ class LicItemsController extends Controller
 			$model->soft_ids=array_diff($model->soft_ids,[$soft_id]);
 			$updated=true;
 		}
-
+		
 		//если нужно то АРМ
 		if (!is_null($arms_id)) {
 			$model->arms_ids=array_diff($model->arms_ids,[$arms_id]);
 			$updated=true;
 		}
-
+		
+		//если нужно то Комп
+		if (!is_null($comps_id)) {
+			$model->comps_ids=array_diff($model->comps_ids,[$comps_id]);
+			$updated=true;
+		}
+		
+		//если нужно то Пользователя
+		if (!is_null($users_id)) {
+			$model->users_ids=array_diff($model->users_ids,[$users_id]);
+			$updated=true;
+		}
+		
 		//сохраняем
 		if ($updated) $model->save();
 

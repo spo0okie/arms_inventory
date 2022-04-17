@@ -17,12 +17,13 @@ $licItems=$model->licItems;
 $soft=$model->soft;
 $deleteable=!count($soft)&&!count($licItems);
 $renderer=$this;
+$licGroup=$model;
 
 ?>
 
 <?php if (!$static_view) { ?>
 <div class="row">
-    <div class="col-md-6" >
+    <div class="col-md-9" >
 <?php } ?>
         <h1>
 			<?= Html::encode($model->descr) ?>
@@ -37,10 +38,11 @@ $renderer=$this;
         <p>
 			<?= Yii::$app->formatter->asNtext($model->comment) ?>
         </p>
+		<?= $this->render('/lic-types/descr',['model'=>$model->licType]) ?>
 
 <?php if (!$static_view) { ?>
     </div>
-    <div class="col-md-6" >
+    <div class="col-md-3" >
 <?php } else echo '<br />' ?>
 
 	    <?= $this->render('usage',['model'=>$model]) ?>

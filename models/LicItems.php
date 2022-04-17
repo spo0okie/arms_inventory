@@ -16,6 +16,8 @@ use Yii;
  * @property string $active_to Окончание периода действия
  * @property string $created_at Время создания
  * @property array $arms_ids
+ * @property array $comps_ids Ссылка на ОСи
+ * @property array $users_ids Ссылка на пользователей
  * @property array $contracts_ids
  * @property int $usages
  * @property float $utilization
@@ -26,6 +28,8 @@ use Yii;
  *
  *
  * @property Arms[] $arms
+ * @property Comps[] $comps
+ * @property Users[] $users
  * @property Arms[] $keyArms
  * @property array $keyArmsIds
  * @property LicKeys[] $keys
@@ -60,6 +64,8 @@ class LicItems extends \yii\db\ActiveRecord
 				'relations' => [
 					'contracts_ids' => 'contracts',
 					'arms_ids' => 'arms',
+					'comps_ids' => 'comps',
+					'users_ids' => 'users',
 				]
 			]
 		];
@@ -72,7 +78,7 @@ class LicItems extends \yii\db\ActiveRecord
     {
         return [
             [['descr', 'count'], 'required'],
-	        [['contracts_ids','arms_ids'], 'each', 'rule'=>['integer']],
+	        [['contracts_ids','arms_ids','comps_ids','users_ids'], 'each', 'rule'=>['integer']],
 	        [['lic_group_id',  'count'], 'integer'],
             [['active_from', 'active_to', 'created_at', 'comment'], 'safe'],
 	        [['descr'], 'string', 'max' => 255],
@@ -98,6 +104,8 @@ class LicItems extends \yii\db\ActiveRecord
 	        'count' => 'Количество приобретенных лицензий',
 	        'comment' => 'Комментарий',
 	        'arms_ids' => 'АРМы, куда распределять лицензии',
+			'comps_ids' => 'ОС, куда распределять лицензии',
+			'users_ids' => 'Пользователи, на которых распределять лицензии',
 	        'contracts_ids' => 'Документы',
 	        'active_from' => 'Дата / Начало периода действия',
 	        'active_to' => 'Окончание периода действия',
@@ -133,15 +141,28 @@ class LicItems extends \yii\db\ActiveRecord
 	public function getFullDescr() {
     	return $this->descr.' ('.$this->datePart.')';
 	}
-
-
+	
+	/**
+	 * Search name
+	 * @return string
+	 */
 	public function getSname()
 	{
 		return $this->licGroup->descr.' /'.$this->fullDescr;
 	}
-
-
-    /**
+	
+	/**
+	 * Display name
+	 * @return string
+	 */
+	public function getDname()
+	{
+		return $this->licGroup->descr.' /'.$this->descr;
+	}
+	
+	
+	
+	/**
      * @return \yii\db\ActiveQuery
      */
     public function getLicGroup()
@@ -152,26 +173,43 @@ class LicItems extends \yii\db\ActiveRecord
 
     /**
 	 * Возвращает набор документов
+	 * @return \yii\db\ActiveQuery
 	 */
 	public function getContracts()
 	{
 		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
 			->viaTable('{{%contracts_in_lics}}', ['lics_id' => 'id']);
 	}
-
+	
 	/**
-	 * Возвращает набор контрагентов в договоре
-	 * @return array
+	 * @return \yii\db\ActiveQuery
 	 */
 	public function getArms()
 	{
 		return static::hasMany(Arms::className(), ['id' => 'arms_id'])
 			->viaTable('{{%lic_items_in_arms}}', ['lics_id' => 'id']);
 	}
-
+	
 	/**
-	 * Возвращает набор контрагентов в договоре
-	 * @return array
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getUsers()
+	{
+		return static::hasMany(Users::className(), ['id' => 'users_id'])
+			->viaTable('{{%lic_items_in_users}}', ['lic_items_id' => 'id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getComps()
+	{
+		return static::hasMany(Comps::className(), ['id' => 'comps_id'])
+			->viaTable('{{%lic_items_in_comps}}', ['lic_items_id' => 'id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
 	 */
 	public function getKeys()
 	{
@@ -179,7 +217,6 @@ class LicItems extends \yii\db\ActiveRecord
 	}
 
 	/**
-	 * Возвращает набор контрагентов в договоре
 	 * @return array
 	 */
 	public function getUsedKeys()
@@ -241,7 +278,7 @@ class LicItems extends \yii\db\ActiveRecord
 	}
 
 	public function getUsages() {
-		return count($this->arms_ids)+count($this->usedKeys);
+		return count($this->arms_ids)+count($this->comps_ids)+count($this->users_ids)+count($this->usedKeys);
 	}
 
 	public function getUtilization() {

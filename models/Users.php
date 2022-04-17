@@ -40,6 +40,9 @@ use Yii;
  * @property Arms[] $armsResponsible
  * @property Materials[] $materials
  * @property Services[] $services
+ * @property LicGroups[] $licGroups
+ * @property LicItems[] $licItems
+ * @property LicKeys[] $licKeys
  */
 class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
@@ -91,6 +94,12 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 		$fields[]='ln'; //last name
 		$fields[]='orgStruct'; //department
 		$fields[]='org'; //org
+		$fields[]='licKeys_ids';
+		$fields[]='licItems_ids';
+		$fields[]='licGroups_ids';
+		$fields[]='licKeys';
+		$fields[]='licItems';
+		$fields[]='licGroups';
 		return $fields;
 	}
 
@@ -445,6 +454,33 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 			$tokens[$i]=mb_substr($tokens[$i],0,1).'.';
 		}
 		return implode(' ',$tokens);
+	}
+	
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getLicGroups()
+	{
+		return static::hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
+			->viaTable('{{%lic_groups_in_users}}', ['users_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getLicItems()
+	{
+		return static::hasMany(LicItems::className(), ['id' => 'lic_items_id'])
+			->viaTable('{{%lic_items_in_users}}', ['users_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getLicKeys()
+	{
+		return static::hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
+			->viaTable('{{%lic_keys_in_users}}', ['users_id' => 'id']);
 	}
 	
 	/**

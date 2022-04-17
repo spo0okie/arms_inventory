@@ -9,12 +9,18 @@ namespace app\models;
  * @property int $id id
  * @property int $lic_items_id Закупка
  * @property array $arms_ids
+ * @property array $comps_ids Ссылка на ОСи
+ * @property array $users_ids Ссылка на пользователей
  * @property string $key_text Ключ
  * @property string $keyShort начало и конец ключа (чтобы не палить везде ключ целиком)
  * @property string $comment Допольнительно
+ * @property string $sname
+ * @property string $dname
 
  * @property \app\models\LicItems $licItem закупка
- * @property \app\models\Arms[] $arms АРМы
+ * @property Arms[] $arms АРМы
+ * @property Comps[] $comps
+ * @property Users[] $users
  */
 class LicKeys extends \yii\db\ActiveRecord
 {
@@ -40,6 +46,8 @@ class LicKeys extends \yii\db\ActiveRecord
 				'class' => \voskobovich\linker\LinkerBehavior::className(),
 				'relations' => [
 					'arms_ids' => 'arms',
+					'comps_ids' => 'comps',
+					'users_ids' => 'users',
 				]
 			]
 		];
@@ -54,7 +62,7 @@ class LicKeys extends \yii\db\ActiveRecord
         return [
             [['lic_items_id', 'key_text'], 'required'],
             [['lic_items_id'], 'integer'],
-	        [['arms_ids'], 'each', 'rule'=>['integer']],
+	        [['arms_ids','comps_ids','users_ids'], 'each', 'rule'=>['integer']],
             [['key_text', 'comment'], 'string'],
         ];
     }
@@ -68,6 +76,9 @@ class LicKeys extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'lic_items_id' => 'Закупка лицензий',
 			'arms_ids' => 'Привязанный(е) АРМ(ы)',
+			'comps_ids' => 'Привязанная(ые) ОС(и)',
+			'users_ids' => 'Привязанный(е) пользователь(и)',
+			'links' => 'Привязки',
 			'key_text' => 'Ключ',
 			'lic_item' => 'Группа/Закупка',
 			'comment' => 'Комментарии',
@@ -82,13 +93,15 @@ class LicKeys extends \yii\db\ActiveRecord
 		return [
 			'id' => 'ID',
 			'lic_items_id' => 'К какой закупке лицензий относятся эти ключи. Тут надо внимательно отнестись, чтобы не вносить путанницу.',
-			'arms_ids' => 'Привязанный(е) АРМ(ы)',
+			'arms_ids' => 'К какому рабочему ПК привязан ключ',
+			'comps_ids' => 'К какой операционной системе привязан ключ',
+			'users_ids' => 'К какому пользователю(пользователям) привязан ключ',
 			'key_text' => 'Текст ключа / серийный номер / чтобы то ни было, что используется для активации продукта',
 			'comment' => 'Все что стоит знать об этом ключе кроме информации в остальных полях',
 		];
 	}
-
-
+	
+	
 	/**
 	 * Возвращает АРМы, к которым может быть привязан ключ
 	 * @return \yii\db\ActiveQuery
@@ -99,8 +112,32 @@ class LicKeys extends \yii\db\ActiveRecord
 		return static::hasMany(Arms::className(), ['id' => 'arms_id'])
 			->viaTable('{{%lic_keys_in_arms}}', ['lic_keys_id' => 'id']);
 	}
-
-
+	
+	
+	/**
+	 * Возвращает АРМы, к которым может быть привязан ключ
+	 * @return \yii\db\ActiveQuery
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function getComps()
+	{
+		return static::hasMany(Comps::className(), ['id' => 'comps_id'])
+			->viaTable('{{%lic_keys_in_comps}}', ['lic_keys_id' => 'id']);
+	}
+	
+	
+	/**
+	 * Возвращает АРМы, к которым может быть привязан ключ
+	 * @return \yii\db\ActiveQuery
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function getUsers()
+	{
+		return static::hasMany(Users::className(), ['id' => 'users_id'])
+			->viaTable('{{%lic_keys_in_users}}', ['lic_keys_id' => 'id']);
+	}
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -117,10 +154,23 @@ class LicKeys extends \yii\db\ActiveRecord
 		if (strlen($this->key_text)<=10) return $this->key_text;
 		return substr($this->key_text,0,5).' ... '.substr($this->key_text,-5,5);
 	}
-
+	
+	/**
+	 * Search name
+	 * @return string
+	 */
 	public function getSname()
 	{
 		return $this->licItem->licGroup->descr.' /'.$this->licItem->fullDescr.' /'.$this->keyShort;
+	}
+	
+	/**
+	 * Display name
+	 * @return string
+	 */
+	public function getDname()
+	{
+		return $this->licItem->licGroup->descr.' /'.$this->licItem->descr.' /'.$this->keyShort;
 	}
 	
 	

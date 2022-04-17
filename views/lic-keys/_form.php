@@ -59,6 +59,28 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			'multiple' => true
 		]
 	])->hint(\app\models\Contracts::fetchArmsHint(is_object($model->licItem)?$model->licItem->contracts_ids:null ,'lickeys'),['id'=>'arms_id-hint']) ?>
+
+	<?= $form->field($model, 'users_ids')->widget(Select2::className(), [
+		'data' => \app\models\Users::fetchWorking(),
+		'options' => ['placeholder' => 'Выберите пользователей',],
+		'toggleAllSettings'=>['selectLabel'=>null],
+		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
+			'allowClear' => true,
+			'multiple' => true
+		]
+	]) ?>
+	
+	<?= $form->field($model, 'comps_ids')->widget(Select2::className(), [
+		'data' => \app\models\Comps::fetchNames(),
+		'options' => ['placeholder' => 'Выберите операционные системы',],
+		'toggleAllSettings'=>['selectLabel'=>null],
+		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
+			'allowClear' => true,
+			'multiple' => true
+		]
+	]) ?>
 	
 	
 	<?= \app\components\TextAutoResizeWidget::widget([

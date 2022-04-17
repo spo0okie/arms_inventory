@@ -69,6 +69,7 @@ if (!mb_strlen($domain))
 
 <div>
 	<?= $this->render('ips_list',['model'=>$model,'static_view'=>$static_view,'glue'=>$ips_glue]) ?>
+	<?= $this->render('lics_list',['model'=>$model,'static_view'=>$static_view]) ?>
 </div>
 
 <?php if (count($services)) {

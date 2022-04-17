@@ -18,6 +18,7 @@ use Yii;
  * @property string $exclude_hw Скрытое из паспорта железо
  * @property string $ignore_hw Игнорировать железо на машине
  * @property string $mac MAC адреса через перенос строки
+ * @property string $formattedMac MAC адреса (приведенные к приличному виду) через перенос строки
  * @property string $ip IP адреса через перенос строки
  * @property string $ip_ignore Игнорировать IP адреса
  * @property int $arm_id Рабочее место
@@ -28,6 +29,8 @@ use Yii;
  * @property array $soft_ids Массив ID ПО, которое установлено на компе
  * @property array $netIps_ids Массив ID IP
  * @property array $comps Массив объектов ПО, которое установлено на компе
+ * @property boolean $isWindows ОС относится к семейству Windows
+ * @property boolean $isLinux ОС относится к семейству Linux
  
  * @property Arms $arm
  * @property Comps[] $dupes
@@ -48,6 +51,9 @@ use Yii;
  * @property \app\models\SwList $swList
  * @property \app\models\Services $services
  * @property Acls[] $acls
+ * @property LicGroups[] $licGroups
+ * @property LicItems[] $licItems
+ * @property LicKeys[] $licKeys
  */
 class Comps extends \yii\db\ActiveRecord
 {
@@ -269,7 +275,7 @@ class Comps extends \yii\db\ActiveRecord
 		return static::getDb()->cache(function($db) {return static::hasMany(Soft::className(), ['id' => 'soft_id'])
 			->viaTable('{{%soft_in_comps}}', ['comp_id' => 'id']);},Manufacturers::$CACHE_TIME);
 	}
-
+	
 	/**
 	 * Возвращает закрепленное на компе ПО
 	 */
@@ -278,8 +284,35 @@ class Comps extends \yii\db\ActiveRecord
 		return static::hasMany(Services::className(), ['id' => 'services_id'])
 			->viaTable('{{%comps_in_services}}', ['comps_id' => 'id']);
 	}
+	
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getLicGroups()
+	{
+		return static::hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
+			->viaTable('{{%lic_groups_in_comps}}', ['comps_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getLicItems()
+	{
+		return static::hasMany(LicItems::className(), ['id' => 'lic_items_id'])
+			->viaTable('{{%lic_items_in_comps}}', ['comps_id' => 'id']);
+	}
 
-
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getLicKeys()
+	{
+		return static::hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
+			->viaTable('{{%lic_keys_in_comps}}', ['comps_id' => 'id']);
+	}
+	
+	
 	public static function findByDomainName($domain_id,$name){
 		$name=mb_strtolower($name);
 		//error_log("searching Domain Name: $domain_id $name");
@@ -567,5 +600,21 @@ class Comps extends \yii\db\ActiveRecord
 			}
 		}
 		return true;
+	}
+	
+	public function getIsWindows()
+	{
+		return (mb_stripos($this->os,'windows')!==false);
+	}
+	
+	public function getIsLinux()
+	{
+		if (mb_stripos($this->os,'debian')!==false) return true;
+		if (mb_stripos($this->os,'centos')!==false) return true;
+		if (mb_stripos($this->os,'ubuntu')!==false) return true;
+		if (mb_stripos($this->os,'fedora')!==false) return true;
+		if (mb_stripos($this->os,'red hat')!==false) return true;
+		if (mb_stripos($this->os,'suse')!==false) return true;
+		return false;
 	}
 }

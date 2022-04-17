@@ -8,13 +8,27 @@ use dosamigos\selectize\SelectizeDropDownList;
 
 if (!isset($static_view)) $static_view=false;
 if (!isset($fqdn)) $fqdn=false;
+if (!isset($icon)) $icon=false;
 
-if (is_object($model)) { ?>
+if (is_object($model)) {
+	$name=$model->renderName($fqdn);
+	if ($icon) {
+		if ($model->isWindows) $name='<span class="fab fa-windows"></span>'.$name;
+		elseif ($model->isLinux) $name='<span class="fab fa-linux"></span>'.$name;
+		//else $name='<span class="far fa-meh-blank"></span>'.$name;
+	}
 	
-<span class="comps-item">
-    <?= Html::a($model->renderName($fqdn),['/comps/view','id'=>$model->id], [
-	    'qtip_ajxhrf'=>\yii\helpers\Url::to(['/comps/ttip','id'=>$model->id]),
-	    //'qtip_class'=>"qtip-wide",
-    ]) ?><?= $static_view?'':Html::a('<i class="fas fa-pencil-alt"></i>',['/comps/update','id'=>$model->id])?>
+	
+	?>
+	
+<span class="comps-item object-item">
+    <?= Html::a(
+			$name,
+			['/comps/view','id'=>$model->id],
+			['qtip_ajxhrf'=>\yii\helpers\Url::to(['/comps/ttip','id'=>$model->id])]
+	)
+	?><?=
+	$static_view?'':Html::a('<i class="fas fa-pencil-alt"></i>',['/comps/update','id'=>$model->id])
+	?>
 </span>
 <?php } else echo "Отсутствует";

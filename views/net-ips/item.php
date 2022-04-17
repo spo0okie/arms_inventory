@@ -14,7 +14,7 @@ if (!empty($model)) {
 	if (!isset($name)) $name=$model->sname;
 	?>
 
-	<span class="net-ips-item <?= $class ?>"
+	<span class="object-item net-ips-item <?= $class ?>"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['net-ips/ttip','id'=>$model->id]) ?>"
 	><?=
 		Html::a($name,['net-ips/view','id'=>$model->id])
