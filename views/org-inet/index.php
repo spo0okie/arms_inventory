@@ -22,7 +22,7 @@ $renderer=$this;
 				'attribute' => 'name',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('item', ['model' => $data]);
+					return $renderer->render('item', ['model' => $data,'static_view'=>false]);
 				}
 			],
 			[
@@ -37,7 +37,7 @@ $renderer=$this;
 				'attribute' => 'networks_id',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return $this->render('/networks/item',['model'=>$data->network]);;
+					return $this->render('/networks/item',['model'=>$data->network, 'static_view'=>true]);
 				},
 			],
 			[
@@ -50,6 +50,20 @@ $renderer=$this;
 	        'account',
 	        'cost',
 	        'charge',
+			[
+				'attribute' => 'totalUnpaid',
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+    				if (is_object($service=$data->service))
+					if (count($service->totalUnpaid)) {
+						$debt = [];
+						foreach ($service->totalUnpaid as $currency => $total)
+							$debt[] = $total . '' . $currency;
+						return implode('<br />', $debt) . '<br />' . floor((time()-strtotime($service->firstUnpaid))/86400).' дней';
+					}
+    				return null;
+				}
+			],
 	        'comment:ntext',
 
             //['class' => 'yii\grid\ActionColumn'],

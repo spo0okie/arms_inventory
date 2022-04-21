@@ -140,7 +140,7 @@ class Networks extends \yii\db\ActiveRecord
 	 */
 	public function getSname()
 	{
-		return $this->text_addr.'('.$this->name.')';
+		return $this->text_addr. ($this->name?('('.$this->name.')'):'');
 	}
 	
 	

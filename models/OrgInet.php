@@ -79,6 +79,7 @@ class OrgInet extends \yii\db\ActiveRecord
 			'contracts_id' => 'Договор',
 			'cost' => 'Стоимость',
 			'charge' => 'в т.ч. НДС',
+			'totalUnpaid' => 'К оплате',
 			'account' => 'Аккаунт / л/с',
 			'history' => 'Заметки',
 		];
