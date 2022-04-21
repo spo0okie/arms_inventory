@@ -272,7 +272,73 @@ class CompsController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-
+	
+	/**
+	 * Найти ОС по имени DOMAIN\computer, computer.domain.local или отдельно передав домен
+	 * @param string      $name
+	 * @param null|string $domain
+	 * @param null|string $ip
+	 * @return array|\yii\db\ActiveRecord
+	 * @throws NotFoundHttpException
+	 */
+	public static function searchModel(string $name, $domain=null, $ip=null){
+		$notFoundDescription="Comp with name '$name'";
+		
+		$name=strtoupper($name);
+		
+		$domainObj=null;
+		if (strpos($name,'.')!==false) {
+			//fqdn passed
+			$tokens=explode('.',$name);
+			$name=$tokens[0];
+			unset($tokens[0]);
+			$domain=implode('.',$tokens);
+			
+			//ищем домен
+			if (is_null($domainObj=\app\models\Domains::find()
+				->where(['fqdn'=>$domain])
+				->one()
+			)) throw new \yii\web\NotFoundHttpException("Domain with fqdn='$domain' not found");
+			
+		} else { //no FQDN
+			if (is_null($domain) && strpos($name,'\\')!==false) {
+				//DOMAIN\computer notation
+				$tokens=explode('\\',$name);
+				$domain=$tokens[0];
+				$name=$tokens[1];
+			}
+			if ($domain && is_null($domainObj=\app\models\Domains::find()
+				->where(['name'=>strtoupper($domain)])
+				->one()
+			)) throw new \yii\web\NotFoundHttpException("Domain '$domain' not found");
+		}
+		
+		
+		$query=\app\models\Comps::find()->where(['name'=>strtoupper($name)]);
+		
+		//добавляем фильтрацию по IP если он есть
+		if (!is_null($ip)) {
+			//если передано несколько адресов (через пробел)
+			$query->andFilterWhere(['or like','ip',explode(' ',trim($ip))]);
+			$notFoundDescription.=" with IP $ip";
+		}
+		
+		$notFoundDescription.=" not found";
+		
+		//добавляем фильтрацию по домену если он есть
+		if (is_object($domainObj)) {
+			//добавляем домен к условию поиска
+			$query->andFilterWhere(['domain_id'=>$domainObj->id]);
+			$notFoundDescription.=" in domain $domain";
+		}
+		
+		$model = $query->one();
+		
+		if ($model === null)
+			throw new \yii\web\NotFoundHttpException($notFoundDescription);
+		
+		return $model;
+	}
 
 	/**
 	 * Обновляем элементы ПО
