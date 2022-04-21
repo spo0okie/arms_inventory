@@ -45,10 +45,7 @@ class LicGroupsController extends \yii\rest\ActiveController
 		}
 		
 		if ($user_login) {
-			$user=\app\models\Users::find()
-				->where(['LOWER(Login)'=>strtolower($user_login)])
-				->one();
-			if (!is_object($user))
+			if (!is_object($user=\app\models\Users::findByLogin($user_login)))
 				$errors[]="User '$user_login' not found";
 			else {
 				foreach ($user->licGroups as $licGroup)

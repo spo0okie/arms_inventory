@@ -381,13 +381,16 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
 	public static function findByLogin($login){
-		$login=mb_strtolower($login);
 		//при поиске по логину предпочитаем сначала искать среди трудоустроенных
-		$list = static::find()->select(['id','Login','Uvolen'])->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])->asArray(true)->all();
-		foreach ($list as $item) {
+		return static::find()
+			->select(['id','Login','Uvolen'])
+			->where(['LOWER(Login)'=>strtolower($login)])
+			->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])
+			->one();
+/*		foreach ($list as $item) {
 			if (!strcmp(mb_strtolower($item['Login']),$login)) return $item['id'];
 		}
-		return null;
+		return null;*/
 	}
 
 	public function getLastLogin() {
