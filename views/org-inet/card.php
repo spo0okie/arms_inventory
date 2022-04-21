@@ -60,13 +60,5 @@ if ($model->network) { ?>
 <h4><?= $model->getAttributeLabel('account')?> </h4>
 <p><?= $model->account ?></p>
 
-
-<hr />
-<h4>Услуга связи</h4>
-<p>
-	<?= $this->render('/services/item',['model'=>$model->service ,'static_view'=>$static_view]) ?>
-</p>
-
-
-<h4>Провайдер</h4>
-<?= is_object($model->partner)?$this->render('/partners/card',['model'=>$model->partner,'static_view'=>$static_view]):'' ?>
+<h3>Заметки:</h3>
+<?= \Yii::$app->formatter->asNtext($model->history) ?>

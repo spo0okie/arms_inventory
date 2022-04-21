@@ -126,7 +126,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 			<h4>Предоставляет ввод(ы) интернет:</h4>
 			<p>
 				<?php foreach ($model->orgInets as $inet)
-					echo $this->render('/org-inet/item',['model'=>$inet,'static_view'=>$static_view]).'<br />';
+					echo $this->render('/org-inet/card',['model'=>$inet,'static_view'=>$static_view]).'<br />';
 				?>
 			</p>
 			<br />
