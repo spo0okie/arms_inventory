@@ -47,7 +47,23 @@ $renderer=$this;
 					return $renderer->render('/services/item', ['model' => $data->service, 'href'=>true]);
 				}
 			],
-	        'account',
+			[
+				'attribute' => 'account',
+				'format' => 'raw',
+				'value' => function ($data) use ($renderer) {
+					/**
+					 * @var $data \app\models\OrgInet
+					 */
+    				if (is_object($data->service) && count($data->service->contracts)) {
+						return $renderer->render('/contracts/item', [
+							'model' => $data->service->contracts[0],
+							'name'=>$data->account,
+							'static_view'=>true
+						]);
+					} else return $data->account;
+					
+				}
+			],
 	        'cost',
 	        'charge',
 			[

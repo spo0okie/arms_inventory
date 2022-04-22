@@ -21,6 +21,7 @@ if (is_object($model)) {
 	if (!isset($active)) $active=!is_object($model->successor);
 
 	if (!isset($selected)) $selected=false;
+	if (!isset($static_view)) $static_view=false;
 ?>
 
 <span class="contracts-item <?= $selected?'contracts_selected':'' ?>">
@@ -32,7 +33,7 @@ if (is_object($model)) {
 			$class=is_object($model->state)?$model->state->code:'';
 			echo "<span class='$class'>{$model->total} {$model->currency->symbol}</span>";
 		} ?>
-	    <?= Html::a(
+	    <?= $static_view?'':Html::a(
 		    '<span class="fas fa-pencil-alt"/>',
 		    ['/contracts/update','id'=>$model->id],
 		    [
