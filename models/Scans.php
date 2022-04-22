@@ -2,8 +2,8 @@
 
 namespace app\models;
 
+use Imagine\Imagick\Imagine;
 use Yii;
-use yii\web\UploadedFile;
 use yii\imagine\Image;
 
 
@@ -96,9 +96,7 @@ class Scans extends \yii\db\ActiveRecord
 		if (!$this->fileExists) {
 			return static::noThumb();
 		} else {
-			return (strtolower($this->format)=='pdf')
-				?
-			(static::pdfThumb()) : $this->idxThumb;
+			$this->idxThumb;
 		}
 	}
 
@@ -193,14 +191,16 @@ class Scans extends \yii\db\ActiveRecord
 	 * @return string
 	 */
 	public function thumb($width,$height){
-		if (strtolower($this->format)=='pdf') return static::$PDF_ORIG_ERR;
 		$thumbName=$this->thumbFname($width,$height);
 		$width=$width?$width:null;
 		$height=$height?$height:null;
 		if (!file_exists($_SERVER['DOCUMENT_ROOT'].$thumbName)) {
 			if (!$this->fileExists)
 				return static::$NO_ORIG_ERR;
-			Image::resize($_SERVER['DOCUMENT_ROOT'] . $this->fullFname, $width, $height)
+			$imagine=new Imagine();
+			$image=$imagine->open($_SERVER['DOCUMENT_ROOT'] . $this->fullFname);
+			
+			Image::resize($image, $width, $height)
 				->save($_SERVER['DOCUMENT_ROOT'] . $thumbName,['quality'=>80]);
 		}
 
@@ -218,7 +218,10 @@ class Scans extends \yii\db\ActiveRecord
 		if (!file_exists($_SERVER['DOCUMENT_ROOT'].$thumb)) {
 			if (!file_exists($_SERVER['DOCUMENT_ROOT'].$orig))
 				return static::$NO_ORIG_ERR;
-			Image::resize($_SERVER['DOCUMENT_ROOT'].$orig, $width, $height)
+			$imagine=new Imagine();
+			$image=$imagine->open($_SERVER['DOCUMENT_ROOT'] . $orig);
+			
+			Image::resize($image, $width, $height)
 				->save($_SERVER['DOCUMENT_ROOT'].$thumb,['quality'=>80]);
 		}
 		return $thumb;

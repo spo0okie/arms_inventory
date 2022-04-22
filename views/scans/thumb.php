@@ -19,7 +19,7 @@ if (!isset($static_view)) $static_view=false;
         } else {
 	        $hint = 'Файл в формате ' . strtoupper($model->format) . '. Размер ' . $model->humanFileSize;
 	        echo Html::a(
-		        Html::img((strtolower($model->format) == 'pdf') ? (\app\models\Scans::pdfThumb()) : $model->idxThumb,
+		        Html::img($model->idxThumb,
                     ['title'=>$hint]),
 		        $model->fullFname
 	        );
