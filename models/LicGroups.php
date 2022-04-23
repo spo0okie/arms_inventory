@@ -236,7 +236,7 @@ class LicGroups extends \yii\db\ActiveRecord
 	}
 
 	public function getUsedCount() {
-		$total=count($this->arms);
+		$total=count($this->arms) + count($this->comps) + count($this->users);
 		foreach ($this->licItems as $item) if ($item->active) $total+=$item->usages;
 		return $total;
 	}
