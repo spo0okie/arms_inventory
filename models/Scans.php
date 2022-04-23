@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Imagine\Image\Box;
 use Imagine\Imagick\Imagine;
 use Yii;
 use yii\imagine\Image;
@@ -14,6 +15,7 @@ use yii\imagine\Image;
  * @property int $contracts_id contracts link
  * @property string $viewThumb
  * @property string $idxThumb
+ * @property string $thumbExt
  * @property string $shortFname
  * @property string $fullFname
  * @property string $fsFname
@@ -172,45 +174,90 @@ class Scans extends \yii\db\ActiveRecord
 		$sz = 'BKMGTP';
 		$factor = floor((strlen($bytes) - 1) / 3);
 		return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];	}
-
+	
 	/**
-	 * Возвращает путь превью файла заданного размера
+	 * Возвращает разрешение превью файла
+	 * для разных форматов оригинала - разные превью (прозрачность/без)
 	 * @return string
 	 */
-	public function thumbFname($width,$height){
+	public function getThumbExt(){
+		$ext=strtolower($this->format);
+		return $ext=='png'||$ext=='pdf'?'png':'jpeg';
+	}
+	
+	/**
+	 * Возвращает разрешение файла
+	 * @param $origin
+	 * @return string
+	 */
+	public static function cutExtension($origin){
+		$parts=pathinfo(strtolower($origin));
+		return isset($parts['extension'])?$parts['extension']:'';
+	}
+	
+	
+	/**
+	 * Возвращает тип файла превью
+	 * @param $ext
+	 * @return string
+	 */
+	public static function formThumbFormat($ext){
+		return $ext=='png'||$ext=='pdf'?'png':'jpeg';
+	}
+	
+	/**
+	 * Возвращает имя файла превью
+	 * @param $origin
+	 * @param $width
+	 * @param $height
+	 * @return string
+	 */
+	public static function formThumbFileName($origin,$width,$height){
+		$parts=pathinfo($origin);
+		//var_dump($parts);
 		$w=$width?$width:'';
 		$h=$height?$height:'';
-		$x='x';
-		$ext=strtolower($this->format)=='png'?'png':'jpg';
-		return '/web/scans/thumbs/'.$this->file."_thumb_$w$x$h.$ext";
+		return '/web/scans/thumbs/'.$parts['basename']."_thumb_{$w}x{$h}.".self::formThumbFormat($parts['extension']);
 	}
-
+	
+	/**
+	 * Возвращает путь превью файла заданного размера
+	 * @param $width
+	 * @param $height
+	 * @return string
+	 */
+	public function thumbFileName($width,$height){
+		return self::formThumbFileName($this->file.'.'.$this->format,$width,$height);
+	}
+	
+	
 	/**
 	 * Возвращает путь к превью файла вписанного в заданный размер
 	 * генерирует превью при необходимости
 	 * @return string
 	 */
 	public function thumb($width,$height){
-		$thumbName=$this->thumbFname($width,$height);
+		$thumbName=$this->thumbFileName($width,$height);
 		$width=$width?$width:null;
 		$height=$height?$height:null;
 		if (!file_exists($_SERVER['DOCUMENT_ROOT'].$thumbName)) {
 			if (!$this->fileExists)
 				return static::$NO_ORIG_ERR;
-			$imagine=new Imagine();
-			$image=$imagine->open($_SERVER['DOCUMENT_ROOT'] . $this->fullFname);
-			
-			Image::resize($image, $width, $height)
-				->save($_SERVER['DOCUMENT_ROOT'] . $thumbName,['quality'=>80]);
+			self::prepThumb($this->fullFname,$thumbName,$width,$height);
 		}
 
 		return $thumbName;
 	}
-
+	
 	/**
 	 * Возвращает путь к превью файла вписанного в заданный размер
 	 * генерирует превью при необходимости
+	 * @param $orig
+	 * @param $thumb
+	 * @param $width
+	 * @param $height
 	 * @return string
+	 * @throws \ImagickException
 	 */
 	public static function prepThumb($orig,$thumb,$width,$height){
 		$width=$width?$width:null;
@@ -218,11 +265,31 @@ class Scans extends \yii\db\ActiveRecord
 		if (!file_exists($_SERVER['DOCUMENT_ROOT'].$thumb)) {
 			if (!file_exists($_SERVER['DOCUMENT_ROOT'].$orig))
 				return static::$NO_ORIG_ERR;
-			$imagine=new Imagine();
-			$image=$imagine->open($_SERVER['DOCUMENT_ROOT'] . $orig);
 			
-			Image::resize($image, $width, $height)
-				->save($_SERVER['DOCUMENT_ROOT'].$thumb,['quality'=>80]);
+			$ext=self::cutExtension($orig);
+			$format=self::cutExtension($thumb);
+			$im=new \Imagick($_SERVER['DOCUMENT_ROOT'] . $orig.($ext=='pdf'?'[0]':''));
+			$im->setImageColorspace(255); // prevent image colors from inverting
+			$im->setimageformat($format);
+			if ($width&&$height) {
+				if ($im->getImageWidth()>$im->getImageHeight())
+					$height=0;
+				else
+					$width=0;
+			}
+			if ($ext=='pdf') {
+				$bg=new \Imagick();
+				$bg->setResolution($im->getImageWidth(),$im->getImageHeight());
+				$bg->newImage($im->getImageWidth(),$im->getImageHeight(),'white');
+				$bg->compositeImage($im,\Imagick::COMPOSITE_OVER,0,0);
+				$bg->flattenImages();
+				$im=$bg;
+			}
+			$im->resizeImage($width,$height,\Imagick::FILTER_LANCZOS,1);
+			//$im->thumbnailimage($width, $height); // width and height
+			$im->writeimage($_SERVER['DOCUMENT_ROOT'] . $thumb);
+			$im->clear();
+			$im->destroy();
 		}
 		return $thumb;
 	}
