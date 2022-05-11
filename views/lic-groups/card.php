@@ -22,6 +22,8 @@ $deleteable=!count($soft)&&!count($licItems);
 $renderer=$this;
 $licGroup=$model;
 
+if (!isset($linksData)) $linksData=null;
+
 ?>
 
 <?php if (!$static_view) { ?>

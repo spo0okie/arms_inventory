@@ -82,7 +82,7 @@ $soft=$licGroup->soft;
 				echo '<br />';
 			} ?>
         </p>*/
-		echo $this->render('/lic-links/obj-list', ['dataProvider' => $linksData]);
+		if (isset($linksData)) echo $this->render('/lic-links/obj-list', ['dataProvider' => $linksData]);
 		
 		if (!$static_view) { ?>
     </div>

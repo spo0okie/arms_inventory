@@ -15,6 +15,7 @@ $renderer=$this;
 $contracts=$model->contracts;
 $arms=$model->arms;
 $deleteable=!count($arms)&&!count($contracts);
+if (!isset($linksData)) $linksData=null;
 ?>
 <?php if (!$static_view) { ?>
     <div class="row">
