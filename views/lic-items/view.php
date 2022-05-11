@@ -15,6 +15,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 <div class="lic-items-view">
-    <?= $this->render('card',['model'=>$model,'keys'=>$keys]) ?>
+    <?= $this->render('card',compact(['model','keys','linksData'])) ?>
 
 </div>

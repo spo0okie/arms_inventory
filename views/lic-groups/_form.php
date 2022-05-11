@@ -77,6 +77,8 @@ if (!isset($modalParent)) $modalParent=null;
 		]
 	]) ?>
 
+	<?= $form->field($model, 'linkComment')->textInput(['maxlength' => true]) ?>
+
 	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,

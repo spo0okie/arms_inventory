@@ -14,7 +14,14 @@ $this->params['breadcrumbs'][] = $this->title;
 //\yii\web\YiiAsset::register($this);
 ?>
 <div class="lic-keys-view">
+	<div class="row">
+		<div class="col-md-4">
 
-    <?= $this->render('card',compact('model')) ?>
+		    <?= $this->render('card',compact('model')) ?>
+		</div>
+		<div class="col-md-8">
+			<h4>Привязки</h4>
+			<?= $this->render('/lic-links/obj-list', ['dataProvider' => $linksData]); ?>
+		</div>
 
 </div>

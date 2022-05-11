@@ -421,7 +421,7 @@ class Arms extends \yii\db\ActiveRecord
 	 */
 	public function getLicItems()
 	{
-		return static::hasMany(LicItems::className(), ['id' => 'lics_id'])
+		return static::hasMany(LicItems::className(), ['id' => 'lic_items_id'])
 			->viaTable('{{%lic_items_in_arms}}', ['arms_id' => 'id']);
 	}
 
@@ -439,7 +439,7 @@ class Arms extends \yii\db\ActiveRecord
 	 */
 	public function getLicGroups()
 	{
-		return static::hasMany(LicGroups::className(), ['id' => 'lics_id'])
+		return static::hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
 			->viaTable('{{%lic_groups_in_arms}}', ['arms_id' => 'id']);
 	}
 

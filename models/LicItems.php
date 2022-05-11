@@ -187,7 +187,7 @@ class LicItems extends \yii\db\ActiveRecord
 	public function getArms()
 	{
 		return static::hasMany(Arms::className(), ['id' => 'arms_id'])
-			->viaTable('{{%lic_items_in_arms}}', ['lics_id' => 'id']);
+			->viaTable('{{%lic_items_in_arms}}', ['lic_items_id' => 'id']);
 	}
 	
 	/**

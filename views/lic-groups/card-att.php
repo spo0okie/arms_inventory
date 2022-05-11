@@ -5,6 +5,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicGroups */
+/* @var $linksData \yii\data\ArrayDataProvider */
 
 if (!isset($static_view)) $static_view=false;
 //если не передать отдельно набор привязанных армов, то отрендерятся те что привязаны к группе
@@ -21,7 +22,7 @@ $soft=$licGroup->soft;
 
 <?php if (!$static_view) { ?>
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-4">
 		<?php }  ?>
 
         <h4>Лицензируемые продукты:</h4>
@@ -41,10 +42,11 @@ $soft=$licGroup->soft;
 
 		<?php if (!$static_view) { ?>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-8">
 		<?php } else echo '<br />' ?>
 
         <h4>Привязки:</h4>
+		<?php /*
         <p>
 			<?php foreach ($arms as $arm) {
 				echo $this->render('/arms/item',['model'=>$arm,'icon'=>true,'static_view'=>true]);
@@ -79,9 +81,10 @@ $soft=$licGroup->soft;
 				);
 				echo '<br />';
 			} ?>
-        </p>
-
-<?php if (!$static_view) { ?>
+        </p>*/
+		echo $this->render('/lic-links/obj-list', ['dataProvider' => $linksData]);
+		
+		if (!$static_view) { ?>
     </div>
 </div>
 <?php } else echo '<br />' ?>

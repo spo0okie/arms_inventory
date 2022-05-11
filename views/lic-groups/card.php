@@ -6,6 +6,9 @@ use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicGroups */
+/* @var $dataProvider \yii\data\ActiveDataProvider */
+/* @var $searchModel \app\models\LicGroupsSearch */
+/* @var $linksData \yii\data\ArrayDataProvider */
 
 if (!isset($static_view)) $static_view=false;
 //если не передать отдельно набор привязанных армов, то отрендерятся те что привязаны к группе
@@ -54,7 +57,7 @@ $licGroup=$model;
 
 <br />
 
-<?= $this->render('card-att',compact(['model','static_view'])) ?>
+<?= $this->render('card-att',compact(['model','static_view','linksData'])) ?>
 
 <br />
 

@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\LicGroups;
 use app\models\LicGroupsSearch;
+use yii\data\ArrayDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -82,11 +83,30 @@ class LicGroupsController extends Controller
 	    if (!isset($query['LicItemsSearch'])) $query['LicItemsSearch']=[];
 	    $query['LicItemsSearch']['lic_group_id']=$id;
 	    $dataProvider = $searchModel->search($query);
+	    
+	    $linksData=new ArrayDataProvider([
+			'allModels' => \app\models\links\LicLinks::findForLic('groups',$id),
+			'key'=>'id',
+			'sort' => [
+				'attributes'=> [
+					'objName',
+					'comment',
+					'changedAt',
+					'changedBy',
+				],
+				'defaultOrder' => [
+					'objName' => SORT_ASC
+				]
+			],
+			'pagination' => false,
+		]);
+			
 
         return $this->render('view', [
             'model' => $this->findModel($id),
 		    'searchModel' => $searchModel,
 		    'dataProvider' => $dataProvider,
+	        'linksData' => $linksData,
 	        //'q'=>$query
 	    ]);
 

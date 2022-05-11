@@ -19,6 +19,7 @@ use Yii;
  * @property string $created_at Время создания
  * @property int $totalCount общее количество лицензий
  * @property int $activeCount общее количество активных лицензий (не просроченных)
+ * @property int $directUsedCount количество лицензий привязанных прямо к группе (не через закупки)
  * @property int $usedCount общее количество используемых лицензий (активных занятых)
  * @property int $freeCount общее количество доступных лицензий (активных не занятых)
  *
@@ -33,6 +34,7 @@ class LicGroups extends \yii\db\ActiveRecord
 {
 	public static $titles='Типы лицензий';
 	public static $title='Тип лицензий';
+	public $linkComment=null; //комментарий, добавляемый при привязке лицензий
 
     /**
      * @inheritdoc
@@ -51,7 +53,7 @@ class LicGroups extends \yii\db\ActiveRecord
             [['soft_ids', 'lic_types_id', 'descr'], 'required'],
 	        [['soft_ids','arms_ids','comps_ids','users_ids'], 'each', 'rule'=>['integer']],
             [['lic_types_id'], 'integer'],
-            [['created_at','comment'], 'safe'],
+            [['created_at','comment','linkComment'], 'safe'],
             [['descr',], 'string', 'max' => 255],
 	        [['lic_types_id'], 'exist', 'skipOnError' => true, 'targetClass' => LicTypes::className(), 'targetAttribute' => ['lic_types_id' => 'id']],
         ];
@@ -70,7 +72,8 @@ class LicGroups extends \yii\db\ActiveRecord
 			'users_ids' => 'Пользователи, на которых распределять лицензии',
 	        'lic_types_id' => 'Схема лицензирования',
             'descr' => 'Описание',
-            'comment' => 'Комментарий',
+			'linkComment' => 'Пояснение к добавляемым привязкам',
+			'comment' => 'Комментарий',
             'created_at' => 'Время создания',
         ];
     }
@@ -88,6 +91,7 @@ class LicGroups extends \yii\db\ActiveRecord
 			'comment' => 'Комментарий. Все что нужно знать об этой группе лицензий. Длина не ограничена.',
 			'arms_ids' => 'Если не назначать закупки напрямую, можно привязывать АРМы к типу лицензий, и на эти рабочие места будут распределяться все доступные лицензии этого типа',
 			'created_at' => 'Время создания',
+			'linkComment' => 'На каком основании эти лицензии закрепляются за этими объектами. Чтобы спустя время не было вопросов, а кто и зачем эту лицензию туда выделил',
 		];
 	}
 	/**
@@ -96,14 +100,33 @@ class LicGroups extends \yii\db\ActiveRecord
 	 */
 	public function behaviors()
 	{
+		$model=$this;
 		return [
 			[
 				'class' => \voskobovich\linker\LinkerBehavior::className(),
 				'relations' => [
 					'soft_ids' => 'soft',
-					'arms_ids' => 'arms',
-					'comps_ids' => 'comps',
-					'users_ids' => 'users',
+					'arms_ids' => [
+						'arms',
+						'updater' => [
+							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
+							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+						],
+					],
+					'comps_ids' => [
+						'comps',
+						'updater' => [
+							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
+							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+						],
+					],
+					'users_ids' => [
+						'users',
+						'updater' => [
+							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
+							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+						],
+					],
 				]
 			]
 		];
@@ -124,7 +147,7 @@ class LicGroups extends \yii\db\ActiveRecord
 	public function getArms()
 	{
 		return static::hasMany(Arms::className(), ['id' => 'arms_id'])
-			->viaTable('{{%lic_groups_in_arms}}', ['lics_id' => 'id']);
+			->viaTable('{{%lic_groups_in_arms}}', ['lic_groups_id' => 'id']);
 	}
 	
 	/**
@@ -229,18 +252,23 @@ class LicGroups extends \yii\db\ActiveRecord
 		foreach ($this->licItems as $item) if ($item->active) $total+=$item->count;
 		return $total;
 	}
+	
 	public function getActiveItemsCount() {
 		$total=0;
 		foreach ($this->licItems as $item) if ($item->active) $total++;
 		return $total;
 	}
-
+	
+	public function getDirectUsedCount() {
+		return count($this->arms) + count($this->comps) + count($this->users);
+	}
+	
 	public function getUsedCount() {
-		$total=count($this->arms) + count($this->comps) + count($this->users);
+		$total=$this->directUsedCount;
 		foreach ($this->licItems as $item) if ($item->active) $total+=$item->usages;
 		return $total;
 	}
-
+	
 	public function getFreeCount() {
 		return $this->activeCount - $this->usedCount;
 	}

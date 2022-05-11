@@ -10,5 +10,5 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 <div class="lic-groups-view">
-    <?= $this->render('card',compact(['model','dataProvider','searchModel'])) ?>
+    <?= $this->render('card',compact(['model','dataProvider','searchModel','linksData'])) ?>
 </div>

@@ -7,6 +7,7 @@ use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
+/* @var $linksData \yii\data\ArrayDataProvider */
 
 if (!isset($static_view)) $static_view=false;
 if (!isset($keys)) $keys=null;
@@ -74,7 +75,8 @@ $deleteable=!count($arms)&&!count($contracts);
         'model'=>$model,
         'static_view'=>$static_view,
 		'licGroup'=>$model->licGroup,
-        'unlink_href'=>['/lic-items/unlink','id'=>$model->id]
+        'unlink_href'=>['/lic-items/unlink','id'=>$model->id],
+		'linksData'=>$linksData,
     ]) ?>
 
 

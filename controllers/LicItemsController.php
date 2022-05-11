@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\LicItems;
 use app\models\LicItemsSearch;
+use yii\data\ArrayDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -108,11 +109,28 @@ class LicItemsController extends Controller
      */
     public function actionView($id)
     {
-        return $this->render('view', [
+	
+		return $this->render('view', [
             'model' => $this->findModel($id),
 	        'keys' => new ActiveDataProvider([
 		        'query' => \app\models\LicKeys::find()->where(['lic_items_id'=>$id]),
-	        ])
+	        ]),
+			'linksData'=>new ArrayDataProvider([
+				'allModels' => \app\models\links\LicLinks::findForLic('items',$id),
+				'key'=>'id',
+				'sort' => [
+					'attributes'=> [
+						'objName',
+						'comment',
+						'changedAt',
+						'changedBy',
+					],
+					'defaultOrder' => [
+						'objName' => SORT_ASC
+					]
+				],
+				'pagination' => false,
+			])
         ]);
     }
 

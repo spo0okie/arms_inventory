@@ -44,6 +44,7 @@
     "kartik-v/yii2-widget-depdrop": "dev-master",
 	"kartik-v/yii2-markdown": "dev-master",
 	"kartik-v/yii2-datecontrol": "dev-master",
+	"kartik-v/yii2-editable": "dev-master",
     "voskobovich/yii2-linker-behavior": "dev-master",
     "edvlerblog/yii2-adldap-module": "^6.0.0",
     "loveorigami/yii2-modal-ajax": "dev-master",
