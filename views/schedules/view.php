@@ -59,6 +59,13 @@ $schedule_id=$model->id;
 				<?= $this->render('exceptions',['model'=>$model])?>
 			</div>
 		</div>
+		<?php if (strlen($model->history)) { ?>
+			<h3>Записная книжка:</h3>
+			<p>
+				<?= Markdown::convert($model->history) ?>
+			</p>
+			<br />
+		<?php } ?>
 	<?php } else { ?>
 
 		<div class="row">
@@ -67,15 +74,15 @@ $schedule_id=$model->id;
 			</div>
 			<div class="col-md-6">
 				<?= $this->render('exceptions',['model'=>$model]) ?>
+				<?php if (strlen($model->history)) { ?>
+					<br /><br />
+					<h3>Записная книжка:</h3>
+					<p>
+						<?= Markdown::convert($model->history) ?>
+					</p>
+				<?php } ?>
 			</div>
 		</div>
 		
-	<?php if (strlen($model->history)) { ?>
-		<h3>Записная книжка:</h3>
-		<p>
-			<?= Markdown::convert($model->history) ?>
-		</p>
-		<br />
-	<?php }
-	} ?>
+	<?php } ?>
 </div>
