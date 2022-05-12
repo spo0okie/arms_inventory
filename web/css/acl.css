@@ -3,6 +3,9 @@ div.acl-card {
     border: none;
 }
 
+div.acl-card p {
+    margin-bottom: 0.4rem;
+}
 
 
 div.ace-card {

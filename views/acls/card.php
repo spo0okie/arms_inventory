@@ -21,7 +21,6 @@ if (!isset($static_view)) $static_view=false;
 				}
 				
 				?>
-				<small><?= Markdown::convert($model->notepad) ?></small>
 			</div>
 			<div class="col-md-3 py-2">
 				<h5 class="card-title"></span><?php
@@ -58,4 +57,5 @@ if (!isset($static_view)) $static_view=false;
 
 			</div>
 		</div>
+	<small><?= Markdown::convert($model->notepad) ?></small>
 </div>
