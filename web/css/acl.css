@@ -1,0 +1,23 @@
+div.acl-card {
+    background-color: #ced4da;
+    border: none;
+}
+
+
+
+div.ace-card {
+    background-color: #838c99;
+    color: white;
+    border: none;
+}
+div.ace-card a {
+    color: white;
+}
+
+div.ace-access-card {
+    background-color: #6c757d;
+}
+
+div.ace-access-buttons {
+    background-color: #495057;
+}

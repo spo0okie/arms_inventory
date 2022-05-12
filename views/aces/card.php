@@ -75,13 +75,29 @@ foreach ($model->accessTypes as $accessType) {
 </table>
 -->
 
-<div class="card w-100 my-2">
+<div class="card w-100 my-2 ace-card shadow-sm g-0">
 	<div class="row g-0">
-		<div class="col-md-9 bg-light bg-opacity-50 rounded-left p-2">
+		<div class="col-md-8 p-2">
 			<?= implode(' <br /> ',$items) ?>
 		</div>
-		<div class="col-md-3 bg-secondary rounded-right p-2">
-			<?= $this->render('item',['model'=>$model,'name'=>implode(', ',$accessTypes),'show_delete'=>!$static_view]) ?>
+		<div class="col-md-4 ace-access-card d-flex flex-column text-white text-center pt-2">
+			<?= implode(', ',$accessTypes) ?>
+			<div class="row mt-auto g-0 ace-access-buttons">
+				<div class="btn-group" role="group">
+					<?=  Html::a('<span class="fas fa-pencil-alt"></span>',['aces/update','id'=>$model->id,'return'=>'previous'],
+						[
+							'class'=>'btn btn-sm text-white'
+						]) ?>
+					<?=  Html::a('<span class="fas fa-trash"/>', ['aces/delete', 'id' => $model->id,'return'=>'previous'], [
+						'data' => [
+							'confirm' => 'Удалить этого участника доступа? Действие необратимо!',
+							'method' => 'post',
+						],
+						'class'=>'btn btn-sm text-white'
+					])?>
+
+				</div>
+			</div>
 		</div>
 	</div>
 

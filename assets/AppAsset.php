@@ -22,6 +22,7 @@ class AppAsset extends AssetBundle
     public $css = [
     	'css/custom.css',
 		'css/site.css',
+		'css/acl.css',
 		'css/codes.private.css',
 	    'css/tooltip-yellow.css',
 	    'css/tooltipster.main.min.css',
