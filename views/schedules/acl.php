@@ -11,7 +11,7 @@ use yii\grid\GridView;
 <div class="schedules-acls">
 	<h2>Доступы</h2>
 	<?php foreach ($model->acls as $acl) { ?>
-		<?= $this->render('/acls/card',['model'=>$acl]) ?><br/>
+		<?= $this->render('/acls/card',['model'=>$acl]) ?>
 	<?php } ?>
 
 	<?= Html::a('Добавить',['acls/create','schedules_id'=>$model->id],['class'=>'btn btn-success'])?>

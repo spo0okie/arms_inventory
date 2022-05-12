@@ -12,21 +12,7 @@ if (!isset($static_view)) $static_view=false;
 
 ?>
 
-<!---
-
-
-
-
-
-<table class="acls-table">
-	<tr>
-		<?= $this->render('tdrow',['model'=>$model]) ?>
-	</tr>
-</table>
-
--->
-
-<div class="card w-100 px-2 acl-card shadow">
+<div class="card w-100 px-2 acl-card shadow mb-1">
 		<div class="row g-2">
 			<div class="col-md-9">
 				<?php
@@ -35,10 +21,27 @@ if (!isset($static_view)) $static_view=false;
 				}
 				
 				?>
-				<?= Markdown::convert($model->notepad) ?>
+				<small><?= Markdown::convert($model->notepad) ?></small>
 			</div>
 			<div class="col-md-3 py-2">
-				<h5 class="card-title"><?= $model->sname ?></h5>
+				<h5 class="card-title"><?php
+					if (strlen($model->comment))
+						echo $model->comment;
+					
+					elseif (($model->comps_id) and is_object($model->comp))
+						echo $this->render('/comps/item',['model'=>$model->comp,'static_view'=>true,'icon'=>true]);
+
+					elseif (($model->techs_id) and is_object($model->tech))
+						echo $this->render('/techs/item',['model'=>$model->tech,'static_view'=>true,'icon'=>true]);
+
+					elseif (($model->services_id) and is_object($model->service))
+						echo $this->render('/services/item',['model'=>$model->ip,'static_view'=>true,'icon'=>true]);
+
+					elseif (($model->ips_id) and is_object($model->ip))
+						echo $this->render('/ips/item',['model'=>$model->service,'static_view'=>true,'icon'=>true]);
+					else
+						echo \app\models\Acls::$emptyComment;
+					?></h5>
 				<div class="row">
 					<div class="btn-group " role="group">
 						<?= Html::a('<span class="fas fa-plus"></span>',['aces/create','acls_id'=>$model->id],['class'=>'btn btn-primary btn-sm']) ?>
