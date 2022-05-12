@@ -24,7 +24,7 @@ if (!isset($static_view)) $static_view=false;
 				<small><?= Markdown::convert($model->notepad) ?></small>
 			</div>
 			<div class="col-md-3 py-2">
-				<h5 class="card-title"><?php
+				<h5 class="card-title"></span><?php
 					if (strlen($model->comment))
 						echo $model->comment;
 					
@@ -35,10 +35,10 @@ if (!isset($static_view)) $static_view=false;
 						echo $this->render('/techs/item',['model'=>$model->tech,'static_view'=>true,'icon'=>true]);
 
 					elseif (($model->services_id) and is_object($model->service))
-						echo $this->render('/services/item',['model'=>$model->ip,'static_view'=>true,'icon'=>true]);
+						echo $this->render('/services/item',['model'=>$model->service,'static_view'=>true,'icon'=>true]);
 
 					elseif (($model->ips_id) and is_object($model->ip))
-						echo $this->render('/net-ips/item',['model'=>$model->service,'static_view'=>true,'icon'=>true,'no_class'=>true]);
+						echo $this->render('/net-ips/item',['model'=>$model->ip,'static_view'=>true,'icon'=>true,'no_class'=>true]);
 					else
 						echo \app\models\Acls::$emptyComment;
 					?></h5>
