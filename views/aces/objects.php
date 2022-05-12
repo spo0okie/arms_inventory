@@ -11,13 +11,13 @@ $items=[];
 
 
 foreach ($model->users as $user)
-	$items[]=$this->render('/users/item',['model'=>$user,'static_view'=>true]);
+	$items[]=$this->render('/users/item',['model'=>$user,'static_view'=>true,'icon'=>true]);
 
 foreach ($model->comps as $comp)
-	$items[]=$this->render('/comps/item',['model'=>$comp,'static_view'=>true]);
+	$items[]=$this->render('/comps/item',['model'=>$comp,'static_view'=>true,'icon'=>true]);
 
 foreach ($model->netIps as $ip)
-	$items[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true]);
+	$items[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true]);
 
 if (!count($items))
 	$items[]='- не задано -';

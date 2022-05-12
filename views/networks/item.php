@@ -5,6 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
 if (!isset($static_view)) $static_view=false;
+if (!isset($icon)) $icon=false;
 
 if (is_object($model)) {
 	if (!isset($name)) $name=$model->sname;
@@ -14,7 +15,7 @@ if (is_object($model)) {
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['networks/ttip','id'=>$model->id]) ?>"
 	>
 		<?=
-		Html::a($name,['networks/view','id'=>$model->id])
+		Html::a(($icon?'<span class="fas fa-network-wired"></span>':'').$name,['networks/view','id'=>$model->id])
 		?><?=
 		$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['networks/update','id'=>$model->id,'return'=>'previous'])
 		?>

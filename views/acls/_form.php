@@ -1,13 +1,44 @@
 <?php
 
+use kartik\tabs\TabsX;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
+//use kartik\form\ActiveForm;
 use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
 /* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
+
+$js=<<<JS
+commentInput="input#acls-comment";
+compInput="select#acls-comps_id";
+techInput="select#acls-techs_id";
+ipInput="select#acls-ips_id";
+srvInput="select#acls-services_id";
+
+function onInputUpdate(input) {
+    //console.log("clearing not "+input+": "+$(input).val())
+    if ($(input).val()) {
+        [commentInput,compInput,techInput,ipInput,srvInput].forEach(item => {
+            if (item !== input) {
+                //console.log("clearing "+item)
+            	$(item).val("").trigger("change");
+            }
+        })
+	}
+};
+JS;
+
+$this->registerJs($js,yii\web\View::POS_HEAD);
+
+$selectOptions= [
+	'dropdownParent' => $modalParent,
+	'allowClear' => false,
+	'multiple' => false,
+]
+
 ?>
 
 <div class="acls-form">
@@ -23,87 +54,84 @@ if (!isset($modalParent)) $modalParent=null;
 	]); ?>
 	<div class="row">
 		<div class="col-md-6">
-			<h3>Выберите ресурс к которому предоставляется доступ</h3>
-			<?= $form->field($model, 'comps_id')->widget(Select2::className(), [
-				'data' => \app\models\Comps::fetchNames(),
-				'options' => [
-					'placeholder' => 'Выберите ОС',
-					'onchange' => 'if ($("select#acls-comps_id").val()) {'.
-						'$("select#acls-techs_id").val("").trigger("change");'.
-						'$("select#acls-ips_id").val("").trigger("change");'.
-						'$("select#acls-services_id").val("").trigger("change"); }',
+			<h3>Выберите один ресурс к которому предоставляется доступ</h3>
+			<?= TabsX::widget([
+				'items'=>[
+					[
+						'label'=>'ОС',
+						'content'=>$form->field($model, 'comps_id')->widget(Select2::className(), [
+							'data' => \app\models\Comps::fetchNames(),
+							'options' => [
+								'placeholder' => 'Выберите ОС',
+								'onchange' => 'onInputUpdate(compInput)',
+							],
+							'pluginOptions' => $selectOptions,
+						]),
+						'active'=>(bool)$model->comps_id
+					],
+					[
+						'label'=>'Оборудование',
+						'content'=>$form->field($model, 'techs_id')->widget(Select2::className(), [
+							'data' => \app\models\Techs::fetchNames(),
+							'options' => [
+								'placeholder' => 'Выберите оборудование',
+								'onchange' => 'onInputUpdate(techInput)',
+							],
+							'pluginOptions' => $selectOptions,
+						]),
+						'active'=>(bool)$model->techs_id
+					],
+					[
+						'label'=>'IP адрес',
+						'content'=>$form->field($model, 'ips_id')->widget(Select2::className(), [
+							'data' => \app\models\NetIps::fetchNames(),
+							'options' => [
+								'placeholder' => 'Выберите IP',
+								'onchange' => 'onInputUpdate(ipInput)',
+							],
+							'pluginOptions' => $selectOptions,
+						]),
+						'active'=>(bool)$model->ips_id
+					],
+					[
+						'label'=>'Сервис',
+						'content'=>$form->field($model, 'services_id')->widget(Select2::className(), [
+							'data' => \app\models\Services::fetchNames(),
+							'options' => [
+								'placeholder' => 'Выберите сервис',
+								'onchange' => 'onInputUpdate(srvInput)',
+							],
+							'pluginOptions' => $selectOptions,
+						]),
+						'active'=>(bool)$model->services_id
+					],
+					[
+						'label'=>'Другое',
+						'content'=>$form->field($model, 'comment')->textInput([
+							'maxlength' => true,
+							'onchange'=>'onInputUpdate(commentInput)'
+						]),
+						'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->services_id)
+					],
 				],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false,
-				]
+				'position'=>TabsX::POS_ABOVE,
+				//'align'=>TabsX::ALIGN_CENTER,
+				'encodeLabels'=>false,
+				'bordered'=>true,
+				
 			]) ?>
-			
-			<?= $form->field($model, 'techs_id')->widget(Select2::className(), [
-				'data' => \app\models\Techs::fetchNames(),
-				'options' => [
-					'placeholder' => 'Выберите оборудование',
-					'onchange' => 'if ($("select#acls-techs_id").val()) {'.
-						'$("select#acls-comps_id").val("").trigger("change");'.
-						'$("select#acls-ips_id").val("").trigger("change");'.
-						'$("select#acls-services_id").val("").trigger("change"); }',
-				],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-			
-			<?= $form->field($model, 'ips_id')->widget(Select2::className(), [
-				'data' => \app\models\NetIps::fetchNames(),
-				'options' => [
-					'placeholder' => 'Выберите IP',
-					'onchange' => 'if ($("select#acls-ips_id").val()) {'.
-						'$("select#acls-comps_id").val("").trigger("change");'.
-						'$("select#acls-techs_id").val("").trigger("change");'.
-						'$("select#acls-services_id").val("").trigger("change"); }',
-				],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-			
-			<?= $form->field($model, 'services_id')->widget(Select2::className(), [
-				'data' => \app\models\Services::fetchNames(),
-				'options' => [
-					'placeholder' => 'Выберите сервис',
-					'onchange' => 'if ($("select#acls-services_id").val()) {'.
-						'$("select#acls-comps_id").val("").trigger("change");'.
-						'$("select#acls-ips_id").val("").trigger("change");'.
-						'$("select#acls-tech_id").val("").trigger("change");}',
-				],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-			<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
-		</div>
-		<div class="col-md-6">
-			<h3>Записная книжка по доступу к этому ресурсу</h3>
 			<?= $form->field($model, 'notepad')->widget(\kartik\markdown\MarkdownEditor::className(), [
 				'showExport'=>false
 			]) ?>
+		</div>
+		<div class="col-md-6">
 
 		</div>
 	</div>
-
-
-	<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+	
+	
+	<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
+	<?= Html::submitButton($model->isNewRecord?'Предоставить доступ':'Применить', ['class' => 'btn btn-success']) ?>
 
     <?php ActiveForm::end(); ?>
 

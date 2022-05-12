@@ -21,8 +21,9 @@ $renderer=$this;
         <?= Html::a('Добавить', ['create-acl'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php //echo $this->render('_search', ['model' => $searchModel]); ?>
 
+	
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -30,26 +31,6 @@ $renderer=$this;
             //['class' => 'yii\grid\SerialColumn'],
 
             //'id',
-            [
-                'attribute'=>'name',
-                'format'=>'raw',
-                'value'=>function($data) {
-                    return Html::a($data->name,['view','id'=>$data->id]);
-                }
-            ],
-			[
-				'attribute'=>'resources',
-                'format'=>'raw',
-                'value'=>function($data) use ($renderer) {
-    				$output=[];
-    				if (count($data->acls)) foreach ($data->acls as $acl) {
-    					$output[]=$renderer->render('/acls/item',['model'=>$acl,'static_view'=>true]);
-					}
-                    //return implode(',',$output);
-					return implode('<br />',$output);
-	
-				}
-			],
 			[
 				'attribute'=>'objects',
 				'format'=>'raw',
@@ -66,10 +47,22 @@ $renderer=$this;
 				}
 			],
 			[
-				'attribute'=>'comments',
+				'attribute'=>'resources',
+                'format'=>'raw',
+                'value'=>function($data) use ($renderer) {
+    				$output=[];
+    				if (count($data->acls)) foreach ($data->acls as $acl) {
+    					$output[]=$renderer->render('/acls/item',['model'=>$acl,'static_view'=>true]);
+					}
+					return implode('<br />',$output);
+	
+				}
+			],
+			[
+				'attribute'=>'name',
 				'format'=>'raw',
 				'value'=>function($data) use ($renderer) {
-					$output=[];
+					$output=[Html::a($data->name,['view','id'=>$data->id])];
 					if ($data->description) $output[]=$data->description;
 					if ($data->history) $output[]=Markdown::convert($data->history);
 					return implode('<br />',$output);

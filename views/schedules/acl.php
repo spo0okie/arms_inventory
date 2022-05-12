@@ -10,22 +10,9 @@ use yii\grid\GridView;
 ?>
 <div class="schedules-acls">
 	<h2>Доступы</h2>
-	<table class="acls-table">
-		<tr>
-			<th>
-				Ресурс
-			</th>
-			<th>
-				Тип доступа
-			</th>
-			<th>
-				Субъект
-			</th>
-		</tr>
-		<?php foreach ($model->acls as $acl) { ?>
-			<?= $this->render('/acls/tdrow',['model'=>$acl]) ?><br/>
-		<?php } ?>
-		
-	</table>
+	<?php foreach ($model->acls as $acl) { ?>
+		<?= $this->render('/acls/card',['model'=>$acl]) ?><br/>
+	<?php } ?>
+
 	<?= Html::a('Добавить',['acls/create','schedules_id'=>$model->id],['class'=>'btn btn-success'])?>
 </div>

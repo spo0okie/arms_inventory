@@ -39,6 +39,7 @@
 	"kartik-v/bootstrap-fileinput": "dev-master",
 	"kartik-v/yii2-widget-fileinput": "dev-master",
 	"kartik-v/yii2-nav-x": "dev-master",
+	"kartik-v/yii2-tabs-x": "dev-master",
 	"kartik-v/yii2-widget-typeahead": "dev-master",
     "kartik-v/yii2-grid": "dev-master",
     "kartik-v/yii2-widget-depdrop": "dev-master",

@@ -85,10 +85,11 @@ echo GridView::widget([
 			'format'=>'raw',
 			'value'=>function($item) use ($renderer){
 				return Html::a('<span class="fas fa-trash"/>',
-					array_merge(
-						['/lic-'.$item->licType.'/unlink','id'=>$item->lic->id],
-						[$item->objType.'_id'=>$item->object->id]
-					),
+					[
+						'/lic-'.$item->licType.'/unlink',
+						'id'=>$item->lic->id,
+						$item->objType.'_id'=>$item->object->id
+					],
 					[
 						'data'=>['confirm' => 'Отвязать лицензию от '.$item->objName.'?',],
 						'qtip_ttip'=>'Удалить закрепление лицензии'
