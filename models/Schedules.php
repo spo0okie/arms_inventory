@@ -592,6 +592,7 @@ class Schedules extends \yii\db\ActiveRecord
 		$periods=$schedule->schedulePeriods;
 		//var_dump($periods);
 		$now=\app\models\SchedulesEntries::strTimestampToMinutes($time);
+		//var_dump($now);
 		foreach ($periods as $period) {
 			$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
 			if (self::intervalCheck($interval,$now)) return	1;

@@ -346,7 +346,12 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	 * @return false|int
 	 */
 	public static function strTimestampToMinutes($timestamp) {
-		if (count($tokens=explode(':',$timestamp))!==2) return false;
+		$tokens=explode(':',$timestamp);
+		
+		if (count($tokens)===3) unset($tokens[2]); //выкидываем секунды если вдруг они есть
+		
+		if (count($tokens)!==2) return false; //что-то пошло не так
+		
 		return 60*(int)$tokens[0]+(int)$tokens[1];
 	}
 	
@@ -450,7 +455,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		
 		if (date('Y-m-d',strtotime($this->date)) == date('Y-m-d',strtotime($this->date_end ))) {
 			//начинается и кончается в один день
-			return date('Y-m-d',strtotime($this->date)).' '.date('H:i',strtotime($this->date)).'-'.date('H:i',strtotime($this->date));
+			return date('Y-m-d',strtotime($this->date)).' '.date('H:i',strtotime($this->date)).'-'.date('H:i',strtotime($this->date_end));
 		} else {
 			return
 				(is_null($this->date)?'нет начала':date('Y-m-d',strtotime($this->date))).

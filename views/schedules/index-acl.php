@@ -89,8 +89,7 @@ $renderer=$this;
 					 * @var $data \app\models\Schedules
 					 */
 					$output=[
-						date('Y-m-d').' '.date('H:i:s'),
-						//var_dump($data->getDateSchedule(date('Y-m-d')))
+						date('Y-m-d').' '.date('H:i'),
 					];
 					if (is_array($periods=$data->findPeriods(null,null)) && count($periods))
 						foreach ($periods as $period) {
