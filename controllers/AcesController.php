@@ -114,9 +114,12 @@ class AcesController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($id,$ajax=0)
     {
-        return $this->render('view', [
+        return $ajax?$this->renderAjax('card', [
+			'model' => $this->findModel($id),
+		]):
+			$this->render('view', [
             'model' => $this->findModel($id),
         ]);
     }
@@ -126,17 +129,29 @@ class AcesController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate($acls_id)
+    public function actionCreate($acls_id,$ajax=0,$modal=null)
     {
         $model = new Aces();
         $model->acls_id = $acls_id;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (Yii::$app->request->isAjax) {
+				Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+				return [
+					'success' => true,
+				];
+			}
+	
 			//if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
             return $this->redirect(['acls/view', 'id' => $model->acls_id]);
         }
 
-        return $this->render('create', [
+        return $ajax?
+			$this->renderAjax('_form', [
+				'model' => $model,
+				'modalParent'=>'#'.$modal
+			]):
+			$this->render('create', [
             'model' => $model,
         ]);
     }
@@ -148,18 +163,30 @@ class AcesController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id,$ajax=0,$modal=null)
     {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (Yii::$app->request->isAjax) {
+				Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+				return [
+					'success' => true,
+				];
+			}
+
 			//if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['acl/view', 'id' => $model->acls_id]);
         }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        return $ajax?
+			$this->renderAjax('_form', [
+				'model' => $model,
+				'modalParent'=>'#'.$modal
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
     }
 
     /**
@@ -171,9 +198,19 @@ class AcesController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+    	$ace=$this->findModel($id);
+    	$acl=$ace->acl;
+    	
+        $ace->delete();
+	
+		if (Yii::$app->request->get('return')=='previous')
+			return $this->redirect(Url::previous());
+		
+		if (is_object($acl) && $acl->schedules_id)
+			return $this->redirect(['/schedules/view','id'=>$acl->schedules_id]);
+		
+		
+		$this->redirect(['/schedules/index-acl']);
     }
 
     /**

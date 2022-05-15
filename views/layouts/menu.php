@@ -70,6 +70,7 @@ NavBar::begin([
 				'items' => [
 					['label' => \app\models\Acls::$titles, 'url' => ['/acls/index']],
 					['label' => \app\models\Acls::$scheduleTitles, 'url' => ['/schedules/index-acl']],
+					['label' => \app\models\AccessTypes::$titles, 'url' => ['/access-types/index']],
 				]
 			]:'',
 			\app\models\Users::isViewer()?

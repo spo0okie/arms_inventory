@@ -1,18 +1,20 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\DetailView;
-use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
 
+$acls=[];
+foreach ($model->acls as $acl)
+	$acls[$acl->sname]=$this->render('/acls/card',['model'=>$acl]);
+
+ksort($acls,SORT_STRING);
 ?>
 <div class="schedules-acls">
 	<h2>Доступы</h2>
-	<?php foreach ($model->acls as $acl) { ?>
-		<?= $this->render('/acls/card',['model'=>$acl]) ?>
-	<?php } ?>
+	<?= implode(' ',$acls)?>
+	
 
-	<?= Html::a('Добавить',['acls/create','schedules_id'=>$model->id],['class'=>'btn btn-success'])?>
+	<?= Html::a('Добавить',['acls/create','schedules_id'=>$model->id],['class'=>'btn btn-success pull-right'])?>
 </div>

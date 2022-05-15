@@ -14,6 +14,7 @@ if (!isset($static_view)) $static_view=false;
 
 
 $this->render('breadcrumbs',['model'=>$model,'static_view'=>true]);
+\yii\helpers\Url::remember();
 
 \yii\web\YiiAsset::register($this);
 

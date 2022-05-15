@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 //use kartik\form\ActiveForm;
 use kartik\select2\Select2;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
@@ -37,8 +38,8 @@ $selectOptions= [
 	'dropdownParent' => $modalParent,
 	'allowClear' => false,
 	'multiple' => false,
-]
-
+];
+echo(Url::previous().' vs '.Url::current().' : '.strcmp(Url::previous(),Url::current([],false)));
 ?>
 
 <div class="acls-form">
@@ -46,7 +47,7 @@ $selectOptions= [
     <?php $form = ActiveForm::begin([
 		//'enableClientValidation' => false,	//чтобы отключить валидацию через JS в браузере
 		//'enableAjaxValidation' => true,		//чтобы включить валидацию на сервере ajax запросы
-		//'id' => 'acls-form',
+		'id' => 'acls-form',
 		//'validationUrl' => $model->isNewRecord?	//URL валидации на стороне сервера
 			//['acls/validate']:	//для новых моделей
 			//['acls/validate','id'=>$model->id], //для существующих
@@ -125,13 +126,45 @@ $selectOptions= [
 			]) ?>
 		</div>
 		<div class="col-md-6">
-
+			<h3>Выберите кому предоставляется доступ к ресурсу</h3>
+			<?php if ($model->isNewRecord) { ?>
+				<div class="text-center" >
+					<img class="exclamation-sign" src="/web/img/exclamation-mark.svg" /><br/>
+				</div>
+				<div class="text-center" >
+					Чтобы добавлять элементы списка контроля доступа, нужно сначала сохранить список
+				</div>
+			<?php } else { ?>
+			<div id="aces-list">
+				
+				<?php foreach ($model->aces as $ace) {
+					echo $this->render('/aces/card', ['model' => $ace]);
+				}?>
+			</div>
+			
+				<?= Html::a('<span class="fas fa-plus"></span>', [
+					'aces/create',
+					'acls_id' => $model->id,
+					'ajax' => 1,
+					'modal' => 'modal_form_loader'
+				], [
+					'class' => 'btn btn-primary btn-sm open-in-modal-form',
+					'title' => 'Добавление элемента в список доступа',
+					'data-update-element' => '#aces-list',
+					'data-update-url' => Url::to(['/acls/view', 'id' => $model->id, 'ajax' => 1,'aceCards'=>1]),
+				]);
+			}?>
 		</div>
 	</div>
 	
 	
 	<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
-	<?= Html::submitButton($model->isNewRecord?'Предоставить доступ':'Применить', ['class' => 'btn btn-success']) ?>
+	<?= Html::Button('Применить',	[
+			'class' => 'btn btn-primary',
+			'onClick' => '$("form#acls-form").attr("action",
+				$("#acls-form").attr("action") + ($("#acls-form").attr("action").indexOf("?")>=0?"&":"?") +	"accept=1"
+			); $("form#acls-form").trigger("submit");'
+		]) ?>
 
     <?php ActiveForm::end(); ?>
 

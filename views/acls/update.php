@@ -10,6 +10,7 @@ $this->title = 'Редактирование списка доступа';
 $this->render('breadcrumbs',['model'=>$model]);
 
 $this->params['breadcrumbs'][] = $this->title;
+\yii\helpers\Url::remember();
 
 ?>
 <div class="acls-update">

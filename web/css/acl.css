@@ -1,3 +1,4 @@
+span.acl-card,
 div.acl-card {
     background-color: #ced4da;
     border: none;
@@ -7,7 +8,7 @@ div.acl-card p {
     margin-bottom: 0.4rem;
 }
 
-
+span.ace-card,
 div.ace-card {
     background-color: #838c99;
     color: white;
@@ -21,6 +22,10 @@ div.ace-access-card {
     background-color: #6c757d;
 }
 
-div.ace-access-buttons {
-    background-color: #495057;
-}
+button.ace-access-buttons,
+a.ace-access-buttons {background-color: #495057;}
+
+button.ace-access-buttons:hover,
+a.ace-access-buttons:hover {background-color: #4f5a69;}
+
+div.acls-form img.exclamation-sign {width: 60pt; height: 60pt; margin-top: 60pt;}

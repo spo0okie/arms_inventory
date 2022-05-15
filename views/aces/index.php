@@ -5,7 +5,6 @@ use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-\yii\helpers\Url::remember();
 
 $this->title = \app\models\Aces::$titles;
 $this->params['breadcrumbs'][] = $this->title;

@@ -79,25 +79,39 @@ class Aces extends \yii\db\ActiveRecord
 			}],
         ];
     }
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'acls_id' => 'ACL',
-            'ips' => \app\models\NetIps::$titles,
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function attributeLabels()
+	{
+		return [
+			'id' => 'ID',
+			'acls_id' => 'ACL',
+			'ips' => \app\models\NetIps::$titles,
 			'ips_ids' => \app\models\NetIps::$titles,
 			'comps_ids' => 'Компьютеры',
 			'access_types_ids' => \app\models\AccessTypes::$titles,
 			'users_ids' => \app\models\Users::$titles,
-            'comment' => 'Комментарий',
-            'notepad' => 'Записная книжка',
-        ];
-    }
-
+			'comment' => 'Прочее',
+			'notepad' => 'Записная книжка',
+		];
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function attributeHints()
+	{
+		return [
+			//'ips' => 'С которых предоставляется доступ',
+			//'comps_ids' => 'С которых предоставляется доступ',
+			//'users_ids' => 'Которым предоставляется доступ',
+			'comment' => 'Все что не получилось описать через списки выше',
+			'notepad' => 'Если есть какие-то заметки, то можно их записать здесь',
+		];
+	}
+	
 	/**
 	 * Name for search
 	 * @return string

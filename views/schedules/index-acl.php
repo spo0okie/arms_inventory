@@ -35,15 +35,28 @@ $renderer=$this;
 				'attribute'=>'objects',
 				'format'=>'raw',
 				'value'=>function($data) use ($renderer) {
-					$output=[];
+					$items=[];
 					if (count($data->acls)) foreach ($data->acls as $acl) {
 						foreach ($acl->aces as $ace) {
-							//$output[]=$renderer->render('/aces/objects',['model'=>$ace,'glue'=>',']);
-							$output[]=$renderer->render('/aces/objects',['model'=>$ace,'glue'=>'<br />']);
+							foreach ($ace->users as $user)
+								$items[$user->shortName]=$this->render('/users/item',['model'=>$user,'static_view'=>true,'icon'=>true,'short'=>true]);
+							
+							foreach ($ace->comps as $comp)
+								$items[$comp->name]=$this->render('/comps/item',['model'=>$comp,'static_view'=>true,'icon'=>true]);
+							
+							foreach ($ace->netIps as $ip)
+								$items[$ip->sname]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true,'no_class'=>true]);
+							
+							if (strlen($ace->comment))
+								$items[$ace->comment]=$ace->comment;
+							
+							ksort($items,SORT_STRING);
 						}
 					}
+					ksort($items,SORT_STRING);
+					
 					//return implode(',',$output);
-					return implode('<br />',$output);
+					return implode('<br />',$items);
 				}
 			],
 			[
@@ -52,7 +65,7 @@ $renderer=$this;
                 'value'=>function($data) use ($renderer) {
     				$output=[];
     				if (count($data->acls)) foreach ($data->acls as $acl) {
-    					$output[]=$renderer->render('/acls/item',['model'=>$acl,'static_view'=>true]);
+    					$output[$acl->sname]=$renderer->render('/acls/resource',['model'=>$acl,'static_view'=>true]);
 					}
 					return implode('<br />',$output);
 	

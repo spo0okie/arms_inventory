@@ -106,7 +106,7 @@ class Acls extends \yii\db\ActiveRecord
 			return $this->comment;
 		
 		if (($this->comps_id) and is_object($this->comp))
-			return $this->comp->name;
+			return $this->comp->renderName();
 		
 		if (($this->techs_id) and is_object($this->tech))
 			return $this->tech->num;

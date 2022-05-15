@@ -12,6 +12,8 @@ if (!isset($modalParent)) $modalParent=null;
 
 ?>
 
+<script>console.log('zjop!')</script>
+
 <div class="aces-form">
 
     <?php $form = ActiveForm::begin([
@@ -23,9 +25,9 @@ if (!isset($modalParent)) $modalParent=null;
 			//['aces/validate','id'=>$model->id], //для существующих
 		//'action' => Yii::$app->request->getQueryString(),
 	]); ?>
+	<div class="for-alert"></div>
 	<div class="row">
 		<div class="col-md-6">
-			<h3>Кому предоставляется</h3>
 			<?= $form->field($model, 'users_ids')->widget(Select2::classname(), [
 				'data' => \app\models\Users::fetchWorking(),
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
@@ -52,48 +54,35 @@ if (!isset($modalParent)) $modalParent=null;
 				'form' => $form,
 				'model' => $model,
 				'attribute' => 'ips',
-				'lines' => 4,
+				'lines' => 1,
 			]) ?>
+			
+			<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+
 			<hr />
-			<?php
-			/*echo $form->field($model, 'access_types_ids')->widget(Select2::classname(), [
-				'data' => \app\models\AccessTypes::fetchNames(),
-				'options' => ['placeholder' => 'Начните набирать название для поиска'],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'allowClear' => false,
-					'multiple' => true
-				],
-			]);*/
-			//https://www.yiiframework.com/doc/api/2.0/yii-helpers-basehtml#activeCheckboxList()-detail
-			echo $form->field($model, 'access_types_ids')
-				->checkboxList(\app\models\AccessTypes::fetchNames(),[
-					'separator'=>'<br />',
-				]);
-			/*echo $form->field($model, 'access_types_ids')->widget(Select2::classname(), [
-				'data' => \app\models\AccessTypes::fetchNames(),
-				'options' => ['placeholder' => 'Начните набирать название для поиска'],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'allowClear' => true,
-					'multiple' => true
-				],
-			])*/
-			?>
+			<!-- https://www.yiiframework.com/doc/api/2.0/yii-helpers-basehtml#activeCheckboxList()-detail -->
+			<?= $form->field($model, 'access_types_ids')->checkboxList(
+				\app\models\AccessTypes::fetchNames(),
+				[
+					'class'=>"card d-flex flex-row pt-2 pb-1",
+					'itemOptions'=>[
+						'class'=>'p-2'
+					],
+				]
+			);	?>
+			
+			<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
+
 		</div>
 		<div class="col-md-6">
-			<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
-			
 			<?= $form->field($model, 'notepad')->widget(\kartik\markdown\MarkdownEditor::className(), [
 				'showExport'=>false
 			]) ?>
+
 		</div>
 	</div>
+	
 
-
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-    </div>
 
     <?php ActiveForm::end(); ?>
 

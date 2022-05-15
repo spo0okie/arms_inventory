@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\Acls;
 use app\models\AclsSearch;
+use yii\helpers\BaseUrl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -114,9 +115,11 @@ class AclsController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($id,$ajax=0,$aceCards=0)
     {
-        return $this->render('view', [
+		return $ajax?$this->renderAjax($aceCards?'ace-cards':'card', [
+			'model' => $this->findModel($id),
+		]):$this->render('view', [
             'model' => $this->findModel($id),
         ]);
     }
@@ -126,13 +129,19 @@ class AclsController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate($schedules_id=null)
+    public function actionCreate($schedules_id=null,$accept=0)
     {
         $model = new Acls();
 		if ($schedules_id) $model->schedules_id=$schedules_id;
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
-            return $this->redirect(['view', 'id' => $model->id]);
+			if ($accept) return $this->redirect(['update', 'id' => $model->id]);
+
+			if ((Yii::$app->request->get('return')=='previous')&&strcmp(Url::previous(),BaseUrl::current())!==0)
+				return $this->redirect(Url::previous());
+
+			if ($model->schedules_id)
+				$this->redirect(['/schedules/view','id'=>$model->schedules_id]);
+			return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('create', [
@@ -147,13 +156,20 @@ class AclsController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id,$accept=0)
     {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			//if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
-            return $this->redirect(['view', 'id' => $model->id]);
+			if ($accept) return $this->redirect(Url::current());
+
+			if ((Yii::$app->request->get('return')=='previous')&&strcmp(Url::previous(),BaseUrl::current())!==0)
+				return $this->redirect(Url::previous());
+			
+			if ($model->schedules_id)
+				return $this->redirect(['/schedules/view','id'=>$model->schedules_id]);
+			
+			return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('update', [
@@ -170,9 +186,13 @@ class AclsController extends Controller
      */
     public function actionDelete($id)
     {
+    	$schedules_id=$this->findModel($id)->schedules_id;
         $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+	
+		if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
+        return $schedules_id?
+			$this->redirect(['/schedules/view','id'=>$schedules_id]):
+			$this->redirect(['/schedules/index-acl']);
     }
 
     /**

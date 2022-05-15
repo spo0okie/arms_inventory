@@ -18,6 +18,7 @@ if (!$acl_mode) {
 	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index-acl']];
 }
 $this->params['breadcrumbs'][] = $this->title;
+\yii\helpers\Url::remember();
 
 $providingServices=$model->providingServices;
 $supportServices=$model->supportServices;
