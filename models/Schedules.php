@@ -581,6 +581,7 @@ class Schedules extends \yii\db\ActiveRecord
 	public function isWorkTime($date,$time)
 	{
 		$schedule=$this->getDateScheduleRecursive($date);
+		if (!is_object($schedule)) return 0;
 		$periods=$schedule->schedulePeriods;
 		$now=\app\models\SchedulesEntries::strTimestampToMinutes($time);
 		foreach ($periods as $period) {

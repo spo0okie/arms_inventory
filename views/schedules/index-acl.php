@@ -88,12 +88,22 @@ $renderer=$this;
 					$output=[];
 					if (is_array($periods=$data->findPeriods(null,null)) && count($periods))
 						foreach ($periods as $period) {
-							$output[]=$period->periodSchedule;
-							$output[]=$period->comment;
+							$output[]='<span title="'.Yii::$app->formatter->asNtext($period->comment).'">'.
+								$period->periodSchedule.
+								'</span>';
 						}
 						
 					
 					return implode('<br />',$output);
+				},
+				'contentOptions'=>function ($data) {
+					/**
+					 * @var $data \app\models\Schedules
+					 */
+					$working=$data->isWorkTime(date('y-m-d'),date('H:i:s'));
+					return [
+						'class'=>$working?'table-success':'table-danger',
+					];
 				}
 			],
         ],
