@@ -39,7 +39,6 @@ $selectOptions= [
 	'allowClear' => false,
 	'multiple' => false,
 ];
-echo(Url::previous().' vs '.Url::current().' : '.strcmp(Url::previous(),Url::current([],false)));
 ?>
 
 <div class="acls-form">
@@ -112,7 +111,7 @@ echo(Url::previous().' vs '.Url::current().' : '.strcmp(Url::previous(),Url::cur
 							'maxlength' => true,
 							'onchange'=>'onInputUpdate(commentInput)'
 						]),
-						'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->services_id)
+						'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->ips_id)
 					],
 				],
 				'position'=>TabsX::POS_ABOVE,

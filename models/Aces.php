@@ -135,7 +135,8 @@ class Aces extends \yii\db\ActiveRecord
 	 */
 	public function getUsers()
 	{
-		return static::hasMany(Users::className(), ['id' => 'users_id'])
+		return static::hasMany(Users::class, ['id' => 'users_id'])
+			->from(['users_objects'=>Users::tableName()])
 			->viaTable('{{%users_in_aces}}', ['aces_id' => 'id']);
 	}
 	
@@ -145,6 +146,7 @@ class Aces extends \yii\db\ActiveRecord
 	public function getComps()
 	{
 		return static::hasMany(Comps::className(), ['id' => 'comps_id'])
+			->from(['comps_objects'=>Comps::tableName()])
 			->viaTable('{{%comps_in_aces}}', ['aces_id' => 'id']);
 	}
 	
@@ -154,6 +156,7 @@ class Aces extends \yii\db\ActiveRecord
 	public function getNetIps()
 	{
 		return static::hasMany(NetIps::className(), ['id' => 'ips_id'])
+			->from(['ips_objects'=>NetIps::tableName()])
 			->viaTable('{{%ips_in_aces}}', ['aces_id' => 'id']);
 	}
 	

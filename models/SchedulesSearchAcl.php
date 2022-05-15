@@ -11,6 +11,10 @@ use app\models\Schedules;
  */
 class SchedulesSearchAcl extends Schedules
 {
+	
+	public $objects;
+	public $resources;
+	
     /**
      * {@inheritdoc}
      */
@@ -18,7 +22,7 @@ class SchedulesSearchAcl extends Schedules
     {
         return [
             [['id'], 'integer'],
-            [['name', 'comment', 'created_at'], 'safe'],
+            [['name', 'comment', 'created_at','objects','resources'], 'safe'],
         ];
     }
 
@@ -41,7 +45,15 @@ class SchedulesSearchAcl extends Schedules
     public function search($params)
     {
         $query = Schedules::find()
-		->joinWith('acls')
+		->joinWith([
+			'acls.aces.comps',
+			'acls.aces.users',
+			'acls.aces',
+			'acls.comp',
+			'acls.tech',
+			'acls.service',
+			'acls.ip',
+		])
 		->where('acls.id');
 
         // add conditions that should always apply here
@@ -65,10 +77,25 @@ class SchedulesSearchAcl extends Schedules
             //'created_at' => $this->created_at,
         ]);
 
-        $query->andFilterWhere(['or like', 'name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
-            //->andFilterWhere(['like', 'comment', $this->comment]);
+        $query->andFilterWhere(['or like', 'CONCAT(schedules.name,schedules.description,schedules.history)', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
+	
+		$query->andFilterWhere(['or',
+			['or like', 'comps_objects.name', \yii\helpers\StringHelper::explode($this->objects,'|',true,true)],
+			['or like', 'users_objects.Ename', \yii\helpers\StringHelper::explode($this->objects,'|',true,true)],
+			['or like', 'aces.ips', \yii\helpers\StringHelper::explode($this->objects,'|',true,true)],
+			['or like', 'aces.comment', \yii\helpers\StringHelper::explode($this->objects,'|',true,true)],
+		]);
 
-        return new ActiveDataProvider([
+		$query->andFilterWhere(['or',
+			['or like', 'comps_resources.name', \yii\helpers\StringHelper::explode($this->resources,'|',true,true)],
+			['or like', 'services_resources.name', \yii\helpers\StringHelper::explode($this->resources,'|',true,true)],
+			['or like', 'techs_resources.num', \yii\helpers\StringHelper::explode($this->resources,'|',true,true)],
+			['or like', 'ips_resources.text_addr', \yii\helpers\StringHelper::explode($this->resources,'|',true,true)],
+			['or like', 'acls.comment', \yii\helpers\StringHelper::explode($this->resources,'|',true,true)],
+		]);
+	
+	
+		return new ActiveDataProvider([
 			'query' => $query,
 			'totalCount' => $query->count('distinct(schedules.id)'),
 		]);

@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Composer\Util\Url;
 use Yii;
 
 /**
@@ -121,26 +122,30 @@ class Acls extends \yii\db\ActiveRecord
 	}
 	
 	public function getSchedule() {
-		return $this->hasOne(Schedules::className(), ['id' => 'schedules_id']);
+		return $this->hasOne(Schedules::class, ['id' => 'schedules_id']);
 	}
 	
 	public function getService() {
-		return $this->hasOne(Services::className(), ['id' => 'services_id']);
+		return $this->hasOne(Services::class, ['id' => 'services_id'])
+			->from(['services_resources'=>Services::tableName()]);
 	}
 	public function getComp() {
-		return $this->hasOne(Comps::className(), ['id' => 'comps_id']);
+		return $this->hasOne(Comps::class, ['id' => 'comps_id'])
+			->from(['comps_resources'=>Comps::tableName()]);
 	}
 	
 	public function getTech() {
-		return $this->hasOne(Techs::className(), ['id' => 'techs_id']);
+		return $this->hasOne(Techs::class, ['id' => 'techs_id'])
+			->from(['techs_resources'=>Techs::tableName()]);
 	}
 	
 	public function getIp() {
-		return $this->hasOne(NetIps::className(), ['id' => 'ips_id']);
+		return $this->hasOne(NetIps::class, ['id' => 'ips_id'])
+			->from(['ips_resources'=>NetIps::tableName()]);
 	}
 	
 	public function getAces() {
-		return $this->hasMany(Aces::className(), ['acls_id' => 'id']);
+		return $this->hasMany(Aces::class, ['acls_id' => 'id']);
 	}
 	
 	public function beforeDelete()
