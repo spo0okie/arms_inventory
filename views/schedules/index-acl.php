@@ -89,12 +89,12 @@ $renderer=$this;
 					 * @var $data \app\models\Schedules
 					 */
 					$output=[
-						date('Y-m-d').' '.date('H:i'),
+						//date('Y-m-d').' '.date('H:i'),
 					];
 					if (is_array($periods=$data->findPeriods(null,null)) && count($periods))
 						foreach ($periods as $period) {
 							$output[]='<span title="'.Yii::$app->formatter->asNtext($period->comment).'">'.
-								$period->periodSchedule.
+								str_replace(' ','&nbsp;',$period->periodSchedule).
 								'</span>';
 						}
 						
