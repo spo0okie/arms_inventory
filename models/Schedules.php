@@ -482,6 +482,7 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	/**
 	 * Ищет график работы на конкретную дату учитывая родительские расписания
+	 * но не учитывая периоды включения/выключения
 	 * @param $date
 	 * @return SchedulesEntries|null
 	 */
@@ -510,11 +511,13 @@ class Schedules extends \yii\db\ActiveRecord
 		//рабочий график на день
 		$objSchedule=$this->getDateScheduleRecursive($date);
 		if (!is_object($objSchedule)) {
-			$objSchedule=new \app\models\SchedulesEntries([
+			$objSchedule=new \app\models\SchedulesEntries();
+			$objSchedule->load([
 				'is_period'=>0,
 				'schedule'=>'-',
 				'date'=>'def'
-			]);
+			],'');
+			
 		}
 		
 		//ищем периоды работы/отдыха перекрывающие этот день
@@ -554,6 +557,7 @@ class Schedules extends \yii\db\ActiveRecord
 			//есть нерабочие интервалы - они перекрывают рабочие
 			//слепляем в кучку
 			$negative=static::intervalMerge($negative);
+			
 			//вычитаем нерабочие из рабочих
 			$positive=static::intervalsSubtraction($positive,$negative);
 		}
@@ -568,7 +572,7 @@ class Schedules extends \yii\db\ActiveRecord
 			implode(',',$arSchedule)
 			:
 			'-';
-		
+		$objSchedule->schedule=$strSchedule;
 		//возвращаем комплексный массив данных
 		return [
 			'schedule' => $strSchedule,
@@ -580,9 +584,13 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public function isWorkTime($date,$time)
 	{
-		$schedule=$this->getDateScheduleRecursive($date);
+		$scheduleArray=$this->getDateSchedule($date);
+		//var_dump($scheduleArray);
+		if (!is_array($scheduleArray) || !isset($scheduleArray['day'])) return 0;
+		$schedule=$scheduleArray['day'];
 		if (!is_object($schedule)) return 0;
 		$periods=$schedule->schedulePeriods;
+		//var_dump($periods);
 		$now=\app\models\SchedulesEntries::strTimestampToMinutes($time);
 		foreach ($periods as $period) {
 			$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
@@ -658,6 +666,7 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public static function schedule2Interval($schedule,$date)
 	{
+		//var_dump($schedule);
 		$tokens=explode('-',$schedule);
 		return [
 			strtotime($date.' '.$tokens[0]),

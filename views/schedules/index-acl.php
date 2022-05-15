@@ -85,7 +85,13 @@ $renderer=$this;
 				'attribute'=>'periods',
 				'format'=>'raw',
 				'value'=>function($data) use ($renderer) {
-					$output=[];
+					/**
+					 * @var $data \app\models\Schedules
+					 */
+					$output=[
+						date('Y-m-d').' '.date('H:i:s'),
+						//var_dump($data->getDateSchedule(date('Y-m-d')))
+					];
 					if (is_array($periods=$data->findPeriods(null,null)) && count($periods))
 						foreach ($periods as $period) {
 							$output[]='<span title="'.Yii::$app->formatter->asNtext($period->comment).'">'.
@@ -100,7 +106,7 @@ $renderer=$this;
 					/**
 					 * @var $data \app\models\Schedules
 					 */
-					$working=$data->isWorkTime(date('y-m-d'),date('H:i:s'));
+					$working=$data->isWorkTime( date('Y-m-d'),date('H:i:s'));
 					return [
 						'class'=>$working?'table-success':'table-danger',
 					];
