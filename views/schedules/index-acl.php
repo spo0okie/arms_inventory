@@ -82,18 +82,17 @@ $renderer=$this;
 				}
 			],
 			[
-				'attribute'=>'periods',
+				'attribute'=>'accessPeriods',
 				'format'=>'raw',
 				'value'=>function($data) use ($renderer) {
 					/**
 					 * @var $data \app\models\Schedules
 					 */
-					$output=[
-						//date('Y-m-d').' '.date('H:i'),
-					];
+					$output=[];
 					if (is_array($periods=$data->findPeriods(null,null)) && count($periods))
 						foreach ($periods as $period) {
-							$output[]='<span title="'.Yii::$app->formatter->asNtext($period->comment).'">'.
+							$output[]=
+								'<span title="'.Yii::$app->formatter->asNtext($period->comment).'" class="text-nowrap">'.
 								str_replace(' ','&nbsp;',$period->periodSchedule).
 								'</span>';
 						}

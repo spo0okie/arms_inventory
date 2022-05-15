@@ -130,6 +130,7 @@ class Schedules extends \yii\db\ActiveRecord
 			'end_date'=>'Дата окончания',
 			'resources' => 'Ресурсы', //для ACLs
 			'objects' => 'Субъекты', //для ACLs
+			'accessPeriods' => 'Активность доступа', //для ACLs
 		];
 	}
 	
