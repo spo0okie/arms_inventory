@@ -41,21 +41,23 @@ echo GridView::widget([
 				'header'=>'Комментарий',
 				'format'=>Editable::FORMAT_LINK,
 				'inputType' => Editable::INPUT_TEXT,
+				'inlineSettings' => [
+					'templateBefore'=>'<div class="kv-editable-form-inline d-flex w-100 g-0 m-0"><div class="mb-2">{loading}</div>',
+				],
 				'asPopover' => false,
 				'value' => $model['comment'],
 				'buttonsTemplate'=>'{submit}',
 				'options' => [
-					'style' => 'width:300px',
+					'class' => 'w-100',
 					'placeholder'=>'Введите комментарий...',
 					'pluginOptions'=>[
 						'maxLength'=>255
 					],
 				],
-				'editableButtonOptions'=>[
-				],
-				'editableValueOptions'=>[
-					'class'=>'text-start kv-editable-link',
-				],
+				'containerOptions'=>['class'=>'row p-0 m-0'],
+				'contentOptions'=>['class'=>'p-0 m-0'],
+				'inputFieldConfig'=>['options'=>['class'=>'flex-grow-1']],
+				'editableValueOptions'=>['class'=>'p-0 text-start kv-editable-link',],
 				'formOptions' => [
 					'action' => [
 						'/lic-links/update-lic-'.$model->licType.'-in-'.$model->objType,
