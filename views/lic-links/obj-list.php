@@ -21,21 +21,25 @@ echo GridView::widget([
 	'columns' => [
 		[
 			'attribute'=>'objName',
-			//'header'=>'Закреплено',
+			'label'=>'Закреплено',
+			//'modelClass' => \app\models\links\LicLinks::class,
 			'format'=>'raw',
 			'value'=>function($item) use ($renderer){
-				return $renderer->render('/'.$item->objType.'/item',[
+				return '<span class="text-nowrap">'.$renderer->render('/'.$item->objType.'/item',[
 					'model'=>$item->object,
 					'icon'=>true,
-				]);
+					'short'=>true,
+				]).'</span>';
 			}
 		],
 		[
 			'class'=>'kartik\grid\EditableColumn',
+			'label'=>'Комментарий',
 			'attribute'=>'comment',
 			'editableOptions'=> function ($model, $key, $index) { return [
 				'name'=>'comment',
 				'header'=>'Комментарий',
+				'format'=>Editable::FORMAT_LINK,
 				'inputType' => Editable::INPUT_TEXT,
 				'asPopover' => false,
 				'value' => $model['comment'],
@@ -47,17 +51,23 @@ echo GridView::widget([
 						'maxLength'=>255
 					],
 				],
+				'editableButtonOptions'=>[
+				],
+				'editableValueOptions'=>[
+					'class'=>'text-start kv-editable-link',
+				],
 				'formOptions' => [
 					'action' => [
 						'/lic-links/update-lic-'.$model->licType.'-in-'.$model->objType,
 					]
 				],
 			];},
-			//'tableOptions' => [
-			//],
+			/*'contentOptions' => [
+			],*/
 		],
 		[
 			'attribute'=>'created_at',
+			'label'=>'Когда',
 			'format'=>'raw',
 			'value'=>function($item) use ($renderer){
 				/**
