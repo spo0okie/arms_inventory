@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model app\models\LicTypes */
 
 if (!isset($static_view)) $static_view=false;
-
+if (is_object($model)) {
 ?>
 
 <h4>
@@ -21,3 +21,4 @@ if (!isset($static_view)) $static_view=false;
 	</p>
 <?php } else echo '<br />' ?>
 <br />
+<?php } else echo "Ошибка описания типа лицензии<br />";
