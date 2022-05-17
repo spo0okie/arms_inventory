@@ -33,7 +33,7 @@ function attach_qTip(el){
         interactive: true,
         theme: 'tooltipster-shadow tooltipster-shadow-yellow',
         updateAnimation: 'fade',
-        side: ['bottom', 'top', 'right', 'left'],
+        side: [ 'right', 'left', 'bottom', 'top'],
         functionBefore: $load,
     });
 }
