@@ -51,7 +51,9 @@ class ServicesSearch extends Services
     {
         $query = Services::find()
 			//->joinWith('techs')
-			->with([
+			//->with([])
+			->joinWith([
+				'support',
 				'comps.arm.place',
 				'techs.place',
 				'responsible',
@@ -59,9 +61,6 @@ class ServicesSearch extends Services
 				'providingSchedule',
 				'orgPhones',
 				'orgInets',
-			])
-			->joinWith([
-				'support',
 			])
 			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)');
 	
@@ -77,7 +76,7 @@ class ServicesSearch extends Services
 		$dataProvider = new ActiveDataProvider([
             'query' => $query,
 	        'totalCount' => $query->count('distinct(services.id)'),
-	        'pagination' => ['pageSize' => 500,],
+	        'pagination' => false,
 	        'sort'=> ['defaultOrder' => ['name'=>SORT_ASC]]
         ]);
 	
