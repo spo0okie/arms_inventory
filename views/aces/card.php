@@ -1,5 +1,6 @@
 <?php
 
+use kartik\markdown\Markdown;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -24,7 +25,7 @@ foreach ($model->netIps as $ip)
 	$items[$ip->sname]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true,'no_class'=>true]);
 
 if (strlen($model->comment))
-	$items[$model->comment]=$model->comment;
+	$items[$model->comment]='<span class="text-wrap">'.$model->comment.'</span>';
 
 ksort($items,SORT_STRING);
 
@@ -39,8 +40,8 @@ if (!count($accessTypes)) $accessTypes[]=\app\models\Aces::$noAccessName;
 ?>
 
 <div class="card w-100 my-2 ace-card shadow-sm g-0" id="ace_card_<?= $model->id ?>">
-	<div class="row g-0">
-		<div class="col-md-8 p-2">
+	<div class="d-flex g-0">
+		<div class="p-2 text-nowrap">
 			<?php if (count($items)) {
 				echo implode(' <br /> ',$items);
 			} else { ?>
@@ -55,7 +56,10 @@ if (!count($accessTypes)) $accessTypes[]=\app\models\Aces::$noAccessName;
 			
 			<?php } ?>
 		</div>
-		<div class="col-md-4 ace-access-card d-flex flex-column pt-2">
+		<div class="flex-fill p-2 small">
+			<?=  Markdown::convert($model->notepad) ?>
+		</div>
+		<div class="col-md-4 ace-access-card d-flex flex-column pt-2 pull-right">
 			<div class="text-center text-white"><?= implode(', ',$accessTypes) ?></div>
 			
 			<div class="row mt-auto g-0">
