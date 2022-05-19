@@ -22,32 +22,19 @@ $this->title = 'Инвентаризация';
 		Starting MS-DOS...<br />
 		Поиск:<br />
 		<p>
-			<label class="search-label" for="comps" onclick="document.location.replace('<?= \yii\helpers\Url::to(['/comps/index']) ?>');">Компьютеры:\&gt; </label>
-			<span class="search-group">
-				<input id="comps-search" type="text" class="search-input" onkeypress="onkeypress = function(e){
-					if (!e) e = window.event;
-					let keyCode = e.code || e.key;
-					if (keyCode == 'Enter'){
-						document.location.replace('<?= \yii\helpers\Url::to(['/comps/index']) ?>?CompsSearch[name]=' + $(this).val());
-						return false;
-					}
-				}">
-			</span>
+			<?= \app\components\SearchFieldWidget::widget(['model'=>'Comps','field'=>'name','label'=>'Компьютеры:\&gt; ']) ?>
 		</p>
 		
 		<p>
-			<label class="search-label" for="comps" onclick="document.location.replace('<?= \yii\helpers\Url::to(['/users/index']) ?>');">Пользователи:\&gt; </label>
-			<span class="search-group">
-				<input id="users-search" type="text" class="search-input" onkeypress="onkeypress = function(e){
-					if (!e) e = window.event;
-					let keyCode = e.code || e.key;
-					if (keyCode == 'Enter'){
-						document.location.replace('<?= \yii\helpers\Url::to(['/users/index']) ?>?UsersSearch[Ename]=' + $(this).val());
-						return false;
-					}
-				}">
-			</span>
+			<?= \app\components\SearchFieldWidget::widget(['model'=>'Users','field'=>'Ename','label'=>'Пользователи:\&gt; ']) ?>
+		</p>
 
+		<p>
+			<?= \app\components\SearchFieldWidget::widget(['model'=>'Services','field'=>'name','label'=>'Сервисы:\&gt; ']) ?>
+		</p>
+
+		<p>
+			<?= \app\components\SearchFieldWidget::widget(['model'=>'NetIps','field'=>'text_addr','label'=>'IP адреса:\&gt; ']) ?>
 		</p>
 	</div>
 	
