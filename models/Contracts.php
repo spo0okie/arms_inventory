@@ -744,11 +744,16 @@ HTML;
 	{
 		if (parent::beforeSave($insert)) {
 			
+			if (!$this->parent_id) $this->is_successor=0;
 			if ($this->is_successor) {
 				//Если этот документ заменяет предыдущую версию договора,
 				//то мы его пришиваем именно к последней версии, чтобы не было
 				//двух документов заменяющих один (это нарушает логику)
 				$this->parent_id=$this->firstPredecessor->id;
+			}
+			if ($this->parent_id === $this->id) {
+				$this->parent_id=null;
+				$this->is_successor=0;
 			}
 		}
 		return true;
