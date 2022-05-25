@@ -141,11 +141,16 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
 	<?php
 
-	if (!$model->isNewRecord) $scans=$model->scans;
-	else $scans=[];
+	if (!$model->isNewRecord)
+		$scans=$model->scans;
+	else
+		$scans=[];
 	$preview=[];
 	$config=[];
 	foreach ($scans as $scan) {
+		/**
+		 * @var $scan \app\models\Scans
+		 */
 	    $preview[]=$scan->thumbUrl;
 	    $config[]=(object)[
             'caption'=>$scan->noidxFname,
@@ -154,6 +159,9 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
             'key'=>$scan->id
         ];
 	}
+	
+	//var_dump($scans);
+	//var_dump($preview);
 
     try {
 		echo FileInput::widget([

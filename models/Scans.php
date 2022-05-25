@@ -16,7 +16,9 @@ use yii\imagine\Image;
  * @property string $viewThumb
  * @property string $idxThumb
  * @property string $thumbExt
+ * @property string $thumbUrl
  * @property string $shortFname
+ * @property string $noidxFname
  * @property string $fullFname
  * @property string $fsFname
  * @property boolean $fileExists
@@ -98,7 +100,7 @@ class Scans extends \yii\db\ActiveRecord
 		if (!$this->fileExists) {
 			return static::noThumb();
 		} else {
-			$this->idxThumb;
+			return $this->idxThumb;
 		}
 	}
 
@@ -242,6 +244,7 @@ class Scans extends \yii\db\ActiveRecord
 	 */
 	public function thumb($width,$height){
 		$thumbName=$this->thumbFileName($width,$height);
+		//return $thumbName;
 		$width=$width?$width:null;
 		$height=$height?$height:null;
 		if (!file_exists($_SERVER['DOCUMENT_ROOT'].$thumbName)) {
@@ -290,7 +293,6 @@ class Scans extends \yii\db\ActiveRecord
 				$im=$bg;
 			}
 			$im->resizeImage($width,$height,\Imagick::FILTER_LANCZOS,1);
-			//$im->thumbnailimage($width, $height); // width and height
 			$im->writeimage($_SERVER['DOCUMENT_ROOT'] . $thumb);
 			$im->clear();
 			$im->destroy();
