@@ -59,7 +59,7 @@ class Scans extends \yii\db\ActiveRecord
     {
         return [
             [['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id','arms_id','techs_id'], 'integer'],
-	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
+	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 2024*2024*30],
         ];
     }
 
@@ -84,7 +84,7 @@ class Scans extends \yii\db\ActiveRecord
 	{
 		if ($this->validate()) {
 			$prefix=($this->id)?$this->id:static::fetchNextId();
-			$this->file=$prefix.'-'. $this->scanFile->baseName;
+			$this->file=$prefix.'-'.\yii\helpers\StringHelper::truncate($this->scanFile->baseName,80);
 			$this->format=$this->scanFile->extension;
 			$this->scanFile->saveAs($_SERVER['DOCUMENT_ROOT'].$this->fullFname);
 			return true;
@@ -227,7 +227,11 @@ class Scans extends \yii\db\ActiveRecord
 	 * @return string
 	 */
 	public function thumbFileName($width,$height){
-		return self::formThumbFileName($this->file.'.'.$this->format,$width,$height);
+		return self::formThumbFileName(
+			yii\helpers\StringHelper::truncate($this->file,80).'.'.$this->format,
+			$width,
+			$height
+		);
 	}
 	
 	
