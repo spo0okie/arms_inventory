@@ -18,6 +18,7 @@ use Yii;
  * @property array $arms_ids
  * @property array $comps_ids Ссылка на ОСи
  * @property array $users_ids Ссылка на пользователей
+ * @property array $softIds Ссылка на софт
  * @property array $contracts_ids
  * @property int $usages
  * @property float $utilization
@@ -160,7 +161,10 @@ class LicItems extends \yii\db\ActiveRecord
 		return $this->licGroup->descr.' /'.$this->descr;
 	}
 	
-	
+	public function getSoftIds()
+	{
+		return $this->licGroup->softIds;
+	}
 	
 	/**
      * @return \yii\db\ActiveQuery

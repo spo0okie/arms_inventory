@@ -9,6 +9,7 @@ use Yii;
  *
  * @property int $id Идентификатор
  * @property array $soft_ids Ссылка на софт
+ * @property array $softIds Ссылка на софт
  * @property array $arms_ids Ссылка на АРМы
  * @property array $comps_ids Ссылка на ОСи
  * @property array $users_ids Ссылка на пользователей
@@ -132,6 +133,12 @@ class LicGroups extends \yii\db\ActiveRecord
 		];
 	}
 
+	public function getSoftIds()
+	{
+		return $this->soft_ids;
+	}
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

@@ -8,6 +8,7 @@ namespace app\models;
  *
  * @property int $id id
  * @property int $lic_items_id Закупка
+ * @property array $softIds Ссылка на софт
  * @property array $arms_ids
  * @property array $comps_ids Ссылка на ОСи
  * @property array $users_ids Ссылка на пользователей
@@ -173,6 +174,10 @@ class LicKeys extends \yii\db\ActiveRecord
 		return $this->licItem->licGroup->descr.' /'.$this->licItem->descr.' /'.$this->keyShort;
 	}
 	
+	public function getSoftIds()
+	{
+		return $this->licItem->softIds;
+	}
 	
 	/**
 	 * @inheritdoc

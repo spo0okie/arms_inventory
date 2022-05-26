@@ -185,6 +185,48 @@ class LicLinks extends ActiveRecord
 		return $objs;
 	}
 	
+	public static function findProductLicenses(
+		int $productId=null,
+		string $objectType=null,
+		string $licenseType=null,
+		int $objId=null,
+		int $licId=null
+	) {
+		//среди каких типов объектов будем искать (переданный тип или все)
+		//пользователь, АРМ, ОС
+		if (!is_null($objectType))
+			$objTypes=[$objectType];
+		else {
+			$objTypes=self::$objTypes;
+			$objId=null; //нельзя искать по номеру объекта если их много типов
+		}
+		
+		//среди каких групп лицензий будем искать (переданный или все)
+		if (!is_null($licenseType))
+			$licTypes=[$licenseType];
+		else {
+			$licTypes=self::$licTypes;
+			$licId=null;  //нельзя искать по номеру лицензии если их много типов
+		}
+		
+		$items=[];
+		foreach ($objTypes as $objType) {
+			foreach ($licTypes as $licType) {
+				$objClass = '\app\\models\\links\\'.static::linksClassName($licType, $objType);
+				foreach ($objClass::findLinks($licId,$objId) as $item) {
+					if (!is_null($productId)) {
+						if (array_search($productId,$item->softIds)) {
+							$items[]=$item;
+						}
+					} else {
+						$items[]=$item;
+					}
+				}
+			}
+		}
+		return $items;
+	}
+	
 	public static function updateLink(string $lic, string $obj, int $id, string $comment) {
 		$link=new LicLinks($lic,$obj);
 		\Yii::$app->db->createCommand()->update(
