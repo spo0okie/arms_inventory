@@ -22,6 +22,7 @@ class LicLinksController extends \yii\rest\ActiveController
 		int $objId=null,
 		int $licId=null
 	){
+		//return $productId;
 		return \app\models\links\LicLinks::findProductLicenses(
 			$productId,
 			$objectType,

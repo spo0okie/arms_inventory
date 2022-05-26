@@ -215,7 +215,7 @@ class LicLinks extends ActiveRecord
 				$objClass = '\app\\models\\links\\'.static::linksClassName($licType, $objType);
 				foreach ($objClass::findLinks($licId,$objId) as $item) {
 					if (!is_null($productId)) {
-						if (array_search($productId,$item->softIds)) {
+						if (array_search($productId,$item->lic->softIds)!==false) {
 							$items[]=$item;
 						}
 					} else {
