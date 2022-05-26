@@ -37,6 +37,13 @@ class LicLinks extends ActiveRecord
 			[['comment'], 'safe'],
 		];
 	}
+	public function extraFields()
+	{
+		return [
+			'licComment',
+		];
+	}
+	
 	
 	public static $licTypes=['groups','items','keys'];
 	public static $objTypes=['arms','users','comps'];
@@ -90,6 +97,11 @@ class LicLinks extends ActiveRecord
 	public function getLic()
 	{
 		return static::hasOne('\\app\\models\\'.static::licClass(), ['id' => static::licIdField()]);
+	}
+	
+	public function getLicComment()
+	{
+		return $this->lic->comment;
 	}
 	
 	/**
@@ -210,6 +222,8 @@ class LicLinks extends ActiveRecord
 		}
 		
 		$items=[];
+		//var_dump($objTypes);
+		//var_dump($licTypes);
 		foreach ($objTypes as $objType) {
 			foreach ($licTypes as $licType) {
 				$objClass = '\app\\models\\links\\'.static::linksClassName($licType, $objType);
