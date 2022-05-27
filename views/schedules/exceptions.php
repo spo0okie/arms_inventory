@@ -45,11 +45,12 @@ echo GridView::widget([
 	'columns' => [
 		[
 			'attribute'=>'date',
+			'format'=>'raw',
 			'value'=>function($data)use($renderer){
 				return $data->is_period?
 					$data->periodSchedule
 					:
-					$data->date
+					'<span class="text-nowrap">'.Yii::$app->formatter->asDate($data->date,'dd.MM.yyyy (E)').'</span>'
 					;
 			},
 			'contentOptions' => function ($data) { return [
@@ -59,11 +60,14 @@ echo GridView::widget([
 		],
 		[
 			'attribute'=>'schedule',
+			'format' => 'raw',
 			'value' => function($data) {
-				return $data->is_period?
-					($data->isWorkDescription)
-					:
-					$data->mergedSchedule;
+				if ($data->is_period) return $data->isWorkDescription;
+				$tokens=explode(',',$data->mergedSchedule);
+				foreach ($tokens as $i=>$token)
+					$tokens[$i]='<span class="text-nowrap">'.$token.'</span>';
+				return implode(', ',$tokens);
+				
 			},
 			'contentOptions' => function ($data) { return [
 				'class' => $data->cellClass,

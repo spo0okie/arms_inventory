@@ -18,6 +18,11 @@ if (is_object($model)) {
 			$name=$model->getPeriodSchedule();
 		} else {
 			$name=$model->mergedSchedule;
+			$tokens=explode(',',$name);
+			foreach ($tokens as $i=>$token)
+				$tokens[$i]='<span class="text-nowrap">'.$token.'</span>';
+			$name=implode(', ',$tokens);
+			
 		}
 	}
 	?>

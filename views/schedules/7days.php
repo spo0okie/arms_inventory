@@ -52,7 +52,7 @@ if (
 		?>
 			<tr>
 				<td>
-					<?= Yii::$app->formatter->asDate(time()+86400*$i,'dd.MM.yyyy (E)') ?>
+					<span class="text-nowrap"><?= Yii::$app->formatter->asDate(time()+86400*$i,'dd.MM.yyyy (E)') ?></span>
 				</td>
 				<td>
 					<?= $this->render('/schedules-entries/item',['model'=>$day]) ?>
