@@ -36,6 +36,7 @@ use Yii;
  * @property Comps[] $dupes
  * @property Users $user
  * @property Users $responsible
+ * @property Users[] $supportTeam
  * @property Domains $domain
  * @property string $updatedRenderClass
  * @property string $updatedText
@@ -75,7 +76,7 @@ class Comps extends \yii\db\ActiveRecord
     
     public function extraFields()
 	{
-		return ['responsible'];
+		return ['responsible','supportTeam'];
 	}
 
     /**
@@ -436,6 +437,38 @@ class Comps extends \yii\db\ActiveRecord
 			if (count($rating)) return $responsibles[array_search(max($rating), $rating)];
 		}
 		return null;
+	}
+	
+	/**
+	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
+	 * @return \app\models\Users
+	 */
+	public function getSupportTeam()
+	{
+		$team=[];
+		if (is_object($this->user)) $team[$this->user->id]=$this->user;
+		
+		if (is_array($this->services) && count($this->services)) {
+			foreach ($this->services as $service) {
+				/**
+				 * @var $service \app\models\Services
+				 */
+				
+				//ответственные за сервисы на машине
+				if (is_object($responsible=$service->responsibleRecursive)) {
+					$team[$responsible->id]=$responsible;
+				}
+				
+				//поддержка сервисов на машине
+				if (is_array($support=$service->supportRecursive)) {
+					foreach ($support as $item) {
+						if (is_object($item))
+							$team[$item->id]=$item;
+					}
+				}
+			}
+		}
+		return $team;
 	}
 	
 	
