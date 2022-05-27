@@ -468,7 +468,7 @@ class Comps extends \yii\db\ActiveRecord
 				}
 			}
 		}
-		return $team;
+		return array_values($team);
 	}
 	
 	
