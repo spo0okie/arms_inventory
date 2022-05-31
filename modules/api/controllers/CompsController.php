@@ -2,7 +2,7 @@
 
 namespace app\modules\api\controllers;
 
-use app\models\Domains;
+use yii\filters\auth\HttpBasicAuth;
 
 
 class CompsController extends \yii\rest\ActiveController
@@ -10,16 +10,22 @@ class CompsController extends \yii\rest\ActiveController
 	public function behaviors()
 	{
 		$behaviors=parent::behaviors();
-		if (!empty(\Yii::$app->params['useRBAC'])) $behaviors['access']=[
-			'class' => \yii\filters\AccessControl::className(),
-			'rules' => [
-				['allow' => true, 'actions'=>['index'], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['create','view','update','search'], 'roles'=>['@','?']],
-			],
-			'denyCallback' => function ($rule, $action) {
-				throw new  \yii\web\ForbiddenHttpException('Access denied');
-			}
-		];
+		if (!empty(\Yii::$app->params['useRBAC'])) {
+			$behaviors['access']=[
+				'class' => \yii\filters\AccessControl::className(),
+				'rules' => [
+					['allow' => true, 'actions'=>['index'], 'roles'=>['editor']],
+					['allow' => true, 'actions'=>['create','view','update','search'], 'roles'=>['@','?']],
+				],
+				'denyCallback' => function ($rule, $action) {
+					throw new  \yii\web\ForbiddenHttpException('Access denied');
+				}
+			];
+			$behaviors['authenticator'] = [
+				'class' => HttpBasicAuth::class,
+				'only'=>['index']
+			];
+		}
 		return $behaviors;
 	}
 	
