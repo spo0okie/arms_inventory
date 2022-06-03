@@ -2,6 +2,7 @@
 
 namespace app\modules\api\controllers;
 
+use app\models\Users;
 use yii\filters\auth\HttpBasicAuth;
 
 
@@ -23,7 +24,14 @@ class CompsController extends \yii\rest\ActiveController
 			];
 			$behaviors['authenticator'] = [
 				'class' => HttpBasicAuth::class,
-				'only'=>['index']
+				'only'=>['index'],
+				'auth' => function ($login, $password) {
+					$user = Users::find()->where(['Login' => $login])->one();
+					if ($user && $user->validatePassword($password)) {
+						return $user;
+					}
+					return null;
+				},
 			];
 		}
 		return $behaviors;
