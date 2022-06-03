@@ -11,6 +11,7 @@ $ldap = require __DIR__ . '/ldap.php';
 $config = [
     'id' => 'arms',
     'name' => 'Инвентаризация',
+	'language' => 'ru-RU',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
 	'timeZone' => 'Asia/Yekaterinburg', // : Yii::$app->user->identity->timeZone ,//->php_name,
@@ -110,7 +111,7 @@ $config = [
         'api'       => ['class' => 'app\modules\api\Rest'],
 		'gridview'  => ['class' => 'kartik\grid\Module'],
 	    'rbac'      => [
-		    'class' => 'johnitvn\rbacplus\Module',
+		    'class' => 'spo0okie\rbacplus\Module',
 		    'userModelLoginField'=>'Login'
 	    ],
 		'markdown' => [
