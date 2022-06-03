@@ -62,11 +62,49 @@ $this->beginPage() ?>
 	</div>
 </footer>
 
-<?= ModalAjax::widget([
+<?php
+
+$js = <<<JS
+function(event, data, status, xhr, selector) {
+    console.log('Got modal commit ('+status+')');
+	if (status!=='success') {
+		$(this)
+			.find('div.for-alert')
+			.html('<div class="alert alert-danger alert-dismissible fade show" role="alert">'+
+				'Не удалось сохранить'+
+				'<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'+
+			'</div>').show();
+	} else {
+		if (selector.attr('data-update-element') && selector.attr('data-update-url')) {
+			console.log('url:'+selector.attr('data-update-url'));
+			$.ajax({
+				url: selector.attr('data-update-url'),
+				success: function(data,status,xhr) {
+					$(selector.attr('data-update-element')).replaceWith(data);
+				}
+			});
+		}
+		
+		if (selector.attr('data-click-on-submit')) {
+			$(selector.attr('data-click-on-submit')).click();
+		}
+		
+		if (selector.attr('data-reload-page-on-submit')) {
+		    console.log('reloading page')
+			window.location.reload();
+		}
+
+		$(this).modal('toggle');
+	}
+}
+JS;
+
+
+echo ModalAjax::widget([
 	'id' => 'modal_form_loader',
 	'bootstrapVersion' => ModalAjax::BOOTSTRAP_VERSION_5,
 	'header' => 'Правка',
-	'selector' => 'a.btn.open-in-modal-form',
+	'selector' => 'a.open-in-modal-form',
 	'ajaxSubmit' => true, // Submit the contained form as ajax, true by default
 	'size' => ModalAjax::SIZE_EXTRA_LARGE,
 	'options' => ['class' => 'header-secondary text-black text-left'],
@@ -74,35 +112,10 @@ $this->beginPage() ?>
 	'events'=>[
 		ModalAjax::EVENT_MODAL_SHOW => new \yii\web\JsExpression("
             	function(event, data, status, xhr, selector) {
-                	selector.addClass('warning');
+                	selector.addClass('modal-open');
             	}
        		"),
-		ModalAjax::EVENT_MODAL_SUBMIT => new \yii\web\JsExpression("
-				function(event, data, status, xhr, selector) {
-					if (status!=='success') {
-						$(this)
-							.find('div.for-alert')
-							.html('<div class=\"alert alert-danger alert-dismissible fade show\" role=\"alert\">'+
-								'Не удалось сохранить'+
-								'<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button>'+
-							'</div>').show();
-					} else {
-						if (selector.attr('data-update-element') && selector.attr('data-update-url')) {
-							console.log('url:'+selector.attr('data-update-url'));
-						
-							$.ajax({
-								url: selector.attr('data-update-url'),
-								success: function(data,status,xhr) {
-									$(selector.attr('data-update-element')).replaceWith(data);
-								}
-							});
-						} else {
-							console.log('Nothing to update');
-						}
-						$(this).modal('toggle');
-					}
-				}
-			"),
+		ModalAjax::EVENT_MODAL_SUBMIT => new \yii\web\JsExpression($js),
 	],
 ]); ?>
 

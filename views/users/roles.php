@@ -24,8 +24,14 @@ use lo\widgets\modal\ModalAjax;
 	} else {
 		echo "Не задан";
 	}
+	echo \yii\helpers\Html::a(
+	'Изменить',
+	['/rbac/assignment/assignment','id'=>$model->id],
+	[
+		'class' => 'open-in-modal-form',
+		'data-reload-page-on-submit' => 1
+	]);
 	yii\widgets\Pjax::end();
 
-	echo \yii\helpers\Html::a('Изменить',['/rbac/assignment/assignment','id'=>$model->id]);
 	
 ?>
