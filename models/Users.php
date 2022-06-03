@@ -338,7 +338,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function validatePassword($password)
     {
-        return $this->password === $password;
+		return \Yii::$app->ldap->auth()->attempt($this->Login, $password);
     }
 
     /**
@@ -503,4 +503,5 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 			Yii::$app->user->can('view')
 		);
 	}
+	
 }

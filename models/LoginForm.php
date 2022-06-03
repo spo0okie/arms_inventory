@@ -61,8 +61,16 @@ class LoginForm extends Model
     {
 	    $authUser = \Yii::$app->ldap->auth()->attempt($this->username, $this->password);
 	
-	    if ($authUser)
-		    return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
+	    //$authuser - успех авторизации
+		//$this->getuser - наличие такого пользователя в нашей БД
+	    if ($authUser && $this->getUser()) {
+	    	//var_dump($authUser);
+	    	//var_dump(\Yii::$app->user);
+			return \Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
+		} else {
+			//$this->addError('username', 'Incorrect username or password.');
+			$this->addError('password', 'Incorrect username or password.');
+		}
 	    
         return false;
     }
