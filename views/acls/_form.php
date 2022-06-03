@@ -42,7 +42,6 @@ $selectOptions= [
 ?>
 
 <div class="acls-form">
-
     <?php $form = ActiveForm::begin([
 		//'enableClientValidation' => false,	//чтобы отключить валидацию через JS в браузере
 		//'enableAjaxValidation' => true,		//чтобы включить валидацию на сервере ajax запросы
@@ -52,6 +51,7 @@ $selectOptions= [
 			//['acls/validate','id'=>$model->id], //для существующих
 		//'action' => Yii::$app->request->getQueryString(),
 	]); ?>
+	<div class="for-alert"></div>
 	<div class="row">
 		<div class="col-md-6">
 			<h3>Выберите один ресурс к которому предоставляется доступ</h3>
