@@ -168,6 +168,7 @@ class SchedulesController extends Controller
 			$model->override_id = Yii::$app->request->get('override_id');
 			$model->parent_id = Yii::$app->request->get('override_id');
 			$model->start_date = date('Y-m-d');
+			$model->name='Override for #'.$model->override_id;
 		}
 		
 		
