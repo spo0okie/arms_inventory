@@ -81,6 +81,10 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		]
 	];
 	
+	public static $label_day='День';
+	public static $label_schedule='График';
+	public static $label_graph='Картина дня';
+	
 
 	public $isAclCache=null;
 	
@@ -276,10 +280,10 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			'is_work' => $this->isAcl?'Период предоставления/отзыва прав':'Рабочий/нерабочий период',
 			
 			'date' => $this->is_period?'Начало':'День/Дата',
-			'day' => 'День',
+			'day' => static::$label_day,
 			'date_end' => 'Окончание',
-			'schedule' => 'График',
-			'graph' => 'Картина дня',
+			'schedule' => static::$label_schedule,
+			'graph' => static::$label_graph,
 			
 			'comment' => 'Комментарий',
 			'history' => 'Дополнительные заметки',

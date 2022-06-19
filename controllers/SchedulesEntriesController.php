@@ -89,10 +89,14 @@ class SchedulesEntriesController extends Controller
 		if (isset($_GET['schedule_id'])) $model->schedule_id=$_GET['schedule_id'];
 		if (isset($_GET['is_period'])) $model->is_period=$_GET['is_period'];
         if (isset($_GET['date'])) $model->date=$_GET['date'];
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('create', [
+				'model' => $model,
+			]):
+			$this->render('create', [
+				'model' => $model,
+			]);
     }
 
     /**
@@ -110,9 +114,13 @@ class SchedulesEntriesController extends Controller
             return $this->redirect(['/schedules/view', 'id' => $model->schedule_id]);
         }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        return Yii::$app->request->isAjax?
+			$this->renderAjax('update', [
+				'model' => $model,
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
     }
 
     /**

@@ -56,7 +56,7 @@ $schedule_id=$model->id;
 				<?= $this->render('services',['model'=>$model])?>
 			</div>
 			<div class="col-md-6">
-				<?= $this->render('week-edit',['model'=>$model])?>
+				<?= $this->render('week/list',['model'=>$model])?>
 				<?= $this->render('exceptions',['model'=>$model])?>
 			</div>
 		</div>

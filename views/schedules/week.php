@@ -22,8 +22,10 @@ for ($i=1; $i<=7; $i++) {
 }*/
 if (!isset($static_view)) $static_view=false;
 
+$today=strtotime("today");
+
 
 ?>
 
-<h2><?= $model->weekWorkTimeDescription ?></h2>
+<h2><?= $model->getWeekWorkTimeDescription($today) ?></h2>
 

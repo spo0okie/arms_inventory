@@ -1,0 +1,40 @@
+div.schedule-item-block {
+    background-color: #b9d7d9;
+    color: white;
+    padding: 10px;
+    margin-bottom: 7px;
+    box-shadow:
+        0 1px 1px hsl(0deg 0% 0% / 0.075),
+        0 2px 2px hsl(0deg 0% 0% / 0.075),
+        0 4px 4px hsl(0deg 0% 0% / 0.075),
+        0 8px 8px hsl(0deg 0% 0% / 0.075),
+        0 16px 16px hsl(0deg 0% 0% / 0.075)
+    ;
+}
+
+div.schedule-item-block a {color:#d6dede}
+
+div.schedule-item-block table {
+    color: #d6dede;
+    box-shadow:
+            0 1px 1px hsl(0deg 0% 0% / 0.075),
+            0 2px 2px hsl(0deg 0% 0% / 0.075),
+            0 4px 4px hsl(0deg 0% 0% / 0.075)
+    ;
+    margin-bottom:0;
+    margin-top:7px;
+}
+
+div.schedule-item-block table tbody tr td {padding:4px 12px 2px 12px;}
+div.schedule-item-block table.table-hover tbody tr:hover * {color:white!important;}
+div.schedule-item-block table tbody tr td div.progress {background-color:#d6dede;}
+div.schedule-item-block table.table-hover tbody tr:hover td div.progress {background-color:white!important;}
+
+div.schedule-item-block div.schedule-item-edit {
+    background-color: #668284;
+}
+
+div.schedule-item-block div.schedule-item-preview {
+    font-weight: bold;
+    cursor: pointer;
+}

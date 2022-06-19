@@ -6,8 +6,11 @@ use yii\helpers\Html;
 /* @var $model app\models\Schedules */
 
 if (!isset($acl_mode)) $acl_mode=false;
-
-if (!$acl_mode) {
+if ($model->isOverride) {
+	$this->title = 'Изменения в периоде дат';
+	$this->params['breadcrumbs'][] = ['label' => \app\models\Schedules::$titles, 'url' => ['index']];
+	$this->params['breadcrumbs'][] = ['label' => $model->overriding->name, 'url' => ['index']];
+} elseif (!$acl_mode) {
 	$this->title = 'Новое '.mb_strtolower(\app\models\Schedules::$title);
 	$this->params['breadcrumbs'][] = ['label' => \app\models\Schedules::$titles, 'url' => ['index']];
 } else {
@@ -20,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= $this->render('_form', [
+    <?= $this->render($model->override_id?'_form_override':'_form', [
         'model' => $model,
 		'acl_mode'=>$acl_mode,
     ]) ?>

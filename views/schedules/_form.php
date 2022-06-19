@@ -32,7 +32,6 @@ if (!isset($acl_mode)) $acl_mode=false;
 						'data' => \app\models\Schedules::fetchNames(),
 						'options' => [
 							'placeholder' => 'Выберите расписание',
-							//'onchange' => 'if($(this).val()){$("#schedules-defaultitemschedule").prop("disabled",true)} else {$("#schedules-defaultitemschedule").prop("disabled",false)};',
 							'onchange' => '$("#schedules-defaultitemschedule").prop("disabled",($(this).val()))',
 						],
 						'toggleAllSettings'=>['selectLabel'=>null],
@@ -92,7 +91,7 @@ if (!isset($acl_mode)) $acl_mode=false;
 				'pluginOptions'=>[
 					'weekStart' => '1',
 				]
-			])->hint($model->getDictionary($model->override_id?'override_start':'period_start')); ?>
+			])->hint($model->getDictionary('period_start')); ?>
 		</div>
 		<div class="col-md-3">
 			<?= $form->field($model, 'end_date')->widget(DateControl::classname(), [
@@ -101,7 +100,7 @@ if (!isset($acl_mode)) $acl_mode=false;
 				'pluginOptions'=>[
 					'weekStart' => '1',
 				]
-			])->hint($model->getDictionary($model->override_id?'override_end':'period_end')); ?>
+			])->hint($model->getDictionary('period_end')); ?>
 		</div>
 	</div>
 	<?= $form->field($model, 'history')->widget(\kartik\markdown\MarkdownEditor::className(), [

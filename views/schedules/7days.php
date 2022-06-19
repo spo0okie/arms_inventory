@@ -26,7 +26,7 @@ for ($i=0; $i<7; $i++) {
 		'label' => $dateLabel,
 		'format' => 'raw',
 		'value'=> $this->render('/schedules-entries/item',[
-			'model'=>$model->getDateScheduleRecursive($dateDay)
+			'model'=>$model->getDateScheduleRecursive($dateDay,null)
 		])
 	];
 }

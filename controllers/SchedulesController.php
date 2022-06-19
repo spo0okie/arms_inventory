@@ -141,8 +141,13 @@ class SchedulesController extends Controller
 	 */
     public function actionView($id,$acl_mode=false)
     {
+    	$model=$this->findModel($id);
+    	if ($model->isOverride) return $this->redirect([
+    		'view',
+			'id'=>$model->override_id,
+		]);
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
 			'acl_mode' => $acl_mode,
         ]);
     }
@@ -158,6 +163,14 @@ class SchedulesController extends Controller
 		
 		if (Yii::$app->request->get('parent_id'))
 			$model->parent_id=Yii::$app->request->get('parent_id');
+
+		if (Yii::$app->request->get('override_id')) {
+			$model->override_id = Yii::$app->request->get('override_id');
+			$model->parent_id = Yii::$app->request->get('override_id');
+			$model->start_date = date('Y-m-d');
+		}
+		
+		
 		$support_service=null;
 		$service=null;
 		$item=null;
@@ -172,8 +185,6 @@ class SchedulesController extends Controller
 				$model->name=\app\models\Schedules::$title.' поддержки '.$support_service->name;
 			}
 		}
-		
-		
 		
 		if ($model->load(Yii::$app->request->post())) {
 			//var_dump($model);
@@ -205,10 +216,15 @@ class SchedulesController extends Controller
 			}
 		}
 		
-		return $this->render('create', [
-			'model' => $model,
-			'attach_service'=>Yii::$app->request->get('attach_service')
-		]);
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('create', [
+				'model' => $model,
+				'attach_service'=>Yii::$app->request->get('attach_service')
+			]):
+			$this->render('create', [
+				'model' => $model,
+				'attach_service'=>Yii::$app->request->get('attach_service')
+			]);
 	}
 	/**
 	 * Creates a new Schedules model with attached ACL.
@@ -243,14 +259,18 @@ class SchedulesController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
+	
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        return Yii::$app->request->isAjax?
+			$this->renderAjax('update', [
+				'model' => $model,
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
     }
 
     /**

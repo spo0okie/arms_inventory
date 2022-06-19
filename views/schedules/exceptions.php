@@ -39,6 +39,43 @@ if (!$acl_mode) {
 	echo '<h2>Периоды предоставления / отзыва доступа</h2>';
 }
 
+echo '<div class="btn-group">';
+if (!$acl_mode) {
+	echo Html::a('Добавить график на дату', [
+		'/schedules-entries/create',
+		'schedule_id' => $model->id,
+		'is_period' => 0,
+	], [
+		'class' => 'btn btn-success',
+		'title' => 'На выбранную дату расписание будет изменено. Например сокращенный рабочий день или праздничный выходной.'
+	]);
+	
+	echo Html::a('Изменить расписание на период', [
+		'/schedules/create',
+		'override_id' => $model->id,
+		'is_period' => 0,
+	], [
+		'class' => 'btn btn-success',
+		'title' => 'На выбранный период в календаре расписание на неделю будет изменено. Например чей-то отпуск.'
+	]);
+	
+	echo Html::a('Добавить раб/не раб. период', [
+		'/schedules-entries/create',
+		'schedule_id' => $model->id,
+		'is_period' => 1,
+	], [
+		'class' => 'btn btn-success',
+		'title' => 'С начала периода (дата, время) и до его конца (дата, время) будет непрерывно нерабочее или рабочее время.'
+	]);
+} else {
+	echo Html::a('Добавить период предоставления/отзыва доступа', [
+		'/schedules-entries/create',
+		'schedule_id' => $model->id,
+		'is_period' => 1,
+	], ['class' => 'btn btn-success']);
+}
+echo '</div>';
+
 echo GridView::widget([
 	'dataProvider' => $daysDataProvider,
 	'filterModel' => $daysSearchModel,
@@ -96,24 +133,3 @@ echo GridView::widget([
 	],
 ]);
 
-echo '<div class="btn-group">';
-if (!$acl_mode) {
-	echo Html::a('Добавить нестандартный график на дату', [
-		'/schedules-entries/create',
-		'schedule_id' => $model->id,
-		'is_period' => 0,
-	], ['class' => 'btn btn-success']);
-	
-	echo Html::a('Добавить раб/не раб. период', [
-		'/schedules-entries/create',
-		'schedule_id' => $model->id,
-		'is_period' => 1,
-	], ['class' => 'btn btn-success']);
-} else {
-	echo Html::a('Добавить период предоставления/отзыва доступа', [
-		'/schedules-entries/create',
-		'schedule_id' => $model->id,
-		'is_period' => 1,
-	], ['class' => 'btn btn-success']);
-}
-echo '</div>';

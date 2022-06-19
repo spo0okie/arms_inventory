@@ -8,8 +8,8 @@ return [
     'wikiPass'=>'m8-W8CZSZ(wANqL+',
 	'bsVersion' => '5.x',
 
-	'useRBAC'=>false,   //включить RBAC и выдавать админа только тем кому назначено
-	'authorizedView'=>true,
+	'useRBAC'=>true,   //включить RBAC и выдавать админа только тем кому назначено
+	'authorizedView'=>false,
 	'userSyncFields'=>[
 		'Orgeh' => 'SAP',
 		'Doljnost' => 'SAP',
@@ -24,4 +24,5 @@ return [
 		'Bday' => 'SAP',
 		'manager_id' => 'SAP',
 	],
+	'schedulesTZShift'=>3600*3,
 ];

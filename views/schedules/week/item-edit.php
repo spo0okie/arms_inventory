@@ -6,21 +6,28 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
 
-if (!isset($static_view)) $static_view=false;
+if (!isset($static_view)) $static_view=$model->isNewRecord;
 $renderer=$this;
 
-
+//if (!isset($hide_capture) || !$hide_capture) echo '<h2>Расписание на рабочую неделю</h2>';
 ?>
 
-<h2>Изменить рабочую неделю</h2>
 
+<?= $model->isNewRecord?\yii\bootstrap5\Alert::widget([
+	'body'=>'Для внесения изменений нужно сначала сохранить расписание',
+	'options'=>['class' => 'alert-warning'],
+	'closeButton'=>false
+]):'' ?>
 
 <?= \yii\grid\GridView::widget([
 	'dataProvider' => $model->getWeekDataProvider(),
 	'summary' => false,
+	'tableOptions' => [
+		'class'=>'table table-condensed table-hover table-borderless'
+	],
 	'columns' => [
 		[
-			'attribute'=>'day',
+			'header'=>\app\models\SchedulesEntries::$label_day,
 			'value'=>function($data,$day) {
 				return \app\models\SchedulesEntries::$days[$day];
 			},
@@ -30,7 +37,7 @@ $renderer=$this;
 			];},
 		],
 		[
-			'attribute'=>'schedule',
+			'header'=>\app\models\SchedulesEntries::$label_schedule,
 			'format'=>'raw',
 			'value'=>function ($data,$day) use ($static_view,$model) {
 				//Если задано явно, то рисуем явно заданное с возможностью править и удалить
@@ -41,7 +48,7 @@ $renderer=$this;
 					$update=$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>', [
 						'/schedules-entries/update',
 						'id' => $data->id,
-					]);
+					],['class'=>'open-in-modal-form']);
 					$delete=$static_view?'':Html::a('<span class="fas fa-trash"></span>', [
 						'/schedules-entries/delete',
 						'id' => $data->id,
@@ -58,7 +65,7 @@ $renderer=$this;
 						'/schedules-entries/create',
 						'schedule_id' => $model->id,
 						'date' => $day,
-					]);
+					],['class'=>'open-in-modal-form']);
 					return (
 						is_object($data)?
 							$text='<span title="Расписание на этот день наследуется">'.$data->mergedSchedule.'</span>'
@@ -72,7 +79,7 @@ $renderer=$this;
 			];},
 		],
 		[
-			'attribute'=>'graph',
+			'header'=>\app\models\SchedulesEntries::$label_graph,
 			'value'=>function($data,$day) use ($renderer,$model) {
 				return $renderer->render('/schedules-entries/stripe',['model'=>$data,'schedule'=>$model]);
 			},
