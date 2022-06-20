@@ -121,14 +121,22 @@ for ($i=0; $i<count($comps); $i++) {
 					<?php if (count($model->monitors)) {
 						echo ' / ';
 						foreach ($model->monitors as $tech) {
-							echo $this->render('/techs/item', ['model' => $tech, 'name' => $tech->model->shortest]);
+							echo $this->render('/techs/item', [
+								'model' => $tech,
+								'name' => $tech->model->shortest,
+								'static_view' => true
+							]);
 						}
 					}
 					?>
 					<?php if (count($model->ups)) {
 						echo ' / ';
 						foreach ($model->ups as $tech) {
-							echo $this->render('/techs/item', ['model' => $tech, 'name' => $tech->model->shortest]);
+							echo $this->render('/techs/item', [
+								'model' => $tech,
+								'name' => $tech->model->shortest,
+								'static_view' => true
+							]);
 						}
 					}
 					?>
