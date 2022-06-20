@@ -42,6 +42,7 @@ class TechModels extends \yii\db\ActiveRecord
 	private static $phones_ids_cache=null;
 	private static $pcs_ids_cache=null;
 	private static $ups_ids_cache=null;
+	private static $monitors_ids_cache=null;
 
     /**
      * {@inheritdoc}
@@ -281,7 +282,21 @@ class TechModels extends \yii\db\ActiveRecord
 
 		return static::$ups_ids_cache;
 	}
-
+	
+	public static function fetchMonitorsIds()
+	{
+		if (is_null(static::$monitors_ids_cache)) {
+			$list = static::find()
+				//->select('id')
+				->joinWith('type')
+				->where(['type_id'=>\app\models\TechTypes::fetchMonitorIds()])
+				->all();
+			static::$monitors_ids_cache=\yii\helpers\ArrayHelper::getColumn($list,'id');
+		}
+		
+		return static::$monitors_ids_cache;
+	}
+	
 	/**
 	 * Возвращает признак того, что это оборудование ПК
 	 * @param $id
@@ -299,7 +314,7 @@ class TechModels extends \yii\db\ActiveRecord
 	public static function getIsPhone($id) {
 		return array_search($id,static::fetchPhonesIds())!==false;
 	}
-
+	
 	/**
 	 * Возвращает признак того, что это оборудование Телефон
 	 * @param $id
@@ -308,8 +323,17 @@ class TechModels extends \yii\db\ActiveRecord
 	public static function getIsUps($id) {
 		return array_search($id,static::fetchUpsIds())!==false;
 	}
-
-
+	
+	/**
+	 * Возвращает признак того, что это оборудование Монитор
+	 * @param $id
+	 * @return bool
+	 */
+	public static function getIsMonitor($id) {
+		return array_search($id,static::fetchMonitorsIds())!==false;
+	}
+	
+	
 	/**
 	 * Возвращает описание поля комментарий для типа оборудования по модели
 	 */

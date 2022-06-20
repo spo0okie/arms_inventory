@@ -53,6 +53,8 @@ use Yii;
  * @property Techs[] $techs
  * @property TechStates $state
  * @property Techs[] $voipPhones
+ * @property Techs[] $ups
+ * @property Techs[] $monitors
  * @property TechModels $techModel
  * @property Contracts[] $contracts
  * @property LicItems[] $licItems
@@ -68,6 +70,7 @@ class Arms extends \yii\db\ActiveRecord
 	private $techs_cache=null;
 	private $voipPhones_cache=null;
 	private $ups_cache=null;
+	private $monitors_cache=null;
 	private $hwComp_cache=null;  //тот комп с которого вытаскивать железо (если основная ОС - виртуальная)
 	private $hwComps_cache=null; //для методов вытащить только поставленные на железо
 	private $vmComps_cache=null; //и виртуальные ОС пригодится кэш (наверно)
@@ -378,7 +381,7 @@ class Arms extends \yii\db\ActiveRecord
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return array
 	 */
 	public function getVoipPhones()
 	{
@@ -395,9 +398,9 @@ class Arms extends \yii\db\ActiveRecord
 	{
 		return $this->hasMany(MaterialsUsages::className(), ['arms_id' => 'id']);
 	}
-
+	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return array
 	 */
 	public function getUps()
 	{
@@ -405,6 +408,17 @@ class Arms extends \yii\db\ActiveRecord
 		$this->ups_cache=[];
 		foreach ($this->techs as $tech) if ($tech->isUps) $this->ups_cache[]=$tech;
 		return $this->ups_cache;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getMonitors()
+	{
+		if (!is_null($this->monitors_cache)) return $this->monitors_cache;
+		$this->monitors_cache=[];
+		foreach ($this->techs as $tech) if ($tech->isMonitor) $this->monitors_cache[]=$tech;
+		return $this->monitors_cache;
 	}
 	
 	/**

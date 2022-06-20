@@ -118,6 +118,13 @@ for ($i=0; $i<count($comps); $i++) {
 			if (!$i&&array_search('hardware',$skip)===false) { ?>
         	    <td class="hardware" <?= $rowspanPhys ?>>
 					<?= $this->render('/hwlist/shortlist',['model'=>$model->hwList,'arm_id'=>$model->id]) ?>
+					<?php if (count($model->monitors)) {
+						echo ' / ';
+						foreach ($model->monitors as $tech) {
+							echo $this->render('/techs/item', ['model' => $tech, 'name' => $tech->model->shortest]);
+						}
+					}
+					?>
 					<?php if (count($model->ups)) {
 						echo ' / ';
 						foreach ($model->ups as $tech) {

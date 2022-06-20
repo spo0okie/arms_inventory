@@ -35,6 +35,8 @@ foreach ($arms as $arm ) {
 		foreach ($techs as $i=>$tech) if ($tech['id']==$phone['id']) unset($techs[$i]);
 	foreach ($arm->ups as $upsItem)
 		foreach ($techs as $i=>$tech) if ($tech['id']==$upsItem['id']) unset($techs[$i]);
+	foreach ($arm->monitors as $monitorItem)
+		foreach ($techs as $i=>$tech) if ($tech['id']==$monitorItem['id']) unset($techs[$i]);
 }
 
 

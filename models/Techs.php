@@ -27,6 +27,8 @@ use yii\validators\IpValidator;
  * @property string $stateName статус
  * @property bool $isVoipPhone Является IP телефоном
  * @property bool $isUps Является UPS
+ * @property bool $isPc Является ПК
+ * @property bool $isMonitor Является Монитором
  * @property array $contracts_ids Список документов
  * @property array $netIps_ids Список IP
  * @property array $portsList
@@ -380,12 +382,14 @@ class Techs extends \yii\db\ActiveRecord
 
 	public function getIsVoipPhone() {
 		return \app\models\TechModels::getIsPhone($this->model_id);
-		return \app\models\TechTypes::getIsPhone($this->model->type_id);
     }
-
+	
 	public function getIsUps() {
 		return \app\models\TechModels::getIsUps($this->model_id);
-		return \app\models\TechTypes::getIsUps($this->model->type_id);
+	}
+	
+	public function getIsMonitor() {
+		return \app\models\TechModels::getIsMonitor($this->model_id);
 	}
 	
 	

@@ -32,6 +32,9 @@ class TechTypes extends \yii\db\ActiveRecord
 	//категории UPS
 	public static $Ups=['ups'];
 	public static $ups_ids=null;
+	//категории Monitors
+	public static $Monitors=['display'];
+	public static $monitors_ids=null;
 
 
 
@@ -151,31 +154,39 @@ class TechTypes extends \yii\db\ActiveRecord
 		if (isset(static::$id_codes[$id])) return static::$id_codes[$id];
 		return static::$id_codes[$id]=static::findOne($id)->code;
 	}
+	
+	/**
+	 * Заполняяет массив $ids идентифкаторами оборудования с кодами из $codes
+	 * @param $codes
+	 * @param $ids
+	 */
+	public static function fetchTypeIds($codes,&$ids) {
+		$ids=[];
+		foreach ($codes as $code)
+			$ids[]=static::getCodeId($code);
+		return $ids;
+	}
 
 	public static function fetchPhonesIds() {
 		if (isset(static::$Phones_ids)) return static::$Phones_ids;
-		static::$Phones_ids=[];
-		foreach (static::$Phones as $code)
-			static::$Phones_ids[]=static::getCodeId($code);
-		return static::$Phones_ids;
+		return static::fetchTypeIds(static::$Phones,static::$Phones_ids);
 	}
 
 	public static function fetchPCsIds() {
 		if (isset(static::$PCs_ids)) return static::$PCs_ids;
-		static::$PCs_ids=[];
-		foreach (static::$PCs as $code)
-			static::$PCs_ids[]=static::getCodeId($code);
-		return static::$PCs_ids;
+		return static::fetchTypeIds(static::$PCs,static::$PCs_ids);
 	}
-
+	
 	public static function fetchUpsIds() {
 		if (isset(static::$ups_ids)) return static::$ups_ids;
-		static::$ups_ids=[];
-		foreach (static::$Ups as $code)
-			static::$ups_ids[]=static::getCodeId($code);
-		return static::$ups_ids;
+		return static::fetchTypeIds(static::$Ups,static::$ups_ids);
 	}
-
+	
+	public static function fetchMonitorIds() {
+		if (isset(static::$monitors_ids)) return static::$monitors_ids;
+		return static::fetchTypeIds(static::$Monitors,static::$monitors_ids);
+	}
+	
 	/**
 	 * Возвращает признак того, что это оборудование ПК
 	 * @param $id
@@ -193,7 +204,7 @@ class TechTypes extends \yii\db\ActiveRecord
 	public static function getIsPhone($id) {
 		return array_search($id,static::fetchPhonesIds())!==false;
 	}
-
+	
 	/**
 	 * Возвращает признак того, что это оборудование Телефон
 	 * @param $id
@@ -202,6 +213,15 @@ class TechTypes extends \yii\db\ActiveRecord
 	public static function getIsUps($id) {
 		return array_search($id,static::fetchUpsIds())!==false;
 	}
-
-
+	
+	/**
+	 * Возвращает признак того, что это оборудование Монитор
+	 * @param $id
+	 * @return bool
+	 */
+	public static function getIsMonitor($id) {
+		return array_search($id,static::fetchMonitorIds())!==false;
+	}
+	
+	
 }
