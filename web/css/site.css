@@ -375,8 +375,8 @@ table.places-arms-container col.arm_id          {width: 120px;}
 table.places-arms-container col.arm_hostname    {width: 120px;}
 table.places-arms-container col.arm_uname       {width: 220px}
 table.places-arms-container col.arm_uphone      {width: 100px;}
-table.places-arms-container col.arm_model       {width: 280px;}
-table.places-arms-container col.hardware        {width: 240px;}
+table.places-arms-container col.arm_model       {width: 220px;}
+table.places-arms-container col.hardware        {width: 300px;}
 table.places-arms-container col.attachments     {width: 70px;}
 table.places-arms-container col.item_status     {width: 60px;}
 table.places-arms-container col.item_ip         {width: 110px;}
