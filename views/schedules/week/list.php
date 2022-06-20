@@ -12,10 +12,11 @@ $renderer=$this;
 echo '<h2>Расписание на неделю</h2>';
 echo $this->render('item',['model'=>$model]);
 
-$overrides=$model->overrides;
-if (count($overrides)) {
-	foreach ($overrides as $override) {
-		echo $this->render('item',['model'=>$override]);
+$periods=$model->overrides;
+if (count($periods)) {
+	
+	foreach ($periods as $period) {
+		echo $this->render('item',['model'=>$period]);
 	}
 	
 }

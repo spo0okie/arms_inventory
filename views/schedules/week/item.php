@@ -1,7 +1,6 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
@@ -18,13 +17,6 @@ if ($model->isOverride) {
 } else {
 	$prefix='Основное расписание';
 	$limits=$model->getPeriodDescription(); //полный период действия
-	$todayLimits=\app\models\Schedules::generatePeriodDescription($model->findPeriodLimits($today)); //с ограничениями справа и слева от сегодня
-	if ($limits!=$todayLimits) {//если изменения в расписании вносят правки в период действия расписания
-		if (strlen($limits)) //если у расписания есть явный период действия то дополняем его
-			$limits.="\n(с учетом изменений в расписании $todayLimits)";
-		else //иначе заменяем
-			$limits=$todayLimits;
-	}
 	$match=$model->findEffectiveWeekSchedule($today);
 	$hidden=is_object($match)&&$match->id==$model->id?'':'style="display:none;"';
 	
@@ -37,9 +29,10 @@ if ($model->isOverride) {
 	<div class="d-flex flex-row">
 		<div class="schedule-item-preview flex-fill" onclick="$(this).parents('div.schedule-item-block').children('div.schedule-item-edit').fadeToggle()">
 			<?= $prefix.' '.$limits ?>
+			<div class="comment"><?= $model->description ?></div>
 		</div>
 		<?php if ($model->isOverride){ ?>
-			<div class="btn-group pull-right" role="group">
+			<div class="btn-group pull-right align-self-center" role="group">
 				<?= Html::a('<span class="fas fa-pencil-alt"></span>',[
 					'schedules/update',
 					'id'=>$model->id,

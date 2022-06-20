@@ -17,9 +17,9 @@ $periodEnd=$today+($days_forward+1)*60*60*24-1;
 
 $exceptions=$model->findExceptions($today,$periodEnd);
 $periods=$model->findPeriods($today,$periodEnd);
-
+$weeks=[];
 $dateAttr=[];
-for ($i=0; $i<7; $i++) {
+for ($i=0; $i<$days_forward; $i++) {
 	$dateDay=gmdate('Y-m-d',$today+86400*$i+Yii::$app->params['schedulesTZShift']);
 	$dateLabel='График на '.Yii::$app->formatter->asDate(time()+86400*$i,'full');
 	$dateAttr[]=[
@@ -29,19 +29,23 @@ for ($i=0; $i<7; $i++) {
 			'model'=>$model->getDateScheduleRecursive($dateDay,null)
 		])
 	];
+	$week=$model->findEffectiveWeekSchedule($dateDay);
+	$weeks[$week->id]=$week;
 }
 
 if (
 	(is_array($exceptions) && count($exceptions))
 ||
 	(is_array($periods) && count($periods))
+||
+	(count($weeks)>1)
 ) {
 	?>
 
-
+<div class="schedule-next-days-modeling">
 <h2>В ближайшие <?= $days_forward ?> дней есть исключения</h2>
 <p>праздничные дни/ аварийные простои и т.п.<br> Посмотрите внимательно график на ближайшие <?= $days_forward ?> дней</p>
-	<table class="table table-condensed table-striped">
+	<table class="table table-condensed table-hover table-borderless">
 		<?php for ($i=0; $i<$days_forward; $i++) {
 			$day=$model->getDateSchedule(date('Y-m-d',time()+86400*$i));
 			if (is_object($day)) {
@@ -66,6 +70,5 @@ if (
 			</tr>
 		<?php } ?>
 	</table>
-<?php //= DetailView::widget(['model'=>$model,'attributes'=>$dateAttr])
-
-}
+</div>
+<?php }

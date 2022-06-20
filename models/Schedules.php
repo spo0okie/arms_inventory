@@ -111,6 +111,18 @@ class Schedules extends \yii\db\ActiveRecord
 			[['name','description','defaultItemSchedule'], 'string', 'max' => 255],
 			[['start_date','end_date'], 'string', 'max' => 64],
 			['start_date','required','on'=>self::SCENARIO_OVERRIDE],
+			[['start_date','end_date'],function ($attribute, $params, $validator) {
+        		foreach ($this->parent->overrides as $override){
+        			if ($override->id != $this->id && (
+        				
+        				$override->matchDate($this->$attribute) ||
+						$this->matchDate($override->start_date) ||
+						$this->matchDate($override->end_date)
+					)) {
+						$this->addError($attribute,'Пересекается с периодом '.$override->getPeriodDescription());
+					}
+				}
+			},'on'=>self::SCENARIO_OVERRIDE],
 			[['history'],'safe'],
 			[['override_id'],'integer'],
 			[['parent_id'], function ($attribute, $params, $validator) {

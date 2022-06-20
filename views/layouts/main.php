@@ -68,6 +68,11 @@ $js = <<<JS
 function(event, data, status, xhr, selector) {
     console.log('Got modal commit ('+status+')');
 	if (status!=='success') {
+	    if (data) {
+			$(this)
+				.find('div.modal-body')
+				.html(data);
+	    }
 		$(this)
 			.find('div.for-alert')
 			.html('<div class="alert alert-danger alert-dismissible fade show" role="alert">'+

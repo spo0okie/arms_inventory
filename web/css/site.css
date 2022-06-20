@@ -832,6 +832,11 @@ table.acls-table th{
 
 /* Корректировки BOOTSTRAP */
 
+
+div.invalid-feedback {
+    display: inherit!important;
+}
+
 @media (min-width: 1200px) {
     .container-large {
         width: 1600px;
