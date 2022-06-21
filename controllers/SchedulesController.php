@@ -142,10 +142,12 @@ class SchedulesController extends Controller
     public function actionView($id,$acl_mode=false)
     {
     	$model=$this->findModel($id);
-    	if ($model->isOverride) return $this->redirect([
-    		'view',
-			'id'=>$model->override_id,
-		]);
+    	if ($model->isOverride) {
+    		$params=Yii::$app->request->get();
+    		$params['id']=$model->override_id;
+    		return $this->redirect(array_merge(['view'],$params));
+		}
+    		
         return $this->render('view', [
             'model' => $model,
 			'acl_mode' => $acl_mode,

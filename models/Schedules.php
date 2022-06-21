@@ -13,6 +13,7 @@ use yii\data\ArrayDataProvider;
  * This is the model class for table "schedules".
  *
  * @property int $id
+ * @property int $baseId ID основного расписания, если это перекрытие
  * @property int $parent_id
  * @property int $override_id
  * @property string $name
@@ -86,12 +87,12 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public $isAclCache=null;
 	public $metaClasses=[]; //список классов метаданных привязанных к этому расписанию
-	private $weekDaysCache=null;
+	private $daysEntriesCache=null;
 	private $providingModeCache=null;
 	private $overridesCache=null;
 	private $startUnixTimeCache=-1; //нельзя инициировать как NULL, т.к. NULL возможно будет закеширован
 	private $endUnixTimeCache=-1;	//если у расписания нет начала или конца
-	
+	private $entriesCache=null;
 	public $defaultItemSchedule;
 	
     /**
@@ -114,7 +115,6 @@ class Schedules extends \yii\db\ActiveRecord
 			[['start_date','end_date'],function ($attribute, $params, $validator) {
         		foreach ($this->parent->overrides as $override){
         			if ($override->id != $this->id && (
-        				
         				$override->matchDate($this->$attribute) ||
 						$this->matchDate($override->start_date) ||
 						$this->matchDate($override->end_date)
@@ -176,7 +176,7 @@ class Schedules extends \yii\db\ActiveRecord
 	}
 	
 	/**
-	 * Проверяем петлю по связи потомок-предок
+	 * Проверяем петлю по связи потомок-предок заполняя цепочку $children рекурсивно добавляя туда предков
 	 * @param $children integer[]
 	 * @return false|int
 	 */
@@ -198,17 +198,6 @@ class Schedules extends \yii\db\ActiveRecord
 		return $this->parent->loopCheck($children);
 	}
 	
-	public function findDay($day) {
-		if (is_null($this->weekDaysCache)) {
-			$this->weekDaysCache=['def'=>null,'1'=>null,'2'=>null,'3'=>null,'4'=>null,'5'=>null,'6'=>null,'7'=>null];
-			foreach ($this->entries as $entry)
-				if (!$entry->is_period)
-					$this->weekDaysCache[$entry->date]=$entry;
-		}
-		if (isset($this->weekDaysCache[$day])) return $this->weekDaysCache[$day];
-		return null;
-	}
-	
 	public function getIsAcl() {
 		if (is_null($this->isAclCache)) {
 			$this->isAclCache=is_array($this->acls) && count($this->acls);
@@ -218,6 +207,10 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public function getIsOverride() {
 		return !is_null($this->override_id);
+	}
+	
+	public function getBaseId() {
+		return $this->isOverride?$this->override_id:$this->id;
 	}
 	
 	/**
@@ -298,83 +291,13 @@ class Schedules extends \yii\db\ActiveRecord
 		return true;
 	}
 	
-	/**
-	 * Ищет ближайшее перекрытие расписания до даты
-	 * @param $date
-	 * @return Schedules|null
-	 */
-	public function findOverrideBefore($date)
-	{
-		if (!is_int($date))			//если передано не числом
-			$date=strtotime($date); //конвертируем в Unixtime
-		
-		$match=null;
-		foreach ($this->overrides as $override) {		//перебираем перекрытия расписания
-			if ($override->endsBeforeDate($date)) {		//это заканчивается до даты
-				//если мы еще ничего не нашли, или у этого дата окончания позже
-				if (is_null($match) || ($override->endUnixTime > $match->endUnixTime)) $match=$override;
-			}
-		}
-		return $match;
-	}
-	
-	/**
-	 * Ищет ближайшее перекрытие расписания после даты
-	 * @param $date
-	 * @return Schedules|null
-	 */
-	public function findOverrideAfter($date)
-	{
-		if (!is_int($date))			//если передано не числом
-			$date=strtotime($date); //конвертируем в Unixtime
-		
-		$match=null;
-		foreach ($this->overrides as $override) {		//перебираем перекрытия расписания
-			if ($override->startsAfterDate($date)) {	//это начинается после даты
-				//если мы еще ничего не нашли, или у этого дата начала раньше
-				if (is_null($match) || ($override->startUnixTime < $match->startUnixTime)) $match=$override;
-			}
-		}
-		return $match;
-	}
-	
-	/**
-	 * Возвращает границы действия расписания в окрестностях даты
-	 * показывает откуда начинается действие периода или где заканчивается
-	 * действие периода может ограничиваться перекрытиями или пределами расписания
-	 * @param $date
-	 * @return $array|null
-	 */
-	public function findPeriodLimits($date) {
-		if (!is_int($date))			//если передано не числом
-			$date=strtotime($date); //конвертируем в Unixtime
-
-		if (!$this->matchDate($date)) return null;
-		
-		//если это перекрывающий период, то у него есть только свои границы
-		if ($this->isOverride) return [$this->startUnixTime,$this->endUnixTime];
-		
-		//иначе это исходное расписание
-
-		if (!is_null($overrideBefore=$this->findOverrideBefore($date))) {
-			//есть период до даты
-			$start=$overrideBefore->endUnixTime+86400;
-		} else $start=$this->startUnixTime;
-		
-		if (!is_null($overrideAfter=$this->findOverrideAfter($date))) {
-			//есть период до даты
-			$end=$overrideAfter->startUnixTime-86400;
-		} else $end=$this->endUnixTime;
-		
-		return [$start,$end];
-	}
 	
 	/**
 	 * Находит расписание недели, которое действует на дату
 	 * @param $date
 	 * @return Schedules|null
 	 */
-	public function findEffectiveWeekSchedule($date) {
+	public function getWeekSchedule($date) {
 		//перебираем перекрытия расписания в поисках перекрытия даты
 		foreach ($this->overrides as $override)
 			if ($override->matchDate($date)) return $override;
@@ -386,6 +309,156 @@ class Schedules extends \yii\db\ActiveRecord
 		return null;
 	}
 	
+	/**
+	 * Возвращает кодовое слово режима использования расписания
+	 * @return string
+	 */
+	public function getProvidingMode() {
+		if (!is_null($this->providingModeCache)) return $this->providingModeCache;
+		if ($this->isOverride) $this->providingModeCache=$this->overriding->providingMode;
+		elseif ($this->isAcl) $this->providingModeCache='acl';	//доступ предоставляется
+		elseif (count($this->providingServices)) $this->providingModeCache='providing'; //услуга предоставляется
+		elseif (count($this->supportServices)) $this->providingModeCache='support'; //услуга поддерживается
+		else $this->providingModeCache='working'; //рабочее время
+		return $this->providingModeCache;
+	}
+	
+	/**
+	 * Вытаскивает слово из словаря с учетом использования расписания (выше)
+	 * @param $word
+	 * @return mixed
+	 */
+	public function getDictionary($word) {
+		if (!isset(static::$dictionary[$word]))
+			return $word;
+		if (is_array(static::$dictionary[$word]))
+			return static::$dictionary[$word][$this->providingMode];
+		return static::$dictionary[$word];
+	}
+	
+	/**
+	 * Находим исключения в расписании в указанный период
+	 * @param $start int
+	 * @param $end int|null
+	 * @return array|\yii\db\ActiveRecord[]
+	 */
+	public function findExceptions(int $start,int $end=null)
+	{
+		return SchedulesEntries::find()
+			->Where(['not',['in', 'date', ['1','2','3','4','5','6','7','def']]])
+			->andWhere([
+				'schedule_id'=>$this->id,
+				'is_period'=>0
+			])
+			->andWhere(is_null($end)?
+				[
+					'>=', 'UNIX_TIMESTAMP(date)', $start
+				]:
+				['and',
+					['<=', 'UNIX_TIMESTAMP(date)', $end],
+					['>=', 'UNIX_TIMESTAMP(date)', $start],
+				])
+			->all();
+	}
+	
+	/**
+	 * Ищем периоды в расписании в указанный период
+	 * @param $start
+	 * @param $end
+	 * @return array|\yii\db\ActiveRecord[]
+	 */
+	public function findPeriods($start=null,$end=null) {
+		$query=\app\models\SchedulesEntries::find()
+			->where([
+				'schedule_id'=>$this->id,
+				'is_period'=>1
+			]);
+		
+		if ($start || $end)
+			$query->andWhere(['and',
+				[
+					'or',
+					['<=', 'UNIX_TIMESTAMP(date)', $end],
+					['date'=>null]
+				],
+				[
+					'or',
+					['>=', 'UNIX_TIMESTAMP(date_end)', $start],
+					['date_end'=>null],
+				],
+			]);
+		
+		return $query->all();
+		
+	}
+	
+	/**
+	 * Возвращает все привязанные к расписанию записи (периоды и дни)
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getEntries() {
+		if (is_null($this->entriesCache))
+			$this->entriesCache=$this->hasMany(SchedulesEntries::className(), ['schedule_id' => 'id']);
+		return $this->entriesCache;
+	}
+	
+	/**
+	 * Ищет запись про какой-то день/дату (не период)
+	 * @param $day
+	 * @return mixed|null
+	 */
+	public function getDayEntry($day) {
+		if (is_null($this->daysEntriesCache)) {
+			$this->daysEntriesCache=['def'=>null,'1'=>null,'2'=>null,'3'=>null,'4'=>null,'5'=>null,'6'=>null,'7'=>null];
+			foreach ($this->entries as $entry)
+				if (!$entry->is_period)
+					$this->daysEntriesCache[$entry->date]=$entry;
+		}
+		if (isset($this->daysEntriesCache[$day])) return $this->daysEntriesCache[$day];
+		return null;
+	}
+	
+	/**
+	 * Ищет график работы на конкретный день учитывая родительские расписания
+	 * @param $day
+	 * @param $date
+	 * @return SchedulesEntries|null
+	 */
+	public function getDayEntryRecursive($day, $date)
+	{
+		
+		//перекрывающие периоды данные ниоткуда не наследуют
+		if ($this->isOverride) return $this->getDayEntry($day);
+		
+		//ищем расписание на этот день недели
+		$period=is_null($date)?$this:$this->getWeekSchedule($date);
+		
+		if (!is_null($daySchedule=$period->getDayEntry($day))) {
+			return $daySchedule;
+		}
+		
+		if (is_object($this->parent)) {
+			return $this->parent->getDayEntryRecursive($day,$date);
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Ищет график работы на конкретный день недели учитывая родительские расписания
+	 * $date - день на который это все ищется, т.к. у расписания бывают разные периоды
+	 * @param $weekday
+	 * @param $date
+	 * @return SchedulesEntries|null
+	 */
+	public function getWeekdayEntryRecursive($weekday, $date)
+	{
+		//ищем расписание на этот день недели
+		if (!is_null($daySchedule=$this->getDayEntryRecursive($weekday,$date))) return $daySchedule;
+		//если не получилось - ищем расписание на каждый день
+		return $this->getDayEntryRecursive('def',$date);
+	}
+
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -469,13 +542,7 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public function getPeriodDescription()
 	{
-		if (!$this->start_date && !$this->end_date) return '';
-		
-		if (!$this->start_date) return 'до '.$this->end_date;
-
-		if (!$this->end_date) return 'с '.$this->start_date;
-		
-		return 'с '.$this->start_date . ' до '.$this->end_date;
+		return static::generatePeriodDescription([$this->startUnixTime,$this->endUnixTime]);
 	}
 	
 	
@@ -498,7 +565,7 @@ class Schedules extends \yii\db\ActiveRecord
 			$scheduleObj=($i===8)?
 				null
 				:
-				$this->getWeekDayScheduleRecursive($i,$date);
+				$this->getWeekdayEntryRecursive($i,$date);
 			
 			$schedule= is_object($scheduleObj)?
 				$scheduleObj->mergedSchedule
@@ -535,18 +602,15 @@ class Schedules extends \yii\db\ActiveRecord
 	}
 	
 	/**
-	 * Пробуем вернуть dataProvider расписания на неделю
+	 * Пробуем вернуть dataProvider расписания на неделю с учетом родителя
 	 * @return \yii\data\ArrayDataProvider
 	 */
 	public function getWeekDataProvider()
 	{
 		$models=[];
-		foreach (\app\models\SchedulesEntries::$days as $day=>$name) {
-			$models[$day]=$this->getWeekDayScheduleRecursive($day,null);
-		}
-		return new \yii\data\ArrayDataProvider([
-			'allModels'=>$models
-		]);
+		foreach (\app\models\SchedulesEntries::$days as $day=>$name)
+			$models[$day]=$this->getWeekdayEntryRecursive($day,null);
+		return new \yii\data\ArrayDataProvider(['allModels'=>$models]);
 	}
 	
 	public function getWeekWorkTimeDescription($date=null) {
@@ -561,157 +625,6 @@ class Schedules extends \yii\db\ActiveRecord
 			return $this->getDictionary('nodata');
 	}
 	
-	/**
-	 * Возвращает кодовое слово режима использования расписания
-	 * @return string
-	 */
-	public function getProvidingMode() {
-		if (!is_null($this->providingModeCache)) return $this->providingModeCache;
-		if ($this->isOverride) $this->providingModeCache=$this->overriding->providingMode;
-		elseif ($this->isAcl) $this->providingModeCache='acl';	//доступ предоставляется
-		elseif (count($this->providingServices)) $this->providingModeCache='providing'; //услуга предоставляется
-		elseif (count($this->supportServices)) $this->providingModeCache='support'; //услуга поддерживается
-		else $this->providingModeCache='working'; //рабочее время
-		return $this->providingModeCache;
-	}
-	
-	public function getDictionary($word) {
-		if (!isset(static::$dictionary[$word]))
-			return $word;
-		if (is_array(static::$dictionary[$word]))
-			return static::$dictionary[$word][$this->providingMode];
-		return static::$dictionary[$word];
-	}
-	
-	/**
-	 * Находим исключения в расписании в указанный период
-	 * @param $start integer
-	 * @param $end    integer
-	 * @return array|\yii\db\ActiveRecord[]
-	 */
-	public function findExceptions($start,$end=null)
-	{
-		return SchedulesEntries::find()
-			->Where(['not',['in', 'date', ['1','2','3','4','5','6','7','def']]])
-			->andWhere([
-				'schedule_id'=>$this->id,
-				'is_period'=>0
-			])
-			->andWhere(is_null($end)?
-			[
-				'>=', 'UNIX_TIMESTAMP(date)', $start
-			]:
-			['and',
-				['<=', 'UNIX_TIMESTAMP(date)', $end],
-				['>=', 'UNIX_TIMESTAMP(date)', $start],
-			])
-			->all();
-
-		
-	}
-	
-	/**
-	 * Ищем периоды в расписании в указанный период
-	 * @param $start
-	 * @param $end
-	 * @return array|\yii\db\ActiveRecord[]
-	 */
-	public function findPeriods($start=null,$end=null) {
-		$query=\app\models\SchedulesEntries::find()
-			->where([
-				'schedule_id'=>$this->id,
-				'is_period'=>1
-			]);
-		
-		if ($start || $end)
-			$query->andWhere(['and',
-				[
-					'or',
-					['<=', 'UNIX_TIMESTAMP(date)', $end],
-					['date'=>null]
-				],
-				[
-					'or',
-					['>=', 'UNIX_TIMESTAMP(date_end)', $start],
-					['date_end'=>null],
-				],
-			]);
-
-		return $query->all();
-		
-	}
-	
-	public function getEntries() {
-		return $this->hasMany(SchedulesEntries::className(), ['schedule_id' => 'id']);
-		
-	}
-	
-	/**
-	 * Ищет эффективный день. если не задан конкретный - пытается сослаться на день по умолчанию
-	 * @param string $day
-	 * @return SchedulesEntries|null
-	 */
-	public function findEffectiveDay($day) {
-		if (!is_null($schedule=$this->findDay($day))) return $schedule;
-		return $this->findDay('def');
-	}
-	
-	public function findEffectiveDescription($day) {
-		if (is_object($schedule=$this->findEffectiveDay($day))) {
-			return $schedule->description;
-		} return 'не задано';
-	}
-	
-	public static function fetchNames(){
-		$list= static::find()
-			->joinWith('acls')
-			->select(['schedules.id','name'])
-			->where(['acls.schedules_id'=>null])
-			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
-	}
-	
-	/**
-	 * Ищет график работы на конкретный день учитывая родительские расписания
-	 * @param $day
-	 * @param $date
-	 * @return SchedulesEntries|null
-	 */
-	public function getDayScheduleRecursive($day,$date)
-	{
-		
-		//перекрывающие периоды данные ниоткуда не наследуют
-		if ($this->isOverride) return $this->findDay($day);
-		
-		//ищем расписание на этот день недели
-		$period=is_null($date)?$this:$this->findEffectiveWeekSchedule($date);
-
-		if (!is_null($daySchedule=$period->findDay($day))) {
-			return $daySchedule;
-		}
-		
-		if (is_object($this->parent)) {
-			return $this->parent->getDayScheduleRecursive($day,$date);
-		} else {
-			return null;
-		}
-	}
-	
-	/**
-	 * Ищет график работы на конкретный день недели учитывая родительские расписания
-	 * @param $weekday
-	 * @param $date string день на который это все ищется, т.к. у расписания бывают разные периоды
-	 * @return SchedulesEntries|null
-	 */
-	public function getWeekDayScheduleRecursive($weekday,$date)
-	{
-		
-		//ищем расписание на этот день недели
-		if (!is_null($daySchedule=$this->getDayScheduleRecursive($weekday,$date))) return $daySchedule;
-		
-		//если не получилось - ищем расписание на любой день
-		return $this->getDayScheduleRecursive('def',$date);
-	}
 	
 	/**
 	 * Ищет график работы на конкретную дату учитывая родительские расписания
@@ -719,11 +632,11 @@ class Schedules extends \yii\db\ActiveRecord
 	 * @param $date
 	 * @return SchedulesEntries|null
 	 */
-	public function getDateScheduleRecursive($date)
+	public function getDateEntryRecursive($date)
 	{
 		
 		//ищем расписание на этот день недели
-		if (!is_null($daySchedule=$this->getDayScheduleRecursive($date,null))) return $daySchedule;
+		if (!is_null($daySchedule=$this->getDayEntryRecursive($date,null))) return $daySchedule;
 		
 		//если не получилось - ищем расписание на эту дату по дню недели
 		//выясняем день недели на эту дату
@@ -731,7 +644,7 @@ class Schedules extends \yii\db\ActiveRecord
 		if (count($words)<3) return null; //ошибка. передана дата не в формате ГГГГ-ММ-ДД
 		$weekday=date('N',mktime(0,0,0,$words[1],$words[2],$words[0]));
 		
-		return $this->getWeekDayScheduleRecursive($weekday,$date);
+		return $this->getWeekdayEntryRecursive($weekday,$date);
 	}
 	
 	/**
@@ -742,7 +655,7 @@ class Schedules extends \yii\db\ActiveRecord
 	public function getDateSchedule($date)
 	{
 		//рабочий график на день
-		$objSchedule=$this->getDateScheduleRecursive($date);
+		$objSchedule=$this->getDateEntryRecursive($date);
 		if (!is_object($objSchedule)) {
 			$objSchedule=new \app\models\SchedulesEntries();
 			$objSchedule->load([
@@ -834,7 +747,7 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public function metaAtTime($date,$time)
 	{
-		$schedule=$this->getDateScheduleRecursive($date);
+		$schedule=$this->getDateEntryRecursive($date);
 		$periods=$schedule->schedulePeriods;
 		$now=\app\models\SchedulesEntries::strTimestampToMinutes($time);
 		foreach ($periods as $period) {
@@ -868,7 +781,7 @@ class Schedules extends \yii\db\ActiveRecord
 		$testTimestamp=strtotime(date($date.' '.$time.':00+0000'));
 		for ($i=0;$i<=7;$i++) {
 			$day=gmdate('Y-m-d',$testDate+86400*$i);
-			$schedule=$this->getDateScheduleRecursive($day);
+			$schedule=$this->getDateEntryRecursive($day);
 			if (count($periods=$schedule->schedulePeriods)) {
 				foreach ($periods as $period) {
 					$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
@@ -1101,6 +1014,15 @@ class Schedules extends \yii\db\ActiveRecord
 		if ($this->isOverride) $this->scenario=self::SCENARIO_OVERRIDE;
 		elseif ($this->isAcl) $this->scenario=self::SCENARIO_ACL;
 		return parent::beforeValidate();
+	}
+	
+	public static function fetchNames(){
+		$list= static::find()
+			->joinWith('acls')
+			->select(['schedules.id','name'])
+			->where(['acls.schedules_id'=>null])
+			->all();
+		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}
 	
 }

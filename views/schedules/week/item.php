@@ -7,7 +7,9 @@ use yii\helpers\Html;
 
 if (!isset($static_view)) $static_view=$model->isNewRecord;
 $renderer=$this;
-$today=strtotime("today");
+$today=Yii::$app->request->get('date')?
+	Yii::$app->request->get('date'):	//если явно передали дату, ориентируемся на нее
+	strtotime("today");	//иначе на сегодня
 
 
 if ($model->isOverride) {
@@ -17,7 +19,7 @@ if ($model->isOverride) {
 } else {
 	$prefix='Основное расписание';
 	$limits=$model->getPeriodDescription(); //полный период действия
-	$match=$model->findEffectiveWeekSchedule($today);
+	$match=$model->getWeekSchedule($today);
 	$hidden=is_object($match)&&$match->id==$model->id?'':'style="display:none;"';
 	
 }

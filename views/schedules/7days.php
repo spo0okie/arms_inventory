@@ -26,10 +26,10 @@ for ($i=0; $i<$days_forward; $i++) {
 		'label' => $dateLabel,
 		'format' => 'raw',
 		'value'=> $this->render('/schedules-entries/item',[
-			'model'=>$model->getDateScheduleRecursive($dateDay,null)
+			'model'=>$model->getDateEntryRecursive($dateDay,null)
 		])
 	];
-	$week=$model->findEffectiveWeekSchedule($dateDay);
+	$week=$model->getWeekSchedule($dateDay);
 	$weeks[$week->id]=$week;
 }
 
@@ -47,7 +47,8 @@ if (
 <p>праздничные дни/ аварийные простои и т.п.<br> Посмотрите внимательно график на ближайшие <?= $days_forward ?> дней</p>
 	<table class="table table-condensed table-hover table-borderless">
 		<?php for ($i=0; $i<$days_forward; $i++) {
-			$day=$model->getDateSchedule(date('Y-m-d',time()+86400*$i));
+			$date=date('Y-m-d',time()+86400*$i);
+			$day=$model->getDateSchedule($date);
 			if (is_object($day)) {
 				$comment=$day->comment;
 			} elseif (is_array($day)) {
@@ -59,10 +60,10 @@ if (
 					<span class="text-nowrap"><?= Yii::$app->formatter->asDate(time()+86400*$i,'dd.MM.yyyy (E)') ?></span>
 				</td>
 				<td>
-					<?= $this->render('/schedules-entries/item',['model'=>$day]) ?>
+					<?= $this->render('/schedules-entries/item',['model'=>$day,'date'=>$date]) ?>
 				</td>
 				<td>
-					<?= $this->render('/schedules-entries/item',['model'=>$day,'name'=>$comment]) ?>
+					<?= $this->render('/schedules-entries/item',['model'=>$day,'name'=>$comment,'date'=>$date]) ?>
 				</td>
 				<td width="33%">
 					<?= $this->render('/schedules-entries/stripe',['model'=>$day,'schedule'=>$model]) ?>

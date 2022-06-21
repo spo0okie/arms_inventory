@@ -8,8 +8,10 @@ use yii\widgets\DetailView;
 
 if (!isset($static_view)) $static_view=$model->isNewRecord;
 $renderer=$this;
+$today=Yii::$app->request->get('date')?
+	Yii::$app->request->get('date'):	//если явно передали дату, ориентируемся на нее
+	strtotime("today");	//иначе на сегодня
 
-//if (!isset($hide_capture) || !$hide_capture) echo '<h2>Расписание на рабочую неделю</h2>';
 ?>
 
 
@@ -31,8 +33,12 @@ $renderer=$this;
 			'value'=>function($data,$day) {
 				return \app\models\SchedulesEntries::$days[$day];
 			},
-			'contentOptions' => function($data,$day){return[
-				'class' => ($day==Yii::$app->request->get('date'))?'table-success':'',
+			'contentOptions' => function($data,$day) use ($model) {return[
+				'class' => (
+					$model->matchDate(Yii::$app->request->get('date'))
+					&&
+					$day==Yii::$app->request->get('entry')
+				)?'table-success':'',
 				'id'=>'day-'.$day
 			];},
 		],
@@ -74,8 +80,12 @@ $renderer=$this;
 						).' '.$create;
 				}
 			},
-			'contentOptions' => function($data,$day){return[
-				'class' => ($day==Yii::$app->request->get('date'))?'table-success':'',
+			'contentOptions' => function($data,$day) use ($model) {return[
+				'class' => (
+					$model->matchDate(Yii::$app->request->get('date'))
+					&&
+					$day==Yii::$app->request->get('entry')
+				)?'table-success':''
 			];},
 		],
 		[
@@ -84,8 +94,12 @@ $renderer=$this;
 				return $renderer->render('/schedules-entries/stripe',['model'=>$data,'schedule'=>$model]);
 			},
 			'format'=>'raw',
-			'contentOptions' => function($data,$day){return[
-				'class' => ($day==Yii::$app->request->get('date'))?'table-success schedule_graph':'schedule_graph',
+			'contentOptions' => function($data,$day) use ($model) {return[
+				'class' => (
+					$model->matchDate(Yii::$app->request->get('date'))
+					&&
+					$day==Yii::$app->request->get('entry')
+				)?'table-success schedule_graph':'schedule_graph'
 			];},
 		]
 	]

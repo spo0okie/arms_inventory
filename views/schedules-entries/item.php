@@ -25,12 +25,13 @@ if (is_object($model)) {
 			
 		}
 	}
-	?>
+	if (!isset($date))$date=$model->date;
+?>
 
 	<span class="schedules-entries-item"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules-entries/ttip','id'=>$model->id]) ?>"
 	>
-		<?= \yii\helpers\Html::a($name,['/schedules/view/','id'=>$model->schedule_id,'date'=>$model->date,'#'=>'day-'.$model->date.'-'.$model->date_end]) ?>
+		<?= \yii\helpers\Html::a($name,['/schedules/view/','id'=>$model->schedule_id,'date'=>$date,'entry'=>$model->date,'#'=>'day-'.$model->date.'-'.$model->date_end]) ?>
 	</span>
 <?php } elseif (is_array($model)) {
 	if (!isset($name)) {
