@@ -534,9 +534,9 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public static function generatePeriodDescription($period)
 	{
-		if (is_null($period[0]) && is_null($period[1])) return '';
-		if (is_null($period[0])) return 'до '.date('Y-m-d',$period[1]);
-		if (is_null($period[1])) return 'с '.date('Y-m-d',$period[0]);
+		if (!$period[0] && !$period[1]) return '';
+		if (!$period[0]) return 'до '.date('Y-m-d',$period[1]);
+		if (!$period[1]) return 'с '.date('Y-m-d',$period[0]);
 		return 'с '.date('Y-m-d',$period[0]).' до '.date('Y-m-d',$period[1]);
 	}
 	
