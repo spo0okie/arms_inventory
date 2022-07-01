@@ -221,17 +221,28 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			'multiple' => true
 		],
 	]) ?>
-    <?= $form->field($model, 'lics_ids')->widget(Select2::classname(), [
-        'data' => \app\models\LicItems::fetchNames(),
-        'options' => ['placeholder' => 'Начните набирать название для поиска'],
-        'toggleAllSettings'=>['selectLabel'=>null],
-        'pluginOptions' => [
+	<?= $form->field($model, 'lics_ids')->widget(Select2::classname(), [
+		'data' => \app\models\LicItems::fetchNames(),
+		'options' => ['placeholder' => 'Начните набирать название для поиска'],
+		'toggleAllSettings'=>['selectLabel'=>null],
+		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
-            'allowClear' => true,
-            'multiple' => true
-        ],
-    ]) ?>
+			'allowClear' => true,
+			'multiple' => true
+		],
+	]) ?>
 	
+	<?= $form->field($model, 'services_ids')->widget(Select2::classname(), [
+		'data' => \app\models\Services::fetchNames(),
+		'options' => ['placeholder' => 'Начните набирать название для поиска'],
+		'toggleAllSettings'=>['selectLabel'=>null],
+		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
+			'allowClear' => true,
+			'multiple' => true
+		],
+	]) ?>
+
 	<?= \app\components\TextAutoResizeWidget::widget([
 		'form' => $form,
 		'model' => $model,
@@ -242,23 +253,19 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	<?php ActiveForm::end(); ?>
 
 
-
- <?php
-$js = <<<JS
-//переводим сабмит на голый аякс
+	<?php
+	//у нас
+	$js = <<<JS
 $('#contracts-edit-form').on('beforeSubmit', function(){
-    var yiiform = $(this);
-    console.log('contracts-submit: '+yiiform.attr('action'));
     $.ajax({
         type: 'POST',
-        url: yiiform.attr('action'),
-        data: yiiform.serializeArray(),
+        url: $(this).attr('action'),
+        data: $(this).serializeArray()
     })
-        .done(function(data) {contractFromApplyChanges(data)})
-        .fail(function () {alert('Ошибка отправки данных!')});
+    .done(function(data) {contractFromApplyChanges(data)})
+    .fail(function () {alert('Ошибка отправки данных!')});
     return false; // prevent default form submission
-
-}); 
+});
 JS;
 
 $this->registerJs($js);
@@ -268,16 +275,16 @@ $this->registerJs($js);
     <div class="form-group">
 		<?= Html::Button('Применить', [
 			'class' => 'btn btn-success',
-			'id' => 'contracts-edit-form-apply',
-			'name' => 'apply',
-			'onclick'=>"contractFormSaveClick(this.name)",
+			//'id' => 'contracts-edit-form-apply',
+			//'name' => 'apply',
+			'onclick'=>"$('#contracts-edit-form').attr('data-submit-mode','apply').submit()",
 		]) ?>
 
 		<?= Html::Button('Сохранить', [
 			'class' => 'btn btn-success',
-			'id' => 'contracts-edit-form-save',
-			'name' => 'save',
-			'onclick'=>"contractFormSaveClick(this.name)",
+			//'id' => 'contracts-edit-form-save',
+			//'name' => 'save',
+			'onclick'=>"$('#contracts-edit-form').attr('data-submit-mode','save').submit()",
 		]) ?>
     </div>
 </div>

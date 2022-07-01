@@ -131,7 +131,13 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 		        'header'=>'<span class="fas fa-globe" title="Привязано вводов интернет"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
-			        return '';//count($data->orgInets)?count($data->orgInets):'';
+					/**
+					 * @var \app\models\Services $data
+					 */
+    				$count=count($data->orgInets);
+    				if (is_object($data->parent))
+    					$count+=count($data->parent->orgInets);
+			        return $count?$count:'';
 		        }
 	        ],
 	        [
@@ -139,7 +145,13 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 		        'header'=>'<span class="fas fa-phone-alt" title="Привязано услуг телефонии"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
-					return '';// count($data->orgInets)?count($data->orgInets):'';
+					/**
+					 * @var \app\models\Services $data
+					 */
+					$count=count($data->orgPhones);
+					if (is_object($data->parent))
+						$count+=count($data->parent->orgPhones);
+					return $count?$count:'';
 		        }
 	        ],
         ],

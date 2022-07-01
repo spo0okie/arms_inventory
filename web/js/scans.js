@@ -1,4 +1,4 @@
-//посуольку строки в JS иммутабельные, то создаем свою функцию замены части строки
+//поскольку строки в JS иммутабельные, то создаем свою функцию замены части строки
 //взято отсюда: https://stackoverflow.com/questions/1431094/how-do-i-replace-a-character-at-a-particular-index-in-javascript
 String.prototype.replaceAt=function(index, replacement) {
     return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
@@ -25,37 +25,6 @@ function scansDeleteConfirm(scans_id,contracts_id) {
     });
 }
 
-
-/*
-    При сохранении формы со сканами может возникнуть ситуация, что сканы еще не загружены
-    Тогда мы запускаем процедуру заливки сканов, после которой дергается этот обработчик
-    Задача обработчика закрыть форму, если режим сохранения это предполагает (save/apply)
- */
-function contractFormAfterScansUpload() {
-    let save_mode_obj = $('#contract_form_save_mode');
-    let save_mode = save_mode_obj.val();
-    let yiiform = $('#contracts-edit-form');
-    let scans=$('#contract_form_scans_input');
-    let pending_upload = scans.fileinput('getFileStack');
-    let pending_count=Object.keys(pending_upload).length;
-    if (pending_count === 0 ) {
-        //обрабатываем окончание режима сохранения
-        switch (save_mode) {
-            case 'save':
-                console.log('scans uploaded, closing form');
-                //данные сохранились. обрабатываем завершение редактирования (разные сценарии в разных ситуациях)
-                yiiform.trigger('afterSubmit');
-                break;
-            case 'apply':
-                console.log('data applied');
-                break;
-            default:
-                console.log('unknown save mode: ' + save_mode);
-                break;
-        }
-    }
-
-}
 
 /*
     При бросании скана в окно документа - пытаемся вытащить информацию из имени файла скана
@@ -125,12 +94,38 @@ function scansFileListChange(scans){
     }
 }
 
+/*
+    При сохранении формы со сканами может возникнуть ситуация, что сканы еще не загружены
+    Тогда мы запускаем процедуру заливки сканов, после которой дергается этот обработчик
+    Задача обработчика закрыть форму, если режим сохранения это предполагает (save/apply)
+ */
+function contractFormAfterScansUpload() {
+    let yiiform = $('#contracts-edit-form');
+    let scans=$('#contract_form_scans_input');
+    if (Object.keys(scans.fileinput('getFileStack')).length === 0 ) {
+        //обрабатываем окончание режима сохранения
+        switch (yiiform.attr('data-submit-mode')) {
+            case 'save':
+                console.log('scans uploaded, closing form');
+                //данные сохранились. обрабатываем завершение редактирования (разные сценарии в разных ситуациях)
+                yiiform.trigger('afterSubmit');
+                break;
+            case 'apply':
+                console.log('data applied');
+                break;
+            default:
+                console.log('unknown save mode: ' + yiiform.attr('data-submit-mode'));
+                break;
+        }
+    }
+
+}
+
 
 //функция обработчик применения изменений в форме редактирования документа
 function contractFromApplyChanges(data){
-    let save_mode_obj = $('#contract_form_save_mode');
-    let save_mode = save_mode_obj.val();
     let yiiform = $('#contracts-edit-form');
+    let save_mode = yiiform.attr('data-submit-mode');
     if (data.error === 'OK') {
         //если все сохранилось хорошо
         //экшн формы теперь обновление созданной модели, а не создание новой
@@ -177,11 +172,13 @@ function contractFormGotoViewOnSave() {
     window.location=new_url;
 }
 
+/*
 function contractFormSaveClick(mode) {
     //console.log('do '+mode);
     //устанавливаем режим сохранения
-    $('#contract_form_save_mode').val(mode);
+    //$('#contract_form_save_mode').val(mode);
+    $('#contracts-edit-form').attr('data-submit-mode',mode)
     //отправляем данные
     $('#contracts-edit-form').submit();
 }
-
+*/

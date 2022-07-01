@@ -129,7 +129,7 @@ class AcesController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate($acls_id,$ajax=0,$modal=null)
+    public function actionCreate($acls_id, $modal=null)
     {
         $model = new Aces();
         $model->acls_id = $acls_id;
@@ -137,23 +137,21 @@ class AcesController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			if (Yii::$app->request->isAjax) {
 				Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-				return [
-					'success' => true,
-				];
+				return ['success' => true,];
 			}
 	
 			//if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
             return $this->redirect(['acls/view', 'id' => $model->acls_id]);
         }
 
-        return $ajax?
+        return Yii::$app->request->isAjax?
 			$this->renderAjax('_form', [
 				'model' => $model,
 				'modalParent'=>'#'.$modal
 			]):
 			$this->render('create', [
-            'model' => $model,
-        ]);
+            	'model' => $model,
+        	]);
     }
 
     /**

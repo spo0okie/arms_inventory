@@ -146,12 +146,16 @@ class LicItemsController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         }
+	
+		if ($group=Yii::$app->request->get('lic_group_id')) $model->lic_group_id=$group;
+		if ($contracts_id=Yii::$app->request->get('contracts_id')) $model->contracts_ids=[$contracts_id];
 
-        if ($group=Yii::$app->request->get('lic_group_id')) $model->lic_group_id=$group;
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        return Yii::$app->request->isAjax?
+			$this->renderAjax('create', [
+            	'model' => $model,
+        	]):$this->render('create', [
+				'model' => $model,
+			]);
     }
 
 	/**

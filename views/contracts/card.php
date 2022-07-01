@@ -68,7 +68,7 @@ $deletable=!(count($arms)||count($services)||count($lics)||count($childs)||count
         <?php
 
         //создание связаного документа
-        Modal::begin(['title' => '<h2>Добавление документа</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
+       /* Modal::begin(['title' => '<h2>Добавление документа</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
 				'id'=>'contracts_add_modal',
 				'tabindex' => false
 			]]);
@@ -158,17 +158,17 @@ JS;
 
         ?>
         Создать
-        <a onclick="$('#contracts_add_modal').modal('toggle')" class="href">Подчиненный документ</a>
+        <a href="<?= \yii\helpers\Url::to(['/contracts/create','parent'=>$model->id])?>" class="open-in-modal-form">Подчиненный документ</a>
         //
-        <a onclick="$('#arms_add_modal').modal('toggle')" class="href">АРМ</a>
+		<a href="<?= \yii\helpers\Url::to(['/arms/create','contracts_id'=>$model->id])?>" class="open-in-modal-form">АРМ</a>
         //
-        <a onclick="$('#techs_add_modal').modal('toggle')" class="href">Оборудование</a>
+		<a href="<?= \yii\helpers\Url::to(['/techs/create','contracts_id'=>$model->id])?>" class="open-in-modal-form">Оборудование</a>
         //
-        <a onclick="$('#materials_add_modal').modal('toggle')" class="href">Материалы</a>
+		<a href="<?= \yii\helpers\Url::to(['/materials/create','contracts_id'=>$model->id])?>" class="open-in-modal-form">Материалы</a>
         //
-        <a onclick="$('#lic_add_modal').modal('toggle')" class="href">Лицензию</a>
+		<a href="<?= \yii\helpers\Url::to(['/lic-items/create','contracts_id'=>$model->id])?>" class="open-in-modal-form">Лицензию</a>
         //
-        <a onclick="$('#service_add_modal').modal('toggle')" class="href">Услугу</a>
+		<a href="<?= \yii\helpers\Url::to(['/services/create','contracts_id'=>$model->id])?>" class="open-in-modal-form">Услугу</a>
         :: на основании этого документа
     </p>
 <?php } ?>

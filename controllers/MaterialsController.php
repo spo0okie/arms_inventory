@@ -160,9 +160,14 @@ class MaterialsController extends Controller
 	        }
         }
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        return Yii::$app->request->isAjax?
+			$this->renderAjax('create', [
+				'model' => $model,
+			])
+			:
+			$this->render('create', [
+				'model' => $model,
+			]);
     }
 
     /**

@@ -84,6 +84,8 @@ class Contracts extends \yii\db\ActiveRecord
 	private $successors_chain_cache=null;
 	private $techs_chain_cache=null;
 	private $arms_chain_cache=null;
+	private $inets_cache=null;
+	private $phones_cache=null;
 	private $inets_chain_cache=null;
 	private $phones_chain_cache=null;
 	private $lics_chain_cache=null;
@@ -108,7 +110,7 @@ class Contracts extends \yii\db\ActiveRecord
         return [
             [['name'], 'required'],
 			[['currency_id'],'default','value'=>1],
-	        [['lics_ids','partners_ids','arms_ids','techs_ids'], 'each', 'rule'=>['integer']],
+	        [['lics_ids','partners_ids','arms_ids','techs_ids','services_ids'], 'each', 'rule'=>['integer']],
 	        //[['scanFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
 	        [['parent_id','state_id','currency_id'], 'integer'],
 	        [['total','charge'], 'number'],
@@ -134,6 +136,7 @@ class Contracts extends \yii\db\ActiveRecord
 					'lics_ids' => 'licItems',
 					'arms_ids' => 'arms',
 					'techs_ids' => 'techs',
+					'services_ids' => 'services',
 					'materials_ids' => 'materials'
 				]
 			]
@@ -164,6 +167,7 @@ class Contracts extends \yii\db\ActiveRecord
 			'arms_ids' => 'АРМы',
 			'scans_ids' => 'Сканы',
 			'state_id' => 'Статус',
+			'services_ids' => 'Сервисы',
 			'comment' => 'Комментарий',
 		];
 	}
@@ -185,6 +189,8 @@ class Contracts extends \yii\db\ActiveRecord
 			'partners_ids' => 'Если отсутствуют, значит документ внутренний',
 			'arms_ids' => 'С какими рабочими местами связан документ (если связан)',
 			'techs_ids' => 'С каким оборудованием связан документ (если связан)',
+			'lics_ids' => 'С какими закупками лицензий связан документ (если связан)',
+			'services_ids' => 'С какими сервисами связан документ (если связан)',
 			'state_id' => 'Для удобства контроля процессов оплаты',
 			'scans_ids' => 'Отсканированная версия документа',
 		];
@@ -355,19 +361,35 @@ class Contracts extends \yii\db\ActiveRecord
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return OrgInet[]
 	 */
 	public function getOrgInets()
 	{
-		return $this->hasMany(OrgInet::className(), ['contracts_id' => 'id']);
+		if (!is_null($this->inets_cache)) return $this->inets_cache;
+		$this->inets_cache=[];
+		foreach ($this->services as $service) {
+			if (count($service->orgInets)) {
+				foreach ($service->orgInets as $orgInet)
+					$this->inets_cache[$orgInet->id]=$orgInet;
+			}
+		}
+		return $this->inets_cache;
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return OrgPhones[]
 	 */
 	public function getOrgPhones()
 	{
-		return $this->hasMany(OrgPhones::className(), ['contracts_id' => 'id']);
+		if (!is_null($this->phones_cache)) return $this->phones_cache;
+		$this->phones_cache=[];
+		foreach ($this->services as $service) {
+			if (count($service->orgPhones)) {
+				foreach ($service->orgPhones as $orgPhone)
+					$this->phones_cache[$orgPhone->id]=$orgPhone;
+			}
+		}
+		return $this->phones_cache;
 	}
 	
 	/**
@@ -629,7 +651,7 @@ class Contracts extends \yii\db\ActiveRecord
 		//if (!is_null($this->partners_cache)) return $this->partners_cache;
 
 		//return $this->partners_cache=Partners::fetchByField('contracts_id',$this->contracts_id)
-		return $this->partners_cache=static::hasMany(Partners::className(), ['id' => 'partners_id'])
+		return static::hasMany(Partners::className(), ['id' => 'partners_id'])
 			->viaTable('{{%partners_in_contracts}}', ['contracts_id' => 'id']);
 	}
 

@@ -159,17 +159,22 @@ class ArmsController extends Controller
 				Yii::$app->response->format = Response::FORMAT_JSON;
 				return [$model];
 			}  else {
-				//if (Yii::$app->request->get('return')=='previous')
-					return $this->redirect(Url::previous());
-				//return $this->redirect(['view', 'id' => $model->id]);
+				return $this->redirect(Url::previous());
 			}
 		}
+		
+		if (Yii::$app->request->get('user_id'))
+			$model->user_id=Yii::$app->request->get('user_id');
+		if (Yii::$app->request->get('contracts_id'))
+			$model->contracts_ids=[Yii::$app->request->get('contracts_id')];
 
-
-		$model->user_id=Yii::$app->request->get('user_id');
-		return $this->render('create', [
-			'model' => $model,
-		]);
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('create', [
+				'model' => $model,
+			]):
+			$this->render('create', [
+				'model' => $model,
+			]);
 	}
 
 	/**

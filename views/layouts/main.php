@@ -116,10 +116,16 @@ echo ModalAjax::widget([
 	'autoClose' => true,
 	'events'=>[
 		ModalAjax::EVENT_MODAL_SHOW => new \yii\web\JsExpression("
-            	function(event, data, status, xhr, selector) {
-                	selector.addClass('modal-open');
-            	}
-       		"),
+			function(event, data, status, xhr, selector) {
+				selector.addClass('modal-open');
+				let h1=$(this).find('h1');
+				if (h1.length) {
+					let title=h1[0].innerHTML;
+					$('h5.modal-title#modal_form_loader-label').html(title);
+					h1.slice(0).hide();
+				}
+			}
+		"),
 		ModalAjax::EVENT_MODAL_SUBMIT => new \yii\web\JsExpression($js),
 	],
 ]); ?>

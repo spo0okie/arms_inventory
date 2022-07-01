@@ -151,44 +151,42 @@ class ContractsController extends Controller
 	 */
     public function actionCreate()
     {
-	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	    //if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 	
 	    $model = new Contracts();
-
-
-        //обработка аякс запросов
-        if (Yii::$app->request->isAjax) {
-	        Yii::$app->response->format = Response::FORMAT_JSON;
-
-	        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-		        return ['error'=>'OK','code'=>0,'model'=>$model];
-	        } else {
-		        $result = [];
-		        // The code below comes from ActiveForm::validate(). We do not need to validate the model
-		        // again, as it was already validated by save(). Just collect the messages.
-		        foreach ($model->getErrors() as $attribute => $errors) {
-			        $result[yii\helpers\Html::getInputId($model, $attribute)] = $errors;
-		        }
-		        return ['error'=>'ERROR','code'=>1,'validation'=>$result];
-	        }
-        }
-	    //$model->scanFile = UploadedFile::getInstance($model, 'scanFile');
-
+	
+		//передали родительский документ
+		if ($parent_id=Yii::$app->request->get('parent')) {
+			$model->parent_id=$parent_id;
+		}
+	
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-	        return $this->redirect([Yii::$app->request->get('apply')?'update':'view', 'id' => $model->id]);
-        }
+			if (Yii::$app->request->isAjax) {
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return ['error'=>'OK','code'=>0,'model'=>$model];
+			} else {
+				return $this->redirect([Yii::$app->request->get('apply')?'update':'view', 'id' => $model->id]);
+			}
+		} elseif (Yii::$app->request->isPost && Yii::$app->request->isAjax) {
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			$result = [];
+			foreach ($model->getErrors() as $attribute => $errors) {
+				$result[yii\helpers\Html::getInputId($model, $attribute)] = $errors;
+			}
+			return ['error'=>'ERROR','code'=>1,'validation'=>$result];
+			
+		} elseif (Yii::$app->request->isAjax) {
+			return $this->renderAjax('create', [
+				'model' => $model,
+			]);
+		}
+	
+	
+		return $this->render('create', [
+			'model' => $model,
+		]);
 
-        //передали родительский документ
-        if (($parent_id=Yii::$app->request->get('parent')) && is_object($parent=$this->findModel($parent_id))) {
-        	$model->parent_id=$parent_id;
-        	$childs=$parent->childs;
-        	$childs_count=(is_array($childs))?count($childs):0;
-	        $model->name=$parent->name.' - Дополнение № '.($childs_count+1);
-        }
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
     }
 
 
@@ -201,7 +199,7 @@ class ContractsController extends Controller
 	 */
 	public function actionUpdate($id)
 	{
-		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		//if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 		
 		$model = $this->findModel($id);
 
@@ -211,15 +209,16 @@ class ContractsController extends Controller
 
 			if ($model->load(Yii::$app->request->post()) && $model->save()) {
 				return ['error'=>'OK','code'=>0,'model'=>$model];
-			} else {
+			} elseif(Yii::$app->request->isPost) {
 				$result = [];
-				// The code below comes from ActiveForm::validate(). We do not need to validate the model
-				// again, as it was already validated by save(). Just collect the messages.
 				foreach ($model->getErrors() as $attribute => $errors) {
 					$result[yii\helpers\Html::getInputId($model, $attribute)] = $errors;
 				}
 				return ['error'=>'ERROR','code'=>1,'validation'=>$result];
 			}
+			return $this->renderAjax('update', [
+				'model' => $model,
+			]);
 		}
 
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
