@@ -14,7 +14,7 @@ $techs=     $model->techs;
 $materials= $model->materials;
 $lics=      $model->licItems;
 $services=     $model->services;
-$phones=    $model->orgPhones;
+//$phones=    $model->orgPhones;
 
 $model_id=$model->id;
 
@@ -119,7 +119,7 @@ $deletable=!(count($arms)||count($services)||count($lics)||count($childs)||count
         Modal::end();
 
         //создание связанного оборудования
-        Modal::begin(['title' => '<h2>Добавление ввода интернет</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
+        /*Modal::begin(['title' => '<h2>Добавление ввода интернет</h2>','size'=>Modal::SIZE_LARGE,'options'=>[
 			'id'=>'inet_add_modal',
 			'tabindex' => false
 		]]);
@@ -136,7 +136,7 @@ $deletable=!(count($arms)||count($services)||count($lics)||count($childs)||count
         $phoneModel=new \app\models\OrgPhones();
         $phoneModel->contracts_id=[$model_id];
         echo $this->render('/org-phones/_form',['model'=>$phoneModel,'modalParent'=>'#phone_add_modal']);
-        Modal::end();
+        Modal::end();*/
 
         $js = <<<JS
                 $('#contracts-edit-form').on('afterSubmit', function(){window.location.reload();});
