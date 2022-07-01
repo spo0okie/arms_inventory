@@ -131,7 +131,7 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 		        'header'=>'<span class="fas fa-globe" title="Привязано вводов интернет"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
-			        return count($data->orgInets)?count($data->orgInets):'';
+			        return '';//count($data->orgInets)?count($data->orgInets):'';
 		        }
 	        ],
 	        [
@@ -139,7 +139,7 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 		        'header'=>'<span class="fas fa-phone-alt" title="Привязано услуг телефонии"></span>',
 		        'format'=>'raw',
 		        'value'=>function($data){
-			        return count($data->orgInets)?count($data->orgInets):'';
+					return '';// count($data->orgInets)?count($data->orgInets):'';
 		        }
 	        ],
         ],

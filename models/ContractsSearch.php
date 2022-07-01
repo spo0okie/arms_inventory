@@ -58,8 +58,8 @@ class ContractsSearch extends Contracts
 	        'arms',
 	        'techs',
 	        'licItems',
-	        'orgPhones',
-	        'orgInets',
+	        //'orgPhones',
+	        //'orgInets',
         ]);
 
         $this->load($params);
