@@ -108,8 +108,6 @@ class OrgPhonesController extends Controller
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
-        $model->prov_tel_id=Yii::$app->request->get('prov-tel');
-
         return $this->render('create', [
             'model' => $model,
         ]);

@@ -136,7 +136,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 			<h4>Предоставляет телефонию:</h4>
 			<p>
 				<?php foreach ($model->orgPhones as $phone)
-					echo $this->render('/org-phones/item',['model'=>$phone,'static_view'=>$static_view,'href'=>true]).'<br />';
+					echo $this->render('/org-phones/card',['model'=>$phone,'static_view'=>$static_view,'href'=>true]).'<br />';
 				?>
 			</p>
 			<br />

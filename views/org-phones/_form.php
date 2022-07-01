@@ -14,6 +14,7 @@ if (!isset($modalParent)) $modalParent=null;
 
     <?php $form = ActiveForm::begin(); ?>
 
+	Если услуга предоставляет номер телефона, впишите его сдесь
     <div class="row">
         <div class="col-md-2">
 	        <?= $form->field($model, 'country_code')->textInput(['maxlength' => true]) ?>

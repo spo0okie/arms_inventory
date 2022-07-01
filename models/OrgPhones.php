@@ -18,6 +18,9 @@ use Yii;
  * @property string $comment Комментарий
  * @property float $cost
  * @property float $charge
+ * @property bool $providesNumber
+ * @property string $title
+ * @property string $untitledComment
  
  * @property ProvTel $provTel
  * @property Contracts $contracts
@@ -42,12 +45,12 @@ class OrgPhones extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['country_code', 'city_code', 'local_code', 'comment'], 'required'],
+			[['services_id'],'required'],
 	        [['cost','charge'], 'number'],
-            [['services_id','places_id','contracts_id'], 'integer'],
+            [['services_id','places_id'], 'integer'],
             [['comment','account'], 'string'],
             [['country_code', 'city_code', 'local_code'], 'string', 'max' => 10],
-	        [['prov_tel_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProvTel::className(), 'targetAttribute' => ['prov_tel_id' => 'id']],
+	        //[['prov_tel_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProvTel::className(), 'targetAttribute' => ['prov_tel_id' => 'id']],
 	        [['places_id'], 'exist', 'skipOnError' => true, 'targetClass' => Places::className(), 'targetAttribute' => ['places_id' => 'id']],
         ];
     }
@@ -110,8 +113,42 @@ class OrgPhones extends \yii\db\ActiveRecord
 		return implode(',',$arPhones);
     }
 
+    public function getProvidesNumber() {
+    	return !(
+    		empty($this->country_code)
+		||
+			empty($this->city_code)
+		||
+			empty($this->local_code)
+		);
+	}
+	
+	/**
+	 * Комментарий без первой строки заголовка (если услуга не предоставляет номер)
+	 * @return string
+	 */
+    public function getUntitledComment() {
+    	//если номер есть, то он и заголовок
+		if ($this->providesNumber) return $this->comment;
+		//иначе разбиваем на строки
+		$strings=explode("\n",$this->comment);
+		//если их одна, то это и есть заголовок, а комментария нет
+		if (count($strings)<2) return '';
+		//выкидываем из строк заголовок
+		unset ($strings[0]);
+		return implode("\n",$strings);
+	}
+	
+	public function getTitle(){
+    	if ($this->providesNumber) return $this->fullNum;
+		return explode("\n",$this->comment)[0];
+	}
+ 
 	public function getSname(){
-		return '+'.$this->country_code.' ('.$this->city_code.') '.$this->local_code.' - '.$this->comment;
+		return $this->title.
+			(
+				empty($this->untitledComment)?'':(' - '.$this->untitledComment)
+			);
 	}
 
 	public function getFullNum(){
@@ -121,29 +158,10 @@ class OrgPhones extends \yii\db\ActiveRecord
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
-	public function getProvTel()
-	{
-		return $this->hasOne(ProvTel::className(), ['id' => 'prov_tel_id']);
-	}
-
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
 	public function getPlace()
 	{
 		return $this->hasOne(Places::className(), ['id' => 'places_id']);
 	}
-	
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getContracts()
-	{
-		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
-			->viaTable('{{%contracts_in_services}}', ['services_id' => 'services_id']);
-	}
-	
-	
 	
 	
 	/**

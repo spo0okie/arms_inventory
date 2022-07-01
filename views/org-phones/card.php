@@ -17,9 +17,9 @@ use yii\widgets\DetailView;
 if (!isset($static_view)) $static_view=false;
 
 ?>
-<h1>
+<h2>
 
-	<?= $model->fullNum ?>
+	<?= $model->title ?>
 	<?php if (!$static_view) { ?>
 		<?= Html::a('<span class="fas fa-pencil-alt"/>', ['update', 'id' => $model->id]) ?>
 		<?= Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
@@ -29,9 +29,9 @@ if (!isset($static_view)) $static_view=false;
 			],
 		]) ?>
 	<?php } ?>
-</h1>
+</h2>
 
-<p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
+<p>	<?= \Yii::$app->formatter->asNtext($model->untitledComment) ?> </p>
 <p>
 	Стоимость: <?= Yii::$app->formatter->asCurrency((int)$model->cost) ?>
 	<?php if ($model->charge){ ?>
@@ -40,24 +40,21 @@ if (!isset($static_view)) $static_view=false;
 	/мес
 </p>
 
+<div class="row">
+	<div class="col-md-4">
+		<h5>Место подключения:</h5>
+	</div>
+	<div class="col-md-8">
+		<?= $this->render('/places/item',['model'=>$model->place ,'static_view'=>$static_view]) ?>
+	</div>
+</div>
 
-<h4>Место подключения:</h4>
-<?= $this->render('/places/item',['model'=>$model->place ,'static_view'=>$static_view]) ?>
-
-<h4><?= $model->getAttributeLabel('services_id')?> </h4>
-<p><?= $this->render('/services/item',['model'=>$model->service]) ?></p>
-
-<h4>Документ(ы)-основание</h4>
-<p>
-	<?php
-	foreach ($model->contracts as $contract)
-		if (is_object($contract)) echo $this->render('/contracts/tree-map',['model'=>$contract,'static_view'=>$static_view,'map'=>$static_view?'chain-up':'full'])
-	?>
-</p>
-
-<h4><?= $model->getAttributeLabel('account')?> </h4>
-<p><?= $model->account ?></p>
+<div class="row">
+	<div class="col-md-4">
+		<h5><?= $model->getAttributeLabel('account')?> </h5>
+	</div>
+	<div class="col-md-8">
+		<?= $model->account ?>
+	</div>
+</div>
 <hr />
-
-<h4>Поставщики услуги связи:</h4>
-<?= is_object($model->partner)?$this->render('/partners/card',['model'=>$model->partner,'static_view'=>$static_view]):'' ?>
