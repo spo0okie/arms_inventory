@@ -468,6 +468,9 @@ class Comps extends \yii\db\ActiveRecord
 				}
 			}
 		}
+		if (is_object($responsible=$this->responsible)) {
+			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
+		}
 		return array_values($team);
 	}
 	
