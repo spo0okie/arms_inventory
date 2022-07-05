@@ -31,12 +31,16 @@ if (is_object($model)) {
 	<span class="schedules-entries-item"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules-entries/ttip','id'=>$model->id]) ?>"
 	>
-		<?= \yii\helpers\Html::a($name,['/schedules/view/','id'=>$model->schedule_id,'date'=>$date,'entry'=>$model->date,'#'=>'day-'.$model->date.'-'.$model->date_end]) ?>
+		<?= \yii\helpers\Html::a($name,[
+			'/schedules/view/',
+			'id'=>$model->schedule_id,
+			'date'=>$date,
+			'entry'=>$model->date,
+			'#'=>'day-'.$model->date.'-'.$model->date_end]) ?>
 	</span>
 <?php } elseif (is_array($model)) {
-	if (!isset($name)) {
-		$name=$model['schedule'];
-	}
+	if (!isset($name)) $name=\app\models\SchedulesEntries::scheduleWithoutMetadata($model['schedule']);
+	if (!isset($date)) $date=$model['day']->date;
 	if (count($model['posPeriods'])) {
 		$positive=[];
 		foreach ($model['posPeriods'] as $period)
@@ -56,7 +60,8 @@ if (is_object($model)) {
 		<?= \yii\helpers\Html::a($name,[
 			'/schedules/view/',
 			'id'=>$model['day']->schedule_id,
-			'date'=>$model['day']->date,
+			'date'=>$date,
+			'entry'=>$model['day']->date,
 			'#'=>'day-'.$model['day']->date,
 			'positive'=>$positive,
 			'negative'=>$negative

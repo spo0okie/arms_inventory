@@ -32,9 +32,11 @@ use yii\data\ArrayDataProvider;
  * @property Services[] $supportServices
  * @property Acls[] $acls
  * @property Schedules $parent
+ * @property Schedules $base
  * @property Schedules $overriding
  * @property Schedules[] $overrides
  * @property SchedulesEntries $entries
+ * @property SchedulesEntries $periods
  * @property ArrayDataProvider $WeekDataProvider
  */
 class Schedules extends \yii\db\ActiveRecord
@@ -88,6 +90,7 @@ class Schedules extends \yii\db\ActiveRecord
 	public $isAclCache=null;
 	public $metaClasses=[]; //список классов метаданных привязанных к этому расписанию
 	private $daysEntriesCache=null;
+	private $periodsCache=null;
 	private $providingModeCache=null;
 	private $overridesCache=null;
 	private $startUnixTimeCache=-1; //нельзя инициировать как NULL, т.к. NULL возможно будет закеширован
@@ -211,6 +214,10 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	public function getBaseId() {
 		return $this->isOverride?$this->override_id:$this->id;
+	}
+	
+	public function getBase() {
+		return $this->isOverride?$this->overriding:$this;
 	}
 	
 	/**
@@ -365,7 +372,7 @@ class Schedules extends \yii\db\ActiveRecord
 	 * Ищем периоды в расписании в указанный период
 	 * @param $start
 	 * @param $end
-	 * @return array|\yii\db\ActiveRecord[]
+	 * @return SchedulesEntries[]
 	 */
 	public function findPeriods($start=null,$end=null) {
 		$query=\app\models\SchedulesEntries::find()
@@ -416,6 +423,19 @@ class Schedules extends \yii\db\ActiveRecord
 		}
 		if (isset($this->daysEntriesCache[$day])) return $this->daysEntriesCache[$day];
 		return null;
+	}
+	
+	/**
+	 * все привязанные периоды к расписанию
+	 * @return array
+	 */
+	public function getPeriods() {
+		if (is_null($this->periodsCache)) {
+			foreach ($this->entries as $entry)
+				if ($entry->is_period)
+					$this->periodsCache[]=$entry;
+		}
+		return $this->periodsCache;
 	}
 	
 	/**
@@ -532,6 +552,11 @@ class Schedules extends \yii\db\ActiveRecord
 		}
 	}
 	
+	/**
+	 * Возвращает текстовое описание периода вида [unixtime1,unixtime2]
+	 * @param $period
+	 * @return string
+	 */
 	public static function generatePeriodDescription($period)
 	{
 		if (!$period[0] && !$period[1]) return '';
@@ -663,7 +688,7 @@ class Schedules extends \yii\db\ActiveRecord
 				'schedule'=>'-',
 				'date'=>'def'
 			],'');
-		}
+		} else $objSchedule=clone $objSchedule;
 		
 		//ищем периоды работы/отдыха перекрывающие этот день
 		$periods=$this->findPeriods(
@@ -679,6 +704,7 @@ class Schedules extends \yii\db\ActiveRecord
 		
 		//рабочие интервалы формируем сначала из графика на день
 		$positive=$objSchedule->getIntervals($date);
+		//var_dump($positive);
 		$posPeriods=[];
 		
 		//нерабочих изначально нет, их ищем в периодах
@@ -712,7 +738,8 @@ class Schedules extends \yii\db\ActiveRecord
 
 		//формируем обратно расписание на день
 		$arSchedule=[];
-		foreach ($positive as $interval) $arSchedule[]=static::interval2Schedule($interval);
+		foreach ($positive as $interval)
+			$arSchedule[]=SchedulesEntries::unixIntervalToSchedule($interval);
 		$strSchedule=count ($arSchedule)?
 			implode(',',$arSchedule)
 			:
@@ -727,17 +754,20 @@ class Schedules extends \yii\db\ActiveRecord
 		];
 	}
 	
+	/**
+	 * Проверка что переданные дата/время попадают в интервал рабочего времени
+	 * @param $date
+	 * @param $time
+	 * @return int
+	 */
 	public function isWorkTime($date,$time)
 	{
 		$scheduleArray=$this->getDateSchedule($date);
-		//var_dump($scheduleArray);
 		if (!is_array($scheduleArray) || !isset($scheduleArray['day'])) return 0;
 		$schedule=$scheduleArray['day'];
 		if (!is_object($schedule)) return 0;
 		$periods=$schedule->schedulePeriods;
-		//var_dump($periods);
 		$now=\app\models\SchedulesEntries::strTimestampToMinutes($time);
-		//var_dump($now);
 		foreach ($periods as $period) {
 			$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
 			if (self::intervalCheck($interval,$now)) return	1;
@@ -758,12 +788,6 @@ class Schedules extends \yii\db\ActiveRecord
 			};
 		}
 		return '{}';
-	}
-	
-	public function nextExclusionRecursive($date,$time)
-	{
-		$testTimestamp=strtotime(date($date.' '.$time.':00+0000'));
-		
 	}
 	
 	public function nextWorkingMeta($date,$time)
@@ -807,7 +831,7 @@ class Schedules extends \yii\db\ActiveRecord
 	
 	
 	// МАТЕМАТИКА ИНТЕРВАЛОВ //
-	public static function interval2Schedule($interval)
+	/*public static function interval2Schedule($interval)
 	{
 		return date('H:i',$interval[0]).'-'.date('H:i',$interval[1]);
 	}
@@ -821,7 +845,7 @@ class Schedules extends \yii\db\ActiveRecord
 			strtotime($date.' '.$tokens[1]),
 		];
 		
-	}
+	}*/
 	
 	/**
 	 * обрезает границы интервала $interval так, чтобы они не выходили за рамки $range
@@ -865,14 +889,28 @@ class Schedules extends \yii\db\ActiveRecord
 	public static function intervalIntersect($interval1,$interval2)
 	{
 		// сортируем интервалы так, чтобы второй был не раньше первого
-		if ($interval2[0]<$interval1[0]) {
+		if ((is_null($interval2[0]) && !is_null($interval1[0])) || $interval2[0]<$interval1[0]) {
 			$tmp=$interval1;
 			$interval1=$interval2;
 			$interval2=$tmp;
 		}
-		//далее у нас точно интервал 1 начинается не позже 2го (одновременно или раньше)
-		//значит если второй начинается раньше чем первый заканчивается => они пересекаются
-		return $interval2[0]<=$interval1[1];
+		/*error_log('['.
+		(is_null($interval1[0])?'null':$interval1[0]).','.
+		(is_null($interval1[1])?'null':$interval1[1]).']<['.
+		(is_null($interval2[0])?'null':$interval2[0]).','.
+		(is_null($interval2[1])?'null':$interval2[1]).
+		']');*/
+		return
+			is_null($interval2[0]) //у более позднего отрезка нет начала
+			||
+			is_null($interval1[1]) //у более раннего отрезка нет конца
+			||
+			(is_null($interval1[0]) && $interval1[1]>=$interval2[0]) //луч без начала кончается позже начала второго отрезка
+			||
+			(is_null($interval2[1]) && $interval2[0]<=$interval1[1]) //луч без конца начинается раньше конца второго отрезка
+			||
+			$interval2[0]<=$interval1[1]
+			;
 	}
 	
 	/**
@@ -900,6 +938,7 @@ class Schedules extends \yii\db\ActiveRecord
 	 */
 	public static function intervalSubtraction($A,$B)
 	{
+		$meta=isset($A['meta'])?$A['meta']:false;
 		if ($B[0]<=$A[0]) {
 			//если вычитаемое начинается раньше
 			if ($B[1]>=$A[1]) {
@@ -907,29 +946,29 @@ class Schedules extends \yii\db\ActiveRecord
 				return [];
 			} elseif ($B[1]<=$A[0]) {
 				//если вычитаемое заканчивается раньше, то оно не пересекается и не трогает уменьшаемое
-				return [$A];
+				return $A;
 			} else {
 				//если начинается раньше начала А и заканчивается раньше конца А, то
 				//возвращаем кусок от конца вычитаемого до конца уменьшаемого (остальное вычтено)
 				return [
-					[$B[1],$A[1]]
+					[$B[1],$A[1],'meta'=>$meta]
 				];
 			}
 		} else {
 			//вычитаемое В начинается позже начала уменьшаемого А
 			if ($B[0]>=$A[1]) {
 				//если вычитаемое начинается после уменьшаемого, то они не пересекаются. А не тронуто
-				return [$A];
+				return $A;
 			} elseif ($B[1]>=$A[1]) {
 				//вычитаемое начинается внутри уменьшаемого заканчивается позже (откусывает правый кусок)
 				return [
-					[$A[0],$B[0]]
+					[$A[0],$B[0],'meta'=>$meta]
 				];
 			} else {
 				//В находится внутри А и режет его на кусочки
 				return [
-					[$A[0],$B[0]],
-					[$B[1],$A[1]]
+					[$A[0],$B[0],'meta'=>$meta],
+					[$B[1],$A[1],'meta'=>$meta]
 				];
 			}
 		}

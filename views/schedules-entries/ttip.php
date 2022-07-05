@@ -24,7 +24,7 @@ if ($model->is_period) {
 		echo ($model->is_work?'Рабочий период':'Нерабочий период').' из расписания';
 	} else echo 'Из расписания'; ?>
 	</b>:
-	<?= $this->render('/schedules/item',['model'=>$model->master,'static_view'=>true]) ?>
+	<?= $this->render('/schedules/item',['model'=>$model->master->base,'static_view'=>true]) ?>
 	<p><?= $model->history ?></p>
 	<br />
 	<?php if (isset($positive) && is_array($positive) && count($positive)) {

@@ -27,6 +27,7 @@ use yii\validators\DateValidator;
  * @property string|null $date_end
  * @property string|null $schedule
  * @property string|null $mergedSchedule
+ * @property string|null $periodSchedule
  * @property string|null $scheduleWithoutMetadata
  * @property string|null $description
  * @property string|null $comment
@@ -38,6 +39,7 @@ use yii\validators\DateValidator;
  * @property string|null $is_work
  * @property string|null $isWorkDescription
  * @property string|null $cellClass
+ * @property array $periodInterval
  * @property array $schedulePeriods
  * @property array $minuteIntervals
  * @property array $minuteIntervalsEx
@@ -47,6 +49,8 @@ use yii\validators\DateValidator;
  */
 class SchedulesEntries extends \yii\db\ActiveRecord
 {
+	const SCENARIO_PERIOD='scenario_period';
+	const SCENARIO_DAY='scenario_day';
 	
 	public static $days=[
 		'def' => "По умолч.",
@@ -229,21 +233,25 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			[['schedule_id','is_period','is_work'], 'integer'],
 			['is_period','default','value'=>0],
 			['is_work','default','value'=>1],
-			[['created_at'], 'safe'],
+			[['created_at','history'], 'safe'],
+			[['comment','schedule'], 'string', 'max' => 255],
+			[['date','date_end'],'string','max' => 64],
 			
 			//если у нас "расписание на день, а не период"
 			//нужна дата расписания
 			['date',function ($attribute, $params, $validator) {
 				if (isset(SchedulesEntries::$days[$this->date])) return;
-				
 				$dateValidator=new DateValidator(['format'=>'php:Y-m-d']);
 				if (!$dateValidator->validate($this->date, $error)) {
 					$this->addError($attribute, $error.': '.$this->date);
 					return; // stop on first error
 				}
-			}, 'when'=>function ($model) {return !$model->is_period;}],
+				if (is_object($entry=$this->master->getDayEntry($this->date)) && ($entry->id!=$this->id)) {
+					$this->addError($attribute, 'Расписание на этот день уже внесено');
+				}
+			}, 'on'=>static::SCENARIO_DAY],
 			//и нужно расписание
-			['schedule', 'required', 'when'=>function ($model) {return !$model->is_period;}],
+			['schedule', 'required', 'on'=>static::SCENARIO_DAY],
 			['schedule', function ($attribute, $params, $validator) {
 				if (!strlen(trim($this->schedule))) { //если расписания нет - ругаемся
 					$this->addError($attribute, "Необходимо указать расписание на этот день");
@@ -251,19 +259,34 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 					if (!static::validateSchedules($this->schedule))
 						$this->addError($attribute, "Неправильный формат(синтаксис) расписания на день");
 				}
-			}, 'when'=>function ($model) {return !$model->is_period;}],
+			},'on'=>static::SCENARIO_DAY],
 			
 			//если у нас период, а не расписание на день
 			//то нужно начало и конец периода в нужных форматах
 			[['date','date_end'],'required',
 				'message' => 'У периода должна быть хотя бы одна граница',
-				'when'=>function ($model) {return $model->is_period && empty($model->date) && empty($model->date_end);},
+				'on'=>static::SCENARIO_PERIOD,
+				'when'=>function ($model) {return empty($model->date) && empty($model->date_end);},
 				'enableClientValidation' => false,
 			],
-			[['date','date_end'],'date','format'=>'php:Y-m-d H:i:s', 'when'=>function ($model) {return $model->is_period;}],
+			[['date','date_end'],'date','format'=>'php:Y-m-d H:i:s', 'on'=>static::SCENARIO_PERIOD,],
+			[['date','date_end'],function ($attribute, $params, $validator)
+				{
+					if (!empty($this->date) && !empty($this->date_end)) {
+						if ($this->periodInterval[0] > $this->periodInterval[1]) {
+							$this->addError($attribute, 'Окончание периода должно быть позже его начала');
+						}
+					}
+				},
+				'on'=>static::SCENARIO_PERIOD,
+			],
+			[['date','date_end'],function ($attribute, $params, $validator) {
+				foreach ($this->master->periods as $period)
+				if ($period->id!=$this->id && $this->periodsIntersect($period)) {
+					$this->addError($attribute, 'Пересекается с периодом '.$period->periodSchedule);
+				}
+			},'on'=>static::SCENARIO_PERIOD],
 			
-			[['comment'], 'string', 'max' => 255],
-			[['history'], 'safe'],
 		];
 	}
 	
@@ -314,9 +337,35 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			'created_at' => 'Отметка времени создания записи',
 		];
 	}
+
+	static function strToUnixTime($time) {
+		if (is_null($time) || !strlen($time)) return null;
+		return strtotime($time);
+	}
+	
 	
 	public function getMaster() {
 		return \app\models\Schedules::findOne($this->schedule_id);
+	}
+	
+	/**
+	 * @param SchedulesEntries $period
+	 * @return bool
+	 */
+	public function periodsIntersect($period) {
+		if (!$this->is_period || !$period->is_period) return false;
+		return Schedules::intervalIntersect($this->periodInterval,$period->periodInterval);
+	}
+	
+	/**
+	 * Возвращает границы интервала в формате [unixtime1,unixtime2]
+	 * @return array
+	 */
+	public function getPeriodInterval() {
+		return [
+			static::strToUnixTime($this->date),
+			static::strToUnixTime($this->date_end),
+		];
 	}
 	
 	/**
@@ -329,13 +378,13 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	public function getIntervals($date) {
 		if ($this->is_period) {
 			return [\app\models\Schedules::intervalCut(
-				[is_null($this->date)?null:strtotime($this->date),is_null($this->date_end)?null:strtotime($this->date_end)],
+				$this->periodInterval,
 				[strtotime($date.' 00:00:00'),strtotime($date.' 23:59:59')]
 			)];
 		} elseif ($this->schedule!=='-') {
 			$intervals=[];
-			foreach (explode(',',$this->scheduleWithoutMetadata) as $schedule) {
-				$intervals[]=\app\models\Schedules::schedule2Interval($schedule,$date);
+			foreach (explode(',',$this->schedule) as $schedule) {
+				$intervals[]=\app\models\SchedulesEntries::scheduleExToInterval($schedule,$date);
 			};
 			return $intervals;
 			
@@ -358,6 +407,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		
 		return 60*(int)$tokens[0]+(int)$tokens[1];
 	}
+	
 	
 	/**
 	 * конвертирует минуты в запись HH:MM
@@ -396,8 +446,6 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	 * @return false|array
 	 */
 	public static function scheduleExToMinuteInterval($schedule) {
-		//var_dump($schedule);
-		//синтаксические ошибки в периоде
 		$metadata=self::periodMetadata($schedule);
 		$schedule=self::scheduleWithoutMetadata($schedule);
 		if (count($tokens=explode('-',$schedule))!==2) return false;
@@ -405,6 +453,24 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			($start=static::strTimestampToMinutes($tokens[0]))===false
 			||
 			($end=static::strTimestampToMinutes($tokens[1]))===false
+		) return false; //синтаксические ошибки во временных отметках
+		
+		return [$start,$end,'meta'=>$metadata];
+	}
+	
+	/**
+	 * Конвертирует HH:MM-HH:MM в [unixtime начала,unixtime окончания,{metadata}]
+	 * @param $schedule
+	 * @return false|array
+	 */
+	public static function scheduleExToInterval($schedule,$date) {
+		$metadata=self::periodMetadata($schedule);
+		$schedule=self::scheduleWithoutMetadata($schedule);
+		if (count($tokens=explode('-',$schedule))!==2) return false;
+		if (
+			($start=static::strToUnixTime($date.' '.$tokens[0]))===false
+			||
+			($end=static::strToUnixTime($date.' '.$tokens[1]))===false
 		) return false; //синтаксические ошибки во временных отметках
 		
 		return [$start,$end,'meta'=>$metadata];
@@ -423,6 +489,26 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			self::intMinutesToStrTimestamp($interval[0])
 			.'-'
 			.self::intMinutesToStrTimestamp($interval[1]);
+	}
+	
+	/**
+	 * Конвертирует HH:MM-HH:MM в [минуты начала,минуты окончания]
+	 * @param $interval array
+	 * @return string
+	 */
+	public static function unixIntervalToSchedule(array $interval) {
+		//синтаксические ошибки в периоде
+		if (count($interval)<2) return '';
+		
+		return
+			date('H:i',$interval[0])
+			.'-'.
+			date('H:i',$interval[1]).
+			(
+				isset($interval['meta']) && $interval['meta']?
+				$interval['meta']:''
+			);
+			
 	}
 	
 	public function getSchedulePeriods() {
@@ -480,6 +566,13 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 		foreach ($intervals as $interval)
 			$timestamps[]=static::minuteIntervalToSchedule($interval);
 		return implode(',',$timestamps);
+	}
+	
+	public function beforeValidate()
+	{
+		//корректируем сценарии перед валидацией
+		$this->scenario=($this->is_period)?static::SCENARIO_PERIOD:static::SCENARIO_DAY;
+		return parent::beforeValidate();
 	}
 	
 	public function beforeSave($insert)

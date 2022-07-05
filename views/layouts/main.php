@@ -122,7 +122,7 @@ echo ModalAjax::widget([
 				if (h1.length) {
 					let title=h1[0].innerHTML;
 					$('h5.modal-title#modal_form_loader-label').html(title);
-					h1.slice(0).hide();
+					h1.slice(0).remove();
 				}
 			}
 		"),

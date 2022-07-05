@@ -22,13 +22,6 @@ $dateAttr=[];
 for ($i=0; $i<$days_forward; $i++) {
 	$dateDay=gmdate('Y-m-d',$today+86400*$i+Yii::$app->params['schedulesTZShift']);
 	$dateLabel='График на '.Yii::$app->formatter->asDate(time()+86400*$i,'full');
-	$dateAttr[]=[
-		'label' => $dateLabel,
-		'format' => 'raw',
-		'value'=> $this->render('/schedules-entries/item',[
-			'model'=>$model->getDateEntryRecursive($dateDay,null)
-		])
-	];
 	$week=$model->getWeekSchedule($dateDay);
 	$weeks[$week->id]=$week;
 }
@@ -51,9 +44,14 @@ if (
 			$day=$model->getDateSchedule($date);
 			if (is_object($day)) {
 				$comment=$day->comment;
+				$objDay=$day;
 			} elseif (is_array($day)) {
 				$comment=$day['day']->comment.' + наложения';
-			} else $comment='';
+				$objDay=$day['day'];
+			} else {
+				$comment='';
+				$objDay=null;
+			}
 		?>
 			<tr>
 				<td>
@@ -66,7 +64,7 @@ if (
 					<?= $this->render('/schedules-entries/item',['model'=>$day,'name'=>$comment,'date'=>$date]) ?>
 				</td>
 				<td width="33%">
-					<?= $this->render('/schedules-entries/stripe',['model'=>$day,'schedule'=>$model]) ?>
+					<?= $this->render('/schedules-entries/stripe',['model'=>$objDay,'schedule'=>$model]) ?>
 				</td>
 			</tr>
 		<?php } ?>
