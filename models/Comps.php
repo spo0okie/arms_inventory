@@ -76,7 +76,7 @@ class Comps extends \yii\db\ActiveRecord
     
     public function extraFields()
 	{
-		return ['responsible','supportTeam'];
+		return ['responsible','supportTeam','fqdn'];
 	}
 
     /**
