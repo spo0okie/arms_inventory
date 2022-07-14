@@ -622,13 +622,11 @@ class Services extends \yii\db\ActiveRecord
 		$iFirst=0;
 		$strFirst=null;
 		foreach ($this->payments as $doc)
-			/**
-			 * @var $doc Contracts
-			 */
+			/** @var $doc Contracts */
 			if ($doc->isUnpaid) {
 				if (!$iFirst || strtotime($doc->date)<$iFirst) {
 					$strFirst=$doc->date;
-					$iFirst=strtotime($iFirst);
+					$iFirst=strtotime($strFirst);
 				}
 			}
 	
