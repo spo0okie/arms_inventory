@@ -379,7 +379,11 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     	if (!is_null(static::$names_cache)) return static::$names_cache;
 	    return static::$names_cache=static::listItems();
     }
-
+	
+	/**
+	 * @param $login
+	 * @return \yii\db\ActiveRecord|null
+	 */
 	public static function findByLogin($login){
 		//при поиске по логину предпочитаем сначала искать среди трудоустроенных
 		return static::find()
@@ -387,10 +391,6 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 			->where(['LOWER(Login)'=>strtolower($login)])
 			->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])
 			->one();
-/*		foreach ($list as $item) {
-			if (!strcmp(mb_strtolower($item['Login']),$login)) return $item['id'];
-		}
-		return null;*/
 	}
 
 	public function getLastLogin() {

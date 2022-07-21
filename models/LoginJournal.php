@@ -155,7 +155,9 @@ class LoginJournal extends \yii\db\ActiveRecord
 				$user_tokens=explode('\\',$this->user_login);
 				if (count($user_tokens)==2) {
 					//$domain_id = \app\models\Domains::findByName($user_tokens[0]);
-					$this->users_id = \app\models\Users::findByLogin($user_tokens[1]);
+					$user = \app\models\Users::findByLogin($user_tokens[1]);
+					if (is_object($user))
+						$this->users_id = $user->id;
 				}
 			}
 			return true;
