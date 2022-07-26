@@ -22,7 +22,7 @@ $renderer=$this;
 				'attribute' => 'fullNum',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('item', ['model' => $data, 'href'=>true]);
+					return $renderer->render('item', ['model' => $data, 'href'=>true,'static_view'=>false]);
 				}
 			],
 	        'comment:ntext',
