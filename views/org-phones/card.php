@@ -21,8 +21,8 @@ if (!isset($static_view)) $static_view=false;
 
 	<?= $model->title ?>
 	<?php if (!$static_view) { ?>
-		<?= Html::a('<span class="fas fa-pencil-alt"/>', ['update', 'id' => $model->id]) ?>
-		<?= Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
+		<?= Html::a('<span class="fas fa-pencil-alt"/>', ['org-phones/update', 'id' => $model->id]) ?>
+		<?= Html::a('<span class="fas fa-trash"/>', ['org-phones/delete', 'id' => $model->id], [
 			'data' => [
 				'confirm' => 'Удалить этот городской телефон? Это действие необратимо!',
 				'method' => 'post',
