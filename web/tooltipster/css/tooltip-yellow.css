@@ -1,0 +1,22 @@
+.tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow .tooltipster-box {background: #FFFFA3;}
+.tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow.tooltipster-right .tooltipster-arrow-border {border-right-color: #FFFFA3;}
+.tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow.tooltipster-left .tooltipster-arrow-border {border-left-color: #FFFFA3;}
+.tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow.tooltipster-top .tooltipster-arrow-border {border-top-color: #FFFFA3;}
+.tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow.tooltipster-bottom .tooltipster-arrow-border {border-bottom-color: #FFFFA3;}
+.tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow .tooltipster-content {
+    color: #555;
+    font-size: 10.5px;
+    line-height: 12px;
+}
+
+.tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-infobox .tooltipster-content {
+    color: #555;
+    font-size: smaller;
+    padding: 0;
+}
+.tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-infobox .tooltipster-content .card-body,
+.tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-infobox .tooltipster-content .card-header {
+    padding: 0.5rem;
+}
+
+

@@ -56,10 +56,11 @@ use Yii;
  * @property LicItems[] $licItems
  * @property LicKeys[] $licKeys
  */
-class Comps extends \yii\db\ActiveRecord
+class Comps extends ArmsModel
 {
-
-	public static $title='Операционные системы';
+	
+	public static $title='Операционная система';
+	public static $titles='Операционные системы';
     private $hwList_obj=null;
     private $swList_obj=null;
     private $ip_cache=null;
@@ -113,23 +114,50 @@ class Comps extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
 	        'id' => 'Идентификатор',
-			'mac' => 'MAC Адрес',
-			'ip' => 'IP Адрес',
+			'mac' => [
+				'MAC Адрес',
+				'indexHint' => 'MAC адреса сетевых интерфейсов настроенных в ОС'.static::searchableOrHint,
+			],
+			'ip' => [
+				'IP Адрес',
+				'indexHint' => 'IP адреса сетевых интерфейсов настроенных в ОС'.static::searchableOrHint,
+			],
 			'domain_id' => 'Домен',
 			'user_id' => 'Пользователь',
 			'user' => 'Пользователь',
-            'name' => 'Имя компьютера',
-            'os' => 'Отпечаток версии ОС (заполняется скриптом)',
-            'raw_hw' => 'Отпечаток железа (заполняется скриптом)',
+            'name' => [
+            	'Имя компьютера',
+				'indexHint' => 'Сетевое имя компьютера настроенное в ОС.<br>'.
+					'Домен не выводится, но при поиске можно указывать.<br>'.
+					'Вводимый текст ищется в строке формата DOMAIN\\computer'.static::searchableOrHint,
+			],
+            'os' => [
+            	'Наименование и версия операционной системы',
+				'indexHint' => 'В таблице в этой ячейке выводится только наименование ОС,<br>'.
+					'но поиск ведется также и по софту (в сыром, а не отформатированном виде)'.
+					static::searchableOrHint,
+			],
+			'raw_hw' => [
+				'Hardware',
+				'indexHint' => 'Строка оборудования обнаруженного Операционной Системой<br>'.
+					'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку'.
+					static::searchableOrHint,
+			],
 	        'raw_soft' => 'Отпечаток софта (заполняется скриптом)',
-	        'raw_version' => 'Скрипт',
+	        'raw_version' => [
+	        	'Скрипт',
+				'indexHint' => 'Скрипт, который внес последние данные по этой ОС'.static::searchableOrHint,
+			],
             'exclude_hw' => 'Скрытое из паспорта железо',
             'ignore_hw' => 'Виртуальная ОС',
-            'arm_id' => 'Рабочее место',
+            'arm_id' => [
+            	'АРМ',
+				'indexHint' => 'ПК на котором установлена ОС'.static::searchableOrHint,
+			],
             'comment' => 'Комментарий',
             'updated_at' => 'Время обновления',
         ];
@@ -428,10 +456,10 @@ class Comps extends \yii\db\ActiveRecord
 				if (is_object($responsible=$service->responsibleRecursive)) {
 					$responsible_id=$responsible->id;
 					if (!isset($rating[$responsible_id])) {
-						$rating[$responsible_id]=1;
+						$rating[$responsible_id]=$service->weight;
 						$responsibles[$responsible_id]=$responsible;
 					} else
-						$rating[$responsible_id]++;
+						$rating[$responsible_id]+=$service->weight;
 				}
 			}
 			if (count($rating)) return $responsibles[array_search(max($rating), $rating)];

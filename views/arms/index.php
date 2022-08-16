@@ -6,27 +6,39 @@ use yii\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ArmsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+use app\components\DynaGridWidget;
+
 \yii\helpers\Url::remember();
 
-$this->title = 'АРМы';
+$this->title = \app\models\Arms::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer = $this;
 ?>
 <div class="arms-index">
-
-    <h1>
-        <?= Html::encode($this->title) ?>
-        <?= \app\components\HintIconWidget::widget(['model'=>'\app\models\Arms','cssClass'=>'pull-right']) ?>
-    </h1>
-
-    <p>
-        <?= Html::a('Создать АРМ', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-	<?= $this->render('/arms/table', [
-		'searchModel' => $searchModel,
+	<?= DynaGridWidget::widget([
+		'id' => 'arms-index',
+		'header' => Html::encode($this->title),
+		'columns' => require 'columns.php',
+		'defaultOrder' => [
+			'attach',
+			'num',
+			'model_id',
+			'comp_id',
+			'comp_hw',
+			'comp_ip',
+			'comp_mac',
+			'mac',
+			'state_id',
+			'user_id',
+			'user_position',
+			'places_id',
+			'inv_sn'
+		],
+		'createButton' => Html::a('Создать АРМ', ['create'], ['class' => 'btn btn-success']),
+		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Arms','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
-		'columns'   => ['attach','num','model','comp_id','comp_hw','comp_ip','comp_mac','sn','mac','state','user_id','user_position','places_id','inv_num'],
+		'filterModel' => $searchModel,
 	]) ?>
+
 
 </div>

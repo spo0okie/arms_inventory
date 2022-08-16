@@ -12,7 +12,6 @@ use yii\helpers\Html;
 
 	
 AppAsset::register($this);
-//FontAwesomeAsset::register($this);
 
 if (isset($this->params['layout-container'])) {
 	$containerClass=$this->params['layout-container'];

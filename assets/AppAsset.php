@@ -25,24 +25,18 @@ class AppAsset extends AssetBundle
 		'css/acl.css',
 		'css/schedules.css',
 		'css/codes.private.css',
-	    'css/tooltip-yellow.css',
-	    'css/tooltipster.main.min.css',
-	    'css/tooltipster.bundle.min.css',
-	    'css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-shadow.min.css',
     ];
     public $js = [
-	    'js/tooltipster.main.min.js',
-	    'js/tooltipster.bundle.min.js',
-	    'js/qtip_ajax.js',
 		'js/scans.js',
 		'js/tools.lib1.js',
 	    'js/jquery.autoResize.js',
 		'js/fontawesome/all.min.js',
-		
     ];
     public $cssOptions = [];
     public $depends = [
         'yii\web\YiiAsset',
         'yii\bootstrap5\BootstrapAsset',
+		'app\assets\Select2ArmsAsset',
+		'app\assets\TooltipsterAsset',
     ];
 }

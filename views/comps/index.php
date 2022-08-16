@@ -1,35 +1,25 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
-use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\CompsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Операционные системы';
-$this->params['breadcrumbs'][] = \app\models\Comps::$title;
+$this->title = \app\models\Comps::$titles;
+$this->params['breadcrumbs'][] = \app\models\Comps::$titles;
 $renderer=$this;
 ?>
 <div class="comps-index">
-
-    <h1>
-        <?= Html::encode($this->title) ?>
-        <?= \app\components\HintIconWidget::widget(['model'=>'\app\models\Comps','cssClass'=>'pull-right']) ?>
-    </h1>
-    Информация об известных установках операционных систем и ПО.<br/>
-    <div id="help_block" style="display: none">
-    <p>
-    
-    </p>
-    </div>
-
-	<?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success','title'=>'Еще раз обращаю внимание, что это делать надо только для тех компьютеров, на которых не запускается автоматический скрипт!']) ?>
-	
-	
-	<?= $this->render('/comps/table', [
-		'searchModel' => $searchModel,
+	<?= DynaGridWidget::widget([
+		'id' => 'comps-index',
+		'header' => Html::encode($this->title),
+		'columns' => require 'columns.php',
+		'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
+		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success','title'=>'Еще раз обращаю внимание, что это делать надо только для тех компьютеров, на которых не запускается автоматический скрипт!']),
+		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Comps','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
-		'columns'   => ['name','ip','mac','os','updated_at','arm_id','place','raw_version'],
+		'filterModel' => $searchModel,
 	]) ?>
 </div>

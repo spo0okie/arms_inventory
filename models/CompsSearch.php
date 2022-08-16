@@ -12,7 +12,7 @@ use app\models\Comps;
  */
 class CompsSearch extends Comps
 {
-	public $place;
+	public $places_id;
 
     /**
      * @inheritdoc
@@ -21,7 +21,7 @@ class CompsSearch extends Comps
     {
         return [
             [['id', 'domain_id'], 'integer'],
-            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','place'], 'safe'],
+            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id'], 'safe'],
         ];
     }
 
@@ -44,7 +44,7 @@ class CompsSearch extends Comps
     public function search($params)
     {
         $query = Comps::find()
-			->joinWith(['arm','domain']);
+			->joinWith(['arm.place','domain']);
 
         // add conditions that should always apply here
 		$sort=[
@@ -75,7 +75,7 @@ class CompsSearch extends Comps
 					'asc'=>['users.doljnost'=>SORT_ASC],
 					'desc'=>['users.doljnost'=>SORT_DESC],
 				],
-				'place'=>[
+				'places_id'=>[
 					'asc'=>['getplacepath(arms.places_id)'=>SORT_ASC],
 					'desc'=>['getplacepath(arms.places_id)'=>SORT_DESC],
 				],
@@ -112,6 +112,7 @@ class CompsSearch extends Comps
 			->andFilterWhere(['or like', 'mac', \yii\helpers\StringHelper::explode($this->mac,'|',true,true)])
             ->andFilterWhere(['or like', 'arms.num', \yii\helpers\StringHelper::explode($this->arm_id,'|',true,true)])
             ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+			->andFilterWhere(['or like', 'getplacepath({{places}}.id)', \yii\helpers\StringHelper::explode($this->places_id,'|',true,true)])
 			->andFilterWhere(['or',
 				['or like', 'os', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
 				['or like', 'raw_soft', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],

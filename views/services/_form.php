@@ -186,6 +186,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					<?= $form->field($model,'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('services','cost','charge')) ?>
 				</div>
 			</div>
+			<?= $form->field($model,'weight')->textInput() ?>
 
 
 		</div>

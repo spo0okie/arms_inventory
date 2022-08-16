@@ -7,7 +7,7 @@ use yii\helpers\Html;
 $domain = is_object($model->domain)?$model->domain->name:'- не в домене - ';
 $name=$domain.'\\'.mb_strtolower($model->name);
 $this->title = 'Правка: '.$name;
-$this->params['breadcrumbs'][] = ['label' => 'ОС', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\Comps::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Правка';
 ?>

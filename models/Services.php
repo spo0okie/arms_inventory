@@ -40,6 +40,7 @@ use yii\web\User;
  * @property int[] $techs_ids
  * @property int[] $contracts_ids
  * @property int $totalUnpaid
+ * @property int $weight
  * @property string $firstUnpaid
  *
  *
@@ -150,8 +151,9 @@ class Services extends \yii\db\ActiveRecord
             [['name', 'description', 'is_end_user'], 'required'],
 	        [['depends_ids','comps_ids','support_ids','techs_ids','contracts_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
-			[['places_id','partners_id','places_id','archived','currency_id'],'integer'],
+			[['places_id','partners_id','places_id','archived','currency_id','weight'],'integer'],
 			[['cost','charge'], 'number'],
+			[['weight'],'default', 'value' => '100'],
 	        [['is_end_user', 'is_service', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 			[['name'], 'string', 'max' => 64],
 			[['search_text'], 'string', 'max' => 255],
@@ -204,6 +206,7 @@ class Services extends \yii\db\ActiveRecord
 			'sites' => 'Площадки',
 			'cost' => 'Стоимость',
 			'charge' => 'НДС',
+			'weight' => 'Вес'
         ];
     }
 
@@ -238,6 +241,7 @@ class Services extends \yii\db\ActiveRecord
 			'cost' => 'Стоимость услуги в месяц. (если понадобится другой период - обращайтесь к разработчику)',
 			'charge' => 'налог',
 			'contracts_ids' => 'Привязанные к услуге документы. Можно привязать только договор, а все счета/акты/доп.соглашения уже привязывать к договору',
+			'weight' => 'Значимость сервиса по сравнению с другими. Используется для определения наиболее важных сервисов на сервере и выборе ответственного за сервер.'
 		];
 	}
 	

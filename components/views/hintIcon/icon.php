@@ -7,12 +7,16 @@
  * Рисует иконку помощи.
  */
 
+/* @var $href */
+/* @var $hintText */
+/* @var $cssClass */
+
 echo \yii\helpers\Html::a(
-	'',
+	'<span class="fas fa-question-circle"></span>',
 	$href,
 	[
 		'title'=>$hintText,
-		'class'=>['glyphicon', 'glyphicon-question-sign', $cssClass]
+		'class'=>[$cssClass]
 	]
 )
 ?>

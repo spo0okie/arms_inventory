@@ -619,6 +619,7 @@ div.arms-card div.data-block.tree-level-2 div {margin: 2pt;}
 /* АРМы */
 table.arms_index td.comp_ip_col,
 table.arms_index td.sn_col,
+table.arms_index td.state_id_col,
 table.arms_index td.inv_num_col,
 table.arms_index td.num_col,
 table.arms_index td.comp_hw_col {
@@ -627,6 +628,14 @@ table.arms_index td.comp_hw_col {
     overflow: hidden;
     width: 110px;
     max-width: 110px;
+}
+
+table.arms_index td.state_id_col {
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: hidden;
+    width: 80px;
+    max-width: 80px;
 }
 
 span.arm_user_position {

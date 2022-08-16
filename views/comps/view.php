@@ -9,7 +9,7 @@ use yii\widgets\DetailView;
 $domain = is_object($model->domain)?$model->domain->name:'- не в домене - ';
 
 $this->title = 'ОС '.$domain.'\\'.strtolower($model->name);
-$this->params['breadcrumbs'][] = ['label' => 'ОС', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\Comps::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\helpers\Url::remember();
 $manufacturers=\app\models\Manufacturers::fetchNames();

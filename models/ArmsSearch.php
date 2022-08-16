@@ -16,6 +16,7 @@ class ArmsSearch extends Arms
 	public $comp_ip;
 	public $comp_mac;
 	public $type_id;
+	public $inv_sn;
 	public $user_position;
 
     /**
@@ -25,7 +26,8 @@ class ArmsSearch extends Arms
     {
         return [
             [['id'], 'integer'],
-            [['num', 'inv_num', 'model_id', 'sn', 'user_id', 'places_id','departments_id', 'comp_ip','comp_mac', 'comp_id','model_id','type_id','model','user_position','comp_hw'], 'safe'],
+			[['state_id'],'each','rule'=>['integer']],
+            [['num', 'inv_num', 'inv_sn', 'model_id', 'sn', 'user_id', 'places_id','departments_id', 'comp_ip','comp_mac', 'comp_id','model_id','type_id','model_id','user_position','comp_hw'], 'safe'],
         ];
     }
 
@@ -48,7 +50,7 @@ class ArmsSearch extends Arms
     public function search($params)
     {
         $query = Arms::find()
-	        ->joinWith(['user.orgStruct','techModel','comp.netIps','place','contracts','licItems','licGroups','licKeys','department']);
+	        ->joinWith(['user.orgStruct','techModel.manufacturer','comp.netIps','place','contracts','licItems','licGroups','licKeys','department']);
 
         $this->load($params);
 		
@@ -57,7 +59,7 @@ class ArmsSearch extends Arms
 			'attributes'=>[
 				'num',
 				'sn',
-				'state',
+				'state_id',
 				'inv_num',
 				'comp_id'=>[
 					'asc'=>['comps.name'=>SORT_ASC],
@@ -75,7 +77,7 @@ class ArmsSearch extends Arms
 					'asc'=>['users.Ename'=>SORT_ASC],
 					'desc'=>['users.Ename'=>SORT_DESC],
 				],
-				'model'=>[
+				'model_id'=>[
 					'asc'=>['arms_models.name'=>SORT_ASC],
 					'desc'=>['arms_models.name'=>SORT_DESC],
 				],
@@ -91,6 +93,10 @@ class ArmsSearch extends Arms
 					'asc'=>['getplacepath(arms.places_id)'=>SORT_ASC],
 					'desc'=>['getplacepath(arms.places_id)'=>SORT_DESC],
 				],
+				'inv_sn'=>[
+					'asc'=>['concat(sn,inv_num)'=>SORT_ASC],
+					'desc'=>['concat(sn,inv_num)'=>SORT_DESC],
+				],
 			]
 		];
         
@@ -105,7 +111,8 @@ class ArmsSearch extends Arms
 
         $query->andFilterWhere(['or like', 'num', \yii\helpers\StringHelper::explode($this->num,'|',true,true)])
 	        ->andFilterWhere(['or like', 'inv_num', \yii\helpers\StringHelper::explode($this->inv_num,'|',true,true)])
-            ->andFilterWhere(['or like', 'sn', \yii\helpers\StringHelper::explode($this->sn,'|',true,true)])
+			->andFilterWhere(['or like', 'sn', \yii\helpers\StringHelper::explode($this->sn,'|',true,true)])
+			->andFilterWhere(['or like', 'concat(sn,", ",inv_num)', \yii\helpers\StringHelper::explode($this->inv_sn,'|',true,true)])
 	        ->andFilterWhere(['or like', 'users.Ename', \yii\helpers\StringHelper::explode($this->user_id,'|',true,true)])
 	        ->andFilterWhere(['or like', 'users.Doljnost', \yii\helpers\StringHelper::explode($this->user_position,'|',true,true)])
 			->andFilterWhere(['or like', 'comps.ip', \yii\helpers\StringHelper::explode($this->comp_ip,'|',true,true)])
@@ -113,10 +120,10 @@ class ArmsSearch extends Arms
 	        ->andFilterWhere(['or like', 'comps.name', \yii\helpers\StringHelper::explode($this->comp_id,'|',true,true)])
 	        ->andFilterWhere(['or like', 'comps.raw_hw', \yii\helpers\StringHelper::explode($this->comp_hw,'|',true,true)])
 	        ->andFilterWhere(['or like', 'org_struct.name', \yii\helpers\StringHelper::explode($this->departments_id,'|',true,true)])
-	        ->andFilterWhere(['or like', 'arms_models.name', \yii\helpers\StringHelper::explode($this->model,'|',true,true)])
+	        ->andFilterWhere(['or like', 'concat(manufacturers.name," ",arms_models.name)', \yii\helpers\StringHelper::explode($this->model_id,'|',true,true)])
 	        ->andFilterWhere(['or like', 'getplacepath({{places}}.id)', \yii\helpers\StringHelper::explode($this->places_id,'|',true,true)])
-	        ->andFilterWhere(['arms.model_id'=>$this->model_id])
 	        ->andFilterWhere(['arms_models.type_id'=>$this->type_id])
+			->andFilterWhere(['arms.state_id'=>$this->state_id])
 		    ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 	
 		$totalQuery=clone $query;

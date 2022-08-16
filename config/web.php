@@ -21,11 +21,14 @@ $config = [
     ],
     'components' => [
 		'assetManager' => [
-			/*'bundles' => [
-				'yii\bootstrap5\BootstrapAsset' => [
-					'css' => [],
-				]
-			]*/
+			'bundles' => [
+				'yii\web\JqueryAsset' => [
+					'jsOptions' => [ 'position' => \yii\web\View::POS_HEAD ],
+				],
+				'kartik\select2\Select2Asset' => [
+					'jsOptions' => [ 'position' => \yii\web\View::POS_HEAD ],
+				],
+			]
 		],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
@@ -110,6 +113,12 @@ $config = [
     'modules' => [
         'api'       => ['class' => 'app\modules\api\Rest'],
 		'gridview'  => ['class' => 'kartik\grid\Module'],
+		'dynagrid'	=> [
+			'class' => '\kartik\dynagrid\Module',
+			'minPageSize' => 20,
+			'maxPageSize' => 1000,
+			'defaultPageSize' => 100,
+		],
 	    'rbac'      => [
 		    'class' => 'spo0okie\rbacplus\Module',
 		    'userModelLoginField'=>'Login'

@@ -2,25 +2,21 @@ function attach_qTip(el){
     if (el.hasClass('tooltipstered')) return;
     let $url=el.attr('qtip_ajxhrf');
     let $text=el.attr('qtip_ttip');
+    let $side=el.attr('qtip_side') || 'right,left,bottom,top';
+    let $theme=el.attr('qtip_theme') || 'tooltipster-shadow tooltipster-shadow-yellow';
     let $b64text=el.attr('qtip_b64ttip');
-    if (typeof $b64text !== 'undefined') {
-        //console.log(typeof $b64text);
-        $text=atob($b64text);
-        //console.log($text);
-    }
+
+    if (typeof $b64text !== 'undefined') $text=atob($b64text);
+
     let $load=undefined;
-    if (typeof $url != 'undefined') {
+    if (typeof $url !== 'undefined') {
         if (typeof $text == 'undefined') $text='Загрузка...';
         $load=function(instance, helper) {
-            var $origin = $(helper.origin);
+            let $origin = $(helper.origin);
             if ($origin.data('loaded') !== true) {
                 $.get($url, function(data) {
                     instance.content(data);
                     $origin.data('loaded', true);
-                    /*setTimeout(()=>{
-                        console.log('repositioning');
-                        $origin.tooltipster('reposition');
-                    },100);*/
                 });
             }
         }
@@ -31,9 +27,9 @@ function attach_qTip(el){
         contentAsHTML: true,
         delay: 50,
         interactive: true,
-        theme: 'tooltipster-shadow tooltipster-shadow-yellow',
+        theme: $theme,
         updateAnimation: 'fade',
-        side: [ 'right', 'left', 'bottom', 'top'],
+        side: $side.split(','),
         functionBefore: $load,
     });
 }
