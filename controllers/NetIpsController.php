@@ -36,7 +36,7 @@ class NetIpsController extends Controller
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','update','delete',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','view','ttip','validate','item-by-name'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -59,7 +59,14 @@ class NetIpsController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
-
+	public function actionItemByName($name)
+	{
+		if (($model = NetIps::findOne(['text_addr' => $name])) !== null) {
+			return $this->renderPartial('item', ['model' => $model, 'static_view' => false]);
+		}
+		throw new NotFoundHttpException('The requested page does not exist.');
+	}
+	
 	/**
 	* Validates  model on update.
 	* @param null $id
