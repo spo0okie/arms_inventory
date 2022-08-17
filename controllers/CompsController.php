@@ -119,13 +119,13 @@ class CompsController extends Controller
 		$tokens=explode('\\',$name);
 		if (count($tokens)==1) {
 			if (($model = Comps::findOne(['name'=>$name])) !== null) {
-				return $this->renderPartial('item', ['model' => $model	]);
+				return $this->renderPartial('item', ['model' => $model	,'static_view'=>true]);
 			}
 			throw new NotFoundHttpException('The requested page does not exist.');
 		} elseif (count($tokens)==2) {
 			if (($domain = \app\models\Domains::findOne(['name'=>$tokens[0]])) !== null) {
 				if (($model = Comps::findOne(['name'=>$tokens[1],'domain_id'=>$domain->id])) !== null) {
-					return $this->renderPartial('item', ['model' => $model	]);
+					return $this->renderPartial('item', ['model' => $model	,'static_view'=>true]);
 				}
 			}
 			throw new NotFoundHttpException('The requested page does not exist.');

@@ -62,7 +62,7 @@ class NetIpsController extends Controller
 	public function actionItemByName($name)
 	{
 		if (($model = NetIps::findOne(['text_addr' => $name])) !== null) {
-			return $this->renderPartial('item', ['model' => $model, 'static_view' => false]);
+			return $this->renderPartial('item', ['model' => $model, 'static_view' => true]);
 		}
 		throw new NotFoundHttpException('The requested page does not exist.');
 	}
