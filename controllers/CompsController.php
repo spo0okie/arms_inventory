@@ -109,7 +109,7 @@ class CompsController extends Controller
 			$fqdn=implode('.',$tokens);
 			if (($domain = \app\models\Domains::findOne(['fqdn'=>$fqdn])) !== null) {
 				if (($model = Comps::findOne(['name'=>$compName,'domain_id'=>$domain->id])) !== null) {
-					return $this->renderPartial('item', ['model' => $model,'static_view'=>false]);
+					return $this->renderPartial('item', ['model' => $model,'static_view'=>true]);
 				}
 			}
 			throw new NotFoundHttpException('The requested page does not exist.');
