@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\helpers\Html;
 use yii\web\User;
 
 /**
@@ -24,7 +25,7 @@ use yii\web\User;
  * @property int[]	$users_ids
  * @property int[]	$access_types_ids
  */
-class Aces extends \yii\db\ActiveRecord
+class Aces extends ArmsModel
 {
 	
 	public static $title='доступ';
@@ -83,34 +84,37 @@ class Aces extends \yii\db\ActiveRecord
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
 			'id' => 'ID',
 			'acls_id' => 'ACL',
-			'ips' => \app\models\NetIps::$titles,
-			'ips_ids' => \app\models\NetIps::$titles,
-			'comps_ids' => 'Компьютеры',
+			'ips' => [
+				\app\models\NetIps::$titles,
+				'hint' => 'IP адреса с которых разрешается доступ<br>'.
+					\app\models\NetIps::$inputHint
+			],
+			'comps_ids' => [
+				'Компьютеры',
+				'hint' => 'Сетевые имена компьютеров с которых разрешается доступ'
+			],
 			'access_types_ids' => \app\models\AccessTypes::$titles,
-			'users_ids' => \app\models\Users::$titles,
-			'comment' => 'Прочее',
-			'notepad' => 'Записная книжка',
+			'users_ids' => [
+				\app\models\Users::$titles,
+				'hint' => \app\models\Users::$titles.', которым предоставляется доступ<br>'.
+					'Сотрудников других организаций можно также добавить в '.Html::a('список пользователей',['/users/index'])
+			],
+			'comment' => [
+				'Прочее',
+				'hint' => 'Если есть какие-то объекты, предоставления доступа которым не получается учесть через поля выше,<br> вписываем их текстом сюда',
+			],
+			'notepad' => [
+				'Записная книжка',
+				'hint' => 'Если есть какие-то заметки, то можно их записать здесь',
+			]
 		];
 	}
 	
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			//'ips' => 'С которых предоставляется доступ',
-			//'comps_ids' => 'С которых предоставляется доступ',
-			//'users_ids' => 'Которым предоставляется доступ',
-			'comment' => 'Все что не получилось описать через списки выше',
-			'notepad' => 'Если есть какие-то заметки, то можно их записать здесь',
-		];
-	}
 	
 	/**
 	 * Name for search

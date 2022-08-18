@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
+use \app\helpers\FieldsHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Aces */
@@ -12,10 +13,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 ?>
 
-<script>console.log('zjop!')</script>
-
 <div class="aces-form">
-
     <?php $form = ActiveForm::begin([
 		//'enableClientValidation' => false,	//чтобы отключить валидацию через JS в браузере
 		//'enableAjaxValidation' => true,		//чтобы включить валидацию на сервере ajax запросы
@@ -25,60 +23,53 @@ if (!isset($modalParent)) $modalParent=null;
 			//['aces/validate','id'=>$model->id], //для существующих
 		//'action' => Yii::$app->request->getQueryString(),
 	]); ?>
+	<i></i>
 	<div class="for-alert"></div>
 	<div class="row">
 		<div class="col-md-6">
-			<?= $form->field($model, 'users_ids')->widget(Select2::classname(), [
-				'data' => \app\models\Users::fetchWorking(),
-				'options' => ['placeholder' => 'Начните набирать название для поиска'],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				],
-			]) ?>
-			
-			<?= $form->field($model, 'comps_ids')->widget(Select2::classname(), [
-				'data' => \app\models\Comps::fetchNames(),
-				'options' => ['placeholder' => 'Начните набирать название для поиска'],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				],
-			]) ?>
-			
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'ips',
-				'lines' => 1,
-			]) ?>
-			
-			<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+			<div class="card bg-light">
+				<div class="card-header">Кому предоставляется доступ</div>
+				<div class="card-body">
+					<?= FieldsHelper::Select2Field($form, $model, 'users_ids', [
+						'data' => \app\models\Users::fetchWorking(),
+						'pluginOptions' => ['dropdownParent' => $modalParent,'multiple' => true],
+					]) ?>
+					
+					<?= FieldsHelper::Select2Field($form, $model, 'comps_ids', [
+						'data' => \app\models\Comps::fetchNames(),
+						'pluginOptions' => ['dropdownParent' => $modalParent,'multiple' => true],
+					]) ?>
+					
+					<?= FieldsHelper::TextAutoresizeField($form,$model,'ips',['lines' => 1]) ?>
+					
+					<?= FieldsHelper::TextInputField($form,$model, 'comment') ?>
+				</div>
+			</div>
 
 			<hr />
 			<!-- https://www.yiiframework.com/doc/api/2.0/yii-helpers-basehtml#activeCheckboxList()-detail -->
-			<?= $form->field($model, 'access_types_ids')->checkboxList(
-				\app\models\AccessTypes::fetchNames(),
-				[
-					'class'=>"card d-flex flex-row pt-2 pb-1",
-					'itemOptions'=>[
-						'class'=>'p-2'
-					],
-				]
-			);	?>
+			<div class="card bg-light">
+				<div class="card-header"><?= Html::tag(
+					'span',
+					'Какой этим объектам предоставляется доступ',
+					FieldsHelper::toolTipOptions(
+						'Типы предоставляемого доступа' ,
+						$model->getAttributeHint('access_types_ids')
+					)
+				)?>
+				</div>
+				<div class="card-body">
+					<?= FieldsHelper::CheckboxField($form,$model, 'access_types_ids',[
+						'data'=>\app\models\AccessTypes::fetchNames()
+					]);?>
+				</div>
+			</div>
 			
-			<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
 
 		</div>
 		<div class="col-md-6">
-			<?= $form->field($model, 'notepad')->widget(\kartik\markdown\MarkdownEditor::className(), [
-				'showExport'=>false
-			]) ?>
-
+			<?= FieldsHelper::MarkdownField($form,$model, 'notepad') ?>
+			<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success float-end']) ?>
 		</div>
 	</div>
 	

@@ -67,19 +67,6 @@ class DynaGridWidget extends Widget
 		return $columns;
 	}
 	
-	public static function toolTipFields($title,$text) {
-		return [
-			'qtip_ttip'=>'<div class="card">'.
-				'<div class="card-header">'.$title.'</div>'.
-				'<div class="card-body">'.
-				'<p class="card-text">'.$text.'</p>'.
-				'</div>'.
-				'</div>',
-			'qtip_side'=>'top,bottom,right,left',
-			'qtip_theme'=>'tooltipster-shadow tooltipster-shadow-infobox'
-		];
-	}
-	
 	public function defaultColumn($attr,$data=[]) {
 		if (!isset($data['attribute']))
 			$data['attribute']=$attr;
@@ -139,7 +126,7 @@ class DynaGridWidget extends Widget
 			$data['label']=\yii\helpers\Html::tag(
 				'span',
 				$data['label'],
-				static::toolTipFields($fieldFullName,$data['hint'])
+				\app\helpers\FieldsHelper::toolTipOptions($fieldFullName,$data['hint'])
 			);
 		}
 		unset($data['hint']);

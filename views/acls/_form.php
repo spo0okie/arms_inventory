@@ -54,105 +54,113 @@ $selectOptions= [
 	<div class="for-alert"></div>
 	<div class="row">
 		<div class="col-md-6">
-			<h3>Выберите один ресурс к которому предоставляется доступ</h3>
-			<?= TabsX::widget([
-				'items'=>[
-					[
-						'label'=>'ОС',
-						'content'=>$form->field($model, 'comps_id')->widget(Select2::className(), [
-							'data' => \app\models\Comps::fetchNames(),
-							'options' => [
-								'placeholder' => 'Выберите ОС',
-								'onchange' => 'onInputUpdate(compInput)',
+			<div class="card bg-light">
+				<div class="card-header">Выберите кому и какой предоставляется доступ</div>
+				<div class="card-body">
+					<?php if ($model->isNewRecord) { ?>
+						<div class="text-center" >
+							<img class="exclamation-sign" src="/web/img/exclamation-mark.svg" /><br/>
+						</div>
+						<div class="text-center" >
+							Чтобы добавлять элементы списка контроля доступа, нужно сначала сохранить список
+						</div>
+					<?php } else { ?>
+						<div id="aces-list">
+							
+							<?php foreach ($model->aces as $ace) {
+								echo $this->render('/aces/card', ['model' => $ace]);
+							}?>
+						</div>
+						
+						<?= Html::a('<span class="fas fa-plus"></span>', [
+							'aces/create',
+							'acls_id' => $model->id,
+							'ajax' => 1,
+							'modal' => 'modal_form_loader'
+						], [
+							'class' => 'btn btn-primary btn-sm open-in-modal-form',
+							'title' => 'Добавление элемента в список доступа',
+							'data-update-element' => '#aces-list',
+							'data-update-url' => Url::to(['/acls/view', 'id' => $model->id, 'ajax' => 1,'aceCards'=>1]),
+						]);
+					}?>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card bg-light">
+				<div class="card-header">Выберите <b>один</b> ресурс к которому предоставляется доступ</div>
+				<div class="card-body">
+					<?= TabsX::widget([
+						'items'=>[
+							[
+								'label'=>'ОС',
+								'content'=>$form->field($model, 'comps_id')->widget(Select2::className(), [
+									'data' => \app\models\Comps::fetchNames(),
+									'options' => [
+										'placeholder' => 'Выберите ОС',
+										'onchange' => 'onInputUpdate(compInput)',
+									],
+									'pluginOptions' => $selectOptions,
+								]),
+								'active'=>(bool)$model->comps_id
 							],
-							'pluginOptions' => $selectOptions,
-						]),
-						'active'=>(bool)$model->comps_id
-					],
-					[
-						'label'=>'Оборудование',
-						'content'=>$form->field($model, 'techs_id')->widget(Select2::className(), [
-							'data' => \app\models\Techs::fetchNames(),
-							'options' => [
-								'placeholder' => 'Выберите оборудование',
-								'onchange' => 'onInputUpdate(techInput)',
+							[
+								'label'=>'Оборудование',
+								'content'=>$form->field($model, 'techs_id')->widget(Select2::className(), [
+									'data' => \app\models\Techs::fetchNames(),
+									'options' => [
+										'placeholder' => 'Выберите оборудование',
+										'onchange' => 'onInputUpdate(techInput)',
+									],
+									'pluginOptions' => $selectOptions,
+								]),
+								'active'=>(bool)$model->techs_id
 							],
-							'pluginOptions' => $selectOptions,
-						]),
-						'active'=>(bool)$model->techs_id
-					],
-					[
-						'label'=>'IP адрес',
-						'content'=>$form->field($model, 'ips_id')->widget(Select2::className(), [
-							'data' => \app\models\NetIps::fetchNames(),
-							'options' => [
-								'placeholder' => 'Выберите IP',
-								'onchange' => 'onInputUpdate(ipInput)',
+							[
+								'label'=>'IP адрес',
+								'content'=>$form->field($model, 'ips_id')->widget(Select2::className(), [
+									'data' => \app\models\NetIps::fetchNames(),
+									'options' => [
+										'placeholder' => 'Выберите IP',
+										'onchange' => 'onInputUpdate(ipInput)',
+									],
+									'pluginOptions' => $selectOptions,
+								]),
+								'active'=>(bool)$model->ips_id
 							],
-							'pluginOptions' => $selectOptions,
-						]),
-						'active'=>(bool)$model->ips_id
-					],
-					[
-						'label'=>'Сервис',
-						'content'=>$form->field($model, 'services_id')->widget(Select2::className(), [
-							'data' => \app\models\Services::fetchNames(),
-							'options' => [
-								'placeholder' => 'Выберите сервис',
-								'onchange' => 'onInputUpdate(srvInput)',
+							[
+								'label'=>'Сервис',
+								'content'=>$form->field($model, 'services_id')->widget(Select2::className(), [
+									'data' => \app\models\Services::fetchNames(),
+									'options' => [
+										'placeholder' => 'Выберите сервис',
+										'onchange' => 'onInputUpdate(srvInput)',
+									],
+									'pluginOptions' => $selectOptions,
+								]),
+								'active'=>(bool)$model->services_id
 							],
-							'pluginOptions' => $selectOptions,
-						]),
-						'active'=>(bool)$model->services_id
-					],
-					[
-						'label'=>'Другое',
-						'content'=>$form->field($model, 'comment')->textInput([
-							'maxlength' => true,
-							'onchange'=>'onInputUpdate(commentInput)'
-						]),
-						'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->ips_id)
-					],
-				],
-				'position'=>TabsX::POS_ABOVE,
-				//'align'=>TabsX::ALIGN_CENTER,
-				'encodeLabels'=>false,
-				'bordered'=>true,
-				
-			]) ?>
+							[
+								'label'=>'Другое',
+								'content'=>$form->field($model, 'comment')->textInput([
+									'maxlength' => true,
+									'onchange'=>'onInputUpdate(commentInput)'
+								]),
+								'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->ips_id)
+							],
+						],
+						'position'=>TabsX::POS_ABOVE,
+						//'align'=>TabsX::ALIGN_CENTER,
+						'encodeLabels'=>false,
+						'bordered'=>true,
+						
+					]) ?>
+				</div>
+			</div>
 			<?= $form->field($model, 'notepad')->widget(\kartik\markdown\MarkdownEditor::className(), [
 				'showExport'=>false
 			]) ?>
-		</div>
-		<div class="col-md-6">
-			<h3>Выберите кому предоставляется доступ к ресурсу</h3>
-			<?php if ($model->isNewRecord) { ?>
-				<div class="text-center" >
-					<img class="exclamation-sign" src="/web/img/exclamation-mark.svg" /><br/>
-				</div>
-				<div class="text-center" >
-					Чтобы добавлять элементы списка контроля доступа, нужно сначала сохранить список
-				</div>
-			<?php } else { ?>
-			<div id="aces-list">
-				
-				<?php foreach ($model->aces as $ace) {
-					echo $this->render('/aces/card', ['model' => $ace]);
-				}?>
-			</div>
-			
-				<?= Html::a('<span class="fas fa-plus"></span>', [
-					'aces/create',
-					'acls_id' => $model->id,
-					'ajax' => 1,
-					'modal' => 'modal_form_loader'
-				], [
-					'class' => 'btn btn-primary btn-sm open-in-modal-form',
-					'title' => 'Добавление элемента в список доступа',
-					'data-update-element' => '#aces-list',
-					'data-update-url' => Url::to(['/acls/view', 'id' => $model->id, 'ajax' => 1,'aceCards'=>1]),
-				]);
-			}?>
 		</div>
 	</div>
 	

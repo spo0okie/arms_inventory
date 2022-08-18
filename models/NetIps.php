@@ -37,6 +37,8 @@ class NetIps extends \yii\db\ActiveRecord
 	public static $title='IP адрес';
 	public static $titles='IP адреса';
 	
+	public static $inputHint='по одному в строке';
+	
 	/**
 	 * @var PhpIP\IPv4Block
 	 */
