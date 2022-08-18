@@ -178,6 +178,7 @@ class ContractsController extends Controller
 		} elseif (Yii::$app->request->isAjax) {
 			return $this->renderAjax('create', [
 				'model' => $model,
+				'modalParent' => '#modal_form_loader'
 			]);
 		}
 	
@@ -218,6 +219,7 @@ class ContractsController extends Controller
 			}
 			return $this->renderAjax('update', [
 				'model' => $model,
+				'modalParent' => '#modal_form_loader'
 			]);
 		}
 

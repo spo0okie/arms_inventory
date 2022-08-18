@@ -4,6 +4,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
+if (!isset($modalParent)) $modalParent=null;
 $domain = is_object($model->domain)?$model->domain->name:'- не в домене - ';
 $name=$domain.'\\'.mb_strtolower($model->name);
 $this->title = 'Правка: '.$name;
@@ -17,6 +18,7 @@ $this->params['breadcrumbs'][] = 'Правка';
 
     <?= $this->render('_form', [
         'model' => $model,
-    ]) ?>
+		'modalParent' => $modalParent,
+	]) ?>
 
 </div>

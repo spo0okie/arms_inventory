@@ -259,7 +259,7 @@ class SchedulesController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id,$modal=null)
     {
         $model = $this->findModel($id);
 	
@@ -270,6 +270,7 @@ class SchedulesController extends Controller
         return Yii::$app->request->isAjax?
 			$this->renderAjax('update', [
 				'model' => $model,
+				'modalParent' => '#modal_form_loader'
 			]):
 			$this->render('update', [
 				'model' => $model,

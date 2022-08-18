@@ -5,6 +5,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Materials */
 
+if (!isset($modalParent)) $modalParent=null;
+
 $this->title = 'Правка: ' . $model->sname;
 $this->params['breadcrumbs'][] = ['label' => \app\models\Materials::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->sname, 'url' => ['view', 'id' => $model->id]];
@@ -16,6 +18,7 @@ $this->params['breadcrumbs'][] = 'Правка';
 
     <?= $this->render('_form', [
         'model' => $model,
+		'modalParent' => $modalParent,
     ]) ?>
 
 </div>

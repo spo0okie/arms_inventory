@@ -171,6 +171,7 @@ class ArmsController extends Controller
 		return Yii::$app->request->isAjax?
 			$this->renderAjax('create', [
 				'model' => $model,
+				'modalParent' => '#modal_form_loader'
 			]):
 			$this->render('create', [
 				'model' => $model,
@@ -219,11 +220,16 @@ class ArmsController extends Controller
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         }
-
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+	
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('update', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
     }
 
 	/**

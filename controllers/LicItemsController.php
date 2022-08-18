@@ -149,11 +149,13 @@ class LicItemsController extends Controller
 	
 		if ($group=Yii::$app->request->get('lic_group_id')) $model->lic_group_id=$group;
 		if ($contracts_id=Yii::$app->request->get('contracts_id')) $model->contracts_ids=[$contracts_id];
-
-        return Yii::$app->request->isAjax?
+	
+		return Yii::$app->request->isAjax?
 			$this->renderAjax('create', [
-            	'model' => $model,
-        	]):$this->render('create', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('create', [
 				'model' => $model,
 			]);
     }
@@ -191,10 +193,15 @@ class LicItemsController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('update', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
     }
 
     /**

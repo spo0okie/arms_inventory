@@ -180,7 +180,7 @@ class AcesController extends Controller
         return $ajax?
 			$this->renderAjax('_form', [
 				'model' => $model,
-				'modalParent'=>'#'.$modal
+				'modalParent'=>'#'.($modal?$modal:'modal_form_loader'),
 			]):
 			$this->render('update', [
 				'model' => $model,

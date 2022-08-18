@@ -6,6 +6,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
 
+if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Внесение новой закупки';
 if (!is_null($model->lic_group_id)) {
     //если группа лицензий указана, то опираемся на группц
@@ -22,6 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
-    ]) ?>
+		'modalParent' => $modalParent,
+	]) ?>
 
 </div>

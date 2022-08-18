@@ -6,6 +6,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Arms */
 
+if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Добавление АРМ';
 $this->params['breadcrumbs'][] = ['label' => 'АРМы', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
@@ -16,6 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
+		'modalParent' => $modalParent,
     ]) ?>
 
 </div>

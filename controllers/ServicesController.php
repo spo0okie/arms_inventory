@@ -191,11 +191,12 @@ class ServicesController extends Controller
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			return $this->redirect(Url::previous());
 		}
-
-        return Yii::$app->request->isAjax?
+	
+		return Yii::$app->request->isAjax?
 			$this->renderAjax('create', [
-            	'model' => $model,
-        	]):
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
 			$this->render('create', [
 				'model' => $model,
 			]);
@@ -216,10 +217,15 @@ class ServicesController extends Controller
 			return $this->redirect(Url::previous());
             //return $this->redirect(['view', 'id' => $model->id]);
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('update', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
     }
 	
 	/**

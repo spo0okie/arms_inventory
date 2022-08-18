@@ -6,6 +6,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
 
+if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Добавление операционной системы';
 $this->params['breadcrumbs'][] = ['label' => \app\models\Comps::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
@@ -20,6 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
-    ]) ?>
+		'modalParent' => $modalParent,
+	]) ?>
 
 </div>

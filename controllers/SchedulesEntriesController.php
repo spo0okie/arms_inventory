@@ -117,6 +117,7 @@ class SchedulesEntriesController extends Controller
         return Yii::$app->request->isAjax?
 			$this->renderAjax('update', [
 				'model' => $model,
+				'modalParent' => '#modal_form_loader'
 			]):
 			$this->render('update', [
 				'model' => $model,

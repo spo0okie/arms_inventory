@@ -166,6 +166,7 @@ class MaterialsController extends Controller
         return Yii::$app->request->isAjax?
 			$this->renderAjax('create', [
 				'model' => $model,
+				'modalParent' => '#modal_form_loader'
 			])
 			:
 			$this->render('create', [

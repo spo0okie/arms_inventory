@@ -146,10 +146,11 @@ class TechsController extends Controller
         
         if (Yii::$app->request->get('contracts_id'))
 			$model->contracts_ids=[Yii::$app->request->get('contracts_id')];
-
-        return Yii::$app->request->isAjax?
+	
+		return Yii::$app->request->isAjax?
 			$this->renderAjax('create', [
 				'model' => $model,
+				'modalParent' => '#modal_form_loader'
 			]):
 			$this->render('create', [
 				'model' => $model,
@@ -171,10 +172,15 @@ class TechsController extends Controller
 	        if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
             return $this->redirect(['view', 'id' => $model->id]);
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('update', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
     }
 	
 	/**

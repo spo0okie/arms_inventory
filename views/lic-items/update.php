@@ -5,6 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
 
+if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Редактирование: ' . $model->descr;
 $this->params['breadcrumbs'][] = ['label' => \app\models\LicGroups::$titles, 'url' => ['lic-groups/index']];
 $this->params['breadcrumbs'][] = ['label' => $model->licGroup->descr, 'url' => ['lic-groups/view','id'=>$model->lic_group_id]];
@@ -17,6 +18,7 @@ $this->params['breadcrumbs'][] = 'Редактирование';
 
     <?= $this->render('_form', [
         'model' => $model,
+		'modalParent' => $modalParent,
     ]) ?>
 
 </div>
