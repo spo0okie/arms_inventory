@@ -109,7 +109,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function rules()
     {
         return [
-	        [['employee_id', 'Ename', 'Persg', 'Uvolen', ], 'required'],
+	        [['Ename', 'Persg', 'Uvolen', ], 'required'],
 	        [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
 	        [['employee_id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
 	        [['Doljnost', 'Ename', 'Login','Mobile','private_phone'], 'string', 'max' => 255],
@@ -208,7 +208,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	 */
 	public function getOrgStruct()
 	{
-		return $this->hasOne(OrgStruct::className(), ['id'=>'Orgeh']);
+		return $this->hasOne(OrgStruct::className(), ['id'=>'Orgeh','org_id'=>'org_id']);
 	}
 	
 	/**
@@ -216,7 +216,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	 */
 	public function getOrg()
 	{
-		return $this->hasOne(\app\models\Orgs::className(), ['id'=>'org_id']);
+		return $this->hasOne(\app\models\Partners::className(), ['id'=>'org_id']);
 	}
 	
 	/**

@@ -29,7 +29,7 @@ if (!isset($modalParent)) $modalParent=null;
 			<div class="row">
 				<div class="col-md-8">
 					<?= $form->field($model, 'org_id')->widget(Select2::className(), [
-						'data' => \app\models\Orgs::fetchNames(),
+						'data' => \app\models\Partners::fetchNames(),
 						'options' => ['placeholder' => 'Организация',],
 						'toggleAllSettings'=>['selectLabel'=>null],
 						'pluginOptions' => [

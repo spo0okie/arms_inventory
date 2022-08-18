@@ -43,8 +43,8 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
 	    <?= $model->org->name ?>
         //
         <?= $model->Doljnost ?>
-        <br />
-        <?= (is_object($model->orgStruct))?$model->orgStruct->name:'- отдел не найден -' ?>
+        
+        <?= (is_object($model->orgStruct))?('<br />'.$model->orgStruct->name):'' ?>
     </p>
 
     <br />

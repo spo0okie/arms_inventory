@@ -108,11 +108,15 @@ class Partners extends \yii\db\ActiveRecord
 	 * Возвращает имя для поиска
 	 * @return string
 	 */
-    public function getSname() {
-    	if (strpos(mb_strtolower($this->uname),mb_strtolower($this->bname))!==false) return $this->uname;
-    	return $this->uname.' ('.$this->bname.')';
-    }
-
+	public function getSname() {
+		if (strpos(mb_strtolower($this->uname),mb_strtolower($this->bname))!==false) return $this->uname;
+		return $this->uname.' ('.$this->bname.')';
+	}
+	
+	public function getName() {
+		return $this->bname?$this->bname:$this->uname;
+	}
+	
 	public static function fetchAll(){
 		if (is_null(static::$all_items)) {
 			$tmp=static::find()->all();
