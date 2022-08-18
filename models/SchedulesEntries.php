@@ -281,9 +281,11 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 				'on'=>static::SCENARIO_PERIOD,
 			],
 			[['date','date_end'],function ($attribute, $params, $validator) {
-				foreach ($this->master->periods as $period)
-				if ($period->id!=$this->id && $this->periodsIntersect($period)) {
-					$this->addError($attribute, 'Пересекается с периодом '.$period->periodSchedule);
+				if (is_object($this->master)) {
+					if (is_array($this->master->periods)) foreach ($this->master->periods as $period)
+						if ($period->id!=$this->id && $this->periodsIntersect($period)) {
+							$this->addError($attribute, 'Пересекается с периодом '.$period->periodSchedule);
+						}
 				}
 			},'on'=>static::SCENARIO_PERIOD],
 			
