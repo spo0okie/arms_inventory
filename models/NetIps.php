@@ -178,7 +178,7 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getAces()
 	{
-		return static::hasMany(Aces::className(), ['id' => 'aces_id'])->from(['ip_aces'=>Techs::tableName()])
+		return static::hasMany(Aces::className(), ['id' => 'aces_id'])->from(['ip_aces'=>Aces::tableName()])
 			->viaTable('{{%ips_in_aces}}', ['ips_id' => 'id']);
 	}
 

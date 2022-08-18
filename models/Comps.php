@@ -52,6 +52,7 @@ use Yii;
  * @property \app\models\SwList $swList
  * @property \app\models\Services $services
  * @property Acls[] $acls
+ * @property Aces[] $aces
  * @property LicGroups[] $licGroups
  * @property LicItems[] $licItems
  * @property LicKeys[] $licKeys
@@ -370,6 +371,14 @@ class Comps extends ArmsModel
 		return $this->hasMany(Acls::className(), ['comps_id' => 'id']);
 	}
 	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getAces()
+	{
+		return static::hasMany(Aces::className(), ['id' => 'aces_id'])->from(['comp_aces'=>Aces::tableName()])
+			->viaTable('{{%comps_in_aces}}', ['comps_id' => 'id']);
+	}
 	
 	
 	//список адресов, которые вернул скрипт инвентаризации

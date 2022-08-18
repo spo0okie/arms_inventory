@@ -95,7 +95,9 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
 
 	<?= $this->render('/comps/lics_list',['model'=>$model]); ?>
 
-    <h4>Входы в комп</h4>
+	<?= $this->render('/aces/list',['models'=>$model->aces]); ?>
+	
+	<h4>Входы в комп</h4>
     <?php if (is_array($model->lastThreeLogins)) foreach ($model->lastThreeLogins as $logon) { ?>
         <?= $this->render('/login-journal/item-comp',['model'=>$logon]); ?> <br />
     <?php } ?>

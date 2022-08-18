@@ -130,7 +130,7 @@ class Aces extends ArmsModel
 	
 	public function getAcl()
 	{
-		return static::hasOne(Acls::className(), ['id' => 'acls_id']);
+		return static::hasOne(Acls::class, ['id' => 'acls_id']);
 	}
 	
 	
@@ -149,7 +149,7 @@ class Aces extends ArmsModel
 	 */
 	public function getComps()
 	{
-		return static::hasMany(Comps::className(), ['id' => 'comps_id'])
+		return static::hasMany(Comps::class, ['id' => 'comps_id'])
 			->from(['comps_objects'=>Comps::tableName()])
 			->viaTable('{{%comps_in_aces}}', ['aces_id' => 'id']);
 	}
@@ -159,7 +159,7 @@ class Aces extends ArmsModel
 	 */
 	public function getNetIps()
 	{
-		return static::hasMany(NetIps::className(), ['id' => 'ips_id'])
+		return static::hasMany(NetIps::class, ['id' => 'ips_id'])
 			->from(['ips_objects'=>NetIps::tableName()])
 			->viaTable('{{%ips_in_aces}}', ['aces_id' => 'id']);
 	}

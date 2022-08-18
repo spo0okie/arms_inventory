@@ -30,6 +30,7 @@ use Yii;
  * @property int $mn Middle Name
  * @property int $shortName Сокращенные И.О.
  *
+ * @property Aces[] $aces
  * @property Comps[] $comps
  * @property Comps[] $compsFromServices
  * @property Comps[] $compsTotal
@@ -146,7 +147,18 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 			'LastThreeLogins' => 'Входы',
 		];
 	}
-
+	
+	
+	/**
+	 * Возвращает привязанные элементы доступа
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getAces()
+	{
+		return static::hasMany(Aces::className(), ['id' => 'aces_id'])->from(['users_aces'=>Aces::tableName()])
+			->viaTable('{{%users_in_aces}}', ['users_id' => 'id']);
+	}
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

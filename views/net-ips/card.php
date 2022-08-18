@@ -44,4 +44,6 @@ if (count($objects)) echo '<h4>привязан к:'.implode(', ',$objects).'</h
 <?= $this->render('/networks/item',['model'=>$model->network]) ?>
 
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
+<?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
+
 

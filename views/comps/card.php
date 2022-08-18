@@ -79,10 +79,11 @@ if (!mb_strlen($domain))
 		$output[]=$this->render('/services/item',['model'=>$service,'static_view'=>$static_view]);
 	echo "<h3>Размещенные сервисы</h3><p>".implode('<br />',$output)."</p>";
  } ?>
-
-
-
+	
+	
+	
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
+<?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
 
 <div class="login_journal">
 	<h4>Журнал входов (3 посл)</h4>
