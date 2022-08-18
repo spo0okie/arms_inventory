@@ -41,7 +41,7 @@ if (!count($accessTypes)) $accessTypes[]=\app\models\Aces::$noAccessName;
 
 <div class="card w-100 my-2 ace-card shadow-sm g-0" id="ace_card_<?= $model->id ?>">
 	<div class="d-flex g-0">
-		<div class="p-2 text-nowrap">
+		<div class="p-2 text-wrap flex-fill ">
 			<?php if (count($items)) {
 				echo implode(' <br /> ',$items);
 			} else { ?>
@@ -55,9 +55,6 @@ if (!count($accessTypes)) $accessTypes[]=\app\models\Aces::$noAccessName;
 				<span class="row text-center"><small >добавьте записи в этот элемент списка доступа</small></span>
 			
 			<?php } ?>
-		</div>
-		<div class="flex-fill p-2 small">
-			<?=  Markdown::convert($model->notepad) ?>
 		</div>
 		<div class="col-md-4 ace-access-card d-flex flex-column pt-2 pull-right">
 			<div class="text-center text-white"><?= implode(', ',$accessTypes) ?></div>
@@ -86,5 +83,10 @@ if (!count($accessTypes)) $accessTypes[]=\app\models\Aces::$noAccessName;
 			</div>
 		</div>
 	</div>
+	<?php if ($model->notepad) { ?>
+		<div class="p-1 small text-wrap border-top">
+			<?=  Markdown::convert($model->notepad) ?>
+		</div>
+	<?php } ?>
 
 </div>
