@@ -48,7 +48,7 @@ class SchedulesSearchAcl extends Schedules
 		->joinWith([
 			'acls.aces.comps',
 			'acls.aces.users',
-			'acls.aces',
+			'acls.aces.netIps',
 			'acls.comp',
 			'acls.tech',
 			'acls.service',
@@ -91,10 +91,10 @@ class SchedulesSearchAcl extends Schedules
 			['or like', 'acls.comment', \yii\helpers\StringHelper::explode($this->resources,'|',true,true)],
 		]);
 	
-	
+		$totalQuery=clone $query;
 		return new ActiveDataProvider([
 			'query' => $query,
-			'totalCount' => $query->count('distinct(schedules.id)'),
+			'totalCount' => $totalQuery->count('distinct(schedules.id)'),
 		]);
     }
 }
