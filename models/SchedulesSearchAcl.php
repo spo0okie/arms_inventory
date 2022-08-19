@@ -58,19 +58,15 @@ class SchedulesSearchAcl extends Schedules
 
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-			'totalCount' => $query->count('distinct(schedules.id)'),
-			'pagination' => ['pageSize' => 1000,],
-
-		]);
-
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
+			$totalQuery=clone $query;
+            return new ActiveDataProvider([
+				'query' => $query,
+				'totalCount' => $query->count('distinct(schedules.id)'),
+				'pagination' => ['pageSize' => 1000,],
+			]);
         }
         
 
@@ -95,6 +91,7 @@ class SchedulesSearchAcl extends Schedules
 		return new ActiveDataProvider([
 			'query' => $query,
 			'totalCount' => $totalQuery->count('distinct(schedules.id)'),
+			'pagination' => ['pageSize' => 1000,],
 		]);
     }
 }
