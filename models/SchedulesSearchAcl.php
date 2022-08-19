@@ -14,6 +14,8 @@ class SchedulesSearchAcl extends Schedules
 	
 	public $objects;
 	public $resources;
+	public $aclPartners;
+	public $accessTypes;
 	
     /**
      * {@inheritdoc}
@@ -22,7 +24,7 @@ class SchedulesSearchAcl extends Schedules
     {
         return [
             [['id'], 'integer'],
-            [['name', 'comment', 'created_at','objects','resources'], 'safe'],
+            [['name', 'comment', 'created_at','objects','resources','aclPartners','accessTypes'], 'safe'],
         ];
     }
 
@@ -47,8 +49,9 @@ class SchedulesSearchAcl extends Schedules
         $query = Schedules::find()
 		->joinWith([
 			'acls.aces.comps',
-			'acls.aces.users',
+			'acls.aces.users.org',
 			'acls.aces.netIps',
+			'acls.aces.accessTypes',
 			'acls.comp',
 			'acls.tech',
 			'acls.service',
@@ -68,9 +71,13 @@ class SchedulesSearchAcl extends Schedules
 				'pagination' => ['pageSize' => 1000,],
 			]);
         }
-        
+	
+	
+		$query->andFilterWhere(['or like', 'CONCAT(schedules.name,schedules.description,schedules.history)', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
+	
+		$query->andFilterWhere(['or like', 'CONCAT(partners.bname," ",partners.uname)', \yii\helpers\StringHelper::explode($this->aclPartners,'|',true,true)]);
 
-        $query->andFilterWhere(['or like', 'CONCAT(schedules.name,schedules.description,schedules.history)', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
+		$query->andFilterWhere(['or like', 'access_types.name', \yii\helpers\StringHelper::explode($this->accessTypes,'|',true,true)]);
 	
 		$query->andFilterWhere(['or',
 			['or like', 'comps_objects.name', \yii\helpers\StringHelper::explode($this->objects,'|',true,true)],

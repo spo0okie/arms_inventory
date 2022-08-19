@@ -18,12 +18,14 @@ use Yii;
  * @property string $notepad
  * @property string sname
  *
- * @property \app\models\Schedules	$schedule
- * @property \app\models\Comps		$comp
- * @property \app\models\Techs		$tech
- * @property \app\models\NetIps		$ip
- * @property \app\models\Services	$service
- * @property \app\models\Aces[]		$aces
+ * @property Schedules	$schedule
+ * @property Comps		$comp
+ * @property Techs		$tech
+ * @property NetIps		$ip
+ * @property Services	$service
+ * @property Aces[]		$aces
+ * @property AccessTypes[] $accessTypes
+ * @property Partners[] $partners
  */
 class Acls extends \yii\db\ActiveRecord
 {
@@ -119,6 +121,24 @@ class Acls extends \yii\db\ActiveRecord
 			return $this->ip->sname;
 		
 		return static::$emptyComment;
+	}
+	
+	public function getPartners() {
+		if (!is_array($this->aces)) return [];
+		$partners=[];
+		foreach ($this->aces as $ace) {
+			$partners=\app\helpers\ArrayHelper::recursiveOverride($partners,$ace->partners);
+		}
+		return $partners;
+	}
+	
+	public function getAccessTypes() {
+		if (!is_array($this->aces)) return [];
+		$types=[];
+		foreach ($this->aces as $ace) {
+			$types=\app\helpers\ArrayHelper::recursiveOverride($types,$ace->accessTypesUniq);
+		}
+		return $types;
 	}
 	
 	public function getSchedule() {

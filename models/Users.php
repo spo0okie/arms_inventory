@@ -12,6 +12,7 @@ use Yii;
  * @property string $Orgtx Подразделение
  * @property string $Doljnost Должность
  * @property string $Ename Полное имя
+ * @property int $org_id Организация
  * @property int $Persg Тип трудоустройства
  * @property int $Uvolen Уволен
  * @property string $Login Логин (AD)
@@ -44,6 +45,7 @@ use Yii;
  * @property LicGroups[] $licGroups
  * @property LicItems[] $licItems
  * @property LicKeys[] $licKeys
+ * @property Partners $org
  */
 class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {

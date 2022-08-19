@@ -52,7 +52,6 @@ class ArmsController extends Controller
         $searchModel = new ArmsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 	    
-        $this->view->params['layout-container'] = 'container-fluid';
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,

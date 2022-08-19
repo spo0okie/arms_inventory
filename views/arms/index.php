@@ -12,6 +12,7 @@ use app\components\DynaGridWidget;
 
 $this->title = \app\models\Arms::$titles;
 $this->params['breadcrumbs'][] = $this->title;
+$this->params['layout-container'] = 'container-fluid';
 $renderer = $this;
 ?>
 <div class="arms-index">

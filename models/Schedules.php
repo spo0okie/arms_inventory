@@ -31,6 +31,8 @@ use yii\data\ArrayDataProvider;
  * @property Services[] $providingServices
  * @property Services[] $supportServices
  * @property Acls[] $acls
+ * @property AccessTypes[] $accessTypes
+ * @property Partners[] $aclPartners
  * @property Schedules $parent
  * @property Schedules $base
  * @property Schedules $overriding
@@ -39,7 +41,7 @@ use yii\data\ArrayDataProvider;
  * @property SchedulesEntries $periods
  * @property ArrayDataProvider $WeekDataProvider
  */
-class Schedules extends \yii\db\ActiveRecord
+class Schedules extends ArmsModel
 {
 	
 	public static $titles = 'Расписания';
@@ -146,37 +148,59 @@ class Schedules extends \yii\db\ActiveRecord
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
 			'id' => 'ID',
-			'parent_id' => 'Исходное расписание',
-			'name' => 'Наименование',
-			'defaultItemSchedule' => 'Расписание на день',
-			'description' => 'Пояснение',
-			'history' => 'Заметки',
+			'parent_id' => [
+				'Исходное расписание',
+				'hint'=>'Если указать, то расписание будет повторять исходное, а внесенные дни будут правками поверх исходного. (т.е. в текущее расписание надо будет вносить только отличия от исходного)',
+			],
+			'name' => [
+				'name' => 'Как-то надо назвать это расписание',
+				'Наименование'
+			],
+			'defaultItemSchedule' => [
+				'Расписание на день',
+				'hint' => 'Позже можно будет уточнить дни недели и отдельные даты',
+			],
+			'description' => [
+				'Пояснение',
+				'hint' => 'Пояснение выводится в списке расписаний',
+			],
+			'history' => [
+				'Заметки',
+				'hint' => 'В списке расписаний не видны. Чтобы прочитать надо будет проваливаться в расписание',
+			],
 			'start_date'=>'Дата начала',
 			'end_date'=>'Дата окончания',
-			'resources' => 'Ресурсы', //для ACLs
-			'objects' => 'Субъекты', //для ACLs
+			'resources' => [
+				'Ресурсы', //для ACLs
+				'indexHint' => 'Все ресурсы к которым предоставляется доступ.<br>'.
+					'Поиск по этому полю ведется без учета к какому ресурсу какой доступ'.
+					static::searchableOrHint
+			],
+			'objects' => [
+				'Субъекты', //для ACLs
+				'indexHint' => 'Все субъекты которым предоставляется доступ.<br>'.
+					'Поиск по этому полю ведется без учета кому какой доступ'.
+					static::searchableOrHint
+			],
+			'aclPartners' => [
+				'Контрагенты', //для ACLs
+				'indexHint' => 'Контрагенты, сотрудниками которых являются пользователи-субъекты доступа.'.
+					'Можно искать как по юр. названию так и по названию бренда'.
+					static::searchableOrHint
+			],
+			'accessTypes' => [
+				'Тип доступа', //для ACLs
+				'indexHint' => 'Все типы доступа к ресурсам, которые присутствуют в этом временном доступе'.
+					static::searchableOrHint
+			],
 			'accessPeriods' => 'Активность доступа', //для ACLs
 		];
 	}
 	
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'ID',
-			'parent_id' => 'Если указать, то расписание будет повторять исходное, а внесенные дни будут правками поверх исходного. (т.е. в текущее расписание надо будет вносить только отличия от исходного)',
-			'name' => 'Как-то надо назвать это расписание',
-			'defaultItemSchedule' => 'Позже можно будет уточнить дни недели и отдельные даты',
-			'description' => 'Пояснение выводится в списке расписаний',
-			'history' => 'В списке расписаний не видны. Чтобы прочитать надо будет проваливаться в расписание',
-		];
-	}
 	
 	/**
 	 * Проверяем петлю по связи потомок-предок заполняя цепочку $children рекурсивно добавляя туда предков
@@ -522,6 +546,25 @@ class Schedules extends \yii\db\ActiveRecord
 	{
 		return $this->hasMany(Acls::className(), ['schedules_id' => 'id']);
 	}
+	
+	public function getAclPartners() {
+		if (!is_array($this->acls)) return [];
+		$partners=[];
+		foreach ($this->acls as $acl) {
+			$partners=\app\helpers\ArrayHelper::recursiveOverride($partners,$acl->partners);
+		}
+		return $partners;
+	}
+	
+	public function getAccessTypes() {
+		if (!is_array($this->acls)) return [];
+		$types=[];
+		foreach ($this->acls as $acl) {
+			$types=\app\helpers\ArrayHelper::recursiveOverride($types,$acl->accessTypes);
+		}
+		return $types;
+	}
+	
 	
 	/**
 	 * @return \yii\db\ActiveQuery

@@ -20,6 +20,8 @@ use yii\web\User;
  * @property Comps[]	$comps
  * @property NetIps[]	$netIps
  * @property AccessTypes[] $accessTypes
+ * @property AccessTypes[] $accessTypesUniq
+ * @property Partners[] $partners
  * @property int[]	$netIps_ids
  * @property int[]	$comps_ids
  * @property int[]	$users_ids
@@ -165,7 +167,7 @@ class Aces extends ArmsModel
 	}
 	
 	/**
-	 * Привязанные пользователи
+	 * Типы доступа
 	 */
 	public function getAccessTypes()
 	{
@@ -173,6 +175,25 @@ class Aces extends ArmsModel
 			->viaTable('{{%access_in_aces}}', ['aces_id' => 'id']);
 	}
 	
+	/**
+	 * Типы доступа
+	 */
+	public function getAccessTypesUniq()
+	{
+		if (!is_array($this->accessTypes)) return[];
+		$types=[];
+		foreach ($this->accessTypes as $type)
+			$types[$type->id]=$type;
+		return $types;
+	}
+
+	public function getPartners() {
+		if (!count($this->users_ids)) return [];
+		$partners=[];
+		foreach ($this->users as $user)
+			$partners[$user->org_id]=$user->org;
+		return $partners;
+	}
 	
 	/**
 	 * Возвращает список всех элементов
