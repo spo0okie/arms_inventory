@@ -64,7 +64,7 @@ class SchedulesSearchAcl extends Schedules
 			$totalQuery=clone $query;
             return new ActiveDataProvider([
 				'query' => $query,
-				'totalCount' => $query->count('distinct(schedules.id)'),
+				'totalCount' => $totalQuery->count('distinct(schedules.id)'),
 				'pagination' => ['pageSize' => 1000,],
 			]);
         }
