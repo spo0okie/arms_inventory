@@ -19,7 +19,9 @@ $renderer=$this;
 		'header' => Html::encode($this->title),
 		'columns' => require 'columns-acl.php',
 		'defaultOrder' => [
+			'aclPartners',
 			'objects',
+			'accessTypes',
 			'resources',
 			'name',
 			'accessPeriods',

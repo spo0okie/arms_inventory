@@ -59,10 +59,14 @@ return [
 			$output=[];
 			if (is_array($periods=$data->findPeriods(null,null)) && count($periods))
 				foreach ($periods as $period) {
-					$output[]=
-						'<span title="'.Yii::$app->formatter->asNtext($period->comment).'" class="text-nowrap">'.
-						str_replace(' ','&nbsp;',$period->periodSchedule).
-						'</span>';
+					$output[]=Html::tag(
+						'span',
+						str_replace(' ','&nbsp;',$period->periodSchedule),
+						[
+							'title'=>Yii::$app->formatter->asNtext($period->comment),
+							'class'=>"text-nowrap p-1 ".($period->is_work?"bg-success":"bg-danger")
+						]
+					);
 				}
 			return implode('<br />',$output);
 		},
@@ -72,7 +76,7 @@ return [
 			 */
 			$working=$data->isWorkTime( date('Y-m-d'),date('H:i:s'));
 			return [
-				'class'=>$working?'table-success':'table-danger',
+				'class'=>$working?'border-success border-2':'border-danger border-2',
 			];
 		}
 	],
