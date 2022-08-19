@@ -53,6 +53,13 @@ class Schedules extends ArmsModel
 	const SCENARIO_OVERRIDE = 'scenario_override';
 	const SCENARIO_ACL = 'scenario_acl';
 	
+	public function scenarios()
+	{
+		$scenarios = parent::scenarios();
+		$scenarios[self::SCENARIO_OVERRIDE] = $scenarios[self::SCENARIO_DEFAULT];
+		$scenarios[self::SCENARIO_ACL] = $scenarios[self::SCENARIO_DEFAULT];;
+		return $scenarios;
+	}
 	
 	public static $dictionary=[
 		'usage'=>[
