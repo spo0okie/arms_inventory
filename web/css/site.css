@@ -708,7 +708,14 @@ td.contracts-total-column {text-align: right}
 
 .ttip-card h4 {
     font-size: 11px;
-    font-weight: bold;
+    font-weight: bolder;
+    padding: 0;
+    margin: 0;
+}
+
+.ttip-card h5 {
+    font-size: 11px;
+    font-weight: 550;
     padding: 0;
     margin: 0;
 }
