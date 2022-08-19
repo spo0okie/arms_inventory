@@ -61,6 +61,8 @@ class SchedulesSearchAcl extends Schedules
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
 			'totalCount' => $query->count('distinct(schedules.id)'),
+			'pagination' => ['pageSize' => 1000,],
+
 		]);
 
         $this->load($params);
@@ -70,12 +72,7 @@ class SchedulesSearchAcl extends Schedules
             // $query->where('0=1');
             return $dataProvider;
         }
-
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            //'created_at' => $this->created_at,
-        ]);
+        
 
         $query->andFilterWhere(['or like', 'CONCAT(schedules.name,schedules.description,schedules.history)', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
 	
