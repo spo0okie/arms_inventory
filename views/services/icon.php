@@ -12,7 +12,7 @@ if (is_object($model)) {
 	//выбираем иконку
 	if ($model->is_service) {
 		$icon=$model->is_end_user?
-			'<span class="fas fa-user service-icon" title="'.\app\models\Services::$user_service_title.'"></span>':
+			'<span class="fas fa-users-cog service-icon" title="'.\app\models\Services::$user_service_title.'"></span>':
 			'<span class="fas fa-cog service-icon" title="'.\app\models\Services::$tech_service_title.'"></span>';
 	} else {
 		if (count($model->orgInets))
