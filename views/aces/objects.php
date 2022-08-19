@@ -7,6 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model app\models\Aces */
 
 if (!isset($glue)) $glue=' <br /> ';
+if (!isset($empty)) $empty='- не задано -';
 $items=[];
 
 
@@ -19,7 +20,7 @@ foreach ($model->comps as $comp)
 foreach ($model->netIps as $ip)
 	$items[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true]);
 
-if (!count($items))
-	$items[]='- не задано -';
+if (!count($items) && $empty)
+	$items[]=$empty;
 
 echo implode($glue,$items);
