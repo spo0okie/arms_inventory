@@ -126,7 +126,7 @@ return [
 			 */
 			$items=[];
 			if (count($data->aclSites)) foreach ($data->aclSites as $site) {
-				$items[]=$this->render('/places/item',['model'=>$site,'static_view'=>true]);
+				$items[]=$this->render('/places/item',['model'=>$site,'static_view'=>true,'short'=>true]);
 			}
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);
