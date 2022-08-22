@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "net_domains".
@@ -11,6 +12,7 @@ use Yii;
  * @property string $name
  * @property string $comment
  * @property int $tech_id
+ * @property Places $place
  */
 class NetDomains extends \yii\db\ActiveRecord
 {
@@ -31,6 +33,7 @@ class NetDomains extends \yii\db\ActiveRecord
     {
         return [
 			[['name'], 'string', 'max' => 255],
+			[['places_id'],'integer'],
 			[['comment'], 'safe'],
         ];
     }
@@ -43,6 +46,7 @@ class NetDomains extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
 			'name' => 'Название домена',
+			'places_id' => 'Помещение',
 			'comment' => 'Пояснение',
         ];
     }
@@ -56,9 +60,18 @@ class NetDomains extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'name' => 'Пояснение чем объединены сети входящие в этот домен',
 			'comment' => 'Все что нужно знать об этом домене, но что не ясно из названия',
+			'places_id' => 'Помещение/площадка где локализован этот L2 Домен',
 		];
 	}
 	
+	/**
+	 * Place
+	 * @return Networks|ActiveQuery
+	 */
+	public function getPlaces()
+	{
+		return static::hasOne(Places::class, ['id' => 'places_id']);
+	}
 	
 	/**
 	 * Возвращает список всех доменов

@@ -47,7 +47,8 @@ use yii\validators\IpValidator;
  * @property Services[] $services
  * @property Ports[] $ports
  * @property MaterialsUsages[] $materialsUsages
- * @property \app\models\NetIps[] $netIps
+ * @property NetIps[] $netIps
+ * @property Segments[] $segments
  * @property Acls[] $acls
  *
  * @property int $scans_id Картинка - предпросмотр
@@ -441,6 +442,15 @@ class Techs extends \yii\db\ActiveRecord
 	}
 	
 	
+	public function getSegments() {
+		$segments=[];
+		foreach ($this->netIps as $ip)
+			if (is_object($ip)){
+				if (is_object($segment=$ip->segment))
+					$segments[$segment->id]=$segment;
+			}
+		return $segments;
+	}
 	
 	
 	/**

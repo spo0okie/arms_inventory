@@ -16,6 +16,8 @@ class SchedulesSearchAcl extends Schedules
 	public $resources;
 	public $aclPartners;
 	public $accessTypes;
+	public $acePartners;
+	public $aceDepartments;
 	
     /**
      * {@inheritdoc}
@@ -24,7 +26,7 @@ class SchedulesSearchAcl extends Schedules
     {
         return [
             [['id'], 'integer'],
-            [['name', 'comment', 'created_at','objects','resources','aclPartners','accessTypes'], 'safe'],
+            [['name', 'comment', 'created_at','objects','resources','aclPartners','accessTypes','acePartners','aceDepartments'], 'safe'],
         ];
     }
 
@@ -50,6 +52,7 @@ class SchedulesSearchAcl extends Schedules
 		->joinWith([
 			'acls.aces.comps',
 			'acls.aces.users.org',
+			'acls.aces.users.orgStruct',
 			'acls.aces.netIps',
 			'acls.aces.accessTypes',
 			'acls.comp',
@@ -75,7 +78,9 @@ class SchedulesSearchAcl extends Schedules
 	
 		$query->andFilterWhere(['or like', 'CONCAT(schedules.name,schedules.description,schedules.history)', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
 	
-		$query->andFilterWhere(['or like', 'CONCAT(partners.bname," ",partners.uname)', \yii\helpers\StringHelper::explode($this->aclPartners,'|',true,true)]);
+		$query->andFilterWhere(['or like', 'CONCAT(partners.bname," ",partners.uname)', \yii\helpers\StringHelper::explode($this->acePartners,'|',true,true)]);
+		
+		$query->andFilterWhere(['or like', 'org_struct.name', \yii\helpers\StringHelper::explode($this->aceDepartments,'|',true,true)]);
 
 		$query->andFilterWhere(['or like', 'access_types.name', \yii\helpers\StringHelper::explode($this->accessTypes,'|',true,true)]);
 	
@@ -85,7 +90,7 @@ class SchedulesSearchAcl extends Schedules
 			['or like', 'aces.ips', \yii\helpers\StringHelper::explode($this->objects,'|',true,true)],
 			['or like', 'aces.comment', \yii\helpers\StringHelper::explode($this->objects,'|',true,true)],
 		]);
-
+	
 		$query->andFilterWhere(['or',
 			['or like', 'comps_resources.name', \yii\helpers\StringHelper::explode($this->resources,'|',true,true)],
 			['or like', 'services_resources.name', \yii\helpers\StringHelper::explode($this->resources,'|',true,true)],

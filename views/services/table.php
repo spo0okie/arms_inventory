@@ -19,6 +19,7 @@ $totalSegments=[];
 $totalSupport=[];
 $totalComps=[];
 $totalTechs=[];
+
 foreach ($dataProvider->models as $model) {
 	/* @var $model \app\models\Services */
 	
@@ -36,6 +37,7 @@ foreach ($dataProvider->models as $model) {
 	if (is_array($model->comps))
 		foreach ($model->comps as $comp) if (!isset($totalComps[$comp->id]))
 			$totalComps[$comp->id]=$renderer->render('/comps/item', ['model' => $comp,'short'=>true]);
+
 	if (is_array($model->techs))
 		foreach ($model->techs as $tech) if (!isset($totalTechs[$tech->id]))
 		$totalTechs[$tech->id]=$renderer->render('/techs/item', ['model' => $tech,'short'=>true]);

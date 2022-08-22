@@ -13,6 +13,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 	 * @return mixed
 	 */
 	public static function recursiveOverride($default,$custom) {
+		if (is_null($custom)) return $default;
 		foreach ($custom as $key=>$value) {
 			if (!isset($default[$key]))
 				$default[$key]=$value;

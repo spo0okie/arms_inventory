@@ -32,6 +32,7 @@ use yii\db\Expression;
  * @property NetDomains $netDomain
  * @property Segments $segment
  * @property NetIps[] $ips
+ * @property Places $place
  */
 class Networks extends \yii\db\ActiveRecord
 {
@@ -116,6 +117,12 @@ class Networks extends \yii\db\ActiveRecord
 			'text_dhcp' => 'Кто является DHCP сервером (опционально)',
 			'comment' => 'Все что нужно знать про сеть сверх того, что уже внесено выше',
 		];
+	}
+	
+	public function getPlace()
+	{
+		if (!is_object($this->netDomain)) return null;
+		return $this->netDomain->place;
 	}
 	
 	/**

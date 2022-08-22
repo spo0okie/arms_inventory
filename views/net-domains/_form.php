@@ -13,7 +13,16 @@ if (!isset($modalParent)) $modalParent=null;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+		</div>
+		<div class="col-md-6">
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'places_id',[
+				'data'=>\app\models\Places::fetchNames()
+			]) ?>
+		</div>
+	</div>
 
     <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
 

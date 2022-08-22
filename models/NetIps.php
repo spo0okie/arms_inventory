@@ -26,8 +26,10 @@ use yii\db\Expression;
  * @property int[] $aces_ids
  * @property Techs[] $techs
  * @property Networks $network
+ * @property Segments $segment
  * @property Acls[] $acls
  * @property Aces[] $aces
+ * @property Places $place
  */
 class NetIps extends \yii\db\ActiveRecord
 {
@@ -137,6 +139,11 @@ class NetIps extends \yii\db\ActiveRecord
 		return static::hasOne(Networks::className(), ['id' => 'networks_id']);
 	}
 	
+	public function getSegment()
+	{
+		if (is_object($this->network)) return $this->network->segment;
+	}
+	
 	/**
 	 * Network
 	 * @return Networks|array|ActiveRecord
@@ -190,6 +197,11 @@ class NetIps extends \yii\db\ActiveRecord
 		return $this->hasMany(Acls::className(), ['ips_id' => 'id']);
 	}
 	
+	public function getPlace()
+	{
+		if (!is_object($this->network)) return null;
+		return $this->network->place;
+	}
 	
 	
 	/**

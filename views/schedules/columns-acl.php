@@ -80,14 +80,53 @@ return [
 			];
 		}
 	],
-	'aclPartners'=>[
+	'acePartners'=>[
 		'value'=>function($data) use ($renderer) {
 			/**
 			 * @var $data \app\models\Schedules
 			 */
 			$items=[];
-			if (count($data->aclPartners)) foreach ($data->aclPartners as $partner) {
+			if (count($data->acePartners)) foreach ($data->acePartners as $partner) {
 				$items[]=$this->render('/partners/item',['model'=>$partner,'static_view'=>true]);
+			}
+			ksort($items,SORT_STRING);
+			return implode('<br />',$items);
+		}
+	],
+	'aclSegments'=>[
+		'value'=>function($data) use ($renderer) {
+			/**
+			 * @var $data \app\models\Schedules
+			 */
+			$items=[];
+			if (count($data->aclSegments)) foreach ($data->aclSegments as $segment) {
+				$items[]=$this->render('/segments/item',['model'=>$segment,'static_view'=>true]);
+			}
+			ksort($items,SORT_STRING);
+			return implode('<br />',$items);
+		}
+	],
+	'aceDepartments'=>[
+		'value'=>function($data) {
+			/**
+			 * @var $data \app\models\Schedules
+			 */
+			$items=[];
+			if (count($data->aceDepartments)) foreach ($data->aceDepartments as $department) {
+				$items[]=$this->render('/org-struct/item',['model'=>$department,'static_view'=>true]);
+			}
+			ksort($items,SORT_STRING);
+			return implode('<br />',$items);
+		}
+	],
+	'aclSites'=>[
+		'value'=>function($data) use ($renderer) {
+			/**
+			 * @var $data \app\models\Schedules
+			 */
+			$items=[];
+			if (count($data->aclSites)) foreach ($data->aclSites as $site) {
+				$items[]=$this->render('/places/item',['model'=>$site,'static_view'=>true]);
 			}
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);

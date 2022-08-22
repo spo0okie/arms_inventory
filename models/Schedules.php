@@ -32,7 +32,9 @@ use yii\data\ArrayDataProvider;
  * @property Services[] $supportServices
  * @property Acls[] $acls
  * @property AccessTypes[] $accessTypes
- * @property Partners[] $aclPartners
+ * @property Partners[] $acePartners
+ * @property OrgStruct[] $aceDepartments
+ * @property Places[] $aclSites
  * @property Schedules $parent
  * @property Schedules $base
  * @property Schedules $overriding
@@ -193,11 +195,27 @@ class Schedules extends ArmsModel
 					'Поиск по этому полю ведется без учета кому какой доступ'.
 					static::searchableOrHint
 			],
-			'aclPartners' => [
+			'acePartners' => [
 				'Контрагенты', //для ACLs
-				'indexHint' => 'Контрагенты, сотрудниками которых являются пользователи-субъекты доступа.'.
+				'indexHint' => 'Контрагенты, которым предоставляется доступ.<br>'.
+					'(определяются на основании трудоустройства пользователей, которым предоставлен доступ).<br>',
 					'Можно искать как по юр. названию так и по названию бренда'.
 					static::searchableOrHint
+			],
+			'aceDepartments' => [
+				'Подразделения', //для ACLs
+				'indexHint' => 'Подразделения, в которые входят сотрудники, которым предоставлен доступ.',
+					//static::searchableOrHint
+			],
+			'aclSites' => [
+				'Площадки', //для ACLs
+				'indexHint' => 'Площадки, на которых расположены ресурсы, к которым предоставляется доступ'
+				//static::searchableOrHint
+			],
+			'aclSegments' => [
+				'Сегменты', //для ACLs
+				'indexHint' => 'Сегменты ИТ инфраструктуры, в которых расположены ресурсы, к которым предоставляется доступ'
+				//static::searchableOrHint
 			],
 			'accessTypes' => [
 				'Тип доступа', //для ACLs
@@ -554,13 +572,50 @@ class Schedules extends ArmsModel
 		return $this->hasMany(Acls::className(), ['schedules_id' => 'id']);
 	}
 	
-	public function getAclPartners() {
+	public function getAcePartners() {
 		if (!is_array($this->acls)) return [];
 		$partners=[];
 		foreach ($this->acls as $acl) {
 			$partners=\app\helpers\ArrayHelper::recursiveOverride($partners,$acl->partners);
 		}
 		return $partners;
+	}
+	
+	public function getAclSegments() {
+		if (!is_array($this->acls)) return [];
+		$segments=[];
+		foreach ($this->acls as $acl) {
+			$segments=\app\helpers\ArrayHelper::recursiveOverride(
+			//$segments=array_merge_recursive(
+				$segments,
+				\app\helpers\ArrayHelper::index($acl->segments,'id')
+			);
+		}
+		return $segments;
+	}
+	
+	public function getAclSites() {
+		if (!is_array($this->acls)) return [];
+		$sites=[];
+		foreach ($this->acls as $acl) {
+			$sites=\app\helpers\ArrayHelper::recursiveOverride(
+				$sites,
+				\app\helpers\ArrayHelper::index($acl->sites,'id')
+			);
+		}
+		return $sites;
+	}
+	
+	public function getAceDepartments() {
+		if (!is_array($this->acls)) return [];
+		$departments=[];
+		foreach ($this->acls as $acl) {
+			$departments=\app\helpers\ArrayHelper::recursiveOverride(
+				$departments,
+				$acl->departments
+			);
+		}
+		return $departments;
 	}
 	
 	public function getAccessTypes() {

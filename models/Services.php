@@ -52,12 +52,15 @@ use yii\web\User;
  * @property \app\models\Techs[] $techsRecursive
  * @property \app\models\Arms[] $arms
  * @property \app\models\Arms[] $armsRecursive
- * @property \app\models\Places[] $armPlaces
- * @property \app\models\Places[] $techPlaces
- * @property \app\models\Places[] $sites
- * @property \app\models\Places[] $sitesRecursive
- * @property \app\models\Services $parent
- * @property \app\models\Services[] $children
+ * @property Places $place
+ * @property Places[] $armPlaces
+ * @property Places[] $techPlaces
+ * @property Places[] $phonesPlaces
+ * @property Places[] $inetsPlaces
+ * @property Places[] $sites
+ * @property Places[] $sitesRecursive
+ * @property Services $parent
+ * @property Services[] $children
  * @property Schedules $providingSchedule
  * @property Schedules $providingScheduleRecursive
  * @property Users $responsible
@@ -94,9 +97,6 @@ class Services extends \yii\db\ActiveRecord
 	private $responsibleRecursiveCache=null;
 	private $providingScheduleRecursiveCache=null;
 	private $supportScheduleRecursiveCache=null;
-	private $armsRecursiveCache=null;
-	private $techsRecursiveCache=null;
-	private $placesRecursiveCache=null;
 	private $sitesRecursiveCache=null;
 	private $sumTotalsCache=null;
 	private $sumChargeCache=null;
@@ -438,24 +438,6 @@ class Services extends \yii\db\ActiveRecord
 	/**
 	 * Возвращает серверы на которых живет этот сервис
 	 */
-	public function getComps()
-	{
-		return static::hasMany(Comps::className(), ['id' => 'comps_id'])
-			->viaTable('{{%comps_in_services}}', ['services_id' => 'id']);
-	}
-	
-	public function getArmsRecursive()
-	{
-		if (is_array($this->armsRecursiveCache)) return $this->armsRecursiveCache;
-		$this->armsRecursiveCache=$this->getArms()->all();
-		if (is_object($this->parent)) {
-			array_push($this->armsRecursiveCache,$this->parent->armsRecursive);
-		}
-	}
-	
-	/**
-	 * Возвращает серверы на которых живет этот сервис
-	 */
 	public function getTechs()
 	{
 		return static::hasMany(Techs::className(), ['id' => 'tech_id'])
@@ -470,34 +452,75 @@ class Services extends \yii\db\ActiveRecord
 		return static::hasOne(UserGroups::className(), ['id' => 'user_group_id']);
 	}
 	
+	/**
+	 * Возвращает серверы на которых живет этот сервис
+	 */
+	public function getComps()
+	{
+		return static::hasMany(Comps::class, ['id' => 'comps_id'])
+			->from(['svc_comps'=>Comps::tableName()])
+			->viaTable('{{%comps_in_services}}', ['services_id' => 'id']);
+	}
+	
 	public function getArms()
 	{
-		return static::hasMany(Arms::className(), ['id' => 'arm_id'])
+		return static::hasMany(Arms::class, ['id' => 'arm_id'])
+			->from(['svc_arms'=>Arms::tableName()])
 			->via('comps');
+	}
+	
+	public function getPlace()
+	{
+		return static::hasOne(Places::className(), ['id' => 'places_id']);
 	}
 	
 	public function getArmPlaces()
 	{
 		return static::hasMany(Places::className(), ['id' => 'places_id'])
-			->from(['arms_places'=>Places::tableName()])
+			->from(['places_in_svc_arms'=>Places::tableName()])
 			->via('arms');
 	}
 	
 	public function getTechPlaces()
 	{
 		return static::hasMany(Places::className(), ['id' => 'places_id'])
-			->from(['tech_places'=>Places::tableName()])
+			->from(['places_in_svc_techs'=>Places::tableName()])
 			->via('techs');
+	}
+	
+	public function getInetsPlaces()
+	{
+		return static::hasMany(Places::className(), ['id' => 'places_id'])
+			->from(['places_in_svc_inets'=>Places::tableName()])
+			->via('orgInets');
+	}
+	
+	public function getPhonesPlaces()
+	{
+		return static::hasMany(Places::className(), ['id' => 'places_id'])
+			->from(['places_in_svc_phones'=>Places::tableName()])
+			->via('orgPhones');
+	}
+	
+	public function getPlaces() {
+		$places=[];
+		foreach (array_merge($this->techPlaces,$this->armPlaces,$this->phonesPlaces,$this->inetsPlaces) as $place)
+			$places[$place->id]=$place;
+		return $places;
 	}
 	
 	public function getSites(){
 		$sites=[];
-		foreach (array_merge($this->techPlaces,$this->armPlaces) as $place) {
+		if (is_object($place=$this->place)) {
+			$site = $place->top;
+			$sites[$site->id] = $site;
+		}
+		//foreach ($this->armPlaces as $place) {
+		foreach ($this->places as $place) {
 			$site=$place->top;
-			if (!array_key_exists($site->id,$sites))
 				$sites[$site->id]=$site;
 		}
-		return array_values($sites);
+		return $sites;
 	}
 
 	public function getSitesRecursive(){
@@ -509,7 +532,7 @@ class Services extends \yii\db\ActiveRecord
 			foreach ($service->sitesRecursive as $site)
 				$sites[$site->id]=$site;
 		
-		return $this->sitesRecursiveCache = array_values($sites);
+		return $this->sitesRecursiveCache = $sites;
 	}
 	
 	public function getSumTotals()

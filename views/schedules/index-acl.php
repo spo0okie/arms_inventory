@@ -19,7 +19,7 @@ $renderer=$this;
 		'header' => Html::encode($this->title),
 		'columns' => require 'columns-acl.php',
 		'defaultOrder' => [
-			'aclPartners',
+			'acePartners',
 			'objects',
 			'accessTypes',
 			'resources',

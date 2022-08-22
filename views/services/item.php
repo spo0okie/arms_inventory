@@ -13,10 +13,13 @@ if (is_object($model)) {
 	$icon=$this->render('icon',compact('model'));
 	
 	$name=$model->name;
+	//если в имени сервиса есть имя сайта (Телефония - челябинск)
+	//и у сервиса всего один сайт и как раз этот
+	//убираем имя сайта из имени сервиса
 	if (!empty($crop_site)) {
 		// вырезаем имя площадки из имени
 		if (count($model->sites)==1) {
-			$site=$model->sites[0];
+			$site=array_values($model->sites)[0];
 			$cropped=false;
 			//ищем полное имя
 			$pos_full=mb_strpos($name,$site->name);

@@ -48,6 +48,7 @@ use Yii;
  * @property \app\models\LoginJournal[] $lastThreeLogins
  * @property \app\models\LoginJournal[] $logins
  * @property \app\models\NetIps[] $netIps
+ * @property Segments[] $segments
  * @property \app\models\HwList $hwList
  * @property \app\models\SwList $swList
  * @property \app\models\Services $services
@@ -389,6 +390,16 @@ class Comps extends ArmsModel
 		$this->ip_cache=array_unique($this->ip_cache);
 		return $this->ip_cache;
 	}
+	
+	public function getSegments() {
+		$segments=[];
+		foreach ($this->filteredIps as $ip)
+			if (is_object($ip)){;
+				if (is_object($segment=$ip->segment))
+					$segments[$segment->id]=$segment;
+			}
+		return $segments;
+	}
 
 	//фильтр наложенный пользователем
 	public function getIgnoredIps() {
@@ -455,7 +466,7 @@ class Comps extends ArmsModel
 		if (is_object($this->user)) return $this->user;
 		
 		if (is_array($this->services) && count($this->services)) {
-			$responsibles=[];
+			$persons=[];
 			$rating=[];
 			foreach ($this->services as $service) {
 				/**
@@ -466,12 +477,12 @@ class Comps extends ArmsModel
 					$responsible_id=$responsible->id;
 					if (!isset($rating[$responsible_id])) {
 						$rating[$responsible_id]=$service->weight;
-						$responsibles[$responsible_id]=$responsible;
+						$persons[$responsible_id]=$responsible;
 					} else
 						$rating[$responsible_id]+=$service->weight;
 				}
 			}
-			if (count($rating)) return $responsibles[array_search(max($rating), $rating)];
+			if (count($rating)) return $persons[array_search(max($rating), $rating)];
 		}
 		return null;
 	}

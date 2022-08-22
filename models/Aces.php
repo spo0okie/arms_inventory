@@ -17,6 +17,8 @@ use yii\web\User;
  * @property string $sname
  * @property Acls	$acl
  * @property Users[]	$users
+ * @property Users[]	$usersUniq
+ * @property Departments[]	$departments
  * @property Comps[]	$comps
  * @property NetIps[]	$netIps
  * @property AccessTypes[] $accessTypes
@@ -186,7 +188,32 @@ class Aces extends ArmsModel
 			$types[$type->id]=$type;
 		return $types;
 	}
-
+	
+	/**
+	 * Набор пользователей
+	 */
+	public function getUsersUniq()
+	{
+		if (!is_array($this->users)) return[];
+		$users=[];
+		foreach ($this->users as $user)
+			$users[$user->id]=$user;
+		return $users;
+	}
+	
+	/**
+	 * Набор пользователей
+	 */
+	public function getDepartments()
+	{
+		if (!is_array($this->usersUniq)) return[];
+		$departments=[];
+		foreach ($this->usersUniq as $user)
+			if (is_object($department=$user->orgStruct))
+				$departments[$department->id]=$department;
+		return $departments;
+	}
+	
 	public function getPartners() {
 		if (!count($this->users_ids)) return [];
 		$partners=[];

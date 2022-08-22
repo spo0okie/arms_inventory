@@ -50,20 +50,22 @@ class ServicesSearch extends Services
     public function search($params)
     {
         $query = Services::find()
-			//->joinWith('techs')
-			//->with([])
+			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)')
 			->joinWith([
 				'support',
-				'comps.arm.place',
-				'techs.place',
+				'comps',
+				'arms',
+				'armPlaces',
+				'techPlaces',
+				'inetsPlaces',
+				'phonesPlaces',
 				'responsible',
 				'supportSchedule',
 				'providingSchedule',
 				'orgPhones',
 				'orgInets',
-			])
-			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)');
-	
+			],false);
+		
 		if ($this->parent_id===false) {
 			$query->andWhere(['services.parent_id'=>null]);
 		}
@@ -73,19 +75,17 @@ class ServicesSearch extends Services
 		}
 	
 
-		$dataProvider = new ActiveDataProvider([
-            'query' => $query,
-	        'totalCount' => $query->count('distinct(services.id)'),
-	        'pagination' => false,
-	        'sort'=> ['defaultOrder' => ['name'=>SORT_ASC]]
-        ]);
-	
         $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
-            return $dataProvider;
+            return new ActiveDataProvider([
+				'query' => $query,
+				'totalCount' => (clone $query)->count('distinct(services.id)'),
+				'pagination' => false,
+				'sort'=> ['defaultOrder' => ['name'=>SORT_ASC]]
+			]);
         }
         
         if ($this->directlySupported) {
@@ -116,8 +116,8 @@ class ServicesSearch extends Services
 			->andFilterWhere(['or like', 'support_schedule.name', \yii\helpers\StringHelper::explode($this->supportSchedule,'|',true,true)])
 	        ->andFilterWhere([
 	        	'or',
-		        ['or like', 'getplacepath(places.id)', \yii\helpers\StringHelper::explode($this->sites,'|',true,true)],
-		        ['or like', 'getplacepath(places_techs.id)', \yii\helpers\StringHelper::explode($this->sites,'|',true,true)]
+		        ['or like', 'getplacepath(places_in_svc_arms.id)', \yii\helpers\StringHelper::explode($this->sites,'|',true,true)],
+		        ['or like', 'getplacepath(places_in_svc_techs.id)', \yii\helpers\StringHelper::explode($this->sites,'|',true,true)]
 	        ])
             ->andFilterWhere(['like', 'notebook', \yii\helpers\StringHelper::explode($this->notebook,'|',true,true)])
 			->andFilterWhere([
@@ -134,11 +134,11 @@ class ServicesSearch extends Services
 			]);
 		
 		}
-	
+		/**/
 		return new ActiveDataProvider([
 			'query' => $query,
-			'totalCount' => $query->count('distinct(services.id)'),
-			'pagination' => ['pageSize' => 500,],
+			//'totalCount' => (clone $query)->count('distinct(services.id)'),
+			'pagination' => false,
 			'sort'=> ['defaultOrder' => ['name'=>SORT_ASC]]
 		]);
     }

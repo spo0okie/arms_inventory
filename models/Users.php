@@ -46,6 +46,7 @@ use Yii;
  * @property LicItems[] $licItems
  * @property LicKeys[] $licKeys
  * @property Partners $org
+ * @property OrgStruct $orgStruct
  */
 class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
