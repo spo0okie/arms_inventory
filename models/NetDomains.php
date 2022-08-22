@@ -68,7 +68,7 @@ class NetDomains extends \yii\db\ActiveRecord
 	 * Place
 	 * @return Networks|ActiveQuery
 	 */
-	public function getPlaces()
+	public function getPlace()
 	{
 		return static::hasOne(Places::class, ['id' => 'places_id']);
 	}
