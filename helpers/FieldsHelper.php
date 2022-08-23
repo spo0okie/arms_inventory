@@ -5,6 +5,7 @@ namespace app\helpers;
 
 
 use app\models\ArmsModel;
+use kartik\date\DatePicker;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 use yii\helpers\ArrayHelper;
@@ -12,6 +13,8 @@ use yii\helpers\ArrayHelper;
 
 class FieldsHelper
 {
+	
+	public const labelHintIcon='<i class="far fa-question-circle"></i>';
 	
 	/**
 	 * Формирует поля для options=>[] для всплывающей подсказки
@@ -29,6 +32,20 @@ class FieldsHelper
 		]:[];
 	}
 	
+	public static function cutSingleOption(&$options,$option,$default) {
+		if (!isset($options[$option])) return $default;
+		$result=$options[$option];
+		unset($options[$option]);
+		return $result;
+	}
+	
+	public static function cutHint(&$options) {
+		return static::cutSingleOption($options,'classicHint',false);
+	}
+	public static function cutHintOptions(&$options) {
+		return static::cutSingleOption($options,'classicHintOptions',[]);
+	}
+	
 	/**
 	 * @param ActiveForm $form
 	 * @param ArmsModel $model
@@ -37,6 +54,8 @@ class FieldsHelper
 	 * @return mixed
 	 */
 	public static function Select2Field($form,$model,$attr,$options=[]) {
+		$hint=static::cutHint($options);
+		$hintOptions=static::cutHintOptions($options);
 		return $form
 			->field($model, $attr)
 			->widget(Select2::classname(),\app\helpers\ArrayHelper::recursiveOverride([
@@ -49,13 +68,13 @@ class FieldsHelper
 				]
 			],$options)
 			)->label(
-				null,
+				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
 				static::toolTipOptions(
 					$model->getAttributeLabel($attr),
 					$model->getAttributeHint($attr)
 				)
 			)
-			->hint(false);
+			->hint($hint,$hintOptions);
 	}
 	
 	/**
@@ -66,6 +85,8 @@ class FieldsHelper
 	 * @return mixed
 	 */
 	public static function TextAutoresizeField($form,$model,$attr,$options=[]) {
+		$hint=static::cutHint($options);
+		$hintOptions=static::cutHintOptions($options);
 		$options=\app\helpers\ArrayHelper::recursiveOverride([
 			'lines'=>1
 		],$options);
@@ -78,13 +99,13 @@ class FieldsHelper
 		return $form->field($model, $attr)
 			->textarea(['rows' => max($lines, count(explode("\n", $model->$attr)))])
 			->label(
-				null,
+				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
 				static::toolTipOptions(
 					$model->getAttributeLabel($attr),
 					$model->getAttributeHint($attr)
 				)
 			)
-			->hint(false);
+			->hint($hint,$hintOptions);
 	}
 	
 	/**
@@ -95,20 +116,21 @@ class FieldsHelper
 	 * @return mixed
 	 */
 	public static function TextInputField($form,$model,$attr,$options=[]) {
+		$hint=static::cutHint($options);
+		$hintOptions=static::cutHintOptions($options);
 		return $form
 			->field($model, $attr)
 			->textInput(\app\helpers\ArrayHelper::recursiveOverride([
 				'maxlength'=>true
 			],$options))
 			->label(
-				null,
+				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
 				static::toolTipOptions(
 					$model->getAttributeLabel($attr),
 					$model->getAttributeHint($attr)
 				)
 			)
-			->hint(false);
-		
+			->hint($hint,$hintOptions);
 	}
 	
 	/**
@@ -119,6 +141,30 @@ class FieldsHelper
 	 * @return mixed
 	 */
 	public static function CheckboxField($form,$model,$attr,$options=[]) {
+		$hint=static::cutHint($options);
+		$hintOptions=static::cutHintOptions($options);
+		return $form
+			->field($model, $attr)->checkbox()
+			->label(
+				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
+				static::toolTipOptions(
+					$model->getAttributeLabel($attr),
+					$model->getAttributeHint($attr)
+				)
+			)
+			->hint($hint,$hintOptions);
+	}
+	
+	/**
+	 * @param ActiveForm $form
+	 * @param ArmsModel $model
+	 * @param string $attr
+	 * @param array $options
+	 * @return mixed
+	 */
+	public static function CheckboxListField($form,$model,$attr,$options=[]) {
+		$hint=static::cutHint($options);
+		$hintOptions=static::cutHintOptions($options);
 		$options=\app\helpers\ArrayHelper::recursiveOverride([
 			'class'=>"card d-flex flex-row pt-2 pb-1",
 			'itemOptions'=>[
@@ -133,13 +179,13 @@ class FieldsHelper
 				$items,$options
 			)
 			->label(
-				null,
+				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
 				static::toolTipOptions(
 					$model->getAttributeLabel($attr),
 					$model->getAttributeHint($attr)
 				)
 			)
-			->hint(false);
+			->hint($hint,$hintOptions);
 	}
 	
 	/**
@@ -151,6 +197,8 @@ class FieldsHelper
 	 */
 	public static function MarkdownField($form,$model,$attr,$options=[])
 	{
+		$hint=static::cutHint($options);
+		$hintOptions=static::cutHintOptions($options);
 		return $form
 			->field($model, $attr)
 			->widget(\kartik\markdown\MarkdownEditor::className(),
@@ -159,13 +207,44 @@ class FieldsHelper
 				],$options)
 			)
 			->label(
-				null,
+				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
 				static::toolTipOptions(
 					$model->getAttributeLabel($attr),
 					$model->getAttributeHint($attr)
 				)
 			)
-			->hint(false);
+			->hint($hint,$hintOptions);
+	}
+	
+	/**
+	 * @param ActiveForm $form
+	 * @param ArmsModel $model
+	 * @param string $attr
+	 * @param array $options
+	 * @return mixed
+	 */
+	public static function DateField($form,$model,$attr,$options=[])
+	{
+		$hint=static::cutHint($options);
+		$hintOptions=static::cutHintOptions($options);
+		return $form
+			->field($model, $attr)
+			->widget(DatePicker::classname(), \app\helpers\ArrayHelper::recursiveOverride([
+				'options' => ['placeholder' => 'Введите дату ...'],
+				'pluginOptions' => [
+					'autoclose'=>true,
+					'weekStart' => '1',
+					'format' => 'yyyy-mm-dd'
+				]
+			],$options))
+			->label(
+				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
+				static::toolTipOptions(
+					$model->getAttributeLabel($attr),
+					$model->getAttributeHint($attr)
+				)
+			)
+			->hint($hint,$hintOptions);
 	}
 	
 	

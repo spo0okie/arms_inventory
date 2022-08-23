@@ -59,7 +59,7 @@ if (!isset($modalParent)) $modalParent=null;
 				)?>
 				</div>
 				<div class="card-body">
-					<?= FieldsHelper::CheckboxField($form,$model, 'access_types_ids',[
+					<?= FieldsHelper::CheckboxListField($form,$model, 'access_types_ids',[
 						'data'=>\app\models\AccessTypes::fetchNames()
 					]);?>
 				</div>

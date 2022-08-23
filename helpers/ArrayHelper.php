@@ -14,11 +14,15 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 	 */
 	public static function recursiveOverride($default,$custom) {
 		if (is_null($custom)) return $default;
+		$default=(array)$default;
 		foreach ($custom as $key=>$value) {
-			if (!isset($default[$key]))
+			if (is_array($value)) {
+				$default[$key]=isset($default[$key])?
+					static::recursiveOverride(isset($default[$key]),$value):
+					$value;
+			} else {
 				$default[$key]=$value;
-			elseif (is_array($value) && is_array($default[$key]))
-				$default[$key]=static::recursiveOverride($default[$key],$value);
+			}
 		}
 		return $default;
 	}
