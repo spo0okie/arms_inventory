@@ -116,15 +116,6 @@ class ArmsModel extends \yii\db\ActiveRecord
 		return null;
 	}
 	
-	public function getAttributeTooltipOptions($attribute)
-	{
-		
-		return ($hint=$this->getAttributeHint($attribute))?
-			DynaGridWidget::toolTipFields(
-			$this->getAttributeLabel($attribute),
-			$hint
-		):[];
-	}
 	
 	public static function fetchNames(){
 		$list= static::find()

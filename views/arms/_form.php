@@ -252,7 +252,7 @@ if (!isset($modalParent)) $modalParent=null;
 					'allowClear' => true,
 					'multiple' => false
 				]
-			])->label(null,$model->getAttributeTooltipOptions('places_id')) ?>
+			]) ?>
 		</div>
 		<div class="col-md-6">
 			<?= $form->field($model, 'departments_id')->widget(Select2::className(), [
