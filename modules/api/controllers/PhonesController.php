@@ -14,9 +14,9 @@ class PhonesController extends \yii\rest\ActiveController
     {
         //$actions = parent::actions();
         //$actions['search'];
-        return ['search'];
+        return ['search','caller-id'];
     }
-
+	
 	public function actionSearch($num){
 		//ищем телефонный аппарат по номеру
 		$tech = \app\models\Techs::find()
@@ -37,7 +37,34 @@ class PhonesController extends \yii\rest\ActiveController
 		}
 		throw new \yii\web\NotFoundHttpException("not found");
 	}
-
+	
+	public function actionCallerId($num){
+		//ищем телефонный аппарат по номеру
+		$tech = \app\models\Techs::find()
+			->where(['comment' => $num ])
+			->one();
+		//если нашли
+		if (is_object($tech)){
+			//он прикреплен к АРМ?
+			if (is_object($arm=$tech->arm)) {
+				//пользователь у АРМа есть?
+				if (is_object($user=$arm->user)) {
+					return $user->Ename;
+				}
+			}
+			if (is_object($user=$tech->user)) {
+				return $user->Ename;
+			}
+		}
+		$user=\app\models\Users::find()
+			->where(['phone'=>$num])
+			->one();
+		if (is_object($user))
+			return $user->Ename;
+		
+		throw new \yii\web\NotFoundHttpException("not found");
+	}
+	
 	public function actionSearchByUser($id=null,$login=null){
 		//ищем пользователя
 		if ($id)
