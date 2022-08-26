@@ -89,7 +89,7 @@ class Services extends \yii\db\ActiveRecord
 	public static $user_service_title='Сервис для пользователей';
 	public static $tech_service_title='Служебный сервис';
 	public static $user_job_title='Услуга для пользователей';
-	public static $tech_job_title='Служебная услуга';
+	public static $tech_job_title='Услуга';
 	
 	private $docsCache=null;
 	private $segmentRecursiveCache=null;

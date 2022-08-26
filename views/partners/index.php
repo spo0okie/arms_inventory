@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 
@@ -11,28 +12,13 @@ $this->title = 'Контрагенты';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="partners-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Новый', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
- //           ['class' => 'yii\grid\SerialColumn'],
-
-            //'id',
-            'inn',
-            'kpp',
-            'uname',
-            'bname',
-            'comment:ntext',
-
-            ['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
+	
+	<?= DynaGridWidget::widget([
+		'id' => 'partners-index',
+		'header' => Html::encode($this->title),
+		'columns' => require 'columns.php',
+		'createButton' => Html::a('Новый', ['create'], ['class' => 'btn btn-success']),
+		'dataProvider' => $dataProvider,
+		'filterModel' => $searchModel,
+	]) ?>
 </div>

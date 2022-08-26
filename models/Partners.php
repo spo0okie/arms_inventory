@@ -22,7 +22,7 @@ use Yii;
  * @property Contracts[] $invoices
  * @property Services[] $services
  */
-class Partners extends \yii\db\ActiveRecord
+class Partners extends ArmsModel
 {
 	
 	public static $title="Контрагент";
@@ -58,14 +58,17 @@ class Partners extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
             'id' => 'id',
-            'inn' => 'ИНН',
-            'kpp' => 'КПП',
+			'inn' => 'ИНН',
+			'kpp' => 'КПП',
+			'inn_kpp' => 'ИНН/КПП',
             'uname' => 'Юр. название',
             'bname' => 'Бренд',
+			'sname' => 'Короткое название',
+			'fname' => 'Полное название',
             'comment' => 'Комментарий',
 			'cabinet_url' => 'Ссылка на личный кабинет',
 			'support_tel' => 'Телефон тех.поддержки',
@@ -110,6 +113,14 @@ class Partners extends \yii\db\ActiveRecord
 	 */
 	public function getSname() {
 		if (strpos(mb_strtolower($this->uname),mb_strtolower($this->bname))!==false) return $this->uname;
+		return $this->uname.' ('.$this->bname.')';
+	}
+	
+	/**
+	 * Возвращает имя для поиска
+	 * @return string
+	 */
+	public function getLongName() {
 		return $this->uname.' ('.$this->bname.')';
 	}
 	

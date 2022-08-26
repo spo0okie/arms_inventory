@@ -13,11 +13,20 @@ use yii\helpers\Html;
 
 ?>
 
+<?php if ($model->cabinet_url) { ?>
 	<h4><?= $model->getAttributeLabel('cabinet_url')?> </h4>
 	<?= \Yii::$app->formatter->asUrl($model->cabinet_url) ?>
 	<br />
+<?php } ?>
+
+<?php if ($model->support_tel) { ?>
 	<h4><?= $model->getAttributeLabel('support_tel')?> </h4>
 	<?= $model->support_tel ?>
-	<br /><br />
+	<br />
+<?php } ?>
+
+<?php if ($model->comment) { ?>
 	<h4><?= $model->getAttributeLabel('comment')?> </h4>
 	<?= \Yii::$app->formatter->asNtext($model->comment) ?>
+<?php } ?>
+

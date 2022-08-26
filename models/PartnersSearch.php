@@ -12,6 +12,13 @@ use app\models\Partners;
  */
 class PartnersSearch extends Partners
 {
+	
+	public $sname;
+	public $longName;
+	public $inn_kpp;
+	
+	
+	
     /**
      * @inheritdoc
      */
@@ -19,7 +26,7 @@ class PartnersSearch extends Partners
     {
         return [
             [['id'], 'integer'],
-            [['inn', 'kpp', 'ogrn', 'uname', 'bname', 'comment'], 'safe'],
+            [['inn', 'kpp', 'ogrn', 'uname', 'bname', 'comment','sname','inn_kpp'], 'safe'],
         ];
     }
 
@@ -43,10 +50,22 @@ class PartnersSearch extends Partners
     {
         $query = Partners::find();
 
-        // add conditions that should always apply here
+        $sort = [
+			'attributes'=>[
+				'sname'=>[
+					'asc'=>['CONCAT(uname,bname)'=>SORT_ASC],
+					'desc'=>['CONCAT(uname,bname)'=>SORT_DESC],
+				],
+				'inn_kpp'=>[
+					'asc'=>['CONCAT(inn,"/",kpp)'=>SORT_ASC],
+					'desc'=>['CONCAT(inn,"/",kpp)'=>SORT_DESC],
+				],
+			],
+		];
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+			'sort' => $sort,
         ]);
 
         $this->load($params);
@@ -63,10 +82,8 @@ class PartnersSearch extends Partners
         ]);
 
         $query
-			->andFilterWhere(['or like', 'inn', \yii\helpers\StringHelper::explode($this->inn,'|',true,true)])
-            ->andFilterWhere(['or like', 'kpp', \yii\helpers\StringHelper::explode($this->kpp,'|',true,true)])
-            ->andFilterWhere(['or like', 'uname', \yii\helpers\StringHelper::explode($this->uname,'|',true,true)])
-            ->andFilterWhere(['or like', 'bname', \yii\helpers\StringHelper::explode($this->bname,'|',true,true)])
+			->andFilterWhere(['or like', 'CONCAT(inn,"/",kpp)', \yii\helpers\StringHelper::explode($this->inn_kpp,'|',true,true)])
+			->andFilterWhere(['or like', 'CONCAT(uname,bname)', \yii\helpers\StringHelper::explode($this->sname,'|',true,true)])
 			->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
 			->andFilterWhere(['or like', 'cabinet_url', \yii\helpers\StringHelper::explode($this->cabinet_url,'|',true,true)])
 			->andFilterWhere(['or like', 'support_tel', \yii\helpers\StringHelper::explode($this->support_tel,'|',true,true)]);
