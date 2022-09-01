@@ -58,6 +58,7 @@ class PhonesController extends \yii\rest\ActiveController
 		}
 		$user=\app\models\Users::find()
 			->where(['phone'=>$num])
+			->where(['Uvolen'=>false])
 			->one();
 		if (is_object($user))
 			return $user->Ename;
