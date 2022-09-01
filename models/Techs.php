@@ -437,7 +437,7 @@ class Techs extends \yii\db\ActiveRecord
 	 */
 	public function getNetIps()
 	{
-		return static::hasMany(NetIps::className(), ['id' => 'ips_id'])->from(['techs_ip'=>NetIps::tableName()])
+		return $this->hasMany(NetIps::className(), ['id' => 'ips_id'])->from(['techs_ip'=>NetIps::tableName()])
 			->viaTable('{{%ips_in_techs}}', ['techs_id' => 'id']);
 	}
 	
@@ -512,7 +512,7 @@ class Techs extends \yii\db\ActiveRecord
 	 */
 	public function getContracts()
 	{
-		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
 			->viaTable('{{%contracts_in_techs}}', ['techs_id' => 'id']);
 	}
 	
@@ -521,7 +521,7 @@ class Techs extends \yii\db\ActiveRecord
 	 */
 	public function getServices()
 	{
-		return static::hasMany(Services::className(), ['id' => 'service_id'])
+		return $this->hasMany(Services::className(), ['id' => 'service_id'])
 			->viaTable('{{%techs_in_services}}', ['tech_id' => 'id']);
 	}
 	

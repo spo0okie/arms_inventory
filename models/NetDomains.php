@@ -70,7 +70,7 @@ class NetDomains extends \yii\db\ActiveRecord
 	 */
 	public function getPlace()
 	{
-		return static::hasOne(Places::class, ['id' => 'places_id']);
+		return $this->hasOne(Places::class, ['id' => 'places_id']);
 	}
 	
 	/**

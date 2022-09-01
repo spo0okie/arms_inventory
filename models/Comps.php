@@ -185,7 +185,7 @@ class Comps extends ArmsModel
 	 */
 	public function getArm()
 	{
-		return $this->hasOne(Arms::className(), ['id' => 'arm_id']);
+		return $this->hasOne(Arms::class, ['id' => 'arm_id']);
 	}
 	
 	/**
@@ -303,7 +303,7 @@ class Comps extends ArmsModel
 	 */
 	public function getSoft()
 	{
-		return static::getDb()->cache(function($db) {return static::hasMany(Soft::className(), ['id' => 'soft_id'])
+		return static::getDb()->cache(function($db) {return $this->hasMany(Soft::className(), ['id' => 'soft_id'])
 			->viaTable('{{%soft_in_comps}}', ['comp_id' => 'id']);},Manufacturers::$CACHE_TIME);
 	}
 	
@@ -312,7 +312,7 @@ class Comps extends ArmsModel
 	 */
 	public function getServices()
 	{
-		return static::hasMany(Services::className(), ['id' => 'services_id'])
+		return $this->hasMany(Services::className(), ['id' => 'services_id'])
 			->viaTable('{{%comps_in_services}}', ['comps_id' => 'id']);
 	}
 	
@@ -321,7 +321,7 @@ class Comps extends ArmsModel
 	 */
 	public function getLicGroups()
 	{
-		return static::hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
+		return $this->hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
 			->viaTable('{{%lic_groups_in_comps}}', ['comps_id' => 'id']);
 	}
 	
@@ -330,7 +330,7 @@ class Comps extends ArmsModel
 	 */
 	public function getLicItems()
 	{
-		return static::hasMany(LicItems::className(), ['id' => 'lic_items_id'])
+		return $this->hasMany(LicItems::className(), ['id' => 'lic_items_id'])
 			->viaTable('{{%lic_items_in_comps}}', ['comps_id' => 'id']);
 	}
 
@@ -339,7 +339,7 @@ class Comps extends ArmsModel
 	 */
 	public function getLicKeys()
 	{
-		return static::hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
+		return $this->hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
 			->viaTable('{{%lic_keys_in_comps}}', ['comps_id' => 'id']);
 	}
 	
@@ -377,7 +377,7 @@ class Comps extends ArmsModel
 	 */
 	public function getAces()
 	{
-		return static::hasMany(Aces::className(), ['id' => 'aces_id'])->from(['comp_aces'=>Aces::tableName()])
+		return $this->hasMany(Aces::className(), ['id' => 'aces_id'])->from(['comp_aces'=>Aces::tableName()])
 			->viaTable('{{%comps_in_aces}}', ['comps_id' => 'id']);
 	}
 	
@@ -432,7 +432,7 @@ class Comps extends ArmsModel
 	 */
 	public function getNetIps()
 	{
-		return static::hasMany(NetIps::className(), ['id' => 'ips_id'])->from(NetIps::tableName())
+		return $this->hasMany(NetIps::className(), ['id' => 'ips_id'])->from(NetIps::tableName())
 			->viaTable('{{%ips_in_comps}}', ['comps_id' => 'id']);
 	}
 	

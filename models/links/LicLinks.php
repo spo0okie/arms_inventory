@@ -88,7 +88,7 @@ class LicLinks extends ActiveRecord
 	 */
 	public function getObject()
 	{
-		return static::hasOne('\\app\\models\\'.static::objClass(), ['id' => static::objIdField()]);
+		return $this->hasOne('\\app\\models\\'.static::objClass(), ['id' => static::objIdField()]);
 	}
 	
 	/**
@@ -96,7 +96,7 @@ class LicLinks extends ActiveRecord
 	 */
 	public function getLic()
 	{
-		return static::hasOne('\\app\\models\\'.static::licClass(), ['id' => static::licIdField()]);
+		return $this->hasOne('\\app\\models\\'.static::licClass(), ['id' => static::licIdField()]);
 	}
 	
 	public function getLicComment()
@@ -109,7 +109,7 @@ class LicLinks extends ActiveRecord
 	 */
 	public function getCreator()
 	{
-		return static::hasOne(\app\models\Users::className(), ['id' => $this->created_by]);
+		return $this->hasOne(\app\models\Users::className(), ['id' => $this->created_by]);
 	}
 	
 	/**
@@ -117,7 +117,7 @@ class LicLinks extends ActiveRecord
 	 */
 	public function getUpdater()
 	{
-		return static::hasOne(\app\models\Users::className(), ['id' => $this->updated_by]);
+		return $this->hasOne(\app\models\Users::className(), ['id' => $this->updated_by]);
 	}
 	
 	

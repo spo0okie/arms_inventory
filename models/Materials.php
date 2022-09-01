@@ -217,7 +217,7 @@ class Materials extends \yii\db\ActiveRecord
 	 */
 	public function getContracts()
 	{
-		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
 			->viaTable('{{%contracts_in_materials}}', ['materials_id' => 'id']);
 	}
 

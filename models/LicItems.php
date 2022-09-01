@@ -181,7 +181,7 @@ class LicItems extends \yii\db\ActiveRecord
 	 */
 	public function getContracts()
 	{
-		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
 			->viaTable('{{%contracts_in_lics}}', ['lics_id' => 'id']);
 	}
 	
@@ -190,7 +190,7 @@ class LicItems extends \yii\db\ActiveRecord
 	 */
 	public function getArms()
 	{
-		return static::hasMany(Arms::className(), ['id' => 'arms_id'])
+		return $this->hasMany(Arms::className(), ['id' => 'arms_id'])
 			->viaTable('{{%lic_items_in_arms}}', ['lic_items_id' => 'id']);
 	}
 	
@@ -199,7 +199,7 @@ class LicItems extends \yii\db\ActiveRecord
 	 */
 	public function getUsers()
 	{
-		return static::hasMany(Users::className(), ['id' => 'users_id'])
+		return $this->hasMany(Users::className(), ['id' => 'users_id'])
 			->viaTable('{{%lic_items_in_users}}', ['lic_items_id' => 'id']);
 	}
 	
@@ -208,7 +208,7 @@ class LicItems extends \yii\db\ActiveRecord
 	 */
 	public function getComps()
 	{
-		return static::hasMany(Comps::className(), ['id' => 'comps_id'])
+		return $this->hasMany(Comps::className(), ['id' => 'comps_id'])
 			->viaTable('{{%lic_items_in_comps}}', ['lic_items_id' => 'id']);
 	}
 	
@@ -217,7 +217,7 @@ class LicItems extends \yii\db\ActiveRecord
 	 */
 	public function getKeys()
 	{
-		return static::hasMany(LicKeys::className(), ['lic_items_id' => 'id']);
+		return $this->hasMany(LicKeys::className(), ['lic_items_id' => 'id']);
 	}
 
 	/**

@@ -147,7 +147,7 @@ class Soft extends \yii\db\ActiveRecord
      */
     public function getSoftLists()
     {
-        return static::getDb()->cache(function($db) {return static::hasMany(SoftLists::className(), ['id' => 'list_id'])
+        return static::getDb()->cache(function($db) {return $this->hasMany(SoftLists::className(), ['id' => 'list_id'])
             ->viaTable('{{%soft_in_lists}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
     }
 
@@ -156,7 +156,7 @@ class Soft extends \yii\db\ActiveRecord
      */
     public function getComps()
     {
-        return static::getDb()->cache(function($db) {return static::hasMany(Comps::className(), ['id' => 'comp_id'])
+        return static::getDb()->cache(function($db) {return $this->hasMany(Comps::className(), ['id' => 'comp_id'])
             ->viaTable('{{%soft_in_comps}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
     }
 

@@ -158,7 +158,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	 */
 	public function getAces()
 	{
-		return static::hasMany(Aces::className(), ['id' => 'aces_id'])->from(['users_aces'=>Aces::tableName()])
+		return $this->hasMany(Aces::className(), ['id' => 'aces_id'])->from(['users_aces'=>Aces::tableName()])
 			->viaTable('{{%users_in_aces}}', ['users_id' => 'id']);
 	}
 	
@@ -479,7 +479,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	 */
 	public function getLicGroups()
 	{
-		return static::hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
+		return $this->hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
 			->viaTable('{{%lic_groups_in_users}}', ['users_id' => 'id']);
 	}
 	
@@ -488,7 +488,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	 */
 	public function getLicItems()
 	{
-		return static::hasMany(LicItems::className(), ['id' => 'lic_items_id'])
+		return $this->hasMany(LicItems::className(), ['id' => 'lic_items_id'])
 			->viaTable('{{%lic_items_in_users}}', ['users_id' => 'id']);
 	}
 	
@@ -497,7 +497,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	 */
 	public function getLicKeys()
 	{
-		return static::hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
+		return $this->hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
 			->viaTable('{{%lic_keys_in_users}}', ['users_id' => 'id']);
 	}
 	

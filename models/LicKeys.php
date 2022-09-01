@@ -110,7 +110,7 @@ class LicKeys extends \yii\db\ActiveRecord
 	 */
 	public function getArms()
 	{
-		return static::hasMany(Arms::className(), ['id' => 'arms_id'])
+		return $this->hasMany(Arms::className(), ['id' => 'arms_id'])
 			->viaTable('{{%lic_keys_in_arms}}', ['lic_keys_id' => 'id']);
 	}
 	
@@ -122,7 +122,7 @@ class LicKeys extends \yii\db\ActiveRecord
 	 */
 	public function getComps()
 	{
-		return static::hasMany(Comps::className(), ['id' => 'comps_id'])
+		return $this->hasMany(Comps::className(), ['id' => 'comps_id'])
 			->viaTable('{{%lic_keys_in_comps}}', ['lic_keys_id' => 'id']);
 	}
 	
@@ -134,7 +134,7 @@ class LicKeys extends \yii\db\ActiveRecord
 	 */
 	public function getUsers()
 	{
-		return static::hasMany(Users::className(), ['id' => 'users_id'])
+		return $this->hasMany(Users::className(), ['id' => 'users_id'])
 			->viaTable('{{%lic_keys_in_users}}', ['lic_keys_id' => 'id']);
 	}
 	

@@ -99,7 +99,7 @@ class UserGroups extends \yii\db\ActiveRecord
 	 */
 	public function getUsers()
 	{
-		return static::hasMany(Users::className(), ['id' => 'users_id'])
+		return $this->hasMany(Users::className(), ['id' => 'users_id'])
 			->viaTable('{{%users_in_groups}}', ['groups_id' => 'id']);
 	}
 
@@ -108,7 +108,7 @@ class UserGroups extends \yii\db\ActiveRecord
 	 */
 	public function getServices()
 	{
-		return static::hasMany(Services::className(), ['user_group_id'=>'id']);
+		return $this->hasMany(Services::className(), ['user_group_id'=>'id']);
 	}
 
 

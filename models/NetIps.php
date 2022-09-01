@@ -136,7 +136,7 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getNetwork()
 	{
-		return static::hasOne(Networks::className(), ['id' => 'networks_id']);
+		return $this->hasOne(Networks::className(), ['id' => 'networks_id']);
 	}
 	
 	public function getSegment()
@@ -167,7 +167,7 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getComps()
 	{
-		return static::hasMany(Comps::className(), ['id' => 'comps_id'])->from(['ip_comps'=>Comps::tableName()])
+		return $this->hasMany(Comps::className(), ['id' => 'comps_id'])->from(['ip_comps'=>Comps::tableName()])
 			->viaTable('{{%ips_in_comps}}', ['ips_id' => 'id']);
 	}
 	
@@ -176,7 +176,7 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getTechs()
 	{
-		return static::hasMany(Techs::className(), ['id' => 'techs_id'])->from(['ip_techs'=>Techs::tableName()])
+		return $this->hasMany(Techs::className(), ['id' => 'techs_id'])->from(['ip_techs'=>Techs::tableName()])
 			->viaTable('{{%ips_in_techs}}', ['ips_id' => 'id']);
 	}
 	
@@ -185,7 +185,7 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getAces()
 	{
-		return static::hasMany(Aces::className(), ['id' => 'aces_id'])->from(['ip_aces'=>Aces::tableName()])
+		return $this->hasMany(Aces::className(), ['id' => 'aces_id'])->from(['ip_aces'=>Aces::tableName()])
 			->viaTable('{{%ips_in_aces}}', ['ips_id' => 'id']);
 	}
 

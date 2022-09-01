@@ -83,7 +83,7 @@ class Partners extends ArmsModel
 	 */
 	public function getDocs()
 	{
-		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
 			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id']);
 	}
 	
@@ -94,7 +94,7 @@ class Partners extends ArmsModel
 	 */
 	public function getContracts()
 	{
-		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
 			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id'])
 			->where(['like','name',Contracts::$dictionary['contract']]);
 	}

@@ -144,7 +144,7 @@ class LicGroups extends \yii\db\ActiveRecord
 	 */
 	public function getSoft()
 	{
-		return static::hasMany(Soft::className(), ['id' => 'soft_id'])
+		return $this->hasMany(Soft::className(), ['id' => 'soft_id'])
 			->viaTable('{{%soft_in_lics}}', ['lics_id' => 'id']);
 	}
 	
@@ -153,7 +153,7 @@ class LicGroups extends \yii\db\ActiveRecord
 	 */
 	public function getArms()
 	{
-		return static::hasMany(Arms::className(), ['id' => 'arms_id'])
+		return $this->hasMany(Arms::className(), ['id' => 'arms_id'])
 			->viaTable('{{%lic_groups_in_arms}}', ['lic_groups_id' => 'id']);
 	}
 	
@@ -162,7 +162,7 @@ class LicGroups extends \yii\db\ActiveRecord
 	 */
 	public function getComps()
 	{
-		return static::hasMany(Comps::className(), ['id' => 'comps_id'])
+		return $this->hasMany(Comps::className(), ['id' => 'comps_id'])
 			->viaTable('{{%lic_groups_in_comps}}', ['lic_groups_id' => 'id']);
 	}
 	
@@ -171,7 +171,7 @@ class LicGroups extends \yii\db\ActiveRecord
 	 */
 	public function getUsers()
 	{
-		return static::hasMany(Users::className(), ['id' => 'users_id'])
+		return $this->hasMany(Users::className(), ['id' => 'users_id'])
 			->viaTable('{{%lic_groups_in_users}}', ['lic_groups_id' => 'id']);
 	}
 	

@@ -378,7 +378,7 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getDepends()
 	{
-		return static::hasMany(Services::className(), ['id' => 'depends_id'])
+		return $this->hasMany(Services::className(), ['id' => 'depends_id'])
 			->viaTable('{{%services_depends}}', ['service_id' => 'id']);
 	}
 	
@@ -387,7 +387,7 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getSupport()
 	{
-		return static::hasMany(Users::className(), ['id' => 'user_id'])
+		return $this->hasMany(Users::className(), ['id' => 'user_id'])
 			->from(['support'=>Users::tableName()])
 			->viaTable('{{%users_in_services}}', ['service_id' => 'id']);
 	}
@@ -397,7 +397,7 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getContracts()
 	{
-		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
 			->from(['service_contracts'=>Contracts::tableName()])
 			->viaTable('{{%contracts_in_services}}', ['services_id' => 'id']);
 	}
@@ -430,7 +430,7 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getDependants()
 	{
-		return static::hasMany(Services::className(), ['id' => 'service_id'])
+		return $this->hasMany(Services::className(), ['id' => 'service_id'])
 			->from(['responsible'=>Services::tableName()])
 			->viaTable('{{%services_depends}}', ['depends_id' => 'id']);
 	}
@@ -440,7 +440,7 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getTechs()
 	{
-		return static::hasMany(Techs::className(), ['id' => 'tech_id'])
+		return $this->hasMany(Techs::className(), ['id' => 'tech_id'])
 			->viaTable('{{%techs_in_services}}', ['service_id' => 'id']);
 	}
 	
@@ -449,7 +449,7 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getUserGroup()
 	{
-		return static::hasOne(UserGroups::className(), ['id' => 'user_group_id']);
+		return $this->hasOne(UserGroups::className(), ['id' => 'user_group_id']);
 	}
 	
 	/**
@@ -457,47 +457,47 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getComps()
 	{
-		return static::hasMany(Comps::class, ['id' => 'comps_id'])
+		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
 			->from(['svc_comps'=>Comps::tableName()])
 			->viaTable('{{%comps_in_services}}', ['services_id' => 'id']);
 	}
 	
 	public function getArms()
 	{
-		return static::hasMany(Arms::class, ['id' => 'arm_id'])
+		return $this->hasMany(Arms::class, ['id' => 'arm_id'])
 			->from(['svc_arms'=>Arms::tableName()])
 			->via('comps');
 	}
 	
 	public function getPlace()
 	{
-		return static::hasOne(Places::className(), ['id' => 'places_id']);
+		return $this->hasOne(Places::className(), ['id' => 'places_id']);
 	}
 	
 	public function getArmPlaces()
 	{
-		return static::hasMany(Places::className(), ['id' => 'places_id'])
+		return $this->hasMany(Places::className(), ['id' => 'places_id'])
 			->from(['places_in_svc_arms'=>Places::tableName()])
 			->via('arms');
 	}
 	
 	public function getTechPlaces()
 	{
-		return static::hasMany(Places::className(), ['id' => 'places_id'])
+		return $this->hasMany(Places::className(), ['id' => 'places_id'])
 			->from(['places_in_svc_techs'=>Places::tableName()])
 			->via('techs');
 	}
 	
 	public function getInetsPlaces()
 	{
-		return static::hasMany(Places::className(), ['id' => 'places_id'])
+		return $this->hasMany(Places::className(), ['id' => 'places_id'])
 			->from(['places_in_svc_inets'=>Places::tableName()])
 			->via('orgInets');
 	}
 	
 	public function getPhonesPlaces()
 	{
-		return static::hasMany(Places::className(), ['id' => 'places_id'])
+		return $this->hasMany(Places::className(), ['id' => 'places_id'])
 			->from(['places_in_svc_phones'=>Places::tableName()])
 			->via('orgPhones');
 	}

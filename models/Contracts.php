@@ -517,7 +517,7 @@ class Contracts extends ArmsModel
 	 */
 	public function getScans()
 	{
-		return static::hasMany(Scans::className(), ['contracts_id' => 'id']);
+		return $this->hasMany(Scans::className(), ['contracts_id' => 'id']);
 	}
 
 	/**
@@ -525,7 +525,7 @@ class Contracts extends ArmsModel
 	 */
 	public function getArms()
 	{
-		return static::hasMany(Arms::className(), ['id' => 'arms_id'])
+		return $this->hasMany(Arms::className(), ['id' => 'arms_id'])
 			->viaTable('{{%contracts_in_arms}}', ['contracts_id' => 'id']);
 	}
 
@@ -534,7 +534,7 @@ class Contracts extends ArmsModel
 	 */
 	public function getMaterials()
 	{
-		return static::hasMany(Materials::className(), ['id' => 'materials_id'])
+		return $this->hasMany(Materials::className(), ['id' => 'materials_id'])
 			->viaTable('{{%contracts_in_materials}}', ['contracts_id' => 'id']);
 	}
 
@@ -543,13 +543,13 @@ class Contracts extends ArmsModel
 	 */
 	public function getTechs()
 	{
-		return static::hasMany(Techs::className(), ['id' => 'techs_id'])
+		return $this->hasMany(Techs::className(), ['id' => 'techs_id'])
 			->viaTable('{{%contracts_in_techs}}', ['contracts_id' => 'id']);
 	}
 
 	public function getLicItems()
 	{
-		return static::hasMany(LicItems::className(), ['id' => 'lics_id'])
+		return $this->hasMany(LicItems::className(), ['id' => 'lics_id'])
 			->viaTable('{{%contracts_in_lics}}', ['contracts_id' => 'id']);
 	}
 
@@ -596,7 +596,7 @@ class Contracts extends ArmsModel
 		}
 		//кэшируем результат*/
 
-		return static::hasMany(\app\models\Techs::className(),['id' => 'techs_id'])
+		return $this->hasMany(\app\models\Techs::className(),['id' => 'techs_id'])
 			->viaTable('{{%contracts_in_techs}}', ['contracts_id' => $chain]);
 	}
 
@@ -694,7 +694,7 @@ class Contracts extends ArmsModel
 		//if (!is_null($this->partners_cache)) return $this->partners_cache;
 
 		//return $this->partners_cache=Partners::fetchByField('contracts_id',$this->contracts_id)
-		return static::hasMany(Partners::className(), ['id' => 'partners_id'])
+		return $this->hasMany(Partners::className(), ['id' => 'partners_id'])
 			->viaTable('{{%partners_in_contracts}}', ['contracts_id' => 'id']);
 	}
 

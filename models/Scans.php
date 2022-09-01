@@ -350,7 +350,7 @@ class Scans extends \yii\db\ActiveRecord
 	 */
 	public function getContract()
 	{
-		return static::hasOne(Contracts::className(), ['id' => 'contracts_id']);
+		return $this->hasOne(Contracts::className(), ['id' => 'contracts_id']);
 	}
 	
 	/**
@@ -358,7 +358,7 @@ class Scans extends \yii\db\ActiveRecord
 	 */
 	public function getPlace()
 	{
-		return static::hasOne(Places::className(), ['id' => 'places_id']);
+		return $this->hasOne(Places::className(), ['id' => 'places_id']);
 	}
 	
 	/**
@@ -366,7 +366,7 @@ class Scans extends \yii\db\ActiveRecord
 	 */
 	public function getTechModel()
 	{
-		return static::hasOne(TechModels::className(), ['id' => 'tech_models_id']);
+		return $this->hasOne(TechModels::className(), ['id' => 'tech_models_id']);
 	}
 	
 	/**
@@ -374,7 +374,7 @@ class Scans extends \yii\db\ActiveRecord
 	 */
 	public function getMaterialType()
 	{
-		return static::hasOne(MaterialsTypes::className(), ['id' => 'material_types_id']);
+		return $this->hasOne(MaterialsTypes::className(), ['id' => 'material_types_id']);
 	}
 	
 	/**
@@ -383,7 +383,7 @@ class Scans extends \yii\db\ActiveRecord
 
 	public function getLicType()
 	{
-		return static::hasOne(LicTypes::className(), ['id' => 'lic_types_id']);
+		return $this->hasOne(LicTypes::className(), ['id' => 'lic_types_id']);
 	}
 	
 	/**
@@ -391,6 +391,6 @@ class Scans extends \yii\db\ActiveRecord
 	 */
 	public function getLicItem()
 	{
-		return static::hasOne(LicItems::className(), ['id' => 'lic_items_id']);
+		return $this->hasOne(LicItems::className(), ['id' => 'lic_items_id']);
 	}
 }

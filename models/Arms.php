@@ -489,7 +489,7 @@ class Arms extends ArmsModel
 	 */
 	public function getContracts()
 	{
-		return static::hasMany(Contracts::className(), ['id' => 'contracts_id'])->from(['arms_contracts'=>Contracts::tableName()])
+		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])->from(['arms_contracts'=>Contracts::tableName()])
 			->viaTable('{{%contracts_in_arms}}', ['arms_id' => 'id']);
 	}
 	
@@ -498,7 +498,7 @@ class Arms extends ArmsModel
 	 */
 	public function getLicItems()
 	{
-		return static::hasMany(LicItems::className(), ['id' => 'lic_items_id'])
+		return $this->hasMany(LicItems::className(), ['id' => 'lic_items_id'])
 			->viaTable('{{%lic_items_in_arms}}', ['arms_id' => 'id']);
 	}
 
@@ -507,7 +507,7 @@ class Arms extends ArmsModel
 	 */
 	public function getLicKeys()
 	{
-		return static::hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
+		return $this->hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
 			->viaTable('{{%lic_keys_in_arms}}', ['arms_id' => 'id']);
 	}
 
@@ -516,7 +516,7 @@ class Arms extends ArmsModel
 	 */
 	public function getLicGroups()
 	{
-		return static::hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
+		return $this->hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
 			->viaTable('{{%lic_groups_in_arms}}', ['arms_id' => 'id']);
 	}
 
