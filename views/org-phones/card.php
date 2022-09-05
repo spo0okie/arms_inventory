@@ -45,7 +45,7 @@ if (!isset($static_view)) $static_view=false;
 		<h5>Место подключения:</h5>
 	</div>
 	<div class="col-md-8">
-		<?= $this->render('/places/item',['model'=>$model->place ,'static_view'=>$static_view]) ?>
+		<?= $this->render('/places/item',['model'=>$model->place , 'full'=>true, 'static_view'=>$static_view]) ?>
 	</div>
 </div>
 
