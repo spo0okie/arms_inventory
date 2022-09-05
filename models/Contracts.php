@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\web\JsExpression;
 
 /**
@@ -356,7 +357,8 @@ class Contracts extends ArmsModel
 	public function getChilds()
 	{
 		return $this->hasMany(Contracts::className(), ['parent_id' => 'id'])
-			->andWhere(['is_successor'=>false]);
+			->andWhere(['is_successor'=>false])
+			->orderBy(['date'=>SORT_DESC]);
 	}
 	
 	public function getChildrenRecursive()
@@ -370,6 +372,7 @@ class Contracts extends ArmsModel
 			if (count($recursive=$child->childrenRecursive))
 				$this->recursive_children_cache=array_merge($this->recursive_children_cache,$recursive);
 		}
+		ArrayHelper::multisort($this->recursive_children_cache,'date',SORT_DESC);
 		return $this->recursive_children_cache;
 	}
 	
@@ -383,6 +386,7 @@ class Contracts extends ArmsModel
 		$chain=$this->successorsChain;
 		$children=[];
 		foreach ($chain as $item) $children=array_merge($children,$item->childs);
+		ArrayHelper::multisort($children,'date',SORT_DESC);
 		return $children;
 	}
 	
