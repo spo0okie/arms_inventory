@@ -18,6 +18,8 @@ use Yii;
 class OrgStruct extends \yii\db\ActiveRecord
 {
 	public static $title='Орг. структура';
+	public static $titles='Орг. структура';
+	
     /**
      * {@inheritdoc}
      */

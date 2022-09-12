@@ -43,8 +43,9 @@ $deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($mod
 	    <?= $model->org->name ?>
         //
         <?= $model->Doljnost ?>
-        
-        <?= (is_object($model->orgStruct))?('<br />'.$model->orgStruct->name):'' ?>
+		<br>
+		<?= $this->render('/org-struct/item',['model'=>$model->orgStruct,'chain'=>true]) ?>
+		
     </p>
 
     <br />
