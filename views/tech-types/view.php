@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
 //use kartik\tabs\TabsX;
 use yii\bootstrap5\Tabs;
@@ -31,10 +32,30 @@ if (\app\models\TechTypes::isPC($model->id)) {
 	$tabs[] = [
 		'label'=>'Экземпляры рабочих мест',
 		'linkOptions'=>['id'=>'items'],
-		'content'=>$this->render('/arms/table', [
-			'searchModel' => $armsSearchModel,
-			'dataProvider' => $armsDataProvider,
-		]),
+		'content'=>DynaGridWidget::widget([
+				'id' => 'tech-types-arms-index',
+				'header' => '',
+				'columns' => require __DIR__.'/../arms/columns.php',
+				'defaultOrder' => [
+					'attach',
+					'num',
+					'model_id',
+					'comp_id',
+					'comp_hw',
+					'comp_ip',
+					'comp_mac',
+					'mac',
+					'state_id',
+					'user_id',
+					'user_position',
+					'places_id',
+					'inv_sn'
+				],
+				//'createButton' => Html::a('Создать АРМ', ['create'], ['class' => 'btn btn-success']),
+				//'hintButton' => \app\components\HintIconWidget::widget(['model' => '\app\models\Arms', 'cssClass' => 'btn']),
+				'dataProvider' => $armsDataProvider,
+				'filterModel' => $armsSearchModel,
+			]) ,
 		'active'=>is_array(Yii::$app->request->get('ArmsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')
 	];
 } else {
