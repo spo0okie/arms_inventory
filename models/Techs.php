@@ -608,12 +608,7 @@ class Techs extends \yii\db\ActiveRecord
 				$this->it_staff_id=$this->arm->it_staff_id;
 			}
 			
-			/* убираем посторонние символы из MAC*/
-			$macs=explode("\n",$this->mac);
-			foreach ($macs as $i=>$mac) {
-				$macs[$i]=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
-			}
-			$this->mac=implode("\n",$macs);
+			$this->mac=\app\helpers\MacsHelper::fixList($this->mac);
 			
 			/* взаимодействие с NetIPs */
 			$this->netIps_ids=NetIps::fetchIpIds($this->ip);
