@@ -39,17 +39,62 @@ if (!isset($modalParent)) $modalParent=null;
     ]); ?>
 
     <div class="row">
-        <div class="col-md-3" >
-		    <?= $form->field($model, 'num')->textInput(['maxlength' => true]) ?>
-        </div>
-        <div class="col-md-3" >
-		    <?= $form->field($model, 'inv_num')->textInput(['maxlength' => true]) ?>
-        </div>
-        <div class="col-md-3" >
-	        <?= $form->field($model, 'sn')->textInput(['maxlength' => true]) ?>
-        </div>
-        <div class="col-md-3" >
-		    <?= $form->field($model, 'is_server')->checkbox() ?>
+		<div class="col-md-10" >
+			<row class="row">
+				<div class="col-md-4" >
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'num') ?>
+				</div>
+				<div class="col-md-4" >
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'inv_num')->textInput(['maxlength' => true]) ?>
+				</div>
+				<div class="col-md-4" >
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'sn')->textInput(['maxlength' => true]) ?>
+				</div>
+			</row>
+			<div class="row">
+				<div class="col-md-5" >
+					<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'model_id', [
+						'data' => \app\models\TechModels::fetchPCs(),
+						'options' => [
+							'placeholder' => 'Выберите модель',
+							'onchange' => 'techSwitchDescr();'
+						],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => false,
+						]
+					]) ?>
+					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'is_server') ?>
+				</div>
+				<div class="col-md-2" >
+					<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'comp_id',[
+						'data'=>\yii\helpers\ArrayHelper::map($model->comps,'id','name'),
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => false,
+						]
+					]) ?>
+					<p id="os_attach_selector">
+						<?= $this->render('compsAttach',['arm_id'=>$model->id,'user_id'=>$model->user_id]); ?>
+					</p>
+				</div>
+				<div class="col-md-2" >
+					<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'state_id', [
+						'data' => \app\models\TechStates::fetchNames(),
+						'options' => ['placeholder' => 'Статус рабочего места',],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => false,
+						]
+					]) ?>
+				</div>
+				<div class="col-md-3" >
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'comment') ?>
+				</div>
+			</div>
+		</div>
+        <div class="col-md-2" >
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'mac',['lines'=>4]) ?>
         </div>
 
 	    <?php /*
@@ -111,56 +156,13 @@ if (!isset($modalParent)) $modalParent=null;
 	
 	?>
 
-    <div class="row">
-        <div class="col-md-4" >
-	        <?= $form->field($model, 'model_id')->widget(Select2::className(), [
-		        'data' => \app\models\TechModels::fetchPCs(),
-		        'options' => [
-					'placeholder' => 'Выберите модель',
-					'onchange' => 'techSwitchDescr();'
-				],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-			        'allowClear' => false,
-			        'multiple' => false
-		        ]
-	        ]) ?>
-        </div>
-        <div class="col-md-3" >
-		    <?= $form->field($model, 'comp_id')->dropDownList(\yii\helpers\ArrayHelper::map($model->comps,'id','name')) ?>
-            <p id="os_attach_selector">
-			    <?= $this->render('compsAttach',['arm_id'=>$model->id,'user_id'=>$model->user_id]); ?>
-            </p>
-        </div>
-        <div class="col-md-2" >
-		    <?= $form->field($model, 'state_id')->widget(Select2::className(), [
-			    'data' => \app\models\TechStates::fetchNames(),
-			    'options' => ['placeholder' => 'Статус рабочего места',],
-			    'toggleAllSettings'=>['selectLabel'=>null],
-			    'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-				    'allowClear' => false,
-				    'multiple' => false
-			    ]
-		    ]) ?>
-        </div>
-        <div class="col-md-3" >
-		    <?= $form->field($model, 'comment')->textInput(['maxlength'=>true]) ?>
-        </div>
-    </div>
 	
 	
 	<div class="row " id="arms-specs_settings"
 		<?= (is_object($model) && is_object($model->techModel) && $model->techModel->individual_specs)?'':'style="display:none"' ?>
 	>
 		<div class="col-md-4" >
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'specs',
-				'lines' => 6,
-			]) ?>
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'specs',['lines'=>6]) ?>
 
 		</div>
 		<div class="col-md-4" >

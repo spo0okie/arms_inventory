@@ -1,7 +1,8 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
-use yii\grid\GridView;
+
 
 
 /* @var $this yii\web\View */
@@ -73,10 +74,15 @@ $static_view=false;
 
 	<?php if (count($model->arms)) {?>
         <h4>АРМ этой модели:</h4>
-		<?= $this->render('/arms/table', [
-			'searchModel'   => $armsSearchModel,
-			'dataProvider'  => $armsDataProvider,
-			'columns'       => ['attach','num','model','comp_id','comp_ip','sn','state','user_id','places_id']
+		<?= DynaGridWidget::widget([
+			'id' => 'tech-types-arms-index',
+			'header' => '',
+			'columns' => require __DIR__.'/../arms/columns.php',
+			'defaultOrder' => ['attach','num','model','comp_id','comp_ip','sn','state','user_id','places_id'],
+			//'createButton' => Html::a('Создать АРМ', ['create'], ['class' => 'btn btn-success']),
+			//'hintButton' => \app\components\HintIconWidget::widget(['model' => '\app\models\Arms', 'cssClass' => 'btn']),
+			'dataProvider' => $armsDataProvider,
+			'filterModel' => $armsSearchModel,
 		]) ?>
 	<?php } ?>
 

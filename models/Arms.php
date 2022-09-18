@@ -19,6 +19,7 @@ use yii\helpers\Html;
  * @property int $model_id Модель оборудования
  * @property string $sn Серийный номер
  * @property string $hw Аппаратное обеспечение
+ * @property string $mac MAC адреса
  * @property string $specs Спецификация оборудования (опц)
  * @property int $state_id Статус
  * @property int $places_id Помещение
@@ -139,6 +140,11 @@ class Arms extends ArmsModel
 				'label'=>'Серийный номер',
 				'hint' => 'Серийный номер системного блока / ноутбука',
 			],
+			'mac' => [
+				'label'=>'MAC адреса',
+				'hint' => 'MAC адреса сетевых интерфейсов АРМ<br>'.
+					'При заполнении адресов можно будет найти все ОС с такими адресами и привязать к АРМ',
+			],
 			'comp_id' => [
 				'label'=>'Основная ОС',
 				'indexLabel'=>'ОС',
@@ -154,6 +160,7 @@ class Arms extends ArmsModel
 					'Производитель в таблице не выводится, но при поиске учитывается'.
 					static::searchableOrHint,
 			],
+			'model_name'=>['alias'=>'model_id'],
 			'comp_hw' => [
 				'label'=>'Комплектация',
 				'indexHint' => 'Строка оборудования обнаруженного <b>в основной ОС</b><br>'.
@@ -605,8 +612,10 @@ class Arms extends ArmsModel
             } else {
 	            //error_log('null hw');
             }
-			
-            //если ОС которая была назначена основной удалена или сменила АРМ
+	
+			$this->mac=\app\helpers\MacsHelper::fixList($this->mac);
+	
+			//если ОС которая была назначена основной удалена или сменила АРМ
             if (!is_object($this->comp) || $this->comp->arm_id != $this->id)
             	$this->comp_id = null; //удаляем основную ОС
             

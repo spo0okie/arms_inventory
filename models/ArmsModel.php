@@ -3,6 +3,8 @@
 namespace app\models;
 
 use app\components\DynaGridWidget;
+use DateTime;
+use DateTimeZone;
 use Yii;
 
 /**
@@ -14,6 +16,9 @@ use Yii;
  * @property string $comment Комментарий
  * @property string $history история
  * @property string $updatedAt Время обновления
+ * @property string $updated_at Время обновления
+ 
+ * @property int $secondsSinceUpdate Секунды с момента обновления
  */
 class ArmsModel extends \yii\db\ActiveRecord
 {
@@ -23,6 +28,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 	public const searchableOrHint='<br><i>HINT: Можно искать несколько вариантов, разделив их вертикальной</i> <b>|</b> <i>чертой</i>';
 	
 	
+	private $attributeDataCache=null;
 	private $attributeLabelsCache=null;
 	/**
 	 * Массив описания полей
@@ -47,6 +53,21 @@ class ArmsModel extends \yii\db\ActiveRecord
 		];
 	}
 
+	public function getAttributeData($key)
+	{
+		if (is_null($this->attributeDataCache)) {
+			$this->attributeDataCache=$this->attributeData();
+		}
+		
+		if (!isset($this->attributeDataCache[$key])) {
+			return null;
+		}
+		
+		$data=$this->attributeDataCache[$key];
+		if (!isset($data['alias'])) return $data;
+		
+		return $this->getAttributeData($data['alias']);
+	}
 	
     /**
      * @inheritdoc
@@ -56,7 +77,9 @@ class ArmsModel extends \yii\db\ActiveRecord
     	if (is_null($this->attributeLabelsCache)) {
 			$this->attributeLabelsCache=[];
 			foreach ($this->attributeData() as $key=>$data) {
+				$data=$this->getAttributeData($key);
 				if (is_array($data)) {
+					$label=null;
 					if (isset($data[0]))
 						$this->attributeLabelsCache[$key]=$data[0];
 					elseif (isset($data['label']))
@@ -73,9 +96,12 @@ class ArmsModel extends \yii\db\ActiveRecord
 	public function attributeHints()
 	{
 		$hints=[];
-		foreach ($this->attributeData() as $key=>$data)
+		foreach ($this->attributeData() as $key=>$data) {
+			$data=$this->getAttributeData($key);
 			if (is_array($data) && isset($data['hint']))
 				$hints[$key]=$data['hint'];
+			
+		}
 		return $hints;
 	}
 	
@@ -86,12 +112,9 @@ class ArmsModel extends \yii\db\ActiveRecord
 	 */
 	public function getAttributeIndexLabel($attribute)
 	{
-		$data=$this->attributeData();
-		if (isset($data[$attribute])) {
-			$item=$data[$attribute];
-			if (is_array($item) && isset($item['indexLabel']))
-				return $item['indexLabel'];
-		}
+		$item=$this->getAttributeData($attribute);
+		if (is_array($item) && isset($item['indexLabel']))
+			return $item['indexLabel'];
 		return $this->getAttributeLabel($attribute);
 	}
 	
@@ -103,16 +126,13 @@ class ArmsModel extends \yii\db\ActiveRecord
 	 */
 	public function getAttributeIndexHint($attribute)
 	{
-		$data=$this->attributeData();
-		if (isset($data[$attribute])) {
-			$item=$data[$attribute];
-			if (isset($item['indexHint']))
-				return str_replace(
-					'{same}',
-					$this->getAttributeHint($attribute),
-					$item['indexHint']
-				);
-		}
+		$item=$this->getAttributeData($attribute);
+		if (isset($item['indexHint']))
+			return str_replace(
+				'{same}',
+				$this->getAttributeHint($attribute),
+				$item['indexHint']
+			);
 		return null;
 	}
 	
@@ -126,5 +146,10 @@ class ArmsModel extends \yii\db\ActiveRecord
 
 	public function getSname(){
 		return $this->name;
+	}
+	
+	public function getSecondsSinceUpdate() {
+		$updated = new	DateTime($this->updated_at,	new DateTimeZone('UTC') );
+		return time()-$updated->format('U');
 	}
 }
