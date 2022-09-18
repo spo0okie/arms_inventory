@@ -5,31 +5,31 @@
  * Date: 13.07.2020
  * Time: 1:07
  */
+/* @var $this yii\web\View */
 ?>
 
-<div class="site-access-denied">
-	
-	<div class="jumbotron">
-		<h1>ИТ - инвентаризация</h1>
-		
-		<p class="lead">База данных софта, железа и лицензий</p>
-		
-		<img src="/web/img/azimut_alfa.png">
-	</div>
+<div class="site-access-denied row col align-self-center">
 	
 	<div class="body-content">
 		
+		<?= $this->render('_about') ?>
+
 		<div class="row">
-			<div class="col-lg-4">
+			<div class="col-lg-3">
 			</div>
-			<div class="col-lg-4">
-				<div class="alert alert-danger">
-					<h2>Доступ закрыт</h2>
-					Доступ к этой секции закрыт, т.к. у вас недостаточно прав. Возможно необходимо авторизоваться под более привелигерованной учетной записью или запросить права в отделе ИТ.
+			<div class="col-lg-6 text-center">
+				<div class="card text-center border-danger ">
+					<div class="card-header bg-danger">
+						<h2 class="card-title">Доступ закрыт</h2>
+					</div>
+					<div class="card-body">
+						<h5>Доступ к этой секции закрыт, т.к. у вас недостаточно прав.</h5>
+						<p class="p-3">Возможно необходимо авторизоваться под более привилегированной учетной записью или запросить права в отделе ИТ.</p>
+						<a class="btn btn-danger" href="/web/site/login">Авторизоваться</a>
+					</div>
 				</div>
-				<p><a class="btn btn-danger" href="/web/site/login">Авторизоваться &raquo;</a></p>
 			</div>
-			<div class="col-lg-4">
+			<div class="col-lg-3">
 			</div>
 		</div>
 	

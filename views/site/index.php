@@ -7,16 +7,7 @@ use yii\helpers\Html;
 $this->title = 'Инвентаризация';
 ?>
 <div class="site-index row col align-self-center">
-	<h1>⬢ инвентаризация</h1>
-	<p class="lead">База данных софта, железа и лицензий</p>
-	<ul>
-		<li><a href="https://github.com/spo0okie/arms_inventory">github repository</a> </li>
-		
-		<li><a href="https://github.com/spo0okie/arms_inventory/commits/master">dev history</a> </li>
-
-		<li><a href="https://github.com/spo0okie/arms_inventory/issues">issues list</a> </li>
-	</ul>
-
+	<?= $this->render('_about') ?>
 
 	<div class="search">
 		Starting MS-DOS...<br />

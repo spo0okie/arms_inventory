@@ -19,18 +19,17 @@ foreach (\app\models\Places::fetchNames(1) as $idx=>$placeName)
 	
 
 NavBar::begin([
-	'brandLabel' => Yii::$app->name,
+	'brandLabel' => '<i class="fas fa-dice-d6"></i> '.Yii::$app->name,
 	'brandUrl' => Yii::$app->homeUrl,
 	'options' => [
 		'class' => ['navbar-dark', 'bg-dark', 'navbar-expand-md'],
 	],
-	//'innerContainerOptions' => ['class' => 'container container-large'],
+	'innerContainerOptions' => ['class' => 'container-fluid text-center'],
 ]);
-	echo Nav::widget([
-		'options' => ['class' => ['nav', 'navbar-nav', 'navbar-right']],
+	echo \app\models\Users::isViewer()?Nav::widget([
+		'options' => ['class' => ['nav', 'navbar-nav', 'mx-auto']],
 		'dropdownClass' => Dropdown::classname(),
 		'items' => [
-			\app\models\Users::isViewer()?
 			['label' => 'Лицензии',
 				'items' => [
 					['label' => \app\models\LicTypes::$titles, 'url' => ['/lic-types/index']],
@@ -38,8 +37,7 @@ NavBar::begin([
 					['label' => 'Закупки', 'url' => ['/lic-items/index']],
 					['label' => 'Ключи', 'url' => ['/lic-keys/index']],
 				]
-			]:'',
-			\app\models\Users::isViewer()?
+			],
 			['label' => 'Контрагенты',
 				'items' => [
 					['label' => \app\models\Contracts::$titles, 'url' => ['/contracts/index']],
@@ -48,8 +46,7 @@ NavBar::begin([
 					['label' => \app\models\OrgPhones::$title, 'url' => ['/org-phones/index']],
 					['label' => \app\models\OrgInet::$title, 'url' => ['/org-inet/index']],
 				]
-			]:'',
-			\app\models\Users::isViewer()?
+			],
 			['label' => 'Организация',
 				'items' => [
 					['label' => \app\models\Places::$titles,
@@ -64,16 +61,14 @@ NavBar::begin([
 					['label' => 'Карта рабочих мест', 'url' => ['/places/armmap']],
 					['label' => 'По подразделениям', 'url' => ['/places/depmap']],
 				]
-			]:'',
-			\app\models\Users::isViewer()?
+			],
 			['label' => 'Доступы',
 				'items' => [
 					['label' => \app\models\Acls::$titles, 'url' => ['/acls/index']],
 					['label' => \app\models\Acls::$scheduleTitles, 'url' => ['/schedules/index-acl']],
 					['label' => \app\models\AccessTypes::$titles, 'url' => ['/access-types/index']],
 				]
-			]:'',
-			\app\models\Users::isViewer()?
+			],
 			['label' => 'Люди',
 				'items' => [
 					//['label' => \app\models\OrgStruct::$title, 'url' => ['/org-struct/index']],
@@ -81,8 +76,7 @@ NavBar::begin([
 					//['label' => 'Пользователи', 'url' => ['/users/logins']],
 					['label' => \app\models\UserGroups::$title, 'url' => ['/user-groups/index']],
 				]
-			]:'',
-			\app\models\Users::isViewer()?
+			],
 			['label' => 'Сети',
 				'items' => [
 					['label' => \app\models\Ports::$titles, 'url' => ['/ports/index']],
@@ -92,8 +86,7 @@ NavBar::begin([
 					['label' => \app\models\NetDomains::$title, 'url' => ['/net-domains/index']],
 					['label' => \app\models\Segments::$titles, 'url' => ['/segments/index']],
 				],
-			]:'',
-			\app\models\Users::isViewer()?
+			],
 			['label' => 'Компьютеры',
 				'items' => [
 					['label' => 'АРМы', 'url' => ['/arms/index']],
@@ -109,8 +102,7 @@ NavBar::begin([
 						],
 					]
 				],
-			]:'',
-			\app\models\Users::isViewer()?
+			],
 			['label' => \app\models\Techs::$title,
 				'items' => [
 					['label' => \app\models\Materials::$title,
@@ -127,23 +119,34 @@ NavBar::begin([
 					['label' => 'Игнорируемое', 'url' => ['/hw-ignore/index']],
 					['label' => 'Состояния', 'url' => ['/tech-states/index']],
 				],
-			]:'',
-			\app\models\Users::isAdmin()?
-				['label' => 'Администрирование',
-				'items' => [
-					['label' => 'Пользователи', 'url' => ['/users/index']],
-					['label' => 'Роли', 'url' => ['/rbac/role']],
-					['label' => 'Правила', 'url' => ['/rbac/rule']],
-					['label' => 'Разрешения', 'url' => ['/rbac/permission']],
-					//['label' => 'Назначение', 'url' => ['/rbac/assignment']],
-				],
-			]:'',
-			Yii::$app->user->isGuest ? (
-				['label' => 'Вход', 'url' => ['/site/login']]
-			) : (
-				['label' => 'Выход (' . Yii::$app->user->identity->shortName . ')','linkOptions'=>['onclick'=>'$("#logout-form").submit();']]
-			)
+			],
 		],
+	]):'<div class="mx-auto"></div>';
+	echo Nav::widget([
+		'options' => ['class' => ['nav', 'navbar-nav', 'navbar-right']],
+		'dropdownClass' => Dropdown::classname(),
+		'items' => [
+			\app\models\Users::isAdmin()?
+				['label' => '<i class="fa fa-cog"></i>',
+					'encode'=>false,
+					'dropdownOptions' => ['class'=>'dropdown-menu-end'],
+					'items' => [
+						['label' => 'Пользователи', 'url' => ['/users/index']],
+						['label' => 'Роли', 'url' => ['/rbac/role']],
+						['label' => 'Правила', 'url' => ['/rbac/rule']],
+						['label' => 'Разрешения', 'url' => ['/rbac/permission']],
+					],
+				]:'',
+			Yii::$app->user->isGuest ?
+				['label' => 'Вход', 'url' => ['/site/login']]:
+				['label' => Yii::$app->user->identity->shortName,
+					'dropdownOptions' => ['class'=>'dropdown-menu-end'],
+					'items'=>[
+						['label' => 'Выход', 'linkOptions'=>['onclick'=>'$("#logout-form").submit();'],'url'=>'#']
+					]
+				]
+			
+		]
 	]);
 NavBar::end();
 echo \yii\helpers\Html::beginForm(['/site/logout'], 'post',['id'=>'logout-form','style'=>'display:none']);

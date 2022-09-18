@@ -1,0 +1,38 @@
+div.nav-header {
+    background-color: #25333d;
+    color: #99abb1;
+}
+
+div.nav-header p {margin: 0}
+
+div.nav-header h1,
+div.nav-header h2
+{color: #ebeced;}
+
+div.nav-header a {color: inherit;}
+div.nav-header a:hover {color: white;}
+
+div.nav-header .breadcrumb{
+    border-top: #3b4a57 1pt solid;
+    border-bottom: #3b4a57 1pt solid;
+}
+
+ul.nav-header {
+    background-color: #25333d;
+    border-bottom: #3b4a57 2px solid;
+    margin-bottom: 2em;
+    padding-left: 2em;
+}
+
+ul.nav-header li.nav-item a.nav-link {
+    background: transparent;
+    border: none;
+    font-size: larger;
+    color: #aaa;
+}
+
+ul.nav-header li.nav-item a.nav-link.active {
+    background: transparent;
+    border-bottom: #0dcaf0 5px solid;
+    color: white;
+}

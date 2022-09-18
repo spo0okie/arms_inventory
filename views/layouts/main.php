@@ -5,9 +5,8 @@
 
 use a1inani\yii2ModalAjax\ModalAjax;
 use app\components\Alert;
-use yii\widgets\Breadcrumbs;
+use yii\bootstrap5\Tabs;
 use app\assets\AppAsset;
-//use app\assets\FontAwesomeAsset;
 use yii\helpers\Html;
 
 	
@@ -20,7 +19,7 @@ if (isset($this->params['layout-container'])) {
 }
 
 $request=Yii::$app->urlManager->parseRequest(Yii::$app->request);
-if (is_array($request)) $path=$request[0];
+$path=is_array($request)?$request[0]:'';
 
 $this->beginPage() ?>
 
@@ -40,16 +39,46 @@ $this->beginPage() ?>
 
 <div class="wrap">
 
-<?= $this->render('menu') ?>
-<?php if ($path=='site/login' || \app\models\Users::isViewer()) { ?>
-	<div class="<?= $containerClass ?>">
-		<?= \yii\bootstrap5\Breadcrumbs::widget([
-			'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-		]) ?>
-		<?= Alert::widget() ?>
-		<?= $content ?>
-	</div>
-<?php } else echo $this->render('/site/access-denied') ?>
+	<?= $this->render('menu') ?>
+	<?php if ($path=='site/login' || \app\models\Users::isViewer()) {
+		if (isset($this->params['navTabs'])) { ?>
+			<div class="nav-header">
+				<?= \yii\bootstrap5\Breadcrumbs::widget([
+					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+				]) ?>
+				<?= Alert::widget() ?>
+				<div class="px-5"><?= $this->params['headerContent'] ?></div>
+			</div>
+			<?= Tabs::widget([
+				'items'=>$this->params['navTabs'],
+				'options'=>['class'=>'nav-header'],
+				'encodeLabels'=>false,
+			]); ?>
+		<?php } elseif (isset($this->params['navHeader'])) { ?>
+			<div class="nav-header">
+				<?= \yii\bootstrap5\Breadcrumbs::widget([
+					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+				]) ?>
+				<?= Alert::widget() ?>
+				<div class="px-5"><?= $this->params['headerContent'] ?></div>
+			</div>
+			<div class="<?= $containerClass ?>">
+				<?= $content ?>
+			</div>
+		<?php } else { ?>
+			<div class="<?= $containerClass ?>">
+				<?= \yii\bootstrap5\Breadcrumbs::widget([
+					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+				]) ?>
+				<?= Alert::widget() ?>
+				<?= $content ?>
+			</div>
+		<?php }
+	} else { ?>
+		<div class="<?= $containerClass ?>">
+			<?= $this->render('/site/access-denied') ?>
+		</div>
+	<?php } ?>
 
 </div>
 

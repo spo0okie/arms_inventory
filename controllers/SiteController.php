@@ -61,7 +61,6 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-		//$this->view->params['layout-container']='col align-self-center';
         return $this->render('index');
     }
 

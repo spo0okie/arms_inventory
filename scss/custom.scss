@@ -1,6 +1,8 @@
 $font-family-base: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $font-size-base: .9rem;
-//$line-height-base: 20px;
+$gray-800: #1A2931;
+$gray-700: #25333D;
+
 
 @import "../vendor/thomaspark/bootswatch/dist/Yeti/variables";
 @import "../vendor/bower-asset/bootstrap/scss/bootstrap";
@@ -8,9 +10,8 @@ $font-size-base: .9rem;
 
 
 
-
 // @import "Flatly/variables";
 // @import "Flatly/bootswatch";
 
-/* проверочка */
+/* render test */
 
