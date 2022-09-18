@@ -21,7 +21,7 @@ return [
 			return $renderer->render('/arms/item', ['model' => $data]);
 		},
 	],
-	'model_id' => [
+	'model_name' => [
 		'value' => function ($data) use ($renderer) {
 			return is_object($data->techModel) ?
 				$renderer->render('/tech-models/item', ['model' => $data->techModel, 'static_view' => true]) :
