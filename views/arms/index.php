@@ -23,7 +23,7 @@ $renderer = $this;
 		'defaultOrder' => [
 			'attach',
 			'num',
-			'model_id',
+			'model_name',
 			'comp_id',
 			'comp_hw',
 			'comp_ip',

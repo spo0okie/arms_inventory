@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use DateTime;
+use DateTimeZone;
 use Yii;
 
 /**
@@ -33,6 +35,7 @@ use Yii;
  * @property boolean $isLinux ОС относится к семейству Linux
  
  * @property Arms $arm
+ * @property Arms $mainArm
  * @property Comps[] $dupes
  * @property Users $user
  * @property Users $responsible
@@ -186,6 +189,14 @@ class Comps extends ArmsModel
 	public function getArm()
 	{
 		return $this->hasOne(Arms::class, ['id' => 'arm_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getMainArm()
+	{
+		return $this->hasOne(Arms::class, ['comp_id' => 'id']);
 	}
 	
 	/**
@@ -440,7 +451,7 @@ class Comps extends ArmsModel
 	
 	public function getUpdatedRenderClass() {
 		if (strlen($this->updated_at)) {
-			$data_age=time()-strtotime($this->updated_at);
+			$data_age=$this->secondsSinceUpdate;
 			if ($data_age < 3600) return 'hour_fresh';
 			elseif ($data_age < 3600*24) return 'day_fresh';
 			elseif ($data_age < 3600*24*7) return 'week_fresh';
@@ -451,7 +462,7 @@ class Comps extends ArmsModel
 	
 	public function getUpdatedText() {
 		if (strlen($this->updated_at)) {
-			$data_age=time()-strtotime($this->updated_at);
+			$data_age=$this->secondsSinceUpdate;
 			if ($data_age < 3600) return (int)($data_age/60).' мин.';
 			elseif ($data_age < 3600*72) return (int)($data_age/3600).' ч.';
 			else return (int)($data_age/3600/24).' дн.';
@@ -681,6 +692,12 @@ class Comps extends ArmsModel
 					$arm->comp_id=$this->id;
 					$arm->save();
 				}
+			}
+		}
+		if ($this->mac && is_object($arm=$this->mainArm)) {
+			if (empty($arm->mac)) {
+				$arm->mac=$this->mac;
+				$arm->save();
 			}
 		}
 		return true;
