@@ -174,6 +174,15 @@ class OrgPhones extends \yii\db\ActiveRecord
 	}
 	
 	/**
+	 * Не используется в текущей версии. Нужен для миграции со старой версии
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getProvTel()
+	{
+		return $this->hasOne(ProvTel::className(), ['id' => 'prov_tel_id']);
+	}
+	
+	/**
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getService()
