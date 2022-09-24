@@ -6,54 +6,28 @@
  * Time: 16:24
  */
 
-use yii\bootstrap5\Modal;
+
+use yii\helpers\Html;
 
 if (!isset($places_id)) $places_id=null;
 
-Modal::begin([
-	'id'=>'arms_add_modal',
-	'size' => Modal::SIZE_LARGE,
-	'title' => '<h2>Добавление АРМ</h2>',
-	'toggleButton' => [
-		'label' => 'Новый АРМ',
-		'tag' => 'button',
-		'class' => 'btn btn-success',
-	],
-]);
-$arm=new \app\models\Arms();
-$arm->places_id=$places_id;
-echo $this->render('/arms/_form',	['model'=>$arm]);
-Modal::end();
 
-Modal::begin([
-	'id'=>'techs_add_modal',
-	'size' => Modal::SIZE_LARGE,
-	'title' => '<h2>Добавление оборудования</h2>',
-	'toggleButton' => [
-		'label' => 'Новое оборудование',
-		'tag' => 'button',
-		'class' => 'btn btn-success',
-	],
-]);
-$tech=new \app\models\Techs();
-$tech->places_id=$places_id;
-echo $this->render('/techs/_form',	['model'=>$tech]);
-Modal::end();
+echo Html::a('Новый АРМ',
+	['/arms/create','Arms[places_id]'=>$places_id],
+	['class'=>'open-in-modal-form btn btn-success','data-reload-page-on-submit'=>1]
+).' ';
 
-Modal::begin([
-	'id'=>'materials_add_modal',
-	'size' => Modal::SIZE_LARGE,
-	'title' => '<h2>Добавление ЗиП и материалов</h2>',
-	'toggleButton' => [
-		'label' => 'Новые ЗиП и материалы',
-		'tag' => 'button',
-		'class' => 'btn btn-success',
-	],
-]);
-$materials=new \app\models\Materials();
-$materials->places_id=$places_id;
-echo $this->render('/materials/_form',	['model'=>$materials]);
-Modal::end();
+echo Html::a('Новое оборудование',
+	['/techs/create','Techs[places_id]'=>$places_id],
+	['class'=>'open-in-modal-form btn btn-success','data-reload-page-on-submit'=>1]
+).' ';
+
+echo Html::a('Новые ЗиП и материалы',
+	['/materials/create','Materials[places_id]'=>$places_id],
+	['class'=>'open-in-modal-form btn btn-success','data-reload-page-on-submit'=>1]
+).' ';
+
+
 
 $js = <<<JS
     $('#arms_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2

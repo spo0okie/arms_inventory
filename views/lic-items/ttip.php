@@ -6,11 +6,12 @@
  * Time: 21:55
  */
 
-/* @var \app\models\LicGroups $model */
+/* @var \app\models\LicItems $model */
 /* @var $this yii\web\View */
 
-use yii\helpers\Html;
 ?>
 <div class="lics-ttip ttip-card">
+<?= $this->render('hdr', ['model'=>$model,'static_view'=>true]) ?>
+<?= $this->render('stat',['model'=>$model]) ?>
 <?= $this->render('card',['model'=>$model,'static_view'=>true]) ?>
 </div>

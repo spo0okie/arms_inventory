@@ -121,8 +121,7 @@ class LicKeysController extends Controller
 			}
         }
 	
-		if (Yii::$app->request->get('lic_items_id'))
-			$model->lic_items_id=Yii::$app->request->get('lic_items_id');
+		$model->load(Yii::$app->request->get());
 		
 		return Yii::$app->request->isAjax?
 			$this->renderAjax('create', [

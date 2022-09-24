@@ -87,17 +87,17 @@ JS;
 
         ?>
         Создать
-        <a href="<?= \yii\helpers\Url::to(['/contracts/create','parent'=>$model->id])?>" class="open-in-modal-form">Подчиненный документ</a>
+        <a href="<?= \yii\helpers\Url::to(['/contracts/create','Contracts[parent_id]'=>$model->id])?>" class="open-in-modal-form">Подчиненный документ</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/arms/create','contracts_id'=>$model->id])?>" class="open-in-modal-form">АРМ</a>
+		<a href="<?= \yii\helpers\Url::to(['/arms/create','Arms[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form">АРМ</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/techs/create','contracts_id'=>$model->id])?>" class="open-in-modal-form">Оборудование</a>
+		<a href="<?= \yii\helpers\Url::to(['/techs/create','Techs[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form">Оборудование</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/materials/create','contracts_id'=>$model->id])?>" class="open-in-modal-form">Материалы</a>
+		<a href="<?= \yii\helpers\Url::to(['/materials/create','Materials[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form">Материалы</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/lic-items/create','contracts_id'=>$model->id])?>" class="open-in-modal-form">Лицензию</a>
+		<a href="<?= \yii\helpers\Url::to(['/lic-items/create','LicItems[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form">Лицензию</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/services/create','contracts_id'=>$model->id])?>" class="open-in-modal-form">Услугу</a>
+		<a href="<?= \yii\helpers\Url::to(['/services/create','Services[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form">Услугу</a>
         :: на основании этого документа
     </p>
 <?php } ?>

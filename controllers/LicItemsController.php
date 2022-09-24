@@ -150,6 +150,8 @@ class LicItemsController extends Controller
 		if ($group=Yii::$app->request->get('lic_group_id')) $model->lic_group_id=$group;
 		if ($contracts_id=Yii::$app->request->get('contracts_id')) $model->contracts_ids=[$contracts_id];
 	
+		$model->load(Yii::$app->request->get());
+	
 		return Yii::$app->request->isAjax?
 			$this->renderAjax('create', [
 				'model' => $model,

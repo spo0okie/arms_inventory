@@ -147,6 +147,8 @@ class TechsController extends Controller
         if (Yii::$app->request->get('contracts_id'))
 			$model->contracts_ids=[Yii::$app->request->get('contracts_id')];
 	
+		$model->load(Yii::$app->request->get());
+	
 		return Yii::$app->request->isAjax?
 			$this->renderAjax('create', [
 				'model' => $model,

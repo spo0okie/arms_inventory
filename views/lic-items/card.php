@@ -1,74 +1,19 @@
 <?php
 
 use yii\helpers\Html;
-use yii\bootstrap5\Modal;
 use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
 /* @var $linksData \yii\data\ArrayDataProvider */
 
+$renderer = $this;
+
 if (!isset($static_view)) $static_view=false;
 if (!isset($keys)) $keys=null;
-$renderer=$this;
-$contracts=$model->contracts;
-$arms=$model->arms;
-$deleteable=!count($arms)&&!count($contracts);
 if (!isset($linksData)) $linksData=null;
 ?>
 
-<?php if (!$static_view) { ?>
-    <div class="row">
-        <div class="col-md-9" >
-<?php } else echo '<h4>Группа лицензий: </h4>' ?>
-            <h3>
-                <?= $this->render('/lic-groups/item',['model'=>$model->licGroup,'static_view'=>$static_view]) ?>
-
-                <?= $static_view?'<br /> <h4> Закупка: </h4>':'/' ?>
-
-                <?= $this->render('/lic-items/item',['model'=>$model,'static_view'=>$static_view,'name'=>$model->descr]) ?>
-
-                <?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
-                    'data' => [
-                        'confirm' => 'Удалить эту закупку лицензий? Это действие необратимо!',
-                        'method' => 'post',
-                    ],
-                ]); else { ?>
-					<span class="small">
-						<span class="fas fa-lock"	title="Невозможно в данный момент удалить эту закупку лицензий, т.к. присутствуют привязанные объекты: документы или АРМы."></span>
-					</span>
-				<?php } ?>
-            </h3>
-			<hr/>
-			<?= $this->render('/lic-types/descr',['model'=>$model->licGroup->licType]) ?>
-
-    <?php if (!$static_view) { ?>
-        </div>
-        <div class="col-md-3" >
-    <?php } else echo '<br />' ?>
-            <h4>Статус:</h4>
-            <h3><?= $model->status ?></h3>
-            (<?= $model->datePart ?>)
-	
-			<?php if (count($model->arms_ids)) { ?>
-				<br />Привязано к АРМ: <?= count($model->arms_ids) ?>
-			<?php } ?>
-			<?php if (count($model->comps_ids)) { ?>
-				<br />Привязано к ОС: <?= count($model->comps_ids) ?>
-			<?php } ?>
-			<?php if (count($model->users_ids)) { ?>
-				<br />Привязано к Польз: <?= count($model->users_ids) ?>
-            <?php } ?>
-	        <?php if (count($model->keys)) { ?>
-                <br/>Внесено ключей: <?= count($model->keys) ?>
-		        <?php if (count($model->keyArms)) { ?>
-                    <br/>Распределено ключей: <?= count($model->usedKeys) ?>
-		        <?php }
-	        }?>
-    <?php if (!$static_view) { ?>
-        </div>
-    </div>
-    <?php } ?>
 
     <br />
 
@@ -116,8 +61,9 @@ if (!isset($linksData)) $linksData=null;
 		
 		
 		echo Html::a('Добавить ключ',
-			['/lic-keys/create','lic_items_id'=>$model->id],
-			['class'=>'open-in-modal-form btn btn-success','data-reload-page-on-submit'=>1]);
+			['/lic-keys/create','LicKeys[lic_items_id]'=>$model->id],
+			['class'=>'open-in-modal-form btn btn-success','data-reload-page-on-submit'=>1]
+		);
 	 
 	}?>
 

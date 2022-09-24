@@ -54,7 +54,7 @@ $this->beginPage() ?>
 				'options'=>['class'=>'nav-header'],
 				'encodeLabels'=>false,
 			]); ?>
-		<?php } elseif (isset($this->params['navHeader'])) { ?>
+		<?php } elseif (isset($this->params['headerContent'])) { ?>
 			<div class="nav-header">
 				<?= \yii\bootstrap5\Breadcrumbs::widget([
 					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],

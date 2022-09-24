@@ -185,13 +185,12 @@ class ServicesController extends Controller
 		if (Yii::$app->request->get('parent_id'))
 			$model->parent_id=Yii::$app->request->get('parent_id');
 
-		if (Yii::$app->request->get('contracts_id'))
-			$model->contracts_ids=[Yii::$app->request->get('contracts_id')];
-	
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			return $this->redirect(Url::previous());
 		}
 	
+		$model->load(Yii::$app->request->get());
+		
 		return Yii::$app->request->isAjax?
 			$this->renderAjax('create', [
 				'model' => $model,

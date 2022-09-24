@@ -156,9 +156,7 @@ class ContractsController extends Controller
 	    $model = new Contracts();
 	
 		//передали родительский документ
-		if ($parent_id=Yii::$app->request->get('parent')) {
-			$model->parent_id=$parent_id;
-		}
+		$model->load(Yii::$app->request->get());
 	
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			if (Yii::$app->request->isAjax) {
