@@ -293,7 +293,7 @@ class LicItems extends \yii\db\ActiveRecord
 		$list= static::find()->with('licGroup')
 			//->select(['id','descr'])
 			->all();
-		return yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}
 	
 	
