@@ -127,7 +127,7 @@ if (!isset($linksData)) $linksData=null;
 
 		$newKey = new \app\models\LicKeys();
 		$newKey->lic_items_id = $model->id;
-		echo $this->render('/lic-keys/_form',	['model'=>$newKey]);
+		echo $this->render('/lic-keys/_form',	['model'=>$newKey,'modalParent'=>'#keys_add_modal']);
 
 		Modal::end();
 	}?>
