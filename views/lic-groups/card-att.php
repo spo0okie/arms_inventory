@@ -46,42 +46,7 @@ $soft=$licGroup->soft;
 		<?php } else echo '<br />' ?>
 
         <h4>Привязки:</h4>
-		<?php /*
-        <p>
-			<?php foreach ($arms as $arm) {
-				echo $this->render('/arms/item',['model'=>$arm,'icon'=>true,'static_view'=>true]);
-				if (!$static_view) echo Html::a('<span class="fas fa-trash"/>',
-					array_merge(
-						['arms_id'=>$arm->id],
-						$unlink_href
-					),
-					['data'=>['confirm' => 'Отвязать лицензию от АРМ '.$arm->num.'?',]]
-				);
-				echo '<br />';
-			}
-			foreach ($comps as $comp) {
-				echo $this->render('/comps/item',['model'=>$comp,'icon'=>true,'static_view'=>true]);
-				if (!$static_view) echo Html::a('<span class="fas fa-trash"/>',
-					array_merge(
-						['comps_id'=>$comp->id],
-						$unlink_href
-					),
-					['data'=>['confirm' => 'Отвязать лицензию от OC '.$comp->name.'?',]]
-				);
-				echo '<br />';
-			}
-			foreach ($users as $user) {
-				echo $this->render('/users/item',['model'=>$user,'icon'=>true,'static_view'=>true]);
-				if (!$static_view) echo Html::a('<span class="fas fa-trash"/>',
-					array_merge(
-						['users_id'=>$user->id],
-						$unlink_href
-					),
-					['data'=>['confirm' => 'Отвязать лицензию от пользователя '.$user->Ename.'?',]]
-				);
-				echo '<br />';
-			} ?>
-        </p>*/
+		<?php
 		if (isset($linksData)) echo $this->render('/lic-links/obj-list', ['dataProvider' => $linksData]);
 		
 		if (!$static_view) { ?>

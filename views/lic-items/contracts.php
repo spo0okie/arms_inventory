@@ -30,7 +30,7 @@ Modal::begin([
 $contract=new \app\models\Contracts();
 $contract->lics_ids=[$model->id];
 
-echo $this->render('/contracts/_form',['model'=>$contract]);
+echo $this->render('/contracts/_form',['model'=>$contract,'dropdownParent'=>'#lics_new_contract_modal']);
 Modal::end();
 
 $this->registerJs("$('#contracts-edit-form').on('afterSubmit',function() {

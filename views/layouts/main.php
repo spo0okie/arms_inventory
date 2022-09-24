@@ -93,7 +93,7 @@ $this->beginPage() ?>
 <?php
 
 $js = <<<JS
-function(event, data, status, xhr, selector) {
+(function(event, data, status, xhr, selector) {
     console.log('Got modal commit ('+status+')');
 	if (status!=='success') {
 	    if (data) {
@@ -129,7 +129,7 @@ function(event, data, status, xhr, selector) {
 
 		$(this).modal('toggle');
 	}
-}
+})
 JS;
 
 

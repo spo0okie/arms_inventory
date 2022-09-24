@@ -722,7 +722,7 @@ class Contracts extends ArmsModel
 
 		if (!is_array($ids))
 			$ids=explode(',',$ids);
-		$hint='Выберите АРМ';
+		$hint='';
 		if (!count($ids)) return $hint;
 		$arms=\app\models\Arms::find()
 			->joinWith('contracts')

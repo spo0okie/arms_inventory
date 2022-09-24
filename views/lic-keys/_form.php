@@ -28,42 +28,35 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		'action' => $model->isNewRecord?\yii\helpers\Url::to(['lic-keys/create']):\yii\helpers\Url::to(['lic-keys/update','id'=>$model->id]),
 	]); ?>
 
-	<?= $form->field($model, 'lic_items_id')->widget(Select2::className(), [
+	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'lic_items_id', [
 		'data' => \app\models\LicItems::fetchNames(),
 		'options' => [
             'placeholder' => 'Выберите закупку',
 			'onchange' => 'fetchArmsFromDocs();'
         ],
-		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
 			'allowClear' => false,
-			'multiple' => false
 		]
 	]) ?>
-	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'key_text',
-		'lines' => 1,
-	]) ?>
 
-	<?= $form->field($model, 'arms_ids')->widget(Select2::className(), [
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form, $model, 'key_text',['lines' => 1,]) ?>
+
+	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'arms_ids', [
 		'data' => \app\models\Arms::fetchNames(),
 		'options' => ['placeholder' => 'Выберите АРМы',],
-		'toggleAllSettings'=>['selectLabel'=>null],
+		'classicHint' => \app\models\Contracts::fetchArmsHint(is_object($model->licItem)?$model->licItem->contracts_ids:null ,'lickeys'),
+		'classicHintOptions'=> ['id'=>'arms_id-hint'],
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
 		]
-	])->hint(\app\models\Contracts::fetchArmsHint(is_object($model->licItem)?$model->licItem->contracts_ids:null ,'lickeys'),['id'=>'arms_id-hint']) ?>
+	]); ?>
 
-	<?= $form->field($model, 'users_ids')->widget(Select2::className(), [
+	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'users_ids', [
 		'data' => \app\models\Users::fetchWorking(),
 		'options' => ['placeholder' => 'Выберите пользователей',],
-		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
 			'allowClear' => true,
@@ -71,10 +64,9 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		]
 	]) ?>
 	
-	<?= $form->field($model, 'comps_ids')->widget(Select2::className(), [
+	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'comps_ids', [
 		'data' => \app\models\Comps::fetchNames(),
 		'options' => ['placeholder' => 'Выберите операционные системы',],
-		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
 			'allowClear' => true,
@@ -83,12 +75,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	]) ?>
 	
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'comment',
-		'lines' => 4,
-	]) ?>
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form, $model, 'comment',['lines' => 4,]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

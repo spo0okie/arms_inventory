@@ -7,9 +7,11 @@ use Yii;
 use app\models\LicKeys;
 use app\models\LicKeysSearch;
 use yii\data\ArrayDataProvider;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * LicKeysController implements the CRUD actions for LicKeys model.
@@ -111,12 +113,25 @@ class LicKeysController extends Controller
         $model = new LicKeys();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['/lic-items/view', 'id' => $model->lic_items_id]);
+			if (Yii::$app->request->isAjax) {
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return [$model];
+			}  else {
+				return $this->redirect(Url::previous());
+			}
         }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+	
+		if (Yii::$app->request->get('lic_items_id'))
+			$model->lic_items_id=Yii::$app->request->get('lic_items_id');
+		
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('create', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('create', [
+				'model' => $model,
+			]);
     }
 
     /**
@@ -131,12 +146,22 @@ class LicKeysController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-	        return $this->redirect(['/lic-items/view', 'id' => $model->lic_items_id]);
+			if (Yii::$app->request->isAjax) {
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return [$model];
+			}  else {
+				return $this->redirect(Url::previous());
+			}
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('update', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
     }
 
     /**

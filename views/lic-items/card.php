@@ -1,9 +1,8 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\DetailView;
 use yii\bootstrap5\Modal;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
@@ -17,6 +16,7 @@ $arms=$model->arms;
 $deleteable=!count($arms)&&!count($contracts);
 if (!isset($linksData)) $linksData=null;
 ?>
+
 <?php if (!$static_view) { ?>
     <div class="row">
         <div class="col-md-9" >
@@ -72,13 +72,13 @@ if (!isset($linksData)) $linksData=null;
 
     <br />
 
-    <?= $this->render('/lic-groups/card-att',[
+    <?php  $this->render('/lic-groups/card-att',[
         'model'=>$model,
         'static_view'=>$static_view,
 		'licGroup'=>$model->licGroup,
         'unlink_href'=>['/lic-items/unlink','id'=>$model->id],
 		'linksData'=>$linksData,
-    ]) ?>
+    ])  ?>
 
 
     <?php if (!$static_view) { ?>
@@ -113,30 +113,19 @@ if (!isset($linksData)) $linksData=null;
 				'comment'
 			],
 		]);
-
-	    Modal::begin([
-			'id'=>'keys_add_modal',
-			'size' => Modal::SIZE_LARGE,
-			'title' => '<h2>Добавление лиц. ключа</h2>',
-			'toggleButton' => [
-				'label' => 'Добавить ключ',
-				'tag' => 'button',
-				'class' => 'btn btn-success',
-			],
-		]);
-
-		$newKey = new \app\models\LicKeys();
-		$newKey->lic_items_id = $model->id;
-		echo $this->render('/lic-keys/_form',	['model'=>$newKey,'modalParent'=>'#keys_add_modal']);
-
-		Modal::end();
+		
+		
+		echo Html::a('Добавить ключ',
+			['/lic-keys/create','lic_items_id'=>$model->id],
+			['class'=>'open-in-modal-form btn btn-success','data-reload-page-on-submit'=>1]);
+	 
 	}?>
 
 
     <div id="lics_<?= $model->id ?>_attached_contracts">
         <h4>Привязанные документы:</h4>
         <p>
-	    	<?= $this->render('contracts',['model'=>$model]) ?>
+	    	<?php $this->render('contracts',['model'=>$model]) ?>
         </p>
     </div>
 
