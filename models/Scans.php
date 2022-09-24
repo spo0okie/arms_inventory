@@ -277,6 +277,7 @@ class Scans extends \yii\db\ActiveRecord
 			$format=self::cutExtension($thumb);
 			$im=new \Imagick($_SERVER['DOCUMENT_ROOT'] . $orig.($ext=='pdf'?'[0]':''));
 			$im->setImageColorspace(255); // prevent image colors from inverting
+			$im->setImageColorSpace(\Imagick::COLORSPACE_SRGB); //иначе у белых JPG становился розовый фон
 			$im->setimageformat($format);
 			if ($width&&$height) {
 				if ($im->getImageWidth()>$im->getImageHeight())
