@@ -229,3 +229,9 @@
 .tooltipster-update-scale {
 	animation: tooltipster-scaling 600ms;
 }
+
+
+.tooltipster-content > ul {
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+}
