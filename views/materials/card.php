@@ -14,6 +14,9 @@ use yii\bootstrap5\Modal;
 /* @var $model app\models\Materials */
 
 if (!isset($static_view)) $static_view=false;
+if (!isset($hide_usages)) $hide_usages=false;
+if (!isset($hide_places)) $hide_places=false;
+
 $deleteable=!count($model->childs) && !count($model->usages);
 
 ?>
@@ -21,8 +24,8 @@ $deleteable=!count($model->childs) && !count($model->usages);
 
 	<h1>
 		<?= Html::a($model->type->name.': '. $model->model,['/material/view','id'=>$model->id]) ?>
-		<?= Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]) ?>
-		<?= $deleteable?Html::a('<span class="fas fa-trash">', ['delete', 'id' => $model->id], [
+		<?= !$static_view?Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]):'' ?>
+		<?= $deleteable&&!$static_view?Html::a('<span class="fas fa-trash">', ['delete', 'id' => $model->id], [
 			'data' => [
 				'confirm' => 'Are you sure you want to delete this item?',
 				'method' => 'post',
@@ -50,39 +53,42 @@ $deleteable=!count($model->childs) && !count($model->usages);
 		<br/>
 	<?php } ?>
 
-
-	<h4>Местонахождение</h4>
-	<p><?= $this->render('/places/item',['model'=>$model->place,'full'=>true]) ?></p>
-	<br/>
+	<?php if (!$hide_places) { ?>
+		<h4>Местонахождение</h4>
+		<p><?= $this->render('/places/item',['model'=>$model->place,'full'=>true]) ?></p>
+		<br/>
+	<?php } ?>
 
 	<h4>Ответственный</h4>
 	<p><?= $this->render('/users/item',['model'=>$model->itStaff]) ?></p>
 	<br/>
-
-	<?php if (!empty($model->parent_id)) { ?>
-		<h4>Частично перемещено из</h4>
-		<p><?= $this->render('/materials/item',['model'=>$model->parent,'full'=>true]) ?> </p>
-		<br/>
-	<?php } ?>
-
-	<?php if (!empty($model->childs)) { ?>
-		<h4>Частично перемещено в</h4>
-		<p>
-			<?php foreach ($model->childs as $child) { ?>
-				<?= $this->render('/materials/item',['model'=>$child,'from'=>true]) ?> (<?= $child->count?><?= $model->type->units?>) <br />
-			<?php } ?>
-		</p>
-		<br/>
-	<?php } ?>
-
-	<?php if (!empty($model->usages)) { ?>
-		<h4>Частично израсходовано в</h4>
-		<p>
-			<?php foreach ($model->usages as $usage) { ?>
-				<?= $this->render('/materials-usages/item',['model'=>$usage,'count'=>true,'to'=>true]) ?> <br />
-			<?php } ?>
-		</p>
-		<br/>
+	
+	<?php if (!$hide_usages) { ?>
+		<?php if (!empty($model->parent_id)) { ?>
+			<h4>Частично перемещено из</h4>
+			<p><?= $this->render('/materials/item',['model'=>$model->parent,'full'=>true]) ?> </p>
+			<br/>
+		<?php } ?>
+	
+		<?php if (!empty($model->childs)) { ?>
+			<h4>Частично перемещено в</h4>
+			<p>
+				<?php foreach ($model->childs as $child) { ?>
+					<?= $this->render('/materials/item',['model'=>$child,'from'=>true]) ?> (<?= $child->count?><?= $model->type->units?>) <br />
+				<?php } ?>
+			</p>
+			<br/>
+		<?php } ?>
+	
+		<?php if (!empty($model->usages)) { ?>
+			<h4>Частично израсходовано в</h4>
+			<p>
+				<?php foreach ($model->usages as $usage) { ?>
+					<?= $this->render('/materials-usages/item',['model'=>$usage,'count'=>true,'to'=>true]) ?> <br />
+				<?php } ?>
+			</p>
+			<br/>
+		<?php } ?>
 	<?php } ?>
 
 	<?php if(!$static_view) {

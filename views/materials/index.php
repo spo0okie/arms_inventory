@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'it_staff_id',
             //'history:ntext',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            //['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 </div>

@@ -12,11 +12,13 @@ use Yii;
  * @property string $name Название
  * @property string $units Ед. изм
  * @property string $comment Комментарий
+ * @property Materials[] $materials
  */
-class MaterialsTypes extends \yii\db\ActiveRecord
+class MaterialsTypes extends ArmsModel
 {
-
-	public static $title='Категории материалов';
+	
+	public static $title='Категория материалов';
+	public static $titles='Категории материалов';
     /**
      * {@inheritdoc}
      */
@@ -42,30 +44,53 @@ class MaterialsTypes extends \yii\db\ActiveRecord
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
-			'id' => 'id',
-			'code' => 'Код',
-			'name' => 'Название',
-			'units' => 'Ед. изм',
-			'comment' => 'Комментарий',
+			'id' => [
+				'id',
+			],
+			'code' => [
+				'Код',
+				'hint' => 'Может использоваться впоследствии для отдельных обработчиков событий и генерации CSS классов в формах просмотра и отчетах',
+			],
+			'name' => [
+				'Название',
+				'hint' => 'Название категории ЗиП и материалов',
+			],
+			'rest' => [
+				'Остаток',
+				'indexHint' => 'Суммарный остаток всех материалов этого типа',
+			],
+			'units' => [
+				'Ед. изм',
+				'hint' => 'Единицы измерения материалов этой категории (штуки/метры/килограммы)',
+			],
+			'comment' => [
+				'Комментарий',
+				'hint' => 'Все что нужно знать про эту категорию материалов сверх уже внесенной информации',
+			],
 		];
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * @return \yii\db\ActiveQuery
 	 */
-	public function attributeHints()
+	public function getMaterials()
 	{
-		return [
-			'id' => 'id',
-			'code' => 'Может использоваться впоследствии для отдельных обработчиков событий и генерации CSS классов в формах просмотра и отчетах',
-			'name' => 'Название категории ЗиП и материалов',
-			'units' => 'Единицы измерения материалов этой категории (штуки/метры/килограммы)',
-			'comment' => 'Все что нужно знать про эту категорию материалов сверх уже внесенной информации',
-		];
+		return $this->hasMany(Materials::className(), ['type_id' => 'id']);
 	}
+	
+	public function getRest()
+	{
+		$rest=0;
+		
+		foreach ($this->materials as $material)
+			$rest+=$material->rest;
+		
+		return $rest;
+	}
+	
 
 	public static function fetchNames(){
 		$list= static::find()->orderBy('name')

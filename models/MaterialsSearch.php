@@ -5,6 +5,7 @@ namespace app\models;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Materials;
+use yii\data\ArrayDataProvider;
 
 /**
  * MaterialsSearch represents the model behind the search form of `app\models\Materials`.
@@ -13,6 +14,8 @@ class MaterialsSearch extends Materials
 {
 	private static $modelSearch='concat( getplacepath(materials.places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", materials.model )';
 	public $rest;
+	public $place;
+	public $type;
     /**
      * {@inheritdoc}
      */
@@ -20,7 +23,7 @@ class MaterialsSearch extends Materials
     {
         return [
             [['id', 'parent_id', 'rest', 'type_id', 'places_id'], 'integer'],
-            [['date', 'model', 'it_staff_id', 'comment', 'history'], 'safe'],
+            [['date', 'model', 'it_staff_id', 'comment', 'history','place','type'], 'safe'],
         ];
     }
 
@@ -80,12 +83,14 @@ class MaterialsSearch extends Materials
             'id' => $this->id,
             'parent_id' => $this->parent_id,
             'date' => $this->date,
-            'type_id' => $this->type_id,
-            'places_id' => $this->places_id,
+            'materials.type_id' => $this->type_id,
+            'materials.places_id' => $this->places_id,
         ]);
 		
         $query->andFilterWhere(['or like', static::$modelSearch, \yii\helpers\StringHelper::explode($this->model,'|',true,true)])
-	    ->andFilterWhere(['or like', 'materials.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+			->andFilterWhere(['or like', 'getplacepath(materials.places_id)', \yii\helpers\StringHelper::explode($this->place,'|',true,true)])
+			->andFilterWhere(['or like', 'materials_types.name', \yii\helpers\StringHelper::explode($this->type,'|',true,true)])
+			->andFilterWhere(['or like', 'materials.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
         ->groupBy('materials.id')
         //->having(['>=','(`materials`.`count` - ifnull(`usedCount`,0) - ifnull(`movedCount`,0))',$this->rest]);
         //вот это вызывало ошибку неизвестный столбец в хэвинг условии
@@ -95,4 +100,54 @@ class MaterialsSearch extends Materials
 
         return $dataProvider;
     }
+	
+	/**
+	 * @param $groups array
+	 * @param $model Materials
+	 */
+    public function pushToGroup(&$groups,$model)
+	{
+		foreach ($groups as $key=>$group) {
+			if (
+				$group['place_id']==$model->places_id
+				&&
+				$group['type_id']==$model->type_id
+			) {
+				$groups[$key]['models'][]=$model;
+				return;
+			}
+		}
+		
+		$groups[]=[
+			'place_id'=>$model->places_id,
+			'type_id'=>$model->type_id,
+			'place'=>$model->place->fullName,
+			'type'=>$model->type->name,
+			'models'=>[$model]
+		];
+	}
+ 
+	/**
+	 * Creates data provider instance with search query applied
+	 *
+	 * @param array $params
+	 *
+	 * @return ArrayDataProvider
+	 */
+	public function searchGroups($params)
+	{
+		$data=$this->search($params);
+		$groups=[];
+		foreach ($data->models as $model)
+			$this->pushToGroup($groups,$model);
+		
+		return new ArrayDataProvider([
+			'allModels'=>$groups,
+			'pagination'=>false,
+			'sort' => [
+				'attributes' => ['place', 'type'],
+				'defaultOrder' => ['place'=>SORT_ASC,'type'=>SORT_ASC],
+			],
+		]);
+	}
 }

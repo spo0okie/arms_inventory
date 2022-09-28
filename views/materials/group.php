@@ -1,7 +1,7 @@
 <?php
 
 /* @var $this yii\web\View */
-/* @var $models[] app\models\Materials */
+/* @var $models app\models\Materials[] */
 if (!isset($from)&!isset($material)&!isset($rest)) {
 	$from=true;
 	$material=true;
@@ -37,7 +37,7 @@ if (is_array($models)) {
 		$link=['materials/view','id'=>$ids[0]];
 	} else {
 		//иначе на поиск
-		$link=['materials/index','MaterialsSearch[model]'=>$model->place->fullName.'|'.$model->model];
+		$link=['materials/index','MaterialsSearch[model]'=>$model->model,'MaterialsSearch[places_id]'=>$model->places_id];
 	}
 	
 	if (is_object($model)) {

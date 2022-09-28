@@ -35,7 +35,7 @@ class MaterialsController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','ttips','validate','search-list'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','groups','view','ttip','ttips','validate','search-list'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -64,21 +64,36 @@ class MaterialsController extends Controller
 			return ActiveForm::validate($model);
 		}
 	}
-
-    /**
-     * Lists all Materials models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel = new MaterialsSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
+	
+	/**
+	 * Lists all Materials models.
+	 * @return mixed
+	 */
+	public function actionIndex()
+	{
+		$searchModel = new MaterialsSearch();
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		
+		return $this->render('index', [
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
+		]);
+	}
+	
+	/**
+	 * Lists all Materials models by groups.
+	 * @return mixed
+	 */
+	public function actionGroups()
+	{
+		$searchModel = new MaterialsSearch();
+		$dataProvider = $searchModel->searchGroups(Yii::$app->request->queryParams);
+		
+		return $this->render('groups', [
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
+		]);
+	}
 	
 	/**
 	 * Displays a single model ttip.
@@ -103,6 +118,8 @@ class MaterialsController extends Controller
 	{
 		return $this->renderPartial('ttips', [
 			'models' => $this->findModels(explode(',',$ids)),
+			'hide_usages' => Yii::$app->request->get('hide_usages'),
+			'hide_places' => Yii::$app->request->get('hide_places'),
 		]);
 	}
 	

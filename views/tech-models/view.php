@@ -24,20 +24,14 @@ $static_view=false;
         <?= $this->render('/tech-types/item',['model'=>$model->type]) ?>
         <?= Html::encode($this->title) ?>
         <?= Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
-        <?php if ($deletable) echo Html::a('<span class="fas fa-trash"></span>', ['delete', 'id' => $model->id], [
-	        'data' => [
-		        'confirm' => 'Действительно удалить описание этой модели оборудования?',
-		        'method' => 'post',
-	        ],
-        ]) ?>
+        <?= \app\components\DeleteObjectWidget::Widget([
+			'model'=>$model,
+			'confirm' => 'Действительно удалить описание этой модели оборудования?',
+			'undeletable'=>'Описание этой модели оборудования нельзя удалить в настоящий момент,<br> т.к. в БД есть экземпляры оборудования этой модели',
+			'links'=>[$model->arms,$model->techs]
+		]) ?>
     </h1>
-
-    <?php if (!$deletable) { ?>
-        <p>
-            <span class="fas fa-warning-sign"></span> Описание этой модели оборудования нельзя удалить в настоящий момент, т.к. в БД есть экзепляры оборудования этой модели
-        </p>
-        <br />
-    <?php } ?>
+	
 	<div class="row">
 		<div class="col-md-6">
 			<p>

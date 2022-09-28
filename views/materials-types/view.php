@@ -7,34 +7,37 @@ use yii\widgets\DetailView;
 /* @var $model app\models\MaterialsTypes */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Materials Types', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\MaterialsTypes::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-\yii\web\YiiAsset::register($this);
+
 ?>
 <div class="materials-types-view">
+	<div class="row">
+		<div class="col-md-8">
+			<h1>
+				<?= Html::encode($this->title) ?>
+				<?= Html::a('<span class="fas fa-pencil-alt"/>', ['update', 'id' => $model->id]) ?>
+				<?= \app\components\DeleteObjectWidget::widget([
+					'confirm'=>'Удалить этот тип материалов?',
+					'undeletable'=>'Невозможно сейчас удалить этот тип материалов,<br>т.к. заведены материалы этого типа',
+					'links'=>[$model->materials],
+					'model'=>$model,
+				]) ?>
+			</h1>
+			<p>	<?= $model->comment ?> </p>
+		</div>
+		<div class="col-md-2">
+			<?= DetailView::widget([
+				'model' => $model,
+				'attributes' => [
+					'code',
+					'units',
+				],
+			]) ?>
+		</div>
+	</div>
+	
 
-    <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
-    </p>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'id',
-            'code',
-            'name',
-            'units',
-            'comment:ntext',
-        ],
-    ]) ?>
 
 </div>
