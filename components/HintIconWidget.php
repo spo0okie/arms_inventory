@@ -26,12 +26,14 @@ class HintIconWidget extends Widget
 	{
 		//по умолчанию домашняя
 		$search='';
-
+		
 		$title='$title';
+		$titles='$titles';
 		$helptitle='$helptitle';
 		$model=$this->model;
 		
 		if (property_exists($this->model,'title')) $search=$model::$title;
+		if (property_exists($this->model,'titles')) $search=$model::$titles;
 		if (property_exists($this->model,'helptitle')) $search=$model::$helptitle;
 		
 		if (isset(\Yii::$app->params['hintUrl'])) $url=\Yii::$app->params['hintUrl'];
