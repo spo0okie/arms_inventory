@@ -109,7 +109,7 @@ class CompsSearch extends Comps
         $query->andFilterWhere(['or like', 'concat(IFNULL(domains.name,""),"\\\\",comps.name)', yii\helpers\StringHelper::explode($this->name,'|',true,true)])
             ->andFilterWhere(['or like', 'raw_version', \yii\helpers\StringHelper::explode($this->raw_version,'|',true,true)])
 			->andFilterWhere(['or like', 'ip', \yii\helpers\StringHelper::explode($this->ip,'|',true,true)])
-			->andFilterWhere(['or like', 'mac', \yii\helpers\StringHelper::explode($this->mac,'|',true,true)])
+			->andFilterWhere(['or like', 'comps.mac', \yii\helpers\StringHelper::explode($this->mac,'|',true,true)])
             ->andFilterWhere(['or like', 'arms.num', \yii\helpers\StringHelper::explode($this->arm_id,'|',true,true)])
             ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
 			->andFilterWhere(['or like', 'getplacepath({{places}}.id)', \yii\helpers\StringHelper::explode($this->places_id,'|',true,true)])
