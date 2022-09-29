@@ -13,16 +13,20 @@ if (!isset($glue)) $glue='<br />';
 
 ?>
 
-        <h4>IP адрес(а)</h4>
-        <?php
-		$output=[];
-		foreach ($model->netIps as $ip) {
-			$output[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>$static_view]);
-		}
-		echo implode($glue,$output);
-		?>
+<h4>IP адрес(а)</h4>
+<p><?php
+	$output=[];
+	foreach ($model->netIps as $ip) {
+		$output[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>$static_view]);
+	}
+	echo implode($glue,$output);
+?></p>
 
-		<h4>MAC адрес(а)</h4>
-		<p>
-			<?= implode($glue,explode("\n",$model->formattedMac)) ?>
-		</p>
+<h4>MAC адрес(а)</h4>
+<p><?php
+	$output=[];
+	foreach (explode("\n",$model->formattedMac) as $mac) {
+		$output[]=\yii\helpers\Html::a($mac,['comps/index','CompsSearch[mac]'=>$mac]);
+	}
+	echo implode($glue,$output);
+?></p>

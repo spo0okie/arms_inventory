@@ -108,6 +108,14 @@ class Comps extends ArmsModel
 			['ip', 'filter', 'filter' => function ($value) {
 				return \app\models\NetIps::filterInput($value);
 			}],
+			
+			['mac', 'filter', 'filter' => function ($value) {
+				$macs=explode("\n",$value);
+				foreach ($macs as $i=>$mac) {
+					$macs[$i]=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
+				}
+				return implode("\n",$macs);;
+			}],
 	
 			[['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],
 			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arm_id' => 'id']],
