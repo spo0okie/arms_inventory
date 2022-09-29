@@ -6,12 +6,12 @@ use dosamigos\selectize\SelectizeDropDownList;
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
 
-if (!isset($static_view)) $static_view=false;
+if (!isset($static_view)) $static_view=true;
 if (!isset($fqdn)) $fqdn=false;
 if (!isset($icon)) $icon=false;
 
 if (is_object($model)) {
-	$name=$model->renderName($fqdn);
+	if (!isset($name)) $name=$model->renderName($fqdn);
 	if ($icon) {
 		if ($model->isWindows) $name='<span class="fab fa-windows"></span>'.$name;
 		elseif ($model->isLinux) $name='<span class="fab fa-linux"></span>'.$name;

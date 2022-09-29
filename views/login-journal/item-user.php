@@ -8,14 +8,6 @@ use yii\widgets\DetailView;
 /* @var $name string */
 
 
-if (is_object($model)) {
-if (!isset($name)) $name=$model->compName
+if (is_object($model))
+	echo $this->render('/users/item',['model'=>$model->user,'name'=>$model->userDescr.' ('.$model->age.')']);
 
-?>
-<span class="login-journal-item">
-    <?= Html::a($model->userDescr.' ('.$model->age.')',['/users/view','id'=>$model->users_id], [
-	    'qtip_ajxhrf'=>\yii\helpers\Url::to(['/login-journal/ttip','id'=>$model->id]),
-        'qtip_class'=>"qtip-wide",
-    ]) ?>
-</span>
-<?php } else echo "Отсутствует";

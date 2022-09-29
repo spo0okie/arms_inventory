@@ -12,11 +12,12 @@ use yii\helpers\Html;
 if (!isset($icon)) $icon=false;
 
 if (is_object($model)) {
-	
-	if (isset($short))
-		$title=$model->shortName;
-	else
-		$title=$model->Ename;
+	if (!isset($name)) {
+		if (isset($short))
+			$name=$model->shortName;
+		else
+			$name=$model->Ename;
+	}
 	
 	if ($icon) $title='<span class="fas fa-user"></span>'.$title;
 ?>
@@ -24,7 +25,7 @@ if (is_object($model)) {
 <span class="users-item object-item <?= $model->Uvolen?'uvolen':'' ?>"
       qtip_ajxhrf="<?= \yii\helpers\Url::to(['/users/ttip','id'=>$model->id])?>"
 >
-	<?= Html::a($title,['users/view','id'=>$model->id]) ?>
+	<?= Html::a($name,['users/view','id'=>$model->id]) ?>
 </span>
 
 <?php } else echo "Отсутствует";
