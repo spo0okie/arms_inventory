@@ -33,8 +33,9 @@ use Yii;
  */
 class Materials extends ArmsModel
 {
-
+	
 	public static $title="ЗиП и Материалы";
+	public static $titles="ЗиП и Материалы";
 
     /**
      * {@inheritdoc}

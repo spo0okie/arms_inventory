@@ -19,7 +19,7 @@ if (is_object($model)) {
 			$name=$model->Ename;
 	}
 	
-	if ($icon) $title='<span class="fas fa-user"></span>'.$title;
+	if ($icon) $title='<span class="fas fa-user"></span>'.$name;
 ?>
 
 <span class="users-item object-item <?= $model->Uvolen?'uvolen':'' ?>"
