@@ -12,7 +12,7 @@ use yii\data\ArrayDataProvider;
  */
 class MaterialsSearch extends Materials
 {
-	private static $modelSearch='concat( getplacepath(materials.places_id) , "(" , users.Ename , ") \ " , materials_types.name , ": ", materials.model )';
+	private static $modelSearch='concat( materials_types.name , ": ", materials.model )';
 	public $rest;
 	public $place;
 	public $type;
@@ -58,14 +58,39 @@ class MaterialsSearch extends Materials
 	            'type',
 	            //'usages'
             ]);
-
-        // add conditions that should always apply here
+	
+		$sort=[
+			'defaultOrder' => ['place'=>SORT_ASC,'type'=>SORT_ASC],
+			'attributes'=>[
+				'place'=>[
+					'asc'=>['getplacepath(materials.places_id)'=>SORT_ASC],
+					'desc'=>['getplacepath(materials.places_id)'=>SORT_DESC],
+				],
+				'type'=>[
+					'asc'=>['materials_types.name'=>SORT_ASC],
+					'desc'=>['materials_types.name'=>SORT_DESC],
+				],
+				'model'=>[
+					'asc'=>[static::$modelSearch=>SORT_ASC],
+					'desc'=>[static::$modelSearch=>SORT_DESC],
+				],
+				'comment'=>[
+					'asc'=>['materials.comment'=>SORT_ASC],
+					'desc'=>['materials.comment'=>SORT_DESC],
+				],
+				'date'=>[
+					'asc'=>['materials.date'=>SORT_ASC],
+					'desc'=>['materials.date'=>SORT_DESC],
+				],
+			]
+		];
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
 	        'pagination' => [
 		        'pageSize'=>100
-	        ]
+	        ],
+			'sort'=>$sort
         ]);
 
         $this->load($params);

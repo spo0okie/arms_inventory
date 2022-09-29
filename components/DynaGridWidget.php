@@ -2,6 +2,8 @@
 namespace app\components;
 
 use app\models\ArmsModel;
+use kartik\dynagrid\DynaGrid;
+use kartik\grid\GridView;
 use yii\base\Widget;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
@@ -46,14 +48,30 @@ class DynaGridWidget extends Widget
 			$this->model=$this->filterModel;
 		}
 		
-		return $this->render('dynaGrid/table', [
-			'id'			=> $this->id,
-			'header'		=> $this->header,
-			'createButton'	=> $this->createButton,
-			'hintButton'	=> $this->hintButton,
-			'columns'		=> $this->prepareColumns($this->columns,$this->defaultOrder),
-			'dataProvider'	=> $this->dataProvider,
-			'filterModel'	=> $this->filterModel,
+		return DynaGrid::widget([
+			'storage'=>DynaGrid::TYPE_COOKIE,
+			'columns' => $this->prepareColumns($this->columns,$this->defaultOrder),
+			'gridOptions'=>[
+				'panel'=>[
+					'type' => GridView::TYPE_DEFAULT,
+					'heading' => $this->header,
+					'before' => $this->createButton,
+				],
+				'toolbar' => [
+					['content'=>'{dynagridFilter}{dynagridSort}{dynagrid}'],
+					['content'=>'{export}'],
+					['content'=>$this->hintButton],
+				],
+				'condensed' => true,
+				'dataProvider' => $this->dataProvider,
+				'filterModel' => $this->filterModel,
+				'tableOptions' => ['class'=>'table-condensed table-striped table-bordered arms_index'],
+				'resizableColumns'=>true,
+				'persistResize'=>true
+			],
+			'options'=>[
+				'id'=>'dynaGrid-'.$this->id,
+			]
 		]);
 	}
 	

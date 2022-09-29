@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -11,40 +12,16 @@ $this->title = \app\models\Materials::$title;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="materials-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            //'id',
-            //'parent_id',
-            //'type_id',
-	        [
-		        'attribute'=>'model',
-		        'format'=>'raw',
-		        'value' => function($data) use($renderer){
-			        return $renderer->render('/materials/item',['model'=>$data,'full'=>true]);
-		        }
-	        ],
-	        'comment:ntext',
-	        'date',
-			[
-					'header'=>'<span title="Отображаются только материалы с остатком не меньше установленного в фильтр">Остаток</span>',
-					'attribute'=>'rest'
-			],
-            //'it_staff_id',
-            //'history:ntext',
-
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
+	
+	
+	<?= DynaGridWidget::widget([
+		'id' => 'materials-types-groups',
+		'header' => Html::encode($this->title),
+		'columns' => require 'columns.php',
+		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) .' // '.Html::a('По кучкам',['groups']),
+		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Materials','cssClass'=>'btn']),
+		'dataProvider' => $dataProvider,
+		'filterModel' => $searchModel,
+	]) ?>
+	
 </div>
