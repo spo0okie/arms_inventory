@@ -59,7 +59,12 @@ $deletable = !count ($licItems) && !count($licGroups) && !count($comps) && !coun
             </div>
             <div class="col-md-4">
                 <h4>Материалы и ЗиП</h4>
-                <?php foreach ($model->materialsUsages as $usage) echo $this->render('/materials-usages/item',['model'=>$usage,'material'=>true,'count'=>true,'cost'=>true,'date'=>true]).'<br />'; ?>
+                <?php
+				$materialsUsages=$model->materialsUsages;
+				\app\helpers\ArrayHelper::multisort($materialsUsages,'date',SORT_DESC);
+				foreach($materialsUsages as $usage)
+					echo $this->render('/materials-usages/item',['model'=>$usage,'material'=>true,'count'=>true,'cost'=>true,'date'=>true]).'<br />';
+				?>
             </div>
             <div class="col-md-5">
 	            <?= $this->render('arm-history',['model'=>$model]) ?>
