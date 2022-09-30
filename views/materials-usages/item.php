@@ -20,14 +20,16 @@ if (!isset($cost)) $cost=false;
 
 if (is_object($model)) {
 	?>
-	<?php if ($from||$material) echo $this->render('/materials/item',['model'=>$model->material,'material'=>$material,'from'=>$from]);?>
 	<span
 		class="materials-usages-item cursor-default"
 		qtip_ajxhrf="<?= \yii\helpers\Url::to(['/materials-usages/ttip','id'=>$model->id]) ?>"
 	>
         <?= \yii\helpers\Html::a(
 	        ($date?$model->date.' ':'').
-			($count?('<span class="badge bg-secondary">'.$model->count.$model->material->type->units.'</span>'):'').
+			($from?($model->material->place->fullName):'').
+			(($from&&$material)?' \ ':'').
+			($material?($model->material->type->name.':'.$model->material->model):'').
+			($count?(' <span class="badge bg-secondary">'.$model->count.$model->material->type->units.'</span>'):'').
 			($cost&&$model->cost?('<span class="badge bg-success">'.$model->cost.$model->currency->symbol.'</span>'):'').
             (($count&$to)?' -&gt; ':'').
             ($to?$model->to:''),

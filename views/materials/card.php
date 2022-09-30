@@ -111,7 +111,7 @@ $deleteable=!count($model->childs) && !count($model->usages);
 			<h4>Частично израсходовано в</h4>
 			<p>
 				<?php foreach ($model->usages as $usage) { ?>
-					<?= $this->render('/materials-usages/item',['model'=>$usage,'count'=>true,'to'=>true]) ?> <br />
+					<?= $this->render('/materials-usages/item',['model'=>$usage,'count'=>true,'to'=>true,'date'=>true]) ?> <br />
 				<?php } ?>
 			</p>
 			<br/>
