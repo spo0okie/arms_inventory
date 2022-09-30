@@ -36,11 +36,31 @@ $deleteable=!count($model->childs) && !count($model->usages);
 
 	<p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
 	<p>
-		<strong>Поступило</strong> <?= $model->date?> <b><?= $model->count?><?= $model->type->units?></b>. Остаток <b><?= $model->rest?><?= $model->type->units?></b>
-		<?php if (!$static_view && ($model->rest >0)) { ?> <a onclick="$('#material_new_usage_modal').modal('toggle')" class="href btn btn-primary">использовать</a> <?php } ?>
-		<?php if (!$static_view && ($model->rest >1)) { ?> <a onclick="$('#material_new_material_modal').modal('toggle')" class="href btn btn-primary">разделить</a> <?php } ?>
+		<strong>Поступило</strong> <?= $model->date?> <b><?= $model->count?><?= $model->type->units?></b>
+		<?php if ($static_view) { ?>
+			<br><strong>Остаток</strong>
+			<span class="badge <?= $model->rest?'bg-success':'bg-danger' ?>"><?= $model->rest?><?= $model->type->units?></span>
+				<?= $model->rest?'':' - израсходован' ?>
+			</span>
+		<?php } ?>
 	</p>
 	
+	<?php if (!$static_view) { ?>
+	<div class="mb-3">
+		<span class="fs-4 mx-1">Остаток
+			<span class="badge <?= $model->rest?'bg-success':'bg-danger' ?>"><?= $model->rest?><?= $model->type->units?></span>
+			<?= $model->rest?' ⏵⏵ ':' - израсходован' ?>
+		</span>
+				
+		<?php if ($model->rest >0) { ?>
+			<a onclick="$('#material_new_usage_modal').modal('toggle')" class="href btn btn-primary mx-1" qtip_side="bottom,top" qtip_ttip="Израсходовать часть или весь остаток материала">Использовать</a>
+		<?php }
+		if ($model->rest >1) { ?>
+			<a onclick="$('#material_new_material_modal').modal('toggle')" class="href btn btn-primary mx-1" qtip_side="bottom,top" qtip_ttip="Переместить часть материала на другой склад<br>или передать другому ответственному" >Переместить</a>
+		<?php } ?>
+	</div>
+	<?php } ?>
+
 	<?php if ($model->cost) { ?>
 	<p>
 		<strong>Стоимость:</strong> <?= $model->cost.''.$model->currency->symbol. (
