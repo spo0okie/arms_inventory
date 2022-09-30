@@ -107,15 +107,14 @@ class MaterialsSearch extends Materials
         $query->andFilterWhere([
             'id' => $this->id,
             'parent_id' => $this->parent_id,
-            'date' => $this->date,
             'materials.type_id' => $this->type_id,
             'materials.places_id' => $this->places_id,
         ]);
 		
         $query->andFilterWhere(['or like', static::$modelSearch, \yii\helpers\StringHelper::explode($this->model,'|',true,true)])
 			->andFilterWhere(['or like', 'getplacepath(materials.places_id)', \yii\helpers\StringHelper::explode($this->place,'|',true,true)])
-			->andFilterWhere(['or like', 'materials_types.name', \yii\helpers\StringHelper::explode($this->type,'|',true,true)])
 			->andFilterWhere(['or like', 'materials.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+			->andFilterWhere(['or like', 'materials.date', \yii\helpers\StringHelper::explode($this->date,'|',true,true)])
         ->groupBy('materials.id')
         //->having(['>=','(`materials`.`count` - ifnull(`usedCount`,0) - ifnull(`movedCount`,0))',$this->rest]);
         //вот это вызывало ошибку неизвестный столбец в хэвинг условии
@@ -148,6 +147,7 @@ class MaterialsSearch extends Materials
 			'type_id'=>$model->type_id,
 			'place'=>$model->place->fullName,
 			'type'=>$model->type->name,
+			'model'=>$model->type->name,
 			'models'=>[$model]
 		];
 	}
@@ -170,8 +170,8 @@ class MaterialsSearch extends Materials
 			'allModels'=>$groups,
 			'pagination'=>false,
 			'sort' => [
-				'attributes' => ['place', 'type'],
-				'defaultOrder' => ['place'=>SORT_ASC,'type'=>SORT_ASC],
+				'attributes' => ['place', 'model'],
+				'defaultOrder' => ['place'=>SORT_ASC,'model'=>SORT_ASC],
 			],
 		]);
 	}

@@ -18,7 +18,7 @@ return  [
 		}
 	],
 	[
-		'attribute'=>'type',
+		'attribute'=>'model',
 		'format'=>'raw',
 		'value' => function($data) use($renderer){
 			return $renderer->render('/materials-types/item',['model'=>$data['models'][0]->type,'full'=>true]);
