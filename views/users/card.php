@@ -8,18 +8,18 @@ use kartik\markdown\Markdown;
 /* @var $model app\models\Users */
 
 if (!isset($static_view)) $static_view=false;
-$deleteable=!(bool)(count($model->arms) || count($model->armsHead) || count($model->armsIt) || count($model->armsResponsible) || count($model->techs) || count($model->techsIt));
+
 ?>
     <h1>
 		
 		<?= Html::a($model->Ename,['/users/view', 'id' => $model->id]) ?>
-        <?= Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
-        <?php if($deleteable) echo Html::a('<span class="fas fa-trash"></span>', ['users/delete', 'id' => $model->id], [
-	        'data' => [
-		        'confirm' => 'Удалить этого пользователя?',
-		        'method' => 'post',
-	        ],
-        ]) ?>
+        <?= !$static_view?Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]):'' ?>
+		<?= !$static_view?\app\components\DeleteObjectWidget::Widget([
+			'model'=>$model,
+			'confirm' => 'Действительно удалить этого пользователя?',
+			'undeletable'=>'Нельзя удалить этого пользователя,<br> т.к. к нему привязаны другие объекты',
+			'links'=>[$model->arms,$model->armsHead,$model->armsIt,$model->armsResponsible,$model->techs,$model->techsIt]
+		]):'' ?>
     </h1>
 	<?= $model->nosync?'<span class="fas fa-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
 	Дата рождения: <?= $model->Bday ?> <br/>

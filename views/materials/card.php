@@ -25,11 +25,11 @@ $deleteable=!count($model->childs) && !count($model->usages);
 	<h1>
 		<?= Html::a($model->type->name.': '. $model->model,['/materials/view','id'=>$model->id]) ?>
 		<?= !$static_view?Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]):'' ?>
-		<?= $deleteable&&!$static_view?Html::a('<span class="fas fa-trash">', ['delete', 'id' => $model->id], [
-			'data' => [
-				'confirm' => 'Are you sure you want to delete this item?',
-				'method' => 'post',
-			],
+		<?= !$static_view?\app\components\DeleteObjectWidget::Widget([
+			'model'=>$model,
+			'confirm' => 'Действительно удалить этот материал?',
+			'undeletable'=>'Нельзя удалить этот материал, т.к. есть его расходы',
+			'links'=>[$model->usages]
 		]):'' ?>
 
 	</h1>

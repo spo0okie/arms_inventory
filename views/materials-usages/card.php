@@ -17,13 +17,11 @@ if (!isset($static_view)) $static_view=false;
 ?>
     <h1>
         <?= Html::encode($model->to) ?>
-        <?= Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]) ?>
-        <?= !$static_view?Html::a('<span class="fas fa-trash">', ['delete', 'id' => $model->id], [
-	        'data' => [
-		        'confirm' => 'Are you sure you want to delete this item?',
-		        'method' => 'post',
-	        ],
-        ]):'' ?>
+		<?= !$static_view?Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]):'' ?>
+		<?= !$static_view?\app\components\DeleteObjectWidget::Widget([
+			'model'=>$model,
+			'confirm' => 'Действительно удалить этот расход материала?',
+		]):'' ?>
     </h1>
 	<p><strong>Дата:</strong> <?= $model->date ?></p>
 <?php if ($model->cost) { ?>
