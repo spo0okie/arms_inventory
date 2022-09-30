@@ -813,3 +813,22 @@ div.invalid-feedback {
 .dropdown-menu {
     min-width: 200px !important;
 }
+
+
+
+.alert-striped{
+    background-size: 40px 40px;
+    background-image: -webkit-linear-gradient(45deg, rgba(188,188,188, .2) 25%, transparent 25%,
+    transparent 50%, rgba(188,188,188, .2) 50%, rgba(188,188,188, .2) 75%,
+    transparent 75%, transparent);
+    background-image: -moz-linear-gradient(45deg, rgba(188,188,188, .2) 25%, transparent 25%,
+    transparent 50%, rgba(188,188,188, .2) 50%, rgba(188,188,188, .2) 75%,
+    transparent 75%, transparent);
+    background-image: linear-gradient(45deg, rgba(188,188,188, .2) 25%, transparent 25%,
+    transparent 50%, rgba(188,188,188, .2) 50%, rgba(188,188,188, .2) 75%,
+    transparent 75%, transparent);
+    -pie-background: linear-gradient(45deg, rgba(188,188,188, .2) 25%, transparent 25%,
+    transparent 50%, rgba(188,188,188, .2) 50%, rgba(188,188,188, .2) 75%,
+    transparent 75%, transparent) 0 0 / 40px 40px rgba(188,188,188, .2);
+    color: #666;
+}

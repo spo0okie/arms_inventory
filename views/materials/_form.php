@@ -35,24 +35,103 @@ if ($model->isNewRecord) {
 	    'validationUrl' => $model->isNewRecord?['materials/validate']:['materials/validate','id'=>$model->id],
     ]); ?>
 
-    <div class="row" id="materials-model-selector" <?= !empty($model->parent_id)?$hidden:'' ?>>
-        <div class="col-md-6">
-		    <?= $form->field($model, 'type_id')->widget(Select2::className(), [
-			    'data' => \app\models\MaterialsTypes::fetchNames(),
-			    'options' => ['placeholder' => 'Выберите тип',],
-			    'toggleAllSettings'=>['selectLabel'=>null],
-			    'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-				    'allowClear' => false,
-				    'multiple' => false
-			    ]
-		    ]) ?>
+    <div class="row">
+		<div class="col-md-2">
+			<br>
+			<div class="form-check">
+				<input class="form-check-input"
+					   type="radio"
+					   name="materialSource"
+					   id="materialSource1"
+					<?= !$model->parent_id?'checked':'' ?>
+					   onchange="$('#source_parent, #source_new, #materials-model-selector, #materials-model-hint').toggle();">
+				<label class="form-check-label" for="materialSource1">
+					Приобретено новое
+				</label>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input"
+					   type="radio"
+					   name="materialSource"
+					   id="materialSource2"
+					<?= $model->parent_id?'checked':'' ?>
+					   onchange="$('#source_parent, #source_new, #materials-model-selector, #materials-model-hint').toggle();">
+				<label class="form-check-label" for="materialSource2">
+					Перемещено из другого места
+				</label>
+			</div>
+		</div>
+        <div class="col-md-2">
+		    <?= $form->field($model, 'count')->textInput() ?>
+        </div>
+        <div class="col-md-2">
+	        <?= $form->field($model, 'date')->widget(DatePicker::classname(), [
+		        'options' => ['placeholder' => 'Введите дату ...'],
+		        'pluginOptions' => [
+			        'autoclose'=>true,
+			        'format' => 'yyyy-mm-dd',
+					'weekStart' => '1'
+		        ]
+	        ]); ?>
         </div>
         <div class="col-md-6">
+			<div id="source_parent" <?= empty($model->parent_id)?$hidden:'' ?>>
+				<?= $form->field($model, 'parent_id')->widget(Select2::className(), [
+					'data' => \app\models\Materials::fetchNames(),
+					'options' => ['placeholder' => 'Выберите источник этого материала',],
+					'toggleAllSettings'=>['selectLabel'=>null],
+					'pluginOptions' => [
+						'dropdownParent' => $modalParent,
+						'allowClear' => true,
+						'multiple' => false
+					],
+				]) ?>
+			</div>
+			<div id="source_new" class="row" <?= !empty($model->parent_id)?$hidden:'' ?>>
+				<div class="col-md-3">
+					<?= $form->field($model, 'currency_id')->widget(Select2::classname(), [
+						'data' => \app\models\Currency::fetchNames(),
+						'options' => ['placeholder' => 'RUR'],
+						'toggleAllSettings'=>['selectLabel'=>null],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => false,
+							'multiple' => false
+						],
+					]) ?>
+				</div>
+				<div class="col-md-6">
+					<?= $form->field($model,'cost')->textInput() ?>
+				</div>
+				<div class="col-md-3">
+					<?= $form->field($model,'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('materials','cost','charge')) ?>
+				</div>
+			</div>
+			
+
+        </div>
+    </div>
+	<div <?= empty($model->parent_id)?$hidden:'' ?> id="materials-model-hint" class="alert alert-striped text-center" role="alert">
+		<big>Если выбрано взятие материала из другого источника, то соответственно категория и модель те же, что и в источнике</big>
+	</div>
+	<div class="row" id="materials-model-selector" <?= !empty($model->parent_id)?$hidden:'' ?>>
+		<div class="col-md-6">
+			<?= $form->field($model, 'type_id')->widget(Select2::className(), [
+				'data' => \app\models\MaterialsTypes::fetchNames(),
+				'options' => ['placeholder' => 'Выберите тип',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => false,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
+		<div class="col-md-6">
 			<?= $form->field($model, 'model')->widget(Typeahead::classname(), [
 				'options' => ['placeholder' => 'Наберите или выберите название','autocomplete'=>'off'],
 				'pluginOptions' => ['highlight'=>true],
-	            'pluginEvents' => ['click'=>'function(){
+				'pluginEvents' => ['click'=>'function(){
 	                $(\'.typeahead\').typeahead(\'open\');
 	            }'],
 				'dataset' => [
@@ -66,51 +145,8 @@ if ($model->isNewRecord) {
 						]
 					]
 				]			]); ?>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-2">
-		    <?= $form->field($model, 'count')->textInput() ?>
-        </div>
-        <div class="col-md-3">
-	        <?= $form->field($model, 'date')->widget(DatePicker::classname(), [
-		        'options' => ['placeholder' => 'Введите дату ...'],
-		        'pluginOptions' => [
-			        'autoclose'=>true,
-			        'format' => 'yyyy-mm-dd',
-					'weekStart' => '1'
-		        ]
-	        ]); ?>
-        </div>
-        <div class="col-md-7">
-	        <?= $form->field($model, 'parent_id')->widget(Select2::className(), [
-		        'data' => \app\models\Materials::fetchNames(),
-		        'options' => ['placeholder' => 'Выберите источник этого материала',],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-			        'allowClear' => true,
-			        'multiple' => false
-		        ],
-		        'pluginEvents' =>[
-			        'change'=>'function(){
-                        if ($("#materials-parent_id").val()) {
-                            $("#materials-model-selector").hide();
-                            $("#materials-model-hint").show();
-                        } else {
-                            $("#materials-model-selector").show();
-                            $("#materials-model-hint").hide();
-                        }
-                    }'
-		        ],
-
-	        ]) ?>
-            <div <?= empty($model->parent_id)?$hidden:'' ?> id="materials-model-hint" >
-                Если выбран источник материала, то категория и модель те, же что и в источнике<br /><br />
-            </div>
-
-        </div>
-    </div>
+		</div>
+	</div>
 
     <div class="row">
         <div class="col-md-6">
@@ -149,7 +185,20 @@ if ($model->isNewRecord) {
         <?php //Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success','name' => 'save', 'formaction' => $formActionSave,]) ?>
     </div>
+	
+    
+	<?php ActiveForm::end();
+	$js=<<<JS
+	$('#materials-form').on('beforeSubmit', function (e) {
+		if ($('#materialSource1').is(':checked')) $('#materials-parent_id').val('');
+		return true;
+	});
+JS;
 
-    <?php ActiveForm::end(); ?>
+	$this->registerJs($js)
+	?>
+	
+	
+	
 
 </div>

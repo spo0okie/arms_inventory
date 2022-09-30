@@ -13,6 +13,14 @@ class MaterialsUsagesSearch extends MaterialsUsages
 {
 
 	public $sname;
+	public $place;
+	public $material;
+	public $to;
+	
+	
+	private static $placeCode='getplacepath(materials.places_id)';
+	private static $materialCode='CONCAT(materials_types.name, ":", materials.model)';
+	private static $toCode='CONCAT(ifnull(arms.num,""), " " ,ifnull(techs.num,"") , " ",materials_usages.comment)';
 
     /**
      * {@inheritdoc}
@@ -20,8 +28,8 @@ class MaterialsUsagesSearch extends MaterialsUsages
     public function rules()
     {
         return [
-            [['id', 'materials_id', 'count', 'arms_id', 'techs_id'], 'integer'],
-            [['date', 'comment','sname'], 'safe'],
+            [['id', 'materials_id', 'arms_id', 'techs_id'], 'integer'],
+            [['date', 'comment','to','place','material'], 'safe'],
         ];
     }
 
@@ -47,11 +55,36 @@ class MaterialsUsagesSearch extends MaterialsUsages
         ->joinWith(['material','material.type','material.place','material.itStaff','arm','tech']);
 
         // add conditions that should always apply here
-
+	
+		$sort=[
+			'defaultOrder' => ['date'=>SORT_DESC],
+			'attributes'=>[
+				'place'=>[
+					'asc'=>[static::$placeCode=>SORT_ASC],
+					'desc'=>[static::$placeCode=>SORT_DESC],
+				],
+				'material'=>[
+					'asc'=>[static::$materialCode=>SORT_ASC],
+					'desc'=>[static::$materialCode=>SORT_DESC],
+				],
+				'to'=>[
+					'asc'=>[static::$toCode=>SORT_ASC],
+					'desc'=>[static::$toCode=>SORT_DESC],
+				],
+				'date'=>[
+					'asc'=>['materials_usages.date'=>SORT_ASC],
+					'desc'=>['materials_usages.date'=>SORT_DESC],
+				],
+				'count'=>[
+					'asc'=>['materials_usages.count'=>SORT_ASC],
+					'desc'=>['materials_usages.count'=>SORT_DESC],
+				],
+			]
+		];
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
 	        'pagination' => ['pageSize' => 100,],
-	        'sort'=> ['defaultOrder' => ['date'=>SORT_DESC]]
+	        'sort'=> $sort
         ]);
 
         $this->load($params);
@@ -66,27 +99,23 @@ class MaterialsUsagesSearch extends MaterialsUsages
         $query->andFilterWhere([
             'id' => $this->id,
             'materials_id' => $this->materials_id,
-            'count' => $this->count,
-            'date' => $this->date,
             'arms_id' => $this->arms_id,
             'techs_id' => $this->techs_id,
         ]);
 
-        $query->andFilterWhere([
-        	'or like',
-	        'CONCAT('.
-	        'getplacepath(places.id), '.
-	        '"(", ifnull(users.Ename,""), ") \ ", '.
-	        'materials_types.name, ":", '.
-	        'materials.model, " ", '.
-	        'materials_usages.count, '.
-	        'materials_types.units, " -> ", '.
-	        'ifnull(arms.num,""), " " ,'.
-	        'ifnull(techs.num,"") , " ",'.
-	        'materials_usages.comment , '.
-	        '" //", materials_usages.date)',
-			\yii\helpers\StringHelper::explode($this->sname,'|',true,true)
-        ]);
+        $query
+			->andFilterWhere([
+				'or like','getplacepath(places.id)',\yii\helpers\StringHelper::explode($this->place,'|',true,true)
+			])->andFilterWhere([
+				'or like',
+				'CONCAT(materials_types.name, ":", materials.model)',\yii\helpers\StringHelper::explode($this->material,'|',true,true)
+			])->andFilterWhere([
+				'or like',
+				'CONCAT(ifnull(arms.num,""), " " ,ifnull(techs.num,"") , " ",materials_usages.comment)',\yii\helpers\StringHelper::explode($this->to,'|',true,true)
+			])->andFilterWhere([
+				'or like',
+				'materials_usages.date',\yii\helpers\StringHelper::explode($this->date,'|',true,true)
+			]);
 
         return $dataProvider;
     }

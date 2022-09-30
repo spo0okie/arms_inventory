@@ -25,6 +25,15 @@ if (!isset($static_view)) $static_view=false;
 	        ],
         ]):'' ?>
     </h1>
+	<p><strong>Дата:</strong> <?= $model->date ?></p>
+<?php if ($model->cost) { ?>
+	<p>
+		<strong>Стоимость:</strong> <?= $model->cost.''.$model->currency->symbol. (
+		$model->charge?(' (в т.ч. НДС: '.$model->charge.$model->currency->symbol.')'):''
+		) ?>
+	</p>
+<?php } ?>
+	<br>
     <br />
 
     <h4><?= $model->attributeLabels()['materials_id'] ?></h4>
@@ -35,14 +44,18 @@ if (!isset($static_view)) $static_view=false;
     </p>
     <br />
 
+<?php if (!empty($model->arms_id)) { ?>
     <h4><?= $model->attributeLabels()['arms_id'] ?></h4>
     <p>
 		<?= $this->render('/arms/item',['model'=>$model->arm]) ?>
     </p>
     <br />
+<?php } ?>
 
+<?php if (!empty($model->techs_id)) { ?>
     <h4><?= $model->attributeLabels()['techs_id'] ?></h4>
     <p>
 		<?= $this->render('/techs/item',['model'=>$model->tech]) ?>
     </p>
     <br />
+<?php }

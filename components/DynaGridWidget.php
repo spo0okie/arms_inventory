@@ -29,6 +29,8 @@ class DynaGridWidget extends Widget
 	public $createButton;
 	public $hintButton;
 	
+	public $showFooter=false;
+	
 	/**
 	 * данные
 	 * @var ActiveDataProvider
@@ -67,7 +69,8 @@ class DynaGridWidget extends Widget
 				'filterModel' => $this->filterModel,
 				'tableOptions' => ['class'=>'table-condensed table-striped table-bordered arms_index'],
 				'resizableColumns'=>true,
-				'persistResize'=>true
+				'persistResize'=>true,
+				'showFooter'=>$this->showFooter,
 			],
 			'options'=>[
 				'id'=>'dynaGrid-'.$this->id,
@@ -166,6 +169,7 @@ class DynaGridWidget extends Widget
 		foreach ($columns as $attr=>$data) if (array_search($attr,$defaultOrder)===false) {
 			$column=$this->defaultColumn($attr,$columns[$attr]);
 			if (count($defaultOrder)) $column['visible']=false;
+			if (isset($column['footer'])) $this->showFooter=true;
 			$prepared[]=$column;
 		}
 		return $prepared;

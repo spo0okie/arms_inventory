@@ -23,7 +23,7 @@ $deleteable=!count($model->childs) && !count($model->usages);
 <div class="materials-view">
 
 	<h1>
-		<?= Html::a($model->type->name.': '. $model->model,['/material/view','id'=>$model->id]) ?>
+		<?= Html::a($model->type->name.': '. $model->model,['/materials/view','id'=>$model->id]) ?>
 		<?= !$static_view?Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]):'' ?>
 		<?= $deleteable&&!$static_view?Html::a('<span class="fas fa-trash">', ['delete', 'id' => $model->id], [
 			'data' => [
@@ -36,11 +36,18 @@ $deleteable=!count($model->childs) && !count($model->usages);
 
 	<p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
 	<p>
-		Поступило <?= $model->date?> <b><?= $model->count?><?= $model->type->units?></b>. Остаток <b><?= $model->rest?><?= $model->type->units?></b>
+		<strong>Поступило</strong> <?= $model->date?> <b><?= $model->count?><?= $model->type->units?></b>. Остаток <b><?= $model->rest?><?= $model->type->units?></b>
 		<?php if (!$static_view && ($model->rest >0)) { ?> <a onclick="$('#material_new_usage_modal').modal('toggle')" class="href btn btn-primary">использовать</a> <?php } ?>
 		<?php if (!$static_view && ($model->rest >1)) { ?> <a onclick="$('#material_new_material_modal').modal('toggle')" class="href btn btn-primary">разделить</a> <?php } ?>
 	</p>
-
+	
+	<?php if ($model->cost) { ?>
+	<p>
+		<strong>Стоимость:</strong> <?= $model->cost.''.$model->currency->symbol. (
+			$model->charge?(' (в т.ч. НДС: '.$model->charge.$model->currency->symbol.')'):''
+		) ?>
+	</p>
+	<?php } ?>
 	<br>
 
 	<?php if (!empty($model->contracts_ids)) { ?>

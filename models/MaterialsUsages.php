@@ -16,15 +16,19 @@ use Yii;
  * @property string $comment Коментарий
  * @property string $sname Поисковая строка
  * @property string $to Куда потрачено
+ * @property float $cost Стоимость пачки материалов
+ * @property float $charge НДС
  *
+ * @property Currency $currency Валюта покупки
  * @property Materials $material
  * @property Arms $arm
  * @property Techs $tech
  */
-class MaterialsUsages extends \yii\db\ActiveRecord
+class MaterialsUsages extends ArmsModel
 {
-
+	
 	public static $title='Расход материалов';
+	public static $titles='Расход материалов';
 
 
 	/**
@@ -54,35 +58,44 @@ class MaterialsUsages extends \yii\db\ActiveRecord
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
-			'id' => 'id',
-			'materials_id' => 'Материал',
-			'count' => 'Количество',
-			'date' => 'Дата расхода',
-			'arms_id' => 'АРМ',
-			'techs_id' => 'Оборудование',
-			'comment' => 'Пояснение',
-			'history' => 'Зап. книжка',
-			'sname' => 'Описание',
-		];
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'id',
-			'materials_id' => 'Что использовано для работы',
-			'count' => 'Сколько исзрасходовано в ед. изм. материала',
-			'date' => 'Дата проведения работ связанных с расходом',
-			'arms_id' => 'АРМ на который был потрачен материал или установлен ЗиП',
-			'techs_id' => 'Оборудование на которое был потрачен материал или установлен ЗиП',
-			'comment' => 'Что за работы производились',
-			'history' => 'Подробности по списанию. Кто инициатор, номер заявки, какие-то нюансы',
+			'materials_id' => [
+				'Материал',
+				'hint' => 'Что использовано для работы'
+			],
+			'material' => ['alias'=>'materials_id',],
+			'count' => [
+				'Количество',
+				'indexLabel'=>'Кол-во',
+				'hint' => 'Сколько израсходовано в ед. изм. материала',
+			],
+			'date' => [
+				'Дата расхода',
+				'hint' => 'Дата проведения работ связанных с расходом',
+			],
+			'arms_id' => [
+				'АРМ',
+				'hint' => 'АРМ на который был потрачен материал или установлен ЗиП',
+			],
+			'techs_id' => [
+				'Оборудование',
+				'hint' => 'Оборудование на которое был потрачен материал или установлен ЗиП',
+			],
+			'comment' => [
+				'Пояснение',
+				'hint' => 'Что за работы производились',
+			],
+			'history' => [
+				'Зап. книжка',
+				'hint' => 'Подробности по списанию. Кто инициатор, номер заявки, какие-то нюансы',
+			],
+			'sname' => ['Описание',],
+			'place' => ['Откуда',],
+			'to' => ['Куда',],
+			'cost' => 'Стоимость',
+			'charge' => 'в т.ч. НДС',
 		];
 	}
 
@@ -109,7 +122,25 @@ class MaterialsUsages extends \yii\db\ActiveRecord
 	{
 		return $this->hasOne(Techs::className(), ['id' => 'techs_id']);
 	}
-
+	
+	public function getCost()
+	{
+		return $this->material->cost/$this->material->count*$this->count;
+	}
+	
+	public function getCharge()
+	{
+		return $this->material->charge/$this->material->count*$this->count;
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getCurrency()
+	{
+		return $this->material->currency;
+	}
+	
 	/**
 	 * @return string
 	 */
@@ -119,8 +150,7 @@ class MaterialsUsages extends \yii\db\ActiveRecord
 		if(!empty($this->arm)) $tokens[]=$this->arm->num;
 		if(!empty($this->tech)) $tokens[]=$this->tech->num;
 		if(strlen($this->comment)) $tokens[]=$this->comment;
-		return	implode(' ',$tokens).' //'.
-			$this->date;
+		return	implode(' ',$tokens);
 	}
 
 	/**

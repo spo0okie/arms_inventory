@@ -17,12 +17,15 @@ use Yii;
  * @property string $it_staff_id Сотрудник службы ИТ
  * @property string $comment Комментарий
  * @property string $history Записная кинжка
+ * @property float $cost Стоимость пачки материалов
+ * @property float $charge НДС
  * @property array $contracts_ids массив ссылок на документы
  
  * @property int $used Израсходовано
  * @property int $movedCount Израсходовано
  * @property int $usedCount Израсходовано
  * @property int $rest Остаток
+ * @property \app\models\Currency $currency Валюта покупки
  * @property \app\models\Places $place Помещение
  * @property \app\models\Users $itStaff Ответственный
  * @property \app\models\Materials $parent Источник
@@ -68,6 +71,8 @@ class Materials extends ArmsModel
     public function rules()
     {
         return [
+			[['cost','charge'], 'number'],
+			[['currency_id'],'default','value'=>1],
             [['parent_id', 'count', 'type_id', 'places_id'], 'integer'],
             [['date', 'count', 'it_staff_id', 'places_id'  ], 'required'],
 	        //подмена категории и модели, если установлен источник материалов
@@ -140,6 +145,9 @@ class Materials extends ArmsModel
 				'Документы',
 				'hint' => 'Документы, привязанные к поступлению или хранению материала (расходные привязываются к расходам материала)',
 			],
+			'currency_id' => 'Валюта',
+			'cost' => 'Стоимость',
+			'charge' => 'НДС',
 		];
 	}
 
@@ -241,7 +249,14 @@ class Materials extends ArmsModel
 		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
 			->viaTable('{{%contracts_in_materials}}', ['materials_id' => 'id']);
 	}
-
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getCurrency()
+	{
+		return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+	}
 	/**
 	 * Имя для поиска материала
 	 */
