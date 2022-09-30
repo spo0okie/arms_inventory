@@ -25,21 +25,14 @@ $deletable=!(count($arms)||count($services)||count($lics)||count($childs)||count
 
 <h1>
     <?= Html::encode($model->name) ?>
-	<?php if (!$static_view) {
-		echo Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id], ['title' => 'Изменить',]);
-		if ($deletable) echo Html::a('<span class="fas fa-trash"></span>', ['delete', 'id' => $model->id], [
-			'title' => 'Удалить',
-			'data' => [
-				'confirm' => 'Удалить этот документ и все его сканы? Данное действие необратимо.',
-				'method' => 'post',
-			],
-		]); else { ?>
-			<span class="small">
-				<span class="fas fa-lock"
-					  title="Невозможно удалить этот документ, т.к. есть привязанные к нему объекты"></span>
-			</span>
-		<?php }
-	}?>
+	<?= !$static_view?app\components\UpdateObjectWidget::Widget(['model'=>$model]):''; ?>
+	<?= !$static_view?\app\components\DeleteObjectWidget::Widget([
+		'model'=>$model,
+		'confirm' => 'Действительно удалить этот материал?',
+		'undeletable'=>'Нельзя удалить этот материал, т.к. есть его расходы',
+		'links'=>[$arms,$services,$lics,$childs,$techs]
+	]):'' ?>
+	
 </h1>
 
 <h4>От: <?= $model->datePart ?><?= $this->render('item-state',compact('model'))?></h4>
@@ -87,17 +80,17 @@ JS;
 
         ?>
         Создать
-        <a href="<?= \yii\helpers\Url::to(['/contracts/create','Contracts[parent_id]'=>$model->id])?>" class="open-in-modal-form">Подчиненный документ</a>
+        <a href="<?= \yii\helpers\Url::to(['/contracts/create','Contracts[parent_id]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Подчиненный документ</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/arms/create','Arms[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form">АРМ</a>
+		<a href="<?= \yii\helpers\Url::to(['/arms/create','Arms[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">АРМ</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/techs/create','Techs[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form">Оборудование</a>
+		<a href="<?= \yii\helpers\Url::to(['/techs/create','Techs[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Оборудование</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/materials/create','Materials[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form">Материалы</a>
+		<a href="<?= \yii\helpers\Url::to(['/materials/create','Materials[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Материалы</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/lic-items/create','LicItems[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form">Лицензию</a>
+		<a href="<?= \yii\helpers\Url::to(['/lic-items/create','LicItems[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Лицензию</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/services/create','Services[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form">Услугу</a>
+		<a href="<?= \yii\helpers\Url::to(['/services/create','Services[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Услугу</a>
         :: на основании этого документа
     </p>
 <?php } ?>
