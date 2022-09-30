@@ -151,7 +151,7 @@ if ($model->isNewRecord) {
     <div class="row">
         <div class="col-md-6">
 	        <?= $form->field($model, 'it_staff_id')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchWorking(),
+		        'data' => \app\models\Users::fetchWorking($model->it_staff_id),
 		        'options' => ['placeholder' => 'сотрудник не назначен',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
