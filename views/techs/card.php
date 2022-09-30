@@ -147,7 +147,7 @@ JS;
 <h4>Использованные материалы:</h4>
 <p>
     <?php foreach($model->materialsUsages as $materialsUsage) {
-        echo $this->render('/materials-usages/item',['model'=>$materialsUsage,'material'=>true,'count'=>true,'date'=>true]).'<br />';
+        echo $this->render('/materials-usages/item',['model'=>$materialsUsage,'material'=>true,'count'=>true,'cost'=>true,'date'=>true]).'<br />';
     } ?>
 </p>
 

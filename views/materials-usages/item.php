@@ -16,6 +16,7 @@ if (!isset($material)) $material=false;
 if (!isset($count)) $count=false;
 if (!isset($to)) $to=false;
 if (!isset($date)) $date=false;
+if (!isset($cost)) $cost=false;
 
 if (is_object($model)) {
 	?>
@@ -26,7 +27,8 @@ if (is_object($model)) {
 	>
         <?= \yii\helpers\Html::a(
 	        ($date?$model->date.' ':'').
-            ($count?($model->count.$model->material->type->units):'').
+			($count?('<span class="badge bg-secondary">'.$model->count.$model->material->type->units.'</span>'):'').
+			($cost&&$model->cost?('<span class="badge bg-success">'.$model->cost.$model->currency->symbol.'</span>'):'').
             (($count&$to)?' -&gt; ':'').
             ($to?$model->to:''),
             ['materials-usages/view','id'=>$model->id]

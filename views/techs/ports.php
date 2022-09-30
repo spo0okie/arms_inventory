@@ -10,7 +10,7 @@
 /* @var $this yii\web\View */
 
 if (!is_object($model->model) || !is_array($model->model->portsList) || !count($model->model->portsList)) { ?>
-	<div class="bg-warning">
+	<div class="alert alert-striped">
 		Для этой модели оборудования не объявлено стандартных сетевых портов.
 		Если это неверно - <?= \yii\helpers\Html::a('отредактируйте модель оборудования.',[
 			'/tech-models/update',
