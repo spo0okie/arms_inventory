@@ -52,7 +52,7 @@ class OrgInet extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-	        [['static', 'services_id', 'networks_id', 'places_id','contracts_id'], 'integer'],
+	        [['static', 'services_id', 'networks_id', 'places_id'], 'integer'],
 	        [['cost','charge'], 'number'],
             [['name'], 'required'],
             [['ip_addr', 'ip_mask', 'ip_gw', 'ip_dns1', 'ip_dns2'], 'string', 'max' => 15],
