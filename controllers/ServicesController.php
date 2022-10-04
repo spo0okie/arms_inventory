@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Places;
 use Yii;
 use app\models\Services;
 use yii\data\ActiveDataProvider;
@@ -120,6 +121,8 @@ class ServicesController extends Controller
 	public function actionIndex()
 	{
 		
+		Services::cacheAllItems();
+		Places::cacheAllItems();
 		$searchModel = new ServicesSearch();
 		if (Yii::$app->request->get('showChildren',false))
 			$searchModel->parent_id=null; //игнорировать
@@ -146,7 +149,7 @@ class ServicesController extends Controller
 	 */
 	public function actionIndexByUsers()
 	{
-		
+		Services::cacheAllItems();
 		$searchModel = new ServicesSearch();
 		$searchModel->directlySupported=true;
 		$searchModel->archived=false; //должен отсутствовать

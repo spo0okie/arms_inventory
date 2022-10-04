@@ -28,8 +28,12 @@ class ArmsModel extends \yii\db\ActiveRecord
 	public const searchableOrHint='<br><i>HINT: Можно искать несколько вариантов, разделив их вертикальной</i> <b>|</b> <i>чертой</i>';
 	
 	
-	private $attributeDataCache=null;
-	private $attributeLabelsCache=null;
+	protected $attributeDataCache=null;
+	protected $attributeLabelsCache=null;
+	
+	private static $allItems=null;
+	
+	
 	/**
 	 * Массив описания полей
 	 */
@@ -151,5 +155,31 @@ class ArmsModel extends \yii\db\ActiveRecord
 	public function getSecondsSinceUpdate() {
 		$updated = new	DateTime($this->updated_at,	new DateTimeZone('UTC') );
 		return time()-$updated->format('U');
+	}
+	
+	
+	public static function allItemsLoaded() {
+		return !is_null(static::$allItems);
+	}
+	
+	public static function cacheAllItems() {
+		if (!static::allItemsLoaded())
+			static::$allItems=static::find()->all();
+	}
+	
+	public static function getAllItems($autoload=false) {
+		if (!static::allItemsLoaded() && $autoload)
+			static::cacheAllItems();
+		return static::$allItems;
+	}
+	
+	public static function getLoadedItem($id,$autoload=false) {
+		if (!static::allItemsLoaded()) {
+			if ($autoload)
+				static::cacheAllItems();
+			else
+				return null;
+		}
+		return isset(static::$allItems[$id])?static::$allItems[$id]:null;
 	}
 }

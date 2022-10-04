@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\ArrayHelper;
 use Yii;
 use yii\web\User;
 
@@ -57,6 +58,7 @@ use yii\web\User;
  * @property Places[] $techPlaces
  * @property Places[] $phonesPlaces
  * @property Places[] $inetsPlaces
+ * @property Places[] $places
  * @property Places[] $sites
  * @property Places[] $sitesRecursive
  * @property Services $parent
@@ -80,7 +82,7 @@ use yii\web\User;
  * @property Contracts $docs
  * @property Contracts $payments
  */
-class Services extends \yii\db\ActiveRecord
+class Services extends ArmsModel
 {
 	
 	public static $titles='Сервисы/услуги';
@@ -98,8 +100,11 @@ class Services extends \yii\db\ActiveRecord
 	private $providingScheduleRecursiveCache=null;
 	private $supportScheduleRecursiveCache=null;
 	private $sitesRecursiveCache=null;
+	private $placesCache=null;
 	private $sumTotalsCache=null;
 	private $sumChargeCache=null;
+	
+	protected static $allItems=null;
 	
 	
 	/**
@@ -312,6 +317,7 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getParent()
 	{
+		if (static::allItemsLoaded()) return static::getLoadedItem($this->parent_id);
 		return $this->hasOne(Services::className(), ['id' => 'parent_id']);
 	}
 	
@@ -321,6 +327,11 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getChildren()
 	{
+		if (static::allItemsLoaded()) return ArrayHelper::findByField(
+			static::getAllItems(),
+			'parent_id',
+			$this->id
+		);
 		return $this->hasMany(Services::className(), ['parent_id' => 'id']);
 	}
 	
@@ -352,7 +363,8 @@ class Services extends \yii\db\ActiveRecord
 	 */
 	public function getSegment()
 	{
-		return $this->hasOne(Segments::className(), ['id' => 'segment_id']);
+		return $this->hasOne(Segments::className(), ['id' => 'segment_id'])
+			->from(['services_segment'=>Users::tableName()]);
 	}
 	
 	/**
@@ -458,7 +470,6 @@ class Services extends \yii\db\ActiveRecord
 	public function getComps()
 	{
 		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
-			//->from(['svc_comps'=>Comps::tableName()])
 			->viaTable('comps_in_services', ['services_id' => 'id']);
 	}
 	
@@ -503,22 +514,36 @@ class Services extends \yii\db\ActiveRecord
 	}
 	
 	public function getPlaces() {
-		$places=[];
-		foreach (array_merge($this->techPlaces,$this->armPlaces,$this->phonesPlaces,$this->inetsPlaces) as $place)
-			$places[$place->id]=$place;
-		return $places;
+		if (is_null($this->placesCache)) {
+			$this->placesCache=[$this->places_id=>$this->place];
+			if (Places::allItemsLoaded()) {
+				foreach ($this->techs as $item)
+					if (!isset($this->placesCache[$item->places_id]))
+						$this->placesCache[$item->places_id]=Places::getLoadedItem($item->places_id);
+				foreach ($this->arms as $item)
+					if (!isset($this->placesCache[$item->places_id]))
+						$this->placesCache[$item->places_id]=Places::getLoadedItem($item->places_id);
+				foreach ($this->orgPhones as $item)
+					if (!isset($this->placesCache[$item->places_id]))
+						$this->placesCache[$item->places_id]=Places::getLoadedItem($item->places_id);
+				foreach ($this->orgInets as $item)
+					if (!isset($this->placesCache[$item->places_id]))
+						$this->placesCache[$item->places_id]=Places::getLoadedItem($item->places_id);
+			} else {
+				foreach (array_merge($this->techPlaces,$this->armPlaces,$this->phonesPlaces,$this->inetsPlaces) as $place)
+					$this->placesCache[$place->id]=$place;
+			}
+		}
+		return $this->placesCache;
 	}
 	
 	public function getSites(){
 		$sites=[];
-		if (is_object($place=$this->place)) {
-			$site = $place->top;
-			$sites[$site->id] = $site;
-		}
-		//foreach ($this->armPlaces as $place) {
 		foreach ($this->places as $place) {
-			$site=$place->top;
+			if (is_object($place)) {
+				$site=$place->top;
 				$sites[$site->id]=$site;
+			}
 		}
 		return $sites;
 	}
@@ -682,5 +707,12 @@ class Services extends \yii\db\ActiveRecord
 			->orderBy('name')
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
+	}
+	
+	public static function cacheAllItems() {
+		if (!static::allItemsLoaded())
+			static::$allItems=static::find()
+				->with(['orgPhones','orgInets','techs','comps','place'])
+				->all();
 	}
 }

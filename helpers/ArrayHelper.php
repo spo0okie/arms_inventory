@@ -26,4 +26,13 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		}
 		return $default;
 	}
+	
+	public static function findByField($array,$field,$value) {
+		$result=[];
+		foreach ($array as $item) {
+			if (isset($item[$field]) && $item[$field]==$value)
+				$result[]=$item;
+		}
+		return $result;
+	}
 }

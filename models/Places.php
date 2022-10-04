@@ -26,7 +26,7 @@ use Yii;
  * @property Places[] $childs
  * @property Materials[] $materials
  */
-class Places extends \yii\db\ActiveRecord
+class Places extends ArmsModel
 {
 
 
@@ -76,10 +76,10 @@ DELIMITER ;
 	private $phones_cache=null;
 	private $childs_cache=null;
 	private $arms_cache=null;
-	private $techs_cache=null;
 	private static $all_items=null;
-	private static $names_cache=null;
-
+	
+	protected static $allItems=null;
+	
 	/**
      * @inheritdoc
      */

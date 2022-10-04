@@ -15,6 +15,7 @@ use Yii;
  * @property string $sname Строка для поиска
  * @property string $fullNum Полный номер
  * @property int $prov_tel_id Услуга телефонии
+ * @property int $places_id Помещение
  * @property string $comment Комментарий
  * @property float $cost
  * @property float $charge
