@@ -341,7 +341,8 @@ class Services extends ArmsModel
 	 */
 	public function getResponsible()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'responsible_id'])->from(['responsible'=>Users::tableName()]);
+		return $this->hasOne(Users::className(), ['id' => 'responsible_id'])
+			->from(['responsible'=>Users::tableName()]);
 	}
 	
 	public function getResponsibleRecursive() {
@@ -712,7 +713,7 @@ class Services extends ArmsModel
 	public static function cacheAllItems() {
 		if (!static::allItemsLoaded())
 			static::$allItems=static::find()
-				->with(['orgPhones','orgInets','techs','comps','place'])
+				->with(['orgPhones','orgInets','techs','comps','place','segment',])
 				->all();
 	}
 }
