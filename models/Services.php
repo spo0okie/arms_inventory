@@ -147,12 +147,12 @@ class Services extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+			[['cost','charge'], 'number'],
 			[['currency_id'],'default','value'=>1],
             [['name', 'description', 'is_end_user'], 'required'],
 	        [['depends_ids','comps_ids','support_ids','techs_ids','contracts_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
 			[['places_id','partners_id','places_id','archived','currency_id','weight'],'integer'],
-			[['cost','charge'], 'number'],
 			[['weight'],'default', 'value' => '100'],
 	        [['is_end_user', 'is_service', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 			[['name'], 'string', 'max' => 64],
@@ -172,7 +172,6 @@ class Services extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-			'currency_id' => 'Валюта',
 			'name' => 'Название',
 			'parent_id' => 'Основной сервис/услуга',
 			'description' => 'Описание',
@@ -204,6 +203,7 @@ class Services extends \yii\db\ActiveRecord
 			'partners_id' => Partners::$title,
 			'partner' => Partners::$title,
 			'sites' => 'Площадки',
+			'currency_id' => 'Валюта',
 			'cost' => 'Стоимость',
 			'charge' => 'НДС',
 			'weight' => 'Вес'
@@ -458,14 +458,14 @@ class Services extends \yii\db\ActiveRecord
 	public function getComps()
 	{
 		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
-			->from(['svc_comps'=>Comps::tableName()])
-			->viaTable('{{%comps_in_services}}', ['services_id' => 'id']);
+			//->from(['svc_comps'=>Comps::tableName()])
+			->viaTable('comps_in_services', ['services_id' => 'id']);
 	}
 	
 	public function getArms()
 	{
 		return $this->hasMany(Arms::class, ['id' => 'arm_id'])
-			->from(['svc_arms'=>Arms::tableName()])
+			//->from(['svc_arms'=>Arms::tableName()])
 			->via('comps');
 	}
 	

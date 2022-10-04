@@ -52,6 +52,7 @@ class ServicesSearch extends Services
         $query = Services::find()
 			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)')
 			->joinWith([
+			//->with([
 				'support',
 				'comps',
 				'arms',
@@ -64,7 +65,7 @@ class ServicesSearch extends Services
 				'providingSchedule',
 				'orgPhones',
 				'orgInets',
-			],false);
+			],true);
 		
 		if ($this->parent_id===false) {
 			$query->andWhere(['services.parent_id'=>null]);
@@ -82,7 +83,7 @@ class ServicesSearch extends Services
             // $query->where('0=1');
             return new ActiveDataProvider([
 				'query' => $query,
-				'totalCount' => (clone $query)->count('distinct(services.id)'),
+				//'totalCount' => $query->count('distinct(services.id)'),
 				'pagination' => false,
 				'sort'=> ['defaultOrder' => ['name'=>SORT_ASC]]
 			]);
