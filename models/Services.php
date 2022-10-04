@@ -365,7 +365,7 @@ class Services extends ArmsModel
 	public function getSegment()
 	{
 		return $this->hasOne(Segments::className(), ['id' => 'segment_id'])
-			->from(['services_segment'=>Users::tableName()]);
+			->from(['services_segment'=>Segments::tableName()]);
 	}
 	
 	/**
