@@ -49,7 +49,7 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 		'id' => 'materials-usages-index',
 		'header' => Html::encode($this->title),
 		'columns' => require 'columns.php',
-		'createButton' => Html::a('Добавить расход', ['create'], ['class' => 'btn btn-success']),
+		//'createButton' => Html::a('Добавить расход', ['create'], ['class' => 'btn btn-success']),
 		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\MaterialsUsages','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
