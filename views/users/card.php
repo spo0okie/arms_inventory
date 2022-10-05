@@ -41,8 +41,7 @@ if (!isset($static_view)) $static_view=false;
 	?>
     <p>
 	    <?= $this->render('/partners/item',['model'=>$model->org,'static_view'=>true]) ?>
-		//
-		<?= $model->Doljnost ?>
+		<?= $model->Doljnost?(' // '.$model->Doljnost):'' ?>
 		<br>
 		<?= $this->render('/org-struct/item',['model'=>$model->orgStruct,'chain'=>true]) ?>
 		
