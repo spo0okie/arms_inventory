@@ -28,8 +28,8 @@ $deletable=!(count($arms)||count($services)||count($lics)||count($childs)||count
 	<?= !$static_view?app\components\UpdateObjectWidget::Widget(['model'=>$model]):''; ?>
 	<?= !$static_view?\app\components\DeleteObjectWidget::Widget([
 		'model'=>$model,
-		'confirm' => 'Действительно удалить этот материал?',
-		'undeletable'=>'Нельзя удалить этот материал, т.к. есть его расходы',
+		'confirm' => 'Действительно удалить этот документ?',
+		'undeletable'=>'Нельзя удалить этот документ, т.к. есть привязанные к нему объекты',
 		'links'=>[$arms,$services,$lics,$childs,$techs]
 	]):'' ?>
 	
