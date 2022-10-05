@@ -2,8 +2,10 @@
 
 namespace app\controllers;
 
+use app\models\Places;
 use app\models\SchedulesEntries;
 use app\models\SchedulesSearchAcl;
+use app\models\Services;
 use Yii;
 use app\models\Schedules;
 use app\models\SchedulesSearch;
@@ -64,6 +66,8 @@ class SchedulesController extends Controller
 	 */
 	public function actionIndexAcl()
 	{
+		Services::cacheAllItems();
+		Places::cacheAllItems();
 		$searchModel = new SchedulesSearchAcl();
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		
