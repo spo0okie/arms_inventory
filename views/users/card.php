@@ -40,9 +40,9 @@ if (!isset($static_view)) $static_view=false;
 	    };
 	?>
     <p>
-	    <?= $model->org->name ?>
-        //
-        <?= $model->Doljnost ?>
+	    <?= $this->render('/partners/item',['model'=>$model->org,'static_view'=>true]) ?>
+		//
+		<?= $model->Doljnost ?>
 		<br>
 		<?= $this->render('/org-struct/item',['model'=>$model->orgStruct,'chain'=>true]) ?>
 		
