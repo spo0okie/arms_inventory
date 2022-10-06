@@ -80,7 +80,9 @@ class DynaGridWidget extends Widget
 	
 	public function setColumnKeys($columns) {
 		foreach ($columns as $attr=>$data) {
-			if (!is_array($data) && is_numeric($attr)) {
+			if (is_null($data)||empty($data)) {
+				unset($columns[$attr]);
+			} elseif (!is_array($data) && is_numeric($attr)) {
 				unset($columns[$attr]);
 				$columns[$data]=[];
 			}
