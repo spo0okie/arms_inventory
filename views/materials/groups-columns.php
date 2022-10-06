@@ -40,7 +40,7 @@ return  [
 						'hide_places' => 1,
 						'hide_usages' => 1
 					]) . '">' .
-					Html::a($data[$groupBy], $link) .
+					Html::a($data['model'], $link) .
 					'</span>';
 			}
 		}
