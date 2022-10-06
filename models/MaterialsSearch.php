@@ -174,7 +174,7 @@ class MaterialsSearch extends Materials
 			'name'=>$model->model,
 			'place'=>$model->place->fullName,
 			'type'=>$model->type->name,
-			'model'=>$model->type->name,
+			'model'=>$model->type->name.':'.$model->model,
 			'models'=>[$model]
 		];
 	}

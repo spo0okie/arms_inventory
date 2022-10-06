@@ -15,6 +15,11 @@ if (!isset($material)) $material=true;
 if (!isset($rest)) $rest=false;
 if (!isset($responsible)) $responsible=false;
 
+if (!isset($name)) $name=
+	($from?($model->place->fullName.($responsible?'('.$model->itStaff->Ename.')':'')):'').
+	(($from&&$material)?' \ ':'').
+	($material?($model->type->name.':'.$model->model):'').
+	($rest?(' '.$model->rest.$model->type->units):'');
 
 if (is_object($model)) {
 	?>
@@ -23,10 +28,7 @@ if (is_object($model)) {
 		qtip_ajxhrf="<?= \yii\helpers\Url::to(['/materials/ttip','id'=>$model->id]) ?>"
 	>
     <?= \yii\helpers\Html::a(
-        ($from?($model->place->fullName.($responsible?'('.$model->itStaff->Ename.')':'')):'').
-        (($from&&$material)?' \ ':'').
-        ($material?($model->type->name.':'.$model->model):'').
-        ($rest?(' '.$model->rest.$model->type->units):'')
+        $name
         ,
         ['materials/view','id'=>$model->id]
     ) ?>

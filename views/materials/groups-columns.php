@@ -19,20 +19,20 @@ return  [
 		}
 	],
 	[
-		'attribute'=>'type',
-		'format'=>'raw',
-		'value' => function($data) use($renderer){
-			return $renderer->render('/materials-types/item',['model'=>$data['models'][0]->type,'full'=>true]);
-		}
-	],
-	$groupBy=='name'?[
 		'attribute'=>'model',
 		'format'=>'raw',
 		'value' => function($data) use($renderer,$groupBy){
 			if (count($data['models'])==1) {
 				//если у нас 1 материал то ссылка будет прямо на него
-				return $renderer->render('/materials/item',['model'=>$data['models'][0],'material'=>true]);
+				return $renderer->render('/materials/item',[
+					'model'=>$data['models'][0],
+					'name'=>$data['model']]
+				);
 			} else {
+				if ($groupBy=='type')
+					$link=['materials/index','MaterialsSearch[type_id]'=>$data['type_id'],'MaterialsSearch[places_id]'=>$data['place_id']];
+				if ($groupBy=='name')
+					$link=['materials/index','MaterialsSearch[model]'=>$data['name'],'MaterialsSearch[places_id]'=>$data['place_id']];
 				return '<span class="material-item cursor-default" qtip_ajxhrf="' .
 					\yii\helpers\Url::to([
 						'/materials/ttips',
@@ -40,11 +40,11 @@ return  [
 						'hide_places' => 1,
 						'hide_usages' => 1
 					]) . '">' .
-					Html::a($data['name'], ['materials/index', 'MaterialsSearch[model]' => $data['name'], 'MaterialsSearch[places_id]' => $data['place_id']]) .
+					Html::a($data[$groupBy], $link) .
 					'</span>';
 			}
 		}
-	]:false,
+	],
 	[
 		'attribute'=>'rest',
 		'format'=>'raw',
@@ -70,7 +70,7 @@ return  [
 				if ($groupBy=='type')
 					$link=['materials/index','MaterialsSearch[type_id]'=>$data['type_id'],'MaterialsSearch[places_id]'=>$data['place_id']];
 				if ($groupBy=='name')
-					$link=['materials/index','MaterialsSearch[name]'=>$data['name'],'MaterialsSearch[places_id]'=>$data['place_id']];
+					$link=['materials/index','MaterialsSearch[model]'=>$data['name'],'MaterialsSearch[places_id]'=>$data['place_id']];
 			}
 			return '<span class="material-item cursor-default" qtip_ajxhrf="'.
 				\yii\helpers\Url::to([
