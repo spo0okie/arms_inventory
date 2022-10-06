@@ -20,6 +20,11 @@ $static_view=false;
 <div class="tech-models-view">
 
     <h1>
+		<?= \app\components\LinkObjectWidget::widget([
+			'model'=>$model->type,
+			'ttipUrl'=>false,
+			'static'=>true
+		]) ?>
         <?= \app\components\LinkObjectWidget::widget([
 			'model'=>$model,
 			'name'=>$model->manufacturer->name.' '.$model->name,
