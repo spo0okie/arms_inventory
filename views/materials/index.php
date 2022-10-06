@@ -17,7 +17,9 @@ $this->params['breadcrumbs'][] = $this->title;
 		'id' => 'materials-types-groups',
 		'header' => Html::encode($this->title),
 		'columns' => require 'columns.php',
-		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) .' // '.Html::a('Сложить в кучки',['groups']+Yii::$app->request->get()),
+		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success'])
+			.' // '.Html::a('Группировать по наименованию',['name-groups']+Yii::$app->request->get())
+			.' // '.Html::a('Группировать по типу',['type-groups']+Yii::$app->request->get()),
 		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Materials','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,

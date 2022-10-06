@@ -35,7 +35,7 @@ class MaterialsController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','groups','view','ttip','ttips','validate','search-list'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','name-groups','type-groups','view','ttip','ttips','validate','search-list'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -84,12 +84,29 @@ class MaterialsController extends Controller
 	 * Lists all Materials models by groups.
 	 * @return mixed
 	 */
-	public function actionGroups()
+	public function actionTypeGroups()
 	{
 		$searchModel = new MaterialsSearch();
-		$dataProvider = $searchModel->searchGroups(Yii::$app->request->queryParams);
+		$dataProvider = $searchModel->searchTypeGroups(Yii::$app->request->queryParams);
 		
 		return $this->render('groups', [
+			'groupBy'=>'type',
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
+		]);
+	}
+	
+	/**
+	 * Lists all Materials models by groups.
+	 * @return mixed
+	 */
+	public function actionNameGroups()
+	{
+		$searchModel = new MaterialsSearch();
+		$dataProvider = $searchModel->searchNameGroups(Yii::$app->request->queryParams);
+		
+		return $this->render('groups', [
+			'groupBy'=>'name',
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,
 		]);

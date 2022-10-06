@@ -4,7 +4,6 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Materials;
 use yii\data\ArrayDataProvider;
 
 /**
@@ -129,7 +128,7 @@ class MaterialsSearch extends Materials
 	 * @param $groups array
 	 * @param $model Materials
 	 */
-    public function pushToGroup(&$groups,$model)
+	public function pushToTypesGroup(&$groups,$model)
 	{
 		foreach ($groups as $key=>$group) {
 			if (
@@ -151,7 +150,35 @@ class MaterialsSearch extends Materials
 			'models'=>[$model]
 		];
 	}
- 
+	
+	/**
+	 * @param $groups array
+	 * @param $model Materials
+	 */
+	public function pushToNamesGroup(&$groups,$model)
+	{
+		foreach ($groups as $key=>$group) {
+			if (
+				$group['place_id']==$model->places_id
+				&&
+				$group['name']==$model->model
+			) {
+				$groups[$key]['models'][]=$model;
+				return;
+			}
+		}
+		
+		$groups[]=[
+			'place_id'=>$model->places_id,
+			'type_id'=>$model->type_id,
+			'name'=>$model->model,
+			'place'=>$model->place->fullName,
+			'type'=>$model->type->name,
+			'model'=>$model->type->name,
+			'models'=>[$model]
+		];
+	}
+	
 	/**
 	 * Creates data provider instance with search query applied
 	 *
@@ -159,12 +186,36 @@ class MaterialsSearch extends Materials
 	 *
 	 * @return ArrayDataProvider
 	 */
-	public function searchGroups($params)
+	public function searchTypeGroups($params)
 	{
 		$data=$this->search($params);
 		$groups=[];
 		foreach ($data->models as $model)
-			$this->pushToGroup($groups,$model);
+			$this->pushToTypesGroup($groups,$model);
+		
+		return new ArrayDataProvider([
+			'allModels'=>$groups,
+			'pagination'=>false,
+			'sort' => [
+				'attributes' => ['place', 'model'],
+				'defaultOrder' => ['place'=>SORT_ASC,'model'=>SORT_ASC],
+			],
+		]);
+	}
+
+	/**
+	 * Creates data provider instance with search query applied
+	 *
+	 * @param array $params
+	 *
+	 * @return ArrayDataProvider
+	 */
+	public function searchNameGroups($params)
+	{
+		$data=$this->search($params);
+		$groups=[];
+		foreach ($data->models as $model)
+			$this->pushToNamesGroup($groups,$model);
 		
 		return new ArrayDataProvider([
 			'allModels'=>$groups,
