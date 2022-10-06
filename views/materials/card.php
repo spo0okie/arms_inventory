@@ -17,21 +17,20 @@ if (!isset($static_view)) $static_view=false;
 if (!isset($hide_usages)) $hide_usages=false;
 if (!isset($hide_places)) $hide_places=false;
 
-$deleteable=!count($model->childs) && !count($model->usages);
+//$deleteable=!count($model->childs) && !count($model->usages);
 
 ?>
 <div class="materials-view">
 
 	<h1>
-		<?= Html::a($model->type->name.': '. $model->model,['/materials/view','id'=>$model->id]) ?>
-		<?= !$static_view?Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]):'' ?>
-		<?= !$static_view?\app\components\DeleteObjectWidget::Widget([
+		<?= \app\components\LinkObjectWidget::widget([
 			'model'=>$model,
-			'confirm' => 'Действительно удалить этот материал?',
-			'undeletable'=>'Нельзя удалить этот материал, т.к. есть его расходы',
-			'links'=>[$model->usages]
-		]):'' ?>
-
+			'name'=>$model->type->name.': '. $model->model,
+			'confirmMessage' => 'Действительно удалить этот материал?',
+			'undeletableMessage'=>'Нельзя удалить этот материал, т.к. есть его расходы',
+			'links'=>[$model->usages],
+			'static'=>$static_view
+		]) ?>
 	</h1>
 
 	<p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>

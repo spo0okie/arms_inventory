@@ -11,15 +11,13 @@ if (!isset($static_view)) $static_view=false;
 
 ?>
     <h1>
-		
-		<?= Html::a($model->Ename,['/users/view', 'id' => $model->id]) ?>
-        <?= !$static_view?Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]):'' ?>
-		<?= !$static_view?\app\components\DeleteObjectWidget::Widget([
+		<?= app\components\LinkObjectWidget::widget([
 			'model'=>$model,
-			'confirm' => 'Действительно удалить этого пользователя?',
-			'undeletable'=>'Нельзя удалить этого пользователя,<br> т.к. к нему привязаны другие объекты',
-			'links'=>[$model->arms,$model->armsHead,$model->armsIt,$model->armsResponsible,$model->techs,$model->techsIt]
-		]):'' ?>
+			'static'=>$static_view,
+			'confirmMessage' => 'Действительно удалить этого пользователя?',
+			'undeletableMessage'=>'Нельзя удалить этого пользователя,'.
+				'<br> т.к. к нему привязаны другие объекты',
+		]) ?>
     </h1>
 	<?= $model->nosync?'<span class="fas fa-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
 	Дата рождения: <?= $model->Bday ?> <br/>

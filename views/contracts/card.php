@@ -24,15 +24,11 @@ $deletable=!(count($arms)||count($services)||count($lics)||count($childs)||count
 ?>
 
 <h1>
-    <?= Html::encode($model->name) ?>
-	<?= !$static_view?app\components\UpdateObjectWidget::Widget(['model'=>$model]):''; ?>
-	<?= !$static_view?\app\components\DeleteObjectWidget::Widget([
+    <?= \app\components\LinkObjectWidget::widget([
 		'model'=>$model,
-		'confirm' => 'Действительно удалить этот документ?',
-		'undeletable'=>'Нельзя удалить этот документ, т.к. есть привязанные к нему объекты',
-		'links'=>[$arms,$services,$lics,$childs,$techs]
-	]):'' ?>
-	
+		'confirmMessage' => 'Действительно удалить этот документ?',
+		'undeletableMessage'=>'Нельзя удалить этот документ, т.к. есть привязанные к нему объекты',
+	]) ?>
 </h1>
 
 <h4>От: <?= $model->datePart ?><?= $this->render('item-state',compact('model'))?></h4>

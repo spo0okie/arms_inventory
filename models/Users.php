@@ -37,6 +37,7 @@ use Yii;
  * @property Comps[] $compsTotal
  * @property Arms[] $arms
  * @property Techs[] $techs
+ * @property Techs[] $techsIt
  * @property Arms[] $armsHead
  * @property Arms[] $armsIt
  * @property Arms[] $armsResponsible
@@ -88,7 +89,6 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         return 'users';
     }
-
 
 	public function extraFields()
 	{
@@ -151,6 +151,27 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 		];
 	}
 	
+	/**
+	 * Список всех объектов ссылающихся на этот
+	 * @return array
+	 */
+	public function reverseLinks() {
+		return [
+			$this->aces,
+			$this->arms,
+			$this->armsResponsible,
+			$this->armsHead,
+			$this->armsIt,
+			$this->comps,
+			$this->licGroups,
+			$this->licKeys,
+			$this->licItems,
+			$this->materials,
+			$this->services,
+			$this->techs,
+			$this->techsIt,
+		];
+	}
 	
 	/**
 	 * Возвращает привязанные элементы доступа
@@ -209,7 +230,34 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 	{
 		return $this->hasMany(Techs::className(), ['it_staff_id' => 'id']);
 	}
-
+	
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getLicGroups()
+	{
+		return $this->hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
+			->viaTable('{{%lic_groups_in_users}}', ['users_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getLicItems()
+	{
+		return $this->hasMany(LicItems::className(), ['id' => 'lic_items_id'])
+			->viaTable('{{%lic_items_in_users}}', ['users_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getLicKeys()
+	{
+		return $this->hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
+			->viaTable('{{%lic_keys_in_users}}', ['users_id' => 'id']);
+	}
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -298,6 +346,10 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 
         return null;
     }
+    
+    public function getName() {
+    	return $this->Ename;
+	}
 
     /**
      * Finds user by username
@@ -472,33 +524,6 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 			$tokens[$i]=mb_substr($tokens[$i],0,1).'.';
 		}
 		return implode(' ',$tokens);
-	}
-	
-	/**
-	 * Возвращает закрепленное на компе ПО
-	 */
-	public function getLicGroups()
-	{
-		return $this->hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
-			->viaTable('{{%lic_groups_in_users}}', ['users_id' => 'id']);
-	}
-	
-	/**
-	 * Возвращает закрепленное на компе ПО
-	 */
-	public function getLicItems()
-	{
-		return $this->hasMany(LicItems::className(), ['id' => 'lic_items_id'])
-			->viaTable('{{%lic_items_in_users}}', ['users_id' => 'id']);
-	}
-	
-	/**
-	 * Возвращает закрепленное на компе ПО
-	 */
-	public function getLicKeys()
-	{
-		return $this->hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
-			->viaTable('{{%lic_keys_in_users}}', ['users_id' => 'id']);
 	}
 	
 	/**

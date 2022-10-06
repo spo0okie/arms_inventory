@@ -11,26 +11,22 @@ use yii\helpers\Html;
 \yii\helpers\Url::remember();
 
 $renderer=$this;
-$this->title = $model->name;
+$this->title = $model->manufacturer->name.' '.$model->name;
 $this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index']];
 $this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['/tech-types/view','id'=>$model->type_id]];
 $this->params['breadcrumbs'][] = $this->title;
-$deletable=!count($model->arms)&&!count($model->techs);
 $static_view=false;
 ?>
 <div class="tech-models-view">
 
     <h1>
-        <?= $this->render('/tech-types/item',['model'=>$model->type]) ?>
-        <?= Html::encode($this->title) ?>
-        <?= Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
-        <?= \app\components\DeleteObjectWidget::Widget([
+        <?= \app\components\LinkObjectWidget::widget([
 			'model'=>$model,
-			'confirm' => 'Действительно удалить описание этой модели оборудования?',
-			'undeletable'=>'Описание этой модели оборудования нельзя удалить в настоящий момент,<br> т.к. в БД есть экземпляры оборудования этой модели',
-			'links'=>[$model->arms,$model->techs]
+			'name'=>$model->manufacturer->name.' '.$model->name,
+			'confirmMessage' => 'Действительно удалить описание этой модели оборудования?',
+			'undeletableMessage'=>'Описание этой модели оборудования нельзя удалить в настоящий момент,<br> т.к. в БД есть экземпляры оборудования этой модели',
 		]) ?>
-    </h1>
+	</h1>
 	
 	<div class="row">
 		<div class="col-md-6">

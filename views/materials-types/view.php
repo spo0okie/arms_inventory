@@ -15,13 +15,11 @@ $this->params['breadcrumbs'][] = $this->title;
 	<div class="row">
 		<div class="col-md-8">
 			<h1>
-				<?= Html::encode($this->title) ?>
-				<?= Html::a('<span class="fas fa-pencil-alt"/>', ['update', 'id' => $model->id]) ?>
-				<?= \app\components\DeleteObjectWidget::widget([
-					'confirm'=>'Удалить этот тип материалов?',
-					'undeletable'=>'Невозможно сейчас удалить этот тип материалов,<br>т.к. заведены материалы этого типа',
-					'links'=>[$model->materials],
+				<?= \app\components\LinkObjectWidget::widget([
 					'model'=>$model,
+					'confirmMessage'=>'Удалить этот тип материалов?',
+					'undeletableMessage'=>'Невозможно сейчас удалить этот тип материалов,<br>т.к. заведены материалы этого типа',
+					'links'=>[$model->materials],
 				]) ?>
 			</h1>
 			<p>	<?= $model->comment ?> </p>

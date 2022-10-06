@@ -16,12 +16,11 @@ if (!isset($static_view)) $static_view=false;
 
 ?>
     <h1>
-        <?= Html::encode($model->to) ?>
-		<?= !$static_view?Html::a('<span class="fas fa-pencil-alt">', ['update', 'id' => $model->id]):'' ?>
-		<?= !$static_view?\app\components\DeleteObjectWidget::Widget([
+		<?= \app\components\LinkObjectWidget::widget([
 			'model'=>$model,
-			'confirm' => 'Действительно удалить этот расход материала?',
-		]):'' ?>
+			'confirmMessage' => 'Действительно удалить этот расход материала?',
+			'name'=>$model->to,
+		])?>
     </h1>
 	<p><strong>Дата:</strong> <?= $model->date ?></p>
 <?php if ($model->cost) { ?>

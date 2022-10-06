@@ -1,6 +1,7 @@
 <?php
 namespace app\components;
 
+use app\models\ArmsModel;
 use yii\base\Widget;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
@@ -15,20 +16,50 @@ class DeleteObjectWidget extends Widget
 	 * Сообщение по умолчанию, если объекты не переданы
 	 * @var string
      */
-	public $undeletable='Невозможно удалить этот объект,<br/>т.к. имеются другие объекты привязанные к нему';
+	public $deleteHint=null;
+	public $undeletableMessage=null;
+	public $confirmMessage=null;
+	public $links=null;
 	
-	public $confirm='Удалить объект?<br/>>Операция необратима';
-	public $links=[];
 	/**
-	 * @var $model ActiveRecord
+	 * @var $model ArmsModel
 	 */
 	public $model=null;
 	
 	
 	public $defaultObjectType='Прочее';
 	
+	public function init()
+	{
+		parent::init();
+		$modelClass=get_class($this->model);
+		$modelTitle=($this->model->hasProperty('title'))?
+			$modelTitle=$modelClass::$title:'объект';
+		
+		if (is_null($this->deleteHint)) $this->deleteHint='Удалить';
+		
+		if (is_null($this->undeletableMessage)) {
+			$this->undeletableMessage='Невозможно удалить этот '.$modelTitle.','.
+				'<br/>т.к. имеются другие объекты привязанные к нему';
+		}
+		
+		if (is_null($this->confirmMessage)) {
+			$this->confirmMessage='Удалить '.$modelTitle.'?'.
+				'<br/>>Операция необратима';
+		}
+		
+		if (is_null($this->links)) {
+			$this->links=$this->model->hasMethod('reverseLinks')?
+				$this->model->reverseLinks():[];
+		}
+		
+		
+	}
+	
 	public function run()
 	{
+		
+		
 		
 		$types=[];
 		$totalLinks=0;
@@ -60,30 +91,32 @@ class DeleteObjectWidget extends Widget
 		}
 
 		if (count($types)) {
-			$this->undeletable.=':<ul>';
+			$this->undeletableMessage.=':<ul>';
 			foreach ($types as $type=>$count) {
-				$this->undeletable.='<li>'.$type.': '.$count.'</li>';
+				$this->undeletableMessage.='<li>'.$type.': '.$count.'</li>';
 			}
-			$this->undeletable.='</ul>';
+			$this->undeletableMessage.='</ul>';
 		}
 		
 	
 		return $totalLinks?
-			'<span class="small text-muted" qtip_ttip="'.$this->undeletable.'" disabled>
+			'<span class="small text-muted" qtip_ttip="'.$this->undeletableMessage.'" disabled>
 				<span class="fas fa-lock"></span>
 			</span>'
 			:
 			Html::a('<span class="fas fa-trash"></span>', [
-				Inflector::camel2id(
+				'/'.Inflector::camel2id(
 					StringHelper::basename(
 						get_class($this->model)
 					)
 				).'/delete', 'id' => $this->model->id
 			], [
 				'data' => [
-					'confirm' => $this->confirm,
+					'confirm' => $this->confirmMessage,
 					'method' => 'post',
-				]
+				],
+				'qtip_ttip'=>$this->deleteHint,
+				'qtip_side'=>'bottom,top,right,left'
 			]);
 	}
 }

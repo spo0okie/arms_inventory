@@ -140,6 +140,15 @@ class ArmsModel extends \yii\db\ActiveRecord
 		return null;
 	}
 	
+	/**
+	 * Возвращает ссылки на объекты ссылающиеся на этот
+	 * по схеме one-to-many и many-to-many
+	 * @return array
+	 */
+	public function reverseLinks() {
+		return [];
+	}
+	
 	
 	public static function fetchNames(){
 		$list= static::find()

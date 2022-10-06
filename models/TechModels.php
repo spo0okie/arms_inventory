@@ -107,6 +107,10 @@ class TechModels extends \yii\db\ActiveRecord
 		];
 	}
 
+	public function reverseLinks() {
+		return [$this->arms,$this->techs];
+	}
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

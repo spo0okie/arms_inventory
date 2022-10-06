@@ -48,6 +48,7 @@ use yii\web\JsExpression;
  * @property Contracts[] $successorsRecursive
  * @property Contracts $predecessor
  * @property Contracts $firstPredecessor
+ * @property Contracts[] $contracts
  * @property Contracts[] $childs
  * @property Contracts[] $chainChildren
  * @property Contracts[] $childrenRecursive
@@ -240,6 +241,19 @@ class Contracts extends ArmsModel
 		];
 	}
 	
+	public function reverseLinks()
+	{
+		return [
+			$this->contracts,
+			$this->arms,
+			$this->techs,
+			$this->materials,
+			$this->services,
+			$this->licItems,
+			//$this->scans, //сканы удаляются при удалении документа
+		];
+	}
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -266,7 +280,17 @@ class Contracts extends ArmsModel
 			->andWhere(['is_successor'=>true])
 			->orderBy(['date'=>SORT_DESC]);
 	}
-
+	
+	/**
+	 * ищет одного наследника (один уровень наследования + самый молодой)
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getContracts()
+	{
+		return $this->hasOne(Contracts::className(), ['parent_id' => 'id'])
+			->orderBy(['date'=>SORT_DESC]);
+	}
+	
 	/**
 	 * Ищет всех непосредственных наследников (один уровень наследования)
 	 * @return \yii\db\ActiveQuery

@@ -10,6 +10,7 @@
 
 use yii\helpers\Html;
 if (!isset($icon)) $icon=false;
+if (!isset($static_view)) $static_view=true;
 
 if (is_object($model)) {
 	if (!isset($name)) {
@@ -22,10 +23,8 @@ if (is_object($model)) {
 	if ($icon) $title='<span class="fas fa-user"></span>'.$name;
 ?>
 
-<span class="users-item object-item <?= $model->Uvolen?'uvolen':'' ?>"
-      qtip_ajxhrf="<?= \yii\helpers\Url::to(['/users/ttip','id'=>$model->id])?>"
->
-	<?= Html::a($name,['users/view','id'=>$model->id]) ?>
+<span class="users-item object-item <?= $model->Uvolen?'uvolen':'' ?>">
+	<?= \app\components\LinkObjectWidget::widget(['model'=>$model,'name'=>$name,'static'=>$static_view]) ?>
 </span>
 
 <?php } else echo "Отсутствует";
