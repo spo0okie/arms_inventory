@@ -8,7 +8,7 @@
 
 /* @var \app\models\TechModels $model */
 
-if (!isset($static_view)) $static_view=false;
+if (!isset($static_view)) $static_view=true;
 
 use yii\helpers\Html;
 if (is_object($model)) {
