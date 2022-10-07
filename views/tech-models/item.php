@@ -9,7 +9,6 @@
 /* @var \app\models\TechModels $model */
 
 if (!isset($static_view)) $static_view=false;
-if (!isset($hideUndeletable)) $hideUndeletable=false;
 
 use yii\helpers\Html;
 if (is_object($model)) {
@@ -27,7 +26,7 @@ if (is_object($model)) {
 	<?= \app\components\LinkObjectWidget::widget([
 		'model'=>$model,
 		'name'=>$name,
-		'hideUndeletable'=>$hideUndeletable
+		'static'=>$static_view
 	]) ?>
 </span>
 
