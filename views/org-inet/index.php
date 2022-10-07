@@ -29,7 +29,7 @@ $renderer=$this;
 				'attribute' => 'places_id',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('/places/item', ['model' => $data->place, 'static_view'=>true]);
+					return $renderer->render('/places/item', ['model' => $data->place, 'static_view'=>true,'short'=>true]);
 				}
 			],
 	        //'static',
