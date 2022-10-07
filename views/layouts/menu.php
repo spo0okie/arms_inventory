@@ -113,7 +113,7 @@ NavBar::begin([
 						],
 					],
 					['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index'], 'items'=>$techTypes],
-					['label' => \app\models\TechModels::$title, 'url' => ['/tech-models/index']],
+					['label' => \app\models\TechModels::$titles, 'url' => ['/tech-models/index']],
 					['label' => \app\models\Techs::$title, 'url' => ['/techs/index']],
 					['label' => 'Производители', 'url' => ['/manufacturers/index']],
 					['label' => 'Игнорируемое', 'url' => ['/hw-ignore/index']],

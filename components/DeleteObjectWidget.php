@@ -25,6 +25,7 @@ class DeleteObjectWidget extends Widget
 	 * @var $model ArmsModel
 	 */
 	public $model=null;
+	public $hideUndeletable=null;
 	
 	
 	public $defaultObjectType='Прочее';
@@ -44,8 +45,7 @@ class DeleteObjectWidget extends Widget
 		}
 		
 		if (is_null($this->confirmMessage)) {
-			$this->confirmMessage='Удалить '.$modelTitle.'?'.
-				'<br/>>Операция необратима';
+			$this->confirmMessage='Удалить '.$modelTitle.'? (Операция необратима!)';
 		}
 		
 		if (is_null($this->links)) {
@@ -100,9 +100,12 @@ class DeleteObjectWidget extends Widget
 		
 	
 		return $totalLinks?
-			'<span class="small text-muted" qtip_ttip="'.$this->undeletableMessage.'" disabled>
-				<span class="fas fa-lock"></span>
-			</span>'
+			(
+				$this->hideUndeletable?'':
+				'<span class="small text-muted" qtip_ttip="'.$this->undeletableMessage.'" disabled>
+					<span class="fas fa-lock"></span>
+				</span>'
+			)
 			:
 			Html::a('<span class="fas fa-trash"></span>', [
 				'/'.Inflector::camel2id(

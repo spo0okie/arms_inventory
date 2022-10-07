@@ -35,7 +35,7 @@ $renderer=$this;
 		        'attribute'=>'name',
 		        'format'=>'raw',
 		        'value'=>function($data) use ($renderer) {
-			        return $renderer->render('/tech-models/item',['model'=>$data]);
+			        return $renderer->render('/tech-models/item',['model'=>$data,'hideUndeletable'=>true]);
 		        }
 	        ],
 	        //'comment:ntext',

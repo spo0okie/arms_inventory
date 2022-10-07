@@ -44,7 +44,7 @@ class TechModelsSearch extends TechModels
      */
     public function search($params)
     {
-        $query = TechModels::find()->joinWith('type');
+        $query = TechModels::find()->joinWith(['type','manufacturer']);
 
         // add conditions that should always apply here
 
@@ -62,7 +62,7 @@ class TechModelsSearch extends TechModels
         }
 
 
-        $query->andFilterWhere(['or like', '`tech_models`.`name`', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
+        $query->andFilterWhere(['or like', 'concat(`manufacturers`.`name`," ",`tech_models`.`name`)', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
 	        ->andFilterWhere(['or like', '`tech_types`.`name`', \yii\helpers\StringHelper::explode($this->type,'|',true,true)])
             ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 

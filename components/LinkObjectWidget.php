@@ -14,6 +14,7 @@ class LinkObjectWidget extends Widget
 	public $deleteHint=null;
 	public $undeletableMessage=null;
 	public $confirmMessage=null;
+	public $hideUndeletable=null;
 	
 	public $static=false;
 
@@ -80,6 +81,7 @@ class LinkObjectWidget extends Widget
 					'deleteHint'=>$this->deleteHint,
 					'undeletableMessage'=>$this->undeletableMessage,
 					'confirmMessage'=>$this->confirmMessage,
+					'hideUndeletable'=>$this->hideUndeletable,
 					'links'=>$this->links
 				]):''
 			);

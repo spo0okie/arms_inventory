@@ -32,7 +32,8 @@ use Yii;
  */
 class TechModels extends \yii\db\ActiveRecord
 {
-	public static $title='Модели оборудования';
+	public static $title='Модель оборудования';
+	public static $titles='Модели оборудования';
 	public static $descr='Ну модели и модели. Что про них особо сказать';
 	//подсказка которая передается через JSON если запрошена подсказка оформления спеки для моделей без спек
 	public static $no_specs_hint='NO_SPECS_USE';

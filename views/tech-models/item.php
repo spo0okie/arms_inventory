@@ -9,6 +9,7 @@
 /* @var \app\models\TechModels $model */
 
 if (!isset($static_view)) $static_view=false;
+if (!isset($hideUndeletable)) $hideUndeletable=false;
 
 use yii\helpers\Html;
 if (is_object($model)) {
@@ -22,11 +23,12 @@ if (is_object($model)) {
 		$name=$model->name;
     ?>
 
-<span class="tech_model-item"
-      qtip_ajxhrf="<?= \yii\helpers\Url::to(['/tech-models/ttip','id'=>$model->id])?>"
->
-	<?= Html::a($name,['tech-models/view','id'=>$model->id]) ?>
-	<?= $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['tech-models/update','id'=>$model->id]) ?>
+<span class="tech_model-item">
+	<?= \app\components\LinkObjectWidget::widget([
+		'model'=>$model,
+		'name'=>$name,
+		'hideUndeletable'=>$hideUndeletable
+	]) ?>
 </span>
 
 <?php }
