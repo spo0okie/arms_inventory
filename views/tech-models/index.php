@@ -7,7 +7,7 @@ use yii\grid\GridView;
 /* @var $searchModel app\models\TechModelsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = \app\models\TechModels::$title;
+$this->title = \app\models\TechModels::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
@@ -35,7 +35,7 @@ $renderer=$this;
 		        'attribute'=>'name',
 		        'format'=>'raw',
 		        'value'=>function($data) use ($renderer) {
-			        return $renderer->render('/tech-models/item',['model'=>$data,'hideUndeletable'=>true]);
+			        return $renderer->render('/tech-models/item',['model'=>$data,'hideUndeletable'=>true,'long'=>true]);
 		        }
 	        ],
 	        //'comment:ntext',
