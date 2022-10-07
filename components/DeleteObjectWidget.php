@@ -39,6 +39,10 @@ class DeleteObjectWidget extends Widget
 		
 		if (is_null($this->deleteHint)) $this->deleteHint='Удалить';
 		
+		if (is_null($this->hideUndeletable)) {
+			$this->hideUndeletable=is_null($this->undeletableMessage);
+		}
+		
 		if (is_null($this->undeletableMessage)) {
 			$this->undeletableMessage='Невозможно удалить этот '.$modelTitle.','.
 				'<br/>т.к. имеются другие объекты привязанные к нему';
@@ -58,9 +62,6 @@ class DeleteObjectWidget extends Widget
 	
 	public function run()
 	{
-		
-		
-		
 		$types=[];
 		$totalLinks=0;
 		if (count($this->links)) {
