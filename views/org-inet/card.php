@@ -63,3 +63,6 @@ if (!$content_only){ ?>
 		<?= \Yii::$app->formatter->asNtext(trim($model->history)) ?>
 		</p>
 	<?php } ?>
+<?php if (!$content_only){ ?>
+	</div>
+<?php } ?>
