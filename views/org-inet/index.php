@@ -13,6 +13,7 @@ $renderer=$this;
 <div class="org-inet-index">
 	
 	<?= \app\components\DynaGridWidget::widget([
+		'id' => 'org-inet-index',
 		'dataProvider' => $dataProvider,
 		'model' => new \app\models\OrgInet(),
 		'columns' => [

@@ -14,6 +14,7 @@ $renderer=$this;
 <div class="org-phones-index">
 	
 	<?= \app\components\DynaGridWidget::widget([
+		'id' => 'org-phones-index',
 		'dataProvider' => $dataProvider,
 		'model' => new \app\models\OrgPhones(),
 		'columns' => [
