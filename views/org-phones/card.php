@@ -15,46 +15,44 @@ use yii\widgets\DetailView;
 /* @var $model app\models\OrgPhones */
 
 if (!isset($static_view)) $static_view=false;
+if (!isset($content_only)) $content_only=false;
 
-?>
-<h2>
+if (!$content_only){ ?>
+	<div
+		class="<?= $static_view?'me-1 mb-1 p-1':'me-2 mb-2 p-2'?> <?= $model->archived?'archived-item':''?> org-phones-card"
+		<?= ($model->archived&&!(\Yii::$app->request->get('showArchived')))?'style="display:none"':'' ?>>
+<?php } ?>
 
-	<?= $model->title ?>
-	<?php if (!$static_view) { ?>
-		<?= Html::a('<span class="fas fa-pencil-alt"/>', ['org-phones/update', 'id' => $model->id]) ?>
-		<?= Html::a('<span class="fas fa-trash"/>', ['org-phones/delete', 'id' => $model->id], [
-			'data' => [
-				'confirm' => 'Удалить этот городской телефон? Это действие необратимо!',
-				'method' => 'post',
-			],
-		]) ?>
-	<?php } ?>
-</h2>
-
-<p>	<?= \Yii::$app->formatter->asNtext($model->untitledComment) ?> </p>
-<p>
-	Стоимость: <?= Yii::$app->formatter->asCurrency((int)$model->cost) ?>
-	<?php if ($model->charge){ ?>
-		(в т.ч. НДС: <?= Yii::$app->formatter->asCurrency($model->charge) ?>)
-	<?php } ?>
-	/мес
-</p>
-
-<div class="row">
-	<div class="col-md-4">
-		<h5>Место подключения:</h5>
-	</div>
-	<div class="col-md-8">
+	
+		<?php if ($model->archived) echo \app\components\StripedRowWidget::widget(['title'=>'АРХИВИРОВАН']) ?>
+	
+		<div class="float-end">
+			<h3>
+				<?= \app\components\LinkObjectWidget::widget([
+					'model'=>$model,
+					'name'=>'',
+					'static'=>$static_view,
+					'modal'=>true,
+				]) ?>
+				
+			</h3>
+		</div>
+		<h3><?= $model->title ?></h3>
+		
+		<p>	<?= \Yii::$app->formatter->asNtext($model->untitledComment) ?> </p>
+		<p>
+			Стоимость: <span class="badge bg-success"><?= Yii::$app->formatter->asCurrency((int)$model->cost) ?></span>
+			<?php if ($model->charge) { ?>
+				(в т.ч. НДС: <span class="small"><?= Yii::$app->formatter->asCurrency($model->charge) ?></span>)
+			<?php } ?>
+			/мес
+		</p>
+		
+		<strong>Место подключения:</strong>
 		<?= $this->render('/places/item',['model'=>$model->place , 'full'=>true, 'static_view'=>$static_view]) ?>
-	</div>
-</div>
-
-<div class="row">
-	<div class="col-md-4">
-		<h5><?= $model->getAttributeLabel('account')?> </h5>
-	</div>
-	<div class="col-md-8">
+		<br />
+		<strong><?= $model->getAttributeLabel('account')?></strong>
 		<?= $model->account ?>
+<?php if (!$content_only){ ?>
 	</div>
-</div>
-<hr />
+<?php } ?>

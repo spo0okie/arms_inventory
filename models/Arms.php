@@ -40,6 +40,7 @@ use yii\helpers\Html;
  * @property string $history история
  * @property boolean $is_server является сервером
  * @property array $contracts_ids ссылки на Документы
+ * @property boolean $archived Признак списанного АРМ
  *
  * @property Users $head
  * @property Users $responsible
@@ -489,6 +490,11 @@ class Arms extends ArmsModel
 		$this->monitors_cache=[];
 		foreach ($this->techs as $tech) if ($tech->isMonitor) $this->monitors_cache[]=$tech;
 		return $this->monitors_cache;
+	}
+	
+	public function getArchived()
+	{
+		return is_object($this->state)?$this->state->archived:false;
 	}
 	
 	/**

@@ -29,6 +29,7 @@ use yii\validators\IpValidator;
  * @property bool $isUps Является UPS
  * @property bool $isPc Является ПК
  * @property bool $isMonitor Является Монитором
+ * @property bool $archived Списано
  * @property array $contracts_ids Список документов
  * @property array $netIps_ids Список IP
  * @property array $portsList
@@ -393,6 +394,10 @@ class Techs extends \yii\db\ActiveRecord
 		return \app\models\TechModels::getIsMonitor($this->model_id);
 	}
 	
+	public function getArchived()
+	{
+		return is_object($this->state)?$this->state->archived:false;
+	}
 	
 	public static function formatMacs($raw) {
 		

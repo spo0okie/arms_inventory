@@ -15,22 +15,22 @@ $dependants=$model->dependants;
 $support=$model->support;
 $children=$model->children;
 $contracts=$model->contracts;
-$deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($support)&&!count($techs)&&!count($children);
-?>
+
+if(!$static_view) { ?>
+<span class="float-end">
+	<?= \app\components\ShowArchivedWidget::widget(['reload'=>false]) ?>
+</span>
+
+<?php } ?>
+
 
 <h1>
-    <?= Html::encode($model->name) ?>
-    <?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['services/update','id'=>$model->id])) ?>
-    <?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['services/delete', 'id' => $model->id], [
-	    'data' => [
-		    'confirm' => 'Удалить этот сервис? Это действие необратимо!',
-		    'method' => 'post',
-	    ],
-    ]); else { ?>
-		<span class="small">
-			<span class="fas fa-lock" title="Невозможно в данный момент удалить этот сервис, т.к. присутствуют привязанные объекты: привязанные пользователи, компьютеры или другие сервисы."></span>
-		</span>
-	<?php } ?>
+	<?= \app\components\LinkObjectWidget::widget([
+		'model'=>$model,
+		'static'=>$static_view,
+		//'confirm' => 'Удалить этот сервис? Это действие необратимо!',
+		'hideUndeletable'=>false
+	]) ?>
 </h1>
 <div class="row">
 	<div class="col-md-6">
@@ -48,12 +48,10 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 			<?php if (is_object($model->parent))  echo "<br /> Входит в состав: {$this->render('item',['model'=>$model->parent])}"; ?>
 		</h4>
 		<?php if ($model->sumTotals) { ?>
-			<h4>
-				Стоимость: <?= $model->sumTotals.''.$model->currency->symbol ?>
-				<?php if ($model->sumCharge){ ?>
-					(в т.ч. НДС: <?= $model->sumCharge.''.$model->currency->symbol ?>)
-				<?php } ?> / мес.
-			</h4>
+		<strong>Стоимость:</strong> <span class="badge bg-success"><?= $model->sumTotals.''.$model->currency->symbol ?></span>
+			<?php if ($model->sumCharge){ ?>
+				(в т.ч. НДС: <?= $model->sumCharge.''.$model->currency->symbol ?>)
+			<?php } ?> / мес.<br/>
 		<?php }
 		//var_dump(\app\models\ContractsStates::fetchUnpaidIds());
 		//var_dump($model->docs[0]->allChildren);
@@ -104,11 +102,6 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		
 		?>
 		
-		<?php if(!$static_view&&!$deleteable) { ?>
-			<p>
-
-			</p>
-		<?php } ?>
 		<br />
 		<p>
 			<?= Yii::$app->formatter->asNtext($model->description) ?>
@@ -126,7 +119,7 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 			<h4>Предоставляет ввод(ы) интернет:</h4>
 			<p>
 				<?php foreach ($model->orgInets as $inet)
-					echo $this->render('/org-inet/card',['model'=>$inet,'static_view'=>$static_view]).'<br />';
+					echo $this->render('/org-inet/card',['model'=>$inet,'static_view'=>$static_view]);
 				?>
 			</p>
 			<br />
@@ -134,11 +127,13 @@ $deleteable=!count($comps)&&!count($services)&&!count($dependants)&&!count($supp
 		
 		if (is_array($model->orgPhones) && count($model->orgPhones)) { ?>
 			<h4>Предоставляет телефонию:</h4>
-			<p>
-				<?php foreach ($model->orgPhones as $phone)
-					echo $this->render('/org-phones/card',['model'=>$phone,'static_view'=>$static_view,'href'=>true]).'<br />';
-				?>
-			</p>
+			<div class="d-flex flex-row flex-wrap p-0">
+				<?php foreach ($model->orgPhones as $phone) { ?>
+				
+						<?= $this->render('/org-phones/card',['model'=>$phone,'static_view'=>$static_view,'href'=>true]) ?>
+				
+				<?php } ?>
+			</div>
 			<br />
 		<?php } ?>
 

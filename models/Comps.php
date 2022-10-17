@@ -93,7 +93,7 @@ class Comps extends ArmsModel
         return [
             [['soft_ids','netIps_ids'], 'each', 'rule'=>['integer']],
             [['domain_id','name', 'os'], 'required'],
-            [['domain_id', 'arm_id', 'ignore_hw', 'user_id'], 'integer'],
+            [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
             [['updated_at'], 'safe'],
             [['name','raw_version'], 'string', 'max' => 32],
@@ -173,7 +173,15 @@ class Comps extends ArmsModel
 			],
             'comment' => 'Комментарий',
             'updated_at' => 'Время обновления',
-        ];
+			'archived' => [
+				'Архивирован',
+				'hint'=>'Если эта ОС уже не используется, но на нее есть ссылки из других объектов,<br />'.
+					'например если есть заархивированный сервис который был развернут на этой ос,<br />'.
+					'то можно не удалять ее, а заархивировать, чтобы не разрушать взаимосвязи объектов<br />'.
+					'ОС останется в БД для истории, но не будет попадаться на глаза, если явно не попросить'
+			]
+
+		];
     }
 
 

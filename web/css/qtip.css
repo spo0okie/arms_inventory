@@ -1,0 +1,79 @@
+
+
+/* ТУЛТИПЫ */
+.tooltipster-base {
+    height: auto !important;
+}
+.ttip-row {
+    display: table-row;
+    vertical-align: top;
+    padding: 0;
+    margin: 0;
+}
+
+.ttip-preview {
+    width: 100px;
+    display: table-cell;
+    padding-top: 15px;
+    padding-right: 7px;
+    margin: 0;
+}
+
+.ttip-card {
+    display: table-cell;
+    vertical-align: top;
+    min-width: 250px;
+    padding: 0;
+    margin: 0;
+}
+
+.ttip-card h1 {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+}
+
+.ttip-card h2 {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+}
+.ttip-card p {
+    margin-bottom: 3px;
+}
+
+.ttip-card h3 {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+}
+
+.ttip-card h4 {
+    font-size: 11px;
+    font-weight: bolder;
+    padding: 0;
+    margin: 0;
+}
+
+.ttip-card h5 {
+    font-size: 11px;
+    font-weight: 550;
+    padding: 0;
+    margin: 0;
+}
+
+.ttip-card hr {
+    padding: 0;
+    margin: 0;
+    color: black;
+    background-color: #222;
+    height: 1px;
+    border: none;
+}
+
+.qtip-wide {
+    width: 500px;
+}

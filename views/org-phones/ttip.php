@@ -7,5 +7,5 @@ use yii\widgets\DetailView;
 /* @var $model app\models\OrgPhones */
 ?>
 <div class="org-phones-ttip ttip-card">
-	<?= $this->render('card',['model'=>$model,'static_view'=>true]) ?>
+	<?= $this->render('card',['model'=>$model,'static_view'=>true,'content_only'=>true]) ?>
 </div>

@@ -43,8 +43,8 @@ NavBar::begin([
 					['label' => \app\models\Contracts::$titles, 'url' => ['/contracts/index']],
 					['label' => \app\models\Partners::$titles, 'url' => ['/partners/index']],
 					['label' => \app\models\ContractsStates::$title, 'url' => ['/contracts-states/index']],
-					['label' => \app\models\OrgPhones::$title, 'url' => ['/org-phones/index']],
-					['label' => \app\models\OrgInet::$title, 'url' => ['/org-inet/index']],
+					['label' => \app\models\OrgPhones::$titles, 'url' => ['/org-phones/index']],
+					['label' => \app\models\OrgInet::$titles, 'url' => ['/org-inet/index']],
 				]
 			],
 			['label' => 'Организация',

@@ -21,14 +21,11 @@ if (is_object($model)) {
 	
 	?>
 	
-<span class="comps-item object-item">
-    <?= Html::a(
-			$name,
-			['/comps/view','id'=>$model->id],
-			['qtip_ajxhrf'=>\yii\helpers\Url::to(['/comps/ttip','id'=>$model->id])]
-	)
-	?><?=
-	$static_view?'':Html::a('<i class="fas fa-pencil-alt"></i>',['/comps/update','id'=>$model->id])
-	?>
-</span>
+<span class="comps-item object-item <?= $model->archived?'text-muted text-decoration-line-through':'' ?>">
+    <?= \app\components\LinkObjectWidget::widget([
+		'model'=>$model,
+		'modal'=>true,
+		'noDelete'=>true,
+	]) ?>
+	</span>
 <?php } else echo "Отсутствует";

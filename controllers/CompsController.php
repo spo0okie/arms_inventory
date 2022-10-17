@@ -6,6 +6,7 @@ use Yii;
 use app\models\Comps;
 use app\models\CompsSearch;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -49,6 +50,7 @@ class CompsController extends Controller
     public function actionIndex()
     {
         $searchModel = new CompsSearch();
+        $searchModel->archived=\Yii::$app->request->get('showArchived',false);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -197,19 +199,29 @@ class CompsController extends Controller
      */
     public function actionCreate()
     {
-	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
-	
 	    $model = new Comps();
+	
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (Yii::$app->request->isAjax) {
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return [$model];
+			}  else {
+				return $this->redirect(Url::previous());
+			}
+		}
+	
+		$model->load(Yii::$app->request->get());
+		$model->arm_id=Yii::$app->request->get('arms_id',$model->arm_id);
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('create', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('create', [
+				'model' => $model,
+			]);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        $model->arm_id=Yii::$app->request->get('arms_id',$model->arm_id);
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
     }
 
     /**
@@ -221,25 +233,27 @@ class CompsController extends Controller
      */
     public function actionUpdate($id)
     {
-	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		$model = $this->findModel($id);
 	
-	    $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-	        if (Yii::$app->request->isAjax) {
-		        Yii::$app->response->format = Response::FORMAT_JSON;
-		        return [$model];
-	        }  else {
-		        return $this->redirect(['view', 'id' => $model->id]);
-	        }
-        }
-
-        $model->arm_id=Yii::$app->request->get('arms_id',$model->arm_id);
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (Yii::$app->request->isAjax) {
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return [$model];
+			}  else {
+				if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
+				return $this->redirect(['view', 'id' => $model->id]);
+			}
+		}
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('update', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
+	}
 
     /**
      * Deletes an existing Comps model.

@@ -287,8 +287,7 @@ class Contracts extends ArmsModel
 	 */
 	public function getContracts()
 	{
-		return $this->hasOne(Contracts::className(), ['parent_id' => 'id'])
-			->orderBy(['date'=>SORT_DESC]);
+		return $this->hasMany(Contracts::className(), ['parent_id' => 'id']);
 	}
 	
 	/**

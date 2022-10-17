@@ -10,7 +10,7 @@ $static_view=true;
 
 ?>
 <div class="org-inet-ttip ttip-card">
-	<?= $this->render('card',['model'=>$model,'static_view'=>true]) ?>
+	<?= $this->render('card',['model'=>$model,'static_view'=>true,'content_only'=>true]) ?>
 	<hr />
 	<h4>Услуга связи</h4>
 	<p>

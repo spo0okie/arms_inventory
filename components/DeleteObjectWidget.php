@@ -26,6 +26,7 @@ class DeleteObjectWidget extends Widget
 	 */
 	public $model=null;
 	public $hideUndeletable=null;
+	public $options=[];
 	
 	
 	public $defaultObjectType='Прочее';
@@ -57,7 +58,12 @@ class DeleteObjectWidget extends Widget
 				$this->model->reverseLinks():[];
 		}
 		
-		
+		$this->options['data'] = [
+			'confirm' => $this->confirmMessage,
+			'method' => 'post',
+		];
+		$this->options['qtip_ttip']=$this->deleteHint;
+		$this->options['qtip_side']='bottom,top,right,left';
 	}
 	
 	public function run()
@@ -80,7 +86,7 @@ class DeleteObjectWidget extends Widget
 						elseif ($first->hasProperty('title')) $type=$class::$title;
 					}
 					$count=count($count);
-				}
+				} else $count=1;
 				
 				if (is_numeric($type)) $type=$this->defaultObjectType;
 				if ($count) {
@@ -108,19 +114,12 @@ class DeleteObjectWidget extends Widget
 				</span>'
 			)
 			:
-			Html::a('<span class="fas fa-trash"></span>', [
+			Html::a('<span class="fas fa-trash delete-item-button"></span>', [
 				'/'.Inflector::camel2id(
 					StringHelper::basename(
 						get_class($this->model)
 					)
 				).'/delete', 'id' => $this->model->id
-			], [
-				'data' => [
-					'confirm' => $this->confirmMessage,
-					'method' => 'post',
-				],
-				'qtip_ttip'=>$this->deleteHint,
-				'qtip_side'=>'bottom,top,right,left'
-			]);
+			], $this->options);
 	}
 }

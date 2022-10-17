@@ -10,6 +10,10 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Places */
 /* @var $models[] app\models\Places */
+/* @var $depth integer */
+
+if (!isset($show_archived)) $show_archived=true;
+
 ?>
 
 <div class="places-container">
@@ -21,11 +25,11 @@ use yii\widgets\DetailView;
         </h1>
     <?php } ?>
 
-	<?= $this->render('header',compact(['model','depth'])) ?>
-	<?= $this->render('arms-list',compact(['model','depth'])) ?>
+	<?= $this->render('header',compact(['model','depth','show_archived'])) ?>
+	<?= $this->render('arms-list',compact(['model','depth','show_archived'])) ?>
 
 	<?php foreach ($models as $cab)
-		if ($cab->parent_id==$model->id) echo $this->render('container',['model'=>$cab,'models'=>$models,'depth'=>$depth+1]);
+		if ($cab->parent_id==$model->id) echo $this->render('container',['model'=>$cab,'models'=>$models,'depth'=>$depth+1,'show_archived'=>$show_archived]);
 	?>
 
 </div>

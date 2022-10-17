@@ -68,13 +68,14 @@ class ServicesSearch extends Services
 				'providingSchedule',
 				'orgPhones',
 				'orgInets',
+				'support'
 			],true);
 		
-		if ($this->parent_id===false) {
+		if (!$this->parent_id) {
 			$query->andWhere(['services.parent_id'=>null]);
 		}
 
-		if ($this->archived===false) {
+		if (!$this->archived) {
 			$query->andWhere(['services.archived'=>0]);
 		}
 	

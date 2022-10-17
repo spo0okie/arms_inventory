@@ -101,6 +101,7 @@ class PlacesController extends Controller
 					//'materials.usages' дико добавляет тормозов
 				])->orderBy('short')
 				->all(),
+			'show_archived'=>\Yii::$app->request->get('showArchived',false),
 		]);
 	}
 	/**

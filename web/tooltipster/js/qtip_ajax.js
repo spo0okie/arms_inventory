@@ -1,5 +1,9 @@
-function attach_qTip(el){
-    if (el.hasClass('tooltipstered')) return;
+function attach_qTip(el,force=false){
+    if (el.hasClass('tooltipstered')) {
+        if (force) {
+            el.tooltipster('destroy');
+        } else return;
+    }
     let $url=el.attr('qtip_ajxhrf');
     let $text=el.attr('qtip_ttip');
     let $side=el.attr('qtip_side') || 'right,left,bottom,top';

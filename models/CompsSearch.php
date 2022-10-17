@@ -20,7 +20,7 @@ class CompsSearch extends Comps
     public function rules()
     {
         return [
-            [['id', 'domain_id'], 'integer'],
+            [['id', 'domain_id','archived'], 'integer'],
             [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id'], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
 				$macs=explode("\n",$value);
@@ -104,14 +104,10 @@ class CompsSearch extends Comps
             return $dataProvider;
         }
 
-        // grid filtering conditions
-        /*$query->andFilterWhere([
-            //'id' => $this->id,
-            //'domain_id' => $this->domain_id,
-            //'arm_id' => $this->arm_id,
-            //'updated_at' => $this->updated_at,
-        ]);*/
-		
+	
+		if (!$this->archived) {
+			$query->andWhere(['not',['comps.archived'=>1]]);
+		}
 
         $query->andFilterWhere(['or like', 'concat(IFNULL(domains.name,""),"\\\\",comps.name)', yii\helpers\StringHelper::explode($this->name,'|',true,true)])
             ->andFilterWhere(['or like', 'raw_version', \yii\helpers\StringHelper::explode($this->raw_version,'|',true,true)])

@@ -14,24 +14,21 @@ use Yii;
  * @property string $local_code Местный номер
  * @property string $sname Строка для поиска
  * @property string $fullNum Полный номер
- * @property int $prov_tel_id Услуга телефонии
  * @property int $places_id Помещение
  * @property string $comment Комментарий
  * @property float $cost
  * @property float $charge
- * @property bool $providesNumber
+ * @property bool $archived
  * @property string $title
  * @property string $untitledComment
  
- * @property ProvTel $provTel
- * @property Contracts $contracts
  * @property Services $service
- * @property Partners $partner
  * @property Places $place
  */
-class OrgPhones extends \yii\db\ActiveRecord
+class OrgPhones extends ArmsModel
 {
-	public static $title='Услуги телефонии';
+	public static $title='Телефонный номер';
+	public static $titles='Телефонныe номерa';
     /**
      * {@inheritdoc}
      */
@@ -48,7 +45,7 @@ class OrgPhones extends \yii\db\ActiveRecord
         return [
 			[['services_id'],'required'],
 	        [['cost','charge'], 'number'],
-            [['services_id','places_id'], 'integer'],
+            [['services_id','places_id','archived'], 'integer'],
             [['comment','account'], 'string'],
             [['country_code', 'city_code', 'local_code'], 'string', 'max' => 10],
 	        //[['prov_tel_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProvTel::className(), 'targetAttribute' => ['prov_tel_id' => 'id']],
@@ -59,45 +56,39 @@ class OrgPhones extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
             'id' => 'ID',
             'country_code' => 'Код страны',
             'city_code' => 'Код города',
             'local_code' => 'Местный номер',
-	        'places_id' => 'Помещение',
-	        'prov_tel_id' => 'Поставщик услуги',
-			'contracts_id' => 'Договор',
-			'services_id' => 'Услуга связи',
+	        'places_id' => [
+	        	'Помещение',
+				'hint' => 'Куда подключен телефонный номер.<br />'
+					.'(С точки зрения телефонии, т.е. где он будет звонить?)',
+			],
+			'services_id' => [
+				'Услуга связи',
+				'hint' => 'Услуга связи в рамках которой предоставляется номер.<br />'.
+					'Контрагент, договор, счета, график предоставления и прочее все берется из услуги'
+			],
 	        'account' => 'Аккаунт, л/с',
 	        'sname' => 'Полный номер для поиска',
-	        'fullNum' => 'Полный номер',
-	        'cost' => 'Стоимость',
+	        'fullNum' => 'Номер телефона',
+	        'cost' => [
+	        	'Стоимость',
+				'hint' => 'Стоимость номера в месяц (планируемая стоимость, если величина плавает)',
+			],
 	        'charge' => 'В т.ч. НДС',
             'comment' => 'Комментарий',
+			'archived' => [
+				'Архивирован',
+				'hint'=>'Если номер уже не используется, лучше его заархивировать.<br /> Он останется в БД для истории, но не будет попадаться на глаза, если явно не попросить'
+			]
         ];
     }
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			//'country_code' => '7 для РФ',
-			//'city_code' => 'Код города',
-			//'local_code' => '',
-			'places_id' => 'Где подключен телефонный номер',
-			'prov_tel_id' => 'Поставщик услуги',
-			'contracts_id' => 'Документ на основании которого подключена эта услуга',
-			'cost' => 'Стоимость номера в месяц (планируемая стоимость, если величина плавает)',
-			//'account' => 'Аккаунт, л/с',
-			//'sname' => 'Полный номер для поиска',
-			//'fullNum' => 'Полный номер',
-			//'comment' => 'Комментарий',
-		];
-	}
 
 	/**
 	 * Отдает строку номеров телефонов

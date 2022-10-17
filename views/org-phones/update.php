@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\OrgPhones */
 
 $this->title = 'Правка услуги телефонии: ' . $model->sname;
-$this->params['breadcrumbs'][] = ['label' => \app\models\OrgPhones::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\OrgPhones::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->sname, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Правка';
 ?>

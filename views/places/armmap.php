@@ -11,13 +11,15 @@ use yii\grid\GridView;
 $this->title = \app\models\Places::$title;
 $this->params['breadcrumbs'][] = $this->title;
 
+if (!isset($show_archived)) $show_archived=true;
+
 echo $this->render('hdr_create_obj');
 ?>
 
 <div class="places-index">
 
 	<?php foreach ($models as $model) if (empty($model->parent_id)) {
-		echo $this->render('container',['model'=>$model,'models'=>$models,'depth'=>0]);
+		echo $this->render('container',['model'=>$model,'models'=>$models,'depth'=>0,'show_archived'=>$show_archived]);
 	} ?>
     <br />
 	<?= Html::a('Добавить помещение первого уровня',['places/create']) ?>

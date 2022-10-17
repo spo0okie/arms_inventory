@@ -27,7 +27,8 @@ class DynaGridWidget extends Widget
 	public $id;
 	public $header;
 	public $createButton;
-	public $hintButton;
+	public $hintButton=null;
+	public $toolButton=null;
 	
 	public $showFooter=false;
 	
@@ -54,12 +55,14 @@ class DynaGridWidget extends Widget
 			'storage'=>DynaGrid::TYPE_COOKIE,
 			'columns' => $this->prepareColumns($this->columns,$this->defaultOrder),
 			'gridOptions'=>[
+				'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
 				'panel'=>[
 					'type' => GridView::TYPE_DEFAULT,
 					'heading' => $this->header,
 					'before' => $this->createButton,
 				],
 				'toolbar' => [
+					['content'=>$this->toolButton],
 					['content'=>'{dynagridFilter}{dynagridSort}{dynagrid}'],
 					['content'=>'{export}'],
 					['content'=>$this->hintButton],
@@ -71,6 +74,12 @@ class DynaGridWidget extends Widget
 				'resizableColumns'=>true,
 				'persistResize'=>true,
 				'showFooter'=>$this->showFooter,
+				/*'rowOptions'=>function($data) {
+					return [
+						'class'=>($data->hasProperty('archived') && $data->archived)?'row-archived':''
+					];
+					
+				}*/
 			],
 			'options'=>[
 				'id'=>'dynaGrid-'.$this->id,

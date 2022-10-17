@@ -250,6 +250,23 @@ class Services extends ArmsModel
 		];
 	}
 	
+	
+	public function reverseLinks()
+	{
+		return [
+			$this->children,
+			$this->depends,
+			$this->dependants,
+			$this->contracts,
+			$this->comps,
+			$this->techs,
+			$this->arms,
+			$this->acls,
+			$this->orgInets,
+			$this->orgPhones
+		];
+	}
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

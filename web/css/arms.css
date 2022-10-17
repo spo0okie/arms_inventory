@@ -1,0 +1,172 @@
+/* ПАСПОРТ */
+
+div.arm_passport h3 {display: inline;}
+div.arm_passport div.header {text-align: center;}
+/* Табличка */
+div.arm_passport td {
+    border: black 1px solid;
+    border-collapse: collapse;
+    padding-left: 4px;
+}
+div.arm_passport th {
+    border: black 1px solid;
+    border-collapse: collapse;
+    padding-left: 4px;
+    font-weight: bold;
+}
+div.arm_passport table {width: 100%}
+div.soft_unagreed,
+div.soft_unknown,
+div.soft_ignored,
+div.soft_free,
+div.soft_agreed { margin-bottom: 30px;}
+div.arm_passport #unagreed_hdr, div.arm_passport #unknown_hdr, div.arm_passport #agreed_hdr {color: red; cursor: pointer;}
+div.arm_passport .hardware_item.saved-found,   div.arm_passport .software_item.saved-found {background-color: #ccffcc;}
+div.arm_passport .hardware_item.saved-missing, div.arm_passport .software_item.saved-missing {background-color: #ffffcc;}
+div.arm_passport .hardware_item.unsaved-found, div.arm_passport .software_item.saved-missing {background-color: #ffcccc;}
+
+div.arm_passport #unknown_items td.passport_tools,
+div.arm_passport #unknown_items th.passport_tools,
+div.arm_passport #ignored_items td.passport_tools,
+div.arm_passport #ignored_items th.passport_tools,
+div.arm_passport #free_items td.passport_tools,
+div.arm_passport #free_items th.passport_tools
+{display: none !important;}
+
+div.arm_passport td.os-name {
+    word-break: keep-all;
+    white-space: nowrap;
+}
+
+div.edit-hw-item td {width: 20%;}
+
+.underlined {text-decoration: underline;}
+
+@media print {
+    .wrap {padding: 0!important; margin: 0!important;}
+    .wrap .container {padding: 0 !important;}
+    #reformal_tab, .footer {display: none !important;}
+    div.arm_passport a:after{display: none !important;}
+    div.arm_passport #free_hdr,
+    div.arm_passport #ignored_hdr,
+    div.arm_passport #unagreed_hdr,
+    div.arm_passport #unknown_hdr {display: none !important;}
+    div.arms-view .arms-view-header {display: none !important;}
+    .breadcrumb, .passport_tools {display: none;}
+
+    div.arm_passport .glyphicon{display: none !important;}
+    div.arm_passport {font-size: 3mm !important;}
+    div.arm_passport .soft td {font-size: 2.5mm !important;}
+    div.arm_passport .header h3, div.arm_passport h3{font-size: 3.2mm !important; font-weight: bold !important;}
+    div.arm_passport .header h1{font-size: 5mm !important;  margin: 0 !important;}
+    div.arm_passport .excluded, div.arm_passport .hardware_item.unsaved-found {display: none;}
+    div.arm_passport .hardware_item.saved-found, div.arm_passport .hardware_item.saved-missing {background-color: white;}
+}
+
+
+
+/* КАРТОЧКА АРМА */
+/*Сама карточка*/
+div.users-view div.arms-card {
+    background-color: slategray;
+    border-radius: 2pt 12pt 2pt 12pt;
+    color: whitesmoke;
+    font-family: 'Roboto Condensed', sans-serif;
+    margin-bottom: 5px;
+}
+/* номер АРМ */
+div.arms-card h3 {font: bold 42px 'Stencil', Helvetica, sans-serif; padding: 10pt 0 0 20pt;}
+div.arms-card h3 span.arms-item { font-family: 'Stencil', Helvetica, sans-serif;}
+
+div.arms-card h4 {width: 100%;  display: block; margin: 0; text-align: center;}
+
+div.arms-card div.row {margin-left: 8pt;}
+div.arms-card div.comment-block {font-weight: 150; text-align: center}
+div.arms-card div.comment-block img.exclamation-sign {width: 30pt; height: 30pt; filter: invert(100%)}
+
+/* подсвечиваемый кликабельный блок */
+div.arms-card span.clickable {cursor: pointer; padding: 0 10pt}
+div.arms-card span.clickable:hover {background-color: darkgray}
+div.arms-card span.clickable:hover:before {content: '⌵   '}
+div.arms-card span.clickable:hover:after {content: '   ⌵'}
+
+/* ссылочки */
+div.arms-card a,
+div.arms-card a:visited { color: silver; text-decoration: none;}
+div.arms-card a:hover   { color: yellow; text-decoration: none;}
+
+div.arms-card span.net-ips-item {border-radius: 0}
+div.arms-card span.net-ips-item a {color: white; font-family: 'Roboto Condensed',sans-serif; margin: 0 1.5pt}
+div.arms-card span.net-ips-item a:hover {color: yellow}
+
+/* ярлычок статуса */
+div.arms-card span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0 12pt 0 0;}
+span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0; color: white}
+
+div.arms-card span.it-staff {
+    width: 100%;
+    text-align: right;
+    display: block;
+    padding-right:4pt;
+    padding-bottom:2pt;
+}
+
+div.arms-card span.divider1 {
+    display: block; width: 100%; height: 10pt; margin: 2pt 0; padding: 0;
+    background: linear-gradient(to right, white ,white 1%,transparent 1%,transparent 99%,white 99%);
+}
+
+span.divider2-striped,
+div.arms-card span.divider2 {
+    display: block; width: 100%; height: 15pt; margin: 2pt 0; padding: 0;
+    background: repeating-linear-gradient(120deg, transparent,transparent 5px,white 6px, white 10px, transparent 11px);
+}
+
+/* блок в рамочке */
+div.arms-card div.data-block {
+    margin: 4pt;
+    padding: 0 4pt;
+    border: solid silver 1px;
+}
+
+div.arms-card div.data-block.tree-level-2 div.comps-card {background-color: #7f8f9f; padding: 0; margin: 6pt 2pt;}
+div.arms-card div.data-block.tree-level-2 {font-size: 80%;}
+div.arms-card div.data-block.tree-level-2 h1 {font-size:16pt; margin: 2pt 0 0 2pt; padding: 0;}
+div.arms-card div.data-block.tree-level-2 h4 {font-size:10pt; margin: 0; padding: 0; text-align: left}
+div.arms-card div.data-block.tree-level-2 span.unit-status {float: right; width: 20%; text-align: right; border-radius: 0;}
+div.arms-card div.data-block.tree-level-2 div {margin: 2pt;}
+
+
+
+
+/************************************************/
+/******************* ТАБЛИЦЫ ********************/
+/************************************************/
+
+/* АРМы */
+table.arms_index td.comp_ip_col,
+table.arms_index td.sn_col,
+table.arms_index td.state_id_col,
+table.arms_index td.inv_num_col,
+table.arms_index td.num_col,
+table.arms_index td.comp_hw_col {
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: hidden;
+    width: 110px;
+    max-width: 110px;
+}
+
+table.arms_index td.state_id_col {
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: hidden;
+    width: 80px;
+    max-width: 80px;
+}
+
+span.arm_user_position {
+    max-width: 180px;
+    display: inline-block;
+}
+

@@ -12,44 +12,31 @@ $renderer=$this;
 ?>
 <div class="org-inet-index">
 	
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-	    'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
-	
-	    'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-			[
-				'attribute' => 'name',
-				'format' => 'raw',
+	<?= \app\components\DynaGridWidget::widget([
+		'dataProvider' => $dataProvider,
+		'model' => new \app\models\OrgInet(),
+		'columns' => [
+			'name' => [
 				'value' => function ($data) use ($renderer) {
 					return $renderer->render('item', ['model' => $data,'static_view'=>false]);
 				}
 			],
-			[
-				'attribute' => 'places_id',
-				'format' => 'raw',
+			'places_id' => [
 				'value' => function ($data) use ($renderer) {
 					return $renderer->render('/places/item', ['model' => $data->place, 'static_view'=>true,'short'=>true]);
 				}
 			],
-	        //'static',
-			[
-				'attribute' => 'networks_id',
-				'format' => 'raw',
+			'networks_id' => [
 				'value' => function ($data) use ($renderer) {
 					return $this->render('/networks/item',['model'=>$data->network, 'static_view'=>true]);
 				},
 			],
-			[
-				'attribute' => 'services_id',
-				'format' => 'raw',
+			'services_id' => [
 				'value' => function ($data) use ($renderer) {
 					return $renderer->render('/services/item', ['model' => $data->service, 'href'=>true]);
 				}
 			],
-			[
-				'attribute' => 'account',
-				'format' => 'raw',
+			'account' => [
 				'value' => function ($data) use ($renderer) {
 					/**
 					 * @var $data \app\models\OrgInet
@@ -61,14 +48,11 @@ $renderer=$this;
 							'static_view'=>true
 						]);
 					} else return $data->account;
-					
 				}
 			],
 	        'cost',
 	        'charge',
-			[
-				'attribute' => 'totalUnpaid',
-				'format' => 'raw',
+			'totalUnpaid' => [
 				'value' => function ($data) use ($renderer) {
     				if (is_object($service=$data->service))
 					if (count($service->totalUnpaid)) {
@@ -80,23 +64,9 @@ $renderer=$this;
     				return null;
 				}
 			],
-	        'comment:ntext',
-
-            //['class' => 'yii\grid\ActionColumn'],
+	        'comment',
         ],
-	    'toolbar' => [
-		    Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
-		    '{export}'
-	    ],
-	    'toolbarContainerOptions' => ['class'=>'btn-toolbar pull-left'],
-	    'export' => [
-		    'fontAwesome' => true
-	    ],
-	    'showFooter' => false,
-	    'showPageSummary' => false,
-	    'panel' => [
-		    'type' => GridView::TYPE_DEFAULT,
-		    'heading' => $this->title,
-	    ]
+	    'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		'toolButton'=> '<span class="p-2">'.\app\components\ShowArchivedWidget::widget().'<span>',
     ]); ?>
 </div>

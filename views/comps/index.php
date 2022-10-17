@@ -21,5 +21,6 @@ $renderer=$this;
 		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Comps','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
+		'toolButton'=> '<span class="p-2">'.\app\components\ShowArchivedWidget::widget().'<span>',
 	]) ?>
 </div>

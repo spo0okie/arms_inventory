@@ -1,0 +1,123 @@
+
+
+/***************************
+    КАРТА РАБОЧИХ МЕСТ
+****************************/
+
+/*Шапка помещения 1 уровня*/
+div.places-container-hdr-depth0
+{
+    background-color: yellow;
+}
+
+div.places-container-hdr-depth1
+{
+    background: none;
+    font-size: 10px;
+}
+
+div.places-container-hdr > div.places-addr,
+div.places-container-hdr > div.org-phones {
+    display: inline;
+    padding: 3px;
+}
+
+.places-container h1 {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+
+
+/* табличка с АРМами внутри кабинета */
+table.places-arms-container
+{
+    border: none;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0 0 8px 0;
+    padding: 0;
+}
+
+/* ячейка названия кабинета */
+table.places-arms-container td.places-arms-cabinet {
+    background-color: white;
+    border: solid 1px darkgray;
+    border-right: none;
+    text-overflow: clip;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+table.places-arms-container td {
+    text-overflow: clip;
+    overflow: hidden;
+    white-space: nowrap;
+    border: solid 1px darkgray;
+}
+
+table.places-arms-container col.arms_cabinet    {width: 50px;}
+table.places-arms-container col.arm_id          {width: 120px;}
+table.places-arms-container col.arm_hostname    {width: 120px;}
+table.places-arms-container col.arm_uname       {width: 220px}
+table.places-arms-container col.arm_uphone      {width: 100px;}
+table.places-arms-container col.arm_model       {width: 220px;}
+table.places-arms-container col.hardware        {width: 300px;}
+table.places-arms-container col.attachments     {width: 70px;}
+table.places-arms-container col.item_status     {width: 60px;}
+table.places-arms-container col.item_ip         {width: 110px;}
+table.places-arms-container col.item_invnum     {width: 120px;}
+
+
+
+
+span.arms-comp-attach-selector,
+span.arms-num-selector {
+    cursor: pointer;
+}
+span.arms-comp-attach-selector:hover,
+span.arms-num-selector:hover {
+    text-decoration: underline;
+}
+
+/* Раскраска оборудования */
+
+/* Принтеры */
+table.places-arms-container tr.tech_printer_a4,
+table.places-arms-container tr.tech_printer_a3,
+table.places-arms-container tr.tech_printer_a3_ink,
+table.places-arms-container tr.tech_mfu_bw_a4,
+table.places-arms-container tr.tech_mfu_bw_a3,
+table.places-arms-container tr.tech_mfu_color_a4,
+table.places-arms-container tr.tech_mfu_color_a3
+{background-color: lightgrey}
+
+
+td.arm_uphone.tech_voip_phone,
+table.places-arms-container tr.tech_voip_gw,
+table.places-arms-container tr.tech_voip_phone
+{background-color: #ccffcc}
+
+table.places-arms-container tr.tech_net_switch,
+table.places-arms-container tr.tech_net_router
+{background-color: plum}
+
+table.places-arms-container tr.tech_wifi_ap,
+table.places-arms-container tr.tech_wifi_router
+{background-color: lightskyblue}
+
+table.places-arms-container tr.tech_nas {
+    background-color: DarkTurquoise;
+    background-image: url(/web/img/diagonal-noise.png)
+}
+
+table.places-arms-container td.tech_whitespace {
+    background-color: white;
+}
+
+
+table.places-arms-container td.arm_services span.services-item {
+    display: block;
+}

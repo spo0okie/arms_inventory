@@ -1,0 +1,81 @@
+
+
+/*
+ * Сканы документов
+ */
+iframe.scan-pdf-preview {width:100%; height:1000px;}
+
+/* внешний блок */
+div.scans-thumb-tiles{
+    text-align: left;
+    vertical-align: top;
+}
+
+/* плитка */
+div.scans-thumb-tile{
+    display: inline-block;
+    width: 180px;
+    height: 196px;
+    min-height: 220px;
+    padding: 3px;
+    text-align: center;
+    vertical-align: top;
+}
+
+/* картинка в плитке */
+div.scans-thumb-img{
+    display: inline-block;
+    width: 162px;
+    min-height: 162px;
+    height: 162px;
+    text-align: center;
+    border: lightgrey solid 1px;
+    border-radius: 3px;
+    position: relative;
+}
+div.scans-thumb-img > span.upload-scan {
+    font-size:24px;
+    margin-top:16px;
+}
+/* само изображение */
+div.scans-thumb-img img {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: -2px;
+}
+
+/* подпись к скану */
+div.scans-thumb-text{
+    font-size: 8px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* элементы управления */
+div.scans-thumb-ctrls{
+    position: absolute;
+    width: 100%;
+    text-align: right;
+    font-size: 12px;
+    text-shadow: 0 0 2px white ;
+    display: none;
+    cursor: pointer;
+    letter-spacing: 0;
+}
+
+/* показывать инструменты при наведении мыши */
+div.scans-thumb-img:hover > div.scans-thumb-ctrls {
+    display: block;
+}
+
+div.ttip-card a.scans-ttip {
+    float: right;
+    margin-left: 5px;
+}
+
+div.tech-model-view a.scans-ttip {
+    float: right;
+    margin-left: 5px;
+}

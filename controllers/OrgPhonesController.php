@@ -5,9 +5,11 @@ namespace app\controllers;
 use Yii;
 use app\models\OrgPhones;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * OrgPhonesController implements the CRUD actions for OrgPhones model.
@@ -59,8 +61,13 @@ class OrgPhonesController extends Controller
      */
     public function actionIndex()
     {
+    	$query=OrgPhones::find();
+    	if (!Yii::$app->request->get('showArchived',false))
+    		$query->where(['not',['archived'=>1]]);
+
+    	
         $dataProvider = new ActiveDataProvider([
-            'query' => OrgPhones::find(),
+            'query' => $query,
 			'pagination' => ['pageSize' => 100,],
         ]);
 
@@ -103,14 +110,27 @@ class OrgPhonesController extends Controller
     public function actionCreate()
     {
         $model = new OrgPhones();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (Yii::$app->request->isAjax) {
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return [$model];
+			}  else {
+				return $this->redirect(Url::previous());
+			}
+		}
+		
+		$model->load(Yii::$app->request->get());
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('create', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('create', [
+				'model' => $model,
+			]);
+		
     }
 
     /**
@@ -122,15 +142,27 @@ class OrgPhonesController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['org-phones/index']);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+		$model = $this->findModel($id);
+	
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (Yii::$app->request->isAjax) {
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return [$model];
+			}  else {
+				if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
+				return $this->redirect(['view', 'id' => $model->id]);
+			}
+		}
+	
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('update', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
     }
 
     /**

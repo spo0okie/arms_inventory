@@ -1,0 +1,38 @@
+
+
+.org-phones-card {
+    clip-path: polygon(0 0, 0 100%, calc(100% - 20px) 100%, 100% calc(100% - 20px), 100% 0);
+    background: rgba(0,0,0,0.04);
+    color: var(--bs-gray-600);
+    font-family: 'Roboto Condensed', sans-serif;
+    width: 45%;
+}
+
+
+.org-phones-card .delete-item-button,
+.org-phones-card .update-item-button
+{display:none}
+
+.org-phones-card h3 {font-weight: bold}
+.org-phones-card a {color: var(--bs-gray-500);}
+.org-phones-card .bg-success {background-color: var(--bs-gray-600) !important;}
+
+
+.org-phones-card.archived-item {
+    background: rgba(0,0,0,0.02);
+    color: var(--bs-gray-400);
+}
+.org-phones-card.archived-item a {color: var(--bs-gray-300);}
+.org-phones-card.archived-item .bg-success {background-color: var(--bs-gray-400) !important;}
+
+
+
+.org-phones-card:hover{background: rgba(0,0,0,0.06);}
+
+.org-phones-card:hover .delete-item-button,
+.org-phones-card:hover .update-item-button
+{display:inline}
+
+.org-phones-card:hover .bg-success {background-color: var(--bs-success) !important;}
+.org-phones-card:hover a {color: var(--bs-link-color) !important;}
+.org-phones-card:hover {color: var(--bs-gray-700) !important;}

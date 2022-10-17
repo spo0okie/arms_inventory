@@ -15,50 +15,51 @@ use yii\widgets\DetailView;
 /* @var $model app\models\OrgInet */
 
 if (!isset($static_view)) $static_view=false;
+if (!isset($content_only)) $content_only=false;
 
-?>
-
-
-<h1>
-
-	<?= $model->name ?>
-	<?php if (!$static_view) { ?>
-		<?= Html::a('<span class="fas fa-pencil-alt"/>', ['/org-inet/update', 'id' => $model->id]) ?>
-		<?= Html::a('<span class="fas fa-trash"/>', ['/org-inet/delete', 'id' => $model->id], [
-			'data' => [
-				'confirm' => 'Удалить этот ввод интернет? Это действие необратимо!',
-				'method' => 'post',
-			],
-		]) ?>
+if (!$content_only){ ?>
+<div
+		class="<?= $static_view?'me-1 mb-1 p-1':'me-2 mb-2 p-2'?> <?= $model->archived?'archived-item':''?> org-phones-card"
+	<?= ($model->archived&&!(\Yii::$app->request->get('showArchived')))?'style="display:none"':'' ?>>
 	<?php } ?>
-</h1>
+	
+	
+	<?php if ($model->archived) echo \app\components\StripedRowWidget::widget(['title'=>'АРХИВИРОВАН']) ?>
 
-<p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
-<?php if($model->cost) { ?>
+	<h3>
+
+	<?= \app\components\LinkObjectWidget::widget([
+		'model'=>$model,
+		'modal'=>true,
+		'confirmMessage'=>'Удалить этот ввод интернет? Это действие необратимо!',
+		'static'=>$static_view
+	]) ?>
+	</h3>
+
+	<p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
 	<p>
-		Стоимость: <?= Yii::$app->formatter->asCurrency($model->cost) ?>
-		<?php if ($model->charge){ ?>
-			(в т.ч. НДС: <?= Yii::$app->formatter->asCurrency($model->charge) ?>)
+		Стоимость: <span class="badge bg-success"><?= Yii::$app->formatter->asCurrency((int)$model->cost) ?></span>
+		<?php if ($model->charge) { ?>
+			(в т.ч. НДС: <span class="small"><?= Yii::$app->formatter->asCurrency($model->charge) ?></span>)
 		<?php } ?>
 		/мес
 	</p>
-<?php }
 
-if ($model->network) { ?>
-	<h4>Сетевые адреса:</h4>
-	<p>
-		<?= $this->render('/networks/item',['model'=>$model->network]) ?>
-	</p>
-<?php } else { ?>
-	<h4>Динамический адрес</h4>
+<?php if ($model->network) { ?>
+	<strong>Подсеть:</strong>
+	<?= $this->render('/networks/item',['model'=>$model->network]) ?><br />
 <?php } ?>
 
-<h4>Место подключения:</h4>
-<?= $this->render('/places/item',['model'=>$model->place ,'static_view'=>$static_view]) ?>
+	<strong>Место подключения:</strong>
+	<?= $this->render('/places/item',['model'=>$model->place , 'full'=>true, 'static_view'=>$static_view]) ?>
+	<br />
 
+	<strong><?= $model->getAttributeLabel('account')?></strong>
+	<?= $model->account ?>
 
-<h4><?= $model->getAttributeLabel('account')?> </h4>
-<p><?= $model->account ?></p>
-
-<h3>Заметки:</h3>
-<?= \Yii::$app->formatter->asNtext($model->history) ?>
+	<?php if ($model->history) { ?>
+		<p>
+		<strong>Заметки:</strong><br />
+		<?= \Yii::$app->formatter->asNtext(trim($model->history)) ?>
+		</p>
+	<?php } ?>

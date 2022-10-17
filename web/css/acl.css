@@ -29,3 +29,19 @@ button.ace-access-buttons:hover,
 a.ace-access-buttons:hover {background-color: #4f5a69;}
 
 div.acls-form img.exclamation-sign {width: 60pt; height: 60pt; margin-top: 60pt;}
+
+
+
+/*ACLS*/
+
+table.acls-table {
+    border: solid 1px darkgray;
+    border-collapse: collapse;
+}
+table.acls-table td,
+table.acls-table th{
+    border: solid 1px darkgray;
+    border-collapse: collapse;
+    padding: 7px;
+    text-align: center;
+}

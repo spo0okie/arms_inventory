@@ -1,6 +1,7 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\components\UrlParamSwitcherWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\widgets\Pjax;
@@ -16,15 +17,10 @@ $this->params['breadcrumbs'][] = $this->title;
 $models=$dataProvider->models;
 
 $showChildren=Yii::$app->request->get('showChildren',false);
-$showArchived=Yii::$app->request->get('showArchived',false);
 
 $childrenLabel=$showChildren?'Скрыть дочерние сервисы':'Показать дочерние сервисы';
 $childrenUrl=array_merge(['index'],Yii::$app->request->get());
 $childrenUrl['showChildren']=!$showChildren;
-
-$archivedLabel=$showArchived?'Скрыть архивные':'Показать архивные';
-$archivedUrl=array_merge(['index'],Yii::$app->request->get());
-$archivedUrl['showArchived']=!$showArchived;
 
 $renderer=$this;
 
@@ -34,23 +30,6 @@ if (true) {
 ?>
 <div class="services-index">
 
-	<div class="pull-right">
-		<?= Html::a(
-			'Распределение по сотрудникам',
-			'index-by-users'
-		) ?>
-		//
-		<?= Html::a(
-			$childrenLabel,
-			$childrenUrl
-		) ?>
-		//
-		<?= Html::a(
-			$archivedLabel,
-			$archivedUrl
-		) ?>
-		
-	</div>
 	
 	<?php Pjax::begin(); ?>
 	<?= DynaGridWidget::widget([
@@ -58,7 +37,15 @@ if (true) {
 		'header' => Html::encode($this->title),
 		'columns' => require 'columns.php',
 		'defaultOrder' => ['name','sites','segment','providingSchedule','supportSchedule','responsible','compsAndTechs'],
-		'createButton' => Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']),
+		'createButton' => Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']) .
+			' // '.UrlParamSwitcherWidget::widget([
+				'param'=>'showChildren',
+				'hintOff'=>'Скрыть дочерние сервисы',
+				'hintOn'=>'Показать дочерние сервисы',
+				'label'=>'Дочерние',
+			]).
+			' // '.\app\components\ShowArchivedWidget::widget().
+			' // '.Html::a('Распределение по сотрудникам','index-by-users'),
 		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Services','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,

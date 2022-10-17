@@ -20,16 +20,16 @@ if (!isset($modalParent)) $modalParent=null;
         <div class="col-md-6">
 			<div class="row">
 				<div class="col-md-7">
-					<?= $form->field($model, 'name')->textInput() ?>
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
 				</div>
 				<div class="col-md-5">
-					<?= $form->field($model, 'account')->textInput() ?>
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'account') ?>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="col-md-7">
-					<?= $form->field($model, 'services_id')->widget(Select2::className(), [
+					<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'services_id', [
 						'data' => \app\models\Services::fetchProviderNames(),
 						'options' => ['placeholder' => 'Выберите услугу связи',],
 						'pluginOptions' => [
@@ -40,24 +40,17 @@ if (!isset($modalParent)) $modalParent=null;
 					]) ?>
 				</div>
 				<div class="col-md-3">
-					<?= $form->field($model, 'cost')->textInput() ?>
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'cost') ?>
 				</div>
 				<div class="col-md-2">
-					<?= $form->field($model, 'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('orginet','cost','charge')) ?>
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'charge',[
+						'staticHint'=>\app\models\Contracts::chargeCalcHtml('orginet','cost','charge')
+					]) ?>
 				</div>
-				<?= \app\components\TextAutoResizeWidget::widget([
-					'form' => $form,
-					'model' => $model,
-					'attribute' => 'comment',
+				<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment',[
 					'lines' => 2,
 				]) ?>
 			</div>
-
-
-
-
-			
-
 
             <div class="form-group">
 		        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
@@ -66,7 +59,7 @@ if (!isset($modalParent)) $modalParent=null;
         <div class="col-md-6">
 			<div class="row">
 				<div class="col-md-6">
-					<?= $form->field($model, 'networks_id')->widget(Select2::className(), [
+					<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'networks_id', [
 						'data' => \app\models\Networks::fetchNames(),
 						'options' => ['placeholder' => 'Выберите предоставляемую подсеть',],
 						'pluginOptions' => [
@@ -77,10 +70,8 @@ if (!isset($modalParent)) $modalParent=null;
 					]) ?>
 				</div>
 				<div class="col-md-6">
-					<?= $form->field($model, 'places_id')->widget(Select2::className(), [
+					<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'places_id', [
 						'data' => \app\models\Places::fetchNames(),
-						//'options' => ['placeholder' => 'Статус рабочего места',],
-						'toggleAllSettings'=>['selectLabel'=>null],
 						'pluginOptions' => [
 							'dropdownParent' => $modalParent,
 							'allowClear' => false,
@@ -91,13 +82,12 @@ if (!isset($modalParent)) $modalParent=null;
 			</div>
 
 			
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'history',
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'history',[
 				'lines' => 2,
 			]) ?>
-
+			<div class="float-end">
+				<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'archived') ?>
+			</div>
 		</div>
     </div>
 

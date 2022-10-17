@@ -6,6 +6,14 @@ use yii\helpers\Html;
 /* @var $model app\models\Services */
 
 if (!isset($static_view)) $static_view=false;
+if (!isset($show_archived)) $show_archived=true;
+if (!isset($display)) {
+	$display=($model->archived&&!$show_archived)?'style="display:none"':'';
+};
+
+if (!isset($archClass)) {
+	$archClass=$model->archived?'text-muted text-decoration-line-through archived-item':'';
+};
 
 
 if (is_object($model)) {
@@ -49,8 +57,7 @@ if (is_object($model)) {
 		}
 	}
 	?>
-	<span class="services-item <?= $model->archived?'archived':'' ?>" qtip_ajxhrf="<?= \yii\helpers\Url::to(['/services/ttip','id'=>$model->id]) ?>">
-		<?= Html::a($icon.$name,['/services/view','id'=>$model->id]) ?>
-    	<?= $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['/services/update','id'=>$model->id]) ?>
+	<span class="services-item <?= $archClass ?>" <?= $display ?> >
+		<?= \app\components\LinkObjectWidget::widget(['model'=>$model]) ?>
 	</span>
 <?php }

@@ -13,11 +13,20 @@ if (!isset($modalParent)) $modalParent=null;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'code')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'descr')->textarea(['rows' => 6]) ?>
+	<div class="row">
+		<div class="col-md-5">
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+		</div>
+		<div class="col-md-5">
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'code') ?>
+		</div>
+		<div class="col-md-2 pt-3">
+			<br />
+			<?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'archived') ?>
+		</div>
+	</div>
+	
+    <?= \app\helpers\FieldsHelper::TextAutoresizeField($form, $model, 'descr',['lines' => 6]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

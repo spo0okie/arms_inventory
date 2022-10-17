@@ -15,6 +15,7 @@ $attached=0; //техника прикрепленная к АРМ
 //foreach ($arms as $arm) foreach ($arm->techs as $tech)
     //if (!$tech->isVoipPhone && !$tech->isUps) $attached++;
 
+if (!isset($show_archived)) $show_archived=true;
 
 yii\helpers\ArrayHelper::multisort($arms,'num');
 yii\helpers\ArrayHelper::multisort($techs,'num');
@@ -27,7 +28,8 @@ foreach ($arms as $arm ) {
 	$content.=$this->render(
 		'/arms/tdrow',[
 			'model'=>$arm,
-			'cabinet_col'=>strlen($content)?null:$cabinet_col
+			'cabinet_col'=>strlen($content)?null:$cabinet_col,
+			'show_archived'=>$show_archived,
 		]
 	);
 	//убираем из рендера оборудования в помещении то, что прилипло к АРМ
@@ -44,7 +46,8 @@ foreach ($techs as $tech )
 	$content.=$this->render(
 		'/techs/tdrow',[
 			'model'=>$tech,
-			'cabinet_col'=>strlen($content)?null:$cabinet_col
+			'cabinet_col'=>strlen($content)?null:$cabinet_col,
+			'show_archived'=>$show_archived,
 		]
 	);
 

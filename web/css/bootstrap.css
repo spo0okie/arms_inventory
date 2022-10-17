@@ -1,0 +1,63 @@
+
+
+/* Корректировки BOOTSTRAP */
+
+
+div.invalid-feedback {
+    display: inherit!important;
+}
+
+@media (min-width: 1200px) {
+    .container-large {
+        width: 1600px;
+    }
+}
+
+.container-large {
+    max-width: 100%;
+}
+
+.text-monospace {
+    font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+}
+
+.dropdown-menu {
+    min-width: 200px !important;
+}
+
+
+
+.alert-striped{
+    background-size: 40px 40px;
+    background-image: -webkit-linear-gradient(45deg, rgba(188,188,188, .2) 25%, transparent 25%,
+    transparent 50%, rgba(188,188,188, .2) 50%, rgba(188,188,188, .2) 75%,
+    transparent 75%, transparent);
+    background-image: -moz-linear-gradient(45deg, rgba(188,188,188, .2) 25%, transparent 25%,
+    transparent 50%, rgba(188,188,188, .2) 50%, rgba(188,188,188, .2) 75%,
+    transparent 75%, transparent);
+    background-image: linear-gradient(45deg, rgba(188,188,188, .2) 25%, transparent 25%,
+    transparent 50%, rgba(188,188,188, .2) 50%, rgba(188,188,188, .2) 75%,
+    transparent 75%, transparent);
+    -pie-background: linear-gradient(45deg, rgba(188,188,188, .2) 25%, transparent 25%,
+    transparent 50%, rgba(188,188,188, .2) 50%, rgba(188,188,188, .2) 75%,
+    transparent 75%, transparent) 0 0 / 40px 40px rgba(188,188,188, .2);
+    color: #666;
+}
+
+
+.bg-red-striped{
+    background-size: 40px 40px;
+    background-image: -webkit-linear-gradient(45deg, rgba(240,128,128, .2) 25%, transparent 25%,
+    transparent 50%, rgba(240,128,128, .2) 50%, rgba(240,128,128, .2) 75%,
+    transparent 75%, transparent);
+    background-image: -moz-linear-gradient(45deg, rgba(240,128,128, .2) 25%, transparent 25%,
+    transparent 50%, rgba(240,128,128, .2) 50%, rgba(240,128,128, .2) 75%,
+    transparent 75%, transparent);
+    background-image: linear-gradient(45deg, rgba(240,128,128, .2) 25%, transparent 25%,
+    transparent 50%, rgba(240,128,128, .2) 50%, rgba(240,128,128, .2) 75%,
+    transparent 75%, transparent);
+    -pie-background: linear-gradient(45deg, rgba(240,128,128, .2) 25%, transparent 25%,
+    transparent 50%, rgba(240,128,128, .2) 50%, rgba(240,128,128, .2) 75%,
+    transparent 75%, transparent) 0 0 / 40px 40px rgba(240,128,128, .2);
+    color: #666;
+}

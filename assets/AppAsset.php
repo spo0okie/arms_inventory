@@ -20,12 +20,19 @@ class AppAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-    	'css/custom.css',
+		'css/custom.css',
 		'css/site.css',
-		'css/page-header.css',
+		'css/qtip.css',
 		'css/acl.css',
+		'css/arm-map.css',
+		'css/arms.css',
+		'css/org-phones.css',
+		'css/page-header.css',
+		'css/scans.css',
 		'css/schedules.css',
+		'css/state-colors.css',
 		'css/codes.private.css',
+		'css/bootstrap.css',
     ];
     public $js = [
 		'js/scans.js',

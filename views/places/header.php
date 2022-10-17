@@ -10,6 +10,8 @@ $phones=$model->phones;
 $addr=$model->addr;
 $inets=$model->inets;
 
+if (!isset($show_archived)) $show_archived=true;
+
 if (count($phones)||count($inets)||strlen($addr)) {
 ?>
 
@@ -19,13 +21,15 @@ if (count($phones)||count($inets)||strlen($addr)) {
         <?php if (count($phones)) {
             echo '<i class="fas fa-phone"></i>';
             foreach ($phones as $phone)
-		        echo $this->render('/org-phones/item',['model'=>$phone]).' ';
+		        echo $this->render('/org-phones/item',['model'=>$phone,'show_archived'=>$show_archived]).' ';
         }?>
     </span>
     <span class="org-phones">
         <?php if (count($inets)) {
-	        foreach ($inets as $inet)
-		        echo '<i class="fas fa-globe"></i>'.$this->render('/org-inet/item',['model'=>$inet]).' ';
+	        foreach ($inets as $inet) {
+	        	echo '<i class="fas fa-globe '.($inet->archived?'archived-item':'').'" '.($inet->archived&&!$show_archived?'style="display:none"':'').'></i>';
+				echo $this->render('/org-inet/item', ['model' => $inet, 'show_archived' => $show_archived]) . ' ';
+			}
         }?>
     </span>
     <?php if(strlen($addr)) { ?>

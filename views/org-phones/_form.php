@@ -14,26 +14,25 @@ if (!isset($modalParent)) $modalParent=null;
 
     <?php $form = ActiveForm::begin(); ?>
 
-	Если услуга предоставляет номер телефона, впишите его сдесь
+	Номер телефона, предоставляемый услугой связи
     <div class="row">
         <div class="col-md-2">
-	        <?= $form->field($model, 'country_code')->textInput(['maxlength' => true]) ?>
+	        <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'country_code') ?>
         </div>
         <div class="col-md-3">
-	        <?= $form->field($model, 'city_code')->textInput(['maxlength' => true]) ?>
+	        <?= \app\helpers\FieldsHelper::TextInputField($form,$model,'city_code') ?>
         </div>
         <div class="col-md-7">
-	        <?= $form->field($model, 'local_code')->textInput(['maxlength' => true]) ?>
+	        <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'local_code') ?>
         </div>
     </div>
 
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= $form->field($model, 'places_id')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'places_id', [
 				'data' => \app\models\Places::fetchNames(),
 				'options' => ['placeholder' => 'Выберите помещение',],
-				//'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'allowClear' => false,
@@ -42,7 +41,7 @@ if (!isset($modalParent)) $modalParent=null;
 			]) ?>
 		</div>
 		<div class="col-md-6">
-			<?= $form->field($model, 'services_id')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'services_id', [
 				'data' => \app\models\Services::fetchProviderNames(),
 				'options' => ['placeholder' => 'Выберите услугу предоставляющую номер',],
 				'pluginOptions' => [
@@ -56,14 +55,20 @@ if (!isset($modalParent)) $modalParent=null;
 	</div>
 
     <div class="row">
-        <div class="col-md-6">
-	        <?= $form->field($model, 'account')->textInput(['maxlength' => true]) ?>
+        <div class="col-md-4">
+	        <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'account')->textInput(['maxlength' => true]) ?>
         </div>
 		<div class="col-md-4">
-			<?= $form->field($model, 'cost')->textInput() ?>
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'cost')->textInput() ?>
 		</div>
 		<div class="col-md-2">
-			<?= $form->field($model, 'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('orgphones','cost','charge')) ?>
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'charge',[
+				'classicHint'=>\app\models\Contracts::chargeCalcHtml('orgphones','cost','charge')
+			])?>
+		</div>
+		<div class="col-md-2 pt-3">
+			<br />
+			<?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'archived')?>
 		</div>
     </div>
 

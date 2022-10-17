@@ -8,6 +8,8 @@ use yii\grid\GridView;
 
 $this->title = \app\models\TechStates::$title;
 $this->params['breadcrumbs'][] = $this->title;
+
+$renderer=$this;
 ?>
 <div class="tech-states-index">
 
@@ -20,14 +22,28 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            //'id',
             'code',
-            'name',
+            [
+				'attribute'=>'name',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer) {
+    				return $renderer->render('/tech-states/item',['model'=>$data]).
+						\app\components\LinkObjectWidget::widget([
+							'model'=>$data,
+							'name'=>false,
+							'modal'=>true,
+							'hideUndeletable'=>false,
+						]);
+				}
+			],
+			[
+				'attribute'=>'archived',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer) {
+					return '<input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" disabled '.($data->archived?'checked':'').'>';
+				}
+			],
             'descr:ntext',
-
-            ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 </div>

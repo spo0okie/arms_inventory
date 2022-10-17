@@ -27,49 +27,6 @@ echo Html::a('Новые ЗиП и материалы',
 	['class'=>'open-in-modal-form btn btn-success','data-reload-page-on-submit'=>1]
 ).' ';
 
-
-
-$js = <<<JS
-    $('#arms_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-    $('#techs_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-    $('#materials_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-
-    $('#materials-form').on('beforeSubmit', function(){
-        var data = $(this).serialize();
-        $.ajax({
-            url: '/web/materials/create',
-            type: 'POST',
-            data: data,
-            success: function(res){window.location.reload();},
-            error: function(){alert('Чтото пошло не так...');}
-        });
-        return false;
-    });
-
-    $('#arms-form').on('beforeSubmit', function(){
-        var data = $(this).serialize();
-        $.ajax({
-            url: '/web/arms/create',
-            type: 'POST',
-            data: data,
-            success: function(res){window.location.reload();},
-            error: function(){alert('Чтото пошло не так...');}
-        });
-        return false;
-    });
-
-    $('#techs-edit-form').on('beforeSubmit', function(){
-        var data = $(this).serialize();
-        $.ajax({
-            url: '/web/techs/create',
-            type: 'POST',
-            data: data,
-            success: function(res){window.location.reload();},
-            error: function(){alert('Чтото пошло не так...');}
-        });
-        return false;
-    });
-JS;
-
-$this->registerJs($js);
 ?>
+
+<span class="float-end p-2"><?= \app\components\ShowArchivedWidget::widget(['reload' => false]) ?></span>

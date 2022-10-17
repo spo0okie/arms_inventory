@@ -124,15 +124,9 @@ class ServicesController extends Controller
 		Services::cacheAllItems();
 		Places::cacheAllItems();
 		$searchModel = new ServicesSearch();
-		if (Yii::$app->request->get('showChildren',false))
-			$searchModel->parent_id=null; //игнорировать
-		else
-			$searchModel->parent_id=false; //должен отсутствовать
-		
-		if (Yii::$app->request->get('showArchived',false))
-			$searchModel->archived=null; //игнорировать
-		else
-			$searchModel->archived=false; //должен отсутствовать
+
+		$searchModel->parent_id=Yii::$app->request->get('showChildren',false);
+		$searchModel->archived=Yii::$app->request->get('showArchived',false);
 		
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		$this->view->params['layout-container'] = 'container-fluid';
