@@ -20,8 +20,8 @@ class CompsSearch extends Comps
     public function rules()
     {
         return [
-            [['id', 'domain_id','archived'], 'integer'],
-            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id'], 'safe'],
+            [['id', 'domain_id'], 'integer'],
+            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id','archived'], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
 				$macs=explode("\n",$value);
 				foreach ($macs as $i=>$mac) {
@@ -101,7 +101,7 @@ class CompsSearch extends Comps
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
-            //return $dataProvider;
+            var_dump($this->errors);
         }
 
 	
