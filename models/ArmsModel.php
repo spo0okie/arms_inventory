@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\components\DynaGridWidget;
+use app\helpers\ArrayHelper;
 use DateTime;
 use DateTimeZone;
 use Yii;
@@ -173,7 +174,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 	
 	public static function cacheAllItems() {
 		if (!static::allItemsLoaded())
-			static::$allItems=static::find()->all();
+			static::$allItems=ArrayHelper::index(static::find()->all(),'id');
 	}
 	
 	public static function getAllItems($autoload=false) {
