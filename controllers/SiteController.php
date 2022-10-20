@@ -63,8 +63,41 @@ class SiteController extends Controller
     {
         return $this->render('index');
     }
-
-    /**
+	
+	/**
+	 * Displays homepage.
+	 *
+	 * @return string
+	 */
+	public function actionWiki($pageName)
+	{
+		$arrContextOptions = [
+			"http" => [
+				"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['wikiUser'] . ":" . \Yii::$app->params['wikiPass']),
+				'method' => 'POST',
+				'content' => xmlrpc_encode_request(
+					'wiki.getPageHTML',
+					urldecode($pageName),
+					['encoding'=>'utf-8','escaping'=>[]]
+				),
+				'timeout' => 5,
+			],
+			"ssl" => [
+				"verify_peer" => false,
+				"verify_peer_name" => false,
+			],
+		];
+		$page = @file_get_contents(\Yii::$app->params['wikiUrl'].'lib/exe/xmlrpc.php',
+			false,
+			stream_context_create($arrContextOptions)
+		);
+		if ($page===false) return "Ошибка получения детального описания из Wiki";
+		$page=xmlrpc_decode($page);
+		$page = str_replace('href="/', 'href="' . \Yii::$app->params['wikiUrl'] , $page);
+		return $page;
+	}
+	
+	/**
      * Login action.
      *
      * @return Response|string

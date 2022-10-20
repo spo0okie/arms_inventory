@@ -31,11 +31,14 @@ class WikiPageWidget extends Widget
 				
 				if (strpos($url, \Yii::$app->params['wikiUrl']) === 0) {
 					$cache = \Yii::$app->cache;
+					$pageName=substr($url,strlen(\Yii::$app->params['wikiUrl']));
 					//пробуем выдернуть это из кэша
-					if ($page = $cache->get($url)) return '<h1>Wiki:</h1>'.$page;
-					$arrContextOptions = [
+					//if ($page = $cache->get($url)) return '<h1>Wiki:</h1>'.$page;
+					/*$arrContextOptions = [
 						"http" => [
 							"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['wikiUser'] . ":" . \Yii::$app->params['wikiPass']),
+							'method' => 'POST',
+							'content' => xmlrpc_encode_request('wiki.getPageHTML',urldecode($pageName),['encoding'=>'utf-8','escaping'=>[]]),
 							'timeout' => 5,
 						],
 						"ssl" => [
@@ -43,24 +46,15 @@ class WikiPageWidget extends Widget
 							"verify_peer_name" => false,
 						],
 					];
-					$page = @file_get_contents($url, false, stream_context_create($arrContextOptions));
+					$page = @file_get_contents(\Yii::$app->params['wikiUrl'].'lib/exe/xmlrpc.php',
+						false,
+						stream_context_create($arrContextOptions)
+					);
 					if ($page===false) return "Ошибка получения детального описания из Wiki";
-					$startCode = '<div class="dw-content">';
-					$endCode = '<div class="comment_wrapper" id="comment_wrapper">';
-					if ($startPos = strpos($page, $startCode)) {
-						$page = substr($page, $startPos + strlen($startCode));
-						if ($endPos = strpos($page, $endCode)) {
-							$page = substr($page, 0, $endPos);
-							if ($titlePos = strpos($page, '</h1>')) {
-								$page = substr($page, $titlePos + 5);
-							}
-							
-							$page = str_replace('href="/', 'href="' . \Yii::$app->params['wikiUrl'] , $page);
-							$cache->set($url, $page, 3600*12);
-							
-							return '<h1>Wiki:</h1>'. $page;
-						} else return "no end";
-					} else return "no start";
+					$page=xmlrpc_decode($page);
+					$page = str_replace('href="/', 'href="' . \Yii::$app->params['wikiUrl'] , $page);*/
+					return '<div id="wikiPage"></div><script>$.get("'.'/web/site/wiki?pageName='.$pageName.'", function(data) {$("#wikiPage").html(data);})</script>';
+
 					
 				}
 			}
