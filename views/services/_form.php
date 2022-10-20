@@ -63,10 +63,10 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 
 	<div class="row">
 		<div class="col-md-5">
-			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
 		</div>
 		<div class="col-md-5">
-			<?= $form->field($model, 'parent_id')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'parent_id', [
 				'data' => \app\models\Services::fetchNames(),
 				'options' => [
 					'placeholder' => 'Выберите основной сервис/услугу',
@@ -95,8 +95,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 
     <div class="row">
         <div class="col-md-4">
-	        <?= $form->field($model, 'is_end_user')->checkbox() ?>
-			<?= $form->field($model, 'segment_id')->widget(Select2::className(), [
+	        <?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'is_end_user') ?>
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'segment_id', [
 				'data' => \app\models\Segments::fetchNames(),
 				'options' => [
 					'placeholder' => (is_object($model->parent) && strlen($model->parent->segmentName))?
@@ -109,7 +109,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
-			<?= $form->field($model, 'providing_schedule_id')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'providing_schedule_id', [
 				'data' => \app\models\Schedules::fetchNames(),
 				'options' => [
 					'placeholder' => (is_object($model->parent) && strlen($model->parent->providingScheduleName))?
@@ -122,7 +122,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
-			<?= $form->field($model, 'support_schedule_id')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'support_schedule_id', [
 				'data' => \app\models\Schedules::fetchNames(),
 				'options' => [
 					'placeholder' => (is_object($model->parent) && strlen($model->parent->supportScheduleName))?
@@ -135,7 +135,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
-			<?= $form->field($model, 'responsible_id')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'responsible_id', [
 				'data' => \app\models\Users::fetchWorking(),
 				'options' => [
 					'placeholder' => (is_object($model->parent) && strlen($model->parent->responsibleName))?
@@ -148,7 +148,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
-			<?= $form->field($model, 'places_id')->widget(Select2::classname(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'places_id', [
 				'data' => \app\models\Places::fetchNames(),
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -157,7 +157,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'allowClear' => true,
 				],
 			]) ?>
-			<?= $form->field($model, 'partners_id')->widget(Select2::classname(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'partners_id', [
 				'data' => \app\models\Partners::fetchNames(),
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -168,7 +168,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			]) ?>
 			<div class="row">
 				<div class="col-md-3">
-					<?= $form->field($model, 'currency_id')->widget(Select2::classname(), [
+					<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'currency_id', [
 						'data' => \app\models\Currency::fetchNames(),
 						'options' => ['placeholder' => 'RUR'],
 						'toggleAllSettings'=>['selectLabel'=>null],
@@ -180,37 +180,29 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					]) ?>
 				</div>
 				<div class="col-md-6">
-					<?= $form->field($model,'cost')->textInput() ?>
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'cost') ?>
 				</div>
 				<div class="col-md-3">
 					<?= $form->field($model,'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('services','cost','charge')) ?>
 				</div>
 			</div>
-			<?= $form->field($model,'weight')->textInput() ?>
+			<div class="row">
+				<div class="col-md-6">
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'weight') ?>
+				</div>
+				<div class="col-md-6 p-3 align-content-end">
+					<br/>
+					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'archived') ?>
+				</div>
+			</div>
 
 
 		</div>
         <div class="col-md-8">
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'search_text',
-				'lines' => 1,
-			]) ?>
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'description',
-				'lines' => 3,
-			]) ?>
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'links',
-				'lines' => 3,
-			]) ?>
-			
-			<?= $form->field($model, 'support_ids')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'search_text',['lines' => 1,]) ?>
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'description',['lines' => 2,]) ?>
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'links',[	'lines' => 1,]) ?>
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'support_ids', [
 				'data' => \app\models\Users::fetchWorking(),
 				'options' => [
 					'placeholder' => (is_object($model->parent) && strlen($model->parent->supportNames))?
@@ -223,7 +215,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
-			<?= $form->field($model, 'depends_ids')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'depends_ids', [
 				'data' => \app\models\Services::fetchNames(),
 				'options' => ['placeholder' => 'Выберите сервисы',],
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -233,7 +225,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
-			<?= $form->field($model, 'comps_ids')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'comps_ids', [
 				'data' => \app\models\Comps::fetchNames(),
 				'options' => ['placeholder' => 'Выберите серверы',],
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -243,7 +235,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
-			<?= $form->field($model, 'techs_ids')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'techs_ids', [
 				'data' => \app\models\Techs::fetchNames(),
 				'options' => ['placeholder' => 'Выберите оборудование',],
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -253,7 +245,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
-			<?= $form->field($model, 'contracts_ids')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
 				'data' => \app\models\Contracts::fetchNames(),
 				'options' => ['placeholder' => 'Выберите документы',],
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -266,17 +258,9 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6">
-	
-	
-	
-			<?= $form->field($model, 'archived')->checkbox() ?>
-        </div>
-        <div class="col-md-6">
-
-        </div>
-    </div>
+	<div class="form-group">
+		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+	</div>
 	<?= $form->field($model, 'notebook')->widget(\kartik\markdown\MarkdownEditor::className(), [
 		'showExport'=>false
 	]) ?>
@@ -285,9 +269,6 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 
 
 
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-    </div>
 
     <?php ActiveForm::end(); ?>
 
