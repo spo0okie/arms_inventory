@@ -1,5 +1,6 @@
 <?php
 
+use app\components\UrlParamSwitcherWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -12,6 +13,8 @@ $this->title = $model->sname;
 $this->params['breadcrumbs'][] = ['label' => app\models\Networks::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
+
+$showEmpty=\Yii::$app->request->get('showEmpty',false);
 
 $index=\yii\helpers\ArrayHelper::index($ips,'addr');
 //var_dump($index);
@@ -27,8 +30,17 @@ $index=\yii\helpers\ArrayHelper::index($ips,'addr');
 		</div>
 	</div>
 	<br />
+	<?= UrlParamSwitcherWidget::widget([
+		'cssClass'=>'float-end',
+		'param'=>'showEmpty',
+		'hintOff'=>'Скрыть не занятые IP',
+		'hintOn'=>'Показать не занятые IP',
+		'label'=>'Пустые',
+		'reload'=>false,
+		'scriptOn'=>"\$('.empty-item').show();",
+		'scriptOff'=>"\$('.empty-item').hide();",
+	]) ?>
 	<h4>Адреса:</h4>
-	<?= ($model->capacity>512)?'<p>Список адресов отображается в режиме <strong>Большой сети</strong>: не созданные IP адреса пропущены, т.к. общее количество адресов более 512':'' ?>
 	<table class="table table-bordered table-striped table-condensed">
 		<tr>
 			<th>
@@ -44,21 +56,14 @@ $index=\yii\helpers\ArrayHelper::index($ips,'addr');
 				comment
 			</th>
 		</tr>
-		<?php if ($model->capacity>512) {
-			foreach ($index as $ip) { ?>
-				<tr>
-					<?= $this->render('ip-row',['model'=>$model,'i'=>($ip->addr - $model->addr),'ip'=>$ip]) ?>
-				</tr>
-			<?php }
-		} else {
+		<?php
 			for ($i=0; $i<$model->capacity; $i++) {
 				$addr=$model->addr+$i;
 				?>
-				<tr>
+				<tr class="<?= isset($index[$addr])?'':'empty-item' ?>" <?= isset($index[$addr])?'':'style="display:none"' ?>>
 					<?= $this->render('ip-row',['model'=>$model,'i'=>$i,'ip'=>isset($index[$addr])?$index[$addr]:null]) ?>
 				</tr>
-		<?php }
-		}?>
+		<?php } ?>
 	</table>
 
 </div>
