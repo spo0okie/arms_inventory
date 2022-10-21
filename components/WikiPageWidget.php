@@ -32,28 +32,13 @@ class WikiPageWidget extends Widget
 				if (strpos($url, \Yii::$app->params['wikiUrl']) === 0) {
 					$cache = \Yii::$app->cache;
 					$pageName=substr($url,strlen(\Yii::$app->params['wikiUrl']));
-					//пробуем выдернуть это из кэша
-					//if ($page = $cache->get($url)) return '<h1>Wiki:</h1>'.$page;
-					/*$arrContextOptions = [
-						"http" => [
-							"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['wikiUser'] . ":" . \Yii::$app->params['wikiPass']),
-							'method' => 'POST',
-							'content' => xmlrpc_encode_request('wiki.getPageHTML',urldecode($pageName),['encoding'=>'utf-8','escaping'=>[]]),
-							'timeout' => 5,
-						],
-						"ssl" => [
-							"verify_peer" => false,
-							"verify_peer_name" => false,
-						],
-					];
-					$page = @file_get_contents(\Yii::$app->params['wikiUrl'].'lib/exe/xmlrpc.php',
-						false,
-						stream_context_create($arrContextOptions)
-					);
-					if ($page===false) return "Ошибка получения детального описания из Wiki";
-					$page=xmlrpc_decode($page);
-					$page = str_replace('href="/', 'href="' . \Yii::$app->params['wikiUrl'] , $page);*/
-					return '<div id="wikiPage"></div><script>$.get("'.'/web/site/wiki?pageName='.$pageName.'", function(data) {$("#wikiPage").html(data);})</script>';
+
+					return '<div id="wikiPage">
+		<div class="spinner-border" role="status">
+	  		<span class="visually-hidden">Loading...</span>
+		</div>
+	</div>
+	<script>$.get("'.'/web/site/wiki?pageName='.$pageName.'", function(data) {$("#wikiPage").html(data);})</script>';
 
 					
 				}
