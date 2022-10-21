@@ -21,9 +21,11 @@ class UrlParamSwitcherWidget extends Widget
 	public $reload=true;
 	public $scriptOff='';
 	public $scriptOn='';
+	public $cssClass=null;
 	private $onChange;
 	
 	public function init() {
+		parent::init();
 		if (is_null($this->state))
 			$this->state = \Yii::$app->request->get($this->param);
 		
@@ -60,7 +62,7 @@ JS;
 	
 	public function run()
 	{
-		return '<div class="form-switch '.$this->param.'-switcher-widget" qtip_ttip="'.$this->hint.'" qtip_side="top,bottom,right,left">
+		return '<div class="form-switch '.$this->param.'-switcher-widget '.$this->cssClass.'" qtip_ttip="'.$this->hint.'" qtip_side="top,bottom,right,left">
   			<input class="form-check-input"
   				type="checkbox"
   				id="'.$this->param.'SwitchWidget"
