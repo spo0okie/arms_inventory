@@ -60,7 +60,7 @@ $index=\yii\helpers\ArrayHelper::index($ips,'addr');
 			for ($i=0; $i<$model->capacity; $i++) {
 				$addr=$model->addr+$i;
 				?>
-				<tr class="<?= isset($index[$addr])?'':'empty-item' ?>" <?= isset($index[$addr])?'':'style="display:none"' ?>>
+				<tr class="<?= isset($index[$addr])?'':'empty-item' ?>" <?= (isset($index[$addr])||$showEmpty)?'':'style="display:none"' ?>>
 					<?= $this->render('ip-row',['model'=>$model,'i'=>$i,'ip'=>isset($index[$addr])?$index[$addr]:null]) ?>
 				</tr>
 		<?php } ?>
