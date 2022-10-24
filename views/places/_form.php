@@ -37,6 +37,7 @@ if ($model->parent_id)
     <?= $form->field($model, 'addr')->textInput(['maxlength' => true,'placeholder'=>($model->parent_id)?$model->parent->addr:'']) ?>
 
     <?= $form->field($model, 'prefix')->textInput(['maxlength' => true,'placeholder'=>($model->parent_id)?$model->parent->prefix:'']) ?>
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'comment',['lines'=>3]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

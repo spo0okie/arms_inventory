@@ -32,11 +32,17 @@ if (count($phones)||count($inets)||strlen($addr)) {
 			}
         }?>
     </span>
-    <?php if(strlen($addr)) { ?>
-        <span class="places-addr">
+	<?php if(strlen($addr)) { ?>
+		<span class="places-addr">
             <span class="fas fa-envelope"></span><?= Html::encode($addr) ?>
-            <?= Html::a('<i class="fas fa-pencil-alt"></i>',['/places/update','id'=>$model->id],['title'=>'Редактировать помещение']) ?>
+			<?= Html::a('<i class="fas fa-pencil-alt"></i>',['/places/update','id'=>$model->id],['title'=>'Редактировать помещение']) ?>
         </span>
-    <?php } ?>
+	<?php } ?>
+	<?php if(strlen($model->comment)) { ?>
+		<span class="places-comment">
+            <span class="fas fa-info-circle"></span><?= Html::encode($model->comment) ?>
+			<?= Html::a('<i class="fas fa-pencil-alt"></i>',['/places/update','id'=>$model->id],['title'=>'Редактировать помещение']) ?>
+        </span>
+	<?php } ?>
 </div>
 <?php } ?>

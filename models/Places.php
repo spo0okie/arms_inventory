@@ -111,7 +111,8 @@ DELIMITER ;
             [['name'], 'string', 'max' => 128],
             [['addr'], 'string', 'max' => 255],
             [['prefix'], 'string', 'max' => 5],
-            [['short'], 'string', 'max' => 16],
+			[['short'], 'string', 'max' => 16],
+			[['comment'], 'safe'],
         ];
     }
 
