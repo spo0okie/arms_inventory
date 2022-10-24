@@ -121,46 +121,15 @@ class DynaGridWidget extends Widget
 		
 		$model=isset($data['model'])?
 			$data['model']:$this->model;
-		//если наш объект поддерживает getAttributeIndexLabel, а наименования столбца нет
-		if (
-			!isset($data['label'])
-		) {
-			if (is_object($model)) {
-				$data['label']=method_exists($model,'getAttributeIndexLabel')
-				?
-				$model->getAttributeIndexLabel($attribute)
-				:
-				$model->getAttributeLabel($attribute);
-			} else {
-				$data['label']=Inflector::camel2words($attr, true);
-			}
-		}
 		
-		$data['label']=Html::encode($data['label']);
+		$data['label']=AttributeHintWidget::widget([
+			'model'=>$model,
+			'attribute'=>$attribute,
+			'label'=>isset($data['label'])?$data['label']:null,
+			'hint'=>isset($data['hint'])?$data['hint']:null,
+		]);
 		$data['encodeLabel']=false;
 		
-		if (
-			!isset($data['hint']) &&
-			is_object($model) &&
-			method_exists($model,'getAttributeIndexHint')
-		) {
-			$data['hint']=$model->getAttributeIndexHint($attribute);
-		}
-
-		if (isset($data['hint'])) {
-			$fieldFullName=
-				is_object($model)
-					?
-				$model->getAttributeLabel($attribute)
-					:
-				$data['label'];
-			
-			$data['label']=\yii\helpers\Html::tag(
-				'span',
-				$data['label'],
-				\app\helpers\FieldsHelper::toolTipOptions($fieldFullName,$data['hint'])
-			);
-		}
 		unset($data['hint']);
 		unset($data['model']);
 		unset($data['modelAttribute']);
