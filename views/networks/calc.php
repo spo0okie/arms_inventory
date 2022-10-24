@@ -18,16 +18,19 @@ if (!isset($static_view)) $static_view=false;
 			<th>Значение</th>
 		</tr>
 		<?php foreach ([
-							'readableNetMask',
-							'readableWildcard',
-						   	'readableNetworkIp',
-						   'readableFirstIp',
-						   'readableLastIp',
-						   'readableBroadcastIp',
-						   'maxHosts',
+			'readableNetMask',
+			'readableWildcard',
+			'readableNetworkIp',
+			'readableFirstIp',
+			'readableLastIp',
+			'readableBroadcastIp',
+			'maxHosts',
 	   ] as $attr) { ?>
 			<tr>
-				<td><?= $model->getAttributeLabel($attr) ?></td>
+				<td><?= \app\components\AttributeHintWidget::widget([
+						'model'=>$model,
+						'attribute'=>$attr,
+					]) ?></td>
 				<td><?= $model->$attr ?></td>
 			</tr>
 		<?php } ?>
