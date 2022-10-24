@@ -41,7 +41,7 @@ $index=\yii\helpers\ArrayHelper::index($ips,'addr');
 		'scriptOff'=>"\$('.empty-item').hide();",
 	]) ?>
 	<h4>Адреса:</h4>
-	<table class="table table-bordered table-striped table-condensed">
+	<table class="table table-bordered table-condensed">
 		<tr>
 			<th>
 				#
