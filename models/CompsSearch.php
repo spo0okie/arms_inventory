@@ -121,7 +121,8 @@ class CompsSearch extends Comps
 				['or like', 'os', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
 				['or like', 'raw_soft', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
 				['or like', 'raw_hw', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
-			]);
+			])
+			->andFilterWhere(['or like', 'raw_hw', \yii\helpers\StringHelper::explode($this->raw_hw,'|',true,true)]);
 
         return $dataProvider;
     }
