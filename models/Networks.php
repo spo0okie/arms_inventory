@@ -34,7 +34,7 @@ use yii\db\Expression;
  * @property NetIps[] $ips
  * @property Places $place
  */
-class Networks extends \yii\db\ActiveRecord
+class Networks extends ArmsModel
 {
 	
 	private $_IPv4Block=null;
@@ -72,50 +72,67 @@ class Networks extends \yii\db\ActiveRecord
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
 			'id' => 'ID',
-			'name' => 'Название сети',
-			'vlan_id' => 'Vlan',
-			'vlan' => 'Vlan',
-			'segments_id' => Segments::$title,
-			'segment' => Segments::$title,
-			'netDomain' => 'Домен',
-			'domain_id' => 'Домен',
-			'domain' => 'Домен',
-			'addr' => 'Адрес',
-			'usage' => 'Исп.',
-			'text_addr' => 'Адрес и маска',
-			'mask' => 'Маска',
-			'router' => 'Шлюз',
-			'text_router' => 'Шлюз',
-			'readableRouter' => 'Шлюз',
-			'dhcp' => 'DHCP сервер',
-			'readableDhcp' => 'DHCP сервер',
-			'text_dhcp' => 'DHCP сервер',
-			'comment' => 'Пояснение',
-		];
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'ID',
-			'name' => 'Короткое понятное название',
-			'vlan_id' => 'В каком Vlan находится эта сеть',
-			'segments_id' => 'К какому сегменту относится эта сеть',
-			'text_addr' => 'Адрес и маска сети (в десятичной нотации 192.168.1.0/24)',
-			'addr' => 'Адрес сети (в понятной нотации 192.168.0.0)',
-			'mask' => 'Маска сети (в понятной нотации 255.255.255.0)',
-			'router' => 'Кто является шлюзом в сети (опционально)',
-			'text_router' => 'Кто является шлюзом в сети (опционально)',
-			'dhcp' => 'Кто является DHCP сервером (опционально)',
-			'text_dhcp' => 'Кто является DHCP сервером (опционально)',
-			'comment' => 'Все что нужно знать про сеть сверх того, что уже внесено выше',
+			'name' => [
+				'Название сети',
+				'hint' => 'Короткое понятное название',
+			],
+			'vlan_id' => [
+				'Vlan',
+				'hint' => 'В каком Vlan находится эта сеть',
+			],
+			'vlan' => ['alias'=>'vlan_id'],
+			'segments_id' => [
+				Segments::$title,
+				'hint' => 'К какому сегменту относится эта сеть',
+			],
+			'segment' => ['alias'=>'segments_id'],
+			'domain_id' => [
+				'Домен',
+			],
+			'domain' => ['alias'=>'domain_id'],
+			'netDomain' => ['alias'=>'domain_id'],
+			'addr' => [
+				'Адрес',
+				'hint' => 'Адрес сети (в понятной нотации 192.168.0.0)',
+			],
+			'usage' => [
+				'Исп.',
+			],
+			'text_addr' => [
+				'Адрес и маска',
+				'hint' => 'Адрес и маска сети (в десятичной нотации 192.168.1.0/24)',
+			],
+			'mask' => [
+				'Маска',
+				'hint' => 'Маска сети (в понятной нотации 255.255.255.0)',
+			],
+			'readableNetMask' => ['alias'=>'mask'],
+			'router' => [
+				'Шлюз',
+				'hint' => 'Кто является шлюзом в сети (опционально)',
+			],
+			'text_router' => ['alias'=>'router'],
+			'readableRouter' => ['alias'=>'router'],
+			'dhcp' => [
+				'DHCP сервер',
+				'hint' => 'Кто является DHCP сервером (опционально)',
+			],
+			'readableDhcp' => ['alias'=>'dhcp'],
+			'text_dhcp' => ['alias'=>'dhcp'],
+			'comment' => [
+				'Пояснение',
+				'hint' => 'Все что нужно знать про сеть сверх того, что уже внесено выше',
+			],
+			'readableWildcard' => ['Обратная маска'],
+			'readableNetworkIp' => ['IP сети'],
+			'readableFirstIp' => ['Первый доступный IP'],
+			'readableLastIp' => ['Последний доступный IP'],
+			'readableBroadcastIp' => ['Широковещательный IP'],
+			'maxHosts' => ['Допустимое количество узлов'],
 		];
 	}
 	
