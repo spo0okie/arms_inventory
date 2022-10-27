@@ -193,7 +193,7 @@ JS;
     <h4>Прикреплен к услугам:</h4>
     <p>
 		<?php foreach ($services as $service) {
-			echo $this->render('/services/item',['model'=>$service]);
+			echo $this->render('/services/item',['model'=>$service]).'<br />';
 		} ?>
     </p>
     <br />
