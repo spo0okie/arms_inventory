@@ -53,7 +53,7 @@ NavBar::begin([
 						'items'=>$places,
 						'class'=>'dropdown-menu dropdown-submenu'
 					],
-					['label' => \app\models\Orgs::$title, 'url' => ['/orgs/index']],
+					//['label' => \app\models\Orgs::$title, 'url' => ['/orgs/index']],
 					['label' => \app\models\Departments::$title, 'url' => ['/departments/index']],
 					['label' => \app\models\Services::$titles, 'url' => ['/services/index']],
 					['label' => \app\models\Schedules::$titles, 'url' => ['/schedules/index']],
