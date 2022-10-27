@@ -110,9 +110,7 @@ JS;
 } else {
     ?>
     <h4>Карта связей документов</h4>
-    <p>
         <?= $this->render('/contracts/tree-map',['model'=>$model]) ?>
-    </p>
     <br/>
 <?php } ?>
 
