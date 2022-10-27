@@ -364,13 +364,23 @@ class Contracts extends ArmsModel
 
 		//составляем цепочку из всех потомков и их потомков
 		$chain=$root->getSuccessorsRecursive();
-
-		//и себя
+		
+		//и себя последним
 		$chain[]=$root;
 
 		//надо отсортировать по дате
-		usort($chain,function($a,$b){if ($a->date==$b->date) return 0; return ($a->date<$b->date)?-1:1;});
-		//кэшируем
+		usort($chain,function($a,$b){
+			if ($a->date==$b->date) {
+				if ($a->id==$b->id)
+				return 0;
+				return ($a->id<$b->id)?-1:1;
+			}
+			return ($a->date<$b->date)?-1:1;
+		});
+		
+
+		
+		//кэшируем (root принудительно вставляем первым, т.к. бывает что документ наследник идет той же датой)
 		return $this->successors_chain_cache=$chain;
 	}
 	
@@ -402,15 +412,16 @@ class Contracts extends ArmsModel
 	/**
 	 * Возвращает список всех потомков этого документа и его наследников (новых версий этого же документа)
 	 * только первый уровень
-	 * @return \yii\db\ActiveQuery
+	 * @return Contracts[]
 	 */
 	public function getChainChildren()
 	{
 		$chain=$this->successorsChain;
+		//$root=array_pop($chain); //выкидываем самого себя из цепочки
 		$children=[];
 		foreach ($chain as $item) $children=array_merge($children,$item->childs);
 		ArrayHelper::multisort($children,'date',SORT_DESC);
-		return $children;
+		return $children; //ставим себя первым
 	}
 	
 	public function getAllChildren()
