@@ -115,7 +115,6 @@ class CompsSearch extends Comps
 			->andFilterWhere(['or like', 'comps.mac', \yii\helpers\StringHelper::explode($this->mac,'|',true,true)])
             ->andFilterWhere(['or like', 'arms.num', \yii\helpers\StringHelper::explode($this->arm_id,'|',true,true)])
 			->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
-			->andFilterWhere(['or like', 'comps.updated_at', \yii\helpers\StringHelper::explode($this->updated_at,'|',true,true)])
 			->andFilterWhere(['or like', 'getplacepath({{places}}.id)', \yii\helpers\StringHelper::explode($this->places_id,'|',true,true)])
 			->andFilterWhere(['or',
 				['or like', 'os', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
@@ -124,6 +123,19 @@ class CompsSearch extends Comps
 			])
 			->andFilterWhere(['or like', 'raw_hw', \yii\helpers\StringHelper::explode($this->raw_hw,'|',true,true)]);
 
+		if (strlen($this->updated_at)) {
+			if (substr($this->updated_at,0,1)=='>') {
+				$query->andFilterWhere(['>', 'comps.updated_at', substr($this->updated_at,1)]);
+			} elseif (substr($this->updated_at,0,1)=='<') {
+				$query->andFilterWhere(['<', 'comps.updated_at', substr($this->updated_at,1)]);
+			} else
+				$query->andFilterWhere([
+					'or like',
+					'comps.updated_at',
+					\yii\helpers\StringHelper::explode($this->updated_at,'|',true,true)
+				]);
+
+		}
         return $dataProvider;
     }
 }

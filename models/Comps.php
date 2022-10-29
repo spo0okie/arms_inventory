@@ -33,6 +33,7 @@ use Yii;
  * @property array $comps Массив объектов ПО, которое установлено на компе
  * @property boolean $isWindows ОС относится к семейству Windows
  * @property boolean $isLinux ОС относится к семейству Linux
+ * @property boolean $archived
  
  * @property Arms $arm
  * @property Arms $mainArm
