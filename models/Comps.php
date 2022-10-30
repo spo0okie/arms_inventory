@@ -83,7 +83,7 @@ class Comps extends ArmsModel
     
     public function extraFields()
 	{
-		return ['responsible','supportTeam','fqdn'];
+		return ['responsible','supportTeam','fqdn','domain'];
 	}
 
     /**
