@@ -9,9 +9,11 @@ use yii\db\ActiveQuery;
 class QueryHelper
 {
 	private static $symbolEscapes=[
-		'!'=>'$$$EXCLAMATION$$$',
-		'|'=>'$$$BOOEANOR$$$',
-		'&'=>'$$$BOOEANAND$$$',
+		'!'=>'###EXCLAMATION###',
+		'|'=>'###BOOEANOR###',
+		'&'=>'###BOOEANAND###',
+		'^'=>'###LINESTART###',
+		'$'=>'###LINEEND###',
 	];
 	
 	/**
@@ -28,13 +30,21 @@ class QueryHelper
 	}
 	
 	static function likeToken($token) {
+		if (!strlen($token)) return ['like',$token];
 		if (strpos($token,'!')===0) {
 			$operator='not like';
-			$token=static::macroStringToUnescape(trim(substr($token,1)));
+			$token=trim(substr($token,1));
 		} else {
 			$operator='like';
-			$token=static::macroStringToUnescape($token);
 		}
+		if (strpos($token,'^')===0) {
+			$token=substr($token,1);
+		} else $token='%'.$token;
+		
+		if (strpos($token,'$')===strlen($token)-1) {
+			$token=substr($token,0,strlen($token)-1);
+		} else $token=$token.'%';
+
 		return [$operator,$token];
 	}
 	
@@ -68,7 +78,7 @@ class QueryHelper
 		} else {
 			//простой вариант
 			list($operator,$string)=static::likeToken($string);
-			return [$operator,$param,$string];
+			return [$operator,$param,$string,false];
 		}
 
 		$subQueries=[];
@@ -76,7 +86,7 @@ class QueryHelper
 		//var_dump($tokens);
 		foreach ($tokens as $token) if (strlen($token)){
 			list($operator,$token)=static::likeToken($token);
-			$subQueries[]=[$operator,$param,$token];
+			$subQueries[]=[$operator,$param,$token,false];
 		}
 		
 		return array_merge([$tokensOperator],$subQueries);
