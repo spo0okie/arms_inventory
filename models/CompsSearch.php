@@ -109,17 +109,18 @@ class CompsSearch extends Comps
 			$query->andWhere(['not',['comps.archived'=>1]]);
 		}
 
-        $query->andFilterWhere(['or like', 'concat(IFNULL(domains.name,""),"\\\\",comps.name)', yii\helpers\StringHelper::explode($this->name,'|',true,true)])
-            ->andFilterWhere(['or like', 'raw_version', \yii\helpers\StringHelper::explode($this->raw_version,'|',true,true)])
-			->andFilterWhere(['or like', 'comps.ip', \yii\helpers\StringHelper::explode($this->ip,'|',true,true)])
-			->andFilterWhere(['or like', 'comps.mac', \yii\helpers\StringHelper::explode($this->mac,'|',true,true)])
-            ->andFilterWhere(['or like', 'arms.num', \yii\helpers\StringHelper::explode($this->arm_id,'|',true,true)])
-			->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
-			->andFilterWhere(['or like', 'getplacepath({{places}}.id)', \yii\helpers\StringHelper::explode($this->places_id,'|',true,true)])
+        $query
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('concat(IFNULL(domains.name,""),"\\\\",comps.name)', $this->name))
+            ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('raw_version', $this->raw_version))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.ip', $this->ip))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.mac', $this->mac))
+            ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('arms.num', $this->arm_id))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comment', $this->comment))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('getplacepath({{places}}.id)', $this->places_id))
 			->andFilterWhere(['or',
-				['or like', 'os', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
-				['or like', 'raw_soft', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
-				['or like', 'raw_hw', \yii\helpers\StringHelper::explode($this->os,'|',true,true)],
+				\app\helpers\QueryHelper::querySearchString('os', $this->os),
+				\app\helpers\QueryHelper::querySearchString('raw_soft', $this->os),
+				\app\helpers\QueryHelper::querySearchString('raw_hw', $this->os),
 			])
 			->andFilterWhere(['or like', 'raw_hw', \yii\helpers\StringHelper::explode($this->raw_hw,'|',true,true)]);
 

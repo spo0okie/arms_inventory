@@ -128,23 +128,25 @@ class ArmsSearch extends Arms
 			]);
         }
 
-        $query->andFilterWhere(['or like', 'num', \yii\helpers\StringHelper::explode($this->num,'|',true,true)])
-	        ->andFilterWhere(['or like', 'inv_num', \yii\helpers\StringHelper::explode($this->inv_num,'|',true,true)])
-			->andFilterWhere(['or like', 'sn', \yii\helpers\StringHelper::explode($this->sn,'|',true,true)])
-			->andFilterWhere(['or like', 'concat(sn,", ",inv_num)', \yii\helpers\StringHelper::explode($this->inv_sn,'|',true,true)])
-	        ->andFilterWhere(['or like', 'users.Ename', \yii\helpers\StringHelper::explode($this->user_id,'|',true,true)])
-	        ->andFilterWhere(['or like', 'users.Doljnost', \yii\helpers\StringHelper::explode($this->user_position,'|',true,true)])
-			->andFilterWhere(['or like', 'comps.ip', \yii\helpers\StringHelper::explode($this->comp_ip,'|',true,true)])
-			->andFilterWhere(['or like', 'comps.mac', \yii\helpers\StringHelper::explode($this->comp_mac,'|',true,true)])
-	        ->andFilterWhere(['or like', 'comps.name', \yii\helpers\StringHelper::explode($this->comp_id,'|',true,true)])
-	        ->andFilterWhere(['or like', 'comps.raw_hw', \yii\helpers\StringHelper::explode($this->comp_hw,'|',true,true)])
-	        ->andFilterWhere(['or like', 'org_struct.name', \yii\helpers\StringHelper::explode($this->departments_id,'|',true,true)])
-			->andFilterWhere(['or like', 'model_id', $this->model_id])
-			->andFilterWhere(['or like', 'concat(manufacturers.name," ",arms_models.name)', \yii\helpers\StringHelper::explode($this->model_name,'|',true,true)])
-	        ->andFilterWhere(['or like', 'getplacepath({{places}}.id)', \yii\helpers\StringHelper::explode($this->places_id,'|',true,true)])
+        $query
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('num', $this->num))
+	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('inv_num', $this->inv_num))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('sn', $this->sn))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('concat(sn, ", ", inv_num)', $this->inv_sn))
+	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('users.Ename', $this->user_id))
+	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('users.Doljnost', $this->user_position))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.ip', $this->comp_ip))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.mac', $this->comp_mac))
+	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.name', $this->comp_id))
+			//->andFilterWhere(['or like', 'comps.raw_hw', \yii\helpers\StringHelper::explode($this->comp_hw,'|',true,true)])
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.raw_hw',$this->comp_hw))
+	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('org_struct.name',$this->departments_id))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('model_id', $this->model_id))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('concat(manufacturers.name," ",arms_models.name)',$this->model_name))
+	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('getplacepath({{places}}.id)', $this->places_id))
 	        ->andFilterWhere(['arms_models.type_id'=>$this->type_id])
 			->andFilterWhere(['arms.state_id'=>$this->state_id])
-		    ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
+		    ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comment', $this->comment));
 
 		$totalQuery=clone $query;
 	
