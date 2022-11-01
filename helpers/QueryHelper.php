@@ -8,6 +8,17 @@ use yii\db\ActiveQuery;
 
 class QueryHelper
 {
+	public static $stringSearchHint='Можно делать сложные запросы, используя служебные знаки:'.
+	'<ul>'.
+	'<li><strong>|</strong> (вертикальная черта) - ИЛИ</li>'.
+	'<li><strong>&</strong> (амперсанд/and) - И</li>'.
+	'<li><strong>!</strong> (восклицательный зн.) - НЕ</li>'.
+	'</ul>'.
+	'<i>Примеры:<br />'.
+		'<strong>Siemens & !NX & !teamcenter</strong> - Siemens но не NX и не Teamcenter<br/>'.
+		'<strong>Debian | Ubuntu</strong> - Debian или Ubuntu<br/>'.
+	'</i>';
+	
 	private static $symbolEscapes=[
 		'!'=>'###EXCLAMATION###',
 		'|'=>'###BOOEANOR###',
