@@ -7,7 +7,7 @@ span.item_status.state_in_warehouse, td.item_status.state_in_warehouse {backgrou
 span.item_status.state_operating, td.item_status.state_operating {background-color: #5cb85c}
 span.item_status.state_malfunction, td.item_status.state_malfunction {background-color: orange}
 span.item_status.state_broken, td.item_status.state_broken {background-color: red}
-span.item_status.state_issued, td.item_status.state_broken {background-color: darkmagenta}
+span.item_status.state_issued, td.item_status.state_broken {background-color: darkmagenta; color: white}
 
 span.unit-status.state_in_supply_service {background: linear-gradient(45deg,transparent,transparent 15px,cyan 15px)}
 span.unit-status.state_in_warehouse {background: linear-gradient(45deg,transparent,transparent 15px,grey 15px)}
@@ -21,9 +21,9 @@ span.unit-status.state_unknown {background: linear-gradient(45deg,transparent,tr
 span.state_required, span.state_paywait {background-color: yellow}
 span.state_paywait_confirmed {background-color: lightgreen}
 span.state_payed_partial {background-color: limegreen}
-span.state_paywait_full {background-color: green}
+span.state_paywait_full {background-color: green; color:white}
 span.state_payed {background-color: #1da7ee}
-span.state_revoked, span.state_fail {background-color: red}
+span.state_revoked, span.state_fail {background-color: red; color: white}
 
 /*span.contract_history_preview {display: inline-block; white-space: nowrap; overflow: hidden; width: auto; height: 1.2em; max-width: 10em;}*/
 span.contract_state_cell {display: inline-block; white-space: nowrap; overflow: hidden; max-width: 25em;}
