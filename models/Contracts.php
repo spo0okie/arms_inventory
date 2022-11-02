@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\JsExpression;
@@ -176,7 +177,10 @@ class Contracts extends ArmsModel
 						'<li>Дату</li>'.
 						'<li>Контрагента</li>'.
 					'</ul>они указывается в отдельных полях',
+				'indexHint'=>'Можно искать по имени, дате, названию контрагента и комментарию к документу<br />'.
+					QueryHelper::$stringSearchHint
 			],
+			'fullname'=>['alias'=>'name'],
 			'scanFile' => 'Скан документа',
 			'date' => [
 				'Дата',
@@ -191,6 +195,7 @@ class Contracts extends ArmsModel
 					'<li>к договору нужно прикреплять счета</li>'.
 					'<li>к счетам закрывающие документы</li>'.
 					'</ul>Сумма при этом должна проставляться только в счетах',
+				'indexHint'=>'Сумма документа<br />'.QueryHelper::$numberSearchHint
 			],
 			'charge' => 'в т.ч. НДС',
 			'end_date' => [
@@ -238,6 +243,10 @@ class Contracts extends ArmsModel
 					'2020-01-13 согласован<br>'.
 					'2020-01-10 подан на согласование<br>'
 			],
+			'attach'=>[
+				'Связи',
+				'indexHint'=>'Привязанные к документу объекты'
+			]
 		];
 	}
 	

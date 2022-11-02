@@ -81,8 +81,8 @@ class ContractsSearch extends Contracts
 	    $query
 		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
 	    $query
-		    ->andFilterWhere(['or like', $nameExpression, yii\helpers\StringHelper::explode($this->fullname,'|',true,true)])
-		    ->andFilterWhere(['total'=>$this->total])
+		    ->andFilterWhere(\app\helpers\QueryHelper::querySearchString($nameExpression,$this->fullname))
+		    ->andFilterWhere(\app\helpers\QueryHelper::querySearchNumberOrDate('total',$this->total))
 		    ->orderBy(['date'=>SORT_DESC,'name'=>SORT_DESC]);
 
 	    $dataProvider = new ActiveDataProvider([
