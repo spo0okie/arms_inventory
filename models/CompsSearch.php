@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Comps;
+use \app\helpers\QueryHelper;
 
 /**
  * CompsSearch represents the model behind the search form of `app\models\Comps`.
@@ -110,33 +111,21 @@ class CompsSearch extends Comps
 		}
 
         $query
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('concat(IFNULL(domains.name,""),"\\\\",comps.name)', $this->name))
-            ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('raw_version', $this->raw_version))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.ip', $this->ip))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.mac', $this->mac))
-            ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('arms.num', $this->arm_id))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comment', $this->comment))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('getplacepath({{places}}.id)', $this->places_id))
+			->andFilterWhere(QueryHelper::querySearchString('concat(IFNULL(domains.name,""),"\\\\",comps.name)', $this->name))
+            ->andFilterWhere(QueryHelper::querySearchString('raw_version', $this->raw_version))
+			->andFilterWhere(QueryHelper::querySearchString('comps.ip', $this->ip))
+			->andFilterWhere(QueryHelper::querySearchString('comps.mac', $this->mac))
+            ->andFilterWhere(QueryHelper::querySearchString('arms.num', $this->arm_id))
+			->andFilterWhere(QueryHelper::querySearchString('comment', $this->comment))
+			->andFilterWhere(QueryHelper::querySearchString('getplacepath({{places}}.id)', $this->places_id))
 			->andFilterWhere(['or',
-				\app\helpers\QueryHelper::querySearchString('os', $this->os),
-				\app\helpers\QueryHelper::querySearchString('raw_soft', $this->os),
-				\app\helpers\QueryHelper::querySearchString('raw_hw', $this->os),
+				QueryHelper::querySearchString('os', $this->os),
+				QueryHelper::querySearchString('raw_soft', $this->os),
+				QueryHelper::querySearchString('raw_hw', $this->os),
 			])
-			->andFilterWhere(['or like', 'raw_hw', \yii\helpers\StringHelper::explode($this->raw_hw,'|',true,true)]);
-
-		if (strlen($this->updated_at)) {
-			if (substr($this->updated_at,0,1)=='>') {
-				$query->andFilterWhere(['>', 'comps.updated_at', substr($this->updated_at,1)]);
-			} elseif (substr($this->updated_at,0,1)=='<') {
-				$query->andFilterWhere(['<', 'comps.updated_at', substr($this->updated_at,1)]);
-			} else
-				$query->andFilterWhere([
-					'or like',
-					'comps.updated_at',
-					\yii\helpers\StringHelper::explode($this->updated_at,'|',true,true)
-				]);
-
-		}
+			->andFilterWhere(QueryHelper::querySearchString('raw_hw', $this->raw_hw))
+			->andFilterWhere(QueryHelper::querySearchNumberOrDate('comps.updated_at',$this->updated_at));
+		
         return $dataProvider;
     }
 }

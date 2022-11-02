@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use Yii;
 use yii\helpers\Html;
 
@@ -119,7 +120,7 @@ class Arms extends ArmsModel
 				'Инвентарный номер',
 				'indexLabel'=>'Инв. номер',
 				'hint' => 'Внутренний инвентарный номер АРМ в службе ИТ.',
-				'indexHint' => '{same}'.static::searchableOrHint,
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'state_id' => [
 				'Статус',
@@ -134,8 +135,7 @@ class Arms extends ArmsModel
 			'inv_sn' => [
 				'label'=>'Бух/SN',
 				'indexHint' => 'Серийный и бухгалтерский инвентарный/номенклатурный номера через запятую<br>'.
-					'Искать можно по обоим номерам сразу'.
-					static::searchableOrHint,
+					'Искать можно по обоим номерам сразу<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'sn' => [
 				'label'=>'Серийный номер',
@@ -152,21 +152,21 @@ class Arms extends ArmsModel
 				'hint' => 'Какую ОС отображать в паспорте',
 				'indexHint' => 'Поиск ведется <b>только по основной</b> операционной системе.<br>'.
 					'Найти АРМ по неосновной ОС можно через '.Html::a('список ОС',['/comps/index']).
-					static::searchableOrHint,
+					'<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'model_id' => [
 				'label'=>'Модель ПК',
 				'hint' => 'Модель системного блока / ноутбука / сервера.  Если нужная модель отсутствует в списке, то нужно сначала завести в ее в соотв. категории оборудования',
 				'indexHint' => 'Модель системного блока / ноутбука / сервера<br>'.
 					'Производитель в таблице не выводится, но при поиске учитывается'.
-					static::searchableOrHint,
+					'<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'model_name'=>['alias'=>'model_id'],
 			'comp_hw' => [
 				'label'=>'Комплектация',
 				'indexHint' => 'Строка оборудования обнаруженного <b>в основной ОС</b><br>'.
 					'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку'.
-					static::searchableOrHint,
+					'<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'specs' => [
 				'label'=>'Тех. спецификация',
@@ -183,17 +183,17 @@ class Arms extends ArmsModel
 			'user_id' => [
 				'label'=>'Пользователь',
 				'hint' => 'Кто работает за этим АРМ',
-				'indexHint' => '{same}'.static::searchableOrHint,
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'places_id' => [
 				'label'=>'Помещение',
 				'hint' => 'Помещение, куда установлен АРМ',
-				'indexHint' => '{same}'.static::searchableOrHint,
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'departments_id' => [
 				'label'=>'Подразделение',
 				'hint' => 'Подразделение, за которым закреплен АРМ',
-				'indexHint' => '{same}'.static::searchableOrHint,
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'responsible_id' => [
 				'label'=>'Ответственный',

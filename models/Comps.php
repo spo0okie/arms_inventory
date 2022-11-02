@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use DateTime;
 use DateTimeZone;
 use Yii;
@@ -134,11 +135,11 @@ class Comps extends ArmsModel
 	        'id' => 'Идентификатор',
 			'mac' => [
 				'MAC Адрес',
-				'indexHint' => 'MAC адреса сетевых интерфейсов настроенных в ОС'.static::searchableOrHint,
+				'indexHint' => 'MAC адреса сетевых интерфейсов настроенных в ОС<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'ip' => [
 				'IP Адрес',
-				'indexHint' => 'IP адреса сетевых интерфейсов настроенных в ОС'.static::searchableOrHint,
+				'indexHint' => 'IP адреса сетевых интерфейсов настроенных в ОС<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'domain_id' => 'Домен',
 			'user_id' => 'Пользователь',
@@ -147,30 +148,30 @@ class Comps extends ArmsModel
             	'Имя компьютера',
 				'indexHint' => 'Сетевое имя компьютера настроенное в ОС.<br>'.
 					'Домен не выводится, но при поиске можно указывать.<br>'.
-					'Вводимый текст ищется в строке формата DOMAIN\\computer'.static::searchableOrHint,
+					'Вводимый текст ищется в строке формата DOMAIN\\computer<br/>'.QueryHelper::$stringSearchHint,
 			],
             'os' => [
             	'Наименование и версия операционной системы',
 				'indexHint' => 'В таблице в этой ячейке выводится только наименование ОС,<br>'.
-					'но поиск ведется также и по софту (в сыром, а не отформатированном виде)'.
-					static::searchableOrHint,
+					'но поиск ведется также и по софту (в сыром, а не отформатированном виде)<br/>'.
+					QueryHelper::$stringSearchHint,
 			],
 			'raw_hw' => [
 				'Hardware',
 				'indexHint' => 'Строка оборудования обнаруженного Операционной Системой<br>'.
-					'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку'.
-					static::searchableOrHint,
+					'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку<br/>'.
+					QueryHelper::$stringSearchHint,
 			],
 	        'raw_soft' => 'Отпечаток софта (заполняется скриптом)',
 	        'raw_version' => [
 	        	'Скрипт',
-				'indexHint' => 'Скрипт, который внес последние данные по этой ОС'.static::searchableOrHint,
+				'indexHint' => 'Скрипт, который внес последние данные по этой ОС<br/>'.QueryHelper::$stringSearchHint,
 			],
             'exclude_hw' => 'Скрытое из паспорта железо',
             'ignore_hw' => 'Виртуальная ОС',
             'arm_id' => [
             	'АРМ',
-				'indexHint' => 'ПК на котором установлена ОС'.static::searchableOrHint,
+				'indexHint' => 'ПК на котором установлена ОС<br/>'.QueryHelper::$stringSearchHint,
 			],
             'comment' => 'Комментарий',
             'updated_at' => 'Время обновления',
