@@ -29,7 +29,7 @@ class DynaGridWidget extends Widget
 	public $createButton;
 	public $hintButton=null;
 	public $toolButton=null;
-	
+	public $resizableColumns=true;
 	public $showFooter=false;
 	
 	/**
@@ -71,7 +71,7 @@ class DynaGridWidget extends Widget
 				'dataProvider' => $this->dataProvider,
 				'filterModel' => $this->filterModel,
 				'tableOptions' => ['class'=>'table-condensed table-striped table-bordered arms_index'],
-				'resizableColumns'=>true,
+				'resizableColumns'=>$this->resizableColumns,
 				'persistResize'=>true,
 				'showFooter'=>$this->showFooter,
 				/*'rowOptions'=>function($data) {
