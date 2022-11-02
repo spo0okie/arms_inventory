@@ -5,18 +5,43 @@ namespace app\helpers;
 
 
 use yii\db\ActiveQuery;
+use \yii\helpers\StringHelper;
 
 class QueryHelper
 {
 	public static $stringSearchHint='Можно делать сложные запросы, используя служебные знаки:'.
 	'<ul>'.
 	'<li><strong>|</strong> (вертикальная черта) - ИЛИ</li>'.
-	'<li><strong>&</strong> (амперсанд/and) - И</li>'.
+	'<li><strong>&amp;</strong> (амперсанд/and) - И</li>'.
 	'<li><strong>!</strong> (восклицательный зн.) - НЕ</li>'.
 	'</ul>'.
 	'<i>Примеры:<br />'.
-		'<strong>Siemens & !NX & !teamcenter</strong> - Siemens но не NX и не Teamcenter<br/>'.
-		'<strong>Debian | Ubuntu</strong> - Debian или Ubuntu<br/>'.
+	'<strong>Siemens &amp; !NX &amp; !teamcenter</strong> - Siemens но не NX и не Teamcenter<br/>'.
+	'<strong>Debian | Ubuntu</strong> - Debian или Ubuntu<br/>'.
+	'</i>';
+	
+	public static $numberSearchHint='Можно делать сложные запросы, используя служебные знаки:'.
+	'<ul>'.
+	'<li><strong>|</strong> (вертикальная черта) - ИЛИ</li>'.
+	'<li><strong>&amp;</strong> (амперсанд/and) - И</li>'.
+	'<li><strong>&lt;</strong> (восклицательный зн.) - МЕНЬШЕ ЧЕМ</li>'.
+	'<li><strong>&gt;</strong> (восклицательный зн.) - БОЛЬШЕ ЧЕМ</li>'.
+	'</ul>'.
+	'<i>Примеры:<br />'.
+	'<strong>&lt;1000|&gt;50000</strong> - меньше 1000 или больше 50000<br/>'.
+	'<strong>&gt;10000&amp;&lt;20000</strong> - больше 10000, но меньше 20000<br/>'.
+	'</i>';
+	
+	public static $dateSearchHint='Можно делать сложные запросы, используя служебные знаки:'.
+	'<ul>'.
+	'<li><strong>|</strong> (вертикальная черта) - ИЛИ</li>'.
+	'<li><strong>&amp;</strong> (амперсанд/and) - И</li>'.
+	'<li><strong>&lt;</strong> (восклицательный зн.) - МЕНЬШЕ ЧЕМ</li>'.
+	'<li><strong>&gt;</strong> (восклицательный зн.) - БОЛЬШЕ ЧЕМ</li>'.
+	'</ul>'.
+	'<i>Примеры:<br />'.
+	'<strong>&lt;2020-01-01|&gt;2021-12-31</strong> - меньше 2020-01-01 или больше 2021-12-31<br/>'.
+	'<strong>&gt;2021-05-01&amp;&lt;2021-05-09</strong> - больше 2021-05-01, но меньше 2021-05-09<br/>'.
 	'</i>';
 	
 	private static $symbolEscapes=[
@@ -40,7 +65,12 @@ class QueryHelper
 		return $string;
 	}
 	
-	static function likeToken($token) {
+	/**
+	 * Обработка строчного токена (like или not like)
+	 * @param $token
+	 * @return array
+	 */
+	static function likeToken($token,$param) {
 		if (!strlen($token)) return ['like',$token];
 		if (strpos($token,'!')===0) {
 			$operator='not like';
@@ -56,7 +86,22 @@ class QueryHelper
 			$token=substr($token,0,strlen($token)-1);
 		} else $token=$token.'%';
 
-		return [$operator,$token];
+		return [$operator,$param,static::macroStringToUnescape($token),false];
+	}
+	
+	
+	static function lessOrGreaterToken($token,$param) {
+		if (substr($token,0,1)=='>') {
+			$operator='>';
+			$token=substr($token,1);
+		} elseif (substr($token,0,1)=='<') {
+			$operator='<';
+			$token=substr($token,1);
+		} else {
+			$operator='like';
+		}
+
+		return [$operator,$param,static::macroStringToUnescape($token)];
 	}
 	
 	/**
@@ -71,35 +116,47 @@ class QueryHelper
 		return $string;
 	}
 	
+	
+	public static function tokenizeString($string,$param,$tokenParser) {
+		$string=static::escapedStringToMacro($string);
+		
+		if (strpos($string,'&')!==false) {
+			$tokens=StringHelper::explode($string,'&',true,true);
+			$tokensOperator='AND';
+		} elseif (strpos($string,'|')!==false) {
+			$tokens=StringHelper::explode($string,'|',true,true);
+			$tokensOperator='OR';
+		} else {
+			//простой вариант
+			return $tokenParser($string,$param);
+		}
+		
+		$subQueries=[];
+		
+		foreach ($tokens as $token) if (strlen($token)){
+			$subQueries[]=$tokenParser($token,$param);
+		}
+		
+		return array_merge([$tokensOperator],$subQueries);
+		
+	}
+	
 	/**
 	 * @param $param string
 	 * @param $string string
 	 * @return array
 	 */
 	public static function querySearchString($param,$string) {
-
-		$string=static::escapedStringToMacro($string);
-
-		if (strpos($string,'&')!==false) {
-			$tokens=\yii\helpers\StringHelper::explode($string,'&',true,true);
-			$tokensOperator='AND';
-		} elseif (strpos($string,'|')!==false) {
-			$tokens=\yii\helpers\StringHelper::explode($string,'|',true,true);
-			$tokensOperator='OR';
-		} else {
-			//простой вариант
-			list($operator,$string)=static::likeToken($string);
-			return [$operator,$param,$string,false];
-		}
-
-		$subQueries=[];
-
-		//var_dump($tokens);
-		foreach ($tokens as $token) if (strlen($token)){
-			list($operator,$token)=static::likeToken($token);
-			$subQueries[]=[$operator,$param,$token,false];
-		}
-		
-		return array_merge([$tokensOperator],$subQueries);
+		return static::tokenizeString($string,$param,[static::class,'likeToken']);
+	}
+	
+	
+	/**
+	 * @param $param string
+	 * @param $string string
+	 * @return array
+	 */
+	public static function querySearchNumberOrDate($param,$string) {
+		return static::tokenizeString($string,$param,[static::class,'lessOrGreaterToken']);
 	}
 }
