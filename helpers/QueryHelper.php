@@ -71,7 +71,7 @@ class QueryHelper
 	 * @return array
 	 */
 	static function likeToken($token,$param) {
-		if (!strlen($token)) return ['like',$token];
+		if (!strlen($token)) return ['like',$param,$token];
 		if (strpos($token,'!')===0) {
 			$operator='not like';
 			$token=trim(substr($token,1));
@@ -147,6 +147,8 @@ class QueryHelper
 	 * @return array
 	 */
 	public static function querySearchString($param,$string) {
+		//var_dump(static::tokenizeString($string,$param,[static::class,'likeToken']));
+		//return [];
 		return static::tokenizeString($string,$param,[static::class,'likeToken']);
 	}
 	
