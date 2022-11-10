@@ -94,8 +94,8 @@ class SiteController extends Controller
 		if ($page===false) return "Ошибка получения детального описания из Wiki";
 		$page=xmlrpc_decode($page);
 		if (is_array($page)) return print_r($page,true);
-		$page = str_replace(' href="/', ' href="' . \Yii::$app->params['wikiUrl'] , $page);
-		$page = str_replace(' src="/', ' src="' . \Yii::$app->params['wikiUrl'] , $page);
+		$page = str_replace('href="/', 'href="' . \Yii::$app->params['wikiUrl'] , $page);
+		$page = str_replace('src="/', 'src="' . \Yii::$app->params['wikiUrl'] , $page);
 		return $page;
 	}
 	
