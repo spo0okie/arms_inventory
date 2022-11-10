@@ -24,7 +24,7 @@ class DynaGridWidget extends Widget
 	 * Кнопка добавления нового элемента
 	 * @var string
 	 */
-	public $id;
+	public $id=null;
 	public $header;
 	public $createButton;
 	public $hintButton=null;
@@ -47,6 +47,10 @@ class DynaGridWidget extends Widget
 	
 	public function run()
 	{
+		if (is_null($this->id)) {
+			$this->id=\Yii::$app->controller->id.'-'.\Yii::$app->controller->action->id;
+		}
+		
 		if (is_null($this->model)) {
 			$this->model=$this->filterModel;
 		}
