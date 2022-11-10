@@ -31,7 +31,6 @@ if (true) {
 <div class="services-index">
 
 	
-	<?php Pjax::begin(); ?>
 	<?= DynaGridWidget::widget([
 		'id' => 'services-index',
 		'header' => Html::encode($this->title),
@@ -50,7 +49,6 @@ if (true) {
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>
-	<?php Pjax::end(); ?>
 </div>
 
 <?php }
