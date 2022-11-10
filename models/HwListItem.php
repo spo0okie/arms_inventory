@@ -25,7 +25,8 @@ class HwListItem
     protected static $loadParams=[
         'type',
         'manufacturer',
-        'product',
+		'product',
+		'cores',
         'sn',
         'title',
         'manufacturer_id',
