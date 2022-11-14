@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Services;
@@ -112,24 +113,20 @@ class ServicesSearch extends Services
         
         $query
 			->andFilterWhere(['or',
-				['or like', 'services.name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)],
-				['or like', 'services.search_text', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]
+				QueryHelper::querySearchString('services.name', $this->name),
+				QueryHelper::querySearchString('services.search_text',$this->name)
 			])
-            ->andFilterWhere(['or like', 'description', \yii\helpers\StringHelper::explode($this->description,'|',true,true)])
-			->andFilterWhere(['or like', 'segments.name', \yii\helpers\StringHelper::explode($this->segment,'|',true,true)])
-			->andFilterWhere(['or like', 'providing_schedule.name', \yii\helpers\StringHelper::explode($this->providingSchedule,'|',true,true)])
-			->andFilterWhere(['or like', 'support_schedule.name', \yii\helpers\StringHelper::explode($this->supportSchedule,'|',true,true)])
+            ->andFilterWhere(QueryHelper::querySearchString( 'description', $this->description))
+			->andFilterWhere(QueryHelper::querySearchString('segments.name', $this->segment))
+			->andFilterWhere(QueryHelper::querySearchString('providing_schedule.name', $this->providingSchedule))
+			->andFilterWhere(QueryHelper::querySearchString('support_schedule.name', $this->supportSchedule))
 	        ->andFilterWhere([
 	        	'or',
-		        ['or like', 'getplacepath(places_in_svc_arms.id)', \yii\helpers\StringHelper::explode($this->sites,'|',true,true)],
-		        ['or like', 'getplacepath(places_in_svc_techs.id)', \yii\helpers\StringHelper::explode($this->sites,'|',true,true)]
+					QueryHelper::querySearchString('getplacepath(places_in_svc_arms.id)', $this->sites),
+					QueryHelper::querySearchString('getplacepath(places_in_svc_techs.id)', $this->sites)
 	        ])
-            ->andFilterWhere(['like', 'notebook', \yii\helpers\StringHelper::explode($this->notebook,'|',true,true)])
-			->andFilterWhere([
-				'or',
-				['or like', 'responsible.Ename', \yii\helpers\StringHelper::explode($this->responsible,'|',true,true)],
-				['or like', 'support.Ename', \yii\helpers\StringHelper::explode($this->responsible,'|',true,true)]
-			]);
+            ->andFilterWhere(QueryHelper::querySearchString( 'notebook', $this->notebook,'|',true,true))
+			->andFilterWhere(QueryHelper::querySearchString(['or','responsible.Ename','support.Ename'], $this->responsible));
 	
 		if (is_array($this->responsible_ids)) {
 			$query->andWhere([
