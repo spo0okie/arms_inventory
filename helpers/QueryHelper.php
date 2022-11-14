@@ -66,6 +66,30 @@ class QueryHelper
 	}
 	
 	/**
+	 * Если в качестве параметра не строка а массив вроде [or,param1,param2],
+	 * то нам надо  на входящие параметры [like,[or,param1,param2],value1]
+	 * выдать [or,[like,param1,value1],[like,param2,value1]]
+	 * @param $operator
+	 * @param $param
+	 * @param $token
+	 */
+	static function parseArrayInParam($operator,$param,$token) {
+		//var_dump($param);
+		//return '0=1';
+		if (is_array($param) && count($param)>2) {
+			//первый элемент - оператор объединения
+			$paramOperator=reset($param);
+			$condition=[$paramOperator,];
+			//перебираем остальные значения массива
+			while (false!==($subParam=next($param))) {
+				$condition[]=[$operator,$subParam,$token,false];
+			}
+			return $condition;
+		}
+		return [$operator,$param,$token,false];
+	}
+	
+	/**
 	 * Обработка строчного токена (like или not like)
 	 * @param $token
 	 * @return array
@@ -85,8 +109,9 @@ class QueryHelper
 		if (strpos($token,'$')===strlen($token)-1) {
 			$token=substr($token,0,strlen($token)-1);
 		} else $token=$token.'%';
-
-		return [$operator,$param,static::macroStringToUnescape($token),false];
+		
+		//return [$operator,$param,static::macroStringToUnescape($token),false];
+		return static::parseArrayInParam($operator,$param,static::macroStringToUnescape($token));
 	}
 	
 	
