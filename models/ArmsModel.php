@@ -193,4 +193,41 @@ class ArmsModel extends \yii\db\ActiveRecord
 		}
 		return isset(static::$allItems[$id])?static::$allItems[$id]:null;
 	}
+	
+	/**
+	 * Валидация отсутствия рекурсии при построении ссылок на родителей
+	 * @param       $attribute - аттрибут с id другого объекта
+	 * @param array $params
+	 * в параметрах надо указать 'params'=>['getLink'=>'parentService'] - метод которым получить не id а объект
+	 */
+	public function validateRecursiveLink($attribute, $params=[])
+	{
+		$params=(array)$params;
+		//если у нас нет цепочки связей - создаем пустую
+		if (!isset($params['attributeChain']))	$params['attributeChain']=[];
+		//кладем себя в цепочку
+		$params['attributeChain'][]=$this->id;
+		
+		//если никакой другой объект не передан, то проверяем себя
+		$object=isset($params['object'])?$params['object']:$this;
+		
+		//метод для получения связанного объекта
+		$getLink=$params['getLink'];
+		
+		//если у нас есть ссылка
+		if (!empty($object->$attribute)) {
+			//если она уже есть в цепочке id
+			if (in_array($object->$attribute, $params['attributeChain'])) {
+				$this->addError($attribute, $this->getAttributeLabel($attribute).' рекурсивно ссылается сам на себя');
+			} else {
+				//иначе пробуем загрузить объект на который ссылаемся
+				if(is_object($link=$object->$getLink)) {
+					//кладем его в параметры для следующей проверки
+					$params['object']=$link;
+					//проверяем
+					$this->validateRecursiveLink($attribute, $params);
+				}
+			}
+		}
+	}
 }
