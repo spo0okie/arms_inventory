@@ -404,8 +404,12 @@ class Services extends ArmsModel
 		if (is_object($this->responsibleRecursiveCache)) return $this->responsibleRecursiveCache;
 		if (is_object($this->responsibleRecursiveCache = $this->responsible))
 			return $this->responsibleRecursiveCache;
-		if (is_object($this->parentService))
+		if (is_object($this->parentService)) {
+			var_dump($this->parentService);
+			return null;
 			return $this->responsibleRecursiveCache = $this->parentService->responsibleRecursive;
+			
+		}
 		return null;
 	}
 
