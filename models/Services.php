@@ -370,6 +370,7 @@ class Services extends ArmsModel
 	 */
 	public function getParentService()
 	{
+		if (!$this->parent_id) return null;
 		if ($this->parent_id == $this->id) return null;
 		if (static::allItemsLoaded()) return static::getLoadedItem($this->parent_id);
 		return $this->hasOne(Services::className(), ['id' => 'parent_id']);
