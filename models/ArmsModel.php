@@ -70,6 +70,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 		
 		$data=$this->attributeDataCache[$key];
 		if (!isset($data['alias'])) return $data;
+		if ($data['alias']==$key) return $data; //no recursion!
 		
 		return $this->getAttributeData($data['alias']);
 	}

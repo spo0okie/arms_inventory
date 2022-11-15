@@ -61,6 +61,7 @@ use yii\web\User;
  * @property Places[] $places
  * @property Places[] $sites
  * @property Places[] $sitesRecursive
+ * @property Services $parentService
  * @property Services $parent
  * @property Services[] $children
  * @property Schedules $providingSchedule
@@ -173,83 +174,118 @@ class Services extends ArmsModel
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
-            'id' => 'ID',
-			'name' => 'Название',
-			'parent_id' => 'Основной сервис/услуга',
-			'description' => 'Описание',
-			'search_text' => 'Другие варианты названия',
-	        'links' => 'Ссылки',
-			'is_service' => 'Тип объекта',
-			'is_end_user' => 'Предоставляется пользователям',
-            'user_group_id' => 'Группа ответственных',
-	        'depends_ids' => 'Зависит от сервисов/услуг',
-			'comps' => 'Серверы',
-			'comps_ids' => 'Серверы',
-			'techs' => 'Оборудование',
-			'techs_ids' => 'Оборудование',
-	        'providingSchedule' => 'Время предоставления',
-	        'providing_schedule_id' => 'Время предоставления',
-	        'supportSchedule' => 'Время поддержки',
-	        'support_schedule_id' => 'Время поддержки',
-	        'responsible' => 'Ответственный, поддержка',
-	        'responsible_id' => 'Ответственный',
-			'support_ids' => 'Поддержка',
-			'contracts_ids' => Contracts::$titles,
-            'notebook' => 'Записная книжка',
-			'segment_id' => 'Сегмент ИТ',
-			'segment' => 'Сегмент ИТ',
-			'arms' => Arms::$title,
-			'archived' => 'Архивирован',
-			'places_id' => Places::$title,
-			'places' => Places::$titles,
-			'partners_id' => Partners::$title,
-			'partner' => Partners::$title,
-			'sites' => 'Площадки',
-			'currency_id' => 'Валюта',
-			'cost' => 'Стоимость',
-			'charge' => 'НДС',
-			'weight' => 'Вес'
+			'name' => [
+				'Название',
+				'hint' => 'Короткое уникальное название сервиса или услуги',
+			],
+			'parent_id' => [
+				'Основной сервис/услуга',
+				'hint' => 'Здесь можно указать в состав какого, более крупного сервиса, входит этот сервис',
+			],
+			'description' => [
+				'Описание',
+				'hint' => 'Развернутое название или краткое описание назначения этого сервиса. Все детали тут описывать не нужно. Нужно в поле ниже вставить ссылку на вики страничку с описанием',
+			],
+			'search_text' => [
+				'Другие варианты названия',
+				'hint' => 'Какие еще названия используются в отношении этого сервиса. Нужно для лучшей работы поиска (искать будет не только по основному названию но и по этим). Через запятую',
+			],
+	        'links' => [
+	        	'Ссылки',
+				'hint' => \app\components\UrlListWidget::$hint.' Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
+			],
+			'is_service' => [
+				'Тип объекта',
+			],
+			'is_end_user' => [
+				'Предоставляется пользователям',
+				'hint' => 'Предоставляется ли этот сервис пользователям (иначе используется другими сервисами)',
+			],
+	        'depends_ids' => [
+	        	'Зависит от сервисов/услуг',
+				'hint' => 'От работы каких сервисов зависит работа этого сервиса/предоставление услуги',
+	
+			],
+			'comps_ids' => [
+				'Серверы',
+				'hint' => 'На каких серверах выполняется этот сервис/услуге',
+			],
+			'comps' => ['alias'=>'comps_ids',],
+			'techs_ids' => [
+				'Оборудование',
+				'hint' => 'На каком оборудовании выполняется этот сервис',
+			],
+			'techs' => ['same'=>'techs_ids'],
+	        'providing_schedule_id' => [
+	        	'Время предоставления',
+				'hint' => 'Расписание, когда сервисом могут воспользоваться пользователи или другие сервисы',
+			],
+			'providingSchedule' => ['alias'=>'providing_schedule_id'],
+	        'support_schedule_id' => [
+	        	'Время поддержки',
+				'hint' => 'Расписание, когда нужно реагировать на сбои в работе сервиса',
+			],
+			'supportSchedule' => ['alias'=>'support_schedule_id'],
+	        'responsible_id' => [
+	        	'Ответственный',
+				'hint' => 'Ответственный за работу сервиса/оказание услуги',
+			],
+			'responsible' => ['Ответственный, поддержка'],
+			'support_ids' => [
+				'Поддержка',
+				'hint' => 'Дополнительные члены команды по поддержке сервиса/оказанию услуги',
+			],
+			'contracts_ids' => [
+				Contracts::$titles,
+				'hint' => 'Привязанные к услуге документы. Нужно привязать только договор, а все счета/акты/доп.соглашения уже привязывать к договору',
+			],
+			'segment_id' => [
+				'Сегмент ИТ',
+				'hint' => 'Сегмент ИТ инфраструктуры к которому относится этот сервис',
+			],
+			'segment' => ['alias'=>'segment_id'],
+			'arms' => [Arms::$title],
+			'archived' => [
+				'Архивирован',
+				'hint' => 'Если сервис/услуга более не используется, но для истории его описание лучше сохранить - то его можно просто заархивировать, чтобы не отсвечивал',
+			],
+			'places_id' => [
+				Places::$title,
+				'hint' => 'Привязать сервис/услугу к помещению. Иначе помещение будет косвенно выясняться на основании расположения серверов и оборудования',
+			],
+			'places' => ['alias'=>'places_id'],
+			'partners_id' => [
+				Partners::$title,
+				'hint' => 'Если услуга/сервис оказывается каким-либо контрагентом (иначе внутренняя)',
+			],
+			'partner' => ['alias'=>'partners_id'],
+			'sites' => ['Площадки'],
+			'currency_id' => [
+				'Валюта',
+				'hint' => 'Ед. изм. стоим.',
+			],
+			'cost' => [
+				'Стоимость',
+				'hint' => 'Стоимость услуги в месяц. (если понадобится другой период - обращайтесь к разработчику)',
+			],
+			'charge' => [
+				'НДС',
+				'hint' => 'налог',
+			],
+			'notebook' => [
+				'Записная книжка',
+				'hint' => 'Можно сохранять тут подробное описание сервиса',
+			],
+			'weight' => [
+				'Вес',
+				'hint' => 'Значимость сервиса по сравнению с другими. Используется для определения наиболее важных сервисов на сервере и выборе ответственного за сервер.'
+			]
         ];
     }
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'ID',
-			'currency_id' => 'Ед. изм. стоим.',
-			'name' => 'Короткое уникальное название сервиса или услуги',
-			'parent_id' => 'Здесь можно указать в состав какого, более крупного сервиса, входит этот сервис',
-			'description' => 'Развернутое название или краткое описание назначения этого сервиса. Все детали тут описывать не нужно. Нужно в поле ниже вставить ссылку на вики страничку с описанием',
-			'search_text' => 'Какие еще названия используются в отношении этого сервиса. Нужно для лучшей работы поиска (искать будет не только по основному названию но и по этим). Через запятую',
-			'links' => \app\components\UrlListWidget::$hint.' Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
-			'is_end_user' => 'Предоставляется ли этот сервис пользователям (иначе используется другими сервисами)',
-			'user_group_id' => 'Группа сотрудников ответственных за работоспособность сервиса/предоставление услуги',
-			'depends_ids' => 'От работы каких сервисов зависит работа этого сервиса/предоставление услуги',
-			'comps_ids' => 'На каких серверах выполняется этот сервис/услуге',
-			'contract_ids' => 'Документы привязанные к этому сервису/услуге',
-			'techs_ids' => 'На каком оборудовании выполняется этот сервис',
-			'places_id' => 'Привязать сервис/услугу к помещению. Иначе помещение будет косвенно выясняться на основании расположения серверов и оборудования',
-			'partners_id' => 'Если услуга/сервис оказывается каким-либо контрагентом (иначе внутренняя)',
-			'notebook' => 'Устаревшее поле. Вся информация должна быть на вики страничке.',
-			'support_schedule_id' => 'Расписание, когда нужно реагировать на сбои в работе сервиса',
-			'providing_schedule_id' => 'Расписание, когда сервисом могут воспользоваться пользователи или другие сервисы',
-			'responsible_id' => 'Ответственный за работу сервиса/оказание услуги',
-			'support_ids' => 'Дополнительные члены команды по поддержке сервиса/оказанию услуги',
-			'segment_id' => 'Сегмент ИТ инфраструктуры к которому относится этот сервис',
-			'archived' => 'Если сервис/услуга более не используется, но для истории его описание лучше сохранить - то его можно просто заархивировать, чтобы не отсвечивал',
-			'cost' => 'Стоимость услуги в месяц. (если понадобится другой период - обращайтесь к разработчику)',
-			'charge' => 'налог',
-			'contracts_ids' => 'Привязанные к услуге документы. Можно привязать только договор, а все счета/акты/доп.соглашения уже привязывать к договору',
-			'weight' => 'Значимость сервиса по сравнению с другими. Используется для определения наиболее важных сервисов на сервере и выборе ответственного за сервер.'
-		];
-	}
-	
+    
 	
 	public function reverseLinks()
 	{
@@ -296,8 +332,8 @@ class Services extends ArmsModel
 		if (is_object($this->supportScheduleRecursiveCache)) return $this->supportScheduleRecursiveCache;
 		if (is_object($this->supportScheduleRecursiveCache = $this->supportSchedule))
 			return $this->supportScheduleRecursiveCache;
-		if (is_object($this->parent))
-			return $this->supportScheduleRecursiveCache=$this->parent->supportScheduleRecursive;
+		if (is_object($this->parentService))
+			return $this->supportScheduleRecursiveCache=$this->parentService->supportScheduleRecursive;
 		return null;
 	}
 	
@@ -319,8 +355,8 @@ class Services extends ArmsModel
 		if (is_object($this->providingScheduleRecursiveCache)) return $this->providingScheduleRecursiveCache;
 		if (is_object($this->providingScheduleRecursiveCache = $this->providingSchedule))
 			return $this->providingScheduleRecursiveCache;
-		if (is_object($this->parent))
-			return $this->providingScheduleRecursiveCache = $this->parent->providingScheduleRecursive;
+		if (is_object($this->parentService))
+			return $this->providingScheduleRecursiveCache = $this->parentService->providingScheduleRecursive;
 		return null;
 	}
 	
@@ -332,8 +368,9 @@ class Services extends ArmsModel
 	/**
 	 * @return Segments|\yii\db\ActiveQuery
 	 */
-	public function getParent()
+	public function getParentService()
 	{
+		if ($this->parent_id == $this->id) return null;
 		if (static::allItemsLoaded()) return static::getLoadedItem($this->parent_id);
 		return $this->hasOne(Services::className(), ['id' => 'parent_id']);
 	}
@@ -366,8 +403,8 @@ class Services extends ArmsModel
 		if (is_object($this->responsibleRecursiveCache)) return $this->responsibleRecursiveCache;
 		if (is_object($this->responsibleRecursiveCache = $this->responsible))
 			return $this->responsibleRecursiveCache;
-		if (is_object($this->parent))
-			return $this->responsibleRecursiveCache = $this->parent->responsibleRecursive;
+		if (is_object($this->parentService))
+			return $this->responsibleRecursiveCache = $this->parentService->responsibleRecursive;
 		return null;
 	}
 
@@ -393,8 +430,8 @@ class Services extends ArmsModel
 		if (is_object($this->segmentRecursiveCache)) return $this->segmentRecursiveCache;
 		if (is_object($this->segmentRecursiveCache = $this->segment))
 			return $this->segmentRecursiveCache;
-		if (is_object($this->parent))
-			return $this->segmentRecursiveCache = $this->parent->segment;
+		if (is_object($this->parentService))
+			return $this->segmentRecursiveCache = $this->parentService->segment;
 		return null;
 	}
 	
@@ -441,8 +478,8 @@ class Services extends ArmsModel
 			return $this->supportRecursiveCache;
 			
 		}
-		if (is_object($this->parent))
-			return $this->supportRecursiveCache = $this->parent->supportRecursive;
+		if (is_object($this->parentService))
+			return $this->supportRecursiveCache = $this->parentService->supportRecursive;
 		return [];
 	}
 	

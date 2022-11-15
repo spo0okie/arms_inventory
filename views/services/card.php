@@ -8,6 +8,10 @@ use kartik\markdown\Markdown;
 /* @var $model app\models\Services */
 
 if (!isset($static_view)) $static_view=false;
+If (!is_object($model)) {
+	echo "Сервис/услуга не найдены";
+	return;
+}
 $comps=$model->comps;
 $techs=$model->techs;
 $services=$model->depends;
@@ -45,7 +49,7 @@ if(!$static_view) { ?>
 			} ?>
 			
 			<?=	(is_object($model->segmentRecursive))?" // Сегмент ИТ: ".$this->render('/segments/item',['model'=>$model->segmentRecursive,'static_view'=>true]):'' ?>
-			<?php if (is_object($model->parent))  echo "<br /> Входит в состав: {$this->render('item',['model'=>$model->parent])}"; ?>
+			<?php if (is_object($model->parentService))  echo "<br /> Входит в состав: {$this->render('item',['model'=>$model->parentService])}"; ?>
 		</h4>
 		<?php if ($model->sumTotals) { ?>
 		<strong>Стоимость:</strong> <span class="badge bg-success"><?= $model->sumTotals.''.$model->currency->symbol ?></span>

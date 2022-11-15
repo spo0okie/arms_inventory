@@ -99,8 +99,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'segment_id', [
 				'data' => \app\models\Segments::fetchNames(),
 				'options' => [
-					'placeholder' => (is_object($model->parent) && strlen($model->parent->segmentName))?
-						$model->parent->segmentName.$parentPlaceholder:$segmentPlaceholder,
+					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->segmentName))?
+						$model->parentService->segmentName.$parentPlaceholder:$segmentPlaceholder,
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
@@ -112,8 +112,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'providing_schedule_id', [
 				'data' => \app\models\Schedules::fetchNames(),
 				'options' => [
-					'placeholder' => (is_object($model->parent) && strlen($model->parent->providingScheduleName))?
-						$model->parent->providingScheduleName.$parentPlaceholder:$schedulePlaceholder,
+					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->providingScheduleName))?
+						$model->parentService->providingScheduleName.$parentPlaceholder:$schedulePlaceholder,
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
@@ -125,8 +125,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'support_schedule_id', [
 				'data' => \app\models\Schedules::fetchNames(),
 				'options' => [
-					'placeholder' => (is_object($model->parent) && strlen($model->parent->supportScheduleName))?
-						$model->parent->supportScheduleName.$parentPlaceholder:$schedulePlaceholder,
+					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->supportScheduleName))?
+						$model->parentService->supportScheduleName.$parentPlaceholder:$schedulePlaceholder,
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
@@ -138,8 +138,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'responsible_id', [
 				'data' => \app\models\Users::fetchWorking(),
 				'options' => [
-					'placeholder' => (is_object($model->parent) && strlen($model->parent->responsibleName))?
-						$model->parent->responsibleName.$parentPlaceholder:$responsiblePlaceholder,
+					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->responsibleName))?
+						$model->parentService->responsibleName.$parentPlaceholder:$responsiblePlaceholder,
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
@@ -205,8 +205,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'support_ids', [
 				'data' => \app\models\Users::fetchWorking(),
 				'options' => [
-					'placeholder' => (is_object($model->parent) && strlen($model->parent->supportNames))?
-						$model->parent->supportNames.$parentPlaceholder:$supportPlaceholder,
+					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->supportNames))?
+						$model->parentService->supportNames.$parentPlaceholder:$supportPlaceholder,
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
