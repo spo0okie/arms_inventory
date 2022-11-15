@@ -49,10 +49,10 @@ NavBar::begin([
 			],
 			['label' => 'Организация',
 				'items' => [
-					['label' => \app\models\Places::$titles,
+					count($places)?['label' => \app\models\Places::$titles,
 						'items'=>$places,
 						'class'=>'dropdown-menu dropdown-submenu'
-					],
+					]:['label' => \app\models\Places::$titles,'url' => ['/places/index']],
 					['label' => \app\models\Departments::$title, 'url' => ['/departments/index']],
 					['label' => \app\models\Services::$titles, 'url' => ['/services/index']],
 					['label' => \app\models\Schedules::$titles, 'url' => ['/schedules/index']],
