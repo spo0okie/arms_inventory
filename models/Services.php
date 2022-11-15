@@ -168,6 +168,7 @@ class Services extends ArmsModel
 	        [['support_schedule_id'],   'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['support_schedule_id' => 'id']],
 			[['segment_id'],			'exist', 'skipOnError' => true, 'targetClass' => Segments::className(), 'targetAttribute' => ['segment_id' => 'id']],
 			[['parent_id'],				'exist', 'skipOnError' => true, 'targetClass' => Services::className(), 'targetAttribute' => ['parent_id' => 'id']],
+			[['parent_id'],				'validateRecursiveLink', 'params'=>['getLink' => 'parentService']],
         ];
     }
 
@@ -405,10 +406,7 @@ class Services extends ArmsModel
 		if (is_object($this->responsibleRecursiveCache = $this->responsible))
 			return $this->responsibleRecursiveCache;
 		if (is_object($this->parentService)) {
-			var_dump($this->parentService);
-			return null;
 			return $this->responsibleRecursiveCache = $this->parentService->responsibleRecursive;
-			
 		}
 		return null;
 	}
@@ -771,8 +769,10 @@ class Services extends ArmsModel
 	
 	public static function cacheAllItems() {
 		if (!static::allItemsLoaded())
-			static::$allItems=static::find()
+			static::$allItems=ArrayHelper::index(
+				static::find()
 				->with(['orgPhones','orgInets','techs','comps','place','segment',])
-				->all();
+				->all()
+			,'id');
 	}
 }
