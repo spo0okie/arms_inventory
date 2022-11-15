@@ -7,16 +7,17 @@ use yii\helpers\Html;
 
 if (!isset($static_view)) $static_view=false;
 if (!isset($show_archived)) $show_archived=true;
-if (!isset($display)) {
-	$display=($model->archived&&!$show_archived)?'style="display:none"':'';
-};
-
-if (!isset($archClass)) {
-	$archClass=$model->archived?'text-muted text-decoration-line-through archived-item':'';
-};
 
 
 if (is_object($model)) {
+	if (!isset($display)) {
+		$display=($model->archived&&!$show_archived)?'style="display:none"':'';
+	};
+	
+	if (!isset($archClass)) {
+		$archClass=$model->archived?'text-muted text-decoration-line-through archived-item':'';
+	};
+
 	//выбираем иконку
 	$icon=$this->render('icon',compact('model'));
 	
