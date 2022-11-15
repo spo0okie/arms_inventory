@@ -110,7 +110,7 @@ class OrgInetController extends Controller
 		}
 	
 		$model->load(Yii::$app->request->get());
-		$model->prov_tel_id=Yii::$app->request->get('prov-tel');
+		//$model->prov_tel_id=Yii::$app->request->get('prov-tel');
 	
 		return Yii::$app->request->isAjax?
 			$this->renderAjax('create', [
