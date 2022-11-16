@@ -58,7 +58,7 @@ class ContractsSearch extends Contracts
 	        'arms',
 	        'techs',
 	        'licItems',
-	        'services.parent',
+	        'services',
 	        //'orgInets',
         ]);
 

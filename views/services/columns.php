@@ -69,7 +69,7 @@ return [
 		},
 	],
 	'responsible' => [
-		'header' => 'Отв., поддержка.',
+		//'header' => 'Отв., поддержка.',
 		'value' => function ($data) {
 			$output = [];
 			if (is_object($data->responsibleRecursive))

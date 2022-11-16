@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\helpers\QueryHelper;
 use Yii;
 use yii\web\User;
 
@@ -181,6 +182,11 @@ class Services extends ArmsModel
 			'name' => [
 				'Название',
 				'hint' => 'Короткое уникальное название сервиса или услуги',
+				'indexHint' => '{same}<br />'.
+					'При поиске также ищет в полях '.
+					'<strong>"'.$this->getAttributeLabel('search_text').'"</strong> и '.
+					'<strong>"'.$this->getAttributeLabel('description').'"</strong><br />'.
+					QueryHelper::$stringSearchHint,
 			],
 			'parent_id' => [
 				'Основной сервис/услуга',
@@ -212,14 +218,16 @@ class Services extends ArmsModel
 			],
 			'comps_ids' => [
 				'Серверы',
-				'hint' => 'На каких серверах выполняется этот сервис/услуге',
+				'hint' => 'На каких серверах выполняется этот сервис/услуга',
+				'indexHint' => '{same}',//<br />'.QueryHelper::$stringSearchHint,
 			],
 			'comps' => ['alias'=>'comps_ids',],
 			'techs_ids' => [
 				'Оборудование',
 				'hint' => 'На каком оборудовании выполняется этот сервис',
+				'indexHint' => '{same}',//<br />'.QueryHelper::$stringSearchHint,
 			],
-			'techs' => ['same'=>'techs_ids'],
+			'techs' => ['alias'=>'techs_ids'],
 	        'providing_schedule_id' => [
 	        	'Время предоставления',
 				'hint' => 'Расписание, когда сервисом могут воспользоваться пользователи или другие сервисы',
@@ -234,7 +242,11 @@ class Services extends ArmsModel
 	        	'Ответственный',
 				'hint' => 'Ответственный за работу сервиса/оказание услуги',
 			],
-			'responsible' => ['Ответственный, поддержка'],
+			'responsible' => [
+				'Ответственный, поддержка',
+				'indexLabel'=>'Отв., поддержка',
+				'indexHint'=>'Поиск по ответственному или поддержке сервиса.<br />'.QueryHelper::$stringSearchHint,
+			],
 			'support_ids' => [
 				'Поддержка',
 				'hint' => 'Дополнительные члены команды по поддержке сервиса/оказанию услуги',

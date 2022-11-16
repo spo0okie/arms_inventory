@@ -106,9 +106,9 @@ NavBar::begin([
 				'items' => [
 					['label' => \app\models\Materials::$title,
 						'items' => [
-							['label' => \app\models\Materials::$title, 'url' => ['/materials/index']],
+							['label' => \app\models\Materials::$title, 		 'url' => ['/materials/index']],
 							['label' => \app\models\MaterialsUsages::$title, 'url' => ['/materials-usages/index']],
-							['label' => \app\models\MaterialsTypes::$title, 'url' => ['/materials-types/index']],
+							['label' => \app\models\MaterialsTypes::$title,  'url' => ['/materials-types/index']],
 						],
 					],
 					['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index'], 'items'=>$techTypes],
@@ -131,9 +131,9 @@ NavBar::begin([
 					'dropdownOptions' => ['class'=>'dropdown-menu-end'],
 					'items' => [
 						['label' => 'Пользователи', 'url' => ['/users/index']],
-						['label' => 'Роли', 'url' => ['/rbac/role']],
-						['label' => 'Правила', 'url' => ['/rbac/rule']],
-						['label' => 'Разрешения', 'url' => ['/rbac/permission']],
+						['label' => 'Роли', 		'url' => ['/rbac/role']],
+						['label' => 'Правила', 		'url' => ['/rbac/rule']],
+						['label' => 'Разрешения', 	'url' => ['/rbac/permission']],
 					],
 				]:'',
 			Yii::$app->user->isGuest ?

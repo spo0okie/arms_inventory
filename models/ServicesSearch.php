@@ -13,6 +13,8 @@ use app\models\Services;
 class ServicesSearch extends Services
 {
 	public $sites;
+	public $comps;
+	public $techs;
 	public $segment;
 	public $responsible;
 	public $responsible_ids;
@@ -28,7 +30,7 @@ class ServicesSearch extends Services
         return [
 	        [['id', 'is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 			[['responsible_ids'], 'each', 'rule'=>['integer']],
-            [['name', 'description', 'segment', 'sites','responsible', 'providingSchedule', 'supportSchedule','directlySupported'], 'safe'],
+            [['name', 'description', 'segment', 'sites','responsible', 'providingSchedule', 'supportSchedule','directlySupported','comps','techs'], 'safe'],
         ];
     }
 
@@ -114,10 +116,12 @@ class ServicesSearch extends Services
         $query
 			->andFilterWhere(['or',
 				QueryHelper::querySearchString('services.name', $this->name),
-				QueryHelper::querySearchString('services.search_text',$this->name)
+				QueryHelper::querySearchString('services.search_text',$this->name),
+				QueryHelper::querySearchString( 'description', $this->name),
 			])
-            ->andFilterWhere(QueryHelper::querySearchString( 'description', $this->description))
 			->andFilterWhere(QueryHelper::querySearchString('segments.name', $this->segment))
+			->andFilterWhere(QueryHelper::querySearchString('comps.name', $this->comps))
+			->andFilterWhere(QueryHelper::querySearchString('techs.name', $this->comps))
 			->andFilterWhere(QueryHelper::querySearchString('providing_schedule.name', $this->providingSchedule))
 			->andFilterWhere(QueryHelper::querySearchString('support_schedule.name', $this->supportSchedule))
 	        ->andFilterWhere([

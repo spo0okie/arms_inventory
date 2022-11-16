@@ -121,8 +121,8 @@ class Contracts extends ArmsModel
             [['comment'], 'string'],
             [['name','date','end_date'], 'string', 'max' => 128],
 	        [['parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => Contracts::className(), 'targetAttribute' => ['parent' => 'id']],
-			[['parent_id'],	'compare', 'compareAttribute'=>'id','operator'=>'!=','message'=>'Нельзя выбрать этот документ, как родительский для самого себя'],
-        ];
+			[['parent_id'],	'validateRecursiveLink', 'params'=>['getLink' => 'parent']],
+		];
     }
 
 	/**
