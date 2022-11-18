@@ -69,30 +69,46 @@ class SiteController extends Controller
 	 *
 	 * @return string
 	 */
-	public function actionWiki($pageName)
+	public function actionWiki($pageName,$api='doku')
 	{
-		$arrContextOptions = [
-			"http" => [
-				"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['wikiUser'] . ":" . \Yii::$app->params['wikiPass']),
-				'method' => 'POST',
-				'content' => xmlrpc_encode_request(
-					'wiki.getPageHTML',
-					urldecode($pageName),
-					['encoding'=>'utf-8','escaping'=>[]]
-				),
-				'timeout' => 5,
-			],
-			"ssl" => [
-				"verify_peer" => false,
-				"verify_peer_name" => false,
-			],
-		];
-		$page = @file_get_contents(\Yii::$app->params['wikiUrl'].'lib/exe/xmlrpc.php',
-			false,
-			stream_context_create($arrContextOptions)
-		);
-		if ($page===false) return "Ошибка получения детального описания из Wiki";
-		$page=xmlrpc_decode($page);
+		if ($api=='doku') {
+			$arrContextOptions = [
+				"http" => [
+					"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['wikiUser'] . ":" . \Yii::$app->params['wikiPass']),
+					'method' => 'POST',
+					'content' => xmlrpc_encode_request(
+						'wiki.getPageHTML',
+						urldecode($pageName),
+						['encoding'=>'utf-8','escaping'=>[]]
+					),
+					'timeout' => 5,
+				],"ssl" => ["verify_peer" => false,"verify_peer_name" => false,],
+			];
+			$page = @file_get_contents(\Yii::$app->params['wikiUrl'].'lib/exe/xmlrpc.php',
+				false,
+				stream_context_create($arrContextOptions)
+			);
+			if ($page===false) return "Ошибка получения детального описания из Wiki";
+			$page=xmlrpc_decode($page);
+		}
+		
+		if ($api=='confluence') {
+			$arrContextOptions = [
+				"http" => [
+					"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['confluenceUser'] . ":" . \Yii::$app->params['confluencePass']),
+					'method' => 'POST',
+					'timeout' => 5,
+				],"ssl" => ["verify_peer" => false,	"verify_peer_name" => false,],
+			];
+			$page = @file_get_contents(\Yii::$app->params['wikiUrl'].'/rest/api/content/'.$pageName.'?expand=body.storage',
+				false,
+				stream_context_create($arrContextOptions)
+			);
+			if ($page===false) return "Ошибка получения детального описания из Wiki";
+			$page=json_decode($page);
+			
+		}
+		
 		if (is_array($page)) return print_r($page,true);
 		$page = str_replace('href="/', 'href="' . \Yii::$app->params['wikiUrl'] , $page);
 		$page = str_replace('href=\'/','href=\'' . \Yii::$app->params['wikiUrl'] , $page);
