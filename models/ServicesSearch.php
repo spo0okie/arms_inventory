@@ -117,7 +117,7 @@ class ServicesSearch extends Services
 			->andFilterWhere(['or',
 				QueryHelper::querySearchString('services.name', $this->name),
 				QueryHelper::querySearchString('services.search_text',$this->name),
-				QueryHelper::querySearchString( 'description', $this->name),
+				QueryHelper::querySearchString( 'services.description', $this->name),
 			])
 			->andFilterWhere(QueryHelper::querySearchString('segments.name', $this->segment))
 			->andFilterWhere(QueryHelper::querySearchString('comps.name', $this->comps))
