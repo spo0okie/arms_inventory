@@ -71,7 +71,9 @@ class SiteController extends Controller
 	 */
 	public function actionWiki($pageName,$api='doku')
 	{
+		$wikiUrl='';
 		if ($api=='doku') {
+			$wikiUrl=\Yii::$app->params['wikiUrl'];
 			$arrContextOptions = [
 				"http" => [
 					"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['wikiUser'] . ":" . \Yii::$app->params['wikiPass']),
@@ -81,10 +83,9 @@ class SiteController extends Controller
 						urldecode($pageName),
 						['encoding'=>'utf-8','escaping'=>[]]
 					),
-					'timeout' => 5,
 				],"ssl" => ["verify_peer" => false,"verify_peer_name" => false,],
 			];
-			$page = @file_get_contents(\Yii::$app->params['wikiUrl'].'lib/exe/xmlrpc.php',
+			$page = @file_get_contents($wikiUrl.'lib/exe/xmlrpc.php',
 				false,
 				stream_context_create($arrContextOptions)
 			);
@@ -93,27 +94,37 @@ class SiteController extends Controller
 		}
 		
 		if ($api=='confluence') {
+			$wikiUrl=\Yii::$app->params['confluenceUrl'];
 			$arrContextOptions = [
 				"http" => [
 					"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['confluenceUser'] . ":" . \Yii::$app->params['confluencePass']),
-					'method' => 'POST',
-					'timeout' => 5,
 				],"ssl" => ["verify_peer" => false,	"verify_peer_name" => false,],
 			];
-			$page = @file_get_contents(\Yii::$app->params['wikiUrl'].'/rest/api/content/'.$pageName.'?expand=body.storage',
+			$page = @file_get_contents($wikiUrl.'/rest/api/content/'.$pageName.'?expand=body.storage',
 				false,
 				stream_context_create($arrContextOptions)
 			);
 			if ($page===false) return "Ошибка получения детального описания из Wiki";
+			
 			$page=json_decode($page);
+			if (
+				!is_object($page)
+				||
+				!property_exists($page,'body')
+				||
+				!property_exists($page->body,'storage')
+				||
+				!property_exists($page->body->storage,'value')
+			) return "Ошибка расшифровки JSON детального описания из Wiki";
 			
 		}
 		
 		if (is_array($page)) return print_r($page,true);
-		$page = str_replace('href="/', 'href="' . \Yii::$app->params['wikiUrl'] , $page);
-		$page = str_replace('href=\'/','href=\'' . \Yii::$app->params['wikiUrl'] , $page);
-		$page = str_replace('src="/',  'src="' . \Yii::$app->params['wikiUrl'] , $page);
-		$page = str_replace('src=\'/', 'src=\'' . \Yii::$app->params['wikiUrl'] , $page);
+		
+		$page = str_replace('href="/', 'href="' . $wikiUrl , $page);
+		$page = str_replace('href=\'/','href=\'' . $wikiUrl , $page);
+		$page = str_replace('src="/',  'src="' . $wikiUrl , $page);
+		$page = str_replace('src=\'/', 'src=\'' . $wikiUrl , $page);
 		return $page;
 	}
 	
