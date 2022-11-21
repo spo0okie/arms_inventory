@@ -12,7 +12,9 @@ class m221024_153826_add_comment_column_to_places_table extends Migration
      */
     public function safeUp()
     {
-		$this->addColumn('places', 'comment', $this->text());
+		$table = $this->db->getTableSchema('places');
+		if (!isset($table->columns['comment']))
+			$this->addColumn('places', 'comment', $this->text());
     }
 
     /**
