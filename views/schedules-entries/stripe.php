@@ -16,7 +16,8 @@ $bgClasses=[
 	'',
 	'bg-info',
 	'bg-warning',
-	'bg-danger'
+	'bg-danger',
+	'bg-success',
 ];
 
 
