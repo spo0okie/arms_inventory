@@ -24,14 +24,42 @@ if (!isset($modalParent)) $modalParent=null;
 		//'action' => Yii::$app->request->getQueryString(),
 	]); ?>
 
-    <?= $form->field($model, 'code')->textInput(['maxlength' => true]) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= \app\helpers\FieldsHelper::TextInputField($form, $model, 'name') ?>
+		</div>
+		<div class="col-md-6">
+			<?= \app\helpers\FieldsHelper::TextInputField($form, $model, 'code') ?>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-3">
+			<?= \app\helpers\FieldsHelper::CheckboxField($form, $model, 'is_app') ?>
+		</div>
+		<div class="col-md-3">
+			<?= \app\helpers\FieldsHelper::CheckboxField($form, $model, 'is_ip') ?>
+		</div>
+		<div class="col-md-3">
+			<?= \app\helpers\FieldsHelper::CheckboxField($form, $model, 'is_phone') ?>
+		</div>
+		<div class="col-md-3">
+			<?= \app\helpers\FieldsHelper::CheckboxField($form, $model, 'is_vpn') ?>
+		</div>
+	</div>
+	
+	<?= \app\helpers\FieldsHelper::TextInputField($form, $model, 'comment') ?>
 
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+	<?= \app\helpers\FieldsHelper::Select2Field($form, $model, 'children_ids',[
+		'data'=>\app\models\AccessTypes::fetchNames(),
+		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
+			'allowClear' => true,
+			'multiple' => true
+		]
+	]) ?>
 
-    <?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form, $model, 'notepad',['rows' => 4]) ?>
 
-<?= $form->field($model, 'notepad')->textarea(['rows' => max(4, count(explode("\n", $model->notepad)))]) ?>		
-	<?php $this->registerJs("$('#access-types-notepad').autoResize();"); ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

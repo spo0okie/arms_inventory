@@ -12,9 +12,13 @@ use Yii;
  * @property string $name
  * @property string $comment
  * @property string $notepad
- * @property string sname
+ * @property boolean $is_app
+ * @property boolean $is_ip
+ * @property boolean $is_phone
+ * @property boolean $is_vpn
+ * @property AccessTypes[] $children
  */
-class AccessTypes extends \yii\db\ActiveRecord
+class AccessTypes extends ArmsModel
 {
 
 	public static $title='Тип доступа';
@@ -36,23 +40,89 @@ class AccessTypes extends \yii\db\ActiveRecord
         return [
             [['notepad'], 'string'],
             [['code', 'name'], 'string', 'max' => 64],
+			[['is_app','is_ip','is_phone','is_vpn'],'integer'],
             [['comment'], 'string', 'max' => 255],
+			[['children_ids'], 'each', 'rule'=>['integer']],
         ];
     }
-
+	
+	/**
+	 * В списке поведений прикручиваем many-to-many контрагентов
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'relations' => [
+					'children_ids' => 'children',
+				]
+			]
+		];
+	}
+    
+    
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
             'id' => 'ID',
-            'code' => 'Code',
-            'name' => 'Name',
-            'comment' => 'Comment',
-            'notepad' => 'Notepad',
+            'code' => [
+            	'Код',
+				'hint' => 'хз пока зачем. Еще нигде не используется'
+			],
+            'name' => [
+            	'Название',
+				'hint' => 'Желательно короткое, т.к. везде где употребляется обычно под него отводится мало места'
+			],
+            'comment' => [
+            	'Комментарий',
+				'hint' => 'Пояснение к названию, если из него не все ясно'
+			],
+            'notepad' => [
+            	'Зап. книжка',
+				'hint' => 'Тут можно вообще все в деталях описать если нужно'
+			],
+			'children_ids'=>[
+				'Включает в себя',
+				'hint' => 'Если это комплексный доступ/роль, который включает в себя другие, то их надо перечислить здесь'
+			],
+			'children'=>['alias'=>'children_ids'],
+			'is_app'=>[
+				'Доступ в приложение',
+				'hint' => 'Подразумевает, что этот уровень доступа дает полномочия на уровне приложения'
+			],
+			'is_ip'=>[
+				'Доступ по IP',
+				'hint' => 'Подразумевает, что этот уровень доступа дает доступ на уровне IP (разрешения на фаерволе)'.
+					'<br />При отображении выдачи такого доступа, будет дополнительно отображать IP адреса объектов'
+			],
+			'is_phone'=>[
+				'Доступ телефонии',
+				'hint' => 'Подразумевает, что этот уровень доступа дает какие-то разрешения на уровне телефонии/диалплана'.
+					'<br />При отображении выдачи такого доступа, будет дополнительно отображать внутренний телефон пользователя'
+			],
+			'is_vpn'=>[
+				'Доступ через VPN',
+				'hint' => 'Подразумевает что этот доступ предоставляет возможность удаленного VPN подключения'
+			],
         ];
     }
+	
+	/**
+	 * Возвращает набор контрагентов в договоре
+	 * @return \yii\db\ActiveQuery
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function getChildren()
+	{
+		return $this->hasMany(AccessTypes::className(), ['id' => 'child_id'])
+			->viaTable('{{%access_types_hierarchy}}', ['parent_id' => 'id']);
+	}
+
 
 	/**
 	 * Name for search

@@ -22,14 +22,17 @@ if (!isset($static_view)) $static_view=false;
 	]) ?>
 </h1>
 
-<?= DetailView::widget([
-    'model' => $model,
-    'attributes' => [
-        'id',
-        'code',
-        'name',
-        'comment',
-        'notepad:ntext',
-    ],
-]) ?>
+<?= Html::encode($model->comment) ?>
+
+<?php if (strlen($model->notepad)) {
+	echo '<p>'.Yii::$app->formatter->asNtext($model->notepad).'</p>';
+} ?>
+
+<?php if (count($model->children)) {
+	echo '<h4>'.$model->getAttributeLabel('children').'</h4>';
+	echo '<ul>';
+	foreach ($model->children as $child)
+		echo '<li>'.$this->render('item',['model'=>$child,'static_view'=>true]).'</li>';
+	echo '</ul>';
+} ?>
 

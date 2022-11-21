@@ -116,7 +116,7 @@ class SiteController extends Controller
 				||
 				!property_exists($page->body->storage,'value')
 			) return "Ошибка расшифровки JSON детального описания из Wiki";
-			
+			$page=$page->body->storage->value;
 		}
 		
 		if (is_array($page)) return print_r($page,true);

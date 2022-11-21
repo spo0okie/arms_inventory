@@ -15,7 +15,7 @@ if (!empty($model)) {
 	<span class="access-types-item"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['access-types/ttip','id'=>$model->id]) ?>"
 	>
-		<?=  Html::tag('span',$name,['access-types/view','id'=>$model->id]) ?>
+		<?=  Html::a($name,['access-types/view','id'=>$model->id]) ?>
 		<?=  $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['access-types/update','id'=>$model->id,'return'=>'previous']) ?>
 	</span>
 <?php } ?>

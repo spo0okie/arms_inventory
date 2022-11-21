@@ -47,7 +47,7 @@ return [
 		'value'=>function($data) use ($renderer) {
 			$output=[Html::a($data->name,['view','id'=>$data->id])];
 			if ($data->description) $output[]=$data->description;
-			if ($data->history) $output[]=Markdown::convert($data->history);
+			//if ($data->history) $output[]=Markdown::convert($data->history);
 			return implode('<br />',$output);
 		}
 	],

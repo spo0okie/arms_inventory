@@ -44,11 +44,21 @@ class AclsSearch extends Acls
 
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+		
+        $sort=[
+			'defaultOrder' => ['id'=>SORT_ASC],
+			'attributes'=>[
+				'id',
+				'name',
+			]
+		];
 
         $this->load($params);
+
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+			'sort' => $sort,
+		]);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
