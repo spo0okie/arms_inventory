@@ -42,6 +42,8 @@ use yii\helpers\Html;
  * @property boolean $is_server является сервером
  * @property array $contracts_ids ссылки на Документы
  * @property boolean $archived Признак списанного АРМ
+ * @property array $portsList
+ * @property array $ddPortsList
  *
  * @property Users $head
  * @property Users $responsible
@@ -49,6 +51,8 @@ use yii\helpers\Html;
  * @property Places $place
  * @property Users $itStaff
  * @property Comps $comp
+ * @property Ports $ports
+ * @property Ports $linkedPorts
  * @property Comps $hwComp
  * @property Comps[] $comps
  * @property Comps[] $sortedComps
@@ -563,8 +567,86 @@ class Arms extends ArmsModel
 		}
 		return 'Нет пользователя';
 	}
-
-
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getPorts()
+	{
+		return $this->hasMany(Ports::className(), ['arms_id' => 'id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getLinkedPorts()
+	{
+		return $this->hasMany(Ports::className(), ['id' => 'linked_ports_id'])
+			->from(['linked_ports'=>Ports::tableName()])
+			->via('ports');
+	}
+	
+	/**
+	 * Возвращает массив портов (фактически объявленных или потенциально возможных исходя из модели оборудования)
+	 */
+	public function getPortsList()
+	{
+		//Порты которые должны быть у этой модели оборудования
+		$model_ports=[];
+		
+		//Порты которые объявлены в БД конкретно для этого устройства
+		$custom_ports=$this->ports;
+		if (!is_array($custom_ports)) $custom_ports=[];
+		
+		//если корректно пришита модель оборудования и у модели есть набор портов
+		if (is_object($this->techModel) && count($this->techModel->portsList)) {
+			//перебираем распарсеные порты
+			foreach ($this->techModel->portsList as $port_name=>$port_comment) {
+				//ищем есть ли порт-объект к этому порту
+				$port_link=null;
+				foreach ($custom_ports as $i=>$custom_port) if ($custom_port->name == $port_name) {
+					$port_link=$custom_port;
+					unset($custom_ports[$i]);
+				}
+				$model_ports[$port_name]=compact('port_name','port_comment','port_link');
+			}
+		}
+		
+		foreach ($custom_ports as $port_link) {
+			$model_ports[$port_link->name]=[
+				'port_name'=>$port_link->name,
+				'port_comment'=>$port_link->comment,
+				'port_link'=>$port_link
+			];
+		}
+		
+		return $model_ports;
+	}
+	
+	/**
+	 * Возвращает комментарий порта из шаблона модели
+	 */
+	public function getModelPortComment($port)
+	{
+		if (is_object($this->techModel))
+			return $this->techModel->getPortComment($port);
+		else
+			return null;
+	}
+	
+	
+	public function getDdPortsList()
+	{
+		$out=[];
+		foreach ($this->portsList as $name=>$port) {
+			$out[]=[
+				'id'=>is_object($port['port_link'])?$port['port_link']->id:"create:$name",
+				'name'=>$name
+			];
+		}
+		return $out;
+	}
+	
 	/**
 	 *
 	 */
@@ -639,7 +721,28 @@ class Arms extends ArmsModel
         }
         return false;
     }
-
+	
+	
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+		//если изменился порт
+		if (isset($changedAttributes['places_id'])
+			||
+			isset($changedAttributes['user_id'])
+			||
+			isset($changedAttributes['it_staff_id'])
+		) {
+			//поменялись поля которые нам надо прокинуть в привязанное оборудование
+			foreach ($this->techs as $tech) {
+				$tech->places_id=$this->places_id;
+				$tech->user_id=$this->user_id;
+				$tech->it_staff_id=$this->it_staff_id;
+				$tech->save();
+			}
+		}
+	}
+		
     /**
      * Возвращает первый свободный инвентарный номер с заданным инв. номером
      * @param $idx текущий инв. номер

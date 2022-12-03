@@ -75,7 +75,10 @@ div.users-view div.arms-card {
     margin-bottom: 5px;
 }
 /* номер АРМ */
-div.arms-card h3 {font: bold 42px 'Stencil', Helvetica, sans-serif; padding: 10pt 0 0 20pt;}
+
+div.arms-card span.arms-item,
+div.arms-card span.techs-item {font-family: 'Stencil', Helvetica, sans-serif; font-size: 112%}
+div.arms-card h3 {font-weight: bold; font-size: 42px; padding: 10pt 0 0 20pt;}
 div.arms-card h3 span.arms-item { font-family: 'Stencil', Helvetica, sans-serif;}
 
 div.arms-card h4 {width: 100%;  display: block; margin: 0; text-align: center;}
@@ -84,7 +87,9 @@ div.arms-card div.row {margin-left: 8pt;}
 div.arms-card div.comment-block {font-weight: 150; text-align: center}
 div.arms-card div.comment-block img.exclamation-sign {width: 30pt; height: 30pt; filter: invert(100%)}
 
-/* подсвечиваемый кликабельный блок */
+div.arms-card div.port-links {width: max-content; float: right}
+
+    /* подсвечиваемый кликабельный блок */
 div.arms-card span.clickable {cursor: pointer; padding: 0 10pt}
 div.arms-card span.clickable:hover {background-color: darkgray}
 div.arms-card span.clickable:hover:before {content: '⌵   '}
@@ -129,13 +134,21 @@ div.arms-card div.data-block {
     border: solid silver 1px;
 }
 
+div.arms-card div.tree-level-2 div.comps-card {background-color: #7f8f9f; padding: 0; margin: 6pt 2pt;}
+div.arms-card div.tree-level-2 {font-size: 80%;}
+div.arms-card div.tree-level-2 h1 {font-size:16pt; margin: 2pt 0 0 2pt; padding: 0;}
+div.arms-card div.tree-level-2 h4 {font-size:10pt; margin: 0; padding: 0; text-align: left}
+div.arms-card div.tree-level-2 span.unit-status {float: right; width: 20%; text-align: right; border-radius: 0;}
+div.arms-card div.tree-level-2 div {margin: 2pt;}
+
+/*
 div.arms-card div.data-block.tree-level-2 div.comps-card {background-color: #7f8f9f; padding: 0; margin: 6pt 2pt;}
 div.arms-card div.data-block.tree-level-2 {font-size: 80%;}
 div.arms-card div.data-block.tree-level-2 h1 {font-size:16pt; margin: 2pt 0 0 2pt; padding: 0;}
 div.arms-card div.data-block.tree-level-2 h4 {font-size:10pt; margin: 0; padding: 0; text-align: left}
 div.arms-card div.data-block.tree-level-2 span.unit-status {float: right; width: 20%; text-align: right; border-radius: 0;}
 div.arms-card div.data-block.tree-level-2 div {margin: 2pt;}
-
+*/
 
 
 

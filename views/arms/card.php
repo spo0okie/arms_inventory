@@ -83,7 +83,25 @@ if (is_object($model->state)) {
 		<?php }?>
 	</div>
 
-	<br />
+	<?php if (count($model->ports)) {
+		echo '<div class="d-flex flex-row-reverse px-3 pb-1 m-0"><div class="tree-level-2 text-uppercase port-links">';
+		foreach ($model->ports as $port) {
+			//echo '<span class="fas fa-solid fa-network-wired"></span>'.
+			echo '<span class="fas fa-solid fa-square-full"></span> '.
+				$this->render('/ports/item',['model'=>$port,'reverse'=>true]).
+				//' <span class="fas fa-solid fa-arrows-left-right"></span> '.
+				' ❱❱❱ '.
+				$this->render('/ports/item',[
+					'model'=>$port->linkPort,
+					'static_view'=>true,
+					'include_tech'=>true,
+					'reverse'=>true
+				]).' <br />';
+		}
+		echo '</div></div> ';
+	} else {
+		echo '<br />';
+	} ?>
 
 	<?php if (!$no_users) { ?>
 		<h4>Сотрудники:</h4>
@@ -95,8 +113,7 @@ if (is_object($model->state)) {
 
 	
     <?php // $this->render('att-techs',['model'=>$model,'static_view'=>$static_view]) ?>
-    <br />
-
+    
 	<span class="divider2"></span>
 	
 	<?php if (strlen($licList=$this->render('/comps/lics_list',['model'=>$model,'static_view'=>$static_view]))) { ?>

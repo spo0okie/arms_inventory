@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\Techs;
+use app\models\Arms;
 use Yii;
 use app\models\Ports;
 use app\models\PortsSearch;
@@ -10,12 +12,13 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\Url;
 use yii\bootstrap5\ActiveForm;
+use yii\web\Response;
 
 
 /**
  * PortsController implements the CRUD actions for Ports model.
  */
-class PortsController extends Controller
+class PortsController extends ArmsBaseController
 {
 
 	/**
@@ -35,7 +38,7 @@ class PortsController extends Controller
 		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
-				['allow' => true, 'actions'=>['create','update','delete',], 'roles'=>['editor']],
+				['allow' => true, 'actions'=>['create','update','delete','port-list',], 'roles'=>['editor']],
 				['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
@@ -78,72 +81,12 @@ class PortsController extends Controller
 			return ActiveForm::validate($model);
 		}
 	}
-
-
-	/**
-	* Displays a item for single model.
-	* @param integer $id
-	* @return mixed
-	* @throws NotFoundHttpException if the model cannot be found
-	*/
-	public function actionItem($id)
-	{
-		return $this->renderPartial('item', [
-			'model' => $this->findModel($id)
-		]);
-	}
-
-
-	/**
-	* Displays a tooltip for single model.
-	* @param integer $id
-	* @return mixed
-	* @throws NotFoundHttpException if the model cannot be found
-	*/
-	public function actionTtip($id)
-	{
-		return $this->renderPartial('ttip', [
-			'model' => $this->findModel($id),
-		]);
-	}
-
-
-    /**
-     * Displays a single Ports model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
-
-    /**
-     * Creates a new Ports model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new Ports();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
 	
-		$model->techs_id=Yii::$app->request->get('techs_id',null);
-		$model->name=Yii::$app->request->get('name',null);
-		$model->comment=Yii::$app->request->get('comment',null);
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
-
+	public function actionCreate() {
+		return $this->actionUpdate(null);
+	}
+	
     /**
      * Updates an existing Ports model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -153,16 +96,40 @@ class PortsController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $model = is_null($id)?
+			$model=new Ports():
+			$this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        	if ($model->save()) {
+				if (Yii::$app->request->isAjax) {
+					Yii::$app->response->format = Response::FORMAT_JSON;
+					return [$model];
+				}  else {
+					if (Yii::$app->request->get('return') == 'previous')
+						return $this->redirect(Url::previous());
+					else
+						return $this->redirect(['view', 'id' => $model->id]);
+				}
+			} else {
+				//тут у нас интересная логика. Если валидация прошла, а сохранение нет
+				//значит мы сами отказались сохранять в beforeSave
+				//значит сохраняемая информация не уникальная (пустая/шаблонная)
+				if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
+				return $this->redirect(['ports/index']);
+			}
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+	
+		$model->load(Yii::$app->request->get());
+	
+		return Yii::$app->request->isAjax?
+			$this->renderAjax('update', [
+				'model' => $model,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('update', [
+				'model' => $model,
+			]);
     }
 
     /**
@@ -178,7 +145,38 @@ class PortsController extends Controller
 
         return $this->redirect(['index']);
     }
-
+	
+	/**
+	 * Returns tech available network ports
+	 * @return array
+	 */
+	public function actionPortList()
+	{
+		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		if (isset($_POST['depdrop_all_params'])) {
+			$params = $_POST['depdrop_all_params'];
+			if (is_array($params)) {
+				if (isset($params['link_techs_id']) && strlen($params['link_techs_id'])) {
+					$model=Techs::findOne($params['link_techs_id']);
+					return ['output'=>$model->ddPortsList, 'selected'=>''];
+				} elseif (isset($params['link_arms_id']) && strlen($params['link_arms_id'])) {
+					$model=Arms::findOne($params['link_arms_id']);
+					return ['output'=>$model->ddPortsList, 'selected'=>''];
+				} else {
+					return ['output'=>[], 'selected'=>''];
+				}
+				
+				//$out = self::getSubCatList($cat_id);
+				// the getSubCatList function will query the database based on the
+				// cat_id and return an array like below:
+				// [
+				//    ['id'=>'<sub-cat-id-1>', 'name'=>'<sub-cat-name1>'],
+				//    ['id'=>'<sub-cat_id_2>', 'name'=>'<sub-cat-name2>']
+				// ]
+			}
+		}
+		return ['output'=>'', 'selected'=>''];
+	}
     /**
      * Finds the Ports model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -186,12 +184,16 @@ class PortsController extends Controller
      * @return Ports the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel($id,$failRoute=null)
     {
         if (($model = Ports::findOne($id)) !== null) {
             return $model;
         }
-
+		
+        if (!is_null($failRoute)) {
+			$this->redirect($failRoute);
+		}
+        
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

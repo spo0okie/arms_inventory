@@ -10,34 +10,32 @@ use kartik\depdrop\DepDrop;
 /* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
 
-if (!empty($model->link_ports_id) && is_object($model->linkPort))
+if (!empty($model->link_ports_id) && is_object($model->linkPort)) {
 	$model->link_techs_id=$model->linkPort->techs_id;
+	$model->link_arms_id=$model->linkPort->arms_id;
+	//echo $model->link_techs_id."/".$model->link_arms_id;
+};
 
 $switchToTech=<<<JS
 	$("#type_switcher_arm").prop('checked',false);
    	$("#link_to_arm").hide();
    	$("#link_to_tech").show();
+	$("#link_arms_id").val('').trigger('change');
+	$("#ports-link_ports_id").val('').trigger('change');
 JS;
+
 $switchToArm=<<<JS
 	$("#type_switcher_tech").prop('checked',false);
    	$("#link_to_tech").hide();
    	$("#link_to_arm").show();
+	$("#link_techs_id").val('').trigger('change');
+	$("#ports-link_ports_id").val('').trigger('change');
 JS;
 
-$armLinkSelected=<<<JS
-	$("#link_techs_id").val('');
-	$("#link_ports_id").val('');
+$clearPort=<<<JS
+	$("#ports-link_ports_id").val('').trigger('change');
 JS;
 
-$techLinkSelected=<<<JS
-	$("#ports-link_arms_id").val('');
-	if ($("#link_techs_id").val()) {
-	   	$("#link_to_port").show();
-	} else {
-	   	$("#link_to_port").hide();
-		$("#link_ports_id").val('');
-	}
-JS;
 
 
 ?>
@@ -52,27 +50,24 @@ JS;
 			//['ports/validate']:	//для новых моделей
 			//['ports/validate','id'=>$model->id], //для существующих
 	]); ?>
-
-	<div class="row">
-		<div class="col-md-6">
-			<?= $form->field($model, 'techs_id')->widget(Select2::className(), [
-				'data' => app\models\Techs::fetchNames(),
-				'options' => [
-					'placeholder' => 'Выберите '.$model->getAttributeLabel('techs_id')
-				],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
+	
+	<?= $form->field($model, 'techs_id')->hiddenInput()->label(false)->hint(false); ?>
+	<?= $form->field($model, 'arms_id')->hiddenInput()->label(false)->hint(false); ?>
+	
+	<?php if (strlen($model->name)) { ?>
+		<?= $form->field($model, 'name')->hiddenInput()->label(false)->hint(false); ?>
+		<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+	<?php } else { ?>
+		<div class="row">
+			<div class="col-md-3">
+				<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+			</div>
+			<div class="col-md-9">
+				<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+			</div>
 		</div>
-		<div class="col-md-6">
-			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-		</div>
-	</div>
+	<?php } ?>
 
-    <?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
 	<h3>Соединено с</h3>
 
 	<?= Html::radio('Оборудование',!is_object($model->linkArm),[
@@ -96,7 +91,8 @@ JS;
 			'data' => app\models\Arms::fetchNames(),
 			'options' => [
 				'placeholder' => 'Выберите '.$model->getAttributeLabel('link_arms_id'),
-				'onchange'=>$armLinkSelected,
+				'id'=>'link_arms_id',
+				'onclear' => $clearPort,
 			],
 			'pluginOptions' => [
 				'dropdownParent' => $modalParent,
@@ -105,13 +101,14 @@ JS;
 			]
     	]) ?>
 	</div>
+	
 	<div id="link_to_tech" <?= is_object($model->linkArm)?'style="display:none"':''?>>
 		<?=	$form->field($model, 'link_techs_id')->widget(Select2::className(), [
 			'data' => app\models\Techs::fetchNames(),
 			'options' => [
 				'placeholder' => 'Выберите Устройство',
-				'onchange' => $techLinkSelected,
 				'id'=>'link_techs_id',
+				'onclear' => $clearPort,
 			],
 			'pluginOptions' => [
 				'dropdownParent' => $modalParent,
@@ -119,25 +116,32 @@ JS;
 				'multiple' => false
 			]
 		]) ?>
-		<div id="link_to_port" <?= empty($model->link_techs_id)?'style="display:none"':''?>>
-			<?= $form->field($model, 'link_ports_id')->widget(DepDrop::className(), [
-				//'data' => app\models\Ports::fetchNames(),
-				'type' => DepDrop::TYPE_SELECT2,
-				'data' => is_object($model->linkPort)?\yii\helpers\ArrayHelper::map($model->linkPort->tech->ddPortsList,'id','name'):null,
-				'options'=>[
-					'placeholder' => 'Выберите '.$model->getAttributeLabel('link_ports_id'),
-				],
-				'select2Options' => ['pluginOptions' => ['allowClear' => true]],
-				'pluginOptions' => [
-					'depends'=>['link_techs_id'],
-					'allowClear' => true,
-					'multiple' => false,
-					'url'=>\yii\helpers\Url::to(['/techs/port-list'])
-				]
-			]) ?>
-		</div>
 	</div>
-    <div class="form-group">
+
+	<div id="link_to_port">
+		<?= $form->field($model, 'link_ports_id')->widget(DepDrop::className(), [
+			//'data' => app\models\Ports::fetchNames(),
+			'type' => DepDrop::TYPE_SELECT2,
+			'data' => is_object($model->linkPort)?(
+					$model->linkPort->techs_id?
+					\yii\helpers\ArrayHelper::map($model->linkPort->tech->ddPortsList,'id','name'):
+					\yii\helpers\ArrayHelper::map($model->linkPort->arm->ddPortsList,'id','name')
+			):null,
+			'options'=>[
+				'placeholder' => 'Выберите '.$model->getAttributeLabel('link_ports_id'),
+			],
+			'select2Options' => ['pluginOptions' => ['allowClear' => true]],
+			'pluginOptions' => [
+				'depends'=>['link_techs_id','link_arms_id'],
+				'allowClear' => true,
+				'multiple' => false,
+				'loading' => false,
+				'url'=>\yii\helpers\Url::to(['/ports/port-list'])
+			]
+		]) ?>
+	</div>
+
+	<div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 

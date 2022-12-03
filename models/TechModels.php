@@ -182,9 +182,17 @@ class TechModels extends \yii\db\ActiveRecord
 			unset ($tokens[0]);
 			
 			//остальные слова - комментарий
-			if (strlen($port_name)) $model_ports[$port_name]=implode(' ',$tokens);
+			if (strlen($port_name)) $model_ports[(string)$port_name]=trim(implode(' ',$tokens));
 		}
 		return $model_ports;
+	}
+	
+	public function getPortComment($port) {
+		$ports=$this->portsList;
+		if (isset($ports[$port])){
+			return $ports[$port];
+		}
+		return null;
 	}
 	
 	public function getSname()

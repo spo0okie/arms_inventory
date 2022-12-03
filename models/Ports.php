@@ -9,23 +9,30 @@ use Yii;
  *
  * @property int $id
  * @property int $techs_id
+ * @property int $arms_id
  * @property string $name
  * @property string $comment
  * @property int $link_techs_id
  * @property int $link_arms_id
  * @property int $link_ports_id
  * @property string sname
+ * @property string deviceName
+ * @property string fullName
  *
  * @property Arms $linkArm
  * @property Ports $linkPort
  * @property Techs $linkTech
  * @property Techs $tech
+ * @property Arms $arm
  */
 class Ports extends \yii\db\ActiveRecord
 {
+	public $link_arms_id;
+	public $link_techs_id;
 	
 	public static $port_prefix='Порт ';
 	public static $tech_postfix=': ';
+	public static $null_port='0';
 	
 	public static $title='Сетевой порт';
 	public static $titles='Сетевые порты';
@@ -43,25 +50,25 @@ class Ports extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['techs_id'], 'required'],
-            [['techs_id', 'link_techs_id', 'link_arms_id'], 'integer'],
+            [['techs_id', 'arms_id', 'link_techs_id', 'link_arms_id'], 'integer'],
 			[['link_ports_id'],function ($attribute, $params, $validator) {
-				if (!is_numeric($this->$attribute)) {
-					if (
-						!(strlen($this->$attribute)>strlen('create:1@1'))
-						&&
-						!(substr($this->$attribute,0,strlen('create:'))=='create:')
-					)
-						$this->addError($attribute, "Неверный порт устройства");
+				if (
+					!empty($this->link_ports_id)
+				&&
+					!is_numeric($this->link_ports_id)
+				&&
+					strpos($this->link_ports_id,'create:')!==0
+				) {
+					$this->addError($attribute, "Неверный порт устройства");
 				}
 			}],
 	
 			[['name'], 'string', 'max' => 32],
             [['comment'], 'string', 'max' => 255],
             [['link_arms_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['link_arms_id' => 'id']],
-            //[['link_ports_id'], 'exist', 'skipOnError' => true, 'targetClass' => Ports::className(), 'targetAttribute' => ['link_ports_id' => 'id']],
             [['link_techs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::className(), 'targetAttribute' => ['link_techs_id' => 'id']],
-            [['techs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::className(), 'targetAttribute' => ['techs_id' => 'id']],
+			[['techs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::className(), 'targetAttribute' => ['techs_id' => 'id']],
+			[['arms_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arms_id' => 'id']],
         ];
     }
 	
@@ -97,60 +104,98 @@ class Ports extends \yii\db\ActiveRecord
 	}
 	
 	
-	/**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getLinkArm()
-    {
-        return $this->hasOne(Arms::className(), ['id' => 'link_arms_id'])
-			->from(['port_linked_arms'=>Arms::tableName()]);;;
-    }
-
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getLinkPort()
     {
         return $this->hasOne(Ports::className(), ['id' => 'link_ports_id'])
-			->from(['port_linked_ports'=>Ports::tableName()]);;;
+			->from(['port_linked_ports'=>Ports::tableName()]);
     }
-
-    /**
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getLinkArm()
+	{
+		return $this->hasOne(Arms::className(), ['id' => 'arms_id'])
+			->via('linkPort');
+	}
+	
+	public function getTemplateComment()
+	{
+		if (is_object($this->arm))
+			return $this->arm->getModelPortComment($this->name);
+		
+		if (is_object($this->tech))
+			return $this->tech->getModelPortComment($this->name);
+		
+		return null;
+	}
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getLinkTech()
+	{
+		return $this->hasOne(Techs::className(), ['id' => 'techs_id'])
+			->via('linkPort');
+	}
+	
+	/**
      * @return \yii\db\ActiveQuery
-     */
     public function getPort()
     {
         return $this->hasOne(Ports::className(), ['link_ports_id' => 'id'])
-			->from(['port_parent_ports'=>Ports::tableName()]);;
+			->from(['port_parent_ports'=>Ports::tableName()]);
     }
+	 */
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getLinkTech()
-    {
-        return $this->hasOne(Techs::className(), ['id' => 'link_techs_id'])
-			->from(['port_linked_techs'=>Techs::tableName()]);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTech()
-    {
-        return $this->hasOne(Techs::className(), ['id' => 'techs_id']);
-    }
-
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getTech()
+	{
+		return $this->hasOne(Techs::className(), ['id' => 'techs_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getArm()
+	{
+		return $this->hasOne(Arms::className(), ['id' => 'arms_id']);
+	}
+	
 	/**
 	 * Name for search
 	 * @return string
 	 */
 	public function getSname()
 	{
-		return $this->name;
+		return $this->name?$this->name:static::$null_port;
 	}
-
-
+	
+	/**
+	 * Name of port device
+	 * @return string
+	 */
+	public function getDeviceName() {
+		if ($this->arms_id) return $this->arm->num;
+		if ($this->techs_id) return $this->tech->num;
+		return 'NO DEVICE (ERR)';
+	}
+	
+	/**
+	 * Name of device-port
+	 * @return string
+	 */
+	public function getFullName($reverse=false)
+	{
+		return $reverse?
+			(static::$port_prefix.$this->sname.static::$tech_postfix.$this->deviceName):
+			($this->deviceName.static::$tech_postfix.static::$port_prefix.$this->sname);
+	}
+	
 	/**
 	 * Возвращает список всех элементов
 	 * @return array|mixed|null
@@ -173,33 +218,67 @@ class Ports extends \yii\db\ActiveRecord
 	{
 		if (parent::beforeSave($insert)) {
 			
-			if (!empty($this->link_ports_id)) {
-				$this->link_arms_id=null;
-				$this->link_techs_id=null;
-				
-				if (
-					(strlen($this->link_ports_id)>strlen('create:1@1'))
-					&&
-					(substr($this->link_ports_id,0,strlen('create:'))=='create:')
-				) {
+			//https://wiki.reviakin.net/инвентаризация:dev:ports
+			//error_log('before_save '.$this->id.' -> '.$this->link_ports_id);
+			
+			$tpl=$this->getTemplateComment();
+			$reversePort=null;
+			if (!is_numeric($this->link_ports_id)) {
+				//если нам нужно создать порт - создаем
+				if (strlen($this->link_ports_id) && strpos($this->link_ports_id,'create:')===0) {
+					$reversePort=new Ports();
 					$tokens=explode(':',$this->link_ports_id);
-					$subTokens=explode('@',$tokens[1]);
-					$newPort=new Ports();
-					$newPort->link_ports_id=$this->id;
-					$newPort->name=$subTokens[0];
-					$newPort->techs_id=$subTokens[1];
-					$newPort->save();
-					$newPort->refresh();
-					$this->link_ports_id=$newPort->id;
-				}
+					//нужно создать новый порт с именем
+					if (strlen($tokens[1]))		$reversePort->name=$tokens[1];
+					//привязываем оборудование
+					if ($this->link_arms_id)	$reversePort->arms_id=$this->link_arms_id;
+					if ($this->link_techs_id)	$reversePort->techs_id=$this->link_techs_id;
 				
-			} elseif (!empty($this->link_techs_id)) {
-				$this->link_ports_id=null;
-				$this->link_arms_id=null;
-			} elseif (!empty($this->link_arms_id)) {
-				$this->link_ports_id=null;
-				$this->link_techs_id=null;
+				} elseif ($this->link_arms_id || $this->link_techs_id) {
+					//порт не передан числом (ID) и не тестовая директива создания - считаем что тогда NULL
+					//если при этом указано оборудование/АРМ - значит надо привязаться к порту NULL на этом оборудовании
+					//ищем такой порт
+					$reversePort=Ports::find()
+						->where(['and',
+							['arms_id'=>$this->link_arms_id],
+							['techs_id'=>$this->link_techs_id],
+							['name'=>null]
+						])
+						->one();
+					
+					//если не нашли-создаем
+					if (!is_object($reversePort)) {
+						$reversePort=new Ports();
+						$reversePort->arms_id=$this->link_arms_id;
+						$reversePort->techs_id=$this->link_techs_id;
+					}
+					
+				} elseif (!strlen(trim($this->comment)) || $this->comment==$tpl) {
+					//мы вообще ни к чему не привязываемся и у нас даже комментария нет
+					if (!$insert) {
+						//если это обновление (не вставка)
+						$this->delete();
+						//ну и такое мы не сохраняем. Привязок нет, комментариев нет. А что сохранять то?
+						return false;
+						//почему удаляем только на обновлении?
+						//потому что возможен сценарий когда мы создаем одновременно 2 порта.
+						//новый ссылается на новый (директива create)
+						//тогда после create нам нужно его сохранить и получить ID,
+						//но на момент сохранения у него не будет ничего
+						//такой вроде бы пустой, но нужный порт надо сохранять
+					}
+				}
 			}
+			
+			if (is_object($reversePort)) {
+				$reversePort->save();
+				$reversePort->refresh();
+				$this->link_ports_id=$reversePort->id;
+			}
+			
+
+			
+			
 			return true;
 		}
 		return false;
@@ -214,28 +293,39 @@ class Ports extends \yii\db\ActiveRecord
 			if (
 				!empty($changedAttributes['link_ports_id'])
 				&&
+				$changedAttributes['link_ports_id']!=(int)$this->link_ports_id
+				&&
 				is_object($oldPort=Ports::findOne($changedAttributes['link_ports_id']))
+				&&
+				$oldPort->link_ports_id==$this->id //тут может быть момент что тот с кем мы раньше были связаны уже от нас отвязался
 			){
 				//если получилось загрузить порт с которым были связаны
 				//отвязываемся
 				$oldPort->link_ports_id=null;
-				$oldPort->save();
+				if (empty($oldPort->name) && empty($oldPort->comment))
+					$oldPort->delete();
+				else
+					$oldPort->save(false);
 			}
-
 		}
-
+		
+		//error_log($this->id.'->'.$this->link_ports_id);
+		//if (!is_object($newPort=$this->linkPort)) error_log($this->id.'->'.$this->link_ports_id.' - not an obj');
+		//else error_log($this->id.'->'.$this->link_ports_id.'->'.$this->linkPort->link_ports_id);
+		//также это может означать что теперь мы привязаны к новому порту, который не привязан к нам
 		if (
 			!empty($this->link_ports_id)
-		
-			//&&
-			//is_object($this->linkPort)
+			&&
+			is_object($newPort=$this->linkPort)
+			&&
+			$newPort->link_ports_id!=$this->id
 		){
-			//если новый порт не связан с этим - связываем
-			if ($this->linkPort->link_ports_id!=$this->id) {
-				$this->linkPort->link_ports_id=$this->id;
-				$this->linkPort->save();
-			}
-		}
-		
+			//error_log('reversing '.$newPort->id.'->'.$this->id);
+			//если получилось загрузить порт с которым стали связаны
+			//и который не связан с нами - связываем
+			$newPort->link_ports_id=$this->id;
+			$newPort->save(false);
+			//$newPort->refresh();
+		} //else error_log('no reverse link for '.$this->id);
 	}
 }

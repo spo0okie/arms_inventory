@@ -161,7 +161,9 @@ class ArmsBaseController extends Controller
 				Yii::$app->response->format = Response::FORMAT_JSON;
 				return [$model];
 			}  else {
-				return $this->redirect(Url::previous());
+				if (Yii::$app->request->get('return')=='previous')
+					return $this->redirect(Url::previous());
+				return $this->redirect(['view', 'id' => $model->id]);
 			}
 		}
 		
@@ -193,7 +195,8 @@ class ArmsBaseController extends Controller
                 Yii::$app->response->format = Response::FORMAT_JSON;
                 return [$model];
             }  else {
-	            if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
+	            if (Yii::$app->request->get('return')=='previous')
+	            	return $this->redirect(Url::previous());
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         }

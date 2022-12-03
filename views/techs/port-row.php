@@ -17,21 +17,30 @@
 <tr>
 	<td>
 		<?= is_object($port_link)?
-			$this->render('/ports/item',['model'=>$port_link]):
-			\yii\helpers\Html::a('Порт '.$port_name,[
+			$this->render('/ports/item',[
+				'model'=>$port_link,
+				'return'=>'previous',
+				'modal'=>true,
+			]):
+			\yii\helpers\Html::a(\app\models\Ports::$port_prefix.$port_name,[
 				'/ports/create',
 				'return'=>'previous',
-				'name'=>$port_name,
-				'comment'=>$port_comment,
-				'techs_id'=>$model->id
-			])
+				'Ports[name]'=>$port_name,
+				'Ports[comment]'=>$port_comment,
+				'Ports[techs_id]'=>$model->id
+			],['class'=>'open-in-modal-form','data-reload-page-on-submit'=>1])
 		?>
 	</td>
 	<td>
 		<?= is_object($port_link)?$port_link->comment:$port_comment ?>
 	</td>
 	<?php if (is_object($port_link)) {
-		echo '<td><span class="fas fa-exchange-alt"></span></td>';
+		
+		if (is_object($port_link->linkPort))
+			echo '<td><span class="fas fa-exchange-alt"></span></td>';
+		else
+			echo '<td></td>';
+		
 		if (is_object($port_link->linkPort)) {
 			echo '<td>'.$port_link->linkPort->comment.'</td>';
 			echo '<td>'.$this->render('/ports/item',[

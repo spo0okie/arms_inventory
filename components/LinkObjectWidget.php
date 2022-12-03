@@ -24,17 +24,18 @@ class LinkObjectWidget extends Widget
 	/**
 	 * @var $model ArmsModel
 	 */
-	public $model=null;
-	public $links=null;
+	public $model=null;		//модель на которую делаем ссылку
+	public $links=null;		//имена полей обратных ссылок (кто ссылается на этот объект), чтобы понять можно ли его удалить или нет
 	
-	public $name=null;
+	public $name=null;		//подмена имени объекта
 	
-	public $url=null;
-	public $ttipUrl=null;
+	public $url=null;		//ссылка куда переходить по клику
+	public $ttipUrl=null;	//ссылка что показывать в тултипе
 	
-	public $class=null;
+	public $cssClass=null;
+	public $hrefOptions=[];
 	
-	private $samePage;
+	private $samePage=false;//признак того что элемент отображается на той же странице куда ведет ссылка
 	
 	public function init()
 	{
@@ -53,13 +54,15 @@ class LinkObjectWidget extends Widget
 				&&
 				\Yii::$app->request->get('id')==$this->model->id
 			);
+		} elseif (is_array($this->url)) {
+			$this->url=Url::to($this->url);
 		}
-
+		
 		if (is_null($this->ttipUrl)) {
 			$this->ttipUrl=Url::to([$controller.'/ttip','id'=>$this->model->id]);
-		} else {
-			$this->samePage=\Yii::$app->request->url==$this->url;
 		}
+
+		$this->samePage=$this->samePage||\Yii::$app->request->url==$this->url;
 		
 		if (is_null($this->name)) {
 			$this->name = $this->model->name;
@@ -69,8 +72,11 @@ class LinkObjectWidget extends Widget
 			$this->archived=$this->model->hasAttribute('archived')&&$this->model->getAttribute('archived');
 		}
 		
-		if (is_null($this->class) && $this->archived)
-			$this->class='text-reset';
+		if (is_null($this->cssClass) && $this->archived)
+			$this->cssClass='text-reset';
+		
+		$this->hrefOptions['class']=$this->cssClass;
+		$this->hrefOptions['qtip_ajxhrf']=$this->ttipUrl;
 	}
 	
 	public function run()
@@ -79,13 +85,13 @@ class LinkObjectWidget extends Widget
 		return (
 				$this->samePage?$this->name
 				:
-				Html::a($this->name,$this->url,['qtip_ajxhrf'=>$this->ttipUrl,'class'=>$this->class])
+				Html::a($this->name,$this->url,$this->hrefOptions)
 			).(
 				!$this->static?' '.UpdateObjectWidget::widget([
 					'model'=>$this->model,
 					'updateHint'=>$this->updateHint,
 					'modal'=>$this->modal,
-					'options'=>['class'=>$this->class],
+					'options'=>['cssClass'=>$this->cssClass],
 				]):''
 			).(
 				!$this->static&&!$this->noDelete?' '.DeleteObjectWidget::widget([
@@ -95,7 +101,7 @@ class LinkObjectWidget extends Widget
 					'confirmMessage'=>$this->confirmMessage,
 					'hideUndeletable'=>$this->hideUndeletable,
 					'links'=>$this->links,
-					'options'=>['class'=>$this->class],
+					'options'=>['cssClass'=>$this->cssClass],
 				]):''
 			);
 	}

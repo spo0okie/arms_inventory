@@ -559,17 +559,18 @@ class Techs extends \yii\db\ActiveRecord
 				$port_link=null;
 				foreach ($custom_ports as $i=>$custom_port) if ($custom_port->name == $port_name) {
 					$port_link=$custom_port;
-					unset($custom_ports[$i]);
+					unset($custom_ports[$i]); //убираем обработанный порт из пула существующих для этого устройства
 				}
 				$model_ports[$port_name]=compact('port_name','port_comment','port_link');
 			}
 		}
 		
-		foreach ($custom_ports as $port_link) {
-			$model_ports[$port_link->name]=[
-				'port_name'=>$port_link->name,
-				'port_comment'=>$port_link->comment,
-				'port_link'=>$port_link
+		//если какие-то порты не ушли через список выше - добавляем их в конец
+		foreach ($custom_ports as $port) {
+			$model_ports[$port->name]=[
+				'port_name'=>$port->name,
+				'port_comment'=>$port->comment,
+				'port_link'=>$port
 			];
 		}
 		
@@ -581,11 +582,22 @@ class Techs extends \yii\db\ActiveRecord
 		$out=[];
 		foreach ($this->portsList as $name=>$port) {
 			$out[]=[
-				'id'=>is_object($port['port_link'])?$port['port_link']->id:"create:$name@{$this->id}",
+				'id'=>is_object($port['port_link'])?$port['port_link']->id:"create:$name",
 				'name'=>$name
 			];
 		}
 		return $out;
+	}
+	
+	/**
+	 * Возвращает комментарий порта из шаблона модели
+	 */
+	public function getModelPortComment($port)
+	{
+		if (is_object($this->model))
+			return $this->model->getPortComment($port);
+		else
+			return null;
 	}
 	
 	

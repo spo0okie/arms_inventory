@@ -6,9 +6,17 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ports */
 
+\yii\helpers\Url::remember();
+
 $this->title = \app\models\Ports::$port_prefix.$model->name;
-$this->params['breadcrumbs'][] = ['label' => app\models\Techs::$title, 'url' => ['/techs/index']];
-$this->params['breadcrumbs'][] = ['label' => $model->tech->num, 'url' => ['/techs/view','id'=>$model->techs_id]];
+if (is_object($model->tech)){
+	$this->params['breadcrumbs'][] = ['label' => app\models\Techs::$title, 'url' => ['/techs/index']];
+	$this->params['breadcrumbs'][] = ['label' => $model->tech->num, 'url' => ['/techs/view','id'=>$model->techs_id]];
+}
+if (is_object($model->arm)){
+	$this->params['breadcrumbs'][] = ['label' => app\models\Arms::$titles, 'url' => ['/arms/index']];
+	$this->params['breadcrumbs'][] = ['label' => $model->arm->num, 'url' => ['/arms/view','id'=>$model->techs_id]];
+}
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 

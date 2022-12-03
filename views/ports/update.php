@@ -5,10 +5,16 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ports */
 
-$this->title = 'Правка: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => app\models\Techs::$title, 'url' => ['/techs/index']];
-$this->params['breadcrumbs'][] = ['label' => $model->tech->num, 'url' => ['/techs/view','id'=>$model->techs_id]];
-$this->params['breadcrumbs'][] = ['label' => \app\models\Ports::$port_prefix.$model->name, 'url' => ['view', 'id' => $model->id]];
+$this->title = 'Правка: ' . $model->fullName;
+if (is_object($model->tech)){
+	$this->params['breadcrumbs'][] = ['label' => app\models\Techs::$title, 'url' => ['/techs/index']];
+	$this->params['breadcrumbs'][] = ['label' => $model->tech->num, 'url' => ['/techs/view','id'=>$model->techs_id]];
+}
+if (is_object($model->arm)){
+	$this->params['breadcrumbs'][] = ['label' => app\models\Arms::$titles, 'url' => ['/arms/index']];
+	$this->params['breadcrumbs'][] = ['label' => $model->arm->num, 'url' => ['/arms/view','id'=>$model->techs_id]];
+}
+$this->params['breadcrumbs'][] = ['label' => \app\models\Ports::$port_prefix.$model->name, 'url'=>['/ports/view','id'=>$model->id]];
 $this->params['breadcrumbs'][] = 'Правка';
 ?>
 <div class="ports-update">

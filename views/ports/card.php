@@ -9,34 +9,77 @@ use yii\widgets\DetailView;
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
 
-?>
-
-<h1>
-	<?= $this->render('/techs/item', ['model'=>$model->tech,'static_view'=>true]) ?>
-	<?= \app\models\Ports::$tech_postfix.\app\models\Ports::$port_prefix.Html::encode($model->name) ?>
-	<?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['ports/update','id'=>$model->id])) ?>
-	<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['ports/delete', 'id' => $model->id], [
-		'data' => [
-			'confirm' => 'Удалить этот элемент? Действие необратимо',
-			'method' => 'post',
-		],
-	]) ?>
-</h1>
-
-<?php if (!empty($model->comment)) {
-	echo Yii::$app->formatter->asNtext($model->comment).'<br />';
-} ?>
-
-<?php
-if (is_object($model->linkPort)||is_object($model->linkTech)||is_object($model->linkArm))
-	echo '<h4><span class="fas fa-sort"></span></h4>';
-
 if (is_object($model->linkPort)) {
-	echo $this->render('/ports/item',['model'=>$model->linkPort,'static_view'=>$static_view,'include_tech'=>true]);
-} elseif (is_object($model->linkTech)) {
-	echo $this->render('/techs/item',['model'=>$model->linkTech,'static_view'=>$static_view]);
-} elseif (is_object($model->linkArm)) {
-	echo $this->render('/arms/item',['model'=>$model->linkArm,'static_view'=>$static_view]);
-}
+?>
+<h1>Схема коммутации <?= $model->fullName ?></h1>
+<br />
+	<table>
+		<?php if ($model->comment) { ?>
+		<tr>
+			<td></td>
+			<td>
+				<svg width="80" height="40" xmlns="http://www.w3.org/2000/svg">
+					<path d="M0 40 l20 -20 l60 0"  fill="transparent" stroke="black" stroke-width="1%"/>
+				</svg>
+				<?= Yii::$app->formatter->asNtext($model->comment) ?>
+			</td>
+		</tr>
+		<?php } ?>
+		<tr>
+			<td class="text-end align-top">
+				<h2>
+					<?= $this->render('/ports/item',['model'=>$model,'static_view'=>$static_view,'include_tech'=>true,'badge'=>true]) ?>
+				</h2>
+			</td>
+			<td rowspan="3">
+				<svg width="50" height="100" xmlns="http://www.w3.org/2000/svg">
+					<circle cx="0" cy="50" r="40"  fill="transparent" stroke="black" stroke-width="3%"/>
+					<circle cx="0" cy="10" r="3"  fill="black" stroke="black"/>
+					<circle cx="0" cy="90" r="3"  fill="black" stroke="black"/>
+				</svg>
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td class="text-end align-bottom">
+				<h4 class="p-0 m-0">
+					<?= $this->render('/ports/item',['model'=>$model->linkPort,'static_view'=>$static_view,'include_tech'=>true,'badge'=>true]); ?>
+				</h4>
+			</td>
+			<td></td>
+		</tr>
+		<?php if ($model->linkPort->comment) { ?>
+			<tr>
+				<td></td>
+				<td>
+					<svg width="80" height="40" xmlns="http://www.w3.org/2000/svg">
+						<path d="M0 0 l20 20 l60 0"  fill="transparent" stroke="black" stroke-width="1%"/>
+					</svg>
+					<?= Yii::$app->formatter->asNtext($model->linkPort->comment) ?>
+				</td>
+			</tr>
+		<?php } ?>
+	</table>
 
+<?php } else { ?>
 
+	<h1>Схема коммутации <?= $model->fullName ?></h1>
+	<br />
+	<table>
+		<tr>
+			<td>
+				<?= $this->render('/ports/item',['model'=>$model,'static_view'=>$static_view,'include_tech'=>true,'badge'=>true]) ?>
+			</td>
+			<td class="p-2">
+				<?= $model->comment?(' - '.Yii::$app->formatter->asNtext($model->comment)):''?>
+			</td>
+		</tr>
+	</table>
+	<div class="alert alert-striped">
+		Порт ни к чему не подключен
+	</div>
+
+<?php }

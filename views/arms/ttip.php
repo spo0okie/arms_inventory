@@ -24,8 +24,9 @@ $static_view=true;
     <?= $this->render('att-comps',['model'=>$model,'static_view'=>$static_view]) ?>
     <br />
 
-    <h4>Сотрудники:</h4>
-    Пользователь:<?= is_object($model->user)?$this->render('/users/item',['model'=>$model->user]):'-не назначен-' ?><br/>
+    <h4>Сотрудники и помещение:</h4>
+	Помещение: <?= $this->render('/places/item',['model'=>$model->place]) ?> <br />
+	Пользователь:<?= is_object($model->user)?$this->render('/users/item',['model'=>$model->user]):'-не назначен-' ?><br/>
 	<?= is_object($model->head)?('Руководитель отдела:'.$this->render('/users/item',['model'=>$model->head]).'<br/>'):'' ?>
 	<?= is_object($model->itStaff)?('Сотрудник ИТ:'.$this->render('/users/item',['model'=>$model->itStaff]).'<br/>'):'' ?>
 	<?= is_object($model->responsible)?('Ответственный:'.$this->render('/users/item',['model'=>$model->responsible]).'<br/>'):'' ?>
