@@ -62,7 +62,8 @@ class Ports extends \yii\db\ActiveRecord
 					$this->addError($attribute, "Неверный порт устройства");
 				}
 			}],
-	
+			[['techs_id', 'arms_id', 'link_techs_id', 'link_arms_id','link_ports_id','name'], 'default','value'=>null],
+			[['name'], 'unique', 'skipOnError' => true, 'skipOnEmpty'=>false, 'targetAttribute'=>['name','arms_id','techs_id'],'message'=>'Такой порт на этому устройстве уже объявлен'],
 			[['name'], 'string', 'max' => 32],
             [['comment'], 'string', 'max' => 255],
             [['link_arms_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['link_arms_id' => 'id']],
