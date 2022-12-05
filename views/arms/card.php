@@ -83,21 +83,21 @@ if (is_object($model->state)) {
 		<?php }?>
 	</div>
 
-	<?php if (count($model->ports)) { ?>
-		<div class="d-flex flex-row-reverse px-3 pb-1 m-0">
-			<div class="tree-level-2 network-link-add" onmouseenter="$(this).children().toggle()"  onmouseleave="$(this).children().toggle()">
-				<span class="fas fa-network-wired"></span>
-				<?= Html::a('<span class="fas fa-plus-circle"></span>',
-					[
-						'/ports/create',
-						'Ports[arms_id]'=>$model->id
-					],[
-						'class'=>'open-in-modal-form',
-						'style'=>'display:none',
-						'data-reload-page-on-submit'=>1,
-						'qtip_ttip'=>'Добавить соединение порта<br>этого АРМ с другим устройством'
-					]) ?>
-			</div>
+	<div class="d-flex flex-row-reverse px-3 pb-1 m-0">
+		<div class="tree-level-2 network-link-add" onmouseenter="$(this).children().toggle()"  onmouseleave="$(this).children().toggle()">
+			<span class="fas fa-network-wired"></span>
+			<?= Html::a('<span class="fas fa-plus-circle"></span>',
+				[
+					'/ports/create',
+					'Ports[arms_id]'=>$model->id
+				],[
+					'class'=>'open-in-modal-form',
+					'style'=>'display:none',
+					'data-reload-page-on-submit'=>1,
+					'qtip_ttip'=>'Добавить соединение порта<br>этого АРМ с другим устройством'
+				]) ?>
+		</div>
+		<?php if (count($model->ports)) { ?>
 			<div class="tree-level-2 text-uppercase port-links pe-5">
 				<?php foreach ($model->ports as $port) {
 					//echo '<span class="fas fa-solid fa-network-wired"></span>'.
@@ -114,10 +114,8 @@ if (is_object($model->state)) {
 						]).' <br />';
 				}?>
 			</div>
-		</div>
-	<?php } else {
-		echo '<br />';
-	} ?>
+		<?php }  ?>
+	</div>
 
 	<?php if (!$no_users) { ?>
 		<h4>Сотрудники:</h4>
