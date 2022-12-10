@@ -31,7 +31,7 @@ return [
 				}
 			}
 			ksort($items,SORT_STRING);
-			return implode('<br />',$items);
+			return \app\components\ExpandableCardWidget::widget(['content'=>implode('<br />',$items)]);
 		}
 	],
 	'resources'=>[
@@ -40,7 +40,7 @@ return [
 			if (count($data->acls)) foreach ($data->acls as $acl) {
 				$output[$acl->sname]=$renderer->render('/acls/resource',['model'=>$acl,'static_view'=>true]);
 			}
-			return implode('<br />',$output);
+			return \app\components\ExpandableCardWidget::widget(['content'=>implode('<br />',$output)]);
 		}
 	],
 	'name'=>[
@@ -76,7 +76,7 @@ return [
 			 */
 			$working=$data->isWorkTime( date('Y-m-d'),date('H:i:s'));
 			return [
-				'class'=>$working?'border-success border-2':'border-danger border-2',
+				'class'=>$working?'bg-green-striped border-2':'bg-red-striped border-2',
 			];
 		}
 	],

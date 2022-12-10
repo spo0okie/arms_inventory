@@ -61,3 +61,20 @@ div.invalid-feedback {
     transparent 75%, transparent) 0 0 / 40px 40px rgba(240,128,128, .2);
     color: #666;
 }
+
+.bg-green-striped{
+    background-size: 40px 40px;
+    background-image: -webkit-linear-gradient(45deg, rgba(128,240,128, .2) 25%, transparent 25%,
+    transparent 50%, rgba(128,240,128, .2) 50%, rgba(128,240,128, .2) 75%,
+    transparent 75%, transparent);
+    background-image: -moz-linear-gradient(45deg, rgba(128,240,128, .2) 25%, transparent 25%,
+    transparent 50%, rgba(128,240,128, .2) 50%, rgba(128,240,128, .2) 75%,
+    transparent 75%, transparent);
+    background-image: linear-gradient(45deg, rgba(128,240,128, .2) 25%, transparent 25%,
+    transparent 50%, rgba(128,240,128, .2) 50%, rgba(128,240,128, .2) 75%,
+    transparent 75%, transparent);
+    -pie-background: linear-gradient(45deg, rgba(128,240,128, .2) 25%, transparent 25%,
+    transparent 50%, rgba(128,240,128, .2) 50%, rgba(128,240,128, .2) 75%,
+    transparent 75%, transparent) 0 0 / 40px 40px rgba(128,240,128, .2);
+    color: #666;
+}

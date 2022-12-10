@@ -118,6 +118,7 @@ $config = [
 			'minPageSize' => 20,
 			'maxPageSize' => 1000,
 			'defaultPageSize' => 100,
+			'dbSettings' => [],
 		],
 	    'rbac'      => [
 		    'class' => 'spo0okie\rbacplus\Module',
