@@ -5,6 +5,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ports */
 
+if (!isset($modalParent)) $modalParent=null;
+
 $this->title = 'Правка: ' . $model->fullName;
 if (is_object($model->tech)){
 	$this->params['breadcrumbs'][] = ['label' => app\models\Techs::$title, 'url' => ['/techs/index']];
@@ -23,6 +25,7 @@ $this->params['breadcrumbs'][] = 'Правка';
 
     <?= $this->render('_form', [
         'model' => $model,
+		'modalParent' => $modalParent
     ]) ?>
 
 </div>
