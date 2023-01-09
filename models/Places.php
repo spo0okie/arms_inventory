@@ -235,8 +235,21 @@ DELIMITER ;
 		//	->andOnCondition(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
 
 	}
-
-
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getTechsRecursive()
+	{
+		$techs=$this->techs;
+		foreach ($this->childs as $child) {
+			$techs=array_merge($techs,$child->techs);
+		}
+		return $techs;
+	}
+	
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

@@ -10,12 +10,22 @@
 /* @var $models \app\models\Arms */
 
 $i=0;
-foreach ($models as $arm) {
+foreach ($models['arms'] as $arm) {
 	if ($i++) echo '<br />';
 	
 	echo $this->render('/arms/item',['model'=>$arm,'static_view'=>true]);
 	
 	if (is_object($arm->user)) {
 		echo '('.$this->render('/users/item', ['model' => $arm->user,'short'=>true]).')';
+	}
+}
+
+foreach ($models['techs'] as $tech) {
+	if ($i++) echo '<br />';
+	
+	echo $this->render('/techs/item',['model'=>$tech,'static_view'=>true]);
+	
+	if (is_object($tech->user)) {
+		echo '('.$this->render('/users/item', ['model' => $tech->user,'short'=>true]).')';
 	}
 }
