@@ -57,10 +57,10 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
             ) ?>
         <?php } else { ?>
             <?= $item->manufacturer ?>
-            <?= $static_view?'':strlen($item->manufacturer)?\yii\helpers\Html::a('<span class="fas fa-wrench"/>',
+            <?= $static_view?'':(strlen($item->manufacturer)?\yii\helpers\Html::a('<span class="fas fa-wrench"/>',
                 ['/manufacturers-dict/create', 'word' => $item->manufacturer,'return'=>'previous'],
                 ['title'=>'Создать производителя','class'=>'passport_tools']
-            ):'' ?>
+            ):'') ?>
         <?php } ?>
     </td>
     <td><?= $item->getName() ?></td>
