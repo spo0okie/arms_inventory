@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use Yii;
 use yii\validators\IpValidator;
 
@@ -37,7 +38,9 @@ use yii\validators\IpValidator;
  *
  * @property Users $user
  * @property Users $itStaff
+ * @property Users $techUser
  * @property Arms $arm
+ * @property Departments $department
  * @property Places $place
  * @property Places $effectivePlace
  * @property Places $origPlace
@@ -58,7 +61,7 @@ use yii\validators\IpValidator;
  
  */
 
-class Techs extends \yii\db\ActiveRecord
+class Techs extends ArmsModel
 {
 
 	private static $num_str_pad=4; //количество знаков в цифровой части номера
@@ -93,7 +96,7 @@ class Techs extends \yii\db\ActiveRecord
     {
         return [
             [['model_id'], 'required'],
-	        [['model_id', 'arms_id', 'places_id', 'state_id', 'scans_id'], 'integer'],
+	        [['model_id', 'arms_id', 'places_id', 'state_id', 'scans_id', 'departments_id'], 'integer'],
 	        [['contracts_ids'], 'each', 'rule'=>['integer']],
 	        [['url', 'comment'], 'string'],
 	        [['history','specs'], 'safe'],
@@ -139,6 +142,7 @@ class Techs extends \yii\db\ActiveRecord
             [['it_staff_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['it_staff_id' => 'id']],
             [['arms_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arms_id' => 'id']],
             [['places_id'], 'exist', 'skipOnError' => true, 'targetClass' => Places::className(), 'targetAttribute' => ['places_id' => 'id']],
+			[['departments_id'], 'exist', 'skipOnError' => true, 'targetClass' => Departments::className(), 'targetAttribute' => ['departments_id' => 'id']],
         ];
     }
 
@@ -164,60 +168,93 @@ class Techs extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
-            'id' => 'Идентификатор',
-            'num' => 'Инвентарный номер',
-            'inv_num' => 'Бухг. номер',
-	        'model_id' => 'Модель оборудования',
-	        'model' => 'Модель оборудования',
-            'sn' => 'Серийный номер',
-			'specs' => 'Тех. спецификация',
-	        'state_id' => 'Состояние',
-	        'state' => 'Статус',
-	        'attach' => 'Док.',
-	        'arms_id' => 'Рабочее место',
-	        'places_id' => 'Помещение',
-	        'place' => 'Помещение',
-	        'user_id' => 'Пользователь',
-	        'user' => 'Пользователь',
-	        'contracts_ids' => 'Связанные документы',
-            'it_staff_id' => 'Сотрудник службы ИТ',
-	        'ip' => 'IP адреса',
-	        'mac' => 'MAC адреса',
-            'url' => 'Ссылки',
-	        'comment' => 'Примечание',
-	        'history' => 'Записная книжка',
+            'id' => ['Идентификатор'],
+            'num' => [
+            	'Инвентарный номер',
+				'hint' => 'Внутренний инвентарный номер в службе ИТ.',
+			],
+            'inv_num' => [
+            	'Бухг. номер',
+				'hint' => 'Бухгалтерский инвентарный / номенклатурный номер.',
+			],
+	        'model_id' => [
+	        	'Модель оборудования',
+				'hint' => 'Модель устанавливаемого оборудования. Если нужная модель отсутствует в списке, то нужно сначала завести в ее в соотв. категории оборудования',
+			],
+	        'model' => ['alias'=>'model_id'],
+            'sn' => [
+            	'Серийный номер',
+				'hint' => 'Серийный номер оборудования. Если явно нет, то MAC/IMEI/и т.п. чтобы можно было однозначно идентифицировать оборудование',
+			],
+			'specs' => [
+				'Тех. спецификация',
+				'hint' => 'Спецификация оборудования в случае, если модель оборудования не полностью определяет комплектацию каждого отдельного экземпляра',
+			],
+	        'state_id' => [
+	        	'Состояние',
+				'hint' => 'Состояние, в котором в данный момент находится оборудование',
+			],
+	        'state' => ['Статус'],
+	        'attach' => ['Док.'],
+	        'arms_id' => [
+	        	'Рабочее место',
+				'hint' => 'Рабочее место, к которому прикреплено оборудование',
+			],
+			'places_id' => [
+				'Помещение',
+				'hint' => 'Помещение, куда установлено',
+			],
+			'userDep' => [
+				'Отдел',
+				'hint' => 'Отдел в котором числится пользователь',
+				'indexHint' => '{same}',
+			],
+			'departments_id' => [
+				'label'=>'Подразделение',
+				'hint' => 'Закрепить оборудование за подразделением.<br><i>'.Departments::$hint.'</i>',
+				'indexHint' => 'Подразделение, за которым закреплено оборудование',
+			],
+	        'place' => ['Помещение'],
+	        'user_id' => [
+	        	'Пользователь',
+				'hint' => 'Сотрудник которому установлено',
+			],
+	        'user' => ['alias'=>'user_id'],
+	        'contracts_ids' => [
+	        	'Связанные документы',
+				'hint' => 'Счета, накладные, фотографии серийных номеров и т.п.',
+			],
+            'it_staff_id' => [
+            	'Сотрудник службы ИТ',
+				'hint' => 'Сотрудник службы ИТ, который отвечает за обслуживание оборудования',
+			],
+	        'ip' => [
+	        	'IP адреса',
+				'hint' => 'По одному в строке',
+			],
+	        'mac' => [
+	        	'MAC адреса',
+				'hint' => 'По одному в строке',
+			],
+            'url' => [
+            	'Ссылки',
+				'hint' => \app\components\UrlListWidget::$hint,
+			],
+	        'comment' => [
+	        	'Примечание',
+				'hint' => 'Краткое пояснение по этому оборудованию',
+			],
+	        'history' => [
+	        	'Записная книжка',
+				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого оборудования',
+			],
         ];
     }
 
-
-	/**
-	 * @inheritdoc
-	 */
-	public function attributeHints()
-	{
-		return [
-			'num' => 'Внутренний инвентарный номер в службе ИТ.',
-			'inv_num' => 'Бухгалтерский инвентарный / номенклатурный номер.',
-			'model_id' => 'Модель устанавливаемого оборудования. Если нужная модель отустствует в списке, то нужно сначала завести в ее в соотв. категории оборудования',
-			'sn' => 'Серийный номер оборудования. Если явно нет, то MAC/IMEI/и т.п. чтобы можно было однозначно идентифицировать оборудование',
-			'state_id' => 'Состояние, в котором в данный момент находится оборудование',
-			'arms_id' => 'Рабочее место, к которому прикреплено оборудование',
-			'user_id' => 'Сотрудник которому установлено',
-			'specs' => 'Спецификация оборудования в случае, если модель оборудования не полностью определяет комплектацию каждого отдельного экземпляра',
-			'places_id' => 'Помещение, куда установлено',
-			'it_staff_id' => 'Сотрудник службы ИТ, который отвечает за обслуживание оборудования',
-			'head_id' => 'Руководитель отдела сотрудника которому установлено',
-			'contracts_ids' => 'Счета, накладные, фотографии серийных номеров и т.п.',
-			'url' => \app\components\UrlListWidget::$hint,
-			'comment' => 'Краткое пояснение по этому оборудованию',
-			'history' => 'Все важные и не очень заметки и примечания по жизненному циклу этого АРМ',
-			'ip' => 'По одному в строке',
-			'mac' => 'По одному в строке',
-		];
-	}
+    
 
 	/**
 	 * @return \yii\db\ActiveQuery
@@ -339,15 +376,31 @@ class Techs extends \yii\db\ActiveRecord
 		if (!is_null($this->type_cache)) return $this->type_cache;
 		return $this->type_cache=$this->model->type;
 	}
-
+	
 	/**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getArm()
-    {
-        return $this->hasOne(Arms::className(), ['id' => 'arms_id']);
-    }
-
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getArm()
+	{
+		return $this->hasOne(Arms::className(), ['id' => 'arms_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getDepartment()
+	{
+		return $this->hasOne(Departments::className(), ['id' => 'departments_id']);
+	}
+	
+	/**
+	 * @return \app\models\Places;
+	 */
+	public function getEffectiveDepartment()
+	{
+		return (is_object($this->arm)) ?$this->arm->department:$this->department;
+	}
+	
 	/**
 	 * @return \app\models\Places;
 	 */
@@ -356,7 +409,7 @@ class Techs extends \yii\db\ActiveRecord
 		return (is_object($this->arm)) ?$this->arm->place:$this->place;
 		//return $this->hasOne(Places::className(), ['id' => 'places_id']);
 	}
-
+	
 	public function getSite()
 	{
 		if (!is_object($place=$this->effectivePlace)) return null;

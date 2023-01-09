@@ -16,7 +16,7 @@ class QueryHelper
 	'<li><strong>!</strong> (восклицательный зн.) - НЕ</li>'.
 	'</ul>'.
 	'<i>Примеры:<br />'.
-	'<strong>Siemens &amp; !NX &amp; !teamcenter</strong> - Siemens но не NX и не Teamcenter<br/>'.
+	'<strong>Siemens &amp; !NX &amp; !teamcenter</strong> - Siemens, но не NX и не Teamcenter<br/>'.
 	'<strong>Debian | Ubuntu</strong> - Debian или Ubuntu<br/>'.
 	'</i>';
 	

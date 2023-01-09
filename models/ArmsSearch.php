@@ -16,6 +16,7 @@ class ArmsSearch extends Arms
 	public $comp_ip;
 	public $comp_mac;
 	public $model_name;
+	public $userDep;
 	public $type_id;
 	public $inv_sn;
 	public $user_position;
@@ -36,6 +37,7 @@ class ArmsSearch extends Arms
 				'sn',
 				'user_id',
 				'places_id',
+				'userDep',
 				'departments_id',
 				'comp_ip',
 				'comp_mac',
@@ -100,9 +102,13 @@ class ArmsSearch extends Arms
 					'asc'=>['arms_models.name'=>SORT_ASC],
 					'desc'=>['arms_models.name'=>SORT_DESC],
 				],
-				'departments_id'=>[
+				'userDep'=>[
 					'asc'=>['org_struct.name'=>SORT_ASC],
 					'desc'=>['org_struct.name'=>SORT_DESC],
+				],
+				'departments_id'=>[
+					'asc'=>['departments.name'=>SORT_ASC],
+					'desc'=>['departments.name'=>SORT_DESC],
 				],
 				'user_position'=>[
 					'asc'=>['users.doljnost'=>SORT_ASC],
@@ -140,7 +146,8 @@ class ArmsSearch extends Arms
 	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.name', $this->comp_id))
 			//->andFilterWhere(['or like', 'comps.raw_hw', \yii\helpers\StringHelper::explode($this->comp_hw,'|',true,true)])
 			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.raw_hw',$this->comp_hw))
-	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('org_struct.name',$this->departments_id))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('departments.name',$this->departments_id))
+			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('org_struct.name',$this->userDep))
 			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('model_id', $this->model_id))
 			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('concat(manufacturers.name," ",arms_models.name)',$this->model_name))
 	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('getplacepath({{places}}.id)', $this->places_id))

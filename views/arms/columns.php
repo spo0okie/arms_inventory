@@ -85,9 +85,14 @@ return [
 			return is_object($data->place) ? $renderer->render('/places/item', ['model' => $data->place, 'full' => 1]) : null;
 		},
 	],
-	'departments_id' => [
+	'userDep' => [
 		'value' => function ($data) {
 			return (is_object($data->user) && is_object($data->user->orgStruct)) ? $data->user->orgStruct->name:null;
+		},
+	],
+	'departments_id' => [
+		'value' => function ($data) {
+			return (is_object($data->department)) ? $data->department->name:null;
 		},
 	],
 	'attach' => [

@@ -47,7 +47,7 @@ class TechsSearch extends Techs
     public function search($params)
     {
         $query = Techs::find()
-            ->joinWith(['place','model','arm.user','arm.place','model.manufacturer','techUser','state','contracts']);
+            ->joinWith(['place','model','arm.user.orgStruct','arm.place','model.manufacturer','techUser','state','contracts']);
 
         $this->load($params);
 	

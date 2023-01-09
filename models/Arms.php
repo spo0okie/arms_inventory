@@ -194,10 +194,17 @@ class Arms extends ArmsModel
 				'hint' => 'Помещение, куда установлен АРМ',
 				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
 			],
+			'userDep' => [
+				'Отдел',
+				'hint' => 'Отдел в котором числится пользователь',
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
+			],
 			'departments_id' => [
 				'label'=>'Подразделение',
-				'hint' => 'Подразделение, за которым закреплен АРМ',
-				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
+				'hint' => 'Закрепить АРМ за подразделением.<br><i>'.Departments::$hint.'</i>',
+				'indexHint' => 'Подразделение, за которым закреплен АРМ.<br><i>'
+					.Departments::$hint.
+					'</i><hr/>'.QueryHelper::$stringSearchHint,
 			],
 			'responsible_id' => [
 				'label'=>'Ответственный',

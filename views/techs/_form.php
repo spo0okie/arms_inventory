@@ -185,7 +185,7 @@ JS;
     </div>
 
     <div class="row">
-        <div class="col-md-6" >
+        <div class="col-md-4" >
 			<?= $form->field($model, 'arms_id')->widget(Select2::className(), [
 				'data' => \app\models\Arms::fetchNames(),
 				'options' => ['placeholder' => 'Выберите АРМ',],
@@ -193,10 +193,10 @@ JS;
 				'pluginEvents' =>[
                     'change'=>'function(){
                         if ($("#techs-arms_id").val()) {
-                            $("#tech-place-selector, #tech-users-selector").hide();
+                            $("#tech-place-selector, #tech-users-selector, #tech-departments-selector").hide();
                             $("#tech-place-arm-hint").show();
                         } else {
-                            $("#tech-place-selector, #tech-users-selector").show();
+                            $("#tech-place-selector, #tech-users-selector, #tech-departments-selector").show();
                             $("#tech-place-arm-hint").hide();
                         }
                     }'
@@ -209,21 +209,34 @@ JS;
 			])->hint(\app\models\Contracts::fetchArmsHint($model->contracts_ids,'techs'),['id'=>'arms_id-hint']) ?>
         </div>
 
-        <div class="col-md-6" id="tech-place-selector" <?= ($model->arms_id)?$hidden:'' ?>>
-		    <?= $form->field($model, 'places_id')->widget(Select2::className(), [
-			    'data' => \app\models\Places::fetchNames(),
-			    'options' => ['placeholder' => 'Выберите помещение',],
-			    'toggleAllSettings'=>['selectLabel'=>null],
-			    'pluginOptions' => [
+		<div class="col-md-4" id="tech-place-selector" <?= ($model->arms_id)?$hidden:'' ?>>
+			<?= $form->field($model, 'places_id')->widget(Select2::className(), [
+				'data' => \app\models\Places::fetchNames(),
+				'options' => ['placeholder' => 'Выберите помещение',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
-				    'allowClear' => true,
-				    'multiple' => false
-			    ]
-		    ]) ?>
-        </div>
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
 
-        <div class="col-md-6" id="tech-place-arm-hint" <?= ($model->arms_id)?'':$hidden ?>>
-            <br />Когда оборудование прикреплено к АРМ, то место установки и ответственные сотрудники наследуются из этого АРМ
+		<div class="col-md-4" id="tech-departments-selector" <?= ($model->arms_id)?$hidden:'' ?>>
+			<?= $form->field($model, 'departments_id')->widget(Select2::className(), [
+				'data' => \app\models\Departments::fetchNames(),
+				'options' => ['placeholder' => 'Выберите подразделение',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
+
+		<div class="col-md-6" id="tech-place-arm-hint" <?= ($model->arms_id)?'':$hidden ?>>
+            <br />Когда оборудование прикреплено к АРМ, то место установки, подразделение и ответственные сотрудники наследуются из этого АРМ
         </div>
     </div>
 
