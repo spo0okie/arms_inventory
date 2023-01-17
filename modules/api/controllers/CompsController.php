@@ -20,12 +20,13 @@ class CompsController extends \yii\rest\ActiveController
 					['allow' => true, 'actions'=>['create','view','update','search'], 'roles'=>['@','?']],
 				],
 				'denyCallback' => function ($rule, $action) {
-					throw new  \yii\web\ForbiddenHttpException('Access denied');
+					
+						throw new  \yii\web\ForbiddenHttpException('Access denied');
 				}
 			];
 			$behaviors['authenticator'] = [
 				'class' => HttpBasicAuth::class,
-				'only'=>['index'],
+				'only'=>['index','filter'],
 				'auth' => function ($login, $password) {
 					$user = Users::find()->where(['Login' => $login])->one();
 					if ($user && $user->validatePassword($password)) {

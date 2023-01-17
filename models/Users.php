@@ -49,7 +49,7 @@ use Yii;
  * @property Partners $org
  * @property OrgStruct $orgStruct
  */
-class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
+class Users extends ArmsModel implements \yii\web\IdentityInterface
 {
 
 
@@ -127,7 +127,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     /**
      * @inheritdoc
      */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
 			'employee_id' => 'Табельный номер',
@@ -145,7 +145,11 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 			'private_phone' => 'Личный тел',
 			'Bday' => 'День рождения',
 			'manager_id' => 'Руководитель',
-			'nosync' => 'Отключить синхронизацию',
+			'nosync' => [
+				'Отключить синхронизацию',
+				'hint'=>'Запрет внешнему скрипту синхронизации с кадровой БД обновлять эту запись<br>'.
+					'<i>(Должно быть реализовано во внешнем скрипте)</i>',
+			],
 			'Arms' => 'АРМ',
 			'LastThreeLogins' => 'Входы',
 		];
