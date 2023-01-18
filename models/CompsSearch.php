@@ -93,7 +93,7 @@ class CompsSearch extends Comps
 	
 		$dataProvider = new ActiveDataProvider([
             'query' => $query,
-	        'pagination' => ['pageSize' => 100,],
+	        'pagination' => ['pageSize' => \Yii::$app->request->get('per-page',100),],
 			'sort'=>$sort,
         ]);
 
