@@ -54,7 +54,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		    <?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'state_id',[
 			    'data' => \app\models\ContractsStates::fetchNames(),
 			    'options' => ['placeholder' => 'Выберите статус документа',],
-			    'pluginOptions' => ['dropdownParent' => $modalParent,]
+			    'pluginOptions' => ['dropdownParent' => $modalParent,'allowClear' => true,],
 		    ]) ?>
         </div>
         <div class="col-md-4" >
