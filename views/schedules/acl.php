@@ -7,7 +7,7 @@ use yii\helpers\Html;
 
 $acls=[];
 foreach ($model->acls as $acl)
-	$acls[$acl->sname]=$this->render('/acls/card',['model'=>$acl]);
+	$acls[$acl->sname.count($acls)]=$this->render('/acls/card',['model'=>$acl]);
 
 ksort($acls,SORT_STRING);
 ?>
