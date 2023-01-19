@@ -57,6 +57,7 @@ use Yii;
  * @property \app\models\HwList $hwList
  * @property \app\models\SwList $swList
  * @property \app\models\Services $services
+ * @property Places $place
  * @property Acls[] $acls
  * @property Aces[] $aces
  * @property LicGroups[] $licGroups
@@ -84,7 +85,7 @@ class Comps extends ArmsModel
     
     public function extraFields()
 	{
-		return ['responsible','supportTeam','fqdn','domain'];
+		return ['responsible','supportTeam','fqdn','domain','site','place','arm'];
 	}
 
     /**
@@ -419,6 +420,21 @@ class Comps extends ArmsModel
 		$this->ip_cache=array_unique($this->ip_cache);
 		return $this->ip_cache;
 	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getPlace()
+	{
+		return $this->hasOne(Places::className(), ['id' => 'places_id'])//->from(['comp_places'=>Places::tableName()])
+			->via('arm');
+	}
+	
+	public function getSite()
+	{
+		return is_object($this->place)?$this->place->top:null;
+	}
+	
 	
 	public function getSegments() {
 		$segments=[];

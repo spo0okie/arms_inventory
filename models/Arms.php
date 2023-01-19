@@ -341,6 +341,14 @@ class Arms extends ArmsModel
 	}
 	
 	/**
+	 * @return Places
+	 */
+	public function getSite()
+	{
+		return is_object($this->place)?$this->place->top:null;
+	}
+	
+	/**
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getDepartment()
