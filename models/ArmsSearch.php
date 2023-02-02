@@ -148,9 +148,9 @@ class ArmsSearch extends Arms
 			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.raw_hw',$this->comp_hw))
 			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('departments.name',$this->departments_id))
 			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('org_struct.name',$this->userDep))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('model_id', $this->model_id))
 			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('concat(manufacturers.name," ",arms_models.name)',$this->model_name))
 	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('getplacepath({{places}}.id)', $this->places_id))
+			->andFilterWhere(['arms.model_id'=>$this->model_id])
 	        ->andFilterWhere(['arms_models.type_id'=>$this->type_id])
 			->andFilterWhere(['arms.state_id'=>$this->state_id])
 		    ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comment', $this->comment));
