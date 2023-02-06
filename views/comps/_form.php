@@ -68,8 +68,8 @@ asort($arms);
 			<?=  \app\helpers\FieldsHelper::CheckboxField($form,$model,'archived') ?>
 		</div>
 	</div>
-
-    <?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+	
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment',['lines'=>4]) ?>
 
     <p>
         <span onclick="$('#comps_advanced_settings').toggle()" class="href">Расширенные настройки</span>

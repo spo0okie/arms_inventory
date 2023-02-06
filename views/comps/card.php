@@ -53,7 +53,7 @@ if (!mb_strlen($domain))
 </div>
 <div>
 	<?= is_object($responsible)?'<strong>Ответственный:</strong>'.$this->render('/users/item',['model'=>$responsible,'static_view'=>$static_view]).'<br />':'' ?>
-	<?= $model->comment ?>
+	<?= Yii::$app->formatter->asNtext($model->comment) ?>
 </div>
 <br />
 <?php if(!$no_arm) { ?>
