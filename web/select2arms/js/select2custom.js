@@ -151,10 +151,10 @@ $.fn.select2.amd.define("QtippedMultipleSelectionAdapter", [
         "select2/selection/multiple",
         "select2/selection/placeholder",
         "select2/selection/eventRelay",
-        "select2/selection/single",
+        "select2/selection/search",
         "select2/selection/allowClear",
     ],
-    function(Utils, MultipleSelection, Placeholder, EventRelay, SingleSelection, AllowClear) {
+    function(Utils, MultipleSelection, Placeholder, EventRelay, SelectionSearch, AllowClear) {
 
         function QtippedMultipleSelectionAdapter() {};
         // Decorates MultipleSelection with Placeholder
@@ -195,6 +195,7 @@ $.fn.select2.amd.define("QtippedMultipleSelectionAdapter", [
         };
 
         QtippedMultipleSelectionAdapter = Utils.Decorate(QtippedMultipleSelectionAdapter, AllowClear);
+        QtippedMultipleSelectionAdapter = Utils.Decorate(QtippedMultipleSelectionAdapter, SelectionSearch);
         QtippedMultipleSelectionAdapter = Utils.Decorate(QtippedMultipleSelectionAdapter, EventRelay);
 
         return QtippedMultipleSelectionAdapter;
