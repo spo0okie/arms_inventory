@@ -194,8 +194,8 @@ $.fn.select2.amd.define("QtippedMultipleSelectionAdapter", [
             })
         };
 
-        //QtippedMultipleSelectionAdapter = Utils.Decorate(QtippedMultipleSelectionAdapter, AllowClear);
-        //QtippedMultipleSelectionAdapter = Utils.Decorate(QtippedMultipleSelectionAdapter, EventRelay);
+        QtippedMultipleSelectionAdapter = Utils.Decorate(QtippedMultipleSelectionAdapter, AllowClear);
+        QtippedMultipleSelectionAdapter = Utils.Decorate(QtippedMultipleSelectionAdapter, EventRelay);
 
         return QtippedMultipleSelectionAdapter;
     });
