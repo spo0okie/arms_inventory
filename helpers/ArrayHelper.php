@@ -18,7 +18,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		foreach ($custom as $key=>$value) {
 			if (is_array($value)) {
 				$default[$key]=isset($default[$key])?
-					static::recursiveOverride(isset($default[$key]),$value):
+					static::recursiveOverride($default[$key],$value):
 					$value;
 			} else {
 				$default[$key]=$value;
