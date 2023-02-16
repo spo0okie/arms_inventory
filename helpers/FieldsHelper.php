@@ -4,11 +4,13 @@
 namespace app\helpers;
 
 
+use app\components\assets\FieldsHelperAsset;
 use app\models\ArmsModel;
 use kartik\date\DatePicker;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 use yii\helpers\ArrayHelper;
+use yii\web\JsExpression;
 
 
 class FieldsHelper
@@ -17,7 +19,7 @@ class FieldsHelper
 	public const labelHintIcon='<i class="far fa-question-circle"></i>';
 	
 	/**
-	 * Формирует поля для options=>[] для всплывающей подсказки
+	 * Формирует поля для options=>[] для всплывающей подсказки у label
 	 */
 	public static function toolTipOptions($title,$text) {
 		return $text?[
@@ -42,8 +44,13 @@ class FieldsHelper
 	public static function cutHint(&$options) {
 		return static::cutSingleOption($options,'classicHint',false);
 	}
+	
 	public static function cutHintOptions(&$options) {
 		return static::cutSingleOption($options,'classicHintOptions',[]);
+	}
+	
+	public static function cutItemsHintsOptions(&$options) {
+		return static::cutSingleOption($options,'itemsHintsUrl','');
 	}
 	
 	/**
@@ -56,6 +63,16 @@ class FieldsHelper
 	public static function Select2Field($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
+		$itemsHintsUrl=static::cutItemsHintsOptions($options);
+		$pluginOptions=['allowClear' => true];
+		if (strlen($itemsHintsUrl)) {
+			FieldsHelperAsset::register($form->view);
+			$pluginOptions['templateResult']=new JsExpression('function(item){return formatSelect2ItemHint(item,"'.$itemsHintsUrl.'")}');
+			$pluginOptions['templateSelection']=new JsExpression('function(item){return formatSelect2ItemHint(item,"'.$itemsHintsUrl.'")}');
+			$pluginOptions['escapeMarkup']=new JsExpression('function(m) { return m; }');
+			$pluginOptions['selectionAdapter']=new JsExpression('$.fn.select2.amd.require("QtippedMultipleSelectionAdapter")');
+			
+		}
 		return $form
 			->field($model, $attr)
 			->widget(Select2::classname(),\app\helpers\ArrayHelper::recursiveOverride([
@@ -63,9 +80,7 @@ class FieldsHelper
 					'placeholder'=>'Начните набирать для поиска',
 				],
 				'toggleAllSettings'=>['selectLabel' => null],
-				'pluginOptions' => [
-					'allowClear' => true
-				]
+				'pluginOptions' => $pluginOptions
 			],$options)
 			)->label(
 				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,

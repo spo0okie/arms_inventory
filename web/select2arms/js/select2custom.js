@@ -23,6 +23,8 @@ $.fn.select2.amd.define("ArmsSelectionAdapter", [
         ArmsSelectionAdapter.prototype.render = function() {
             // Use selection-box from SingleSelection adapter
             // This implementation overrides the default implementation
+            // передираем рендер выбранного из стандартного рендера для single-selection
+            //т.е. просто рисуем один выбранный элемент строкой
             let $selection = SingleSelection.prototype.render.call(this);
             return $selection;
         };
@@ -31,17 +33,24 @@ $.fn.select2.amd.define("ArmsSelectionAdapter", [
             // copy and modify SingleSelection adapter
             //this.clear();
 
+            //находим отрендеренный элемент
             let $rendered = this.$selection.find('.select2-selection__rendered');
             let noItemsSelected = data.length === 0;
             let text = "";
             let formatted = "";
 
+            //если ничего
             if (noItemsSelected) {
+                //подменяем текст на заглушку или пусто
                 formatted = text = this.options.get("placeholder") || "";
+                //убираем класс который делает отступ справа под крестик очистки
                 this.$selection.removeClass('select2-selection--multiple-arms');
             } else {
+                //для рендера
                 formatted = '<span style="padding-top:4px">'+data.length + ' поз.</span>';
+                //для тултипа
                 text = data.length + ' позиций выбрано';
+                //добавляем класс с отступом справа, чтобы крестик не накладывался на тест
                 this.$selection.addClass('select2-selection--multiple-arms');
             }
 
@@ -135,3 +144,58 @@ $.fn.select2.amd.define("Select2clearAll", ["jquery"],
 */
 
 //let ArmsSelect2MultiselectTemplate= function (data) {return data.selected.length + " шт."}
+
+
+$.fn.select2.amd.define("QtippedMultipleSelectionAdapter", [
+        "select2/utils",
+        "select2/selection/multiple",
+        "select2/selection/placeholder",
+        "select2/selection/eventRelay",
+        "select2/selection/single",
+        "select2/selection/allowClear",
+    ],
+    function(Utils, MultipleSelection, Placeholder, EventRelay, SingleSelection, AllowClear) {
+
+        function QtippedMultipleSelectionAdapter() {};
+        // Decorates MultipleSelection with Placeholder
+
+        QtippedMultipleSelectionAdapter = MultipleSelection
+
+        QtippedMultipleSelectionAdapter = Utils.Decorate(QtippedMultipleSelectionAdapter, Placeholder);
+        //adapter = Utils.Decorate(adapter, AllowClear);
+        // Decorates adapter with EventRelay - ensures events will continue to fire
+        // e.g. selected, changed
+
+        QtippedMultipleSelectionAdapter.prototype.render = function() {
+            // Use selection-box from SingleSelection adapter
+            // This implementation overrides the default implementation
+            let $selection = MultipleSelection.prototype.render.call(this);
+            return $selection;
+        };
+
+        QtippedMultipleSelectionAdapter.prototype.update = function(data) {
+            // copy and modify SingleSelection adapter
+            //this.clear();
+
+            MultipleSelection.prototype.update.call(this,data);
+            //let $selection=this.selectionContainer();
+            let $rendered = this.$selection.find('.select2-selection__rendered');
+            $rendered.find('li').each(function(i,item){
+                let qtipped=$(item).find('span[qtip_ajxhrf]');
+                if (qtipped.length) {
+                    let $qtipped=$(qtipped[0]);
+                    let href=$qtipped.attr('qtip_ajxhrf');
+                    $qtipped.removeAttr('qtip_ajxhrf');
+                    if ($qtipped.hasClass('tooltipstered')) $qtipped.tooltipster('destroy');
+                    $(item).attr('qtip_ajxhrf',href);
+                    $(item).attr('title','')
+
+                }
+            })
+        };
+
+        //QtippedMultipleSelectionAdapter = Utils.Decorate(QtippedMultipleSelectionAdapter, AllowClear);
+        //QtippedMultipleSelectionAdapter = Utils.Decorate(QtippedMultipleSelectionAdapter, EventRelay);
+
+        return QtippedMultipleSelectionAdapter;
+    });

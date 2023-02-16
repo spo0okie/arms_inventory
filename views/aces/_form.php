@@ -32,13 +32,14 @@ if (!isset($modalParent)) $modalParent=null;
 				<div class="card-body">
 					<?= FieldsHelper::Select2Field($form, $model, 'users_ids', [
 						'data' => \app\models\Users::fetchWorking(),
+						'itemsHintsUrl'=>\yii\helpers\Url::to(['/users/ttip','q'=>'dummyVar']),
 						'pluginOptions' => ['dropdownParent' => $modalParent,'multiple' => true],
 					]) ?>
 					
-					<?= FieldsHelper::Select2Field($form, $model, 'comps_ids', [
+					<?php /*= FieldsHelper::Select2Field($form, $model, 'comps_ids', [
 						'data' => \app\models\Comps::fetchNames(),
 						'pluginOptions' => ['dropdownParent' => $modalParent,'multiple' => true],
-					]) ?>
+					]) */ ?>
 					
 					<?= FieldsHelper::TextAutoresizeField($form,$model,'ips',['lines' => 1]) ?>
 					
