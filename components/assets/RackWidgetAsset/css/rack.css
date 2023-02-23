@@ -1,0 +1,35 @@
+.rack-cabinet {
+    margin: 5pt;
+    text-align: center;
+}
+
+
+
+table.rack-widget {
+    display: inline-table;
+    background-color: gray;
+    border: #0d3349 solid 1px;
+    border-collapse: separate;
+    border-spacing: 0;
+
+
+}
+
+td.rack-unit {
+    border: #0d3349 solid 1px;
+    margin:0;
+    padding:0;
+}
+
+td.rack-unit-label {
+    font-size: 8pt;
+    color: white;
+    border-top: lightgray solid 1px;
+    border-left: lightgray solid 1px;
+    border-bottom: dimgray solid 1px;
+    border-right: dimgray solid 1px;
+}
+
+td.rack-unit.highlight {
+    border: lime solid 1px !important;
+}

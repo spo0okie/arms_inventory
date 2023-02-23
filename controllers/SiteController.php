@@ -147,17 +147,28 @@ class SiteController extends Controller
             'model' => $model,
         ]);
     }
-
-    /**
-     * Logout action.
-     *
-     * @return Response
-     */
-    public function actionLogout()
-    {
-        Yii::$app->user->logout();
-
-        return $this->goHome();
-    }
-    
+	
+	/**
+	 * Logout action.
+	 *
+	 * @return Response
+	 */
+	public function actionLogout()
+	{
+		Yii::$app->user->logout();
+		
+		return $this->goHome();
+	}
+	
+	/**
+	 * Test action.
+	 *
+	 * @return string|Response
+	 */
+	public function actionRackTest()
+	{
+		//return 'test';
+		return $this->render('/places/rack');
+	}
+	
 }
