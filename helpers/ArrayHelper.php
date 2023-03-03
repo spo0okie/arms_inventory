@@ -40,7 +40,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 			if (
 				(isset($item[$field]) && $item[$field]==$value)
 				||
-				(property_exists($item,$field) && $item->$field==$value)
+				(is_object($item)&&property_exists($item,$field) && $item->$field==$value)
 			)
 				$result[]=$item;
 		}
@@ -58,7 +58,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 			if (
 				(isset($item[$field]) && $item[$field]==$value)
 				||
-				(property_exists($item,$field) && $item->$field==$value)
+				(is_object($item)&&property_exists($item,$field) && $item->$field==$value)
 			)
 				unset($array[$key]);
 		}
