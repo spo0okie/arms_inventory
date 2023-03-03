@@ -58,7 +58,7 @@ class Ports extends \yii\db\ActiveRecord
 					$this->addError($attribute, "Неверный порт устройства");
 				}
 			}],
-			[['techs_id', 'arms_id', 'link_techs_id', 'link_arms_id','link_ports_id','name'], 'default','value'=>null],
+			[['techs_id', 'link_techs_id','link_ports_id','name'], 'default','value'=>null],
 			[['name'], 'unique', 'skipOnError' => true, 'skipOnEmpty'=>false, 'targetAttribute'=>['name','arms_id','techs_id'],'message'=>'Такой порт на этому устройстве уже объявлен'],
 			[['name'], 'string', 'max' => 32],
             [['comment'], 'string', 'max' => 255],
@@ -77,7 +77,6 @@ class Ports extends \yii\db\ActiveRecord
 			'techs_id' => 'На устройстве',
 			'name' => 'Наименование',
 			'comment' => 'Комментарий',
-			'link_arms_id' => 'Подсоединенный АРМ',
 			'link_techs_id' => 'Подсоединенное устройство',
 			'link_ports_id' => 'Порт на устройстве',
 		];
@@ -157,7 +156,6 @@ class Ports extends \yii\db\ActiveRecord
 	 * @return string
 	 */
 	public function getDeviceName() {
-		if ($this->arms_id) return $this->arm->num;
 		if ($this->techs_id) return $this->tech->num;
 		return 'NO DEVICE (ERR)';
 	}

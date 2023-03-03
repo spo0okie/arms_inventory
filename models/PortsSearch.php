@@ -41,7 +41,7 @@ class PortsSearch extends Ports
     public function search($params)
     {
         $query = Ports::find()
-			->joinWith(['tech','linkTech','linkPort','linkArm']);
+			->joinWith(['tech','linkTech','linkPort']);
 
         // add conditions that should always apply here
 	
@@ -80,7 +80,6 @@ class PortsSearch extends Ports
 			->andFilterWhere(['or like', 'techs.num', \yii\helpers\StringHelper::explode($this->techs_id,'|',true,true)])
 			->andFilterWhere(['or',
 				['or like', 'port_linked_techs.num', \yii\helpers\StringHelper::explode($this->link_techs_id,'|',true,true)],
-				['or like', 'port_linked_arms.num', \yii\helpers\StringHelper::explode($this->link_techs_id,'|',true,true)],
 				['or like', 'port_linked_ports.name', \yii\helpers\StringHelper::explode($this->link_techs_id,'|',true,true)],
 			])
             ->andFilterWhere(['or like', 'ports.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);

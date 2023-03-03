@@ -54,8 +54,6 @@ $renderer=$this;
 						]);
 					} elseif (is_object($data->linkTech)) {
 						return $renderer->render('/techs/item', ['model' => $data->linkTech]);
-					} elseif (is_object($data->linkArm)) {
-						return $renderer->render('/arms/item', ['model' => $data->linkArm]);
 					}
 				}
 			],
