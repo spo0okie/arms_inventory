@@ -175,7 +175,7 @@ JS;
     <h4>Контрагенты:</h4>
     <p>
     <?php foreach ($partners as $partner) {
-        echo Html::a($partner->sname,['partners/view','id'=>$partner->id,'static_view'=>$static_view]);
+        echo $this->render('/partners/item',['model'=>$partner]).'<br />';
     } ?>
     </p>
     <br />
