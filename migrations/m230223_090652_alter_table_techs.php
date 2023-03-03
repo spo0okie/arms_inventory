@@ -7,18 +7,36 @@ use yii\db\Migration;
  */
 class m230223_090652_alter_table_techs extends Migration
 {
+	function addColumnIfNotExist($table,$column,$type,$index=false)
+	{
+		$tableSchema = $this->db->getTableSchema($table);
+		if (!isset($tableSchema->columns[$column])) {
+			$this->addColumn($table,$column,$type);
+			if ($index) $this->createIndex("idx-$table-$column",$table,$column);
+			
+		}
+	}
+	
+	function dropColumnIfExist($table,$column)
+	{
+		$tableSchema = $this->db->getTableSchema($table);
+		if (isset($tableSchema->columns[$column])) {
+			$this->dropColumn($table,$column);
+		}
+	}
+
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
-    	$this->addColumn('techs','comp_id',$this->integer()->null());
-		$this->addColumn('techs','installed_id',$this->integer()->null());
-		$this->addColumn('techs','installed_pos',$this->string(128));
-		$this->addColumn('techs','head_id',$this->integer()->null());
-		$this->addColumn('techs','responsible_id',$this->integer()->null());
-		$this->addColumn('techs','hw',$this->text()->defaultValue(''));
-		$this->addColumn('techs','updated_at',$this->timestamp());
+    	$this->addColumnIfNotExist('techs','comp_id',$this->integer()->null(),true);
+		$this->addColumnIfNotExist('techs','installed_id',$this->integer()->null(),true);
+		$this->addColumnIfNotExist('techs','installed_pos',$this->string(128));
+		$this->addColumnIfNotExist('techs','head_id',$this->integer()->null(),true);
+		$this->addColumnIfNotExist('techs','responsible_id',$this->integer()->null(),true);
+		$this->addColumnIfNotExist('techs','hw',$this->text()->defaultValue(''));
+		$this->addColumnIfNotExist('techs','updated_at',$this->timestamp());
     }
 
     /**
@@ -26,13 +44,13 @@ class m230223_090652_alter_table_techs extends Migration
      */
     public function safeDown()
     {
-		$this->dropColumn('techs','comp_id');
-		$this->dropColumn('techs','installed_id');
-		$this->dropColumn('techs','installed_pos');
-		$this->dropColumn('techs','head_id');
-		$this->dropColumn('techs','responsible_id');
-		$this->dropColumn('techs','hw');
-		$this->dropColumn('techs','updated_at');
+		$this->dropColumnIfExist('techs','comp_id');
+		$this->dropColumnIfExist('techs','installed_id');
+		$this->dropColumnIfExist('techs','installed_pos');
+		$this->dropColumnIfExist('techs','head_id');
+		$this->dropColumnIfExist('techs','responsible_id');
+		$this->dropColumnIfExist('techs','hw');
+		$this->dropColumnIfExist('techs','updated_at');
     }
 
     /*

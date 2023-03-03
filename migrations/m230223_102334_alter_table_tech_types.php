@@ -13,17 +13,35 @@ class m230223_102334_alter_table_tech_types extends Migration
 		return str_pad( $input, $pad_length + $diff, $pad_string, $pad_type );
 	}
 	
-    /**
+	function addColumnIfNotExist($table,$column,$type,$index=false)
+	{
+		$tableSchema = $this->db->getTableSchema($table);
+		if (!isset($tableSchema->columns[$column])) {
+			$this->addColumn($table,$column,$type);
+			if ($index) $this->createIndex("idx-$table-$column",$table,$column);
+			
+		}
+	}
+	
+	function dropColumnIfExist($table,$column)
+	{
+		$tableSchema = $this->db->getTableSchema($table);
+		if (isset($tableSchema->columns[$column])) {
+			$this->dropColumn($table,$column);
+		}
+	}
+	
+	/**
      * {@inheritdoc}
      */
     public function safeUp()
     {
 	
 	
-		$this->addColumn('tech_types','is_computer',$this->boolean()->defaultValue(0));
-		$this->addColumn('tech_types','is_phone',	$this->boolean()->defaultValue(0));
-		$this->addColumn('tech_types','is_ups',	$this->boolean()->defaultValue(0));
-		$this->addColumn('tech_types','is_display',$this->boolean()->defaultValue(0));
+		$this->addColumnIfNotExist('tech_types','is_computer',$this->boolean()->defaultValue(0));
+		$this->addColumnIfNotExist('tech_types','is_phone',	$this->boolean()->defaultValue(0));
+		$this->addColumnIfNotExist('tech_types','is_ups',	$this->boolean()->defaultValue(0));
+		$this->addColumnIfNotExist('tech_types','is_display',$this->boolean()->defaultValue(0));
 		
 		foreach(\app\models\TechTypes::find()->all() as $item) {
 			/**
@@ -54,10 +72,10 @@ class m230223_102334_alter_table_tech_types extends Migration
      */
     public function safeDown()
     {
-		$this->dropColumn('tech_types','is_computer');
-		$this->dropColumn('tech_types','is_phone');
-		$this->dropColumn('tech_types','is_ups');
-		$this->dropColumn('tech_types','is_display');
+		$this->dropColumnIfExist('tech_types','is_computer');
+		$this->dropColumnIfExist('tech_types','is_phone');
+		$this->dropColumnIfExist('tech_types','is_ups');
+		$this->dropColumnIfExist('tech_types','is_display');
     }
 
     /*
