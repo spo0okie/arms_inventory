@@ -42,6 +42,7 @@ class m230223_102334_alter_table_tech_types extends Migration
 		$this->addColumnIfNotExist('tech_types','is_phone',	$this->boolean()->defaultValue(0));
 		$this->addColumnIfNotExist('tech_types','is_ups',	$this->boolean()->defaultValue(0));
 		$this->addColumnIfNotExist('tech_types','is_display',$this->boolean()->defaultValue(0));
+		$this->alterColumn('tech_types','prefix',$this->string(16)->null());
 		
 		foreach(\app\models\TechTypes::find()->all() as $item) {
 			/**
