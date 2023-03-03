@@ -53,6 +53,7 @@ class m230224_081112_migrate_arms2techs extends Migration
 			$pc=new \app\models\TechTypes([
 				'code'=>'pc1',
 				'name'=>'ПК',
+				'prefix'=>'ПК',
 				'comment'=>'Персональный компьютер (создано автоматически при обновлении БД)',
 				'is_computer'=>true,
 			]);
