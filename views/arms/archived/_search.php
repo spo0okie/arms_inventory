@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\ArmsSearch */
+/* @var $model app\models\OldArmsSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

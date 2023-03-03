@@ -10,58 +10,71 @@ if (!isset($static_view)) $static_view=false;
 if (!isset($no_model)) $no_model=false; //не выводить инфу о модели оборудования
 $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 
-?>
+if (is_object($model->state)) { ?>
+	<span class="unit-status <?= $model->state->code ?> "><?= $model->state->name ?></span>
+<?php }?>
+
 <h1>
-    <?= Html::encode($model->num) ?>
-    <?= Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
-    <?= $deleteable?Html::a('<span class="fas fa-trash"></span>', ['delete', 'id' => $model->id], [
-        'data' => [
-            'confirm' => 'Удалить оборудование из базы?',
-            'method' => 'post',
-        ],
-    ]):'<span class="small">
-			<span class="fas fa-lock" title="Нельзя удалить оборудование, к которому привязаны другие объекты. Для удаления сначала надо отвязать Материалы и Документы. (Если материалы действительно израсходованы на оборудование, то удалять его нельзя, надо поставить ему статус списано)"></span>
-		</span>' ?>
+	<?= \app\components\LinkObjectWidget::widget([
+		'model'=>$model,
+		'confirmMessage' => 'Удалить этот оборудование из базы (необратимо)?',
+		'undeletableMessage'=>'Нельзя удалить это оборудование/АРМ, т.к. есть привязанные к нему объекты.<br> Может лучше проставить флажок &quot;архивировано&quot;?',
+	]) ?>
 </h1>
 
-<?php if ($no_model) { ?>
-<?php } else { ?>
-	<?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?>
+<?php if (!$no_model) { ?>
+	Модель: <?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?> <br />
+	Серийный №: <?= $model->sn ?> <br />
+	Бухг. инв. №: <?= $model->inv_num ?> <br />
+	<?php if (strlen($model->comment)){
+		echo ('<b>'.$model->commentLabel.':</b> '.Yii::$app->formatter->asNtext($model->comment).'<br />');
+	} ?>
 	
 	<?php if ($model->model->individual_specs) { ?>
 		<h4>Спецификация:</h4>
 		<?= \Yii::$app->formatter->asNtext($model->specs) ?>
 		<br />
 	<?php } ?>
+	
+<?php } else { ?>
+	<h4>Идентификаторы:</h4>
+	<p>
+		Серийный №: <?= $model->sn ?> <br />
+		Бухг. инв. №: <?= $model->inv_num ?> <br />
+		<?php if (strlen($model->comment)){
+			echo ('<b>'.$model->commentLabel.':</b> '.Yii::$app->formatter->asNtext($model->comment).'<br />');
+		} ?>
+	</p>
 <?php } ?>
 
 
-<p>
-    <?php if (strlen($model->comment)){
-        if ($model->isVoipPhone) {
-            echo ('<h2>Внутренний номер: '.Yii::$app->formatter->asNtext($model->comment).'</h2>');
-        } else echo (Yii::$app->formatter->asNtext($model->comment).'<br />');
-    } ?>
-    <?= \app\components\UrlListWidget::Widget(['list'=>$model->url,'ips'=>$model->ip]) ?>
-</p>
+<?php
+	//для оборудования не АРМ выводим в список урл ссылку на IP устройства
+	$urls=$model->url;
+	$ips=$model->isComputer?'':$model->ip;
+	if (strlen($urls.$ips)) { ?>
+		<h4>Ссылки:</h4>
+		<p>
+			<?= \app\components\UrlListWidget::Widget(['list'=>$urls,'ips'=>$ips]) ?>
+		</p>
+<?php }	?>
 
 
-<h4>Идентификаторы:</h4>
-<p>
-    Бухг. инв. №: <?= $model->inv_num ?> <br />
-    Серийный №: <?= $model->sn ?>
-</p>
+<?php if (!$model->isComputer) echo $this->render('/arms/att-comps',['model'=>$model]) ?>
+
 
 <h4>Место установки и сотрудники:</h4>
 <p>
-    АРМ: <?= $this->render('/arms/item',['model'=>$model->arm]) ?> <br />
-    Помещение: <?= $this->render('/places/item',['model'=>$model->effectivePlace]) ?> <br />
+    <?= is_object($model->arm)?('АРМ: '.$this->render('/techs/item',['model'=>$model->arm]).'<br />'):'' ?>
+    Помещение: <?= $this->render('/places/item',['model'=>$model->place]) ?> <br />
     Пользователь: <?= $this->render('/users/item',['model'=>$model->user]) ?> <br />
-    Сотрудник ИТ: <?= $this->render('/users/item',['model'=>$model->itStaff]) ?> <br />
+	<?= is_object($model->head)?('Руководитель отдела:'.$this->render('/users/item',['model'=>$model->head]).'<br/>'):'' ?>
+	<?= is_object($model->itStaff)?('Сотрудник ИТ:'.$this->render('/users/item',['model'=>$model->itStaff]).'<br/>'):'' ?>
+	<?= is_object($model->responsible)?('Ответственный:'.$this->render('/users/item',['model'=>$model->responsible]).'<br/>'):'' ?>
 </p>
 
 <?php if (count($model->services)) { ?>
-	<h4>Учавствтует в работе сервисов:</h4>
+	<h4>Участвует в работе сервисов:</h4>
 	<p>
 		<?php foreach ($model->services as $service) { ?>
 			<?= $this->render('/services/item',['model'=>$service]) ?><br />
@@ -69,13 +82,26 @@ $deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 	</p>
 <?php } ?>
 
+<div class="d-flex flex-row">
+	<div class="pe-4">
+		<?= $this->render('ips_list',compact('model')) ?>
+	</div>
+	<div class="pe-4">
+		<h4>MAC адрес(а)</h4>
+		<p>
+			<?= Yii::$app->formatter->asNtext($model->formattedMac) ?>
+		</p>
+	</div>
+</div>
 
-<?= $this->render('ips_list',compact('model')) ?>
+<?php if (count($model->licItems) || count($model->licGroups) || count($model->licKeys)) {
+	echo $this->render('/arms/att-lics',['model'=>$model]);
+} ?>
 
-<h4>MAC адрес(а)</h4>
-<p>
-	<?= Yii::$app->formatter->asNtext($model->formattedMac) ?>
-</p>
+
+<?php if (count($model->armTechs)) {
+	echo $this->render('/arms/att-techs',['model'=>$model]);
+} ?>
 
 <h4>Документы:</h4>
 <p>

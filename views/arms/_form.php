@@ -5,7 +5,7 @@ use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Arms */
+/* @var $model app\models\OldArms */
 /* @var $form yii\widgets\ActiveForm */
 
 /*
@@ -123,7 +123,7 @@ if (!isset($modalParent)) $modalParent=null;
         <p>
             Свободные номера АРМов:
 			<?php
-			$nums=\app\models\Arms::fetchNextNums();
+			$nums=\app\models\OldArms::fetchNextNums();
 			foreach ($nums as $num) { ?>
                 <span class="arms-num-selector" onclick="$('#arms-num').val('<?= $num ?>')">
                     <?= $num ?>

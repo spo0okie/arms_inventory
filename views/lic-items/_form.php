@@ -77,7 +77,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
     </div>
 
 	<?= $form->field($model, 'arms_ids')->widget(Select2::className(), [
-		'data' => \app\models\Arms::fetchNames(),
+		'data' => \app\models\Techs::fetchArmNames(),
 		'options' => ['placeholder' => 'Выберите АРМы',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [

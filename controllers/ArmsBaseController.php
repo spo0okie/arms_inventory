@@ -2,9 +2,9 @@
 
 namespace app\controllers;
 
+use app\helpers\ArrayHelper;
+use app\models\ArmsModel;
 use Yii;
-use app\models\Arms;
-use app\models\ArmsSearch;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -20,6 +20,18 @@ class ArmsBaseController extends Controller
 {
 	public $modelClass;
 	public $defaultShowArchived=false;
+	
+	/**
+	 * Устанавливает один параметр запроса
+	 * (из коробки только все одновременно можно установить - пришлось это дописать)
+	 * @param $param
+	 */
+	public function setQueryParam($param)
+	{
+		$params=Yii::$app->request->getQueryParams();
+		$newParams=ArrayHelper::recursiveOverride($params,$param);
+		Yii::$app->request->setQueryParams($newParams);
+	}
 	
     /**
      * @inheritdoc
@@ -56,7 +68,7 @@ class ArmsBaseController extends Controller
     	$searchModelClass=$this->modelClass.'Search';
     	
     	if (class_exists($searchModelClass)) {
-			$searchModel = new ArmsSearch();
+			$searchModel = new $searchModelClass();
 			$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 			
 			if ($searchModel->hasAttribute('archived'))
@@ -235,7 +247,7 @@ class ArmsBaseController extends Controller
      * Finds the Arms model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Arms the loaded model
+     * @return ArmsModel the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)

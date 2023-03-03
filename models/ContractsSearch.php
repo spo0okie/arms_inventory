@@ -55,7 +55,6 @@ class ContractsSearch extends Contracts
         $query = Contracts::find()->joinWith([
 			'currency',
 			'partners',
-	        'arms',
 	        'techs',
 	        'licItems',
 	        'services',

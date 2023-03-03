@@ -13,25 +13,48 @@ if (!isset($modalParent)) $modalParent=null;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'code')->textInput(['maxlength' => true]) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+		</div>
+		<div class="col-md-3">
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'prefix') ?>
+		</div>
+		<div class="col-md-3">
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'code') ?>
+		</div>
+	</div>
 
-	<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
-	<?= $form->field($model, 'prefix')->textInput(['maxlength' => true]) ?>
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'comment',
-		'lines' => 4,
-	]) ?>
+	<div class="row">
+		<div class="col-md-9">
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'comment',['lines' => 8,]) ?>
 
-	<?= $form->field($model, 'comment_name')->textInput(['maxlength' => true]) ?>
+		</div>
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-header">
+					Может выполнять роли
+				</div>
+				<div class="card-body">
+					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'is_computer') ?>
+					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'is_display') ?>
+					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'is_ups') ?>
+					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'is_phone') ?>
+				</div>
+			</div>
+		</div>
+	</div>
 
-	<?= $form->field($model, 'comment_hint')->textInput(['maxlength' => true]) ?>
-    <div class="form-group">
-		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-    </div>
+
+
+	<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'comment_name') ?>
+
+	<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'comment_hint') ?>
+	
+	<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+	
     <?php ActiveForm::end(); ?>
 
 

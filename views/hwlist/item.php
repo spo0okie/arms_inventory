@@ -5,9 +5,9 @@
  * Date: 07.03.2018
  * Time: 23:02
  * @var \app\models\HwListItem $item отображаемый элемент
- * @var \app\models\Arms $model объект компьютера или АРМа, из которого вызвано
- * @var array $manufacturers список производителей
- * @var bool $addItem признак того, что это не настоящий элемент а пустышка для добавления элемента в паспорт
+ * @var \app\models\OldArms    $model объект компьютера или АРМа, из которого вызвано
+ * @var array                  $manufacturers список производителей
+ * @var bool                   $addItem признак того, что это не настоящий элемент а пустышка для добавления элемента в паспорт
  */
 use yii\bootstrap5\Modal;
 use yii\helpers\Html;
@@ -68,7 +68,7 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
     <td><?= \yii\helpers\Html::a($item->getSN(),['comps/index','CompsSearch[os]'=>$item->getSN()]) ?></td>
     <td><?= $item->inv_num ?></td>
     <td class="passport_tools">
-        <?php if(get_class($model) == \app\models\Arms::className()){ //если передан паспорт АРМ, то можем поредактировать железо
+        <?php if(get_class($model) == \app\models\Techs::className()){ //если передан паспорт АРМ, то можем поредактировать железо
             //проверяем есть ли uid у железки, если есть, то она уже сохранена, если нету, то можно сохранить
             if (strlen($item->uid)) {
                 //УИД есть, значит работаем как с загруженной железкой

@@ -47,7 +47,7 @@ if (!isset($linksData)) $linksData=null;
 					'value' => function ($item) use ($renderer) {
 						$output = '';
 						foreach ($item->arms as $arm)
-							$output .= ' ' . $renderer->render('/arms/item', ['model' => $arm,'icon'=>true,'static_view'=>true]);
+							$output .= ' ' . $renderer->render('/techs/item', ['model' => $arm,'icon'=>true,'static_view'=>true]);
 						foreach ($item->comps as $comp)
 							$output .= ' ' . $renderer->render('/comps/item', ['model' => $comp,'icon'=>true,'static_view'=>true]);
 						foreach ($item->users as $user)

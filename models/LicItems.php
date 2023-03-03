@@ -18,26 +18,26 @@ use Yii;
  * @property array $arms_ids
  * @property array $comps_ids Ссылка на ОСи
  * @property array $users_ids Ссылка на пользователей
- * @property array $softIds Ссылка на софт
- * @property array $contracts_ids
- * @property int $usages
- * @property float $utilization
- * @property bool $active
- * @property string $sname
- * @property string $fullDescr
- * @property string $status
+ * @property array       $softIds Ссылка на софт
+ * @property array       $contracts_ids
+ * @property int         $usages
+ * @property float       $utilization
+ * @property bool        $active
+ * @property string      $sname
+ * @property string      $fullDescr
+ * @property string      $status
  *
  *
- * @property Arms[] $arms
- * @property Comps[] $comps
- * @property Users[] $users
- * @property Arms[] $keyArms
- * @property array $keyArmsIds
- * @property LicKeys[] $keys
- * @property LicKeys[] $usedKeys
+ * @property Techs[] 	 $arms
+ * @property Comps[]     $comps
+ * @property Users[]     $users
+ * @property OldArms[]   $keyArms
+ * @property array       $keyArmsIds
+ * @property LicKeys[]   $keys
+ * @property LicKeys[]   $usedKeys
  * @property Contracts[] $contracts
- * @property LicGroups $licGroup
- * @property LicTypes $licType
+ * @property LicGroups   $licGroup
+ * @property LicTypes    $licType
  */
 class LicItems extends \yii\db\ActiveRecord
 {
@@ -190,7 +190,7 @@ class LicItems extends \yii\db\ActiveRecord
 	 */
 	public function getArms()
 	{
-		return $this->hasMany(Arms::className(), ['id' => 'arms_id'])
+		return $this->hasMany(Techs::className(), ['id' => 'arms_id'])
 			->viaTable('{{%lic_items_in_arms}}', ['lic_items_id' => 'id']);
 	}
 	

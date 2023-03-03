@@ -16,12 +16,21 @@ use yii\helpers\Html;
  * @property string $sname
  * @property string $inv_num Бухгалтерский инвентарный номер
  * @property int $comp_id Основная ОС рабочего места
- * @property string $model Модель системного блока
  * @property int $model_id Модель оборудования
  * @property string $sn Серийный номер
  * @property string $hw Аппаратное обеспечение
  * @property string $mac MAC адреса
  * @property string $specs Спецификация оборудования (опц)
+ * @property string $installed_pos Позиция установки в корзину/шкаф
+ * @property string $department Структурное подразделение
+ * @property string $comment Комментарий
+ * @property string $updated_at Время изменения
+ * @property string $stateName Статус
+ * @property string $history история
+ *
+ *
+ *
+ 
  * @property int $state_id Статус
  * @property int $places_id Помещение
  * @property int $user_id Пользователь
@@ -29,49 +38,53 @@ use yii\helpers\Html;
  * @property int $head_id Руководитель отдела
  * @property int $it_staff_id Сотрудник ИТ
  * @property int $techsCount Количество техники
- * @property int $voipPhonesCount Количество телефонов
- * @property string $user_name Пользователь машины
- * @property string $user_login Логин пользователя
- * @property string $department Структурное подразделение
- * @property string $department_head Руководитель структурного подразделения
- * @property string $responsible_person Ответственное лицо
- * @property string $comment Комментарий
- * @property string $updated_at Время изменения
- * @property string $stateName Статус
- * @property string $history история
+
  * @property boolean $is_server является сервером
- * @property array $contracts_ids ссылки на Документы
  * @property boolean $archived Признак списанного АРМ
+
+ * @property array $contracts_ids ссылки на Документы
  * @property array $portsList
  * @property array $ddPortsList
+ *
  *
  * @property Users $head
  * @property Users $responsible
  * @property Users $user
- * @property Places $place
  * @property Users $itStaff
+ * @property Places $place
+ *
+ *
  * @property Comps $comp
- * @property Ports $ports
- * @property Ports $linkedPorts
  * @property Comps $hwComp
  * @property Comps[] $comps
  * @property Comps[] $sortedComps
  * @property Comps[] $hwComps
  * @property Comps[] $vmComps
- * @property Techs[] $techs
+
+ * @property Ports $ports
+ * @property Ports $linkedPorts
+ 
  * @property TechStates $state
+
+ *
+ * @property Techs[] $techs
  * @property Techs[] $voipPhones
  * @property Techs[] $ups
  * @property Techs[] $monitors
+
+ *
+ *
  * @property TechModels $techModel
+ *
  * @property Contracts[] $contracts
+ *
  * @property LicItems[] $licItems
  * @property LicKeys[] $licKeys
  * @property LicGroups[] $licGroups
  * @property HwList $hwList
  * @property MaterialsUsages[] $materialsUsages
  */
-class Arms extends ArmsModel
+class OldArmsArchived extends ArmsModel
 {
 	public static $title='АРМ';
 	public static $titles='АРМы';
@@ -128,7 +141,7 @@ class Arms extends ArmsModel
 			],
 			'state_id' => [
 				'Статус',
-				'indexHint' => 'Статус этого АРМ<br>'.
+				'indexHint' => 'Статус этого АРМ/оборудования<br>'.
 					'Можно выбрать несколько из выпадающего списка <br>'.
 					'Позиции выбираются кликом'
 			],
@@ -180,19 +193,26 @@ class Arms extends ArmsModel
 				'label'=>'Сервер',
 				'hint' => 'Это оборудование формирует сервер, на котором выполняются какие-то сервисы (будет отмечено другим оформлением, возможно повесить сервисы)',
 			],
-			'it_staff_id' => [
-				'label'=>'Сотрудник Дирекции ИТ',
-				'hint' => 'Сотрудник службы ИТ, который отвечает за это рабочее место/сервер, если явно не указан другой ответственный',
-			],
 			'user_id' => [
 				'label'=>'Пользователь',
 				'hint' => 'Кто работает за этим АРМ',
 				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
 			],
+			'it_staff_id' => [
+				'label'=>'Сотрудник Дирекции ИТ',
+				'hint' => 'Сотрудник службы ИТ, который отвечает за это рабочее место/сервер, если явно не указан другой ответственный',
+			],
+			'responsible_id' => [
+				'label'=>'Ответственный',
+				'hint' => 'Если указан, то ответственность за установленное ПО будет нести указанное ответственное лицо. В таком случае в паспорте появится дополнительный пункт, в котором ответственное лицо должно расписаться.',
+			],
+			'head_id' => [
+				'label'=>'Руководитель отдела',
+				'hint' => 'Руководитель отдела сотрудника работающего на АРМ',
+			],
 			'places_id' => [
 				'label'=>'Помещение',
 				'hint' => 'Помещение, куда установлен АРМ',
-				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'userDep' => [
 				'Отдел',
@@ -206,14 +226,7 @@ class Arms extends ArmsModel
 					.Departments::$hint.
 					'</i><hr/>'.QueryHelper::$stringSearchHint,
 			],
-			'responsible_id' => [
-				'label'=>'Ответственный',
-				'hint' => 'Если указан, то ответственность за установленное ПО будет нести указанное ответственное лицо. В таком случае в паспорте появится дополнительный пункт, в котором ответственное лицо должно расписаться.',
-			],
-			'head_id' => [
-				'label'=>'Руководитель отдела',
-				'hint' => 'Руководитель отдела сотрудника работающего на АРМ',
-			],
+
 			'department_head' => 'Руководитель стр. подразделения',
 			'responsible_person' => 'Ответственное лицо',
 			'comment' => [
@@ -380,84 +393,6 @@ class Arms extends ArmsModel
 		//return $this->state_cache=TechStates::findOne($this->state_id);
 	}
 
-
-	/**
-	 * Возвращает все ОС привязанные к этому АРМ
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getComps()
-	{
-		//if (!is_null($this->comps_cache)) return $this->comps_cache;
-		//return $this->comps_cache=
-		return $this->hasMany(Comps::className(), ['arm_id' => 'id'])
-			->from(['arms_comps'=>Comps::tableName()])
-			->orderBy([
-				'arms_comps.ignore_hw'=>SORT_ASC,
-				'arms_comps.name'=>SORT_ASC
-			]);
-	}
-	
-	public function getSortedComps()
-	{
-		$comps=$this->comps;
-		if ($comps[0]->id!=$this->comp_id) {
-			foreach ($comps as $idx=>$comp)
-				if ($comp->id == $this->comp_id)
-					unset($comps[$idx]);
-				
-			array_unshift($comps,$this->comp);
-		}
-		return $comps;
-	}
-	
-	public function buildHwAndVms() {
-		if (!is_null($this->hwComp_cache)) return;
-		$this->hwComps_cache=[];
-		$this->vmComps_cache=[];
-		$this->hwComp_cache=$this->comp;
-		if (count($this->comps)) foreach ($this->comps as $comp) {
-			if ($comp->ignore_hw)
-				$this->vmComps_cache[]=$comp;
-			else {
-				if (!is_object($this->hwComp_cache) || ($this->hwComp_cache->ignore_hw)) $this->hwComp_cache=$comp;
-				$this->hwComps_cache[]=$comp;
-			}
-		}
-		
-	}
-
-	
-	/**
-	 * Возвращает все не виртуальные ОС привязанные к этому АРМ
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getHwComps()
-	{
-		$this->buildHwAndVms();
-		return $this->hwComps_cache;
-	}
-	
-	
-	/**
-	 * Возвращает тот комп, с которого снимать железо АРМ
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getHwComp()
-	{
-		$this->buildHwAndVms();
-		return $this->hwComp_cache;
-	}
-	
-	
-	/**
-	 * Возвращает все виртуальные ОС привязанные к этому АРМ
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getVmComps()
-	{
-		$this->buildHwAndVms();
-		return $this->vmComps_cache;
-	}
 	
 	
 	/**
@@ -465,11 +400,18 @@ class Arms extends ArmsModel
 	 */
 	public function getTechs()
 	{
-		//if (!is_null($this->techs_cache)) return $this->techs_cache;
-		//return $this->techs_cache=$this->hasMany(Techs::className(), ['arms_id' => 'id'])->from(['arms_techs'=>Techs::tableName()]);
 		return $this->hasMany(Techs::className(), ['arms_id' => 'id'])->from(['arms_techs'=>Techs::tableName()]);
 	}
-
+	
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getMaterialsUsages()
+	{
+		return $this->hasMany(MaterialsUsages::className(), ['arms_id' => 'id']);
+	}
+	
 	/**
 	 * @return array
 	 */
@@ -481,14 +423,6 @@ class Arms extends ArmsModel
 		return $this->voipPhones_cache;
 	}
 
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getMaterialsUsages()
-	{
-		return $this->hasMany(MaterialsUsages::className(), ['arms_id' => 'id']);
-	}
-	
 	/**
 	 * @return array
 	 */
@@ -818,5 +752,6 @@ class Arms extends ArmsModel
 			return $this->comp->updatedRenderClass;
 		} else return '';
 	}
-
+	
+	
 }

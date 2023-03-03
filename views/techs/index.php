@@ -10,6 +10,7 @@ use yii\helpers\Html;
 $renderer = $this;
 $this->title = \app\models\Techs::$title;
 $this->params['breadcrumbs'][] = $this->title;
+$this->params['layout-container'] = 'container-fluid';
 
 ?>
 <div class="techs-index">

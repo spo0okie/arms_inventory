@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\models\Techs;
-use app\models\Arms;
 use Yii;
 use app\models\Ports;
 use app\models\PortsSearch;
@@ -158,9 +157,6 @@ class PortsController extends ArmsBaseController
 			if (is_array($params)) {
 				if (isset($params['link_techs_id']) && strlen($params['link_techs_id'])) {
 					$model=Techs::findOne($params['link_techs_id']);
-					return ['output'=>$model->ddPortsList, 'selected'=>''];
-				} elseif (isset($params['link_arms_id']) && strlen($params['link_arms_id'])) {
-					$model=Arms::findOne($params['link_arms_id']);
 					return ['output'=>$model->ddPortsList, 'selected'=>''];
 				} else {
 					return ['output'=>[], 'selected'=>''];

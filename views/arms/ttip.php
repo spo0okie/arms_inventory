@@ -4,18 +4,18 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Arms */
+/* @var $model app\models\Techs */
 $static_view=true;
 ?>
 
 <div class="arms-ttip ttip-card">
     <h4>Компьютер:</h4>
-    Модель:<?= $this->render('/tech-models/item',['model'=>$model->techModel]) ?><br />
+    Модель:<?= $this->render('/tech-models/item',['model'=>$model->model]) ?><br />
     Серийный номер:<?= $model->sn ?><br/>
     Инвентарный номер:<?= $model->inv_num ?><br />
     <br />
 	
-	<?php if (is_object($model->techModel) && $model->techModel->individual_specs) { ?>
+	<?php if (is_object($model->model) && $model->model->individual_specs) { ?>
 	<h4>Спецификация:</h4>
 		<?= \Yii::$app->formatter->asNtext($model->specs) ?>
 		<br />

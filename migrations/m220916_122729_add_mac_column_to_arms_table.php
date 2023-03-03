@@ -18,9 +18,9 @@ class m220916_122729_add_mac_column_to_arms_table extends Migration
 			$this->addColumn('{{%arms}}', 'mac', $this->string()->null());
 		}
 		
-        foreach ($arms=\app\models\Arms::find()->all() as $arm) {
+        foreach ($arms=\app\models\OldArms::find()->all() as $arm) {
 			/**
-			 * @var $arm \app\models\Arms
+			 * @var $arm \app\models\OldArms
 			 */
 			if (is_object($arm->comp)){
 				$arm->mac=$arm->comp->mac;

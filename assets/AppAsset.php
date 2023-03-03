@@ -25,6 +25,7 @@ class AppAsset extends AssetBundle
 		'css/qtip.css',
 		'css/acl.css',
 		'css/arm-map.css',
+		'css/arm-passport.css',
 		'css/arms.css',
 		'css/org-phones.css',
 		'css/page-header.css',

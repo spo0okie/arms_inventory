@@ -7,18 +7,9 @@
  */
 
 /* @var $this yii\web\View */
-/* @var $models \app\models\Arms */
+/* @var $models \app\models\OldArms */
 
 $i=0;
-foreach ($models['arms'] as $arm) {
-	if ($i++) echo '<br />';
-	
-	echo $this->render('/arms/item',['model'=>$arm,'static_view'=>true]);
-	
-	if (is_object($arm->user)) {
-		echo '('.$this->render('/users/item', ['model' => $arm->user,'short'=>true]).')';
-	}
-}
 
 foreach ($models['techs'] as $tech) {
 	if ($i++) echo '<br />';

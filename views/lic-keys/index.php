@@ -48,7 +48,7 @@ $renderer=$this;
 		        'value' => function ($item) use ($renderer) {
 			        $output = '';
 			        foreach ($item->arms as $arm)
-				        $output .= ' ' . $renderer->render('/arms/item', ['model' => $arm]);
+				        $output .= ' ' . $renderer->render('/techs/item', ['model' => $arm]);
 			        return $output;
 		        }
 	        ],

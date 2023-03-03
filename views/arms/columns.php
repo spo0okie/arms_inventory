@@ -2,7 +2,7 @@
 
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\ArmsSearch */
+/* @var $searchModel app\models\OldArmsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 
@@ -112,7 +112,7 @@ return [
 			'pluginOptions' => [
 				'allowClear' => true,
 				'placeholder' => '',
-				'debug' => true,
+				//'debug' => true,
 				'multiple'=>true,
 				'closeOnSelect' =>false,
 				'selectionAdapter' => new JsExpression('$.fn.select2.amd.require("ArmsSelectionAdapter")'),
@@ -165,7 +165,7 @@ return [
 			
 		},
 		'contentOptions'=>function ($data) {
-			/* @var $data \app\models\Arms */
+			/* @var $data \app\models\OldArms */
 			return [
 				'class'=>'inv_num_col',
 				'qtip_ttip'=>

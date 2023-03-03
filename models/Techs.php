@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\helpers\QueryHelper;
 use Yii;
+use yii\helpers\Html;
 use yii\validators\IpValidator;
 
 /**
@@ -11,45 +12,83 @@ use yii\validators\IpValidator;
  *
  * @property int $id Идентификатор
  * @property string $num Инвентарный номер
+ * @property string $hostname
+ * @property string $name
+ * @property string $sname
  * @property string $inv_num Бухгалтерский инвентарный номер
+ * @property int $comp_id Основная ОС рабочего места
  * @property int $model_id Модель оборудования
  * @property string $sn Серийный номер
- * @property string $specs Тех. спецификация
- * @property int $arms_id Рабочее место
- * @property int $places_id Помещение
- * @property int $state_id Состояние
- * @property string $user_id Пользователь
- * @property string $it_staff_id Сотрудник службы ИТ
- * @property string $ip IP адрес
+ * @property string $hw Аппаратное обеспечение
  * @property string $mac MAC адрес
+ * @property string $specs Тех. спецификация
+ * @property string $installed_pos Позиция установки в корзину/шкаф
+ * @property string $comment Комментарий
+ * @property string $updated_at Время изменения
+ * @property string $stateName Статус
+ * @property string $history история
+ * @property string $ip IP адрес
  * @property string $formattedMac MAC адрес с двоеточиями
  * @property string $url Ссылка
- * @property string $comment Комментарий
- * @property string $stateName статус
- * @property bool $isVoipPhone Является IP телефоном
- * @property bool $isUps Является UPS
- * @property bool $isPc Является ПК
- * @property bool $isMonitor Является Монитором
+ * @property string $commentLabel название поля комментарий (для этой модели)
+ *
+ * @property int $arms_id Рабочее место
+ * @property int $state_id Состояние
+ * @property int $places_id Помещение
+ * @property int $user_id Пользователь
+ * @property int $responsible_id Ответственный
+ * @property int $head_id Руководитель отдела
+ * @property int $it_staff_id Сотрудник ИТ
+ * @property int $departments_id Подразделение
+ * @property int $techsCount Количество техники
+ 
+ * @property boolean $isComputer является компьютером (исходя из модели оборудования)
+ * @property boolean $isVoipPhone является компьютером (исходя из модели оборудования)
+ * @property boolean $isUps является компьютером (исходя из модели оборудования)
+ * @property boolean $isMonitor является компьютером (исходя из модели оборудования)
  * @property bool $archived Списано
+
  * @property array $contracts_ids Список документов
  * @property array $netIps_ids Список IP
  * @property array $portsList
  * @property array $ddPortsList
  *
+ * @property Users $head
+ * @property Users $responsible
  * @property Users $user
  * @property Users $itStaff
- * @property Users $techUser
- * @property Arms $arm
- * @property Departments $department
+ *
  * @property Places $place
  * @property Places $effectivePlace
  * @property Places $origPlace
+ * @property Comps $comp
+ * @property Comps $hwComp
+ * @property Comps[] $comps
+ * @property Comps[] $sortedComps
+ * @property Comps[] $hwComps
+ * @property Comps[] $vmComps
+ *
+ * @property Ports[] $ports
+ * @property Ports[] $linkedPorts
+ *
  * @property TechStates $state
+ *
+ * @property Techs $arm
+ * @property Techs[] $armTechs
+ * @property Techs[] $voipPhones
+ * @property Techs[] $ups
+ * @property Techs[] $monitors
+
+ * @property Departments $department
+ *
  * @property TechModels $model
  * @property TechTypes $type
  * @property Contracts[] $contracts
  * @property Services[] $services
- * @property Ports[] $ports
+ * @property Services[] $compsServices
+ * @property LicItems[] $licItems
+ * @property LicKeys[] $licKeys
+ * @property LicGroups[] $licGroups
  * @property MaterialsUsages[] $materialsUsages
  * @property NetIps[] $netIps
  * @property Segments[] $segments
@@ -59,19 +98,37 @@ use yii\validators\IpValidator;
  * @property Scans[] $scans
  * @property Scans $preview
  
+ * @property HwList $hwList
+ 
  */
 
 class Techs extends ArmsModel
 {
-
-	private static $num_str_pad=4; //количество знаков в цифровой части номера
+	
+	public static $title='Оборудование';
+	public static $titles='Оборудование';
+	public static $armsTitle='АРМ';
+	public static $armsTitles='АРМы';
+	
+	public static $descr='Оргтехника, сетевое оборудование, сервера и вообще все, что является предметом ответственности ИТ службы, имеет материальное представление, но не является АРМом.';
+	
+	
+	private static $num_str_pad_3tokens=4;	//количество знаков в цифровой части номера для 2 префиксов (3 токена вместе с цифровой частью)
+	private static $num_str_pad_2tokens=6;	//количество знаков в цифровой части номера для 1 префикса (2 токена вместе с цифровой частью)
+	private static $armInheritance=[		//поля которые наследуются у оборудования подключенного к АРМ
+		'places_id','user_id','it_staff_id','head_id','responsible_id','departments_id'
+	];
 	private $model_cache=null;
 	private $state_cache=null;
 	private $type_cache=null;
-
-	public static $title='Оборудование';
-
-	public static $descr='Оргтехника, сетевое оборудование, сервера и вообще все, что является предметом ответственности ИТ службы, имеет материальное представление, но не является АРМом.';
+	private $hwList_obj=null;
+	private $voipPhones_cache=null;
+	private $ups_cache=null;
+	private $monitors_cache=null;
+	private $hwComp_cache=null;  //тот комп с которого вытаскивать железо (если основная ОС - виртуальная)
+	private $hwComps_cache=null; //для методов вытащить только поставленные на железо
+	private $vmComps_cache=null; //и виртуальные ОС пригодится кэш (наверно)
+	private $compsServices_cache=null;
 
     /**
      * {@inheritdoc}
@@ -88,20 +145,179 @@ class Techs extends ArmsModel
 		];
 	}
 	
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function attributeData()
+	{
+		return [
+			'id' => ['Идентификатор'],
+			'attach' => ['Связи'],
 
-    /**
+			'num' => [
+				'Инвентарный номер',
+				'indexLabel'=>'Инв. номер',
+				'hint' => 'Внутренний инвентарный номер в службе ИТ.<br/>'.
+					'Заполняется вручную на основании префиксов помещения и оборудования<br/>'.
+					'(нужно выбрать помещение и модель оборудования)<br/>'.
+					'Вручную заполнять только если на то есть основания.',
+				'indexHint' => 'Внутренний инвентарный номер в службе ИТ.<br/>'.
+					QueryHelper::$stringSearchHint,
+			],
+
+			'inv_num' => [
+				'Бухг. номер',
+				'hint' => 'Бухгалтерский инвентарный / номенклатурный номер.',
+			],
+			'inv_sn' => [
+				'label'=>'Бух/SN',
+				'indexHint' => 'Серийный и бухгалтерский инвентарный/номенклатурный номера через запятую<br>'.
+					'Искать можно по обоим номерам сразу<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'sn' => [
+				'Серийный номер',
+				'hint' => 'Серийный номер оборудования. Если явно нет, то MAC/IMEI/и т.п. чтобы можно было однозначно идентифицировать оборудование',
+			],
+
+			'model_id' => [
+				'Модель оборудования',
+				'hint' => 'Модель устанавливаемого оборудования / компьютера.<br>'.
+					'Если нужная модель отсутствует в списке, то нужно сначала завести в ее в соотв. категории оборудования',
+				'indexHint' => 'Модель системного блока / ноутбука / сервера<br>'.
+					'Производитель в таблице не выводится, но при поиске учитывается'.
+					'<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'model' => ['alias'=>'model_id'],
+			'specs' => [
+				'Тех. спецификация',
+				'hint' => 'Спецификация оборудования в случае, если модель оборудования не полностью определяет комплектацию каждого отдельного экземпляра',
+			],
+			
+			'comp_id' => [
+				'label'=>'Основная ОС',
+				'indexLabel'=>'ОС',
+				'hint' => 'Какую ОС отображать в паспорте',
+				'indexHint' => 'Поиск ведется <b>только по основной</b> операционной системе.<br>'.
+					'Найти АРМ по неосновной ОС можно через Компьютеры->ОС'.
+					'<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'comp_hw' => [
+				'label'=>'Комплектация',
+				'indexHint' => 'Строка оборудования обнаруженного <b>в основной ОС</b><br>'.
+					'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку'.
+					'<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'is_server' => [
+				'label'=>'Сервер',
+				'hint' => 'Это оборудование формирует сервер, на котором выполняются какие-то сервисы (будет отмечено другим оформлением, возможно повесить сервисы)',
+			],
+
+			'state_id' => [
+				'Состояние',
+				'hint' => 'Состояние, в котором в данный момент находится оборудование',
+				'indexHint' => 'Статус этого АРМ/оборудования<br>'.
+					'Можно выбрать несколько из выпадающего списка <br>'.
+					'Позиции выбираются кликом'
+			],
+			'state' => ['Статус'],
+
+			'arms_id' => [
+				'Рабочее место',
+				'hint' => 'Рабочее место, к которому прикреплено оборудование',
+			],
+
+			'places_id' => [
+				'Помещение',
+				'hint' => 'Помещение, куда установлено',
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'place'=>['alias'=>'places_id'],
+
+			'contracts_ids' => [
+				'Связанные документы',
+				'hint' => 'Счета, накладные, фотографии серийных номеров и т.п.',
+			],
+
+			'user_id' => [
+				'Пользователь',
+				'hint' => 'Сотрудник которому установлено',
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'user' => ['alias'=>'user_id'],
+			'user_dep' => [
+				'Отдел',
+				'hint' => 'Отдел в котором числится пользователь',
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'user_position' => [
+				'Должность',
+				'hint' => 'Должность пользователя АРМ/оборудования',
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'departments_id' => [
+				'label'=>'Подразделение',
+				'hint' => 'Закрепить оборудование/АРМ за подразделением.<br><i>'.Departments::$hint.'</i>',
+				'indexHint' => 'Подразделение, за которым закреплено.<br><i>'
+					.Departments::$hint.
+					'</i><hr/>'.QueryHelper::$stringSearchHint,
+			],
+			'it_staff_id' => [
+				'Сотрудник службы ИТ',
+				'hint' => 'Сотрудник службы ИТ, который отвечает за обслуживание оборудования/рабочего места',
+			],
+			'responsible_id' => [
+				'label'=>'Ответственный',
+				'hint' => 'Если указан, то ответственность за установленное ПО будет нести указанное ответственное лицо. В таком случае в паспорте появится дополнительный пункт, в котором ответственное лицо должно расписаться.',
+			],
+			'head_id' => [
+				'label'=>'Руководитель отдела',
+				'hint' => 'Руководитель отдела сотрудника которому установлено',
+			],
+			
+			'ip' => [
+				'IP адреса',
+				'hint' => 'По одному в строке',
+			],
+			'mac' => [
+				'MAC адреса',
+				'hint' => 'MAC адреса сетевых интерфейсов оборудования<br>'.
+					'Заполняются по одному в строке',
+			],
+			'url' => [
+				'Ссылки',
+				'hint' => \app\components\UrlListWidget::$hint,
+			],
+			'comment' => [
+				'Примечание',
+				'hint' => 'Краткое пояснение по этому оборудованию',
+			],
+			'history' => [
+				'Записная книжка',
+				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого оборудования/АРМ',
+			],
+		];
+	}
+	
+	
+	
+	/**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
             [['model_id'], 'required'],
-	        [['model_id', 'arms_id', 'places_id', 'state_id', 'scans_id', 'departments_id'], 'integer'],
-	        [['contracts_ids'], 'each', 'rule'=>['integer']],
-	        [['url', 'comment'], 'string'],
-	        [['history','specs'], 'safe'],
-	        [['num', 'user_id', 'it_staff_id'], 'string', 'max' => 16],
-			[['inv_num', 'sn'], 'string', 'max' => 128],
+			[['model_id', 'state_id', 'scans_id', 'departments_id','comp_id'], 'integer'],
+			[['installed_id', 'arms_id', 'places_id'], 'integer'],
+			[['user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'integer'],
+
+	        [['contracts_ids','lic_items_ids','lic_groups_ids','lic_keys_ids'], 'each', 'rule'=>['integer']],
+
+
+			[['url', 'comment','updated_at','history','hw','specs'], 'safe'],
+			[['inv_num', 'sn','installed_pos'], 'string', 'max' => 128],
+			
 			[['ip', 'mac'], 'string', 'max' => 255],
 			['ip', function ($attribute, $params, $validator) {
 				\app\models\NetIps::validateInput($this,$attribute);
@@ -109,23 +325,15 @@ class Techs extends ArmsModel
 			['ip', 'filter', 'filter' => function ($value) {
 				return \app\models\NetIps::filterInput($value);
 			}],
-			//['ip', 'ip','ipv6'=>false,'subnet'=>null],
-	        [['user_id', 'it_staff_id'], 'filter', 'filter' => function ($value) {
-        	    //заменяем пустые значения табельных номеров на NULL
-		        return strlen($value)?$value:null;
-	        }],
+			
+			[['num'], 'string', 'max' => 16],
 	        ['num', function ($attribute, $params, $validator) {
-		        if (count(explode('-',$this->$attribute))!==3) {
-			        $this->addError($attribute, 'Инвентарный номер должен быть в формате "ФИЛ-ТИП-НОМЕР", где ФИЛ - префикс филиала, ТИП - тип оборудования, НОМЕР - целочисленный номер уникальный в рамках филиала.');
+        		$tokens=explode('-',$this->$attribute);
+		        if (count($tokens)!==3 && count($tokens)!==2) {
+			        $this->addError($attribute, 'Инвентарный номер должен быть в формате "ФИЛ-[ТИП-]НОМЕР", где ФИЛ - префикс филиала, ТИП - префикс типа оборудования, НОМЕР - целочисленный номер уникальный в рамках филиала.');
 		        }
 	        }],
-	        ['num', 'filter', 'filter' => function ($value) {
-		        // выполняем определенные действия с переменной, возвращаем преобразованную переменную
-		        $tokens=explode('-',$value);
-		        $num=(int)$tokens[count($tokens)-1];
-		        $tokens[count($tokens)-1]=str_pad((string)$num,static::$num_str_pad,'0',STR_PAD_LEFT);
-		        return mb_strtoupper(implode('-',$tokens));
-	        }],
+	        ['num', 'filter', 'filter' => ['\app\models\Techs','formatInvNum']],
 	        ['num', function ($attribute, $params, $validator) {
 		        $same=static::findOne([$attribute=>$this->$attribute]);
 		        if (is_object($same)&&($same->id != $this->id)) {
@@ -137,12 +345,6 @@ class Techs extends ArmsModel
 		        }
 	        }],
 	        ['num', 'unique'],
-	        [['state_id'], 'exist', 'skipOnError' => true, 'targetClass' => TechStates::className(), 'targetAttribute' => ['state_id' => 'id']],
-	        [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
-            [['it_staff_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['it_staff_id' => 'id']],
-            [['arms_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arms_id' => 'id']],
-            [['places_id'], 'exist', 'skipOnError' => true, 'targetClass' => Places::className(), 'targetAttribute' => ['places_id' => 'id']],
-			[['departments_id'], 'exist', 'skipOnError' => true, 'targetClass' => Departments::className(), 'targetAttribute' => ['departments_id' => 'id']],
         ];
     }
 
@@ -159,102 +361,26 @@ class Techs extends ArmsModel
 					'contracts_ids' => 'contracts',
 					'services_ids' => 'services',
 					'netIps_ids' => 'netIps',
+					'lic_items_ids' => 'licItems',
+					'lic_keys_ids' => 'licKeys',
+					'lic_groups_ids' => 'licGroups',
 				]
 			]
 		];
 	}
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeData()
-    {
-        return [
-            'id' => ['Идентификатор'],
-            'num' => [
-            	'Инвентарный номер',
-				'hint' => 'Внутренний инвентарный номер в службе ИТ.',
-			],
-            'inv_num' => [
-            	'Бухг. номер',
-				'hint' => 'Бухгалтерский инвентарный / номенклатурный номер.',
-			],
-	        'model_id' => [
-	        	'Модель оборудования',
-				'hint' => 'Модель устанавливаемого оборудования. Если нужная модель отсутствует в списке, то нужно сначала завести в ее в соотв. категории оборудования',
-			],
-	        'model' => ['alias'=>'model_id'],
-            'sn' => [
-            	'Серийный номер',
-				'hint' => 'Серийный номер оборудования. Если явно нет, то MAC/IMEI/и т.п. чтобы можно было однозначно идентифицировать оборудование',
-			],
-			'specs' => [
-				'Тех. спецификация',
-				'hint' => 'Спецификация оборудования в случае, если модель оборудования не полностью определяет комплектацию каждого отдельного экземпляра',
-			],
-	        'state_id' => [
-	        	'Состояние',
-				'hint' => 'Состояние, в котором в данный момент находится оборудование',
-			],
-	        'state' => ['Статус'],
-	        'attach' => ['Док.'],
-	        'arms_id' => [
-	        	'Рабочее место',
-				'hint' => 'Рабочее место, к которому прикреплено оборудование',
-			],
-			'places_id' => [
-				'Помещение',
-				'hint' => 'Помещение, куда установлено',
-			],
-			'userDep' => [
-				'Отдел',
-				'hint' => 'Отдел в котором числится пользователь',
-				'indexHint' => '{same}',
-			],
-			'departments_id' => [
-				'label'=>'Подразделение',
-				'hint' => 'Закрепить оборудование за подразделением.<br><i>'.Departments::$hint.'</i>',
-				'indexHint' => 'Подразделение, за которым закреплено оборудование',
-			],
-	        'place' => ['Помещение'],
-	        'user_id' => [
-	        	'Пользователь',
-				'hint' => 'Сотрудник которому установлено',
-			],
-	        'user' => ['alias'=>'user_id'],
-	        'contracts_ids' => [
-	        	'Связанные документы',
-				'hint' => 'Счета, накладные, фотографии серийных номеров и т.п.',
-			],
-            'it_staff_id' => [
-            	'Сотрудник службы ИТ',
-				'hint' => 'Сотрудник службы ИТ, который отвечает за обслуживание оборудования',
-			],
-	        'ip' => [
-	        	'IP адреса',
-				'hint' => 'По одному в строке',
-			],
-	        'mac' => [
-	        	'MAC адреса',
-				'hint' => 'По одному в строке',
-			],
-            'url' => [
-            	'Ссылки',
-				'hint' => \app\components\UrlListWidget::$hint,
-			],
-	        'comment' => [
-	        	'Примечание',
-				'hint' => 'Краткое пояснение по этому оборудованию',
-			],
-	        'history' => [
-	        	'Записная книжка',
-				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого оборудования',
-			],
-        ];
-    }
-
-    
+	
+	public static function formatInvNum($value)
+	{
+		// выполняем определенные действия с переменной, возвращаем преобразованную переменную
+		$tokens = explode('-', $value);
+		$num_str_pad = (count($tokens) > 2) ?
+			(static::$num_str_pad_3tokens) :
+			(static::$num_str_pad_2tokens);
+		
+		$num = (int)$tokens[count($tokens) - 1];
+		$tokens[count($tokens) - 1] = str_pad((string)$num, $num_str_pad, '0', STR_PAD_LEFT);
+		return mb_strtoupper(implode('-', $tokens));
+	}
 
 	/**
 	 * @return \yii\db\ActiveQuery
@@ -270,6 +396,120 @@ class Techs extends ArmsModel
 		if (is_object($this->state)) return $this->state->name;
 		return '';
 	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getComp()
+	{
+		return $this->hasOne(Comps::className(), ['id' => 'comp_id']);
+	}
+	
+	/**
+	 * Возвращает все ОС привязанные к этому АРМ
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getComps()
+	{
+		return $this->hasMany(Comps::className(), ['arm_id' => 'id'])
+			->from(['arms_comps'=>Comps::tableName()])
+			->orderBy([
+				'arms_comps.ignore_hw'=>SORT_ASC,
+				'arms_comps.name'=>SORT_ASC
+			]);
+	}
+	
+	public function getSortedComps()
+	{
+		$comps=$this->comps;
+		if ($comps[0]->id!=$this->comp_id) {
+			foreach ($comps as $idx=>$comp)
+				if ($comp->id == $this->comp_id)
+					unset($comps[$idx]);
+			
+			array_unshift($comps,$this->comp);
+		}
+		return $comps;
+	}
+	
+	public function buildHwAndVms() {
+		if (!is_null($this->hwComp_cache)) return;
+		$this->hwComps_cache=[];
+		$this->vmComps_cache=[];
+		$this->hwComp_cache=$this->comp;
+		if (count($this->comps)) foreach ($this->comps as $comp) {
+			if ($comp->ignore_hw)
+				$this->vmComps_cache[]=$comp;
+			else {
+				if (!is_object($this->hwComp_cache) || ($this->hwComp_cache->ignore_hw)) $this->hwComp_cache=$comp;
+				$this->hwComps_cache[]=$comp;
+			}
+		}
+		
+	}
+	
+	
+	/**
+	 * Возвращает все не виртуальные ОС привязанные к этому АРМ
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getHwComps()
+	{
+		$this->buildHwAndVms();
+		return $this->hwComps_cache;
+	}
+	
+	
+	/**
+	 * Возвращает тот комп, с которого снимать железо АРМ
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getHwComp()
+	{
+		$this->buildHwAndVms();
+		return $this->hwComp_cache;
+	}
+	
+	
+	/**
+	 * Возвращает все виртуальные ОС привязанные к этому АРМ
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getVmComps()
+	{
+		$this->buildHwAndVms();
+		return $this->vmComps_cache;
+	}
+	
+	/**
+	 * Возвращает все оборудование в виде HwList
+	 */
+	public function getHwList()
+	{
+		if (!is_null($this->hwList_obj)) return $this->hwList_obj;
+		$this->hwList_obj = new HwList();
+		$this->hwList_obj->loadJSON($this->hw);
+		if (is_object($this->hwComp))
+			$this->hwList_obj->loadFound($this->hwComp->hwList);
+		return $this->hwList_obj;
+	}
+	
+	/**
+	 * @return Services[]
+	 */
+	public function getCompsServices()
+	{
+		if (is_null($this->compsServices_cache)){
+			$this->compsServices_cache=[];
+			foreach ($this->comps as $comp) {
+				foreach ($comp->services as $service)
+					$this->compsServices_cache[$service->id]=$service;
+			}
+		}
+		return $this->compsServices_cache;
+	}
+	
+	
 	
 	/**
 	 * Возвращает набор сканов в договоре
@@ -298,41 +538,113 @@ class Techs extends ArmsModel
 		return null;
 	}
 	
-	
-	/**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getUser()
-    {
-	    if (is_object($this->arm)) return $this->arm->user;
-        return $this->techUser;
-    }
-
-	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
-	public function getTechUser()
+	public function getArmTechs()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'user_id'])->from(['users_techs'=>Users::tableName()]);
+		return $this->hasMany(Techs::className(), ['arms_id' => 'id'])->from(['arms_techs'=>Techs::tableName()]);
 	}
+	
+	/**
+	 * отфильтровать из переданного массива $models те, которые привязаны к этому АРМ
+	 * @param $models Techs[]
+	 * @return Techs[]
+	 */
+	public function filterArmTechs($models)
+	{
+		$filtered=[];
+		foreach ($models as $model)
+			if ($model->arms_id == $this->id)
+				$filtered[]=$model;
+		return $filtered;
+	}
+	
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return array
 	 */
-	public function getArmUser()
+	public function getVoipPhones()
 	{
-		return $this->arm->user;
+		if (!is_null($this->voipPhones_cache)) return $this->voipPhones_cache;
+		$this->voipPhones_cache=[];
+		foreach ($this->armTechs as $tech) if ($tech->isVoipPhone) $this->voipPhones_cache[]=$tech;
+		return $this->voipPhones_cache;
 	}
+	
+	/**
+	 * @return array
+	 */
+	public function getUps()
+	{
+		if (!is_null($this->ups_cache)) return $this->ups_cache;
+		$this->ups_cache=[];
+		foreach ($this->armTechs as $tech) if ($tech->isUps) $this->ups_cache[]=$tech;
+		return $this->ups_cache;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getMonitors()
+	{
+		if (!is_null($this->monitors_cache)) return $this->monitors_cache;
+		$this->monitors_cache=[];
+		foreach ($this->armTechs as $tech) if ($tech->isMonitor) $this->monitors_cache[]=$tech;
+		return $this->monitors_cache;
+	}
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getItStaff()
 	{
-		if (is_object($this->arm))  return $this->arm->itStaff;
 		return $this->hasOne(Users::className(), ['id' => 'it_staff_id']);
 	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getHead()
+	{
+		return $this->hasOne(Users::className(), ['id' => 'head_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getResponsible()
+	{
+		return $this->hasOne(Users::className(), ['id' => 'responsible_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getUser()
+	{
+		return $this->hasOne(Users::className(), ['id' => 'user_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getPlace()
+	{
+		return $this->hasOne(Places::className(), ['id' => 'places_id']);
+	}
+	
+	/**
+	 * @return Places
+	 */
+	public function getSite()
+	{
+		return is_object($this->place)?$this->place->top:null;
+	}
 
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -340,6 +652,20 @@ class Techs extends ArmsModel
 	{
 		//if (isset($this))
 		return $this->model_cache=$this->hasOne(TechModels::className(), ['id' => 'model_id']);
+	}
+	
+	/**
+	 * Возвращает название поля комментарий
+	 */
+	public function getCommentLabel()
+	{
+		if (is_object($model=$this->model)) {
+			if (is_object($type=$model->type)) {
+				if (strlen($type->comment_name))
+					return $type->comment_name;
+			}
+		}
+		return $this->getAttributeLabel('comment');
 	}
 
 	/**
@@ -351,6 +677,35 @@ class Techs extends ArmsModel
 			->from(['attached_tech_models'=>TechModels::tableName()]);
 
 	}
+	
+	
+	/**
+	 * Возвращает набор документов
+	 */
+	public function getLicItems()
+	{
+		return $this->hasMany(LicItems::className(), ['id' => 'lic_items_id'])
+			->viaTable('{{%lic_items_in_arms}}', ['arms_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает набор документов
+	 */
+	public function getLicKeys()
+	{
+		return $this->hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
+			->viaTable('{{%lic_keys_in_arms}}', ['arms_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает набор документов
+	 */
+	public function getLicGroups()
+	{
+		return $this->hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
+			->viaTable('{{%lic_groups_in_arms}}', ['arms_id' => 'id']);
+	}
+	
 	
 	/**
 	 * @return \yii\db\ActiveQuery
@@ -382,7 +737,7 @@ class Techs extends ArmsModel
 	 */
 	public function getArm()
 	{
-		return $this->hasOne(Arms::className(), ['id' => 'arms_id']);
+		return $this->hasOne(Techs::class, ['id' => 'arms_id']);
 	}
 	
 	/**
@@ -393,58 +748,21 @@ class Techs extends ArmsModel
 		return $this->hasOne(Departments::className(), ['id' => 'departments_id']);
 	}
 	
-	/**
-	 * @return \app\models\Places;
-	 */
-	public function getEffectiveDepartment()
-	{
-		return (is_object($this->arm)) ?$this->arm->department:$this->department;
+	
+	public function getIsComputer() {
+		return $this->model->type->is_computer;
 	}
 	
-	/**
-	 * @return \app\models\Places;
-	 */
-	public function getEffectivePlace()
-	{
-		return (is_object($this->arm)) ?$this->arm->place:$this->place;
-		//return $this->hasOne(Places::className(), ['id' => 'places_id']);
-	}
-	
-	public function getSite()
-	{
-		if (!is_object($place=$this->effectivePlace)) return null;
-		return $place->top;
-	}
-	
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getPlace()
-	{
-		return $this->hasOne(Places::className(), ['id' => 'places_id'])
-			->from(['places_techs'=>Places::tableName()]);
-	}
-
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getOrigPlace()
-	{
-		//if ($this->arms_id) return $this->arm->place;
-		return $this->hasOne(Places::className(), ['id' => 'places_id'])
-			->from(['places_techs'=>Techs::tableName()]);
-	}
-
 	public function getIsVoipPhone() {
-		return \app\models\TechModels::getIsPhone($this->model_id);
-    }
+		return $this->model->type->is_phone;
+	}
 	
 	public function getIsUps() {
-		return \app\models\TechModels::getIsUps($this->model_id);
+		return $this->model->type->is_ups;
 	}
 	
 	public function getIsMonitor() {
-		return \app\models\TechModels::getIsMonitor($this->model_id);
+		return $this->model->type->is_display;
 	}
 	
 	public function getArchived()
@@ -474,20 +792,6 @@ class Techs extends ArmsModel
 		return static::formatMacs($this->mac);
 	}
 	
-	/**
-	 * Имя для поиска
-	 * @return string
-	 */
-	public function getSname()
-	{
-		return $this->num.' ('.$this->type->name.' '.$this->model->name.')'.
-			(
-				!is_null($this->places_id)?
-					(' в '.\app\models\Places::fetchFullName($this->places_id))
-					:''
-			);
-	}
-	
 	
 	
 	/**
@@ -512,18 +816,23 @@ class Techs extends ArmsModel
 	
 	
 	/**
-	 * Возвращает первый свободный инвентарный номер с заданным инв. номером
-	 * @param $idx текущий инв. номер
+	 * Возвращает первый свободный инвентарный номер с заданным префиксом
+	 * @param string $prefix текущий инв. номер
 	 * @return integer номер следующей позиции
 	 */
-	public static function fetchNextNum($idx) {
-		$last=static::find()->where(['like','num',$idx])->orderBy(['num'=>SORT_DESC])->one();
+	public static function fetchNextNum($prefix) {
+		//ищем запись с таким префиксом (сортируем по префиксу и выбираем один самый большой)
+		$last=static::find()->where(['like','num',$prefix])->orderBy(['num'=>SORT_DESC])->one();
 		if (is_object($last)) {
 			$tokens = explode('-', $last->num);
-			$subidx = (int)$tokens[count($tokens)-1] + 1;
-		} else $subidx=1;
-		$num=str_pad((string)$subidx,static::$num_str_pad,'0',STR_PAD_LEFT);
-		return $idx.'-'.$num;
+			$subIndex = (int)$tokens[count($tokens)-1] + 1;
+		} else $subIndex=1;
+		//в зависимости от количество токенов в префиксе выбираем длину номерной части
+		$num_str_pad=count(explode('-',$prefix))>1?
+			(static::$num_str_pad_3tokens):
+			(static::$num_str_pad_2tokens);
+		$num=str_pad((string)$subIndex,$num_str_pad,'0',STR_PAD_LEFT);
+		return $prefix.'-'.$num;
 
 	}
 
@@ -537,15 +846,17 @@ class Techs extends ArmsModel
 	public static function genInvPrefix($model_id,$place_id,$arm_id)
 	{
 		$tokens=[];
-
+		
+		$place=null;
 		if ($arm_id) {
 			//если есть АРМ - то место установки там где АРМ
-			$arm=\app\models\Arms::findOne($arm_id);
+			$arm=\app\models\Techs::findOne($arm_id);
 			if (is_object($arm)) $place=$arm->place;
 		} elseif ($place_id) {
 			//иначе там где место установки
 			$place=\app\models\Places::findOne($place_id);
-		} else $place=null;
+		}
+		
 		if (is_object($place)) {
 			//если нашли место установки, то ищем там префикс
 			$place_token=$place->prefTree;
@@ -571,6 +882,7 @@ class Techs extends ArmsModel
 	public function getContracts()
 	{
 		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
+			->from(['techs_contracts'=>Contracts::tableName()])
 			->viaTable('{{%contracts_in_techs}}', ['techs_id' => 'id']);
 	}
 	
@@ -654,10 +966,49 @@ class Techs extends ArmsModel
 	}
 	
 	
+	public function getTechsCount(){
+		return count($this->techs);
+	}
+	
+	public function getVoipPhonesCount(){
+		return count($this->voipPhones);
+	}
+	
+	public function getUpdatedRenderClass(){
+		if (is_object($this->comp)) {
+			return $this->comp->updatedRenderClass;
+		} else return '';
+	}
+	
+	
+	/**
+	 * Имя для поиска
+	 * @return string
+	 */
+	public function getSname()
+	{
+		$tokens=[$this->num];
+		if (is_object($this->comp)) $tokens[]=$this->comp->name;
+		if (is_object($this->user)) $tokens[]=$this->user->shortName;
+		if (!is_object($this->comp)) {
+			$tokens[]='('.$this->type->name.' '.$this->model->name.')';
+			if (is_object($this->place)) $tokens[]=$this->place->fullName;
+		}
+		return implode(' / ',$tokens);
+	}
+	
 	public static function fetchNames(){
 		$list= static::find()
-			->joinWith(['model','model.type','origPlace','arm','arm.place'])
+			->joinWith(['model.type','place','user','comp'])
 			//->select(['id','name'])
+			->all();
+		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+	}
+	
+	public static function fetchArmNames(){
+		$list= static::find()
+			->joinWith(['model.type','place','user','comp'])
+			->where(['tech_types.is_computer'=>true])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}
@@ -672,13 +1023,29 @@ class Techs extends ArmsModel
 			//если привязаны к АРМ,
 			if (is_object($this->arm)) {
 				//то отвязываемся от собственных помещения и пользователя
-				//т.к. теперь мы косвенно привязаны к помещению и пользователю АРМ
-				$this->places_id=$this->arm->places_id;
-				$this->user_id=$this->arm->user_id;
-				$this->it_staff_id=$this->arm->it_staff_id;
+				//и перепривязываемся к наследуемым
+				foreach (static::$armInheritance as $attr) {
+					$this->$attr = $this->arm->$attr;
+				}
+			}
+			
+			if (!is_null($this->hwList_obj)) {
+				$this->hw=$this->hwList->onlySaved()->saveJSON();
 			}
 			
 			$this->mac=\app\helpers\MacsHelper::fixList($this->mac);
+			
+			//если ОС которая была назначена основной удалена или сменила АРМ
+			if (!is_object($this->comp) || $this->comp->arm_id != $this->id)
+				$this->comp_id = null; //удаляем основную ОС
+			
+			//если основной ОС нет, но есть привязанные, то выбираем первую из привязанных как основную
+			if (is_null($this->comp_id) && is_array($comps=$this->comps) && count($comps)) {
+				foreach ($comps as $comp) {
+					$this->comp_id = $comp->id;
+					break;
+				}
+			}
 			
 			/* взаимодействие с NetIPs */
 			$this->netIps_ids=NetIps::fetchIpIds($this->ip);
@@ -715,6 +1082,48 @@ class Techs extends ArmsModel
 		}
 		
 		return true;
+	}
+	
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+
+		//если изменились поля которые наследуются для оборудования входящего в АРМ ($armInheritance)
+		$updateInheritance=false;
+		foreach (array_keys($changedAttributes) as $attr) {
+			if (array_search($attr,static::$armInheritance)!==false) {
+				$updateInheritance=true;
+			}
+		}
+		
+		//если поля изменились - перебираем все входящие в АРМ экз. оборудования
+		if ($updateInheritance) {
+			foreach ($this->armTechs as $tech) {
+				//и проставляем им наследуемые поля
+				foreach (static::$armInheritance as $attr) {
+					$tech->$attr = $this->$attr;
+				}
+				$tech->save();
+			}
+		}
+	}
+	
+	//альяс чтобы привычно можно было использовать поле name
+	public function getName() {return $this->num;}
+	
+	
+	public function reverseLinks()
+	{
+		return [
+			$this->comps,
+			$this->armTechs,
+			$this->materialsUsages,
+			$this->contracts,
+			$this->licItems,
+			$this->licGroups,
+			$this->licKeys,
+			$this->ports
+		];
 	}
 	
 }

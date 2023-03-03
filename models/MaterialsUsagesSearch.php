@@ -52,7 +52,7 @@ class MaterialsUsagesSearch extends MaterialsUsages
     public function search($params)
     {
         $query = MaterialsUsages::find()
-        ->joinWith(['material','material.type','material.place','material.itStaff','arm','tech']);
+        ->joinWith(['material','material.type','material.place','material.itStaff','tech']);
 
         // add conditions that should always apply here
 	
@@ -99,7 +99,6 @@ class MaterialsUsagesSearch extends MaterialsUsages
         $query->andFilterWhere([
             'id' => $this->id,
             'materials_id' => $this->materials_id,
-            'arms_id' => $this->arms_id,
             'techs_id' => $this->techs_id,
         ]);
 
@@ -111,7 +110,7 @@ class MaterialsUsagesSearch extends MaterialsUsages
 				'CONCAT(materials_types.name, ":", materials.model)',\yii\helpers\StringHelper::explode($this->material,'|',true,true)
 			])->andFilterWhere([
 				'or like',
-				'CONCAT(ifnull(arms.num,""), " " ,ifnull(techs.num,"") , " ",materials_usages.comment)',\yii\helpers\StringHelper::explode($this->to,'|',true,true)
+				'CONCAT(ifnull(techs.num,"") , " ",materials_usages.comment)',\yii\helpers\StringHelper::explode($this->to,'|',true,true)
 			])->andFilterWhere([
 				'or like',
 				'materials_usages.date',\yii\helpers\StringHelper::explode($this->date,'|',true,true)

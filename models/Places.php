@@ -13,6 +13,7 @@ use Yii;
  * @property string $fullName Полное название
  * @property string $prefTree Префикс с резервированием родительским.
  * @property string $addr Адрес
+ * @property Techs $techsRecursive
  * @property \app\models\Places $top помещение самого верхнего уровня над текущим
  * @property \yii\db\ActiveQuery $parent родительское помещения
  * @property \yii\db\ActiveQuery $arms АРМы размещенные в этом помещении
@@ -204,16 +205,14 @@ DELIMITER ;
 	
 	/**
 	 * @return \yii\db\ActiveQuery
-	 */
 	public function getArms()
 	{
 		if (!is_null($this->arms_cache)) return $this->arms_cache;
-		return $this->arms_cache=$this->hasMany(Arms::className(), ['places_id' => 'id']);
+		return $this->arms_cache=$this->hasMany(OldArms::className(), ['places_id' => 'id']);
 	}
 	
 	/**
 	 * @return \yii\db\ActiveQuery
-	 */
 	public function getArmsRecursive()
 	{
 		$arms=$this->arms;
@@ -222,6 +221,7 @@ DELIMITER ;
 		}
 		return $arms;
 	}
+	 */
 
 	/**
 	 * @return \yii\db\ActiveQuery

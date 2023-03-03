@@ -47,26 +47,22 @@ use yii\web\JsExpression;
  * @property Contracts[] $successors
  * @property Contracts[] $successorsChain
  * @property Contracts[] $successorsRecursive
- * @property Contracts $predecessor
- * @property Contracts $firstPredecessor
+ * @property Contracts   $predecessor
+ * @property Contracts   $firstPredecessor
  * @property Contracts[] $contracts
  * @property Contracts[] $childs
  * @property Contracts[] $chainChildren
  * @property Contracts[] $childrenRecursive
  * @property Contracts[] $allChildren
- * @property Arms[] $arms
  * @property Materials[] $materials
- * @property Techs[] $techs
- * @property LicItems[] $licItems
- * @property Arms[] $armsChain
- * @property Techs[] $techsChain
- * @property LicItems[] $licsChain
+ * @property Techs[]     $techs
+ * @property LicItems[]  $licItems
+ * @property Techs[]     $techsChain
+ * @property LicItems[]  $licsChain
  * @property OrgPhones[] $orgPhones
  * @property OrgPhones[] $phonesChain
- * @property OrgInets[] $orgInets
- * @property OrgInets[] $inetsChain
- * @property Services[] $services
- * @property Services[] $servicesChain
+ * @property Services[]  $services
+ * @property Services[]  $servicesChain
  */
 class Contracts extends ArmsModel
 {
@@ -113,7 +109,7 @@ class Contracts extends ArmsModel
         return [
             [['name'], 'required'],
 			[['currency_id'],'default','value'=>1],
-	        [['lics_ids','partners_ids','arms_ids','techs_ids','services_ids'], 'each', 'rule'=>['integer']],
+	        [['lics_ids','partners_ids','techs_ids','services_ids'], 'each', 'rule'=>['integer']],
 	        //[['scanFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
 	        [['parent_id','state_id','currency_id'], 'integer'],
 	        [['total','charge'], 'number'],
@@ -137,7 +133,6 @@ class Contracts extends ArmsModel
 				'relations' => [
 					'partners_ids' => 'partners',
 					'lics_ids' => 'licItems',
-					'arms_ids' => 'arms',
 					'techs_ids' => 'techs',
 					'services_ids' => 'services',
 					'materials_ids' => 'materials'
@@ -214,10 +209,6 @@ class Contracts extends ArmsModel
 				'Оборудование',
 				'hint' => 'С каким оборудованием связан документ (если связан)',
 			],
-			'arms_ids' => [
-				'АРМы',
-				'hint' => 'С какими рабочими местами связан документ (если связан)',
-			],
 			'scans_ids' => [
 				'Сканы',
 				'hint' => 'Отсканированная версия документа',
@@ -254,7 +245,6 @@ class Contracts extends ArmsModel
 	{
 		return [
 			$this->contracts,
-			$this->arms,
 			$this->techs,
 			$this->materials,
 			$this->services,
@@ -536,7 +526,6 @@ class Contracts extends ArmsModel
 	{
 		$attaches='';
 		if (count($this->childs)) $attaches.='<span class="fas fa-paperclip" title="Привязаны документы: '.(count($this->childs)).'шт"></span>';
-		if (count($this->arms)) $attaches.='<span class="fas fa-desktop" title="Привязаны АРМы: '.(count($this->arms)).'шт"></span>';
 		if (count($this->techs)) $attaches.='<span class="fas fa-print" title="Привязана техника: '.(count($this->techs)).'шт"></span>';
 		if (count($this->licItems)) $attaches.='<span class="fas fa-award" title="Привязаны лицензии: '.(count($this->licItems)).'шт"></span>';
 		if (count($this->services)) $attaches.='<span class="fas fa-cog" title="Привязаны услуги: '.(count($this->services)).'шт"></span>';
@@ -567,14 +556,6 @@ class Contracts extends ArmsModel
 		return $this->hasMany(Scans::className(), ['contracts_id' => 'id']);
 	}
 
-	/**
-	 * Возвращает набор связанных Армов
-	 */
-	public function getArms()
-	{
-		return $this->hasMany(Arms::className(), ['id' => 'arms_id'])
-			->viaTable('{{%contracts_in_arms}}', ['contracts_id' => 'id']);
-	}
 
 	/**
 	 * Возвращает набор связанных Армов
@@ -600,26 +581,6 @@ class Contracts extends ArmsModel
 			->viaTable('{{%contracts_in_lics}}', ['contracts_id' => 'id']);
 	}
 
-	/**
-	 * набор всех армов привязанных к цепочке документов
-	 * @return \app\models\Arms[]
-	 */
-	public function getArmsChain()
-	{
-		//пытаемся обратиться к кэшу
-		if (!is_null($this->arms_chain_cache)) return $this->arms_chain_cache;
-
-		$chain=[];
-		//перебираем все документы
-		foreach ($this->successorsChain as $item) {
-			//в них все армы
-			foreach ($item->arms as $arm)
-				//добавляем по ИД, чтобы исключить задвоения
-				$chain[$arm->id] = $arm;
-		}
-		//кэшируем результат
-		return $this->arms_chain_cache=$chain;
-	}
 	
 	/**
 	 * набор всей техники привязанной к цепочке документов
@@ -634,14 +595,7 @@ class Contracts extends ArmsModel
 		$chain=[];
 		//перебираем все документы
 		foreach ($this->successorsChain as $item) $chain[]=$item->id;
-
-		/*{
-			//в них все армы
-			foreach ($item->techs as $tech)
-				//добавляем по ИД, чтобы исключить задвоения
-				$chain[$tech->id] = $tech;
-		}
-		//кэшируем результат*/
+		
 
 		return $this->hasMany(\app\models\Techs::className(),['id' => 'techs_id'])
 			->viaTable('{{%contracts_in_techs}}', ['contracts_id' => $chain]);
@@ -760,29 +714,35 @@ class Contracts extends ArmsModel
 	public static function fetchNextId() {
 		return static::find()->max("id")+1;
 	}
-
+	
+	/**
+	 * @param array $ids передаем список контрактов
+	 * @param string $form имя формы
+	 * @return string на выходе список хинтов
+	 */
 	public static function fetchArmsHint($ids,$form='') {
 
 		if (!is_array($ids))
 			$ids=explode(',',$ids);
-		$hint='';
-		if (!count($ids)) return $hint;
-		$arms=\app\models\Arms::find()
-			->joinWith('contracts')
-			->where(['arms_contracts.id'=>$ids])
-			->all();
-		if (!count($arms)) return $hint;
 
-		$hintTtip='В подсказке приведены АРМы из привязанных документов'.(strlen($form)?' (кликабельно)':'');
-		$hint="<span title=\"$hintTtip\">Подсказка</span>: ";
+		if (!count($ids)) return '';
+
+		$arms=\app\models\Techs::find()
+			->joinWith(['contracts','model.type'])
+			->where(['techs_contracts.id'=>$ids,'tech_types.is_computer'=>1])
+			->all();
+
+		if (!count($arms)) return '';
+
+		$hint='АРМы из привязанных документов: ';
 		foreach ($arms as $arm) {
 			/**
-			 * @var $arm Arms
+			 * @var $arm Techs
 			 */
-			$js=strlen($form)?(
-				"onclick=\"$('#$form-arms_id,#$form-arms_ids').val({$arm->id}).trigger('change');\""
-			):'';
-			$ttip=\yii\helpers\Url::to(['/arms/ttip','id'=>$arm->id]);
+			$js=strlen($form)?
+				"onclick=\"$('#$form-arms_id,#$form-arms_ids').val({$arm->id}).trigger('change');\"":
+				'';
+			$ttip=\yii\helpers\Url::to(['/techs/ttip','id'=>$arm->id]);
 			$hint.="<span class='href' qtip_ajxhrf='$ttip' $js>{$arm->num}</span> ";
 		}
 		return $hint;

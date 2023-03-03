@@ -1,8 +1,23 @@
 <?php
 
+use app\helpers\FieldsHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
+use app\models\TechModels;
+
+/*
+ * Для порядку: список жабаскриптовых свистоперделок:
+ * fetchArmsFromDocs - подгружает список АРМ из документов прикрепленных к оборудованию
+ * надо бы учитывать текущую модель: если мы сами АРМ, то не надо ничего предлагать
+ *
+ * fetchCommentFromModel - меняет название и подсказку примечания для телефонов
+ * (ну и если где-то еще в оборудовании переопределено)
+ * также открывает окно спецификаций и грузит в него подсказки, если для модели это определено
+ *
+ * при выборе АРМ скрываются соответствующие поля (которые подтягиваются из АРМ)
+ *
+ * для новых моделей подтягивается код формирования инвентарного номера
+ */
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
@@ -22,12 +37,14 @@ switch (Yii::$app->request->get('type')) {
         break;
 }
 
-	$no_specs_hint=\app\models\TechModels::$no_specs_hint;
-    $js = <<<JS
+$no_specs_hint=\app\models\TechModels::$no_specs_hint;
+$hint_icon=FieldsHelper::labelHintIcon;
+
+$js =  /** @lang JavaScript */ <<<JS
     //меняем подсказку выбора арм в при смене списка документов
     function fetchArmsFromDocs(){
-        docs=$("#techs-contracts_ids").val();
-        console.log(docs);
+        let docs=$("#techs-contracts_ids").val();
+        //console.log(docs);
         $.ajax({url: "/web/contracts/hint-arms?form=techs&ids="+docs})
         .done(function(data) {
             $("#arms_id-hint").html(data);
@@ -38,14 +55,19 @@ switch (Yii::$app->request->get('type')) {
     
     //меняем подсказки для разных типов оборудования
     function fetchCommentFromModel(){
-        model_id=$("#techs-model_id").val();
-        console.log(model_id);
+        let model_id=$("#techs-model_id").val();
+        //console.log(model_id);
+        
         $.ajax({url: "/web/tech-models/hint-comment?id="+model_id})
         .done(function(data) {
-            $('label[for="techs-comment"]').text(data['name']);
-            $("#comment-hint").html(data['hint']);
+            $('label[for="techs-comment"]')
+            	.html(data['name']+' $hint_icon')
+            	.attr('qtip_ttip',data['hint'])
+            	.tooltipster('destroy');
+            //$("#comment-hint").html(data['hint']);
         })
         .fail(function () {console.log("Ошибка получения данных!")});
+        
 		$.ajax({url: "/web/tech-models/hint-template?id="+model_id})
 			.done(function(data) {
 				if (data=="$no_specs_hint") {
@@ -56,6 +78,7 @@ switch (Yii::$app->request->get('type')) {
 				}
 			})
 			.fail(function () {console.log("Ошибка получения данных!")});
+		
 		$.ajax({url: "/web/tech-models/hint-description?id="+model_id})
 			.done(function(data) {
 				$("#model-hint").html(data);
@@ -64,7 +87,27 @@ switch (Yii::$app->request->get('type')) {
     }
     
 JS;
-    $this->registerJs($js, yii\web\View::POS_BEGIN);
+$this->registerJs($js, yii\web\View::POS_BEGIN);
+
+//формирование инвентарника регистрируем только для новых моделей
+$formInvNumJs = /** @lang JavaScript */ <<<JS
+	$('#techs-model_id, #techs-places_id, #techs-arms_id').on('change', function(){
+		$.ajax({
+			url: '/web/techs/inv-num?model_id='+
+			$('#techs-model_id').val()
+			+'&place_id='+
+			$('#techs-places_id').val()
+			+'&arm_id='+
+			$('#techs-arms_id').val(),
+			success: function(data) {
+				$('#techs-num').val(data);
+			}
+		});
+	});
+JS;
+
+if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD);
+
 ?>
 
 <div class="techs-form">
@@ -76,55 +119,72 @@ JS;
 	    'validateOnBlur' => true,
 	    'validateOnChange' => true,
 	    'validateOnSubmit' => true,
-	    'validationUrl' => $model->isNewRecord?['techs/validate']:['techs/validate','id'=>$model->id],
-	    //'options' => ['enctype' => 'multipart/form-data'],
-	    'action' => $model->isNewRecord?\yii\helpers\Url::to(['techs/create']):\yii\helpers\Url::to(['techs/update','id'=>$model->id,'return'=>'previous']),
+	    'validationUrl' => $model->isNewRecord?
+			['techs/validate']:
+			['techs/validate','id'=>$model->id],
+	    'action' => $model->isNewRecord?
+			['techs/create']:
+			['techs/update','id'=>$model->id,'return'=>'previous'],
     ]); ?>
 
     <div class="row">
         <div class="col-md-4" >
-			<?= $form->field($model, 'num')->textInput(['maxlength' => true]) ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'num') ?>
         </div>
         <div class="col-md-4" >
-			<?= $form->field($model, 'inv_num')->textInput(['maxlength' => true]) ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'inv_num') ?>
         </div>
         <div class="col-md-4" >
-			<?= $form->field($model, 'sn')->textInput(['maxlength' => true]) ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'sn') ?>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-6" >
-			<?= $form->field($model, 'model_id')->widget(Select2::className(), [
+			<?= FieldsHelper::Select2Field($form,$model, 'model_id', [
 				'data' => $techModels,
+				'itemsHintsUrl'=>\yii\helpers\Url::to(['/tech-models/ttip','q'=>'dummyVar']),
 				'options' => [
 			        'placeholder' => 'Выберите модель',
 					'onchange' => 'fetchCommentFromModel();'
                 ],
-				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'allowClear' => false,
-					'multiple' => false
 				]
 			]) ?>
         </div>
-        <div class="col-md-3" >
-			<?= $form->field($model, 'state_id')->widget(Select2::className(), [
+		<div class="col-md-2" >
+			<?php if (count($model->comps)) {
+				echo FieldsHelper::Select2Field($form, $model, 'comp_id', [
+					'data' => \yii\helpers\ArrayHelper::map($model->comps, 'id', 'name'),
+					'itemsHintsUrl'=>\yii\helpers\Url::to(['/comps/ttip','q'=>'dummyVar']),
+					'pluginOptions' => [
+						'dropdownParent' => $modalParent,
+						'allowClear' => false,
+					]
+				]);
+			} else { ?>
+				<div class="alert-striped w-100 p-2 mt-4 cursor-default"
+					 qtip_ttip="Когда/если к этому оборудованию АРМ будут привязаны ОС (делается из формы редактирования самой ОС),
+					 тогда тут можно будет выбрать какую из них считать основной">Отсутствуют привязанные ОС</div>
+			<?php } ?>
+		</div>
+        <div class="col-md-2" >
+			<?= FieldsHelper::Select2Field($form, $model, 'state_id', [
 				'data' => \app\models\TechStates::fetchNames(),
 				'options' => ['placeholder' => 'Выберите состояние оборудования',],
-				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'allowClear' => true,
-					'multiple' => false
 				]
 			]) ?>
         </div>
-        <div class="col-md-3" >
-		    <?= $form->field($model, 'comment')->textInput(['maxlength' => true])
-                ->hint(\app\models\TechModels::fetchTypeComment($model->model_id)['hint'],['id'=>'comment-hint'])
-                ->label(app\models\TechModels::fetchTypeComment($model->model_id)['name']) ?>
+        <div class="col-md-2" >
+		    <?= FieldsHelper::TextInputField($form,$model, 'comment',[
+				'hint'=>TechModels::fetchTypeComment($model->model_id)['hint'],
+				'label'=>app\models\TechModels::fetchTypeComment($model->model_id)['name']
+			]) ?>
         </div>
     </div>
 
@@ -165,31 +225,19 @@ JS;
 	
     <div class="row">
         <div class="col-md-6" >
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'ip',
-				'lines' => 1,
-			]) ?>
-
-
+			<?= FieldsHelper::TextAutoresizeField($form,$model,'ip',['lines' => 1,]) ?>
 		</div>
         <div class="col-md-6" >
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'mac',
-				'lines' => 1,
-			]) ?>
+			<?= FieldsHelper::TextAutoresizeField($form,$model,'mac',['lines' => 1,]) ?>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-4" >
-			<?= $form->field($model, 'arms_id')->widget(Select2::className(), [
-				'data' => \app\models\Arms::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'arms_id', [
+				'data' => \app\models\Techs::fetchArmNames(),
+				'itemsHintsUrl'=>\yii\helpers\Url::to(['/techs/ttip','q'=>'dummyVar']),
 				'options' => ['placeholder' => 'Выберите АРМ',],
-				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginEvents' =>[
                     'change'=>'function(){
                         if ($("#techs-arms_id").val()) {
@@ -203,34 +251,26 @@ JS;
                 ],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
 				]
 			])->hint(\app\models\Contracts::fetchArmsHint($model->contracts_ids,'techs'),['id'=>'arms_id-hint']) ?>
         </div>
 
 		<div class="col-md-4" id="tech-place-selector" <?= ($model->arms_id)?$hidden:'' ?>>
-			<?= $form->field($model, 'places_id')->widget(Select2::className(), [
+			<?= FieldsHelper::Select2Field($form,$model, 'places_id', [
 				'data' => \app\models\Places::fetchNames(),
 				'options' => ['placeholder' => 'Выберите помещение',],
-				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
 				]
 			]) ?>
 		</div>
 
 		<div class="col-md-4" id="tech-departments-selector" <?= ($model->arms_id)?$hidden:'' ?>>
-			<?= $form->field($model, 'departments_id')->widget(Select2::className(), [
+			<?= FieldsHelper::Select2Field($form,$model, 'departments_id', [
 				'data' => \app\models\Departments::fetchNames(),
 				'options' => ['placeholder' => 'Выберите подразделение',],
-				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
 				]
 			]) ?>
 		</div>
@@ -241,63 +281,61 @@ JS;
     </div>
 
     <div class="row" id="tech-users-selector" <?= ($model->arms_id)?$hidden:'' ?>>
-        <div class="col-md-6" >
-	        <?= $form->field($model, 'user_id')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchWorking(),
-		        'options' => ['placeholder' => 'Выберите сотрудника',],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-			        'allowClear' => true,
-			        'multiple' => false
-		        ]
-	        ]) ?>
+		<div class="row">
+			<div class="col-md-6" >
+				<?= FieldsHelper::Select2Field($form,$model, 'user_id', [
+					'data' => \app\models\Users::fetchWorking(),
+					'itemsHintsUrl'=>\yii\helpers\Url::to(['/users/ttip','q'=>'dummyVar']),
+					'options' => ['placeholder' => 'Выберите сотрудника',],
+					'pluginOptions' => [
+						'dropdownParent' => $modalParent,
+					]
+				]) ?>
 
-        </div>
-        <div class="col-md-6" >
-	        <?= $form->field($model, 'it_staff_id')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchWorking(),
-		        'options' => ['placeholder' => 'Выберите сотрудника',],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-			        'allowClear' => true,
-			        'multiple' => false
-		        ]
-	        ]) ?>
-        </div>
+			</div>
+			<div class="col-md-6" >
+				<?= FieldsHelper::Select2Field($form,$model, 'head_id', [
+					'data' => \app\models\Users::fetchWorking(),
+					'itemsHintsUrl'=>\yii\helpers\Url::to(['/users/ttip','q'=>'dummyVar']),
+					'options' => ['placeholder' => 'Выберите сотрудника',],
+					'pluginOptions' => [
+						'dropdownParent' => $modalParent,
+					]
+				]) ?>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6" >
+				<?= FieldsHelper::Select2Field($form,$model,'it_staff_id', [
+					'data' => \app\models\Users::fetchWorking(),
+					'itemsHintsUrl'=>\yii\helpers\Url::to(['/users/ttip','q'=>'dummyVar']),
+					'options' => ['placeholder' => 'Выберите сотрудника',],
+					'pluginOptions' => [
+						'dropdownParent' => $modalParent,
+					]
+				]) ?>
+			</div>
+			<div class="col-md-6" >
+				<?= FieldsHelper::Select2Field($form,$model,'responsible_id', [
+					'data' => \app\models\Users::fetchWorking(),
+					'itemsHintsUrl'=>\yii\helpers\Url::to(['/users/ttip','q'=>'dummyVar']),
+					'options' => ['placeholder' => 'Выберите сотрудника',],
+					'pluginOptions' => [
+						'dropdownParent' => $modalParent,
+					]
+				]) ?>
+
+			</div>
+		</div>
     </div>
-
-
-
-	<?php
-	$js = <<<JS
-//переводим сабмит на голый аякс
-$('#techs-model_id, #techs-places_id, #techs-arms_id').on('change', function(){
-    $.ajax({
-        url: '/web/techs/inv-num?model_id='+
-        $('#techs-model_id').val()
-        +'&place_id='+
-        $('#techs-places_id').val()
-        +'&arm_id='+
-        $('#techs-arms_id').val(),
-        success: function(data) {
-            $('#techs-num').val(data);
-        }
-    });
-}); 
-JS;
-
-	if ($model->isNewRecord) $this->registerJs($js);
-	?>
-
-	<?= $form->field($model, 'contracts_ids')->widget(Select2::className(), [
+	
+	<?= FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
 		'data' => \app\models\Contracts::fetchNames(),
+		'itemsHintsUrl'=>\yii\helpers\Url::to(['/contracts/ttip','q'=>'dummyVar']),
 		'options' => [
             'placeholder' => 'Выберите документы',
 			'onchange' => 'fetchArmsFromDocs();'
         ],
-		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
 			'allowClear' => true,
 			'multiple' => true
@@ -306,22 +344,12 @@ JS;
 	
 	
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'url',
-		'lines' => 3,
-	]) ?>
+	<?= FieldsHelper::TextAutoresizeField($form,$model,'url',['lines' => 2,]) ?>
 	
-	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'history',
-		'lines' => 4,
-	]) ?>
+	<?= FieldsHelper::TextAutoresizeField($form,$model,'history',['lines' => 3,]) ?>
 
-    <div class="form-group">
+
+	<div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 

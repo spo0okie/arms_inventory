@@ -126,7 +126,7 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($renderer) {
 					$output = [];
 					if (is_array($data->arms)) foreach ($data->arms as $arm)
-						$output[] = $renderer->render('/arms/item', ['model' => $arm,'short'=>true]);
+						$output[] = $renderer->render('/techs/item', ['model' => $arm,'short'=>true]);
 					return count($output) ? implode(', ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']

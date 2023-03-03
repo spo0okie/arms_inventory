@@ -73,20 +73,10 @@ if (!isset($static_view)) $static_view=false;
 
 
     <?php if (!$static_view) {
-		if (
-				count($model->arms) ||
-				count($model->techs)
-		) { ?>
+		if (count($model->techs)) { ?>
 			<h4>Привязанное оборудование</h4>
-			<?php if (count($model->arms)) { ?>
-				Пользователь АРМ:
-				<?php foreach ($model->arms as $arm) echo $this->render('/arms/item',['model'=>$arm]) ?>
-				<br />
-			<?php } ?>
 			<?php if (count($model->techs)) { ?>
-				Пользователь техники:
 				<?php foreach ($model->techs as $tech) echo $this->render('/techs/item',['model'=>$tech]) ?>
-				<br />
 			<?php } ?>
 		<?php }
 		} ?>

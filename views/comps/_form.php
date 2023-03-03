@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
-use \app\models\Arms;
+use \app\models\OldArms;
 use yii\bootstrap5\Modal;
 use kartik\select2\Select2;
 
@@ -13,9 +13,6 @@ use kartik\select2\Select2;
 /* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
 
-$arms=\yii\helpers\ArrayHelper::map(Arms::find()->all(),'id','num');
-$arms['']='-Отсутствует-';
-asort($arms);
 ?>
 
 <div class="comps-form">
@@ -38,7 +35,7 @@ asort($arms);
 	<div class="row">
 		<div class="col-md-6">
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'arm_id', [
-				'data' => \app\models\Arms::fetchNames(),
+				'data' => \app\models\Techs::fetchArmNames(),
 				'options' => ['placeholder' => 'Выберите АРМ',],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,

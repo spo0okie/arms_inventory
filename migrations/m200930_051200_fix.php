@@ -12,7 +12,7 @@ class m200930_051200_fix extends Migration
      */
     public function safeUp()
     {
-		$arms= \app\models\Arms::find()->all();
+		$arms= \app\models\OldArms::find()->all();
 		foreach ($arms as $arm) {
 			echo "checking arm ".$arm->id."\n";
 			if (count($arm->comps)) {

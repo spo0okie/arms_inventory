@@ -45,22 +45,10 @@ if (!isset($modalParent)) $modalParent=null;
         </div>
     </div>
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
 	        <?= $form->field($model, 'comment')->textInput() ?>
         </div>
-        <div class="col-md-4">
-	        <?= $form->field($model, 'arms_id')->widget(Select2::className(), [
-		        'data' => \app\models\Arms::fetchNames(),
-		        'options' => ['placeholder' => 'Выберите АРМ назначения',],
-		        'toggleAllSettings'=>['selectLabel'=>null],
-		        'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-			        'allowClear' => true,
-			        'multiple' => false
-		        ],
-	        ]) ?>
-        </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
 	        <?= $form->field($model, 'techs_id')->widget(Select2::className(), [
 		        'data' => \app\models\Techs::fetchNames(),
 		        'options' => ['placeholder' => 'Выберите оборудование назначения',],

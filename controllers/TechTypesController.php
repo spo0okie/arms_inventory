@@ -67,34 +67,16 @@ class TechTypesController extends Controller
 	    
 	    $model=$this->findModel($id);
 			
-		if (\app\models\TechTypes::isPC($model->id)) {
+		if (!isset($params['TechsSearch'])) $params['TechsSearch']=[];
+		$params['TechsSearch']['type_id']=$id;
+		$searchModel = new \app\models\TechsSearch();
+		$dataProvider = $searchModel->search($params);
+		return $this->render('view', [
+			'model' => $model,
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
+		]);
 			
-			if (!isset($params['ArmsSearch'])) $params['ArmsSearch']=[];
-			$params['ArmsSearch']['type_id']=$id;
-			$armsSearchModel = new \app\models\ArmsSearch();
-			$armsDataProvider = $armsSearchModel->search($params);
-			return $this->render('view', [
-				'model' => $model,
-				'armsSearchModel' => $armsSearchModel,
-				'armsDataProvider' => $armsDataProvider,
-			]);
-			
-		} else {
-			
-			if (!isset($params['TechsSearch'])) $params['TechsSearch']=[];
-			$params['TechsSearch']['type_id']=$id;
-			$techsSearchModel = new \app\models\TechsSearch();
-			$techsDataProvider = $techsSearchModel->search($params);
-			return $this->render('view', [
-				'model' => $model,
-				'techsSearchModel' => $techsSearchModel,
-				'techsDataProvider' => $techsDataProvider,
-			]);
-			
-		}
-	    
-
-
     }
 
 

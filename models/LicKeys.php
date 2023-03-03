@@ -9,19 +9,18 @@ namespace app\models;
  * @property int $id id
  * @property int $lic_items_id Закупка
  * @property array $softIds Ссылка на софт
- * @property array $arms_ids
- * @property array $comps_ids Ссылка на ОСи
- * @property array $users_ids Ссылка на пользователей
- * @property string $key_text Ключ
- * @property string $keyShort начало и конец ключа (чтобы не палить везде ключ целиком)
- * @property string $comment Допольнительно
- * @property string $sname
- * @property string $dname
-
+ * @property array                $arms_ids
+ * @property array                $comps_ids Ссылка на ОСи
+ * @property array                $users_ids Ссылка на пользователей
+ * @property string               $key_text Ключ
+ * @property string               $keyShort начало и конец ключа (чтобы не палить везде ключ целиком)
+ * @property string               $comment Допольнительно
+ * @property string               $sname
+ * @property string               $dname
  * @property \app\models\LicItems $licItem закупка
- * @property Arms[] $arms АРМы
- * @property Comps[] $comps
- * @property Users[] $users
+ * @property Techs[]	          $arms АРМы
+ * @property Comps[]              $comps
+ * @property Users[]              $users
  */
 class LicKeys extends \yii\db\ActiveRecord
 {
@@ -110,7 +109,7 @@ class LicKeys extends \yii\db\ActiveRecord
 	 */
 	public function getArms()
 	{
-		return $this->hasMany(Arms::className(), ['id' => 'arms_id'])
+		return $this->hasMany(Techs::className(), ['id' => 'arms_id'])
 			->viaTable('{{%lic_keys_in_arms}}', ['lic_keys_id' => 'id']);
 	}
 	

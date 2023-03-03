@@ -5,11 +5,19 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Places */
-/* @var $arms app\models\Arms[] */
+/* @var $arms app\models\Techs[] */
 /* @var $techs app\models\Techs[] */
 
-$arms=$model->arms;
-$techs=$model->techs;
+$arms=[];
+$techs=[];
+foreach ($model->techs as $item) {
+	if ($item->isComputer) {
+		$arms[]=$item;
+	} else {
+		$techs[]=$item;
+	}
+}
+
 $materials=$model->materials;
 $attached=0; //техника прикрепленная к АРМ
 //foreach ($arms as $arm) foreach ($arm->techs as $tech)
@@ -30,19 +38,21 @@ foreach ($arms as $arm ) {
 			'model'=>$arm,
 			'cabinet_col'=>strlen($content)?null:$cabinet_col,
 			'show_archived'=>$show_archived,
+			'techs'=>$techs
 		]
 	);
 	//убираем из рендера оборудования в помещении то, что прилипло к АРМ
-	foreach ($arm->voipPhones as $phone)
+	/*foreach ($arm->voipPhones as $phone)
 		foreach ($techs as $i=>$tech) if ($tech['id']==$phone['id']) unset($techs[$i]);
 	foreach ($arm->ups as $upsItem)
 		foreach ($techs as $i=>$tech) if ($tech['id']==$upsItem['id']) unset($techs[$i]);
 	foreach ($arm->monitors as $monitorItem)
-		foreach ($techs as $i=>$tech) if ($tech['id']==$monitorItem['id']) unset($techs[$i]);
+		foreach ($techs as $i=>$tech) if ($tech['id']==$monitorItem['id']) unset($techs[$i]);*/
 }
 
 
 foreach ($techs as $tech )
+	if (!($tech->num=='rendered'))
 	$content.=$this->render(
 		'/techs/tdrow',[
 			'model'=>$tech,

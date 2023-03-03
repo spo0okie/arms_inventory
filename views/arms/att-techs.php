@@ -8,8 +8,8 @@ use yii\helpers\Html;
 use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Arms */
-    $techs = $model->techs;
+/* @var $model app\models\Techs */
+    $techs = $model->armTechs;
     if (!isset($static_view)) $static_view=false;
     $model_id=$model->id;
 ?>

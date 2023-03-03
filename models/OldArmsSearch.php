@@ -5,12 +5,12 @@ namespace app\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Arms;
+use app\models\OldArms;
 
 /**
  * ArmsSearch represents the model behind the search form of `\app\models\Arms`.
  */
-class ArmsSearch extends Arms
+class OldArmsSearchArchived extends OldArms
 {
 	public $comp_hw;
 	public $comp_ip;
@@ -30,23 +30,23 @@ class ArmsSearch extends Arms
             [['id'], 'integer'],
 			[['state_id'],'each','rule'=>['integer']],
             [[
-            	'num',
-				'inv_num',
-				'inv_sn',
-				'model_id',
-				'sn',
-				'user_id',
-				'places_id',
-				'userDep',
+            	//'num',
+				//'inv_num',
+				//'inv_sn',
+				//'sn',
+				//'model_id',
+				//'user_id',
+				//'places_id',
+				//'userDep',
+				//'user_position',
 				'departments_id',
-				'comp_ip',
-				'comp_mac',
+				//'comp_ip',
+				//'comp_mac',
 				'comp_id',
 				'model_id',
 				'model_name',
 				'type_id',
 				'model_id',
-				'user_position',
 				'comp_hw'
 			], 'safe'],
         ];
@@ -70,7 +70,7 @@ class ArmsSearch extends Arms
      */
     public function search($params)
     {
-        $query = Arms::find()
+        $query = OldArms::find()
 	        ->joinWith(['user.orgStruct','techModel.manufacturer','comp.netIps','place','contracts','licItems','licGroups','licKeys','department']);
 
         $this->load($params);
@@ -135,21 +135,26 @@ class ArmsSearch extends Arms
         }
 
         $query
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('num', $this->num))
-	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('inv_num', $this->inv_num))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('sn', $this->sn))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('concat(sn, ", ", inv_num)', $this->inv_sn))
-	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('users.Ename', $this->user_id))
-	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('users.Doljnost', $this->user_position))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.ip', $this->comp_ip))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.mac', $this->comp_mac))
-	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.name', $this->comp_id))
+			//->andFilterWhere(\app\helpers\QueryHelper::querySearchString('num', $this->num))
+	        //->andFilterWhere(\app\helpers\QueryHelper::querySearchString('inv_num', $this->inv_num))
+			//->andFilterWhere(\app\helpers\QueryHelper::querySearchString('sn', $this->sn))
+			//->andFilterWhere(\app\helpers\QueryHelper::querySearchString('concat(sn, ", ", inv_num)', $this->inv_sn))
+	        //->andFilterWhere(\app\helpers\QueryHelper::querySearchString('users.Ename', $this->user_id))
+	        //->andFilterWhere(\app\helpers\QueryHelper::querySearchString('users.Doljnost', $this->user_position))
+			//->andFilterWhere(\app\helpers\QueryHelper::querySearchString('org_struct.name',$this->userDep))
+
+			//->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.ip', $this->comp_ip))
+			//->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.mac', $this->comp_mac))
+			
+	        //->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.name', $this->comp_id))
 			//->andFilterWhere(['or like', 'comps.raw_hw', \yii\helpers\StringHelper::explode($this->comp_hw,'|',true,true)])
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.raw_hw',$this->comp_hw))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('departments.name',$this->departments_id))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('org_struct.name',$this->userDep))
-			->andFilterWhere(\app\helpers\QueryHelper::querySearchString('concat(manufacturers.name," ",arms_models.name)',$this->model_name))
-	        ->andFilterWhere(\app\helpers\QueryHelper::querySearchString('getplacepath({{places}}.id)', $this->places_id))
+
+			//->andFilterWhere(\app\helpers\QueryHelper::querySearchString('comps.raw_hw',$this->comp_hw))
+
+			//->andFilterWhere(\app\helpers\QueryHelper::querySearchString('departments.name',$this->departments_id))
+
+			//->andFilterWhere(\app\helpers\QueryHelper::querySearchString('concat(manufacturers.name," ",arms_models.name)',$this->model_name))
+	        //->andFilterWhere(\app\helpers\QueryHelper::querySearchString('getplacepath({{places}}.id)', $this->places_id))
 			->andFilterWhere(['arms.model_id'=>$this->model_id])
 	        ->andFilterWhere(['arms_models.type_id'=>$this->type_id])
 			->andFilterWhere(['arms.state_id'=>$this->state_id])

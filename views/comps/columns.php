@@ -10,7 +10,7 @@ use kartik\grid\GridView;
 
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\ArmsSearch */
+/* @var $searchModel app\models\OldArmsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $renderer = $this;
@@ -28,7 +28,7 @@ return [
 	],
 	'arm_id' => [
 		'value' => function ($data) use ($renderer) {
-			return is_object($data->arm) ? $renderer->render('/arms/item', ['model' => $data->arm]) : null;
+			return is_object($data->arm) ? $renderer->render('/techs/item', ['model' => $data->arm]) : null;
 		},
 	],
 	'ip' => [
@@ -57,7 +57,7 @@ return [
 		},
 	],
 	'places_id' => [
-		'model' => new \app\models\Arms(),
+		'model' => new \app\models\Techs(),
 		'value' => function ($data) use ($renderer) {
 			return (is_object($data->arm)&&is_object($data->arm->place)) ?
 				$renderer->render('/places/item', ['model' => $data->arm->place, 'full' => 1])
