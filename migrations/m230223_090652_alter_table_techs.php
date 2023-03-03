@@ -30,6 +30,7 @@ class m230223_090652_alter_table_techs extends Migration
      */
     public function safeUp()
     {
+		$this->execute("ALTER TABLE techs ROW_FORMAT=DYNAMIC");
     	$this->addColumnIfNotExist('techs','comp_id',$this->integer()->null(),true);
 		$this->addColumnIfNotExist('techs','installed_id',$this->integer()->null(),true);
 		$this->addColumnIfNotExist('techs','installed_pos',$this->string(16));
