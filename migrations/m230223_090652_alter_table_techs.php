@@ -32,7 +32,7 @@ class m230223_090652_alter_table_techs extends Migration
     {
     	$this->addColumnIfNotExist('techs','comp_id',$this->integer()->null(),true);
 		$this->addColumnIfNotExist('techs','installed_id',$this->integer()->null(),true);
-		$this->addColumnIfNotExist('techs','installed_pos',$this->string(128));
+		$this->addColumnIfNotExist('techs','installed_pos',$this->string(16));
 		$this->addColumnIfNotExist('techs','head_id',$this->integer()->null(),true);
 		$this->addColumnIfNotExist('techs','responsible_id',$this->integer()->null(),true);
 		$this->addColumnIfNotExist('techs','hw',$this->text()->defaultValue(''));
