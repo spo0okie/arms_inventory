@@ -3,6 +3,7 @@
 namespace app\modules\api\controllers;
 
 use app\models\Domains;
+use app\models\Techs;
 
 
 class PhonesController extends \yii\rest\ActiveController
@@ -22,6 +23,9 @@ class PhonesController extends \yii\rest\ActiveController
 		$tech = \app\models\Techs::find()
 			->where(['comment' => $num ])
 			->one();
+		/**
+		 * @var $tech Techs
+		 */
 		//если нашли
 		if (is_object($tech)){
 			//он прикреплен к АРМ?
@@ -43,6 +47,9 @@ class PhonesController extends \yii\rest\ActiveController
 		$tech = \app\models\Techs::find()
 			->where(['comment' => $num ])
 			->one();
+		/**
+		 * @var $tech Techs
+		 */
 		//если нашли
 		if (is_object($tech)){
 			//он прикреплен к АРМ?
@@ -62,6 +69,9 @@ class PhonesController extends \yii\rest\ActiveController
 				'Uvolen'=>false
 			])
 			->one();
+		/**
+		 * @var $user Users
+		 */
 		if (is_object($user))
 			return $user->Ename;
 		
@@ -76,27 +86,31 @@ class PhonesController extends \yii\rest\ActiveController
 			$user = \app\models\Users::find()
 			->where(['Login'=>$login])
 			->one();
+		/**
+		 * @var $user Users
+		 */
+
 		//если нашли
 		//var_dump($user);
 		$return=[];
 		if (is_object($user)){
 			//он прикреплен к АРМ?
-			$arms=$user->arms;
+			$techs=$user->techs;
 			//var_dump($arms);
-			if (is_array($arms)) {
+			if (is_array($techs)) {
 				//перебираем армы
-				foreach ($arms as $arm){
-				//ищем у них телефоны
-				$phones=$arm->voipPhones;
-				//var_dump($phones);
-				if (is_array($phones)) foreach ($phones as $phone) {
-					if (strlen($phone->comment) && (int)$phone->comment)
-						$return[(int)$phone->comment]=(int)$phone->comment;
+				foreach ($techs as $tech) {
+					//ищем у них телефоны
+					$phones = $tech->voipPhones;
+					//var_dump($phones);
+					if (is_array($phones)) foreach ($phones as $phone) {
+						if (strlen($phone->comment) && (int)$phone->comment)
+							$return[(int)$phone->comment] = (int)$phone->comment;
+					}
+					if ($tech->isVoipPhone && strlen($tech->comment) && (int)$tech->comment) {
+						$return[(int)$tech->comment] = (int)$tech->comment;
+					}
 				}
-			}}
-			if (is_object($techs=$user->techs)) foreach ($techs as $tech)
-				if ($tech->isVoipPhone && strlen($tech->comment) && (int)$tech->comment) {
-					$return[(int)$tech->comment]=(int)$tech->comment;
 			}
 			if (count($return))
 				return implode(', ',$return);

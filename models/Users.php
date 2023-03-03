@@ -35,6 +35,7 @@ use Yii;
  * @property Comps[]     $comps
  * @property Comps[]     $compsFromServices
  * @property Comps[]     $compsTotal
+ //* @property Techs[]     $arms
  * @property Techs[]     $techs
  * @property Techs[]     $techsIt
  * @property Techs[]     $techsHead
@@ -199,9 +200,9 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
     {
         return $this->hasMany(Techs::className(), ['head_id' => 'id']);
     }
-
-
-
+	
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -209,7 +210,8 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	{
 		return $this->hasMany(Techs::className(), ['user_id' => 'id']);
 	}
-
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
