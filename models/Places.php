@@ -353,4 +353,13 @@ DELIMITER ;
 		return '';
 	}
 
+	public function getReverseLinks() {
+		return [
+			$this->techs,
+			$this->childs,
+			$this->materials,
+			$this->phones,
+			$this->inets,
+		];
+	}
 }

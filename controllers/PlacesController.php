@@ -15,8 +15,9 @@ use yii\filters\VerbFilter;
 /**
  * PlacesController implements the CRUD actions for Places model.
  */
-class PlacesController extends Controller
+class PlacesController extends ArmsBaseController
 {
+	public $modelClass='\app\models\Places';
     /**
      * @inheritdoc
      */
@@ -42,20 +43,7 @@ class PlacesController extends Controller
 	    ];
 	    return $behaviors;
     }
-
-
-	/**
-	 * Displays a tooltip.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionTtip($id)
-	{
-		return $this->renderPartial('ttip', [
-			'model' => $this->findModel($id),
-		]);
-	}
+    
 
     /**
      * Lists all Places models.
@@ -159,45 +147,7 @@ class PlacesController extends Controller
         ]);
     }
 
-    /**
-     * Creates a new Places model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new Places();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['armmap']);
-        }
-
-        if ($parent_id=Yii::$app->request->get('parent_id')) $model->parent_id=$parent_id;
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Updates an existing Places model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param string $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['armmap']);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
 
     /**
      * Deletes an existing Places model.

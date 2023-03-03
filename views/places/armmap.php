@@ -22,7 +22,4 @@ echo $this->render('hdr_create_obj');
 		echo $this->render('container',['model'=>$model,'models'=>$models,'depth'=>0,'show_archived'=>$show_archived]);
 	} ?>
     <br />
-	<?= Html::a('Добавить помещение первого уровня',['places/create']) ?>
-
-
 </div>
