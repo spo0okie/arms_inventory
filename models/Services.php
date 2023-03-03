@@ -42,28 +42,28 @@ use yii\web\User;
  * @property int[] $techs_ids
  * @property int[] $contracts_ids
  * @property int $totalUnpaid
- * @property int $weight
- * @property string $firstUnpaid
+ * @property int                    $weight
+ * @property string                 $firstUnpaid
  *
  *
- * @property \app\models\Comps[] $comps
+ * @property \app\models\Comps[]    $comps
  * @property \app\models\Services[] $depends
  * @property \app\models\Services[] $dependants
  * @property \app\models\UserGroups $userGroup
- * @property \app\models\Techs[] $techs
- * @property \app\models\Techs[] $techsRecursive
- * @property \app\models\Arms[] $arms
- * @property \app\models\Arms[] $armsRecursive
- * @property Places $place
- * @property Places[] $armPlaces
- * @property Places[] $techPlaces
- * @property Places[] $phonesPlaces
- * @property Places[] $inetsPlaces
- * @property Places[] $places
- * @property Places[] $sites
- * @property Places[] $sitesRecursive
- * @property Services $parentService
- * @property Services $parent
+ * @property \app\models\Techs[]    $techs
+ * @property \app\models\Techs[]    $techsRecursive
+ * @property Techs[]  				$arms
+ * @property Techs[]  				$armsRecursive
+ * @property Places                 $place
+ * @property Places[]               $armPlaces
+ * @property Places[]               $techPlaces
+ * @property Places[]               $phonesPlaces
+ * @property Places[]               $inetsPlaces
+ * @property Places[]               $places
+ * @property Places[]               $sites
+ * @property Places[]               $sitesRecursive
+ * @property Services               $parentService
+ * @property Services               $parent
  * @property Services[] $children
  * @property Schedules $providingSchedule
  * @property Schedules $providingScheduleRecursive
@@ -260,7 +260,7 @@ class Services extends ArmsModel
 				'hint' => 'Сегмент ИТ инфраструктуры к которому относится этот сервис',
 			],
 			'segment' => ['alias'=>'segment_id'],
-			'arms' => [Arms::$title],
+			'arms' => [Techs::$title],
 			'archived' => [
 				'Архивирован',
 				'hint' => 'Если сервис/услуга более не используется, но для истории его описание лучше сохранить - то его можно просто заархивировать, чтобы не отсвечивал',
@@ -545,7 +545,7 @@ class Services extends ArmsModel
 	
 	public function getArms()
 	{
-		return $this->hasMany(Arms::class, ['id' => 'arm_id'])
+		return $this->hasMany(Techs::class, ['id' => 'arm_id'])
 			//->from(['svc_arms'=>Arms::tableName()])
 			->via('comps');
 	}

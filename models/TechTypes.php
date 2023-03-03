@@ -8,6 +8,10 @@ use Yii;
  * This is the model class for table "tech_types".
  *
  * @property int $id id
+ * @property bool $is_computer
+ * @property bool $is_display
+ * @property bool $is_ups
+ * @property bool $is_phone
  * @property string $code Код
  * @property string $prefix Префикс
  * @property string $name Название
@@ -17,30 +21,12 @@ use Yii;
  *
  * @property TechModels[] $techModels
  */
-class TechTypes extends \yii\db\ActiveRecord
+class TechTypes extends ArmsModel
 {
 
 
 	public static $title='Категории оборудования';
 	public static $descr='Используемые категории различной техники для удобной группировки';
-	//категории телефония
-	public static $Phones=['voip_phone'];
-	public static $Phones_ids=null;
-	//какие категории относятся к ПК
-	public static $PCs=['laptop','aio_pc','pc','srv'];
-	public static $PCs_ids=null;
-	//категории UPS
-	public static $Ups=['ups'];
-	public static $ups_ids=null;
-	//категории Monitors
-	public static $Monitors=['display'];
-	public static $monitors_ids=null;
-
-
-
-	//кэш трансляции кодов в ИД и обратно
-	private static $code_ids=[];
-	private static $id_codes=[];
 
     /**
      * {@inheritdoc}
@@ -56,48 +42,94 @@ class TechTypes extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-	        [['code', 'name', 'prefix', 'comment'], 'required'],
+	        [['code', 'name', 'comment'], 'required'],
+			[['is_computer','is_phone','is_display','is_ups'],'boolean'],
             [['comment'], 'string'],
 	        [['code', 'name'], 'string', 'max' => 128,'min'=>2],
 	        [['comment_hint'], 'string', 'max' => 128],
 	        [['comment_name'], 'string', 'max' => 32],
-	        [['prefix'], 'string', 'max' => 16,'min'=>2],
+	        [['prefix'], 'string', 'max' => 5,'min'=>2],
         ];
     }
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
 			'id' => 'id',
-			'code' => 'Код',
-			'name' => 'Название',
-			'prefix' => 'Префикс инв. номера',
-			'techModelsCount' => '# Моделей',
-			'usages' => '# Обор-я',
-			'comment' => 'Шаблон описаний',
-			'comment_name' => 'Замена комментария',
-			'comment_hint' => 'Пояснение поля комментария',
+			'code' => [
+				'Код',
+				'hint' => 'Может использоваться впоследствии для отдельных обработчиков событий и генерации CSS классов в формах просмотра и отчетах',
+			],
+			'name' => [
+				'Название',
+				'hint' => 'Понятное название категории оборудования<br><br>'.
+					'Пример:<i>МФУ, VoIP Телефоны, ИБП, Радиостанции, WiFi AP, Маршрутизатор</i> ',
+			],
+			'prefix' => [
+				'Префикс инв. номера',
+				'hint' => 'При формировании инвентарного номера будет использоваться второй префикс<br>'.
+					'для пояснения категории оборудования и объединения оборудования в одну группу<br>'.
+					'Пример: <i>МСК-<b>МФУ</b>-0017, СПБ-<b>ИБП</b>-0102, ЧЕЛ-<b>ТЕЛ</b>-0033</i><br><br>'.
+					'Если не указать, то всему оборудованию этой категории (и других без дополнительного префикса)<br>'.
+ 					'будет предложена сквозная нумерация на основе первоначального помещения<br>'.
+					'(где оборудование изначально было введено в эксплуатацию)<br>'.
+					'Пример: <i>МСК-000017, СПБ-000102, ЧЕЛ-000033</i>'
+			],
+			
+			'techModelsCount' => [
+				'# Моделей',
+			],
+			'usages' => [
+				'# Обор-я',
+			],
+			'comment' => [
+				'Шаблон описания моделей',
+				'hint' => 'Те характеристики, которые нужно будет указывать при описании моделей оборудования<br>'.
+					'Будет выводиться в форме создания/редактирования модели оборудования (этой категории),<br>'.
+					'чтобы не забыть указать в описании модели важные (для этой категории оборудования) параметры и характеристики',
+			],
+			'comment_name' => [
+				'Замена комментария',
+				'hint' => 'Если заполнено, то у оборудования этой категории вместо поля "комментарий"<br>'.
+					'будет выводиться внесенное здесь название (дополнительный ключевой параметр)<br>'.
+				'Например <b>№ тел</b> для телефонов или <b>IMEI</b> для модемов',
+			],
+			'comment_hint' => [
+				'Пояснение поля комментария',
+				'hint' => 'Если предыдущий параметр заполнен,<br> '.
+					'то этим параметром можно сделать подсказку для заполнения кастомного поля комментария.<br>'.
+					'Выводиться будет также как эта подсказка',
+			],
+			'is_computer' => [
+				'Компьютер',
+				'hint' => 'Является разновидностью компьютера. <br>'.
+					'Оборудование этой категории будет считаться обязательным для формирования АРМ<br>'.
+					'Пример: <i>ПК, ноутбук, моноблок, сервер</i>',
+			],
+			'is_phone' => [
+				'Телефон',
+				'hint' => 'Является разновидностью телефона. <br>'.
+					'При прикреплении к АРМ будет трактоваться как пользовательский телефон,<br>'.
+					'а телефонный номер устройства будет прикреплен к пользователю АРМ как внутренний номер.<br>'.
+					'<i>Пример: VoIP телефон, аналоговый телефон, DECT телефон</i>',
+			],
+			'is_ups' => [
+				'ИБП',
+				'hint' => 'Является разновидностью ИБП. <br>'.
+					'При прикреплении к АРМ будет выводится как ИБП',
+			],
+			'is_display' => [
+				'Дисплей',
+				'hint' => 'Является разновидностью дисплея.<br>'.
+					'При прикреплении к АРМ будет трактоваться как дисплей<br>'.
+					'<i>Прим: монитор, проектор, ТВ</i>',
+			],
 		];
 	}
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			//'id' => 'id',
-			'code' => 'Может использоваться впоследствии для отдельных обработчиков событий и генерации CSS классов в формах просмотра и отчетах',
-			'name' => 'Понятное название типа техники: чб МФУ А4, VoIP Телефоны, ИБП, Радиостанции, WiFi AP, Маршрутизатор',
-			'prefix' => 'При формировании инвентарного номера будет использоваться дополнительный префикс типа техники',
-			'comment' => 'Те характеристики, которые нужно укаывзать при описании модели',
-			'comment_name' => 'Если заполнено, то у оборудования этого типа вместо поля "комменатрий" будет выводиться другое. Например №тел для телефонов или IMEI для модемов',
-			'comment_hint' => 'Если предыдущий параметр заполнен, то этим параметром можно сделать Hint для заполнения кастомного поля комментария. Как вот эта надпись под полем ввода.',
-		];
-	}
 
 	/**
 	 * @return \yii\db\ActiveQuery
@@ -133,95 +165,7 @@ class TechTypes extends \yii\db\ActiveRecord
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}
-
-	/**
-	 * Возвращает ИД категории по коду и кэширует запросы
-	 * @param $code
-	 * @return int|mixed
-	 */
-	public static function getCodeId($code) {
-		if (isset(static::$code_ids[$code])) return static::$code_ids[$code];
-		$obj=static::findOne(['code'=>$code]);
-		return static::$code_ids[$code]=is_object($obj)?$obj->id:null;
-	}
-
-	/**
-	 * наоборот
-	 * @param integer $id
-	 * @return string
-	 */
-	public static function getIdCode($id) {
-		if (isset(static::$id_codes[$id])) return static::$id_codes[$id];
-		return static::$id_codes[$id]=static::findOne($id)->code;
-	}
 	
-	/**
-	 * Заполняяет массив $ids идентифкаторами оборудования с кодами из $codes
-	 * @param $codes
-	 * @param $ids
-	 */
-	public static function fetchTypeIds($codes,&$ids) {
-		$ids=[];
-		foreach ($codes as $code)
-			$ids[]=static::getCodeId($code);
-		return $ids;
-	}
-
-	public static function fetchPhonesIds() {
-		if (isset(static::$Phones_ids)) return static::$Phones_ids;
-		return static::fetchTypeIds(static::$Phones,static::$Phones_ids);
-	}
-
-	public static function fetchPCsIds() {
-		if (isset(static::$PCs_ids)) return static::$PCs_ids;
-		return static::fetchTypeIds(static::$PCs,static::$PCs_ids);
-	}
-	
-	public static function fetchUpsIds() {
-		if (isset(static::$ups_ids)) return static::$ups_ids;
-		return static::fetchTypeIds(static::$Ups,static::$ups_ids);
-	}
-	
-	public static function fetchMonitorIds() {
-		if (isset(static::$monitors_ids)) return static::$monitors_ids;
-		return static::fetchTypeIds(static::$Monitors,static::$monitors_ids);
-	}
-	
-	/**
-	 * Возвращает признак того, что это оборудование ПК
-	 * @param $id
-	 * @return bool
-	 */
-	public static function isPC($id){
-		return array_search($id,static::fetchPCsIds())!==false;
-	}
-
-	/**
-	 * Возвращает признак того, что это оборудование Телефон
-	 * @param $id
-	 * @return bool
-	 */
-	public static function getIsPhone($id) {
-		return array_search($id,static::fetchPhonesIds())!==false;
-	}
-	
-	/**
-	 * Возвращает признак того, что это оборудование Телефон
-	 * @param $id
-	 * @return bool
-	 */
-	public static function getIsUps($id) {
-		return array_search($id,static::fetchUpsIds())!==false;
-	}
-	
-	/**
-	 * Возвращает признак того, что это оборудование Монитор
-	 * @param $id
-	 * @return bool
-	 */
-	public static function getIsMonitor($id) {
-		return array_search($id,static::fetchMonitorIds())!==false;
-	}
 	
 	
 }

@@ -18,7 +18,7 @@ $comps=count($services)?$model->compsTotal:$model->comps;
 		</div>
 		<div class="col-md-4">
 			<h2>Рабочее место</h2>
-			<?php foreach ($model->arms as $arm)
+			<?php foreach ($model->techs as $arm) if ($arm->isComputer)
 				echo $this->render('/arms/card',['model'=>$arm,'no_users'=>true,'no_specs'=>true])?>
 		</div>
 		<div class="col-md-4">
@@ -34,28 +34,28 @@ $comps=count($services)?$model->compsTotal:$model->comps;
 				foreach ($comps as $comp) echo $this->render('/comps/item',['model'=>$comp]);
 				echo '</p><br />';
 			}
-
-			if (count($model->armsHead)) {
-				echo '<h4>АРМ числящиеся за подчиненными</h4><p>';
-				foreach ($model->armsHead as $arm) echo $this->render('/arms/item',['model'=>$arm]);
+			
+			if (count($model->techs)) {
+				echo '<h4>Оборудование числящиеся за сотрудником</h4><p>';
+				foreach ($model->techsHead as $arm) if (!$arm->isComputer) echo $this->render('/techs/item',['model'=>$arm]);
 				echo '</p><br />';
 			}
-
-			if (count($model->armsIt)) {
-				echo '<h4>Обслуживаемые АРМ через отдел IT</h4><p>';
-				foreach ($model->armsIt as $arm) echo $this->render('/arms/item',['model'=>$arm]);
-				echo '</p><br />';
-			}
-
-			if (count($model->armsResponsible)) {
-				echo '<h4>АРМ в ответственности</h4><p>';
-				foreach ($model->armsResponsible as $arm) echo $this->render('/arms/item',['model'=>$arm]);
+			
+			if (count($model->techsHead)) {
+				echo '<h4>АРМ/оборудование числящиеся за подчиненными</h4><p>';
+				foreach ($model->techsHead as $arm) echo $this->render('/techs/item',['model'=>$arm]);
 				echo '</p><br />';
 			}
 			
 			if (count($model->techsIt)) {
-				echo '<h4>Обслуживает технику</h4><p>';
-				foreach ($model->techsIt as $tech) echo $this->render('/techs/item',['model'=>$tech]);
+				echo '<h4>Обслуживаемое сотрудником оборудование</h4><p>';
+				foreach ($model->techsIt as $arm) echo $this->render('/techs/item',['model'=>$arm]);
+				echo '</p><br />';
+			}
+
+			if (count($model->techsResponsible)) {
+				echo '<h4>АРМ/оборудование в ответственности</h4><p>';
+				foreach ($model->techsResponsible as $arm) echo $this->render('/techs/item',['model'=>$arm]);
 				echo '</p><br />';
 			}
 			

@@ -11,18 +11,17 @@ use Yii;
  * @property int $materials_id Материал
  * @property int $count Количество
  * @property string $date Дата расхода
- * @property int $arms_id АРМ
- * @property int $techs_id Оборудование
- * @property string $comment Коментарий
- * @property string $sname Поисковая строка
- * @property string $to Куда потрачено
- * @property float $cost Стоимость пачки материалов
- * @property float $charge НДС
+ * @property int       $arms_id АРМ
+ * @property int       $techs_id Оборудование
+ * @property string    $comment Коментарий
+ * @property string    $sname Поисковая строка
+ * @property string    $to Куда потрачено
+ * @property float     $cost Стоимость пачки материалов
+ * @property float     $charge НДС
  *
- * @property Currency $currency Валюта покупки
+ * @property Currency  $currency Валюта покупки
  * @property Materials $material
- * @property Arms $arm
- * @property Techs $tech
+ * @property Techs     $tech
  */
 class MaterialsUsages extends ArmsModel
 {
@@ -47,11 +46,10 @@ class MaterialsUsages extends ArmsModel
     {
         return [
             [['materials_id', 'count', 'date', 'comment'], 'required'],
-            [['materials_id', 'count', 'arms_id', 'techs_id'], 'integer'],
+            [['materials_id', 'count', 'techs_id'], 'integer'],
             [['date','history'], 'safe'],
             [['comment','history'], 'string'],
             [['materials_id'], 'exist', 'skipOnError' => true, 'targetClass' => Materials::className(), 'targetAttribute' => ['materials_id' => 'id']],
-            [['arms_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arms_id' => 'id']],
             [['techs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::className(), 'targetAttribute' => ['techs_id' => 'id']],
         ];
     }
@@ -106,14 +104,6 @@ class MaterialsUsages extends ArmsModel
     public function getMaterial()
     {
         return $this->hasOne(Materials::className(), ['id' => 'materials_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getArm()
-    {
-        return $this->hasOne(Arms::className(), ['id' => 'arms_id']);
     }
 
 	/**

@@ -47,17 +47,17 @@ $renderer=$this;
             'Email:email',
             'Phone',
 	        [
-		        'attribute'=>'Arms',
+		        'attribute'=>'techs',
 		        'format'=>'raw',
 		        'value' => function($data)use($renderer){
-                    $arms=$data->arms;
+                    $arms=$data->techs;
                     if (is_array($arms)) {
                         if (count($arms)==0) {
 	                        return 'Не назначено';
                         } else {
                         	$items=[];
 	                        foreach ($arms as $arm)
-	                        	$items[]=$renderer->render('/arms/item',['model'=>$arm,'static_view'=>true]);
+	                        	$items[]=$renderer->render('/techs/item',['model'=>$arm,'static_view'=>true]);
 	                        return implode('<br />',$items);
                         }
                     }

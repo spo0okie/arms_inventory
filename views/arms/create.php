@@ -4,7 +4,7 @@ use yii\helpers\Html;
 
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Arms */
+/* @var $model app\models\OldArms */
 
 if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Добавление АРМ';

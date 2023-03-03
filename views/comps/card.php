@@ -60,7 +60,7 @@ if (!mb_strlen($domain))
 	<h4>АРМ</h4>
 	<p>
 		<?php if (is_object($model->arm)) { ?>
-			<?= $this->render('/arms/item',['model'=>$model->arm,'static_view'=>$static_view]) ?>
+			<?= $this->render('/techs/item',['model'=>$model->arm,'static_view'=>$static_view]) ?>
 		<?php } else { ?>
 			не назначен
 		<?php } ?>

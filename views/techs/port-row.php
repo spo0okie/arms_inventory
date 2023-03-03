@@ -50,8 +50,6 @@
 				]).'</td>';
 		} elseif (is_object($port_link->linkTech)) {
 			echo '<td></td><td>'.$this->render('/techs/item',['model'=>$port_link->linkTech]).'</td>';
-		} elseif (is_object($port_link->linkArm)) {
-			echo '<td></td><td>'.$this->render('/arms/item',['model'=>$port_link->linkArm]).'</td>';;
 		} else {
 			echo '<td colspan="2"></td>';
 		}

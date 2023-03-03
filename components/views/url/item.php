@@ -6,23 +6,15 @@
  * Time: 9:25
  */
 
-/* @var $item string */
+/* @var $item array */
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
-$tokens=explode(' ',$item);
-if (count($tokens)>1) {
-	//Есть описание
-	$url=$tokens[count($tokens)-1];
-	unset($tokens[count($tokens)-1]);
-	$descr=implode(' ',$tokens);
-} else {
-	$url=$item;
-	$descr=$item;
-}
+if (!is_array($item)) $item=\app\components\UrlListWidget::parseListItem($item);
+
 try {
-	echo Html::a($descr,$url);
+	echo Html::a($item['descr'],$item['url']);
 } catch (Exception $e) {
-	echo $descr.' (неверный URL)';
+	echo $item['descr'].' (неверный URL)';
 } ?><br/>

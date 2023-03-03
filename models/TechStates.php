@@ -7,14 +7,13 @@ use Yii;
 /**
  * This is the model class for table "tech_states".
  *
- * @property int $id id
- * @property bool $archived статус архивации
- * @property string $code Служебное имя
- * @property string $name Состояние
- * @property string $descr Описание
+ * @property int       $id id
+ * @property bool      $archived статус архивации
+ * @property string    $code Служебное имя
+ * @property string    $name Состояние
+ * @property string    $descr Описание
  *
- * @property Arms[] $arms
- * @property Techs[] $techs
+ * @property Techs[]   $techs
  */
 class TechStates extends ArmsModel
 {
@@ -84,17 +83,10 @@ class TechStates extends ArmsModel
 		return $this->hasMany(Techs::className(), ['state_id' => 'id']);
 	}
 	
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getArms()
-	{
-		return $this->hasMany(Arms::className(), ['state_id' => 'id']);
-	}
 	
 	public function reverseLinks()
 	{
-		return [$this->arms,$this->techs];
+		return [$this->techs];
 	}
 	
 }

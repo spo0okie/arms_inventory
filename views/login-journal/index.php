@@ -23,7 +23,7 @@ $renderer=$this;
 	        [
 		        'attribute'=>'АРМ',
 		        'format'=>'raw',
-		        'value' => function($data) use($renderer){return (is_null($data->comp)||is_null($data->comp->arm))?null:$renderer->render('/arms/item',['model'=>$data->comp->arm]);}
+		        'value' => function($data) use($renderer){return (is_null($data->comp)||is_null($data->comp->arm))?null:$renderer->render('/techs/item',['model'=>$data->comp->arm]);}
 	        ],
 	        [
 		        'attribute'=>'comps_id',

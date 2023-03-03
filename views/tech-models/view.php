@@ -58,27 +58,16 @@ $static_view=false;
 	
 
 
-    <?php if (count($model->techs)) {?>
-        <h4>Экземпляры оборудования:</h4>
-	    <?= $this->render('/techs/table', [
-		    'searchModel'   => $techSearchModel,
-		    'dataProvider'  => $techDataProvider,
-		    'columns'       => ['num','mac','ip','state','user','place','inv_num'],
-	    ]) ?>
-    <?php } ?>
-
-	<?php if (count($model->arms)) {?>
-        <h4>АРМ этой модели:</h4>
-		<?= DynaGridWidget::widget([
-			'id' => 'tech-types-arms-index',
-			'header' => '',
-			'columns' => require __DIR__.'/../arms/columns.php',
-			'defaultOrder' => ['attach','num','model','comp_id','comp_ip','sn','state','user_id','places_id'],
-			//'createButton' => Html::a('Создать АРМ', ['create'], ['class' => 'btn btn-success']),
-			//'hintButton' => \app\components\HintIconWidget::widget(['model' => '\app\models\Arms', 'cssClass' => 'btn']),
-			'dataProvider' => $armsDataProvider,
-			'filterModel' => $armsSearchModel,
-		]) ?>
-	<?php } ?>
+    <h4>Экземпляры АРМ/оборудования:</h4>
+	<?= DynaGridWidget::widget([
+		'id' => 'tech-types-arms-index',
+		'header' => '',
+		'columns' => require __DIR__.'/../techs/columns.php',
+		'defaultOrder' => ['attach','num','model','comp_id','comp_ip','sn','state','user_id','places_id'],
+		//'createButton' => Html::a('Создать АРМ', ['create'], ['class' => 'btn btn-success']),
+		//'hintButton' => \app\components\HintIconWidget::widget(['model' => '\app\models\Arms', 'cssClass' => 'btn']),
+		'dataProvider' => $dataProvider,
+		'filterModel' => $searchModel,
+	]) ?>
 
 </div>

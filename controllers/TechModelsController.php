@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\FieldsHelper;
 use app\models\Comps;
 use Yii;
 use app\models\TechModels;
@@ -16,8 +17,11 @@ use yii\web\Response;
 /**
  * TechModelsController implements the CRUD actions for TechModels model.
  */
-class TechModelsController extends Controller
+class TechModelsController extends ArmsBaseController
 {
+	
+	public $modelClass='app\models\TechModels';
+	
     /**
      * {@inheritdoc}
      */
@@ -83,18 +87,6 @@ class TechModelsController extends Controller
 	}
 	
 	
-	/**
-	 * Displays a single OrgPhones model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionTtip($id)
-	{
-		return $this->renderPartial('ttip', [
-			'model' => $this->findModel($id),
-		]);
-	}
 	
 	/**
 	 * Подсказка по заполнению спеки (берется из типа модели)
@@ -129,22 +121,11 @@ class TechModelsController extends Controller
 		Yii::$app->response->format = Response::FORMAT_JSON;
 		$data=\app\models\TechModels::fetchTypeComment($id);
 		if (!is_array($data)) throw new NotFoundHttpException('The requested data does not exist.');
+		//переоформляем под qtip
+		$data['hint']=FieldsHelper::toolTipOptions($data['name'],$data['hint'])['qtip_ttip'];
 		return $data;
 	}
-    /**
-     * Lists all TechModels models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel = new TechModelsSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
+	
 
     /**
      * Displays a single TechModels model.
@@ -154,25 +135,15 @@ class TechModelsController extends Controller
      */
     public function actionView($id)
     {
-	    $params=Yii::$app->request->queryParams;
-	    if (!isset($params['TechsSearch'])) $params['TechsSearch']=[];
-	    if (!isset($params['ArmsSearch'])) $params['ArmsSearch']=[];
-
-	    $params['TechsSearch']['model_id']=$id;
-	    $params['ArmsSearch']['model_id']=$id;
-
+	    $this->setQueryParam(['TechsSearch'=>['model_id'=>$id]]);
+	    
 	    $techSearchModel = new \app\models\TechsSearch();
-	    $techDataProvider = $techSearchModel->search($params);
-
-	    $armsSearchModel = new \app\models\ArmsSearch();
-	    $armsDataProvider = $armsSearchModel->search($params);
-
+	    $techDataProvider = $techSearchModel->search(Yii::$app->request->queryParams);
+	    
         return $this->render('view', [
             'model' => $this->findModel($id),
-	        'techSearchModel' => $techSearchModel,
-	        'techDataProvider' => $techDataProvider,
-	        'armsSearchModel' => $armsSearchModel,
-	        'armsDataProvider' => $armsDataProvider,
+	        'searchModel' => $techSearchModel,
+	        'dataProvider' => $techDataProvider,
         ]);
     }
 

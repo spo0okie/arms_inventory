@@ -17,19 +17,19 @@ use Yii;
  * @property array $itemArmsIds Ссылка на АРМы через закупки
  * @property string $descr Описание
  * @property string $comment Комментарий
- * @property string $created_at Время создания
- * @property int $totalCount общее количество лицензий
- * @property int $activeCount общее количество активных лицензий (не просроченных)
- * @property int $directUsedCount количество лицензий привязанных прямо к группе (не через закупки)
- * @property int $usedCount общее количество используемых лицензий (активных занятых)
- * @property int $freeCount общее количество доступных лицензий (активных не занятых)
+ * @property string     $created_at Время создания
+ * @property int        $totalCount общее количество лицензий
+ * @property int        $activeCount общее количество активных лицензий (не просроченных)
+ * @property int        $directUsedCount количество лицензий привязанных прямо к группе (не через закупки)
+ * @property int        $usedCount общее количество используемых лицензий (активных занятых)
+ * @property int        $freeCount общее количество доступных лицензий (активных не занятых)
  *
- * @property Soft $soft
+ * @property Soft       $soft
  * @property LicItems[] $licItems
- * @property LicTypes $licType
- * @property Arms[] $arms
- * @property Comps[] $comps
- * @property Users[] $users
+ * @property LicTypes   $licType
+ * @property Techs[] 	 $arms
+ * @property Comps[]    $comps
+ * @property Users[]    $users
  */
 class LicGroups extends \yii\db\ActiveRecord
 {
@@ -153,7 +153,7 @@ class LicGroups extends \yii\db\ActiveRecord
 	 */
 	public function getArms()
 	{
-		return $this->hasMany(Arms::className(), ['id' => 'arms_id'])
+		return $this->hasMany(Techs::className(), ['id' => 'arms_id'])
 			->viaTable('{{%lic_groups_in_arms}}', ['lic_groups_id' => 'id']);
 	}
 	

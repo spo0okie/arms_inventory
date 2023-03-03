@@ -4,9 +4,10 @@
  * User: Spookie
  * Date: 02.03.2018
  * Time: 14:14
- * @var \app\models\Arms $model
- * @var yii\web\View $this
- * @var string $cabinet_col первая колнка - название помещения
+ * @var \app\models\Techs 	$model
+ * @var \app\models\Techs[]	$techs
+ * @var yii\web\View        $this
+ * @var string              $cabinet_col первая колнка - название помещения
  */
 
 //подгружаем все ОС АРМа
@@ -34,6 +35,22 @@ if (!isset($skip)) $skip=[];
 
 $sortedComps=array_merge($hwComps,$vmComps);
 
+$armTechs=$model->filterArmTechs($techs);
+
+$voipPhones=[];
+$ups=[];
+$monitors=[];
+foreach ($armTechs as $tech) {
+	if ($tech->isVoipPhone)
+		$voipPhones[]=$tech;
+	if ($tech->isUps)
+		$ups[]=$tech;
+	if ($tech->isMonitor)
+		$monitors[]=$tech;
+}
+
+$compsServices=$model->compsServices;
+$is_server=(bool)(count($compsServices));
 
 /*
  * Вдруг откуда ни возьмись дока внутри пых-файла
@@ -49,10 +66,10 @@ $sortedComps=array_merge($hwComps,$vmComps);
 
 //поехали!
 for ($i=0; $i<count($comps); $i++) {
-	$archClass=$model->archived?'archived-item':'';
+	$archClass=($model->archived?'archived-item':'').' '.($is_server?'server':'');
 	$archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
     $comp=$comps[$i]; ?>
-    <tr class="<?= $model->is_server?'server':''?>" >
+    <tr>
 	
 		<?php //в самой первой строчке нужно вставить в начале колонку кабинета/помещения.
 		// вставить надо только один раз, т.к. у нее rowspan=0 и она идет сквозняком до конца таблицы
@@ -64,16 +81,16 @@ for ($i=0; $i<count($comps); $i++) {
 		
 		
 		<?php if (!$i) { ?>
-            <td class="arm_id <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspan ?>><?= $this->render('/arms/item',['model'=>$model]) ?></td>
+            <td class="arm_id <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspan ?>><?= $this->render('/techs/item',['model'=>$model]) ?></td>
 	    <?php } ?>
 	    
 	    <?php //если у нас есть ОС, то зададим ячейке класс свежести данных об этой ОС
 	    	$age_class=is_object($comp)?$comp->updatedRenderClass:'';
 	    ?>
-        <td class="arm_hostname <?= $age_class ?>  <?= $archClass ?>" <?=$archDisplay ?>><?= is_object($comp)?$this->render('/comps/item',['model'=>$comp]):$model->hostname ?></td>
+        <td class="arm_hostname <?= $age_class ?> <?= $archClass ?>" <?=$archDisplay ?>><?= is_object($comp)?$this->render('/comps/item',['model'=>$comp]):'' ?></td>
 
 		
-        <?php if ($model->is_server) {
+        <?php if (count($model->compsServices)) {
         	$services=[];
 			if (isset($comp->services)) {
 				$renderServices=$comp->services;
@@ -90,17 +107,25 @@ for ($i=0; $i<count($comps); $i++) {
 				$services[]='<span class="grayed-out href"><span class="fas fa-comment small"></span> '.$comp->comment.'</span>';
 	
 			?>
-            <td colspan="2" class="arm_services <?= $archClass ?>" <?= $archDisplay ?>"><?= implode(' ',$services); ?></td>
+            <td colspan="2" class="arm_services <?= $archClass ?> " <?= $archDisplay ?>"><?= implode(' ',$services); ?></td>
         <?php } else if (!$i) { ?>
 
             <td class="arm_uname <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspan ?>>
                 <?= (is_object($model->user))?$this->render('/users/item',['model'=>$model->user]):'' ?>
             </td>
 
-            <td class="arm_uphone <?= count($model->voipPhones)?'tech_voip_phone':'' ?>  <?= $archClass?>" <?= $archDisplay ?> <?= $rowspan ?>>
-		        <?php if (count($model->voipPhones)) {
+            <td class="arm_uphone <?= count($voipPhones)?'tech_voip_phone':'' ?>  <?= $archClass?>" <?= $archDisplay ?> <?= $rowspan ?>>
+		        <?php if (count($voipPhones)) {
 		            $phones=[];
-		            foreach ($model->voipPhones as $tech) $phones[]=$this->render('/techs/item',['model'=>$tech,'name'=>strlen($tech->comment)?$tech->comment:$tech->attachModel->shortest]);
+		            foreach ($voipPhones as $tech) {
+		            	$phones[]=$this->render('/techs/item',[
+		            		'model'=>$tech,
+							'name'=>strlen($tech->comment)?$tech->comment:$tech->attachModel->shortest
+						]);
+		            	$tech->num='rendered';
+		            	\app\helpers\ArrayHelper::deleteByField($techs,'num','rendered');
+					}
+		            
 		            echo implode('<br />',$phones);
 		        } ?>
             </td>
@@ -110,7 +135,7 @@ for ($i=0; $i<count($comps); $i++) {
 	    <?php if (!is_object($comp) || !$comp->ignore_hw) {
 	    	if (!$i&&(array_search('arm_model',$skip)===false)) { ?>
             <td class="arm_model <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspanPhys ?>>
-				<?= $this->render('/tech-models/item',['model'=>$model->techModel,'compact'=>true]) ?>
+				<?= $this->render('/tech-models/item',['model'=>$model->model,'compact'=>true]) ?>
 			</td>
         <?php }} else { ?>
 			<td class="arm_model <?= $archClass ?>" <?= $archDisplay ?>>
@@ -122,25 +147,29 @@ for ($i=0; $i<count($comps); $i++) {
 			if (!$i&&array_search('hardware',$skip)===false) { ?>
         	    <td class="hardware <?= $archClass?>" <?= $archDisplay ?> <?= $rowspanPhys ?>>
 					<?= $this->render('/hwlist/shortlist',['model'=>$model->hwList,'arm_id'=>$model->id]) ?>
-					<?php if (count($model->monitors)) {
+					<?php if (count($monitors)) {
 						echo ' / ';
-						foreach ($model->monitors as $tech) {
+						foreach ($monitors as $tech) {
 							echo $this->render('/techs/item', [
 								'model' => $tech,
 								'name' => $tech->model->shortest,
 								'static_view' => true
 							]);
+							$tech->num='rendered';
+							\app\helpers\ArrayHelper::deleteByField($techs,'id',$tech->id);
 						}
 					}
 					?>
-					<?php if (count($model->ups)) {
+					<?php if (count($ups)) {
 						echo ' / ';
-						foreach ($model->ups as $tech) {
+						foreach ($ups as $tech) {
 							echo $this->render('/techs/item', [
 								'model' => $tech,
 								'name' => $tech->model->shortest,
 								'static_view' => true
 							]);
+							$tech->num='rendered';
+							\app\helpers\ArrayHelper::deleteByField($techs,'id',$tech->id);
 						}
 					}
 					?>
@@ -154,7 +183,7 @@ for ($i=0; $i<count($comps); $i++) {
 
 	    <?php if (!$i) { ?>
             <td class="attachments <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspan ?>>
-			    <?= $this->render('/arms/item-attachments',compact('model'))?>
+			    <?= $this->render('/techs/item-attachments',compact('model'))?>
             </td>
 	    <?php }?>
 

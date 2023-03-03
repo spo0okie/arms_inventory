@@ -8,7 +8,7 @@ use yii\helpers\Html;
 use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Arms */
+/* @var $model app\models\OldArms */
     $comps = $model->comps;
     if (!isset($static_view)) $static_view=false;
     $model_id=$model->id;

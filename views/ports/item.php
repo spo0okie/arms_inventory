@@ -28,8 +28,6 @@ if (!empty($model)) {
 		if (!is_null($model->tech))
 			echo $this->render('/techs/item', ['model'=>$model->tech,'static_view'=>true]).\app\models\Ports::$tech_postfix;
 		
-		if (!is_null($model->arm))
-			echo $this->render('/arms/item', ['model'=>$model->arm,'static_view'=>true]).\app\models\Ports::$tech_postfix;
 	}
 
 	
@@ -56,7 +54,5 @@ if (!empty($model)) {
 		if (!is_null($model->tech))
 			echo \app\models\Ports::$tech_postfix.' '.$this->render('/techs/item', ['model'=>$model->tech,'static_view'=>true]);
 		
-		if (!is_null($model->arm))
-			echo \app\models\Ports::$tech_postfix.' '.$this->render('/arms/item', ['model'=>$model->arm,'static_view'=>true]);
 	}
 } ?>

@@ -43,7 +43,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form, $model, 'key_text',['lines' => 1,]) ?>
 
 	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'arms_ids', [
-		'data' => \app\models\Arms::fetchNames(),
+		'data' => \app\models\Techs::fetchArmNames(),
 		'options' => ['placeholder' => 'Выберите АРМы',],
 		'classicHint' => \app\models\Contracts::fetchArmsHint(is_object($model->licItem)?$model->licItem->contracts_ids:null ,'lickeys'),
 		'classicHintOptions'=> ['id'=>'arms_id-hint'],

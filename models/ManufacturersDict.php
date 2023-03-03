@@ -16,6 +16,7 @@ use Yii;
 class ManufacturersDict extends \yii\db\ActiveRecord
 {
 	static private $cache=[];
+	static private $cacheComplete=false;
 
     /**
      * @inheritdoc
@@ -76,16 +77,28 @@ class ManufacturersDict extends \yii\db\ActiveRecord
     	$word=mb_strtolower($word,'utf-8');
 
     	if (!array_key_exists($word,static::$cache)) {
-    		//error_log('caching word '.$word.' //'.count(static::$cache));
-		    $item=static::find()
-			    ->where(['word' => $word])
-			    ->one();
-		    static::$cache[$word]=is_object($item)?$item->manufacturers_id:null;
-		    //error_log('cached  word '.$word.' //'.count(static::$cache));
+    		if (!static::$cacheComplete) {
+    			//если кэш не загружался полностью ищем слово
+				$item=static::find()->where(['word' => $word])->one();
+				/**
+				 * @var $item ManufacturersDict
+				 */
+				static::$cache[$word]=is_object($item)?$item->manufacturers_id:null;
+			} else static::$cache[$word]=null;
 	    }
 
         return static::$cache[$word];
 
     }
+    
+    public static function initCache() {
+    	foreach (static::find()->all() as $item) {
+			/**
+			 * @var $item ManufacturersDict
+			 */
+			static::$cache[mb_strtolower($item->word,'utf-8')] = $item->manufacturers_id;
+		}
+    	static::$cacheComplete=true;
+	}
 
 }

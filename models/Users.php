@@ -25,29 +25,27 @@ use Yii;
  * @property string $employ_date Дата приема
  * @property string $resign_date Дата увольнения
  * @property string $manager_id Руководитель
- * @property int $nosync Отключить синхронизацию
- * @property int $ln Last Name
- * @property int $fn First Name
- * @property int $mn Middle Name
- * @property int $shortName Сокращенные И.О.
+ * @property int         $nosync Отключить синхронизацию
+ * @property int         $ln Last Name
+ * @property int         $fn First Name
+ * @property int         $mn Middle Name
+ * @property int         $shortName Сокращенные И.О.
  *
- * @property Aces[] $aces
- * @property Comps[] $comps
- * @property Comps[] $compsFromServices
- * @property Comps[] $compsTotal
- * @property Arms[] $arms
- * @property Techs[] $techs
- * @property Techs[] $techsIt
- * @property Arms[] $armsHead
- * @property Arms[] $armsIt
- * @property Arms[] $armsResponsible
+ * @property Aces[]      $aces
+ * @property Comps[]     $comps
+ * @property Comps[]     $compsFromServices
+ * @property Comps[]     $compsTotal
+ * @property Techs[]     $techs
+ * @property Techs[]     $techsIt
+ * @property Techs[]     $techsHead
+ * @property Techs[]     $techsResponsible
  * @property Materials[] $materials
- * @property Services[] $services
+ * @property Services[]  $services
  * @property LicGroups[] $licGroups
- * @property LicItems[] $licItems
- * @property LicKeys[] $licKeys
- * @property Partners $org
- * @property OrgStruct $orgStruct
+ * @property LicItems[]  $licItems
+ * @property LicKeys[]   $licKeys
+ * @property Partners    $org
+ * @property OrgStruct   $orgStruct
  */
 class Users extends ArmsModel implements \yii\web\IdentityInterface
 {
@@ -162,18 +160,16 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	public function reverseLinks() {
 		return [
 			$this->aces,
-			$this->arms,
-			$this->armsResponsible,
-			$this->armsHead,
-			$this->armsIt,
+			$this->techs,
+			$this->techsResponsible,
+			$this->techsHead,
+			$this->techsIt,
 			$this->comps,
 			$this->licGroups,
 			$this->licKeys,
 			$this->licItems,
 			$this->materials,
 			$this->services,
-			$this->techs,
-			$this->techsIt,
 		];
 	}
 	
@@ -187,37 +183,24 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			->viaTable('{{%users_in_aces}}', ['users_id' => 'id']);
 	}
 	
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getArms()
-	{
-		return $this->hasMany(Arms::className(), ['user_id' => 'id']);
-	}
 
 	/**
      * @return \yii\db\ActiveQuery
      */
-    public function getArmsResponsible()
+    public function getTechsResponsible()
     {
-        return $this->hasMany(Arms::className(), ['responsible_id' => 'id']);
+        return $this->hasMany(Techs::className(), ['responsible_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getArmsHead()
+    public function getTechsHead()
     {
-        return $this->hasMany(Arms::className(), ['head_id' => 'id']);
+        return $this->hasMany(Techs::className(), ['head_id' => 'id']);
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getArmsIt()
-    {
-        return $this->hasMany(Arms::className(), ['it_staff_id' => 'id']);
-    }
+
 
 	/**
 	 * @return \yii\db\ActiveQuery

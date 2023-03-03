@@ -14,21 +14,20 @@ use Yii;
  * @property int $manufacturers_id Производитель
  * @property int $usages Количество экземпляров этой модели
  * @property string $name Модель
- * @property string $short Короткое наименование
- * @property string $shortest Самое короткое какое есть (или короткое или полное)
- * @property string $sname Расширенное имя для поиска
- * @property string $links Ссылки
- * @property string $comment Комментарий
- * @property string $ports Порты
- * @property array $portsList Порты
+ * @property string        $short Короткое наименование
+ * @property string        $shortest Самое короткое какое есть (или короткое или полное)
+ * @property string        $sname Расширенное имя для поиска
+ * @property string        $links Ссылки
+ * @property string        $comment Комментарий
+ * @property string        $ports Порты
+ * @property array         $portsList Порты
  *
- * @property TechTypes $type
- * @property Techs[] $techs
- * @property Arms[] $arms
+ * @property TechTypes     $type
+ * @property Techs[]       $techs
  * @property Manufacturers $manufacturer
- * @property int $scans_id Картинка - предпросмотр
- * @property Scans[] $scans
- * @property Scans $preview
+ * @property int           $scans_id Картинка - предпросмотр
+ * @property Scans[]       $scans
+ * @property Scans         $preview
  */
 class TechModels extends \yii\db\ActiveRecord
 {
@@ -109,7 +108,7 @@ class TechModels extends \yii\db\ActiveRecord
 	}
 
 	public function reverseLinks() {
-		return [$this->arms,$this->techs];
+		return [$this->techs];
 	}
 	
 	/**
@@ -157,17 +156,9 @@ class TechModels extends \yii\db\ActiveRecord
 		return $this->hasMany(Techs::className(), ['model_id' => 'id']);
 	}
 
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getArms()
-	{
-		return $this->hasMany(Arms::className(), ['model_id' => 'id']);
-	}
-	
 	public function getUsages()
 	{
-		return count($this->techs)+count($this->arms);
+		return count($this->techs);
 	}
 	
 	public function getPortsList()
@@ -240,7 +231,7 @@ class TechModels extends \yii\db\ActiveRecord
 	public static function fetchPCs()
 	{
 		$list = static::find()->joinWith('type')->joinWith('techs')->joinWith('manufacturer')
-			->where(['type_id'=>\app\models\TechTypes::fetchPCsIds()])
+			->where(['is_computer'=>true])
 			//->select(['id', 'name'])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
@@ -249,18 +240,18 @@ class TechModels extends \yii\db\ActiveRecord
 	public static function fetchPhones()
 	{
 		$list = static::find()->joinWith('type')->joinWith('techs')->joinWith('manufacturer')
-			->where(['type_id'=>\app\models\TechTypes::fetchPhonesIds()])
+			->where(['is_phone'=>true])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}
 
-	public static function fetchPhonesIds()
+	/*public static function fetchPhonesIds()
 	{
 		if (is_null(static::$phones_ids_cache)) {
 			$list = static::find()
 				//->select('id')
 				->joinWith('type')
-				->where(['type_id'=>\app\models\TechTypes::fetchPhonesIds()])
+				->where(['is_phone'=>true])
 				->all();
 			static::$phones_ids_cache=\yii\helpers\ArrayHelper::getColumn($list,'id');
 		}
@@ -308,33 +299,30 @@ class TechModels extends \yii\db\ActiveRecord
 		}
 		
 		return static::$monitors_ids_cache;
-	}
+	}*/
 	
 	/**
 	 * Возвращает признак того, что это оборудование ПК
-	 * @param $id
 	 * @return bool
 	 */
-	public static function isPC($id){
-		return array_search($id,static::fetchPCsIds())!==false;
+	public function getIsPC(){
+		return $this->type->is_computer;
 	}
 
 	/**
 	 * Возвращает признак того, что это оборудование Телефон
-	 * @param $id
 	 * @return bool
 	 */
-	public static function getIsPhone($id) {
-		return array_search($id,static::fetchPhonesIds())!==false;
+	public  function getIsPhone() {
+		return $this->type->is_phone;
 	}
 	
 	/**
 	 * Возвращает признак того, что это оборудование Телефон
-	 * @param $id
 	 * @return bool
 	 */
-	public static function getIsUps($id) {
-		return array_search($id,static::fetchUpsIds())!==false;
+	public  function getIsUps() {
+		return $this->type->is_ups;
 	}
 	
 	/**
@@ -342,8 +330,8 @@ class TechModels extends \yii\db\ActiveRecord
 	 * @param $id
 	 * @return bool
 	 */
-	public static function getIsMonitor($id) {
-		return array_search($id,static::fetchMonitorsIds())!==false;
+	public function getIsMonitor() {
+		return $this->type->is_display;
 	}
 	
 	

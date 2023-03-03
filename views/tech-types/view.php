@@ -6,10 +6,8 @@ use yii\bootstrap5\Tabs;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\TechTypes */
-/* @var $techsSearchModel /app/models/TechsSearch */
-/* @var $techsDataProvider \yii\data\ActiveDataProvider */
-/* @var $armsSearchModel /app/models/ArmsSearch */
-/* @var $armsDataProvider \yii\data\ActiveDataProvider */
+/* @var $searchModel /app/models/TechsSearch */
+/* @var $dataProvider \yii\data\ActiveDataProvider */
 
 \yii\helpers\Url::remember();
 $this->title = $model->name;
@@ -48,7 +46,7 @@ $tabs = [
 	],
 ];
 
-if (\app\models\TechTypes::isPC($model->id)) {
+if ($model->is_computer) {
 	$tabs[] = [
 		'label'=>'Экземпляры рабочих мест',
 		'linkOptions'=>['id'=>'items'],
@@ -57,13 +55,13 @@ if (\app\models\TechTypes::isPC($model->id)) {
 				'header' => '',
 				'columns' => require __DIR__.'/../arms/columns.php',
 				'defaultOrder' => [
-					'attach',
+					//'attach',
 					'num',
 					'model_id',
-					'comp_id',
+					/*'comp_id',
 					'comp_hw',
 					'comp_ip',
-					'comp_mac',
+					'comp_mac',*/
 					'mac',
 					'state_id',
 					'user_id',
@@ -71,10 +69,8 @@ if (\app\models\TechTypes::isPC($model->id)) {
 					'places_id',
 					'inv_sn'
 				],
-				//'createButton' => Html::a('Создать АРМ', ['create'], ['class' => 'btn btn-success']),
-				//'hintButton' => \app\components\HintIconWidget::widget(['model' => '\app\models\Arms', 'cssClass' => 'btn']),
-				'dataProvider' => $armsDataProvider,
-				'filterModel' => $armsSearchModel,
+				'dataProvider' => $dataProvider,
+				'filterModel' => $searchModel,
 			]).'</div>' ,
 		'active'=>is_array(Yii::$app->request->get('ArmsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')
 	];
@@ -83,8 +79,8 @@ if (\app\models\TechTypes::isPC($model->id)) {
 		'label'=>'Экземпляры оборудования',
 		'linkOptions'=>['id'=>'items'],
 		'content'=>'<div class="container-fluid">'.$this->render('/techs/table', [
-			'searchModel' => $techsSearchModel,
-			'dataProvider' => $techsDataProvider,
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
 			'columns' => ['attach', 'num', 'model', 'mac', 'ip', 'state', 'user', 'place', 'inv_num', 'comment'],
 		]).'</div>',
 		'active'=>is_array(Yii::$app->request->get('TechsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')

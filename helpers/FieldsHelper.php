@@ -70,7 +70,10 @@ class FieldsHelper
 			$pluginOptions['templateResult']=new JsExpression('function(item){return formatSelect2ItemHint(item,"'.$itemsHintsUrl.'")}');
 			$pluginOptions['templateSelection']=new JsExpression('function(item){return formatSelect2ItemHint(item,"'.$itemsHintsUrl.'")}');
 			$pluginOptions['escapeMarkup']=new JsExpression('function(m) { return m; }');
-			$pluginOptions['selectionAdapter']=new JsExpression('$.fn.select2.amd.require("QtippedMultipleSelectionAdapter")');
+			if (\app\helpers\ArrayHelper::getTreeValue($options,['pluginOptions','multiple'],false))
+				$pluginOptions['selectionAdapter']=new JsExpression('$.fn.select2.amd.require("QtippedMultipleSelectionAdapter")');
+			else
+				$pluginOptions['selectionAdapter']=new JsExpression('$.fn.select2.amd.require("QtippedSingleSelectionAdapter")');
 			
 		}
 		return $form

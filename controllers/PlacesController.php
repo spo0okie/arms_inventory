@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Departments;
+use app\models\ManufacturersDict;
 use Codeception\Module\Yii2;
 use Yii;
 use app\models\Places;
@@ -78,27 +79,26 @@ class PlacesController extends Controller
 	 */
 	public function actionArmmap()
 	{
+		ManufacturersDict::initCache();
 		return $this->render('armmap', [
 			'models' => Places::find()
 				->joinWith([
 					'phones',
 					'inets',
-					'arms.user',
-					'arms.techs.attachModel',
-					'arms.state',
-					'arms.comp.domain',
-					'arms.comps',
-					'arms.techModel',
-					'arms.licKeys',
-					'arms.licItems',
-					'arms.licGroups',
-					'arms.contracts',
+					'techs.comp.domain',
+					'techs.comps.services',
+					'techs.licKeys',
+					'techs.licItems',
+					'techs.licGroups',
 					'techs',
 					'techs.contracts',
 					'techs.state',
 					'techs.model.type',
-					'techs.techUser',
-					//'materials.usages' дико добавляет тормозов
+					'techs.model.manufacturer',
+					'techs.user',
+					'materials.type',
+					'materials.childs',
+					'materials.usages', //дико добавляет тормозов
 				])->orderBy('short')
 				->all(),
 			'show_archived'=>\Yii::$app->request->get('showArchived',false),
@@ -137,26 +137,24 @@ class PlacesController extends Controller
         return $this->render('view', [
             'model' => $this->findModel($id),
 	        'models' => Places::find()
-		        ->joinWith([
-			        'phones',
-			        'inets',
-			        'arms.user',
-			        'arms.techs.attachModel',
-			        'arms.state',
-			        'arms.comp.domain',
-			        'arms.comps',
-			        'arms.techModel',
-			        'arms.licKeys',
-			        'arms.licItems',
-			        'arms.licGroups',
-			        'arms.contracts',
-			        'techs',
-			        'techs.contracts',
-			        'techs.state',
-			        'techs.model.type',
-			        'techs.techUser',
-			        //'materials.usages'
-		        ])->orderBy('short')
+				->joinWith([
+					'phones',
+					'inets',
+					'techs.comp.domain',
+					'techs.comps.services',
+					'techs.licKeys',
+					'techs.licItems',
+					'techs.licGroups',
+					'techs',
+					'techs.contracts',
+					'techs.state',
+					'techs.model.type',
+					'techs.model.manufacturer',
+					'techs.user',
+					'materials.type',
+					'materials.childs',
+					'materials.usages', //дико добавляет тормозов
+				])->orderBy('short')
 		        ->all(),
         ]);
     }

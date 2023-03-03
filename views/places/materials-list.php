@@ -12,8 +12,7 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $models app\models\Materials[] */
-/* @var $arms app\models\Arms[] */
-/* @var $techs app\models\Techs[] */
+
 
 $materials=[];
 \yii\helpers\ArrayHelper::multisort($models,'typeName');

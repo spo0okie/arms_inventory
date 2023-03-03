@@ -41,13 +41,6 @@ if (!isset($static_view)) $static_view=false;
     </p>
     <br />
 
-<?php if (!empty($model->arms_id)) { ?>
-    <h4><?= $model->attributeLabels()['arms_id'] ?></h4>
-    <p>
-		<?= $this->render('/arms/item',['model'=>$model->arm]) ?>
-    </p>
-    <br />
-<?php } ?>
 
 <?php if (!empty($model->techs_id)) { ?>
     <h4><?= $model->attributeLabels()['techs_id'] ?></h4>

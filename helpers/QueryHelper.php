@@ -141,7 +141,14 @@ class QueryHelper
 		return $string;
 	}
 	
-	
+	/**
+	 * Что я бл.дь тут понаделал без комментариев. Вроде работает но как?
+	 * вроде как разбивает строку с & или | на токены с нужным оператором
+	 * @param $string
+	 * @param $param
+	 * @param $tokenParser
+	 * @return array
+	 */
 	public static function tokenizeString($string,$param,$tokenParser) {
 		$string=static::escapedStringToMacro($string);
 		
@@ -167,8 +174,8 @@ class QueryHelper
 	}
 	
 	/**
-	 * @param $param string
-	 * @param $string string
+	 * @param $param string|array параметр по которому ищем, можно передавать выражение ['or','responsible.Ename','support.Ename']
+	 * @param $string string значение которое должны принять параметры
 	 * @return array
 	 */
 	public static function querySearchString($param,$string) {

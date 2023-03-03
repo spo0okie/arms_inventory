@@ -33,7 +33,7 @@ class ArmsController extends Controller
 
 	public function actionReSave()
 	{
-		if (is_array($arms=\app\models\Arms::find()->all()))
+		if (is_array($arms=\app\models\Techs::find()->all()))
 			foreach ($arms as $arm) {
 				echo "{$arm->num}\n";
 				$arm->save(false);

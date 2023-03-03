@@ -44,7 +44,7 @@ $renderer=$this;
                         if (count($arms)) {
 	                        $items=[];
 	                        foreach ($arms as $arm) {
-		                        $items[]=$renderer->render('/arms/item',['model'=>$arm]);
+		                        $items[]=$renderer->render('/techs/item',['model'=>$arm]);
 	                        }
 	                        return implode('<br />',$items);
                         } else {

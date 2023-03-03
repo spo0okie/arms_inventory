@@ -84,7 +84,7 @@ return [
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->arms)) foreach ($data->arms as $arm)
-				$output[] = $this->render('/arms/item', ['model' => $arm,'static_view'=>true]);
+				$output[] = $this->render('/techs/item', ['model' => $arm,'static_view'=>true]);
 			return count($output) ? implode(', ', $output) : null;
 		},
 	],

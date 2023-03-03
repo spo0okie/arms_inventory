@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Arms */
+/* @var $model app\models\Techs */
 $static_view=true;
 
 if (!isset($no_users)) $no_users=false;
@@ -38,7 +38,7 @@ if (is_object($model->state)) {
 			<?php if (strlen($model->inv_num)) {?>
 				<span class="serial">Инв.№: <?= $model->inv_num ?></span><br/>
 			<?php } ?>
-			Модель:<?= $this->render('/tech-models/item',['model'=>$model->techModel,'static_view'=>true]) ?><br />
+			Модель:<?= $this->render('/tech-models/item',['model'=>$model->model,'static_view'=>true]) ?><br />
 			Помещение:<?= $this->render('/places/item',['model'=>$model->place,'static_view'=>true,'full'=>true,'items_glue'=>' &gt; ']) ?><br />
 		</div>
 		<?php if (strlen($model->comment)) { ?>

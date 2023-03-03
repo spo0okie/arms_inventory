@@ -18,7 +18,7 @@ use yii\helpers\Inflector;
  * @property int|null $created_by
  * @property string|null $created_at
  * @property string $licType
- * @property stringl $objType
+ * @property string $objType
  * @property ActiveRecord $object
  * @property ActiveRecord $lic
  * @property Users $creator
@@ -55,7 +55,7 @@ class LicLinks extends ActiveRecord
 	public static function linksCtrlName ($lic,$obj) {	return 'update-lic-'.$lic.'-in-'.$obj;}
 	public static function linksClassName ($lic,$obj) {	return Inflector::camelize(self::linksTableName($lic,$obj));}
 	public static function linksLicTableName ($lic) {	return 'lic_'.$lic;}
-	public static function linksObjTableName ($obj) {	return $obj;}
+	public static function linksObjTableName ($obj) {	return str_replace('arms','techs',$obj);} //с тех пор как вместо армов у нас оборудование
 	public static function linksLicIdField ($lic) {		return 'lic_'.$lic.'_id';}
 	public static function linksObjIdField ($obj) {		return $obj.'_id';}
 	

@@ -7,11 +7,10 @@ use Yii;
 /**
  * This is the model class for table "departments".
  *
- * @property int $id id
- * @property string $name Подразделение
- * @property string $comment Комментарии
+ * @property int       $id id
+ * @property string    $name Подразделение
+ * @property string    $comment Комментарии
  *
- * @property Arms[] $arms
  */
 class Departments extends \yii\db\ActiveRecord
 {
@@ -53,13 +52,6 @@ class Departments extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getArms()
-    {
-        return $this->hasMany(Arms::className(), ['departments_id' => 'id']);
-    }
 
 
     public static function fetchNames(){

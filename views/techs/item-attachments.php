@@ -4,7 +4,7 @@
  * User: aareviakin
  * Date: 03.10.2019
  * Time: 23:59
- * @var \app\models\Arms $model
+ * @var \app\models\Techs $model
  */
 
 

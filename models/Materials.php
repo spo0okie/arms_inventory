@@ -187,7 +187,7 @@ class Materials extends ArmsModel
 	 */
 	public function getChilds()
 	{
-		return $this->hasMany(Materials::className(), ['parent_id' => 'id']);
+		return $this->hasMany(Materials::className(), ['parent_id' => 'id'])->from(['materials_children'=>Materials::tableName()]);
 	}
 
 	/**

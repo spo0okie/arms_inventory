@@ -4,7 +4,7 @@
  * User: Spookie
  * Date: 02.03.2018
  * Time: 14:14
- * @var \app\models\Arms $model
+ * @var \app\models\OldArms $model
  */
 
 use yii\bootstrap5\Modal;

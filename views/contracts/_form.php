@@ -176,13 +176,6 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
     <br/>
 
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'arms_ids', [
-		'data' => \app\models\Arms::fetchNames(),
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'multiple' => true
-		],
-	]) ?>
 	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'techs_ids', [
 		'data' => \app\models\Techs::fetchNames(),
 		'pluginOptions' => [

@@ -9,21 +9,17 @@ use Yii;
  *
  * @property int $id
  * @property int $techs_id
- * @property int $arms_id
- * @property string $name
- * @property string $comment
- * @property int $link_techs_id
- * @property int $link_arms_id
- * @property int $link_ports_id
- * @property string sname
- * @property string deviceName
- * @property string fullName
+ * @property string  $name
+ * @property string  $comment
+ * @property int     $link_techs_id
+ * @property int     $link_ports_id
+ * @property string  sname
+ * @property string  deviceName
+ * @property string  fullName
  *
- * @property Arms $linkArm
- * @property Ports $linkPort
- * @property Techs $linkTech
- * @property Techs $tech
- * @property Arms $arm
+ * @property Ports   $linkPort
+ * @property Techs   $linkTech
+ * @property Techs   $tech
  */
 class Ports extends \yii\db\ActiveRecord
 {
@@ -66,10 +62,8 @@ class Ports extends \yii\db\ActiveRecord
 			[['name'], 'unique', 'skipOnError' => true, 'skipOnEmpty'=>false, 'targetAttribute'=>['name','arms_id','techs_id'],'message'=>'Такой порт на этому устройстве уже объявлен'],
 			[['name'], 'string', 'max' => 32],
             [['comment'], 'string', 'max' => 255],
-            [['link_arms_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['link_arms_id' => 'id']],
             [['link_techs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::className(), 'targetAttribute' => ['link_techs_id' => 'id']],
 			[['techs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::className(), 'targetAttribute' => ['techs_id' => 'id']],
-			[['arms_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arms_id' => 'id']],
         ];
     }
 	
@@ -113,21 +107,10 @@ class Ports extends \yii\db\ActiveRecord
         return $this->hasOne(Ports::className(), ['id' => 'link_ports_id'])
 			->from(['port_linked_ports'=>Ports::tableName()]);
     }
-	
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getLinkArm()
-	{
-		return $this->hasOne(Arms::className(), ['id' => 'arms_id'])
-			->via('linkPort');
-	}
+    
 	
 	public function getTemplateComment()
 	{
-		if (is_object($this->arm))
-			return $this->arm->getModelPortComment($this->name);
-		
 		if (is_object($this->tech))
 			return $this->tech->getModelPortComment($this->name);
 		
@@ -159,14 +142,7 @@ class Ports extends \yii\db\ActiveRecord
 		return $this->hasOne(Techs::className(), ['id' => 'techs_id']);
 	}
 	
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getArm()
-	{
-		return $this->hasOne(Arms::className(), ['id' => 'arms_id']);
-	}
-	
+
 	/**
 	 * Name for search
 	 * @return string
@@ -232,16 +208,14 @@ class Ports extends \yii\db\ActiveRecord
 					//нужно создать новый порт с именем
 					if (strlen($tokens[1]))		$reversePort->name=$tokens[1];
 					//привязываем оборудование
-					if ($this->link_arms_id)	$reversePort->arms_id=$this->link_arms_id;
 					if ($this->link_techs_id)	$reversePort->techs_id=$this->link_techs_id;
 				
-				} elseif ($this->link_arms_id || $this->link_techs_id) {
+				} elseif ($this->link_techs_id) {
 					//порт не передан числом (ID) и не тестовая директива создания - считаем что тогда NULL
 					//если при этом указано оборудование/АРМ - значит надо привязаться к порту NULL на этом оборудовании
 					//ищем такой порт
 					$reversePort=Ports::find()
 						->where(['and',
-							['arms_id'=>$this->link_arms_id],
 							['techs_id'=>$this->link_techs_id],
 							['name'=>null]
 						])
@@ -250,7 +224,6 @@ class Ports extends \yii\db\ActiveRecord
 					//если не нашли-создаем
 					if (!is_object($reversePort)) {
 						$reversePort=new Ports();
-						$reversePort->arms_id=$this->link_arms_id;
 						$reversePort->techs_id=$this->link_techs_id;
 					}
 					

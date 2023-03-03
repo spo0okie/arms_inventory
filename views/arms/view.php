@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Arms */
+/* @var $model app\models\OldArms */
 
 \yii\helpers\Url::remember();
 $this->title = $model->num;

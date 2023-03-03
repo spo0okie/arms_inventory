@@ -26,27 +26,26 @@ use Yii;
  * @property string $ip_ignore Игнорировать IP адреса
  * @property int $arm_id Рабочее место
  * @property int $user_id Пользователь
- * @property string $comment Комментарий
- * @property string $updated_at Время обновления
- * @property boolean $isIgnored Софт находится в списке игнорируемого ПО
- * @property array $soft_ids Массив ID ПО, которое установлено на компе
- * @property array $netIps_ids Массив ID IP
- * @property array $comps Массив объектов ПО, которое установлено на компе
- * @property boolean $isWindows ОС относится к семейству Windows
- * @property boolean $isLinux ОС относится к семейству Linux
- * @property boolean $archived
- 
- * @property Arms $arm
- * @property Arms $mainArm
- * @property Comps[] $dupes
- * @property Users $user
- * @property Users $responsible
- * @property Users[] $supportTeam
- * @property Domains $domain
- * @property string $updatedRenderClass
- * @property string $updatedText
- * @property string $domainName
- * @property string $currentIp
+ * @property string   $comment Комментарий
+ * @property string   $updated_at Время обновления
+ * @property boolean  $isIgnored Софт находится в списке игнорируемого ПО
+ * @property array    $soft_ids Массив ID ПО, которое установлено на компе
+ * @property array    $netIps_ids Массив ID IP
+ * @property array    $comps Массив объектов ПО, которое установлено на компе
+ * @property boolean  $isWindows ОС относится к семейству Windows
+ * @property boolean  $isLinux ОС относится к семейству Linux
+ * @property boolean  $archived
+ * @property Techs  $arm
+ * @property Techs  $mainArm
+ * @property Comps[]  $dupes
+ * @property Users    $user
+ * @property Users    $responsible
+ * @property Users[]  $supportTeam
+ * @property Domains  $domain
+ * @property string   $updatedRenderClass
+ * @property string   $updatedText
+ * @property string   $domainName
+ * @property string   $currentIp
  * @property string[] $ips
  * @property string[] $ignoredIps
  * @property string[] $filteredIps
@@ -121,7 +120,7 @@ class Comps extends ArmsModel
 			}],
 	
 			[['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],
-			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Arms::className(), 'targetAttribute' => ['arm_id' => 'id']],
+			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::className(), 'targetAttribute' => ['arm_id' => 'id']],
 			[['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
             [['domain_id'], 'exist', 'skipOnError' => true, 'targetClass' => Domains::className(), 'targetAttribute' => ['domain_id' => 'id']],
         ];
@@ -207,7 +206,7 @@ class Comps extends ArmsModel
 	 */
 	public function getArm()
 	{
-		return $this->hasOne(Arms::class, ['id' => 'arm_id']);
+		return $this->hasOne(Techs::class, ['id' => 'arm_id']);
 	}
 	
 	/**
@@ -215,7 +214,7 @@ class Comps extends ArmsModel
 	 */
 	public function getMainArm()
 	{
-		return $this->hasOne(Arms::class, ['comp_id' => 'id']);
+		return $this->hasOne(Techs::class, ['comp_id' => 'id']);
 	}
 	
 	/**

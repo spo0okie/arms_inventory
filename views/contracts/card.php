@@ -9,7 +9,6 @@ use yii\bootstrap5\Modal;
 /* @var $model app\models\Contracts */
 
 $childs=    $model->childs;
-$arms=      $model->arms;
 $techs=     $model->techs;
 $materials= $model->materials;
 $lics=      $model->licItems;
@@ -19,7 +18,7 @@ $services=     $model->services;
 $model_id=$model->id;
 
 if (!isset($static_view)) $static_view=false;
-$deletable=!(count($arms)||count($services)||count($lics)||count($childs)||count($techs));
+//$deletable=!сount($services)||count($lics)||count($childs)||count($techs));
 
 ?>
 
@@ -78,9 +77,7 @@ JS;
         Создать
         <a href="<?= \yii\helpers\Url::to(['/contracts/create','Contracts[parent_id]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Подчиненный документ</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/arms/create','Arms[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">АРМ</a>
-        //
-		<a href="<?= \yii\helpers\Url::to(['/techs/create','Techs[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Оборудование</a>
+		<a href="<?= \yii\helpers\Url::to(['/techs/create','Techs[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Оборудование/АРМ</a>
         //
 		<a href="<?= \yii\helpers\Url::to(['/materials/create','Materials[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Материалы</a>
         //
@@ -119,34 +116,9 @@ JS;
     //foreach ($model->successorsChain as $item) echo $this->render('/contracts/item',['model'=>$item]);
 ?>
 
-<?php if (count($arms)) { ?>
-    <h4>Прикреплен к АРМ:</h4>
-    <p>
-		<?php foreach ($arms as $arm) {
-			$arm_id=$arm->id;
-			echo $this->render('/arms/item',['model'=>$arm,'static_view'=>$static_view]);
-			if (!$static_view) { ?>
-                <a href="#"><span
-                            class="fas fa-unlink href"
-                            title="Отвязать документ от этого АРМа"
-                            onclick="if (confirm('Отвязать документ от этого АРМа?')) $.ajax({
-                                    url: '/web/contracts/unlink-arm?id=<?= $model->id ?>&arms_id=<?= $arm->id ?>',
-                                    success: function(res) {
-                                    location.reload()
-                                    }
-                                    })"
-                    /></a>
-				<?php
-			}
-			echo '<br/>';
-		} ?>
-    </p>
-    <br />
-<?php } ?>
-
 
 <?php if (count($techs)) { ?>
-    <h4>Прикреплен к оборудованию:</h4>
+    <h4>Прикреплен к АРМ/оборудованию:</h4>
     <p>
 		<?php foreach ($techs as $tech) {
 			$tech_id=$tech->id;
