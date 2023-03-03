@@ -185,12 +185,14 @@ JS;
 <?php } ?>
 
 
+<?php if (strlen(trim($model->comment))) { ?>
 <h4>Комментарий:</h4>
 <p>
-<?= nl2br(htmlspecialchars($model->comment)) ?>
+	<?= nl2br(htmlspecialchars($model->comment)) ?>
 </p>
 
 <br />
+<?php } ?>
 
 <h4>Сканы:</h4>
 <div id="contract_<?= $model->id ?>_scans" class="scans-thumb-tiles">
