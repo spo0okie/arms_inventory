@@ -39,7 +39,8 @@ public $testStore= <<<JS
     	    $.ajax({
     	    	url: "/web/ui-tables-cols/set?table="+table+"&column="+column+"&user="+userId+"&value="+val
     	    })
-        //.fail(function () {console.log("Err saving data")});}
+        //.fail(function () {console.log("Err saving data")});
+        }
 	}
 JS;
 	
