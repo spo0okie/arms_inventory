@@ -118,7 +118,8 @@ $config = [
 			'minPageSize' => 20,
 			'maxPageSize' => 1000,
 			'defaultPageSize' => 100,
-			'dbSettings' => [],
+			'dbSettings' => ['tableName'=>'ui_dynagrid'],
+			'dbSettingsDtl' => ['tableName'=>'ui_dynagrid_dtl'],
 		],
 	    'rbac'      => [
 		    'class' => 'spo0okie\rbacplus\Module',

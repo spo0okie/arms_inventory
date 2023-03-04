@@ -1,18 +1,49 @@
 <?php
 namespace app\components;
 
+use app\helpers\ArrayHelper;
 use app\models\ArmsModel;
+use app\models\ui\UiTablesCols;
 use kartik\dynagrid\DynaGrid;
 use kartik\grid\GridView;
 use yii\base\Widget;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
+use yii\web\JsExpression;
+
+
 
 class DynaGridWidget extends Widget
 {
-	
 
+public $testStore= <<<JS
+	{
+    	get: function (key,def) {},
+    	set: function (key,val) {
+    	    let tokens=key.split('-');
+    	    if (!tokens.length) return;
+    	    if (tokens[0]!=='kv') return; //must be like kv-2364-dynaGrid-arms-index-place
+    	    tokens.splice(0,1); //remove 'kv'
+    	    
+    	    let userId=tokens[0];
+    	    if (userId=='guest') return; //not saving for guests
+    	    tokens.splice(0,1); //remove 'userId'
+    	    
+    	    let column=tokens[tokens.length-1];
+    	    tokens.splice(tokens.length-1,1); //remove 'column'
+    	    
+    	    let table=tokens.join('-');
+    	    console.log('SET',table,column,userId,val);
+    	    
+    	    $.ajax({
+    	    	url: "/web/ui-tables-cols/set?table="+table+"&column="+column+"&user="+userId+"&value="+val
+    	    })
+        //.fail(function () {console.log("Err saving data")});}
+	}
+JS;
+	
+	
 	/**
 	 * Колонки для вывода
 	 * @var array
@@ -56,9 +87,10 @@ class DynaGridWidget extends Widget
 		}
 		
 		return DynaGrid::widget([
-			'storage'=>DynaGrid::TYPE_COOKIE,
+			'storage'=>DynaGrid::TYPE_DB,
 			'columns' => $this->prepareColumns($this->columns,$this->defaultOrder),
 			'gridOptions'=>[
+				'id'=>$this->id,
 				'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
 				'panel'=>[
 					'type' => GridView::TYPE_DEFAULT,
@@ -76,6 +108,7 @@ class DynaGridWidget extends Widget
 				'filterModel' => $this->filterModel,
 				'tableOptions' => ['class'=>'table-condensed table-striped table-bordered arms_index'],
 				'resizableColumns'=>$this->resizableColumns,
+				'resizableColumnsOptions'=>['store'=>new JsExpression($this->testStore)],
 				'persistResize'=>true,
 				'showFooter'=>$this->showFooter,
 				/*'rowOptions'=>function($data) {
@@ -86,7 +119,8 @@ class DynaGridWidget extends Widget
 				}*/
 			],
 			'options'=>[
-				'id'=>'dynaGrid-'.$this->id,
+				'id'=>$this->id,
+				'resizable-columns-id'=>$this->id,
 			]
 		]);
 	}
@@ -115,13 +149,18 @@ class DynaGridWidget extends Widget
 		if (!isset($data['format']))
 			$data['format']='raw';
 		
-		//параметры ячейки
-		if (!isset($data['contentOptions']))
-			$data['contentOptions']=[];
-		//custom class
-		if (is_array($data['contentOptions']) && !isset($data['contentOptions']['class']))
-			$data['contentOptions']['class']=$attr.'_col';
+		//custom class if not set
+		$data=ArrayHelper::setTreeDefaultValue($data,['contentOptions','class'],$attr.'_col');
 		
+		$colId=str_replace('-','_',$data['attribute']);
+		
+		//column id for resizable-column
+		$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','data-resizable-column-id'],$colId);
+		
+		//fetching saved column width
+		if ($width=UiTablesCols::fetchColWidth($this->id,$colId)) {
+			$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','style'],"width:$width%");
+		}
 		
 		$model=isset($data['model'])?
 			$data['model']:$this->model;

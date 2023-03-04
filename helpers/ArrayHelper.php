@@ -7,10 +7,10 @@ namespace app\helpers;
 class ArrayHelper extends \yii\helpers\ArrayHelper
 {
 	/**
-	 * Рекурсивно обходит древовидный массив перекрывает значения по умолчанию кастомными
-	 * @param $default
-	 * @param $custom
-	 * @return mixed
+	 * Рекурсивно обходит древовидный массив и перекрывает значения по умолчанию кастомными
+	 * @param $default array
+	 * @param $custom array
+	 * @return array
 	 */
 	public static function recursiveOverride($default,$custom) {
 		if (is_null($custom)) return $default;
@@ -73,7 +73,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 	 * @return mixed|null
 	 */
 	public static function getTreeValue($array,$path,$default=null) {
-		if (!is_array($path)) $path=[$path];
+		if (!is_array($path)) $path=explode('/',$path);
 		//движемся от корня пути к концу
 		for ($i=0;$i<count($path);$i++) {
 			//на каждом этапе проверяем есть ли нужный элемент (директория/узел дерева)
@@ -83,5 +83,60 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		}
 		//если дошли до конца пути - возвращаем результат
 		return $array;
+	}
+	
+	/**
+	 * Строит из пути и значения (['options','pluginOptions','multiple'],true)
+	 * ветку вида ['options'=>['pluginOptions'=>['multiple'=>true]]]
+	 * @param array $path
+	 * @param mixed $value
+	 * @return array
+	 */
+	public static function buildBranch($path,$value) {
+		if (!is_array($path)) $path=explode('/',$path);
+		//движемся от корня пути к концу
+		$newBranch=[$path[count($path)-1]=>$value];
+		
+		for ($i=count($path)-2;$i>=0;$i--) {
+			$newBranch=[$path[$i]=>$newBranch];
+		}
+		
+		return $newBranch;
+	}
+	
+	/**
+	 * Записывает значение в древовидный архив
+	 * @param array $array		исходный архив в котором ищем
+	 * @param array $path		путь ['options','pluginOptions','multiple']
+	 * @param mixed $value		значение если ничего не нашлось
+	 * @return mixed|null
+	 */
+	public static function setTreeValue($array,$path,$value) {
+		//если дошли до конца пути - возвращаем результат
+		return self::recursiveOverride( //переписываем
+			$array,						//исходный архив
+			self::buildBranch(			//веткой построенной
+				$path,					//из пути
+				$value					//и значения
+			)
+		);
+	}
+
+	/**
+	 * Записывает значение по умолчанию в древовидный архив (если не установлено)
+	 * @param array $array		исходный архив в котором ищем
+	 * @param array $path		путь ['options','pluginOptions','multiple']
+	 * @param mixed $value		значение если ничего не нашлось
+	 * @return mixed|null
+	 */
+	public static function setTreeDefaultValue($array,$path,$value) {
+		//если дошли до конца пути - возвращаем результат
+		return self::recursiveOverride( //переписываем
+			self::buildBranch(			//ветку построенную
+				$path,					//из пути
+				$value					//и значения по умолчанию
+			),
+			$array						//исходным архивом
+		);
 	}
 }
