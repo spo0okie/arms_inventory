@@ -276,7 +276,8 @@ class Contracts extends ArmsModel
 	public function getSuccessor()
 	{
 		return $this->hasOne(Contracts::className(), ['parent_id' => 'id'])
-			->andWhere(['is_successor'=>true])
+			->from(['contract_successor'=>self::tableName()])
+			->andWhere(['contract_successor.is_successor'=>true])
 			->orderBy(['date'=>SORT_DESC]);
 	}
 	
@@ -517,9 +518,14 @@ class Contracts extends ArmsModel
 		return $name;
 	}
 	
-	public function getSname()
+	public function getSname($date=true,$self=true,$partner=true)
 	{
-		return $this->datePart.' - '.$this->selfSname.' - '.$this->partnersNames;
+		$tokens=[];
+		if ($date) $tokens[]=$this->datePart;
+		if ($self) $tokens[]=$this->selfSname;
+		if ($partner) $tokens[]=$this->partnersNames;
+		
+		return implode('-',$tokens);
 	}
 	
 	public function getSAttach()

@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Contracts;
 use Yii;
 use app\models\Partners;
 use app\models\PartnersSearch;
@@ -77,8 +78,21 @@ class PartnersController extends Controller
      */
     public function actionView($id)
     {
+    	$contracts=Contracts::find()
+			->joinWith([
+				'currency',
+				'techs',
+				'licItems',
+				'services',
+				
+			])
+			->join('LEFT JOIN','partners_in_contracts','`partners_in_contracts`.`contracts_id`=`contracts`.`id`')
+			->where(['partners_in_contracts.partners_id'=>$id])
+			->orderBy(['date'=>SORT_DESC])
+			->all();
         return $this->render('view', [
             'model' => $this->findModel($id),
+			'contracts'=>$contracts
         ]);
     }
 
