@@ -85,7 +85,9 @@ class DynaGridWidget extends Widget
 				'condensed' => true,
 				'dataProvider' => $this->dataProvider,
 				'filterModel' => $this->filterModel,
-				'tableOptions' => ['class'=>'table-condensed table-striped table-bordered table-hover table-dynaGrid-noWrap'],
+				'tableOptions' => [
+					'class'=>'table-condensed table-striped table-bordered table-hover'.($this->resizableColumns?' table-dynaGrid-noWrap':'')
+				],
 				'resizableColumns'=>$this->resizableColumns,
 				'resizableColumnsOptions'=>['store'=>new JsExpression('{
     				get: function (key,def) {/*no need to get anything. all columns rendered resized on server-side*/},

@@ -32,6 +32,7 @@ class AppAsset extends AssetBundle
 		'css/scans.css',
 		'css/schedules.css',
 		'css/state-colors.css',
+		'css/tables.css',
 		'css/codes.private.css',
 		'css/bootstrap.css',
     ];

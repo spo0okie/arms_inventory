@@ -1,0 +1,5 @@
+/** ДОКУМЕНТЫ **/
+td.contracts-total-column {text-align: right; width: 100px}
+td.contracts-state-column {max-width: 250px; width: 250px;  overflow: hidden}
+td.contracts-attach-column {max-width: 70px; width: 70px;  overflow: hidden; text-align: center}
+
