@@ -378,8 +378,11 @@ class Techs extends ArmsModel
 			(static::$num_str_pad_2tokens);
 		
 		$num = (int)$tokens[count($tokens) - 1];
-		$tokens[count($tokens) - 1] = str_pad((string)$num, $num_str_pad, '0', STR_PAD_LEFT);
-		return mb_strtoupper(implode('-', $tokens));
+		unset($tokens[count($tokens) - 1]);
+		$prefix=implode('-', $tokens);
+		$num_str_pad=min($num_str_pad,15-mb_strlen($prefix));
+		$num = str_pad((string)$num, $num_str_pad, '0', STR_PAD_LEFT);
+		return mb_strtoupper($prefix . '-' . $num);
 	}
 
 	/**
