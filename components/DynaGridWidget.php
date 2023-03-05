@@ -1,48 +1,20 @@
 <?php
 namespace app\components;
 
+use app\components\assets\DynaGridWidgetAsset;
 use app\helpers\ArrayHelper;
-use app\models\ArmsModel;
+//use app\models\ArmsModel;
 use app\models\ui\UiTablesCols;
 use kartik\dynagrid\DynaGrid;
 use kartik\grid\GridView;
 use yii\base\Widget;
 use yii\data\ActiveDataProvider;
-use yii\helpers\Html;
-use yii\helpers\Inflector;
 use yii\web\JsExpression;
 
 
 
 class DynaGridWidget extends Widget
 {
-
-public $testStore= <<<JS
-	{
-    	get: function (key,def) {},
-    	set: function (key,val) {
-    	    let tokens=key.split('-');
-    	    if (!tokens.length) return;
-    	    if (tokens[0]!=='kv') return; //must be like kv-2364-dynaGrid-arms-index-place
-    	    tokens.splice(0,1); //remove 'kv'
-    	    
-    	    let userId=tokens[0];
-    	    if (userId=='guest') return; //not saving for guests
-    	    tokens.splice(0,1); //remove 'userId'
-    	    
-    	    let column=tokens[tokens.length-1];
-    	    tokens.splice(tokens.length-1,1); //remove 'column'
-    	    
-    	    let table=tokens.join('-');
-    	    console.log('SET',table,column,userId,val);
-    	    
-    	    $.ajax({
-    	    	url: "/web/ui-tables-cols/set?table="+table+"&column="+column+"&user="+userId+"&value="+val
-    	    })
-        //.fail(function () {console.log("Err saving data")});
-        }
-	}
-JS;
 	
 	
 	/**
@@ -77,6 +49,12 @@ JS;
 	public $filterModel=null;
 	public $model=null;
 	
+	public function init()
+	{
+		parent::init();
+		DynaGridWidgetAsset::register($this->view);
+	}
+	
 	public function run()
 	{
 		if (is_null($this->id)) {
@@ -107,17 +85,14 @@ JS;
 				'condensed' => true,
 				'dataProvider' => $this->dataProvider,
 				'filterModel' => $this->filterModel,
-				'tableOptions' => ['class'=>'table-condensed table-striped table-bordered arms_index'],
+				'tableOptions' => ['class'=>'table-condensed table-striped table-bordered table-hover table-dynaGrid-noWrap'],
 				'resizableColumns'=>$this->resizableColumns,
-				'resizableColumnsOptions'=>['store'=>new JsExpression($this->testStore)],
+				'resizableColumnsOptions'=>['store'=>new JsExpression('{
+    				get: function (key,def) {/*no need to get anything. all columns rendered resized on server-side*/},
+    				set: function (key,val) {persistResizeColumn(key,val)}
+				}')],
 				'persistResize'=>true,
 				'showFooter'=>$this->showFooter,
-				/*'rowOptions'=>function($data) {
-					return [
-						'class'=>($data->hasProperty('archived') && $data->archived)?'row-archived':''
-					];
-					
-				}*/
 			],
 			'options'=>[
 				'id'=>$this->id,

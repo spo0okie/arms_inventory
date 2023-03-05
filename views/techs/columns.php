@@ -69,14 +69,16 @@ return [
 	
 	'user' => [
 		'value' => function ($data) use ($renderer) {
-			return is_object($data->user)?$renderer->render('/users/item', ['model' => $data->user]):null;
+			return is_object($data->user)?$renderer->render('/users/item', ['model' => $data->user,'short'=>true]):null;
 		}
 	],
+	
 	'user_position' => [
 		'value' => function ($data) use ($renderer) {
 			return is_object($data->user) ?"<span class='arm_user_position'>{$data->user->Doljnost}</span>": null;
 		},
 	],
+	
 	'user_dep' => [
 		'value' => function ($data) use ($renderer) {
 			return (is_object($data->user) && is_object($data->user->orgStruct)) ?
@@ -97,6 +99,7 @@ return [
 			'class'=>'arm_hostname '.$data->updatedRenderClass
 		];}
 	],
+	
 	'comp_hw' => [
 		'value' => function ($data) use ($renderer) {
 			return $renderer->render('/hwlist/shortlist',['model'=>$data->hwList,'arm_id'=>$data->id]);
@@ -116,13 +119,13 @@ return [
 				foreach ($data->netIps as $ip)
 					$output[$ip->addr]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true]);
 				
-				return implode(' ',$output);
+				return implode('<br />',$output);
 			}
 			return null;
 		},
 	],
 	'mac' => [
-		'value'=>function ($data) {return Html::tag('span',\app\models\Techs::formatMacs($data->mac),[
+		'value'=>function ($data) {return Html::tag('span',\app\models\Techs::formatMacs($data->mac,'<br />'),[
 			'class'=>'mac_address'
 		]);},
 	],

@@ -1,8 +1,6 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\SoftLists */

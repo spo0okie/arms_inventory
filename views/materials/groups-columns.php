@@ -3,7 +3,6 @@
 /* Колонки для Материалы по кучкам Помещение/Тип
  */
 use yii\helpers\Html;
-use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $groupBy string */

@@ -770,7 +770,7 @@ class Techs extends ArmsModel
 		return is_object($this->state)?$this->state->archived:false;
 	}
 	
-	public static function formatMacs($raw) {
+	public static function formatMacs($raw,$glue="\n") {
 		
 		$macs=explode("\n",$raw);
 		
@@ -784,7 +784,7 @@ class Techs extends ArmsModel
 			$macs[$k]=implode(':',$macTokens);
 		}
 		
-		return implode("\n",$macs);
+		return implode($glue,$macs);
 	}
 	
 	public function getFormattedMac() {

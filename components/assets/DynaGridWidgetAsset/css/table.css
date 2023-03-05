@@ -1,0 +1,12 @@
+table.table-dynaGrid-noWrap {
+    table-layout: fixed;
+}
+
+
+table.table-dynaGrid-noWrap td,
+table.table-dynaGrid-noWrap th
+{
+    white-space: nowrap;
+    overflow: hidden;
+    /*text-overflow: ellipsis;*/
+}
