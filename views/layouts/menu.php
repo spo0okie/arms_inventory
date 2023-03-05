@@ -16,6 +16,9 @@ foreach (\app\models\TechTypes::fetchNames() as $idx=>$typeName)
 $places=[];
 foreach (\app\models\Places::fetchNames(1) as $idx=>$placeName)
 	$places[]=['label'=>$placeName,'url' => ['/places/view','id'=>$idx]];
+
+if (count($places)) $places[]='-';
+$places[]=['label' => 'Список помещений','url' => ['/places/index']];
 	
 
 NavBar::begin([
@@ -49,10 +52,7 @@ NavBar::begin([
 			],
 			['label' => 'Организация',
 				'items' => [
-					count($places)?['label' => \app\models\Places::$titles,
-						'items'=>$places,
-						'class'=>'dropdown-menu dropdown-submenu'
-					]:['label' => \app\models\Places::$titles,'url' => ['/places/index']],
+					['label' => \app\models\Places::$titles, 'items'=>$places, 'class'=>'dropdown-menu dropdown-submenu'],
 					['label' => \app\models\Departments::$title, 'url' => ['/departments/index']],
 					['label' => \app\models\Services::$titles, 'url' => ['/services/index']],
 					['label' => \app\models\Schedules::$titles, 'url' => ['/schedules/index']],
