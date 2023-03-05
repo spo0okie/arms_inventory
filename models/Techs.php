@@ -825,7 +825,18 @@ class Techs extends ArmsModel
 	 */
 	public static function fetchNextNum($prefix) {
 		//ищем запись с таким префиксом (сортируем по префиксу и выбираем один самый большой)
-		$last=static::find()->where(['like','num',$prefix])->orderBy(['num'=>SORT_DESC])->one();
+		$query=static::find()
+			->where(['like','num',$prefix]);
+		
+		
+		if (strpos($prefix,'-')===false) //если в переданном префиксе нет "-", то ищем записи в которых
+			$query->andWhere('LOCATE("-",num,LOCATE("-",num)+1)=0'); //после первого "-" второго уже нет
+		//иначе он вместо чел-0000018 найдет чел-тел-0002 и все неправильно посчитает
+		
+		$last=$query
+			->orderBy(['num'=>SORT_DESC])
+			->one();
+		
 		if (is_object($last)) {
 			$tokens = explode('-', $last->num);
 			$subIndex = (int)$tokens[count($tokens)-1] + 1;
