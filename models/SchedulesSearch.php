@@ -42,7 +42,7 @@ class SchedulesSearch extends Schedules
     {
 		$query = Schedules::find()
 			->joinWith(['providingServices','acls','entries'])
-			->where(['acls.schedules_id'=>null,'schedules.parent_id'=>null]);
+			->where(['acls.schedules_id'=>null,'schedules.override_id'=>null]);
 	
 		// add conditions that should always apply here
 

@@ -61,7 +61,7 @@ class SchedulesSearchAcl extends Schedules
 			'acls.ip',
 		])
 		->where('acls.id')
-		->andWhere(['schedules.parent_id'=>null]);
+		->andWhere(['schedules.override_id'=>null]);
 
         // add conditions that should always apply here
 
