@@ -46,46 +46,23 @@ $tabs = [
 	],
 ];
 
-if ($model->is_computer) {
-	$tabs[] = [
-		'label'=>'Экземпляры рабочих мест',
-		'linkOptions'=>['id'=>'items'],
-		'content'=>'<div class="container-fluid">'.DynaGridWidget::widget([
-				'id' => 'tech-types-arms-index',
-				'header' => '',
-				'columns' => require __DIR__.'/../arms/columns.php',
-				'defaultOrder' => [
-					//'attach',
-					'num',
-					'model_id',
-					/*'comp_id',
-					'comp_hw',
-					'comp_ip',
-					'comp_mac',*/
-					'mac',
-					'state_id',
-					'user_id',
-					'user_position',
-					'places_id',
-					'inv_sn'
-				],
-				'dataProvider' => $dataProvider,
-				'filterModel' => $searchModel,
-			]).'</div>' ,
-		'active'=>is_array(Yii::$app->request->get('ArmsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')
-	];
-} else {
-	$tabs[] = [
-		'label'=>'Экземпляры оборудования',
-		'linkOptions'=>['id'=>'items'],
-		'content'=>'<div class="container-fluid">'.$this->render('/techs/table', [
-			'searchModel' => $searchModel,
+$tabs[] = [
+	'label'=>'Экземпляры рабочих мест',
+	'linkOptions'=>['id'=>'items'],
+	'content'=>'<div class="container-fluid">'.DynaGridWidget::widget([
+			'id' => 'tech-types-arms-index',
+			'header' => 'Оборудование',
+			'columns' => require __DIR__.'/../techs/columns.php',
+			'defaultOrder' => $model->is_computer?
+				['attach','num','model','comp_id','ip','mac','state_id','user','place','inv_sn']:
+				['attach','num','model','ip','mac','state_id','user','place','inv_sn'],
 			'dataProvider' => $dataProvider,
-			'columns' => ['attach', 'num', 'model', 'mac', 'ip', 'state', 'user', 'place', 'inv_num', 'comment'],
-		]).'</div>',
-		'active'=>is_array(Yii::$app->request->get('TechsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')
-	];
-}
+			'filterModel' => $searchModel,
+			'resizableColumns' => true,
+	]).'</div>' ,
+	'active'=>is_array(Yii::$app->request->get('TechsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')
+];
+
 
 $this->params['navTabs'] = $tabs;
 
