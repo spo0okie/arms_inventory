@@ -73,10 +73,10 @@ return [
 		'value' => function ($data) {
 			$output = [];
 			if (is_object($data->responsibleRecursive))
-				$output[] = '<strong>'.$this->render('/users/item', ['model' => $data->responsibleRecursive,'short'=>true]).'</strong>';
+				$output[] = '<div class="pe-2"><strong>'.$this->render('/users/item', ['model' => $data->responsibleRecursive,'short'=>true]).'</strong></div>';
 			if (is_array($data->supportRecursive)) foreach ($data->supportRecursive as $user)
-				$output[] = $this->render('/users/item', ['model' => $user,'short'=>true]);
-			return count($output) ? implode(', ', $output) : null;
+				$output[] = '<div class="pe-2">'.$this->render('/users/item', ['model' => $user,'short'=>true]).'</div>';
+			return '<div class="d-flex flex-wrap">'. implode(' ', $output).'</div>';
 		},
 		'footer'=>$totalSupportRendered,
 	],
@@ -84,24 +84,24 @@ return [
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->arms)) foreach ($data->arms as $arm)
-				$output[] = $this->render('/techs/item', ['model' => $arm,'static_view'=>true]);
-			return count($output) ? implode(', ', $output) : null;
+				$output[] = '<div class="pe-2">'.$this->render('/techs/item', ['model' => $arm,'static_view'=>true]).'</div>';
+			return '<div class="d-flex flex-wrap">'. implode(' ', $output).'</div>';
 		},
 	],
 	'comps' =>[
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->comps)) foreach ($data->comps as $comp)
-				$output[] = $this->render('/comps/item', ['model' => $comp,'static_view'=>true]);
-			return count($output) ? implode(', ', $output) : null;
+				$output[] = '<div class="pe-2">'.$this->render('/comps/item', ['model' => $comp,'static_view'=>true]).'</div>';
+			return '<div class="d-flex flex-wrap">'. implode(' ', $output).'</div>';
 		},
 	],
 	'techs'=>[
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->techs)) foreach ($data->techs as $tech)
-				$output[] = $this->render('/techs/item', ['model' => $tech,'static_view'=>true]);
-			return count($output) ? implode(', ', $output) : null;
+				$output[] = '<div class="pe-2">'.$this->render('/techs/item', ['model' => $tech,'static_view'=>true]).'</div>';
+			return '<div class="d-flex flex-wrap">'. implode(' ', $output).'</div>';
 		},
 	],
 	'compsAndTechs'=> [
@@ -109,12 +109,13 @@ return [
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->comps)) foreach ($data->comps as $comp)
-				$output[] = $this->render('/comps/item', ['model' => $comp,'static_view'=>true]);
+				$output[] = '<div class="pe-2">'.$this->render('/comps/item', ['model' => $comp,'static_view'=>true]).'</div>';
 			if (is_array($data->techs)) foreach ($data->techs as $tech)
-				$output[] = $this->render('/techs/item', ['model' => $tech,'static_view'=>true]);
-			return count($output) ? implode(', ', $output) : null;
+				$output[] = '<div class="pe-2">'.$this->render('/techs/item', ['model' => $tech,'static_view'=>true]).'</div>';
+			return '<div class="d-flex flex-wrap">'.implode(' ', $output).'</div>';
 		},
 		'footer' => $totalCompsAndTechsRendered,
+		//'contentOptions'=>['class'=>'d-flex flex-row']
 	],
 	/*'places' => [
 		'value' => function ($data) {
@@ -128,8 +129,8 @@ return [
 		'value' => function ($data) use ($renderer) {
 			$output = [];
 			if (is_array($data->sitesRecursive)) foreach ($data->sitesRecursive as $site)
-				$output[] = $renderer->render('/places/item', ['model' => $site,'short'=>true]);
-			return count($output) ? implode(' ', $output) : null;
+				$output[] = '<div class="pe-2">'.$renderer->render('/places/item', ['model' => $site,'short'=>true]).'</div>';
+			return '<div class="d-flex flex-wrap">'.implode(' ', $output).'</div>';
 		},
 	],
 	'providingSchedule' => [
