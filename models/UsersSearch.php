@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -42,7 +43,10 @@ class UsersSearch extends Users
      */
     public function search($params)
     {
-        $query = Users::find()->joinWith('orgStruct');
+        $query = Users::find()->joinWith([
+        	'orgStruct',
+			'techs'
+		]);
 
         // add conditions that should always apply here
 
@@ -74,8 +78,8 @@ class UsersSearch extends Users
             ->andFilterWhere(['or like', 'Ename', 		\yii\helpers\StringHelper::explode($this->Ename,'|',true,true)])
             ->andFilterWhere(['or like', 'Login',		\yii\helpers\StringHelper::explode($this->Login,'|',true,true)])
             ->andFilterWhere(['or like', 'Email',		\yii\helpers\StringHelper::explode($this->Email,'|',true,true)])
-            ->andFilterWhere(['or like', 'Phone',		\yii\helpers\StringHelper::explode($this->Phone,'|',true,true)])
-            ->andFilterWhere(['or like', 'Mobile',		\yii\helpers\StringHelper::explode($this->Mobile,'|',true,true)])
+			->andFilterWhere(QueryHelper::querySearchString(['OR','users.Phone','techs.comment'], $this->Phone))
+			->andFilterWhere(['or like', 'Mobile',		\yii\helpers\StringHelper::explode($this->Mobile,'|',true,true)])
             ->andFilterWhere(['or like', 'org_struct.name', \yii\helpers\StringHelper::explode($this->orgStruct_name,'|',true,true)])
             ->andFilterWhere(['or like', 'work_phone',	\yii\helpers\StringHelper::explode($this->work_phone,'|',true,true)])
             ->andFilterWhere(['or like', 'Bday', 		\yii\helpers\StringHelper::explode($this->Bday,'|',true,true)])

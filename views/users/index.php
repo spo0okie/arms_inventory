@@ -45,7 +45,22 @@ $renderer=$this;
             //'Uvolen',
             'Login',
             'Email:email',
-            'Phone',
+			[
+				'attribute'=>'Phone',
+				'format'=>'raw',
+				'value' => function($data)use($renderer){
+					$techs=$data->techs;
+					if (!is_array($techs) || count($techs)==0) {
+						return $data->Phone;
+					} else {
+						$items=[];
+						foreach ($techs as $tech)
+							if ($tech->isVoipPhone && strlen($tech->comment))
+								$items[]=$renderer->render('/techs/item',['model'=>$tech,'static_view'=>true,'name'=>$tech->comment]);
+						return count($items)?implode(' ',$items):$data->Phone;
+					}
+				}
+			],
 	        [
 		        'attribute'=>'techs',
 		        'format'=>'raw',
