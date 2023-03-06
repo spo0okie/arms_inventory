@@ -201,7 +201,7 @@ class TechsSearch extends Techs
 			->andFilterWhere(['tech_models.type_id'=>$this->type_id])
 			->andFilterWhere(['tech_types.is_computer'=>$this->is_computer])
 
-			->andFilterWhere(QueryHelper::querySearchString('comment', $this->comment));
+			->andFilterWhere(QueryHelper::querySearchString('techs.comment', $this->comment));
 	
 		$totalQuery=clone $query;
 	
