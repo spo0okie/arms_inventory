@@ -29,7 +29,7 @@ $this->title = 'Инвентаризация';
 		</p>
 
 		<p>
-			<?= \app\components\SearchFieldWidget::widget(['model'=>'Contracts','field'=>'name','label'=>'Документы:\&gt; ']) ?>
+			<?= \app\components\SearchFieldWidget::widget(['model'=>'Contracts','field'=>'fullname','label'=>'Документы:\&gt; ']) ?>
 		</p>
 	</div>
 	
