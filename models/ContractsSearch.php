@@ -58,7 +58,9 @@ class ContractsSearch extends Contracts
 	        'techs',
 	        'licItems',
 	        'services',
-	        //'orgInets',
+			'successor',
+			'childs',
+	        'state',
         ]);
 
         $this->load($params);

@@ -277,8 +277,8 @@ class Contracts extends ArmsModel
 	{
 		return $this->hasOne(Contracts::className(), ['parent_id' => 'id'])
 			->from(['contract_successor'=>self::tableName()])
-			->andWhere(['contract_successor.is_successor'=>true])
-			->orderBy(['date'=>SORT_DESC]);
+			->onCondition(['contract_successor.is_successor'=>true])
+			->orderBy(['contract_successor.date'=>SORT_DESC]);
 	}
 	
 	/**
@@ -390,8 +390,9 @@ class Contracts extends ArmsModel
 	public function getChilds()
 	{
 		return $this->hasMany(Contracts::className(), ['parent_id' => 'id'])
-			->andWhere(['is_successor'=>false])
-			->orderBy(['date'=>SORT_DESC]);
+			->from(['contract_children'=>self::tableName()])
+			->onCondition(['contract_children.is_successor'=>false])
+			->orderBy(['contract_children.date'=>SORT_DESC]);
 	}
 	
 	public function getChildrenRecursive()

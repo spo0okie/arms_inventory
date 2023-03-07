@@ -27,6 +27,10 @@ $this->title = 'Инвентаризация';
 		<p>
 			<?= \app\components\SearchFieldWidget::widget(['model'=>'NetIps','field'=>'text_addr','label'=>'IP адреса:\&gt; ']) ?>
 		</p>
+
+		<p>
+			<?= \app\components\SearchFieldWidget::widget(['model'=>'Contracts','field'=>'name','label'=>'Документы:\&gt; ']) ?>
+		</p>
 	</div>
 	
 </div>
