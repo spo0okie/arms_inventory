@@ -51,8 +51,14 @@ class CompsSearch extends Comps
      */
     public function search($params)
     {
+		ManufacturersDict::initCache();
         $query = Comps::find()
-			->joinWith(['arm.place','domain']);
+			->joinWith([
+				'arm.place',
+				'arm.user',
+				'domain',
+				"netIps.network"
+			]);
 
         // add conditions that should always apply here
 		$sort=[
