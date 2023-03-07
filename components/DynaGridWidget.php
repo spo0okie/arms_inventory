@@ -90,7 +90,7 @@ class DynaGridWidget extends Widget
 				],
 				'resizableColumns'=>$this->resizableColumns,
 				'resizableColumnsOptions'=>['store'=>new JsExpression('{
-    				get: function (key,def) {/*no need to get anything. all columns rendered resized on server-side*/},
+    				get: function (key,def) {return def},
     				set: function (key,val) {persistResizeColumn(key,val)}
 				}')],
 				'persistResize'=>true,
