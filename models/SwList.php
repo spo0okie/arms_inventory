@@ -262,7 +262,10 @@ class SwList {
     public function sortByName(){
         $manufacturers=Manufacturers::fetchNames();
         usort($this->items, function ($a, $b) use ($manufacturers) {
-            if (($x = strcasecmp($manufacturers[$a['dev']], $manufacturers[$b['dev']])) !== 0) return $x;
+            if (($x = strcasecmp(
+				isset($manufacturers[$a['dev']])?$manufacturers[$a['dev']]:'',
+				isset($manufacturers[$b['dev']])?$manufacturers[$b['dev']]:''
+			)) !== 0) return $x;
             return strcasecmp($a['descr'], $b['descr']);
         });
 
