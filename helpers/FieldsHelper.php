@@ -57,8 +57,9 @@ class FieldsHelper
 		$label=static::cutSingleOption($options,'label');
 		$hint=static::cutSingleOption($options,'hint');
 		if (empty($label)) $label=$model->getAttributeLabel($attr);
-		if (empty($hint)) $label=$model->getAttributeLabel($attr);
+		if (empty($hint)) $hint=$model->getAttributeHint($attr);
 		if (!$label) return null;
+		if (!$hint) return [$label,[]];
 		return [
 			$label.' '.static::labelHintIcon,
 			static::toolTipOptions($label,$hint)
