@@ -35,19 +35,9 @@ $this->params['headerContent']='<h2>'.
 		);
 	
 
-
-$tabs = [
-	[
-		'label'=>'Список моделей',
-		'linkOptions'=>['id'=>'models'],
-		'content'=>'<div class="container">'.
-			$this->render('list-models',['model'=>$model,'techModels'=>$techModels]).
-		'</div>',
-	],
-];
-
+$tabs=[];
 $tabs[] = [
-	'label'=>'Экземпляры рабочих мест',
+	'label'=>'Экземпляры оборудования',
 	'linkOptions'=>['id'=>'items'],
 	'content'=>'<div class="container-fluid">'.DynaGridWidget::widget([
 			'id' => 'tech-types-arms-index',
@@ -60,8 +50,18 @@ $tabs[] = [
 			'filterModel' => $searchModel,
 			'resizableColumns' => true,
 	]).'</div>' ,
-	'active'=>is_array(Yii::$app->request->get('TechsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')
+	//'active'=>is_array(Yii::$app->request->get('TechsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')
+	'active'=>true,
 ];
+
+$tabs[] = [
+	'label'=>'Список моделей',
+	'linkOptions'=>['id'=>'models'],
+	'content'=>'<div class="container">'.
+		$this->render('list-models',['model'=>$model,'techModels'=>$techModels]).
+		'</div>',
+];
+
 
 
 $this->params['navTabs'] = $tabs;
