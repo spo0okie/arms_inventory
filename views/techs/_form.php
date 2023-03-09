@@ -183,7 +183,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
         <div class="col-md-2" >
 		    <?= FieldsHelper::TextInputField($form,$model, 'comment',[
 				'hint'=>TechModels::fetchTypeComment($model->model_id)['hint'],
-				'label'=>app\models\TechModels::fetchTypeComment($model->model_id)['name']
+				'label'=>TechModels::fetchTypeComment($model->model_id)['name']
 			]) ?>
         </div>
     </div>

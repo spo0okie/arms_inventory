@@ -34,7 +34,7 @@ class FieldsHelper
 		]:[];
 	}
 	
-	public static function cutSingleOption(&$options,$option,$default) {
+	public static function cutSingleOption(&$options,$option,$default=null) {
 		if (!isset($options[$option])) return $default;
 		$result=$options[$option];
 		unset($options[$option]);
@@ -53,6 +53,18 @@ class FieldsHelper
 		return static::cutSingleOption($options,'itemsHintsUrl','');
 	}
 	
+	public static function labelOption($model,$attr,$options) {
+		$label=static::cutSingleOption($options,'label');
+		$hint=static::cutSingleOption($options,'hint');
+		if (empty($label)) $label=$model->getAttributeLabel($attr);
+		if (empty($hint)) $label=$model->getAttributeLabel($attr);
+		if (!$label) return null;
+		return [
+			$label.' '.static::labelHintIcon,
+			static::toolTipOptions($label,$hint)
+		];
+	}
+	
 	/**
 	 * @param ActiveForm $form
 	 * @param ArmsModel $model
@@ -63,6 +75,7 @@ class FieldsHelper
 	public static function Select2Field($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
+		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
 		$itemsHintsUrl=static::cutItemsHintsOptions($options);
 		$pluginOptions=['allowClear' => true];
 		if (strlen($itemsHintsUrl)) {
@@ -85,13 +98,8 @@ class FieldsHelper
 				'toggleAllSettings'=>['selectLabel' => null],
 				'pluginOptions' => $pluginOptions
 			],$options)
-			)->label(
-				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
-				static::toolTipOptions(
-					$model->getAttributeLabel($attr),
-					$model->getAttributeHint($attr)
-				)
 			)
+			->label($label,$labelOptions)
 			->hint($hint,$hintOptions);
 	}
 	
@@ -105,6 +113,7 @@ class FieldsHelper
 	public static function TextAutoresizeField($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
+		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
 		$options=\app\helpers\ArrayHelper::recursiveOverride([
 			'lines'=>1
 		],$options);
@@ -116,13 +125,7 @@ class FieldsHelper
 		$form->view->registerJs("$('#$fieldId').autoResize({extraSpace:25}).trigger('change.dynSiz');");
 		return $form->field($model, $attr)
 			->textarea(['rows' => max($lines, count(explode("\n", $model->$attr)))])
-			->label(
-				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
-				static::toolTipOptions(
-					$model->getAttributeLabel($attr),
-					$model->getAttributeHint($attr)
-				)
-			)
+			->label($label,$labelOptions)
 			->hint($hint,$hintOptions);
 	}
 	
@@ -136,18 +139,13 @@ class FieldsHelper
 	public static function TextInputField($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
+		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)
 			->textInput(\app\helpers\ArrayHelper::recursiveOverride([
 				'maxlength'=>true
 			],$options))
-			->label(
-				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
-				static::toolTipOptions(
-					$model->getAttributeLabel($attr),
-					$model->getAttributeHint($attr)
-				)
-			)
+			->label($label,$labelOptions)
 			->hint($hint,$hintOptions);
 	}
 	
@@ -161,15 +159,10 @@ class FieldsHelper
 	public static function CheckboxField($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
+		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)->checkbox()
-			->label(
-				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
-				static::toolTipOptions(
-					$model->getAttributeLabel($attr),
-					$model->getAttributeHint($attr)
-				)
-			)
+			->label($label,$labelOptions)
 			->hint($hint,$hintOptions);
 	}
 	
@@ -183,6 +176,7 @@ class FieldsHelper
 	public static function CheckboxListField($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
+		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
 		$options=\app\helpers\ArrayHelper::recursiveOverride([
 			'class'=>"card d-flex flex-row pt-2 pb-1",
 			'itemOptions'=>[
@@ -196,13 +190,7 @@ class FieldsHelper
 			->field($model, $attr)->checkboxList(
 				$items,$options
 			)
-			->label(
-				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
-				static::toolTipOptions(
-					$model->getAttributeLabel($attr),
-					$model->getAttributeHint($attr)
-				)
-			)
+			->label($label,$labelOptions)
 			->hint($hint,$hintOptions);
 	}
 	
@@ -217,6 +205,7 @@ class FieldsHelper
 	{
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
+		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)
 			->widget(\kartik\markdown\MarkdownEditor::className(),
@@ -224,13 +213,7 @@ class FieldsHelper
 					'showExport'=>false
 				],$options)
 			)
-			->label(
-				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
-				static::toolTipOptions(
-					$model->getAttributeLabel($attr),
-					$model->getAttributeHint($attr)
-				)
-			)
+			->label($label,$labelOptions)
 			->hint($hint,$hintOptions);
 	}
 	
@@ -245,6 +228,8 @@ class FieldsHelper
 	{
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
+		
+		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)
 			->widget(DatePicker::classname(), \app\helpers\ArrayHelper::recursiveOverride([
@@ -255,13 +240,7 @@ class FieldsHelper
 					'format' => 'yyyy-mm-dd'
 				]
 			],$options))
-			->label(
-				$model->getAttributeHint($attr)?($model->getAttributeLabel($attr).' '.static::labelHintIcon):null,
-				static::toolTipOptions(
-					$model->getAttributeLabel($attr),
-					$model->getAttributeHint($attr)
-				)
-			)
+			->label($label,$labelOptions)
 			->hint($hint,$hintOptions);
 	}
 	
