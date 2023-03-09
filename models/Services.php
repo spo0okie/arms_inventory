@@ -309,7 +309,6 @@ class Services extends ArmsModel
 			$this->contracts,
 			$this->comps,
 			$this->techs,
-			$this->arms,
 			$this->acls,
 			$this->orgInets,
 			$this->orgPhones
@@ -400,7 +399,8 @@ class Services extends ArmsModel
 			'parent_id',
 			$this->id
 		);
-		return $this->hasMany(Services::className(), ['parent_id' => 'id']);
+		return $this->hasMany(Services::className(), ['parent_id' => 'id'])
+			->from(['service_children'=>self::tableName()]);
 	}
 	
 	
@@ -461,6 +461,7 @@ class Services extends ArmsModel
 	public function getDepends()
 	{
 		return $this->hasMany(Services::className(), ['id' => 'depends_id'])
+			->from(['service_depend'=>Users::tableName()])
 			->viaTable('{{%services_depends}}', ['service_id' => 'id']);
 	}
 	
@@ -513,7 +514,7 @@ class Services extends ArmsModel
 	public function getDependants()
 	{
 		return $this->hasMany(Services::className(), ['id' => 'service_id'])
-			->from(['responsible'=>Services::tableName()])
+			->from(['dependant_services'=>Services::tableName()])
 			->viaTable('{{%services_depends}}', ['depends_id' => 'id']);
 	}
 	
@@ -546,7 +547,6 @@ class Services extends ArmsModel
 	public function getArms()
 	{
 		return $this->hasMany(Techs::class, ['id' => 'arm_id'])
-			//->from(['svc_arms'=>Arms::tableName()])
 			->via('comps');
 	}
 	
@@ -585,8 +585,8 @@ class Services extends ArmsModel
 	
 	public function getPlaces() {
 		if (is_null($this->placesCache)) {
-			$this->placesCache=[$this->places_id=>$this->place];
 			if (Places::allItemsLoaded()) {
+				$this->placesCache=[$this->places_id=>Places::getLoadedItem($this->places_id)];
 				foreach ($this->techs as $item)
 					if (!isset($this->placesCache[$item->places_id]))
 						$this->placesCache[$item->places_id]=Places::getLoadedItem($item->places_id);
@@ -600,6 +600,7 @@ class Services extends ArmsModel
 					if (!isset($this->placesCache[$item->places_id]))
 						$this->placesCache[$item->places_id]=Places::getLoadedItem($item->places_id);
 			} else {
+				$this->placesCache=[$this->places_id=>$this->place];
 				foreach (array_merge($this->techPlaces,$this->armPlaces,$this->phonesPlaces,$this->inetsPlaces) as $place)
 					$this->placesCache[$place->id]=$place;
 			}
@@ -783,7 +784,30 @@ class Services extends ArmsModel
 		if (!static::allItemsLoaded())
 			static::$allItems=ArrayHelper::index(
 				static::find()
-				->with(['orgPhones','orgInets','techs','comps','place','segment',])
+				->with([
+					'comps',
+					'arms',
+					'acls',
+					'segment',
+					'orgPhones',
+					'children',
+					'depends',
+					'place',
+					'comps',
+					'arms',
+					'techs',
+					'arms.place',
+					'techs.place',
+					'responsible',
+					'support',
+					'providingSchedule',
+					'supportSchedule',
+					'orgPhones',
+					'orgInets',
+					'orgPhones.place',
+					'orgInets.place',
+					'contracts',
+					])
 				->all()
 			,'id');
 	}

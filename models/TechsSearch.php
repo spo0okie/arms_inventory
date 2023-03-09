@@ -89,6 +89,7 @@ class TechsSearch extends Techs
             ->joinWith([
             	'place',
 				'comp.netIps.network',
+				'comps',
 				'netIps.network',
 				'user.orgStruct',
 				'model.manufacturer',

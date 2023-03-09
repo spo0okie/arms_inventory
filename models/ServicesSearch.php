@@ -53,26 +53,28 @@ class ServicesSearch extends Services
     public function search($params)
     {
         $query = Services::find()
-			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)')
 			->joinWith([
 			//->with([
-				'support',
-				'comps',
-				'arms',
+				'acls',
 				'segment',
 				'orgPhones',
+				//'children', - берем из кэша (cacheAllItems)
+				'depends',
 				'place',
-				'armPlaces',
-				'techPlaces',
-				'inetsPlaces',
-				'phonesPlaces',
+				'comps',
+				'arms',
+				'techs',
+				'arms.place',
+				'techs.place',
 				'responsible',
 				'supportSchedule',
 				'providingSchedule',
-				'orgPhones',
-				'orgInets',
+				'orgPhones.place',
+				'orgInets.place',
+				'contracts',
 				'support'
-			],true);
+			])
+			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)');
 		
 		if (!$this->parent_id) {
 			$query->andWhere(['services.parent_id'=>null]);
