@@ -33,18 +33,18 @@ $departments=[];
 //перебираем подразделения
 foreach ($dataProvider->models as $place) {
 	//раскладываем АРМы по помещениям/подразделениям
-	foreach ($place->top->armsRecursive as $arm) {
+	/*foreach ($place->top->armsRecursive as $arm) {
 		if (!$arm->departments_id) continue;
 		$dep = $arm->departments_id;
 		if (!isset($departments[$dep]))	$departments[$dep] = ['name'=>$arm->department->name];
 		if (!isset($departments[$dep][$place->id]))	$departments[$dep][$place->id] = ['arms'=>[],'techs'=>[]];
 		$departments[$dep][$place->id]['arms'][] = $arm;
-	}
+	}*/
 	
 	foreach ($place->top->techsRecursive as $tech) {
-		if (!is_object($tech->effectiveDepartment)) continue;
-		$dep = $tech->effectiveDepartment->id;
-		if (!isset($departments[$dep]))	$departments[$dep] = ['name'=>$tech->effectiveDepartment->name];
+		if (!is_object($tech->department)) continue;
+		$dep = $tech->department->id;
+		if (!isset($departments[$dep]))	$departments[$dep] = ['name'=>$tech->department->name];
 		if (!isset($departments[$dep][$place->id]))	$departments[$dep][$place->id] = ['arms'=>[],'techs'=>[]];
 		$departments[$dep][$place->id]['techs'][] = $tech;
 	}

@@ -27,8 +27,10 @@ $this->params['breadcrumbs'][] = $this->title;
 				echo $this->render('/scans/thumb',['model'=>$scan,'contracts_id'=>$model->id,'static_view'=>true]);
 			?>
 			<p>
-
-			<?= $this->render('model',['model'=>$model]) ?>
+			<?php if ($model->isComputer) echo Html::a('Паспорт АРМ',['passport','id'=>$model->id]); ?>
+				
+				
+				<?= $this->render('model',['model'=>$model]) ?>
 			<h3><?= \app\models\Ports::$titles ?></h3>
 			<?= $this->render('ports',['model'=>$model,'static_view'=>false]) ?>
 		</div>

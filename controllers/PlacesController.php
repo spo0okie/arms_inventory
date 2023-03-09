@@ -101,8 +101,8 @@ class PlacesController extends ArmsBaseController
 		
 		$dataProvider = new ActiveDataProvider([
 			'query' => Places::find()
-				->joinWith(['arms'])
-				->where(['not',['arms.departments_id'=>null]])
+				->joinWith(['techs'])
+				->where(['not',['places_techs.departments_id'=>null]])
 				->groupBy('getplacetop(places.id)'),
 				//->all()
 			'pagination'=>false

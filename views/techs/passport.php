@@ -4,7 +4,7 @@
  * User: Spookie
  * Date: 02.03.2018
  * Time: 14:14
- * @var \app\models\OldArms $model
+ * @var \app\models\Techs $model
  */
 
 use yii\bootstrap5\Modal;
@@ -74,7 +74,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
             </tr>
             <tr>
                 <td>Модель:</td>
-                <td><?= $this->render('/tech-models/item',['model'=>$model->techModel]) ?></td>
+                <td><?= $this->render('/tech-models/item',['model'=>$model->model]) ?></td>
                 <td>Серийный номер:</td>
                 <td><?= $model->sn ?></td>
             </tr>
@@ -205,7 +205,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
 
     <div class="techs">
         <h3>Доп. оборудование:</h3>
-        <?php if ($model->techsCount) { ?>
+        <?php if ($model->armTechsCount) { ?>
         <table>
             <thead>
             <th>Тип</th>
@@ -214,7 +214,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
             <th>Серийный номер</th>
             <th>Инвентарный номер</th>
             </thead>
-            <?php foreach ($model->techs as $tech) echo '<tr>'.$this->render('/techs/passport-row',['model'=>$tech]).'</tr>' ?>
+            <?php foreach ($model->armTechs as $tech) echo '<tr>'.$this->render('/techs/passport-row',['model'=>$tech]).'</tr>' ?>
         </table>
 
         <?php } else { ?>

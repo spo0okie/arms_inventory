@@ -40,7 +40,7 @@ use yii\validators\IpValidator;
  * @property int $head_id Руководитель отдела
  * @property int $it_staff_id Сотрудник ИТ
  * @property int $departments_id Подразделение
- * @property int $techsCount Количество техники
+ * @property int $armTechsCount Количество техники в арм
  
  * @property boolean $isComputer является компьютером (исходя из модели оборудования)
  * @property boolean $isVoipPhone является компьютером (исходя из модели оборудования)
@@ -980,8 +980,8 @@ class Techs extends ArmsModel
 	}
 	
 	
-	public function getTechsCount(){
-		return count($this->techs);
+	public function getArmTechsCount(){
+		return count($this->armTechs);
 	}
 	
 	public function getVoipPhonesCount(){
