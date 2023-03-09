@@ -136,9 +136,17 @@ class DynaGridWidget extends Widget
 		$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','data-resizable-column-id'],$colId);
 		
 		//fetching saved column width
-		if ($width=UiTablesCols::fetchColWidth($this->id,$colId)) {
-			$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','style'],"width:$width%");
+		if (UiTablesCols::colWidthsExist($this->id)) {
+			//если ширина сохранена - проставляем ее
+			if ($width=UiTablesCols::fetchColWidth($this->id,$colId)) {
+				$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','style'],"width:$width%");
+			} else {
+				//иначе 7%, т.к если совсем ничего не поставить (а в этом месте у нас точно есть сохраненные столбцы)
+				//они поделят 100% ширины таблицы меж собой и эта будет с шириной 0
+				$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','style'],"width:7%");
+			}
 		}
+		
 		
 		$model=isset($data['model'])?
 			$data['model']:$this->model;

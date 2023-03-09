@@ -68,4 +68,13 @@ class UiTablesCols extends \app\models\ArmsModel
 		return null;
 	}
 	
+	public static function colWidthsExist($table,$user_id=null) {
+		if (is_null($user_id)) $user_id=\Yii::$app->user->id;
+		$index=static::cacheIndex($table,$user_id);
+		static::cacheTableData($table,$user_id);
+		
+		if (isset(static::$cache[$index])) return count(static::$cache[$index])>0;
+		return false;
+	}
+	
 }
