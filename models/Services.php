@@ -461,7 +461,7 @@ class Services extends ArmsModel
 	public function getDepends()
 	{
 		return $this->hasMany(Services::className(), ['id' => 'depends_id'])
-			->from(['service_depend'=>Users::tableName()])
+			->from(['service_depend'=>Services::tableName()])
 			->viaTable('{{%services_depends}}', ['service_id' => 'id']);
 	}
 	
