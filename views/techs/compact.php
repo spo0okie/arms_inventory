@@ -23,7 +23,7 @@ if (is_object($model->state)) {
 <div class="arms-card">
 	<span class="unit-status <?= $statusCode ?>"><?= $statusName ?></span>
     <h3><?=
-		$this->render('/arms/item',[
+		$this->render('/techs/item',[
 			'model'=>$model,
 			'static_view'=>true,
 			'no_ttip'=>true,

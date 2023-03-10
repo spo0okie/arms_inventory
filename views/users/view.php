@@ -19,7 +19,7 @@ $comps=count($services)?$model->compsTotal:$model->comps;
 		<div class="col-md-4">
 			<h2>Рабочее место</h2>
 			<?php foreach ($model->techs as $arm) if ($arm->isComputer)
-				echo $this->render('/arms/card',['model'=>$arm,'no_users'=>true,'no_specs'=>true])?>
+				echo $this->render('/techs/compact',['model'=>$arm,'no_users'=>true,'no_specs'=>true])?>
 		</div>
 		<div class="col-md-4">
 			<?php
