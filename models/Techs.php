@@ -33,6 +33,7 @@ use yii\validators\IpValidator;
  * @property string $commentLabel название поля комментарий (для этой модели)
  *
  * @property int $arms_id Рабочее место
+ * @property int $installed_id Куда вставлено (в другое оборудование)
  * @property int $state_id Состояние
  * @property int $places_id Помещение
  * @property int $user_id Пользователь
@@ -46,7 +47,9 @@ use yii\validators\IpValidator;
  * @property boolean $isVoipPhone является компьютером (исходя из модели оборудования)
  * @property boolean $isUps является компьютером (исходя из модели оборудования)
  * @property boolean $isMonitor является компьютером (исходя из модели оборудования)
- * @property bool $archived Списано
+ * @property boolean $archived Списано
+ * @property boolean $full_length Вся глубина корзины
+ * @property boolean $installed_back Установлено с обратной стороны
 
  * @property array $contracts_ids Список документов
  * @property array $netIps_ids Список IP
@@ -74,6 +77,8 @@ use yii\validators\IpValidator;
  * @property TechStates $state
  *
  * @property Techs $arm
+ * @property Techs $installation
+ * @property Techs[] $installedTechs
  * @property Techs[] $armTechs
  * @property Techs[] $voipPhones
  * @property Techs[] $ups
@@ -104,6 +109,8 @@ use yii\validators\IpValidator;
 
 class Techs extends ArmsModel
 {
+	public $renderedInFrontRack=false;
+	public $renderedInBackRack=false;
 	
 	public static $title='Оборудование';
 	public static $titles='Оборудование';
@@ -117,6 +124,9 @@ class Techs extends ArmsModel
 	private static $num_str_pad_2tokens=6;	//количество знаков в цифровой части номера для 1 префикса (2 токена вместе с цифровой частью)
 	private static $armInheritance=[		//поля которые наследуются у оборудования подключенного к АРМ
 		'places_id','user_id','it_staff_id','head_id','responsible_id','departments_id'
+	];
+	private static $installInheritance=[	//поля которые наследуются у оборудования установленного в другое
+		'places_id'
 	];
 	private $model_cache=null;
 	private $state_cache=null;
@@ -192,6 +202,25 @@ class Techs extends ArmsModel
 			'specs' => [
 				'Тех. спецификация',
 				'hint' => 'Спецификация оборудования в случае, если модель оборудования не полностью определяет комплектацию каждого отдельного экземпляра',
+			],
+			'installed_id'=>[
+				'Установлено в',
+				'hint'=>'Если это устройство установлено в другое, то нужно указать в какое'
+			],
+			'installed_pos'=>[
+				'Место установки',
+				'hint'=>'Позиция этого устройства в корзине/шкафу<br>'.
+					'Номера посадочных мест (одно или несколько через тире)'
+			],
+			'installed_back'=>[
+				'Установлено с обратной стороны',
+				'hint'=>'Устройство установлено с задней стенки. <br>'.
+					'Либо в заднюю корзину либо в переднюю, но с обратной стороны'
+			],
+			'full_length'=>[
+				'Полноразмерный модуль',
+				'hint'=>'Устройство занимает всю глубину корзины/шкафа.<br>'.
+					'В случае двусторонней корзины будет считаться что занимает обе стороны'
 			],
 			
 			'comp_id' => [
@@ -311,12 +340,14 @@ class Techs extends ArmsModel
 			[['model_id', 'state_id', 'scans_id', 'departments_id','comp_id'], 'integer'],
 			[['installed_id', 'arms_id', 'places_id'], 'integer'],
 			[['user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'integer'],
+			[['installed_back','full_length'],'boolean'],
 
 	        [['contracts_ids','lic_items_ids','lic_groups_ids','lic_keys_ids'], 'each', 'rule'=>['integer']],
 
 
 			[['url', 'comment','updated_at','history','hw','specs'], 'safe'],
-			[['inv_num', 'sn','installed_pos'], 'string', 'max' => 128],
+			[['inv_num', 'sn',], 'string', 'max' => 128],
+			[['installed_pos'], 'string', 'max' => 16],
 			
 			[['ip', 'mac'], 'string', 'max' => 255],
 			['ip', function ($attribute, $params, $validator) {
@@ -325,7 +356,9 @@ class Techs extends ArmsModel
 			['ip', 'filter', 'filter' => function ($value) {
 				return \app\models\NetIps::filterInput($value);
 			}],
-			
+			['mac', 'filter', 'filter' => function ($value) {
+				return \app\helpers\MacsHelper::fixList($value);
+			}],
 			[['num'], 'string', 'max' => 16],
 	        ['num', function ($attribute, $params, $validator) {
         		$tokens=explode('-',$this->$attribute);
@@ -345,6 +378,12 @@ class Techs extends ArmsModel
 		        }
 	        }],
 	        ['num', 'unique'],
+			['arms_id',function ($attribute,$params,$validator){
+				$this->validateRecursiveLink($attribute, $params=['getLink'=>'arm']);
+			}],
+			['installed_id',function ($attribute,$params,$validator){
+				$this->validateRecursiveLink($attribute, $params=['getLink'=>'installation']);
+			}],
         ];
     }
 
@@ -550,6 +589,14 @@ class Techs extends ArmsModel
 	}
 	
 	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getInstalledTechs()
+	{
+		return $this->hasMany(Techs::className(), ['installed_id' => 'id'])->from(['arms_techs'=>Techs::tableName()]);
+	}
+	
+	/**
 	 * отфильтровать из переданного массива $models те, которые привязаны к этому АРМ
 	 * @param $models Techs[]
 	 * @return Techs[]
@@ -741,6 +788,14 @@ class Techs extends ArmsModel
 	public function getArm()
 	{
 		return $this->hasOne(Techs::class, ['id' => 'arms_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getInstallation()
+	{
+		return $this->hasOne(Techs::class, ['id' => 'installed_id']);
 	}
 	
 	/**
@@ -1011,6 +1066,28 @@ class Techs extends ArmsModel
 		return implode(' / ',$tokens);
 	}
 	
+	/**
+	 * Проверяет установлено ли оборудование в модуль $unit
+	 * installed_pos может иметь значение 1,2,7-8
+	 * @param $unit
+	 * @return bool
+	 */
+	public function isInstalledAt($unit,$front=true) {
+		if (!$this->full_length) {
+			if (($front == $this->installed_back)) return false;
+		}
+		$intervals=explode(',',$this->installed_pos);
+		foreach ($intervals as $interval) {
+			if (strpos($interval,'-')!==false) {
+				$limits=explode('-',$interval);
+				if ($limits[0]<=$unit and $limits[1]>=$unit) return true;
+			} else {
+				if ($unit==$interval) return true;
+			}
+		}
+		return false;
+	}
+	
 	public static function fetchNames(){
 		$list= static::find()
 			->joinWith(['model.type','place','user','comp'])
@@ -1040,6 +1117,14 @@ class Techs extends ArmsModel
 				//и перепривязываемся к наследуемым
 				foreach (static::$armInheritance as $attr) {
 					$this->$attr = $this->arm->$attr;
+				}
+			}
+			
+			if (is_object($this->installation)) {
+				//то отвязываемся от собственных помещения
+				//и перепривязываемся к наследуемым
+				foreach (static::$installInheritance as $attr) {
+					$this->$attr = $this->installation->$attr;
 				}
 			}
 			
@@ -1101,20 +1186,39 @@ class Techs extends ArmsModel
 	public function afterSave($insert, $changedAttributes)
 	{
 		parent::afterSave($insert, $changedAttributes);
-
+		
 		//если изменились поля которые наследуются для оборудования входящего в АРМ ($armInheritance)
-		$updateInheritance=false;
+		$updateArmInheritance=false;
 		foreach (array_keys($changedAttributes) as $attr) {
 			if (array_search($attr,static::$armInheritance)!==false) {
-				$updateInheritance=true;
+				$updateArmInheritance=true;
+			}
+		}
+		
+		//если изменились поля которые наследуются для оборудования установленного в другое оборудование ($installInheritance)
+		$updateInstallInheritance=false;
+		foreach (array_keys($changedAttributes) as $attr) {
+			if (array_search($attr,static::$installInheritance)!==false) {
+				$updateInstallInheritance=true;
 			}
 		}
 		
 		//если поля изменились - перебираем все входящие в АРМ экз. оборудования
-		if ($updateInheritance) {
+		if ($updateArmInheritance) {
 			foreach ($this->armTechs as $tech) {
 				//и проставляем им наследуемые поля
 				foreach (static::$armInheritance as $attr) {
+					$tech->$attr = $this->$attr;
+				}
+				$tech->save();
+			}
+		}
+
+		//если поля изменились - перебираем все входящие в АРМ экз. оборудования
+		if ($updateInstallInheritance) {
+			foreach ($this->installedTechs as $tech) {
+				//и проставляем им наследуемые поля
+				foreach (static::$installInheritance as $attr) {
 					$tech->$attr = $this->$attr;
 				}
 				$tech->save();
@@ -1131,6 +1235,7 @@ class Techs extends ArmsModel
 		return [
 			$this->comps,
 			$this->armTechs,
+			$this->installedTechs,
 			$this->materialsUsages,
 			$this->contracts,
 			$this->licItems,

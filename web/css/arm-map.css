@@ -97,19 +97,32 @@ table.places-arms-container tr.tech_mfu_color_a3
 
 td.arm_uphone.tech_voip_phone,
 table.places-arms-container tr.tech_voip_gw,
-table.places-arms-container tr.tech_voip_phone
+table.places-arms-container tr.tech_voip_phone,
+td.rack-unit.tech_voip_gw
 {background-color: #ccffcc}
 
 table.places-arms-container tr.tech_net_switch,
-table.places-arms-container tr.tech_net_router
+table.places-arms-container tr.tech_net_router,
+td.rack-unit.tech_net_router,
+td.rack-unit.tech_net_switch
 {background-color: plum}
 
 table.places-arms-container tr.tech_wifi_ap,
-table.places-arms-container tr.tech_wifi_router
+table.places-arms-container tr.tech_wifi_router,
+td.rack-unit.tech_wifi_router,
+td.rack-unit.tech_wifi_ap
 {background-color: lightskyblue}
 
-table.places-arms-container tr.tech_nas {
+table.places-arms-container tr.tech_nas,
+td.rack-unit.tech_nas
+{
     background-color: DarkTurquoise;
+    background-image: url(/web/img/diagonal-noise.png)
+}
+
+td.rack-unit.tech_srv
+{
+    background-color: white;
     background-image: url(/web/img/diagonal-noise.png)
 }
 

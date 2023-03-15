@@ -29,7 +29,6 @@ $this->params['breadcrumbs'][] = $this->title;
 			<p>
 			<?php if ($model->isComputer) echo Html::a('Паспорт АРМ',['passport','id'=>$model->id]); ?>
 				
-				
 				<?= $this->render('model',['model'=>$model]) ?>
 			<h3><?= \app\models\Ports::$titles ?></h3>
 			<?= $this->render('ports',['model'=>$model,'static_view'=>false]) ?>

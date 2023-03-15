@@ -123,7 +123,7 @@ class FieldsHelper
 		unset($options['lines']);
 		
 		$fieldId=strtolower(\yii\helpers\StringHelper::basename($model::className()).'-'.$attr);
-		$form->view->registerJs("$('#$fieldId').autoResize({extraSpace:25}).trigger('change.dynSiz');");
+		$form->view->registerJs("$('#$fieldId').autoResize({extraSpace:25,minLines:$lines}).trigger('change.dynSiz');");
 		return $form->field($model, $attr)
 			->textarea(['rows' => max($lines, count(explode("\n", $model->$attr)))])
 			->label($label,$labelOptions)

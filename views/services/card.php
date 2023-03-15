@@ -14,7 +14,6 @@ If (!is_object($model)) {
 }
 $comps=$model->comps;
 $techs=$model->techs;
-$services=$model->depends;
 $dependants=$model->dependants;
 $support=$model->support;
 $children=$model->children;
@@ -178,11 +177,11 @@ if(!$static_view) { ?>
 			<br />
 		<?php } ?>
 		
-		<?php if (count($services)) { ?>
+		<?php if (count($depends=$model->depends)) { ?>
 			<h4>Зависит от сервисов:</h4>
 			<p>
 				<?php
-				foreach ($services as $service)
+				foreach ($depends as $service)
 					echo $this->render('/services/item',['model'=>$service,'static_view'=>$static_view]).'<br />';
 				?>
 			</p>

@@ -13,7 +13,9 @@ use app\models\Users;
  */
 class UsersSearch extends Users
 {
+	public $org_name;
 	public $orgStruct_name;
+	public $shortName;
     /**
      * @inheritdoc
      */
@@ -21,7 +23,7 @@ class UsersSearch extends Users
     {
         return [
             [['Persg', 'Uvolen', 'nosync'], 'integer'],
-            [['id', 'Orgeh', 'Doljnost', 'Ename', 'Login', 'Email', 'Phone', 'Mobile', 'work_phone', 'Bday', 'manager_id', 'employee_id', 'orgStruct_name'], 'safe'],
+            [['shortName', 'Doljnost', 'Ename', 'Login', 'Email', 'Phone', 'Mobile', 'work_phone',  'employee_id', 'orgStruct_name','org_name'], 'safe'],
         ];
     }
 
@@ -45,9 +47,38 @@ class UsersSearch extends Users
     {
         $query = Users::find()->joinWith([
         	'orgStruct',
-			'techs'
+			'org',
+			'techs.model.type'
 		]);
-
+	
+		$sort=[
+			//'defaultOrder' => ['num'=>'E'],
+			'attributes'=>[
+				'employee_id',
+				'Ename',
+				'shortName'=>[
+					'asc'=>['users.Ename'=>SORT_ASC],
+					'desc'=>['users.Ename'=>SORT_DESC],
+				],
+				'Doljnost',
+				'orgStruct_name'=>[
+					'asc'=>['orgStruct.name'=>SORT_ASC],
+					'desc'=>['orgStruct.name'=>SORT_DESC],
+				],
+				'org_name'=>[
+					'asc'=>['partners.bname'=>SORT_ASC],
+					'desc'=>['partners.bname'=>SORT_DESC],
+				],
+				'Login',
+				'Email',
+				'Phone',
+				'Mobile'=>[
+					'asc'=>['concat(users.Phone,users.private_phone)'=>SORT_ASC],
+					'desc'=>['concat(users.Phone,users.private_phone)'=>SORT_DESC],
+				],
+			]
+		];
+		
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -61,30 +92,26 @@ class UsersSearch extends Users
             // $query->where('0=1');
             return $dataProvider;
         }
-
-        // grid filtering conditions
-        $query->andFilterWhere([
-            //'id' => $this->id,
-            'Persg' => $this->Persg,
-            'Uvolen' => $this->Uvolen,
-            'nosync' => $this->nosync,
-        ]);
-
+        
         $query
-			->andFilterWhere(['or like', 'id', 			\yii\helpers\StringHelper::explode($this->id,'|',true,true)])
-	        ->andFilterWhere(['or like', 'employee_id', \yii\helpers\StringHelper::explode($this->employee_id,'|',true,true)])
-	        ->andFilterWhere(['or like', 'Orgeh', 		\yii\helpers\StringHelper::explode($this->Orgeh,'|',true,true)])
-            ->andFilterWhere(['or like', 'Doljnost', 	\yii\helpers\StringHelper::explode($this->Doljnost,'|',true,true)])
-            ->andFilterWhere(['or like', 'Ename', 		\yii\helpers\StringHelper::explode($this->Ename,'|',true,true)])
-            ->andFilterWhere(['or like', 'Login',		\yii\helpers\StringHelper::explode($this->Login,'|',true,true)])
-            ->andFilterWhere(['or like', 'Email',		\yii\helpers\StringHelper::explode($this->Email,'|',true,true)])
+	        ->andFilterWhere(QueryHelper::querySearchString('employee_id',$this->employee_id))
+            ->andFilterWhere(QueryHelper::querySearchString('Doljnost',$this->Doljnost))
+			->andFilterWhere(QueryHelper::querySearchString('Ename',$this->Ename))
+			->andFilterWhere(QueryHelper::querySearchString('Ename',$this->shortName))
+            ->andFilterWhere(QueryHelper::querySearchString('Login',$this->Login))
+            ->andFilterWhere(QueryHelper::querySearchString('Email',$this->Email))
 			->andFilterWhere(QueryHelper::querySearchString(['OR','users.Phone','techs.comment'], $this->Phone))
-			->andFilterWhere(['or like', 'Mobile',		\yii\helpers\StringHelper::explode($this->Mobile,'|',true,true)])
-            ->andFilterWhere(['or like', 'org_struct.name', \yii\helpers\StringHelper::explode($this->orgStruct_name,'|',true,true)])
-            ->andFilterWhere(['or like', 'work_phone',	\yii\helpers\StringHelper::explode($this->work_phone,'|',true,true)])
-            ->andFilterWhere(['or like', 'Bday', 		\yii\helpers\StringHelper::explode($this->Bday,'|',true,true)])
-            ->andFilterWhere(['or like', 'manager_id', \yii\helpers\StringHelper::explode($this->manager_id,'|',true,true)]);
-
+			->andFilterWhere(QueryHelper::querySearchString(['OR','users.Mobile','users.private_phone'], $this->Phone))
+            ->andFilterWhere(QueryHelper::querySearchString('org_struct.name',$this->orgStruct_name));
+	
+		$totalQuery=clone $query;
+	
+		return new ActiveDataProvider([
+			'query' => $query->groupBy('users.id'),
+			'totalCount' => $totalQuery->count('distinct(users.id)'),
+			'sort'=> $sort,
+        ]);
+        
         return $dataProvider;
     }
 }

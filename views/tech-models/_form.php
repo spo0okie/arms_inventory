@@ -131,15 +131,44 @@ if (Yii::$app->request->get('return'))
 	
 	<?= $form->field($model, 'links')->textarea(['rows' => 3]) ?>
 
+	<div class="card p-2 mb-2 bg-secondary">
 	<?= \app\components\CollapsableCardWidget::widget([
-		'openedTitle'=>'Порты на устройстве (скрыть)',
-		'closedTitle'=>'Порты на устройстве (показать)',
+		'openedTitle'=>'<i class="far fa-minus-square"></i> Порты на устройстве',
+		'closedTitle'=>'<i class="far fa-plus-square"></i> Порты на устройстве',
 		'initialCollapse'=>!(bool)$model->ports,
-		'content'=>$this->render('_form-ports',['form'=>$form,'model'=>$model]),
+		'content'=>'<div class="card-body">'.$this->render('_form-ports',['form'=>$form,'model'=>$model]).'</div>',
 	]); ?>
+	</div>
 
+	<div class="card p-2 mb-2 bg-secondary">
+		<?= \app\components\CollapsableCardWidget::widget([
+			'openedTitle'=>'<i class="far fa-minus-square"></i> Корзина спереди',
+			'closedTitle'=>'<i class="far fa-plus-square"></i> Корзина спереди',
+			'initialCollapse'=>!$model->contain_front_rack,
+			'content'=>'<div class="card-body">'.\app\components\RackConstructorWidget::widget([
+				'form'=>$form,
+				'model'=>$model,
+				'attr'=>'front_rack',
+			]).'</div>',
+		]); ?>
+	</div>
+
+	<div class="card p-2 mb-2 bg-secondary">
+		<?= \app\components\CollapsableCardWidget::widget([
+			'openedTitle'=>'<i class="far fa-minus-square"></i> Корзина сзади',
+			'closedTitle'=>'<i class="far fa-plus-square"></i> Корзина сзади',
+			'initialCollapse'=>!$model->contain_back_rack,
+			'content'=>'<div class="card-body">'.\app\components\RackConstructorWidget::widget([
+					'form'=>$form,
+					'model'=>$model,
+					'attr'=>'back_rack',
+				]).'</div>',
+		]); ?>
+	</div>
+
+	<br />
 	<div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

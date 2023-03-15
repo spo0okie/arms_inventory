@@ -31,7 +31,8 @@ class TechModelsController extends ArmsBaseController
 		    'verbs' => [
 			    'class' => VerbFilter::className(),
 			    'actions' => [
-				    'delete' => ['POST'],
+					'delete' => ['POST'],
+					'render-rack' => ['POST'],
 			    ],
 		    ]
 	    ];
@@ -126,28 +127,43 @@ class TechModelsController extends ArmsBaseController
 		return $data;
 	}
 	
+	
+	/**
+	 * Displays a single TechModels model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionView($id)
+	{
+		$this->setQueryParam(['TechsSearch'=>['model_id'=>$id]]);
+		
+		$techSearchModel = new \app\models\TechsSearch();
+		$techDataProvider = $techSearchModel->search(Yii::$app->request->queryParams);
+		
+		return $this->render('view', [
+			'model' => $this->findModel($id),
+			'searchModel' => $techSearchModel,
+			'dataProvider' => $techDataProvider,
+		]);
+	}
 
-    /**
-     * Displays a single TechModels model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
-    {
-	    $this->setQueryParam(['TechsSearch'=>['model_id'=>$id]]);
-	    
-	    $techSearchModel = new \app\models\TechsSearch();
-	    $techDataProvider = $techSearchModel->search(Yii::$app->request->queryParams);
-	    
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-	        'searchModel' => $techSearchModel,
-	        'dataProvider' => $techDataProvider,
-        ]);
-    }
-
-    /**
+	/**
+	 * Displays a single TechModels model.
+	 * @param string $config
+	 * @return mixed
+	 */
+	public function actionRenderRack()
+	{
+		return \app\components\RackWidget::widget(
+			json_decode(
+				Yii::$app->request->getBodyParam('config'),true
+			)
+		);
+	}
+	
+	
+	/**
      * Creates a new TechModels model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed

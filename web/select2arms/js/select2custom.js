@@ -228,6 +228,7 @@ $.fn.select2.amd.define("QtippedSingleSelectionAdapter", [
             return $selection;
         };
 
+
         QtippedSingleSelectionAdapter.prototype.update = function(data) {
             // copy and modify SingleSelection adapter
             //this.clear();
@@ -243,7 +244,6 @@ $.fn.select2.amd.define("QtippedSingleSelectionAdapter", [
         };
 
         QtippedSingleSelectionAdapter = Utils.Decorate(QtippedSingleSelectionAdapter, AllowClear);
-        //QtippedSingleSelectionAdapter = Utils.Decorate(QtippedSingleSelectionAdapter, SelectionSearch);
         QtippedSingleSelectionAdapter = Utils.Decorate(QtippedSingleSelectionAdapter, EventRelay);
 
         return QtippedSingleSelectionAdapter;

@@ -264,7 +264,10 @@ DELIMITER ;
 	 */
 	public function getParent()
 	{
-		//return static::fetchItem($this->parent_id);
+		if (static::allItemsLoaded()) {
+			if (!$this->parent_id) return null;
+			return static::getLoadedItem($this->parent_id);
+		}
 		return $this->hasOne(Places::className(), ['id' => 'parent_id']);
 	}
 	

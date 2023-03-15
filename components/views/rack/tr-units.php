@@ -8,11 +8,13 @@
 
 /* @var $height */
 /* @var $row */
+/* @var $sectionRow */
+/* @var $sectionRowCount */
 /* @var $rack \app\components\RackWidget */
 /* @var $this yii\web\View */
+/* @var $models \app\models\Techs[] */
 
 
-$labelWidth=$rack->getWidthPercent($rack->labelWidth);
 $id=$rack->id;
 if ($rack->front) {
 	$currentCol=0; $x=0;
@@ -35,17 +37,19 @@ use yii\helpers\Html;
 			case 'units':
 				for ($j=0;$j<$col['count']; $j++) {
 					$width=$rack->getWidthPercent($col['size']/$col['count']-$rack->labelWidth*$rack->getLabelsCount());
-					$sectorId=$rack->getSectorId($x,$row);
 					
-					//метка слева
-					if ($rack->labelMode=='h' && ($rack->front&&$rack->labelPre || !$rack->front&&$rack->labelPost))
-						echo $this->render('td-label',['rackId'=>$id,'unitId'=>$sectorId,'width'=>$labelWidth]);
-					
-					echo $this->render('td-unit',['rackId'=>$id,'unitId'=>$sectorId,'width'=>$width]);
+					echo $this->render('td-unit',[
+						'width'=>$width,
+						'models'=>$models,
+						'col'=>$x,
+						'row'=>$row,
+						'rack'=>$rack,
+						'sectionCol'=>$j,
+						'sectionColCount'=>$col['count'],
+						'sectionRow'=>$sectionRow,
+						'sectionRowCount'=>$sectionRowCount,
+					]);
 								
-					if  ($rack->labelMode=='h' && ($rack->front&&$rack->labelPost || !$rack->front&&$rack->labelPre))
-						echo $this->render('td-label',['rackId'=>$id,'unitId'=>$sectorId,'width'=>$labelWidth]);
-
 					$x+=$colShift;
 				}
 				break;

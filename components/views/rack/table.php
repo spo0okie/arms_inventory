@@ -8,6 +8,7 @@
 
 /* @var $rack \app\components\RackWidget */
 /* @var $this yii\web\View */
+/* @var $models \app\models\Techs[] */
 
 use yii\helpers\Html;
 //print_r($rows);
@@ -19,6 +20,12 @@ $height=$width*$rack->getTotalHeight()/$rack->getTotalWidth();
 $id=$rack->id;
 $labelWidth=$rack->getWidthPercent($rack->labelWidth);
 $y=0;
+
+if (is_object($rack) && is_object($rack->model)) {
+	$models=$rack->model->installedTechs;
+} else {
+	$models=[];
+}
 //echo $rack->getTotalWidth()."x".$rack->getTotalHeight().'<br />';
 ?>
 <table class="rack-widget" id="rack-<?= $id ?>" width="<?= $width ?>" height="<?= $height ?>">
@@ -29,7 +36,10 @@ $y=0;
 					for ($i=0; $i<$row['count']; $i++) {
 						echo $this->render('tr-units',[
 							'row'=>$y,
+							'sectionRow'=>$i,
+							'sectionRowCount'=>$row['count'],
 							'rack'=>$rack,
+							'models'=>$models,
 							'height'=>$rack->getHeightPercent($row['size']/$row['count']),
 						]);
 						$y++;

@@ -22,12 +22,14 @@ td.rack-unit {
 }
 
 td.rack-unit-label {
-    font-size: 8pt;
+    text-align: center;
+    font-size: 0.6vw;
     color: white;
     border-top: lightgray solid 1px;
     border-left: lightgray solid 1px;
     border-bottom: dimgray solid 1px;
     border-right: dimgray solid 1px;
+    background-color: #8f8f8f;
 }
 
 td.rack-unit.highlight {

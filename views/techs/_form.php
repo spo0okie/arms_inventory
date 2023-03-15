@@ -187,7 +187,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			]) ?>
         </div>
     </div>
-
+	
 	<div class="row " id="techs-specs_settings"
 		<?= (is_object($model) && is_object($model->model) && $model->model->individual_specs)?'':'style="display:none"' ?>
 	>
@@ -220,42 +220,75 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			</div>
 		</div>
 	</div>
-	
-	
-	
-    <div class="row">
-        <div class="col-md-6" >
+
+
+	<div class="row">
+		<div class="col-md-6" >
 			<?= FieldsHelper::TextAutoresizeField($form,$model,'ip',['lines' => 1,]) ?>
 		</div>
-        <div class="col-md-6" >
+		<div class="col-md-6" >
 			<?= FieldsHelper::TextAutoresizeField($form,$model,'mac',['lines' => 1,]) ?>
-        </div>
-    </div>
+		</div>
+	</div>
 
-    <div class="row">
-        <div class="col-md-4" >
+	<div class="row">
+		<div class="col-md-6"  id="tech-arms-selector" <?= ($model->installed_id)?$hidden:'' ?>>
 			<?= FieldsHelper::Select2Field($form,$model, 'arms_id', [
 				'data' => \app\models\Techs::fetchArmNames(),
 				'itemsHintsUrl'=>\yii\helpers\Url::to(['/techs/ttip','q'=>'dummyVar']),
-				'options' => ['placeholder' => 'Выберите АРМ',],
+				'options' => ['placeholder' => 'Выберите АРМ в состав которого входит это оборудование',],
+				'pluginEvents' =>[
+					'change'=>'function(){
+                        if ($("#techs-arms_id").val()) {
+                            $("#tech-users-selector, #tech-installed-selector, #tech-departments-selector").hide();
+                        } else {
+                            $("#tech-users-selector, #tech-installed-selector, #tech-departments-selector").show();
+                        }
+                    }'
+				],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+				]
+			])->hint(\app\models\Contracts::fetchArmsHint($model->contracts_ids,'techs'),['id'=>'arms_id-hint']) ?>
+		</div>
+		<div class="col-md-4 mt-2" id="tech-installed-param" <?= ($model->installed_id)?'':$hidden ?>>
+			<div class="d-flex flex-row-reverse">
+				<div class="pe-2">
+					<br><?= FieldsHelper::CheckboxField($form,$model,'full_length') ?>
+				</div>
+				<div class="pe-2">
+					<br><?= FieldsHelper::CheckboxField($form,$model,'installed_back') ?>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-2" id="tech-installed-pos" <?= ($model->installed_id)?'':$hidden ?>>
+			<?= FieldsHelper::TextInputField($form,$model,'installed_pos') ?>
+		</div>
+		<div class="col-md-6" id="tech-installed-selector" <?= ($model->arms_id)?$hidden:'' ?>>
+			<?= FieldsHelper::Select2Field($form,$model,'installed_id', [
+				'data' => \app\models\Techs::fetchNames(),
+				'itemsHintsUrl'=>\yii\helpers\Url::to(['/techs/ttip','q'=>'dummyVar']),
+				'options' => ['placeholder' => 'Выберите оборудование куда установлено это устройство',],
 				'pluginEvents' =>[
                     'change'=>'function(){
-                        if ($("#techs-arms_id").val()) {
-                            $("#tech-place-selector, #tech-users-selector, #tech-departments-selector").hide();
-                            $("#tech-place-arm-hint").show();
+                        if ($("#techs-installed_id").val()) {
+                            $("#tech-place-selector, #tech-arms-selector").hide();
+                            $("#tech-installed-pos, #tech-installed-param").show();
                         } else {
-                            $("#tech-place-selector, #tech-users-selector, #tech-departments-selector").show();
-                            $("#tech-place-arm-hint").hide();
+                            $("#tech-arms-selector, #tech-place-selector").show();
+                            $("#tech-installed-pos, #tech-installed-param").hide();
                         }
                     }'
                 ],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 				]
-			])->hint(\app\models\Contracts::fetchArmsHint($model->contracts_ids,'techs'),['id'=>'arms_id-hint']) ?>
-        </div>
+			]) ?>
+		</div>
+	</div>
 
-		<div class="col-md-4" id="tech-place-selector" <?= ($model->arms_id)?$hidden:'' ?>>
+	<div class="row" id="tech-departments-selector" <?= ($model->arms_id)?$hidden:'' ?>>
+		<div class="col-md-6" id="tech-place-selector" <?= ($model->arms_id||$model->installed_id)?$hidden:'' ?>>
 			<?= FieldsHelper::Select2Field($form,$model, 'places_id', [
 				'data' => \app\models\Places::fetchNames(),
 				'options' => ['placeholder' => 'Выберите помещение',],
@@ -264,8 +297,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				]
 			]) ?>
 		</div>
-
-		<div class="col-md-4" id="tech-departments-selector" <?= ($model->arms_id)?$hidden:'' ?>>
+		<div class="col-md-6">
 			<?= FieldsHelper::Select2Field($form,$model, 'departments_id', [
 				'data' => \app\models\Departments::fetchNames(),
 				'options' => ['placeholder' => 'Выберите подразделение',],
@@ -274,13 +306,9 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				]
 			]) ?>
 		</div>
-
-		<div class="col-md-6" id="tech-place-arm-hint" <?= ($model->arms_id)?'':$hidden ?>>
-            <br />Когда оборудование прикреплено к АРМ, то место установки, подразделение и ответственные сотрудники наследуются из этого АРМ
-        </div>
-    </div>
-
-    <div class="row" id="tech-users-selector" <?= ($model->arms_id)?$hidden:'' ?>>
+	</div>
+	
+    <div id="tech-users-selector" <?= ($model->arms_id)?$hidden:'' ?>>
 		<div class="row">
 			<div class="col-md-6" >
 				<?= FieldsHelper::Select2Field($form,$model, 'user_id', [
@@ -324,7 +352,6 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 						'dropdownParent' => $modalParent,
 					]
 				]) ?>
-
 			</div>
 		</div>
     </div>
@@ -350,7 +377,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 
 
 	<div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

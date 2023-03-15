@@ -64,6 +64,9 @@ class TechsSearch extends Techs
 				'comment',
 
 			], 'safe'],
+			['mac', 'filter', 'filter' => function ($value) {
+				return \app\helpers\MacsHelper::fixList($value);
+			}]
         ];
     }
 

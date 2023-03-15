@@ -12,6 +12,9 @@ use yii\bootstrap5\Modal;
 <div class="tech-model-view">
 	<h3><?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?></h3>
 	<?= $this->render('/scans/ttip',['model'=>$model->model->preview]) ?>
+	<?php if ($model->model->contain_front_rack || $model->model->contain_back_rack) {
+		echo $this->render('rack/rack',['model'=>$model]);
+	}?>
 	<h4>Характеристики</h4>
 	<p>
 		<?= Yii::$app->formatter->asNtext($model->model->comment) ?>

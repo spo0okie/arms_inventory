@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\helpers\FieldsHelper;
+use app\helpers\QueryHelper;
 use Yii;
 
 /**
@@ -26,10 +28,10 @@ use Yii;
  * @property string $resign_date Дата увольнения
  * @property string $manager_id Руководитель
  * @property int         $nosync Отключить синхронизацию
- * @property int         $ln Last Name
- * @property int         $fn First Name
- * @property int         $mn Middle Name
- * @property int         $shortName Сокращенные И.О.
+ * @property string		$ln Last Name
+ * @property string		$fn First Name
+ * @property string		$mn Middle Name
+ * @property string		$shortName Сокращенные И.О.
  *
  * @property Aces[]      $aces
  * @property Comps[]     $comps
@@ -129,11 +131,22 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	public function attributeData()
 	{
 		return [
-			'employee_id' => 'Табельный номер',
+			'employee_id' => [
+				'Таб. №',
+				'hint'=>'Табельный номер сотрудника<br>(конкретно этого его трудоустройства)'
+			],
 			'org_id' => 'Организация',
+			'org_name'=>['alias'=>'org_id'],
 			'Orgeh' => 'Подразделение',
+			'orgStruct_name' => ['alias'=>'Orgeh'],
 			'Doljnost' => 'Должность',
 			'Ename' => 'Полное имя',
+			'shortName' => [
+				'Короткое имя',
+				'indexHint'=>'Отображаться будет "Фамилия И.О.",<br>'.
+					'поиск будет вестись по полному имени.<br>'.
+					QueryHelper::$stringSearchHint
+			],
 			'Persg' => 'Тип трудоустройства',
 			'Uvolen' => 'Уволен',
 			'Login' => 'Логин (AD)',
@@ -149,7 +162,8 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 				'hint'=>'Запрет внешнему скрипту синхронизации с кадровой БД обновлять эту запись<br>'.
 					'<i>(Должно быть реализовано во внешнем скрипте)</i>',
 			],
-			'Arms' => 'АРМ',
+			'arms' => 'АРМ',
+			'techs' => 'Оборудование',
 			'LastThreeLogins' => 'Входы',
 		];
 	}

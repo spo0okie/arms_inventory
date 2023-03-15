@@ -73,10 +73,13 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 				'footerOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
     				if ($data->total) {
-						return number_format($data->total,2,'.','&nbsp;').$data->currency->symbol;
-					} return '';
+    					//return $data->total;
+						return number_format($data->total,2,',','');//.$data->currency->symbol;
+					} return null;
 				},
+				//'format'=>'currency',
 				'footer'=>implode('<br />',$arrFooter['total']),
+				//'xlFormat'=>"$\\#\\ \\#\\#0.00"
 			],
 			[
 				'attribute'=>'charge',
@@ -84,10 +87,18 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 				'footerOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
 					if ($data->charge) {
-						return number_format($data->charge,2,'.','&nbsp;').$data->currency->symbol;
-					} return '';
+						//return $data->charge;
+						return number_format($data->charge,2,',','');//.$data->currency->symbol;
+					} return null;
 				},
+				//'format'=>'currency',
 				'footer'=>implode('<br />',$arrFooter['charge']),
+			],
+			[
+				'attribute'=>'currency',
+				'value'=>function($data) {
+					return ($data->total)?$data->currency->symbol:null;
+				},
 			],
 	        [
 		        'attribute'=>'attach',

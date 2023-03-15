@@ -11,6 +11,12 @@ use Yii;
  * @property int $type_id Тип оборудования
  *
  * @property bool $individual_specs Индивидуальные спеки
+ * @property bool $contain_front_rack
+ * @property bool $front_rack_two_sided
+ * @property bool $contain_back_rack
+ * @property bool $back_rack_two_sided
+ * @property string $front_rack_layout
+ * @property string $back_rack_layout
  * @property int $manufacturers_id Производитель
  * @property int $usages Количество экземпляров этой модели
  * @property string $name Модель
@@ -29,7 +35,7 @@ use Yii;
  * @property Scans[]       $scans
  * @property Scans         $preview
  */
-class TechModels extends \yii\db\ActiveRecord
+class TechModels extends ArmsModel
 {
 	public static $title='Модель оборудования';
 	public static $titles='Модели оборудования';
@@ -39,10 +45,6 @@ class TechModels extends \yii\db\ActiveRecord
 
 	private static $all_items=null;
 	private static $names_cache=null;
-	private static $phones_ids_cache=null;
-	private static $pcs_ids_cache=null;
-	private static $ups_ids_cache=null;
-	private static $monitors_ids_cache=null;
 
     /**
      * {@inheritdoc}
@@ -59,11 +61,21 @@ class TechModels extends \yii\db\ActiveRecord
     {
         return [
 	        [['type_id', 'manufacturers_id', 'name', 'comment'], 'required'],
-	        [['type_id', 'manufacturers_id', 'individual_specs', 'scans_id'], 'integer'],
+			[['type_id', 'manufacturers_id', 'individual_specs', 'scans_id'], 'integer'],
+			[['contain_front_rack', 'contain_back_rack', 'front_rack_two_sided', 'back_rack_two_sided'], 'boolean'],
 	        [['links', 'comment','ports'], 'string'],
 	        [['name'], 'string', 'max' => 128],
 	        [['short'], 'string', 'max' => 24],
 	        [['name'], 'unique'],
+			[['front_rack_layout','back_rack_layout'],'safe'],
+			['contain_back_rack',function ($attribute, $params, $validator) {
+				if ($this->contain_front_rack && $this->front_rack_two_sided && $this->contain_back_rack)
+					$this->addError($attribute,"Невозможно иметь одновременно и двустороннюю переднюю корзину и корзину сзади");
+			}],
+			['contain_front_rack',function ($attribute, $params, $validator) {
+				if ($this->contain_back_rack && $this->back_rack_two_sided && $this->contain_front_rack)
+					$this->addError($attribute,"Невозможно иметь одновременно и двустороннюю заднюю корзину и корзину спереди");
+			}],
 	        [['manufacturers_id'], 'exist', 'skipOnError' => true, 'targetClass' => Manufacturers::className(), 'targetAttribute' => ['manufacturers_id' => 'id']],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => TechTypes::className(), 'targetAttribute' => ['type_id' => 'id']],
         ];
@@ -72,40 +84,75 @@ class TechModels extends \yii\db\ActiveRecord
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
 			'id' => 'id',
-			'type' => 'Тип оборудования',
-			'type_id' => 'Тип оборудования',
-			'manufacturers_id' => 'Производитель',
-			'name' => 'Наименование',
-			'short' => 'Короткое имя',
-			'links' => 'Ссылки',
-			'comment' => 'Описание',
-			'ports' => 'Порты на устройстве',
-			'usages' => 'Экз.',
-			'individual_specs' => 'Индив. спеки',
+			'type_id' => [
+				'Тип оборудования',
+				'hint' => 'К какому типу оборудования относится эта модель',
+			],
+			'type'=>['alias'=>'type_id'],
+			'manufacturers_id' => [
+				'Производитель',
+				'hint' => 'Производитель этой модели оборудования',
+			],
+			'name' => [
+				'Наименование',
+				'hint' => 'Наименование модели (включая комплектацию, если бывают разные) достаточное для точной идентификации при закупке (имя производителя писать не надо)',
+			],
+			'short' => [
+				'Короткое имя',
+				'hint' => 'Короткое название для вывода в плотных списках',
+			],
+			'links' => [
+				'Ссылки',
+				'hint' => \app\components\UrlListWidget::$hint,
+			],
+			'comment' => [
+				'Описание',
+				'hint' => 'Описание оборудования наиболее значимые параметры отличающие эту модель от других моделей того же типа оборудования',
+			],
+			'ports' => [
+				'Порты на устройстве',
+				'hint' => 'Список Ethernet портов на устройстве, по строке на порт. Первое слово в строке - наименование порта (1/WAN/Lan_1/management), остальные слова - комментарий к порту',
+			],
+			'individual_specs' => [
+				'Индив. спеки',
+				'hint' => 'Признак того что модель не полностью определяет спецификацию оборудования, и для каждого экземпляра ее нужно описывать индивидуально (сервера, СХД, самосборные ПК)',
+			],
+			'contain_front_rack' => [
+				'Посадочные места спереди',
+				'hint'=>'Имеет посадочные места для дополнительных устройств (корзину) спереди'
+			],
+			'contain_back_rack' => [
+				'Посадочные места сзади',
+				'hint'=>'Имеет посадочные места для дополнительных устройств (корзину) сзади'
+			],
+			'front_rack_layout'=>[
+				'Конфигурация передней корзины',
+				'hint'=>'Может быть типовая (одна сетка на стенке устройства), в таком случае можно настраивать через конструктор<br>'.
+					'Может быть более сложная (несколько секций столбцов и строк), в таком случае можно настраивать только через JSON конфигурацию',
+			],
+			'back_rack_layout'=>[
+				'Конфигурация задней корзины',
+				'hint'=>'Может быть типовая (одна сетка на стенке устройства), в таком случае можно настраивать через конструктор<br>'.
+					'Может быть более сложная (несколько секций столбцов и строк), в таком случае можно настраивать только через JSON конфигурацию',
+			],
+			'front_rack_two_sided'=>[
+				'Двухсторонняя',
+				'hint'=>'Посадочные места идут на всю глубину устройства и доступны для установки устройств как спереди так и сзади',
+			],
+			'back_rack_two_sided'=>[
+				'Двухсторонняя',
+				'hint'=>'Посадочные места идут на всю глубину устройства и доступны для установки устройств как сзади так и спереди',
+			],
+			'usages' => [
+				'Экз.',
+			],
 		];
 	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'id',
-			'type_id' => 'К какому типу оборудования относится эта модель',
-			'manufacturers_id' => 'Производитель этой модели оборудования',
-			'name' => 'Наименование модели (включая комплектацию, если бывают разные) достаточное для точной идентификации при закупке (имя производителя писать не надо)',
-			'short' => 'Короткое название для вывода в плотных списках',
-			'links' => \app\components\UrlListWidget::$hint,
-			'comment' => 'Описание оборудования наиболее значимые параметры отличающие эту модель от других моделей того же типа оборудования',
-			'ports' => 'Список Ethernet портов на устройстве, по строке на порт. Первое слово в строке - наименование порта (1/WAN/Lan_1/management), остальные слова - комментарий к порту',
-			'individual_specs' => 'Признак того что модель не полностью определяет спецификацию оборудования, и для каждого экземпляра ее нужно описывать индивидуально (сервера, СХД, самосборные ПК)',
-		];
-	}
+	
 
 	public function reverseLinks() {
 		return [$this->techs];

@@ -11,9 +11,7 @@
         // Just some abstracted details,
         // to make plugin users happy:
         var settings = $.extend({
-            onResize : function(){
-				 
-			},
+            onResize : function(){},
             animate : true,
             animateDuration : 100,
             animateCallback : function(){},
@@ -22,7 +20,7 @@
             limit: 1000
         }, options);
 
-        console.log("got minLines " + settings.minLines)
+        //console.log("got minLines " + settings.minLines)
         // Only textarea's auto-resize:
         this.filter('textarea').each(function(){
             
@@ -64,15 +62,16 @@
                         $textLines.push('fake');
                     }
                     $text=$textLines.join("\n");
+                    //console.log($text);
 
                     // Prepare the clone:
                     clone.height(0).val($text).scrollTop(10000);
 
                     // Find the height of text:
-                    let scrollTop = Math.max(clone.scrollTop()+clone.height(), origHeight) + settings.extraSpace,
+                    let scrollTop = Math.max(clone.scrollTop()+clone.height(), origHeight) + settings.extraSpace
                         toChange = $(this).add(clone);
-						
-                    // Don't do anything if scrollTip hasen't changed:
+
+                    // Don't do anything if scrollTop hasn't changed:
                     if (lastScrollTop === scrollTop) { return; }
                     lastScrollTop = scrollTop;
 					

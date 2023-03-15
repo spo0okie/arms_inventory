@@ -60,12 +60,13 @@ if (is_object($model->state)) { ?>
 <?php }	?>
 
 
-<?php if (!$model->isComputer) echo $this->render('/arms/att-comps',['model'=>$model]) ?>
+<?php if ($model->isComputer) echo $this->render('/techs/att-comps',['model'=>$model]) ?>
 
 
 <h4>Место установки и сотрудники:</h4>
 <p>
-    <?= is_object($model->arm)?('АРМ: '.$this->render('/techs/item',['model'=>$model->arm]).'<br />'):'' ?>
+	<?= is_object($model->arm)?('АРМ: '.$this->render('/techs/item',['model'=>$model->arm]).'<br />'):'' ?>
+	<?= is_object($model->installation)?('Установлено в: '.$this->render('/techs/item',['model'=>$model->installation]).'<br />'):'' ?>
     Помещение: <?= $this->render('/places/item',['model'=>$model->place]) ?> <br />
     Пользователь: <?= $this->render('/users/item',['model'=>$model->user]) ?> <br />
 	<?= is_object($model->head)?('Руководитель отдела:'.$this->render('/users/item',['model'=>$model->head]).'<br/>'):'' ?>
@@ -95,12 +96,17 @@ if (is_object($model->state)) { ?>
 </div>
 
 <?php if (count($model->licItems) || count($model->licGroups) || count($model->licKeys)) {
-	echo $this->render('/arms/att-lics',['model'=>$model]);
+	echo $this->render('/techs/att-lics',['model'=>$model]);
 } ?>
 
 
 <?php if (count($model->armTechs)) {
-	echo $this->render('/arms/att-techs',['model'=>$model]);
+	echo $this->render('/techs/att-techs',['model'=>$model]);
+} ?>
+
+
+<?php if (count($model->installedTechs)) {
+	echo $this->render('/techs/att-installed',['model'=>$model]);
 } ?>
 
 <h4>Документы:</h4>

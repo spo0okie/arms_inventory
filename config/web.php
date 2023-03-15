@@ -48,11 +48,10 @@ $config = [
 	    	'locale' => 'ru-RU',
 		    'dateFormat' => 'dd.MM.y',
 		    'datetimeFormat' => 'dd.MM.y HH:mm:ss',
-		    //'currencyCode' => 'RUR',
+		    'currencyCode' => '',
 		    'numberFormatterSymbols' => [
-			    NumberFormatter::CURRENCY_SYMBOL => '&#8381;',
+			    NumberFormatter::CURRENCY_SYMBOL => '',
 		    ],
-		    //'thousandSeparator' => '&nbsp;',
 		    'numberFormatterOptions' => [
 			    NumberFormatter::MIN_FRACTION_DIGITS => 0,
 			    NumberFormatter::MAX_FRACTION_DIGITS => 2,

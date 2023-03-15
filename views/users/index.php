@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 
@@ -12,79 +13,17 @@ $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
 <div class="users-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Создать нового', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            'employee_id',
-
-            [
-                'attribute'=>'Ename',
-                'format'=>'raw',
-                'value' => function($data) use($renderer){return $renderer->render('/users/item',['model'=>$data]);}
-            ],
-            'Doljnost',
-			[
-				'attribute'=>'orgStruct_name',
-				'format'=>'raw',
-				'header'=>$searchModel->getAttributeLabel('Orgeh'),
-				'value' => function($data) use($renderer){return $renderer->render('/org-struct/item',['model'=>$data->orgStruct]);}
-			],
-	        
-            //'Persg',
-            //'Uvolen',
-            'Login',
-            'Email:email',
-			[
-				'attribute'=>'Phone',
-				'format'=>'raw',
-				'value' => function($data)use($renderer){
-					$techs=$data->techs;
-					if (!is_array($techs) || count($techs)==0) {
-						return $data->Phone;
-					} else {
-						$items=[];
-						foreach ($techs as $tech)
-							if ($tech->isVoipPhone && strlen($tech->comment))
-								$items[]=$renderer->render('/techs/item',['model'=>$tech,'static_view'=>true,'name'=>$tech->comment]);
-						return count($items)?implode(' ',$items):$data->Phone;
-					}
-				}
-			],
-	        [
-		        'attribute'=>'techs',
-		        'format'=>'raw',
-		        'value' => function($data)use($renderer){
-                    $arms=$data->techs;
-                    if (is_array($arms)) {
-                        if (count($arms)==0) {
-	                        return 'Не назначено';
-                        } else {
-                        	$items=[];
-	                        foreach ($arms as $arm)
-	                        	$items[]=$renderer->render('/techs/item',['model'=>$arm,'static_view'=>true]);
-	                        return implode('<br />',$items);
-                        }
-                    }
-                }
-	        ],
-            'Mobile',
-            //'work_phone',
-            //'Bday',
-            //'manager_id',
-            //'nosync',
-
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
+	
+	<?= DynaGridWidget::widget([
+		'id' => 'users-index',
+		'header' => Html::encode($this->title),
+		'columns' => require 'columns.php',
+		'defaultOrder' => ['employee_id','shortName','Doljnost','orgStruct_name','Login','Email','Phone','arms','Mobile'],
+		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Users','cssClass'=>'btn']),
+		'dataProvider' => $dataProvider,
+		'filterModel' => $searchModel,
+	]) ?>
+	
+	
 </div>

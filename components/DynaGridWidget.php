@@ -7,6 +7,7 @@ use app\helpers\ArrayHelper;
 use app\models\ui\UiTablesCols;
 use kartik\dynagrid\DynaGrid;
 use kartik\grid\GridView;
+use NumberFormatter;
 use yii\base\Widget;
 use yii\data\ActiveDataProvider;
 use yii\web\JsExpression;
@@ -70,7 +71,15 @@ class DynaGridWidget extends Widget
 			'columns' => $this->prepareColumns($this->columns,$this->defaultOrder),
 			'gridOptions'=>[
 				'id'=>$this->id,
-				'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+				'formatter' => [
+					'class' => 'yii\i18n\Formatter',
+					'nullDisplay' => '',
+					'currencyCode'=>'',
+					'decimalSeparator'=>',',
+					'numberFormatterSymbols' => [
+						NumberFormatter::CURRENCY_SYMBOL => '',
+					],
+				],
 				'panel'=>[
 					'type' => GridView::TYPE_DEFAULT,
 					'heading' => $this->header,

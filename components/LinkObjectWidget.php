@@ -81,6 +81,18 @@ class LinkObjectWidget extends Widget
 	
 	public function run()
 	{
+		if (!$this->static&&!$this->noDelete) {
+			$deleteObject=' '.DeleteObjectWidget::widget([
+					'model'=>$this->model,
+					'deleteHint'=>$this->deleteHint,
+					'undeletableMessage'=>$this->undeletableMessage,
+					'confirmMessage'=>$this->confirmMessage,
+					'hideUndeletable'=>$this->hideUndeletable,
+					'links'=>$this->links,
+					'options'=>['cssClass'=>$this->cssClass],
+				]);
+		} else $deleteObject='';
+		
 		//если мы уже на этой странице то не делаем ссылки
 		return (
 				$this->samePage?$this->name
@@ -93,16 +105,6 @@ class LinkObjectWidget extends Widget
 					'modal'=>$this->modal,
 					'options'=>['cssClass'=>$this->cssClass],
 				]):''
-			).(
-				!$this->static&&!$this->noDelete?' '.DeleteObjectWidget::widget([
-					'model'=>$this->model,
-					'deleteHint'=>$this->deleteHint,
-					'undeletableMessage'=>$this->undeletableMessage,
-					'confirmMessage'=>$this->confirmMessage,
-					'hideUndeletable'=>$this->hideUndeletable,
-					'links'=>$this->links,
-					'options'=>['cssClass'=>$this->cssClass],
-				]):''
-			);
+			).$deleteObject;
 	}
 }
