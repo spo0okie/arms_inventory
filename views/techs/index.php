@@ -4,6 +4,8 @@ use app\components\DynaGridWidget;
 use yii\helpers\Html;
 
 
+\yii\helpers\Url::remember();
+
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\TechsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

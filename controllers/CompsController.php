@@ -379,7 +379,7 @@ class CompsController extends Controller
 			};
 		}
 
-		return $this->redirect(['/arms/view', 'id' => $model->arm_id]);
+		return $this->redirect(['/techs/passport', 'id' => $model->arm_id]);
 	}
 
     /**
@@ -402,7 +402,7 @@ class CompsController extends Controller
             };
         }
 
-        return $this->redirect(['/arms/view', 'id' => $model->arm_id]);
+        return $this->redirect(['/techs/passport', 'id' => $model->arm_id]);
     }
 	/**
 	 * Обновляем  список скртытых IP
