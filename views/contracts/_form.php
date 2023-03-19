@@ -2,8 +2,6 @@
 
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
-use kartik\date\DatePicker;
 use kartik\file\FileInput;
 
 
@@ -151,6 +149,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
                 'initialPreview' => $preview,
 				'initialPreviewAsData' => true,
 				'initialPreviewConfig' => $config,
+				'overwriteInitial' => false,
 				'uploadUrl' => \yii\helpers\Url::to(['scans/create']),
 				'deleteUrl' => \yii\helpers\Url::to(['scans/delete']),
 				'uploadExtraData' => new \yii\web\JsExpression('function(previewId, index) {
