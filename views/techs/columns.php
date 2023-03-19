@@ -156,7 +156,7 @@ return [
 				//'debug' => true,
 				'multiple'=>true,
 				'closeOnSelect' =>false,
-				'selectionAdapter' => new JsExpression('$.fn.select2.amd.require("ArmsSelectionAdapter")'),
+				'selectionAdapter' => new JsExpression('$.fn.select2.amd.require("CountChoicesSelectionAdapter")'),
 			],
 		],
 	],
