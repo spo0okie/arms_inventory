@@ -19,7 +19,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
 return [
 	'name' => [
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/comps/item', ['model' => $data,'icon'=>true]);
+			return $renderer->render('/comps/item', ['model' => $data,'icon'=>true,'static_view'=>false]);
 		},
 		'contentOptions'=>function ($data) {return [
 			'class'=>'arm_hostname '.$data->updatedRenderClass
@@ -28,7 +28,7 @@ return [
 	],
 	'arm_id' => [
 		'value' => function ($data) use ($renderer) {
-			return is_object($data->arm) ? $renderer->render('/techs/item', ['model' => $data->arm]) : null;
+			return is_object($data->arm) ? $renderer->render('/techs/item', ['model' => $data->arm,'static_view'=>true]) : null;
 		},
 	],
 	'ip' => [

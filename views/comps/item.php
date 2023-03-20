@@ -27,6 +27,7 @@ if (is_object($model)) {
 		'modal'=>true,
 		'noDelete'=>true,
 		'static'=>$static_view,
+		'name'=>$name
 	]) ?>
 	</span>
 <?php } else echo "Отсутствует";
