@@ -2,14 +2,14 @@
 
 use app\components\DynaGridWidget;
 use yii\helpers\Html;
-use kartik\grid\GridView;
+
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\UsersSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = \app\models\Users::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+//$this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
 <div class="users-index">

@@ -3,11 +3,15 @@ namespace app\components;
 
 use app\components\assets\DynaGridWidgetAsset;
 use app\helpers\ArrayHelper;
-//use app\models\ArmsModel;
+use app\models\ArmsModel;
 use app\models\ui\UiTablesCols;
+use kartik\base\Lib;
 use kartik\dynagrid\DynaGrid;
+use kartik\dynagrid\DynaGridStore;
+use kartik\dynagrid\Module;
 use kartik\grid\GridView;
 use NumberFormatter;
+use yii\base\InvalidConfigException;
 use yii\base\Widget;
 use yii\data\ActiveDataProvider;
 use yii\web\JsExpression;
@@ -50,10 +54,70 @@ class DynaGridWidget extends Widget
 	public $filterModel=null;
 	public $model=null;
 	
+	public $visibleColumns=null;
+	/**
+	 * Finds the matches for a string column format
+	 *
+	 * @param  string  $column
+	 *
+	 * @return array
+	 * @throws InvalidConfigException
+	 */
+	protected function matchColumnString($column)
+	{
+		$matches = [];
+		if (!Lib::preg_match('/^([\w\.]+)(:(\w*))?(:(.*))?$/u', $column, $matches)) {
+			throw new InvalidConfigException(
+				"Invalid column configuration for '{$column}'. The column must be specified ".
+				"in the format of 'attribute', 'attribute:format' or 'attribute:format: label'."
+			);
+		}
+		
+		return $matches;
+	}
+	
+	protected function getColumnKey($column)
+	{
+		if (!is_array($column)) {
+			$matches = $this->matchColumnString($column);
+			$columnKey = $matches[1];
+		} elseif (!empty($column['attribute'])) {
+			$columnKey = $column['attribute'];
+		} elseif (!empty($column['label'])) {
+			$columnKey = $column['label'];
+		} elseif (!empty($column['header'])) {
+			$columnKey = $column['header'];
+		} elseif (!empty($column['class'])) {
+			$columnKey = $column['class'];
+		} else {
+			$columnKey = null;
+		}
+		
+		return hash('crc32', $columnKey);
+	}
+	
+	
+	public function columnIsVisible($col) {
+		if (is_null($this->visibleColumns)) return true;
+		return !(array_search($this->getColumnKey($col),$this->visibleColumns)===false);
+	}
+	
+	
 	public function init()
 	{
 		parent::init();
 		DynaGridWidgetAsset::register($this->view);
+		$dynaGridStore = new DynaGridStore(
+			[
+				'id' => $this->id,
+				'moduleId' => Module::MODULE,
+				'storage' => DynaGrid::TYPE_DB,
+				//'userSpecific' => $this->userSpecific,
+				//'dbUpdateNameOnly' => $this->dbUpdateNameOnly,
+			]
+		);
+		$data=$dynaGridStore->fetch('dataAttr');
+		$this->visibleColumns=isset($data['keys'])?$data['keys']:null;
 	}
 	
 	public function run()
