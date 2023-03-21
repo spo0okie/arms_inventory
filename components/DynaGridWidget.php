@@ -63,7 +63,7 @@ class DynaGridWidget extends Widget
 	 * @return array
 	 * @throws InvalidConfigException
 	 */
-	protected function matchColumnString($column)
+	public static function matchColumnString($column)
 	{
 		$matches = [];
 		if (!Lib::preg_match('/^([\w\.]+)(:(\w*))?(:(.*))?$/u', $column, $matches)) {
@@ -76,10 +76,10 @@ class DynaGridWidget extends Widget
 		return $matches;
 	}
 	
-	protected function getColumnKey($column)
+	public static function getColumnKey($column)
 	{
 		if (!is_array($column)) {
-			$matches = $this->matchColumnString($column);
+			$matches = self::matchColumnString($column);
 			$columnKey = $matches[1];
 		} elseif (!empty($column['attribute'])) {
 			$columnKey = $column['attribute'];
@@ -96,20 +96,9 @@ class DynaGridWidget extends Widget
 		return hash('crc32', $columnKey);
 	}
 	
-	
-	public function columnIsVisible($col) {
-		if (is_null($this->visibleColumns)) return true;
-		return !(array_search($this->getColumnKey($col),$this->visibleColumns)===false);
-	}
-	
-	
-	public function init()
-	{
-		parent::init();
-		DynaGridWidgetAsset::register($this->view);
-		$dynaGridStore = new DynaGridStore(
-			[
-				'id' => $this->id,
+	public static function fetchVisibleColumns($id) {
+		$dynaGridStore = new DynaGridStore([
+				'id' => $id,
 				'moduleId' => Module::MODULE,
 				'storage' => DynaGrid::TYPE_DB,
 				//'userSpecific' => $this->userSpecific,
@@ -117,7 +106,21 @@ class DynaGridWidget extends Widget
 			]
 		);
 		$data=$dynaGridStore->fetch('dataAttr');
-		$this->visibleColumns=isset($data['keys'])?$data['keys']:null;
+		return isset($data['keys'])?$data['keys']:null;
+	}
+	
+	public static function columnIsVisible($col,$visibleColumns) {
+		if (is_null($visibleColumns)) return true;
+		return !(array_search(static::getColumnKey($col),$visibleColumns)===false);
+	}
+	
+	
+	public function init()
+	{
+		parent::init();
+		DynaGridWidgetAsset::register($this->view);
+		if (is_null($this->visibleColumns))
+			$this->visibleColumns=static::fetchVisibleColumns($this->id);
 	}
 	
 	public function run()
@@ -130,9 +133,22 @@ class DynaGridWidget extends Widget
 			$this->model=$this->filterModel;
 		}
 		
+		$columns=$this->prepareColumns($this->columns,$this->defaultOrder);
+		
+		/*foreach ($columns as $column) {
+			if (!static::columnIsVisible($column,$this->visibleColumns)) {
+				$attr=$column['attribute'];
+				if (!$this->filterModel->$attr) continue;
+				if ($this->filterModel->hasAttribute($attr))
+					$this->filterModel->setAttribute($attr,null);
+				elseif ($this->filterModel->hasProperty($attr))
+					$this->filterModel->$attr=null;
+			}
+		}*/
+		
 		return DynaGrid::widget([
 			'storage'=>DynaGrid::TYPE_DB,
-			'columns' => $this->prepareColumns($this->columns,$this->defaultOrder),
+			'columns' => $columns,
 			'gridOptions'=>[
 				'id'=>$this->id,
 				'formatter' => [
