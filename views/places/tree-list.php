@@ -30,7 +30,7 @@ if (count($filtered)) {
                 <?= $this->render('item',['model'=>$model,'static_view'=>false]) ?>
 				<?= \yii\helpers\Html::a(
 					'<span class="fas fa-plus-circle"></span>',
-					['places/create','parent_id'=>$model->id],
+					['places/create','Places[parent_id]'=>$model->id],
 					['qtip_ttip'=>'Добавить дочернее помещение']
 				) ?>
                 <?= $subtree=$this->render('tree-list',[
