@@ -15,7 +15,7 @@ use yii\helpers\Url;
 /**
  * TechsController implements the CRUD actions for Techs model.
  */
-class TechsController extends Controller
+class TechsController extends ArmsBaseController
 {
     /**
      * {@inheritdoc}
@@ -49,7 +49,7 @@ class TechsController extends Controller
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionItem(int $id)
+	public function actionItem($id)
 	{
 		return $this->renderPartial('item', [
 			'model'	=> $this->findModel($id),
@@ -157,8 +157,6 @@ class TechsController extends Controller
         if (Yii::$app->request->get('arms_id'))
         	$model->arms_id=Yii::$app->request->get('arms_id');
         
-        if (Yii::$app->request->get('contracts_id'))
-			$model->contracts_ids=[Yii::$app->request->get('contracts_id')];
 	
 		$model->load(Yii::$app->request->get());
 	

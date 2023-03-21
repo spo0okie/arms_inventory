@@ -64,7 +64,13 @@ $static_view=false;
 		'header' => '',
 		'columns' => require __DIR__.'/../techs/columns.php',
 		'defaultOrder' => ['attach','num','model','comp_id','comp_ip','sn','state','user_id','places_id'],
-		//'createButton' => Html::a('Создать АРМ', ['create'], ['class' => 'btn btn-success']),
+		'createButton' => Html::a('Добавить', [
+			'/techs/create',
+			'Techs[model_id]'=>$model->id
+		], [
+			'class' => 'btn btn-success open-in-modal-form',
+			'data-reload-page-on-submit'=>1
+		]),
 		//'hintButton' => \app\components\HintIconWidget::widget(['model' => '\app\models\Arms', 'cssClass' => 'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
