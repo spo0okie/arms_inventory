@@ -98,8 +98,8 @@ class Comps extends ArmsModel
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
             [['updated_at', 'comment'], 'safe'],
-            [['name','raw_version'], 'string', 'max' => 32],
-            [['os'], 'string', 'max' => 128],
+			[['raw_version'], 'string', 'max' => 32],
+            [['name','os'], 'string', 'max' => 128],
 	        [['ip', 'ip_ignore','mac'], 'string', 'max' => 512],
 			/* Валидация отключена, т.к. ввод данных в основном автоматический (скриптами)
 			и если ее включить, данные просто не будут приниматься, что весьма плохо
