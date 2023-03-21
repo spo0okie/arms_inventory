@@ -111,7 +111,5 @@ class UsersSearch extends Users
 			'totalCount' => $totalQuery->count('distinct(users.id)'),
 			'sort'=> $sort,
         ]);
-        
-        return $dataProvider;
     }
 }
