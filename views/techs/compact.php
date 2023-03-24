@@ -70,7 +70,7 @@ if (is_object($model->state)) {
 	<h4>Привязанные ОС:</h4>
 	<div class="data-block tree-level-2">
 		<?php if (is_array($comps=$model->comps) && count ($comps)) {
-			foreach ($model->sortedComps as $comp) { ?>
+			foreach ($model->sortedComps as $comp) if (!$comp->archived){ ?>
 				<div class="comps-card"> <?= $this->render('/comps/card',[
 					'model'=>$comp,
 					'static_view'=>$static_view,
