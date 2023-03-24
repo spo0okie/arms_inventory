@@ -164,53 +164,6 @@ class TechModelsController extends ArmsBaseController
 	
 	
 	/**
-     * Creates a new TechModels model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new TechModels();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-	        if (Yii::$app->request->isAjax) {
-		        Yii::$app->response->format = Response::FORMAT_JSON;
-		        return $model;
-	        }
-	
-			if (Yii::$app->request->get('return')=='previous')
-				return $this->redirect(Url::previous());
-	        return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
-	
-	/**
-	 * Updates an existing TechModels model.
-	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionUpdate($id)
-	{
-		$model = $this->findModel($id);
-		
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if (Yii::$app->request->get('return')=='previous')
-				return $this->redirect(Url::previous());
-			return $this->redirect(['view', 'id' => $model->id]);
-		}
-		
-		return $this->render('update', [
-			'model' => $model,
-		]);
-	}
-	
-	/**
 	 * Updates an existing TechModels model.
 	 * If update is successful, the browser will be redirected to the 'view' page.
 	 * @param integer $id

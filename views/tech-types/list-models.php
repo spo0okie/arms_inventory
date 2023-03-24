@@ -1,6 +1,7 @@
 <?php
 
 use yii\bootstrap5\Modal;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\TechTypes */
@@ -26,55 +27,13 @@ use yii\bootstrap5\Modal;
 			<?php } ?>
 		</table>
 		
-		<?php
-		Modal::begin([
-			'title' => '<h2>Добавление модели оборудования</h2>',
-			'size' => Modal::SIZE_LARGE,
-			'options'=>[
-				'id'=>'tech_models-add',
-				'tabindex' => false,
-			],
-			'toggleButton' => [
-				'label' => 'Добавить модель',
-				'tag' => 'a',
-				'class' => 'btn btn-success',
-			],
-		]);
-		
-		$techModel=new \app\models\TechModels();
-		$techModel->type_id=$model->id;
-		
-		echo $this->render(
-			'/tech-models/_form',
-			[
-				'model'=>$techModel,
-				'modalParent'=>'#tech_models-add'
-			]
-		);
-		
-		$js = <<<JS
-			$('#tech_models-add').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-			$('#tech_models-edit-form').on('beforeSubmit', function(){
-				var data = $(this).serialize();
-				$.ajax({
-					url: '/web/tech-models/create',
-					type: 'POST',
-					data: data,
-					success: function(res){
-						//alert();
-						window.location.reload();// replace(window.location.toString()+'&manufacturers_id='+res[0].id);
-					},
-					error: function(){
-						alert('Error!');
-					}
-				});
-				return false;
-			});
-JS;
-		
-		$this->registerJs($js);
-		Modal::end();
-		?>
+		<?= Html::a('Добавить', [
+			'/tech-models/create',
+			'TechModels[type_id]'=>$model->id
+		], [
+			'class' => 'btn btn-success open-in-modal-form',
+			'data-reload-page-on-submit'=>1
+		])?>
 	</div>
 	<div class="col-md-6">
 		<h4><?= $model->getAttributeLabel('comment')?></h4>
