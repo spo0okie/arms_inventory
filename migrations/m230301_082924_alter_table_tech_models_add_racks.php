@@ -5,7 +5,7 @@ use yii\db\Migration;
 /**
  * Class m230305_082924_alter_table_tech_models_add_racks
  */
-class m230305_082924_alter_table_tech_models_add_racks extends Migration
+class m230301_082924_alter_table_tech_models_add_racks extends Migration
 {
 	function addColumnIfNotExist($table,$column,$type,$index=false)
 	{
