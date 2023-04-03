@@ -128,17 +128,7 @@ if (is_object($model->state)) { ?>
         echo $this->render('/contracts/_linkform');
         //закрываем форму
         Modal::end();
-
-        Modal::begin([
-            'id'=>'tech_new_contract_modal',
-			'size' => Modal::SIZE_LARGE,
-            'title' => '<h2>Добавление документа к оборудованию</h2>',
-        ]);
-        $contract=new \app\models\Contracts();
-        $contract->techs_ids=[$model->id];
-        echo $this->render('/contracts/_form',['model'=>$contract]);
-        Modal::end();
-
+        
 
         $js = <<<JS
 
@@ -168,7 +158,12 @@ JS;
             ?>
         <a onclick="$('#tech_link_contract_modal').modal('toggle')" class="href">Привязать</a>
         /
-        <a onclick="$('#tech_new_contract_modal').modal('toggle')" class="href">добавить новый</a>
+        <?= Html::a('добавить новый',[
+			'contracts/create','Contracts[techs_ids][]'=>$model->id
+		],[
+			'class'=>'open-in-modal-form',
+			'data-reload-page-on-submit'=>1
+		]) ?>
 
     <?php } ?>
 
