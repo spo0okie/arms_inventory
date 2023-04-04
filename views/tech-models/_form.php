@@ -67,7 +67,7 @@ if (Yii::$app->request->get('return'))
 
     <div class="row">
         <div class="col-md-6" >
-            <?= $form->field($model, 'type_id')->widget(Select2::className(), [
+            <?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'type_id', [
                 'data' => \app\models\TechTypes::fetchNames(),
                 'options' => [
 					'placeholder' => 'Выберите тип оборудования',
@@ -82,7 +82,7 @@ if (Yii::$app->request->get('return'))
             ]) ?>
         </div>
         <div class="col-md-6" >
-            <?= $form->field($model, 'manufacturers_id')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'manufacturers_id', [
                 'data' => \app\models\Manufacturers::fetchNames(),
                 'options' => ['placeholder' => 'Выберите производителя',],
                 //'toggleAllSettings'=>['selectLabel'=>null],
@@ -97,10 +97,10 @@ if (Yii::$app->request->get('return'))
 
     <div class="row">
         <div class="col-md-8" >
-	        <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+	        <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
         </div>
         <div class="col-md-4" >
-	        <?= $form->field($model, 'short')->textInput(['maxlength' => true]) ?>
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'short')?>
         </div>
     </div>
 

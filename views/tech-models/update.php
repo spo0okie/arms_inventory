@@ -4,6 +4,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\TechModels */
+if (!isset($modalParent)) $modalParent=null;
 
 $this->title = 'Редактирование: ' . $model->name;
 $this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index']];
@@ -17,6 +18,7 @@ $this->params['breadcrumbs'][] = 'Редактирование';
 
     <?= $this->render('_form', [
         'model' => $model,
+		'modalParent' => $modalParent
     ]) ?>
 
 </div>
