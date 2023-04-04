@@ -96,19 +96,19 @@ class CompsSearch extends Comps
 				'updated_at'
 			]
 		];
-	
-		$dataProvider = new ActiveDataProvider([
-            'query' => $query,
-	        'pagination' => ['pageSize' => \Yii::$app->request->get('per-page',100),],
-			'sort'=>$sort,
-        ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
-            var_dump($this->errors);
+            //var_dump($this->errors);
+			return new ActiveDataProvider([
+				'query' => $query,
+				'totalCount' => $query->count('distinct(techs.id)'),
+				'pagination' => ['pageSize' => \Yii::$app->request->get('per-page',100),],
+				'sort'=> $sort,
+			]);
         }
 
 	
@@ -131,7 +131,13 @@ class CompsSearch extends Comps
 			])
 			->andFilterWhere(QueryHelper::querySearchString('raw_hw', $this->raw_hw))
 			->andFilterWhere(QueryHelper::querySearchNumberOrDate('comps.updated_at',$this->updated_at));
-		
-        return $dataProvider;
-    }
+	
+		$totalQuery=clone $query;
+	
+		return new ActiveDataProvider([
+			'query' => $query->groupBy('comps.id'),
+			'totalCount' => $totalQuery->count('distinct(comps.id)'),
+			'pagination' => ['pageSize' => \Yii::$app->request->get('per-page',100),],
+			'sort'=> $sort,
+		]);    }
 }
