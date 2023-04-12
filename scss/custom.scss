@@ -5,12 +5,16 @@ $gray-700: #214553;
 $gray-600: #597182;
 $gray-500: #7C8995;
 
+$dropdown-item-padding-y: .1em;
 
 @import "../vendor/thomaspark/bootswatch/dist/Yeti/variables";
 @import "../vendor/bower-asset/bootstrap/scss/bootstrap";
 @import "../vendor/thomaspark/bootswatch/dist/Yeti/bootswatch";
 
-
+.dropdown-item {
+  padding-top: .6rem;
+  padding-bottom: .5rem;
+}
 
 // @import "Flatly/variables";
 // @import "Flatly/bootswatch";

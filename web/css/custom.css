@@ -3411,7 +3411,7 @@ textarea.form-control-lg {
   --bs-dropdown-link-active-bg: #008cba;
   --bs-dropdown-link-disabled-color: #7C8995;
   --bs-dropdown-item-padding-x: 1rem;
-  --bs-dropdown-item-padding-y: 0.25rem;
+  --bs-dropdown-item-padding-y: 0.1em;
   --bs-dropdown-header-color: #597182;
   --bs-dropdown-header-padding-x: 1rem;
   --bs-dropdown-header-padding-y: 0.5rem;
@@ -12049,6 +12049,11 @@ label,
 .popover-header {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+.dropdown-item {
+  padding-top: 0.6rem;
+  padding-bottom: 0.5rem;
 }
 
 /* render test */
