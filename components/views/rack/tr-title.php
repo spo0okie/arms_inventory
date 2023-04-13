@@ -11,8 +11,8 @@
 /* @var $rack \app\components\RackWidget */
 
 use yii\helpers\Html;
-
+$fontSize=min($height*0.6,22);
 ?>
-<tr height="<?= $height ?>%">
+<tr height="<?= $height ?>%" style="font-size: <?= $fontSize ?>px">
 	<td class="rack-title" colspan="<?= $rack->getTotalCols() ?>"><?= $rack->title ?></td>
 </tr>

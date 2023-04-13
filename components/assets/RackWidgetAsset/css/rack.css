@@ -15,6 +15,12 @@ table.rack-widget {
 
 }
 
+td.rack-title {
+    color: white;
+    font-width: bold;
+    margin:0;
+    padding:0;
+}
 td.rack-unit {
     border: #0d3349 solid 1px;
     margin:0;
@@ -22,14 +28,24 @@ td.rack-unit {
 }
 
 td.rack-unit-label {
+    margin:0;
+    padding:0;
     text-align: center;
-    font-size: 0.6vw;
+    /*font-size: 0.6vw;*/
     color: white;
     border-top: lightgray solid 1px;
     border-left: lightgray solid 1px;
     border-bottom: dimgray solid 1px;
     border-right: dimgray solid 1px;
     background-color: #8f8f8f;
+}
+
+td.rack-unit-installed {
+    border-bottom: lightgray solid 1px;
+    border-right: lightgray solid 1px;
+    border-top: dimgray solid 1px;
+    border-left: dimgray solid 1px;
+    background-color: #cccccc;
 }
 
 td.rack-unit.highlight {

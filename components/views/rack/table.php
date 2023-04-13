@@ -11,7 +11,7 @@
 /* @var $models \app\models\Techs[] */
 
 use yii\helpers\Html;
-//print_r($rows);
+print_r($rack->rows);
 //echo"<br>";
 //print_r($rack->cols);
 //echo"<br>";
@@ -41,6 +41,7 @@ if (is_object($rack) && is_object($rack->model)) {
 							'rack'=>$rack,
 							'models'=>$models,
 							'height'=>$rack->getHeightPercent($row['size']/$row['count']),
+							'totalHeight'=>$height
 						]);
 						$y++;
 					}

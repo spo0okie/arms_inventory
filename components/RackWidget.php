@@ -22,6 +22,7 @@ use yii\helpers\Html;
  * @property integer simpleRightOffset
  * @property integer simpleTopOffset
  * @property integer simpleBottomOffset
+ * @property float smallestUnitHeight
  */
 class RackWidget extends Widget
 {
@@ -75,6 +76,7 @@ class RackWidget extends Widget
 	private $unitColsCache=null;
 	private $unitRowsCache=null;
 	private $isSimpleConfigCache=null;
+	private $smallestUnitHeightCache=null;
 	
 	
 	public function run()
@@ -82,6 +84,7 @@ class RackWidget extends Widget
 		if ($this->isErrorConfig) return Html::tag('div','Некорректная конфигурация корзины',[
 			'class'=>'alert alert-striped'
 		]);
+		
 		return $this->render('rack/table',[
 			'rack'=>$this
 		]);
@@ -118,6 +121,85 @@ class RackWidget extends Widget
 		if ($vNum==-1) $row=$height-1-$row;
 		if ($hNum*$evenNum==-1) $col=$width-1-$col;
 		return $row*$width+$col+$this->labelStartId;
+	}
+	
+	/**
+	 * Возвращает полное количество ячеек по колонкам или строкам
+	 * @param $cols
+	 * @param $pos
+	 * @return array
+	 */
+	public function getViewportCellsCount($cols) {
+		$count=0;
+		foreach ($cols as $block)
+			$count+=($block['count']??1);		//количество ячеек в блоке
+		
+		return $count;
+	}
+	
+	/**
+	 * Возвращает линейные (одномерные) координаты юнита по в строке/колонке
+	 * @param $cols
+	 * @param $pos
+	 * @return array
+	 */
+	public function getColItemCoords($cols,$pos) {
+		$i=0; //номер позиции
+		$begin=0;
+		$end=0;
+		foreach ($cols as $block) {
+			$count=$block['count']??1;		//количество ячеек в блоке
+			$size=$block['size']/$count; 	//размер ячеек в блоке
+			for ($k=0;$k<$count; $k++) {
+				$end+=$size;
+				if ($i==$pos) break(2); 	//если мы находимся в искомой строке - выходим из цикла
+				$begin+=$size;
+				$i++;
+			}
+		}
+		
+		return [$begin,$end];
+	}
+	
+	/**
+	 * Возвращает наименьшую высоту юнита в корзине
+	 * @return float
+	 */
+	public function getSmallestUnitHeight() {
+		if (!is_null($this->smallestUnitHeightCache))
+			return $this->smallestUnitHeightCache;
+		
+		foreach ($this->rows as $block) {
+			if (isset($block['count']) && $block['count']) {        //количество ячеек в блоке
+				$size = $block['size'] / $block['count'];    //размер ячеек в блоке
+				if (is_null($this->smallestUnitHeightCache))
+					$this->smallestUnitHeightCache=$size;
+				else
+					$this->smallestUnitHeightCache=min($this->smallestUnitHeightCache,$size);
+			}
+		}
+		
+		return $this->smallestUnitHeightCache;
+	}
+	
+	/**
+	 * Считает координаты (Y↓;X→) ячейки в зависимости от его положения в таблице
+	 * @param $row integer Строка в которой расположена ячейка (сверху вниз)
+	 * @param $col integer Столбец в котором расположена ячейка (слева направо)
+	 * @return array
+	 */
+	public function getCellViewportCoords($row,$col) {
+		//вертикальные по положению строки в конфигурации строк
+		[$top,$bottom]=$this->getColItemCoords($this->rows,$row);
+		//горизонтальные по положению колонки в конфигурации колонок
+		[$left,$right]=$this->getColItemCoords($this->cols,$col);
+		return [
+			$left,$top,$right,$bottom,
+			'left'=>$left,
+			'right'=>$right,
+			'top'=>$top,
+			'bottom'=>$bottom
+		];
 	}
 	
 	

@@ -7,6 +7,7 @@
  */
 
 /* @var $height */
+/* @var $totalHeight */
 /* @var $row */
 /* @var $sectionRow */
 /* @var $sectionRowCount */
@@ -25,10 +26,11 @@ if ($rack->front) {
 	$colShift=-1;
 }
 
+$fontSize=($rack->smallestUnitHeight-2)*$totalHeight/$rack->getTotalHeight()*0.6;
 use yii\helpers\Html;
 ?>
 
-<tr height="<?= $height ?>%">
+<tr height="<?= $height ?>%" style="font-size: <?= $fontSize ?>px">
 <?php
 	//если рисуем переднюю сторону, то слева направо, а если зад, то наоборот
 	for ($c=0; $c<count($rack->cols); $c++) {

@@ -66,14 +66,15 @@ foreach ($models as $model) {
 //метка слева
 if ($rack->labelMode=='h' && ($rack->front&&$rack->labelPre || !$rack->front&&$rack->labelPost))
 	echo $this->render('td-label',['rackId'=>$rack->id,'unitId'=>$unitId,'width'=>$labelWidth]);
-
+$installedClass='';
+if ($content) $installedClass='rack-unit-installed';
 if (!$skip) {
 ?>
 
 
 
 <td
-	class="rack-unit rack-<?= $rack->id ?>-unit-<?= $unitId ?> <?= $contentClass ?>"
+	class="rack-unit rack-<?= $rack->id ?>-unit-<?= $unitId ?> <?= $installedClass ?> <?= $contentClass ?>"
 	width="<?= $width ?>%"
 	id="rack-<?= $rack->id ?>-unit-<?= $unitId ?>"
 	colspan="<?= $colspan ?>"
