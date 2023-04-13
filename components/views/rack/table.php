@@ -50,6 +50,7 @@ if (is_object($rack) && is_object($rack->model)) {
 					echo $this->render('tr-title',[
 						'height'=>$rack->getHeightPercent($row['size']),
 						'rack'=>$rack,
+						'titleHeight'=>$row['size']*$height/$rack->totalHeight
 					]);
 					break;
 				default:
