@@ -109,8 +109,8 @@ use yii\validators\IpValidator;
 
 class Techs extends ArmsModel
 {
-	public $renderedInFrontRack=false;
-	public $renderedInBackRack=false;
+	public $renderedInFrontRack=[];	//позиции в передней корзине где уже отрендерилось
+	public $renderedInBackRack=[];	//тоже самое в задней корзине
 	
 	public static $title='Оборудование';
 	public static $titles='Оборудование';

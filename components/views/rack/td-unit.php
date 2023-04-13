@@ -32,15 +32,12 @@ $contentClass='';
 foreach ($models as $model) {
 	if ($model->isInstalledAt($unitId,$rack->front)) {
 		if (
-			(!$model->renderedInFrontRack && $rack->front)
+			(!isset($model->renderedInFrontRack[$unitId]) && $rack->front)
 			||
-			(!$model->renderedInBackRack && !$rack->front)
+			(!isset($model->renderedInBackRack[$unitId]) && !$rack->front)
 		) {
 			$content=$this->render('/techs/item',['model'=>$model]);
-			if ($rack->front)
-				$model->renderedInFrontRack=true;
-			else
-				$model->renderedInBackRack=true;
+			
 			$contentClass='tech_'.$model->type->code;
 			//Теперь пробуем увеличивать колонку таблицы и проверять входит ли она в это оборудование
 			for ($x=$col+1;$x<$sectionColCount; $x++) {
@@ -56,6 +53,19 @@ foreach ($models as $model) {
 				else
 					break;
 			}
+			
+			//теперь запоминаем в каких юнитах это оборудование отрендерится
+			for ($x=$col; $x<$col+$colspan; $x++ ) {
+				for ($y=$row; $y<$row+$rowspan; $y++ ) {
+					$uid=$rack->getSectorId($x,$y);
+					if ($rack->front)
+						$model->renderedInFrontRack[$uid]=true;
+					else
+						$model->renderedInBackRack[$uid]=true;
+				}
+			}
+			
+			
 		} else {
 			$skip=true;
 		}
