@@ -11,7 +11,7 @@
 /* @var $models \app\models\Techs[] */
 
 use yii\helpers\Html;
-print_r($rack->rows);
+//print_r($rack->rows);
 //echo"<br>";
 //print_r($rack->cols);
 //echo"<br>";
