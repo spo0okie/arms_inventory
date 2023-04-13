@@ -251,18 +251,29 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				]
 			])->hint(\app\models\Contracts::fetchArmsHint($model->contracts_ids,'techs'),['id'=>'arms_id-hint']) ?>
 		</div>
-		<div class="col-md-4 mt-2" id="tech-installed-param" <?= ($model->installed_id)?'':$hidden ?>>
-			<div class="d-flex flex-row-reverse">
-				<div class="pe-2">
-					<br><?= FieldsHelper::CheckboxField($form,$model,'full_length') ?>
+		<div class="col-md-6" id="tech-installed-param" <?= ($model->installed_id)?'':$hidden ?>>
+			<div class="row float-right	">
+				<div class="col-md-4 ">
+					<?= FieldsHelper::CheckboxField($form,$model,'full_length',[
+						'onchange'=>'{
+						if ($("#techs-full_length").is(":checked")) {
+							$("#tech-installed-pos-end").show();
+						} else {
+							$("#tech-installed-pos-end").hide();
+						}
+						console.log("click");
+					}'
+					]) ?>
+					<?= FieldsHelper::CheckboxField($form,$model,'installed_back') ?>
 				</div>
-				<div class="pe-2">
-					<br><?= FieldsHelper::CheckboxField($form,$model,'installed_back') ?>
+				<div class="col-md-4" id="tech-installed-pos">
+					<?= FieldsHelper::TextInputField($form,$model,'installed_pos') ?>
 				</div>
+				<div class="col-md-4" id="tech-installed-pos-end" <?= ($model->full_length)?'':$hidden ?>>
+					<?= FieldsHelper::TextInputField($form,$model,'installed_pos_end') ?>
+				</div>
+				
 			</div>
-		</div>
-		<div class="col-md-2" id="tech-installed-pos" <?= ($model->installed_id)?'':$hidden ?>>
-			<?= FieldsHelper::TextInputField($form,$model,'installed_pos') ?>
 		</div>
 		<div class="col-md-6" id="tech-installed-selector" <?= ($model->arms_id)?$hidden:'' ?>>
 			<?= FieldsHelper::Select2Field($form,$model,'installed_id', [
@@ -273,10 +284,10 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
                     'change'=>'function(){
                         if ($("#techs-installed_id").val()) {
                             $("#tech-place-selector, #tech-arms-selector").hide();
-                            $("#tech-installed-pos, #tech-installed-param").show();
+                            $("#tech-installed-param").show();
                         } else {
                             $("#tech-arms-selector, #tech-place-selector").show();
-                            $("#tech-installed-pos, #tech-installed-param").hide();
+                            $("#tech-installed-param").hide();
                         }
                     }'
                 ],

@@ -41,14 +41,14 @@ foreach ($models as $model) {
 			$contentClass='tech_'.$model->type->code;
 			//Теперь пробуем увеличивать колонку таблицы и проверять входит ли она в это оборудование
 			for ($x=$col+1;$x<$sectionColCount; $x++) {
-				if ($model->isInstalledAt($rack->getSectorId($x,$row)))
+				if ($model->isInstalledAt($rack->getSectorId($x,$row),$rack->front))
 					$colspan++;
 				else
 					break;
 			}
 			
 			for ($y=$row+1;$x<$sectionRowCount; $y++) {
-				if ($model->isInstalledAt($rack->getSectorId($col,$y)))
+				if ($model->isInstalledAt($rack->getSectorId($col,$y),$rack->front))
 					$rowspan++;
 				else
 					break;

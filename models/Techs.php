@@ -22,7 +22,8 @@ use yii\validators\IpValidator;
  * @property string $hw Аппаратное обеспечение
  * @property string $mac MAC адрес
  * @property string $specs Тех. спецификация
- * @property string $installed_pos Позиция установки в корзину/шкаф
+ * @property string $installed_pos Позиция установки в корзину/шкаф морды устройства
+ * @property string $installed_pos_end Позиция установки в корзину/шкаф задницы устройства
  * @property string $comment Комментарий
  * @property string $updated_at Время изменения
  * @property string $stateName Статус
@@ -208,9 +209,23 @@ class Techs extends ArmsModel
 				'hint'=>'Если это устройство установлено в другое, то нужно указать в какое'
 			],
 			'installed_pos'=>[
-				'Место установки',
+				'Места установки',
 				'hint'=>'Позиция этого устройства в корзине/шкафу<br>'.
-					'Номера посадочных мест (одно или несколько через тире)'
+					'Номера посадочных мест, которые занимает устройства<br>'.
+					'(лицевая сторона, если позиции для обратной стороны отличаются)<br>'.
+					'Одно или несколько через тире, можно несколько позиций через запятую<br>'.
+					'<b>Пример 1:</b>2 - занимает юнит №2'.
+					'<b>Пример 2:</b>1-2 - занимает юниты с 1го по 2й'.
+					'<b>Пример 3:</b>1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й'
+			],
+			'installed_pos_end'=>[
+				'Места обр. стороны',
+				'hint'=>'Если обратная сторона устройства занимает другие позиции,<br>'.
+					'то тут нужно указать номера посадочных мест для обратной стороны<br>'.
+					'Одно или несколько через тире, можно несколько позиций через запятую<br>'.
+					'<b>Пример 1:</b>2 - занимает юнит №2'.
+					'<b>Пример 2:</b>1-2 - занимает юниты с 1го по 2й'.
+					'<b>Пример 3:</b>1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й'
 			],
 			'installed_back'=>[
 				'Установлено с обратной стороны',
@@ -346,8 +361,7 @@ class Techs extends ArmsModel
 
 
 			[['url', 'comment','updated_at','history','hw','specs'], 'safe'],
-			[['inv_num', 'sn',], 'string', 'max' => 128],
-			[['installed_pos'], 'string', 'max' => 16],
+			[['inv_num', 'sn','installed_pos','installed_pos_end'], 'string', 'max' => 128],
 			
 			[['ip', 'mac'], 'string', 'max' => 255],
 			['ip', function ($attribute, $params, $validator) {
@@ -1076,7 +1090,13 @@ class Techs extends ArmsModel
 		if (!$this->full_length) {
 			if (($front == $this->installed_back)) return false;
 		}
-		$intervals=explode(',',$this->installed_pos);
+		
+		//если смотрим на задницу устройства и для нее другие позиции
+		if ($front==$this->installed_back && $this->installed_pos_end)
+			$intervals=explode(',',$this->installed_pos_end);
+		else
+			$intervals=explode(',',$this->installed_pos);
+		
 		foreach ($intervals as $interval) {
 			if (strpos($interval,'-')!==false) {
 				$limits=explode('-',$interval);

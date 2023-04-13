@@ -162,7 +162,7 @@ class FieldsHelper
 		$hintOptions=static::cutHintOptions($options);
 		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
 		return $form
-			->field($model, $attr)->checkbox()
+			->field($model, $attr)->checkbox($options)
 			->label($label,$labelOptions)
 			->hint($hint,$hintOptions);
 	}
