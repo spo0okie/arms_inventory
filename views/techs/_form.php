@@ -91,12 +91,14 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
 //формирование инвентарника регистрируем только для новых моделей
 $formInvNumJs = /** @lang JavaScript */ <<<JS
-	$('#techs-model_id, #techs-places_id, #techs-arms_id').on('change', function(){
+	$('#techs-model_id, #techs-places_id, #techs-arms_id, #techs-installed_id').on('change', function(){
 		$.ajax({
 			url: '/web/techs/inv-num?model_id='+
 			$('#techs-model_id').val()
 			+'&place_id='+
 			$('#techs-places_id').val()
+			+'&installed_id='+
+			$('#techs-installed_id').val()
 			+'&arm_id='+
 			$('#techs-arms_id').val(),
 			success: function(data) {
@@ -253,7 +255,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		</div>
 		<div class="col-md-6" id="tech-installed-param" <?= ($model->installed_id)?'':$hidden ?>>
 			<div class="row float-right	">
-				<div class="col-md-4 ">
+				<div class="col-md-6 ">
 					<?= FieldsHelper::CheckboxField($form,$model,'full_length',[
 						'onchange'=>'{
 						if ($("#techs-full_length").is(":checked")) {
@@ -266,10 +268,10 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 					]) ?>
 					<?= FieldsHelper::CheckboxField($form,$model,'installed_back') ?>
 				</div>
-				<div class="col-md-4" id="tech-installed-pos">
+				<div class="col-md-3" id="tech-installed-pos">
 					<?= FieldsHelper::TextInputField($form,$model,'installed_pos') ?>
 				</div>
-				<div class="col-md-4" id="tech-installed-pos-end" <?= ($model->full_length)?'':$hidden ?>>
+				<div class="col-md-3" id="tech-installed-pos-end" <?= ($model->full_length)?'':$hidden ?>>
 					<?= FieldsHelper::TextInputField($form,$model,'installed_pos_end') ?>
 				</div>
 				

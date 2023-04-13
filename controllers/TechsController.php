@@ -86,11 +86,12 @@ class TechsController extends ArmsBaseController
 	 * @param null $model_id
 	 * @param null $place_id
 	 * @param null $arm_id
+	 * @param null $installed_id
 	 * @return mixed
 	 */
-	public function actionInvNum($model_id=null,$place_id=null,$arm_id=null)
+	public function actionInvNum($model_id=null,$place_id=null,$arm_id=null,$installed_id=null)
 	{
-		$prefix=\app\models\Techs::genInvPrefix($model_id,$place_id,$arm_id);
+		$prefix=\app\models\Techs::genInvPrefix($model_id,$place_id,$arm_id,$installed_id);
 		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		return \app\models\Techs::fetchNextNum($prefix);
 	}

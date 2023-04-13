@@ -214,18 +214,18 @@ class Techs extends ArmsModel
 					'Номера посадочных мест, которые занимает устройства<br>'.
 					'(лицевая сторона, если позиции для обратной стороны отличаются)<br>'.
 					'Одно или несколько через тире, можно несколько позиций через запятую<br>'.
-					'<b>Пример 1:</b>2 - занимает юнит №2'.
-					'<b>Пример 2:</b>1-2 - занимает юниты с 1го по 2й'.
-					'<b>Пример 3:</b>1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й'
+					'<b>Пример 1:</b> 2 - занимает юнит №2<br>'.
+					'<b>Пример 2:</b> 1-2 - занимает юниты с 1го по 2й<br>'.
+					'<b>Пример 3:</b> 1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й'
 			],
 			'installed_pos_end'=>[
 				'Места обр. стороны',
 				'hint'=>'Если обратная сторона устройства занимает другие позиции,<br>'.
 					'то тут нужно указать номера посадочных мест для обратной стороны<br>'.
 					'Одно или несколько через тире, можно несколько позиций через запятую<br>'.
-					'<b>Пример 1:</b>2 - занимает юнит №2'.
-					'<b>Пример 2:</b>1-2 - занимает юниты с 1го по 2й'.
-					'<b>Пример 3:</b>1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й'
+					'<b>Пример 1:</b> 2 - занимает юнит №2<br>'.
+					'<b>Пример 2:</b> 1-2 - занимает юниты с 1го по 2й<br>'.
+					'<b>Пример 3:</b> 1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й'
 			],
 			'installed_back'=>[
 				'Установлено с обратной стороны',
@@ -376,7 +376,7 @@ class Techs extends ArmsModel
 			[['num'], 'string', 'max' => 16],
 	        ['num', function ($attribute, $params, $validator) {
         		$tokens=explode('-',$this->$attribute);
-		        if (count($tokens)!==3 && count($tokens)!==2) {
+		        if ((count($tokens)!==3 && count($tokens)!==2) || !strlen($tokens[0])) {
 			        $this->addError($attribute, 'Инвентарный номер должен быть в формате "ФИЛ-[ТИП-]НОМЕР", где ФИЛ - префикс филиала, ТИП - префикс типа оборудования, НОМЕР - целочисленный номер уникальный в рамках филиала.');
 		        }
 	        }],
@@ -926,12 +926,16 @@ class Techs extends ArmsModel
 	 * @param $arm_id integer АРМ
 	 * @return string префикс инвентарного номера
 	 */
-	public static function genInvPrefix($model_id,$place_id,$arm_id)
+	public static function genInvPrefix($model_id,$place_id,$arm_id,$installed_id)
 	{
 		$tokens=[];
 		
 		$place=null;
-		if ($arm_id) {
+		if ($installed_id) {
+			//если есть АРМ - то место установки там где АРМ
+			$arm=\app\models\Techs::findOne($installed_id);
+			if (is_object($arm)) $place=$arm->place;
+		} elseif ($arm_id) {
 			//если есть АРМ - то место установки там где АРМ
 			$arm=\app\models\Techs::findOne($arm_id);
 			if (is_object($arm)) $place=$arm->place;
@@ -946,6 +950,7 @@ class Techs extends ArmsModel
 			//если есть, то добавляем
 			if (strlen($place_token)) $tokens[]=$place_token;
 		}
+
 		//ищем модель оборудования
 		$model=\app\models\TechModels::findOne($model_id);
 		if (is_object($model)) {
