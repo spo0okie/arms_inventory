@@ -25,6 +25,7 @@ td.rack-unit {
     border: #0d3349 solid 1px;
     margin:0;
     padding:0;
+    line-height:0;
 }
 
 td.rack-unit-label {
@@ -38,6 +39,7 @@ td.rack-unit-label {
     border-bottom: dimgray solid 1px;
     border-right: dimgray solid 1px;
     background-color: #8f8f8f;
+    line-height:0;
 }
 
 td.rack-unit-installed {
@@ -46,6 +48,7 @@ td.rack-unit-installed {
     border-top: dimgray solid 1px;
     border-left: dimgray solid 1px;
     background-color: #cccccc;
+    line-height:0;
 }
 
 td.rack-unit.highlight {

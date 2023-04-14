@@ -26,7 +26,7 @@ if ($rack->front) {
 	$colShift=-1;
 }
 
-$fontSize=($rack->smallestUnitHeight-2)*$totalHeight/$rack->getTotalHeight()*0.6;
+$fontSize=min (($rack->smallestUnitHeight-2)*$totalHeight/$rack->getTotalHeight()*0.9,16);
 use yii\helpers\Html;
 ?>
 
