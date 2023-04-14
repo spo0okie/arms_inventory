@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Techs */
 
 if (!isset($modalParent)) $modalParent=null;
-$this->title = 'Новая позиция';
+$this->title = 'Новое оборудование/АРМ';
 $this->params['breadcrumbs'][] = ['label' => \app\models\Techs::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
