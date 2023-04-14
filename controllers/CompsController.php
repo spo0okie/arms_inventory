@@ -51,11 +51,18 @@ class CompsController extends Controller
     {
         $searchModel = new CompsSearch();
         $searchModel->archived=\Yii::$app->request->get('showArchived',false);
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+	
+		//ищем тоже самое но с дочерними в противоположном положении
+		$switchArchived=clone $searchModel;
+		$switchArchived->archived=!$switchArchived->archived;
+		$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams)->totalCount;
+	
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+			'switchArchivedCount' => $switchArchivedCount,
         ]);
     }
 	

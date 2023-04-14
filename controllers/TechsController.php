@@ -17,6 +17,8 @@ use yii\helpers\Url;
  */
 class TechsController extends ArmsBaseController
 {
+	public $modelClass='app\models\Techs';
+	
     /**
      * {@inheritdoc}
      */
@@ -96,20 +98,6 @@ class TechsController extends ArmsBaseController
 		return \app\models\Techs::fetchNextNum($prefix);
 	}
 
-    /**
-     * Lists all Techs models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel = new TechsSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
 
     /**
      * Displays a single Techs model.
@@ -137,39 +125,6 @@ class TechsController extends ArmsBaseController
         ]);
     }
 
-    /**
-     * Creates a new Techs model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new Techs();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if (Yii::$app->request->isAjax) {
-				Yii::$app->response->format = Response::FORMAT_JSON;
-				return [$model];
-			} else {
-				return $this->redirect(['view', 'id' => $model->id]);
-			}
-		}
-        
-        if (Yii::$app->request->get('arms_id'))
-        	$model->arms_id=Yii::$app->request->get('arms_id');
-        
-	
-		$model->load(Yii::$app->request->get());
-	
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('create', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('create', [
-				'model' => $model,
-			]);
-    }
 
     /**
      * Updates an existing Techs model.

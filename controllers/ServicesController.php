@@ -128,12 +128,24 @@ class ServicesController extends Controller
 		$searchModel->parent_id=Yii::$app->request->get('showChildren',false);
 		$searchModel->archived=Yii::$app->request->get('showArchived',false);
 		
+		//ищем тоже самое но с дочерними в противоположном положении
+		$switchParent=clone $searchModel;
+		$switchParent->parent_id=!$switchParent->parent_id;
+		$switchParentCount=$switchParent->search(Yii::$app->request->queryParams)->totalCount;
+		
+		//ищем тоже самое но с дочерними в противоположном положении
+		$switchArchived=clone $searchModel;
+		$switchArchived->archived=!$switchArchived->archived;
+		$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams)->totalCount;
+		
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		$this->view->params['layout-container'] = 'container-fluid';
 		
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,
+			'switchParentCount' => $switchParentCount,
+			'switchArchivedCount' => $switchArchivedCount,
 		]);
 	}
 	

@@ -359,7 +359,6 @@ class Techs extends ArmsModel
 
 	        [['contracts_ids','lic_items_ids','lic_groups_ids','lic_keys_ids'], 'each', 'rule'=>['integer']],
 
-
 			[['url', 'comment','updated_at','history','hw','specs'], 'safe'],
 			[['inv_num', 'sn','installed_pos','installed_pos_end'], 'string', 'max' => 128],
 			

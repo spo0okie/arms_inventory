@@ -8,15 +8,19 @@ use yii\helpers\Inflector;
 use yii\helpers\StringHelper;
 use yii\helpers\Url;
 
-class ShowArchivedWidget extends Widget
+class ShowArchivedWidget extends UrlParamSwitcherWidget
 {
 	
 	public $state=null;
-	public $reload=true;
 	public $label='Архивные';
-	public $hint=null;
+	public $scriptOff="\$('.archived-item').show();";
+	public $scriptOn="\$('.archived-item').hide();";
+	public $param='showArchived';
+	public $hintOff='Скрыть архивные объекты';
+	public $hintOn='Показать архивные объекты';
 	
 	public function init() {
+		parent::init();
 		if (is_null($this->state))
 			$this->state = \Yii::$app->request->get('showArchived');
 		
@@ -25,16 +29,4 @@ class ShowArchivedWidget extends Widget
 		}
 	}
 	
-	public function run()
-	{
-		return UrlParamSwitcherWidget::widget([
-			'param'=>'showArchived',
-			'hintOff'=>'Скрыть архивные объекты',
-			'hintOn'=>'Показать архивные объекты',
-			'label'=>$this->label,
-			'reload'=>$this->reload,
-			'scriptOn'=>"\$('.archived-item').show();",
-			'scriptOff'=>"\$('.archived-item').hide();",
-		]);
-	}
 }

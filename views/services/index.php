@@ -10,6 +10,8 @@ use yii\widgets\Pjax;
 /* @var $searchModel app\models\ServicesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $models \app\models\Services[] */
+/* @var $switchParentCount */
+/* @var $switchArchivedCount */
 
 \yii\helpers\Url::remember();
 $this->title = \app\models\Services::$titles;
@@ -23,6 +25,22 @@ $childrenUrl=array_merge(['index'],Yii::$app->request->get());
 $childrenUrl['showChildren']=!$showChildren;
 
 $renderer=$this;
+
+
+//признак того что в форму поиска вбиты данные
+$filtered=false;
+if (isset(Yii::$app->request->get()['ServicesSearch'])) {
+	foreach (Yii::$app->request->get()['ServicesSearch'] as $field) if ($field) $filtered=true;
+}
+
+
+$switchParentDelta=$switchParentCount-$dataProvider->totalCount;
+if ($switchParentDelta>0) $switchParentDelta='+'.$switchParentDelta;
+
+$switchArchivedDelta=$switchArchivedCount-$dataProvider->totalCount;
+if ($switchArchivedDelta>0) $switchArchivedDelta='+'.$switchArchivedDelta;
+
+
 
 //var_dump($dataProvider->query->createCommand()->getRawSql());
 //var_dump($dataProvider->models[7]->arms);
@@ -42,8 +60,13 @@ if (true) {
 				'hintOff'=>'Скрыть дочерние сервисы',
 				'hintOn'=>'Показать дочерние сервисы',
 				'label'=>'Дочерние',
+				'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
+				'labelBadge'=>$switchParentDelta
 			]).
-			' // '.\app\components\ShowArchivedWidget::widget().
+			' // '.\app\components\ShowArchivedWidget::widget([
+				'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
+				'labelBadge'=>$switchArchivedDelta
+			]).
 			' // '.Html::a('Распределение по сотрудникам','index-by-users'),
 		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Services','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,

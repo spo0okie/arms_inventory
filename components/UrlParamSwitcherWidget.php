@@ -22,6 +22,9 @@ class UrlParamSwitcherWidget extends Widget
 	public $scriptOff='';
 	public $scriptOn='';
 	public $cssClass=null;
+	public $labelBadge=null;
+	public $labelBadgeClass='badge rounded-pill p-1 m-1 d-inline';
+	public $labelBadgeBg='bg-secondary';
 	private $onChange;
 	
 	public function init() {
@@ -34,6 +37,9 @@ class UrlParamSwitcherWidget extends Widget
 				$this->hintOff:
 				$this->hintOn;
 		}
+		
+		if ($this->labelBadge)
+			$this->label.="<span class='{$this->labelBadgeClass} {$this->labelBadgeBg}'>{$this->labelBadge}</span>";
 		
 		$newPageUrl=Url::current([$this->param=>!$this->state]);
 		$reload=$this->reload?'true':'false';
