@@ -44,11 +44,19 @@ class HwList {
                         //мониторы могут плодиться по несколько просто от того, что их цепляли разными портами
                         //при том назваться при этом могут по разному
                         //потому оставляем только уникальные по серийникам
+						if ($newItem->sn=='Not Present in EDID') $newItem->sn='';
                         $unique=true;
-                        foreach ($this->items as $testitem)
-                            if (
-                                (strcmp($testitem->sn,$newItem->sn)==0)
-                            ) $unique=false;
+						if ($newItem->sn) {
+							foreach ($this->items as $testitem)
+								if ($testitem->sn==$newItem->sn) $unique=false;
+						} else {
+							foreach ($this->items as $testitem)
+								if (
+									$testitem->type == HwListItem::$TYPE_MONITOR
+								&&
+                                	$testitem->product == $newItem->product
+								) $unique=false;
+						}
                         //если других мониторов с этим серийником нет, то и збс.
                         if ($unique) $this->add($newItem);
                     } else $this->add($newItem); //немониторы просто добавляем
