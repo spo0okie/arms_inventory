@@ -895,7 +895,7 @@ class Techs extends ArmsModel
 	public static function fetchNextNum($prefix) {
 		//ищем запись с таким префиксом (сортируем по префиксу и выбираем один самый большой)
 		$query=static::find()
-			->where(['like','num',$prefix]);
+			->where(['like','num',$prefix.'-%',false]);
 		
 		
 		if (strpos($prefix,'-')===false) //если в переданном префиксе нет "-", то ищем записи в которых
