@@ -35,8 +35,8 @@ use Yii;
  * @property boolean  $isWindows ОС относится к семейству Windows
  * @property boolean  $isLinux ОС относится к семейству Linux
  * @property boolean  $archived
- * @property Techs  $arm
- * @property Techs  $mainArm
+ * @property Techs    $arm
+ * @property Techs    $linkedArms
  * @property Comps[]  $dupes
  * @property Users    $user
  * @property Users    $responsible
@@ -212,9 +212,9 @@ class Comps extends ArmsModel
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
-	public function getMainArm()
+	public function getLinkedArms()
 	{
-		return $this->hasOne(Techs::class, ['comp_id' => 'id']);
+		return $this->hasMany(Techs::class, ['comp_id' => 'id']);
 	}
 	
 	/**
@@ -625,6 +625,11 @@ class Comps extends ArmsModel
 			$service->save();
 		}
 		
+		foreach ($comp->linkedArms as $arm) {
+			$arm->comp_id=$this->id;
+			$arm->save();
+		}
+		
 		$comp->delete();
 		$this->save();
 	}
@@ -709,6 +714,11 @@ class Comps extends ArmsModel
 			$ip->detachComp($this->id);
 		}
 		
+		foreach ($this->linkedArms as $arm) {
+			$arm->comp_id=null;
+			$arm->save();
+		}
+		
 		return true;
 	}
 	
@@ -727,10 +737,18 @@ class Comps extends ArmsModel
 				}
 			}
 		}
-		if ($this->mac && is_object($arm=$this->mainArm)) {
-			if (empty($arm->mac)) {
-				$arm->mac=$this->mac;
-				$arm->save();
+		/*
+		 * Если у этой есть МАК и это не виртуалка
+		 * и есть АРМы ссылающиеся на эту ОС
+		 * и у них МАК пустой
+		 * тогда вписываем им МАК от этой ОС
+		 */
+		if ($this->mac && !$this->ignore_hw) {
+			foreach ($this->linkedArms as $arm) {
+				if (empty($arm->mac)) {
+					$arm->mac=$this->mac;
+					$arm->save();
+				}
 			}
 		}
 		return true;

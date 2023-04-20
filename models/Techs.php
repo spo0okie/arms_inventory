@@ -475,10 +475,12 @@ class Techs extends ArmsModel
 			]);
 	}
 	
+	
+	//возвращает список ОС таким образом, что та, на которую указывает сам АРМ будет первой
 	public function getSortedComps()
 	{
 		$comps=$this->comps;
-		if ($comps[0]->id!=$this->comp_id) {
+		if ($comps[0]->id!=$this->comp_id && is_object($this->comp)) {
 			foreach ($comps as $idx=>$comp)
 				if ($comp->id == $this->comp_id)
 					unset($comps[$idx]);
