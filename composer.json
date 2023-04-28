@@ -19,7 +19,7 @@
         "url": "https://asset-packagist.org"
       },
       {
-        "type": "git",
+        "type": "vcs",
         "url": "https://github.com/spo0okie/yii2-rbac-plus.git"
       }
     ],

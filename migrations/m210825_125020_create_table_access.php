@@ -153,10 +153,7 @@ class m210825_125020_create_table_access extends Migration
 			'Запись'=>'write',
 		];
 		foreach ($defaults as $name=>$code) {
-			$accessType=new \app\models\AccessTypes();
-			$accessType->name = $name;
-			$accessType->code = $code;
-			$accessType->save();
+			$this->execute("insert into access_types (code,name) values (:code,:name)",[':code'=>$code,':name'=>$name]);
 		}
 	}
 
