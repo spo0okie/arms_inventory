@@ -46,7 +46,12 @@ class m220504_172124_alter_tables_lics extends Migration
 		if (isset($table->columns['lics_id']))
 			$this->renameColumn('lic_groups_in_arms','lics_id','lic_groups_id');
 		
+		
 		$table = $this->db->getTableSchema('lic_items_in_arms');
+		
+		if (isset($table->foreignKeys['lic_items_in_arms_ibfk_2']))
+			$this->dropForeignKey('lic_items_in_arms_ibfk_2','lic_items_in_arms');
+		
 		if (isset($table->columns['lics_id']))
 			$this->renameColumn('lic_items_in_arms','lics_id','lic_items_id');
     }
