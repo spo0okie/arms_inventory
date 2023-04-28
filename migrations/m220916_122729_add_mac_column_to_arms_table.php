@@ -18,7 +18,7 @@ class m220916_122729_add_mac_column_to_arms_table extends Migration
 			$this->addColumn('{{%arms}}', 'mac', $this->string()->null());
 		}
 		
-		$this->execute('update `arms` inner join `comps` on `comps.id`=`arms`.`comp_id` set `arms`.`mac`=`comps`.`mac`');
+		$this->execute('update `arms` inner join `comps` on `comps`.`id`=`arms`.`comp_id` set `arms`.`mac`=`comps`.`mac`');
     
     }
 
