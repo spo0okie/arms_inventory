@@ -18,23 +18,7 @@ class m220916_122729_add_mac_column_to_arms_table extends Migration
 			$this->addColumn('{{%arms}}', 'mac', $this->string()->null());
 		}
 		
-        foreach ($arms=\app\models\OldArms::find()->all() as $arm) {
-			/**
-			 * @var $arm \app\models\OldArms
-			 */
-			if (is_object($arm->comp)){
-				$arm->mac=$arm->comp->mac;
-			} elseif (count($comps=$arm->comps)) {
-				foreach ($comps as $comp) {
-					if (!strlen($arm->mac) && strlen($comp->mac)) {
-						$arm->mac=$comp->mac;
-					}
-				}
-			}
-			
-			if (strlen($arm->mac))
-				$arm->save(false);
-		};
+		$this->execute('update `arms` inner join `comps` on `comps.id`=`arms`.`comp_id` set `arms`.`mac`=`comps`.`mac`');
     
     }
 
