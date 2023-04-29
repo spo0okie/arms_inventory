@@ -1,11 +1,16 @@
 <?php
 
 use kartik\datecontrol\Module;
-use kartik\date\DatePicker;
+use yii\helpers\ArrayHelper;
 
-
-$params = require __DIR__ . '/params.php';
-$db = require __DIR__ . '/db.php';
+$params = ArrayHelper::merge(
+	require __DIR__ . '/params.php',
+	require __DIR__ . '/params-local.php',
+);
+$db = ArrayHelper::merge(
+	require __DIR__ . '/db.php',
+	require __DIR__ . '/db-local.php',
+);
 $ldap = require __DIR__ . '/ldap.php';
 
 $config = [
