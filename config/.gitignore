@@ -1,0 +1,5 @@
+#private config
+db-local.php
+params-local.php
+test_db-local.php
+ldap.php

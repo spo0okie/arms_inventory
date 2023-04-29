@@ -48,34 +48,54 @@ class m230224_081112_migrate_arms2techs extends Migration
 		$this->dropForeignKeyIfExists('materials_usages','materials_usages_ibfk_2');
 	
 	
-		$pc=\app\models\TechTypes::find()->where(['code'=>'pc'])->one();
-		if (!is_object($pc)) {
-			$pc=new \app\models\TechTypes([
-				'code'=>'pc1',
+		$pcCode='pc_test';
+		$pcQuery=new \yii\db\Query();
+		$pc=$pcQuery->select('*')->from('tech_types')->where(['code'=>$pcCode])->one();
+		//$pc=\app\models\TechTypes::find()->where(['code'=>'pc'])->one();
+		if (!is_array($pc)) {
+			echo "Creating PC tech_type\n";
+			$this->execute(
+				'insert into tech_types (code,name,prefix,comment,is_computer) values (:code,:name,:prefix,:comment,:is_computer)',[
+				'code'=>$pcCode,
 				'name'=>'ПК',
 				'prefix'=>'ПК',
 				'comment'=>'Персональный компьютер (создано автоматически при обновлении БД)',
 				'is_computer'=>true,
 			]);
-			$pc->save();
-			$pc->refresh();
+			$pc=$pcQuery->select('*')->from('tech_types')->where(['code'=>$pcCode])->one();
+			if (!is_array($pc)) {
+				echo "Error creating PC tech_type!\n";
+				return false;
+			}
+		}
+		
+		echo "PC type ID: ".$pc['id']."\n";
+		
+		$unknownPcName='Unknown';
+		$unknownPcQuery=new \yii\db\Query();
+		$unknownPc=$unknownPcQuery->select('*')->from('tech_models')->where(['name'=>$unknownPcName])->one();
+		if (!is_array($unknownPc)) {
+			echo "Creating \"unknown PC\" tech_model\n";
+			$this->execute(
+				'insert into tech_models (manufacturers_id,name,comment,type_id) values (:manufacturers_id,:name,:comment,:type_id)',[
+				'manufacturers_id'=>1,
+				'name'=>$unknownPcName,
+				'comment'=>'Автоматически созданная модель оборудования назначена всем АРМ, где модель не была указана при обновлении БД. Нужно проставить правильные модели оборудования и удалить эту.',
+				'type_id'=>$pc['id'],
+			]);
+			$unknownPc=$unknownPcQuery->select('*')->from('tech_models')->where(['name'=>$unknownPcName])->one();
+			if (!is_array($unknownPc)) {
+				echo "Error creating \"unknown PC\" tech_model!\n";
+				return false;
+			}
 		}
 	
-		$unknown=\app\models\TechModels::find()->where(['name'=>'Unknown'])->one();
-		if (!is_object($unknown)) {
-			$unknown=new \app\models\TechModels([
-				'manufacturers_id'=>1,
-				'name'=>'Unknown',
-				'comment'=>'Автоматически созданная модель оборудования назначена всем АРМ, где модель не была указана при обновлении БД. Нужно проставить правильные модели оборудования и удалить эту.',
-				'type_id'=>$pc->id,
-			]);
-			$unknown->save();
-		}
+		echo "UnkonownPC model ID: ".$unknownPc['id']."\n";
 	
 		$preCheckFail=false;
 		$arms = new SqlDataProvider(['sql'=> 'SELECT * FROM arms ','pagination' => false,]);
 		foreach ($arms->models as $model) {
-			$tech=$this->TechFromArm($model,$unknown->id);
+			$tech=$this->TechFromArm($model,$unknownPc['id']);
 			$tech->installed_pos='migrated_arm:'.$model['id'];
 			$tech->validate();
 			if (count($tech->errors)){
@@ -92,7 +112,7 @@ class m230224_081112_migrate_arms2techs extends Migration
 			
 			$oldId=$model['id'];
 			
-			$tech=$this->TechFromArm($model,$unknown->id);
+			$tech=$this->TechFromArm($model,$unknownPc['id']);
 			$tech->installed_pos='migrated_arm:'.$model['id'];
 			$tech->save();
 			$tech->refresh();
@@ -118,7 +138,7 @@ class m230224_081112_migrate_arms2techs extends Migration
 			echo "OK\n";
 		}
 		
-		if (!count($unknown->techs)) $unknown->delete();
+		//if (!count($unknown->techs)) $unknown->delete();
     }
 
     /**

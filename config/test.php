@@ -1,6 +1,15 @@
 <?php
-$params = require __DIR__ . '/params.php';
-$db = require __DIR__ . '/test_db.php';
+
+use yii\helpers\ArrayHelper;
+
+$params = ArrayHelper::merge(
+	require __DIR__ . '/params.php',
+	require __DIR__ . '/params-local.php'
+);
+$db = ArrayHelper::merge(
+	require __DIR__ . '/test_db.php',
+	require __DIR__ . '/test_db-local.php'
+);
 
 /**
  * Application configuration shared by all test types
