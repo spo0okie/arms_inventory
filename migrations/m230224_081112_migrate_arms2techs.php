@@ -48,7 +48,7 @@ class m230224_081112_migrate_arms2techs extends Migration
 		$this->dropForeignKeyIfExists('materials_usages','materials_usages_ibfk_2');
 	
 	
-		$pcCode='pc_test';
+		$pcCode='pc';
 		$pcQuery=new \yii\db\Query();
 		$pc=$pcQuery->select('*')->from('tech_types')->where(['code'=>$pcCode])->one();
 		//$pc=\app\models\TechTypes::find()->where(['code'=>'pc'])->one();
