@@ -1,7 +1,13 @@
 <?php
 
-$params = require __DIR__ . '/params.php';
-$db = require __DIR__ . '/db.php';
+$params = ArrayHelper::merge(
+	require __DIR__ . '/params.php',
+	require __DIR__ . '/params-local.php',
+);
+$db = ArrayHelper::merge(
+	require __DIR__ . '/db.php',
+	require __DIR__ . '/db-local.php',
+);
 
 $config = [
     'id' => 'basic-console',
