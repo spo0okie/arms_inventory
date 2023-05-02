@@ -124,6 +124,7 @@ class PlacesController extends ArmsBaseController
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
+			'show_archived'=>\Yii::$app->request->get('showArchived',false),
 	        'models' => Places::find()
 				->joinWith([
 					'phones',

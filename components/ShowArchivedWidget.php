@@ -13,8 +13,8 @@ class ShowArchivedWidget extends UrlParamSwitcherWidget
 	
 	public $state=null;
 	public $label='Архивные';
-	public $scriptOff="\$('.archived-item').show();";
-	public $scriptOn="\$('.archived-item').hide();";
+	public $scriptOn="\$('.archived-item').show();";
+	public $scriptOff="\$('.archived-item').hide();";
 	public $param='showArchived';
 	public $hintOff='Скрыть архивные объекты';
 	public $hintOn='Показать архивные объекты';
