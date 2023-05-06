@@ -34,7 +34,7 @@ $cabinet_col='<td class="places-arms-cabinet" rowspan="0">'.$this->render('item'
 
 foreach ($arms as $arm ) {
 	$content.=$this->render(
-		'/arms/tdrow',[
+		'/techs/map/arm-row',[
 			'model'=>$arm,
 			'cabinet_col'=>strlen($content)?null:$cabinet_col,
 			'show_archived'=>$show_archived,
@@ -54,7 +54,7 @@ foreach ($arms as $arm ) {
 foreach ($techs as $tech )
 	if (!($tech->num=='rendered'))
 	$content.=$this->render(
-		'/techs/tdrow',[
+		'/techs/map/tech-row',[
 			'model'=>$tech,
 			'cabinet_col'=>strlen($content)?null:$cabinet_col,
 			'show_archived'=>$show_archived,

@@ -81,8 +81,20 @@ class TechsController extends ArmsBaseController
 			'model' => $this->findModel($id),
 		]);
 	}
-
-
+	
+	/**
+	 * Displays a tooltip for hw of single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionTtipHw($id)
+	{
+		return $this->renderPartial('ttip-hw', [
+			'model' => $this->findModel($id),
+		]);
+	}
+	
 	/**
 	 * Формирует префикс и возвращает следующий инвентарный номер в этом префиксе
 	 * @param null $model_id
