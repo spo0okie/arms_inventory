@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\Soft */
 
-$this->title = $model->manufacturer->name.' '.$model->descr;
+$this->title = (is_object($model->manufacturer)?$model->manufacturer->name.' ':'').$model->descr;
 $this->params['breadcrumbs'][] = ['label' => 'ПО', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
