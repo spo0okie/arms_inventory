@@ -45,7 +45,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
 				'value'=>function($data) use ($renderer){
 					return $renderer->render('/soft/item',[
 						'model'=>$data,
-						'name'=>$data->manufacturer->name.' '.$data->descr
+						'name'=>(is_object($data->manufacturer)?$data->manufacturer->name.' ':'').$data->descr
 					]);
 				}
 			],
