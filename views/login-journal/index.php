@@ -32,6 +32,17 @@ $renderer=$this;
 	        ],
 	        'comp_name',
             'time',
+			[
+				'attribute'=>'type',
+				'format'=>'raw',
+				'value' => function($data) use($renderer){
+    				switch ($data->type) {
+						case 0: return 'CON';
+						case 1: return 'RDP';
+						default: return 'Unknown';
+					}
+    			}
+			],
             'user_login',
 	        [
 		        'attribute'=>'users_id',

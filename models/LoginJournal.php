@@ -21,7 +21,7 @@ use Yii;
  * @property Users $user
  * @property Comps $comp
  */
-class LoginJournal extends \yii\db\ActiveRecord
+class LoginJournal extends ArmsModel
 {
 
 	public static $title='Входы в ПК';
@@ -42,7 +42,7 @@ class LoginJournal extends \yii\db\ActiveRecord
         return [
             [['time'], 'safe'],
             [['comp_name', 'user_login'], 'required'],
-            [['comps_id'], 'integer'],
+            [['comps_id','type'], 'integer'],
             [['comp_name', 'user_login'], 'string', 'max' => 128],
             [['users_id'], 'string', 'max' => 16],
             [['users_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['users_id' => 'id']],
@@ -53,7 +53,7 @@ class LoginJournal extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
             'id' => 'ID',
@@ -63,7 +63,8 @@ class LoginJournal extends \yii\db\ActiveRecord
             'comps_id' => 'Компьютер',
             'user_login' => 'Логин',
 	        'users_id' => 'Пользователь',
-	        'user' => 'Пользователь',
+			'user' => 'Пользователь',
+			'type' => 'Тип входа',
         ];
     }
 
