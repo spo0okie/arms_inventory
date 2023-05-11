@@ -27,11 +27,12 @@ class LoginJournalController extends \yii\rest\ActiveController
 	 * @return array|null|\yii\db\ActiveRecord
 	 * @throws \yii\web\NotFoundHttpException
 	 */
-    public function actionSearch($user_login,$comp_name,$time){
+    public function actionSearch($user_login,$comp_name,$time,$type=0){
 	    $record = \app\models\LoginJournal::find()
 		    ->andFilterWhere(['comp_name' => $comp_name])
 		    ->andFilterWhere(['user_login' => $user_login])
-		    ->andFilterWhere(['time' => date('Y-m-d H:i:s',$time)])
+			->andFilterWhere(['time' => date('Y-m-d H:i:s',$time)])
+			->andFilterWhere(['type' => $type])
 		    ->one();
         if (is_null($record))
             throw new \yii\web\NotFoundHttpException("Record not found");
