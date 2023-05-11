@@ -7,9 +7,12 @@ use yii\helpers\Html;
 /* @var $searchModel app\models\CompsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $switchArchivedCount */
-
-$switchArchivedDelta=$switchArchivedCount-$dataProvider->totalCount;
-if ($switchArchivedDelta>0) $switchArchivedDelta='+'.$switchArchivedDelta;
+if (isset($switchArchivedCount)) {
+	$switchArchivedDelta=$switchArchivedCount-$dataProvider->totalCount;
+	if ($switchArchivedDelta>0) $switchArchivedDelta='+'.$switchArchivedDelta;
+} else {
+	$switchArchivedDelta=null;
+}
 
 $filtered=false;
 if (isset(Yii::$app->request->get()['CompsSearch'])) {
