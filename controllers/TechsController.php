@@ -35,7 +35,7 @@ class TechsController extends ArmsBaseController
 	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','uploads','delete','unlink','port-list'], 'roles'=>['editor']],
+			    ['allow' => true, 'actions'=>['create','update','uploads','delete','unlink','updhw','rmhw','port-list'], 'roles'=>['editor']],
 			    ['allow' => true, 'actions'=>['index','view','ttip','validate','inv-num','item','item-by-name','passport'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
@@ -255,5 +255,52 @@ class TechsController extends ArmsBaseController
 		return ['output'=>'', 'selected'=>''];
 	}
 	
+	/**
+	 * Обновляем элемент оборудования
+	 * @param $id
+	 * @return string|\yii\web\Response
+	 * @throws NotFoundHttpException
+	 */
+	public function actionUpdhw($id){
+		
+		$model = $this->findModel($id);
+		
+		//проверяем передан ли uid
+		$uid=Yii::$app->request->get('uid',null);
+		if (strlen($uid)) {
+			if ($uid==='sign-all') { //специальная команда на подпись всего оборудования
+				//error_log('signing all');
+				$model->hwList->signAll();
+			}else {
+				$newItem = new \app\models\HwListItem();
+				$newItem->loadArr($_GET);
+				$model->hwList->add($newItem);
+			}
+			//error_log('saving');
+			//сохраняем без проверки валидности, т.к. пользователь не может изменить данные
+			if (!$model->save(false)) error_log(print_r($model->errors,true));
+		}
+		
+		return $this->redirect(['passport', 'id' => $model->id]);
+	}
 	
+	/**
+	 * Удаляем элемент оборудования
+	 * @param $id
+	 * @return string|\yii\web\Response
+	 * @throws NotFoundHttpException
+	 */
+	public function actionRmhw($id){
+		
+		$model = $this->findModel($id);
+		
+		//проверяем передан ли uid
+		if (strlen(Yii::$app->request->get('uid',null))) {
+			$model->hwList->del(Yii::$app->request->get('uid'));
+			//сохраняем без проверки валидности, т.к. пользователь не может изменить данные
+			$model->save(false);
+		}
+		
+		return $this->redirect(['passport', 'id' => $model->id]);
+	}
 }

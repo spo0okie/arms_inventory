@@ -86,7 +86,7 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
                 ]);?>
 
                 <div class="edit-hw-item">
-                    <?php $form = ActiveForm::begin(['action' => ['arms/updhw','id'=>$model->id,'uid'=>$item->uid],'method' => 'get']); ?>
+                    <?php $form = ActiveForm::begin(['action' => ['techs/updhw','id'=>$model->id,'uid'=>$item->uid],'method' => 'get']); ?>
                         <table>
                             <thead>
                             <td>Оборудование<br />
@@ -127,13 +127,13 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
                 <?php       //закрываем форму
                 Modal::end();
                 echo \yii\helpers\Html::a('<span class="fas fa-minus-circle"/>',
-                    ['arms/rmhw', 'id'=>$model->id,'uid' => $item->uid],
+                    ['techs/rmhw', 'id'=>$model->id,'uid' => $item->uid],
                     ['title'=>'Убрать из паспорта этот элемент','class'=>'passport_tools']
                 );
 
             } else {
                 echo \yii\helpers\Html::a('<span class="fas fa-plus-circle"/>',
-                    array_merge(['arms/updhw', 'id'=>$model->id],$item->toSave()),
+                    array_merge(['techs/updhw', 'id'=>$model->id],$item->toSave()),
                     [
                         'title'=>(isset($addItem)&&($addItem===true))?'Добавить новый элемент в паспорт':'Сохранить в паспорт этот элемент',
                         'class'=>'passport_tools',
