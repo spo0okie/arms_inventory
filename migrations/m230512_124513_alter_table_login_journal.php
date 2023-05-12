@@ -31,6 +31,8 @@ class m230512_124513_alter_table_login_journal extends Migration
     public function safeUp()
     {
 		$this->addColumnIfNotExist('login_journal','local_time',$this->integer()->null());
+		$this->alterColumn('login_journal','user_id',$this->integer()->null());
+		$this->alterColumn('login_journal','comps_id',$this->integer()->null());
     }
 
     /**
