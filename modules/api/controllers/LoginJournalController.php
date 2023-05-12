@@ -16,7 +16,9 @@ class LoginJournalController extends \yii\rest\ActiveController
         $actions[]='search';
         return $actions;
     }
-
+	
+    
+    
 	/**
 	 * Ищет запись в бд по компу, логину и времени.
 	 * Это не для пользовательских запросов, т.к. время надо передать с точностью для секунды
@@ -27,7 +29,12 @@ class LoginJournalController extends \yii\rest\ActiveController
 	 * @return array|null|\yii\db\ActiveRecord
 	 * @throws \yii\web\NotFoundHttpException
 	 */
-    public function actionSearch($user_login,$comp_name,$time,$type=0){
+    public function actionSearch($user_login,$comp_name,$time,$type=0,$local_time=null){
+    	//если вместе с отметкой времени входа в ПК передана текущая отметка времени
+		// - корректируем ее на сдвиг текущего времени ПК относительно текущего времени сервера
+		//(случай сбитых часов на ПК)
+    	if (!$local_time)
+    		$time=$time-$local_time+time();
 	    $record = \app\models\LoginJournal::find()
 		    ->andFilterWhere(['comp_name' => $comp_name])
 		    ->andFilterWhere(['user_login' => $user_login])

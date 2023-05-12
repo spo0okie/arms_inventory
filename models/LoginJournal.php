@@ -25,6 +25,7 @@ class LoginJournal extends ArmsModel
 {
 
 	public static $title='Входы в ПК';
+	public $local_time=null;
 
 	/**
      * {@inheritdoc}
@@ -142,8 +143,11 @@ class LoginJournal extends ArmsModel
 	{
 		//error_log("dataIncom: beforeSave");
 		if (parent::beforeSave($insert)) {
-			if (is_numeric($this->time))
+			if (is_numeric($this->time)) {
+				if ($this->local_time)
+					$this->time = $this->time - $this->local_time + time();
 				$this->time = date('Y-m-d H:i:s',$this->time);
+			}
 
 			if (!isset($this->comps_id)) {
 				$comp_tokens=explode('\\',$this->comp_name);
