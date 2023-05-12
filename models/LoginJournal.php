@@ -17,6 +17,7 @@ use Yii;
  * @property string $compName имя компа
  * @property string $userDescr имя компа
  * @property string $compFqdn FQDN компа
+ * @property int $local_time Время компьютера на момент обновления
  *
  * @property Users $user
  * @property Comps $comp
@@ -25,7 +26,7 @@ class LoginJournal extends ArmsModel
 {
 
 	public static $title='Входы в ПК';
-	public $local_time=null;
+	//public $local_time;
 
 	/**
      * {@inheritdoc}
@@ -43,7 +44,7 @@ class LoginJournal extends ArmsModel
         return [
             [['time'], 'safe'],
             [['comp_name', 'user_login'], 'required'],
-            [['comps_id','type'], 'integer'],
+            [['comps_id','type','local_time'], 'integer'],
             [['comp_name', 'user_login'], 'string', 'max' => 128],
             [['users_id'], 'string', 'max' => 16],
             [['users_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['users_id' => 'id']],
@@ -144,8 +145,9 @@ class LoginJournal extends ArmsModel
 		//error_log("dataIncom: beforeSave");
 		if (parent::beforeSave($insert)) {
 			if (is_numeric($this->time)) {
-				if ($this->local_time)
-					$this->time = $this->time - $this->local_time + time();
+				if ($this->local_time) {
+					$this->time += (time()-$this->local_time);
+				}
 				$this->time = date('Y-m-d H:i:s',$this->time);
 			}
 

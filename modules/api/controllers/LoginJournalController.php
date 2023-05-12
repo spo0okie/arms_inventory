@@ -33,7 +33,7 @@ class LoginJournalController extends \yii\rest\ActiveController
     	//если вместе с отметкой времени входа в ПК передана текущая отметка времени
 		// - корректируем ее на сдвиг текущего времени ПК относительно текущего времени сервера
 		//(случай сбитых часов на ПК)
-    	if (!$local_time)
+    	if ($local_time)
     		$time=$time-$local_time+time();
 	    $record = \app\models\LoginJournal::find()
 		    ->andFilterWhere(['comp_name' => $comp_name])
