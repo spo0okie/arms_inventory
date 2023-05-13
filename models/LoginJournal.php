@@ -141,8 +141,8 @@ class LoginJournal extends ArmsModel
 	public function getAge()
 	{
 		$age=time()-strtotime($this->time);
-		if ($age<60) return $age;
-		if ($age/60<60) return floor($age/60).'м';
+		if ($age<60) return $age.'сек';
+		if ($age/60<60) return floor($age/60).'мин';
 		if ($age/3600<24) return floor($age/3600).'ч';
 		if ($age/86400<50) return floor($age/86400).'д';
 		return floor($age/86400/30).'мес';
