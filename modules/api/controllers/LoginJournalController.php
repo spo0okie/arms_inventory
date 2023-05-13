@@ -4,6 +4,8 @@ namespace app\modules\api\controllers;
 
 
 
+use app\models\LoginJournal;
+
 class LoginJournalController extends \yii\rest\ActiveController
 {
     
@@ -38,7 +40,8 @@ class LoginJournalController extends \yii\rest\ActiveController
 	    $record = \app\models\LoginJournal::find()
 		    ->andFilterWhere(['comp_name' => $comp_name])
 		    ->andFilterWhere(['user_login' => $user_login])
-			->andFilterWhere(['time' => date('Y-m-d H:i:s',$time)])
+			->andFilterWhere(['>','time',date('Y-m-d H:i:s',$time-LoginJournal::$maxTimeShift)])
+			->andFilterWhere(['<','time',date('Y-m-d H:i:s',$time+LoginJournal::$maxTimeShift)])
 			->andFilterWhere(['type' => $type])
 		    ->one();
         if (is_null($record))

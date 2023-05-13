@@ -27,6 +27,15 @@ class LoginJournal extends ArmsModel
 
 	public static $title='Входы в ПК';
 	//public $local_time;
+	
+	/*
+	 * Максимальный сдвиг во времени, который все еще квалифицируется как та-же запись
+	 * сдвиг во времени может формироваться из-за коррекции времени события в за счет сравнения
+	 * timestamp отправки сообщения (фиксируется на клиенте) и получения (фиксируется на сервере)
+	 * За счет этого нивелируется ошибка заложенная в клиентских отметках времени при сбитых часах
+	 * но накладывается ошибка времени доставки. Поэтому необходим небольшой "люфт"
+	 */
+	public static $maxTimeShift=5;
 
 	/**
      * {@inheritdoc}
@@ -182,7 +191,7 @@ class LoginJournal extends ArmsModel
 			->where(['users_id'=>$user_id])
 			->andWhere(['not',['comps_id'=>NULL]])
 			->groupBy('comps_id')
-			->orderBy(['id'=>SORT_DESC])
+			->orderBy(['time'=>SORT_DESC])
 			->limit($limit)
 			->all();
 
@@ -205,7 +214,7 @@ class LoginJournal extends ArmsModel
 			->where(['comps_id'=>$comp_id])
 			->andWhere(['not',['comps_id'=>NULL]])
 			->groupBy('comps_id')
-			->orderBy(['id'=>SORT_DESC])
+			->orderBy(['time'=>SORT_DESC])
 			->limit($limit)
 			->all();
 
