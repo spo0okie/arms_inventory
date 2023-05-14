@@ -847,18 +847,19 @@ class Techs extends ArmsModel
 	public static function formatMacs($raw,$glue="\n") {
 		
 		$macs=explode("\n",$raw);
-		
-		foreach ($macs as $k=>$mac) {
+		$formatted=[];
+		foreach ($macs as $k=>$mac) if ($mac) {
 			$rawMac=preg_replace('/[^0-9A-F]/', '', mb_strtoupper($mac));
 			$macTokens=[];
 			for ($i=0;$i<mb_strlen($rawMac);$i++){
 				if (!isset($macTokens[(int)($i/2)])) $macTokens[(int)($i/2)]='';
 				$macTokens[(int)($i/2)].=mb_substr($rawMac,$i,1);
 			}
-			$macs[$k]=implode(':',$macTokens);
+			$formatted[]=implode(':',$macTokens);
+			//$macs[$k]=
 		}
 		
-		return implode($glue,$macs);
+		return implode($glue,$formatted);
 	}
 	
 	public function getFormattedMac() {
