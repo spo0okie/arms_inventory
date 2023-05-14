@@ -29,14 +29,22 @@ $soft=$licGroup->soft;
         <p>
 		    <?php foreach ($soft as $item) { ?>
 			    <?= $this->render('/soft/item',['model'=>$item]) ?>
-			    <?php if (!$static_view) echo Html::a('<span class="fas fa-trash"/>',[
-			        '/lic-groups/unlink',
-                    'id'=>$model->id,
-                    'soft_id'=>$item->id,
-                ],[
-				    'data'=>['confirm' => 'Убрать ПО '.$item->descr.' из этой группы лицензий?',]
-                ]) ?>
-                <br />
+			    <?php if (!$static_view) {
+					if (count($soft) > 1) {
+						echo Html::a('<span class="fas fa-trash"/>', [
+							'/lic-groups/unlink',
+							'id' => $model->id,
+							'soft_id' => $item->id,
+						], [
+							'data' => ['confirm' => 'Убрать ПО ' . $item->descr . ' из этой группы лицензий?',]
+						]);
+					} else {
+						echo '<span class="small text-muted" qtip_ttip="Невозможно удалить единственный элемент ПО. <br> В списке лицензирования должно быть хоть что-то" disabled>
+							<span class="fas fa-lock"></span>
+						</span>';
+					}
+				}?>
+			<br />
 		    <?php } ?>
         </p>
 
