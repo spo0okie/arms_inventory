@@ -216,6 +216,9 @@ if(!$static_view) { ?>
 			</p>
 			<br/>
 		<?php } ?>
+
+		<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
+
 	</div>
 </div>
 

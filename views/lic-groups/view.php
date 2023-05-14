@@ -4,6 +4,8 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\LicGroups */
 
+\yii\helpers\Url::remember();
+
 $this->title = $model->descr;
 $this->params['breadcrumbs'][] = ['label' => \app\models\LicGroups::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;

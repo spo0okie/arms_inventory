@@ -19,6 +19,7 @@ class LinkObjectWidget extends Widget
 	
 	public $static=false;
 	public $noDelete=false;
+	public $noUpdate=false;
 	public $modal=false;
 
 	/**
@@ -99,7 +100,7 @@ class LinkObjectWidget extends Widget
 				:
 				Html::a($this->name,$this->url,$this->hrefOptions)
 			).(
-				!$this->static?' '.UpdateObjectWidget::widget([
+				!$this->static&&!$this->noUpdate?' '.UpdateObjectWidget::widget([
 					'model'=>$this->model,
 					'updateHint'=>$this->updateHint,
 					'modal'=>$this->modal,

@@ -7,6 +7,8 @@ use yii\helpers\Html;
 /* @var $deleteable bool */
 
 if (!isset($static_view)) $static_view=false;
+$contracts=$model->contracts;
+$link='lics_ids';
 ?>
 
 <h3>
@@ -29,3 +31,4 @@ if (!isset($static_view)) $static_view=false;
 </h3>
 <hr/>
 <?= $this->render('/lic-types/descr',['model'=>$model->licGroup->licType]) ?>
+

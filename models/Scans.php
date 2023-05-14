@@ -61,7 +61,7 @@ class Scans extends \yii\db\ActiveRecord
     {
         return [
             [['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id','arms_id','techs_id'], 'integer'],
-	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 2024*2024*30],
+	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg, pdf, gif'],
         ];
     }
 

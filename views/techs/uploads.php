@@ -5,10 +5,10 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
 
-$this->title = 'Редактирование: ' . $model->num;
+$this->title = 'Изображения: ' . $model->num;
 $this->params['breadcrumbs'][] = ['label' => \app\models\Techs::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->num, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Редактирование';
+$this->params['breadcrumbs'][] = 'Изображения';
 ?>
 <div class="techs-update">
 

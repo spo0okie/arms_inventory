@@ -18,6 +18,7 @@ use Yii;
  * @property string $history история
  * @property string $updatedAt Время обновления
  * @property string $updated_at Время обновления
+ * @property Attaches $attaches Загруженные файлы
  
  * @property int $secondsSinceUpdate Секунды с момента обновления
  */
@@ -151,6 +152,12 @@ class ArmsModel extends \yii\db\ActiveRecord
 		return [];
 	}
 	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getAttaches() {
+		return $this->hasMany(Attaches::class,[static::tableName().'_id'=>'id'	]);
+	}
 	
 	public static function fetchNames(){
 		$list= static::find()

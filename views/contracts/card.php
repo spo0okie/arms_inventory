@@ -194,8 +194,10 @@ JS;
 <br />
 <?php } ?>
 
+
 <h4>Сканы:</h4>
 <div id="contract_<?= $model->id ?>_scans" class="scans-thumb-tiles">
     <?= $this->render('scans',['model'=>$model,'static_view'=>$static_view])?>
 </div>
 
+<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>

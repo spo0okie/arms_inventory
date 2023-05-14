@@ -16,7 +16,7 @@ use Yii;
  *
  * @property LicGroups[] $licGroups Группы лицензий по этой схеме
  */
-class LicTypes extends \yii\db\ActiveRecord
+class LicTypes extends ArmsModel
 {
 	
 	public static $title='Схема лицензирования';

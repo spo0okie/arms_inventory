@@ -31,7 +31,7 @@ use Yii;
  * @property Comps[]    $comps
  * @property Users[]    $users
  */
-class LicGroups extends \yii\db\ActiveRecord
+class LicGroups extends ArmsModel
 {
 	public static $titles='Типы лицензий';
 	public static $title='Тип лицензий';

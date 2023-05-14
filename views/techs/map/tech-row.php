@@ -32,7 +32,7 @@ $archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
         <?= $this->render('/techs/item',['model'=>$model]) ?>
     </td>
     <td class="attachments <?= $archClass ?>" <?= $archDisplay ?>>
-	    <?= $this->render('/techs/att-contracts',['model'=>$model]) ?>
+	    <?= $this->render('/techs/map/item-attachments',['model'=>$model]) ?>
     </td>
     <td class="item_status <?= strlen($model->stateName)?$model->state->code:'' ?> <?= $archClass ?>" <?= $archDisplay ?>>
         <?= $model->stateName ?>

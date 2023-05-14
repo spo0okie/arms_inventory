@@ -28,17 +28,19 @@ $deleteable=!count($arms);
 		</span>
 	<?php } ?>
 </h1>
-		<h4>Группа лицензий:</h4>
-		<?= $this->render('/lic-groups/item',['model'=>$model->licItem->licGroup,'static_view'=>$static_view]) ?>
-		<br />
+	<h4>Группа лицензий:</h4>
+	<?= $this->render('/lic-groups/item',['model'=>$model->licItem->licGroup,'static_view'=>$static_view]) ?>
+	<br />
 
-		<h4>Закупка:</h4>
-		<?= $this->render('/lic-items/item',['model'=>$model->licItem,'static_view'=>$static_view,'name'=>$model->licItem->descr]) ?>
-		<br />
+	<h4>Закупка:</h4>
+	<?= $this->render('/lic-items/item',['model'=>$model->licItem,'static_view'=>$static_view,'name'=>$model->licItem->descr]) ?>
+	<br />
 
-		<h4>Ключ:</h4>
-		<?= $static_view?$model->keyShort:$model->key_text ?>
-		<br />
+	<h4>Ключ:</h4>
+	<?= $static_view?$model->keyShort:$model->key_text ?>
+	<br />
 
-		<h4>Комментарий:</h4>
-		<?= Yii::$app->formatter->asNtext($model->comment) ?>
+	<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
+
+	<h4>Комментарий:</h4>
+	<?= Yii::$app->formatter->asNtext($model->comment) ?>

@@ -51,6 +51,7 @@ if (!isset($linksData)) $linksData=null;
 <?php } else echo '<br />' ?>
 
 	    <?= $this->render('usage',['model'=>$model]) ?>
+		<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
 
 <?php if (!$static_view) { ?>
     </div>

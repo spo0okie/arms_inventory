@@ -39,7 +39,7 @@ use Yii;
  * @property LicGroups   $licGroup
  * @property LicTypes    $licType
  */
-class LicItems extends \yii\db\ActiveRecord
+class LicItems extends ArmsModel
 {
 	
 	public static $titles='Закупленные лицензии';

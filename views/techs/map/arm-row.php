@@ -183,7 +183,7 @@ for ($i=0; $i<count($comps); $i++) {
 
 	    <?php if (!$i) { ?>
             <td class="attachments <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspan ?>>
-			    <?= $this->render('/techs/item-attachments',compact('model'))?>
+			    <?= $this->render('/techs/map/item-attachments',compact('model'))?>
             </td>
 	    <?php }?>
 

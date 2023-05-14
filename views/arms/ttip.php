@@ -21,7 +21,7 @@ $static_view=true;
 		<br />
 	<?php } ?>
 
-    <?= $this->render('att-comps',['model'=>$model,'static_view'=>$static_view]) ?>
+    <?= $this->render('attaches/comps',['model'=>$model,'static_view'=>$static_view]) ?>
     <br />
 
     <h4>Сотрудники и помещение:</h4>
@@ -36,13 +36,13 @@ $static_view=true;
 	<?= $this->render('arm-status',['model'=>$model,'static_view'=>$static_view]) ?>
     <br />
 
-    <?= $this->render('att-techs',['model'=>$model,'static_view'=>$static_view]) ?>
+    <?= $this->render('attached/techs',['model'=>$model,'static_view'=>$static_view]) ?>
     <br />
 
-    <?= $this->render('att-lics',['model'=>$model,'static_view'=>$static_view]) ?>
+    <?= $this->render('attached/lics',['model'=>$model,'static_view'=>$static_view]) ?>
     <br />
 
-    <?= $this->render('att-contracts',['model'=>$model,'static_view'=>$static_view]) ?>
+    <?= $this->render('attached/contracts',['model'=>$model,'static_view'=>$static_view]) ?>
     <br />
 
     <?= $this->render('arm-history',['model'=>$model,'static_view'=>$static_view]) ?>

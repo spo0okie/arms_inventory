@@ -22,7 +22,7 @@ namespace app\models;
  * @property Comps[]              $comps
  * @property Users[]              $users
  */
-class LicKeys extends \yii\db\ActiveRecord
+class LicKeys extends ArmsModel
 {
 
 	public static $title='Лиц. ключи';

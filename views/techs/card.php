@@ -1,7 +1,6 @@
 <?php
 
 use yii\helpers\Html;
-use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
@@ -47,6 +46,8 @@ if (is_object($model->state)) { ?>
 	</p>
 <?php } ?>
 
+<?= $this->render('attached/files',['model'=>$model,'static_view'=>$static_view]) ?>
+
 
 <?php
 	//для оборудования не АРМ выводим в список урл ссылку на IP устройства
@@ -60,7 +61,7 @@ if (is_object($model->state)) { ?>
 <?php }	?>
 
 
-<?php if ($model->isComputer) echo $this->render('/techs/att-comps',['model'=>$model]) ?>
+<?php if ($model->isComputer) echo $this->render('/techs/attached/comps',['model'=>$model]) ?>
 
 
 <h4>Место установки и сотрудники:</h4>
@@ -95,79 +96,21 @@ if (is_object($model->state)) { ?>
 	</div>
 </div>
 
+<?= $this->render('/techs/attached/contracts',['model'=>$model,'static_view'=>$static_view]) ?>
+
 <?php if (count($model->licItems) || count($model->licGroups) || count($model->licKeys)) {
-	echo $this->render('/techs/att-lics',['model'=>$model]);
+	echo $this->render('/techs/attached/lics',['model'=>$model]);
 } ?>
 
 
 <?php if (count($model->armTechs)) {
-	echo $this->render('/techs/att-techs',['model'=>$model]);
+	echo $this->render('/techs/attached/techs',['model'=>$model]);
 } ?>
 
 
 <?php if (count($model->installedTechs)) {
-	echo $this->render('/techs/att-installed',['model'=>$model]);
+	echo $this->render('/techs/attached/installed',['model'=>$model]);
 } ?>
-
-<h4>Документы:</h4>
-<p>
-
-    <?php if(is_array($contracts = $model->contracts) && count($contracts)) foreach ($contracts as $contract) {
-        echo $this->render('/contracts/item',['model'=>$contract]).'<br />';
-    } else { ?>
-        отсутствуют<br />
-    <?php }
-
-    if (!$static_view) {
-    //моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
-        Modal::begin([
-            'id'=>'tech_link_contract_modal',
-			'size' => Modal::SIZE_LARGE,
-            'title' => 'Выберите связанный с оборудованием документ'
-        ]);
-        echo $this->render('/contracts/_linkform');
-        //закрываем форму
-        Modal::end();
-        
-
-        $js = <<<JS
-
-            $('#tech_link_contract_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-            $('#tech_new_contract_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-            
-            $('#contracts-link-form').on('beforeSubmit', function(){
-                console.log($('input[name=contracts_id]').val());
-                $.ajax({
-                    url: '/web/contracts/link-tech',
-                    type: 'GET',
-                    data: {
-                        techs_id: $model_id,
-                        id: $('select[name=contracts_id]').val()
-                    },
-                    success: function(res){window.location.reload();},
-                    error: function(){alert('Error!');}
-                });
-                return false;
-            });
-            
-            $('#contracts-edit-form').on('afterSubmit', function(){window.location.reload();});
-JS;
-
-            $this->registerJs($js);
-
-            ?>
-        <a onclick="$('#tech_link_contract_modal').modal('toggle')" class="href">Привязать</a>
-        /
-        <?= Html::a('добавить новый',[
-			'contracts/create','Contracts[techs_ids][]'=>$model->id
-		],[
-			'class'=>'open-in-modal-form',
-			'data-reload-page-on-submit'=>1
-		]) ?>
-
-    <?php } ?>
-
-</p>
 
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 
