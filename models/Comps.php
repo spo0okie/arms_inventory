@@ -648,6 +648,8 @@ class Comps extends ArmsModel
 		if (parent::beforeSave($insert)) {
 			
 
+			if (!$this->updated_at) $this->updated_at=date('Y-m-d H:i:s',time());
+			
 			//грузим старые значения записи
 			$old=static::findOne($this->id);
 			if (!is_null($old)) {
