@@ -25,7 +25,7 @@ if (
 return [
 	'attach'=>[
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/techs/item-attachments', ['model' => $data]);
+			return $renderer->render('/techs/map/item-attachments', ['model' => $data]);
 		}
 	],
 
