@@ -20,20 +20,23 @@ $this->params['breadcrumbs'][] = $this->title;
 			<?= $this->render('card',['model'=>$model,'static_view'=>false,'no_model'=>true]) ?>
 		</div>
 		<div class="col-md-6">
-			<h1>&nbsp;</h1>
-			<h4><?= Html::a('Изображения',['uploads','id'=>$model->id]) ?></h4>
+			<h1 class="text-end">
+				<?php if ($model->isComputer) echo Html::a('<i class="fas fa-passport"></i>',['passport','id'=>$model->id],[
+					'qtip_ttip'=>'Паспорт рабочего места',
+					'qtip_side'=>'top'
+				]); ?>
+				<?= Html::a('<i class="fas fa-images"></i>',['uploads','id'=>$model->id],[
+					'qtip_ttip'=>'Редактировать изображения/фото этого оборудования',
+					'qtip_side'=>'top'
+				]) ?>
+			</h1>
 			<div>
-				<?php
-				if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
+				<?php if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
 					echo $this->render('/scans/thumb',['model'=>$scan,'contracts_id'=>$model->id,'static_view'=>true]);
 				?>
-				
 			</div>
-
-			<?php if ($model->isComputer) echo Html::a('Паспорт АРМ',['passport','id'=>$model->id]); ?>
-				
-				<?= $this->render('model',['model'=>$model]) ?>
-			<h3><?= \app\models\Ports::$titles ?></h3>
+			<?= $this->render('model',['model'=>$model]) ?>
+			<h4><?= \app\models\Ports::$titles ?></h4>
 			<?= $this->render('ports',['model'=>$model,'static_view'=>false]) ?>
 		</div>
 	</div>

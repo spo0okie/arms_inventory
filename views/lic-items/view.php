@@ -6,6 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
 
+\yii\helpers\Url::remember();
 $static_view=false;
 
 if (!isset($keys)) $keys=null;
@@ -28,8 +29,11 @@ $this->params['headerContent']='<div class="row">'.
 		\yii\bootstrap5\Breadcrumbs::widget(['links' => $breadcrumbs]).
 		$this->render('hdr',compact(['model','deleteable'])).
 	'</div>'.
-	'<div class="col-md-3" >'.$this->render('stat',['model'=>$model]).'</div>'.
-	'</div>';
+	'<div class="col-md-3" >'.
+		$this->render('stat',['model'=>$model]).
+		$this->render('/attaches/model-list',compact(['model','static_view'])).
+	'</div>'.
+'</div>';
 
 ?>
 <div class="lic-items-view">

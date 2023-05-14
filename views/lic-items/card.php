@@ -67,15 +67,11 @@ if (!isset($linksData)) $linksData=null;
 	 
 	}?>
 
+<br />
+<br />
 
-    <div id="lics_<?= $model->id ?>_attached_contracts">
-        <h4>Привязанные документы:</h4>
-        <p>
-	    	<?php $this->render('contracts',['model'=>$model]) ?>
-        </p>
-    </div>
+<?= $this->render('/contracts/model-list',['model'=>$model,'static_view'=>$static_view,'link'=>'lics_ids']) ?>
 
-    <br />
 
 
 

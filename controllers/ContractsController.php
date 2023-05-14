@@ -34,7 +34,7 @@ class ContractsController extends Controller
 		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
-				['allow' => true, 'actions'=>['create','update','update-form','delete','unlink','unlink-arm','unlink-tech','link-arm','link-tech','scan-upload'], 'roles'=>['editor']],
+				['allow' => true, 'actions'=>['create','update','update-form','delete','unlink','unlink-arm','unlink-tech','link','link-tech','scan-upload'], 'roles'=>['editor']],
 				['allow' => true, 'actions'=>['index','view','ttip','hint-arms','hint-parent','scans','validate'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
@@ -284,26 +284,26 @@ class ContractsController extends Controller
 
 	/**
 	 * Отвязывает документ от объекта.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
 	 * @param integer $id
-	 * @param integer $arms_id
+	 * @param integer $model_id
+	 * @param string $link
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionUnlinkArm($id,$arms_id)
+	public function actionUnlink($id,$model_id,$link)
 	{
-		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
-		
-		
+		//признак что документ был связан с объектом
 		$usage=false;
+		//признак что был отвязан в результате
 		$usage_deleted=false;
 
-		$model=$this->findModel($id);
-		$arms_ids=$model->arms_ids;
-		if (array_search($arms_id,$arms_ids)!==false) {
+		$contract=$this->findModel($id);
+		$model_ids=$contract->$link;
+		
+		if (array_search($model_id,$model_ids)!==false) {
 			$usage=true;
-			$model->arms_ids=array_diff($arms_ids,[$arms_id]);
-			if ($model->save()) $usage_deleted=true;
+			$contract->$link=array_diff($model_ids,[$model_id]);
+			if ($contract->save()) $usage_deleted=true;
 		}
 
 		Yii::$app->response->format = Response::FORMAT_JSON;
@@ -314,7 +314,7 @@ class ContractsController extends Controller
 				return ['error'=>'ERROR','code'=>'1','Message'=>'Link removing error'];
 			}
 		} else {
-			return ['error'=>'OK','code'=>'2','Message'=>'Requested usage not found ['.implode(',',$arms_ids).']'];
+			return ['error'=>'OK','code'=>'2','Message'=>'Requested usage not found ['.implode(',',$model_ids).']'];
 		}
 	}
 
@@ -357,20 +357,20 @@ class ContractsController extends Controller
 	 * Отвязывает документ от объекта.
 	 * If deletion is successful, the browser will be redirected to the 'index' page.
 	 * @param integer $id
-	 * @param integer $arms_id
+	 * @param integer $model_id
+	 * @param string $link
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionLinkArm($id,$arms_id)
+	public function actionLink($id,$model_id,$link)
 	{
-		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 		
-		$model=$this->findModel($id);
-		$arms_ids=$model->arms_ids;
-		if (array_search($arms_id,$arms_ids)===false) {
-			$arms_ids[]=$arms_id;
-			$model->arms_ids=$arms_ids;
-			$model->save();
+		$contract=$this->findModel($id);
+		$model_ids=$contract->$link;
+		if (array_search($model_id,$model_ids)===false) {
+			$model_ids[]=$model_id;
+			$contract->$link=$model_ids;
+			$contract->save();
 		}
 
 		Yii::$app->response->format = Response::FORMAT_JSON;
