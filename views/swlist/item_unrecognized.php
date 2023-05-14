@@ -95,7 +95,8 @@ if (
             'label' => '<i class="fas fa-wrench"></i>',
             'tag' => 'a',
             'class' => 'passport_tools',
-            'title' => 'добавить к существующему продукту в базе'
+            'title' => 'добавить к существующему продукту в базе',
+			'id' => 'softAddModal'
         ],
     ]);
 
@@ -105,6 +106,7 @@ if (
         [
             'addItems'=>$item['name'],
             'items'=>$items,
+			'modalParent' => 'softAddModal',
         ]
     );
 
