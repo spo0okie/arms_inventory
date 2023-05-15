@@ -223,51 +223,16 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
             <p>Отсутствует</p>
         <?php }
 
-        Modal::begin([
-	        'title' => '<h2>Добавление оборудования</h2>',
-			'size' => Modal::SIZE_LARGE,
-			'options'=>[
-				'id'=>'techs_add_modal',
-				'tabindex' => false,
-			],
-	        'toggleButton' => [
-		        'label' => 'Внести доп. оборудование',
-		        'tag' => 'button',
-		        'class' => 'btn btn-success passport_tools',
-	        ],
-	        //'footer' => 'Низ окна',
-        ]);
-        $tech=new \app\models\Techs();
-        $tech->arms_id=$model->id;
-
-        echo $this->render(
-	        '/techs/_form',
-	        [
-		        'model'=>$tech,
-				'modalParent'=>'#techs_add_modal'
-	        ]
-        );
-        $js = <<<JS
-    $('#techs_add_modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
-    $('#techs-form').on('beforeSubmit', function(){
-        var data = $(this).serialize();
-        $.ajax({
-            url: '/web/techs/create',
-            type: 'POST',
-            data: data,
-            success: function(res){
-                //alert();
-                window.location.reload();// replace(window.location.toString()+'&manufacturers_id='+res[0].id);
-            },
-            error: function(){
-                alert('Error!');
-            }
-        });
-        return false;
-    });
-JS;
-        $this->registerJs($js);
-        Modal::end(); ?>
+        echo \yii\helpers\Html::a(
+			'Внести доп. оборудование',
+			[
+				'/techs/create',
+				'Techs[arms_id]'=>$model->id
+			],[
+				'class'=>'open-in-modal-form btn btn-success passport_tools',
+				'data-reload-page-on-submit'=>1,
+			]
+		);?>
 
     </div>
 
