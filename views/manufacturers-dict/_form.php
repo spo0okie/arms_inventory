@@ -14,10 +14,15 @@ if (!isset($modalParent)) $modalParent=null;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'word')->textInput(['maxlength' => true]) ?>
+    <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'word') ?>
 
 
-    <?= $form->field($model, 'manufacturers_id')->dropDownList(\app\models\Manufacturers::fetchNames()) ?>
+    <?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'manufacturers_id',[
+    	'data'=>\app\models\Manufacturers::fetchNames(),
+		'pluginOptions'=>[
+			'modalParent'=>$modalParent
+		]
+	]) ?>
 
 
     <div class="form-group">
