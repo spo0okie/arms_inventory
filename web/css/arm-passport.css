@@ -22,8 +22,8 @@ div.soft_free,
 div.soft_agreed { margin-bottom: 30px;}
 div.arm_passport #unagreed_hdr, div.arm_passport #unknown_hdr, div.arm_passport #agreed_hdr {color: red; cursor: pointer;}
 div.arm_passport .hardware_item.saved-found,   div.arm_passport .software_item.saved-found {background-color: #ccffcc;}
-div.arm_passport .hardware_item.saved-missing, div.arm_passport .software_item.saved-missing {background-color: #ffffcc;}
-div.arm_passport .hardware_item.unsaved-found, div.arm_passport .software_item.saved-missing {background-color: #ffcccc;}
+div.arm_passport .hardware_item.unsaved-found, div.arm_passport .software_item.saved-missing {background-color: #ffffcc;}
+div.arm_passport .hardware_item.saved-missing, div.arm_passport .software_item.saved-missing {background-color: #ffcccc;}
 
 div.arm_passport #unknown_items td.passport_tools,
 div.arm_passport #unknown_items th.passport_tools,

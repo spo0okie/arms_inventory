@@ -35,7 +35,7 @@ class TechsController extends ArmsBaseController
 	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','uploads','delete','unlink','updhw','rmhw','port-list'], 'roles'=>['editor']],
+			    ['allow' => true, 'actions'=>['create','update','uploads','delete','unlink','updhw','rmhw','edithw','port-list'], 'roles'=>['editor']],
 			    ['allow' => true, 'actions'=>['index','view','ttip','validate','inv-num','item','item-by-name','passport'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
@@ -282,6 +282,41 @@ class TechsController extends ArmsBaseController
 		}
 		
 		return $this->redirect(['passport', 'id' => $model->id]);
+	}
+	
+	/**
+	 * Обновляем элемент оборудования
+	 * @param $id
+	 * @return string|\yii\web\Response
+	 * @throws NotFoundHttpException
+	 */
+	public function actionEdithw($id){
+		
+		$manufacturers=\app\models\Manufacturers::fetchNames();
+		$model = $this->findModel($id);
+		
+		//проверяем передан ли uid
+		$uid=Yii::$app->request->get('uid',null);
+		$editItem=null;
+		foreach ($model->hwList->items as $pos=>$item) {
+			if ($item->uid == $uid) $editItem=$item;
+		}
+		if (!$editItem) $editItem = new \app\models\HwListItem();
+		
+		return Yii::$app->request->isAjax?
+		$this->renderAjax( '/hwlist/edit-item',
+			[
+				'item'=>$editItem,
+				'model'=>$model,
+				'manufacturers'=>$manufacturers,
+				'modalParent' => '#modal_form_loader'
+			]):
+		$this->render( '/hwlist/edit-item',
+			[
+				'item'=>$editItem,
+				'model'=>$model,
+				'manufacturers'=>$manufacturers,
+			]);
 	}
 	
 	/**

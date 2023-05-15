@@ -23,9 +23,9 @@ if (!isset($static_view)) $static_view=false;
         </thead>
 	<?php
 	}
-	foreach ($model->hwList->items as $item) {
+	foreach ($model->hwList->items as $pos=>$item) {
 		if (!$static_view || !$item->hidden) echo $this->render('/hwlist/item',
-			compact('model','item','manufacturers','static_view')
+			compact('model','pos', 'item','manufacturers','static_view')
 		);
 	}
 
@@ -37,6 +37,7 @@ if (!isset($static_view)) $static_view=false;
             [
                 'model'=>$model,
                 'item'=>$item,
+                'pos'=>null,
                 'manufacturers'=>$manufacturers,
                 'addItem'=>true ,
             ]

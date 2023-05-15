@@ -9,6 +9,9 @@
  * @var array                  $manufacturers список производителей
  * @var bool                   $addItem признак того, что это не настоящий элемент а пустышка для добавления элемента в паспорт
  */
+
+if (!isset($pos)) $pos=null;
+
 use yii\bootstrap5\Modal;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
@@ -72,60 +75,12 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
             //проверяем есть ли uid у железки, если есть, то она уже сохранена, если нету, то можно сохранить
             if (strlen($item->uid)) {
                 //УИД есть, значит работаем как с загруженной железкой
-
+				echo \yii\helpers\Html::a('<span class="fas fa-pencil-alt"/>',
+					['techs/edithw', 'id'=>$model->id,'uid' => $item->uid],
+					['title'=>'Редактировать этот элемент','class'=>'passport_tools open-in-modal-form']
+				);
                 //кнопочка редактирования
-                Modal::begin([
-                    'title' => 'Редактирование элемента',
-                    'toggleButton' => [
-                        'label' => '<span class="fas fa-pencil-alt"/>',
-                        'tag' => 'a',
-                        'class' => 'passport_tools',
-                        'title' => 'Изменить элемент'
-                    ],
-                    'size'=>Modal::SIZE_LARGE,
-                ]);?>
-
-                <div class="edit-hw-item">
-                    <?php $form = ActiveForm::begin(['action' => ['techs/updhw','id'=>$model->id,'uid'=>$item->uid],'method' => 'get']); ?>
-                        <table>
-                            <thead>
-                            <td>Оборудование<br />
-                                <div class="hint-block">Системный тип:<br /><?= $item->type ?></div>
-                            </td>
-                            <td>Производитель<br />
-                                <div class="hint-block">Ориг.:<br /><?= $item->manufacturer ?></div>
-                            </td>
-                            <td>Наименование<br />
-                                <div class="hint-block">Перекроет исходное:<br /><?= $item->product ?></div>
-                            </td>
-                            <td>Серийный №<br />
-                                <div class="hint-block">Перекроет исходный:<br /><?= $item->sn ?></div>
-                            </td>
-                            <td>
-                                Инвентарный №<br />
-                                <div class="hint-block">Вводится только вручную</div>
-                            </td>
-                            </thead>
-                            <tr>
-                                <td><?= \yii\helpers\BaseHtml::input('string','title',$item->title,['class'=>'form-control']) ?></td>
-                                <td><?= \yii\helpers\BaseHtml::dropDownList('manufacturer_id',$item->manufacturer_id,\app\models\Manufacturers::fetchNames() ,['class'=>'form-control']) ?></td>
-                                <td><?= \yii\helpers\BaseHtml::input('string','manual_name',$item->manual_name,['class'=>'form-control']) ?></td>
-                                <td><?= \yii\helpers\BaseHtml::input('string','manual_sn',$item->manual_sn,['class'=>'form-control']) ?></td>
-                                <td><?= \yii\helpers\BaseHtml::input('string','inv_num',$item->inv_num,['class'=>'form-control']) ?></td>
-                            </tr>
-                        </table>
-
-
-                        <div class="form-group">
-                            <p><?= \yii\helpers\BaseHtml::checkbox('hidden',$item->hidden,['label'=>'Скрыть элемент из паспорта']) ?></p>
-                            <?= Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) ?>
-                        </div>
-
-                    <?php ActiveForm::end(); ?>
-
-                </div>
-                <?php       //закрываем форму
-                Modal::end();
+                
                 echo \yii\helpers\Html::a('<span class="fas fa-minus-circle"/>',
                     ['techs/rmhw', 'id'=>$model->id,'uid' => $item->uid],
                     ['title'=>'Убрать из паспорта этот элемент','class'=>'passport_tools']

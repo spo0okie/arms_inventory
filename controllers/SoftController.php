@@ -9,6 +9,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\Url;
+use yii\web\Response;
 
 /**
  * SoftController implements the CRUD actions for Soft model.
@@ -31,7 +32,7 @@ class SoftController extends Controller
 	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
+			    ['allow' => true, 'actions'=>['create','update','delete','unlink','select-update'], 'roles'=>['editor']],
 			    ['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
@@ -123,7 +124,7 @@ class SoftController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(array_merge(Yii::$app->request->get(),Yii::$app->request->post())) && $model->save()) {
             if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
             return $this->redirect(['view', 'id' => $model->id]);
         }
@@ -135,7 +136,36 @@ class SoftController extends Controller
             'model' => $model,
         ]);
     }
-
+	
+	/**
+	 * Creates a new model.
+	 * If creation is successful, the browser will be redirected to the 'view' page.
+	 * @return mixed
+	 */
+	public function actionSelectUpdate($name,$manufacturers_id=null)
+	{
+		if (!is_null($manufacturers_id))
+			//для случаев, если производитель определен, выводим его продукты (только названия самих продуктов)
+			$items=\yii\helpers\ArrayHelper::map(\app\models\Soft::fetchBy(['manufacturers_id'=>$manufacturers_id]),'id','descr');
+		else
+			//в ином случае выводим список всех продуктов с указанием производителя в названии
+			$items=\app\models\Soft::listItemsWithPublisher();
+		
+		
+		return Yii::$app->request->isAjax?
+			$this->renderAjax( '/soft/_search_by_name_to_update',
+			[
+				'addItems'=>$name,
+				'items'=>$items,
+				'modalParent' => '#modal_form_loader'
+			]):
+			$this->render('/soft/_search_by_name_to_update',
+			[
+				'addItems'=>$name,
+				'items'=>$items,
+			]);
+	}
+    
     /**
      * Deletes an existing Soft model.
      * If deletion is successful, the browser will be redirected to the 'index' page.

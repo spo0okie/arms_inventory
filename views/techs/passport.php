@@ -9,6 +9,8 @@
 
 use yii\bootstrap5\Modal;
 
+\yii\helpers\Url::remember();
+
 $manufacturers=\app\models\Manufacturers::fetchNames();
 ?>
 <div class="arm_passport">

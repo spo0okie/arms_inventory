@@ -88,30 +88,16 @@ if (
     );
 
     //моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
-    Modal::begin([
-        'title' => 'Выберите продукт',
-		'size' => Modal::SIZE_LARGE,
-        'toggleButton' => [
-            'label' => '<i class="fas fa-wrench"></i>',
-            'tag' => 'a',
-            'class' => 'passport_tools',
-            'title' => 'добавить к существующему продукту в базе',
-			'id' => 'softAddModal'
-        ],
-    ]);
-
-    //вставляем содержимое формы, в качестве элементов выбора - вышеназначенные элементы
-    echo $this->render(
-        '/soft/_search_by_name_to_update',
-        [
-            'addItems'=>$item['name'],
-            'items'=>$items,
-			'modalParent' => 'softAddModal',
-        ]
-    );
-
-    //закрываем форму
-    Modal::end();
+	echo \yii\helpers\Html::a('<i class="fas fa-wrench"></i>',
+		[
+			'soft/select-update',
+			'name'=>$item['name'],
+			'manufacturers_id'=>$item['manufacturers_id']
+		],[
+    	    'title' => 'Выберите продукт',
+			'class' => 'open-in-modal-form'
+    	]
+	);
 
 
 } // вот и молодцы!)
