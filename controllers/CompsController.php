@@ -180,7 +180,7 @@ class CompsController extends Controller
 	 */
 	public function actionTtipHw($id)
 	{
-		return $this->renderPartial('/arms/ttip-hw', [
+		return $this->renderPartial('/techs/ttip-hw', [
 			'model' => $this->findModel($id),
 		]);
 	}
