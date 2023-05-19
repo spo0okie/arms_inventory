@@ -192,5 +192,5 @@ if (YII_ENV_DEV) {
 	    ]
     ];
 }
-Yii::$classMap['yii\helpers\Url'] = dirname(__DIR__) . '/components/Url.php';
+Yii::$classMap['yii\helpers\Url'] = dirname(__DIR__) . '/helpers/Url.php';
 return $config;
