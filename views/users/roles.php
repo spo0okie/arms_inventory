@@ -22,7 +22,7 @@ use lo\widgets\modal\ModalAjax;
 			echo $role->name.'<br />';
 		}
 	} else {
-		echo "Не задан";
+		echo "Не задан<br />";
 	}
 	echo \yii\helpers\Html::a(
 	'Изменить',
