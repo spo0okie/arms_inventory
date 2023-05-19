@@ -3,7 +3,6 @@
 }
 
 .expandable-card-outer.compressed .expandable-card-content.oversize{
-    max-height: 100px;
     overflow-y: hidden;
     mask-image: linear-gradient(rgba(0, 0, 0, 1), transparent);
     -webkit-mask-image: -webkit-gradient(linear, left 80%, left bottom, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)));

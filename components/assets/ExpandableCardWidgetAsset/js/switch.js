@@ -1,13 +1,17 @@
 function ExpandableCardOversizeCheck($card) {
     let $content=$card.find('.expandable-card-content')
-    if ($content.prop('scrollHeight') > 100 && $card.hasClass('compressed')) {
+    let maxHeight=$card.attr('data-expandable-max-height');
+    console.log(maxHeight);
+    if ($content.prop('scrollHeight') > maxHeight && $card.hasClass('compressed')) {
         if (!$content.hasClass('oversize')) {
             $content.addClass('oversize');
+            $content.css('max-height',maxHeight+'px');
             $card.prepend('<span class="expandable-card-switch"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 2"><path d="m 0 0 l 4 0 l -2 2" fill="currentColor"/></svg></span>');
         }
     } else {
         if ($content.hasClass('oversize')) {
             $content.removeClass('oversize');
+            $content.css('max-height',"");
         }
         $card.find('span.expandable-card-switch').remove();
     }
