@@ -11,6 +11,7 @@ class ExpandableCardWidget extends Widget
 	public $content='';
 	public $initialExpand=false;
 	public $maxHeight='150';
+	public $cardClass='';
 	
 	private $currentClass=null;
 	
@@ -23,7 +24,7 @@ class ExpandableCardWidget extends Widget
 	
 	public function run()
 	{
-		return '<div class="expandable-card-outer '.$this->currentClass.'" data-expandable-max-height="'.$this->maxHeight.'">'.
+		return '<div class="expandable-card-outer '.$this->currentClass.' '.$this->cardClass.'" data-expandable-max-height="'.$this->maxHeight.'">'.
 			'<div class="expandable-card-content">'.$this->content.'</div>'.
 			'</div>';
 	}

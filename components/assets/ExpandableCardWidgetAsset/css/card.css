@@ -8,6 +8,10 @@
     -webkit-mask-image: -webkit-gradient(linear, left 80%, left bottom, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)));
 }
 
+.expandable-card-outer.line-break .expandable-card-content span.object-item{
+    display: block;
+}
+
 .expandable-card-switch {
     bottom: 0px;
     position: absolute;

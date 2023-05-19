@@ -1,7 +1,7 @@
 function ExpandableCardOversizeCheck($card) {
+    $card=$($card);
     let $content=$card.find('.expandable-card-content')
     let maxHeight=$card.attr('data-expandable-max-height');
-    console.log(maxHeight);
     if ($content.prop('scrollHeight') > maxHeight && $card.hasClass('compressed')) {
         if (!$content.hasClass('oversize')) {
             $content.addClass('oversize');
