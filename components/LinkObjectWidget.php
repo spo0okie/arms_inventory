@@ -20,6 +20,7 @@ class LinkObjectWidget extends Widget
 	public $static=false;
 	public $noDelete=false;
 	public $noUpdate=false;
+	public $noSpaces=false;	//убирать пробелы перед редактированием и корзиной (в monospace выглядит стремно)
 	public $modal=false;
 
 	/**
@@ -82,8 +83,9 @@ class LinkObjectWidget extends Widget
 	
 	public function run()
 	{
+		$space=$this->noSpaces?'':' ';
 		if (!$this->static&&!$this->noDelete) {
-			$deleteObject=' '.DeleteObjectWidget::widget([
+			$deleteObject=$space.DeleteObjectWidget::widget([
 					'model'=>$this->model,
 					'deleteHint'=>$this->deleteHint,
 					'undeletableMessage'=>$this->undeletableMessage,
@@ -100,7 +102,7 @@ class LinkObjectWidget extends Widget
 				:
 				Html::a($this->name,$this->url,$this->hrefOptions)
 			).(
-				!$this->static&&!$this->noUpdate?' '.UpdateObjectWidget::widget([
+				!$this->static&&!$this->noUpdate?$space.UpdateObjectWidget::widget([
 					'model'=>$this->model,
 					'updateHint'=>$this->updateHint,
 					'modal'=>$this->modal,

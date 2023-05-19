@@ -22,16 +22,13 @@ if (!isset($name)) $name=
 	($rest?(' '.$model->rest.$model->type->units):'');
 
 if (is_object($model)) {
-	?>
-	<span
-		class="material-item cursor-default"
-		qtip_ajxhrf="<?= \yii\helpers\Url::to(['/materials/ttip','id'=>$model->id]) ?>"
-	>
-    <?= \yii\helpers\Html::a(
-        $name
-        ,
-        ['materials/view','id'=>$model->id]
-    ) ?>
-</span>
-
-<?php } else echo "Отсутствует";
+	echo \app\components\ItemObjectWidget::widget([
+		'model'=>$model,
+		'link'=>\app\components\LinkObjectWidget::widget([
+			'model'=>$model,
+			'noDelete'=>true,
+			'static'=>true,
+			'name'=>$name,
+		]),
+	]);
+} else echo "Отсутствует";

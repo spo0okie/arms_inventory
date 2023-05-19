@@ -18,16 +18,15 @@ if (is_object($model)) {
 		//else $name='<span class="far fa-meh-blank"></span>'.$name;
 	}
 	
-	
-	?>
-	
-<span class="comps-item object-item <?= $model->archived?'text-muted text-decoration-line-through':'' ?>">
-    <?= \app\components\LinkObjectWidget::widget([
+	echo \app\components\ItemObjectWidget::widget([
 		'model'=>$model,
-		'modal'=>true,
-		'noDelete'=>true,
-		'static'=>$static_view,
-		'name'=>$name
-	]) ?>
-	</span>
-<?php } else echo "Отсутствует";
+		'link'=>\app\components\LinkObjectWidget::widget([
+			'model'=>$model,
+			'modal'=>true,
+			'noDelete'=>true,
+			'static'=>$static_view,
+			'name'=>$name,
+			'noSpaces'=>true
+		]),
+	]);
+} else echo "Отсутствует";

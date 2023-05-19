@@ -7,8 +7,11 @@ $this->title = $model->Ename;
 $this->params['breadcrumbs'][] = ['label' => \app\models\Users::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
+$static_view=false;
+
 $services=$model->services;
 $comps=count($services)?$model->compsTotal:$model->comps;
+if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived',false);
 
 ?>
 <div class="users-view">
@@ -19,59 +22,72 @@ $comps=count($services)?$model->compsTotal:$model->comps;
 		<div class="col-md-4">
 			<h2>Рабочее место</h2>
 			<?php foreach ($model->techs as $arm) if ($arm->isComputer)
-				echo $this->render('/techs/compact',['model'=>$arm,'no_users'=>true,'no_specs'=>true])?>
+				echo $this->render('/techs/compact',['model'=>$arm,'no_users'=>true,'no_specs'=>true,'show_archived'=>$show_archived])?>
 		</div>
 		<div class="col-md-4">
+			<span class="float-end">
+				<?= \app\components\ShowArchivedWidget::widget(['reload'=>false]) ?>
+			</span>
+			<br/>
 			<?php
-			if (count($model->services)) {
-				echo '<h4>Ответственный за сервисы</h4><p>';
-				foreach ($model->services as $service) echo $this->render('/services/item',['model'=>$service]);
-				echo '</p><br />';
-			}
-
-			if (count($comps)) {
-				echo '<h4>Ответственный за ОС</h4><p>';
-				foreach ($comps as $comp) echo $this->render('/comps/item',['model'=>$comp]);
-				echo '</p><br />';
-			}
 			
-			if (count($model->techs)) {
-				echo '<h4>Оборудование числящиеся за сотрудником</h4><p>';
-				foreach ($model->techsHead as $arm) if (!$arm->isComputer) echo $this->render('/techs/item',['model'=>$arm]);
-				echo '</p><br />';
-			}
+			echo \app\components\ListObjectWidget::widget([
+				'models' => $model->services,
+				'title' => 'Ответственный за сервисы:',
+				'item_options' => ['static_view' => $static_view, ],
+				'card_options' => ['cardClass' => 'mb-3'],
+				'lineBr'=> false,
+			]);
 			
-			if (count($model->techsHead)) {
-				echo '<h4>АРМ/оборудование числящиеся за подчиненными</h4><p>';
-				foreach ($model->techsHead as $arm) echo $this->render('/techs/item',['model'=>$arm]);
-				echo '</p><br />';
-			}
+			echo \app\components\ListObjectWidget::widget([
+				'models' => $comps,
+				'title' => 'Ответственный за ОС:',
+				'item_options' => ['static_view' => $static_view, ],
+				'card_options' => ['cardClass' => 'mb-3'],
+				'lineBr'=> false,
+			]);
 			
-			if (count($model->techsIt)) {
-				echo '<h4>Обслуживаемое сотрудником оборудование</h4><p>';
-				foreach ($model->techsIt as $arm) echo $this->render('/techs/item',['model'=>$arm]);
-				echo '</p><br />';
-			}
-
-			if (count($model->techsResponsible)) {
-				echo '<h4>АРМ/оборудование в ответственности</h4><p>';
-				foreach ($model->techsResponsible as $arm) echo $this->render('/techs/item',['model'=>$arm]);
-				echo '</p><br />';
-			}
+			echo \app\components\ListObjectWidget::widget([
+				'models' => $model->techsHead,
+				'title' => 'АРМ/оборудование числящиеся за подчиненными:',
+				'item_options' => ['static_view' => $static_view, ],
+				'card_options' => ['cardClass' => 'mb-3'],
+				'lineBr'=> false,
+			]);
 			
-			if (count($model->materials)) {
-				echo '<h4>Ответственный материалы</h4><p>';
-				foreach ($model->materials as $material) if ($material->rest>0) echo $this->render('/materials/item',[
-						'model'=>$material,
-						'responsible'=>false,
-						'from'=>true,
-						'rest'=>true,
-					]).'<br />';
-				echo '</p><br />';
-			}
+			echo \app\components\ListObjectWidget::widget([
+				'models' => $model->techsIt,
+				'title' => 'Обслуживаемое сотрудником оборудование:',
+				'item_options' => ['static_view' => $static_view, ],
+				'card_options' => ['cardClass' => 'mb-3'],
+				'lineBr'=> false,
+			]);
+			
+			echo \app\components\ListObjectWidget::widget([
+				'models' => $model->techsResponsible,
+				'title' => 'АРМ/оборудование в ответственности:',
+				'item_options' => ['static_view' => $static_view, ],
+				'card_options' => ['cardClass' => 'mb-3'],
+				'lineBr'=> false,
+			]);
+			
+			$materials=[];
+			foreach ($model->materials as $material) if ($material->rest>0) $materials[]=$material;
+			
+			echo \app\components\ListObjectWidget::widget([
+				'models' => $materials,
+				'title' => 'Ответственный за материалы:',
+				'item_options' => [
+					'static_view' => $static_view,
+					'responsible'=>false,
+					'from'=>true,
+					'rest'=>true,
+				],
+				'card_options' => ['cardClass' => 'mb-3'],
+				'lineBr'=> true,
+			]);
 			?>
 
-			<br />
 			<?= \app\models\Users::isAdmin()?$this->render('roles',['model'=>$model,'static_view'=>false]):'' ?>
 
 		</div>

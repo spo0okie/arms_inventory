@@ -72,14 +72,13 @@ if (!isset($static_view)) $static_view=false;
     <br />
 
 
-    <?php if (!$static_view) {
-		if (count($model->techs)) { ?>
-			<h4>Привязанное оборудование</h4>
-			<?php if (count($model->techs)) { ?>
-				<?php foreach ($model->techs as $tech) echo $this->render('/techs/item',['model'=>$tech]) ?>
-			<?php } ?>
-		<?php }
-		} ?>
+    <?php if (!$static_view) echo \app\components\ListObjectWidget::widget([
+		'models' => $model->techs,
+		'title' => 'АРМ/Оборудование числящиеся за сотрудником:',
+		'item_options' => ['static_view' => $static_view, ],
+		'card_options' => ['cardClass' => 'mb-3'],
+		'lineBr'=> false,
+	]) ?>
 
 	<?= $this->render('/comps/lics_list',['model'=>$model]); ?>
 

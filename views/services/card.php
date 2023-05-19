@@ -154,51 +154,34 @@ if(!$static_view) { ?>
 			</p>
 			<?= $static_view?'':Html::a('Добавить суб-сервис',['create','parent_id'=>$model->id],['class'=>'btn btn-success']).'<br />'?>
 			<br />
-
-		<?php if (count($comps)) { ?>
-			<h4>Выполняется на компьютерах:</h4>
-			<p>
-				<?php
-				foreach ($comps as $comp)
-					echo $this->render('/comps/item',['model'=>$comp,'static_view'=>$static_view,'fqdn'=>true]).'<br />';
-				?>
-			</p>
-			<br />
-		<?php } ?>
 		
-		<?php if (count($techs)) { ?>
-			<h4>Выполняется на оборудовании:</h4>
-			<p>
-				<?php
-				foreach ($techs as $tech)
-					echo $this->render('/techs/item',['model'=>$tech,'static_view'=>$static_view]).'<br />';
-				?>
-			</p>
-			<br />
-		<?php } ?>
+		<?= \app\components\ListObjectWidget::widget([
+			'models'=>$comps,
+			'title'=>'Выполняется на компьютерах:',
+			'item_options'=>['static_view'=>$static_view,'fqdn'=>true],
+			'card_options'=>['cardClass'=>'mb-3'],
+		]) ?>
 		
-		<?php if (count($depends=$model->depends)) { ?>
-			<h4>Зависит от сервисов:</h4>
-			<p>
-				<?php
-				foreach ($depends as $service)
-					echo $this->render('/services/item',['model'=>$service,'static_view'=>$static_view]).'<br />';
-				?>
-			</p>
-			<br />
-		<?php } ?>
+		<?= \app\components\ListObjectWidget::widget([
+			'models'=>$techs,
+			'title'=>'Выполняется на оборудовании:',
+			'item_options'=>['static_view'=>$static_view,],
+			'card_options'=>['cardClass'=>'mb-3'],
+		]) ?>
 		
-		<?php if (count($dependants)) { ?>
-			<h4>Зависимые сервисы:</h4>
-			<p>
-				<?php
-				foreach ($dependants as $service)
-					echo $this->render('/services/item',['model'=>$service,'static_view'=>$static_view]).'<br />';
-				?>
-			</p>
-			<br />
-		<?php } ?>
-
+		<?= \app\components\ListObjectWidget::widget([
+			'models'=>$model->depends,
+			'title'=>'Зависит от сервисов:',
+			'item_options'=>['static_view'=>$static_view,],
+			'card_options'=>['cardClass'=>'mb-3'],
+		]) ?>
+		
+		<?= \app\components\ListObjectWidget::widget([
+			'models'=>$dependants,
+			'title'=>'Зависимые сервисы:',
+			'item_options'=>['static_view'=>$static_view,],
+			'card_options'=>['cardClass'=>'mb-3'],
+		]) ?>
 
 		<?php if (is_object($model->partner)) { ?>
 			<hr/>

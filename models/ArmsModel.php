@@ -19,6 +19,7 @@ use Yii;
  * @property string $updatedAt Время обновления
  * @property string $updated_at Время обновления
  * @property Attaches $attaches Загруженные файлы
+ * @property boolean $archived Статус архивирования элемента
  
  * @property int $secondsSinceUpdate Секунды с момента обновления
  */

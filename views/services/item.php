@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Services */
 
 if (!isset($static_view)) $static_view=false;
-if (!isset($show_archived)) $show_archived=true;
+if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived',true);
 
 
 if (is_object($model)) {
@@ -57,8 +57,11 @@ if (is_object($model)) {
 			}
 		}
 	}
-	?>
-	<span class="services-item <?= $archClass ?>" <?= $display ?> >
-		<?= \app\components\LinkObjectWidget::widget(['model'=>$model]) ?>
-	</span>
-<?php }
+	
+	echo \app\components\ItemObjectWidget::widget([
+		'model'=>$model,
+		'link'=>\app\components\LinkObjectWidget::widget([
+			'model'=>$model,'static'=>$static_view
+		])
+	]);
+}

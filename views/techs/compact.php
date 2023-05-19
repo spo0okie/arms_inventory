@@ -10,6 +10,8 @@ $static_view=true;
 if (!isset($no_users)) $no_users=false;
 if (!isset($no_specs)) $no_specs=false;
 
+if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived',true);
+
 if (is_object($model->state)) {
 	$statusName=$model->stateName;
 	$statusCode=$model->state->code;
@@ -20,7 +22,7 @@ if (is_object($model->state)) {
 
 ?>
 
-<div class="arms-card">
+<div class="arms-card <?= $model->archived?'archived-item':'' ?>" <?= \app\helpers\HtmlHelper::ArchivedDisplay($model,$show_archived) ?>>
 	<span class="unit-status <?= $statusCode ?>"><?= $statusName ?></span>
     <h3><?=
 		$this->render('/techs/item',[
@@ -70,8 +72,9 @@ if (is_object($model->state)) {
 	<h4>Привязанные ОС:</h4>
 	<div class="data-block tree-level-2">
 		<?php if (is_array($comps=$model->comps) && count ($comps)) {
-			foreach ($model->sortedComps as $comp) if (!$comp->archived){ ?>
-				<div class="comps-card"> <?= $this->render('/comps/card',[
+			foreach ($model->sortedComps as $comp) { ?>
+				<div class="comps-card <?= $comp->archived?'archived-item':'' ?>" <?= \app\helpers\HtmlHelper::ArchivedDisplay($comp,$show_archived) ?>>
+					<?= $this->render('/comps/card',[
 					'model'=>$comp,
 					'static_view'=>$static_view,
 					'no_arm'=>true,
