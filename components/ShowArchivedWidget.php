@@ -10,23 +10,34 @@ use yii\helpers\Url;
 
 class ShowArchivedWidget extends UrlParamSwitcherWidget
 {
+	/*
+	 * Такой финт ушами. По умолчанию мы считаем что все архивные элементы на страничке надо рисовать
+	 * Но если на страничке рисуется этот виджет - значит архивные по умолчанию спрятаны
+	 */
+	public static $defaultValue=true;
+	public static $itemClass='archived-item';
 	
 	public $state=null;
 	public $label='Архивные';
-	public $scriptOn="\$('.archived-item').show();";
-	public $scriptOff="\$('.archived-item').hide();";
+	public $scriptOn=<<<JS
+	$('.archived-item').show();
+	if (typeof ExpandableCardOversizeCheck === 'function') {
+		$('.expandable-card-outer').each(function (index,item){ExpandableCardOversizeCheck(item)});
+	}
+JS;
+	public $scriptOff=<<<JS
+	$('.archived-item').hide();
+	if (typeof ExpandableCardOversizeCheck === 'function') {
+		$('.expandable-card-outer').each(function (index,item){ExpandableCardOversizeCheck(item)});
+	}
+JS;
 	public $param='showArchived';
 	public $hintOff='Скрыть архивные объекты';
 	public $hintOn='Показать архивные объекты';
 	
 	public function init() {
 		parent::init();
-		if (is_null($this->state))
-			$this->state = \Yii::$app->request->get('showArchived');
-		
-		if (is_null($this->hint)){
-			$this->hint=$this->state?'Скрыть архивные объекты':'Показать архивные объекты';
-		}
+		static::$defaultValue=false;
 	}
 	
 }
