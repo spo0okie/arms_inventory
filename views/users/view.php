@@ -7,6 +7,8 @@ $this->title = $model->Ename;
 $this->params['breadcrumbs'][] = ['label' => \app\models\Users::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
+\yii\helpers\Url::remember();
+
 $static_view=false;
 
 $services=$model->services;
@@ -86,7 +88,17 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> true,
 			]);
+			
+			echo \app\components\ListObjectWidget::widget([
+				'models' => $model->contracts,
+				'title' => 'Документы:',
+				'item_options' => ['static_view' => $static_view, ],
+				'card_options' => ['cardClass' => 'mb-3'],
+			]);
+			
 			?>
+			
+			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
 
 			<?= \app\models\Users::isAdmin()?$this->render('roles',['model'=>$model,'static_view'=>false]):'' ?>
 

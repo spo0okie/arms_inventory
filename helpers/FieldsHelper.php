@@ -6,10 +6,14 @@ namespace app\helpers;
 
 use app\components\assets\FieldsHelperAsset;
 use app\models\ArmsModel;
+use Composer\Util\IniHelper;
 use kartik\date\DatePicker;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Inflector;
+use yii\helpers\StringHelper;
+use yii\helpers\Url;
 use yii\web\JsExpression;
 
 
@@ -76,9 +80,21 @@ class FieldsHelper
 	public static function Select2Field($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
-		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
-		$itemsHintsUrl=static::cutItemsHintsOptions($options);
+		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		$pluginOptions=['allowClear' => true];
+		
+		$itemsHintsUrl=static::cutItemsHintsOptions($options);
+		
+		//если выставлено в авто, вытаскиваем ссылку к тултипу исходя из имени поля
+		if ($itemsHintsUrl=='auto') {
+			$hintModelTokens=explode('_',$attr);
+			if ($hintModelTokens[count($hintModelTokens)-1] == 'id' || $hintModelTokens[count($hintModelTokens)-1] == 'ids') {
+				unset($hintModelTokens[count($hintModelTokens)-1]);
+			}
+			$hintModel=implode('-',$hintModelTokens);
+			$itemsHintsUrl=Url::to([$hintModel.'/ttip','q'=>'dummy']);
+		}
+		
 		if (strlen($itemsHintsUrl)) {
 			FieldsHelperAsset::register($form->view);
 			$pluginOptions['templateResult']=new JsExpression('function(item){return formatSelect2ItemHint(item,"'.$itemsHintsUrl.'")}');
@@ -114,7 +130,7 @@ class FieldsHelper
 	public static function TextAutoresizeField($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
-		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
+		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		$options=\app\helpers\ArrayHelper::recursiveOverride([
 			'lines'=>1
 		],$options);
@@ -140,7 +156,7 @@ class FieldsHelper
 	public static function TextInputField($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
-		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
+		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)
 			->textInput(\app\helpers\ArrayHelper::recursiveOverride([
@@ -160,7 +176,7 @@ class FieldsHelper
 	public static function CheckboxField($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
-		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
+		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)->checkbox($options)
 			->label($label,$labelOptions)
@@ -177,7 +193,7 @@ class FieldsHelper
 	public static function CheckboxListField($form,$model,$attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
-		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
+		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		$options=\app\helpers\ArrayHelper::recursiveOverride([
 			'class'=>"card d-flex flex-row pt-2 pb-1",
 			'itemOptions'=>[
@@ -206,7 +222,7 @@ class FieldsHelper
 	{
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
-		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
+		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)
 			->widget(\kartik\markdown\MarkdownEditor::className(),
@@ -230,7 +246,7 @@ class FieldsHelper
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		
-		list($label,$labelOptions)=static::labelOption($model,$attr,$options);
+		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)
 			->widget(DatePicker::classname(), \app\helpers\ArrayHelper::recursiveOverride([

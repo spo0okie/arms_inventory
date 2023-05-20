@@ -41,7 +41,21 @@ class Attaches extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['techs_id', 'services_id', 'lic_types_id', 'lic_groups_id', 'lic_items_id', 'lic_keys_id', 'contracts_id', 'places_id', 'schedules_id'], 'integer'],
+            [
+            	[
+            		'techs_id',
+					'services_id',
+					'lic_types_id',
+					'lic_groups_id',
+					'lic_items_id',
+					'lic_keys_id',
+					'contracts_id',
+					'places_id',
+					'schedules_id',
+					'users_id',
+				],
+				'integer'
+			],
 			[['filename'], 'string'],
 			//[['uploadedFile'], 'file'],
         ];

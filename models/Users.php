@@ -185,6 +185,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			$this->licItems,
 			$this->materials,
 			$this->services,
+			$this->contracts,
 		];
 	}
 	
@@ -232,6 +233,15 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	public function getTechsIt()
 	{
 		return $this->hasMany(Techs::className(), ['it_staff_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getContracts()
+	{
+		return $this->hasMany(Contracts::class, ['id' => 'contracts_id'])
+			->viaTable('{{%users_in_contracts}}', ['users_id' => 'id']);
 	}
 	
 	/**

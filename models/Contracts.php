@@ -37,7 +37,6 @@ use yii\web\JsExpression;
  * @property array $arms_ids массив ссылок на контрагентов в договоре
  * @property array $techs_ids массив ссылок на контрагентов в договоре
  * @property array $lics_ids массив ссылок на контрагентов в договоре
- * @property array $partners массив объектов контрагентов в договоре
  * @property array $scans массив сканов документов в договоре
  * @property array $scans_ids массив ссылок на сканы в договоре
  *
@@ -61,8 +60,10 @@ use yii\web\JsExpression;
  * @property LicItems[]  $licsChain
  * @property OrgPhones[] $orgPhones
  * @property OrgPhones[] $phonesChain
+ * @property Partners[]  $partners массив объектов контрагентов в договоре
  * @property Services[]  $services
  * @property Services[]  $servicesChain
+ * @property Users[]     $users
  */
 class Contracts extends ArmsModel
 {
@@ -109,7 +110,7 @@ class Contracts extends ArmsModel
         return [
             [['name'], 'required'],
 			[['currency_id'],'default','value'=>1],
-	        [['lics_ids','partners_ids','techs_ids','services_ids'], 'each', 'rule'=>['integer']],
+	        [['lics_ids','partners_ids','techs_ids','services_ids','users_ids'], 'each', 'rule'=>['integer']],
 	        //[['scanFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
 	        [['parent_id','state_id','currency_id'], 'integer'],
 	        [['total','charge'], 'number'],
@@ -135,7 +136,8 @@ class Contracts extends ArmsModel
 					'lics_ids' => 'licItems',
 					'techs_ids' => 'techs',
 					'services_ids' => 'services',
-					'materials_ids' => 'materials'
+					'materials_ids' => 'materials',
+					'users_ids' => 'users',
 				]
 			]
 		];
@@ -221,6 +223,10 @@ class Contracts extends ArmsModel
 				'Сервисы',
 				'hint' => 'С какими сервисами связан документ (если связан)',
 			],
+			'users_ids' => [
+				'Пользователи',
+				'hint' => 'С какими пользователями связан документ (если связан)',
+			],
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Для счетов желательно записывать историю и логистику закупки:<br>'.
@@ -249,6 +255,7 @@ class Contracts extends ArmsModel
 			$this->materials,
 			$this->services,
 			$this->licItems,
+			$this->users,
 			//$this->scans, //сканы удаляются при удалении документа
 		];
 	}
@@ -484,6 +491,15 @@ class Contracts extends ArmsModel
 	}
 	
 	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getUsers()
+	{
+		return $this->hasMany(Users::class, ['id'=>'users_id'])
+			->viaTable('users_in_contracts',['contracts_id' => 'id']);
+	}
+	
+	/**
 	 * Возвращает набор контрагентов в договоре
 	 * @return string
 	 */
@@ -492,6 +508,10 @@ class Contracts extends ArmsModel
 		if (is_array($partners=$this->partners)&&count($partners)) {
 			$names=[];
 			foreach ($partners as $partner) $names[]=$partner->sname;
+			return implode(',',$names);
+		} elseif (is_array($users=$this->users)&&count($users)) {
+			$names=[];
+			foreach ($users as $user) $names[]=$user->shortName;
 			return implode(',',$names);
 		} else {
 			return static::$noPartnerSuffix;

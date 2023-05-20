@@ -119,7 +119,7 @@ JS;
 
 <?php if (count($techs)) { ?>
     <h4>Прикреплен к АРМ/оборудованию:</h4>
-    <p>
+    <p class="mb-3">
 		<?php foreach ($techs as $tech) {
 			$tech_id=$tech->id;
 			echo $this->render('/techs/item',['model'=>$tech,'static_view'=>$static_view]);
@@ -137,53 +137,43 @@ JS;
 			echo '<br/>';
 		} ?>
     </p>
-    <br />
-<?php } ?>
+<?php }
 
-<?php if (count($materials)) { ?>
-    <h4>Прикреплен к поступлениям ЗиП и материалов:</h4>
-    <p>
-		<?php foreach ($materials as $material) {
-			echo $this->render('/materials/item',['model'=>$material]).'<br />';
-		} ?>
-    </p>
-    <br />
-<?php } ?>
+echo \app\components\ListObjectWidget::widget([
+	'models' => $materials,
+	'title' => 'Прикреплен к поступлениям ЗиП и материалов:',
+	'item_options' => ['static_view' => $static_view, ],
+	'card_options' => ['cardClass' => 'mb-3'],
+]);
 
+echo \app\components\ListObjectWidget::widget([
+	'models' => $lics,
+	'title' => 'Прикреплен к закупкам лицензий:',
+	'item_options' => ['static_view' => $static_view, ],
+	'card_options' => ['cardClass' => 'mb-3'],
+]);
 
-<?php if (count($lics)) { ?>
-    <h4>Прикреплен к закупкам лицензий:</h4>
-    <p>
-		<?php foreach ($lics as $lic) {
-			echo $this->render('/lic-items/item',['model'=>$lic]).'<br />';
-		} ?>
-    </p>
-    <br />
-<?php } ?>
+echo \app\components\ListObjectWidget::widget([
+	'models' => $services,
+	'title' => 'Прикреплен к услугам:',
+	'item_options' => ['static_view' => $static_view, ],
+	'card_options' => ['cardClass' => 'mb-3'],
+]);
 
-<?php if (count($services)) { ?>
-    <h4>Прикреплен к услугам:</h4>
-    <p>
-		<?php foreach ($services as $service) {
-			echo $this->render('/services/item',['model'=>$service]).'<br />';
-		} ?>
-    </p>
-    <br />
-<?php } ?>
+echo \app\components\ListObjectWidget::widget([
+	'models' => $model->partners,
+	'title' => 'Контрагенты:',
+	'item_options' => ['static_view' => $static_view, ],
+	'card_options' => ['cardClass' => 'mb-3'],
+]);
 
-<?php if (is_array($partners=$model->partners)&&count($partners)) { ?>
-    <h4>Контрагенты:</h4>
-    <p>
-    <?php foreach ($partners as $partner) {
-        echo $this->render('/partners/item',['model'=>$partner]).'<br />';
-    } ?>
-    </p>
-    <br />
-<?php } else { ?>
-    <h5><?= $model->partnersNames ?></h5>
-    <br />
-<?php } ?>
-
+echo \app\components\ListObjectWidget::widget([
+	'models' => $model->users,
+	'title' => 'Пользователи:',
+	'item_options' => ['static_view' => $static_view, 'noDelete'=>true],
+	'card_options' => ['cardClass' => 'mb-3'],
+]);
+?>
 
 <?php if (strlen(trim($model->comment))) { ?>
 <h4>Комментарий:</h4>

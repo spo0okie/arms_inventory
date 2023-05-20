@@ -48,19 +48,29 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
     <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
 
     <div class="row">
-        <div class="col-md-4" >
+        <div class="col-md-2" >
 		    <?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'state_id',[
 			    'data' => \app\models\ContractsStates::fetchNames(),
 			    'options' => ['placeholder' => 'Выберите статус документа',],
 			    'pluginOptions' => ['dropdownParent' => $modalParent,'allowClear' => true,],
 		    ]) ?>
         </div>
-        <div class="col-md-4" >
+        <div class="col-md-2" >
             <?= \app\helpers\FieldsHelper::DateField($form,$model, 'date'); ?>
         </div>
-        <div class="col-md-4" >
+        <div class="col-md-2" >
 			<?= \app\helpers\FieldsHelper::DateField($form,$model, 'end_date'); ?>
         </div>
+		<div class="col-md-6">
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'users_ids', [
+				'data' => \app\models\Users::fetchNames(),
+				'itemsHintsUrl'=>'auto',
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'multiple' => true
+				],
+			]) ?>
+		</div>
     </div>
 
     <div class="row">
@@ -86,6 +96,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'partners_ids', [
 				'data' => \app\models\Partners::fetchNames(),
 				'options' => ['onchange' => 'fetchContractsFromPartners();'],
+				'itemsHintsUrl'=>'auto',
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'multiple' => true
