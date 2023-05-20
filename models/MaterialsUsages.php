@@ -116,12 +116,12 @@ class MaterialsUsages extends ArmsModel
 	
 	public function getCost()
 	{
-		return $this->material->cost/$this->material->count*$this->count;
+		return ($this->material->count)?$this->material->cost/$this->material->count*$this->count:null;
 	}
 	
 	public function getCharge()
 	{
-		return $this->material->charge/$this->material->count*$this->count;
+		return ($this->material->count)?$this->material->charge/$this->material->count*$this->count:null;
 	}
 	
 	/**
