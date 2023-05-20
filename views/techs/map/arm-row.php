@@ -86,7 +86,11 @@ for ($i=0; $i<count($comps); $i++) {
 	    
 	    <?php //если у нас есть ОС, то зададим ячейке класс свежести данных об этой ОС
 	    	$age_class=is_object($comp)?$comp->updatedRenderClass:'';
-	    ?>
+			//клас архивации пересматриваем с учетом архивации ОС
+			$archClass=((is_object($comp)&&$comp->archived || $model->archived)?'archived-item':'').' '.($is_server?'server':'');
+			$archDisplay=((is_object($comp)&&$comp->archived || $model->archived)&&!$show_archived)?'style="display:none"':'';
+	
+		?>
         <td class="arm_hostname <?= $age_class ?> <?= $archClass ?>" <?=$archDisplay ?>><?= is_object($comp)?$this->render('/comps/item',['model'=>$comp]):'' ?></td>
 
 		
