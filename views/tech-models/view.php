@@ -31,6 +31,11 @@ $static_view=false;
 			'confirmMessage' => 'Действительно удалить описание этой модели оборудования?',
 			'undeletableMessage'=>'Описание этой модели оборудования нельзя удалить в настоящий момент,<br> т.к. в БД есть экземпляры оборудования этой модели',
 		]) ?>
+		<?= Html::a('<i class="fas fa-images"></i>',['uploads','id'=>$model->id],[
+			'class'=>'float-end',
+			'qtip_ttip'=>'Редактировать изображения/фото этой модели оборудования',
+			'qtip_side'=>'top'
+		]) ?>
 	</h1>
 	
 	<div class="row">
@@ -41,17 +46,15 @@ $static_view=false;
 			
 		</div>
 		<div class="col-md-6">
-			<h4><?= Html::a('Изображения',['uploads','id'=>$model->id]) ?></h4>
 			<?php
 			if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
 				echo $this->render('/scans/thumb',['model'=>$scan,'contracts_id'=>$model->id,'static_view'=>true]);
 			?>
-			<p>
 			<h4>Ссылки:</h4>
+			<p class="mb-2">
 			<?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
 			</p>
-
-			<br />
+			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
 
 		</div>
 	</div>

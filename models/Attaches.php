@@ -52,6 +52,7 @@ class Attaches extends \yii\db\ActiveRecord
 					'contracts_id',
 					'places_id',
 					'schedules_id',
+					'tech_models_id',
 					'users_id',
 				],
 				'integer'
