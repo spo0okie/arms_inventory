@@ -63,7 +63,7 @@ if (!isset($static_view)) $static_view=false;
 
     <h4>Телефоны</h4>
     <p>
-        Внутренний: <?= $model->Phone ?><br />
+        Внутренний: <?= $this->render('internal-phone',compact('model')) ?><br />
 		Сотовый: <?= $model->Mobile ?><br />
 		<?= strlen($model->private_phone)?"Личный: {$model->private_phone} <br />":'' ?>
         Городской: <?= $model->work_phone ?><br />

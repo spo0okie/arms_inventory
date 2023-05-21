@@ -21,6 +21,7 @@ if (!empty($model)) {
 		'archived_class'=>'text-decoration-line-through',
 		'link'=>\app\components\LinkObjectWidget::widget([
 			'model'=>$model,
+			'name'=>$name,
 			'static'=>$static_view,
 			'noDelete'=>true,
 			'noSpaces'=>true,
