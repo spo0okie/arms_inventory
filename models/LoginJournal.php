@@ -157,7 +157,7 @@ class LoginJournal extends ArmsModel
 				if ($this->local_time) {
 					$this->time += (time()-$this->local_time);
 				}
-				$this->time = date('Y-m-d H:i:s',$this->time);
+				$this->time = gmdate('Y-m-d H:i:s',$this->time);
 			}
 
 			if (!isset($this->comps_id)) {
