@@ -52,63 +52,77 @@ foreach (\app\models\Currency::find()->all() as $currency) {
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
 	    'columns' => [
-	        [
-		        'attribute'=>'fullname',
-		        'format'=>'raw',
+	        'fullname'=>[
 		        'value'=>function($data) use ($renderer) {
 			        return $renderer->render('/contracts/item',['model'=>$data,'name'=>$data['sname']]);
 		        }
 	        ],
-			[
-				'attribute'=>'state_id',
+			'state_id'=>[
 				'filter'=>\app\models\ContractsStates::fetchNames(),
 				'contentOptions' => ['class' => 'contracts-state-column'],
 				'value'=>function($data) use ($renderer) {
 					return $renderer->render('/contracts/item-state',['model'=>$data]);
 				}
 			],
-			[
-				'attribute'=>'total',
+			'float_total'=>[
 				'contentOptions' => ['class' => 'contracts-total-column'],
 				'footerOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
     				if ($data->total) {
-    					//return $data->total;
-						return number_format($data->total,2,',','');//.$data->currency->symbol;
+						return number_format($data->total,2,',','');
 					} return null;
 				},
-				//'format'=>'currency',
-				'footer'=>implode('<br />',$arrFooter['total']),
-				//'xlFormat'=>"$\\#\\ \\#\\#0.00"
 			],
-			[
-				'attribute'=>'charge',
+			'float_charge'=>[
 				'contentOptions' => ['class' => 'contracts-total-column'],
 				'footerOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
 					if ($data->charge) {
 						//return $data->charge;
-						return number_format($data->charge,2,',','');//.$data->currency->symbol;
+						return number_format($data->charge,2,',','');
 					} return null;
 				},
-				//'format'=>'currency',
+			],
+			'total'=>[
+				'contentOptions' => ['class' => 'contracts-total-column'],
+				'footerOptions' => ['class' => 'contracts-total-column'],
+				'value'=>function($data) use ($renderer) {
+					if ($data->total) {
+						//return $data->total;
+						return number_format($data->total,2,'.',' ' ).$data->currency->symbol;
+					} return null;
+				},
+				'footer'=>implode('<br />',$arrFooter['total']),
+			],
+			'charge'=>[
+				'contentOptions' => ['class' => 'contracts-total-column'],
+				'footerOptions' => ['class' => 'contracts-total-column'],
+				'value'=>function($data) use ($renderer) {
+					if ($data->charge) {
+						return number_format($data->charge,2,'.',' ').$data->currency->symbol;
+					} return null;
+				},
 				'footer'=>implode('<br />',$arrFooter['charge']),
 			],
-			[
-				'attribute'=>'currency',
+			'currency'=>[
 				'value'=>function($data) {
 					return ($data->total)?$data->currency->symbol:null;
 				},
 			],
-	        [
-		        'attribute'=>'attach',
+	        'attach'=>[
 				'contentOptions' => ['class' => 'contracts-attach-column'],
-		        'format'=>'raw',
 		        'value'=>function($data){
 			        return $data->sAttach;
 		        },
 	        ],
         ],
+		'defaultOrder' => [
+			'fullname',
+			'state_id',
+			'total',
+			'charge',
+			'attach',
+		],
 		'createButton'=>Html::a('Добавить', ['create'], ['class' => 'btn btn-success']).$filter,
 		'showFooter' => true,
 		'header' => $this->title,
