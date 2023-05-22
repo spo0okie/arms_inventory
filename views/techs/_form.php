@@ -242,9 +242,9 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				'pluginEvents' =>[
 					'change'=>'function(){
                         if ($("#techs-arms_id").val()) {
-                            $("#tech-users-selector, #tech-installed-selector, #tech-departments-selector").hide();
+                            $("#tech-users-selector, #tech-installed-selector, #tech-departments-selector, #tech-place-selector").hide();
                         } else {
-                            $("#tech-users-selector, #tech-installed-selector, #tech-departments-selector").show();
+                            $("#tech-users-selector, #tech-installed-selector, #tech-departments-selector, #tech-place-selector").show();
                         }
                     }'
 				],
