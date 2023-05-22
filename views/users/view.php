@@ -92,7 +92,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			echo \app\components\ListObjectWidget::widget([
 				'models' => $model->contracts,
 				'title' => 'Документы:',
-				'item_options' => ['static_view' => $static_view, ],
+				'item_options' => ['static_view' => $static_view, 'user'=>false ],
 				'card_options' => ['cardClass' => 'mb-3'],
 			]);
 			

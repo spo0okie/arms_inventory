@@ -11,8 +11,9 @@ if (is_object($model)) {
   //  $successors=$model->successorChain;
     if (!isset($name)) {
         $attaches=$model->sAttach;
-        if (!isset($partner)) $partner=true;
-        $name=$model->getSname(true,true,$partner).(strlen($attaches)?' - ':'').$attaches;
+		if (!isset($partner)) $partner=true;
+		if (!isset($user)) $user=true;
+        $name=$model->getSname(true,true,$partner,$user).(strlen($attaches)?' - ':'').$attaches;
     }
     
     if (!isset($show_payment)) $show_payment=false;

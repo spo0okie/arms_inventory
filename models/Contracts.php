@@ -503,13 +503,14 @@ class Contracts extends ArmsModel
 	 * Возвращает набор контрагентов в договоре
 	 * @return string
 	 */
-	public function getPartnersNames()
+	public function getPartnersNames($userName=true)
 	{
 		if (is_array($partners=$this->partners)&&count($partners)) {
 			$names=[];
 			foreach ($partners as $partner) $names[]=$partner->sname;
 			return implode(',',$names);
 		} elseif (is_array($users=$this->users)&&count($users)) {
+			if (!$userName) return '';
 			$names=[];
 			foreach ($users as $user) $names[]=$user->shortName;
 			return implode(',',$names);
@@ -539,12 +540,12 @@ class Contracts extends ArmsModel
 		return $name;
 	}
 	
-	public function getSname($date=true,$self=true,$partner=true)
+	public function getSname($date=true,$self=true,$partner=true,$user=true)
 	{
 		$tokens=[];
 		if ($date) $tokens[]=$this->datePart;
 		if ($self) $tokens[]=$this->selfSname;
-		if ($partner) $tokens[]=$this->partnersNames;
+		if ($partner &&	strlen($partner=$this->getPartnersNames($user))) $tokens[]=$partner;
 		
 		return implode('-',$tokens);
 	}
