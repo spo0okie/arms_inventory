@@ -60,6 +60,7 @@ class ContractsSearch extends Contracts
 	        'services',
 			'successor',
 			'childs',
+			'users',
 	        'state',
         ]);
 
@@ -76,6 +77,7 @@ class ContractsSearch extends Contracts
 			"`contracts`.`date`,' - ',".
 			"`contracts`.`name`,' - ',".
 			"ifnull(`partners`.`uname`,'".static::$noPartnerSuffix."'),' (', ifnull(`partners`.`bname`,'') , ')',".
+			"ifnull(`users`.`Ename`,''),".
 			"ifnull(`contracts`.`comment`,'')".
 		")");
 
