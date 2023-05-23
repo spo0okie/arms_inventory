@@ -70,8 +70,8 @@ class CompsSearch extends Comps
 				'name',
 				'raw_version',
 				'arm_id'=>[
-					'asc'=>['arms.num'=>SORT_ASC],
-					'desc'=>['arms.num'=>SORT_DESC],
+					'asc'=>['techs.num'=>SORT_ASC],
+					'desc'=>['techs.num'=>SORT_DESC],
 				],
 				'comp_ip'=>[
 					'asc'=>['comps.ip'=>SORT_ASC],
