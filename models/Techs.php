@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\ArrayHelper;
 use app\helpers\QueryHelper;
 use Yii;
 use yii\helpers\Html;
@@ -162,7 +163,7 @@ class Techs extends ArmsModel
 	 */
 	public function attributeData()
 	{
-		return [
+		return ArrayHelper::recursiveOverride(parent::attributeData(),[
 			'id' => ['Идентификатор'],
 			'attach' => ['Связи'],
 
@@ -340,7 +341,7 @@ class Techs extends ArmsModel
 				'Записная книжка',
 				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого оборудования/АРМ',
 			],
-		];
+		]);
 	}
 	
 	
@@ -359,7 +360,7 @@ class Techs extends ArmsModel
 
 	        [['contracts_ids','lic_items_ids','lic_groups_ids','lic_keys_ids'], 'each', 'rule'=>['integer']],
 
-			[['url', 'comment','updated_at','history','hw','specs'], 'safe'],
+			[['url', 'comment','updated_at','history','hw','specs','external_links'], 'safe'],
 			[['inv_num', 'sn','installed_pos','installed_pos_end'], 'string', 'max' => 128],
 			
 			[['ip', 'mac'], 'string', 'max' => 255],

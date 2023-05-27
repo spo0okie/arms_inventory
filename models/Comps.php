@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\ArrayHelper;
 use app\helpers\QueryHelper;
 use DateTime;
 use DateTimeZone;
@@ -97,7 +98,7 @@ class Comps extends ArmsModel
             [['domain_id','name', 'os'], 'required'],
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
-            [['updated_at', 'comment'], 'safe'],
+            [['updated_at', 'comment','external_links'], 'safe'],
 			[['raw_version'], 'string', 'max' => 32],
             [['name','os'], 'string', 'max' => 128],
 	        [['ip', 'ip_ignore','mac'], 'string', 'max' => 512],
@@ -131,8 +132,7 @@ class Comps extends ArmsModel
      */
     public function attributeData()
     {
-        return [
-	        'id' => 'Идентификатор',
+        return ArrayHelper::recursiveOverride(parent::attributeData(),[
 			'mac' => [
 				'MAC Адрес',
 				'indexHint' => 'MAC адреса сетевых интерфейсов настроенных в ОС<br/>'.QueryHelper::$stringSearchHint,
@@ -183,7 +183,7 @@ class Comps extends ArmsModel
 					'ОС останется в БД для истории, но не будет попадаться на глаза, если явно не попросить'
 			]
 
-		];
+		]);
     }
 
 

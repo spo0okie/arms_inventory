@@ -20,6 +20,7 @@ use Yii;
  * @property string $updated_at Время обновления
  * @property Attaches $attaches Загруженные файлы
  * @property boolean $archived Статус архивирования элемента
+ * @property string $external_links Внешние ссылки
  
  * @property int $secondsSinceUpdate Секунды с момента обновления
  */
@@ -48,14 +49,18 @@ class ArmsModel extends \yii\db\ActiveRecord
 			],
 			'comment' => [
 				'Примечание',
-				'hint' => 'Краткое пояснение по этому АРМ',
+				'hint' => 'Краткое пояснение по этому объекту',
 			],
 			'history' => [
 				'Записная книжка',
-				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого АРМ',
+				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого объекта',
 			],
 			'updated_at' => [
 				'Время изменения',
+			],
+			'external_links' => [
+				'Внешние ссылки',
+				'hint'=>'JSON структура с идентификаторами этого объекта во внешних ИС'
 			],
 		];
 	}
@@ -236,6 +241,20 @@ class ArmsModel extends \yii\db\ActiveRecord
 					$this->validateRecursiveLink($attribute, $params);
 				}
 			}
+		}
+	}
+	
+	
+	public function beforeSave($insert)
+	{
+		if (!parent::beforeSave($insert)) return false;
+		
+		if ($this->hasProperty('external_links') && $this->external_links) {
+			$old=static::findOne($this->id);
+			$current=$old->external_links?json_decode($old->external_links,true):[];
+			$new=json_decode($this->external_links,true);
+			$merged=ArrayHelper::recursiveOverride($current,$new);
+			$this->external_links=json_encode($merged,JSON_UNESCAPED_UNICODE);
 		}
 	}
 }

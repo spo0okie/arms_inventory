@@ -82,7 +82,8 @@ if (!isset($modalParent)) $modalParent=null;
 			</div>
 		</div>
         <?= $form->field($model, 'raw_hw')->textarea(['rows' => 10]) ?>
-        <?= $form->field($model, 'raw_soft')->textarea(['rows' => 10]) ?>
+		<?= $form->field($model, 'raw_soft')->textarea(['rows' => 10]) ?>
+		<?= $form->field($model, 'external_links')->textarea(['rows' => 10]) ?>
     </div>
 
 
