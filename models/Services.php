@@ -22,6 +22,8 @@ use yii\web\User;
  * @property string $links
  * @property int $responsible_id
  * @property string $responsibleName
+ * @property int $infrastructure_user_id
+ * @property string $infrastructureResponsibleName
  * @property int $providing_schedule_id
  * @property int $support_schedule_id
  * @property string $providingScheduleName
@@ -39,6 +41,9 @@ use yii\web\User;
  * @property int[] $depends_ids
  * @property int[] $comps_ids
  * @property int[] $support_ids
+ * @property string $supportNames
+ * @property int[] $infrastructure_support_ids
+ * @property string $infrastructureSupportNames
  * @property int[] $techs_ids
  * @property int[] $contracts_ids
  * @property int $totalUnpaid
@@ -71,6 +76,10 @@ use yii\web\User;
  * @property Users $responsibleRecursive
  * @property Users[] $support
  * @property Users[] $supportRecursive
+ * @property Users $infrastructureResponsible
+ * @property Users $infrastructureResponsibleRecursive
+ * @property Users[] $infrastructureSupport
+ * @property Users[] $infrastructureSupportRecursive
  * @property Schedules $supportSchedule
  * @property Schedules $supportScheduleRecursive
  * @property Segments $segment
@@ -99,6 +108,8 @@ class Services extends ArmsModel
 	private $segmentRecursiveCache=null;
 	private $supportRecursiveCache=null;
 	private $responsibleRecursiveCache=null;
+	private $infrastructureResponsibleRecursiveCache=null;
+	private $infrastructureSupportRecursiveCache=null;
 	private $providingScheduleRecursiveCache=null;
 	private $supportScheduleRecursiveCache=null;
 	private $sitesRecursiveCache=null;
@@ -122,6 +133,7 @@ class Services extends ArmsModel
 					'depends_ids' => 'depends',
 					'comps_ids' => 'comps',
 					'support_ids' => 'support',
+					'infrastructure_support_ids' => 'infrastructureSupport',
 					'contracts_ids' => 'contracts',
 					'techs_ids' => 'techs'
 				]
@@ -157,14 +169,15 @@ class Services extends ArmsModel
 			[['cost','charge'], 'number'],
 			[['currency_id'],'default','value'=>1],
             [['name', 'description', 'is_end_user'], 'required'],
-	        [['depends_ids','comps_ids','support_ids','techs_ids','contracts_ids'], 'each', 'rule'=>['integer']],
+	        [['depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
 			[['places_id','partners_id','places_id','archived','currency_id','weight'],'integer'],
 			[['weight'],'default', 'value' => '100'],
-	        [['is_end_user', 'is_service', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
+	        [['is_end_user', 'is_service', 'responsible_id', 'infrastructure_user_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 			[['name'], 'string', 'max' => 64],
 			[['search_text'], 'string', 'max' => 255],
-	        [['responsible_id'],        'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['responsible_id' => 'id']],
+			[['responsible_id'],        'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['responsible_id' => 'id']],
+			[['infrastructure_user_id'],'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['infrastructure_user_id' => 'id']],
 	        [['providing_schedule_id'], 'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['providing_schedule_id' => 'id']],
 	        [['support_schedule_id'],   'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['support_schedule_id' => 'id']],
 			[['segment_id'],			'exist', 'skipOnError' => true, 'targetClass' => Segments::className(), 'targetAttribute' => ['segment_id' => 'id']],
@@ -238,14 +251,23 @@ class Services extends ArmsModel
 				'hint' => 'Расписание, когда нужно реагировать на сбои в работе сервиса',
 			],
 			'supportSchedule' => ['alias'=>'support_schedule_id'],
-	        'responsible_id' => [
-	        	'Ответственный',
+			'responsible_id' => [
+				'Ответственный',
 				'hint' => 'Ответственный за работу сервиса/оказание услуги',
+			],
+			'infrastructure_user_id' => [
+				'Ответственный за инфраструктуру',
+				'hint' => 'Ответственный за инфраструктуру сервиса (если отличается от ответственного за сервис)',
+			],
+			'infrastructure_support_ids' => [
+				'Поддержка инфраструктуры',
+				'hint' => 'Дополнительные члены команды по поддержке инфраструктуры сервиса<br />'.
+					'(если отличаются от поддержки сервиса)',
 			],
 			'responsible' => [
 				'Ответственный, поддержка',
 				'indexLabel'=>'Отв., поддержка',
-				'indexHint'=>'Поиск по ответственному или поддержке сервиса.<br />'.QueryHelper::$stringSearchHint,
+				'indexHint'=>'Поиск по ответственному или поддержке сервиса или инфраструктуры сервиса.<br />'.QueryHelper::$stringSearchHint,
 			],
 			'support_ids' => [
 				'Поддержка',
@@ -407,6 +429,36 @@ class Services extends ArmsModel
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
+	public function getInfrastructureResponsible()
+	{
+		return $this->hasOne(Users::className(), ['id' => 'infrastructure_user_id'])
+			->from(['infrastructure_responsible'=>Users::tableName()]);
+	}
+	
+	public function getInfrastructureResponsibleRecursive() {
+		if (is_object($this->infrastructureResponsibleRecursiveCache))
+			return $this->infrastructureResponsibleRecursiveCache;
+		
+		if (is_object($this->infrastructureResponsibleRecursiveCache = $this->infrastructureResponsible))
+			return $this->infrastructureResponsibleRecursiveCache;
+		
+		if (is_object($this->parentService)) {
+			return $this->infrastructureResponsibleRecursiveCache = $this
+				->parentService
+				->infrastructureResponsibleRecursive;
+		}
+		return null;
+	}
+	
+	
+	public function getInfrastructureResponsibleName() {
+		if (is_object($this->infrastructureResponsibleRecursive)) return $this->responsibleRecursive->Ename;
+		return null;
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
 	public function getResponsible()
 	{
 		return $this->hasOne(Users::className(), ['id' => 'responsible_id'])
@@ -423,6 +475,7 @@ class Services extends ArmsModel
 		return null;
 	}
 
+	
 	public function getResponsibleName() {
 		if (is_object($this->responsibleRecursive)) return $this->responsibleRecursive->Ename;
 		return null;
@@ -466,23 +519,13 @@ class Services extends ArmsModel
 	}
 	
 	/**
-	 * Возвращает сервисы от которых зависит этот сервис
+	 * Возвращает комманду техподдержки
 	 */
 	public function getSupport()
 	{
 		return $this->hasMany(Users::className(), ['id' => 'user_id'])
 			->from(['support'=>Users::tableName()])
 			->viaTable('{{%users_in_services}}', ['service_id' => 'id']);
-	}
-	
-	/**
-	 * Возвращает документы привязанные к сервису
-	 */
-	public function getContracts()
-	{
-		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
-			->from(['service_contracts'=>Contracts::tableName()])
-			->viaTable('{{%contracts_in_services}}', ['services_id' => 'id']);
 	}
 	
 	public function getSupportRecursive() {
@@ -503,9 +546,52 @@ class Services extends ArmsModel
 		$names=[];
 		foreach ($this->supportRecursive as $user)
 			if (is_object($user)) $names[]=$user->Ename;
+		
+		if (count($names)) return implode(',',$names);
+		return null;
+	}
+	
+	/**
+	 * Возвращает комманду поддержки инфраструктуры
+	 */
+	public function getInfrastructureSupport()
+	{
+		return $this->hasMany(Users::className(), ['id' => 'users_id'])
+			->from(['infrastructure_support'=>Users::tableName()])
+			->viaTable('{{%users_in_svc_infrastructure}}', ['services_id' => 'id']);
+	}
+	
+	public function getInfrastructureSupportRecursive() {
+		if (is_array($this->infrastructureSupportRecursiveCache) && count($this->infrastructureSupportRecursiveCache)) {
+			return $this->infrastructureSupportRecursiveCache;
+		}
+		if (is_array($this->infrastructureSupportRecursiveCache = $this->infrastructureSupport) && count($this->infrastructureSupportRecursiveCache)){
+			//var_dump($this->supportRecursiveCache);
+			return $this->infrastructureSupportRecursiveCache;
+			
+		}
+		if (is_object($this->parentService))
+			return $this->infrastructureSupportRecursiveCache = $this->parentService->infrastructureSupportRecursive;
+		return [];
+	}
+	
+	public function getInfrastructureSupportNames() {
+		$names=[];
+		foreach ($this->infrastructureSupportRecursive as $user)
+			if (is_object($user)) $names[]=$user->Ename;
 			
 		if (count($names)) return implode(',',$names);
 		return null;
+	}
+	
+	/**
+	 * Возвращает документы привязанные к сервису
+	 */
+	public function getContracts()
+	{
+		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
+			->from(['service_contracts'=>Contracts::tableName()])
+			->viaTable('{{%contracts_in_services}}', ['services_id' => 'id']);
 	}
 	
 	/**

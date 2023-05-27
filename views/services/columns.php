@@ -71,11 +71,20 @@ return [
 	'responsible' => [
 		//'header' => 'Отв., поддержка.',
 		'value' => function ($data) {
+			/** @var $data \app\models\Services */
 			$output = [];
 			if (is_object($data->responsibleRecursive))
 				$output[] = '<div class="pe-2"><strong>'.$this->render('/users/item', ['model' => $data->responsibleRecursive,'short'=>true]).'</strong></div>';
+			
+			if (is_object($data->infrastructureResponsibleRecursive))
+				$output[] = '<div class="pe-2"><strong>'.$this->render('/users/item', ['model' => $data->infrastructureResponsibleRecursive,'short'=>true]).'</strong></div>';
+			
 			if (is_array($data->supportRecursive)) foreach ($data->supportRecursive as $user)
 				$output[] = '<div class="pe-2">'.$this->render('/users/item', ['model' => $user,'short'=>true]).'</div>';
+			
+			if (is_array($data->infrastructureSupportRecursive)) foreach ($data->infrastructureSupportRecursive as $user)
+				$output[] = '<div class="pe-2">'.$this->render('/users/item', ['model' => $user,'short'=>true]).'</div>';
+			
 			return '<div class="d-flex flex-wrap">'. implode(' ', $output).'</div>';
 		},
 		'footer'=>$totalSupportRendered,

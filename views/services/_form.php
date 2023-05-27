@@ -11,8 +11,10 @@ if (!isset($modalParent)) $modalParent=null;
 
 $segmentPlaceholder='Выберите сегмент ИТ инфраструктуры предприятия';
 $schedulePlaceholder='Выберите расписание';
-$responsiblePlaceholder='Выберите ответственного';
-$supportPlaceholder='Выберите сотрудников';
+$responsiblePlaceholder='Выберите ответственного за сервис';
+$supportPlaceholder='Выберите сотрудников поддержки';
+$infrastructureResponsiblePlaceholder='Выберите ответственного за инфраструктуру';
+$infrastructureSupportPlaceholder='Выберите сотрудников поддержки инфраструктуры';
 $parentPlaceholder=' (насл. из основного сервиса/услуги)';
 
 if (!$model->is_service) $model->is_service=0;
@@ -148,6 +150,19 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'infrastructure_user_id', [
+				'data' => \app\models\Users::fetchWorking(),
+				'options' => [
+					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->infrastructureResponsibleName))?
+						$model->parentService->infrastructureResponsibleName.$parentPlaceholder:$infrastructureResponsiblePlaceholder,
+				],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'places_id', [
 				'data' => \app\models\Places::fetchNames(),
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
@@ -207,6 +222,19 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				'options' => [
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->supportNames))?
 						$model->parentService->supportNames.$parentPlaceholder:$supportPlaceholder,
+				],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'infrastructure_support_ids', [
+				'data' => \app\models\Users::fetchWorking(),
+				'options' => [
+					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->infrastructureSupportNames))?
+						$model->parentService->infrastructureSupportNames.$parentPlaceholder:$infrastructureSupportPlaceholder,
 				],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [

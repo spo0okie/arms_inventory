@@ -37,13 +37,14 @@ use Yii;
  * @property Comps[]     $comps
  * @property Comps[]     $compsFromServices
  * @property Comps[]     $compsTotal
- //* @property Techs[]     $arms
+ * @property Contracts[] $contracts
  * @property Techs[]     $techs
  * @property Techs[]     $techsIt
  * @property Techs[]     $techsHead
  * @property Techs[]     $techsResponsible
  * @property Materials[] $materials
  * @property Services[]  $services
+ * @property Services[]  $infrastructureServices
  * @property LicGroups[] $licGroups
  * @property LicItems[]  $licItems
  * @property LicKeys[]   $licKeys
@@ -185,6 +186,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			$this->licItems,
 			$this->materials,
 			$this->services,
+			$this->infrastructureServices,
 			$this->contracts,
 		];
 	}
@@ -302,6 +304,16 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	public function getServices()
 	{
 		return $this->hasMany(Services::className(), ['responsible_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает сервисы, за которые отвечает пользователь
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getInfrastructureServices()
+	{
+		return $this->hasMany(Services::className(), ['infrastructure_user_id' => 'id'])
+			->from(['infrastructure_services'=>Services::tableName()]);;
 	}
 	
 	/**

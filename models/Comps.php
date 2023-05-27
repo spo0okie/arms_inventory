@@ -517,7 +517,16 @@ class Comps extends ArmsModel
 				 * @var $service \app\models\Services
 				 */
 				
-				if (is_object($responsible=$service->responsibleRecursive)) {
+				$responsible=null;
+				//сначала проверяем ответственного за инфраструктуру
+				if (is_object($service->infrastructureResponsibleRecursive)) {
+					$responsible=$service->infrastructureResponsibleRecursive;
+				//уже потом за сам сервис
+				} elseif (is_object($service->responsibleRecursive)) {
+					$responsible=$service->responsibleRecursive;
+				}
+				
+				if (is_object($responsible)) {
 					$responsible_id=$responsible->id;
 					if (!isset($rating[$responsible_id])) {
 						$rating[$responsible_id]=$service->weight;
@@ -533,7 +542,7 @@ class Comps extends ArmsModel
 	
 	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
-	 * @return \app\models\Users
+	 * @return \app\models\Users[]
 	 */
 	public function getSupportTeam()
 	{
@@ -546,13 +555,28 @@ class Comps extends ArmsModel
 				 * @var $service \app\models\Services
 				 */
 				
-				//ответственные за сервисы на машине
-				if (is_object($responsible=$service->responsibleRecursive)) {
-					$team[$responsible->id]=$responsible;
+				$responsible=null;
+				//сначала проверяем ответственного за инфраструктуру
+				if (is_object($service->infrastructureResponsibleRecursive)) {
+					$responsible=$service->infrastructureResponsibleRecursive;
+					//уже потом за сам сервис
+				} elseif (is_object($service->responsibleRecursive)) {
+					$responsible=$service->responsibleRecursive;
 				}
+				//ответственные за сервисы на машине
+				if (is_object($responsible)) $team[$responsible->id]=$responsible;
 				
+				
+				$support=null;
+				//сначала проверяем ответственного за инфраструктуру
+				if (is_array($service->infrastructureSupportRecursive)) {
+					$support=$service->infrastructureSupportRecursive;
+					//уже потом за сам сервис
+				} elseif (is_array($service->supportRecursive)) {
+					$support=$service->supportRecursive;
+				}
 				//поддержка сервисов на машине
-				if (is_array($support=$service->supportRecursive)) {
+				if (is_array($support)) {
 					foreach ($support as $item) {
 						if (is_object($item))
 							$team[$item->id]=$item;
@@ -560,9 +584,12 @@ class Comps extends ArmsModel
 				}
 			}
 		}
+		
+		//убираем из команды ответственного за ОС
 		if (is_object($responsible=$this->responsible)) {
 			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
 		}
+		
 		return array_values($team);
 	}
 	

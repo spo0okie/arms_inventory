@@ -40,6 +40,14 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
+
+			echo \app\components\ListObjectWidget::widget([
+				'models' => $model->infrastructureServices,
+				'title' => 'Ответственный за инфраструктуру:',
+				'item_options' => ['static_view' => $static_view, ],
+				'card_options' => ['cardClass' => 'mb-3'],
+				'lineBr'=> false,
+			]);
 			
 			echo \app\components\ListObjectWidget::widget([
 				'models' => $comps,

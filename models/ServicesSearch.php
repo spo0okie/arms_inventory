@@ -67,12 +67,14 @@ class ServicesSearch extends Services
 				'arms.place',
 				'techs.place',
 				'responsible',
+				'infrastructureResponsible',
 				'supportSchedule',
 				'providingSchedule',
 				'orgPhones.place',
 				'orgInets.place',
 				'contracts',
-				'support'
+				'support',
+				'infrastructureSupport',
 			])
 			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)');
 		
@@ -132,7 +134,12 @@ class ServicesSearch extends Services
 					QueryHelper::querySearchString('getplacepath(places_in_svc_techs.id)', $this->sites)
 	        ])
             ->andFilterWhere(QueryHelper::querySearchString( 'notebook', $this->notebook,'|',true,true))
-			->andFilterWhere(QueryHelper::querySearchString(['or','responsible.Ename','support.Ename'], $this->responsible));
+			->andFilterWhere(QueryHelper::querySearchString(['or',
+				'responsible.Ename',
+				'support.Ename',
+				'infrastructure_responsible.Ename',
+				'infrastructure_support.Ename',
+			], $this->responsible));
 	
 		if (is_array($this->responsible_ids)) {
 			$query->andWhere([
