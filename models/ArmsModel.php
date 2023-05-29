@@ -256,5 +256,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 			$merged=ArrayHelper::recursiveOverride($current,$new);
 			$this->external_links=json_encode($merged,JSON_UNESCAPED_UNICODE);
 		}
+		
+		return true;
 	}
 }
