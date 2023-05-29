@@ -502,7 +502,8 @@ class Schedules extends ArmsModel
 		//ищем расписание на этот день недели
 		$period=is_null($date)?$this:$this->getWeekSchedule($date);
 		
-		if (!is_null($daySchedule=$period->getDayEntry($day))) {
+		
+		if (!is_null($period) && !is_null($daySchedule=$period->getDayEntry($day))) {
 			return $daySchedule;
 		}
 		
