@@ -11,7 +11,7 @@ use yii\widgets\DetailView;
 
     <h1>
         <?= Html::encode($model->name) ?>
-        <?= Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
+        <?php // Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
     </h1>
 
 	<?= ''//Html::a('<span class="fas fa-plus-circle"></span>Добавить новое оборудование', ['update', 'id' => $model->id]) ?>

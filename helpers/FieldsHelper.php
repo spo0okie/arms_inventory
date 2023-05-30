@@ -53,8 +53,22 @@ class FieldsHelper
 		return static::cutSingleOption($options,'classicHintOptions',[]);
 	}
 	
-	public static function cutItemsHintsOptions(&$options) {
-		return static::cutSingleOption($options,'itemsHintsUrl','');
+	public static function cutItemsHintsOptions(&$options,$attr) {
+		
+		$itemsHintsUrl=static::cutSingleOption($options,'itemsHintsUrl','');
+		if (strlen($hintModel=static::cutSingleOption($options,'hintModel',''))) {
+			$itemsHintsUrl=Url::to([\yii\helpers\Inflector::camel2id($hintModel).'/ttip','q'=>'dummy']);
+		} elseif ($itemsHintsUrl=='auto') {
+			//если выставлено в авто, вытаскиваем ссылку к тултипу исходя из имени поля
+			$hintModelTokens=explode('_',$attr);
+			if ($hintModelTokens[count($hintModelTokens)-1] == 'id' || $hintModelTokens[count($hintModelTokens)-1] == 'ids') {
+				unset($hintModelTokens[count($hintModelTokens)-1]);
+			}
+			$hintModel=implode('-',$hintModelTokens);
+			$itemsHintsUrl=Url::to([$hintModel.'/ttip','q'=>'dummy']);
+		}
+		
+		return $itemsHintsUrl;
 	}
 	
 	public static function labelOption($model,$attr,$options) {
@@ -83,17 +97,7 @@ class FieldsHelper
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		$pluginOptions=['allowClear' => true];
 		
-		$itemsHintsUrl=static::cutItemsHintsOptions($options);
-		
-		//если выставлено в авто, вытаскиваем ссылку к тултипу исходя из имени поля
-		if ($itemsHintsUrl=='auto') {
-			$hintModelTokens=explode('_',$attr);
-			if ($hintModelTokens[count($hintModelTokens)-1] == 'id' || $hintModelTokens[count($hintModelTokens)-1] == 'ids') {
-				unset($hintModelTokens[count($hintModelTokens)-1]);
-			}
-			$hintModel=implode('-',$hintModelTokens);
-			$itemsHintsUrl=Url::to([$hintModel.'/ttip','q'=>'dummy']);
-		}
+		$itemsHintsUrl=static::cutItemsHintsOptions($options,$attr);
 		
 		if (strlen($itemsHintsUrl)) {
 			FieldsHelperAsset::register($form->view);

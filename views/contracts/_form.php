@@ -64,7 +64,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		<div class="col-md-6">
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'users_ids', [
 				'data' => \app\models\Users::fetchNames(),
-				'itemsHintsUrl'=>'auto',
+				'hintModel'=>'Users',
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'multiple' => true
@@ -77,6 +77,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
         <div class="col-md-9" >
             <?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'parent_id', [
                 'data' => array_diff_key(\app\models\Contracts::fetchNames(),[$model->id=>$model->id]),
+				'hintModel'=>'Contracts',
                 'options' => ['placeholder' => 'Основной документ не назначен',],
                 'pluginOptions' => ['dropdownParent' => $modalParent,],
 				'classicHint'=>\app\models\Contracts::fetchParentHint($model->partners_ids,'contracts'),
@@ -188,6 +189,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
 	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'techs_ids', [
 		'data' => \app\models\Techs::fetchNames(),
+		'hintModel'=>'Techs',
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
 			'multiple' => true
@@ -195,6 +197,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	]) ?>
 	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'lics_ids', [
 		'data' => \app\models\LicItems::fetchNames(),
+		'hintModel'=>'LicItems',
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
 			'multiple' => true
@@ -203,6 +206,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	
 	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'services_ids', [
 		'data' => \app\models\Services::fetchNames(),
+		'hintModel'=>'Services',
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
 			'multiple' => true

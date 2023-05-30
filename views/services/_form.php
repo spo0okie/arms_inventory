@@ -143,6 +143,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->responsibleName))?
 						$model->parentService->responsibleName.$parentPlaceholder:$responsiblePlaceholder,
 				],
+				'hintModel'=>'Users',
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -156,6 +157,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->infrastructureResponsibleName))?
 						$model->parentService->infrastructureResponsibleName.$parentPlaceholder:$infrastructureResponsiblePlaceholder,
 				],
+				'hintModel'=>'Users',
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -166,6 +168,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'places_id', [
 				'data' => \app\models\Places::fetchNames(),
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
+				'hintModel'=>'Places',
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -175,6 +178,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'partners_id', [
 				'data' => \app\models\Partners::fetchNames(),
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
+				'hintModel'=>'Partners',
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -223,6 +227,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->supportNames))?
 						$model->parentService->supportNames.$parentPlaceholder:$supportPlaceholder,
 				],
+				'hintModel'=>'Users',
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -236,6 +241,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->infrastructureSupportNames))?
 						$model->parentService->infrastructureSupportNames.$parentPlaceholder:$infrastructureSupportPlaceholder,
 				],
+				'hintModel'=>'Users',
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -247,6 +253,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				'data' => \app\models\Services::fetchNames(),
 				'options' => ['placeholder' => 'Выберите сервисы',],
 				'toggleAllSettings'=>['selectLabel'=>null],
+				'hintModel'=>'Services',
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'allowClear' => true,
@@ -256,6 +263,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'comps_ids', [
 				'data' => \app\models\Comps::fetchNames(),
 				'options' => ['placeholder' => 'Выберите серверы',],
+				'hintModel'=>'Comps',
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -266,6 +274,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'techs_ids', [
 				'data' => \app\models\Techs::fetchNames(),
 				'options' => ['placeholder' => 'Выберите оборудование',],
+				'hintModel'=>'Techs',
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -276,6 +285,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
 				'data' => \app\models\Contracts::fetchNames(),
 				'options' => ['placeholder' => 'Выберите документы',],
+				'hintModel'=>'Contracts',
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,

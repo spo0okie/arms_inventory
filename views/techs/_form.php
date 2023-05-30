@@ -145,7 +145,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
         <div class="col-md-6" >
 			<?= FieldsHelper::Select2Field($form,$model, 'model_id', [
 				'data' => $techModels,
-				'itemsHintsUrl'=>\yii\helpers\Url::to(['/tech-models/ttip','q'=>'dummyVar']),
+				'hintModel'=>'TechModels',
 				'options' => [
 			        'placeholder' => 'Выберите модель',
 					'onchange' => 'fetchCommentFromModel();'
@@ -160,7 +160,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			<?php if (count($model->comps)) {
 				echo FieldsHelper::Select2Field($form, $model, 'comp_id', [
 					'data' => \yii\helpers\ArrayHelper::map($model->comps, 'id', 'name'),
-					'itemsHintsUrl'=>\yii\helpers\Url::to(['/comps/ttip','q'=>'dummyVar']),
+					'hintModel'=>'Comps',
 					'pluginOptions' => [
 						'dropdownParent' => $modalParent,
 						'allowClear' => false,
@@ -237,7 +237,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		<div class="col-md-6"  id="tech-arms-selector" <?= ($model->installed_id)?$hidden:'' ?>>
 			<?= FieldsHelper::Select2Field($form,$model, 'arms_id', [
 				'data' => \app\models\Techs::fetchArmNames(),
-				'itemsHintsUrl'=>\yii\helpers\Url::to(['/techs/ttip','q'=>'dummyVar']),
+				'hintModel'=>'Techs',
 				'options' => ['placeholder' => 'Выберите АРМ в состав которого входит это оборудование',],
 				'pluginEvents' =>[
 					'change'=>'function(){
@@ -280,7 +280,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		<div class="col-md-6" id="tech-installed-selector" <?= ($model->arms_id)?$hidden:'' ?>>
 			<?= FieldsHelper::Select2Field($form,$model,'installed_id', [
 				'data' => \app\models\Techs::fetchNames(),
-				'itemsHintsUrl'=>\yii\helpers\Url::to(['/techs/ttip','q'=>'dummyVar']),
+				'hintModel'=>'Techs',
 				'options' => ['placeholder' => 'Выберите оборудование куда установлено это устройство',],
 				'pluginEvents' =>[
                     'change'=>'function(){
@@ -304,6 +304,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		<div class="col-md-6" id="tech-place-selector" <?= ($model->arms_id||$model->installed_id)?$hidden:'' ?>>
 			<?= FieldsHelper::Select2Field($form,$model, 'places_id', [
 				'data' => \app\models\Places::fetchNames(),
+				'hintModel'=>'Places',
 				'options' => ['placeholder' => 'Выберите помещение',],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -326,7 +327,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			<div class="col-md-6" >
 				<?= FieldsHelper::Select2Field($form,$model, 'user_id', [
 					'data' => \app\models\Users::fetchWorking(),
-					'itemsHintsUrl'=>\yii\helpers\Url::to(['/users/ttip','q'=>'dummyVar']),
+					'hintModel'=>'Users',
 					'options' => ['placeholder' => 'Выберите сотрудника',],
 					'pluginOptions' => [
 						'dropdownParent' => $modalParent,
@@ -337,7 +338,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			<div class="col-md-6" >
 				<?= FieldsHelper::Select2Field($form,$model, 'head_id', [
 					'data' => \app\models\Users::fetchWorking(),
-					'itemsHintsUrl'=>\yii\helpers\Url::to(['/users/ttip','q'=>'dummyVar']),
+					'hintModel'=>'Users',
 					'options' => ['placeholder' => 'Выберите сотрудника',],
 					'pluginOptions' => [
 						'dropdownParent' => $modalParent,
@@ -349,7 +350,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			<div class="col-md-6" >
 				<?= FieldsHelper::Select2Field($form,$model,'it_staff_id', [
 					'data' => \app\models\Users::fetchWorking(),
-					'itemsHintsUrl'=>\yii\helpers\Url::to(['/users/ttip','q'=>'dummyVar']),
+					'hintModel'=>'Users',
 					'options' => ['placeholder' => 'Выберите сотрудника',],
 					'pluginOptions' => [
 						'dropdownParent' => $modalParent,
@@ -359,7 +360,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			<div class="col-md-6" >
 				<?= FieldsHelper::Select2Field($form,$model,'responsible_id', [
 					'data' => \app\models\Users::fetchWorking(),
-					'itemsHintsUrl'=>\yii\helpers\Url::to(['/users/ttip','q'=>'dummyVar']),
+					'hintModel'=>'Users',
 					'options' => ['placeholder' => 'Выберите сотрудника',],
 					'pluginOptions' => [
 						'dropdownParent' => $modalParent,
@@ -371,7 +372,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 	
 	<?= FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
 		'data' => \app\models\Contracts::fetchNames(),
-		'itemsHintsUrl'=>\yii\helpers\Url::to(['/contracts/ttip','q'=>'dummyVar']),
+		'hintModel'=>'Contracts',
 		'options' => [
             'placeholder' => 'Выберите документы',
 			'onchange' => 'fetchArmsFromDocs();'
