@@ -121,7 +121,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	        [['Doljnost', 'Ename', 'Login','Mobile','private_phone'], 'string', 'max' => 255],
 			[['notepad'],'safe'],
 	        [['id','Login'], 'unique'],
-	        [['Email'], 'string', 'max' => 64],
+	        [['Email','uid'], 'string', 'max' => 64],
 	        [['Phone', 'work_phone'], 'string', 'max' => 32],
         ];
     }
@@ -165,6 +165,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			],
 			'arms' => 'АРМ',
 			'techs' => 'Оборудование',
+			'uid' => 'Идентификатор',
 			'LastThreeLogins' => 'Входы',
 		];
 	}
