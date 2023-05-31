@@ -19,20 +19,21 @@ class UsersController extends \yii\rest\ActiveController
         //return ['view','update'];
     }
 
-	public function actionView($id='',$num='',$name='',$org='',$login='',$mobile=''){
+	public function actionView($id='',$num='',$name='',$org='',$login='',$mobile='',$uid=''){
 		/**
 		 * ТЗ по поиску примерно следующее
 		 * нужно найти все записи о пользователе со всеми вариантами трудоустройства
 		 * сформировать из этого табличку всех типов трудоустройтсв сотрудника (при наличии 2х трудоустройств одного типа предпочитать активное (не уволен))
 		 *
 		 */
-		//ищем телефонный аппарат по номеру
+		//ищем пользователя
 		$user = \app\models\Users::find()
 			->andFilterWhere(['id' => $id])
 			->andFilterWhere(['Ename' => $name])
 			->andFilterWhere(['employee_id' => $num])
 			->andFilterWhere(['login' => $login])
 			->andFilterWhere(['org_id' => $org])
+			->andFilterWhere(['uid' => $uid])
 			->andFilterWhere(['like','Mobile',$mobile])
 			->orderBy([
 				'Uvolen'=>SORT_ASC,
