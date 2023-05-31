@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\ArrayHelper;
 use app\helpers\FieldsHelper;
 use app\helpers\QueryHelper;
 use Yii;
@@ -32,6 +33,7 @@ use Yii;
  * @property string		$fn First Name
  * @property string		$mn Middle Name
  * @property string		$shortName Сокращенные И.О.
+ * @property string		$uid
  *
  * @property Aces[]      $aces
  * @property Comps[]     $comps
@@ -45,6 +47,8 @@ use Yii;
  * @property Materials[] $materials
  * @property Services[]  $services
  * @property Services[]  $infrastructureServices
+ * @property Services[]  $supportServices
+ * @property Services[]  $infrastructureSupportServices
  * @property LicGroups[] $licGroups
  * @property LicItems[]  $licItems
  * @property LicKeys[]   $licKeys
@@ -120,9 +124,18 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	        [['employee_id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
 	        [['Doljnost', 'Ename', 'Login','Mobile','private_phone'], 'string', 'max' => 255],
 			[['notepad'],'safe'],
-	        [['id','Login'], 'unique'],
+	        [['id'], 'unique'],
 	        [['Email','uid'], 'string', 'max' => 64],
 	        [['Phone', 'work_phone'], 'string', 'max' => 32],
+			['Login', function ($attribute, $params, $validator) {
+				$exist=static::find()->where(['Login'=>$this->Login])->one();
+				/** @var $exist Users */
+				if (is_object($exist)) {
+					//если этот логин у того же самого человека (совпадает uid) то и пофик
+					if (strlen($this->uid) && $this->uid==$exist->uid) return;
+					$this->addError($attribute, 'Такой логин уже занят пользователем '.$exist->Ename);
+				}
+			}],
         ];
     }
 
@@ -188,6 +201,8 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			$this->materials,
 			$this->services,
 			$this->infrastructureServices,
+			$this->supportServices,
+			$this->infrastructureSupportServices,
 			$this->contracts,
 		];
 	}
@@ -307,6 +322,29 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 		return $this->hasMany(Services::className(), ['responsible_id' => 'id']);
 	}
 	
+	/**
+	 * Возвращает сервисы, за которые отвечает пользователь
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getSupportServices()
+	{
+		return $this->hasMany(Services::class, ['service_id' => 'id'])
+			->from(['support_services'=>Services::tableName()])
+			->viaTable('{{%users_in_services}}', ['user_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает сервисы, за которые отвечает пользователь
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getInfrastructureSupportServices()
+	{
+		return $this->hasMany(Services::class, ['service_id' => 'id'])
+			->from(['support_infrastructure_services'=>Services::tableName()])
+			->viaTable('{{%users_in_svc_infrastructure}}', ['users_id' => 'id']);
+	}
+	
+
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
 	 * @return \yii\db\ActiveQuery
@@ -568,6 +606,111 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			empty(Yii::$app->params['authorizedView']) ||
 			Yii::$app->user->can('view')
 		);
+	}
+	
+	/**
+	 * @param $user Users
+	 */
+	public function absorbUser($user) {
+		
+		foreach ($user->aces as $ace){
+			$ace->users_ids=array_merge(array_diff($ace->users_ids,[$user->id]),[$this->id]);
+			$ace->save();
+		}
+		
+		foreach ($user->techs as $tech){
+			$tech->user_id=$this->id;
+			$tech->save();
+		};
+		
+		foreach ($user->techsResponsible as $tech) {
+			$tech->responsible_id=$this->id;
+			$tech->save();
+		};
+		
+		foreach ($user->techsHead as $tech) {
+			$tech->head_id=$this->id;
+			$tech->save();
+		};
+		
+		foreach($user->techsIt as $tech) {
+			$tech->it_staff_id=$this->id;
+			$tech->save();
+		};
+		
+		foreach ($user->comps as $comp) {
+			$comp->user_id=$this->id;
+			$comp->save();
+		};
+		
+		foreach ($user->licGroups as $licGroup) {
+			$licGroup->users_ids=array_merge(array_diff($licGroup->users_ids,[$user->id]),[$this->id]);
+			$licGroup->save();
+		}
+		
+		foreach ($user->licKeys as $licKey) {
+			$licKey->users_ids=array_merge(array_diff($licKey->users_ids,[$user->id]),[$this->id]);
+			$licKey->save();
+		}
+		
+		foreach ($user->licItems as $licItem) {
+			$licItem->users_ids=array_merge(array_diff($licItem->users_ids,[$user->id]),[$this->id]);
+			$licItem->save();
+		}
+		
+		foreach ($user->materials as $material) {
+			$material->it_staff_id=$this->id;
+			$material->save();
+		}
+		
+		foreach ($user->services as $service) {
+			$service->responsible_id=$this->id;
+			$service->save();
+		}
+		
+		foreach ($user->infrastructureServices as $service) {
+			$service->infrastructure_user_id=$this->id;
+			$service->save();
+		}
+		
+		foreach ($this->infrastructureServices as $service) {
+			$service->support_ids=array_merge(array_diff($service->support_ids,[$user->id]),[$this->id]);
+			$service->save();
+		}
+		
+		foreach ($this->infrastructureSupportServices as $service) {
+			$service->infrastructure_support_ids=array_merge(array_diff($service->infrastructure_support_ids,[$user->id]),[$this->id]);
+			$service->save();
+		}
+
+		foreach ($user->contracts as $contract) {
+			$contract->users_ids=array_merge(array_diff($contract->users_ids,[$user->id]),[$this->id]);
+			$contract->save();
+		}
+
+	}
+	
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+		
+		//если uid нет, или этот уволен, то ничего не проверяем
+		if (!$this->uid) return;
+
+		//ищем нет ли таких же пользователей с таким же логином и uid
+		$exist=static::find()
+			->where(['Login'=>$this->Login])
+			->andWhere(['uid'=>$this->uid])
+			->andWhere(['not',['id'=>$this->id]])
+			->all();
+		
+		if (is_array($exist) && count($exist)) foreach ($exist as $user) {
+			/** @var $user Users */
+			//если найденный пользователь уволен, а этот нет
+			if (!$this->Uvolen && $user->Uvolen) $this->absorbUser($user);
+			$user->Login='';
+			$user->save();
+		}
 	}
 	
 }

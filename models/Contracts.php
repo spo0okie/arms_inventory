@@ -39,6 +39,7 @@ use yii\web\JsExpression;
  * @property array $lics_ids массив ссылок на контрагентов в договоре
  * @property array $scans массив сканов документов в договоре
  * @property array $scans_ids массив ссылок на сканы в договоре
+ * @property array $users_ids массив пользователей в договоре
  *
  * @property Contracts $parent
  * @property Currency $currency
