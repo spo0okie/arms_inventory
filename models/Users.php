@@ -328,7 +328,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	 */
 	public function getSupportServices()
 	{
-		return $this->hasMany(Services::class, ['service_id' => 'id'])
+		return $this->hasMany(Services::class, ['id' => 'service_id'])
 			->from(['support_services'=>Services::tableName()])
 			->viaTable('{{%users_in_services}}', ['user_id' => 'id']);
 	}
@@ -337,22 +337,21 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	 * Возвращает сервисы, за которые отвечает пользователь
 	 * @return \yii\db\ActiveQuery
 	 */
-	public function getInfrastructureSupportServices()
+	public function getInfrastructureServices()
 	{
-		return $this->hasMany(Services::class, ['service_id' => 'id'])
-			->from(['support_infrastructure_services'=>Services::tableName()])
-			->viaTable('{{%users_in_svc_infrastructure}}', ['users_id' => 'id']);
+		return $this->hasMany(Services::className(), ['infrastructure_user_id'=>'id'])
+			->from(['infrastructure_services'=>Services::tableName()]);;
 	}
 	
-
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
 	 * @return \yii\db\ActiveQuery
 	 */
-	public function getInfrastructureServices()
+	public function getInfrastructureSupportServices()
 	{
-		return $this->hasMany(Services::className(), ['infrastructure_user_id' => 'id'])
-			->from(['infrastructure_services'=>Services::tableName()]);;
+		return $this->hasMany(Services::class, ['id' => 'service_id'])
+			->from(['support_infrastructure_services'=>Services::tableName()])
+			->viaTable('{{%users_in_svc_infrastructure}}', ['users_id' => 'id']);
 	}
 	
 	/**
