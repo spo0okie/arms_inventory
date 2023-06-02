@@ -8,7 +8,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 $this->title = 'Редактирование: ' . $model->name;
 $this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index']];
-$this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['/tech-types/view','id'=>$model->type_id]];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Редактирование';
 ?>
