@@ -205,10 +205,10 @@ class AcesController extends Controller
 			return $this->redirect(Url::previous());
 		
 		if (is_object($acl) && $acl->schedules_id)
-			return $this->redirect(['/schedules/view','id'=>$acl->schedules_id]);
+			return $this->redirect(['/scheduled-access/view','id'=>$acl->schedules_id]);
 		
 		
-		$this->redirect(['/schedules/index-acl']);
+		$this->redirect(['/scheduled-access/index']);
     }
 
     /**

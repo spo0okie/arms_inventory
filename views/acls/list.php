@@ -16,7 +16,7 @@ if (is_array($models) && count($models)) {
 		}
 		echo '<h5>';
 		if (is_object($model->schedule)) {
-			echo $this->render('/schedules/item',['model'=>$model->schedule,'static_view'=>true]).':';
+			echo $this->render('/scheduled-access/item',['model'=>$model->schedule,'static_view'=>true]).':';
 		} else {
 			echo 'Доступ к '.$this->render('/acls/item',['model'=>$model]).':';
 		}

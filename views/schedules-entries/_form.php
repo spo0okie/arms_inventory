@@ -11,6 +11,11 @@ use kartik\datecontrol\DateControl;
 /* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
 if (!isset($formId)) $formId='scheduleEntityForm';
+
+$workToggle=<<<JS
+	$("#schedulesentries-is_work").val($("#is_work_y").is(":checked")?1:0);
+JS;
+
 ?>
 
 <div class="schedules-days-form">
@@ -51,7 +56,15 @@ if (!isset($formId)) $formId='scheduleEntityForm';
 				]); ?>
 			</div>
 			<div class="col-md-4">
-				<?= $form->field($model, 'is_work')->checkbox() ?>
+				<label class="form-label"><?= $model->getAttributeLabel('is_work') ?></label><br />
+				<div class="btn-group" role="group" >
+					<input onchange='<?= $workToggle ?>' type="radio" class="btn-check" name="is_work" id="is_work_y" autocomplete="off" <?= $model->is_work?'checked':''?> >
+					<label class="btn btn-outline-success" for="is_work_y"><?= $model->getAttributeLabel('is_work_Y')?></label>
+
+					<input onchange='<?= $workToggle ?>' type="radio" class="btn-check" name="is_work" id="is_work_n" autocomplete="off"  <?= !$model->is_work?'checked':''?>>
+					<label class="btn btn-outline-danger" for="is_work_n"><?= $model->getAttributeLabel('is_work_N')?></label>
+				</div>
+				<?php // $form->field($model, 'is_work')->checkbox() ?>
 			</div>
 		</div>
 		<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>

@@ -302,7 +302,9 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			'id' => 'ID',
 			'schedule_id' => 'Расписание',
 			'is_period' => 'Период',
-			'is_work' => $this->isAcl?'Период предоставления/отзыва прав':'Рабочий/нерабочий период',
+			'is_work' => 'Тип периода',
+			'is_work_Y' => $this->isAcl?'Доступ предоставляется':'Рабочий период',
+			'is_work_N' => $this->isAcl?'Доступ запрещается':'Нерабочий период',
 			
 			'date' => $this->is_period?'Начало':'День/Дата',
 			'day' => static::$label_day,

@@ -64,7 +64,7 @@ NavBar::begin([
 			['label' => 'Доступы',
 				'items' => [
 					['label' => \app\models\Acls::$titles, 'url' => ['/acls/index']],
-					['label' => \app\models\Acls::$scheduleTitles, 'url' => ['/schedules/index-acl']],
+					['label' => \app\models\Acls::$scheduleTitles, 'url' => ['/scheduled-access/index']],
 					['label' => \app\models\AccessTypes::$titles, 'url' => ['/access-types/index']],
 				]
 			],

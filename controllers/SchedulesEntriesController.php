@@ -83,7 +83,7 @@ class SchedulesEntriesController extends Controller
         $model = new SchedulesEntries();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['/schedules/view', 'id' => $model->schedule_id]);
+            return $this->redirect(['/scheduled-access/view', 'id' => $model->schedule_id]);
         }
 	
 		if (isset($_GET['schedule_id'])) $model->schedule_id=$_GET['schedule_id'];
@@ -111,7 +111,7 @@ class SchedulesEntriesController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['/schedules/view', 'id' => $model->schedule_id]);
+            return $this->redirect(['/scheduled-access/view', 'id' => $model->schedule_id]);
         }
 
         return Yii::$app->request->isAjax?
@@ -136,7 +136,7 @@ class SchedulesEntriesController extends Controller
         $schedule_id=$this->findModel($id)->schedule_id;
         $this->findModel($id)->delete();
 
-        return $this->redirect(['/schedules/view', 'id' => $schedule_id]);
+        return $this->redirect(['/scheduled-access/view', 'id' => $schedule_id]);
     }
 
     /**

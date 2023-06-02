@@ -140,7 +140,7 @@ class AclsController extends Controller
 				return $this->redirect(Url::previous());
 
 			if ($model->schedules_id)
-				$this->redirect(['/schedules/view','id'=>$model->schedules_id]);
+				$this->redirect(['/scheduled-access/view','id'=>$model->schedules_id]);
 			return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -167,7 +167,7 @@ class AclsController extends Controller
 				return $this->redirect(Url::previous());
 			
 			if ($model->schedules_id)
-				return $this->redirect(['/schedules/view','id'=>$model->schedules_id]);
+				return $this->redirect(['/scheduled-access/view','id'=>$model->schedules_id]);
 			
 			return $this->redirect(['view', 'id' => $model->id]);
         }
@@ -191,8 +191,8 @@ class AclsController extends Controller
 	
 		if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
         return $schedules_id?
-			$this->redirect(['/schedules/view','id'=>$schedules_id]):
-			$this->redirect(['/schedules/index-acl']);
+			$this->redirect(['/scheduled-access/view','id'=>$schedules_id]):
+			$this->redirect(['/scheduled-access/index-acl']);
     }
 
     /**
