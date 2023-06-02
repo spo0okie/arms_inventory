@@ -73,6 +73,7 @@ class SchedulesSearchAcl extends Schedules
 				'query' => $query,
 				//'totalCount' => $totalQuery->count('distinct(schedules.id)'),
 				'pagination' => false,
+				'sort'=> ['defaultOrder' => ['id'=>SORT_DESC]]
 			]);
         }
 	
@@ -105,6 +106,7 @@ class SchedulesSearchAcl extends Schedules
 			'query' => $query,
 			//'totalCount' => $totalQuery->count('distinct(schedules.id)'),
 			'pagination' => false,
+			'sort'=> ['defaultOrder' => ['id'=>SORT_DESC]]
 		]);
     }
 }
