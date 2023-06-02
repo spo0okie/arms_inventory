@@ -68,11 +68,11 @@ class SchedulesSearchAcl extends Schedules
         $this->load($params);
 
         if (!$this->validate()) {
-			$totalQuery=clone $query;
+			//$totalQuery=clone $query;
             return new ActiveDataProvider([
 				'query' => $query,
-				'totalCount' => $totalQuery->count('distinct(schedules.id)'),
-				'pagination' => ['pageSize' => 1000,],
+				//'totalCount' => $totalQuery->count('distinct(schedules.id)'),
+				'pagination' => false,
 			]);
         }
 	
@@ -100,11 +100,11 @@ class SchedulesSearchAcl extends Schedules
 			['or like', 'acls.comment', \yii\helpers\StringHelper::explode($this->resources,'|',true,true)],
 		]);
 	
-		$totalQuery=clone $query;
+		//$totalQuery=clone $query;
 		return new ActiveDataProvider([
 			'query' => $query,
-			'totalCount' => $totalQuery->count('distinct(schedules.id)'),
-			'pagination' => ['pageSize' => 1000,],
+			//'totalCount' => $totalQuery->count('distinct(schedules.id)'),
+			'pagination' => false,
 		]);
     }
 }
