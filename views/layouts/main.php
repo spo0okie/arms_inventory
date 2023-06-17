@@ -137,10 +137,12 @@ echo ModalAjax::widget([
 	'id' => 'modal_form_loader',
 	'bootstrapVersion' => ModalAjax::BOOTSTRAP_VERSION_5,
 	'header' => 'Правка',
+	
 	'selector' => 'a.open-in-modal-form',
 	'ajaxSubmit' => true, // Submit the contained form as ajax, true by default
 	'size' => ModalAjax::SIZE_EXTRA_LARGE,
-	'options' => ['class' => 'header-secondary text-black text-left'],
+	'options' => ['class' => 'header-secondary text-black text-left',],
+	'clientOptions'=>['backdrop'=> 'static',],
 	'autoClose' => true,
 	'events'=>[
 		ModalAjax::EVENT_MODAL_SHOW => new \yii\web\JsExpression("
