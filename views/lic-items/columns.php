@@ -19,7 +19,12 @@ return [
 	],
 	[
 		'attribute'=>'comment',
-		'format'=>'ntext'
+		'format'=>'raw',
+		'value'=>function($item) {
+			return \app\components\ExpandableCardWidget::widget([
+				'content'=>Yii::$app->formatter->asNtext($item->comment)
+			]);
+		}
 	],
 	'status'
 ];
