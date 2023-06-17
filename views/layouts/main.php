@@ -160,9 +160,13 @@ echo ModalAjax::widget([
 
 <?php $this->endBody();
 $js = <<<JS
-$('.modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
+//$('.modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
+
+//более универсальный фикс
+//https://github.com/kartik-v/yii2-widget-select2/issues/341
+bootstrap.Modal.prototype._initializeFocusTrap = function () { return { activate: function () { }, deactivate: function () { } } };
 JS;
-$this->registerJs($js);
+$this->registerJs($js,\yii\web\View::POS_END);
 ?>
 </body>
 </html>
