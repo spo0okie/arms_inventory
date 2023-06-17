@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 
@@ -13,37 +14,15 @@ $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
 <div class="lic-items-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-
-
-            [
-                'attribute'=>'lic_group_id',
-                'format'=>'raw',
-                'value'=>function($item) use ($renderer){
-                    return $renderer->render('/lic-groups/item',['model'=>$item->licGroup]);
-                }
-            ],
-            [
-                'attribute'=>'descr',
-                'format'=>'raw',
-	            'value'=>function($item) use ($renderer){
-		            return $renderer->render('item',['model'=>$item,'name'=>$item->descr]);
-	            }
-            ],
-            //'count',
-            'comment',
-            'status'
-        ],
-    ]); ?>
+	
+	<?= DynaGridWidget::widget([
+		'id' => 'lic-items',
+		'header' => Html::encode($this->title),
+		'columns' => include 'columns.php',
+		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\LicItems','cssClass'=>'btn']),
+		'dataProvider' => $dataProvider,
+		'filterModel' => $searchModel,
+	]) ?>
+	
 </div>

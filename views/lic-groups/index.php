@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 
@@ -13,46 +14,14 @@ $renderer=$this;
 ?>
 <div class="lic-groups-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Создать', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            //'descr',
-	        [
-		        'attribute'=>'descr',
-		        'format'=>'raw',
-		        'value'=>function($item) use ($renderer){
-			        return $renderer->render('/lic-groups/item',['model'=>$item]);
-		        }
-	        ],
-	        [
-		        'attribute'=>'itemsCount',
-		        'header'=>'Закупок<br/>акт/всего',
-		        'format'=>'raw',
-		        'value'=>function($item) {
-			        return $item->activeItemsCount.'/'.count($item->licItems);
-		        }
-	        ],
-	        [
-		        'attribute'=>'itemsCount',
-		        'header'=>'Ключей<br/>исп/всего',
-		        'format'=>'raw',
-		        'value'=>function($item) {
-
-			        return $item->usedCount.'/'.$item->activeCount;
-		        }
-	        ],
-            'comment:ntext',
-            //'created_at',
-
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
+	<?= DynaGridWidget::widget([
+		'id' => 'lic-groups',
+		'header' => Html::encode($this->title),
+		'columns' => include 'columns.php',
+		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\LicGroups','cssClass'=>'btn']),
+		'dataProvider' => $dataProvider,
+		'filterModel' => $searchModel,
+	]) ?>
+	
 </div>

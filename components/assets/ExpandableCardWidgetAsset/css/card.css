@@ -13,7 +13,7 @@
 }
 
 .expandable-card-switch {
-    bottom: 0px;
+    bottom: 0;
     position: absolute;
     padding:0; margin:0; border:0;
     width:100%;
@@ -21,6 +21,7 @@
     text-align: center;
     vertical-align: bottom;
     color: inherit;
+    z-index: 999;
 }
 
 .expandable-card-switch svg {
@@ -28,9 +29,11 @@
     display: block;
     position: static;
     margin: auto;
-    opacity: 50%;
+    opacity: 30%;
 }
 
-.expandable-card-compressed:hover .expandable-card-switch svg{
-    opacity: 75%;
+.expandable-card-outer.compressed:hover .expandable-card-switch svg{
+    opacity: 45%;
 }
+
+.expandable-card-outer:hover {background-color:rgba(0, 0, 0, 0.02);}

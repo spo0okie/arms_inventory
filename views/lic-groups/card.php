@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 
@@ -64,29 +65,20 @@ if (!isset($linksData)) $linksData=null;
 
 <br />
 
-<h4>Закупленные лицензии:</h4>
-<p>
-	<?php if ($static_view) {
-        foreach ($model->licItems as $item) { ?>
-            <?= $this->render('/lic-items/item',['model'=>$item,'static_view'=>$static_view]) ?><br />
-        <?php }
-    } else { ?>
-        <?= GridView::widget([
-            'dataProvider' => $dataProvider,
-            'filterModel' => $searchModel,
-            'columns' => [
-                [
-                    'attribute'=>'descr',
-                    'format'=>'raw',
-                    'value'=>function($item) use ($renderer){
-                        return $renderer->render('/lic-items/item',['model'=>$item,'name'=>$item->descr]);
-                    }
-                ],
-                'comment:ntext',
-                'status'
-            ],
-        ]); ?>
-
-        <span class="lic_item-item"><?= Html::a('Добавить закупку',['/lic-items/create','lic_group_id'=>$model->id],['class' => 'btn btn-success']) ?></span>
-    <?php } ?>
-</p>
+	<?php if ($static_view) { ?>
+	<h4>Закупленные лицензии:</h4>
+	<p>
+		<?php foreach ($model->licItems as $item) { echo $this->render('/lic-items/item',['model'=>$item,'static_view'=>$static_view]).'<br />';} ?>
+	</p>
+    
+    <?php } else { ?>
+        <?= DynaGridWidget::widget([
+			'id' => 'lic-groups-view-items',
+			'header' => 'Закупленные лицензии',
+			'columns' => \app\helpers\ArrayHelper::filter(include $_SERVER['DOCUMENT_ROOT'].'/views/lic-items/columns.php',[1,2,3]),
+			'createButton' => Html::a('Добавить закупку',['/lic-items/create','lic_group_id'=>$model->id],['class' => 'btn btn-success']),
+			'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\LicItems','cssClass'=>'btn']),
+			'dataProvider' => $dataProvider,
+			'filterModel' => $searchModel,
+		]) ?>
+	<?php } ?>

@@ -6,7 +6,13 @@ function ExpandableCardOversizeCheck($card) {
         if (!$content.hasClass('oversize')) {
             $content.addClass('oversize');
             $content.css('max-height',maxHeight+'px');
-            $card.prepend('<span class="expandable-card-switch"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 2"><path d="m 0 0 l 4 0 l -2 2" fill="currentColor"/></svg></span>');
+            let $toggle=$('<span class="expandable-card-switch">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 2">' +
+                '<path d="m 0 0 l 4 0 l -2 2" fill="currentColor"/>' +
+                '</svg>' +
+                '</span>')
+            //    .on("mouseover", function(e){console.log("!");e.stopPropagation();});
+            $card.prepend($toggle);
         }
     } else {
         if ($content.hasClass('oversize')) {
