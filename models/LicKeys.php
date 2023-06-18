@@ -26,7 +26,8 @@ class LicKeys extends ArmsModel
 {
 
 	public static $title='Лиц. ключи';
-
+	
+	public $linkComment=null; //комментарий, добавляемый при привязке лицензий
     /**
      * {@inheritdoc}
      */
@@ -41,13 +42,32 @@ class LicKeys extends ArmsModel
 	 */
 	public function behaviors()
 	{
+		$model=$this;
 		return [
 			[
 				'class' => \voskobovich\linker\LinkerBehavior::className(),
 				'relations' => [
-					'arms_ids' => 'arms',
-					'comps_ids' => 'comps',
-					'users_ids' => 'users',
+					'arms_ids' => [
+						'arms',
+						'updater' => [
+							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
+							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+						],
+					],
+					'comps_ids' => [
+						'comps',
+						'updater' => [
+							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
+							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+						],
+					],
+					'users_ids' => [
+						'users',
+						'updater' => [
+							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
+							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+						],
+					],
 				]
 			]
 		];
@@ -63,41 +83,49 @@ class LicKeys extends ArmsModel
             [['lic_items_id', 'key_text'], 'required'],
             [['lic_items_id'], 'integer'],
 	        [['arms_ids','comps_ids','users_ids'], 'each', 'rule'=>['integer']],
-            [['key_text', 'comment'], 'string'],
+            [['key_text', 'comment','linkComment'], 'string'],
         ];
     }
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
 			'id' => 'ID',
-			'lic_items_id' => 'Закупка лицензий',
-			'arms_ids' => 'Привязанный(е) АРМ(ы)',
-			'comps_ids' => 'Привязанная(ые) ОС(и)',
-			'users_ids' => 'Привязанный(е) пользователь(и)',
-			'links' => 'Привязки',
-			'key_text' => 'Ключ',
-			'lic_item' => 'Группа/Закупка',
-			'comment' => 'Комментарии',
-		];
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'ID',
-			'lic_items_id' => 'К какой закупке лицензий относятся эти ключи. Тут надо внимательно отнестись, чтобы не вносить путанницу.',
-			'arms_ids' => 'К какому рабочему ПК привязан ключ',
-			'comps_ids' => 'К какой операционной системе привязан ключ',
-			'users_ids' => 'К какому пользователю(пользователям) привязан ключ',
-			'key_text' => 'Текст ключа / серийный номер / чтобы то ни было, что используется для активации продукта',
-			'comment' => 'Все что стоит знать об этом ключе кроме информации в остальных полях',
+			'lic_items_id' => [
+				'Закупка',
+				'hint' => 'К какой закупке лицензий относятся эти ключи. Тут надо внимательно отнестись, чтобы не вносить путанницу.',
+			],
+			'lic_item' => ['alias'=>'lic_items_id',	],
+			'arms_ids' => [
+				'Привязанный(е) АРМ(ы)',
+				'hint' => 'К какому рабочему ПК привязан ключ',
+			],
+			'comps_ids' => [
+				'Привязанная(ые) ОС(и)',
+				'hint' => 'К какой операционной системе привязан ключ',
+			],
+			'users_ids' => [
+				'Привязанный(е) пользователь(и)',
+				'hint' => 'К какому пользователю(пользователям) привязан ключ',
+			],
+			'links' => [
+				'Привязки',
+			],
+			'key_text' => [
+				'Ключ',
+				'hint' => 'Текст ключа / серийный номер / чтобы то ни было, что используется для активации продукта',
+			],
+			'comment' => [
+				'Комментарии',
+				'comment' => 'Все что стоит знать об этом ключе кроме информации в остальных полях',
+			],
+			'linkComment' => [
+				'Пояснение к добавляемым привязкам',
+				'hint' => 'На каком основании эти лицензии закрепляются за добавленными выше объектами. Чтобы спустя время не было вопросов, а кто и зачем эту лицензию туда выделил (уже существующие привязки не меняются, только новые)',
+			],
 		];
 	}
 	

@@ -11,18 +11,17 @@
 use yii\helpers\Html;
 if (is_object($model)) {
 	if (!isset($static_view)) $static_view=false;
-?>
-
-<span class="lic_groups-item">
-	<?= Html::a(
-		$model->descr,
-        ['lic-groups/view','id'=>$model->id],
-        [
-            'qtip_ajxhrf'=>$static_view?null:\yii\helpers\Url::to(['/lic-groups/ttip','id'=>$model->id]),
-        ]
-    )
-	?><?=
-	$static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['lic-groups/update','id'=>$model->id]))
-	?>
-</span>
-<?php } else echo "Отсутствует";
+	if (!isset($noDelete)) $noDelete=true;
+	
+	echo \app\components\ItemObjectWidget::widget([
+		'model'=>$model,
+		'archived_class'=>'text-decoration-line-through',
+		'link'=>\app\components\LinkObjectWidget::widget([
+			'model'=>$model,
+			'static'=>$static_view,
+			'noDelete'=>$noDelete,
+			'hideUndeletable'=>$noDelete,
+			'noSpaces'=>true,
+		])
+	]);
+} else echo "Отсутствует";

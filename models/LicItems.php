@@ -31,7 +31,6 @@ use Yii;
  * @property Techs[] 	 $arms
  * @property Comps[]     $comps
  * @property Users[]     $users
- * @property OldArms[]   $keyArms
  * @property array       $keyArmsIds
  * @property LicKeys[]   $keys
  * @property LicKeys[]   $usedKeys
@@ -44,6 +43,8 @@ class LicItems extends ArmsModel
 	
 	public static $titles='Закупленные лицензии';
 	public static $title='Закупленные лицензии';
+	
+	public $linkComment=null; //комментарий, добавляемый при привязке лицензий
 
     /**
      * {@inheritdoc}
@@ -59,14 +60,33 @@ class LicItems extends ArmsModel
 	 */
 	public function behaviors()
 	{
+		$model=$this;
 		return [
 			[
 				'class' => \voskobovich\linker\LinkerBehavior::className(),
 				'relations' => [
 					'contracts_ids' => 'contracts',
-					'arms_ids' => 'arms',
-					'comps_ids' => 'comps',
-					'users_ids' => 'users',
+					'arms_ids' => [
+						'arms',
+						'updater' => [
+							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
+							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+						],
+					],
+					'comps_ids' => [
+						'comps',
+						'updater' => [
+							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
+							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+						],
+					],
+					'users_ids' => [
+						'users',
+						'updater' => [
+							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
+							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+						],
+					],
 				]
 			]
 		];
@@ -81,7 +101,7 @@ class LicItems extends ArmsModel
             [['descr', 'count'], 'required'],
 	        [['contracts_ids','arms_ids','comps_ids','users_ids'], 'each', 'rule'=>['integer']],
 	        [['lic_group_id',  'count'], 'integer'],
-            [['active_from', 'active_to', 'created_at', 'comment'], 'safe'],
+            [['active_from', 'active_to', 'created_at', 'comment', 'linkComment'], 'safe'],
 	        [['descr'], 'string', 'max' => 255],
 	        ['descr', function ($attribute, $params, $validator) {
 		        $same=static::findOne([$attribute=>$this->$attribute,'lic_group_id'=>$this->lic_group_id]);
@@ -96,38 +116,60 @@ class LicItems extends ArmsModel
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
-	        'id' => 'Идентификатор',
-	        'lic_group_id' => 'Тип лицензий',
-	        'descr' => 'Описание закупки',
-	        'count' => 'Количество приобретенных лицензий',
-	        'comment' => 'Комментарий',
-	        'arms_ids' => 'АРМы, куда распределять лицензии',
-			'comps_ids' => 'ОС, куда распределять лицензии',
-			'users_ids' => 'Пользователи, на которых распределять лицензии',
-	        'contracts_ids' => 'Документы',
-	        'active_from' => 'Дата / Начало периода действия',
-	        'active_to' => 'Окончание периода действия',
-	        'status' => 'Состояние',
+	        'lic_group_id' => [
+	        	'Тип лицензий',
+				'hint' => 'Тип лицензий которые были закуплены<br>'.
+				'Выберите один из вариантов. Если нужного нет - то надо сначала завести',
+			],
+	        'descr' => [
+				'Описание закупки',
+				'hint' => 'Куда/Кому/С какой целью производится конкретно эта закупка. Например на какой АРМ, группу АРМ, проект и т.п. Описание должно идентифицировать эту закупку в группе от остальных. Желательно кратко',
+			],
+	        'count' => [
+				'Количество приобретенных лицензий',
+			],
+	        'comment' => [
+				'Комментарий',
+				'hint' => 'Вся прочая информация по этой закупке. Если есть сомнения записать или нет чтото полезное в комментарии - лучше записать. Объем не ограничен.',
+			],
+	        'arms_ids' => [
+				'АРМы, куда распределять лицензии',
+				'hint' => 'На эти АРМы будут распределяться лицензии не распределенные через лиц. ключи',
+			],
+			'comps_ids' => [
+				'ОС, куда распределять лицензии',
+				'hint' => 'На эти ОС будут распределяться лицензии не распределенные через лиц. ключи',
+			],
+			'users_ids' => [
+				'Пользователи, на которых распределять лицензии',
+				'hint' => 'На этих пользователей будут распределяться лицензии не распределенные через лиц. ключи',
+			],
+	        'contracts_ids' => [
+				'Документы',
+				'hint' => 'Желательно привязать документы на основании которых лицензии были приобретены (заявки, счета, акты)',
+			],
+	        'active_from' => [
+				'Дата / Начало периода действия',
+				'hint' => 'С какого момента лицензия считается действительной',
+			],
+	        'active_to' => [
+				'Окончание периода действия',
+				'hint' => 'Если не указано, то считается бессрочной',
+			],
+			'linkComment' => [
+				'Пояснение к добавляемым привязкам',
+				'hint' => 'На каком основании эти лицензии закрепляются за добавленными выше объектами. Чтобы спустя время не было вопросов, а кто и зачем эту лицензию туда выделил (уже существующие привязки не меняются, только новые)',
+			],
+	        'status' => [
+				'Состояние',
+			],
         ];
     }
 
-
-	public function attributeHints()
-	{
-		return [
-			'lic_group_id' => 'К какому типу/описанию лицензий производится закупка',
-			'descr' => 'Куда/Кому/С какой целью производится конкретно эта закупка. Например на какой АРМ, группу АРМ, проект и т.п. Описание должно идентифицировать эту закупку в группе от остальных. Желательно кратко',
-			'arms_ids' => 'АРМы, куда распределять лицензии',
-			'contracts_ids' => 'Желательно привязать документы на основании которых заводится эта закупка лицензий (заявки, счета, акты)',
-			'active_from' => 'С какого момента лицензия считается действительной',
-			'active_to' => 'Если не указано, то считается бессрочной',
-			'comment' => 'Вся прочая информация по этой закупке. Если есть сомнения записать или нет чтото полезное в комментарии - лучше записать. Объем не ограничен.',
-		];
-	}
-
+    
 	public function getDatePart()
 	{
 		if (strlen($this->active_from)) {
@@ -322,4 +364,14 @@ class LicItems extends ArmsModel
 		return false;
 	}
 	
+	public function reverseLinks()
+	{
+		return [
+			$this->keys,
+			$this->users,
+			$this->arms,
+			$this->comps,
+			$this->contracts
+		];
+	}
 }

@@ -51,7 +51,8 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
-		]
+		],
+		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]); ?>
 
 	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'users_ids', [
@@ -61,7 +62,8 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
-		]
+		],
+		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
 	
 	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'comps_ids', [
@@ -71,10 +73,14 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
-		]
+		],
+		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
 	
-	
+	<?= $form->field($model, 'linkComment',['options'=>['style'=>'display:none','id'=>'linkComment']])->textInput(['maxlength' => true]) ?>
+
+
+
 	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form, $model, 'comment',['lines' => 4,]) ?>
 
     <div class="form-group">

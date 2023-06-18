@@ -44,7 +44,8 @@ class AppAsset extends AssetBundle
     ];
     public $cssOptions = [];
     public $depends = [
-        'yii\web\YiiAsset',
+		'yii\web\YiiAsset',
+		'yii\jui\JuiAsset',
         'yii\bootstrap5\BootstrapAsset',
 		'app\assets\Select2ArmsAsset',
 		'app\assets\TooltipsterAsset',

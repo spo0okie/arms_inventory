@@ -19,7 +19,7 @@ $renderer=$this;
 		'id' => 'lic-keys',
 		'header' => Html::encode($this->title),
 		'columns' => include 'columns.php',
-		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		//'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
 		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\LicKeys','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,

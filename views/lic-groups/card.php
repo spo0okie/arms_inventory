@@ -27,39 +27,8 @@ if (!isset($linksData)) $linksData=null;
 
 ?>
 
-<?php if (!$static_view) { ?>
-<div class="row">
-    <div class="col-md-9" >
-<?php } ?>
-        <h1>
-			<?= Html::encode($model->descr) ?>
-			<?= Html::a('<span class="fas fa-pencil-alt"/>', ['update', 'id' => $model->id]) ?>
-			<?php if (!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
-				'data' => [
-					'confirm' => 'Действительно удалить '.\app\models\LicGroups::$title.'?',
-					'method' => 'post',
-				],
-			]) ?>
-        </h1>
-        <p>
-			<?= Yii::$app->formatter->asNtext($model->comment) ?>
-        </p>
-		<?= $this->render('/lic-types/descr',['model'=>$model->licType]) ?>
-
-<?php if (!$static_view) { ?>
-    </div>
-    <div class="col-md-3" >
-<?php } else echo '<br />' ?>
-
-	    <?= $this->render('usage',['model'=>$model]) ?>
-		<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
-
-<?php if (!$static_view) { ?>
-    </div>
-</div>
-<?php } ?>
-
 <br />
+
 
 <?= $this->render('card-att',compact(['model','static_view','linksData'])) ?>
 

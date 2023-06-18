@@ -75,19 +75,23 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	        ]); ?>
         </div>
     </div>
-
-	<?= $form->field($model, 'arms_ids')->widget(Select2::className(), [
+	
+	
+	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'arms_ids', [
 		'data' => \app\models\Techs::fetchArmNames(),
 		'options' => ['placeholder' => 'Выберите АРМы',],
+		'classicHint'=>\app\models\Contracts::fetchArmsHint($model->contracts_ids,'licitems'),
+		'classicHintOptions'=>['id'=>'arms_id-hint'],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
-		]
-	])->hint(\app\models\Contracts::fetchArmsHint($model->contracts_ids,'licitems'),['id'=>'arms_id-hint']) ?>
+		],
+		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
+	]) ?>
 	
-	<?= $form->field($model, 'users_ids')->widget(Select2::className(), [
+	<?= \app\helpers\FieldsHelper::Select2Field($form,$model,  'users_ids', [
 		'data' => \app\models\Users::fetchWorking(),
 		'options' => ['placeholder' => 'Выберите пользователей',],
 		'toggleAllSettings'=>['selectLabel'=>null],
@@ -95,10 +99,11 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
-		]
+		],
+		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
 	
-	<?= $form->field($model, 'comps_ids')->widget(Select2::className(), [
+	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'comps_ids', [
 		'data' => \app\models\Comps::fetchNames(),
 		'options' => ['placeholder' => 'Выберите операционные системы',],
 		'toggleAllSettings'=>['selectLabel'=>null],
@@ -106,8 +111,12 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			'dropdownParent' => $modalParent,
 			'allowClear' => true,
 			'multiple' => true
-		]
+		],
+		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
+	
+	<?= $form->field($model, 'linkComment',['options'=>['style'=>'display:none','id'=>'linkComment']])->textInput(['maxlength' => true]) ?>
+
 
 	<?= $form->field($model, 'contracts_ids')->widget(Select2::className(), [
 		'data' => \app\models\Contracts::fetchNames(),

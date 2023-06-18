@@ -52,6 +52,7 @@
 	"spo0okie/yii2-rbac-plus": "dev-master",
     "rlanvin/php-ip": "^2.1",
 	"thomaspark/bootswatch": "dev-master",
+    "yiisoft/yii2-jui": "~2.0.0",
     "ext-imagick": "*"
   },
     "require-dev": {

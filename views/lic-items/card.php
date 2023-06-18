@@ -25,6 +25,10 @@ if (!isset($linksData)) $linksData=null;
 		'linksData'=>$linksData,
     ])  ?>
 
+	<?php if (isset($linksData) && $linksData->count) { ?>
+		<h4>Привязки</h4>
+		<?= $this->render('/lic-links/obj-list', ['dataProvider' => $linksData]); ?>
+	<?php } ?>
 
     <?php if (!$static_view) { ?>
 
@@ -73,10 +77,7 @@ if (!isset($linksData)) $linksData=null;
 <?= $this->render('/contracts/model-list',['model'=>$model,'static_view'=>$static_view,'link'=>'lics_ids']) ?>
 
 
-
-
-
 <h4>Комментарий:</h4>
-    <p>
-		<?= Yii::$app->formatter->asNtext($model->comment) ?>
-    </p>
+<p>
+	<?= Yii::$app->formatter->asNtext($model->comment) ?>
+</p>
