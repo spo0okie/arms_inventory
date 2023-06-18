@@ -226,7 +226,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 
 	<div class="row">
 		<div class="col-md-6" >
-			<?= FieldsHelper::TextAutoresizeField($form,$model,'ip',['lines' => 1,]) ?>
+			<?= FieldsHelper::TextAutoresizeField($form,$model,'ip',['lines' => 2,]) ?>
 		</div>
 		<div class="col-md-6" >
 			<?= FieldsHelper::TextAutoresizeField($form,$model,'mac',['lines' => 1,]) ?>

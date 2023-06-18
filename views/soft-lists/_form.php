@@ -26,10 +26,7 @@ if (!isset($modalParent)) $modalParent=null;
 
     <?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'comment',
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment', [
 		'lines' => 4,
 	]) ?>
 

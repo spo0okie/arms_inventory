@@ -123,10 +123,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		]
 	]) ?>
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'comment',
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'comment',[
 		'lines' => 4,
 	]) ?>
 

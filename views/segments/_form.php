@@ -22,12 +22,7 @@ if (!isset($modalParent)) $modalParent=null;
 		</div>
 	</div>
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'description',
-		'lines' => 4,
-	]) ?>
+	<?= app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'description',['lines' => 4,]) ?>
 
 	<?= $form->field($model, 'history')->widget(\kartik\markdown\MarkdownEditor::className(), [
 		'showExport'=>false

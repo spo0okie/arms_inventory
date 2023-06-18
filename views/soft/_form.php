@@ -41,10 +41,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'items',
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'items', [
 				'lines' => 4,
 			]) ?>
 
@@ -57,10 +54,7 @@ if (!isset($modalParent)) $modalParent=null;
 	</div>
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'additional',
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'additional', [
 				'lines' => 4,
 			]) ?>
 
@@ -84,10 +78,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<h3>Описание ПО</h3>
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'comment',
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment',[
 		'lines' => 4,
 	]) ?>
 

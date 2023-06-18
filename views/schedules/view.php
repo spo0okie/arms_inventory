@@ -46,44 +46,23 @@ $schedule_id=$model->id;
 	</h1>
 	<p><?= $model->description ?></p>
 
-	<?php if (!$acl_mode) { ?>
-		<div class="row">
-			<div class="col-md-6">
-				<?= $this->render('week',['model'=>$model])?>
-				<?= $this->render('7days',['model'=>$model])?>
-				<?= $this->render('services',['model'=>$model])?>
-			</div>
-			<div class="col-md-6">
-				<?= $this->render('week/list',['model'=>$model])?>
-				<?= $this->render('exceptions',['model'=>$model])?>
-			</div>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $this->render('week',['model'=>$model])?>
+			<?= $this->render('7days',['model'=>$model])?>
+			<?= $this->render('services',['model'=>$model])?>
 		</div>
-		<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
-		<?php if (strlen($model->history)) { ?>
-			<h3>Записная книжка:</h3>
-			<p>
-				<?= Markdown::convert($model->history) ?>
-			</p>
-			<br />
-		<?php } ?>
-	<?php } else { ?>
-
-		<div class="row">
-			<div class="col-md-6">
-				<?= $this->render('acl',['model'=>$model]) ?>
-			</div>
-			<div class="col-md-6">
-				<?= $this->render('exceptions',['model'=>$model]) ?>
-				<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
-				<?php if (strlen($model->history)) { ?>
-					<br /><br />
-					<h3>Записная книжка:</h3>
-					<p>
-						<?= Markdown::convert($model->history) ?>
-					</p>
-				<?php } ?>
-			</div>
+		<div class="col-md-6">
+			<?= $this->render('week/list',['model'=>$model])?>
+			<?= $this->render('exceptions',['model'=>$model])?>
 		</div>
-		
+	</div>
+	<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
+	<?php if (strlen($model->history)) { ?>
+		<h3>Записная книжка:</h3>
+		<p>
+			<?= Markdown::convert($model->history) ?>
+		</p>
+		<br />
 	<?php } ?>
 </div>

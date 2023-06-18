@@ -312,12 +312,7 @@ if (!isset($modalParent)) $modalParent=null;
 	    <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success','name' => 'save', 'formaction' => $formActionSave,]) ?>
     </div>
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'history',
-		'lines' => 10,
-	]) ?>
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'history',['lines' => 10,]) ?>
 
 	<?php ActiveForm::end(); ?>
 

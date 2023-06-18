@@ -106,10 +106,7 @@ if (Yii::$app->request->get('return'))
 
     <div class="row">
         <div class="col-md-8" >
-			<?= \app\components\TextAutoResizeWidget::widget([
-				'form' => $form,
-				'model' => $model,
-				'attribute' => 'comment',
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment', [
 				'lines' => 4,
 			]) ?>
 			<?= $form->field($model, 'individual_specs')->checkbox() ?>

@@ -101,10 +101,7 @@ JS;
 	<?php } ?>
 	
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'history',
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'history', [
 		'lines' => 4,
 	]) ?>
 

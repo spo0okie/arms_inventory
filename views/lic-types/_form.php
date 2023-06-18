@@ -25,17 +25,11 @@ if (!isset($modalParent)) $modalParent=null;
 	</div>
 	
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'comment',
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment',[
 		'lines' => 4,
 	]) ?>
 	
-	<?= \app\components\TextAutoResizeWidget::widget([
-		'form' => $form,
-		'model' => $model,
-		'attribute' => 'links',
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'links', [
 		'lines' => 4,
 	]) ?>
 
