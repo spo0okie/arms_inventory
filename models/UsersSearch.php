@@ -48,7 +48,7 @@ class UsersSearch extends Users
         $query = Users::find()->joinWith([
         	'orgStruct',
 			'org',
-			'techs.model.type'
+			'techs.model.type',
 		]);
 	
 		$sort=[
@@ -102,7 +102,8 @@ class UsersSearch extends Users
             ->andFilterWhere(QueryHelper::querySearchString('Email',$this->Email))
 			->andFilterWhere(QueryHelper::querySearchString(['OR','users.Phone','techs.comment'], $this->Phone))
 			->andFilterWhere(QueryHelper::querySearchString(['OR','users.Mobile','users.private_phone'], $this->Mobile))
-            ->andFilterWhere(QueryHelper::querySearchString('org_struct.name',$this->orgStruct_name));
+			->andFilterWhere(QueryHelper::querySearchString('partners.bname',$this->org_name))
+			->andFilterWhere(QueryHelper::querySearchString('org_struct.name',$this->orgStruct_name));
 	
 		$totalQuery=clone $query;
 	
