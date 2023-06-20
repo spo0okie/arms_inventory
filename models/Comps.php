@@ -677,6 +677,16 @@ class Comps extends ArmsModel
 
 			if (!$this->updated_at) $this->updated_at=gmdate('Y-m-d H:i:s');
 			
+			/* убираем посторонние символы из MAC*/
+			$macs=explode("\n",$this->mac);
+			foreach ($macs as $i=>$mac) {
+				$macs[$i]=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
+			}
+			$this->mac=implode("\n",$macs);
+			
+			/* взаимодействие с NetIPs */
+			$this->netIps_ids=NetIps::fetchIpIds($this->ip);
+			
 			//грузим старые значения записи
 			$old=static::findOne($this->id);
 			if (!is_null($old)) {
@@ -701,16 +711,7 @@ class Comps extends ArmsModel
 					//сохраняем старый арм
 					$old->arm->save();
 				}
-				
-				/* убираем посторонние символы из MAC*/
-				$macs=explode("\n",$this->mac);
-				foreach ($macs as $i=>$mac) {
-					$macs[$i]=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
-				}
-				$this->mac=implode("\n",$macs);
-				
-				/* взаимодействие с NetIPs */
-				$this->netIps_ids=NetIps::fetchIpIds($this->ip);
+
 				//находим все IP адреса которые от этой ОС отвалились
 				$removed=array_diff($old->netIps_ids,$this->netIps_ids);
 				//если есть отвязанные от это ос адреса
@@ -719,6 +720,7 @@ class Comps extends ArmsModel
 					if (is_object($ip=NetIps::findOne($id))) $ip->detachComp($this->id);
 				}
 			}
+			
 
 		}
 		return true;
