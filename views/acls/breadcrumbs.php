@@ -5,8 +5,8 @@ if (!isset($static_view)) $static_view=false;
 if (!isset($show_item)) $show_item=true;
 
 if ($model->schedules_id) {
-	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['schedules/index-acl']];
-	$this->params['breadcrumbs'][] = ['label' => $model->schedule->name, 'url' => ['schedules/view','id'=>$model->schedules_id]];
+	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['scheduled-access/index']];
+	$this->params['breadcrumbs'][] = ['label' => $model->schedule->name, 'url' => ['scheduled-access/view','id'=>$model->schedules_id]];
 } else {
 	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$titles, 'url' => ['index']];
 }
