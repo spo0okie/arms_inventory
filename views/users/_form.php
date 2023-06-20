@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
+use app\helpers\FieldsHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Users */
@@ -18,10 +19,10 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-md-6">
 			<div class="row">
 				<div class="col-md-8">
-					<?= $form->field($model, 'Ename')->textInput(['maxlength' => true]) ?>
+					<?= FieldsHelper::TextInputField($form,$model, 'Ename') ?>
 				</div>
 				<div class="col-md-4">
-					<?= $form->field($model, 'Bday')->textInput(['maxlength' => true]) ?>
+					<?= FieldsHelper::TextInputField($form,$model, 'Bday') ?>
 				</div>
 			</div>
 			
@@ -41,7 +42,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 				</div>
 				<div class="col-md-4">
-					<?= $form->field($model, 'employee_id')->textInput(['maxlength' => true]) ?>
+					<?= FieldsHelper::TextInputField($form,$model, 'employee_id') ?>
 
 				</div>
 			</div>
@@ -67,42 +68,43 @@ if (!isset($modalParent)) $modalParent=null;
 			</div>
 
 
-			<?= $form->field($model, 'Doljnost')->textInput(['maxlength' => true]) ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'Doljnost') ?>
 
 
 			<div class="row">
 				<div class="col-md-4">
-					<?= $form->field($model, 'Login')->textInput(['maxlength' => true]) ?>
+					<?= FieldsHelper::TextInputField($form,$model, 'Login') ?>
 				</div>
 				<div class="col-md-8">
-					<?= $form->field($model, 'Email')->textInput(['maxlength' => true]) ?>
+					<?= FieldsHelper::TextInputField($form,$model, 'Email') ?>
 				</div>
 			</div>
 
 
 			<div class="row">
 				<div class="col-md-4">
-					<?= $form->field($model, 'Phone')->textInput(['maxlength' => true]) ?>
+					<?= FieldsHelper::TextInputField($form,$model, 'Phone') ?>
 				</div>
 				<div class="col-md-8">
-					<?= $form->field($model, 'work_phone')->textInput(['maxlength' => true]) ?>
+					<?= FieldsHelper::TextInputField($form,$model, 'work_phone') ?>
 				</div>
 			</div>
 
 
 			
-			<?= $form->field($model, 'Mobile')->textInput(['maxlength' => true]) ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'Mobile') ?>
 			
-			<?= $form->field($model, 'private_phone')->textInput(['maxlength' => true]) ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'private_phone') ?>
 			
 			
-			<?= $form->field($model, 'manager_id')->textInput(['maxlength' => true]) ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'manager_id') ?>
 			
 			<?= $form->field($model, 'Uvolen')->checkbox() ?>
 			
 			<?= $form->field($model, 'nosync')->checkbox() ?>
 		</div>
 		<div class="col-md-6">
+			<?= FieldsHelper::TextAutoresizeField($form,$model,'ips',['lines'=>4])?>
 			<?= $form->field($model, 'notepad')->widget(\kartik\markdown\MarkdownEditor::className(), [
 				'showExport'=>false
 			]) ?>

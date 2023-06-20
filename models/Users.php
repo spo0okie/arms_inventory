@@ -34,6 +34,8 @@ use Yii;
  * @property string		$mn Middle Name
  * @property string		$shortName Сокращенные И.О.
  * @property string		$uid
+ * @property string		$ips
+ * @property array		$netIps_ids
  *
  * @property Aces[]      $aces
  * @property Comps[]     $comps
@@ -54,6 +56,7 @@ use Yii;
  * @property LicKeys[]   $licKeys
  * @property Partners    $org
  * @property OrgStruct   $orgStruct
+ * @property NetIps   	 $netIps
  */
 class Users extends ArmsModel implements \yii\web\IdentityInterface
 {
@@ -112,6 +115,24 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 		$fields[]='licGroups';
 		return $fields;
 	}
+	
+	
+	/**
+	 * В списке поведений прикручиваем many-to-many контрагентов
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'relations' => [
+					'netIps_ids' => 'netIps',
+				]
+			]
+		];
+	}
+	
 
 	/**
      * @inheritdoc
@@ -122,13 +143,13 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	        [['Ename', 'Persg', 'Uvolen', ], 'required'],
 	        [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
 	        [['employee_id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
-	        [['Doljnost', 'Ename', 'Login','Mobile','private_phone'], 'string', 'max' => 255],
+	        [['Doljnost', 'Ename', 'Login','Mobile','private_phone','ips'], 'string', 'max' => 255],
 			[['notepad'],'safe'],
 	        [['id'], 'unique'],
 	        [['Email','uid'], 'string', 'max' => 64],
 	        [['Phone', 'work_phone'], 'string', 'max' => 32],
 			['Login', function ($attribute, $params, $validator) {
-				$exist=static::find()->where(['Login'=>$this->Login])->one();
+				$exist=static::find()->where(['Login'=>$this->Login])->andWhere(['not',['id'=>$this->id]])->one();
 				/** @var $exist Users */
 				if (is_object($exist)) {
 					//если этот логин у того же самого человека (совпадает uid) то и пофик
@@ -136,7 +157,8 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 					$this->addError($attribute, 'Такой логин уже занят пользователем '.$exist->Ename);
 				}
 			}],
-        ];
+			[['netIps_ids'], 'each', 'rule'=>['integer']],
+		];
     }
 
     /**
@@ -312,6 +334,16 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	{
 		return $this->hasOne(\app\models\Partners::className(), ['id'=>'org_id']);
 	}
+	
+	/**
+	 * Возвращает IP адреса
+	 */
+	public function getNetIps()
+	{
+		return $this->hasMany(NetIps::className(), ['id' => 'ips_id'])->from(['users_ip'=>NetIps::tableName()])
+			->viaTable('{{%ips_in_users}}', ['users_id' => 'id']);
+	}
+	
 	
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
@@ -687,6 +719,16 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			$contract->save();
 		}
 
+	}
+	
+	public function beforeSave($insert)
+	{
+		if (parent::beforeSave($insert)) {
+			/* взаимодействие с NetIPs */
+			$this->netIps_ids=NetIps::fetchIpIds($this->ips);
+			return true;
+		}
+		return false;
 	}
 	
 	public function afterSave($insert, $changedAttributes)

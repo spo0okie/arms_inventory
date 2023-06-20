@@ -37,6 +37,11 @@ if (is_array($model->techs) && count ($model->techs)) {
 	foreach ($model->techs as $tech) $objects[]=$this->render('/techs/item',['model'=>$tech]);
 }
 
+if (is_array($model->users) && count ($model->users)) {
+	$users=[];
+	foreach ($model->users as $user) $objects[]=$this->render('/users/item',['model'=>$user]);
+}
+
 if (count($objects)) echo '<h4>привязан к:'.implode(', ',$objects).'</h4><br />';
 
 ?>

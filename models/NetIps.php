@@ -29,6 +29,7 @@ use yii\db\Expression;
  * @property Segments $segment
  * @property Acls[] $acls
  * @property Aces[] $aces
+ * @property Users[] $users
  * @property Places $place
  */
 class NetIps extends \yii\db\ActiveRecord
@@ -83,6 +84,7 @@ class NetIps extends \yii\db\ActiveRecord
 					'comps_ids' => 'comps',
 					'techs_ids' => 'techs',
 					'aces_ids' => 'aces',
+					'users_ids' => 'users',
 				]
 			]
 		];
@@ -169,6 +171,15 @@ class NetIps extends \yii\db\ActiveRecord
 	{
 		return $this->hasMany(Comps::className(), ['id' => 'comps_id'])->from(['ip_comps'=>Comps::tableName()])
 			->viaTable('{{%ips_in_comps}}', ['ips_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает привязанные ОС
+	 */
+	public function getUsers()
+	{
+		return $this->hasMany(Users::className(), ['id' => 'users_id'])->from(['ip_users'=>Users::tableName()])
+			->viaTable('{{%ips_in_users}}', ['ips_id' => 'id']);
 	}
 	
 	/**
@@ -393,8 +404,8 @@ class NetIps extends \yii\db\ActiveRecord
 		if (!count($items=explode("\n",$text))) return[];
 		$ids=[];
 		foreach ($items as $item) {
-			if (strlen(trim($item)))
-				$ids[]=NetIps::fetchByTextAddr($item);
+			$item=trim($item);
+			if (strlen($item)) $ids[]=NetIps::fetchByTextAddr($item);
 		}
 		return $ids;
 	}

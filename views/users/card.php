@@ -72,6 +72,14 @@ if (!isset($static_view)) $static_view=false;
     <br />
 
 
+	<?php echo \app\components\ListObjectWidget::widget([
+		'models' => $model->netIps,
+		'title' => 'Закрепленные IP:',
+		'item_options' => ['static_view' => $static_view, ],
+		'card_options' => ['cardClass' => 'mb-3'],
+		'lineBr'=> false,
+	]) ?>
+
     <?php if (!$static_view) echo \app\components\ListObjectWidget::widget([
 		'models' => $model->techs,
 		'title' => 'АРМ/Оборудование числящиеся за сотрудником:',
