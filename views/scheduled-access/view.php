@@ -10,7 +10,7 @@ $acl_mode=(count($model->acls));
 if (!isset($static_view)) $static_view=false;
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index-acl']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\helpers\Url::remember();
 
