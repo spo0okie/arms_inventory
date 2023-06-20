@@ -77,7 +77,7 @@ if (!isset($static_view)) $static_view=false;
 		'title' => 'Закрепленные IP:',
 		'item_options' => ['static_view' => $static_view, ],
 		'card_options' => ['cardClass' => 'mb-3'],
-		'lineBr'=> false,
+		//'lineBr'=> false,
 	]) ?>
 
     <?php if (!$static_view) echo \app\components\ListObjectWidget::widget([
