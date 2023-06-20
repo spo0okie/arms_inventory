@@ -199,7 +199,7 @@ class FieldsHelper
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		$options=\app\helpers\ArrayHelper::recursiveOverride([
-			'class'=>"card d-flex flex-row pt-2 pb-1",
+			'class'=>"card d-flex flex-wrap flex-row pt-2 pb-1",
 			'itemOptions'=>[
 				'class'=>'p-2'
 			],
