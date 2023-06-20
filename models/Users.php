@@ -28,6 +28,7 @@ use Yii;
  * @property string $employ_date Дата приема
  * @property string $resign_date Дата увольнения
  * @property string $manager_id Руководитель
+ * @property string $notepad
  * @property int         $nosync Отключить синхронизацию
  * @property string		$ln Last Name
  * @property string		$fn First Name
@@ -166,7 +167,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
      */
 	public function attributeData()
 	{
-		return [
+		return array_merge(parent::attributeData(),[
 			'employee_id' => [
 				'Таб. №',
 				'hint'=>'Табельный номер сотрудника<br>(конкретно этого его трудоустройства)'
@@ -201,8 +202,9 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			'arms' => 'АРМ',
 			'techs' => 'Оборудование',
 			'uid' => 'Идентификатор',
+			'ips' => 'Привязанные IP адреса',
 			'LastThreeLogins' => 'Входы',
-		];
+		]);
 	}
 	
 	/**
@@ -718,7 +720,13 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			$contract->users_ids=array_merge(array_diff($contract->users_ids,[$user->id]),[$this->id]);
 			$contract->save();
 		}
-
+		
+		$stringAttributes=['Phone','Email','work_phone','Mobile','private_phone','ips','notepad'];
+		foreach ($stringAttributes as $attr) //забираем себе те поля, которые тут не проставлены
+			if (!$this->$attr) {$this->$attr=$user->$attr;	$user->$attr='';}
+		$user->Login='';
+		$user->save();
+		$this->save();
 	}
 	
 	public function beforeSave($insert)
@@ -749,8 +757,6 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			/** @var $user Users */
 			//если найденный пользователь уволен, а этот нет
 			if (!$this->Uvolen && $user->Uvolen) $this->absorbUser($user);
-			$user->Login='';
-			$user->save();
 		}
 	}
 	

@@ -38,6 +38,8 @@ if (is_object($ip)) {
 			echo $this->render('/comps/item',['model'=>$comp]);
 		if (is_array($ip->techs)) foreach ($ip->techs as $tech)
 			echo $this->render('/techs/item',['model'=>$tech]);
+		if (is_array($ip->users)) foreach ($ip->users as $user)
+			echo $this->render('/users/item',['model'=>$user,'short'=>true]);
 		echo $ip->name;
 		?>
 	</td>
