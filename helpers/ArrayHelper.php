@@ -139,4 +139,10 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 			$array						//исходным архивом
 		);
 	}
+	
+	public static function implode($glue,$array,$keepEmpty=false){
+		$cleaned=[];
+		foreach ($array as $item) if ($keepEmpty||$item) $cleaned[]=$item;
+		return implode($glue,$cleaned);
+	}
 }

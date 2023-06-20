@@ -235,6 +235,19 @@ class Aces extends ArmsModel
         return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
     }
 	
+	public function hasIpAccess(){
+		foreach ($this->accessTypesUniq as $accessType) {
+			if ($accessType->isIpRecursive) return true;
+		}
+		return false;
+	}
+	
+	public function hasPhoneAccess(){
+		foreach ($this->accessTypesUniq as $accessType) {
+			if ($accessType->isTelephonyRecursive) return true;
+		}
+		return false;
+	}
 	
 	/**
 	 * @inheritdoc

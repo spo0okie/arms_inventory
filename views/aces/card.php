@@ -14,15 +14,47 @@ $deleteable=true; //тут переопределить возможность �
 if (!isset($static_view)) $static_view=false;
 
 $items=[];
+$hasIp=$model->hasIpAccess();
+$hasPhone=$model->hasPhoneAccess();
 
-foreach ($model->users as $user)
-	$items[$user->shortName]=$this->render('/users/item',['model'=>$user,'static_view'=>true,'icon'=>true,'short'=>true]);
+foreach ($model->users as $user) {
+	
+	if ($hasPhone)
+		$rendered = $this->render('/users/item', ['model' => $user, 'static_view' => true, 'icon' => true, 'name' => $user->shortName.(strlen($user->Phone)?'('.$user->Phone.')':'')]);
+	else
+		$rendered = $this->render('/users/item', ['model' => $user, 'static_view' => true, 'icon' => true, 'short' => true]);
+	
+	if ($hasIp) {
+		$ips=[];
+		foreach ($user->netIps as $ip) {
+			$ips[$ip->sname] = $this->render('/net-ips/item', ['model' => $ip, 'static_view' => true, 'icon' => true, 'no_class' => true]);
+			$items[$ip->sname]='';
+		}
+		if (count($ips)) $rendered.=': '.implode(', ',$ips);
+	}
+	
+	
+	$items[$user->shortName]=$rendered;
+}
 
-foreach ($model->comps as $comp)
-	$items[$comp->name]=$this->render('/comps/item',['model'=>$comp,'static_view'=>true,'icon'=>true]);
+foreach ($model->comps as $comp) {
+	$rendered = $this->render('/comps/item', ['model' => $comp, 'static_view' => true, 'icon' => true]);
+	
+	if ($hasIp) {
+		$ips=[];
+		foreach ($comp->netIps as $ip) {
+			$ips[$ip->sname] = $this->render('/net-ips/item', ['model' => $ip, 'static_view' => true, 'icon' => true, 'no_class' => true]);
+			$items[$ip->sname]='';
+		}
+		if (count($ips)) $rendered.=': '.implode(', ',$ips);
+	}
+	$items[$comp->name]=$rendered;
+}
 
-foreach ($model->netIps as $ip)
-	$items[$ip->sname]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true,'no_class'=>true]);
+foreach ($model->netIps as $ip) {
+	if (!isset($items[$ip->sname]))
+		$items[$ip->sname]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true,'no_class'=>true]);
+}
 
 if (strlen($model->comment))
 	$items[$model->comment]='<span class="text-wrap">'.$model->comment.'</span>';
@@ -43,7 +75,7 @@ if (!count($accessTypes)) $accessTypes[]=\app\models\Aces::$noAccessName;
 	<div class="d-flex g-0">
 		<div class="p-2 text-wrap flex-fill ">
 			<?php if (count($items)) {
-				echo implode(' <br /> ',$items);
+				echo \app\helpers\ArrayHelper::implode(' <br /> ',$items);
 			} else { ?>
 				<span class="text-center divider2-striped">
 					<span class="ace-card p-1">

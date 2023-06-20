@@ -16,6 +16,8 @@ use Yii;
  * @property boolean $is_ip
  * @property boolean $is_phone
  * @property boolean $is_vpn
+ * @property boolean $isIpRecursive
+ * @property boolean $isTelephonyRecursive
  * @property AccessTypes[] $children
  */
 class AccessTypes extends ArmsModel
@@ -132,8 +134,26 @@ class AccessTypes extends ArmsModel
 	{
 		return $this->name;
 	}
-
-
+	
+	public function getFlagRecursive($flag)
+	{
+		if ($this->$flag) return true;
+		foreach ($this->children as $child) {
+			if ($child->getFlagRecursive($flag)) return true;
+		}
+		return false;
+	}
+	
+	public function getIsTelephonyRecursive()
+	{
+		return $this->getFlagRecursive('is_phone');
+	}
+	
+	public function getIsIpRecursive()
+	{
+		return $this->getFlagRecursive('is_ip');
+	}
+	
 	/**
 	 * Возвращает список всех элементов
 	 * @return array|mixed|null
