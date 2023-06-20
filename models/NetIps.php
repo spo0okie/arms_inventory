@@ -67,7 +67,9 @@ class NetIps extends \yii\db\ActiveRecord
     {
         return [
             [['addr', 'mask','networks_id'], 'integer'],
+			
             [['text_addr'], 'ip', 'ipv6' => false, 'subnet'=>null],
+			[['text_addr'], 'unique'],
 			[['comment','name'],'string']
         ];
     }

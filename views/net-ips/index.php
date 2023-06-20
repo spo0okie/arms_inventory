@@ -56,12 +56,15 @@ $renderer=$this;
 				'value'=>function($data) use ($renderer){
 					$objects=[];
 					
-					if (is_array($data->comps) && count ($data->comps)) {
+					if (is_array($data->comps) && count($data->comps)) {
 						foreach ($data->comps as $comp) $objects[]=$renderer->render('/comps/item',['model'=>$comp]);
 					}
 					
-					if (is_array($data->techs) && count ($data->techs)) {
+					if (is_array($data->techs) && count($data->techs)) {
 						foreach ($data->techs as $tech) $objects[]=$renderer->render('/techs/item',['model'=>$tech]);
+					}
+					if (is_array($data->users) && count($data->users)) {
+						foreach ($data->users as $user) $objects[]=$renderer->render('/users/item',['model'=>$user,'short'=>true]);
 					}
 					
 					if (count($objects)) return implode(', ',$objects);
