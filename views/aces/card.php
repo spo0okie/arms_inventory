@@ -20,7 +20,7 @@ $hasPhone=$model->hasPhoneAccess();
 foreach ($model->users as $user) {
 	
 	if ($hasPhone)
-		$rendered = $this->render('/users/item', ['model' => $user, 'static_view' => true, 'icon' => true, 'name' => $user->shortName.(strlen($user->Phone)?'('.$user->Phone.')':'')]);
+		$rendered = $this->render('/users/item', ['model' => $user, 'static_view' => true, 'icon' => true, 'name' => $user->shortName.(strlen($user->Phone)?' ('.$user->Phone.')':'')]);
 	else
 		$rendered = $this->render('/users/item', ['model' => $user, 'static_view' => true, 'icon' => true, 'short' => true]);
 	
