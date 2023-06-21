@@ -5,14 +5,15 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\NetIps */
 
-$class='';
 
+
+if (!isset($class)) $class='';
 if (!isset($static_view)) $static_view=false;
 if (!isset($icon)) $icon=false;
 if (!isset($no_class)) $no_class=false;
 
 if (!empty($model)) {
-	if (!$no_class&&is_object($model->network)) $class=$model->network->segmentCode;
+	if (!$no_class&&is_object($model->network)) $class.=' '.$model->network->segmentCode;
 	if (!isset($name)) $name=$model->sname;
 	?>
 
