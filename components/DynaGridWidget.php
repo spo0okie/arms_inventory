@@ -35,11 +35,13 @@ class DynaGridWidget extends Widget
 	 */
 	public $id=null;
 	public $header;
+	public $panel=null;
 	public $createButton;
 	public $hintButton=null;
 	public $toolButton=null;
 	public $resizableColumns=true;
 	public $showFooter=false;
+	public $gridOptions=[];
 	
 	/**
 	 * данные
@@ -149,7 +151,7 @@ class DynaGridWidget extends Widget
 		return DynaGrid::widget([
 			'storage'=>DynaGrid::TYPE_DB,
 			'columns' => $columns,
-			'gridOptions'=>[
+			'gridOptions'=>ArrayHelper::recursiveOverride([
 				'id'=>$this->id,
 				'formatter' => [
 					'class' => 'yii\i18n\Formatter',
@@ -160,7 +162,7 @@ class DynaGridWidget extends Widget
 						NumberFormatter::CURRENCY_SYMBOL => '',
 					],
 				],
-				'panel'=>[
+				'panel'=>$this->panel ?? [
 					'type' => GridView::TYPE_DEFAULT,
 					'heading' => $this->header,
 					'before' => $this->createButton,
@@ -184,7 +186,7 @@ class DynaGridWidget extends Widget
 				}')],
 				'persistResize'=>true,
 				'showFooter'=>$this->showFooter,
-			],
+			],$this->gridOptions),
 			'options'=>[
 				'id'=>$this->id,
 				'resizable-columns-id'=>$this->id,

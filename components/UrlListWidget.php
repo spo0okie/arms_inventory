@@ -36,7 +36,7 @@ class UrlListWidget extends Widget
 			$url=$item;
 			$descr=$item;
 		}
-		return ['url'=>$url,'descr'=>$descr];
+		return ['url'=>trim($url),'descr'=>trim($descr)];
 	}
 
 	public function run()

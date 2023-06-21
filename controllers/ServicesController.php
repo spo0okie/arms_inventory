@@ -195,17 +195,17 @@ class ServicesController extends Controller
 		$dataProvider=new ArrayDataProvider([
 			'allModels' => $model->compsRecursive,
 			'key'=>'id',
-			/*'sort' => [
+			'sort' => [
 				'attributes'=> [
-					'objName',
-					'comment',
-					'changedAt',
-					'changedBy',
+					'name',
+					'ip',
+					'mac',
+					'raw_ver',
 				],
 				'defaultOrder' => [
-					'objName' => SORT_ASC
+					'name' => SORT_ASC
 				]
-			],*/
+			],
 			'pagination' => false,
 		]);;
 		return $this->renderAjax('comps-list', [

@@ -643,7 +643,7 @@ class Services extends ArmsModel
 				$this->compsRecursiveCache[$comp->id]=$comp;
 			
 			foreach ($this->children as $child)
-				$this->compsRecursiveCache=array_merge($child->compsRecursive,$this->compsRecursiveCache);
+				$this->compsRecursiveCache=ArrayHelper::recursiveOverride($child->compsRecursive,$this->compsRecursiveCache);
 		}
 		return $this->compsRecursiveCache;
 	}
