@@ -25,7 +25,10 @@ echo GridView::widget([
 			//'modelClass' => \app\models\links\LicLinks::class,
 			'format'=>'raw',
 			'value'=>function($item) use ($renderer){
-				return '<span class="text-nowrap">'.$renderer->render('/'.$item->objType.'/item',[
+				$linkObj=$item->objType;
+				//объединили АРМы с оборудованием же
+				if ($linkObj=='arms') $linkObj='techs';
+				return '<span class="text-nowrap">'.$renderer->render('/'.$linkObj.'/item',[
 					'model'=>$item->object,
 					'icon'=>true,
 					'short'=>true,
