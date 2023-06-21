@@ -26,27 +26,30 @@ $soft=$licGroup->soft;
 		<?php }  ?>
 
         <h4>Лицензируемые продукты:</h4>
+		<?php if (count($soft)) { ?>
         <p>
 		    <?php foreach ($soft as $item) { ?>
 			    <?= $this->render('/soft/item',['model'=>$item]) ?>
 			    <?php if (!$static_view) {
-					if (count($soft) > 1) {
-						echo Html::a('<span class="fas fa-trash"/>', [
-							'/lic-groups/unlink',
-							'id' => $model->id,
-							'soft_id' => $item->id,
-						], [
-							'data' => ['confirm' => 'Убрать ПО ' . $item->descr . ' из этой группы лицензий?',]
-						]);
-					} else {
-						echo '<span class="small text-muted" qtip_ttip="Невозможно удалить единственный элемент ПО. <br> В списке лицензирования должно быть хоть что-то" disabled>
-							<span class="fas fa-lock"></span>
-						</span>';
-					}
+					echo Html::a('<span class="fas fa-trash"/>', [
+						'/lic-groups/unlink',
+						'id' => $model->id,
+						'soft_id' => $item->id,
+					], [
+						'data' => ['confirm' => 'Убрать ПО ' . $item->descr . ' из этой группы лицензий?',]
+					]);
 				}?>
 			<br />
 		    <?php } ?>
         </p>
+		<?php } else { ?>
+
+			<div class="alert-striped text-center w-100 p-2">
+				<span class="fas fa-exclamation-triangle"></span>
+					ОТСУТСТВУЮТ
+				<span class="fas fa-exclamation-triangle"></span>
+			</div>
+		<?php } ?>
 
 		<?php if (!$static_view) { ?>
     </div>

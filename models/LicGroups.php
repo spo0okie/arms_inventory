@@ -51,7 +51,7 @@ class LicGroups extends ArmsModel
     public function rules()
     {
         return [
-            [['soft_ids', 'lic_types_id', 'descr'], 'required'],
+            [['lic_types_id', 'descr'], 'required'],
 	        [['soft_ids','arms_ids','comps_ids','users_ids'], 'each', 'rule'=>['integer']],
             [['lic_types_id'], 'integer'],
             [['created_at','comment','linkComment'], 'safe'],
@@ -325,7 +325,8 @@ class LicGroups extends ArmsModel
 			$this->arms,
 			$this->users,
 			$this->comps,
-			$this->licItems
+			$this->licItems,
+			$this->soft
 		];
 	}
 }
