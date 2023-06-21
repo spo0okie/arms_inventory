@@ -73,7 +73,7 @@ if (!count($accessTypes)) $accessTypes[]=\app\models\Aces::$noAccessName;
 
 <div class="card w-100 my-2 ace-card shadow-sm g-0" id="ace_card_<?= $model->id ?>">
 	<div class="d-flex g-0">
-		<div class="p-2 text-wrap flex-fill ">
+		<div class="p-2 text-wrap flex-fill small">
 			<?php if (count($items)) {
 				echo \app\helpers\ArrayHelper::implode(' <br /> ',$items);
 			} else { ?>
