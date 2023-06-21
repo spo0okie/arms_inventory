@@ -26,7 +26,7 @@ $renderer=$this;
 			'name',
 			'accessPeriods',
 		],
-		'createButton' => Html::a('Добавить', ['create-acl'], ['class' => 'btn btn-success']),
+		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
 		//'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Arms','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
