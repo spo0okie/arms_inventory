@@ -21,10 +21,11 @@ if (is_object($model)) {
 			$name=$model->Ename;
 	}
 	
-	if ($icon) $title='<span class="fas fa-user"></span>'.$name;
+	if ($icon) $name='<span class="fas fa-user small"></span>'.$name;
 ?>
 
 <span class="users-item object-item <?= $model->Uvolen?'uvolen':'' ?>">
+	
 	<?= \app\components\LinkObjectWidget::widget(['model'=>$model,'name'=>$name,'static'=>$static_view,'noDelete'=>$noDelete]) ?>
 </span>
 

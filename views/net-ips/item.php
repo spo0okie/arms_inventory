@@ -19,7 +19,7 @@ if (!empty($model)) {
 	<span class="object-item net-ips-item <?= $class ?>"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['net-ips/ttip','id'=>$model->id]) ?>"
 	><?=
-		Html::a(($icon?'<span class="fas fa-network-wired"></span>':'').$name,['net-ips/view','id'=>$model->id])
+		Html::a(($icon?'<span class="fas fa-network-wired small"></span>':'').$name,['net-ips/view','id'=>$model->id])
 	?><?=
 		$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['net-ips/update','id'=>$model->id,'return'=>'previous'])
 	?></span>
