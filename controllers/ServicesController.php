@@ -6,6 +6,7 @@ use app\models\Places;
 use Yii;
 use app\models\Services;
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -34,7 +35,7 @@ class ServicesController extends Controller
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','index-by-users','view','card','card-support','ttip','validate','item','json-preview'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','index-by-users','view','card','card-support','ttip','validate','item','json-preview','os-list','techs-list'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -170,19 +171,50 @@ class ServicesController extends Controller
 	
 	
 	/**
-     * Displays a single Services model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
-
-    /**
+	 * Displays a single Services model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionView($id)
+	{
+		return $this->render('view', [
+			'model' => $this->findModel($id),
+		]);
+	}
+	/**
+	 * Список ОС рекурсивно задействованные в сервисе (с учетом вложенных)
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionOsList($id)
+	{
+		$model=$this->findModel($id);
+		//$comps=$model->compsRecursive;
+		$dataProvider=new ArrayDataProvider([
+			'allModels' => $model->compsRecursive,
+			'key'=>'id',
+			/*'sort' => [
+				'attributes'=> [
+					'objName',
+					'comment',
+					'changedAt',
+					'changedBy',
+				],
+				'defaultOrder' => [
+					'objName' => SORT_ASC
+				]
+			],*/
+			'pagination' => false,
+		]);;
+		return $this->renderAjax('comps-list', [
+			'dataProvider' => $dataProvider,
+		]);
+	}
+	
+	
+	/**
      * Creates a new Services model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed

@@ -51,7 +51,8 @@ use yii\web\User;
  * @property string                 $firstUnpaid
  *
  *
- * @property \app\models\Comps[]    $comps
+ * @property Comps[]			    $comps
+ * @property Comps[]			    $compsRecursive
  * @property \app\models\Services[] $depends
  * @property \app\models\Services[] $dependants
  * @property \app\models\UserGroups $userGroup
@@ -116,6 +117,7 @@ class Services extends ArmsModel
 	private $placesCache=null;
 	private $sumTotalsCache=null;
 	private $sumChargeCache=null;
+	private $compsRecursiveCache=null;
 	
 	protected static $allItems=null;
 	
@@ -628,6 +630,22 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
 			->viaTable('comps_in_services', ['services_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает серверы на которых живет этот сервис
+	 */
+	public function getCompsRecursive()
+	{
+		if (is_null($this->compsRecursiveCache)) {
+			$this->compsRecursiveCache=[];
+			foreach ($this->comps as $comp)
+				$this->compsRecursiveCache[$comp->id]=$comp;
+			
+			foreach ($this->children as $child)
+				$this->compsRecursiveCache=array_merge($child->compsRecursive,$this->compsRecursiveCache);
+		}
+		return $this->compsRecursiveCache;
 	}
 	
 	public function getArms()
