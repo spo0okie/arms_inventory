@@ -31,7 +31,7 @@ $tabNumber=0;
 foreach ($wikiLinks as $name=>$url) {
 	$tabId='wiki'.$tabNumber;
 	$tabs[]=[
-		'label'=>$name,
+		'label'=>($name==$url)?'Wiki':$name,
 		'active'=>$cookieTab==$tabId,
 		'content'=>\app\components\WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
 		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
