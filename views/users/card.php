@@ -42,35 +42,32 @@ if (!isset($static_view)) $static_view=false;
 		<?= $model->Doljnost?(' // '.$model->Doljnost):'' ?>
 		<br>
 		<?= $this->render('/org-struct/item',['model'=>$model->orgStruct,'chain'=>true]) ?>
-		
     </p>
 
-    <br />
-
-    <h4>Логин в AD</h4>
-    <p>
-        <?= $model->Login ?>
-    </p>
-
-    <br />
-
-    <h4>E-Mail</h4>
-    <p>
-        <?= Yii::$app->formatter->asEmail($model->Email) ?>
-    </p>
-
-    <br />
+	<div class="flex-row d-flex flex-wrap pb-3">
+		<span class="pe-4">
+			<span class="h5">Логин в AD: </span><?= $model->Login ?>
+		</span>
+		<span>
+			<span class="h5">E-Mail: </span><?= Yii::$app->formatter->asEmail($model->Email) ?>
+		</span>
+	</div>
 
     <h4>Телефоны</h4>
-    <p>
+    <p class="pb-3">
         Внутренний: <?= $this->render('internal-phone',compact('model')) ?><br />
 		Сотовый: <?= $model->Mobile ?><br />
 		<?= strlen($model->private_phone)?"Личный: {$model->private_phone} <br />":'' ?>
         Городской: <?= $model->work_phone ?><br />
     </p>
 
-    <br />
-
+	<?php echo \app\components\ListObjectWidget::widget([
+		'models' => $model->compsFromTechs,
+		'title' => 'Привязанные ОС:',
+		'item_options' => ['static_view' => true, 'class'=>'text-nowrap','rc'=>true],
+		'card_options' => ['cardClass' => 'mb-3'],
+		'lineBr'=> $static_view,
+	]) ?>
 
 	<?php echo \app\components\ListObjectWidget::widget([
 		'models' => $model->netIps,

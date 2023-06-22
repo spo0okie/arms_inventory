@@ -9,6 +9,7 @@ use dosamigos\selectize\SelectizeDropDownList;
 if (!isset($static_view)) $static_view=true;
 if (!isset($fqdn)) $fqdn=false;
 if (!isset($icon)) $icon=false;
+if (!isset($rc)) 	$rc=false;
 
 if (is_object($model)) {
 	if (!isset($name)) $name=$model->renderName($fqdn);
@@ -26,6 +27,7 @@ if (is_object($model)) {
 			'noDelete'=>true,
 			'static'=>$static_view,
 			'name'=>$name,
+			'nameSuffix'=>$rc?Html::a("<i class=\"fas fa-sign-in-alt\" title='Удаленное управление {$model->fqdn}' ></i>",'remotecontrol://'.$model->fqdn):'',
 			'noSpaces'=>true
 		]),
 	]);

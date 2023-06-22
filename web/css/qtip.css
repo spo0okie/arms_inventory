@@ -51,6 +51,7 @@
     margin: 0;
 }
 
+.ttip-card .h4,
 .ttip-card h4 {
     font-size: 11px;
     font-weight: bolder;
@@ -58,6 +59,7 @@
     margin: 0;
 }
 
+.ttip-card .h5,
 .ttip-card h5 {
     font-size: 11px;
     font-weight: 550;

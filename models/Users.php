@@ -41,6 +41,7 @@ use Yii;
  * @property Aces[]      $aces
  * @property Comps[]     $comps
  * @property Comps[]     $compsFromServices
+ * @property Comps[]     $compsFromTechs
  * @property Comps[]     $compsTotal
  * @property Contracts[] $contracts
  * @property Techs[]     $techs
@@ -410,6 +411,16 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			$result[$comp->id]=$comp;
 		return $result;
 	}
+	
+	public function getCompsFromTechs()
+	{
+		$result=[];
+		foreach ($this->techs as $tech)
+			foreach ($tech->comps as $comp)
+				$result[$comp->id]=$comp;
+		return $result;
+	}
+	
 	
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь

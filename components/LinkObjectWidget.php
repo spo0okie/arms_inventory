@@ -30,6 +30,7 @@ class LinkObjectWidget extends Widget
 	public $links=null;		//имена полей обратных ссылок (кто ссылается на этот объект), чтобы понять можно ли его удалить или нет
 	
 	public $name=null;		//подмена имени объекта
+	public $nameSuffix='';	//подмена имени объекта
 	
 	public $url=null;		//ссылка куда переходить по клику
 	public $ttipUrl=null;	//ссылка что показывать в тултипе
@@ -101,7 +102,7 @@ class LinkObjectWidget extends Widget
 				$this->samePage?$this->name
 				:
 				Html::a($this->name,$this->url,$this->hrefOptions)
-			).(
+			).$this->nameSuffix.(
 				!$this->static&&!$this->noUpdate?$space.UpdateObjectWidget::widget([
 					'model'=>$this->model,
 					'updateHint'=>$this->updateHint,
