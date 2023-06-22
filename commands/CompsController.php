@@ -7,6 +7,7 @@
 
 namespace app\commands;
 
+use app\models\Comps;
 use yii\console\Controller;
 use yii\console\ExitCode;
 
@@ -42,6 +43,16 @@ class CompsController extends Controller
 					}
 				}
 			
+		return ExitCode::OK;
+	}
+	
+	public function actionResave()
+	{
+		foreach (\app\models\Comps::find()->all() as $comp) {
+			/** @var Comps $comp */
+			$comp->silentSave();
+		}
+		
 		return ExitCode::OK;
 	}
 }

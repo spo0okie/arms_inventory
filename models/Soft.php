@@ -2,7 +2,9 @@
 
 namespace app\models;
 
+use app\helpers\ArrayHelper;
 use Yii;
+use yii\helpers\StringHelper;
 
 /**
  * This is the model class for table "soft".
@@ -122,7 +124,8 @@ class Soft extends \yii\db\ActiveRecord
      */
     public function getLicGroups()
     {
-        return $this->hasMany(LicGroups::className(), ['soft_id' => 'id']);
+		return $this->hasMany(LicGroups::className(), ['id' => 'lics_id'])
+			->viaTable('{{%soft_in_lics}}', ['soft_id' => 'id']);
     }
 
     /**
@@ -322,11 +325,25 @@ class Soft extends \yii\db\ActiveRecord
 					}
 				}
 			}
+			
+			$this->items=implode("\n",StringHelper::explode($this->items,"\n",true,true));
+			$this->additional=implode("\n",StringHelper::explode($this->additional,"\n",true,true));
 			return true;
 		} else {
 			//error_log('uh oh');
 		}
 		return false;
+	}
+	
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+		/** @var Comps $comps */
+		$comps=Comps::find()
+			->where(['regexp','raw_soft',$this->items])
+			->all();
+		
+		foreach ($comps as $comp) $comp->silentSave();
 	}
 	
 	

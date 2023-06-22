@@ -74,6 +74,7 @@ class Comps extends ArmsModel
     private $ip_cache=null;
 	private $ip_ignore_cache=null;
 	private $ip_filtered_cache=null;
+	private $doNotChangeAuthor=false;
 
     /**
      * @inheritdoc
@@ -666,6 +667,10 @@ class Comps extends ArmsModel
 		return $fqdn?mb_strtolower($this->fqdn):mb_strtoupper($this->name);
 	}
 	
+	public function silentSave() {
+		$this->doNotChangeAuthor=true;
+		$this->save();
+	}
 	
 	/**
 	 * @inheritdoc
@@ -674,8 +679,10 @@ class Comps extends ArmsModel
 	{
 		if (parent::beforeSave($insert)) {
 			
+			$soft_ids=array_keys($this->swList->items);
+			$this->soft_ids=$soft_ids;
 
-			if (!$this->updated_at) $this->updated_at=gmdate('Y-m-d H:i:s');
+			if (!$this->updated_at && !$this->doNotChangeAuthor) $this->updated_at=gmdate('Y-m-d H:i:s');
 			
 			/* убираем посторонние символы из MAC*/
 			$macs=explode("\n",$this->mac);

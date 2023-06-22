@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\ArrayHelper;
 use Yii;
 use app\models\Soft;
 use app\models\SoftSearch;
@@ -79,8 +80,13 @@ class SoftController extends Controller
 	 */
 	public function actionView($id)
 	{
+		$searchModel = new \app\models\CompsSearch();
+		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(Yii::$app->request->queryParams,['CompsSearch'=>['soft_ids'=>$id]]));
+		
 		return $this->render('view', [
 			'model' => $this->findModel($id),
+			'searchModel'=>$searchModel,
+			'dataProvider'=>$dataProvider,
 		]);
 	}
 	
