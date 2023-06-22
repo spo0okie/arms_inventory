@@ -16,6 +16,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $techModels=$model->techModels;
 
+$cookieTabName='techmodels-view-tab-'.$model->id;
+$cookieTab=$_COOKIE[$cookieTabName]??'techs';
+
 
 $this->params['headerContent']='<h2>'.
         Html::encode($this->title).' '.
@@ -36,9 +39,12 @@ $this->params['headerContent']='<h2>'.
 	
 
 $tabs=[];
+$tabId='techs';
 $tabs[] = [
 	'label'=>'Экземпляры оборудования',
 	'linkOptions'=>['id'=>'items'],
+	'active'=>$cookieTab==$tabId,
+	'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 	'content'=>'<div class="container-fluid">'.DynaGridWidget::widget([
 			'id' => 'tech-types-arms-index',
 			'header' => 'Оборудование',
@@ -50,12 +56,13 @@ $tabs[] = [
 			'filterModel' => $searchModel,
 			'resizableColumns' => true,
 	]).'</div>' ,
-	//'active'=>is_array(Yii::$app->request->get('TechsSearch'))||Yii::$app->request->get('page')||Yii::$app->request->get('sort')
-	'active'=>true,
 ];
 
+$tabId='models';
 $tabs[] = [
 	'label'=>'Список моделей',
+	'active'=>$cookieTab==$tabId,
+	'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 	'linkOptions'=>['id'=>'models'],
 	'content'=>'<div class="container">'.
 		$this->render('list-models',['model'=>$model,'techModels'=>$techModels]).
