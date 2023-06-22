@@ -35,8 +35,13 @@ return [
 		'value' => function ($data) use ($renderer) {
 			if (is_object($data)) {
 				$output=[];
-				foreach ($data->netIps as $ip)
-					$output[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true]);
+				/* @var $data \app\models\Comps */
+				foreach ($data->netIps as $ip) {
+					$name=strtolower($ip->name);
+					//выводим пояснение к IP только если он не поясняет про FQDN или hostname нашей ОС
+					$sname=$ip->text_addr.(trim($name) && $name!=strtolower($data->name) && $name!=strtolower($data->fqdn)?' ('.$ip->name.')':'');
+					$output[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'name'=>$sname]);
+				}
 				return implode(' ',$output);
 			}
 			return null;
