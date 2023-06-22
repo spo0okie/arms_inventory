@@ -194,7 +194,10 @@ class Comps extends ArmsModel
             [
                 'class' => \voskobovich\linker\LinkerBehavior::className(),
                 'relations' => [
-					'soft_ids' => 'soft',
+					'soft_ids' => [
+						'soft',
+						'updater' => ['class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),],
+					],
 					'netIps_ids' => 'netIps',
                 ]
             ]
