@@ -34,7 +34,7 @@ foreach ($licProvider->models as $lic) {
 			'dataProvider' => $licProvider,
 			'panel'=>false
 		]) ?>
-		<?= count($licProvider->models)?('<span class="h5">Итого активных лицензий :'.$keysCount.'</span>'):'' ?>
+		<?= count($licProvider->models)?('<span class="h5">Итого активных лицензий: '.$keysCount.'</span>'):'' ?>
 	</div>
 </div>
 
