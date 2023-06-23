@@ -114,11 +114,15 @@ class Comps extends ArmsModel
 			}],
 			
 			['mac', 'filter', 'filter' => function ($value) {
-				$macs=explode("\n",$value);
+				/* убираем посторонние символы из MAC*/
+				$macs=explode("\n",$this->mac);
+				$filtered=[];
 				foreach ($macs as $i=>$mac) {
-					$macs[$i]=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
+					$cleanMac=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
+					//убираем MAC вида 0000000
+					if (hexdec($cleanMac)>0) $filtered[$cleanMac]=$cleanMac;
 				}
-				return implode("\n",$macs);;
+				return implode("\n",$filtered);
 			}],
 	
 			[['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],
@@ -686,13 +690,6 @@ class Comps extends ArmsModel
 			$this->soft_ids=$soft_ids;
 
 			if (!$this->updated_at && !$this->doNotChangeAuthor) $this->updated_at=gmdate('Y-m-d H:i:s');
-			
-			/* убираем посторонние символы из MAC*/
-			$macs=explode("\n",$this->mac);
-			foreach ($macs as $i=>$mac) {
-				$macs[$i]=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
-			}
-			$this->mac=implode("\n",$macs);
 			
 			/* взаимодействие с NetIPs */
 			$this->netIps_ids=NetIps::fetchIpIds($this->ip);
