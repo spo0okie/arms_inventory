@@ -41,7 +41,10 @@ class LicGroupsSearch extends LicGroups
      */
     public function search($params)
     {
-        $query = LicGroups::find();
+        $query = LicGroups::find()
+		->joinWith([
+			'soft'
+		]);
 
         // add conditions that should always apply here
 
@@ -65,7 +68,8 @@ class LicGroupsSearch extends LicGroups
         ]);
 
         $query->andFilterWhere(['or like', 'descr', \yii\helpers\StringHelper::explode($this->descr,'|',true,true)])
-            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+			->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+			->andFilterWhere(['soft.id'=>$this->soft_ids])
 			->orderBy('descr');
 
         return $dataProvider;

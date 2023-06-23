@@ -83,10 +83,14 @@ class SoftController extends Controller
 		$searchModel = new \app\models\CompsSearch();
 		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(Yii::$app->request->queryParams,['CompsSearch'=>['soft_ids'=>$id]]));
 		
+		$licSearchModel = new \app\models\LicGroupsSearch();
+		$licProvider = $licSearchModel->search(ArrayHelper::recursiveOverride(Yii::$app->request->queryParams,['LicGroupsSearch'=>['soft_ids'=>$id]]));
+		
 		return $this->render('view', [
 			'model' => $this->findModel($id),
 			'searchModel'=>$searchModel,
 			'dataProvider'=>$dataProvider,
+			'licProvider'=>$licProvider,
 		]);
 	}
 	

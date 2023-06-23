@@ -18,7 +18,12 @@ return [
 		'format'=>'raw',
 		'value'=>function($item) {
 			return $item->activeItemsCount.'/'.count($item->licItems);
-		}
+		},
+		'contentOptions'=>function($item){
+			return [
+				'class'=>count($item->licItems)?($item->activeItemsCount?'table-success':'table-danger'):'alert-gray-striped'
+			];
+		},
 	],
 	[
 		'attribute'=>'keysCount',
@@ -26,7 +31,14 @@ return [
 		'format'=>'raw',
 		'value'=>function($item) {
 			return $item->usedCount.'/'.$item->activeCount;
-		}
+		},
+		'contentOptions'=>function($item){
+			return [
+				'class'=>$item->usedCount==$item->activeCount?
+					($item->activeCount?'table-success':'alert-gray-striped'):
+					($item->usedCount>$item->activeCount?'table-danger':'table-info')
+			];
+		},
 	],
 	[
 		'attribute'=>'comment',
