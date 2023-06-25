@@ -20,8 +20,12 @@ use yii\helpers\StringHelper;
  * @property array $softLists Массив объектов списков ПО, в которые включено ПО
  * @property array $softLists_ids Массив ID списков ПО, в которые включено ПО
  * @property array $comps_ids Массив ID компов, на которые установлено ПО
- * @property array $comps Массив объектов компов, на которые установлено ПО
+ * @property bool $isFree входит в список бесплатного ПО
+ * @property bool $isIgnored входит в список игнорируемого ПО
+ * @property array $compHits_ids Массив ID компов, на которые установлено ПО
  *
+ * @property Soft[] $comps Массив объектов компов, на которые ПО внесено в паспорт
+ * @property Soft[] $hits Массив объектов компов, на которые установлено ПО
  * @property LicGroups[] $licGroups
  * @property Manufacturers $manufacturer
  */
@@ -153,17 +157,26 @@ class Soft extends \yii\db\ActiveRecord
         return static::getDb()->cache(function($db) {return $this->hasMany(SoftLists::className(), ['id' => 'list_id'])
             ->viaTable('{{%soft_in_lists}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
     }
-
-    /**
-     * Возвращает набор компов, в которых находится ПО
-     */
-    public function getComps()
-    {
-        return static::getDb()->cache(function($db) {return $this->hasMany(Comps::className(), ['id' => 'comp_id'])
-            ->viaTable('{{%soft_in_comps}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
-    }
-
-    /**
+	
+	/**
+	 * Возвращает набор компов, в которых находится ПО
+	 */
+	public function getComps()
+	{
+		return static::getDb()->cache(function($db) {return $this->hasMany(Comps::className(), ['id' => 'comp_id'])
+			->viaTable('{{%soft_in_comps}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
+	}
+	/**
+	 * Возвращает набор компов, в которых находится ПО
+	 */
+	public function getHits()
+	{
+		return $this->hasMany(Comps::className(), ['id' => 'comp_id'])
+			->viaTable('{{%soft_hits}}', ['soft_id' => 'id']);
+	}
+	
+	
+	/**
      * Возвращает количество совпадения с переданными массивами входных строк
      * @param array $strings входные строки среди которых искать продукт
      * @param array $additional дополнительные строки среди которых искать дополнительные продукты, если есть совпадения в основных

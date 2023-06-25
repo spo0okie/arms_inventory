@@ -30,7 +30,8 @@ use Yii;
  * @property string   $comment Комментарий
  * @property string   $updated_at Время обновления
  * @property boolean  $isIgnored Софт находится в списке игнорируемого ПО
- * @property array    $soft_ids Массив ID ПО, которое установлено на компе
+ * @property array    $softHits_ids Массив ID ПО, которое установлено на компе
+ * @property array    $soft_ids Массив ID ПО, которое внесено в паспорт
  * @property array    $netIps_ids Массив ID IP
  * @property array    $comps Массив объектов ПО, которое установлено на компе
  * @property boolean  $isWindows ОС относится к семейству Windows
@@ -202,6 +203,10 @@ class Comps extends ArmsModel
 						'soft',
 						'updater' => ['class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),],
 					],
+					'softHits_ids' => [
+						'softHits',
+						'updater' => ['class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),],
+					],
 					'netIps_ids' => 'netIps',
                 ]
             ]
@@ -334,7 +339,7 @@ class Comps extends ArmsModel
 
         return \yii\helpers\ArrayHelper::map($query->all(), $keyField, $valueField);
     }
-
+	
 	/**
 	 * Возвращает закрепленное на компе ПО
 	 */
@@ -342,6 +347,16 @@ class Comps extends ArmsModel
 	{
 		return static::getDb()->cache(function($db) {return $this->hasMany(Soft::className(), ['id' => 'soft_id'])
 			->viaTable('{{%soft_in_comps}}', ['comp_id' => 'id']);},Manufacturers::$CACHE_TIME);
+	}
+	
+	/**
+	 * Возвращает закрепленное на компе ПО
+	 */
+	public function getSoftHits()
+	{
+		return $this->hasMany(Soft::className(), ['id' => 'soft_id'])
+			->from(['installed_soft'=>Soft::tableName()])
+			->viaTable('{{%soft_hits}}', ['comp_id' => 'id']);
 	}
 	
 	/**
@@ -686,8 +701,7 @@ class Comps extends ArmsModel
 	{
 		if (parent::beforeSave($insert)) {
 			
-			$soft_ids=array_keys($this->swList->items);
-			$this->soft_ids=$soft_ids;
+			$this->softHits_ids=array_keys($this->swList->items);
 
 			if (!$this->updated_at && !$this->doNotChangeAuthor) $this->updated_at=gmdate('Y-m-d H:i:s');
 			

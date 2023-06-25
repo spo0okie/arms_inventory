@@ -81,7 +81,7 @@ class SoftController extends Controller
 	public function actionView($id)
 	{
 		$searchModel = new \app\models\CompsSearch();
-		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(Yii::$app->request->queryParams,['CompsSearch'=>['soft_ids'=>$id]]));
+		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(Yii::$app->request->queryParams,['CompsSearch'=>['softHits_ids'=>$id]]));
 		
 		$licSearchModel = new \app\models\LicGroupsSearch();
 		$licProvider = $licSearchModel->search(ArrayHelper::recursiveOverride(Yii::$app->request->queryParams,['LicGroupsSearch'=>['soft_ids'=>$id]]));

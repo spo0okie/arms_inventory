@@ -21,7 +21,7 @@ class CompsSearch extends Comps
     public function rules()
     {
         return [
-            [['id', 'domain_id','soft_ids'], 'integer'],
+            [['id', 'domain_id','soft_ids','softHits_ids'], 'integer'],
             [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id','archived'], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
 				$macs=explode("\n",$value);
@@ -58,6 +58,7 @@ class CompsSearch extends Comps
 				'arm.user',
 				'domain',
 				'soft',
+				'softHits',
 				'netIps.network'
 			]);
 
@@ -133,6 +134,7 @@ class CompsSearch extends Comps
 			->andFilterWhere(QueryHelper::querySearchString('raw_hw', $this->raw_hw))
 			->andFilterWhere(QueryHelper::querySearchNumberOrDate('comps.updated_at',$this->updated_at))
 			->andFilterWhere(['soft.id'=>$this->soft_ids])
+			->andFilterWhere(['installed_soft.id'=>$this->softHits_ids])
 		;
 	
 		$totalQuery=clone $query;
