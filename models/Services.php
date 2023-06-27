@@ -147,9 +147,11 @@ class Services extends ArmsModel
 	{
 		return [
 			'responsibleName',
+			'infrastructureResponsibleName',
 			'supportScheduleName',
 			'providingScheduleName',
 			'supportNames',
+			'infrastructureSupportNames',
 			'segmentName',
 		];
 	}
@@ -454,8 +456,9 @@ class Services extends ArmsModel
 	
 	
 	public function getInfrastructureResponsibleName() {
-		if (is_object($this->infrastructureResponsibleRecursive)) return $this->responsibleRecursive->Ename;
-		return null;
+		if (is_object($this->infrastructureResponsibleRecursive)) return $this->infrastructureResponsibleRecursive->Ename;
+		//если никто не нашелся за инфраструктуру, тогда за нее отвечает ответственный за сервис
+		return $this->responsibleName;
 	}
 	
 	/**
@@ -583,7 +586,8 @@ class Services extends ArmsModel
 			if (is_object($user)) $names[]=$user->Ename;
 			
 		if (count($names)) return implode(',',$names);
-		return null;
+		//если никто не нашелся за инфраструктуру, тогда за нее отвечает ответственный за сервис
+		return $this->supportNames;
 	}
 	
 	/**

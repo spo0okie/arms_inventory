@@ -97,6 +97,7 @@ $config = [
 						'contracts'		=> 'api/contracts',
 						'scans'			=> 'api/scans',
 						'org-struct'	=> 'api/org-struct',
+						'services'		=> 'api/services',
                     ],
                     'pluralize' => false,
                     'prefix' => 'api'
