@@ -45,9 +45,10 @@ if (!$content_only){ ?>
 		/мес
 	</p>
 
-<?php if ($model->network) { ?>
-	<strong>Подсеть:</strong>
-	<?= $this->render('/networks/item',['model'=>$model->network]) ?><br />
+<?php if (count($model->networks)) { ?>
+	<strong>Подсети:</strong>
+	<?php foreach ($model->networks as $network) echo $this->render('/networks/item',['model'=>$network,'class'=>'text-nowrap']).'' ?>
+	<br />
 <?php } ?>
 
 	<strong>Место подключения:</strong>

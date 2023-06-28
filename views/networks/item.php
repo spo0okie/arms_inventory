@@ -6,12 +6,13 @@ use yii\helpers\Html;
 /* @var $model app\models\Networks */
 if (!isset($static_view)) $static_view=false;
 if (!isset($icon)) $icon=false;
+if (!isset($class)) $class='text-monospace';
 
 if (is_object($model)) {
 	if (!isset($name)) $name=$model->sname;
 	?>
 
-	<span class="object-item networks-item text-monospace <?= $model->segmentCode ?>"
+	<span class="object-item networks-item <?= $class ?> <?= $model->segmentCode ?>"
 		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['networks/ttip','id'=>$model->id]) ?>"
 	>
 		<?=

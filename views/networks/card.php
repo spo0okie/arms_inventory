@@ -39,6 +39,12 @@ if (!isset($static_view)) $static_view=false;
 	<h4>L2 Домен: <?= $this->render('/net-domains/item',['model'=>$model->netDomain]) ?></h4>
 <?php } ?>
 
+	<?php if (count($model->orgInets)) {?>
+		<h4>Относится к вводу интернет: <?php foreach ($model->orgInets as $inet)
+				echo $this->render('/org-inet/item',['model'=>$inet])
+			?></h4>
+	<?php } ?>
+
 	<br />
 	<div class="row">
 		<div class="col-md-6">

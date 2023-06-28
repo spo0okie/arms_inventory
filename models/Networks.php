@@ -32,6 +32,7 @@ use yii\db\Expression;
  * @property NetDomains $netDomain
  * @property Segments $segment
  * @property NetIps[] $ips
+ * @property OrgInet[] $orgInets
  * @property Places $place
  */
 class Networks extends ArmsModel
@@ -177,6 +178,14 @@ class Networks extends ArmsModel
 		return empty($this->dhcp)?'':long2ip($this->dhcp);
 	}
 	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getOrgInets()
+	{
+		return $this->hasMany(OrgInet::className(), ['id' => 'org_inets_id'])
+			->viaTable('{{%org_inets_in_networks}}', ['networks_id' => 'id']);
+	}
 	
 	/**
 	 * читаемый Router

@@ -57,30 +57,23 @@ if (!isset($modalParent)) $modalParent=null;
             </div>
         </div>
         <div class="col-md-6">
-			<div class="row">
-				<div class="col-md-6">
-					<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'networks_id', [
-						'data' => \app\models\Networks::fetchNames(),
-						'options' => ['placeholder' => 'Выберите предоставляемую подсеть',],
-						'pluginOptions' => [
-							'dropdownParent' => $modalParent,
-							'allowClear' => false,
-							'multiple' => false
-						]
-					]) ?>
-				</div>
-				<div class="col-md-6">
-					<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'places_id', [
-						'data' => \app\models\Places::fetchNames(),
-						'pluginOptions' => [
-							'dropdownParent' => $modalParent,
-							'allowClear' => false,
-							'multiple' => false
-						]
-					]) ?>
-				</div>
-			</div>
-
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'places_id', [
+				'data' => \app\models\Places::fetchNames(),
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => false,
+					'multiple' => false
+				]
+			]) ?>
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'networks_ids', [
+				'data' => \app\models\Networks::fetchNames(),
+				'options' => ['placeholder' => 'Выберите предоставляемую подсеть',],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => false,
+					'multiple' => true
+				]
+			]) ?>
 			
 			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'history',[
 				'lines' => 2,

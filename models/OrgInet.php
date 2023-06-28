@@ -25,13 +25,15 @@ use Yii;
  * @property int $places_id Помещение
  * @property int $contracts_id Договор
  * @property int $services_id Услуга связи
- * @property int $networks_id Подсеть
+ * @property int $networks_id Подсеть	//Deprecated: заменено множественным полем ниже
+ * @property int[] $networks_ids Подсети
  *
  * @property ProvTel $provTel
  * @property Contracts $contract
  * @property Places $place
  * @property Services $service
- * @property Networks $network
+ * @property Networks $network	//Deprecated: заменено множественным полем ниже
+ * @property Networks[] $networks
  * @property Partners $partner
  */
 class OrgInet extends ArmsModel
@@ -46,14 +48,31 @@ class OrgInet extends ArmsModel
     {
         return 'org_inet';
     }
-
+	
+	/**
+	 * В списке поведений прикручиваем many-to-many contracts
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'relations' => [
+					'networks_ids' => 'networks',
+				]
+			]
+		];
+	}
+    
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-	        [['static', 'services_id', 'networks_id', 'places_id','archived'], 'integer'],
+			[['networks_ids'], 'each','rule'=>['integer']],
+			[['static', 'services_id', 'networks_id', 'places_id','archived'], 'integer'],
 	        [['cost','charge'], 'number'],
             [['name'], 'required'],
             [['ip_addr', 'ip_mask', 'ip_gw', 'ip_dns1', 'ip_dns2'], 'string', 'max' => 15],
@@ -92,11 +111,13 @@ class OrgInet extends ArmsModel
 				'Помещение',
 				'hint' => 'Помещение в которое заводится интернет',
 			],
-			'networks_id' => [
-				'Подсеть',
+			'networks_ids' => [
+				'Подсети',
+				'hint' => 'Какие IP подсети предоставляется этим вводом интернет со стороны провайдера'
 			],
 			'services_id' => [
 				'Услуга',
+				'hint' => 'На основании договора должна быть зарегистрирована услуга связи (которая может быть комплексной),<br> а на ее основании уже заводится ввод интернет'
 			],
 			'prov_tel_id' => [
 				'Оператор связи',
@@ -155,6 +176,16 @@ class OrgInet extends ArmsModel
 	public function getNetwork()
 	{
 		return $this->hasOne(Networks::className(), ['id' => 'networks_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getNetworks()
+	{
+		//return $this->hasOne(Networks::className(), ['id' => 'networks_id']);
+		return $this->hasMany(Networks::className(), ['id' => 'networks_id'])
+			->viaTable('{{%org_inets_in_networks}}', ['org_inets_id' => 'id']);
 	}
 	
 	/**
