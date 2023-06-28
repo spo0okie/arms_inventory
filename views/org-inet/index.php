@@ -32,7 +32,7 @@ $renderer=$this;
 					$output=[];
 					foreach ($data->networks as $network)
 						$output[]=$this->render('/networks/item',['model'=>$network, 'static_view'=>true]);
-					return implode($output);
+					return implode('<br />',$output);
 				},
 			],
 			'services_id' => [
