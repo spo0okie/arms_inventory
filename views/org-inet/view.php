@@ -8,7 +8,7 @@ use yii\widgets\DetailView;
 
 $static_view=false;
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\OrgInet::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\OrgInet::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="org-inet-view">

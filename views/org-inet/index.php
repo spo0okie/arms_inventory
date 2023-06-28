@@ -6,7 +6,7 @@ use kartik\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = \app\models\OrgInet::$title;
+$this->title = \app\models\OrgInet::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
@@ -27,9 +27,12 @@ $renderer=$this;
 					return $renderer->render('/places/item', ['model' => $data->place, 'static_view'=>true,'short'=>true]);
 				}
 			],
-			'networks_id' => [
+			'networks_ids' => [
 				'value' => function ($data) use ($renderer) {
-					return $this->render('/networks/item',['model'=>$data->network, 'static_view'=>true]);
+					$output=[];
+					foreach ($data->networks as $network)
+						$output[]=$this->render('/networks/item',['model'=>$network, 'static_view'=>true]);
+					return implode($output);
 				},
 			],
 			'services_id' => [

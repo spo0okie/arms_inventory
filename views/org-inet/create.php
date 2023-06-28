@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\OrgInet */
 
 $this->title = 'Новое подключение интернет';
-$this->params['breadcrumbs'][] = ['label' => \app\models\OrgInet::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\OrgInet::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="org-inet-create">
