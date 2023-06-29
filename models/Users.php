@@ -734,7 +734,9 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 		
 		$stringAttributes=['Phone','Email','work_phone','Mobile','private_phone','ips','notepad'];
 		foreach ($stringAttributes as $attr) //забираем себе те поля, которые тут не проставлены
-			if (!$this->$attr) {$this->$attr=$user->$attr;	$user->$attr='';}
+			if (!$this->$attr || $this->$attr==$user->$attr) {
+				$this->$attr=$user->$attr;	$user->$attr='';
+			}
 		$user->Login='';
 		$user->save();
 		$this->save();
