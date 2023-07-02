@@ -2,23 +2,45 @@
 /* РАСКРАСКА СЕГМЕНТОВ СЕТИ */
 span.segment_open {background-color: lightgreen; border-radius: 7px}
 div.arms-card div span.segment_open {background-color: seagreen;}
+
 span.segment_closed {background-color: pink; border-radius: 7px}
 div.arms-card div span.segment_closed {background-color: indianred}
+
 span.segment_common {background-color: lightskyblue; border-radius: 7px}
+
 span.segment_ext {background-color:yellow; border-radius: 7px;}
+
 span.segment_ext_dmz {background-color:yellow; border-radius: 7px; border: 1.2pt red dashed;}
+
 span.segment_int_dmz  {background-color:lightgray; border-radius: 7px; border: 1.2pt orange dashed;}
+
+span.segment_open_dmz  {background-color:lightgreen; border-radius: 7px; border: 1.2pt orange dashed;}
+
+span.segment_closed_dmz  {background-color:pink; border-radius: 7px; border: 1.2pt orange dashed;}
+
 span.segment_guest_dmz  {background-color:#3c3c3c; border-radius: 7px;  border: 1.5pt orange solid;}
 span.segment_guest_dmz a {color: orange}
+
 span.segment_client_vpn  {background-color:palegoldenrod; border-radius: 7px}
+
 span.segment_intersite_vpn  {background-color:cyan; border-radius: 7px}
+
 span.segment_it_lan  {background-color:orange; border-radius: 7px}
 div.arms-card div span.segment_it_lan  {background-color: darkorange;}
+
 span.segment_videoconf  {background-color:lightyellow;}
+
 span.segment_gw_close2open  {background-color:lightgreen; border-radius: 7px;  border: 2pt red solid;}
+
 span.segment_gw_open2close  {background-color:pink; border-radius: 7px;  border: 2pt lime solid;}
-span.segment_voip  {background-color: greenyellow;}
-span.segment_skud  {background-color: burlywood;}
+
+span.segment_voip  {background-color: greenyellow; border-radius: 7px;}
+
+span.segment_prn  {background-color: gray; border-radius: 7px;}
+span.segment_prn a {color: white}
+
+span.segment_skud  {background-color: burlywood; border-radius: 7px;}
+
 span.segment_mgmt {background: repeating-linear-gradient(
     45deg,
     lightyellow,

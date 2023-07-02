@@ -13,7 +13,7 @@ use Yii;
  * @property string $description
  * @property string $history
  */
-class Segments extends \yii\db\ActiveRecord
+class Segments extends ArmsModel
 {
 	
 	static $titles='Сегменты инфраструктуры';
@@ -41,30 +41,29 @@ class Segments extends \yii\db\ActiveRecord
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
 			'id' => 'ID',
-			'code' => 'Код',
-			'name' => 'Название',
-			'description' => 'Коротко',
-			'history' => 'Подробно',
+			'code' => [
+				'Код CSS',
+				'hint' => 'Название класса CSS для раскраски.',
+			],
+			'name' => [
+				'Название',
+				'hint' => 'Понятное человеку название',
+			],
+			'description' => [
+				'Короткое описание',
+				'hint' => 'Короткое описание сегмента, выводится в общем списке',
+			],
+			'history' => [
+				'Подробное описание',
+				'hint' => 'Подробное описание, чтобы увидеть надо будет открыть описание сегмента',
+			],
 		];
 	}
 	
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'ID',
-			'code' => 'Название класса CSS для раскраски. Нигде не видно в явном виде',
-			'name' => 'Понятное человеку название',
-			'description' => 'Короткое описание, выводится в общем списке',
-			'history' => 'Подробное описание, чтобы увидеть надо будет открыть описание сегмента',
-		];
-	}
 	
 	public static function fetchNames(){
 		$list= static::find()

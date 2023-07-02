@@ -7,6 +7,26 @@ use yii\bootstrap5\ActiveForm;
 /* @var $model app\models\Segments */
 /* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
+$defaultCss=[
+	'open',
+	'closed',
+	'common',
+	'gw_close2open',
+	'gw_open2close',
+	'ext',
+	'ext_dmz',
+	'int_dmz',
+	'open_dmz',
+	'closed_dmz',
+	'guest_dmz',
+	'client_vpn',
+	'intersite_vpn',
+	'it_lan',
+	'voip',
+	'prn',
+	'skud',
+	'mgmt'
+];
 ?>
 
 <div class="segments-form">
@@ -15,14 +35,21 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+			<?= app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+			<?= app\helpers\FieldsHelper::TextInputField($form,$model, 'code')->textInput(['maxlength' => true]) ?>
 		</div>
 		<div class="col-md-6">
-			<?= $form->field($model, 'code')->textInput(['maxlength' => true]) ?>
+			<?= app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'description',['lines' => 4,]) ?>
 		</div>
 	</div>
-	
-	<?= app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'description',['lines' => 4,]) ?>
+	<div class="d-flex flex-row flex-wrap">
+		<span>Готовые коды: </span>
+		<?php
+		foreach ($defaultCss as $css) {
+			echo '<span class="segment_'.$css.' mx-1 px-1"><a href="#" onclick="$(\'#segments-code\').val(\''.$css.'\')">'.$css.'</a></span>';
+		}
+		?>
+	</div>
 
 	<?= $form->field($model, 'history')->widget(\kartik\markdown\MarkdownEditor::className(), [
 		'showExport'=>false
