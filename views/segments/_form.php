@@ -43,10 +43,10 @@ $defaultCss=[
 		</div>
 	</div>
 	<div class="d-flex flex-row flex-wrap">
-		<span>Готовые коды: </span>
+		<span class="m-1">Готовые коды: </span>
 		<?php
 		foreach ($defaultCss as $css) {
-			echo '<span class="segment_'.$css.' mx-1 px-1"><a href="#" onclick="$(\'#segments-code\').val(\''.$css.'\')">'.$css.'</a></span>';
+			echo '<span class="segment_'.$css.' m-1 px-1"><a href="#" onclick="$(\'#segments-code\').val(\'segment_'.$css.'\')">segment_'.$css.'</a></span>';
 		}
 		?>
 	</div>
