@@ -365,6 +365,7 @@ class NetIps extends \yii\db\ActiveRecord
 		if (is_null($item=static::findOne(['addr'=>$addr]))) {
 			if ($create) {
 				$item=new NetIps();
+				$item->addr=$addr;
 				$item->text_addr=long2ip($addr);
 				if (!is_null($mask)) $item->text_addr.='/'.$mask;
 				$item->save();

@@ -6,20 +6,31 @@ use yii\helpers\Html;
 /* @var $model app\models\Networks */
 /* @var $ip app\models\NetIps */
 /* @var $i integer */
+/* @var $showEmpty boolean */
+
 
 $addr=long2ip($model->addr+$i);
 $default_comment='';
 $class='';
 if ($i==0){ //адрес сети
 	$default_comment='Network address';
-	$class='class="warning"';
+	$class='class="table-warning"';
 } elseif ($i==$model->capacity-1) {
 	$default_comment='Broadcast address';
-	$class='class="warning"';
+	$class='class="table-warning"';
 } elseif ($model->addr+$i==$model->router) {
 	$default_comment='Default gateway';
-	$class='class="success"';
-}?>
+	$class='class="table-success"';
+} elseif (is_object($model->firstUnusedIp) && $model->addr+$i==$model->firstUnusedIp->addr) {
+	$default_comment='Первый свободный адрес';
+	$class='class="table-success"';
+}
+
+$isEmpty=isset($model->ipsByAddr[$model->addr+$i])||$class;
+$ip=$model->ipsByAddr[$model->addr+$i]??null;
+?>
+
+<tr class="<?= $isEmpty?'':'empty-item' ?>" <?= ($isEmpty||$showEmpty)?'':'style="display:none"' ?>>
 
 <td <?= $class ?>>
 	<?= $i ?>
@@ -48,8 +59,9 @@ if (is_object($ip)) {
 	</td>
 	
 <?php } else { ?>
-	<td <?= $class ?>><?= Html::a($addr,['net-ips/create','return'=>'previous','text_addr'=>$addr]) ?></td>
+	<td <?= $class ?>><span class="net-ips-item"><?= Html::a($addr,['net-ips/create','return'=>'previous','text_addr'=>$addr]) ?></span></td>
 	<td <?= $class ?>></td>
 	<td <?= $class ?>><?= Yii::$app->formatter->asNtext($default_comment) ?></td>
-<?php }
+<?php } ?>
 
+</tr>

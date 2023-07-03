@@ -16,9 +16,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $showEmpty=\Yii::$app->request->get('showEmpty',false);
 
-$index=\yii\helpers\ArrayHelper::index($ips,'addr');
 //var_dump($index);
 
+//var_dump($model->ipsByAddr);
 ?>
 <div class="networks-view">
 	<div class="row">
@@ -59,11 +59,12 @@ $index=\yii\helpers\ArrayHelper::index($ips,'addr');
 		<?php
 			for ($i=0; $i<$model->capacity; $i++) {
 				$addr=$model->addr+$i;
-				?>
-				<tr class="<?= isset($index[$addr])?'':'empty-item' ?>" <?= (isset($index[$addr])||$showEmpty)?'':'style="display:none"' ?>>
-					<?= $this->render('ip-row',['model'=>$model,'i'=>$i,'ip'=>isset($index[$addr])?$index[$addr]:null]) ?>
-				</tr>
-		<?php } ?>
+				echo $this->render('ip-row',[
+					'model'=>$model,
+					'i'=>$i,
+					'showEmpty'=>$showEmpty,
+				]);
+		} ?>
 	</table>
 
 </div>

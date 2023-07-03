@@ -31,7 +31,9 @@ use yii\db\Expression;
  * @property NetVlans $netVlan
  * @property NetDomains $netDomain
  * @property Segments $segment
+ * @property NetIps $firstUnusedIp
  * @property NetIps[] $ips
+ * @property NetIps[] $ipsByAddr
  * @property OrgInet[] $orgInets
  * @property Places $place
  */
@@ -40,6 +42,7 @@ class Networks extends ArmsModel
 	
 	private $_IPv4Block=null;
 	private $ips_cache=null;
+	private $first_unused_cache=null;
 	
 	public static $title='Сети';
 	public $text_dhcp;
@@ -259,6 +262,37 @@ class Networks extends ArmsModel
 		return $this->hasMany(NetIps::className(), ['networks_id'=>'id'])->orderBy(['addr'=>SORT_ASC]);
 	}
 	
+	public function getIpsByAddr()
+	{
+		if (is_null($this->ips_cache))
+			$this->ips_cache=\yii\helpers\ArrayHelper::index($this->ips,'addr');
+
+		return $this->ips_cache;
+	}
+	
+	/**
+	 * Первый свободный IP
+	 */
+	public function getFirstUnusedIp()
+	{
+		if (is_null($this->first_unused_cache)) {
+			$first=($this->capacity>=4)?1:0;
+			$last=($this->capacity>=4)?$this->capacity:$this->capacity-1;
+			for ($i=$first; $i<$last; $i++) {
+				$addr=$this->addr+$i;
+				if (!isset($this->ipsByAddr[$addr])) {
+					$this->first_unused_cache=new NetIps();
+					//$this->first_unused_cache->addr=$addr;
+					$this->first_unused_cache->text_addr=long2ip($addr);
+					$this->first_unused_cache->beforeSave(true);
+					return $this->first_unused_cache;
+				}
+			}
+			$this->first_unused_cache=false;
+		}
+		return $this->first_unused_cache;
+	}
+	
 	/**
 	 * @return \yii\db\ActiveQuery|Segments
 	 */
@@ -316,8 +350,9 @@ class Networks extends ArmsModel
 	
 	public function fetchIp($i)
 	{
-		foreach ($this->ips as $ip) if ($ip->addr == $this->addr+$i) return $ip;
-		return null;
+		return $this->ipsByAddr[$this->addr+$i]??null;
+		//foreach ($this->ips as $ip) if ($ip->addr == $this->addr+$i) return $ip;
+		//return null;
 	}
 	
 	/**
