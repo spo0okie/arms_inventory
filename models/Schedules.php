@@ -554,7 +554,7 @@ class Schedules extends ArmsModel
 	{
 		if (!is_null($this->overridesCache)) return $this->overridesCache;
 		return $this->overridesCache=$this->hasMany(Schedules::className(), ['override_id' => 'id'])
-			->orderBy(['start_date'=>SORT_ASC]);
+			->orderBy(['start_date'=>SORT_DESC]);
 	}
 	
 	/**
