@@ -16,7 +16,7 @@ if (!empty($model)) {
 	elseif (($model->services_id) and is_object($model->service))
 		echo $this->render('/services/item',['model'=>$model->service,'static_view'=>true]);
 	elseif (($model->ips_id) and is_object($model->ip))
-		echo $this->render('/ips/item',['model'=>$model->ip,'static_view'=>true]);
+		echo $this->render('/net-ips/item',['model'=>$model->ip,'static_view'=>true]);
 	else {
 		if (!isset($name)) $name=$model->sname;
 	?>
