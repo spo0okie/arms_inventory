@@ -117,6 +117,12 @@ if (!isset($modalParent)) $modalParent=null;
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
+	<?= \app\components\CollapsableCardWidget::widget([
+		'title'=>'Дополнительно',
+		'content'=>FieldsHelper::TextInputField($form,$model,'uid'),
+		'initialCollapse'=>true,
+	])?>
+	
     <?php ActiveForm::end(); ?>
 
 </div>

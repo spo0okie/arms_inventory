@@ -202,7 +202,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			],
 			'arms' => 'АРМ',
 			'techs' => 'Оборудование',
-			'uid' => 'Идентификатор',
+			'uid' => ['Идентификатор','hint'=>'Уникальный идентификатор человека.<br>ИНН / СНИЛС / MD5(ИНН) и т.п.'],
 			'ips' => 'Привязанные IP адреса',
 			'LastThreeLogins' => 'Входы',
 		]);
