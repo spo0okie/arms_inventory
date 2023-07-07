@@ -21,7 +21,9 @@ $renderer=$this;
         <?= Html::a('Создать', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?= GridView::widget([
+    <?= \app\components\DynaGridWidget::widget([
+		'id'=>'net-ips-index',
+        'panel'=>false,
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
