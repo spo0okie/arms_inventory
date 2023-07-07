@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\NetIps;
 use app\models\NetIpsSearch;
+use yii\data\ArrayDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -52,8 +53,12 @@ class NetIpsController extends Controller
     public function actionIndex()
     {
         $searchModel = new NetIpsSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $dataProvider = new ArrayDataProvider([
+        	'allModels'=>$searchModel->search(Yii::$app->request->queryParams)->models,
+			'pagination'=>['pageSize'=>100],
+		]);
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,

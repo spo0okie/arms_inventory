@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 
@@ -21,15 +22,12 @@ $renderer=$this;
         <?= Html::a('Создать', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?= GridView::widget([
+    <?= DynaGridWidget::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-		'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+        'id'=>'vlans-index',
+        'panel'=>false,
         'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            //'id',
-			//'vlan',
 			[
 				'attribute'=>'networks_ids',
 				'format'=>'raw',
@@ -66,9 +64,7 @@ $renderer=$this;
 					'class'=>'text-center'
 				]
 			],
-            'comment:ntext',
-
-            //['class' => 'yii\grid\ActionColumn'],
+            'comment',
         ],
     ]); ?>
 </div>

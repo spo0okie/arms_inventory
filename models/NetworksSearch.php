@@ -56,7 +56,7 @@ class NetworksSearch extends Networks
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'pagination' => ['pageSize' => 100,],
+			'pagination' => false,
 			'sort'=> [
 				//'defaultOrder' => ['domains_id'=>SORT_ASC],
 				'attributes'=>[

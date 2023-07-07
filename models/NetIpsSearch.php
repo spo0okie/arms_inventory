@@ -45,13 +45,13 @@ class NetIpsSearch extends NetIps
     public function search($params)
     {
         $query = NetIps::find()
-		->joinWith(['network.netVlan','network.segment','techs','comps']);
+		->joinWith(['network.netVlan','network.segment','techs.state','comps','users']);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'pagination' => ['pageSize' => 100,],
+			'pagination' => false,
 			'sort'=> [
 				//'defaultOrder' => ['domains_id'=>SORT_ASC],
 				'attributes'=>[
