@@ -14,6 +14,7 @@ use \app\helpers\QueryHelper;
 class CompsSearch extends Comps
 {
 	public $places_id;
+	public $services_ids;
 
     /**
      * @inheritdoc
@@ -22,7 +23,7 @@ class CompsSearch extends Comps
     {
         return [
             [['id', 'domain_id','soft_ids','softHits_ids'], 'integer'],
-            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id','archived'], 'safe'],
+            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id','archived','services_ids'], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
 				$macs=explode("\n",$value);
 				foreach ($macs as $i=>$mac) {
@@ -56,10 +57,12 @@ class CompsSearch extends Comps
 			->joinWith([
 				'arm.place',
 				'arm.user',
+				'arm.state',
 				'domain',
 				'soft',
 				'softHits',
-				'netIps.network'
+				'netIps.network.segment',
+				'services'
 			]);
 
         // add conditions that should always apply here
@@ -125,6 +128,11 @@ class CompsSearch extends Comps
 			->andFilterWhere(QueryHelper::querySearchString('comps.mac', $this->mac))
             ->andFilterWhere(QueryHelper::querySearchString('arms.num', $this->arm_id))
 			->andFilterWhere(QueryHelper::querySearchString('comment', $this->comment))
+			->andFilterWhere(['or',
+				QueryHelper::querySearchString('services.name', $this->services_ids),
+				QueryHelper::querySearchString('services.search_text',$this->services_ids),
+				QueryHelper::querySearchString( 'services.description', $this->services_ids),
+			])
 			->andFilterWhere(QueryHelper::querySearchString('getplacepath({{places}}.id)', $this->places_id))
 			->andFilterWhere(['or',
 				QueryHelper::querySearchString('os', $this->os),

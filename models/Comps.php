@@ -179,6 +179,11 @@ class Comps extends ArmsModel
             	'АРМ',
 				'indexHint' => 'ПК на котором установлена ОС<br/>'.QueryHelper::$stringSearchHint,
 			],
+			'services_ids' => [
+				'Сервисы',
+				'hint' => 'Какие сервисы развернуты на этой ОС',
+				'indexHint' => '{same}<br />'.QueryHelper::$stringSearchHint,
+			],
             'comment' => 'Комментарий',
             'updated_at' => 'Время обновления',
 			'archived' => [

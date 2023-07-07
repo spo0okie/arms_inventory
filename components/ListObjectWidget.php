@@ -103,7 +103,7 @@ class ListObjectWidget extends Widget
 		//заголовок
 		$titleClass=($this->archived && !$this->show_empty)?ShowArchivedWidget::$itemClass:'';
 		$titleDisplay=HtmlHelper::ArchivedDisplay($this,$this->show_empty||$this->show_archived);
-		$title="<h4 class='$titleClass' $titleDisplay >{$this->title}</h4>";
+		$title=$this->title?"<h4 class='$titleClass' $titleDisplay >{$this->title}</h4>":'';
 		
 		//список
 		$listItems=[];

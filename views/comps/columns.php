@@ -69,6 +69,15 @@ return [
 				: null;
 		},
 	],
+	'services_ids' => [
+		'value' => function ($data) use ($renderer) {
+			return \app\components\ListObjectWidget::widget([
+				'models'=>$data->services,
+				'title'=>false,
+				'item_options'=>['static_view'=>true],
+			]);
+		},
+	],
 	'raw_hw' => [
 		'value' => function ($data) use ($manufacturers) {
 			if (is_object($data)) {
