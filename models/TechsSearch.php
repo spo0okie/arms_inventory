@@ -117,6 +117,7 @@ class TechsSearch extends Techs
 				'num',
 				'inv_num',
 				'sn',
+				'uid',
 				'inv_sn'=>[
 					'asc'=>['concat(sn,inv_num)'=>SORT_ASC],
 					'desc'=>['concat(sn,inv_num)'=>SORT_DESC],
