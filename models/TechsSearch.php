@@ -46,6 +46,7 @@ class TechsSearch extends Techs
 				'inv_num',
 				'inv_sn',
 				'sn',
+				'uid',
 	
 				'user',
 				'user_dep',
