@@ -35,22 +35,16 @@ return [
 		}
 	],
 	
-	'sn'=>[
-		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/techs/sn', ['model' => $data]);
-		}
-	],
-	'inv_num'=> [
-		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/techs/sn', ['model' => $data]);
-		}
-	],
+	'sn',
+	'inv_num',
+	'uid',
 	'inv_sn'=>[
 		'value' => function ($data) use ($renderer) {
 			$tokens=[];
 			
 			if (strlen($data->sn)) $tokens[]=$data->sn;
 			if (strlen($data->inv_num)) $tokens[]=$data->inv_num;
+			if (strlen($data->uid)) $tokens[]=$data->uid;
 			return \yii\helpers\Html::encode(implode(', ',$tokens));
 			
 		},
@@ -61,7 +55,8 @@ return [
 				'qtip_ttip'=>
 					'<strong>'.$data->getAttributeIndexLabel('sn').':</strong> '.($data->sn?$data->sn:'<i>отсутствует</i>').
 					'<br />'.
-					'<strong>'.$data->getAttributeIndexLabel('inv_num').':</strong> '.($data->inv_num?$data->inv_num:'<i>отсутствует</i>')
+					'<strong>'.$data->getAttributeIndexLabel('inv_num').':</strong> '.($data->inv_num?$data->inv_num:'<i>отсутствует</i>').
+					($data->uid?('<br /><strong>'.$data->getAttributeIndexLabel('uid').':</strong> '.$data->uid):'')
 			];
 		},
 	
@@ -88,6 +83,12 @@ return [
 	'departments_id' => [
 		'value' => function ($data) {
 			return (is_object($data->department)) ? $data->department->name:null;
+		},
+	],
+
+	'partners_id' => [
+		'value' => function ($data) use ($renderer) {
+			return (is_object($data->partner)) ? $renderer->render('/partners/item', ['model' => $data->partner,'static_view'=>true]) :null;
 		},
 	],
 	

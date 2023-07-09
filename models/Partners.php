@@ -51,7 +51,8 @@ class Partners extends ArmsModel
             [['comment','support_tel','cabinet_url'], 'string'],
             [['inn'], 'string', 'max' => 12],
             [['kpp'], 'string', 'max' => 9],
-            [['uname', 'bname'], 'string', 'max' => 255],
+			[['prefix'], 'string', 'max' => 5],
+			[['uname', 'bname'], 'string', 'max' => 255],
         ];
     }
 
@@ -66,7 +67,8 @@ class Partners extends ArmsModel
 			'kpp' => 'КПП',
 			'inn_kpp' => 'ИНН/КПП',
             'uname' => 'Юр. название',
-            'bname' => 'Бренд',
+			'bname' => 'Бренд',
+			'prefix' => ['Префикс','hint'=>'Префикс для инв. номера оборудования, закрепленного за этой организацией<br>(Если инв. номер составляется с учетом владельца)'],
 			'sname' => 'Короткое название',
 			'fname' => 'Полное название',
             'comment' => 'Комментарий',

@@ -91,12 +91,14 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
 //формирование инвентарника регистрируем только для новых моделей
 $formInvNumJs = /** @lang JavaScript */ <<<JS
-	$('#techs-model_id, #techs-places_id, #techs-arms_id, #techs-installed_id').on('change', function(){
+	$('#techs-model_id, #techs-places_id, #techs-arms_id, #techs-installed_id, #techs-partners_id').on('change', function(){
 		$.ajax({
 			url: '/web/techs/inv-num?model_id='+
 			$('#techs-model_id').val()
 			+'&place_id='+
 			$('#techs-places_id').val()
+			+'&org_id='+
+			$('#techs-partners_id').val()
 			+'&installed_id='+
 			$('#techs-installed_id').val()
 			+'&arm_id='+
@@ -130,19 +132,22 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
     ]); ?>
 
     <div class="row">
-        <div class="col-md-4" >
+        <div class="col-md-3" >
 			<?= FieldsHelper::TextInputField($form,$model, 'num') ?>
         </div>
-        <div class="col-md-4" >
+        <div class="col-md-3" >
 			<?= FieldsHelper::TextInputField($form,$model, 'inv_num') ?>
         </div>
-        <div class="col-md-4" >
+		<div class="col-md-3" >
 			<?= FieldsHelper::TextInputField($form,$model, 'sn') ?>
-        </div>
+		</div>
+		<div class="col-md-3" >
+			<?= FieldsHelper::TextInputField($form,$model, 'uid') ?>
+		</div>
     </div>
 
     <div class="row">
-        <div class="col-md-6" >
+        <div class="col-md-4" >
 			<?= FieldsHelper::Select2Field($form,$model, 'model_id', [
 				'data' => $techModels,
 				'hintModel'=>'TechModels',
@@ -156,6 +161,11 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				]
 			]) ?>
         </div>
+		<div class="col-md-2" >
+			<?= FieldsHelper::Select2Field($form,$model,'partners_id',[
+				'data'=>\app\models\Partners::fetchNames()
+			])?>
+		</div>
 		<div class="col-md-2" >
 			<?php if (count($model->comps)) {
 				echo FieldsHelper::Select2Field($form, $model, 'comp_id', [
@@ -194,7 +204,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		<?= (is_object($model) && is_object($model->model) && $model->model->individual_specs)?'':'style="display:none"' ?>
 	>
 		<div class="col-md-4" >
-			<?= $form->field($model, 'specs')->textarea(['rows' => max(6,count(explode("\n",$model->history)))]) ?>
+			<?= $form->field($model, 'specs')->textarea(['rows' => max(6,count(explode("\n",$model->specs)))]) ?>
 		</div>
 		<div class="col-md-4" >
 			<label class="control-label" >

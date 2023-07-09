@@ -54,6 +54,8 @@ class TechsSearch extends Techs
 	
 				'comp_id',
 				'comp_hw',
+
+				'partners_id',
 				
 				'ip',
 				'mac',
@@ -98,6 +100,7 @@ class TechsSearch extends Techs
 				'model.manufacturer',
 				'model.type',
 				'state',
+				'partner',
 				'department',
 				'contracts',
 				'licItems',
@@ -130,11 +133,17 @@ class TechsSearch extends Techs
 					'asc'=>['org_struct.name'=>SORT_ASC],
 					'desc'=>['org_struct.name'=>SORT_DESC],
 				],
+
 				'departments_id'=>[
 					'asc'=>['departments.name'=>SORT_ASC],
 					'desc'=>['departments.name'=>SORT_DESC],
 				],
-
+				
+				'partners_id'=>[
+					'asc'=>['CONCAT(partners.uname,partners.bname)'=>SORT_ASC],
+					'desc'=>['CONCAT(partners.uname,partners.bname)'=>SORT_DESC],
+				],
+				
 				'state_id'=>[
 					'asc'=>['tech_states.name'=>SORT_ASC],
 					'desc'=>['tech_states.name'=>SORT_DESC],
@@ -158,6 +167,7 @@ class TechsSearch extends Techs
 					'asc'=>['tech_models.name'=>SORT_ASC],
 					'desc'=>['tech_models.name'=>SORT_DESC],
 				],
+				
 				'place'=>[
 					'asc'=>['getplacepath(arms.places_id)'=>SORT_ASC],
 					'desc'=>['getplacepath(arms.places_id)'=>SORT_DESC],
@@ -182,7 +192,8 @@ class TechsSearch extends Techs
 
 			->andFilterWhere(QueryHelper::querySearchString('inv_num', $this->inv_num))
 			->andFilterWhere(QueryHelper::querySearchString('sn', $this->sn))
-			->andFilterWhere(QueryHelper::querySearchString('concat(sn, ", ", inv_num)', $this->inv_sn))
+			->andFilterWhere(QueryHelper::querySearchString('techs.uid', $this->uid))
+			->andFilterWhere(QueryHelper::querySearchString('concat(sn, ", ", inv_num, ", " , techs.uid)', $this->inv_sn))
 
 			->andFilterWhere(QueryHelper::querySearchString('users.Ename', $this->user))
 			->andFilterWhere(QueryHelper::querySearchString('users.Doljnost', $this->user_position))
@@ -195,6 +206,8 @@ class TechsSearch extends Techs
 	
 			->andFilterWhere(QueryHelper::querySearchString('concat(manufacturers.name," ",tech_models.name)',$this->model))
 			->andFilterWhere(QueryHelper::querySearchString('getplacepath(places.id)', $this->place))
+			
+			->andFilterWhere(QueryHelper::querySearchString('CONCAT(partners.uname,partners.bname)', $this->partners_id))
 
             ->andFilterWhere(QueryHelper::querySearchString(['OR','comps.ip','techs.ip'], $this->ip))
 			->andFilterWhere(QueryHelper::querySearchString(['OR','comps.mac','techs.mac'], $this->mac))

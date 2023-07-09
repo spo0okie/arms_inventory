@@ -97,17 +97,18 @@ class TechsController extends ArmsBaseController
 	
 	/**
 	 * Формирует префикс и возвращает следующий инвентарный номер в этом префиксе
-	 * @param null $model_id
-	 * @param null $place_id
-	 * @param null $arm_id
-	 * @param null $installed_id
+	 * @param null|integer $model_id
+	 * @param null|integer $place_id
+	 * @param null|integer $org_id
+	 * @param null|integer $arm_id
+	 * @param null|integer $installed_id
 	 * @return mixed
 	 */
-	public function actionInvNum($model_id=null,$place_id=null,$arm_id=null,$installed_id=null)
+	public function actionInvNum($model_id=null,$place_id=null,$org_id=null,$arm_id=null,$installed_id=null)
 	{
-		$prefix=\app\models\Techs::genInvPrefix($model_id,$place_id,$arm_id,$installed_id);
+		$prefix=Techs::genInvPrefix($model_id,$place_id,$org_id,$arm_id,$installed_id);
 		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-		return \app\models\Techs::fetchNextNum($prefix);
+		return Techs::fetchNextNum($prefix);
 	}
 
 

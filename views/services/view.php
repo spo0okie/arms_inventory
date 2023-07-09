@@ -11,6 +11,7 @@ $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => \app\models\Services::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
+\app\components\assets\DynaGridWidgetAsset::register($this);
 
 $wikiLinks=\app\components\WikiPageWidget::getLinks($model->links);
 $cookieTabName='services-view-tab-'.$model->id;

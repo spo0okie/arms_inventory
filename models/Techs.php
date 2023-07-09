@@ -121,9 +121,10 @@ class Techs extends ArmsModel
 	
 	public static $descr='Оргтехника, сетевое оборудование, сервера и вообще все, что является предметом ответственности ИТ службы, имеет материальное представление, но не является АРМом.';
 	
+	private static $defaultPrefixFormat=['place','org','type'];	//порядок префиксов для инв. номера
+	private static $defaultNumStrPad=[9,6,4];	//количество знаков в цифровой части номера в зависимости от количества токенов префикса
+	private static $defaultNumMaxLen=15;	//максимальная длина инвентарного номера (если получится уложиться убирая нули в числовой части)
 	
-	private static $num_str_pad_3tokens=4;	//количество знаков в цифровой части номера для 2 префиксов (3 токена вместе с цифровой частью)
-	private static $num_str_pad_2tokens=6;	//количество знаков в цифровой части номера для 1 префикса (2 токена вместе с цифровой частью)
 	private static $armInheritance=[		//поля которые наследуются у оборудования подключенного к АРМ
 		'places_id','user_id','it_staff_id','head_id','responsible_id','departments_id'
 	];
@@ -171,7 +172,7 @@ class Techs extends ArmsModel
 				'Инвентарный номер',
 				'indexLabel'=>'Инв. номер',
 				'hint' => 'Внутренний инвентарный номер в службе ИТ.<br/>'.
-					'Заполняется вручную на основании префиксов помещения и оборудования<br/>'.
+					'Заполняется автоматически на основании префиксов помещения, организации и оборудования<br/>'.
 					'(нужно выбрать помещение и модель оборудования)<br/>'.
 					'Вручную заполнять только если на то есть основания.',
 				'indexHint' => 'Внутренний инвентарный номер в службе ИТ.<br/>'.
@@ -183,15 +184,15 @@ class Techs extends ArmsModel
 				'hint' => 'Бухгалтерский инвентарный / номенклатурный номер.',
 			],
 			'inv_sn' => [
-				'label'=>'Бух/SN',
-				'indexHint' => 'Серийный и бухгалтерский инвентарный/номенклатурный номера через запятую<br>'.
-					'Искать можно по обоим номерам сразу<br/>'.QueryHelper::$stringSearchHint,
+				'label'=>'Бух/SN/Доп.',
+				'indexHint' => 'Серийный, бухгалтерский инвентарный/номенклатурный, дополнительный номера через запятую<br>'.
+					'Искать можно по всем номерам сразу<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'sn' => [
 				'Серийный номер',
 				'hint' => 'Серийный номер оборудования. Если явно нет, то MAC/IMEI/и т.п. чтобы можно было однозначно идентифицировать оборудование',
 			],
-
+			
 			'model_id' => [
 				'Модель оборудования',
 				'hint' => 'Модель устанавливаемого оборудования / компьютера.<br>'.
@@ -201,6 +202,13 @@ class Techs extends ArmsModel
 					'<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'model' => ['alias'=>'model_id'],
+			'partners_id' => [
+				'Организация',
+				'hint' => 'Организация в которую приобретено оборудование / компьютер.<br>'.
+					'Если в инвентаризации сопровождаются несколько организаций и нужно разделять оборудование между ними',
+				'indexHint' => '{same}'.
+					'<br/>'.QueryHelper::$stringSearchHint,
+			],
 			'specs' => [
 				'Тех. спецификация',
 				'hint' => 'Спецификация оборудования в случае, если модель оборудования не полностью определяет комплектацию каждого отдельного экземпляра',
@@ -238,7 +246,10 @@ class Techs extends ArmsModel
 				'hint'=>'Устройство занимает всю глубину корзины/шкафа.<br>'.
 					'В случае двусторонней корзины будет считаться что занимает обе стороны'
 			],
-			
+			'uid' => [
+				Yii::$app->params['techs.uidLabel']??'Доп. маркировка',
+				'hint'=>Yii::$app->params['techs.uidHint']??'Какая-либо дополнительная маркировка нанесенная на оборудование',
+			],
 			'comp_id' => [
 				'label'=>'Основная ОС',
 				'indexLabel'=>'ОС',
@@ -354,7 +365,7 @@ class Techs extends ArmsModel
         return [
             [['model_id'], 'required'],
 			[['model_id', 'state_id', 'scans_id', 'departments_id','comp_id'], 'integer'],
-			[['installed_id', 'arms_id', 'places_id'], 'integer'],
+			[['installed_id', 'arms_id', 'places_id','partners_id'], 'integer'],
 			[['user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'integer'],
 			[['installed_back','full_length'],'boolean'],
 
@@ -373,11 +384,12 @@ class Techs extends ArmsModel
 			['mac', 'filter', 'filter' => function ($value) {
 				return \app\helpers\MacsHelper::fixList($value);
 			}],
-			[['num'], 'string', 'max' => 16],
+			[['num','uid'], 'string', 'max' => 16],
 	        ['num', function ($attribute, $params, $validator) {
         		$tokens=explode('-',$this->$attribute);
-		        if ((count($tokens)!==3 && count($tokens)!==2) || !strlen($tokens[0])) {
-			        $this->addError($attribute, 'Инвентарный номер должен быть в формате "ФИЛ-[ТИП-]НОМЕР", где ФИЛ - префикс филиала, ТИП - префикс типа оборудования, НОМЕР - целочисленный номер уникальный в рамках филиала.');
+		        if (count($tokens)>4 || !strlen($tokens[0])) {
+		        	
+			        $this->addError($attribute, 'Инвентарный номер должен быть в формате "ПРЕФ1-[ПРЕФ2-][ПРЕФ3-]НОМЕР", где ПРЕФ1-N - префикс филиала/организации/оборудования, НОМЕР - целочисленный номер уникальный для этого набора префиксов.');
 		        }
 	        }],
 	        ['num', 'filter', 'filter' => ['\app\models\Techs','formatInvNum']],
@@ -423,22 +435,144 @@ class Techs extends ArmsModel
 		];
 	}
 	
+	/**
+	 * Возвращает массив размеров числовой части номера в зависимости от количества токенов
+	 */
+	public static function invNumStrPads() {
+		return Yii::$app->params['techs.invNumStrPads']??static::$defaultNumStrPad;
+	}
+	
+	public static function invNumMaxLen() {
+		return Yii::$app->params['techs.invNumMaxLen']??static::$defaultNumMaxLen;
+	}
+	
+	public static function invNumPrefixFormat() {
+		return Yii::$app->params['techs.prefixFormat']??static::$defaultPrefixFormat;
+	}
+	
+	/**
+	 * Возвращает размер числовой части инв. номера в зависимости от количества токенов
+	 * @param $tokens - количество токенов
+	 * @return int
+	 */
+	public static function getNumStrPad($tokens) {
+		$pads=static::invNumStrPads();
+		return $pads[$tokens]??$pads[count($pads)-1];
+	}
+	
 	public static function formatInvNum($value)
 	{
 		// выполняем определенные действия с переменной, возвращаем преобразованную переменную
 		$tokens = explode('-', $value);
-		$num_str_pad = (count($tokens) > 2) ?
-			(static::$num_str_pad_3tokens) :
-			(static::$num_str_pad_2tokens);
+		//
+		$num_str_pad = static::getNumStrPad(count($tokens)-1);
 		
 		$num = (int)$tokens[count($tokens) - 1];
 		unset($tokens[count($tokens) - 1]);
 		$prefix=implode('-', $tokens);
-		$num_str_pad=min($num_str_pad,15-mb_strlen($prefix));
+		$num_str_pad=min($num_str_pad,static::invNumMaxLen()-mb_strlen($prefix));
 		$num = str_pad((string)$num, $num_str_pad, '0', STR_PAD_LEFT);
 		return mb_strtoupper($prefix . '-' . $num);
 	}
-
+	
+	
+	
+	/**
+	 * Возвращает первый свободный инвентарный номер с заданным префиксом
+	 * @param string $prefix текущий инв. номер
+	 * @return integer номер следующей позиции
+	 */
+	public static function fetchNextNum($prefix) {
+		//ищем запись с таким префиксом (сортируем по префиксу и выбираем один самый большой)
+		$query=static::find()
+			->where(['like','num',$prefix.'-%',false]);
+		
+		
+		if (strpos($prefix,'-')===false) //если в переданном префиксе нет "-", то ищем записи в которых
+			$query->andWhere('LOCATE("-",num,'.(mb_strlen($prefix)+1).')=0'); //после первого "-" второго уже нет
+		//иначе он вместо чел-0000018 найдет чел-тел-0002 и все неправильно посчитает
+		
+		$last=$query
+			->orderBy(['num'=>SORT_DESC])
+			->one();
+		
+		if (is_object($last)) {
+			$tokens = explode('-', $last->num);
+			$subIndex = (int)$tokens[count($tokens)-1] + 1;
+		} else $subIndex=1;
+		//в зависимости от количество токенов в префиксе выбираем длину номерной части
+		
+		return static::formatInvNum($prefix.'-'.$subIndex);
+		
+	}
+	
+	/**
+	 * Формирует префикс инвентарного номера оборудования на основании типа и места установки
+	 * @param $model_id integer модель оборудования
+	 * @param $place_id integer помещение
+	 * @param $org_id integer организация
+	 * @param $arm_id integer АРМ
+	 * @param $installed_id integer Куда установлено
+	 * @return string префикс инвентарного номера
+	 */
+	public static function genInvPrefix($model_id,$place_id,$org_id,$arm_id,$installed_id)
+	{
+		$tokens=[];
+		
+		foreach (static::invNumPrefixFormat() as $token) {
+			switch ($token) {
+				case 'place':
+					$place=null;
+					if ($installed_id) {
+						//если есть АРМ - то место установки там где АРМ
+						$arm=\app\models\Techs::findOne($installed_id);
+						if (is_object($arm)) $place=$arm->place;
+					} elseif ($arm_id) {
+						//если есть АРМ - то место установки там где АРМ
+						$arm=\app\models\Techs::findOne($arm_id);
+						if (is_object($arm)) $place=$arm->place;
+					} elseif ($place_id) {
+						//иначе там где место установки
+						$place=\app\models\Places::findOne($place_id);
+					}
+					
+					if (is_object($place)) {
+						//если нашли место установки, то ищем там префикс
+						$place_token=$place->prefTree;
+						//если есть, то добавляем
+						if (strlen($place_token)) $tokens[]=$place_token;
+					}
+					break;
+				case 'org':
+					$org=\app\models\Partners::findOne($org_id);
+					if (is_object($org)) {
+						//если все ок то берем префикс типа оборудования
+						$org_token=$org->prefix;
+						//если он не пустой то добавляем
+						if (strlen($org_token)) $tokens[]=$org_token;
+					}
+					break;
+				case 'type':
+					//ищем модель оборудования
+					$model=\app\models\TechModels::findOne($model_id);
+					if (is_object($model)) {
+						//если все ок то берем префикс типа оборудования
+						$tech_token=$model->type->prefix;
+						//если он не пустой то добавляем
+						if (strlen($tech_token)) $tokens[]=$tech_token;
+					}
+					break;
+			}
+		}
+		
+		//или цепочка из префиксов или пусто
+		return count($tokens)?implode('-',$tokens):'';
+	}
+	
+	
+	
+	
+	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
@@ -460,6 +594,14 @@ class Techs extends ArmsModel
 	public function getComp()
 	{
 		return $this->hasOne(Comps::className(), ['id' => 'comp_id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getPartner()
+	{
+		return $this->hasOne(Partners::class, ['id' => 'partners_id']);
 	}
 	
 	/**
@@ -888,84 +1030,6 @@ class Techs extends ArmsModel
 					$segments[$segment->id]=$segment;
 			}
 		return $segments;
-	}
-	
-	
-	/**
-	 * Возвращает первый свободный инвентарный номер с заданным префиксом
-	 * @param string $prefix текущий инв. номер
-	 * @return integer номер следующей позиции
-	 */
-	public static function fetchNextNum($prefix) {
-		//ищем запись с таким префиксом (сортируем по префиксу и выбираем один самый большой)
-		$query=static::find()
-			->where(['like','num',$prefix.'-%',false]);
-		
-		
-		if (strpos($prefix,'-')===false) //если в переданном префиксе нет "-", то ищем записи в которых
-			$query->andWhere('LOCATE("-",num,LOCATE("-",num)+1)=0'); //после первого "-" второго уже нет
-		//иначе он вместо чел-0000018 найдет чел-тел-0002 и все неправильно посчитает
-		
-		$last=$query
-			->orderBy(['num'=>SORT_DESC])
-			->one();
-		
-		if (is_object($last)) {
-			$tokens = explode('-', $last->num);
-			$subIndex = (int)$tokens[count($tokens)-1] + 1;
-		} else $subIndex=1;
-		//в зависимости от количество токенов в префиксе выбираем длину номерной части
-		$num_str_pad=count(explode('-',$prefix))>1?
-			(static::$num_str_pad_3tokens):
-			(static::$num_str_pad_2tokens);
-		$num=str_pad((string)$subIndex,$num_str_pad,'0',STR_PAD_LEFT);
-		return $prefix.'-'.$num;
-
-	}
-
-	/**
-	 * Формирует префикс инвентарного номера оборудования на основании типа и места установки
-	 * @param $model_id integer модель оборудования
-	 * @param $place_id integer помещение
-	 * @param $arm_id integer АРМ
-	 * @return string префикс инвентарного номера
-	 */
-	public static function genInvPrefix($model_id,$place_id,$arm_id,$installed_id)
-	{
-		$tokens=[];
-		
-		$place=null;
-		if ($installed_id) {
-			//если есть АРМ - то место установки там где АРМ
-			$arm=\app\models\Techs::findOne($installed_id);
-			if (is_object($arm)) $place=$arm->place;
-		} elseif ($arm_id) {
-			//если есть АРМ - то место установки там где АРМ
-			$arm=\app\models\Techs::findOne($arm_id);
-			if (is_object($arm)) $place=$arm->place;
-		} elseif ($place_id) {
-			//иначе там где место установки
-			$place=\app\models\Places::findOne($place_id);
-		}
-		
-		if (is_object($place)) {
-			//если нашли место установки, то ищем там префикс
-			$place_token=$place->prefTree;
-			//если есть, то добавляем
-			if (strlen($place_token)) $tokens[]=$place_token;
-		}
-
-		//ищем модель оборудования
-		$model=\app\models\TechModels::findOne($model_id);
-		if (is_object($model)) {
-			//если все ок то берем префикс типа оборудования
-			$tech_token=$model->type->prefix;
-			//если он не пустой то добавляем
-			if (strlen($tech_token)) $tokens[]=$tech_token;
-		}
-
-		//или цепочка из префиксов или пусто
-		return count($tokens)?implode('-',$tokens):'';
 	}
 	
 	/**
