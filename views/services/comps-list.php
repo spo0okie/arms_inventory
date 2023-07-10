@@ -15,12 +15,12 @@ use app\components\DynaGridWidget;
 		'columns' => include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php',
 		'defaultOrder' => ['name','ip','services_ids','os','updated_at','arm_id','places_id','raw_version'],
 		'dataProvider' => $dataProvider,
-		/*'gridOptions' => [
+		'gridOptions' => [
 			'pjax' => true,
 			'pjaxSettings' => ['options'=>[
 				'enablePushState'=>false,
 				'enableReplaceState'=>false,
 			]],
-		],*/
+		],
 	]) ?>
 </div>
