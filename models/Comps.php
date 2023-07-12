@@ -595,16 +595,16 @@ class Comps extends ArmsModel
 				if (is_object($responsible)) $team[$responsible->id]=$responsible;
 				
 				
-				$support=null;
+				$support=[];
 				//сначала проверяем ответственного за инфраструктуру
-				if (is_array($service->infrastructureSupportRecursive)) {
+				if (count($service->infrastructureSupportRecursive)) {
 					$support=$service->infrastructureSupportRecursive;
 					//уже потом за сам сервис
-				} elseif (is_array($service->supportRecursive)) {
+				} elseif (count($service->supportRecursive)) {
 					$support=$service->supportRecursive;
 				}
 				//поддержка сервисов на машине
-				if (is_array($support)) {
+				if (count($support)) {
 					foreach ($support as $item) {
 						if (is_object($item))
 							$team[$item->id]=$item;
