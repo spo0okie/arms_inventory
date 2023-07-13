@@ -76,7 +76,7 @@
 
                     // Find the height of text:
                     let scrollTop = Math.max(clone.scrollTop()+clone.height(), origHeight) + settings.extraSpace;
-                    //console.log("scrolltop: " + scrollTop + " vs " + lastScrollTop);
+                    console.log("scrolltop: " + scrollTop + " vs " + lastScrollTop);
                     let toChange = $(this) //.add(clone);
 
                     // Don't do anything if scrollTop hasn't changed:
@@ -86,7 +86,7 @@
                     // Check for limit:
                     if ( scrollTop >= settings.limit ) {
                         $(this).css('overflow-y','');
-                        return;
+                        scrollTop = settings.limit;
                     }
                     // Fire off callback:
                     settings.onResize.call(this);
