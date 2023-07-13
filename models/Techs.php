@@ -373,8 +373,9 @@ class Techs extends ArmsModel
 
 			[['url', 'comment','updated_at','history','hw','specs','external_links'], 'safe'],
 			[['inv_num', 'sn','installed_pos','installed_pos_end'], 'string', 'max' => 128],
-			
-			[['ip', 'mac'], 'string', 'max' => 255],
+	
+			[['ip'], 'string', 'max' => 512],
+			[['mac'], 'string', 'max' => 255],
 			['ip', function ($attribute, $params, $validator) {
 				\app\models\NetIps::validateInput($this,$attribute);
 			}],
