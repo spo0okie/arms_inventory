@@ -14,6 +14,8 @@ class m230713_070612_alter_table_techs extends Migration
     {
 		$this->alterColumn('techs','ip', $this->string(768));
 		$this->alterColumn('comps','ip', $this->string(768));
+		$this->alterColumn('techs','mac', $this->string(768));
+		$this->alterColumn('comps','mac', $this->string(768));
     }
 
     /**
@@ -23,6 +25,8 @@ class m230713_070612_alter_table_techs extends Migration
     {
 		$this->alterColumn('techs','ip', $this->string(255));
 		$this->alterColumn('comps','ip', $this->string(512));
+		$this->alterColumn('techs','mac', $this->string(255));
+		$this->alterColumn('comps','mac', $this->string(512));
     }
 
     /*

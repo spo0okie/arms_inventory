@@ -103,7 +103,8 @@ class Comps extends ArmsModel
             [['updated_at', 'comment','external_links'], 'safe'],
 			[['raw_version'], 'string', 'max' => 32],
             [['name','os'], 'string', 'max' => 128],
-	        [['ip', 'ip_ignore','mac'], 'string', 'max' => 512],
+			[['ip', 'mac'], 'string', 'max' => 768],
+			[['ip_ignore'], 'string', 'max' => 512],
 			/* Валидация отключена, т.к. ввод данных в основном автоматический (скриптами)
 			и если ее включить, данные просто не будут приниматься, что весьма плохо
 			['ip', function ($attribute, $params, $validator) {
