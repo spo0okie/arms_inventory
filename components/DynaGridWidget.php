@@ -180,10 +180,14 @@ class DynaGridWidget extends Widget
 					'class'=>'table-condensed table-striped table-bordered table-hover'.($this->resizableColumns?' table-dynaGrid-noWrap':'')
 				],
 				'resizableColumns'=>$this->resizableColumns,
-				'resizableColumnsOptions'=>['store'=>new JsExpression('{
-    				get: function (key,def) {return def},
-    				set: function (key,val) {persistResizeColumn(key,val)}
-				}')],
+				'resizableColumnsOptions'=>[
+					'store'=>new JsExpression('{
+						get: function (key,def) {return def},
+						set: function (key,val) {persistResizeColumn(key,val)}
+					}'),
+					'selector'=>'tr th',
+					'visWaitTimeout'=>500
+				],
 				'persistResize'=>true,
 				'showFooter'=>$this->showFooter,
 			],$this->gridOptions),
