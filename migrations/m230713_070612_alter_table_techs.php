@@ -12,7 +12,8 @@ class m230713_070612_alter_table_techs extends Migration
      */
     public function safeUp()
     {
-		$this->alterColumn('techs','ip', $this->string(512));
+		$this->alterColumn('techs','ip', $this->string(768));
+		$this->alterColumn('comps','ip', $this->string(768));
     }
 
     /**
@@ -21,6 +22,7 @@ class m230713_070612_alter_table_techs extends Migration
     public function safeDown()
     {
 		$this->alterColumn('techs','ip', $this->string(255));
+		$this->alterColumn('comps','ip', $this->string(512));
     }
 
     /*
