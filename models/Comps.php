@@ -374,6 +374,12 @@ class Comps extends ArmsModel
 			->viaTable('{{%comps_in_services}}', ['comps_id' => 'id']);
 	}
 	
+	public function getServicesNames() {
+		$names=ArrayHelper::getColumn($this->services,'name',false);
+		sort($names);
+		return implode('',$names);
+	}
+	
 	/**
 	 * Возвращает закрепленное на компе ПО
 	 */

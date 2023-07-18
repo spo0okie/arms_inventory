@@ -78,6 +78,10 @@ class CompsSearch extends Comps
 					'asc'=>['techs.num'=>SORT_ASC],
 					'desc'=>['techs.num'=>SORT_DESC],
 				],
+				'services_ids'=>[
+					'asc'=>['services.name'=>SORT_ASC],
+					'desc'=>['services.name'=>SORT_DESC],
+				],
 				'comp_ip'=>[
 					'asc'=>['comps.ip'=>SORT_ASC],
 					'desc'=>['comps.ip'=>SORT_DESC],

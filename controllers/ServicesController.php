@@ -201,6 +201,10 @@ class ServicesController extends Controller
 					'ip',
 					'mac',
 					'raw_ver',
+					'services_ids'=>[
+						'asc'=>['servicesNames'=>SORT_ASC],
+						'desc'=>['servicesNames'=>SORT_DESC],
+					],
 				],
 				'defaultOrder' => [
 					'name' => SORT_ASC
