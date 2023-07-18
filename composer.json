@@ -21,6 +21,10 @@
       {
         "type": "vcs",
         "url": "https://github.com/spo0okie/yii2-rbac-plus.git"
+      },
+      {
+        "type": "vcs",
+        "url": "https://github.com/spo0okie/yii2-grid.git"
       }
     ],
 
@@ -41,7 +45,6 @@
     "kartik-v/yii2-widget-depdrop": "dev-master",
 	"kartik-v/yii2-nav-x": "dev-master",
 	"kartik-v/yii2-tabs-x": "dev-master",
-    "kartik-v/yii2-grid": "dev-master",
     "kartik-v/yii2-dynagrid": "dev-master",
 	"kartik-v/yii2-markdown": "dev-master",
 	"kartik-v/yii2-datecontrol": "dev-master",
@@ -49,6 +52,7 @@
     "voskobovich/yii2-linker-behavior": "dev-master",
     "edvlerblog/yii2-adldap-module": "^6.0.0",
     "a1inani/yii2-modal-ajax": "@dev",
+    "spo0okie/yii2-grid": "dev-master",
 	"spo0okie/yii2-rbac-plus": "dev-master",
     "rlanvin/php-ip": "^2.1",
 	"thomaspark/bootswatch": "dev-master",
