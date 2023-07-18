@@ -14,5 +14,8 @@ use yii\widgets\DetailView;
 
 <?php
 $chain=[];
+if (is_object($model->partner)) {
+	$chain[]=$this->render('/partners/item',['model'=>$model->partner,'static_view'=>true]);
+}
 foreach ($model->chain as $item) $chain[]=$item->name;
 echo implode('→',$chain);

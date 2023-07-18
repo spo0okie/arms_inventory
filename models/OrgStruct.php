@@ -12,6 +12,7 @@ use Yii;
  * @property string $name Название подразделения
  * @property int $org_id Организация
  *
+ * @property Partners $partner Организация
  * @property OrgStruct $parent Родительское подразделение
  * @property OrgStruct[] $chain Цепочка от корня до текущего подразделения
  */
@@ -68,7 +69,15 @@ class OrgStruct extends \yii\db\ActiveRecord
     	$chain[]=$this;
     	return $chain;
 	}
-
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getPartner()
+	{
+		return $this->hasOne(Partners::class, ['id' => 'org_id']);
+	}
+	
 	public static function fetchNames(){
 		$list= static::find()
 			->select(['id','name'])

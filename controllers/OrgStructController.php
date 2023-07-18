@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\helpers\ArrayHelper;
+use app\models\UsersSearch;
 use Yii;
 use app\models\OrgStruct;
 use yii\data\ActiveDataProvider;
@@ -117,8 +119,20 @@ class OrgStructController extends Controller
      */
     public function actionView($id, $org_id)
     {
+		$model=$this->findModel($id, $org_id);
+  
+		$params=Yii::$app->request->queryParams;
+		$params=ArrayHelper::setTreeDefaultValue($params,['UsersSearch','org_id'],$model->org_id);
+		$params=ArrayHelper::setTreeDefaultValue($params,['UsersSearch','Orgeh'],$model->id);
+		
+  
+		$searchModel = new UsersSearch();
+		$dataProvider = $searchModel->search($params);
+		
         return $this->render('view', [
-            'model' => $this->findModel($id, $org_id),
+            'model' => $model,
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
         ]);
     }
 

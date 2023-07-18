@@ -1,6 +1,7 @@
  <?php
 
-use yii\helpers\Html;
+ use app\components\DynaGridWidget;
+ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -43,4 +44,14 @@ $this->params['breadcrumbs'][] = $this->title;
 			<?php } ?>
 		</div>
 	</div>
+	<?= DynaGridWidget::widget([
+		'id' => 'org-struct-users-index',
+		'columns' => require __DIR__.'\..\users\columns.php',
+		'header' => 'Пользователи организации',
+		'defaultOrder' => ['employee_id','shortName','Doljnost','orgStruct_name','Login','Email','Phone','arms','Mobile'],
+		//'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		//'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Users','cssClass'=>'btn']),
+		'dataProvider' => $dataProvider,
+		'filterModel' => $searchModel,
+	]) ?>
 </div>

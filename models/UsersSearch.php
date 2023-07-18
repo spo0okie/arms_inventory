@@ -22,8 +22,8 @@ class UsersSearch extends Users
     public function rules()
     {
         return [
-            [['Persg', 'Uvolen', 'nosync'], 'integer'],
-            [['shortName', 'Doljnost', 'Ename', 'Login', 'Email', 'Phone', 'Mobile', 'work_phone',  'employee_id', 'orgStruct_name','org_name'], 'safe'],
+            [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
+            [['shortName', 'Doljnost', 'Ename', 'Login', 'Email', 'Phone', 'Mobile', 'work_phone',  'employee_id', 'orgStruct_name','org_name','Orgeh'], 'safe'],
         ];
     }
 
@@ -94,8 +94,10 @@ class UsersSearch extends Users
         }
         
         $query
+			->andFilterWhere(['users.Orgeh'=>$this->Orgeh])
+			->andFilterWhere(['users.org_id'=>$this->org_id])
 	        ->andFilterWhere(QueryHelper::querySearchString('employee_id',$this->employee_id))
-            ->andFilterWhere(QueryHelper::querySearchString('Doljnost',$this->Doljnost))
+			->andFilterWhere(QueryHelper::querySearchString('Doljnost',$this->Doljnost))
 			->andFilterWhere(QueryHelper::querySearchString('Ename',$this->Ename))
 			->andFilterWhere(QueryHelper::querySearchString('Ename',$this->shortName))
             ->andFilterWhere(QueryHelper::querySearchString('Login',$this->Login))

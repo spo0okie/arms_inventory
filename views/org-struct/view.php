@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -15,5 +16,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 <div class="org-struct-view">
-	<?= $this->render('card',['model'=>$model]) ?>
+	<div class="mb-3">
+		<?= $this->render('card',['model'=>$model]) ?>
+	</div>
+	
+	<?= DynaGridWidget::widget([
+		'id' => 'org-struct-users-index',
+		'columns' => require __DIR__.'\..\users\columns.php',
+		'header' => 'Пользователи подразделения',
+		'defaultOrder' => ['employee_id','shortName','Doljnost','Login','Email','Phone','arms','Mobile'],
+		//'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		//'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Users','cssClass'=>'btn']),
+		'dataProvider' => $dataProvider,
+		'filterModel' => $searchModel,
+	]) ?>
 </div>

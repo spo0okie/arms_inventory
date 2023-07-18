@@ -7,8 +7,6 @@ use kartik\grid\GridView;
 /* @var $searchModel app\models\UsersSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = \app\models\Users::$titles;
-$this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 return [
 	'employee_id',

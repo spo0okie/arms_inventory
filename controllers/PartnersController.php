@@ -2,7 +2,9 @@
 
 namespace app\controllers;
 
+use app\helpers\ArrayHelper;
 use app\models\Contracts;
+use app\models\UsersSearch;
 use Yii;
 use app\models\Partners;
 use app\models\PartnersSearch;
@@ -90,9 +92,19 @@ class PartnersController extends Controller
 			->where(['partners_in_contracts.partners_id'=>$id])
 			->orderBy(['date'=>SORT_DESC])
 			->all();
-        return $this->render('view', [
+	
+		$params=Yii::$app->request->queryParams;
+		$params=ArrayHelper::setTreeDefaultValue($params,['UsersSearch','org_id'],$id);
+	
+	
+		$searchModel = new UsersSearch();
+		$dataProvider = $searchModel->search($params);
+	
+		return $this->render('view', [
             'model' => $this->findModel($id),
-			'contracts'=>$contracts
+			'contracts'=>$contracts,
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
         ]);
     }
 
