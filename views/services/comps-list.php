@@ -5,7 +5,9 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 use app\components\DynaGridWidget;
-
+//эта страничка вызывается из другой, где есть этот виджет,
+//поэтому хак со сменой поведения архивных элементов по умолчанию делаем руками, а не автоматом
+\app\components\ShowArchivedWidget::$defaultValue=false;
 ?>
 <div class="comps-index">
 	<?= DynaGridWidget::widget([
@@ -21,6 +23,10 @@ use app\components\DynaGridWidget;
 				'enablePushState'=>false,
 				'enableReplaceState'=>false,
 			]],
+			'rowOptions'=>function($data){return[
+				'class'=>\app\components\ShowArchivedWidget::archivedClass($data),
+				'style'=>\app\components\ShowArchivedWidget::archivedDisplay($data),
+			];}
 		],
 	]) ?>
 </div>

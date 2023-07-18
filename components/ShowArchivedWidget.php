@@ -17,6 +17,14 @@ class ShowArchivedWidget extends UrlParamSwitcherWidget
 	public static $defaultValue=true;
 	public static $itemClass='archived-item';
 	
+	public static function archivedClass($model,$attr='archived') {
+		return ($model->$attr)?static::$itemClass:'';
+	}
+	
+	public static function archivedDisplay($model,$inverse=false,$attr='archived') {
+		return ($inverse xor $model->$attr)?'display:none;':'';
+	}
+
 	public $state=null;
 	public $label='Архивные';
 	public $scriptOn=<<<JS
