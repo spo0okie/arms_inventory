@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
 	</div>
 	<?= DynaGridWidget::widget([
 		'id' => 'org-struct-users-index',
-		'columns' => require __DIR__.'\..\users\columns.php',
+		'columns' => require __DIR__.'/../users/columns.php',
 		'header' => 'Пользователи организации',
 		'defaultOrder' => ['employee_id','shortName','Doljnost','orgStruct_name','Login','Email','Phone','arms','Mobile'],
 		//'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
