@@ -108,4 +108,5 @@ return [
 	],
 	'raw_version',
 	'updated_at',
+	'comment',
 ];

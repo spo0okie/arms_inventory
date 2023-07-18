@@ -205,6 +205,7 @@ class ServicesController extends Controller
 						'asc'=>['servicesNames'=>SORT_ASC],
 						'desc'=>['servicesNames'=>SORT_DESC],
 					],
+					'comment',
 				],
 				'defaultOrder' => [
 					'name' => SORT_ASC

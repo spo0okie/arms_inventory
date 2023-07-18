@@ -15,7 +15,7 @@ use app\components\DynaGridWidget;
 		'model' => new \app\models\Comps(),
 		'panel' => false,
 		'columns' => include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php',
-		'defaultOrder' => ['name','ip','services_ids','os','updated_at','arm_id','places_id','raw_version'],
+		'defaultOrder' => ['name','ip','services_ids','comment','os','arm_id','places_id','raw_version'],
 		'dataProvider' => $dataProvider,
 		'gridOptions' => [
 			'pjax' => true,
