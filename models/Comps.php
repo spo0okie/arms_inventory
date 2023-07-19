@@ -96,7 +96,7 @@ class Comps extends ArmsModel
     public function rules()
     {
         return [
-            [['soft_ids','netIps_ids'], 'each', 'rule'=>['integer']],
+            [['soft_ids','netIps_ids','services_ids'], 'each', 'rule'=>['integer']],
             [['domain_id','name', 'os'], 'required'],
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
@@ -214,6 +214,7 @@ class Comps extends ArmsModel
 						'updater' => ['class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),],
 					],
 					'netIps_ids' => 'netIps',
+					'services_ids' => 'services',
                 ]
             ]
         ];
@@ -374,6 +375,7 @@ class Comps extends ArmsModel
 			->viaTable('{{%comps_in_services}}', ['comps_id' => 'id']);
 	}
 	
+	//нужно только для сортировки моделей внутри ArrayDataProvider
 	public function getServicesNames() {
 		$names=ArrayHelper::getColumn($this->services,'name',false);
 		sort($names);

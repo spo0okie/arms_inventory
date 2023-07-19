@@ -66,7 +66,17 @@ if (!isset($modalParent)) $modalParent=null;
 		</div>
 	</div>
 	
-	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment',['lines'=>4]) ?>
+	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'services_ids', [
+		'data' => \app\models\Services::fetchNames(),
+		'options' => ['placeholder' => 'Сервисы на этой ОС',],
+		'pluginOptions' => [
+			'dropdownParent' => $modalParent,
+			'allowClear' => true,
+			'multiple' => true
+		]
+	]) ?>
+
+	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment',['lines'=>2]) ?>
 
     <p>
         <span onclick="$('#comps_advanced_settings').toggle()" class="href">Расширенные настройки</span>
