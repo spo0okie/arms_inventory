@@ -40,12 +40,13 @@ foreach ($wikiLinks as $name=>$url) {
 	$tabNumber++;
 }
 
-$tabId='serviceComps';
-$tabs[]=[
-	'label'=>'Задействованные ОС',
-	'active'=>$cookieTab==$tabId,
-	'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
-	'content'=><<<HTML
+if (count($model->children)||count($model->comps)) {
+	$tabId='serviceComps';
+	$tabs[]=[
+		'label'=>'Задействованные ОС',
+		'active'=>$cookieTab==$tabId,
+		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
+		'content'=><<<HTML
 		<div id="serviceCompsList"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>
 		<script>
 			$(document).ready(function() {
@@ -53,8 +54,9 @@ $tabs[]=[
 			})
 		</script>
 HTML,
-
-];
+	];
+	
+}
 
 echo \yii\bootstrap5\Tabs::widget([
 	'items'=>$tabs,
