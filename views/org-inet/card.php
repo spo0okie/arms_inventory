@@ -16,7 +16,10 @@ use yii\widgets\DetailView;
 
 if (!isset($static_view)) $static_view=false;
 if (!isset($content_only)) $content_only=false;
-
+$currency='';
+if (is_object($model->service) && is_object($model->service->currency)) {
+	$currency=' '.$model->service->currency->symbol;
+}
 if (!$content_only){ ?>
 <div
 		class="<?= $static_view?'me-1 mb-1 p-1':'me-2 mb-2 p-2'?> <?= $model->archived?'archived-item':''?> org-phones-card"
@@ -38,9 +41,9 @@ if (!$content_only){ ?>
 
 	<p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
 	<p>
-		Стоимость: <span class="badge bg-success"><?= Yii::$app->formatter->asCurrency((int)$model->cost) ?></span>
+		Стоимость: <span class="badge bg-success"><?= number_format((int)$model->cost,0,'',' ').$currency ?></span>
 		<?php if ($model->charge) { ?>
-			(в т.ч. НДС: <span class="small"><?= Yii::$app->formatter->asCurrency($model->charge) ?></span>)
+			(в т.ч. НДС: <span class="small"><?= number_format($model->charge,0,'',' ').$currency ?></span>)
 		<?php } ?>
 		/мес
 	</p>

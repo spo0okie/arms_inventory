@@ -51,7 +51,7 @@ if(!$static_view) { ?>
 			<?php if (is_object($model->parentService))  echo "<br /> Входит в состав: {$this->render('item',['model'=>$model->parentService])}"; ?>
 		</h4>
 		<?php if ($model->sumTotals) { ?>
-		<strong>Стоимость:</strong> <span class="badge bg-success"><?= $model->sumTotals.''.$model->currency->symbol ?></span>
+		<strong>Стоимость:</strong> <span class="badge bg-success"><?= number_format($model->sumTotals,0,'',' ').' '.$model->currency->symbol ?></span>
 			<?php if ($model->sumCharge){ ?>
 				(в т.ч. НДС: <?= $model->sumCharge.''.$model->currency->symbol ?>)
 			<?php } ?> / мес.<br/>
