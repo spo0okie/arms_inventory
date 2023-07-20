@@ -5,6 +5,7 @@ use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+\yii\helpers\Url::remember();
 
 $this->title = \app\models\OrgInet::$titles;
 $this->params['breadcrumbs'][] = $this->title;
