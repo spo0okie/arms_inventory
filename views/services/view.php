@@ -47,7 +47,11 @@ $tabs[]=[
 	'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 	'content'=><<<HTML
 		<div id="serviceCompsList"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>
-		<script>$.get("/web/services/os-list?id={$model->id}", function(data) {jQuery("#serviceCompsList").html(data);})</script>
+		<script>
+			$(document).ready(function() {
+				$.get("/web/services/os-list?id={$model->id}", function(data) {jQuery("#serviceCompsList").html(data);})
+			})
+		</script>
 HTML,
 
 ];
