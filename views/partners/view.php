@@ -6,6 +6,7 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Partners */
+ /* @var $dataProvider yii\data\ActiveDataProvider */
 
 if (!isset($contracts)) $contracts=$model->docs;
 
@@ -44,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
 			<?php } ?>
 		</div>
 	</div>
-	<?= DynaGridWidget::widget([
+	<?= $dataProvider->totalCount?DynaGridWidget::widget([
 		'id' => 'org-struct-users-index',
 		'columns' => require __DIR__.'/../users/columns.php',
 		'header' => 'Пользователи организации',
@@ -53,5 +54,5 @@ $this->params['breadcrumbs'][] = $this->title;
 		//'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Users','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
-	]) ?>
+	]):'' ?>
 </div>
