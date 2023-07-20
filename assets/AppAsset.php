@@ -8,6 +8,7 @@
 namespace app\assets;
 
 use yii\web\AssetBundle;
+use yii\web\View;
 
 /**
  * Main application asset bundle.
@@ -42,7 +43,8 @@ class AppAsset extends AssetBundle
 	    'js/jquery.autoResize.js',
 		'js/fontawesome/all.min.js',
     ];
-    public $cssOptions = [];
+	public $cssOptions = [];
+	public $jsOptions = [View::POS_HEAD];
     public $depends = [
 		'yii\web\YiiAsset',
 		'yii\jui\JuiAsset',
