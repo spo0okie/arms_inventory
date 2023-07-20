@@ -8,6 +8,7 @@
 namespace app\assets;
 
 use yii\web\AssetBundle;
+use yii\web\View;
 
 /**
  * Select2 Customization asset bundle.
@@ -21,6 +22,7 @@ class TooltipsterAsset extends AssetBundle
 		'tooltipster/js/tooltipster.bundle.min.js',
 		'tooltipster/js/qtip_ajax.js',
 	];
+	public $jsOptions = [View::POS_HEAD];
 	public $css = [
 		'tooltipster/css/tooltipster.main.min.css',
 		'tooltipster/css/tooltipster.bundle.min.css',
