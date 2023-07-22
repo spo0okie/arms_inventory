@@ -90,7 +90,8 @@ $config = [
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [
-                    	'comps'			=> 'api/comps',
+						'comps'			=> 'api/comps',
+						'techs'			=> 'api/techs',
 	                    'domains'		=> 'api/domains',
 	                    'login-journal' => 'api/login-journal',
 						'users'			=> 'api/users',
