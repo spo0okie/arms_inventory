@@ -42,13 +42,6 @@ class TechsController extends \yii\rest\ActiveController
 		}
 		return $behaviors;
 	}
-    
-    public function actions()
-    {
-        //$actions = parent::actions();
-        //$actions['search'];
-        return ['index'];
-    }
 
 	public function actionSearchByMac($mac){
 		//ищем телефонный аппарат по номеру
