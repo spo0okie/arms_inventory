@@ -4,18 +4,50 @@ namespace app\modules\api\controllers;
 
 
 
+use app\models\Users;
+use yii\filters\auth\HttpBasicAuth;
 use yii\web\User;
 
 class TechsController extends \yii\rest\ActiveController
 {
     
     public $modelClass='app\models\Techs';
+	
+	public function behaviors()
+	{
+		$behaviors=parent::behaviors();
+		if (!empty(\Yii::$app->params['useRBAC'])) {
+			$behaviors['access']=[
+				'class' => \yii\filters\AccessControl::className(),
+				'rules' => [
+					['allow' => true, 'actions'=>['index'], 'roles'=>['editor']],
+					//['allow' => true, 'actions'=>['create','view','update','search'], 'roles'=>['@','?']],
+				],
+				'denyCallback' => function ($rule, $action) {
+					
+					throw new  \yii\web\ForbiddenHttpException('Access denied');
+				}
+			];
+			$behaviors['authenticator'] = [
+				'class' => HttpBasicAuth::class,
+				'only'=>['index'],
+				'auth' => function ($login, $password) {
+					$user = Users::find()->where(['Login' => $login])->one();
+					if ($user && $user->validatePassword($password)) {
+						return $user;
+					}
+					return null;
+				},
+			];
+		}
+		return $behaviors;
+	}
     
     public function actions()
     {
         //$actions = parent::actions();
         //$actions['search'];
-        return ['search'];
+        return ['index'];
     }
 
 	public function actionSearchByMac($mac){
