@@ -59,6 +59,7 @@ use yii\validators\IpValidator;
  * @property array $ddPortsList
  *
  * @property Users $head
+ * @property Users $admResponsible
  * @property Users $responsible
  * @property Users $user
  * @property Users $itStaff
@@ -154,7 +155,7 @@ class Techs extends ArmsModel
     public function extraFields()
 	{
 		return [
-			'site','comp' //площадка - помещение верхнего уровня относительно помещения где размещено оборудование
+			'site','comp','supportteam','responsible' //площадка - помещение верхнего уровня относительно помещения где размещено оборудование
 		];
 	}
 	
@@ -323,9 +324,12 @@ class Techs extends ArmsModel
 				'hint' => 'Сотрудник службы ИТ, который отвечает за обслуживание оборудования/рабочего места',
 			],
 			'responsible_id' => [
-				'label'=>'Ответственный',
-				'hint' => 'Если указан, то ответственность за установленное ПО будет нести указанное ответственное лицо. В таком случае в паспорте появится дополнительный пункт, в котором ответственное лицо должно расписаться.',
+				'label'=>'Адм.Ответственный',
+				'hint' => 'Административно ответственный. Указывается, если пользователю выдаются административные полномочия.<br/>'.
+					'В таком случае ответственное лицо самостоятельно несет ответственность за любые нелегитимные действия этого АРМ/оборудования.<br />'.
+					'Также в этом случае в паспорте появится дополнительный пункт, в котором ответственное лицо должно расписаться.',
 			],
+			'admResponsible'=>['alias'=>'responsible'],
 			'head_id' => [
 				'label'=>'Руководитель отдела',
 				'hint' => 'Руководитель отдела сотрудника которому установлено',
@@ -710,6 +714,32 @@ class Techs extends ArmsModel
 		return $this->compsServices_cache;
 	}
 	
+	/**
+	 * @return \app\models\Users
+	 */
+	public function getResponsible()
+	{
+		if (is_object($user=Services::responsibleFrom($this->services))) return $user;
+		
+		return $this->itStaff;
+	}
+	
+	/**
+	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
+	 * @return \app\models\Users[]
+	 */
+	public function getSupportTeam()
+	{
+		$team=Services::supportTeamFrom($this->services);
+		//if (is_object($this->user)) $team[$this->user->id]=$this->user;
+		
+		//убираем из команды ответственного за ОС
+		if (is_object($responsible=$this->responsible)) {
+			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
+		}
+		
+		return array_values($team);
+	}
 	
 	
 	/**
@@ -823,7 +853,7 @@ class Techs extends ArmsModel
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
-	public function getResponsible()
+	public function getAdmResponsible()
 	{
 		return $this->hasOne(Users::className(), ['id' => 'responsible_id']);
 	}

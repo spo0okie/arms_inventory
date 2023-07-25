@@ -252,11 +252,11 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
         <p>
             Сотрудник: _________________ <?= is_object($model->user)?$model->user->fullName:'________________________________________' ?>
         </p>
-        <?php if  (is_object($model->responsible)) {?>
+        <?php if  (is_object($model->admResponsible)) {?>
         <p>
             <i>
             Установку и изменение аппаратно-программной конфигурации данном ПК осуществляет:
-            Сотрудник: _________________ <?= $model->responsible->fullName ?>
+            Сотрудник: _________________ <?= $model->admResponsible->fullName ?>
             </i>
         </p>
         <?php } ?>

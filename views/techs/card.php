@@ -21,31 +21,47 @@ if (is_object($model->state)) { ?>
 	]) ?>
 </h1>
 
-<?php if (!$no_model) { ?>
-	Модель: <?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?> <br />
-	Серийный №: <?= $model->sn ?> <br />
-	Бухг. инв. №: <?= $model->inv_num ?> <br />
-	<?php if (strlen($model->comment)){
-		echo ('<b>'.$model->commentLabel.':</b> '.Yii::$app->formatter->asNtext($model->comment).'<br />');
-	} ?>
-	
-	<?php if ($model->model->individual_specs) { ?>
-		<h4>Спецификация:</h4>
-		<?= \Yii::$app->formatter->asNtext($model->specs) ?>
-		<br />
-	<?php } ?>
-	
-<?php } else { ?>
-	<h4>Идентификаторы:</h4>
-	<p>
-		Серийный №: <?= $model->sn ?> <br />
-		Бухг. инв. №: <?= $model->inv_num ?> <br />
-		<?php if (strlen($model->comment)){
-			echo ('<b>'.$model->commentLabel.':</b> '.Yii::$app->formatter->asNtext($model->comment).'<br />');
-		} ?>
-	</p>
-<?php } ?>
-
+<div class="d-flex flex-row">
+	<div class="pe-5">
+		<?php if (!$no_model) { ?>
+			Модель: <?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?> <br />
+			Серийный №: <?= $model->sn ?> <br />
+			Бухг. инв. №: <?= $model->inv_num ?> <br />
+			<?php if (strlen($model->comment)){
+				echo ('<b>'.$model->commentLabel.':</b> '.Yii::$app->formatter->asNtext($model->comment).'<br />');
+			} ?>
+			
+			<?php if ($model->model->individual_specs) { ?>
+				<h4>Спецификация:</h4>
+				<?= \Yii::$app->formatter->asNtext($model->specs) ?>
+				<br />
+			<?php } ?>
+		
+		<?php } else { ?>
+			<h4>Идентификаторы:</h4>
+			<p>
+				Серийный №: <?= $model->sn ?> <br />
+				Бухг. инв. №: <?= $model->inv_num ?> <br />
+				<?php if (strlen($model->comment)){
+					echo ('<b>'.$model->commentLabel.':</b> '.Yii::$app->formatter->asNtext($model->comment).'<br />');
+				} ?>
+			</p>
+		<?php } ?>
+	</div>
+	<div class="pe-1">
+		<h4>Тех. обслуживание:</h4>
+		<?= is_object($model->responsible)?'<strong>Ответственный:</strong>'.$this->render('/users/item',['model'=>$model->responsible,'static_view'=>true]).'<br />':'' ?>
+		<?php if (count($model->supportTeam)) { ?>
+			<strong>Поддержка:</strong>
+			<?php
+			$support=[];
+			foreach ($model->supportTeam as $mate) $support[]= $this->render('/users/item',['model'=>$mate,'static_view'=>true,'short'=>true]);
+			echo implode(', ',$support);
+			?>
+			<br />
+		<?php } ?>
+	</div>
+</div>
 <?= $this->render('attached/files',['model'=>$model,'static_view'=>$static_view]) ?>
 
 
@@ -72,7 +88,7 @@ if (is_object($model->state)) { ?>
     Пользователь: <?= $this->render('/users/item',['model'=>$model->user]) ?> <br />
 	<?= is_object($model->head)?('Руководитель отдела:'.$this->render('/users/item',['model'=>$model->head]).'<br/>'):'' ?>
 	<?= is_object($model->itStaff)?('Сотрудник ИТ:'.$this->render('/users/item',['model'=>$model->itStaff]).'<br/>'):'' ?>
-	<?= is_object($model->responsible)?('Ответственный:'.$this->render('/users/item',['model'=>$model->responsible]).'<br/>'):'' ?>
+	<?= is_object($model->admResponsible)?($model->getAttributeLabel('responsible_id').':'.$this->render('/users/item',['model'=>$model->admResponsible]).'<br/>'):'' ?>
 </p>
 
 <?php if (count($model->services)) { ?>

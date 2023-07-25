@@ -61,7 +61,7 @@ if (!mb_strlen($domain))
 		?>
 		<br />
 	<?php } ?>
-	<?= Yii::$app->formatter->asNtext($model->comment) ?>
+	<?= Yii::$app->formatter->asNtext($model->comment??'') ?>
 </div>
 <br />
 <?php if(!$no_arm) { ?>

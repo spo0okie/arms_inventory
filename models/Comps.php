@@ -546,35 +546,7 @@ class Comps extends ArmsModel
 	{
 		if (is_object($this->user)) return $this->user;
 		
-		if (is_array($this->services) && count($this->services)) {
-			$persons=[];
-			$rating=[];
-			foreach ($this->services as $service) {
-				/**
-				 * @var $service \app\models\Services
-				 */
-				
-				$responsible=null;
-				//сначала проверяем ответственного за инфраструктуру
-				if (is_object($service->infrastructureResponsibleRecursive)) {
-					$responsible=$service->infrastructureResponsibleRecursive;
-				//уже потом за сам сервис
-				} elseif (is_object($service->responsibleRecursive)) {
-					$responsible=$service->responsibleRecursive;
-				}
-				
-				if (is_object($responsible)) {
-					$responsible_id=$responsible->id;
-					if (!isset($rating[$responsible_id])) {
-						$rating[$responsible_id]=$service->weight;
-						$persons[$responsible_id]=$responsible;
-					} else
-						$rating[$responsible_id]+=$service->weight;
-				}
-			}
-			if (count($rating)) return $persons[array_search(max($rating), $rating)];
-		}
-		return null;
+		return Services::responsibleFrom($this->services);
 	}
 	
 	/**
@@ -583,44 +555,8 @@ class Comps extends ArmsModel
 	 */
 	public function getSupportTeam()
 	{
-		$team=[];
+		$team=Services::supportTeamFrom($this->services);
 		if (is_object($this->user)) $team[$this->user->id]=$this->user;
-		
-		if (is_array($this->services) && count($this->services)) {
-			foreach ($this->services as $service) {
-				/**
-				 * @var $service \app\models\Services
-				 */
-				
-				$responsible=null;
-				//сначала проверяем ответственного за инфраструктуру
-				if (is_object($service->infrastructureResponsibleRecursive)) {
-					$responsible=$service->infrastructureResponsibleRecursive;
-					//уже потом за сам сервис
-				} elseif (is_object($service->responsibleRecursive)) {
-					$responsible=$service->responsibleRecursive;
-				}
-				//ответственные за сервисы на машине
-				if (is_object($responsible)) $team[$responsible->id]=$responsible;
-				
-				
-				$support=[];
-				//сначала проверяем ответственного за инфраструктуру
-				if (count($service->infrastructureSupportRecursive)) {
-					$support=$service->infrastructureSupportRecursive;
-					//уже потом за сам сервис
-				} elseif (count($service->supportRecursive)) {
-					$support=$service->supportRecursive;
-				}
-				//поддержка сервисов на машине
-				if (count($support)) {
-					foreach ($support as $item) {
-						if (is_object($item))
-							$team[$item->id]=$item;
-					}
-				}
-			}
-		}
 		
 		//убираем из команды ответственного за ОС
 		if (is_object($responsible=$this->responsible)) {

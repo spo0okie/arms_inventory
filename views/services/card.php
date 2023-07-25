@@ -13,7 +13,6 @@ If (!is_object($model)) {
 	return;
 }
 $comps=$model->comps;
-$techs=$model->techs;
 $dependants=$model->dependants;
 $support=$model->support;
 $children=$model->children;
@@ -163,7 +162,7 @@ if(!$static_view) { ?>
 		]) ?>
 		
 		<?= \app\components\ListObjectWidget::widget([
-			'models'=>$techs,
+			'models'=>$model->techs,
 			'title'=>'Выполняется на оборудовании:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
