@@ -155,7 +155,7 @@ class Techs extends ArmsModel
     public function extraFields()
 	{
 		return [
-			'site','comp','supportteam','responsible' //площадка - помещение верхнего уровня относительно помещения где размещено оборудование
+			'site','comp','supportteam','responsible','stateName' //площадка - помещение верхнего уровня относительно помещения где размещено оборудование
 		];
 	}
 	
