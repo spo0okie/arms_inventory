@@ -20,8 +20,8 @@ class TechsController extends \yii\rest\ActiveController
 			$behaviors['access']=[
 				'class' => \yii\filters\AccessControl::className(),
 				'rules' => [
-					['allow' => true, 'actions'=>['index'], 'roles'=>['editor']],
-					//['allow' => true, 'actions'=>['create','view','update','search'], 'roles'=>['@','?']],
+					['allow' => true, 'actions'=>['index','view','update'], 'roles'=>['editor']],
+					//['allow' => true, 'actions'=>['create','search'], 'roles'=>['@','?']],
 				],
 				'denyCallback' => function ($rule, $action) {
 					
