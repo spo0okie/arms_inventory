@@ -24,6 +24,6 @@ if (count($periods)) {
 }
 echo \app\components\ExpandableCardWidget::widget([
 	'content'=>$content,
-	'maxHeight'=>450,
+	'maxHeight'=>650,
 	'switchOnlyOnButton'=>true
 ]);
