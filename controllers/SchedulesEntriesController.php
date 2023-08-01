@@ -13,8 +13,10 @@ use yii\filters\VerbFilter;
 /**
  * SchedulesDaysController implements the CRUD actions for SchedulesDays model.
  */
-class SchedulesEntriesController extends Controller
+class SchedulesEntriesController extends ArmsBaseController
 {
+	public $modelClass='app\models\SchedulesEntries';
+	
     /**
      * {@inheritdoc}
      */
@@ -30,20 +32,6 @@ class SchedulesEntriesController extends Controller
         ];
     }
 
-    /**
-     * Lists all SchedulesDays models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel = new SchedulesEntriesSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
 
 	/**
 	 * Displays a single model ttip.
@@ -78,7 +66,7 @@ class SchedulesEntriesController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    /*public function actionCreate()
     {
         $model = new SchedulesEntries();
 
@@ -108,7 +96,7 @@ class SchedulesEntriesController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    /*public function actionUpdate($id)
     {
         $model = $this->findModel($id);
 
@@ -126,7 +114,7 @@ class SchedulesEntriesController extends Controller
 			$this->render('update', [
 				'model' => $model,
 			]);
-    }
+    }*/
 
     /**
      * Deletes an existing SchedulesDays model.

@@ -12,13 +12,16 @@ use app\models\SchedulesSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * SchedulesController implements the CRUD actions for Schedules model.
  */
-class SchedulesController extends Controller
+class SchedulesController extends ArmsBaseController
 {
-    /**
+	public $modelClass='app\models\Schedules';
+	
+	/**
      * {@inheritdoc}
      */
     public function behaviors()
@@ -46,21 +49,6 @@ class SchedulesController extends Controller
     }
 	
 	/**
-	 * Lists all Schedules models.
-	 * @return mixed
-	 */
-	public function actionIndex()
-	{
-		$searchModel = new SchedulesSearch();
-		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-		
-		return $this->render('index', [
-			'searchModel' => $searchModel,
-			'dataProvider' => $dataProvider,
-		]);
-	}
-	
-	/**
 	 * Lists only ACL Schedules.
 	 * @return mixed
 	 */
@@ -74,19 +62,6 @@ class SchedulesController extends Controller
 		return $this->render('index-acl', [
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,
-		]);
-	}
-	
-	/**
-	 * Displays a single model ttip.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionTtip($id)
-	{
-		return $this->renderPartial('ttip', [
-			'model' => $this->findModel($id),
 		]);
 	}
 	
@@ -213,13 +188,25 @@ class SchedulesController extends Controller
 				if (is_object($service)) {
 					$service->providing_schedule_id = $model->id;
 					$service->save();
-					return $this->redirect(['services/view', 'id' => $service->id]);
+					if (Yii::$app->request->isAjax) {
+						Yii::$app->response->format = Response::FORMAT_JSON;
+						return [$model];
+					}  else
+						return $this->redirect(['services/view', 'id' => $service->id]);
 				} elseif (is_object($support_service)) {
 					$support_service->providing_schedule_id = $model->id;
 					$support_service->save();
-					return $this->redirect(['services/view', 'id' => $support_service->id]);
+					if (Yii::$app->request->isAjax) {
+						Yii::$app->response->format = Response::FORMAT_JSON;
+						return [$model];
+					}  else
+						return $this->redirect(['services/view', 'id' => $support_service->id]);
 				} else
-					return $this->redirect(['view', 'id' => $model->id]);
+					if (Yii::$app->request->isAjax) {
+						Yii::$app->response->format = Response::FORMAT_JSON;
+						return [$model];
+					}  else
+						return $this->redirect(['view', 'id' => $model->id]);
 			}
 		}
 		
@@ -246,7 +233,11 @@ class SchedulesController extends Controller
 			$acl=new \app\models\Acls();
 			$acl->schedules_id=$model->id;
 			$acl->save();
-			return $this->redirect(['view', 'id' => $model->id, 'acl_mode'=>1] );
+			if (Yii::$app->request->isAjax) {
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return [$model];
+			}  else
+				return $this->redirect(['view', 'id' => $model->id, 'acl_mode'=>1] );
 		}
 		
 		return $this->render('create', [
@@ -256,30 +247,6 @@ class SchedulesController extends Controller
 	}
 	
 	
-	/**
-     * Updates an existing Schedules model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id,$modal=null)
-    {
-        $model = $this->findModel($id);
-	
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return Yii::$app->request->isAjax?
-			$this->renderAjax('update', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('update', [
-				'model' => $model,
-			]);
-    }
 
     /**
      * Deletes an existing Schedules model.

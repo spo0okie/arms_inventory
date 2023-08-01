@@ -10,13 +10,20 @@ if (!isset($static_view)) $static_view=$model->isNewRecord;
 $renderer=$this;
 
 echo '<h2>Расписание на неделю</h2>';
-echo $this->render('item',['model'=>$model]);
+
+$content=$this->render('item',['model'=>$model]);
+
 
 $periods=$model->overrides;
 if (count($periods)) {
 	
 	foreach ($periods as $period) {
-		echo $this->render('item',['model'=>$period]);
+		$content.=$this->render('item',['model'=>$period]);
 	}
 	
 }
+echo \app\components\ExpandableCardWidget::widget([
+	'content'=>$content,
+	'maxHeight'=>450,
+	'switchOnlyOnButton'=>true
+]);

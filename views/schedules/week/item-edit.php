@@ -69,9 +69,12 @@ $today=Yii::$app->request->get('date')?
 				} else {
 					$create=$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>', [
 						'/schedules-entries/create',
-						'schedule_id' => $model->id,
-						'date' => $day,
-					],['class'=>'open-in-modal-form']);
+						'SchedulesEntries[schedule_id]' => $model->id,
+						'SchedulesEntries[date]' => $day,
+					],[
+						'class'=>'open-in-modal-form',
+						'data'=>['modal-pjax-reload'=>'auto',],
+					]);
 					return (
 						is_object($data)?
 							$text='<span title="Расписание на этот день наследуется">'.$data->mergedSchedule.'</span>'

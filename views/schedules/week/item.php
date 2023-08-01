@@ -15,24 +15,30 @@ $today=Yii::$app->request->get('date')?
 if ($model->isOverride) {
 	$prefix='Изменение расписания';
 	$limits=$model->getPeriodDescription();
-	$hidden=$model->matchDate($today)?'':'style="display:none;"';
+	$hidden=$model->matchDate($today);
 } else {
 	$prefix='Основное расписание';
 	$limits=$model->getPeriodDescription(); //полный период действия
 	$match=$model->getWeekSchedule($today);
-	$hidden=is_object($match)&&$match->id==$model->id?'':'style="display:none;"';
-	
+	$hidden=is_object($match)&&$match->id==$model->id;
 }
 
 
-?>
 
+$switchCard=new \app\components\CollapsableCardWidget([
+	'title'=>"$prefix $limits<div class='comment'>{$model->description}</div>",
+	'buttonClass'=>'schedule-item-preview flex-fill',
+	'content'=>$this->render('item-edit',['model'=>$model]),
+	'contentClass'=>'schedule-item-edit',
+	'initialCollapse'=>!$hidden,
+	'saveState'=>true,
+	'id'=>'schedule-week-view-'.$model->id,
+]);
+
+\yii\widgets\Pjax::begin();?>
 <div class="schedule-item-block">
 	<div class="d-flex flex-row">
-		<div class="schedule-item-preview flex-fill" onclick="$(this).parents('div.schedule-item-block').children('div.schedule-item-edit').fadeToggle()">
-			<?= $prefix.' '.$limits ?>
-			<div class="comment"><?= $model->description ?></div>
-		</div>
+		<?= $switchCard->switcher() ?>
 		<?php if ($model->isOverride){ ?>
 			<div class="btn-group pull-right align-self-center" role="group">
 				<?= Html::a('<span class="fas fa-pencil-alt"></span>',[
@@ -40,7 +46,8 @@ if ($model->isOverride) {
 					'id'=>$model->id,
 					'return'=>'previous'
 				],[
-					'class'=>'btn btn-primary btn-sm open-in-modal-form'
+					'class'=>'btn btn-primary btn-sm open-in-modal-form',
+					'data'=>['modal-pjax-reload'=>'auto',],
 				]) ?>
 				
 				<?= Html::a('<span class="fas fa-trash"/>', [
@@ -51,12 +58,11 @@ if ($model->isOverride) {
 						'confirm' => 'Удалить этот период расписания? Действие необратимо',
 						'method' => 'post',
 					],
-					'class'=>'btn btn-danger btn-sm'
+					'class'=>'btn btn-danger btn-sm',
 				]) ?>
 			</div>
 		<?php } ?>
 	</div>
-	<div class="schedule-item-edit" <?= $hidden ?> >
-		<?= $this->render('item-edit',['model'=>$model]) ?>
-	</div>
+	<?= $switchCard->card() ?>
 </div>
+<?php \yii\widgets\Pjax::end();

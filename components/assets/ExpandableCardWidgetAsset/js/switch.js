@@ -11,6 +11,8 @@ function ExpandableCardOversizeCheck($card) {
                 '<path d="m 0 0 l 4 0 l -2 2" fill="currentColor"/>' +
                 '</svg>' +
                 '</span>')
+            if ($card.hasClass('switch-only-on-button'))
+                $toggle.on('click',function (){ExpandableCardSwitch($card)});
             //    .on("mouseover", function(e){console.log("!");e.stopPropagation();});
             $card.prepend($toggle);
         }
@@ -31,7 +33,8 @@ function ExpandableCardSwitch ($card) {
 
 function ExpandableCardInit (card) {
     let $card=$(card);
-    $card.on('click',function (){ExpandableCardSwitch($card)});
+    if (!$card.hasClass('switch-only-on-button'))
+        $card.on('click',function (){ExpandableCardSwitch($card)});
     ExpandableCardOversizeCheck($card);
 }
 

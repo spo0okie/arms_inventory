@@ -12,12 +12,14 @@ class ExpandableCardWidget extends Widget
 	public $initialExpand=false;
 	public $maxHeight='150';
 	public $cardClass='';
+	public $switchOnlyOnButton=false;
 	
 	private $currentClass=null;
 	
 	public function init()
 	{
 		parent::init();
+		if ($this->switchOnlyOnButton) $this->cardClass.=' switch-only-on-button';
 		$this->currentClass=$this->initialExpand?'':'compressed';
 		ExpandableCardWidgetAsset::register($this->view);
 	}

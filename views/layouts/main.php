@@ -93,8 +93,9 @@ $this->beginPage() ?>
 <?php
 
 $js = <<<JS
-(function(event, data, status, xhr, selector) {
+function(event, data, status, xhr, selector) {
     console.log('Got modal commit ('+status+')');
+    //console.log(selector);
 	if (status!=='success') {
 	    if (data) {
 			$(this)
@@ -127,17 +128,29 @@ $js = <<<JS
 			window.location.reload();
 		}
 
+		if (selector.attr('data-modal-pjax-reload')) {
+		    let \$pjaxContainer=$(selector).closest('div[data-pjax-container]');
+		    //console.log(\$pjaxContainer);
+		    if (\$pjaxContainer.length) {
+		        let pjaxId='#'+\$pjaxContainer.attr('id');
+			    console.log('reloading pjax '+pjaxId);
+		        $.pjax.reload({container : pjaxId, timeout : 1000 });
+		    } else {
+		        console.log('failed found pjax container. reloading page :(')
+				window.location.reload();
+		    }
+		}
+
 		$(this).modal('toggle');
 	}
-})
+}
 JS;
-
 
 echo ModalAjax::widget([
 	'id' => 'modal_form_loader',
 	'bootstrapVersion' => ModalAjax::BOOTSTRAP_VERSION_5,
 	'header' => 'Правка',
-	
+
 	'selector' => 'a.open-in-modal-form',
 	'ajaxSubmit' => true, // Submit the contained form as ajax, true by default
 	'size' => ModalAjax::SIZE_EXTRA_LARGE,
@@ -156,11 +169,14 @@ echo ModalAjax::widget([
 				}
 			}
 		"),
+		//ModalAjax::EVENT_BEFORE_SUBMIT => new \yii\web\JsExpression($js1),
 		ModalAjax::EVENT_MODAL_SUBMIT => new \yii\web\JsExpression($js),
+		//ModalAjax::EVENT_MODAL_SUBMIT_COMPLETE => new \yii\web\JsExpression($js3),
 	],
 ]); ?>
 
 <?php $this->endBody();
+
 $js = <<<JS
 //$('.modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
 
@@ -169,6 +185,8 @@ $js = <<<JS
 bootstrap.Modal.prototype._initializeFocusTrap = function () { return { activate: function () { }, deactivate: function () { } } };
 JS;
 $this->registerJs($js,\yii\web\View::POS_END);
+
+
 ?>
 </body>
 </html>
