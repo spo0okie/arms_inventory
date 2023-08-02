@@ -493,9 +493,10 @@ class Techs extends ArmsModel
 		
 		
 		if (strpos($prefix,'-')===false) //если в переданном префиксе нет "-", то ищем записи в которых
-			$query->andWhere('LOCATE("-",num,'.(mb_strlen($prefix)+1).')=0'); //после первого "-" второго уже нет
+			$query->andWhere('LOCATE("-",num,'.(mb_strlen($prefix)+2).')=0'); //после первого "-" второго уже нет
 		//иначе он вместо чел-0000018 найдет чел-тел-0002 и все неправильно посчитает
 		
+		//$sql=$query->createCommand()->getRawSql();
 		$last=$query
 			->orderBy(['num'=>SORT_DESC])
 			->one();
