@@ -132,7 +132,12 @@ class DynaGridWidget extends Widget
 		}
 		
 		if (is_null($this->model)) {
-			$this->model=$this->filterModel;
+			if (!is_null($this->filterModel)) {
+				$this->model=$this->filterModel;
+			} elseif (count($models=$this->dataProvider->getModels())) {
+				$this->model=reset($models);
+			}
+			
 		}
 		
 		$columns=$this->prepareColumns($this->columns,$this->defaultOrder);

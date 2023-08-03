@@ -59,9 +59,23 @@ class NetIpsController extends Controller
         	'allModels'=>$searchModel->search(Yii::$app->request->queryParams)->models,
 			'pagination'=>['pageSize'=>100],
 		]);
+	
+		$networkProvider=null;
+        if (!$dataProvider->totalCount && ($ip_addr=$searchModel->text_addr)) {
+			$ip=new NetIps(['text_addr'=>$ip_addr]);
+			$ip->beforeSave(true);
+			if (is_object($ip->network)) {
+				$networkProvider= new ArrayDataProvider([
+					'allModels'=>[$ip->network],
+					'pagination'=>false,
+				]);
+			}
+		}
+        
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+			'networkProvider' => $networkProvider,
         ]);
     }
 	public function actionItemByName($name)

@@ -45,10 +45,13 @@ if (is_array($model->users) && count ($model->users)) {
 if (count($objects)) echo '<h4>привязан к:'.implode(', ',$objects).'</h4><br />';
 
 ?>
-<h4>Сеть:</h4>
-<?= $this->render('/networks/item',['model'=>$model->network]) ?>
 
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 <?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
 
+<?php if (is_object($model->network)) { ?>
+<hr>
+<h4>Сеть:</h4>
+<?= $this->render('/networks/card',['model'=>$model->network]) ?>
 
+<?php }

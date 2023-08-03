@@ -13,14 +13,10 @@ if (!isset($static_view)) $static_view=false;
 ?>
 
 <h1 class="text-monospace">
-	<?= Html::encode($model->sname) ?>
-	<?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['networks/update','id'=>$model->id])) ?>
-	<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['networks/delete', 'id' => $model->id], [
-		'data' => [
-			'confirm' => 'Удалить этот элемент? Действие необратимо',
-			'method' => 'post',
-		],
-	]) ?>
+	<?= \app\components\LinkObjectWidget::widget([
+		'model'=>$model,
+		'name'=>$model->sname
+	])?>
 </h1>
 <?= Yii::$app->formatter->asNtext($model->comment) ?>
 

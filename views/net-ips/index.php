@@ -6,6 +6,7 @@ use kartik\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\NetIpsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $networkProvider yii\data\ActiveDataProvider */
 \yii\helpers\Url::remember();
 
 $this->title = app\models\NetIps::$titles;
@@ -80,4 +81,11 @@ $renderer=$this;
             //['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
+	
+	<?php
+	if (is_object($networkProvider)) {
+		echo '<h4>Адрес не найден, но есть подходящая сеть</h4>';
+		echo $this->render('/networks/table', ['dataProvider'=>$networkProvider, 'searchModel'=>null]);
+	}
+	?>
 </div>
