@@ -1,5 +1,6 @@
 <?php
 
+use kartik\markdown\Markdown;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -45,8 +46,7 @@ if (!isset($static_view)) $static_view=false;
 			?></h4>
 	<?php } ?>
 
-	<br />
-	<div class="row">
+	<div class="row mb-3">
 		<div class="col-md-6">
 			<h4>Шлюз</h4>
 			<?= $model->readableRouter; ?>
@@ -56,10 +56,16 @@ if (!isset($static_view)) $static_view=false;
 			<?= $model->readableDhcp; ?>
 		</div>
 	</div>
-	<br />
-	<div class="row">
+	<div class="row mb-3">
 		<div class="col-md-12">
 			<h4>Использовано:</h4>
 			<?= $this->render('used',['model'=>$model]) ?>
 		</div>
 	</div>
+
+<?php
+if ($model->notepad) {
+	echo \app\components\ExpandableCardWidget::widget([
+		'content'=>Markdown::convert($model->notepad)
+	]);
+}

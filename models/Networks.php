@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\ArrayHelper;
 use PhpIP;
 use Yii;
 use yii\db\ActiveRecord;
@@ -19,6 +20,7 @@ use yii\db\Expression;
  * @property string $readableRouter
  * @property string $readableDhcp
  * @property string $comment
+ * @property string $notepad
  * @property int $vlan_id
  * @property int $segments_id
  * @property int $addr
@@ -68,7 +70,7 @@ class Networks extends ArmsModel
 			[['text_router','text_dhcp'], 'ip','ipv6'=>false],
             [['vlan_id', 'segments_id', 'addr', 'mask', 'router', 'dhcp'], 'integer'],
             [['name'], 'string', 'max' => 255],
-			[['comment'], 'safe'],
+			[['comment','notepad'], 'safe'],
 			[['segments_id'], 'exist', 'skipOnError' => true, 'targetClass' => Segments::className(), 'targetAttribute' => ['segments_id' => 'id']],
 		];
     }
@@ -78,7 +80,7 @@ class Networks extends ArmsModel
 	 */
 	public function attributeData()
 	{
-		return [
+		return ArrayHelper::recursiveOverride(parent::attributeData(),[
 			'id' => 'ID',
 			'name' => [
 				'Название сети',
@@ -128,8 +130,12 @@ class Networks extends ArmsModel
 			'readableDhcp' => ['alias'=>'dhcp'],
 			'text_dhcp' => ['alias'=>'dhcp'],
 			'comment' => [
-				'Пояснение',
-				'hint' => 'Все что нужно знать про сеть сверх того, что уже внесено выше',
+				'Описание',
+				'hint' => 'Короткое описание сети',
+			],
+			'notepad' => [
+				'Подробно',
+				'hint' => 'Подробное описание сети',
 			],
 			'readableWildcard' => ['Обратная маска'],
 			'readableNetworkIp' => ['IP сети'],
@@ -137,7 +143,7 @@ class Networks extends ArmsModel
 			'readableLastIp' => ['Последний доступный IP'],
 			'readableBroadcastIp' => ['Широковещательный IP'],
 			'maxHosts' => ['Допустимое количество узлов'],
-		];
+		]);
 	}
 	
 	public function getPlace()

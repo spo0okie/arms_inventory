@@ -70,8 +70,10 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 
 
 
-    <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
-
+    <?= $form->field($model, 'comment')->textarea(['rows' => 1]) ?>
+	<?= $form->field($model, 'notepad')->widget(\kartik\markdown\MarkdownEditor::className(), [
+		'showExport'=>false
+	]) ?>
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
