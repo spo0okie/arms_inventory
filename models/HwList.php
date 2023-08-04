@@ -208,6 +208,18 @@ class HwList {
 		if (count($cpus)) return $cpus[0];
 		return '';
 	}
+	
+	public function getCpuCoresCount() {
+		$cpuCount=0;
+		foreach ($this->items as $item) if (!$item->hidden) {
+			if ($item->type == \app\models\HwListItem::$TYPE_CPU) {
+				$cpuCount+= $item->cores;
+			}
+		}
+		return ($cpuCount);
+  
+	}
+	
 	//возвращает короткое описание CPU
 	public function getCPUCount(){
 		$cpuCount=0;
@@ -228,18 +240,23 @@ class HwList {
 	}
 	
 	
+	public function getRamMb(){
+		$ram=0;
+		foreach ($this->items as $item) if (!$item->hidden) {
+			if ($item->type == \app\models\HwListItem::$TYPE_RAM) $ram+=(int)substr($item->product,0,-3);
+		}
+    	return (int)$ram;
+	}
+	
 	public function getRAMShort(){
-    	$ram=0;
-	    foreach ($this->items as $item) if (!$item->hidden) {
-		    if ($item->type == \app\models\HwListItem::$TYPE_RAM) $ram+=(int)substr($item->product,0,-3);
-	    }
+    	$ram=$this->getRamMb();
 	    if (!$ram) return '';
 	    return ((int)$ram < 1024)?
 			(int)($ram).'MiB'
 			:(int)($ram/1024).'GiB';
     }
-
-	public function getHDDShort(){
+	
+    public function getHddGb() {
 		$size=0;
 		foreach ($this->items as $item) if (!$item->hidden) {
 			if ($item->type == \app\models\HwListItem::$TYPE_HDD) {
@@ -248,6 +265,10 @@ class HwList {
 				$size+=(int)substr($prod,0,-2);
 			}
 		}
+    	return (int)$size;
+	}
+	public function getHDDShort(){
+    	$size=$this->getHddGb();
 		if (!$size) return '';
 		if ($size>1000) return (int)($size/1000).'Tb';
 		return (int)$size.'Gb';

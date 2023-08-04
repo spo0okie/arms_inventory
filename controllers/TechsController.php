@@ -36,7 +36,7 @@ class TechsController extends ArmsBaseController
 		    'class' => \yii\filters\AccessControl::className(),
 		    'rules' => [
 			    ['allow' => true, 'actions'=>['create','update','uploads','delete','unlink','updhw','rmhw','edithw','port-list'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','validate','inv-num','item','item-by-name','passport'], 'roles'=>['@','?']],
+			    ['allow' => true, 'actions'=>['index','view','ttip','ttip-hw','validate','inv-num','item','item-by-name','passport'], 'roles'=>['@','?']],
 		    ],
 		    'denyCallback' => function ($rule, $action) {
 			    throw new  \yii\web\ForbiddenHttpException('Access denied');

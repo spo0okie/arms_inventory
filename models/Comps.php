@@ -76,6 +76,7 @@ class Comps extends ArmsModel
 	private $ip_ignore_cache=null;
 	private $ip_filtered_cache=null;
 	private $doNotChangeAuthor=false;
+	private $servicePartialWeightCache=[];
 
     /**
      * @inheritdoc
@@ -298,8 +299,19 @@ class Comps extends ArmsModel
     {
         return $this->exclude_hw=implode("\n",array_diff($this->getExcludeHwArray(),[$item]));
     }
-
-    /**
+	
+	public function getCpuCoresCount() {
+		return $this->hwList->getCpuCoresCount();
+	}
+	public function getRamGb() {
+		return $this->hwList->getRamMb()/1024;
+	}
+	public function getHddGb() {
+		return $this->hwList->getHddGb();
+	}
+	
+	
+	/**
      * Возвращает все оборудование в виде HwList
      */
     public function getHwList()
@@ -537,6 +549,30 @@ class Comps extends ArmsModel
 			elseif ($data_age < 3600*72) return (int)($data_age/3600).' ч.';
 			else return (int)($data_age/3600/24).' дн.';
 		} else return '';
+	}
+	
+	/**
+	 * Возвращает долю веса сервиса (с учетом дочерних)
+	 * @param $serviceId
+	 */
+	public function recursiveServicePartialWeight($serviceId) {
+		if (isset($this->servicePartialWeightCache[$serviceId]))
+			return $this->servicePartialWeightCache[$serviceId];
+		$total=0;
+		$current=0;
+		foreach ($this->services as $service) {
+			$total+=$service->weight;
+			if ($service->inService($serviceId)) {
+				$current+=$service->weight;
+			}
+		}
+		
+		if (!$total)
+			$this->servicePartialWeightCache[$serviceId]=0; //no services
+		else
+			$this->servicePartialWeightCache[$serviceId]=$current/$total;
+		
+		return $this->servicePartialWeightCache[$serviceId];
 	}
 	
 	/**

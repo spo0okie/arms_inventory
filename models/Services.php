@@ -761,6 +761,16 @@ class Services extends ArmsModel
 		return $this->sumTotalsCache;
 	}
 	
+	/**
+	 * Проверяет что этот сервис косвенно входит в сервис с ID serviceID
+	 * @param $serviceID
+	 */
+	public function inService($serviceID) {
+		if ($this->id === $serviceID) return true;
+		if (is_object($this->parentService)) return $this->parentService->inService($serviceID);
+		return false;
+	}
+	
 	
 	/**
 	 * @return \yii\db\ActiveQuery

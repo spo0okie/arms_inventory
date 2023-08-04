@@ -214,6 +214,7 @@ class ServicesController extends Controller
 			'pagination' => false,
 		]);;
 		return $this->renderAjax('comps-list', [
+			'model'=>$model,
 			'dataProvider' => $dataProvider,
 		]);
 	}
