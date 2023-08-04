@@ -16,10 +16,18 @@ function attach_qTip(el,force=false){
     if (typeof $url !== 'undefined') {
         if (typeof $text == 'undefined') $text='Загрузка...';
         $load=function(instance, helper) {
-            let $origin = $(helper.origin);
+            let $origin = $(helper.tooltip);
             if ($origin.data('loaded') !== true) {
                 $.get($url, function(data) {
                     instance.content(data);
+                    if (typeof ExpandableCardInit === "function") {
+                        $(instance.elementTooltip())
+                            .find('.expandable-card-outer')
+                            .each(function (index,item){
+                                console.log(item);
+                                ExpandableCardInit(item);
+                            });
+                    }
                     $origin.data('loaded', true);
                 });
             }

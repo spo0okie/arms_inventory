@@ -51,5 +51,6 @@ class AppAsset extends AssetBundle
         'yii\bootstrap5\BootstrapAsset',
 		'app\assets\Select2ArmsAsset',
 		'app\assets\TooltipsterAsset',
+		'app\components\assets\ExpandableCardWidgetAsset'
     ];
 }
