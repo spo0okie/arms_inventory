@@ -47,10 +47,17 @@ if (count($model->children)||count($model->comps)) {
 		'active'=>$cookieTab==$tabId,
 		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 		'content'=><<<HTML
-		<div id="serviceCompsList"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>
+		<div id="serviceCompsList">
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
 		<script>
 			$(document).ready(function() {
-				$.get("/web/services/os-list?id={$model->id}", function(data) {jQuery("#serviceCompsList").html(data);})
+				$.get("/web/services/os-list?id={$model->id}", function(data) {
+				    jQuery("#serviceCompsList").hide().html(data);
+				    setTimeout(function (){jQuery("#serviceCompsList").fadeToggle()},500)
+				})
 			})
 		</script>
 HTML,
