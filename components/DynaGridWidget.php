@@ -191,7 +191,7 @@ class DynaGridWidget extends Widget
 						set: function (key,val) {persistResizeColumn(key,val)}
 					}'),
 					'selector'=>'tr th',
-					'visWaitTimeout'=>500
+					'visibilityWaitTimeout'=>500
 				],
 				'persistResize'=>true,
 				'showFooter'=>$this->showFooter,
