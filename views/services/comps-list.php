@@ -14,45 +14,48 @@ use app\components\DynaGridWidget;
 $vmCpus=0;
 $vmRam=0;
 $vmHdd=0;
-foreach ($dataProvider->getModels() as $data) {
+foreach ($dataProvider->getModels() as $data) if ($data->ignore_hw==1) {
 	$vmCpus+=$data->recursiveServicePartialWeight($model->id)*$data->getCpuCoresCount();
 	$vmRam+=$data->recursiveServicePartialWeight($model->id)*$data->getRamGb();
 	$vmHdd+=$data->recursiveServicePartialWeight($model->id)*$data->getHddGb();
 }
 
 $vmRes=[
-	'cpuCores'=>[
+	'vCpuCores'=>[
 		'value' => function ($data) use ($model){
 			/* @var $data \app\models\Comps */
+			if (!$data->ignore_hw) return '';
 			$partial=$data->recursiveServicePartialWeight($model->id)*$data->getCpuCoresCount();
 			$total=$data->getCpuCoresCount();
-			$partial=Yii::$app->formatter->asDecimal($partial);
-			$total=Yii::$app->formatter->asDecimal($total);
+			$partial=Yii::$app->formatter->asDecimal($partial,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$partial<10?1:0]);
+			$total=Yii::$app->formatter->asDecimal($total,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$total<10?1:0]);
 			return ($total==$partial)?$total:"$partial / $total";
 		},
-		'footer'=>Yii::$app->formatter->asDecimal($vmCpus),
+		'footer'=>Yii::$app->formatter->asDecimal($vmCpus,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$vmCpus<10?1:0]),
 	],
-	'ramGb'=>[
+	'vRamGb'=>[
 		'value' => function ($data) use ($model){
 			/* @var $data \app\models\Comps */
+			if (!$data->ignore_hw) return '';
 			$partial=$data->recursiveServicePartialWeight($model->id)*$data->getRamGb();
 			$total=$data->getRamGb();
-			$partial=Yii::$app->formatter->asDecimal($partial);
-			$total=Yii::$app->formatter->asDecimal($total);
+			$partial=Yii::$app->formatter->asDecimal($partial,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$partial<10?1:0]);
+			$total=Yii::$app->formatter->asDecimal($total,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$total<10?1:0]);
 			return ($total==$partial)?$total:"$partial / $total";
 		},
-		'footer'=>Yii::$app->formatter->asDecimal($vmRam),
+		'footer'=>Yii::$app->formatter->asDecimal($vmRam,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$vmRam<10?1:0]),
 	],
-	'hddGb'=>[
+	'vHddGb'=>[
 		'value' => function ($data) use ($model){
 			/* @var $data \app\models\Comps */
+			if (!$data->ignore_hw) return '';
 			$partial=$data->recursiveServicePartialWeight($model->id)*$data->getHddGb();
 			$total=$data->getHddGb();
-			$partial=Yii::$app->formatter->asDecimal($partial);
-			$total=Yii::$app->formatter->asDecimal($total);
+			$partial=Yii::$app->formatter->asDecimal($partial,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$partial<10?1:0]);
+			$total=Yii::$app->formatter->asDecimal($total,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$total<10?1:0]);
 			return ($total==$partial)?$total:"$partial / $total";
 		},
-		'footer'=>Yii::$app->formatter->asDecimal($vmHdd),
+		'footer'=>Yii::$app->formatter->asDecimal($vmHdd,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$vmHdd<10?1:0]),
 	],
 ];
 ?>
@@ -65,7 +68,7 @@ $vmRes=[
 			include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php',
 			$vmRes
 		),
-		'defaultOrder' => ['name','ip','mac','services_ids','comment','os','cpuCores','ramGb','hddGb','arm_id','places_id','raw_version'],
+		'defaultOrder' => ['name','ip','mac','services_ids','comment','os','vCpuCores','vRamGb','vHddGb','arm_id','places_id','raw_version'],
 		'dataProvider' => $dataProvider,
 		'gridOptions' => [
 			'showFooter' => true,
