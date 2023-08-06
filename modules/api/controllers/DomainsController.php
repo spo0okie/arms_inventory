@@ -19,7 +19,8 @@ class DomainsController extends \yii\rest\ActiveController
     public function actionView($id){
         $modelClass = $this->modelClass;
         $model = $modelClass::find()->where(['name' => strtoupper($id)])->one();
-        if ($model === null) $model = $modelClass::find()->where(['id' => $id])->one();
+		if ($model === null) $model = $modelClass::find()->where(['LOWER(fqdn)' => strtolower($id)])->one();
+		if ($model === null) $model = $modelClass::find()->where(['id' => $id])->one();
         if ($model === null)
             throw new \yii\web\NotFoundHttpException("Domain with name or id '$id' not found");
             

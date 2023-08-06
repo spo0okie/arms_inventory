@@ -103,7 +103,7 @@ $config = [
                     'pluralize' => false,
                     'prefix' => 'api'
                 ],
-                'api/domains/<id:[\w-]+>' => 'api/domains/view',
+                'api/domains/<id:[\.\w-]+>' => 'api/domains/view',
                 'api/comps/<domain:[\w-]+>/<name:[\w-]+>' => 'api/comps/search',
             ],
         ],
