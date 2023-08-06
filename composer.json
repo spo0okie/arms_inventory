@@ -57,8 +57,7 @@
     "rlanvin/php-ip": "^2.1",
 	"thomaspark/bootswatch": "dev-master",
     "yiisoft/yii2-jui": "~2.0.0",
-    "ext-imagick": "*",
-
+    "ext-imagick": "*"
   },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",
