@@ -155,7 +155,7 @@ class Techs extends ArmsModel
     public function extraFields()
 	{
 		return [
-			'site','comp','supportTeam','responsible','stateName','model','type' //площадка - помещение верхнего уровня относительно помещения где размещено оборудование
+			'site','comp','supportTeam','responsible','stateName','model','manufacturer','type' //площадка - помещение верхнего уровня относительно помещения где размещено оборудование
 		];
 	}
 	
@@ -883,15 +883,17 @@ class Techs extends ArmsModel
 		return is_object($this->place)?$this->place->top:null;
 	}
 
-	
+
+	public function getManufacturer() {
+		return is_object($this->model)?$this->model->manufacturer:null;
+	}
 	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getModel()
 	{
-		//if (isset($this))
-		return $this->model_cache=$this->hasOne(TechModels::className(), ['id' => 'model_id']);
+		return $this->hasOne(TechModels::className(), ['id' => 'model_id']);
 	}
 	
 	/**
