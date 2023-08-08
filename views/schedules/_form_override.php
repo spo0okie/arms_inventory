@@ -18,6 +18,8 @@ if (!isset($acl_mode)) $acl_mode=false;
 
 <div class="schedules-form">
     <?php $form = ActiveForm::begin(); ?>
+	<?= $form->field($model,'override_id')->hiddenInput()->label(false)->hint(false); ?>
+	<?= $form->field($model,'is_period')->hiddenInput()->label(false)->hint(false); ?>
 	<div class="row">
 		<div class="col-md-4">
 			<?= $form->field($model, 'description')->textInput(['maxlength' => true]) ?>

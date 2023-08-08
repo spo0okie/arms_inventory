@@ -142,20 +142,11 @@ class SchedulesController extends ArmsBaseController
 	{
 		$model = new Schedules();
 		
-		if (Yii::$app->request->get('parent_id'))
-			$model->parent_id=Yii::$app->request->get('parent_id');
-
-		if (Yii::$app->request->get('override_id')) {
-			$model->override_id = Yii::$app->request->get('override_id');
-			$model->parent_id = Yii::$app->request->get('override_id');
-			$model->start_date = date('Y-m-d');
-			$model->name='Override for #'.$model->override_id;
-		}
-		
-		
 		$support_service=null;
 		$service=null;
 		$item=null;
+
+		//
 		if (Yii::$app->request->get('attach_service')) {
 			$service=\app\models\Services::findOne(Yii::$app->request->get('attach_service'));
 			if (is_object($service)) {
@@ -167,83 +158,46 @@ class SchedulesController extends ArmsBaseController
 				$model->name=\app\models\Schedules::$title.' поддержки '.$support_service->name;
 			}
 		}
+
+		$model->load(Yii::$app->request->get());
 		
+		if ($model->override_id) {
+			$model->parent_id = $model->override_id;
+			$model->start_date = date('Y-m-d');
+			$model->name='Override for #'.$model->override_id;
+		}
+
 		if ($model->load(Yii::$app->request->post())) {
-			//var_dump($model);
-			//return;
-			
 			if ($model->save()) {
+				//если было указано расписание по умолчанию - надо его создат в БД
 				if (strlen($model->defaultItemSchedule)) {
 					$item=new SchedulesEntries();
 					$item->schedule=$model->defaultItemSchedule;
 					$item->date='def';
 					$item->schedule_id = $model->id;
-					//var_dump($item);
-					//return;
 					$item->save();
 				}
-				if (is_object($item)) {
-					//return $this->redirect(['view', 'id' => $model->id]);
-				}
+				//если надо привязать сервис
 				if (is_object($service)) {
 					$service->providing_schedule_id = $model->id;
 					$service->save();
-					if (Yii::$app->request->isAjax) {
-						Yii::$app->response->format = Response::FORMAT_JSON;
-						return [$model];
-					}  else
-						return $this->redirect(['services/view', 'id' => $service->id]);
-				} elseif (is_object($support_service)) {
+					return $this->defaultReturn(['services/view', 'id' => $service->id],[$model]);
+				} elseif (is_object($support_service)) { //или поддержку сервиса
 					$support_service->providing_schedule_id = $model->id;
 					$support_service->save();
-					if (Yii::$app->request->isAjax) {
-						Yii::$app->response->format = Response::FORMAT_JSON;
-						return [$model];
-					}  else
-						return $this->redirect(['services/view', 'id' => $support_service->id]);
+					return $this->defaultReturn(['services/view', 'id' => $support_service->id],[$model]);
 				} else
-					if (Yii::$app->request->isAjax) {
-						Yii::$app->response->format = Response::FORMAT_JSON;
-						return [$model];
-					}  else
-						return $this->redirect(['view', 'id' => $model->id]);
+					return $this->defaultReturn(['view', 'id' => $model->id],[$model]);
 			}
 		}
 		
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('create', [
-				'model' => $model,
-				'attach_service'=>Yii::$app->request->get('attach_service')
-			]):
-			$this->render('create', [
-				'model' => $model,
-				'attach_service'=>Yii::$app->request->get('attach_service')
-			]);
-	}
-	/**
-	 * Creates a new Schedules model with attached ACL.
-	 * If creation is successful, the browser will be redirected to the 'view' page.
-	 * @return mixed
-	 */
-	public function actionCreateAcl()
-	{
-		$model = new Schedules();
 		
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			$acl=new \app\models\Acls();
-			$acl->schedules_id=$model->id;
-			$acl->save();
-			if (Yii::$app->request->isAjax) {
-				Yii::$app->response->format = Response::FORMAT_JSON;
-				return [$model];
-			}  else
-				return $this->redirect(['view', 'id' => $model->id, 'acl_mode'=>1] );
-		}
 		
-		return $this->render('create', [
+		return $this->defaultRender('create',[
 			'model' => $model,
-			'acl_mode'=>true
+			'attach_service'=>Yii::$app->request->get('attach_service')
 		]);
+		
 	}
 	
 	

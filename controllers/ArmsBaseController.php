@@ -21,6 +21,45 @@ class ArmsBaseController extends Controller
 	public $modelClass;
 	public $defaultShowArchived=false;
 	
+	
+	/**
+	 * Что должен вернуть контроллер
+	 * @param array $defaultPath путь куда вернуться если вызов не Ajax и не указано previous
+	 * @param mixed $ajaxObject какой объект вернуть если вызов Ajax
+	 * @param bool $previous признак что если в вызове есть return=previous то туда и возвращаемся
+	 */
+	public function defaultReturn(array $defaultPath, $ajaxObject, $previous=true) {
+		if (Yii::$app->request->isAjax) {
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			return [$ajaxObject];
+
+		}  elseif ($previous && Yii::$app->request->get('return')=='previous') {
+			return $this->redirect(Url::previous());
+		} else {
+			return $this->redirect($defaultPath);
+		}
+	}
+	
+	/**
+	 * Отрендерить страничку в обычном или Ajax режиме в зависимости от запроса
+	 * @param      $path
+	 * @param      $params
+	 * @param null $ajaxParams
+	 * @return string
+	 */
+	public function defaultRender($path,$params,$ajaxParams=null) {
+		//если параметры для режима Ajax не заданы, то те же что и для обычного
+		if (is_null($ajaxParams)) $ajaxParams=$params;
+		
+		//добавляем modalParent по умолчанию
+		$ajaxParams=ArrayHelper::recursiveOverride(['modalParent' => '#modal_form_loader'],$ajaxParams);
+		
+		return Yii::$app->request->isAjax?
+			$this->renderAjax($path,$ajaxParams):
+			$this->render($path,$params);
+	}
+	
 	/**
 	 * Устанавливает один параметр запроса
 	 * (из коробки только все одновременно можно установить - пришлось это дописать)
@@ -169,26 +208,11 @@ class ArmsBaseController extends Controller
 		$model = new $this->modelClass();
 
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if (Yii::$app->request->isAjax) {
-				Yii::$app->response->format = Response::FORMAT_JSON;
-				return [$model];
-			}  else {
-				if (Yii::$app->request->get('return')=='previous')
-					return $this->redirect(Url::previous());
-				return $this->redirect(['view', 'id' => $model->id]);
-			}
+			return $this->defaultReturn(['view', 'id' => $model->id],[$model]);
 		}
 		
 		$model->load(Yii::$app->request->get());
-		
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('create', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('create', [
-				'model' => $model,
-			]);
+		return $this->defaultRender('create', ['model' => $model,]);
 	}
 
 	/**
@@ -203,24 +227,10 @@ class ArmsBaseController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return [$model];
-            }  else {
-	            if (Yii::$app->request->get('return')=='previous')
-	            	return $this->redirect(Url::previous());
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
+			return $this->defaultReturn(['view', 'id' => $model->id],[$model]);
         }
-        
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('update', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('update', [
-				'model' => $model,
-			]);
+	
+		return $this->defaultRender('update', ['model' => $model,]);
     }
 
 

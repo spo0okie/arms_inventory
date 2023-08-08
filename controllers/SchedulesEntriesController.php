@@ -66,27 +66,19 @@ class SchedulesEntriesController extends ArmsBaseController
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    /*public function actionCreate()
+    public function actionCreate()
     {
         $model = new SchedulesEntries();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			return (is_object($model->master) && $model->master->isAcl)?
-				$this->redirect(['/scheduled-access/view', 'id' => $model->schedule_id]):
-				$this->redirect(['/schedules/view', 'id' => $model->schedule_id]);
+				$this->defaultReturn(['/scheduled-access/view', 'id' => $model->schedule_id],[$model]):
+				$this->defaultReturn(['/schedules/view', 'id' => $model->schedule_id],[$model]);
         }
 	
-		if (isset($_GET['schedule_id'])) $model->schedule_id=$_GET['schedule_id'];
-		if (isset($_GET['is_period'])) $model->is_period=$_GET['is_period'];
-        if (isset($_GET['date'])) $model->date=$_GET['date'];
+		$model->load(Yii::$app->request->get());
 	
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('create', [
-				'model' => $model,
-			]):
-			$this->render('create', [
-				'model' => $model,
-			]);
+		return $this->defaultRender('create', ['model' => $model,]);
     }
 
     /**
@@ -96,25 +88,20 @@ class SchedulesEntriesController extends ArmsBaseController
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    /*public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+    public function actionUpdate($id)
+	{
+		$model = $this->findModel($id);
+		
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			return (is_object($model->master) && $model->master->isAcl)?
-				$this->redirect(['/scheduled-access/view', 'id' => $model->schedule_id]):
-				$this->redirect(['/schedules/view', 'id' => $model->schedule_id]);
-        }
-
-        return Yii::$app->request->isAjax?
-			$this->renderAjax('update', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('update', [
-				'model' => $model,
-			]);
-    }*/
+				$this->defaultReturn(['/scheduled-access/view', 'id' => $model->schedule_id],[$model]):
+				$this->defaultReturn(['/schedules/view', 'id' => $model->schedule_id],[$model]);
+		}
+		
+		$model->load(Yii::$app->request->get());
+		
+		return $this->defaultRender('update', ['model' => $model,]);
+	}
 
     /**
      * Deletes an existing SchedulesDays model.

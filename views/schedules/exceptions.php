@@ -43,8 +43,8 @@ echo '<div class="btn-group">';
 if (!$acl_mode) {
 	echo Html::a('Добавить график на дату', [
 		'/schedules-entries/create',
-		'schedule_id' => $model->id,
-		'is_period' => 0,
+		'SchedulesEntries[schedule_id]' => $model->id,
+		'SchedulesEntries[is_period]' => 0,
 	], [
 		'class' => 'btn btn-success',
 		'title' => 'На выбранную дату расписание будет изменено. Например сокращенный рабочий день или праздничный выходной.'
@@ -52,8 +52,8 @@ if (!$acl_mode) {
 	
 	echo Html::a('Изменить расписание на период', [
 		'/schedules/create',
-		'override_id' => $model->id,
-		'is_period' => 0,
+		'Schedules[override_id]' => $model->id,
+		'Schedules[is_period]' => 0,
 	], [
 		'class' => 'btn btn-success',
 		'title' => 'На выбранный период в календаре расписание на неделю будет изменено. Например чей-то отпуск.'
@@ -61,8 +61,8 @@ if (!$acl_mode) {
 	
 	echo Html::a('Добавить раб/не раб. период', [
 		'/schedules-entries/create',
-		'schedule_id' => $model->id,
-		'is_period' => 1,
+		'SchedulesEntries[schedule_id]' => $model->id,
+		'SchedulesEntries[is_period]' => 1,
 	], [
 		'class' => 'btn btn-success',
 		'title' => 'С начала периода (дата, время) и до его конца (дата, время) будет непрерывно нерабочее или рабочее время.'

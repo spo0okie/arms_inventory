@@ -22,8 +22,8 @@ echo '<h2>Периоды предоставления / отзыва досту�
 
 echo Html::a('Добавить период предоставления/отзыва доступа', [
 	'/schedules-entries/create',
-	'schedule_id' => $model->id,
-	'is_period' => 1,
+	'SchedulesEntries[schedule_id]' => $model->id,
+	'SchedulesEntries[is_period]' => 1,
 ], ['class' => 'btn btn-success']);
 
 
