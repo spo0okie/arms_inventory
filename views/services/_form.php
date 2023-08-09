@@ -206,6 +206,17 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 				</div>
 			</div>
 			<div class="row">
+				<div class="col-md-4">
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'vm_cores') ?>
+				</div>
+				<div class="col-md-4">
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'vm_ram') ?>
+				</div>
+				<div class="col-md-4">
+					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'vm_hdd') ?>
+				</div>
+			</div>
+			<div class="row">
 				<div class="col-md-6">
 					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'weight') ?>
 				</div>

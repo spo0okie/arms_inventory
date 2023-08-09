@@ -35,6 +35,9 @@ use yii\web\User;
  * @property int $archived
  * @property int $sumTotals
  * @property int $sumCharge
+ * @property int $vm_cores
+ * @property int $vm_ram
+ * @property int $vm_hdd
  * @property float $cost
  * @property float $charge
  * @property string $segmentName
@@ -175,7 +178,7 @@ class Services extends ArmsModel
             [['name', 'description', 'is_end_user'], 'required'],
 	        [['depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
-			[['places_id','partners_id','places_id','archived','currency_id','weight'],'integer'],
+			[['vm_cores','vm_ram','vm_hdd','places_id','partners_id','places_id','archived','currency_id','weight'],'integer'],
 			[['weight'],'default', 'value' => '100'],
 	        [['is_end_user', 'is_service', 'responsible_id', 'infrastructure_user_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 			[['name'], 'string', 'max' => 64],
@@ -321,7 +324,22 @@ class Services extends ArmsModel
 			'weight' => [
 				'Вес',
 				'hint' => 'Значимость сервиса по сравнению с другими. Используется для определения наиболее важных сервисов на сервере и выборе ответственного за сервер.'
-			]
+			],
+			'vm_cores' => [
+				'Выделено VM CPU',
+				'hint' => 'Количество ядер VM резервированное/запланированное для этого сервиса.<br>'.
+					'(Если на этот сервис запланированы ресурсы виртуализации)'
+			],
+			'vm_ram' => [
+				'Выделено VM RAM',
+				'hint' => 'Объем VM RAM в GiB зарезервированный/запланированный для этого сервиса.<br>'.
+					'(Если на этот сервис запланированы ресурсы виртуализации)'
+			],
+			'vm_hdd' => [
+				'Выделено VM HDD',
+				'hint' =>'Объем дискового пространства VM в GiB зарезервированный/запланированный для этого сервиса.<br>'.
+					'(Если на этот сервис запланированы ресурсы виртуализации)'
+			],
         ];
     }
     
@@ -416,7 +434,7 @@ class Services extends ArmsModel
 	
 	/**
 	 * Непосредственные потомки
-	 * @return Segments[]|\yii\db\ActiveQuery
+	 * @return Services[]|\yii\db\ActiveQuery
 	 */
 	public function getChildren()
 	{
@@ -425,6 +443,24 @@ class Services extends ArmsModel
 			'parent_id',
 			$this->id
 		);
+		return $this->hasMany(Services::className(), ['parent_id' => 'id'])
+			->from(['service_children'=>self::tableName()]);
+	}
+	
+	/**
+	 * Все потомки (включая потомков потомков)
+	 * @return Services[]|\yii\db\ActiveQuery
+	 */
+	public function getChildrenRecursive()
+	{
+		if (static::allItemsLoaded()) {
+			$items=$this->getChildren();
+			$result=$items;
+			foreach ($items as $item) {
+				$result=array_merge($result,$item->getChildrenRecursive());
+			}
+			return $result;
+		}
 		return $this->hasMany(Services::className(), ['parent_id' => 'id'])
 			->from(['service_children'=>self::tableName()]);
 	}

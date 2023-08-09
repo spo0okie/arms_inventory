@@ -20,6 +20,14 @@ foreach ($dataProvider->getModels() as $data) if ($data->ignore_hw==1) {
 	$vmHdd+=$data->recursiveServicePartialWeight($model->id)*$data->getHddGb();
 }
 
+$vCpuTotal=Yii::$app->formatter->asDecimal($vmCpus,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$vmCpus<10?1:0]);
+$vRamTotal=Yii::$app->formatter->asDecimal($vmRam,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$vmRam<10?1:0]);
+$vHddTotal=Yii::$app->formatter->asDecimal($vmHdd,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$vmHdd<10?1:0]);
+
+if ($model->vm_cores) $vCpuTotal=$vCpuTotal." / ".$model->vm_cores;
+if ($model->vm_ram) $vRamTotal=$vRamTotal." / ".$model->vm_ram;
+if ($model->vm_hdd) $vHddTotal=$vHddTotal." / ".$model->vm_hdd;
+
 $vmRes=[
 	'vCpuCores'=>[
 		'value' => function ($data) use ($model){
@@ -31,7 +39,7 @@ $vmRes=[
 			$total=Yii::$app->formatter->asDecimal($total,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$total<10?1:0]);
 			return ($total==$partial)?$total:"$partial / $total";
 		},
-		'footer'=>Yii::$app->formatter->asDecimal($vmCpus,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$vmCpus<10?1:0]),
+		'footer'=>$vCpuTotal,
 	],
 	'vRamGb'=>[
 		'value' => function ($data) use ($model){
@@ -43,7 +51,7 @@ $vmRes=[
 			$total=Yii::$app->formatter->asDecimal($total,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$total<10?1:0]);
 			return ($total==$partial)?$total:"$partial / $total";
 		},
-		'footer'=>Yii::$app->formatter->asDecimal($vmRam,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$vmRam<10?1:0]),
+		'footer'=>$vRamTotal,
 	],
 	'vHddGb'=>[
 		'value' => function ($data) use ($model){
@@ -55,7 +63,7 @@ $vmRes=[
 			$total=Yii::$app->formatter->asDecimal($total,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$total<10?1:0]);
 			return ($total==$partial)?$total:"$partial / $total";
 		},
-		'footer'=>Yii::$app->formatter->asDecimal($vmHdd,null,[NumberFormatter::MAX_FRACTION_DIGITS=>$vmHdd<10?1:0]),
+		'footer'=>$vHddTotal,
 	],
 ];
 ?>
