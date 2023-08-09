@@ -14,7 +14,7 @@ use app\components\DynaGridWidget;
 $vmCpus=0;
 $vmRam=0;
 $vmHdd=0;
-foreach ($dataProvider->getModels() as $data) if ($data->ignore_hw==1) {
+foreach ($dataProvider->getModels() as $data) if ($data->ignore_hw==1 && !$data->archived) {
 	$vmCpus+=$data->recursiveServicePartialWeight($model->id)*$data->getCpuCoresCount();
 	$vmRam+=$data->recursiveServicePartialWeight($model->id)*$data->getRamGb();
 	$vmHdd+=$data->recursiveServicePartialWeight($model->id)*$data->getHddGb();
