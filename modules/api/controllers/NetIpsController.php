@@ -2,6 +2,7 @@
 
 namespace app\modules\api\controllers;
 
+use app\models\NetIps;
 use app\models\Networks;
 use app\models\Users;
 use yii\filters\auth\HttpBasicAuth;
@@ -49,9 +50,17 @@ class NetIpsController extends \yii\rest\ActiveController
         return $actions;
     }
     
-    public function actionSearch($addr,$name=null,$comment=null){
-    	return \app\controllers\NetIpsController::searchModel($addr,$name,$comment);
-    }
+    public function actionSearch($addr=null,$name=null,$comment=null){
+    	$addr=NetIps::find()
+			->andFilterWhere(['text_addr'=>$addr])
+			->andFilterWhere(['name'=>$name])
+			->andFilterWhere(['comment'=>$comment])
+			->one();
+		if (!is_object($addr))  {
+			throw new NotFoundHttpException("Searched IP address not found");
+		}
+		return $addr;
+	}
 	
 	public function actionFirstUnused($text_addr){
     	if (!is_object($network=Networks::find()->where(['text_addr'=>$text_addr])->one()))  {
