@@ -16,25 +16,20 @@
  class ErrorHandler extends \yii\console\ErrorHandler {
  	protected function renderException($exception)
 	{
-		if ($exception instanceof RestHelperException) {
-			// от сих
+		if ($exception instanceof \app\console\ConsoleException) {
 			$previous = $exception->getPrevious();
+
 			$message = $this->formatMessage("Exception ({$exception->getName()})");
 			$message .= $this->formatMessage(" '" . get_class($exception) . "'", [Console::BOLD, Console::FG_BLUE])
 				. ' with message ' . $this->formatMessage("'{$exception->getMessage()}'", [Console::BOLD])
 				. "\n\nin " . dirname($exception->getFile()) . DIRECTORY_SEPARATOR . $this->formatMessage(basename($exception->getFile()), [Console::BOLD])
 				. ':' . $this->formatMessage($exception->getLine(), [Console::BOLD, Console::FG_YELLOW]) . "\n";
 			
-			if (!empty($exception->helper)) {
+			// от сих
+			if (count($exception->details)) foreach ($exception->details as $param=>$value) {
 				$message .= "\n" .
-					$this->formatMessage("Requested URL:\n", [Console::BOLD]) .
-					$exception->helper->request;
-				$message .= "\n" .
-					$this->formatMessage("Response headers:", [Console::BOLD]) .' '.
-					print_r($exception->helper->responseHeaders, true);
-				$message .= "\n" .
-					$this->formatMessage("Response:\n", [Console::BOLD]) .
-					print_r($exception->helper->response, true);
+					$this->formatMessage($param.':', [Console::BOLD]).' '.
+					((is_array($value)||is_object($value))?print_r($value,true):$value);
 			}
 			
 			//до сих обработка кастомного прерывания, с форматированием ошибки

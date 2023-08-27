@@ -5,6 +5,7 @@
 
 namespace app\helpers;
 
+use app\console\ConsoleException;
 use yii\web\UrlManager;
 
 class RestHelper
@@ -103,7 +104,7 @@ class RestHelper
 	/**
 	 * Получает данные с удаленной системы
 	 * @param $url
-	 * @return array|false
+	 * @return array
 	 */
 	public function getData($url) {
 		$this->request=$url;
@@ -111,7 +112,11 @@ class RestHelper
 		$this->responseHeaders=static::parseHeaders($http_response_header);
 		if (isset($this->responseHeaders['response_code'])&&($this->responseHeaders['response_code']=='200')) {
 			return json_decode($this->response, true);
-		} return false;
+		} throw new ConsoleException("Error getting remote data",[
+			'Requested URL' =>$this->request,
+			'Response headers'=>$this->responseHeaders,
+			'Response'=>$this->response
+		]);
 	}
 	
 	/**
