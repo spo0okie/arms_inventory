@@ -6,7 +6,7 @@
  * Time: 11:09
  */
 
-namespace app\commands;
+namespace app\console\commands;
 
 use yii\console\Controller;
 

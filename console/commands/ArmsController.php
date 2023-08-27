@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace app\commands;
+namespace app\console\commands;
 
 use yii\console\Controller;
 use yii\console\ExitCode;
@@ -18,7 +18,7 @@ use yii\console\ExitCode;
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @since 2.0
  */
-class IpController extends Controller
+class ArmsController extends Controller
 {
 	/**
 	 * This command echoes what you have entered as the message.
@@ -27,44 +27,17 @@ class IpController extends Controller
 	 */
 	public function actionIndex()
 	{
-		
-		
 		return ExitCode::OK;
 	}
 	
-	private function reCalcComps()
-	{
-		if (is_array($comps=\app\models\Comps::find()->all())) {
-			foreach ($comps as $comp) $comp->save();
-		};
-	}
-	
-	private function reCalcTechs()
-	{
-		if (is_array($techs=\app\models\Techs::find()->all())) {
-			foreach ($techs as $tech) {
-				echo "{$tech->num}: {$tech->ip}\n";
-				$tech->save(false);
-			}
-		};
-	}
-	
-	public function actionRecalc()
-	{
-		$this->reCalcComps();
-		$this->reCalcTechs();
-		return ExitCode::OK;
-	}
-	
-	public function actionRecalcComps()
-	{
-		$this->reCalcComps();
-		return ExitCode::OK;
-	}
 
-	public function actionRecalcTechs()
+	public function actionReSave()
 	{
-		$this->reCalcTechs();
+		if (is_array($arms=\app\models\Techs::find()->all()))
+			foreach ($arms as $arm) {
+				echo "{$arm->num}\n";
+				$arm->save(false);
+			}
 		return ExitCode::OK;
 	}
 }
