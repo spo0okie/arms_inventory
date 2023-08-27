@@ -18,6 +18,7 @@ use Yii;
  * @property string $history история
  * @property string $updatedAt Время обновления
  * @property string $updated_at Время обновления
+ * @property string $updated_by Автор обновления
  * @property Attaches $attaches Загруженные файлы
  * @property boolean $archived Статус архивирования элемента
  * @property string $external_links Внешние ссылки
@@ -37,6 +38,15 @@ class ArmsModel extends \yii\db\ActiveRecord
 	
 	private static $allItems=null;
 	
+	/** @var bool при сохранении не менять отметку времени и не менять время обновления */
+	private $doNotChangeAuthor=false;
+	
+	
+	/**
+	 * @var array поля которые у этой модели можно синхронизировать с удаленной системы
+	 * (для функционала импорта/синхронизации)
+	 */
+	private static $syncableFields=[];
 	
 	/**
 	 * Массив описания полей
@@ -245,11 +255,17 @@ class ArmsModel extends \yii\db\ActiveRecord
 		}
 	}
 	
+	public function silentSave() {
+		$this->doNotChangeAuthor=true;
+		$this->save();
+	}
 	
 	public function beforeSave($insert)
 	{
 		if (!parent::beforeSave($insert)) return false;
 		
+		// Механизм обновления поля external_links такой что задавая какую-то внешнюю ссылку
+		// - она просто добавляется к существующим
 		if ($this->hasProperty('external_links') && $this->external_links) {
 			$old=static::findOne($this->id);
 			$current=$old->external_links?json_decode($old->external_links,true):[];
@@ -258,6 +274,40 @@ class ArmsModel extends \yii\db\ActiveRecord
 			$this->external_links=json_encode($merged,JSON_UNESCAPED_UNICODE);
 		}
 		
+		if ($this->hasProperty('updated_at') && !$this->doNotChangeAuthor) {
+			$this->updated_at=gmdate('Y-m-d H:i:s');
+		}
+		
+		if ($this->hasProperty('updated_by') && !$this->doNotChangeAuthor) {
+			if (is_object(Yii::$app->user) && is_object(Yii::$app->user->identity))
+				$this->updated_by=Yii::$app->user->identity->Login;
+		}
+		
 		return true;
 	}
+	
+	
+	/**
+	 * Загрузить поля с объекта загруженного с другой системы (такой же инвентори)
+	 * @param $remote
+	 */
+	public function syncFields($remote) {
+		$updated=false;
+		
+		foreach (static::$syncableFields as $field) {
+			if ($this->$field != $remote[$field]) {
+				$this->$field = $remote[$field];
+				$updated=true;
+			}
+		}
+		//если ничего не поменялось то возвращаем null
+		if (!$updated) return null;
+		
+		echo "updating: ".print_r($this->attributes);
+		return true;
+		
+		//иначе результат сохранения изменений
+		return $this->save();
+	}
+	
 }
