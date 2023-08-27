@@ -13,10 +13,14 @@ use Yii;
  *
  * @property Manufacturers $manufacturers
  */
-class ManufacturersDict extends \yii\db\ActiveRecord
+class ManufacturersDict extends ArmsModel
 {
 	static private $cache=[];
 	static private $cacheComplete=false;
+	
+	static private $syncableFields=[
+		'name'	//синхронизируем только имя
+	];
 
     /**
      * @inheritdoc

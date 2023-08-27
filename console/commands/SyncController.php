@@ -7,7 +7,10 @@
 
 namespace app\console\commands;
 
+use app\console\ConsoleException;
+use app\helpers\ArrayHelper;
 use app\helpers\RestHelperException;
+use app\models\ArmsModel;
 use yii\console\Controller;
 use app\helpers\RestHelper;
 use yii\db\Exception;
@@ -57,10 +60,43 @@ class SyncController extends Controller
 	 */
 	public function loadRemote(string $class, $params=[]) {
 		$objects=$this->remote->getObjects($class,'',$params);
-		if ($objects!=false)
-			$this->loaded[$class]=$objects;
-		else
-			throw new RestHelperException("Error getting remote $class objects", $this->remote);
+		if ($objects!=false) foreach ($objects as $object) {
+			$this->storeLoaded($class,$object);
+		}
+	}
+	
+	/**
+	 * Синхронизация простых объектов (без ссылок)
+	 * @param string $class класс локальных объектов
+	 * @param array  $remotes массив удаленных объектов
+	 * @param string $name имя поля "ключа" по которому ищем локальные (ID у них не совпадают)
+	 */
+	public static function syncSimple(string $class, array $remotes, $name='name'){
+		//грузим локальные объекты
+		$locals=$class::find()->all();
+		
+		//перебираем удаленные
+		foreach ($remotes as $id=>$remote) {
+			//каждому удаленному ищем локальный
+			$localSearch=ArrayHelper::findByField($locals,$name,$remote[$name]);
+			
+			//если в качестве ключа выбран $name, то по нему не должно искаться несколько объектов
+			if (count($localSearch)>1) throw new ConsoleException('Got multiple objects with same name',[
+				'Name'=>$remote[$name],
+				'Objects Found'=>$localSearch
+			]);
+			
+			if (!count($localSearch)) {
+				//TODO тут надо принимать решение создаем ли новые объекты и если нужно - создавать
+				echo "Local $name missing!\n";
+				continue;
+			}
+			
+			/** @var $local ArmsModel */
+			$local=reset($localSearch);
+			
+			$local->syncFields($remote);
+		}
 	}
 	
 	/**
@@ -72,8 +108,8 @@ class SyncController extends Controller
     public function actionManufacturers(string $url, string $user='', string $pass='')
     {
     	$this->initRemote($url,$user,$pass);
-		$this->loadRemote('manufacturers');
 		$this->loadRemote('manufacturers-dict');
-    	print_r($this->loaded);
+		static::syncSimple('/app/models/ManufacturersDict',$this->remote['manufacturers-dict']);
+    	//print_r($this->loaded);
     }
 }
