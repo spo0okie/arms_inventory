@@ -4,18 +4,18 @@ use yii\helpers\ArrayHelper;
 
 $params = ArrayHelper::merge(
 	require __DIR__ . '/params.php',
-	require __DIR__ . '/params-local.php',
+	require __DIR__ . '/params-local.php'
 );
 $db = ArrayHelper::merge(
 	require __DIR__ . '/db.php',
-	require __DIR__ . '/db-local.php',
+	require __DIR__ . '/db-local.php'
 );
 
 $config = [
     'id' => 'basic-console',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
-    'controllerNamespace' => 'app\commands',
+    'controllerNamespace' => 'app\console\commands',
     'components' => [
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -32,7 +32,10 @@ $config = [
 	    'authManager' => [
 		    'class' => 'yii\rbac\DbManager',
 	    ],
-	    
+		'errorHandler'=>[
+			'class'=>'app\console\errorHandler',
+		],
+	   
     ],
     'params' => $params,
     /*
