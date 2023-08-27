@@ -33,7 +33,7 @@ $config = [
 		    'class' => 'yii\rbac\DbManager',
 	    ],
 		'errorHandler'=>[
-			'class'=>'app\console\errorHandler',
+			'class'=>'app\console\ErrorHandler',
 		],
 	   
     ],
