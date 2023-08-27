@@ -145,11 +145,11 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	        [['Ename', 'Persg', 'Uvolen', ], 'required'],
 	        [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
 	        [['employee_id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
-	        [['Doljnost', 'Ename', 'Login','Mobile','private_phone','ips'], 'string', 'max' => 255],
+	        [['Doljnost', 'Ename', 'Mobile','private_phone','ips'], 'string', 'max' => 255],
 			[['notepad'],'safe'],
 	        [['id'], 'unique'],
 	        [['Email','uid'], 'string', 'max' => 64],
-	        [['Phone', 'work_phone'], 'string', 'max' => 32],
+	        [['Login', 'Phone', 'work_phone'], 'string', 'max' => 32],
 			['Login', function ($attribute, $params, $validator) {
 				$exist=static::find()->where(['Login'=>$this->Login])->andWhere(['not',['id'=>$this->id]])->one();
 				/** @var $exist Users */
