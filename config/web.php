@@ -91,15 +91,18 @@ $config = [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [
 						'comps'			=> 'api/comps',
-						'techs'			=> 'api/techs',
-	                    'domains'		=> 'api/domains',
-	                    'login-journal' => 'api/login-journal',
-						'users'			=> 'api/users',
 						'contracts'		=> 'api/contracts',
-						'scans'			=> 'api/scans',
+						'domains'		=> 'api/domains',
+						'login-journal' => 'api/login-journal',
+						'manufacturers' => 'api/manufacturers',
+						'manufacturers-dict' => 'api/manufacturers-dict',
 						'org-struct'	=> 'api/org-struct',
+						'scans'			=> 'api/scans',
 						'services'		=> 'api/services',
+						'techs'			=> 'api/techs',
+						'users'			=> 'api/users',
                     ],
+					
                     'pluralize' => false,
                     'prefix' => 'api'
                 ],
