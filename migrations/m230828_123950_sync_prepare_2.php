@@ -39,22 +39,22 @@ class m230828_123950_sync_prepare_2 extends Migration
     public function safeUp()
     {
 		$this->alterColumn('manufacturers','updated_at',$this->timestamp());
-		$this->alterColumn('soft','created_at',$this->timestamp());
 	
 		$this->addColumnIfNotExist('tech_types','updated_at',$this->timestamp());
 		$this->addColumnIfNotExist('tech_types','updated_by',$this->string(32));
+		$this->addColumnIfNotExist('tech_types','archived',$this->boolean(),true);
 
 		$this->addColumnIfNotExist('tech_models','updated_at',$this->timestamp());
 		$this->addColumnIfNotExist('tech_models','updated_by',$this->string(32));
+		$this->addColumnIfNotExist('tech_models','archived',$this->boolean(),true);
 		$this->dropFkIfExist('tech_models', 'tech_models_ibfk_1');
 		$this->dropFkIfExist('tech_models', 'tech_models_ibfk_2');
-	
-	
+		
+		$this->alterColumn('soft','created_at',$this->timestamp());
 		$this->renameColumn('soft','created_at','updated_at');
 		$this->addColumnIfNotExist('soft','updated_by',$this->string(32));
+		$this->addColumnIfNotExist('soft','archived',$this->boolean(),true);
 		$this->dropFkIfExist('soft', 'manufacturers_id');
-	
-	
 	}
 
     /**

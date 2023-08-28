@@ -27,8 +27,29 @@ class TechTypes extends ArmsModel
 
 	public static $title='Категории оборудования';
 	public static $descr='Используемые категории различной техники для удобной группировки';
-
-    /**
+	
+	/** @inheritdoc   */
+	protected static $syncableFields=[
+		'code',
+		'prefix',
+		'comment',
+		'comment_name',
+		'comment_hint',
+		'is_computer',
+		'is_phone',
+		'is_ips',
+		'is_display',
+		'updated_at',
+		'updated_by',
+	];
+	
+	/** @inheritdoc   */
+	public static $syncableReverseLinks=[
+		'ManufacturersDict'=>'manufacturers_id'
+	];
+	
+	
+	/**
      * {@inheritdoc}
      */
     public static function tableName()
