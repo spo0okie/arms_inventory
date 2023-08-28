@@ -39,14 +39,21 @@ class ArmsModel extends \yii\db\ActiveRecord
 	private static $allItems=null;
 	
 	/** @var bool при сохранении не менять отметку времени и не менять время обновления */
-	private $doNotChangeAuthor=false;
+	protected $doNotChangeAuthor=false;
+
+	// (для функционала импорта/синхронизации)
 	
+	/** @var array поля которые у этой модели можно синхронизировать с удаленной системы */
+	protected static $syncableFields=[];
 	
-	/**
-	 * @var array поля которые у этой модели можно синхронизировать с удаленной системы
-	 * (для функционала импорта/синхронизации)
-	 */
-	private static $syncableFields=[];
+	/** @var array ссылки других объектов на этот, которые надо синхронизировать */
+	public static $syncableReverseLinks=[];
+	
+	/** @var string|null ключ, по которому можно найти такой объект на удаленной системе */
+	public static $syncKey='name';
+	
+	/** @var string поле которое сравнивается  */
+	public static $syncTimestamp='updated_at';
 	
 	/**
 	 * Массив описания полей
@@ -68,6 +75,11 @@ class ArmsModel extends \yii\db\ActiveRecord
 			'history' => ['alias'=>'notepad'],
 			'updated_at' => [
 				'Время изменения',
+				'hint' => 'Время обновления объекта в БД'
+			],
+			'updated_by'=>[
+				'Редактор',
+				'hint' => 'Автор последних изменений объекта'
 			],
 			'external_links' => [
 				'Внешние ссылки',
@@ -255,9 +267,9 @@ class ArmsModel extends \yii\db\ActiveRecord
 		}
 	}
 	
-	public function silentSave() {
+	public function silentSave($runValidation = true) {
 		$this->doNotChangeAuthor=true;
-		$this->save();
+		return $this->save($runValidation);
 	}
 	
 	public function beforeSave($insert)
@@ -279,7 +291,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 		}
 		
 		if ($this->hasProperty('updated_by') && !$this->doNotChangeAuthor) {
-			if (is_object(Yii::$app->user) && is_object(Yii::$app->user->identity))
+			if (Yii::$app->hasProperty('user') && is_object(Yii::$app->user) && is_object(Yii::$app->user->identity))
 				$this->updated_by=Yii::$app->user->identity->Login;
 		}
 		
@@ -289,25 +301,54 @@ class ArmsModel extends \yii\db\ActiveRecord
 	
 	/**
 	 * Загрузить поля с объекта загруженного с другой системы (такой же инвентори)
-	 * @param $remote
+	 * @param array $remote 	сам удаленный объект
+	 * @param array $overrides	поля которым надо задать кастомные значения (для ссылок, их нельзя взять из удаленного)
+	 * @return bool|null
 	 */
-	public function syncFields($remote) {
-		$updated=false;
+	public function syncFields(array $remote, array $overrides) {
+		$timestamp=static::$syncTimestamp;
 		
-		foreach (static::$syncableFields as $field) {
-			if ($this->$field != $remote[$field]) {
+		//если (удаленный объект имеет отметку времени и она больше) или надо поменять (а не синхронизировать) какие-то поля
+		if (($remote[$timestamp] && $remote[$timestamp]>$this->$timestamp) || count($overrides)) {
+			foreach (array_unique(array_merge(static::$syncableFields,[$timestamp])) as $field) {
+				if ($this->$field != $remote[$field]) echo "$field: [{$this->$field} != {$remote[$field]}]; ";
 				$this->$field = $remote[$field];
-				$updated=true;
 			}
+			foreach ($overrides as $field=>$value) {
+				$this->$field=$value;
+			}
+			return $this->silentSave(false);
 		}
-		//если ничего не поменялось то возвращаем null
-		if (!$updated) return null;
-		
-		echo "updating: ".print_r($this->attributes);
-		return true;
-		
-		//иначе результат сохранения изменений
-		return $this->save();
+		//если менять не надо
+		return null;
 	}
 	
+	/**
+	 * Создает объект в локальной системе на основании данных из удаленной
+	 * @param array $remote 	сам удаленный объект
+	 * @param array $overrides	поля которым надо задать кастомные значения (для ссылок, их нельзя взять из удаленного)
+	 * @return ArmsModel
+	 */
+	public static function syncCreate(array $remote, array $overrides) {
+		
+		$import=[
+			static::$syncKey=>$remote[static::$syncKey],
+			static::$syncTimestamp=>$remote[static::$syncTimestamp],
+		];
+		
+		foreach (static::$syncableFields as $field) {
+			$import[$field]=$remote[$field];
+		}
+		
+		ArrayHelper::recursiveOverride($import,$overrides);
+		
+		foreach ($import as $p=>$v) echo "$p=>$v; ";
+
+		return new static($import);
+	}
+	
+	public static function syncReverseLinks($remote,$system) {
+	
+	
+	}
 }

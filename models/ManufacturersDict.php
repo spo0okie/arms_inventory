@@ -18,9 +18,11 @@ class ManufacturersDict extends ArmsModel
 	static private $cache=[];
 	static private $cacheComplete=false;
 	
-	static private $syncableFields=[
-		'name'	//синхронизируем только имя
-	];
+	/** @inheritdoc */
+	static protected $syncableFields=['updated_at','updated_by'	];
+	
+	/** @inheritdoc */
+	static public $syncKey='word';
 
     /**
      * @inheritdoc

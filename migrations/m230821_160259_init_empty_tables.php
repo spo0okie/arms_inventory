@@ -78,6 +78,7 @@ class m230821_160259_init_empty_tables extends Migration
 		
 		$this->addColumnIfNotExist('manufacturers_dict','updated_at',$this->timestamp());
 		$this->addColumnIfNotExist('manufacturers_dict','updated_by',$this->string(32));
+		$this->dropForeignKey('manufacturers','manufacturers_dict');
 	
 		$this->renameColumn('manufacturers','created_at','updated_at');
 		$this->addColumnIfNotExist('manufacturers','updated_by',$this->string(32));

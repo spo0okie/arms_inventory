@@ -29,45 +29,10 @@ use yii\helpers\StringHelper;
  * @property LicGroups[] $licGroups
  * @property Manufacturers $manufacturer
  */
-class Soft extends \yii\db\ActiveRecord
+class Soft extends ArmsModel
 {
 
     private static $all_items=null;
-
-    public static function fetchAll(){
-        if (is_null(static::$all_items)) {
-            $tmp=static::find()->all();
-            static::$all_items=[];
-            foreach ($tmp as $item) static::$all_items[$item->id]=$item;
-        }
-        return static::$all_items;
-    }
-
-    public static function fetchItem($id){
-        return isset(static::fetchAll()[$id])?
-            static::fetchAll()[$id]
-            :
-            null;
-    }
-
-    public static function fetchItems($ids){
-        $tmp=[];
-        foreach ($ids as $id) $tmp[$id]=static::fetchItem($id);
-        return $tmp;
-    }
-
-    public static function fetchBy($condition){
-        foreach ($condition as $param=>$values) if (!is_array($values)) $condition[$param]=[$values];
-        $tmp=[];
-        foreach (static::fetchAll() as $item) {
-            $match=true;
-            foreach ($condition as $param=>$values) {
-                if (!in_array($item->$param,$values)) $match=false;
-            }
-            if ($match) $tmp[]=$item;
-        }
-        return $tmp;
-    }
 
     /**
      * @inheritdoc
@@ -357,6 +322,41 @@ class Soft extends \yii\db\ActiveRecord
 			->all();
 		
 		foreach ($comps as $comp) $comp->silentSave();
+	}
+	
+	public static function fetchAll(){
+		if (is_null(static::$all_items)) {
+			$tmp=static::find()->all();
+			static::$all_items=[];
+			foreach ($tmp as $item) static::$all_items[$item->id]=$item;
+		}
+		return static::$all_items;
+	}
+	
+	public static function fetchItem($id){
+		return isset(static::fetchAll()[$id])?
+			static::fetchAll()[$id]
+			:
+			null;
+	}
+	
+	public static function fetchItems($ids){
+		$tmp=[];
+		foreach ($ids as $id) $tmp[$id]=static::fetchItem($id);
+		return $tmp;
+	}
+	
+	public static function fetchBy($condition){
+		foreach ($condition as $param=>$values) if (!is_array($values)) $condition[$param]=[$values];
+		$tmp=[];
+		foreach (static::fetchAll() as $item) {
+			$match=true;
+			foreach ($condition as $param=>$values) {
+				if (!in_array($item->$param,$values)) $match=false;
+			}
+			if ($match) $tmp[]=$item;
+		}
+		return $tmp;
 	}
 	
 	

@@ -19,7 +19,7 @@ use yii\helpers\ArrayHelper;
  * @property Soft[] $soft
  * @property TechModels[] $techModels
  */
-class Manufacturers extends \yii\db\ActiveRecord
+class Manufacturers extends ArmsModel
 {
 
 	private $all_names=[];
@@ -29,48 +29,13 @@ class Manufacturers extends \yii\db\ActiveRecord
     private static $all_items=null;
     private static $names_cache=null;
 
-    public static function fetchAll(){
-        if (is_null(static::$all_items)) {
-            $tmp=static::find()->all();
-            static::$all_items=[];
-            foreach ($tmp as $item) static::$all_items[$item->id]=$item;
-        }
-        return static::$all_items;
-    }
+    /** @inheritdoc   */
+    protected static $syncableFields=['updated_at','updated_by','full_name','comment'];
 
-    public static function fetchItem($id){
-        return isset(static::fetchAll()[$id])?
-            static::fetchAll()[$id]
-            :
-            null;
-    }
-
-    public static function fetchItems($ids){
-        $tmp=[];
-        foreach ($ids as $id) $tmp[$id]=static::fetchItem($id);
-        return $tmp;
-    }
-
-    public static function fetchNames()
-    {
-	    if (!is_null(static::$names_cache)) return static::$names_cache;
-        $names= ArrayHelper::map(static::fetchAll(), 'id', 'name');
-        asort($names);
-        return static::$names_cache=$names;
-    }
-
-	/**
-	 * возвращает элементы, поле которые имеет значение value
-	 * @param $field
-	 * @param $value
-	 * @return array
-	 */
-	public static function fetchByField($field,$value){
-		$tmp=[];
-		foreach (static::fetchAll() as $item)
-			if ($item->$field == $value) $tmp[$item->id]=$item;
-		return $tmp;
-	}
+	/** @inheritdoc   */
+    public static $syncableReverseLinks=[
+    	'ManufacturersDict'=>'manufacturers_id'
+	];
 
     /**
      * @inheritdoc
@@ -183,5 +148,49 @@ class Manufacturers extends \yii\db\ActiveRecord
 	public function getDict() {
 		return $this->hasMany(ManufacturersDict::className(), ['manufacturers_id' => 'id']);
 	}
-
+	
+	public static function fetchAll(){
+		if (is_null(static::$all_items)) {
+			$tmp=static::find()->all();
+			static::$all_items=[];
+			foreach ($tmp as $item) static::$all_items[$item->id]=$item;
+		}
+		return static::$all_items;
+	}
+	
+	public static function fetchItem($id){
+		return isset(static::fetchAll()[$id])?
+			static::fetchAll()[$id]
+			:
+			null;
+	}
+	
+	public static function fetchItems($ids){
+		$tmp=[];
+		foreach ($ids as $id) $tmp[$id]=static::fetchItem($id);
+		return $tmp;
+	}
+	
+	public static function fetchNames()
+	{
+		if (!is_null(static::$names_cache)) return static::$names_cache;
+		$names= ArrayHelper::map(static::fetchAll(), 'id', 'name');
+		asort($names);
+		return static::$names_cache=$names;
+	}
+	
+	/**
+	 * возвращает элементы, поле которые имеет значение value
+	 * @param $field
+	 * @param $value
+	 * @return array
+	 */
+	public static function fetchByField($field,$value){
+		$tmp=[];
+		foreach (static::fetchAll() as $item)
+			if ($item->$field == $value) $tmp[$item->id]=$item;
+		return $tmp;
+	}
+	
+	
 }
