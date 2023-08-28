@@ -99,7 +99,10 @@ $config = [
 						'org-struct'	=> 'api/org-struct',
 						'scans'			=> 'api/scans',
 						'services'		=> 'api/services',
+						'soft'			=> 'api/soft',
 						'techs'			=> 'api/techs',
+						'tech-models'	=> 'api/tech-models',
+						'tech-types'	=> 'api/tech-types',
 						'users'			=> 'api/users',
                     ],
 					

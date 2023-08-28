@@ -43,12 +43,6 @@ class TechTypes extends ArmsModel
 		'updated_by',
 	];
 	
-	/** @inheritdoc   */
-	public static $syncableReverseLinks=[
-		'ManufacturersDict'=>'manufacturers_id'
-	];
-	
-	
 	/**
      * {@inheritdoc}
      */
