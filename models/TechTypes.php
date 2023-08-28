@@ -37,7 +37,7 @@ class TechTypes extends ArmsModel
 		'comment_hint',
 		'is_computer',
 		'is_phone',
-		'is_ips',
+		'is_ups',
 		'is_display',
 		'updated_at',
 		'updated_by',

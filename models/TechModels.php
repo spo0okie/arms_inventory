@@ -45,8 +45,29 @@ class TechModels extends ArmsModel
 
 	private static $all_items=null;
 	private static $names_cache=null;
-
-    /**
+	
+	/** @inheritdoc   */
+	protected static $syncableFields=[
+		'short',
+		'links',
+		'comment',
+		'individual_specs',
+		'ports',
+		'front_rack_layout',
+		'contain_front_rack',
+		'back_rack_layout',
+		'contain_back_rack',
+		'back_rack_two_sided',
+		'updated_at',
+		'updated_by',
+	];
+	
+	public static $syncableDirectLinks=[
+		'manufacturers_id'=>'Manufacturers',
+		'type_id'=>'TechTypes',
+	];
+	
+	/**
      * {@inheritdoc}
      */
     public static function tableName()

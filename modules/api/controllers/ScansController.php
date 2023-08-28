@@ -7,16 +7,14 @@ use yii\web\Response;
 use yii\web\UploadedFile;
 
 
-class ScansController extends \yii\rest\ActiveController
+class ScansController extends BaseRestController
 {
 	
 	public $modelClass='app\models\Scans';
 	
 	public function actions()
 	{
-		$actions = parent::actions();
-		$actions[]='upload';
-		return $actions;
+		return array_merge(parent::actions(),['upload','download']);
 	}
 	
 	/**
@@ -33,7 +31,14 @@ class ScansController extends \yii\rest\ActiveController
 		if (!$model->upload()) return '{"error":"upload err"}';
 		if (!$model->save(false)) return '{"error":"model saving error"}';
 		return $model;
+	}
+	
+	public function actionDownload($id) {
+		$model = Scans::findOne($id);
+		$path = Yii::getAlias('@webroot').'/bukti/'.$download->bukti;
 		
-		
-	}/**/
+		if (file_exists($path)) {
+			return Yii::$app->response->sendFile($path, 'File name here');
+		}
+	}
 }

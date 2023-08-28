@@ -49,6 +49,9 @@ class ArmsModel extends \yii\db\ActiveRecord
 	/** @var array ссылки других объектов на этот, которые надо синхронизировать */
 	public static $syncableReverseLinks=[];
 	
+	/** @var array ссылки этого объекта на другие, которые надо синхронизировать */
+	public static $syncableDirectLinks=[];
+	
 	/** @var string|null ключ, по которому можно найти такой объект на удаленной системе */
 	public static $syncKey='name';
 	
@@ -305,13 +308,13 @@ class ArmsModel extends \yii\db\ActiveRecord
 	 * @param array $overrides	поля которым надо задать кастомные значения (для ссылок, их нельзя взять из удаленного)
 	 * @return bool|null
 	 */
-	public function syncFields(array $remote, array $overrides) {
+	public function syncFields(array $remote, array $overrides, &$log) {
 		$timestamp=static::$syncTimestamp;
 		
 		//если (удаленный объект имеет отметку времени и она больше) или надо поменять (а не синхронизировать) какие-то поля
 		if (($remote[$timestamp] && $remote[$timestamp]>$this->$timestamp) || count($overrides)) {
 			foreach (array_unique(array_merge(static::$syncableFields,[$timestamp])) as $field) {
-				if ($this->$field != $remote[$field]) echo "$field: [{$this->$field} != {$remote[$field]}]; ";
+				if ($this->$field != $remote[$field]) $log.= "$field: [{$this->$field} != {$remote[$field]}]; ";
 				$this->$field = $remote[$field];
 			}
 			foreach ($overrides as $field=>$value) {
@@ -329,7 +332,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 	 * @param array $overrides	поля которым надо задать кастомные значения (для ссылок, их нельзя взять из удаленного)
 	 * @return ArmsModel
 	 */
-	public static function syncCreate(array $remote, array $overrides) {
+	public static function syncCreate(array $remote, array $overrides, &$log) {
 		
 		$import=[
 			static::$syncKey=>$remote[static::$syncKey],
@@ -342,7 +345,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 		
 		ArrayHelper::recursiveOverride($import,$overrides);
 		
-		foreach ($import as $p=>$v) echo "$p=>$v; ";
+		foreach ($import as $p=>$v) $log.= "$p=>$v; ";
 
 		return new static($import);
 	}

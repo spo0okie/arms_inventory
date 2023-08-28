@@ -13,7 +13,6 @@ use app\helpers\RestHelperException;
 use app\models\ArmsModel;
 use yii\console\Controller;
 use app\helpers\RestHelper;
-use yii\db\Exception;
 use yii\helpers\Inflector;
 
 /**
@@ -36,6 +35,28 @@ class SyncController extends Controller
 	private $detached=[];
 	
 	/**
+	 * Инициализация удаленной системы
+	 * @param $url
+	 * @param $user
+	 * @param $pass
+	 */
+	public function initRemote($url,$user,$pass) {
+		$this->remote = new RestHelper();
+		$this->remote->unsecureSSL=true;
+		$this->remote->init($url,$user,$pass);
+	}
+	
+	static function getClassPath($path) {
+		return (strpos($path,'\\')===false)?'app\\models\\'.$path:$path;
+	}
+	
+	static function getClassName($path) {
+		if (strpos($path,'\\')===false) return $path;
+		$classPath=explode('\\',$path);
+		return end($classPath);
+	}
+	
+	/**
 	 * сохранить загруженный объект в хранилище
 	 * @param $class string класс объекта
 	 * @param $object array|object сам объект
@@ -48,11 +69,34 @@ class SyncController extends Controller
 		$this->loaded[$class][$id]=$object;
 	}
 	
-	public function initRemote($url,$user,$pass) {
-		$this->remote = new RestHelper();
-		$this->remote->unsecureSSL=true;
-		$this->remote->init($url,$user,$pass);
+	/**
+	 * сохранить отключенный объект в хранилище
+	 * это те объекты ссылки на которые мы перенаправили в другое место
+	 * их надо после синхронизации проверять на осиротевшесть
+	 * @param string $class класс объекта
+	 * @param string $linkClass
+	 * @param array  $remote		//объект, который сейчас будет перенацелен
+	 * @throws ConsoleException
+	 */
+	public function storeDetachedReverse(string $class, string $linkClass, array $remote) {
+		if (!isset($this->detached[$class])) $this->detached[$class]=[];
+		
+		$classPath=self::getClassPath($class);
+		
+		//находим локальный объект до перенацеливания
+		$currentLinking=$this->getLocalObject($linkClass,$remote);
+		if (is_null($currentLinking)) return; //нечего сохранять
+		
+		//какое поле ссылается на отключаемый объект
+		$linkField=$classPath::$syncableReverseLinks[$linkClass];
+		
+		//находим тот объект, на который сейчас ссылается перенацеливаемый
+		$detached=$classPath::findOne($currentLinking->$linkField);
+		if (is_null($detached)) return; //нечего сохранять
+		
+		$this->loaded[$class][$detached->id]=$detached;
 	}
+	
 	
 	/**
 	 * Загрузить удаленный класс
@@ -82,21 +126,18 @@ class SyncController extends Controller
 	}
 	
 	/**
-	 * Синхронизировать загруженный удаленный объект $object класса $class в локальную базу
+	 * Найти локальный объект нужного класса у соответствующий $remote
 	 * @param string $class
-	 * @param array  $remote
-	 * @param array  $overrides
-	 * @throws ConsoleException
+	 * @param array $remote
 	 */
-	public function syncSingle(string $class, array $remote, $overrides=[]) {
+	public function getLocalObject(string $class,$remote) {
+		$classPath=static::getClassPath($class);
+		$className=static::getClassPath($class);
+		
 		//поле по которому ищем локальный объект
-		$name=$class::$syncKey;
+		$name=$classPath::$syncKey;
 		
-		echo "{$remote[$name]}: ";
-		
-		//каждому удаленному ищем локальный
-		//$localSearch=ArrayHelper::findByField($locals,$name,$remote[$name]);
-		$localSearch=$class::find()->where([$name=>$remote[$name]])->all();
+		$localSearch=$classPath::find()->where([$name=>$remote[$name]])->all();
 		
 		//если в качестве ключа выбран $name, то по нему не должно искаться несколько объектов
 		if (count($localSearch)>1) throw new ConsoleException('Got multiple objects with same name',[
@@ -104,31 +145,77 @@ class SyncController extends Controller
 			'Objects Found'=>$localSearch
 		]);
 		
-		/** @var $local ArmsModel */
-		if (!count($localSearch)) {
-			//если нет - создаем
+		if (!count($localSearch)) return null;
+		
+		return reset($localSearch);
+	}
+	
+	/**
+	 * Синхронизировать загруженный удаленный объект $object класса $class в локальную базу
+	 * @param string $class
+	 * @param array  $remote
+	 * @param array  $overrides
+	 * @throws ConsoleException
+	 */
+	public function syncSingle(string $class, array $remote, $overrides=[]) {
+		//полный путь до класса
+		$class=self::getClassPath($class);
 
+		//поле по которому ищем локальный объект
+		$name=$class::$syncKey;
+		
+		
+		//каждому удаленному ищем локальный
+		/** @var $local ArmsModel */
+		$local=$this->getLocalObject($class,$remote);
+		$log='';
+		if (is_null($local)) {
+			//если нет - создаем
 			echo "Local $name missing!";
-			$local=$class::syncCreate($remote,$overrides);
+			$local=$class::syncCreate($remote,$overrides,$log);
 			$sync=$local->silentSave(false);
 		} else {
-			$local=reset($localSearch);
-			
 			//иначе обновляем
-			$sync=$local->syncFields($remote,$overrides);
+			$sync=$local->syncFields($remote,$overrides,$log);
 		}
 
-		if (is_null($sync)) echo " - No changes";
-		else echo $sync?" - OK":" - ERR";
-		echo "\n";
+		if (!is_null($sync)) {
+			echo "{$remote[$name]}: $log ";
+			echo $sync?" - OK":" - ERR";
+			echo "\n";
+		}
 		
 		if ($sync===false) throw new ConsoleException('Error saving local object!',[
 			'Local'=>$local,
 			'Remote'=>$remote,
 			'Overrides'=>$overrides
 		]);
+
+		//синхронизируем прямые ссылки
 		
+		//вытаскиваем для удобства список ссылок из этого класса на других
+		$linksClasses=$class::$syncableDirectLinks;
+		
+		//грузим объекты на которые ссылаемся
+		$objectLinks=$this->getRemoteDirectLinks($remote,$class);
+		
+		//перебираем их по полям-ссылкам
+		foreach ($objectLinks as $linkField=>$object) {
+			//выясняем поле которое в ссылающемся объекте указывает на этот
+			$linkClass=$linksClasses[$linkField];
+			//находим/создаем в локальной БД такой объект
+			$localLink=$this->syncSingle($linkClass,$object);
+			//прописываем прямую ссылку на него
+			$local->$linkField=$localLink->id;
+			$local->silentSave(false);
+		}
+
+
+
+
 		//на этом этапе сам объект загружен, но есть ли у нас ссылки на него??
+
+
 		//вытаскиваем для удобства список ссылок из других классов на этот
 		$classLinks=$class::$syncableReverseLinks;
 		//грузим фактически ссылающиеся на наш объекты
@@ -141,10 +228,11 @@ class SyncController extends Controller
 			//перебираем ссылающиеся объекты и "ссылаем их на новый"
 			foreach ($objects as $object) {
 				//TODO Запомнить объекты куда раньше ссылались эти
-				$this->syncSingle('app\\models\\'.$linkClass,$object,[$link=>$local->id]);
+				$this->storeDetachedReverse($class,$linkClass,$object);
+				$this->syncSingle($linkClass,$object,[$link=>$local->id]);
 			}
 		}
-		
+		return $local;
 	}
 	
 	
@@ -163,7 +251,6 @@ class SyncController extends Controller
 		
 		$classPath=explode('\\',$class);
 		$className=end($classPath);
-		$name=$class::$syncKey;
 		
 		//перебираем удаленные
 		foreach ($this->getLoadedClass($className) as $id=>$remote) {
@@ -181,7 +268,7 @@ class SyncController extends Controller
 	public function getRemoteReverseLinks(array $remote, string $class) {
 		$classes=$class::$syncableReverseLinks;
 		/* public static $syncableReverseLinks=[
-		   	'manufacturersDict'=>'manufacturers_id'
+		   	'ManufacturersDict'=>'manufacturers_id'
 		]; */
 		$links=[];
 		foreach ($classes as $class => $link) {
@@ -190,6 +277,32 @@ class SyncController extends Controller
 				$link,							//у которых ссылка $link
 				$remote['id']					//указывает на $remote
 			);
+		}
+		return $links;
+	}
+	
+	/**
+	 * Загружает объекты ссылающиеся на удаленный
+	 * @param array  $remote удаленный объект
+	 * @param string $class класс удаленного объекта (грузим то мы его в виде массива, класс не виден)
+	 * @return array массив ссылок field=>object
+	 * @throws ConsoleException
+	 */
+	public function getRemoteDirectLinks(array $remote, string $class) {
+		$classes=$class::$syncableDirectLinks;
+		/* public static $syncableDirectLinks=[
+			'manufacturers_id'=>'Manufacturers',
+			'type_id'=>'TechTypes',
+		]; */
+		$links=[];
+		foreach ($classes as $link=>$class) {
+			$linkSearch=ArrayHelper::findByField(
+				$this->getLoadedClass($class),	//ищем все объекты такого класса
+				'id',						//$id которых
+				$remote[$link]					//указывает ссылка $link у $remote
+			);
+			//фактически с конкретным $id у нас только один объект
+			if (count($linkSearch)) $links[$link]=reset($linkSearch);
 		}
 		return $links;
 	}
@@ -209,8 +322,8 @@ class SyncController extends Controller
 		//print_r($this->loaded);
 		static::syncSimple('app\models\Manufacturers');
     }
-
-
+	
+	
 	/**
 	 * Подтянуть типы оборудования
 	 * @param $url
@@ -220,10 +333,27 @@ class SyncController extends Controller
 	public function actionTechTypes(string $url, string $user='', string $pass='')
 	{
 		$this->initRemote($url,$user,$pass);
-		$this->loadRemote('manufacturers-dict');
-		$this->loadRemote('manufacturers');
+		$this->loadRemote('tech-types');
 		//static::syncSimple('app\models\ManufacturersDict');
 		//print_r($this->loaded);
-		static::syncSimple('app\models\Manufacturers');
+		static::syncSimple('app\models\TechTypes');
+	}
+
+	/**
+	 * Подтянуть типы оборудования
+	 * @param $url
+	 * @param $user
+	 * @param $pass
+	 */
+	public function actionTechModels(string $url, string $user='', string $pass='')
+	{
+		$this->initRemote($url,$user,$pass);
+		$this->loadRemote('manufacturers-dict');
+		$this->loadRemote('manufacturers');
+		$this->loadRemote('tech-types');
+		$this->loadRemote('tech-models');
+		//static::syncSimple('app\models\ManufacturersDict');
+		//print_r($this->loaded);
+		static::syncSimple('app\models\TechModels');
 	}
 }

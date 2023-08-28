@@ -24,7 +24,8 @@ use yii\imagine\Image;
  * @property boolean $fileExists
  * @property int $fileSize
  * @property int $humanFileSize
- * @property string $file
+ * @property string $file		Имя файла без пути
+ * @property string $name		Имя без префикса
  * @property string $format
  * @property yii\web\UploadedFile $scanFile
  * @property string $descr
@@ -43,8 +44,11 @@ class Scans extends \yii\db\ActiveRecord
 	public static $idxThumbSizes=[160,160];
 
 	public static $title="Сканы документов";
-
-
+	
+	public function extraFields()
+	{
+		return ['name','fileSize','fileDate','fileExists'];
+	}
 
     /**
      * @inheritdoc
@@ -103,6 +107,12 @@ class Scans extends \yii\db\ActiveRecord
 			return $this->idxThumb;
 		}
 	}
+	
+	public function getName() {
+		$tokens=explode('-',$this->file);
+		unset ($tokens[0]);
+		return implode('-',$tokens);
+	}
 
 	/**
 	 * Возвращает короткое имя файла без пути
@@ -155,7 +165,7 @@ class Scans extends \yii\db\ActiveRecord
 	public function getFileExists(){
 		return file_exists($this->fsFname);
 	}
-
+	
 	/**
 	 * Размер файла оригинала в байтах
 	 * @return string
@@ -165,7 +175,16 @@ class Scans extends \yii\db\ActiveRecord
 		return filesize($this->fsFname);
 	}
 
-/**
+	/**
+	 * Размер файла оригинала в байтах
+	 * @return string
+	 */
+	public function getFileDate(){
+		if (!$this->fileExists) return 0;
+		return filemtime($this->fsFname);
+	}
+
+	/**
 	 * Размер файла оригинала в байтах
 	 * @return string
 	 */
