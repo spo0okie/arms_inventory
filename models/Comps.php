@@ -75,7 +75,6 @@ class Comps extends ArmsModel
     private $ip_cache=null;
 	private $ip_ignore_cache=null;
 	private $ip_filtered_cache=null;
-	private $doNotChangeAuthor=false;
 	private $servicePartialWeightCache=[];
 
     /**
@@ -687,11 +686,6 @@ class Comps extends ArmsModel
 		return $fqdn?mb_strtolower($this->fqdn):mb_strtoupper($this->name);
 	}
 	
-	public function silentSave() {
-		$this->doNotChangeAuthor=true;
-		$this->save();
-	}
-	
 	/**
 	 * @inheritdoc
 	 */
@@ -701,8 +695,6 @@ class Comps extends ArmsModel
 			
 			$this->softHits_ids=array_keys($this->swList->items);
 
-			if (!$this->updated_at && !$this->doNotChangeAuthor) $this->updated_at=gmdate('Y-m-d H:i:s');
-			
 			/* взаимодействие с NetIPs */
 			$this->netIps_ids=NetIps::fetchIpIds($this->ip);
 			
