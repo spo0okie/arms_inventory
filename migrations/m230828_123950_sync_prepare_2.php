@@ -37,9 +37,14 @@ class m230828_123950_sync_prepare_2 extends Migration
 
 		$this->addColumnIfNotExist('tech_models','updated_at',$this->timestamp());
 		$this->addColumnIfNotExist('tech_models','updated_by',$this->string(32));
+		$this->dropForeignKey('tech_models_ibfk_1','tech_models');
+		$this->dropForeignKey('tech_models_ibfk_2','tech_models');
+	
 	
 		$this->renameColumn('soft','created_at','updated_at');
 		$this->addColumnIfNotExist('soft','updated_by',$this->string(32));
+		$this->dropForeignKey('manufacturers_id','soft');
+	
 	
 	}
 
