@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\RestHelper;
 use Imagine\Image\Box;
 use Imagine\Imagick\Imagine;
 use Yii;
@@ -23,6 +24,7 @@ use yii\imagine\Image;
  * @property string $fsFname
  * @property boolean $fileExists
  * @property int $fileSize
+ * @property int $fileDate
  * @property int $humanFileSize
  * @property string $file		Имя файла без пути
  * @property string $name		Имя без префикса
@@ -84,9 +86,9 @@ class Scans extends ArmsModel
             //'descr' => 'Описание скана',
         ];
     }
-
+	
 	/**
-	 * Сохраняет файл
+	 * Сохраняет загруженный файл
 	 * @return bool
 	 */
 	public function upload()
@@ -101,8 +103,32 @@ class Scans extends ArmsModel
 			return false;
 		}
 	}
+	
+	/**
+	 * Синхронизирует удаленный файл
+	 * @param array      $remote
+	 * @param RestHelper $rest
+	 * @return int|null
+	 */
+	public function syncFile(array $remote, RestHelper $rest)
+	{
+		$name=$remote[static::$syncKey];
 
-
+		//ориентируемся на дату файла
+		$timestamp=static::$syncTimestamp;
+		//echo "Comparing $name [{$this->id}] $timestamp: {$this->fileDate} vs {$remote[$timestamp]}...";
+		if ($this->$timestamp >= $remote[$timestamp]) return null;
+		//echo "Downloading $name ...";
+		
+		$prefix=($this->id)?$this->id:(static::fetchNextId());
+		$this->file=$prefix.'-'.pathinfo($name)['filename'];
+		$this->format=pathinfo($name)['extension'];
+		$this->save(false);
+		$data=$rest->getFile('scans','download',['id'=>$remote['id']]);
+		return file_put_contents(\Yii::$app->basePath.$this->fullFname,$data);
+	}
+	
+	
 	public function getThumbUrl(){
 		if (!$this->fileExists) {
 			return static::noThumb();
@@ -158,7 +184,7 @@ class Scans extends ArmsModel
 	 * @return string
 	 */
 	public function getFsFname(){
-		return $_SERVER['DOCUMENT_ROOT'].$this->fullFname;
+		return \Yii::$app->basePath.$this->fullFname;
 	}
 
 	/**
@@ -166,6 +192,8 @@ class Scans extends ArmsModel
 	 * @return boolean
 	 */
 	public function getFileExists(){
+		//при синхронизации может сначала создать объект а файл не указать/закачать
+		if (!strlen($this->file)) return false;
 		return file_exists($this->fsFname);
 	}
 	
@@ -421,10 +449,29 @@ class Scans extends ArmsModel
 	 * @inheritDoc
 	 */
 	public static function syncFindLocal($name) {
-		echo 'select * from scans where concat(file,format) regexp \'^\d+\-'.preg_quote($name).'$\''."\n";
+		$dbName='concat(file,\'.\',format)';		//как этот файл получить в БД
+		$regexp='^[0-9]+\-'.preg_quote($name).'$';	//regexp для выражения "числовой_префикс-имяФайла.расширение"
+		//echo "select * from scans where $dbName regexp '$regexp'\n";
+		
 		return static::find()
-			->where(['regexp','concat(file,format)','^\d+\-'.preg_quote($name).'$'])
+			->where(['regexp',$dbName,$regexp])
 			->all();
 	}
+	
+	public static function syncCreate(array $remote, array $overrides, string &$log, RestHelper $rest)
+	{
+		/** @var $new Scans */
+		$new=parent::syncCreate($remote, $overrides, $log, $rest);
+		$new->syncFile($remote,$rest);
+		return $new;
+	}
+	
+	public function syncFields(array $remote, array $overrides, string &$log, RestHelper $rest)
+	{
+		$update=parent::syncFields($remote, $overrides, $log, $rest);
+		$this->syncFile($remote,$rest);
+		return $update;
+	}
+	
 	
 }
