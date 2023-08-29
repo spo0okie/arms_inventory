@@ -16,8 +16,8 @@ use yii\web\User;
 class BaseRestController extends \yii\rest\ActiveController
 {
  
-	public $viewActions=['index','view','search'];
-	public $editActions=['create','update','delete'];
+	public $viewActions=['index','view','search','download'];
+	public $editActions=['create','update','delete','upload'];
 	
 	public function behaviors()
 	{
