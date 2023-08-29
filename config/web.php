@@ -100,6 +100,7 @@ $config = [
 						'scans'			=> 'api/scans',
 						'services'		=> 'api/services',
 						'soft'			=> 'api/soft',
+						'soft-lists'	=> 'api/soft-lists',
 						'techs'			=> 'api/techs',
 						'tech-models'	=> 'api/tech-models',
 						'tech-types'	=> 'api/tech-types',
