@@ -11,6 +11,7 @@ use app\console\ConsoleException;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelperException;
 use app\models\ArmsModel;
+use app\models\Scans;
 use yii\console\Controller;
 use app\helpers\RestHelper;
 use yii\helpers\Inflector;
@@ -172,12 +173,12 @@ class SyncController extends Controller
 		$log='';
 		if (is_null($local)) {
 			//если нет - создаем
-			echo "Local $name missing!";
-			$local=$class::syncCreate($remote,$overrides,$log);
+			$log.= "Local $name missing! ";
+			$local=$class::syncCreate($remote,$overrides,$log,$this->remote);
 			$sync=$local->silentSave(false);
 		} else {
 			//иначе обновляем
-			$sync=$local->syncFields($remote,$overrides,$log);
+			$sync=$local->syncFields($remote,$overrides,$log,$this->remote);
 		}
 
 		if (!is_null($sync)) {
@@ -209,8 +210,10 @@ class SyncController extends Controller
 			//находим/создаем в локальной БД такой объект
 			$localLink=$this->syncSingle($linkClass,$object);
 			//прописываем прямую ссылку на него
-			$local->$linkField=$localLink->id;
-			$local->silentSave(false);
+			if ($local->$linkField!=$localLink->id) {
+				$local->$linkField=$localLink->id;
+				$local->silentSave(false);
+			}
 		}
 
 
@@ -311,6 +314,36 @@ class SyncController extends Controller
 	}
 	
 	/**
+	 * Загружает объекты ссылающиеся на удаленный
+	 * @param array  $remote удаленный объект
+	 * @param string $class класс удаленного объекта (грузим то мы его в виде массива, класс не виден)
+	 * @return array массив обратных ссылок
+	 * @throws ConsoleException
+	 */
+	public function getRemoteMany2ManyLinks(array $remote, string $class) {
+		$definitions=$class::$syncableMany2ManyLinks;
+		/* public static $syncableMany2ManyLinks=[
+			'soft_ids'=>'Soft,softList_ids'
+		]; */
+		$links=[];
+		foreach ($definitions as $link=>$definition) {
+			[$linkClass,$reverseLink]=explode(',',$definition);
+			$links[$link]=[];
+			foreach ($remote[$link] as $linkedId) {
+				$linkSearch=ArrayHelper::findByField(
+					$this->getLoadedClass($linkClass),	//ищем все объекты такого класса
+					'id',						//$id которых
+					$linkedId					//указывает ссылка $link у $remote
+				);
+				//фактически с конкретным $id у нас только один объект
+				if (count($linkSearch))
+					$links[$link][]=reset($linkSearch);
+			}
+		}
+		return $links;
+	}
+	
+	/**
 	 * Подтянуть вендоров
 	 * @param $url
 	 * @param $user
@@ -337,11 +370,9 @@ class SyncController extends Controller
 	{
 		$this->initRemote($url,$user,$pass);
 		$this->loadRemote('tech-types');
-		//static::syncSimple('app\models\ManufacturersDict');
-		//print_r($this->loaded);
-		static::syncSimple('app\models\TechTypes');
+		static::syncSimple('TechTypes');
 	}
-
+	
 	/**
 	 * Подтянуть типы оборудования
 	 * @param $url
@@ -358,6 +389,23 @@ class SyncController extends Controller
 		$this->loadRemote('scans',['expand'=>'fileSize,fileDate,name']);
 		//static::syncSimple('app\models\ManufacturersDict');
 		//print_r($this->loaded);
-		static::syncSimple('app\models\TechModels');
+		static::syncSimple('TechModels');
+	}
+
+	/**
+	 * Подтянуть типы оборудования
+	 * @param $url
+	 * @param $user
+	 * @param $pass
+	 */
+	public function actionSoft(string $url, string $user='', string $pass='')
+	{
+		$this->initRemote($url,$user,$pass);
+		$this->loadRemote('manufacturers-dict');
+		$this->loadRemote('manufacturers');
+		$this->loadRemote('soft');
+		//static::syncSimple('app\models\ManufacturersDict');
+		//print_r($this->loaded);
+		static::syncSimple('Soft');
 	}
 }

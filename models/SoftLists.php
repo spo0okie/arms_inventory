@@ -13,7 +13,7 @@ use Yii;
  * @property string $comment Комментарий
  * @property Soft[] $soft
  */
-class SoftLists extends \yii\db\ActiveRecord
+class SoftLists extends ArmsModel
 {
 	
 	public static $title = 'Список ПО';
@@ -28,7 +28,26 @@ class SoftLists extends \yii\db\ActiveRecord
 	protected static $IGNORED_LIST_ID = null;
 	protected static $FREE_LIST_NAME = 'soft_free';
 	protected static $FREE_LIST_ID = null;
-
+	
+	public function extraFields()
+	{
+		return ['soft_ids'];
+	}
+	
+	/** @inheritdoc  */
+	protected static $syncableFields=[
+		'name',
+		'descr',
+		'comment',
+	];
+	
+	public static $syncableMany2ManyLinks=[
+		'soft_ids'=>'Soft,softList_ids'
+	];
+	
+	
+	public static $syncTimestamp=null;	//отметок времени в софте нет
+	
     /**
      * @inheritdoc
      */
@@ -36,8 +55,20 @@ class SoftLists extends \yii\db\ActiveRecord
     {
         return 'soft_lists';
     }
-
-    /**
+	
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'relations' => [
+					'soft_ids' => 'soft',
+				]
+			]
+		];
+	}
+	
+	/**
      * @inheritdoc
      */
     public function rules()

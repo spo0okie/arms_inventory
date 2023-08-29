@@ -33,15 +33,32 @@ class Soft extends ArmsModel
 {
 
     private static $all_items=null;
-
-    /**
+	
+	/** @inheritdoc  */
+	protected static $syncableFields=[
+		'descr',
+		'comment',
+		'items',
+		'additional',
+		'updated_at',
+		'updated_by',
+	];
+	
+	/** @inheritdoc */
+	public static $syncableDirectLinks=['manufacturers_id'=>'Manufacturers'];
+	
+	/**
      * @inheritdoc
      */
     public static function tableName()
     {
         return 'soft';
     }
-
+	
+    public function extraFields()
+	{
+		return['nameWithVendor'];
+	}
     /**
      * @inheritdoc
      */
@@ -140,6 +157,10 @@ class Soft extends ArmsModel
 			->viaTable('{{%soft_hits}}', ['soft_id' => 'id']);
 	}
 	
+	public function getName()
+	{
+		return	$this->manufacturer->name.' '.$this->descr;
+	}
 	
 	/**
      * Возвращает количество совпадения с переданными массивами входных строк
@@ -289,17 +310,18 @@ class Soft extends ArmsModel
 	{
 		//error_log('savin');
 		if (parent::beforeSave($insert)) {
-			
-			if (mb_strpos($this->descr,$this->manufacturer->name)===0) {
-				//название продукта начинается с имени производителя
-				$this->descr=trim(mb_substr($this->descr,mb_strlen($this->manufacturer->name)));
-				return true;
-			} else {
-				//проверяем все синонимы написания производителя
-				foreach ($this->manufacturer->manufacturersDicts as $dict) {
-					if (mb_strpos($this->descr,$dict->word)===0) {
-						$this->descr=trim(mb_substr($this->descr,mb_strlen($dict->word)));
-						return true;
+			if (is_object($this->manufacturer)) {
+				if (mb_strpos($this->descr,$this->manufacturer->name)===0) {
+					//название продукта начинается с имени производителя
+					$this->descr=trim(mb_substr($this->descr,mb_strlen($this->manufacturer->name)));
+					return true;
+				} else {
+					//проверяем все синонимы написания производителя
+					foreach ($this->manufacturer->manufacturersDicts as $dict) {
+						if (mb_strpos($this->descr,$dict->word)===0) {
+							$this->descr=trim(mb_substr($this->descr,mb_strlen($dict->word)));
+							return true;
+						}
 					}
 				}
 			}

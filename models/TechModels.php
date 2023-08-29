@@ -23,6 +23,7 @@ use Yii;
  * @property string        $short Короткое наименование
  * @property string        $shortest Самое короткое какое есть (или короткое или полное)
  * @property string        $sname Расширенное имя для поиска
+ * @property string        $nameWithVendor имя с вендором для синхронизации
  * @property string        $links Ссылки
  * @property string        $comment Комментарий
  * @property string        $ports Порты
@@ -66,11 +67,14 @@ class TechModels extends ArmsModel
 	public static $syncableDirectLinks=[
 		'manufacturers_id'=>'Manufacturers',
 		'type_id'=>'TechTypes',
+		'scans_id'=>'Scans',
 	];
 	
 	public static $syncableReverseLinks=[
 		'Scans'=>'tech_models_id',
 	];
+	
+	public static $syncKey='nameWithVendor';
 	
 	/**
      * {@inheritdoc}
@@ -79,8 +83,13 @@ class TechModels extends ArmsModel
     {
         return 'tech_models';
     }
-
-    /**
+    
+    public function extraFields()
+	{
+		return['nameWithVendor'];
+	}
+	
+	/**
      * {@inheritdoc}
      */
     public function rules()
@@ -268,7 +277,12 @@ class TechModels extends ArmsModel
 			$this->manufacturer->name.' '.
 			$this->name;
 	}
-
+	
+	public function getNameWithVendor()
+	{
+		return	$this->manufacturer->name.' '.$this->name;
+	}
+	
 	public function getShortest()
 	{
 		return strlen($this->short)?$this->short:$this->name;
@@ -426,4 +440,16 @@ class TechModels extends ArmsModel
 				$typeModel->attributeHints()['comment'],
 		];
 	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	public static function syncFindLocal($name) {
+		return static::find()
+			->joinWith('manufacturer')
+			->where(['concat(tech_models.name,\' \',manufacturers.name)'=>$name])
+			->all();
+	}
+	
+	
 }
