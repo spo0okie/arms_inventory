@@ -447,7 +447,7 @@ class TechModels extends ArmsModel
 	public static function syncFindLocal($name) {
 		return static::find()
 			->joinWith('manufacturer')
-			->where(['concat(tech_models.name,\' \',manufacturers.name)'=>$name])
+			->where(['LOWER(CONCAT(manufacturers.name,\' \',tech_models.name))'=>mb_strtolower($name)])
 			->all();
 	}
 	

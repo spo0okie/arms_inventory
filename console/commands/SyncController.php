@@ -173,7 +173,7 @@ class SyncController extends Controller
 		$log='';
 		if (is_null($local)) {
 			//если нет - создаем
-			$log.= "Local $name missing! ";
+			echo "Local {$remote[$name]} missing! ";
 			$local=$class::syncCreate($remote,$overrides,$log,$this->remote);
 			$sync=$local->silentSave(false);
 		} else {
@@ -385,7 +385,7 @@ class SyncController extends Controller
 		$this->loadRemote('manufacturers-dict');
 		$this->loadRemote('manufacturers');
 		$this->loadRemote('tech-types');
-		$this->loadRemote('tech-models');
+		$this->loadRemote('tech-models',['expand'=>'nameWithVendor']);
 		$this->loadRemote('scans',['expand'=>'fileSize,fileDate,name']);
 		//static::syncSimple('app\models\ManufacturersDict');
 		//print_r($this->loaded);

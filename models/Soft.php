@@ -57,7 +57,7 @@ class Soft extends ArmsModel
 	
     public function extraFields()
 	{
-		return['nameWithVendor'];
+		return['name'];
 	}
     /**
      * @inheritdoc
@@ -381,5 +381,14 @@ class Soft extends ArmsModel
 		return $tmp;
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
+	public static function syncFindLocal($name) {
+		return static::find()
+			->joinWith('manufacturer')
+			->where(['LOWER(CONCAT(manufacturers.name,\' \',soft.descr))'=>mb_strtolower($name)])
+			->all();
+	}
 	
 }
