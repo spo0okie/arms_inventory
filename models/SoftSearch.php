@@ -83,7 +83,7 @@ class SoftSearch extends Soft
         $query->andFilterWhere([
             'id' => $this->id,
             'manufacturers_id' => $this->manufacturers_id,
-			'created_at' => $this->created_at,
+			//'created_at' => $this->created_at,
 			'soft_in_lists.list_id' => $this->softLists_ids,
         ]);
 
