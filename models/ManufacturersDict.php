@@ -19,7 +19,11 @@ class ManufacturersDict extends ArmsModel
 	static private $cacheComplete=false;
 	
 	/** @inheritdoc */
-	static protected $syncableFields=['updated_at','updated_by'	];
+	static protected $syncableFields=[
+		'word',
+		'updated_at',
+		'updated_by'
+	];
 	
 	/** @inheritdoc */
 	static public $syncKey='word';

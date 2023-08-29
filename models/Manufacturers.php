@@ -30,7 +30,13 @@ class Manufacturers extends ArmsModel
     private static $names_cache=null;
 
     /** @inheritdoc   */
-    protected static $syncableFields=['updated_at','updated_by','full_name','comment'];
+    protected static $syncableFields=[
+		'name',
+    	'updated_at',
+		'updated_by',
+		'full_name',
+		'comment'
+	];
 
 	/** @inheritdoc   */
     public static $syncableReverseLinks=[

@@ -48,6 +48,7 @@ class TechModels extends ArmsModel
 	
 	/** @inheritdoc   */
 	protected static $syncableFields=[
+		'name',
 		'short',
 		'links',
 		'comment',
@@ -65,6 +66,10 @@ class TechModels extends ArmsModel
 	public static $syncableDirectLinks=[
 		'manufacturers_id'=>'Manufacturers',
 		'type_id'=>'TechTypes',
+	];
+	
+	public static $syncableReverseLinks=[
+		'Scans'=>'tech_models_id',
 	];
 	
 	/**

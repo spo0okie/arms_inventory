@@ -334,10 +334,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 	 */
 	public static function syncCreate(array $remote, array $overrides, &$log) {
 		
-		$import=[
-			static::$syncKey=>$remote[static::$syncKey],
-			static::$syncTimestamp=>$remote[static::$syncTimestamp],
-		];
+		$import=[];
 		
 		foreach (static::$syncableFields as $field) {
 			$import[$field]=$remote[$field];
@@ -350,8 +347,14 @@ class ArmsModel extends \yii\db\ActiveRecord
 		return new static($import);
 	}
 	
-	public static function syncReverseLinks($remote,$system) {
-	
-	
+	/**
+	 * Как найти локальные объекты по ключу синхронизации
+	 * (который на самом деле никакой не ключ с точки зрения БД)
+	 * @param $name
+	 * @return ArmsModel[]
+	 */
+	public static function syncFindLocal($name) {
+		return static::find()->where([static::$syncKey=>$name])->all();
 	}
+	
 }

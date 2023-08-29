@@ -30,6 +30,7 @@ class TechTypes extends ArmsModel
 	
 	/** @inheritdoc   */
 	protected static $syncableFields=[
+		'name',
 		'code',
 		'prefix',
 		'comment',
