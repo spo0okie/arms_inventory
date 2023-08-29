@@ -3,6 +3,7 @@
 namespace app\modules\api\controllers;
 
 use app\models\Scans;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UploadedFile;
 
@@ -35,10 +36,10 @@ class ScansController extends BaseRestController
 	
 	public function actionDownload($id) {
 		$model = Scans::findOne($id);
-		$path = Yii::getAlias('@webroot').'/bukti/'.$download->bukti;
+		if (!is_object($model)) throw new NotFoundHttpException('Requested scan not found');
 		
-		if (file_exists($path)) {
-			return Yii::$app->response->sendFile($path, 'File name here');
+		if ($model->fileExists) {
+			return \Yii::$app->response->sendFile($model->fsFname, $model->name);
 		}
 	}
 }

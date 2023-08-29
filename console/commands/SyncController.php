@@ -137,7 +137,8 @@ class SyncController extends Controller
 		//поле по которому ищем локальный объект
 		$name=$classPath::$syncKey;
 		
-		$localSearch=$classPath::find()->where([$name=>$remote[$name]])->all();
+		//$localSearch=$classPath::find()->where([$name=>$remote[$name]])->all();
+		$localSearch=$classPath::syncFindLocal($remote[$name]);
 		
 		//если в качестве ключа выбран $name, то по нему не должно искаться несколько объектов
 		if (count($localSearch)>1) throw new ConsoleException('Got multiple objects with same name',[
@@ -203,6 +204,8 @@ class SyncController extends Controller
 		foreach ($objectLinks as $linkField=>$object) {
 			//выясняем поле которое в ссылающемся объекте указывает на этот
 			$linkClass=$linksClasses[$linkField];
+			//TODO запомнить тот на который ссылались до сих пор
+			//$this->storeDetachedReverse($class,$linkClass,$object);
 			//находим/создаем в локальной БД такой объект
 			$localLink=$this->syncSingle($linkClass,$object);
 			//прописываем прямую ссылку на него
@@ -352,6 +355,7 @@ class SyncController extends Controller
 		$this->loadRemote('manufacturers');
 		$this->loadRemote('tech-types');
 		$this->loadRemote('tech-models');
+		$this->loadRemote('scans',['expand'=>'fileSize,fileDate,name']);
 		//static::syncSimple('app\models\ManufacturersDict');
 		//print_r($this->loaded);
 		static::syncSimple('app\models\TechModels');

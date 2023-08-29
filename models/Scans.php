@@ -31,7 +31,7 @@ use yii\imagine\Image;
  * @property string $descr
  * @property array $contracts
  */
-class Scans extends \yii\db\ActiveRecord
+class Scans extends ArmsModel
 {
 	/*
 	 * Ошибка потерянного изображения
@@ -44,6 +44,9 @@ class Scans extends \yii\db\ActiveRecord
 	public static $idxThumbSizes=[160,160];
 
 	public static $title="Сканы документов";
+	
+	public static $syncTimestamp='fileDate';
+	
 	
 	public function extraFields()
 	{
@@ -111,7 +114,7 @@ class Scans extends \yii\db\ActiveRecord
 	public function getName() {
 		$tokens=explode('-',$this->file);
 		unset ($tokens[0]);
-		return implode('-',$tokens);
+		return implode('-',$tokens).'.'.$this->format;
 	}
 
 	/**
@@ -413,4 +416,15 @@ class Scans extends \yii\db\ActiveRecord
 	{
 		return $this->hasOne(LicItems::className(), ['id' => 'lic_items_id']);
 	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	public static function syncFindLocal($name) {
+		echo 'select * from scans where concat(file,format) regexp \'^\d+\-'.preg_quote($name).'$\''."\n";
+		return static::find()
+			->where(['regexp','concat(file,format)','^\d+\-'.preg_quote($name).'$'])
+			->all();
+	}
+	
 }
