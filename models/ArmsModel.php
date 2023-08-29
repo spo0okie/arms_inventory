@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\components\DynaGridWidget;
 use app\helpers\ArrayHelper;
+use app\helpers\RestHelper;
 use DateTime;
 use DateTimeZone;
 use Yii;
@@ -52,6 +53,9 @@ class ArmsModel extends \yii\db\ActiveRecord
 	/** @var array ссылки этого объекта на другие, которые надо синхронизировать */
 	public static $syncableDirectLinks=[];
 	
+	/** @var array many-many ссылки этого объекта на другие, которые надо синхронизировать */
+	public static $syncableMany2ManyLinks=[];
+
 	/** @var string|null ключ, по которому можно найти такой объект на удаленной системе */
 	public static $syncKey='name';
 	
@@ -304,22 +308,38 @@ class ArmsModel extends \yii\db\ActiveRecord
 	
 	/**
 	 * Загрузить поля с объекта загруженного с другой системы (такой же инвентори)
-	 * @param array $remote 	сам удаленный объект
-	 * @param array $overrides	поля которым надо задать кастомные значения (для ссылок, их нельзя взять из удаленного)
+	 * @param array      $remote сам удаленный объект
+	 * @param array      $overrides поля которым надо задать кастомные значения (для ссылок, их нельзя взять из удаленного)
+	 * @param string     $log
+	 * @param RestHelper $rest
 	 * @return bool|null
 	 */
-	public function syncFields(array $remote, array $overrides, &$log) {
+	public function syncFields(array $remote, array $overrides, string &$log, RestHelper $rest) {
 		$timestamp=static::$syncTimestamp;
 		
+		foreach ($overrides as $field=>$value) {
+			if ($this->$field==$value) unset ($overrides[$field]);
+		}
+		
+		
 		//если (удаленный объект имеет отметку времени и она больше) или надо поменять (а не синхронизировать) какие-то поля
-		if (($remote[$timestamp] && $remote[$timestamp]>$this->$timestamp) || count($overrides)) {
-			foreach (array_unique(array_merge(static::$syncableFields,[$timestamp])) as $field) {
-				if ($this->$field != $remote[$field]) $log.= "$field: [{$this->$field} != {$remote[$field]}]; ";
-				$this->$field = $remote[$field];
+		if (($timestamp && $remote[$timestamp] && $remote[$timestamp]>$this->$timestamp) || count($overrides)) {
+			$needUpdate=false;
+			foreach (static::$syncableFields as $field) {
+				if ($this->$field != $remote[$field]) {
+					$log.= "$field: [{$this->$field} != {$remote[$field]}]; ";
+					$this->$field = $remote[$field];
+					$needUpdate=true;
+				}
 			}
 			foreach ($overrides as $field=>$value) {
-				$this->$field=$value;
+				if ($this->$field != $value) {
+					$this->$field = $value;
+					$log .= "$field: [{$this->$field} => $value]; ";
+					$needUpdate=true;
+				}
 			}
+			if (!$needUpdate) return null;
 			return $this->silentSave(false);
 		}
 		//если менять не надо
@@ -328,11 +348,13 @@ class ArmsModel extends \yii\db\ActiveRecord
 	
 	/**
 	 * Создает объект в локальной системе на основании данных из удаленной
-	 * @param array $remote 	сам удаленный объект
-	 * @param array $overrides	поля которым надо задать кастомные значения (для ссылок, их нельзя взять из удаленного)
+	 * @param array      $remote сам удаленный объект
+	 * @param array      $overrides поля которым надо задать кастомные значения (для ссылок, их нельзя взять из удаленного)
+	 * @param string     $log
+	 * @param RestHelper $rest
 	 * @return ArmsModel
 	 */
-	public static function syncCreate(array $remote, array $overrides, &$log) {
+	public static function syncCreate(array $remote, array $overrides, string &$log, RestHelper $rest) {
 		
 		$import=[];
 		
@@ -340,9 +362,11 @@ class ArmsModel extends \yii\db\ActiveRecord
 			$import[$field]=$remote[$field];
 		}
 		
-		ArrayHelper::recursiveOverride($import,$overrides);
+		foreach ($overrides as $field=>$value) {
+			$import[$field]=$value;
+		}
 		
-		foreach ($import as $p=>$v) $log.= "$p=>$v; ";
+		foreach ($import as $p=>$v) $log.= "[$p=>$v]; ";
 
 		return new static($import);
 	}
