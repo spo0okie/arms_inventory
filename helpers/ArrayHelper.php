@@ -145,4 +145,13 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		foreach ($array as $item) if ($keepEmpty||$item) $cleaned[]=$item;
 		return implode($glue,$cleaned);
 	}
+	
+	public static function explode($delimiter,$string,$trim=true,$keepEmpty=false){
+		$cleaned=[];
+		foreach (explode($delimiter,$string) as $item) {
+			if ($trim) $item=trim($item);
+			if ($keepEmpty||$item) $cleaned[]=$item;
+		}
+		return $cleaned;
+	}
 }
