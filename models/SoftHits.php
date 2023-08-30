@@ -110,7 +110,7 @@ class SoftHits extends \yii\db\ActiveRecord
 	 */
 	public function getManufacturers_id()
 	{
-		return Soft::fetchAll()[$this->soft_id]->manufacturers_id;
+		return Soft::fetchItem($this->soft_id)->manufacturers_id;
 	}
 
 	/**

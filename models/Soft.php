@@ -20,6 +20,7 @@ use yii\helpers\StringHelper;
  * @property array $softLists Массив объектов списков ПО, в которые включено ПО
  * @property array $softLists_ids Массив ID списков ПО, в которые включено ПО
  * @property array $comps_ids Массив ID компов, на которые установлено ПО
+ * @property array $hits_ids Массив ID компов, на которые установлено ПО
  * @property bool $isFree входит в список бесплатного ПО
  * @property bool $isIgnored входит в список игнорируемого ПО
  * @property array $compHits_ids Массив ID компов, на которые установлено ПО
@@ -33,6 +34,9 @@ class Soft extends ArmsModel
 {
 
     private static $all_items=null;
+	public static $disable_cache=false;
+	public static $disable_rescan=false;
+	private $doNotRescan=false;
 	
 	/** @inheritdoc  */
 	protected static $syncableFields=[
@@ -82,7 +86,8 @@ class Soft extends ArmsModel
                 'class' => \voskobovich\linker\LinkerBehavior::className(),
                 'relations' => [
                     'softLists_ids' => 'softLists',
-                    'comps_ids' => 'comps',
+					'comps_ids' => 'comps',
+					'hits_ids' => 'hits',
                 ]
             ]
         ];
@@ -105,6 +110,13 @@ class Soft extends ArmsModel
         ];
     }
 
+	public function reverseLinks()
+	{
+		return [
+			$this->hits,
+			$this->licGroups,
+		];
+	}
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -149,7 +161,7 @@ class Soft extends ArmsModel
 			->viaTable('{{%soft_in_comps}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
 	}
 	/**
-	 * Возвращает набор компов, в которых находится ПО
+	 * Возвращает набор компов, в которых закреплено ПО
 	 */
 	public function getHits()
 	{
@@ -204,7 +216,7 @@ class Soft extends ArmsModel
 
 	public static function fetchItemsArray($id)
 	{
-		$arrItems = explode("\n",static::fetchAll()[$id]->items);
+		$arrItems = explode("\n",static::fetchItem($id)->items);
 		foreach ($arrItems as $i => $item) {
 			$arrItems[$i]=trim($item);
 		}
@@ -216,7 +228,7 @@ class Soft extends ArmsModel
 	 */
 	public static function fetchAdditionalArray($id)
 	{
-		$arrItems = explode("\n",static::fetchAll()[$id]->additional);
+		$arrItems = explode("\n",static::fetchItem($id)->additional);
 		foreach ($arrItems as $i => $item) {
 			$arrItems[$i]=trim($item);
 		}
@@ -310,15 +322,18 @@ class Soft extends ArmsModel
 	{
 		//error_log('savin');
 		if (parent::beforeSave($insert)) {
+			$descr=mb_strtolower($this->descr);
 			if (is_object($this->manufacturer)) {
-				if (mb_strpos($this->descr,$this->manufacturer->name)===0) {
+				$vendor=mb_strtolower($this->manufacturer->name);
+				if (mb_strpos($descr,$vendor)===0) {
 					//название продукта начинается с имени производителя
 					$this->descr=trim(mb_substr($this->descr,mb_strlen($this->manufacturer->name)));
 					return true;
 				} else {
 					//проверяем все синонимы написания производителя
 					foreach ($this->manufacturer->manufacturersDicts as $dict) {
-						if (mb_strpos($this->descr,$dict->word)===0) {
+						$vendor=mb_strtolower($dict->word);
+						if (mb_strpos($descr,$vendor)===0) {
 							$this->descr=trim(mb_substr($this->descr,mb_strlen($dict->word)));
 							return true;
 						}
@@ -329,8 +344,6 @@ class Soft extends ArmsModel
 			$this->items=implode("\n",StringHelper::explode($this->items,"\n",true,true));
 			$this->additional=implode("\n",StringHelper::explode($this->additional,"\n",true,true));
 			return true;
-		} else {
-			//error_log('uh oh');
 		}
 		return false;
 	}
@@ -338,15 +351,28 @@ class Soft extends ArmsModel
 	public function afterSave($insert, $changedAttributes)
 	{
 		parent::afterSave($insert, $changedAttributes);
+		if (static::$disable_rescan || $this->doNotRescan) return;
+		
+		$items=ArrayHelper::explode("\n",$this->items);
+		if (!count($items)) return;
+		
+		if (count($items)==1)
+			$where=['regexp','raw_soft',$items[0]];
+		else {
+			$where=['or'];
+			foreach ($items as $item)
+				$where[]=['regexp','raw_soft',$item];
+		}
 		/** @var Comps $comps */
 		$comps=Comps::find()
-			->where(['regexp','raw_soft',$this->items])
+			->where($where)
 			->all();
 		
 		foreach ($comps as $comp) $comp->silentSave();
 	}
 	
 	public static function fetchAll(){
+		if (static::$disable_cache) return static::find()->all();
 		if (is_null(static::$all_items)) {
 			$tmp=static::find()->all();
 			static::$all_items=[];
@@ -356,10 +382,8 @@ class Soft extends ArmsModel
 	}
 	
 	public static function fetchItem($id){
-		return isset(static::fetchAll()[$id])?
-			static::fetchAll()[$id]
-			:
-			null;
+		if (static::$disable_cache) return static::findOne($id);
+		return static::fetchAll()[$id]??null;
 	}
 	
 	public static function fetchItems($ids){
@@ -389,6 +413,15 @@ class Soft extends ArmsModel
 			->joinWith('manufacturer')
 			->where(['LOWER(CONCAT(manufacturers.name,\' \',soft.descr))'=>mb_strtolower($name)])
 			->all();
+	}
+	
+	public function beforeDelete()
+	{
+		$this->comps_ids=[];
+		$this->hits_ids=[];
+		$this->doNotRescan=true;
+		$this->silentSave(false);
+		return parent::beforeDelete();
 	}
 	
 }
