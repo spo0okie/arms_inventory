@@ -15,6 +15,7 @@ if (!isset($static_view)) $static_view=false;
 	<?= $this->render('/manufacturers/item',['model'=>$model->manufacturer]) ?>
 	<?= \app\components\LinkObjectWidget::widget([
 		'model'=>$model,
+		'name'=>$model->descr,
 		'static'=>$static_view,
 		//'confirm' => 'Удалить этот сервис? Это действие необратимо!',
 		'hideUndeletable'=>false
