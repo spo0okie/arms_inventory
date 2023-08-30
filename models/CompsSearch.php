@@ -15,6 +15,7 @@ class CompsSearch extends Comps
 {
 	public $places_id;
 	public $services_ids;
+	public $linkedSoft_ids;
 
     /**
      * @inheritdoc
@@ -22,7 +23,7 @@ class CompsSearch extends Comps
     public function rules()
     {
         return [
-            [['id', 'domain_id','soft_ids','softHits_ids'], 'integer'],
+            [['id', 'domain_id','soft_ids','linkedSoft_ids','softHits_ids'], 'integer'],
             [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id','archived','services_ids'], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
 				$macs=explode("\n",$value);
@@ -147,6 +148,10 @@ class CompsSearch extends Comps
 			->andFilterWhere(QueryHelper::querySearchNumberOrDate('comps.updated_at',$this->updated_at))
 			->andFilterWhere(['soft.id'=>$this->soft_ids])
 			->andFilterWhere(['installed_soft.id'=>$this->softHits_ids])
+			->andFilterWhere(['or',
+				['installed_soft.id'=>$this->linkedSoft_ids],
+				['soft.id'=>$this->linkedSoft_ids]
+			])
 		;
 	
 		$totalQuery=clone $query;
