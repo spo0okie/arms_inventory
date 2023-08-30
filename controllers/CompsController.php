@@ -382,7 +382,7 @@ class CompsController extends Controller
 
 			if (is_array($items)) {
 				$model->soft_ids=array_unique(array_merge($model->soft_ids,$items));
-				$model->save();
+				$model->silentSave();
 			};
 		}
 
@@ -405,7 +405,7 @@ class CompsController extends Controller
         if (strlen($strItems)) {
             if (is_array($items=explode(',',$strItems))){
                 $model->soft_ids=array_diff($model->soft_ids,$items);
-                $model->save();
+                $model->silentSave();
             };
         }
 
