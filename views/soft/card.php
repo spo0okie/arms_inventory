@@ -13,13 +13,11 @@ if (!isset($static_view)) $static_view=false;
 
 <h1>
 	<?= $this->render('/manufacturers/item',['model'=>$model->manufacturer]) ?>
-	<?= $this->render('item',['model'=>$model,'static_view'=>$static_view]) ?>
-	<?php if (!$static_view) echo Html::a('<span class="fas fa-trash"></span>',
-		['delete', 'id' => $model->id], [
-		'data' => [
-			'confirm' => 'Are you sure you want to delete this item?',
-			'method' => 'post',
-		],
+	<?= \app\components\LinkObjectWidget::widget([
+		'model'=>$model,
+		'static'=>$static_view,
+		//'confirm' => 'Удалить этот сервис? Это действие необратимо!',
+		'hideUndeletable'=>false
 	]) ?>
 </h1>
 <p><?= $model->comment?></p>

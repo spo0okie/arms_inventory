@@ -113,7 +113,7 @@ class Soft extends ArmsModel
 	public function reverseLinks()
 	{
 		return [
-			$this->hits,
+			'ПО закреплено в паспортах ОС'=>$this->hits,
 			$this->licGroups,
 		];
 	}
