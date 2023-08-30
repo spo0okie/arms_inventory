@@ -170,7 +170,7 @@ class Soft extends ArmsModel
 	
 	public function getName()
 	{
-		return	$this->manufacturer->name.' '.$this->descr;
+		return	is_object($this->manufacturer)?$this->manufacturer->name.' '.$this->descr:$this->descr;
 	}
 	
 	/**
