@@ -11,7 +11,7 @@ use app\console\ConsoleException;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelperException;
 use app\models\ArmsModel;
-use app\models\Scans;
+use app\models\Soft;
 use yii\console\Controller;
 use app\helpers\RestHelper;
 use yii\helpers\Inflector;
@@ -400,10 +400,12 @@ class SyncController extends Controller
 	 */
 	public function actionSoft(string $url, string $user='', string $pass='')
 	{
+		Soft::$disable_cache=true;
+		Soft::$disable_rescan=true;
 		$this->initRemote($url,$user,$pass);
 		$this->loadRemote('manufacturers-dict');
 		$this->loadRemote('manufacturers');
-		$this->loadRemote('soft');
+		$this->loadRemote('soft',['expand'=>'name']);
 		//static::syncSimple('app\models\ManufacturersDict');
 		//print_r($this->loaded);
 		static::syncSimple('Soft');
