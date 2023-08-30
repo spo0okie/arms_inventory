@@ -211,9 +211,11 @@ class SchedulesController extends ArmsBaseController
      */
     public function actionDelete($id)
     {
+    	$model=$this->findModel($id);
+    	$parent=$model->parent_id;
         $this->findModel($id)->delete();
 
-        return $this->redirect(['index']);
+        return $this->redirect($parent?['view', 'id' => $parent]:['index']);
     }
 
     /**
