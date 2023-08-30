@@ -19,11 +19,10 @@ use yii\helpers\StringHelper;
  * @property string $created_at Время создания
  * @property array $softLists Массив объектов списков ПО, в которые включено ПО
  * @property array $softLists_ids Массив ID списков ПО, в которые включено ПО
- * @property array $comps_ids Массив ID компов, на которые установлено ПО
+ * @property array $comps_ids Массив ID компов, на которые закреплено ПО
  * @property array $hits_ids Массив ID компов, на которые установлено ПО
  * @property bool $isFree входит в список бесплатного ПО
  * @property bool $isIgnored входит в список игнорируемого ПО
- * @property array $compHits_ids Массив ID компов, на которые установлено ПО
  *
  * @property Soft[] $comps Массив объектов компов, на которые ПО внесено в паспорт
  * @property Soft[] $hits Массив объектов компов, на которые установлено ПО
@@ -113,7 +112,7 @@ class Soft extends ArmsModel
 	public function reverseLinks()
 	{
 		return [
-			'ПО закреплено в паспортах ОС'=>$this->hits,
+			'ПО закреплено в паспортах ОС'=>$this->comps,
 			$this->licGroups,
 		];
 	}
@@ -153,7 +152,7 @@ class Soft extends ArmsModel
     }
 	
 	/**
-	 * Возвращает набор компов, в которых находится ПО
+	 * Возвращает набор компов, в которых закреплено ПО
 	 */
 	public function getComps()
 	{
@@ -161,7 +160,7 @@ class Soft extends ArmsModel
 			->viaTable('{{%soft_in_comps}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
 	}
 	/**
-	 * Возвращает набор компов, в которых закреплено ПО
+	 * Возвращает набор компов, в которых находится ПО
 	 */
 	public function getHits()
 	{
