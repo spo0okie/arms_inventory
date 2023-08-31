@@ -42,7 +42,7 @@ class SoftLists extends ArmsModel
 	];
 	
 	public static $syncableMany2ManyLinks=[
-		'soft_ids'=>'Soft,softList_ids'
+		'soft_ids'=>'Soft,softLists_ids'
 	];
 	
 	

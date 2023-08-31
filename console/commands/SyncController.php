@@ -238,6 +238,26 @@ class SyncController extends Controller
 				$this->syncSingle($linkClass,$object,[$link=>$local->id]);
 			}
 		}
+		
+		//вытаскиваем для удобства список ссылок из других классов на этот
+		/* public static $syncableMany2ManyLinks=[
+			'soft_ids'=>'Soft,softList_ids'
+		]; */
+		$linksDefinitions=$class::$syncableMany2ManyLinks;
+		//грузим фактически ссылающиеся на наш объекты
+		$objectLinks=$this->getRemoteMany2ManyLinks($remote,$class);
+		//перебираем их по классам
+		foreach ($objectLinks as $linkClass=>$objects) {
+			//выясняем поле которое в ссылающемся объекте указывает на этот
+			[$linkClass,$reverseLink]=explode(',',$linksDefinitions[$linkClass]);
+			
+			//перебираем ссылающиеся объекты и "ссылаем их на новый"
+			foreach ($objects as $object) {
+				//TODO Запомнить объекты куда раньше ссылались эти
+				//$this->storeDetachedReverse($class,$linkClass,$object);
+				$this->syncSingle($linkClass,$object,[$reverseLink=>$local->id]);
+			}
+		}
 		return $local;
 	}
 	
@@ -391,7 +411,7 @@ class SyncController extends Controller
 		//print_r($this->loaded);
 		static::syncSimple('TechModels');
 	}
-
+	
 	/**
 	 * Подтянуть типы оборудования
 	 * @param $url
@@ -409,5 +429,25 @@ class SyncController extends Controller
 		//static::syncSimple('app\models\ManufacturersDict');
 		//print_r($this->loaded);
 		static::syncSimple('Soft');
+	}
+
+	/**
+	 * Подтянуть типы оборудования
+	 * @param $url
+	 * @param $user
+	 * @param $pass
+	 */
+	public function actionSoftLists(string $url, string $user='', string $pass='')
+	{
+		Soft::$disable_cache=true;
+		Soft::$disable_rescan=true;
+		$this->initRemote($url,$user,$pass);
+		$this->loadRemote('manufacturers-dict');
+		$this->loadRemote('manufacturers');
+		$this->loadRemote('soft',['expand'=>'name']);
+		$this->loadRemote('soft-lists',['expand'=>'soft_ids']);
+		//static::syncSimple('app\models\ManufacturersDict');
+		//print_r($this->loaded);
+		static::syncSimple('SoftLists');
 	}
 }
