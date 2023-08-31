@@ -198,5 +198,30 @@ class Manufacturers extends ArmsModel
 		return $tmp;
 	}
 	
+	/**
+	 * Вырезать имя вендора из названия если оно идет спереди
+	 * @param $name
+	 * @return bool
+	 */
+	public function cropVendorName($name){
+		$orig=$name;
+		$full=mb_strtolower($name);
+		$vendor=mb_strtolower($this->name).' ';	//убираем регистр и добавляем пробел,
+												//т.к. вендор должен быть отдельным словом и при этом не последним
+		if (mb_strpos($full,$vendor)===0) {
+			//название продукта начинается с имени производителя
+			$name=trim(mb_substr($name,mb_strlen($vendor)));
+		} else {
+			//проверяем все синонимы написания производителя
+			foreach ($this->manufacturersDicts as $dict) {
+				$vendor=mb_strtolower($dict->word).' '; //убираем регистр и добавляем пробел, также как и выше
+				if (mb_strpos($full,$vendor)===0) {
+					$name=trim(mb_substr($name,mb_strlen($vendor)));
+				}
+			}
+		}
+		return mb_strlen($name)>3?$name:$orig;
+		
+	}
 	
 }

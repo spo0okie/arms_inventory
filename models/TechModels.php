@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\helpers\StringHelper;
 
 /**
  * This is the model class for table "tech_models".
@@ -439,6 +440,21 @@ class TechModels extends ArmsModel
 				$comment_hint:
 				$typeModel->attributeHints()['comment'],
 		];
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function beforeSave($insert)
+	{
+		if (parent::beforeSave($insert)) {
+			if (is_object($this->manufacturer)) {
+				//если есть производитель, то его название надо бы убрать из имени софта
+				$this->name=$this->manufacturer->cropVendorName($this->name);
+			}
+			return true;
+		}
+		return false;
 	}
 	
 	/**

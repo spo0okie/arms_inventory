@@ -322,24 +322,8 @@ class Soft extends ArmsModel
 		//error_log('savin');
 		if (parent::beforeSave($insert)) {
 			if (is_object($this->manufacturer)) {
-				$cleanName=$this->descr;
-				$descr=mb_strtolower($this->descr);
-				$vendor=mb_strtolower($this->manufacturer->name);
-				if (mb_strpos($descr,$vendor)===0) {
-					//название продукта начинается с имени производителя
-					$cleanName=trim(mb_substr($cleanName,mb_strlen($this->manufacturer->name)));
-					return true;
-				} else {
-					//проверяем все синонимы написания производителя
-					foreach ($this->manufacturer->manufacturersDicts as $dict) {
-						$vendor=mb_strtolower($dict->word);
-						if (mb_strpos($descr,$vendor)===0) {
-							$cleanName=trim(mb_substr($cleanName,mb_strlen($dict->word)));
-							return true;
-						}
-					}
-				}
-				if (mb_strlen($cleanName)>3) $this->descr = $cleanName;
+				//если есть производитель, то его название надо бы убрать из имени софта
+				$this->descr=$this->manufacturer->cropVendorName($this->descr);
 			}
 			
 			$this->items=implode("\n",StringHelper::explode($this->items,"\n",true,true));
