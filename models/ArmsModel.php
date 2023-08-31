@@ -333,10 +333,18 @@ class ArmsModel extends \yii\db\ActiveRecord
 				}
 			}
 			foreach ($overrides as $field=>$value) {
-				if ($this->$field != $value) {
-					$this->$field = $value;
-					$log .= "$field: [{$this->$field} => $value]; ";
-					$needUpdate=true;
+				if (strpos($field,'_ids')==(strlen($field)-4)) {
+					if (array_search($value,$this->$field)===false) {
+						echo "$field: [+ $value]; ";
+						$this->$field = array_merge($this->$field,[$value]);
+						$needUpdate=true;
+					}
+				} else {
+					if ($this->$field != $value) {
+						$this->$field = $value;
+						$log .= "$field: [{$this->$field} => $value]; ";
+						$needUpdate=true;
+					}
 				}
 			}
 			if (!$needUpdate) return null;
@@ -363,10 +371,17 @@ class ArmsModel extends \yii\db\ActiveRecord
 		}
 		
 		foreach ($overrides as $field=>$value) {
-			$import[$field]=$value;
+			if (strpos($field,'_ids')==(strlen($field)-4)) {
+				$import[$field] = [$value];
+			} else {
+				$import[$field]=$value;
+			}
 		}
 		
-		foreach ($import as $p=>$v) $log.= "[$p=>$v]; ";
+		foreach ($import as $p=>$v) {
+			if (is_array($v)) $v=implode(',',$v);
+			$log.= "[$p=>$v]; ";
+		}
 
 		return new static($import);
 	}
