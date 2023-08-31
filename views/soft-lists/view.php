@@ -37,13 +37,13 @@ $renderer=$this;
 					'value'=>function($data) use ($renderer){
 						return $renderer->render('/soft/item',[
 							'model'=>$data,
-							'name'=>$data->manufacturer->name.' '.$data->descr
+							'name'=>$data->name
 						]);
 					}
 				],
 				'comment',
 				//'items:ntext',
-				'created_at:date',
+				//'created_at:date',
 		
 				//['class' => 'yii\grid\ActionColumn'],
 			],
