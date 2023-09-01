@@ -65,7 +65,7 @@ class m230821_160259_init_empty_tables extends Migration
 		
 		$docState=$query->select('*')->from('tech_states')->one();
 		if (!is_array($docState)) {
-			foreach ($this->initialDocStates as $s) $this->execute(
+			foreach ($this->initialTechStates as $s) $this->execute(
 				'insert into tech_states (code,name,archived,descr) values (:code,:name,:archived,:descr)',[
 				'code'=>$s[0],
 				'name'=>$s[1],
