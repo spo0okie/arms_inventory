@@ -56,7 +56,7 @@ class m230821_160259_init_empty_tables extends Migration
 		$docState=$query->select('*')->from('contracts_states')->one();
 		if (!is_array($docState)) {
 			foreach ($this->initialDocStates as $s) $this->execute(
-				'insert into contracts_states (code,name,desscr) values (:code,:name,:desccr)',[
+				'insert into contracts_states (code,name,descr) values (:code,:name,:descr)',[
 				'code'=>$s[0],
 				'name'=>$s[1],
 				'descr'=>$s[2],
@@ -66,7 +66,7 @@ class m230821_160259_init_empty_tables extends Migration
 		$docState=$query->select('*')->from('tech_states')->one();
 		if (!is_array($docState)) {
 			foreach ($this->initialDocStates as $s) $this->execute(
-				'insert into tech_states (code,name,archived,desscr) values (:code,:name,:archived,:desccr)',[
+				'insert into tech_states (code,name,archived,descr) values (:code,:name,:archived,:descr)',[
 				'code'=>$s[0],
 				'name'=>$s[1],
 				'descr'=>$s[3],
