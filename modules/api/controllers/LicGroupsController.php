@@ -3,7 +3,6 @@
 namespace app\modules\api\controllers;
 
 
-use yii\web\User;
 
 class LicGroupsController extends BaseRestController
 {

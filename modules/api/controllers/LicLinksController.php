@@ -3,8 +3,6 @@
 namespace app\modules\api\controllers;
 
 
-use yii\web\User;
-
 class LicLinksController extends \yii\rest\ActiveController
 {
 
