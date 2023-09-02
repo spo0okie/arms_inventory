@@ -85,6 +85,7 @@ class Soft extends ArmsModel
                 'class' => \voskobovich\linker\LinkerBehavior::className(),
                 'relations' => [
                     'softLists_ids' => 'softLists',
+					'licGroups_ids' => 'licGroups',
 					'comps_ids' => 'comps',
 					'hits_ids' => 'hits',
                 ]
