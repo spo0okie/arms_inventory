@@ -28,30 +28,53 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= $form->field($model, 'inn')->textInput(['maxlength' => true]) ?>
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,  'inn') ?>
 		</div>
 		<div class="col-md-6">
-			<?= $form->field($model, 'kpp')->textInput(['maxlength' => true]) ?>
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,  'kpp') ?>
 		</div>
 	</div>
 
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= $form->field($model, 'cabinet_url')->textInput(['maxlength' => true]) ?>
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,  'cabinet_url') ?>
 		</div>
-		<div class="col-md-6">
-			<?= $form->field($model, 'support_tel')->textInput(['maxlength' => true]) ?>
+		<div class="col-md-6 form-text text-muted">
+			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,  'support_tel') ?>
 		</div>
 	</div>
 
-	
 
-    <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
 
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-    </div>
+	<div class="row">
+		<div class="col-md-6">
+		    <?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,  'comment',['lines' => 6]) ?>
+			<br>
+			<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+			
+		</div>
+		<div class="col-md-6 form-text text-muted">
+			<strong>Пример</strong>:<br>
+			Поставщик софта / железа<br>
+			Менеджер по продажам:<br>
+			Лоханкин Васиссуалий Петрович<br>
+			Тел.: +7-351-ХХХ-ХХХХ доб. ХХХ<br>
+			Моб.: +7-9ХХ-ХХХ-ХХХХ<br>
+			Эл. почта: lohankin@rogaikopyta.ru<br>
+			<br>
+			Инженер/технарь:<br>
+			Скумбриевич Егор Александровича<br>
+			Руководитель по направлению аппаратного обеспечения<br>
+			Тел.: +7-351-ХХХ-ХХХХ доб. ХХХ<br>
+			Моб.: +7-9ХХ-ХХХ-ХХХХ<br>
+			Эл. почта: skumbrievich@rogaikopyta.ru<br>
+			<br>
+			Оригиналы документов отправлять по адресу:<br>
+			454111 г.Челябинск, улица Пушкина, дом колотушкина
+		</div>
+	</div>
+
 
     <?php ActiveForm::end(); ?>
 
