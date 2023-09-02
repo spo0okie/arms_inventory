@@ -445,10 +445,10 @@ class SyncController extends Controller
 		$this->loadRemote('manufacturers-dict');
 		$this->loadRemote('manufacturers');
 		$this->loadRemote('soft',['expand'=>'name']);
-		$this->loadRemote('lic-types',['expand'=>'soft_ids']);
-		$this->loadRemote('lic-goups',['expand'=>'soft_ids']);
+		$this->loadRemote('lic-types');
+		$this->loadRemote('lic-groups',['expand'=>'soft_ids']);
 		//static::syncSimple('app\models\ManufacturersDict');
 		//print_r($this->loaded);
-		static::syncSimple('SoftLists');
+		static::syncSimple('LicGroups');
 	}
 }

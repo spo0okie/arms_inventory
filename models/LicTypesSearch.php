@@ -59,7 +59,7 @@ class LicTypesSearch extends LicTypes
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'created_at' => $this->created_at,
+            //'created_at' => $this->created_at,
         ]);
 
         $query->andFilterWhere(['or like', 'name', 	\yii\helpers\StringHelper::explode($this->name,'|',true,true)])

@@ -45,17 +45,10 @@ class LicGroups extends ArmsModel
         return 'lic_groups';
     }
 	
-	public static $syncableFields=[
-		'descr','comment','updated_at','updated_by'
-	];
-    
-    public static $syncableDirectLinks=[
-    	'type_id'=>'LicTypes'
-	];
-    
-    public static $syncableMany2ManyLinks=[
-    	'soft_ids'=>'Soft,comps_ids'
-	];
+	public static $syncableFields=['descr','comment','updated_at','updated_by'];
+    public static $syncableDirectLinks=['lic_types_id'=>'LicTypes'];
+    public static $syncableMany2ManyLinks=['soft_ids'=>'Soft,comps_ids'];
+    public static $syncKey='descr';
     
     public function extraFields()
 	{

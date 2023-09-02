@@ -64,7 +64,7 @@ class LicGroupsSearch extends LicGroups
         $query->andFilterWhere([
             //'id' => $this->id,
             //'soft_ids' => $this->soft_ids,
-            'created_at' => $this->created_at,
+            //'created_at' => $this->created_at,
         ]);
 
         $query->andFilterWhere(['or like', 'lic_groups.descr', \yii\helpers\StringHelper::explode($this->descr,'|',true,true)])

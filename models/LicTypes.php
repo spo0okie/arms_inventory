@@ -28,9 +28,7 @@ class LicTypes extends ArmsModel
     public static function tableName()
     {return 'lic_types';}
     
-    public static $syncableFields=[
-    	'name','descr','comment','updated_at','updated_by'
-	];
+    public static $syncableFields=['name','descr','comment','links','updated_at','updated_by'];
 
     /**
      * @inheritdoc
