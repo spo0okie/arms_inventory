@@ -430,7 +430,7 @@ class SyncController extends Controller
 		//print_r($this->loaded);
 		static::syncSimple('Soft');
 	}
-
+	
 	/**
 	 * Подтянуть Лицензии
 	 * @param $url
@@ -450,5 +450,18 @@ class SyncController extends Controller
 		//static::syncSimple('app\models\ManufacturersDict');
 		//print_r($this->loaded);
 		static::syncSimple('LicGroups');
+	}
+
+	/**
+	 * Подтянуть Контрагентов
+	 * @param $url
+	 * @param $user
+	 * @param $pass
+	 */
+	public function actionPartners(string $url, string $user='', string $pass='')
+	{
+		$this->initRemote($url,$user,$pass);
+		$this->loadRemote('partners');
+		static::syncSimple('Partners');
 	}
 }

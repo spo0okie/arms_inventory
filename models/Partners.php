@@ -127,6 +127,16 @@ class Partners extends ArmsModel
 		return $this->hasMany(Services::className(), ['partners_id' => 'id']);
 	}
 	
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getUsers()
+	{
+		return $this->hasMany(Users::className(), ['org_id' => 'id']);
+	}
+	
+	
 	/**
 	 * Возвращает имя для поиска
 	 * @return string
@@ -199,6 +209,13 @@ class Partners extends ArmsModel
 		asort($names);
 		return static::$names_cache=$names;
 	}
-
-
+	
+	public function reverseLinks()
+	{
+		return [
+			$this->services,
+			$this->contracts,
+			$this->users
+		];
+	}
 }
