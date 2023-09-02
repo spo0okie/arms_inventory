@@ -5,14 +5,15 @@ namespace app\modules\api\controllers;
 
 use yii\web\User;
 
-class LicGroupsController extends \yii\rest\ActiveController
+class LicGroupsController extends BaseRestController
 {
 
 	public $modelClass='app\models\LicGroups';
+	public $anyoneActions=['search'];
 
 	public function actions()
 	{
-		return ['search'];
+		return array_merge(['search'],parent::actions());
 	}
 
 	public function actionSearch($product_id,$comp_name=null,$user_login=null){

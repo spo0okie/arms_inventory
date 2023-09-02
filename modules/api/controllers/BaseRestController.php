@@ -15,7 +15,8 @@ use yii\web\User;
 
 class BaseRestController extends \yii\rest\ActiveController
 {
- 
+	
+	public $anyoneActions=[];
 	public $viewActions=['index','view','search','download'];
 	public $editActions=['create','update','delete','upload'];
 	
@@ -27,6 +28,7 @@ class BaseRestController extends \yii\rest\ActiveController
 			$behaviors['access']=[
 				'class' => \yii\filters\AccessControl::className(),
 				'rules' => [
+					['allow' => true, 'actions'=>$this->anyoneActions,	'roles'=>['?']],
 					['allow' => true, 'actions'=>$this->viewActions,	'roles'=>['@']],
 					['allow' => true, 'actions'=>$this->editActions,	'roles'=>['editor']],
 				],
