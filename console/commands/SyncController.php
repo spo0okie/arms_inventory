@@ -413,7 +413,7 @@ class SyncController extends Controller
 	}
 	
 	/**
-	 * Подтянуть типы оборудования
+	 * Подтянуть ПО
 	 * @param $url
 	 * @param $user
 	 * @param $pass
@@ -432,12 +432,12 @@ class SyncController extends Controller
 	}
 
 	/**
-	 * Подтянуть типы оборудования
+	 * Подтянуть Лицензии
 	 * @param $url
 	 * @param $user
 	 * @param $pass
 	 */
-	public function actionSoftLists(string $url, string $user='', string $pass='')
+	public function actionLicGroups(string $url, string $user='', string $pass='')
 	{
 		Soft::$disable_cache=true;
 		Soft::$disable_rescan=true;
@@ -445,7 +445,8 @@ class SyncController extends Controller
 		$this->loadRemote('manufacturers-dict');
 		$this->loadRemote('manufacturers');
 		$this->loadRemote('soft',['expand'=>'name']);
-		$this->loadRemote('soft-lists',['expand'=>'soft_ids']);
+		$this->loadRemote('lic-types',['expand'=>'soft_ids']);
+		$this->loadRemote('lic-goups',['expand'=>'soft_ids']);
 		//static::syncSimple('app\models\ManufacturersDict');
 		//print_r($this->loaded);
 		static::syncSimple('SoftLists');

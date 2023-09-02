@@ -56,6 +56,11 @@ class LicGroups extends ArmsModel
     public static $syncableMany2ManyLinks=[
     	'soft_ids'=>'Soft,comps_ids'
 	];
+    
+    public function extraFields()
+	{
+		return ['soft_ids'];
+	}
 	
 	/**
      * @inheritdoc
