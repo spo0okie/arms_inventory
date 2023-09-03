@@ -433,6 +433,26 @@ class SyncController extends Controller
 	}
 	
 	/**
+	 * Подтянуть ПО
+	 * @param $url
+	 * @param $user
+	 * @param $pass
+	 */
+	public function actionSoftLists(string $url, string $user='', string $pass='')
+	{
+		Soft::$disable_cache=true;
+		Soft::$disable_rescan=true;
+		$this->initRemote($url,$user,$pass);
+		$this->loadRemote('manufacturers-dict');
+		$this->loadRemote('manufacturers');
+		$this->loadRemote('soft',['expand'=>'name']);
+		$this->loadRemote('soft-lists',['expand'=>'soft_ids']);
+		//static::syncSimple('app\models\ManufacturersDict');
+		//print_r($this->loaded);
+		static::syncSimple('Soft');
+	}
+	
+	/**
 	 * Подтянуть Лицензии
 	 * @param $url
 	 * @param $user
