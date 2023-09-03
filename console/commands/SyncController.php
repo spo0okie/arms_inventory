@@ -108,7 +108,7 @@ class SyncController extends Controller
 	public function loadRemote(string $class, $params=[], $storeClass='') {
 		$params['per-page']=0;
 		if (!$storeClass) $storeClass=Inflector::camelize($class);
-		echo "Loading $storeClass ...\n";
+		//echo "Loading $storeClass ...\n";
 		$objects=$this->remote->getObjects($class,'index',$params);
 		if ($objects!=false) foreach ($objects as $object) {
 			$this->storeLoaded($storeClass,$object);
@@ -463,7 +463,6 @@ class SyncController extends Controller
 	{
 		$this->initRemote($url,$user,$pass);
 		$this->loadRemote('partners');
-		var_dump($this->loaded);
 		static::syncSimple('Partners');
 	}
 }

@@ -19,7 +19,6 @@ $deleteable=true; //тут переопределить возможность �
 			'model'=>$model,
 			'name'=>$model->bname.' ('.$model->uname.')',
 			'static'=>$static_view,
-			//'confirm' => 'Удалить этот сервис? Это действие необратимо!',
 			'hideUndeletable'=>false
 		]) ?>
 	</h1>
