@@ -29,6 +29,8 @@ use Yii;
  * @property string $resign_date Дата увольнения
  * @property string $manager_id Руководитель
  * @property string $notepad
+ * @property string $password
+ * @property string $authKey Идентификатор Куки для авторизации
  * @property int         $nosync Отключить синхронизацию
  * @property string		$ln Last Name
  * @property string		$fn First Name
@@ -145,7 +147,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	        [['Ename', 'Persg', 'Uvolen', ], 'required'],
 	        [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
 	        [['employee_id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
-	        [['Doljnost', 'Ename', 'Mobile','private_phone','ips'], 'string', 'max' => 255],
+	        [['Doljnost', 'Ename', 'Mobile','private_phone','ips','auth_key'], 'string', 'max' => 255],
 			[['notepad'],'safe'],
 	        [['id'], 'unique'],
 	        [['Email','uid'], 'string', 'max' => 64],
@@ -469,7 +471,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
     {
 	    $login=mb_strtolower($username);
 	    //при поиске по логину предпочитаем сначала искать среди трудоустроенных
-	    $list = static::find()->select(['id','Login','Uvolen'])->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])->all();
+	    $list = static::find()->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])->all();
 	    foreach ($list as $item) {
 		    if (!strcmp(mb_strtolower($item['Login']),$login)) return $item;
 	    }
@@ -502,8 +504,16 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
      */
     public function validateAuthKey($authKey)
     {
-        return $this->authKey === $authKey;
+        return $authKey===$this->authKey;
     }
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function setPassword($password)
+	{
+		return $this->password=password_hash($password,PASSWORD_BCRYPT);
+	}
 
     /**
      * Validates password
@@ -513,7 +523,10 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
      */
     public function validatePassword($password)
     {
-		return \Yii::$app->ldap->auth()->attempt($this->Login, $password);
+    	if (\Yii::$app->params['localAuth']??false) {//Local DB Backend
+			return password_verify($password,$this->password);
+		} else //LDAP backednd
+			return \Yii::$app->ldap->auth()->attempt($this->Login, $password);
     }
 
     /**
@@ -732,14 +745,25 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 			$contract->save();
 		}
 		
-		$stringAttributes=['Phone','Email','work_phone','Mobile','private_phone','ips','notepad'];
+		$stringAttributes=['Phone','Email','work_phone','Mobile','private_phone','ips','notepad','password','auth_key','access_token'];
 		foreach ($stringAttributes as $attr) //забираем себе те поля, которые тут не проставлены
 			if (!$this->$attr || $this->$attr==$user->$attr) {
 				$this->$attr=$user->$attr;	$user->$attr='';
 			}
 		$user->Login='';
+
+		//Если мы используем RBAC модель доступа, то переназначаем все роли новому логину
+		if (\Yii::$app->params['useRBAC']) {
+			foreach (\Yii::$app->authManager->getRolesByUser($user->id) as $role) {
+				\Yii::$app->authManager->assign($role,$this->id);
+			}
+			\Yii::$app->authManager->revokeAll($user->id);
+		}
+
+		
 		$user->save();
 		$this->save();
+		
 	}
 	
 	public function beforeSave($insert)

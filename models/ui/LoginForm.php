@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models;
+namespace app\models\ui;
 
 use Yii;
 use yii\base\Model;
@@ -59,14 +59,15 @@ class LoginForm extends Model
      */
     public function login()
     {
-	    $authUser = \Yii::$app->ldap->auth()->attempt($this->username, $this->password);
+    	$user=$this->getUser();
+	    $authUser = $user->validatePassword($this->password);
 	
 	    //$authuser - успех авторизации
 		//$this->getuser - наличие такого пользователя в нашей БД
-	    if ($authUser && $this->getUser()) {
+	    if ($authUser) {
 	    	//var_dump($authUser);
 	    	//var_dump(\Yii::$app->user);
-			return \Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
+			return \Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
 		} else {
 			//$this->addError('username', 'Incorrect username or password.');
 			$this->addError('password', 'Incorrect username or password.');
@@ -78,12 +79,12 @@ class LoginForm extends Model
     /**
      * Finds user by [[username]]
      *
-     * @return Users|null
+     * @return \app\models\Users|null
      */
     public function getUser()
     {
         if ($this->_user === false) {
-            $this->_user = Users::findByUsername($this->username);
+            $this->_user = \app\models\Users::findByUsername($this->username);
         }
 
         return $this->_user;

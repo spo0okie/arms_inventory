@@ -141,7 +141,10 @@ NavBar::begin([
 				['label' => Yii::$app->user->identity->shortName,
 					'dropdownOptions' => ['class'=>'dropdown-menu-end'],
 					'items'=>[
-						['label' => 'Выход', 'linkOptions'=>['onclick'=>'$("#logout-form").submit();'],'url'=>'#']
+						(Yii::$app->params['localAuth']??false)?[
+							'label' => 'Сменить пароль', 'linkOptions'=>['onclick'=>'open-in-modal-form'],'url'=>['/site/password-set','id'=>Yii::$app->user->identity->id]
+						]:'',
+						['label' => 'Выход', 'linkOptions'=>['onclick'=>'$("#logout-form").submit();'],'url'=>'#'],
 					]
 				]
 			

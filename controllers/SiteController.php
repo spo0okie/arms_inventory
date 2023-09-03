@@ -2,13 +2,16 @@
 
 namespace app\controllers;
 
+use app\models\ui\PasswordForm;
+use app\models\Users;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
+use app\models\ui\LoginForm;
 
 class SiteController extends Controller
 {
@@ -171,4 +174,44 @@ class SiteController extends Controller
 		return $this->render('/places/rack');
 	}
 	
+	/**
+	 * Finds the Users model based on its primary key value.
+	 * If the model is not found, a 404 HTTP exception will be thrown.
+	 * @param integer $id
+	 * @return Users the loaded model
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	protected function findUser($id)
+	{
+		if (($model = Users::findOne($id)) !== null) {
+			return $model;
+		}
+		
+		throw new NotFoundHttpException('The requested page does not exist.');
+	}
+	
+	/**
+	 * Login action.
+	 *
+	 * @return Response|string
+	 */
+	public function actionPasswordSet($id)
+	{
+		$user = $this->findUser($id);
+		
+		if (!Yii::$app->user->identity->isAdmin() && !Yii::$app->user->identity->id != $id) {
+			throw new ForbiddenHttpException('Access denied');
+		}
+		
+		$model = new PasswordForm();
+		$model->user_id=$user->id;
+		
+		if ($model->load(Yii::$app->request->post()) && $model->update()) {
+			return $this->redirect(['/users/view','id'=>$id]);
+		}
+		
+		return $this->render('password', [
+			'model' => $model,
+		]);
+	}
 }
