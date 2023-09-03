@@ -110,7 +110,7 @@ class RestHelper
 		$this->request=$url;
 		$this->response=@file_get_contents($url,false,$this->context);
 		$this->responseHeaders=static::parseHeaders($http_response_header);
-		//echo "$url\n";
+		echo "$url\n";
 		if (isset($this->responseHeaders['response_code'])&&($this->responseHeaders['response_code']=='200')) {
 			return json_decode($this->response, true);
 		} throw new ConsoleException("Error getting remote data",[
