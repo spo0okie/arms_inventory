@@ -23,8 +23,9 @@ use yii\helpers\StringHelper;
  * @property string $name Модель
  * @property string        $short Короткое наименование
  * @property string        $shortest Самое короткое какое есть (или короткое или полное)
- * @property string        $sname Расширенное имя для поиска
  * @property string        $nameWithVendor имя с вендором для синхронизации
+ * @property string        $shortWithVendor самое короткое с вендором
+ * @property string        $sname Расширенное имя для поиска
  * @property string        $links Ссылки
  * @property string        $comment Комментарий
  * @property string        $ports Порты
@@ -281,14 +282,22 @@ class TechModels extends ArmsModel
 	
 	public function getNameWithVendor()
 	{
-		return	$this->manufacturer->name.' '.$this->name;
+		return	(is_object($this->manufacturer)?$this->manufacturer->name.' ':'')
+			.$this->name;
+	}
+	
+	public function getShortWithVendor()
+	{
+		return	(is_object($this->manufacturer)?$this->manufacturer->name.' ':'')
+			.$this->shortest;
 	}
 	
 	public function getShortest()
 	{
 		return strlen($this->short)?$this->short:$this->name;
 	}
-
+	
+	
 	public static function fetchAll(){
 		if (!is_null(static::$all_items)) return static::$all_items;
 		static::$all_items=[];

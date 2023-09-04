@@ -11,7 +11,7 @@ use yii\helpers\Html;
 \yii\helpers\Url::remember();
 
 $renderer=$this;
-$this->title = $model->manufacturer->name.' '.$model->name;
+$this->title = $model->nameWithVendor;
 $this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index']];
 $this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['/tech-types/view','id'=>$model->type_id]];
 $this->params['breadcrumbs'][] = $this->title;
@@ -27,7 +27,7 @@ $static_view=false;
 		]) ?>
         <?= \app\components\LinkObjectWidget::widget([
 			'model'=>$model,
-			'name'=>$model->manufacturer->name.' '.$model->name,
+			'name'=>$model->nameWithVendor,
 			'confirmMessage' => 'Действительно удалить описание этой модели оборудования?',
 			'undeletableMessage'=>'Описание этой модели оборудования нельзя удалить в настоящий момент,<br> т.к. в БД есть экземпляры оборудования этой модели',
 		]) ?>
