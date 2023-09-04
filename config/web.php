@@ -139,7 +139,13 @@ $config = [
 		],
 	    'rbac'      => [
 		    'class' => 'spo0okie\rbacplus\Module',
-		    'userModelLoginField'=>'Login'
+		    'userModelLoginField'=>'Login',
+			'beforeCreateController'=>function($route){
+				/** @var string $route The route consisting of module, controller and action IDs. */
+				if (!is_object($user=\Yii::$app->user->identity) || !$user->isAdmin())
+					throw new \yii\web\ForbiddenHttpException('Access denied');
+				return $route;
+			}
 	    ],
 		'markdown' => [
 			'class' => 'kartik\markdown\Module',

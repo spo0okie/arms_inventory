@@ -199,7 +199,7 @@ class SiteController extends Controller
 	{
 		$user = $this->findUser($id);
 		
-		if (Yii::$app->params['useRBAC'] && !Yii::$app->user->identity->isAdmin() && !Yii::$app->user->identity->id != $id) {
+		if (Yii::$app->params['useRBAC'] && !Yii::$app->user->identity->isAdmin() && !(Yii::$app->user->identity->id == $id)) {
 			throw new ForbiddenHttpException('Access denied');
 		}
 		
