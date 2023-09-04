@@ -111,6 +111,10 @@ class TechsSearch extends Techs
 
         $this->load($params);
 	
+		//строка полной маркировки такая сложная, т.к. надо проверить что каждая компонента не NULL
+		//т.к. CONCAT в который передали хоть один NULL верент ответом также NULL
+		$mark='CONCAT(IFNULL(techs.sn,""), ", ", IFNULL(techs.inv_num,""), ", " , IFNULL(techs.uid,""))';
+
 		$sort=[
 			//'defaultOrder' => ['num'=>SORT_ASC],
 			'attributes'=>[
@@ -119,8 +123,8 @@ class TechsSearch extends Techs
 				'sn',
 				'uid',
 				'inv_sn'=>[
-					'asc'=>['concat(sn,inv_num)'=>SORT_ASC],
-					'desc'=>['concat(sn,inv_num)'=>SORT_DESC],
+					'asc'=>[$mark=>SORT_ASC],
+					'desc'=>[$mark=>SORT_DESC],
 				],
 				
 				'user'=>[
@@ -189,9 +193,6 @@ class TechsSearch extends Techs
 			]);
         }
 		
-		//строка полной маркировки такая сложная, т.к. надо проверить что каждая компонента не NULL
-		//т.к. CONCAT в который передали хоть один NULL верент ответом также NULL
-		$mark='CONCAT(IFNULL(techs.sn,""), ", ", IFNULL(techs.inv_num,""), ", " , IFNULL(techs.uid,""))';
 		
         $query
 			->andFilterWhere(QueryHelper::querySearchString('techs.num', $this->num))
