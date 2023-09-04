@@ -12,12 +12,13 @@ if (!isset($static_view)) $static_view=true;
 
 use yii\helpers\Html;
 if (is_object($model)) {
-	if (isset($short)&&$short)
+	if ($short??false)
 		$name=(strlen($model->short))?$model->short:$model->name;
-	elseif (isset($long)&&$long)
-		$name=$model->manufacturer->name.' '.$model->name;
-	elseif (isset($compact)&&$compact)
-		$name=$model->manufacturer->name.' '.(strlen($model->short)?$model->short:$model->name);
+	elseif ($long??false)
+		$name=is_object($model->manufacturer)?($model->manufacturer->name.' '.$model->name):$model->name;
+	elseif ($compact??false)
+		$name=(is_object($model->manufacturer)?$model->manufacturer->name.' ':'')
+			.(strlen($model->short)?$model->short:$model->name);
     else
 		$name=$model->name;
     ?>
