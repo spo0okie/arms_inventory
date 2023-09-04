@@ -188,14 +188,18 @@ class TechsSearch extends Techs
 				'sort'=> $sort,
 			]);
         }
-
+		
+		//строка полной маркировки такая сложная, т.к. надо проверить что каждая компонента не NULL
+		//т.к. CONCAT в который передали хоть один NULL верент ответом также NULL
+		$mark='CONCAT(IFNULL(techs.sn,""), ", ", IFNULL(techs.inv_num,""), ", " , IFNULL(techs.uid,""))';
+		
         $query
 			->andFilterWhere(QueryHelper::querySearchString('techs.num', $this->num))
 
 			->andFilterWhere(QueryHelper::querySearchString('techs.inv_num', $this->inv_num))
 			->andFilterWhere(QueryHelper::querySearchString('techs.sn', $this->sn))
 			->andFilterWhere(QueryHelper::querySearchString('techs.uid', $this->uid))
-			->andFilterWhere(QueryHelper::querySearchString('concat(techs.sn, ", ", techs.inv_num, ", " , techs.uid)', $this->inv_sn))
+			->andFilterWhere(QueryHelper::querySearchString($mark, $this->inv_sn))
 
 			->andFilterWhere(QueryHelper::querySearchString('users.Ename', $this->user))
 			->andFilterWhere(QueryHelper::querySearchString('users.Doljnost', $this->user_position))
