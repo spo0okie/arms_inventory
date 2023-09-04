@@ -73,7 +73,7 @@ NavBar::begin([
 					//['label' => \app\models\OrgStruct::$title, 'url' => ['/org-struct/index']],
 					['label' => \app\models\Users::$titles, 'url' => ['/users/index']],
 					//['label' => 'Пользователи', 'url' => ['/users/logins']],
-					['label' => \app\models\UserGroups::$title, 'url' => ['/user-groups/index']],
+					//['label' => \app\models\UserGroups::$title, 'url' => ['/user-groups/index']],
 				]
 			],
 			['label' => 'Сети',
