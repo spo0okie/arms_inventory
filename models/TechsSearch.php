@@ -190,12 +190,12 @@ class TechsSearch extends Techs
         }
 
         $query
-			->andFilterWhere(QueryHelper::querySearchString('num', $this->num))
+			->andFilterWhere(QueryHelper::querySearchString('techs.num', $this->num))
 
-			->andFilterWhere(QueryHelper::querySearchString('inv_num', $this->inv_num))
-			->andFilterWhere(QueryHelper::querySearchString('sn', $this->sn))
+			->andFilterWhere(QueryHelper::querySearchString('techs.inv_num', $this->inv_num))
+			->andFilterWhere(QueryHelper::querySearchString('techs.sn', $this->sn))
 			->andFilterWhere(QueryHelper::querySearchString('techs.uid', $this->uid))
-			->andFilterWhere(QueryHelper::querySearchString('concat(sn, ", ", inv_num, ", " , techs.uid)', $this->inv_sn))
+			->andFilterWhere(QueryHelper::querySearchString('concat(techs.sn, ", ", techs.inv_num, ", " , techs.uid)', $this->inv_sn))
 
 			->andFilterWhere(QueryHelper::querySearchString('users.Ename', $this->user))
 			->andFilterWhere(QueryHelper::querySearchString('users.Doljnost', $this->user_position))
