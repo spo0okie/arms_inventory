@@ -18,6 +18,8 @@ use yii\filters\VerbFilter;
  */
 class UsersController extends ArmsBaseController
 {
+	public $modelClass='app\models\Users';
+
     /**
      * @inheritdoc
      */
