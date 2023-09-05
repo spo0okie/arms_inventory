@@ -14,6 +14,7 @@ class m230905_045527_sync_prepare_5 extends Migration
     {
 		$this->alterColumn('soft','manufacturers_id',$this->integer()->null());
 		$this->alterColumn('tech_models','type_id',$this->integer()->null());
+		$this->alterColumn('tech_models','manufacturers_id',$this->integer()->null());
     }
 
     /**
@@ -23,6 +24,7 @@ class m230905_045527_sync_prepare_5 extends Migration
     {
 		$this->alterColumn('soft','manufacturers_id',$this->integer());
 		$this->alterColumn('tech_models','type_id',$this->integer());
+		$this->alterColumn('tech_models','manufacturers_id',$this->integer());
     }
 
     /*
