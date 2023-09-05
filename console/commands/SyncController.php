@@ -447,9 +447,7 @@ class SyncController extends Controller
 		$this->loadRemote('manufacturers');
 		$this->loadRemote('soft',['expand'=>'name']);
 		$this->loadRemote('soft-lists',['expand'=>'soft_ids']);
-		//static::syncSimple('app\models\ManufacturersDict');
-		//print_r($this->loaded);
-		static::syncSimple('Soft');
+		static::syncSimple('SoftLists');
 	}
 	
 	/**
