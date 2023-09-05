@@ -9,8 +9,8 @@ return [
 	'bsVersion' => '5.x',
 
 	'useRBAC'=>false,   		//включить RBAC и выдавать админа только тем кому назначено
-	'localAuth'=>false,   		//включить локальную авторизацию
-	'authorizedView'=>false,	//запретить просмотр без авторизации
+	'localAuth'=>false,   		//включить локальную БД паролей
+	'authorizedView'=>false,	//запретить доступ без авторизации
 	'userSyncFields'=>[
 		'Orgeh' => 'SAP',
 		'Doljnost' => 'SAP',
