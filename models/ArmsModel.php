@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\components\DynaGridWidget;
+use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelper;
 use DateTime;
@@ -393,7 +394,12 @@ class ArmsModel extends \yii\db\ActiveRecord
 	 * @return ArmsModel[]
 	 */
 	public static function syncFindLocal($name) {
-		return static::find()->where([static::$syncKey=>$name])->all();
+		$query=static::find()->where([static::$syncKey=>$name]);
+		if (SyncController::$debug) {
+			$class=SyncController::getClassName(static::class);
+			echo "Searching local $class: ".$query->createCommand()->rawSql."\n";
+		}
+		return $query->all();
 	}
 	
 }

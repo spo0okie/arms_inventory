@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\console\commands\SyncController;
 use app\helpers\RestHelper;
 use Imagine\Image\Box;
 use Imagine\Imagick\Imagine;
@@ -453,9 +454,12 @@ class Scans extends ArmsModel
 		$regexp='^[0-9]+\-'.preg_quote($name).'$';	//regexp для выражения "числовой_префикс-имяФайла.расширение"
 		//echo "select * from scans where $dbName regexp '$regexp'\n";
 		
-		return static::find()
-			->where(['regexp',$dbName,$regexp])
-			->all();
+		$query=static::find()->where(['regexp',$dbName,$regexp]);
+		if (SyncController::$debug) {
+			$class=SyncController::getClassName(static::class);
+			echo "Searching local $class: ".$query->createCommand()->rawSql."\n";
+		}
+		return $query->all();
 	}
 	
 	public static function syncCreate(array $remote, array $overrides, string &$log, RestHelper $rest)

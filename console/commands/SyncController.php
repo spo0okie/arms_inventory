@@ -35,6 +35,11 @@ class SyncController extends Controller
 	//массив объектов от которых была произведена миграция и которые надо после проверить на осиротевшесть
 	private $detached=[];
 	
+	//массив тех что подобрали локально
+	private $local=[];
+	
+	public static $debug=true;
+	
 	/**
 	 * Инициализация удаленной системы
 	 * @param $url
@@ -69,6 +74,18 @@ class SyncController extends Controller
 		$id=$object[$key];
 		$this->loaded[$class][$id]=$object;
 	}
+	
+	/**
+	 * сохранить загруженный объект в хранилище
+	 * @param $class string класс объекта
+	 * @param $key string значение ключа
+	 * @param $object array|object сам объект
+	 */
+	public function storeFound(string $class, string $key, $object) {
+		if (!isset($this->local[$class])) $this->local[$class]=[];
+		$this->local[$class][$key]=$object;
+	}
+	
 	
 	/**
 	 * сохранить отключенный объект в хранилище
@@ -132,25 +149,29 @@ class SyncController extends Controller
 	 * @param string $class
 	 * @param array $remote
 	 */
-	public function getLocalObject(string $class,$remote) {
+	public function getLocalObject(string $class, array $remote) {
 		$classPath=static::getClassPath($class);
-		$className=static::getClassPath($class);
+		$className=static::getClassName($class);
+		
 		
 		//поле по которому ищем локальный объект
 		$name=$classPath::$syncKey;
 		
 		//$localSearch=$classPath::find()->where([$name=>$remote[$name]])->all();
-		$localSearch=$classPath::syncFindLocal($remote[$name]);
+		if (!isset($this->local[$className][$remote[$name]])) {
+			$localSearch=$classPath::syncFindLocal($remote[$name]);
+			
+			//если в качестве ключа выбран $name, то по нему не должно искаться несколько объектов
+			if (count($localSearch)>1) throw new ConsoleException('Got multiple objects with same name',[
+				'Name'=>$remote[$name],
+				'Objects Found'=>$localSearch
+			]);
+			
+			$obj=count($localSearch)?reset($localSearch):null;
+			$this->storeFound($className,$remote[$name],$obj);
+		}
 		
-		//если в качестве ключа выбран $name, то по нему не должно искаться несколько объектов
-		if (count($localSearch)>1) throw new ConsoleException('Got multiple objects with same name',[
-			'Name'=>$remote[$name],
-			'Objects Found'=>$localSearch
-		]);
-		
-		if (!count($localSearch)) return null;
-		
-		return reset($localSearch);
+		return $this->local[$className][$remote[$name]];
 	}
 	
 	/**
