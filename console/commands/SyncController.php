@@ -38,6 +38,9 @@ class SyncController extends Controller
 	//массив тех что подобрали локально
 	private $local=[];
 	
+	//массив уже синхронизированных
+	private $synced=[];
+	
 	public static $debug=true;
 	
 	/**
@@ -76,7 +79,7 @@ class SyncController extends Controller
 	}
 	
 	/**
-	 * сохранить загруженный объект в хранилище
+	 * сохранить обнаруженный локальный объект в хранилище
 	 * @param $class string класс объекта
 	 * @param $key string значение ключа
 	 * @param $object array|object сам объект
@@ -84,6 +87,17 @@ class SyncController extends Controller
 	public function storeFound(string $class, string $key, $object) {
 		if (!isset($this->local[$class])) $this->local[$class]=[];
 		$this->local[$class][$key]=$object;
+	}
+	
+	/**
+	 * сохранить синхронизированный объект в хранилище
+	 * @param $class string класс объекта
+	 * @param $key string значение ключа
+	 * @param $object array|object сам объект
+	 */
+	public function storeSynced(string $class, string $key, $object) {
+		if (!isset($this->synced[$class])) $this->synced[$class]=[];
+		$this->synced[$class][$key]=$object;
 	}
 	
 	
@@ -184,14 +198,24 @@ class SyncController extends Controller
 	public function syncSingle(string $class, array $remote, $overrides=[]) {
 		//полный путь до класса
 		$class=self::getClassPath($class);
-
+		$className=self::getClassName($class);
+		
 		//поле по которому ищем локальный объект
 		$name=$class::$syncKey;
 		
 		
 		//каждому удаленному ищем локальный
 		/** @var $local ArmsModel */
-		$local=$this->getLocalObject($class,$remote);
+		
+		if (isset($this->synced[$className][$name])) {
+			$local=$this->synced[$className][$name];
+			if (!count($overrides)) return $local;
+
+		} else {
+			$local=$this->getLocalObject($class,$remote);
+		}
+		
+		
 		$log='';
 		if (is_null($local)) {
 			//если нет - создаем
@@ -280,6 +304,7 @@ class SyncController extends Controller
 				$this->syncSingle($linkClass,$object,[$reverseLink=>$local->id]);
 			}
 		}
+		$this->storeSynced($className,$name,$local);
 		return $local;
 	}
 	

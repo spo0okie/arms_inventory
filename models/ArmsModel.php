@@ -322,6 +322,11 @@ class ArmsModel extends \yii\db\ActiveRecord
 			if ($this->$field==$value) unset ($overrides[$field]);
 		}
 		
+		if (SyncController::$debug) {
+			$class=SyncController::getClassName(static::class);
+			echo "Comparing $class $timestamp: Local={$this->$timestamp} vs Remote={$remote[$timestamp]}\n";
+		}
+		
 		
 		//если (удаленный объект имеет отметку времени и она больше) или надо поменять (а не синхронизировать) какие-то поля
 		if (($timestamp && $remote[$timestamp] && $remote[$timestamp]>$this->$timestamp) || count($overrides)) {
