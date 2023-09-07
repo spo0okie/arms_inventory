@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\console\commands\SyncController;
 use Yii;
 use yii\helpers\StringHelper;
 
@@ -474,10 +475,15 @@ class TechModels extends ArmsModel
 				->joinWith('manufacturer')
 				->where(['LOWER(CONCAT(manufacturers.name,\' \',tech_models.name))'=>mb_strtolower($name)])
 				->createCommand()->rawSql."!!\n";*/
-		return static::find()
+		$query=static::find()
 			->joinWith('manufacturer')
-			->where(['LOWER(CONCAT(manufacturers.name,\' \',tech_models.name))'=>mb_strtolower($name)])
-			->all();
+			->where(['LOWER(CONCAT(manufacturers.name,\' \',tech_models.name))'=>mb_strtolower($name)]);
+		
+		if (SyncController::$debug) {
+			$class=SyncController::getClassName(static::class);
+			echo "Searching local $class: ".$query->createCommand()->rawSql."\n";
+		}
+		return $query->all();
 	}
 	
 	

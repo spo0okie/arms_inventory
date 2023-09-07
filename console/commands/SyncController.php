@@ -207,8 +207,8 @@ class SyncController extends Controller
 		//каждому удаленному ищем локальный
 		/** @var $local ArmsModel */
 		
-		if (isset($this->synced[$className][$name])) {
-			$local=$this->synced[$className][$name];
+		if (isset($this->synced[$className][$remote[$name]])) {
+			$local=$this->synced[$className][$remote[$name]];
 			if (!count($overrides)) return $local;
 
 		} else {
@@ -304,7 +304,7 @@ class SyncController extends Controller
 				$this->syncSingle($linkClass,$object,[$reverseLink=>$local->id]);
 			}
 		}
-		$this->storeSynced($className,$name,$local);
+		$this->storeSynced($className,$remote[$name],$local);
 		return $local;
 	}
 	
