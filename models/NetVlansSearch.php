@@ -51,7 +51,7 @@ class NetVlansSearch extends NetVlans
             'query' => $query,
 			'pagination' => ['pageSize' => 100,],
 			'sort'=> [
-				//'defaultOrder' => ['domains_id'=>SORT_ASC],
+				'defaultOrder' => ['name'=>SORT_ASC],
 				'attributes'=>[
 					'name'=>[
 						'asc'=>[$vlanName=>SORT_ASC],
