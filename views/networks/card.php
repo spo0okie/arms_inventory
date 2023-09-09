@@ -60,22 +60,23 @@ if (!isset($static_view)) $static_view=false;
 	</div>
 
 <?php
+$descr='';
+
 if (
 	\Yii::$app->params['networkDescribeSegment']===true
 	||
 	(\Yii::$app->params['networkDescribeSegment']==='auto' && !$model->notepad)
 ) {
 	if (is_object($model->segment) && $model->segment->history) {
-		echo \app\components\ExpandableCardWidget::widget([
-			'content'=>Markdown::convert($model->segment->history)
-		]);
+		$descr.= Markdown::convert($model->segment->history);
 	}
-	
 }
 
 if ($model->notepad) {
-	echo \app\components\ExpandableCardWidget::widget([
-		'content'=>Markdown::convert($model->notepad)
-	]);
+	$descr.= Markdown::convert($model->notepad);
 }
+
+if ($descr) echo \app\components\ExpandableCardWidget::widget([
+	'content'=>$descr
+]);
 
