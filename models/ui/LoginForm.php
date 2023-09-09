@@ -59,7 +59,10 @@ class LoginForm extends Model
      */
     public function login()
     {
-    	$user=$this->getUser();
+		if (!is_object($user=$this->getUser())) {
+			$this->addError('username','User not found');
+			return false;
+		};
 	    $authUser = $user->validatePassword($this->password);
 	
 	    //$authuser - успех авторизации
