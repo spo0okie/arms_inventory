@@ -16,7 +16,7 @@ use yii\db\ActiveQuery;
  */
 class NetDomains extends ArmsModel
 {
-	public static $title='L2 Домены';
+	public static $title='L2 Домен';
 	public static $titles='L2 Домены';
 	
     /**
@@ -55,11 +55,11 @@ class NetDomains extends ArmsModel
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeHits()
+	public function attributeHints()
 	{
 		return [
 			'id' => 'ID',
-			'name' => 'Пояснение чем объединены сети входящие в этот домен',
+			'name' => 'Скорее всего пояснение по территориальному расположению сети',
 			'comment' => 'Все что нужно знать об этом домене, но что не ясно из названия',
 			'places_id' => 'Помещение/площадка где локализован этот L2 Домен',
 		];

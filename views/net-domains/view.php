@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model app\models\NetDomains */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\NetDomains::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\NetDomains::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 

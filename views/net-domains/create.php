@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\NetDomains */
 
 $this->title = "Новый ".\app\models\NetDomains::$title;
-$this->params['breadcrumbs'][] = ['label' => \app\models\NetDomains::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\NetDomains::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="net-domains-create">
