@@ -46,10 +46,20 @@ class Networks extends ArmsModel
 	private $ips_cache=null;
 	private $first_unused_cache=null;
 	
-	public static $title='Сети';
+	public static $titles='Сети';
+	public static $title='Сеть';
+	
+	public static $latinNameHint='<br>'
+	. '<i>'
+	. '<b>Hint:</b> Рекомендуется написание латиницей без пробелов<br>'
+	. 'чтобы можно было использовать сквозное именование в инвентаризации,<br>'
+	. 'коммутаторах, маршрутизаторах, гипервизорах, фаерволах и т.п.'
+	. '</i>';
+	
 	public $text_dhcp;
 	public $text_router;
 	public $domain;
+	
 	
 	
     /**
@@ -84,7 +94,7 @@ class Networks extends ArmsModel
 			'id' => 'ID',
 			'name' => [
 				'Название сети',
-				'hint' => 'Короткое понятное название',
+				'hint' => 'Короткое понятное название' . static::$latinNameHint,
 			],
 			'vlan_id' => [
 				'Vlan',
@@ -106,7 +116,7 @@ class Networks extends ArmsModel
 				'hint' => 'Адрес сети (в понятной нотации 192.168.0.0)',
 			],
 			'usage' => [
-				'Исп.',
+				'Занято',
 			],
 			'text_addr' => [
 				'Адрес и маска',

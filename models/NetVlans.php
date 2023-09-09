@@ -20,10 +20,11 @@ use Yii;
  * @property Segments $segment
  * @property Networks $networks
  */
-class NetVlans extends \yii\db\ActiveRecord
+class NetVlans extends ArmsModel
 {
 	
-	public static $title='Vlan\'ы';
+	public static $title='Vlan';
+	public static $titles='Vlan\'ы';
 	
 	/**
      * {@inheritdoc}
@@ -48,34 +49,40 @@ class NetVlans extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
-            'id' => 'ID',
-			'name' => 'Название',
-			'networks_ids' => 'Сети',
-            'vlan' => 'Vlan ID',
-			'domain_id' => 'Домен L2',
-			'segment_id' => 'Сегмент ИТ',
-			'comment' => 'Пояснение',
+            'id' => [
+            	'ID',
+			],
+			'name' => [
+				'Название',
+				'hint' => 'Понятное обозначение' . Networks::$latinNameHint,
+			],
+			'networks_ids' => [
+				'Сети',
+			],
+            'vlan' => [
+            	'Vlan ID',
+				'hint' => 'Номер Vlan от 1 до 4094'
+				. '<br><i>(0, 1002-1005 и 4095 зарезервированы)</i>',
+			],
+			'domain_id' => [
+				'Домен L2',
+				'hint' => 'В каком L2 домене находится этот Vlan'
+				. '<br><i>(Для разделения VLAN с одинаковыми номерами, но в разных доменах)</i>',
+			],
+			'segment_id' => [
+				'Сегмент ИТ',
+				'hint' => 'К какому сегменту ИТ инфраструктуры относится этот Vlan',
+			],
+			'comment' => [
+				'Пояснение',
+				'comment' => 'Все что нужно знать об этом Vlan, но что не ясно из названия',
+			],
         ];
     }
-	
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'ID',
-			'name' => 'Понятное обозначение',
-			'vlan' => 'Номер Vlan от 0 до 4096',
-			'segment_id' => 'К какому сегменту ИТ инфраструктуры относится этот Vlan',
-			'domain_id' => 'В каком L2 домене находится этот Vlan',
-			'comment' => 'Все что нужно знать об этом Vlan, но что не ясно из названия',
-		];
-	}
-	
+
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

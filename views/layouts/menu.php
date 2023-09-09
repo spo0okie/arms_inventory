@@ -80,9 +80,9 @@ NavBar::begin([
 				'items' => [
 					['label' => \app\models\Ports::$titles, 'url' => ['/ports/index']],
 					['label' => \app\models\NetIps::$titles, 'url' => ['/net-ips/index']],
-					['label' => \app\models\Networks::$title, 'url' => ['/networks/index']],
-					['label' => \app\models\NetVlans::$title, 'url' => ['/net-vlans/index']],
-					['label' => \app\models\NetDomains::$title, 'url' => ['/net-domains/index']],
+					['label' => \app\models\Networks::$titles, 'url' => ['/networks/index']],
+					['label' => \app\models\NetVlans::$titles, 'url' => ['/net-vlans/index']],
+					['label' => \app\models\NetDomains::$titles, 'url' => ['/net-domains/index']],
 					['label' => \app\models\Segments::$titles, 'url' => ['/segments/index']],
 				],
 			],

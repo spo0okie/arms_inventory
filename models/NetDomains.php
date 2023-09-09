@@ -14,9 +14,10 @@ use yii\db\ActiveQuery;
  * @property int $tech_id
  * @property Places $place
  */
-class NetDomains extends \yii\db\ActiveRecord
+class NetDomains extends ArmsModel
 {
 	public static $title='L2 Домены';
+	public static $titles='L2 Домены';
 	
     /**
      * {@inheritdoc}

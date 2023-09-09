@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Networks */
 
 $this->title = "Новая ".app\models\Networks::$title;
-$this->params['breadcrumbs'][] = ['label' => app\models\Networks::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => app\models\Networks::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="networks-create">

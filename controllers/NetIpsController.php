@@ -58,17 +58,37 @@ class NetIpsController extends Controller
         $dataProvider = new ArrayDataProvider([
         	'allModels'=>$searchModel->search(Yii::$app->request->queryParams)->models,
 			'pagination'=>['pageSize'=>100],
+			'sort'=> [
+				'defaultOrder' => ['text_addr'=>SORT_ASC],
+				'attributes'=>[
+					'text_addr'=>[
+						'asc'=>['addr'=>SORT_ASC],
+						'desc'=>['addr'=>SORT_DESC],
+					],
+					'network'=>[
+						'asc'=>['network.addr'=>SORT_ASC],
+						'desc'=>['network.addr'=>SORT_DESC],
+					],
+					'vlan'=>[
+						'asc'=>['network.netVlan.vlan'=>SORT_ASC],
+						'desc'=>['network.netVlan.vlan'=>SORT_DESC],
+					],
+					'comment'
+				]
+			]
 		]);
 	
 		$networkProvider=null;
         if (!$dataProvider->totalCount && ($ip_addr=$searchModel->text_addr)) {
 			$ip=new NetIps(['text_addr'=>$ip_addr]);
-			$ip->beforeSave(true);
-			if (is_object($ip->network)) {
-				$networkProvider= new ArrayDataProvider([
-					'allModels'=>[$ip->network],
-					'pagination'=>false,
-				]);
+			if ($ip->validate()) { //если тут валидный адрес, то можно подобрать сетку
+				$ip->beforeSave(true);
+				if (is_object($ip->network)) {
+					$networkProvider= new ArrayDataProvider([
+						'allModels'=>[$ip->network],
+						'pagination'=>false,
+					]);
+				}
 			}
 		}
         

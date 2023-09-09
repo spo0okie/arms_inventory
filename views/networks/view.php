@@ -10,7 +10,7 @@ use yii\widgets\DetailView;
 \yii\helpers\Url::remember();
 
 $this->title = $model->sname;
-$this->params['breadcrumbs'][] = ['label' => app\models\Networks::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => app\models\Networks::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 

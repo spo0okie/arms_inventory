@@ -72,7 +72,7 @@ class NetworksSearch extends Networks
 						'asc'=>['net_vlans.vlan'=>SORT_ASC],
 						'desc'=>['net_vlans.vlan'=>SORT_DESC],
 					],
-					'segments'=>[
+					'segment'=>[
 						'asc'=>['segments.name'=>SORT_ASC],
 						'desc'=>['segments.name'=>SORT_DESC],
 					],

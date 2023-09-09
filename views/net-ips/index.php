@@ -1,7 +1,7 @@
 <?php
 
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
-use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\NetIpsSearch */
@@ -14,78 +14,28 @@ $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
 <div class="net-ips-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Создать', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?= \app\components\DynaGridWidget::widget([
-		'id'=>'net-ips-index',
-        'panel'=>false,
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            [
-                'attribute'=>'text_addr',
-                'format'=>'raw',
-                'value'=>function($data) use ($renderer){
-                    return $renderer->render('item',['model'=>$data]);
-                }
-            ],
-			[
-				'attribute'=>'network',
-				'format'=>'raw',
-				'value'=>function($data) use ($renderer){
-					return $renderer->render('/networks/item',['model'=>$data->network]);
-				}
-			],
-			[
-				'attribute'=>'vlan',
-				'format'=>'raw',
-				'value'=>function($data) use ($renderer){
-    				if (is_object($data->network))
-						return $renderer->render('/net-vlans/item',['model'=>$data->network->netVlan]);
-    				return null;
-				}
-			],
-			[
-				'attribute'=>'attached',
-				'format'=>'raw',
-				'value'=>function($data) use ($renderer){
-					$objects=[];
-					
-					if (is_array($data->comps) && count($data->comps)) {
-						foreach ($data->comps as $comp) $objects[]=$renderer->render('/comps/item',['model'=>$comp]);
-					}
-					
-					if (is_array($data->techs) && count($data->techs)) {
-						foreach ($data->techs as $tech) $objects[]=$renderer->render('/techs/item',['model'=>$tech]);
-					}
-					if (is_array($data->users) && count($data->users)) {
-						foreach ($data->users as $user) $objects[]=$renderer->render('/users/item',['model'=>$user,'short'=>true]);
-					}
-					
-					if (count($objects)) return implode(', ',$objects);
-					return null;
-				}
-			],
-            //'addr',
-            //'mask',
-            'comment',
-			//
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
+	<?php yii\widgets\Pjax::begin(['id' => 'net-ips-outer-div']);
 	
-	<?php
+	echo DynaGridWidget::widget([
+		'id' => 'net-ips-index',
+		'header' => Html::encode($this->title),
+		'createButton' => Html::a('Новый', ['create'], ['class' => 'btn btn-success']),
+		'columns' => require 'columns.php',
+		'dataProvider' => $dataProvider,
+		'gridOptions'=>[
+			'pjax' => true,
+			'pjaxSettings' => [
+				'neverTimeout'=>true,
+				'options'=>['id'=>'net-ips-outer-div'],
+			],
+		],
+		'filterModel' => $searchModel,
+	]) ;
+	
 	if (is_object($networkProvider)) {
-		echo '<h4>Адрес не найден, но есть подходящая сеть</h4>';
+		echo '<h4 class="mt-4 mb-2">Адрес не найден, но есть подходящая сеть</h4>';
 		echo $this->render('/networks/table', ['dataProvider'=>$networkProvider, 'searchModel'=>null]);
 	}
+	yii\widgets\Pjax::end();
 	?>
 </div>

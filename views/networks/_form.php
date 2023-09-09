@@ -25,13 +25,13 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 	]); ?>
 	<div class="row">
 		<div class="col-md-4">
-			<?= $form->field($model, 'text_addr')->textInput() ?>
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'text_addr') ?>
 		</div>
 		<div class="col-md-4">
-			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
 		</div>
 		<div class="col-md-4">
-			<?= $form->field($model, 'vlan_id')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'vlan_id', [
 				'data' => app\models\NetVlans::fetchNames(),
 				'options' => [
 					'placeholder' => 'Выберите VLAN',
@@ -47,7 +47,7 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 
 	<div class="row">
 		<div class="col-md-4">
-			<?= $form->field($model, 'segments_id')->widget(Select2::className(), [
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,  'segments_id', [
 				'data' => \app\models\Segments::fetchNames(),
 				'options' => [
 					'placeholder' => 'Выберите Сегмент ИТ',
@@ -60,10 +60,10 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 			]) ?>
 		</div>
 		<div class="col-md-4">
-			<?= $form->field($model, 'text_router')->textInput() ?>
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,  'text_router') ?>
 		</div>
 		<div class="col-md-4">
-			<?= $form->field($model, 'text_dhcp')->textInput() ?>
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,  'text_dhcp') ?>
 		</div>
 	</div>
 

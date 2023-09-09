@@ -8,18 +8,10 @@ use yii\helpers\Html;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 \yii\helpers\Url::remember();
 
-$this->title = app\models\Networks::$title;
+$this->title = app\models\Networks::$titles;
 $this->params['breadcrumbs'][] = $this->title;
-$renderer=$this;
+$panel=true;
 ?>
 <div class="networks-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Создать', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?= $this->render('table',compact('dataProvider','searchModel')) ?>
+    <?= $this->render('table',compact('dataProvider','searchModel','panel')) ?>
 </div>

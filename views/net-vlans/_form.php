@@ -14,21 +14,29 @@ if (!isset($modalParent)) $modalParent=null;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+	<div class="row">
+		<div class="col-md-6">
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+		</div>
+		<div class="col-md-2">
+			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'vlan') ?>
+		</div>
+		<div class="col-md-4">
+			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'domain_id', [
+				'data' => \app\models\NetDomains::fetchNames(),
+				'options' => [
+					'placeholder' => 'Выберите L2 Домен',
+				],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => false
+				]
+			]) ?>
+		</div>
+	</div>
 
-    <?= $form->field($model, 'vlan')->textInput() ?>
 	
-	<?= $form->field($model, 'domain_id')->widget(Select2::className(), [
-		'data' => \app\models\NetDomains::fetchNames(),
-		'options' => [
-			'placeholder' => 'Выберите L2 Домен',
-		],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => true,
-			'multiple' => false
-		]
-	]) ?>
 	
 	<?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
 

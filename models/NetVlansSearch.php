@@ -44,6 +44,7 @@ class NetVlansSearch extends NetVlans
         $query = NetVlans::find()
 		->joinWith(['netDomain','networks']);
 
+        $vlanName='CONCAT(net_vlans.name," (",net_vlans.vlan)';
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -53,9 +54,10 @@ class NetVlansSearch extends NetVlans
 				//'defaultOrder' => ['domains_id'=>SORT_ASC],
 				'attributes'=>[
 					'name'=>[
-						'asc'=>['vlan'=>SORT_ASC],
-						'desc'=>['vlan'=>SORT_DESC],
+						'asc'=>[$vlanName=>SORT_ASC],
+						'desc'=>[$vlanName=>SORT_DESC],
 					],
+					'vlan',
 					'domain_id'=>[
 						'asc'=>['net_domains.name'=>SORT_ASC],
 						'desc'=>['net_domains.name'=>SORT_DESC],
@@ -75,7 +77,7 @@ class NetVlansSearch extends NetVlans
 
         // grid filtering conditions
         $query
-			->andFilterWhere(['or like', 'CONCAT(net_vlans.name," (",net_vlans.vlan)', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
+			->andFilterWhere(['or like', $vlanName, \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
 			->andFilterWhere(['or like', 'net_domains.name', \yii\helpers\StringHelper::explode($this->domain_id,'|',true,true)])
 			->andFilterWhere(['or like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', \yii\helpers\StringHelper::explode($this->networks_ids,'|',true,true)])
             ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
