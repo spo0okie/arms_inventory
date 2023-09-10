@@ -11,14 +11,29 @@ use yii\widgets\DetailView;
 
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+
+if (is_object($model->partner)) {
+	$this->params['breadcrumbs'][]=['label' => $model->partner->bname, 'url'=>['partners/view','id'=>$model->org_id]];
+}
+foreach ($model->chain as $item) $this->params['breadcrumbs'][]=[
+	'label'=>$item->name,
+	'url'=>$model->id==$item->id?false:['org-struct/view','id'=>$item->id],
+];
+
 \yii\web\YiiAsset::register($this);
 
 ?>
 <div class="org-struct-view">
-	<div class="mb-3">
-		<?= $this->render('card',['model'=>$model]) ?>
-	</div>
+	<h1>
+		<?= \app\components\LinkObjectWidget::widget([
+			'model'=>$model,
+			'deleteUrl'=>['/org-struct/delete','id'=>$model->id,'org_id'=>$model->org_id],
+			'updateUrl'=>['/org-struct/update','id'=>$model->id,'org_id'=>$model->org_id],
+			'static'=>false,
+			//'confirm' => 'Удалить этот сервис? Это действие необратимо!',
+			'hideUndeletable'=>false
+		]) ?>	</h1>
+
 	
 	<?= DynaGridWidget::widget([
 		'id' => 'org-struct-users-index',

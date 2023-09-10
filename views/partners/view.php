@@ -45,6 +45,9 @@ $this->params['breadcrumbs'][] = $this->title;
 			<?php } ?>
 		</div>
 	</div>
+	<div class="my-3">
+		<?= Html::a(\app\models\OrgStruct::$title,['org-struct/index','org_id'=>$model->id]) ?>
+	</div>
 	<?= $dataProvider->totalCount?DynaGridWidget::widget([
 		'id' => 'org-struct-users-index',
 		'columns' => require __DIR__.'/../users/columns.php',

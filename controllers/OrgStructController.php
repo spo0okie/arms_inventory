@@ -51,15 +51,13 @@ class OrgStructController extends Controller
      * Lists all OrgStruct models.
      * @return mixed
      */
-    public function actionIndex()
+    public function actionIndex($org_id=1)
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => OrgStruct::find(),
-        ]);
-
-        return $this->render('index', [
-            'dataProvider' => $dataProvider,
-        ]);
+		return $this->render('index', [
+			'models' => OrgStruct::find()
+				->where(['org_id'=>$org_id])
+				->all(),
+		]);
     }
 
 	/**
@@ -189,7 +187,7 @@ class OrgStructController extends Controller
     {
         $this->findModel($id, $org_id)->delete();
 
-        return $this->redirect(['index']);
+        return $this->redirect(['index', 'org_id' => $org_id]);
     }
 
     /**

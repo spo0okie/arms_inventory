@@ -21,12 +21,17 @@ if (!isset($modalParent)) $modalParent=null;
 			//['org-struct/validate','id'=>$model->id], //для существующих
 		//'action' => Yii::$app->request->getQueryString(),
 	]); ?>
+	
+	<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'org_id',[
+			'data'=>\app\models\Partners::fetchNames()
+	])?>
+	
+	<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+
+	<?= $form->field($model, 'pup')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'id')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'pup')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
 		
 	

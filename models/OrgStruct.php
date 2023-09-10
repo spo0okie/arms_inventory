@@ -16,7 +16,7 @@ use Yii;
  * @property OrgStruct $parent Родительское подразделение
  * @property OrgStruct[] $chain Цепочка от корня до текущего подразделения
  */
-class OrgStruct extends \yii\db\ActiveRecord
+class OrgStruct extends ArmsModel
 {
 	public static $title='Орг. структура';
 	public static $titles='Орг. структура';
@@ -46,21 +46,42 @@ class OrgStruct extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
-            'id' => 'ID',
-            'pup' => 'Pup',
-            'name' => 'Name',
+			'id' => [
+				'ID подразделения в HR БД',
+			],
+			'org_id' => [
+				'Организация',
+			],
+            'pup' => [
+            	'ID родительского подразделения',
+			],
+            'name' => 'Наименование подразделения',
         ];
     }
 	
 	/**
 	 * @return OrgStruct|null
 	 */
-    public function getParent() {
-    	if (is_null($this->pup)) return null;
+	public function getParent() {
+		if (is_null($this->pup)) return null;
 		return static::findOne($this->pup);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getChildren() {
+		return $this->hasMany(OrgStruct::className(), ['pup' => 'id']);
+	}
+	
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getUsers() {
+		return $this->hasMany(Users::className(), ['Orgeh' => 'id', 'org_id'=>'org_id']);
 	}
 	
 	public function getChain() {
@@ -85,4 +106,11 @@ class OrgStruct extends \yii\db\ActiveRecord
 		return yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}
 
+	public function reverseLinks()
+	{
+		return [
+			'Дочерние подразделения' => $this->children,
+			'Сотрудники' => $this->users,
+		];
+	}
 }

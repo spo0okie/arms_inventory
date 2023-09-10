@@ -7,7 +7,14 @@ use yii\helpers\Html;
 
 $this->title = 'Правка: ' . $model->name;
 $this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id, 'org_id' => $model->org_id]];
+if (is_object($model->partner)) {
+	$this->params['breadcrumbs'][]=['label' => $model->partner->bname, 'url'=>['partners/view','id'=>$model->org_id]];
+}
+foreach ($model->chain as $item) $this->params['breadcrumbs'][]=[
+	'label'=>$item->name,
+	'url'=>['org-struct/view','id'=>$item->id],
+];
+
 $this->params['breadcrumbs'][] = 'Правка';
 ?>
 <div class="org-struct-update">
