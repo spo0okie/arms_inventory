@@ -38,6 +38,9 @@ class LinkObjectWidget extends Widget
 	public $cssClass=null;
 	public $hrefOptions=[];
 	
+	public $deleteUrl=null;
+	public $updateUrl=null;
+	
 	private $samePage=false;//признак того что элемент отображается на той же странице куда ведет ссылка
 	
 	public function init()
@@ -93,6 +96,7 @@ class LinkObjectWidget extends Widget
 					'confirmMessage'=>$this->confirmMessage,
 					'hideUndeletable'=>$this->hideUndeletable,
 					'links'=>$this->links,
+					'url'=>$this->deleteUrl,
 					'options'=>['cssClass'=>$this->cssClass],
 				]);
 		} else $deleteObject='';
@@ -107,6 +111,7 @@ class LinkObjectWidget extends Widget
 					'model'=>$this->model,
 					'updateHint'=>$this->updateHint,
 					'modal'=>$this->modal,
+					'url'=>$this->updateUrl,
 					'options'=>['cssClass'=>$this->cssClass],
 				]):''
 			).$deleteObject;

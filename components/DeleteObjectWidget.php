@@ -28,6 +28,8 @@ class DeleteObjectWidget extends Widget
 	public $hideUndeletable=null;
 	public $options=[];
 	
+	public $url=null;
+	
 	
 	public $defaultObjectType='Прочее';
 	
@@ -64,6 +66,16 @@ class DeleteObjectWidget extends Widget
 		];
 		$this->options['qtip_ttip']=$this->deleteHint;
 		$this->options['qtip_side']='bottom,top,right,left';
+		
+		if (is_null($this->url)) {
+			$this->url=[
+				'/'.Inflector::camel2id(
+					StringHelper::basename(
+						get_class($this->model)
+					)
+				).'/delete', 'id' => $this->model->id
+			];
+		}
 	}
 	
 	public function run()
@@ -114,12 +126,6 @@ class DeleteObjectWidget extends Widget
 				</span>'
 			)
 			:
-			Html::a('<span class="fas fa-trash delete-item-button"></span>', [
-				'/'.Inflector::camel2id(
-					StringHelper::basename(
-						get_class($this->model)
-					)
-				).'/delete', 'id' => $this->model->id
-			], $this->options);
+			Html::a('<span class="fas fa-trash delete-item-button"></span>', $this->url, $this->options);
 	}
 }

@@ -22,7 +22,7 @@ class UpdateObjectWidget extends Widget
 	 * @var $model ArmsModel
 	 */
 	public $model=null;
-	
+	public $url=null;
 	public $options=[];
 	
 	public function init() {
@@ -39,18 +39,20 @@ class UpdateObjectWidget extends Widget
 			$this->options['class'].=' open-in-modal-form';
 			$this->options['data-reload-page-on-submit']=1;
 		}
-	
-	}
-	
-	public function run()
-	{
-		return Html::a('<span class="fas fa-pencil-alt update-item-button">', [
+		
+		if (is_null($this->url)) $this->url=[
 			'/'.Inflector::camel2id(
 				StringHelper::basename(
 					get_class($this->model)
 				)
 			).'/update',
 			'id' => $this->model->id,
-		],$this->options);
+		];
+	
+	}
+	
+	public function run()
+	{
+		return Html::a('<span class="fas fa-pencil-alt update-item-button">', $this->url, $this->options);
 	}
 }
