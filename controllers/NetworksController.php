@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\NetIps;
 use Yii;
 use app\models\Networks;
 use app\models\NetworksSearch;
@@ -36,7 +37,7 @@ class NetworksController extends Controller
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','update','delete',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','view','ttip','validate','item-by-name'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -92,7 +93,19 @@ class NetworksController extends Controller
 			'model' => $this->findModel($id)
 		]);
 	}
-
+	
+	/**
+	 * @param $name
+	 * @return string
+	 * @throws NotFoundHttpException
+	 */
+	public function actionItemByName($name)
+	{
+		if (($model = Networks::findOne(['text_addr' => $name])) !== null) {
+			return $this->renderPartial('item', ['model' => $model, 'static_view' => true]);
+		}
+		throw new NotFoundHttpException('The requested page does not exist.');
+	}
 
 	/**
 	* Displays a tooltip for single model.

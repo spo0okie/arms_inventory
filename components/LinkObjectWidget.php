@@ -73,6 +73,7 @@ class LinkObjectWidget extends Widget
 		if (is_null($this->name)) {
 			$this->name = $this->model->name;
 		}
+		$this->name="<span class='item-name'>{$this->name}</span>";
 		
 		if (is_null($this->archived)) {
 			$this->archived=$this->model->hasAttribute('archived')&&$this->model->getAttribute('archived');

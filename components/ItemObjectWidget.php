@@ -8,9 +8,11 @@
 
 namespace app\components;
 
+use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use Yii;
 use yii\base\Widget;
+
 
 /**
 * Class ItemObjectWidget
@@ -28,9 +30,8 @@ class ItemObjectWidget extends Widget
 	public function run()
 	{
 
-		
 		//если прямо не сказано что за класс элемента - стряпаем сами
-		if (is_null($this->item_class)) $this->item_class=$this->model::tableName().'-item';
+		if (is_null($this->item_class)) $this->item_class= StringHelper::class2Id(get_class($this->model)).'-item';
 
 		//к архивному классу кроме оформительской части всегда должен быть добавлен флажок архивного элемента
 		//(для переключателя отображения)
