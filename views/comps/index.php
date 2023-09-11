@@ -7,6 +7,9 @@ use yii\helpers\Html;
 /* @var $searchModel app\models\CompsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $switchArchivedCount */
+
+\yii\helpers\Url::remember();
+
 if (isset($switchArchivedCount)) {
 	$switchArchivedDelta=$switchArchivedCount-$dataProvider->totalCount;
 	if ($switchArchivedDelta>0) $switchArchivedDelta='+'.$switchArchivedDelta;
