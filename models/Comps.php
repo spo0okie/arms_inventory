@@ -752,6 +752,11 @@ class Comps extends ArmsModel
 			return false;
 		}
 		
+		//отключаем рескан чтобы при сохранении софт не привязался обратно
+		Soft::$disable_rescan=true;
+		$this->softHits_ids=[];
+		$this->silentSave(false);
+		
 		//отрываем IP от удаляемого компа
 		foreach ($this->netIps as $ip) {
 			$ip->detachComp($this->id);
@@ -761,10 +766,6 @@ class Comps extends ArmsModel
 			$arm->comp_id=null;
 			$arm->save();
 		}
-		//отключаем рескан чтобы при сохранении софт не привязался обратно
-		Soft::$disable_rescan=true;
-		$this->softHits_ids=[];
-		$this->silentSave(false);
 		
 		return true;
 	}
