@@ -693,7 +693,7 @@ class Comps extends ArmsModel
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
-			
+			if (!Soft::$disable_rescan) //если только автообновление привязок не блокировано
 			$this->softHits_ids=array_keys($this->swList->items);
 
 			/* взаимодействие с NetIPs */
@@ -761,7 +761,8 @@ class Comps extends ArmsModel
 			$arm->comp_id=null;
 			$arm->save();
 		}
-		
+		//отключаем рескан чтобы при сохранении софт не привязался обратно
+		Soft::$disable_rescan=true;
 		$this->softHits_ids=[];
 		$this->silentSave(false);
 		
