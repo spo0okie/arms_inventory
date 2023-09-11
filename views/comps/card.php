@@ -27,23 +27,14 @@ if (!mb_strlen($domain))
 <span class="unit-status <?= $model->updatedRenderClass ?> href" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()"><?= $model->updatedText ?></span>
 <br />
 <h1>
-	<span class="small"><?= $domain ?>\</span><?= $static_view?Html::a($model->renderName(),['comps/view','id'=>$model->id]):$model->name ?>
-
-	<?= Html::a("<i class=\"fas fa-sign-in-alt\" title='Удаленное управление {$model->fqdn}' ></i>",'remotecontrol://'.$model->fqdn) ?>
-
-	<?= $static_view?'':(Html::a('<i class="fas fa-pencil-alt" title="Изменить"></i>',['comps/update','id'=>$model->id])) ?>
-
-	<?php if(!$static_view) if($deleteable) echo Html::a('<i class="fas fa-trash" title="Удалить"></i>', ['comps/delete', 'id' => $model->id], [
-		'data' => [
-			'confirm' => 'Удалить эту ОС? Это действие необратимо!',
-			'method' => 'post',
-		],
-	]); else { ?>
-		<span class="small">
-			<span class="fas fa-lock" title="Невозможно в данный момент удалить эту операционную систему, т.к. присутствуют привязанные сервисы."></span>
-		</span>
-	<?php } ?>
-	&nbsp;
+	<span class="small"><?= $domain ?>\</span><?=
+		\app\components\LinkObjectWidget::widget([
+			'model'=>$model,
+			'name'=>$model->renderName(),
+			'nameSuffix'=>Html::a("<i class=\"fas fa-sign-in-alt\" title='Удаленное управление {$model->fqdn}' ></i>",'remotecontrol://'.$model->fqdn),
+			'hideUndeletable'=>false,
+		])
+	?>
 </h1>
 
 <div>

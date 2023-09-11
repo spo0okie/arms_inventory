@@ -64,6 +64,7 @@ use Yii;
  * @property LicGroups[] $licGroups
  * @property LicItems[] $licItems
  * @property LicKeys[] $licKeys
+ * @property Soft[] $soft
  */
 class Comps extends ArmsModel
 {
@@ -761,6 +762,9 @@ class Comps extends ArmsModel
 			$arm->save();
 		}
 		
+		$this->softHits_ids=[];
+		$this->silentSave(false);
+		
 		return true;
 	}
 	
@@ -810,5 +814,18 @@ class Comps extends ArmsModel
 		if (mb_stripos($this->os,'red hat')!==false) return true;
 		if (mb_stripos($this->os,'suse')!==false) return true;
 		return false;
+	}
+	
+	public function reverseLinks()
+	{
+		return [
+			'ПО закреплено в паспортах ОС'=>$this->soft,
+			$this->licGroups,
+			$this->licItems,
+			$this->licKeys,
+			$this->services,
+			'Доступы с этого ПК'=>$this->aces,
+			'Доступы к этому ПК'=>$this->acls,
+		];
 	}
 }
