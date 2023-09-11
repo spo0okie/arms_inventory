@@ -47,6 +47,11 @@ $this->params['breadcrumbs'][] = $this->title;
 	</div>
 	<div class="my-3">
 		<?= Html::a(\app\models\OrgStruct::$title,['org-struct/index','org_id'=>$model->id]) ?>
+		//
+		<?= Html::a('Новый '.\app\models\Users::$title,['users/create','Users[org_id]'=>$model->id],[
+			'class'=>'open-in-modal-form',
+			'data-reload-page-on-submit'=>1
+		]) ?>
 	</div>
 	<?= $dataProvider->totalCount?DynaGridWidget::widget([
 		'id' => 'org-struct-users-index',
