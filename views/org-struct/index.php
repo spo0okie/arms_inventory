@@ -23,7 +23,7 @@ $renderer=$this;
     <?= $this->render('tree-list',
 		[
 			'models'=>$models,
-			'parent_id'=>'NULL',
+			'parent_id'=>null,
 			'tree_level'=>0
 		]
 	) ?>

@@ -31,7 +31,16 @@ if (!isset($modalParent)) $modalParent=null;
 				<div class="col-md-8">
 					<?= $form->field($model, 'org_id')->widget(Select2::className(), [
 						'data' => \app\models\Partners::fetchNames(),
-						'options' => ['placeholder' => 'Организация',],
+						'options' => [
+							'placeholder' => 'Организация',
+							/*'onchange' => <<<JS
+	select2id=$("select#users-orgeh").attr("data-krajee-select2");
+	$("select#users-orgeh")
+	.select2("destroy")
+	.select2({data:[1,2,3]})
+	.select2(eval(select2id));
+JS*/
+						],
 						'toggleAllSettings'=>['selectLabel'=>null],
 						'pluginOptions' => [
 							'dropdownParent' => $modalParent,
@@ -49,14 +58,23 @@ if (!isset($modalParent)) $modalParent=null;
 
 			<div class="row">
 				<div class="col-md-8">
-					<?= $form->field($model, 'Orgeh')->widget(Select2::className(), [
-						'data' => \app\models\OrgStruct::fetchNames(),
-						'options' => ['placeholder' => 'Подразделение',],
-						'toggleAllSettings'=>['selectLabel'=>null],
+					<?= $form->field($model, 'Orgeh')->widget(\kartik\depdrop\DepDrop::className(), [
+						'data' => \app\models\OrgStruct::fetchOrgNames($model->org_id),
+						'type' => \kartik\depdrop\DepDrop::TYPE_SELECT2,
+						'options' => [
+							'placeholder' => 'Подразделение',
+							
+						],
+						'select2Options' => [
+							'pluginOptions' => [
+								'dropdownParent' => $modalParent,
+								'allowClear' => true,
+								'multiple' => false,
+							],
+						],
 						'pluginOptions' => [
-							'dropdownParent' => $modalParent,
-							'allowClear' => false,
-							'multiple' => false
+							'depends'=>['users-org_id'],
+							'url'=>\yii\helpers\Url::to(['/org-struct/dep-drop']),
 						]
 					]) ?>
 

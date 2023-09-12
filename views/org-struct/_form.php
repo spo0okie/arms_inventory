@@ -26,9 +26,27 @@ if (!isset($modalParent)) $modalParent=null;
 			'data'=>\app\models\Partners::fetchNames()
 	])?>
 	
+	<?= $form->field($model, 'pup')->widget(\kartik\depdrop\DepDrop::className(), [
+		'data' => \app\models\OrgStruct::fetchOrgNames($model->org_id),
+		'type' => \kartik\depdrop\DepDrop::TYPE_SELECT2,
+		'options' => [
+			'placeholder' => 'Родительское подразделение',
+		],
+		'select2Options' => [
+			'pluginOptions' => [
+				'dropdownParent' => $modalParent,
+				'allowClear' => true,
+				'multiple' => false,
+			],
+		],
+		'pluginOptions' => [
+			'depends'=>['users-org_id'],
+			'url'=>\yii\helpers\Url::to(['/org-struct/dep-drop']),
+		]
+	]) ?>
+	
 	<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
-	<?= $form->field($model, 'pup')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'id')->textInput(['maxlength' => true]) ?>
 

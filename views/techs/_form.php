@@ -51,7 +51,6 @@ $js =  /** @lang JavaScript */ <<<JS
         })
         .fail(function () {console.log("Ошибка получения данных!")});
     }
-
     
     //меняем подсказки для разных типов оборудования
     function fetchCommentFromModel(){

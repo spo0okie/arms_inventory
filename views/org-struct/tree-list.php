@@ -17,7 +17,7 @@ $filtered=[];
 //echo $parent_id;
 //перебираем все модельки и отфильтровываем нужные нам
 foreach ($models as $model) {
-	if ($model->pup == $parent_id) {
+	if ($model->pup == $parent_id || ($parent_id===null && $model->pup == 'NULL')) {
 		$filtered[]=$model;
 	}
 }
@@ -32,7 +32,7 @@ if (count($filtered)) {
                 <?= $this->render('item',['model'=>$model,'static_view'=>false]) ?>
 				<?= \yii\helpers\Html::a(
 					'<span class="fas fa-plus-circle"></span>',
-					['org-struct/create','OrgStruct[pup]'=>$model->id],
+					['org-struct/create','OrgStruct[pup]'=>$model->id,'OrgStruct[org_id]'=>$model->org_id],
 					['qtip_ttip'=>'Добавить дочернее подразделение']
 				) ?>
                 <?= $subtree=$this->render('tree-list',[

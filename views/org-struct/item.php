@@ -32,7 +32,7 @@ if (!empty($model)) {
 				['/org-struct/view','id'=>$model->id,'org_id'=>$model->org_id],
 				['qtip_ajxhrf'=>\yii\helpers\Url::to(['org-struct/ttip','id'=>$model->id,'org_id'=>$model->org_id])]
 			);
-			if (!$static_view) echo Html::a('<span class="fas fa-pencil-alt"/>',['/places/update','id'=>$model->id]);
+			if (!$static_view) echo Html::a('<span class="fas fa-pencil-alt"/>',['/org-struct/update','id'=>$model->id,'org_id'=>$model->org_id]);
 		} ?>	</span>
 <?php }
 

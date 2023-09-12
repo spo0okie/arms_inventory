@@ -40,7 +40,8 @@ class OrgStruct extends ArmsModel
 			[['id', 'pup'], 'string', 'max' => 16],
             [['name'], 'string', 'max' => 255],
 			[['id', 'org_id'], 'unique', 'targetAttribute' => ['id', 'org_id']],
-        ];
+			[['pup'],	'validateRecursiveLink', 'params'=>['getLink' => 'parent']],
+		];
     }
 
     /**
@@ -105,7 +106,14 @@ class OrgStruct extends ArmsModel
 			->all();
 		return yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}
-
+	
+	public static function fetchOrgNames($org_id){
+		$list= static::find()
+			->select(['id','name'])
+			->where(['org_id'=>$org_id])
+			->all();
+		return yii\helpers\ArrayHelper::map($list, 'id', 'name');
+	}
 	public function reverseLinks()
 	{
 		return [

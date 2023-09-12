@@ -38,7 +38,7 @@ class OrgStructController extends Controller
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','update','delete',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','view','ttip','validate','dep-drop'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -147,7 +147,8 @@ class OrgStructController extends Controller
 			if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
             return $this->redirect(['view', 'id' => $model->id, 'org_id' => $model->org_id]);
         }
-
+	
+		$model->load(Yii::$app->request->get());
         return $this->render('create', [
             'model' => $model,
         ]);
@@ -189,7 +190,37 @@ class OrgStructController extends Controller
 
         return $this->redirect(['index', 'org_id' => $org_id]);
     }
-
+	
+	
+	/**
+	 * Returns tech available network ports
+	 * @return array
+	 */
+	public function actionDepDrop()
+	{
+		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		if (isset($_POST['depdrop_parents'])) {
+			$parents = $_POST['depdrop_parents'];
+			if ($parents != null) {
+				$models=OrgStruct::fetchOrgNames($parents);
+				$output=[];
+				foreach ($models as $id=>$name) {
+					$output[]=['id'=>$id,'name'=>$name];
+				}
+				//$out = self::getSubCatList($cat_id);
+				// the getSubCatList function will query the database based on the
+				// cat_id and return an array like below:
+				// [
+				//    ['id'=>'<sub-cat-id-1>', 'name'=>'<sub-cat-name1>'],
+				//    ['id'=>'<sub-cat_id_2>', 'name'=>'<sub-cat-name2>']
+				// ]
+				return ['output'=>$output, 'selected'=>''];
+			}
+		}
+		return ['output'=>'', 'selected'=>''];
+	}
+	
+	
     /**
      * Finds the OrgStruct model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

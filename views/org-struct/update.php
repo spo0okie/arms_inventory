@@ -6,10 +6,14 @@ use yii\helpers\Html;
 /* @var $model app\models\OrgStruct */
 
 $this->title = 'Правка: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index']];
+
 if (is_object($model->partner)) {
-	$this->params['breadcrumbs'][]=['label' => $model->partner->bname, 'url'=>['partners/view','id'=>$model->org_id]];
+	$this->params['breadcrumbs'][] = ['label' => $model->partner->bname, 'url'=>['partners/view','id'=>$model->org_id]];
+	$this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index','org_id'=>$model->org_id]];
+} else {
+	$this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index']];
 }
+
 foreach ($model->chain as $item) $this->params['breadcrumbs'][]=[
 	'label'=>$item->name,
 	'url'=>['org-struct/view','id'=>$item->id],
