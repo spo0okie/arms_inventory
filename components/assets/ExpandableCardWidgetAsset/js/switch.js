@@ -39,6 +39,8 @@ function ExpandableCardInit (card) {
 }
 
 
+function ExpandableCardInitAll() {
+    $('.expandable-card-outer').each(function (index,item){ExpandableCardInit(item)})
+}
 
-
-$('.expandable-card-outer').each(function (index,item){ExpandableCardInit(item)})
+ExpandableCardInitAll();
