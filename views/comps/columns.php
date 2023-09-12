@@ -42,7 +42,9 @@ return [
 					$sname=$ip->text_addr.(trim($name) && $name!=strtolower($data->name) && $name!=strtolower($data->fqdn)?' ('.$ip->name.')':'');
 					$output[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'name'=>$sname]);
 				}
-				return implode(' ',$output);
+				return \app\components\ExpandableCardWidget::widget([
+					'content'=>implode('<br />',$output)
+				]);
 			}
 			return null;
 		},
@@ -104,7 +106,13 @@ return [
 		'label' => 'Софт',
 	],
 	'mac' => [
-		'format' => 'ntext'
+		'value'=>function ($data) {return \app\components\ExpandableCardWidget::widget([
+			'content'=>\yii\helpers\Html::tag(
+				'span',
+				\app\models\Techs::formatMacs($data->mac,'<br />'),
+				['class'=>'mac_address']
+			)
+		]);},
 	],
 	'raw_version',
 	'updated_at',
