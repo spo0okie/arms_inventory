@@ -62,8 +62,8 @@ class UsersSearch extends Users
 				],
 				'Doljnost',
 				'orgStruct_name'=>[
-					'asc'=>['orgStruct.name'=>SORT_ASC],
-					'desc'=>['orgStruct.name'=>SORT_DESC],
+					'asc'=>['org_struct.name'=>SORT_ASC],
+					'desc'=>['org_struct.name'=>SORT_DESC],
 				],
 				'org_name'=>[
 					'asc'=>['partners.bname'=>SORT_ASC],
