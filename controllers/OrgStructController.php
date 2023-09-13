@@ -46,17 +46,19 @@ class OrgStructController extends Controller
 		];
 		return $behaviors;
 	}
-
-    /**
-     * Lists all OrgStruct models.
-     * @return mixed
-     */
+	
+	/**
+	 * Lists all OrgStruct models.
+	 * @param int $org_id Организация, чье расписание показываем
+	 * @return mixed
+	 */
     public function actionIndex($org_id=1)
     {
 		return $this->render('index', [
 			'models' => OrgStruct::find()
 				->where(['org_id'=>$org_id])
 				->all(),
+			'org_id'=>$org_id
 		]);
     }
 

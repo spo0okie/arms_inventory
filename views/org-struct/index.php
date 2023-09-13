@@ -6,6 +6,7 @@ use kartik\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $models \app\models\OrgStruct[] */
+/* @var $org_id integer */
 \yii\helpers\Url::remember();
 
 $this->title = \app\models\OrgStruct::$titles;
@@ -17,7 +18,7 @@ $renderer=$this;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Создать', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Создать', ['create','OrgStruct[org_id]'=>$org_id], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= $this->render('tree-list',
