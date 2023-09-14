@@ -83,7 +83,7 @@ if (
 				. 'aria-valuenow="'.$width.'" '
 				. 'aria-valuemin="0" '
 				. 'aria-valuemax="100" '
-				. 'qtip_b64ttip=\''.base64_encode($bar['hint']).'\'"></div>';
+				. 'qtip_b64ttip=\''.base64_encode($bar['hint']).'\'></div>';
 		}
 	}
 	
