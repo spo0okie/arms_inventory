@@ -1,6 +1,7 @@
 <?php
 /**
  * Рендер элемента графика рабочего дня
+ * Полоски
  * Created by PhpStorm.
  * User: reviakin.a
  * Date: 18.10.2020
@@ -75,7 +76,14 @@ if (
 						$bar['hint'].='<br>'.$meta->user;
 				}
 			}
-			echo '<div class="progress-bar '.$bgClasses[$bar['class'] % count($bgClasses)].'" role="progressbar" style="width: '.$width.'%" aria-valuenow="'.$width.'" aria-valuemin="0" aria-valuemax="100" qtip_ttip=\''.$bar['hint'].'\'"></div>';
+			echo '<div '
+				. 'class="progress-bar '.$bgClasses[$bar['class'] % count($bgClasses)].'" '
+				. 'role="progressbar" '
+				. 'style="width: '.$width.'%" '
+				. 'aria-valuenow="'.$width.'" '
+				. 'aria-valuemin="0" '
+				. 'aria-valuemax="100" '
+				. 'qtip_b64ttip=\''.base64_encode($bar['hint']).'\'"></div>';
 		}
 	}
 	
