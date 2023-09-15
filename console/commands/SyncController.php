@@ -144,8 +144,12 @@ class SyncController extends Controller
 		if ($objects!=false) foreach ($objects as $object) {
 			$this->storeLoaded($storeClass,$object);
 		}
-		$count=count($objects);
-		echo "OK ($count objects)\n";
+		if ($objects===false) {
+			echo "Failed\n";
+		} else {
+			$count=count($objects);
+			echo "OK ($count objects)\n";
+		}
 	}
 	
 	/**
