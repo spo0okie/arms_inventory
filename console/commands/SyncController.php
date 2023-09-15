@@ -144,7 +144,7 @@ class SyncController extends Controller
 		if ($objects!=false) foreach ($objects as $object) {
 			$this->storeLoaded($storeClass,$object);
 		}
-		$count=count($this->getLoadedClass($storeClass));
+		$count=count($objects);
 		echo "OK ($count objects)\n";
 	}
 	
