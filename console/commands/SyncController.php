@@ -148,7 +148,7 @@ class SyncController extends Controller
 			$count=count($objects);
 			echo "OK ($count objects)\n";
 		} else {
-			echo "Failed\n";
+			echo "Failed {$this->remote->request}\n";
 		}
 	}
 	
