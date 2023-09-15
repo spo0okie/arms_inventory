@@ -141,17 +141,14 @@ class SyncController extends Controller
 		if (!$storeClass) $storeClass=Inflector::camelize($class);
 		echo "Loading $storeClass ... ";
 		$objects=$this->remote->getObjects($class,'index',$params);
-		if ($objects!=false) foreach ($objects as $object) {
-			$this->storeLoaded($storeClass,$object);
-		}
-		if ($objects===false) {
-			echo "Failed\n";
-		} elseif (is_array($objects)) {
+		if (is_array($objects)) {
+			foreach ($objects as $object) {
+				$this->storeLoaded($storeClass, $object);
+			}
 			$count=count($objects);
 			echo "OK ($count objects)\n";
 		} else {
-			echo "0_o\n";
-			var_dump($objects);
+			echo "Failed\n";
 		}
 	}
 	
