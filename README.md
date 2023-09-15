@@ -7,7 +7,12 @@
     <br>
 </p>
 
-
+FEATURES/ВОЗМОЖНОСТИ
+- [Учет оборудования](https://inventory.reviakin.net/web/techs/index)
+ - [Учет используемых на предприятии моделей оборудования](https://inventory.reviakin.net/web/tech-models/index)
+- [Учет операционных систем](https://inventory.reviakin.net/web/comps/index)
+- [Учет предоставляемых ИТ отделом услуг и сервисов](https://inventory.reviakin.net/web/services/index?showChildren=1)
+ - [Распределение сервисов по ответственным](https://inventory.reviakin.net/web/services/index-by-users)
 
 REQUIREMENTS/ТРЕБОВАНИЯ
 ------------
