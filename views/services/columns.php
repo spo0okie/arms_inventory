@@ -58,7 +58,7 @@ if ((count($totalComps)+count($totalTechs))>10)
 //формируем список столбцов для рендера
 return [
 	'name' => [
-		'value' => function ($data) {return $this->render('/services/item', ['model' => $data,'crop_site'=>true]);},
+		'value' => function ($data) {return $this->render('/services/item', ['model' => $data,'noDelete'=>true]);},
 	],
 	'segment' => [
 		'value' => function ($data) {return $this->render('/segments/item', ['model' => $data->segmentRecursive]);},

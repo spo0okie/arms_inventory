@@ -7,6 +7,7 @@ use yii\helpers\Html;
 
 if (!isset($static_view)) $static_view=false;
 if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived',true);
+if (!isset($noDelete)) $noDelete=false;
 
 
 if (is_object($model)) {
@@ -61,7 +62,7 @@ if (is_object($model)) {
 	echo \app\components\ItemObjectWidget::widget([
 		'model'=>$model,
 		'link'=>\app\components\LinkObjectWidget::widget([
-			'model'=>$model,'static'=>$static_view
+			'model'=>$model,'static'=>$static_view,'noDelete'=>$noDelete
 		])
 	]);
 }
