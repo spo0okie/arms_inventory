@@ -10,18 +10,19 @@
 FEATURES/ВОЗМОЖНОСТИ
 - [Учет оборудования](https://inventory.reviakin.net/web/techs/index)
   - [Учет используемых на предприятии моделей оборудования](https://inventory.reviakin.net/web/tech-models/index)
+  - [Компоновка стоек и шкафов](https://inventory.reviakin.net/web/techs/view?id=18)
+  - [Учет портов](https://inventory.reviakin.net/web/techs/view?id=12)
 - [Учет операционных систем](https://inventory.reviakin.net/web/comps/index)
+- [Компоновка рабочих мест](https://inventory.reviakin.net/web/places/armmap)
 - [Учет предоставляемых ИТ отделом услуг и сервисов](https://inventory.reviakin.net/web/services/index?showChildren=1)
   - [Распределение сервисов по ответственным](https://inventory.reviakin.net/web/services/index-by-users)
 - [Учет лицензий](https://inventory.reviakin.net/web/lic-groups/index)
   - [Учет ключей](https://inventory.reviakin.net/web/lic-items/view?id=1)
 - [Учет сегментов инфраструры](https://inventory.reviakin.net/web/segments/index)
 - [Учет сетей](https://inventory.reviakin.net/web/networks/index), [Vlan](https://inventory.reviakin.net/web/net-vlans/index), [IP Адресов](https://inventory.reviakin.net/web/networks/view?id=12)
-- [Компоновка рабочих мест](https://inventory.reviakin.net/web/places/armmap)
+  - [Учет вводов интернет](https://inventory.reviakin.net/web/org-inet/index) и [подключений телефонии](https://inventory.reviakin.net/web/org-phones/index) c [привязкой к договорам](https://inventory.reviakin.net/web/services/view?id=2)
 - [Ведение расписаний](https://inventory.reviakin.net/web/schedules/view?id=4)
-- [Компоновка стоек и шкафов](https://inventory.reviakin.net/web/techs/view?id=18)
-- [Учет портов](https://inventory.reviakin.net/web/techs/view?id=12)
-- [Учет вводов интернет](https://inventory.reviakin.net/web/org-inet/index) и [подключений телефонии](https://inventory.reviakin.net/web/org-phones/index) c [привязкой к договорам](https://inventory.reviakin.net/web/services/view?id=2)
+
 
 REQUIREMENTS/ТРЕБОВАНИЯ
 ------------
