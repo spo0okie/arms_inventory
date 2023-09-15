@@ -146,9 +146,12 @@ class SyncController extends Controller
 		}
 		if ($objects===false) {
 			echo "Failed\n";
-		} else {
+		} elseif (is_array($objects)) {
 			$count=count($objects);
 			echo "OK ($count objects)\n";
+		} else {
+			echo "0_o\n";
+			var_dump($objects);
 		}
 	}
 	
