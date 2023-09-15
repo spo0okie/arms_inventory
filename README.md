@@ -22,6 +22,8 @@ FEATURES/ВОЗМОЖНОСТИ
 - [Учет сетей](https://inventory.reviakin.net/web/networks/index), [Vlan](https://inventory.reviakin.net/web/net-vlans/index), [IP Адресов](https://inventory.reviakin.net/web/networks/view?id=12)
   - [Учет вводов интернет](https://inventory.reviakin.net/web/org-inet/index) и [подключений телефонии](https://inventory.reviakin.net/web/org-phones/index) c [привязкой к договорам](https://inventory.reviakin.net/web/services/view?id=2)
 - [Ведение расписаний](https://inventory.reviakin.net/web/schedules/view?id=4)
+- [Учет временных доступов](https://inventory.reviakin.net/web/scheduled-access/view?id=6)
+  - [В т.ч. сотрудникам внешних организаций](https://inventory.reviakin.net/web/partners/view?id=2)
 
 
 REQUIREMENTS/ТРЕБОВАНИЯ
