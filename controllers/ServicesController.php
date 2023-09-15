@@ -159,6 +159,7 @@ class ServicesController extends Controller
 		Services::cacheAllItems();
 		$searchModel = new ServicesSearch();
 		$searchModel->directlySupported=true;
+		$searchModel->parent_id=true;  //в т.ч. дочерние
 		$searchModel->archived=false; //должен отсутствовать
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		$this->view->params['layout-container'] = 'container-fluid';
