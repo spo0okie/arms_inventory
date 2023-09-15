@@ -270,8 +270,8 @@ class HwList {
 	public function getHDDShort(){
     	$size=$this->getHddGb();
 		if (!$size) return '';
-		if ($size>1000) return (int)($size/1000).'Tb';
-		return (int)$size.'Gb';
+		if ($size>1000) return (int)($size/1000).'TB';
+		return (int)$size.'GB';
 	}
 
 }
