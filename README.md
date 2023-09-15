@@ -9,10 +9,17 @@
 
 FEATURES/ВОЗМОЖНОСТИ
 - [Учет оборудования](https://inventory.reviakin.net/web/techs/index)
- - [Учет используемых на предприятии моделей оборудования](https://inventory.reviakin.net/web/tech-models/index)
+  - [Учет используемых на предприятии моделей оборудования](https://inventory.reviakin.net/web/tech-models/index)
 - [Учет операционных систем](https://inventory.reviakin.net/web/comps/index)
 - [Учет предоставляемых ИТ отделом услуг и сервисов](https://inventory.reviakin.net/web/services/index?showChildren=1)
- - [Распределение сервисов по ответственным](https://inventory.reviakin.net/web/services/index-by-users)
+  - [Распределение сервисов по ответственным](https://inventory.reviakin.net/web/services/index-by-users)
+- [Учет лицензий](https://inventory.reviakin.net/web/lic-groups/index)
+- [Учет сегментов инфраструры](https://inventory.reviakin.net/web/segments/index)
+- [Учет сетей](https://inventory.reviakin.net/web/networks/index), [Vlan](https://inventory.reviakin.net/web/net-vlans/index), [IP Адресов](https://inventory.reviakin.net/web/networks/view?id=12)
+- [Компоновка рабочих мест](https://inventory.reviakin.net/web/places/armmap)
+- [Ведение расписаний](https://inventory.reviakin.net/web/schedules/view?id=4)
+- [Компоновка стоек и шкафов](https://inventory.reviakin.net/web/techs/view?id=18)
+- [Учет портов](https://inventory.reviakin.net/web/techs/view?id=12)
 
 REQUIREMENTS/ТРЕБОВАНИЯ
 ------------
