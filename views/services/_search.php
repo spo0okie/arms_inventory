@@ -8,41 +8,39 @@ use kartik\select2\Select2;
 /* @var $form yii\widgets\ActiveForm */
 
 if (!isset($action)) $action='index';
+if (!isset($userFilter)) $userFilter=\app\models\Users::fetchWorking();
 
 ?>
 
-<div class="services-search">
-	<?php $form = ActiveForm::begin([
-		'action' => [$action],
-		'method' => 'get',
-	]); ?>
-	<div class="row">
-		<div class="col-md-10">
-			<?= $form->field($model, 'responsible_ids')->widget(Select2::className(), [
-				'data' => \app\models\Users::fetchWorking(),
-				'options' => [
-					'placeholder' => 'ограничить список пользователями',
-					'tag'=>null,
-				],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'allowClear' => true,
-					'multiple' => true
-				]
-			])->label(false) ?>
-
-		</div>
-		<div class="col-md-2">
-			<div class="input-group">
-				
-				<?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-				<?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
-			</div>
-		</div>
-		
+<?php $form = ActiveForm::begin([
+	'action' => [$action],
+	'method' => 'get',
+	//'options'=>['class' =>'d-flex-inline flex-row flex-nowrap']
+]); ?>
+<div class="d-flex flex-row flex-nowrap">
+	<div class="px-2 flex-fill">
+		<?= $form->field($model, 'responsible_ids')->widget(Select2::className(), [
+			'data' => $userFilter,
+			'options' => [
+				'placeholder' => 'фильтр',
+				'tag'=>null,
+			],
+			'toggleAllSettings'=>['selectLabel'=>null],
+			'pluginOptions' => [
+				'allowClear' => true,
+				'multiple' => true
+			]
+		])->label(false) ?>
 	</div>
+
+
+	<div class="px-2">
+		<?= Html::submitButton('Отфильтровать', ['class' => 'btn btn-primary']) ?>
+		<?= Html::resetButton('Сбросить фильтр', ['class' => 'btn btn-outline-secondary']) ?>
+	</div>
+	
+</div>
 	
 	
 	<?php ActiveForm::end(); ?>
 
-</div>

@@ -1043,4 +1043,19 @@ class Services extends ArmsModel
 		return $team;
 	}
 	
+	/**
+	 * Моделирует поддержку сервиса (смотрит кто его поддерживает и моделирует отсутствие сотрудников)
+	 * @param $dismissed array кого нет
+	 * @return array
+	 */
+	public function supportModeling(array $dismissed) {
+		$responsible_id=$this->responsibleRecursive->id;
+		$support_ids[$responsible_id]=$responsible_id;
+		foreach ($this->supportRecursive as $user) {
+			$user_id=$user->id;
+			$support_ids[$user_id]=$user_id;
+		}
+		return array_diff($support_ids,$dismissed);
+	}
+	
 }

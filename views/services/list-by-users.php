@@ -8,6 +8,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel app\models\ServicesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $models \app\models\Services[] */
+/* @var $disabled_ids array */
 
 \yii\helpers\Url::remember();
 
@@ -16,43 +17,28 @@ $this->params['breadcrumbs'][] = $this->title;
 $models=$dataProvider->models;
 
 $renderer=$this;
-?>
-<div class="services-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <div class="row">
-		<div class="col-md-1">
-			<?= Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success']) ?>
-		</div>
-		<div class="col-md-11">
-			<?php echo $this->render('_search', ['model' => $searchModel,'action'=>'index-by-users']); ?>
-		</div>
-    
-    </div>
-	
-	
-<?php
-
-
 
 $render_columns=[
 	[
 		'attribute' => 'name',
 		'format' => 'raw',
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/services/item', ['model' => $data]);
+			return $renderer->render('/services/item', ['model' => $data,'noDelete'=>true]);
 		},
 	],
 	[
 		'attribute' => 'support',
-		'header' => '#',
+		'header' => \app\components\AttributeHintWidget::widget([
+			'label'=>'#',
+			'hint'=>'Количество сотрудников сопровождающих сервис'
+		]),
 		'format' => 'raw',
-		'value' => function ($data) use ($renderer) {
-			return empty($data->responsible_id)?0:1+count($data->support_ids);
+		'value' => function ($data) use ($disabled_ids) {
+			/* @var $data \app\models\Services */
+			return count($data->supportModeling($disabled_ids));
 		},
-		'contentOptions' => function ($data) use ($renderer) {
-			switch (empty($data->responsible_id)?0:1+count($data->support_ids)) {
+		'contentOptions' => function ($data) use ($disabled_ids) {
+			switch (count($data->supportModeling($disabled_ids))) {
 				case 0:
 					return ['class' => ['col_serviceSum','status_Alert']];
 					break;
@@ -67,19 +53,25 @@ $render_columns=[
 	],
 ];
 
+$usersFilter=[];
 $users=[];
 //собираем Какие пользователи сколько раз встречаются в сервисах
 foreach ($dataProvider->models as $model) {
+	/** @var $model \app\models\Services */
 	foreach (array_merge([$model->responsible_id],$model->support_ids) as $user_id) {
-		if (isset($users[$user_id])) {
+
+		if (isset($users[$user_id]))
 			$users[$user_id]++;
-		} else {
+		else
 			$users[$user_id]=1;
-		}
+	}
+	foreach (array_merge([$model->responsible],$model->support) as $user) {
+		$usersFilter[$user->id]=$user->Ename;
 	}
 }
 
 arsort($users);
+asort($usersFilter,SORT_STRING);
 
 //если отфильтровали по пользователям, то из рендера убираем посторонних
 if (is_array($searchModel->responsible_ids) && count($searchModel->responsible_ids)) {
@@ -95,6 +87,16 @@ foreach ($users as $user=>$total) {
 		$render_columns[]=[
 			'attribute' => $user,
 			'header' => $objUser->shortName,
+			//.'<br>'
+			'filter'=>Html::a(
+				array_search($user,$disabled_ids)===false?'Отключить':'Восстановить',
+					\yii\helpers\Url::currentNonRecursive([
+							'disabled_ids'=>\app\helpers\ArrayHelper::itemToggle($disabled_ids,(string)$user)
+					]),
+					[
+						'class'=>'btn '.(array_search($user,$disabled_ids)===false?'btn-warning':'btn-success'),
+						'qtip_ttip'=>'Смоделировать отсутствие сотрудника'
+					]),
 			'format' => 'raw',
 			'value' => function ($data) use ($renderer,$user) {
 				if ($data->responsible_id == $user) return 'Ответственный';
@@ -102,25 +104,49 @@ foreach ($users as $user=>$total) {
 				return '';
 			},
 			'footer'=>$total,
-			'contentOptions' => function ($data) use ($user) {
-				if ($data->responsible_id == $user) return ['class' => ['col_serviceUser','col_responsible']];
-				if (in_array($user,$data->support_ids)) return ['class' => ['col_serviceUser','col_support']];
+			'contentOptions' => function ($data) use ($user,$disabled_ids) {
+				if ($data->responsible_id == $user) return ['class' => [
+					'col_serviceUser',
+					array_search($user,$disabled_ids)===false?'col_responsible':'col_missing'
+				]];
+				if (in_array($user,$data->support_ids)) return ['class' => [
+					'col_serviceUser',
+					array_search($user,$disabled_ids)===false?'col_support':'col_missing'
+				]];
 				return ['col_serviceUser'];
-			}
+			},
 			
 		];
 	}
 }
 
-echo GridView::widget([
+
+echo '<div class="services-index">';
+
+echo \app\components\DynaGridWidget::widget([
+	'id'=>'index-by-users',
 	'dataProvider' => $dataProvider,
+	'header'=>$this->title,
+	'createButton'=> '<div class="d-flex flex-row flex-nowrap">'
+		. '<div>'
+			. Html::a('Новый сервис', ['create'], ['class' => 'btn btn-success'])
+		. '</div>'
+		. '<div class="align-self-stretch row flex-nowrap flex-fill">'
+			. $this->render('_search', [
+				'model' => $searchModel,
+				'action'=>'index-by-users',
+				'userFilter'=>$usersFilter
+			])
+		. '</div>'
+	. '</div>',
 	'filterModel' => $searchModel,
 	'columns' => $render_columns,
-	'responsive' => false,
-	'showFooter' => true,
-	'floatHeader'=>true,
-	'floatHeaderOptions'=>['top'=>'0']
+	'resizableColumns' => false,
+	'gridOptions' => [
+		'showFooter' => true,
+		'floatHeader'=>true,
+		'floatHeaderOptions'=>['top'=>'0'],
+	],
 ]);
-?>
 
-</div>
+echo '</div>';

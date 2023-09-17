@@ -154,4 +154,20 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		}
 		return $cleaned;
 	}
+	
+	/**
+	 * Переключает присутствие элемента в массиве (если не было - добавит, иначе уберет
+	 * @param $array
+	 * @param $item
+	 * @return array
+	 */
+	public static function itemToggle($array,$item) {
+		$pos=array_search($item,$array);
+		if ($pos!==false) {
+			unset($array[$pos]);
+			return $array;
+		}
+		$array[]=$item;
+		return $array;
+	}
 }

@@ -152,9 +152,10 @@ class ServicesController extends Controller
 	
 	/**
 	 * Lists all Services models.
+	 * @param array $disabled_ids
 	 * @return mixed
 	 */
-	public function actionIndexByUsers()
+	public function actionIndexByUsers(array $disabled_ids=[])
 	{
 		Services::cacheAllItems();
 		$searchModel = new ServicesSearch();
@@ -167,6 +168,7 @@ class ServicesController extends Controller
 		return $this->render('list-by-users', [
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,
+			'disabled_ids'=>$disabled_ids
 		]);
 	}
 	

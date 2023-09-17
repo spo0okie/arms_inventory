@@ -18,4 +18,18 @@ class Url extends \yii\helpers\BaseUrl {
 	public static function toRoute($route, $scheme = false) {
 		return parent::toRoute($route, $scheme || (!empty(\Yii::$app->request->origin)));
 	}
+	
+	/**
+	 * В точности как current, Но заменяет параметры не рекурсивно, что позволяет заменять параметры-массивы пустыми значениями
+	 * @param array $params
+	 * @param false $scheme
+	 * @return string
+	 */
+	public static function currentNonRecursive(array $params = [], $scheme = false)
+	{
+		$currentParams = \Yii::$app->getRequest()->getQueryParams();
+		$currentParams[0] = '/' . \Yii::$app->controller->getRoute();
+		$route = array_replace($currentParams, $params);
+		return static::toRoute($route, $scheme);
+	}
 }
