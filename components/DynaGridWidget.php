@@ -194,6 +194,7 @@ class DynaGridWidget extends Widget
 					'visibilityWaitTimeout'=>500
 				],
 				'persistResize'=>true,
+				'responsive'=>!ArrayHelper::getValue($this->gridOptions,'floatHeader'),
 				'showFooter'=>$this->showFooter,
 			],$this->gridOptions),
 			'options'=>[
