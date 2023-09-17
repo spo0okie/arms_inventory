@@ -58,15 +58,13 @@ $users=[];
 //собираем Какие пользователи сколько раз встречаются в сервисах
 foreach ($dataProvider->models as $model) {
 	/** @var $model \app\models\Services */
-	foreach (array_merge([$model->responsible_id],$model->support_ids) as $user_id) {
-
+	foreach (array_merge([$model->responsibleRecursive],$model->supportRecursive) as $user) if (is_object($user)) {
+		$usersFilter[$user->id]=$user->Ename;
+		$user_id=$user->id;
 		if (isset($users[$user_id]))
 			$users[$user_id]++;
 		else
 			$users[$user_id]=1;
-	}
-	foreach (array_merge([$model->responsible],$model->support) as $user) {
-		$usersFilter[$user->id]=$user->Ename;
 	}
 }
 
