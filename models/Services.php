@@ -1049,9 +1049,13 @@ class Services extends ArmsModel
 	 * @return array
 	 */
 	public function supportModeling(array $dismissed) {
-		$responsible_id=$this->responsibleRecursive->id;
-		$support_ids[$responsible_id]=$responsible_id;
-		foreach ($this->supportRecursive as $user) {
+		$responsible=$this->responsibleRecursive;
+		if (is_object($responsible)) {
+			$responsible_id=$this->responsibleRecursive->id;
+			$support_ids[$responsible_id]=$responsible_id;
+		} else $support_ids=[];
+		
+		foreach ($this->supportRecursive as $user) if (is_object($user)) {
 			$user_id=$user->id;
 			$support_ids[$user_id]=$user_id;
 		}
