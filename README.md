@@ -16,6 +16,7 @@ FEATURES/ВОЗМОЖНОСТИ
 - [Компоновка рабочих мест](https://inventory.reviakin.net/web/places/armmap)
 - [Учет предоставляемых ИТ отделом услуг и сервисов](https://inventory.reviakin.net/web/services/index?showChildren=1)
   - [Распределение сервисов по ответственным](https://inventory.reviakin.net/web/services/index-by-users)
+  - [Планирование отсутствий сотрудников](https://inventory.reviakin.net/web/services/index-by-users?disabled_ids%5B1%5D=6&disabled_ids%5B2%5D=9) для оценки деградации поддержки сервисов
 - [Учет лицензий](https://inventory.reviakin.net/web/lic-groups/index)
   - [Учет ключей](https://inventory.reviakin.net/web/lic-items/view?id=1)
 - [Учет сегментов инфраструры](https://inventory.reviakin.net/web/segments/index)
