@@ -39,8 +39,8 @@ $nonAgreedClass=($model->isFree||$model->isIgnored)?'':'table-warning';
 	</div>
 </div>
 
-<h4>Установки</h4>
 <?= DynaGridWidget::widget([
+	'header'=>'Установки',
 	'id' => 'soft-comps-list',
 	'columns' => array_merge(include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php', [
 		'softAgreed'=>[
@@ -56,5 +56,5 @@ $nonAgreedClass=($model->isFree||$model->isIgnored)?'':'table-warning';
 	'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version','softAgreed'],
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
-	'panel'=>false
+	//'panel'=>true
 ]) ?>

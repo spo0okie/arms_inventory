@@ -44,7 +44,7 @@ class SoftSearch extends Soft
     public function search($params)
     {
         $query = Soft::find()
-			->joinWith(['manufacturer','softLists']);
+			->joinWith(['manufacturer','softLists','comps','hits','licGroups']);
 
         // add conditions that should always apply here
 
