@@ -62,7 +62,10 @@ if (is_object($model)) {
 	echo \app\components\ItemObjectWidget::widget([
 		'model'=>$model,
 		'link'=>\app\components\LinkObjectWidget::widget([
-			'model'=>$model,'static'=>$static_view,'noDelete'=>$noDelete
+			'model'=>$model,
+			'static'=>$static_view,
+			'noDelete'=>$noDelete,
+			'name'=>$icon.$name,
 		])
 	]);
 }
