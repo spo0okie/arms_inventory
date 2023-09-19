@@ -6,6 +6,7 @@ use app\helpers\ArrayHelper;
 use Yii;
 use app\models\Soft;
 use app\models\SoftSearch;
+use yii\data\ArrayDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -50,7 +51,22 @@ class SoftController extends Controller
     public function actionIndex()
     {
         $searchModel = new SoftSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$dataProvider=new ArrayDataProvider([
+			'allModels' => $searchModel->search(Yii::$app->request->queryParams)->getModels(),
+			'key'=>'id',
+			'sort' => [
+				'attributes'=> [
+					'descr',
+					'comment',
+					'hitsCount',
+					'compsCount',
+				],
+				'defaultOrder' => [
+					'descr' => SORT_ASC
+				]
+			],
+			//'pagination' => false,
+		]);;
 
         return $this->render('index', [
             'searchModel' => $searchModel,

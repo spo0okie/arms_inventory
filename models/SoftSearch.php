@@ -50,7 +50,7 @@ class SoftSearch extends Soft
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'pagination' => ['pageSize' => 500,],
+			'pagination' => false,
 			'sort'=> [
 				'defaultOrder' => [
 					//'manufacturers_id'=>SORT_ASC,

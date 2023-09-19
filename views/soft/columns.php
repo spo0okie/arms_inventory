@@ -20,22 +20,6 @@ return [
 		}
 	],
 	'comment',
-	'hits'=>[
-		'header'=>\app\components\AttributeHintWidget::widget([
-			'label'=>'Уст.',
-			'hint'=>'Количество обнаруженных установок продукта'
-		]),
-		'value'=>function($data) {
-			return count($data->hits);
-		}
-	],
-	'comps'=>[
-		'header'=>\app\components\AttributeHintWidget::widget([
-			'label'=>'В пасп.',
-			'hint'=>'Количество внесений продукта в паспорта АРМ'
-		]),
-		'value'=>function($data) {
-			return count($data->comps);
-		}
-	],
+	'hitsCount',
+	'compsCount',
 ];

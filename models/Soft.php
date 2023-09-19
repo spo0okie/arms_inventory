@@ -96,7 +96,7 @@ class Soft extends ArmsModel
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
             'id' => 'Идентификатор',
@@ -107,6 +107,14 @@ class Soft extends ArmsModel
             'additional' => 'Дополнительные элементы входящие в пакет ПО',
 	        'softLists_ids' => 'В списках ПО',
 	        'created_at' => 'Дата добавления',
+			'hitsCount'=>[
+				'Уст.',
+				'indexHint'=>'Количество обнаруженных установок продукта',
+			],
+			'compsCount'=>[
+				'Пасп.',
+				'indexHint'=>'Количество внесений продукта в паспорта АРМ'
+			],
         ];
     }
 
@@ -160,6 +168,8 @@ class Soft extends ArmsModel
 		return static::getDb()->cache(function($db) {return $this->hasMany(Comps::className(), ['id' => 'comp_id'])
 			->viaTable('{{%soft_in_comps}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
 	}
+	
+	public function getCompsCount() {return count($this->comps);}
 	/**
 	 * Возвращает набор компов, в которых находится ПО
 	 */
@@ -168,6 +178,7 @@ class Soft extends ArmsModel
 		return $this->hasMany(Comps::className(), ['id' => 'comp_id'])
 			->viaTable('{{%soft_hits}}', ['soft_id' => 'id']);
 	}
+	public function getHitsCount() {return count($this->hits);}
 	
 	public function getName()
 	{

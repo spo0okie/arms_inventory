@@ -21,6 +21,6 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => include 'columns.php',
-		'defaultOrder' => ['descr','comment','hits','comps'],
+		'defaultOrder' => ['descr','comment','hitsCount','compsCount'],
     ]); ?>
 </div>
