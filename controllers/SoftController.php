@@ -51,9 +51,10 @@ class SoftController extends Controller
      */
     public function actionIndex()
     {
-    	SoftHits::cacheAllItems();
+    	//SoftHits::cacheAllItems();
+    	//Soft::cacheCompsInSoft();
         $searchModel = new SoftSearch();
-		$dataProvider=new ArrayDataProvider([
+		/*$dataProvider=new ArrayDataProvider([
 			'allModels' => $searchModel->search(Yii::$app->request->queryParams)->getModels(),
 			'key'=>'id',
 			'sort' => [
@@ -68,11 +69,11 @@ class SoftController extends Controller
 				]
 			],
 			//'pagination' => false,
-		]);;
+		]);;*/
 
         return $this->render('index', [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+            'dataProvider' => $searchModel->search(Yii::$app->request->queryParams),
         ]);
     }
 	

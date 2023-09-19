@@ -44,13 +44,13 @@ class SoftSearch extends Soft
     public function search($params)
     {
         $query = Soft::find()
-			->joinWith(['manufacturer','softLists','comps','licGroups']);
+			->joinWith(['manufacturer'/*,'softLists','comps','licGroups'*/]);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'pagination' => false,
+			//'pagination' => false,
 			'sort'=> [
 				'defaultOrder' => [
 					//'manufacturers_id'=>SORT_ASC,

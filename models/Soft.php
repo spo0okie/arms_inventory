@@ -4,6 +4,9 @@ namespace app\models;
 
 use app\helpers\ArrayHelper;
 use Yii;
+use yii\db\ActiveQuery;
+use yii\db\Query;
+use yii\db\QueryBuilder;
 use yii\helpers\StringHelper;
 
 /**
@@ -31,8 +34,9 @@ use yii\helpers\StringHelper;
  */
 class Soft extends ArmsModel
 {
-
-    private static $all_items=null;
+	
+	private static $all_items=null;
+	private static $comps_in_soft=null;
 	public static $disable_cache=false;
 	public static $disable_rescan=false;
 	private $doNotRescan=false;
@@ -169,7 +173,12 @@ class Soft extends ArmsModel
 			->viaTable('{{%soft_in_comps}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
 	}
 	
-	public function getCompsCount() {return count($this->comps);}
+	public function getCompsCount() {
+		if (static::compsInSoftCached()) {
+			return count(ArrayHelper::getItemsByFields(static::$comps_in_soft,['soft_id'=>$this->id]));
+		}
+		return count($this->comps);
+	}
 	/**
 	 * Возвращает набор компов, в которых находится ПО
 	 */
@@ -404,6 +413,17 @@ class Soft extends ArmsModel
 			if ($match) $tmp[]=$item;
 		}
 		return $tmp;
+	}
+	
+	
+	public static function compsInSoftCached() {
+		return !is_null(static::$comps_in_soft);
+	}
+	public static function cacheCompsInSoft() {
+		static::$comps_in_soft=(new Query())
+			->select('*')
+			->from('soft_in_comps')
+			->all();
 	}
 	
 	/**
