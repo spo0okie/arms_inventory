@@ -22,7 +22,7 @@ use Yii;
  * @property bool $searched
  * @property integer $count
  */
-class SoftHits extends \yii\db\ActiveRecord
+class SoftHits extends ArmsModel
 {
 	//флажок того что в этом объекте реально производился поиск
 	private $searched_flag=false;

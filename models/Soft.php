@@ -175,6 +175,10 @@ class Soft extends ArmsModel
 	 */
 	public function getHits()
 	{
+		if (SoftHits::allItemsLoaded()) {
+			return ArrayHelper::getItemsByFields(SoftHits::getAllItems(),['soft_id'=>$this->id]);
+		}
+		
 		return $this->hasMany(Comps::className(), ['id' => 'comp_id'])
 			->viaTable('{{%soft_hits}}', ['soft_id' => 'id']);
 	}

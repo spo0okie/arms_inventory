@@ -170,4 +170,59 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		$array[]=$item;
 		return $array;
 	}
+	
+	/**
+	 * Получить свойство объекта или поле массива
+	 * @param      $obj
+	 * @param      $field
+	 * @param null $default
+	 * @return mixed|null
+	 */
+	public static function getField($obj,$field,$default=null) {
+		if (is_object($obj)) {
+			return $obj->$field;
+		}
+		if (is_array($obj)) {
+			if (isset($obj[$field]))
+				return $obj[$field];
+		}
+		return $default;
+	}
+	
+	/**
+	 * Проверяет что у $item все поля соответствуют фильтру [field1=>value1,field2=>value2]
+	 * @param $item
+	 * @param $filter
+	 * @return bool
+	 */
+	public static function compareItemFields($item,$filter) {
+		foreach ((array)$filter as $var => $value) {
+			$testValue=static::getField($item,$var);
+			if (is_array($testValue) || is_object($testValue)) {
+				if (!static::compareItemFields($testValue,$value)) return false;
+			} else {
+				if ($testValue != $value) {
+					//echo "$var: $testValue != $value\n";
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Поиск элементов массива содержащих в себе набор $search[ключ1=>значение1,...]
+	 * @param $array
+	 * @param $search
+	 * @return array
+	 */
+	public static function getItemsByFields($array,$search) {
+		$result=[];
+		foreach ($array as $item) {
+			if (static::compareItemFields($item,$search)) $result[]=$item;
+		}
+		return $result;
+	}
+	
+	
 }

@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\helpers\ArrayHelper;
+use app\models\SoftHits;
 use Yii;
 use app\models\Soft;
 use app\models\SoftSearch;
@@ -50,6 +51,7 @@ class SoftController extends Controller
      */
     public function actionIndex()
     {
+    	SoftHits::cacheAllItems();
         $searchModel = new SoftSearch();
 		$dataProvider=new ArrayDataProvider([
 			'allModels' => $searchModel->search(Yii::$app->request->queryParams)->getModels(),
