@@ -38,7 +38,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 	protected $attributeDataCache=null;
 	protected $attributeLabelsCache=null;
 	
-	private static $allItems=null;
+	protected static $allItems=null;
 	
 	/** @var bool при сохранении не менять отметку времени и не менять время обновления */
 	protected $doNotChangeAuthor=false;
