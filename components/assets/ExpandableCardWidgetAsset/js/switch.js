@@ -13,7 +13,7 @@ function ExpandableCardOversizeCheck($card) {
                 '</span>')
             if ($card.hasClass('switch-only-on-button'))
                 $toggle.on('click',function (){ExpandableCardSwitch($card)});
-            //    .on("mouseover", function(e){console.log("!");e.stopPropagation();});
+
             $card.prepend($toggle);
         }
     } else {
@@ -27,14 +27,18 @@ function ExpandableCardOversizeCheck($card) {
 
 
 function ExpandableCardSwitch ($card) {
+    console.log("toggle card");
+
     $card.toggleClass('compressed');
     ExpandableCardOversizeCheck($card);
 }
 
 function ExpandableCardInit (card) {
     let $card=$(card);
+    if ($card.attr('data-expandable-card')) return;
     if (!$card.hasClass('switch-only-on-button'))
         $card.on('click',function (){ExpandableCardSwitch($card)});
+    $card.attr('data-expandable-card',1);
     ExpandableCardOversizeCheck($card);
 }
 
