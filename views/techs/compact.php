@@ -92,7 +92,7 @@ if (is_object($model->state)) {
 			<?= Html::a('<span class="fas fa-plus-circle"></span>',
 				[
 					'/ports/create',
-					'Ports[arms_id]'=>$model->id
+					'Ports[techs_id]'=>$model->id
 				],[
 					'class'=>'open-in-modal-form',
 					'style'=>'display:none',
