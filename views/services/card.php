@@ -115,8 +115,6 @@ if(!$static_view) { ?>
 		
 		<?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 		
-		<br />
-		
 		<?php if (is_array($model->orgInets) && count($model->orgInets)) { ?>
 			<h4>Предоставляет ввод(ы) интернет:</h4>
 			<p>

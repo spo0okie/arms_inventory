@@ -24,6 +24,8 @@ class ItemObjectWidget extends Widget
 	public $model;				//модель на которую ссылаемся
 	public $link=null;			//ссылка на модель (Html::a)
 	public $show_archived=null;	//флаг отображения архивного элемента
+	public $archivedProperty='archived'; //какое свойство объекта означает признак "архивирован"
+	public $archived=null;		//явное указание что объект архивирован
 	public $archived_class='text-muted text-decoration-line-through';	//класс который добавлять к архивному элементу
 	public $item_class=null;	//класс который добавлять к элементу
 
@@ -44,8 +46,13 @@ class ItemObjectWidget extends Widget
 		);
 		
 		if (is_null($this->link)) $this->link=LinkObjectWidget::widget(['model'=>$this->model]);
-
-		$archived=$this->model->hasProperty('archived')?$this->model->archived:false;
+		
+		if (is_null($this->archived)) {
+			$archivedProperty = $this->archivedProperty;
+			$archived = $this->model->hasProperty($archivedProperty) ? $this->model->$archivedProperty : false;
+		} else {
+			$archived=$this->archived;
+		}
 
 		$display=($archived&&!$this->show_archived)?'style="display:none"':'';
 		
