@@ -2,4 +2,5 @@
 db-local.php
 params-local.php
 test_db-local.php
+web-local.php
 ldap.php
