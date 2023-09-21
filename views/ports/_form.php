@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DeleteObjectWidget;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
@@ -109,8 +110,14 @@ JS;
 		
 	</div>
 
-	<div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+	<div class="d-flex flex-row">
+        <?= Html::submitButton('Save', ['class' => 'btn btn-success me-auto']) ?>
+		<?= $model->isNewRecord?'':DeleteObjectWidget::widget([
+			'model'=>$model,
+			'hideUndeletable'=>true,
+			'options'=>['class'=>'align-self-end btn btn-danger'],
+			'url'=>['/ports/delete','id'=>$model->id,'return'=>'previous'],
+		]) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
