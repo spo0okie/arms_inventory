@@ -5,7 +5,7 @@ namespace app\modules\api\controllers;
 
 
 
-class UsersController extends \yii\rest\ActiveController
+class UsersController extends BaseRestController
 {
     
     public $modelClass='app\models\Users';
