@@ -10,15 +10,22 @@ namespace app\modules\api\controllers;
 
 
 use app\models\Users;
+use yii\db\ActiveQuery;
+use yii\db\Query;
 use yii\filters\auth\HttpBasicAuth;
+use yii\web\HttpException;
 use yii\web\User;
 
 class BaseRestController extends \yii\rest\ActiveController
 {
+	public $modelClass='app\models\ArmsModel';
 	
 	public $anyoneActions=[];
-	public $viewActions=['index','view','search','download'];
+	public $viewActions=['index','view','search','filter','download'];
 	public $editActions=['create','update','delete','upload'];
+	public static $searchFields=[	//набор полей по которым можно делать серч с мапом в SQL поля
+		'name'=>'name'
+	];
 	
 	public function behaviors()
 	{
@@ -50,6 +57,38 @@ class BaseRestController extends \yii\rest\ActiveController
 			];
 		}
 		return $behaviors;
+	}
+	
+	/**
+	 * Строит поисковый запрос исходя из полей которые переданы в запросе
+	 * @return ActiveQuery
+	 * @throws \HttpInvalidParamException
+	 */
+	public function searchFilter() {
+		$class=$this->modelClass;
+		/** @var $search ActiveQuery */
+		$search=$class::find();
+		
+		$filtersCount=0; //счетчик примененных фильтров
+		foreach (static::$searchFields as $param=>$field) {
+			$value=\Yii::$app->request->get($param);
+			if (!is_null($value)) {
+				$search->andWhere([$field=>$value]);
+				$filtersCount++;
+			}
+		}
+		if (!$filtersCount) { //не удалось применить ни одного фильтра
+			throw new \HttpInvalidParamException('Empty search filter');
+		}
+		return $search;
+	}
+	
+	public function actionSearch() {
+		return $this->searchFilter()->one();
+	}
+	
+	public function actionFilter() {
+		return $this->searchFilter()->all();
 	}
 	
 }
