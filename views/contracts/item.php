@@ -33,7 +33,8 @@ if (is_object($model)) {
 	    ]) ?>
 		<?php if ($show_payment && $model->total) {
 			$class=is_object($model->state)?$model->state->code:'';
-			echo "<span class='$class'>{$model->total} {$model->currency->symbol}</span>";
+			$total=number_format($model->total,2,'.',' ' );
+			echo "<span class='$class'>{$total}{$model->currency->symbol}</span>";
 		} ?>
 	    <?= $static_view?'':Html::a(
 		    '<span class="fas fa-pencil-alt"/>',
