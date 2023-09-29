@@ -1065,8 +1065,7 @@ ALTER TABLE `lic_items_in_arms`
 -- Ограничения внешнего ключа таблицы `login_journal`
 --
 ALTER TABLE `login_journal`
-  ADD CONSTRAINT `login_journal_ibfk_1` FOREIGN KEY (`comps_id`) REFERENCES `comps` (`id`),
-  ADD CONSTRAINT `login_journal_ibfk_2` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `login_journal_ibfk_1` FOREIGN KEY (`comps_id`) REFERENCES `comps` (`id`);
 
 --
 -- Ограничения внешнего ключа таблицы `manufacturers_dict`
