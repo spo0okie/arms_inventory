@@ -31,7 +31,7 @@ CREATE TABLE `arms` (
   `it_staff_id` varchar(16) DEFAULT NULL COMMENT 'Сотрудник службы ИТ',
   `places_id` int(11) DEFAULT NULL,
   `comment` varchar(128) DEFAULT NULL COMMENT 'Комментарий',
-  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP COMMENT 'Время изменения',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Время изменения',
   `state_id` int(11) DEFAULT NULL,
   `history` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
