@@ -111,7 +111,7 @@ CREATE TABLE `contracts_in_materials` (
   `id` int(11) NOT NULL,
   `contracts_id` int(11) NOT NULL,
   `materials_id` int(11) NOT NULL
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 # Disable Foreign Keys Check
 SET FOREIGN_KEY_CHECKS = 1;

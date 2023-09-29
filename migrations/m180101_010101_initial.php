@@ -34,7 +34,7 @@ CREATE TABLE `arms` (
   `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP COMMENT 'Время изменения',
   `state_id` int(11) DEFAULT NULL,
   `history` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Рабочие места';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -57,7 +57,7 @@ CREATE TABLE `comps` (
   `arm_id` int(11) DEFAULT NULL COMMENT 'Рабочее место',
   `comment` varchar(128) DEFAULT NULL COMMENT 'Комментарий',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Время обновления'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Компьютеры';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -122,7 +122,7 @@ CREATE TABLE `domains` (
   `name` varchar(16) NOT NULL COMMENT 'Имя',
   `fqdn` varchar(128) NOT NULL COMMENT 'FQDN',
   `comment` varchar(255) DEFAULT NULL COMMENT 'Комментарий'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Домены';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -134,7 +134,7 @@ CREATE TABLE `hw_ignore` (
   `id` int(11) NOT NULL COMMENT 'ID',
   `fingerprint` varchar(255) NOT NULL COMMENT 'Отпечаток ',
   `comment` varchar(255) NOT NULL COMMENT 'Комментарий'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Список игнорируемого железа';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -148,7 +148,7 @@ CREATE TABLE `lic_groups` (
   `descr` varchar(255) NOT NULL COMMENT 'Описание',
   `comment` varchar(255) DEFAULT NULL COMMENT 'Комментарий',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Время создания'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Группы лицензий';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -177,7 +177,7 @@ CREATE TABLE `lic_items` (
   `active_from` date DEFAULT NULL COMMENT 'Начало периода действия',
   `active_to` date DEFAULT NULL COMMENT 'Окончание периода действия',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Время создания'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Лицензии';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -203,7 +203,7 @@ CREATE TABLE `lic_types` (
   `descr` varchar(128) NOT NULL COMMENT 'Описание',
   `comment` text NOT NULL COMMENT 'Комментарий',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Время создания'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Типы лицензирования';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -232,7 +232,7 @@ CREATE TABLE `manufacturers` (
   `full_name` varchar(255) DEFAULT NULL COMMENT 'Полное название',
   `comment` varchar(255) DEFAULT NULL COMMENT 'Комментарий',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Время создания'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Производители ПО и железа';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -244,7 +244,7 @@ CREATE TABLE `manufacturers_dict` (
   `id` int(11) NOT NULL,
   `word` varchar(255) NOT NULL COMMENT 'Вариант написания',
   `manufacturers_id` int(11) NOT NULL COMMENT 'Производитель'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Словарь производителей';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -298,7 +298,7 @@ CREATE TABLE `org_struct` (
   `id` varchar(16) NOT NULL COMMENT 'Идентификатор (seqnr)',
   `pup` varchar(16) NOT NULL COMMENT 'Вышестоящий отдел',
   `name` varchar(255) NOT NULL COMMENT 'Название подразделения'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Структурные подразделения';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -383,7 +383,7 @@ CREATE TABLE `soft` (
   `items` text COMMENT 'Элементы входящие в пакет ПО',
   `additional` text COMMENT 'Дополнительные компоненты',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Время создания'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Программное обеспечение';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -396,7 +396,7 @@ CREATE TABLE `soft_hits` (
   `soft_id` int(11) NOT NULL,
   `comp_id` int(11) NOT NULL,
   `hits` text COLLATE utf8_unicode_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Софт автоматически обнаруженный на компах';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -408,7 +408,7 @@ CREATE TABLE `soft_in_comps` (
   `id` int(11) NOT NULL COMMENT 'ID',
   `comp_id` int(11) NOT NULL COMMENT 'Компьютер',
   `soft_id` int(11) NOT NULL COMMENT 'ПО'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Отношение софта и компов';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -432,7 +432,7 @@ CREATE TABLE `soft_in_lists` (
   `id` int(11) NOT NULL COMMENT 'id',
   `soft_id` int(11) NOT NULL,
   `list_id` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -445,7 +445,7 @@ CREATE TABLE `soft_lists` (
   `name` varchar(32) NOT NULL COMMENT 'Служебное имя',
   `descr` varchar(256) NOT NULL COMMENT 'Описание',
   `comment` text NOT NULL COMMENT 'Комментарий'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Списки ПО';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -469,7 +469,7 @@ CREATE TABLE `techs` (
   `url` text COMMENT 'Ссылка',
   `comment` text COMMENT 'Комментарий',
   `history` text NOT NULL COMMENT 'Записная кинжка'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Рабочие места';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -498,7 +498,7 @@ CREATE TABLE `tech_states` (
   `code` varchar(32) NOT NULL,
   `name` varchar(128) NOT NULL,
   `descr` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -535,7 +535,7 @@ CREATE TABLE `users` (
   `Bday` varchar(16) DEFAULT NULL,
   `manager_id` varchar(16) DEFAULT NULL,
   `nosync` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Индексы сохранённых таблиц
