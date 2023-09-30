@@ -10,7 +10,7 @@ class m191103_203015_add_procedures_for_places extends Migration
     /**
      * {@inheritdoc}
      */
-    public function Up()
+    public function safeUp()
     {
     	$sql=<<<SQL
     	set names utf8mb4;
@@ -72,7 +72,7 @@ SQL;
     /**
      * {@inheritdoc}
      */
-    public function Down()
+    public function safeDown()
     {
 		$sql=<<<SQL
 			DROP FUNCTION IF EXISTS getplacepath;
