@@ -50,6 +50,7 @@ SQL;
 	
 	static $getPlaceTopProc=<<<SQL
 set names utf8mb4;
+delimiter //
 CREATE PROCEDURE getplacetop(IN place_id INT, OUT top INT)
 COMMENT 'Recursive last parent search'
 READS SQL DATA
@@ -63,17 +64,18 @@ BEGIN
     ELSE
         CALL getplacetop(tempparent, top);
     END IF;
-END;
+END//
 SQL;
 	
 	static $getPlaceTopFunc=<<<SQL
 set names utf8mb4;
+delimiter //
 CREATE FUNCTION getplacetop(place_id INT) RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE res INT;
     CALL getplacetop(place_id, res);
     RETURN res;
-END;
+END//
 SQL;
 	
 	/**
