@@ -15,6 +15,10 @@ class m191103_203015_add_procedures_for_places extends Migration
     	$sql=<<<SQL
 set names utf8mb4;
 DROP PROCEDURE IF EXISTS getplacepath;
+DROP FUNCTION IF EXISTS getplacepath;
+DROP PROCEDURE IF EXISTS getplacetop;
+DROP FUNCTION IF EXISTS getplacetop;
+
 CREATE PROCEDURE getplacepath(IN place_id INT, OUT path TEXT CHARACTER SET utf8mb4)
 COMMENT 'Recursive path build'
 READS SQL DATA
@@ -33,7 +37,6 @@ BEGIN
     END IF;
 END;
 
-DROP FUNCTION IF EXISTS getplacepath//
 CREATE FUNCTION getplacepath(place_id INT) RETURNS TEXT CHARACTER SET utf8mb4 DETERMINISTIC
 BEGIN
     DECLARE res TEXT CHARACTER SET utf8mb4;
@@ -42,10 +45,9 @@ BEGIN
 END;
 
 
-DROP PROCEDURE IF EXISTS getplacetop//
+CREATE PROCEDURE getplacetop(IN place_id INT, OUT top INT)
 COMMENT 'Recursive last parent search'
 READS SQL DATA
-CREATE PROCEDURE getplacetop(IN place_id INT, OUT top INT)
 BEGIN
     DECLARE tempparent INT;
     SET max_sp_recursion_depth = 32;
@@ -58,7 +60,6 @@ BEGIN
     END IF;
 END;
 
-DROP FUNCTION IF EXISTS getplacetop//
 CREATE FUNCTION getplacetop(place_id INT) RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE res INT;
