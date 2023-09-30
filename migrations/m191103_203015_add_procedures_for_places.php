@@ -17,7 +17,6 @@ SQL;
 
 	static $getPlacePathProc=<<<SQL
 set names utf8mb4;
-delimiter //
 CREATE PROCEDURE getplacepath(IN place_id INT, OUT path TEXT CHARACTER SET utf8mb4)
 COMMENT 'Recursive path build'
 READS SQL DATA
@@ -34,23 +33,21 @@ BEGIN
         CALL getplacepath(tempparent, temppath);
         SET path = CONCAT(temppath, '/', placename);
     END IF;
-END//
+END;
 SQL;
 	
 	static $getPlacePathFunc=<<<SQL
 set names utf8mb4;
-delimiter //
 CREATE FUNCTION getplacepath(place_id INT) RETURNS TEXT CHARACTER SET utf8mb4 DETERMINISTIC
 BEGIN
     DECLARE res TEXT CHARACTER SET utf8mb4;
     CALL getplacepath(place_id, res);
     RETURN res;
-END//
+END;
 SQL;
 	
 	static $getPlaceTopProc=<<<SQL
 set names utf8mb4;
-delimiter //
 CREATE PROCEDURE getplacetop(IN place_id INT, OUT top INT)
 COMMENT 'Recursive last parent search'
 READS SQL DATA
@@ -64,18 +61,17 @@ BEGIN
     ELSE
         CALL getplacetop(tempparent, top);
     END IF;
-END//
+END;
 SQL;
 	
 	static $getPlaceTopFunc=<<<SQL
 set names utf8mb4;
-delimiter //
 CREATE FUNCTION getplacetop(place_id INT) RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE res INT;
     CALL getplacetop(place_id, res);
     RETURN res;
-END//
+END;
 SQL;
 	
 	/**
