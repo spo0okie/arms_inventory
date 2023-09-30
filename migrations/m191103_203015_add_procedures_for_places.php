@@ -6,19 +6,17 @@ use yii\db\Migration;
  * Class m191103_203015_add_procedures_for_places
  */
 class m191103_203015_add_procedures_for_places extends Migration
+
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-    	$sql=<<<SQL
-set names utf8mb4;
+	static $drop= <<<SQL
 DROP PROCEDURE IF EXISTS getplacepath;
 DROP FUNCTION IF EXISTS getplacepath;
 DROP PROCEDURE IF EXISTS getplacetop;
 DROP FUNCTION IF EXISTS getplacetop;
+SQL;
 
+	static $getPlacePathProc=<<<SQL
+set names utf8mb4;
 CREATE PROCEDURE getplacepath(IN place_id INT, OUT path TEXT CHARACTER SET utf8mb4)
 COMMENT 'Recursive path build'
 READS SQL DATA
@@ -36,15 +34,20 @@ BEGIN
         SET path = CONCAT(temppath, '/', placename);
     END IF;
 END;
-
+SQL;
+	
+	static $getPlacePathFunc=<<<SQL
+set names utf8mb4;
 CREATE FUNCTION getplacepath(place_id INT) RETURNS TEXT CHARACTER SET utf8mb4 DETERMINISTIC
 BEGIN
     DECLARE res TEXT CHARACTER SET utf8mb4;
     CALL getplacepath(place_id, res);
     RETURN res;
 END;
-
-
+SQL;
+	
+	static $getPlaceTopProc=<<<SQL
+set names utf8mb4;
 CREATE PROCEDURE getplacetop(IN place_id INT, OUT top INT)
 COMMENT 'Recursive last parent search'
 READS SQL DATA
@@ -59,7 +62,10 @@ BEGIN
         CALL getplacetop(tempparent, top);
     END IF;
 END;
-
+SQL;
+	
+	static $getPlaceTopFunc=<<<SQL
+set names utf8mb4;
 CREATE FUNCTION getplacetop(place_id INT) RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE res INT;
@@ -67,23 +73,25 @@ BEGIN
     RETURN res;
 END;
 SQL;
-
-		$this->execute($sql);
+	
+	/**
+     * {@inheritdoc}
+     */
+    public function up()
+    {
+		$this->execute(static::$drop);
+		$this->execute(static::$getPlacePathProc);
+		$this->execute(static::$getPlacePathFunc);
+		$this->execute(static::$getPlaceTopProc);
+		$this->execute(static::$getPlaceTopFunc);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function safeDown()
+    public function down()
     {
-		$sql=<<<SQL
-			DROP FUNCTION IF EXISTS getplacepath;
-    		DROP PROCEDURE IF EXISTS getplacepath;
-			DROP FUNCTION IF EXISTS getplacetop;
-			DROP PROCEDURE IF EXISTS getplacetop;
-SQL;
-	
-	    $this->execute($sql);
+		$this->execute(static::$drop);
     }
 
     /*
