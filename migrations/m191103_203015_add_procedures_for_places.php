@@ -64,6 +64,7 @@ BEGIN
     RETURN res;
 END//
 delimiter ;
+COMMIT;
 SQL;
 
 		$this->execute($sql);
