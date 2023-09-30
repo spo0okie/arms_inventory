@@ -14,9 +14,10 @@ class m191103_203015_add_procedures_for_places extends Migration
     {
     	$sql=<<<SQL
 set names utf8mb4;
-delimiter //
-DROP PROCEDURE IF EXISTS getplacepath//
+DROP PROCEDURE IF EXISTS getplacepath;
 CREATE PROCEDURE getplacepath(IN place_id INT, OUT path TEXT CHARACTER SET utf8mb4)
+COMMENT 'Recursive path build'
+READS SQL DATA
 BEGIN
     DECLARE placename VARCHAR(20) CHARACTER SET utf8mb4;
     DECLARE temppath TEXT CHARACTER SET utf8mb4;
@@ -30,7 +31,7 @@ BEGIN
         CALL getplacepath(tempparent, temppath);
         SET path = CONCAT(temppath, '/', placename);
     END IF;
-END//
+END;
 
 DROP FUNCTION IF EXISTS getplacepath//
 CREATE FUNCTION getplacepath(place_id INT) RETURNS TEXT CHARACTER SET utf8mb4 DETERMINISTIC
@@ -38,10 +39,12 @@ BEGIN
     DECLARE res TEXT CHARACTER SET utf8mb4;
     CALL getplacepath(place_id, res);
     RETURN res;
-END//
+END;
 
 
 DROP PROCEDURE IF EXISTS getplacetop//
+COMMENT 'Recursive last parent search'
+READS SQL DATA
 CREATE PROCEDURE getplacetop(IN place_id INT, OUT top INT)
 BEGIN
     DECLARE tempparent INT;
@@ -53,8 +56,7 @@ BEGIN
     ELSE
         CALL getplacetop(tempparent, top);
     END IF;
-END//
-
+END;
 
 DROP FUNCTION IF EXISTS getplacetop//
 CREATE FUNCTION getplacetop(place_id INT) RETURNS INT DETERMINISTIC
@@ -62,9 +64,7 @@ BEGIN
     DECLARE res INT;
     CALL getplacetop(place_id, res);
     RETURN res;
-END//
-delimiter ;
-COMMIT;
+END;
 SQL;
 
 		$this->execute($sql);
