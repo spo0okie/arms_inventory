@@ -13,7 +13,7 @@ class m191103_203015_add_procedures_for_places extends Migration
     public function safeUp()
     {
     	$sql=<<<SQL
-    	set names utf8mb4;
+set names utf8mb4;
 delimiter //
 DROP PROCEDURE IF EXISTS getplacepath//
 CREATE PROCEDURE getplacepath(IN place_id INT, OUT path TEXT CHARACTER SET utf8mb4)

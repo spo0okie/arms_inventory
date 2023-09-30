@@ -36,7 +36,7 @@ class m230223_090652_alter_table_techs extends Migration
 		$this->addColumnIfNotExist('techs','installed_pos',$this->string(16));
 		$this->addColumnIfNotExist('techs','head_id',$this->integer()->null(),true);
 		$this->addColumnIfNotExist('techs','responsible_id',$this->integer()->null(),true);
-		$this->addColumnIfNotExist('techs','hw',$this->text()->defaultValue(''));
+		$this->addColumnIfNotExist('techs','hw',$this->text());
 		$this->addColumnIfNotExist('techs','updated_at',$this->timestamp());
 		$this->addColumnIfNotExist('techs','installed_pos_end',$this->string(128));
 		$this->alterColumn('techs','installed_pos',$this->string(128));
