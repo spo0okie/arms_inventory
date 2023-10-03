@@ -9,14 +9,47 @@ namespace yii\helpers;
 
 class Url extends \yii\helpers\BaseUrl {
 	
+	public static $localServerCache=null;
+	
 	// Set the $scheme to be true by default.
 	public static function to($url = '', $scheme = false) {
-		return parent::to($url, $scheme || (!empty(\Yii::$app->request->origin)));
+		
+		return parent::to($url, $scheme || (!empty(\Yii::$app->request->origin) && !static::sameServer(\Yii::$app->request->origin)));
 	}
 	
 	// Set the $scheme to be true by default.
 	public static function toRoute($route, $scheme = false) {
-		return parent::toRoute($route, $scheme || (!empty(\Yii::$app->request->origin)));
+		return parent::toRoute($route, $scheme || (!empty(\Yii::$app->request->origin) && !static::sameServer(\Yii::$app->request->origin)));
+	}
+	
+	/**
+	 * Возвращает имя сервера из url
+	 * @param $url
+	 * @return mixed|string
+	 */
+	public static function serverName($url) {
+		$nonScheme=explode('://',$url)[1];
+		return explode('/',$nonScheme)[0];
+	}
+	
+	/**
+	 * Локальный сервер приложения
+	 * @return string
+	 */
+	public static function localServer() {
+		if (is_null(static::$localServerCache)) {
+			static::$localServerCache=strtolower(static::serverName(\Yii::$app->homeUrl));
+		}
+		return static::$localServerCache;
+	}
+	
+	/**
+	 * Проверка что URL ведет на тот же сервер что и наш
+	 * @param $url
+	 * @return bool
+	 */
+	public static function sameServer($url) {
+		return (static::localServer()) == (strtolower(static::serverName($url)));
 	}
 	
 	/**
