@@ -34,5 +34,6 @@ phpunit.phar
 tests/_output/*
 tests/_support/_generated
 
+web/scans/*
+!web/scans/.htaccess
 
-web/scans
