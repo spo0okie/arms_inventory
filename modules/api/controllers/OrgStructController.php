@@ -10,14 +10,7 @@ namespace app\modules\api\controllers;
 use app\models\OrgStruct;
 
 
-class OrgStructController extends \yii\rest\ActiveController
+class OrgStructController extends BaseRestController
 {
 	public $modelClass='app\models\OrgStruct';
-	
-	public function actions()
-	{
-		$actions = parent::actions();
-		unset($actions['index']);
-		return $actions;
-	}
 }
