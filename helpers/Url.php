@@ -28,7 +28,8 @@ class Url extends \yii\helpers\BaseUrl {
 	 * @return mixed|string
 	 */
 	public static function serverName($url) {
-		$nonScheme=explode('://',$url)[1];
+		$schemeTokens=explode('://',$url)[1];
+		$nonScheme=$schemeTokens[1]??$url;
 		return explode('/',$nonScheme)[0];
 	}
 	
