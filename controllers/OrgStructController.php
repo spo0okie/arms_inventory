@@ -57,6 +57,7 @@ class OrgStructController extends Controller
 		return $this->render('index', [
 			'models' => OrgStruct::find()
 				->where(['org_id'=>$org_id])
+				->orderBy(['name'=>SORT_ASC])
 				->all(),
 			'org_id'=>$org_id
 		]);
