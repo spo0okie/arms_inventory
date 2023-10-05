@@ -35,7 +35,13 @@ class OrgStruct extends ArmsModel
     public function rules()
     {
         return [
-			[['id', 'org_id'], 'required'],
+			['id', 'filter', 'filter' => function ($value) {
+				/* генерируем ID для новой записи если он пустой*/
+				if (strlen($this->id) || !$this->isNewRecord) return $this->id;
+				
+				return (string)static::fetchNextId();
+			}],
+			[['org_id','name'], 'required'],
 			[['org_id'], 'integer'],
 			[['id', 'pup'], 'string', 'max' => 16],
             [['name'], 'string', 'max' => 255],
@@ -57,7 +63,7 @@ class OrgStruct extends ArmsModel
 				'Организация',
 			],
             'pup' => [
-            	'ID родительского подразделения',
+            	'Родительское подразделение',
 			],
             'name' => 'Наименование подразделения',
         ];
