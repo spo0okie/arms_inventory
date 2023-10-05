@@ -11,17 +11,7 @@ use yii\widgets\DetailView;
 
 $this->title = $model->name;
 
-if (is_object($model->partner)) {
-	$this->params['breadcrumbs'][] = ['label' => $model->partner->bname, 'url'=>['partners/view','id'=>$model->org_id]];
-	$this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index','org_id'=>$model->org_id]];
-} else {
-	$this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index']];
-}
-
-foreach ($model->chain as $item) $this->params['breadcrumbs'][]=[
-	'label'=>$item->name,
-	'url'=>$model->id==$item->id?false:['org-struct/view','id'=>$item->id],
-];
+$this->render('breadcrumbs',['partner'=>$model->partner,'model'=>$model]);
 
 \yii\web\YiiAsset::register($this);
 

@@ -9,8 +9,12 @@ use kartik\grid\GridView;
 /* @var $org_id integer */
 \yii\helpers\Url::remember();
 
+$partner=\app\models\Partners::findOne($org_id);
+
 $this->title = \app\models\OrgStruct::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+
+$this->render('breadcrumbs',['partner'=>$partner,'model'=>null]);
+
 $renderer=$this;
 ?>
 <div class="org-struct-index">

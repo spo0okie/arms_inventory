@@ -7,17 +7,7 @@ use yii\helpers\Html;
 
 $this->title = "Новое подразделение";
 
-if (is_object($model->partner)) {
-	$this->params['breadcrumbs'][] = ['label' => $model->partner->bname, 'url'=>['partners/view','id'=>$model->org_id]];
-	$this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index','org_id'=>$model->org_id]];
-} else {
-	$this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index']];
-}
-
-foreach ($model->chain as $item) if ($item->id!=$model->id) $this->params['breadcrumbs'][]=[
-	'label'=>$item->name,
-	'url'=>['org-struct/view','id'=>$item->id],
-];
+$this->render('breadcrumbs',['partner'=>$model->partner,'model'=>$model->parent]);
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
