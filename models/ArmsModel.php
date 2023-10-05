@@ -407,4 +407,10 @@ class ArmsModel extends \yii\db\ActiveRecord
 		return $query->all();
 	}
 	
+	public static function fetchNextId() {
+		$max=static::find()->select(['id'])->orderBy(['id'=>SORT_DESC])->one();
+		$id=is_object($max)?$max['id']:0;
+		return ++$id;
+	}
+	
 }
