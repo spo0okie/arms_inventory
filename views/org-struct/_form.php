@@ -40,7 +40,7 @@ if (!isset($modalParent)) $modalParent=null;
 			],
 		],
 		'pluginOptions' => [
-			'depends'=>['users-org_id'],
+			'depends'=>['orgstruct-org_id'],
 			'url'=>\yii\helpers\Url::to(['/org-struct/dep-drop']),
 		]
 	]) ?>
