@@ -8,9 +8,11 @@ use app\components\Alert;
 use yii\bootstrap5\Tabs;
 use app\assets\AppAsset;
 use yii\helpers\Html;
+use yii\helpers\Url;
 
-	
+
 AppAsset::register($this);
+$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png', 'href' => Url::to(['/favicon.png'])]);
 
 if (isset($this->params['layout-container'])) {
 	$containerClass=$this->params['layout-container'];
