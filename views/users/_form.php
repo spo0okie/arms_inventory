@@ -33,13 +33,6 @@ if (!isset($modalParent)) $modalParent=null;
 						'data' => \app\models\Partners::fetchNames(),
 						'options' => [
 							'placeholder' => 'Организация',
-							/*'onchange' => <<<JS
-	select2id=$("select#users-orgeh").attr("data-krajee-select2");
-	$("select#users-orgeh")
-	.select2("destroy")
-	.select2({data:[1,2,3]})
-	.select2(eval(select2id));
-JS*/
 						],
 						'toggleAllSettings'=>['selectLabel'=>null],
 						'pluginOptions' => [
