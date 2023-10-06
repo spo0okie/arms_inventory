@@ -10,6 +10,7 @@ namespace app\modules\api\controllers;
 
 
 use app\models\Users;
+use HttpInvalidParamException;
 use yii\db\ActiveQuery;
 use yii\db\Query;
 use yii\filters\auth\HttpBasicAuth;
@@ -66,7 +67,7 @@ class BaseRestController extends \yii\rest\ActiveController
 	/**
 	 * Строит поисковый запрос исходя из полей которые переданы в запросе
 	 * @return ActiveQuery
-	 * @throws \HttpInvalidParamException
+	 * @throws HttpInvalidParamException
 	 */
 	public function searchFilter() {
 		$class=$this->modelClass;
@@ -91,7 +92,7 @@ class BaseRestController extends \yii\rest\ActiveController
 		}
 		
 		if (!$filtersCount) { //не удалось применить ни одного фильтра
-			throw new \HttpInvalidParamException('Empty search filter');
+			throw new HttpInvalidParamException('Empty search filter');
 		}
 		
 		if (count(static::$searchOrder)) {

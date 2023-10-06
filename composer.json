@@ -57,7 +57,8 @@
     "a1inani/yii2-modal-ajax": "@dev",
 	"spo0okie/yii2-rbac-plus": "dev-master",
     "rlanvin/php-ip": "^2.1",
-	"thomaspark/bootswatch": "dev-master"
+	"thomaspark/bootswatch": "dev-master",
+    "ext-http": "*"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.0.0",
