@@ -13,6 +13,7 @@ class m231006_070638_user_rest_unify extends Migration
     public function safeUp()
     {
 		$this->alterColumn('users','employee_id',$this->string(16)->null()->defaultValue(null));
+		$this->alterColumn('users','Doljnost',$this->string()->null()->defaultValue(null));
     }
 
     /**
@@ -21,6 +22,7 @@ class m231006_070638_user_rest_unify extends Migration
     public function safeDown()
     {
 		$this->alterColumn('users','employee_id',$this->string(16));
+		$this->alterColumn('users','Doljnost',$this->string());
     }
 
     /*
