@@ -26,6 +26,10 @@ class BaseRestController extends \yii\rest\ActiveController
 	public static $searchFields=[	//набор полей по которым можно делать серч с мапом в SQL поля
 		'name'=>'name'
 	];
+	public static $searchFieldsLike=[];	//набор полей по которым можно делать Like поиск
+	
+	
+	public static $searchOrder=[]; //порядок в котором сортировать поиск
 	
 	public function behaviors()
 	{
@@ -77,9 +81,23 @@ class BaseRestController extends \yii\rest\ActiveController
 				$filtersCount++;
 			}
 		}
+		
+		foreach (static::$searchFieldsLike as $param=>$field) {
+			$value=\Yii::$app->request->get($param);
+			if (!is_null($value)) {
+				$search->andWhere(['Like',$field,$value]);
+				$filtersCount++;
+			}
+		}
+		
 		if (!$filtersCount) { //не удалось применить ни одного фильтра
 			throw new \HttpInvalidParamException('Empty search filter');
 		}
+		
+		if (count(static::$searchOrder)) {
+			$search->orderBy(static::$searchOrder);
+		}
+		
 		return $search;
 	}
 	
