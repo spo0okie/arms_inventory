@@ -9,23 +9,43 @@ class UsersController extends BaseRestController
 {
     
     public $modelClass='app\models\Users';
+	
+	public static $searchFields=[
+		'id',
+		'Ename'=>'Ename',
+		'name'=>'Ename',
+		'employee_id'=>'employee_id',
+		'num'=>'employee_id',
+		'login'=>'Login',
+		'org'=>'org_id',
+		'org_id'=>'org_id',
+		'uid'=>'uid'
+	];
+	
+	public static $searchFieldsLike=[
+		'mobile'=>'mobile'
+	];
+	
+	public static $searchOrder=[
+		'Uvolen'=>SORT_ASC,
+		'Persg'=>SORT_ASC,
+	];
     
     public function actions()
     {
         $actions = parent::actions();
-        unset($actions['view']);
-		unset($actions['index']);
 	    return $actions;
         //return ['view','update'];
     }
+	
+	/**
+	 * ТЗ по поиску примерно следующее
+	 * нужно найти все записи о пользователе со всеми вариантами трудоустройства
+	 * сформировать из этого табличку всех типов трудоустройтсв сотрудника (при наличии 2х трудоустройств одного типа предпочитать активное (не уволен))
+	 *
+	 */
 
-	public function actionView($id='',$num='',$name='',$org='',$login='',$mobile='',$uid=''){
-		/**
-		 * ТЗ по поиску примерно следующее
-		 * нужно найти все записи о пользователе со всеми вариантами трудоустройства
-		 * сформировать из этого табличку всех типов трудоустройтсв сотрудника (при наличии 2х трудоустройств одного типа предпочитать активное (не уволен))
-		 *
-		 */
+	/*public function actionView($id='',$num='',$name='',$org='',$login='',$mobile='',$uid=''){
 		//ищем пользователя
 		$user = \app\models\Users::find()
 			->andFilterWhere(['id' => $id])
@@ -63,6 +83,6 @@ class UsersController extends BaseRestController
 			if (is_object($user)) return $user;
 		}
 		throw new \yii\web\NotFoundHttpException("not found");
-	}
+	}*/
 
 }
