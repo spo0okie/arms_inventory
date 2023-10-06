@@ -30,13 +30,6 @@ class UsersController extends BaseRestController
 		'Uvolen'=>SORT_ASC,
 		'Persg'=>SORT_ASC,
 	];
-    
-    public function actions()
-    {
-        $actions = parent::actions();
-	    return $actions;
-        //return ['view','update'];
-    }
 	
 	/**
 	 * ТЗ по поиску примерно следующее
