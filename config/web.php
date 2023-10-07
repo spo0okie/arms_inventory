@@ -100,6 +100,7 @@ $config = ArrayHelper::merge([
 						'manufacturers-dict'=>'api/manufacturers-dict',
 						'org-struct'=>'api/org-struct',
 						'partners'=>'api/partners',
+						'phones'=>'api/phones',
 						'scans'=>'api/scans',
 						'services'=>'api/services',
 						'soft'=>'api/soft',

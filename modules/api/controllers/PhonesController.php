@@ -6,43 +6,18 @@ use app\models\Domains;
 use app\models\Techs;
 
 
-class PhonesController extends \yii\rest\ActiveController
+class PhonesController extends BaseRestController
 {
-    
-    public $modelClass='app\models\Techs';
-    
-    public function actions()
-    {
-        //$actions = parent::actions();
-        //$actions['search'];
-        return ['search','caller-id'];
-    }
 	
-	public function actionSearch($num){
-		//ищем телефонный аппарат по номеру
-		$tech = \app\models\Techs::find()
-			->where(['comment' => $num ])
-			->one();
-		/**
-		 * @var $tech Techs
-		 */
-		//если нашли
-		if (is_object($tech)){
-			//он прикреплен к АРМ?
-			if (is_object($arm=$tech->arm)) {
-				//пользователь у АРМа есть?
-				if (is_object($user=$arm->user)) {
-					return $user->Ename;
-				}
-			}
-			if (is_object($user=$tech->user)) {
-				return $user->Ename;
-			}
-		}
-		throw new \yii\web\NotFoundHttpException("not found");
+	public $viewActions=['search-by-user','search-by-num'];
+	public $editActions=[];
+	public static $searchFields=[];
+	
+	public function actions(){
+		return $this->viewActions;
 	}
 	
-	public function actionCallerId($num){
+	public function actionSearchByNum($num){
 		//ищем телефонный аппарат по номеру
 		$tech = \app\models\Techs::find()
 			->where(['comment' => $num ])
