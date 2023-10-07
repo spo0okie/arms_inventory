@@ -32,8 +32,5 @@ if (!isset($static_view)) $static_view=false;
             </div>
         <?php } ?>
     </div>
-    <div class="scans-thumb-text">
-		<?= $model->descr ?>
-    </div>
 
 </div>
