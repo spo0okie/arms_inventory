@@ -17,7 +17,14 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="comps-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin([
+		'enableClientValidation' => false,
+		'enableAjaxValidation' => true,
+		'validateOnBlur' => true,
+		'validateOnChange' => true,
+		'validateOnSubmit' => true,
+		'validationUrl' => $model->isNewRecord?['comps/validate']:['comps/validate','id'=>$model->id],
+	]); ?>
 
 	<div class="row">
 		<div class="col-md-6">

@@ -84,5 +84,37 @@ class Domains extends \yii\db\ActiveRecord
 		}
 		return null;
 	}
+	
+	/**
+	 * Должно вытащить ID домена и вернуть
+	 * вернет номер домена, Null если не нашлось или False если ошибка в формате имени
+	 * @param $name
+	 * @return array|false|null
+	 */
+	public static function fetchFromCompName($name) {
+		$slashPos=mb_strpos($name,'\\');
+		$dotPos=mb_strpos($name,'.');
+		if ($slashPos && $dotPos) return false;
+
+		//DOMAIN\comp
+		if ($slashPos) {
+			$tokens=explode('\\',$name);
+			if (count($tokens)>2) return false;
+			
+			return [static::findByName($tokens[0]),$tokens[1],$tokens[0]];
+		}
+		
+		//FQDN
+		if ($dotPos) {
+			$tokens=explode('.',$name);
+			$compName=$tokens[0];
+			unset ($tokens[0]);
+			$domainFqdn=implode('.',$tokens);
+			return [static::findByFQDN($domainFqdn),$compName,$domainFqdn];
+		}
+		
+		//nor any of above
+		return [null,$name,''];
+	}
 
 }

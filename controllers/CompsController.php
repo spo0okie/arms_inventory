@@ -2,12 +2,11 @@
 
 namespace app\controllers;
 
+use app\models\Domains;
 use Yii;
 use app\models\Comps;
 use app\models\CompsSearch;
 use yii\data\ActiveDataProvider;
-use yii\helpers\Url;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -15,8 +14,10 @@ use yii\web\Response;
 /**
  * CompsController implements the CRUD actions for Comps model.
  */
-class CompsController extends Controller
+class CompsController extends ArmsBaseController
 {
+	public $modelClass='app\models\Comps';
+	
     /**
      * @inheritdoc
      */
@@ -33,7 +34,7 @@ class CompsController extends Controller
 		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
-				['allow' => true, 'actions'=>['create','update','delete','unlink','addsw','rmsw','ignoreip','unignoreip','dupes','absorb'], 'roles'=>['editor']],
+				['allow' => true, 'actions'=>['create','update','delete','unlink','addsw','rmsw','ignoreip','unignoreip','dupes','absorb','validate'], 'roles'=>['editor']],
 				['allow' => true, 'actions'=>['index','view','ttip','ttip-hw','item','item-by-name'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
@@ -110,50 +111,27 @@ class CompsController extends Controller
 	
 	public function actionItemByName($name)
 	{
-		//распарсиваем FQDN
-		if (strpos($name,'.')>0) {
-			$tokens=explode('.',$name);
-			$compName=$tokens[0];
-			unset ($tokens[0]);
-			$fqdn=implode('.',$tokens);
-			if (($domain = \app\models\Domains::findOne(['fqdn'=>$fqdn])) !== null) {
-				if (($model = Comps::findOne(['name'=>$compName,'domain_id'=>$domain->id])) !== null) {
-					return $this->renderPartial('item', ['model' => $model,'static_view'=>true]);
-				}
-			}
-			throw new NotFoundHttpException('The requested page does not exist.');
+		$nameParts=Domains::fetchFromCompName($name);
+		
+		if ($nameParts===false) {
+			throw new \HttpInvalidParamException('Invalid comp name format');
 		}
 		
-		//иначе в формате домен/имя
-		$tokens=explode('\\',$name);
-		if (count($tokens)==1) {
-			if (($model = Comps::findOne(['name'=>$name])) !== null) {
-				return $this->renderPartial('item', ['model' => $model	,'static_view'=>true]);
-			}
-			throw new NotFoundHttpException('The requested page does not exist.');
-		} elseif (count($tokens)==2) {
-			if (($domain = \app\models\Domains::findOne(['name'=>$tokens[0]])) !== null) {
-				if (($model = Comps::findOne(['name'=>$tokens[1],'domain_id'=>$domain->id])) !== null) {
-					return $this->renderPartial('item', ['model' => $model	,'static_view'=>true]);
-				}
-			}
-			throw new NotFoundHttpException('The requested page does not exist.');
+		$domain_id=$nameParts[0];
+		$compName=$nameParts[1];
+		$domainName=$nameParts[2];
+		
+		if (is_null($domain_id)) {
+			throw new NotFoundHttpException("Domain $domainName not found");
 		}
+		
+		if (is_null($model = Comps::findOne(['name'=>$compName,'domain_id'=>$domain_id]))) {
+			throw new NotFoundHttpException("Computer $compName not found in domain $domainName");
+		}
+		
+		return $this->renderPartial('item', ['model' => $model	,'static_view'=>true]);
 	}
 	
-	
-	/**
-	 * Displays a tooltip for single model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionTtip($id)
-	{
-		return $this->renderPartial('ttip', [
-			'model' => $this->findModel($id),
-		]);
-	}
 	
 	
 	/**
@@ -186,114 +164,6 @@ class CompsController extends Controller
 	}
 	
 
-    /**
-     * Displays a single Comps model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
-
-    /**
-     * Creates a new Comps model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-	    $model = new Comps();
-	
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if (Yii::$app->request->isAjax) {
-				Yii::$app->response->format = Response::FORMAT_JSON;
-				return [$model];
-			}  else {
-				return $this->redirect(Url::previous());
-			}
-		}
-	
-		$model->load(Yii::$app->request->get());
-		$model->arm_id=Yii::$app->request->get('arms_id',$model->arm_id);
-	
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('create', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('create', [
-				'model' => $model,
-			]);
-
-    }
-
-    /**
-     * Updates an existing Comps model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-		$model = $this->findModel($id);
-	
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if (Yii::$app->request->isAjax) {
-				Yii::$app->response->format = Response::FORMAT_JSON;
-				return [$model];
-			}  else {
-				if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
-				return $this->redirect(['view', 'id' => $model->id]);
-			}
-		}
-	
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('update', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('update', [
-				'model' => $model,
-			]);
-	}
-
-    /**
-     * Deletes an existing Comps model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
-    {
-	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
-	
-	    $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
-    }
-
-    /**
-     * Finds the Comps model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Comps the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Comps::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
-	
 	/**
 	 * Найти ОС по имени DOMAIN\computer, computer.domain.local или отдельно передав домен
 	 * @param string      $name

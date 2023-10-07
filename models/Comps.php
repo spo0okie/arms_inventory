@@ -97,8 +97,19 @@ class Comps extends ArmsModel
     public function rules()
     {
         return [
+			['name', 'filter', 'filter' => function ($value) {
+				/* убираем посторонние символы из MAC*/
+				$parseName=Domains::fetchFromCompName($value);
+				if ($parseName===false) $this->addError('name','Некорректный формат имени');
+				if (is_array($parseName)) {
+					if (!is_null($domain_id=$parseName[0]));
+						$this->domain_id = $domain_id;
+					return $parseName[1];
+				}
+				return $value;
+			}],
             [['soft_ids','netIps_ids','services_ids'], 'each', 'rule'=>['integer']],
-            [['domain_id','name', 'os'], 'required'],
+            [['name', 'os','domain_id'], 'required'],
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
             [['updated_at', 'comment','external_links'], 'safe'],
@@ -106,12 +117,6 @@ class Comps extends ArmsModel
             [['name','os'], 'string', 'max' => 128],
 			[['ip', 'mac'], 'string', 'max' => 768],
 			[['ip_ignore'], 'string', 'max' => 512],
-			/* Валидация отключена, т.к. ввод данных в основном автоматический (скриптами)
-			и если ее включить, данные просто не будут приниматься, что весьма плохо
-			['ip', function ($attribute, $params, $validator) {
-				\app\models\NetIps::validateInput($this,$attribute);
-			}],
-			вместо этого мы их фильтруем выкидывая неверные значения (ниже)*/
 			['ip', 'filter', 'filter' => function ($value) {
 				return \app\models\NetIps::filterInput($value);
 			}],
