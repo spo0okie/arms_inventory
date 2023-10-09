@@ -28,8 +28,8 @@ class SchedulesController extends BaseRestController
 		$model=$this->findModel($id);
 		
 		return $model->isWorkTime(
-			gmdate('Y-m-d',time()+Yii::$app->params['schedulesTZShift']),
-			gmdate('H:i',time()+Yii::$app->params['schedulesTZShift'])
+			gmdate('Y-m-d',time()+\Yii::$app->params['schedulesTZShift']),
+			gmdate('H:i',time()+\Yii::$app->params['schedulesTZShift'])
 		);
 	}
 	
@@ -43,8 +43,8 @@ class SchedulesController extends BaseRestController
 	{
 		$model=$this->findModel($id);
 		return $model->metaAtTime(
-			gmdate('Y-m-d',time()+Yii::$app->params['schedulesTZShift']),
-			gmdate('H:i',time()+Yii::$app->params['schedulesTZShift'])
+			gmdate('Y-m-d',time()+\Yii::$app->params['schedulesTZShift']),
+			gmdate('H:i',time()+\Yii::$app->params['schedulesTZShift'])
 		);
 	}
 	
@@ -58,8 +58,8 @@ class SchedulesController extends BaseRestController
 	{
 		$model=$this->findModel($id);
 		return $model->nextWorkingMeta(
-			gmdate('Y-m-d',time()+Yii::$app->params['schedulesTZShift']),
-			gmdate('H:i',time()+Yii::$app->params['schedulesTZShift'])
+			gmdate('Y-m-d',time()+\Yii::$app->params['schedulesTZShift']),
+			gmdate('H:i',time()+\Yii::$app->params['schedulesTZShift'])
 		);
 	}
 	
