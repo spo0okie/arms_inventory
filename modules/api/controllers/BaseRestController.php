@@ -41,7 +41,7 @@ class BaseRestController extends \yii\rest\ActiveController
 				'class' => \yii\filters\AccessControl::className(),
 				'rules' => [
 					['allow' => true, 'actions'=>$this->anyoneActions,	'roles'=>['?']],
-					['allow' => true, 'actions'=>$this->viewActions,	'roles'=>['@']],
+					['allow' => true, 'actions'=>$this->viewActions,	'roles'=>['viewer']],
 					['allow' => true, 'actions'=>$this->editActions,	'roles'=>['editor']],
 				],
 				'denyCallback' => function ($rule, $action) {
