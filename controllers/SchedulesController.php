@@ -39,7 +39,7 @@ class SchedulesController extends ArmsBaseController
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','create-acl','update','delete',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','index-acl','view','ttip','validate','status','meta-status','next-meta'], 'roles'=>['@','?']],
+				['allow' => true, 'actions'=>['index','index-acl','view','ttip','validate'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
 				throw new  \yii\web\ForbiddenHttpException('Access denied');
@@ -65,51 +65,7 @@ class SchedulesController extends ArmsBaseController
 		]);
 	}
 	
-	/**
-	 * Displays a single model status
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionStatus($id)
-	{
-		$model=$this->findModel($id);
-
-		return $model->isWorkTime(
-			gmdate('Y-m-d',time()+Yii::$app->params['schedulesTZShift']),
-			gmdate('H:i',time()+Yii::$app->params['schedulesTZShift'])
-		);
-	}
 	
-	/**
-	 * Displays a single model status
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionMetaStatus($id)
-	{
-		$model=$this->findModel($id);
-		return $model->metaAtTime(
-			gmdate('Y-m-d',time()+Yii::$app->params['schedulesTZShift']),
-			gmdate('H:i',time()+Yii::$app->params['schedulesTZShift'])
-		);
-	}
-	
-	/**
-	 * Displays a single model status
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionNextMeta($id)
-	{
-		$model=$this->findModel($id);
-		return $model->nextWorkingMeta(
-			gmdate('Y-m-d',time()+Yii::$app->params['schedulesTZShift']),
-			gmdate('H:i',time()+Yii::$app->params['schedulesTZShift'])
-		);
-	}
 
 	/**
 	 * Displays a single Schedules model.
