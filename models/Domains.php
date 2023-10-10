@@ -114,7 +114,7 @@ class Domains extends \yii\db\ActiveRecord
 		}
 		
 		//nor any of above
-		return [null,$name,''];
+		return [false,$name,''];
 	}
 
 }

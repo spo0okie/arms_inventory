@@ -34,6 +34,7 @@ class CompsController extends ArmsBaseController
 		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
 			'class' => \yii\filters\AccessControl::className(),
 			'rules' => [
+				['allow' => true, 'actions'=>['create','update'], 'permissions'=>['edit-comps']],
 				['allow' => true, 'actions'=>['create','update','delete','unlink','addsw','rmsw','ignoreip','unignoreip','dupes','absorb','validate'], 'roles'=>['editor']],
 				['allow' => true, 'actions'=>['index','view','ttip','ttip-hw','item','item-by-name'], 'roles'=>['@','?']],
 			],
@@ -123,9 +124,11 @@ class CompsController extends ArmsBaseController
 		
 		if (is_null($domain_id)) {
 			throw new NotFoundHttpException("Domain $domainName not found");
-		}
-		
-		if (is_null($model = Comps::findOne(['name'=>$compName,'domain_id'=>$domain_id]))) {
+		} elseif ($domain_id===false) {
+			if (is_null($model = Comps::findOne(['name'=>$compName]))) {
+				throw new NotFoundHttpException("Computer $compName not found");
+			}
+		} elseif (is_null($model = Comps::findOne(['name'=>$compName,'domain_id'=>$domain_id]))) {
 			throw new NotFoundHttpException("Computer $compName not found in domain $domainName");
 		}
 		
