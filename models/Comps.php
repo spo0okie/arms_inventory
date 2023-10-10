@@ -102,9 +102,11 @@ class Comps extends ArmsModel
 				$parseName=Domains::fetchFromCompName($value);
 				if ($parseName===false) $this->addError('name','Некорректный формат имени');
 				if (is_array($parseName)) {
-					if (!is_null($domain_id=$parseName[0]));
+					$domain_id=$parseName[0];
+					if (!is_null($domain_id)){
 						$this->domain_id = $domain_id;
-					return $parseName[1];
+						return $parseName[1];
+					}
 				}
 				return $value;
 			}],
