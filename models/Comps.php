@@ -103,7 +103,7 @@ class Comps extends ArmsModel
 				if ($parseName===false) $this->addError('name','Некорректный формат имени');
 				if (is_array($parseName)) {
 					$domain_id=$parseName[0];
-					if (!is_null($domain_id)){
+					if (!is_null($domain_id) && ($domain_id!==false)){
 						$this->domain_id = $domain_id;
 						return $parseName[1];
 					}
