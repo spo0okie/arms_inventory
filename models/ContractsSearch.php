@@ -52,7 +52,7 @@ class ContractsSearch extends Contracts
      */
     public function search($params)
     {
-        $query = Contracts::find()->joinWith([
+        $query = Contracts::find()->with([
 			'currency',
 			'partners',
 	        'techs',
@@ -70,6 +70,18 @@ class ContractsSearch extends Contracts
             // $query->where('0=1');
         //    return $dataProvider;
         //}
+	
+		/*
+		 * В общем тут надо исповедаться, т.к. далее идет изврат, который не каждому будет по душе. Чтобы одновременно
+		 * использовать join для поиска, и при этом не ломать пагинацию, в которую изза джойна попадают дополнительные
+		 * строки, мы делаем так. Сначала делаем поиск по имени (которое включает в себя заджойненные таблицы) без
+		 * пагинации. Этим поиском мы находим все контракты с нужным именем/пользователем/контрагентом. А потом мы
+		 * ищем уже контракты у которых ID из найденного ранее набора.
+		 *
+		 * называется Subquery
+		 * SELECT * FROM sometable WHERE Location IN (SELECT DISTINCT Location FROM sometable LIMIT 2);
+		 */
+		
 		
 		//поисковый запрос в тексте повторяющем "шаблон вывода списка документов"
 		// дата - наименование - контрагент - комментарий
@@ -79,12 +91,26 @@ class ContractsSearch extends Contracts
 			"ifnull(`partners`.`uname`,'".static::$noPartnerSuffix."'),' (', ifnull(`partners`.`bname`,'') , ')',".
 			"ifnull(`users`.`Ename`,''),".
 			"ifnull(`contracts`.`comment`,'')".
-		")");
+			")");
+	
+	
+		$nameSubQuery=Contracts::find()
+			->select('DISTINCT(contracts.id)')
+			->joinWith(['partners','users'])
+			->where(\app\helpers\QueryHelper::querySearchString($nameExpression,$this->fullname))
+			->createCommand()
+			->rawSql;
+		
+		
 
 	    $query
 		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
+	    
+	    if ($this->fullname)
+	    	$query->andWhere('contracts.id in ('.$nameSubQuery.')');
+	    
 	    $query
-		    ->andFilterWhere(\app\helpers\QueryHelper::querySearchString($nameExpression,$this->fullname))
+		    //->andFilterWhere(\app\helpers\QueryHelper::querySearchString($nameExpression,$this->fullname))
 		    ->andFilterWhere(\app\helpers\QueryHelper::querySearchNumberOrDate('total',$this->total))
 		    ->orderBy(['date'=>SORT_DESC,'name'=>SORT_DESC]);
 
