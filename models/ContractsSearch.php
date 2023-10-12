@@ -116,7 +116,6 @@ class ContractsSearch extends Contracts
 
 	    $dataProvider = new ActiveDataProvider([
 		    'query' => $query,
-		    'pagination' => ['pageSize' => 100,],
 	    ]);
 
         return $dataProvider;
