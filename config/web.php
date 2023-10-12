@@ -13,7 +13,7 @@ $db = ArrayHelper::merge(
 );
 $ldap = require __DIR__ . '/ldap.php';
 
-$config = ArrayHelper::merge([
+$config = [
     'id' => 'arms',
     'name' => 'Инвентаризация',
 	'language' => 'ru-RU',
@@ -177,9 +177,7 @@ $config = ArrayHelper::merge([
 		],
     ],
     'params' => $params,
-],
-	require __DIR__ . '/web-local.php',
-);;
+];
 
 \Yii::$container->set('yii\data\Pagination', ['pageSizeLimit' => [0, 9999]]);
 
@@ -214,4 +212,7 @@ if (YII_ENV_DEV) {
     ];
 }
 Yii::$classMap['yii\helpers\Url'] = dirname(__DIR__) . '/helpers/Url.php';
-return $config;
+return ArrayHelper::merge(
+	$config,
+	require __DIR__ . '/web-local.php'
+);
