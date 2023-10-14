@@ -3,12 +3,14 @@
 namespace app\controllers;
 
 use app\models\Domains;
+use HttpInvalidParamException;
 use Yii;
 use app\models\Comps;
 use app\models\CompsSearch;
 use yii\data\ActiveDataProvider;
+use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
@@ -21,28 +23,15 @@ class CompsController extends ArmsBaseController
     /**
      * @inheritdoc
      */
-    public function behaviors()
+    public function accessMap()
     {
-		$behaviors=[
-			'verbs' => [
-				'class' => VerbFilter::className(),
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			]
-		];
-		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-			'class' => \yii\filters\AccessControl::className(),
-			'rules' => [
-				['allow' => true, 'actions'=>['create','update'], 'permissions'=>['edit-comps']],
-				['allow' => true, 'actions'=>['create','update','delete','unlink','addsw','rmsw','ignoreip','unignoreip','dupes','absorb','validate'], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','ttip-hw','item','item-by-name'], 'roles'=>['@','?']],
-			],
-			'denyCallback' => function ($rule, $action) {
-				throw new  \yii\web\ForbiddenHttpException('Access denied');
-			}
-		];
-		return $behaviors;
+		return array_merge_recursive(
+			parent::accessMap(),
+			[
+				'edit'=>['unlink','addsw','rmsw','ignoreip','unignoreip','dupes','absorb'],
+				'view'=>['ttip-hw','item','item-by-name'],
+			]);
+		
     }
 
     /**
@@ -74,7 +63,7 @@ class CompsController extends ArmsBaseController
      */
     public function actionDupes()
     {
-		$dupes = (new \yii\db\Query())
+		$dupes = (new Query())
 			->select(['GROUP_CONCAT(id) ids','name','COUNT(*) c'])
 			->from('comps')
 			->groupBy(['name'])
@@ -99,11 +88,11 @@ class CompsController extends ArmsBaseController
 	
 	/**
 	 * Displays a item for single model.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionItem($id)
+	public function actionItem(int $id)
 	{
 		return $this->renderPartial('item', [
 			'model' => $this->findModel($id)
@@ -115,7 +104,7 @@ class CompsController extends ArmsBaseController
 		$nameParts=Domains::fetchFromCompName($name);
 		
 		if ($nameParts===false) {
-			throw new \HttpInvalidParamException('Invalid comp name format');
+			throw new HttpInvalidParamException('Invalid comp name format');
 		}
 		
 		$domain_id=$nameParts[0];
@@ -139,15 +128,17 @@ class CompsController extends ArmsBaseController
 	
 	/**
 	 * Absorb other comp in this
-	 * @param integer $id
-	 * @param         $absorb_id
+	 * @param int $id
+	 * @param $absorb_id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionAbsorb($id, $absorb_id)
+	public function actionAbsorb(int $id, $absorb_id)
 	{
 		$model = $this->findModel($id);
+		/** @var Comps $model */
 		$absorb = $this->findModel($absorb_id);
+		/** @var Comps $absorb */
 		
 		$model->absorbComp($absorb);
 		return $this->redirect(['view', 'id' => $model->id]);
@@ -155,11 +146,11 @@ class CompsController extends ArmsBaseController
 	
 	/**
 	 * Displays a tooltip for hw of single model.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionTtipHw($id)
+	public function actionTtipHw(int $id)
 	{
 		return $this->renderPartial('/techs/ttip-hw', [
 			'model' => $this->findModel($id),
@@ -172,43 +163,28 @@ class CompsController extends ArmsBaseController
 	 * @param string      $name
 	 * @param null|string $domain
 	 * @param null|string $ip
-	 * @return array|\yii\db\ActiveRecord
-	 * @throws NotFoundHttpException
+	 * @return array|ActiveRecord
+	 * @throws NotFoundHttpException|HttpInvalidParamException
 	 */
 	public static function searchModel(string $name, $domain=null, $ip=null){
-		$notFoundDescription="Comp with name '$name'";
 		
 		$name=strtoupper($name);
-		
-		$domainObj=null;
-		if (strpos($name,'.')!==false) {
-			//fqdn passed
-			$tokens=explode('.',$name);
-			$name=$tokens[0];
-			unset($tokens[0]);
-			$domain=implode('.',$tokens);
+
+		if ($domain) {
+			$domain_id=Domains::findByAnyName($domain);
+			$compName=$name;
+			$domainName=$domain;
+		} else {
+			$nameParse=Domains::fetchFromCompName($name);
+			if (!is_array($nameParse)) throw new HttpInvalidParamException("Incorrect comp name $name");
 			
-			//ищем домен
-			if (is_null($domainObj=\app\models\Domains::find()
-				->where(['fqdn'=>$domain])
-				->one()
-			)) throw new \yii\web\NotFoundHttpException("Domain with fqdn='$domain' not found");
-			
-		} else { //no FQDN
-			if (is_null($domain) && strpos($name,'\\')!==false) {
-				//DOMAIN\computer notation
-				$tokens=explode('\\',$name);
-				$domain=$tokens[0];
-				$name=$tokens[1];
-			}
-			if ($domain && is_null($domainObj=\app\models\Domains::find()
-				->where(['name'=>strtoupper($domain)])
-				->one()
-			)) throw new \yii\web\NotFoundHttpException("Domain '$domain' not found");
+			[$domain_id,$compName,$domainName]=$nameParse;
 		}
-		
-		
-		$query=\app\models\Comps::find()->where(['name'=>strtoupper($name)]);
+
+		if (is_null($domain_id)) throw new \yii\web\NotFoundHttpException("Domain $domainName not found");
+
+		$notFoundDescription="Comp with name '$compName'";
+		$query=\app\models\Comps::find()->where(['LOWER(name)'=>mb_strtolower($name)]);
 		
 		//добавляем фильтрацию по IP если он есть
 		if (!is_null($ip)) {
@@ -220,10 +196,10 @@ class CompsController extends ArmsBaseController
 		$notFoundDescription.=" not found";
 		
 		//добавляем фильтрацию по домену если он есть
-		if (is_object($domainObj)) {
+		if ($domain_id!==false) {
 			//добавляем домен к условию поиска
-			$query->andFilterWhere(['domain_id'=>$domainObj->id]);
-			$notFoundDescription.=" in domain $domain";
+			$query->andFilterWhere(['domain_id'=>$domain_id]);
+			$notFoundDescription.=" in domain $domainName";
 		}
 		
 		$model = $query->one();
@@ -237,13 +213,14 @@ class CompsController extends ArmsBaseController
 	/**
 	 * Обновляем элементы ПО
 	 * @param $id
-	 * @return string|\yii\web\Response
+	 * @return string|Response
 	 * @throws NotFoundHttpException
 	 */
 	public function actionAddsw($id){
 		//if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 		
 		$model = $this->findModel($id);
+		/** @var Comps $model */
 
 		//проверяем передан ли a
 		$strItems=Yii::$app->request->get('items',null);
@@ -256,7 +233,7 @@ class CompsController extends ArmsBaseController
 			if (is_array($items)) {
 				$model->soft_ids=array_unique(array_merge($model->soft_ids,$items));
 				$model->silentSave();
-			};
+			}
 		}
 
 		return $this->redirect(['/techs/passport', 'id' => $model->arm_id]);
@@ -265,13 +242,14 @@ class CompsController extends ArmsBaseController
     /**
      * Удаляем элементы ПО
      * @param $id
-     * @return string|\yii\web\Response
+     * @return string|Response
      * @throws NotFoundHttpException
      */
     public function actionRmsw($id){
 	    //if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
 	
 	    $model = $this->findModel($id);
+		/** @var Comps $model */
 
         //проверяем передан ли a
         $strItems=Yii::$app->request->get('items',null);
@@ -279,22 +257,21 @@ class CompsController extends ArmsBaseController
             if (is_array($items=explode(',',$strItems))){
                 $model->soft_ids=array_diff($model->soft_ids,$items);
                 $model->silentSave();
-            };
-        }
+            }
+		}
 
         return $this->redirect(['/techs/passport', 'id' => $model->arm_id]);
     }
 	/**
-	 * Обновляем  список скртытых IP
+	 * Обновляем  список скрытых IP
 	 * @param $id
 	 * @param $ip
-	 * @return string|\yii\web\Response
+	 * @return string|Response
 	 * @throws NotFoundHttpException
 	 */
 	public function actionIgnoreip($id,$ip){
-		//if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
-		
 		$model = $this->findModel($id);
+		/** @var Comps $model */
 
 		$ignored=explode("\n",$model->ip_ignore);
 		$ignored[]=$ip;
@@ -305,16 +282,15 @@ class CompsController extends ArmsBaseController
 	}
 
 	/**
-	 * Обновляем  список скртытых IP
+	 * Обновляем  список скрытых IP
 	 * @param $id
 	 * @param $ip
-	 * @return string|\yii\web\Response
+	 * @return string|Response
 	 * @throws NotFoundHttpException
 	 */
 	public function actionUnignoreip($id,$ip){
-		//if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
-		
 		$model = $this->findModel($id);
+		/** @var Comps $model */
 
 		$ignored=explode("\n",$model->ip_ignore);
 		$id=array_search($ip,$ignored);
@@ -322,8 +298,8 @@ class CompsController extends ArmsBaseController
 			unset($ignored[$id]);
 			$model->ip_ignore=implode("\n",array_unique($ignored));
 			$model->save();
-		};
-
+		}
+		
 		return $this->redirect(['/comps/view', 'id' => $model->id]);
 	}
 
