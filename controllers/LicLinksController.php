@@ -4,20 +4,21 @@
 namespace app\controllers;
 
 
+use app\models\links\LicLinks;
 use kartik\grid\EditableColumnAction;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Inflector;
+use yii\web\Controller;
 
-class LicLinksController extends \yii\web\Controller
+class LicLinksController extends Controller
 {
 	
 	public function linkActions() {
 		$actions=[];
-		foreach (\app\models\links\LicLinks::$licTypes as $licType)
-			foreach (\app\models\links\LicLinks::$objTypes as $objType) {
-				$class='\\app\\models\\links\\'.\app\models\links\LicLinks::linksClassName($licType,$objType);
-				$actions[\app\models\links\LicLinks::linksCtrlName($licType,$objType)]=[
-					'class' => EditableColumnAction::className(),		// action class name
+		foreach (LicLinks::$licTypes as $licType)
+			foreach (LicLinks::$objTypes as $objType) {
+				$class='\\app\\models\\links\\'. LicLinks::linksClassName($licType,$objType);
+				$actions[LicLinks::linksCtrlName($licType,$objType)]=[
+					'class' => EditableColumnAction::class,		// action class name
 					'modelClass' => $class,	// the update model class
 					/*
 					'outputValue' => function ($model, $attribute, $key, $index) {
