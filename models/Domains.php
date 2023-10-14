@@ -86,10 +86,12 @@ class Domains extends \yii\db\ActiveRecord
 	}
 	
 	/**
-	 * Должно вытащить ID домена и вернуть
-	 * вернет номер домена, Null если не нашлось или False если ошибка в формате имени
+	 * Должно вытащить ID домена и вернуть [id домена, имя компа, имя домена]
+	 * false в случае ошибки формата имени компа
+	 * вместо имени домена false если имя домена не найдено в имени компа
+	 * вместо имени домена null если имя домена есть, но он не найден
 	 * @param $name
-	 * @return array|false|null
+	 * @return array|false
 	 */
 	public static function fetchFromCompName($name) {
 		$slashPos=mb_strpos($name,'\\');
