@@ -68,21 +68,17 @@ class Domains extends \yii\db\ActiveRecord
     }
 
 	public static function findByName($name){
-		$name=mb_strtolower($name);
-		$list = static::find()->select(['id','name'])->asArray(true)->all();
-		foreach ($list as $item) {
-			if (!strcmp(mb_strtolower($item['name']),$name)) return $item['id'];
-		}
-		return null;
+		$domain=static::find()->where(['LOWER(name)'=>mb_strtolower($name)])->one();
+		if (!is_object($domain)) return null;
+		/** @var Domains $domain */
+		return $domain->id;
 	}
 
 	public static function findByFQDN($name){
-		$name=mb_strtolower($name);
-		$list = static::find()->select(['id','fqdn'])->asArray(true)->all();
-		foreach ($list as $item) {
-			if (!strcmp(mb_strtolower($item['fqdn']),$name)) return $item['id'];
-		}
-		return null;
+		$domain=static::find()->where(['LOWER(fqdn)'=>mb_strtolower($name)])->one();
+		if (!is_object($domain)) return null;
+		/** @var Domains $domain */
+		return $domain->id;
 	}
 	
 	/**
