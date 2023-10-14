@@ -2,48 +2,27 @@
 
 namespace app\controllers;
 
+use app\models\Acls;
 use app\models\Places;
-use app\models\SchedulesEntries;
 use app\models\SchedulesSearchAcl;
 use app\models\Services;
 use Yii;
 use app\models\Schedules;
-use app\models\SchedulesSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 
 /**
  * SchedulesController implements the CRUD actions for Schedules model.
  */
-class ScheduledAccessController extends ArmsController
+class ScheduledAccessController extends ArmsBaseController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-		$behaviors=[
-			'verbs' => [
-				'class' => VerbFilter::className(),
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			]
-		];
+	public $modelClass=Schedules::class;
+	public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['status']
+		]);
+	}
 	
-		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-			'class' => \yii\filters\AccessControl::className(),
-			'rules' => [
-				['allow' => true, 'actions'=>['create','update','delete',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','validate','status'], 'roles'=>['@','?']],
-			],
-			'denyCallback' => function ($rule, $action) {
-				throw new  \yii\web\ForbiddenHttpException('Access denied');
-			}
-		];
-		return $behaviors;
-    }
 	
 	/**
 	 * Lists all Schedules models.
@@ -63,26 +42,14 @@ class ScheduledAccessController extends ArmsController
 	}
 	
 	/**
-	 * Displays a single model ttip.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionTtip($id)
-	{
-		return $this->renderPartial('ttip', [
-			'model' => $this->findModel($id),
-		]);
-	}
-	
-	/**
 	 * Displays a single model status
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionStatus($id)
+	public function actionStatus(int $id)
 	{
+		/** @var Schedules $model */
 		$model=$this->findModel($id);
 		return $model->isWorkTime(
 			gmdate('Y-m-d',time()+Yii::$app->params['schedulesTZShift']),
@@ -93,13 +60,13 @@ class ScheduledAccessController extends ArmsController
 	
 	/**
 	 * Displays a single Schedules model.
-	 * @param integer $id
-	 * @param bool    $acl_mode
+	 * @param int  $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-    public function actionView($id,$acl_mode=false)
+    public function actionView(int $id)
     {
+    	/** @var Schedules $model */
     	$model=$this->findModel($id);
     	if ($model->isOverride) {
     		$params=Yii::$app->request->get();
@@ -109,7 +76,6 @@ class ScheduledAccessController extends ArmsController
     		
         return $this->render('view', [
             'model' => $model,
-			'acl_mode' => $acl_mode,
         ]);
     }
 	
@@ -123,7 +89,7 @@ class ScheduledAccessController extends ArmsController
 		$model = new Schedules();
 		
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			$acl=new \app\models\Acls();
+			$acl=new Acls();
 			$acl->schedules_id=$model->id;
 			$acl->save();
 			return $this->redirect(['view', 'id' => $model->id, 'acl_mode'=>1] );
@@ -134,19 +100,4 @@ class ScheduledAccessController extends ArmsController
 		]);
 	}
 	
-	/**
-	 * Finds the Schedules model based on its primary key value.
-	 * If the model is not found, a 404 HTTP exception will be thrown.
-	 * @param integer $id
-	 * @return Schedules the loaded model
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	protected function findModel($id)
-	{
-		if (($model = Schedules::findOne($id)) !== null) {
-			return $model;
-		}
-		
-		throw new NotFoundHttpException('The requested page does not exist.');
-	}
 }

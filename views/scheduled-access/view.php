@@ -6,7 +6,6 @@ use kartik\markdown\Markdown;
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
 
-$acl_mode=(count($model->acls));
 if (!isset($static_view)) $static_view=false;
 
 $this->title = $model->name;

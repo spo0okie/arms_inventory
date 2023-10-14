@@ -5,12 +5,7 @@ namespace app\controllers;
 use app\models\Techs;
 use Yii;
 use app\models\Ports;
-use app\models\PortsSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use yii\helpers\Url;
-use yii\bootstrap5\ActiveForm;
 use yii\web\Response;
 
 
@@ -20,66 +15,15 @@ use yii\web\Response;
 class PortsController extends ArmsBaseController
 {
 
-	/**
-	* {@inheritdoc}
-	*/
-	public function behaviors()
+	public $modelClass=Ports::class;
+	
+	public function accessMap()
 	{
-		$behaviors=[
-			'verbs' => [
-				'class' => VerbFilter::className(),
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			]
-		];
-
-		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-			'class' => \yii\filters\AccessControl::className(),
-			'rules' => [
-				['allow' => true, 'actions'=>['create','update','delete','port-list',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
-			],
-			'denyCallback' => function ($rule, $action) {
-				throw new  \yii\web\ForbiddenHttpException('Access denied');
-			}
-		];
-		return $behaviors;
+		return array_merge_recursive(parent::accessMap(),[
+			'edit'=>['port-list',],
+		]);
 	}
-
-    /**
-     * Lists all Ports models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel = new PortsSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
-
-	/**
-	* Validates  model on update.
-	* @param null $id
-	* @return mixed
-	* @throws NotFoundHttpException
-	*/
-	public function actionValidate($id=null)
-	{
-		if (!is_null($id))
-			$model = $this->findModel($id);
-		else
-			$model = new Ports();
-
-		if ($model->load(Yii::$app->request->post())) {
-			Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-			return ActiveForm::validate($model);
-		}
-	}
+	
 	
 
 	public function actionCreate() {
@@ -89,46 +33,22 @@ class PortsController extends ArmsBaseController
     /**
      * Updates an existing Ports model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
+     * @param int|null $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id=null)
     {
         $model = is_null($id)?
 			$model=new Ports():
 			$this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-        	if ($model->save()) {
-				if (Yii::$app->request->isAjax) {
-					Yii::$app->response->format = Response::FORMAT_JSON;
-					return [$model];
-				}  else {
-					if (Yii::$app->request->get('return') == 'previous')
-						return $this->redirect(Url::previous());
-					else
-						return $this->redirect(['view', 'id' => $model->id]);
-				}
-			} else {
-				//тут у нас интересная логика. Если валидация прошла, а сохранение нет
-				//значит мы сами отказались сохранять в beforeSave
-				//значит сохраняемая информация не уникальная (пустая/шаблонная)
-				if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
-				return $this->redirect(['ports/index']);
-			}
-        }
+	
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			return $this->defaultReturn(['view', 'id' => $model->id],[$model]);
+		}
 	
 		$model->load(Yii::$app->request->get());
-	
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('update', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('update', [
-				'model' => $model,
-			]);
+		return $this->defaultRender('update', ['model' => $model,]);
     }
 
 	
@@ -138,7 +58,7 @@ class PortsController extends ArmsBaseController
 	 */
 	public function actionPortList()
 	{
-		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		Yii::$app->response->format = Response::FORMAT_JSON;
 		if (isset($_POST['depdrop_all_params'])) {
 			$params = $_POST['depdrop_all_params'];
 			if (is_array($params)) {
@@ -148,26 +68,20 @@ class PortsController extends ArmsBaseController
 				} else {
 					return ['output'=>[], 'selected'=>''];
 				}
-				
-				//$out = self::getSubCatList($cat_id);
-				// the getSubCatList function will query the database based on the
-				// cat_id and return an array like below:
-				// [
-				//    ['id'=>'<sub-cat-id-1>', 'name'=>'<sub-cat-name1>'],
-				//    ['id'=>'<sub-cat_id_2>', 'name'=>'<sub-cat-name2>']
-				// ]
 			}
 		}
 		return ['output'=>'', 'selected'=>''];
 	}
-    /**
-     * Finds the Ports model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Ports the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id,$failRoute=null)
+	
+	/**
+	 * Finds the Ports model based on its primary key value.
+	 * If the model is not found, a 404 HTTP exception will be thrown.
+	 * @param integer $id
+	 * @param null    $failRoute
+	 * @return Ports the loaded model
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+    protected function findModel(int $id, $failRoute=null)
     {
         if (($model = Ports::findOne($id)) !== null) {
             return $model;

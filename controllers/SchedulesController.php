@@ -2,17 +2,13 @@
 
 namespace app\controllers;
 
-use app\models\Places;
 use app\models\SchedulesEntries;
-use app\models\SchedulesSearchAcl;
 use app\models\Services;
+use Throwable;
 use Yii;
 use app\models\Schedules;
-use app\models\SchedulesSearch;
-use yii\web\Controller;
+use yii\db\StaleObjectException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use yii\web\Response;
 
 /**
  * SchedulesController implements the CRUD actions for Schedules model.
@@ -22,72 +18,25 @@ class SchedulesController extends ArmsBaseController
 	public $modelClass='app\models\Schedules';
 	
 	/**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-		$behaviors=[
-			'verbs' => [
-				'class' => VerbFilter::className(),
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			]
-		];
-	
-		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-			'class' => \yii\filters\AccessControl::className(),
-			'rules' => [
-				['allow' => true, 'actions'=>['create','create-acl','update','delete',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','index-acl','view','ttip','validate'], 'roles'=>['@','?']],
-			],
-			'denyCallback' => function ($rule, $action) {
-				throw new  \yii\web\ForbiddenHttpException('Access denied');
-			}
-		];
-		return $behaviors;
-    }
-	
-	/**
-	 * Lists only ACL Schedules.
-	 * @return mixed
-	 */
-	public function actionIndexAcl()
-	{
-		Services::cacheAllItems();
-		Places::cacheAllItems();
-		$searchModel = new SchedulesSearchAcl();
-		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-		
-		return $this->render('index-acl', [
-			'searchModel' => $searchModel,
-			'dataProvider' => $dataProvider,
-		]);
-	}
-	
-	
-
-	/**
 	 * Displays a single Schedules model.
-	 * @param integer $id
-	 * @param bool    $acl_mode
+	 * @param int  $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-    public function actionView($id,$acl_mode=false)
-    {
-    	$model=$this->findModel($id);
-    	if ($model->isOverride) {
-    		$params=Yii::$app->request->get();
-    		$params['id']=$model->override_id;
-    		return $this->redirect(array_merge(['view'],$params));
+	public function actionView(int $id)
+	{
+		/** @var Schedules $model */
+		$model=$this->findModel($id);
+		if ($model->isOverride) {
+			$params=Yii::$app->request->get();
+			$params['id']=$model->override_id;
+			return $this->redirect(array_merge(['view'],$params));
 		}
-    		
-        return $this->render('view', [
-            'model' => $model,
-			'acl_mode' => $acl_mode,
-        ]);
-    }
+		
+		return $this->render('view', [
+			'model' => $model,
+		]);
+	}
 	
 	/**
 	 * Creates a new Schedules model.
@@ -104,12 +53,12 @@ class SchedulesController extends ArmsBaseController
 
 		//
 		if (Yii::$app->request->get('attach_service')) {
-			$service=\app\models\Services::findOne(Yii::$app->request->get('attach_service'));
+			$service= Services::findOne(Yii::$app->request->get('attach_service'));
 			if (is_object($service)) {
 				$model->name=\app\models\Schedules::$title.' работы '.$service->name;
 			}
 		} elseif (Yii::$app->request->get('support_service')) {
-			$support_service=\app\models\Services::findOne(Yii::$app->request->get('support_service'));
+			$support_service= Services::findOne(Yii::$app->request->get('support_service'));
 			if (is_object($service)) {
 				$model->name=\app\models\Schedules::$title.' поддержки '.$support_service->name;
 			}
@@ -125,7 +74,7 @@ class SchedulesController extends ArmsBaseController
 
 		if ($model->load(Yii::$app->request->post())) {
 			if ($model->save()) {
-				//если было указано расписание по умолчанию - надо его создат в БД
+				//если было указано расписание по умолчанию - надо его создать в БД
 				if (strlen($model->defaultItemSchedule)) {
 					$item=new SchedulesEntries();
 					$item->schedule=$model->defaultItemSchedule;
@@ -157,36 +106,22 @@ class SchedulesController extends ArmsBaseController
 	}
 	
 	
-
-    /**
-     * Deletes an existing Schedules model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
+	/**
+	 * Deletes an existing Schedules model.
+	 * If deletion is successful, the browser will be redirected to the 'index' page.
+	 * @param int $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws Throwable
+	 * @throws StaleObjectException
+	 */
+    public function actionDelete(int $id)
     {
+		/** @var Schedules $model */
     	$model=$this->findModel($id);
     	$parent=$model->parent_id;
         $this->findModel($id)->delete();
 
         return $this->redirect($parent?['view', 'id' => $parent]:['index']);
-    }
-
-    /**
-     * Finds the Schedules model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Schedules the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Schedules::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

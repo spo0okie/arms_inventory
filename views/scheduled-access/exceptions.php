@@ -13,9 +13,6 @@ $daysSearchModel->schedule_id = $model->id;
 $daysDataProvider = $daysSearchModel->search([]);
 $renderer=$this;
 
-if (!isset($acl_mode)) $acl_mode=(count($model->acls));
-
-
 
 echo '<h2>Периоды предоставления / отзыва доступа</h2>';
 
