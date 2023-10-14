@@ -2,15 +2,13 @@
 
 namespace app\controllers;
 
-use app\models\Departments;
 use app\models\ManufacturersDict;
-use Codeception\Module\Yii2;
-use Yii;
 use app\models\Places;
+use Throwable;
+use Yii;
 use yii\data\ActiveDataProvider;
-use yii\web\Controller;
+use yii\db\StaleObjectException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 
 /**
  * PlacesController implements the CRUD actions for Places model.
@@ -18,32 +16,14 @@ use yii\filters\VerbFilter;
 class PlacesController extends ArmsBaseController
 {
 	public $modelClass='\app\models\Places';
-    /**
-     * @inheritdoc
-     */
-    public function behaviors()
-    {
-	    $behaviors=[
-		    'verbs' => [
-			    'class' => VerbFilter::className(),
-			    'actions' => [
-				    'delete' => ['POST'],
-			    ],
-		    ]
-	    ];
-	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-		    'class' => \yii\filters\AccessControl::className(),
-		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','validate','armmap','depmap'], 'roles'=>['@','?']],
-		    ],
-		    'denyCallback' => function ($rule, $action) {
-			    throw new  \yii\web\ForbiddenHttpException('Access denied');
-		    }
-	    ];
-	    return $behaviors;
-    }
-    
+	
+	public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['armmap','depmap']
+		]);
+	}
+	
 
     /**
      * Lists all Places models.
@@ -89,9 +69,10 @@ class PlacesController extends ArmsBaseController
 					'materials.usages', //дико добавляет тормозов
 				])->orderBy('short')
 				->all(),
-			'show_archived'=>\Yii::$app->request->get('showArchived',false),
+			'show_archived'=> Yii::$app->request->get('showArchived',false),
 		]);
 	}
+
 	/**
 	 * Lists all Places models.
 	 * @return mixed
@@ -116,15 +97,15 @@ class PlacesController extends ArmsBaseController
 	
 	/**
      * Displays a single Places model.
-     * @param string $id
+     * @param int $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView(int $id)
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
-			'show_archived'=>\Yii::$app->request->get('showArchived',false),
+			'show_archived'=> Yii::$app->request->get('showArchived',false),
 	        'models' => Places::find()
 				->joinWith([
 					'phones',
@@ -147,18 +128,20 @@ class PlacesController extends ArmsBaseController
 		        ->all(),
         ]);
     }
-
-
-
-    /**
-     * Deletes an existing Places model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
+	
+	
+	/**
+	 * Deletes an existing Places model.
+	 * If deletion is successful, the browser will be redirected to the 'index' page.
+	 * @param int $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws Throwable
+	 * @throws StaleObjectException
+	 */
+    public function actionDelete(int $id)
     {
+    	/** @var Places $model */
     	$model=$this->findModel($id);
     	$parent_id=$model->parent_id;
         $model->delete();
@@ -166,21 +149,5 @@ class PlacesController extends ArmsBaseController
             return $this->redirect(['index']);
 		else
 			return $this->redirect(['view','id'=>$parent_id]);
-    }
-
-    /**
-     * Finds the Places model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $id
-     * @return Places the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Places::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }
