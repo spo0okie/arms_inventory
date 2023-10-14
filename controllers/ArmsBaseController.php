@@ -3,10 +3,15 @@
 namespace app\controllers;
 
 use app\helpers\ArrayHelper;
+use app\helpers\StringHelper;
 use app\models\ArmsModel;
+use Throwable;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\db\StaleObjectException;
+use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\bootstrap5\ActiveForm;
@@ -22,11 +27,32 @@ class ArmsBaseController extends Controller
 	public $defaultShowArchived=false;
 	
 	
+	//как в карте доступов обозначать анонимный и авторизованный
+	const PERM_ANONYMOUS='@anonymous';
+	const PERM_AUTHENTICATED='@authorized';
+	
+	/**
+	 * Карта доступа с какими полномочиями что можно делать
+	 * @return array
+	 */
+	public function accessMap() {
+		$class=StringHelper::class2Id($this->modelClass);
+		return [
+			'view'=>['index','view','search','ttip','item-by-name','item'],			//чтение всего
+			'edit'=>['create','update','delete','validate'],						//редактирование всего
+			"view-$class"=>['index','view','search','ttip','item-by-name','item'],	//чтение объектов этого класса по одному
+			"edit-$class"=>['create','update','delete','validate'],					//обновление объектов этого класса
+			self::PERM_ANONYMOUS=>[],
+			self::PERM_AUTHENTICATED=>[],
+		];
+	}
+	
 	/**
 	 * Что должен вернуть контроллер
 	 * @param array $defaultPath путь куда вернуться если вызов не Ajax и не указано previous
 	 * @param mixed $ajaxObject какой объект вернуть если вызов Ajax
-	 * @param bool $previous признак что если в вызове есть return=previous то туда и возвращаемся
+	 * @param bool  $previous признак что если в вызове есть return=previous то туда и возвращаемся
+	 * @return array|Response
 	 */
 	public function defaultReturn(array $defaultPath, $ajaxObject, $previous=true) {
 		if (Yii::$app->request->isAjax) {
@@ -72,29 +98,49 @@ class ArmsBaseController extends Controller
 		Yii::$app->request->setQueryParams($newParams);
 	}
 	
-    /**
+	/** @noinspection PhpUnusedParameterInspection */
+	public static function buildAccessRules($map) {
+		$rules=[];
+		foreach ($map as $permission=>$actions) {
+			$rule=['allow'=>true, 'actions'=>$actions];
+			switch ($permission) {
+				case self::PERM_AUTHENTICATED:
+					$rule['roles']=['@'];
+					break;
+				case self::PERM_ANONYMOUS:
+					$rule['roles']=['?'];
+					break;
+				default:
+					$rule['permissions']=[$permission];
+			}
+			$rules[]=$rule;
+		}
+		return [
+			'class' => AccessControl::class,
+			'rules' => $rules,
+			'denyCallback' => function ($rule, $action) {
+				throw new  ForbiddenHttpException('Access denied');
+			}
+		];
+	}
+	
+	/**
      * @inheritdoc
      */
     public function behaviors()
     {
 		$behaviors=[
 			'verbs' => [
-				'class' => VerbFilter::className(),
+				'class' => VerbFilter::class,
 				'actions' => [
 					'delete' => ['POST'],
 				],
 			]
 		];
-		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-			'class' => \yii\filters\AccessControl::className(),
-			'rules' => [
-				['allow' => true, 'actions'=>['create','update','delete'], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','validate',], 'roles'=>['@','?']],
-			],
-			'denyCallback' => function ($rule, $action) {
-				throw new  \yii\web\ForbiddenHttpException('Access denied');
-			}
-		];
+		
+		if (!empty(Yii::$app->params['useRBAC']))
+			$behaviors['access']=static::buildAccessRules($this->accessMap());
+		
 		return $behaviors;
     }
 
@@ -139,11 +185,11 @@ class ArmsBaseController extends Controller
 	
 	/**
 	 * Displays a item for single model.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionItem($id)
+	public function actionItem(int $id)
 	{
 		return $this->renderPartial('item', [
 			'model' => $this->findModel($id)
@@ -153,11 +199,11 @@ class ArmsBaseController extends Controller
 	
 	/**
 	 * Displays a tooltip for single model.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionTtip($id)
+	public function actionTtip(int $id)
 	{
 		return $this->renderPartial('ttip', [
 			'model' => $this->findModel($id),
@@ -167,11 +213,11 @@ class ArmsBaseController extends Controller
 
 	/**
 	 * Displays a single Arms model.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionView($id)
+	public function actionView(int $id)
 	{
 		return $this->render('view', [
 			'model' => $this->findModel($id),
@@ -180,7 +226,7 @@ class ArmsBaseController extends Controller
 
     /**
      * Validates  model on update.
-     * @param null $id
+     * @param int|null $id
      * @return mixed
      * @throws NotFoundHttpException
      */
@@ -195,6 +241,8 @@ class ArmsBaseController extends Controller
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
+        
+        return null;
     }
 
 
@@ -218,11 +266,11 @@ class ArmsBaseController extends Controller
 	/**
      * Updates an existing model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
+     * @param int $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id)
     {
         $model = $this->findModel($id);
 
@@ -232,20 +280,18 @@ class ArmsBaseController extends Controller
 	
 		return $this->defaultRender('update', ['model' => $model,]);
     }
-
-
-
+	
+	
 	/**
 	 * Deletes an existing Arms model.
 	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
-	 * @throws \Exception
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
+	 * @throws Throwable
+	 * @throws StaleObjectException
 	 */
-    public function actionDelete($id)
+    public function actionDelete(int $id)
     {
         $this->findModel($id)->delete();
 
@@ -256,11 +302,11 @@ class ArmsBaseController extends Controller
     /**
      * Finds the Arms model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
+     * @param int $id
      * @return ArmsModel the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel(int $id)
     {
         if (($model = ($this->modelClass)::findOne($id)) !== null) {
             return $model;
