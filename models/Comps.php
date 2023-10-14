@@ -7,6 +7,7 @@ use app\helpers\QueryHelper;
 use DateTime;
 use DateTimeZone;
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "comps".
@@ -443,7 +444,7 @@ class Comps extends ArmsModel
 	/**
 	 * Найти комп по полному имени (Domain\comp или comp.domain.local)
 	 * @param $name
-	 * @return Comps|null
+	 * @return ActiveRecord|Comps|null|false
 	 */
 	public static function fetchByFullName($name) {
 		$nameParse=Domains::fetchFromCompName($name);
