@@ -440,17 +440,21 @@ class Comps extends ArmsModel
 			->viaTable('{{%lic_keys_in_comps}}', ['comps_id' => 'id']);
 	}
 	
-	
-	public static function findByDomainName($domain_id,$name){
-		$name=mb_strtolower($name);
-		//error_log("searching Domain Name: $domain_id $name");
-		$list = static::find()->select(['id','domain_id','name'])->asArray(true)->all();
-		//var_dump($list);
-		foreach ($list as $item) {
-			if ($item['domain_id']==$domain_id && !strcmp(mb_strtolower($item['name']),$name)) return $item['id'];
-			//if ($item->domain_id==$domain_id && !strcmp(mb_strtolower($item->name),$name)) return $item->id;
-		}
-		return null;
+	/**
+	 * Найти комп по полному имени (Domain\comp или comp.domain.local)
+	 * @param $name
+	 * @return Comps|null
+	 */
+	public static function fetchByFullName($name) {
+		$nameParse=Domains::fetchFromCompName($name);
+		if (!is_array($nameParse)) return false;	//ошибка формата имени компа
+		[$domain_id,$compName,$domainName]=$nameParse;
+		if (is_null($domain_id)) return null;		//не найден домен => не найден комп в этом домене
+
+		$filter=['LOWER(name)'=>strtolower($compName)];
+		if ($domain_id!==false) $filter['domain_id']=$domain_id;
+		
+		return static::find()->where($filter)->one();
 	}
 	
 	public function getLastThreeLogins() {
