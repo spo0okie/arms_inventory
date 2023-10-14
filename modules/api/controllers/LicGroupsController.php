@@ -4,18 +4,18 @@ namespace app\modules\api\controllers;
 
 
 
+use app\models\Comps;
+use app\models\Users;
+use HttpException;
+use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
+
 class LicGroupsController extends BaseRestController
 {
 
 	public $modelClass='app\models\LicGroups';
-	public $anyoneActions=['search'];
 
-	public function actions()
-	{
-		return array_merge(['search'],parent::actions());
-	}
-
-	public function actionSearch($product_id,$comp_name=null,$user_login=null){
+	public function actionSearch($product_id=null,$comp_name=null,$user_login=null){
 		//$modelClass = $this->modelClass;
 		
 		$licGroups=[];
@@ -24,12 +24,16 @@ class LicGroupsController extends BaseRestController
 		$comp=null;
 		$user=null;
 		/**
-		 * @var $comp \app\models\Comps
-		 * @var $user \app\models\Users
+		 * @var $comp Comps
+		 * @var $user Users
 		 */
 		
+		if (!$product_id) {
+			throw new BadRequestHttpException("No product_id passed");
+		}
+
 		if (!$comp_name && !$user_login) {
-			throw new \yii\web\BadRequestHttpException("No login or computer name passed");
+			throw new BadRequestHttpException("No login or computer name passed");
 		}
 		
 		if ($comp_name) {
@@ -39,13 +43,13 @@ class LicGroupsController extends BaseRestController
 					foreach ($licGroup->soft_ids as $soft_id)
 						if ($soft_id == $product_id)
 							$licGroups[]=$licGroup;
-			} catch (\HttpException $e) {
+			} catch (HttpException $e) {
 				$errors[]=$e->getMessage();
 			}
 		}
 		
 		if ($user_login) {
-			if (!is_object($user=\app\models\Users::findByLogin($user_login)))
+			if (!is_object($user= Users::findByLogin($user_login)))
 				$errors[]="User '$user_login' not found";
 			else {
 				foreach ($user->licGroups as $licGroup)
@@ -56,7 +60,7 @@ class LicGroupsController extends BaseRestController
 		}
 		
 		if (!is_object($comp) && !is_object($user))
-			throw new \yii\web\NotFoundHttpException(implode(',',$errors));
+			throw new NotFoundHttpException(implode(',',$errors));
 
 		return $licGroups;
 	}
