@@ -39,9 +39,9 @@ class ArmsBaseController extends Controller
 		$class=StringHelper::class2Id($this->modelClass);
 		return [
 			'view'=>['index','view','search','ttip','item-by-name','item'],			//чтение всего
-			'edit'=>['create','update','delete','validate'],						//редактирование всего
-			"view-$class"=>['index','view','search','ttip','item-by-name','item'],	//чтение объектов этого класса по одному
-			"edit-$class"=>['create','update','delete','validate'],					//обновление объектов этого класса
+			'edit'=>['create','update','delete','validate','unlink'],				//редактирование всего
+			"view-$class"=>['index','view','search','ttip','item-by-name','item'],	//чтение объектов этого класса
+			"edit-$class"=>['create','update','delete','validate','unlink'],		//редактирование объектов этого класса
 			self::PERM_ANONYMOUS=>[],
 			self::PERM_AUTHENTICATED=>[],
 		];
