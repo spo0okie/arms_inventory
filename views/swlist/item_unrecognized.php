@@ -6,9 +6,14 @@
  * Time: 11:17
  *
  * Рендер нераспознанного элемента софта
- * @var \app\models\Comps $model
+ * @var Comps $model
  */
-use yii\bootstrap5\Modal;
+
+use app\models\Comps;
+use app\models\Manufacturers;
+use app\models\Soft;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 if (!isset($item['manufacturers_id'])) $item['manufacturers_id']=null;
 
@@ -19,16 +24,16 @@ if (!isset($item['manufacturers_id'])) $item['manufacturers_id']=null;
 <td class="manufacturer">
 <?php if (!is_null($item['manufacturers_id'])){
     //если производитель определен, то выводим его из таблицы производителей в виде "кнопочки"
-    $dev=\app\models\Manufacturers::fetchItem($item['manufacturers_id']);
+    $dev= Manufacturers::fetchItem($item['manufacturers_id']);
     echo $this->render('/manufacturers/item',['model'=>$dev]);
 } else {
     //иначе выводим производителя из отпечатка сканирования и предлагаем кнопочку чтобы его добавить в таблицу
     echo $item['publisher']; //название
 
     //если производитель вообще имеется, то предлагаем его добавить в таблицу
-    if (strlen($item['publisher'])) echo \yii\helpers\Html::a(
+    if (strlen($item['publisher'])) echo Html::a(
         '<span class="fas fa-plus-circle"/>',
-        ['manufacturers-dict/create', 'word' => $item['publisher'],'return'=>'previous'],
+        ['manufacturers-dict/create', 'ManufacturersDict'=>['word' => $item['publisher']],'return'=>'previous'],
         ['title'=>'Добавить производителя в базу','class' => 'passport_tools',]
     );
 } ?>
@@ -73,22 +78,22 @@ if (
     //для кнопочки добавления описания к продукту нам нужны списки продуктов для выбора, к чему добавлять описание
     if (!is_null($item['manufacturers_id']))
         //для случаев, если производитель определен, выводим его продукты (только названия самих продуктов)
-        $items=\yii\helpers\ArrayHelper::map(\app\models\Soft::fetchBy(['manufacturers_id'=>$item['manufacturers_id']]),'id','descr');
+        $items= ArrayHelper::map(Soft::fetchBy(['manufacturers_id'=>$item['manufacturers_id']]),'id','descr');
     else
         //в ином случае выводим список всех продуктов с указанием производителя в названии
-        $items=\app\models\Soft::listItemsWithPublisher();
+        $items= Soft::listItemsWithPublisher();
 
 
 
     // кнопочка создания продукта
-    echo \yii\helpers\Html::a(
+    echo Html::a(
         '<i class="fas fa-plus-circle"></i>',
         $btn_create,
         ['title'=>'Создать продукт из этого элемента','class'=>'passport_tools']
     );
 
     //моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
-	echo \yii\helpers\Html::a('<i class="fas fa-wrench"></i>',
+	echo Html::a('<i class="fas fa-wrench"></i>',
 		[
 			'soft/select-update',
 			'name'=>$item['name'],

@@ -50,11 +50,11 @@ $techs=$model->techModels;
 <h4>Варианты написания производителя:</h4>
 <p>
 	<?php for ($i=0; $i<min(count($dict),$static_limit); $i++ ) { ?>
-		<?= $this->render('/manufacturers-dict/item',['model'=>$dict[$i],'static_view'=>$static_view,'static_view'=>$static_view]) ?><br />
+		<?= $this->render('/manufacturers-dict/item',['model'=>$dict[$i],'static_view'=>$static_view]) ?><br />
 	<?php }
 	if ($static_view && (count($dict)>$static_limit)) echo 'Еще '.($static_limit-count($dict)).' ...<br />';
 	?>
-	<?= Html::a('Добавить вариант написания', ['manufacturers-dict/create','manufacturers_id'=>$model->id]) ?>
+	<?= Html::a('Добавить вариант написания', ['manufacturers-dict/create','ManufacturersDict'=>['manufacturers_id'=>$model->id]]) ?>
 </p>
 
 <br />
