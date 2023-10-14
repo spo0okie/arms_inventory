@@ -151,7 +151,6 @@ class LoginJournal extends ArmsModel
 
 	public function beforeSave($insert)
 	{
-		//error_log("dataIncom: beforeSave");
 		if (parent::beforeSave($insert)) {
 			if (is_numeric($this->time)) {
 				if ($this->local_time) {
@@ -159,20 +158,21 @@ class LoginJournal extends ArmsModel
 				}
 				$this->time = gmdate('Y-m-d H:i:s',$this->time);
 			}
-
+			
 			if (!isset($this->comps_id)) {
-				$comp_tokens=explode('\\',$this->comp_name);
-				if (count($comp_tokens)==2) {
-					$domain_id = \app\models\Domains::findByFQDN($comp_tokens[0]);
-					$this->comps_id = \app\models\Comps::findByDomainName($domain_id,$comp_tokens[1]);
+				if (is_object($comp=\app\models\Comps::fetchByFullName($this->comp_name))) {
+					/** @var Comps $comp */
+					$this->comps_id = $comp->id;
 				}
 			}
+			
 			if (!isset($this->users_id)) {
 				$user_tokens=explode('\\',$this->user_login);
 				if (count($user_tokens)==2) {
 					//$domain_id = \app\models\Domains::findByName($user_tokens[0]);
 					$user = \app\models\Users::findByLogin($user_tokens[1]);
 					if (is_object($user))
+						/** @var Users $user */
 						$this->users_id = $user->id;
 				}
 			}
