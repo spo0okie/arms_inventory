@@ -2,16 +2,15 @@
 
 namespace app\controllers;
 
+use app\components\RackWidget;
 use app\helpers\FieldsHelper;
-use app\models\Comps;
+use app\models\Manufacturers;
+use app\models\ManufacturersDict;
+use app\models\TechsSearch;
+use Throwable;
 use Yii;
 use app\models\TechModels;
-use app\models\TechModelsSearch;
-use yii\helpers\Url;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use yii\bootstrap5\ActiveForm;
 use yii\web\Response;
 
 /**
@@ -22,41 +21,39 @@ class TechModelsController extends ArmsBaseController
 	
 	public $modelClass='app\models\TechModels';
 	
-    /**
+	public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['hint-comment','hint-template','hint-description',],
+			'edit'=>['uploads']
+		]);
+	}
+	
+	
+	
+	/**
      * {@inheritdoc}
      */
     public function behaviors()
     {
-	    $behaviors=[
-		    'verbs' => [
-			    'class' => VerbFilter::className(),
-			    'actions' => [
-					'delete' => ['POST'],
+    	return array_merge_recursive(parent::behaviors(),[
+			'verbs' => [
+				'actions' => [
 					'render-rack' => ['POST'],
-			    ],
-		    ]
-	    ];
-	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-		    'class' => \yii\filters\AccessControl::className(),
-		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','uploads','delete','unlink'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','validate','hint-comment','hint-template','hint-description','item','item-by-name'], 'roles'=>['@','?']],
-		    ],
-		    'denyCallback' => function ($rule, $action) {
-			    throw new  \yii\web\ForbiddenHttpException('Access denied');
-		    }
-	    ];
-	    return $behaviors;
+				],
+			]
+		]);
     }
 	
 	
 	/**
 	 * Displays a item for single model.
-	 * @param integer $id
+	 * @param int  $id
+	 * @param null $long
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionItem($id,$long=false)
+	public function actionItem(int $id, $long=null)
 	{
 		return $this->renderPartial('item', [
 			'model'	=> $this->findModel($id),
@@ -69,9 +66,9 @@ class TechModelsController extends ArmsBaseController
 	{
 		/// производитель
 		//ищем в словаре
-		if (is_null($man_id=\app\models\ManufacturersDict::fetchManufacturer($manufacturer))) {
+		if (is_null($man_id= ManufacturersDict::fetchManufacturer($manufacturer))) {
 			//ищем в самих производителях
-			if (!is_object($man_obj = \app\models\Manufacturers::findOne(['name'=>$manufacturer]))) {
+			if (!is_object($man_obj = Manufacturers::findOne(['name'=>$manufacturer]))) {
 				throw new NotFoundHttpException('Requested manufacturer not found');
 			} else {
 				$man_id=$man_obj->id;
@@ -91,12 +88,13 @@ class TechModelsController extends ArmsBaseController
 	
 	/**
 	 * Подсказка по заполнению спеки (берется из типа модели)
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionHintTemplate($id)
+	public function actionHintTemplate(int $id)
 	{
+		/** @var TechModels $model */
 		$model=$this->findModel($id);
 		if ($model->individual_specs)
 			return Yii::$app->formatter->asNtext($model->type->comment);
@@ -106,11 +104,11 @@ class TechModelsController extends ArmsBaseController
 	
 	/**
 	 * Информация о модели
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionHintDescription($id)
+	public function actionHintDescription(int $id)
 	{
 		$model=$this->findModel($id);
 		return Yii::$app->formatter->asNtext($model->comment);
@@ -118,7 +116,7 @@ class TechModelsController extends ArmsBaseController
 	
 	
 	
-	public function actionHintComment($id){
+	public function actionHintComment(int $id){
 		Yii::$app->response->format = Response::FORMAT_JSON;
 		$data=\app\models\TechModels::fetchTypeComment($id);
 		if (!is_array($data)) throw new NotFoundHttpException('The requested data does not exist.');
@@ -130,15 +128,15 @@ class TechModelsController extends ArmsBaseController
 	
 	/**
 	 * Displays a single TechModels model.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionView($id)
+	public function actionView(int $id)
 	{
 		$this->setQueryParam(['TechsSearch'=>['model_id'=>$id]]);
 		
-		$techSearchModel = new \app\models\TechsSearch();
+		$techSearchModel = new TechsSearch();
 		$techDataProvider = $techSearchModel->search(Yii::$app->request->queryParams);
 		
 		return $this->render('view', [
@@ -147,15 +145,15 @@ class TechModelsController extends ArmsBaseController
 			'dataProvider' => $techDataProvider,
 		]);
 	}
-
+	
 	/**
 	 * Displays a single TechModels model.
-	 * @param string $config
 	 * @return mixed
+	 * @throws Throwable
 	 */
 	public function actionRenderRack()
 	{
-		return \app\components\RackWidget::widget(
+		return RackWidget::widget(
 			json_decode(
 				Yii::$app->request->getBodyParam('config'),true
 			)
@@ -166,11 +164,11 @@ class TechModelsController extends ArmsBaseController
 	/**
 	 * Updates an existing TechModels model.
 	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionUploads($id)
+	public function actionUploads(int $id)
 	{
 		$model = $this->findModel($id);
 		return $this->render('uploads', [
@@ -178,23 +176,4 @@ class TechModelsController extends ArmsBaseController
 		]);
 	}
 	
-	/**
-	 * Validates  model on update.
-	 * @param null $id
-	 * @return mixed
-	 * @throws NotFoundHttpException
-	 */
-	public function actionValidate($id=null)
-	{
-		if (!is_null($id))
-			$model = $this->findModel($id);
-		else
-			$model = new \app\models\TechModels();
-
-		if ($model->load(Yii::$app->request->post())) {
-			Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-			return ActiveForm::validate($model);
-		}
-	}
-
 }
