@@ -14,29 +14,20 @@ use yii\helpers\Url;
 class UiTablesColsController extends ArmsBaseController
 {
 
-	/**
-	* {@inheritdoc}
-	*/
-	public function behaviors()
+	public function accessMap()
 	{
-		$behaviors=[];
-		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-			'class' => \yii\filters\AccessControl::className(),
-			'rules' => [
-				['allow' => true, 'actions'=>['set','get','delete',], 'roles'=>['@']],
-			],
-			'denyCallback' => function ($rule, $action) {
-				throw new  \yii\web\ForbiddenHttpException('Access denied');
-			}
-		];
-		return $behaviors;
+		return [ArmsBaseController::PERM_AUTHENTICATED=>['set','get','delete']];
 	}
-
-
-    /**
-     * @return mixed
-     */
-    public function actionSet($table, $column, $user, $value)
+	
+	
+	/**
+	 * @param string $table
+	 * @param string $column
+	 * @param int    $user
+	 * @param string $value
+	 * @return mixed
+	 */
+    public function actionSet(string $table, string $column, int $user, string $value)
     {
         $model = UiTablesCols::find()->where([
 			'table'=>$table,
