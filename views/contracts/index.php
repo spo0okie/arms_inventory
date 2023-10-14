@@ -1,13 +1,18 @@
 <?php
 
+use app\components\DynaGridWidget;
+use app\models\Contracts;
+use app\models\ContractsStates;
+use app\models\Currency;
 use yii\helpers\Html;
-use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ContractsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = \app\models\Contracts::$title;
+$this->title = Contracts::$title;
+$this->params['layout-container'] = 'container-fluid';
+
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'btn']).
@@ -34,7 +39,8 @@ foreach ($dataProvider->models as $model) {
 }
 
 $arrFooter=['total'=>[],'charge'=>[]];
-foreach (\app\models\Currency::find()->all() as $currency) {
+foreach (Currency::find()->all() as $currency) {
+	/** @var Currency $currency */
 	if (isset($totals[$currency->id]) && $totals[$currency->id]) {
 		$arrFooter['total'][]=number_format($totals[$currency->id],2,'.','&nbsp;').$currency->symbol;
 	}
@@ -47,7 +53,7 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 ?>
 <div class="contracts-index">
 
-    <?= \app\components\DynaGridWidget::widget([
+    <?= DynaGridWidget::widget([
 		'id'=>'contracts-index',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -58,7 +64,7 @@ foreach (\app\models\Currency::find()->all() as $currency) {
 		        }
 	        ],
 			'state_id'=>[
-				'filter'=>\app\models\ContractsStates::fetchNames(),
+				'filter'=> ContractsStates::fetchNames(),
 				'contentOptions' => ['class' => 'contracts-state-column'],
 				'value'=>function($data) use ($renderer) {
 					return $renderer->render('/contracts/item-state',['model'=>$data]);

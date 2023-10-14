@@ -2,63 +2,32 @@
 
 namespace app\controllers;
 
+use app\models\Users;
+use Exception;
+use Throwable;
 use Yii;
 use app\models\Contracts;
-use app\models\ContractsSearch;
-use yii\web\Controller;
+use yii\db\StaleObjectException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use yii\bootstrap5\ActiveForm;
 use yii\web\Response;
-use yii\web\UploadedFile;
 
 
 /**
  * ContractsController implements the CRUD actions for Contracts model.
  */
-class ContractsController extends Controller
+class ContractsController extends ArmsBaseController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-		$behaviors=[
-			'verbs' => [
-				'class' => VerbFilter::className(),
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			]
-		];
-		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-			'class' => \yii\filters\AccessControl::className(),
-			'rules' => [
-				['allow' => true, 'actions'=>['create','update','update-form','delete','unlink','unlink-arm','unlink-tech','link','link-tech','scan-upload'], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','hint-arms','hint-parent','scans','validate'], 'roles'=>['@','?']],
-			],
-			'denyCallback' => function ($rule, $action) {
-				throw new  \yii\web\ForbiddenHttpException('Access denied');
-			}
-		];
-		return $behaviors;
-    }
-
-    /**
-     * Lists all Contracts models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel = new ContractsSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-		$this->view->params['layout-container'] = 'container-fluid';
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
+	public $modelClass='\app\models\Contracts';
+	public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['hint-arms','hint-parent','scans'],
+			'edit'=>['update-form','unlink','unlink-arm','unlink-tech','link','link-tech','scan-upload']
+		]);
+	}
+	
+	
 	
 	/**
 	 * Возвращает IDs армов с переданными документами
@@ -82,66 +51,20 @@ class ContractsController extends Controller
 		return Yii::$app->formatter->asRaw(Contracts::fetchParentHint($ids,$form));
 	}
 	
-	/**
-	 * Displays a single Contracts model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionTtip($id)
-	{
-		return $this->renderPartial('ttip', [
-			'model' => $this->findModel($id),
-		]);
-	}
+	
 
 	/**
 	 * Displays a single Contracts model.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionView($id)
-	{
-		return $this->render('view', [
-			'model' => $this->findModel($id),
-		]);
-	}
-
-	/**
-	 * Displays a single Contracts model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionScans($id)
+	public function actionScans(int $id)
 	{
 		return $this->renderAjax('scans', [
 			'model' => $this->findModel($id),
 		]);
 	}
-
-
-
-	/**
-	 * Validates  model on update.
-	 * @param null $id
-	 * @return mixed
-	 * @throws NotFoundHttpException
-	 */
-	public function actionValidate($id=null)
-	{
-		if (!is_null($id))
-			$model = $this->findModel($id);
-		else
-			$model = new Contracts();
-
-		if ($model->load(Yii::$app->request->post())) {
-			Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-			return ActiveForm::validate($model);
-		}
-	}
-
 
 	/**
 	 * Creates a new Contracts model.
@@ -151,8 +74,6 @@ class ContractsController extends Controller
 	 */
     public function actionCreate()
     {
-	    //if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
-	
 	    $model = new Contracts();
 	
 		//передали родительский документ
@@ -192,14 +113,12 @@ class ContractsController extends Controller
 	/**
 	 * Updates an existing Contracts model.
 	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionUpdate($id)
+	public function actionUpdate(int $id)
 	{
-		//if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
-		
 		$model = $this->findModel($id);
 
 		//обработка аякс запросов
@@ -233,11 +152,11 @@ class ContractsController extends Controller
 	/**
 	 * Updates an existing Contracts model.
 	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionUpdateForm($id)
+	public function actionUpdateForm(int $id)
 	{
 		return $this->renderAjax('_form', [
 			'model' => $this->findModel($id),
@@ -247,16 +166,16 @@ class ContractsController extends Controller
 	/**
 	 * Deletes an existing Contracts model.
 	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
-	 * @throws \Exception
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
+	 * @throws Exception
+	 * @throws Throwable
+	 * @throws StaleObjectException
 	 */
-    public function actionDelete($id)
+    public function actionDelete(int $id)
     {
-	    if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+	    if (!Users::isAdmin()) {throw new  ForbiddenHttpException('Access denied');}
 	
 	    $model=$this->findModel($id);
 
@@ -276,7 +195,6 @@ class ContractsController extends Controller
 	public function actionScanUpload()
 	{
 		$id=Yii::$app->request->post('contracts_id');
-		//Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		if (is_null($id))
 			return "{\"error\":\"Невозможно прикрепить сканы к еще не созданному документу. Нажмите сначала кнопку &quot;Применить&quot;\"}";
 		else
@@ -284,13 +202,13 @@ class ContractsController extends Controller
 
 	/**
 	 * Отвязывает документ от объекта.
-	 * @param integer $id
-	 * @param integer $model_id
+	 * @param int $id
+	 * @param int $model_id
 	 * @param string $link
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionUnlink($id,$model_id,$link)
+	public function actionUnlink(int $id, int $model_id, string $link)
 	{
 		//признак что документ был связан с объектом
 		$usage=false;
@@ -321,14 +239,14 @@ class ContractsController extends Controller
 	/**
 	 * Отвязывает документ от объекта.
 	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param integer $id
-	 * @param integer $techs_id
+	 * @param int $id
+	 * @param int $techs_id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionUnlinkTech($id,$techs_id)
+	public function actionUnlinkTech(int $id, int $techs_id)
 	{
-		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		if (!Users::isAdmin()) {throw new  ForbiddenHttpException('Access denied');}
 		
 		$usage=false;
 		$usage_deleted=false;
@@ -356,13 +274,13 @@ class ContractsController extends Controller
 	/**
 	 * Отвязывает документ от объекта.
 	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param integer $id
-	 * @param integer $model_id
+	 * @param int $id
+	 * @param int $model_id
 	 * @param string $link
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionLink($id,$model_id,$link)
+	public function actionLink(int $id, int $model_id, string $link)
 	{
 		
 		$contract=$this->findModel($id);
@@ -381,14 +299,14 @@ class ContractsController extends Controller
 	/**
 	 * Отвязывает документ от объекта.
 	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param integer $id
-	 * @param integer $arms_id
+	 * @param int $id
+	 * @param int $techs_id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionLinkTech($id,$techs_id)
+	public function actionLinkTech(int $id, int $techs_id)
 	{
-		if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
+		if (!Users::isAdmin()) {throw new  ForbiddenHttpException('Access denied');}
 		
 		$model=$this->findModel($id);
 		$techs_ids=$model->techs_ids;
@@ -406,11 +324,11 @@ class ContractsController extends Controller
 	/**
      * Finds the Contracts model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
+     * @param int $id
      * @return Contracts the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel(int $id)
     {
         if (($model = Contracts::findOne($id)) !== null) {
             return $model;
