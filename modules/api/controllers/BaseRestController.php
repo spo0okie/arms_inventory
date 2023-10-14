@@ -9,22 +9,19 @@ namespace app\modules\api\controllers;
  */
 
 
+use app\controllers\ArmsBaseController;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use app\models\Users;
 use HttpInvalidParamException;
 use Yii;
 use yii\db\ActiveQuery;
-use yii\filters\AccessControl;
 use yii\filters\auth\HttpBasicAuth;
 use yii\rest\ActiveController;
-use yii\web\ForbiddenHttpException;
 
 class BaseRestController extends ActiveController
 {
 	//как в карте доступов обозначать анонимный и авторизованный
-	public static $PERM_ANONYMOUS='@anonymous';
-	public static $PERM_AUTHENTICATED='@authorized';
 	
 	public $modelClass='app\models\ArmsModel';
 
@@ -45,34 +42,8 @@ class BaseRestController extends ActiveController
 			"index-$class"=>['index','filter'],						//чтение объектов этого класса  списком
 			"update-$class"=>['create','update','upload'],			//обновление объектов этого класса
 			"delete-$class"=>['delete'],							//удаление объектов этого класса
-			self::$PERM_ANONYMOUS=>[],
-			self::$PERM_AUTHENTICATED=>[],
-		];
-	}
-	
-	/** @noinspection PhpUnusedParameterInspection */
-	public static function buildAccessRules($map) {
-		$rules=[];
-		foreach ($map as $permission=>$actions) {
-			$rule=['allow'=>true, 'actions'=>$actions];
-			switch ($permission) {
-				case self::$PERM_AUTHENTICATED:
-					$rule['roles']=['@'];
-					break;
-				case self::$PERM_ANONYMOUS:
-					$rule['roles']=['?'];
-					break;
-				default:
-					$rule['permissions']=[$permission];
-			}
-			$rules[]=$rule;
-		}
-		return [
-			'class' => AccessControl::class,
-			'rules' => $rules,
-			'denyCallback' => function ($rule, $action) {
-				throw new  ForbiddenHttpException('Access denied');
-			}
+			ArmsBaseController::PERM_ANONYMOUS=>[],
+			ArmsBaseController::PERM_AUTHENTICATED=>[],
 		];
 	}
 	
@@ -80,7 +51,7 @@ class BaseRestController extends ActiveController
 	{
 		$behaviors=parent::behaviors();
 		if (!empty(Yii::$app->params['useRBAC'])) {
-			$behaviors['access']=static::buildAccessRules($this->accessMap());
+			$behaviors['access']=ArmsBaseController::buildAccessRules($this->accessMap());
 			$behaviors['authenticator'] = [
 				'class' => HttpBasicAuth::class,
 				'auth' => function ($login, $password) {
@@ -89,7 +60,7 @@ class BaseRestController extends ActiveController
 					if ($user && $user->validatePassword($password)) return $user;
 					return null;
 				},
-				'except' => $this->accessMap()[static::$PERM_ANONYMOUS],	//отключаем авторизацию для действий доступных без нее
+				'except' => $this->accessMap()[ArmsBaseController::PERM_ANONYMOUS],	//отключаем авторизацию для действий доступных без нее
 			];
 		}
 		return $behaviors;
