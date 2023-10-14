@@ -2,7 +2,13 @@
 
 namespace app\models;
 
+use app\models\links\LicLinks;
+use voskobovich\linker\LinkerBehavior;
+use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "lic_items".
@@ -15,9 +21,11 @@ use Yii;
  * @property string $active_from Начало периода действия
  * @property string $active_to Окончание периода действия
  * @property string $created_at Время создания
+ * @property string $datePart часть описания - дата
  * @property array $arms_ids
  * @property array $comps_ids Ссылка на ОСи
  * @property array $users_ids Ссылка на пользователей
+ * @property array $soft_ids Ссылка на софт
  * @property array       $softIds Ссылка на софт
  * @property array       $contracts_ids
  * @property int         $usages
@@ -63,28 +71,28 @@ class LicItems extends ArmsModel
 		$model=$this;
 		return [
 			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'class' => LinkerBehavior::class,
 				'relations' => [
 					'contracts_ids' => 'contracts',
 					'arms_ids' => [
 						'arms',
 						'updater' => [
-							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
-							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+							'class' => ManyToManySmartUpdater::class,
+							'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
 						],
 					],
 					'comps_ids' => [
 						'comps',
 						'updater' => [
-							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
-							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+							'class' => ManyToManySmartUpdater::class,
+							'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
 						],
 					],
 					'users_ids' => [
 						'users',
 						'updater' => [
-							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
-							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
+							'class' => ManyToManySmartUpdater::class,
+							'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
 						],
 					],
 				]
@@ -94,8 +102,9 @@ class LicItems extends ArmsModel
 
     /**
      * {@inheritdoc}
+	 * @noinspection PhpUnusedParameterInspection
      */
-    public function rules()
+	public function rules()
     {
         return [
             [['descr', 'count'], 'required'],
@@ -109,7 +118,7 @@ class LicItems extends ArmsModel
 			        $this->addError($attribute, "Такая закупка (с таким описанием) уже существует в этой группе лицензий. Необходимо дать такое описание, чтобы было очевидно, какая закупка для чего была сделана.");
 		        }
 	        }],
-            [['lic_group_id'], 'exist', 'skipOnError' => true, 'targetClass' => LicGroups::className(), 'targetAttribute' => ['lic_group_id' => 'id']],
+            [['lic_group_id'], 'exist', 'skipOnError' => true, 'targetClass' => LicGroups::class, 'targetAttribute' => ['lic_group_id' => 'id']],
         ];
     }
 
@@ -133,7 +142,7 @@ class LicItems extends ArmsModel
 			],
 	        'comment' => [
 				'Комментарий',
-				'hint' => 'Вся прочая информация по этой закупке. Если есть сомнения записать или нет чтото полезное в комментарии - лучше записать. Объем не ограничен.',
+				'hint' => 'Вся прочая информация по этой закупке. Если есть сомнения записать или нет что-то полезное в комментарии - лучше записать. Объем не ограничен.',
 			],
 	        'arms_ids' => [
 				'АРМы, куда распределять лицензии',
@@ -209,57 +218,61 @@ class LicItems extends ArmsModel
 	}
 	
 	/**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLicGroup()
     {
-        return $this->hasOne(LicGroups::className(), ['id' => 'lic_group_id']);
+        return $this->hasOne(LicGroups::class, ['id' => 'lic_group_id']);
     }
-
-
-    /**
+	
+	
+	/**
 	 * Возвращает набор документов
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getContracts()
 	{
-		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::class, ['id' => 'contracts_id'])
 			->viaTable('{{%contracts_in_lics}}', ['lics_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getArms()
 	{
-		return $this->hasMany(Techs::className(), ['id' => 'arms_id'])
+		return $this->hasMany(Techs::class, ['id' => 'arms_id'])
 			->viaTable('{{%lic_items_in_arms}}', ['lic_items_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getUsers()
 	{
-		return $this->hasMany(Users::className(), ['id' => 'users_id'])
+		return $this->hasMany(Users::class, ['id' => 'users_id'])
 			->viaTable('{{%lic_items_in_users}}', ['lic_items_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getComps()
 	{
-		return $this->hasMany(Comps::className(), ['id' => 'comps_id'])
+		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
 			->viaTable('{{%lic_items_in_comps}}', ['lic_items_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getKeys()
 	{
-		return $this->hasMany(LicKeys::className(), ['lic_items_id' => 'id']);
+		return $this->hasMany(LicKeys::class, ['lic_items_id' => 'id']);
 	}
 
 	/**
@@ -335,7 +348,7 @@ class LicItems extends ArmsModel
 		$list= static::find()->with('licGroup')
 			//->select(['id','descr'])
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+		return ArrayHelper::map($list, 'id', 'sname');
 	}
 	
 	

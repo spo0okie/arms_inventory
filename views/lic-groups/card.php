@@ -1,15 +1,19 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\components\HintIconWidget;
+use app\helpers\ArrayHelper;
+use app\models\LicGroupsSearch;
+use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
-use kartik\grid\GridView;
 
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicGroups */
-/* @var $dataProvider \yii\data\ActiveDataProvider */
-/* @var $searchModel \app\models\LicGroupsSearch */
-/* @var $linksData \yii\data\ArrayDataProvider */
+/* @var $dataProvider ActiveDataProvider */
+/* @var $searchModel LicGroupsSearch */
+/* @var $linksData ArrayDataProvider */
 
 if (!isset($static_view)) $static_view=false;
 //если не передать отдельно набор привязанных армов, то отрендерятся те что привязаны к группе
@@ -44,9 +48,9 @@ if (!isset($linksData)) $linksData=null;
         <?= DynaGridWidget::widget([
 			'id' => 'lic-groups-view-items',
 			'header' => 'Закупленные лицензии',
-			'columns' => \app\helpers\ArrayHelper::filter(include $_SERVER['DOCUMENT_ROOT'].'/views/lic-items/columns.php',[1,2,3]),
-			'createButton' => Html::a('Добавить закупку',['/lic-items/create','lic_group_id'=>$model->id],['class' => 'btn btn-success']),
-			'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\LicItems','cssClass'=>'btn']),
+			'columns' => ArrayHelper::filter(include $_SERVER['DOCUMENT_ROOT'].'/views/lic-items/columns.php',[1,2,3]),
+			'createButton' => Html::a('Добавить закупку',['/lic-items/create','LicItems'=>['lic_group_id'=>$model->id]],['class' => 'btn btn-success']),
+			'hintButton' => HintIconWidget::widget(['model'=>'\app\models\LicItems','cssClass'=>'btn']),
 			'dataProvider' => $dataProvider,
 			'filterModel' => $searchModel,
 		]) ?>

@@ -2,121 +2,77 @@
 
 namespace app\controllers;
 
+use app\models\Contracts;
+use app\models\LicKeys;
+use app\models\links\LicLinks;
 use Yii;
 use app\models\LicItems;
-use app\models\LicItemsSearch;
 use yii\data\ArrayDataProvider;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use yii\bootstrap5\ActiveForm;
 use yii\data\ActiveDataProvider;
+use yii\web\Response;
 
 
 /**
  * LicItemsController implements the CRUD actions for LicItems model.
  */
-class LicItemsController extends Controller
+class LicItemsController extends ArmsBaseController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-	    $behaviors=[
-		    'verbs' => [
-			    'class' => VerbFilter::className(),
-			    'actions' => [
-				    'delete' => ['POST'],
-			    ],
-		    ]
-	    ];
-	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-		    'class' => \yii\filters\AccessControl::className(),
-		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
-		    ],
-		    'denyCallback' => function ($rule, $action) {
-			    throw new  \yii\web\ForbiddenHttpException('Access denied');
-		    }
-	    ];
-	    return $behaviors;
-    }
 
-
+	public $modelClass=LicItems::class;
+	
+	public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['hint-arms','contracts'],
+		]);
+	}
+	
 	/**
-	 * Возвращает IDs армов связанных с закупкой (через документы)
-	 * @param $id
+	 * Возвращает IDs оборудования связанного с закупкой (через документы)
+	 * @param int    $id
+	 * @param string $form
 	 * @return mixed
 	 * @throws NotFoundHttpException
 	 */
-	public function actionHintArms($id,$form)
+	public function actionHintArms(int $id, string $form)
 	{
-		//Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		if ($model=$this->findModel($id)) {
-			return Yii::$app->formatter->asRaw(\app\models\Contracts::fetchArmsHint($model->contracts_ids,$form));
-		};
+			/** @var $model LicItems */
+			return Yii::$app->formatter->asRaw(Contracts::fetchArmsHint($model->contracts_ids,$form));
+		}
 		return null;
-	}
-
-    /**
-     * Lists all LicItems models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel = new LicItemsSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
-
-	/**
-	 * Displays a tooltip for single model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionTtip($id)
-	{
-		return $this->renderPartial('ttip', [
-			'model' => $this->findModel($id),
-		]);
 	}
 
 
 	/**
 	 * Displays a single Arms model.
-	 * @param integer $id
+	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionContracts($id)
+	public function actionContracts(int $id)
 	{
-		return $this->renderAjax('contracts', ['model' => $this->findModel($id),]);
+		return $this->renderAjax('contracts', ['model' => $this->findModel($id)]);
 	}
 
 
 	/**
      * Displays a single LicItems model.
-     * @param integer $id
+     * @param int $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView(int $id)
     {
 	
 		return $this->render('view', [
             'model' => $this->findModel($id),
 	        'keys' => new ActiveDataProvider([
-		        'query' => \app\models\LicKeys::find()->where(['lic_items_id'=>$id]),
+		        'query' => LicKeys::find()->where(['lic_items_id'=>$id]),
 	        ]),
 			'linksData'=>new ArrayDataProvider([
-				'allModels' => \app\models\links\LicLinks::findForLic('items',$id),
+				'allModels' => LicLinks::findForLic('items',$id),
 				'key'=>'id',
 				'sort' => [
 					'attributes'=> [
@@ -133,100 +89,19 @@ class LicItemsController extends Controller
 			])
         ]);
     }
-
-    /**
-     * Creates a new LicItems model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new LicItems();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
 	
-		if ($group=Yii::$app->request->get('lic_group_id')) $model->lic_group_id=$group;
-		if ($contracts_id=Yii::$app->request->get('contracts_id')) $model->contracts_ids=[$contracts_id];
-	
-		$model->load(Yii::$app->request->get());
-	
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('create', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('create', [
-				'model' => $model,
-			]);
-    }
-
-	/**
-	 * Validates  model on update.
-	 * @param null $id
-	 * @return mixed
-	 * @throws NotFoundHttpException
-	 */
-	public function actionValidate($id=null)
-	{
-		if (!is_null($id))
-			$model = $this->findModel($id);
-		else
-			$model = new LicItems();
-
-		if ($model->load(Yii::$app->request->post())) {
-			Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-			return ActiveForm::validate($model);
-		}
-	}
-
-    /**
-     * Updates an existing LicItems model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-	
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('update', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('update', [
-				'model' => $model,
-			]);
-    }
-
-    /**
-     * Deletes an existing LicItems model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
-    }
-
 	/**
 	 * Удаляем АРМ или софт из лицензии
-	 * @param $id
-	 * @return string|\yii\web\Response
+	 * @param int $id
+	 * @param int|null $soft_id
+	 * @param int|null $arms_id
+	 * @param int|null $users_id
+	 * @param int|null $comps_id
+	 * @return string|Response
 	 * @throws NotFoundHttpException
 	 */
-	public function actionUnlink($id,$soft_id=null,$arms_id=null,$users_id=null,$comps_id=null){
+	public function actionUnlink(int $id, $soft_id=null, $arms_id=null, $users_id=null, $comps_id=null){
+		/** @var LicItems $model */
 		$model = $this->findModel($id);
 		$updated = false;
 
@@ -261,19 +136,4 @@ class LicItemsController extends Controller
 	}
 
 
-    /**
-     * Finds the LicItems model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return LicItems the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = LicItems::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
 }
