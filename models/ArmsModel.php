@@ -2,13 +2,14 @@
 
 namespace app\models;
 
-use app\components\DynaGridWidget;
 use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelper;
 use DateTime;
 use DateTimeZone;
 use Yii;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "arms".
@@ -27,7 +28,7 @@ use Yii;
  
  * @property int $secondsSinceUpdate Секунды с момента обновления
  */
-class ArmsModel extends \yii\db\ActiveRecord
+class ArmsModel extends ActiveRecord
 {
 	public static $title='Объект';
 	public static $titles='Объекты';
@@ -190,7 +191,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getAttaches() {
 		return $this->hasMany(Attaches::class,[static::tableName().'_id'=>'id'	]);
@@ -314,6 +315,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 	 * @param string     $log
 	 * @param RestHelper $rest
 	 * @return bool|null
+	 * @noinspection PhpUnusedParameterInspection
 	 */
 	public function syncFields(array $remote, array $overrides, string &$log, RestHelper $rest) {
 		$timestamp=static::$syncTimestamp;
@@ -367,6 +369,7 @@ class ArmsModel extends \yii\db\ActiveRecord
 	 * @param string     $log
 	 * @param RestHelper $rest
 	 * @return ArmsModel
+	 * @noinspection PhpUnusedParameterInspection
 	 */
 	public static function syncCreate(array $remote, array $overrides, string &$log, RestHelper $rest) {
 		
@@ -413,4 +416,23 @@ class ArmsModel extends \yii\db\ActiveRecord
 		return ++$id;
 	}
 	
+	/**
+	 * Поиск объекта по имени
+	 * @param string $name
+	 * @return ArmsModel|ActiveRecord|null
+	 */
+	public static function findByName(string $name)	{
+		return static::find()
+			->where(['LOWER(name)'=>strtolower($name)])
+			->one();
+	}
+	
+	/**
+	 * @param string $name
+	 * @return ArmsModel|ActiveRecord|null
+	 */
+	public static function findByAnyName(string $name)
+	{
+		return static::findByName($name);
+	}
 }

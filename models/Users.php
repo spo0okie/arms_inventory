@@ -481,22 +481,6 @@ class Users extends ArmsModel implements IdentityInterface
     	return $this->Ename;
 	}
 
-    /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
-     */
-    public static function findByUsername(string $username)
-    {
-	    $login=mb_strtolower($username);
-	    //при поиске по логину предпочитаем сначала искать среди трудоустроенных
-	    $list = static::find()->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])->all();
-	    foreach ($list as $item) {
-		    if (!strcmp(mb_strtolower($item['Login']),$login)) return $item;
-	    }
-	    return null;
-    }
 
     /**
      * @inheritdoc
@@ -593,16 +577,39 @@ class Users extends ArmsModel implements IdentityInterface
     }
 	
 	/**
+	 * Finds user by login
 	 * @param $login
-	 * @return ActiveRecord|null
+	 * @return ActiveRecord|static|null
 	 */
-	public static function findByLogin($login){
+	public static function findByLogin(string $login){
 		//при поиске по логину предпочитаем сначала искать среди трудоустроенных
 		return static::find()
-			->select(['id','Login','Uvolen'])
 			->where(['LOWER(Login)'=>strtolower($login)])
 			->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])
 			->one();
+	}
+	
+	/**
+	 * Finds user by Name
+	 * @param string $name
+	 * @return ActiveRecord|static|null
+	 */
+	public static function findByName(string $name)	{
+		return static::find()
+			->where(['LOWER(Ename)'=>strtolower($name)])
+			->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])
+			->one();
+	}
+	
+	/**
+	 * Универсальная процедура поиска объекта по имени
+	 * @param string $name
+	 * @return Users|ActiveRecord|null
+	 */
+	public static function findByAnyName(string $name) {
+		if (is_object($model=static::findByLogin($name))) return $model;
+		if (is_object($model=static::findByName($name))) return $model;
+		return null;
 	}
 
 	public function getLastLogin() {
