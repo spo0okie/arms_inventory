@@ -7,7 +7,6 @@
  */
 
 namespace app\modules\api\controllers;
-use app\models\OrgStruct;
 
 
 class OrgStructController extends BaseRestController

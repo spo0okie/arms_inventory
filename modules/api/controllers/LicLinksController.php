@@ -3,15 +3,12 @@
 namespace app\modules\api\controllers;
 
 
-class LicLinksController extends \yii\rest\ActiveController
+use app\models\links\LicLinks;
+
+class LicLinksController extends BaseRestController
 {
 
 	public $modelClass='app\models\links\LicLinks';
-
-	public function actions()
-	{
-		return ['search'];
-	}
 
 	public function actionSearch(
 		int $productId=null,
@@ -21,7 +18,7 @@ class LicLinksController extends \yii\rest\ActiveController
 		int $licId=null
 	){
 		//return $productId;
-		return \app\models\links\LicLinks::findProductLicenses(
+		return LicLinks::findProductLicenses(
 			$productId,
 			$objectType,
 			$licenseType,

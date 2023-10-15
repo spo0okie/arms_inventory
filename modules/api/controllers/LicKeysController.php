@@ -3,16 +3,15 @@
 namespace app\modules\api\controllers;
 
 
-use app\controllers\ArmsBaseController;
 use app\models\Comps;
 use yii\web\NotFoundHttpException;
 
-class LicKeysController extends ArmsBaseController
+class LicKeysController extends BaseRestController
 {
 
 	public $modelClass='app\models\LicKeys';
 
-	public function actionSearch($product_id,$comp_name){
+	public function actionSearch($product_id=null,$comp_name=null){
 		/** @var Comps $comp */
 		$comp= Comps::find()->where(['name' => strtoupper($comp_name)])->one();
 		if ($comp === null)

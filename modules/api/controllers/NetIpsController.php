@@ -2,19 +2,22 @@
 
 namespace app\modules\api\controllers;
 
-use app\models\NetIps;
+use app\helpers\StringHelper;
 use app\models\Networks;
-use app\models\Users;
-use yii\filters\auth\HttpBasicAuth;
 use yii\web\NotFoundHttpException;
 
 
 class NetIpsController extends BaseRestController
 {
 	public $modelClass='app\models\NetIps';
-	
-	public $viewActions=['index','view','search','filter'];
-	public $editActions=['create','update','delete','first-unused'];
+	public function accessMap()
+	{
+		$class=StringHelper::class2Id($this->modelClass);
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['first-unused'],
+			"view-$class"=>['first-unused'],
+		]);
+	}
 	
 	public static $searchFields=[	//набор полей по которым можно делать серч с мапом в SQL поля
 		'name'=>'name',

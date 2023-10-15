@@ -2,16 +2,24 @@
 
 namespace app\modules\api\controllers;
 
-use app\models\Domains;
+use app\controllers\ArmsBaseController;
 use app\models\Techs;
+use app\models\Users;
+use yii\web\NotFoundHttpException;
 
 
 class PhonesController extends BaseRestController
 {
 	
 	public $viewActions=['search-by-user','search-by-num'];
-	public $editActions=[];
-	public static $searchFields=[];
+	public function accessMap()
+	{
+		return [
+			'view'=>$this->viewActions,
+			'view-phones'=>$this->viewActions,
+			ArmsBaseController::PERM_ANONYMOUS=>[]
+		];
+	}
 	
 	public function actions(){
 		return $this->viewActions;
@@ -38,7 +46,7 @@ class PhonesController extends BaseRestController
 				return $user->Ename;
 			}
 		}
-		$user=\app\models\Users::find()
+		$user= Users::find()
 			->where([
 				'phone'=>$num,
 				'Uvolen'=>false
@@ -50,15 +58,15 @@ class PhonesController extends BaseRestController
 		if (is_object($user))
 			return $user->Ename;
 		
-		throw new \yii\web\NotFoundHttpException("not found");
+		throw new NotFoundHttpException("not found");
 	}
 	
 	public function actionSearchByUser($id=null,$login=null){
 		//ищем пользователя
 		if ($id)
-			$user = \app\models\Users::findOne($id);
+			$user = Users::findOne($id);
 		elseif ($login)
-			$user = \app\models\Users::find()
+			$user = Users::find()
 			->where(['Login'=>$login])
 			->one();
 		/**
@@ -92,7 +100,7 @@ class PhonesController extends BaseRestController
 			else
 				return $user->Phone;
 		} else
-		throw new \yii\web\NotFoundHttpException("not found");
+		throw new NotFoundHttpException("not found");
 	}
 
 }

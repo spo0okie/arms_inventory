@@ -2,11 +2,8 @@
 
 namespace app\modules\api\controllers;
 
-use app\models\NetIps;
-use app\models\Networks;
 use app\models\Schedules;
-use app\models\Users;
-use yii\filters\auth\HttpBasicAuth;
+use Yii;
 use yii\web\NotFoundHttpException;
 
 
@@ -14,8 +11,13 @@ class SchedulesController extends BaseRestController
 {
 	public $modelClass='app\models\Schedules';
 	
-	public $viewActions=['index','view','search','filter','status','meta-status','next-meta'];
-	public $editActions=['create','update','delete','first-unused'];
+	public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['status','meta-status','next-meta'],
+			'view-schedules'=>['status','meta-status','next-meta'],
+		]);
+	}
 	
 	/**
 	 * Displays a single model status
@@ -23,13 +25,13 @@ class SchedulesController extends BaseRestController
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionStatus($id)
+	public function actionStatus(int $id)
 	{
 		$model=$this->findModel($id);
 		
 		return $model->isWorkTime(
-			gmdate('Y-m-d',time()+\Yii::$app->params['schedulesTZShift']),
-			gmdate('H:i',time()+\Yii::$app->params['schedulesTZShift'])
+			gmdate('Y-m-d',time()+ Yii::$app->params['schedulesTZShift']),
+			gmdate('H:i',time()+ Yii::$app->params['schedulesTZShift'])
 		);
 	}
 	
@@ -39,12 +41,12 @@ class SchedulesController extends BaseRestController
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionMetaStatus($id)
+	public function actionMetaStatus(int $id)
 	{
 		$model=$this->findModel($id);
 		return $model->metaAtTime(
-			gmdate('Y-m-d',time()+\Yii::$app->params['schedulesTZShift']),
-			gmdate('H:i',time()+\Yii::$app->params['schedulesTZShift'])
+			gmdate('Y-m-d',time()+ Yii::$app->params['schedulesTZShift']),
+			gmdate('H:i',time()+ Yii::$app->params['schedulesTZShift'])
 		);
 	}
 	
@@ -54,12 +56,12 @@ class SchedulesController extends BaseRestController
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionNextMeta($id)
+	public function actionNextMeta(int $id)
 	{
 		$model=$this->findModel($id);
 		return $model->nextWorkingMeta(
-			gmdate('Y-m-d',time()+\Yii::$app->params['schedulesTZShift']),
-			gmdate('H:i',time()+\Yii::$app->params['schedulesTZShift'])
+			gmdate('Y-m-d',time()+ Yii::$app->params['schedulesTZShift']),
+			gmdate('H:i',time()+ Yii::$app->params['schedulesTZShift'])
 		);
 	}
 	
@@ -70,7 +72,7 @@ class SchedulesController extends BaseRestController
 	 * @return Schedules the loaded model
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	protected function findModel($id)
+	protected function findModel(int $id)
 	{
 		if (($model = Schedules::findOne($id)) !== null) {
 			return $model;
