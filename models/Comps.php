@@ -4,10 +4,13 @@ namespace app\models;
 
 use app\helpers\ArrayHelper;
 use app\helpers\QueryHelper;
-use DateTime;
-use DateTimeZone;
-use Yii;
+use Throwable;
+use voskobovich\linker\LinkerBehavior;
+use voskobovich\linker\updaters\ManyToManySmartUpdater;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\StaleObjectException;
 
 /**
  * This is the model class for table "comps".
@@ -58,7 +61,7 @@ use yii\db\ActiveRecord;
  * @property Segments[] $segments
  * @property \app\models\HwList $hwList
  * @property \app\models\SwList $swList
- * @property \app\models\Services $services
+ * @property \app\models\Services[] $services
  * @property Places $place
  * @property Acls[] $acls
  * @property Aces[] $aces
@@ -94,6 +97,7 @@ class Comps extends ArmsModel
 
     /**
      * @inheritdoc
+	 * @noinspection PhpUnusedParameterInspection
      */
     public function rules()
     {
@@ -137,9 +141,9 @@ class Comps extends ArmsModel
 			}],
 	
 			[['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],
-			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::className(), 'targetAttribute' => ['arm_id' => 'id']],
-			[['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
-            [['domain_id'], 'exist', 'skipOnError' => true, 'targetClass' => Domains::className(), 'targetAttribute' => ['domain_id' => 'id']],
+			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::class, 'targetAttribute' => ['arm_id' => 'id']],
+			[['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['user_id' => 'id']],
+            [['domain_id'], 'exist', 'skipOnError' => true, 'targetClass' => Domains::class, 'targetAttribute' => ['domain_id' => 'id']],
         ];
     }
 
@@ -224,15 +228,15 @@ class Comps extends ArmsModel
     {
         return [
             [
-                'class' => \voskobovich\linker\LinkerBehavior::className(),
+                'class' => LinkerBehavior::class,
                 'relations' => [
 					'soft_ids' => [
 						'soft',
-						'updater' => ['class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),],
+						'updater' => ['class' => ManyToManySmartUpdater::class,],
 					],
 					'softHits_ids' => [
 						'softHits',
-						'updater' => ['class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),],
+						'updater' => ['class' => ManyToManySmartUpdater::class,],
 					],
 					'netIps_ids' => 'netIps',
 					'services_ids' => 'services',
@@ -243,7 +247,7 @@ class Comps extends ArmsModel
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getArm()
 	{
@@ -251,7 +255,7 @@ class Comps extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getLinkedArms()
 	{
@@ -259,26 +263,26 @@ class Comps extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getUser()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'user_id']);
+		return $this->hasOne(Users::class, ['id' => 'user_id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getDomain()
 	{
-		return $this->hasOne(Domains::className(), ['id' => 'domain_id']);
+		return $this->hasOne(Domains::class, ['id' => 'domain_id']);
 	}
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getDupes()
 	{
-		return $this->hasmany(Comps::className(), ['name' => 'name'])
+		return $this->hasmany(Comps::class, ['name' => 'name'])
 			->where(['not',['id'=>$this->id]]);
 	}
 	
@@ -363,7 +367,7 @@ class Comps extends ArmsModel
 
     /**
      * Возвращает массив ключ=>значение запрошенных/всех записей таблицы
-     * @param array $items список элементов для вывода
+     * @param array|null $items список элементов для вывода
      * @param string $keyField поле - ключ
      * @param string $valueField поле - значение
      * @param bool $asArray
@@ -384,8 +388,8 @@ class Comps extends ArmsModel
 	 */
 	public function getSoft()
 	{
-		return static::getDb()->cache(function($db) {return $this->hasMany(Soft::className(), ['id' => 'soft_id'])
-			->viaTable('{{%soft_in_comps}}', ['comp_id' => 'id']);},Manufacturers::$CACHE_TIME);
+		return $this->hasMany(Soft::class, ['id' => 'soft_id'])
+			->viaTable('{{%soft_in_comps}}', ['comp_id' => 'id']);
 	}
 	
 	/**
@@ -393,7 +397,7 @@ class Comps extends ArmsModel
 	 */
 	public function getSoftHits()
 	{
-		return $this->hasMany(Soft::className(), ['id' => 'soft_id'])
+		return $this->hasMany(Soft::class, ['id' => 'soft_id'])
 			->from(['installed_soft'=>Soft::tableName()])
 			->viaTable('{{%soft_hits}}', ['comp_id' => 'id']);
 	}
@@ -403,7 +407,7 @@ class Comps extends ArmsModel
 	 */
 	public function getServices()
 	{
-		return $this->hasMany(Services::className(), ['id' => 'services_id'])
+		return $this->hasMany(Services::class, ['id' => 'services_id'])
 			->viaTable('{{%comps_in_services}}', ['comps_id' => 'id']);
 	}
 	
@@ -419,7 +423,7 @@ class Comps extends ArmsModel
 	 */
 	public function getLicGroups()
 	{
-		return $this->hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
+		return $this->hasMany(LicGroups::class, ['id' => 'lic_groups_id'])
 			->viaTable('{{%lic_groups_in_comps}}', ['comps_id' => 'id']);
 	}
 	
@@ -428,7 +432,7 @@ class Comps extends ArmsModel
 	 */
 	public function getLicItems()
 	{
-		return $this->hasMany(LicItems::className(), ['id' => 'lic_items_id'])
+		return $this->hasMany(LicItems::class, ['id' => 'lic_items_id'])
 			->viaTable('{{%lic_items_in_comps}}', ['comps_id' => 'id']);
 	}
 
@@ -437,7 +441,7 @@ class Comps extends ArmsModel
 	 */
 	public function getLicKeys()
 	{
-		return $this->hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
+		return $this->hasMany(LicKeys::class, ['id' => 'lic_keys_id'])
 			->viaTable('{{%lic_keys_in_comps}}', ['comps_id' => 'id']);
 	}
 	
@@ -445,8 +449,9 @@ class Comps extends ArmsModel
 	 * Найти комп по полному имени (Domain\comp или comp.domain.local)
 	 * @param $name
 	 * @return ActiveRecord|Comps|null|false
+	 * @noinspection PhpUnusedLocalVariableInspection
 	 */
-	public static function fetchByFullName($name) {
+	public static function findByAnyName($name) {
 		$nameParse=Domains::fetchFromCompName($name);
 		if (!is_array($nameParse)) return false;	//ошибка формата имени компа
 		[$domain_id,$compName,$domainName]=$nameParse;
@@ -463,23 +468,24 @@ class Comps extends ArmsModel
 	}
 	
 	public function getLogins() {
-		return $this->hasmany(LoginJournal::className(), ['comps_id' => 'id']);
+		return $this->hasmany(LoginJournal::class, ['comps_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getAcls()
 	{
-		return $this->hasMany(Acls::className(), ['comps_id' => 'id']);
+		return $this->hasMany(Acls::class, ['comps_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getAces()
 	{
-		return $this->hasMany(Aces::className(), ['id' => 'aces_id'])->from(['comp_aces'=>Aces::tableName()])
+		return $this->hasMany(Aces::class, ['id' => 'aces_id'])->from(['comp_aces'=>Aces::tableName()])
 			->viaTable('{{%comps_in_aces}}', ['comps_id' => 'id']);
 	}
 	
@@ -494,11 +500,11 @@ class Comps extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getPlace()
 	{
-		return $this->hasOne(Places::className(), ['id' => 'places_id'])//->from(['comp_places'=>Places::tableName()])
+		return $this->hasOne(Places::class, ['id' => 'places_id'])//->from(['comp_places'=>Places::tableName()])
 			->via('arm');
 	}
 	
@@ -511,7 +517,7 @@ class Comps extends ArmsModel
 	public function getSegments() {
 		$segments=[];
 		foreach ($this->filteredIps as $ip)
-			if (is_object($ip)){;
+			if (is_object($ip)){
 				if (is_object($segment=$ip->segment))
 					$segments[$segment->id]=$segment;
 			}
@@ -549,7 +555,7 @@ class Comps extends ArmsModel
 	 */
 	public function getNetIps()
 	{
-		return $this->hasMany(NetIps::className(), ['id' => 'ips_id'])->from(NetIps::tableName())
+		return $this->hasMany(NetIps::class, ['id' => 'ips_id'])->from(NetIps::tableName())
 			->viaTable('{{%ips_in_comps}}', ['comps_id' => 'id']);
 	}
 	
@@ -578,6 +584,7 @@ class Comps extends ArmsModel
 	/**
 	 * Возвращает долю веса сервиса (с учетом дочерних)
 	 * @param $serviceId
+	 * @return float|int|mixed
 	 */
 	public function recursiveServicePartialWeight($serviceId) {
 		if (isset($this->servicePartialWeightCache[$serviceId]))
@@ -612,6 +619,7 @@ class Comps extends ArmsModel
 	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
 	 * @return \app\models\Users[]
+	 * @noinspection UnusedElement
 	 */
 	public function getSupportTeam()
 	{
@@ -637,8 +645,10 @@ class Comps extends ArmsModel
 	
 	/**
 	 * @param Comps $comp
+	 * @throws Throwable
+	 * @throws StaleObjectException
 	 */
-	public function absorbComp($comp) {
+	public function absorbComp(Comps $comp) {
 		$fields=[
 			'domain_id',
 			'os',

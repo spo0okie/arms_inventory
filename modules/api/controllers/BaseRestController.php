@@ -13,11 +13,11 @@ use app\controllers\ArmsBaseController;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use app\models\Users;
-use HttpInvalidParamException;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\filters\auth\HttpBasicAuth;
 use yii\rest\ActiveController;
+use yii\web\BadRequestHttpException;
 
 class BaseRestController extends ActiveController
 {
@@ -69,7 +69,7 @@ class BaseRestController extends ActiveController
 	/**
 	 * Строит поисковый запрос исходя из полей которые переданы в запросе
 	 * @return ActiveQuery
-	 * @throws HttpInvalidParamException
+	 * @throws BadRequestHttpException
 	 */
 	public function searchFilter() {
 		$class=$this->modelClass;
@@ -95,7 +95,7 @@ class BaseRestController extends ActiveController
 		}
 		
 		if (!$filtersCount) { //не удалось применить ни одного фильтра
-			throw new HttpInvalidParamException('Empty search filter');
+			throw new BadRequestHttpException('Empty search filter');
 		}
 		
 		if (count(static::$searchOrder)) {

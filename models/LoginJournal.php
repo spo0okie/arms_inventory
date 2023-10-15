@@ -2,7 +2,9 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use yii\db\Query;
 
 /**
  * This is the model class for table "login_journal".
@@ -18,6 +20,7 @@ use Yii;
  * @property string $userDescr имя компа
  * @property string $compFqdn FQDN компа
  * @property int $local_time Время компьютера на момент обновления
+ * @property int $type Тип входа
  *
  * @property Users $user
  * @property Comps $comp
@@ -56,8 +59,8 @@ class LoginJournal extends ArmsModel
             [['comps_id','type','local_time'], 'integer'],
             [['comp_name', 'user_login'], 'string', 'max' => 128],
             [['users_id'], 'string', 'max' => 16],
-            [['users_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['users_id' => 'id']],
-            [['comps_id'], 'exist', 'skipOnError' => true, 'targetClass' => Comps::className(), 'targetAttribute' => ['comps_id' => 'id']],
+            [['users_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['users_id' => 'id']],
+            [['comps_id'], 'exist', 'skipOnError' => true, 'targetClass' => Comps::class, 'targetAttribute' => ['comps_id' => 'id']],
         ];
     }
 
@@ -80,19 +83,19 @@ class LoginJournal extends ArmsModel
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUser()
     {
-        return $this->hasOne(Users::className(), ['id' => 'users_id']);
+        return $this->hasOne(Users::class, ['id' => 'users_id']);
     }
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getComp()
 	{
-		return $this->hasOne(Comps::className(), ['id' => 'comps_id']);
+		return $this->hasOne(Comps::class, ['id' => 'comps_id']);
 	}
 
 	/**
@@ -103,8 +106,8 @@ class LoginJournal extends ArmsModel
 		if (is_object($comp=$this->comp)) {
 			return mb_strtolower($comp->name);
 		} else {
-			$tokens=explode('\\',$this->comp_name);
-			return mb_strtolower($tokens[1]);
+			$tokens=Domains::fetchFromCompName($this->comp_name);
+			return mb_strtolower($tokens[0]);
 		}
 	}
 
@@ -118,19 +121,6 @@ class LoginJournal extends ArmsModel
 		} else {
 			$tokens=explode('\\',$this->user_login);
 			return mb_strtolower($tokens[1]).' (пользователь не найден в БД)';
-		}
-	}
-
-	/**
-	 * Возвращает имя логона
-	 */
-	public function getCompFqdn()
-	{
-		if (is_object($comp=$this->comp)) {
-			return mb_strtolower($comp->fqdn);
-		} else {
-			$tokens=explode('\\',$this->comp_name);
-			return mb_strtolower($tokens[1]);
 		}
 	}
 
@@ -160,7 +150,7 @@ class LoginJournal extends ArmsModel
 			}
 			
 			if (!isset($this->comps_id)) {
-				if (is_object($comp=\app\models\Comps::fetchByFullName($this->comp_name))) {
+				if (is_object($comp=\app\models\Comps::findByAnyName($this->comp_name))) {
 					/** @var Comps $comp */
 					$this->comps_id = $comp->id;
 				}
@@ -179,12 +169,15 @@ class LoginJournal extends ArmsModel
 			return true;
 		} else return false;
 	}
-
+	
 	/**
 	 * запрашивает последние уникальные входы пользователя на машины
+	 * @param int $user_id
+	 * @param int $limit
+	 * @return array|ActiveRecord[]
 	 */
-	public static function fetchUniqComps($user_id,$limit=3) {
-		$query= new \yii\db\Query();
+	public static function fetchUniqComps(int $user_id, int $limit=3) {
+		$query= new Query();
 		$recs=$query->select(['comps_id','users_id','max(id) as id'])
 			//->distinct()
 			->from(static::tableName())
@@ -202,12 +195,15 @@ class LoginJournal extends ArmsModel
 		if (!is_array($result)) $result=[];
 		return $result;
 	}
-
+	
 	/**
 	 * запрашивает последние уникальные входы пользователей на машину
+	 * @param int $comp_id
+	 * @param int $limit
+	 * @return array|ActiveRecord[]
 	 */
-	public static function fetchUniqUsers($comp_id,$limit=3) {
-		$query= new \yii\db\Query();
+	public static function fetchUniqUsers(int $comp_id,int $limit=3) {
+		$query= new Query();
 		$recs=$query->select(['comps_id','users_id','max(id) as id'])
 			//->distinct()
 			->from(static::tableName())

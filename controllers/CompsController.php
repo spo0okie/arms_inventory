@@ -3,13 +3,13 @@
 namespace app\controllers;
 
 use app\models\Domains;
-use HttpInvalidParamException;
 use Yii;
 use app\models\Comps;
 use app\models\CompsSearch;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\Query;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -104,7 +104,7 @@ class CompsController extends ArmsBaseController
 		$nameParts=Domains::fetchFromCompName($name);
 		
 		if ($nameParts===false) {
-			throw new HttpInvalidParamException('Invalid comp name format');
+			throw new BadRequestHttpException('Invalid comp name format');
 		}
 		
 		$domain_id=$nameParts[0];
@@ -164,7 +164,7 @@ class CompsController extends ArmsBaseController
 	 * @param null|string $domain
 	 * @param null|string $ip
 	 * @return array|ActiveRecord
-	 * @throws NotFoundHttpException|HttpInvalidParamException
+	 * @throws NotFoundHttpException|BadRequestHttpException
 	 */
 	public static function searchModel(string $name, $domain=null, $ip=null){
 		
@@ -176,7 +176,7 @@ class CompsController extends ArmsBaseController
 			$domainName=$domain;
 		} else {
 			$nameParse=Domains::fetchFromCompName($name);
-			if (!is_array($nameParse)) throw new HttpInvalidParamException("Incorrect comp name $name");
+			if (!is_array($nameParse)) throw new BadRequestHttpException("Incorrect comp name $name");
 			
 			[$domain_id,$compName,$domainName]=$nameParse;
 		}
@@ -184,7 +184,7 @@ class CompsController extends ArmsBaseController
 		if (is_null($domain_id)) throw new \yii\web\NotFoundHttpException("Domain $domainName not found");
 
 		$notFoundDescription="Comp with name '$compName'";
-		$query=\app\models\Comps::find()->where(['LOWER(name)'=>mb_strtolower($name)]);
+		$query=\app\models\Comps::find()->where(['LOWER(name)'=>mb_strtolower($compName)]);
 		
 		//добавляем фильтрацию по IP если он есть
 		if (!is_null($ip)) {

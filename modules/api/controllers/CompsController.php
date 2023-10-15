@@ -2,62 +2,64 @@
 
 namespace app\modules\api\controllers;
 
+use app\models\Comps;
 use app\models\CompsSearch;
-use app\models\Users;
-use yii\filters\auth\HttpBasicAuth;
+use Yii;
+use yii\web\BadRequestHttpException;
 
 
-class CompsController extends \yii\rest\ActiveController
+class CompsController extends BaseRestController
 {
+	
+	public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			'update-comps'=>['push']
+		]);
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
 	public function behaviors()
 	{
 		$behaviors=parent::behaviors();
-		if (!empty(\Yii::$app->params['useRBAC'])) {
-			$behaviors['access']=[
-				'class' => \yii\filters\AccessControl::className(),
-				'rules' => [
-					['allow' => true, 'actions'=>['index','filter'], 'roles'=>['editor']],
-					['allow' => true, 'actions'=>['create','view','update','search'], 'roles'=>['@','?']],
-				],
-				'denyCallback' => function ($rule, $action) {
-					
-						throw new  \yii\web\ForbiddenHttpException('Access denied');
-				}
-			];
-			$behaviors['authenticator'] = [
-				'class' => HttpBasicAuth::class,
-				'only'=>['index','filter'],
-				'auth' => function ($login, $password) {
-					$user = Users::find()->where(['Login' => $login])->one();
-					if ($user && $user->validatePassword($password)) {
-						return $user;
-					}
-					return null;
-				},
-			];
-		}
+		$behaviors['verbFilter']['actions']['push']=['POST'];
+		$behaviors['verbFilter']['actions']['update']=['POST','PUT','PATCH'];
 		return $behaviors;
 	}
 	
-	
 	public $modelClass='app\models\Comps';
-    
-    public function actions()
-    {
-        $actions = parent::actions();
-		//unset($actions['index']);
-		$actions[]='search';
-		$actions[]='filter';
-        return $actions;
-    }
 	
-	public function actionSearch($name,$domain=null,$ip=null){
+	public function actionSearch($name=null,$domain=null,$ip=null) {
 		return \app\controllers\CompsController::searchModel($name,$domain,$ip);
 	}
 	
 	public function actionFilter(){
 		$searchModel = new CompsSearch();
-		$searchModel->archived=\Yii::$app->request->get('showArchived',false);
-		return $searchModel->search(\Yii::$app->request->queryParams)->models;
+		$searchModel->archived= Yii::$app->request->get('showArchived',false);
+		return $searchModel->search(Yii::$app->request->queryParams)->models;
     }
+    
+    public function actionPush() {
+    	/** @var Comps $loader */
+		$loader = new $this->modelClass();
+	
+		//грузим переданные данные
+		if (!$loader->load(Yii::$app->getRequest()->getBodyParams(),'')) {
+			throw new BadRequestHttpException("Error loading posted data");
+		}
+		
+		//передали ID?
+		if ($loader->id) {
+			return $this->runAction('update',['id'=>$loader->id]);
+		}
+		
+		$search=Comps::findByAnyName($loader->name);
+		if (is_object($search)&&$search->id) {
+			return $this->runAction('update',['id'=>$search->id]);
+		}
+	
+		return $this->runAction('create');
+	}
 }
