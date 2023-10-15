@@ -5,10 +5,20 @@ namespace app\modules\api\controllers;
 
 
 
+use app\controllers\ArmsBaseController;
+use Yii;
+
 class UsersController extends BaseRestController
 {
     
     public $modelClass='app\models\Users';
+    
+    public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			ArmsBaseController::PERM_AUTHENTICATED=>['whoami']
+		]);
+	}
 	
 	public static $searchFields=[
 		'id',
@@ -31,4 +41,11 @@ class UsersController extends BaseRestController
 		'Persg'=>SORT_ASC,
 	];
 	
+	/**
+	 * возвращает идентификатор авторизованного пользователя
+	 * @return \yii\web\IdentityInterface|null
+	 */
+	public function actionWhoami() {
+		return Yii::$app->user->identity;
+	}
 }

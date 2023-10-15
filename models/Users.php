@@ -2,10 +2,15 @@
 
 namespace app\models;
 
-use app\helpers\ArrayHelper;
-use app\helpers\FieldsHelper;
 use app\helpers\QueryHelper;
+use Exception;
+use voskobovich\linker\LinkerBehavior;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
+use yii\web\IdentityInterface;
 
 /**
  * This is the model class for table "users".
@@ -30,6 +35,7 @@ use Yii;
  * @property string $manager_id Руководитель
  * @property string $notepad
  * @property string $password
+ * @property string $auth_key Идентификатор Куки для авторизации
  * @property string $authKey Идентификатор Куки для авторизации
  * @property int         $nosync Отключить синхронизацию
  * @property string		$ln Last Name
@@ -62,7 +68,7 @@ use Yii;
  * @property OrgStruct   $orgStruct
  * @property NetIps   	 $netIps
  */
-class Users extends ArmsModel implements \yii\web\IdentityInterface
+class Users extends ArmsModel implements IdentityInterface
 {
 
 
@@ -102,6 +108,16 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
     {
         return 'users';
     }
+	
+	public function fields()
+	{
+		$fields = parent::fields();
+		
+		// remove fields that contain sensitive information
+		unset($fields['auth_key'], $fields['password'], $fields['access_token']);
+		
+		return $fields;
+	}
 
 	public function extraFields()
 	{
@@ -129,7 +145,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	{
 		return [
 			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'class' => LinkerBehavior::class,
 				'relations' => [
 					'netIps_ids' => 'netIps',
 				]
@@ -140,6 +156,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 
 	/**
      * @inheritdoc
+	 * @noinspection PhpUnusedParameterInspection
      */
     public function rules()
     {
@@ -156,7 +173,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 				$exist=static::find()->where(['Login'=>$this->Login])->andWhere(['not',['id'=>$this->id]])->one();
 				/** @var $exist Users */
 				if (is_object($exist)) {
-					//если этот логин у того же самого человека (совпадает uid) то и пофик
+					//если этот логин у того же самого человека (совпадает uid=>ИНН) то и пофиг
 					if (strlen($this->uid) && $this->uid==$exist->uid) return;
 					$this->addError($attribute, 'Такой логин уже занят пользователем '.$exist->Ename);
 				}
@@ -236,48 +253,49 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	
 	/**
 	 * Возвращает привязанные элементы доступа
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getAces()
 	{
-		return $this->hasMany(Aces::className(), ['id' => 'aces_id'])->from(['users_aces'=>Aces::tableName()])
+		return $this->hasMany(Aces::class, ['id' => 'aces_id'])->from(['users_aces'=>Aces::tableName()])
 			->viaTable('{{%users_in_aces}}', ['users_id' => 'id']);
 	}
 	
 
 	/**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getTechsResponsible()
     {
-        return $this->hasMany(Techs::className(), ['responsible_id' => 'id']);
+        return $this->hasMany(Techs::class, ['responsible_id' => 'id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getTechsHead()
     {
-        return $this->hasMany(Techs::className(), ['head_id' => 'id']);
+        return $this->hasMany(Techs::class, ['head_id' => 'id']);
     }
 	
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getTechs()
 	{
-		return $this->hasMany(Techs::className(), ['user_id' => 'id']);
+		return $this->hasMany(Techs::class, ['user_id' => 'id']);
 	}
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getTechsIt()
 	{
-		return $this->hasMany(Techs::className(), ['it_staff_id' => 'id']);
+		return $this->hasMany(Techs::class, ['it_staff_id' => 'id']);
 	}
 	
 	/**
@@ -294,7 +312,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	 */
 	public function getLicGroups()
 	{
-		return $this->hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
+		return $this->hasMany(LicGroups::class, ['id' => 'lic_groups_id'])
 			->viaTable('{{%lic_groups_in_users}}', ['users_id' => 'id']);
 	}
 	
@@ -303,7 +321,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	 */
 	public function getLicItems()
 	{
-		return $this->hasMany(LicItems::className(), ['id' => 'lic_items_id'])
+		return $this->hasMany(LicItems::class, ['id' => 'lic_items_id'])
 			->viaTable('{{%lic_items_in_users}}', ['users_id' => 'id']);
 	}
 	
@@ -312,32 +330,32 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	 */
 	public function getLicKeys()
 	{
-		return $this->hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
+		return $this->hasMany(LicKeys::class, ['id' => 'lic_keys_id'])
 			->viaTable('{{%lic_keys_in_users}}', ['users_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getMaterials()
 	{
-		return $this->hasMany(Materials::className(), ['it_staff_id' => 'id']);
+		return $this->hasMany(Materials::class, ['it_staff_id' => 'id']);
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getOrgStruct()
 	{
-		return $this->hasOne(OrgStruct::className(), ['id'=>'Orgeh','org_id'=>'org_id']);
+		return $this->hasOne(OrgStruct::class, ['id'=>'Orgeh','org_id'=>'org_id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getOrg()
 	{
-		return $this->hasOne(\app\models\Partners::className(), ['id'=>'org_id']);
+		return $this->hasOne(\app\models\Partners::class, ['id'=>'org_id']);
 	}
 	
 	/**
@@ -345,23 +363,24 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	 */
 	public function getNetIps()
 	{
-		return $this->hasMany(NetIps::className(), ['id' => 'ips_id'])->from(['users_ip'=>NetIps::tableName()])
+		return $this->hasMany(NetIps::class, ['id' => 'ips_id'])->from(['users_ip'=>NetIps::tableName()])
 			->viaTable('{{%ips_in_users}}', ['users_id' => 'id']);
 	}
 	
 	
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getServices()
 	{
-		return $this->hasMany(Services::className(), ['responsible_id' => 'id']);
+		return $this->hasMany(Services::class, ['responsible_id' => 'id']);
 	}
 	
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getSupportServices()
 	{
@@ -372,17 +391,18 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getInfrastructureServices()
 	{
-		return $this->hasMany(Services::className(), ['infrastructure_user_id'=>'id'])
-			->from(['infrastructure_services'=>Services::tableName()]);;
+		return $this->hasMany(Services::class, ['infrastructure_user_id'=>'id'])
+			->from(['infrastructure_services'=>Services::tableName()]);
 	}
 	
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getInfrastructureSupportServices()
 	{
@@ -426,11 +446,11 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getComps()
 	{
-		return $this->hasMany(Comps::className(), ['user_id' => 'id']);
+		return $this->hasMany(Comps::class, ['user_id' => 'id']);
 	}
 	
 	/**
@@ -467,7 +487,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
      * @param string $username
      * @return static|null
      */
-    public static function findByUsername($username)
+    public static function findByUsername(string $username)
     {
 	    $login=mb_strtolower($username);
 	    //при поиске по логину предпочитаем сначала искать среди трудоустроенных
@@ -507,9 +527,6 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
         return $authKey===$this->authKey;
     }
 	
-	/**
-	 * @inheritdoc
-	 */
 	public function setPassword($password)
 	{
 		return $this->password=password_hash($password,PASSWORD_BCRYPT);
@@ -521,17 +538,24 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
      * @param string $password password to validate
      * @return bool if password provided is valid for current user
      */
-    public function validatePassword($password)
+    public function validatePassword(string $password)
     {
+    	//local backend
     	if (\Yii::$app->params['localAuth']??false) {//Local DB Backend
 			return password_verify($password,$this->password);
-		} else //LDAP backednd
+		}
+    	
+    	//LDAP backend
+		if (isset(\Yii::$app->ldap)) {
 			return \Yii::$app->ldap->auth()->attempt($this->Login, $password);
+		}
+		
+		return false;
     }
 
     /**
      * Возвращает массив ключ=>значение запрошенных/всех записей таблицы
-     * @param array $items список элементов для вывода
+     * @param array|null $items список элементов для вывода
      * @param string $keyField поле - ключ
      * @param string $valueField поле - значение
      * @param bool $asArray
@@ -544,19 +568,19 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
         if (!is_null($items)) $query->filterWhere(['id'=>$items]);
         if ($asArray) $query->select([$keyField, $valueField])->asArray();
 
-        return \yii\helpers\ArrayHelper::map($query->all(), $keyField, $valueField);
+        return ArrayHelper::map($query->all(), $keyField, $valueField);
     }
 	
 	/**
-	 * Возвращает список неуволенных сотрудников
-	 * @param null $current если передан, то возвращает еще этого, независимо от состяния уволен или нет
+	 * Возвращает список не уволенных сотрудников
+	 * @param null $current если передан, то возвращает еще этого, независимо от состояния уволен или нет
 	 * @return array|null
 	 */
 	public static function fetchWorking($current=null)
 	{
 		if (!is_null(static::$working_cache)) return static::$working_cache;
 		$query = static::find()->filterWhere(['Uvolen'=>0])->orderBy(['Ename'=>SORT_ASC,'Login'=>SORT_DESC,'Persg'=>SORT_ASC]);
-		$list= (static::$working_cache = \yii\helpers\ArrayHelper::map($query->all(), 'id', 'Ename'));
+		$list= (static::$working_cache = ArrayHelper::map($query->all(), 'id', 'Ename'));
 		if ($current && (!isset($list[$current]))) {
 			$list[$current]=static::findOne($current)->Ename;
 		}
@@ -570,7 +594,7 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	
 	/**
 	 * @param $login
-	 * @return \yii\db\ActiveRecord|null
+	 * @return ActiveRecord|null
 	 */
 	public static function findByLogin($login){
 		//при поиске по логину предпочитаем сначала искать среди трудоустроенных
@@ -593,8 +617,10 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	}
 
 	public function getLastLoginComp() {
-		//$lastLogin=\app\models\LoginJournal::find(['users_id'=>$this->id,'!comp_id'=>null])->orderBy('id desc')->one();
-		return \app\models\LoginJournal::find(['users_id'=>$this->id,'!comp_id'=>null])->orderBy('id desc')->one();
+		return \app\models\LoginJournal::find()
+			->where(['users_id'=>$this->id,'!comp_id'=>null])
+			->orderBy('id desc')
+			->one();
 
 	}
 	
@@ -667,8 +693,9 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 	
 	/**
 	 * @param $user Users
+	 * @throws Exception
 	 */
-	public function absorbUser($user) {
+	public function absorbUser(Users $user) {
 		
 		foreach ($user->aces as $ace){
 			$ace->users_ids=array_merge(array_diff($ace->users_ids,[$user->id]),[$this->id]);
@@ -678,27 +705,27 @@ class Users extends ArmsModel implements \yii\web\IdentityInterface
 		foreach ($user->techs as $tech){
 			$tech->user_id=$this->id;
 			$tech->save();
-		};
+		}
 		
 		foreach ($user->techsResponsible as $tech) {
 			$tech->responsible_id=$this->id;
 			$tech->save();
-		};
+		}
 		
 		foreach ($user->techsHead as $tech) {
 			$tech->head_id=$this->id;
 			$tech->save();
-		};
+		}
 		
 		foreach($user->techsIt as $tech) {
 			$tech->it_staff_id=$this->id;
 			$tech->save();
-		};
+		}
 		
 		foreach ($user->comps as $comp) {
 			$comp->user_id=$this->id;
 			$comp->save();
-		};
+		}
 		
 		foreach ($user->licGroups as $licGroup) {
 			$licGroup->users_ids=array_merge(array_diff($licGroup->users_ids,[$user->id]),[$this->id]);
