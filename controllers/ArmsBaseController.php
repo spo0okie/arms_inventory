@@ -113,7 +113,7 @@ class ArmsBaseController extends Controller
 				default:
 					$rule['permissions']=[$permission];
 			}
-			$rules[]=$rule;
+			if (count($actions)) $rules[]=$rule;
 		}
 		return [
 			'class' => AccessControl::class,

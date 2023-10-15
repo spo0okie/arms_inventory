@@ -32,6 +32,8 @@ class LicLinksController extends BaseRestController
 			$objId=$obj->id;
 		}
 		
+		//var_dump($this->behaviors());
+		
 		return LicLinks::findProductLicenses(
 			$productId,
 			$objectType,
