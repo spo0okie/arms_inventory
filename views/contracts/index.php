@@ -21,34 +21,6 @@ $filter=\yii\helpers\Html::tag('span','Отфильтровать:',['class'=>'b
 	\yii\helpers\Html::a('УПД',['index','ContractsSearch[fullname]'=>'упд'],['class'=>'btn btn-default']).' // '.
 	\yii\helpers\Html::a('договоры',['index','ContractsSearch[fullname]'=>'договор'],['class'=>'btn btn-default']);
 
-$users=[];
-
-//собираем суммы по валютам
-$totals=[];
-$charge=[];
-foreach ($dataProvider->models as $model) {
-	
-	if ($model->total) {
-		if (!isset($totals[$model->currency_id])) $totals[$model->currency_id]=0;
-		if (!isset($charge[$model->currency_id])) $charge[$model->currency_id]=0;
-		
-		$totals[$model->currency_id]+=$model->total;
-		$charge[$model->currency_id]+=$model->charge;
-	}
-	
-}
-
-$arrFooter=['total'=>[],'charge'=>[]];
-foreach (Currency::find()->all() as $currency) {
-	/** @var Currency $currency */
-	if (isset($totals[$currency->id]) && $totals[$currency->id]) {
-		$arrFooter['total'][]=number_format($totals[$currency->id],2,'.','&nbsp;').$currency->symbol;
-	}
-	if (isset($charge[$currency->id]) && $charge[$currency->id]) {
-		$arrFooter['charge'][]=number_format($charge[$currency->id],2,'.','&nbsp;').$currency->symbol;
-	}
-}
-
 
 ?>
 <div class="contracts-index">
@@ -90,25 +62,58 @@ foreach (Currency::find()->all() as $currency) {
 				},
 			],
 			'total'=>[
+				'class' => '\kartik\grid\DataColumn',
 				'contentOptions' => ['class' => 'contracts-total-column'],
-				'footerOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
 					if ($data->total) {
 						//return $data->total;
 						return number_format($data->total,2,'.',' ' ).$data->currency->symbol;
 					} return null;
 				},
-				'footer'=>implode('<br />',$arrFooter['total']),
+				'pageSummary'=>function() use ($dataProvider) {
+					$totals=[];
+					foreach ($dataProvider->models as $model) {
+						if ($model->total) {
+							if (!isset($totals[$model->currency_id])) $totals[$model->currency_id]=0;
+							$totals[$model->currency_id]+=$model->total;
+						}
+					}
+					
+					$arrFooter=[];
+					foreach (Currency::find()->all() as $currency) {
+						/** @var Currency $currency */
+						if (isset($totals[$currency->id]) && $totals[$currency->id]) {
+							$arrFooter[]=number_format($totals[$currency->id],2,'.','&nbsp;').$currency->symbol;
+						}
+					}
+					return implode('<br />',$arrFooter);
+				}
 			],
 			'charge'=>[
 				'contentOptions' => ['class' => 'contracts-total-column'],
-				'footerOptions' => ['class' => 'contracts-total-column'],
 				'value'=>function($data) use ($renderer) {
 					if ($data->charge) {
 						return number_format($data->charge,2,'.',' ').$data->currency->symbol;
 					} return null;
 				},
-				'footer'=>implode('<br />',$arrFooter['charge']),
+				'pageSummary'=>function() use ($dataProvider) {
+					$totals=[];
+					foreach ($dataProvider->models as $model) {
+						if ($model->charge) {
+							if (!isset($totals[$model->currency_id])) $totals[$model->currency_id]=0;
+							$totals[$model->currency_id]+=$model->charge;
+						}
+					}
+					
+					$arrFooter=[];
+					foreach (Currency::find()->all() as $currency) {
+						/** @var Currency $currency */
+						if (isset($totals[$currency->id]) && $totals[$currency->id]) {
+							$arrFooter[]=number_format($totals[$currency->id],2,'.','&nbsp;').$currency->symbol;
+						}
+					}
+					return implode('<br />',$arrFooter);
+				},
 			],
 			'currency'=>[
 				'value'=>function($data) {
@@ -129,8 +134,11 @@ foreach (Currency::find()->all() as $currency) {
 			'charge',
 			'attach',
 		],
+		'gridOptions'=> [
+			'showPageSummary' => true,
+			'pageSummaryRowOptions'=>['class'=>'contracts-total-summary default']
+		],
 		'createButton'=>Html::a('Добавить', ['create'], ['class' => 'btn btn-success']).$filter,
-		'showFooter' => true,
 		'header' => $this->title,
 		'resizableColumns'=>false,
 	]); ?>
