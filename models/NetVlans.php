@@ -41,7 +41,8 @@ class NetVlans extends ArmsModel
     {
         return [
             [['vlan', 'domain_id', 'segment_id'], 'integer'],
-            [['name'], 'string', 'max' => 255],
+			[['vlan', 'domain_id'], 'unique', 'targetAttribute' => ['vlan', 'domain_id'],'message'=>'Такая комбинация домена и Vlan уже есть'],
+			[['name'], 'string', 'max' => 255],
 			[['comment'], 'safe'],
         ];
     }
