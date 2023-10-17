@@ -1,7 +1,11 @@
 <?php
 
+use app\components\LinkObjectWidget;
+use app\components\ListObjectWidget;
+use app\components\ShowArchivedWidget;
+use app\components\UrlListWidget;
+use app\models\Services;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
 use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
@@ -20,14 +24,14 @@ $contracts=$model->contracts;
 
 if(!$static_view) { ?>
 <span class="float-end">
-	<?= \app\components\ShowArchivedWidget::widget(['reload'=>false]) ?>
+	<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
 </span>
 
 <?php } ?>
 
 
 <h1>
-	<?= \app\components\LinkObjectWidget::widget([
+	<?= LinkObjectWidget::widget([
 		'model'=>$model,
 		'static'=>$static_view,
 		//'confirm' => 'Удалить этот сервис? Это действие необратимо!',
@@ -41,9 +45,9 @@ if(!$static_view) { ?>
 			<?php
 			
 			if ($model->is_service) {
-				echo $model->is_end_user?\app\models\Services::$user_service_title:\app\models\Services::$tech_service_title;
+				echo $model->is_end_user? Services::$user_service_title: Services::$tech_service_title;
 			} else {
-				echo $model->is_end_user?\app\models\Services::$user_job_title:\app\models\Services::$tech_job_title;
+				echo $model->is_end_user? Services::$user_job_title: Services::$tech_job_title;
 			} ?>
 			
 			<?=	(is_object($model->segmentRecursive))?" // Сегмент ИТ: ".$this->render('/segments/item',['model'=>$model->segmentRecursive,'static_view'=>true]):'' ?>
@@ -108,7 +112,7 @@ if(!$static_view) { ?>
 		<p>
 			<?= Yii::$app->formatter->asNtext($model->description) ?>
 		</p>
-		<?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
+		<?= UrlListWidget::Widget(['list'=>$model->links]) ?>
 		<br />
 
 		<?= $this->render('card-support',['model'=>$model,'static_view'=>$static_view]) ?>
@@ -149,31 +153,35 @@ if(!$static_view) { ?>
 					Нет суб-сервисов
 				<?php } ?>
 			</p>
-			<?= $static_view?'':Html::a('Добавить суб-сервис',['create','parent_id'=>$model->id],['class'=>'btn btn-success']).'<br />'?>
+			<?= $static_view?'':Html::a('Добавить суб-сервис',[
+					'create','Services'=>['parent_id'=>$model->id]
+				],[
+					'class'=>'btn btn-success'
+				]).'<br />'?>
 			<br />
 		
-		<?= \app\components\ListObjectWidget::widget([
+		<?= ListObjectWidget::widget([
 			'models'=>$comps,
 			'title'=>'Выполняется на компьютерах:',
 			'item_options'=>['static_view'=>$static_view,'fqdn'=>true],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
-		<?= \app\components\ListObjectWidget::widget([
+		<?= ListObjectWidget::widget([
 			'models'=>$model->techs,
 			'title'=>'Выполняется на оборудовании:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
-		<?= \app\components\ListObjectWidget::widget([
+		<?= ListObjectWidget::widget([
 			'models'=>$model->depends,
 			'title'=>'Зависит от сервисов:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
-		<?= \app\components\ListObjectWidget::widget([
+		<?= ListObjectWidget::widget([
 			'models'=>$dependants,
 			'title'=>'Зависимые сервисы:',
 			'item_options'=>['static_view'=>$static_view,],

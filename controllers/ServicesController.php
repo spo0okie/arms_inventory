@@ -5,69 +5,22 @@ namespace app\controllers;
 use app\models\Places;
 use Yii;
 use app\models\Services;
-use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
-use yii\helpers\Url;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use app\models\ServicesSearch;
+use yii\web\Response;
 
 /**
  * ServicesController implements the CRUD actions for Services model.
  */
-class ServicesController extends Controller
+class ServicesController extends ArmsBaseController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-	    $behaviors=[
-		    'verbs' => [
-			    'class' => VerbFilter::className(),
-			    'actions' => [
-				    'delete' => ['POST'],
-			    ],
-		    ]
-	    ];
-	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-		    'class' => \yii\filters\AccessControl::className(),
-		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','delete','unlink'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','index-by-users','view','card','card-support','ttip','validate','item','json-preview','os-list','techs-list'], 'roles'=>['@','?']],
-		    ],
-		    'denyCallback' => function ($rule, $action) {
-			    throw new  \yii\web\ForbiddenHttpException('Access denied');
-		    }
-	    ];
-	    return $behaviors;
-    }
-
-
-	/**
-	 * Displays a tooltip for single model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionTtip($id)
-	{
-		return $this->renderPartial('ttip', [
-			'model' => $this->findModel($id),
-		]);
-	}
 	
-	/**
-	 * Displays a item for single model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionItem($id)
+	public $modelClass=Services::class;
+	public function accessMap()
 	{
-		return $this->renderPartial('item', [
-			'model' => $this->findModel($id)
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['index-by-users','card','card-support','json-preview','os-list','techs-list'],
 		]);
 	}
 	
@@ -76,15 +29,16 @@ class ServicesController extends Controller
 	 * @param integer $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
+	 * @noinspection PhpUnusedElementInspection
 	 */
-	public function actionJsonPreview($id)
+	public function actionJsonPreview(int $id)
 	{
 		$model=$this->findModel($id);
 		$response=[];
 		foreach ($model->extraFields() as $field) {
 			$response[$field]=$model->$field;
 		}
-		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		Yii::$app->response->format = Response::FORMAT_JSON;
 		return $response;
 	}
 	
@@ -94,7 +48,7 @@ class ServicesController extends Controller
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionCard($id)
+	public function actionCard(int $id)
 	{
 		return $this->renderPartial('card', [
 			'model' => $this->findModel($id),
@@ -107,7 +61,7 @@ class ServicesController extends Controller
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionCardSupport($id)
+	public function actionCardSupport(int $id)
 	{
 		return $this->renderPartial('card-support', [
 			'model' => $this->findModel($id),
@@ -172,27 +126,15 @@ class ServicesController extends Controller
 		]);
 	}
 	
-	
-	/**
-	 * Displays a single Services model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionView($id)
-	{
-		return $this->render('view', [
-			'model' => $this->findModel($id),
-		]);
-	}
 	/**
 	 * Список ОС рекурсивно задействованные в сервисе (с учетом вложенных)
 	 * @param integer $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionOsList($id)
+	public function actionOsList(int $id)
 	{
+		/** @var Services $model */
 		$model=$this->findModel($id);
 		//$comps=$model->compsRecursive;
 		$dataProvider=new ArrayDataProvider([
@@ -215,99 +157,10 @@ class ServicesController extends Controller
 				]
 			],
 			'pagination' => false,
-		]);;
+		]);
 		return $this->renderAjax('comps-list', [
 			'model'=>$model,
 			'dataProvider' => $dataProvider,
 		]);
 	}
-	
-	
-	/**
-     * Creates a new Services model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new Services();
-	
-		if (Yii::$app->request->get('parent_id'))
-			$model->parent_id=Yii::$app->request->get('parent_id');
-
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			return $this->redirect(Url::previous());
-		}
-	
-		$model->load(Yii::$app->request->get());
-		
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('create', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('create', [
-				'model' => $model,
-			]);
-    }
-
-    /**
-     * Updates an existing Services model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			return $this->redirect(Url::previous());
-            //return $this->redirect(['view', 'id' => $model->id]);
-        }
-	
-		return Yii::$app->request->isAjax?
-			$this->renderAjax('update', [
-				'model' => $model,
-				'modalParent' => '#modal_form_loader'
-			]):
-			$this->render('update', [
-				'model' => $model,
-			]);
-    }
-	
-	/**
-	 * Deletes an existing Services model.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 * @throws \Exception
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
-	 */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-		return $this->redirect(Url::previous());
-
-        //return $this->redirect(['index']);
-    }
-
-    /**
-     * Finds the Services model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Services the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Services::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
 }
