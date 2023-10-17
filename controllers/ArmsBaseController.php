@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
+use app\models\Users;
 use Throwable;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -122,6 +123,8 @@ class ArmsBaseController extends Controller
 			'class' => AccessControl::class,
 			'rules' => $rules,
 			'denyCallback' => function ($rule, $action) {
+				//$user=is_object(\Yii::$app->user->identity)?\Yii::$app->user->identity->Login:'anon';
+				//error_log("{$action->id} denied for user $user");
 				throw new  ForbiddenHttpException('Access denied');
 			}
 		];
@@ -140,12 +143,14 @@ class ArmsBaseController extends Controller
 				],
 			],
 			'authenticator' => [
-				'class' => CompositeAuth::class,
-				'authMethods' => [
-					HttpBasicAuth::class,
-					HttpBearerAuth::class,
-				],
-				'optional'=>['*'],
+				'class' => HttpBasicAuth::class,
+				'optional'=>\Yii::$app->user->isGuest?[]:['*'],
+				'auth' => function ($login, $password) {
+					/** @var $user Users */
+					$user = Users::find()->where(['Login' => $login])->one();
+					if ($user && $user->validatePassword($password)) return $user;
+					return null;
+				},
 			],
 		];
 		
