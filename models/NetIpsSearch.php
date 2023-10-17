@@ -4,7 +4,7 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\NetIps;
+use yii\helpers\StringHelper;
 
 /**
  * NetIpsSearch represents the model behind the search form of `app\models\NetIps`.
@@ -42,16 +42,15 @@ class NetIpsSearch extends NetIps
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search(array $params)
     {
-        $query = NetIps::find()
-		->joinWith(['network.netVlan','network.segment','techs.state','comps','users']);
+        $searchQuery = NetIps::find()
+		->joinWith(['network.netVlan','network.segment','techs','comps','users']);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-			'pagination' => false,
+            'query' => $searchQuery,
 			'sort'=> [
 				//'defaultOrder' => ['domains_id'=>SORT_ASC],
 				'attributes'=>[
@@ -79,19 +78,36 @@ class NetIpsSearch extends NetIps
             // $query->where('0=1');
             return $dataProvider;
         }
-
-
-        $query
-			->andFilterWhere(['or like', 'concat(net_ips.text_addr,"(",IFNULL(net_ips.name,""))', \yii\helpers\StringHelper::explode($this->text_addr,'|',true,true)])
-			->andFilterWhere(['or like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', \yii\helpers\StringHelper::explode($this->network,'|',true,true)])
-			->andFilterWhere(['or like', 'concat(net_vlans.name," (",net_vlans.vlan)', \yii\helpers\StringHelper::explode($this->vlan,'|',true,true)])
-			->andFilterWhere(['or like', 'net_ips.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
+	
+	
+		$searchQuery
+			->andFilterWhere(['or like', 'concat(net_ips.text_addr,"(",IFNULL(net_ips.name,""))', StringHelper::explode($this->text_addr,'|',true,true)])
+			->andFilterWhere(['or like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', StringHelper::explode($this->network,'|',true,true)])
+			->andFilterWhere(['or like', 'concat(net_vlans.name," (",net_vlans.vlan)', StringHelper::explode($this->vlan,'|',true,true)])
+			->andFilterWhere(['or like', 'net_ips.comment', StringHelper::explode($this->comment,'|',true,true)])
 			->andFilterWhere([
 				'OR',
-					['or like', 'ip_comps.name', \yii\helpers\StringHelper::explode($this->attached,'|',true,true)],
-					['or like', 'ip_techs.num', \yii\helpers\StringHelper::explode($this->attached,'|',true,true)],
+					['or like', 'ip_comps.name', StringHelper::explode($this->attached,'|',true,true)],
+					['or like', 'ip_techs.num', StringHelper::explode($this->attached,'|',true,true)],
 				]);
-
+	
+	
+		//делаем with (без Join) объектов для отфильтрованных IPs (это борьба с пагинацией которая несовместима с join)
+        $dataQuery=NetIps::find()
+			->with(['network.netVlan','network.segment','techs.state','comps','users']);
+        
+        //если фильтруем, то делаем двухходовку
+        if ($searchQuery->where) {
+        	//выбираем ID отфильтрованных IPs
+			$filterSubQuery=$searchQuery
+				->select('DISTINCT(net_ips.id)')
+				->createCommand()
+				->rawSql;
+			$dataQuery
+				->where('net_ips.id in ('.$filterSubQuery.')');
+		}
+		
+		$dataProvider->query=$dataQuery;
         return $dataProvider;
     }
 }
