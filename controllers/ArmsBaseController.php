@@ -10,6 +10,9 @@ use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
+use yii\filters\auth\CompositeAuth;
+use yii\filters\auth\HttpBasicAuth;
+use yii\filters\auth\HttpBearerAuth;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -135,7 +138,14 @@ class ArmsBaseController extends Controller
 				'actions' => [
 					'delete' => ['POST'],
 				],
-			]
+			],
+			'authenticator' => [
+				'class' => CompositeAuth::class,
+				'authMethods' => [
+					HttpBasicAuth::class,
+					HttpBearerAuth::class,
+				],
+			],
 		];
 		
 		if (!empty(Yii::$app->params['useRBAC']))
