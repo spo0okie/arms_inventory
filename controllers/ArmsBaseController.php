@@ -145,6 +145,7 @@ class ArmsBaseController extends Controller
 					HttpBasicAuth::class,
 					HttpBearerAuth::class,
 				],
+				'optional'=>['*'],
 			],
 		];
 		
