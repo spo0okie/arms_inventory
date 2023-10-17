@@ -2,7 +2,8 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "net_vlans".
@@ -85,11 +86,11 @@ class NetVlans extends ArmsModel
     }
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getNetDomain()
 	{
-		return $this->hasOne(NetDomains::className(), ['id' => 'domain_id']);
+		return $this->hasOne(NetDomains::class, ['id' => 'domain_id']);
 	}
 	
 	
@@ -105,11 +106,11 @@ class NetVlans extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery|Networks
+	 * @return ActiveQuery|Networks
 	 */
 	public function getNetworks()
 	{
-		return $this->hasMany(Networks::className(), ['vlan_id' => 'id']);
+		return $this->hasMany(Networks::class, ['vlan_id' => 'id']);
 	}
 	
 	/**
@@ -130,6 +131,6 @@ class NetVlans extends ArmsModel
 		$list = static::find()
 			->orderBy('name')
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+		return ArrayHelper::map($list, 'id', 'sname');
 	}
 }
