@@ -179,7 +179,7 @@ $config = [
     'params' => $params,
 ];
 
-\Yii::$container->set('yii\data\Pagination', ['pageSizeLimit' => [0, 9999]]);
+\Yii::$container->set('yii\data\Pagination', ['pageSizeLimit' => [0, 10000]]);
 
 if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
