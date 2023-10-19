@@ -2,7 +2,8 @@
 
 namespace app\models;
 
-use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "partners".
@@ -21,6 +22,7 @@ use Yii;
  * @property Contracts[] $contracts
  * @property Contracts[] $invoices
  * @property Services[] $services
+ * @property Users[] $users
  */
 class Partners extends ArmsModel
 {
@@ -98,42 +100,42 @@ class Partners extends ArmsModel
 	
 	/**
 	 * Возвращает набор контрагентов в договоре
-	 * @return \yii\db\ActiveQuery
-	 * @throws \yii\base\InvalidConfigException
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getDocs()
 	{
-		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::class, ['id' => 'contracts_id'])
 			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id']);
 	}
 	
 	/**
 	 * Возвращает набор контрагентов в договоре
-	 * @return \yii\db\ActiveQuery
-	 * @throws \yii\base\InvalidConfigException
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getContracts()
 	{
-		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::class, ['id' => 'contracts_id'])
 			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id'])
 			->where(['like','name',Contracts::$dictionary['contract']]);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getServices()
 	{
-		return $this->hasMany(Services::className(), ['partners_id' => 'id']);
+		return $this->hasMany(Services::class, ['partners_id' => 'id']);
 	}
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getUsers()
 	{
-		return $this->hasMany(Users::className(), ['org_id' => 'id']);
+		return $this->hasMany(Users::class, ['org_id' => 'id']);
 	}
 	
 	
@@ -160,6 +162,7 @@ class Partners extends ArmsModel
 	
 	public static function fetchAll(){
 		if (is_null(static::$all_items)) {
+			/** @var Partners $tmp */
 			$tmp=static::find()->all();
 			static::$all_items=[];
 			foreach ($tmp as $item) static::$all_items[$item->id]=$item;

@@ -110,6 +110,7 @@ class BaseRestController extends ActiveController
 		foreach (static::$searchFields as $param=>$field) {
 			if ($field===static::SEARCH_BY_ANY_NAME && ($value= Yii::$app->request->get($param))) {
 				$class=$this->modelClass;
+				/** @var ArmsModel $class */
 				return $class::findByAnyName($value);
 			}
 		}
