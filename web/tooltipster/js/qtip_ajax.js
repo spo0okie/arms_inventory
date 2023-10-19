@@ -8,16 +8,16 @@
 
  **/
 
-var Base64 = {
+let Base64 = {
 
     // private property
     _keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
 
     // public method for encoding
     encode : function (input) {
-        var output = "";
-        var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-        var i = 0;
+        let output = "";
+        let chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+        let i = 0;
 
         input = Base64._utf8_encode(input);
 
@@ -49,12 +49,12 @@ var Base64 = {
 
     // public method for decoding
     decode : function (input) {
-        var output = "";
-        var chr1, chr2, chr3;
-        var enc1, enc2, enc3, enc4;
-        var i = 0;
+        let output = "";
+        let chr1, chr2, chr3;
+        let enc1, enc2, enc3, enc4;
+        let i = 0;
 
-        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+        input = input.replace(/[^A-Za-z0-9+\/=]/g, "");
 
         while (i < input.length) {
 
@@ -69,10 +69,10 @@ var Base64 = {
 
             output = output + String.fromCharCode(chr1);
 
-            if (enc3 != 64) {
+            if (enc3 !== 64) {
                 output = output + String.fromCharCode(chr2);
             }
-            if (enc4 != 64) {
+            if (enc4 !== 64) {
                 output = output + String.fromCharCode(chr3);
             }
 
@@ -87,11 +87,11 @@ var Base64 = {
     // private method for UTF-8 encoding
     _utf8_encode : function (string) {
         string = string.replace(/\r\n/g,"\n");
-        var utftext = "";
+        let utftext = "";
 
-        for (var n = 0; n < string.length; n++) {
+        for (let n = 0; n < string.length; n++) {
 
-            var c = string.charCodeAt(n);
+            let c = string.charCodeAt(n);
 
             if (c < 128) {
                 utftext += String.fromCharCode(c);
@@ -113,9 +113,11 @@ var Base64 = {
 
     // private method for UTF-8 decoding
     _utf8_decode : function (utftext) {
-        var string = "";
-        var i = 0;
-        var c = c1 = c2 = 0;
+        let string = "";
+        let i = 0;
+        let c = 0;
+        let c2 = 0;
+        let c3 = 0;
 
         while ( i < utftext.length ) {
 
@@ -142,7 +144,7 @@ var Base64 = {
         return string;
     }
 
-}
+};
 
 
 function attach_qTip(el,force=false){
@@ -163,12 +165,12 @@ function attach_qTip(el,force=false){
     if (typeof $url !== 'undefined') {
         if (typeof $text == 'undefined') $text='Загрузка...';
         $load=function(instance, helper) {
-            let $origin = $(helper.tooltip);
+            let $origin = jQuery(helper.tooltip);
             if ($origin.data('loaded') !== true) {
-                $.get($url, function(data) {
+                jQuery.get($url, function(data) {
                     instance.content(data);
                     if (typeof ExpandableCardInit === "function") {
-                        $(instance.elementTooltip())
+                        jQuery(instance.elementTooltip())
                             .find('.expandable-card-outer')
                             .each(function (index,item){
                                 console.log(item);
@@ -195,12 +197,13 @@ function attach_qTip(el,force=false){
 
 
 function attachAllTTips(){
-    $('[qtip_ajxhrf]').not(".tooltipstered").each(function(){attach_qTip($(this));});
-    $('[qtip_ttip]').not(".tooltipstered").each(function(){attach_qTip($(this));});
-    $('[qtip_b64ttip]').not(".tooltipstered").each(function(){attach_qTip($(this));});
+    jQuery('[qtip_ajxhrf]').not(".tooltipstered").each(function(){attach_qTip(jQuery(this));});
+    jQuery('[qtip_ttip]').not(".tooltipstered").each(function(){attach_qTip(jQuery(this));});
+    jQuery('[qtip_b64ttip]').not(".tooltipstered").each(function(){attach_qTip(jQuery(this));});
 }
 
-$(document).ready(function(){
+jQuery(document).ready(function(){
     //setTimeout(attachAllTTips,500);
+    //console.log("qtiip initialized");
     setInterval(attachAllTTips,500);
 });
