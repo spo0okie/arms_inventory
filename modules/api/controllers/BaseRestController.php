@@ -21,7 +21,7 @@ use yii\web\BadRequestHttpException;
 
 class BaseRestController extends ActiveController
 {
-	//как в карте доступов обозначать анонимный и авторизованный
+	const SEARCH_BY_ANY_NAME='@search-by-any';
 	
 	public $modelClass='app\models\ArmsModel';
 
@@ -105,7 +105,14 @@ class BaseRestController extends ActiveController
 		return $search;
 	}
 	
+	
 	public function actionSearch() {
+		foreach (static::$searchFields as $param=>$field) {
+			if ($field===static::SEARCH_BY_ANY_NAME && ($value= Yii::$app->request->get($param))) {
+				$class=$this->modelClass;
+				return $class::findByAnyName($value);
+			}
+		}
 		return $this->searchFilter()->one();
 	}
 	

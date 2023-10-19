@@ -218,4 +218,13 @@ class Partners extends ArmsModel
 			$this->users
 		];
 	}
+	
+	public static function findByAnyName(string $name)
+	{
+		return static::find()
+			->where(['or',
+				['LOWER(uname)'=>mb_strtolower($name)],
+				['LOWER(bname)'=>mb_strtolower($name)],
+			])->one();
+	}
 }
