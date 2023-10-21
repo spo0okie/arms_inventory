@@ -248,6 +248,9 @@ class ArmsModel extends ActiveRecord
 	public function validateRecursiveLink($attribute, $params=[])
 	{
 		$params=(array)$params;
+		
+		// кладем инициатора рекурсии в параметры
+		if (!isset($params['origin'])) $params['origin']=$this;
 		//если у нас нет цепочки связей - создаем пустую
 		if (!isset($params['attributeChain']))	$params['attributeChain']=[];
 		//кладем себя в цепочку
@@ -263,15 +266,15 @@ class ArmsModel extends ActiveRecord
 		if (!empty($object->$attribute)) {
 			//если она уже есть в цепочке id
 			if (in_array($object->$attribute, $params['attributeChain'])) {
-				$this->addError($attribute, $this->getAttributeLabel($attribute).' рекурсивно ссылается сам на себя');
-			} else {
+				$error=($this->hasProperty('name')?$this->name:$this->getAttributeLabel($attribute))
+					.' рекурсивно ссылается сам на себя';
+				$params['origin']->addError($attribute, $error);
+			} elseif (is_object($link=$object->$getLink)) {
 				//иначе пробуем загрузить объект на который ссылаемся
-				if(is_object($link=$object->$getLink)) {
-					//кладем его в параметры для следующей проверки
-					$params['object']=$link;
-					//проверяем
-					$this->validateRecursiveLink($attribute, $params);
-				}
+				//кладем его в параметры для следующей проверки
+				$params['object']=$link;
+				//проверяем
+				$link->validateRecursiveLink($attribute, $params);
 			}
 		}
 	}
@@ -301,6 +304,7 @@ class ArmsModel extends ActiveRecord
 		
 		if ($this->hasProperty('updated_by') && !$this->doNotChangeAuthor) {
 			if (Yii::$app->hasProperty('user') && is_object(Yii::$app->user) && is_object(Yii::$app->user->identity))
+				/** @noinspection PhpPossiblePolymorphicInvocationInspection */
 				$this->updated_by=Yii::$app->user->identity->Login;
 		}
 		
@@ -347,12 +351,10 @@ class ArmsModel extends ActiveRecord
 						$this->$field = array_merge($this->$field,[$value]);
 						$needUpdate=true;
 					}
-				} else {
-					if ($this->$field != $value) {
-						$this->$field = $value;
-						$log .= "$field: [{$this->$field} => $value]; ";
-						$needUpdate=true;
-					}
+				} elseif ($this->$field != $value) {
+					$this->$field = $value;
+					$log .= "$field: [{$this->$field} => $value]; ";
+					$needUpdate=true;
 				}
 			}
 			if (!$needUpdate) return null;
@@ -410,10 +412,13 @@ class ArmsModel extends ActiveRecord
 		return $query->all();
 	}
 	
+	public static function fetchNextValue($field) {
+		$max=static::find()->select("MAX(CAST(`$field` as SIGNED))")->scalar();
+		return ++$max;
+	}
+	
 	public static function fetchNextId() {
-		$max=static::find()->select(['id'])->orderBy(['id'=>SORT_DESC])->one();
-		$id=is_object($max)?$max['id']:0;
-		return ++$id;
+		return static::fetchNextValue('id');
 	}
 	
 	/**
