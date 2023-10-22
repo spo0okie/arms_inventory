@@ -142,7 +142,7 @@ class ArmsBaseController extends Controller
 			],
 			'authenticator' => [
 				'class' => HttpBasicAuth::class,
-				'optional'=>\Yii::$app->user->isGuest?[]:['*'],
+				'optional'=> Yii::$app->user->isGuest?[]:['*'],
 				'auth' => function ($login, $password) {
 					/** @var $user Users */
 					$user = Users::find()->where(['Login' => $login])->one();
@@ -171,7 +171,7 @@ class ArmsBaseController extends Controller
 			$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 			
 			if ($searchModel->hasAttribute('archived'))
-				$searchModel->archived=\Yii::$app->request->get('showArchived',$this->defaultShowArchived);
+				$searchModel->archived= Yii::$app->request->get('showArchived',$this->defaultShowArchived);
 			
 			return $this->render('index', [
 				'searchModel' => $searchModel,
@@ -252,14 +252,36 @@ class ArmsBaseController extends Controller
             $model = new $this->modelClass();
 
         if ($model->load(Yii::$app->request->post())) {
-            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
         
         return null;
     }
-
-
+	
+	/**
+	 * Маршрут куда идти при успешном сохранении, создании
+	 * @param $model
+	 * @return array
+	 */
+    public function routeOnUpdate($model) {
+    	return [
+    		Yii::$app->request->get('accept')?'update':'view',
+			'id'=>$model->id
+		];
+	}
+	
+	/**
+	 * Маршрут куда идти при успешном удалении
+	 * @param $model
+	 * @return array
+	 * @noinspection PhpUnusedParameterInspection
+	 */
+	public function routeOnDelete($model) {
+		return ['index'];
+	}
+	
+	
 	/**
 	 * Creates a new model.
 	 * If creation is successful, the browser will be redirected to the 'view' page.
@@ -270,7 +292,7 @@ class ArmsBaseController extends Controller
 		$model = new $this->modelClass();
 
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			return $this->defaultReturn(['view', 'id' => $model->id],[$model]);
+			return $this->defaultReturn($this->routeOnUpdate($model),[$model]);
 		}
 		
 		$model->load(Yii::$app->request->get());
@@ -289,7 +311,9 @@ class ArmsBaseController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			return $this->defaultReturn(['view', 'id' => $model->id],[$model]);
+			return $this->defaultReturn($this->routeOnUpdate($model),[
+				$model
+			]);
         }
 	
 		return $this->defaultRender('update', ['model' => $model,]);
@@ -307,10 +331,16 @@ class ArmsBaseController extends Controller
 	 */
     public function actionDelete(int $id)
     {
-        $this->findModel($id)->delete();
+    	$model=$this->findModel($id);
+    	$defaultRoute=$this->routeOnDelete($model);
+        $model->delete();
 
-	    if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
-        return $this->redirect(['index']);
+	    if (
+	    	Yii::$app->request->get('return')=='previous'
+			||
+			Yii::$app->request->post('return')=='previous'
+		) return $this->redirect(Url::previous());
+        return $this->redirect($defaultRoute);
     }
 
     /**

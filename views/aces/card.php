@@ -1,5 +1,7 @@
 <?php
 
+use app\helpers\ArrayHelper;
+use app\models\Aces;
 use kartik\markdown\Markdown;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -68,14 +70,14 @@ $accessTypes=[];
 foreach ($model->accessTypes as $accessType)
 	$accessTypes[]=$accessType->name;
 
-if (!count($accessTypes)) $accessTypes[]=\app\models\Aces::$noAccessName;
+if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 ?>
 
 <div class="card w-100 my-2 ace-card shadow-sm g-0" id="ace_card_<?= $model->id ?>">
 	<div class="d-flex g-0">
 		<div class="p-2 text-wrap flex-fill small">
 			<?php if (count($items)) {
-				echo \app\helpers\ArrayHelper::implode(' <br /> ',$items);
+				echo ArrayHelper::implode(' <br /> ',$items);
 			} else { ?>
 				<span class="text-center divider2-striped">
 					<span class="ace-card p-1">
@@ -102,7 +104,7 @@ if (!count($accessTypes)) $accessTypes[]=\app\models\Aces::$noAccessName;
 						'class' => 'btn btn-sm text-white ace-access-buttons open-in-modal-form',
 						'title' => 'Правка элемента доступа',
 						'data-update-element' => '#ace_card_'.$model->id,
-						'data-update-url' => Url::to(['/aces/view','id'=>$model->id,'ajax'=>1]),
+						'data-update-url' => Url::to(['/aces/view','id'=>$model->id]),
 					]) ?>
 					<?=  Html::a('<span class="fas fa-trash"/>', ['aces/delete', 'id' => $model->id,'return'=>'previous'], [
 						'data' => [

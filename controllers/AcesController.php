@@ -2,12 +2,7 @@
 
 namespace app\controllers;
 
-use Throwable;
-use Yii;
 use app\models\Aces;
-use yii\db\StaleObjectException;
-use yii\web\NotFoundHttpException;
-use yii\helpers\Url;
 
 
 /**
@@ -18,28 +13,13 @@ class AcesController extends ArmsBaseController
 	public $modelClass=Aces::class;
 	
 	/**
-	 * Deletes an existing Aces model.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 * @throws Throwable
-	 * @throws StaleObjectException
+	 * @inheritdoc
 	 */
-    public function actionDelete(int $id)
+    public function routeOnDelete($model)
     {
-    	/** @var Aces $ace */
-    	$ace=$this->findModel($id);
-    	$acl=$ace->acl;
-    	
-        $ace->delete();
-	
-		if (Yii::$app->request->get('return')=='previous')
-			return $this->redirect(Url::previous());
-		
-		if (is_object($acl) && $acl->schedules_id)
-			return $this->redirect(['/scheduled-access/view','id'=>$acl->schedules_id]);
-		
-		return $this->redirect(['/scheduled-access/index']);
+    	/** @var Aces $model */
+		return (is_object($model->acl) && $model->acl->schedules_id)?
+			['/scheduled-access/view','id'=>$model->acl->schedules_id]:
+			['/scheduled-access/index'];
     }
 }
