@@ -1,5 +1,6 @@
 <?php
-
+namespace app\migrations;
+use app\models\Currency;
 use yii\db\Migration;
 
 /**
@@ -22,7 +23,7 @@ class m210921_035506_create_table_currency extends Migration
 				'[[notepad]]' => $this->text(),
 			]);
 			
-			$RUR=new \app\models\Currency();
+			$RUR=new Currency();
 			$RUR->id=1;
 			$RUR->name='Российский рубль';
 			$RUR->code='RUR';
@@ -30,14 +31,14 @@ class m210921_035506_create_table_currency extends Migration
 			$RUR->comment='Валюта по умолчанию';
 			$RUR->save();
 			
-			$USD=new \app\models\Currency();
+			$USD=new Currency();
 			$USD->id=2;
 			$USD->name='Доллар США';
 			$USD->code='USD';
 			$USD->symbol='$';
 			$USD->save();
 			
-			$EUR=new \app\models\Currency();
+			$EUR=new Currency();
 			$EUR->id=3;
 			$EUR->name='Евро';
 			$EUR->code='EUR';

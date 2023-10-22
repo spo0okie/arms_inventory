@@ -1,5 +1,6 @@
 <?php
-
+namespace app\migrations;
+use app\models\Networks;
 use yii\db\Migration;
 
 /**
@@ -25,7 +26,8 @@ class m210310_174301_move_vlans_link extends Migration
 				'SET NULL'
 			);
 
-			foreach (\app\models\Networks::find()->all() as $network){
+			foreach (Networks::find()->all() as $network){
+				/** @var Networks $network */
 				if (is_object($network->netVlan)) {
 					$network->segments_id = $network->netVlan->segment_id;
 					$network->save();
@@ -50,7 +52,8 @@ class m210310_174301_move_vlans_link extends Migration
 			$this->addColumn('net_vlans','segments_id',$this->integer()->null());
 			$this->createIndex('{{%idx-net_vlans-segments_id}}', 			'{{%net_vlans}}', '[[segments_id]]');
 			
-			foreach (\app\models\Networks::find()->all() as $network){
+			foreach (Networks::find()->all() as $network){
+				/** @var Networks $network */
 				if (is_object($network->netVlan)) {
 					$network->netVlan->segment_id = $network->segments_id;
 					$network->netVlan->save();

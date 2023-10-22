@@ -1,5 +1,6 @@
 <?php
-
+namespace app\migrations;
+use app\models\NetIps;
 use yii\db\Migration;
 
 /**
@@ -24,7 +25,7 @@ class m210302_161545_alter_table_net_ips extends Migration
 				'id',
 				'SET NULL'
 			);
-			foreach (\app\models\NetIps::find()->all() as $ip) $ip->save();
+			foreach (NetIps::find()->all() as $ip) $ip->save();
 		}
 	
 	

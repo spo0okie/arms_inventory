@@ -2,7 +2,7 @@
 /**
  * Добавляем
  */
-
+namespace app\migrations;
 use yii\db\Migration;
 
 /**

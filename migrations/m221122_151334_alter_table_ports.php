@@ -1,5 +1,6 @@
 <?php
-
+namespace app\migrations;
+use app\models\Ports;
 use yii\db\Migration;
 
 /**
@@ -32,21 +33,19 @@ class m221122_151334_alter_table_ports extends Migration
 		$this->alterColumn('ports','techs_id',$this->integer()->null());
 	
 		//Добавляем линки на все старые порты связанные напрямую с Tech или Arm
-		foreach (\app\models\Ports::find()->all() as $model) {
-			/**
-			 * @var $model \app\models\Ports
-			 */
+		/** @var Ports $model */
+		foreach (Ports::find()->all() as $model) {
 			
 			//если он связан напрямую с оборудованием - делаем порт этому оборудованию с именем порта Null
 			if ($model->link_techs_id) {
-				$linkedPort=new \app\models\Ports();
+				$linkedPort=new Ports();
 				$linkedPort->techs_id=$model->link_techs_id;
 				$linkedPort->link_ports_id=$model->id;
 				echo "linking ".$model->id." to new port with tech ".$model->link_techs_id." \n";
 				$linkedPort->save(false);
 			}
 			if ($model->link_arms_id) {
-				$linkedPort=new \app\models\Ports();
+				$linkedPort=new Ports();
 				$linkedPort->arms_id=$model->link_arms_id;
 				$linkedPort->link_ports_id=$model->id;
 				echo "linking ".$model->id." to new port with arm ".$model->link_arms_id." \n";
@@ -73,7 +72,8 @@ class m221122_151334_alter_table_ports extends Migration
 		$this->createIndex('ports_link_arms_id','ports','link_arms_id');
 		$this->createIndex('ports_link_techs_id','ports','link_techs_id');
 	
-		foreach (\app\models\Ports::find()->all() as $model) {
+		/** @var Ports $model */
+		foreach (Ports::find()->all() as $model) {
 			//если он связан напрямую с оборудованием - делаем порт этому оборудованию с именем порта Null
 			if (empty($model->name) && !empty($model->arms_id) && !empty($model->link_ports_id)) {
 				$linkedPort=$model->linkPort;

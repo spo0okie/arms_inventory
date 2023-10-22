@@ -1,5 +1,6 @@
 <?php
-
+namespace app\migrations;
+use app\models\Techs;
 use yii\db\Migration;
 
 /**
@@ -12,7 +13,8 @@ class m200616_205619_alter_table_techs_format_mac extends Migration
      */
     public function safeUp()
     {
-		foreach (\app\models\Techs::find()->all() as $model) {
+    	/** @var Techs $model */
+		foreach (Techs::find()->all() as $model) {
 			$mac=preg_replace('/[^0-9a-f]/', '', mb_strtolower($model->mac));
 			echo $mac;
 			$model->mac=$mac;

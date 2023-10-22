@@ -1,5 +1,6 @@
 <?php
-
+namespace app\migrations;
+use app\models\TechTypes;
 use yii\db\Migration;
 
 /**
@@ -44,9 +45,9 @@ class m230223_102334_alter_table_tech_types extends Migration
 		$this->addColumnIfNotExist('tech_types','is_display',$this->boolean()->defaultValue(0));
 		$this->alterColumn('tech_types','prefix',$this->string(16)->null());
 		
-		foreach(\app\models\TechTypes::find()->all() as $item) {
+		foreach(TechTypes::find()->all() as $item) {
 			/**
-			 * @var $item \app\models\TechTypes
+			 * @var $item TechTypes
 			 */
 			if (array_search($item->code,['laptop','aio_pc','pc','srv'])!==false) {
 				$item->is_computer=true;

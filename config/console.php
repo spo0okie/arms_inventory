@@ -38,13 +38,18 @@ $config = [
 	   
     ],
     'params' => $params,
-    /*
-    'controllerMap' => [
-        'fixture' => [ // Fixture generation command line.
-            'class' => 'yii\faker\FixtureController',
-        ],
-    ],
-    */
+	'controllerMap' => [
+		'migrate' => [
+			'class' => 'yii\console\controllers\MigrateController',
+			'migrationNamespaces' => [
+				//'app\migrations\svc', // Служебные/сервисные миграции
+				'app\migrations', // Common migrations for the whole application
+				//'module\migrations', // Migrations for the specific project's module
+				//'some\extension\migrations', // Migrations for the specific extension
+			],
+			'migrationPath'=>null,
+		],
+	],
 ];
 
 if (YII_ENV_DEV) {

@@ -1,5 +1,5 @@
 <?php
-
+namespace app\migrations;
 use yii\db\Migration;
 
 /**
@@ -26,7 +26,7 @@ class m210831_093619_alter_table_users extends Migration
     {
 		$table=$this->db->getTableSchema('users');
 		if (isset($table->columns['notepad']))
-			$this->dropColumn('users','notepad',$this->text());
+			$this->dropColumn('users','notepad');
     }
 
     /*

@@ -1,5 +1,10 @@
 <?php
-
+namespace app\migrations;
+use app\models\NetIps;
+use app\models\Networks;
+use app\models\OrgInet;
+use app\models\Partners;
+use app\models\Services;
 use yii\db\Migration;
 
 /**
@@ -19,44 +24,41 @@ class m220303_191454_alter_table_org_inets extends Migration
 		if (!isset($table->columns['networks_id']))
 			$this->addColumn('org_inet', 'networks_id', $this->integer()->defaultValue(null));
 		
-		foreach (app\models\OrgInet::find()->all() as $inet) {
+		foreach (OrgInet::find()->all() as $inet) {
 			/**
-			 * @var $inet \app\models\OrgInet
+			 * @var $inet OrgInet
 			 */
 			echo $inet->name."\n";
-			$inetService=new app\models\Services();
+			$inetService=new Services();
 			$inetService->name = 'Услуги связи '.$inet->name;
 			$inetService->is_service=false;
 			$inetService->is_end_user=false;
 			$inetService->contracts_ids=[$inet->contracts_id];
 			$inetService->description='Автоматически созданная услуга для ввода интернет';
 			
-			$partner=app\models\Partners::find()
+			/** @var Partners $partner */
+			$partner= Partners::find()
 				->where([
 					'or',
 					['like','uname',$inet->provTel->name],
-					['like','bname',$inet->provTel->name]
+					['like','bname',$inet->provTel->name],
 				])
 				->one();
 			if (is_object($partner)) {
-				$needSave=false;
 				foreach (['cabinet_url','support_tel','comment'] as $field) {
-					//if (strlen($inet->provTel->$field) && !strlen($partner->$field)) {
 						$partner->$field = $inet->provTel->$field;
-						$needSave = true;
-					//}
 				}
-				if ($needSave) $partner->save(false);
+				$partner->save(false);
 				$inetService->partners_id=$partner->id;
 			}
 			
 			if (strlen($inet->ip_addr)) {
-				$ip=new \app\models\NetIps();
+				$ip=new NetIps();
 				$ip->text_addr=$inet->ip_addr;
 				$ip->beforeSave(false);
 				if ($ip->networks_id) $inet->networks_id=$ip->networks_id;
 				else {
-					$net=new \app\models\Networks();
+					$net=new Networks();
 					$net->text_addr=$inet->ip_addr.'/30';
 					$net->save(false);
 					$inet->networks_id=$net->id;
@@ -76,7 +78,8 @@ class m220303_191454_alter_table_org_inets extends Migration
      */
     public function down()
     {
-		foreach (app\models\OrgInet::find()->all() as $inet) {
+    	/** @var OrgInet $inet */
+		foreach (OrgInet::find()->all() as $inet) {
 			if (is_object($inet->service)) $inet->service->delete();
 		}
   

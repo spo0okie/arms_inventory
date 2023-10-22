@@ -1,5 +1,8 @@
 <?php
-
+namespace app\migrations;
+use app\models\OrgPhones;
+use app\models\Partners;
+use app\models\Services;
 use yii\db\Migration;
 
 /**
@@ -16,14 +19,12 @@ class m220303_120730_alter_table_orgphones extends Migration
 		if (!isset($table->columns['services_id']))
 			$this->addColumn('org_phones', 'services_id', $this->integer()->defaultValue(null));
 	
-		foreach (app\models\OrgPhones::find()->all() as $phone) {
-			/**
-			 * @var $phone \app\models\OrgPhones
-			 */
+		foreach (OrgPhones::find()->all() as $phone) {
+			/** @var $phone OrgPhones */
 			echo $phone->fullNum."\n";
 			$serviceName='Услуги связи '.$phone->provTel->name;
-			
-			$service=app\models\Services::find()
+			/** @var Services $service */
+			$service= Services::find()
 				->where([
 					'like',
 					'name',
@@ -33,13 +34,15 @@ class m220303_120730_alter_table_orgphones extends Migration
 			if (is_object($service))
 				$phone->services_id=$service->id;
 			else {
-				$inetService=new app\models\Services();
+				$inetService=new Services();
 				$inetService->name = $serviceName;
 				$inetService->is_service=false;
 				$inetService->is_end_user=false;
+				/** @noinspection PhpPossiblePolymorphicInvocationInspection */
 				$inetService->contracts_ids=[$phone->contracts_id];
 				$inetService->description='Автоматически созданная услуга для ввода интернет';
-				$partner=app\models\Partners::find()
+				/** @var Partners $partner */
+				$partner= Partners::find()
 					->where([
 						'or',
 						['like','uname',$phone->provTel->name],
@@ -48,14 +51,10 @@ class m220303_120730_alter_table_orgphones extends Migration
 					->one();
 				if (is_object($partner)) {
 					echo $partner->uname."\n";
-					$needSave=false;
 					foreach (['cabinet_url','support_tel','comment'] as $field) {
-						//if (strlen($phone->provTel->$field) && !strlen($partner->$field)) {
-							$partner->$field = $phone->provTel->$field;
-							$needSave = true;
-						//}
+						$partner->$field = $phone->provTel->$field;
 					}
-					if ($needSave) $partner->save(false);
+					$partner->save(false);
 					$inetService->partners_id=$partner->id;
 				}
 				
@@ -73,9 +72,9 @@ class m220303_120730_alter_table_orgphones extends Migration
      */
     public function down()
     {
-		foreach (app\models\OrgPhones::find()->all() as $phone) {
+		foreach (OrgPhones::find()->all() as $phone) {
 			/**
-			 * @var $phone \app\models\OrgPhones
+			 * @var $phone OrgPhones
 			 */
 			if (is_object($phone->service)) $phone->service->delete();
 		}

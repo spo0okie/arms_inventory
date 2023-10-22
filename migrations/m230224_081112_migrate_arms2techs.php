@@ -1,7 +1,9 @@
 <?php
-
+namespace app\migrations;
+use app\models\Techs;
 use yii\data\SqlDataProvider;
 use yii\db\Migration;
+use yii\db\Query;
 
 /**
  * Class m230224_081112_migrate_arms2techs
@@ -25,7 +27,7 @@ class m230224_081112_migrate_arms2techs extends Migration
 		if (empty($arm['model_id']))
 			$arm['model_id']=$model_id;		//ну лучше как-то неправильно провести миграцию чем сфейлить
 		
-		$tech=new \app\models\Techs();
+		$tech=new Techs();
 		
 		foreach (array_keys($arm) as $field)
 			$tech->$field=$arm[$field];
@@ -49,7 +51,7 @@ class m230224_081112_migrate_arms2techs extends Migration
 	
 	
 		$pcCode='pc';
-		$pcQuery=new \yii\db\Query();
+		$pcQuery=new Query();
 		$pc=$pcQuery->select('*')->from('tech_types')->where(['code'=>$pcCode])->one();
 		//$pc=\app\models\TechTypes::find()->where(['code'=>'pc'])->one();
 		if (!is_array($pc)) {
@@ -72,7 +74,7 @@ class m230224_081112_migrate_arms2techs extends Migration
 		echo "PC type ID: ".$pc['id']."\n";
 		
 		$unknownPcName='Unknown';
-		$unknownPcQuery=new \yii\db\Query();
+		$unknownPcQuery=new Query();
 		$unknownPc=$unknownPcQuery->select('*')->from('tech_models')->where(['name'=>$unknownPcName])->one();
 		if (!is_array($unknownPc)) {
 			echo "Creating \"unknown PC\" tech_model\n";
@@ -90,7 +92,7 @@ class m230224_081112_migrate_arms2techs extends Migration
 			}
 		}
 	
-		echo "UnkonownPC model ID: ".$unknownPc['id']."\n";
+		echo "UnknownPC model ID: ".$unknownPc['id']."\n";
 	
 		$preCheckFail=false;
 		$arms = new SqlDataProvider(['sql'=> 'SELECT * FROM arms ','pagination' => false,]);
@@ -138,11 +140,12 @@ class m230224_081112_migrate_arms2techs extends Migration
 			echo "OK\n";
 		}
 		
-		//if (!count($unknown->techs)) $unknown->delete();
+		return true;
     }
 
     /**
      * {@inheritdoc}
+	 * @noinspection SqlResolve
      */
     public function down()
     {
@@ -168,6 +171,7 @@ class m230224_081112_migrate_arms2techs extends Migration
 			echo "OK\n";
 		}
 	
+		return true;
     }
 
 }

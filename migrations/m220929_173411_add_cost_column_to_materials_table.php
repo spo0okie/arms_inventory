@@ -1,5 +1,5 @@
 <?php
-
+namespace app\migrations;
 use yii\db\Migration;
 
 /**
@@ -32,13 +32,13 @@ class m220929_173411_add_cost_column_to_materials_table extends Migration
 	{
 		$table=$this->db->getTableSchema('materials');
 		if (isset($table->columns['cost']))
-			$this->dropColumn('materials','cost',$this->float(2));
+			$this->dropColumn('materials','cost');
 		
 		if (isset($table->columns['charge']))
-			$this->dropColumn('materials','charge',$this->float(2));
+			$this->dropColumn('materials','charge');
 		
 		if (isset($table->columns['currency_id']))
-			$this->dropColumn('materials','currency_id',$this->integer()->notNull()->defaultValue(1));
+			$this->dropColumn('materials','currency_id');
 		
 	}
 }

@@ -1,6 +1,7 @@
 <?php
-
+namespace app\migrations;
 use yii\db\Migration;
+use yii\db\Query;
 
 /**
  * Class m230821_160259_init_empty_tables
@@ -52,7 +53,7 @@ class m230821_160259_init_empty_tables extends Migration
      */
     public function safeUp()
     {
-		$query=new \yii\db\Query();
+		$query=new Query();
 		$docState=$query->select('*')->from('contracts_states')->one();
 		if (!is_array($docState)) {
 			foreach ($this->initialDocStates as $s) $this->execute(

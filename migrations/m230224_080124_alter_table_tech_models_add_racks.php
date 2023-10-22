@@ -1,5 +1,5 @@
 <?php
-
+namespace app\migrations;
 use yii\db\Migration;
 
 /**
@@ -40,6 +40,7 @@ class m230224_080124_alter_table_tech_models_add_racks extends Migration
 	
 		$this->addColumnIfNotExist('techs','installed_back',$this->boolean()->defaultValue(false));
 		$this->addColumnIfNotExist('techs','full_length',$this->boolean()->defaultValue(false));
+		/** @noinspection SqlWithoutWhere */
 		$this->execute('update techs set installed_pos=null');
     }
 

@@ -1,5 +1,5 @@
 <?php
-
+namespace app\migrations;
 use yii\db\Migration;
 
 /**
@@ -16,7 +16,7 @@ class m210216_155422_table_net_vlans extends Migration
 			$this->createTable('net_vlans', [
 				'[[id]]'			=> $this->primaryKey(),		//ключ
 				'[[name]]'			=> $this->string(),			//имя
-				'[[vlan]]'			=> $this->integer(),		//номер вилана
+				'[[vlan]]'			=> $this->integer(),		//номер vlan
 				'[[domain_id]]'		=> $this->integer()->null(),//домен
 				'[[segment_id]]'	=> $this->integer()->null(),//сегмент ИТ
 				'[[comment]]'		=> $this->text(),			//комментарий

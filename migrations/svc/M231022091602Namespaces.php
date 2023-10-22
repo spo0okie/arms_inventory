@@ -1,18 +1,20 @@
 <?php
-namespace app\migrations;
+
+namespace app\migrations\svc;
+
 use yii\db\Migration;
 
 /**
- * Class m220421_075705_alter_table_org_inets
+ * Class M231022091602Namespaces
  */
-class m220421_075705_alter_table_org_inets extends Migration
+class M231022091602Namespaces extends Migration
 {
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
-		$this->alterColumn('org_inet', 'prov_tel_id', $this->integer()->defaultValue(null));
+		$this->execute("update migration set version=CONCAT('app\\\\migrations\\\\',version)");
     }
 
     /**
@@ -20,7 +22,9 @@ class m220421_075705_alter_table_org_inets extends Migration
      */
     public function safeDown()
     {
-		$this->alterColumn('org_inet', 'prov_tel_id', $this->integer());
+        echo "M231022091602Namespaces cannot be reverted.\n";
+
+        return false;
     }
 
     /*
@@ -32,7 +36,7 @@ class m220421_075705_alter_table_org_inets extends Migration
 
     public function down()
     {
-        echo "m220421_075705_alter_table_org_inets cannot be reverted.\n";
+        echo "M231022091602Namespaces cannot be reverted.\n";
 
         return false;
     }

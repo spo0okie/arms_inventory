@@ -1,5 +1,6 @@
 <?php
-
+namespace app\migrations;
+use Yii;
 use yii\db\Migration;
 
 /**
@@ -17,7 +18,8 @@ class m220916_122729_add_mac_column_to_arms_table extends Migration
 		if (!isset($table->columns['mac'])){
 			$this->addColumn('{{%arms}}', 'mac', $this->string()->null());
 		}
-		
+	
+		/** @noinspection SqlWithoutWhere */
 		$this->execute('update `arms` inner join `comps` on `comps`.`id`=`arms`.`comp_id` set `arms`.`mac`=`comps`.`mac`');
     
     }

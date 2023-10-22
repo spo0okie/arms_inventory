@@ -1,5 +1,6 @@
 <?php
-
+namespace app\migrations;
+use app\models\OrgInet;
 use yii\data\SqlDataProvider;
 use yii\db\Migration;
 
@@ -26,7 +27,7 @@ class m230628_041251_create_table_org_inets_in_networks extends Migration
 	
 		$inets = new SqlDataProvider(['sql'=> 'SELECT * FROM org_inet ','pagination' => false,]);
 		foreach ($inets->models as $model) {
-			/** @var $model \app\models\OrgInet */
+			/** @var $model OrgInet */
 			if ($model['networks_id']) {
 				$this->execute(
 					"insert into org_inets_in_networks (org_inets_id,networks_id) values (:inet,:net)",

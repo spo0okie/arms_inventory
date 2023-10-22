@@ -1,6 +1,9 @@
 <?php
 
+namespace app\migrations;
+
 use yii\db\Migration;
+
 
 /**
  * Создание БД первой версии (редакция Азимут)
@@ -13,7 +16,8 @@ class m180101_010101_initial extends Migration
      */
     public function safeUp()
     {
-	$sql=<<<SQL
+	$sql= /** @lang MySQL */
+		<<<SQL
 set names utf8mb4;
 
 CREATE TABLE `arms` (
@@ -1131,7 +1135,8 @@ SQL;
      */
     public function safeDown()
     {
-        $sql=<<<SQL
+        $sql= /** @lang MySQL */
+			<<<SQL
 		DROP TABLE IF EXISTS arms;
 		DROP TABLE IF EXISTS comps;
 		DROP TABLE IF EXISTS contracts;

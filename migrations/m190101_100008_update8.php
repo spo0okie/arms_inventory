@@ -1,5 +1,5 @@
 <?php
-
+namespace app\migrations;
 use yii\db\Migration;
 
 /**
@@ -29,7 +29,7 @@ class m190101_100008_update8 extends Migration
 		}
 		
 		if (!isset($table->columns['org_id'])) {
-			//добавляем ссылку на оргагнизацию в пользователях
+			//добавляем ссылку на организацию в пользователях
 			$this->addColumn('{{%users}}', 'org_id', $this->integer()->notNull()->defaultValue(1)->comment('Организация')->after('employee_id'));
 			$this->createIndex('{{%idx-users-org_id}}', '{{%users}}', 'org_id');
 		}
@@ -47,6 +47,7 @@ class m190101_100008_update8 extends Migration
 		if (isset($table->foreignKeys['login_journal_ibfk_1'])) $this->dropForeignKey('{{%login_journal_ibfk_1}}','{{%login_journal}}');
 		if (isset($table->foreignKeys['login_journal_ibfk_2'])) $this->dropForeignKey('{{%login_journal_ibfk_2}}','{{%login_journal}}');
 		
+		/** @noinspection SqlWithoutWhere */
 		$sql=<<<SQL
 			SET FOREIGN_KEY_CHECKS=0;
 			SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -113,6 +114,8 @@ SQL;
 		$this->alterColumn('techs','user_id',$this->string(16)->notNull());
 		$this->alterColumn('techs','it_staff_id',$this->string(16)->notNull());
 		
+		/** @noinspection SqlResolve */
+		/** @noinspection SqlWithoutWhere */
 		$sql=<<<SQL
 			SET FOREIGN_KEY_CHECKS=0;
 			SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";

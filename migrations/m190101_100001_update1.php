@@ -1,5 +1,5 @@
 <?php
-
+namespace app\migrations;
 use yii\db\Migration;
 
 /**
@@ -25,7 +25,7 @@ class m190101_100001_update1 extends Migration
 		if (!isset($table->columns['state_id'])) {
 			$this->addColumn(
 				'{{%contracts}}',    //правим АРМы
-				'state_id', //добавпляем подразделения
+				'state_id', //добавляем подразделения
 				$this->integer()      //ссылка на ключ
 				->defaultValue(null)    //а иначе будут нули, а у нас внешний ключ
 			);

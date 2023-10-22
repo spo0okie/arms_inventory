@@ -1,5 +1,5 @@
 <?php
-
+namespace app\migrations;
 use app\models\OrgStruct;
 use yii\db\Migration;
 

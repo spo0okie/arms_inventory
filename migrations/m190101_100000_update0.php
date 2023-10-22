@@ -1,5 +1,5 @@
 <?php
-
+namespace app\migrations;
 use yii\db\Migration;
 
 /**
@@ -12,7 +12,9 @@ class m190101_100000_update0 extends Migration
      */
     public function safeUp()
     {
-	    $sql=<<<SQL
+		/** @noinspection SqlResolve */
+		$sql= /** @lang MySQL */
+			<<<SQL
 set names utf8mb4;
 
 ALTER TABLE `techs` DROP FOREIGN KEY `techs_ibfk_1`;
