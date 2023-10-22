@@ -1,8 +1,12 @@
 <?php
 
+use app\helpers\FieldsHelper;
+use app\models\OrgStruct;
+use app\models\Partners;
+use kartik\depdrop\DepDrop;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgStruct */
@@ -22,13 +26,13 @@ if (!isset($modalParent)) $modalParent=null;
 		//'action' => Yii::$app->request->getQueryString(),
 	]); ?>
 	
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'org_id',[
-			'data'=>\app\models\Partners::fetchNames()
+	<?= FieldsHelper::Select2Field($form,$model,'org_id',[
+			'data'=> Partners::fetchNames()
 	])?>
 	
-	<?= $form->field($model, 'pup')->widget(\kartik\depdrop\DepDrop::className(), [
-		'data' => \app\models\OrgStruct::fetchOrgNames($model->org_id),
-		'type' => \kartik\depdrop\DepDrop::TYPE_SELECT2,
+	<?= $form->field($model, 'parent_hr_id')->widget(DepDrop::class, [
+		'data' => OrgStruct::fetchOrgNames($model->org_id),
+		'type' => DepDrop::TYPE_SELECT2,
 		'options' => [
 			'placeholder' => 'Родительское подразделение',
 		],
@@ -41,18 +45,13 @@ if (!isset($modalParent)) $modalParent=null;
 		],
 		'pluginOptions' => [
 			'depends'=>['orgstruct-org_id'],
-			'url'=>\yii\helpers\Url::to(['/org-struct/dep-drop']),
+			'url'=> Url::to(['/org-struct/dep-drop']),
 		]
 	]) ?>
 	
 	<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
-
-    <?= $form->field($model, 'id')->textInput(['maxlength' => true]) ?>
-
-
-		
-	
+    <?= $form->field($model, 'hr_id')->textInput(['maxlength' => true]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

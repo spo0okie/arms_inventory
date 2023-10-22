@@ -6,45 +6,22 @@ use app\helpers\ArrayHelper;
 use app\models\UsersSearch;
 use Yii;
 use app\models\OrgStruct;
-use yii\data\ActiveDataProvider;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\helpers\Url;
-use yii\bootstrap5\ActiveForm;
-
+use yii\web\Response;
 
 /**
  * OrgStructController implements the CRUD actions for OrgStruct model.
  */
-class OrgStructController extends Controller
+class OrgStructController extends ArmsBaseController
 {
+	public $modelClass=OrgStruct::class;
 
-	/**
-	* {@inheritdoc}
-	*/
-	public function behaviors()
+	public function accessMap()
 	{
-		$behaviors=[
-			'verbs' => [
-				'class' => VerbFilter::className(),
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			]
-		];
-
-		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-			'class' => \yii\filters\AccessControl::className(),
-			'rules' => [
-				['allow' => true, 'actions'=>['create','update','delete',], 'roles'=>['editor']],
-				['allow' => true, 'actions'=>['index','view','ttip','validate','dep-drop'], 'roles'=>['@','?']],
-			],
-			'denyCallback' => function ($rule, $action) {
-				throw new  \yii\web\ForbiddenHttpException('Access denied');
-			}
-		];
-		return $behaviors;
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['dep-drop']
+		]);
 	}
 	
 	/**
@@ -56,76 +33,28 @@ class OrgStructController extends Controller
     {
 		return $this->render('index', [
 			'models' => OrgStruct::find()
-				->where(['org_id'=>$org_id])
+				->where(['org_id'=>$org_id,'parent_id'=>null])
 				->orderBy(['name'=>SORT_ASC])
 				->all(),
 			'org_id'=>$org_id
 		]);
     }
-
+	
+	
 	/**
-	* Validates  model on update.
-	* @param null $id
-	* @return mixed
-	* @throws NotFoundHttpException
-	*/
-	public function actionValidate($id=null)
-	{
-		if (!is_null($id))
-			$model = $this->findModel($id);
-		else
-			$model = new OrgStruct();
-
-		if ($model->load(Yii::$app->request->post())) {
-			Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-			return ActiveForm::validate($model);
-		}
-	}
-
-
-	/**
-	* Displays a item for single model.
-	* @param integer $id
-	* @return mixed
-	* @throws NotFoundHttpException if the model cannot be found
-	*/
-	public function actionItem($id)
-	{
-		return $this->renderPartial('item', [
-			'model' => $this->findModel($id)
-		]);
-	}
-
-
-	/**
-	* Displays a tooltip for single model.
-	* @param integer $id
-	* @return mixed
-	* @throws NotFoundHttpException if the model cannot be found
-	*/
-	public function actionTtip($id, $org_id)
-	{
-		return $this->renderPartial('ttip', [
-			'model' => $this->findModel($id, $org_id),
-		]);
-	}
-
-
-    /**
-     * Displays a single OrgStruct model.
-     * @param string $id
-     * @param integer $org_id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id, $org_id)
+	 * Displays a single OrgStruct model.
+	 * @param int $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+    public function actionView(int $id)
     {
-		$model=$this->findModel($id, $org_id);
+    	/** @var OrgStruct $model */
+		$model=$this->findModel($id);
   
 		$params=Yii::$app->request->queryParams;
 		$params=ArrayHelper::setTreeDefaultValue($params,['UsersSearch','org_id'],$model->org_id);
-		$params=ArrayHelper::setTreeDefaultValue($params,['UsersSearch','Orgeh'],$model->id);
-		
+		$params=ArrayHelper::setTreeDefaultValue($params,['UsersSearch','Orgeh'],$model->hr_id);
   
 		$searchModel = new UsersSearch();
 		$dataProvider = $searchModel->search($params);
@@ -156,52 +85,16 @@ class OrgStructController extends Controller
             'model' => $model,
         ]);
     }
-
-    /**
-     * Updates an existing OrgStruct model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param string $id
-     * @param integer $org_id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id, $org_id)
-    {
-        $model = $this->findModel($id, $org_id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if (Yii::$app->request->get('return')=='previous') return $this->redirect(Url::previous());
-            return $this->redirect(['view', 'id' => $model->id, 'org_id' => $model->org_id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Deletes an existing OrgStruct model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $id
-     * @param integer $org_id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id, $org_id)
-    {
-        $this->findModel($id, $org_id)->delete();
-
-        return $this->redirect(['index', 'org_id' => $org_id]);
-    }
-	
+    
 	
 	/**
-	 * Returns tech available network ports
+	 * Возвращает подразделения организации
+	 * Бэкенд для Dependant Dropdown (меняем орг-ю, меняются подразделения)
 	 * @return array
 	 */
 	public function actionDepDrop()
 	{
-		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		Yii::$app->response->format = Response::FORMAT_JSON;
 		if (isset($_POST['depdrop_parents'])) {
 			$parents = $_POST['depdrop_parents'];
 			if ($parents != null) {
@@ -223,21 +116,4 @@ class OrgStructController extends Controller
 		return ['output'=>'', 'selected'=>''];
 	}
 	
-	
-    /**
-     * Finds the OrgStruct model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $id
-     * @param integer $org_id
-     * @return OrgStruct the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id, $org_id)
-    {
-        if (($model = OrgStruct::findOne(['id' => $id, 'org_id' => $org_id])) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
 }

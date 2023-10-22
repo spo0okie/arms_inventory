@@ -8,38 +8,28 @@
 
 /* @var $this yii\web\View */
 /* @var $models app\models\OrgStruct */
-/* @var $parent_id integer */
 /* @var $tree_level integer */
+
+use yii\helpers\Html;
+
 if (!isset($tree_level)) $tree_level=0;
-if (!isset($org_id)) $org_id=1;
 
-$filtered=[];
-//echo $parent_id;
-//перебираем все модельки и отфильтровываем нужные нам
-foreach ($models as $model) {
-	if ($model->pup == $parent_id || ($parent_id===null && $model->pup == 'NULL')) {
-		$filtered[]=$model;
-	}
-}
-
-if (count($filtered)) {
-	//если чтото нафильтровали то вперед!
-?>
+if (count($models)) {?>
 	<ul class="orgStruct_tree orgStruct_tree_lev_<?= $tree_level ?>">
-		<?php foreach ($filtered as $model) {
+		<?php foreach ($models as $model) {
+			$children=$model->children;
 			//рисуем элемент ?>
 			<li>
                 <?= $this->render('item',['model'=>$model,'static_view'=>false]) ?>
-				<?= \yii\helpers\Html::a(
+				<?= Html::a(
 					'<span class="fas fa-plus-circle"></span>',
-					['org-struct/create','OrgStruct[pup]'=>$model->id,'OrgStruct[org_id]'=>$model->org_id],
+					['org-struct/create','OrgStruct[parent_hr_id]'=>$model->hr_id,'OrgStruct[org_id]'=>$model->org_id],
 					['qtip_ttip'=>'Добавить дочернее подразделение']
 				) ?>
-                <?= $subtree=$this->render('tree-list',[
-                    'models'=>$models,
-                    'parent_id'=>$model->id,
+                <?= count($children)?$this->render('tree-list',[
+                    'models'=>$children,
                     $tree_level+1
-                ]); ?>
+                ]):'' ?>
             </li>
 		<?php } ?>
 	</ul>
