@@ -183,7 +183,7 @@ class ArmsBaseController extends Controller
 			$model= new $this->modelClass();
 			if ($model->hasAttribute('archived')) {
 				if (!Yii::$app->request->get('showArchived',$this->defaultShowArchived))
-					$query->where(['not',['archived'=>1]]);
+					$query->where(['not',['IFNULL(archived,0)'=>1]]);
 			}
 		
 			$dataProvider = new ActiveDataProvider([
