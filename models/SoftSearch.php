@@ -2,10 +2,9 @@
 
 namespace app\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Soft;
+use yii\helpers\StringHelper;
 
 /**
  * SoftSearch represents the model behind the search form of `\app\models\Soft`.
@@ -41,10 +40,10 @@ class SoftSearch extends Soft
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search(array $params)
     {
         $query = Soft::find()
-			->joinWith(['manufacturer'/*,'softLists','comps','licGroups'*/]);
+			->joinWith(['manufacturer','softLists'/*,'comps','licGroups'*/]);
 
         // add conditions that should always apply here
 
@@ -88,9 +87,9 @@ class SoftSearch extends Soft
         ]);
 
         $query
-			->andFilterWhere(['or like', 'CONCAT(manufacturers.name,soft.descr)', \yii\helpers\StringHelper::explode($this->descr,'|',true,true)])
-            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
-            ->andFilterWhere(['or like', 'items', \yii\helpers\StringHelper::explode($this->items,'|',true,true)]);
+			->andFilterWhere(['or like', 'CONCAT(manufacturers.name,soft.descr)', StringHelper::explode($this->descr,'|',true,true)])
+            ->andFilterWhere(['or like', 'comment', StringHelper::explode($this->comment,'|',true,true)])
+            ->andFilterWhere(['or like', 'items', StringHelper::explode($this->items,'|',true,true)]);
 
         return $dataProvider;
     }
