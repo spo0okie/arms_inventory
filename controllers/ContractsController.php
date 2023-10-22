@@ -65,12 +65,11 @@ class ContractsController extends ArmsBaseController
 			'model' => $this->findModel($id),
 		]);
 	}
-
+	
 	/**
 	 * Creates a new Contracts model.
 	 * If creation is successful, the browser will be redirected to the 'view' page.
 	 * @return mixed
-	 * @throws NotFoundHttpException
 	 */
     public function actionCreate()
     {
@@ -155,6 +154,7 @@ class ContractsController extends ArmsBaseController
 	 * @param int $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
+	 * @noinspection PhpUnusedFunctionInspection
 	 */
 	public function actionUpdateForm(int $id)
 	{
@@ -235,7 +235,7 @@ class ContractsController extends ArmsBaseController
 			return ['error'=>'OK','code'=>'2','Message'=>'Requested usage not found ['.implode(',',$model_ids).']'];
 		}
 	}
-
+	
 	/**
 	 * Отвязывает документ от объекта.
 	 * If deletion is successful, the browser will be redirected to the 'index' page.
@@ -243,11 +243,10 @@ class ContractsController extends ArmsBaseController
 	 * @param int $techs_id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
+	 * @noinspection PhpUnusedFunctionInspection
 	 */
 	public function actionUnlinkTech(int $id, int $techs_id)
 	{
-		if (!Users::isAdmin()) {throw new  ForbiddenHttpException('Access denied');}
-		
 		$usage=false;
 		$usage_deleted=false;
 
@@ -306,8 +305,6 @@ class ContractsController extends ArmsBaseController
 	 */
 	public function actionLinkTech(int $id, int $techs_id)
 	{
-		if (!Users::isAdmin()) {throw new  ForbiddenHttpException('Access denied');}
-		
 		$model=$this->findModel($id);
 		$techs_ids=$model->techs_ids;
 		if (array_search($techs_id,$techs_ids)===false) {
