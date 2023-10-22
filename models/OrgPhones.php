@@ -2,7 +2,8 @@
 
 namespace app\models;
 
-use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "org_phones".
@@ -15,20 +16,23 @@ use Yii;
  * @property string $sname Строка для поиска
  * @property string $fullNum Полный номер
  * @property int $places_id Помещение
+ * @property int $services_id Услуга
  * @property string $comment Комментарий
  * @property float $cost
  * @property float $charge
  * @property bool $archived
+ * @property bool $providesNumber
  * @property string $title
  * @property string $untitledComment
  
  * @property Services $service
  * @property Places $place
+ * @property Services $provTel старое поле используется только в миграциях до новой версии
  */
 class OrgPhones extends ArmsModel
 {
 	public static $title='Телефонный номер';
-	public static $titles='Телефонныe номерa';
+	public static $titles='Телефонные номера';
     /**
      * {@inheritdoc}
      */
@@ -48,8 +52,8 @@ class OrgPhones extends ArmsModel
             [['services_id','places_id','archived'], 'integer'],
             [['comment','account'], 'string'],
             [['country_code', 'city_code', 'local_code'], 'string', 'max' => 10],
-	        //[['prov_tel_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProvTel::className(), 'targetAttribute' => ['prov_tel_id' => 'id']],
-	        [['places_id'], 'exist', 'skipOnError' => true, 'targetClass' => Places::className(), 'targetAttribute' => ['places_id' => 'id']],
+	        //[['prov_tel_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProvTel::class, 'targetAttribute' => ['prov_tel_id' => 'id']],
+	        [['places_id'], 'exist', 'skipOnError' => true, 'targetClass' => Places::class, 'targetAttribute' => ['places_id' => 'id']],
         ];
     }
 
@@ -95,7 +99,7 @@ class OrgPhones extends ArmsModel
 	 * @param array $phones
 	 * @return string
 	 */
-    public static function concatSnames($phones) {
+    public static function concatSnames(array $phones) {
 	    $arPhones=[];
 	    if (is_array($phones)&&count($phones)) {
 		    foreach ($phones as $phone) {
@@ -148,37 +152,29 @@ class OrgPhones extends ArmsModel
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getPlace()
 	{
-		return $this->hasOne(Places::className(), ['id' => 'places_id']);
+		return $this->hasOne(Places::class, ['id' => 'places_id']);
 	}
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getPartner()
 	{
-		return $this->hasOne(Partners::className(), ['id' => 'partners_id'])
-			->viaTable(\app\models\Services::tableName(), ['id' => 'services_id']);
+		return $this->hasOne(Partners::class, ['id' => 'partners_id'])
+			->viaTable(Services::tableName(), ['id' => 'services_id']);
 	}
 	
 	/**
-	 * Не используется в текущей версии. Нужен для миграции со старой версии
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getProvTel()
-	{
-		return $this->hasOne(ProvTel::className(), ['id' => 'prov_tel_id']);
-	}
-	
-	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getService()
 	{
-		return $this->hasOne(Services::className(), ['id' => 'services_id']);
+		return $this->hasOne(Services::class, ['id' => 'services_id']);
 	}
 }

@@ -13,8 +13,24 @@ class OrgPhonesController extends ArmsBaseController
 {
 	
 	public $modelClass=OrgPhones::class;
-
-    /**
+	
+	public function routeOnUpdate($model)
+	{
+		/** @var OrgPhones $model */
+		return $model->services_id?
+			['services/view','id'=>$model->services_id]:
+			['org-phones/view','id'=>$model->id];
+	}
+	
+	public function routeOnDelete($model)
+	{
+		/** @var OrgPhones $model */
+		return $model->services_id?
+			['services/view','id'=>$model->services_id]:
+			['org-phones/index'];
+	}
+	
+	/**
      * Lists all OrgPhones models.
      * @return mixed
      */
