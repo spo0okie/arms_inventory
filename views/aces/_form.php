@@ -72,6 +72,7 @@ if (!isset($modalParent)) $modalParent=null;
 			<?= FieldsHelper::MarkdownField($form,$model, 'notepad') ?>
 			<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success float-end']) ?>
 		</div>
+		<?= $form->field($model,"acls_id")->hiddenInput()->label(false)->hint(false) ?>
 	</div>
 	
 

@@ -25,14 +25,12 @@ if (!isset($static_view)) $static_view=false;
 						<?php //Html::a('<span class="fas fa-plus"></span>',['aces/create','acls_id'=>$model->id],['class'=>'btn btn-primary btn-sm']) ?>
 						<?=  Html::a('<span class="fas fa-plus"></span>',[
 							'aces/create',
-							'acls_id'=>$model->id,
-							'ajax'=>1,
-							'modal'=>'modal_form_loader'
+							'Aces[acls_id]'=>$model->id,
 						],[
 							'class' => 'btn btn-primary btn-sm open-in-modal-form',
 							'title' => 'Добавление элемента в список доступа',
 							'data-update-element' => '#acl_card_'.$model->id,
-							'data-update-url' => Url::to(['/acls/view','id'=>$model->id,'ajax'=>1]),
+							'data-update-url' => Url::to(['/acls/view','id'=>$model->id]),
 						]) ?>
 						
 						<?= Html::a('<span class="fas fa-pencil-alt"></span>',['acls/update','id'=>$model->id,'return'=>'previous'],['class'=>'btn btn-primary btn-sm']) ?>

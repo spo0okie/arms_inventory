@@ -224,7 +224,7 @@ class ArmsBaseController extends Controller
 		]);
 	}
 	
-
+	
 	/**
 	 * Displays a single Arms model.
 	 * @param int $id
@@ -233,7 +233,7 @@ class ArmsBaseController extends Controller
 	 */
 	public function actionView(int $id)
 	{
-		return $this->render('view', [
+		return $this->defaultRender('view', [
 			'model' => $this->findModel($id),
 		]);
 	}
