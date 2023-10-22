@@ -292,6 +292,10 @@ class ArmsBaseController extends Controller
 		$model = new $this->modelClass();
 
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if (isset(Yii::$app->request->acceptableContentTypes['application/json'])) {
+				Yii::$app->response->format=Response::FORMAT_JSON;
+				return $model;
+			}
 			return $this->defaultReturn($this->routeOnUpdate($model),[$model]);
 		}
 		
@@ -311,6 +315,10 @@ class ArmsBaseController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        	if (in_array('application/json',Yii::$app->request->acceptableContentTypes)) {
+        		Yii::$app->response->format=Response::FORMAT_JSON;
+        		return $model;
+			}
 			return $this->defaultReturn($this->routeOnUpdate($model),[
 				$model
 			]);

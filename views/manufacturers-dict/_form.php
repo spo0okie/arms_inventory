@@ -1,5 +1,7 @@
 <?php
 
+use app\helpers\FieldsHelper;
+use app\models\Manufacturers;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use yii\bootstrap5\Modal;
@@ -14,11 +16,11 @@ if (!isset($modalParent)) $modalParent=null;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'word') ?>
+    <?= FieldsHelper::TextInputField($form,$model, 'word') ?>
 
 
-    <?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'manufacturers_id',[
-    	'data'=>\app\models\Manufacturers::fetchNames(),
+    <?= FieldsHelper::Select2Field($form,$model, 'manufacturers_id',[
+    	'data'=> Manufacturers::fetchNames(),
 		'pluginOptions'=>[
 			'modalParent'=>$modalParent
 		]
@@ -44,7 +46,7 @@ if (!isset($modalParent)) $modalParent=null;
             ],
             //'footer' => 'Низ окна',
         ]);
-        $manufacturerModel=new \app\models\Manufacturers();
+        $manufacturerModel=new Manufacturers();
         $manufacturerModel->name=$model->word;
         $manufacturerModel->full_name=$model->word;
 
@@ -59,11 +61,14 @@ if (!isset($modalParent)) $modalParent=null;
         var data = $(this).serialize();
         $.ajax({
             url: '/web/manufacturers/create',
+            headers: {
+    			Accept: "application/json; charset=utf-8"
+			},
             type: 'POST',
             data: data,
             success: function(res){
                 //alert();
-                window.location.replace(window.location.toString()+'&manufacturers_id='+res[0].id);
+                window.location.replace(window.location.toString()+'&ManufacturersDict[manufacturers_id]='+res.id);
             },
             error: function(){
                 alert('Error!');
