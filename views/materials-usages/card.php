@@ -6,8 +6,7 @@
  * Time: 12:08
  */
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\LinkObjectWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\MaterialsUsages */
@@ -16,7 +15,7 @@ if (!isset($static_view)) $static_view=false;
 
 ?>
     <h1>
-		<?= \app\components\LinkObjectWidget::widget([
+		<?= LinkObjectWidget::widget([
 			'model'=>$model,
 			'confirmMessage' => 'Действительно удалить этот расход материала?',
 			'name'=>$model->to,
@@ -25,9 +24,11 @@ if (!isset($static_view)) $static_view=false;
 	<p><strong>Дата:</strong> <?= $model->date ?></p>
 <?php if ($model->cost) { ?>
 	<p>
-		<strong>Стоимость:</strong> <?= $model->cost.''.$model->currency->symbol. (
-		$model->charge?(' (в т.ч. НДС: '.$model->charge.$model->currency->symbol.')'):''
-		) ?>
+		<strong>Стоимость:</strong> <?= $this->render('/contracts/price',[
+			'total'=>$model->cost,
+			'charge'=>$model->charge,
+			'currency'=>$model->currency->symbol,
+		]) ?>
 	</p>
 <?php } ?>
 	<br>
