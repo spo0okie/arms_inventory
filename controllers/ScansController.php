@@ -3,12 +3,12 @@
 namespace app\controllers;
 
 use app\models\TechModels;
+use app\models\Techs;
+use Throwable;
 use Yii;
 use app\models\Scans;
-use app\models\ScansSearch;
-use yii\web\Controller;
+use yii\db\StaleObjectException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\UploadedFile;
 use yii\web\Response;
 use yii\bootstrap5\ActiveForm;
@@ -16,61 +16,17 @@ use yii\bootstrap5\ActiveForm;
 /**
  * ScansController implements the CRUD actions for Scans model.
  */
-class ScansController extends Controller
+class ScansController extends ArmsBaseController
 {
-    /**
-     * @inheritdoc
-     */
-    public function behaviors()
-    {
-	    $behaviors=[
-		    'verbs' => [
-			    'class' => VerbFilter::className(),
-			    'actions' => [
-				    'delete' => ['POST'],
-			    ],
-		    ]
-	    ];
-	    if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-		    'class' => \yii\filters\AccessControl::className(),
-		    'rules' => [
-			    ['allow' => true, 'actions'=>['create','update','delete','unlink','thumb'], 'roles'=>['editor']],
-			    ['allow' => true, 'actions'=>['index','view','ttip','validate'], 'roles'=>['@','?']],
-		    ],
-		    'denyCallback' => function ($rule, $action) {
-			    throw new  \yii\web\ForbiddenHttpException('Access denied');
-		    }
-	    ];
-	    return $behaviors;
-    }
-
-    /**
-     * Lists all Scans models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel = new ScansSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
-
-    /**
-     * Displays a single Scans model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
+	public $modelClass=Scans::class;
+	
+	public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			'edit'=>['thumb'],
+		]);
+	}
+	
 
 
 	/**
@@ -91,6 +47,8 @@ class ScansController extends Controller
 			Yii::$app->response->format = Response::FORMAT_JSON;
 			return ActiveForm::validate($model);
 		}
+		
+		return null;
 	}
 
     /**
@@ -118,17 +76,6 @@ class ScansController extends Controller
 		    }
 		    if (!$model->upload()) return "{\"error\":\"не удалось загрузить\"}";
 		    if ($model->save(false)) {
-			    // тут у нас уже произошло успешное создание объекта и он уже в базе
-				// это очевидно какаято устаревшая дичь со времен many-2-many отношений с доками
-			    /* if ($contracts_id=Yii::$app->request->get('contracts_id')) {
-			    	//а тут мы обнаружили, что надо этот скан прикрутить к конрактам
-				    if (is_object($contract=\app\models\Contracts::findOne(['id'=>$contracts_id]))) {
-				    	$contract_scans=$contract->scans_ids;
-					    $contract_scans[]=$model->id;
-				    	$contract->scans_ids=$contract_scans;
-				    	$contract->save();
-				    }
-			    } */
 			    Yii::$app->response->format = Response::FORMAT_JSON;
 			    return [$model];
 		    }
@@ -145,8 +92,9 @@ class ScansController extends Controller
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionUpdate($id)
+	public function actionUpdate(int $id)
 	{
+		/** @var Scans $model */
 		$model = $this->findModel($id);
 		
 		if ($model->load(Yii::$app->request->post())) {
@@ -161,22 +109,21 @@ class ScansController extends Controller
 	}
 	
 	/**
-	 * Updates an existing Scans model.
-	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param integer $id
-	 * @param string  $link
-	 * @param integer $link_id
+	 * Устанавливает переданный по ID скан превьюшкой указанного объекта
+	 * @param integer $id	ID скана
+	 * @param string  $link	тип объекта
+	 * @param integer $link_id ID объекта
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionThumb($id,$link,$link_id)
+	public function actionThumb(int $id, string $link, int $link_id)
 	{
 		switch ($link) {
 			case 'tech_models_id':
-				$model = \app\models\TechModels::findOne($link_id);
+				$model = TechModels::findOne($link_id);
 				break;
 			case 'techs_id':
-				$model = \app\models\Techs::findOne($link_id);
+				$model = Techs::findOne($link_id);
 				break;
 			default:
 				$model=null;
@@ -193,16 +140,18 @@ class ScansController extends Controller
 	
 	
 	/**
-     * Deletes an existing Scans model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @param integer $contracts_id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id=null)
+	 * Deletes an existing Scans model.
+	 * If deletion is successful, the browser will be redirected to the 'index' page.
+	 * @param int|null $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws Throwable
+	 * @throws StaleObjectException
+	 */
+    public function actionDelete(int $id=null)
     {
     	if (is_null($id)) $id=Yii::$app->request->post('key');
+    	/** @var Scans $model */
     	$model=$this->findModel($id);
         $model->delete();
 
@@ -215,21 +164,5 @@ class ScansController extends Controller
 	    }
 	    return $this->redirect(['index']);
     }
-
-    /**
-     * Finds the Scans model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Scans the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Scans::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
-
+    
 }
