@@ -1,5 +1,10 @@
 <?php
 
+use app\models\Comps;
+use app\models\NetIps;
+use app\models\Services;
+use app\models\Techs;
+use kartik\markdown\MarkdownEditor;
 use kartik\tabs\TabsX;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
@@ -12,13 +17,13 @@ use yii\helpers\Url;
 /* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
 
-$js=<<<JS
+/** @noinspection JSUnusedLocalSymbolsInspection */
+$js= <<<JS
 commentInput="input#acls-comment";
 compInput="select#acls-comps_id";
 techInput="select#acls-techs_id";
 ipInput="select#acls-ips_id";
 srvInput="select#acls-services_id";
-
 function onInputUpdate(input) {
     //console.log("clearing not "+input+": "+$(input).val())
     if ($(input).val()) {
@@ -29,7 +34,7 @@ function onInputUpdate(input) {
             }
         })
 	}
-};
+}
 JS;
 
 $this->registerJs($js,yii\web\View::POS_HEAD);
@@ -51,6 +56,8 @@ $selectOptions= [
 			//['acls/validate','id'=>$model->id], //для существующих
 		//'action' => Yii::$app->request->getQueryString(),
 	]); ?>
+	<?= $form->field($model,'schedules_id')->hiddenInput()->label(false)->hint(false) ?>
+
 	<div class="for-alert"></div>
 	<div class="row">
 		<div class="col-md-6">
@@ -59,7 +66,7 @@ $selectOptions= [
 				<div class="card-body">
 					<?php if ($model->isNewRecord) { ?>
 						<div class="text-center" >
-							<img class="exclamation-sign" src="/web/img/exclamation-mark.svg" /><br/>
+							<img class="exclamation-sign" src="/web/img/exclamation-mark.svg" alt="!" /><br/>
 						</div>
 						<div class="text-center" >
 							Чтобы добавлять элементы списка контроля доступа, нужно сначала сохранить список
@@ -74,14 +81,13 @@ $selectOptions= [
 						
 						<?= Html::a('<span class="fas fa-plus"></span>', [
 							'aces/create',
-							'acls_id' => $model->id,
-							'ajax' => 1,
+							'Aces[acls_id]' => $model->id,
 							'modal' => 'modal_form_loader'
 						], [
 							'class' => 'btn btn-primary btn-sm open-in-modal-form',
 							'title' => 'Добавление элемента в список доступа',
 							'data-update-element' => '#aces-list',
-							'data-update-url' => Url::to(['/acls/view', 'id' => $model->id, 'ajax' => 1,'aceCards'=>1]),
+							'data-update-url' => Url::to(['/acls/ace-cards', 'id' => $model->id]),
 						]);
 					}?>
 				</div>
@@ -95,8 +101,8 @@ $selectOptions= [
 						'items'=>[
 							[
 								'label'=>'ОС',
-								'content'=>$form->field($model, 'comps_id')->widget(Select2::className(), [
-									'data' => \app\models\Comps::fetchNames(),
+								'content'=>$form->field($model, 'comps_id')->widget(Select2::class, [
+									'data' => Comps::fetchNames(),
 									'options' => [
 										'placeholder' => 'Выберите ОС',
 										'onchange' => 'onInputUpdate(compInput)',
@@ -107,8 +113,8 @@ $selectOptions= [
 							],
 							[
 								'label'=>'Оборудование',
-								'content'=>$form->field($model, 'techs_id')->widget(Select2::className(), [
-									'data' => \app\models\Techs::fetchNames(),
+								'content'=>$form->field($model, 'techs_id')->widget(Select2::class, [
+									'data' => Techs::fetchNames(),
 									'options' => [
 										'placeholder' => 'Выберите оборудование',
 										'onchange' => 'onInputUpdate(techInput)',
@@ -119,8 +125,8 @@ $selectOptions= [
 							],
 							[
 								'label'=>'IP адрес',
-								'content'=>$form->field($model, 'ips_id')->widget(Select2::className(), [
-									'data' => \app\models\NetIps::fetchNames(),
+								'content'=>$form->field($model, 'ips_id')->widget(Select2::class, [
+									'data' => NetIps::fetchNames(),
 									'options' => [
 										'placeholder' => 'Выберите IP',
 										'onchange' => 'onInputUpdate(ipInput)',
@@ -131,8 +137,8 @@ $selectOptions= [
 							],
 							[
 								'label'=>'Сервис',
-								'content'=>$form->field($model, 'services_id')->widget(Select2::className(), [
-									'data' => \app\models\Services::fetchNames(),
+								'content'=>$form->field($model, 'services_id')->widget(Select2::class, [
+									'data' => Services::fetchNames(),
 									'options' => [
 										'placeholder' => 'Выберите сервис',
 										'onchange' => 'onInputUpdate(srvInput)',
@@ -158,7 +164,7 @@ $selectOptions= [
 					]) ?>
 				</div>
 			</div>
-			<?= $form->field($model, 'notepad')->widget(\kartik\markdown\MarkdownEditor::className(), [
+			<?= $form->field($model, 'notepad')->widget(MarkdownEditor::class, [
 				'showExport'=>false
 			]) ?>
 		</div>

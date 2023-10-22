@@ -18,8 +18,10 @@ class AcesController extends ArmsBaseController
     public function routeOnDelete($model)
     {
     	/** @var Aces $model */
-		return (is_object($model->acl) && $model->acl->schedules_id)?
-			['/scheduled-access/view','id'=>$model->acl->schedules_id]:
+		$acl=$model->acl;
+		$schedules_id=is_object($acl)?$acl->schedules_id:0;
+		return ($schedules_id)?
+			['/scheduled-access/view','id'=>$schedules_id]:
 			['/scheduled-access/index'];
     }
 }

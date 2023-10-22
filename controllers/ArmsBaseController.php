@@ -334,12 +334,12 @@ class ArmsBaseController extends Controller
     	$model=$this->findModel($id);
     	$defaultRoute=$this->routeOnDelete($model);
         $model->delete();
-
+		$url=Url::previous();
 	    if (
 	    	Yii::$app->request->get('return')=='previous'
 			||
 			Yii::$app->request->post('return')=='previous'
-		) return $this->redirect(Url::previous());
+		) return $this->redirect($url);
         return $this->redirect($defaultRoute);
     }
 
