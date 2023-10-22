@@ -3,12 +3,14 @@
 namespace app\controllers;
 
 use app\models\Domains;
+use Throwable;
 use Yii;
 use app\models\Comps;
 use app\models\CompsSearch;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\Query;
+use yii\db\StaleObjectException;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -41,7 +43,7 @@ class CompsController extends ArmsBaseController
     public function actionIndex()
     {
         $searchModel = new CompsSearch();
-        $searchModel->archived=\Yii::$app->request->get('showArchived',false);
+        $searchModel->archived= Yii::$app->request->get('showArchived',false);
 	
 		//ищем тоже самое но с дочерними в противоположном положении
 		$switchArchived=clone $searchModel;
@@ -125,13 +127,14 @@ class CompsController extends ArmsBaseController
 	}
 	
 	
-	
 	/**
 	 * Absorb other comp in this
 	 * @param int $id
-	 * @param $absorb_id
+	 * @param     $absorb_id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws Throwable
+	 * @throws StaleObjectException
 	 */
 	public function actionAbsorb(int $id, $absorb_id)
 	{
@@ -181,10 +184,10 @@ class CompsController extends ArmsBaseController
 			[$domain_id,$compName,$domainName]=$nameParse;
 		}
 
-		if (is_null($domain_id)) throw new \yii\web\NotFoundHttpException("Domain $domainName not found");
+		if (is_null($domain_id)) throw new NotFoundHttpException("Domain $domainName not found");
 
 		$notFoundDescription="Comp with name '$compName'";
-		$query=\app\models\Comps::find()->where(['LOWER(name)'=>mb_strtolower($compName)]);
+		$query= Comps::find()->where(['LOWER(name)'=>mb_strtolower($compName)]);
 		
 		//добавляем фильтрацию по IP если он есть
 		if (!is_null($ip)) {
@@ -205,7 +208,7 @@ class CompsController extends ArmsBaseController
 		$model = $query->one();
 		
 		if ($model === null)
-			throw new \yii\web\NotFoundHttpException($notFoundDescription);
+			throw new NotFoundHttpException($notFoundDescription);
 		
 		return $model;
 	}
@@ -268,6 +271,7 @@ class CompsController extends ArmsBaseController
 	 * @param $ip
 	 * @return string|Response
 	 * @throws NotFoundHttpException
+	 * @noinspection PhpUnusedFunctionInspection
 	 */
 	public function actionIgnoreip($id,$ip){
 		$model = $this->findModel($id);
@@ -287,6 +291,7 @@ class CompsController extends ArmsBaseController
 	 * @param $ip
 	 * @return string|Response
 	 * @throws NotFoundHttpException
+	 * @noinspection PhpUnusedFunctionInspection
 	 */
 	public function actionUnignoreip($id,$ip){
 		$model = $this->findModel($id);
