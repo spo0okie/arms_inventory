@@ -15,7 +15,7 @@ use yii\web\NotFoundHttpException;
  */
 class UsersController extends ArmsBaseController
 {
-	public $modelClass='app\models\Users';
+	public $modelClass=Users::class;
 	
 	public function accessMap()
 	{
