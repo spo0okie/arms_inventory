@@ -315,7 +315,8 @@ class ArmsBaseController extends Controller
 				$model
 			]);
         }
-	
+
+		$model->load(Yii::$app->request->get());
 		return $this->defaultRender('update', ['model' => $model,]);
     }
 	

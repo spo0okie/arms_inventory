@@ -3,10 +3,10 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
-use Yii;
+use voskobovich\linker\LinkerBehavior;
+use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
 use yii\db\Query;
-use yii\db\QueryBuilder;
 use yii\helpers\StringHelper;
 
 /**
@@ -34,12 +34,15 @@ use yii\helpers\StringHelper;
  */
 class Soft extends ArmsModel
 {
+	public static $title='ПО';
+	public static $titles='ПО';
 	
 	private static $all_items=null;
 	private static $comps_in_soft=null;
 	public static $disable_cache=false;
 	public static $disable_rescan=false;
 	private $doNotRescan=false;
+	public $add_item='';
 	
 	/** @inheritdoc  */
 	protected static $syncableFields=[
@@ -76,9 +79,10 @@ class Soft extends ArmsModel
             [['manufacturers_id', 'descr'], 'required'],
             [['manufacturers_id'], 'integer'],
             [['items','additional'], 'string'],
-            [['created_at'], 'safe'],
+            [['created_at','add_item'], 'safe'],
             [['descr', 'comment'], 'string', 'max' => 255],
-            [['manufacturers_id'], 'exist', 'skipOnError' => true, 'targetClass' => Manufacturers::className(), 'targetAttribute' => ['manufacturers_id' => 'id']],
+			[['descr', 'manufacturers_id'], 'unique', 'targetAttribute' => ['descr', 'manufacturers_id']],
+            [['manufacturers_id'], 'exist', 'skipOnError' => true, 'targetClass' => Manufacturers::class, 'targetAttribute' => ['manufacturers_id' => 'id']],
         ];
     }
 
@@ -86,7 +90,7 @@ class Soft extends ArmsModel
     {
         return [
             [
-                'class' => \voskobovich\linker\LinkerBehavior::className(),
+                'class' => LinkerBehavior::class,
                 'relations' => [
                     'softLists_ids' => 'softLists',
 					'licGroups_ids' => 'licGroups',
@@ -129,25 +133,27 @@ class Soft extends ArmsModel
 			$this->licGroups,
 		];
 	}
-    /**
-     * @return \yii\db\ActiveQuery
-     */
+	
+	/**
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
+	 */
     public function getLicGroups()
     {
-		return $this->hasMany(LicGroups::className(), ['id' => 'lics_id'])
+		return $this->hasMany(LicGroups::class, ['id' => 'lics_id'])
 			->viaTable('{{%soft_in_lics}}', ['soft_id' => 'id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getManufacturer()
     {
-        return $this->hasOne(Manufacturers::className(), ['id' => 'manufacturers_id']);
+        return $this->hasOne(Manufacturers::class, ['id' => 'manufacturers_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return string
      */
     public function getFullDescr()
     {
@@ -160,8 +166,8 @@ class Soft extends ArmsModel
      */
     public function getSoftLists()
     {
-        return static::getDb()->cache(function($db) {return $this->hasMany(SoftLists::className(), ['id' => 'list_id'])
-            ->viaTable('{{%soft_in_lists}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
+        return $this->hasMany(SoftLists::class, ['id' => 'list_id'])
+            ->viaTable('{{%soft_in_lists}}', ['soft_id' => 'id']);
     }
 	
 	/**
@@ -169,8 +175,8 @@ class Soft extends ArmsModel
 	 */
 	public function getComps()
 	{
-		return static::getDb()->cache(function($db) {return $this->hasMany(Comps::className(), ['id' => 'comp_id'])
-			->viaTable('{{%soft_in_comps}}', ['soft_id' => 'id']);},Manufacturers::$CACHE_TIME);
+		return $this->hasMany(Comps::class, ['id' => 'comp_id'])
+			->viaTable('{{%soft_in_comps}}', ['soft_id' => 'id']);
 	}
 	
 	public function getCompsCount() {
@@ -188,7 +194,7 @@ class Soft extends ArmsModel
 			return ArrayHelper::getItemsByFields(SoftHits::getAllItems(),['soft_id'=>$this->id]);
 		}
 		
-		return $this->hasMany(Comps::className(), ['id' => 'comp_id'])
+		return $this->hasMany(Comps::class, ['id' => 'comp_id'])
 			->viaTable('{{%soft_hits}}', ['soft_id' => 'id']);
 	}
 	public function getHitsCount() {return count($this->hits);}
@@ -202,20 +208,19 @@ class Soft extends ArmsModel
      * Возвращает количество совпадения с переданными массивами входных строк
      * @param array $strings входные строки среди которых искать продукт
      * @param array $additional дополнительные строки среди которых искать дополнительные продукты, если есть совпадения в основных
-     * @return array SoftHits
+     * @return SoftHits
      */
-    public function findHits($strings,$additional=[]) {
-        $hits=new \app\models\SoftHits([
-        	'masks'=>$this->getItemsArray(),
-	        'additional_masks'=>$this->getAdditionalArray(),
-	        'strings'=>$strings,
-	        'additional_strings'=>$additional,
-        ]);
-        return $hits;
+    public function findHits(array $strings,$additional=[]) {
+		return new SoftHits([
+			'masks'=>$this->getItemsArray(),
+			'additional_masks'=>$this->getAdditionalArray(),
+			'strings'=>$strings,
+			'additional_strings'=>$additional,
+		]);
     }
 
 	/**
-     * Возвращает набор строк-допольниельных элементов ПО
+     * Возвращает набор строк-дополнительных элементов ПО
      */
     public function getAdditionalArray()
     {
@@ -246,11 +251,13 @@ class Soft extends ArmsModel
 		}
 		return $arrItems;
 	}
-
+	
 	/**
-	 * Возвращает набор строк-допольниельных элементов ПО
+	 * Возвращает набор строк-дополнительных элементов ПО
+	 * @param int $id
+	 * @return false|string[]
 	 */
-	public static function fetchAdditionalArray($id)
+	public static function fetchAdditionalArray(int $id)
 	{
 		$arrItems = explode("\n",static::fetchItem($id)->additional);
 		foreach ($arrItems as $i => $item) {
@@ -277,7 +284,7 @@ class Soft extends ArmsModel
     public function getIsIgnored()
     {
 		return (array_search(SoftLists::getIgnoredListId(),SoftLists::getSoftLists($this->id),false)!==false);
-        return (array_search(SoftLists::getIgnoredListId(),$this->softLists_ids,false)!==false);
+        //return (array_search(SoftLists::getIgnoredListId(),$this->softLists_ids,false)!==false);
     }
 
     /**
@@ -286,7 +293,7 @@ class Soft extends ArmsModel
     public function getIsAgreed()
     {
 	    return (array_search(SoftLists::getAgreedListId(),SoftLists::getSoftLists($this->id),false)!==false);
-	    return (array_search(SoftLists::getAgreedListId(),$this->softLists_ids,false)!==false);
+	    //return (array_search(SoftLists::getAgreedListId(),$this->softLists_ids,false)!==false);
     }
 
 	/**
@@ -295,13 +302,13 @@ class Soft extends ArmsModel
 	public function getIsFree()
 	{
 		return (array_search(SoftLists::getFreeListId(),SoftLists::getSoftLists($this->id),false)!==false);
-		return (array_search(SoftLists::getFreeListId(),$this->softLists_ids,false)!==false);
+		//return (array_search(SoftLists::getFreeListId(),$this->softLists_ids,false)!==false);
 	}
 
 
 	/**
      * Возвращает массив ключ=>значение запрошенных/всех записей таблицы
-     * @param array $items список элементов для вывода
+     * @param array|null $items список элементов для вывода
      * @param string $keyField поле - ключ
      * @param string $valueField поле - значение
      * @param bool $asArray
@@ -320,10 +327,7 @@ class Soft extends ArmsModel
 
     /**
      * Возвращает массив ключ=>значение запрошенных/всех записей таблицы
-     * @param array $items список элементов для вывода
-     * @param string $keyField поле - ключ
-     * @param string $valueField поле - значение
-     * @param bool $asArray
+     * @param array|null $items список элементов для вывода
      * @return array
      */
     public static function listItemsWithPublisher($items=null)
@@ -344,7 +348,7 @@ class Soft extends ArmsModel
 	 */
 	public function beforeSave($insert)
 	{
-		//error_log('savin');
+		//error_log('saving');
 		if (parent::beforeSave($insert)) {
 			if (is_object($this->manufacturer)) {
 				//если есть производитель, то его название надо бы убрать из имени софта
@@ -384,6 +388,7 @@ class Soft extends ArmsModel
 	public static function fetchAll(){
 		if (static::$disable_cache) return static::find()->all();
 		if (is_null(static::$all_items)) {
+			/** @var Soft[] $tmp */
 			$tmp=static::find()->all();
 			static::$all_items=[];
 			foreach ($tmp as $item) static::$all_items[$item->id]=$item;

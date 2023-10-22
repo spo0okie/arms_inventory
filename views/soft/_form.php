@@ -1,5 +1,8 @@
 <?php
 
+use app\helpers\FieldsHelper;
+use app\models\Manufacturers;
+use app\models\SoftLists;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
@@ -9,6 +12,8 @@ use kartik\select2\Select2;
 /* @var $model app\models\Soft */
 /* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
+
+$model->addItem($model->add_item);
 ?>
 
 <div class="soft-form">
@@ -17,8 +22,8 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= $form->field($model, 'manufacturers_id')->widget(Select2::className(), [
-				'data' => \app\models\Manufacturers::fetchNames(),
+			<?= $form->field($model, 'manufacturers_id')->widget(Select2::class, [
+				'data' => Manufacturers::fetchNames(),
 				'options' => ['placeholder' => 'Выберите производителя',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
@@ -32,7 +37,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 		</div>
 		<div class="col-md-6">
-			<?= $form->field($model, 'softLists_ids')->dropDownList(\app\models\SoftLists::listAll(), ['multiple' => true]) ?>
+			<?= $form->field($model, 'softLists_ids')->dropDownList(SoftLists::listAll(), ['multiple' => true]) ?>
 		</div>
 	</div>
 
@@ -41,7 +46,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'items', [
+			<?= FieldsHelper::TextAutoresizeField($form,$model, 'items', [
 				'lines' => 4,
 			]) ?>
 
@@ -54,7 +59,7 @@ if (!isset($modalParent)) $modalParent=null;
 	</div>
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'additional', [
+			<?= FieldsHelper::TextAutoresizeField($form,$model, 'additional', [
 				'lines' => 4,
 			]) ?>
 
@@ -78,7 +83,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<h3>Описание ПО</h3>
 	
-	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment',[
+	<?= FieldsHelper::TextAutoresizeField($form,$model, 'comment',[
 		'lines' => 4,
 	]) ?>
 
