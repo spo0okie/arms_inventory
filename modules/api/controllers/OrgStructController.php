@@ -12,4 +12,9 @@ namespace app\modules\api\controllers;
 class OrgStructController extends BaseRestController
 {
 	public $modelClass='app\models\OrgStruct';
+	//набор полей по которым можно делать поиск с маппингом в SQL поля
+	public static $searchFields=[
+		'name'=>'name',
+		'org_id'=>'org_id',
+	];
 }
