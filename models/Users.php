@@ -347,7 +347,7 @@ class Users extends ArmsModel implements IdentityInterface
 	 */
 	public function getOrgStruct()
 	{
-		return $this->hasOne(OrgStruct::class, ['id'=>'Orgeh','org_id'=>'org_id']);
+		return $this->hasOne(OrgStruct::class, ['hr_id'=>'Orgeh','org_id'=>'org_id']);
 	}
 	
 	/**
