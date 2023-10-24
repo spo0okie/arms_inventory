@@ -2,10 +2,14 @@
 
 namespace app\modules\api\controllers;
 
-
 use app\models\Comps;
 use yii\web\NotFoundHttpException;
 
+/**
+ * Class LicKeysController
+ * @package app\modules\api\controllers
+ * @noinspection PhpUnusedElementInspection
+ */
 class LicKeysController extends BaseRestController
 {
 

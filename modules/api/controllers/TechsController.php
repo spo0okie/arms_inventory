@@ -2,50 +2,37 @@
 
 namespace app\modules\api\controllers;
 
-
-
+use app\models\Techs;
 use app\models\Users;
-use yii\filters\auth\HttpBasicAuth;
-use yii\web\User;
+use yii\db\ActiveRecord;
+use yii\web\NotFoundHttpException;
 
-class TechsController extends \yii\rest\ActiveController
+/**
+ * Class TechsController
+ * @package app\modules\api\controllers
+ * @noinspection PhpUnusedElement
+ */
+class TechsController extends BaseRestController
 {
     
     public $modelClass='app\models\Techs';
 	
-	public function behaviors()
+	public function accessMap()
 	{
-		$behaviors=parent::behaviors();
-		if (!empty(\Yii::$app->params['useRBAC'])) {
-			$behaviors['access']=[
-				'class' => \yii\filters\AccessControl::className(),
-				'rules' => [
-					['allow' => true, 'actions'=>['index','view','update'], 'roles'=>['editor']],
-					//['allow' => true, 'actions'=>['create','search'], 'roles'=>['@','?']],
-				],
-				'denyCallback' => function ($rule, $action) {
-					
-					throw new  \yii\web\ForbiddenHttpException('Access denied');
-				}
-			];
-			$behaviors['authenticator'] = [
-				'class' => HttpBasicAuth::class,
-				'only'=>['index'],
-				'auth' => function ($login, $password) {
-					$user = Users::find()->where(['Login' => $login])->one();
-					if ($user && $user->validatePassword($password)) {
-						return $user;
-					}
-					return null;
-				},
-			];
-		}
-		return $behaviors;
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['search-by-mac','search-by-user']
+		]);
 	}
-
+	
+	/**
+	 * @param $mac
+	 * @return ActiveRecord
+	 * @throws NotFoundHttpException
+	 * @noinspection PhpUnusedElement
+	 */
 	public function actionSearchByMac($mac){
 		//ищем телефонный аппарат по номеру
-		$tech = \app\models\Techs::find()
+		$tech = Techs::find()
 			->where(['mac' => $mac ])
 			->one();
 		//если нашли
@@ -53,14 +40,19 @@ class TechsController extends \yii\rest\ActiveController
 			//он прикреплен к АРМ?
 			return $tech;
 		}
-		throw new \yii\web\NotFoundHttpException("not found");
+		throw new NotFoundHttpException("not found");
 	}
-
+	
+	/**
+	 * @param $id
+	 * @return string
+	 * @throws NotFoundHttpException
+	 */
 	public function actionSearchByUser($id){
 		//ищем пользователя
-		$user = \app\models\Users::findOne($id);
+		$user = Users::findOne($id);
 		/**
-		 * @var $user \app\models\Users
+		 * @var $user Users
 		 */
 		//если нашли
 		if (is_object($user)){
@@ -80,7 +72,7 @@ class TechsController extends \yii\rest\ActiveController
 				}
 			}
 		}
-		throw new \yii\web\NotFoundHttpException("not found");
+		throw new NotFoundHttpException("not found");
 	}
 
 }

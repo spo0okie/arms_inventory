@@ -2,11 +2,8 @@
 
 namespace app\modules\api\controllers;
 
-
-
 use app\models\Comps;
 use app\models\Users;
-use HttpException;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 
@@ -43,7 +40,7 @@ class LicGroupsController extends BaseRestController
 					foreach ($licGroup->soft_ids as $soft_id)
 						if ($soft_id == $product_id)
 							$licGroups[]=$licGroup;
-			} catch (HttpException $e) {
+			} catch (NotFoundHttpException $e) {
 				$errors[]=$e->getMessage();
 			}
 		}

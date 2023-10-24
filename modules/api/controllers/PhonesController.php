@@ -25,9 +25,15 @@ class PhonesController extends BaseRestController
 		return $this->viewActions;
 	}
 	
+	/**
+	 * @param $num
+	 * @return mixed|string|null
+	 * @throws NotFoundHttpException
+	 * @noinspection PhpUnusedElementInspection
+	 */
 	public function actionSearchByNum($num){
 		//ищем телефонный аппарат по номеру
-		$tech = \app\models\Techs::find()
+		$tech = Techs::find()
 			->where(['comment' => $num ])
 			->one();
 		/**

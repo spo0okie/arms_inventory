@@ -48,7 +48,7 @@ class LoginJournalController extends BaseRestController
 		// - корректируем ее на сдвиг текущего времени ПК относительно текущего времени сервера
 		//(случай сбитых часов на ПК)
     	if ($local_time) $time+=(time()-$local_time);
-	    return \app\models\LoginJournal::find()
+	    return LoginJournal::find()
 		    ->andFilterWhere(['LOWER(comp_name)' => mb_strtolower($comp_name)])
 		    ->andFilterWhere(['LOWER(user_login)' => mb_strtolower($user_login)])
 			->andFilterWhere(['>','time',gmdate('Y-m-d H:i:s',$time-LoginJournal::$maxTimeShift)])

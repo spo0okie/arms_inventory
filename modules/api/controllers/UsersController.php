@@ -7,6 +7,7 @@ namespace app\modules\api\controllers;
 
 use app\controllers\ArmsBaseController;
 use Yii;
+use yii\web\IdentityInterface;
 
 class UsersController extends BaseRestController
 {
@@ -43,7 +44,7 @@ class UsersController extends BaseRestController
 	
 	/**
 	 * возвращает идентификатор авторизованного пользователя
-	 * @return \yii\web\IdentityInterface|null
+	 * @return IdentityInterface|null
 	 */
 	public function actionWhoami() {
 		return Yii::$app->user->identity;

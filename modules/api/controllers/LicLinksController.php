@@ -3,6 +3,7 @@
 namespace app\modules\api\controllers;
 
 
+use app\models\ArmsModel;
 use app\models\links\LicLinks;
 use yii\web\NotFoundHttpException;
 
@@ -25,6 +26,7 @@ class LicLinksController extends BaseRestController
 		if (!$objId && $objName) {
 			$objClass=ucfirst($objectType);
 			$objClass="app\\models\\$objClass";
+			/** @var ArmsModel $objClass */
 			$obj=$objClass::findByAnyName($objName);
 			if (!is_object($obj)) {
 				throw new NotFoundHttpException("$objectType $objName not found");

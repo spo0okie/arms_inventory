@@ -4,7 +4,7 @@ namespace app\modules\api\controllers;
 
 
 
-class ContractsController extends \yii\rest\ActiveController
+class ContractsController extends BaseRestController
 {
 	
 	public $modelClass='app\models\Contracts';

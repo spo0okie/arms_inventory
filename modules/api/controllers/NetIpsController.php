@@ -6,7 +6,11 @@ use app\helpers\StringHelper;
 use app\models\Networks;
 use yii\web\NotFoundHttpException;
 
-
+/**
+ * Class NetIpsController
+ * @package app\modules\api\controllers
+ * @noinspection PhpUnusedElementInspection
+ */
 class NetIpsController extends BaseRestController
 {
 	public $modelClass='app\models\NetIps';
@@ -19,7 +23,7 @@ class NetIpsController extends BaseRestController
 		]);
 	}
 	
-	public static $searchFields=[	//набор полей по которым можно делать серч с мапом в SQL поля
+	public static $searchFields=[	//набор полей по которым можно делать поиск с маппингом в SQL поля
 		'name'=>'name',
 		'addr'=>'text_addr',
 		'comment'=>'comment',
@@ -29,7 +33,7 @@ class NetIpsController extends BaseRestController
     	if (!is_object($network=Networks::find()->where(['text_addr'=>$text_addr])->one()))  {
 			throw new NotFoundHttpException("Network $text_addr not found");
 		}
-    	/* @var \app\models\Networks $network */
+    	/* @var Networks $network */
 		return $network->firstUnusedIp;
 	}
 }
