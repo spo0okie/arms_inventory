@@ -11,6 +11,7 @@ use yii\web\Response;
 
 /**
  * TechsController implements the CRUD actions for Techs model.
+ * @noinspection PhpUnused
  */
 class TechsController extends ArmsBaseController
 {
@@ -24,6 +25,18 @@ class TechsController extends ArmsBaseController
 		]);
 	}
 	
+	/**
+	 * Displays a tooltip for hw of single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionTtipHw(int $id)
+	{
+		return $this->renderPartial('ttip-hw', [
+			'model' => $this->findModel($id),
+		]);
+	}
 	
 	public function actionItemByName($name)
 	{
