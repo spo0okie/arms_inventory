@@ -23,7 +23,7 @@ class ContractsController extends ArmsBaseController
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			'view'=>['hint-arms','hint-parent','scans'],
-			'edit'=>['update-form','unlink','unlink-arm','unlink-tech','link','link-tech','scan-upload']
+			'edit'=>['update-form','unlink','link','link-tech','scan-upload']
 		]);
 	}
 	
@@ -236,40 +236,6 @@ class ContractsController extends ArmsBaseController
 		}
 	}
 	
-	/**
-	 * Отвязывает документ от объекта.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param int $id
-	 * @param int $techs_id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 * @noinspection PhpUnusedFunctionInspection
-	 */
-	public function actionUnlinkTech(int $id, int $techs_id)
-	{
-		$usage=false;
-		$usage_deleted=false;
-
-		$model=$this->findModel($id);
-		$techs_ids=$model->techs_ids;
-		if (array_search($techs_id,$techs_ids)!==false) {
-			$usage=true;
-			$model->techs_ids=array_diff($techs_ids,[$techs_id]);
-			if ($model->save()) $usage_deleted=true;
-		}
-
-		Yii::$app->response->format = Response::FORMAT_JSON;
-		if ($usage) {
-			if ($usage_deleted) {
-				return ['error'=>'OK','code'=>'0','Message'=>'Usage removed'];
-			} else {
-				return ['error'=>'ERROR','code'=>'1','Message'=>'Link removing error'];
-			}
-		} else {
-			return ['error'=>'OK','code'=>'2','Message'=>'Requested usage not found ['.implode(',',$techs_ids).']'];
-		}
-	}
-
 	/**
 	 * Отвязывает документ от объекта.
 	 * If deletion is successful, the browser will be redirected to the 'index' page.

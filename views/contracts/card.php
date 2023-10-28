@@ -2,28 +2,22 @@
 
 /* Карточка документа Можно использовать во View можно в тултипе */
 
+use app\components\LinkObjectWidget;
+use app\components\ListObjectWidget;
 use yii\helpers\Html;
-use yii\bootstrap5\Modal;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
 
-$childs=    $model->childs;
-$techs=     $model->techs;
-$materials= $model->materials;
-$lics=      $model->licItems;
-$services=     $model->services;
-//$phones=    $model->orgPhones;
-
 $model_id=$model->id;
 
 if (!isset($static_view)) $static_view=false;
-//$deletable=!сount($services)||count($lics)||count($childs)||count($techs));
 
 ?>
 
 <h1>
-    <?= \app\components\LinkObjectWidget::widget([
+    <?= LinkObjectWidget::widget([
 		'model'=>$model,
 		'confirmMessage' => 'Действительно удалить этот документ?',
 		'undeletableMessage'=>'Нельзя удалить этот документ, т.к. есть привязанные к нему объекты',
@@ -65,7 +59,7 @@ if (!isset($static_view)) $static_view=false;
                         url: '/web/arms/create',
                         type: 'POST',
                         data: data,
-                        success: function(res){window.location.reload();},
+                        success: function(){window.location.reload();},
                         error: function(){alert('Error!');}
                     });
                     return false;
@@ -75,15 +69,15 @@ JS;
 
         ?>
         Создать
-        <a href="<?= \yii\helpers\Url::to(['/contracts/create','Contracts[parent_id]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Подчиненный документ</a>
+        <a href="<?= Url::to(['/contracts/create','Contracts[parent_id]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Подчиненный документ</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/techs/create','Techs[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Оборудование/АРМ</a>
+		<a href="<?= Url::to(['/techs/create','Techs[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Оборудование/АРМ</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/materials/create','Materials[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Материалы</a>
+		<a href="<?= Url::to(['/materials/create','Materials[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Материалы</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/lic-items/create','LicItems[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Лицензию</a>
+		<a href="<?= Url::to(['/lic-items/create','LicItems[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Лицензию</a>
         //
-		<a href="<?= \yii\helpers\Url::to(['/services/create','Services[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Услугу</a>
+		<a href="<?= Url::to(['/services/create','Services[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Услугу</a>
         :: на основании этого документа
     </p>
 <?php } ?>
@@ -93,11 +87,11 @@ JS;
 
 
 <?php if ($static_view) {
-
-	if (count($childs)) { ?>
+	
+	if (count($children=$model->childs)) { ?>
         <h4>Связанные документы:</h4>
         <p>
-			<?php foreach ($childs as $child) {
+			<?php foreach ($children as $child) {
 				echo $this->render('/contracts/item', ['model' => $child, 'static_view' => $static_view]) . '<br/>';
 			} ?>
         </p>
@@ -117,57 +111,44 @@ JS;
 ?>
 
 
-<?php if (count($techs)) { ?>
-    <h4>Прикреплен к АРМ/оборудованию:</h4>
-    <p class="mb-3">
-		<?php foreach ($techs as $tech) {
-			$tech_id=$tech->id;
-			echo $this->render('/techs/item',['model'=>$tech,'static_view'=>$static_view]);
-			if (!$static_view) { ?>
-                <a href="#"><span
-                            class="fas fa-unlink href"
-                            title="Отвязать документ от этого оборудования"
-                            onclick="if (confirm('Отвязать документ от этого оборудования?')) $.ajax({
-                                url: '/web/contracts/unlink-tech?id=<?= $model->id ?>&techs_id=<?= $tech->id ?>',
-                                success: function(res) {location.reload()}
-                            })"
-                    /></a>
-				<?php
-			}
-			echo '<br/>';
-		} ?>
-    </p>
-<?php }
+<?php
+echo ListObjectWidget::widget([
+	'models' => $model->techs,
+	'title' => 'Прикреплен к АРМ/оборудованию:',
+	'item_options' => ['static_view' => $static_view, 'class'=>'text-nowrap','rc'=>true],
+	'card_options' => ['cardClass' => 'mb-3'],
+	//'lineBr'=> $static_view,
+]);
 
-echo \app\components\ListObjectWidget::widget([
-	'models' => $materials,
+echo ListObjectWidget::widget([
+	'models' => $model->materials,
 	'title' => 'Прикреплен к поступлениям ЗиП и материалов:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo \app\components\ListObjectWidget::widget([
-	'models' => $lics,
+echo ListObjectWidget::widget([
+	'models' => $model->licItems,
 	'title' => 'Прикреплен к закупкам лицензий:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo \app\components\ListObjectWidget::widget([
-	'models' => $services,
+echo ListObjectWidget::widget([
+	'models' => $model->services,
 	'title' => 'Прикреплен к услугам:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo \app\components\ListObjectWidget::widget([
+echo ListObjectWidget::widget([
 	'models' => $model->partners,
 	'title' => 'Контрагенты:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo \app\components\ListObjectWidget::widget([
+echo ListObjectWidget::widget([
 	'models' => $model->users,
 	'title' => 'Пользователи:',
 	'item_options' => ['static_view' => $static_view, 'noDelete'=>true],
