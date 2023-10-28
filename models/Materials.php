@@ -2,7 +2,9 @@
 
 namespace app\models;
 
-use Yii;
+use voskobovich\linker\LinkerBehavior;
+use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "materials".
@@ -14,25 +16,24 @@ use Yii;
  * @property int $type_id Тип материалов
  * @property string $model Модель
  * @property int $places_id Помещение
- * @property string $it_staff_id Сотрудник службы ИТ
- * @property string $comment Комментарий
- * @property string $history Записная кинжка
- * @property float $cost Стоимость пачки материалов
- * @property float $charge НДС
- * @property array $contracts_ids массив ссылок на документы
- 
- * @property int $used Израсходовано
- * @property int $movedCount Израсходовано
- * @property int $usedCount Израсходовано
- * @property int $rest Остаток
- * @property \app\models\Currency $currency Валюта покупки
- * @property \app\models\Places $place Помещение
- * @property \app\models\Users $itStaff Ответственный
- * @property \app\models\Materials $parent Источник
- * @property \app\models\MaterialsTypes $type Категория
- * @property \app\models\Materials[] $childs Источник
- * @property \app\models\MaterialsUsages[] $usages Расходы
- * @property \app\models\Contracts[] $contracts Документы
+ * @property string            $it_staff_id Сотрудник службы ИТ
+ * @property string            $comment Комментарий
+ * @property string            $history Записная кинжка
+ * @property float             $cost Стоимость пачки материалов
+ * @property float             $charge НДС
+ * @property array             $contracts_ids массив ссылок на документы
+ * @property int               $used Израсходовано
+ * @property int               $movedCount Израсходовано
+ * @property int               $usedCount Израсходовано
+ * @property int               $rest Остаток
+ * @property Currency          $currency Валюта покупки
+ * @property Places            $place Помещение
+ * @property Users             $itStaff Ответственный
+ * @property Materials         $parent Источник
+ * @property MaterialsTypes    $type Категория
+ * @property Materials[]       $childs Источник
+ * @property MaterialsUsages[] $usages Расходы
+ * @property Contracts[]       $contracts Документы
  */
 class Materials extends ArmsModel
 {
@@ -56,7 +57,7 @@ class Materials extends ArmsModel
 	{
 		return [
 			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'class' => LinkerBehavior::class,
 				'relations' => [
 					'contracts_ids' => 'contracts',
 				]
@@ -159,43 +160,43 @@ class Materials extends ArmsModel
 
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getItStaff()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'it_staff_id']);
+		return $this->hasOne(Users::class, ['id' => 'it_staff_id']);
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getPlace()
 	{
-		return $this->hasOne(Places::className(), ['id' => 'places_id']);
+		return $this->hasOne(Places::class, ['id' => 'places_id']);
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getParent()
 	{
-		return $this->hasOne(Materials::className(), ['id' => 'parent_id']);
+		return $this->hasOne(Materials::class, ['id' => 'parent_id']);
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getChilds()
 	{
-		return $this->hasMany(Materials::className(), ['parent_id' => 'id'])->from(['materials_children'=>Materials::tableName()]);
+		return $this->hasMany(Materials::class, ['parent_id' => 'id'])->from(['materials_children'=>Materials::tableName()]);
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getUsages()
 	{
-		return $this->hasMany(MaterialsUsages::className(), ['materials_id' => 'id']);
+		return $this->hasMany(MaterialsUsages::class, ['materials_id' => 'id']);
 	}
 
 	/**
@@ -216,7 +217,7 @@ class Materials extends ArmsModel
 	 */
 	public function getMovedCount() {
 		//на этом этапе еще не реализованы списания, поэтому учитываем только перемещения
-		return $this->hasMany(Materials::className(), ['parent_id' => 'id'])->sum('count');
+		return $this->hasMany(Materials::class, ['parent_id' => 'id'])->sum('count');
 	}
 
 	/**
@@ -225,7 +226,7 @@ class Materials extends ArmsModel
 	 */
 	public function getUsedCount() {
 		//на этом этапе еще не реализованы списания, поэтому учитываем только перемещения
-		return $this->hasMany(\app\models\MaterialsUsages::className(), ['materials_id' => 'id'])->sum('count');
+		return $this->hasMany(MaterialsUsages::class, ['materials_id' => 'id'])->sum('count');
 	}
 
 	/**
@@ -237,11 +238,11 @@ class Materials extends ArmsModel
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getType()
 	{
-		return $this->hasOne(MaterialsTypes::className(), ['id' => 'type_id']);
+		return $this->hasOne(MaterialsTypes::class, ['id' => 'type_id']);
 	}
 
 	/**
@@ -249,16 +250,16 @@ class Materials extends ArmsModel
 	 */
 	public function getContracts()
 	{
-		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::class, ['id' => 'contracts_id'])
 			->viaTable('{{%contracts_in_materials}}', ['materials_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getCurrency()
 	{
-		return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+		return $this->hasOne(Currency::class, ['id' => 'currency_id']);
 	}
 	/**
 	 * Имя для поиска материала
@@ -285,7 +286,15 @@ class Materials extends ArmsModel
 			->joinWith('place')
 			//->select(['id','name'])
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+		return ArrayHelper::map($list, 'id', 'sname');
 	}
-
+	
+	public function reverseLinks()
+	{
+		return [
+			$this->usages,
+			$this->childs
+		];
+	}
+	
 }
