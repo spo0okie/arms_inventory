@@ -45,30 +45,30 @@ use yii\db\StaleObjectException;
  * @property Techs    $linkedArms
  * @property Comps[]  $dupes
  * @property Users    $user
- * @property Users    $responsible
- * @property Users[]  $supportTeam
- * @property Domains  $domain
- * @property string   $updatedRenderClass
- * @property string   $updatedText
- * @property string   $domainName
- * @property string   $currentIp
- * @property string[] $ips
- * @property string[] $ignoredIps
- * @property string[] $filteredIps
- * @property \app\models\LoginJournal[] $lastThreeLogins
- * @property \app\models\LoginJournal[] $logins
- * @property \app\models\NetIps[] $netIps
- * @property Segments[] $segments
- * @property \app\models\HwList $hwList
- * @property \app\models\SwList $swList
- * @property \app\models\Services[] $services
- * @property Places $place
- * @property Acls[] $acls
- * @property Aces[] $aces
- * @property LicGroups[] $licGroups
- * @property LicItems[] $licItems
- * @property LicKeys[] $licKeys
- * @property Soft[] $soft
+ * @property Users                  $responsible
+ * @property Users[]                $supportTeam
+ * @property Domains                $domain
+ * @property string                 $updatedRenderClass
+ * @property string         $updatedText
+ * @property string         $domainName
+ * @property string         $currentIp
+ * @property string[]       $ips
+ * @property string[]       $ignoredIps
+ * @property string[]       $filteredIps
+ * @property LoginJournal[] $lastThreeLogins
+ * @property LoginJournal[] $logins
+ * @property NetIps[]       $netIps
+ * @property Segments[]     $segments
+ * @property HwList         $hwList
+ * @property SwList         $swList
+ * @property Services[]     $services
+ * @property Places         $place
+ * @property Acls[]         $acls
+ * @property Aces[]         $aces
+ * @property LicGroups[]    $licGroups
+ * @property LicItems[]     $licItems
+ * @property LicKeys[]      $licKeys
+ * @property Soft[]         $soft
  */
 class Comps extends ArmsModel
 {
@@ -125,7 +125,7 @@ class Comps extends ArmsModel
 			[['ip', 'mac'], 'string', 'max' => 768],
 			[['ip_ignore'], 'string', 'max' => 512],
 			['ip', 'filter', 'filter' => function ($value) {
-				return \app\models\NetIps::filterInput($value);
+				return NetIps::filterInput($value);
 			}],
 			
 			['mac', 'filter', 'filter' => function ($value) {
@@ -464,7 +464,7 @@ class Comps extends ArmsModel
 	}
 	
 	public function getLastThreeLogins() {
-		return \app\models\LoginJournal::fetchUniqUsers($this->id);
+		return LoginJournal::fetchUniqUsers($this->id);
 	}
 	
 	public function getLogins() {
@@ -607,7 +607,7 @@ class Comps extends ArmsModel
 	}
 	
 	/**
-	 * @return \app\models\Users
+	 * @return Users
 	 */
 	public function getResponsible()
 	{
@@ -618,7 +618,7 @@ class Comps extends ArmsModel
 	
 	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
-	 * @return \app\models\Users[]
+	 * @return Users[]
 	 * @noinspection UnusedElement
 	 */
 	public function getSupportTeam()
@@ -762,7 +762,7 @@ class Comps extends ArmsModel
 
 	public function getFormattedMac() {
 		
-		return \app\models\Techs::formatMacs($this->mac);
+		return Techs::formatMacs($this->mac);
 	}
 	
 	/**
