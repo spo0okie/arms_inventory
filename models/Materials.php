@@ -293,7 +293,7 @@ class Materials extends ArmsModel
 	{
 		return [
 			$this->usages,
-			$this->childs
+			'Перемещения'=>$this->childs,
 		];
 	}
 	
