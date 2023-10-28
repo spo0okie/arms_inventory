@@ -1,20 +1,53 @@
 <?php
 
-/* @var $this \yii\web\View */
+/* @var $this View */
 /* @var $content string */
 
 
 //use kartik\nav\NavX;
+use app\models\AccessTypes;
+use app\models\Acls;
+use app\models\Contracts;
+use app\models\ContractsStates;
+use app\models\Departments;
+use app\models\LicGroups;
+use app\models\LicTypes;
+use app\models\LoginJournal;
+use app\models\Materials;
+use app\models\MaterialsTypes;
+use app\models\MaterialsUsages;
+use app\models\NetDomains;
+use app\models\NetIps;
+use app\models\NetVlans;
+use app\models\Networks;
+use app\models\OrgInet;
+use app\models\OrgPhones;
+use app\models\Partners;
+use app\models\Places;
+use app\models\Ports;
+use app\models\Schedules;
+use app\models\Segments;
+use app\models\Services;
+use app\models\TechModels;
+use app\models\Techs;
+use app\models\TechTypes;
+use app\models\Users;
 use yii\bootstrap5\NavBar;
 use yii\bootstrap5\Nav;
 use kartik\bs5dropdown\Dropdown;
+use yii\helpers\Html;
+use yii\web\View;
 
 $techTypes=[];
-foreach (\app\models\TechTypes::fetchNames() as $idx=>$typeName)
+foreach (TechTypes::fetchNames() as $idx=> $typeName)
 	$techTypes[]=['label'=>$typeName,'url' => ['/tech-types/view','id'=>$idx]];
 
+if (count($techTypes)) $techTypes[]='-';
+$techTypes[]=['label' => 'Список категорий','url' => ['/tech-types/index']];
+
+
 $places=[];
-foreach (\app\models\Places::fetchNames(1) as $idx=>$placeName)
+foreach (Places::fetchNames(1) as $idx=> $placeName)
 	$places[]=['label'=>$placeName,'url' => ['/places/view','id'=>$idx]];
 
 if (count($places)) $places[]='-';
@@ -29,33 +62,33 @@ NavBar::begin([
 	],
 	'innerContainerOptions' => ['class' => 'container-fluid text-center'],
 ]);
-	echo \app\models\Users::isViewer()?Nav::widget([
+	echo Users::isViewer()?Nav::widget([
 		'options' => ['class' => ['nav', 'navbar-nav', 'mx-auto']],
-		'dropdownClass' => Dropdown::classname(),
+		'dropdownClass' => Dropdown::class,
 		'items' => [
 			['label' => 'Лицензии',
 				'items' => [
-					['label' => \app\models\LicTypes::$titles, 'url' => ['/lic-types/index']],
-					['label' => \app\models\LicGroups::$titles, 'url' => ['/lic-groups/index']],
+					['label' => LicTypes::$titles, 'url' => ['/lic-types/index']],
+					['label' => LicGroups::$titles, 'url' => ['/lic-groups/index']],
 					['label' => 'Закупки', 'url' => ['/lic-items/index']],
 					['label' => 'Ключи', 'url' => ['/lic-keys/index']],
 				]
 			],
 			['label' => 'Контрагенты',
 				'items' => [
-					['label' => \app\models\Contracts::$titles, 'url' => ['/contracts/index']],
-					['label' => \app\models\Partners::$titles, 'url' => ['/partners/index']],
-					['label' => \app\models\ContractsStates::$title, 'url' => ['/contracts-states/index']],
-					['label' => \app\models\OrgPhones::$titles, 'url' => ['/org-phones/index']],
-					['label' => \app\models\OrgInet::$titles, 'url' => ['/org-inet/index']],
+					['label' => Contracts::$titles, 'url' => ['/contracts/index']],
+					['label' => Partners::$titles, 'url' => ['/partners/index']],
+					['label' => ContractsStates::$title, 'url' => ['/contracts-states/index']],
+					['label' => OrgPhones::$titles, 'url' => ['/org-phones/index']],
+					['label' => OrgInet::$titles, 'url' => ['/org-inet/index']],
 				]
 			],
 			['label' => 'Организация',
 				'items' => [
-					['label' => \app\models\Places::$titles, 'items'=>$places, 'class'=>'dropdown-menu dropdown-submenu'],
-					['label' => \app\models\Departments::$title, 'url' => ['/departments/index']],
-					['label' => \app\models\Services::$titles, 'url' => ['/services/index']],
-					['label' => \app\models\Schedules::$titles, 'url' => ['/schedules/index']],
+					['label' => Places::$titles, 'items'=>$places, 'class'=>'dropdown-menu dropdown-submenu'],
+					['label' => Departments::$title, 'url' => ['/departments/index']],
+					['label' => Services::$titles, 'url' => ['/services/index']],
+					['label' => Schedules::$titles, 'url' => ['/schedules/index']],
 					//'<li class="divider"></li>',
 					['label' => 'Карта рабочих мест', 'url' => ['/places/armmap']],
 					['label' => 'По подразделениям', 'url' => ['/places/depmap']],
@@ -63,27 +96,27 @@ NavBar::begin([
 			],
 			['label' => 'Доступы',
 				'items' => [
-					['label' => \app\models\Acls::$titles, 'url' => ['/acls/index']],
-					['label' => \app\models\Acls::$scheduleTitles, 'url' => ['/scheduled-access/index']],
-					['label' => \app\models\AccessTypes::$titles, 'url' => ['/access-types/index']],
+					['label' => Acls::$titles, 'url' => ['/acls/index']],
+					['label' => Acls::$scheduleTitles, 'url' => ['/scheduled-access/index']],
+					['label' => AccessTypes::$titles, 'url' => ['/access-types/index']],
 				]
 			],
 			['label' => 'Люди',
 				'items' => [
 					//['label' => \app\models\OrgStruct::$title, 'url' => ['/org-struct/index']],
-					['label' => \app\models\Users::$titles, 'url' => ['/users/index']],
+					['label' => Users::$titles, 'url' => ['/users/index']],
 					//['label' => 'Пользователи', 'url' => ['/users/logins']],
 					//['label' => \app\models\UserGroups::$title, 'url' => ['/user-groups/index']],
 				]
 			],
 			['label' => 'Сети',
 				'items' => [
-					['label' => \app\models\Ports::$titles, 'url' => ['/ports/index']],
-					['label' => \app\models\NetIps::$titles, 'url' => ['/net-ips/index']],
-					['label' => \app\models\Networks::$titles, 'url' => ['/networks/index']],
-					['label' => \app\models\NetVlans::$titles, 'url' => ['/net-vlans/index']],
-					['label' => \app\models\NetDomains::$titles, 'url' => ['/net-domains/index']],
-					['label' => \app\models\Segments::$titles, 'url' => ['/segments/index']],
+					['label' => Ports::$titles, 'url' => ['/ports/index']],
+					['label' => NetIps::$titles, 'url' => ['/net-ips/index']],
+					['label' => Networks::$titles, 'url' => ['/networks/index']],
+					['label' => NetVlans::$titles, 'url' => ['/net-vlans/index']],
+					['label' => NetDomains::$titles, 'url' => ['/net-domains/index']],
+					['label' => Segments::$titles, 'url' => ['/segments/index']],
 				],
 			],
 			['label' => 'Компьютеры',
@@ -91,7 +124,7 @@ NavBar::begin([
 					['label' => 'АРМы', 'url' => ['/arms/index']],
 					['label' => 'ОС', 'url' => ['/comps/index']],
 					['label' => 'Домены', 'url' => ['/domains/index']],
-					['label' => \app\models\LoginJournal::$title, 'url' => ['/login-journal/index']],
+					['label' => LoginJournal::$title, 'url' => ['/login-journal/index']],
 					['label' => 'Дубликаты', 'url' => ['/comps/dupes?sort=name']],
 					['label' => 'Софт',
 						'items' => [
@@ -102,18 +135,18 @@ NavBar::begin([
 					]
 				],
 			],
-			['label' => \app\models\Techs::$title,
+			['label' => Techs::$title,
 				'items' => [
-					['label' => \app\models\Materials::$title,
+					['label' => Materials::$title,
 						'items' => [
-							['label' => \app\models\Materials::$title, 		 'url' => ['/materials/index']],
-							['label' => \app\models\MaterialsUsages::$title, 'url' => ['/materials-usages/index']],
-							['label' => \app\models\MaterialsTypes::$title,  'url' => ['/materials-types/index']],
+							['label' => Materials::$title, 		 'url' => ['/materials/index']],
+							['label' => MaterialsUsages::$title, 'url' => ['/materials-usages/index']],
+							['label' => MaterialsTypes::$title,  'url' => ['/materials-types/index']],
 						],
 					],
-					['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index'], 'items'=>$techTypes],
-					['label' => \app\models\TechModels::$titles, 'url' => ['/tech-models/index']],
-					['label' => \app\models\Techs::$title, 'url' => ['/techs/index']],
+					['label' => TechTypes::$title, 'url' => ['/tech-types/index'], 'items'=>$techTypes],
+					['label' => TechModels::$titles, 'url' => ['/tech-models/index']],
+					['label' => Techs::$title, 'url' => ['/techs/index']],
 					['label' => 'Производители', 'url' => ['/manufacturers/index']],
 					['label' => 'Игнорируемое', 'url' => ['/hw-ignore/index']],
 					['label' => 'Состояния', 'url' => ['/tech-states/index']],
@@ -121,11 +154,12 @@ NavBar::begin([
 			],
 		],
 	]):'<div class="mx-auto"></div>';
-	echo Nav::widget([
+/** @noinspection PhpPossiblePolymorphicInvocationInspection */
+echo Nav::widget([
 		'options' => ['class' => ['nav', 'navbar-nav', 'navbar-right']],
-		'dropdownClass' => Dropdown::classname(),
+		'dropdownClass' => Dropdown::class,
 		'items' => [
-			\app\models\Users::isAdmin()?
+			Users::isAdmin()?
 				['label' => '<i class="fa fa-cog"></i>',
 					'encode'=>false,
 					'dropdownOptions' => ['class'=>'dropdown-menu-end'],
@@ -151,5 +185,5 @@ NavBar::begin([
 		]
 	]);
 NavBar::end();
-echo \yii\helpers\Html::beginForm(['/site/logout'], 'post',['id'=>'logout-form','style'=>'display:none']);
-echo \yii\helpers\Html::endForm();
+echo Html::beginForm(['/site/logout'], 'post',['id'=>'logout-form','style'=>'display:none']);
+echo Html::endForm();
