@@ -1,20 +1,21 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
-use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Materials */
 
-$deleteable=!count($model->childs);
+use app\models\Materials;
+use yii\helpers\Url;
+use yii\web\YiiAsset;
 
+Url::remember();
 $this->title =  $model->type->name.': '. $model->model;
 
-$this->params['breadcrumbs'][] = ['label' => \app\models\Materials::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Materials::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
-\yii\web\YiiAsset::register($this);
+YiiAsset::register($this);
+
 ?>
 <div class="materials-view">
 

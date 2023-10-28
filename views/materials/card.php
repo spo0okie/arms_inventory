@@ -6,8 +6,9 @@
  * Time: 12:08
  */
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\LinkObjectWidget;
+use app\models\Materials;
+use app\models\MaterialsUsages;
 use yii\bootstrap5\Modal;
 
 /* @var $this yii\web\View */
@@ -23,22 +24,22 @@ if (!isset($hide_places)) $hide_places=false;
 <div class="materials-view">
 
 	<h1>
-		<?= \app\components\LinkObjectWidget::widget([
+		<?= LinkObjectWidget::widget([
 			'model'=>$model,
 			'name'=>$model->type->name.': '. $model->model,
 			'confirmMessage' => 'Действительно удалить этот материал?',
 			'undeletableMessage'=>'Нельзя удалить этот материал, т.к. есть его расходы',
-			'links'=>[$model->usages],
+			//'links'=>[$model->usages],
 			'static'=>$static_view
 		]) ?>
 	</h1>
 
-	<p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
+	<p>	<?= Yii::$app->formatter->asNtext($model->comment) ?> </p>
 	<p>
 		<strong>Поступило</strong> <?= $model->date?> <b><?= $model->count?><?= $model->type->units?></b>
 		<?php if ($static_view) { ?>
 			<br><strong>Остаток</strong>
-			<span class="badge <?= $model->rest?'bg-success':'bg-danger' ?>"><?= $model->rest?><?= $model->type->units?></span>
+			<span class="badge <?= $model->rest?'bg-success':'bg-danger' ?>"><?= $model->rest?><?= $model->type->units?>
 				<?= $model->rest?'':' - израсходован' ?>
 			</span>
 		<?php } ?>
@@ -118,13 +119,13 @@ if (!isset($hide_places)) $hide_places=false;
 	<?php } ?>
 
 	<?php if(!$static_view) {
-		//моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
+		//создаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
 		Modal::begin([
 			'id' => 'material_new_usage_modal',
 			'title' => '<h2>использовать материал</h2>',
 			'size' => Modal::SIZE_LARGE,
 		]);
-		$usage = new \app\models\MaterialsUsages();
+		$usage = new MaterialsUsages();
 		$usage->materials_id = [$model->id];
 		$usage->date=date('Y-m-d',time());
 		echo $this->render('/materials-usages/_form', ['model' => $usage,'modalParent'=>'#material_new_usage_modal']);
@@ -135,7 +136,7 @@ if (!isset($hide_places)) $hide_places=false;
 			'title' => '<h2>переместить часть</h2>',
 			'size' => Modal::SIZE_LARGE,
 		]);
-		$material = new \app\models\Materials();
+		$material = new Materials();
 		$material->parent_id = [$model->id];
 		echo $this->render('/materials/_form', ['model' => $material,'modalParent'=>'#material_new_material_modal']);
 		Modal::end();
