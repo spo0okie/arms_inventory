@@ -1,19 +1,24 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\assets\DynaGridWidgetAsset;
+use app\components\WikiPageWidget;
+use app\models\Services;
+use yii\bootstrap5\Tabs;
+use yii\helpers\Url;
+use yii\web\View;
+use yii\web\YiiAsset;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
-\yii\helpers\Url::remember();
+Url::remember();
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Services::$titles, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Services::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-\yii\web\YiiAsset::register($this);
-\app\components\assets\DynaGridWidgetAsset::register($this);
+YiiAsset::register($this);
+DynaGridWidgetAsset::register($this);
 
-$wikiLinks=\app\components\WikiPageWidget::getLinks($model->links);
+$wikiLinks= WikiPageWidget::getLinks($model->links);
 $cookieTabName='services-view-tab-'.$model->id;
 $cookieTab=$_COOKIE[$cookieTabName]??(count($wikiLinks)?'wiki0':'serviceComps');
 
@@ -34,7 +39,7 @@ foreach ($wikiLinks as $name=>$url) {
 	$tabs[]=[
 		'label'=>($name==$url)?'Wiki':$name,
 		'active'=>$cookieTab==$tabId,
-		'content'=>\app\components\WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
+		'content'=> WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
 		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 	];
 	$tabNumber++;
@@ -43,7 +48,7 @@ foreach ($wikiLinks as $name=>$url) {
 if (count($model->children)||count($model->comps)) {
 	$tabId='serviceComps';
 	$tabs[]=[
-		'label'=>'Задействованные ОС',
+		'label'=>'Оборудование и ОС',
 		'active'=>$cookieTab==$tabId,
 		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 		'content'=><<<HTML
@@ -65,7 +70,7 @@ HTML,
 	
 }
 
-echo \yii\bootstrap5\Tabs::widget([
+echo Tabs::widget([
 	'items'=>$tabs,
 	'options'=>[
 		'class'=>'nav-pills',
@@ -77,4 +82,4 @@ $this->registerJs(<<<JS
 	    ExpandableCardInitAll();
 	})
 JS
-,\yii\web\View::POS_END);
+, View::POS_END);

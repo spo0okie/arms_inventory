@@ -15,6 +15,7 @@ use yii\db\ActiveQuery;
  * @property string $bname Бренд
  * @property string $sname Имя для поиска (юр название и бренд)
  * @property string $comment Комментарий
+ * @property string $prefix Префикс именования оборудования
  * @property string $cabinet_url Урл личного кабинет
  * @property string $support_tel Тел. тех. поддержки
  *

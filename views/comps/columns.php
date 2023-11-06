@@ -1,7 +1,5 @@
 <?php
 
-use kartik\grid\GridView;
-
 /**
  * Это рендер списка АРМов, вынесен отдельным файлом, т.к. нужен много где:
  * в списке АРМов
@@ -10,11 +8,17 @@ use kartik\grid\GridView;
 
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\OldArmsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
+use app\components\ExpandableCardWidget;
+use app\components\ListObjectWidget;
+use app\models\Comps;
+use app\models\Manufacturers;
+use app\models\Techs;
+use yii\helpers\Html;
+
 $renderer = $this;
-$manufacturers=\app\models\Manufacturers::fetchNames();
+$manufacturers= Manufacturers::fetchNames();
 
 return [
 	'name' => [
@@ -35,14 +39,14 @@ return [
 		'value' => function ($data) use ($renderer) {
 			if (is_object($data)) {
 				$output=[];
-				/* @var $data \app\models\Comps */
+				/* @var $data Comps */
 				foreach ($data->netIps as $ip) {
 					$name=strtolower($ip->name);
 					//выводим пояснение к IP только если он не поясняет про FQDN или hostname нашей ОС
 					$sname=$ip->text_addr.(trim($name) && $name!=strtolower($data->name) && $name!=strtolower($data->fqdn)?' ('.$ip->name.')':'');
 					$output[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'name'=>$sname]);
 				}
-				return \app\components\ExpandableCardWidget::widget([
+				return ExpandableCardWidget::widget([
 					'content'=>implode('<br />',$output)
 				]);
 			}
@@ -64,7 +68,7 @@ return [
 		},
 	],
 	'places_id' => [
-		'model' => new \app\models\Techs(),
+		'model' => new Techs(),
 		'value' => function ($data) use ($renderer) {
 			return (is_object($data->arm)&&is_object($data->arm->place)) ?
 				$renderer->render('/places/item', ['model' => $data->arm->place, 'full' => 1])
@@ -73,7 +77,7 @@ return [
 	],
 	'services_ids' => [
 		'value' => function ($data) use ($renderer) {
-			return \app\components\ListObjectWidget::widget([
+			return ListObjectWidget::widget([
 				'models'=>$data->services,
 				'title'=>false,
 				'item_options'=>['static_view'=>true],
@@ -104,12 +108,13 @@ return [
 	],
 	'os' => [
 		'label' => 'Софт',
+		'value' => function ($data) {return $data->os;},
 	],
 	'mac' => [
-		'value'=>function ($data) {return \app\components\ExpandableCardWidget::widget([
-			'content'=>\yii\helpers\Html::tag(
+		'value'=>function ($data) {return ExpandableCardWidget::widget([
+			'content'=> Html::tag(
 				'span',
-				\app\models\Techs::formatMacs($data->mac,'<br />'),
+				Techs::formatMacs($data->mac,'<br />'),
 				['class'=>'mac_address']
 			)
 		]);},

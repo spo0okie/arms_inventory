@@ -2,11 +2,13 @@
 
 namespace app\models;
 
+use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
+use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
+use voskobovich\linker\LinkerBehavior;
 use Yii;
-use yii\helpers\Html;
-use yii\validators\IpValidator;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "techs".
@@ -20,6 +22,7 @@ use yii\validators\IpValidator;
  * @property int $comp_id Основная ОС рабочего места
  * @property int $model_id Модель оборудования
  * @property string $sn Серийный номер
+ * @property string $uid Доп идентификатор
  * @property string $hw Аппаратное обеспечение
  * @property string $mac MAC адрес
  * @property string $specs Тех. спецификация
@@ -132,7 +135,6 @@ class Techs extends ArmsModel
 	private static $installInheritance=[	//поля которые наследуются у оборудования установленного в другое
 		'places_id'
 	];
-	private $model_cache=null;
 	private $state_cache=null;
 	private $type_cache=null;
 	private $hwList_obj=null;
@@ -346,7 +348,7 @@ class Techs extends ArmsModel
 			],
 			'url' => [
 				'Ссылки',
-				'hint' => \app\components\UrlListWidget::$hint,
+				'hint' => UrlListWidget::$hint,
 			],
 			'comment' => [
 				'Примечание',
@@ -379,17 +381,17 @@ class Techs extends ArmsModel
 			[['inv_num', 'sn','installed_pos','installed_pos_end'], 'string', 'max' => 128],
 	
 			[['ip','mac'], 'string', 'max' => 768],
-			['ip', function ($attribute, $params, $validator) {
-				\app\models\NetIps::validateInput($this,$attribute);
+			['ip', function ($attribute) {
+				NetIps::validateInput($this,$attribute);
 			}],
 			['ip', 'filter', 'filter' => function ($value) {
-				return \app\models\NetIps::filterInput($value);
+				return NetIps::filterInput($value);
 			}],
 			['mac', 'filter', 'filter' => function ($value) {
-				return \app\helpers\MacsHelper::fixList($value);
+				return MacsHelper::fixList($value);
 			}],
 			[['num','uid'], 'string', 'max' => 16],
-	        ['num', function ($attribute, $params, $validator) {
+	        ['num', function ($attribute) {
         		$tokens=explode('-',$this->$attribute);
 		        if (count($tokens)>4 || !strlen($tokens[0])) {
 		        	
@@ -397,7 +399,7 @@ class Techs extends ArmsModel
 		        }
 	        }],
 	        ['num', 'filter', 'filter' => ['\app\models\Techs','formatInvNum']],
-	        ['num', function ($attribute, $params, $validator) {
+	        ['num', function ($attribute) {
 		        $same=static::findOne([$attribute=>$this->$attribute]);
 		        if (is_object($same)&&($same->id != $this->id)) {
 			        $tok =explode('-',$this->$attribute);
@@ -409,10 +411,10 @@ class Techs extends ArmsModel
 	        }],
 			['num', 'unique'],
 			['sn', 'unique','targetAttribute'=>['sn','model_id'],'message'=>'Оборудование с этим серийным номером уже заведено'],
-			['arms_id',function ($attribute,$params,$validator){
+			['arms_id',function ($attribute){
 				$this->validateRecursiveLink($attribute, $params=['getLink'=>'arm']);
 			}],
-			['installed_id',function ($attribute,$params,$validator){
+			['installed_id',function ($attribute){
 				$this->validateRecursiveLink($attribute, $params=['getLink'=>'installation']);
 			}],
         ];
@@ -426,7 +428,7 @@ class Techs extends ArmsModel
 	{
 		return [
 			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'class' => LinkerBehavior::class,
 				'relations' => [
 					'contracts_ids' => 'contracts',
 					'services_ids' => 'services',
@@ -486,7 +488,7 @@ class Techs extends ArmsModel
 	 * @param string $prefix текущий инв. номер
 	 * @return integer номер следующей позиции
 	 */
-	public static function fetchNextNum($prefix) {
+	public static function fetchNextNum(string $prefix) {
 		//ищем запись с таким префиксом (сортируем по префиксу и выбираем один самый большой)
 		$query=static::find()
 			->where(['like','num',$prefix.'-%',false]);
@@ -497,6 +499,7 @@ class Techs extends ArmsModel
 		//иначе он вместо чел-0000018 найдет чел-тел-0002 и все неправильно посчитает
 		
 		//$sql=$query->createCommand()->getRawSql();
+		/** @var Techs $last */
 		$last=$query
 			->orderBy(['num'=>SORT_DESC])
 			->one();
@@ -520,7 +523,7 @@ class Techs extends ArmsModel
 	 * @param $installed_id integer Куда установлено
 	 * @return string префикс инвентарного номера
 	 */
-	public static function genInvPrefix($model_id,$place_id,$org_id,$arm_id,$installed_id)
+	public static function genInvPrefix(int $model_id, int $place_id, int $org_id, int $arm_id, int $installed_id)
 	{
 		$tokens=[];
 		
@@ -530,15 +533,15 @@ class Techs extends ArmsModel
 					$place=null;
 					if ($installed_id) {
 						//если есть АРМ - то место установки там где АРМ
-						$arm=\app\models\Techs::findOne($installed_id);
+						$arm= Techs::findOne($installed_id);
 						if (is_object($arm)) $place=$arm->place;
 					} elseif ($arm_id) {
 						//если есть АРМ - то место установки там где АРМ
-						$arm=\app\models\Techs::findOne($arm_id);
+						$arm= Techs::findOne($arm_id);
 						if (is_object($arm)) $place=$arm->place;
 					} elseif ($place_id) {
 						//иначе там где место установки
-						$place=\app\models\Places::findOne($place_id);
+						$place= Places::findOne($place_id);
 					}
 					
 					if (is_object($place)) {
@@ -549,7 +552,8 @@ class Techs extends ArmsModel
 					}
 					break;
 				case 'org':
-					$org=\app\models\Partners::findOne($org_id);
+					/** @var Partners $org */
+					$org= Partners::findOne($org_id);
 					if (is_object($org)) {
 						//если все ок то берем префикс типа оборудования
 						$org_token=$org->prefix;
@@ -559,7 +563,7 @@ class Techs extends ArmsModel
 					break;
 				case 'type':
 					//ищем модель оборудования
-					$model=\app\models\TechModels::findOne($model_id);
+					$model= TechModels::findOne($model_id);
 					if (is_object($model)) {
 						//если все ок то берем префикс типа оборудования
 						$tech_token=$model->type->prefix;
@@ -579,12 +583,12 @@ class Techs extends ArmsModel
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getState()
 	{
 		if (!is_null($this->state_cache)) return $this->state_cache;
-		return $this->state_cache=$this->hasOne(TechStates::className(), ['id' => 'state_id']);
+		return $this->state_cache=$this->hasOne(TechStates::class, ['id' => 'state_id']);
 	}
 
 	public function getStateName()
@@ -594,15 +598,15 @@ class Techs extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getComp()
 	{
-		return $this->hasOne(Comps::className(), ['id' => 'comp_id']);
+		return $this->hasOne(Comps::class, ['id' => 'comp_id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getPartner()
 	{
@@ -611,11 +615,11 @@ class Techs extends ArmsModel
 	
 	/**
 	 * Возвращает все ОС привязанные к этому АРМ
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getComps()
 	{
-		return $this->hasMany(Comps::className(), ['arm_id' => 'id'])
+		return $this->hasMany(Comps::class, ['arm_id' => 'id'])
 			->from(['arms_comps'=>Comps::tableName()])
 			->orderBy([
 				'arms_comps.ignore_hw'=>SORT_ASC,
@@ -657,7 +661,7 @@ class Techs extends ArmsModel
 	
 	/**
 	 * Возвращает все не виртуальные ОС привязанные к этому АРМ
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getHwComps()
 	{
@@ -668,7 +672,7 @@ class Techs extends ArmsModel
 	
 	/**
 	 * Возвращает тот комп, с которого снимать железо АРМ
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getHwComp()
 	{
@@ -679,7 +683,7 @@ class Techs extends ArmsModel
 	
 	/**
 	 * Возвращает все виртуальные ОС привязанные к этому АРМ
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getVmComps()
 	{
@@ -716,7 +720,7 @@ class Techs extends ArmsModel
 	}
 	
 	/**
-	 * @return \app\models\Users
+	 * @return Users
 	 */
 	public function getResponsible()
 	{
@@ -727,7 +731,7 @@ class Techs extends ArmsModel
 	
 	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
-	 * @return \app\models\Users[]
+	 * @return Users[]
 	 */
 	public function getSupportTeam()
 	{
@@ -748,6 +752,7 @@ class Techs extends ArmsModel
 	 */
 	public function getScans()
 	{
+		/** @var Scans $scans */
 		$scans=Scans::find()->where(['techs_id' => $this->id ])->all();
 		$scans_sorted=[];
 		foreach ($scans as $scan) if($scan->id == $this->scans_id) $scans_sorted[]=$scan;
@@ -771,27 +776,27 @@ class Techs extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getArmTechs()
 	{
-		return $this->hasMany(Techs::className(), ['arms_id' => 'id'])->from(['arms_techs'=>Techs::tableName()]);
+		return $this->hasMany(Techs::class, ['arms_id' => 'id'])->from(['arms_techs'=>Techs::tableName()]);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getInstalledTechs()
 	{
-		return $this->hasMany(Techs::className(), ['installed_id' => 'id'])->from(['arms_techs'=>Techs::tableName()]);
+		return $this->hasMany(Techs::class, ['installed_id' => 'id'])->from(['arms_techs'=>Techs::tableName()]);
 	}
 	
 	/**
 	 * отфильтровать из переданного массива $models те, которые привязаны к этому АРМ
-	 * @param $models Techs[]
+	 * @param Techs[] $models
 	 * @return Techs[]
 	 */
-	public function filterArmTechs($models)
+	public function filterArmTechs(array $models)
 	{
 		$filtered=[];
 		foreach ($models as $model)
@@ -836,43 +841,43 @@ class Techs extends ArmsModel
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getItStaff()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'it_staff_id']);
+		return $this->hasOne(Users::class, ['id' => 'it_staff_id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getHead()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'head_id']);
+		return $this->hasOne(Users::class, ['id' => 'head_id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getAdmResponsible()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'responsible_id']);
+		return $this->hasOne(Users::class, ['id' => 'responsible_id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getUser()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'user_id']);
+		return $this->hasOne(Users::class, ['id' => 'user_id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getPlace()
 	{
-		return $this->hasOne(Places::className(), ['id' => 'places_id']);
+		return $this->hasOne(Places::class, ['id' => 'places_id']);
 	}
 	
 	/**
@@ -889,11 +894,11 @@ class Techs extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getModel()
 	{
-		return $this->hasOne(TechModels::className(), ['id' => 'model_id']);
+		return $this->hasOne(TechModels::class, ['id' => 'model_id']);
 	}
 	
 	/**
@@ -911,11 +916,11 @@ class Techs extends ArmsModel
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getAttachModel()
 	{
-		return $this->model_cache=$this->hasOne(TechModels::className(), ['id' => 'model_id'])
+		return $this->hasOne(TechModels::class, ['id' => 'model_id'])
 			->from(['attached_tech_models'=>TechModels::tableName()]);
 
 	}
@@ -926,7 +931,7 @@ class Techs extends ArmsModel
 	 */
 	public function getLicItems()
 	{
-		return $this->hasMany(LicItems::className(), ['id' => 'lic_items_id'])
+		return $this->hasMany(LicItems::class, ['id' => 'lic_items_id'])
 			->viaTable('{{%lic_items_in_arms}}', ['arms_id' => 'id']);
 	}
 	
@@ -935,7 +940,7 @@ class Techs extends ArmsModel
 	 */
 	public function getLicKeys()
 	{
-		return $this->hasMany(LicKeys::className(), ['id' => 'lic_keys_id'])
+		return $this->hasMany(LicKeys::class, ['id' => 'lic_keys_id'])
 			->viaTable('{{%lic_keys_in_arms}}', ['arms_id' => 'id']);
 	}
 	
@@ -944,25 +949,25 @@ class Techs extends ArmsModel
 	 */
 	public function getLicGroups()
 	{
-		return $this->hasMany(LicGroups::className(), ['id' => 'lic_groups_id'])
+		return $this->hasMany(LicGroups::class, ['id' => 'lic_groups_id'])
 			->viaTable('{{%lic_groups_in_arms}}', ['arms_id' => 'id']);
 	}
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getMaterialsUsages()
 	{
-		return $this->hasMany(MaterialsUsages::className(), ['techs_id' => 'id']);
+		return $this->hasMany(MaterialsUsages::class, ['techs_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getPorts()
 	{
-		return $this->hasMany(Ports::className(), ['techs_id' => 'id']);
+		return $this->hasMany(Ports::class, ['techs_id' => 'id']);
 	}
 	
 	/**
@@ -975,7 +980,7 @@ class Techs extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getArm()
 	{
@@ -983,7 +988,7 @@ class Techs extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getInstallation()
 	{
@@ -991,11 +996,11 @@ class Techs extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getDepartment()
 	{
-		return $this->hasOne(Departments::className(), ['id' => 'departments_id']);
+		return $this->hasOne(Departments::class, ['id' => 'departments_id']);
 	}
 	
 	
@@ -1050,7 +1055,7 @@ class Techs extends ArmsModel
 	 */
 	public function getNetIps()
 	{
-		return $this->hasMany(NetIps::className(), ['id' => 'ips_id'])->from(['techs_ip'=>NetIps::tableName()])
+		return $this->hasMany(NetIps::class, ['id' => 'ips_id'])->from(['techs_ip'=>NetIps::tableName()])
 			->viaTable('{{%ips_in_techs}}', ['techs_id' => 'id']);
 	}
 	
@@ -1070,7 +1075,7 @@ class Techs extends ArmsModel
 	 */
 	public function getContracts()
 	{
-		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::class, ['id' => 'contracts_id'])
 			->from(['techs_contracts'=>Contracts::tableName()])
 			->viaTable('{{%contracts_in_techs}}', ['techs_id' => 'id']);
 	}
@@ -1080,16 +1085,16 @@ class Techs extends ArmsModel
 	 */
 	public function getServices()
 	{
-		return $this->hasMany(Services::className(), ['id' => 'service_id'])
+		return $this->hasMany(Services::class, ['id' => 'service_id'])
 			->viaTable('{{%techs_in_services}}', ['tech_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getAcls()
 	{
-		return $this->hasMany(Acls::className(), ['techs_id' => 'id']);
+		return $this->hasMany(Acls::class, ['techs_id' => 'id']);
 	}
 	
 	
@@ -1145,8 +1150,10 @@ class Techs extends ArmsModel
 	
 	/**
 	 * Возвращает комментарий порта из шаблона модели
+	 * @param string $port
+	 * @return mixed|null
 	 */
-	public function getModelPortComment($port)
+	public function getModelPortComment(string $port)
 	{
 		if (is_object($this->model))
 			return $this->model->getPortComment($port);
@@ -1189,10 +1196,11 @@ class Techs extends ArmsModel
 	/**
 	 * Проверяет установлено ли оборудование в модуль $unit
 	 * installed_pos может иметь значение 1,2,7-8
-	 * @param $unit
+	 * @param      $unit
+	 * @param bool $front
 	 * @return bool
 	 */
-	public function isInstalledAt($unit,$front=true) {
+	public function isInstalledAt($unit, bool $front=true) {
 		if (!$this->full_length) {
 			if (($front == $this->installed_back)) return false;
 		}
@@ -1207,9 +1215,7 @@ class Techs extends ArmsModel
 			if (strpos($interval,'-')!==false) {
 				$limits=explode('-',$interval);
 				if ($limits[0]<=$unit and $limits[1]>=$unit) return true;
-			} else {
-				if ($unit==$interval) return true;
-			}
+			} elseif ($unit==$interval) return true;
 		}
 		return false;
 	}
@@ -1258,7 +1264,7 @@ class Techs extends ArmsModel
 				$this->hw=$this->hwList->onlySaved()->saveJSON();
 			}
 			
-			$this->mac=\app\helpers\MacsHelper::fixList($this->mac);
+			$this->mac= MacsHelper::fixList($this->mac);
 			
 			//если ОС которая была назначена основной удалена или сменила АРМ
 			if (!is_object($this->comp) || $this->comp->arm_id != $this->id)

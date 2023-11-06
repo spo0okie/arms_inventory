@@ -4,17 +4,23 @@
 /* @var $searchModel app\models\TechsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
+use app\components\ListObjectWidget;
+use app\models\Techs;
+use app\models\TechsSearch;
+use app\models\TechStates;
+use app\models\TechTypes;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\web\JsExpression;
 
+if (!isset($searchModel)) $searchModel=new TechsSearch();
 
 $renderer = $this;
 
 if (
 	!empty($searchModel->type_id)
 	&&
-	(is_object($type=\app\models\TechTypes::findOne($searchModel->type_id)))
+	(is_object($type= TechTypes::findOne($searchModel->type_id)))
 ) {
 	$comment=$type->comment_name;
 } else {
@@ -45,11 +51,11 @@ return [
 			if (strlen($data->sn)) $tokens[]=$data->sn;
 			if (strlen($data->inv_num)) $tokens[]=$data->inv_num;
 			if (strlen($data->uid)) $tokens[]=$data->uid;
-			return \yii\helpers\Html::encode(implode(', ',$tokens));
+			return Html::encode(implode(', ',$tokens));
 			
 		},
 		'contentOptions'=>function ($data) {
-			/* @var $data \app\models\OldArms */
+			/* @var $data Techs */
 			return [
 				'class'=>'inv_num_col',
 				'qtip_ttip'=>
@@ -126,7 +132,7 @@ return [
 		},
 	],
 	'mac' => [
-		'value'=>function ($data) {return Html::tag('span',\app\models\Techs::formatMacs($data->mac,'<br />'),[
+		'value'=>function ($data) {return Html::tag('span', Techs::formatMacs($data->mac,'<br />'),[
 			'class'=>'mac_address'
 		]);},
 	],
@@ -141,13 +147,22 @@ return [
 			return $renderer->render('/places/item', ['model' => $data->place, 'full' => true]);
 		}
 	],
+	'services_ids' => [
+		'value' => function ($data) use ($renderer) {
+			return ListObjectWidget::widget([
+				'models'=>$data->services,
+				'title'=>false,
+				'item_options'=>['static_view'=>true],
+			]);
+		},
+	],
 	
 	'state_id' => [
 		'value' => function ($data) use ($renderer) {
 			return $renderer->render('/tech-states/item', ['model' => $data->state]);
 		},
 		'filterType'=>GridView::FILTER_SELECT2,
-		'filter'=>\app\models\TechStates::fetchNames(),
+		'filter'=> TechStates::fetchNames(),
 		'filterWidgetOptions' => [
 			'hideSearch'=>true,
 			'showToggleAll'=>false,

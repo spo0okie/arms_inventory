@@ -138,7 +138,7 @@ class ServicesController extends ArmsBaseController
 		$model=$this->findModel($id);
 		//$comps=$model->compsRecursive;
 		$dataProvider=new ArrayDataProvider([
-			'allModels' => $model->compsRecursive,
+			'allModels' => array_merge($model->compsRecursive,$model->techsRecursive),
 			'key'=>'id',
 			'sort' => [
 				'attributes'=> [

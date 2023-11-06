@@ -2,10 +2,11 @@
 
 namespace app\models;
 
+use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\QueryHelper;
-use Yii;
-use yii\web\User;
+use voskobovich\linker\LinkerBehavior;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "services".
@@ -46,30 +47,29 @@ use yii\web\User;
  * @property int[] $support_ids
  * @property string $supportNames
  * @property int[] $infrastructure_support_ids
- * @property string $infrastructureSupportNames
- * @property int[] $techs_ids
- * @property int[] $contracts_ids
- * @property int $totalUnpaid
- * @property int                    $weight
- * @property string                 $firstUnpaid
+ * @property string                 $infrastructureSupportNames
+ * @property int[]                  $techs_ids
+ * @property int[]      $contracts_ids
+ * @property int        $totalUnpaid
+ * @property int        $weight
+ * @property string     $firstUnpaid
  *
  *
- * @property Comps[]			    $comps
- * @property Comps[]			    $compsRecursive
- * @property \app\models\Services[] $depends
- * @property \app\models\Services[] $dependants
- * @property \app\models\UserGroups $userGroup
- * @property \app\models\Techs[]    $techs
- * @property \app\models\Techs[]    $techsRecursive
- * @property Techs[]  				$arms
- * @property Techs[]  				$armsRecursive
- * @property Places                 $place
- * @property Places[]               $armPlaces
- * @property Places[]               $techPlaces
- * @property Places[]               $phonesPlaces
- * @property Places[]               $inetsPlaces
- * @property Places[]               $places
- * @property Places[]               $sites
+ * @property Comps[]    $comps
+ * @property Comps[]    $compsRecursive
+ * @property Services[] $depends
+ * @property Services[] $dependants
+ * @property UserGroups $userGroup
+ * @property Techs[]    $techs
+ * @property Techs[]    $techsRecursive
+ * @property Techs[]    $arms
+ * @property Places     $place
+ * @property Places[]   $armPlaces
+ * @property Places[]   $techPlaces
+ * @property Places[]   $phonesPlaces
+ * @property Places[]   $inetsPlaces
+ * @property Places[]   $places
+ * @property Places[]   $sites
  * @property Places[]               $sitesRecursive
  * @property Services               $parentService
  * @property Services               $parent
@@ -121,6 +121,7 @@ class Services extends ArmsModel
 	private $sumTotalsCache=null;
 	private $sumChargeCache=null;
 	private $compsRecursiveCache=null;
+	private $techsRecursiveCache=null;
 	
 	protected static $allItems=null;
 	
@@ -133,7 +134,7 @@ class Services extends ArmsModel
 	{
 		return [
 			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'class' => LinkerBehavior::class,
 				'relations' => [
 					'depends_ids' => 'depends',
 					'comps_ids' => 'comps',
@@ -183,12 +184,12 @@ class Services extends ArmsModel
 	        [['is_end_user', 'is_service', 'responsible_id', 'infrastructure_user_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 			[['name'], 'string', 'max' => 64],
 			[['search_text'], 'string', 'max' => 255],
-			[['responsible_id'],        'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['responsible_id' => 'id']],
-			[['infrastructure_user_id'],'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['infrastructure_user_id' => 'id']],
-	        [['providing_schedule_id'], 'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['providing_schedule_id' => 'id']],
-	        [['support_schedule_id'],   'exist', 'skipOnError' => true, 'targetClass' => Schedules::className(), 'targetAttribute' => ['support_schedule_id' => 'id']],
-			[['segment_id'],			'exist', 'skipOnError' => true, 'targetClass' => Segments::className(), 'targetAttribute' => ['segment_id' => 'id']],
-			[['parent_id'],				'exist', 'skipOnError' => true, 'targetClass' => Services::className(), 'targetAttribute' => ['parent_id' => 'id']],
+			[['responsible_id'],        'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['responsible_id' => 'id']],
+			[['infrastructure_user_id'],'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['infrastructure_user_id' => 'id']],
+	        [['providing_schedule_id'], 'exist', 'skipOnError' => true, 'targetClass' => Schedules::class, 'targetAttribute' => ['providing_schedule_id' => 'id']],
+	        [['support_schedule_id'],   'exist', 'skipOnError' => true, 'targetClass' => Schedules::class, 'targetAttribute' => ['support_schedule_id' => 'id']],
+			[['segment_id'],			'exist', 'skipOnError' => true, 'targetClass' => Segments::class, 'targetAttribute' => ['segment_id' => 'id']],
+			[['parent_id'],				'exist', 'skipOnError' => true, 'targetClass' => Services::class, 'targetAttribute' => ['parent_id' => 'id']],
 			[['parent_id'],				'validateRecursiveLink', 'params'=>['getLink' => 'parentService']],
         ];
     }
@@ -222,7 +223,7 @@ class Services extends ArmsModel
 			],
 	        'links' => [
 	        	'Ссылки',
-				'hint' => \app\components\UrlListWidget::$hint.' Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
+				'hint' => UrlListWidget::$hint.' Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
 			],
 			'is_service' => [
 				'Тип объекта',
@@ -360,27 +361,27 @@ class Services extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getCurrency()
 	{
-		return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+		return $this->hasOne(Currency::class, ['id' => 'currency_id']);
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getPartner()
 	{
-		return $this->hasOne(Partners::className(), ['id' => 'partners_id']);
+		return $this->hasOne(Partners::class, ['id' => 'partners_id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getSupportSchedule()
 	{
-		return $this->hasOne(Schedules::className(), ['id' => 'support_schedule_id'])
+		return $this->hasOne(Schedules::class, ['id' => 'support_schedule_id'])
 			->from(['support_schedule'=>Schedules::tableName()]);
 	}
 	
@@ -399,14 +400,18 @@ class Services extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getProvidingSchedule()
 	{
-		return $this->hasOne(Schedules::className(), ['id' => 'providing_schedule_id'])
+		return $this->hasOne(Schedules::class, ['id' => 'providing_schedule_id'])
 			->from(['providing_schedule'=>Schedules::tableName()]);
 	}
 	
+	/**
+	 * @return Schedules|null
+	 * @noinspection PhpUnusedFunctionInspection
+	 */
 	public function getProvidingScheduleRecursive() {
 		if (is_object($this->providingScheduleRecursiveCache)) return $this->providingScheduleRecursiveCache;
 		if (is_object($this->providingScheduleRecursiveCache = $this->providingSchedule))
@@ -422,19 +427,19 @@ class Services extends ArmsModel
 	}
 	
 	/**
-	 * @return Segments|\yii\db\ActiveQuery
+	 * @return Segments|ActiveQuery
 	 */
 	public function getParentService()
 	{
 		if (!$this->parent_id) return null;
 		if ($this->parent_id == $this->id) return null;
 		if (static::allItemsLoaded()) return static::getLoadedItem($this->parent_id);
-		return $this->hasOne(Services::className(), ['id' => 'parent_id']);
+		return $this->hasOne(Services::class, ['id' => 'parent_id']);
 	}
 	
 	/**
 	 * Непосредственные потомки
-	 * @return Services[]|\yii\db\ActiveQuery
+	 * @return Services[]|ActiveQuery
 	 */
 	public function getChildren()
 	{
@@ -443,13 +448,13 @@ class Services extends ArmsModel
 			'parent_id',
 			$this->id
 		);
-		return $this->hasMany(Services::className(), ['parent_id' => 'id'])
+		return $this->hasMany(Services::class, ['parent_id' => 'id'])
 			->from(['service_children'=>self::tableName()]);
 	}
 	
 	/**
 	 * Все потомки (включая потомков потомков)
-	 * @return Services[]|\yii\db\ActiveQuery
+	 * @return Services[]|ActiveQuery
 	 */
 	public function getChildrenRecursive()
 	{
@@ -461,17 +466,18 @@ class Services extends ArmsModel
 			}
 			return $result;
 		}
-		return $this->hasMany(Services::className(), ['parent_id' => 'id'])
+		return $this->hasMany(Services::class, ['parent_id' => 'id'])
 			->from(['service_children'=>self::tableName()]);
 	}
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @noinspection PhpUnusedFunctionInspection
 	 */
 	public function getInfrastructureResponsible()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'infrastructure_user_id'])
+		return $this->hasOne(Users::class, ['id' => 'infrastructure_user_id'])
 			->from(['infrastructure_responsible'=>Users::tableName()]);
 	}
 	
@@ -490,7 +496,10 @@ class Services extends ArmsModel
 		return null;
 	}
 	
-	
+	/**
+	 * @return string
+	 * @noinspection PhpUnusedFunctionInspection
+	 */
 	public function getInfrastructureResponsibleName() {
 		if (is_object($this->infrastructureResponsibleRecursive)) return $this->infrastructureResponsibleRecursive->Ename;
 		//если никто не нашелся за инфраструктуру, тогда за нее отвечает ответственный за сервис
@@ -498,11 +507,11 @@ class Services extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getResponsible()
 	{
-		return $this->hasOne(Users::className(), ['id' => 'responsible_id'])
+		return $this->hasOne(Users::class, ['id' => 'responsible_id'])
 			->from(['responsible'=>Users::tableName()]);
 	}
 	
@@ -523,11 +532,11 @@ class Services extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getSegment()
 	{
-		return $this->hasOne(Segments::className(), ['id' => 'segment_id'])
+		return $this->hasOne(Segments::class, ['id' => 'segment_id'])
 			->from(['services_segment'=>Segments::tableName()]);
 	}
 	
@@ -554,17 +563,17 @@ class Services extends ArmsModel
 	 */
 	public function getDepends()
 	{
-		return $this->hasMany(Services::className(), ['id' => 'depends_id'])
+		return $this->hasMany(Services::class, ['id' => 'depends_id'])
 			->from(['service_depend'=>Services::tableName()])
 			->viaTable('{{%services_depends}}', ['service_id' => 'id']);
 	}
 	
 	/**
-	 * Возвращает комманду техподдержки
+	 * Возвращает команду техподдержки
 	 */
 	public function getSupport()
 	{
-		return $this->hasMany(Users::className(), ['id' => 'user_id'])
+		return $this->hasMany(Users::class, ['id' => 'user_id'])
 			->from(['support'=>Users::tableName()])
 			->viaTable('{{%users_in_services}}', ['service_id' => 'id']);
 	}
@@ -593,11 +602,11 @@ class Services extends ArmsModel
 	}
 	
 	/**
-	 * Возвращает комманду поддержки инфраструктуры
+	 * Возвращает команду поддержки инфраструктуры
 	 */
 	public function getInfrastructureSupport()
 	{
-		return $this->hasMany(Users::className(), ['id' => 'users_id'])
+		return $this->hasMany(Users::class, ['id' => 'users_id'])
 			->from(['infrastructure_support'=>Users::tableName()])
 			->viaTable('{{%users_in_svc_infrastructure}}', ['services_id' => 'id']);
 	}
@@ -631,7 +640,7 @@ class Services extends ArmsModel
 	 */
 	public function getContracts()
 	{
-		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::class, ['id' => 'contracts_id'])
 			->from(['service_contracts'=>Contracts::tableName()])
 			->viaTable('{{%contracts_in_services}}', ['services_id' => 'id']);
 	}
@@ -641,7 +650,7 @@ class Services extends ArmsModel
 	 */
 	public function getDependants()
 	{
-		return $this->hasMany(Services::className(), ['id' => 'service_id'])
+		return $this->hasMany(Services::class, ['id' => 'service_id'])
 			->from(['dependant_services'=>Services::tableName()])
 			->viaTable('{{%services_depends}}', ['depends_id' => 'id']);
 	}
@@ -651,7 +660,7 @@ class Services extends ArmsModel
 	 */
 	public function getTechs()
 	{
-		return $this->hasMany(Techs::className(), ['id' => 'tech_id'])
+		return $this->hasMany(Techs::class, ['id' => 'tech_id'])
 			->viaTable('{{%techs_in_services}}', ['service_id' => 'id']);
 	}
 	
@@ -660,7 +669,7 @@ class Services extends ArmsModel
 	 */
 	public function getUserGroup()
 	{
-		return $this->hasOne(UserGroups::className(), ['id' => 'user_group_id']);
+		return $this->hasOne(UserGroups::class, ['id' => 'user_group_id']);
 	}
 	
 	/**
@@ -673,7 +682,7 @@ class Services extends ArmsModel
 	}
 	
 	/**
-	 * Возвращает серверы на которых живет этот сервис
+	 * Возвращает серверы на которых живет этот сервис (и дочерние)
 	 */
 	public function getCompsRecursive()
 	{
@@ -688,6 +697,22 @@ class Services extends ArmsModel
 		return $this->compsRecursiveCache;
 	}
 	
+	/**
+	 * Возвращает оборудование на котором живет этот сервис (и дочерние)
+	 */
+	public function getTechsRecursive()
+	{
+		if (is_null($this->techsRecursiveCache)) {
+			$this->techsRecursiveCache=[];
+			foreach ($this->techs as $tech)
+				$this->techsRecursiveCache[$tech->id]=$tech;
+			
+			foreach ($this->children as $child)
+				$this->techsRecursiveCache=ArrayHelper::recursiveOverride($child->techsRecursive,$this->techsRecursiveCache);
+		}
+		return $this->techsRecursiveCache;
+	}
+	
 	public function getArms()
 	{
 		return $this->hasMany(Techs::class, ['id' => 'arm_id'])
@@ -696,33 +721,33 @@ class Services extends ArmsModel
 	
 	public function getPlace()
 	{
-		return $this->hasOne(Places::className(), ['id' => 'places_id']);
+		return $this->hasOne(Places::class, ['id' => 'places_id']);
 	}
 	
 	public function getArmPlaces()
 	{
-		return $this->hasMany(Places::className(), ['id' => 'places_id'])
+		return $this->hasMany(Places::class, ['id' => 'places_id'])
 			->from(['places_in_svc_arms'=>Places::tableName()])
 			->via('arms');
 	}
 	
 	public function getTechPlaces()
 	{
-		return $this->hasMany(Places::className(), ['id' => 'places_id'])
+		return $this->hasMany(Places::class, ['id' => 'places_id'])
 			->from(['places_in_svc_techs'=>Places::tableName()])
 			->via('techs');
 	}
 	
 	public function getInetsPlaces()
 	{
-		return $this->hasMany(Places::className(), ['id' => 'places_id'])
+		return $this->hasMany(Places::class, ['id' => 'places_id'])
 			->from(['places_in_svc_inets'=>Places::tableName()])
 			->via('orgInets');
 	}
 	
 	public function getPhonesPlaces()
 	{
-		return $this->hasMany(Places::className(), ['id' => 'places_id'])
+		return $this->hasMany(Places::class, ['id' => 'places_id'])
 			->from(['places_in_svc_phones'=>Places::tableName()])
 			->via('orgPhones');
 	}
@@ -800,6 +825,7 @@ class Services extends ArmsModel
 	/**
 	 * Проверяет что этот сервис косвенно входит в сервис с ID serviceID
 	 * @param $serviceID
+	 * @return bool
 	 */
 	public function inService($serviceID) {
 		if ($this->id === $serviceID) return true;
@@ -809,27 +835,27 @@ class Services extends ArmsModel
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getAcls()
 	{
-		return $this->hasMany(Acls::className(), ['services_id' => 'id']);
+		return $this->hasMany(Acls::class, ['services_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getOrgInets()
 	{
-		return $this->hasMany(OrgInet::className(), ['services_id' => 'id']);
+		return $this->hasMany(OrgInet::class, ['services_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getOrgPhones()
 	{
-		return $this->hasMany(OrgPhones::className(), ['services_id' => 'id']);
+		return $this->hasMany(OrgPhones::class, ['services_id' => 'id']);
 	}
 	
 	/**
@@ -977,7 +1003,7 @@ class Services extends ArmsModel
 			$rating=[];
 			foreach ($services as $service) {
 				/**
-				 * @var $service \app\models\Services
+				 * @var $service Services
 				 */
 				
 				$responsible=null;
@@ -1008,7 +1034,7 @@ class Services extends ArmsModel
 		if (is_array($services) && count($services)) {
 			foreach ($services as $service) {
 				/**
-				 * @var $service \app\models\Services
+				 * @var $service Services
 				 */
 				
 				$responsible=null;
