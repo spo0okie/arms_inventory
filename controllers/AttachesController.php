@@ -3,7 +3,9 @@
 namespace app\controllers;
 
 use app\models\Attaches;
+use Throwable;
 use Yii;
+use yii\db\StaleObjectException;
 use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
@@ -25,21 +27,23 @@ class AttachesController extends ArmsBaseController
 
 	    if ($model->load(Yii::$app->request->get())) {
 		    $model->uploadedFile = UploadedFile::getInstance($model, 'uploadedFile');
-		    if ($model->upload()) $model->save();
+		    if (is_object($model->uploadedFile) && $model->upload()) $model->save();
+		    else Yii::$app->session->setFlash('error', 'Error uploading file');
 	    }
 		return $this->redirect(Url::previous());
 
     }
-    
 	
 	
 	/**
-     * Deletes an existing Scans model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+	 * Deletes an existing Scans model.
+	 * If deletion is successful, the browser will be redirected to the 'index' page.
+	 * @param int $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws Throwable
+	 * @throws StaleObjectException
+	 */
     public function actionDelete(int $id)
     {
     	//if (is_null($id)) $id=Yii::$app->request->post('id');
