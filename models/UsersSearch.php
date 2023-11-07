@@ -3,10 +3,8 @@
 namespace app\models;
 
 use app\helpers\QueryHelper;
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Users;
 
 /**
  * UsersSearch represents the model behind the search form of `app\models\Users`.
@@ -16,6 +14,7 @@ class UsersSearch extends Users
 	public $org_name;
 	public $orgStruct_name;
 	public $shortName;
+	public $archived=true;
     /**
      * @inheritdoc
      */
@@ -43,7 +42,7 @@ class UsersSearch extends Users
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search(array $params)
     {
         $query = Users::find()->joinWith([
         	'orgStruct',
@@ -92,6 +91,11 @@ class UsersSearch extends Users
             // $query->where('0=1');
             return $dataProvider;
         }
+        
+        if (!$this->archived) {
+        	$query
+				->andFilterWhere(['users.Uvolen'=>0]);
+		}
         
         $query
 			->andFilterWhere(['users.Orgeh'=>$this->Orgeh])

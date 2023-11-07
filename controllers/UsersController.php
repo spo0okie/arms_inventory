@@ -61,10 +61,18 @@ class UsersController extends ArmsBaseController
 		
 		//дальше все как обычно
 		$searchModel = new UsersSearch();
+		$searchModel->archived= Yii::$app->request->get('showArchived',false);
 		$dataProvider = $searchModel->search($params);
+		
+		//ищем тоже самое но с дочерними в противоположном положении
+		$switchArchived=clone $searchModel;
+		$switchArchived->archived=!$switchArchived->archived;
+		$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams)->totalCount;
+		
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,
+			'switchArchivedCount' => $switchArchivedCount,
 		]);
 	}
 	
