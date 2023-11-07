@@ -11,6 +11,7 @@ use kartik\dynagrid\DynaGridStore;
 use kartik\dynagrid\Module;
 use kartik\grid\GridView;
 use NumberFormatter;
+use Yii;
 use yii\base\InvalidConfigException;
 use yii\base\Widget;
 use yii\data\ActiveDataProvider;
@@ -65,10 +66,10 @@ class DynaGridWidget extends Widget
 	 * @return array
 	 * @throws InvalidConfigException
 	 */
-	public static function matchColumnString($column)
+	public static function matchColumnString(string $column)
 	{
 		$matches = [];
-		if (!Lib::preg_match('/^([\w\.]+)(:(\w*))?(:(.*))?$/u', $column, $matches)) {
+		if (!Lib::preg_match('/^([\w.]+)(:(\w*))?(:(.*))?$/u', $column, $matches)) {
 			throw new InvalidConfigException(
 				"Invalid column configuration for '{$column}'. The column must be specified ".
 				"in the format of 'attribute', 'attribute:format' or 'attribute:format: label'."
@@ -128,7 +129,7 @@ class DynaGridWidget extends Widget
 	public function run()
 	{
 		if (is_null($this->id)) {
-			$this->id=\Yii::$app->controller->id.'-'.\Yii::$app->controller->action->id;
+			$this->id= Yii::$app->controller->id.'-'. Yii::$app->controller->action->id;
 		}
 		
 		if (is_null($this->model)) {
@@ -191,7 +192,8 @@ class DynaGridWidget extends Widget
 						set: function (key,val) {persistResizeColumn(key,val)}
 					}'),
 					'selector'=>'tr th',
-					'visibilityWaitTimeout'=>500
+					'visibilityWaitTimeout'=>500,
+					'debug'=>1,
 				],
 				'persistResize'=>true,
 				'responsive'=>!ArrayHelper::getValue($this->gridOptions,'floatHeader'),
@@ -275,7 +277,7 @@ class DynaGridWidget extends Widget
 		$columns=static::setColumnKeys($columns);
 		foreach ($defaultOrder as $attr) {
 			if (isset($columns[$attr])) $prepared[]=$this->defaultColumn($attr,$columns[$attr]);
-		};
+		}
 		foreach ($columns as $attr=>$data) if (array_search($attr,$defaultOrder)===false) {
 			$column=$this->defaultColumn($attr,$columns[$attr]);
 			if (count($defaultOrder)) $column['visible']=false;
