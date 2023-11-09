@@ -14,6 +14,10 @@ class M231109084405FixAutoincrement extends Migration
      */
     public function safeUp()
     {
+    	$techs=$this->getDb()->getTableSchema('techs');
+    	foreach ($techs->foreignKeys as $foreignKey=>$data)
+    		$this->dropForeignKey($foreignKey,'techs');
+    	
     	$this->execute('set @max_id=(select max(id) from hw_ignore); update hw_ignore set id=@max_id+1 where id=0;');
 		$this->alterColumn('hw_ignore','id',$this->integer()->append(' AUTO_INCREMENT'));
 		$this->execute('set @max_id=(select max(id) from tech_states); update tech_states set id=@max_id+1 where id=0;');
