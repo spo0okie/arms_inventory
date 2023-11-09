@@ -14,6 +14,7 @@ class M231109084405FixAutoincrement extends Migration
      */
     public function safeUp()
     {
+    	$this->execute('update hw_ignore set id=max(id)+1 where id=0');
 		$this->alterColumn('hw_ignore','id',$this->integer()->append(' AUTO_INCREMENT'));
 		$this->alterColumn('tech_states','id',$this->integer()->append(' AUTO_INCREMENT'));
     }
