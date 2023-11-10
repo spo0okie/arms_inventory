@@ -1,7 +1,7 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\ListObjectWidget;
+use app\helpers\ArrayHelper;
 use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
@@ -30,18 +30,18 @@ if (!isset($static_view)) $static_view=false;
                 echo 'Уволен с '.$model->resign_date;
             else
                 echo 'Уволен';
-	    } else {
-	        if (strlen($model->employ_date))
-		        echo 'Работает с '.$model->employ_date;
-	        else
-		        echo 'Работает';
-	    };
+	    } elseif (strlen($model->employ_date))
+			echo 'Работает с '.$model->employ_date;
+	    else
+			echo 'Работает';
 	?>
     <p>
-	    <?= $this->render('/partners/item',['model'=>$model->org,'static_view'=>true]) ?>
-		<?= $model->Doljnost?(' // '.$model->Doljnost):'' ?>
-		<br>
-		<?= $this->render('/org-struct/item',['model'=>$model->orgStruct,'chain'=>true]) ?>
+	    <?= ArrayHelper::implode(' / ',[
+			$this->render('/partners/item',['model'=>$model->org,'static_view'=>true]),
+			$this->render('/org-struct/item',['model'=>$model->orgStruct,'chain'=>true]),
+			$model->Doljnost
+		]) ?>
+		
     </p>
 
 	<div class="flex-row d-flex flex-wrap pb-3">
@@ -61,7 +61,7 @@ if (!isset($static_view)) $static_view=false;
         Городской: <?= $model->work_phone ?><br />
     </p>
 
-	<?php echo \app\components\ListObjectWidget::widget([
+	<?php echo ListObjectWidget::widget([
 		'models' => $model->compsFromTechs,
 		'title' => 'Привязанные ОС:',
 		'item_options' => ['static_view' => true, 'class'=>'text-nowrap','rc'=>true],
@@ -69,7 +69,7 @@ if (!isset($static_view)) $static_view=false;
 		'lineBr'=> $static_view,
 	]) ?>
 
-	<?php echo \app\components\ListObjectWidget::widget([
+	<?php echo ListObjectWidget::widget([
 		'models' => $model->netIps,
 		'title' => 'Закрепленные IP:',
 		'item_options' => ['static_view' => $static_view, 'class'=>'text-nowrap'],
@@ -77,7 +77,7 @@ if (!isset($static_view)) $static_view=false;
 		'lineBr'=> $static_view,
 	]) ?>
 
-    <?php if (!$static_view) echo \app\components\ListObjectWidget::widget([
+    <?php if (!$static_view) echo ListObjectWidget::widget([
 		'models' => $model->techs,
 		'title' => 'АРМ/Оборудование числящиеся за сотрудником:',
 		'item_options' => ['static_view' => $static_view, ],

@@ -19,7 +19,9 @@ class UrlListWidget extends Widget
 	 */
 	public $list;
 	public $ips='';
-	public static $hint='Список ссылок (по одной в строке) с описанием. Последнее слово в строке - ссылка, все остальные - описание. Пример: "описание сервиса https://wiki.domain.local/services:inventory".';
+	public static $hint='Список ссылок с описанием по одной в строке. <br>'
+		. 'Сначала описание ссылки, затем последнее слово - сама ссылка (в ней пробелов не должно быть, вместо них %20).<br>'
+		. 'Пример: <i><b>описание сервиса</b> https://wiki.domain.local/services:inventory</i>.';
 	
 	/**
 	 * @param $item

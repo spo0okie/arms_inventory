@@ -15,7 +15,8 @@ use yii\web\IdentityInterface;
 /**
  * This is the model class for table "users".
  *
- * @property string $id Табельный номер
+ * @property integer $id Табельный номер
+ * @property string $employee_id Табельный номер
  * @property string $Orgeh Подразделение (id)
  * @property string $Orgtx Подразделение
  * @property string $Doljnost Должность
@@ -61,6 +62,7 @@ use yii\web\IdentityInterface;
  * @property Services[]  $infrastructureServices
  * @property Services[]  $supportServices
  * @property Services[]  $infrastructureSupportServices
+ * @property LoginJournal[]  $lastThreeLogins
  * @property LicGroups[] $licGroups
  * @property LicItems[]  $licItems
  * @property LicKeys[]   $licKeys
@@ -355,7 +357,7 @@ class Users extends ArmsModel implements IdentityInterface
 	 */
 	public function getOrg()
 	{
-		return $this->hasOne(\app\models\Partners::class, ['id'=>'org_id']);
+		return $this->hasOne(Partners::class, ['id'=>'org_id']);
 	}
 	
 	/**
@@ -525,13 +527,13 @@ class Users extends ArmsModel implements IdentityInterface
     public function validatePassword(string $password)
     {
     	//local backend
-    	if (\Yii::$app->params['localAuth']??false) {//Local DB Backend
+    	if (Yii::$app->params['localAuth']??false) {//Local DB Backend
 			return password_verify($password,$this->password);
 		}
     	
     	//LDAP backend
-		if (isset(\Yii::$app->ldap)) {
-			return \Yii::$app->ldap->auth()->attempt($this->Login, $password);
+		if (isset(Yii::$app->ldap)) {
+			return Yii::$app->ldap->auth()->attempt($this->Login, $password);
 		}
 		
 		return false;
@@ -613,18 +615,18 @@ class Users extends ArmsModel implements IdentityInterface
 	}
 
 	public function getLastLogin() {
-		return \app\models\LoginJournal::find()
+		return LoginJournal::find()
 			->where(['users_id'=>$this->id])
 			->andWhere(['!=','comps_id','NULL'])
 			->orderBy('id desc')->one();
 	}
 
 	public function getLastThreeLogins() {
-		return \app\models\LoginJournal::fetchUniqComps($this->id);
+		return LoginJournal::fetchUniqComps($this->id);
 	}
 
 	public function getLastLoginComp() {
-		return \app\models\LoginJournal::find()
+		return LoginJournal::find()
 			->where(['users_id'=>$this->id,'!comp_id'=>null])
 			->orderBy('id desc')
 			->one();
@@ -787,11 +789,11 @@ class Users extends ArmsModel implements IdentityInterface
 		$user->Login='';
 
 		//Если мы используем RBAC модель доступа, то переназначаем все роли новому логину
-		if (\Yii::$app->params['useRBAC']) {
-			foreach (\Yii::$app->authManager->getRolesByUser($user->id) as $role) {
-				\Yii::$app->authManager->assign($role,$this->id);
+		if (Yii::$app->params['useRBAC']) {
+			foreach (Yii::$app->authManager->getRolesByUser($user->id) as $role) {
+				Yii::$app->authManager->assign($role,$this->id);
 			}
-			\Yii::$app->authManager->revokeAll($user->id);
+			Yii::$app->authManager->revokeAll($user->id);
 		}
 
 		
