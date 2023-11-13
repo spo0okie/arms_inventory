@@ -86,7 +86,7 @@ class ContractsSearch extends Contracts
 		//поисковый запрос в тексте повторяющем "шаблон вывода списка документов"
 		// дата - наименование - контрагент - комментарий
 		$nameExpression=new \yii\db\Expression("concat(".
-			"`contracts`.`date`,' - ',".
+			"ifnull(`contracts`.`date`,'нет даты'),' - ',".
 			"`contracts`.`name`,' - ',".
 			"ifnull(`partners`.`uname`,'".static::$noPartnerSuffix."'),' (', ifnull(`partners`.`bname`,'') , ')',".
 			"ifnull(`users`.`Ename`,''),".
