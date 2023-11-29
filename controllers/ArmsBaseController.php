@@ -112,17 +112,14 @@ class ArmsBaseController extends Controller
 				case self::PERM_ANONYMOUS:
 					$rule['roles']=['?'];
 					break;
+				/** @noinspection PhpMissingBreakStatementInspection */
 				case 'view':
-					//отрабатываем комбинацию !authorizedView && useRBAC дающую права просмотра при аутентификации
+					//отрабатываем комбинацию !authorizedView && useRBAC дающую права просмотра всем аутентифицированным
 					//https://wiki.reviakin.net/инвентаризация:настройка#авторизация
 					if (
 						empty(Yii::$app->params['authorizedView']) &&
 						!empty(Yii::$app->params['useRBAC'])
-					)	//если нужная комбинация стоит, то даем view права аутентифицированным
-						$rule['roles']=['?'];
-					else	//иначе как default
-						$rule['permissions']=[$permission];
-					break;
+					) $rule['roles']=['?'];
 				default:
 					$rule['permissions']=[$permission];
 			}
