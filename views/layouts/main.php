@@ -171,6 +171,16 @@ echo ModalAjax::widget([
 				}
 			}
 		"),
+		ModalAjax::EVENT_MODAL_SHOW_COMPLETE => new \yii\web\JsExpression("
+            function(event, xhr, textStatus) {
+                if (xhr.status == 403) {
+                	$('div#modal_form_loader').addClass('border-danger');
+                	$('div#modal_form_loader div.modal-header').addClass('card-header bg-danger');
+                	$('h5.modal-title#modal_form_loader-label').html('Error');
+                	$('div#modal_form_loader div.modal-body').html('Доступ к этой операции отсутствует');
+                }
+            }
+		"),
 		//ModalAjax::EVENT_BEFORE_SUBMIT => new \yii\web\JsExpression($js1),
 		ModalAjax::EVENT_MODAL_SUBMIT => new \yii\web\JsExpression($js),
 		//ModalAjax::EVENT_MODAL_SUBMIT_COMPLETE => new \yii\web\JsExpression($js3),

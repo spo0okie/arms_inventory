@@ -112,6 +112,17 @@ class ArmsBaseController extends Controller
 				case self::PERM_ANONYMOUS:
 					$rule['roles']=['?'];
 					break;
+				case 'view':
+					//отрабатываем комбинацию !authorizedView && useRBAC дающую права просмотра при аутентификации
+					//https://wiki.reviakin.net/инвентаризация:настройка#авторизация
+					if (
+						empty(Yii::$app->params['authorizedView']) &&
+						!empty(Yii::$app->params['useRBAC'])
+					)	//если нужная комбинация стоит, то даем view права аутентифицированным
+						$rule['roles']=['?'];
+					else	//иначе как default
+						$rule['permissions']=[$permission];
+					break;
 				default:
 					$rule['permissions']=[$permission];
 			}
@@ -123,6 +134,7 @@ class ArmsBaseController extends Controller
 			'denyCallback' => function ($rule, $action) {
 				//$user=is_object(\Yii::$app->user->identity)?\Yii::$app->user->identity->Login:'anon';
 				//error_log("{$action->id} denied for user $user");
+				//if (Yii::$app->request->isAjax) return $this->defaultReturn('site/error',[]);
 				throw new  ForbiddenHttpException('Access denied');
 			}
 		];
