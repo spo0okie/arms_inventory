@@ -142,7 +142,12 @@ class ArmsBaseController extends Controller
 			],
 			'authenticator' => [
 				'class' => HttpBasicAuth::class,
-				'optional'=> Yii::$app->user->isGuest?[]:['*'],
+				'optional'=> /*(
+					Yii::$app->user->isGuest &&	(
+						!empty(Yii::$app->params['authorizedView']) ||
+						!empty(Yii::$app->params['useRBAC'])
+					)
+				)?[]:*/['*'],
 				'auth' => function ($login, $password) {
 					/** @var $user Users */
 					$user = Users::find()->where(['Login' => $login])->one();
