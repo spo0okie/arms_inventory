@@ -818,6 +818,9 @@ class Users extends ArmsModel implements IdentityInterface
 		
 		//если uid нет, или этот уволен, то ничего не проверяем
 		if (!$this->uid) return;
+		
+		//если этот уволен то тоже ничего не проверяем
+		if ($this->Uvolen) return;
 
 		//ищем нет ли таких же пользователей с таким же логином и uid
 		$exist=static::find()
@@ -829,7 +832,7 @@ class Users extends ArmsModel implements IdentityInterface
 		if (is_array($exist) && count($exist)) foreach ($exist as $user) {
 			/** @var $user Users */
 			//если найденный пользователь уволен, а этот нет
-			if (!$this->Uvolen && $user->Uvolen) $this->absorbUser($user);
+			$this->absorbUser($user);
 		}
 	}
 	
