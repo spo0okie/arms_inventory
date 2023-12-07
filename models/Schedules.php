@@ -4,6 +4,9 @@ namespace app\models;
 
 use Yii;
 use yii\data\ArrayDataProvider;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * Hint: В оформлении расписания надо придерживаться правила, что расписание отвечает на вопрос когда?
@@ -22,7 +25,10 @@ use yii\data\ArrayDataProvider;
  * @property string $description
  * @property string $history
  * @property string $providingMode
- * @property array $weekWorkTimeDescription //расписание через запятую
+ * @property string $weekWorkTimeDescription //недельное расписание
+ * @property string $dateWorkTimeDescription //начало и конец расписания (даты)
+ * @property string $workTimeDescription	 //полное описание из двух выше
+ * @property string $usageDescription	 	 //описание применения расписания
  * @property boolean isAcl
  * @property boolean isOverride
  * @property integer startUnixTime
@@ -59,7 +65,7 @@ class Schedules extends ArmsModel
 	{
 		$scenarios = parent::scenarios();
 		$scenarios[self::SCENARIO_OVERRIDE] = $scenarios[self::SCENARIO_DEFAULT];
-		$scenarios[self::SCENARIO_ACL] = $scenarios[self::SCENARIO_DEFAULT];;
+		$scenarios[self::SCENARIO_ACL] = $scenarios[self::SCENARIO_DEFAULT];
 		return $scenarios;
 	}
 	
@@ -70,6 +76,18 @@ class Schedules extends ArmsModel
 			'support'=>'Услуга/сервис поддерживается',
 			'working'=>'Рабочее время'
 		],
+		'usage_complete'=>[
+			'acl'=>'Доступ предоставлялся',
+			'providing'=>'Услуга/сервис предоставлялся',
+			'support'=>'Услуга/сервис поддерживался',
+			'working'=>'Рабочее время было'
+		],
+		'usage_will_be'=>[
+			'acl'=>'Доступ будет предоставляться',
+			'providing'=>'Услуга/сервис будет предоставляться',
+			'support'=>'Услуга/сервис будет поддерживаться',
+			'working'=>'Рабочее время будет'
+		],
 		'nodata'=>[
 			'acl'=>'Доступ не предоставляется никогда',
 			'providing'=>'Услуга/сервис не предоставляется никогда',
@@ -77,10 +95,10 @@ class Schedules extends ArmsModel
 			'working'=>'Рабочее время отсутствует (не работает никогда)'
 		],
 		'always'=>[
-			'acl'=>'Доступ предоставляется всегда',
-			'providing'=>'Услуга/сервис предоставляется 24/7 без перерывов',
-			'support'=>'Услуга/сервис поддерживается 24/7 без перерывов',
-			'working'=>'Рабочее время всегда (работает 24/7)'
+			'acl'=>'всегда',
+			'providing'=>'без перерывов (24/7)',
+			'support'=>'без перерывов (24/7)',
+			'working'=>'всегда (24/7)'
 		],
 		'period_start'=>[
 			'acl'=>'Начало периода предоставления доступа (если есть)',
@@ -126,7 +144,7 @@ class Schedules extends ArmsModel
 			[['name','description','defaultItemSchedule'], 'string', 'max' => 255],
 			[['start_date','end_date'], 'string', 'max' => 64],
 			['start_date','required','on'=>self::SCENARIO_OVERRIDE],
-			[['start_date','end_date'],function ($attribute, $params, $validator) {
+			[['start_date','end_date'],function ($attribute) {
         		foreach ($this->parent->overrides as $override){
         			if ($override->id != $this->id && (
         				$override->matchDate($this->$attribute) ||
@@ -139,7 +157,7 @@ class Schedules extends ArmsModel
 			},'on'=>self::SCENARIO_OVERRIDE],
 			[['history'],'safe'],
 			[['override_id'],'integer'],
-			[['parent_id'], function ($attribute, $params, $validator) {
+			[['parent_id'], function ($attribute) {
 				$children=[$this->id];
 				if (is_object($this->parent) && $this->parent->loopCheck($children)!==false) {
 					$chain=[];
@@ -229,10 +247,10 @@ class Schedules extends ArmsModel
 	
 	/**
 	 * Проверяем петлю по связи потомок-предок заполняя цепочку $children рекурсивно добавляя туда предков
-	 * @param $children integer[]
+	 * @param integer[] $children
 	 * @return false|int
 	 */
-	public function loopCheck(&$children)
+	public function loopCheck(array &$children)
 	{
 		//если предок уже встречается среди потомков, то сообщаем его
 		if (($loop=array_search($this->id,$children))!==false) {
@@ -396,7 +414,7 @@ class Schedules extends ArmsModel
 	 * Находим исключения в расписании в указанный период
 	 * @param $start int
 	 * @param $end int|null
-	 * @return array|\yii\db\ActiveRecord[]
+	 * @return array|ActiveRecord[]
 	 */
 	public function findExceptions(int $start,int $end=null)
 	{
@@ -424,7 +442,7 @@ class Schedules extends ArmsModel
 	 * @return SchedulesEntries[]
 	 */
 	public function findPeriods($start=null,$end=null) {
-		$query=\app\models\SchedulesEntries::find()
+		$query= SchedulesEntries::find()
 			->where([
 				'schedule_id'=>$this->id,
 				'is_period'=>1
@@ -450,11 +468,11 @@ class Schedules extends ArmsModel
 	
 	/**
 	 * Возвращает все привязанные к расписанию записи (периоды и дни)
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getEntries() {
 		if (is_null($this->entriesCache))
-			$this->entriesCache=$this->hasMany(SchedulesEntries::className(), ['schedule_id' => 'id']);
+			$this->entriesCache=$this->hasMany(SchedulesEntries::class, ['schedule_id' => 'id']);
 		return $this->entriesCache;
 	}
 	
@@ -530,47 +548,47 @@ class Schedules extends ArmsModel
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getParent()
 	{
-		return $this->hasOne(Schedules::className(), ['id' => 'parent_id']);
+		return $this->hasOne(Schedules::class, ['id' => 'parent_id']);
 	}
 	
 	/**
 	 * Возвращает перекрываемое расписание (если это расписание перекрывает другое)
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getOverriding()
 	{
-		return $this->hasOne(Schedules::className(), ['id' => 'override_id']);
+		return $this->hasOne(Schedules::class, ['id' => 'override_id']);
 	}
 	
 	/**
 	 * Возвращает перекрывающие расписания (если это расписание перекрывается другими)
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getOverrides()
 	{
 		if (!is_null($this->overridesCache)) return $this->overridesCache;
-		return $this->overridesCache=$this->hasMany(Schedules::className(), ['override_id' => 'id'])
+		return $this->overridesCache=$this->hasMany(Schedules::class, ['override_id' => 'id'])
 			->orderBy(['start_date'=>SORT_DESC]);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getProvidingServices()
 	{
-		return $this->hasMany(Services::className(), ['providing_schedule_id' => 'id']);
+		return $this->hasMany(Services::class, ['providing_schedule_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getAcls()
 	{
-		return $this->hasMany(Acls::className(), ['schedules_id' => 'id']);
+		return $this->hasMany(Acls::class, ['schedules_id' => 'id']);
 	}
 	
 	public function getAcePartners() {
@@ -630,11 +648,11 @@ class Schedules extends ArmsModel
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getSupportServices()
 	{
-		return $this->hasMany(Services::className(), ['support_schedule_id' => 'id']);
+		return $this->hasMany(Services::class, ['support_schedule_id' => 'id']);
 	}
 	
 	public function getServicesArr()
@@ -679,6 +697,7 @@ class Schedules extends ArmsModel
 	
 	/**
 	 * Пробуем вернуть коротко расписание работы на неделю
+	 * @param null|integer $date
 	 * @return array
 	 */
 	public function getWeekWorkTime($date=null)
@@ -734,16 +753,21 @@ class Schedules extends ArmsModel
 	
 	/**
 	 * Пробуем вернуть dataProvider расписания на неделю с учетом родителя
-	 * @return \yii\data\ArrayDataProvider
+	 * @return ArrayDataProvider
 	 */
 	public function getWeekDataProvider()
 	{
 		$models=[];
-		foreach (\app\models\SchedulesEntries::$days as $day=>$name)
+		foreach (SchedulesEntries::$days as $day=> $name)
 			$models[$day]=$this->getWeekdayEntryRecursive($day,null);
-		return new \yii\data\ArrayDataProvider(['allModels'=>$models]);
+		return new ArrayDataProvider(['allModels'=>$models]);
 	}
 	
+	/**
+	 * Описание расписания на неделю
+	 * @param null $date
+	 * @return mixed|string
+	 */
 	public function getWeekWorkTimeDescription($date=null) {
 		if (is_null($date)) $date=strtotime('today');
 		
@@ -751,10 +775,42 @@ class Schedules extends ArmsModel
 			$description=implode(',',$periods);
 			if ($description=='00:00-23:59 '.static::$allDaysTitle)
 				return $this->getDictionary('always');
-			return $this->getDictionary('usage').' '.$description;
+			return $description;
 		} else
-			return $this->getDictionary('nodata');
+			return '';
 	}
+	
+	/**
+	 * Пояснение применения расписания
+	 */
+	public function getUsageDescription() {
+		if ($this->start_date && strtotime('today')<strtotime($this->start_date)) {
+			return $this->getDictionary('usage_will_be');
+		}
+		if ($this->end_date && strtotime('today')>strtotime($this->end_date)) {
+			return $this->getDictionary('usage_complete');
+		}
+		return $this->getDictionary('usage');
+	}
+	
+	public function getDateWorkTimeDescription() {
+		$tokens=[];
+		if ($this->start_date) $tokens[]="с ". Yii::$app->formatter->asDate($this->start_date);
+		if ($this->end_date) $tokens[]="до ". Yii::$app->formatter->asDate($this->end_date);
+		return count($tokens)?implode(' ',$tokens):'';
+	}
+	
+	public function getWorkTimeDescription() {
+		$tokens=[];
+		$weekDescription=$this->weekWorkTimeDescription;
+		$dateDescription=$this->dateWorkTimeDescription;
+		if ($weekDescription) $tokens[]=$weekDescription;
+		if ($dateDescription) $tokens[]=$dateDescription;
+		if (count($tokens)) return $this->usageDescription.' '.implode(' ',$tokens);
+		return $this->getDictionary('nodata');
+	}
+	
+	
 	
 	
 	/**
@@ -788,7 +844,7 @@ class Schedules extends ArmsModel
 		//рабочий график на день
 		$objSchedule=$this->getDateEntryRecursive($date);
 		if (!is_object($objSchedule)) {
-			$objSchedule=new \app\models\SchedulesEntries();
+			$objSchedule=new SchedulesEntries();
 			$objSchedule->load([
 				'is_period'=>0,
 				'schedule'=>'-',
@@ -873,9 +929,9 @@ class Schedules extends ArmsModel
 		$schedule=$scheduleArray['day'];
 		if (!is_object($schedule)) return 0;
 		$periods=$schedule->schedulePeriods;
-		$now=\app\models\SchedulesEntries::strTimestampToMinutes($time);
+		$now= SchedulesEntries::strTimestampToMinutes($time);
 		foreach ($periods as $period) {
-			$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
+			$interval= SchedulesEntries::scheduleExToMinuteInterval($period);
 			if (self::intervalCheck($interval,$now)) return	1;
 		}
 		return 0;
@@ -885,13 +941,13 @@ class Schedules extends ArmsModel
 	{
 		$schedule=$this->getDateEntryRecursive($date);
 		$periods=$schedule->schedulePeriods;
-		$now=\app\models\SchedulesEntries::strTimestampToMinutes($time);
+		$now= SchedulesEntries::strTimestampToMinutes($time);
 		foreach ($periods as $period) {
-			$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
+			$interval= SchedulesEntries::scheduleExToMinuteInterval($period);
 			if (self::intervalCheck($interval,$now)) {
 				if ($interval['meta']===false) return '{}';
 				else return $interval['meta'];
-			};
+			}
 		}
 		return '{}';
 	}
@@ -914,7 +970,7 @@ class Schedules extends ArmsModel
 			$schedule=$this->getDateEntryRecursive($day);
 			if (count($periods=$schedule->schedulePeriods)) {
 				foreach ($periods as $period) {
-					$interval=\app\models\SchedulesEntries::scheduleExToMinuteInterval($period);
+					$interval= SchedulesEntries::scheduleExToMinuteInterval($period);
 					if ($interval[0]*60+$testDate+86400*$i >= $testTimestamp) {
 						if ($interval['meta']!==false) return $interval['meta'];
 					}
@@ -959,7 +1015,7 @@ class Schedules extends ArmsModel
 	 * @param $range array
 	 * @return array
 	 */
-	public static function intervalCut($interval,$range)
+	public static function intervalCut(array $interval, array $range)
 	{
 		//граница NULL означает что с этого края интервал открыт
 		if (
@@ -977,12 +1033,13 @@ class Schedules extends ArmsModel
 	
 	/**
 	 * проверка попадания в интервал
-	 * @param $interval array
-	 * @param $value int
+	 * @param $interval array|false
+	 * @param $value integer
 	 * @return bool
 	 */
-	public static function intervalCheck($interval,$value)
+	public static function intervalCheck($interval,int $value)
 	{
+		if ($interval===false) return false;
 		return $interval[0]<=$value && $interval[1]>=$value;
 	}
 	
@@ -992,7 +1049,7 @@ class Schedules extends ArmsModel
 	 * @param $interval2 array
 	 * @return bool
 	 */
-	public static function intervalIntersect($interval1,$interval2)
+	public static function intervalIntersect(array $interval1, array $interval2)
 	{
 		// сортируем интервалы так, чтобы второй был не раньше первого
 		if ((is_null($interval2[0]) && !is_null($interval1[0])) || $interval2[0]<$interval1[0]) {
@@ -1042,7 +1099,7 @@ class Schedules extends ArmsModel
 	 * @param $B array Вычитаемое
 	 * @return array[]
 	 */
-	public static function intervalSubtraction($A,$B)
+	public static function intervalSubtraction(array $A, array $B)
 	{
 		$meta=isset($A['meta'])?$A['meta']:false;
 		if ($B[0]<=$A[0]) {
@@ -1086,7 +1143,7 @@ class Schedules extends ArmsModel
 	 * @param $subtrahend array вычитаемые
 	 * @return array[]
 	 */
-	public static function intervalsSubtraction($minuend,$subtrahend)
+	public static function intervalsSubtraction(array $minuend, array $subtrahend)
 	{
 		//выкусываем из всех уменьшаемых вычитаемые по одному
 		
@@ -1107,9 +1164,9 @@ class Schedules extends ArmsModel
 	/**
 	 * склеивает все пересекающиеся интервалы в массиве
 	 * @param $intervals array[]
-	 * @return array[]
+	 * @return array
 	 */
-	public static function intervalMerge($intervals)
+	public static function intervalMerge(array $intervals)
 	{
 		do {
 			$intersect=false; //сначала мы не знаем ни о каких пересечениях
@@ -1165,9 +1222,12 @@ class Schedules extends ArmsModel
 		$list= static::find()
 			->joinWith('acls')
 			->select(['schedules.id','name'])
-			->where(['acls.schedules_id'=>null])
+			->where(['and',
+				['acls.schedules_id'=>null],
+				['schedules.override_id'=>null],
+			])
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
+		return ArrayHelper::map($list, 'id', 'name');
 	}
 	
 }
