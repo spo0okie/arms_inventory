@@ -3,9 +3,12 @@
 namespace app\models;
 
 use app\helpers\QueryHelper;
+use voskobovich\linker\LinkerBehavior;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
-use yii\web\JsExpression;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "contracts".
@@ -33,6 +36,7 @@ use yii\web\JsExpression;
  * @property string $sAttach строка с иконками приложений
  * @property string $comment Комментарий
  * @property string $partnersNames имена партнеров (ч/з запятую)
+ * @property string $stateName Статус
  * @property array $partners_ids массив ссылок на контрагентов в договоре
  * @property array $arms_ids массив ссылок на контрагентов в договоре
  * @property array $techs_ids массив ссылок на контрагентов в договоре
@@ -65,6 +69,7 @@ use yii\web\JsExpression;
  * @property Services[]  $services
  * @property Services[]  $servicesChain
  * @property Users[]     $users
+ * @property ContractsStates $state Статус
  */
 class Contracts extends ArmsModel
 {
@@ -81,10 +86,8 @@ class Contracts extends ArmsModel
 
 	public $scanFile;
 
-	private $partners_cache=null;
 	private $successors_chain_cache=null;
 	private $techs_chain_cache=null;
-	private $arms_chain_cache=null;
 	private $inets_cache=null;
 	private $phones_cache=null;
 	private $inets_chain_cache=null;
@@ -118,7 +121,7 @@ class Contracts extends ArmsModel
 	        [['is_successor'], 'boolean'],
             [['comment'], 'string'],
             [['name','date','end_date'], 'string', 'max' => 128],
-	        [['parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => Contracts::className(), 'targetAttribute' => ['parent' => 'id']],
+	        [['parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => Contracts::class, 'targetAttribute' => ['parent' => 'id']],
 			[['parent_id'],	'validateRecursiveLink', 'params'=>['getLink' => 'parent']],
 		];
     }
@@ -131,7 +134,7 @@ class Contracts extends ArmsModel
 	{
 		return [
 			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'class' => LinkerBehavior::class,
 				'relations' => [
 					'partners_ids' => 'partners',
 					'lics_ids' => 'licItems',
@@ -281,28 +284,28 @@ class Contracts extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getCurrency()
 	{
-		return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+		return $this->hasOne(Currency::class, ['id' => 'currency_id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getParent()
 	{
-		return $this->hasOne(Contracts::className(), ['id' => 'parent_id']);
+		return $this->hasOne(Contracts::class, ['id' => 'parent_id']);
 	}
 	
 	/**
 	 * ищет одного наследника (один уровень наследования + самый молодой)
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getSuccessor()
 	{
-		return $this->hasOne(Contracts::className(), ['parent_id' => 'id'])
+		return $this->hasOne(Contracts::class, ['parent_id' => 'id'])
 			->from(['contract_successor'=>self::tableName()])
 			->onCondition(['contract_successor.is_successor'=>true])
 			->orderBy(['contract_successor.date'=>SORT_DESC]);
@@ -310,27 +313,27 @@ class Contracts extends ArmsModel
 	
 	/**
 	 * ищет одного наследника (один уровень наследования + самый молодой)
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getContracts()
 	{
-		return $this->hasMany(Contracts::className(), ['parent_id' => 'id']);
+		return $this->hasMany(Contracts::class, ['parent_id' => 'id']);
 	}
 	
 	/**
 	 * Ищет всех непосредственных наследников (один уровень наследования)
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getSuccessors()
 	{
-		return $this->hasMany(Contracts::className(), ['parent_id' => 'id'])
+		return $this->hasMany(Contracts::class, ['parent_id' => 'id'])
 			->andWhere(['is_successor'=>true])
 			->orderBy(['date'=>SORT_DESC]);
 	}
 
 	/**
 	 * Ищет всех наследников
-	 * @return \app\models\Contracts[]
+	 * @return Contracts[]
 	 */
 	public function getSuccessorsRecursive()
 	{
@@ -347,7 +350,7 @@ class Contracts extends ArmsModel
 
 	/**
 	 * Предшественник документа (если есть)
-	 * @return \app\models\Contracts
+	 * @return Contracts
 	 */
 	public function getPredecessor()
 	{
@@ -358,7 +361,7 @@ class Contracts extends ArmsModel
 	/**
 	 * Первый предшественник документа
 	 * (тот, который актуален на текущий момент, а все остальные устарели)
-	 * @return \app\models\Contracts
+	 * @return Contracts
 	 */
 	public function getFirstPredecessor()
 	{
@@ -378,7 +381,7 @@ class Contracts extends ArmsModel
 	 * не привязанных к документу других документов, а по сути версий договоров заменяющих друг друга в разные периоды времени
 	 * отсортированная по дате
 	 * начиная с самого последнего, даже если этот документ не крайний наследник
-	 * @return \app\models\Contracts[]
+	 * @return Contracts[]
 	 */
 	public function getSuccessorsChain()
 	{
@@ -412,11 +415,11 @@ class Contracts extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getChilds()
 	{
-		return $this->hasMany(Contracts::className(), ['parent_id' => 'id'])
+		return $this->hasMany(Contracts::class, ['parent_id' => 'id'])
 			->from(['contract_children'=>self::tableName()])
 			->onCondition(['contract_children.is_successor'=>false])
 			->orderBy(['contract_children.date'=>SORT_DESC]);
@@ -502,16 +505,18 @@ class Contracts extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getServices()
 	{
-		return $this->hasMany(Services::className(), ['id'=>'services_id'])
+		return $this->hasMany(Services::class, ['id'=>'services_id'])
 			->viaTable('contracts_in_services',['contracts_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getUsers()
 	{
@@ -521,6 +526,7 @@ class Contracts extends ArmsModel
 	
 	/**
 	 * Возвращает набор контрагентов в договоре
+	 * @param bool $userName
 	 * @return string
 	 */
 	public function getPartnersNames($userName=true)
@@ -582,11 +588,11 @@ class Contracts extends ArmsModel
 
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getState()
 	{
-		return $this->hasOne(ContractsStates::className(), ['id' => 'state_id']);
+		return $this->hasOne(ContractsStates::class, ['id' => 'state_id']);
 	}
 
 	public function getStateName()
@@ -601,7 +607,7 @@ class Contracts extends ArmsModel
 	 */
 	public function getScans()
 	{
-		return $this->hasMany(Scans::className(), ['contracts_id' => 'id']);
+		return $this->hasMany(Scans::class, ['contracts_id' => 'id']);
 	}
 
 
@@ -610,7 +616,7 @@ class Contracts extends ArmsModel
 	 */
 	public function getMaterials()
 	{
-		return $this->hasMany(Materials::className(), ['id' => 'materials_id'])
+		return $this->hasMany(Materials::class, ['id' => 'materials_id'])
 			->viaTable('{{%contracts_in_materials}}', ['contracts_id' => 'id']);
 	}
 
@@ -619,21 +625,21 @@ class Contracts extends ArmsModel
 	 */
 	public function getTechs()
 	{
-		return $this->hasMany(Techs::className(), ['id' => 'techs_id'])
+		return $this->hasMany(Techs::class, ['id' => 'techs_id'])
 			->viaTable('{{%contracts_in_techs}}', ['contracts_id' => 'id']);
 	}
 
 	public function getLicItems()
 	{
-		return $this->hasMany(LicItems::className(), ['id' => 'lics_id'])
+		return $this->hasMany(LicItems::class, ['id' => 'lics_id'])
 			->viaTable('{{%contracts_in_lics}}', ['contracts_id' => 'id']);
 	}
 
 	
 	/**
 	 * набор всей техники привязанной к цепочке документов
-	 * @return null|\yii\db\ActiveQuery
-	 * @throws \yii\base\InvalidConfigException
+	 * @return null|ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getTechsChain()
 	{
@@ -645,13 +651,13 @@ class Contracts extends ArmsModel
 		foreach ($this->successorsChain as $item) $chain[]=$item->id;
 		
 
-		return $this->hasMany(\app\models\Techs::className(),['id' => 'techs_id'])
+		return $this->hasMany(Techs::class,['id' => 'techs_id'])
 			->viaTable('{{%contracts_in_techs}}', ['contracts_id' => $chain]);
 	}
 
 	/**
 	 * набор всех вводов интернет привязанных к цепочке документов
-	 * @return \app\models\OrgInet[]
+	 * @return OrgInet[]
 	 */
 	public function getInetsChain()
 	{
@@ -672,7 +678,7 @@ class Contracts extends ArmsModel
 
 	/**
 	 * набор всех телефонов привязанных к цепочке документов
-	 * @return \app\models\OrgPhones[]
+	 * @return OrgPhones[]
 	 */
 	public function getPhonesChain()
 	{
@@ -693,7 +699,7 @@ class Contracts extends ArmsModel
 	
 	/**
 	 * набор всех лицензий привязанных к цепочке документов
-	 * @return \app\models\LicItems[]
+	 * @return LicItems[]
 	 */
 	public function getLicsChain()
 	{
@@ -714,7 +720,7 @@ class Contracts extends ArmsModel
 	
 	/**
 	 * набор всех лицензий привязанных к цепочке документов
-	 * @return \app\models\Services[]
+	 * @return Services[]
 	 */
 	public function getServicesChain()
 	{
@@ -735,23 +741,23 @@ class Contracts extends ArmsModel
 	
 	/**
 	 * Возвращает набор контрагентов в договоре
-	 * @return \yii\db\ActiveQuery
-	 * @throws \yii\base\InvalidConfigException
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getPartners()
 	{
 		//if (!is_null($this->partners_cache)) return $this->partners_cache;
 
 		//return $this->partners_cache=Partners::fetchByField('contracts_id',$this->contracts_id)
-		return $this->hasMany(Partners::className(), ['id' => 'partners_id'])
+		return $this->hasMany(Partners::class, ['id' => 'partners_id'])
 			->viaTable('{{%partners_in_contracts}}', ['contracts_id' => 'id']);
 	}
 
 	public static function fetchNames(){
-		$list= static::find()->joinWith('partners')->viaTable('{{%partners_in_contracts}}', ['contracts_id' => 'id'])
-			//->select(['id','name'])
+		$list= static::find()
+			->with(['partners','users'])
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+		return ArrayHelper::map($list, 'id', 'sname');
 	}
 
 
@@ -764,7 +770,7 @@ class Contracts extends ArmsModel
 	}
 	
 	/**
-	 * @param array $ids передаем список контрактов
+	 * @param array|string $ids передаем список контрактов
 	 * @param string $form имя формы
 	 * @return string на выходе список хинтов
 	 */
@@ -775,7 +781,7 @@ class Contracts extends ArmsModel
 
 		if (!count($ids)) return '';
 
-		$arms=\app\models\Techs::find()
+		$arms= Techs::find()
 			->joinWith(['contracts','model.type'])
 			->where(['techs_contracts.id'=>$ids,'tech_types.is_computer'=>1])
 			->all();
@@ -790,7 +796,7 @@ class Contracts extends ArmsModel
 			$js=strlen($form)?
 				"onclick=\"$('#$form-arms_id,#$form-arms_ids').val({$arm->id}).trigger('change');\"":
 				'';
-			$ttip=\yii\helpers\Url::to(['/techs/ttip','id'=>$arm->id]);
+			$ttip= Url::to(['/techs/ttip','id'=>$arm->id]);
 			$hint.="<span class='href' qtip_ajxhrf='$ttip' $js>{$arm->num}</span> ";
 		}
 		return $hint;
@@ -826,7 +832,7 @@ class Contracts extends ArmsModel
 			$js=strlen($form)?(
 			"onclick=\"$('#$form-parent_id').val({$doc->id}).trigger('change');\""
 			):'';
-			$ttip=\yii\helpers\Url::to(['/contracts/ttip','id'=>$doc->id]);
+			$ttip= Url::to(['/contracts/ttip','id'=>$doc->id]);
 			$hint.="<br /><span class='href' qtip_ajxhrf='$ttip' $js>{$doc->selfSname}</span>";
 		}
 	
@@ -851,6 +857,7 @@ class Contracts extends ArmsModel
 	 */
 	public static function chargeCalcHtml($model,$total,$charge) {
 		//строка подсчета НДС в поле $charge из значения в поле $total в ActiveForm
+		/** @noinspection JSJQueryEfficiency */
 		return <<<HTML
 		<span class="href" onclick="$('#{$model}-{$charge}').val(($('#{$model}-{$total}').val()/1.2*0.2).toFixed(2))">20%</span>
 		/
