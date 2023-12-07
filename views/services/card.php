@@ -75,7 +75,7 @@ if(!$static_view) { ?>
 			echo '<strong>Время предоставления: </strong>'
 				.$this->render('/schedules/item',[
 					'model'=>$model->providingScheduleRecursive,
-					'name'=>$model->providingScheduleRecursive->weekWorkTimeDescription
+					'name'=>$model->providingScheduleRecursive->workTimeDescription
 				]);
 			if (!$static_view && count($model->providingScheduleRecursive->getServicesArr())>1) { ?>
 				<span onmouseenter="$('#private_schedule').show()" onmouseleave="$('#private_schedule').hide()">
@@ -84,7 +84,7 @@ if(!$static_view) { ?>
 			    		<?= Html::a('Создать индивидуальное расписание',[
 							'schedules/create',
 							'attach_service'=>$model->id,
-							'parent_id'=>$model->providingScheduleRecursive->id
+							'Schedules[parent_id]'=>$model->providingScheduleRecursive->id
 						],[
 							'id'=>'private_schedule',
 							'style'=>'display:none'
