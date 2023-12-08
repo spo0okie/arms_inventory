@@ -1,7 +1,12 @@
 <?php
-
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+/*
+ * Задача: Посмотреть расписание на следующие 7 дней (включая текущий)
+ * Если за эти 7 дней есть
+ *  - Дни-исключения
+ *  - Периоды работоспособности/неработоспособности
+ *  - Переход с одного недельного графика на другой
+ * То вывести фактическое расписание на каждый из 7 дней
+ */
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
@@ -23,7 +28,7 @@ for ($i=0; $i<$days_forward; $i++) {
 	$dateDay=gmdate('Y-m-d',$today+86400*$i+Yii::$app->params['schedulesTZShift']);
 	$dateLabel='График на '.Yii::$app->formatter->asDate(time()+86400*$i,'full');
 	$week=$model->getWeekSchedule($dateDay);
-	$weeks[$week->id]=$week;
+	if (is_object($week)) $weeks[$week->id]=$week;
 }
 
 if (
