@@ -22,9 +22,6 @@ use yii\helpers\Inflector;
  */
 class ListObjectWidget extends Widget
 {
-	public static $modelsPath='app\\models\\';	//путь где живут классы моделей, который откусываем от имени класса
-								// модели для формирования пути view
-	
 	public $models;				//модели, список которых нам нужен
 	public $title=null;			//заголовок списка
 	public $show_archived=null;	//флаг отображения архивного элемента
@@ -38,6 +35,10 @@ class ListObjectWidget extends Widget
 	
 	private $model=null;
 	private $empty;
+	private $modelClassName=null; //не путь класса а только его имя
+	private $modelClassPath=null; //путь где живут классы моделей, который откусываем от имени класса
+	// модели для формирования пути view
+	
 	
 	public function init(){
 		parent::init();
@@ -52,27 +53,30 @@ class ListObjectWidget extends Widget
 		if (is_null($this->modelClass)) {
 			$this->modelClass='ArmsModel';
 			if (!$this->empty)
-				$this->modelClass=$this->model::className();
+				$this->modelClass=get_class($this->model);
 			
+			//формируем полный путь до класса
+			$this->modelClassPath=explode('\\',$this->modelClass);
+
 			//выкидываем адрес пути до всех моделей
-			if (strpos($this->modelClass,static::$modelsPath)===0)
-				$this->modelClass=substr($this->modelClass,strlen(static::$modelsPath));
+			$this->modelClassName=$this->modelClassPath[count($this->modelClassPath)-1];
 		}
 		
 		//строим путь до view model/item
 		if (is_null($this->itemViewPath)) {
-			$this->itemViewPath='/'.Inflector::camel2id($this->modelClass).'/item';
+			$this->itemViewPath='/'.Inflector::camel2id($this->modelClassName).'/item';
 		}
 		
 		//вытаскиваем заголовок из модели
 		if (is_null($this->title)) {
 			$this->title='$Title_error';
 			if (!$this->empty) {
+				$class=$this->modelClass;
 				if ($this->model->hasProperty('titles')) {
-					$this->title=$this->model->titles;
+					$this->title=$class::$titles;
 				} elseif ($this->model->hasProperty('title')) {
-					$this->title=$this->model->title;
-				}
+					$this->title=$class::$title;
+				} else $this->title=$this->modelClassName;
 			}
 		}
 		
