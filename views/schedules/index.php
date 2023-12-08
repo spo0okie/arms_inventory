@@ -1,28 +1,24 @@
 <?php
 
+use app\components\DynaGridWidget;
+use app\models\Schedules;
 use yii\helpers\Html;
-use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\SchedulesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = \app\models\Schedules::$titles;
+$this->title = Schedules::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="schedules-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Новое', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?php //var_dump($dataProvider->models); ?>
-
-    <?= GridView::widget([
+    <?= DynaGridWidget::widget([
+		'id'=>'schedules-index',
+        'header' => $this->title,
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'createButton' => Html::a('Новое', ['create'], ['class' => 'btn btn-success']),
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
@@ -36,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             'description',
-            'weekWorkTimeDescription',
+            'workTimeDescription',
 
             //['class' => 'yii\grid\ActionColumn'],
         ],
