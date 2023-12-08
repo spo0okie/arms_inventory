@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\data\ArrayDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -29,6 +30,7 @@ use yii\helpers\ArrayHelper;
  * @property string $dateWorkTimeDescription //начало и конец расписания (даты)
  * @property string $workTimeDescription	 //полное описание из двух выше
  * @property string $usageDescription	 	 //описание применения расписания
+ * @property string $usageWorkTimeDescription//полное описание: график, период, применение
  * @property boolean isAcl
  * @property boolean isOverride
  * @property integer startUnixTime
@@ -45,6 +47,8 @@ use yii\helpers\ArrayHelper;
  * @property Schedules $base
  * @property Schedules $overriding
  * @property Schedules[] $overrides
+ * @property Schedules[] $children
+ * @property Schedules[] $parentsChain
  * @property SchedulesEntries $entries
  * @property SchedulesEntries $periods
  * @property ArrayDataProvider $WeekDataProvider
@@ -195,6 +199,9 @@ class Schedules extends ArmsModel
 				'Пояснение',
 				'hint' => 'Пояснение выводится в списке расписаний',
 			],
+			'workTimeDescription' => [
+				'График по дням',
+			],
 			'history' => [
 				'Заметки',
 				'hint' => 'В списке расписаний не видны. Чтобы прочитать надо будет проваливаться в расписание',
@@ -241,6 +248,8 @@ class Schedules extends ArmsModel
 					static::searchableOrHint
 			],
 			'accessPeriods' => 'Активность доступа', //для ACLs
+			'overrides' => 'Периоды - исключения',
+			'children' => 'Дочерние расписания',
 		];
 	}
 	
@@ -400,7 +409,7 @@ class Schedules extends ArmsModel
 	/**
 	 * Вытаскивает слово из словаря с учетом использования расписания (выше)
 	 * @param $word
-	 * @return mixed
+	 * @return string
 	 */
 	public function getDictionary($word) {
 		if (!isset(static::$dictionary[$word]))
@@ -421,9 +430,9 @@ class Schedules extends ArmsModel
 		return SchedulesEntries::find()
 			->Where(['not',['in', 'date', ['1','2','3','4','5','6','7','def']]])
 			->andWhere([
-				'schedule_id'=>$this->id,
 				'is_period'=>0
 			])
+			->andWhere(['in','schedule_id',array_keys($this->parentsChain)])
 			->andWhere(is_null($end)?
 				[
 					'>=', 'UNIX_TIMESTAMP(date)', $start
@@ -546,13 +555,37 @@ class Schedules extends ArmsModel
 		//если не получилось - ищем расписание на каждый день
 		return $this->getDayEntryRecursive('def',$date);
 	}
-
+	
 	/**
 	 * @return ActiveQuery
 	 */
 	public function getParent()
 	{
 		return $this->hasOne(Schedules::class, ['id' => 'parent_id']);
+	}
+	
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getChildren()
+	{
+		return $this->hasMany(Schedules::class, ['parent_id' => 'id']);
+	}
+	
+	/**
+	 * Вернуть цепочку от себя до последнего родителя
+	 * @param array $chain
+	 * @return array
+	 */
+	public function getParentsChain($chain=[]){
+		//если мы уже есть в цепи, значит цепь замкнулась и дальше искать смысла нет.
+		if (isset($chain[$this->id])) return $chain;
+		//добавляем себя в цепочку
+		$chain[$this->id]=$this;
+		//если у нас есть родитель
+		return $this->parent_id?
+			$this->parent->getParentsChain($chain):  //- передаем ему эстафету
+			$chain; //возвращаем текущую цепочку
 	}
 	
 	/**
@@ -793,6 +826,11 @@ class Schedules extends ArmsModel
 		return $this->getDictionary('usage');
 	}
 	
+	/**
+	 * Пояснение периода действия расписания
+	 * @return string
+	 * @throws InvalidConfigException
+	 */
 	public function getDateWorkTimeDescription() {
 		$tokens=[];
 		if ($this->start_date) $tokens[]="с ". Yii::$app->formatter->asDate($this->start_date);
@@ -800,7 +838,25 @@ class Schedules extends ArmsModel
 		return count($tokens)?implode(' ',$tokens):'';
 	}
 	
+	/**
+	 * Пояснение расписания безотносительно использования: график и период
+	 * @return string
+	 */
 	public function getWorkTimeDescription() {
+		$tokens=[];
+		$weekDescription=$this->weekWorkTimeDescription;
+		$dateDescription=$this->dateWorkTimeDescription;
+		if ($weekDescription) $tokens[]=$weekDescription;
+		if ($dateDescription) $tokens[]=$dateDescription;
+		if (count($tokens)) return implode(' ',$tokens);
+		return $this->getDictionary('nodata');
+	}
+	
+	/**
+	 * Пояснение расписания полное: зачем, график, какой период действия
+	 * @return string
+	 */
+	public function getUsageWorkTimeDescription() {
 		$tokens=[];
 		$weekDescription=$this->weekWorkTimeDescription;
 		$dateDescription=$this->dateWorkTimeDescription;
@@ -1230,4 +1286,13 @@ class Schedules extends ArmsModel
 		return ArrayHelper::map($list, 'id', 'name');
 	}
 	
+	public function reverseLinks()
+	{
+		return [
+			$this->providingServices,
+			$this->supportServices,
+			$this->overrides,
+			$this->children,
+		];
+	}
 }
