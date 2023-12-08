@@ -75,7 +75,7 @@ if(!$static_view) { ?>
 			echo '<strong>Время предоставления: </strong>'
 				.$this->render('/schedules/item',[
 					'model'=>$model->providingScheduleRecursive,
-					'name'=>$model->providingScheduleRecursive->workTimeDescription
+					'name'=>$model->providingScheduleRecursive->usageWorkTimeDescription
 				]);
 			if (!$static_view && count($model->providingScheduleRecursive->getServicesArr())>1) { ?>
 				<span onmouseenter="$('#private_schedule').show()" onmouseleave="$('#private_schedule').hide()">
