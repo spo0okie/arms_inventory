@@ -772,7 +772,7 @@ class Schedules extends ArmsModel
 		if (is_null($date)) $date=strtotime('today');
 		
 		if (count($periods=$this->getWeekWorkTime($date))) {
-			$description=implode(',',$periods);
+			$description=implode(', ',$periods);
 			if ($description=='00:00-23:59 '.static::$allDaysTitle)
 				return $this->getDictionary('always');
 			return $description;
