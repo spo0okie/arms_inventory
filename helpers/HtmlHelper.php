@@ -3,17 +3,17 @@
 
 namespace app\helpers;
 
+use yii\helpers\Html;
 
-use app\models\ArmsModel;
-
-class HtmlHelper extends \yii\helpers\Html
+class HtmlHelper extends Html
 {
 	
 	/**
-	 * @param ArmsModel $model
-	 * @param bool $show_archived
+	 * @param object $model
+	 * @param bool   $show_archived
+	 * @return string
 	 */
-	static public function ArchivedDisplay($model,$show_archived=true) {
+	static public function ArchivedDisplay(object $model, $show_archived=true) {
 		return ($model->archived&&!$show_archived)?'style="display:none"':'';
 	}
 	
