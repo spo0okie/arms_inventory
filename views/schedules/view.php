@@ -46,17 +46,16 @@ YiiAsset::register($this);
 	</h1>
 	<p><?= $model->description ?></p>
 	
-	<?= is_object($model->parent)?(
-			'Родительское расписание :'.$this->render('item',['model'=>$model->parent])
-	):'' ?>
-
+	
 	<div class="row">
 		<div class="col-md-6">
-			<?= $this->render('week',['model'=>$model])?>
+			<?= $this->render('week-description',['model'=>$model])?>
+			<?= is_object($model->parent)?('Родительское расписание :'.$this->render('item',['model'=>$model->parent])):'' ?>
 			<?= $this->render('7days',['model'=>$model])?>
 			<?= $this->render('services',['model'=>$model])?>
 			<?= ListObjectWidget::widget([
-				'models'=>$model->children
+				'models'=>$model->children,
+				'title'=>$model->getAttributeLabel('children')
 			]) ?>
 			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
 		</div>
