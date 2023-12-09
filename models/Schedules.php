@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\DateTimeHelper;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\data\ArrayDataProvider;
@@ -735,7 +736,7 @@ class Schedules extends ArmsModel
 	 */
 	public function getWeekWorkTime($date=null)
 	{
-		if (is_null($date)) $date=strtotime('today');
+		$date=DateTimeHelper::weekMonday($date);
 		$days=['-','пн','вт','ср','чт','пт','сб','вс'];
 		
 		$description=[];		//итоговое описание расписания на неделю
@@ -748,7 +749,7 @@ class Schedules extends ArmsModel
 			$scheduleObj=($i===8)?
 				null
 				:
-				$this->getWeekdayEntryRecursive($i,$date);
+				$this->getWeekdayEntryRecursive($i,$date+86400*($i-1));
 			
 			$schedule= is_object($scheduleObj)?
 				$scheduleObj->mergedSchedule
@@ -802,8 +803,6 @@ class Schedules extends ArmsModel
 	 * @return mixed|string
 	 */
 	public function getWeekWorkTimeDescription($date=null) {
-		if (is_null($date)) $date=strtotime('today');
-		
 		if (count($periods=$this->getWeekWorkTime($date))) {
 			$description=implode(', ',$periods);
 			if ($description=='00:00-23:59 '.static::$allDaysTitle)
