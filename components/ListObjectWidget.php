@@ -26,7 +26,7 @@ class ListObjectWidget extends Widget
 	public $title=null;			//заголовок списка
 	public $show_archived=null;	//флаг отображения архивного элемента
 	public $item_options=[];	//опции для рендера элемента
-	public $card_options=[];	//опции для рендера карточки
+	public $card_options=['cardClass'=>'mb-3'];	//опции для рендера карточки
 	public $archived=null;		//признак того что весь список состоит из архивных элементов
 	public $lineBr=true;		//переносить строку между элементами
 	public $show_empty=false;	//отображать заголовок если список пуст
