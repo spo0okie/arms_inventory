@@ -12,7 +12,7 @@
 /* @var $model app\models\Schedules */
 
 
-if (!isset($days_forward)) $days_forward=7;
+if (!isset($days_forward)) $days_forward=10;
 
 if (!isset($static_view)) $static_view=false;
 
@@ -40,9 +40,12 @@ if (
 ) {
 	?>
 
-<div class="schedule-next-days-modeling">
-<h2>В ближайшие <?= $days_forward ?> дней есть исключения</h2>
-<p>праздничные дни/ аварийные простои и т.п.<br> Посмотрите внимательно график на ближайшие <?= $days_forward ?> дней</p>
+<div class="schedule-next-days-modeling mb-4">
+<h2>В ближайшие <?= $days_forward ?> дней есть изменения в расписании</h2>
+<p>
+	праздничные дни/ аварийные простои / смена недельного графика работы и т.п.<br>
+	Посмотрите внимательно график на ближайшие <?= $days_forward ?> дней
+</p>
 	<table class="table table-condensed table-hover table-borderless">
 		<?php for ($i=0; $i<$days_forward; $i++) {
 			$date=date('Y-m-d',time()+86400*$i);
