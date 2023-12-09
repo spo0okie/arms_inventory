@@ -28,7 +28,7 @@ for ($i=0; $i<$days_forward; $i++) {
 	$dateDay=gmdate('Y-m-d',$today+86400*$i+Yii::$app->params['schedulesTZShift']);
 	$dateLabel='График на '.Yii::$app->formatter->asDate(time()+86400*$i,'full');
 	$week=$model->getWeekSchedule($dateDay);
-	if (is_object($week)) $weeks[$week->id]=$week;
+	if (is_object($week)) $weeks[$week->id]=$week; else $week[null]=null;
 }
 
 if (
