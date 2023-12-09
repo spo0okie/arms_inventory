@@ -1,16 +1,17 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\ExpandableCardWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
 
 if (!isset($static_view)) $static_view=$model->isNewRecord;
 $renderer=$this;
+?>
+<h2>Расписание на неделю</h2>
+<div class="mb-3">
 
-echo '<h2>Расписание на неделю</h2>';
-
+<?php
 $content=$this->render('item',['model'=>$model]);
 
 
@@ -22,8 +23,10 @@ if (count($periods)) {
 	}
 	
 }
-echo \app\components\ExpandableCardWidget::widget([
+echo ExpandableCardWidget::widget([
 	'content'=>$content,
 	'maxHeight'=>650,
 	'switchOnlyOnButton'=>true
 ]);
+?>
+</div>
