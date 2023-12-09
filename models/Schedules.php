@@ -878,13 +878,24 @@ class Schedules extends ArmsModel
 	public function getDateEntryRecursive($date)
 	{
 		
-		//ищем расписание на этот день недели
+		//ищем расписание-исключение на этот день недели
 		if (!is_null($daySchedule=$this->getDayEntryRecursive($date,null))) return $daySchedule;
 		
 		//если не получилось - ищем расписание на эту дату по дню недели
 		//выясняем день недели на эту дату
 		$words=explode('-',$date);
 		if (count($words)<3) return null; //ошибка. передана дата не в формате ГГГГ-ММ-ДД
+		//формат даты правильный
+		
+		//если у расписания есть границы и мы вне них то нет никакого графика на этот день
+		$unixDate=strtotime($date);
+		if (
+			($this->startUnixTime && $unixDate<$this->startUnixTime)
+			||
+			($this->endUnixTime && $unixDate>$this->endUnixTime)
+		) return null;
+		
+		//мы внутри границ расписания и у нас нормальная дата. Получаем день недели
 		$weekday=date('N',mktime(0,0,0,$words[1],$words[2],$words[0]));
 		
 		return $this->getWeekdayEntryRecursive($weekday,$date);
@@ -898,7 +909,9 @@ class Schedules extends ArmsModel
 	public function getDateSchedule($date)
 	{
 		//рабочий график на день
+
 		$objSchedule=$this->getDateEntryRecursive($date);
+		
 		if (!is_object($objSchedule)) {
 			$objSchedule=new SchedulesEntries();
 			$objSchedule->load([
