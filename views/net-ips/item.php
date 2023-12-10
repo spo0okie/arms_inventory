@@ -1,11 +1,11 @@
 <?php
 
-use yii\helpers\Html;
-
 /* @var $this yii\web\View */
 /* @var $model app\models\NetIps */
 
 
+use app\components\ItemObjectWidget;
+use app\components\LinkObjectWidget;
 
 if (!isset($class)) $class='';
 if (!isset($static_view)) $static_view=false;
@@ -18,9 +18,10 @@ if (!empty($model)) {
 	if ($icon) $name='<span class="fas fa-network-wired small"></span>'.$name;
 	
 	
-	echo \app\components\ItemObjectWidget::widget([
+	echo ItemObjectWidget::widget([
 		'model'=>$model,
-		'link'=>\app\components\LinkObjectWidget::widget([
+		'archived_class'=>'text-decoration-line-through',
+		'link'=> LinkObjectWidget::widget([
 			'model'=>$model,
 			'noDelete'=>true,
 			'static'=>$static_view,

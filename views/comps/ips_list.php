@@ -8,25 +8,25 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
 
+use app\components\ListObjectWidget;
+use yii\helpers\Html;
+
 if (!isset($static_view)) $static_view=false;
 if (!isset($glue)) $glue='<br />';
 
 ?>
 
-<h4>IP адрес(а)</h4>
-<p><?php
-	$output=[];
-	foreach ($model->netIps as $ip) {
-		$output[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>$static_view]);
-	}
-	echo implode($glue,$output);
-?></p>
+<?= ListObjectWidget::widget([
+	'models'=>$model->netIps,
+	'title'=>'IP адрес(а)',
+	'lineBr'=>($glue=='<br />'),
+]) ?>
 
 <h4>MAC адрес(а)</h4>
 <p><?php
 	$output=[];
 	foreach (explode("\n",$model->formattedMac) as $mac) {
-		$output[]=\yii\helpers\Html::a($mac,['comps/index','CompsSearch[mac]'=>$mac]);
+		$output[]= Html::a($mac,['comps/index','CompsSearch[mac]'=>$mac]);
 	}
 	echo implode($glue,$output);
 ?></p>

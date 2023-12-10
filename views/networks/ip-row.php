@@ -8,10 +8,12 @@ use yii\helpers\Html;
 /* @var $i integer */
 /* @var $showEmpty boolean */
 
-
-$addr=long2ip($model->addr+$i);
+$ip=$model->addr+$i;
+$addr=long2ip($ip);
+$dhcps=$model->dhcpList;
 $default_comment='';
 $class='';
+
 if ($i==0){ //адрес сети
 	$default_comment='Network address';
 	$class='class="table-warning"';
@@ -21,9 +23,16 @@ if ($i==0){ //адрес сети
 } elseif ($model->addr+$i==$model->router) {
 	$default_comment='Default gateway';
 	$class='class="table-success"';
-} elseif (is_object($model->firstUnusedIp) && $model->addr+$i==$model->firstUnusedIp->addr) {
+} elseif (is_object($model->firstUnusedIp) && $ip==$model->firstUnusedIp->addr) {
 	$default_comment='Первый свободный адрес';
 	$class='class="table-success"';
+} elseif (array_search($ip,$dhcps)!==false) {
+	$default_comment='DHCP server';
+	$class='class="table-info"';
+}
+$rangeName='';
+foreach ($model->rangesList as $range) {
+	if ($i>=$range[0] && $i<=$range[1]) $rangeName=$range[2];
 }
 
 $isEmpty=isset($model->ipsByAddr[$model->addr+$i])||$class;
@@ -33,7 +42,13 @@ $ip=$model->ipsByAddr[$model->addr+$i]??null;
 <tr class="<?= $isEmpty?'':'empty-item' ?>" <?= ($isEmpty||$showEmpty)?'':'style="display:none"' ?>>
 
 <td <?= $class ?>>
-	<?= $i ?>
+	<span class="net-ips-item">
+		<?php
+			for ($j=0; $j<(4-strlen($i)); $j++) echo '&nbsp;';
+			echo $i;
+		?>
+	</span>
+	<span class="text-muted"><?= $rangeName ?></span>
 </td>
 
 <?php

@@ -2,12 +2,15 @@
 
 namespace app\models;
 
-use Yii;
 use PhpIP;
+use Throwable;
+use voskobovich\linker\LinkerBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Exception;
-use yii\db\Expression;
+use yii\db\StaleObjectException;
+use yii\helpers\ArrayHelper;
+use yii\validators\IpValidator;
 
 /**
  * This is the model class for table "net_ips".
@@ -32,10 +35,10 @@ use yii\db\Expression;
  * @property Users[] $users
  * @property Places $place
  */
-class NetIps extends \yii\db\ActiveRecord
+class NetIps extends ActiveRecord
 {
 
-	private $network_cache=null;
+	//private $network_cache=null;
 	
 	public static $title='IP адрес';
 	public static $titles='IP адреса';
@@ -81,7 +84,7 @@ class NetIps extends \yii\db\ActiveRecord
 	{
 		return [
 			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'class' => LinkerBehavior::class,
 				'relations' => [
 					'comps_ids' => 'comps',
 					'techs_ids' => 'techs',
@@ -140,12 +143,13 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getNetwork()
 	{
-		return $this->hasOne(Networks::className(), ['id' => 'networks_id']);
+		return $this->hasOne(Networks::class, ['id' => 'networks_id']);
 	}
 	
 	public function getSegment()
 	{
 		if (is_object($this->network)) return $this->network->segment;
+		return null;
 	}
 	
 	/**
@@ -171,7 +175,7 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getComps()
 	{
-		return $this->hasMany(Comps::className(), ['id' => 'comps_id'])->from(['ip_comps'=>Comps::tableName()])
+		return $this->hasMany(Comps::class, ['id' => 'comps_id'])->from(['ip_comps'=>Comps::tableName()])
 			->viaTable('{{%ips_in_comps}}', ['ips_id' => 'id']);
 	}
 	
@@ -180,7 +184,7 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getUsers()
 	{
-		return $this->hasMany(Users::className(), ['id' => 'users_id'])->from(['ip_users'=>Users::tableName()])
+		return $this->hasMany(Users::class, ['id' => 'users_id'])->from(['ip_users'=>Users::tableName()])
 			->viaTable('{{%ips_in_users}}', ['ips_id' => 'id']);
 	}
 	
@@ -189,7 +193,7 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getTechs()
 	{
-		return $this->hasMany(Techs::className(), ['id' => 'techs_id'])->from(['ip_techs'=>Techs::tableName()])
+		return $this->hasMany(Techs::class, ['id' => 'techs_id'])->from(['ip_techs'=>Techs::tableName()])
 			->viaTable('{{%ips_in_techs}}', ['ips_id' => 'id']);
 	}
 	
@@ -198,16 +202,16 @@ class NetIps extends \yii\db\ActiveRecord
 	 */
 	public function getAces()
 	{
-		return $this->hasMany(Aces::className(), ['id' => 'aces_id'])->from(['ip_aces'=>Aces::tableName()])
+		return $this->hasMany(Aces::class, ['id' => 'aces_id'])->from(['ip_aces'=>Aces::tableName()])
 			->viaTable('{{%ips_in_aces}}', ['ips_id' => 'id']);
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getAcls()
 	{
-		return $this->hasMany(Acls::className(), ['ips_id' => 'id']);
+		return $this->hasMany(Acls::class, ['ips_id' => 'id']);
 	}
 	
 	public function getPlace()
@@ -220,8 +224,8 @@ class NetIps extends \yii\db\ActiveRecord
 	/**
 	 * Отвязать ОС от этого IP и удалить IP если к нему более ничего не привязано
 	 * @param $comp_id
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
+	 * @throws Throwable
+	 * @throws StaleObjectException
 	 */
 	public function detachComp($comp_id)
 	{
@@ -243,8 +247,8 @@ class NetIps extends \yii\db\ActiveRecord
 	/**
 	 * Отвязать ОС от этого IP и удалить IP если к нему более ничего не привязано
 	 * @param $tech_id
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
+	 * @throws Throwable
+	 * @throws StaleObjectException
 	 */
 	public function detachTech($tech_id)
 	{
@@ -266,8 +270,8 @@ class NetIps extends \yii\db\ActiveRecord
 	/**
 	 * Отвязать ОС от этого IP и удалить IP если к нему более ничего не привязано
 	 * @param $ace_id
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
+	 * @throws Throwable
+	 * @throws StaleObjectException
 	 */
 	public function detachAce($ace_id)
 	{
@@ -288,8 +292,8 @@ class NetIps extends \yii\db\ActiveRecord
 	
 	/**
 	 * Удаляет IP если к нему ничего не привязано и нет комментария
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
+	 * @throws Throwable
+	 * @throws StaleObjectException
 	 */
 	public function deleteIfEmpty()
 	{
@@ -377,7 +381,6 @@ class NetIps extends \yii\db\ActiveRecord
 	/**
 	 * Ищет ID по адресу. если не находит и можно создать, то создает
 	 * @param              $addr
-	 * @param bool|integer $mask
 	 * @param bool         $create
 	 * @return int|null
 	 */
@@ -429,7 +432,7 @@ class NetIps extends \yii\db\ActiveRecord
 	 * @param string $text_addr
 	 * @return bool
 	 */
-	public static function filterLocal($text_addr) {
+	public static function filterLocal(string $text_addr) {
 		if (!strlen(trim($text_addr))) return false;
 		//Если сети loopback & apipa не инициированы - инициализируем
 		if (is_null(static::$loopbackNet)) static::$loopbackNet=new PhpIP\IPv4Block('127.0.0.0/8');
@@ -447,15 +450,20 @@ class NetIps extends \yii\db\ActiveRecord
 		return true;
 	}
 	
+	public function getArchived() {
+		if (is_object($this->network)) return $this->network->archived;
+		return false;
+	}
 	
 	/**
 	 * Фильтрует ввод "список IP по одному в строку"
 	 * удаляет некорректные значения
 	 * @param $value
+	 * @return string
 	 */
 	public static function filterInput($value) {
 		if (count($items=explode("\n",$value))) {
-			$validator = new \yii\validators\IpValidator();
+			$validator = new IpValidator();
 			$validator->subnet = null;
 			$validator->ipv6 = false;
 			$error=null;
@@ -472,7 +480,7 @@ class NetIps extends \yii\db\ActiveRecord
 	
 	public static function validateInput(&$model,$attribute) {
 		$items=explode("\n",$model->$attribute);
-		$ipValidator = new \yii\validators\IpValidator(['ipv6'=>false,'subnet'=>null]);
+		$ipValidator = new IpValidator(['ipv6'=>false,'subnet'=>null]);
 		$error=null;
 		foreach ($items as $item) if (strlen(trim($item))) {
 			if (!$ipValidator->validate(trim($item), $error)) {
@@ -480,6 +488,13 @@ class NetIps extends \yii\db\ActiveRecord
 				//return; // stop on first error
 			}
 		}
+	}
+	
+	public static function ipList2long($list) {
+		$ips=explode("\n",$list);
+		$longs=[];
+		foreach ($ips as $ip) $longs[]=ip2long($ip);
+		return $longs;
 	}
 	
 	/**
@@ -492,6 +507,6 @@ class NetIps extends \yii\db\ActiveRecord
             //->select(['id','name'])
 			->orderBy(['addr'=>SORT_ASC])
             ->all();
-        return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+        return ArrayHelper::map($list, 'id', 'sname');
     }
 }

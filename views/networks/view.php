@@ -1,20 +1,22 @@
 <?php
 
-use app\components\UrlParamSwitcherWidget;
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\WikiPageWidget;
+use kartik\markdown\Markdown;
+use yii\bootstrap5\Tabs;
+use yii\helpers\Url;
+use yii\web\YiiAsset;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
 /* @var $ips app\models\NetIps[] */
-\yii\helpers\Url::remember();
+Url::remember();
 
 $this->title = $model->sname;
 $this->params['breadcrumbs'][] = ['label' => app\models\Networks::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-\yii\web\YiiAsset::register($this);
+YiiAsset::register($this);
 
-$showEmpty=\Yii::$app->request->get('showEmpty',false);
+$showEmpty= Yii::$app->request->get('showEmpty',false);
 
 //var_dump($index);
 
@@ -29,42 +31,59 @@ $showEmpty=\Yii::$app->request->get('showEmpty',false);
 			<?= $this->render('calc',['model'=>$model]) ?>
 		</div>
 	</div>
-	<br />
-	<?= UrlParamSwitcherWidget::widget([
-		'cssClass'=>'float-end',
-		'param'=>'showEmpty',
-		'hintOff'=>'Скрыть не занятые IP',
-		'hintOn'=>'Показать не занятые IP',
-		'label'=>'Пустые',
-		'reload'=>false,
-		'scriptOn'=>"\$('.empty-item').show();",
-		'scriptOff'=>"\$('.empty-item').hide();",
-	]) ?>
-	<h4>Адреса:</h4>
-	<table class="table table-bordered table-condensed">
-		<tr>
-			<th>
-				#
-			</th>
-			<th>
-				addr
-			</th>
-			<th>
-				Name
-			</th>
-			<th>
-				comment
-			</th>
-		</tr>
-		<?php
-			for ($i=0; $i<$model->capacity; $i++) {
-				$addr=$model->addr+$i;
-				echo $this->render('ip-row',[
-					'model'=>$model,
-					'i'=>$i,
-					'showEmpty'=>$showEmpty,
-				]);
-		} ?>
-	</table>
+<?php
 
+$cookieTabName='networks-view-tab-'.$model->id;
+$cookieTab=$_COOKIE[$cookieTabName]??'ip-table';
+
+
+$tabs=[];
+
+$tabId='ip-table';
+$tabs[]=[
+	'label'=>'Адреса',
+	'active'=>$cookieTab==$tabId,
+	'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
+	'content'=>$this->render('ip-table',['model'=>$model]),
+];
+
+$tabId='net-description';
+$tabs[]=[
+	'label'=>'Описание сети',
+	'active'=>$cookieTab==$tabId,
+	'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
+	'content'=>Markdown::convert($model->notepad),
+];
+
+if (is_object($model->segment)) {
+	$tabId='segment-description';
+	$tabs[]=[
+		'label'=>'Описание сегмента',
+		'active'=>$cookieTab==$tabId,
+		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
+		'content'=>Markdown::convert($model->segment->history),
+	];
+}
+
+$tabNumber=0;
+$wikiLinks= WikiPageWidget::getLinks($model->links);
+foreach ($wikiLinks as $name=>$url) {
+	$tabId='wiki'.$tabNumber;
+	$tabs[]=[
+		'label'=>($name==$url)?'Wiki':$name,
+		'active'=>$cookieTab==$tabId,
+		'content'=> WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
+		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
+	];
+	$tabNumber++;
+}
+
+echo Tabs::widget([
+	'items'=>$tabs,
+	'options'=>[
+		'class'=>'nav-pills',
+	]
+]);
+
+?>
 </div>

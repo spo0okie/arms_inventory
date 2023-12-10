@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\UrlListWidget;
 use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelper;
@@ -82,6 +83,14 @@ class ArmsModel extends ActiveRecord
 				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого объекта',
 			],
 			'history' => ['alias'=>'notepad'],
+			'links' => [
+				'Ссылки',
+				'hint' => UrlListWidget::$hint,
+			],
+			'archived' => [
+				'Перенесено в архив',
+				'hint' => 'Помечается если в работе более не используется, но для истории запись лучше сохранить',
+			],
 			'updated_at' => [
 				'Время изменения',
 				'hint' => 'Время обновления объекта в БД'

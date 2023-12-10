@@ -4,9 +4,8 @@ namespace app\models;
 
 use app\helpers\ArrayHelper;
 use PhpIP;
-use Yii;
-use yii\db\ActiveRecord;
-use yii\db\Expression;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
 
 
 /**
@@ -16,11 +15,13 @@ use yii\db\Expression;
  * @property string $name
  * @property string $sname
  * @property string $text_addr
+ * @property string $text_dhcp
  * @property string $segmentCode
  * @property string $readableRouter
  * @property string $readableDhcp
  * @property string $comment
  * @property string $notepad
+ * @property string $ranges
  * @property int $vlan_id
  * @property int $segments_id
  * @property int $addr
@@ -30,6 +31,8 @@ use yii\db\Expression;
  * @property int $router
  * @property int $usedPercent
  * @property int $dhcp
+ * @property array $dhcpList
+ * @property array $rangesList
  * @property NetVlans $netVlan
  * @property NetDomains $netDomain
  * @property Segments $segment
@@ -45,6 +48,8 @@ class Networks extends ArmsModel
 	private $_IPv4Block=null;
 	private $ips_cache=null;
 	private $first_unused_cache=null;
+	private $dhcp_list_cache=null;
+	private $ranges_cache=null;
 	
 	public static $titles='Сети';
 	public static $title='Сеть';
@@ -56,7 +61,6 @@ class Networks extends ArmsModel
 	. 'коммутаторах, маршрутизаторах, гипервизорах, фаерволах и т.п.'
 	. '</i>';
 	
-	public $text_dhcp;
 	public $text_router;
 	public $domain;
 	
@@ -77,11 +81,14 @@ class Networks extends ArmsModel
     {
         return [
 			[['text_addr'],'ip','ipv6'=>false,'subnet'=>true],
-			[['text_router','text_dhcp'], 'ip','ipv6'=>false],
-            [['vlan_id', 'segments_id', 'addr', 'mask', 'router', 'dhcp'], 'integer'],
+			[['text_router'], 'ip','ipv6'=>false],
+			['text_dhcp', 'filter', 'filter' => function ($value) {
+				return NetIps::filterInput($value);
+			}],
+            [['vlan_id', 'segments_id', 'addr', 'mask', 'router', 'dhcp','archived'], 'integer'],
             [['name'], 'string', 'max' => 255],
-			[['comment','notepad'], 'safe'],
-			[['segments_id'], 'exist', 'skipOnError' => true, 'targetClass' => Segments::className(), 'targetAttribute' => ['segments_id' => 'id']],
+			[['comment','notepad','links','ranges'], 'safe'],
+			[['segments_id'], 'exist', 'skipOnError' => true, 'targetClass' => Segments::class, 'targetAttribute' => ['segments_id' => 'id']],
 		];
     }
 	
@@ -143,6 +150,14 @@ class Networks extends ArmsModel
 				'Описание',
 				'hint' => 'Короткое описание сети',
 			],
+			'ranges' => [
+				'Диапазоны',
+				'hint' => 'Диапазоны адресов для более удобного IPAM<br>'
+					.'Например:<br>'
+					.'1-29 Статика<br>'
+					.'30-249 DHCP<br>'
+					.'250-254 Резерв',
+			],
 			'notepad' => [
 				'Подробно',
 				'hint' => 'Подробное описание сети',
@@ -163,11 +178,11 @@ class Networks extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getNetVlan()
 	{
-		return $this->hasOne(NetVlans::className(), ['id' => 'vlan_id']);
+		return $this->hasOne(NetVlans::class, ['id' => 'vlan_id']);
 	}
 	
 	/**
@@ -198,11 +213,12 @@ class Networks extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getOrgInets()
 	{
-		return $this->hasMany(OrgInet::className(), ['id' => 'org_inets_id'])
+		return $this->hasMany(OrgInet::class, ['id' => 'org_inets_id'])
 			->viaTable('{{%org_inets_in_networks}}', ['networks_id' => 'id']);
 	}
 	
@@ -271,11 +287,11 @@ class Networks extends ArmsModel
 	
 	/**
 	 * Network
-	 * @return \yii\db\ActiveQuery|Networks
+	 * @return ActiveQuery|Networks
 	 */
 	public function getIps()
 	{
-		return $this->hasMany(NetIps::className(), ['networks_id'=>'id'])->orderBy(['addr'=>SORT_ASC]);
+		return $this->hasMany(NetIps::class, ['networks_id'=>'id'])->orderBy(['addr'=>SORT_ASC]);
 	}
 	
 	public function getIpsByAddr()
@@ -284,6 +300,43 @@ class Networks extends ArmsModel
 			$this->ips_cache=\yii\helpers\ArrayHelper::index($this->ips,'addr');
 
 		return $this->ips_cache;
+	}
+	
+	/**
+	 * DHCP сервера в виде массива long
+	 * @return array
+	 */
+	public function getDhcpList() {
+		if (is_null($this->dhcp_list_cache))
+			$this->dhcp_list_cache=NetIps::ipList2long($this->text_dhcp);
+		return $this->dhcp_list_cache;
+	}
+	
+	/**
+	 * Возвращает поле ranges из множества строк вида 1-14 бла бла бла
+	 * в виде массива из [1,14,"бла бла бла"]
+	 * @return array
+	 */
+	public function getRangesList() {
+		if (is_null($this->ranges_cache)) {
+			$this->ranges_cache=[];
+			$match=null;
+			foreach (explode("\n",$this->ranges) as $line) {
+				if (preg_match('/^(\d+)\s*-\s*(\d+)\s+(.+)$/',$line,$match)===1) {
+					//убираем лишние пробелы
+					$line=preg_replace('/^(\d+)\s*-\s*(\d+)\s+(.+)/', '\1-\2 \3', $line);
+					$tokens = explode(' ', $line);
+					$bounds = explode('-', $tokens[0]);
+					unset ($tokens[0]);
+					$this->ranges_cache[] = [
+						$bounds[0],
+						$bounds[1],
+						trim(implode(' ', $tokens)),
+					];
+				}
+			}
+		}
+		return $this->ranges_cache;
 	}
 	
 	/**
@@ -310,11 +363,11 @@ class Networks extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery|Segments
+	 * @return ActiveQuery|Segments
 	 */
 	public function getSegment()
 	{
-		return $this->hasOne(Segments::className(), ['id' => 'segments_id']);
+		return $this->hasOne(Segments::class, ['id' => 'segments_id']);
 	}
 	
 	/**
@@ -351,6 +404,8 @@ class Networks extends ArmsModel
 	
 	/**
 	 * Network
+	 * @param null $addr
+	 * @param null $mask
 	 * @return NetIps[]
 	 */
 	public function findIps($addr=null,$mask=null)
@@ -382,8 +437,6 @@ class Networks extends ArmsModel
 			$this->mask=$addr->getPrefix();
 			$this->text_addr=$addr->getNetworkAddress()->humanReadable().'/'.$this->mask;
 			
-			if (!empty($this->text_dhcp)) $this->dhcp=ip2long($this->text_dhcp);
-	
 			if (!empty($this->text_router)) $this->router=ip2long($this->text_router);
 			return true;
 		}

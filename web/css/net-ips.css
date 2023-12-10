@@ -1,0 +1,5 @@
+/** IP-адреса **/
+span.net-ips-item,
+table.net-ips span.ip-number {
+    font-family: Consolas, monospace;
+}

@@ -1,11 +1,9 @@
 <?php
 
-use kartik\markdown\Markdown;
-use yii\helpers\Html;
-use yii\widgets\DetailView;
-
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
+
+use app\components\LinkObjectWidget;
 
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
@@ -13,13 +11,23 @@ if (!isset($static_view)) $static_view=false;
 ?>
 
 <h1 class="text-monospace">
-	<?= \app\components\LinkObjectWidget::widget([
+	<?= LinkObjectWidget::widget([
 		'model'=>$model,
 		'name'=>$model->sname
 	])?>
 </h1>
 <?= Yii::$app->formatter->asNtext($model->comment) ?>
-
+<?php if ($model->archived) { ?>
+		<div class="d-flex w-100 my-2">
+			<div class="flex-fill alert-striped"></div>
+			<div class="text-center mx-2">
+				<span class="fas fa-exclamation-triangle"></span>
+				СЕТЬ ПЕРЕНЕСЕНА В АРХИВ
+				<span class="fas fa-exclamation-triangle"></span>
+			</div>
+			<div class="flex-fill alert-striped"></div>
+		</div>
+<?php }?>
 	<h4>
 		<?php if (is_object($model->segment)) { ?>
 			Сегмент: <?= $this->render('/segments/item',['model'=>$model->segment]) ?>
@@ -49,7 +57,7 @@ if (!isset($static_view)) $static_view=false;
 		</div>
 		<div class="col-md-6">
 			<h4>DHCP</h4>
-			<?= $model->readableDhcp; ?>
+			<?= Yii::$app->formatter->asNtext($model->text_dhcp) ?>
 		</div>
 	</div>
 	<div class="row mb-3">
@@ -58,25 +66,4 @@ if (!isset($static_view)) $static_view=false;
 			<?= $this->render('used',['model'=>$model]) ?>
 		</div>
 	</div>
-
-<?php
-$descr='';
-
-if (
-	\Yii::$app->params['networkDescribeSegment']===true
-	||
-	(\Yii::$app->params['networkDescribeSegment']==='auto' && !$model->notepad)
-) {
-	if (is_object($model->segment) && $model->segment->history) {
-		$descr.= Markdown::convert($model->segment->history);
-	}
-}
-
-if ($model->notepad) {
-	$descr.= Markdown::convert($model->notepad);
-}
-
-if ($descr) echo \app\components\ExpandableCardWidget::widget([
-	'content'=>$descr
-]);
 
