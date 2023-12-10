@@ -1,8 +1,10 @@
 <?php
 
+use app\helpers\FieldsHelper;
+use app\models\Segments;
+use kartik\markdown\MarkdownEditor;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
@@ -24,54 +26,57 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 		'validationUrl' => $model->isNewRecord?['networks/validate']:['networks/validate','id'=>$model->id], //URL валидации на стороне сервера
 	]); ?>
 	<div class="row">
-		<div class="col-md-4">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'text_addr') ?>
+		<div class="col-md-6">
+			<div class="row">
+				<div class="col-md-6">
+					<?= FieldsHelper::TextInputField($form,$model, 'text_addr') ?>
+				</div>
+				<div class="col-md-6">
+					<?= FieldsHelper::TextInputField($form,$model, 'name') ?>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<?= FieldsHelper::Select2Field($form,$model,  'segments_id', [
+						'data' => Segments::fetchNames(),
+						'options' => [
+							'placeholder' => 'Выберите Сегмент ИТ',
+						],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => true,
+							'multiple' => false
+						]
+					]) ?>
+				</div>
+				<div class="col-md-6">
+					<?= FieldsHelper::Select2Field($form,$model, 'vlan_id', [
+						'data' => app\models\NetVlans::fetchNames(),
+						'options' => [
+							'placeholder' => 'Выберите VLAN',
+						],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => true,
+							'multiple' => false
+						]
+					]) ?>
+				</div>
+			</div>
+			<?= FieldsHelper::TextInputField($form,$model,  'comment') ?>
 		</div>
-		<div class="col-md-4">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+		<div class="col-md-3">
+			<?= FieldsHelper::TextInputField($form,$model,  'text_router') ?>
+			<?= FieldsHelper::TextAutoresizeField($form,$model,  'text_dhcp',['lines'=>2]) ?>
 		</div>
-		<div class="col-md-4">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'vlan_id', [
-				'data' => app\models\NetVlans::fetchNames(),
-				'options' => [
-					'placeholder' => 'Выберите VLAN',
-				],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
+		<div class="col-md-3">
+			<?= FieldsHelper::TextAutoresizeField($form,$model, 'ranges',['lines'=>2]) ?>
+			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links') ?>
+			<?= FieldsHelper::CheckboxField($form,$model, 'archived') ?>
 		</div>
 	</div>
 
-	<div class="row">
-		<div class="col-md-4">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,  'segments_id', [
-				'data' => \app\models\Segments::fetchNames(),
-				'options' => [
-					'placeholder' => 'Выберите Сегмент ИТ',
-				],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-		</div>
-		<div class="col-md-4">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,  'text_router') ?>
-		</div>
-		<div class="col-md-4">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,  'text_dhcp') ?>
-		</div>
-	</div>
-
-
-
-
-    <?= $form->field($model, 'comment')->textarea(['rows' => 1]) ?>
-	<?= $form->field($model, 'notepad')->widget(\kartik\markdown\MarkdownEditor::className(), [
+	<?= $form->field($model, 'notepad')->widget(MarkdownEditor::class, [
 		'showExport'=>false
 	]) ?>
     <div class="form-group">

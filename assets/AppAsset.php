@@ -29,6 +29,7 @@ class AppAsset extends AssetBundle
 		'css/arm-passport.css',
 		'css/arms.css',
 		'css/org-phones.css',
+		'css/net-ips.css',
 		'css/page-header.css',
 		'css/scans.css',
 		'css/schedules.css',

@@ -1,18 +1,20 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
-
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
+
+use app\components\ShowArchivedWidget;
+use app\models\Comps;
+use app\models\Manufacturers;
+use yii\helpers\Url;
 
 $domain = is_object($model->domain)?$model->domain->name:'- не в домене - ';
 
 $this->title = 'ОС '.$domain.'\\'.strtolower($model->name);
-$this->params['breadcrumbs'][] = ['label' => \app\models\Comps::$titles, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Comps::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-\yii\helpers\Url::remember();
-$manufacturers=\app\models\Manufacturers::fetchNames();
+Url::remember();
+$manufacturers= Manufacturers::fetchNames();
 $model->swList->sortByName();
 $soft=[
 	'free'=>[],
@@ -41,6 +43,10 @@ foreach ($model->swList->items as $item) {
 
 	$absorbTitle="Связать(поглотить) клона с этой ОС: недостающие свойства и связанные объекты клона перейдут к этой ОС. Сам клон будет удален";
 ?>
+<span class="float-end">
+			<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
+		</span>
+
 <div class="comps-view row">
 	<div class="col-md-6">
 		<?= $this->render('card',['model'=>$model]) ?>
@@ -70,6 +76,7 @@ foreach ($model->swList->items as $item) {
 
 	</div>
 	<div class="col-md-6">
+
 		<div class="software_settings">
 			<h3>Софт</h3>
 			<?php // echo '<pre>'; var_dump($model->swList->items); echo '</pre>'; ?>
