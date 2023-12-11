@@ -74,7 +74,7 @@ if (is_object($ip)) {
 	</td>
 	
 <?php } else { ?>
-	<td <?= $class ?>><span class="net-ips-item"><?= Html::a($addr,['net-ips/create','return'=>'previous','text_addr'=>$addr]) ?></span></td>
+	<td <?= $class ?>><span class="net-ips-item"><?= Html::a($addr,['net-ips/create','return'=>'previous','NetIps[text_addr]'=>$addr]) ?></span></td>
 	<td <?= $class ?>></td>
 	<td <?= $class ?>><?= Yii::$app->formatter->asNtext($default_comment) ?></td>
 <?php } ?>
