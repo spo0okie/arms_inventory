@@ -1,18 +1,23 @@
 <?php
 
+use app\components\AttributeHintWidget;
+use app\components\DynaGridWidget;
+use app\helpers\ArrayHelper;
+use app\models\Services;
+use app\models\Users;
 use yii\helpers\Html;
-use kartik\grid\GridView;
-use yii\widgets\Pjax;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ServicesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $models \app\models\Services[] */
+/* @var $models Services[] */
 /* @var $disabled_ids array */
 
-\yii\helpers\Url::remember();
+Url::remember();
 
-$this->title = \app\models\Services::$titles;
+$this->title = 'Распределение по сотрудникам';
+$this->params['breadcrumbs'][] = ['label' => Services::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 $models=$dataProvider->models;
 
@@ -28,27 +33,24 @@ $render_columns=[
 	],
 	[
 		'attribute' => 'support',
-		'header' => \app\components\AttributeHintWidget::widget([
+		'header' => AttributeHintWidget::widget([
 			'label'=>'#',
 			'hint'=>'Количество сотрудников сопровождающих сервис'
 		]),
 		'format' => 'raw',
 		'value' => function ($data) use ($disabled_ids) {
-			/* @var $data \app\models\Services */
+			/* @var $data Services */
 			return count($data->supportModeling($disabled_ids));
 		},
 		'contentOptions' => function ($data) use ($disabled_ids) {
 			switch (count($data->supportModeling($disabled_ids))) {
 				case 0:
 					return ['class' => ['col_serviceSum','status_Alert']];
-					break;
 				case 1:
 					return ['class' => ['col_serviceSum','status_Warning']];
-					break;
 				default:
 					return ['class' => ['col_serviceSum','status_OK']];
-					break;
-			};
+			}
 		},
 	],
 ];
@@ -57,7 +59,7 @@ $usersFilter=[];
 $users=[];
 //собираем Какие пользователи сколько раз встречаются в сервисах
 foreach ($dataProvider->models as $model) {
-	/** @var $model \app\models\Services */
+	/** @var $model Services */
 	foreach (array_merge([$model->responsibleRecursive],$model->supportRecursive) as $user) if (is_object($user)) {
 		$usersFilter[$user->id]=$user->Ename;
 		$user_id=$user->id;
@@ -81,15 +83,15 @@ if (is_array($searchModel->responsible_ids) && count($searchModel->responsible_i
 foreach ($users as $user=>$total) {
 	
 	if (!empty($user))	{
-		$objUser=\app\models\Users::findIdentity($user);
+		$objUser= Users::findIdentity($user);
 		$render_columns[]=[
 			'attribute' => $user,
 			'header' => $objUser->shortName,
 			//.'<br>'
 			'filter'=>Html::a(
 				array_search($user,$disabled_ids)===false?'Отключить':'Восстановить',
-					\yii\helpers\Url::currentNonRecursive([
-							'disabled_ids'=>\app\helpers\ArrayHelper::itemToggle($disabled_ids,(string)$user)
+					Url::currentNonRecursive([
+							'disabled_ids'=> ArrayHelper::itemToggle($disabled_ids,(string)$user)
 					]),
 					[
 						'class'=>'btn '.(array_search($user,$disabled_ids)===false?'btn-warning':'btn-success'),
@@ -121,7 +123,7 @@ foreach ($users as $user=>$total) {
 
 echo '<div class="services-index">';
 
-echo \app\components\DynaGridWidget::widget([
+echo DynaGridWidget::widget([
 	'id'=>'index-by-users',
 	'dataProvider' => $dataProvider,
 	'header'=>$this->title,
