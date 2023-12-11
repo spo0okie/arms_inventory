@@ -22,6 +22,7 @@ use yii\db\ActiveQuery;
  * @property string $comment
  * @property string $notepad
  * @property string $ranges
+ * @property string $links
  * @property int $vlan_id
  * @property int $segments_id
  * @property int $addr
@@ -207,6 +208,7 @@ class Networks extends ArmsModel
 	/**
 	 * читаемый DHCP
 	 * @return string
+	 * @noinspection PhpUnusedFunctionInspection
 	 */
 	public function getReadableDhcp()
 	{
@@ -342,6 +344,7 @@ class Networks extends ArmsModel
 	
 	/**
 	 * Первый свободный IP
+	 * @noinspection PhpUnusedFunctionInspection
 	 */
 	public function getFirstUnusedIp()
 	{
@@ -419,7 +422,11 @@ class Networks extends ArmsModel
 			])->all();
 	}
 	
-	
+	/**
+	 * @param $i
+	 * @return NetIps|null
+	 * @noinspection PhpUnusedFunctionInspection
+	 */
 	public function fetchIp($i)
 	{
 		return $this->ipsByAddr[$this->addr+$i]??null;

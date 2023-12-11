@@ -18,14 +18,22 @@ YiiAsset::register($this);
 
 $showEmpty= Yii::$app->request->get('showEmpty',false);
 
-//var_dump($index);
 
-//var_dump($model->ipsByAddr);
+$notepadRender='';
+$notepadLines=0;
+$notepad=strlen(trim($model->notepad));
+if ($notepad) {
+	$notepadRender=Markdown::convert($model->notepad);
+	$notepadLines=count(explode("\n",trim($model->notepad)));
+}
+$notepadCompact=$notepadLines<=10;
+
 ?>
 <div class="networks-view">
 	<div class="row">
 		<div class="col-md-6">
 			<?= $this->render('card',['model'=>$model]) ?>
+			<?= $notepad&$notepadCompact?$notepadRender:'' ?>
 		</div>
 		<div class="col-md-6">
 			<?= $this->render('calc',['model'=>$model]) ?>
@@ -47,15 +55,18 @@ $tabs[]=[
 	'content'=>$this->render('ip-table',['model'=>$model]),
 ];
 
-$tabId='net-description';
-$tabs[]=[
-	'label'=>'Описание сети',
-	'active'=>$cookieTab==$tabId,
-	'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
-	'content'=>Markdown::convert($model->notepad),
-];
+if ($notepad&&(!$notepadCompact)) {
+	$tabId='net-description';
+	$tabs[]=[
+		'label'=>'Описание сети',
+		'active'=>$cookieTab==$tabId,
+		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
+		'content'=>$notepadRender,
+	];
+}
 
-if (is_object($model->segment)) {
+
+if (is_object($model->segment) && trim($model->segment->history)) {
 	$tabId='segment-description';
 	$tabs[]=[
 		'label'=>'Описание сегмента',
