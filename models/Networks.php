@@ -31,6 +31,7 @@ use yii\db\ActiveQuery;
  * @property int $router
  * @property int $usedPercent
  * @property int $dhcp
+ * @property int $archived
  * @property array $dhcpList
  * @property array $rangesList
  * @property NetVlans $netVlan

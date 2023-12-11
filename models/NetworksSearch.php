@@ -4,7 +4,7 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Networks;
+use yii\helpers\StringHelper;
 
 /**
  * NetworksSearch represents the model behind the search form of `app\models\Networks`.
@@ -38,12 +38,10 @@ class NetworksSearch extends Networks
 
     /**
      * Creates data provider instance with search query applied
-     *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search(array $params)
     {
         $query = Networks::find()
 			//->select(['*',''])
@@ -88,14 +86,17 @@ class NetworksSearch extends Networks
             // $query->where('0=1');
             return $dataProvider;
         }
-
+		if (!$this->archived) {
+			$query->andWhere(['not',['IFNULL(networks.archived,0)'=>1]]);
+		}
+		
         $query
-			->andFilterWhere(['or like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
-			->andFilterWhere(['or like', 'concat(net_vlans.name," (",net_vlans.vlan)', \yii\helpers\StringHelper::explode($this->vlan,'|',true,true)])
-			->andFilterWhere(['or like', 'net_domains.name', \yii\helpers\StringHelper::explode($this->domain,'|',true,true)])
-			->andFilterWhere(['or like', 'segments.name', \yii\helpers\StringHelper::explode($this->segment,'|',true,true)])
+			->andFilterWhere(['or like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', StringHelper::explode($this->name,'|',true,true)])
+			->andFilterWhere(['or like', 'concat(net_vlans.name," (",net_vlans.vlan)', StringHelper::explode($this->vlan,'|',true,true)])
+			->andFilterWhere(['or like', 'net_domains.name', StringHelper::explode($this->domain,'|',true,true)])
+			->andFilterWhere(['or like', 'segments.name', StringHelper::explode($this->segment,'|',true,true)])
 			->andFilterWhere(['networks.segments_id'=>$this->segments_id])
-            ->andFilterWhere(['or like', 'networks.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
+            ->andFilterWhere(['or like', 'networks.comment', StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }

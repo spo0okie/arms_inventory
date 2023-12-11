@@ -4,6 +4,8 @@ namespace app\controllers;
 
 use app\models\NetIps;
 use app\models\Networks;
+use app\models\NetworksSearch;
+use Yii;
 use yii\web\NotFoundHttpException;
 
 
@@ -47,4 +49,27 @@ class NetworksController extends ArmsBaseController
             compact('model','ips')
         );
     }
+	
+	/**
+	 * Lists all Comps models.
+	 * @return mixed
+	 */
+	public function actionIndex()
+	{
+		$searchModel = new NetworksSearch();
+		$searchModel->archived= Yii::$app->request->get('showArchived',false);
+		
+		//ищем тоже самое но с дочерними в противоположном положении
+		$switchArchived=clone $searchModel;
+		$switchArchived->archived=!$switchArchived->archived;
+		$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams)->totalCount;
+		
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		
+		return $this->render('index', [
+			'searchModel' => $searchModel,
+			'dataProvider' => $dataProvider,
+			'switchArchivedCount' => $switchArchivedCount,
+		]);
+	}
 }
