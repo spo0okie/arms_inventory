@@ -20,6 +20,7 @@ if (!isset($glue)) $glue='<br />';
 	'models'=>$model->netIps,
 	'title'=>'IP адрес(а)',
 	'lineBr'=>($glue=='<br />'),
+	'glue'=>$glue
 ]) ?>
 
 <h4>MAC адрес(а)</h4>

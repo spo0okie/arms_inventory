@@ -3,11 +3,16 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\Users */
 
+use app\components\ListObjectWidget;
+use app\components\ShowArchivedWidget;
+use app\models\Users;
+use yii\helpers\Url;
+
 $this->title = $model->Ename;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Users::$titles, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Users::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
-\yii\helpers\Url::remember();
+Url::remember();
 
 $static_view=false;
 
@@ -17,6 +22,9 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 
 ?>
 <div class="users-view">
+		<span class="float-end">
+			<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
+		</span>
 	<div class="row">
 		<div class="col-md-4">
 			<?= $this->render('card',['model'=>$model,'static_view'=>false]) ?>
@@ -27,13 +35,10 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				echo $this->render('/techs/compact',['model'=>$arm,'no_users'=>true,'no_specs'=>true,'show_archived'=>$show_archived])?>
 		</div>
 		<div class="col-md-4">
-			<span class="float-end">
-				<?= \app\components\ShowArchivedWidget::widget(['reload'=>false]) ?>
-			</span>
 			<br/>
 			<?php
 			
-			echo \app\components\ListObjectWidget::widget([
+			echo ListObjectWidget::widget([
 				'models' => $model->services,
 				'title' => 'Ответственный за сервисы:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -41,7 +46,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> false,
 			]);
 
-			echo \app\components\ListObjectWidget::widget([
+			echo ListObjectWidget::widget([
 				'models' => $model->infrastructureServices,
 				'title' => 'Ответственный за инфраструктуру:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -49,7 +54,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> false,
 			]);
 			
-			echo \app\components\ListObjectWidget::widget([
+			echo ListObjectWidget::widget([
 				'models' => $comps,
 				'title' => 'Ответственный за ОС:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -57,7 +62,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> false,
 			]);
 			
-			echo \app\components\ListObjectWidget::widget([
+			echo ListObjectWidget::widget([
 				'models' => $model->techsHead,
 				'title' => 'АРМ/оборудование числящиеся за подчиненными:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -65,7 +70,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> false,
 			]);
 			
-			echo \app\components\ListObjectWidget::widget([
+			echo ListObjectWidget::widget([
 				'models' => $model->techsIt,
 				'title' => 'Обслуживаемое сотрудником оборудование:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -73,7 +78,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> false,
 			]);
 			
-			echo \app\components\ListObjectWidget::widget([
+			echo ListObjectWidget::widget([
 				'models' => $model->techsResponsible,
 				'title' => 'АРМ/оборудование в ответственности:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -84,7 +89,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			$materials=[];
 			foreach ($model->materials as $material) if ($material->rest>0) $materials[]=$material;
 			
-			echo \app\components\ListObjectWidget::widget([
+			echo ListObjectWidget::widget([
 				'models' => $materials,
 				'title' => 'Ответственный за материалы:',
 				'item_options' => [
@@ -97,7 +102,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> true,
 			]);
 			
-			echo \app\components\ListObjectWidget::widget([
+			echo ListObjectWidget::widget([
 				'models' => $model->contracts,
 				'title' => 'Документы:',
 				'item_options' => ['static_view' => $static_view, 'user'=>false ],
@@ -108,7 +113,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			
 			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
 
-			<?= \app\models\Users::isAdmin()?$this->render('roles',['model'=>$model,'static_view'=>false]):'' ?>
+			<?= Users::isAdmin()?$this->render('roles',['model'=>$model,'static_view'=>false]):'' ?>
 
 		</div>
 	</div>

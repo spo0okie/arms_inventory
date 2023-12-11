@@ -29,6 +29,7 @@ class ListObjectWidget extends Widget
 	public $card_options=['cardClass'=>'mb-3'];	//опции для рендера карточки
 	public $archived=null;		//признак того что весь список состоит из архивных элементов
 	public $lineBr=true;		//переносить строку между элементами
+	public $glue=' ';			//чем разделять элементы
 	public $show_empty=false;	//отображать заголовок если список пуст
 	public $itemViewPath=null;	//путь для рендера элемента
 	public $modelClass=null;
@@ -116,7 +117,7 @@ class ListObjectWidget extends Widget
 				'model'=>$model,'show_archived'=>$this->show_archived
 			],$this->item_options));
 		}
-		$list=implode(' ',$listItems);
+		$list=implode($this->glue,$listItems);
 		
 		//карточка
 		return ExpandableCardWidget::widget(ArrayHelper::recursiveOverride([
