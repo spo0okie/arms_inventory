@@ -26,14 +26,37 @@ if ($notepad) {
 	$notepadRender=Markdown::convert($model->notepad);
 	$notepadLines=count(explode("\n",trim($model->notepad)));
 }
-$notepadCompact=$notepadLines<=10;
+$notepadCompact=$notepadLines<=Yii::$app->params['networkInlineDescriptionLimit'];
+
+$segmentRender='';
+$segmentLines=0;
+if (is_object($model->segment) && trim($model->segment->history)) {
+	$segmentRender=Markdown::convert($model->segment->history);
+	$notepadLines=count(explode("\n",trim($model->segment->history)));
+}
+$segmentCompact=$segmentLines<=Yii::$app->params['networkInlineDescriptionLimit'];
+
+$showSegment=(
+	Yii::$app->params['networkDescribeSegment']===true
+	||
+	Yii::$app->params['networkDescribeSegment']==='auto' && !$notepad
+);
 
 ?>
 <div class="networks-view">
 	<div class="row">
 		<div class="col-md-6">
 			<?= $this->render('card',['model'=>$model]) ?>
-			<?= $notepad&$notepadCompact?$notepadRender:'' ?>
+			<?php
+				if ($notepad&&$notepadCompact) {
+					echo $notepadRender;
+				}
+				
+				if (!$notepad&&$showSegment&&$segmentCompact) {
+					echo $segmentRender;
+					$showSegment=false;
+				}
+			?>
 		</div>
 		<div class="col-md-6">
 			<?= $this->render('calc',['model'=>$model]) ?>
@@ -55,7 +78,7 @@ $tabs[]=[
 	'content'=>$this->render('ip-table',['model'=>$model]),
 ];
 
-if ($notepad&&(!$notepadCompact)) {
+if ($notepad&&!$notepadCompact) {
 	$tabId='net-description';
 	$tabs[]=[
 		'label'=>'Описание сети',
@@ -66,7 +89,7 @@ if ($notepad&&(!$notepadCompact)) {
 }
 
 
-if (is_object($model->segment) && trim($model->segment->history)) {
+if ($showSegment) {
 	$tabId='segment-description';
 	$tabs[]=[
 		'label'=>'Описание сегмента',

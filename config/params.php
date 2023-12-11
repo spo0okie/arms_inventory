@@ -33,4 +33,5 @@ return [
 		'это позволит впоследствии быстро найти счет по этим полям<br>',
 	
 	'networkDescribeSegment'=>'auto',
+	'networkInlineDescriptionLimit'=>20,
 ];
