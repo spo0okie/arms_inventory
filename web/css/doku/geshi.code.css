@@ -1,0 +1,166 @@
+/**
+ * GeSHi syntax highlighting styles
+ *
+ * Generated with https://www.dokuwiki.org/tips:geshi_style_builder
+ * Cleaned up with http://cleancss.com/
+ * Manulally LESSified
+ */
+.code .co0 {
+	color: #666666;
+	font-style: italic;
+}
+
+.code .co4 {
+	color: #cc0000;
+	font-style: italic;
+}
+
+.code .es5 {
+	color: #006699;
+	font-weight: bold;
+}
+
+.code .es6 {
+	color: #009933;
+	font-weight: bold;
+}
+
+.code .kw2 {
+	color: #000000;
+	font-weight: bold;
+}
+
+.code .kw5 {
+	color: #008000;
+}
+
+.code .kw6 {
+	color: #f08;
+	font-weight: bold;
+}
+
+.code .me0 {
+	color: #004000;
+}
+
+.code .nu0 {
+	color: #cc66cc;
+}
+
+.code .re0 {
+	color: #0000ff;
+}
+
+.code .re3 {
+	color: #ff3333;
+	font-weight: bold;
+}
+
+.code .re4 {
+	color: #009999;
+}
+
+.code .re5 {
+	color: #660033;
+}
+
+.code .re7 {
+	color: #991111;
+}
+
+.code .re8 {
+	color: #00b000;
+}
+
+.code .sc-2 {
+	color: #404040;
+}
+
+.code .sy3 {
+	color: #000040;
+}
+
+.code .br0,
+.code .sy0 {
+	color: #66cc66;
+}
+
+.code .co1,
+.code .coMULTI,
+.code .sc-1 {
+	color: #808080;
+	font-style: italic;
+}
+
+.code .co2,
+.code .sy1 {
+	color: #339933;
+}
+
+.code .co3,
+.code .sy4 {
+	color: #008080;
+}
+
+.code .es0,
+.code .es1,
+.code .esHARD {
+	color: #000099;
+	font-weight: bold;
+}
+
+.code .es2,
+.code .es3,
+.code .es4 {
+	color: #660099;
+	font-weight: bold;
+}
+
+.code .kw1,
+.code .kw8 {
+	color: #b1b100;
+}
+
+.code .kw10,
+.code .kw11,
+.code .kw12,
+.code .kw9 {
+	color: #003399;
+	font-weight: bold;
+}
+
+.code .kw13,
+.code .kw14,
+.code .kw15,
+.code .kw16,
+.code .me1,
+.code .me2 {
+	color: #006600;
+}
+
+.code .kw3,
+.code .kw7,
+.code .sy2 {
+	color: #000066;
+}
+
+.code .kw4,
+.code .re2 {
+	color: #993333;
+}
+
+.code .re1,
+.code .st0,
+.code .st_h {
+	color: #ff0000;
+}
+
+.code li,
+.code .li1 {
+	font-weight: normal;
+	vertical-align: top;
+}
+
+.code .ln-xtra {
+	background-color: #ffc;
+}

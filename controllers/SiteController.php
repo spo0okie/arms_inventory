@@ -22,7 +22,7 @@ class SiteController extends Controller
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'only' => ['logout'],
                 'rules' => [
                     [
@@ -33,7 +33,7 @@ class SiteController extends Controller
                 ],
             ],
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'logout' => ['post'],
                 ],
@@ -70,16 +70,19 @@ class SiteController extends Controller
 	/**
 	 * Displays homepage.
 	 *
+	 * @param        $pageName
+	 * @param string $api
 	 * @return string
 	 */
 	public function actionWiki($pageName,$api='doku')
 	{
 		$wikiUrl='';
+		$page=[];
 		if ($api=='doku') {
-			$wikiUrl=\Yii::$app->params['wikiUrl'];
+			$wikiUrl= Yii::$app->params['wikiUrl'];
 			$arrContextOptions = [
 				"http" => [
-					"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['wikiUser'] . ":" . \Yii::$app->params['wikiPass']),
+					"header" => "Authorization: Basic " . base64_encode(Yii::$app->params['wikiUser'] . ":" . Yii::$app->params['wikiPass']),
 					'method' => 'POST',
 					'content' => xmlrpc_encode_request(
 						'wiki.getPageHTML',
@@ -93,14 +96,14 @@ class SiteController extends Controller
 				stream_context_create($arrContextOptions)
 			);
 			if ($page===false) return "Ошибка получения детального описания из Wiki";
-			$page=xmlrpc_decode($page);
+			$page=xmlrpc_decode($page,'utf-8');
 		}
 		
 		if ($api=='confluence') {
-			$wikiUrl=\Yii::$app->params['confluenceUrl'];
+			$wikiUrl= Yii::$app->params['confluenceUrl'];
 			$arrContextOptions = [
 				"http" => [
-					"header" => "Authorization: Basic " . base64_encode(\Yii::$app->params['confluenceUser'] . ":" . \Yii::$app->params['confluencePass']),
+					"header" => "Authorization: Basic " . base64_encode(Yii::$app->params['confluenceUser'] . ":" . Yii::$app->params['confluencePass']),
 				],"ssl" => ["verify_peer" => false,	"verify_peer_name" => false,],
 			];
 			$page = @file_get_contents($wikiUrl.'/rest/api/content/'.$pageName.'?expand=body.storage',
@@ -128,7 +131,43 @@ class SiteController extends Controller
 		$page = str_replace('href=\'/','href=\'' . $wikiUrl , $page);
 		$page = str_replace('src="/',  'src="' . $wikiUrl , $page);
 		$page = str_replace('src=\'/', 'src=\'' . $wikiUrl , $page);
-		return $page;
+		
+		$folded_code=<<<JS
+jQuery(function() {
+    // containers for localised reveal/hide strings,
+    // populated from the content set by the action plugin
+    jQuery('a.folder[href*="#folded_"]').attr('title', folded_reveal);
+
+    /*
+     * toggle the folded element via className change also adjust the classname and
+     * title tooltip on the folding link
+     */
+    jQuery('.dokuwiki .folder').click(function folded_toggle(evt) {
+        let id = this.href.match(/#(.*)$/)[1];
+        let \$id = jQuery(document.getElementById(id));
+
+        if (\$id.hasClass('hidden')) {
+            \$id.addClass('open').removeClass('hidden');
+            jQuery(this)
+                .addClass('open')
+                .attr('title', folded_hide);
+        } else {
+            \$id.addClass('hidden').removeClass('open');
+            jQuery(this)
+                .removeClass('open')
+                .attr('title', folded_reveal);
+        }
+
+        evt.preventDefault();
+        return false;
+    });
+});
+
+JS;
+
+		return $page
+			.'<style type="text/css" media="screen">.folded.hidden { display: none; } .folder .indicator { visibility: visible; } </style>'
+			.'<script language="JavaScript">'.$folded_code.'</script>';
 	}
 	
 	/**
@@ -181,7 +220,7 @@ class SiteController extends Controller
 	 * @return Users the loaded model
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	protected function findUser($id)
+	protected function findUser(int $id)
 	{
 		if (($model = Users::findOne($id)) !== null) {
 			return $model;
@@ -193,7 +232,10 @@ class SiteController extends Controller
 	/**
 	 * Login action.
 	 *
+	 * @param $id
 	 * @return Response|string
+	 * @throws ForbiddenHttpException
+	 * @throws NotFoundHttpException
 	 */
 	public function actionPasswordSet($id)
 	{
