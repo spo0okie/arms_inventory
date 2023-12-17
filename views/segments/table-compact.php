@@ -14,10 +14,10 @@ echo GridView::widget([
 			'format'=>'raw',
 			'value'=>function($data) use ($renderer){
 				return $renderer->render('item',['model'=>$data]);
-			}
+			},
+			'contentOptions'=>['class'=>'text-nowrap']
 		],
 		'description:ntext',
-		'code',
 	],
 	'layout'=>'{items}'
 ]);
