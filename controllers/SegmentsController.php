@@ -38,7 +38,7 @@ class SegmentsController extends ArmsBaseController
 			'sort'=>false
 		]);
 		
-		return $this->renderAjax('table-compact', [
+		return $this->renderPartial('table-compact', [
 			'dataProvider' => $dataProvider,
 		]);
 	}
