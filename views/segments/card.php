@@ -1,7 +1,6 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\LinkObjectWidget;
 use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
@@ -11,31 +10,26 @@ $deleteable=true; //тут переопределить возможность �
 if (!isset($static_view)) $static_view=false;
 
 ?>
-
-<h1>
-	<?= Html::encode($model->name) ?>
-	<?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['segments/update','id'=>$model->id])) ?>
-	<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['segments/delete', 'id' => $model->id], [
-		'data' => [
-			'confirm' => 'Удалить этот элемент? Действие необратимо',
-			'method' => 'post',
-		],
-	]) ?>
-</h1>
-
-
-<p><?= $model->code ?></p>
-<br />
-
-<h4><?= $model->getAttributeLabel('description') ?></h4>
-<?= Yii::$app->formatter->asNtext($model->description) ?>
+<div class="d-flex flex-row">
+<div class="pe-5">
+	<h1 class="text-nowrap">
+		<?= LinkObjectWidget::widget([
+			'model'=>$model,
+			'hideUndeletable'=>false
+		]) ?>
+	</h1>
+	<p class="mb-3"><?= $model->code ?></p>
+	<h4><?= $model->getAttributeLabel('description') ?></h4>
+	<?= Yii::$app->formatter->asNtext($model->description) ?>
+</div>
 
 <?php if (!$static_view && strlen($model->history)) { ?>
-	<hr/>
+<div class="p-0">
+	<!--	<hr/> -->
 	<h4><?= $model->getAttributeLabel('history') ?></h4>
 	<p>
 		<?= Markdown::convert($model->history) ?>
 	</p>
-	<br />
+</div>
 <?php } ?>
-
+</div>

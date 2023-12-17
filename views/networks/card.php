@@ -10,13 +10,14 @@ if (!isset($static_view)) $static_view=false;
 
 ?>
 
-<h1 class="text-monospace">
+<h1 class="text-monospace mb-0">
 	<?= LinkObjectWidget::widget([
 		'model'=>$model,
 		'name'=>$model->sname
 	])?>
 </h1>
-<?= Yii::$app->formatter->asNtext($model->comment) ?>
+<p class="mb-2"><?= Yii::$app->formatter->asNtext($model->comment) ?></p>
+
 <?php if ($model->archived) { ?>
 		<div class="d-flex w-100 my-2">
 			<div class="flex-fill alert-striped"></div>

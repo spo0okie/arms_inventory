@@ -36,3 +36,9 @@ ul.nav-header li.nav-item a.nav-link.active {
     border-bottom: #0dcaf0 5px solid;
     color: white;
 }
+
+div.nav-header div.form-switch input.form-check-input{
+    border-color: #99abb1;
+    background-color: #25333d;
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='rgba(255, 255, 255, 0.25)'/></svg>");
+}

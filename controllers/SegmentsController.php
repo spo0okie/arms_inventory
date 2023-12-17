@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\NetworksSearch;
+use app\models\ServicesSearch;
 use Yii;
 use app\models\Segments;
 use yii\web\NotFoundHttpException;
@@ -24,14 +25,24 @@ class SegmentsController extends ArmsBaseController
      */
     public function actionView(int $id)
     {
-		$searchModel = new NetworksSearch();
-		$searchModel->segments_id=$id;
-		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$networksSearch = new NetworksSearch();
+		$networksSearch->segments_id=$id;
+		$networksSearch->archived= Yii::$app->request->get('showArchived',false);
+		$networksProvider = $networksSearch->search(Yii::$app->request->queryParams);
+	
+		$servicesSearch = new ServicesSearch();
+		$servicesSearch->segment_id=$id;
+		$servicesSearch->archived=Yii::$app->request->get('showArchived',false);
+	
+		$servicesProvider = $servicesSearch->search(Yii::$app->request->queryParams);
+	
 	
 		return $this->render('view', [
             'model' => $this->findModel($id),
-			'searchModel' => $searchModel,
-			'dataProvider' => $dataProvider,
+			'networksSearch' => $networksSearch,
+			'networksProvider' => $networksProvider,
+			'servicesSearch' => $servicesSearch,
+			'servicesProvider' => $servicesProvider,
         ]);
     }
 

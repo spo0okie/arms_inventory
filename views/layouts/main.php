@@ -1,14 +1,18 @@
 <?php
 
-/* @var $this \yii\web\View */
+/* @var $this View */
 /* @var $content string */
 
 use a1inani\yii2ModalAjax\ModalAjax;
 use app\components\Alert;
-use yii\bootstrap5\Tabs;
+use app\components\TabsWidget;
+use app\models\Users;
+use yii\bootstrap5\Breadcrumbs;
 use app\assets\AppAsset;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\web\JsExpression;
+use yii\web\View;
 
 
 AppAsset::register($this);
@@ -42,23 +46,23 @@ $this->beginPage() ?>
 <div class="wrap">
 
 	<?= $this->render('menu') ?>
-	<?php if ($path=='site/login' || \app\models\Users::isViewer()) {
+	<?php if ($path=='site/login' || Users::isViewer()) {
 		if (isset($this->params['navTabs'])) { ?>
 			<div class="nav-header">
-				<?= \yii\bootstrap5\Breadcrumbs::widget([
+				<?= Breadcrumbs::widget([
 					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
 				]) ?>
 				<?= Alert::widget() ?>
 				<div class="px-5"><?= $this->params['headerContent'] ?></div>
 			</div>
-			<?= Tabs::widget([
+			<?= TabsWidget::widget(array_merge([
 				'items'=>$this->params['navTabs'],
 				'options'=>['class'=>'nav-header'],
 				'encodeLabels'=>false,
-			]); ?>
+			],$this->params['tabsParams'])); ?>
 		<?php } elseif (isset($this->params['headerContent'])) { ?>
 			<div class="nav-header">
-				<?= \yii\bootstrap5\Breadcrumbs::widget([
+				<?= Breadcrumbs::widget([
 					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
 				]) ?>
 				<?= Alert::widget() ?>
@@ -69,7 +73,7 @@ $this->beginPage() ?>
 			</div>
 		<?php } else { ?>
 			<div class="<?= $containerClass ?>">
-				<?= \yii\bootstrap5\Breadcrumbs::widget([
+				<?= Breadcrumbs::widget([
 					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
 				]) ?>
 				<?= Alert::widget() ?>
@@ -93,7 +97,7 @@ $this->beginPage() ?>
 </footer>
 
 <?php
-
+/** @noinspection */
 $js = <<<JS
 function(event, data, status, xhr, selector) {
     console.log('Got modal commit ('+status+')');
@@ -160,7 +164,7 @@ echo ModalAjax::widget([
 	'clientOptions'=>['backdrop'=> 'static',],
 	'autoClose' => true,
 	'events'=>[
-		ModalAjax::EVENT_MODAL_SHOW => new \yii\web\JsExpression("
+		ModalAjax::EVENT_MODAL_SHOW => new JsExpression("
 			function(event, data, status, xhr, selector) {
 				selector.addClass('modal-open');
 				let h1=$(this).find('h1');
@@ -171,7 +175,7 @@ echo ModalAjax::widget([
 				}
 			}
 		"),
-		ModalAjax::EVENT_MODAL_SHOW_COMPLETE => new \yii\web\JsExpression("
+		ModalAjax::EVENT_MODAL_SHOW_COMPLETE => new JsExpression("
             function(event, xhr, textStatus) {
                 if (xhr.status == 403) {
                 	$('div#modal_form_loader').addClass('border-danger');
@@ -182,7 +186,7 @@ echo ModalAjax::widget([
             }
 		"),
 		//ModalAjax::EVENT_BEFORE_SUBMIT => new \yii\web\JsExpression($js1),
-		ModalAjax::EVENT_MODAL_SUBMIT => new \yii\web\JsExpression($js),
+		ModalAjax::EVENT_MODAL_SUBMIT => new JsExpression($js),
 		//ModalAjax::EVENT_MODAL_SUBMIT_COMPLETE => new \yii\web\JsExpression($js3),
 	],
 ]); ?>
@@ -196,7 +200,7 @@ $js = <<<JS
 //https://github.com/kartik-v/yii2-widget-select2/issues/341
 bootstrap.Modal.prototype._initializeFocusTrap = function () { return { activate: function () { }, deactivate: function () { } } };
 JS;
-$this->registerJs($js,\yii\web\View::POS_END);
+$this->registerJs($js, View::POS_END);
 
 
 ?>

@@ -2,7 +2,8 @@
 
 namespace app\models;
 
-use Yii;
+use app\helpers\ArrayHelper;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "segments".
@@ -12,6 +13,9 @@ use Yii;
  * @property string $code
  * @property string $description
  * @property string $history
+ * @property string $links
+ * @property Networks $networks
+ * @property Services $services
  */
 class Segments extends ArmsModel
 {
@@ -34,7 +38,7 @@ class Segments extends ArmsModel
         return [
 			[['name'], 'string', 'max' => 32],
             [['code','description'], 'string', 'max' => 255],
-			[['history'], 'safe'],
+			[['history','links'], 'safe'],
         ];
     }
 	
@@ -43,7 +47,7 @@ class Segments extends ArmsModel
 	 */
 	public function attributeData()
 	{
-		return [
+		return ArrayHelper::recursiveOverride(parent::attributeData(),[
 			'id' => 'ID',
 			'code' => [
 				'Код CSS',
@@ -61,8 +65,25 @@ class Segments extends ArmsModel
 				'Подробное описание',
 				'hint' => 'Подробное описание, чтобы увидеть надо будет открыть описание сегмента',
 			],
-		];
+		]);
 	}
+	
+	/**
+	 * @return ActiveQuery|Segments
+	 */
+	public function getNetworks()
+	{
+		return $this->hasMany(Networks::class, ['segments_id' => 'id']);
+	}
+	
+	/**
+	 * @return ActiveQuery|Segments
+	 */
+	public function getServices()
+	{
+		return $this->hasMany(Services::class, ['segment_id' => 'id']);
+	}
+	
 	
 	
 	public static function fetchNames(){
@@ -71,6 +92,14 @@ class Segments extends ArmsModel
 			->orderBy(['name'=>SORT_ASC])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
+	}
+	
+	public function reverseLinks()
+	{
+		return [
+			$this->networks,
+			$this->services
+		];
 	}
 	
 }

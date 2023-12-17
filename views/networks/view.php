@@ -32,7 +32,7 @@ $segmentRender='';
 $segmentLines=0;
 if (is_object($model->segment) && trim($model->segment->history)) {
 	$segmentRender=Markdown::convert($model->segment->history);
-	$notepadLines=count(explode("\n",trim($model->segment->history)));
+	$segmentLines=count(explode("\n",trim($model->segment->history)));
 }
 $segmentCompact=$segmentLines<=Yii::$app->params['networkInlineDescriptionLimit'];
 

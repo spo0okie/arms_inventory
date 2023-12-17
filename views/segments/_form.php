@@ -1,5 +1,6 @@
 <?php
 
+use kartik\markdown\MarkdownEditor;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 
@@ -36,10 +37,11 @@ $defaultCss=[
 	<div class="row">
 		<div class="col-md-6">
 			<?= app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
-			<?= app\helpers\FieldsHelper::TextInputField($form,$model, 'code')->textInput(['maxlength' => true]) ?>
+			<?= app\helpers\FieldsHelper::TextInputField($form,$model, 'code') ?>
 		</div>
 		<div class="col-md-6">
-			<?= app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'description',['lines' => 4,]) ?>
+			<?= app\helpers\FieldsHelper::TextInputField($form,$model,'description') ?>
+			<?= app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'links') ?>
 		</div>
 	</div>
 	<div class="d-flex flex-row flex-wrap">
@@ -51,7 +53,7 @@ $defaultCss=[
 		?>
 	</div>
 
-	<?= $form->field($model, 'history')->widget(\kartik\markdown\MarkdownEditor::className(), [
+	<?= $form->field($model, 'history')->widget(MarkdownEditor::className(), [
 		'showExport'=>false
 	]) ?>
 

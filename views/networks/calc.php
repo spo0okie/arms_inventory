@@ -1,10 +1,10 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
+
+use app\components\AttributeHintWidget;
 
 $deleteable=count($model->ips); //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
@@ -12,7 +12,7 @@ if (!isset($static_view)) $static_view=false;
 ?>
 
 <h2>Калькулятор:</h2>
-	<table class="table table-bordered table-striped">
+	<table class="table table-bordered table-striped table-sm table-hover">
 		<tr>
 			<th>Имя</th>
 			<th>Значение</th>
@@ -27,7 +27,7 @@ if (!isset($static_view)) $static_view=false;
 			'maxHosts',
 	   ] as $attr) { ?>
 			<tr>
-				<td><?= \app\components\AttributeHintWidget::widget([
+				<td><?= AttributeHintWidget::widget([
 						'model'=>$model,
 						'attribute'=>$attr,
 					]) ?></td>

@@ -1,13 +1,13 @@
 <?php
 
-use yii\helpers\Html;
+use app\components\UrlListWidget;
+use app\models\Services;
 use kartik\grid\GridView;
-use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ServicesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $models \app\models\Services[] */
+/* @var $models Services[] */
 
 if (!isset($columns)) $columns=['name','sites','segment','providingSchedule','supportSchedule','responsible','compsAndTechs'];
 
@@ -21,7 +21,7 @@ $totalComps=[];
 $totalTechs=[];
 
 foreach ($dataProvider->models as $model) {
-	/* @var $model \app\models\Services */
+	/* @var $model Services */
 	
 	if (is_object($model->segmentRecursive)) {
 		$totalSegments[$model->segmentRecursive->id]=$model->segmentRecursive;
@@ -32,7 +32,7 @@ foreach ($dataProvider->models as $model) {
 
 	if (is_array($model->supportRecursive))
 		foreach ($model->supportRecursive as $user) if (!isset($totalSupport[$user->id]))
-			$totalSupport[$user->id]=$renderer->render('/users/item', ['model' => $user,'short'=>true]);;
+			$totalSupport[$user->id]=$renderer->render('/users/item', ['model' => $user,'short'=>true]);
 	
 	if (is_array($model->comps))
 		foreach ($model->comps as $comp) if (!isset($totalComps[$comp->id]))
@@ -94,7 +94,7 @@ foreach ($columns as $column) {
 				//'header' => 'Инв. номер',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return \app\components\UrlListWidget::Widget(['list'=>$data->links]).' '.$data->description;
+					return UrlListWidget::Widget(['list'=>$data->links]).' '.$data->description;
 				},
 				'contentOptions' => ['class' => $column . '_col']
 			];

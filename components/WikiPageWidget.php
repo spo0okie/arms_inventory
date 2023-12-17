@@ -11,6 +11,7 @@ namespace app\components;
 use app\assets\DokuWikiAsset;
 use Yii;
 use yii\base\Widget;
+use yii\helpers\Inflector;
 
 class WikiPageWidget extends Widget
 {
@@ -55,7 +56,22 @@ class WikiPageWidget extends Widget
 			$url=$link['url'];
 			$name=$link['descr'];
 			
-			if (static::urlIsWiki($url) || static::urlIsConfluence($url)) $links[$name]=$url;
+			if (static::urlIsWiki($url)) {
+				//попытаемся вытащить имя из URL
+				if ($name==$url) {
+					$name=urldecode($url);
+					if (mb_strpos($name,'#')!==false) {
+						$name=mb_substr($name,mb_strpos($name,'#')+1);
+					} else {
+						$tokens=explode(':',$name);
+						$name=$tokens[count($tokens)-1];
+					}
+					$name= Inflector::titleize(trim(str_replace('_',' ',$name)));
+				}
+				$links[$name]=$url;
+			} elseif (static::urlIsConfluence($url)) {
+				$links[$name]=$url;
+			}
 		}
 		return $links;
 	}

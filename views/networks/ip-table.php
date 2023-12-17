@@ -7,7 +7,7 @@ use app\components\UrlParamSwitcherWidget;
 
 $showEmpty= Yii::$app->request->get('showEmpty',false);
 ?>
-<table class="table table-bordered table-condensed net-ips">
+<table class="table table-bordered table-sm table-hover net-ips">
 	<tr>
 		<th>
 			#

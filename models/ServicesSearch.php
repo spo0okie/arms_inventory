@@ -5,7 +5,6 @@ namespace app\models;
 use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Services;
 
 /**
  * ServicesSearch represents the model behind the search form of `app\models\Services`.
@@ -111,7 +110,8 @@ class ServicesSearch extends Services
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'is_end_user' => $this->is_end_user,
+			'services.segment_id' => $this->segment_id,
+			'is_end_user' => $this->is_end_user,
 	        'responsible_id' => $this->responsible_id,
 	        'providing_schedule_id' => $this->providing_schedule_id,
 	        'support_schedule_id' => $this->support_schedule_id,
@@ -133,7 +133,7 @@ class ServicesSearch extends Services
 					QueryHelper::querySearchString('getplacepath(places_in_svc_arms.id)', $this->sites),
 					QueryHelper::querySearchString('getplacepath(places_in_svc_techs.id)', $this->sites)
 	        ])
-            ->andFilterWhere(QueryHelper::querySearchString( 'notebook', $this->notebook,'|',true,true))
+            ->andFilterWhere(QueryHelper::querySearchString( 'notebook', $this->notebook))
 			->andFilterWhere(QueryHelper::querySearchString(['or',
 				'responsible.Ename',
 				'support.Ename',

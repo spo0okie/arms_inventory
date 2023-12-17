@@ -2,6 +2,7 @@
 namespace app\components;
 
 use app\models\ArmsModel;
+use Yii;
 use yii\base\Widget;
 use yii\helpers\Html;use yii\helpers\Inflector;use yii\helpers\StringHelper;
 use yii\helpers\Url;
@@ -14,7 +15,7 @@ class LinkObjectWidget extends Widget
 	public $deleteHint=null;
 	public $undeletableMessage=null;
 	public $confirmMessage=null;
-	public $hideUndeletable=null;
+	public $hideUndeletable=null;	//скрывать замочек неудаляемого объекта (null значит скрывать если задано $undeletableMessage)
 	public $archived=null;
 	
 	public $static=false;
@@ -53,12 +54,12 @@ class LinkObjectWidget extends Widget
 			$this->url=Url::to(['/'.$controller.'/view','id'=>$this->model->id]);
 			$this->samePage=(
 				(
-					\Yii::$app->controller->route==$controller.'/view'
+					Yii::$app->controller->route==$controller.'/view'
 					||
-					\Yii::$app->controller->route==$controller.'/ttip'
+					Yii::$app->controller->route==$controller.'/ttip'
 				)
 				&&
-				\Yii::$app->request->get('id')==$this->model->id
+				Yii::$app->request->get('id')==$this->model->id
 			);
 		} elseif (is_array($this->url)) {
 			$this->url=Url::to($this->url);
@@ -68,7 +69,7 @@ class LinkObjectWidget extends Widget
 			$this->ttipUrl=Url::to([$controller.'/ttip','id'=>$this->model->id]);
 		}
 
-		$this->samePage=$this->samePage||\Yii::$app->request->url==$this->url;
+		$this->samePage=$this->samePage|| Yii::$app->request->url==$this->url;
 		
 		if (is_null($this->name)) {
 			$this->name = $this->model->name;
