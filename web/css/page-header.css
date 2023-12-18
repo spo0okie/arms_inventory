@@ -48,6 +48,10 @@ div.nav-header .table {
     border-color: #3b4a57;
 }
 
+div.nav-header .table :not(caption) * * {
+    color: #99abb1;
+}
+
 div.nav-header .table-striped tbody tr:nth-of-type(odd) * {
     color: #a9bbc1;
     --bs-table-accent-bg: #2c3a46;

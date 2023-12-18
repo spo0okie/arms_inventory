@@ -45,7 +45,7 @@ $showSegment=(
 
 //формируем заголовок странички
 $this->params['headerContent'] = '<div class="d-flex flex-row">'
-	.'<div class="pe-5">'
+	.'<div class="pe-5 flex-fill">'
 	.$this->render('card',['model'=>$model])
 	.(($notepad&&$notepadCompact)?$notepadRender:'');
 	
