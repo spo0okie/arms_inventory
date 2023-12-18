@@ -42,59 +42,48 @@ $showSegment=(
 	Yii::$app->params['networkDescribeSegment']==='auto' && !$notepad
 );
 
-?>
-<div class="networks-view">
-	<div class="row">
-		<div class="col-md-6">
-			<?= $this->render('card',['model'=>$model]) ?>
-			<?php
-				if ($notepad&&$notepadCompact) {
-					echo $notepadRender;
-				}
-				
-				if (!$notepad&&$showSegment&&$segmentCompact) {
-					echo $segmentRender;
-					$showSegment=false;
-				}
-			?>
-		</div>
-		<div class="col-md-6">
-			<?= $this->render('calc',['model'=>$model]) ?>
-		</div>
-	</div>
-<?php
+
+//формируем заголовок странички
+$this->params['headerContent'] = '<div class="d-flex flex-row">'
+	.'<div class="pe-5">'
+	.$this->render('card',['model'=>$model])
+	.(($notepad&&$notepadCompact)?$notepadRender:'');
+	
+if (!$notepad&&$showSegment&&$segmentCompact) {
+	$this->params['headerContent'] .= $segmentRender;
+	$showSegment=false;
+}
+
+$this->params['headerContent'] .= '</div>'
+	.'<div class="pe-0 text-nowrap">'
+	.$this->render('calc',['model'=>$model])
+	.'</div>'
+.'</div>';
 
 $cookieTabName='networks-view-tab-'.$model->id;
-$cookieTab=$_COOKIE[$cookieTabName]??'ip-table';
 
 
 $tabs=[];
 
-$tabId='ip-table';
 $tabs[]=[
+	'id'=>'ip-table',
 	'label'=>'Адреса',
-	'active'=>$cookieTab==$tabId,
-	'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 	'content'=>$this->render('ip-table',['model'=>$model]),
 ];
 
 if ($notepad&&!$notepadCompact) {
-	$tabId='net-description';
 	$tabs[]=[
+		'id'=>'net-description',
 		'label'=>'Описание сети',
-		'active'=>$cookieTab==$tabId,
-		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 		'content'=>$notepadRender,
 	];
 }
 
 
 if ($showSegment) {
-	$tabId='segment-description';
 	$tabs[]=[
+		'id'=>'segment-description',
 		'label'=>'Описание сегмента',
-		'active'=>$cookieTab==$tabId,
-		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 		'content'=>Markdown::convert($model->segment->history),
 	];
 }
@@ -102,16 +91,17 @@ if ($showSegment) {
 $tabNumber=0;
 $wikiLinks= WikiPageWidget::getLinks($model->links);
 foreach ($wikiLinks as $name=>$url) {
-	$tabId='wiki'.$tabNumber;
 	$tabs[]=[
+		'id'=>'wiki'.$tabNumber,
 		'label'=>($name==$url)?'Wiki':$name,
-		'active'=>$cookieTab==$tabId,
 		'content'=> WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
-		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 	];
 	$tabNumber++;
 }
 
+
+$this->params['navTabs']=$tabs;
+$this->params['tabsParams']=['cookieName'=>'networks-view-tab-'.$model->id];
 echo Tabs::widget([
 	'items'=>$tabs,
 	'options'=>[
@@ -119,5 +109,3 @@ echo Tabs::widget([
 	]
 ]);
 
-?>
-</div>

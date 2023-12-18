@@ -59,7 +59,7 @@ $this->beginPage() ?>
 				'items'=>$this->params['navTabs'],
 				'options'=>['class'=>'nav-header'],
 				'encodeLabels'=>false,
-			],$this->params['tabsParams'])); ?>
+			],$this->params['tabsParams']??[])); ?>
 		<?php } elseif (isset($this->params['headerContent'])) { ?>
 			<div class="nav-header">
 				<?= Breadcrumbs::widget([

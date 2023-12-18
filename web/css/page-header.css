@@ -42,3 +42,18 @@ div.nav-header div.form-switch input.form-check-input{
     background-color: #25333d;
     background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='rgba(255, 255, 255, 0.25)'/></svg>");
 }
+
+div.nav-header .table {
+    color: #99abb1;
+    border-color: #3b4a57;
+}
+
+div.nav-header .table-striped tbody tr:nth-of-type(odd) * {
+    color: #a9bbc1;
+    --bs-table-accent-bg: #2c3a46;
+}
+
+div.nav-header .table-hover tbody tr:hover * {
+    color: #ebeced;
+    --bs-table-accent-bg: #35434d;
+}

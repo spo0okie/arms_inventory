@@ -41,8 +41,8 @@ if ($model->history && $segmentCompact) {
 
 
 
-$cookieTabName='segments-view-tab-'.$model->id;
-$cookieTab=$_COOKIE[$cookieTabName]??'networks';
+//$cookieTabName='segments-view-tab-'.$model->id;
+//$cookieTab=$_COOKIE[$cookieTabName]??'networks';
 $tabs=[];
 if ($model->history && !$segmentCompact) {
 	$tabs[]=[
