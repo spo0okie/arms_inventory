@@ -13,13 +13,19 @@ use yii\helpers\Html;
 
 if (!isset($static_view)) $static_view=false;
 if (!isset($glue)) $glue='<br />';
+if (!isset($lineBreak)) $lineBreak=false;
+
+if ($glue=='<br />') {
+	$glue=' ';
+	$lineBreak=true;
+}
 
 ?>
 
 <?= ListObjectWidget::widget([
 	'models'=>$model->netIps,
 	'title'=>'IP адрес(а)',
-	'lineBr'=>($glue=='<br />'),
+	'lineBr'=>$lineBreak,
 	'glue'=>$glue
 ]) ?>
 
