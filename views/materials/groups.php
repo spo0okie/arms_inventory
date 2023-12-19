@@ -5,6 +5,8 @@
  */
 
 use app\components\DynaGridWidget;
+use app\components\HintIconWidget;
+use app\models\Materials;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -12,7 +14,7 @@ use yii\helpers\Html;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $groupBy string */
 $renderer=$this;
-$this->title = \app\models\Materials::$title;
+$this->title = Materials::$title;
 $this->params['breadcrumbs'][] = $this->title;
 $otherGroup=null;
 $otherGroupName=null;
@@ -37,10 +39,11 @@ if ($groupBy=='name') {
 		'id' => 'materials-'.$groupBy.'-groups',
 		'header' => Html::encode($this->title),
 		'columns' => require 'groups-columns.php',
+		'defaultOrder'=>['place','model','rest','count'],
 		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success'])
 			.' // '.Html::a('Показать подробно',['index']+Yii::$app->request->get())
 			.' // '.Html::a($otherGroupName,[$otherGroup.'-groups']+Yii::$app->request->get()),
-		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Materials','cssClass'=>'btn']),
+		'hintButton' => HintIconWidget::widget(['model'=>'\app\models\Materials','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>
