@@ -6,21 +6,20 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 $renderer=$this;
 return [
-	[
-		'attribute'=>'place',
-		'format'=>'raw',
+	'place'=>[
 		'value' => function($data) use($renderer){
 			return $renderer->render('/places/item',['model'=>$data->place,'full'=>true]);
 		}
 	],
-	[
-		'attribute'=>'model',
-		'format'=>'raw',
+	'model'=>[
 		'value' => function($data) use($renderer){
 			return $renderer->render('/materials/item',['model'=>$data,'from'=>false]);
 		}
 	],
 	'comment',
 	'date',
-	'rest'
+	'rest',
+	'count'=>[
+		'label'=>'Поступило',
+	]
 ];
