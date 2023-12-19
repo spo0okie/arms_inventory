@@ -26,7 +26,10 @@ if ($glue=='<br />') {
 	'models'=>$model->netIps,
 	'title'=>'IP адрес(а)',
 	'lineBr'=>$lineBreak,
-	'glue'=>$glue
+	'glue'=>$glue,
+	'item_options'=>[
+		'static_view'=>$static_view,
+	],
 ]) ?>
 
 <h4>MAC адрес(а)</h4>
