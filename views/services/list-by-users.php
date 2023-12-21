@@ -110,7 +110,7 @@ foreach ($users as $user=>$total) {
 					'col_serviceUser',
 					array_search($user,$disabled_ids)===false?'col_responsible':'col_missing'
 				]];
-				if (in_array($user,$data->support_ids)) return ['class' => [
+				if (in_array($user,ArrayHelper::getArrayField($data->support,'id'))) return ['class' => [
 					'col_serviceUser',
 					array_search($user,$disabled_ids)===false?'col_support':'col_missing'
 				]];
