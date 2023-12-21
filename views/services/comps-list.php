@@ -103,7 +103,14 @@ $vmRes=[
 			return 'Class error: '.get_class($data);
 		}
 	],
-	'comment',
+	'comment'=>[
+		'value' => function ($data) use ($compColumns,$techsColumns) {
+			if (get_class($data)== Comps::class) return $data->comment;
+			if (get_class($data)== Techs::class) return $data->history;
+			return 'Class error: '.get_class($data);
+		}
+	],
+	//'comment',
 	'os'=>array_merge($compColumns['os'],[
 		'value' => function ($data) use ($compColumns,$techsColumns) {
 			if (get_class($data)== Comps::class) return $compColumns['os']['value']($data);
