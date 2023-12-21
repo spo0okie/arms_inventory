@@ -45,7 +45,7 @@ foreach ($wikiLinks as $name=>$url) {
 	$tabNumber++;
 }
 
-if (count($model->children)||count($model->comps)) {
+if (count($model->children)||count($model->comps)||count($model->techs)) {
 	$tabId='serviceComps';
 	$tabs[]=[
 		'label'=>'Оборудование и ОС',
