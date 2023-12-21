@@ -36,6 +36,7 @@ use yii\db\ActiveQuery;
  * @property string $formattedMac MAC адрес с двоеточиями
  * @property string $url Ссылка
  * @property string $commentLabel название поля комментарий (для этой модели)
+ * @property string $servicesNames имена связанных сервисов (нужно для сортировки внутри arrDataProvider)
  *
  * @property int $arms_id Рабочее место
  * @property int $installed_id Куда вставлено (в другое оборудование)
@@ -1087,6 +1088,13 @@ class Techs extends ArmsModel
 	{
 		return $this->hasMany(Services::class, ['id' => 'service_id'])
 			->viaTable('{{%techs_in_services}}', ['tech_id' => 'id']);
+	}
+	
+	//нужно только для сортировки моделей внутри ArrayDataProvider
+	public function getServicesNames() {
+		$names=ArrayHelper::getColumn($this->services,'name',false);
+		sort($names);
+		return implode('',$names);
 	}
 	
 	/**
