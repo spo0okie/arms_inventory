@@ -153,6 +153,7 @@ return [
 				'models'=>$data->services,
 				'title'=>false,
 				'item_options'=>['static_view'=>true],
+				'card_options'=>['cardClass'=>'mb-0']
 			]);
 		},
 	],
