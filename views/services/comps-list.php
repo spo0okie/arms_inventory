@@ -78,7 +78,7 @@ $vmRes=[
 	'name'=>[
 		'value' => function ($data) use ($compColumns,$techsColumns) {
 			if (get_class($data)== Comps::class) return $compColumns['name']['value']($data);
-			if (get_class($data)== Techs::class) return $techsColumns['num']['value']($data);
+			if (get_class($data)== Techs::class) return $techsColumns['model']['value']($data);
 			return 'Class error: '.get_class($data);
 		}
 	],
@@ -113,6 +113,7 @@ $vmRes=[
 	'arm_id'=>[
 		'value' => function ($data) use ($compColumns,$techsColumns) {
 			if (get_class($data)== Comps::class) return $compColumns['arm_id']['value']($data);
+			if (get_class($data)== Techs::class) return $techsColumns['num']['value']($data);
 			return '';
 		}
 	],
