@@ -68,7 +68,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 	 * Возвращает значение из древовидного архива
 	 * или $default если значения нет
 	 * @param array $array		исходный архив в котором ищем
-	 * @param array $path		путь ['options','pluginOptions','multiple']
+	 * @param array|string $path		путь ['options','pluginOptions','multiple']
 	 * @param null $default		значение если ничего не нашлось
 	 * @return mixed|null
 	 */
@@ -88,7 +88,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 	/**
 	 * Строит из пути и значения (['options','pluginOptions','multiple'],true)
 	 * ветку вида ['options'=>['pluginOptions'=>['multiple'=>true]]]
-	 * @param array $path
+	 * @param array|string $path
 	 * @param mixed $value
 	 * @return array
 	 */
@@ -187,6 +187,19 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 				return $obj[$field];
 		}
 		return $default;
+	}
+	
+	/**
+	 * Как и выше, только на вход подаем массив объектов на выходе получаем массив значений поля $field
+	 * @param array  $objArray
+	 * @param string $field
+	 * @param null   $default
+	 * @return array
+	 */
+	public static function getArrayField(array $objArray, string $field, $default=null) {
+		$result=[];
+		foreach ($objArray as $obj) $result[]=static::getField($obj,$field,$default);
+		return $result;
 	}
 	
 	/**

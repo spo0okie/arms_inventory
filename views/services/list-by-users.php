@@ -99,8 +99,9 @@ foreach ($users as $user=>$total) {
 					]),
 			'format' => 'raw',
 			'value' => function ($data) use ($renderer,$user) {
+				/** @var $data Services */
 				if ($data->responsible_id == $user) return 'Ответственный';
-				if (in_array($user,$data->support_ids)) return 'Поддержка';
+				if (in_array($user,ArrayHelper::getArrayField($data->support,'id'))) return 'Поддержка';
 				return '';
 			},
 			'footer'=>$total,
