@@ -16,14 +16,14 @@ use app\models\Comps;
 use app\models\Manufacturers;
 use app\models\Techs;
 use yii\helpers\Html;
-
+if(!isset($static_view))$static_view=false;
 $renderer = $this;
 $manufacturers= Manufacturers::fetchNames();
 
 return [
 	'name' => [
-		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/comps/item', ['model' => $data,'icon'=>true,'static_view'=>false]);
+		'value' => function ($data) use ($renderer,$static_view) {
+			return $renderer->render('/comps/item', ['model' => $data,'icon'=>true,'static_view'=>$static_view]);
 		},
 		'contentOptions'=>function ($data) {return [
 			'class'=>'arm_hostname '.$data->updatedRenderClass

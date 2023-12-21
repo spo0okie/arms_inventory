@@ -14,7 +14,7 @@ use app\models\Techs;
 //эта страничка вызывается из другой, где есть этот виджет,
 //поэтому хак со сменой поведения архивных элементов по умолчанию делаем руками, а не автоматом
 ShowArchivedWidget::$defaultValue=false;
-
+$static_view=true;
 $compColumns=include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php';
 $techsColumns=include $_SERVER['DOCUMENT_ROOT'].'/views/techs/columns.php';
 

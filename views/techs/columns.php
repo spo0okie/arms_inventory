@@ -14,6 +14,7 @@ use yii\helpers\Html;
 use yii\web\JsExpression;
 
 if (!isset($searchModel)) $searchModel=new TechsSearch();
+if(!isset($static_view)) $static_view=false;
 
 $renderer = $this;
 
@@ -36,8 +37,8 @@ return [
 	],
 
 	'num'=> [
-		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/techs/item', ['model' => $data]);
+		'value' => function ($data) use ($renderer,$static_view) {
+			return $renderer->render('/techs/item', ['model' => $data,'static_view'=>$static_view]);
 		}
 	],
 	
