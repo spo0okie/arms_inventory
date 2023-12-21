@@ -10,12 +10,16 @@
 /* @var $model app\models\Services */
 /* @var $selected_id integer */
 
+use app\helpers\ArrayHelper;
+
 
 ?>
 <?= $this->render('item',['model'=>$model]) ?>
 	<ul class="ul-treefree ul-dropfree">
-		<?php foreach ($model->children as $child) { ?>
-			<li><?= $this->render('tree-list',['model'=>$child]); ?></li>
+		<?php $items=$model->children;
+		ArrayHelper::multisort($items,'name');
+		foreach ($items as $item) { ?>
+			<li><?= $this->render('tree-list',['model'=>$item]); ?></li>
 		<?php } ?>
 	</ul>
 
