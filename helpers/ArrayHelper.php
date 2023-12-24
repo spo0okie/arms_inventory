@@ -146,9 +146,34 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		return implode($glue,$cleaned);
 	}
 	
-	public static function explode($delimiter,$string,$trim=true,$keepEmpty=false){
+	/**
+	 * Split a string by a string.
+	 *
+	 * @link https://php.net/manual/en/function.explode.php
+	 *
+	 * @param string   $separator Разделитель
+	 * @param string   $string Чего разделить
+	 * @param int|null $limit Если аргумент limit является положительным, возвращаемый массив будет содержать
+	 * максимум limit элементов, при этом последний элемент будет содержать остаток строки string.
+	 * Если параметр limit отрицателен, то будут возвращены все компоненты, кроме последних -limit.
+	 * Если limit равен нулю, то он расценивается как 1.
+	 *
+	 * @param bool     $trim
+	 * @param bool     $keepEmpty
+	 * @return string[] Если separator является пустой строкой (""), explode() выбрасывает ValueError.
+	 * Если separator не содержится в string, и используется отрицательный limit, то будет возвращён пустой массив (array),
+	 * иначе будет возвращён массив, содержащий string.
+	 * Если значения separator появляются в начале или в конце string, указанные значения будут добавлены как пустое
+	 * значение массива (array), либо в первой, либо в последней позиции возвращённого массива (array) соответственно.
+	 */
+	public static function explode(string $separator, string $string, $limit=null, $trim=true, $keepEmpty=false){
+		if (!isset($string) || !isset($separator)) {
+			return [];
+		}
+		$separator = (string)$separator;
+		$string = (string)$string;
 		$cleaned=[];
-		foreach (explode($delimiter,$string) as $item) {
+		foreach (isset($limit) ? explode($separator, $string, $limit) : explode($separator, $string) as $item) {
 			if ($trim) $item=trim($item);
 			if ($keepEmpty||$item) $cleaned[]=$item;
 		}
