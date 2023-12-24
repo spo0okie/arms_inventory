@@ -8,6 +8,7 @@ use app\models\ui\UiTablesCols;
 use kartik\base\Lib;
 use kartik\dynagrid\DynaGrid;
 use kartik\dynagrid\DynaGridStore;
+use kartik\dynagrid\models\DynaGridConfig;
 use kartik\dynagrid\Module;
 use kartik\grid\GridView;
 use NumberFormatter;
@@ -16,7 +17,6 @@ use yii\base\InvalidConfigException;
 use yii\base\Widget;
 use yii\data\ActiveDataProvider;
 use yii\web\JsExpression;
-
 
 
 class DynaGridWidget extends Widget
@@ -29,20 +29,23 @@ class DynaGridWidget extends Widget
      */
 	public $columns=null;
 	public $defaultOrder=[];
-	
-	/**
-	 * Кнопка добавления нового элемента
-	 * @var string
-	 */
-	public $id=null;
+	public $id;
 	public $header;
-	public $panel=null;
+	public $panel;
 	public $createButton;
-	public $hintButton=null;
-	public $toolButton=null;
+	public $hintButton;
+	public $toolButton;
 	public $resizableColumns=true;
 	public $showFooter=false;
 	public $gridOptions=[];
+	public $toggleButtonGrid;
+	/**
+	 * @var string Адрес страницы которую открыть при сохранении настроек. Нужно указывать когда страничка с виджетом
+	 * подгружается асинхронно внутрь родительской странице, о которой ничего не знает. Тогда нужно указывать родительскую
+	 * явно через этот параметр
+	 */
+	public $pageUrl;
+	
 	
 	/**
 	 * данные
@@ -154,9 +157,14 @@ class DynaGridWidget extends Widget
 			}
 		}*/
 		
+		Yii::$app->getModule('dynagrid')->configView='@app/components/views/dynagrid/config';
+		
+		if (isset($this->pageUrl)) $this->view->params['grid-settings-action']=$this->pageUrl;
+		
 		return DynaGrid::widget([
 			'storage'=>DynaGrid::TYPE_DB,
 			'columns' => $columns,
+			'toggleButtonGrid'=>$this->toggleButtonGrid,
 			'gridOptions'=>ArrayHelper::recursiveOverride([
 				'id'=>$this->id,
 				'formatter' => [
@@ -175,7 +183,8 @@ class DynaGridWidget extends Widget
 				],
 				'toolbar' => [
 					['content'=>$this->toolButton],
-					['content'=>'{dynagridFilter}{dynagridSort}{dynagrid}'],
+					['content'=>'{dynagrid}'],
+					//['content'=>'{dynagridFilter}{dynagridSort}{dynagrid}'],
 					['content'=>'{export}'],
 					['content'=>$this->hintButton],
 				],
@@ -285,5 +294,51 @@ class DynaGridWidget extends Widget
 			$prepared[]=$column;
 		}
 		return $prepared;
+	}
+	
+	/**
+	 * Выдернутый в отдельный кусок кода обработчик сохранения параметров DynaGrid.
+	 * Зачем? Затем что Dynagrid виджет обрабатывает сохранение сам и при этом обновляет страницу.
+	 * Если мы асинхронно подгружаем в свою страничку другую содержащую Dynagrid, то при сохранении откроется другая.
+	 * Если мы при этом подменим URL на свой для обновления странички, то в корневой странице нет обработчика сохранения
+	 * и изменения не сохранятся. Чтобы они сохранились, надо вставить вот этот обработчик.
+	 * @param string $id идентификатор таблицы
+	 * @return boolean
+	 * @throws InvalidConfigException
+	 */
+	public static function handleSave(string $id) {
+		$gridConfig=new DynaGridConfig([
+			'id'=>$id,
+			'moduleId'=>'dynagrid',
+		]);
+		if (!empty($_POST[$id.'-dynagrid'])
+			&&
+			$gridConfig->load(Yii::$app->request->post())
+			&&
+			$gridConfig->validate()
+		) {
+			$delete = ArrayHelper::getValue($_POST, 'deleteFlag', 0) == 1;
+			$store = new DynaGridStore([
+				'id' => $id,
+				'moduleId' => 'dynagrid',
+				'storage' => DynaGrid::TYPE_DB,
+				//'userSpecific' => true,
+				//'dbUpdateNameOnly' => $this->dbUpdateNameOnly,
+			]);
+			
+			if ($delete) {
+				$store->delete();
+			} else {
+				$store->save([
+					'page' => $gridConfig->pageSize,
+					'theme' => $gridConfig->theme,
+					'keys' => ArrayHelper::explode(',', $_POST['visibleKeys']),
+					'filter' => $gridConfig->filterId,
+					'sort' => $gridConfig->sortId,
+				]);
+			}
+			return true;
+		}
+		return false;
 	}
 }

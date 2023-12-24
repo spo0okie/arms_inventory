@@ -1,6 +1,7 @@
 <?php
 
 use app\components\assets\DynaGridWidgetAsset;
+use app\components\DynaGridWidget;
 use app\components\WikiPageWidget;
 use app\models\Services;
 use yii\bootstrap5\Tabs;
@@ -46,13 +47,18 @@ foreach ($wikiLinks as $name=>$url) {
 }
 
 if (count($model->children)||count($model->comps)||count($model->techs)) {
+		
+	DynaGridWidget::handleSave('services-comps-index');
+	
 	$tabId='serviceComps';
 	$tabs[]=[
-		'label'=>'Оборудование и ОС',
+		'label'=>'Оборудование и ОС <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#services-comps-index-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+		'encode'=>false,
 		'active'=>$cookieTab==$tabId,
 		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 		'content'=><<<HTML
 		<div id="serviceCompsList">
+		
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
 			</div>

@@ -118,6 +118,7 @@ $vmRes=[
 		}
 	]),
 	'arm_id'=>[
+		'label'=>'Инв. номер',
 		'value' => function ($data) use ($compColumns,$techsColumns) {
 			if (get_class($data)== Comps::class) return $compColumns['arm_id']['value']($data);
 			if (get_class($data)== Techs::class) return $techsColumns['num']['value']($data);
@@ -132,10 +133,12 @@ $vmRes=[
 		}
 	],
 ];
+
 ?>
 <div class="comps-index">
 	<?= DynaGridWidget::widget([
 		'id' => 'services-comps-index',
+		'pageUrl'=>['/services/view','id'=>$model->id],
 		'model' => new Comps(),
 		'panel' => false,
 		'columns' => array_merge(
@@ -144,7 +147,14 @@ $vmRes=[
 		),
 		'defaultOrder' => ['name','ip','mac','services_ids','comment','os','vCpuCores','vRamGb','vHddGb','arm_id','places_id','raw_version'],
 		'dataProvider' => $dataProvider,
+		'toggleButtonGrid'=>[
+			'label' => '<i class="fas fa-wrench fa-fw"></i>',
+			'title' => 'Персонализировать настройки таблицы',
+			'data-pjax' => false,
+			'class' => 'd-none',
+		],
 		'gridOptions' => [
+			'layout'=>'{dynagrid}{items}',
 			'showFooter' => true,
 			'pjax' => true,
 			'pjaxSettings' => ['options'=>[
