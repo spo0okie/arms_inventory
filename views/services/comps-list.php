@@ -10,6 +10,7 @@ use app\components\ShowArchivedWidget;
 use app\models\Comps;
 use app\models\Services;
 use app\models\Techs;
+use kartik\editable\Editable;
 
 //эта страничка вызывается из другой, где есть этот виджет,
 //поэтому хак со сменой поведения архивных элементов по умолчанию делаем руками, а не автоматом
@@ -104,11 +105,37 @@ $vmRes=[
 		}
 	],
 	'comment'=>[
-		'value' => function ($data) use ($compColumns,$techsColumns) {
-			if (get_class($data)== Comps::class) return $data->comment;
-			if (get_class($data)== Techs::class) return $data->history;
-			return 'Class error: '.get_class($data);
-		}
+		'class'=>'kartik\grid\EditableColumn',
+		'editableOptions'=> function ($model) {
+			$field='error';
+			$class='error';
+			if (get_class($model)== Comps::class) {$class='comps';$field='comment';}
+			if (get_class($model)== Techs::class) {$class='techs';$field='history';}
+		return [
+			'name'=>'comment',
+			'header'=>'Комментарий',
+			'format'=>Editable::FORMAT_LINK,
+			'inputType' => Editable::INPUT_TEXT,
+			'inlineSettings' => [
+				'templateBefore'=>'<div class="kv-editable-form-inline d-flex w-100 g-0 m-0"><div class="mb-2">{loading}</div>',
+			],
+			'asPopover' => false,
+			'value' => $model[$field],
+			'buttonsTemplate'=>'{submit}',
+			'options' => [
+				'class' => 'w-100',
+				'placeholder'=>'Введите комментарий...',
+			],
+			'containerOptions'=>['class'=>'w-100 p-0 m-0'],
+			'contentOptions'=>['class'=>'p-0 m-0'],
+			'inputFieldConfig'=>['options'=>['class'=>'flex-grow-1']],
+			'editableValueOptions'=>['class'=>'p-0 m-0 border-0 text-start bg-transparent',],
+			'formOptions' => [
+				'action' => [
+					'/'.$class.'/editable',
+				]
+			],
+		];},
 	],
 	//'comment',
 	'os'=>array_merge($compColumns['os'],[

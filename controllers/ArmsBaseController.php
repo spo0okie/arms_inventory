@@ -6,6 +6,7 @@ use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use app\models\Users;
+use kartik\grid\EditableColumnAction;
 use Throwable;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -33,6 +34,17 @@ class ArmsBaseController extends Controller
 	const PERM_ANONYMOUS='@anonymous';
 	const PERM_AUTHENTICATED='@authorized';
 	
+	
+	public function actions()
+	{
+		return ArrayHelper::merge(parent::actions(), [
+			'editable'=>[
+				'class' => EditableColumnAction::class,		// action class name
+				'modelClass' => $this->modelClass,			// the update model class
+			]
+		]);
+	}
+	
 	/**
 	 * Карта доступа с какими полномочиями что можно делать
 	 * @return array
@@ -41,7 +53,7 @@ class ArmsBaseController extends Controller
 		$class=StringHelper::class2Id($this->modelClass);
 		return [
 			'view'=>['index','view','search','ttip','item-by-name','item'],			//чтение всего
-			'edit'=>['create','update','delete','validate','unlink'],				//редактирование всего
+			'edit'=>['create','update','delete','validate','unlink','editable'],	//редактирование всего
 			"view-$class"=>['index','view','search','ttip','item-by-name','item'],	//чтение объектов этого класса
 			"edit-$class"=>['create','update','delete','validate','unlink'],		//редактирование объектов этого класса
 			self::PERM_ANONYMOUS=>[],
