@@ -10,6 +10,7 @@ namespace app\components;
 
 use app\helpers\ArrayHelper;
 use yii\base\Widget;
+use yii\helpers\Inflector;
 
 class UrlListWidget extends Widget
 {
@@ -37,6 +38,21 @@ class UrlListWidget extends Widget
 		} else {
 			$url=$item;
 			$descr=$item;
+		}
+		
+		if ($descr==$url) {
+			$descr=urldecode($url);
+			//путь dokuwiki->Имя
+			if (WikiPageWidget::urlIsWiki($url)) {
+				//попытаемся вытащить имя из URL
+				if (mb_strpos($descr,'#')!==false) {
+					$descr=mb_substr($descr,mb_strpos($descr,'#')+1);
+				} else {
+					$tokens=explode(':',$descr);
+					$descr=$tokens[count($tokens)-1];
+				}
+				$descr= Inflector::titleize(trim(str_replace('_',' ',$descr)));
+			}
 		}
 		return ['url'=>trim($url),'descr'=>trim($descr)];
 	}
