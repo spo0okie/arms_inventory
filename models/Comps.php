@@ -219,6 +219,10 @@ class Comps extends ArmsModel
 				'vHDD',
 				'indexHint' => 'Объем дискового пространства (GB)'
 			],
+			'places_id' => [
+				'Помещение',
+				'indexHint' => 'Помещение, в котором размещено оборудование'
+			],
 
 		]);
     }
