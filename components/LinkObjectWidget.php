@@ -17,6 +17,12 @@ class LinkObjectWidget extends Widget
 	public $confirmMessage=null;
 	public $hideUndeletable=null;	//скрывать замочек неудаляемого объекта (null значит скрывать если задано $undeletableMessage)
 	public $archived=null;
+	/**
+	 * @var bool Отключить pjax. Есть проблема, когда Grid работает в режиме Pjax и содержит ссылки, то они по умолчанию
+	 * тоже открываются в этом pjax блоке. Сценариев где такое нужно по умолчанию я не нашел, и поэтому по умолчанию
+	 * отключаю pjax во всех ссылках на элементы.
+	 */
+	public $noPjax=true;
 	
 	public $static=false;
 	public $noDelete=false;
@@ -83,8 +89,11 @@ class LinkObjectWidget extends Widget
 		if (is_null($this->cssClass) && $this->archived)
 			$this->cssClass='text-reset';
 		
+		
 		$this->hrefOptions['class']=$this->cssClass;
 		$this->hrefOptions['qtip_ajxhrf']=$this->ttipUrl;
+		if ($this->noPjax) $this->hrefOptions['data']=['pjax'=>0];
+
 	}
 	
 	public function run()
@@ -99,7 +108,10 @@ class LinkObjectWidget extends Widget
 					'hideUndeletable'=>$this->hideUndeletable,
 					'links'=>$this->links,
 					'url'=>$this->deleteUrl,
-					'options'=>['cssClass'=>$this->cssClass],
+					'options'=>[
+						'cssClass'=>$this->cssClass,
+						'data'=>$this->noPjax?['pjax'=>0]:[],
+					],
 				]);
 		} else $deleteObject='';
 		
@@ -114,7 +126,10 @@ class LinkObjectWidget extends Widget
 					'updateHint'=>$this->updateHint,
 					'modal'=>$this->modal,
 					'url'=>$this->updateUrl,
-					'options'=>['cssClass'=>$this->cssClass],
+						'options'=>[
+							'cssClass'=>$this->cssClass,
+							'data'=>$this->noPjax?['pjax'=>0]:[],
+						],
 				]):''
 			).$deleteObject;
 	}
