@@ -2,7 +2,6 @@
 
 use app\components\WikiPageWidget;
 use kartik\markdown\Markdown;
-use yii\bootstrap5\Tabs;
 use yii\helpers\Url;
 use yii\web\YiiAsset;
 
@@ -102,10 +101,10 @@ foreach ($wikiLinks as $name=>$url) {
 
 $this->params['navTabs']=$tabs;
 $this->params['tabsParams']=['cookieName'=>'networks-view-tab-'.$model->id];
-echo Tabs::widget([
+/*echo Tabs::widget([
 	'items'=>$tabs,
 	'options'=>[
 		'class'=>'nav-pills',
 	]
-]);
+]);*/
 

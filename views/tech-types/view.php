@@ -1,24 +1,22 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\models\TechTypes;
+use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
-use yii\bootstrap5\Tabs;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\TechTypes */
 /* @var $searchModel /app/models/TechsSearch */
-/* @var $dataProvider \yii\data\ActiveDataProvider */
+/* @var $dataProvider ActiveDataProvider */
 
-\yii\helpers\Url::remember();
+Url::remember();
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => TechTypes::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 $techModels=$model->techModels;
-
-$cookieTabName='techmodels-view-tab-'.$model->id;
-$cookieTab=$_COOKIE[$cookieTabName]??'techs';
-
 
 $this->params['headerContent']='<h2>'.
         Html::encode($this->title).' '.
@@ -39,12 +37,9 @@ $this->params['headerContent']='<h2>'.
 	
 
 $tabs=[];
-$tabId='techs';
 $tabs[] = [
+	'id'=>'techs',
 	'label'=>'Экземпляры оборудования',
-	'linkOptions'=>['id'=>'items'],
-	'active'=>$cookieTab==$tabId,
-	'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 	'content'=>'<div class="container-fluid">'.DynaGridWidget::widget([
 			'id' => 'tech-types-arms-index',
 			'header' => 'Оборудование',
@@ -58,12 +53,9 @@ $tabs[] = [
 	]).'</div>' ,
 ];
 
-$tabId='models';
 $tabs[] = [
+	'id'=>'models',
 	'label'=>'Список моделей',
-	'active'=>$cookieTab==$tabId,
-	'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
-	'linkOptions'=>['id'=>'models'],
 	'content'=>'<div class="container">'.
 		$this->render('list-models',['model'=>$model,'techModels'=>$techModels]).
 		'</div>',
@@ -72,4 +64,4 @@ $tabs[] = [
 
 
 $this->params['navTabs'] = $tabs;
-
+$this->params['tabsParams']=['cookieName'=>'techmodels-view-tab-'.$model->id];
