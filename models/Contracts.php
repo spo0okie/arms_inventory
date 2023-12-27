@@ -422,7 +422,10 @@ class Contracts extends ArmsModel
 		return $this->hasMany(Contracts::class, ['parent_id' => 'id'])
 			->from(['contract_children'=>self::tableName()])
 			->onCondition(['contract_children.is_successor'=>false])
-			->orderBy(['contract_children.date'=>SORT_DESC]);
+			->orderBy([
+				'contract_children.date'=>SORT_DESC,
+				'contract_children.name'=>SORT_DESC,
+			]);
 	}
 	
 	public function getChildrenRecursive()
