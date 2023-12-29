@@ -2,12 +2,10 @@
 
 namespace app\models;
 
+use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Techs;
-use yii\helpers\StringHelper;
 
 /**
  * TechsSearch represents the model behind the search form of `app\models\Techs`.
@@ -69,7 +67,7 @@ class TechsSearch extends Techs
 
 			], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
-				return \app\helpers\MacsHelper::fixList($value);
+				return MacsHelper::fixList($value);
 			}]
         ];
     }

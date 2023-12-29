@@ -5,7 +5,6 @@ namespace app\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Comps;
 use \app\helpers\QueryHelper;
 
 /**
@@ -32,7 +31,7 @@ class CompsSearch extends Comps
 				foreach ($macs as $i=>$mac) {
 					$macs[$i]=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
 				}
-				return implode("\n",$macs);;
+				return implode("\n",$macs);
 			}],
         ];
     }
@@ -118,7 +117,7 @@ class CompsSearch extends Comps
 			return new ActiveDataProvider([
 				'query' => $query,
 				'totalCount' => $query->count('distinct(techs.id)'),
-				'pagination' => ['pageSize' => \Yii::$app->request->get('per-page',100),],
+				'pagination' => ['pageSize' => Yii::$app->request->get('per-page',100),],
 				'sort'=> $sort,
 			]);
         }
@@ -162,7 +161,7 @@ class CompsSearch extends Comps
 		return new ActiveDataProvider([
 			'query' => $query->groupBy('comps.id'),
 			'totalCount' => $totalQuery->count('distinct(comps.id)'),
-			'pagination' => ['pageSize' => \Yii::$app->request->get('per-page',100),],
+			'pagination' => ['pageSize' => Yii::$app->request->get('per-page',100),],
 			'sort'=> $sort,
 		]);    }
 }
