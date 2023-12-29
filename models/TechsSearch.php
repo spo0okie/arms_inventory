@@ -15,6 +15,7 @@ use yii\helpers\StringHelper;
 class TechsSearch extends Techs
 {
 	
+	public $ids;
 	public $model;
 	public $user;
 	public $place;
@@ -32,7 +33,7 @@ class TechsSearch extends Techs
     public function rules()
     {
         return [
-			[['state_id'],'each','rule'=>['integer']],
+			[['ids','state_id'],'each','rule'=>['integer']],
 			[['is_computer'],'boolean'],
             [[
 				'type_id',
@@ -195,6 +196,7 @@ class TechsSearch extends Techs
 		
 		
         $query
+			->andFilterWhere(['techs.id'=>$this->ids])
 			->andFilterWhere(QueryHelper::querySearchString('techs.num', $this->num))
 
 			->andFilterWhere(QueryHelper::querySearchString('techs.inv_num', $this->inv_num))

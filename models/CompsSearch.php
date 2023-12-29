@@ -16,6 +16,7 @@ class CompsSearch extends Comps
 	public $places_id;
 	public $services_ids;
 	public $linkedSoft_ids;
+	public $ids;
 
     /**
      * @inheritdoc
@@ -23,6 +24,7 @@ class CompsSearch extends Comps
     public function rules()
     {
         return [
+			[['ids'],'each','rule'=>['integer']],
             [['id', 'domain_id','soft_ids','linkedSoft_ids','softHits_ids'], 'integer'],
             [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id','archived','services_ids'], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
@@ -127,6 +129,7 @@ class CompsSearch extends Comps
 		}
 
         $query
+			->andFilterWhere(['comps.id'=>$this->ids])
 			->andFilterWhere(QueryHelper::querySearchString('concat(IFNULL(domains.name,""),"\\\\",comps.name)', $this->name))
             ->andFilterWhere(QueryHelper::querySearchString('raw_version', $this->raw_version))
 			->andFilterWhere(QueryHelper::querySearchString('comps.ip', $this->ip))

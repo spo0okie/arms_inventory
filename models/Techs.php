@@ -1369,6 +1369,8 @@ class Techs extends ArmsModel
 	//альяс чтобы привычно можно было использовать поле name
 	public function getName() {return $this->num;}
 	
+	//имя в списке оборудования и ОС сервиса (для сотртировки)
+	public function getInServicesName() {return mb_strtolower($this->model->nameWithVendor);}
 	
 	public function reverseLinks()
 	{

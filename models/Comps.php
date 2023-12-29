@@ -303,7 +303,7 @@ class Comps extends ArmsModel
 
 	public function getFqdn()
 	{
-		return is_object($this->domain)?$this->name.'.'.$this->domain->fqdn:$this->name;
+		return strtolower(is_object($this->domain)?$this->name.'.'.$this->domain->fqdn:$this->name);
 	}
 
     /**
@@ -843,6 +843,8 @@ class Comps extends ArmsModel
 		if (mb_stripos($this->os,'suse')!==false) return true;
 		return false;
 	}
+	
+	public function getInServicesName() {return strtolower($this->fqdn);}
 	
 	public function reverseLinks()
 	{

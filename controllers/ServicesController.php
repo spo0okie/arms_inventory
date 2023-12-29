@@ -2,7 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\CompsSearch;
 use app\models\Places;
+use app\models\TechsSearch;
 use Yii;
 use app\models\Services;
 use yii\data\ArrayDataProvider;
@@ -136,13 +138,24 @@ class ServicesController extends ArmsBaseController
 	{
 		/** @var Services $model */
 		$model=$this->findModel($id);
-		//$comps=$model->compsRecursive;
+		
+		// Модели полноценного поиска нужны для подгрузки всех joinWith
+		// через compsRecursive и techsRecursive найдем нужные объекты и через search модели подгрузим джойны
+		$compsSearch=new CompsSearch();
+		$techsSearch=new TechsSearch();
+		
 		$dataProvider=new ArrayDataProvider([
-			'allModels' => array_merge($model->compsRecursive,$model->techsRecursive),
+			'allModels' => array_merge(
+				$compsSearch->search(['CompsSearch'=>['ids'=>array_keys($model->compsRecursive)]])->models,
+				$techsSearch->search(['TechsSearch'=>['ids'=>array_keys($model->techsRecursive)]])->models
+			),
 			'key'=>'id',
 			'sort' => [
 				'attributes'=> [
-					'name',
+					'name'=>[
+						'asc'=>['inServicesName'=>SORT_ASC],
+						'desc'=>['inServicesName'=>SORT_DESC],
+					],
 					'ip',
 					'mac',
 					'raw_ver',
