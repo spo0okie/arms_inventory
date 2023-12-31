@@ -1,7 +1,9 @@
 <?php
 
+use app\components\ItemObjectWidget;
+use app\components\LinkObjectWidget;
 use yii\helpers\Html;
-use dosamigos\selectize\SelectizeDropDownList;
+//use dosamigos\selectize\SelectizeDropDownList;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
@@ -19,9 +21,10 @@ if (is_object($model)) {
 		//else $name='<span class="far fa-meh-blank"></span>'.$name;
 	}
 	
-	echo \app\components\ItemObjectWidget::widget([
+	echo ItemObjectWidget::widget([
 		'model'=>$model,
-		'link'=>\app\components\LinkObjectWidget::widget([
+		'archived_class'=>'text-decoration-line-through',
+		'link'=> LinkObjectWidget::widget([
 			'model'=>$model,
 			'modal'=>true,
 			'noDelete'=>true,

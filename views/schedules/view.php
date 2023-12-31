@@ -2,7 +2,7 @@
 
 use app\components\ItemObjectWidget;
 use app\components\LinkObjectWidget;
-use app\components\ListObjectWidget;
+use app\components\ListObjectsWidget;
 use app\models\Acls;
 use app\models\Schedules;
 use kartik\markdown\Markdown;
@@ -53,7 +53,7 @@ YiiAsset::register($this);
 			<?= is_object($model->parent)?('Родительское расписание :'.$this->render('item',['model'=>$model->parent])):'' ?>
 			<?= $this->render('7days',['model'=>$model])?>
 			<?= $this->render('services',['model'=>$model])?>
-			<?= ListObjectWidget::widget([
+			<?= ListObjectsWidget::widget([
 				'models'=>$model->children,
 				'title'=>$model->getAttributeLabel('children')
 			]) ?>

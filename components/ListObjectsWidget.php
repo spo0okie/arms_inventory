@@ -20,7 +20,7 @@ use yii\helpers\Inflector;
  * @package app\components
  * @property ArmsModel[] $models
  */
-class ListObjectWidget extends Widget
+class ListObjectsWidget extends Widget
 {
 	public $models;				//модели, список которых нам нужен
 	public $title=null;			//заголовок списка

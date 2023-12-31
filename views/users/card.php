@@ -1,6 +1,6 @@
 <?php
 
-use app\components\ListObjectWidget;
+use app\components\ListObjectsWidget;
 use app\helpers\ArrayHelper;
 use kartik\markdown\Markdown;
 
@@ -61,7 +61,7 @@ if (!isset($static_view)) $static_view=false;
         Городской: <?= $model->work_phone ?><br />
     </p>
 
-	<?php echo ListObjectWidget::widget([
+	<?php echo ListObjectsWidget::widget([
 		'models' => $model->compsFromTechs,
 		'title' => 'Привязанные ОС:',
 		'item_options' => ['static_view' => true, 'class'=>'text-nowrap','rc'=>true],
@@ -69,7 +69,7 @@ if (!isset($static_view)) $static_view=false;
 		'lineBr'=> $static_view,
 	]) ?>
 
-	<?php echo ListObjectWidget::widget([
+	<?php echo ListObjectsWidget::widget([
 		'models' => $model->netIps,
 		'title' => 'Закрепленные IP:',
 		'item_options' => ['static_view' => $static_view, 'class'=>'text-nowrap'],
@@ -77,7 +77,7 @@ if (!isset($static_view)) $static_view=false;
 		'lineBr'=> $static_view,
 	]) ?>
 
-    <?php if (!$static_view) echo ListObjectWidget::widget([
+    <?php if (!$static_view) echo ListObjectsWidget::widget([
 		'models' => $model->techs,
 		'title' => 'АРМ/Оборудование числящиеся за сотрудником:',
 		'item_options' => ['static_view' => $static_view, ],

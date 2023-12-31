@@ -3,7 +3,7 @@
 /* Карточка документа Можно использовать во View можно в тултипе */
 
 use app\components\LinkObjectWidget;
-use app\components\ListObjectWidget;
+use app\components\ListObjectsWidget;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -112,7 +112,7 @@ JS;
 
 
 <?php
-echo ListObjectWidget::widget([
+echo ListObjectsWidget::widget([
 	'models' => $model->techs,
 	'title' => 'Прикреплен к АРМ/оборудованию:',
 	'item_options' => ['static_view' => $static_view, 'class'=>'text-nowrap','rc'=>true],
@@ -120,35 +120,35 @@ echo ListObjectWidget::widget([
 	//'lineBr'=> $static_view,
 ]);
 
-echo ListObjectWidget::widget([
+echo ListObjectsWidget::widget([
 	'models' => $model->materials,
 	'title' => 'Прикреплен к поступлениям ЗиП и материалов:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo ListObjectWidget::widget([
+echo ListObjectsWidget::widget([
 	'models' => $model->licItems,
 	'title' => 'Прикреплен к закупкам лицензий:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo ListObjectWidget::widget([
+echo ListObjectsWidget::widget([
 	'models' => $model->services,
 	'title' => 'Прикреплен к услугам:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo ListObjectWidget::widget([
+echo ListObjectsWidget::widget([
 	'models' => $model->partners,
 	'title' => 'Контрагенты:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo ListObjectWidget::widget([
+echo ListObjectsWidget::widget([
 	'models' => $model->users,
 	'title' => 'Пользователи:',
 	'item_options' => ['static_view' => $static_view, 'noDelete'=>true],

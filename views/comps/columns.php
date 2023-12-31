@@ -11,7 +11,7 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 use app\components\ExpandableCardWidget;
-use app\components\ListObjectWidget;
+use app\components\ListObjectsWidget;
 use app\models\Comps;
 use app\models\Manufacturers;
 use app\models\Techs;
@@ -77,7 +77,7 @@ return [
 	],
 	'services_ids' => [
 		'value' => function ($data) use ($renderer) {
-			return ListObjectWidget::widget([
+			return ListObjectsWidget::widget([
 				'models'=>$data->services,
 				'title'=>false,
 				'item_options'=>['static_view'=>true],

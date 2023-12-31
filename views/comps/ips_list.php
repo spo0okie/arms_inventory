@@ -8,7 +8,7 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
 
-use app\components\ListObjectWidget;
+use app\components\ListObjectsWidget;
 use yii\helpers\Html;
 
 if (!isset($static_view)) $static_view=false;
@@ -22,7 +22,7 @@ if ($glue=='<br />') {
 
 ?>
 
-<?= ListObjectWidget::widget([
+<?= ListObjectsWidget::widget([
 	'models'=>$model->netIps,
 	'title'=>'IP адрес(а)',
 	'lineBr'=>$lineBreak,

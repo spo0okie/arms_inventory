@@ -1,11 +1,11 @@
 <?php
 
-use yii\helpers\Html;
+use app\components\ListObjectsWidget;
 
 /* @var $this yii\web\View */
 /* @var $models app\models\Acls[] */
 
-echo \app\components\ListObjectWidget::widget([
+echo ListObjectsWidget::widget([
 	'models' => $models,
 	'itemViewPath'=>'/acls/list-item',
 	'title' => 'Предоставлен доступ',

@@ -4,7 +4,7 @@
 /* @var $searchModel app\models\TechsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-use app\components\ListObjectWidget;
+use app\components\ListObjectsWidget;
 use app\models\Techs;
 use app\models\TechsSearch;
 use app\models\TechStates;
@@ -150,7 +150,7 @@ return [
 	],
 	'services_ids' => [
 		'value' => function ($data) use ($renderer) {
-			return ListObjectWidget::widget([
+			return ListObjectsWidget::widget([
 				'models'=>$data->services,
 				'title'=>false,
 				'item_options'=>['static_view'=>true],

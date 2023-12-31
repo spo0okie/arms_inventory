@@ -1,7 +1,7 @@
 <?php
 
 use app\components\LinkObjectWidget;
-use app\components\ListObjectWidget;
+use app\components\ListObjectsWidget;
 use app\components\ShowArchivedWidget;
 use app\components\UrlListWidget;
 use app\models\Services;
@@ -160,28 +160,28 @@ if(!$static_view) { ?>
 				]).'<br />'?>
 			<br />
 		
-		<?= ListObjectWidget::widget([
+		<?= ListObjectsWidget::widget([
 			'models'=>$comps,
 			'title'=>'Выполняется на компьютерах:',
 			'item_options'=>['static_view'=>$static_view,'fqdn'=>true],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
-		<?= ListObjectWidget::widget([
+		<?= ListObjectsWidget::widget([
 			'models'=>$model->techs,
 			'title'=>'Выполняется на оборудовании:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
-		<?= ListObjectWidget::widget([
+		<?= ListObjectsWidget::widget([
 			'models'=>$model->depends,
 			'title'=>'Зависит от сервисов:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
-		<?= ListObjectWidget::widget([
+		<?= ListObjectsWidget::widget([
 			'models'=>$dependants,
 			'title'=>'Зависимые сервисы:',
 			'item_options'=>['static_view'=>$static_view,],

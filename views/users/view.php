@@ -3,7 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\Users */
 
-use app\components\ListObjectWidget;
+use app\components\ListObjectsWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Users;
 use yii\helpers\Url;
@@ -38,7 +38,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			<br/>
 			<?php
 			
-			echo ListObjectWidget::widget([
+			echo ListObjectsWidget::widget([
 				'models' => $model->services,
 				'title' => 'Ответственный за сервисы:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -46,7 +46,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> false,
 			]);
 
-			echo ListObjectWidget::widget([
+			echo ListObjectsWidget::widget([
 				'models' => $model->infrastructureServices,
 				'title' => 'Ответственный за инфраструктуру:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -54,7 +54,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> false,
 			]);
 			
-			echo ListObjectWidget::widget([
+			echo ListObjectsWidget::widget([
 				'models' => $comps,
 				'title' => 'Ответственный за ОС:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -62,7 +62,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> false,
 			]);
 			
-			echo ListObjectWidget::widget([
+			echo ListObjectsWidget::widget([
 				'models' => $model->techsHead,
 				'title' => 'АРМ/оборудование числящиеся за подчиненными:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -70,7 +70,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> false,
 			]);
 			
-			echo ListObjectWidget::widget([
+			echo ListObjectsWidget::widget([
 				'models' => $model->techsIt,
 				'title' => 'Обслуживаемое сотрудником оборудование:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -78,7 +78,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> false,
 			]);
 			
-			echo ListObjectWidget::widget([
+			echo ListObjectsWidget::widget([
 				'models' => $model->techsResponsible,
 				'title' => 'АРМ/оборудование в ответственности:',
 				'item_options' => ['static_view' => $static_view, ],
@@ -89,7 +89,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			$materials=[];
 			foreach ($model->materials as $material) if ($material->rest>0) $materials[]=$material;
 			
-			echo ListObjectWidget::widget([
+			echo ListObjectsWidget::widget([
 				'models' => $materials,
 				'title' => 'Ответственный за материалы:',
 				'item_options' => [
@@ -102,7 +102,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> true,
 			]);
 			
-			echo ListObjectWidget::widget([
+			echo ListObjectsWidget::widget([
 				'models' => $model->contracts,
 				'title' => 'Документы:',
 				'item_options' => ['static_view' => $static_view, 'user'=>false ],
