@@ -140,15 +140,28 @@ class ServicesController extends ArmsBaseController
 		$model=$this->findModel($id);
 		
 		// Модели полноценного поиска нужны для подгрузки всех joinWith
-		// через compsRecursive и techsRecursive найдем нужные объекты и через search модели подгрузим джойны
 		$compsSearch=new CompsSearch();
 		$techsSearch=new TechsSearch();
 		
+		// через compsRecursive и techsRecursive найдем нужные объекты и через search модели подгрузим джойны
+		$comps=$model->compsRecursive;
+		$techs=$model->techsRecursive;
+
+		//по умолчанию не можем передать списки id в search модели, т.к. пустой поиск найдет все вместо ничего
+		$allModels=[];
+		
+		if (count($comps)) $allModels=array_merge(
+			$allModels,
+			$compsSearch->search(['CompsSearch'=>['ids'=>array_keys($comps)]])->models
+		);
+		
+		if (count($techs)) $allModels=array_merge(
+			$allModels,
+			$techsSearch->search(['TechsSearch'=>['ids'=>array_keys($techs)]])->models
+		);
+		
 		$dataProvider=new ArrayDataProvider([
-			'allModels' => array_merge(
-				$compsSearch->search(['CompsSearch'=>['ids'=>array_keys($model->compsRecursive)]])->models,
-				$techsSearch->search(['TechsSearch'=>['ids'=>array_keys($model->techsRecursive)]])->models
-			),
+			'allModels' => $allModels,
 			'key'=>'id',
 			'sort' => [
 				'attributes'=> [
