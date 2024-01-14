@@ -11,8 +11,9 @@ $urlParams = $generator->generateUrlParams();
 echo "<?php\n";
 ?>
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\ModelFieldWidget;
+use app\components\LinkObjectWidget;
+
 
 /* @var $this yii\web\View */
 /* @var $model <?= ltrim($generator->modelClass, '\\') ?> */
@@ -23,31 +24,14 @@ if (!isset($static_view)) $static_view=false;
 ?>
 
 <h1>
-	<?= "<?= " ?>Html::encode($model-><?= $generator->getNameAttribute() ?>) ?>
-	<?= "<?= " ?>$static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/update','id'=>$model->id])) ?>
-	<?= "<?php " ?> if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/delete', 'id' => $model->id], [
-		'data' => [
-			'confirm' => 'Удалить этот элемент? Действие необратимо',
-			'method' => 'post',
-		],
-	]) ?>
+	<?= "<?= " ?> LinkObjectWidget::widget([
+		'model'=>$model,
+		//'confirmMessage' => 'Действительно удалить этот документ?',
+		//'undeletableMessage'=>'Нельзя удалить этот документ, т.к. есть привязанные к нему объекты',
+	]) <?= "?>" ?>
 </h1>
-
-<?= "<?= " ?>DetailView::widget([
-    'model' => $model,
-    'attributes' => [
-<?php
-if (($tableSchema = $generator->getTableSchema()) === false) {
-    foreach ($generator->getColumnNames() as $name) {
-        echo "        '" . $name . "',\n";
-    }
-} else {
-    foreach ($generator->getTableSchema()->columns as $column) {
-        $format = $generator->generateColumnFormat($column);
-        echo "        '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
-    }
-}
-?>
-    ],
-]) ?>
+<?= "<?php " ?>
+<?php foreach ($generator->getColumnNames() as $name) { ?>
+	echo ModelFieldWidget::widget(['model'=>$model,'field'=>'<?= $name ?>']);
+<?php } ?>
 

@@ -20,6 +20,7 @@ echo "<?php\n";
 namespace <?= $generator->ns ?>;
 
 use Yii;
+use voskobovich\linker\LinkerBehavior;
 
 /**
  * This is the model class for table "<?= $generator->generateTableName($tableName) ?>".
@@ -59,24 +60,50 @@ public static $titles='<?= $className ?>ы';
     }
 <?php endif; ?>
 
-    /**
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => LinkerBehavior::class,
+				'relations' => [
+					<?php foreach ($relations as $name => $relation) if (strpos($relation[0],'->viaTable')) { ?>
+					'<?= lcfirst($name) ?>_ids' => [
+						'<?= lcfirst($name) ?>',
+						//'updater' => ['class' => ManyToManySmartUpdater::class,],
+					],
+					<?php } ?>
+				]
+			]
+		];
+	}
+
+
+/**
      * {@inheritdoc}
      */
     public function rules()
     {
-        return [<?= empty($rules) ? '' : ("\n            " . implode(",\n            ", $rules) . ",\n        ") ?>];
+        return [<?= empty($rules) ? '' : ("\n            " . implode(",\n            ", $rules) . ",\n        ") ?>
+		<?php foreach ($relations as $name => $relation) if (strpos($relation[0],'->viaTable')) { ?>
+			//['<?= lcfirst($name) ?>_ids','each', 'rule'=>['integer']],
+		<?php } ?>
+		];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
-        return [
-<?php foreach ($labels as $name => $label): ?>
-            <?= "'$name' => " . $generator->generateString($label) . ",\n" ?>
-<?php endforeach; ?>
-        ];
+        return array_merge(parent::attributeData(),[
+	<?php
+	$model=new \app\models\ArmsModel();
+	$defaultKeys=array_keys($model->attributeData());
+	foreach ($labels as $name => $label) if (array_search($name,$defaultKeys)===false) {
+		echo "\t\t\t'$name' => [\n\t\t\t\t" . $generator->generateString($label) . ",\n\t\t\t\t'hint'=>'$name hint',\n\t\t\t],\n";
+	}
+	?>
+        ]);
     }
 <?php foreach ($relations as $name => $relation): ?>
 
@@ -103,26 +130,4 @@ public static $titles='<?= $className ?>ы';
     }
 <?php endif; ?>
 
-	/**
-	 * Name for search
-	 * @return string
-	 */
-	public function getSname()
-	{
-		return $this->name;
-	}
-
-
-	/**
-	 * Возвращает список всех элементов
-	 * @return array|mixed|null
-	 */
-    public static function fetchNames(){
-        $list= static::find()
-            //->joinWith('some_join')
-            //->select(['id','name'])
-			->orderBy(['name'])
-            ->all();
-        return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
-    }
 }

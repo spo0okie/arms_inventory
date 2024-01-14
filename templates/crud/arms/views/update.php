@@ -24,6 +24,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model <?= ltrim($generator->modelClass, '\\') ?> */
 
+if (!isset($modalParent)) $modalParent=null;
+
 $this->title = <?= $title ?>;
 $this->params['breadcrumbs'][] = ['label' => <?= $generator->modelClass ?>::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model-><?= $generator->getNameAttribute() ?>, 'url' => ['view', <?= $urlParams ?>]];
@@ -35,6 +37,7 @@ $this->params['breadcrumbs'][] = <?= $generator->generateString('Правка') 
 
     <?= '<?= ' ?>$this->render('_form', [
         'model' => $model,
+		'modalParent' => $modalParent,
     ]) ?>
 
 </div>

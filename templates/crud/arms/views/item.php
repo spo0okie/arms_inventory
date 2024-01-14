@@ -11,7 +11,8 @@ $urlParams = $generator->generateUrlParams();
 echo "<?php\n";
 ?>
 
-use yii\helpers\Html;
+use app\components\ItemObjectWidget;
+use app\components\LinkObjectWidget;
 
 /* @var $this yii\web\View */
 /* @var $model <?= ltrim($generator->modelClass, '\\') ?> */
@@ -21,12 +22,17 @@ if (!isset($static_view)) $static_view=false;
 
 if (!empty($model)) {
 	if (!isset($name)) $name=$model-><?= $generator->getNameAttribute() ?>;
-	?>
-
-	<span class="<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>-item"
-		  qtip_ajxhrf="<?= "<?=" ?> \yii\helpers\Url::to(['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/ttip','id'=>$model->id]) ?>"
-	>
-		<?= "<?=" ?>  Html::a($name,['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/view','id'=>$model->id]) ?>
-		<?= "<?=" ?>  $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>/update','id'=>$model->id,'return'=>'previous']) ?>
-	</span>
-<?= "<?php } ?>" ?>
+	echo ItemObjectWidget::widget([
+		'model'=>$model,
+		'archived_class'=>'text-decoration-line-through',
+		'link'=> LinkObjectWidget::widget([
+		'model'=>$model,
+		'modal'=>true,
+		'noDelete'=>true,
+		'static'=>$static_view,
+		'name'=>$name,
+		//'nameSuffix'=>'',
+		'noSpaces'=>true
+	]),
+]);
+} else echo "Отсутствует";
