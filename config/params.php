@@ -34,4 +34,5 @@ return [
 	
 	'networkDescribeSegment'=>'auto',
 	'networkInlineDescriptionLimit'=>20,
+	'departments.enable'=>false,
 ];

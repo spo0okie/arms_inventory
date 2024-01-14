@@ -1,6 +1,16 @@
 <?php
 
 use app\helpers\FieldsHelper;
+use app\models\Contracts;
+use app\models\Departments;
+use app\models\MaintenanceReqs;
+use app\models\Partners;
+use app\models\Places;
+use app\models\Services;
+use app\models\Techs;
+use app\models\TechStates;
+use app\models\Users;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use app\models\TechModels;
@@ -27,21 +37,23 @@ if (!isset($modalParent)) $modalParent=null;
 $hidden=' style="display:none" ';
 switch (Yii::$app->request->get('type')) {
 	case 'phone':
-		$techModels=\app\models\TechModels::fetchPhones();
+		$techModels= TechModels::fetchPhones();
 		break;
     case 'pc':
-	    $techModels=\app\models\TechModels::fetchPCs();
+	    $techModels= TechModels::fetchPCs();
 	    break;
     default:
-	    $techModels=\app\models\TechModels::fetchNames();
+	    $techModels= TechModels::fetchNames();
         break;
 }
 
-$no_specs_hint=\app\models\TechModels::$no_specs_hint;
+$no_specs_hint= TechModels::$no_specs_hint;
 $hint_icon=FieldsHelper::labelHintIcon;
-
+/** @var @noinspect $js */
+/** @noinspection JSUnusedLocalSymbols */
 $js =  /** @lang JavaScript */ <<<JS
     //меняем подсказку выбора арм в при смене списка документов
+
     function fetchArmsFromDocs(){
         let docs=$("#techs-contracts_ids").val();
         //console.log(docs);
@@ -69,7 +81,7 @@ $js =  /** @lang JavaScript */ <<<JS
         
 		$.ajax({url: "/web/tech-models/hint-template?id="+model_id})
 			.done(function(data) {
-				if (data=="$no_specs_hint") {
+				if (data==="$no_specs_hint") {
 					$("#techs-specs_settings").hide();
 				} else {
 					$("#techs-hint").html(data);
@@ -162,13 +174,13 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
         </div>
 		<div class="col-md-2" >
 			<?= FieldsHelper::Select2Field($form,$model,'partners_id',[
-				'data'=>\app\models\Partners::fetchNames()
+				'data'=> Partners::fetchNames()
 			])?>
 		</div>
 		<div class="col-md-2" >
 			<?php if (count($model->comps)) {
 				echo FieldsHelper::Select2Field($form, $model, 'comp_id', [
-					'data' => \yii\helpers\ArrayHelper::map($model->comps, 'id', 'name'),
+					'data' => ArrayHelper::map($model->comps, 'id', 'name'),
 					'hintModel'=>'Comps',
 					'pluginOptions' => [
 						'dropdownParent' => $modalParent,
@@ -183,7 +195,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		</div>
         <div class="col-md-2" >
 			<?= FieldsHelper::Select2Field($form, $model, 'state_id', [
-				'data' => \app\models\TechStates::fetchNames(),
+				'data' => TechStates::fetchNames(),
 				'options' => ['placeholder' => 'Выберите состояние оборудования',],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -245,7 +257,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 	<div class="row">
 		<div class="col-md-6"  id="tech-arms-selector" <?= ($model->installed_id)?$hidden:'' ?>>
 			<?= FieldsHelper::Select2Field($form,$model, 'arms_id', [
-				'data' => \app\models\Techs::fetchArmNames(),
+				'data' => Techs::fetchArmNames(),
 				'hintModel'=>'Techs',
 				'options' => ['placeholder' => 'Выберите АРМ в состав которого входит это оборудование',],
 				'pluginEvents' =>[
@@ -260,7 +272,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 				]
-			])->hint(\app\models\Contracts::fetchArmsHint($model->contracts_ids,'techs'),['id'=>'arms_id-hint']) ?>
+			])->hint(Contracts::fetchArmsHint($model->contracts_ids,'techs'),['id'=>'arms_id-hint']) ?>
 		</div>
 		<div class="col-md-6" id="tech-installed-param" <?= ($model->installed_id)?'':$hidden ?>>
 			<div class="row float-right	">
@@ -288,7 +300,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		</div>
 		<div class="col-md-6" id="tech-installed-selector" <?= ($model->arms_id)?$hidden:'' ?>>
 			<?= FieldsHelper::Select2Field($form,$model,'installed_id', [
-				'data' => \app\models\Techs::fetchNames(),
+				'data' => Techs::fetchNames(),
 				'hintModel'=>'Techs',
 				'options' => ['placeholder' => 'Выберите оборудование куда установлено это устройство',],
 				'pluginEvents' =>[
@@ -312,7 +324,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 	<div class="row" id="tech-departments-selector" <?= ($model->arms_id)?$hidden:'' ?>>
 		<div class="col-md-6" id="tech-place-selector" <?= ($model->arms_id||$model->installed_id)?$hidden:'' ?>>
 			<?= FieldsHelper::Select2Field($form,$model, 'places_id', [
-				'data' => \app\models\Places::fetchNames(),
+				'data' => Places::fetchNames(),
 				'hintModel'=>'Places',
 				'options' => ['placeholder' => 'Выберите помещение',],
 				'pluginOptions' => [
@@ -321,13 +333,13 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			]) ?>
 		</div>
 		<div class="col-md-6">
-			<?= FieldsHelper::Select2Field($form,$model, 'departments_id', [
-				'data' => \app\models\Departments::fetchNames(),
+			<?= Yii::$app->params['departments.enable']?FieldsHelper::Select2Field($form,$model, 'departments_id', [
+				'data' => Departments::fetchNames(),
 				'options' => ['placeholder' => 'Выберите подразделение',],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 				]
-			]) ?>
+			]):'' ?>
 		</div>
 	</div>
 	
@@ -335,7 +347,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		<div class="row">
 			<div class="col-md-6" >
 				<?= FieldsHelper::Select2Field($form,$model, 'user_id', [
-					'data' => \app\models\Users::fetchWorking(),
+					'data' => Users::fetchWorking(),
 					'hintModel'=>'Users',
 					'options' => ['placeholder' => 'Выберите сотрудника',],
 					'pluginOptions' => [
@@ -346,7 +358,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			</div>
 			<div class="col-md-6" >
 				<?= FieldsHelper::Select2Field($form,$model, 'head_id', [
-					'data' => \app\models\Users::fetchWorking(),
+					'data' => Users::fetchWorking(),
 					'hintModel'=>'Users',
 					'options' => ['placeholder' => 'Выберите сотрудника',],
 					'pluginOptions' => [
@@ -358,7 +370,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		<div class="row">
 			<div class="col-md-6" >
 				<?= FieldsHelper::Select2Field($form,$model,'it_staff_id', [
-					'data' => \app\models\Users::fetchWorking(),
+					'data' => Users::fetchWorking(),
 					'hintModel'=>'Users',
 					'options' => ['placeholder' => 'Выберите сотрудника',],
 					'pluginOptions' => [
@@ -368,7 +380,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			</div>
 			<div class="col-md-6" >
 				<?= FieldsHelper::Select2Field($form,$model,'responsible_id', [
-					'data' => \app\models\Users::fetchWorking(),
+					'data' => Users::fetchWorking(),
 					'hintModel'=>'Users',
 					'options' => ['placeholder' => 'Выберите сотрудника',],
 					'pluginOptions' => [
@@ -378,9 +390,32 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			</div>
 		</div>
     </div>
+	<div class="row">
+		<div class="col-md-8">
+			<?= FieldsHelper::Select2Field($form,$model, 'services_ids', [
+				'data' => Services::fetchNames(),
+				'options' => ['placeholder' => 'Нет сервисов',],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+		</div>
+		<div class="col-md-4">
+			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
+				'data' => MaintenanceReqs::fetchNames(),
+				'options' => ['placeholder' => 'Получать из сервисов',],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+		</div>
 	
 	<?= FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
-		'data' => \app\models\Contracts::fetchNames(),
+		'data' => Contracts::fetchNames(),
 		'hintModel'=>'Contracts',
 		'options' => [
             'placeholder' => 'Выберите документы',

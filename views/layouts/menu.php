@@ -13,6 +13,7 @@ use app\models\Departments;
 use app\models\LicGroups;
 use app\models\LicTypes;
 use app\models\LoginJournal;
+use app\models\MaintenanceReqs;
 use app\models\Materials;
 use app\models\MaterialsTypes;
 use app\models\MaterialsUsages;
@@ -79,19 +80,25 @@ NavBar::begin([
 					['label' => Contracts::$titles, 'url' => ['/contracts/index']],
 					['label' => Partners::$titles, 'url' => ['/partners/index']],
 					['label' => ContractsStates::$title, 'url' => ['/contracts-states/index']],
-					['label' => OrgPhones::$titles, 'url' => ['/org-phones/index']],
-					['label' => OrgInet::$titles, 'url' => ['/org-inet/index']],
 				]
 			],
 			['label' => 'Организация',
 				'items' => [
 					['label' => Places::$titles, 'items'=>$places, 'class'=>'dropdown-menu dropdown-submenu'],
-					['label' => Departments::$title, 'url' => ['/departments/index']],
-					['label' => Services::$titles, 'url' => ['/services/index']],
-					['label' => Schedules::$titles, 'url' => ['/schedules/index']],
+					['label' => Users::$titles, 'url' => ['/users/index']],
+					Yii::$app->params['departments.enable']?['label' => Departments::$titles, 'url' => ['/departments/index']]:'',
+					['label' => OrgPhones::$titles, 'url' => ['/org-phones/index']],
+					['label' => OrgInet::$titles, 'url' => ['/org-inet/index']],
 					//'<li class="divider"></li>',
 					['label' => 'Карта рабочих мест', 'url' => ['/places/armmap']],
-					['label' => 'По подразделениям', 'url' => ['/places/depmap']],
+					Yii::$app->params['departments.enable']?['label' => 'По подразделениям', 'url' => ['/places/depmap']]:'',
+				]
+			],
+			['label' => Services::$titles,
+				'items' => [
+					['label' => Services::$titles, 'url' => ['/services/index']],
+					['label' => MaintenanceReqs::$titles, 'url' => ['/maintenance-reqs/index']],
+					['label' => Schedules::$titles, 'url' => ['/schedules/index']],
 				]
 			],
 			['label' => 'Доступы',
@@ -99,14 +106,6 @@ NavBar::begin([
 					['label' => Acls::$titles, 'url' => ['/acls/index']],
 					['label' => Acls::$scheduleTitles, 'url' => ['/scheduled-access/index']],
 					['label' => AccessTypes::$titles, 'url' => ['/access-types/index']],
-				]
-			],
-			['label' => 'Люди',
-				'items' => [
-					//['label' => \app\models\OrgStruct::$title, 'url' => ['/org-struct/index']],
-					['label' => Users::$titles, 'url' => ['/users/index']],
-					//['label' => 'Пользователи', 'url' => ['/users/logins']],
-					//['label' => \app\models\UserGroups::$title, 'url' => ['/user-groups/index']],
 				]
 			],
 			['label' => 'Сети',
