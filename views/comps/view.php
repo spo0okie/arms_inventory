@@ -49,7 +49,7 @@ foreach ($model->swList->items as $item) {
 
 <div class="comps-view row">
 	<div class="col-md-6">
-		<?= $this->render('card',['model'=>$model]) ?>
+		<?= $this->render('card',['model'=>$model,'ips_glue'=>'<br/>']) ?>
 
 		<div class="hardware_settings">
 			<h4>Железо</h4>

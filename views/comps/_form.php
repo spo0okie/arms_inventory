@@ -1,10 +1,13 @@
 <?php
 
+use app\helpers\FieldsHelper;
+use app\models\Domains;
+use app\models\MaintenanceReqs;
+use app\models\Services;
+use app\models\Techs;
+use app\models\Users;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
-use \app\models\OldArms;
-use yii\bootstrap5\Modal;
-use kartik\select2\Select2;
 
 
 
@@ -28,8 +31,8 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'domain_id',[
-				'data'=>\app\models\Domains::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'domain_id',[
+				'data'=> Domains::fetchNames(),
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 				],
@@ -41,8 +44,8 @@ if (!isset($modalParent)) $modalParent=null;
 	</div>
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'arm_id', [
-				'data' => \app\models\Techs::fetchArmNames(),
+			<?= FieldsHelper::Select2Field($form,$model,'arm_id', [
+				'data' => Techs::fetchArmNames(),
 				'options' => ['placeholder' => 'Выберите АРМ',],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -52,9 +55,9 @@ if (!isset($modalParent)) $modalParent=null;
 			]) ?>
 		</div>
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'user_id', [
-				'data' => \app\models\Users::fetchWorking($model->user_id),
-				'options' => ['placeholder' => 'сотрудник не назначен',],
+			<?= FieldsHelper::Select2Field($form,$model, 'user_id', [
+				'data' => Users::fetchWorking($model->user_id),
+				'options' => ['placeholder' => 'Пользователь АРМ',],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'allowClear' => true,
@@ -66,24 +69,40 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'ignore_hw') ?>
+			<?= FieldsHelper::CheckboxField($form,$model, 'ignore_hw') ?>
 		</div>
 		<div class="col-md-6 float-end">
-			<?=  \app\helpers\FieldsHelper::CheckboxField($form,$model,'archived') ?>
+			<?= FieldsHelper::CheckboxField($form,$model,'archived') ?>
 		</div>
 	</div>
-	
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'services_ids', [
-		'data' => \app\models\Services::fetchNames(),
-		'options' => ['placeholder' => 'Сервисы на этой ОС',],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => true,
-			'multiple' => true
-		]
-	]) ?>
 
-	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment',['lines'=>2]) ?>
+	<div class="row">
+		<div class="col-md-8">
+			<?= FieldsHelper::Select2Field($form,$model, 'services_ids', [
+				'data' => Services::fetchNames(),
+				'options' => ['placeholder' => 'Нет сервисов',],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+		</div>
+		<div class="col-md-4">
+			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
+				'data' => MaintenanceReqs::fetchNames(),
+				'options' => ['placeholder' => 'Получать из сервисов',],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+		</div>
+	</div>
+
+
+	<?= FieldsHelper::TextAutoresizeField($form,$model, 'comment',['lines'=>2]) ?>
 
     <p>
         <span onclick="$('#comps_advanced_settings').toggle()" class="href">Расширенные настройки</span>

@@ -69,6 +69,8 @@ use yii\db\StaleObjectException;
  * @property LicItems[]     $licItems
  * @property LicKeys[]      $licKeys
  * @property Soft[]         $soft
+ * @property MaintenanceReqs $maintenanceReqs
+ * @property MaintenanceReqs $effectiveMaintenanceReqs
  */
 class Comps extends ArmsModel
 {
@@ -115,7 +117,7 @@ class Comps extends ArmsModel
 				}
 				return $value;
 			}],
-            [['soft_ids','netIps_ids','services_ids'], 'each', 'rule'=>['integer']],
+            [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids'], 'each', 'rule'=>['integer']],
             [['name', 'os','domain_id'], 'required'],
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
@@ -162,8 +164,12 @@ class Comps extends ArmsModel
 				'indexHint' => 'IP адреса сетевых интерфейсов настроенных в ОС<br/>'.QueryHelper::$stringSearchHint,
 			],
 			'domain_id' => 'Домен',
-			'user_id' => 'Пользователь',
-			'user' => 'Пользователь',
+			'user_id' => [
+				'Пользователь',
+				'hint' => 'Имеет смысл только для серверов и виртуальных машин в случае, '
+					.'<br>если пользователь операционной системы отличается от пользователя АРМ'
+			],
+			'user' => ['alias'=>'user'],
             'name' => [
             	'Имя компьютера',
 				'indexHint' => 'Сетевое имя компьютера настроенное в ОС.<br>'.
@@ -188,7 +194,7 @@ class Comps extends ArmsModel
 				'indexHint' => 'Скрипт, который внес последние данные по этой ОС<br/>'.QueryHelper::$stringSearchHint,
 			],
             'exclude_hw' => 'Скрытое из паспорта железо',
-            'ignore_hw' => 'Виртуальная ОС',
+            'ignore_hw' => 'Виртуальная машина',
             'arm_id' => [
             	'АРМ',
 				'indexHint' => 'ПК на котором установлена ОС<br/>'.QueryHelper::$stringSearchHint,
@@ -202,8 +208,8 @@ class Comps extends ArmsModel
             'updated_at' => 'Время обновления',
 			'archived' => [
 				'Архивирован',
-				'hint'=>'Если эта ОС уже не используется, но на нее есть ссылки из других объектов,<br />'.
-					'например если есть заархивированный сервис который был развернут на этой ос,<br />'.
+				'hint'=>'Если эта ОС уже не используется, но на нее есть ссылки из других объектов <br />'.
+					'(например есть заархивированный сервис, который был развернут на этой ос),<br />'.
 					'то можно не удалять ее, а заархивировать, чтобы не разрушать взаимосвязи объектов<br />'.
 					'ОС останется в БД для истории, но не будет попадаться на глаза, если явно не попросить'
 			],
@@ -222,6 +228,21 @@ class Comps extends ArmsModel
 			'places_id' => [
 				'Помещение',
 				'indexHint' => 'Помещение, в котором размещено оборудование'
+			],
+			'maintenance_reqs_ids'=>[
+				MaintenanceReqs::$titles,
+				'indexLabel'=>'Обслуживание (явн.)',
+				'hint'=>'Какие предъявлены требования по обслуживанию ОС/ВМ.'
+					.'<br>По хорошему требования должны предъявлять сервисы, '
+					.'<br>работающие на ОС/ВМ, но можно задать их и явно',
+				'indexHint'=>'{same}'
+			],
+			'maintenanceReqs'=>['alias'=>'maintenance_reqs_ids'],
+			'effectiveMaintenanceReqs'=>[
+				'Обслуживание',
+				'indexHint'=>'Какие предъявлены требования по обслуживанию.'
+					.'<br>Как распространенные с сервисов, так и заданные явно. '
+					.'<br>Избыточно предъявленные требования помечаются как "архивные"'
 			],
 
 		]);
@@ -244,6 +265,7 @@ class Comps extends ArmsModel
 					],
 					'netIps_ids' => 'netIps',
 					'services_ids' => 'services',
+					'maintenance_reqs_ids' => 'maintenanceReqs',
                 ]
             ]
         ];
@@ -493,6 +515,29 @@ class Comps extends ArmsModel
 			->viaTable('{{%comps_in_aces}}', ['comps_id' => 'id']);
 	}
 	
+	public function getMaintenanceReqs()
+	{
+		return $this->hasMany(MaintenanceReqs::class, ['id' => 'reqs_id'])
+			->viaTable('maintenance_reqs_in_comps', ['comps_id' => 'id']);
+	}
+	
+	public function getEffectiveMaintenanceReqs()
+	{
+		$reqs=[];
+		
+		foreach ($this->maintenanceReqs as $maintenanceReq) {
+			$reqs[$maintenanceReq->id]=$maintenanceReq;
+		}
+		
+		foreach ($this->services as $service) {
+			foreach ($service->maintenanceReqsRecursive as $maintenanceReq) {
+				$reqs[$maintenanceReq->id]=$maintenanceReq;
+			}
+		}
+		$reqs=ArrayHelper::findByField($reqs,'spread_comps',1);
+		
+		return MaintenanceReqs::filterEffective($reqs);
+	}
 	
 	//список адресов, которые вернул скрипт инвентаризации
 	public function getIps() {

@@ -96,6 +96,10 @@ use yii\db\ActiveQuery;
  * @property Contracts $contracts
  * @property Contracts $docs
  * @property Contracts $payments
+ * @property MaintenanceReqs $maintenanceReqs
+ * @property MaintenanceReqs $maintenanceReqsRecursive
+ * @property MaintenanceReqs $backupReqs
+ * @property MaintenanceReqs $otherReqs
  */
 class Services extends ArmsModel
 {
@@ -140,6 +144,7 @@ class Services extends ArmsModel
 					'comps_ids' => 'comps',
 					'support_ids' => 'support',
 					'infrastructure_support_ids' => 'infrastructureSupport',
+					'maintenance_reqs_ids' => 'maintenanceReqs',
 					'contracts_ids' => 'contracts',
 					'techs_ids' => 'techs'
 				]
@@ -177,7 +182,7 @@ class Services extends ArmsModel
 			[['cost','charge'], 'number'],
 			[['currency_id'],'default','value'=>1],
             [['name', 'description', 'is_end_user'], 'required'],
-	        [['depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids'], 'each', 'rule'=>['integer']],
+	        [['depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids','maintenance_reqs_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
 			[['vm_cores','vm_ram','vm_hdd','places_id','partners_id','places_id','archived','currency_id','weight'],'integer'],
 			[['weight'],'default', 'value' => '100'],
@@ -324,7 +329,24 @@ class Services extends ArmsModel
 			],
 			'weight' => [
 				'Вес',
-				'hint' => 'Значимость сервиса по сравнению с другими. Используется для определения наиболее важных сервисов на сервере и выборе ответственного за сервер.'
+				'hint' => 'Значимость сервиса по сравнению с другими. Используется для <ul>'
+					.'<li> определения наиболее весомых сервисов на сервере для выбора ответственного за сервер</li>'
+					.'<li> распределения ресурсов VM между сервисами на ней</li>'
+					.'</ul>'
+			],
+			'maintenance_reqs_ids'=>[
+				MaintenanceReqs::$titles,
+				'hint'=>'Какие требования предъявляет сервис по резервному копированию, переиндексации, обновлению, перезагрузкам и т.п.'
+			],
+			'backupReqs'=>[
+				'Требования по резервному копированию',
+				'indexHint'=>'Какие требования по бэкапам предъявляет сервис',
+				'indexLabel'=>'Рез. треб.',
+			],
+			'otherReqs'=>[
+				'Требования по обслуживанию',
+				'indexHint'=>'Какие требования по регламентному обслуживанию предъявляет сервис',
+				'indexLabel'=>'Обсл. треб.',
 			],
 			'vm_cores' => [
 				'Выделено VM CPU',
@@ -717,6 +739,27 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(Techs::class, ['id' => 'arm_id'])
 			->via('comps');
+	}
+	
+	public function getMaintenanceReqs()
+	{
+		return $this->hasMany(MaintenanceReqs::class, ['id' => 'reqs_id'])
+			->viaTable('maintenance_reqs_in_services', ['services_id' => 'id']);
+	}
+	
+	public function getMaintenanceReqsRecursive()
+	{
+		return $this->findRecursiveAttr('maintenanceReqs','maintenanceReqsRecursive','parentService', []);
+	}
+	
+	public function getBackupReqs()
+	{
+		return ArrayHelper::getItemsByFields($this->maintenanceReqsRecursive??[],['is_backup'=>1]);
+	}
+	
+	public function getOtherReqs()
+	{
+		return ArrayHelper::getItemsByFields($this->maintenanceReqsRecursive??[],['is_backup'=>0]);
 	}
 	
 	public function getPlace()

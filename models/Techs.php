@@ -112,6 +112,9 @@ use yii\db\ActiveQuery;
  
  * @property HwList $hwList
  
+ * @property MaintenanceReqs $maintenanceReqs
+ * @property MaintenanceReqs $effectiveMaintenanceReqs
+ 
  */
 
 class Techs extends ArmsModel
@@ -359,6 +362,12 @@ class Techs extends ArmsModel
 				'Записная книжка',
 				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого оборудования/АРМ',
 			],
+			'maintenance_reqs_ids'=>[
+				MaintenanceReqs::$titles,
+				'hint'=>'Какие предъявлены требования по обслуживанию этого оборудования '
+					.'<br>По хорошему требования должны предъявлять сервисы, работающие на '
+					.'этом оборудовании, но можно задать их и явно.'
+			],
 		]);
 	}
 	
@@ -376,7 +385,7 @@ class Techs extends ArmsModel
 			[['user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'integer'],
 			[['installed_back','full_length'],'boolean'],
 
-	        [['contracts_ids','lic_items_ids','lic_groups_ids','lic_keys_ids'], 'each', 'rule'=>['integer']],
+	        [['contracts_ids','lic_items_ids','lic_groups_ids','lic_keys_ids','maintenance_reqs_ids','services_ids'], 'each', 'rule'=>['integer']],
 
 			[['url', 'comment','updated_at','history','hw','specs','external_links'], 'safe'],
 			[['inv_num', 'sn','installed_pos','installed_pos_end'], 'string', 'max' => 128],
@@ -437,6 +446,7 @@ class Techs extends ArmsModel
 					'lic_items_ids' => 'licItems',
 					'lic_keys_ids' => 'licKeys',
 					'lic_groups_ids' => 'licGroups',
+					'maintenance_reqs_ids' => 'maintenanceReqs',
 				]
 			]
 		];
@@ -988,6 +998,31 @@ class Techs extends ArmsModel
 		return $this->hasOne(Techs::class, ['id' => 'arms_id']);
 	}
 	
+	public function getMaintenanceReqs()
+	{
+		return $this->hasMany(MaintenanceReqs::class, ['id' => 'reqs_id'])
+			->viaTable('maintenance_reqs_in_techs', ['techs_id' => 'id']);
+	}
+	
+	public function getEffectiveMaintenanceReqs()
+	{
+		$reqs=[];
+		
+		foreach ($this->maintenanceReqs as $maintenanceReq) {
+			$reqs[$maintenanceReq->id]=$maintenanceReq;
+		}
+		
+		foreach ($this->services as $service) {
+			foreach ($service->maintenanceReqsRecursive as $maintenanceReq) {
+				$reqs[$maintenanceReq->id]=$maintenanceReq;
+			}
+		}
+
+		$reqs=ArrayHelper::findByField($reqs,'spread_techs',1);
+		
+		return MaintenanceReqs::filterEffective($reqs);
+	}
+
 	/**
 	 * @return ActiveQuery
 	 */

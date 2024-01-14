@@ -6,7 +6,7 @@ use kartik\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = app\models\Departments::$title;
+$this->title = app\models\Departments::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="departments-index">

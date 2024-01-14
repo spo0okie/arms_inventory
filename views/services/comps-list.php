@@ -6,6 +6,7 @@
 /* @var $model Services */
 
 use app\components\DynaGridWidget;
+use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Comps;
 use app\models\Services;
@@ -159,6 +160,27 @@ $vmRes=[
 			return 'Class error: '.get_class($data);
 		}
 	],
+	'maintenanceReqs'=>[
+		'value' =>  function ($data) {
+			return ModelFieldWidget::widget([
+				'model'=>$data,
+				'field'=>'maintenanceReqs',
+				'title'=>false,
+				'item_options'=>['static_view'=>true],
+			]);
+		}
+	],
+	'effectiveMaintenanceReqs'=>[
+		'value' =>  function ($data) {
+			return ModelFieldWidget::widget([
+				'model'=>$data,
+				'field'=>'effectiveMaintenanceReqs',
+				'title'=>false,
+				'item_options'=>['static_view'=>true],
+			]);
+		}
+	],
+
 ];
 
 ?>

@@ -1,8 +1,20 @@
 <?php
 
+use app\helpers\FieldsHelper;
+use app\models\Comps;
+use app\models\Contracts;
+use app\models\Currency;
+use app\models\MaintenanceReqs;
+use app\models\Partners;
+use app\models\Places;
+use app\models\Schedules;
+use app\models\Segments;
+use app\models\Services;
+use app\models\Techs;
+use app\models\Users;
+use kartik\markdown\MarkdownEditor;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
@@ -19,6 +31,7 @@ $parentPlaceholder=' (насл. из основного сервиса/услу�
 
 if (!$model->is_service) $model->is_service=0;
 
+/** @noinspection JSUnusedLocalSymbols */
 $changeParent= <<<JS
 Select2UpdatePlaceholder = function (field,newPlaceholder,defaultValue) {
     if (!newPlaceholder) {
@@ -26,11 +39,12 @@ Select2UpdatePlaceholder = function (field,newPlaceholder,defaultValue) {
     } else {
         newPlaceholder=newPlaceholder+'$parentPlaceholder';
     }
-	var \$select2 = $('#'+field).data('krajeeSelect2');
-	var \$options = $('#'+field).data('s2Options');
+    let \$field=$('#'+field);
+	var \$select2 = \$field.data('krajeeSelect2');
+	var \$options = \$field.data('s2Options');
 	window[\$select2].placeholder = newPlaceholder;
-	if (jQuery('#'+field).data('select2')) { jQuery('#'+field).select2('destroy'); }
-	jQuery.when(jQuery('#'+field).select2(window[\$select2])).done(initS2Loading(field,\$options));
+	if (\$field.data('select2')) { \$field.select2('destroy'); }
+	jQuery.when(\$field.select2(window[\$select2])).done(initS2Loading(field,\$options));
 
 };
 
@@ -65,11 +79,11 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 
 	<div class="row">
 		<div class="col-md-5">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'name') ?>
 		</div>
 		<div class="col-md-5">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'parent_id', [
-				'data' => \app\models\Services::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'parent_id', [
+				'data' => Services::fetchNames(),
 				'options' => [
 					'placeholder' => 'Выберите основной сервис/услугу',
 					'onchange' => 'changeServiceParent($(this).val());'
@@ -97,9 +111,9 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 
     <div class="row">
         <div class="col-md-4">
-	        <?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'is_end_user') ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'segment_id', [
-				'data' => \app\models\Segments::fetchNames(),
+	        <?= FieldsHelper::CheckboxField($form,$model, 'is_end_user') ?>
+			<?= FieldsHelper::Select2Field($form,$model, 'segment_id', [
+				'data' => Segments::fetchNames(),
 				'options' => [
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->segmentName))?
 						$model->parentService->segmentName.$parentPlaceholder:$segmentPlaceholder,
@@ -111,8 +125,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'providing_schedule_id', [
-				'data' => \app\models\Schedules::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'providing_schedule_id', [
+				'data' => Schedules::fetchNames(),
 				'options' => [
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->providingScheduleName))?
 						$model->parentService->providingScheduleName.$parentPlaceholder:$schedulePlaceholder,
@@ -124,8 +138,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'support_schedule_id', [
-				'data' => \app\models\Schedules::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'support_schedule_id', [
+				'data' => Schedules::fetchNames(),
 				'options' => [
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->supportScheduleName))?
 						$model->parentService->supportScheduleName.$parentPlaceholder:$schedulePlaceholder,
@@ -137,8 +151,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'responsible_id', [
-				'data' => \app\models\Users::fetchWorking(),
+			<?= FieldsHelper::Select2Field($form,$model,'responsible_id', [
+				'data' => Users::fetchWorking(),
 				'options' => [
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->responsibleName))?
 						$model->parentService->responsibleName.$parentPlaceholder:$responsiblePlaceholder,
@@ -151,8 +165,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'infrastructure_user_id', [
-				'data' => \app\models\Users::fetchWorking(),
+			<?= FieldsHelper::Select2Field($form,$model,'infrastructure_user_id', [
+				'data' => Users::fetchWorking(),
 				'options' => [
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->infrastructureResponsibleName))?
 						$model->parentService->infrastructureResponsibleName.$parentPlaceholder:$infrastructureResponsiblePlaceholder,
@@ -165,8 +179,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => false
 				]
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'places_id', [
-				'data' => \app\models\Places::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model,'places_id', [
+				'data' => Places::fetchNames(),
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
 				'hintModel'=>'Places',
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -175,8 +189,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'allowClear' => true,
 				],
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'partners_id', [
-				'data' => \app\models\Partners::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model,'partners_id', [
+				'data' => Partners::fetchNames(),
 				'options' => ['placeholder' => 'Начните набирать название для поиска'],
 				'hintModel'=>'Partners',
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -187,8 +201,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			]) ?>
 			<div class="row">
 				<div class="col-md-3">
-					<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'currency_id', [
-						'data' => \app\models\Currency::fetchNames(),
+					<?= FieldsHelper::Select2Field($form,$model,'currency_id', [
+						'data' => Currency::fetchNames(),
 						'options' => ['placeholder' => 'RUR'],
 						'toggleAllSettings'=>['selectLabel'=>null],
 						'pluginOptions' => [
@@ -199,41 +213,41 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					]) ?>
 				</div>
 				<div class="col-md-6">
-					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'cost') ?>
+					<?= FieldsHelper::TextInputField($form,$model,'cost') ?>
 				</div>
 				<div class="col-md-3">
-					<?= $form->field($model,'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('services','cost','charge')) ?>
+					<?= $form->field($model,'charge')->textInput()->hint(Contracts::chargeCalcHtml('services','cost','charge')) ?>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-4">
-					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'vm_cores') ?>
+					<?= FieldsHelper::TextInputField($form,$model,'vm_cores') ?>
 				</div>
 				<div class="col-md-4">
-					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'vm_ram') ?>
+					<?= FieldsHelper::TextInputField($form,$model,'vm_ram') ?>
 				</div>
 				<div class="col-md-4">
-					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'vm_hdd') ?>
+					<?= FieldsHelper::TextInputField($form,$model,'vm_hdd') ?>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-6">
-					<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'weight') ?>
+					<?= FieldsHelper::TextInputField($form,$model,'weight') ?>
 				</div>
 				<div class="col-md-6 p-3 align-content-end">
 					<br/>
-					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'archived') ?>
+					<?= FieldsHelper::CheckboxField($form,$model, 'archived') ?>
 				</div>
 			</div>
 
 
 		</div>
         <div class="col-md-8">
-			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'search_text',['lines' => 1,]) ?>
-			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'description',['lines' => 2,]) ?>
-			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'links',[	'lines' => 1,]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'support_ids', [
-				'data' => \app\models\Users::fetchWorking(),
+			<?= FieldsHelper::TextAutoresizeField($form,$model,'search_text',['lines' => 1,]) ?>
+			<?= FieldsHelper::TextAutoresizeField($form,$model, 'description',['lines' => 2,]) ?>
+			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links',[	'lines' => 1,]) ?>
+			<?= FieldsHelper::Select2Field($form,$model, 'support_ids', [
+				'data' => Users::fetchWorking(),
 				'options' => [
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->supportNames))?
 						$model->parentService->supportNames.$parentPlaceholder:$supportPlaceholder,
@@ -246,8 +260,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'infrastructure_support_ids', [
-				'data' => \app\models\Users::fetchWorking(),
+			<?= FieldsHelper::Select2Field($form,$model, 'infrastructure_support_ids', [
+				'data' => Users::fetchWorking(),
 				'options' => [
 					'placeholder' => (is_object($model->parentService) && strlen($model->parentService->infrastructureSupportNames))?
 						$model->parentService->infrastructureSupportNames.$parentPlaceholder:$infrastructureSupportPlaceholder,
@@ -260,8 +274,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'depends_ids', [
-				'data' => \app\models\Services::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'depends_ids', [
+				'data' => Services::fetchNames(),
 				'options' => ['placeholder' => 'Выберите сервисы',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'hintModel'=>'Services',
@@ -271,8 +285,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'comps_ids', [
-				'data' => \app\models\Comps::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'comps_ids', [
+				'data' => Comps::fetchNames(),
 				'options' => ['placeholder' => 'Выберите серверы',],
 				'hintModel'=>'Comps',
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -282,8 +296,8 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'techs_ids', [
-				'data' => \app\models\Techs::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'techs_ids', [
+				'data' => Techs::fetchNames(),
 				'options' => ['placeholder' => 'Выберите оборудование',],
 				'hintModel'=>'Techs',
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -293,8 +307,19 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
-				'data' => \app\models\Contracts::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
+				'data' => MaintenanceReqs::fetchNames(),
+				'options' => ['placeholder' => 'Выберите требования по обслуживанию',],
+				'hintModel'=>'MaintenanceReqs',
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+			<?= FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
+				'data' => Contracts::fetchNames(),
 				'options' => ['placeholder' => 'Выберите документы',],
 				'hintModel'=>'Contracts',
 				'toggleAllSettings'=>['selectLabel'=>null],
@@ -310,7 +335,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 	<div class="form-group">
 		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
 	</div>
-	<?= $form->field($model, 'notebook')->widget(\kartik\markdown\MarkdownEditor::className(), [
+	<?= $form->field($model, 'notebook')->widget(MarkdownEditor::className(), [
 		'showExport'=>false
 	]) ?>
 
