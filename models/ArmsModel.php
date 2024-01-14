@@ -23,6 +23,7 @@ use yii\db\ActiveRecord;
  * @property string $updatedAt Время обновления
  * @property string $updated_at Время обновления
  * @property string $updated_by Автор обновления
+ * @property string $links Ссылки прикрепленные к объекту
  * @property Attaches $attaches Загруженные файлы
  * @property boolean $archived Статус архивирования элемента
  * @property string $external_links Внешние ссылки
@@ -37,8 +38,13 @@ class ArmsModel extends ActiveRecord
 	public const searchableOrHint='<br><i>HINT: Можно искать несколько вариантов, разделив их вертикальной</i> <b>|</b> <i>чертой</i>';
 	
 	
-	protected $attributeDataCache=null;
-	protected $attributeLabelsCache=null;
+	protected $attributeDataCache;
+	protected $attributeLabelsCache;
+	
+	protected static $historyClass;	//если заполнить, то будет сохранять историю в моделях этого класса
+	
+	/** @var array Кэш для рекурсивного поиска поля */
+	protected $recursiveCache=[];
 	
 	protected static $allItems=null;
 	
@@ -93,7 +99,7 @@ class ArmsModel extends ActiveRecord
 			],
 			'updated_at' => [
 				'Время изменения',
-				'hint' => 'Время обновления объекта в БД'
+				'hint' => 'Дата/время изменения объекта в БД'
 			],
 			'updated_by'=>[
 				'Редактор',
@@ -105,6 +111,8 @@ class ArmsModel extends ActiveRecord
 			],
 		];
 	}
+	
+	
 
 	public function getAttributeData($key)
 	{
@@ -252,7 +260,15 @@ class ArmsModel extends ActiveRecord
 	 * Валидация отсутствия рекурсии при построении ссылок на родителей
 	 * @param       $attribute - аттрибут с id другого объекта
 	 * @param array $params
-	 * в параметрах надо указать 'params'=>['getLink'=>'parentService'] - метод которым получить не id а объект
+	 * в параметрах надо указать 'params'=>[
+	 *     	'getLink'=>'parentService',    	//обязательно! - метод которым получить не id а объект
+	 *     	'initialLink'=>ArmsModel[],    	//можно передать первую итерацию ссылок, т.к. LinkerBehaviour читает ссылки
+	 * 										//из базы а не из переменной, и несохраненные в БД ссылки через getter не получить
+	 *		'origin'						//кому будем писать ошибки валидации (инициатор валидации)
+	 * 		'object'						//чьи аттрибуты проверяем
+	 * 		'attributeChain'				//накопленные значения поля за время движения по рекурсии
+	 * ]
+	 * @return bool
 	 */
 	public function validateRecursiveLink($attribute, $params=[])
 	{
@@ -273,24 +289,58 @@ class ArmsModel extends ActiveRecord
 		
 		//если у нас есть ссылка
 		if (!empty($object->$attribute)) {
+			//предположим что у нас тут может быть и _id и _ids, т.к. _ids более общий - изпользуем его
+			if (!is_array($link_ids=$object->$attribute)) $link_ids=[$link_ids];
 			//если она уже есть в цепочке id
-			if (in_array($object->$attribute, $params['attributeChain'])) {
-				$error=($this->hasProperty('name')?$this->name:$this->getAttributeLabel($attribute))
-					.' рекурсивно ссылается сам на себя';
-				$params['origin']->addError($attribute, $error);
-			} elseif (is_object($link=$object->$getLink)) {
-				//иначе пробуем загрузить объект на который ссылаемся
-				//кладем его в параметры для следующей проверки
-				$params['object']=$link;
-				//проверяем
-				$link->validateRecursiveLink($attribute, $params);
+			foreach ($link_ids as $link_id) {
+				if (in_array($link_id, $params['attributeChain'])) {
+					$error=($this->hasProperty('name')?$this->name:$this->getAttributeLabel($attribute))
+						.' рекурсивно ссылается сам на себя';
+					$params['origin']->addError($attribute, $error);
+					return false; //нет смысла дальше проверять
+				}
+			}
+			//иначе пробуем загрузить объекты на которые ссылаемся
+			if (isset($params['initialLink'])) {//если ссылки передали через параметры
+				$links=$params['initialLink'];	//то из и используем (нужно для links_ids до их записи в БД)
+				unset($params['initialLink']);	//дальше будем использовать ссылки уже из БД
+			} else {
+				$links=$object->$getLink;
+			}
+			//links также может быть и getService и getServices, приводим в общем случае к массиву
+			if (!is_array($links)) $links=[$links];
+			foreach ($links as $link) {
+				if (is_object($link)) {
+					//кладем его в параметры для следующей проверки
+					$params['object']=$link;
+					//проверяем
+					if (!$link->validateRecursiveLink($attribute, $params)) return false; //если нашли косяк, дальше не проверяем
+				}
 			}
 		}
+		return true;
 	}
 	
 	public function silentSave($runValidation = true) {
 		$this->doNotChangeAuthor=true;
 		return $this->save($runValidation);
+	}
+	
+	
+	public function historyCommit($initiator=null) {
+		if (!isset(static::$historyClass) || $this->doNotChangeAuthor) return;
+		//ну что ж, давайте попробуем залепить запись в журнал!
+		$historyClass=static::$historyClass;
+		/** @var HistoryModel $journal */
+		$journal=new $historyClass();
+		$journal->journal($this,$initiator);
+	}
+	
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+		
+		$this->historyCommit();
 	}
 	
 	public function beforeSave($insert)
@@ -448,5 +498,30 @@ class ArmsModel extends ActiveRecord
 	public static function findByAnyName(string $name)
 	{
 		return static::findByName($name);
+	}
+	
+	/**
+	 * Рекурсивный поиск аттрибута в цепочке родителей
+	 * @param string $simpleAttr
+	 * @param string $recursiveAttr
+	 * @param string $parent
+	 * @param null   $empty
+	 * @return mixed|null
+	 */
+	public function findRecursiveAttr(string $simpleAttr, string $recursiveAttr, $parent='parent',$empty=null) {
+		//ищем в кэше
+		if (isset($this->recursiveCache[$recursiveAttr]))
+			return $this->recursiveCache[$recursiveAttr];
+		
+		//ищем у себя
+		if (is_object($this->$simpleAttr)||(is_array($this->$simpleAttr)&&count($this->$simpleAttr)))
+			return $this->recursiveCache[$recursiveAttr] = $this->$simpleAttr;
+		
+		//ищем у родителя
+		if (is_object($this->$parent))
+			return $this->recursiveCache[$recursiveAttr] = $this->$parent->$recursiveAttr;
+		
+		//запоминаем, что ничего не нашли
+		return $this->recursiveCache[$recursiveAttr] = $empty;
 	}
 }
