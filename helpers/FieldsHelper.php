@@ -6,13 +6,12 @@ namespace app\helpers;
 
 use app\components\assets\FieldsHelperAsset;
 use app\models\ArmsModel;
-use Composer\Util\IniHelper;
+use Exception;
 use kartik\date\DatePicker;
+use kartik\markdown\MarkdownEditor;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Inflector;
-use yii\helpers\StringHelper;
 use yii\helpers\Url;
 use yii\web\JsExpression;
 
@@ -24,8 +23,11 @@ class FieldsHelper
 	
 	/**
 	 * Формирует поля для options=>[] для всплывающей подсказки у label
+	 * @param string $title
+	 * @param string $text
+	 * @return array|string[]
 	 */
-	public static function toolTipOptions($title,$text) {
+	public static function toolTipOptions(string $title, string $text) {
 		return $text?[
 			'qtip_ttip'=>'<div class="card">'.
 				'<div class="card-header">'.$title.'</div>'.
@@ -38,6 +40,13 @@ class FieldsHelper
 		]:[];
 	}
 	
+	/**
+	 * Вырезает и возвращает значение из массива
+	 * @param      $options
+	 * @param      $option
+	 * @param null $default
+	 * @return mixed|null
+	 */
 	public static function cutSingleOption(&$options,$option,$default=null) {
 		if (!isset($options[$option])) return $default;
 		$result=$options[$option];
@@ -57,7 +66,7 @@ class FieldsHelper
 		
 		$itemsHintsUrl=static::cutSingleOption($options,'itemsHintsUrl','');
 		if (strlen($hintModel=static::cutSingleOption($options,'hintModel',''))) {
-			$itemsHintsUrl=Url::to([\yii\helpers\Inflector::camel2id($hintModel).'/ttip','q'=>'dummy']);
+			$itemsHintsUrl=Url::to([Inflector::camel2id($hintModel).'/ttip','q'=>'dummy']);
 		} elseif ($itemsHintsUrl=='auto') {
 			//если выставлено в авто, вытаскиваем ссылку к тултипу исходя из имени поля
 			$hintModelTokens=explode('_',$attr);
@@ -86,12 +95,13 @@ class FieldsHelper
 	
 	/**
 	 * @param ActiveForm $form
-	 * @param ArmsModel $model
-	 * @param string $attr
-	 * @param array $options
+	 * @param ArmsModel  $model
+	 * @param string     $attr
+	 * @param array      $options
 	 * @return mixed
+	 * @throws Exception
 	 */
-	public static function Select2Field($form,$model,$attr,$options=[]) {
+	public static function Select2Field(ActiveForm $form,ArmsModel $model, string $attr, $options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
@@ -104,7 +114,7 @@ class FieldsHelper
 			$pluginOptions['templateResult']=new JsExpression('function(item){return formatSelect2ItemHint(item,"'.$itemsHintsUrl.'")}');
 			$pluginOptions['templateSelection']=new JsExpression('function(item){return formatSelect2ItemHint(item,"'.$itemsHintsUrl.'")}');
 			$pluginOptions['escapeMarkup']=new JsExpression('function(m) { return m; }');
-			if (\app\helpers\ArrayHelper::getTreeValue($options,['pluginOptions','multiple'],false))
+			if (ArrayHelper::getTreeValue($options,['pluginOptions','multiple'],false))
 				$pluginOptions['selectionAdapter']=new JsExpression('$.fn.select2.amd.require("QtippedMultipleSelectionAdapter")');
 			else
 				$pluginOptions['selectionAdapter']=new JsExpression('$.fn.select2.amd.require("QtippedSingleSelectionAdapter")');
@@ -112,7 +122,7 @@ class FieldsHelper
 		}
 		return $form
 			->field($model, $attr)
-			->widget(Select2::classname(),\app\helpers\ArrayHelper::recursiveOverride([
+			->widget(Select2::class, ArrayHelper::recursiveOverride([
 				'options'=>[
 					'placeholder'=>'Начните набирать для поиска',
 				],
@@ -131,11 +141,11 @@ class FieldsHelper
 	 * @param array $options
 	 * @return mixed
 	 */
-	public static function TextAutoresizeField($form,$model,$attr,$options=[]) {
+	public static function TextAutoresizeField(ActiveForm $form, ArmsModel $model, string $attr, $options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
-		$options=\app\helpers\ArrayHelper::recursiveOverride([
+		$options= ArrayHelper::recursiveOverride([
 			'lines'=>1
 		],$options);
 
@@ -157,13 +167,13 @@ class FieldsHelper
 	 * @param array $options
 	 * @return mixed
 	 */
-	public static function TextInputField($form,$model,$attr,$options=[]) {
+	public static function TextInputField(ActiveForm $form, ArmsModel $model, string $attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)
-			->textInput(\app\helpers\ArrayHelper::recursiveOverride([
+			->textInput(ArrayHelper::recursiveOverride([
 				'maxlength'=>true
 			],$options))
 			->label($label,$labelOptions)
@@ -177,7 +187,7 @@ class FieldsHelper
 	 * @param array $options
 	 * @return mixed
 	 */
-	public static function CheckboxField($form,$model,$attr,$options=[]) {
+	public static function CheckboxField(ActiveForm $form, ArmsModel $model, string $attr, $options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
@@ -194,11 +204,11 @@ class FieldsHelper
 	 * @param array $options
 	 * @return mixed
 	 */
-	public static function CheckboxListField($form,$model,$attr,$options=[]) {
+	public static function CheckboxListField(ActiveForm $form, ArmsModel $model, string $attr, $options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
-		$options=\app\helpers\ArrayHelper::recursiveOverride([
+		$options= ArrayHelper::recursiveOverride([
 			'class'=>"card d-flex flex-wrap flex-row pt-2 pb-1",
 			'itemOptions'=>[
 				'class'=>'p-2'
@@ -217,20 +227,21 @@ class FieldsHelper
 	
 	/**
 	 * @param ActiveForm $form
-	 * @param ArmsModel $model
-	 * @param string $attr
-	 * @param array $options
+	 * @param ArmsModel  $model
+	 * @param string     $attr
+	 * @param array      $options
 	 * @return mixed
+	 * @throws Exception
 	 */
-	public static function MarkdownField($form,$model,$attr,$options=[])
+	public static function MarkdownField(ActiveForm $form, ArmsModel $model, string $attr,$options=[])
 	{
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)
-			->widget(\kartik\markdown\MarkdownEditor::className(),
-				\app\helpers\ArrayHelper::recursiveOverride([
+			->widget(MarkdownEditor::class,
+				ArrayHelper::recursiveOverride([
 					'showExport'=>false
 				],$options)
 			)
@@ -240,12 +251,13 @@ class FieldsHelper
 	
 	/**
 	 * @param ActiveForm $form
-	 * @param ArmsModel $model
-	 * @param string $attr
-	 * @param array $options
+	 * @param ArmsModel  $model
+	 * @param string     $attr
+	 * @param array      $options
 	 * @return mixed
+	 * @throws Exception
 	 */
-	public static function DateField($form,$model,$attr,$options=[])
+	public static function DateField(ActiveForm $form, ArmsModel $model, string $attr, $options=[])
 	{
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
@@ -253,7 +265,7 @@ class FieldsHelper
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
 		return $form
 			->field($model, $attr)
-			->widget(DatePicker::classname(), \app\helpers\ArrayHelper::recursiveOverride([
+			->widget(DatePicker::class, ArrayHelper::recursiveOverride([
 				'options' => ['placeholder' => 'Введите дату ...'],
 				'pluginOptions' => [
 					'autoclose'=>true,
@@ -264,7 +276,6 @@ class FieldsHelper
 			->label($label,$labelOptions)
 			->hint($hint,$hintOptions);
 	}
-	
 	
 	
 }
