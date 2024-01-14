@@ -1,7 +1,8 @@
 <?php
 
+use app\components\LinkObjectWidget;
+use app\components\ModelFieldWidget;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
@@ -28,7 +29,7 @@ if (!mb_strlen($domain))
 <br />
 <h1>
 	<span class="small"><?= $domain ?>\</span><?=
-		\app\components\LinkObjectWidget::widget([
+		LinkObjectWidget::widget([
 			'model'=>$model,
 			'name'=>$model->renderName(),
 			'nameSuffix'=>Html::a("<i class=\"fas fa-sign-in-alt\" title='Удаленное управление {$model->fqdn}' ></i>",'remotecontrol://'.$model->fqdn),
@@ -41,7 +42,7 @@ if (!mb_strlen($domain))
 	<?= $model->os ?><br />
 	<span id="comp<?= $model->id ?>-updated-info" class="update-timestamp" style="display: none">Последнее обновление данных <?= $model->updated_at ?> (v. <?= $model->raw_version ?>)</span>
 </div>
-<div>
+<div class="mb-3">
 	<?= is_object($model->responsible)?'<strong>Ответственный:</strong>'.$this->render('/users/item',['model'=>$model->responsible,'static_view'=>true]).'<br />':'' ?>
 	<?php if (count($model->supportTeam)) { ?>
 		<strong>Поддержка:</strong>
@@ -54,32 +55,39 @@ if (!mb_strlen($domain))
 	<?php } ?>
 	<?= Yii::$app->formatter->asNtext($model->comment??'') ?>
 </div>
-<br />
-<?php if(!$no_arm) { ?>
-	<h4>АРМ</h4>
-	<p>
-		<?php if (is_object($model->arm)) { ?>
-			<?= $this->render('/techs/item',['model'=>$model->arm,'static_view'=>$static_view]) ?>
-		<?php } else { ?>
-			не назначен
-		<?php } ?>
-	</p>
-<?php } ?>
-
-<div>
+<div class="d-flex flex-row flex-wrap mb-3">
+	<?php if(!$no_arm) { ?>
+		<div class="pe-5">
+			<h4>АРМ</h4>
+			<p>
+				<?php if (is_object($model->arm)) { ?>
+					<?= $this->render('/techs/item',['model'=>$model->arm,'static_view'=>$static_view]) ?>
+				<?php } else { ?>
+					не назначен
+				<?php } ?>
+			</p>
+		</div>
+	<?php } ?>
 	<?= $this->render('ips_list',['model'=>$model,'static_view'=>$static_view,'glue'=>$ips_glue]) ?>
 	<?= $this->render('lics_list',['model'=>$model,'static_view'=>$static_view]) ?>
 </div>
-
-<?php if (count($services)) {
 	
-	$output=[];
-	foreach ($services as $service)
-		$output[]=$this->render('/services/item',['model'=>$service,'static_view'=>$static_view]);
-	echo "<h3>Размещенные сервисы</h3><p>".implode('<br />',$output)."</p>";
- } ?>
-	
-	
+	<?php if (count($model->services)||count($model->effectiveMaintenanceReqs)) { ?>
+		<div class="d-flex flex-row flex-wrap mb-3">
+			<?= ModelFieldWidget::widget([
+				'model'=>$model,
+				'field'=>'services',
+				'title'=>'Участвует в работе сервисов:',
+				'card_options'=>['cardClass'=>'pe-5']
+			]) ?>
+			<?= ModelFieldWidget::widget([
+				'model'=>$model,
+				'field'=>'effectiveMaintenanceReqs',
+				'title'=>'Требует обслуживания:',
+				'card_options'=>['cardClass'=>'pe-5']
+			]) ?>
+		</div>
+	<?php } ?>
 	
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 <?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>

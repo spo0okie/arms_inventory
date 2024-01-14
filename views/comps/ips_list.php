@@ -30,13 +30,16 @@ if ($glue=='<br />') {
 	'item_options'=>[
 		'static_view'=>$static_view,
 	],
+	'card_options'=>['cardClass'=>'pe-4'],
 ]) ?>
 
-<h4>MAC адрес(а)</h4>
-<p><?php
-	$output=[];
-	foreach (explode("\n",$model->formattedMac) as $mac) {
-		$output[]= Html::a($mac,['comps/index','CompsSearch[mac]'=>$mac]);
-	}
-	echo implode($glue,$output);
-?></p>
+<div class="pe-5">
+	<h4>MAC адрес(а)</h4>
+	<p><?php
+		$output=[];
+		foreach (explode("\n",$model->formattedMac) as $mac) {
+			$output[]= Html::a($mac,['comps/index','CompsSearch[mac]'=>$mac]);
+		}
+		echo implode($glue,$output);
+	?></p>
+</div>

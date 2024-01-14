@@ -1,6 +1,9 @@
 <?php
 
-use yii\helpers\Html;
+use app\components\LinkObjectWidget;
+use app\components\ModelFieldWidget;
+use app\components\UrlListWidget;
+use app\helpers\ArrayHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
@@ -14,7 +17,7 @@ if (is_object($model->state)) { ?>
 <?php }?>
 
 <h1>
-	<?= \app\components\LinkObjectWidget::widget([
+	<?= LinkObjectWidget::widget([
 		'model'=>$model,
 		'confirmMessage' => 'Удалить этот оборудование из базы (необратимо)?',
 		'undeletableMessage'=>'Нельзя удалить это оборудование/АРМ, т.к. есть привязанные к нему объекты.<br> Может лучше проставить флажок &quot;архивировано&quot;?',
@@ -33,7 +36,7 @@ if (is_object($model->state)) { ?>
 			
 			<?php if ($model->model->individual_specs) { ?>
 				<h4>Спецификация:</h4>
-				<?= \Yii::$app->formatter->asNtext($model->specs) ?>
+				<?= Yii::$app->formatter->asNtext($model->specs) ?>
 				<br />
 			<?php } ?>
 		
@@ -62,55 +65,69 @@ if (is_object($model->state)) { ?>
 		<?php } ?>
 	</div>
 </div>
-<?= $this->render('attached/files',['model'=>$model,'static_view'=>$static_view]) ?>
 
 
-<?php
-	//для оборудования не АРМ выводим в список урл ссылку на IP устройства
-	$urls=$model->url;
-	$ips=$model->isComputer?'':$model->ip;
-	if (strlen($urls.$ips)) { ?>
-		<h4>Ссылки:</h4>
+<div class="d-flex flex-row mb-3">
+	<div class="pe-5">
+		<h4>Место установки и сотрудники:</h4>
 		<p>
-			<?= \app\components\UrlListWidget::Widget(['list'=>$urls,'ips'=>$ips]) ?>
+			<?= is_object($model->arm)?('АРМ: '.$this->render('/techs/item',['model'=>$model->arm]).'<br />'):'' ?>
+			<?= is_object($model->installation)?('Установлено в: '.$this->render('/techs/item',['model'=>$model->installation]).'<br />'):'' ?>
+			Помещение: <?= $this->render('/places/item',['model'=>$model->place]) ?> <br />
+			Пользователь: <?= $this->render('/users/item',['model'=>$model->user]) ?> <br />
+			<?= is_object($model->head)?('Руководитель отдела:'.$this->render('/users/item',['model'=>$model->head]).'<br/>'):'' ?>
+			<?= is_object($model->itStaff)?('Сотрудник ИТ:'.$this->render('/users/item',['model'=>$model->itStaff]).'<br/>'):'' ?>
+			<?= is_object($model->admResponsible)?($model->getAttributeLabel('responsible_id').':'.$this->render('/users/item',['model'=>$model->admResponsible]).'<br/>'):'' ?>
 		</p>
-<?php }	?>
+	</div>
+	
+	<?php if ($model->isComputer) echo '<div class="pe-4">'.$this->render('/techs/attached/comps',['model'=>$model]).'</div>' ?>
+	
+</div>
 
 
-<?php if ($model->isComputer) echo $this->render('/techs/attached/comps',['model'=>$model]) ?>
-
-
-<h4>Место установки и сотрудники:</h4>
-<p>
-	<?= is_object($model->arm)?('АРМ: '.$this->render('/techs/item',['model'=>$model->arm]).'<br />'):'' ?>
-	<?= is_object($model->installation)?('Установлено в: '.$this->render('/techs/item',['model'=>$model->installation]).'<br />'):'' ?>
-    Помещение: <?= $this->render('/places/item',['model'=>$model->place]) ?> <br />
-    Пользователь: <?= $this->render('/users/item',['model'=>$model->user]) ?> <br />
-	<?= is_object($model->head)?('Руководитель отдела:'.$this->render('/users/item',['model'=>$model->head]).'<br/>'):'' ?>
-	<?= is_object($model->itStaff)?('Сотрудник ИТ:'.$this->render('/users/item',['model'=>$model->itStaff]).'<br/>'):'' ?>
-	<?= is_object($model->admResponsible)?($model->getAttributeLabel('responsible_id').':'.$this->render('/users/item',['model'=>$model->admResponsible]).'<br/>'):'' ?>
-</p>
-
-<?php if (count($model->services)) { ?>
-	<h4>Участвует в работе сервисов:</h4>
-	<p>
-		<?php foreach ($model->services as $service) { ?>
-			<?= $this->render('/services/item',['model'=>$service]) ?><br />
-		<?php } ?>
-	</p>
-<?php } ?>
-
-<div class="d-flex flex-row">
+<div class="d-flex flex-row flex-wrap mb-3">
 	<div class="pe-4">
 		<?= $this->render('ips_list',compact('model')) ?>
 	</div>
-	<div class="pe-4">
-		<h4>MAC адрес(а)</h4>
+	<div class="pe-5">
+		<h4>MAC адрес(а):</h4>
 		<p>
 			<?= Yii::$app->formatter->asNtext($model->formattedMac) ?>
 		</p>
 	</div>
+	
+	<?php
+	//для оборудования не АРМ выводим в список урл ссылку на IP устройства
+	$urls=$model->url;
+	$ips=$model->isComputer?'':$model->ip;
+	if (strlen($urls.$ips)) { ?>
+	<div class="pe-5">
+		<h4>Ссылки:</h4>
+			<?= UrlListWidget::Widget(['list'=>$urls,'ips'=>$ips]) ?>
+	</div>
+	<?php }	?>
+	<div class="pe-5">
+		<?= $this->render('attached/files',['model'=>$model,'static_view'=>$static_view]) ?>
+	</div>
 </div>
+
+<?php if (count($model->services)||count($model->effectiveMaintenanceReqs)) { ?>
+	<div class="d-flex flex-row flex-wrap mb-3">
+		<?= ModelFieldWidget::widget([
+			'model'=>$model,
+			'field'=>'services',
+			'title'=>'Участвует в работе сервисов:',
+			'card_options'=>['cardClass'=>'pe-5']
+		]) ?>
+		<?= ModelFieldWidget::widget([
+			'model'=>$model,
+			'field'=>'effectiveMaintenanceReqs',
+			'title'=>'Требует обслуживания:',
+			'card_options'=>['cardClass'=>'pe-5']
+		]) ?>
+	</div>
+<?php } ?>
 
 <?= $this->render('/techs/attached/contracts',['model'=>$model,'static_view'=>$static_view]) ?>
 
@@ -134,7 +151,7 @@ if (is_object($model->state)) { ?>
 <p>
     <?php
 	$materialsUsages=$model->materialsUsages;
-	\app\helpers\ArrayHelper::multisort($materialsUsages,'date',SORT_DESC);
+	ArrayHelper::multisort($materialsUsages,'date',SORT_DESC);
 	foreach($materialsUsages as $materialsUsage) {
         echo $this->render('/materials-usages/item',['model'=>$materialsUsage,'material'=>true,'count'=>true,'cost'=>true,'date'=>true]).'<br />';
     } ?>

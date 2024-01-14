@@ -4,6 +4,7 @@
 /* @var $model app\models\Networks */
 
 use app\components\LinkObjectWidget;
+use app\components\StripedAlertWidget;
 
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
@@ -18,17 +19,7 @@ if (!isset($static_view)) $static_view=false;
 </h1>
 <p class="mb-2"><?= Yii::$app->formatter->asNtext($model->comment) ?></p>
 
-<?php if ($model->archived) { ?>
-		<div class="d-flex w-100 my-2">
-			<div class="flex-fill alert-striped"></div>
-			<div class="text-center mx-2">
-				<span class="fas fa-exclamation-triangle"></span>
-				СЕТЬ ПЕРЕНЕСЕНА В АРХИВ
-				<span class="fas fa-exclamation-triangle"></span>
-			</div>
-			<div class="flex-fill alert-striped"></div>
-		</div>
-<?php }?>
+<?php if ($model->archived) { echo StripedAlertWidget::widget(['title'=>'СЕТЬ ПЕРЕНЕСЕНА В АРХИВ']); }?>
 	<h4>
 		<?php if (is_object($model->segment)) { ?>
 			<span class="text-nowrap me-3">

@@ -12,7 +12,7 @@ if (!isset($static_view)) $static_view=false;
 
 ?>
 
-	<h4>IP адрес(а)</h4>
+	<h4>IP адрес(а):</h4>
  
 <?php
 	$output=[];

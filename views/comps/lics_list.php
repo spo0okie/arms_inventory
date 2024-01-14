@@ -22,9 +22,11 @@ foreach ($model->licKeys as $licKey)
 
 if (count($output)) {
 ?>
-    <h4>Привязанные лицензии</h4>
-	<p>
-		<?= implode($glue,$output) ?>
-	</p>
+		<div class="pe-5">
+			<h4>Привязанные лицензии</h4>
+			<p>
+				<?= implode($glue,$output) ?>
+			</p>
+		</div>
 
 <?php }

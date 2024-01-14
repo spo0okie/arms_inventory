@@ -2,7 +2,8 @@
 
 use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
-use app\components\ShowArchivedWidget;
+use app\components\ModelFieldWidget;use app\components\ShowArchivedWidget;
+use app\components\StripedAlertWidget;
 use app\components\UrlListWidget;
 use app\models\Services;
 use yii\helpers\Html;
@@ -53,6 +54,7 @@ if(!$static_view) { ?>
 			<?=	(is_object($model->segmentRecursive))?" // Сегмент ИТ: ".$this->render('/segments/item',['model'=>$model->segmentRecursive,'static_view'=>true]):'' ?>
 			<?php if (is_object($model->parentService))  echo "<br /> Входит в состав: {$this->render('item',['model'=>$model->parentService])}"; ?>
 		</h4>
+		<div class="mb-3">
 		<?php if ($model->sumTotals) { ?>
 		<strong>Стоимость:</strong> <span class="badge bg-success"><?= number_format($model->sumTotals,0,'',' ').' '.$model->currency->symbol ?></span>
 			<?php if ($model->sumCharge){ ?>
@@ -100,18 +102,19 @@ if(!$static_view) { ?>
 			//'style'=>'display:none'
 		]);
 
-		echo '<br />';
 		
 		if (!empty($model->supportScheduleRecursive))
-			echo '<strong>Время поддержки:</strong> '.$this->render('/schedules/item',['model'=>$model->supportScheduleRecursive]).'<br />';
-		
-		
+			echo '<strong>Время поддержки:</strong> '.$this->render('/schedules/item',['model'=>$model->supportScheduleRecursive]);
 		?>
+			<?php if ($model->is_service && !count($model->backupReqs)) echo StripedAlertWidget::widget(['title'=>'Отсутствуют требования к резервному копированию!']); ?>
+		</div>
 		
-		<br />
-		<p>
+		<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'backupReqs']) ?>
+		<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'otherReqs']) ?>
+		
+		<div class="mb-3">
 			<?= Yii::$app->formatter->asNtext($model->description) ?>
-		</p>
+		</div>
 		<?= UrlListWidget::Widget(['list'=>$model->links]) ?>
 		<br />
 
