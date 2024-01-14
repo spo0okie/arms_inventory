@@ -2,32 +2,14 @@
 
 namespace app\migrations;
 
-use yii\db\Migration;
+use app\migrations\arms\ArmsMigration;
 use yii\db\Query;
 
 /**
  * Class M231209133554AlterTableNetworks
  */
-class M231209133554AlterTableNetworks extends Migration
+class M231209133554AlterTableNetworks extends ArmsMigration
 {
-	
-	function addColumnIfNotExist($table,$column,$type,$index=false)
-	{
-		$tableSchema = $this->db->getTableSchema($table);
-		if (!isset($tableSchema->columns[$column])) {
-			$this->addColumn($table,$column,$type);
-			if ($index) $this->createIndex("idx-$table-$column",$table,$column);
-			
-		}
-	}
-	
-	function dropColumnIfExist($table,$column)
-	{
-		$tableSchema = $this->db->getTableSchema($table);
-		if (isset($tableSchema->columns[$column])) {
-			$this->dropColumn($table,$column);
-		}
-	}
 	
     /**
      * {@inheritdoc}
