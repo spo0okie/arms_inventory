@@ -23,37 +23,47 @@ use yii\helpers\Inflector;
 class ListObjectsWidget extends Widget
 {
 	public $models;				//модели, список которых нам нужен
-	public $title=null;			//заголовок списка
-	public $show_archived=null;	//флаг отображения архивного элемента
+	public $title;				//заголовок списка
+	public $show_archived;		//флаг отображения архивного элемента
 	public $item_options=[];	//опции для рендера элемента
 	public $card_options=['cardClass'=>'mb-3'];	//опции для рендера карточки
-	public $archived=null;		//признак того что весь список состоит из архивных элементов
+	public $archived;			//признак того что весь список состоит из архивных элементов
 	public $lineBr=true;		//переносить строку между элементами
 	public $glue=' ';			//чем разделять элементы
 	public $show_empty=false;	//отображать заголовок если список пуст
-	public $itemViewPath=null;	//путь для рендера элемента
-	public $modelClass=null;
+	public $itemViewPath;		//путь для рендера элемента
+	public $modelClass;
+	public $raw_items=false;	//не конвертировать текстовые итемы в HTML (уже сконверчены)
 	
-	private $model=null;
+	/**
+	 * @var ArmsModel
+	 */
+	private $model;
+	private $is_object=false;
 	private $empty;
-	private $modelClassName=null; //не путь класса а только его имя
-	private $modelClassPath=null; //путь где живут классы моделей, который откусываем от имени класса
+	private $modelClassName; 	//не путь класса а только его имя
+	private $modelClassPath;	 //путь где живут классы моделей, который откусываем от имени класса
 	// модели для формирования пути view
 	
 	
 	public function init(){
 		parent::init();
 		
+		//пустой ли список?
 		$this->empty=!count($this->models);
+		
 		if (!$this->empty) {
 			//берем себе одну модель для образца
 			$this->model=reset($this->models);
+			//это вообще объект?
+			$this->is_object=is_object($this->model);
 		}
 		
-		//определяем класс перечисляемых моделей
-		if (is_null($this->modelClass)) {
+		//определяем класс перечисляемых моделей если у нас там объекты
+		if (!isset($this->modelClass) && $this->is_object) {
 			$this->modelClass='ArmsModel';
-			if (!$this->empty)
+			
+			if (!$this->empty )
 				$this->modelClass=get_class($this->model);
 			
 			//формируем полный путь до класса
@@ -64,14 +74,14 @@ class ListObjectsWidget extends Widget
 		}
 		
 		//строим путь до view model/item
-		if (is_null($this->itemViewPath)) {
+		if (!isset($this->itemViewPath)) {
 			$this->itemViewPath='/'.Inflector::camel2id($this->modelClassName).'/item';
 		}
 		
 		//вытаскиваем заголовок из модели
-		if (is_null($this->title)) {
+		if (!isset($this->title)) {
 			$this->title='$Title_error';
-			if (!$this->empty) {
+			if ($this->is_object) {
 				$class=$this->modelClass;
 				if ($this->model->hasProperty('titles')) {
 					$this->title=$class::$titles;
@@ -82,7 +92,7 @@ class ListObjectsWidget extends Widget
 		}
 		
 		//проверяем не содержит ли список только архивные элементы
-		if (is_null($this->archived) && !$this->empty && $this->model && $this->model->hasProperty('archived')) {
+		if (!isset($this->archived) && $this->is_object && $this->model->hasProperty('archived')) {
 			$allArchived=true;
 			foreach ($this->models as $model) $allArchived=$allArchived&&$model->archived;
 			$this->archived=$allArchived;
@@ -94,7 +104,7 @@ class ListObjectsWidget extends Widget
 		$this->card_options['cardClass'].=' '.($this->lineBr?'line-break':'line-nobr');
 		
 		//если не знаем показывать ли архивные - смотрим по запросу
-		if (is_null($this->show_archived)) $this->show_archived=Yii::$app->request->get(
+		if (!isset($this->show_archived)) $this->show_archived=Yii::$app->request->get(
 			'showArchived',
 			ShowArchivedWidget::$defaultValue
 		);
@@ -113,9 +123,15 @@ class ListObjectsWidget extends Widget
 		//список
 		$listItems=[];
 		foreach ($this->models as $model) {
-			$listItems[]=$this->render($this->itemViewPath,ArrayHelper::recursiveOverride([
-				'model'=>$model,'show_archived'=>$this->show_archived
-			],$this->item_options));
+			if ($this->is_object) {
+				$listItems[]=$this->render($this->itemViewPath,ArrayHelper::recursiveOverride([
+					'model'=>$model,'show_archived'=>$this->show_archived
+				],$this->item_options));
+			} elseif (!$this->raw_items) {
+				$listItems[]=Yii::$app->formatter->asText($model);
+			} else {
+				$listItems[]=$model;
+			}
 		}
 		$list=implode($this->glue,$listItems);
 		
