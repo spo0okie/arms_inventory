@@ -262,5 +262,48 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		return $result;
 	}
 	
+	/**
+	 * Объединение множеств (массивов со значениями)
+	 * Добавляет значения одного массива в другой, если их там не было
+	 * @param $a
+	 * @param $b
+	 * @return array
+	 */
+	public static function setsUnion($a,$b) {
+		return array_unique(array_merge($a,$b));
+	}
+	
+	/**
+	 * Пересечение множеств
+	 * @param $a
+	 * @param $b
+	 * @return array
+	 */
+	public static function setsIntersect($a,$b){
+		return array_intersect($a,$b);
+	}
+	
+	/**
+	 * Вычитание множеств (вычесть $b из $a)
+	 * @param $a
+	 * @param $b
+	 * @return array
+	 */
+	public static function setsDiff($a,$b) {
+		return array_diff($a,$b);
+	}
+	
+	/**
+	 * Симметрическая разность множеств (объединение минус пересечение)
+	 * @param $a
+	 * @param $b
+	 * @return array
+	 */
+	public static function setsSymDiff($a,$b) {
+		return static::setsDiff(
+			static::setsUnion($a,$b),
+			static::setsIntersect($a,$b)
+		);
+	}
 	
 }
