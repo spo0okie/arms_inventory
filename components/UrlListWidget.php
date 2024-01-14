@@ -19,6 +19,8 @@ class UrlListWidget extends Widget
 	 * каждый урл может иметь описание отделенное пробелом таким образом, что последнее слово в строке - УРЛ
 	 */
 	public $list;
+	public $parsed;
+	public $rendered;
 	public $ips='';
 	public static $hint='Список ссылок с описанием по одной в строке. <br>'
 		. 'Сначала описание ссылки, затем последнее слово - сама ссылка (в ней пробелов не должно быть, вместо них %20).<br>'
@@ -56,32 +58,44 @@ class UrlListWidget extends Widget
 		}
 		return ['url'=>trim($url),'descr'=>trim($descr)];
 	}
-
-	public function run()
+	
+	public function parse()
 	{
-
-		$parsed=[];
-
+		if (isset($this->parsed)) return;
+		$this->parsed=[];
+		
 		$items=explode("\n",$this->list);
 		foreach ($items as $item) {
 			$item=trim($item);
 			if (!strlen($item)) continue;
-			$parsed[]=static::parseListItem($item);
+			$this->parsed[]=static::parseListItem($item);
 		}
-
+		
 		$items=explode("\n",$this->ips);
 		foreach ($items as $item) {
 			$item=trim($item);
 			if (!strlen($item)) continue;
 			$item=static::parseListItem('http://'.$item);
-			if (!ArrayHelper::findByField($parsed,'url',$item['url']))
-				$parsed[]=$item;
+			if (!ArrayHelper::findByField($this->parsed,'url',$item['url']))
+				$this->parsed[]=$item;
 		}
+	}
+	
+	public function renderItems()
+	{
+		if (isset($this->rendered)) return;
 		
-		$output='';
-		foreach ($parsed as $item)
-			$output.=$this->render('url/item',['item'=>$item]);
-			
-		return $output;
+		$this->parse();
+		
+		$this->rendered=[];
+		foreach ($this->parsed as $item)
+			$this->rendered[]=$this->render('url/item',['item'=>$item]);
+	}
+
+	public function run()
+	{
+		$this->renderItems();
+		
+		return implode($this->rendered);
 	}
 }
