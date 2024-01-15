@@ -103,9 +103,10 @@ if(!$static_view) { ?>
 		]);
 
 		
-		if (!empty($model->supportScheduleRecursive))
+		if (!empty($model->supportScheduleRecursive)) {
+			if (!empty($model->providingScheduleRecursive)) echo '<br />';
 			echo '<strong>Время поддержки:</strong> '.$this->render('/schedules/item',['model'=>$model->supportScheduleRecursive]);
-		?>
+		} ?>
 			<?php if ($model->is_service && !count($model->backupReqs)) echo StripedAlertWidget::widget(['title'=>'Отсутствуют требования к резервному копированию!']); ?>
 		</div>
 		
