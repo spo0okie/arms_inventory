@@ -1,16 +1,17 @@
 <?php
 
+use app\models\Ports;
+use app\models\Techs;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
-use yii\bootstrap5\Modal;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
 
-\yii\helpers\Url::remember();
+Url::remember();
 
 $this->title = $model->num;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Techs::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Techs::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -21,10 +22,13 @@ $this->params['breadcrumbs'][] = $this->title;
 		</div>
 		<div class="col-md-6">
 			<h1 class="text-end">
-				<?php if ($model->isComputer) echo Html::a('<i class="fas fa-passport"></i>',['passport','id'=>$model->id],[
-					'qtip_ttip'=>'Паспорт рабочего места',
-					'qtip_side'=>'top'
-				]); ?>
+				<?php if ($model->isComputer) foreach (Yii::$app->params['arms.docs'] as $doc=>$params) {
+					echo Html::a($params['icon']??'<i class="fas fa-file"></i>',['docs','id'=>$model->id,'doc'=>$doc],[
+						'qtip_ttip'=>$params[0]??'Документ АРМ',
+						'qtip_side'=>'top',
+						'class'=>'ms-2',
+					]);
+				}?>
 				<?= Html::a('<i class="fas fa-images"></i>',['uploads','id'=>$model->id],[
 					'qtip_ttip'=>'Редактировать изображения/фото этого оборудования',
 					'qtip_side'=>'top'
@@ -36,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				?>
 			</div>
 			<?= $this->render('model',['model'=>$model]) ?>
-			<h4><?= \app\models\Ports::$titles ?></h4>
+			<h4><?= Ports::$titles ?></h4>
 			<?= $this->render('ports',['model'=>$model,'static_view'=>false]) ?>
 		</div>
 	</div>

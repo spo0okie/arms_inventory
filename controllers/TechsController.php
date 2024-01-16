@@ -20,7 +20,7 @@ class TechsController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'view'=>['ttip-hw','inv-num','passport'],
+			'view'=>['ttip-hw','inv-num','docs'],
 			'edit'=>['uploads','unlink','updhw','rmhw','edithw','port-list'],
 		]);
 	}
@@ -64,17 +64,22 @@ class TechsController extends ArmsBaseController
 		Yii::$app->response->format = Response::FORMAT_JSON;
 		return Techs::fetchNextNum($prefix);
 	}
-
-
-    /**
-     * Displays a single Techs model.
-     * @param int $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionPassport(int $id)
+	
+	
+	/**
+	 * Displays a single Techs model.
+	 * @param int    $id
+	 * @param string $doc
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+    public function actionDocs(int $id, string $doc)
     {
-        return $this->render('passport', [
+    	//защита от рендера чего попало
+    	if (!isset(Yii::$app->params['arms.docs'][$doc]))
+			throw new NotFoundHttpException('The requested document does not exist.');
+    	
+        return $this->render('docs/'.$doc, [
             'model' => $this->findModel($id),
         ]);
     }

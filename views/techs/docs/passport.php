@@ -4,14 +4,18 @@
  * User: Spookie
  * Date: 02.03.2018
  * Time: 14:14
- * @var \app\models\Techs $model
+ * @var Techs $model
  */
 
-use yii\bootstrap5\Modal;
 
-\yii\helpers\Url::remember();
+use app\models\Manufacturers;
+use app\models\Techs;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
-$manufacturers=\app\models\Manufacturers::fetchNames();
+Url::remember();
+
+$manufacturers= Manufacturers::fetchNames();
 ?>
 <div class="arm_passport">
 
@@ -112,7 +116,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
                 <h3 id="ignored_hdr">Игнорируемое ПО</h3>
                 <div id="ignored_items"><?= $this->render('/swlist/2cols-list',['items'=>$ignored]) ?></div>
 	            <?php foreach ($model->comps as $comp) {
-		            if ($comp->swList->hasSavedIgnored()) echo \yii\helpers\Html::a('Убрать из паспорта игнорируемое ПО на '.$comp->name,
+		            if ($comp->swList->hasSavedIgnored()) echo Html::a('Убрать из паспорта игнорируемое ПО на '.$comp->name,
 			            ['/comps/rmsw','id'=>$comp->id,'items'=>implode(',',$comp->swList->getSavedIgnored())],
 			            [
 				            'class'=>'btn btn-warning passport_tools',
@@ -131,7 +135,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
                 <h3 id="free_hdr">Бесплатное ПО</h3>
                 <div id="free_items"><?= $this->render('/swlist/2cols-list',['items'=>$free]) ?></div>
 	            <?php foreach ($model->comps as $comp) {
-		            if ($comp->swList->hasSavedFree()) echo \yii\helpers\Html::a('Убрать из паспорта бесплатное ПО на '.$comp->name,
+		            if ($comp->swList->hasSavedFree()) echo Html::a('Убрать из паспорта бесплатное ПО на '.$comp->name,
 			            ['/comps/rmsw','id'=>$comp->id,'items'=>implode(',',$comp->swList->getSavedFree())],
 			            [
 				            'class'=>'btn btn-warning passport_tools',
@@ -165,7 +169,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
                 <div id="agreed_items">
                     <?= $this->render('/swlist/2cols-list',['items'=>$agreed]) ?>
                     <?php foreach ($model->comps as $comp) {
-                        if ($comp->swList->hasUnsavedAgreed()) echo \yii\helpers\Html::a('Внести в паспорт ПО на '.$comp->name,
+                        if ($comp->swList->hasUnsavedAgreed()) echo Html::a('Внести в паспорт ПО на '.$comp->name,
                             ['/comps/addsw','id'=>$comp->id,'items'=>'sign-all'],
                             [
                                 'class'=>'btn btn-warning passport_tools',
@@ -188,9 +192,9 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
 
     <div class="hardware">
         <h3>Аппаратное обеспечение:</h3>
-        <?= $this->render('hw',compact('model','manufacturers')) ?>
+        <?= $this->render('/techs/hw',compact('model','manufacturers')) ?>
         <?php if ($model->hwList->hasUnsaved()) { ?>
-            <?= \yii\helpers\Html::a('Согласовать оборудование',
+            <?= Html::a('Согласовать оборудование',
                 ['updhw','id'=>$model->id,'uid'=>'sign-all'],
                 [
                     'class'=>'btn btn-warning passport_tools',
@@ -209,21 +213,21 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
         <h3>Доп. оборудование:</h3>
         <?php if ($model->armTechsCount) { ?>
         <table>
-            <thead>
-            <th>Тип</th>
-            <th>Модель</th>
-            <th>Идентификатор</th>
-            <th>Серийный номер</th>
-            <th>Инвентарный номер</th>
-            </thead>
-            <?php foreach ($model->armTechs as $tech) echo '<tr>'.$this->render('/techs/passport-row',['model'=>$tech]).'</tr>' ?>
+            <tr>
+				<th>Тип</th>
+				<th>Модель</th>
+				<th>Идентификатор</th>
+				<th>Серийный номер</th>
+				<th>Инвентарный номер</th>
+            </tr>
+            <?php foreach ($model->armTechs as $tech) echo '<tr>'.$this->render('/techs/docs/passport-row',['model'=>$tech]).'</tr>' ?>
         </table>
 
         <?php } else { ?>
             <p>Отсутствует</p>
         <?php }
 
-        echo \yii\helpers\Html::a(
+        echo Html::a(
 			'Внести доп. оборудование',
 			[
 				'/techs/create',
