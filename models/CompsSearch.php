@@ -64,7 +64,8 @@ class CompsSearch extends Comps
 				'soft',
 				'softHits',
 				'netIps.network.segment',
-				'services'
+				'services.maintenanceReqs',
+				'maintenanceReqs'
 			]);
 
         // add conditions that should always apply here

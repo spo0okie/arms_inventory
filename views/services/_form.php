@@ -309,7 +309,7 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 			]) ?>
 			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
 				'data' => MaintenanceReqs::fetchNames(),
-				'options' => ['placeholder' => 'Выберите требования по обслуживанию',],
+				'options' => ['placeholder' => 'Наследовать из родительского сервиса',],
 				'hintModel'=>'MaintenanceReqs',
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [

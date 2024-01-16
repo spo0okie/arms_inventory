@@ -336,8 +336,13 @@ class Services extends ArmsModel
 			],
 			'maintenance_reqs_ids'=>[
 				MaintenanceReqs::$titles,
-				'hint'=>'Какие требования предъявляет сервис по резервному копированию, переиндексации, обновлению, перезагрузкам и т.п.'
+				'hint'=>'Какие требования предъявляет сервис по резервному копированию,'
+					.'<br>переиндексации, обновлению, перезагрузкам и т.п.',
+				'indexLabel'=>'Обслуживание',
+				'indexHint'=>'{same}'
 			],
+			'maintenanceReqs'=>['alias'=>'maintenance_reqs_ids'],
+			'maintenanceReqsRecursive'=>['alias'=>'maintenance_reqs_ids'],
 			'backupReqs'=>[
 				'Требования по резервному копированию',
 				'indexHint'=>'Какие требования по бэкапам предъявляет сервис',

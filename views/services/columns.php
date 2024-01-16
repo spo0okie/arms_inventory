@@ -1,15 +1,15 @@
 <?php
 
-use yii\helpers\Html;
-use kartik\grid\GridView;
-use yii\widgets\Pjax;
+use app\components\ModelFieldWidget;
+use app\components\UrlListWidget;
+use app\models\Services;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ServicesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $models \app\models\Services[] */
+/* @var $models Services[] */
 
-if (!isset($columns)) $columns=['name','sites','segment','providingSchedule','supportSchedule','responsible','compsAndTechs'];
+//if (!isset($columns)) $columns=['name','sites','segment','providingSchedule','supportSchedule','responsible','compsAndTechs'];
 
 $renderer=$this;
 
@@ -21,7 +21,7 @@ $totalComps=[];
 $totalTechs=[];
 
 foreach ($dataProvider->models as $model) {
-	/* @var $model \app\models\Services */
+	/* @var $model Services */
 	
 	if (is_object($model->segmentRecursive)) {
 		$totalSegments[$model->segmentRecursive->id]=$model->segmentRecursive;
@@ -32,7 +32,7 @@ foreach ($dataProvider->models as $model) {
 
 	if (is_array($model->supportRecursive))
 		foreach ($model->supportRecursive as $user) if (!isset($totalSupport[$user->id]))
-			$totalSupport[$user->id]=$renderer->render('/users/item', ['model' => $user,'short'=>true]);;
+			$totalSupport[$user->id]=$renderer->render('/users/item', ['model' => $user,'short'=>true]);
 	
 	if (is_array($model->comps))
 		foreach ($model->comps as $comp) if (!isset($totalComps[$comp->id]))
@@ -65,13 +65,13 @@ return [
 	],
 	'description' => [
 		'value' => function ($data) {
-			return \app\components\UrlListWidget::Widget(['list'=>$data->links]).' '.$data->description;
+			return UrlListWidget::Widget(['list'=>$data->links]).' '.$data->description;
 		},
 	],
 	'responsible' => [
 		//'header' => 'Отв., поддержка.',
 		'value' => function ($data) {
-			/** @var $data \app\models\Services */
+			/** @var $data Services */
 			$output = [];
 			if (is_object($data->responsibleRecursive))
 				$output[] = '<div class="pe-2"><strong>'.$this->render('/users/item', ['model' => $data->responsibleRecursive,'short'=>true]).'</strong></div>';
@@ -147,6 +147,9 @@ return [
 	],
 	'supportSchedule' => [
 		'value' => function ($data) {return $this->render('/schedules/item',['model'=>$data->supportScheduleRecursive,'static_view'=>true,'empty'=>'']);},
-	]
+	],
+	'maintenanceReqs' => [
+		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'maintenanceReqsRecursive','title'=>false,'item_options'=>['static_view'=>true]]);},
+	],
 
 ];

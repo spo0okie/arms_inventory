@@ -5,6 +5,7 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 use app\components\ListObjectsWidget;
+use app\components\ModelFieldWidget;
 use app\models\Techs;
 use app\models\TechsSearch;
 use app\models\TechStates;
@@ -182,6 +183,9 @@ return [
 		'label'=> $comment,
 		'format' => 'ntext',
 		//'value' => function ($data) use ($searchModel){return $data->comment.' '.$searchModel->model_id;}
+	],
+	'effectiveMaintenanceReqs' => [
+		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'effectiveMaintenanceReqs','title'=>false,'item_options'=>['static_view'=>true]]);},
 	],
 
 ];

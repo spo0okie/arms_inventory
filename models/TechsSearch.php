@@ -106,6 +106,8 @@ class TechsSearch extends Techs
 				'licItems',
 				'licGroups',
 				'licKeys',
+				'services.maintenanceReqs',
+				'maintenanceReqs'
 			]);
 
         $this->load($params);

@@ -12,6 +12,7 @@
 
 use app\components\ExpandableCardWidget;
 use app\components\ListObjectsWidget;
+use app\components\ModelFieldWidget;
 use app\models\Comps;
 use app\models\Manufacturers;
 use app\models\Techs;
@@ -123,4 +124,7 @@ return [
 	'raw_version',
 	'updated_at',
 	'comment',
+	'effectiveMaintenanceReqs' => [
+		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'effectiveMaintenanceReqs','title'=>false,'item_options'=>['static_view'=>true]]);},
+	],
 ];

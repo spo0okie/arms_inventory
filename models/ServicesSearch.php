@@ -74,6 +74,7 @@ class ServicesSearch extends Services
 				'contracts',
 				'support',
 				'infrastructureSupport',
+				'maintenanceReqs',
 			])
 			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)');
 		
