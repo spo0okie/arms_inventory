@@ -1,12 +1,7 @@
 <?php
 namespace app\components;
 
-use app\models\ArmsModel;
-use yii\base\Widget;
-use yii\helpers\Html;
-use yii\helpers\Inflector;
-use yii\helpers\StringHelper;
-use yii\helpers\Url;
+use Yii;
 
 class ShowArchivedWidget extends UrlParamSwitcherWidget
 {
@@ -16,6 +11,7 @@ class ShowArchivedWidget extends UrlParamSwitcherWidget
 	 */
 	public static $defaultValue=true;
 	public static $itemClass='archived-item';
+	public static $defaultParam='showArchived';
 	
 	public static function archivedClass($model,$attr='archived') {
 		return ($model->$attr)?static::$itemClass:'';
@@ -24,6 +20,11 @@ class ShowArchivedWidget extends UrlParamSwitcherWidget
 	public static function archivedDisplay($model,$inverse=false,$attr='archived') {
 		return ($inverse xor $model->$attr)?'display:none;':'';
 	}
+	
+	public static function isOn(){
+		return (bool)Yii::$app->request->get(static::$defaultParam,static::$defaultValue);
+	}
+	
 
 	public $state=null;
 	public $label='Архивные';
@@ -39,9 +40,10 @@ JS;
 		$('.expandable-card-outer').each(function (index,item){ExpandableCardOversizeCheck(item)});
 	}
 JS;
-	public $param='showArchived';
+	//public $param='showArchived';
 	public $hintOff='Скрыть архивные объекты';
 	public $hintOn='Показать архивные объекты';
+	public $param='showArchived';
 	
 	public function init() {
 		parent::init();

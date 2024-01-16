@@ -1,13 +1,15 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\components\ShowArchivedWidget;
+use app\models\Acls;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\SchedulesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = \app\models\Acls::$scheduleTitles;
+$this->title = Acls::$scheduleTitles;
 $this->params['breadcrumbs'][] = $this->title;
 $this->params['layout-container'] = 'container-fluid';
 
@@ -26,6 +28,20 @@ $renderer=$this;
 			'name',
 			'accessPeriods',
 		],
+		'gridOptions'=>[
+			'rowOptions' => function ($data) {
+				$archived=!$data->isWorkTime( date('Y-m-d'),date('H:i:s'));
+				return [
+					'class'=>$archived?'archived-item':'',
+					'style'=>$archived&&!ShowArchivedWidget::isOn()?'display:none':'',
+				];
+			}
+		],
+		'toolButton'=> '<span class="p-2">'. ShowArchivedWidget::widget([
+			//'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
+			//'labelBadge'=>$switchArchivedDelta
+			'reload'=>false,
+		]).'<span>',
 		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
 		//'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Arms','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,

@@ -605,8 +605,8 @@ class Techs extends ArmsModel
 	 */
 	public function getState()
 	{
-		if (!is_null($this->state_cache)) return $this->state_cache;
-		return $this->state_cache=$this->hasOne(TechStates::class, ['id' => 'state_id']);
+		//if (!is_null($this->state_cache)) return $this->state_cache;
+		return $this->hasOne(TechStates::class, ['id' => 'state_id']);
 	}
 
 	public function getStateName()

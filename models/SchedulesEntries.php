@@ -47,10 +47,12 @@ use yii\validators\DateValidator;
  *
  * @property Schedules $master
  */
-class SchedulesEntries extends \yii\db\ActiveRecord
+class SchedulesEntries extends ArmsModel
 {
 	const SCENARIO_PERIOD='scenario_period';
 	const SCENARIO_DAY='scenario_day';
+	static $title='Период расписания';
+	static $titles='Периоды расписаний';
 	
 	public static $days=[
 		'def' => "По умолч.",
@@ -159,12 +161,12 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	
 	public static function scheduleWithoutMetadata($schedule)
 	{
-		return preg_replace('/\{[^\}]*\}/','',$schedule);
+		return preg_replace('/{[^}]*}/','',$schedule);
 	}
 	
 	public static function periodMetadata($period)
 	{
-		preg_match('/\{.*\}/',$period,$matches);
+		preg_match('/{.*}/',$period,$matches);
 		if (count($matches)) return $matches[0];
 		return false;
 	}
@@ -239,7 +241,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			
 			//если у нас "расписание на день, а не период"
 			//нужна дата расписания
-			['date',function ($attribute, $params, $validator) {
+			['date',function ($attribute) {
 				if (isset(SchedulesEntries::$days[$this->date])) return;
 				$dateValidator=new DateValidator(['format'=>'php:Y-m-d']);
 				if (!$dateValidator->validate($this->date, $error)) {
@@ -252,7 +254,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 			}, 'on'=>static::SCENARIO_DAY],
 			//и нужно расписание
 			['schedule', 'required', 'on'=>static::SCENARIO_DAY],
-			['schedule', function ($attribute, $params, $validator) {
+			['schedule', function ($attribute) {
 				if (!strlen(trim($this->schedule))) { //если расписания нет - ругаемся
 					$this->addError($attribute, "Необходимо указать расписание на этот день");
 				} else { //если расписание есть, проверяем его валидность
@@ -270,7 +272,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 				'enableClientValidation' => false,
 			],
 			[['date','date_end'],'date','format'=>'php:Y-m-d H:i:s', 'on'=>static::SCENARIO_PERIOD,],
-			[['date','date_end'],function ($attribute, $params, $validator)
+			[['date','date_end'],function ($attribute)
 				{
 					if (!empty($this->date) && !empty($this->date_end)) {
 						if ($this->periodInterval[0] > $this->periodInterval[1]) {
@@ -280,7 +282,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 				},
 				'on'=>static::SCENARIO_PERIOD,
 			],
-			[['date','date_end'],function ($attribute, $params, $validator) {
+			[['date','date_end'],function ($attribute) {
 				if (is_object($this->master)) {
 					if (is_array($this->master->periods)) foreach ($this->master->periods as $period)
 						if ($period->id!=$this->id && $this->periodsIntersect($period)) {
@@ -349,7 +351,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	
 	
 	public function getMaster() {
-		return \app\models\Schedules::findOne($this->schedule_id);
+		return Schedules::findOne($this->schedule_id);
 	}
 	
 	/**
@@ -381,15 +383,15 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	 */
 	public function getIntervals($date) {
 		if ($this->is_period) {
-			return [\app\models\Schedules::intervalCut(
+			return [Schedules::intervalCut(
 				$this->periodInterval,
 				[strtotime($date.' 00:00:00'),strtotime($date.' 23:59:59')]
 			)];
 		} elseif ($this->schedule!=='-') {
 			$intervals=[];
 			foreach (explode(',',$this->schedule) as $schedule) {
-				$intervals[]=\app\models\SchedulesEntries::scheduleExToInterval($schedule,$date);
-			};
+				$intervals[]= SchedulesEntries::scheduleExToInterval($schedule,$date);
+			}
 			return $intervals;
 			
 		}
@@ -564,7 +566,7 @@ class SchedulesEntries extends \yii\db\ActiveRecord
 	
 	public function getMergedSchedule() {
 		if ($this->schedule === '-') return '-';
-		$intervals=\app\models\Schedules::intervalMerge($this->minuteIntervals);
+		$intervals= Schedules::intervalMerge($this->minuteIntervals);
 		//var_dump($intervals);
 		$timestamps=[];
 		foreach ($intervals as $interval)

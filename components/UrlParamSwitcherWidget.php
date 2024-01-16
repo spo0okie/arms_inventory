@@ -1,13 +1,9 @@
 <?php
 namespace app\components;
 
-use app\models\ArmsModel;
+use Yii;
 use yii\base\Widget;
-use yii\helpers\Html;
-use yii\helpers\Inflector;
-use yii\helpers\StringHelper;
 use yii\helpers\Url;
-use yii\web\JsExpression;
 
 class UrlParamSwitcherWidget extends Widget
 {
@@ -25,12 +21,13 @@ class UrlParamSwitcherWidget extends Widget
 	public $labelBadge=null;
 	public $labelBadgeClass='badge rounded-pill p-1 m-1 d-inline';
 	public $labelBadgeBg='bg-secondary';
+	
 	private $onChange;
 	
 	public function init() {
 		parent::init();
 		if (is_null($this->state))
-			$this->state = \Yii::$app->request->get($this->param);
+			$this->state = Yii::$app->request->get($this->param);
 		
 		if (is_null($this->hint)){
 			$this->hint=$this->state?
