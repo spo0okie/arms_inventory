@@ -78,8 +78,6 @@ class ServicesController extends ArmsBaseController
 	public function actionIndex()
 	{
 		
-		Services::cacheAllItems();
-		Places::cacheAllItems();
 		$searchModel = new ServicesSearch();
 
 		$searchModel->parent_id=Yii::$app->request->get('showChildren',false);
@@ -97,6 +95,9 @@ class ServicesController extends ArmsBaseController
 		
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		$this->view->params['layout-container'] = 'container-fluid';
+		
+		Services::cacheAllItems();
+		Places::cacheAllItems();
 		
 		return $this->render('index', [
 			'searchModel' => $searchModel,

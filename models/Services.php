@@ -1035,6 +1035,7 @@ class Services extends ArmsModel
 					'orgPhones.place',
 					'orgInets.place',
 					'contracts',
+					'maintenanceReqs'
 					])
 				->all()
 			,'id');
