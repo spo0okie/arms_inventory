@@ -80,6 +80,7 @@ class SiteController extends Controller
 		$page=[];
 		if ($api=='doku') {
 			$wikiUrl= Yii::$app->params['wikiUrl'];
+			/** @noinspection PhpComposerExtensionStubsInspection */
 			$arrContextOptions = [
 				"http" => [
 					"header" => "Authorization: Basic " . base64_encode(Yii::$app->params['wikiUser'] . ":" . Yii::$app->params['wikiPass']),
@@ -96,6 +97,7 @@ class SiteController extends Controller
 				stream_context_create($arrContextOptions)
 			);
 			if ($page===false) return "Ошибка получения детального описания из Wiki";
+			/** @noinspection PhpComposerExtensionStubsInspection */
 			$page=xmlrpc_decode($page,'utf-8');
 		}
 		
@@ -167,7 +169,7 @@ JS;
 
 		return $page
 			.'<style type="text/css" media="screen">.folded.hidden { display: none; } .folder .indicator { visibility: visible; } </style>'
-			.'<script language="JavaScript">'.$folded_code.'</script>';
+			.'<script>'.$folded_code.'</script>';
 	}
 	
 	/**
@@ -183,7 +185,12 @@ JS;
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+        	$return=Yii::$app->request->get('return');
+			if ($return) {
+				return $this->redirect($return);
+			} else {
+				return $this->goBack();
+			}
         }
         return $this->render('login', [
             'model' => $model,

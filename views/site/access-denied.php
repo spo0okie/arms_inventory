@@ -6,6 +6,9 @@
  * Time: 1:07
  */
 /* @var $this yii\web\View */
+
+$path=Yii::$app->request->getUrl();
+//$params=Yii::$app->request->getParams()
 ?>
 
 <div class="site-access-denied row col align-self-center">
@@ -25,7 +28,8 @@
 					<div class="card-body">
 						<h5>Доступ к этой секции закрыт, т.к. у вас недостаточно прав.</h5>
 						<p class="p-3">Возможно необходимо авторизоваться под более привилегированной учетной записью или запросить права в отделе ИТ.</p>
-						<a class="btn btn-danger" href="/web/site/login">Авторизоваться</a>
+						<!--suppress HtmlUnknownTarget -->
+						<a class="btn btn-danger" href="/web/site/login?return=<?= $path ?>">Авторизоваться</a>
 					</div>
 				</div>
 			</div>
