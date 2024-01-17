@@ -5,6 +5,7 @@ namespace app\models;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
+use yii\helpers\StringHelper;
 
 /**
  * MaterialsSearch represents the model behind the search form of `app\models\Materials`.
@@ -59,7 +60,7 @@ class MaterialsSearch extends Materials
             ]);
 	
 		$sort=[
-			'defaultOrder' => ['place'=>SORT_ASC,'type'=>SORT_ASC],
+			'defaultOrder' => ['type'=>SORT_ASC],
 			'attributes'=>[
 				'place'=>[
 					'asc'=>['getplacepath(materials.places_id)'=>SORT_ASC],
@@ -110,10 +111,10 @@ class MaterialsSearch extends Materials
             'materials.places_id' => $this->places_id,
         ]);
 		
-        $query->andFilterWhere(['or like', static::$modelSearch, \yii\helpers\StringHelper::explode($this->model,'|',true,true)])
-			->andFilterWhere(['or like', 'getplacepath(materials.places_id)', \yii\helpers\StringHelper::explode($this->place,'|',true,true)])
-			->andFilterWhere(['or like', 'materials.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
-			->andFilterWhere(['or like', 'materials.date', \yii\helpers\StringHelper::explode($this->date,'|',true,true)])
+        $query->andFilterWhere(['or like', static::$modelSearch, StringHelper::explode($this->model,'|',true,true)])
+			->andFilterWhere(['or like', 'getplacepath(materials.places_id)', StringHelper::explode($this->place,'|',true,true)])
+			->andFilterWhere(['or like', 'materials.comment', StringHelper::explode($this->comment,'|',true,true)])
+			->andFilterWhere(['or like', 'materials.date', StringHelper::explode($this->date,'|',true,true)])
         ->groupBy('materials.id')
         //->having(['>=','(`materials`.`count` - ifnull(`usedCount`,0) - ifnull(`movedCount`,0))',$this->rest]);
         //вот это вызывало ошибку неизвестный столбец в хэвинг условии
