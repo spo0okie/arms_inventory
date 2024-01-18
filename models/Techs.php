@@ -139,7 +139,7 @@ class Techs extends ArmsModel
 	private static $installInheritance=[	//поля которые наследуются у оборудования установленного в другое
 		'places_id'
 	];
-	private $state_cache=null;
+	//private $state_cache=null;
 	private $type_cache=null;
 	private $hwList_obj=null;
 	private $voipPhones_cache=null;
@@ -373,6 +373,11 @@ class Techs extends ArmsModel
 				'indexHint'=>'Какие предъявлены требования по обслуживанию.'
 					.'<br>Как распространенные с сервисов, так и заданные явно. '
 					.'<br>Избыточно предъявленные требования помечаются как "архивные"'
+			],
+			'services_ids' => [
+				'Сервисы',
+				'hint' => 'Работу каких сервисов обеспечивает это оборудование',
+				'indexHint' => '{same}<br />'.QueryHelper::$stringSearchHint,
 			],
 		
 		]);
@@ -750,6 +755,7 @@ class Techs extends ArmsModel
 	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
 	 * @return Users[]
+	 * @noinspection PhpUnused
 	 */
 	public function getSupportTeam()
 	{
