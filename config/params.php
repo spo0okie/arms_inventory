@@ -38,5 +38,8 @@ return [
 	'arms.docs'=>[
 		'passport'=>['Паспорт рабочего места','icon'=>'<i class="fas fa-passport"></i>'],
 		'act'=>['Акт приема-передачи','icon'=>'<i class="fas fa-file-contract"></i>'],
+	],
+	'techs.docs'=>[
+	
 	]
 ];

@@ -22,9 +22,16 @@ $this->params['breadcrumbs'][] = $this->title;
 		</div>
 		<div class="col-md-6">
 			<h1 class="text-end">
-				<?php if ($model->isComputer) foreach (Yii::$app->params['arms.docs'] as $doc=>$params) {
+				<?php if ($model->isComputer) foreach (Yii::$app->params['arms.docs'] as $doc=>$params) if (is_array($params)) {
 					echo Html::a($params['icon']??'<i class="fas fa-file"></i>',['docs','id'=>$model->id,'doc'=>$doc],[
 						'qtip_ttip'=>$params[0]??'Документ АРМ',
+						'qtip_side'=>'top',
+						'class'=>'ms-2',
+					]);
+				}?>
+				<?php if (!$model->isComputer) foreach (Yii::$app->params['techs.docs'] as $doc=>$params) if (is_array($params)) {
+					echo Html::a($params['icon']??'<i class="fas fa-file"></i>',['docs','id'=>$model->id,'doc'=>$doc],[
+						'qtip_ttip'=>$params[0]??'Документ оборудования',
 						'qtip_side'=>'top',
 						'class'=>'ms-2',
 					]);
