@@ -22,7 +22,7 @@ $user_to=$model->user;
 $user_from=$model->itStaff;
 
 //организация
-$org=$user_from->org;
+$org=$user_to->org;
 
 ?>
 <div class="arm_act">
@@ -82,6 +82,9 @@ $org=$user_from->org;
 			</td>
 			<td>
 				Количество
+			</td>
+			<td>
+				Серийный номер
 			</td>
 			<td>
 				Подпись
