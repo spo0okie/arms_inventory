@@ -95,9 +95,6 @@ $org=$user_to->org;
 			<td>
 				Дата
 			</td>
-			<td>
-			
-			</td>
 		</tr>
 		<tr>
 			<td rowspan="<?= count ($techs) ?>">
