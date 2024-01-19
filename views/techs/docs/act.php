@@ -66,7 +66,7 @@ $org=$user_to->org;
 			<td rowspan="2">
 				Получатель (ФИО)
 			</td>
-			<td colspan="3">
+			<td colspan="4">
 				Объект основных средств и ТМЦ
 			</td>
 			<td colspan="2">
@@ -82,6 +82,9 @@ $org=$user_to->org;
 			</td>
 			<td>
 				Количество
+			</td>
+			<td>
+				Инвентарный номер
 			</td>
 			<td>
 				Серийный номер
@@ -112,6 +115,9 @@ $org=$user_to->org;
 					<?= $tech->model->nameWithVendor ?>
 				</td>
 				<td>1</td>
+				<td>
+					<?= $tech->num ?>
+				</td>
 				<td>
 					<?= $tech->sn ?>
 				</td>
