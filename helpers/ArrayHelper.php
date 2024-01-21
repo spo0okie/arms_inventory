@@ -3,6 +3,18 @@
 
 namespace app\helpers;
 
+if (!function_exists("array_is_list")) {
+	function array_is_list(array $array): bool
+	{
+		$i = 0;
+		foreach ($array as $k => $v) {
+			if ($k !== $i++) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
 
 class ArrayHelper extends \yii\helpers\ArrayHelper
 {
@@ -17,7 +29,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		$default=(array)$default;
 		foreach ($custom as $key=>$value) {
 			if (is_array($value)) {
-				$default[$key]=isset($default[$key])?
+				$default[$key]=isset($default[$key])&&count($value)&&!array_is_list($value)?
 					static::recursiveOverride($default[$key],$value):
 					$value;
 			} else {
@@ -72,7 +84,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 	 * @param null $default		значение если ничего не нашлось
 	 * @return mixed|null
 	 */
-	public static function getTreeValue($array,$path,$default=null) {
+	public static function getTreeValue(array $array, $path, $default=null) {
 		if (!is_array($path)) $path=explode('/',$path);
 		//движемся от корня пути к концу
 		for ($i=0;$i<count($path);$i++) {
@@ -112,7 +124,8 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 	 * @return mixed|null
 	 */
 	public static function setTreeValue($array,$path,$value) {
-		//если дошли до конца пути - возвращаем результат
+		if (!count($path)) return $value;
+		
 		return self::recursiveOverride( //переписываем
 			$array,						//исходный архив
 			self::buildBranch(			//веткой построенной
@@ -130,7 +143,6 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 	 * @return mixed|null
 	 */
 	public static function setTreeDefaultValue($array,$path,$value) {
-		//если дошли до конца пути - возвращаем результат
 		return self::recursiveOverride( //переписываем
 			self::buildBranch(			//ветку построенную
 				$path,					//из пути
@@ -249,6 +261,20 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 	}
 	
 	/**
+	 * Поиск первого элемента массива содержащего в себе набор $search[ключ1=>значение1,...]
+	 * @param $array array где искать
+	 * @param $search array что искать
+	 * @param $default mixed что вернуть если ничего не нашлось
+	 * @return mixed
+	 */
+	public static function getItemByFields(array $array, array $search, $default=null) {
+		foreach ($array as $item) {
+			if (static::compareItemFields($item,$search)) return $item;
+		}
+		return $default;
+	}
+
+	/**
 	 * Поиск элементов массива содержащих в себе набор $search[ключ1=>значение1,...]
 	 * @param $array
 	 * @param $search
@@ -260,6 +286,37 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 			if (static::compareItemFields($item,$search)) $result[]=$item;
 		}
 		return $result;
+	}
+	
+	/**
+	 * Поиск элементов массива содержащих в себе набор $search[ключ1=>значение1,...]
+	 * @param $array
+	 * @param $search
+	 * @return array
+	 */
+	public static function removeItemsByFields($array,$search) {
+		$result=[];
+		foreach ($array as $item) {
+			if (!static::compareItemFields($item,$search)) $result[]=$item;
+		}
+		return $result;
+	}
+	
+	/**
+	 * Поиск элементов массива содержащих в себе набор $search[ключ1=>значение1,...]
+	 * @param $array
+	 * @param $search
+	 * @param $value
+	 */
+	public static function setItemByFields(&$array,$search,$value) {
+		foreach ($array as $i=>$item) {
+			if (static::compareItemFields($item,$search)) {	//нашли
+				$array[$i]=$value;	//заменили
+				return;
+			}
+		}
+		//на нашли - добавили
+		$array[]=$value;
 	}
 	
 	/**
