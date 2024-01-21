@@ -40,6 +40,6 @@ return [
 		'act'=>['Акт приема-передачи','icon'=>'<i class="fas fa-file-contract"></i>'],
 	],
 	'techs.docs'=>[
-	
+		'act-single'=>['Акт приема-передачи','icon'=>'<i class="fas fa-file-contract"></i>'],
 	]
 ];
