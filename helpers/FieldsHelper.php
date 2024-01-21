@@ -5,10 +5,10 @@ namespace app\helpers;
 
 
 use app\components\assets\FieldsHelperAsset;
-use app\models\ArmsModel;
 use Exception;
 use kartik\date\DatePicker;
 use kartik\markdown\MarkdownEditor;
+use yii\base\Model;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 use yii\helpers\Inflector;
@@ -95,13 +95,13 @@ class FieldsHelper
 	
 	/**
 	 * @param ActiveForm $form
-	 * @param ArmsModel  $model
+	 * @param Model  $model
 	 * @param string     $attr
 	 * @param array      $options
 	 * @return mixed
 	 * @throws Exception
 	 */
-	public static function Select2Field(ActiveForm $form,ArmsModel $model, string $attr, $options=[]) {
+	public static function Select2Field(ActiveForm $form, Model $model, string $attr, $options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
@@ -136,12 +136,12 @@ class FieldsHelper
 	
 	/**
 	 * @param ActiveForm $form
-	 * @param ArmsModel $model
+	 * @param Model $model
 	 * @param string $attr
 	 * @param array $options
 	 * @return mixed
 	 */
-	public static function TextAutoresizeField(ActiveForm $form, ArmsModel $model, string $attr, $options=[]) {
+	public static function TextAutoresizeField(ActiveForm $form, Model $model, string $attr, $options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
@@ -162,12 +162,12 @@ class FieldsHelper
 	
 	/**
 	 * @param ActiveForm $form
-	 * @param ArmsModel $model
+	 * @param Model $model
 	 * @param string $attr
 	 * @param array $options
 	 * @return mixed
 	 */
-	public static function TextInputField(ActiveForm $form, ArmsModel $model, string $attr,$options=[]) {
+	public static function TextInputField(ActiveForm $form, Model $model, string $attr,$options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
@@ -182,12 +182,12 @@ class FieldsHelper
 	
 	/**
 	 * @param ActiveForm $form
-	 * @param ArmsModel $model
+	 * @param Model $model
 	 * @param string $attr
 	 * @param array $options
 	 * @return mixed
 	 */
-	public static function CheckboxField(ActiveForm $form, ArmsModel $model, string $attr, $options=[]) {
+	public static function CheckboxField(ActiveForm $form, Model $model, string $attr, $options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
@@ -199,12 +199,12 @@ class FieldsHelper
 	
 	/**
 	 * @param ActiveForm $form
-	 * @param ArmsModel $model
+	 * @param Model $model
 	 * @param string $attr
 	 * @param array $options
 	 * @return mixed
 	 */
-	public static function CheckboxListField(ActiveForm $form, ArmsModel $model, string $attr, $options=[]) {
+	public static function CheckboxListField(ActiveForm $form, Model $model, string $attr, $options=[]) {
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
 		[$label,$labelOptions]=static::labelOption($model,$attr,$options);
@@ -227,13 +227,13 @@ class FieldsHelper
 	
 	/**
 	 * @param ActiveForm $form
-	 * @param ArmsModel  $model
+	 * @param Model  $model
 	 * @param string     $attr
 	 * @param array      $options
 	 * @return mixed
 	 * @throws Exception
 	 */
-	public static function MarkdownField(ActiveForm $form, ArmsModel $model, string $attr,$options=[])
+	public static function MarkdownField(ActiveForm $form, Model $model, string $attr,$options=[])
 	{
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
@@ -251,13 +251,13 @@ class FieldsHelper
 	
 	/**
 	 * @param ActiveForm $form
-	 * @param ArmsModel  $model
+	 * @param Model  $model
 	 * @param string     $attr
 	 * @param array      $options
 	 * @return mixed
 	 * @throws Exception
 	 */
-	public static function DateField(ActiveForm $form, ArmsModel $model, string $attr, $options=[])
+	public static function DateField(ActiveForm $form, Model $model, string $attr, $options=[])
 	{
 		$hint=static::cutHint($options);
 		$hintOptions=static::cutHintOptions($options);
