@@ -1309,6 +1309,7 @@ class Techs extends ArmsModel
 			}
 			
 			if (is_object($this->installation)) {
+				$this->arms_id=null; //отвязываемся от АРМ (нельзя быть в составе АРМ и шкафа одновременно)
 				//то отвязываемся от собственных помещения
 				//и перепривязываемся к наследуемым
 				foreach (static::$installInheritance as $attr) {
