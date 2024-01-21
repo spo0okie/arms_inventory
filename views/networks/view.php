@@ -98,6 +98,21 @@ foreach ($wikiLinks as $name=>$url) {
 	$tabNumber++;
 }
 
+if (
+	Yii::$app->params['networkDescribeSegment']===true
+	||
+	Yii::$app->params['networkDescribeSegment']==='auto' && !count($wikiLinks)
+) {
+	$wikiLinks=is_object($model->segment)?WikiPageWidget::getLinks($model->segment->links):[];
+	foreach ($wikiLinks as $name=>$url) {
+		$tabs[]=[
+			'id'=>'wiki'.$tabNumber,
+			'label'=>($name==$url)?'Wiki':$name,
+			'content'=> WikiPageWidget::Widget(['list'=>$model->segment->links,'item'=>$name]),
+		];
+		$tabNumber++;
+	}
+}
 
 $this->params['navTabs']=$tabs;
 $this->params['tabsParams']=['cookieName'=>'networks-view-tab-'.$model->id];
