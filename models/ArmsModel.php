@@ -6,6 +6,8 @@ use app\components\UrlListWidget;
 use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelper;
+use app\models\traits\AttributeDataModelTrait;
+use app\models\traits\ExternalDataModelTrait;
 use DateTime;
 use DateTimeZone;
 use Yii;
@@ -32,19 +34,21 @@ use yii\db\ActiveRecord;
  */
 class ArmsModel extends ActiveRecord
 {
+	use ExternalDataModelTrait,AttributeDataModelTrait;
+	
 	public static $title='Объект';
 	public static $titles='Объекты';
 	
 	public const searchableOrHint='<br><i>HINT: Можно искать несколько вариантов, разделив их вертикальной</i> <b>|</b> <i>чертой</i>';
 	
 	
-	protected $attributeDataCache;
-	protected $attributeLabelsCache;
-	
 	protected static $historyClass;	//если заполнить, то будет сохранять историю в моделях этого класса
 	
-	/** @var array Кэш для рекурсивного поиска поля */
+	/** @var array Кэш для рекурсивного поиска поля (Когда значение может быть в родителе и в его родителе или ...) */
 	protected $recursiveCache=[];
+	
+	/** @var array Кэш для вычисляемых аттрибутов */
+	protected $attrsCache=[];
 	
 	protected static $allItems=null;
 	
@@ -106,97 +110,14 @@ class ArmsModel extends ActiveRecord
 				'hint' => 'Автор последних изменений объекта'
 			],
 			'external_links' => [
-				'Внешние ссылки',
-				'hint'=>'JSON структура с идентификаторами этого объекта во внешних ИС'
-			],
+				'Доп. связи',
+				'hint' => 'JSON структура с дополнительными объектами и ссылками на внешние информационные системы',
+			]
 		];
 	}
 	
 	
 
-	public function getAttributeData($key)
-	{
-		if (is_null($this->attributeDataCache)) {
-			$this->attributeDataCache=$this->attributeData();
-		}
-		
-		if (!isset($this->attributeDataCache[$key])) {
-			return null;
-		}
-		
-		$data=$this->attributeDataCache[$key];
-		if (!isset($data['alias'])) return $data;
-		if ($data['alias']==$key) return $data; //no recursion!
-		
-		return $this->getAttributeData($data['alias']);
-	}
-	
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels()
-    {
-    	if (is_null($this->attributeLabelsCache)) {
-			$this->attributeLabelsCache=[];
-			foreach ($this->attributeData() as $key=>$data) {
-				$data=$this->getAttributeData($key);
-				if (is_array($data)) {
-					$label=null;
-					if (isset($data[0]))
-						$this->attributeLabelsCache[$key]=$data[0];
-					elseif (isset($data['label']))
-						$this->attributeLabelsCache[$key]=$data['label'];
-				} else $this->attributeLabelsCache[$key]=$data;
-			}
-		}
-        return $this->attributeLabelsCache;
-    }
-
-	/**
-	 * @inheritdoc
-	 */
-	public function attributeHints()
-	{
-		$hints=[];
-		foreach ($this->attributeData() as $key=>$data) {
-			$data=$this->getAttributeData($key);
-			if (is_array($data) && isset($data['hint']))
-				$hints[$key]=$data['hint'];
-			
-		}
-		return $hints;
-	}
-	
-	/**
-	 * Возвращает наименование атрибута для формы поиска
-	 * @param $attribute
-	 * @return string
-	 */
-	public function getAttributeIndexLabel($attribute)
-	{
-		$item=$this->getAttributeData($attribute);
-		if (is_array($item) && isset($item['indexLabel']))
-			return $item['indexLabel'];
-		return $this->getAttributeLabel($attribute);
-	}
-	
-	
-	/**
-	 * Возвращает описание атрибута для формы поиска
-	 * @param $attribute
-	 * @return string
-	 */
-	public function getAttributeIndexHint($attribute)
-	{
-		$item=$this->getAttributeData($attribute);
-		if (isset($item['indexHint']))
-			return str_replace(
-				'{same}',
-				$this->getAttributeHint($attribute),
-				$item['indexHint']
-			);
-		return null;
-	}
 	
 	/**
 	 * Возвращает ссылки на объекты ссылающиеся на этот
@@ -289,7 +210,7 @@ class ArmsModel extends ActiveRecord
 		
 		//если у нас есть ссылка
 		if (!empty($object->$attribute)) {
-			//предположим что у нас тут может быть и _id и _ids, т.к. _ids более общий - изпользуем его
+			//предположим что у нас тут может быть и _id и _ids, т.к. _ids более общий - используем его
 			if (!is_array($link_ids=$object->$attribute)) $link_ids=[$link_ids];
 			//если она уже есть в цепочке id
 			foreach ($link_ids as $link_id) {
@@ -347,15 +268,6 @@ class ArmsModel extends ActiveRecord
 	{
 		if (!parent::beforeSave($insert)) return false;
 		
-		// Механизм обновления поля external_links такой что задавая какую-то внешнюю ссылку
-		// - она просто добавляется к существующим
-		if ($this->hasProperty('external_links') && $this->external_links) {
-			$old=static::findOne($this->id);
-			$current=$old->external_links?json_decode($old->external_links,true):[];
-			$new=json_decode($this->external_links,true);
-			$merged=ArrayHelper::recursiveOverride($current,$new);
-			$this->external_links=json_encode($merged,JSON_UNESCAPED_UNICODE);
-		}
 		
 		if ($this->hasProperty('updated_at') && !$this->doNotChangeAuthor) {
 			$this->updated_at=gmdate('Y-m-d H:i:s');
@@ -367,6 +279,11 @@ class ArmsModel extends ActiveRecord
 				$this->updated_by=Yii::$app->user->identity->Login;
 		}
 		
+		if ($this->hasProperty('external_links')) {
+			$this->externalDataBeforeSave();
+		}
+			
+			
 		return true;
 	}
 	
@@ -524,4 +441,6 @@ class ArmsModel extends ActiveRecord
 		//запоминаем, что ничего не нашли
 		return $this->recursiveCache[$recursiveAttr] = $empty;
 	}
+	
+	public function externalData() {}
 }
