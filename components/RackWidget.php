@@ -2,6 +2,7 @@
 namespace app\components;
 
 use app\components\assets\RackWidgetAsset;
+use app\models\Techs;
 use yii\base\Widget;
 use yii\helpers\Html;
 
@@ -23,6 +24,7 @@ use yii\helpers\Html;
  * @property integer simpleTopOffset
  * @property integer simpleBottomOffset
  * @property float smallestUnitHeight
+ * @property Techs model
  */
 class RackWidget extends Widget
 {
@@ -39,6 +41,7 @@ class RackWidget extends Widget
 		{"type":"void","size":40},				//пустая строка
 		{"type":"units","count":2,"size":60}
 	],
+	"EnumerationStart:1
 	"hEnumeration":"1",		//нумерация по горизонтали - справа налево (таблица рисуется слева направо же)
 	"vEnumeration":"1",		//по вертикали сверху вниз - (также как таблица)
 	"priorEnumeration":"v",	//сначала по рядам (h), потом по колонкам (v)
@@ -54,7 +57,8 @@ class RackWidget extends Widget
 	public $id='default';
 	public $model=null;
 	public $title='';
-	public $front=true;
+	public $front_rack=true;	//корзина передняя (иначе задняя)
+	public $front=true;			//рендер корзины с основной стороны (задняя с обратной стороны это front=false)
 	public $cols=[];			//ширины столбцов
 	public $rows=[];			//высоты строк
 	public $heightRatio=1;

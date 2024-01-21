@@ -2,10 +2,13 @@
 
 namespace app\controllers;
 
+use app\helpers\ArrayHelper;
 use app\models\HwListItem;
 use app\models\Manufacturers;
+use app\models\ui\RackUnitForm;
 use Yii;
 use app\models\Techs;
+use yii\bootstrap5\ActiveForm;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -21,7 +24,7 @@ class TechsController extends ArmsBaseController
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			'view'=>['ttip-hw','inv-num','docs'],
-			'edit'=>['uploads','unlink','updhw','rmhw','edithw','port-list'],
+			'edit'=>['uploads','unlink','updhw','rmhw','edithw','port-list','rack-unit','rack-unit-validate'],
 		]);
 	}
 	
@@ -76,7 +79,7 @@ class TechsController extends ArmsBaseController
     public function actionDocs(int $id, string $doc)
     {
     	//защита от рендера чего попало
-    	if (!isset(Yii::$app->params['arms.docs'][$doc]))
+    	if (!isset(Yii::$app->params['arms.docs'][$doc]) && !isset(Yii::$app->params['techs.docs'][$doc]))
 			throw new NotFoundHttpException('The requested document does not exist.');
     	
         return $this->render('docs/'.$doc, [
@@ -214,5 +217,62 @@ class TechsController extends ArmsBaseController
 		}
 		
 		return $this->redirect(['passport', 'id' => $model->id]);
+	}
+	
+	
+	/**
+	 * Validates  model on update.
+	 * @param int|null $id
+	 * @return mixed
+	 * @throws NotFoundHttpException
+	 */
+	public function actionRackUnitValidate()
+	{
+		$model = new RackUnitForm();
+		
+		if ($model->load(Yii::$app->request->post())) {
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			return ActiveForm::validate($model);
+		}
+		
+		return null;
+	}
+	
+	public function actionRackUnit($id,$unit,$front=true){
+		$model = $this->findModel($id);
+		
+		$rackUnitForm = new RackUnitForm();
+		$rackUnitForm->tech_rack_id=$id;
+		$rackUnitForm->back=!$front;
+		$rackUnitForm->tech_installed_pos=$unit;
+		$rackUnitForm->pos=$unit;
+		
+		$label=ArrayHelper::getItemByFields(
+			$model->getExternalItem(['rack-labels'],[]),
+			[
+				'pos'=>$unit,
+				'back'=>!$front
+			]
+		);
+		
+		if (is_array($label)) {
+			$rackUnitForm->insert_label=true;
+			$rackUnitForm->label=$label['label'];
+		}
+		
+		if ($rackUnitForm->load(Yii::$app->request->post()) && $rackUnitForm->setUnit()) {
+			return $this->defaultReturn($this->routeOnUpdate($model),[
+				$model
+			]);
+		}
+		
+		
+		return $this->defaultRender('rack/unit-edit', [
+			'rackUnitForm'=>$rackUnitForm,
+			'model' => $model,
+			'unit'=>$unit,
+			'front'=>$front
+		]);
+	
 	}
 }

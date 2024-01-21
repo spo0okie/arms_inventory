@@ -6,11 +6,13 @@
  * Time: 15:00
  */
 
-/* @var $rack \app\components\RackWidget */
+/* @var $rack RackWidget */
 /* @var $this yii\web\View */
-/* @var $models \app\models\Techs[] */
+/* @var $models Techs[] */
 
-use yii\helpers\Html;
+use app\components\RackWidget;
+use app\models\Techs;
+
 //print_r($rack->rows);
 //echo"<br>";
 //print_r($rack->cols);
@@ -22,10 +24,15 @@ $labelWidth=$rack->getWidthPercent($rack->labelWidth);
 $y=0;
 
 if (is_object($rack) && is_object($rack->model)) {
+	$labels=$rack->model->getExternalItem(['rack-labels'],[]);
 	$models=$rack->model->installedTechs;
 } else {
 	$models=[];
+	$labels=[];
 }
+
+
+
 //echo $rack->getTotalWidth()."x".$rack->getTotalHeight().'<br />';
 ?>
 <table class="rack-widget" id="rack-<?= $id ?>" width="<?= $width ?>" height="<?= $height ?>">
@@ -40,6 +47,7 @@ if (is_object($rack) && is_object($rack->model)) {
 							'sectionRowCount'=>$row['count'],
 							'rack'=>$rack,
 							'models'=>$models,
+							'labels'=>$labels,
 							'height'=>$rack->getHeightPercent($row['size']/$row['count']),
 							'totalHeight'=>$height
 						]);

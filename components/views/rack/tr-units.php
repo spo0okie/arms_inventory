@@ -11,9 +11,10 @@
 /* @var $row */
 /* @var $sectionRow */
 /* @var $sectionRowCount */
-/* @var $rack \app\components\RackWidget */
+/* @var $rack RackWidget */
 /* @var $this yii\web\View */
-/* @var $models \app\models\Techs[] */
+/* @var $models Techs[] */
+/* @var $labels array */
 
 
 $id=$rack->id;
@@ -27,7 +28,9 @@ if ($rack->front) {
 }
 
 $fontSize=min (($rack->smallestUnitHeight-2)*$totalHeight/$rack->getTotalHeight()*0.9,16);
-use yii\helpers\Html;
+
+use app\components\RackWidget;
+use app\models\Techs;
 ?>
 
 <tr height="<?= $height ?>%" style="font-size: <?= $fontSize ?>px">
@@ -43,6 +46,7 @@ use yii\helpers\Html;
 					echo $this->render('td-unit',[
 						'width'=>$width,
 						'models'=>$models,
+						'labels'=>$labels,
 						'col'=>$x,
 						'row'=>$row,
 						'rack'=>$rack,
