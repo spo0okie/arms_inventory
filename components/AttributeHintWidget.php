@@ -1,6 +1,7 @@
 <?php
 namespace app\components;
 
+use app\helpers\FieldsHelper;
 use app\models\ArmsModel;
 use yii\base\Widget;
 use yii\helpers\Html;
@@ -35,10 +36,10 @@ class AttributeHintWidget extends Widget
 					:
 					$this->label;
 			
-			return \yii\helpers\Html::tag(
+			return Html::tag(
 				'span',
 				$this->label,
-				\app\helpers\FieldsHelper::toolTipOptions($fieldFullName,$this->hint)
+				FieldsHelper::toolTipOptions($fieldFullName,$this->hint)
 			);
 		} else return $this->label;
 	}
@@ -62,7 +63,7 @@ class AttributeHintWidget extends Widget
 			}
 		}
 		
-		$this->label=Html::encode($this->label);
+		//$this->label=Html::encode($this->label);
 		
 		$hintMethod=$this->index?'getAttributeIndexHint':'getAttributeHint';
 		
