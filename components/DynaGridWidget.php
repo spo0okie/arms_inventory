@@ -14,22 +14,23 @@ use kartik\grid\GridView;
 use NumberFormatter;
 use Yii;
 use yii\base\InvalidConfigException;
-use yii\base\Widget;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Inflector;
 use yii\web\JsExpression;
 
 
-class DynaGridWidget extends Widget
+class DynaGridWidget extends DynaGrid
 {
-	
+
+	public $storage=DynaGrid::TYPE_DB;
 	
 	/**
 	 * Колонки для вывода
 	 * @var array
      */
-	public $columns=null;
+	public $columns;
 	public $defaultOrder=[];
-	public $id;
+	//public $id;
 	public $header;
 	public $panel;
 	public $createButton;
@@ -38,7 +39,7 @@ class DynaGridWidget extends Widget
 	public $resizableColumns=true;
 	public $showFooter=false;
 	public $gridOptions=[];
-	public $toggleButtonGrid;
+	public $options=[];
 	/**
 	 * @var string Адрес страницы которую открыть при сохранении настроек. Нужно указывать когда страничка с виджетом
 	 * подгружается асинхронно внутрь родительской странице, о которой ничего не знает. Тогда нужно указывать родительскую
@@ -57,50 +58,23 @@ class DynaGridWidget extends Widget
 	 * фильтр
 	 * @var ArmsModel
 	 */
-	public $filterModel=null;
-	public $model=null;
+	public $filterModel;
+	public $model;
 	
-	public $visibleColumns=null;
-	/**
-	 * Finds the matches for a string column format
-	 *
-	 * @param  string  $column
-	 *
-	 * @return array
-	 * @throws InvalidConfigException
-	 */
-	public static function matchColumnString(string $column)
-	{
-		$matches = [];
-		if (!Lib::preg_match('/^([\w.]+)(:(\w*))?(:(.*))?$/u', $column, $matches)) {
-			throw new InvalidConfigException(
-				"Invalid column configuration for '{$column}'. The column must be specified ".
-				"in the format of 'attribute', 'attribute:format' or 'attribute:format: label'."
-			);
-		}
-		
-		return $matches;
-	}
+	public $visibleColumns;
 	
-	public static function getColumnKey($column)
-	{
-		if (!is_array($column)) {
-			$matches = self::matchColumnString($column);
-			$columnKey = $matches[1];
-		} elseif (!empty($column['attribute'])) {
-			$columnKey = $column['attribute'];
-		} elseif (!empty($column['label'])) {
-			$columnKey = $column['label'];
-		} elseif (!empty($column['header'])) {
-			$columnKey = $column['header'];
-		} elseif (!empty($column['class'])) {
-			$columnKey = $column['class'];
-		} else {
-			$columnKey = null;
-		}
-		
-		return hash('crc32', $columnKey);
-	}
+	
+	protected static $_icons = [
+		'iconVisibleColumn' => ['eye-open', 'eye'],
+		'iconHiddenColumn' => ['eye-close', 'eye-slash'],
+		'iconSortableSeparator' => ['resize-horizontal', 'arrows-alt-h'],
+		'iconPersonalize' => ['wrench', 'wrench fas-fw'],
+		'iconFilter' => ['filter', 'filter fa-fw'],
+		'iconSort' => ['sort', 'sort fa-fw'],
+		'iconConfirm' => ['ok', 'check'],
+		'iconRemove' => ['remove', 'times'],
+	];
+	
 	
 	public static function fetchVisibleColumns($id) {
 		$dynaGridStore = new DynaGridStore([
@@ -121,21 +95,23 @@ class DynaGridWidget extends Widget
 	}
 	
 	
-	public function init()
+	protected function initWidget()
 	{
-		parent::init();
-		DynaGridWidgetAsset::register($this->view);
+		parent::initWidget();
 		if (is_null($this->visibleColumns))
 			$this->visibleColumns=static::fetchVisibleColumns($this->id);
+		DynaGridWidgetAsset::register($this->view);
 	}
 	
 	public function run()
 	{
-		if (is_null($this->id)) {
+		//формируем ID по умолчанию
+		if (!isset($this->id)) {
 			$this->id= Yii::$app->controller->id.'-'. Yii::$app->controller->action->id;
 		}
 		
-		if (is_null($this->model)) {
+		//если явной модели у нас нет, то вытаскиваем ее сами
+		if (!isset($this->model)) {
 			if (!is_null($this->filterModel)) {
 				$this->model=$this->filterModel;
 			} elseif (count($models=$this->dataProvider->getModels())) {
@@ -144,84 +120,75 @@ class DynaGridWidget extends Widget
 			
 		}
 		
-		$columns=$this->prepareColumns($this->columns,$this->defaultOrder);
-		
-		/*foreach ($columns as $column) {
-			if (!static::columnIsVisible($column,$this->visibleColumns)) {
-				$attr=$column['attribute'];
-				if (!$this->filterModel->$attr) continue;
-				if ($this->filterModel->hasAttribute($attr))
-					$this->filterModel->setAttribute($attr,null);
-				elseif ($this->filterModel->hasProperty($attr))
-					$this->filterModel->$attr=null;
-			}
-		}*/
-		
+		//переопределяем рендер конфига на наш кастомный в котором можно передать кастомный путь для формы
 		Yii::$app->getModule('dynagrid')->configView='@app/components/views/dynagrid/config';
-		
+		//устанавливаем такой путь если надо
 		if (isset($this->pageUrl)) $this->view->params['grid-settings-action']=$this->pageUrl;
 		
-		return DynaGrid::widget([
-			'storage'=>DynaGrid::TYPE_DB,
-			'columns' => $columns,
-			'toggleButtonGrid'=>$this->toggleButtonGrid,
-			'gridOptions'=>ArrayHelper::recursiveOverride([
-				'id'=>$this->id,
-				'formatter' => [
-					'class' => 'yii\i18n\Formatter',
-					'nullDisplay' => '',
-					'currencyCode'=>'',
-					'decimalSeparator'=>',',
-					'numberFormatterSymbols' => [
-						NumberFormatter::CURRENCY_SYMBOL => '',
-					],
+		$this->gridOptions=ArrayHelper::recursiveOverride([
+			'id'=>$this->id,
+			'formatter' => [
+				'class' => 'yii\i18n\Formatter',
+				'nullDisplay' => '',
+				'currencyCode'=>'',
+				'decimalSeparator'=>',',
+				'numberFormatterSymbols' => [
+					NumberFormatter::CURRENCY_SYMBOL => '',
 				],
-				'panel'=>$this->panel ?? [
+			],
+			'panel'=>$this->panel ?? [
 					'type' => GridView::TYPE_DEFAULT,
 					'heading' => $this->header,
 					'before' => $this->createButton,
 				],
-				'toolbar' => [
-					['content'=>$this->toolButton],
-					['content'=>'{dynagrid}'],
-					//['content'=>'{dynagridFilter}{dynagridSort}{dynagrid}'],
-					['content'=>'{export}'],
-					['content'=>$this->hintButton],
-				],
-				'condensed' => true,
-				'dataProvider' => $this->dataProvider,
-				'filterModel' => $this->filterModel,
-				'tableOptions' => [
-					'class'=>'table-condensed table-striped table-bordered table-hover'.($this->resizableColumns?' table-dynaGrid-noWrap':'')
-				],
-				'resizableColumns'=>$this->resizableColumns,
-				'resizableColumnsOptions'=>[
-					'store'=>new JsExpression('{
-						get: function (key,def) {return def},
-						set: function (key,val) {persistResizeColumn(key,val)}
-					}'),
-					'selector'=>'tr th',
-					'visibilityWaitTimeout'=>500,
-					'debug'=>1,
-				],
-				'persistResize'=>true,
-				'responsive'=>!ArrayHelper::getValue($this->gridOptions,'floatHeader'),
-				'showFooter'=>$this->showFooter,
-			],$this->gridOptions),
-			'options'=>[
-				'id'=>$this->id,
-				'resizable-columns-id'=>$this->id,
-			]
-		]);
+			'toolbar' => [
+				['content'=>$this->toolButton],
+				['content'=>'{dynagrid}'],
+				//['content'=>'{dynagridFilter}{dynagridSort}{dynagrid}'],
+				['content'=>'{export}'],
+				['content'=>$this->hintButton],
+			],
+			'condensed' => true,
+			'dataProvider' => $this->dataProvider,
+			'filterModel' => $this->filterModel,
+			'tableOptions' => [
+				'class'=>'table-condensed table-striped table-bordered table-hover'.($this->resizableColumns?' table-dynaGrid-noWrap':'')
+			],
+			'resizableColumns'=>$this->resizableColumns,
+			'resizableColumnsOptions'=>[
+				'store'=>new JsExpression('{
+							get: function (key,def) {return def},
+							set: function (key,val) {persistResizeColumn(key,val)}
+						}'),
+				'selector'=>'tr th',
+				'visibilityWaitTimeout'=>500,
+				'debug'=>1,
+			],
+			'persistResize'=>true,
+			'responsive'=>!ArrayHelper::getValue($this->gridOptions,'floatHeader'),
+			'showFooter'=>$this->showFooter,
+		],$this->gridOptions);
+		
+		$this->options=ArrayHelper::recursiveOverride([
+			'id'=>$this->id,
+			'resizable-columns-id'=>$this->id,
+		],$this->options);
+		
+		return parent::run();
 	}
 	
+	/**
+	 * Проставляет ключи там где колонка определена без ключа
+	 * @param $columns
+	 * @return array
+	 */
 	public function setColumnKeys($columns) {
 		foreach ($columns as $attr=>$data) {
-			if (is_null($data)||empty($data)) {
+			if (is_null($data)||empty($data)) {	//если определение колонки пустое - выкидываем ее вообще
 				unset($columns[$attr]);
-			} elseif (!is_array($data) && is_numeric($attr)) {
-				unset($columns[$attr]);
-				$columns[$data]=[];
+			} elseif (!is_array($data) && is_numeric($attr)) {//если оно определено как просто значение массива без именованного индекса
+				unset($columns[$attr]);		//разопределяем старое
+				$columns[$data]=[];			//определяем новое в виде 'attr'=>[]
 			}
 		}
 		return $columns;
@@ -279,21 +246,29 @@ class DynaGridWidget extends Widget
 	}
 	
 	
-	public function prepareColumns($columns,$defaultOrder=[]) {
-		if (is_null($defaultOrder))
-			$defaultOrder=[];
+	public function prepareColumns() {
+		//порядок колонок по умолчанию
+		$defaultOrder=$this->defaultOrder;
+		
+		//переопределяем вводный массив, если колонка задана как просто значение массива с именем атрибута
+		$columns=$this->setColumnKeys($this->columns);
+		
 		$prepared=[];
-		$columns=static::setColumnKeys($columns);
+		//кладем видимые колонки
 		foreach ($defaultOrder as $attr) {
 			if (isset($columns[$attr])) $prepared[]=$this->defaultColumn($attr,$columns[$attr]);
 		}
+		
+		//кладем остальные
 		foreach ($columns as $attr=>$data) if (array_search($attr,$defaultOrder)===false) {
 			$column=$this->defaultColumn($attr,$columns[$attr]);
 			if (count($defaultOrder)) $column['visible']=false;
 			if (isset($column['footer'])) $this->showFooter=true;
 			$prepared[]=$column;
 		}
-		return $prepared;
+		
+		$this->columns=$prepared;
+		parent::prepareColumns();
 	}
 	
 	/**
@@ -340,5 +315,43 @@ class DynaGridWidget extends Widget
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Fetches the column label
+	 *
+	 * @param  mixed  $key  the column key
+	 * @param  mixed  $column  the column object / configuration
+	 *
+	 * @return string
+	 * @throws InvalidConfigException
+	 */
+	protected function getColumnLabel($key, $column)
+	{
+		if (is_string($column)) {
+			$matches = $this->matchColumnString($column);
+			$attribute = $matches[1];
+			if (isset($matches[5])) {
+				return $matches[5];
+			} //header specified is in the format "attribute:format:label"
+			
+			return $this->getAttributeLabel($attribute);
+		} else {
+			$label = $key;
+			if (is_array($column)) {
+				if (!empty($column['label'])) {
+					$label = $column['label'];
+				} elseif (!empty($column['header'])) {
+					$label = $column['header'];
+				} elseif (!empty($column['attribute'])) {
+					$label = $this->getAttributeLabel($column['attribute']);
+				} elseif (!empty($column['class'])) {
+					$class = Lib::explode('\\', $column['class']);
+					$label = Inflector::camel2words(end($class));
+				}
+			}
+			
+			return Lib::trim($label);
+		}
 	}
 }
