@@ -145,28 +145,39 @@ $filter= Html::tag('span','Отфильтровать:',['class'=>'btn']).
 				},
 			],
 			'deliveryStatus'=>[
-				'contentOptions' => ['class' => 'contracts-1attach-column'],
+				'contentOptions' => function($data) {
+					switch ($data->deliveryState) {
+						//case Contracts::DELIVERY_PAYMENT_WAIT:
+						//	return ['class' => 'contracts-1attach-column'];
+						
+						case Contracts::DELIVERY_INCOMPLETE:
+							return ['class' => 'contracts-1attach-column table-danger'];
+						
+						case Contracts::DELIVERY_COMPLETE:
+							return ['class' => 'contracts-1attach-column table-success'];
+						
+						default:
+							return ['class' => 'contracts-1attach-column'];
+					}
+					
+				},
 				'value'=>function($data){
     				/** @var Contracts $data */
-					if (!$data->isPaid) return '';	//неоплаченные документы не интересуют
-					if (!$data->lics_delivery && !$data->techs_delivery && !$data->materials_delivery) return ''; //ничего не ждем
-					$ok=true;
-					$list=[];
-					if ($data->techs_delivery && $data->techsCount<$data->techs_delivery) {
-						$ok=false;
-						$list[]='Оборудование: '.($data->techs_delivery-$data->techsCount).'шт';
+					switch ($data->deliveryState) {
+						case Contracts::DELIVERY_PAYMENT_WAIT:
+							return '<span qtip_ttip="Ожидаем оплату"><i class="fas fa-dollar-sign"></i></span>';
+
+						case Contracts::DELIVERY_INCOMPLETE:
+							return '<span qtip_ttip="Ожидаем поставку:<br>'.(implode('<br>',$data->undeliveredDescription)).'">'
+									.'<i class="fas fa-truck"></i>'
+								.'</span>';
+
+						case Contracts::DELIVERY_COMPLETE:
+							return '<i class="far fa-check-circle"></i>';
+
+						default:
+							return '';
 					}
-					if ($data->materials_delivery && $data->materialsCount<$data->materials_delivery) {
-						$ok=false;
-						$list[]='Материалы: '.($data->techs_delivery-$data->materialsCount).'ед';
-					}
-					if ($data->lics_delivery && $data->licsCount<$data->lics_delivery) {
-						$ok=false;
-						$list[]='Лицензии: '.($data->lics_delivery-$data->licsCount).'шт';
-					}
-					return $ok?
-						'<i class="fas fa-check-circle"></i>':
-						'<span qtip_ttip="Ожидаем поставку:<br>'.(implode('<br>',$list)).'"><i class="fas fa-truck"></i></span>';
 				},
 			],
         ],

@@ -51,6 +51,11 @@ use yii\helpers\Url;
  * @property integer $techsCount количество поставленного оборудования
  * @property integer $licsCount количество поставленных лицензий
  * @property integer $materialsCount количество поставленных материалов
+ * @property integer $undeliveredTechsCount количество поставленного оборудования
+ * @property integer $undeliveredLicsCount количество поставленных лицензий
+ * @property integer $undeliveredMaterialsCount количество поставленных материалов
+ * @property integer $deliveryState состояние доставки
+ * @property string[] $undeliveredDescription описание что недопоставлено
  *
  * @property Contracts $parent
  * @property Currency $currency
@@ -72,6 +77,7 @@ use yii\helpers\Url;
  * @property LicItems[]  $licsChain
  * @property OrgPhones[] $orgPhones
  * @property OrgPhones[] $phonesChain
+ * @property OrgInet[]	 $orgInets
  * @property Partners[]  $partners массив объектов контрагентов в договоре
  * @property Services[]  $services
  * @property Services[]  $servicesChain
@@ -91,6 +97,11 @@ class Contracts extends ArmsModel
 	];
 
 
+	const DELIVERY_NONE=0;
+	const DELIVERY_PAYMENT_WAIT=10;
+	const DELIVERY_INCOMPLETE=20;
+	const DELIVERY_COMPLETE=100;
+	
 	public $scanFile;
 
 	private $successors_chain_cache=null;
@@ -317,7 +328,7 @@ class Contracts extends ArmsModel
 			],
 			'deliveryStatus'=>[
 				'Статус поставки',
-				'indexLabel'=>'<i class="fas fa-truck-moving"></i>',
+				'indexLabel'=>'<i class="fas fa-truck"></i>',
 				'indexHint'=>'Статус поставки: все ли ожидаемые материалы,'
 					.'<br>лицензии, оборудования по этому документу поступили'
 					.'<br>(привязаны к документу)',
@@ -679,6 +690,61 @@ class Contracts extends ArmsModel
 		return $this->attrsCache['licsCount'];
 	}
 	
+	/**
+	 * Количество недопоставленного оборудования
+	 */
+	public function getUndeliveredTechsCount() {
+		if (!$this->techs_delivery) return 0;	//ничего не ждем
+		return max($this->techs_delivery-$this->techsCount,0); //если приехало больше чем хотели, то ничего не ждем
+	}
+	
+	/**
+	 * Количество недопоставленных материалов
+	 */
+	public function getUndeliveredMaterialsCount() {
+		if (!$this->materials_delivery) return 0;	//ничего не ждем
+		return max($this->materials_delivery-$this->materialsCount,0);//если приехало больше чем хотели, то ничего не ждем
+	}
+	
+	/**
+	 * Количество недопоставленных лицензий
+	 */
+	public function getUndeliveredLicsCount() {
+		if (!$this->lics_delivery) return 0;	//ничего не ждем
+		return max($this->lics_delivery-$this->licsCount,0);//если приехало больше чем хотели, то ничего не ждем
+	}
+	
+	/**
+	 * Возвращает массив количества недопоставленных объектов вида ['Оборудование: 3шт','Материалы и ЗИП: 7ед']
+	 * @return array|mixed
+	 */
+	public function getUndeliveredDescription(){
+		if (isset($this->attrsCache['undeliveredDescription'])) return $this->attrsCache['undeliveredDescription'];
+		$this->attrsCache['undeliveredDescription']=[];
+		if ($this->undeliveredTechsCount)
+			$this->attrsCache['undeliveredDescription'][]=Techs::$titles.': '.($this->undeliveredTechsCount).'шт';
+		
+		if ($this->undeliveredMaterialsCount)
+			$this->attrsCache['undeliveredDescription'][]=Materials::$titles.': '.($this->undeliveredMaterialsCount).'ед';
+		
+		if ($this->undeliveredLicsCount)
+			$this->attrsCache['undeliveredDescription'][]=LicItems::$titles.': '.($this->undeliveredLicsCount).'шт';
+		
+		return $this->attrsCache['undeliveredDescription'];
+	}
+	
+	public function getDeliveryState() {
+		if (!$this->techs_delivery && !$this->materials_delivery && !$this->lics_delivery)
+			return self::DELIVERY_NONE;
+		
+		if (!$this->isPaid) return
+			self::DELIVERY_PAYMENT_WAIT;
+		
+		if ($this->undeliveredLicsCount+$this->undeliveredMaterialsCount+$this->undeliveredTechsCount)
+			return self::DELIVERY_INCOMPLETE;
+		
+		return self::DELIVERY_COMPLETE;
+	}
 	
 	/**
 	 * @return ActiveQuery
