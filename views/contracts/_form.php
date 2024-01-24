@@ -1,8 +1,20 @@
 <?php
 
+use app\helpers\FieldsHelper;
+use app\models\Contracts;
+use app\models\ContractsStates;
+use app\models\Currency;
+use app\models\LicItems;
+use app\models\Partners;
+use app\models\Scans;
+use app\models\Services;
+use app\models\Techs;
+use app\models\Users;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\file\FileInput;
+use yii\helpers\Url;
+use yii\web\JsExpression;
 
 
 /* @var $this yii\web\View */
@@ -12,7 +24,8 @@ use kartik\file\FileInput;
 if (!isset($modalParent)) $modalParent=null;
 $js = <<<JS
     //меняем подсказку выбора родителя при смене списка контрагентов
-    function fetchContractsFromPartners(){
+    // noinspection JSUnusedLocalSymbols
+function fetchContractsFromPartners(){
         let partners=$("#contracts-partners_ids").val();
         console.log(partners);
         $.ajax({url: "/web/contracts/hint-parent?form=contracts&ids="+partners})
@@ -42,28 +55,37 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	    'validateOnSubmit' => true,
         'validationUrl' => $model->isNewRecord?['contracts/validate']:['contracts/validate','id'=>$model->id],
 	    'options' => ['enctype' => 'multipart/form-data'],
-        'action' => $model->isNewRecord?\yii\helpers\Url::to(['contracts/create']):\yii\helpers\Url::to(['contracts/update','id'=>$model->id]),
+        'action' => $model->isNewRecord? Url::to(['contracts/create']): Url::to(['contracts/update','id'=>$model->id]),
     ]); ?>
 
-    <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+	<div class="row">
+		<div class="col-<?= Yii::$app->params['docs.pay_id.enable']?'10':'12' ?>">
+			<?= FieldsHelper::TextInputField($form,$model, 'name') ?>
+		</div>
+		<?php if (Yii::$app->params['docs.pay_id.enable']) { ?>
+			<div class="col-2">
+				<?= FieldsHelper::TextInputField($form,$model, 'pay_id') ?>
+			</div>
+		<?php } ?>
+	</div>
 
     <div class="row">
         <div class="col-md-2" >
-		    <?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'state_id',[
-			    'data' => \app\models\ContractsStates::fetchNames(),
+		    <?= FieldsHelper::Select2Field($form,$model, 'state_id',[
+			    'data' => ContractsStates::fetchNames(),
 			    'options' => ['placeholder' => 'Выберите статус документа',],
 			    'pluginOptions' => ['dropdownParent' => $modalParent,'allowClear' => true,],
 		    ]) ?>
         </div>
         <div class="col-md-2" >
-            <?= \app\helpers\FieldsHelper::DateField($form,$model, 'date'); ?>
+            <?= FieldsHelper::DateField($form,$model, 'date'); ?>
         </div>
         <div class="col-md-2" >
-			<?= \app\helpers\FieldsHelper::DateField($form,$model, 'end_date'); ?>
+			<?= FieldsHelper::DateField($form,$model, 'end_date'); ?>
         </div>
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'users_ids', [
-				'data' => \app\models\Users::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'users_ids', [
+				'data' => Users::fetchNames(),
 				'hintModel'=>'Users',
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -74,28 +96,34 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
     </div>
 
     <div class="row">
-        <div class="col-md-9" >
-            <?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'parent_id', [
-                'data' => array_diff_key(\app\models\Contracts::fetchNames(),[$model->id=>$model->id]),
+        <div class="col-md-8" >
+            <?= FieldsHelper::Select2Field($form,$model, 'parent_id', [
+                'data' => array_diff_key(Contracts::fetchNames(),[$model->id=>$model->id]),
 				'hintModel'=>'Contracts',
                 'options' => ['placeholder' => 'Основной документ не назначен',],
                 'pluginOptions' => ['dropdownParent' => $modalParent,],
-				'classicHint'=>\app\models\Contracts::fetchParentHint($model->partners_ids,'contracts'),
+				'classicHint'=> Contracts::fetchParentHint($model->partners_ids,'contracts'),
 				'classicHintOptions'=>['id'=>'parent_id-hint']
             ]) ?>
         </div>
-        <div class="col-md-3 d-inline-flex" >
-			<span class="pt-3">
-				<br>
-            	<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'is_successor') ?>
-			</span>
-        </div>
+		<div class="col-md-1 mt-3" >
+			<?= FieldsHelper::CheckboxField($form,$model,'is_successor') ?>
+		</div>
+		<div class="col-md-1" >
+			<?= FieldsHelper::TextInputField($form,$model,'techs_delivery') ?>
+		</div>
+		<div class="col-md-1" >
+			<?= FieldsHelper::TextInputField($form,$model,'materials_delivery') ?>
+		</div>
+		<div class="col-md-1" >
+			<?= FieldsHelper::TextInputField($form,$model,'lics_delivery') ?>
+		</div>
     </div>
 
 	<div class="row">
 		<div class="col-md-7">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'partners_ids', [
-				'data' => \app\models\Partners::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'partners_ids', [
+				'data' => Partners::fetchNames(),
 				'options' => ['onchange' => 'fetchContractsFromPartners();'],
 				'itemsHintsUrl'=>'auto',
 				'pluginOptions' => [
@@ -105,8 +133,8 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			]) ?>
 		</div>
 		<div class="col-md-1">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'currency_id', [
-				'data' => \app\models\Currency::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'currency_id', [
+				'data' => Currency::fetchNames(),
 				'options' => ['placeholder' => 'RUR'],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -115,11 +143,11 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			]) ?>
 		</div>
 		<div class="col-md-3">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'total') ?>
+			<?= FieldsHelper::TextInputField($form,$model,'total') ?>
 		</div>
 		<div class="col-md-1">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'charge',[
-				'classicHint'=>\app\models\Contracts::chargeCalcHtml('contracts','total','charge')
+			<?= FieldsHelper::TextInputField($form,$model,'charge',[
+				'classicHint'=> Contracts::chargeCalcHtml('contracts','total','charge')
 			]) ?>
 		</div>
 	</div>
@@ -134,7 +162,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	$config=[];
 	foreach ($scans as $scan) {
 		/**
-		 * @var $scan \app\models\Scans
+		 * @var $scan Scans
 		 */
 	    $preview[]=$scan->thumbUrl;
 	    $config[]=(object)[
@@ -162,9 +190,9 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 				'initialPreviewAsData' => true,
 				'initialPreviewConfig' => $config,
 				'overwriteInitial' => false,
-				'uploadUrl' => \yii\helpers\Url::to(['scans/create']),
-				'deleteUrl' => \yii\helpers\Url::to(['scans/delete']),
-				'uploadExtraData' => new \yii\web\JsExpression('function(previewId, index) {
+				'uploadUrl' => Url::to(['scans/create']),
+				'deleteUrl' => Url::to(['scans/delete']),
+				'uploadExtraData' => new JsExpression('function(previewId, index) {
 	                return {"Scans[contracts_id]" : $(\'#contract_form_model_id\').val()};
 	            }'),
 			],
@@ -187,16 +215,16 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
     <br/>
 
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'techs_ids', [
-		'data' => \app\models\Techs::fetchNames(),
+	<?= FieldsHelper::Select2Field($form,$model, 'techs_ids', [
+		'data' => Techs::fetchNames(),
 		'hintModel'=>'Techs',
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
 			'multiple' => true
 		],
 	]) ?>
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'lics_ids', [
-		'data' => \app\models\LicItems::fetchNames(),
+	<?= FieldsHelper::Select2Field($form,$model, 'lics_ids', [
+		'data' => LicItems::fetchNames(),
 		'hintModel'=>'LicItems',
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
@@ -204,8 +232,8 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		],
 	]) ?>
 	
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'services_ids', [
-		'data' => \app\models\Services::fetchNames(),
+	<?= FieldsHelper::Select2Field($form,$model, 'services_ids', [
+		'data' => Services::fetchNames(),
 		'hintModel'=>'Services',
 		'pluginOptions' => [
 			'dropdownParent' => $modalParent,
@@ -213,7 +241,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		],
 	]) ?>
 
-	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'comment',['lines' => 4,]) ?>
+	<?= FieldsHelper::TextAutoresizeField($form,$model,'comment',['lines' => 4,]) ?>
 
 	<?php ActiveForm::end(); ?>
 

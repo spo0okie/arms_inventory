@@ -3,6 +3,11 @@ td.contracts-total-column {text-align: right; width: 100px}
 tr.contracts-total-summary td {text-align: right;}
 td.contracts-state-column {max-width: 250px; width: 250px;  overflow: hidden}
 td.contracts-attach-column {max-width: 70px; width: 70px;  overflow: hidden; text-align: center}
+td.contracts-1attach-column {max-width: 22px; width: 22px;  overflow: hidden; text-align: center}
+
+/*span.contract_history_preview {display: inline-block; white-space: nowrap; overflow: hidden; width: auto; height: 1.2em; max-width: 10em;}*/
+span.contract_state_cell {white-space: nowrap; overflow: hidden; max-width: 25em;}
+
 
 .table-success a,
 .table-warning a,

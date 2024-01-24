@@ -29,8 +29,6 @@ span.state_paywait_full {background-color: green; color:white}
 span.state_payed {background-color: #1da7ee}
 span.state_revoked, span.state_fail {background-color: red; color: white}
 
-/*span.contract_history_preview {display: inline-block; white-space: nowrap; overflow: hidden; width: auto; height: 1.2em; max-width: 10em;}*/
-span.contract_state_cell {display: inline-block; white-space: nowrap; overflow: hidden; max-width: 25em;}
 
 /* РАСКРАСКА ВОЗРАСТА ИНФОРМАЦИИ ОБ ОС */
 td.arm_hostname.hour_fresh {background-color: lightskyblue}

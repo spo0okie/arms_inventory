@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use Yii;
 
 /**
  * This is the model class for table "tech_states".
@@ -11,20 +10,23 @@ use Yii;
  * @property string $code Служебное имя
  * @property string $name Состояние
  * @property string $descr Описание
+ * @property boolean $paid Оплачено
+ * @property boolean $unpaid Ждет оплаты
  */
-class ContractsStates extends \yii\db\ActiveRecord
+class ContractsStates extends ArmsModel
 {
-
-	public static $title='Состояния док-ов';
+	
+	public static $title='Состояние док-ов';
+	public static $titles='Состояния док-ов';
 	public static $description='Состояния жизненного цикла оборудования и иных сущностей в предприятии';
 	//состояния неоплаты документа
-	public static $unpaidStates=['state_paywait_full','state_payed_partial'];
+	//public static $unpaidStates=['state_paywait_full','state_payed_partial'];
 	//состояния полной оплаты документа
-	public static $paidStates=['state_payed_full'];
+	//public static $paidStates=['state_payed_full'];
 	
 	private static $cache=null;
-	private static $unpaidIds=null;
-	private static $paidIds=null;
+	//private static $unpaidIds=null;
+	//private static $paidIds=null;
 
     /**
      * {@inheritdoc}
@@ -51,13 +53,36 @@ class ContractsStates extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
-            'id' => 'id',
-            'code' => 'Служебное имя',
-            'name' => 'Состояние',
-            'descr' => 'Описание',
+            'id' => [
+            	'id',
+			],
+            'code' => [
+            	'код',
+				'hint'=>'используется для CSS раскраски'
+			],
+            'name' => [
+            	'Состояние',
+				'hint'=>'Короткое имя состояния документа'
+			],
+            'descr' => [
+            	'Описание',
+				'hint'=>'Пояснение к состоянию'
+			],
+			'paid'=>[
+				'Оплачен',
+				'hint'=>'Полностью или частично.'
+					.'<br>Оборудование, лицензии и материалы по счетам будут считаться "в доставке"'
+					.'<br>и отмечаться недоставленными, пока не будут привязаны к документу'
+			],
+			'unpaid'=>[
+				'Ожидает оплаты',
+				'hint'=>'Полностью или частично.'
+					.'<br>Счета с таким статусом привязанные к договору, по которому предоставляется услуга'
+					.'<br>будут формировать сумму долга по оплате услуги'
+			],
         ];
     }
 
@@ -69,64 +94,5 @@ class ContractsStates extends \yii\db\ActiveRecord
 			->all();
 	}
 	
-	/**
-	 * Выбрать ID статусов по фильтру кодов
-	 * @param $filter
-	 * @return array
-	 */
-	private static function filterStatesIds($filter) {
-    	$result=[];
-		foreach (static::fetchStatuses() as $status) {
-			/**
-			 * @var $status ContractsStates
-			 */
-			//var_dump($status);
-			//echo($status->code.' vs ['.implode(',',$filter).']<br>');
-			if (array_search($status->code,$filter)!==false) $result[]=$status->id;
-		}
-		//error_log(implode(',',$filter).' => '.implode(',',$result));
-		return $result;
-	}
-	
-	/**
-	 * Список ИД статусов неоплаты
-	 * @return array
-	 */
-	public static function fetchUnpaidIds() {
-		if (!is_null(static::$unpaidIds)) return static::$unpaidIds; //cache
-		return static::$unpaidIds=static::filterStatesIds(Self::$unpaidStates);
-	}
-	
-	/**
-	 * Список ИД статусов неоплаты
-	 * @return array
-	 */
-	public static function fetchPaidIds() {
-		if (!is_null(static::$paidIds)) return static::$paidIds;	//cache
-		return static::$paidIds=static::filterStatesIds(self::$paidIds);
-	}
-	
-	
-	/**
-	 * Является ли переданный ИД статуса признаком неоплаты?
-	 * @param $id
-	 * @return bool
-	 */
-	public static function isUnpaid($id) {
-		return array_search($id,static::fetchUnpaidIds())!==false;
-	}
-	
-	/**
-	 * Является ли переданный ИД статуса признаком оплаты?
-	 * @param $id
-	 * @return bool
-	 */
-	public static function isPaid($id) {
-		return array_search($id,static::fetchPaidIds())!==false;
-	}
-	
-	public static function fetchNames(){
-		return \yii\helpers\ArrayHelper::map(static::fetchStatuses(), 'id', 'name');
-	}
 
 }

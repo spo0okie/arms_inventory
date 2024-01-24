@@ -44,6 +44,13 @@ use yii\helpers\Url;
  * @property array $scans массив сканов документов в договоре
  * @property array $scans_ids массив ссылок на сканы в договоре
  * @property array $users_ids массив пользователей в договоре
+ * @property string $pay_id идентификатор оплаты (в реестре оплат)
+ * @property integer $techs_delivery количество поставляемого оборудования
+ * @property integer $lics_delivery количество поставляемых лицензий
+ * @property integer $materials_delivery количество поставляемых материалов
+ * @property integer $techsCount количество поставленного оборудования
+ * @property integer $licsCount количество поставленных лицензий
+ * @property integer $materialsCount количество поставленных материалов
  *
  * @property Contracts $parent
  * @property Currency $currency
@@ -116,10 +123,10 @@ class Contracts extends ArmsModel
 			[['currency_id'],'default','value'=>1],
 	        [['lics_ids','partners_ids','techs_ids','services_ids','users_ids'], 'each', 'rule'=>['integer']],
 	        //[['scanFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'maxSize' => 1024*1024*30],
-	        [['parent_id','state_id','currency_id'], 'integer'],
+	        [['parent_id','state_id','currency_id','techs_delivery','materials_delivery','lics_delivery'], 'integer'],
 	        [['total','charge'], 'number'],
 	        [['is_successor'], 'boolean'],
-            [['comment'], 'string'],
+            [['comment','pay_id'], 'string'],
             [['name','date','end_date'], 'string', 'max' => 128],
 	        [['parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => Contracts::class, 'targetAttribute' => ['parent' => 'id']],
 			[['parent_id'],	'validateRecursiveLink', 'params'=>['getLink' => 'parent']],
@@ -266,7 +273,55 @@ class Contracts extends ArmsModel
 			'attach'=>[
 				'Связи',
 				'indexHint'=>'Привязанные к документу объекты'
-			]
+			],
+			'pay_id'=>[
+				Yii::$app->params['docs.pay_id.name'],
+				'hint'=>'Заявка на платеж,'
+					.'<br>Идентификатор заявки на оплату в реестре оплат казначейства'
+			],
+			'techs_delivery'=>[
+				'Пост. оборуд.',
+				'hint' => 'Должно быть поставлено оборудования.'
+					.'<br>В документе будет показываться статус ожидается поставка,'
+					.'<br>если количество привязанного к документу оборудования отличается от указанного здесь'
+			],
+			'lics_delivery'=>[
+				'Пост. лиц.',
+				'hint' => 'Должно быть поставлено лицензий'
+					.'<br>В документе будет показываться статус ожидается поставка,'
+					.'<br>если количество привязанных к документу лицензий отличается от указанного здесь'
+			],
+			'materials_delivery'=>[
+				'Пост. матер.',
+				'hint' => 'Должно быть поставлено материалов.'
+					.'<br>В документе будет показываться статус ожидается поставка,'
+					.'<br>если количество привязанных к документу материалов отличается от указанного здесь'
+			],
+			'materialsCount'=>[
+				'Привязано материалов',
+				'indexLabel'=>'<i class="fas fa-box-open"></i>',
+				'indexHint'=>'Сколько материалов поступило по этому документу'
+					.'<br>(привязано к документу)',
+			],
+			'techsCount'=>[
+				'Привязано оборудования',
+				'indexLabel'=>'<i class="fas fa-print"></i>',
+				'indexHint'=>'Сколько оборудования поступило по этому документу'
+					.'<br>(привязано к документу)',
+			],
+			'licsCount'=>[
+				'Привязано лицензий',
+				'indexLabel'=>'<span class="fas fa-award"></span>',
+				'indexHint'=>'Сколько лицензий поступило по этому документу'
+					.'<br>(привязано к документу)',
+			],
+			'deliveryStatus'=>[
+				'Статус поставки',
+				'indexLabel'=>'<i class="fas fa-truck-moving"></i>',
+				'indexHint'=>'Статус поставки: все ли ожидаемые материалы,'
+					.'<br>лицензии, оборудования по этому документу поступили'
+					.'<br>(привязаны к документу)',
+			],
 		];
 	}
 	
@@ -584,12 +639,47 @@ class Contracts extends ArmsModel
 		$attaches='';
 		if (count($this->childs)) $attaches.='<span class="fas fa-paperclip" title="Привязаны документы: '.(count($this->childs)).'шт"></span>';
 		if (count($this->techs)) $attaches.='<span class="fas fa-print" title="Привязана техника: '.(count($this->techs)).'шт"></span>';
+		if (count($this->materials)) $attaches.='<span class="fas fa-box-open" title="Привязаны материалы: '.(count($this->materials)).'ед"></span>';
 		if (count($this->licItems)) $attaches.='<span class="fas fa-award" title="Привязаны лицензии: '.(count($this->licItems)).'шт"></span>';
 		if (count($this->services)) $attaches.='<span class="fas fa-cog" title="Привязаны услуги: '.(count($this->services)).'шт"></span>';
+		
 		return $attaches;
 	}
-
-
+	
+	/**
+	 * Поступило материалов по документу (привязано)
+	 * @return mixed
+	 */
+	public function getMaterialsCount()
+	{
+		if (isset($this->attrsCache['materialsCount'])) return $this->attrsCache['materialsCount'];
+		$this->attrsCache['materialsCount']=0;
+		foreach ($this->materials as $material) {
+			$this->attrsCache['materialsCount']+=$material->count;
+		}
+		return $this->attrsCache['materialsCount'];
+	}
+	
+	public function getTechsCount()
+	{
+		return count($this->techs);
+	}
+	
+	/**
+	 * Поступило лицензий по документу (привязано)
+	 * @return mixed
+	 */
+	public function getLicsCount()
+	{
+		if (isset($this->attrsCache['licsCount'])) return $this->attrsCache['licsCount'];
+		$this->attrsCache['licsCount']=0;
+		foreach ($this->licItems as $licItem) {
+			$this->attrsCache['licsCount']+=$licItem->count;
+		}
+		return $this->attrsCache['licsCount'];
+	}
+	
+	
 	/**
 	 * @return ActiveQuery
 	 */
@@ -844,11 +934,11 @@ class Contracts extends ArmsModel
 	
 	
 	function getIsUnpaid() {
-		return ContractsStates::isUnpaid($this->state_id);
+		return is_object($this->state)&&$this->state->unpaid;
 	}
 
 	function getIsPaid() {
-		return ContractsStates::isPaid($this->state_id);
+		return is_object($this->state)&&$this->state->paid;
 	}
 	
 	/**
