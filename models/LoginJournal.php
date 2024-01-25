@@ -107,6 +107,7 @@ class LoginJournal extends ArmsModel
 			return mb_strtolower($comp->name);
 		} else {
 			$tokens=Domains::fetchFromCompName($this->comp_name);
+			if ($tokens===false) return 'Incorrect hostname';
 			return mb_strtolower($tokens[0]);
 		}
 	}
