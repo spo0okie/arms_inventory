@@ -22,6 +22,9 @@ use yii\web\JsExpression;
 class DynaGridWidget extends DynaGrid
 {
 
+	//куда то подгружать настройки таблиц, чтобы заранее знать в контроллере какие колонки будут выводиться
+	public static $visibleColumnsCache=[];
+	
 	public $storage=DynaGrid::TYPE_DB;
 	
 	/**
@@ -89,9 +92,9 @@ class DynaGridWidget extends DynaGrid
 		return isset($data['keys'])?$data['keys']:null;
 	}
 	
-	public static function columnIsVisible($col,$visibleColumns) {
+	public function columnIsVisible($col,$visibleColumns) {
 		if (is_null($visibleColumns)) return true;
-		return !(array_search(static::getColumnKey($col),$visibleColumns)===false);
+		return !(array_search($this->getColumnKey($col),$visibleColumns)===false);
 	}
 	
 	
