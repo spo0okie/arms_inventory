@@ -17,7 +17,7 @@ $title='Отправка SMS сообщения';
 
 
 <h1><?= $title ?></h1>
-<div class="sms-form">
+<div class="sms-form disable-on-submit">
 
     <?php $form = ActiveForm::begin([
 	    'id'=>'sms-form',
@@ -33,7 +33,7 @@ $title='Отправка SMS сообщения';
 		<div class="col-3">
 			<?= FieldsHelper::TextInputField($form,$model,'phone') ?>
 			<div class="form-group">
-				<?= Html::submitButton('Отправить', ['class' => 'btn btn-success']) ?>
+				<?= Html::submitButton('Отправить', ['class' => 'btn btn-success spinner-on-submit']) ?>
 			</div>
 		</div>
 		<div class="col-9">

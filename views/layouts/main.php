@@ -191,7 +191,18 @@ echo ModalAjax::widget([
                 }
             }
 		"),
-		//ModalAjax::EVENT_BEFORE_SUBMIT => new \yii\web\JsExpression($js1),
+		ModalAjax::EVENT_BEFORE_SUBMIT => new JsExpression(/** @lang JavaScript */ "
+			function(event, data, status, xhr, selector) {
+				let \$disable=$(this).find('div.disable-on-submit');
+				if (\$disable.length) {
+					\$disable.find('*').attr('disabled',1);
+				}
+				let \$spinnerButtons=$(this).find('button.spinner-on-submit');
+				if (\$spinnerButtons.length) {
+					\$spinnerButtons.append(' <span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>');
+				}
+			}
+		"),
 		ModalAjax::EVENT_MODAL_SUBMIT => new JsExpression($js),
 		//ModalAjax::EVENT_MODAL_SUBMIT_COMPLETE => new \yii\web\JsExpression($js3),
 	],
