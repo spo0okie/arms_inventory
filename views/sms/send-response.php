@@ -21,7 +21,7 @@ $title='Отправка SMS сообщения';
 </div>
 <?php } else {  ?>
 <div class="card">
-	<div class="card-title">
+	<div class="card-header">
 		Ответ сервиса
 	</div>
 	<div class="card-body">
