@@ -45,4 +45,6 @@ return [
 	'docs.pay_id.enable'=>false,
 	'docs.pay_id.name'=>'ЗНП',
 	'docs.name.instruction'=>false,
+	
+	'sms.enable'=>false,
 ];
