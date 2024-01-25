@@ -6,20 +6,22 @@
  * Time: 21:55
  */
 
-/* @var \app\models\Techs $model */
+/* @var Techs $model */
 /* @var string $name */
 
-use yii\helpers\Html;
+use app\components\ItemObjectWidget;
+use app\components\LinkObjectWidget;
+use app\models\Techs;
 if (!isset($static_view)) $static_view=false;
 
 if (!empty($model)) {
 	
-    if (!isset($name)) $name=$model->num;
+    if (!isset($name)) $name=$model->name;
 
-	echo \app\components\ItemObjectWidget::widget([
+	echo ItemObjectWidget::widget([
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
-		'link'=>\app\components\LinkObjectWidget::widget([
+		'link'=> LinkObjectWidget::widget([
 			'model'=>$model,
 			'name'=>$name,
 			'static'=>$static_view,

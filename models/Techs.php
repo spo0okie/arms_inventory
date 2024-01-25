@@ -14,8 +14,9 @@ use yii\db\ActiveQuery;
  * This is the model class for table "techs".
  *
  * @property int $id Идентификатор
+ * @property int $domain_id Домен
+ * @property string $hostname Имя
  * @property string $num Инвентарный номер
- * @property string $hostname
  * @property string $name
  * @property string $sname
  * @property string $inv_num Бухгалтерский инвентарный номер
@@ -174,6 +175,7 @@ class Techs extends ArmsModel
 		return ArrayHelper::recursiveOverride(parent::attributeData(),[
 			'id' => ['Идентификатор'],
 			'attach' => ['Связи'],
+			'domain_id' => 'Домен',
 
 			'num' => [
 				'Инвентарный номер',
@@ -391,8 +393,14 @@ class Techs extends ArmsModel
     public function rules()
     {
         return [
+			['hostname', 'filter', 'filter' => function ($value) {
+				return Domains::validateHostname($value,$this);
+			}],
+			[['domain_id'], 'required', 'when' => function(){return (bool)$this->hostname;}],
+			[['domain_id'], 'exist', 'skipOnError' => true, 'targetClass' => Domains::class, 'targetAttribute' => ['domain_id' => 'id']],
+			[['domain_id', 'hostname'], 'unique', 'targetAttribute' => ['domain_id', 'hostname']],
             [['model_id'], 'required'],
-			[['model_id', 'state_id', 'scans_id', 'departments_id','comp_id'], 'integer'],
+			[['model_id', 'state_id', 'scans_id', 'departments_id','comp_id','domain_id'], 'integer'],
 			[['installed_id', 'arms_id', 'places_id','partners_id'], 'integer'],
 			[['user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'integer'],
 			[['installed_back','full_length'],'boolean'],
@@ -1415,10 +1423,11 @@ class Techs extends ArmsModel
 		}
 	}
 	
-	//альяс чтобы привычно можно было использовать поле name
-	public function getName() {return $this->num;}
+	public function getName() {
+		return $this->hostname?$this->hostname:$this->num;
+	}
 	
-	//имя в списке оборудования и ОС сервиса (для сотртировки)
+	//имя в списке оборудования и ОС сервиса (для сортировки)
 	public function getInServicesName() {return mb_strtolower($this->model->nameWithVendor);}
 	
 	public function reverseLinks()

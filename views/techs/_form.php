@@ -3,6 +3,7 @@
 use app\helpers\FieldsHelper;
 use app\models\Contracts;
 use app\models\Departments;
+use app\models\Domains;
 use app\models\MaintenanceReqs;
 use app\models\Partners;
 use app\models\Places;
@@ -177,6 +178,21 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				'data'=> Partners::fetchNames()
 			])?>
 		</div>
+		<?php if (Yii::$app->params['techs.hostname.enable'] && !$model->model->getIsPC()) { ?>
+			<div class="row">
+				<div class="col-6">
+					<?= $form->field($model, 'hostname')->textInput(['maxlength' => true]) ?>
+				</div>
+				<div class="col-6">
+					<?= FieldsHelper::Select2Field($form,$model, 'domain_id',[
+						'data'=> Domains::fetchNames(),
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+						],
+					]) ?>
+				</div>
+			</div>
+		<?php } ?>
 		<div class="col-md-2" >
 			<?php if (count($model->comps)) {
 				echo FieldsHelper::Select2Field($form, $model, 'comp_id', [

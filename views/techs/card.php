@@ -43,6 +43,7 @@ if (is_object($model->state)) { ?>
 		<?php } else { ?>
 			<h4>Идентификаторы:</h4>
 			<p>
+				<?= $model->hostname?'Инвентарный №: <strong>'.$model->num.'</strong><br />':'' ?>
 				Серийный №: <?= $model->sn ?> <br />
 				Бухг. инв. №: <?= $model->inv_num ?> <br />
 				<?php if (strlen($model->comment)){

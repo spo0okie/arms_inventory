@@ -42,6 +42,8 @@ return [
 	'techs.docs'=>[
 		'act-single'=>['Акт приема-передачи','icon'=>'<i class="fas fa-file-contract"></i>'],
 	],
+	'techs.hostname.enable'=>false,
+	
 	'docs.pay_id.enable'=>false,
 	'docs.pay_id.name'=>'ЗНП',
 	'docs.name.instruction'=>false,

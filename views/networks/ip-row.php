@@ -61,11 +61,11 @@ if (is_object($ip)) {
 	<td <?= $class ?>>
 		<?php
 		if (is_array($ip->comps)) foreach ($ip->comps as $comp)
-			echo $this->render('/comps/item',['model'=>$comp]);
+			echo $this->render('/comps/item',['model'=>$comp,'static_view'=>false]);
 		if (is_array($ip->techs)) foreach ($ip->techs as $tech)
-			echo $this->render('/techs/item',['model'=>$tech]);
+			echo $this->render('/techs/item',['model'=>$tech,'static_view'=>false]);
 		if (is_array($ip->users)) foreach ($ip->users as $user)
-			echo $this->render('/users/item',['model'=>$user,'short'=>true]);
+			echo $this->render('/users/item',['model'=>$user,'short'=>true,'static_view'=>false]);
 		echo $ip->name;
 		?>
 	</td>
