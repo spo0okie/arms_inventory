@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
 use Throwable;
 use voskobovich\linker\LinkerBehavior;
@@ -99,23 +100,12 @@ class Comps extends ArmsModel
 
     /**
      * @inheritdoc
-	 * @noinspection PhpUnusedParameterInspection
-     */
+	 */
     public function rules()
     {
         return [
 			['name', 'filter', 'filter' => function ($value) {
-				/* убираем посторонние символы из MAC*/
-				$parseName=Domains::fetchFromCompName($value);
-				if ($parseName===false) $this->addError('name','Некорректный формат имени');
-				if (is_array($parseName)) {
-					$domain_id=$parseName[0];
-					if (!is_null($domain_id) && ($domain_id!==false)){
-						$this->domain_id = $domain_id;
-						return $parseName[1];
-					}
-				}
-				return $value;
+				return Domains::validateHostname($value,$this);
 			}],
             [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids'], 'each', 'rule'=>['integer']],
             [['name', 'os','domain_id'], 'required'],
@@ -126,20 +116,13 @@ class Comps extends ArmsModel
             [['name','os'], 'string', 'max' => 128],
 			[['ip', 'mac'], 'string', 'max' => 768],
 			[['ip_ignore'], 'string', 'max' => 512],
+			
 			['ip', 'filter', 'filter' => function ($value) {
 				return NetIps::filterInput($value);
 			}],
 			
 			['mac', 'filter', 'filter' => function ($value) {
-				/* убираем посторонние символы из MAC*/
-				$macs=explode("\n",$this->mac);
-				$filtered=[];
-				foreach ($macs as $i=>$mac) {
-					$cleanMac=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
-					//убираем MAC вида 0000000
-					if (hexdec($cleanMac)>0) $filtered[$cleanMac]=$cleanMac;
-				}
-				return implode("\n",$filtered);
+				return MacsHelper::fixList($value);
 			}],
 	
 			[['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],

@@ -133,5 +133,26 @@ class Domains extends ActiveRecord
 		//nor any of above
 		return [false,$name,''];
 	}
-
+	
+	
+	/**
+	 * Проверка hostname для разных форматов ввода
+	 * @param string      $hostname
+	 * @param Comps|Techs $object
+	 * @return string
+	 */
+	public static function validateHostname(string $hostname, $object) {
+		/* убираем посторонние символы из MAC*/
+		$parseName=Domains::fetchFromCompName($hostname);
+		if ($parseName===false) $object->addError('name','Некорректный формат hostname');
+		if (is_array($parseName)) {
+			$domain_id=$parseName[0];
+			if (!is_null($domain_id) && ($domain_id!==false)){
+				$object->domain_id = $domain_id;
+				return $parseName[1];
+			}
+		}
+		return $hostname;
+	}
+	
 }
