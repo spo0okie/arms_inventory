@@ -107,6 +107,12 @@ function(event, data, status, xhr, selector) {
 			$(this)
 				.find('div.modal-body')
 				.html(data);
+			let h1=$(this).find('h1');
+			if (h1.length) {
+				let title=h1[0].innerHTML;
+				$('h5.modal-title#modal_form_loader-label').html(title);
+				h1.slice(0).remove();
+			}
 	    }
 		$(this)
 			.find('div.for-alert')
