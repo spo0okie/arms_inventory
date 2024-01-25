@@ -1,14 +1,17 @@
 <?php
 
+use app\models\Places;
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 
 /* @var $this yii\web\View */
 /* @var $models app\models\Places[] */
 
 
+Url::remember();
 
-$this->title = \app\models\Places::$titles;
+$this->title = Places::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="places-index">
