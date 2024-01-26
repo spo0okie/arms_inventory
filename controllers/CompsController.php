@@ -239,7 +239,7 @@ class CompsController extends ArmsBaseController
 			}
 		}
 
-		return $this->redirect(['/techs/passport', 'id' => $model->arm_id]);
+		return $this->redirect(['/techs/docs', 'id' => $model->arm_id,'doc'=>'passport']);
 	}
 
     /**
@@ -263,7 +263,7 @@ class CompsController extends ArmsBaseController
             }
 		}
 
-        return $this->redirect(['/techs/passport', 'id' => $model->arm_id]);
+        return $this->redirect(['/techs/docs', 'id' => $model->arm_id,'doc'=>'passport']);
     }
 	/**
 	 * Обновляем  список скрытых IP

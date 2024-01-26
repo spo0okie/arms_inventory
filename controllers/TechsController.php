@@ -159,7 +159,7 @@ class TechsController extends ArmsBaseController
 			if (!$model->save(false)) error_log(print_r($model->errors,true));
 		}
 		
-		return $this->redirect(['passport', 'id' => $model->id]);
+		return $this->redirect(['docs', 'id' => $model->id,'doc'=>'passport']);
 	}
 	
 	/**
@@ -216,7 +216,7 @@ class TechsController extends ArmsBaseController
 			$model->save(false);
 		}
 		
-		return $this->redirect(['passport', 'id' => $model->id]);
+		return $this->redirect(['docs', 'id' => $model->id,'doc'=>'passport']);
 	}
 	
 	
