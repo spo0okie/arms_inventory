@@ -394,6 +394,7 @@ class Techs extends ArmsModel
     {
         return [
 			['hostname', 'filter', 'filter' => function ($value) {
+        		if (!$value) return $value;
 				return Domains::validateHostname($value,$this);
 			}],
 			[['domain_id'], 'required', 'when' => function(){return (bool)$this->hostname;}],
