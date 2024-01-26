@@ -7,7 +7,7 @@ use yii\helpers\Html;
 
 if (!isset($static_view)) $static_view=true;
 
-$phones= ArrayHelper::explode(',',$phone);
+$phones= $phone?ArrayHelper::explode(',',$phone):[];
 
 $rendered=[];
 foreach ($phones as $phone) {
