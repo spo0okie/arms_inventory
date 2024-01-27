@@ -236,8 +236,8 @@ class DynaGridWidget extends DynaGrid
 		$data['label']=AttributeHintWidget::widget([
 			'model'=>$model,
 			'attribute'=>$attribute,
-			'label'=>isset($data['label'])?$data['label']:null,
-			'hint'=>isset($data['hint'])?$data['hint']:null,
+			'label'=>$data['label']??null,
+			'hint'=>$data['hint']??null,
 		]);
 		$data['encodeLabel']=false;
 		
