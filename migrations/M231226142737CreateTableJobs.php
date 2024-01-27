@@ -22,7 +22,7 @@ class M231226142737CreateTableJobs extends ArmsMigration
 			'spread_comps'=>$this->boolean()->defaultValue(true),
 			'spread_techs'=>$this->boolean()->defaultValue(true),
 			'links'=>$this->text(),
-			'updated_at'=>$this->date(),
+			'updated_at'=>$this->timestamp(),
 			'updated_by'=>$this->string(32),
 		],'engine=InnoDB');
 		$this->createIndex('maintenance_reqs-name','maintenance_reqs','name');
@@ -42,7 +42,7 @@ class M231226142737CreateTableJobs extends ArmsMigration
 			'includes_ids'=>$this->text(),
 			'included_ids'=>$this->text(),
 			'jobs_ids'=>$this->text(),
-			'updated_at'=>$this->date(),
+			'updated_at'=>$this->timestamp(),
 			'updated_by'=>$this->string(32),
 			'updated_comment'=>$this->string(),
 			'changed_attributes'=>$this->text(),
@@ -76,7 +76,7 @@ class M231226142737CreateTableJobs extends ArmsMigration
 			'schedules_id'=>$this->integer()->null(),
 			'services_id'=>$this->integer()->null(),
 			'links'=>$this->text(),
-			'updated_at'=>$this->date(),
+			'updated_at'=>$this->timestamp(),
 			'updated_by'=>$this->string(32),
 		],'engine=InnoDB');
 		$this->createIndex('maintenance_jobs-name','maintenance_jobs','name');
@@ -95,7 +95,7 @@ class M231226142737CreateTableJobs extends ArmsMigration
 			'services_ids'=>$this->text(),
 			'comps_ids'=>$this->text(),
 			'techs_ids'=>$this->text(),
-			'updated_at'=>$this->date(),
+			'updated_at'=>$this->timestamp(),
 			'updated_by'=>$this->string(32),
 			'updated_comment'=>$this->string(),
 			'changed_attributes'=>$this->text(),
