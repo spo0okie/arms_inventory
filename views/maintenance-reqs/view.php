@@ -1,5 +1,6 @@
 <?php
 
+use app\components\HistoryWidget;
 use app\components\WikiPageWidget;
 use yii\web\YiiAsset;
 
@@ -16,11 +17,12 @@ YiiAsset::register($this);
 $wikiLinks= WikiPageWidget::getLinks($model->links);
 
 ?>
-<div class="maintenance-reqs-view">
-	<?= $this->render('card',['model'=>$model]) ?>
-</div>
-<?php
-if (count($wikiLinks)) foreach ($wikiLinks as $name=>$url) {
-	echo WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]);
-	break;
-}
+	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
+	<div class="maintenance-reqs-view">
+		<?= $this->render('card',['model'=>$model]) ?>
+	</div>
+	<?php
+	if (count($wikiLinks)) foreach ($wikiLinks as $name=>$url) {
+		echo WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]);
+		break;
+	}

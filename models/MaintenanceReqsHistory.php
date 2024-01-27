@@ -28,6 +28,8 @@ class MaintenanceReqsHistory extends HistoryModel
 	public static $title='История требований обслуживания';
 	public static $titles='Изменения требований обслуживания';
 	
+	public static $masterClass=MaintenanceReqs::class;
+	
 	public static $journalMany2ManyLinks=[
 		'services_ids'=>Services::class,
 		'comps_ids'=>Comps::class,

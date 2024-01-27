@@ -16,6 +16,7 @@ use yii\db\ActiveRecord;
  * @property string $changed_attributes  Внешние ссылки
  
  * @property int $secondsSinceUpdate Секунды с момента обновления
+ * @property ArmsModel $masterInstance
  */
 class HistoryModel extends ArmsModel
 {
@@ -33,7 +34,7 @@ class HistoryModel extends ArmsModel
 	/**
 	 * @var string[] Какие "полезные" атрибуты изменились (сюда не вписываются $ignoreFieldChanges)
 	 */
-	public $changedAttributes=[];
+	public $changedAttributes;
 	
 	/**
 	 * @var string[] Пояснение какие поля являются many2many полями и каких классов ['services_ids'=>Service::class,]
@@ -44,6 +45,24 @@ class HistoryModel extends ArmsModel
 	 * @var HistoryModel предыдущая запись в журнале
 	 */
 	public $previous;
+	
+	public static $masterClass;
+	protected static $masterClassInstance;
+	
+	public function getMasterInstance() {
+		if (!isset(static::$masterClassInstance)) static::$masterClassInstance=new static::$masterClass();
+		return static::$masterClassInstance;
+	}
+	
+	public function attributeData()
+	{
+		return ArrayHelper::recursiveOverride($this->masterInstance->attributeData(),[
+			'updated_comment'=>[
+				'Пояснение',
+				'indexHint'=>'Пояснение к изменениям',
+			]
+		]);
+	}
 	
 	/**
 	 * Найти последнюю запись в журнале для известного master_id
@@ -85,6 +104,7 @@ class HistoryModel extends ArmsModel
 	 * @param null $record
 	 */
 	public function compareRecords($record=null) {
+		$this->changedAttributes=[];
 		foreach ($this->attributes as $attr=>$value) {
 			if (!$this->canSetProperty($attr)) continue;
 			if (array_search($attr,static::$ignoreFieldChanges)!==false) continue;
@@ -108,15 +128,15 @@ class HistoryModel extends ArmsModel
 					break;
 				case 'changed_attributes':	//заполняется позже
 				case 'id':					//не заполняется
-					continue;
+					break;
 				default:
 					//если у нас есть инициатор и это поле надо брать из него
 					if (isset($initiator) && static::isInitiatorAttr($attr)) {
-						if (!$record->canGetProperty($attr)) continue;
+						if (!$record->canGetProperty($attr)) break;
 						$value=$initiator->$attr;
 					} else {
 						//иначе берез из основного объекта
-						if (!$record->canGetProperty($attr)) continue;
+						if (!$record->canGetProperty($attr)) break;
 						$value=static::simplifyField($record->$attr);
 					}
 					//грузим в журнал аттрибут
@@ -238,5 +258,59 @@ class HistoryModel extends ArmsModel
 				$link->historyCommit($initiator);
 			}
 		}
+	}
+	
+	/**
+	 * Найти пользователя из updated_by
+	 * @return array|ActiveRecord|null
+	 */
+	public function getUpdatedByUser() {
+		return Users::find()
+			->where(['Login'=>$this->updated_by])
+			->one();
+	}
+	
+	/**
+	 * Есть ли аттрибут в changed_attributes
+	 * @param string $attr
+	 * @return bool
+	 */
+	public function attributeIsChanged(string $attr){
+		if (!isset($this->changedAttributes))
+			$this->changedAttributes=ArrayHelper::explode(',',$this->changed_attributes);
+		
+		return in_array($attr,$this->changedAttributes);
+	}
+
+	/**
+	 * Является ли аттрибут ссылкой
+	 * @param string $attr
+	 * @return bool
+	 */
+	public function attributeIsLink(string $attr){
+		return isset(static::$journalMany2ManyLinks[$attr]);
+	}
+	
+	/**
+	 * На какой класс ссылается атрибут
+	 * @param string $attr
+	 * @return bool
+	 */
+	public function attributeLinkClass(string $attr){
+		return static::$journalMany2ManyLinks[$attr];
+	}
+	
+	/**
+	 * Получить объекты, на которые ссылается аттрибут
+	 * @param string $attr
+	 * @return array|ActiveRecord[]
+	 */
+	public function fetchLinks(string $attr){
+		$class=$this->attributeLinkClass($attr);
+		$ids=explode(',',$this->$attr??'');
+		/** @var ArmsModel $class */
+		return $class::find()
+			->where(['id'=>$ids])
+			->all();
 	}
 }
