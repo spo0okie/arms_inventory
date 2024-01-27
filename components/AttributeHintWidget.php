@@ -15,15 +15,15 @@ class AttributeHintWidget extends Widget
 	/**
 	 * @var ArmsModel
 	 */
-	public $model=null;
+	public $model;
 	
 	public $attribute='name';
 	
-	public $label=null;			//выводимое имя аттрибута
+	public $label;			//выводимое имя аттрибута
 
-	public $hint=null;			//подсказка
+	public $hint;			//подсказка
 	
-	public $index=true;			//метка не для формы, а для вывода в шапке таблицы
+	public $index=true;		//метка не для формы, а для вывода в шапке таблицы
 	
 	public function run()
 	{
