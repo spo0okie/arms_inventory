@@ -25,7 +25,7 @@ namespace app\models;
 class MaintenanceReqsHistory extends HistoryModel
 {
 
-	public static $title='История требований обслуживания';
+	public static $title='Изменения требований обслуживания';
 	public static $titles='Изменения требований обслуживания';
 	
 	public static $masterClass=MaintenanceReqs::class;
@@ -47,22 +47,6 @@ class MaintenanceReqsHistory extends HistoryModel
     }
 
 
-
-/**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['master_id', 'name', 'description', 'spread_comps', 'spread_techs', 'links', 'services_ids', 'comps_ids', 'techs_ids', 'included_ids', 'includes_ids', 'jobs_ids', 'updated_at', 'updated_by', 'updated_comment'], 'default', 'value' => null],
-            [['master_id', 'spread_comps', 'spread_techs'], 'integer'],
-            [['links', 'services_ids', 'comps_ids', 'techs_ids', 'included_ids', 'includes_ids'], 'string'],
-            [['updated_at'], 'safe'],
-            [['name', 'updated_comment'], 'string', 'max' => 255],
-            [['description'], 'string', 'max' => 1024],
-            [['updated_by'], 'string', 'max' => 32],
-		];
-    }
-
+    
 
 }
