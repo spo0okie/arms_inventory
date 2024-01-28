@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use yii\base\InvalidConfigException;
 use yii\db\ActiveRecord;
 
 /**
@@ -46,13 +47,33 @@ class HistoryModel extends ArmsModel
 	 */
 	public $previous;
 	
-	public static $masterClass;
-	protected static $masterClassInstance;
+	public static $masterClass;	//какого класса история
+	protected static $masterClassInstance;	//инстанс мастер класса для нестатичных обращений
 	
-	public function getMasterInstance() {
-		if (!isset(static::$masterClassInstance)) static::$masterClassInstance=new static::$masterClass();
+	/**
+	 * Получить инстанс, создать при необходимости
+	 * @return ArmsModel
+	 */
+	public static function fetchMasterInstance() {
+		if (!isset(static::$masterClassInstance))
+			static::$masterClassInstance=new static::$masterClass();
 		return static::$masterClassInstance;
 	}
+	
+	/**
+	 * Получить инстанс, создать при необходимости
+	 * @return ArmsModel
+	 */
+	public function getMasterInstance() {
+		return static::fetchMasterInstance();
+	}
+	
+	public static function fetchHistoryMaster($id) {
+		/** @var ArmsModel $masterClass */
+		$masterClass=static::$masterClass;
+		return $masterClass::findOne($id);
+	}
+	
 	
 	public function attributeData()
 	{
@@ -63,6 +84,21 @@ class HistoryModel extends ArmsModel
 			]
 		]);
 	}
+	
+	
+	public function rules() {
+		$attributes=array_keys($this->attributes);
+		return [
+			//все поля кроме тех что явно для истории по умолчанию null
+			[array_diff($attributes,static::$ignoreFieldChanges),'default','value'=>null],
+			//*_ids
+			//[[preg_grep('/_ids$/',$attributes)],'safe'],
+			//*_id
+			//[[preg_grep('/_id$/',$attributes)],'integer'],
+			[$attributes,'safe'],
+		];
+	}
+	
 	
 	/**
 	 * Найти последнюю запись в журнале для известного master_id
@@ -118,10 +154,13 @@ class HistoryModel extends ArmsModel
 	 * Заполняет модель записи журнала значениями исходной модели
 	 * @param ArmsModel         $record
 	 * @param HistoryModel|null $initiator Кто инициатор изменений (через many2many один объект может менять многие)
+	 * @throws InvalidConfigException
 	 */
 	public function fillRecord(ArmsModel $record, $initiator=null) {
+		//$schema=$this->getTableSchema();
 		foreach ($this->attributes as $attr=>$value) {
 			if (!$this->canSetProperty($attr)) continue;
+			//$type=$schema->columns[$attr]->type;
 			switch ($attr) {
 				case 'master_id':	//ссылка на ID оригинального объекта
 					$this->$attr=$record->id;
@@ -135,12 +174,15 @@ class HistoryModel extends ArmsModel
 						if (!$record->canGetProperty($attr)) break;
 						$value=$initiator->$attr;
 					} else {
-						//иначе берез из основного объекта
+						//иначе берем из основного объекта
 						if (!$record->canGetProperty($attr)) break;
 						$value=static::simplifyField($record->$attr);
 					}
+					//if (is_null($value) && ($type=='text' || $type=='string'))
+					//	$value='';
 					//грузим в журнал аттрибут
 					$this->$attr=$value;
+					
 			}
 		}
 	}
