@@ -29,6 +29,7 @@ use yii\db\ActiveRecord;
  * @property Attaches $attaches Загруженные файлы
  * @property boolean $archived Статус архивирования элемента
  * @property string $external_links Внешние ссылки
+ * @property string $historyClass Класс который хранит журнал изменений моделей класса
  
  * @property int $secondsSinceUpdate Секунды с момента обновления
  */
@@ -42,7 +43,7 @@ class ArmsModel extends ActiveRecord
 	public const searchableOrHint='<br><i>HINT: Можно искать несколько вариантов, разделив их вертикальной</i> <b>|</b> <i>чертой</i>';
 	
 	
-	protected static $historyClass;	//если заполнить, то будет сохранять историю в моделях этого класса
+	protected $historyClass;	//если заполнить, то будет сохранять историю в моделях этого класса
 	
 	/** @var array Кэш для рекурсивного поиска поля (Когда значение может быть в родителе и в его родителе или ...) */
 	protected $recursiveCache=[];
@@ -249,9 +250,15 @@ class ArmsModel extends ActiveRecord
 	
 	
 	public function historyCommit($initiator=null) {
-		if (!isset(static::$historyClass) || $this->doNotChangeAuthor) return;
+		//упростим себе задачу тем что класс не надо задавать всегда вручную, пусть будет {$MasterClass}History
+		if (!isset($this->historyClass)) {
+			//у моделей которые сами журналы истории такое не нужно
+			if ($this instanceof HistoryModel) return;
+			$this->historyClass=static::class.'History';
+		}
+		if (!class_exists($this->historyClass) || $this->doNotChangeAuthor) return;
 		//ну что ж, давайте попробуем залепить запись в журнал!
-		$historyClass=static::$historyClass;
+		$historyClass=$this->historyClass;
 		/** @var HistoryModel $journal */
 		$journal=new $historyClass();
 		$journal->journal($this,$initiator);
