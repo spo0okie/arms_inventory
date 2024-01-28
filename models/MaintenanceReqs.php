@@ -39,8 +39,6 @@ class MaintenanceReqs extends ArmsModel
 	//т.к. оно удовлетворяется более общим требованием
 	public $absorbed=false;
 	
-	protected static $historyClass=MaintenanceReqsHistory::class;
-
     /**
      * {@inheritdoc}
      */
@@ -143,6 +141,8 @@ class MaintenanceReqs extends ArmsModel
 				'Относится к резервному копированию',
 				'hint'=>'Это требование является требованием по резервному копированию.'
 					.'<br>Нужно для выделения таких требований отдельно от прочих',
+				'indexHint'=>'{same}',
+				'indexLabel'=>'<i class="fas fa-archive"></i>',
 			],
 			'spread_comps' => [
 				'Распространяется на ОС',
