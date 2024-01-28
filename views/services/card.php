@@ -1,5 +1,6 @@
 <?php
 
+use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;use app\components\ShowArchivedWidget;
@@ -24,7 +25,9 @@ $children=$model->children;
 $contracts=$model->contracts;
 
 if(!$static_view) { ?>
-<span class="float-end">
+<span class="float-end text-end">
+	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
+	<br />
 	<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
 </span>
 

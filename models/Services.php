@@ -142,11 +142,11 @@ class Services extends ArmsModel
 				'relations' => [
 					'depends_ids' => 'depends',
 					'comps_ids' => 'comps',
+					'techs_ids' => 'techs',
+					'maintenance_reqs_ids' => 'maintenanceReqs',
 					'support_ids' => 'support',
 					'infrastructure_support_ids' => 'infrastructureSupport',
-					'maintenance_reqs_ids' => 'maintenanceReqs',
 					'contracts_ids' => 'contracts',
-					'techs_ids' => 'techs'
 				]
 			]
 		];
