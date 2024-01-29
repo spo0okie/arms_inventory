@@ -31,7 +31,7 @@ class HistoryWidget extends Widget
 
 		if ($this->model->hasAttribute('updated_by')) {
 			$this->updated_by=$this->model->updated_by;
-			$this->user=Users::find()
+			if ($this->updated_by) $this->user=Users::find()
 				->where(['Login'=>$this->updated_by])
 				->one();
 		}
