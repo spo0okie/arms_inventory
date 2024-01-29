@@ -635,10 +635,11 @@ class Contracts extends ArmsModel
 		return $name;
 	}
 	
-	public function getSname($date=true,$self=true,$partner=true,$user=true)
+	public function getSname($date=true,$self=true,$partner=true,$user=true,$payId=true)
 	{
 		$tokens=[];
 		if ($date) $tokens[]=$this->datePart;
+		if ($payId && $this->pay_id) $tokens[]=Yii::$app->params['docs.pay_id.name'].' '.$this->pay_id;
 		if ($self) $tokens[]=$this->selfSname;
 		if ($partner &&	strlen($partner=$this->getPartnersNames($user))) $tokens[]=$partner;
 		

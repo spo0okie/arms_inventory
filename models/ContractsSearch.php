@@ -2,19 +2,16 @@
 
 namespace app\models;
 
-use Yii;
+use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Contracts;
+use yii\db\Expression;
 
 /**
  * ContractsSearch represents the model behind the search form of `app\models\Contracts`.
  */
 class ContractsSearch extends Contracts
 {
-    /**
-     * {@inheritdoc}
-     */
 	
 	/**
 	 * @var mixed|null
@@ -85,8 +82,9 @@ class ContractsSearch extends Contracts
 		
 		//поисковый запрос в тексте повторяющем "шаблон вывода списка документов"
 		// дата - наименование - контрагент - комментарий
-		$nameExpression=new \yii\db\Expression("concat(".
+		$nameExpression=new Expression("concat(".
 			"ifnull(`contracts`.`date`,'нет даты'),' - ',".
+			"ifnull(`contracts`.`pay_id`,''),".
 			"`contracts`.`name`,' - ',".
 			"ifnull(`partners`.`uname`,'".static::$noPartnerSuffix."'),' (', ifnull(`partners`.`bname`,'') , ')',".
 			"ifnull(`users`.`Ename`,''),".
@@ -97,7 +95,7 @@ class ContractsSearch extends Contracts
 		$nameSubQuery=Contracts::find()
 			->select('DISTINCT(contracts.id)')
 			->joinWith(['partners','users'])
-			->where(\app\helpers\QueryHelper::querySearchString($nameExpression,$this->fullname))
+			->where(QueryHelper::querySearchString($nameExpression,$this->fullname))
 			->createCommand()
 			->rawSql;
 		
@@ -111,13 +109,11 @@ class ContractsSearch extends Contracts
 	    
 	    $query
 		    //->andFilterWhere(\app\helpers\QueryHelper::querySearchString($nameExpression,$this->fullname))
-		    ->andFilterWhere(\app\helpers\QueryHelper::querySearchNumberOrDate('total',$this->total))
+		    ->andFilterWhere(QueryHelper::querySearchNumberOrDate('total',$this->total))
 		    ->orderBy(['date'=>SORT_DESC,'name'=>SORT_DESC]);
 
-	    $dataProvider = new ActiveDataProvider([
+	    return new ActiveDataProvider([
 		    'query' => $query,
 	    ]);
-
-        return $dataProvider;
     }
 }
