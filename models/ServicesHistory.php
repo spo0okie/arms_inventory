@@ -24,9 +24,9 @@ class ServicesHistory extends HistoryModel
 	public static $title='Изменения сервиса/услуги';
 	public static $titles='Изменения сервисов/услуг';
 	
-	public static $masterClass=Services::class;
+	public $masterClass=Services::class;
 	
-	public static $journalMany2ManyLinks=[
+	public $journalMany2ManyLinks=[
 		'depends_ids'=>Services::class,
 		'comps_ids'=>Comps::class,
 		'techs_ids'=>Techs::class,
@@ -34,6 +34,18 @@ class ServicesHistory extends HistoryModel
 		'support_ids'=>Users::class,
 		'infrastructure_support_ids'=>Users::class,
 		'contracts_ids' => Contracts::class,
+	];
+	
+	public $journalLinks=[
+		'responsible_id'=>Users::class,
+		'infrastructure_user_id'=>Users::class,
+		'providing_schedule_id'=>Schedules::class,
+		'support_schedule_id'=>Schedules::class,
+		'segment_id'=>Segments::class,
+		'parent_id'=>Services::class,
+		'partners_id'=>Partners::class,
+		'places_id'=>Places::class,
+		'currency_id'=>Currency::class,
 	];
 
     /**

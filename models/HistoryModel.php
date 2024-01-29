@@ -40,37 +40,34 @@ class HistoryModel extends ArmsModel
 	/**
 	 * @var string[] Пояснение какие поля являются many2many полями и каких классов ['services_ids'=>Service::class,]
 	 */
-	public static $journalMany2ManyLinks=[];
+	public $journalMany2ManyLinks=[];
+	
+	/**
+	 * @var string[] Пояснение какие поля являются relation полями и каких классов ['services_id'=>Service::class,]
+	 */
+	public $journalLinks=[];
 	
 	/**
 	 * @var HistoryModel предыдущая запись в журнале
 	 */
 	public $previous;
 	
-	public static $masterClass;	//какого класса история
-	protected static $masterClassInstance;	//инстанс мастер класса для нестатичных обращений
-	
-	/**
-	 * Получить инстанс, создать при необходимости
-	 * @return ArmsModel
-	 */
-	public static function fetchMasterInstance() {
-		if (!isset(static::$masterClassInstance))
-			static::$masterClassInstance=new static::$masterClass();
-		return static::$masterClassInstance;
-	}
+	public $masterClass;	//какого класса история
+	protected $masterClassInstance;	//инстанс мастер класса для нестатичных обращений
 	
 	/**
 	 * Получить инстанс, создать при необходимости
 	 * @return ArmsModel
 	 */
 	public function getMasterInstance() {
-		return static::fetchMasterInstance();
+		if (!isset($this->masterClassInstance))
+			$this->masterClassInstance=new $this->masterClass();
+		return $this->masterClassInstance;
 	}
 	
-	public static function fetchHistoryMaster($id) {
+	public function getHistoryMaster($id) {
 		/** @var ArmsModel $masterClass */
-		$masterClass=static::$masterClass;
+		$masterClass=$this->masterClass;
 		return $masterClass::findOne($id);
 	}
 	
@@ -192,10 +189,11 @@ class HistoryModel extends ArmsModel
 	 * @param $attr
 	 * @return bool
 	 */
-	public static function isMany2ManyLink($attr) {
-		return isset(static::$journalMany2ManyLinks[$attr]);
+	public function isMany2ManyLink($attr) {
+		return isset($this->journalMany2ManyLinks[$attr]);
 	}
 	
+
 	/**
 	 * Является ли поле аттрибутом который надо брать из инициатора если он передан
 	 * @param $attr
@@ -237,7 +235,7 @@ class HistoryModel extends ArmsModel
 	 */
 	public function fetchLink($attr,$id) {
 		/** @var ArmsModel $class */
-		$class=static::$journalMany2ManyLinks[$attr];
+		$class=$this->journalMany2ManyLinks[$attr];
 		return $class::findOne($id);
 	}
 	
@@ -281,7 +279,7 @@ class HistoryModel extends ArmsModel
 		//перебрать изменившиеся поля
 		foreach ($this->changedAttributes as $attribute) {
 			//выбрать из них many2many
-			if (!static::isMany2ManyLink($attribute)) continue; //пропускаем поля "не m-2-m ссылки"
+			if (!$this->isMany2ManyLink($attribute)) continue; //пропускаем поля "не m-2-m ссылки"
 			
 			//найти какие ссылки добавились/пропали
 			//чтобы найти изменяющиеся позиции надо
@@ -294,7 +292,7 @@ class HistoryModel extends ArmsModel
 			);
 			//загрузить объекты-ссылки
 			foreach ($changed as $id) {
-				$link=static::fetchLink($attribute,$id);
+				$link=$this->fetchLink($attribute,$id);
 				if (is_null($link)) continue; // мало ли
 				//вызвать для них historyCommit($initiator)
 				$link->historyCommit($initiator);
@@ -330,7 +328,7 @@ class HistoryModel extends ArmsModel
 	 * @return bool
 	 */
 	public function attributeIsLink(string $attr){
-		return isset(static::$journalMany2ManyLinks[$attr]);
+		return isset($this->journalMany2ManyLinks[$attr]) || isset($this->journalLinks[$attr]);
 	}
 	
 	/**
@@ -339,7 +337,9 @@ class HistoryModel extends ArmsModel
 	 * @return bool
 	 */
 	public function attributeLinkClass(string $attr){
-		return static::$journalMany2ManyLinks[$attr];
+		if (isset($this->journalMany2ManyLinks[$attr])) return $this->journalMany2ManyLinks[$attr];
+		if (isset($this->journalLinks[$attr])) return $this->journalLinks[$attr];
+		return null;
 	}
 	
 	/**

@@ -42,7 +42,7 @@ class HistoryController extends ArmsBaseController
 				->orderBy(['id'=>SORT_DESC])
 		]);
     	
-    	$master=$class::fetchHistoryMaster($id);
+    	$master=$instance->getHistoryMaster($id);
     	
     	return $this->render('journal',[
     		'dataProvider'=>$dataProvider,
