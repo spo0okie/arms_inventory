@@ -2,6 +2,7 @@
 
 /* Карточка документа Можно использовать во View можно в тултипе */
 
+use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
 use yii\helpers\Html;
@@ -15,7 +16,9 @@ $model_id=$model->id;
 if (!isset($static_view)) $static_view=false;
 
 ?>
-
+<span class="float-end text-end">
+	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
+</span>
 <h1>
     <?= LinkObjectWidget::widget([
 		'model'=>$model,

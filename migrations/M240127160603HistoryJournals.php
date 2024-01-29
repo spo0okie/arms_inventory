@@ -3,7 +3,6 @@
 namespace app\migrations;
 
 use app\migrations\arms\ArmsMigration;
-use yii\db\Migration;
 
 /**
  * Class M240127160603HistoryJournals
@@ -34,6 +33,10 @@ class M240127160603HistoryJournals extends ArmsMigration
 		$this->createTable('services_history',[
 			'id'=>$this->primaryKey(),
 			'master_id'=>$this->integer(),
+			'updated_at'=>$this->timestamp(),
+			'updated_by'=>$this->string(32),
+			'updated_comment'=>$this->string(),
+			'changed_attributes'=>$this->text(),
 			
 			'name'=>$this->string(64),
 			'description'=>$this->text(),
@@ -74,10 +77,6 @@ class M240127160603HistoryJournals extends ArmsMigration
 			'infrastructure_support_ids'=>$this->text(),
 			'maintenance_reqs_ids'=>$this->text(),
 
-			'updated_at'=>$this->timestamp(),
-			'updated_by'=>$this->string(32),
-			'updated_comment'=>$this->string(),
-			'changed_attributes'=>$this->text(),
 		]);
 		$this->createIndex('services_history-master_id','services_history','master_id');
 		$this->createIndex('services_history-updated_at','services_history','updated_at');

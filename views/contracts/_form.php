@@ -57,6 +57,8 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	    'options' => ['enctype' => 'multipart/form-data'],
         'action' => $model->isNewRecord? Url::to(['contracts/create']): Url::to(['contracts/update','id'=>$model->id]),
     ]); ?>
+	
+	<?= Yii::$app->params['docs.name.instruction']?Yii::$app->params['docs.name.instruction']:'' ?>
 
 	<div class="row">
 		<div class="col-<?= Yii::$app->params['docs.pay_id.enable']?'10':'12' ?>">
