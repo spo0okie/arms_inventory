@@ -305,6 +305,7 @@ class HistoryModel extends ArmsModel
 	 * @return array|ActiveRecord|null
 	 */
 	public function getUpdatedByUser() {
+		if (!$this->updated_by) return null;
 		return Users::find()
 			->where(['Login'=>$this->updated_by])
 			->one();
