@@ -1,40 +1,51 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\components\HistoryWidget;
+use app\components\LinkObjectWidget;
+use app\components\UrlListWidget;
+use app\models\TechsSearch;
+use app\models\TechTypes;
+use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
-
+use yii\helpers\Url;
 
 
 /* @var $this yii\web\View */
 /* @var $model app\models\TechModels */
+/* @var $dataProvider ActiveDataProvider */
+/* @var $searchModel TechsSearch */
 
-\yii\helpers\Url::remember();
+Url::remember();
 
 $renderer=$this;
 $this->title = $model->nameWithVendor;
-$this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index']];
+$this->params['breadcrumbs'][] = ['label' => TechTypes::$title, 'url' => ['/tech-types/index']];
 $this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['/tech-types/view','id'=>$model->type_id]];
 $this->params['breadcrumbs'][] = $this->title;
 $static_view=false;
 ?>
 <div class="tech-models-view">
+<div class="float-end text-end">
+	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
+	<h1><?= Html::a('<i class="fas fa-images"></i>',['uploads','id'=>$model->id],[
+		'class'=>'float-end',
+		'qtip_ttip'=>'Редактировать изображения/фото этой модели оборудования',
+		'qtip_side'=>'top'
+	]) ?></h1>
 
+</div>
     <h1>
-		<?= \app\components\LinkObjectWidget::widget([
+		<?= LinkObjectWidget::widget([
 			'model'=>$model->type,
 			'ttipUrl'=>false,
 			'static'=>true
 		]) ?>
-        <?= \app\components\LinkObjectWidget::widget([
+        <?= LinkObjectWidget::widget([
 			'model'=>$model,
 			'name'=>$model->nameWithVendor,
 			'confirmMessage' => 'Действительно удалить описание этой модели оборудования?',
 			'undeletableMessage'=>'Описание этой модели оборудования нельзя удалить в настоящий момент,<br> т.к. в БД есть экземпляры оборудования этой модели',
-		]) ?>
-		<?= Html::a('<i class="fas fa-images"></i>',['uploads','id'=>$model->id],[
-			'class'=>'float-end',
-			'qtip_ttip'=>'Редактировать изображения/фото этой модели оборудования',
-			'qtip_side'=>'top'
 		]) ?>
 	</h1>
 	
@@ -52,7 +63,7 @@ $static_view=false;
 			?>
 			<h4>Ссылки:</h4>
 			<p class="mb-2">
-			<?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
+			<?= UrlListWidget::Widget(['list'=>$model->links]) ?>
 			</p>
 			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
 
