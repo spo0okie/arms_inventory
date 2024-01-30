@@ -48,5 +48,6 @@ return [
 	'docs.pay_id.name'=>'ЗНП',
 	'docs.name.instruction'=>false,
 	
+	'user.name_as_uid.enable'=>false,	//запрещаем использование полного ФИО как ключ для переназначения логина
 	'sms.enable'=>false,
 ];

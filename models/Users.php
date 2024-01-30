@@ -177,6 +177,8 @@ class Users extends ArmsModel implements IdentityInterface
 				if (is_object($exist)) {
 					//если этот логин у того же самого человека (совпадает uid=>ИНН) то и пофиг
 					if (strlen($this->uid) && $this->uid==$exist->uid) return;
+					//если ФИО совпадает и такое совпадение в параметрах выставлено достаточным то тоже пофиг
+					if (strlen($this->Ename) && $this->Ename==$exist->Ename && Yii::$app->params['user.name_as_uid.enable']) return;
 					$this->addError($attribute, 'Такой логин уже занят пользователем '.$exist->Ename);
 				}
 			}],
@@ -822,10 +824,15 @@ class Users extends ArmsModel implements IdentityInterface
 		//если этот уволен то тоже ничего не проверяем
 		if ($this->Uvolen) return;
 
+		//в зависимости от параметра использования ФИО ориентируемся только на ИНН или еще на ФИО
+		$uidFilter=Yii::$app->params['user.name_as_uid.enable']?
+		['or',['uid'=>$this->uid],['Ename'=>$this->Ename]]:
+		['uid'=>$this->uid];
+
 		//ищем нет ли таких же пользователей с таким же логином и uid
 		$exist=static::find()
 			->where(['Login'=>$this->Login])
-			->andWhere(['uid'=>$this->uid])
+			->andWhere($uidFilter)
 			->andWhere(['not',['id'=>$this->id]])
 			->all();
 		
