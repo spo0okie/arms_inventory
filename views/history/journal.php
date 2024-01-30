@@ -17,7 +17,7 @@ use yii\web\View;
 $this->params['layout-container'] = 'container-fluid';
 $masterClass=get_class($master);
 /** @noinspection PhpUndefinedFieldInspection */
-$classTitle=$masterClass::$titles;
+$classTitle=$class::$title;
 $classView=Inflector::camel2id(StringHelper::className($masterClass));
 
 $this->params['breadcrumbs'][] = ['label' => $classTitle, 'url' => [$classView.'/index']];
