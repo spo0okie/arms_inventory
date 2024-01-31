@@ -179,6 +179,9 @@ $filter= Html::tag('span','Отфильтровать:',['class'=>'btn']).
 							return '';
 					}
 				},
+				'filter'=>[true=>'С поставками',false=>'Без поставок'],
+				//'filterType'=>GridView::FILTER_SELECT2
+				'filterInputOptions'=>['style'=>'padding:0; background:#fff'],
 			],
         ],
 		'defaultOrder' => [

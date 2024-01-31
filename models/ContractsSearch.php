@@ -23,11 +23,13 @@ class ContractsSearch extends Contracts
 	 */
 	public $total;
 	
+	public $deliveryStatus;
+	
 	public function rules()
     {
         return [
             [['id', 'parent', 'state_id'], 'integer'],
-            [['fullname', 'comment','total'], 'safe'],
+            [['fullname', 'comment','total','deliveryStatus'], 'safe'],
         ];
     }
 
@@ -103,6 +105,13 @@ class ContractsSearch extends Contracts
 
 	    $query
 		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
+	    
+	    if (isset($this->deliveryStatus)) {
+			if ($this->deliveryStatus)
+				$query->andWhere('ifnull(techs_delivery,0) + ifnull(materials_delivery,0) + ifnull(lics_delivery,0)>0');
+			if (!$this->deliveryStatus)
+				$query->andWhere('ifnull(techs_delivery,0) + ifnull(materials_delivery,0) + ifnull(lics_delivery,0)=0');
+		}
 	    
 	    if ($this->fullname)
 	    	$query->andWhere('contracts.id in ('.$nameSubQuery.')');
