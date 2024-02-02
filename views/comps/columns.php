@@ -89,10 +89,8 @@ return [
 	'raw_hw' => [
 		'value' => function ($data) use ($manufacturers) {
 			if (is_object($data)) {
-				$render=[];
-				foreach ($data->getHardArray() as $item)
-					$render[]=$item->getName().' '.$item->getSN();
-				return implode(' ',$render);
+				/** @var Comps $data */
+				return $this->render('/hwlist/shortlist',['model'=>$data->hwList,'arm_id'=>$data->arm_id]);
 			}
 			return null;
 		},
