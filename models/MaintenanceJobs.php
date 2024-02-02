@@ -2,7 +2,9 @@
 
 namespace app\models;
 
+use app\helpers\ArrayHelper;
 use voskobovich\linker\LinkerBehavior;
+use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
 
@@ -22,7 +24,11 @@ use yii\db\ActiveQuery;
  * @property Comps[] $comps
  * @property MaintenanceReqs[] $reqs
  * @property Services[] $services
+ * @property Services $service
+ * @property Schedules $schedule
  * @property Techs[] $techs
+ * @property Users $responsible
+ * @property Users[] $support
  */
 class MaintenanceJobs extends ArmsModel
 {
@@ -46,7 +52,7 @@ public static $titles='Регламентное обслуживание';
 				'relations' => [
 					'comps_ids' => [
 						'comps',
-						//'updater' => ['class' => ManyToManySmartUpdater::class,],
+						'updater' => ['class' => ManyToManySmartUpdater::class,],
 					],
 					'reqs_ids' => [
 						'reqs',
@@ -54,11 +60,11 @@ public static $titles='Регламентное обслуживание';
 					],
 					'services_ids' => [
 						'services',
-						//'updater' => ['class' => ManyToManySmartUpdater::class,],
+						'updater' => ['class' => ManyToManySmartUpdater::class,],
 					],
 					'techs_ids' => [
 						'techs',
-						//'updater' => ['class' => ManyToManySmartUpdater::class,],
+						'updater' => ['class' => ManyToManySmartUpdater::class,],
 					],
 				]
 			]
@@ -72,13 +78,13 @@ public static $titles='Регламентное обслуживание';
     public function rules()
     {
         return [
-            [['schedules_id', 'services_id', 'links', 'changed_at', 'changed_by'], 'default', 'value' => null],
+            [['schedules_id', 'services_id', 'links'], 'default', 'value' => null],
             [['name', 'description'], 'required'],
-            [['schedules_id', 'services_id', 'changed_by'], 'integer'],
+			[['name'], 'string', 'max' => 255],
+			[['description'], 'string', 'max' => 1024],
+			[['schedules_id', 'services_id','archived'], 'integer'],
+			[['comps_ids', 'services_ids', 'techs_ids', 'reqs_ids'], 'each','rule'=>['integer']],
             [['links'], 'string'],
-            [['changed_at'], 'safe'],
-            [['name'], 'string', 'max' => 255],
-            [['description'], 'string', 'max' => 1024],
         ];
     }
 
@@ -87,40 +93,55 @@ public static $titles='Регламентное обслуживание';
      */
     public function attributeData()
     {
-        return [
-            'id' => [
-				'ID',
-				'hint'=>'id hint',
-			],
+        return ArrayHelper::recursiveOverride(parent::attributeData(),[
+
             'name' => [
-				'Name',
-				'hint'=>'name hint',
+				'Название',
+				'hint'=>'Понятное имя для регламентного обслуживания',
 			],
             'description' => [
-				'Description',
-				'hint'=>'description hint',
+				'Описание',
+				'hint'=>'Описание регламентных операций с пояснением деталей',
 			],
             'schedules_id' => [
-				'Schedules ID',
-				'hint'=>'schedules_id hint',
+				'Расписание',
+				'hint'=>'Расписание когда производятся регламентные операции',
 			],
+            'schedule' => ['alias'=>'schedules_id'],
             'services_id' => [
-				'Services ID',
-				'hint'=>'services_id hint',
+				'В рамках сервиса',
+				'hint'=>'В рамках какого сервиса производятся операции обслуживания.'
+					.'<br>Нужно для определения ответственного',
 			],
+			'service' => ['alias'=>'services_id'],
             'links' => [
-				'Links',
-				'hint'=>'links hint',
+				'Ссылки',
+				'hint'=>'С информацией по данному обслуживанию',
 			],
-            'changed_at' => [
-				'Changed At',
-				'hint'=>'changed_at hint',
+			'reqs_ids' => [
+				'Выполняет требования',
+				'hint'=>'Какие требования по регламентному обслуживания выполняет эта операция',
 			],
-            'changed_by' => [
-				'Changed By',
-				'hint'=>'changed_by hint',
+			'reqs' => ['alias'=>'reqs_ids'],
+			'comps_ids' => [
+				'ОС/ВМ',
+				'hint'=>'Обслуживаемые в рамках этой регламентной операции',
 			],
-        ];
+			'comps' => ['alias'=>'comps_ids'],
+			'techs_ids' => [
+				'Оборудование',
+				'hint'=>'Обслуживаемое в рамках этой регламентной операции',
+			],
+			'techs' => ['alias'=>'techs_ids'],
+			'services_ids' => [
+				'Сервисы',
+				'hint'=>'Обслуживаемые в рамках этой регламентной операции',
+			],
+			'services' => ['alias'=>'services_ids'],
+			'responsible' => ['Ответственный'],
+			'support' => ['Поддержка'],
+
+		]);
     }
 	
 	/**
@@ -145,10 +166,18 @@ public static $titles='Регламентное обслуживание';
 	 * @return ActiveQuery
 	 * @throws InvalidConfigException
 	 */
-    public function getServices()
-    {
-        return $this->hasMany(Services::class, ['id' => 'services_id'])->viaTable('maintenance_jobs_in_services', ['jobs_id' => 'id']);
-    }
+	public function getServices()
+	{
+		return $this->hasMany(Services::class, ['id' => 'services_id'])->viaTable('maintenance_jobs_in_services', ['jobs_id' => 'id']);
+	}
+	
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getService()
+	{
+		return $this->hasOne(Services::class, ['id' => 'services_id']);
+	}
 	
 	/**
 	 * @return ActiveQuery
@@ -158,5 +187,36 @@ public static $titles='Регламентное обслуживание';
     {
         return $this->hasMany(Techs::class, ['id' => 'techs_id'])->viaTable('maintenance_jobs_in_techs', ['jobs_id' => 'id']);
     }
-
+	
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getSchedule()
+	{
+		return $this->hasOne(Schedules::class, ['id' => 'schedules_id']);
+	}
+	
+	public function getResponsible()
+	{
+		if (is_object($this->service)) return $this->service->responsibleRecursive;
+		return null;
+	}
+	
+	public function getSupport()
+	{
+		if (is_object($this->service)) return $this->service->supportRecursive;
+		return null;
+	}
+	
+	
+	public function reverseLinks()
+	{
+		return [
+			$this->reqs,
+			$this->services,
+			$this->techs,
+			$this->comps,
+			
+		];
+	}
 }

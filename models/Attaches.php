@@ -2,7 +2,8 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveRecord;
+use yii\helpers\StringHelper;
 use yii\web\UploadedFile;
 
 /**
@@ -22,7 +23,7 @@ use yii\web\UploadedFile;
  * @property string|null $fullFname
  * @property UploadedFile $uploadedFile
  */
-class Attaches extends \yii\db\ActiveRecord
+class Attaches extends ActiveRecord
 {
 	
 	public $uploadedFile;
@@ -54,6 +55,8 @@ class Attaches extends \yii\db\ActiveRecord
 					'schedules_id',
 					'tech_models_id',
 					'users_id',
+					'maintenance_reqs_id',
+					'maintenance_jobs_id',
 				],
 				'integer'
 			],
@@ -91,8 +94,8 @@ class Attaches extends \yii\db\ActiveRecord
 	{
 		if ($this->validate()) {
 			$prefix=($this->id)?$this->id:static::fetchNextId();
-			$this->filename=$prefix.'-'.\yii\helpers\StringHelper::truncate($this->uploadedFile->baseName,80).'.'.$this->uploadedFile->extension;
-			return $this->uploadedFile->saveAs($_SERVER['DOCUMENT_ROOT'].$this->fullFname);;
+			$this->filename=$prefix.'-'. StringHelper::truncate($this->uploadedFile->baseName,80).'.'.$this->uploadedFile->extension;
+			return $this->uploadedFile->saveAs($_SERVER['DOCUMENT_ROOT'].$this->fullFname);
 		} else {
 			return false;
 		}

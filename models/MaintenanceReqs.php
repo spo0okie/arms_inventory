@@ -93,7 +93,7 @@ class MaintenanceReqs extends ArmsModel
 			[['spread_comps', 'spread_techs'], 'default', 'value' => 1],
 			[['name', 'description'], 'required'],
 			[['name', ], 'unique'],
-            [['spread_comps', 'spread_techs','is_backup'], 'integer'],
+            [['spread_comps', 'spread_techs','is_backup','archived'], 'integer'],
             [['links'], 'string'],
             [['updated_at', 'updated_by'], 'safe'],
             [['name'], 'string', 'max' => 255],

@@ -13,6 +13,7 @@ use app\models\Departments;
 use app\models\LicGroups;
 use app\models\LicTypes;
 use app\models\LoginJournal;
+use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
 use app\models\Materials;
 use app\models\MaterialsTypes;
@@ -98,6 +99,7 @@ NavBar::begin([
 				'items' => [
 					['label' => Services::$titles, 'url' => ['/services/index']],
 					['label' => MaintenanceReqs::$titles, 'url' => ['/maintenance-reqs/index']],
+					['label' => MaintenanceJobs::$titles, 'url' => ['/maintenance-jobs/index']],
 					['label' => Schedules::$titles, 'url' => ['/schedules/index']],
 				]
 			],

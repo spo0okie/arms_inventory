@@ -20,26 +20,26 @@ $totalSupport=[];
 $totalComps=[];
 $totalTechs=[];
 
-foreach ($dataProvider->models as $model) {
-	/* @var $model Services */
+foreach ($dataProvider->models as $service) {
+	/* @var $service Services */
 	
-	if (is_object($model->segmentRecursive)) {
-		$totalSegments[$model->segmentRecursive->id]=$model->segmentRecursive;
+	if (is_object($service->segmentRecursive)) {
+		$totalSegments[$service->segmentRecursive->id]=$service->segmentRecursive;
 	}
 	
-	if (is_object($model->responsibleRecursive)) if (!isset($totalSupport[$model->responsibleRecursive->id]))
-		$totalSupport[$model->responsibleRecursive->id]=$renderer->render('/users/item', ['model' => $model->responsibleRecursive,'short'=>true]);
+	if (is_object($service->responsibleRecursive)) if (!isset($totalSupport[$service->responsibleRecursive->id]))
+		$totalSupport[$service->responsibleRecursive->id]=$renderer->render('/users/item', ['model' => $service->responsibleRecursive,'short'=>true]);
 
-	if (is_array($model->supportRecursive))
-		foreach ($model->supportRecursive as $user) if (!isset($totalSupport[$user->id]))
+	if (is_array($service->supportRecursive))
+		foreach ($service->supportRecursive as $user) if (!isset($totalSupport[$user->id]))
 			$totalSupport[$user->id]=$renderer->render('/users/item', ['model' => $user,'short'=>true]);
 	
-	if (is_array($model->comps))
-		foreach ($model->comps as $comp) if (!isset($totalComps[$comp->id]))
+	if (is_array($service->comps))
+		foreach ($service->comps as $comp) if (!isset($totalComps[$comp->id]))
 			$totalComps[$comp->id]=$renderer->render('/comps/item', ['model' => $comp,'short'=>true]);
 
-	if (is_array($model->techs))
-		foreach ($model->techs as $tech) if (!isset($totalTechs[$tech->id]))
+	if (is_array($service->techs))
+		foreach ($service->techs as $tech) if (!isset($totalTechs[$tech->id]))
 		$totalTechs[$tech->id]=$renderer->render('/techs/item', ['model' => $tech,'short'=>true]);
 }
 
