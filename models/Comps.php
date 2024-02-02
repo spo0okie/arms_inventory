@@ -107,7 +107,7 @@ class Comps extends ArmsModel
 			['name', 'filter', 'filter' => function ($value) {
 				return Domains::validateHostname($value,$this);
 			}],
-            [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids'], 'each', 'rule'=>['integer']],
+            [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids','maintenance_jobs_ids'], 'each', 'rule'=>['integer']],
             [['name', 'os','domain_id'], 'required'],
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
@@ -214,7 +214,6 @@ class Comps extends ArmsModel
 			],
 			'maintenance_reqs_ids'=>[
 				MaintenanceReqs::$titles,
-				'indexLabel'=>'Обслуживание (явн.)',
 				'hint'=>'Какие предъявлены требования по обслуживанию ОС/ВМ.'
 					.'<br>По хорошему требования должны предъявлять сервисы, '
 					.'<br>работающие на ОС/ВМ, но можно задать их и явно',
@@ -222,11 +221,18 @@ class Comps extends ArmsModel
 			],
 			'maintenanceReqs'=>['alias'=>'maintenance_reqs_ids'],
 			'effectiveMaintenanceReqs'=>[
-				'Обслуживание',
+				MaintenanceReqs::$titles,
+				'indexLabel'=>'Треб. обслуживания',
 				'indexHint'=>'Какие предъявлены требования по обслуживанию.'
 					.'<br>Как распространенные с сервисов, так и заданные явно. '
 					.'<br>Избыточно предъявленные требования помечаются как "архивные"'
 			],
+			'maintenance_jobs_ids'=>[
+				MaintenanceJobs::$titles,
+				'hint'=>'Какие операции регламентного обслуживания проводятся над этой ОС/ВМ',
+				'indexHint'=>'{same}'
+			],
+			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
 
 		]);
     }
@@ -249,6 +255,7 @@ class Comps extends ArmsModel
 					'netIps_ids' => 'netIps',
 					'services_ids' => 'services',
 					'maintenance_reqs_ids' => 'maintenanceReqs',
+					'maintenance_jobs_ids' => 'maintenanceJobs',
                 ]
             ]
         ];
@@ -504,6 +511,12 @@ class Comps extends ArmsModel
 			->viaTable('maintenance_reqs_in_comps', ['comps_id' => 'id']);
 	}
 	
+	public function getMaintenanceJobs()
+	{
+		return $this->hasMany(MaintenanceJobs::class, ['id' => 'jobs_id'])
+			->viaTable('maintenance_jobs_in_comps', ['comps_id' => 'id']);
+	}
+
 	public function getEffectiveMaintenanceReqs()
 	{
 		$reqs=[];

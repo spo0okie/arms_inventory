@@ -2,6 +2,7 @@
 
 use app\helpers\FieldsHelper;
 use app\models\Domains;
+use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
 use app\models\Services;
 use app\models\Techs;
@@ -77,7 +78,7 @@ if (!isset($modalParent)) $modalParent=null;
 	</div>
 
 	<div class="row">
-		<div class="col-md-8">
+		<div class="col-md-6">
 			<?= FieldsHelper::Select2Field($form,$model, 'services_ids', [
 				'data' => Services::fetchNames(),
 				'options' => ['placeholder' => 'Нет сервисов',],
@@ -88,10 +89,21 @@ if (!isset($modalParent)) $modalParent=null;
 				]
 			]) ?>
 		</div>
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
 				'data' => MaintenanceReqs::fetchNames(),
 				'options' => ['placeholder' => 'Получать из сервисов',],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+		</div>
+		<div class="col-md-3">
+			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_jobs_ids', [
+				'data' => MaintenanceJobs::fetchNames(),
+				'options' => ['placeholder' => 'Отсутствуют',],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'allowClear' => true,

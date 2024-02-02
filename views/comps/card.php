@@ -72,19 +72,25 @@ if (!mb_strlen($domain))
 	<?= $this->render('lics_list',['model'=>$model,'static_view'=>$static_view]) ?>
 </div>
 	
-	<?php if (count($model->services)||count($model->effectiveMaintenanceReqs)) { ?>
-		<div class="d-flex flex-row flex-wrap mb-3">
+	<?php if (count($model->services)||count($model->effectiveMaintenanceReqs)||count($model->maintenanceJobs)) { ?>
+		<div class="d-flex flex-row flex-wrap">
 			<?= ModelFieldWidget::widget([
 				'model'=>$model,
 				'field'=>'services',
 				'title'=>'Участвует в работе сервисов:',
-				'card_options'=>['cardClass'=>'pe-5']
+				'card_options'=>['cardClass'=>'pe-5 mb-3']
 			]) ?>
 			<?= ModelFieldWidget::widget([
 				'model'=>$model,
 				'field'=>'effectiveMaintenanceReqs',
 				'title'=>'Требует обслуживания:',
-				'card_options'=>['cardClass'=>'pe-5']
+				'card_options'=>['cardClass'=>'pe-5 mb-3']
+			]) ?>
+			<?= ModelFieldWidget::widget([
+				'model'=>$model,
+				'field'=>'maintenanceJobs',
+				'title'=>'Обслуживается:',
+				'card_options'=>['cardClass'=>'pe-5 mb-3']
 			]) ?>
 		</div>
 	<?php } ?>

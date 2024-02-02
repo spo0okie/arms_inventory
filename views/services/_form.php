@@ -4,6 +4,7 @@ use app\helpers\FieldsHelper;
 use app\models\Comps;
 use app\models\Contracts;
 use app\models\Currency;
+use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
 use app\models\Partners;
 use app\models\Places;
@@ -307,17 +308,35 @@ $this->registerJs($changeParent, yii\web\View::POS_END);
 					'multiple' => true
 				]
 			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
-				'data' => MaintenanceReqs::fetchNames(),
-				'options' => ['placeholder' => 'Наследовать из родительского сервиса',],
-				'hintModel'=>'MaintenanceReqs',
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<div class="row">
+				<div class="col-6">
+					<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
+						'data' => MaintenanceReqs::fetchNames(),
+						'options' => ['placeholder' => 'Наследовать из родительского сервиса',],
+						'hintModel'=>'MaintenanceReqs',
+						'toggleAllSettings'=>['selectLabel'=>null],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => true,
+							'multiple' => true
+						]
+					]) ?>
+				</div>
+				<div class="col-6">
+					<?= FieldsHelper::Select2Field($form,$model, 'maintenance_jobs_ids', [
+						'data' => MaintenanceJobs::fetchNames(),
+						'options' => ['placeholder' => 'Отсутствует',],
+						'hintModel'=>'MaintenanceReqs',
+						'toggleAllSettings'=>['selectLabel'=>null],
+						'pluginOptions' => [
+							'dropdownParent' => $modalParent,
+							'allowClear' => true,
+							'multiple' => true
+						]
+					]) ?>
+
+				</div>
+			</div>
 			<?= FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
 				'data' => Contracts::fetchNames(),
 				'options' => ['placeholder' => 'Выберите документы',],

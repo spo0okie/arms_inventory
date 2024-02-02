@@ -127,4 +127,7 @@ return [
 	'effectiveMaintenanceReqs' => [
 		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'effectiveMaintenanceReqs','title'=>false,'item_options'=>['static_view'=>true]]);},
 	],
+	'maintenanceJobs' => [
+		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'maintenanceJobs','title'=>false,'item_options'=>['static_view'=>true]]);},
+	],
 ];

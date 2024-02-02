@@ -160,15 +160,8 @@ $vmRes=[
 			return 'Class error: '.get_class($data);
 		}
 	],
-	'maintenanceReqs'=>[
-		'value' =>  function ($data) {
-			return ModelFieldWidget::widget([
-				'model'=>$data,
-				'field'=>'maintenanceReqs',
-				'title'=>false,
-				'item_options'=>['static_view'=>true],
-			]);
-		}
+	'maintenanceJobs' => [
+		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'maintenanceJobs','title'=>false,'item_options'=>['static_view'=>true]]);},
 	],
 	'effectiveMaintenanceReqs'=>[
 		'value' =>  function ($data) {

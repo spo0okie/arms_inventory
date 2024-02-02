@@ -144,6 +144,7 @@ class Services extends ArmsModel
 					'comps_ids' => 'comps',
 					'techs_ids' => 'techs',
 					'maintenance_reqs_ids' => 'maintenanceReqs',
+					'maintenance_jobs_ids' => 'maintenanceJobs',
 					'support_ids' => 'support',
 					'infrastructure_support_ids' => 'infrastructureSupport',
 					'contracts_ids' => 'contracts',
@@ -182,7 +183,7 @@ class Services extends ArmsModel
 			[['cost','charge'], 'number'],
 			[['currency_id'],'default','value'=>1],
             [['name', 'description', 'is_end_user'], 'required'],
-	        [['depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids','maintenance_reqs_ids'], 'each', 'rule'=>['integer']],
+	        [['depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids','maintenance_reqs_ids','maintenance_jobs_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
 			[['vm_cores','vm_ram','vm_hdd','places_id','partners_id','places_id','archived','currency_id','weight'],'integer'],
 			[['weight'],'default', 'value' => '100'],
@@ -368,6 +369,12 @@ class Services extends ArmsModel
 				'hint' =>'Объем дискового пространства VM в GiB зарезервированный/запланированный для этого сервиса.<br>'.
 					'(Если на этот сервис запланированы ресурсы виртуализации)'
 			],
+			'maintenance_jobs_ids'=>[
+				MaintenanceJobs::$titles,
+				'hint'=>'Какие операции регламентного обслуживания проводятся над этим сервисом',
+				'indexHint'=>'{same}'
+			],
+			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
         ];
     }
     
@@ -750,6 +757,12 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(MaintenanceReqs::class, ['id' => 'reqs_id'])
 			->viaTable('maintenance_reqs_in_services', ['services_id' => 'id']);
+	}
+
+	public function getMaintenanceJobs()
+	{
+		return $this->hasMany(MaintenanceJobs::class, ['id' => 'jobs_id'])
+			->viaTable('maintenance_jobs_in_services', ['services_id' => 'id']);
 	}
 	
 	public function getMaintenanceReqsRecursive()

@@ -4,6 +4,7 @@ use app\helpers\FieldsHelper;
 use app\models\Contracts;
 use app\models\Departments;
 use app\models\Domains;
+use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
 use app\models\Partners;
 use app\models\Places;
@@ -407,7 +408,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		</div>
     </div>
 	<div class="row">
-		<div class="col-md-8">
+		<div class="col-md-6">
 			<?= FieldsHelper::Select2Field($form,$model, 'services_ids', [
 				'data' => Services::fetchNames(),
 				'options' => ['placeholder' => 'Нет сервисов',],
@@ -418,7 +419,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				]
 			]) ?>
 		</div>
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
 				'data' => MaintenanceReqs::fetchNames(),
 				'options' => ['placeholder' => 'Получать из сервисов',],
@@ -429,6 +430,18 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				]
 			]) ?>
 		</div>
+		<div class="col-md-3">
+			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_jobs_ids', [
+				'data' => MaintenanceJobs::fetchNames(),
+				'options' => ['placeholder' => 'Отсутствуют',],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+		</div>
+	</div>
 	
 	<?= FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
 		'data' => Contracts::fetchNames(),

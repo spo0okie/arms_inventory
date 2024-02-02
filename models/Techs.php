@@ -376,6 +376,13 @@ class Techs extends ArmsModel
 					.'<br>Как распространенные с сервисов, так и заданные явно. '
 					.'<br>Избыточно предъявленные требования помечаются как "архивные"'
 			],
+			'maintenance_jobs_ids'=>[
+				MaintenanceJobs::$titles,
+				'hint'=>'Какие операции регламентного обслуживания проводятся над этим оборудованием',
+				'indexHint'=>'{same}'
+			],
+			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
+			
 			'services_ids' => [
 				'Сервисы',
 				'hint' => 'Работу каких сервисов обеспечивает это оборудование',
@@ -406,7 +413,7 @@ class Techs extends ArmsModel
 			[['user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'integer'],
 			[['installed_back','full_length'],'boolean'],
 
-	        [['contracts_ids','lic_items_ids','lic_groups_ids','lic_keys_ids','maintenance_reqs_ids','services_ids'], 'each', 'rule'=>['integer']],
+	        [['contracts_ids','lic_items_ids','lic_groups_ids','lic_keys_ids','maintenance_reqs_ids','maintenance_jobs_ids','services_ids'], 'each', 'rule'=>['integer']],
 
 			[['url', 'comment','updated_at','history','hw','specs','external_links'], 'safe'],
 			[['inv_num', 'sn','installed_pos','installed_pos_end'], 'string', 'max' => 128],
@@ -468,6 +475,7 @@ class Techs extends ArmsModel
 					'lic_keys_ids' => 'licKeys',
 					'lic_groups_ids' => 'licGroups',
 					'maintenance_reqs_ids' => 'maintenanceReqs',
+					'maintenance_jobs_ids' => 'maintenanceJobs',
 				]
 			]
 		];
@@ -1025,6 +1033,13 @@ class Techs extends ArmsModel
 		return $this->hasMany(MaintenanceReqs::class, ['id' => 'reqs_id'])
 			->viaTable('maintenance_reqs_in_techs', ['techs_id' => 'id']);
 	}
+	
+	public function getMaintenanceJobs()
+	{
+		return $this->hasMany(MaintenanceJobs::class, ['id' => 'jobs_id'])
+			->viaTable('maintenance_jobs_in_techs', ['techs_id' => 'id']);
+	}
+	
 	
 	public function getEffectiveMaintenanceReqs()
 	{

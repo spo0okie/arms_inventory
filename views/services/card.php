@@ -113,8 +113,15 @@ if(!$static_view) { ?>
 			<?php if ($model->is_service && !count($model->backupReqs)) echo StripedAlertWidget::widget(['title'=>'Отсутствуют требования к резервному копированию!']); ?>
 		</div>
 		
-		<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'backupReqs']) ?>
-		<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'otherReqs']) ?>
+		<div class="row">
+			<div class="col-6">
+				<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'backupReqs']) ?>
+				<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'otherReqs']) ?>
+			</div>
+			<div class="col-6">
+				<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'maintenanceJobs']) ?>
+			</div>
+		</div>
 		
 		<div class="mb-3">
 			<?= Yii::$app->formatter->asNtext($model->description) ?>
