@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
 			</div>
 			<div>
 				<?php if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
-					echo $this->render('/scans/thumb',['model'=>$scan,'contracts_id'=>$model->id,'static_view'=>true]);
+					echo $this->render('/scans/thumb',['model'=>$scan,'static_view'=>true]);
 				?>
 			</div>
 			<?= $this->render('model',['model'=>$model]) ?>
