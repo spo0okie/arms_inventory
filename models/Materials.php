@@ -154,6 +154,7 @@ class Materials extends ArmsModel
 				'hint' => 'Суммарная за все, не удельная'
 			],
 			'charge' => 'НДС',
+			'materials_usages_ids' => 'Расход'
 		];
 	}
 

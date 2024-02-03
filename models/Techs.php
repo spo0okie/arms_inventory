@@ -388,6 +388,8 @@ class Techs extends ArmsModel
 				'hint' => 'Работу каких сервисов обеспечивает это оборудование',
 				'indexHint' => '{same}<br />'.QueryHelper::$stringSearchHint,
 			],
+
+			'materials_usages_ids' => 'Использованные материалы'
 		
 		]);
 	}

@@ -5,6 +5,7 @@ use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use app\models\HistoryModel;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\web\View;
 
@@ -26,10 +27,21 @@ $this->params['breadcrumbs'][] = ['label' => $master->name, 'url' => [$classView
 $this->params['breadcrumbs'][] = ['label' => 'История изменений'];
 
 
+$hideEmptyColumns=Yii::$app->request->get('hideEmptyColumns',true);
+
 echo DynaGridWidget::widget([
 	'id'=> Inflector::camel2id(StringHelper::className($class)).'-journal',
 	'header' => $classTitle,
 	'dataProvider' => $dataProvider,
 	'columns' => include 'columns.php',
-	'model' => $instance
+	'model' => $instance,
+	'createButton' => $hideEmptyColumns?(
+		'Показаны только колонки со значениями. '. Html::a(
+			'Показать пустые',['journal','hideEmptyColumns'=>false]+Yii::$app->request->get()
+	)):(
+		Html::a(
+			'Скрыть пустые колонки',
+			['journal','hideEmptyColumns'=>true]+Yii::$app->request->get()
+		)
+	),
 ]);
