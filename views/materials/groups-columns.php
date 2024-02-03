@@ -12,24 +12,21 @@ use yii\helpers\Url;
 /* @var $groupBy string */
 
 $renderer=$this;
+if (!isset($showTypes)) $showTypes=true; //показывать тип материалов в имени
 
 return  [
-	[
-		'attribute'=>'place',
-		'format'=>'raw',
+	'place'=>[
 		'value' => function($data) use($renderer){
 			return $renderer->render('/places/item',['model'=>$data['models'][0]->place,'full'=>true]);
 		}
 	],
-	[
-		'attribute'=>'model',
-		'format'=>'raw',
-		'value' => function($data) use($renderer,$groupBy){
+	'model'=>[
+		'value' => function($data) use($renderer,$groupBy,$showTypes){
 			if (count($data['models'])==1) {
 				//если у нас 1 материал то ссылка будет прямо на него
 				return $renderer->render('/materials/item',[
 					'model'=>$data['models'][0],
-					'name'=>$data['model']]
+					'name'=>$showTypes?$data['model']:$data['name']]
 				);
 			} else {
 				$link='/error';
@@ -44,14 +41,12 @@ return  [
 						'hide_places' => 1,
 						'hide_usages' => 1
 					]) . '">' .
-					Html::a($data['model'], $link) .
+					Html::a($showTypes?$data['model']:$data['name'], $link) .
 					'</span>';
 			}
 		}
 	],
-	[
-		'attribute'=>'rest',
-		'format'=>'raw',
+	'rest'=>[
 		'value' => function($data) use($renderer,$groupBy){
 			$rest=0;
 			$models=$data['models'];
@@ -87,8 +82,7 @@ return  [
 				'</span>';
 		}
 	],
-	[
-		'attribute'=>'count',
+	'count'=>[
 		'label'=>'Поступило',
 		'value' => function($data) use($renderer,$groupBy){
 			$count=0;

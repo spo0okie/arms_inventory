@@ -2,17 +2,21 @@
 
 namespace app\models;
 
-use Yii;
+
+use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "materials_types".
  *
  * @property int $id id
+ * @property int $scans_id титульная картинка
  * @property string $code Код
  * @property string $name Название
  * @property string $units Ед. изм
  * @property string $comment Комментарий
  * @property Materials[] $materials
+ * @property Scans[] $scans
  */
 class MaterialsTypes extends ArmsModel
 {
@@ -74,7 +78,7 @@ class MaterialsTypes extends ArmsModel
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getMaterials()
 	{
@@ -97,7 +101,22 @@ class MaterialsTypes extends ArmsModel
 			//->joinWith('place')
 			//->select(['id','name'])
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
+		return ArrayHelper::map($list, 'id', 'name');
 	}
-
+	
+	/**
+	 * Возвращает набор сканов в договоре
+	 */
+	public function getScans()
+	{
+		/** @var Scans $scans */
+		$scans=Scans::find()->where(['material_models_id' => $this->id ])->all();
+		$scans_sorted=[];
+		foreach ($scans as $scan) if($scan->id == $this->scans_id) $scans_sorted[]=$scan;
+		foreach ($scans as $scan) if($scan->id != $this->scans_id) $scans_sorted[]=$scan;
+		return $scans_sorted;
+	}
+	
+	
+	
 }

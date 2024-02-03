@@ -33,6 +33,7 @@ class TechsHistory extends HistoryModel
 		'lic_keys_ids' => LicKeys::class,
 		'lic_groups_ids' => LicGroups::class,
 		'maintenance_reqs_ids' => MaintenanceReqs::class,
+		'materials_usages_ids' => MaterialsUsages::class,
 	];
 	
 	public $journalLinks=[

@@ -2,8 +2,6 @@
 
 namespace app\models;
 
-use Yii;
-
 /**
  * This is the model class for table "materials_usages".
  *
@@ -125,7 +123,7 @@ class MaterialsUsages extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return Currency
 	 */
 	public function getCurrency()
 	{

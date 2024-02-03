@@ -15,12 +15,13 @@ use yii\web\View;
 /** @var string $class */
 
 $this->params['layout-container'] = 'container-fluid';
+/** @var ArmsModel $masterClass */
 $masterClass=get_class($master);
 /** @noinspection PhpUndefinedFieldInspection */
 $classTitle=$class::$title;
 $classView=Inflector::camel2id(StringHelper::className($masterClass));
 
-$this->params['breadcrumbs'][] = ['label' => $classTitle, 'url' => [$classView.'/index']];
+$this->params['breadcrumbs'][] = ['label' => $masterClass::$titles, 'url' => [$classView.'/index']];
 $this->params['breadcrumbs'][] = ['label' => $master->name, 'url' => [$classView.'/view','id'=>$master->id]];
 $this->params['breadcrumbs'][] = ['label' => 'История изменений'];
 

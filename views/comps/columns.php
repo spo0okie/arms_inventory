@@ -90,21 +90,10 @@ return [
 		'value' => function ($data) use ($manufacturers) {
 			if (is_object($data)) {
 				/** @var Comps $data */
-				return $this->render('/hwlist/shortlist',['model'=>$data->hwList,'arm_id'=>$data->arm_id]);
+				return $this->render('/hwlist/shortlist',['model'=>$data->hwList,'comp_id'=>$data->id,'vm'=>$data->ignore_hw]);
 			}
 			return null;
 		},
-		'contentOptions'=>function ($data) {
-			$render=[];
-			if (is_object($data)) {
-				foreach ($data->getHardArray() as $item)
-					$render[] = $item->getName() . ' ' . $item->getSN();
-			}
-			return [
-				'class'=>'comp_hw_col',
-				'qtip_ttip' => implode('<br />',$render)
-			];
-		}
 	],
 	'os' => [
 		'label' => 'Софт',

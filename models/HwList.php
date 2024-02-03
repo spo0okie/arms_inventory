@@ -11,6 +11,10 @@ namespace app\models;
 /*
  * Список оборудования
  */
+
+use Exception;
+use Throwable;
+
 class HwList {
 
     public $items=[];       //элементы списка оборудования
@@ -20,8 +24,8 @@ class HwList {
     /**
      * Загружет сырые данные из ОС (\app\models\Comps->raw_hw)
      * @param string $data
-     * @throws \Exception
-     * @throws \Throwable
+     * @throws Exception
+     * @throws Throwable
      */
     public function loadRaw($data)
     {
@@ -95,7 +99,7 @@ class HwList {
 
     /**
      * Добавляет элемент к списку
-     * @param \app\models\HwListItem $item
+     * @param HwListItem $item
      */
     public function add($item){
         if (strlen($item->uid)) {
@@ -121,7 +125,7 @@ class HwList {
 
     /**
      * Добавляет в список элемент, найденный в отпечатке ОС
-     * @param \app\models\HwListItem $item
+     * @param HwListItem $item
      */
     public function addFound($item){
         if ($item->globIgnored()) return; //если элемнт в списке глобального игнорирования - то игнорируем
@@ -140,7 +144,7 @@ class HwList {
 
     /**
      * Подгружает список обнаруженных элементов из другого hwList
-     * @param \app\models\HwList $list
+     * @param HwList $list
      */
     public function loadFound($list) {
         foreach ($list->items as $item) $this->addFound($item);
@@ -203,7 +207,7 @@ class HwList {
 	public function getCPUShort(){
 		$cpus=[];
 		foreach ($this->items as $item) if (!$item->hidden) {
-			if ($item->type == \app\models\HwListItem::$TYPE_CPU) $cpus[]=static::shortenCPUDescr($item->product);
+			if ($item->type == HwListItem::$TYPE_CPU) $cpus[]=static::shortenCPUDescr($item->product);
 		}
 		if (count($cpus)) return $cpus[0];
 		return '';
@@ -212,7 +216,7 @@ class HwList {
 	public function getCpuCoresCount() {
 		$cpuCount=0;
 		foreach ($this->items as $item) if (!$item->hidden) {
-			if ($item->type == \app\models\HwListItem::$TYPE_CPU) {
+			if ($item->type == HwListItem::$TYPE_CPU) {
 				$cpuCount+= $item->cores;
 			}
 		}
@@ -225,7 +229,7 @@ class HwList {
 		$cpuCount=0;
 		$cpuDescr='';
 		foreach ($this->items as $item) if (!$item->hidden) {
-			if ($item->type == \app\models\HwListItem::$TYPE_CPU) {
+			if ($item->type == HwListItem::$TYPE_CPU) {
 				$cpuDescr=static::shortenCPUDescr($item->product);
 				$cpuCount+= $item->cores;
 			}
@@ -243,7 +247,7 @@ class HwList {
 	public function getRamMb(){
 		$ram=0;
 		foreach ($this->items as $item) if (!$item->hidden) {
-			if ($item->type == \app\models\HwListItem::$TYPE_RAM) $ram+=(int)substr($item->product,0,-3);
+			if ($item->type == HwListItem::$TYPE_RAM) $ram+=(int)substr($item->product,0,-3);
 		}
     	return (int)$ram;
 	}
@@ -259,7 +263,7 @@ class HwList {
     public function getHddGb() {
 		$size=0;
 		foreach ($this->items as $item) if (!$item->hidden) {
-			if ($item->type == \app\models\HwListItem::$TYPE_HDD) {
+			if ($item->type == HwListItem::$TYPE_HDD) {
 				$words=explode(' ',$item->product);
 				$prod=$words[count($words)-1];
 				$size+=(int)substr($prod,0,-2);

@@ -4,7 +4,7 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\MaterialsUsages;
+use yii\helpers\StringHelper;
 
 /**
  * MaterialsUsagesSearch represents the model behind the search form of `app\models\MaterialsUsages`.
@@ -28,7 +28,7 @@ class MaterialsUsagesSearch extends MaterialsUsages
     public function rules()
     {
         return [
-            [['id', 'materials_id', 'arms_id', 'techs_id'], 'integer'],
+            [['id', 'materials_id', 'techs_id'], 'integer'],
             [['date', 'comment','to','place','material'], 'safe'],
         ];
     }
@@ -104,16 +104,16 @@ class MaterialsUsagesSearch extends MaterialsUsages
 
         $query
 			->andFilterWhere([
-				'or like','getplacepath(places.id)',\yii\helpers\StringHelper::explode($this->place,'|',true,true)
+				'or like','getplacepath(places.id)', StringHelper::explode($this->place,'|',true,true)
 			])->andFilterWhere([
 				'or like',
-				'CONCAT(materials_types.name, ":", materials.model)',\yii\helpers\StringHelper::explode($this->material,'|',true,true)
+				'CONCAT(materials_types.name, ":", materials.model)', StringHelper::explode($this->material,'|',true,true)
 			])->andFilterWhere([
 				'or like',
-				'CONCAT(ifnull(techs.num,"") , " ",materials_usages.comment)',\yii\helpers\StringHelper::explode($this->to,'|',true,true)
+				'CONCAT(ifnull(techs.num,"") , " ",materials_usages.comment)', StringHelper::explode($this->to,'|',true,true)
 			])->andFilterWhere([
 				'or like',
-				'materials_usages.date',\yii\helpers\StringHelper::explode($this->date,'|',true,true)
+				'materials_usages.date', StringHelper::explode($this->date,'|',true,true)
 			]);
 
         return $dataProvider;

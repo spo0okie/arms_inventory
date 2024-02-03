@@ -39,13 +39,21 @@ class HistoryModel extends ArmsModel
 	
 	/**
 	 * @var string[] Пояснение какие поля являются many2many полями и каких классов ['services_ids'=>Service::class,]
+	 * Используется для отображения журнала и инициации сохранения журналов связанных объектов
 	 */
 	public $journalMany2ManyLinks=[];
 	
 	/**
 	 * @var string[] Пояснение какие поля являются relation полями и каких классов ['services_id'=>Service::class,]
+	 * Используется только для отображения журнала
 	 */
 	public $journalLinks=[];
+	
+	/**
+	 * @var string[] Какие поля являются relation полями с обратными ссылками сюда. ['services_id'=>Service::class,]
+	 * Их будем пинать на предмет обновления записей журнала при сохранении себя
+	 */
+	public $reverseLinks=[];
 	
 	/**
 	 * @var HistoryModel предыдущая запись в журнале
@@ -193,7 +201,16 @@ class HistoryModel extends ArmsModel
 		return isset($this->journalMany2ManyLinks[$attr]);
 	}
 	
-
+	/**
+	 * Является ли поле ссылкой Many2Many
+	 * @param $attr
+	 * @return bool
+	 */
+	public function isLinkWithReverse($attr) {
+		return isset($this->reverseLinks[$attr]);
+	}
+	
+	
 	/**
 	 * Является ли поле аттрибутом который надо брать из инициатора если он передан
 	 * @param $attr
@@ -235,7 +252,11 @@ class HistoryModel extends ArmsModel
 	 */
 	public function fetchLink($attr,$id) {
 		/** @var ArmsModel $class */
-		$class=$this->journalMany2ManyLinks[$attr];
+		if (isset($this->journalMany2ManyLinks[$attr])) {
+			$class=$this->journalMany2ManyLinks[$attr];
+		} elseif (isset($this->journalLinks[$attr])) {
+			$class=$this->journalLinks[$attr];
+		}
 		return $class::findOne($id);
 	}
 	
@@ -279,7 +300,11 @@ class HistoryModel extends ArmsModel
 		//перебрать изменившиеся поля
 		foreach ($this->changedAttributes as $attribute) {
 			//выбрать из них many2many
-			if (!$this->isMany2ManyLink($attribute)) continue; //пропускаем поля "не m-2-m ссылки"
+			if (
+				!$this->isMany2ManyLink($attribute)		//пропускаем поля "не m-2-m ссылки"
+				&&
+				!$this->isLinkWithReverse($attribute)	//и не поля ссылки на объекты, которые журналируют нас
+			) continue;
 			
 			//найти какие ссылки добавились/пропали
 			//чтобы найти изменяющиеся позиции надо

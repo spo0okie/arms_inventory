@@ -2,20 +2,24 @@
 /**
  * Превью скана
  */
+
+use app\models\Scans;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Scans */
 	$model_id=$model->id;
 
-if (!isset($contracts_id)) $contracts_id=null;
+if (!isset($tile_class)) $tile_class='scans-thumb-tile';
+if (!isset($img_class)) $img_class='scans-thumb-img';
+
 if (!isset($static_view)) $static_view=false;
 ?>
-<div class="scans-thumb-tile" id="scan_thumb_tile_<?= $model_id ?>">
-    <div class="scans-thumb-img">
+<div class="<?= $tile_class ?>" id="scan_thumb_tile_<?= $model_id ?>">
+    <div class="<?= $img_class ?>">
 
         <?php if (!$model->fileExists) {
-            echo Html::img(\app\models\Scans::noThumb(),['title'=>"Ошибка: файл ".$model->shortFname." не обнаружен!"]);
+            echo Html::img(Scans::noThumb(),['title'=>"Ошибка: файл ".$model->shortFname." не обнаружен!"]);
         } else {
 	        $hint = 'Файл в формате ' . strtoupper($model->format) . '. Размер ' . $model->humanFileSize;
 	        echo Html::a(
@@ -27,8 +31,7 @@ if (!isset($static_view)) $static_view=false;
 
         if (!$static_view) { ?>
             <div class="scans-thumb-ctrls">
-                <?php // Html::a('<span class="fas fa-pencil-alt" title="Редактировать"/></a>',['scans/update','id'=>$model->id])?>
-                <span class="fas fa-trash"  title="Удалить" onclick="scansDeleteConfirm(<?= $model->id ?>)" />
+                <span class="fas fa-trash"  title="Удалить" onclick="scansDeleteConfirm(<?= $model_id ?>)"></span>
             </div>
         <?php } ?>
     </div>

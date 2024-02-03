@@ -15,6 +15,7 @@ use yii\helpers\ArrayHelper;
  * @property int $count Количество
  * @property int $type_id Тип материалов
  * @property string $model Модель
+ * @property string $typeName тип:Модель
  * @property int $places_id Помещение
  * @property string            $it_staff_id Сотрудник службы ИТ
  * @property string            $comment Комментарий
@@ -60,6 +61,7 @@ class Materials extends ArmsModel
 				'class' => LinkerBehavior::class,
 				'relations' => [
 					'contracts_ids' => 'contracts',
+					'usages_ids' => 'usages'
 				]
 			]
 		];
@@ -271,6 +273,8 @@ class Materials extends ArmsModel
 		$tokens[] = is_null($this->place)?'(Нет помещения!)':'('.$this->place->fullName.')';
 		return implode(' ',$tokens);
 	}
+	
+	public function getName(){return $this->typeName;}
 
 	/**
 	 * Имя для поиска материала

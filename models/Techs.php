@@ -476,6 +476,7 @@ class Techs extends ArmsModel
 					'lic_groups_ids' => 'licGroups',
 					'maintenance_reqs_ids' => 'maintenanceReqs',
 					'maintenance_jobs_ids' => 'maintenanceJobs',
+					'materials_usages_ids' => 'materialsUsages',
 				]
 			]
 		];
