@@ -34,7 +34,9 @@ return [
 	
 	'networkDescribeSegment'=>'auto',
 	'networkInlineDescriptionLimit'=>20,
+	
 	'departments.enable'=>false,
+	
 	'arms.docs'=>[
 		'passport'=>['Паспорт рабочего места','icon'=>'<i class="fas fa-passport"></i>'],
 		'act'=>['Акт приема-передачи','icon'=>'<i class="fas fa-file-contract"></i>'],
@@ -49,5 +51,8 @@ return [
 	'docs.name.instruction'=>false,
 	
 	'user.name_as_uid.enable'=>false,	//запрещаем использование полного ФИО как ключ для переназначения логина
+	
+	'services.no_backup.warn'=>true,	//ругаться если у сервиса не объявлены требования на бэкап
+	
 	'sms.enable'=>false,
 ];

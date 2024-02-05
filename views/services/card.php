@@ -110,7 +110,19 @@ if(!$static_view) { ?>
 			if (!empty($model->providingScheduleRecursive)) echo '<br />';
 			echo '<strong>Время поддержки:</strong> '.$this->render('/schedules/item',['model'=>$model->supportScheduleRecursive]);
 		} ?>
-			<?php if ($model->is_service && !count($model->backupReqs)) echo StripedAlertWidget::widget(['title'=>'Отсутствуют требования к резервному копированию!']); ?>
+			<?php
+			if (
+				$model->is_service //не услуга (а сервис)
+				&& (
+					count($model->comps)	//не чисто организационный узел (только для дочерних сервисов)
+					|| 						//а содержит реальные серверы или оборудование
+					count($model->techs)	//т.е. есть что-то что крутится на серверах/железе
+				)
+				&&
+				!count($model->backupReqs)	//и никто не хочет это бэкапить
+				&&
+				Yii::$app->params['services.no_backup.warn']	//и можно ругаться
+			) echo StripedAlertWidget::widget(['title'=>'Отсутствуют требования к резервному копированию!']); ?>
 		</div>
 		
 		<div class="row">
