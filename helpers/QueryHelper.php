@@ -4,7 +4,6 @@
 namespace app\helpers;
 
 
-use yii\db\ActiveQuery;
 use \yii\helpers\StringHelper;
 
 class QueryHelper
@@ -146,7 +145,7 @@ class QueryHelper
 	 * вроде как разбивает строку с & или | на токены с нужным оператором
 	 * @param $string
 	 * @param $param
-	 * @param $tokenParser
+	 * @param $tokenParser string|string[] в какое правило заворачивать полученные элементы запроса
 	 * @return array
 	 */
 	public static function tokenizeString($string,$param,$tokenParser) {
