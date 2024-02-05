@@ -106,7 +106,7 @@ class ContractsSearch extends Contracts
 	    $query
 		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
 	    
-	    if (isset($this->deliveryStatus)) {
+	    if (strlen($this->deliveryStatus)) {
 			if ($this->deliveryStatus)
 				$query->andWhere('ifnull(techs_delivery,0) + ifnull(materials_delivery,0) + ifnull(lics_delivery,0)>0');
 			if (!$this->deliveryStatus)
