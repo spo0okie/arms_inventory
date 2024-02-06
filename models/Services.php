@@ -1063,10 +1063,8 @@ class Services extends ArmsModel
 		if (is_array($services) && count($services)) {
 			$persons=[];
 			$rating=[];
-			foreach ($services as $service) {
-				/**
-				 * @var $service Services
-				 */
+			/** @var $service Services */
+			foreach ($services as $service) if(!$service->archived) {
 				
 				$responsible=null;
 				//сначала проверяем ответственного за инфраструктуру
@@ -1094,10 +1092,8 @@ class Services extends ArmsModel
 	public static function supportTeamFrom($services) {
 		$team=[];
 		if (is_array($services) && count($services)) {
-			foreach ($services as $service) {
-				/**
-				 * @var $service Services
-				 */
+			/** @var $service Services */
+			foreach ($services as $service) if(!$service->archived) {
 				
 				$responsible=null;
 				//сначала проверяем ответственного за инфраструктуру
