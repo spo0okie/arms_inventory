@@ -112,7 +112,18 @@ return [
 	'updated_at',
 	'comment',
 	'effectiveMaintenanceReqs' => [
-		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'effectiveMaintenanceReqs','title'=>false,'item_options'=>['static_view'=>true]]);},
+		'value' => function ($data) {
+			/** @var $data Comps */
+			return ModelFieldWidget::widget([
+				'model'=>$data,
+				'field'=>'effectiveMaintenanceReqs',
+				'title'=>false,
+				'item_options'=>[
+					'static_view'=>true,
+					'jobs'=>$data->maintenanceJobs
+				],
+			]);
+		},
 	],
 	'maintenanceJobs' => [
 		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'maintenanceJobs','title'=>false,'item_options'=>['static_view'=>true]]);},

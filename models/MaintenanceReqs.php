@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\helpers\ArrayHelper;
 use voskobovich\linker\LinkerBehavior;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
@@ -20,6 +19,9 @@ use yii\db\ActiveQuery;
  * @property string|null $updated_at
  * @property string|null $updated_by
  * @property string sname
+ * @property bool archived
+ * @property bool absorbed
+ * @property bool archivedOrAbsorbed
  *
  * @property Users $changedBy
  * @property Comps[] $comps
@@ -222,7 +224,7 @@ class MaintenanceReqs extends ArmsModel
 	/**
 	 * Какими требованиями удовлетворяется
 	 * слово included не особо поясняет что это значит, а satisfied вполне
-	 * @return MaintenanceReqs[]|array
+	 * @return MaintenanceReqs[]
 	 */
     public function satisfiedBy()
 	{
@@ -230,6 +232,18 @@ class MaintenanceReqs extends ArmsModel
 		// но и таблиц many-2-many ссылок
 		$included=$this->includedBy;
 		return is_array($included)?$included:[];
+	}
+	
+	public function isSatisfiedByReq(MaintenanceReqs $req) {
+    	//нужно проверить что $req входит в массив непосредственно удовлетворяемых требований
+		//либо удовлетворяется ими
+		foreach ($this->satisfiedBy() as $item) {
+			if ($item->id == $req->id) return true;		//если удовлетворяет непосредственно
+			if ($item->isSatisfiedByReq($req)) return true;	//или рекурсивно
+		}
+		//TODO: Обработать состояние AllItemsLoaded, которое должно включать подгрузку не только самой таблицы,
+		// но и таблиц many-2-many ссылок
+		return false;
 	}
 	
 	/**
@@ -261,18 +275,20 @@ class MaintenanceReqs extends ArmsModel
 	{
 		//проверяем всех
 		foreach ($reqs as $req) {
-			$includes=ArrayHelper::getArrayField($req->includes,'id');
 			//со всеми
 			foreach ($reqs as $test) {
 				//если элемент входит в набор удовлетворяемых требований - помечаем его
-				if (array_search($test->id,$includes)!==false) $test->absorbed=true;
+				if ($req->isSatisfiedByReq($test)) {
+					$req->absorbed=$test->id;
+					break;
+				}
 			}
 		}
 		return $reqs;
 	}
 	
-	public function getArchived() {
-    	return $this->absorbed;
+	public function getArchivedOrAbsorbed() {
+    	return $this->absorbed || $this->archived;
 	}
 	
 	public function reverseLinks()

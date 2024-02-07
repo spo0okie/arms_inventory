@@ -155,7 +155,7 @@ return [
 				'model'=>$data,
 				'field'=>'maintenanceReqsRecursive',
 				'title'=>false,
-				'item_options'=>['static_view'=>true,'jobs'=>$data->maintenanceJobs]
+				//'item_options'=>['static_view'=>true,'jobs'=>$data->maintenanceJobs] //удовлетворение самих сервисов не интересно
 			]);
 		},
 	],

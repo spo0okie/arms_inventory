@@ -116,6 +116,8 @@ use yii\db\ActiveQuery;
  * @property MaintenanceReqs $maintenanceReqs
  * @property MaintenanceReqs $effectiveMaintenanceReqs
  
+ * @property MaintenanceJobs $maintenanceJobs
+ 
  */
 
 class Techs extends ArmsModel

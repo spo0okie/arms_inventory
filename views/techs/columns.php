@@ -185,7 +185,18 @@ return [
 		//'value' => function ($data) use ($searchModel){return $data->comment.' '.$searchModel->model_id;}
 	],
 	'effectiveMaintenanceReqs' => [
-		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'effectiveMaintenanceReqs','title'=>false,'item_options'=>['static_view'=>true]]);},
+		'value' => function ($data) {
+			/** @var $data Techs */
+			return ModelFieldWidget::widget([
+				'model'=>$data,
+				'field'=>'effectiveMaintenanceReqs',
+				'title'=>false,
+				'item_options'=>[
+					'static_view'=>true,
+					'jobs'=>$data->maintenanceJobs
+				],
+			]);
+		},
 	],
 	'maintenanceJobs' => [
 		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'maintenanceJobs','title'=>false,'item_options'=>['static_view'=>true]]);},

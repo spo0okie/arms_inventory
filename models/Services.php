@@ -768,7 +768,10 @@ class Services extends ArmsModel
 	
 	public function getMaintenanceReqsRecursive()
 	{
-		return $this->findRecursiveAttr('maintenanceReqs','maintenanceReqsRecursive','parentService', []);
+		if (isset($this->attrsCache['maintenanceReqsRecursive'])) return $this->attrsCache['maintenanceReqsRecursive'];
+		return $this->attrsCache['maintenanceReqsRecursive']=MaintenanceReqs::filterEffective(
+			$this->findRecursiveAttr('maintenanceReqs','maintenanceReqsRecursive','parentService', [])
+		);
 	}
 	
 	public function getBackupReqs()

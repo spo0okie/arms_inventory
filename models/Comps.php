@@ -71,6 +71,7 @@ use yii\db\StaleObjectException;
  * @property LicKeys[]      $licKeys
  * @property Soft[]         $soft
  * @property MaintenanceReqs $maintenanceReqs
+ * @property MaintenanceJobs $maintenanceJobs
  * @property MaintenanceReqs $effectiveMaintenanceReqs
  */
 class Comps extends ArmsModel

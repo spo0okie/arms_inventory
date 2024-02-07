@@ -16,7 +16,9 @@ $ttip=['maintenance-reqs/ttip','id'=>$model->id];
 if (!empty($model)) {
 	if (!isset($name)) $name=$model->name;
 	
-	if (isset($jobs) && !$model->archived) {	//архивные не проверяем
+	if ($model->absorbed) $ttip['absorbedBy']=$model->absorbed;
+	
+	if (isset($jobs) && !$model->archived && !$model->absorbed) {	//архивные и поглощенные не проверяем
 		$satisfied=false;
 		foreach ($jobs as $job) if ($job->satisfiesReq($model)) {
 			$satisfied=true;
@@ -28,6 +30,7 @@ if (!empty($model)) {
 	echo ItemObjectWidget::widget([
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
+		'archivedProperty'=>'archivedOrAbsorbed',
 		'link'=> LinkObjectWidget::widget([
 			'model'=>$model,
 			'modal'=>true,

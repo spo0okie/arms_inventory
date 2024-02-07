@@ -164,13 +164,10 @@ $vmRes=[
 		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'maintenanceJobs','title'=>false,'item_options'=>['static_view'=>true]]);},
 	],
 	'effectiveMaintenanceReqs'=>[
-		'value' =>  function ($data) {
-			return ModelFieldWidget::widget([
-				'model'=>$data,
-				'field'=>'effectiveMaintenanceReqs',
-				'title'=>false,
-				'item_options'=>['static_view'=>true],
-			]);
+		'value' => function ($data) use ($compColumns,$techsColumns) {
+			if (get_class($data)== Comps::class) return $compColumns['effectiveMaintenanceReqs']['value']($data);
+			if (get_class($data)== Techs::class) return $techsColumns['effectiveMaintenanceReqs']['value']($data);
+			return 'Class error: '.get_class($data);
 		}
 	],
 
