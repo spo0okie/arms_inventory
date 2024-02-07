@@ -100,6 +100,7 @@ use yii\db\ActiveQuery;
  * @property MaintenanceReqs $maintenanceReqsRecursive
  * @property MaintenanceReqs $backupReqs
  * @property MaintenanceReqs $otherReqs
+ * @property MaintenanceJobs $maintenanceJobs
  */
 class Services extends ArmsModel
 {
@@ -339,7 +340,7 @@ class Services extends ArmsModel
 				MaintenanceReqs::$titles,
 				'hint'=>'Какие требования предъявляет сервис по резервному копированию,'
 					.'<br>переиндексации, обновлению, перезагрузкам и т.п.',
-				'indexLabel'=>'Обслуживание',
+				'indexLabel'=>'Треб. обслуживание',
 				'indexHint'=>'{same}'
 			],
 			'maintenanceReqs'=>['alias'=>'maintenance_reqs_ids'],

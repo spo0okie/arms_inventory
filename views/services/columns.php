@@ -149,7 +149,15 @@ return [
 		'value' => function ($data) {return $this->render('/schedules/item',['model'=>$data->supportScheduleRecursive,'static_view'=>true,'empty'=>'']);},
 	],
 	'maintenanceReqs' => [
-		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'maintenanceReqsRecursive','title'=>false,'item_options'=>['static_view'=>true]]);},
+		'value' => function ($data) {
+			/** @var $data Services */
+			return ModelFieldWidget::widget([
+				'model'=>$data,
+				'field'=>'maintenanceReqsRecursive',
+				'title'=>false,
+				'item_options'=>['static_view'=>true,'jobs'=>$data->maintenanceJobs]
+			]);
+		},
 	],
 	'maintenanceJobs' => [
 		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'maintenanceJobs','title'=>false,'item_options'=>['static_view'=>true]]);},

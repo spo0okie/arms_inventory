@@ -15,13 +15,13 @@ if (!empty($model)) {
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
 		'link'=> LinkObjectWidget::widget([
-		'model'=>$model,
-		'modal'=>true,
-		'noDelete'=>true,
-		'static'=>$static_view,
-		'name'=>$name,
-		//'nameSuffix'=>'',
-		'noSpaces'=>true
-	]),
-]);
+			'model'=>$model,
+			'modal'=>true,
+			'noDelete'=>true,
+			'static'=>$static_view,
+			'name'=>$name,
+			//'nameSuffix'=>'',
+			'noSpaces'=>true
+		]),
+	]);
 } else echo "Отсутствует";

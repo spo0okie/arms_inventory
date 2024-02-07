@@ -127,7 +127,7 @@ if(!$static_view) { ?>
 		
 		<div class="row">
 			<div class="col-6">
-				<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'backupReqs']) ?>
+				<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'backupReqs','item_options'=>['jobs'=>$model->maintenanceJobs]]) ?>
 				<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'otherReqs']) ?>
 			</div>
 			<div class="col-6">

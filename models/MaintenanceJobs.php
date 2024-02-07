@@ -208,6 +208,24 @@ public static $titles='Регламентное обслуживание';
 		return null;
 	}
 	
+	/**
+	 * Удовлетворяет ли эта операция обслуживания требованию из аргумента
+	 * @param MaintenanceReqs $req
+	 * @return false
+	 */
+	public function satisfiesReq(MaintenanceReqs $req)
+	{
+		if (!is_array($this->reqs)) return false;	//если она не удовлетворяет ничему, то и искомому тоже не удовлетворяет
+		foreach ($this->reqs as $test) {			//если это требование перечислено явно в этой операции то успех
+			if ($req->id == $test->id) return true;
+		}
+		//явно не перечислено, тогда поищем может это требование удовлетворяется другими требованиями и они перечислены явно
+		foreach ($req->satisfiedBy() as $parent) {
+			if ($this->satisfiesReq($parent)) return true;
+		}
+		return false;
+	}
+	
 	
 	public function reverseLinks()
 	{

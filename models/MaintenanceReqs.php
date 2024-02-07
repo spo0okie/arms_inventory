@@ -220,6 +220,19 @@ class MaintenanceReqs extends ArmsModel
     }
 	
 	/**
+	 * Какими требованиями удовлетворяется
+	 * слово included не особо поясняет что это значит, а satisfied вполне
+	 * @return MaintenanceReqs[]|array
+	 */
+    public function satisfiedBy()
+	{
+		//TODO: Обработать состояние AllItemsLoaded, которое должно включать подгрузку не только самой таблицы,
+		// но и таблиц many-2-many ссылок
+		$included=$this->includedBy;
+		return is_array($included)?$included:[];
+	}
+	
+	/**
 	 * @return ActiveQuery
 	 * @throws InvalidConfigException
 	 */
