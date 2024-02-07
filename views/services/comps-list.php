@@ -16,7 +16,7 @@ use kartik\editable\Editable;
 //эта страничка вызывается из другой, где есть этот виджет,
 //поэтому хак со сменой поведения архивных элементов по умолчанию делаем руками, а не автоматом
 ShowArchivedWidget::$defaultValue=false;
-$static_view=true;
+$static_view=false;
 $compColumns=include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php';
 $techsColumns=include $_SERVER['DOCUMENT_ROOT'].'/views/techs/columns.php';
 
@@ -82,6 +82,10 @@ $vmRes=[
 			if (get_class($data)== Comps::class) return $compColumns['name']['value']($data);
 			if (get_class($data)== Techs::class) return $techsColumns['model']['value']($data);
 			return 'Class error: '.get_class($data);
+		},
+		'contentOptions'=>function ($data) use ($compColumns) {
+			if (get_class($data)== Comps::class) return $compColumns['name']['contentOptions']($data);
+			return [];
 		}
 	],
 	'ip'=>[
