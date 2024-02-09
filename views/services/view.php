@@ -16,6 +16,9 @@ Url::remember();
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => Services::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+
+$this->params['layout-container']='fluid mx-5';
+
 YiiAsset::register($this);
 DynaGridWidgetAsset::register($this);
 
