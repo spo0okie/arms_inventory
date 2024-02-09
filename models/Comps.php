@@ -234,6 +234,11 @@ class Comps extends ArmsModel
 				'indexHint'=>'{same}'
 			],
 			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
+			'lics' => [
+				'Лицензии',
+				'hint' => 'Все привязанные лицензии:<br>Типы лицензий, закупки, ключи',
+				'indexHint' => '{same}',
+			]
 
 		]);
     }

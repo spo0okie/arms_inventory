@@ -391,8 +391,12 @@ class Techs extends ArmsModel
 				'indexHint' => '{same}<br />'.QueryHelper::$stringSearchHint,
 			],
 
-			'materials_usages_ids' => 'Использованные материалы'
-		
+			'materials_usages_ids' => 'Использованные материалы',
+			'lics' => [
+				'Лицензии',
+				'hint' => 'Все привязанные лицензии:<br>Типы лицензий, закупки, ключи',
+				'indexHint' => '{same}',
+			]
 		]);
 	}
 	

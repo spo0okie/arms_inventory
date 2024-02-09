@@ -4,6 +4,7 @@
 /* @var $searchModel app\models\TechsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
+use app\components\ExpandableCardWidget;
 use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;
 use app\models\Techs;
@@ -201,5 +202,15 @@ return [
 	'maintenanceJobs' => [
 		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'maintenanceJobs','title'=>false,'item_options'=>['static_view'=>true]]);},
 	],
+	'lics' => [
+		'value'=>function ($data) use ($renderer) {
+			/** @var Techs $data */
+			$items=[];
+			foreach ($data->licItems as $item) $items[]=$renderer->render('/lic-items/item',['model'=>$item]);
+			foreach ($data->licGroups as $item) $items[]=$renderer->render('/lic-groups/item',['model'=>$item]);
+			foreach ($data->licKeys as $item) $items[]=$renderer->render('/lic-keys/item',['model'=>$item]);
+			return count($items)?ExpandableCardWidget::widget(['content'=>implode('<br>',$items),'cardClass'=>'line-br']):'';
+		},
+	]
 
 ];

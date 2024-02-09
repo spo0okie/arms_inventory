@@ -174,6 +174,13 @@ $vmRes=[
 			return 'Class error: '.get_class($data);
 		}
 	],
+	'lics'=>[
+		'value' => function ($data) use ($compColumns,$techsColumns) {
+			if (get_class($data)== Comps::class) return $compColumns['lics']['value']($data);
+			if (get_class($data)== Techs::class) return $techsColumns['lics']['value']($data);
+			return 'Class error: '.get_class($data);
+		}
+	],
 
 ];
 
