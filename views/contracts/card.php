@@ -27,7 +27,11 @@ if (!isset($static_view)) $static_view=false;
 	]) ?>
 </h1>
 
-<h4>От: <?= $model->datePart ?><?= $this->render('item-state',compact('model'))?></h4>
+<h4>От: <?= $model->datePart ?>
+	
+	<?= $model->pay_id?(' // '.Yii::$app->params['docs.pay_id.name'].':'.$model->pay_id):'' ?>
+	
+	<?= $this->render('item-state',compact('model'))?></h4>
 
 
 <?php if ($model->total) { ?>
