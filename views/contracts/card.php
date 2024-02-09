@@ -16,16 +16,16 @@ $model_id=$model->id;
 if (!isset($static_view)) $static_view=false;
 
 ?>
-<span class="float-end text-end">
-	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
-</span>
-<h1>
-    <?= LinkObjectWidget::widget([
-		'model'=>$model,
-		'confirmMessage' => 'Действительно удалить этот документ?',
-		'undeletableMessage'=>'Нельзя удалить этот документ, т.к. есть привязанные к нему объекты',
-	]) ?>
-</h1>
+<div class="d-flex flex-wrap flex-row-reverse">
+	<div class="small opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></div>
+	<div class="flex-fill"><h1>
+		<?= LinkObjectWidget::widget([
+			'model'=>$model,
+			'confirmMessage' => 'Действительно удалить этот документ?',
+			'undeletableMessage'=>'Нельзя удалить этот документ, т.к. есть привязанные к нему объекты',
+		]) ?>
+	</h1></div>
+</div>
 
 <h4>От: <?= $model->datePart ?>
 	
