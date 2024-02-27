@@ -2,9 +2,8 @@
 
 namespace app\models;
 
-use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\SchedulesEntries;
+use yii\helpers\StringHelper;
 
 /**
  * SchedulesEntriesSearch represents the model behind the search form of `\app\models\SchedulesEntries`.
@@ -62,15 +61,14 @@ class SchedulesEntriesSearch extends SchedulesEntries
         $query->andFilterWhere([
             'id' => $this->id,
             'schedule_id' => $this->schedule_id,
-            'created_at' => $this->created_at,
         ]);
 
         $query->andFilterWhere(['or',
 				['like', 'date', $this->date],
 				['like', 'date_end', $this->date]
 			])
-            ->andFilterWhere(['or like', 'schedule', \yii\helpers\StringHelper::explode($this->schedule,'|',true,true)])
-            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
+            ->andFilterWhere(['or like', 'schedule', StringHelper::explode($this->schedule,'|',true,true)])
+            ->andFilterWhere(['or like', 'comment', StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }

@@ -2,9 +2,10 @@
 
 namespace app\models;
 
-use Yii;
+use app\models\traits\AcesModelCalcFieldsTrait;
+use voskobovich\linker\LinkerBehavior;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\web\User;
 
 /**
  * This is the model class for table "aces".
@@ -31,6 +32,7 @@ use yii\web\User;
  */
 class Aces extends ArmsModel
 {
+	use AcesModelCalcFieldsTrait;
 	
 	public static $title='доступ';
 	public static $titles='доступы';
@@ -47,14 +49,14 @@ class Aces extends ArmsModel
 	
 	
 	/**
-	 * В списке поведений прикручиваем many-to-many contracts
+	 * В списке поведений прикручиваем many-to-many ссылки
 	 * @return array
 	 */
 	public function behaviors()
 	{
 		return [
 			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'class' => LinkerBehavior::class,
 				'relations' => [
 					'users_ids' => 'users',
 					'comps_ids' => 'comps',
@@ -76,11 +78,11 @@ class Aces extends ArmsModel
 			[['comps_ids','users_ids','access_types_ids','netIps_ids'], 'each', 'rule'=>['integer']],
             [['ips', 'notepad'], 'string'],
             [['comment'], 'string', 'max' => 255],
-			['ips', function ($attribute, $params, $validator) {
-				\app\models\NetIps::validateInput($this,$attribute);
+			['ips', function ($attribute) {
+				NetIps::validateInput($this,$attribute);
 			}],
 			['ips', 'filter', 'filter' => function ($value) {
-				return \app\models\NetIps::filterInput($value);
+				return NetIps::filterInput($value);
 			}],
         ];
     }
@@ -94,18 +96,18 @@ class Aces extends ArmsModel
 			'id' => 'ID',
 			'acls_id' => 'ACL',
 			'ips' => [
-				\app\models\NetIps::$titles,
+				NetIps::$titles,
 				'hint' => 'IP адреса с которых разрешается доступ<br>'.
-					\app\models\NetIps::$inputHint
+					NetIps::$inputHint
 			],
 			'comps_ids' => [
 				'Компьютеры',
 				'hint' => 'Сетевые имена компьютеров с которых разрешается доступ'
 			],
-			'access_types_ids' => \app\models\AccessTypes::$titles,
+			'access_types_ids' => AccessTypes::$titles,
 			'users_ids' => [
-				\app\models\Users::$titles,
-				'hint' => \app\models\Users::$titles.', которым предоставляется доступ<br>'.
+				Users::$titles,
+				'hint' => Users::$titles.', которым предоставляется доступ<br>'.
 					'Сотрудников других организаций можно также добавить в '.Html::a('список пользователей',['/users/index'])
 			],
 			'comment' => [
@@ -119,17 +121,6 @@ class Aces extends ArmsModel
 		];
 	}
 	
-	
-	/**
-	 * Name for search
-	 * @return string
-	 */
-	public function getSname()
-	{
-		return strlen($this->comment)?
-			$this->comment:
-			'ACE#'.$this->id;
-	}
 	
 	
 	public function getAcl()
@@ -173,54 +164,11 @@ class Aces extends ArmsModel
 	 */
 	public function getAccessTypes()
 	{
-		return $this->hasMany(AccessTypes::className(), ['id' => 'access_types_id'])
+		return $this->hasMany(AccessTypes::class, ['id' => 'access_types_id'])
 			->viaTable('{{%access_in_aces}}', ['aces_id' => 'id']);
 	}
 	
-	/**
-	 * Типы доступа
-	 */
-	public function getAccessTypesUniq()
-	{
-		if (!is_array($this->accessTypes)) return[];
-		$types=[];
-		foreach ($this->accessTypes as $type)
-			$types[$type->id]=$type;
-		return $types;
-	}
-	
-	/**
-	 * Набор пользователей
-	 */
-	public function getUsersUniq()
-	{
-		if (!is_array($this->users)) return[];
-		$users=[];
-		foreach ($this->users as $user)
-			$users[$user->id]=$user;
-		return $users;
-	}
-	
-	/**
-	 * Набор пользователей
-	 */
-	public function getDepartments()
-	{
-		if (!is_array($this->usersUniq)) return[];
-		$departments=[];
-		foreach ($this->usersUniq as $user)
-			if (is_object($department=$user->orgStruct))
-				$departments[$department->id]=$department;
-		return $departments;
-	}
-	
-	public function getPartners() {
-		if (!count($this->users_ids)) return [];
-		$partners=[];
-		foreach ($this->users as $user)
-			$partners[$user->org_id]=$user->org;
-		return $partners;
-	}
+
 	
 	/**
 	 * Возвращает список всех элементов
@@ -232,22 +180,9 @@ class Aces extends ArmsModel
             //->select(['id','name'])
 			->orderBy(['name'])
             ->all();
-        return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+        return ArrayHelper::map($list, 'id', 'sname');
     }
-	
-	public function hasIpAccess(){
-		foreach ($this->accessTypesUniq as $accessType) {
-			if ($accessType->isIpRecursive) return true;
-		}
-		return false;
-	}
-	
-	public function hasPhoneAccess(){
-		foreach ($this->accessTypesUniq as $accessType) {
-			if ($accessType->isTelephonyRecursive) return true;
-		}
-		return false;
-	}
+
 	
 	/**
 	 * @inheritdoc

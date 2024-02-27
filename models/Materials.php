@@ -19,7 +19,7 @@ use yii\helpers\ArrayHelper;
  * @property int $places_id Помещение
  * @property string            $it_staff_id Сотрудник службы ИТ
  * @property string            $comment Комментарий
- * @property string            $history Записная кинжка
+ * @property string            $history Записная книжка
  * @property float             $cost Стоимость пачки материалов
  * @property float             $charge НДС
  * @property array             $contracts_ids массив ссылок на документы
@@ -32,7 +32,7 @@ use yii\helpers\ArrayHelper;
  * @property Users             $itStaff Ответственный
  * @property Materials         $parent Источник
  * @property MaterialsTypes    $type Категория
- * @property Materials[]       $childs Источник
+ * @property Materials[]       $children Источник
  * @property MaterialsUsages[] $usages Расходы
  * @property Contracts[]       $contracts Документы
  */
@@ -51,7 +51,7 @@ class Materials extends ArmsModel
     }
 
 	/**
-	 * В списке поведений прикручиваем many-to-many contracts
+	 * В списке поведений прикручиваем many-to-many ссылки
 	 * @return array
 	 */
 	public function behaviors()
@@ -61,7 +61,8 @@ class Materials extends ArmsModel
 				'class' => LinkerBehavior::class,
 				'relations' => [
 					'contracts_ids' => 'contracts',
-					'usages_ids' => 'usages'
+					'usages_ids' => 'usages',			//one-2-many
+					'children_ids' => 'children',		//one-2-many
 				]
 			]
 		];
@@ -126,7 +127,7 @@ class Materials extends ArmsModel
 			'type'=>['alias'=>'type_id'],
 			'model' => [
 				'Наименование',
-				'hint' => 'Желательно использовать обобщающее наименование из уже использованных для возможности группировки и чтобы не плодить лишнюю номенклатуру. Точное наименование модели можно вписать в коментарий',
+				'hint' => 'Желательно использовать обобщающее наименование из уже использованных для возможности группировки и чтобы не плодить лишнюю номенклатуру. Точное наименование модели можно вписать в комментарий',
 			],
 			'places_id' => [
 				'Помещение',
@@ -189,7 +190,7 @@ class Materials extends ArmsModel
 	/**
 	 * @return ActiveQuery
 	 */
-	public function getChilds()
+	public function getChildren()
 	{
 		return $this->hasMany(Materials::class, ['parent_id' => 'id'])->from(['materials_children'=>Materials::tableName()]);
 	}
@@ -209,7 +210,7 @@ class Materials extends ArmsModel
 	public function getUsed() {
 		//на этом этапе еще не реализованы списания, поэтому учитываем только перемещения
 		$sum=0;
-		foreach ($this->childs as $child) $sum+=$child->count;
+		foreach ($this->children as $child) $sum+=$child->count;
 		foreach ($this->usages as $usage) $sum+=$usage->count;
 		return $sum;
 	}
@@ -298,7 +299,7 @@ class Materials extends ArmsModel
 	{
 		return [
 			$this->usages,
-			'Перемещения'=>$this->childs,
+			'Перемещения'=>$this->children,
 		];
 	}
 	

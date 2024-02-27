@@ -1,7 +1,9 @@
 <?php
 
+use app\components\HistoryWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
@@ -27,7 +29,7 @@ echo Html::a('Добавить период предоставления/отз�
 echo GridView::widget([
 	'dataProvider' => $daysDataProvider,
 	'filterModel' => $daysSearchModel,
-	'rowOptions'=>function($model, $key, $index, $table) {return [
+	'rowOptions'=>function($model) {return [
 		'class' => $model->is_work?'bg-green-striped border-2':'bg-red-striped border-2',
 	];},
 	'columns' => [
@@ -57,18 +59,25 @@ echo GridView::widget([
 		[
 			'attribute'=>'comment',
 		],
+		[
+			'attribute'=>'updated_at',
+			'format'=>'raw',
+			'value'=>function($data){
+				return HistoryWidget::widget(['model'=>$data,'prefix'=>'','showTime'=>false]);
+			},
+		],
 		
 		[
 			'class' => 'yii\grid\ActionColumn',
 			'template'=>'{update}{delete}',
-			'urlCreator'=>function ($action, $model, $key, $index, $column) {
+			'urlCreator'=>function ($action, $model) {
 				switch ($action) {
 					case 'update':
-						return \yii\helpers\Url::to(['/schedules-entries/update','id'=>$key]);
+						return Url::to(['/schedules-entries/update','id'=>$model->id]);
 					case 'delete':
-						return \yii\helpers\Url::to(['/schedules-entries/delete','id'=>$key]);
-				};
-				
+						return Url::to(['/schedules-entries/delete','id'=>$model->id]);
+				}
+				return null;
 			}
 		],
 	],

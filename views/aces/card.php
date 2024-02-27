@@ -1,5 +1,6 @@
 <?php
 
+use app\components\HistoryWidget;
 use app\helpers\ArrayHelper;
 use app\models\Aces;
 use kartik\markdown\Markdown;
@@ -106,6 +107,13 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 						'data-update-element' => '#ace_card_'.$model->id,
 						'data-update-url' => Url::to(['/aces/view','id'=>$model->id]),
 					]) ?>
+					<?=  HistoryWidget::widget([
+						'model'=>$model,
+						'showUser'=>false,
+						'showDate'=>false,
+						'empty'=>'',
+						'iconOptions'=>['class'=>'btn btn-sm text-white ace-access-buttons'],
+					])?>
 					<?=  Html::a('<span class="fas fa-trash"/>', ['aces/delete', 'id' => $model->id,'return'=>'previous'], [
 						'data' => [
 							'confirm' => 'Удалить этого участника доступа? Действие необратимо!',

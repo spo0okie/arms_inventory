@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\traits\MaterialUsagesModelCalcFieldsTrait;
+
 /**
  * This is the model class for table "materials_usages".
  *
@@ -23,6 +25,7 @@ namespace app\models;
  */
 class MaterialsUsages extends ArmsModel
 {
+	use MaterialUsagesModelCalcFieldsTrait;
 	
 	public static $title='Расход материалов';
 	public static $titles='Расход материалов';
@@ -112,45 +115,4 @@ class MaterialsUsages extends ArmsModel
 		return $this->hasOne(Techs::className(), ['id' => 'techs_id']);
 	}
 	
-	public function getCost()
-	{
-		return ($this->material->count)?$this->material->cost/$this->material->count*$this->count:null;
-	}
-	
-	public function getCharge()
-	{
-		return ($this->material->count)?$this->material->charge/$this->material->count*$this->count:null;
-	}
-	
-	/**
-	 * @return Currency
-	 */
-	public function getCurrency()
-	{
-		return $this->material->currency;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getTo()
-	{
-		$tokens=[];
-		if(!empty($this->arm)) $tokens[]=$this->arm->num;
-		if(!empty($this->tech)) $tokens[]=$this->tech->num;
-		if(strlen($this->comment)) $tokens[]=$this->comment;
-		return	implode(' ',$tokens);
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getSname()
-	{
-		return $this->material->sname.':'.
-			$this->count.
-			$this->material->type->units.
-			' -> '.
-			$this->to;
-	}
 }

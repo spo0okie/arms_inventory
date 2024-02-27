@@ -30,11 +30,11 @@ class MaintenanceJobsHistory extends HistoryModel
 	
 	public $masterClass=MaintenanceJobs::class;
 	
-	public $journalMany2ManyLinks=[
-		'services_ids'=>Services::class,
-		'comps_ids'=>Comps::class,
-		'techs_ids'=>Techs::class,
-		'reqs_ids'=>MaintenanceReqs::class,
+	public $linksSchema=[
+		'services_ids'=>[Services::class,'maintenance_jobs_ids'],
+		'comps_ids'=>[Comps::class,'maintenance_jobs_ids'],
+		'techs_ids'=>[Techs::class,'maintenance_jobs_ids'],
+		'reqs_ids'=>[MaintenanceReqs::class,'jobs_ids'],
 	];
 
     /**

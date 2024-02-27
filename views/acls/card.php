@@ -1,9 +1,9 @@
 <?php
 
+use app\components\HistoryWidget;
 use kartik\markdown\Markdown;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
@@ -19,7 +19,7 @@ if (!isset($static_view)) $static_view=false;
 				<?= $this->render('ace-cards',['model'=>$model,'static_view'=>$static_view]) ?>
 			</div>
 			<div class="col-md-3 py-2">
-				<h5 class="card-title"></span><?= $this->render('resource',['model'=>$model])?></h5>
+				<h5 class="card-title"><?= $this->render('resource',['model'=>$model])?></h5>
 				<div class="row">
 					<div class="btn-group " role="group">
 						<?php //Html::a('<span class="fas fa-plus"></span>',['aces/create','acls_id'=>$model->id],['class'=>'btn btn-primary btn-sm']) ?>
@@ -34,6 +34,13 @@ if (!isset($static_view)) $static_view=false;
 						]) ?>
 						
 						<?= Html::a('<span class="fas fa-pencil-alt"></span>',['acls/update','id'=>$model->id,'return'=>'previous'],['class'=>'btn btn-primary btn-sm']) ?>
+						<?= HistoryWidget::widget([
+							'model'=>$model,
+							'showUser'=>false,
+							'showDate'=>false,
+							'empty'=>'',
+							'iconOptions'=>['class'=>'btn btn-sm btn-primary'],
+						])?>
 						<?= Html::a('<span class="fas fa-trash"/>', ['acls/delete', 'id' => $model->id], [
 							'data' => [
 								'confirm' => 'Удалить этот элемент? Действие необратимо',

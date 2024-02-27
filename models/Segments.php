@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use voskobovich\linker\LinkerBehavior;
 use yii\db\ActiveQuery;
 
 /**
@@ -42,6 +43,21 @@ class Segments extends ArmsModel
         ];
     }
 	
+    /**
+	 * В списке поведений прикручиваем many-to-many ссылки
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => LinkerBehavior::class,
+				'relations' => [
+					'services_ids' => 'services',		//one-2-many
+				]
+			]
+		];
+	}
 	/**
 	 * {@inheritdoc}
 	 */

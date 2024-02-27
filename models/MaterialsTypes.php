@@ -3,6 +3,7 @@
 namespace app\models;
 
 
+use voskobovich\linker\LinkerBehavior;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
@@ -44,6 +45,22 @@ class MaterialsTypes extends ArmsModel
             [['units'], 'string', 'max' => 16],
         ];
     }
+    
+	/**
+	 * В списке поведений прикручиваем many-to-many ссылки
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => LinkerBehavior::class,
+				'relations' => [
+					'materials_ids' => 'materials',		//one-2-many
+				]
+			]
+		];
+	}
 
 	/**
 	 * {@inheritdoc}

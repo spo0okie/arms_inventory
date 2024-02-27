@@ -6,6 +6,7 @@ use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
+use app\models\traits\TechsModelCalcFieldsTrait;
 use voskobovich\linker\LinkerBehavior;
 use Yii;
 use yii\db\ActiveQuery;
@@ -122,6 +123,8 @@ use yii\db\ActiveQuery;
 
 class Techs extends ArmsModel
 {
+	use TechsModelCalcFieldsTrait;	//различные вычисляемые поля
+	
 	public $renderedInFrontRack=[];	//позиции в передней корзине где уже отрендерилось
 	public $renderedInBackRack=[];	//тоже самое в задней корзине
 	
@@ -484,7 +487,10 @@ class Techs extends ArmsModel
 					'lic_groups_ids' => 'licGroups',
 					'maintenance_reqs_ids' => 'maintenanceReqs',
 					'maintenance_jobs_ids' => 'maintenanceJobs',
-					'materials_usages_ids' => 'materialsUsages',
+					'acls_ids' => 'acls', //one-2-many
+					'materials_usages_ids' => 'materialsUsages', //one-2-many
+					'arm_techs_ids' => 'armTechs', 				 //one-2-many
+					'installed_techs_ids' => 'installedTechs', 	 //one-2-many
 				]
 			]
 		];
@@ -768,33 +774,6 @@ class Techs extends ArmsModel
 		return $this->compsServices_cache;
 	}
 	
-	/**
-	 * @return Users
-	 */
-	public function getResponsible()
-	{
-		if (is_object($user=Services::responsibleFrom($this->services))) return $user;
-		
-		return $this->itStaff;
-	}
-	
-	/**
-	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
-	 * @return Users[]
-	 * @noinspection PhpUnused
-	 */
-	public function getSupportTeam()
-	{
-		$team=Services::supportTeamFrom($this->services);
-		//if (is_object($this->user)) $team[$this->user->id]=$this->user;
-		
-		//убираем из команды ответственного за ОС
-		if (is_object($responsible=$this->responsible)) {
-			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
-		}
-		
-		return array_values($team);
-	}
 	
 	
 	/**
@@ -810,20 +789,6 @@ class Techs extends ArmsModel
 		return $scans_sorted;
 	}
 	
-	/**
-	 * Возвращает набор сканов в договоре
-	 */
-	public function getPreview()
-	{
-		//ищем собственную картинку
-		if ($this->scans_id && is_object($scan=Scans::find()->where(['id' => $this->scans_id ])->one())) return $scan;
-
-		//ищем картинку от модели
-		if (is_object($this->model)) return $this->model->preview;
-
-		//сдаемся
-		return null;
-	}
 	
 	/**
 	 * @return ActiveQuery
@@ -951,19 +916,6 @@ class Techs extends ArmsModel
 		return $this->hasOne(TechModels::class, ['id' => 'model_id']);
 	}
 	
-	/**
-	 * Возвращает название поля комментарий
-	 */
-	public function getCommentLabel()
-	{
-		if (is_object($model=$this->model)) {
-			if (is_object($type=$model->type)) {
-				if (strlen($type->comment_name))
-					return $type->comment_name;
-			}
-		}
-		return $this->getAttributeLabel('comment');
-	}
 
 	/**
 	 * @return ActiveQuery
@@ -1050,24 +1002,6 @@ class Techs extends ArmsModel
 	}
 	
 	
-	public function getEffectiveMaintenanceReqs()
-	{
-		$reqs=[];
-		
-		foreach ($this->maintenanceReqs as $maintenanceReq) {
-			$reqs[$maintenanceReq->id]=$maintenanceReq;
-		}
-		
-		foreach ($this->services as $service) {
-			foreach ($service->maintenanceReqsRecursive as $maintenanceReq) {
-				$reqs[$maintenanceReq->id]=$maintenanceReq;
-			}
-		}
-
-		$reqs=ArrayHelper::findByField($reqs,'spread_techs',1);
-		
-		return MaintenanceReqs::filterEffective($reqs);
-	}
 
 	/**
 	 * @return ActiveQuery
@@ -1085,27 +1019,6 @@ class Techs extends ArmsModel
 		return $this->hasOne(Departments::class, ['id' => 'departments_id']);
 	}
 	
-	
-	public function getIsComputer() {
-		return $this->model->type->is_computer;
-	}
-	
-	public function getIsVoipPhone() {
-		return $this->model->type->is_phone;
-	}
-	
-	public function getIsUps() {
-		return $this->model->type->is_ups;
-	}
-	
-	public function getIsMonitor() {
-		return $this->model->type->is_display;
-	}
-	
-	public function getArchived()
-	{
-		return is_object($this->state)?$this->state->archived:false;
-	}
 	
 	public static function formatMacs($raw,$glue="\n") {
 		
@@ -1125,10 +1038,7 @@ class Techs extends ArmsModel
 		return implode($glue,$formatted);
 	}
 	
-	public function getFormattedMac() {
-		
-		return static::formatMacs($this->mac);
-	}
+
 	
 	
 	
@@ -1448,9 +1358,6 @@ class Techs extends ArmsModel
 		}
 	}
 	
-	public function getName() {
-		return $this->hostname?$this->hostname:$this->num;
-	}
 	
 	//имя в списке оборудования и ОС сервиса (для сортировки)
 	public function getInServicesName() {return mb_strtolower($this->model->nameWithVendor);}

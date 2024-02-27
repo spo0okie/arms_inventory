@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\components\UrlListWidget;
+use voskobovich\linker\LinkerBehavior;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
 
@@ -47,6 +48,23 @@ class Partners extends ArmsModel
     {
         return 'partners';
     }
+	
+	/**
+	 * В списке поведений прикручиваем many-to-many ссылки
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => LinkerBehavior::class,
+				'relations' => [
+					'contracts_ids' => 'contracts',
+					'services_ids' => 'services', //one-2-many
+				]
+			]
+		];
+	}
 
     /**
      * @inheritdoc

@@ -97,10 +97,10 @@ if (!isset($hide_places)) $hide_places=false;
 			<br/>
 		<?php } ?>
 	
-		<?php if (!empty($model->childs)) { ?>
+		<?php if (!empty($model->children)) { ?>
 			<h4>Частично перемещено в</h4>
 			<p>
-				<?php foreach ($model->childs as $child) { ?>
+				<?php foreach ($model->children as $child) { ?>
 					<?= $this->render('/materials/item',['model'=>$child,'from'=>true]) ?> (<?= $child->count?><?= $model->type->units?>) <br />
 				<?php } ?>
 			</p>

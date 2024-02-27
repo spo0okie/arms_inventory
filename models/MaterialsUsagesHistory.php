@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\traits\MaterialUsagesModelCalcFieldsTrait;
+
 /**
  * This is the model class for table "maintenance_reqs_history".
  *
@@ -24,20 +26,16 @@ namespace app\models;
  */
 class MaterialsUsagesHistory extends HistoryModel
 {
+	use MaterialUsagesModelCalcFieldsTrait;
 
 	public static $title='Изменения расхода материалов';
 	public static $titles='Изменения расходов материалов';
 	
 	public $masterClass=MaterialsUsages::class;
 	
-	public $journalLinks=[
-		'techs_id'=>Techs::class,
-		'materials_id'=>Materials::class,
-	];
-	
-	public $reverseLinks=[
-		'techs_id'=>Techs::class,
-		'materials_id'=>Materials::class,
+	public $linksSchema=[
+		'techs_id'=>[Techs::class,'materials_usages_ids'],
+		'materials_id'=>[Materials::class,'usages_ids'],
 	];
 
     /**

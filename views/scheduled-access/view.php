@@ -1,7 +1,12 @@
 <?php
 
-use yii\helpers\Html;
+use app\components\HistoryWidget;
+use app\components\ItemObjectWidget;
+use app\components\LinkObjectWidget;
+use app\models\Acls;
 use kartik\markdown\Markdown;
+use yii\helpers\Url;
+use yii\web\YiiAsset;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
@@ -9,9 +14,9 @@ use kartik\markdown\Markdown;
 if (!isset($static_view)) $static_view=false;
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Acls::$scheduleTitles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-\yii\helpers\Url::remember();
+Url::remember();
 
 $providingServices=$model->providingServices;
 $supportServices=$model->supportServices;
@@ -20,48 +25,46 @@ $acls=$model->acls;
 $deleteable=!count($providingServices) && !count($supportServices) ;
 
 $schedule_id=$model->id;
-\yii\web\YiiAsset::register($this);
+YiiAsset::register($this);
 ?>
 <div class="schedules-view">
-	<div class="row p-0 m-0">
-		<div class="col-md-11 p-0">
+	<div class="d-flex flex-wrap flex-row-reverse">
+		<div class="px-3 d-flex align-items-center <?= $model->isWorkTime( date('Y-m-d'),date('H:i:s'))?'bg-green-striped':'bg-red-striped' ?>">
+			<span class="text-center w-100 fw-bold"><?= $model->isWorkTime( date('Y-m-d'),date('H:i:s'))?'Доступ есть':'Доступа нет' ?></span>
+		</div>
+		<div class="small opacity-75 me-3"><?= HistoryWidget::widget(['model'=>$model]) ?></div>
+		<div class="flex-fill">
 			<h1>
-				<?= $static_view?Html::a($model->name,['scheduled-access/view','id'=>$model->id]):$model->name ?>
-				
-				<?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt" title="Изменить"></span>',['scheduled-access/update','id'=>$model->id])) ?>
-				
-				<?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash" title="Удалить"/>', ['scheduled-access/delete', 'id' => $model->id], [
-					'data' => [
-						'confirm' => 'Удалить это расписание? Это действие необратимо!',
-						'method' => 'post',
-					],
-				]); else { ?>
-					<span class="small">
-			<span class="fas fa-lock" title="Невозможно в данный момент удалить это расписание, удалить можно только пустое расписание не привязанное ни к каким объектам."></span>
-		</span>
-				<?php } ?>&nbsp;
+				<?= ItemObjectWidget::widget([
+					'model'=>$model,
+					'link'=> LinkObjectWidget::widget([
+						'model'=>$model,
+						'static'=>$static_view,
+						'hideUndeletable'=>false,
+						'controller'=>'scheduled-access', //кастомный контроллер для расписаний доступа
+					])
+				]) ?>&nbsp;
 			</h1>
 		</div>
-		<div class="col-md-1 d-flex align-items-center <?= $model->isWorkTime( date('Y-m-d'),date('H:i:s'))?'bg-green-striped':'bg-red-striped' ?>">
-			<span class=" text-center w-100 fw-bold"><?= $model->isWorkTime( date('Y-m-d'),date('H:i:s'))?'Доступ есть':'Доступа нет' ?></span>
-		</div>
 	</div>
+	
+	
 	<p><?= $model->description ?></p>
 
-		<div class="row">
-			<div class="col-md-6">
-				<?= $this->render('acl',['model'=>$model]) ?>
-			</div>
-			<div class="col-md-6">
-				<?= $this->render('exceptions',['model'=>$model]) ?>
-				<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
-				<?php if (strlen($model->history)) { ?>
-					<br /><br />
-					<h3>Записная книжка:</h3>
-					<p>
-						<?= Markdown::convert($model->history) ?>
-					</p>
-				<?php } ?>
-			</div>
+	<div class="row">
+		<div class="col-md-6">
+			<?= $this->render('acl',['model'=>$model]) ?>
 		</div>
+		<div class="col-md-6">
+			<?= $this->render('exceptions',['model'=>$model]) ?>
+			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
+			<?php if (strlen($model->history)) { ?>
+				<br /><br />
+				<h3>Записная книжка:</h3>
+				<p>
+					<?= Markdown::convert($model->history) ?>
+				</p>
+			<?php } ?>
+		</div>
+	</div>
 </div>

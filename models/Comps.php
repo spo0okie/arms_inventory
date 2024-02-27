@@ -260,6 +260,8 @@ class Comps extends ArmsModel
 					],
 					'netIps_ids' => 'netIps',
 					'services_ids' => 'services',
+					'aces_ids' => 'aces',
+					'acls_ids' => 'acls',	//one-2-many
 					'maintenance_reqs_ids' => 'maintenanceReqs',
 					'maintenance_jobs_ids' => 'maintenanceJobs',
                 ]

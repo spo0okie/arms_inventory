@@ -3,8 +3,8 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
-use yii\base\InvalidConfigException;
 use yii\db\ActiveRecord;
+use yii\helpers\Inflector;
 
 /**
  * This is the model class for table "arms".
@@ -32,28 +32,36 @@ class HistoryModel extends ArmsModel
 	 */
 	public static $initiatorFields=['updated_at','updated_by','updated_comment'];
 	
+	
 	/**
 	 * @var string[] Какие "полезные" атрибуты изменились (сюда не вписываются $ignoreFieldChanges)
 	 */
 	public $changedAttributes;
 	
 	/**
-	 * @var string[] Пояснение какие поля являются many2many полями и каких классов ['services_ids'=>Service::class,]
-	 * Используется для отображения журнала и инициации сохранения журналов связанных объектов
+	 * @var string Что будет записано в changed_attributes если объект удален
 	 */
-	public $journalMany2ManyLinks=[];
+	public const DELETED_FLAG='object_deleted';
+
+	/**
+	 * @var array[] Ссылками на объекты каких классов являются атрибуты
+	 * $linksSchema=[
+	 * 		'services_ids'=>[
+	 * 			Service::class,		//на какой класс ссылаемся
+	 * 			'acls_ids',			//если там есть обратная ссылка, то в каком аттрибуте
+	 * 		],
+	 * 		'user_id'=>[
+	 * 			Users::class,
+	 * 			'loader'=>'user'	//как загрузчик этого объекта называется в мастер-классе
+	 * 		],
+	 * ];
+	 */
+	public $linksSchema=[];
 	
 	/**
-	 * @var string[] Пояснение какие поля являются relation полями и каких классов ['services_id'=>Service::class,]
-	 * Используется только для отображения журнала
+	 * @var string[] Обратный индекс загрузчик => атрибут со ссылками (собирается при инициализации)
 	 */
-	public $journalLinks=[];
-	
-	/**
-	 * @var string[] Какие поля являются relation полями с обратными ссылками сюда. ['services_id'=>Service::class,]
-	 * Их будем пинать на предмет обновления записей журнала при сохранении себя
-	 */
-	public $reverseLinks=[];
+	protected $linksLoaders=[];
 	
 	/**
 	 * @var HistoryModel предыдущая запись в журнале
@@ -61,10 +69,10 @@ class HistoryModel extends ArmsModel
 	public $previous;
 	
 	public $masterClass;	//какого класса история
-	protected $masterClassInstance;	//инстанс мастер класса для нестатичных обращений
+	protected $masterClassInstance;	//экземпляр мастер класса для обращений к не static методам
 	
 	/**
-	 * Получить инстанс, создать при необходимости
+	 * Получить экземпляр, создать при необходимости
 	 * @return ArmsModel
 	 */
 	public function getMasterInstance() {
@@ -79,7 +87,6 @@ class HistoryModel extends ArmsModel
 		return $masterClass::findOne($id);
 	}
 	
-	
 	public function attributeData()
 	{
 		return ArrayHelper::recursiveOverride($this->masterInstance->attributeData(),[
@@ -90,16 +97,11 @@ class HistoryModel extends ArmsModel
 		]);
 	}
 	
-	
 	public function rules() {
 		$attributes=array_keys($this->attributes);
 		return [
 			//все поля кроме тех что явно для истории по умолчанию null
 			[array_diff($attributes,static::$ignoreFieldChanges),'default','value'=>null],
-			//*_ids
-			//[[preg_grep('/_ids$/',$attributes)],'safe'],
-			//*_id
-			//[[preg_grep('/_id$/',$attributes)],'integer'],
 			[$attributes,'safe'],
 		];
 	}
@@ -118,7 +120,21 @@ class HistoryModel extends ArmsModel
 	}
 	
 	/**
-	 * Упрощает поле для возможности сравнения
+	 * Найти запись в журнале для известного master_id на период времени
+	 * @param $master_id
+	 * @param $timestamp
+	 * @return array|ActiveRecord|null
+	 */
+	public static function findOnTimestamp($master_id,$timestamp) {
+		return static::find()
+			->where(['master_id'=>$master_id])
+			->andWhere(['>=','updated_at',$timestamp])
+			->orderBy(['id'=>SORT_DESC])
+			->one();
+	}
+	
+	/**
+	 * Упрощает поле для возможности сравнения (если это массив, то сортирует и превращает в строку)
 	 * @param $field
 	 * @return string
 	 */
@@ -131,7 +147,7 @@ class HistoryModel extends ArmsModel
 	}
 	
 	/**
-	 * Сравнивает значения полей предварительно упрощая их
+	 * Сравнивает значения полей (предварительно упрощая их, если это массивы)
 	 * @param $f1
 	 * @param $f2
 	 * @return bool
@@ -141,14 +157,29 @@ class HistoryModel extends ArmsModel
 	}
 	
 	/**
+	 * Признак журналирования аттрибута:
+	 * что мы ведем его историю, он у нас есть в таблице и его изменения не игнорируются
+	 * @param $attr
+	 * @return bool
+	 */
+	public function attributeIsJournaling($attr) {
+		//если у нас вообще нет такого атрибута то не журналируем
+		if (!isset($this->attributes[$attr])) return false;
+		//если мы его не можем записывать, то не журналируем
+		if (!$this->canSetProperty($attr)) return false;
+		//если его изменения нас не интересуют, то не журналируем
+		if (array_search($attr,static::$ignoreFieldChanges)!==false) return false;
+		return true;
+	}
+	
+	/**
 	 * Сравнивает запись в журнале с другой записью
 	 * @param null $record
 	 */
 	public function compareRecords($record=null) {
 		$this->changedAttributes=[];
 		foreach ($this->attributes as $attr=>$value) {
-			if (!$this->canSetProperty($attr)) continue;
-			if (array_search($attr,static::$ignoreFieldChanges)!==false) continue;
+			if (!$this->attributeIsJournaling($attr)) continue;
 			$current=$this->$attr;
 			$other=$record->$attr;
 			if (!static::compareFields($current,$other)) $this->changedAttributes[]=$attr;
@@ -159,7 +190,6 @@ class HistoryModel extends ArmsModel
 	 * Заполняет модель записи журнала значениями исходной модели
 	 * @param ArmsModel         $record
 	 * @param HistoryModel|null $initiator Кто инициатор изменений (через many2many один объект может менять многие)
-	 * @throws InvalidConfigException
 	 */
 	public function fillRecord(ArmsModel $record, $initiator=null) {
 		//$schema=$this->getTableSchema();
@@ -192,24 +222,6 @@ class HistoryModel extends ArmsModel
 		}
 	}
 	
-	/**
-	 * Является ли поле ссылкой Many2Many
-	 * @param $attr
-	 * @return bool
-	 */
-	public function isMany2ManyLink($attr) {
-		return isset($this->journalMany2ManyLinks[$attr]);
-	}
-	
-	/**
-	 * Является ли поле ссылкой Many2Many
-	 * @param $attr
-	 * @return bool
-	 */
-	public function isLinkWithReverse($attr) {
-		return isset($this->reverseLinks[$attr]);
-	}
-	
 	
 	/**
 	 * Является ли поле аттрибутом который надо брать из инициатора если он передан
@@ -225,7 +237,7 @@ class HistoryModel extends ArmsModel
 	 * @param $attr
 	 * @return array|int
 	 */
-	public function fetchMany2ManyIds($attr){
+	public function fetchLinkIds($attr){
 		$ids=[];
 		if (!isset($this->$attr)||!strlen($this->$attr)) return $ids;
 		foreach (explode(',',$this->$attr) as $id)
@@ -252,11 +264,7 @@ class HistoryModel extends ArmsModel
 	 */
 	public function fetchLink($attr,$id) {
 		/** @var ArmsModel $class */
-		if (isset($this->journalMany2ManyLinks[$attr])) {
-			$class=$this->journalMany2ManyLinks[$attr];
-		} elseif (isset($this->journalLinks[$attr])) {
-			$class=$this->journalLinks[$attr];
-		}
+		$class=$this->attributeLinkClass($attr);
 		return $class::findOne($id);
 	}
 	
@@ -294,17 +302,36 @@ class HistoryModel extends ArmsModel
 	}
 	
 	/**
+	 * Вносит в журнал запись об удалении объекта
+	 * @param ArmsModel    $record	Чье изменение вносим в журнал
+	 * @param HistoryModel|null $initiator Кто инициатор изменений (через many2many один объект может менять многие)
+	 * @return false
+	 */
+	public function journalDeletion(ArmsModel $record, $initiator=null) {
+		//заполняем запись в журнал
+		$this->fillRecord($record,$initiator);
+		
+		if ($this->hasAttribute('changed_attributes')) {
+			$this->changed_attributes=static::DELETED_FLAG;
+		}
+		
+		if ($this->save()) {
+			//если инициатор изменений не передан, значит мы и есть инициатор
+			// и надо передать информацию об изменениях связанным объектам
+			if (!isset($initiator)) $this->spreadOverLinkedJournals($this);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * @param HistoryModel $initiator
 	 */
 	public function spreadOverLinkedJournals(HistoryModel $initiator) {
 		//перебрать изменившиеся поля
 		foreach ($this->changedAttributes as $attribute) {
-			//выбрать из них many2many
-			if (
-				!$this->isMany2ManyLink($attribute)		//пропускаем поля "не m-2-m ссылки"
-				&&
-				!$this->isLinkWithReverse($attribute)	//и не поля ссылки на объекты, которые журналируют нас
-			) continue;
+			//проверить что он ссылка на объект, который имеет обратную ссылку на нас и журналирует ее изменения
+			if (!$this->attributeIsReverseJournaling($attribute)) continue;
 			
 			//найти какие ссылки добавились/пропали
 			//чтобы найти изменяющиеся позиции надо
@@ -312,8 +339,8 @@ class HistoryModel extends ArmsModel
 			//найти объединение массивов - все позиции
 			//вычесть пересечение из объединения - только меняющиеся позиции
 			$changed=ArrayHelper::setsSymDiff(
-				$this->fetchMany2ManyIds($attribute),
-				$this->previous->fetchMany2ManyIds($attribute)
+				$this->fetchLinkIds($attribute),
+				$this->previous->fetchLinkIds($attribute)
 			);
 			//загрузить объекты-ссылки
 			foreach ($changed as $id) {
@@ -350,35 +377,165 @@ class HistoryModel extends ArmsModel
 
 	/**
 	 * Является ли аттрибут ссылкой
+	 * в linksClasses должно быть проставлено на какой класс ссылка
 	 * @param string $attr
 	 * @return bool
 	 */
 	public function attributeIsLink(string $attr){
-		return isset($this->journalMany2ManyLinks[$attr]) || isset($this->journalLinks[$attr]);
+		return isset($this->linksSchema[$attr]);
 	}
 	
 	/**
-	 * На какой класс ссылается атрибут
+	 * Схема атрибута ссылки
+	 * @param string $attr
+	 * @return array
+	 */
+	public function attributeLinkSchema(string $attr){
+		if (isset($this->linksSchema[$attr])) {
+			return is_array($this->linksSchema[$attr])?
+				$this->linksSchema[$attr]:
+				[$this->linksSchema[$attr]];
+		}
+		return [];
+	}
+	
+	/**
+	 * На какой класс ссылается аттрибут
+	 * @param string $attr аттрибут
+	 * @return string
+	 */
+	public function attributeLinkClass(string $attr) {
+		return $this->attributeLinkSchema($attr)[0];	//первым элементом всегда идет класс
+	}
+	
+	/**
+	 * Какой атрибут объекта-ссылки ссылается обратно на нас
+	 * @param string $attr
+	 * @return array|false|mixed
+	 */
+	public function attributeReverseLink(string $attr) {
+		$schema=$this->attributeLinkSchema($attr);
+		if (isset($schema[1])) return $schema[1]; //вторым элементом всегда идет обратная ссылка
+		if (isset($schema['reverseLink'])) return $schema['reverseLink']; //либо так
+		return false;
+	}
+	
+	/**
+	 * Как называется getter в мастер классе, который загружает объекты-ссылки
+	 * @param string $attr
+	 * @return string|false
+	 */
+	public function attributeLinkLoader(string $attr) {
+		if (!$this->attributeIsLink($attr)) return false;
+		
+		$schema=$this->attributeLinkSchema($attr);
+		if (isset($schema['loader'])) return $schema['loader']; //если указан то и славненько
+		
+		if (substr($attr,strlen($attr)-3)=='_id') {
+			return lcfirst(Inflector::singularize(Inflector::camelize(substr($attr,0,strlen($attr)-3))));
+		}
+
+		if (substr($attr,strlen($attr)-4)=='_ids') {
+			return lcfirst(Inflector::camelize(substr($attr,0,strlen($attr)-4)));
+		}
+		
+		return false;
+	}
+	
+	
+	/**
+	 * Атрибут является ссылкой на объект, который журналирует обратную ссылку на этот объект.
+	 * Т.е. если у нас этот аттрибут изменился, то нужно будет пнуть все добавленные и удаленные из него объекты
+	 * на предмет журналирования изменений.
 	 * @param string $attr
 	 * @return bool
 	 */
-	public function attributeLinkClass(string $attr){
-		if (isset($this->journalMany2ManyLinks[$attr])) return $this->journalMany2ManyLinks[$attr];
-		if (isset($this->journalLinks[$attr])) return $this->journalLinks[$attr];
-		return null;
+	public function attributeIsReverseJournaling(string $attr) {
+		if (!$this->attributeIsLink($attr)) return false;
+		
+		//выясним, есть ли обратная ссылка у этого аттрибута
+		$reverseLinkAttr=$this->attributeReverseLink($attr);
+		//если нет, то нечего журналировать
+		if (!$reverseLinkAttr) return false;
+
+		//подтянем класс
+		/** @var ArmsModel $class */
+		$class=$this->attributeLinkClass($attr);
+		$instance=new $class();
+		$historyClass=$instance->getHistoryClass();
+		
+		//если у нас этот класс не ведет историю, то и нечего журналировать
+		if (!$historyClass) return false;
+		
+		
+		/** @var HistoryModel $journal */
+		$journal=new $historyClass();
+		
+		//у нас есть класс истории и есть аттрибут-обратная ссылка. Возвращаем ведется ли его журнал
+		return $journal->attributeIsJournaling($reverseLinkAttr);
 	}
+	
+	
 	
 	/**
 	 * Получить объекты, на которые ссылается аттрибут
 	 * @param string $attr
-	 * @return array|ActiveRecord[]
+	 * @return ActiveRecord[]|ActiveRecord
 	 */
 	public function fetchLinks(string $attr){
-		$class=$this->attributeLinkClass($attr);
-		$ids=explode(',',$this->$attr??'');
 		/** @var ArmsModel $class */
-		return $class::find()
-			->where(['id'=>$ids])
-			->all();
+		$class=$this->attributeLinkClass($attr);
+		
+		//вариант со ссылкой на один объект
+		if (substr($attr,strlen($attr)-3)=='_id') {
+			return $class::fetchJournalRecord($this->$attr,$this->updated_at);
+		}
+		
+		//иначе грузим пачку
+		$models=[];
+		foreach (explode(',',$this->$attr??'') as $id) {
+			if (is_object($model=$class::fetchJournalRecord($id,$this->updated_at))) {
+				$models[]=$model;
+			}
+		};
+		return $models;
+	}
+	
+	/**
+	 * Перекрываем getter аттрибутов, чтобы эмулировать параметры мастер-класса
+	 * Идея такая:
+	 * мы просим атрибут serviceUser, у нас такого нет
+	 * но мы знаем что это getter для атрибута service_user_id
+	 * тогда мы просто грузим нужный объект и отдаем, (как будто у нас есть такой атрибут)
+	 * @param $name
+	 * @return mixed|null
+	 */
+	public function __get($name)
+	{
+		// если мы знаем что такой геттер в мастер классе хранит свои ссылки в другом аттрибуте, то грузим ссылки
+		// например геттер serviceUser хранит ссылки в service_user_id
+		if (isset($this->linksLoaders[$name])) {
+			return $this->fetchLinks($this->linksLoaders[$name]);
+		}
+		
+		return parent::__get($name);
+	}
+	
+	/**
+	 * @inheritdoc
+	 */
+	public function init()
+	{
+		parent::init();
+		
+		//строим кэша обратного индекса загрузчиков атрибутов
+		foreach ($this->attributes as $attr=>$value) {
+			//ищем загрузчик аттрибута
+			$loader = $this->attributeLinkLoader($attr);
+			//если нашелся - запоминаем пару загрузчик-атрибут
+			if ($loader) $this->linksLoaders[$loader] = $attr;
+		}
+		
+		$this->trigger(self::EVENT_INIT);
 	}
 }

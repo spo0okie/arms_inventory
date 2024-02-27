@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\ArrayHelper;
 use Yii;
 use yii\validators\DateValidator;
 
@@ -298,52 +299,52 @@ class SchedulesEntries extends ArmsModel
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
-		return [
-			'id' => 'ID',
-			'schedule_id' => 'Расписание',
-			'is_period' => 'Период',
-			'is_work' => 'Тип периода',
+		return ArrayHelper::recursiveOverride(parent::attributeData(),[
+			'schedule_id' => [
+				'Расписание',
+				'hint' => 'Расписание, к которому относится запись',
+			],
+			'is_period' => [
+				'Период',
+				'hint' => 'Запись - расписание на день, или более длительный период?',
+			],
+			'is_work' => [
+				'Тип периода',
+				'hint' => $this->isAcl?
+					'Если установлено - права предоставляются, иначе - отзываются':
+					'Если установлено - период рабочий, иначе - нерабочий',
+			],
 			'is_work_Y' => $this->isAcl?'Доступ предоставляется':'Рабочий период',
 			'is_work_N' => $this->isAcl?'Доступ запрещается':'Нерабочий период',
 			
-			'date' => $this->is_period?'Начало':'День/Дата',
+			'date' => [
+				$this->is_period?'Начало':'День/Дата',
+				'hint' => $this->is_period?'Дата/время начала периода':'День/Дата',
+			],
 			'day' => static::$label_day,
-			'date_end' => 'Окончание',
-			'schedule' => static::$label_schedule,
+			'date_end' => [
+				'Окончание',
+				'hint' => 'Дата/время окончания периода',
+			],
+			'schedule' => [
+				static::$label_schedule,
+				'hint' => 'График работы/отключения в формате "ЧЧ:ММ-ЧЧ:ММ,ЧЧ:ММ-ЧЧ:ММ", или прочерк (минус) для выходного.<br />Примеры/заготовки: '.static::scheduleSamplesHtml(),
+			],
 			'graph' => static::$label_graph,
 			
-			'comment' => 'Комментарий',
-			'history' => 'Дополнительные заметки',
-			'created_at' => 'Создано',
-		];
+			'comment' => [
+				'Комментарий',
+				'hint' => 'Отображается в общем списке',
+			],
+			'history' => [
+				'Дополнительные заметки',
+				'hint' => 'Чтобы увидеть надо будет провалиться в запись или навести мышь',
+			],
+		]);
 	}
 	
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'ID записи',
-			'schedule_id' => 'Расписание, к которому относится запись',
-			'is_period' => 'Запись - расписание на день, или более длительный период?',
-			'is_work' => $this->isAcl?'Если установлено - права предоставляются, иначе - отзываются':'Если установлено - период рабочий, иначе - нерабочий',
-			
-			//'date' => 'День/Дата',
-			'date' => $this->is_period?'Дата/время начала периода':'День/Дата',
-			//'date_begin' => ,
-			'date_end' => 'Дата/время окончания периода',
-			'schedule' => 'График работы/отключения в формате "ЧЧ:ММ-ЧЧ:ММ,ЧЧ:ММ-ЧЧ:ММ", или прочерк (минус) для выходного.<br />Примеры/заготовки: '.static::scheduleSamplesHtml(),
-			//'description' => 'График',
-			
-			'comment' => 'Отображается в общем списке',
-			'history' => 'Чтобы увидеть надо будет провалиться в запись или навести мышь',
-			'created_at' => 'Отметка времени создания записи',
-		];
-	}
-
 	static function strToUnixTime($time) {
 		if (is_null($time) || !strlen($time)) return null;
 		return strtotime($time);
@@ -629,5 +630,12 @@ HTML;
 		return '';
 	}
 	
+	public function getName() {
+		if ($this->is_period) {
+			return $this->periodSchedule;
+		} else {
+			return $this->mergedSchedule;
+		}
+	}
 	
 }

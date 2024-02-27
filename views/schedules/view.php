@@ -1,5 +1,6 @@
 <?php
 
+use app\components\HistoryWidget;
 use app\components\ItemObjectWidget;
 use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
@@ -34,16 +35,21 @@ $schedule_id=$model->id;
 YiiAsset::register($this);
 ?>
 <div class="schedules-view">
-	<h1>
-		<?= ItemObjectWidget::widget([
-			'model'=>$model,
-			'link'=> LinkObjectWidget::widget([
-				'model'=>$model,
-				'static'=>$static_view,
-				'hideUndeletable'=>false,
-			])
-		]) ?>&nbsp;
-	</h1>
+	<div class="d-flex flex-wrap flex-row-reverse">
+		<div class="small opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></div>
+		<div class="flex-fill">
+			<h1>
+				<?= ItemObjectWidget::widget([
+					'model'=>$model,
+					'link'=> LinkObjectWidget::widget([
+						'model'=>$model,
+						'static'=>$static_view,
+						'hideUndeletable'=>false,
+					])
+				]) ?>&nbsp;
+			</h1>
+		</div>
+	</div>
 	<p><?= $model->description ?></p>
 	
 	

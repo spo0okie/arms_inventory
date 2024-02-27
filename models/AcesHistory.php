@@ -2,47 +2,51 @@
 
 namespace app\models;
 
+use app\models\traits\AcesModelCalcFieldsTrait;
+
 /**
  * This is the model class for table "maintenance_reqs_history".
  *
  * @property int $id
  * @property int|null $master_id
  * @property string|null $name
- * @property string|null $description
- * @property int|null $spread_comps
- * @property int|null $spread_techs
- * @property string|null $links
  * @property string|null $services_ids
  * @property string|null $comps_ids
  * @property string|null $techs_ids
- * @property string|null $reqs_ids
- * @property string|null $jobs_ids
  * @property string|null $updated_at
  * @property string|null $updated_by
  * @property string|null $updated_comment
  * @property string sname
  */
-class MaterialsTypesHistory extends HistoryModel
+class AcesHistory extends HistoryModel
 {
-
-	public static $title='Изменения категории материалов';
-	public static $titles='Изменения категорий материалов';
+	use AcesModelCalcFieldsTrait;
 	
-	public $masterClass=MaterialsTypes::class;
 	
+	public static $title='Изменения записи доступа';
+	public static $titles='Изменения записей доступа';
+	
+	public $masterClass=Aces::class;
+	
+	/**
+	 * {@inheritdoc}
+	 */
 	public $linksSchema=[
-		'scans_id'=>Scans::class,
+		'access_types_ids' => AccessTypes::class,
+		'comps_ids' =>	[Comps::class,'aces_ids'],
+		'users_ids' =>	[Users::class,'aces_ids'],
+		'acls_id' =>	[Acls::class,'aces_ids'],
 	];
-
-    /**
+	
+	
+	/**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'materials_types_history';
+        return 'aces_history';
     }
 
 
-    
 
 }

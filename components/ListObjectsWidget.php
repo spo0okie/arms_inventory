@@ -11,6 +11,7 @@ namespace app\components;
 use app\helpers\ArrayHelper;
 use app\helpers\HtmlHelper;
 use app\models\ArmsModel;
+use app\models\HistoryModel;
 use Yii;
 use yii\base\Widget;
 use yii\helpers\Inflector;
@@ -36,7 +37,7 @@ class ListObjectsWidget extends Widget
 	public $raw_items=false;	//не конвертировать текстовые итемы в HTML (уже сконверчены)
 	
 	/**
-	 * @var ArmsModel
+	 * @var ArmsModel|HistoryModel
 	 */
 	private $model;
 	private $is_object=false;
@@ -63,8 +64,9 @@ class ListObjectsWidget extends Widget
 		if (!isset($this->modelClass) && $this->is_object) {
 			$this->modelClass='ArmsModel';
 			
-			if (!$this->empty )
-				$this->modelClass=get_class($this->model);
+			if (!$this->empty ) {
+				$this->modelClass=$this->model->masterClass??get_class($this->model);
+			}
 			
 			//формируем полный путь до класса
 			$this->modelClassPath=explode('\\',$this->modelClass);

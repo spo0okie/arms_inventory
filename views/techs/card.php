@@ -10,7 +10,6 @@ use app\helpers\ArrayHelper;
 $model_id=$model->id;
 if (!isset($static_view)) $static_view=false;
 if (!isset($no_model)) $no_model=false; //не выводить инфу о модели оборудования
-$deleteable=!count($model->materialsUsages) && !count($model->contracts_ids);
 
 if (is_object($model->state)) { ?>
 	<span class="unit-status <?= $model->state->code ?> "><?= $model->state->name ?></span>

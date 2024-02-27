@@ -11,7 +11,7 @@ namespace app\models;
  * @property string|null $description
  * @property string|null $links
  * @property string|null $services_ids
- * @property string|null $comps_ids
+ * @property string|null $scans_id
  * @property string|null $techs_ids
  * @property string|null $updated_at
  * @property string|null $updated_by
@@ -26,7 +26,7 @@ class TechModelsHistory extends HistoryModel
 	
 	public $masterClass=TechModels::class;
 	
-	public $journalLinks=[
+	public $linksSchema=[
 		'type_id'=>TechTypes::class,
 		'manufacturers_id'=>Manufacturers::class,
 		'scans_id'=>Scans::class,
@@ -39,7 +39,14 @@ class TechModelsHistory extends HistoryModel
     {
         return 'tech_models_history';
     }
-
-
+	
+	/**
+	 * Возвращает набор сканов в договоре
+	 */
+	public function getPreview()
+	{
+		if (!$this->scans_id) return null;
+		return Scans::find()->where(['id' => $this->scans_id ])->one();
+	}
 
 }

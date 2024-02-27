@@ -7,7 +7,9 @@
  * Time: 17:33
  */
 
+use app\models\SchedulesEntries;
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\SchedulesEntries */
@@ -15,7 +17,7 @@ use yii\helpers\Html;
 if (is_object($model)) {
 	if (!isset($name)) {
 		if ($model->is_period) {
-			$name=$model->getPeriodSchedule();
+			$name=$model->periodSchedule;
 		} else {
 			$name=$model->mergedSchedule;
 			$tokens=explode(',',$name);
@@ -29,9 +31,9 @@ if (is_object($model)) {
 ?>
 
 	<span class="schedules-entries-item"
-		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules-entries/ttip','id'=>$model->id]) ?>"
+		  qtip_ajxhrf="<?= Url::to(['schedules-entries/ttip','id'=>$model->id]) ?>"
 	>
-		<?= \yii\helpers\Html::a($name,[
+		<?= Html::a($name,[
 			'/schedules/view/',
 			'id'=>$model->schedule_id,
 			'date'=>$date,
@@ -39,7 +41,7 @@ if (is_object($model)) {
 			'#'=>'day-'.$model->date.'-'.$model->date_end]) ?>
 	</span>
 <?php } elseif (is_array($model)) {
-	if (!isset($name)) $name=\app\models\SchedulesEntries::scheduleWithoutMetadata($model['schedule']);
+	if (!isset($name)) $name= SchedulesEntries::scheduleWithoutMetadata($model['schedule']);
 	if (!isset($date)) $date=$model['day']->date;
 	if (count($model['posPeriods'])) {
 		$positive=[];
@@ -55,9 +57,9 @@ if (is_object($model)) {
 
 	?>
 	<span class="schedules-entries-item"
-		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules-entries/ttip','id'=>$model['day']->id,'positive'=>$positive,'negative'=>$negative]) ?>"
+		  qtip_ajxhrf="<?= Url::to(['schedules-entries/ttip','id'=>$model['day']->id,'positive'=>$positive,'negative'=>$negative]) ?>"
 	>
-		<?= \yii\helpers\Html::a($name,[
+		<?= Html::a($name,[
 			'/schedules/view/',
 			'id'=>$model['day']->schedule_id,
 			'date'=>$date,

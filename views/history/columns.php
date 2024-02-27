@@ -76,11 +76,15 @@ foreach ($attributes as $attribute) {
 	
 	if ($instance->attributeIsLink($attribute)) {
 		$columns[$attribute]['value']=function($data) use($attribute) {
+			$models=$data->fetchLinks($attribute);
+			if (!is_array($models)) $models=[$models];
 			/** @var HistoryModel $data */
 			return ListObjectsWidget::widget([
 				'title'=>false,
-				'models'=>$data->fetchLinks($attribute),
+				'models'=>$models,
 				'glue'=>'<br/>',
+				'lineBr'=>false,
+				'item_options'=>['static_view'=>true]
 			]);
 		};
 	}

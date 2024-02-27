@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\DateTimeHelper;
+use voskobovich\linker\LinkerBehavior;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\data\ArrayDataProvider;
@@ -72,6 +73,28 @@ class Schedules extends ArmsModel
 		$scenarios[self::SCENARIO_OVERRIDE] = $scenarios[self::SCENARIO_DEFAULT];
 		$scenarios[self::SCENARIO_ACL] = $scenarios[self::SCENARIO_DEFAULT];
 		return $scenarios;
+	}
+	
+	/**
+	 * В списке поведений прикручиваем many-to-many связи
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => LinkerBehavior::class,
+				'relations' => [
+					'entries_ids' => 'entries',							//
+					'providing_services_ids' => 'providingServices',	//это все не many-2-many ссылки
+					'support_services_ids' => 'supportServices',		//мне просто нужно вытаскивать
+					'acls_ids' => 'acls',								//_ids этих ссылок
+					'maintenance_jobs_ids' => 'maintenanceJobs',		//для ведения истории
+					'overrides_ids' => 'overrides',						//
+					'children_ids' => 'children',						//
+				]
+			]
+		];
 	}
 	
 	public static $dictionary=[
@@ -678,6 +701,14 @@ class Schedules extends ArmsModel
 			$types=\app\helpers\ArrayHelper::recursiveOverride($types,$acl->accessTypes);
 		}
 		return $types;
+	}
+	
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getMaintenanceJobs()
+	{
+		return $this->hasMany(MaintenanceJobs::class, ['schedules_id' => 'id']);
 	}
 	
 	

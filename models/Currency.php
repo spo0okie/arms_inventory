@@ -2,7 +2,8 @@
 
 namespace app\models;
 
-use Yii;
+
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "currency".
@@ -15,7 +16,7 @@ use Yii;
  * @property string|null $notepad
  * @property string sname
  */
-class Currency extends \yii\db\ActiveRecord
+class Currency extends ArmsModel
 {
 	
 	public static $title='Валюта';
@@ -78,6 +79,6 @@ class Currency extends \yii\db\ActiveRecord
 			//->select(['id','name'])
 			->orderBy(['code'=>SORT_ASC])
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'code');
+		return ArrayHelper::map($list, 'id', 'code');
 	}
 }

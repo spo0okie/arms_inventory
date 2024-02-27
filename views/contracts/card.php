@@ -95,7 +95,7 @@ JS;
 
 <?php if ($static_view) {
 	
-	if (count($children=$model->childs)) { ?>
+	if (count($children=$model->children)) { ?>
         <h4>Связанные документы:</h4>
         <p>
 			<?php foreach ($children as $child) {

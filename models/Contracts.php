@@ -13,10 +13,10 @@ use yii\helpers\Url;
 /**
  * This is the model class for table "contracts".
  *
- * !ВНИМАНИЕ! в модели используется свзь типа потомок родитель
- * в случае интенсивоного использования таких связей количество запросов к БД
- * будет расти невероятным образом, поэтмоу по-хорошему надо добавить в таблицу
- * ключит для хранения NESTED TREE!
+ * !ВНИМАНИЕ! в модели используется связь типа потомок родитель
+ * в случае интенсивного использования таких связей количество запросов к БД
+ * будет расти невероятным образом, поэтому по-хорошему надо добавить в таблицу
+ * ключи для хранения NESTED TREE!
  *
  * @property int $id id
  * @property int $parent_id Родительский договор
@@ -57,16 +57,16 @@ use yii\helpers\Url;
  * @property integer $deliveryState состояние доставки
  * @property string[] $undeliveredDescription описание что недопоставлено
  *
- * @property Contracts $parent
- * @property Currency $currency
- * @property Contracts $successor
+ * @property Contracts   $parent
+ * @property Currency    $currency
+ * @property Contracts   $successor
  * @property Contracts[] $successors
  * @property Contracts[] $successorsChain
  * @property Contracts[] $successorsRecursive
  * @property Contracts   $predecessor
  * @property Contracts   $firstPredecessor
  * @property Contracts[] $contracts
- * @property Contracts[] $childs
+ * @property Contracts[] $children
  * @property Contracts[] $chainChildren
  * @property Contracts[] $childrenRecursive
  * @property Contracts[] $allChildren
@@ -160,6 +160,7 @@ class Contracts extends ArmsModel
 					'services_ids' => 'services',
 					'materials_ids' => 'materials',
 					'users_ids' => 'users',
+					'children_ids' => 'children', //one-2-many
 				]
 			]
 		];
@@ -483,7 +484,7 @@ class Contracts extends ArmsModel
 	/**
 	 * @return ActiveQuery
 	 */
-	public function getChilds()
+	public function getChildren()
 	{
 		return $this->hasMany(Contracts::class, ['parent_id' => 'id'])
 			->from(['contract_children'=>self::tableName()])
@@ -500,7 +501,7 @@ class Contracts extends ArmsModel
 			return $this->recursive_children_cache;
 		
 		$this->recursive_children_cache=[];
-		foreach ($this->childs as $child) {
+		foreach ($this->children as $child) {
 			$this->recursive_children_cache[]=$child;
 			if (count($recursive=$child->childrenRecursive))
 				$this->recursive_children_cache=array_merge($this->recursive_children_cache,$recursive);
@@ -519,7 +520,7 @@ class Contracts extends ArmsModel
 		$chain=$this->successorsChain;
 		//$root=array_pop($chain); //выкидываем самого себя из цепочки
 		$children=[];
-		foreach ($chain as $item) $children=array_merge($children,$item->childs);
+		foreach ($chain as $item) $children=array_merge($children,$item->children);
 		ArrayHelper::multisort($children,'date',SORT_DESC);
 		return $children; //ставим себя первым
 	}
@@ -649,7 +650,7 @@ class Contracts extends ArmsModel
 	public function getSAttach()
 	{
 		$attaches='';
-		if (count($this->childs)) $attaches.='<span class="fas fa-paperclip" title="Привязаны документы: '.(count($this->childs)).'шт"></span>';
+		if (count($this->children)) $attaches.='<span class="fas fa-paperclip" title="Привязаны документы: '.(count($this->children)).'шт"></span>';
 		if (count($this->techs)) $attaches.='<span class="fas fa-print" title="Привязана техника: '.(count($this->techs)).'шт"></span>';
 		if (count($this->materials)) $attaches.='<span class="fas fa-box-open" title="Привязаны материалы: '.(count($this->materials)).'ед"></span>';
 		if (count($this->licItems)) $attaches.='<span class="fas fa-award" title="Привязаны лицензии: '.(count($this->licItems)).'шт"></span>';

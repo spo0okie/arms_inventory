@@ -1,7 +1,5 @@
 <?php
 
-use app\models\Acls;
-use yii\helpers\Html;
 use yii\web\YiiAsset;
 
 /* @var $this yii\web\View */
@@ -18,14 +16,5 @@ YiiAsset::register($this);
 
 ?>
 <div class="acls-view">
-	<h1>
-		<?= Html::encode(Acls::$title.'#'.$model->id.': '.$model->sname) ?>
-		<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['acls/delete', 'id' => $model->id], [
-			'data' => [
-				'confirm' => 'Удалить этот элемент? Действие необратимо',
-				'method' => 'post',
-			],
-		]) ?>
-	</h1>
 	<?= $this->render('card',['model'=>$model]) ?>
 </div>

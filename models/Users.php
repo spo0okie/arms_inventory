@@ -150,6 +150,17 @@ class Users extends ArmsModel implements IdentityInterface
 				'class' => LinkerBehavior::class,
 				'relations' => [
 					'netIps_ids' => 'netIps',
+					'aces_ids' => 'aces',
+					'contracts_ids' => 'contracts',
+					'support_services_ids' => 'supportServices',
+					'infrastructure_support_services_ids' => 'infrastructureSupportServices',
+					'services_ids' => 'services',								//one-2-many
+					'techs_ids' => 'techs',										//one-2-many
+					'it_techs_ids' => 'techsIt',								//one-2-many
+					'head_techs_ids' => 'techsHead',							//one-2-many
+					'responsible_techs_ids' => 'techsResponsible',				//one-2-many
+					'infrastructure_services_ids' => 'infrastructureServices',	//one-2-many
+					'materials_ids' => 'materials',								//one-2-many
 				]
 			]
 		];

@@ -8,30 +8,28 @@ namespace app\models;
  * @property int $id
  * @property int|null $master_id
  * @property string|null $name
- * @property string|null $description
- * @property int|null $spread_comps
- * @property int|null $spread_techs
- * @property string|null $links
  * @property string|null $services_ids
  * @property string|null $comps_ids
  * @property string|null $techs_ids
- * @property string|null $reqs_ids
- * @property string|null $jobs_ids
  * @property string|null $updated_at
  * @property string|null $updated_by
  * @property string|null $updated_comment
  * @property string sname
  */
-class MaterialsTypesHistory extends HistoryModel
+class AclsHistory extends HistoryModel
 {
 
-	public static $title='Изменения категории материалов';
-	public static $titles='Изменения категорий материалов';
+	public static $title='Изменения списка доступа';
+	public static $titles='Изменения списков доступа';
 	
-	public $masterClass=MaterialsTypes::class;
+	public $masterClass=Acls::class;
 	
 	public $linksSchema=[
-		'scans_id'=>Scans::class,
+		'aces_ids'=>[Aces::class,'acls_id'],
+		'schedules_id'=>[Schedules::class,'acls_ids'],
+		'services_id'=>[Services::class,'acls_ids'],
+		'comps_id'=>[Comps::class,'acls_ids'],
+		'techs_id'=>[Techs::class,'acls_ids'],
 	];
 
     /**
@@ -39,10 +37,9 @@ class MaterialsTypesHistory extends HistoryModel
      */
     public static function tableName()
     {
-        return 'materials_types_history';
+        return 'acls_history';
     }
 
 
-    
 
 }

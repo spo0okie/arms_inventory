@@ -2,6 +2,7 @@
 namespace app\components;
 
 use app\models\ArmsModel;
+use app\models\HistoryModel;
 use Yii;
 use yii\base\Widget;
 use yii\helpers\Html;use yii\helpers\Inflector;use yii\helpers\StringHelper;
@@ -31,7 +32,7 @@ class LinkObjectWidget extends Widget
 	public $modal=false;
 
 	/**
-	 * @var $model ArmsModel
+	 * @var $model ArmsModel|HistoryModel
 	 */
 	public $model=null;		//модель на которую делаем ссылку
 	public $links=null;		//имена полей обратных ссылок (кто ссылается на этот объект), чтобы понять можно ли его удалить или нет
@@ -39,14 +40,16 @@ class LinkObjectWidget extends Widget
 	public $name=null;		//подмена имени объекта
 	public $nameSuffix='';	//подмена имени объекта
 	
-	public $url=null;		//ссылка куда переходить по клику
-	public $ttipUrl=null;	//ссылка что показывать в тултипе
+	public $controller;
+	
+	public $url;			//ссылка куда переходить по клику
+	public $ttipUrl;		//ссылка что показывать в тултипе
+	public $deleteUrl;		//как удалять
+	public $updateUrl;		//как обновлять
 	
 	public $cssClass=null;
 	public $hrefOptions=[];
 	
-	public $deleteUrl=null;
-	public $updateUrl=null;
 	
 	private $samePage=false;//признак того что элемент отображается на той же странице куда ведет ссылка
 	
@@ -54,10 +57,13 @@ class LinkObjectWidget extends Widget
 	{
 		parent::init();
 		
-		$controller=Inflector::camel2id(StringHelper::basename(get_class($this->model)));
+		//для объектов класса истории это мастер_ид, для обычных это ид
+		$id=$this->model->master_id??$this->model->id;
+		$controller=$this->controller??
+			Inflector::camel2id(StringHelper::basename($this->model->masterClass??get_class($this->model)));
 		
-		if (is_null($this->url)) {
-			$this->url=Url::to(['/'.$controller.'/view','id'=>$this->model->id]);
+		if (!isset($this->url)) {
+			$this->url=Url::to(['/'.$controller.'/view','id'=>$id]);
 			$this->samePage=(
 				(
 					Yii::$app->controller->route==$controller.'/view'
@@ -65,16 +71,26 @@ class LinkObjectWidget extends Widget
 					Yii::$app->controller->route==$controller.'/ttip'
 				)
 				&&
-				Yii::$app->request->get('id')==$this->model->id
+				Yii::$app->request->get('id')==$id
 			);
 		} elseif (is_array($this->url)) {
 			$this->url=Url::to($this->url);
 		}
 		
-		if (is_null($this->ttipUrl)) {
-			$this->ttipUrl=Url::to([$controller.'/ttip','id'=>$this->model->id]);
+		if (!isset($this->ttipUrl)) {
+			$this->ttipUrl=$this->model instanceof HistoryModel?
+				Url::to([$controller.'/ttip','id'=>$id,'timestamp'=>$this->model->updated_at]):
+				Url::to([$controller.'/ttip','id'=>$id]);
 		}
-
+		
+		if (!isset($this->updateUrl)) {
+			$this->updateUrl=Url::to([$controller.'/update','id'=>$id]);
+		}
+		
+		if (!isset($this->deleteUrl)) {
+			$this->deleteUrl=Url::to([$controller.'/delete','id'=>$id]);
+		}
+		
 		$this->samePage=$this->samePage|| Yii::$app->request->url==$this->url;
 		
 		if (is_null($this->name)) {

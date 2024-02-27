@@ -8,41 +8,34 @@ namespace app\models;
  * @property int $id
  * @property int|null $master_id
  * @property string|null $name
- * @property string|null $description
- * @property int|null $spread_comps
- * @property int|null $spread_techs
- * @property string|null $links
  * @property string|null $services_ids
  * @property string|null $comps_ids
  * @property string|null $techs_ids
- * @property string|null $reqs_ids
- * @property string|null $jobs_ids
  * @property string|null $updated_at
  * @property string|null $updated_by
  * @property string|null $updated_comment
  * @property string sname
  */
-class MaterialsTypesHistory extends HistoryModel
+class SchedulesEntriesHistory extends HistoryModel
 {
 
-	public static $title='Изменения категории материалов';
-	public static $titles='Изменения категорий материалов';
+	public static $title='Изменения записи расписания';
+	public static $titles='Изменения записей расписания';
 	
-	public $masterClass=MaterialsTypes::class;
+	public $masterClass=SchedulesEntries::class;
 	
 	public $linksSchema=[
-		'scans_id'=>Scans::class,
+		'schedule_id'=>[Schedules::class,'entries_ids','loader'=>'master']
 	];
-
+	
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'materials_types_history';
+        return 'schedules_entries_history';
     }
 
 
-    
 
 }

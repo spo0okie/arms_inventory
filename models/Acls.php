@@ -2,8 +2,10 @@
 
 namespace app\models;
 
-use Composer\Util\Url;
-use Yii;
+
+
+use voskobovich\linker\LinkerBehavior;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "acls".
@@ -28,7 +30,7 @@ use Yii;
  * @property Partners[] $partners
  * @property Segments[]	$segments
  */
-class Acls extends \yii\db\ActiveRecord
+class Acls extends ArmsModel
 {
 
 	public static $title='Список доступа';
@@ -59,7 +61,22 @@ class Acls extends \yii\db\ActiveRecord
     {
         return 'acls';
     }
-
+	
+	/**
+	 * В списке поведений прикручиваем many-to-many связи
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => LinkerBehavior::class,
+				'relations' => [
+					'aces_ids' => 'aces', //это не many-2-many. Мне просто нужно _ids поле
+				]
+			]
+		];
+	}
     /**
      * {@inheritdoc}
      */
@@ -128,6 +145,8 @@ class Acls extends \yii\db\ActiveRecord
 		
 		return $this->snameCache;
 	}
+	
+	public function getName(){return $this->sname;}
 	
 	/**
 	 * организации получающие доступ
@@ -247,11 +266,6 @@ class Acls extends \yii\db\ActiveRecord
 		return $this->hasMany(Aces::class, ['acls_id' => 'id']);
 	}
 	
-	public function getAceDepartments() {
-		if (!is_array($this->aces)) return [];
-		
-	}
-	
 	public function beforeDelete()
 	{
 		if (count($this->aces))
@@ -271,6 +285,6 @@ class Acls extends \yii\db\ActiveRecord
             //->select(['id','name'])
 			->orderBy(['name'])
             ->all();
-        return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+        return ArrayHelper::map($list, 'id', 'sname');
     }
 }

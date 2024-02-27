@@ -248,27 +248,60 @@ class ArmsModel extends ActiveRecord
 		return $this->save($runValidation);
 	}
 	
-	
-	public function historyCommit($initiator=null) {
+	/**
+	 * Возвращает класс журнала этой модели. Либо он должен быть явно задан,
+	 * либо должен существовать класс с суффиксом History
+	 * @return false|string
+	 */
+	public function getHistoryClass() {
 		//упростим себе задачу тем что класс не надо задавать всегда вручную, пусть будет {$MasterClass}History
 		if (!isset($this->historyClass)) {
 			//у моделей которые сами журналы истории такое не нужно
-			if ($this instanceof HistoryModel) return;
+			if ($this instanceof HistoryModel) return false;
 			$this->historyClass=static::class.'History';
 		}
-		if (!class_exists($this->historyClass) || $this->doNotChangeAuthor) return;
+		if (!class_exists($this->historyClass)) return false;
+		return $this->historyClass;
+	}
+	
+	/**
+	 * Записывает в журнал изменения (если они обнаружатся относительно предыдущей записи в журнале)
+	 * @param null $initiator
+	 */
+	public function historyCommit($initiator=null) {
+		$historyClass=$this->getHistoryClass();
+		if (!$historyClass || $this->doNotChangeAuthor) return;
+		
 		//ну что ж, давайте попробуем залепить запись в журнал!
-		$historyClass=$this->historyClass;
 		/** @var HistoryModel $journal */
 		$journal=new $historyClass();
 		$journal->journal($this,$initiator);
+	}
+	
+	/**
+	 * Записывает в журнал отметку об удалении объекта
+	 * @param null $initiator
+	 */
+	public function historyEnd($initiator=null) {
+		if (!($historyClass=$this->getHistoryClass())) return;
+		
+		/** @var HistoryModel $journal */
+		$journal=new $historyClass();
+		$journal->journalDeletion($this,$initiator);
 	}
 	
 	public function afterSave($insert, $changedAttributes)
 	{
 		parent::afterSave($insert, $changedAttributes);
 		
-		$this->historyCommit();
+		$this->historyCommit(); //журналирование изменений
+	}
+	
+	public function afterDelete()
+	{
+		parent::afterDelete();
+
+		$this->historyCommit(); //журналирование удаления
 	}
 	
 	public function beforeSave($insert)
@@ -426,10 +459,10 @@ class ArmsModel extends ActiveRecord
 	
 	/**
 	 * Рекурсивный поиск аттрибута в цепочке родителей
-	 * @param string $simpleAttr
-	 * @param string $recursiveAttr
-	 * @param string $parent
-	 * @param null   $empty
+	 * @param string $simpleAttr	как называется локальный аттрибут без учета рекурсии
+	 * @param string $recursiveAttr как называется этот же аттрибут с учетом рекурсии
+	 * @param string $parent		как называется ссылка на батю
+	 * @param null   $empty			что вернуть если ничего не нашли
 	 * @return mixed|null
 	 */
 	public function findRecursiveAttr(string $simpleAttr, string $recursiveAttr, $parent='parent',$empty=null) {
@@ -450,4 +483,27 @@ class ArmsModel extends ActiveRecord
 	}
 	
 	public function externalData() {}
+	
+	/**
+	 * Вытащить запись журнала на дату
+	 * @param $id
+	 * @param $timestamp
+	 * @return ActiveRecord
+	 */
+	public static function fetchJournalRecord($id,$timestamp) {
+		//достаем класс журнала
+		$instance=new static();
+		/** @var HistoryModel $historyClass */
+		$historyClass=$instance->getHistoryClass();
+		
+		//если класс журнала есть, ищем запись в журнале
+		if ($historyClass) {
+			$record=$historyClass::findOnTimestamp($id,$timestamp);
+			//нашли - молодцы!
+			if (is_object($record)) return $record;
+		}
+		//ищем текущую запись в оперативной таблице (не в журнале)
+		return static::findOne($id);
+	}
+
 }

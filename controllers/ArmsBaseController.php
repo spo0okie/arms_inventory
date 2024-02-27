@@ -227,7 +227,7 @@ class ArmsBaseController extends Controller
 	
 	/**
 	 * Displays a item for single model.
-	 * @param int $id
+	 * @param int  $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
@@ -247,6 +247,11 @@ class ArmsBaseController extends Controller
 	 */
 	public function actionTtip(int $id)
 	{
+		if ($t=Yii::$app->request->get('timestamp')) {
+			return $this->renderPartial('ttip', [
+				'model' => $this->findJournalRecord($id,$t),
+			]);
+		}
 		return $this->renderPartial('ttip', [
 			'model' => $this->findModel($id),
 		]);
@@ -379,21 +384,38 @@ class ArmsBaseController extends Controller
 		) return $this->redirect($url);
         return $this->redirect($defaultRoute);
     }
-
-    /**
-     * Finds the Arms model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id
-     * @return ArmsModel the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel(int $id)
-    {
-        if (($model = ($this->modelClass)::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
-
+	
+	/**
+	 * Finds the Arms model based on its primary key value.
+	 * If the model is not found, a 404 HTTP exception will be thrown.
+	 * @param int $id
+	 * @return ArmsModel the loaded model
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	protected function findModel(int $id)
+	{
+		if (($model = ($this->modelClass)::findOne($id)) !== null) {
+			return $model;
+		}
+		
+		throw new NotFoundHttpException('The requested page does not exist.');
+	}
+	
+	/**
+	 * Finds the Arms model based on its primary key value.
+	 * If the model is not found, a 404 HTTP exception will be thrown.
+	 * @param int $id
+	 * @param     $timestamp
+	 * @return ArmsModel the loaded model
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	protected function findJournalRecord(int $id, $timestamp)
+	{
+		if (($model = ($this->modelClass)::fetchJournalRecord($id,$timestamp)) !== null) {
+			return $model;
+		}
+		
+		throw new NotFoundHttpException('The requested page does not exist.');
+	}
+	
 }

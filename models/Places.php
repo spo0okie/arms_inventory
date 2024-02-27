@@ -2,29 +2,30 @@
 
 namespace app\models;
 
-use Yii;
+use voskobovich\linker\LinkerBehavior;
+use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "places".
  *
- * @property string $id id
- * @property integer $parent_id
- * @property string $name Название
- * @property string $fullName Полное название
- * @property string $prefTree Префикс с резервированием родительским.
- * @property string $addr Адрес
- * @property Techs $techsRecursive
- * @property \app\models\Places $top помещение самого верхнего уровня над текущим
- * @property \yii\db\ActiveQuery $parent родительское помещения
- * @property \yii\db\ActiveQuery $arms АРМы размещенные в этом помещении
- * @property \yii\db\ActiveQuery $techs техника размещенная в этом помещении
- * @property string $prefix Префикс
- * @property string $short Короткое имя
+ * @property string      $id id
+ * @property integer     $parent_id
+ * @property string      $name Название
+ * @property string      $fullName Полное название
+ * @property string      $prefTree Префикс с резервированием родительским.
+ * @property string      $addr Адрес
+ * @property Techs       $techsRecursive
+ * @property Places      $top помещение самого верхнего уровня над текущим
+ * @property Places      $parent родительское помещения
+ * @property Techs       $techs техника размещенная в этом помещении
+ * @property string      $prefix Префикс
+ * @property string      $short Короткое имя
  *
- * @property OrgInet[] $inets
+ * @property OrgInet[]   $inets
  * @property OrgPhones[] $phones
  * @property OrgPhones[] $phonesRecursive
- * @property Places[] $childs
+ * @property Places[]    $children
  * @property Materials[] $materials
  */
 class Places extends ArmsModel
@@ -75,8 +76,7 @@ DELIMITER ;
 	//public $path;
 
 	private $phones_cache=null;
-	private $childs_cache=null;
-	private $arms_cache=null;
+	private $children_cache=null;
 	private static $all_items=null;
 	
 	protected static $allItems=null;
@@ -96,7 +96,7 @@ DELIMITER ;
     {
         return [
 			[['parent_id'], 'integer'],
-			[['parent_id'], function ($attribute, $params, $validator) {
+			[['parent_id'], function ($attribute) {
 				$children=[$this->id];
 				if (is_object($this->parent) && $this->parent->loopCheck($children)!==false) {
 					$chain=[];
@@ -116,8 +116,28 @@ DELIMITER ;
 			[['comment'], 'safe'],
         ];
     }
-
-    /**
+	
+	
+	/**
+	 * В списке поведений прикручиваем many-to-many ссылки
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return [
+			[
+				'class' => LinkerBehavior::class,
+				'relations' => [
+					'materials_ids' => 'materials',		//one-2-many
+					'services_ids' => 'services',		//one-2-many
+					'techs_ids' => 'techs',				//one-2-many
+				]
+			]
+		];
+	}
+	
+	
+	/**
      * @inheritdoc
      */
     public function attributeLabels()
@@ -145,7 +165,7 @@ DELIMITER ;
 			'short' => 'Сокращенное название помещения для вывода в узких местах',
 			'addr' => 'Если не указан, то наследуется адрес родительского помещения',
 			'phone' => 'Если для помещения предусмотрены прямые телефоны, укажите их здесь',
-			'prefix' => 'Будет использоваться для формирования инвентарных номеров при заведении нового оборудования в этом помещении. Если не задать - используется родительский префикс. Если изменить, то старые нивентарные номера останутся неизменны.',
+			'prefix' => 'Будет использоваться для формирования инвентарных номеров при заведении нового оборудования в этом помещении. Если не задать - используется родительский префикс. Если изменить, то старые инвентарные номера останутся неизменны.',
 		];
 	}
 	
@@ -154,7 +174,7 @@ DELIMITER ;
 	 * @param $children integer[]
 	 * @return false|int
 	 */
-	public function loopCheck(&$children)
+	public function loopCheck(array &$children)
 	{
 		//если предок уже встречается среди потомков, то сообщаем его
 		if (($loop=array_search($this->id,$children))!==false) {
@@ -173,22 +193,22 @@ DELIMITER ;
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return OrgPhones|ActiveQuery
 	 */
 	public function getPhones()
 	{
 		if (!is_null($this->phones_cache)) return $this->phones_cache;
-		return $this->phones_cache = $this->hasMany(OrgPhones::className(), ['places_id' => 'id']);
+		return $this->phones_cache = $this->hasMany(OrgPhones::class, ['places_id' => 'id']);
 	}
 
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return OrgPhones[]
 	 */
 	public function getPhonesRecursive()
 	{
 		$phones=$this->phones;
-		if (count($this->childs)) foreach ($this->childs as $child) {
+		if (count($this->children)) foreach ($this->children as $child) {
 			$phones=array_merge($phones,$child->phonesRecursive);
 		}
 		return $phones;
@@ -196,40 +216,25 @@ DELIMITER ;
 
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getInets()
 	{
-		return $this->hasMany(OrgInet::className(), ['places_id' => 'id']);
+		return $this->hasMany(OrgInet::class, ['places_id' => 'id']);
 	}
 	
-	/**
-	 * @return \yii\db\ActiveQuery
-	public function getArms()
+	public function getServices()
 	{
-		if (!is_null($this->arms_cache)) return $this->arms_cache;
-		return $this->arms_cache=$this->hasMany(OldArms::className(), ['places_id' => 'id']);
+		return $this->hasMany(Services::class, ['places_id' => 'id']);
 	}
-	
-	/**
-	 * @return \yii\db\ActiveQuery
-	public function getArmsRecursive()
-	{
-		$arms=$this->arms;
-		foreach ($this->childs as $child) {
-			$arms=array_merge($arms,$child->arms);
-		}
-		return $arms;
-	}
-	 */
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getTechs()
 	{
 
-		return $this->hasMany(Techs::className(), ['places_id' => 'id'])
+		return $this->hasMany(Techs::class, ['places_id' => 'id'])
 			->from(['places_techs'=>Techs::tableName()]);
 		//	->andWhere(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
 		//	->andOnCondition(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
@@ -237,12 +242,12 @@ DELIMITER ;
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return Techs[]
 	 */
 	public function getTechsRecursive()
 	{
 		$techs=$this->techs;
-		foreach ($this->childs as $child) {
+		foreach ($this->children as $child) {
 			$techs=array_merge($techs,$child->techs);
 		}
 		return $techs;
@@ -251,16 +256,16 @@ DELIMITER ;
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getMaterials()
 	{
-		return $this->hasMany(Materials::className(), ['places_id' => 'id'])
+		return $this->hasMany(Materials::class, ['places_id' => 'id'])
 			->from(['places_materials'=>Materials::tableName()]);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getParent()
 	{
@@ -268,11 +273,11 @@ DELIMITER ;
 			if (!$this->parent_id) return null;
 			return static::getLoadedItem($this->parent_id);
 		}
-		return $this->hasOne(Places::className(), ['id' => 'parent_id']);
+		return $this->hasOne(Places::class, ['id' => 'parent_id']);
 	}
 	
 	/**
-	 * @return \app\models\Places
+	 * @return Places
 	 */
 	public function getTop()
 	{
@@ -282,17 +287,17 @@ DELIMITER ;
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return Places[]
 	 */
-	public function getChilds()
+	public function getChildren()
 	{
-		if (!is_null($this->childs_cache)) return $this->childs_cache;
-		$childs=[];
+		if (!is_null($this->children_cache)) return $this->children_cache;
+		$children=[];
 		foreach (static::fetchAll() as $item) {
-			if ($item['parent_id']===$this->id) $childs[]=$item;
+			if ($item['parent_id']===$this->id) $children[]=$item;
 		}
-		return $childs;
-		return $this->childs_cache = $this->hasMany(Places::className(), ['parent_id' => 'id']);
+		return $children;
+		//return $this->children_cache = $this->hasMany(Places::class, ['parent_id' => 'id']);
 	}
 
 	public static function fetchAll(){
@@ -324,7 +329,7 @@ DELIMITER ;
 			foreach ($list as $i => $item)
 				if (!is_null($item->parent_id)) unset($list[$i]);
 		}
-		$items=\yii\helpers\ArrayHelper::map($list, 'id', 'fullName');
+		$items= ArrayHelper::map($list, 'id', 'fullName');
 		asort($items);
 		return $items;
 	}
@@ -346,7 +351,7 @@ DELIMITER ;
 	}
 
 	/**
-	 * Возвращает префикс, если отсутствет то префикс родителя.
+	 * Возвращает префикс, если отсутствует то префикс родителя.
 	 */
 	public function getPrefTree() {
 		//если есть свой префикс - отдаем его
@@ -359,7 +364,7 @@ DELIMITER ;
 	public function getReverseLinks() {
 		return [
 			$this->techs,
-			$this->childs,
+			$this->children,
 			$this->materials,
 			$this->phones,
 			$this->inets,
