@@ -179,7 +179,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				'data'=> Partners::fetchNames()
 			])?>
 		</div>
-		<?php if (Yii::$app->params['techs.hostname.enable'] && !$model->model->getIsPC()) { ?>
+		<?php if (Yii::$app->params['techs.hostname.enable'] && is_object($model->model) && !$model->model->getIsPC()) { ?>
 			<div class="row">
 				<div class="col-6">
 					<?= $form->field($model, 'hostname')->textInput(['maxlength' => true]) ?>
