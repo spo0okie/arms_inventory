@@ -158,6 +158,29 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			<?= FieldsHelper::TextInputField($form,$model, 'uid') ?>
 		</div>
     </div>
+	
+	<?php if (
+		Yii::$app->params['techs.hostname.enable'] &&
+		(
+			(is_object($model->model) && !$model->model->getIsPC()) //если модель есть и это не ПК
+			||
+			(!is_object($model->model)) //или модели нет
+		)
+	) { ?>
+		<div class="row">
+			<div class="col-6">
+				<?= $form->field($model, 'hostname')->textInput(['maxlength' => true]) ?>
+			</div>
+			<div class="col-6">
+				<?= FieldsHelper::Select2Field($form,$model, 'domain_id',[
+					'data'=> Domains::fetchNames(),
+					'pluginOptions' => [
+						'dropdownParent' => $modalParent,
+					],
+				]) ?>
+			</div>
+		</div>
+	<?php } ?>
 
     <div class="row">
         <div class="col-md-4" >
@@ -179,28 +202,6 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				'data'=> Partners::fetchNames()
 			])?>
 		</div>
-		<?php if (
-			Yii::$app->params['techs.hostname.enable'] &&
-			(
-				(is_object($model->model) && !$model->model->getIsPC()) //если модель есть и это не ПК
-				||
-				(!is_object($model->model)) //или модели нет
-			)
-		) { ?>
-			<div class="row">
-				<div class="col-6">
-					<?= $form->field($model, 'hostname')->textInput(['maxlength' => true]) ?>
-				</div>
-				<div class="col-6">
-					<?= FieldsHelper::Select2Field($form,$model, 'domain_id',[
-						'data'=> Domains::fetchNames(),
-						'pluginOptions' => [
-							'dropdownParent' => $modalParent,
-						],
-					]) ?>
-				</div>
-			</div>
-		<?php } ?>
 		<div class="col-md-2" >
 			<?php if (count($model->comps)) {
 				echo FieldsHelper::Select2Field($form, $model, 'comp_id', [
