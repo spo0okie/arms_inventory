@@ -58,7 +58,7 @@ class ContractsSearch extends Contracts
 	        'licItems',
 	        'services',
 			'successor',
-			'childs',
+			'children',
 			'users',
 	        'state',
         ]);
