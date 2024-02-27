@@ -65,7 +65,7 @@ class PlacesController extends ArmsBaseController
 					'techs.model.manufacturer',
 					'techs.user',
 					'materials.type',
-					'materials.childs',
+					'materials.children',
 					'materials.usages', //дико добавляет тормозов
 				])->orderBy('short')
 				->all(),
@@ -122,7 +122,7 @@ class PlacesController extends ArmsBaseController
 					'techs.model.manufacturer',
 					'techs.user',
 					'materials.type',
-					'materials.childs',
+					'materials.children',
 					'materials.usages', //дико добавляет тормозов
 				])->orderBy('short')
 		        ->all(),

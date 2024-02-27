@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\ArrayHelper;
 use app\models\HistoryModel;
 use app\components\ListObjectsWidget;
 use yii\data\ActiveDataProvider;
@@ -8,7 +9,7 @@ use yii\web\View;
 /** @var View $this */
 /** @var HistoryModel $instance */
 /** @var ActiveDataProvider $dataProvider */
-/** @var boolean $hideEmptyColumns */
+/** @var string $columnsMode */
 
 $renderer=$this;
 $columns=[];
@@ -18,7 +19,7 @@ $attributes=$instance->attributes();
 //сразу выкидываем поля которые не нужно отображать
 $attributes=array_diff($attributes,['id','master_id','changed_attributes']);
 
-if ($hideEmptyColumns) {
+if ($columnsMode=='non-empty') {
 	$nonEmpty=[];
 	foreach ($attributes as $attribute) {
 		if (!in_array($attribute,$nonEmpty)) {
@@ -32,6 +33,26 @@ if ($hideEmptyColumns) {
 	}
 	if (count($nonEmpty))
 		$attributes=$nonEmpty;
+}
+
+if ($columnsMode=='changed') {
+	$changed=[];
+	if (in_array('updated_at',$attributes)) $changed[]='updated_at';
+	if (in_array('updated_by',$attributes)) $changed[]='updated_by';
+	$firstId=min(ArrayHelper::getArrayField($dataProvider->models,'id'));
+	foreach ($attributes as $attribute) {
+		if (!in_array($attribute,$changed)) {
+			foreach ($dataProvider->models as $model) if ($model->id != $firstId) {
+				/** @var HistoryModel $model */
+				if ($model->attributeIsChanged($attribute)) {
+					$changed[]=$attribute;
+					break;
+				}
+			}
+		}
+	}
+	if (count($changed))
+		$attributes=$changed;
 }
 
 //первым столбцом бы дату изменения

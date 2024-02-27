@@ -27,7 +27,23 @@ $this->params['breadcrumbs'][] = ['label' => $master->name, 'url' => [$classView
 $this->params['breadcrumbs'][] = ['label' => 'История изменений'];
 
 
-$hideEmptyColumns=Yii::$app->request->get('hideEmptyColumns',true);
+$columnsMode=Yii::$app->request->get('columnsMode','non-empty');
+
+$modesHints=[
+	'changed'=>'Показаны только с изменениями',
+	'non-empty'=>'Показаны только колонки со значениями',
+	'all'=>'Показаны все колонки',
+];
+
+$modesLinks=[
+	'changed'=>Html::a('Показать только измененные',['journal','columnsMode'=>'changed']+Yii::$app->request->get()),
+	'non-empty'=>Html::a('Показать только не пустые',['journal','columnsMode'=>'non-empty']+Yii::$app->request->get()),
+	'all'=>Html::a('Показать все',['journal','columnsMode'=>'all']+Yii::$app->request->get()),
+];
+
+unset($modesLinks[$columnsMode]);
+
+
 
 echo DynaGridWidget::widget([
 	'id'=> Inflector::camel2id(StringHelper::className($class)).'-journal',
@@ -35,13 +51,5 @@ echo DynaGridWidget::widget([
 	'dataProvider' => $dataProvider,
 	'columns' => include 'columns.php',
 	'model' => $instance,
-	'createButton' => $hideEmptyColumns?(
-		'Показаны только колонки со значениями. '. Html::a(
-			'Показать пустые',['journal','hideEmptyColumns'=>false]+Yii::$app->request->get()
-	)):(
-		Html::a(
-			'Скрыть пустые колонки',
-			['journal','hideEmptyColumns'=>true]+Yii::$app->request->get()
-		)
-	),
+	'createButton' => $modesHints[$columnsMode].': '.implode(' // ',$modesLinks),
 ]);
