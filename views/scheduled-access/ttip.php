@@ -1,13 +1,14 @@
 <?php
 
+use app\components\HistoryRecordWidget;
 use kartik\grid\GridView;
-use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
 
 ?>
 <div class="schedules-ttip ttip-card">
+	<?= HistoryRecordWidget::widget(compact('model')) ?>
 	<h1>
 		<?= $model->name ?>
 	</h1>

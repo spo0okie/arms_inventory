@@ -37,7 +37,7 @@ trait AttributeDataModelTrait
 	
 	public function getAttributeData($key)
 	{
-		if (is_null($this->attributeDataCache)) {
+		if (!isset($this->attributeDataCache)) {
 			$this->attributeDataCache=$this->attributeData();
 		}
 		

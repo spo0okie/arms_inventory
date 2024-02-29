@@ -37,7 +37,7 @@ class StringHelper {
 		}
 		
 		if (substr($attr,strlen($attr)-4)=='_ids') {
-			return lcfirst(Inflector::camelize(substr($attr,0,strlen($attr)-4)));
+			return lcfirst(Inflector::pluralize(Inflector::camelize(substr($attr,0,strlen($attr)-4))));
 		}
 		
 		return null;

@@ -205,8 +205,8 @@ class Services extends ArmsModel
 				'hint' => 'Короткое уникальное название сервиса или услуги',
 				'indexHint' => '{same}<br />'.
 					'При поиске также ищет в полях '.
-					'<strong>"'.$this->getAttributeLabel('search_text').'"</strong> и '.
-					'<strong>"'.$this->getAttributeLabel('description').'"</strong><br />'.
+					'<strong>"Другие варианты названия"</strong> и '.
+					'<strong>"Описание"</strong><br />'.
 					QueryHelper::$stringSearchHint,
 			],
 			'parent_id' => [

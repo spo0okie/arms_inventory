@@ -447,7 +447,7 @@ trait SchedulesModelCalcFieldsTrait
 	public function getWeekWorkTimeDescription($date=null) {
 		if (count($periods=$this->getWeekWorkTime($date))) {
 			$description=implode(', ',$periods);
-			if ($description=='00:00-23:59 '.static::$allDaysTitle)
+			if ($description=='00:00-23:59 '.Schedules::$allDaysTitle)
 				return $this->getDictionary('always');
 			return $description;
 		} else

@@ -1,5 +1,6 @@
 <?php
 
+use app\components\HistoryRecordWidget;
 use app\models\SchedulesEntries;
 use yii\helpers\Html;
 
@@ -19,7 +20,8 @@ if ($model->is_period) {
 //var_dump($positive);
 ?>
 <div class="schedules-entries-ttip ttip-card">
-    <h1><?= Html::encode($name) ?> : <?= $model->comment ?></h1>
+	<?= HistoryRecordWidget::widget(compact('model')) ?>
+	<h1><?= Html::encode($name) ?> : <?= $model->comment ?></h1>
 	<b>
 	<?php if ($model->is_period) {
 		echo ($model->is_work?'Рабочий период':'Нерабочий период').' из расписания';

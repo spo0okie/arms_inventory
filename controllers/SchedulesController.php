@@ -55,19 +55,19 @@ class SchedulesController extends ArmsBaseController
 		if (Yii::$app->request->get('attach_service')) {
 			$service= Services::findOne(Yii::$app->request->get('attach_service'));
 			if (is_object($service)) {
-				$model->name=\app\models\Schedules::$title.' работы '.$service->name;
+				$model->name= Schedules::$title.' работы '.$service->name;
 			}
 		} elseif (Yii::$app->request->get('support_service')) {
 			$support_service= Services::findOne(Yii::$app->request->get('support_service'));
 			if (is_object($service)) {
-				$model->name=\app\models\Schedules::$title.' поддержки '.$support_service->name;
+				$model->name= Schedules::$title.' поддержки '.$support_service->name;
 			}
 		}
 
 		$model->load(Yii::$app->request->get());
 		
 		if ($model->override_id) {
-			$model->parent_id = $model->override_id;
+			//$model->parent_id = $model->override_id;
 			$model->start_date = date('Y-m-d');
 			$model->name='Override for #'.$model->override_id;
 		}
