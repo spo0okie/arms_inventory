@@ -1,7 +1,8 @@
 <?php
 
+use app\components\HistoryRecordWidget;
+use app\components\UrlListWidget;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\TechModels */
@@ -13,7 +14,8 @@ use yii\widgets\DetailView;
 		</div>
 	<?php } ?>
 	<div class="ttip-card">
-
+		
+		<?= HistoryRecordWidget::widget(['model'=>$model]) ?>
 		<h1><?= Html::a($model->manufacturer->name.' '.$model->name,['/tech-models/view','id'=>$model->id]) ?></h1>
 		<?= $this->render('/tech-types/item',['model'=>$model->type]) ?>
 		<p>
@@ -22,9 +24,9 @@ use yii\widgets\DetailView;
 
 		<br />
 
-		<p>
 		<h4>Ссылки:</h4>
-		<?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
+		<p>
+		<?= UrlListWidget::Widget(['list'=>$model->links]) ?>
 		</p>
 
 	</div>

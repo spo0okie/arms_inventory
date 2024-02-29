@@ -48,5 +48,6 @@ class AcesHistory extends HistoryModel
     }
 
 
+    public $netIps=[]; //надо как-то их собирать из просто IP списка
 
 }

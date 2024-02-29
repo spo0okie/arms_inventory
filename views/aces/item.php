@@ -1,6 +1,7 @@
 <?php
 
-use yii\helpers\Html;
+use app\components\ItemObjectWidget;
+use app\components\LinkObjectWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Aces */
@@ -10,19 +11,13 @@ if (!isset($show_delete)) $show_delete=false;
 
 
 if (!empty($model)) {
-	if (!isset($name)) $name=$model->sname;
-	?>
-
-	<span class="aces-item"
-		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['aces/ttip','id'=>$model->id]) ?>"
-	>
-		<?=  Html::a($name,['aces/view','id'=>$model->id]) ?>
-		<?=  $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['aces/update','id'=>$model->id,'return'=>'previous']) ?>
-		<?=  $show_delete?Html::a('<span class="fas fa-trash"/>', ['aces/delete', 'id' => $model->id], [
-			'data' => [
-				'confirm' => 'Удалить этот элемент? Действие необратимо',
-				'method' => 'post',
-			],
-		]):'' ?>
-	</span>
-<?php } ?>
+	echo ItemObjectWidget::widget([
+		'model'=>$model,
+		'archived_class'=>'text-decoration-line-through',
+		'link'=> LinkObjectWidget::widget([
+			'model'=>$model,
+			'noDelete'=>!$show_delete,
+			'static'=>$static_view,
+		]),
+	]);
+}

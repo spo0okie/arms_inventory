@@ -13,9 +13,6 @@ use yii\helpers\Url;
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
 
-$deleteable=true; //тут переопределить возможность удаления элемента
-if (!isset($static_view)) $static_view=false;
-
 $items=[];
 $hasIp=$model->hasIpAccess();
 $hasPhone=$model->hasPhoneAccess();
@@ -93,36 +90,37 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 		</div>
 		<div class="col-md-4 ace-access-card d-flex flex-column pt-2 pull-right">
 			<div class="text-center text-white"><?= implode(', ',$accessTypes) ?></div>
-			
-			<div class="row mt-auto g-0">
-				<div class="btn-group" role="group">
-					<?=  Html::a('<span class="fas fa-pencil-alt"></span>',[
-						'/aces/update',
-						'id'=>$model->id,
-						'ajax'=>1,
-						'modal'=>'modal_form_loader'
-					],[
-						'class' => 'btn btn-sm text-white ace-access-buttons open-in-modal-form',
-						'title' => 'Правка элемента доступа',
-						'data-update-element' => '#ace_card_'.$model->id,
-						'data-update-url' => Url::to(['/aces/view','id'=>$model->id]),
-					]) ?>
-					<?=  HistoryWidget::widget([
-						'model'=>$model,
-						'showUser'=>false,
-						'showDate'=>false,
-						'empty'=>'',
-						'iconOptions'=>['class'=>'btn btn-sm text-white ace-access-buttons'],
-					])?>
-					<?=  Html::a('<span class="fas fa-trash"/>', ['aces/delete', 'id' => $model->id,'return'=>'previous'], [
-						'data' => [
-							'confirm' => 'Удалить этого участника доступа? Действие необратимо!',
-							'method' => 'post',
-						],
-						'class'=>'btn btn-sm text-white ace-access-buttons'
-					])?>
+			<?php if (!$static_view) { ?>
+				<div class="row mt-auto g-0">
+					<div class="btn-group" role="group">
+						<?=  Html::a('<span class="fas fa-pencil-alt"></span>',[
+							'/aces/update',
+							'id'=>$model->id,
+							'ajax'=>1,
+							'modal'=>'modal_form_loader'
+						],[
+							'class' => 'btn btn-sm text-white ace-access-buttons open-in-modal-form',
+							'title' => 'Правка элемента доступа',
+							'data-update-element' => '#ace_card_'.$model->id,
+							'data-update-url' => Url::to(['/aces/view','id'=>$model->id]),
+						]) ?>
+						<?=  HistoryWidget::widget([
+							'model'=>$model,
+							'showUser'=>false,
+							'showDate'=>false,
+							'empty'=>'',
+							'iconOptions'=>['class'=>'btn btn-sm text-white ace-access-buttons'],
+						])?>
+						<?=  Html::a('<span class="fas fa-trash"/>', ['aces/delete', 'id' => $model->id,'return'=>'previous'], [
+							'data' => [
+								'confirm' => 'Удалить этого участника доступа? Действие необратимо!',
+								'method' => 'post',
+							],
+							'class'=>'btn btn-sm text-white ace-access-buttons'
+						])?>
+					</div>
 				</div>
-			</div>
+			<?php } ?>
 		</div>
 	</div>
 	<?php if ($model->notepad) { ?>

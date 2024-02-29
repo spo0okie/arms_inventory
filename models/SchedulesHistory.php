@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\traits\SchedulesModelCalcFieldsTrait;
+
 /**
  * This is the model class for table "maintenance_reqs_history".
  *
@@ -18,7 +20,9 @@ namespace app\models;
  */
 class SchedulesHistory extends HistoryModel
 {
-
+	use SchedulesModelCalcFieldsTrait;
+	
+	
 	public static $title='Изменения расписания';
 	public static $titles='Изменения расписаний';
 	
@@ -43,7 +47,19 @@ class SchedulesHistory extends HistoryModel
     {
         return 'schedules_history';
     }
-
-
+	
+	/**
+	 * Подменяем поиск исключений в архиве расписания,
+	 * ибо функция имеет смысл для оперативных данных, а архивным никто не будет пользоваться
+	 * @return array
+	 */
+	public function findExceptions(){return [];}
+	
+	/**
+	 * Смысл тот же. Это нужно для оперативной работы с расписанием. Можно переделать на работу с уже загруженными данными
+	 * но в контексте архивных данных смысл все равно теряется
+	 * @return array
+	 */
+	public function findPeriods(){return [];}
 
 }

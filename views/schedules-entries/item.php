@@ -7,6 +7,7 @@
  * Time: 17:33
  */
 
+use app\models\HistoryModel;
 use app\models\SchedulesEntries;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -28,10 +29,15 @@ if (is_object($model)) {
 		}
 	}
 	if (!isset($date))$date=$model->date;
+	if ($model instanceof HistoryModel) {
+		$ttipUrl=Url::to(['schedules-entries/ttip','id'=>$model->master_id,'timestamp'=>$model->updated_at]);
+	} else {
+		$ttipUrl=Url::to(['schedules-entries/ttip','id'=>$model->id]);
+	}
 ?>
 
 	<span class="schedules-entries-item"
-		  qtip_ajxhrf="<?= Url::to(['schedules-entries/ttip','id'=>$model->id]) ?>"
+		  qtip_ajxhrf="<?= $ttipUrl ?>"
 	>
 		<?= Html::a($name,[
 			'/schedules/view/',

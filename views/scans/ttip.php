@@ -2,6 +2,8 @@
 /**
  * Превью скана
  */
+
+use app\models\Scans;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -9,7 +11,7 @@ use yii\helpers\Html;
 
 if (is_object($model) && $model->fileExists)
 	echo Html::a(
-		Html::img((strtolower($model->format) == 'pdf') ? (\app\models\Scans::pdfThumb()) : $model->idxThumb),
+		Html::img((strtolower($model->format) == 'pdf') ? (Scans::pdfThumb()) : $model->idxThumb),
 		$model->fullFname,
 		['class'=>'scans-ttip']
 	);

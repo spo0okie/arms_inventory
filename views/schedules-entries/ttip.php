@@ -1,5 +1,6 @@
 <?php
 
+use app\models\SchedulesEntries;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -24,14 +25,14 @@ if ($model->is_period) {
 		echo ($model->is_work?'Рабочий период':'Нерабочий период').' из расписания';
 	} else echo 'Из расписания'; ?>
 	</b>:
-	<?= $this->render('/schedules/item',['model'=>$model->master->base,'static_view'=>true]) ?>
+	<?= $this->render('/schedules/item',['model'=>is_object($model->master)?$model->master->base:null,'static_view'=>true]) ?>
 	<p><?= $model->history ?></p>
 	<br />
 	<?php if (isset($positive) && is_array($positive) && count($positive)) {
 		echo '<h3>Наложившиеся на этот день доп. рабочие периоды:</h3>';
 	
 		foreach ($positive as $pos) {
-			echo $this->render('/schedules-entries/item',['model'=>\app\models\SchedulesEntries::findOne($pos)]).'<br />';
+			echo $this->render('/schedules-entries/item',['model'=> SchedulesEntries::findOne($pos)]).'<br />';
 		}
 		
 		echo '<br />';
@@ -41,7 +42,7 @@ if ($model->is_period) {
 		echo '<h3>Наложившиеся на этот день доп. нерабочие периоды:</h3>';
 		
 		foreach ($negative as $neg) {
-			echo $this->render('/schedules-entries/item',['model'=>\app\models\SchedulesEntries::findOne($neg)]).'<br />';
+			echo $this->render('/schedules-entries/item',['model'=> SchedulesEntries::findOne($neg)]).'<br />';
 		}
 		
 		echo '<br />';

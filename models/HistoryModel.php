@@ -3,8 +3,8 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\helpers\StringHelper;
 use yii\db\ActiveRecord;
-use yii\helpers\Inflector;
 
 /**
  * This is the model class for table "arms".
@@ -128,8 +128,9 @@ class HistoryModel extends ArmsModel
 	public static function findOnTimestamp($master_id,$timestamp) {
 		return static::find()
 			->where(['master_id'=>$master_id])
-			->andWhere(['>=','updated_at',$timestamp])
+			->andWhere(['<=','updated_at',$timestamp])
 			->orderBy(['id'=>SORT_DESC])
+			->limit(1)
 			->one();
 	}
 	
@@ -164,7 +165,7 @@ class HistoryModel extends ArmsModel
 	 */
 	public function attributeIsJournaling($attr) {
 		//если у нас вообще нет такого атрибута то не журналируем
-		if (!isset($this->attributes[$attr])) return false;
+		//if (!isset($this->attributes[$attr])) return false;
 		//если мы его не можем записывать, то не журналируем
 		if (!$this->canSetProperty($attr)) return false;
 		//если его изменения нас не интересуют, то не журналируем
@@ -315,6 +316,9 @@ class HistoryModel extends ArmsModel
 			$this->changed_attributes=static::DELETED_FLAG;
 		}
 		
+		//все установленные атрибуты считаем измененными чтобы обновились все ссылки которые там могут быть
+		$this->changedAttributes=array_keys($this->attributes);
+		
 		if ($this->save()) {
 			//если инициатор изменений не передан, значит мы и есть инициатор
 			// и надо передать информацию об изменениях связанным объектам
@@ -333,15 +337,22 @@ class HistoryModel extends ArmsModel
 			//проверить что он ссылка на объект, который имеет обратную ссылку на нас и журналирует ее изменения
 			if (!$this->attributeIsReverseJournaling($attribute)) continue;
 			
-			//найти какие ссылки добавились/пропали
-			//чтобы найти изменяющиеся позиции надо
-			//найти пересечение массивов - не меняющиеся позиции
-			//найти объединение массивов - все позиции
-			//вычесть пересечение из объединения - только меняющиеся позиции
-			$changed=ArrayHelper::setsSymDiff(
-				$this->fetchLinkIds($attribute),
-				$this->previous->fetchLinkIds($attribute)
-			);
+			// если у нас есть предыдущая запись, то сравниваем значения этого поля чтобы найти что поменялось
+			if (is_object($this->previous)) {
+				//найти какие ссылки добавились/пропали
+				//чтобы найти изменяющиеся позиции надо
+				//найти пересечение массивов - не меняющиеся позиции
+				//найти объединение массивов - все позиции
+				//вычесть пересечение из объединения - только меняющиеся позиции
+				$changed = ArrayHelper::setsSymDiff(
+					$this->fetchLinkIds($attribute),
+					$this->previous->fetchLinkIds($attribute)
+				);
+			} else {
+				//если предыдущая запись не загружена (а при удалении она не загружена)
+				//то обрабатываем все ссылки на которые ссылался удаленный объект
+				$changed=$this->fetchLinkIds($attribute);
+			}
 			//загрузить объекты-ссылки
 			foreach ($changed as $id) {
 				$link=$this->fetchLink($attribute,$id);
@@ -429,15 +440,9 @@ class HistoryModel extends ArmsModel
 		if (!$this->attributeIsLink($attr)) return false;
 		
 		$schema=$this->attributeLinkSchema($attr);
-		if (isset($schema['loader'])) return $schema['loader']; //если указан то и славненько
+		if (isset($schema['loader'])) return $schema['loader']; //если указан то и славно
 		
-		if (substr($attr,strlen($attr)-3)=='_id') {
-			return lcfirst(Inflector::singularize(Inflector::camelize(substr($attr,0,strlen($attr)-3))));
-		}
-
-		if (substr($attr,strlen($attr)-4)=='_ids') {
-			return lcfirst(Inflector::camelize(substr($attr,0,strlen($attr)-4)));
-		}
+		if ($loader=StringHelper::linkId2Getter($attr)) return $loader;
 		
 		return false;
 	}

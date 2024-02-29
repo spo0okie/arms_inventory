@@ -4,10 +4,10 @@ namespace app\models;
 
 use app\console\commands\SyncController;
 use app\helpers\RestHelper;
-use Imagine\Image\Box;
-use Imagine\Imagick\Imagine;
+use Imagick;
+use ImagickException;
 use Yii;
-use yii\imagine\Image;
+use yii\helpers\StringHelper;
 
 
 /**
@@ -15,6 +15,13 @@ use yii\imagine\Image;
  *
  * @property int $id id
  * @property int $contracts_id contracts link
+ * @property int places_id
+ * @property int tech_models_id
+ * @property int material_models_id
+ * @property int lic_types_id
+ * @property int lic_items_id
+ * @property int arms_id
+ * @property int techs_id
  * @property string $viewThumb
  * @property string $idxThumb
  * @property string $thumbExt
@@ -40,7 +47,7 @@ class Scans extends ArmsModel
 	 * Ошибка потерянного изображения
 	 */
 	public static $NO_ORIG_ERR='err_no_orig';
-	public static $PDF_ORIG_ERR='pdf_no_orig';
+	//public static $PDF_ORIG_ERR='pdf_no_orig';
 	public $scanFile;
 
 	public static $viewThumbSizes=[512,512];
@@ -70,8 +77,9 @@ class Scans extends ArmsModel
     public function rules()
     {
         return [
-            [['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id','arms_id','techs_id'], 'integer'],
-	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg, pdf, gif'],
+			//[['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id','arms_id','techs_id'], 'default', 'value'=>null],
+			[['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id','arms_id','techs_id'], 'integer'],
+	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'on' => 'create'],
         ];
     }
 
@@ -96,7 +104,7 @@ class Scans extends ArmsModel
 	{
 		if ($this->validate()) {
 			$prefix=($this->id)?$this->id:static::fetchNextId();
-			$this->file=$prefix.'-'.\yii\helpers\StringHelper::truncate($this->scanFile->baseName,80);
+			$this->file=$prefix.'-'. StringHelper::truncate($this->scanFile->baseName,80);
 			$this->format=$this->scanFile->extension;
 			$this->scanFile->saveAs($_SERVER['DOCUMENT_ROOT'].$this->fullFname);
 			return true;
@@ -126,7 +134,7 @@ class Scans extends ArmsModel
 		$this->format=pathinfo($name)['extension'];
 		$this->save(false);
 		$data=$rest->getFile('scans','download',['id'=>$remote['id']]);
-		return file_put_contents(\Yii::$app->basePath.$this->fullFname,$data);
+		return file_put_contents(Yii::$app->basePath.$this->fullFname,$data);
 	}
 	
 	
@@ -185,7 +193,7 @@ class Scans extends ArmsModel
 	 * @return string
 	 */
 	public function getFsFname(){
-		return \Yii::$app->basePath.$this->fullFname;
+		return Yii::$app->basePath.$this->fullFname;
 	}
 
 	/**
@@ -281,7 +289,7 @@ class Scans extends ArmsModel
 	 */
 	public function thumbFileName($width,$height){
 		return self::formThumbFileName(
-			yii\helpers\StringHelper::truncate($this->file,80).'.'.$this->format,
+			StringHelper::truncate($this->file,80).'.'.$this->format,
 			$width,
 			$height
 		);
@@ -291,7 +299,10 @@ class Scans extends ArmsModel
 	/**
 	 * Возвращает путь к превью файла вписанного в заданный размер
 	 * генерирует превью при необходимости
+	 * @param $width
+	 * @param $height
 	 * @return string
+	 * @throws ImagickException
 	 */
 	public function thumb($width,$height){
 		$thumbName=$this->thumbFileName($width,$height);
@@ -315,7 +326,7 @@ class Scans extends ArmsModel
 	 * @param $width
 	 * @param $height
 	 * @return string
-	 * @throws \ImagickException
+	 * @throws ImagickException
 	 */
 	public static function prepThumb($orig,$thumb,$width,$height){
 		$width=$width?$width:null;
@@ -326,9 +337,9 @@ class Scans extends ArmsModel
 			
 			$ext=self::cutExtension($orig);
 			$format=self::cutExtension($thumb);
-			$im=new \Imagick($_SERVER['DOCUMENT_ROOT'] . $orig.($ext=='pdf'?'[0]':''));
+			$im=new Imagick($_SERVER['DOCUMENT_ROOT'] . $orig.($ext=='pdf'?'[0]':''));
 			$im->setImageColorspace(255); // prevent image colors from inverting
-			$im->setImageColorSpace(\Imagick::COLORSPACE_SRGB); //иначе у белых JPG становился розовый фон
+			$im->setImageColorSpace(Imagick::COLORSPACE_SRGB); //иначе у белых JPG становился розовый фон
 			$im->setimageformat($format);
 			if ($width&&$height) {
 				if ($im->getImageWidth()>$im->getImageHeight())
@@ -337,14 +348,14 @@ class Scans extends ArmsModel
 					$width=0;
 			}
 			if ($ext=='pdf') {
-				$bg=new \Imagick();
+				$bg=new Imagick();
 				$bg->setResolution($im->getImageWidth(),$im->getImageHeight());
 				$bg->newImage($im->getImageWidth(),$im->getImageHeight(),'white');
-				$bg->compositeImage($im,\Imagick::COMPOSITE_OVER,0,0);
+				$bg->compositeImage($im, Imagick::COMPOSITE_OVER,0,0);
 				$bg->flattenImages();
 				$im=$bg;
 			}
-			$im->resizeImage($width,$height,\Imagick::FILTER_LANCZOS,1);
+			$im->resizeImage($width,$height, Imagick::FILTER_LANCZOS,1);
 			$im->writeimage($_SERVER['DOCUMENT_ROOT'] . $thumb);
 			$im->clear();
 			$im->destroy();
@@ -365,18 +376,20 @@ class Scans extends ArmsModel
 		$h=static::$idxThumbSizes[1];
 		return static::prepThumb('/web/scans/no_file.png',"/web/scans/thumbs/no_file_thumb_${w}x${h}.png",$w,$h);
 	}
-
+	
 	/**
 	 * Возвращает превью для странички view
 	 * @return string
+	 * @throws ImagickException
 	 */
 	public function getViewThumb(){
 		return $this->thumb(static::$viewThumbSizes[0],static::$viewThumbSizes[1]);
 	}
-
+	
 	/**
 	 * Возвращает превью для странички index
 	 * @return string
+	 * @throws ImagickException
 	 */
 	public function getIdxThumb(){
 		return $this->thumb(static::$idxThumbSizes[0],static::$idxThumbSizes[1]);
@@ -402,7 +415,7 @@ class Scans extends ArmsModel
 	 */
 	public function getContract()
 	{
-		return $this->hasOne(Contracts::className(), ['id' => 'contracts_id']);
+		return $this->hasOne(Contracts::class, ['id' => 'contracts_id']);
 	}
 	
 	/**
@@ -410,7 +423,7 @@ class Scans extends ArmsModel
 	 */
 	public function getPlace()
 	{
-		return $this->hasOne(Places::className(), ['id' => 'places_id']);
+		return $this->hasOne(Places::class, ['id' => 'places_id']);
 	}
 	
 	/**
@@ -418,7 +431,7 @@ class Scans extends ArmsModel
 	 */
 	public function getTechModel()
 	{
-		return $this->hasOne(TechModels::className(), ['id' => 'tech_models_id']);
+		return $this->hasOne(TechModels::class, ['id' => 'tech_models_id']);
 	}
 	
 	/**
@@ -426,7 +439,7 @@ class Scans extends ArmsModel
 	 */
 	public function getMaterialType()
 	{
-		return $this->hasOne(MaterialsTypes::className(), ['id' => 'material_types_id']);
+		return $this->hasOne(MaterialsTypes::class, ['id' => 'material_types_id']);
 	}
 	
 	/**
@@ -435,7 +448,7 @@ class Scans extends ArmsModel
 
 	public function getLicType()
 	{
-		return $this->hasOne(LicTypes::className(), ['id' => 'lic_types_id']);
+		return $this->hasOne(LicTypes::class, ['id' => 'lic_types_id']);
 	}
 	
 	/**
@@ -443,7 +456,7 @@ class Scans extends ArmsModel
 	 */
 	public function getLicItem()
 	{
-		return $this->hasOne(LicItems::className(), ['id' => 'lic_items_id']);
+		return $this->hasOne(LicItems::class, ['id' => 'lic_items_id']);
 	}
 	
 	/**

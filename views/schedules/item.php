@@ -7,7 +7,8 @@
  * Time: 17:01
  */
 
-use yii\helpers\Html;
+use app\components\ItemObjectWidget;
+use app\components\LinkObjectWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
@@ -17,15 +18,14 @@ if (!isset($empty)) $empty='- расписание отсутствует -';
 
 if (!empty($model)) {
 	if (!isset($name)) $name=$model->name;
-	?>
-	
-	<span class="schedules-item"
-		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['schedules/ttip','id'=>$model->id]) ?>"
-	>
-		<?=  Html::a($name,['schedules/view','id'=>$model->id]) ?>
-		<?=  $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['schedules/update','id'=>$model->id,'return'=>'previous']) ?>
-	</span>
-<?php } else {
+	echo ItemObjectWidget::widget([
+		'model'=>$model,
+		'archived_class'=>'text-decoration-line-through',
+		'link'=> LinkObjectWidget::widget([
+			'model'=>$model,
+			'static'=>$static_view,
+			'name'=>$name,
+		]),
+	]); } else {
 	echo $empty;
 }
-?>

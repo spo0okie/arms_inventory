@@ -1,5 +1,8 @@
 <?php
 
+use app\models\SchedulesEntries;
+use yii\bootstrap5\Alert;
+use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -15,23 +18,23 @@ $today=Yii::$app->request->get('date')?
 ?>
 
 
-<?= $model->isNewRecord?\yii\bootstrap5\Alert::widget([
+<?= $model->isNewRecord? Alert::widget([
 	'body'=>'Для внесения изменений нужно сначала сохранить расписание',
 	'options'=>['class' => 'alert-warning'],
 	'closeButton'=>false
 ]):'' ?>
 
-<?= \yii\grid\GridView::widget([
+<?= GridView::widget([
 	'dataProvider' => $model->getWeekDataProvider(),
 	'summary' => false,
 	'tableOptions' => [
 		'class'=>'table table-condensed table-hover table-borderless'
 	],
 	'columns' => [
-		[
-			'header'=>\app\models\SchedulesEntries::$label_day,
+		[//название дня недели
+			'header'=> SchedulesEntries::$label_day,
 			'value'=>function($data,$day) {
-				return \app\models\SchedulesEntries::$days[$day];
+				return SchedulesEntries::$days[$day];
 			},
 			'contentOptions' => function($data,$day) use ($model) {return[
 				'class' => (
@@ -42,13 +45,13 @@ $today=Yii::$app->request->get('date')?
 				'id'=>'day-'.$day
 			];},
 		],
-		[
-			'header'=>\app\models\SchedulesEntries::$label_schedule,
+		[//текстовое описание
+			'header'=> SchedulesEntries::$label_schedule,
 			'format'=>'raw',
 			'value'=>function ($data,$day) use ($static_view,$model) {
 				//Если задано явно, то рисуем явно заданное с возможностью править и удалить
 				/**
-				 * @var \app\models\SchedulesEntries $data
+				 * @var SchedulesEntries $data
 				 */
 				if (is_object($data) && ($data->date == $day) && ($data->schedule_id==$model->id)) {
 					$update=$static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>', [
@@ -91,8 +94,8 @@ $today=Yii::$app->request->get('date')?
 				)?'table-success':''
 			];},
 		],
-		[
-			'header'=>\app\models\SchedulesEntries::$label_graph,
+		[//диаграмма
+			'header'=> SchedulesEntries::$label_graph,
 			'value'=>function($data,$day) use ($renderer,$model) {
 				return $renderer->render('/schedules-entries/stripe',['model'=>$data,'schedule'=>$model]);
 			},

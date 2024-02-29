@@ -7,7 +7,10 @@ namespace app\helpers;
 class DateTimeHelper
 {
 	/**
-	 * @param string|integer $time
+	 * Конвертирует строку в unixtime
+	 * Если передать null то возвращает текущее время
+	 * Если передать int то возвращает его обратно, т.к. это вполне себе unixtime
+	 * @param mixed $time
 	 * @return false|int
 	 */
 	public static function unixTime($time) {
@@ -27,7 +30,7 @@ class DateTimeHelper
 	
 	/**
 	 * Понедельник той недели, в какую указывает $date
-	 * @param null $date
+	 * @param string|null $date если null, то текущей неделя
 	 * @return false|int
 	 */
 	public static function weekMonday($date=null) {
@@ -41,7 +44,7 @@ class DateTimeHelper
 	
 	/**
 	 * Воскресенье той недели, в какую указывает $date
-	 * @param null $date
+	 * @param string|null $date если null, то текущей неделя
 	 * @return false|int
 	 */
 	public static function weekSunday($date=null) {
@@ -51,5 +54,9 @@ class DateTimeHelper
 		$weekDay=date('N',$date);
 		$date+=86400*(7-$weekDay);
 		return $date;
+	}
+	
+	public static function previousDay($date) {
+		return date('Y-m-d',static::unixTime($date)-86400);
 	}
 }

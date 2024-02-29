@@ -151,12 +151,22 @@ class ScansController extends ArmsBaseController
     public function actionDelete(int $id=null)
     {
     	if (is_null($id)) $id=Yii::$app->request->post('key');
+    	
     	/** @var Scans $model */
     	$model=$this->findModel($id);
-        $model->delete();
+    	$model->contracts_id=null;
+		$model->places_id=null;
+		$model->tech_models_id=null;
+		$model->material_models_id=null;
+		$model->lic_types_id=null;
+		$model->lic_items_id=null;
+		$model->arms_id=null;
+		$model->techs_id=null;
+        $model->save();
 
-        if (file_exists($_SERVER['DOCUMENT_ROOT'].$model->fullFname))
-            unlink($_SERVER['DOCUMENT_ROOT'].$model->fullFname);
+        //вместо удаления отвязываем ото всех и сохраняем. Осиротевший скан может понадобиться при работе с журналами
+        //if (file_exists($_SERVER['DOCUMENT_ROOT'].$model->fullFname))
+        //    unlink($_SERVER['DOCUMENT_ROOT'].$model->fullFname);
 
 	    if (Yii::$app->request->isAjax) {
 		    Yii::$app->response->format = Response::FORMAT_JSON;

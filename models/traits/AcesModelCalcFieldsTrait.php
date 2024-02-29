@@ -9,7 +9,10 @@ namespace app\models\traits;
 
 
 
-use app\models\Aces;/**
+use app\models\Aces;
+use app\models\HistoryModel;
+
+/**
  * @package app\models\traits
  */
 
@@ -87,9 +90,9 @@ trait AcesModelCalcFieldsTrait
 	 */
 	public function getSname()
 	{
-		return strlen($this->comment)?
-			$this->comment:
-			'ACE#'.$this->id;
+		if ($this->comment) return $this->comment;
+		if ($this instanceof HistoryModel) return 'ACE#'.$this->master_id;
+		return 'ACE#'.$this->id;
 	}
 	
 	public function getName(){return $this->sname;}

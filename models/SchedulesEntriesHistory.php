@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\traits\ScheduleEntriesModelCalcFieldsTrait;
+
 /**
  * This is the model class for table "maintenance_reqs_history".
  *
@@ -18,6 +20,7 @@ namespace app\models;
  */
 class SchedulesEntriesHistory extends HistoryModel
 {
+	use ScheduleEntriesModelCalcFieldsTrait;
 
 	public static $title='Изменения записи расписания';
 	public static $titles='Изменения записей расписания';

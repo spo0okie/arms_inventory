@@ -3,6 +3,8 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\helpers\TimeIntervalsHelper;
+use app\models\traits\ScheduleEntriesModelCalcFieldsTrait;
 use Yii;
 use yii\validators\DateValidator;
 
@@ -50,6 +52,7 @@ use yii\validators\DateValidator;
  */
 class SchedulesEntries extends ArmsModel
 {
+	use ScheduleEntriesModelCalcFieldsTrait;
 	const SCENARIO_PERIOD='scenario_period';
 	const SCENARIO_DAY='scenario_day';
 	static $title='Период расписания';
@@ -93,41 +96,6 @@ class SchedulesEntries extends ArmsModel
 	public static $label_graph='Картина дня';
 	
 
-	public $isAclCache=null;
-	
-		
-		
-		public function getIsAcl() {
-		if (is_null($this->isAclCache)) {
-			$this->isAclCache=is_object($this->master) && $this->master->isAcl;
-		}
-		return $this->isAclCache;
-	}
-	
-	public function getIsWorkDescription() {
-		if ($this->isAcl)
-			return static::$isWorkComment['acl'][$this->is_work];
-		return static::$isWorkComment['default'][$this->is_work];
-		
-	}
-	
-	/**
-	 * Возвращает описание даты записи
-	 * @return string
-	 */
-	public function getDay() {
-		if (isset(static::$days[$this->date])) return static::$days[$this->date];
-		return $this->date;
-	}
-	
-	/**
-	 * Возвращает описание даты записи
-	 * @return string
-	 */
-	public function getDayFor() {
-		if (isset(static::$daysFor[$this->date])) return static::$daysFor[$this->date];
-		return $this->date;
-	}
 	
 	/**
 	 * {@inheritdoc}
@@ -361,7 +329,7 @@ class SchedulesEntries extends ArmsModel
 	 */
 	public function periodsIntersect($period) {
 		if (!$this->is_period || !$period->is_period) return false;
-		return Schedules::intervalIntersect($this->periodInterval,$period->periodInterval);
+		return TimeIntervalsHelper::intervalIntersect($this->periodInterval,$period->periodInterval);
 	}
 	
 	/**
@@ -384,20 +352,20 @@ class SchedulesEntries extends ArmsModel
 	 */
 	public function getIntervals($date) {
 		if ($this->is_period) {
-			return [Schedules::intervalCut(
+			return [TimeIntervalsHelper::intervalCut(
 				$this->periodInterval,
 				[strtotime($date.' 00:00:00'),strtotime($date.' 23:59:59')]
 			)];
-		} elseif ($this->schedule!=='-') {
+		} else {//если у нас это расписание на день
+			//если мы знаем расписание на предыдущий день
 			$intervals=[];
-			foreach (explode(',',$this->schedule) as $schedule) {
-				$intervals[]= SchedulesEntries::scheduleExToInterval($schedule,$date);
+			$workSchedule=$this->getWorkSchedule();
+			foreach (explode(',',$workSchedule) as $period) {
+				if (is_array($interval=SchedulesEntries::scheduleExToInterval($period,$date)))
+					$intervals[]= $interval;
 			}
 			return $intervals;
-			
 		}
-		return [];
-		
 	}
 	
 	/**
@@ -448,6 +416,34 @@ class SchedulesEntries extends ArmsModel
 	}
 	
 	/**
+	 * Проверяет, что интервал не вылазит на следующий день (например 22:00-01:00)
+	 * И если вылазит, то отдает только кусок на день расписания в формате [минуты начала,минуты окончания]
+	 * @param $interval
+	 * @return array
+	 */
+	public static function scheduleMinuteIntervalFitDay($interval) {
+		if ($interval[0]>$interval[1]) {
+			//возвращаем исходный интервал с замененными границами
+			return [$interval[0],24*60-1]+$interval;	//[22:00-23:59]]
+		}
+		return $interval;
+	}
+	
+	/**
+	 * Проверяет, что интервал не вылазит на следующий день (например 22:00-01:00)
+	 * И если вылазит, то отдает только кусок на следующий день расписания в формате [минуты начала,минуты окончания]
+	 * @param $interval
+	 * @return array
+	 */
+	public static function scheduleMinuteIntervalOverheadDay($interval) {
+		if ($interval[0]>$interval[1]) {
+			//возвращаем исходный интервал с замененными границами
+			return [0,$interval[1]]+$interval;	//[00:00-01:00]]
+		}
+		return null; //нет оверхеда
+	}
+	
+	/**
 	 * Конвертирует HH:MM-HH:MM в [минуты начала,минуты окончания,{metadata}]
 	 * @param $schedule
 	 * @return false|array
@@ -468,6 +464,7 @@ class SchedulesEntries extends ArmsModel
 	/**
 	 * Конвертирует HH:MM-HH:MM в [unixtime начала,unixtime окончания,{metadata}]
 	 * @param $schedule
+	 * @param $date
 	 * @return false|array
 	 */
 	public static function scheduleExToInterval($schedule,$date) {
@@ -484,18 +481,19 @@ class SchedulesEntries extends ArmsModel
 	}
 	
 	/**
-	 * Конвертирует HH:MM-HH:MM в [минуты начала,минуты окончания]
+	 * Конвертирует [минуты начала,минуты окончания,{meta}] в HH:MM-HH:MM{meta}
 	 * @param $interval array
 	 * @return string
 	 */
 	public static function minuteIntervalToSchedule(array $interval) {
 		//синтаксические ошибки в периоде
-		if (count($interval)!==2) return '';
+		if (!isset($interval[0]) && !isset($interval[1])) return '';
 		
 		return
 			self::intMinutesToStrTimestamp($interval[0])
 			.'-'
-			.self::intMinutesToStrTimestamp($interval[1]);
+			.self::intMinutesToStrTimestamp($interval[1])
+			.(isset($interval['meta'])?$interval['meta']:'');
 	}
 	
 	/**
@@ -518,33 +516,37 @@ class SchedulesEntries extends ArmsModel
 			
 	}
 	
-	public function getSchedulePeriods() {
-		if ($this->schedule==='-') return [];
-		return explode(',',$this->schedule);
-	}
+
 	
-	public function getMinuteIntervals() {
-		$tokens=explode(',',$this->scheduleWithoutMetadata);
-		$intervals=[];
-		foreach ($tokens as $token) {
-			$interval=static::scheduleToMinuteInterval($token);
-			//var_dump($interval);
-			if ($interval!==false)
-				$intervals[]=$interval;
-		}
-		return $intervals;
-	}
 	
-	public function getMinuteIntervalsEx() {
-		$tokens=explode(',',$this->schedule);
-		$intervals=[];
-		foreach ($tokens as $token) {
-			$interval=static::scheduleExToMinuteInterval($token);
-			//var_dump($interval);
-			if ($interval!==false)
-				$intervals[]=$interval;
+	/**
+	 * Найти Entry на предыдущий день недели в этом расписании
+	 * - без учета перекрытий другими расписаниями
+	 */
+	public function getPreviousWeekDay() {
+		$day=$this->requestedWeekDay??$this->date;
+		
+		//если это расписание на любой день, то предыдущий это он же и есть
+		if ($day=='def') return $this;
+		
+		//нам нужно расписание на неделю, чтобы вытащить другой день
+		if (!is_object($this->master)) return null;
+		
+		//сдвигаем день
+		$weekDay=(int)($day)-1;
+		if ($weekDay==0) $weekDay=7;
+		
+		//ищем сдвинутый день
+		if (is_null($entry=$this->master->getDayEntryRecursive($weekDay,null))) {
+			//если не нашли то ищем default
+			if (is_null($entry=$this->master->getDayEntryRecursive('def',null))) {
+				//если ничего не нашли то null
+				return null;
+			}
 		}
-		return $intervals;
+		//говорим какой день искали найденному расписанию на день
+		$entry->requestedWeekDay=$weekDay;
+		return $entry;
 	}
 	
 	public function getPeriodSchedule() {
@@ -561,19 +563,8 @@ class SchedulesEntries extends ArmsModel
 		}
 	}
 	
-	public function getScheduleWithoutMetadata() {
-		return static::scheduleWithoutMetadata($this->schedule);
-	}
 	
-	public function getMergedSchedule() {
-		if ($this->schedule === '-') return '-';
-		$intervals= Schedules::intervalMerge($this->minuteIntervals);
-		//var_dump($intervals);
-		$timestamps=[];
-		foreach ($intervals as $interval)
-			$timestamps[]=static::minuteIntervalToSchedule($interval);
-		return implode(',',$timestamps);
-	}
+
 	
 	public function beforeValidate()
 	{

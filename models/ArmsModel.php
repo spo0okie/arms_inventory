@@ -117,9 +117,6 @@ class ArmsModel extends ActiveRecord
 		];
 	}
 	
-	
-
-	
 	/**
 	 * Возвращает ссылки на объекты ссылающиеся на этот
 	 * по схеме one-to-many и many-to-many
@@ -207,7 +204,7 @@ class ArmsModel extends ActiveRecord
 		$object=isset($params['object'])?$params['object']:$this;
 		
 		//метод для получения связанного объекта
-		$getLink=$params['getLink'];
+		$getLink=$params['getLink']??'parent';
 		
 		//если у нас есть ссылка
 		if (!empty($object->$attribute)) {
@@ -301,7 +298,7 @@ class ArmsModel extends ActiveRecord
 	{
 		parent::afterDelete();
 
-		$this->historyCommit(); //журналирование удаления
+		$this->historyEnd(); //журналирование удаления
 	}
 	
 	public function beforeSave($insert)

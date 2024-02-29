@@ -24,6 +24,13 @@ class SchedulesEntriesController extends ArmsBaseController
 	 */
 	public function actionTtip(int $id)
 	{
+		if ($t=Yii::$app->request->get('timestamp')) {
+			return $this->renderPartial('ttip', [
+				'model' => $this->findJournalRecord($id,$t),
+				'positive' => Yii::$app->request->getQueryParam( 'positive',[]),
+				'negative' => Yii::$app->request->getQueryParam('negative',[]),
+			]);
+		}
 		return $this->renderPartial('ttip', [
 			'model' => $this->findModel($id),
 			'positive' => Yii::$app->request->getQueryParam( 'positive',[]),

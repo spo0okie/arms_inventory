@@ -5,6 +5,7 @@ namespace app\components;
 
 
 use app\models\ArmsModel;
+use app\models\HistoryModel;
 use app\models\Users;
 use yii\base\Widget;
 use yii\helpers\Html;
@@ -27,11 +28,17 @@ class HistoryWidget extends Widget
 	protected $user;
 	protected $modelClass;
 	protected $historyClass;
+	protected $calledOnHistory;	//признак того что виджет вызвали на объекте класса журнала
 	
 	public function init()
 	{
-		$this->modelClass=get_class($this->model);
-		$this->historyClass=$this->modelClass.'History';
+		if ($this->model instanceof HistoryModel) {
+			$this->calledOnHistory=true;
+		} else {
+			$this->calledOnHistory=false;
+			$this->modelClass=get_class($this->model);
+			$this->historyClass=$this->modelClass.'History';
+		}
 		
 		if ($this->model->hasAttribute('updated_at'))
 			$this->updated_at=$this->model->updated_at;
@@ -65,7 +72,7 @@ class HistoryWidget extends Widget
 		$info=count($tokens)?$this->prefix.implode(', ',$tokens):$this->empty;
 		
 		//если у нас ведется история по этому классу, то оформляем ссылку
-		if ($this->showIcon && class_exists($this->historyClass))
+		if ($this->showIcon && !$this->calledOnHistory && class_exists($this->historyClass))
 			$info.=' '.Html::a($this->icon,[
 				'history/journal',
 				'class'=>$this->historyClass,
