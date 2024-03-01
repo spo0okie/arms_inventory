@@ -33,16 +33,18 @@ use yii\helpers\Html;
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'support']) ?>
 		</div>
 		<div class="me-5">
-			<h4>Расписание</h4>
-			<?php if (is_object($model->schedule)) {
-				echo Html::a(
+			<div class="mb-3">
+				<h4>Расписание</h4>
+				<?php if (is_object($model->schedule)) {
+					echo Html::a(
 						$this->render('/schedules/week-description',['model'=>$model->schedule]),
 						'#',
 						['onclick'=>'$("li#tab-schedule").children("a.nav-link").tab("show");$("li#tab-schedule").click();']
-				);
-			} else {
-				echo StripedAlertWidget::widget(['title'=> Html::a('создать',['schedules/create','attach_job'=>$model->id],['class'=>'open-in-modal-form word-wrap','data-reload-page-on-submit'=>1])]);
-			} ?>
+					);
+				} else {
+					echo StripedAlertWidget::widget(['title'=> Html::a('создать',['schedules/create','attach_job'=>$model->id],['class'=>'open-in-modal-form word-wrap','data-reload-page-on-submit'=>1])]);
+				} ?>
+			</div>
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'reqs']) ?>
 		</div>
 		<div>
