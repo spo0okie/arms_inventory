@@ -228,8 +228,9 @@ class TimeIntervalsHelper {
 							//интервал пересечение;
 							$merged=[
 								min($intervals[$i][0],$intervals[$j][0]),
-								max($intervals[$i][1],$intervals[$j][1])
+								max($intervals[$i][1],$intervals[$j][1]),
 							];
+							if (isset($intervals[$j]['meta'])) $merged['meta']=$intervals[$j]['meta'];
 							//убираем исходные интервалы
 							unset($intervals[$i]);
 							unset($intervals[$j]);
