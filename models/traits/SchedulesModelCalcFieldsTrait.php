@@ -12,14 +12,23 @@ namespace app\models\traits;
 use app\helpers\ArrayHelper;
 use app\helpers\DateTimeHelper;
 use app\helpers\TimeIntervalsHelper;
+use app\models\ArmsModel;
 use app\models\Schedules;
 use app\models\SchedulesEntries;
+use app\models\Services;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\data\ArrayDataProvider;
 
 /**
  * @package app\models\traits
+ * @property ArmsModel[] $usedBy
+ * @property boolean $isPrivate
+ * @property Services[] $services
+ * @property boolean isAcl
+ * @property boolean isOverride
+ * @property integer startUnixTime
+ * @property integer endUnixTime
  */
 
 trait SchedulesModelCalcFieldsTrait
@@ -159,10 +168,12 @@ trait SchedulesModelCalcFieldsTrait
 	public function getProvidingMode() {
 		/** @var Schedules $this */
 		if (isset($this->attrsCache['providingMode'])) return $this->attrsCache['providingMode'];
+		
 		if ($this->isOverride) $this->attrsCache['providingMode']=$this->overriding->providingMode;
 		elseif ($this->isAcl) $this->attrsCache['providingMode']='acl';	//доступ предоставляется
 		elseif (count($this->providingServices)) $this->attrsCache['providingMode']='providing'; //услуга предоставляется
 		elseif (count($this->supportServices)) $this->attrsCache['providingMode']='support'; //услуга поддерживается
+		elseif (count($this->maintenanceJobs)) $this->attrsCache['providingMode']='job'; //услуга поддерживается
 		else $this->attrsCache['providingMode']='working'; //рабочее время
 		return $this->attrsCache['providingMode'];
 	}
@@ -176,9 +187,8 @@ trait SchedulesModelCalcFieldsTrait
 		/** @var Schedules $this */
 		if (!isset(Schedules::$dictionary[$word]))
 			return $word;
-		if (is_array(Schedules::$dictionary[$word]))
-			return Schedules::$dictionary[$word][$this->providingMode];
-		return Schedules::$dictionary[$word];
+
+		return Schedules::$dictionary[$word][$this->getProvidingMode()]??Schedules::$dictionary[$word];
 	}
 	
 	/**
@@ -338,6 +348,10 @@ trait SchedulesModelCalcFieldsTrait
 		return $types;
 	}
 	
+	/**
+	 * Возвращает массив сервисов связанных с расписанием с указанием типа связи
+	 * @return array
+	 */
 	public function getServicesArr()
 	{
 		$support=$this->supportServices;
@@ -357,6 +371,28 @@ trait SchedulesModelCalcFieldsTrait
 		} else {
 			return [];
 		}
+	}
+
+	/**
+	 * Возвращает массив сервисов связанных с расписанием
+	 * @return array
+	 */
+	public function getServices()
+	{
+		if (isset($this->attrsCache['services'])) return $this->attrsCache['services'];
+		$support=$this->supportServices;
+		$provide=$this->providingServices;
+		
+		$this->attrsCache['services'] = [];
+		foreach ($provide as $service) {
+			$this->attrsCache['services'][$service->id] = $service;
+		}
+
+		foreach ($support as $service) {
+			$this->attrsCache['services'][$service->id] = $service;
+		}
+		
+		return $this->attrsCache['services'];
 	}
 	
 	public function getPeriodDescription()
@@ -499,11 +535,11 @@ trait SchedulesModelCalcFieldsTrait
 	 */
 	public function getUsageWorkTimeDescription() {
 		$tokens=[];
-		$weekDescription=$this->weekWorkTimeDescription;
-		$dateDescription=$this->dateWorkTimeDescription;
+		$weekDescription=$this->getWeekWorkTimeDescription();
+		$dateDescription=$this->getDateWorkTimeDescription();
 		if ($weekDescription) $tokens[]=$weekDescription;
 		if ($dateDescription) $tokens[]=$dateDescription;
-		if (count($tokens)) return $this->usageDescription.' '.implode(' ',$tokens);
+		if (count($tokens)) return $this->getUsageDescription().' '.implode(' ',$tokens);
 		return $this->getDictionary('nodata');
 	}
 	
@@ -730,5 +766,28 @@ trait SchedulesModelCalcFieldsTrait
 			};
 		}*/
 		return '{}';
+	}
+	
+	/**
+	 * Массив всех объектов использующих это расписание
+	 * @return ArmsModel[]
+	 */
+	public function getUsedBy() {
+		/** @var Schedules $this */
+		if (!isset($this->attrsCache['usedBy']))
+			$this->attrsCache['usedBy']=array_merge($this->services,$this->acls,$this->maintenanceJobs);
+			
+		return $this->attrsCache['usedBy'];
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getIsPrivate() {
+		if (!isset($this->attrsCache['isPrivate'])) {
+			$this->attrsCache['isPrivate']=(count($this->usedBy)==1);
+		}
+		
+		return $this->attrsCache['isPrivate'];
 	}
 }

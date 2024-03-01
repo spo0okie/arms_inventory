@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\helpers\StringHelper;
+use app\models\MaintenanceJobs;
 use app\models\SchedulesEntries;
 use app\models\Services;
 use Throwable;
@@ -49,18 +51,24 @@ class SchedulesController extends ArmsBaseController
 		
 		$support_service=null;
 		$service=null;
+		$job=null;
 		$item=null;
 
 		//
 		if (Yii::$app->request->get('attach_service')) {
 			$service= Services::findOne(Yii::$app->request->get('attach_service'));
 			if (is_object($service)) {
-				$model->name= Schedules::$title.' работы '.$service->name;
+				$model->name= Schedules::$title.' работы '.StringHelper::mb_lcfirst($service->name);
 			}
 		} elseif (Yii::$app->request->get('support_service')) {
 			$support_service= Services::findOne(Yii::$app->request->get('support_service'));
 			if (is_object($service)) {
-				$model->name= Schedules::$title.' поддержки '.$support_service->name;
+				$model->name= Schedules::$title.' поддержки '.StringHelper::mb_lcfirst($support_service->name);
+			}
+		} elseif (Yii::$app->request->get('attach_job')) {
+			$job= MaintenanceJobs::findOne(Yii::$app->request->get('attach_job'));
+			if (is_object($job)) {
+				$model->name= Schedules::$title.' '.StringHelper::mb_lcfirst($job->name);
 			}
 		}
 
@@ -91,6 +99,10 @@ class SchedulesController extends ArmsBaseController
 					$support_service->providing_schedule_id = $model->id;
 					$support_service->save();
 					return $this->defaultReturn(['services/view', 'id' => $support_service->id],[$model]);
+				} elseif (is_object($job)) { //или поддержку сервиса
+					$job->schedules_id = $model->id;
+					$job->save();
+					return $this->defaultReturn(['maintenance-jobs/view', 'id' => $job->id],[$model]);
 				} else
 					return $this->defaultReturn(['view', 'id' => $model->id],[$model]);
 			}

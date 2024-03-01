@@ -17,7 +17,14 @@ if (!isset($static_view)) $static_view=false;
 if (!isset($empty)) $empty='- расписание отсутствует -';
 
 if (!empty($model)) {
-	if (!isset($name)) $name=$model->name;
+	if (!isset($name)) {
+		$name=$model->name;
+	} elseif ($name='schedule') {
+		$name=$model->getWorkTimeDescription();
+	} elseif ($name='private-schedule' && $model->isPrivate) {
+		$name=$model->getWorkTimeDescription();
+	}
+	
 	echo ItemObjectWidget::widget([
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
@@ -25,6 +32,7 @@ if (!empty($model)) {
 			'model'=>$model,
 			'static'=>$static_view,
 			'name'=>$name,
+			'modal'=>$modal??false
 		]),
 	]); } else {
 	echo $empty;

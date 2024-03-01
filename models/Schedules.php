@@ -31,10 +31,6 @@ use app\helpers\ArrayHelper;
  * @property string $workTimeDescription	 //полное описание из двух выше
  * @property string $usageDescription	 	 //описание применения расписания
  * @property string $usageWorkTimeDescription//полное описание: график, период, применение
- * @property boolean isAcl
- * @property boolean isOverride
- * @property integer startUnixTime
- * @property integer endUnixTime
  *
  * @property Services[] $providingServices
  * @property Services[] $supportServices
@@ -51,6 +47,7 @@ use app\helpers\ArrayHelper;
  * @property Schedules[] $parentsChain
  * @property SchedulesEntries $entries
  * @property SchedulesEntries $periods
+ * @property MaintenanceJobs[] $maintenanceJobs
  * @property ArrayDataProvider $WeekDataProvider
  */
 class Schedules extends ArmsModel
@@ -101,41 +98,48 @@ class Schedules extends ArmsModel
 			'acl'=>'Доступ предоставляется',
 			'providing'=>'Услуга/сервис предоставляется',
 			'support'=>'Услуга/сервис поддерживается',
+			'job'=>'Выполняется',
 			'working'=>'Рабочее время'
 		],
 		'usage_complete'=>[
 			'acl'=>'Доступ предоставлялся',
 			'providing'=>'Услуга/сервис предоставлялся',
 			'support'=>'Услуга/сервис поддерживался',
+			'job'=>'Выполнялось',
 			'working'=>'Рабочее время было'
 		],
 		'usage_will_be'=>[
 			'acl'=>'Доступ будет предоставляться',
 			'providing'=>'Услуга/сервис будет предоставляться',
 			'support'=>'Услуга/сервис будет поддерживаться',
+			'job'=>'Будет выполняться',
 			'working'=>'Рабочее время будет'
 		],
 		'nodata'=>[
 			'acl'=>'Доступ не предоставляется никогда',
 			'providing'=>'Услуга/сервис не предоставляется никогда',
 			'support'=>'Услуга/сервис не поддерживается никогда',
+			'job'=>'Не выполняется никогда',
 			'working'=>'Рабочее время отсутствует (не работает никогда)'
 		],
 		'always'=>[
 			'acl'=>'всегда',
 			'providing'=>'без перерывов (24/7)',
 			'support'=>'без перерывов (24/7)',
+			'job'=>'всегда (24/7)',
 			'working'=>'всегда (24/7)'
 		],
 		'period_start'=>[
 			'acl'=>'Начало периода предоставления доступа (если есть)',
 			'providing'=>'Дата начала предоставления услуги (если есть)',
 			'support'=>'Дата начала поддержки услуги (если есть)',
+			'job'=>'Дата начала выполнения обслуживания (если есть)',
 			'working'=>'Дата начала действия расписания (если есть)'
 		],
 		'period_end'=>[
 			'acl'=>'Конец периода предоставления доступа (если есть)',
 			'providing'=>'Дата окончания предоставления услуги (если есть)',
+			'job'=>'Дата окончания выполнения обслуживания (если есть)',
 			'support'=>'Дата окончания поддержки услуги (если есть)',
 			'working'=>'Дата окончания действия расписания (если есть)'
 		],
@@ -446,8 +450,9 @@ class Schedules extends ArmsModel
 	public function reverseLinks()
 	{
 		return [
-			$this->providingServices,
-			$this->supportServices,
+			$this->services,
+			$this->acls,
+			$this->maintenanceJobs,
 			$this->overrides,
 			$this->children,
 		];

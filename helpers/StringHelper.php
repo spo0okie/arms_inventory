@@ -42,4 +42,30 @@ class StringHelper {
 		
 		return null;
 	}
+	
+	/**
+	 * Как uc_first, только для utf-8
+	 * @param        $string
+	 * @param string $encoding
+	 * @return string
+	 */
+	public static function mb_ucfirst($string, $encoding='UTF-8')
+	{
+		$firstChar = mb_substr($string, 0, 1, $encoding);
+		$then = mb_substr($string, 1, null, $encoding);
+		return mb_strtoupper($firstChar, $encoding) . $then;
+	}
+
+	/**
+	 * Как lc_first, только для utf-8
+	 * @param        $string
+	 * @param string $encoding
+	 * @return string
+	 */
+	public static function mb_lcfirst($string, $encoding='UTF-8')
+	{
+		$firstChar = mb_substr($string, 0, 1, $encoding);
+		$then = mb_substr($string, 1, null, $encoding);
+		return mb_strtolower($firstChar, $encoding) . $then;
+	}
 }

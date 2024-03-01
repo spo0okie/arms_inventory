@@ -37,7 +37,7 @@ class TabsWidget extends Tabs
 			}
 			
 			//if (!isset($this->tabs[$i]['label'])) $this->tabs[$i]['label']='Tab '.$counter;
-			$items[$i]['headerOptions']=['onClick'=>'document.cookie = "'.$this->cookieName.'='.$tabId.'"'];
+			$items[$i]['headerOptions']=['onClick'=>'document.cookie = "'.$this->cookieName.'='.$tabId.'"','id'=>'tab-'.$tabId];
 		}
 		
 		parent::prepareItems($items, $prefix);

@@ -20,6 +20,7 @@ use yii\db\ActiveQuery;
  * @property string|null $changed_at
  * @property int|null $changed_by
  * @property string sname
+ * @property boolean isBackup
  *
  * @property Comps[] $comps
  * @property MaintenanceReqs[] $reqs
@@ -206,6 +207,23 @@ public static $titles='Регламентное обслуживание';
 	{
 		if (is_object($this->service)) return $this->service->supportRecursive;
 		return null;
+	}
+	
+	/**
+	 * Признак того, что это бэкап (удовлетворяет требованию, которое бэкап)
+	 */
+	public function getIsBackup()
+	{
+		if (!isset($this->attrsCache['isBackup'])) {
+			$this->attrsCache['isBackup']=false;
+			foreach ($this->reqs as $req) {
+				if ($req->is_backup) {
+					$this->attrsCache['isBackup']=true;
+					break;
+				}
+			}
+		}
+		return $this->attrsCache['isBackup'];
 	}
 	
 	/**
