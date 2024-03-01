@@ -179,10 +179,8 @@ trait ScheduleEntriesModelCalcFieldsTrait {
 			foreach ($this->previousDateEntry->getOverheadMinuteIntervalsEx() as $interval)
 				$work[]=$interval;
 		}
-		//сортируем по порядку и склеиваем
-		TimeIntervalsHelper::intervalsSort($work);
-		//TODO: нужна склейка, которая не объединяет их, а обрезает интервал в месте начала нового иначе бардак с метаданными!
-		$work=TimeIntervalsHelper::intervalMerge($work);
+		//обрезаем интервалы в точках пересечений (откидываем куски заползающие вправо на следующий интервал)
+		$work=TimeIntervalsHelper::intervalTile($work);
 		return $work;
 	}
 	

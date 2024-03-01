@@ -53,6 +53,7 @@ $this->beginPage() ?>
 					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
 				]) ?>
 				<?= Alert::widget() ?>
+				<?= $this->params['headerWidgets']??'' ?>
 				<div class="px-5"><?= $this->params['headerContent'] ?></div>
 			</div>
 			<?= TabsWidget::widget(array_merge([
@@ -97,8 +98,7 @@ $this->beginPage() ?>
 </footer>
 
 <?php
-/** @noinspection */
-$js = <<<JS
+$js = <<<TXT
 function(event, data, status, xhr, selector) {
     console.log('Got modal commit ('+status+')');
     //console.log(selector);
@@ -156,7 +156,7 @@ function(event, data, status, xhr, selector) {
 		$(this).modal('toggle');
 	}
 }
-JS;
+TXT;
 
 echo ModalAjax::widget([
 	'id' => 'modal_form_loader',
@@ -191,7 +191,7 @@ echo ModalAjax::widget([
                 }
             }
 		"),
-		ModalAjax::EVENT_BEFORE_SUBMIT => new JsExpression(/** @lang JavaScript */ "
+		ModalAjax::EVENT_BEFORE_SUBMIT => new JsExpression("
 			function(event, data, status, xhr, selector) {
 				let \$disable=$(this).find('div.disable-on-submit');
 				if (\$disable.length) {

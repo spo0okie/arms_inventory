@@ -127,14 +127,30 @@ class TimeIntervalsHelper {
 	
 	/**
 	 * Сравнивает интервалы
+	 * сначала сравнивает какой раньше начинается, если начинаются одновременно, сравнивает какой раньше заканчивается
 	 * @param $interval1
 	 * @param $interval2
 	 * @return int 1 - первый позже, -1 - первый раньше, 0 - начинаются одновременно
 	 */
 	public static function intervalsCompare($interval1,$interval2)
 	{
-		if ($interval1[0]==$interval2[0]) return 0;
-		return  ($interval1[0] > $interval2[0])?1:-1;
+		//сначала сравниваем по левому краю
+		if ($interval1[0]===$interval2[0]) {
+			//потом по правому
+			if ($interval1[1]===$interval2[1]) {
+				return 0;
+			}
+			if (is_null($interval1[1])) //первый интервал - луч вправо
+				return 1;	//первый позже заканчивается
+			if (is_null($interval2[1])) //второй интервал - луч вправо
+				return -1;	//первый раньше заканчивается (второй позже заканчивается, т.к. это луч)
+			return ($interval1[1] > $interval2[1])?1:-1;
+		}
+		if (is_null($interval1[0])) //первый интервал - луч влево
+			return -1;	//первый раньше начинается
+		if (is_null($interval2[1])) //второй интервал - луч влево
+			return 1;	//первый позже начинается
+		return ($interval1[0] > $interval2[0])?1:-1;
 	}
 	
 	public static function intervalsSort(&$intervals)
@@ -249,5 +265,64 @@ class TimeIntervalsHelper {
 		} while ($intersect);
 		return $intervals;
 	}
+	
+	/**
+	 * укладывает "плиточкой" интервалы: те что пересекаются обрезаются по началу следующего интервала
+	 * и укладываются стык в стык с сохранением метаданных
+	 * @param $intervals array[]
+	 * @return array
+	 */
+	public static function intervalTile(array $intervals)
+	{
+		do {
+			static::intervalsSort($intervals);
+			$intersect=false; //сначала мы не знаем ни о каких пересечениях
+			if (count($intervals)>1) { //если интервалов больше 1
+				for ($i=0;$i<count($intervals)-1;$i++) { //сравниваем все интервалы по очереди
 
+					//если мы его грохнули в о вложенном цикле на предыдущем шаге
+					if (!isset($intervals[$i])) continue;
+
+					//если этот интервал вырожденный (длина 0)
+					if ($intervals[$i][0]===$intervals[$i][1]) {
+						unset($intervals[$i]); //убираем его
+						continue; //переходим к следующему
+					}
+
+					for ($j=$i+1;$j<count($intervals);$j++) { //со всеми остальными
+						
+						//если этот интервал вырожденный (длина 0)
+						if ($intervals[$j][0]===$intervals[$j][1]) {
+							unset($intervals[$j]); //убираем его
+							continue; //переходим к следующему
+						}
+
+						if (static::intervalIntersect($intervals[$i],$intervals[$j])) { //если они пересекаются,то
+							$intersect=true;
+							//поскольку они отсортированы, то $i должен быть раньше чем $j либо они одинаковые
+							//в любом случае левая граница $i <= $j
+							
+							//если интервалы идентичны
+							if (static::intervalsCompare($intervals[$i],$intervals[$j])==0) {
+								unset($intervals[$i]);	//просто удаляем один из них (по идее первый, но они же идентичны. так что хз)
+								$intervals=array_values($intervals);	//сбрасываем индексы массива интервалов (reindex)
+								break 2; //выходим из 2х вложенных for
+							}
+							
+							//если второй интервал - луч влево (когда оба лучи влево, но второй заканчивается позже)
+							if (is_null($intervals[$j][0])) {
+								//второй интервал начинаем сразу после конца первого
+								$intervals[$j][0]=$intervals[$i][1]+1;
+							} else {
+								//первый интервал заканчиваем сразу перед вторым
+								$intervals[$i][1]=$intervals[$j][0]-1;
+							}
+						}
+					}
+				}
+			}
+		} while ($intersect);
+		return $intervals;
+	}
+	
 }

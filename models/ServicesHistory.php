@@ -35,8 +35,8 @@ class ServicesHistory extends HistoryModel
 		'techs_ids' =>					[Techs::class,'services_ids'],
 		'maintenance_reqs_ids'=>		[MaintenanceReqs::class,'services_ids'],
 		'maintenance_jobs_ids'=>		[MaintenanceJobs::class,'services_ids'],
-		'support_ids' =>				[Users::class,'support_services_ids'],
-		'infrastructure_support_ids' =>	[Users::class,'infrastructure_support_services_ids'],
+		'support_ids' =>				[Users::class,'support_services_ids','loader'=>'support'],
+		'infrastructure_support_ids' =>	[Users::class,'infrastructure_support_services_ids','loader'=>'infrastructureSupport'],
 		'contracts_ids' => 				[Contracts::class,'services_ids'],
 		'acls_ids' => 					[Acls::class,'services_id'],
 		

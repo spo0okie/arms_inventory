@@ -4,11 +4,7 @@ use app\components\HistoryWidget;
 use app\components\ItemObjectWidget;
 use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
-use app\models\Acls;
-use app\models\Schedules;
 use kartik\markdown\Markdown;
-use yii\helpers\Url;
-use yii\web\YiiAsset;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
@@ -31,12 +27,11 @@ if (!isset($static_view)) $static_view=false;
 			</h1>
 		</div>
 	</div>
-	<p><?= $model->description ?></p>
-	
+	<?= $model->description?('<p>'.$model->description.'</p>'):'' ?>
 	
 	<div class="row">
 		<div class="col-md-6">
-			<?= $this->render('week-description',['model'=>$model])?>
+			<h3 class="mb-3"><?= $this->render('week-description',['model'=>$model])?></h3>
 			<?= is_object($model->parent)?('Родительское расписание :'.$this->render('item',['model'=>$model->parent])):'' ?>
 			<?= $this->render('7days',['model'=>$model])?>
 			<?= $this->render('services',['model'=>$model])?>
