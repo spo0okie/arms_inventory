@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\traits\MaintenanceReqsModelCalcFieldsTrait;
+
 /**
  * This is the model class for table "maintenance_reqs_history".
  *
@@ -24,7 +26,8 @@ namespace app\models;
  */
 class MaintenanceReqsHistory extends HistoryModel
 {
-
+	use MaintenanceReqsModelCalcFieldsTrait;
+	
 	public static $title='Изменения требований обслуживания';
 	public static $titles='Изменения требований обслуживания';
 	
@@ -34,8 +37,9 @@ class MaintenanceReqsHistory extends HistoryModel
 		'services_ids'=>[Services::class,'maintenance_jobs_ids'],
 		'comps_ids'=>[Comps::class,'maintenance_jobs_ids'],
 		'techs_ids'=>[Techs::class,'maintenance_jobs_ids'],
+		'jobs_ids'=>[MaintenanceJobs::class,'reqs_ids'],
 		'includes_ids'=>[MaintenanceReqs::class,'included_ids'],
-		'included_ids'=>[MaintenanceReqs::class,'includes_ids'],
+		'included_ids'=>[MaintenanceReqs::class,'includes_ids','loader'=>'includedBy'],
 	];
 
     /**

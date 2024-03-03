@@ -86,14 +86,15 @@ if (in_array('updated_comment',$attributes)) {
 }
 
 foreach ($attributes as $attribute) {
-	$columns[$attribute]=[
-		'contentOptions'=>function ($data) use ($attribute) {
-			/* @var $data HistoryModel */
-			return $data->attributeIsChanged($attribute)?[
-				'class'=>'table-warning'
-			]:[];
-		}
-	];
+	$attrData=$instance->getAttributeData($attribute);
+	$columns[$attribute]=isset($attrData['column'])?$attrData['column']:[];
+	
+	$columns[$attribute]['contentOptions']=function ($data) use ($attribute) {
+		/* @var $data HistoryModel */
+		return $data->attributeIsChanged($attribute)?[
+			'class'=>'table-warning'
+		]:[];
+	};
 	
 	if ($instance->attributeIsLink($attribute)) {
 		$columns[$attribute]['value']=function($data) use($attribute) {
@@ -109,6 +110,7 @@ foreach ($attributes as $attribute) {
 			]);
 		};
 	}
+	
 }
 
 return $columns;

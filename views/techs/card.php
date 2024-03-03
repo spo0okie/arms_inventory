@@ -1,5 +1,6 @@
 <?php
 
+use app\components\HistoryRecordWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\UrlListWidget;
@@ -11,9 +12,12 @@ $model_id=$model->id;
 if (!isset($static_view)) $static_view=false;
 if (!isset($no_model)) $no_model=false; //не выводить инфу о модели оборудования
 
+
 if (is_object($model->state)) { ?>
 	<span class="unit-status <?= $model->state->code ?> "><?= $model->state->name ?></span>
 <?php }?>
+
+<?= HistoryRecordWidget::widget(['model' => $model,'class'=>'me-2']) ?>
 
 <h1>
 	<?= LinkObjectWidget::widget([

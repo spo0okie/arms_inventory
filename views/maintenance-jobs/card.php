@@ -1,5 +1,6 @@
 <?php
 
+use app\components\HistoryRecordWidget;
 use app\components\ModelFieldWidget;
 use app\components\LinkObjectWidget;
 
@@ -11,7 +12,7 @@ $deleteable=true; //тут переопределить возможность �
 if (!isset($static_view)) $static_view=false;
 
 ?>
-
+<?= HistoryRecordWidget::widget(['model'=>$model]) ?>
 <h1>
 	<?=  LinkObjectWidget::widget([
 		'model'=>$model,

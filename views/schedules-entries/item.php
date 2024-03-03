@@ -20,11 +20,10 @@ if (is_object($model)) {
 		if ($model->is_period) {
 			$name=$model->periodSchedule;
 		} else {
-			$name=$model->mergedSchedule;
-			$tokens=explode(',',$name);
+			$tokens=explode(',',$model->mergedSchedule);
 			foreach ($tokens as $i=>$token)
 				$tokens[$i]='<span class="text-nowrap">'.$token.'</span>';
-			$name=implode(', ',$tokens);
+			$name=$model->getDay().': '.implode(', ',$tokens);
 			
 		}
 	}

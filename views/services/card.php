@@ -1,5 +1,6 @@
 <?php
 
+use app\components\HistoryRecordWidget;
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
@@ -30,8 +31,8 @@ if(!$static_view) { ?>
 	<br />
 	<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
 </span>
-
 <?php } ?>
+<?= HistoryRecordWidget::widget(['model'=>$model]) ?>
 
 
 <h1>

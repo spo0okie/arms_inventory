@@ -13,8 +13,8 @@ use yii\helpers\Html;
 
 <div class="d-flex flex-wrap flex-row-reverse">
 	<div class="ms-5 d-flex">
-		<div class="text-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></div>
-		<div class="text-end ms-3"><?= ShowArchivedWidget::widget() ?></div>
+		<div class="text-end opacity-75 small"><?= HistoryWidget::widget(['model'=>$model]) ?></div>
+		<div class="text-end ms-5"><?= ShowArchivedWidget::widget() ?></div>
 	</div>
 	<div class="d-flex flex-fill flex-row flex-nowrap">
 		<div class="me-5">

@@ -5,6 +5,7 @@ namespace app\controllers;
 
 use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
+use Yii;
 use yii\web\NotFoundHttpException;
 
 
@@ -26,6 +27,13 @@ class MaintenanceReqsController extends ArmsBaseController
 	 */
 	public function actionTtip(int $id, $satisfiedBy=null, $absorbedBy=null)
 	{
+		if ($t=Yii::$app->request->get('timestamp')) {
+			return $this->renderPartial('ttip', [
+				'model' => $this->findJournalRecord($id,$t),
+				'job' => $satisfiedBy?MaintenanceJobs::findOne($satisfiedBy):null,
+				'absorbed' => $absorbedBy?MaintenanceReqs::findOne($absorbedBy):null,
+			]);
+		}
 		return $this->renderPartial('ttip', [
 			'model' => $this->findModel($id),
 			'job' => $satisfiedBy?MaintenanceJobs::findOne($satisfiedBy):null,

@@ -1,5 +1,6 @@
 <?php
 
+use app\components\HistoryRecordWidget;
 use app\components\ModelFieldWidget;
 use app\components\LinkObjectWidget;
 
@@ -16,6 +17,7 @@ if ($model->spread_techs) $spread[]='<b>оборудование</b>';
 
 ?>
 
+<?= HistoryRecordWidget::widget(['model'=>$model]) ?>
 <h1>
 	<?=  LinkObjectWidget::widget([
 		'model'=>$model,
@@ -24,6 +26,7 @@ if ($model->spread_techs) $spread[]='<b>оборудование</b>';
 		'undeletableMessage'=>'Нельзя удалить эти требования к обслуживанию, т.к. есть привязанные объекты',
 	]) ?>
 </h1>
+
 <div class="mb-3">
 	<?= Yii::$app->formatter->asNtext($model->description) ?>
 	<?php if (count($spread)) { ?>

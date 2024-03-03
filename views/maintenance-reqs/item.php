@@ -2,6 +2,7 @@
 
 use app\components\ItemObjectWidget;
 use app\components\LinkObjectWidget;
+use app\models\HistoryModel;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
@@ -12,6 +13,10 @@ if (!isset($static_view)) $static_view=false;
 
 $cssClass='';
 $ttip=['maintenance-reqs/ttip','id'=>$model->id];
+if ($model instanceof HistoryModel) {
+	$ttip['id']=$model->master_id;
+	$ttip['timestamp']=$model->updated_at;
+}
 
 if (!empty($model)) {
 	if (!isset($name)) $name=$model->name;

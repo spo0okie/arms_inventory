@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\traits\MaintenanceReqsModelCalcFieldsTrait;
+use kartik\grid\BooleanColumn;
 use voskobovich\linker\LinkerBehavior;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
@@ -33,6 +35,7 @@ use yii\db\ActiveQuery;
  */
 class MaintenanceReqs extends ArmsModel
 {
+	use MaintenanceReqsModelCalcFieldsTrait;
 
 	public static $title='Требования по обслуживанию';
 	public static $titles='Требования по обслуживанию';
@@ -145,18 +148,21 @@ class MaintenanceReqs extends ArmsModel
 					.'<br>Нужно для выделения таких требований отдельно от прочих',
 				'indexHint'=>'{same}',
 				'indexLabel'=>'<i class="fas fa-archive"></i>',
+				'column'=>['class'=>BooleanColumn::class],
 			],
 			'spread_comps' => [
 				'Распространяется на ОС',
 				'indexLabel'=>'<i class="fas fa-laptop-code"></i>',
 				'indexHint'=>'{same}',
 				'hint'=>'При прикреплении требований к сервису, автоматически предъявлять эти требования к операционным системам на которых он работает',
+				'column'=>['class'=>BooleanColumn::class],
 			],
             'spread_techs' => [
 				'Распространяется на оборудование',
 				'indexLabel'=>'<i class="fas fa-screwdriver"></i>',
 				'indexHint'=>'{same}',
 				'hint'=>'При прикреплении требований к сервису, автоматически предъявлять эти требования к оборудованию на которых он работает. (не распространяется АРМ на которых крутятся операционные системы)',
+				'column'=>['class'=>BooleanColumn::class],
 			],
 			'includes' => [
 				'Удовлетворяет',
@@ -176,6 +182,7 @@ class MaintenanceReqs extends ArmsModel
 			'comps_ids'=>['alias'=>'comps'],
 			'techs'=>'Оборудование',
 			'techs_ids'=>['alias'=>'techs'],
+			'jobs'=>MaintenanceJobs::$titles
         ]);
     }
 	
@@ -221,30 +228,6 @@ class MaintenanceReqs extends ArmsModel
 			->viaTable('maintenance_reqs_in_reqs', ['includes_id' => 'id']);
     }
 	
-	/**
-	 * Какими требованиями удовлетворяется
-	 * слово included не особо поясняет что это значит, а satisfied вполне
-	 * @return MaintenanceReqs[]
-	 */
-    public function satisfiedBy()
-	{
-		//TODO: Обработать состояние AllItemsLoaded, которое должно включать подгрузку не только самой таблицы,
-		// но и таблиц many-2-many ссылок
-		$included=$this->includedBy;
-		return is_array($included)?$included:[];
-	}
-	
-	public function isSatisfiedByReq(MaintenanceReqs $req) {
-    	//нужно проверить что $req входит в массив непосредственно удовлетворяемых требований
-		//либо удовлетворяется ими
-		foreach ($this->satisfiedBy() as $item) {
-			if ($item->id == $req->id) return true;		//если удовлетворяет непосредственно
-			if ($item->isSatisfiedByReq($req)) return true;	//или рекурсивно
-		}
-		//TODO: Обработать состояние AllItemsLoaded, которое должно включать подгрузку не только самой таблицы,
-		// но и таблиц many-2-many ссылок
-		return false;
-	}
 	
 	/**
 	 * @return ActiveQuery
@@ -266,30 +249,6 @@ class MaintenanceReqs extends ArmsModel
 			->viaTable('maintenance_reqs_in_techs', ['reqs_id' => 'id']);
     }
 	
-	/**
-	 * Убирает из набора требований такие, которые удовлетворяются другими из набора
-	 * @param MaintenanceReqs[] $reqs
-	 * @return MaintenanceReqs[]
-	 */
-    public static function filterEffective(array $reqs)
-	{
-		//проверяем всех
-		foreach ($reqs as $req) {
-			//со всеми
-			foreach ($reqs as $test) {
-				//если элемент входит в набор удовлетворяемых требований - помечаем его
-				if ($req->isSatisfiedByReq($test)) {
-					$req->absorbed=$test->id;
-					break;
-				}
-			}
-		}
-		return $reqs;
-	}
-	
-	public function getArchivedOrAbsorbed() {
-    	return $this->absorbed || $this->archived;
-	}
 	
 	public function reverseLinks()
 	{
