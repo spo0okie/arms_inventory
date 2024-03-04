@@ -214,6 +214,7 @@ trait SchedulesModelCalcFieldsTrait
 	public function getPeriods() {
 		/** @var Schedules $this */
 		if (!isset($this->attrsCache['periods'])) {
+			$this->attrsCache['periods']=[];
 			foreach ($this->entries as $entry)
 				if ($entry->is_period)
 					$this->attrsCache['periods'][]=$entry;
