@@ -176,8 +176,8 @@ class TechsSearch extends Techs
 				],
 				
 				'place'=>[
-					'asc'=>['getplacepath(arms.places_id)'=>SORT_ASC],
-					'desc'=>['getplacepath(arms.places_id)'=>SORT_DESC],
+					'asc'=>['getplacepath(techs.places_id)'=>SORT_ASC],
+					'desc'=>['getplacepath(techs.places_id)'=>SORT_DESC],
 				],
 				
 				'comment',
