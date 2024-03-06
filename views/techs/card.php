@@ -90,13 +90,13 @@ if (is_object($model->state)) { ?>
 </div>
 
 
-<div class="d-flex flex-row flex-wrap mb-3">
-	<div class="pe-4">
+<div class="d-flex flex-row flex-wrap">
+	<div class="pe-4 mb-3">
 		<?= $this->render('ips_list',compact('model')) ?>
 	</div>
-	<div class="pe-5">
+	<div class="pe-5 mb-3">
 		<h4>MAC адрес(а):</h4>
-		<p>
+		<p class="mb-0">
 			<?= Yii::$app->formatter->asNtext($model->formattedMac) ?>
 		</p>
 	</div>
@@ -106,12 +106,12 @@ if (is_object($model->state)) { ?>
 	$urls=$model->url;
 	$ips=$model->isComputer?'':$model->ip;
 	if (strlen($urls.$ips)) { ?>
-	<div class="pe-5">
+	<div class="pe-5 mb-3">
 		<h4>Ссылки:</h4>
 			<?= UrlListWidget::Widget(['list'=>$urls,'ips'=>$ips]) ?>
 	</div>
 	<?php }	?>
-	<div class="pe-5">
+	<div class="pe-5 mb-3">
 		<?= $this->render('attached/files',['model'=>$model,'static_view'=>$static_view]) ?>
 	</div>
 </div>
