@@ -1,6 +1,6 @@
 <?php
 
-use app\components\HistoryRecordWidget;
+use app\components\IsHistoryObjectWidget;
 use app\models\SchedulesEntries;
 use yii\helpers\Html;
 
@@ -20,7 +20,7 @@ if ($model->is_period) {
 //var_dump($positive);
 ?>
 <div class="schedules-entries-ttip ttip-card">
-	<?= HistoryRecordWidget::widget(compact('model')) ?>
+	<?= IsHistoryObjectWidget::widget(compact('model')) ?>
 	<h1><?= Html::encode($name) ?> : <?= $model->comment ?></h1>
 	<b>
 	<?php if ($model->is_period) {

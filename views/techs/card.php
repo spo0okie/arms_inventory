@@ -1,6 +1,6 @@
 <?php
 
-use app\components\HistoryRecordWidget;
+use app\components\IsHistoryObjectWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\UrlListWidget;
@@ -17,7 +17,7 @@ if (is_object($model->state)) { ?>
 	<span class="unit-status <?= $model->state->code ?> "><?= $model->state->name ?></span>
 <?php }?>
 
-<?= HistoryRecordWidget::widget(['model' => $model,'class'=>'me-2']) ?>
+<?= IsHistoryObjectWidget::widget(['model' => $model,'class'=>'me-2']) ?>
 
 <h1>
 	<?= LinkObjectWidget::widget([

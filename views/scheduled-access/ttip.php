@@ -1,6 +1,6 @@
 <?php
 
-use app\components\HistoryRecordWidget;
+use app\components\IsHistoryObjectWidget;
 use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
@@ -8,7 +8,7 @@ use kartik\grid\GridView;
 
 ?>
 <div class="schedules-ttip ttip-card">
-	<?= HistoryRecordWidget::widget(compact('model')) ?>
+	<?= IsHistoryObjectWidget::widget(compact('model')) ?>
 	<h1>
 		<?= $model->name ?>
 	</h1>
@@ -23,7 +23,7 @@ use kartik\grid\GridView;
 	echo GridView::widget([
 		'dataProvider' => $daysDataProvider,
 		'showHeader'=> false,
-		'rowOptions'=>function($model, $key, $index, $table) {return [
+		'rowOptions'=>function($model) {return [
 			'class' => $model->is_work?'bg-green-striped border-2':'bg-red-striped border-2',
 		];},
 		'columns' => [

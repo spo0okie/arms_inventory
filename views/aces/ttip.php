@@ -1,6 +1,6 @@
 <?php
 
-use app\components\HistoryRecordWidget;
+use app\components\IsHistoryObjectWidget;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -8,7 +8,7 @@ use yii\helpers\Html;
 
 ?>
 <div class="aces-ttip ttip-card">
-	<?= HistoryRecordWidget::widget(['model'=>$model]) ?>
+	<?= IsHistoryObjectWidget::widget(['model'=>$model]) ?>
 	<h1>
 		<?= Html::encode($model->sname) ?>
 	</h1>

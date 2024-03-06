@@ -1,6 +1,6 @@
 <?php
 
-use app\components\HistoryRecordWidget;
+use app\components\IsHistoryObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\LinkObjectWidget;
 
@@ -17,7 +17,7 @@ if ($model->spread_techs) $spread[]='<b>оборудование</b>';
 
 ?>
 
-<?= HistoryRecordWidget::widget(['model'=>$model]) ?>
+<?= IsHistoryObjectWidget::widget(['model'=>$model]) ?>
 <h1>
 	<?=  LinkObjectWidget::widget([
 		'model'=>$model,

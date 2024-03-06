@@ -1,6 +1,6 @@
 <?php
 
-use app\components\HistoryRecordWidget;
+use app\components\IsHistoryObjectWidget;
 use app\components\UrlListWidget;
 use yii\helpers\Html;
 
@@ -15,7 +15,7 @@ use yii\helpers\Html;
 	<?php } ?>
 	<div class="ttip-card">
 		
-		<?= HistoryRecordWidget::widget(['model'=>$model]) ?>
+		<?= IsHistoryObjectWidget::widget(['model'=>$model]) ?>
 		<h1><?= Html::a($model->manufacturer->name.' '.$model->name,['/tech-models/view','id'=>$model->id]) ?></h1>
 		<?= $this->render('/tech-types/item',['model'=>$model->type]) ?>
 		<p>

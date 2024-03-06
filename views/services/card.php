@@ -1,6 +1,7 @@
 <?php
 
-use app\components\HistoryRecordWidget;
+use app\components\IsArchivedObjectWidget;
+use app\components\IsHistoryObjectWidget;
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
@@ -25,6 +26,8 @@ $support=$model->support;
 $children=$model->children;
 $contracts=$model->contracts;
 
+
+echo IsArchivedObjectWidget::widget(['model'=>$model]);
 if(!$static_view) { ?>
 <span class="float-end text-end">
 	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
@@ -32,7 +35,7 @@ if(!$static_view) { ?>
 	<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
 </span>
 <?php } ?>
-<?= HistoryRecordWidget::widget(['model'=>$model]) ?>
+<?= IsHistoryObjectWidget::widget(['model'=>$model]) ?>
 
 
 <h1>
