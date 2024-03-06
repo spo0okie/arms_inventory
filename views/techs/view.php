@@ -1,6 +1,7 @@
 <?php
 
 use app\components\HistoryWidget;
+use app\components\IsArchivedObjectWidget;
 use app\models\Ports;
 use app\models\Techs;
 use yii\helpers\Html;
@@ -17,6 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 <div class="techs-view">
+	<?= IsArchivedObjectWidget::widget(['model'=>$model,'title'=>'Это оборудование перенесено в архив']) ?>
 	<div class="row">
 		<div class="col-md-6">
 			<?= $this->render('card',['model'=>$model,'static_view'=>false,'no_model'=>true]) ?>

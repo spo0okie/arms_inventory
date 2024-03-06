@@ -1,12 +1,12 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\IsArchivedObjectWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
 ?>
 
+<?= IsArchivedObjectWidget::widget(['model'=>$model,'title'=>'Это оборудование перенесено в архив']) ?>
 <div class="tech-models-ttip ttip-row">
 	<?php if (is_object($model->preview)) { ?>
 		<div class="ttip-preview">
