@@ -33,7 +33,7 @@ if (!isset($static_view)) $static_view=false;
 							'data-update-url' => Url::to(['/acls/view','id'=>$model->id]),
 						]) ?>
 						
-						<?= Html::a('<span class="fas fa-pencil-alt"></span>',['acls/update','id'=>$model->id,'return'=>'previous'],['class'=>'btn btn-primary btn-sm']) ?>
+						<?= Html::a('<span class="fas fa-pencil-alt"></span>',['acls/update','id'=>$model->id],['class'=>'btn btn-primary btn-sm']) ?>
 						<?= HistoryWidget::widget([
 							'model'=>$model,
 							'showUser'=>false,
