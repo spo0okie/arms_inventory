@@ -35,7 +35,7 @@ use yii\validators\IpValidator;
  * @property Users[] $users
  * @property Places $place
  */
-class NetIps extends ActiveRecord
+class NetIps extends ArmsModel
 {
 
 	//private $network_cache=null;
