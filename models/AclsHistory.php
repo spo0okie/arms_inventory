@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\traits\AclsModelCalcFieldsTrait;
+
 /**
  * This is the model class for table "maintenance_reqs_history".
  *
@@ -18,6 +20,7 @@ namespace app\models;
  */
 class AclsHistory extends HistoryModel
 {
+	use AclsModelCalcFieldsTrait;
 
 	public static $title='Изменения списка доступа';
 	public static $titles='Изменения списков доступа';
