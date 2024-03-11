@@ -9,7 +9,7 @@ use yii\web\NotFoundHttpException;
 
 class SchedulesController extends BaseRestController
 {
-	public $modelClass='app\models\Schedules';
+	public $modelClass=Schedules::class;
 	
 	public function accessMap()
 	{

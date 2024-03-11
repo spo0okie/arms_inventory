@@ -123,19 +123,20 @@ class Users extends ArmsModel implements IdentityInterface
 
 	public function extraFields()
 	{
-		$fields=parent::extraFields();
-		$fields[]='fn'; //first name
-		$fields[]='mn'; //middle name
-		$fields[]='ln'; //last name
-		$fields[]='orgStruct'; //department
-		$fields[]='org'; //org
-		$fields[]='licKeys_ids';
-		$fields[]='licItems_ids';
-		$fields[]='licGroups_ids';
-		$fields[]='licKeys';
-		$fields[]='licItems';
-		$fields[]='licGroups';
-		return $fields;
+		return array_merge(parent::extraFields(),[
+			'fn',
+			'mn',
+			'ln',
+			'orgStruct',
+			'org',
+			'licKeys_ids',
+			'licItems_ids',
+			'licGroups_ids',
+			'licKeys',
+			'licItems',
+			'licGroups',
+			'netIps'
+		]);
 	}
 	
 	

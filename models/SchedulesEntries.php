@@ -519,49 +519,7 @@ class SchedulesEntries extends ArmsModel
 
 	
 	
-	/**
-	 * Найти Entry на предыдущий день недели в этом расписании
-	 * - без учета перекрытий другими расписаниями
-	 */
-	public function getPreviousWeekDay() {
-		$day=$this->requestedWeekDay??$this->date;
-		
-		//если это расписание на любой день, то предыдущий это он же и есть
-		if ($day=='def') return $this;
-		
-		//нам нужно расписание на неделю, чтобы вытащить другой день
-		if (!is_object($this->master)) return null;
-		
-		//сдвигаем день
-		$weekDay=(int)($day)-1;
-		if ($weekDay==0) $weekDay=7;
-		
-		//ищем сдвинутый день
-		if (is_null($entry=$this->master->getDayEntryRecursive($weekDay,null))) {
-			//если не нашли то ищем default
-			if (is_null($entry=$this->master->getDayEntryRecursive('def',null))) {
-				//если ничего не нашли то null
-				return null;
-			}
-		}
-		//говорим какой день искали найденному расписанию на день
-		$entry->requestedWeekDay=$weekDay;
-		return $entry;
-	}
-	
-	public function getPeriodSchedule() {
-		if (!$this->is_period) return null;
-		
-		if (date('Y-m-d',strtotime($this->date)) == date('Y-m-d',strtotime($this->date_end ))) {
-			//начинается и кончается в один день
-			return date('Y-m-d',strtotime($this->date)).' '.date('H:i',strtotime($this->date)).'-'.date('H:i',strtotime($this->date_end));
-		} else {
-			return
-				(is_null($this->date)?'нет начала':date('Y-m-d',strtotime($this->date))).
-				' - '.
-				(is_null($this->date_end)?'нет конца':date('Y-m-d',strtotime($this->date_end)));
-		}
-	}
+
 	
 	
 

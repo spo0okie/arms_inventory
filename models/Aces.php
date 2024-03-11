@@ -53,6 +53,7 @@ class Aces extends ArmsModel
 	{
 		return array_merge(parent::extraFields(),[
 			'accessTypes',
+			'users',
 			'acl',
 		]);
 	}
