@@ -27,6 +27,7 @@ class BaseRestController extends ActiveController
 
 	public static $searchFields=['name'=>'name'];	//набор полей по которым можно делать поиск с маппингом в SQL поля
 	public static $searchFieldsLike=[];				//набор полей по которым можно делать Like поиск
+	public static $searchJoin=[];					//что нужно join-ить для поиска
 	public static $searchOrder=[]; 					//порядок в котором сортировать поиск
 	
 	/**
@@ -76,6 +77,11 @@ class BaseRestController extends ActiveController
 		/** @var ArmsModel $class */
 		$search=$class::find();
 		/** @var $search ActiveQuery */
+		
+		foreach (static::$searchJoin as $field) {
+			$search->joinWith($field);
+		}
+		
 		
 		$filtersCount=0; //счетчик примененных фильтров
 		foreach (static::$searchFields as $param=>$field) {

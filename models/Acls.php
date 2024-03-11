@@ -62,6 +62,13 @@ class Acls extends ArmsModel
         return 'acls';
     }
 	
+	public function extraFields()
+	{
+		return array_merge(parent::extraFields(),[
+			'schedule',
+			'aces'
+		]);
+	}
 	/**
 	 * В списке поведений прикручиваем many-to-many связи
 	 * @return array

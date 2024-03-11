@@ -155,7 +155,15 @@ class Schedules extends ArmsModel
     {
         return 'schedules';
     }
-
+	
+	public function extraFields()
+	{
+		return array_merge(parent::extraFields(),[
+			'status',
+			'acls',
+		]);
+	}
+	
     /**
      * {@inheritdoc}
      */

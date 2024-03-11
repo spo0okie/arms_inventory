@@ -38,6 +38,8 @@ class Aces extends ArmsModel
 	public static $titles='доступы';
 	
 	public static $noAccessName='нет доступа';
+	
+	
 
     /**
      * {@inheritdoc}
@@ -46,6 +48,14 @@ class Aces extends ArmsModel
     {
         return 'aces';
     }
+	
+	public function extraFields()
+	{
+		return array_merge(parent::extraFields(),[
+			'accessTypes',
+			'acl',
+		]);
+	}
 	
 	
 	/**

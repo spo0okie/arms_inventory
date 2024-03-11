@@ -29,6 +29,7 @@ use yii\data\ArrayDataProvider;
  * @property boolean isOverride
  * @property integer startUnixTime
  * @property integer endUnixTime
+ * @property integer status
  */
 
 trait SchedulesModelCalcFieldsTrait
@@ -696,6 +697,13 @@ trait SchedulesModelCalcFieldsTrait
 			if (TimeIntervalsHelper::intervalCheck($interval,$now)) return	1;
 		}
 		return 0;
+	}
+	
+	public function getStatus(){
+		return $this->isWorkTime(
+			gmdate('Y-m-d',time()+ Yii::$app->params['schedulesTZShift']),
+			gmdate('H:i',time()+ Yii::$app->params['schedulesTZShift'])
+		);
 	}
 	
 	/**

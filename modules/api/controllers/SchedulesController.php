@@ -19,6 +19,9 @@ class SchedulesController extends BaseRestController
 		]);
 	}
 	
+	public static $searchJoin=['acls.aces.accessTypes'];
+	public static $searchFields=['accessTypeName'=>'access_types.name'];
+	
 	/**
 	 * Displays a single model status
 	 * @param integer $id
