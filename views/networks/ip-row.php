@@ -65,7 +65,7 @@ if (is_object($ip)) {
 		if (is_array($ip->techs)) foreach ($ip->techs as $tech)
 			echo $this->render('/techs/item',['model'=>$tech,'static_view'=>false]);
 		if (is_array($ip->users)) foreach ($ip->users as $user)
-			echo $this->render('/users/item',['model'=>$user,'short'=>true,'static_view'=>false]);
+			echo $this->render('/users/item',['model'=>$user,'short'=>true,'static_view'=>false,'noDelete'=>true]);
 		echo $ip->name;
 		?>
 	</td>

@@ -25,13 +25,13 @@ return [
 			$objects=[];
 			
 			if (is_array($data->comps) && count($data->comps)) {
-				foreach ($data->comps as $comp) $objects[]=$renderer->render('/comps/item',['model'=>$comp,'static_view'=>true]);
+				foreach ($data->comps as $comp) $objects[]=$renderer->render('/comps/item',['model'=>$comp,'static_view'=>false]);
 			}
 			if (is_array($data->techs) && count($data->techs)) {
-				foreach ($data->techs as $tech) $objects[]=$renderer->render('/techs/item',['model'=>$tech,'static_view'=>true]);
+				foreach ($data->techs as $tech) $objects[]=$renderer->render('/techs/item',['model'=>$tech,'static_view'=>false]);
 			}
 			if (is_array($data->users) && count($data->users)) {
-				foreach ($data->users as $user) $objects[]=$renderer->render('/users/item',['model'=>$user,'short'=>true,'static_view'=>true]);
+				foreach ($data->users as $user) $objects[]=$renderer->render('/users/item',['model'=>$user,'short'=>true,'static_view'=>false,'noDelete'=>true]);
 			}
 			
 			if (count($objects)) return implode(', ',$objects);

@@ -6,9 +6,11 @@
  * Time: 21:55
  */
 
-/* @var \app\models\Users $model */
+/* @var Users $model */
 
-use yii\helpers\Html;
+use app\components\LinkObjectWidget;
+use app\models\Users;
+
 if (!isset($icon)) $icon=false;
 if (!isset($static_view)) $static_view=true;
 if (!isset($noDelete)) $noDelete=false;
@@ -26,7 +28,7 @@ if (is_object($model)) {
 
 <span class="users-item object-item <?= $model->Uvolen?'uvolen':'' ?>">
 	
-	<?= \app\components\LinkObjectWidget::widget(['model'=>$model,'name'=>$name,'static'=>$static_view,'noDelete'=>$noDelete]) ?>
+	<?= LinkObjectWidget::widget(['model'=>$model,'name'=>$name,'static'=>$static_view,'noDelete'=>$noDelete]) ?>
 </span>
 
 <?php } else echo "Отсутствует";
