@@ -32,7 +32,7 @@ class MapItemForm extends Model
     public function rules()
     {
         return [
-			[['x','y', 'techs_id', 'places_id', 'width', 'height', 'place_id',],'required'],
+			[['x','y', 'width', 'height', 'place_id',],'required'],
 			[['x','y', 'techs_id', 'places_id', 'width', 'height', 'place_id',],'integer'],
 			['item_type','string'],
         ];
