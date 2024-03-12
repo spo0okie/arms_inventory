@@ -137,16 +137,18 @@ class LinkObjectWidget extends Widget
 				:
 				Html::a($this->name,$this->url,$this->hrefOptions)
 			).$this->nameSuffix.(
-				!$this->static&&!$this->noUpdate?$space.UpdateObjectWidget::widget([
-					'model'=>$this->model,
-					'updateHint'=>$this->updateHint,
-					'modal'=>$this->modal,
-					'url'=>$this->updateUrl,
-						'options'=>[
-							'cssClass'=>$this->cssClass,
-							'data'=>$this->noPjax?['pjax'=>0]:[],
-						],
-				]):''
+				!$this->static&&!$this->noUpdate?
+					$space.UpdateObjectWidget::widget([
+						'model'=>$this->model,
+						'updateHint'=>$this->updateHint,
+						'modal'=>$this->modal,
+						'url'=>$this->updateUrl,
+							'options'=>[
+								'cssClass'=>$this->cssClass,
+								'data'=>$this->noPjax?['pjax'=>0]:[],
+							],
+					])
+				:''
 			).$deleteObject;
 	}
 }

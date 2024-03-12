@@ -362,6 +362,28 @@ class Scans extends ArmsModel
 		}
 		return $thumb;
 	}
+	
+	public function getImageSize() {
+		if (isset($this->attrsCache['imageSize'])) return $this->attrsCache['imageSize'];
+		if (!file_exists($_SERVER['DOCUMENT_ROOT'] . $this->getFullFname())) return null;
+		$im=new Imagick($_SERVER['DOCUMENT_ROOT'] . $this->getFullFname());
+		$this->attrsCache['imageSize']=[$im->getImageWidth(),$im->getImageHeight()];
+		$im->clear();
+		$im->destroy();
+		return $this->attrsCache['imageSize'];
+	}
+	
+	public function getImageWidth() {
+		$size=$this->getImageSize();
+		if (is_null($size)) return null;
+		return $size[0];
+	}
+
+	public function getImageHeight() {
+		$size=$this->getImageSize();
+		if (is_null($size)) return null;
+		return $size[1];
+	}
 
 	public static function pdfThumb()
 	{

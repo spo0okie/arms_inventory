@@ -1,0 +1,28 @@
+div.map-item.techs {
+    position: absolute;
+    color: limegreen;
+    border: solid limegreen 2px;
+    background: rgba(0, 100, 0, 0.5);
+    cursor: pointer;
+}
+
+div.map-item.techs:hover {
+    color: lime;
+    border: solid lime 2px;
+    background: rgba(0, 100, 0, 0.8);
+}
+
+
+div.map-item.places {
+    position: absolute;
+    color: #ccd232;
+    border: solid #ccd232 2px;
+    background: rgba(110, 79, 28, 0.5);
+    cursor: pointer;
+}
+
+div.map-item.places:hover {
+    color: yellow;
+    border: solid yellow 2px;
+    background: rgba(110, 79, 28, 0.8);
+}

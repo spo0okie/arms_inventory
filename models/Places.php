@@ -4,13 +4,15 @@ namespace app\models;
 
 use voskobovich\linker\LinkerBehavior;
 use yii\db\ActiveQuery;
-use yii\helpers\ArrayHelper;
+use app\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "places".
  *
  * @property string      $id id
  * @property integer     $parent_id
+ * @property integer     $scans_id
+ * @property integer     $map_id
  * @property string      $name Название
  * @property string      $fullName Полное название
  * @property string      $prefTree Префикс с резервированием родительским.
@@ -21,12 +23,15 @@ use yii\helpers\ArrayHelper;
  * @property Techs       $techs техника размещенная в этом помещении
  * @property string      $prefix Префикс
  * @property string      $short Короткое имя
+ * @property string      $map
  *
  * @property OrgInet[]   $inets
  * @property OrgPhones[] $phones
  * @property OrgPhones[] $phonesRecursive
  * @property Places[]    $children
  * @property Materials[] $materials
+ * @property Scans[]	 $scans
+ * @property Scans	 	 $mapImage
  */
 class Places extends ArmsModel
 {
@@ -95,7 +100,7 @@ DELIMITER ;
     public function rules()
     {
         return [
-			[['parent_id'], 'integer'],
+			[['parent_id','scans_id','map_id'], 'integer'],
 			[['parent_id'], function ($attribute) {
 				$children=[$this->id];
 				if (is_object($this->parent) && $this->parent->loopCheck($children)!==false) {
@@ -113,7 +118,7 @@ DELIMITER ;
             [['addr'], 'string', 'max' => 255],
             [['prefix'], 'string', 'max' => 5],
 			[['short'], 'string', 'max' => 16],
-			[['comment'], 'safe'],
+			[['comment','map'], 'safe'],
         ];
     }
 	
@@ -140,35 +145,36 @@ DELIMITER ;
 	/**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeData()
     {
-        return [
-            'id' => 'id',
-	        'parent_id' => 'Родитель',
-	        'parent' => 'Предок',
-            'name' => 'Полное имя',
-            'addr' => 'Адрес',
-            'phone' => 'Телефон',
-            'prefix' => 'Префикс',
-            'short' => 'Короткое имя',
-        ];
+        return ArrayHelper::recursiveOverride(parent::attributeData(),[
+	        'parent' => [
+	        	'Родитель',
+				'hint' => 'Помещение внутри которого находится это',
+			],
+            'name' => [
+            	'Полное имя',
+				'hint' => 'Понятное название помещения без сокращений',
+			],
+			'short' => [
+				'Короткое имя',
+				'hint' => 'Сокращенное название помещения для вывода в узких местах',
+			],
+            'addr' => [
+            	'Адрес',
+				'hint' => 'Если не указан, то наследуется адрес родительского помещения',
+			],
+            'prefix' => [
+            	'Префикс',
+				'hint' => 'Будет использоваться для генерации инвентарных номеров при заведении нового оборудования в этом помещении. Если не задать - используется родительский префикс. Если изменить, то старые инвентарные номера останутся неизменны.',
+			],
+			'map_id'=>[
+				'Карта помещения',
+				'hint' => 'Карта/план помещения. Выбирается из прикрепленных к помещению изображений'
+			],
+        ]);
     }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function attributeHints()
-	{
-		return [
-			'parent_id' => 'Помещение внутри которого находится это',
-			'name' => 'Понятное название помещения без сокращений',
-			'short' => 'Сокращенное название помещения для вывода в узких местах',
-			'addr' => 'Если не указан, то наследуется адрес родительского помещения',
-			'phone' => 'Если для помещения предусмотрены прямые телефоны, укажите их здесь',
-			'prefix' => 'Будет использоваться для формирования инвентарных номеров при заведении нового оборудования в этом помещении. Если не задать - используется родительский префикс. Если изменить, то старые инвентарные номера останутся неизменны.',
-		];
-	}
-	
 	/**
 	 * Проверяем петлю по связи потомок-предок
 	 * @param $children integer[]
@@ -236,9 +242,6 @@ DELIMITER ;
 
 		return $this->hasMany(Techs::class, ['places_id' => 'id'])
 			->from(['places_techs'=>Techs::tableName()]);
-		//	->andWhere(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
-		//	->andOnCondition(['is', 'places_techs.arms_id', new \yii\db\Expression('null')]);
-
 	}
 	
 	/**
@@ -360,8 +363,28 @@ DELIMITER ;
 		if ($this->parent_id) return $this->parent->prefTree;
 		return '';
 	}
+	
+	/**
+	 * Возвращает набор сканов в договоре
+	 */
+	public function getScans()
+	{
+		$scans=Scans::find()->where(['places_id' => $this->id ])->all();
+		$scans_sorted=[];
+		foreach ($scans as $scan) if($scan->id == $this->scans_id) $scans_sorted[]=$scan;
+		foreach ($scans as $scan) if($scan->id != $this->scans_id) $scans_sorted[]=$scan;
+		return $scans_sorted;
+	}
 
-	public function getReverseLinks() {
+	/**
+	 * Изображение-карту
+	 */
+	public function getMapImage()
+	{
+		return Scans::findOne($this->map_id);
+	}
+	
+	public function reverseLinks() {
 		return [
 			$this->techs,
 			$this->children,

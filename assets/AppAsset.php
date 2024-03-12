@@ -31,6 +31,7 @@ class AppAsset extends AssetBundle
 		'css/org-phones.css',
 		'css/net-ips.css',
 		'css/page-header.css',
+		'css/place-map.css',
 		'css/scans.css',
 		'css/schedules.css',
 		'css/state-colors.css',

@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\ManufacturersDict;
 use app\models\Places;
+use app\models\ui\MapItemForm;
 use Throwable;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -20,7 +21,8 @@ class PlacesController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'view'=>['armmap','depmap']
+			'view'=>['armmap','depmap'],
+			'edit'=>['uploads','map-set','map-delete'],
 		]);
 	}
 	
@@ -150,4 +152,45 @@ class PlacesController extends ArmsBaseController
 		else
 			return $this->redirect(['view','id'=>$parent_id]);
     }
+	
+	/**
+	 * Updates an existing TechModels model.
+	 * If update is successful, the browser will be redirected to the 'view' page.
+	 * @param int $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionUploads(int $id)
+	{
+		$model = $this->findModel($id);
+		return $this->render('uploads', [
+			'model' => $model,
+		]);
+	}
+	
+	public function actionMapSet(int $id){
+		$model=new MapItemForm();
+		$model->load(Yii::$app->request->post());
+		$model->itemSet();
+		return $this->redirect(['view','id'=>$model->place_id]);
+		
+	}
+
+	public function actionMapDelete(int $id, string $item_type, int $item_id){
+		/** @var Places $model */
+		$model=$this->findModel($id);
+		$mapStruct=json_decode($model->map);
+		
+		if (property_exists($mapStruct,$item_type)) {
+			$items=$mapStruct->$item_type;
+			if (property_exists($items,$item_id)) {
+				unset ($items->$item_id);
+				$mapStruct->$item_type=$items;
+				$model->map=json_encode($mapStruct,JSON_UNESCAPED_UNICODE);
+				$model->save();
+			}
+		}
+		
+		return $this->redirect(['view','id'=>$id]);
+	}
 }

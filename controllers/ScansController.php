@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Places;
 use app\models\TechModels;
 use app\models\Techs;
 use Throwable;
@@ -124,6 +125,9 @@ class ScansController extends ArmsBaseController
 				break;
 			case 'techs_id':
 				$model = Techs::findOne($link_id);
+				break;
+			case 'places_id':
+				$model = Places::findOne($link_id);
 				break;
 			default:
 				$model=null;
