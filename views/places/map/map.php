@@ -196,7 +196,7 @@ JS;
 	echo Html::tag('div',implode($items),[
 		'id'=>'place-map',
 		'style'=>"width:{$imgWidth}px; height:{$imgHeight}px; background-image: URL('{$bg->fullFname}'); background-size:100% 100%; position: relative",
-		'class'=>'mb-3',
+		'class'=>'my-3',
 	]);
 	$this->registerJs($jsContextMenu);
 	$editItem=new MapItemForm(['item_type'=>'none','place_id'=>$model->id]);

@@ -40,14 +40,14 @@ $jsCrop= /** @lang JavaScript */
   			
             selectionMove: function (data) {
                 //console.log(data);
-  			    jQuery('input#mapitemform-x').val(data.x);
-  			    jQuery('input#mapitemform-y').val(data.y);
+  			    jQuery('input#mapitemform-x').val(Math.round(data.x));
+  			    jQuery('input#mapitemform-y').val(Math.round(data.y));
   			},
         
             selectionResize: function (data) {
   			    //console.log(data)
-  			    jQuery('input#mapitemform-width').val(data.width);
-  			    jQuery('input#mapitemform-height').val(data.height);
+  			    jQuery('input#mapitemform-width').val(Math.round(data.width);
+  			    jQuery('input#mapitemform-height').val(Math.round(data.height));
   			}
 		})
 		$('img.crop-image').css('width','100%');
