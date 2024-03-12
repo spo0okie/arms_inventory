@@ -49,6 +49,7 @@ class MapItemForm extends Model
 	public function itemSet() {
     	$model=Places::findOne($this->place_id);
     	$mapStruct=json_decode($model->map);
+    	if (!is_object($mapStruct)) $mapStruct=new stdClass();
     	$type=$this->item_type;
     	
     	$item=new stdClass();
