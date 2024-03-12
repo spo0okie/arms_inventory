@@ -46,7 +46,7 @@ $jsCrop= /** @lang JavaScript */
         
             selectionResize: function (data) {
   			    //console.log(data)
-  			    jQuery('input#mapitemform-width').val(Math.round(data.width);
+  			    jQuery('input#mapitemform-width').val(Math.round(data.width));
   			    jQuery('input#mapitemform-height').val(Math.round(data.height));
   			}
 		})
