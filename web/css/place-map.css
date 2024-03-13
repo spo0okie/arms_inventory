@@ -1,9 +1,13 @@
-div.map-item.techs {
+div.map-item {
+    font-size: 12px;
     position: absolute;
+    cursor: pointer;
+}
+
+div.map-item.techs {
     color: limegreen;
     border: solid limegreen 2px;
     background: rgba(0, 100, 0, 0.5);
-    cursor: pointer;
 }
 
 div.map-item.techs:hover {
@@ -12,13 +16,10 @@ div.map-item.techs:hover {
     background: rgba(0, 100, 0, 0.8);
 }
 
-
 div.map-item.places {
-    position: absolute;
     color: #ccd232;
     border: solid #ccd232 2px;
     background: rgba(110, 79, 28, 0.5);
-    cursor: pointer;
 }
 
 div.map-item.places:hover {

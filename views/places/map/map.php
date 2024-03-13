@@ -15,7 +15,7 @@ use yii\helpers\Url;
 ImgCropAsset::register($this);
 ContextMenuAsset::register($this);
 
-const MAP_SIZE=1440;
+const MAP_SIZE=1100;
 
 if (is_object($model->mapImage)) {
 	$bg=$model->mapImage;
@@ -195,7 +195,7 @@ JS;
 	
 	echo Html::tag('div',implode($items),[
 		'id'=>'place-map',
-		'style'=>"width:{$imgWidth}px; height:{$imgHeight}px; background-image: URL('{$bg->fullFname}'); background-size:100% 100%; position: relative",
+		'style'=>"width:{$imgWidth}px; height:{$imgHeight}px; background-image: URL('{$bg->fullFname}'); background-size:{$imgWidth}px; position: relative",
 		'class'=>'my-3',
 	]);
 	$this->registerJs($jsContextMenu);
