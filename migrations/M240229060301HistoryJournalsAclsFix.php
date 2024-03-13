@@ -14,7 +14,8 @@ class M240229060301HistoryJournalsAclsFix extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->renameColumn('schedules_entries_history','notepad','history');
+		$this->dropColumnIfExist('schedules_entries_history','notepad');
+		$this->addColumnIfNotExist('schedules_entries_history','history',$this->text());
     }
 
     /**
@@ -22,7 +23,8 @@ class M240229060301HistoryJournalsAclsFix extends ArmsMigration
      */
     public function safeDown()
     {
-		$this->renameColumn('schedules_entries_history','history','notepad');
+		$this->dropColumnIfExist('schedules_entries_history','history');
+		$this->addColumnIfNotExist('schedules_entries_history','notepad',$this->text());
     }
 
     /*
