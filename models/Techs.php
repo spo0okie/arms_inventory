@@ -1186,7 +1186,8 @@ class Techs extends ArmsModel
 		if (is_object($this->comp)) $tokens[]=$this->comp->name;
 		if (is_object($this->user)) $tokens[]=$this->user->shortName;
 		if (!is_object($this->comp)) {
-			$tokens[]='('.$this->type->name.' '.$this->model->name.')';
+			
+			$tokens[]='('.$this->type->name.' '.$this->model->getShortWithVendor().')';
 			if (is_object($this->place)) $tokens[]=$this->place->fullName;
 		}
 		return implode(' / ',$tokens);
@@ -1221,7 +1222,7 @@ class Techs extends ArmsModel
 	
 	public static function fetchNames(){
 		$list= static::find()
-			->joinWith(['model.type','place','user','comp'])
+			->joinWith(['model.type','place','user','comp','model.manufacturer'])
 			//->select(['id','name'])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
