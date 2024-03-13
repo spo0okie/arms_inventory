@@ -7,7 +7,7 @@ div.map-item {
 div.map-item.techs {
     color: limegreen;
     border: solid limegreen 2px;
-    background: rgba(0, 100, 0, 0.5);
+    background: rgba(0, 40, 0, 0.7);
 }
 
 div.map-item.techs:hover {
