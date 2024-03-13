@@ -1,19 +1,19 @@
 <?php
 
-use yii\helpers\Html;
-use kartik\grid\GridView;
+use app\models\OrgStruct;
+use app\models\Partners;
 
 /* @var $this yii\web\View */
-/* @var $partner \app\models\Partners */
-/* @var $model \app\models\OrgStruct */
+/* @var $partner Partners */
+/* @var $model OrgStruct */
 
 //выходим на список
 if (is_object($partner)) {
-	$this->params['breadcrumbs'][] = ['label' => \app\models\Partners::$titles, 'url'=>['partners/index']];
+	$this->params['breadcrumbs'][] = ['label' => Partners::$titles, 'url'=>['partners/index']];
 	$this->params['breadcrumbs'][] = ['label' => $partner->bname, 'url'=>['partners/view','id'=>$partner->id]];
-	$this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index','org_id'=>$partner->id]];
+	$this->params['breadcrumbs'][] = ['label' => OrgStruct::$titles, 'url' => ['index','org_id'=>$partner->id]];
 } else {
-	$this->params['breadcrumbs'][] = ['label' => \app\models\OrgStruct::$titles, 'url' => ['index']];
+	$this->params['breadcrumbs'][] = ['label' => OrgStruct::$titles, 'url' => ['index']];
 }
 
 //выходим на экземпляр
