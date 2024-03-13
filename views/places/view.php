@@ -2,7 +2,6 @@
 
 use app\components\LinkObjectWidget;
 use app\components\ShowArchivedWidget;
-use app\models\Places;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -14,8 +13,8 @@ if (!isset($static_view)) $static_view=false;
 
 Url::remember();
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => Places::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+include 'breadcrumbs.php';
+
 ?>
 <div class="places-view">
 	<div class="d-flex flex-row-reverse flex-wrap">

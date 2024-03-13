@@ -1,13 +1,14 @@
 <?php
 
+use app\models\Places;
 use yii\helpers\Html;
 
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Places */
 
-$this->title = 'Добавить '.\app\models\Places::$title;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Places::$titles, 'url' => ['index']];
+$this->title = 'Добавить '. Places::$title;
+$this->params['breadcrumbs'][] = ['label' => Places::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="places-create">
