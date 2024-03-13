@@ -27,12 +27,17 @@ if ($srcWidth>$srcHeight) {
 	$imgWidth=$srcWidth*MAP_SIZE/$srcHeight;
 }
 
-$jsCrop= /** @lang JavaScript */
+/** @noinspection JSLastCommaInObjectLiteral */
+/** @noinspection CommaExpressionJS */
+/** @noinspection JSDuplicatedDeclaration */
+$jsCrop=
 <<<JS
 		CropSelectJs.MINIMUM_SELECTION_BOX_WIDTH = 20;
 		CropSelectJs.MINIMUM_SELECTION_BOX_HEIGHT = 20;
 
-		jQuery('#edit-map').CropSelectJs({
+		let \$mapEditSelector=jQuery('#edit-map');
+		
+		\$mapEditSelector.CropSelectJs({
   			imageSrc: '{$mapImage->fullFname}',
   			animatedBorder: false,
   			imgWidth: $imgWidth,
@@ -55,11 +60,10 @@ $jsCrop= /** @lang JavaScript */
 		
 		function CropSelectInitRect(rect) {
     		//console.log(rect);
-			let \$map=jQuery('#edit-map');
-  			\$map.CropSelectJs('setSelectionBoxX',rect.x);
-  			\$map.CropSelectJs('setSelectionBoxY',rect.y);
-  			\$map.CropSelectJs('setSelectionBoxWidth',rect.width);
-  			\$map.CropSelectJs('setSelectionBoxHeight',rect.height);
+  			\$mapEditSelector.CropSelectJs('setSelectionBoxX',rect.x);
+  			\$mapEditSelector.CropSelectJs('setSelectionBoxY',rect.y);
+  			\$mapEditSelector.CropSelectJs('setSelectionBoxWidth',rect.width);
+  			\$mapEditSelector.CropSelectJs('setSelectionBoxHeight',rect.height);
   			jQuery('input#mapitemform-x').val(rect.x);
   			jQuery('input#mapitemform-y').val(rect.y);
 			jQuery('input#mapitemform-width').val(rect.width);
@@ -69,7 +73,7 @@ JS;
 $this->registerJs($jsCrop);
 
 ?>
-<div id="edit-map" style="width: <?= $imgWidth ?>px"></div>
+<div id="edit-map" style="width: <?= $imgWidth ?>px; display: inline-block;"></div>
 <div class="map-item-form mt-1">
     <?php $form = ActiveForm::begin([
 		'fieldConfig' => [

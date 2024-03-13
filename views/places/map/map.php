@@ -196,12 +196,11 @@ JS;
 	echo Html::tag('div',implode($items),[
 		'id'=>'place-map',
 		'style'=>"width:{$imgWidth}px; height:{$imgHeight}px; background-image: URL('{$bg->fullFname}'); background-size:{$imgWidth}px; position: relative",
-		'class'=>'my-3',
 	]);
 	$this->registerJs($jsContextMenu);
 	$editItem=new MapItemForm(['item_type'=>'none','place_id'=>$model->id]);
 	?>
-	<div style="display: none" id="item-edit">
+	<div style="display: none" id="item-edit" class="text-center">
 		<?= $this->render('_form',['model'=>$editItem,'places'=>$model->children,'techs'=>$model->techs,'mapImage'=>$bg]) ?>
 	</div>
 	

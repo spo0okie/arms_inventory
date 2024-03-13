@@ -46,9 +46,11 @@ include 'breadcrumbs.php';
 			<?= $this->render('hdr_create_obj',['places_id'=>$model->id]) ?>
 		</div>
 	</div>
-	<div class="d-flex flex-row justify-content-center">
-		<?= $this->render('map/map',['model'=>$model]) ?>
-	</div>
+	<?php if ($model->map_id) { ?>
+		<div class="d-flex flex-row justify-content-center my-3">
+			<?= $this->render('map/map',['model'=>$model]) ?>
+		</div>
+	<?php } ?>
 
 	<?= $this->render('container',['model'=>$model,'models'=>$models,'depth'=>0,'show_archived'=>$show_archived]) ?>
 	<br />
