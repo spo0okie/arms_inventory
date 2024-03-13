@@ -436,7 +436,7 @@ class Users extends ArmsModel implements IdentityInterface
 		$result=[];
 		foreach ($this->services as $service)
 			foreach ($service->comps as $comp)
-				if ($comp->responsible->id == $this->id)
+				if (is_object($comp->responsible) && $comp->responsible->id == $this->id)
 					$result[$comp->id]=$comp;
 		return $result;
 	}
