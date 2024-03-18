@@ -26,11 +26,16 @@ $deleteable=!count($providingServices) && !count($supportServices) ;
 
 $schedule_id=$model->id;
 YiiAsset::register($this);
+$isWorkTime=$model->isWorkTime( date('Y-m-d'),date('H:i:s'));
 ?>
 <div class="schedules-view">
 	<div class="d-flex flex-wrap flex-row-reverse">
-		<div class="px-3 d-flex align-items-center <?= $model->isWorkTime( date('Y-m-d'),date('H:i:s'))?'bg-green-striped':'bg-red-striped' ?>">
-			<span class="text-center w-100 fw-bold"><?= $model->isWorkTime( date('Y-m-d'),date('H:i:s'))?'Доступ есть':'Доступа нет' ?></span>
+		<div class="px-3 d-flex align-items-center <?= $isWorkTime?'bg-green-striped':'bg-red-striped' ?>"
+			 qtip_ttip="<?= $isWorkTime?
+				 'В настоящее время доступ по этому расписанию предоставляется':
+				 'В настоящее время отсутствует/отозван доступ по этому расписанию'
+			 ?>">
+			<span class="text-center w-100 fw-bold"><?= $isWorkTime?'Доступ есть':'Доступа нет' ?></span>
 		</div>
 		<div class="small opacity-75 me-3"><?= HistoryWidget::widget(['model'=>$model]) ?></div>
 		<div class="flex-fill">

@@ -23,12 +23,13 @@ echo Html::a('Добавить период предоставления/отз�
 	'/schedules-entries/create',
 	'SchedulesEntries[schedule_id]' => $model->id,
 	'SchedulesEntries[is_period]' => 1,
-], ['class' => 'btn btn-success']);
+], ['class' => 'btn btn-success mb-1']);
 
 
 echo GridView::widget([
 	'dataProvider' => $daysDataProvider,
-	'filterModel' => $daysSearchModel,
+	//'filterModel' => $daysSearchModel,
+	'layout'=>"{items}\n{pager}",
 	'rowOptions'=>function($model) {return [
 		'class' => $model->is_work?'bg-green-striped border-2':'bg-red-striped border-2',
 	];},

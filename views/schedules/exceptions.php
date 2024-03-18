@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
@@ -39,7 +40,7 @@ if (!$acl_mode) {
 	echo '<h2>Периоды предоставления / отзыва доступа</h2>';
 }
 
-echo '<div class="btn-group">';
+echo '<div class="btn-group mb-1">';
 if (!$acl_mode) {
 	echo Html::a('Добавить график на дату', [
 		'/schedules-entries/create',
@@ -78,7 +79,8 @@ echo '</div>';
 
 echo GridView::widget([
 	'dataProvider' => $daysDataProvider,
-	'filterModel' => $daysSearchModel,
+	//'filterModel' => $daysSearchModel,
+	'layout'=>"{items}\n{pager}",
 	'columns' => [
 		[
 			'attribute'=>'date',
@@ -123,10 +125,10 @@ echo GridView::widget([
 			'urlCreator'=>function ($action, $model, $key, $index, $column) {
 				switch ($action) {
 					case 'update':
-						return \yii\helpers\Url::to(['/schedules-entries/update','id'=>$key]);
+						return Url::to(['/schedules-entries/update','id'=>$key]);
 					case 'delete':
-						return \yii\helpers\Url::to(['/schedules-entries/delete','id'=>$key]);
-				};
+						return Url::to(['/schedules-entries/delete','id'=>$key]);
+				}
 				
 			}
 		],
