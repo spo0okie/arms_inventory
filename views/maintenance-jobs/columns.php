@@ -5,6 +5,7 @@
 
 
 use app\components\ExpandableCardWidget;
+use app\models\Schedules;
 
 if(!isset($static_view))$static_view=false;
 $renderer = $this;
@@ -15,10 +16,20 @@ return [
 			return $renderer->render('item',['model'=>$data]);
 		},
 	],
-	'description'=>['format' =>'text'],
+	'description'=>['format' =>'ntext'],
 	'schedule'=>[
 		'value'=>function($data) use ($renderer){
-			return $renderer->render('/schedules/item',['model'=>$data->schedule]);
+			/** @var Schedules $schedule */
+			if (is_object($schedule=$data->schedule)) {
+				$descr=$schedule->description?
+					$schedule->description:
+					$schedule->workTimeDescription;
+				return $renderer->render('/schedules/item',[
+					'model'=>$data->schedule,
+					'name'=>$descr
+				]);
+				
+			} return null;
 		},
 	],
 	'objects'=>[

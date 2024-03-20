@@ -37,6 +37,7 @@ use yii\helpers\Html;
 				<h4>Расписание</h4>
 				<?php if (is_object($model->schedule)) {
 					echo Html::a(
+					$model->schedule->description?$model->schedule->description:
 						$this->render('/schedules/week-description',['model'=>$model->schedule]),
 						'#',
 						['onclick'=>'$("li#tab-schedule").children("a.nav-link").tab("show");$("li#tab-schedule").click();']
