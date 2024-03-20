@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -10,6 +11,10 @@ use yii\data\ActiveDataProvider;
  */
 class MaintenanceJobsSearch extends MaintenanceJobs
 {
+	
+	public $objects;
+	public $schedule;
+	
     /**
      * {@inheritdoc}
      */
@@ -17,7 +22,7 @@ class MaintenanceJobsSearch extends MaintenanceJobs
     {
         return [
             [['id', 'schedules_id', 'services_id'], 'integer'],
-            [['name', 'description', 'links', 'updated_at', 'updated_by'], 'safe'],
+            [['name', 'description', 'links', 'updated_at', 'updated_by','schedule','objects'], 'safe'],
         ];
     }
 
@@ -39,7 +44,13 @@ class MaintenanceJobsSearch extends MaintenanceJobs
      */
     public function search($params)
     {
-        $query = MaintenanceJobs::find();
+        $query = MaintenanceJobs::find()
+		->joinWith([
+			'schedule',
+			'comps',
+			'techs',
+			'services'
+		]);
 
         // add conditions that should always apply here
 
@@ -66,6 +77,12 @@ class MaintenanceJobsSearch extends MaintenanceJobs
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'description', $this->description])
             ->andFilterWhere(['like', 'links', $this->links])
+            ->andFilterWhere(QueryHelper::querySearchString(['AND/OR',
+				'IFNULL(comps.name,"")',
+				'IFNULL(techs.num,"")',
+				'IFNULL(techs.hostname,"")',
+				'IFNULL(services.name,"")'
+			], $this->objects))
             ->andFilterWhere(['like', 'updated_by', $this->updated_by]);
 
         return $dataProvider;

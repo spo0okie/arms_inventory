@@ -141,7 +141,7 @@ public static $titles='Регламентное обслуживание';
 			'services' => ['alias'=>'services_ids'],
 			'responsible' => ['Ответственный'],
 			'support' => ['Поддержка'],
-
+			'objects' => ['Объекты','indexHint'=>'Обслуживаемые объекты'],
 		]);
     }
 	
