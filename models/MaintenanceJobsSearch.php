@@ -44,15 +44,25 @@ class MaintenanceJobsSearch extends MaintenanceJobs
      */
     public function search($params)
     {
-        $query = MaintenanceJobs::find()
-		->joinWith([
-			'schedule',
-			'comps',
-			'techs',
-			'services'
-		]);
+    	//Запрос для данных (БЕЗ JOIN чтобы не ломалась пагинация)
+		$query = MaintenanceJobs::find()
+			->with([
+				'schedule',
+				'comps',
+				'techs',
+				'services'
+			]);
+        
+        //запрос для фильтра (с JOIN чтобы нормально можно было фильтровать по связанным объектам)
+		$filter=MaintenanceJobs::find()
+			->select('DISTINCT(maintenance_jobs.id)')
+			->joinWith([
+				'schedule',
+				'comps',
+				'techs',
+				'services'
+			]);
 
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -65,16 +75,13 @@ class MaintenanceJobsSearch extends MaintenanceJobs
             // $query->where('0=1');
             return $dataProvider;
         }
-
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
+        
+        // наполняем фильтр всякими WHERE
+		$filter->andFilterWhere([
             'schedules_id' => $this->schedules_id,
-            'services_id' => $this->services_id,
-            'updated_at' => $this->updated_at,
         ]);
-
-        $query->andFilterWhere(['like', 'name', $this->name])
+	
+		$filter->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'description', $this->description])
             ->andFilterWhere(['like', 'links', $this->links])
             ->andFilterWhere(QueryHelper::querySearchString(['AND/OR',
@@ -83,8 +90,23 @@ class MaintenanceJobsSearch extends MaintenanceJobs
 				'IFNULL(techs.hostname,"")',
 				'IFNULL(services.name,"")'
 			], $this->objects))
-            ->andFilterWhere(['like', 'updated_by', $this->updated_by]);
-
+            ->andFilterWhere(QueryHelper::querySearchString(['AND/OR',
+				'IFNULL(schedules.name,"")',
+				'IFNULL(schedules.description,"")',
+			],$this->schedules_id));
+	
+		//если фильтруем, то делаем двухходовку в виде SUB-QUERY
+		if ($filter->where) {
+			//выбираем ID отфильтрованных записей
+			$filterSubQuery=$filter
+				->createCommand()
+				->rawSql;
+			
+			//фильтруем запрос данных по этим ID
+			$query
+				->where('maintenance_jobs.id in ('.$filterSubQuery.')');
+		}
+		
         return $dataProvider;
     }
 }
