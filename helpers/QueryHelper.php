@@ -90,7 +90,9 @@ class QueryHelper
 	
 	/**
 	 * Обработка строчного токена (like или not like)
-	 * @param $token
+	 * @param mixed $token с чем сравнивать
+	 * @param mixed $param параметр по которому ищем,
+	 * 					можно передавать выражение ['or','responsible.Ename','support.Ename']
 	 * @return array
 	 */
 	static function likeToken($token,$param) {
@@ -98,9 +100,18 @@ class QueryHelper
 		if (strpos($token,'!')===0) {
 			$operator='not like';
 			$token=trim(substr($token,1));
+			//Если мы ищем когда должно быть не похоже - то это каждое поле
+			if (isset($param[0]) && $param[0]==='AND/OR')
+				$param[0]='AND';
 		} else {
 			$operator='like';
+			//Если мы ищем когда должно быть похоже - то это любое поле
+			if (isset($param[0]) && $param[0]==='AND/OR')
+				$param[0]='OR';
 		}
+
+		if ($token==='*') $token='%_%';
+
 		if (strpos($token,'^')===0) {
 			$token=substr($token,1);
 		} else $token='%'.$token;
@@ -173,7 +184,8 @@ class QueryHelper
 	}
 	
 	/**
-	 * @param $param string|array параметр по которому ищем, можно передавать выражение ['or','responsible.Ename','support.Ename']
+	 * @param $param string|array параметр по которому ищем,
+	 * 					можно передавать выражение ['or','responsible.Ename','support.Ename']
 	 * @param $string string значение которое должны принять параметры
 	 * @return array
 	 */
