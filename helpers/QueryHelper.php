@@ -101,12 +101,12 @@ class QueryHelper
 			$operator='not like';
 			$token=trim(substr($token,1));
 			//Если мы ищем когда должно быть не похоже - то это каждое поле
-			if (isset($param[0]) && $param[0]==='AND/OR')
+			if (is_array($param) && isset($param[0]) && $param[0]==='AND/OR')
 				$param[0]='AND';
 		} else {
 			$operator='like';
 			//Если мы ищем когда должно быть похоже - то это любое поле
-			if (isset($param[0]) && $param[0]==='AND/OR')
+			if (is_array($param) && isset($param[0]) && $param[0]==='AND/OR')
 				$param[0]='OR';
 		}
 
