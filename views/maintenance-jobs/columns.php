@@ -25,14 +25,15 @@ return [
 		'value'=>function($data) use ($renderer){
 			$output=[];
 			foreach ($data->comps as $comp) {
-				$output[]=$renderer->render('/comps/item',['model'=>$comp,'static_view'=>false]);
+				$output[$comp->sname]=$renderer->render('/comps/item',['model'=>$comp,'static_view'=>false]);
 			}
 			foreach ($data->techs as $tech) {
-				$output[]=$renderer->render('/techs/item',['model'=>$tech,'static_view'=>false]);
+				$output[$tech->sname]=$renderer->render('/techs/item',['model'=>$tech,'static_view'=>false]);
 			}
 			foreach ($data->services as $service) {
-				$output[]=$renderer->render('/services/item',['model'=>$service,'static_view'=>false]);
+				$output[$service->name]=$renderer->render('/services/item',['model'=>$service,'static_view'=>false]);
 			}
+			ksort($output);
 			return ExpandableCardWidget::widget([
 				'content'=>implode('<br />',$output)
 			]);
