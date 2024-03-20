@@ -19,9 +19,9 @@ if (!isset($empty)) $empty='- расписание отсутствует -';
 if (!empty($model)) {
 	if (!isset($name)) {
 		$name=$model->name;
-	} elseif ($name='schedule') {
+	} elseif ($name=='schedule') {
 		$name=$model->getWorkTimeDescription();
-	} elseif ($name='private-schedule' && $model->isPrivate) {
+	} elseif ($name=='private-schedule' && $model->isPrivate) {
 		$name=$model->getWorkTimeDescription();
 	}
 	
