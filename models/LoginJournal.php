@@ -185,7 +185,7 @@ class LoginJournal extends ArmsModel
 			->where(['users_id'=>$user_id])
 			->andWhere(['not',['comps_id'=>NULL]])
 			->groupBy('comps_id')
-			->orderBy(['time'=>SORT_DESC])
+			->orderBy(['MAX(time)'=>SORT_DESC])
 			->limit($limit)
 			->all();
 
