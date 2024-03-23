@@ -1,12 +1,12 @@
 <?php
 namespace app\migrations;
-use yii\db\Migration;
+use app\migrations\arms\ArmsMigration;
 use yii\db\Query;
 
 /**
  * Class m230821_160259_init_empty_tables
  */
-class m230821_160259_init_empty_tables extends Migration
+class m230821_160259_init_empty_tables extends ArmsMigration
 {
 	
 	public $initialDocStates=[
@@ -30,24 +30,7 @@ class m230821_160259_init_empty_tables extends Migration
 		['state_broken','Сломан',0,'Полностью не работоспособен. Требуется ремонт или списание.'],
 		['state_decommisioned','Списано',1,'Выведено из эксплуатации.'],
 	];
-	
-	function addColumnIfNotExist($table,$column,$type,$index=false)
-	{
-		$tableSchema = $this->db->getTableSchema($table);
-		if (!isset($tableSchema->columns[$column])) {
-			$this->addColumn($table,$column,$type);
-			if ($index) $this->createIndex("idx-$table-$column",$table,$column);
-			
-		}
-	}
-	
-	function dropColumnIfExist($table,$column)
-	{
-		$tableSchema = $this->db->getTableSchema($table);
-		if (isset($tableSchema->columns[$column])) {
-			$this->dropColumn($table,$column);
-		}
-	}
+
     /**
      * {@inheritdoc}
      */
@@ -79,7 +62,7 @@ class m230821_160259_init_empty_tables extends Migration
 		
 		$this->addColumnIfNotExist('manufacturers_dict','updated_at',$this->timestamp());
 		$this->addColumnIfNotExist('manufacturers_dict','updated_by',$this->string(32));
-		$this->dropForeignKey('manufacturers','manufacturers_dict');
+		$this->dropFkIfExist('manufacturers','manufacturers_dict');
 	
 		$this->renameColumn('manufacturers','created_at','updated_at');
 		$this->addColumnIfNotExist('manufacturers','updated_by',$this->string(32));
