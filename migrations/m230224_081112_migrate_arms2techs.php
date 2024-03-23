@@ -73,6 +73,27 @@ class m230224_081112_migrate_arms2techs extends Migration
 		
 		echo "PC type ID: ".$pc['id']."\n";
 		
+		$noNameVendorName='No Name';
+		$noNameVendorQuery=new Query();
+		$noNameVendor=$noNameVendorQuery->select('*')->from('manufacturers')->where(['name'=>$noNameVendorName])->one();
+		if (!is_array($noNameVendor)) {
+			echo "Creating \"No Name\" vendor\n";
+			$this->execute(
+				'insert into manufacturers (name,full_name,comment) values (:name,:full_name,:comment)',[
+				'name'=>$noNameVendorName,
+				'full_name'=>'Безымянные и не определяющиеся производители',
+				'comment'=>'А как без этого',
+			]);
+			$noNameVendor=$noNameVendorQuery->select('*')->from('manufacturers')->where(['name'=>$noNameVendorName])->one();
+			if (!is_array($noNameVendor)) {
+				echo "Error creating \"No Name\" vendor!\n";
+				return false;
+			}
+		}
+	
+		echo "NoName Vendor ID: ".$noNameVendor['id']."\n";
+		
+		
 		$unknownPcName='Unknown';
 		$unknownPcQuery=new Query();
 		$unknownPc=$unknownPcQuery->select('*')->from('tech_models')->where(['name'=>$unknownPcName])->one();
@@ -80,7 +101,7 @@ class m230224_081112_migrate_arms2techs extends Migration
 			echo "Creating \"unknown PC\" tech_model\n";
 			$this->execute(
 				'insert into tech_models (manufacturers_id,name,comment,type_id) values (:manufacturers_id,:name,:comment,:type_id)',[
-				'manufacturers_id'=>1,
+				'manufacturers_id'=>$noNameVendor['id'],
 				'name'=>$unknownPcName,
 				'comment'=>'Автоматически созданная модель оборудования назначена всем АРМ, где модель не была указана при обновлении БД. Нужно проставить правильные модели оборудования и удалить эту.',
 				'type_id'=>$pc['id'],
