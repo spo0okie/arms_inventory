@@ -116,7 +116,6 @@ return [
 		},
 	],
 	'compsAndTechs'=> [
-		'label' => 'Серв./Оборуд.',
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->comps)) foreach ($data->comps as $comp)

@@ -249,7 +249,11 @@ class Services extends ArmsModel
 				'indexHint' => '{same}',//<br />'.QueryHelper::$stringSearchHint,
 			],
 			'techs' => ['alias'=>'techs_ids'],
-	        'providing_schedule_id' => [
+			'compsAndTechs'=> [
+				'Серв./Оборуд.',
+				'indexHint' => 'Серверы и оборудование на которых выполняется этот сервис'
+			],
+			'providing_schedule_id' => [
 	        	'Время предоставления',
 				'hint' => 'Расписание, когда сервисом могут воспользоваться пользователи или другие сервисы',
 			],
@@ -290,7 +294,12 @@ class Services extends ArmsModel
 				'hint' => 'Сегмент ИТ инфраструктуры к которому относится этот сервис',
 			],
 			'segment' => ['alias'=>'segment_id'],
-			'arms' => [Techs::$title],
+			'arms' => [
+				'Физ. сервера',
+				'indexHint'=>'АРМ/оборудование, на которых крутятся ОС/ВМ, на которых крутится сервис'
+					.'<br>(Не то же самое, что оборудование на котом крутится сервис.)'
+					.'<br>Это не прямая, а косвенная связь. При миграции ВМ это список может меняться'
+			],
 			'archived' => [
 				'Архивирован',
 				'hint' => 'Если сервис/услуга более не используется, но для истории его описание лучше сохранить - то его можно просто заархивировать, чтобы не отсвечивал',
@@ -577,6 +586,7 @@ class Services extends ArmsModel
 	public function getArms()
 	{
 		return $this->hasMany(Techs::class, ['id' => 'arm_id'])
+			->from(['arms'=>Techs::tableName()])
 			->via('comps');
 	}
 	

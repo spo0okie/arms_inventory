@@ -14,6 +14,7 @@ class ServicesSearch extends Services
 	public $sites;
 	public $comps;
 	public $techs;
+	public $compsAndTechs;
 	public $segment;
 	public $responsible;
 	public $responsible_ids;
@@ -29,7 +30,19 @@ class ServicesSearch extends Services
         return [
 	        [['id', 'is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 			[['responsible_ids'], 'each', 'rule'=>['integer']],
-            [['name', 'description', 'segment', 'sites','responsible', 'providingSchedule', 'supportSchedule','directlySupported','comps','techs'], 'safe'],
+            [[
+            	'name',
+				'description',
+				'segment',
+				'sites',
+				'responsible',
+				'providingSchedule',
+				'supportSchedule',
+				'directlySupported',
+				'comps',
+				'techs',
+				'compsAndTechs'
+			], 'safe'],
         ];
     }
 
@@ -128,7 +141,8 @@ class ServicesSearch extends Services
 			])
 			->andFilterWhere(QueryHelper::querySearchString('segments.name', $this->segment))
 			->andFilterWhere(QueryHelper::querySearchString('comps.name', $this->comps))
-			->andFilterWhere(QueryHelper::querySearchString('techs.name', $this->comps))
+			->andFilterWhere(QueryHelper::querySearchString(['AND/OR','techs.num','techs.hostname'],$this->techs))
+			->andFilterWhere(QueryHelper::querySearchString(['AND/OR','comps.name','techs.num','techs.hostname'], $this->compsAndTechs))
 			->andFilterWhere(QueryHelper::querySearchString('providing_schedule.name', $this->providingSchedule))
 			->andFilterWhere(QueryHelper::querySearchString('support_schedule.name', $this->supportSchedule))
 	        ->andFilterWhere([
