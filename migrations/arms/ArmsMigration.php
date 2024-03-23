@@ -27,7 +27,7 @@ class ArmsMigration extends Migration
 		}
 	}
 	
-	function dropFkIfExist($table,$name)
+	function dropFkIfExist($name,$table)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (isset($tableSchema->foreignKeys[$name])) {
