@@ -1,11 +1,11 @@
 <?php
 namespace app\migrations;
-use yii\db\Migration;
+use app\migrations\arms\ArmsMigration;
 
 /**
  * Class m220630_173032_alter_tables_prov_tel
  */
-class m220630_173032_alter_tables_prov_tel extends Migration
+class m220630_173032_alter_tables_prov_tel extends ArmsMigration
 {
     /**
      * {@inheritdoc}
@@ -56,10 +56,27 @@ class m220630_173032_alter_tables_prov_tel extends Migration
      */
     public function safeDown()
     {
-        echo "m220630_173032_alter_tables_prov_tel cannot be reverted.\n";
-
-        return false;
-    }
+		$table = $this->db->getTableSchema('org_inet');
+	
+		$this->addColumnIfNotExist('org_inet','prov_tel_id',$this->integer());
+		$this->addColumnIfNotExist('org_inet','contracts_id',$this->integer());
+		$this->addColumnIfNotExist('org_phones','prov_tel_id',$this->integer());
+		$this->addColumnIfNotExist('org_phones','contracts_id',$this->integer());
+	
+		if (is_null($this->db->getTableSchema('prov_tel'))) {
+			$this->execute(<<<SQL
+				CREATE TABLE `prov_tel` (
+				  `id` int(11) NOT NULL COMMENT 'id',
+				  `name` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+				  `cabinet_url` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Личный кабинет',
+				  `support_tel` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Телефон поддержки',
+				  `comment` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Комментарий'
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Поставки услуг телефонии';
+SQL
+);
+		}
+	
+	}
 
     /*
     // Use up()/down() to run migration code without a transaction.
