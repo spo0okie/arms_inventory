@@ -82,7 +82,7 @@ public static $titles='Регламентное обслуживание';
             [['schedules_id', 'services_id', 'links'], 'default', 'value' => null],
             [['name', 'description'], 'required'],
 			[['name'], 'string', 'max' => 255],
-			[['description'], 'string', 'max' => 1024],
+			[['description'], 'string', 'max' => 768],
 			[['schedules_id', 'services_id','archived'], 'integer'],
 			[['comps_ids', 'services_ids', 'techs_ids', 'reqs_ids'], 'each','rule'=>['integer']],
             [['links'], 'string'],
