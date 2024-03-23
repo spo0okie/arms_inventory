@@ -1,11 +1,11 @@
 <?php
 namespace app\migrations;
-use yii\db\Migration;
+use app\migrations\arms\ArmsMigration;
 
 /**
  * Class m210228_121450_table_ports
  */
-class m210228_121450_table_ports extends Migration
+class m210228_121450_table_ports extends ArmsMigration
 {
     /**
      * {@inheritdoc}
@@ -42,10 +42,10 @@ class m210228_121450_table_ports extends Migration
     public function safeDown()
     {
 		if (!is_null($table=$this->db->getTableSchema('{{%ports}}'))) {
-			$this->dropForeignKey('fk-ports_tech',		'ports');
-			$this->dropForeignKey('fk-ports_link_tech',	'ports');
-			$this->dropForeignKey('fk-ports_link_arms',	'ports');
-			$this->dropForeignKey('fk-ports_link_port',	'ports');
+			$this->dropFkIfExist('fk-ports_tech',		'ports');
+			$this->dropFkIfExist('fk-ports_link_tech',	'ports');
+			$this->dropFkIfExist('fk-ports_link_arms',	'ports');
+			$this->dropFkIfExist('fk-ports_link_port',	'ports');
 			$this->dropTable('{{%ports}}');
 		}
     }
