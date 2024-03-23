@@ -35,6 +35,13 @@ class ArmsMigration extends Migration
 		}
 	}
 	
+	function dropTableIfExists($table)
+	{
+		$tableSchema = $this->db->getTableSchema($table);
+		if (!is_null($tableSchema))
+			$this->dropTable($table);
+	}
+	
 	/**
 	 * @param $tableName string maintenance_reqs_in_techs
 	 * @param $links array ['techs_id'=>'techs','reqs_id'=>'maintenance_reqs']
@@ -43,6 +50,7 @@ class ArmsMigration extends Migration
 	{
 		$keys=array_keys($links);
 		$tables=array_values($links);
+		$this->dropTableIfExists($tableName);
 		$this->createTable($tableName,[
 			'id'=>$this->primaryKey(),
 			$keys[0]=>$this->integer(),

@@ -14,6 +14,7 @@ class M231226142737CreateTableJobs extends ArmsMigration
      */
     public function safeUp()
     {
+    	$this->dropTableIfExists('maintenance_reqs');
 		$this->createTable('maintenance_reqs',[
 			'id'=>$this->primaryKey(),
 			'name'=>$this->string()->notNull(),
@@ -27,7 +28,8 @@ class M231226142737CreateTableJobs extends ArmsMigration
 		],'engine=InnoDB');
 		$this->createIndex('maintenance_reqs-name','maintenance_reqs','name');
 		$this->createIndex('maintenance_reqs-description','maintenance_reqs','description');
-		
+	
+		$this->dropTableIfExists('maintenance_reqs_history');
 		$this->createTable('maintenance_reqs_history',[
 			'id'=>$this->primaryKey(),
 			'master_id'=>$this->integer(),
@@ -68,7 +70,8 @@ class M231226142737CreateTableJobs extends ArmsMigration
 			'reqs_id'=>'maintenance_reqs',
 			'includes_id'=>'maintenance_reqs',
 		]);
-		
+	
+		$this->dropTableIfExists('maintenance_jobs');
 		$this->createTable('maintenance_jobs',[
 			'id'=>$this->primaryKey(),
 			'name'=>$this->string()->notNull(),
@@ -84,6 +87,7 @@ class M231226142737CreateTableJobs extends ArmsMigration
 		$this->createIndex('maintenance_jobs-schedules_id','maintenance_jobs','schedules_id');
 		$this->createIndex('maintenance_jobs-services_id','maintenance_jobs','services_id');
 	
+		$this->dropTableIfExists('maintenance_jobs_history');
 		$this->createTable('maintenance_jobs_history',[
 			'id'=>$this->primaryKey(),
 			'master_id'=>$this->integer(),
@@ -128,20 +132,20 @@ class M231226142737CreateTableJobs extends ArmsMigration
      */
     public function safeDown()
     {
-		$this->dropTable('maintenance_jobs_in_techs');
-		$this->dropTable('maintenance_jobs_in_comps');
-		$this->dropTable('maintenance_jobs_in_services');
-		$this->dropTable('maintenance_jobs_history');
+		$this->dropTableIfExists('maintenance_jobs_in_techs');
+		$this->dropTableIfExists('maintenance_jobs_in_comps');
+		$this->dropTableIfExists('maintenance_jobs_in_services');
+		$this->dropTableIfExists('maintenance_jobs_history');
 	
-		$this->dropTable('maintenance_reqs_in_jobs');
-		$this->dropTable('maintenance_reqs_in_reqs');
-		$this->dropTable('maintenance_reqs_in_comps');
-		$this->dropTable('maintenance_reqs_in_techs');
-		$this->dropTable('maintenance_reqs_in_services');
-		$this->dropTable('maintenance_reqs_history');
+		$this->dropTableIfExists('maintenance_reqs_in_jobs');
+		$this->dropTableIfExists('maintenance_reqs_in_reqs');
+		$this->dropTableIfExists('maintenance_reqs_in_comps');
+		$this->dropTableIfExists('maintenance_reqs_in_techs');
+		$this->dropTableIfExists('maintenance_reqs_in_services');
+		$this->dropTableIfExists('maintenance_reqs_history');
 
-		$this->dropTable('maintenance_jobs');
-		$this->dropTable('maintenance_reqs');
+		$this->dropTableIfExists('maintenance_jobs');
+		$this->dropTableIfExists('maintenance_reqs');
     }
 
     /*
