@@ -1,9 +1,13 @@
 <?php
 
-use yii\helpers\Html;
+use app\components\ItemObjectWidget;
+use app\components\LinkObjectWidget;
+use app\helpers\StringHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
+/* @var $crop_site boolean Обрезать имя площадки из имени */
+/* @var $crop_parent boolean Обрезать имя родителя из имени */
 
 if (!isset($static_view)) $static_view=false;
 if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived',true);
@@ -13,12 +17,12 @@ if (!isset($noDelete)) $noDelete=false;
 if (is_object($model)) {
 	if (!isset($display)) {
 		$display=($model->archived&&!$show_archived)?'style="display:none"':'';
-	};
+	}
 	
 	if (!isset($archClass)) {
 		$archClass=$model->archived?'text-muted text-decoration-line-through archived-item':'';
-	};
-
+	}
+	
 	//выбираем иконку
 	$icon=$this->render('icon',compact('model'));
 	
@@ -59,9 +63,36 @@ if (is_object($model)) {
 		}
 	}
 	
-	echo \app\components\ItemObjectWidget::widget([
+	if (!empty($crop_parent)) {
+		$dividers=['-',':','::','/','\\','>','->'];
+		if (is_object($model->parentService)){
+			//разбиваем имя на слова
+			$tokens= StringHelper::explode($name," ",true,true);
+			foreach ($model->parentService->getAliases() as $alias) {
+				//разбиваем альяс на слова
+				$aliasTokens=StringHelper::explode($alias," ",true,true);
+				//если слова альяса это первые слова имени
+				if (array_intersect_assoc($aliasTokens,$tokens) == $aliasTokens) {
+					//собственно нашли совпадение
+					
+					//убираем альяс из начала имени (откусываем в качестве имени правый набор слов после альяса)
+					$tokens=array_slice($tokens,count($aliasTokens));
+					
+					//если теперь в начале имени стоит разделитель, его бы убрать
+					if (array_search($tokens[0],$dividers)!==false)
+						array_shift($tokens);
+					
+					$name=implode(' ',$tokens);
+					break;
+				}
+			}
+		}
+		
+	}
+	
+	echo ItemObjectWidget::widget([
 		'model'=>$model,
-		'link'=>\app\components\LinkObjectWidget::widget([
+		'link'=> LinkObjectWidget::widget([
 			'model'=>$model,
 			'static'=>$static_view,
 			'noDelete'=>$noDelete,

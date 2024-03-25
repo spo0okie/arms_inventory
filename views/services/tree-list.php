@@ -9,19 +9,25 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
 /* @var $selected_id integer */
+/* @var $master app\models\Services */
+
 
 use app\helpers\ArrayHelper;
 
+$items=$model->children;
+ArrayHelper::multisort($items,'name');
 
-?>
-<?= $this->render('item',['model'=>$model]) ?>
-	<ul class="ul-treefree ul-dropfree">
-		<?php $items=$model->children;
-		ArrayHelper::multisort($items,'name');
-		foreach ($items as $item) { ?>
-			<li><?= $this->render('tree-list',['model'=>$item]); ?></li>
+
+echo $this->render('item',['model'=>$model,'crop_parent'=>isset($master)]);
+
+if (count($items)) {?>
+	<ul class="ul-treefree ul-dropfree m-0">
+		<?php foreach ($items as $item) { ?>
+			<li><?= $this->render('tree-list',['model'=>$item,'master'=>$model]); ?></li>
 		<?php } ?>
 	</ul>
+<?php }
+
 
 
 

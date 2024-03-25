@@ -5,6 +5,7 @@ namespace app\models;
 use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\QueryHelper;
+use app\helpers\StringHelper;
 use app\models\traits\ServicesModelCalcFieldsTrait;
 use voskobovich\linker\LinkerBehavior;
 use yii\db\ActiveQuery;
@@ -16,6 +17,7 @@ use yii\db\ActiveQuery;
  * @property int $parent_id
  * @property string $name
  * @property string $description
+ * @property string $search_text
  * @property int $is_end_user
  * @property int $user_group_id
  * @property int $sla_id
@@ -218,8 +220,10 @@ class Services extends ArmsModel
 				'hint' => 'Развернутое название или краткое описание назначения этого сервиса. Все детали тут описывать не нужно. Нужно в поле ниже вставить ссылку на вики страничку с описанием',
 			],
 			'search_text' => [
-				'Другие варианты названия',
-				'hint' => 'Какие еще названия используются в отношении этого сервиса. Нужно для лучшей работы поиска (искать будет не только по основному названию но и по этим). Через запятую',
+				'Альясы',
+				'hint' => 'Какие еще названия используются в отношении этого сервиса (по одному в строку). '
+					.'<br>Нужно для лучшей работы поиска (искать будет не только по основному названию но и по этим).'
+					.'<br>Также при построении дерева сервисов имена и альясы родителей скрывается из дочерних сервисов (для краткости)',
 			],
 	        'links' => [
 	        	'Ссылки',
@@ -396,6 +400,15 @@ class Services extends ArmsModel
 			$this->orgPhones
 		];
 	}
+	
+	/**
+	 * Возвращает все варианты написания/названия сервиса
+	 */
+	public function getAliases()
+	{
+		return array_merge([$this->name],StringHelper::explode($this->search_text,"\n",true,true));
+	}
+	
 	
 	/**
 	 * @return ActiveQuery

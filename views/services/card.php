@@ -1,5 +1,6 @@
 <?php
 
+use app\components\ExpandableCardWidget;
 use app\components\IsArchivedObjectWidget;
 use app\components\IsHistoryObjectWidget;
 use app\components\HistoryWidget;
@@ -175,20 +176,22 @@ if(!$static_view) { ?>
 	</div>
 	<div class="col-md-6">
 		
-			<h2>Содержит в составе:</h2>
-			<p>
-				<?php if (count($children)) { ?>
-					<?= $this->render('/services/tree-list',['model'=>$model]); ?>
-				<?php } else {?>
-					Нет суб-сервисов
-				<?php } ?>
-			</p>
+		<div class="mb-3">
+			<?php if (count($children)) { ?>
+				<?= ExpandableCardWidget::widget([
+					'content'=>'<h4>Содержит в составе:</h4>'.$this->render('/services/tree-list',['model'=>$model]),
+					'cardClass'=>'mb-1',
+				]) ?>
+			<?php } else {?>
+				<p class="mb-1">Нет суб-сервисов</p>
+			<?php } ?>
+			
 			<?= $static_view?'':Html::a('Добавить суб-сервис',[
-					'create','Services'=>['parent_id'=>$model->id]
-				],[
-					'class'=>'btn btn-success'
-				]).'<br />'?>
-			<br />
+				'create','Services'=>['parent_id'=>$model->id]
+			],[
+				'class'=>'btn btn-success m-0'
+			])?>
+		</div>
 		
 		<?= ListObjectsWidget::widget([
 			'models'=>$comps,

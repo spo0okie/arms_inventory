@@ -2,9 +2,10 @@
 
 namespace app\helpers;
 
+use yii\helpers\BaseStringHelper;
 use yii\helpers\Inflector;
 
-class StringHelper {
+class StringHelper extends BaseStringHelper {
 	
 	/**
 	 * Возвращает короткое имя класса без неймспейса
