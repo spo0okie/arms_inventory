@@ -15,19 +15,55 @@ $techs=[
 foreach ($model->armTechs as $tech) $techs[]=$tech;
 foreach ($model->installedTechs as $tech) $techs[]=$tech;
 
+$from_name='';		//кто (ФИО)
+$from_position='';	//кто (Должность)
+$to_name='';		//кому (ФИО)
+$to_position='';	//кому (Должность)
+$org_name='';		//организация
+$dep_name='';		//подразделение
+
+
 //передаем пользователю АРМ
 $user_to=$model->user;
+if (!is_object($user_to)) {
+	Yii::$app->session->setFlash('error', "Пользователь оборудования не заполнен. Кому передавать?");
+} else {
+	$to_name=$user_to->Ename;
+	$to_position=$user_to->Doljnost;
+	
+	//организация
+	if (!is_object($user_to->org)) {
+		Yii::$app->session->setFlash('error', "Организация пользователя не заполнена");
+	} else {
+		$org=$user_to->org;
+		$org_name=$org->uname;
+	}
+	
+	//подразделение
+	if (!is_object($user_to->orgStruct)) {
+		Yii::$app->session->setFlash('error', "Подразделение пользователя не заполнено");
+	} else {
+		$dep=$user_to->orgStruct;
+		$dep_name=$dep->name;
+	}
+
+}
 
 //от ИТ обслуживающего АРМ
 $user_from=$model->itStaff;
+if (!is_object($user_from)) {
+	Yii::$app->session->setFlash('error', "Сотрудник ИТ отдела не заполнен. Кто будет передавать?");
+} else {
+	$from_name=$user_from->Ename;
+	$from_position=$user_from->Doljnost;
+}
 
-//организация
-$org=$user_to->org;
+
 
 ?>
 <div class="arm_act">
 	<div class="text-center">
-		<?= $org->uname ?>
+		<?= $org_name ?>
 		<hr>
 	</div>
 	<div class="row">
@@ -53,7 +89,7 @@ $org=$user_to->org;
 	</div>
     <div class="text-center my-2">
         <h1>AKT</h1>
-		<strong>передачи во временное пользование учетных единиц, принадлежащих компании <?= $org->uname ?></strong>
+		<strong>передачи во временное пользование учетных единиц, принадлежащих компании <?= $org_name ?></strong>
     </div>
 	<table class="table table-bordered border-dark w-100 text-center my-5">
 		<tr>
@@ -101,10 +137,10 @@ $org=$user_to->org;
 				1
 			</td>
 			<td rowspan="<?= count ($techs) ?>">
-				<?= $user_to->orgStruct->name ?>
+				<?= $dep_name ?>
 			</td>
 			<td rowspan="<?= count ($techs) ?>">
-				<?= $user_to->Ename ?>
+				<?= $to_name ?>
 			</td>
 			<?php foreach ($techs as $tech) { ?>
 				<td>
@@ -133,13 +169,13 @@ $org=$user_to->org;
 				Передал
 			</td>
 			<td class="py-4">
-				<?= $user_from->Doljnost ?>
+				<?= $from_position ?>
 			</td>
 			<td class="py-4">
 				_________________
 			</td>
 			<td class="py-4">
-				<?= $user_from->Ename ?>
+				<?= $from_name ?>
 			</td>
 			<td class="py-4">
 				<?= Yii::$app->formatter->asDate(time()); ?>
@@ -150,13 +186,13 @@ $org=$user_to->org;
 				Принял
 			</td>
 			<td class="py-4">
-				<?= $user_to->Doljnost ?>
+				<?= $to_position ?>
 			</td>
 			<td class="py-4">
 				_________________
 			</td>
 			<td class="py-4">
-				<?= $user_to->Ename ?>
+				<?= $to_name ?>
 			</td>
 			<td class="py-4">
 				<?= Yii::$app->formatter->asDate(time()); ?>
@@ -165,4 +201,3 @@ $org=$user_to->org;
 	</table>
 	
 </div>
-
