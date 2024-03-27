@@ -120,6 +120,7 @@ class Partners extends ArmsModel
 					. UrlListWidget::$hint
 			],
 			'support_tel' => 'Телефон тех.поддержки',
+			'docs' => 'Документы'
         ];
     }
 	
@@ -132,7 +133,8 @@ class Partners extends ArmsModel
 	public function getDocs()
 	{
 		return $this->hasMany(Contracts::class, ['id' => 'contracts_id'])
-			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id']);
+			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id'])
+			->orderBy(['date'=>SORT_DESC]);
 	}
 	
 	/**

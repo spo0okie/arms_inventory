@@ -12,7 +12,9 @@ function ExpandableCardOversizeCheck($card) {
                 '</svg>' +
                 '</span>')
             if ($card.hasClass('switch-only-on-button'))
-                $toggle.on('click',function (){ExpandableCardSwitch($card)});
+                $toggle.on('click',function (){
+                        ExpandableCardSwitch($card);
+                });
 
             $card.prepend($toggle);
         }
@@ -37,7 +39,11 @@ function ExpandableCardInit (card) {
     let $card=$(card);
     if ($card.attr('data-expandable-card')) return;
     if (!$card.hasClass('switch-only-on-button'))
-        $card.on('click',function (){ExpandableCardSwitch($card)});
+        $card.on('click',function (e){
+            //проверяем что клик пришел прямо на наш DIV а не на его содержимое (ссылки/кнопочки и т.п.)
+            if ($(e.target).hasClass('expandable-card-content'))
+                ExpandableCardSwitch($card)
+        });
     $card.attr('data-expandable-card',1);
     ExpandableCardOversizeCheck($card);
 }

@@ -1,12 +1,16 @@
  <?php
 
- use app\components\DynaGridWidget;
- use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\DynaGridWidget;
+use app\components\ModelFieldWidget;
+use app\models\OrgStruct;
+use app\models\Users;
+use app\models\UsersSearch;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Partners */
- /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $searchModel UsersSearch */
 
 if (!isset($contracts)) $contracts=$model->docs;
 
@@ -20,35 +24,19 @@ $this->params['breadcrumbs'][] = $this->title;
 			<?= $this->render('card',['model'=>$model]) ?>
 		</div>
 		<div class="col-md-6">
-			<?php if (count($model->services)) { ?>
-				<h4><?= \app\models\Services::$titles ?></h4>
-				<p>
-					<?php
-					$items=[];
-					foreach ($model->services as $service)
-						$items[]=$this->render('/services/item',['model'=>$service]);
-					echo implode('<br />',$items);
-					?>
-				</p>
-			<?php } ?>
-
-			<?php if (count($model->docs)) { ?>
-				<h4><?= \app\models\Contracts::$titles ?></h4>
-				<p>
-					<?php
-					$items=[];
-					foreach ($contracts as $contract)
-						$items[]=$this->render('/contracts/item',['model'=>$contract,'partner'=>false,'show_payment'=>true]);
-					echo implode('<br />',$items);
-					?>
-				</p>
-			<?php } ?>
+			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'services']) ?>
+			<?= ModelFieldWidget::widget([
+				'model'=>$model,
+				'field'=>'docs',
+				'item_options'=>['partner'=>false,'show_payment'=>true],
+				'glue'=>'<br/>'
+			]) ?>
 		</div>
 	</div>
 	<div class="my-3">
-		<?= Html::a(\app\models\OrgStruct::$title,['org-struct/index','org_id'=>$model->id]) ?>
+		<?= Html::a(OrgStruct::$title,['org-struct/index','org_id'=>$model->id]) ?>
 		//
-		<?= Html::a('Новый '.\app\models\Users::$title,['users/create','Users[org_id]'=>$model->id],[
+		<?= Html::a('Новый '. Users::$title,['users/create','Users[org_id]'=>$model->id],[
 			'class'=>'open-in-modal-form',
 			'data-reload-page-on-submit'=>1
 		]) ?>
