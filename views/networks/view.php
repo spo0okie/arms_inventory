@@ -117,7 +117,6 @@ if (
 $this->params['navTabs']=$tabs;
 $this->params['tabsParams']=[
 	'cookieName'=>'networks-view-tab-'.$model->id,
-	'itemOptions'=>['class'=>'mx-5'],
 ];
 /*echo Tabs::widget([
 	'items'=>$tabs,

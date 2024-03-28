@@ -30,47 +30,47 @@ $dataProvider=new ArrayDataProvider(['allModels'=>$model->services]);
 $tabs[]=[
 	'id'=>'services',
 	'label'=>'Сервисы '.$badge.count($model->services).'</span>',
-	'content'=>'<div class="container-fluid">'.DynaGridWidget::widget([
+	'content'=>DynaGridWidget::widget([
 		'id' => 'job-services',
 		'header' => false,
 		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/services/columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
 		'dataProvider' => $dataProvider,
 		'model' => new Services()
-	]).'</div>',
+	]),
 ];
 
 $tabs[]=[
 	'id'=>'computers',
 	'label'=>'ОС / ВМ '.$badge.count($model->comps).'</span>',
-	'content'=>'<div class="container-fluid">'.DynaGridWidget::widget([
+	'content'=>DynaGridWidget::widget([
 		'id' => 'job-comps',
 		'header' => false,
 		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
 		'dataProvider' => new ArrayDataProvider(['allModels'=>$model->comps]),
 		'model' => new Comps()
-	]).'</div>',
+	]),
 ];
 
 $tabs[]=[
 	'id'=>'techs',
 	'label'=>'Оборудование '.$badge.count($model->techs).'</span>',
-	'content'=>'<div class="container-fluid">'.DynaGridWidget::widget([
+	'content'=>DynaGridWidget::widget([
 		'id' => 'job-techs',
 		'header' => false,
 		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/techs/columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
 		'dataProvider' => new ArrayDataProvider(['allModels'=>$model->techs]),
 		'model' => new Techs()
-	]).'</div>',
+	]),
 ];
 
 if (is_object($model->schedule)) {
 	$tabs[]=[
 		'id'=>'schedule',
 		'label'=>'Расписание выполнения',
-		'content'=>'<div class="container-fluid">'.$this->render('/schedules/card',['model'=>$model->schedule,'static_view'=>false]).'</div>',
+		'content'=>$this->render('/schedules/card',['model'=>$model->schedule,'static_view'=>false]),
 	];
 	
 }
@@ -90,5 +90,4 @@ foreach ($wikiLinks as $name=>$url) {
 $this->params['navTabs']=$tabs;
 $this->params['tabsParams']=[
 	'cookieName'=>'jobs-view-tab-'.$model->id,
-	'itemOptions'=>['class'=>'mx-5'],
 ];

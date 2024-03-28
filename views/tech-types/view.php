@@ -40,7 +40,7 @@ $tabs=[];
 $tabs[] = [
 	'id'=>'techs',
 	'label'=>'Экземпляры оборудования',
-	'content'=>'<div class="container-fluid">'.DynaGridWidget::widget([
+	'content'=>DynaGridWidget::widget([
 			'id' => 'tech-types-arms-index',
 			'header' => 'Оборудование',
 			'columns' => require __DIR__.'/../techs/columns.php',
@@ -50,21 +50,18 @@ $tabs[] = [
 			'dataProvider' => $dataProvider,
 			'filterModel' => $searchModel,
 			'resizableColumns' => true,
-	]).'</div>' ,
+	]),
 ];
 
 $tabs[] = [
 	'id'=>'models',
 	'label'=>'Список моделей',
-	'content'=>'<div class="container">'.
-		$this->render('list-models',['model'=>$model,'techModels'=>$techModels]).
-		'</div>',
+	'content'=>$this->render('list-models',['model'=>$model,'techModels'=>$techModels]),
 ];
 
 
 
 $this->params['navTabs'] = $tabs;
 $this->params['tabsParams']=[
-	'itemOptions'=>['class'=>'mx-5'],
 	'cookieName'=>'techmodels-view-tab-'.$model->id
 ];

@@ -48,7 +48,7 @@ if ($model->history && !$segmentCompact) {
 	$tabs[]=[
 		'label'=>'Подробное описание',
 		'id'=>'description',
-		'content'=> '<div class="mx-4 pb-2">'.Markdown::convert($model->history).'</div>',
+		'content'=> Markdown::convert($model->history),
 	];
 }
 
@@ -80,13 +80,12 @@ foreach ($wikiLinks as $name=>$url) {
 	$tabId='wiki'.$tabNumber;
 	$tabs[]=[
 		'label'=>($name==$url)?'Wiki':$name,
-		'content'=> '<div class="mx-4">'.WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]).'</div>',
+		'content'=> WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
 	];
 	$tabNumber++;
 }
 
 $this->params['navTabs']=$tabs;
 $this->params['tabsParams']=[
-	'itemOptions'=>['class'=>'mx-5'],
 	'cookieName'=>'segments-view-tab-'.$model->id
 ];
