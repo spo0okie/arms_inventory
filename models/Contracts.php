@@ -95,6 +95,7 @@ class Contracts extends ArmsModel
 		'contract'=>['договор'],
 		'invoice'=>['счет']
 	];
+	
 
 
 	const DELIVERY_NONE=0;
@@ -239,6 +240,7 @@ class Contracts extends ArmsModel
 				'Контрагенты',
 				'hint' => 'Если отсутствуют, значит документ внутренний',
 			],
+			'partners'=>['alias'=>'partners_ids'],
 			'lics_ids' => [
 				'Лицензии',
 				'hint' => 'С какими закупками лицензий связан документ (если связан)',
@@ -263,6 +265,7 @@ class Contracts extends ArmsModel
 				'Пользователи',
 				'hint' => 'С какими пользователями связан документ (если связан)',
 			],
+			'users'=>['alias'=>'users_ids'],
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Для счетов желательно записывать историю и логистику закупки:<br>'.
@@ -336,6 +339,15 @@ class Contracts extends ArmsModel
 			],
 		];
 	}
+	
+	/** @var string[] Какие колонки выводить по умолчанию */
+	public static $defaultColumns= [
+		'name',
+		'state_id',
+		'total',
+		'charge',
+		'attach',
+	];
 	
 	public function reverseLinks()
 	{

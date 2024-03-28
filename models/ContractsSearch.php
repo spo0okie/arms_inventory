@@ -2,10 +2,10 @@
 
 namespace app\models;
 
+use app\components\DynaGridWidget;
 use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use yii\db\Expression;
 
 /**
  * ContractsSearch represents the model behind the search form of `app\models\Contracts`.
@@ -17,6 +17,8 @@ class ContractsSearch extends Contracts
 	 * @var mixed|null
 	 */
     public $fullname;
+    public $partners;
+    public $users;
 
 	/**
 	 * @var mixed|null
@@ -29,7 +31,7 @@ class ContractsSearch extends Contracts
     {
         return [
             [['id', 'parent', 'state_id'], 'integer'],
-            [['fullname', 'comment','total','deliveryStatus'], 'safe'],
+            [['fullname', 'comment','total','deliveryStatus','name','partners','users','date','pay_id'], 'safe'],
         ];
     }
 
@@ -41,15 +43,16 @@ class ContractsSearch extends Contracts
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
-
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
-     * @return ActiveDataProvider
-     */
-    public function search($params)
+	
+	/**
+	 * Creates data provider instance with search query applied
+	 *
+	 * @param array $params
+	 *
+	 * @param null  $tableId
+	 * @return ActiveDataProvider
+	 */
+    public function search($params,$tableId='contracts-index')
     {
         $query = Contracts::find()->with([
 			'currency',
@@ -62,8 +65,21 @@ class ContractsSearch extends Contracts
 			'users',
 	        'state',
         ]);
+	
+		$showUsersInName=true;
+		$showPartnersInName=true;
+		$showPayIdInName=true;
+		$showDateInName=true;
 
-        $this->load($params);
+		if (!empty($tableId)) {
+			$showUsersInName=!DynaGridWidget::tableColumnIsVisible($tableId,'users',Contracts::$defaultColumns);
+			$showPartnersInName=!DynaGridWidget::tableColumnIsVisible($tableId,'partners',Contracts::$defaultColumns);
+			$showPayIdInName=!DynaGridWidget::tableColumnIsVisible($tableId,'pay_id',Contracts::$defaultColumns);
+			$showDateInName=!DynaGridWidget::tableColumnIsVisible($tableId,'date',Contracts::$defaultColumns);
+		}
+	
+	
+		$this->load($params);
         //if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
@@ -81,30 +97,64 @@ class ContractsSearch extends Contracts
 		 * SELECT * FROM sometable WHERE Location IN (SELECT DISTINCT Location FROM sometable LIMIT 2);
 		 */
 		
+		//как мы ищем контрагентов
+		$partnersExpression="ifnull(`partners`.`uname`,'".static::$noPartnerSuffix."'),' (', ifnull(`partners`.`bname`,'') , ')'";
+		
 		
 		//поисковый запрос в тексте повторяющем "шаблон вывода списка документов"
 		// дата - наименование - контрагент - комментарий
-		$nameExpression=new Expression("concat(".
-			"ifnull(`contracts`.`date`,'нет даты'),' - ',".
-			"ifnull(`contracts`.`pay_id`,''),".
+		$nameExpression="concat(".
+			($showDateInName?"ifnull(`contracts`.`date`,'нет даты'),' - ',":'').
+			($showPayIdInName?"ifnull(`contracts`.`pay_id`,''),":'').
 			"`contracts`.`name`,' - ',".
-			"ifnull(`partners`.`uname`,'".static::$noPartnerSuffix."'),' (', ifnull(`partners`.`bname`,'') , ')',".
-			"ifnull(`users`.`Ename`,''),".
+			($showPartnersInName?$partnersExpression.',':'').
+			($showUsersInName?"ifnull(`users`.`Ename`,''),":'').
 			"ifnull(`contracts`.`comment`,'')".
-			")");
+			")";
+	
+		//для сортировки убираем все джойны, так как сортировка будет только по одной таблице!
+		$nameSort="concat(".
+			($showDateInName?"ifnull(`contracts`.`date`,'нет даты'),' - ',":'').
+			($showPayIdInName?"ifnull(`contracts`.`pay_id`,''),":'').
+			"`contracts`.`name`,' - ',".
+			"ifnull(`contracts`.`comment`,'')".
+			")";
 	
 	
-		$nameSubQuery=Contracts::find()
+		$sort=[
+			'attributes'=>[
+				'date',
+				'name'=>[
+					'asc'=>[$nameSort=>SORT_ASC],
+					'desc'=>[$nameSort=>SORT_DESC],
+				],
+				'pay_id',
+				'total',
+				'charge',
+				'updated_at'
+			],
+			'defaultOrder'=>[
+				'date'=>SORT_DESC
+			]
+		];
+	
+	
+		//кусок запроса с джойнами которые идут у нас в имя и в контрагентов-пользователей
+		$joinSubQuery=Contracts::find()
 			->select('DISTINCT(contracts.id)')
-			->joinWith(['partners','users'])
-			->where(QueryHelper::querySearchString($nameExpression,$this->fullname))
-			->createCommand()
-			->rawSql;
-		
-		
-
-	    $query
-		    ->andFilterWhere(['contracts.state_id'=>$this->state_id]);
+			->joinWith(['partners','users']);
+	
+		$joinSubQuery->andFilterWhere(QueryHelper::querySearchString($nameExpression,$this->name));
+		$joinSubQuery->andFilterWhere(QueryHelper::querySearchString("CONCAT($partnersExpression)",$this->partners));
+		$joinSubQuery->andFilterWhere(QueryHelper::querySearchString('users.Ename',$this->users));
+	
+	
+	
+	
+		$query
+			->andFilterWhere(['contracts.state_id'=>$this->state_id])
+			->andFilterWhere(QueryHelper::querySearchString('contracts.date',$this->date))
+			->andFilterWhere(QueryHelper::querySearchString('contracts.pay_id',$this->pay_id));
 	    
 	    if (strlen($this->deliveryStatus)) {
 			if ($this->deliveryStatus)
@@ -113,16 +163,17 @@ class ContractsSearch extends Contracts
 				$query->andWhere('ifnull(techs_delivery,0) + ifnull(materials_delivery,0) + ifnull(lics_delivery,0)=0');
 		}
 	    
-	    if ($this->fullname)
-	    	$query->andWhere('contracts.id in ('.$nameSubQuery.')');
+	    if ($this->name)
+	    	$query->andWhere('contracts.id in ('.$joinSubQuery->createCommand()->rawSql.')');
+	    
 	    
 	    $query
 		    //->andFilterWhere(\app\helpers\QueryHelper::querySearchString($nameExpression,$this->fullname))
-		    ->andFilterWhere(QueryHelper::querySearchNumberOrDate('total',$this->total))
-		    ->orderBy(['date'=>SORT_DESC,'name'=>SORT_DESC]);
+		    ->andFilterWhere(QueryHelper::querySearchNumberOrDate('total',$this->total));
 
 	    return new ActiveDataProvider([
 		    'query' => $query,
+			'sort' => $sort
 	    ]);
     }
 }

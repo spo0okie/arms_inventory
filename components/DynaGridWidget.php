@@ -24,6 +24,7 @@ class DynaGridWidget extends DynaGrid
 
 	//куда то подгружать настройки таблиц, чтобы заранее знать в контроллере какие колонки будут выводиться
 	public static $visibleColumnsCache=[];
+	public static $instance;
 	
 	public $storage=DynaGrid::TYPE_DB;
 	
@@ -80,6 +81,7 @@ class DynaGridWidget extends DynaGrid
 	
 	
 	public static function fetchVisibleColumns($id) {
+		if (isset(static::$visibleColumnsCache[$id])) return static::$visibleColumnsCache[$id];
 		$dynaGridStore = new DynaGridStore([
 				'id' => $id,
 				'moduleId' => Module::MODULE,
@@ -89,7 +91,7 @@ class DynaGridWidget extends DynaGrid
 			]
 		);
 		$data=$dynaGridStore->fetch('dataAttr');
-		return isset($data['keys'])?$data['keys']:null;
+		return static::$visibleColumnsCache[$id]=isset($data['keys'])?$data['keys']:null;
 	}
 	
 	public function columnIsVisible($col,$visibleColumns) {
@@ -356,5 +358,31 @@ class DynaGridWidget extends DynaGrid
 			
 			return Lib::trim($label);
 		}
+	}
+	
+	/**
+	 * Проверяет будет ли отрендерена колонка $columnName в таблице $tableId
+	 * если колонки выводимые по умолчанию это $defaultColumns
+	 * @param string     $tableId
+	 * @param string     $columnName
+	 * @param null|array $defaultColumns
+	 * @return bool
+	 */
+	public static function tableColumnIsVisible(string $tableId, string $columnName, $defaultColumns=null) {
+		$visibleColumns=DynaGridWidget::fetchVisibleColumns($tableId);
+		//если у нас загрузились настройки колонок таблицы то работаем с ними
+		if (is_array($visibleColumns)) {
+			if (!isset (static::$instance)) static::$instance = new static();
+			return static::$instance->columnIsVisible($columnName,$visibleColumns);
+		}
+		
+		//если настроек таблицы нет но есть колонки по умолчанию работаем с ними
+		if (!empty($defaultColumns)) {
+			//есть ли эта колонка в списке по умолчанию
+			return !(array_search($columnName,$defaultColumns)===false);
+		}
+		
+		//иначе выводится все что есть
+		return true;
 	}
 }
