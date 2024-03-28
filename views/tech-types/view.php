@@ -64,4 +64,7 @@ $tabs[] = [
 
 
 $this->params['navTabs'] = $tabs;
-$this->params['tabsParams']=['cookieName'=>'techmodels-view-tab-'.$model->id];
+$this->params['tabsParams']=[
+	'itemOptions'=>['class'=>'mx-5'],
+	'cookieName'=>'techmodels-view-tab-'.$model->id
+];

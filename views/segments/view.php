@@ -86,4 +86,7 @@ foreach ($wikiLinks as $name=>$url) {
 }
 
 $this->params['navTabs']=$tabs;
-$this->params['tabsParams']=['cookieName'=>'segments-view-tab-'.$model->id];
+$this->params['tabsParams']=[
+	'itemOptions'=>['class'=>'mx-5'],
+	'cookieName'=>'segments-view-tab-'.$model->id
+];

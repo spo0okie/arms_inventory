@@ -1,10 +1,6 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\HistoryWidget;
-use app\components\LinkObjectWidget;
-use app\components\ModelFieldWidget;
-use app\components\ShowArchivedWidget;
 use app\components\WikiPageWidget;
 use app\models\Comps;
 use app\models\Services;
@@ -92,4 +88,7 @@ foreach ($wikiLinks as $name=>$url) {
 }
 
 $this->params['navTabs']=$tabs;
-$this->params['tabsParams']=['cookieName'=>'jobs-view-tab-'.$model->id];
+$this->params['tabsParams']=[
+	'cookieName'=>'jobs-view-tab-'.$model->id,
+	'itemOptions'=>['class'=>'mx-5'],
+];
