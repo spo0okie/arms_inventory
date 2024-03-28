@@ -44,7 +44,7 @@ return [
 	],
 	'users'=>[
 		'value'=>function($data) use ($renderer) {
-			return ModelFieldWidget::widget(['model'=>$data,'field'=>'users','title'=>false]);
+			return ModelFieldWidget::widget(['model'=>$data,'field'=>'users','title'=>false,'item_options'=>['short'=>true]]);
 		}
 	],
 	'partners'=>[
