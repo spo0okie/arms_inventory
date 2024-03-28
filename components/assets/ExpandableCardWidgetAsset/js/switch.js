@@ -40,9 +40,22 @@ function ExpandableCardInit (card) {
     if ($card.attr('data-expandable-card')) return;
     if (!$card.hasClass('switch-only-on-button'))
         $card.on('click',function (e){
-            //проверяем что клик пришел прямо на наш DIV а не на его содержимое (ссылки/кнопочки и т.п.)
-            if ($(e.target).hasClass('expandable-card-content'))
-                ExpandableCardSwitch($card)
+            //проверяем что нам надо обработать клик, он не пришел со ссылки или кнопки
+            let $target=$(e.target);
+            let $needHandleClick=true;
+            //всплываем от места клика до нашего DIV
+            do {
+                //если встретили ссылку или что-то с обработчиком onClick, значит уже клик обработан
+                if ($target.attr('href') || $target.attr('onClick')!==undefined)
+                    $needHandleClick=false;
+                $target=$target.parent();
+            } while (               //пока
+                $needHandleClick    //мы не поняли что обрабатывать не надо
+                &&                  //и
+                !$target.hasClass('expandable-card-content')    //мы не добрались до нашего DIV
+            )
+            //если клик не обработан - обрабатываем
+            if ($needHandleClick) ExpandableCardSwitch($card)
         });
     $card.attr('data-expandable-card',1);
     ExpandableCardOversizeCheck($card);
