@@ -9,6 +9,7 @@
 namespace app\components;
 
 use app\helpers\ArrayHelper;
+use Yii;
 use yii\base\Widget;
 use yii\helpers\Inflector;
 
@@ -46,7 +47,10 @@ class UrlListWidget extends Widget
 			$descr=urldecode($url);
 			//путь dokuwiki->Имя
 			if (WikiPageWidget::urlIsWiki($url)) {
-				//попытаемся вытащить имя из URL
+				//выкусываем из описания УРЛ к вики, чтобы остался только путь до документа
+				$descr=mb_substr($descr,mb_strlen(urldecode(Yii::$app->params['wikiUrl'])));
+				
+				//попытаемся вытащить имя из пути до документа
 				if (mb_strpos($descr,'#')!==false) {
 					$descr=mb_substr($descr,mb_strpos($descr,'#')+1);
 				} else {

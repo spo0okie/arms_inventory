@@ -2,9 +2,8 @@
 
 use app\components\assets\DynaGridWidgetAsset;
 use app\components\DynaGridWidget;
-use app\components\WikiPageWidget;
+use app\components\TabsWidget;
 use app\models\Services;
-use yii\bootstrap5\Tabs;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\web\YiiAsset;
@@ -22,12 +21,6 @@ $this->params['layout-container']='fluid mx-5';
 YiiAsset::register($this);
 DynaGridWidgetAsset::register($this);
 
-$wikiLinks= WikiPageWidget::getLinks($model->links);
-$cookieTabName='services-view-tab-'.$model->id;
-$cookieTab=$_COOKIE[$cookieTabName]??(count($wikiLinks)?'wiki0':'serviceComps');
-
-
-
 ?>
 <div class="services-view">
 
@@ -37,28 +30,14 @@ $cookieTab=$_COOKIE[$cookieTabName]??(count($wikiLinks)?'wiki0':'serviceComps');
 <?php
 
 $tabs=[];
-$tabNumber=0;
-foreach ($wikiLinks as $name=>$url) {
-	$tabId='wiki'.$tabNumber;
-	$tabs[]=[
-		'label'=>($name==$url)?'Wiki':$name,
-		'active'=>$cookieTab==$tabId,
-		'content'=> WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
-		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
-	];
-	$tabNumber++;
-}
 
 if (count($model->children)||count($model->comps)||count($model->techs)) {
 		
 	DynaGridWidget::handleSave('services-comps-index');
 	
-	$tabId='serviceComps';
 	$tabs[]=[
+		'id'=>'serviceComps',
 		'label'=>'Оборудование и ОС <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#services-comps-index-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-		'encode'=>false,
-		'active'=>$cookieTab==$tabId,
-		'headerOptions'=>['onClick'=>'document.cookie = "'.$cookieTabName.'='.$tabId.'"'],
 		'content'=><<<HTML
 		<div id="serviceCompsList">
 		
@@ -79,13 +58,18 @@ HTML,
 	
 }
 
-echo Tabs::widget([
+TabsWidget::addWikiLinks($tabs,$model->links);
+
+echo TabsWidget::widget([
 	'items'=>$tabs,
+	'cookieName'=>'services-view-tab-'.$model->id,
 	'options'=>[
+		'itemsOptions'=>['class'=>'mx-5'],
 		'class'=>'nav-pills',
 	]
 ]);
 
+//после перезагрузки PJAX элементов. Можно убрать в layout
 $this->registerJs(<<<JS
 	$(document).on('pjax:success', function() {
 	    ExpandableCardInitAll();

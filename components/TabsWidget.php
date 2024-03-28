@@ -5,11 +5,14 @@ namespace app\components;
 
 
 use yii\bootstrap5\Tabs;
+use yii\helpers\Html;
 
 class TabsWidget extends Tabs
 {
 	public $cookieName='nonameTabs';
 	public $defaultItem='tab1';
+	public $encodeLabels=false;
+	
 	
 	public function prepareItems(array &$items, string $prefix = '')
 	{
@@ -41,5 +44,36 @@ class TabsWidget extends Tabs
 		}
 		
 		parent::prepareItems($items, $prefix);
+	}
+	
+	
+	public static function addWikiLinks(&$tabs,$links) {
+		$tabNumber=0;
+		$defaultNamesCount=0;
+		$wikiLinks= WikiPageWidget::getLinks($links);
+		foreach ($wikiLinks as $name=>$url) {
+			//идентификатор вкладки
+			$tabId='wiki'.$tabNumber;
+			
+			//если по какой-то причине имя не распозналось и не было префикса и вернулся просто URL
+			if ($name==$url) {
+				//имя по умолчанию для вкладки (Wiki, Wiki #2, Wiki #3 ...)
+				$name='Wiki';
+				if ($defaultNamesCount++) $name.=' #'.($defaultNamesCount+1);
+			}
+			
+			$editLink=Html::tag('i','',[
+				'class'=>"fas fa-pencil-alt ps-1",
+				'onClick'=>'window.open("'.$url.'?do=edit'.'","_blank");'
+			]);
+			
+			$tabs[]=[
+				'label'=>$name.$editLink,
+				'id'=>$tabId,
+				'content' => WikiPageWidget::Widget(['list'=>$links,'item'=>$name]),
+			];
+			
+			$tabNumber++;
+		}
 	}
 }

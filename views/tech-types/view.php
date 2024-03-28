@@ -60,7 +60,6 @@ $tabs[] = [
 ];
 
 
-
 $this->params['navTabs'] = $tabs;
 $this->params['tabsParams']=[
 	'cookieName'=>'techmodels-view-tab-'.$model->id

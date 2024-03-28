@@ -5,7 +5,7 @@ use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
-use app\components\WikiPageWidget;
+use app\components\TabsWidget;
 use app\models\Comps;
 use app\models\Services;
 use app\models\Techs;
@@ -22,8 +22,6 @@ $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => app\models\MaintenanceReqs::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 YiiAsset::register($this);
-
-$wikiLinks= WikiPageWidget::getLinks($model->links);
 
 $this->params['headerContent']=
 	'<div class="float-end text-end">'
@@ -105,17 +103,7 @@ $tabs[]=[
 ];
 
 
-
-$tabNumber=0;
-$wikiLinks= WikiPageWidget::getLinks($model->links);
-foreach ($wikiLinks as $name=>$url) {
-	$tabs[]=[
-		'id'=>'wiki'.$tabNumber,
-		'label'=>($name==$url)?'Wiki':$name,
-		'content'=> WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
-	];
-	$tabNumber++;
-}
+TabsWidget::addWikiLinks($tabs,$model->links);
 
 $this->params['navTabs']=$tabs;
 $this->params['tabsParams']=[

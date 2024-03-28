@@ -1,7 +1,7 @@
 <?php
 
 use app\components\ShowArchivedWidget;
-use app\components\WikiPageWidget;
+use app\components\TabsWidget;
 use app\models\Segments;
 use kartik\markdown\Markdown;
 use yii\web\YiiAsset;
@@ -74,16 +74,7 @@ $tabs[]=[
 ];
 
 
-$tabNumber=0;
-$wikiLinks= WikiPageWidget::getLinks($model->links);
-foreach ($wikiLinks as $name=>$url) {
-	$tabId='wiki'.$tabNumber;
-	$tabs[]=[
-		'label'=>($name==$url)?'Wiki':$name,
-		'content'=> WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
-	];
-	$tabNumber++;
-}
+TabsWidget::addWikiLinks($tabs,$model->links);	//добавляем из вики
 
 $this->params['navTabs']=$tabs;
 $this->params['tabsParams']=[

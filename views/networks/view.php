@@ -1,6 +1,6 @@
 <?php
 
-use app\components\WikiPageWidget;
+use app\components\TabsWidget;
 use kartik\markdown\Markdown;
 use yii\helpers\Url;
 use yii\web\YiiAsset;
@@ -87,31 +87,16 @@ if ($showSegment) {
 	];
 }
 
-$tabNumber=0;
-$wikiLinks= WikiPageWidget::getLinks($model->links);
-foreach ($wikiLinks as $name=>$url) {
-	$tabs[]=[
-		'id'=>'wiki'.$tabNumber,
-		'label'=>($name==$url)?'Wiki':$name,
-		'content'=> WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
-	];
-	$tabNumber++;
-}
+$nonWikiTabs=count($tabs);							//запоминаем сколько было вкладок
+TabsWidget::addWikiLinks($tabs,$model->links);	//добавляем из вики
+$addedWikiTabs=count($tabs)-$nonWikiTabs;			//считаем сколько добавили
 
 if (
-	Yii::$app->params['networkDescribeSegment']===true
+	Yii::$app->params['networkDescribeSegment']===true							//если нужно добавлять из сегмента
 	||
-	Yii::$app->params['networkDescribeSegment']==='auto' && !count($wikiLinks)
+	Yii::$app->params['networkDescribeSegment']==='auto' && !$addedWikiTabs		//или это авто и мы ничего не добавили из сети
 ) {
-	$wikiLinks=is_object($model->segment)?WikiPageWidget::getLinks($model->segment->links):[];
-	foreach ($wikiLinks as $name=>$url) {
-		$tabs[]=[
-			'id'=>'wiki'.$tabNumber,
-			'label'=>($name==$url)?'Wiki':$name,
-			'content'=> WikiPageWidget::Widget(['list'=>$model->segment->links,'item'=>$name]),
-		];
-		$tabNumber++;
-	}
+	if (is_object($model->segment)) TabsWidget::addWikiLinks($tabs,$model->segment->links);
 }
 
 $this->params['navTabs']=$tabs;

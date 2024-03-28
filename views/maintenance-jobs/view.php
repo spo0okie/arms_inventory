@@ -1,7 +1,7 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\WikiPageWidget;
+use app\components\TabsWidget;
 use app\models\Comps;
 use app\models\Services;
 use app\models\Techs;
@@ -76,16 +76,7 @@ if (is_object($model->schedule)) {
 }
 
 
-$tabNumber=0;
-$wikiLinks= WikiPageWidget::getLinks($model->links);
-foreach ($wikiLinks as $name=>$url) {
-	$tabs[]=[
-		'id'=>'wiki'.$tabNumber,
-		'label'=>($name==$url)?'Wiki':$name,
-		'content'=> WikiPageWidget::Widget(['list'=>$model->links,'item'=>$name]),
-	];
-	$tabNumber++;
-}
+TabsWidget::addWikiLinks($tabs,$model->links);	//добавляем из вики
 
 $this->params['navTabs']=$tabs;
 $this->params['tabsParams']=[

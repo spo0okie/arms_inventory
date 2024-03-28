@@ -59,7 +59,6 @@ $this->beginPage() ?>
 			<?= TabsWidget::widget(array_merge([
 				'items'=>$this->params['navTabs'],
 				'options'=>['class'=>'nav-header'],
-				'encodeLabels'=>false,
 				'itemOptions'=>['class'=>'px-5'],	//делаем такой же отступ как в шапке
 			],$this->params['tabsParams']??[])); ?>
 		<?php } elseif (isset($this->params['headerContent'])) { ?>

@@ -47,14 +47,24 @@ class WikiPageWidget extends Widget
 		);
 	}
 	
+	/**
+	 * Из списка ссылок вытаскивает только те, которые ведут на вики в формате
+	 * ['заголовок'=>'url','заголовок2'=>'url2',...]
+	 * @param $list
+	 * @return array
+	 */
 	public static function getLinks($list) {
 		$items = explode("\n", $list);
 		$links=[];
+		//перебираем все строки
 		foreach ($items as $item) {
+			//разбираем строку как запись в списке ссылок
 			$link=UrlListWidget::parseListItem($item);
+			
 			$url=$link['url'];
 			$name=$link['descr'];
 			
+			//если это доку или конфлю, добавляем ее в вывод
 			if (static::urlIsWiki($url)) {
 				//попытаемся вытащить имя из URL
 				$links[$name]=$url;
