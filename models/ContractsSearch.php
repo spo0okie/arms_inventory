@@ -164,7 +164,7 @@ class ContractsSearch extends Contracts
 		}
 	    
 	    //если мы имеем какой-то фильтр внутри запроса с джойнами, то выполняем его и фильтруем основной запрос по ID
-	    if (count($joinSubQuery->where))
+	    if (!empty($joinSubQuery->where) )
 	    	$query->andWhere('contracts.id in ('.$joinSubQuery->createCommand()->rawSql.')');
 	    
 	    
