@@ -163,7 +163,8 @@ class ContractsSearch extends Contracts
 				$query->andWhere('ifnull(techs_delivery,0) + ifnull(materials_delivery,0) + ifnull(lics_delivery,0)=0');
 		}
 	    
-	    if ($this->name)
+	    //если мы имеем какой-то фильтр внутри запроса с джойнами, то выполняем его и фильтруем основной запрос по ID
+	    if (count($joinSubQuery->where))
 	    	$query->andWhere('contracts.id in ('.$joinSubQuery->createCommand()->rawSql.')');
 	    
 	    
