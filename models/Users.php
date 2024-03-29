@@ -177,7 +177,7 @@ class Users extends ArmsModel implements IdentityInterface
         return [
 	        [['Ename', 'Persg', 'Uvolen', ], 'required'],
 	        [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
-	        [['employee_id', 'Orgeh', 'Bday', 'manager_id'], 'string', 'max' => 16],
+	        [['employee_id', 'Orgeh', 'Bday', 'manager_id','employ_date','resign_date'], 'string', 'max' => 16],
 	        [['Doljnost', 'Ename', 'Mobile','private_phone','ips','auth_key'], 'string', 'max' => 255],
 			[['notepad'],'safe'],
 	        [['id'], 'unique'],

@@ -1,9 +1,17 @@
 <?php
 
+use app\components\CollapsableCardWidget;
+use app\models\OrgStruct;
+use app\models\Partners;
+use app\models\Users;
+use kartik\depdrop\DepDrop;
+use kartik\markdown\MarkdownEditor;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 use app\helpers\FieldsHelper;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Users */
@@ -30,7 +38,7 @@ if (!isset($modalParent)) $modalParent=null;
 			<div class="row">
 				<div class="col-md-8">
 					<?= $form->field($model, 'org_id')->widget(Select2::className(), [
-						'data' => \app\models\Partners::fetchNames(),
+						'data' => Partners::fetchNames(),
 						'options' => [
 							'placeholder' => 'Организация',
 						],
@@ -51,9 +59,9 @@ if (!isset($modalParent)) $modalParent=null;
 
 			<div class="row">
 				<div class="col-md-8">
-					<?= $form->field($model, 'Orgeh')->widget(\kartik\depdrop\DepDrop::className(), [
-						'data' => \app\models\OrgStruct::fetchOrgNames($model->org_id),
-						'type' => \kartik\depdrop\DepDrop::TYPE_SELECT2,
+					<?= $form->field($model, 'Orgeh')->widget(DepDrop::className(), [
+						'data' => OrgStruct::fetchOrgNames($model->org_id),
+						'type' => DepDrop::TYPE_SELECT2,
 						'options' => [
 							'placeholder' => 'Подразделение',
 							
@@ -67,13 +75,13 @@ if (!isset($modalParent)) $modalParent=null;
 						],
 						'pluginOptions' => [
 							'depends'=>['users-org_id'],
-							'url'=>\yii\helpers\Url::to(['/org-struct/dep-drop']),
+							'url'=> Url::to(['/org-struct/dep-drop']),
 						]
 					]) ?>
 
 				</div>
 				<div class="col-md-4">
-					<?= $form->field($model, 'Persg')->dropDownList(\yii\helpers\ArrayHelper::getColumn(\app\models\Users::$WTypes,0)) ?>
+					<?= $form->field($model, 'Persg')->dropDownList(ArrayHelper::getColumn(Users::$WTypes,0)) ?>
 
 				</div>
 			</div>
@@ -116,7 +124,7 @@ if (!isset($modalParent)) $modalParent=null;
 		</div>
 		<div class="col-md-6">
 			<?= FieldsHelper::TextAutoresizeField($form,$model,'ips',['lines'=>4])?>
-			<?= $form->field($model, 'notepad')->widget(\kartik\markdown\MarkdownEditor::className(), [
+			<?= $form->field($model, 'notepad')->widget(MarkdownEditor::className(), [
 				'showExport'=>false
 			]) ?>
 		</div>
@@ -128,9 +136,13 @@ if (!isset($modalParent)) $modalParent=null;
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-	<?= \app\components\CollapsableCardWidget::widget([
+	<?= CollapsableCardWidget::widget([
 		'title'=>'Дополнительно',
-		'content'=>FieldsHelper::TextInputField($form,$model,'uid'),
+		'content'=>implode([
+			FieldsHelper::TextInputField($form,$model,'uid'),
+			FieldsHelper::TextInputField($form,$model,'employ_date'),
+			FieldsHelper::TextInputField($form,$model,'resign_date'),
+		]),
 		'initialCollapse'=>true,
 	])?>
 	
