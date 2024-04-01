@@ -15,6 +15,8 @@ class ServicesSearch extends Services
 	public $comps;
 	public $techs;
 	public $compsAndTechs;
+	public $maintenanceReqs;
+	public $maintenanceJobs;
 	public $segment;
 	public $responsible;
 	public $responsible_ids;
@@ -41,7 +43,9 @@ class ServicesSearch extends Services
 				'directlySupported',
 				'comps',
 				'techs',
-				'compsAndTechs'
+				'compsAndTechs',
+				'maintenanceJobs',
+				'maintenanceReqs',
 			], 'safe'],
         ];
     }

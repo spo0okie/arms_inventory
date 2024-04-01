@@ -3,7 +3,6 @@
 namespace app\models;
 
 
-use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -15,7 +14,7 @@ use yii\helpers\ArrayHelper;
  * @property string $comment Комментарий
  *
  */
-class Domains extends ActiveRecord
+class Domains extends ArmsModel
 {
     /**
      * @inheritdoc

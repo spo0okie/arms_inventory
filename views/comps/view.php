@@ -3,6 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
 
+use app\components\HistoryWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Comps;
 use app\models\Manufacturers;
@@ -43,9 +44,11 @@ foreach ($model->swList->items as $item) {
 
 	$absorbTitle="Связать(поглотить) клона с этой ОС: недостающие свойства и связанные объекты клона перейдут к этой ОС. Сам клон будет удален";
 ?>
-<span class="float-end">
-			<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
-		</span>
+<span class="float-end text-end">
+	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
+	<br />
+	<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
+</span>
 
 <div class="comps-view row">
 	<div class="col-md-6">

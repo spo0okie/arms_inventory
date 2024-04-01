@@ -21,6 +21,7 @@ class IsHistoryObjectWidget extends Widget
 	public $tag='div';						//в какой тег завернуть иконку
 	public $hint='Данные восстановлены из журнала аудита.'."\n".
 		'Оперативные данные могут отличаться';
+	public $else='';						//что вывести, если объект не из журнала
 	
 	public function run() {
 		if ($this->model instanceof HistoryModel) {
@@ -30,6 +31,6 @@ class IsHistoryObjectWidget extends Widget
 				['class'=>$this->class]
 			);
 		}
-		return '';
+		return $this->else;
 	}
 }

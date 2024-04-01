@@ -1,7 +1,9 @@
 <?php
 
+use app\components\IsHistoryObjectWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
+use app\models\HistoryModel;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -22,11 +24,14 @@ else
 
 if (!mb_strlen($domain))
 	$domain='- не в домене -';
+	
+	if ($model instanceof HistoryModel) {
+		echo IsHistoryObjectWidget::widget(['model'=>$model]);
+	} else { ?>
+		<span class="unit-status <?= $model->updatedRenderClass ?> href" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()"><?= $model->updatedText ?></span>
+		<br />
+	<?php } ?>
 
-?>
-
-<span class="unit-status <?= $model->updatedRenderClass ?> href" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()"><?= $model->updatedText ?></span>
-<br />
 <h1>
 	<span class="small"><?= $domain ?>\</span><?=
 		LinkObjectWidget::widget([
