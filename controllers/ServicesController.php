@@ -218,7 +218,7 @@ class ServicesController extends ArmsBaseController
 		
 		$dataProvider = $searchModel->search(array_merge(
 			Yii::$app->request->queryParams,
-			['ServiceConnectionsSearch'=>['ids'=>$ids]]
+			['ServiceConnectionsSearch'=>['services_ids'=>$ids]]
 		));
 		
 		return $this->renderAjax('connections-list', [

@@ -11,6 +11,7 @@ use yii\data\ActiveDataProvider;
 class ServiceConnectionsSearch extends ServiceConnections
 {
 	public $ids;
+	public $services_ids;
 	
     /**
      * {@inheritdoc}
@@ -18,7 +19,7 @@ class ServiceConnectionsSearch extends ServiceConnections
     public function rules()
     {
         return [
-			[['ids'],'each','rule'=>['integer']],
+			[['ids','services_ids'],'each','rule'=>['integer']],
             [['id', 'initiator_id', 'target_id'], 'integer'],
             [['initiator', 'target', 'comment'], 'safe'],
         ];
@@ -68,11 +69,15 @@ class ServiceConnectionsSearch extends ServiceConnections
 
         $query
 			->andFilterWhere(['service_connections.id'=>$this->ids])
+			->andFilterWhere(['or',
+				['service_connections.target_id'=>$this->services_ids],
+				['service_connections.initiator_id'=>$this->services_ids],
+			])
 			->andFilterWhere(['like', 'initiator_details', $this->initiator_details])
             ->andFilterWhere(['like', 'target_details', $this->target_details])
             ->andFilterWhere(['like', 'comment', $this->comment])
-            ->andFilterWhere(['like', 'updated_by', $this->updated_by]);
-
+            //->andFilterWhere(['like', 'updated_by', $this->updated_by])
+		;
         return $dataProvider;
     }
 }
