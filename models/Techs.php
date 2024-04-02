@@ -9,6 +9,7 @@ use app\helpers\QueryHelper;
 use app\models\traits\TechsModelCalcFieldsTrait;
 use voskobovich\linker\LinkerBehavior;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
 
 /**
@@ -119,6 +120,10 @@ use yii\db\ActiveQuery;
  
  * @property MaintenanceJobs $maintenanceJobs
  
+ * @property ServiceConnections $incomingConnections
+ * @property ServiceConnections $outgoingConnections
+ * @property ServiceConnections $incomingConnectionsEffective
+ * @property ServiceConnections $outgoingConnectionsEffective
  */
 
 class Techs extends ArmsModel
@@ -680,6 +685,28 @@ class Techs extends ArmsModel
 				'arms_comps.ignore_hw'=>SORT_ASC,
 				'arms_comps.name'=>SORT_ASC
 			]);
+	}
+	
+	/**
+	 * Входящие соединения (явно объявленные на этот комп)
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
+	 */
+	public function getIncomingConnections()
+	{
+		return $this->hasMany(ServiceConnections::class, ['id' => 'connection_id'])
+			->viaTable('techs_in_targets', ['techs_id' => 'id']);
+	}
+	
+	/**
+	 * Исходящие соединения (явно объявленные с этого компа)
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
+	 */
+	public function getOutgoingConnections()
+	{
+		return $this->hasMany(ServiceConnections::class, ['id' => 'connection_id'])
+			->viaTable('techs_in_initiators', ['techs_id' => 'id']);
 	}
 	
 	

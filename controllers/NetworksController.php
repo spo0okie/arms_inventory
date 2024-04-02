@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\NetIps;
 use app\models\Networks;
 use app\models\NetworksSearch;
+use app\models\ServiceConnectionsSearch;
 use Yii;
 use yii\web\NotFoundHttpException;
 
@@ -16,6 +17,12 @@ class NetworksController extends ArmsBaseController
 {
 	
 	public $modelClass=Networks::class;
+	public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['incoming-connections-list'],
+		]);
+	}
 	
 	/**
 	 * @param $name
@@ -70,6 +77,37 @@ class NetworksController extends ArmsBaseController
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,
 			'switchArchivedCount' => $switchArchivedCount,
+		]);
+	}
+	
+	/**
+	 * Список связей в сервисе (с учетом вложенных)
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionIncomingConnectionsList(int $id)
+	{
+		/** @var Networks $model */
+		$model=$this->findModel($id);
+		
+		// Модели полноценного поиска нужны для подгрузки всех joinWith
+		$searchModel=new ServiceConnectionsSearch();
+		
+		// получаем всех детей
+		$connections=$model->getIncomingConnections();
+		
+		$ids=array_keys($connections);
+
+		$dataProvider = $searchModel->search(array_merge(
+			Yii::$app->request->queryParams,
+			['ServiceConnectionsSearch'=>['ids'=>$ids]]
+		));
+		
+		return $this->renderAjax('connections-list', [
+			'searchModel'=>$searchModel,
+			'dataProvider' => $dataProvider,
+			'model' => $model
 		]);
 	}
 }

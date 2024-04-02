@@ -66,18 +66,33 @@ class ServiceConnectionsSearch extends ServiceConnections
             'target_id' => $this->target_id,
             'updated_at' => $this->updated_at,
         ]);
-
-        $query
-			->andFilterWhere(['service_connections.id'=>$this->ids])
-			->andFilterWhere(['or',
-				['service_connections.target_id'=>$this->services_ids],
-				['service_connections.initiator_id'=>$this->services_ids],
-			])
+	
+		if (isset($this->ids) && is_array($this->ids)) {
+			if (count($this->ids))
+				$query->andFilterWhere(['service_connections.id'=>$this->ids]);
+			else
+				$query->where('0=1');
+		}
+	
+		if (isset($this->services_ids) && is_array($this->services_ids)) {
+			if (count($this->services_ids))
+				$query
+					->andFilterWhere(['or',
+						['service_connections.target_id'=>$this->services_ids],
+						['service_connections.initiator_id'=>$this->services_ids],
+					]);
+			else
+				$query->where('0=1');
+		}
+	
+		$query
 			->andFilterWhere(['like', 'initiator_details', $this->initiator_details])
             ->andFilterWhere(['like', 'target_details', $this->target_details])
             ->andFilterWhere(['like', 'comment', $this->comment])
             //->andFilterWhere(['like', 'updated_by', $this->updated_by])
 		;
+        
+        
         return $dataProvider;
     }
 }

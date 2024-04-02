@@ -43,6 +43,8 @@ use yii\db\ActiveQuery;
  * @property NetIps[] $ipsByAddr
  * @property OrgInet[] $orgInets
  * @property Places $place
+ * @property Comps[] $comps
+ * @property Techs[] $techs
  */
 class Networks extends ArmsModel
 {
@@ -223,6 +225,53 @@ class Networks extends ArmsModel
 	{
 		return $this->hasMany(OrgInet::class, ['id' => 'org_inets_id'])
 			->viaTable('{{%org_inets_in_networks}}', ['networks_id' => 'id']);
+	}
+	
+	public function getComps()
+	{
+		if (isset($this->attrsCache['comps'])) return $this->attrsCache['comps'];
+		$comps=[];
+		foreach ($this->ips as $ip) {
+			foreach ($ip->comps as $comp) {
+				$comps[$comp->id]=$comp;
+			}
+		}
+		return $this->attrsCache['comps']=$comps;
+		/*return $this->hasMany(Comps::class, ['id' => 'comps_id'])
+			->from(['ip_comps'=>Comps::tableName()])
+			->viaTable('{{%ips_in_comps}}', ['ips_id' => 'id'])
+			->via('ips');*/
+	}
+	
+	public function getTechs()
+	{
+		if (isset($this->attrsCache['techs'])) return $this->attrsCache['techs'];
+		$techs=[];
+		foreach ($this->ips as $ip) {
+			foreach ($ip->techs as $tech) {
+				$techs[$tech->id]=$tech;
+			}
+		}
+		return $this->attrsCache['techs']=$techs;
+	}
+	
+	public function getIncomingConnections()
+	{
+		if (isset($this->attrsCache['incomingConnections'])) return $this->attrsCache['incomingConnections'];
+		$connections=[];
+		foreach ($this->comps as $comp) {
+			foreach ($comp->incomingConnectionsEffective as $connection) {
+				$connections[$connection->id]=$connection;
+			}
+		}
+
+		foreach ($this->techs as $tech) {
+			foreach ($tech->incomingConnectionsEffective as $connection) {
+				$connections[$connection->id]=$connection;
+			}
+		}
+		
+		return $this->attrsCache['incomingConnections']=$connections;
 	}
 	
 	/**

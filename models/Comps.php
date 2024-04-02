@@ -74,6 +74,10 @@ use yii\db\StaleObjectException;
  * @property MaintenanceReqs $maintenanceReqs
  * @property MaintenanceJobs $maintenanceJobs
  * @property MaintenanceReqs $effectiveMaintenanceReqs
+ * @property ServiceConnections $incomingConnections
+ * @property ServiceConnections $outgoingConnections
+ * @property ServiceConnections $incomingConnectionsEffective
+ * @property ServiceConnections $outgoingConnectionsEffective
  */
 class Comps extends ArmsModel
 {
@@ -289,6 +293,28 @@ class Comps extends ArmsModel
 	public function getLinkedArms()
 	{
 		return $this->hasMany(Techs::class, ['comp_id' => 'id']);
+	}
+	
+	/**
+	 * Входящие соединения (явно объявленные на этот комп)
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
+	 */
+	public function getIncomingConnections()
+	{
+		return $this->hasMany(ServiceConnections::class, ['id' => 'connection_id'])
+			->viaTable('comps_in_targets', ['comps_id' => 'id']);
+	}
+	
+	/**
+	 * Исходящие соединения (явно объявленные с этого компа)
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
+	 */
+	public function getOutgoingConnections()
+	{
+		return $this->hasMany(ServiceConnections::class, ['id' => 'connection_id'])
+			->viaTable('comps_in_initiators', ['comps_id' => 'id']);
 	}
 	
 	/**

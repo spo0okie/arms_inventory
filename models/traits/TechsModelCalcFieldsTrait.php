@@ -141,4 +141,53 @@ trait TechsModelCalcFieldsTrait
 		/** @var Techs $this */
 		return Techs::formatMacs($this->mac);
 	}
+	
+	/**
+	 * Получить соединения
+	 * @param string $direction направление соединений incoming / outgoing
+	 * @param string $nodeSide с какой стороны участвует нода target / initiator
+	 * @return array|mixed
+	 */
+	public function getEffectiveConnections(string $direction, string $nodeSide)
+	{
+		$directAttr=$direction.'Connections';
+		$nodeAttr=$nodeSide.'Techs';
+		$cacheAttr=$directAttr.'Effective';
+		
+		if (isset($this->attrsCache[$cacheAttr])) return $this->attrsCache[$cacheAttr];
+		/** @var Techs $this */
+		$connections=[];
+		
+		//выбираем прямые соединения
+		foreach ($this->$directAttr as $connection)
+			$connections[$connection->id]=$connection;
+		
+		//выбираем сервисы где не объявлены компы
+		foreach ($this->services as $service) {
+			foreach ($service->$directAttr as $connection) {
+				if (empty($connection->$nodeAttr)) {
+					$connections[$connection->id]=$connection;
+				}
+			}
+		}
+		return $this->attrsCache[$cacheAttr]=$connections;
+		
+	}
+	
+	/**
+	 * Получить входящие соединения
+	 * @return array|mixed
+	 */
+	public function getIncomingConnectionsEffective() {
+		return $this->getEffectiveConnections('incoming','target');
+	}
+	
+	/**
+	 * Получить входящие соединения
+	 * @return array|mixed
+	 */
+	public function getOutgoingConnectionsEffective() {
+		return $this->getEffectiveConnections('outgoing','initiator');
+	}
+	
 }

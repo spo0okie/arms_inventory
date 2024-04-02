@@ -1,5 +1,6 @@
 <?php
 
+use app\components\DynaGridWidget;
 use app\components\TabsWidget;
 use kartik\markdown\Markdown;
 use yii\helpers\Url;
@@ -68,6 +69,29 @@ $tabs[]=[
 	'id'=>'ip-table',
 	'label'=>'Адреса',
 	'content'=>$this->render('ip-table',['model'=>$model]),
+];
+
+DynaGridWidget::handleSave('service-connections-list');
+
+$tabs[]=[
+	'id'=>'incomingConnections',
+	'label'=>'Вх. соединения <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-connections-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+	'content'=><<<HTML
+		<div id="incomingConnectionsList">
+		
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
+		<script>
+			$(document).ready(function() {
+				$.get("/web/networks/incoming-connections-list?id={$model->id}", function(data) {
+				    jQuery("#incomingConnectionsList").hide().html(data);
+				    setTimeout(function (){jQuery("#incomingConnectionsList").fadeToggle();ExpandableCardInitAll();},500)
+				})
+			})
+		</script>
+HTML,
 ];
 
 if ($notepad&&!$notepadCompact) {
