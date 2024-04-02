@@ -104,6 +104,8 @@ use yii\db\ActiveQuery;
  * @property MaintenanceReqs $backupReqs
  * @property MaintenanceReqs $otherReqs
  * @property MaintenanceJobs $maintenanceJobs
+ * @property ServiceConnections $incomingConnections
+ * @property ServiceConnections $outgoingConnections
  */
 class Services extends ArmsModel
 {
@@ -382,6 +384,12 @@ class Services extends ArmsModel
 				'indexHint'=>'{same}'
 			],
 			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
+			'incomingConnections'=>[
+				'Входящие связи',
+			],
+			'outgoingConnections'=>[
+				'Исходящие связи',
+			],
         ];
     }
     
@@ -476,16 +484,12 @@ class Services extends ArmsModel
 	 */
 	public function getChildrenRecursive()
 	{
-		if (static::allItemsLoaded()) {
-			$items=$this->getChildren();
-			$result=$items;
-			foreach ($items as $item) {
-				$result=array_merge($result,$item->getChildrenRecursive());
-			}
-			return $result;
+		$items=$this->children??[];
+		$result=$items;
+		foreach ($items as $item) {
+			$result=array_merge($result,$item->getChildrenRecursive());
 		}
-		return $this->hasMany(Services::class, ['parent_id' => 'id'])
-			->from(['service_children'=>self::tableName()]);
+		return $result;
 	}
 	
 	
@@ -526,6 +530,22 @@ class Services extends ArmsModel
 		return $this->hasMany(Services::class, ['id' => 'depends_id'])
 			->from(['service_depend'=>Services::tableName()])
 			->viaTable('{{%services_depends}}', ['service_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает входящие соединения
+	 */
+	public function getIncomingConnections()
+	{
+		return $this->hasMany(ServiceConnections::class, ['target_id'=>'id']);
+	}
+	
+	/**
+	 * Возвращает входящие соединения
+	 */
+	public function getOutgoingConnections()
+	{
+		return $this->hasMany(ServiceConnections::class, ['initiator_id'=>'id']);
 	}
 	
 	/**

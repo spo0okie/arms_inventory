@@ -184,6 +184,47 @@ trait ServicesModelCalcFieldsTrait
 	}
 	
 	/**
+	 * Возвращает входящие связи в которых участвует этот и дочерние сервисы
+	 */
+	public function getIncomingConnectionsRecursive()
+	{
+		if (!isset($this->attrsCache['incomingConnectionsRecursive'])) {
+			$this->attrsCache['incomingConnectionsRecursive']=[];
+			foreach ($this->incomingConnections as $connection)
+				$this->attrsCache['incomingConnectionsRecursive'][$connection->id]=$connection;
+			
+			foreach ($this->children as $child)
+				/** @var Services $child */
+				$this->attrsCache['incomingConnectionsRecursive']=ArrayHelper::recursiveOverride(
+					$child->getIncomingConnectionsRecursive(),
+					$this->attrsCache['incomingConnectionsRecursive']
+				);
+		}
+		return $this->attrsCache['incomingConnectionsRecursive'];
+	}
+	
+	/**
+	 * Возвращает исходящие связи в которых участвует этот и дочерние сервисы
+	 */
+	public function getOutgoingConnectionsRecursive()
+	{
+		if (!isset($this->attrsCache['outgoingConnectionsRecursive'])) {
+			$this->attrsCache['outgoingConnectionsRecursive']=[];
+			foreach ($this->outgoingConnections as $connection)
+				$this->attrsCache['outgoingConnectionsRecursive'][$connection->id]=$connection;
+			
+			foreach ($this->children as $child)
+				$this->attrsCache['outgoingConnectionsRecursive']=ArrayHelper::recursiveOverride(
+					/** @var Services $child */
+					$child->getOutgoingConnectionsRecursive(),
+					$this->attrsCache['outgoingConnectionsRecursive']
+				);
+		}
+		return $this->attrsCache['outgoingConnectionsRecursive'];
+	}
+	
+	
+	/**
 	 * Возвращает оборудование на котором живет этот сервис (и дочерние)
 	 */
 	public function getTechsRecursive()

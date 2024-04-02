@@ -2,8 +2,10 @@
 
 namespace app\controllers;
 
+use app\helpers\ArrayHelper;
 use app\models\CompsSearch;
 use app\models\Places;
+use app\models\ServiceConnectionsSearch;
 use app\models\TechsSearch;
 use Yii;
 use app\models\Services;
@@ -147,7 +149,7 @@ class ServicesController extends ArmsBaseController
 		// через compsRecursive и techsRecursive найдем нужные объекты и через search модели подгрузим джойны
 		$comps=$model->compsRecursive;
 		$techs=$model->techsRecursive;
-
+		
 		//по умолчанию не можем передать списки id в search модели, т.к. пустой поиск найдет все вместо ничего
 		$allModels=[];
 		
@@ -188,6 +190,41 @@ class ServicesController extends ArmsBaseController
 		return $this->renderAjax('comps-list', [
 			'model'=>$model,
 			'dataProvider' => $dataProvider,
+		]);
+	}
+
+
+
+	/**
+	 * Список связей в сервисе (с учетом вложенных)
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionConnectionsList(int $id)
+	{
+		/** @var Services $model */
+		$model=$this->findModel($id);
+		
+		// Модели полноценного поиска нужны для подгрузки всех joinWith
+		$searchModel=new ServiceConnectionsSearch();
+		
+		// получаем всех детей
+		$children=$model->getChildrenRecursive();
+		
+		$ids=is_array($children)?ArrayHelper::getArrayField($children,'id'):[];
+		$ids[]=$model->id;
+		
+		
+		$dataProvider = $searchModel->search(array_merge(
+			Yii::$app->request->queryParams,
+			['ServiceConnectionsSearch'=>['ids'=>$ids]]
+		));
+		
+		return $this->renderAjax('connections-list', [
+			'searchModel'=>$searchModel,
+			'dataProvider' => $dataProvider,
+			'model' => $model
 		]);
 	}
 }

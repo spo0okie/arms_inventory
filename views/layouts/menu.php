@@ -29,6 +29,7 @@ use app\models\Places;
 use app\models\Ports;
 use app\models\Schedules;
 use app\models\Segments;
+use app\models\ServiceConnections;
 use app\models\Services;
 use app\models\TechModels;
 use app\models\Techs;
@@ -100,6 +101,7 @@ NavBar::begin([
 					['label' => Services::$titles, 'url' => ['/services/index']],
 					['label' => MaintenanceReqs::$titles, 'url' => ['/maintenance-reqs/index']],
 					['label' => MaintenanceJobs::$titles, 'url' => ['/maintenance-jobs/index']],
+					['label' => ServiceConnections::$titles, 'url' => ['/service-connections/index']],
 					['label' => Schedules::$titles, 'url' => ['/schedules/index']],
 				]
 			],

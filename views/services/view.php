@@ -58,6 +58,32 @@ HTML,
 	
 }
 
+if (count($model->children)||count($model->incomingConnections)||count($model->outgoingConnections)) {
+	DynaGridWidget::handleSave('service-connections-list');
+	
+	$tabs[]=[
+		'id'=>'serviceConnections',
+		'label'=>'Связи <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-connections-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+		'content'=><<<HTML
+		<div id="serviceConnectionsList">
+		
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
+		<script>
+			$(document).ready(function() {
+				$.get("/web/services/connections-list?id={$model->id}", function(data) {
+				    jQuery("#serviceConnectionsList").hide().html(data);
+				    setTimeout(function (){jQuery("#serviceConnectionsList").fadeToggle();ExpandableCardInitAll();},500)
+				})
+			})
+		</script>
+HTML,
+	];
+	
+}
+
 TabsWidget::addWikiLinks($tabs,$model->links);
 
 echo TabsWidget::widget([

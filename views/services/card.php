@@ -186,11 +186,25 @@ if(!$static_view) { ?>
 				<p class="mb-1">Нет суб-сервисов</p>
 			<?php } ?>
 			
-			<?= $static_view?'':Html::a('Добавить суб-сервис',[
-				'create','Services'=>['parent_id'=>$model->id]
-			],[
-				'class'=>'btn btn-success m-0'
-			])?>
+			<?= $static_view?'':(
+				Html::a('Добавить суб-сервис',[
+					'create','Services'=>['parent_id'=>$model->id]
+				],[
+					'class'=>'btn btn-success m-0'
+				]).
+				Html::a('Добавить вх. связь',[
+					'/service-connections/create','ServiceConnections'=>['target_id'=>$model->id]
+				],[
+					'class'=>'btn btn-success m-0 open-in-modal-form',
+					'data-reload-page-on-submit'=>1
+				]).
+				Html::a('Добавить исх. связь',[
+					'/service-connections/create','ServiceConnections'=>['initiator_id'=>$model->id]
+				],[
+					'class'=>'btn btn-success m-0 open-in-modal-form',
+					'data-reload-page-on-submit'=>1
+				])
+			)?>
 		</div>
 		
 		<?= ListObjectsWidget::widget([
@@ -218,6 +232,22 @@ if(!$static_view) { ?>
 			'models'=>$dependants,
 			'title'=>'Зависимые сервисы:',
 			'item_options'=>['static_view'=>$static_view,],
+			'card_options'=>['cardClass'=>'mb-3'],
+		]) ?>
+		
+		<?= ModelFieldWidget::widget([
+			'model'=>$model, 'field'=>'incomingConnections',
+			'itemViewPath'=>'/service-connections/part',
+			'lineBr'=>true,
+			'item_options'=>['static_view'=>$static_view,'self'=>true,'source'=>'initiator'],
+			'card_options'=>['cardClass'=>'mb-3'],
+		]) ?>
+		
+		<?= ModelFieldWidget::widget([
+			'model'=>$model, 'field'=>'outgoingConnections',
+			'itemViewPath'=>'/service-connections/part',
+			'lineBr'=>true,
+			'item_options'=>['static_view'=>$static_view,'self'=>true,'source'=>'target'],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 

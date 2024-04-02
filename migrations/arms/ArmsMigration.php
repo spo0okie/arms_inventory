@@ -35,10 +35,15 @@ class ArmsMigration extends Migration
 		}
 	}
 	
-	function dropTableIfExists($table)
+	function tableExists($table)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
-		if (!is_null($tableSchema))
+		return !is_null($tableSchema);
+	}
+	
+	function dropTableIfExists($table)
+	{
+		if ($this->tableExists($table))
 			$this->dropTable($table);
 	}
 	
@@ -48,8 +53,14 @@ class ArmsMigration extends Migration
 	 */
 	function createMany2ManyTable(string $tableName, array $links)
 	{
-		$keys=array_keys($links);
-		$tables=array_values($links);
+		//если у нас числовые ключи
+		if (isset($links[0])) {
+			$keys=$links;
+			$tables=null;
+		} else {
+			$keys=array_keys($links);
+			$tables=array_values($links);
+		}
 		$this->dropTableIfExists($tableName);
 		$this->createTable($tableName,[
 			'id'=>$this->primaryKey(),
@@ -59,20 +70,24 @@ class ArmsMigration extends Migration
 		$this->createIndex($tableName.'-'.$keys[0],$tableName,$keys[0]);
 		$this->createIndex($tableName.'-'.$keys[1],$tableName,$keys[1]);
 		$this->createIndex($tableName.'-m2m',$tableName,$keys,true);
-		$this->addForeignKey(
-			'fk-'.$tableName.'-'.$keys[0],
-			$tableName,
-			$keys[0],
-			$tables[0],
-			'id'
-		);
-		$this->addForeignKey(
-			'fk-'.$tableName.'-'.$keys[1],
-			$tableName,
-			$keys[1],
-			$tables[1],
-			'id'
-		);
+		
+		//для генератора моделей полезно чтобы были ссылки в БД
+		if (is_array($tables)) {
+			$this->addForeignKey(
+				'fk-'.$tableName.'-'.$keys[0],
+				$tableName,
+				$keys[0],
+				$tables[0],
+				'id'
+			);
+			$this->addForeignKey(
+				'fk-'.$tableName.'-'.$keys[1],
+				$tableName,
+				$keys[1],
+				$tables[1],
+				'id'
+			);
+		}
 	}
 
 
