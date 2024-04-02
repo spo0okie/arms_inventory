@@ -52,6 +52,8 @@ function ExpandableCardInit (card) {
             } while (               //пока
                 $needHandleClick    //мы не поняли что обрабатывать не надо
                 &&                  //и
+                $target.length
+                &&
                 !$target.hasClass('expandable-card-content')    //мы не добрались до нашего DIV
             )
             //если клик не обработан - обрабатываем
