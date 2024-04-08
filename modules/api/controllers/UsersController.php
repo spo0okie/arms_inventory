@@ -30,7 +30,8 @@ class UsersController extends BaseRestController
 		'login'=>'Login',
 		'org'=>'org_id',
 		'org_id'=>'org_id',
-		'uid'=>'uid'
+		'uid'=>'uid',
+		'uvolen'=>'Uvolen',
 	];
 	
 	public static $searchFieldsLike=[

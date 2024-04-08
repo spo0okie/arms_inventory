@@ -25,22 +25,28 @@ $columns=include $_SERVER['DOCUMENT_ROOT'].'/views/service-connections/columns.p
 		'panel' => false,
 		'columns' => $columns,
 		'defaultOrder' => ['initiator_service','initiator_nodes','initiator_details','comment','target_service','target_nodes','target_details',],
-		'filterModel' => $searchModel,
+		//'filterModel' => $searchModel,
 		'dataProvider' => $dataProvider,
-		'toggleButtonGrid'=>[
+		/*'toggleButtonGrid'=>[
 			'label' => '<i class="fas fa-wrench fa-fw"></i>',
 			'title' => 'Персонализировать настройки таблицы',
 			'data-pjax' => false,
 			'class' => 'd-none',
-		],
+		],*/
 		'gridOptions' => [
 			'layout'=>'{dynagrid}{items}',
 			'showFooter' => false,
 			'pjax' => true,
-			'pjaxSettings' => ['options'=>[
-				'enablePushState'=>false,
-				'enableReplaceState'=>false,
-			]],
+			'pjaxSettings' => [
+				'options'=>[
+					'timeout'=>30000,
+					'enablePushState'=>false,
+					'enableReplaceState'=>false,
+					//'linkSelector'=>'tr#service-connections-list-filters td input,thead.service-connections-list tr th a',
+					//'linkSelector'=>'thead.service-connections-list tr th a'
+					'formSelector'=>'#service-connections-list-pjax form',
+				]
+			],
 			'rowOptions'=>function($data){return[
 				'class'=> ShowArchivedWidget::archivedClass($data),
 				'style'=> ShowArchivedWidget::archivedDisplay($data),

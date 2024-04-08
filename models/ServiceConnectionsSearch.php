@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -12,6 +13,10 @@ class ServiceConnectionsSearch extends ServiceConnections
 {
 	public $ids;
 	public $services_ids;
+	public $initiator_service;
+	public $target_service;
+	public $initiator_nodes;
+	public $target_nodes;
 	
     /**
      * {@inheritdoc}
@@ -21,7 +26,7 @@ class ServiceConnectionsSearch extends ServiceConnections
         return [
 			[['ids','services_ids'],'each','rule'=>['integer']],
             [['id', 'initiator_id', 'target_id'], 'integer'],
-            [['initiator', 'target', 'comment'], 'safe'],
+            [['initiator', 'target', 'comment','initiator_service','target_service','initiator_details','target_details'], 'safe'],
         ];
     }
 
@@ -67,13 +72,15 @@ class ServiceConnectionsSearch extends ServiceConnections
             'updated_at' => $this->updated_at,
         ]);
 	
+        //если ИД указаны, то ограничиваем
 		if (isset($this->ids) && is_array($this->ids)) {
 			if (count($this->ids))
 				$query->andFilterWhere(['service_connections.id'=>$this->ids]);
-			else
+			else //если они пустые, то блокируем дальнейший поиск
 				$query->where('0=1');
 		}
 	
+		//если ИД указаны, то ограничиваем
 		if (isset($this->services_ids) && is_array($this->services_ids)) {
 			if (count($this->services_ids))
 				$query
@@ -81,14 +88,14 @@ class ServiceConnectionsSearch extends ServiceConnections
 						['service_connections.target_id'=>$this->services_ids],
 						['service_connections.initiator_id'=>$this->services_ids],
 					]);
-			else
+			else //если они пустые, то блокируем дальнейший поиск
 				$query->where('0=1');
 		}
 	
 		$query
-			->andFilterWhere(['like', 'initiator_details', $this->initiator_details])
-            ->andFilterWhere(['like', 'target_details', $this->target_details])
-            ->andFilterWhere(['like', 'comment', $this->comment])
+			->andFilterWhere(QueryHelper::querySearchString('service_connections.initiator_details', $this->initiator_details))
+            ->andFilterWhere(QueryHelper::querySearchString('service_connections.target_details', $this->target_details))
+			->andFilterWhere(QueryHelper::querySearchString('service_connections.comment', $this->comment))
             //->andFilterWhere(['like', 'updated_by', $this->updated_by])
 		;
         

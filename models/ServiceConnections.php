@@ -64,23 +64,25 @@ class ServiceConnections extends ArmsModel
     {
         return array_merge(parent::attributeData(),	[
 			'initiator_id' => [
-				'Сервис инициатор',
+				'Сервис-инициатор',
 				'hint'=>'Сервис, который инициирует связь',
 			],
+			'initiator_service'=>['alias'=>'initiator_id'],
 			'target_id' => [
-				'Сервис ответчик',
+				'Сервис-ответчик',
 				'hint'=>'Сервис, который принимает/отвечает на входящее соединение/взаимодействие',
 			],
+			'target_service'=>['alias'=>'target_id'],
 			'initiator_details' => [
-				'Детали источника',
+				'Параметры исх. соединения',
 				'hint'=>'Если есть дополнительная важная информация',
 			],
 			'target_details' => [
-				'Детали ответчика',
+				'Параметры вх. соединения',
 				'hint'=>'Если есть какие-то дополнения: Входящие порты, шары обмена, URI и т.д.',
 			],
 			'initiator_comps_ids' => [
-				'ОС/ВМ инициатор(ы)',
+				'ОС/ВМ-инициатор(ы)',
 				'hint'=>'Какие ОС/ВМ инициируют связь.'
 					.'<br>Заполняется, если сервис работает на нескольких узлах и надо указать только участвующие в связи',
 			],
@@ -89,8 +91,12 @@ class ServiceConnections extends ArmsModel
 				'hint'=>'Какое оборудование инициирует связь'
 					.'<br>Заполняется, если сервис работает на нескольких узлах и надо указать только участвующие в связи',
 			],
+			'initiator_nodes' => [
+				'Узлы-источники',
+				'hint'=>'Какие узлы инициируют исходящие соединения',
+			],
 			'target_comps_ids' => [
-				'ОС/ВМ ответчики',
+				'ОС/ВМ-ответчики',
 				'hint'=>'Какие ОС/ВМ принимают соединения'
 					.'<br>Заполняется, если сервис работает на нескольких узлах и надо указать только участвующие в связи',
 			],
@@ -98,6 +104,10 @@ class ServiceConnections extends ArmsModel
 				'Оборудование-ответчик',
 				'hint'=>'Какое оборудование принимают соединения'
 					.'<br>Заполняется, если сервис работает на нескольких узлах и надо указать только участвующие в связи',
+			],
+			'target_nodes' => [
+				'Узлы-ответчики',
+				'hint'=>'Какие узлы отвечают на входящие соединения',
 			],
 			'comment' => [
 				'Описание взаимодействия',
@@ -132,11 +142,13 @@ class ServiceConnections extends ArmsModel
 	
 	public function getInitiator()
 	{
-		return $this->hasOne(Services::class,['id'=>'initiator_id']);
+		return $this->hasOne(Services::class,['id'=>'initiator_id'])
+			->from(['initiator_services'=>Services::tableName()]);
 	}
 	public function getTarget()
 	{
-		return $this->hasOne(Services::class,['id'=>'target_id']);
+		return $this->hasOne(Services::class,['id'=>'target_id'])
+			->from(['target_services'=>Services::tableName()]);
 	}
 	
 	public function reverseLinks()
