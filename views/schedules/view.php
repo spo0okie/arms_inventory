@@ -20,12 +20,6 @@ if (!$acl_mode) {
 $this->params['breadcrumbs'][] = $this->title;
 Url::remember();
 
-$providingServices=$model->providingServices;
-$supportServices=$model->supportServices;
-$acls=$model->acls;
 
-$deleteable=!count($providingServices) && !count($supportServices) ;
-
-$schedule_id=$model->id;
 YiiAsset::register($this);
 echo $this->render('card',['model'=>$model]);

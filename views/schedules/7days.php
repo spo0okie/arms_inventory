@@ -54,7 +54,17 @@ if (
 				$comment=$day->comment;
 				$objDay=$day;
 			} elseif (is_array($day)) {
-				$comment=$day['day']->comment.' + наложения';
+				$tokens=[];
+				//если есть расписание
+				if (isset($day['sources']['master']) && strlen($day['sources']['master']->description))
+					$tokens[]=$day['sources']['master']->description;
+				//если есть день недели
+				if (strlen(trim($day['day']->comment)))
+					$tokens=$day['day']->comment;
+				//если есть наложения
+				if (isset($day['sources']['periods']) && count($day['sources']['periods']))
+					$tokens[]=' + наложения';
+				$comment=implode(' ',$tokens);
 				$objDay=$day['day'];
 			} else {
 				$comment='';

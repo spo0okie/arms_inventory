@@ -76,13 +76,18 @@ trait ScheduleEntriesModelCalcFieldsTrait {
 		/** @var SchedulesEntries $this */
 		return SchedulesEntries::scheduleWithoutMetadata($this->schedule);
 	}
-
-	public function getMergedSchedule() {
+	
+	/**
+	 * Получить обобщенное расписание (с учетом пересечений интервалов)
+	 * @param bool $touch склеивать соприкасающиеся интервалы
+	 * @return string
+	 */
+	public function getMergedSchedule(bool $touch=false) {
 		/** @var SchedulesEntries $this */
 		if ($this->schedule === '-') return '-';
 		//сначала приводим интервалы к математически корректным
 		$intervals=TimeIntervalsHelper::dayMinutesOverheadFixAll($this->getMinuteIntervals());
-		$intervals=TimeIntervalsHelper::intervalMerge($intervals);
+		$intervals=TimeIntervalsHelper::intervalMerge($intervals,$touch);
 		$intervals=TimeIntervalsHelper::dayMinutesOverheadHumanizeAll($intervals); //возвращаем привычный человеку (математически некорректный) вид
 		
 		//var_dump($intervals);

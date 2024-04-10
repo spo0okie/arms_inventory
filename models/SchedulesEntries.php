@@ -128,9 +128,34 @@ class SchedulesEntries extends ArmsModel
 		return true;
 	}
 	
+	/**
+	 * Вырезает из текстового расписания метаданные
+	 * @param $schedule
+	 * @return string|string[]|null
+	 */
 	public static function scheduleWithoutMetadata($schedule)
 	{
 		return preg_replace('/{[^}]*}/','',$schedule);
+	}
+	
+	/**
+	 * Вырезает из текстового расписания метаданные и склеивает периоды
+	 * @param $schedule
+	 * @return string|string[]|null
+	 */
+	public static function scheduleMergedWithoutMetadata($schedule)
+	{
+		//убираем метаданные
+		$clean=static::scheduleWithoutMetadata($schedule);
+		$intervals=static::scheduleToMinuteIntervals($clean);
+		$intervals=TimeIntervalsHelper::intervalMerge($intervals,true);
+		$intervals=TimeIntervalsHelper::dayMinutesOverheadHumanizeAll($intervals); //возвращаем привычный человеку (математически некорректный) вид
+		
+		//var_dump($intervals);
+		$timestamps=[];
+		foreach ($intervals as $interval)
+			$timestamps[]=SchedulesEntries::minuteIntervalToSchedule($interval);
+		return implode(',',$timestamps);
 	}
 	
 	public static function periodMetadata($period)
@@ -413,6 +438,20 @@ class SchedulesEntries extends ArmsModel
 		) return false; //синтаксические ошибки во временных отметках
 		
 		return [$start,$end];
+	}
+	
+	/**
+	 * Конвертирует HH:MM-HH:MM,HH:MM-HH:MM в [минуты начала,минуты окончания],[минуты начала,минуты окончания]
+	 * @param $schedule
+	 * @return array
+	 */
+	public static function scheduleToMinuteIntervals($schedule) {
+		$periods=[];
+		foreach (explode(',',$schedule) as $textPeriod) {
+			$arrPeriod=static::scheduleToMinuteInterval($textPeriod);
+			if ($arrPeriod) $periods[]=$arrPeriod;
+		};
+		return $periods;
 	}
 	
 	/**

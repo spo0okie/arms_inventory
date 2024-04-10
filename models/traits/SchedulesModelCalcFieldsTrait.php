@@ -598,6 +598,9 @@ trait SchedulesModelCalcFieldsTrait
 	 */
 	public function getDateSchedule($date)
 	{
+		//источники сбора расписания
+		$sources=[];
+		
 		//объект расписания на день
 		$dateScheduleEntry=$this->getDateEntryRecursive($date);
 		
@@ -619,6 +622,14 @@ trait SchedulesModelCalcFieldsTrait
 			strtotime($date.' 00:00:00'),
 			strtotime($date.' 23:59:59')
 		);
+		
+		if (is_object($dateScheduleEntry->master)) {
+			$sources['master']=$dateScheduleEntry->master;
+		}
+		
+		if (count($periods)) {
+			$sources['periods']=$periods;
+		}
 		
 		//если никакие периоды не накладываются то возвращаем обычный график
 		//if (!count($periods)) return $dateScheduleEntry;
@@ -674,7 +685,8 @@ trait SchedulesModelCalcFieldsTrait
 			'schedule' => $strSchedule,
 			'day' => $dateScheduleEntry,
 			'posPeriods' => $posPeriods,
-			'negPeriods' => $negPeriods
+			'negPeriods' => $negPeriods,
+			'sources'	 => $sources,
 		];
 	}
 	

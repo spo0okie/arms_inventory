@@ -94,11 +94,12 @@ class TimeIntervalsHelper {
 	
 	/**
 	 * проверка пересечения интервалов
-	 * @param $interval1 array
-	 * @param $interval2 array
+	 * @param array $interval1
+	 * @param array $interval2
+	 * @param bool $touch	считать пересечением касание интервалов (когда следующий начинается сразу за предыдущим
 	 * @return bool
 	 */
-	public static function intervalIntersect(array $interval1, array $interval2)
+	public static function intervalIntersect(array $interval1, array $interval2, bool $touch=false)
 	{
 		// сортируем интервалы так, чтобы второй был не раньше первого
 		if ((is_null($interval2[0]) && !is_null($interval1[0])) || $interval2[0]<$interval1[0]) {
@@ -122,6 +123,8 @@ class TimeIntervalsHelper {
 			(is_null($interval2[1]) && $interval2[0]<=$interval1[1]) //луч без конца начинается раньше конца второго отрезка
 			||
 			$interval2[0]<=$interval1[1]
+			||
+			(($interval2[0]<=$interval1[1]+1) && $touch)
 			;
 	}
 	
@@ -228,17 +231,18 @@ class TimeIntervalsHelper {
 	
 	/**
 	 * склеивает все пересекающиеся интервалы в массиве
-	 * @param $intervals array[]
+	 * @param array[] $intervals
+	 * @param bool $touch склеивать ли касающиеся интервалы
 	 * @return array
 	 */
-	public static function intervalMerge(array $intervals)
+	public static function intervalMerge(array $intervals, bool $touch=false)
 	{
 		do {
 			$intersect=false; //сначала мы не знаем ни о каких пересечениях
 			if (count($intervals)>1) { //если интервалов больше 1
 				for ($i=0;$i<count($intervals)-1;$i++) { //сравниваем все интервалы по очереди
 					for ($j=$i+1;$j<count($intervals);$j++) {
-						if (static::intervalIntersect($intervals[$i],$intervals[$j])) { //если они пересекаются,то
+						if (static::intervalIntersect($intervals[$i],$intervals[$j],$touch)) { //если они пересекаются,то
 							$intersect=true;
 							
 							//интервал пересечение;

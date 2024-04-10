@@ -20,7 +20,7 @@ if (is_object($model)) {
 		if ($model->is_period) {
 			$name=$model->periodSchedule;
 		} else {
-			$tokens=explode(',',$model->mergedSchedule);
+			$tokens=explode(',',$model->getMergedSchedule(true));
 			foreach ($tokens as $i=>$token)
 				$tokens[$i]='<span class="text-nowrap">'.$token.'</span>';
 			$name=$model->getDay().': '.implode(', ',$tokens);
@@ -45,8 +45,11 @@ if (is_object($model)) {
 			'entry'=>$model->date,
 			'#'=>'day-'.$model->date.'-'.$model->date_end]) ?>
 	</span>
-<?php } elseif (is_array($model)) {
-	if (!isset($name)) $name= SchedulesEntries::scheduleWithoutMetadata($model['schedule']);
+<?php } elseif (is_array($model)) {	//-------------------------
+	
+	
+	
+	if (!isset($name)) $name= SchedulesEntries::scheduleMergedWithoutMetadata($model['schedule']);
 	if (!isset($date)) $date=$model['day']->date;
 	if (count($model['posPeriods'])) {
 		$positive=[];
