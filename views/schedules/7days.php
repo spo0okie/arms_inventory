@@ -12,6 +12,8 @@
 /* @var $model app\models\Schedules */
 
 
+use app\models\Schedules;
+
 if (!isset($days_forward)) $days_forward=10;
 
 if (!isset($static_view)) $static_view=false;
@@ -55,16 +57,28 @@ if (
 				$objDay=$day;
 			} elseif (is_array($day)) {
 				$tokens=[];
+				$source=[];
 				//если есть расписание
-				if (isset($day['sources']['master']) && strlen($day['sources']['master']->description))
-					$tokens[]=$day['sources']['master']->description;
+				if (isset($day['sources']['master']) && is_object($master=$day['sources']['master'])) {
+					/** @var Schedules $master */
+					if ($master->id==$model->id) {    //если это тоже самое
+						$tokens[] = 'Основное';        //говорим что основное
+					} elseif ($master->isOverride) {    //если это период с другим расписанием
+						if (strlen(trim($master->description)))
+							$tokens[] = $master->description;    //выводим пояснение к периоду
+					} else							//если другое расписание
+						$tokens[]=$master->name;	//его имя
+				}
 				//если есть день недели
 				if (strlen(trim($day['day']->comment)))
 					$tokens[]=$day['day']->comment;
+				
+				if (count($tokens)) $source[]=implode(' ',$tokens);
+
 				//если есть наложения
 				if (isset($day['sources']['periods']) && count($day['sources']['periods']))
-					$tokens[]=' + наложения';
-				$comment=implode(' ',$tokens);
+					$source[]='наложения';
+				$comment=implode(' + ',$source);
 				$objDay=$day['day'];
 			} else {
 				$comment='';

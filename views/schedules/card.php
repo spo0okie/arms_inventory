@@ -36,7 +36,7 @@ if (!isset($static_view)) $static_view=false;
 			<?= $this->render('7days',['model'=>$model])?>
 			<?= $this->render('services',['model'=>$model])?>
 			<?= ListObjectsWidget::widget([
-				'models'=>$model->children,
+				'models'=>$model->childrenNonOverrides,
 				'title'=>$model->getAttributeLabel('children')
 			]) ?>
 			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>

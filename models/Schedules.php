@@ -45,6 +45,7 @@ use app\helpers\ArrayHelper;
  * @property Schedules[] $overrides
  * @property Schedules[] $children
  * @property Schedules[] $parentsChain
+ * @property Schedules[] $childrenNonOverrides
  * @property SchedulesEntries $entries
  * @property SchedulesEntries $periods
  * @property MaintenanceJobs[] $maintenanceJobs
@@ -355,6 +356,15 @@ class Schedules extends ArmsModel
 	public function getChildren()
 	{
 		return $this->hasMany(Schedules::class, ['parent_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает потомков, которые не являются перекрытиями
+	 * @return Schedules[]
+	 */
+	public function getChildrenNonOverrides()
+	{
+		return ArrayHelper::getItemsByFields($this->children,['override_id'=>null]);
 	}
 	
 	/**
