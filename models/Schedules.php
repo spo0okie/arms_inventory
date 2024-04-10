@@ -174,6 +174,7 @@ class Schedules extends ArmsModel
 			[['start_date','end_date'], 'string', 'max' => 64],
 			['start_date','required','on'=>self::SCENARIO_OVERRIDE],
 			[['start_date','end_date'],function ($attribute) {
+        		if (!is_object($this->parent)) return;
         		foreach ($this->parent->overrides as $override){
         			if ($override->id != $this->id && (
         				$override->matchDate($this->$attribute) ||
