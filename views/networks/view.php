@@ -44,21 +44,23 @@ $showSegment=(
 
 
 //формируем заголовок странички
-$this->params['headerContent'] = '<div class="d-flex flex-row">'
-	.'<div class="pe-5 flex-fill">'
-	.$this->render('card',['model'=>$model])
-	.(($notepad&&$notepadCompact)?$notepadRender:'');
+$this->params['headerContent'] =
+	'<div class="d-flex flex-row">'
+		.'<div class="pe-5 flex-fill">'
+			.$this->render('card',['model'=>$model])
+			.(($notepad&&$notepadCompact)?$notepadRender:'');
 	
-if (!$notepad&&$showSegment&&$segmentCompact) {
-	$this->params['headerContent'] .= $segmentRender;
-	$showSegment=false;
-}
+			if (!$notepad&&$showSegment&&$segmentCompact) {
+				$this->params['headerContent'] .= $segmentRender;
+				$showSegment=false;
+			}
 
-$this->params['headerContent'] .= '</div>'
-	.'<div class="pe-0 text-nowrap">'
-	.$this->render('calc',['model'=>$model])
-	.'</div>'
-.'</div>';
+			$this->params['headerContent']
+			.= '</div>'
+		.'<div class="pe-0 text-nowrap">'
+			.$this->render('calc',['model'=>$model])
+		.'</div>'
+	.'</div>';
 
 $cookieTabName='networks-view-tab-'.$model->id;
 

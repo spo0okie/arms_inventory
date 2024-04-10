@@ -11,7 +11,6 @@ if (!isset($static_view)) $static_view=false;
 
 ?>
 
-<h2>Калькулятор:</h2>
 	<table class="table table-bordered table-striped table-sm table-hover">
 		<tr>
 			<th>Имя</th>
