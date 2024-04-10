@@ -60,7 +60,7 @@ if (
 					$tokens[]=$day['sources']['master']->description;
 				//если есть день недели
 				if (strlen(trim($day['day']->comment)))
-					$tokens=$day['day']->comment;
+					$tokens[]=$day['day']->comment;
 				//если есть наложения
 				if (isset($day['sources']['periods']) && count($day['sources']['periods']))
 					$tokens[]=' + наложения';
