@@ -30,7 +30,7 @@ DynaGridWidgetAsset::register($this);
 <?php
 
 $tabs=[];
-/*
+
 if (count($model->children)||count($model->comps)||count($model->techs)) {
 		
 	DynaGridWidget::handleSave('services-comps-index');
@@ -56,7 +56,7 @@ if (count($model->children)||count($model->comps)||count($model->techs)) {
 HTML,
 	];
 	
-}*/
+}
 
 if (count($model->children)||count($model->incomingConnections)||count($model->outgoingConnections)) {
 	DynaGridWidget::handleSave('service-connections-list');
