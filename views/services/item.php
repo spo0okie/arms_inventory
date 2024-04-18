@@ -9,7 +9,7 @@ use app\helpers\StringHelper;
 /* @var $crop_site boolean Обрезать имя площадки из имени */
 /* @var $crop_parent boolean Обрезать имя родителя из имени */
 
-if (!isset($static_view)) $static_view=false;
+if (!isset($static_view)) $static_view=true;
 if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived',true);
 if (!isset($noDelete)) $noDelete=false;
 
