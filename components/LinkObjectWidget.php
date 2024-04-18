@@ -97,7 +97,9 @@ class LinkObjectWidget extends Widget
 		if (is_null($this->name)) {
 			$this->name = $this->model->name;
 		}
-		$this->name="<span class='item-name'>{$this->name}</span>";
+		$this->name=$this->namePrefix.
+			Html::tag('span',$this->name,['class'=>'item-name'])
+			.$this->nameSuffix;
 		
 		if (is_null($this->archived)) {
 			$this->archived=$this->model->hasAttribute('archived')&&$this->model->getAttribute('archived');
@@ -133,11 +135,12 @@ class LinkObjectWidget extends Widget
 		} else $deleteObject='';
 		
 		//если мы уже на этой странице то не делаем ссылки
-		return $this->namePrefix.(
-				$this->samePage?$this->name
+		return (
+				$this->samePage?
+				$this->name
 				:
 				Html::a($this->name,$this->url,$this->hrefOptions)
-			).$this->nameSuffix.(
+			).(
 				!$this->static&&!$this->noUpdate?
 					$space.UpdateObjectWidget::widget([
 						'model'=>$this->model,
