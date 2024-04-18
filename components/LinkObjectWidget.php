@@ -38,7 +38,8 @@ class LinkObjectWidget extends Widget
 	public $links=null;		//имена полей обратных ссылок (кто ссылается на этот объект), чтобы понять можно ли его удалить или нет
 	
 	public $name=null;		//подмена имени объекта
-	public $nameSuffix='';	//подмена имени объекта
+	public $namePrefix='';	//префикс имени объекта
+	public $nameSuffix='';	//постфикс имени объекта
 	
 	public $controller;
 	
@@ -132,7 +133,7 @@ class LinkObjectWidget extends Widget
 		} else $deleteObject='';
 		
 		//если мы уже на этой странице то не делаем ссылки
-		return (
+		return $this->namePrefix.(
 				$this->samePage?$this->name
 				:
 				Html::a($this->name,$this->url,$this->hrefOptions)

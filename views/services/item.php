@@ -3,7 +3,6 @@
 use app\components\ItemObjectWidget;
 use app\components\LinkObjectWidget;
 use app\helpers\StringHelper;
-use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
@@ -97,7 +96,8 @@ if (is_object($model)) {
 			'model'=>$model,
 			'static'=>$static_view,
 			'noDelete'=>$noDelete,
-			'name'=>$icon.Html::tag('span', $name,['class'=>'item-name']),
+			'name'=>$name,
+			'namePrefix'=>$icon,
 		])
 	]);
 }
