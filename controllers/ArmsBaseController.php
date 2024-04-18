@@ -234,7 +234,8 @@ class ArmsBaseController extends Controller
 	public function actionItem(int $id)
 	{
 		return $this->renderPartial('item', [
-			'model' => $this->findModel($id)
+			'model' => $this->findModel($id),
+			'static_view'=>true
 		]);
 	}
 	
