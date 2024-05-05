@@ -25,6 +25,14 @@
     {
       "type": "vcs",
       "url": "https://github.com/spo0okie/yii2-grid.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/spo0okie/yii2-widget-select2.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/spo0okie/select2.git"
     }
   ],
 
@@ -38,7 +46,6 @@
     "yiisoft/yii2-swiftmailer": "~2.0.0",
 	"yiisoft/yii2-imagine": "*",
     "yiisoft/yii2-jui": "~2.0.0",
-	"kartik-v/yii2-widget-select2": "dev-master",
 	"kartik-v/yii2-widget-datepicker": "dev-master",
 	"kartik-v/yii2-widget-datetimepicker": "dev-master",
 	"kartik-v/yii2-bootstrap5-dropdown": "dev-master",
@@ -52,6 +59,7 @@
 	"kartik-v/yii2-datecontrol": "dev-master",
 	"kartik-v/yii2-editable": "dev-master",
     "spo0okie/yii2-grid": "dev-patch-1",
+    "spo0okie/yii2-widget-select2": "dev-master",
     "voskobovich/yii2-linker-behavior": "dev-master",
     "edvlerblog/yii2-adldap-module": "^6.0.0",
     "a1inani/yii2-modal-ajax": "@dev",
