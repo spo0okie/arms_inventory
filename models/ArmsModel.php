@@ -6,6 +6,7 @@ use app\components\UrlListWidget;
 use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelper;
+use app\helpers\StringHelper;
 use app\models\traits\AttributeDataModelTrait;
 use app\models\traits\ExternalDataModelTrait;
 use DateTime;
@@ -13,6 +14,7 @@ use DateTimeZone;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\web\View;
 
 /**
  * This is the model class for table "arms".
@@ -502,5 +504,25 @@ class ArmsModel extends ActiveRecord
 		//ищем текущую запись в оперативной таблице (не в журнале)
 		return static::findOne($id);
 	}
-
+	
+	/**
+	 * Построить путь от потомка к предку
+	 * @param View   $view
+	 * @param string $parent
+	 */
+	public function recursiveBreadcrumbs(View $view, $parent='parent') {
+		$item=$this;
+		$chain=[$this];
+		$viewPath='/'.StringHelper::class2Id(get_class($this)).'/view';
+		while (is_object($item=$item->$parent)) {
+			$chain[]=$item;
+		}
+		foreach (array_reverse($chain) as $item) {
+			$view->params['breadcrumbs'][]=[
+				'label'=>$item->name,
+				'url'=>[$viewPath,'id'=>$item->id]
+			];
+		}
+		
+	}
 }
