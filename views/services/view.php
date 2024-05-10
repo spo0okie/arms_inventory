@@ -14,7 +14,7 @@ Url::remember();
 
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => Services::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$model->recursiveBreadcrumbs($this,'parentService','nameWithoutParent');
 
 $this->params['layout-container']='fluid mx-5';
 

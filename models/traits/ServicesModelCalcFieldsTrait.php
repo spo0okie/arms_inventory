@@ -9,6 +9,7 @@ namespace app\models\traits;
 
 
 use app\helpers\ArrayHelper;
+use app\helpers\StringHelper;
 use app\models\Contracts;
 use app\models\MaintenanceReqs;
 use app\models\Scans;
@@ -337,4 +338,40 @@ trait ServicesModelCalcFieldsTrait
 	{
 		return ArrayHelper::getItemsByFields($this->maintenanceReqsRecursive??[],['is_backup'=>0]);
 	}
+	
+	/**
+	 * Имя с откушенным родителем
+	 * @param string $name
+	 * @return string
+	 */
+	public function getNameWithoutParent($name='')
+	{
+		if (!strlen($name)) $name = $this->name;
+		$dividers = ['-', ':', '::', '/', '\\', '>', '->'];
+		if (is_object($this->parentService)) {
+			//разбиваем имя на слова
+			$tokens = StringHelper::explode($name, ' ', true, true);
+			foreach ($this->parentService->getAliases() as $alias) {
+				//разбиваем альяс на слова
+				$aliasTokens = StringHelper::explode($alias, ' ', true, true);
+				//если слова альяса это первые слова имени
+				if (array_intersect_assoc($aliasTokens, $tokens) == $aliasTokens) {
+					//собственно нашли совпадение
+					
+					//убираем альяс из начала имени (откусываем в качестве имени правый набор слов после альяса)
+					$tokens = array_slice($tokens, count($aliasTokens));
+					
+					//если теперь в начале имени стоит разделитель, его бы убрать
+					if (array_search($tokens[0], $dividers) !== false)
+						array_shift($tokens);
+					
+					$name = implode(' ', $tokens);
+					break;
+				}
+			}
+		}
+		return $name;
+	}
+	
+	
 }

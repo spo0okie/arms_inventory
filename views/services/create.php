@@ -1,5 +1,6 @@
 <?php
 
+use app\models\Services;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -7,7 +8,13 @@ use yii\helpers\Html;
 
 if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Новый сервис';
-$this->params['breadcrumbs'][] = ['label' => \app\models\Services::$titles, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Services::$titles, 'url' => ['index']];
+if (is_object($model->parentService)) {
+	$model
+		->parentService
+		->recursiveBreadcrumbs($this,'parentService','nameWithoutParent');
+	$this->title = 'Новый суб-сервис';
+}
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="services-create">

@@ -509,8 +509,9 @@ class ArmsModel extends ActiveRecord
 	 * Построить путь от потомка к предку
 	 * @param View   $view
 	 * @param string $parent
+	 * @param string $label
 	 */
-	public function recursiveBreadcrumbs(View $view, $parent='parent') {
+	public function recursiveBreadcrumbs(View $view, $parent='parent',$label='name') {
 		$item=$this;
 		$chain=[$this];
 		$viewPath='/'.StringHelper::class2Id(get_class($this)).'/view';
@@ -519,7 +520,7 @@ class ArmsModel extends ActiveRecord
 		}
 		foreach (array_reverse($chain) as $item) {
 			$view->params['breadcrumbs'][]=[
-				'label'=>$item->name,
+				'label'=>$item->$label,
 				'url'=>[$viewPath,'id'=>$item->id]
 			];
 		}

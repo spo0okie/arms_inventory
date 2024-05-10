@@ -2,7 +2,6 @@
 
 use app\components\ItemObjectWidget;
 use app\components\LinkObjectWidget;
-use app\helpers\StringHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
@@ -65,28 +64,7 @@ if (is_object($model)) {
 	
 	if (!empty($crop_parent)) {
 		$dividers=['-',':','::','/','\\','>','->'];
-		if (is_object($model->parentService)){
-			//разбиваем имя на слова
-			$tokens= StringHelper::explode($name," ",true,true);
-			foreach ($model->parentService->getAliases() as $alias) {
-				//разбиваем альяс на слова
-				$aliasTokens=StringHelper::explode($alias," ",true,true);
-				//если слова альяса это первые слова имени
-				if (array_intersect_assoc($aliasTokens,$tokens) == $aliasTokens) {
-					//собственно нашли совпадение
-					
-					//убираем альяс из начала имени (откусываем в качестве имени правый набор слов после альяса)
-					$tokens=array_slice($tokens,count($aliasTokens));
-					
-					//если теперь в начале имени стоит разделитель, его бы убрать
-					if (array_search($tokens[0],$dividers)!==false)
-						array_shift($tokens);
-					
-					$name=implode(' ',$tokens);
-					break;
-				}
-			}
-		}
+		$name=$model->getNameWithoutParent($name);
 		
 	}
 	
