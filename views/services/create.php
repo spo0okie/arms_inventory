@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = ['label' => Services::$titles, 'url' => ['index
 if (is_object($model->parentService)) {
 	$model
 		->parentService
-		->recursiveBreadcrumbs($this,'parentService','nameWithoutParent');
+		->recursiveBreadcrumbs($this,'nameWithoutParent');
 	$this->title = 'Новый суб-сервис';
 }
 $this->params['breadcrumbs'][] = $this->title;

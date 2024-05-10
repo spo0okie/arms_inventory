@@ -8,6 +8,7 @@ use app\helpers\ArrayHelper;
 use app\helpers\RestHelper;
 use app\helpers\StringHelper;
 use app\models\traits\AttributeDataModelTrait;
+use app\models\traits\AttributeLinksModelTrait;
 use app\models\traits\ExternalDataModelTrait;
 use DateTime;
 use DateTimeZone;
@@ -37,7 +38,7 @@ use yii\web\View;
  */
 class ArmsModel extends ActiveRecord
 {
-	use ExternalDataModelTrait,AttributeDataModelTrait;
+	use ExternalDataModelTrait,AttributeDataModelTrait,AttributeLinksModelTrait;
 	
 	public static $title='Объект';
 	public static $titles='Объекты';
@@ -458,24 +459,37 @@ class ArmsModel extends ActiveRecord
 	
 	/**
 	 * Рекурсивный поиск аттрибута в цепочке родителей
-	 * @param string $simpleAttr	как называется локальный аттрибут без учета рекурсии
-	 * @param string $recursiveAttr как называется этот же аттрибут с учетом рекурсии
-	 * @param string $parent		как называется ссылка на батю
-	 * @param null   $empty			что вернуть если ничего не нашли
+	 * @param string 		$simpleAttr		как называется локальный аттрибут без учета рекурсии
+	 * @param string|null	$recursiveAttr	как называется этот же аттрибут с учетом рекурсии
+	 * 										(если не указать то рекурсивно будет вызвана эта же функция)
+	 * @param string|null	$parent			как называется ссылка на батю
+	 * @param null   		$empty			что вернуть если ничего не нашли
 	 * @return mixed|null
 	 */
-	public function findRecursiveAttr(string $simpleAttr, string $recursiveAttr, $parent='parent',$empty=null) {
+	public function findRecursiveAttr(string $simpleAttr, string $recursiveAttr=null, $parent=null, $empty=null) {
 		//ищем в кэше
-		if (isset($this->recursiveCache[$recursiveAttr]))
+		if (isset($this->recursiveCache[$simpleAttr]))
+			return $this->recursiveCache[$simpleAttr];
+		
+		if (!is_null($recursiveAttr)&&isset($this->recursiveCache[$recursiveAttr]))
 			return $this->recursiveCache[$recursiveAttr];
 		
 		//ищем у себя
-		if (is_object($this->$simpleAttr)||(is_array($this->$simpleAttr)&&count($this->$simpleAttr)))
-			return $this->recursiveCache[$recursiveAttr] = $this->$simpleAttr;
+		$value=$this->$simpleAttr;
+		if (is_object($value)||(is_array($value)&&count($value))||!empty($value))
+			return $this->recursiveCache[$recursiveAttr] = $value;
+		
+		//атрибут ссылка на предка
+		if (is_null($parent)) $parent=$this->parentAttr;
 		
 		//ищем у родителя
-		if (is_object($this->$parent))
-			return $this->recursiveCache[$recursiveAttr] = $this->$parent->$recursiveAttr;
+		if (is_object($this->$parent)) {
+			if (is_null($recursiveAttr)) {
+				return $this->recursiveCache[$simpleAttr] = $this->$parent->findRecursiveAttr($simpleAttr,$recursiveAttr,$parent,$empty);
+			} else {
+				return $this->recursiveCache[$recursiveAttr] = $this->$parent->$recursiveAttr;
+			}
+		}
 		
 		//запоминаем, что ничего не нашли
 		return $this->recursiveCache[$recursiveAttr] = $empty;
@@ -508,12 +522,12 @@ class ArmsModel extends ActiveRecord
 	/**
 	 * Построить путь от потомка к предку
 	 * @param View   $view
-	 * @param string $parent
-	 * @param string $label
+	 * @param string $label	какой аттрибут использовать в качестве имени модели
 	 */
-	public function recursiveBreadcrumbs(View $view, $parent='parent',$label='name') {
+	public function recursiveBreadcrumbs(View $view, $label='name') {
 		$item=$this;
 		$chain=[$this];
+		$parent=$this->parentAttr;
 		$viewPath='/'.StringHelper::class2Id(get_class($this)).'/view';
 		while (is_object($item=$item->$parent)) {
 			$chain[]=$item;
@@ -524,6 +538,5 @@ class ArmsModel extends ActiveRecord
 				'url'=>[$viewPath,'id'=>$item->id]
 			];
 		}
-		
 	}
 }

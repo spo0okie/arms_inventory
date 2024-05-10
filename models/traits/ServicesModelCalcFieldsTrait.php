@@ -27,6 +27,13 @@ use app\models\Users;
 
 trait ServicesModelCalcFieldsTrait
 {
+	/**
+	 * Заголовок конкретно этой модели (сервис/услуга)
+	 * @return string
+	 */
+	public function getShortTitle() {
+		return $this->is_service?Services::$service_title:Services::$job_title;
+	}
 	
 	/**
 	 * @return string

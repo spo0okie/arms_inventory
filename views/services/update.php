@@ -9,7 +9,7 @@ use yii\helpers\Html;
 if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Редактирование: ' . $model->name;
 $this->params['breadcrumbs'][] = ['label' => Services::$titles, 'url' => ['index']];
-$model->recursiveBreadcrumbs($this,'parentService','nameWithoutParent');
+$model->recursiveBreadcrumbs($this,'nameWithoutParent');
 $this->params['breadcrumbs'][] = 'Редактирование';
 ?>
 <div class="services-update">

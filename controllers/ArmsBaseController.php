@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\components\assets\ArmsFormAsset;
+use app\components\Forms\ArmsForm;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
@@ -17,7 +19,6 @@ use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\bootstrap5\ActiveForm;
 use yii\web\Response;
 use yii\helpers\Url;
 
@@ -287,7 +288,7 @@ class ArmsBaseController extends Controller
 
         if ($model->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            return ActiveForm::validate($model);
+            return ArmsForm::validate($model);
         }
         
         return null;
@@ -323,6 +324,7 @@ class ArmsBaseController extends Controller
 	 */
 	public function actionCreate()
 	{
+		$this->view->registerAssetBundle(ArmsFormAsset::class);
 		$model = new $this->modelClass();
 
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -346,6 +348,7 @@ class ArmsBaseController extends Controller
      */
     public function actionUpdate(int $id)
     {
+		$this->view->registerAssetBundle(ArmsFormAsset::class);
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {

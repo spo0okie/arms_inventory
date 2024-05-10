@@ -263,7 +263,7 @@ class HistoryModel extends ArmsModel
 	 * @param $id
 	 * @return ArmsModel|null
 	 */
-	public function fetchLink($attr,$id) {
+	public function attributeFetchLink($attr, $id) {
 		/** @var ArmsModel $class */
 		$class=$this->attributeLinkClass($attr);
 		return $class::findOne($id);
@@ -355,7 +355,7 @@ class HistoryModel extends ArmsModel
 			}
 			//загрузить объекты-ссылки
 			foreach ($changed as $id) {
-				$link=$this->fetchLink($attribute,$id);
+				$link=$this->attributeFetchLink($attribute,$id);
 				if (is_null($link)) continue; // мало ли
 				//вызвать для них historyCommit($initiator)
 				$link->historyCommit($initiator);

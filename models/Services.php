@@ -62,7 +62,6 @@ use yii\db\ActiveQuery;
  * @property Comps[]    $compsRecursive
  * @property Services[] $depends
  * @property Services[] $dependants
- * @property UserGroups $userGroup
  * @property Techs[]    $techs
  * @property Techs[]    $techsRecursive
  * @property Techs[]    $arms
@@ -119,11 +118,37 @@ class Services extends ArmsModel
 	public static $user_job_title='Услуга для пользователей';
 	public static $tech_job_title='Услуга';
 	
+	public static $job_title='Услуга';
+	public static $service_title='Сервис';
+	
+	
+	public $parentAttr='parentService';
 	private $sitesRecursiveCache=null;
 	private $placesCache=null;
 	
 	protected static $allItems=null;
 	
+	public $linksSchema=[
+		'depends_ids' =>				[Services::class,'dependants_ids'],
+		'comps_ids' =>					[Comps::class,'services_ids'],
+		'techs_ids' =>					[Techs::class,'services_ids'],
+		'maintenance_reqs_ids'=>		[MaintenanceReqs::class,'services_ids'],
+		'maintenance_jobs_ids'=>		[MaintenanceJobs::class,'services_ids'],
+		'support_ids' =>				[Users::class,'support_services_ids','loader'=>'support'],
+		'infrastructure_support_ids' =>	[Users::class,'infrastructure_support_services_ids','loader'=>'infrastructureSupport'],
+		'contracts_ids' => 				[Contracts::class,'services_ids'],
+		'acls_ids' => 					[Acls::class,'services_id'],
+		
+		'responsible_id' =>				[Users::class,'services_ids'],
+		'infrastructure_user_id' =>		[Users::class,'infrastructure_services_ids','loader'=>'infrastructureResponsible'],
+		'providing_schedule_id' =>		[Schedules::class,'providing_services_ids'],
+		'support_schedule_id' =>		[Schedules::class,'support_services_ids'],
+		'segment_id' =>					[Segments::class,'services_ids'],
+		'parent_id' =>					[Services::class,'children_ids','loader'=>'parentService'],
+		'partners_id' =>				[Partners::class,'services_ids'],
+		'places_id' =>					[Places::class,'services_ids'],
+		'currency_id' =>				Currency::class,
+	];
 	
 	/**
 	 * В списке поведений прикручиваем many-to-many contracts
@@ -216,6 +241,7 @@ class Services extends ArmsModel
 			'parent_id' => [
 				'Основной сервис/услуга',
 				'hint' => 'Здесь можно указать в состав какого, более крупного сервиса, входит этот сервис',
+				'placeholder' => 'Выберите основной сервис/услугу',
 			],
 			'description' => [
 				'Описание',
@@ -241,18 +267,20 @@ class Services extends ArmsModel
 	        'depends_ids' => [
 	        	'Зависит от сервисов/услуг',
 				'hint' => 'От работы каких сервисов зависит работа этого сервиса/предоставление услуги',
-	
+				'placeholder' => 'Не зависит ни от каких сервисов',
 			],
 			'comps_ids' => [
 				'Серверы',
 				'hint' => 'На каких серверах выполняется этот сервис/услуга',
 				'indexHint' => '{same}',//<br />'.QueryHelper::$stringSearchHint,
+				'placeholder' => 'Выберите серверы',
 			],
 			'comps' => ['alias'=>'comps_ids',],
 			'techs_ids' => [
 				'Оборудование',
 				'hint' => 'На каком оборудовании выполняется этот сервис',
 				'indexHint' => '{same}',//<br />'.QueryHelper::$stringSearchHint,
+				'placeholder' => 'Выберите оборудование',
 			],
 			'techs' => ['alias'=>'techs_ids'],
 			'compsAndTechs'=> [
@@ -262,25 +290,41 @@ class Services extends ArmsModel
 			'providing_schedule_id' => [
 	        	'Время предоставления',
 				'hint' => 'Расписание, когда сервисом могут воспользоваться пользователи или другие сервисы',
+				'is_inheritable'=>true,
+				'placeholder' => 'Расписание отсутствует'
 			],
 			'providingSchedule' => ['alias'=>'providing_schedule_id'],
 	        'support_schedule_id' => [
 	        	'Время поддержки',
 				'hint' => 'Расписание, когда нужно реагировать на сбои в работе сервиса',
+				'is_inheritable'=>true,
+				'placeholder' => 'Расписание отсутствует'
 			],
 			'supportSchedule' => ['alias'=>'support_schedule_id'],
 			'responsible_id' => [
 				'Ответственный',
 				'hint' => 'Ответственный за работу сервиса/оказание услуги',
+				'is_inheritable'=>true,
+				'placeholder' => 'Ответственный не назначен'
 			],
 			'infrastructure_user_id' => [
 				'Ответственный за инфраструктуру',
 				'hint' => 'Ответственный за инфраструктуру сервиса (если отличается от ответственного за сервис)',
+				'is_inheritable'=>true,
+				'placeholder' => function() {return is_object($this->responsibleRecursive)?
+					$this->responsibleRecursive->name.' (отв. за сервис, включая инфраструктуру)':
+					'Тот же, кто отвечает за сервис (ответственность не разделяется)';
+				},
 			],
 			'infrastructure_support_ids' => [
 				'Поддержка инфраструктуры',
 				'hint' => 'Дополнительные члены команды по поддержке инфраструктуры сервиса<br />'.
 					'(если отличаются от поддержки сервиса)',
+				'is_inheritable'=>true,
+				'placeholder' => function() {return count($this->getSupportRecursive())?
+					$this->renderAttributeToText('support_ids',', ').' (поддерживают сервис, включая инфраструктуру)':
+					'Те же, кто поддерживает сервис (ответственность не разделяется)';
+				}
 			],
 			'responsible' => [
 				'Ответственный, поддержка',
@@ -290,14 +334,19 @@ class Services extends ArmsModel
 			'support_ids' => [
 				'Поддержка',
 				'hint' => 'Дополнительные члены команды по поддержке сервиса/оказанию услуги',
+				'is_inheritable'=>true,
+				'placeholder' => 'Поддержка отсутствует'
 			],
 			'contracts_ids' => [
 				Contracts::$titles,
 				'hint' => 'Привязанные к услуге документы. Нужно привязать только договор, а все счета/акты/доп.соглашения уже привязывать к договору',
+				'placeholder' => 'Нет связанных документов',
 			],
 			'segment_id' => [
 				'Сегмент ИТ',
 				'hint' => 'Сегмент ИТ инфраструктуры к которому относится этот сервис',
+				'is_inheritable'=>true,
+				'placeholder' => 'Сегмент инфраструктуры не объявлен'
 			],
 			'segment' => ['alias'=>'segment_id'],
 			'arms' => [
@@ -313,17 +362,20 @@ class Services extends ArmsModel
 			'places_id' => [
 				Places::$title,
 				'hint' => 'Привязать сервис/услугу к помещению. Иначе помещение будет косвенно выясняться на основании расположения серверов и оборудования',
+				'placeholder' => 'Определять автоматически из расположения серверов и оборудования',
 			],
 			'places' => ['alias'=>'places_id'],
 			'partners_id' => [
 				Partners::$title,
 				'hint' => 'Если услуга/сервис оказывается каким-либо контрагентом (иначе внутренняя)',
+				'placeholder' => 'Отсутствует: сервис/услуга предоставляется ИТ отделом'
 			],
 			'partner' => ['alias'=>'partners_id'],
 			'sites' => ['Площадки'],
 			'currency_id' => [
 				'Валюта',
 				'hint' => 'Ед. изм. стоим.',
+				'placeholder' => 'RUR'
 			],
 			'cost' => [
 				'Стоимость',
@@ -349,7 +401,9 @@ class Services extends ArmsModel
 				'hint'=>'Какие требования предъявляет сервис по резервному копированию,'
 					.'<br>переиндексации, обновлению, перезагрузкам и т.п.',
 				'indexLabel'=>'Треб. обслуживание',
-				'indexHint'=>'{same}'
+				'indexHint'=>'{same}',
+				'is_inheritable'=>true,
+				'placeholder' => 'Не требует обслуживания',
 			],
 			'maintenanceReqs'=>['alias'=>'maintenance_reqs_ids'],
 			'maintenanceReqsRecursive'=>['alias'=>'maintenance_reqs_ids'],
@@ -381,7 +435,8 @@ class Services extends ArmsModel
 			'maintenance_jobs_ids'=>[
 				MaintenanceJobs::$titles,
 				'hint'=>'Какие операции регламентного обслуживания проводятся над этим сервисом',
-				'indexHint'=>'{same}'
+				'indexHint'=>'{same}',
+				'placeholder' => 'Не обслуживается',
 			],
 			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
 			'incomingConnections'=>[

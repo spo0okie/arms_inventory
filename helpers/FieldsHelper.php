@@ -5,6 +5,7 @@ namespace app\helpers;
 
 
 use app\components\assets\FieldsHelperAsset;
+use app\models\ArmsModel;
 use Exception;
 use kartik\date\DatePicker;
 use kartik\markdown\MarkdownEditor;
@@ -120,11 +121,16 @@ class FieldsHelper
 				$pluginOptions['selectionAdapter']=new JsExpression('$.fn.select2.amd.require("QtippedSingleSelectionAdapter")');
 			
 		}
+		$placeholder='Начните набирать для поиска';
+		if ($model->hasMethod('getAttributePlaceholder')) {
+			/** @var ArmsModel $model */
+			$placeholder=$model->getAttributePlaceholder($attr);
+		}
 		return $form
 			->field($model, $attr)
 			->widget(Select2::class, ArrayHelper::recursiveOverride([
 				'options'=>[
-					'placeholder'=>'Начните набирать для поиска',
+					'placeholder'=>$placeholder,
 				],
 				'toggleAllSettings'=>['selectLabel' => null],
 				'pluginOptions' => $pluginOptions
