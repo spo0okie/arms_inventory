@@ -216,7 +216,7 @@ class ServicesController extends ArmsBaseController
 		$ids[]=$model->id;
 		
 		
-		$dataProvider = $searchModel->search(array_merge(
+		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(
 			Yii::$app->request->queryParams,
 			['ServiceConnectionsSearch'=>['services_ids'=>$ids]]
 		));

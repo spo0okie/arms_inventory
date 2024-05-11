@@ -179,7 +179,33 @@ class DynaGridWidget extends DynaGrid
 			'resizable-columns-id'=>$this->id,
 		],$this->options);
 		
+		//https://github.com/spo0okie/arms_inventory/issues/146
+		if ($this->gridOptions['pjax']??false) {
+			$js=<<<JS
+				console.log('attaching pjax mode to {$this->id} filter...');
+				$('#{$this->id}').on('beforeFilter',function(e){
+				    //console.log('beforeFilter hit!');
+				    //console.log(e);
+				    $(e.target).find('form.gridview-filter-form')
+				   		.on('submit', function(event) {
+                			event.preventDefault();
+                			$.pjax.submit(event, '#{$this->id}', {
+                    			'push': false,
+                    			'replace': false,
+                    			'timeout': 30000,
+                    			'scrollTo': 0,
+                    			'maxCacheLength': 0
+                			});
+            		})
+//				    return false;
+				})
+JS;
+			$this->view->registerJs($js);
+		}
+		
+		
 		return parent::run();
+		
 	}
 	
 	/**
