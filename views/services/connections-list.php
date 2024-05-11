@@ -27,12 +27,12 @@ $columns=include $_SERVER['DOCUMENT_ROOT'].'/views/service-connections/columns.p
 		'defaultOrder' => ['initiator_service','initiator_nodes','initiator_details','comment','target_service','target_nodes','target_details',],
 		//'filterModel' => $searchModel,
 		'dataProvider' => $dataProvider,
-		/*'toggleButtonGrid'=>[
+		'toggleButtonGrid'=>[
 			'label' => '<i class="fas fa-wrench fa-fw"></i>',
 			'title' => 'Персонализировать настройки таблицы',
 			'data-pjax' => false,
 			'class' => 'd-none',
-		],*/
+		],
 		'gridOptions' => [
 			'layout'=>'{dynagrid}{items}',
 			'showFooter' => false,

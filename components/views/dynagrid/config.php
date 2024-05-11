@@ -41,7 +41,7 @@ $options1 = ArrayHelper::merge(
 	[
 		'items' => $model->visibleColumns,
 		'connected' => true,
-		'options' => ['class' => 'sortable-visible'],
+		'options' => ['class' => 'sortable-visible','id'=>$model->id.'-vis'],
 	]
 );
 $options2 = ArrayHelper::merge(
@@ -49,7 +49,7 @@ $options2 = ArrayHelper::merge(
 	[
 		'items' => $model->hiddenColumns,
 		'connected' => true,
-		'options' => ['class' => 'sortable-hidden'],
+		'options' => ['class' => 'sortable-hidden','id'=>$model->id.'-hid'],
 	]
 );
 /** @noinspection PhpUnhandledExceptionInspection */
