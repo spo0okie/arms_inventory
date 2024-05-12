@@ -61,7 +61,7 @@ if (is_object($model->state)) {
 	</div>
 
 	
-	<?php if (!$no_specs && is_object($model->techModel) && $model->techModel->individual_specs) { ?>
+	<?php if (!$no_specs && is_object($model->model) && $model->model->individual_specs) { ?>
 	<h4>Спецификация:</h4>
 		<?= Yii::$app->formatter->asNtext($model->specs) ?>
 		<br />
