@@ -1,7 +1,7 @@
 <?php
 
+use app\helpers\HtmlHelper;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
@@ -22,7 +22,7 @@ if (is_object($model->state)) {
 
 ?>
 
-<div class="arms-card <?= $model->archived?'archived-item':'' ?>" <?= \app\helpers\HtmlHelper::ArchivedDisplay($model,$show_archived) ?>>
+<div class="arms-card <?= $model->archived?'archived-item':'' ?>" <?= HtmlHelper::ArchivedStyle($model,$show_archived) ?>>
 	<span class="unit-status <?= $statusCode ?>"><?= $statusName ?></span>
     <h3><?=
 		$this->render('/techs/item',[
@@ -46,7 +46,7 @@ if (is_object($model->state)) {
 		<?php if (strlen($model->comment)) { ?>
 			<div class="col-md-6">
 				<div class="comment-block" >
-					<img class="exclamation-sign" src="/web/img/exclamation-mark.svg" /><br/>
+					<img class="exclamation-sign" src="/web/img/exclamation-mark.svg" alt="WARNING"/><br/>
 					<?= $model->comment ?>
 				</div>
 			</div>
@@ -63,7 +63,7 @@ if (is_object($model->state)) {
 	
 	<?php if (!$no_specs && is_object($model->techModel) && $model->techModel->individual_specs) { ?>
 	<h4>Спецификация:</h4>
-		<?= \Yii::$app->formatter->asNtext($model->specs) ?>
+		<?= Yii::$app->formatter->asNtext($model->specs) ?>
 		<br />
 	<?php } ?>
 
@@ -73,7 +73,7 @@ if (is_object($model->state)) {
 	<div class="data-block tree-level-2">
 		<?php if (is_array($comps=$model->comps) && count ($comps)) {
 			foreach ($model->sortedComps as $comp) { ?>
-				<div class="comps-card <?= $comp->archived?'archived-item':'' ?>" <?= \app\helpers\HtmlHelper::ArchivedDisplay($comp,$show_archived) ?>>
+				<div class="comps-card <?= $comp->archived?'archived-item':'' ?>" <?= HtmlHelper::ArchivedStyle($comp,$show_archived) ?>>
 					<?= $this->render('/comps/card',[
 					'model'=>$comp,
 					'static_view'=>$static_view,

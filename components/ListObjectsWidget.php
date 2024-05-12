@@ -10,11 +10,11 @@ namespace app\components;
 
 use app\helpers\ArrayHelper;
 use app\helpers\HtmlHelper;
+use app\helpers\StringHelper;
 use app\models\ArmsModel;
-use app\models\HistoryModel;
 use Yii;
 use yii\base\Widget;
-use yii\helpers\Inflector;
+use yii\helpers\Html;
 
 /**
 * Class ItemObjectWidget
@@ -27,6 +27,7 @@ class ListObjectsWidget extends Widget
 	public $title;				//заголовок списка
 	public $show_archived;		//флаг отображения архивного элемента
 	public $item_options=[];	//опции для рендера элемента
+	public $card=true;			//завернуть все в разворачиваемую карточку
 	public $card_options=['cardClass'=>'mb-3'];	//опции для рендера карточки
 	public $archived;			//признак того что весь список состоит из архивных элементов
 	public $lineBr=true;		//переносить строку между элементами
@@ -36,15 +37,9 @@ class ListObjectsWidget extends Widget
 	public $modelClass;
 	public $raw_items=false;	//не конвертировать текстовые итемы в HTML (уже сконверчены)
 	
-	/**
-	 * @var ArmsModel|HistoryModel
-	 */
 	private $model;
-	private $is_object=false;
 	private $empty;
-	private $modelClassName; 	//не путь класса а только его имя
-	private $modelClassPath;	 //путь где живут классы моделей, который откусываем от имени класса
-	// модели для формирования пути view
+	private $emptyGlue=false;
 	
 	
 	public function init(){
@@ -53,50 +48,30 @@ class ListObjectsWidget extends Widget
 		//пустой ли список?
 		$this->empty=!count($this->models);
 		
-		if (!$this->empty) {
-			//берем себе одну модель для образца
-			$this->model=reset($this->models);
-			//это вообще объект?
-			$this->is_object=is_object($this->model);
+		//ищем в списке модель
+		foreach ($this->models as $model) {
+			if (is_object($model)) $this->model=$model;
+			break;
 		}
 		
-		//определяем класс перечисляемых моделей если у нас там объекты
-		if (!isset($this->modelClass) && $this->is_object) {
-			$this->modelClass='ArmsModel';
-			
-			if (!$this->empty ) {
-				$this->modelClass=$this->model->masterClass??get_class($this->model);
-			}
-			
-			//формируем полный путь до класса
-			$this->modelClassPath=explode('\\',$this->modelClass);
-
-			//выкидываем адрес пути до всех моделей
-			$this->modelClassName=$this->modelClassPath[count($this->modelClassPath)-1];
-		}
-		
-		//строим путь до view model/item
-		if (!isset($this->itemViewPath)) {
-			$this->itemViewPath='/'.Inflector::camel2id($this->modelClassName).'/item';
-		}
 		
 		//вытаскиваем заголовок из модели
 		if (!isset($this->title)) {
 			$this->title='$Title_error';
-			if ($this->is_object) {
-				$class=$this->modelClass;
+			if (isset($this->model)) {
+				$class=get_class($this->model);
 				if ($this->model->hasProperty('titles')) {
 					$this->title=$class::$titles;
 				} elseif ($this->model->hasProperty('title')) {
 					$this->title=$class::$title;
-				} else $this->title=$this->modelClassName;
+				} else $this->title=StringHelper::className($class);
 			}
 		}
 		
 		//проверяем не содержит ли список только архивные элементы
-		if (!isset($this->archived) && $this->is_object && $this->model->hasProperty('archived')) {
+		if (!isset($this->archived)) {
 			$allArchived=true;
-			foreach ($this->models as $model) $allArchived=$allArchived&&$model->archived;
+			foreach ($this->models as $model) $allArchived=$allArchived&&$this->isArchived($model);
 			$this->archived=$allArchived;
 		}
 		
@@ -110,6 +85,26 @@ class ListObjectsWidget extends Widget
 			'showArchived',
 			ShowArchivedWidget::$defaultValue
 		);
+		
+		//склеивающий текст "пустой" его не надо скрывать между архивными элементами
+		if (!strlen(trim($this->glue))) $this->emptyGlue=true;
+	}
+	
+	private function isArchived($model) {
+		if (!is_object($model)) return false;
+		return $model->isArchived;
+	}
+	
+	private function glueItem($archived=false){
+		if ($this->emptyGlue) return $this->glue;
+		return Html::tag(
+			'span',
+			$this->glue,
+			[
+				'class'=>$archived?ShowArchivedWidget::$itemClass:'',
+				'style'=>HtmlHelper::ArchivedDisplay($archived,$this->show_archived),
+			]
+		);
 	}
 	
 	public function run()
@@ -117,30 +112,71 @@ class ListObjectsWidget extends Widget
 		//если список пуст, а пустое не показываем
 		if ($this->empty && !$this->show_empty) return '';
 		
-		//заголовок
-		$titleClass=($this->archived && !$this->show_empty)?ShowArchivedWidget::$itemClass:'';
-		$titleDisplay=HtmlHelper::ArchivedDisplay($this,$this->show_empty||$this->show_archived);
-		$title=$this->title?"<h4 class='$titleClass' $titleDisplay >{$this->title}</h4>":'';
-		
 		//список
 		$listItems=[];
-		foreach ($this->models as $model) {
-			if ($this->is_object) {
-				$listItems[]=$this->render($this->itemViewPath,ArrayHelper::recursiveOverride([
-					'model'=>$model,'show_archived'=>$this->show_archived
-				],$this->item_options));
+		//все элементы по порядку
+		$models=array_values($this->models);
+		//признак того что все модели в архиве
+		$allArchived=true;
+		for ($i=0; $i<count($models); $i++) {
+			$model=$models[$i];
+			$allArchived=$allArchived&&$this->isArchived($model);
+			if (is_object($model)) {
+				if (isset($this->itemViewPath)) //если у нас явно указан путь рендер файла - используем его
+					$listItems[]=$this->render($this->itemViewPath,ArrayHelper::recursiveOverride([
+						'model'=>$model,'show_archived'=>$this->show_archived
+					],$this->item_options));
+				else //если рендер файл не заявлен, используем внутримодельный
+					$listItems[]=$model->renderItem($this->view,ArrayHelper::recursiveOverride([
+						'show_archived'=>$this->show_archived
+					],$this->item_options));
 			} elseif (!$this->raw_items) {
 				$listItems[]=Yii::$app->formatter->asText($model);
 			} else {
 				$listItems[]=$model;
 			}
+			// -- разделитель --
+			//если это не последний элемент
+			if ($i<count($models)-1) {
+				$archived=false;	//по умолчанию архивных нет
+				if (!$this->emptyGlue) {	//если разделитель не пустой (и его надо скрывать между скрытыми позициями)
+					$archived=true; //то предполагаем что мы между двумя архивными элементами
+					if (!$this->isArchived($model)) {	//если слева не архивный
+						for ($j=$i+1;$j<count($models);$j++) { //проверяем что там справа
+							if (!$this->isArchived($models[$j])) { //если справа есть хоть один не архивный
+								$archived=false;
+								break;
+							}
+						}
+					}
+				}
+				$listItems[]=$this->glueItem($archived);
+			}
 		}
-		$list=implode($this->glue,$listItems);
+		
+		$content=implode('',$listItems);
+		
+		
+		if ($this->title) {
+			//если явно не заявлено что вся карточка архивная, то выставляем то что выяснили в процессе
+			if (!isset($this->archived)) $this->archived=$allArchived;
+
+			//заголовок
+			$content=Html::tag(
+				'h4',
+				$this->title,
+				[
+					'class'=>($this->archived && !$this->show_empty)?ShowArchivedWidget::$itemClass:'',
+					'style'=>HtmlHelper::ArchivedDisplay($this,$this->show_empty||$this->show_archived),
+				]
+			).$content;
+		}
+		
+		if (!$this->card) return $content;
 		
 		//карточка
-		return ExpandableCardWidget::widget(ArrayHelper::recursiveOverride([
-			'content'=>$title.$list
-		],$this->card_options));
+		$this->card_options['content']=$content;
+		return ExpandableCardWidget::widget($this->card_options);
 		
 		//return "<span class=\"$cssClass\" $display>{$this->link}</span> ";
 	}

@@ -31,8 +31,12 @@ use yii\web\View;
  * @property string $links Ссылки прикрепленные к объекту
  * @property Attaches $attaches Загруженные файлы
  * @property boolean $archived Статус архивирования элемента
+ * @property boolean $canBeArchived может иметь статус архивировано
+ * @property boolean $isArchived может иметь статус архивировано и он выставлен
  * @property string $external_links Внешние ссылки
  * @property string $historyClass Класс который хранит журнал изменений моделей класса
+ * @property string $controllerPath Путь до контроллера (для URI)
+ * @property string $viewsPath Путь до папки Views (для рендера)
  
  * @property int $secondsSinceUpdate Секунды с момента обновления
  */
@@ -538,5 +542,51 @@ class ArmsModel extends ActiveRecord
 				'url'=>[$viewPath,'id'=>$item->id]
 			];
 		}
+	}
+	
+	/**
+	 * Признак того, что эта модель имеет статус "архивировано"
+	 * @return bool
+	 */
+	public function getCanBeArchived() {
+		if (isset($this->attrsCache['canBeArchived'])) return $this->attrsCache['canBeArchived'];
+		return $this->attrsCache['canBeArchived']=$this->hasProperty('archived');
+	}
+	
+	public function getIsArchived() {
+		return $this->canBeArchived && $this->archived;
+	}
+	
+	/**
+	 * Путь до контроллера
+	 * @return mixed|string
+	 */
+	public function getControllerPath() {
+		if (isset($this->attrsCache['controllerPath'])) return $this->attrsCache['controllerPath'];
+		return $this->attrsCache['controllerPath']=StringHelper::class2Id(get_class($this));
+	}
+	
+	/**
+	 * Путь до папки views
+	 * @return mixed|string
+	 */
+	public function getViewsPath() {
+		if (isset($this->attrsCache['viewsPath'])) return $this->attrsCache['viewsPath'];
+		return $this->attrsCache['viewsPath']=StringHelper::class2Id(get_class($this));
+	}
+	
+	/**
+	 * Отрендерить элемент
+	 * @param View  $view
+	 * @param array $options
+	 * @return string
+	 */
+	public function renderItem(View $view,$options=[]) {
+		return $view->render(
+			"/{$this->viewsPath}/item",
+			ArrayHelper::recursiveOverride($options,[
+				'model'=>$this
+			])
+		);
 	}
 }
