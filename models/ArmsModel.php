@@ -572,7 +572,8 @@ class ArmsModel extends ActiveRecord
 	 */
 	public function getViewsPath() {
 		if (isset($this->attrsCache['viewsPath'])) return $this->attrsCache['viewsPath'];
-		return $this->attrsCache['viewsPath']=StringHelper::class2Id(get_class($this));
+		$class=($this instanceof HistoryModel)?$this->masterClass:get_class($this);
+		return $this->attrsCache['viewsPath']=StringHelper::class2Id($class);
 	}
 	
 	/**
