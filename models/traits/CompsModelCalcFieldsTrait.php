@@ -8,6 +8,7 @@ namespace app\models\traits;
 
 use app\models\Comps;
 use app\models\HwList;
+use app\models\HwListItem;
 use app\models\MaintenanceReqs;
 use app\models\SwList;
 use app\models\Techs;
@@ -91,6 +92,9 @@ trait CompsModelCalcFieldsTrait
 		return $this->swList_obj;
 	}
 	
+	/**
+	 * @return HwListItem[]
+	 */
 	public function getHardArray()
 	{
 		return $this->hwList->items;

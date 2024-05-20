@@ -21,8 +21,9 @@ use app\models\Techs;
 use yii\helpers\Html;
 
 if (!isset($static_view)) $static_view=false;
+if (!isset($style)) $style='';
 
-$classes=[];    //определим классы элемента
+if (!isset($classes)) $classes=[];    //определим классы элемента
 if (isset($addItem)&&($addItem===true)) {   //если это пустышка
     $classes[]='passport_tools';                  //, то и ок
     $hint='Добавление нового элемента в паспорт';
@@ -50,7 +51,7 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
 
 ?>
 
-<tr class="hardware_item <?= implode(' ',$classes) ?>" title="<?= $hint ?>">
+<tr class="hardware_item <?= implode(' ',$classes) ?>" title="<?= $hint ?>" <?= $style ?>>
     <td>
         <?= $item->title ?>
         <?php if (!is_null($item->manufacturer_id)){ ?>

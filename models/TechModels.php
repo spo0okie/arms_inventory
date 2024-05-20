@@ -2,9 +2,10 @@
 
 namespace app\models;
 
+use app\components\UrlListWidget;
 use app\console\commands\SyncController;
-use Yii;
-use yii\helpers\StringHelper;
+use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "tech_models".
@@ -106,11 +107,11 @@ class TechModels extends ArmsModel
 	        [['short'], 'string', 'max' => 24],
 	        [['name'], 'unique'],
 			[['front_rack_layout','back_rack_layout'],'safe'],
-			['contain_back_rack',function ($attribute, $params, $validator) {
+			['contain_back_rack',function ($attribute) {
 				if ($this->contain_front_rack && $this->front_rack_two_sided && $this->contain_back_rack)
 					$this->addError($attribute,"Невозможно иметь одновременно и двустороннюю переднюю корзину и корзину сзади");
 			}],
-			['contain_front_rack',function ($attribute, $params, $validator) {
+			['contain_front_rack',function ($attribute) {
 				if ($this->contain_back_rack && $this->back_rack_two_sided && $this->contain_front_rack)
 					$this->addError($attribute,"Невозможно иметь одновременно и двустороннюю заднюю корзину и корзину спереди");
 			}],
@@ -145,7 +146,7 @@ class TechModels extends ArmsModel
 			],
 			'links' => [
 				'Ссылки',
-				'hint' => \app\components\UrlListWidget::$hint,
+				'hint' => UrlListWidget::$hint,
 			],
 			'comment' => [
 				'Описание',
@@ -197,7 +198,7 @@ class TechModels extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getManufacturer()
 	{
@@ -226,7 +227,7 @@ class TechModels extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getType()
 	{
@@ -234,7 +235,7 @@ class TechModels extends ArmsModel
 	}
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getTechs()
 	{
@@ -323,7 +324,7 @@ class TechModels extends ArmsModel
 			//->select(['id', 'name'])
 				//->orderBy('sname')
 			->all();
-		return static::$names_cache=\yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+		return static::$names_cache= ArrayHelper::map($list, 'id', 'sname');
 	}
 
 	public static function fetchPCs()
@@ -332,7 +333,7 @@ class TechModels extends ArmsModel
 			->where(['is_computer'=>true])
 			//->select(['id', 'name'])
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+		return ArrayHelper::map($list, 'id', 'sname');
 	}
 
 	public static function fetchPhones()
@@ -340,7 +341,7 @@ class TechModels extends ArmsModel
 		$list = static::find()->joinWith('type')->joinWith('techs')->joinWith('manufacturer')
 			->where(['is_phone'=>true])
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+		return ArrayHelper::map($list, 'id', 'sname');
 	}
 
 	/*public static function fetchPhonesIds()
@@ -404,7 +405,8 @@ class TechModels extends ArmsModel
 	 * @return bool
 	 */
 	public function getIsPC(){
-		return $this->type->is_computer;
+		if (isset($this->attrsCache['isPC'])) return $this->attrsCache['isPC'];
+		return $this->attrsCache['isPC']=$this->type->is_computer;
 	}
 
 	/**
@@ -412,7 +414,8 @@ class TechModels extends ArmsModel
 	 * @return bool
 	 */
 	public  function getIsPhone() {
-		return $this->type->is_phone;
+		if (isset($this->attrsCache['isPhone'])) return $this->attrsCache['isPhone'];
+		return $this->attrsCache['isPhone']=$this->type->is_phone;
 	}
 	
 	/**
@@ -420,16 +423,17 @@ class TechModels extends ArmsModel
 	 * @return bool
 	 */
 	public  function getIsUps() {
-		return $this->type->is_ups;
+		if (isset($this->attrsCache['isUps'])) return $this->attrsCache['isUps'];
+		return $this->attrsCache['isUps']=$this->type->is_ups;
 	}
 	
 	/**
 	 * Возвращает признак того, что это оборудование Монитор
-	 * @param $id
 	 * @return bool
 	 */
 	public function getIsMonitor() {
-		return $this->type->is_display;
+		if (isset($this->attrsCache['isMonitor'])) return $this->attrsCache['isMonitor'];
+		return $this->attrsCache['isMonitor']=$this->type->is_display;
 	}
 	
 	
@@ -441,7 +445,7 @@ class TechModels extends ArmsModel
 		$type=is_object($model)?$model->type:null;
 		$comment_name=is_object($type)?$type->comment_name:null;
 		$comment_hint=is_object($type)?$type->comment_hint:null;
-		$typeModel=new \app\models\Techs();
+		$typeModel=new Techs();
 		return [
 			'name'=>strlen($comment_name)?
 				$comment_name:

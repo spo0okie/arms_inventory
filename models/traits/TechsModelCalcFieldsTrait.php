@@ -113,22 +113,71 @@ trait TechsModelCalcFieldsTrait
 	
 	public function getIsComputer() {
 		/** @var Techs $this */
+		if (isset($this->attrsCache['isComputer'])) return $this->attrsCache['isComputer'];
 		return $this->model->type->is_computer;
 	}
 	
 	public function getIsVoipPhone() {
 		/** @var Techs $this */
+		if (isset($this->attrsCache['isVoipPhone'])) return $this->attrsCache['isVoipPhone'];
 		return $this->model->type->is_phone;
 	}
 	
 	public function getIsUps() {
 		/** @var Techs $this */
+		if (isset($this->attrsCache['isUps'])) return $this->attrsCache['isUps'];
 		return $this->model->type->is_ups;
 	}
 	
 	public function getIsMonitor() {
 		/** @var Techs $this */
+		if (isset($this->attrsCache['isMonitor'])) return $this->attrsCache['isMonitor'];
 		return $this->model->type->is_display;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getVoipPhones()
+	{
+		if (isset($this->attrsCache['voipPhones'])) return $this->attrsCache['voipPhones'];
+		$this->attrsCache['voipPhones']=[];
+		foreach ($this->armTechs as $tech) if ($tech->isVoipPhone) $this->attrsCache['voipPhones'][]=$tech;
+		return $this->attrsCache['voipPhones'];
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getUps()
+	{
+		if (isset($this->attrsCache['ups'])) return $this->attrsCache['ups'];
+		$this->attrsCache['ups']=[];
+		foreach ($this->armTechs as $tech) if ($tech->isUps) $this->attrsCache['ups'][]=$tech;
+		return $this->attrsCache['ups'];
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getMonitors()
+	{
+		if (isset($this->attrsCache['monitors'])) return $this->attrsCache['monitors'];
+		$this->attrsCache['monitors']=[];
+		foreach ($this->armTechs as $tech) if ($tech->isMonitor) $this->attrsCache['monitors'][]=$tech;
+		return $this->attrsCache['monitors'];
+	}
+	
+	public function getArmTechsCount(){
+		return count($this->armTechs);
+	}
+	
+	public function getVoipPhonesCount(){
+		return count($this->voipPhones);
+	}
+	
+	public function getMonitorsCount(){
+		return count($this->monitors);
 	}
 	
 	public function getArchived()
@@ -140,6 +189,26 @@ trait TechsModelCalcFieldsTrait
 	public function getFormattedMac() {
 		/** @var Techs $this */
 		return Techs::formatMacs($this->mac);
+	}
+	
+	/**
+	 * Возвращает комментарий порта из шаблона модели
+	 * @param string $port
+	 * @return mixed|null
+	 */
+	public function getModelPortComment(string $port)
+	{
+		if (is_object($this->model))
+			return $this->model->getPortComment($port);
+		else
+			return null;
+	}
+	
+	
+	public function getUpdatedRenderClass(){
+		if (is_object($this->comp)) {
+			return $this->comp->updatedRenderClass;
+		} else return '';
 	}
 	
 	/**

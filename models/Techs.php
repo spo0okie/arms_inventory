@@ -53,9 +53,9 @@ use yii\db\ActiveQuery;
  * @property int $armTechsCount Количество техники в арм
  
  * @property boolean $isComputer является компьютером (исходя из модели оборудования)
- * @property boolean $isVoipPhone является компьютером (исходя из модели оборудования)
- * @property boolean $isUps является компьютером (исходя из модели оборудования)
- * @property boolean $isMonitor является компьютером (исходя из модели оборудования)
+ * @property boolean $isVoipPhone является телефоном (исходя из модели оборудования)
+ * @property boolean $isUps является UPS (исходя из модели оборудования)
+ * @property boolean $isMonitor является монитором (исходя из модели оборудования)
  * @property boolean $archived Списано
  * @property boolean $full_length Вся глубина корзины
  * @property boolean $installed_back Установлено с обратной стороны
@@ -93,6 +93,9 @@ use yii\db\ActiveQuery;
  * @property Techs[] $voipPhones
  * @property Techs[] $ups
  * @property Techs[] $monitors
+ * @property integer $monitorsCount
+ * @property integer $upsCount
+ * @property integer $voipPhonesCount
 
  * @property Departments $department
  *
@@ -153,7 +156,6 @@ class Techs extends ArmsModel
 	//private $state_cache=null;
 	private $type_cache=null;
 	private $hwList_obj=null;
-	private $voipPhones_cache=null;
 	private $ups_cache=null;
 	private $monitors_cache=null;
 	private $hwComp_cache=null;  //тот комп с которого вытаскивать железо (если основная ОС - виртуальная)
@@ -848,39 +850,6 @@ class Techs extends ArmsModel
 	}
 	
 
-	/**
-	 * @return array
-	 */
-	public function getVoipPhones()
-	{
-		if (!is_null($this->voipPhones_cache)) return $this->voipPhones_cache;
-		$this->voipPhones_cache=[];
-		foreach ($this->armTechs as $tech) if ($tech->isVoipPhone) $this->voipPhones_cache[]=$tech;
-		return $this->voipPhones_cache;
-	}
-	
-	/**
-	 * @return array
-	 */
-	public function getUps()
-	{
-		if (!is_null($this->ups_cache)) return $this->ups_cache;
-		$this->ups_cache=[];
-		foreach ($this->armTechs as $tech) if ($tech->isUps) $this->ups_cache[]=$tech;
-		return $this->ups_cache;
-	}
-	
-	/**
-	 * @return array
-	 */
-	public function getMonitors()
-	{
-		if (!is_null($this->monitors_cache)) return $this->monitors_cache;
-		$this->monitors_cache=[];
-		foreach ($this->armTechs as $tech) if ($tech->isMonitor) $this->monitors_cache[]=$tech;
-		return $this->monitors_cache;
-	}
-	
 	
 	/**
 	 * @return ActiveQuery
@@ -1174,34 +1143,7 @@ class Techs extends ArmsModel
 		return $out;
 	}
 	
-	/**
-	 * Возвращает комментарий порта из шаблона модели
-	 * @param string $port
-	 * @return mixed|null
-	 */
-	public function getModelPortComment(string $port)
-	{
-		if (is_object($this->model))
-			return $this->model->getPortComment($port);
-		else
-			return null;
-	}
-	
-	
-	public function getArmTechsCount(){
-		return count($this->armTechs);
-	}
-	
-	public function getVoipPhonesCount(){
-		return count($this->voipPhones);
-	}
-	
-	public function getUpdatedRenderClass(){
-		if (is_object($this->comp)) {
-			return $this->comp->updatedRenderClass;
-		} else return '';
-	}
-	
+
 	
 	/**
 	 * Имя для поиска

@@ -6,6 +6,7 @@
 use app\components\HistoryWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Comps;
+use app\models\HwListItem;
 use app\models\Manufacturers;
 use yii\helpers\Url;
 
@@ -17,6 +18,9 @@ $this->params['breadcrumbs'][] = $this->title;
 Url::remember();
 $manufacturers= Manufacturers::fetchNames();
 $model->swList->sortByName();
+
+$skipMonitors=is_object($model->arm)?($model->arm->monitorsCount):false;
+
 $soft=[
 	'free'=>[],
 	'ignored'=>[],
@@ -44,11 +48,6 @@ foreach ($model->swList->items as $item) {
 
 	$absorbTitle="Связать(поглотить) клона с этой ОС: недостающие свойства и связанные объекты клона перейдут к этой ОС. Сам клон будет удален";
 ?>
-<span class="float-end text-end">
-	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
-	<br />
-	<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
-</span>
 
 <div class="comps-view row">
 	<div class="col-md-6">
@@ -58,8 +57,14 @@ foreach ($model->swList->items as $item) {
 			<h4>Железо</h4>
 			<table><?php
 				foreach ($model->getHardArray() as $item) if (!$item->globIgnored()){
+					$classes=[];
+					$style='';
+					if ($item->type== HwListItem::$TYPE_MONITOR && $skipMonitors) {
+						$classes[]='archived-item';
+						$style="style='".ShowArchivedWidget::archivedDisplay(true)."'";
+					}
 					echo $this->render('/hwlist/item',
-						compact('model','item', 'manufacturers')
+						compact('model','item', 'manufacturers','classes','style')
 					);
 				} ?>
 			</table>
@@ -79,6 +84,11 @@ foreach ($model->swList->items as $item) {
 
 	</div>
 	<div class="col-md-6">
+		<span class="float-end text-end">
+			<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
+			<br />
+			<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
+		</span>
 
 		<div class="software_settings">
 			<h3>Софт</h3>

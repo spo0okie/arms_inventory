@@ -14,11 +14,13 @@ class ShowArchivedWidget extends UrlParamSwitcherWidget
 	public static $defaultParam='showArchived';
 	
 	public static function archivedClass($model,$attr='archived') {
-		return ($model->$attr)?static::$itemClass:'';
+		$archived=is_bool($model)?$model:($model->$attr);
+		return $archived?static::$itemClass:'';
 	}
 	
 	public static function archivedDisplay($model,$inverse=false,$attr='archived') {
-		return ($inverse xor $model->$attr)?'display:none;':'';
+		$archived=is_bool($model)?$model:($model->$attr);
+		return ($inverse xor $archived)?'display:none;':'';
 	}
 	
 	public static function isOn(){
