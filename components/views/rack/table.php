@@ -22,6 +22,7 @@ $height=$width*$rack->getTotalHeight()/$rack->getTotalWidth();
 $id=$rack->id;
 $labelWidth=$rack->getWidthPercent($rack->labelWidth);
 $y=0;
+$evenLabelShift=$rack->evenLabelShift;
 
 if (is_object($rack) && is_object($rack->model)) {
 	$labels=$rack->model->getExternalItem(['rack-labels'],[]);
@@ -48,6 +49,7 @@ if (is_object($rack) && is_object($rack->model)) {
 							'rack'=>$rack,
 							'models'=>$models,
 							'labels'=>$labels,
+							'evenLabelShift'=>$evenLabelShift,
 							'height'=>$rack->getHeightPercent($row['size']/$row['count']),
 							'totalHeight'=>$height
 						]);

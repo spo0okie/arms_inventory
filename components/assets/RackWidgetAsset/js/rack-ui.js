@@ -33,6 +33,7 @@ function generateRackConfFor(attr) {
     let hEnum=$('#'+attr+'_hEnumL').is(':checked')?'-1':'1';
     let priorEnum=$('#'+attr+'_priorEnumH').is(':checked')?'h':'v';
     let evenEnum=$('#'+attr+'_evenEnumB').is(':checked')?'-1':'1';
+    let evenLabelShift=$('#'+attr+'_evenLabelShift').is(':checked')?'1':'0';
     let labelPre=$('#'+attr+'_labelPre').is(':checked')?1:0;
     let labelPost=$('#'+attr+'_labelPost').is(':checked')?1:0;
     let labelWidth=$('#'+attr+'_labelWidth').val();
@@ -66,6 +67,7 @@ function generateRackConfFor(attr) {
         hEnumeration:hEnum,
         vEnumeration:vEnum,
         evenEnumeration:evenEnum,
+        evenLabelShift:evenLabelShift,
         priorEnumeration:priorEnum,
         labelPre:labelPre,
         labelPost:labelPost,

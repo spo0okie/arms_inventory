@@ -66,6 +66,7 @@ class RackWidget extends Widget
 	public $vEnumeration=1;
 	public $priorEnumeration='h';
 	public $evenEnumeration=1;
+	public $evenLabelShift=0;
 	public $labelMode='h'; //h/v - метки по горизонтали или вертикали размещаем
 	public $labelPre=false; //метка перед (слева/сверху)
 	public $labelPost=false; ////метка после (справа/снизу)
@@ -130,7 +131,6 @@ class RackWidget extends Widget
 	/**
 	 * Возвращает полное количество ячеек по колонкам или строкам
 	 * @param $cols
-	 * @param $pos
 	 * @return array
 	 */
 	public function getViewportCellsCount($cols) {

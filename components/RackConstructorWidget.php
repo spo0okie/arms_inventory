@@ -36,10 +36,10 @@ class RackConstructorWidget extends Widget
 		$layout=$this->layout=$this->attr.'_layout';
 		
 		if (is_object($this->model) && $this->model->$layout) {
-			$this->rack=new \app\components\RackWidget(json_decode($this->model->$layout,true));
+			$this->rack=new RackWidget(json_decode($this->model->$layout,true));
 		}
 		
-		$this->rackDefault=new \app\components\RackWidget(json_decode('{
+		$this->rackDefault=new RackWidget(json_decode('{
 			"cols":[
 				{"type":"void","size":"25"},
 				{"type":"units","size":550,"count":"1"},
@@ -56,6 +56,7 @@ class RackConstructorWidget extends Widget
 			"priorEnumeration":"h",
 			"labelPre":1,
 			"labelPost":1,
+			"evenLabelShift":"0",
 			"labelMode":"h",
 			"labelWidth":"50"
 		}',true));

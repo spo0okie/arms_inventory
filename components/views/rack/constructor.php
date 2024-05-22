@@ -1,12 +1,13 @@
 <?php
 
+use app\components\RackWidget;
 use yii\helpers\Html;
 
 /**
  * @var $attr string
  * @var $empty boolean
- * @var $rack \app\components\RackWidget;
- * @var $rackDefault \app\components\RackWidget;
+ * @var $rack RackWidget;
+ * @var $rackDefault RackWidget;
  
  */
 
@@ -94,6 +95,11 @@ use yii\helpers\Html;
 				<div class="form-check">
 					<?= Html::checkbox($attr.'_labelPost',$rack->labelPost,['id'=>$attr.'_labelPost','class'=>'form-check-input']) ?>
 					<?= Html::label('После места установки',$attr.'_labelPost',['class'=>'form-check-label']) ?>
+				</div>
+
+				<div class="form-check">
+					<?= Html::checkbox($attr.'_evenLabelShift',$rack->evenLabelShift,['id'=>$attr.'_evenLabelShift','class'=>'form-check-input']) ?>
+					<?= Html::label('Смещать в след ряду.',$attr.'_evenLabelShift',['class'=>'form-check-label']) ?>
 				</div>
 			</div>
 			<div class="col-md-4">

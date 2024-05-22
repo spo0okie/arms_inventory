@@ -1,8 +1,14 @@
 <?php
 
+use app\components\CollapsableCardWidget;
+use app\components\RackConstructorWidget;
+use app\helpers\FieldsHelper;
+use app\models\Manufacturers;
+use app\models\TechTypes;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\TechModels */
@@ -49,7 +55,7 @@ if (Yii::$app->request->get('return'))
 	    'validationUrl' => $model->isNewRecord?['tech-models/validate']:['tech-models/validate','id'=>$model->id],
 	    //'options' => ['enctype' => 'multipart/form-data'],
 		//Вот это вот снизу зачем интересно? видимо для вставки в качестве модального окна
-	    'action' => \yii\helpers\Url::to($formAction),
+	    'action' => Url::to($formAction),
     ]); ?>
 
     <?php
@@ -67,8 +73,8 @@ if (Yii::$app->request->get('return'))
 
     <div class="row">
         <div class="col-md-6" >
-            <?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'type_id', [
-                'data' => \app\models\TechTypes::fetchNames(),
+            <?= FieldsHelper::Select2Field($form,$model, 'type_id', [
+                'data' => TechTypes::fetchNames(),
                 'options' => [
 					'placeholder' => 'Выберите тип оборудования',
 					'onchange' => 'techSwitchDescr();'
@@ -82,8 +88,8 @@ if (Yii::$app->request->get('return'))
             ]) ?>
         </div>
         <div class="col-md-6" >
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'manufacturers_id', [
-                'data' => \app\models\Manufacturers::fetchNames(),
+			<?= FieldsHelper::Select2Field($form,$model, 'manufacturers_id', [
+                'data' => Manufacturers::fetchNames(),
                 'options' => ['placeholder' => 'Выберите производителя',],
                 //'toggleAllSettings'=>['selectLabel'=>null],
                 'pluginOptions' => [
@@ -97,16 +103,16 @@ if (Yii::$app->request->get('return'))
 
     <div class="row">
         <div class="col-md-8" >
-	        <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+	        <?= FieldsHelper::TextInputField($form,$model, 'name') ?>
         </div>
         <div class="col-md-4" >
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,'short')?>
+			<?= FieldsHelper::TextInputField($form,$model,'short')?>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-8" >
-			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment', [
+			<?= FieldsHelper::TextAutoresizeField($form,$model, 'comment', [
 				'lines' => 4,
 			]) ?>
 			<?= $form->field($model, 'individual_specs')->checkbox() ?>
@@ -129,7 +135,7 @@ if (Yii::$app->request->get('return'))
 	<?= $form->field($model, 'links')->textarea(['rows' => 3]) ?>
 
 	<div class="card p-2 mb-2 bg-secondary">
-	<?= \app\components\CollapsableCardWidget::widget([
+	<?= CollapsableCardWidget::widget([
 		'openedTitle'=>'<i class="far fa-minus-square"></i> Порты на устройстве',
 		'closedTitle'=>'<i class="far fa-plus-square"></i> Порты на устройстве',
 		'initialCollapse'=>!(bool)$model->ports,
@@ -138,11 +144,11 @@ if (Yii::$app->request->get('return'))
 	</div>
 
 	<div class="card p-2 mb-2 bg-secondary">
-		<?= \app\components\CollapsableCardWidget::widget([
+		<?= CollapsableCardWidget::widget([
 			'openedTitle'=>'<i class="far fa-minus-square"></i> Корзина спереди',
 			'closedTitle'=>'<i class="far fa-plus-square"></i> Корзина спереди',
 			'initialCollapse'=>!$model->contain_front_rack,
-			'content'=>'<div class="card-body">'.\app\components\RackConstructorWidget::widget([
+			'content'=>'<div class="card-body">'. RackConstructorWidget::widget([
 				'form'=>$form,
 				'model'=>$model,
 				'attr'=>'front_rack',
@@ -151,11 +157,11 @@ if (Yii::$app->request->get('return'))
 	</div>
 
 	<div class="card p-2 mb-2 bg-secondary">
-		<?= \app\components\CollapsableCardWidget::widget([
+		<?= CollapsableCardWidget::widget([
 			'openedTitle'=>'<i class="far fa-minus-square"></i> Корзина сзади',
 			'closedTitle'=>'<i class="far fa-plus-square"></i> Корзина сзади',
 			'initialCollapse'=>!$model->contain_back_rack,
-			'content'=>'<div class="card-body">'.\app\components\RackConstructorWidget::widget([
+			'content'=>'<div class="card-body">'. RackConstructorWidget::widget([
 					'form'=>$form,
 					'model'=>$model,
 					'attr'=>'back_rack',

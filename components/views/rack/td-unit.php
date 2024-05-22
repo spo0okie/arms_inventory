@@ -92,9 +92,24 @@ if (!$techInstalled) {
 	if (is_array($label)) $content=$label['label'];
 }
 
+//наличие метки перед юнитом
+$labelPre=($rack->front&&$rack->labelPre || !$rack->front&&$rack->labelPost);
+//наличие метки после юнита
+$labelPost=($rack->front&&$rack->labelPost || !$rack->front&&$rack->labelPre);
+//четная колонка
+$even=($col % 2)==1;
+//необходимость смещать метку в четных колонках
+$evenShift=$rack->evenLabelShift && $even;
+
+
+
 //метка слева
-if ($rack->labelMode=='h' && ($rack->front&&$rack->labelPre || !$rack->front&&$rack->labelPost))
-	echo $this->render('td-label',['rackId'=>$rack->id,'unitId'=>$unitId,'width'=>$labelWidth]);
+if ($rack->labelMode=='h') {
+	//метку слева ставим если надо слева и смещения нет, или надо справа и смещение есть
+	if ((!$evenShift && $labelPre) || ($evenShift && $labelPost))
+		echo $this->render('td-label',['rackId'=>$rack->id,'unitId'=>$unitId,'width'=>$labelWidth]);
+}
+
 $installedClass='';
 if ($content) $installedClass='rack-unit-installed';
 if (!$skip) {
@@ -130,6 +145,9 @@ if (!$skip) {
 
 <?php
 }
-if  ($rack->labelMode=='h' && ($rack->front&&$rack->labelPost || !$rack->front&&$rack->labelPre))
-	echo $this->render('td-label',['rackId'=>$rack->id,'unitId'=>$unitId,'width'=>$labelWidth]);
-	
+if  ($rack->labelMode=='h') {
+	//метку слева ставим если надо слева и смещения нет, или надо справа и смещение есть
+	if (($evenShift && $labelPre) || (!$evenShift && $labelPost))
+		echo $this->render('td-label',['rackId'=>$rack->id,'unitId'=>$unitId,'width'=>$labelWidth]);
+}
+
