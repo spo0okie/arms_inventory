@@ -7,6 +7,7 @@
  */
 
 /* @var $width */
+/* @var $height */
 /* @var $col */
 /* @var $row */
 /* @var $sectionRow */
@@ -111,7 +112,12 @@ if ($rack->labelMode=='h') {
 }
 
 $installedClass='';
-if ($content) $installedClass='rack-unit-installed';
+$style='';
+if ($content) {
+	$installedClass='rack-unit-installed';
+	//если у нас высота больше ширины в 2 раза - поворачиваем текст набок
+	if ($width<$height/2) $style='style="writing-mode:vertical-rl;';
+}
 if (!$skip) {
 ?>
 
@@ -130,6 +136,7 @@ if (!$skip) {
 	id="rack-<?= $rack->id ?>-unit-<?= $unitId ?>"
 	colspan="<?= $colspan ?>"
 	rowspan="<?= $rowspan ?>"
+	<?= $style ?>
 	<?=
 	is_object($rack->model)?
 		('href="'. Url::to(['/techs/rack-unit',

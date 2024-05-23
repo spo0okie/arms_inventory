@@ -41,10 +41,14 @@ use app\models\Techs;
 		switch ($col['type']) {
 			case 'units':
 				for ($j=0;$j<$col['count']; $j++) {
-					$width=$rack->getWidthPercent($col['size']/$col['count']-$rack->labelWidth*$rack->getLabelsCount());
+					$absWidth=$col['size']/$col['count'];
+					//если у нас горизонтально раскидываются метки, то убираем их ширину из ширины ячейки
+					if ($rack->labelMode=='h') $absWidth-=$rack->labelWidth*$rack->getLabelsCount();
+					$width=$rack->getWidthPercent($absWidth);
 					
 					echo $this->render('td-unit',[
 						'width'=>$width,
+						'height'=>$height,
 						'models'=>$models,
 						'labels'=>$labels,
 						'col'=>$x,
