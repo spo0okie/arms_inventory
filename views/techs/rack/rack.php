@@ -87,6 +87,7 @@ echo ModalAjax::widget([
 		$params['front']=true;
 		$params['front_rack']=true;
 		$params['model']=$model;
+		$params['two_sided']=$model->model->front_rack_two_sided;
 		?>
 		<span class="rack-cabinet">
 			Спереди<br />
@@ -102,6 +103,8 @@ echo ModalAjax::widget([
 		$params['front']=false;
 		$params['front_rack']=false;
 		$params['model']=$model;
+		$params['two_sided']=$model->model->back_rack_two_sided;
+		
 		?>
 		<span class="rack-cabinet">
 			Спереди<br />
@@ -117,6 +120,7 @@ echo ModalAjax::widget([
 		$params['front']=true;
 		$params['front_rack']=false;
 		$params['model']=$model;
+		$params['two_sided']=$model->model->back_rack_two_sided;
 		?>
 		<span class="rack-cabinet">
 			Сзади<br />
@@ -132,6 +136,7 @@ echo ModalAjax::widget([
 		$params['front']=false;
 		$params['front_rack']=true;
 		$params['model']=$model;
+		$params['two_sided']=$model->model->front_rack_two_sided;
 		?>
 		<span class="rack-cabinet">
 			Сзади<br />

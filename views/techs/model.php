@@ -1,8 +1,6 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
-use yii\bootstrap5\Modal;
+use app\components\UrlListWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
@@ -26,12 +24,12 @@ use yii\bootstrap5\Modal;
 	
 	<?php if ($model->model->individual_specs) { ?>
 		<h4>Спецификация:</h4>
-		<p><?= \Yii::$app->formatter->asNtext($model->specs) ?></p>
+		<p><?= Yii::$app->formatter->asNtext($model->specs) ?></p>
 		<br />
 	<?php } ?>
 
 	<h4>Ссылки:</h4>
 	<p>
-		<?= \app\components\UrlListWidget::Widget(['list'=>$model->model->links]) ?>
+		<?= UrlListWidget::Widget(['list'=>$model->model->links]) ?>
 	</p>
 </div>

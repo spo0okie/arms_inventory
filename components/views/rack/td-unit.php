@@ -118,7 +118,9 @@ if ($content) {
 	//если у нас высота больше ширины в 2 раза - поворачиваем текст набок
 	if ($width<$height/2) $style='style="writing-mode:vertical-rl;';
 }
+
 if (!$skip) {
+
 ?>
 
 
@@ -136,6 +138,7 @@ if (!$skip) {
 	id="rack-<?= $rack->id ?>-unit-<?= $unitId ?>"
 	colspan="<?= $colspan ?>"
 	rowspan="<?= $rowspan ?>"
+	data-rack-two-sided="<?= $rack->two_sided ?>"
 	<?= $style ?>
 	<?=
 	is_object($rack->model)?

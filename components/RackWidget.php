@@ -59,6 +59,7 @@ class RackWidget extends Widget
 	public $title='';
 	public $front_rack=true;	//корзина передняя (иначе задняя)
 	public $front=true;			//рендер корзины с основной стороны (задняя с обратной стороны это front=false)
+	public $two_sided=true;		//корзина двусторонняя (сквозная)
 	public $cols=[];			//ширины столбцов
 	public $rows=[];			//высоты строк
 	public $heightRatio=1;

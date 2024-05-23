@@ -13,10 +13,16 @@ $('td.rack-unit').each(function(){
     let id=$item.attr('id');
     $item
         .on('mouseover',function(){
-            rackWidgetHighlightUnit("td."+id);
+            if ($item.data('rack-two-sided'))
+                rackWidgetHighlightUnit("td."+id);
+            else
+                rackWidgetHighlightUnit($item);
         })
         .on('mouseout',function(){
-            rackWidgetUnselectUnit("td."+id);
+            if ($item.data('rack-two-sided'))
+                rackWidgetUnselectUnit("td."+id);
+            else
+                rackWidgetUnselectUnit($item);
         })
 })
 
