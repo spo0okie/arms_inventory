@@ -25,12 +25,6 @@ class TechModelsHistory extends HistoryModel
 	public static $titles='Изменения моделей оборудования';
 	
 	public $masterClass=TechModels::class;
-	
-	public $linksSchema=[
-		'type_id'=>TechTypes::class,
-		'manufacturers_id'=>Manufacturers::class,
-		'scans_id'=>Scans::class,
-	];
 
     /**
      * {@inheritdoc}

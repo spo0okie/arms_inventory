@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\models\traits\MaintenanceJobsModelCalcFieldsTrait;
 use voskobovich\linker\LinkerBehavior;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use yii\base\InvalidConfigException;
@@ -34,8 +35,10 @@ use yii\db\ActiveQuery;
 class MaintenanceJobs extends ArmsModel
 {
 
-public static $title='Регламентное обслуживание';
-public static $titles='Регламентное обслуживание';
+	use MaintenanceJobsModelCalcFieldsTrait;
+	
+	public static $title='Регламентное обслуживание';
+	public static $titles='Регламентное обслуживание';
 
     /**
      * {@inheritdoc}
@@ -44,8 +47,17 @@ public static $titles='Регламентное обслуживание';
     {
         return 'maintenance_jobs';
     }
-
-	public function behaviors()
+	
+	public $linksSchema=[
+		'services_ids'=>[Services::class,'maintenance_jobs_ids'],
+		'comps_ids'=>[Comps::class,'maintenance_jobs_ids'],
+		'techs_ids'=>[Techs::class,'maintenance_jobs_ids'],
+		'reqs_ids'=>[MaintenanceReqs::class,'jobs_ids'],
+		'services_id' => Services::class,
+		'schedules_id' => Schedules::class,
+	];
+    
+    public function behaviors()
 	{
 		return [
 			[
@@ -195,53 +207,6 @@ public static $titles='Регламентное обслуживание';
 	public function getSchedule()
 	{
 		return $this->hasOne(Schedules::class, ['id' => 'schedules_id']);
-	}
-	
-	public function getResponsible()
-	{
-		if (is_object($this->service)) return $this->service->responsibleRecursive;
-		return null;
-	}
-	
-	public function getSupport()
-	{
-		if (is_object($this->service)) return $this->service->supportRecursive;
-		return null;
-	}
-	
-	/**
-	 * Признак того, что это бэкап (удовлетворяет требованию, которое бэкап)
-	 */
-	public function getIsBackup()
-	{
-		if (!isset($this->attrsCache['isBackup'])) {
-			$this->attrsCache['isBackup']=false;
-			foreach ($this->reqs as $req) {
-				if ($req->is_backup) {
-					$this->attrsCache['isBackup']=true;
-					break;
-				}
-			}
-		}
-		return $this->attrsCache['isBackup'];
-	}
-	
-	/**
-	 * Удовлетворяет ли эта операция обслуживания требованию из аргумента
-	 * @param MaintenanceReqs $req
-	 * @return false
-	 */
-	public function satisfiesReq(MaintenanceReqs $req)
-	{
-		if (!is_array($this->reqs)) return false;	//если она не удовлетворяет ничему, то и искомому тоже не удовлетворяет
-		foreach ($this->reqs as $test) {			//если это требование перечислено явно в этой операции то успех
-			if ($req->id == $test->id) return true;
-		}
-		//явно не перечислено, тогда поищем может это требование удовлетворяется другими требованиями и они перечислены явно
-		foreach ($req->satisfiedBy() as $parent) {
-			if ($this->satisfiesReq($parent)) return true;
-		}
-		return false;
 	}
 	
 	

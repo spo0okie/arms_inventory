@@ -28,17 +28,6 @@ class SchedulesHistory extends HistoryModel
 	
 	public $masterClass=Schedules::class;
 	
-	public $linksSchema=[
-		'parent_id' => 				[Schedules::class,'children_ids'],
-		'override_id' =>			[Schedules::class,'overrides_ids'],
-		'entries_ids' =>			[SchedulesEntries::class,'schedule_id'],
-		'acls_ids' => 				[Acls::class,'schedules_id'],
-		'providing_services_ids' => [Services::class,'providing_schedule_id'],
-		'support_services_ids' => 	[Services::class,'support_schedule_id'],
-		'maintenance_jobs_ids' => 	[MaintenanceJobs::class,'schedules_id'],
-		'overrides_ids' => 			[Schedules::class,'override_id'],
-	];
-	
 	
 	/**
      * {@inheritdoc}

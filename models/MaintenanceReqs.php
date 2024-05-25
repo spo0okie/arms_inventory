@@ -51,7 +51,16 @@ class MaintenanceReqs extends ArmsModel
     {
         return 'maintenance_reqs';
     }
-	
+    
+	public $linksSchema=[
+		'services_ids'=>[Services::class,'maintenance_jobs_ids'],
+		'comps_ids'=>[Comps::class,'maintenance_jobs_ids'],
+		'techs_ids'=>[Techs::class,'maintenance_jobs_ids'],
+		'jobs_ids'=>[MaintenanceJobs::class,'reqs_ids'],
+		'includes_ids'=>[MaintenanceReqs::class,'included_ids'],
+		'included_ids'=>[MaintenanceReqs::class,'includes_ids','loader'=>'includedBy'],
+	];
+
 	public function behaviors()
 	{
 		return [

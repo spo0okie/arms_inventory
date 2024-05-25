@@ -24,6 +24,7 @@ class MaterialsTypes extends ArmsModel
 	
 	public static $title='Категория материалов';
 	public static $titles='Категории материалов';
+
     /**
      * {@inheritdoc}
      */
@@ -31,6 +32,10 @@ class MaterialsTypes extends ArmsModel
     {
         return 'materials_types';
     }
+	
+	public $linksSchema=[
+		'scans_id'=>Scans::class,
+	];
 
     /**
      * {@inheritdoc}

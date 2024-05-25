@@ -44,7 +44,7 @@ class HistoryModel extends ArmsModel
 	public const DELETED_FLAG='object_deleted';
 
 	/**
-	 * @var array[] Ссылками на объекты каких классов являются атрибуты
+	 * @return array[] Ссылками на объекты каких классов являются атрибуты
 	 * $linksSchema=[
 	 * 		'services_ids'=>[
 	 * 			Service::class,		//на какой класс ссылаемся
@@ -56,7 +56,10 @@ class HistoryModel extends ArmsModel
 	 * 		],
 	 * ];
 	 */
-	public $linksSchema=[];
+	public function getLinksSchema() {
+		if (isset($this->attrsCache['linkSchema'])) return $this->attrsCache['linkSchema'];
+		return $this->attrsCache['linkSchema']=$this->masterInstance->linksSchema;
+	}
 	
 	/**
 	 * @var string[] Обратный индекс загрузчик => атрибут со ссылками (собирается при инициализации)
@@ -393,7 +396,7 @@ class HistoryModel extends ArmsModel
 	 * @return bool
 	 */
 	public function attributeIsLink(string $attr){
-		return isset($this->linksSchema[$attr]);
+		return isset($this->getLinksSchema()[$attr]);
 	}
 	
 	/**
@@ -402,10 +405,11 @@ class HistoryModel extends ArmsModel
 	 * @return array
 	 */
 	public function attributeLinkSchema(string $attr){
-		if (isset($this->linksSchema[$attr])) {
-			return is_array($this->linksSchema[$attr])?
-				$this->linksSchema[$attr]:
-				[$this->linksSchema[$attr]];
+		$linkSchema=$this->getLinksSchema();
+		if (isset($linkSchema[$attr])) {
+			return is_array($linkSchema[$attr])?
+				$linkSchema[$attr]:
+				[$linkSchema[$attr]];
 		}
 		return [];
 	}

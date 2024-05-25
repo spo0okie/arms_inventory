@@ -24,18 +24,6 @@ class ContractsHistory extends HistoryModel
 	
 	public $masterClass=Contracts::class;
 	
-	public $linksSchema=[
-		'state_id' => ContractsStates::class,
-		'currency_id' => Currency::class,
-		'parent_id' =>		[Contracts::class,'children_ids'],
-		'partners_ids' =>	[Partners::class,'contracts_ids'],
-		'lics_ids' =>		[LicItems::class,'contracts_ids'],
-		'techs_ids' =>		[Techs::class,'contracts_ids'],
-		'services_ids' =>	[Services::class,'contracts_ids'],
-		'materials_ids' =>	[Materials::class,'contracts_ids'],
-		'users_ids' =>		[Users::class,'contracts_ids'],
-	];
-	
 
     /**
      * {@inheritdoc}

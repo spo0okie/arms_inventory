@@ -105,6 +105,10 @@ class SchedulesEntries extends ArmsModel
 		return 'schedules_entries';
 	}
 	
+	public $linksSchema=[
+		'schedule_id'=>[Schedules::class,'entries_ids','loader'=>'master']
+	];
+	
 	/**
 	 * Проверка валидности записи времени на формат ЧЧ:ММ
 	 * @param $time

@@ -49,7 +49,17 @@ class Materials extends ArmsModel
     {
         return 'materials';
     }
-
+	
+	public $linksSchema=[
+		'contracts_ids' =>	[Contracts::class,'materials_ids'],
+		'usages_ids' =>		[MaterialsUsages::class,'materials_id'],
+		'parent_id' =>		[Materials::class,'children_ids'],
+		'type_id' =>		[MaterialsTypes::class,'materials_ids'],
+		'places_id' =>		[Places::class,'materials_ids'],
+		'it_staff_id' =>	[Users::class,'materials_ids'],
+		'currency_id' =>	Currency::class
+	];
+ 
 	/**
 	 * В списке поведений прикручиваем many-to-many ссылки
 	 * @return array

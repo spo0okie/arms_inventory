@@ -50,7 +50,14 @@ class Acls extends ArmsModel
 	
 	
 	public static $emptyComment='Заполни меня';
-
+	
+	public $linksSchema=[
+		'aces_ids'=>[Aces::class,'acls_id'],
+		'schedules_id'=>[Schedules::class,'acls_ids'],
+		'services_id'=>[Services::class,'acls_ids'],
+		'comps_id'=>[Comps::class,'acls_ids'],
+		'techs_id'=>[Techs::class,'acls_ids'],
+	];
 
     /**
      * {@inheritdoc}

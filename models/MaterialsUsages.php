@@ -39,7 +39,12 @@ class MaterialsUsages extends ArmsModel
     {
         return 'materials_usages';
     }
-
+	
+	public $linksSchema=[
+		'techs_id'=>[Techs::class,'materials_usages_ids'],
+		'materials_id'=>[Materials::class,'usages_ids'],
+	];
+    
     /**
      * {@inheritdoc}
      */

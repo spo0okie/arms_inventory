@@ -27,10 +27,6 @@ class SchedulesEntriesHistory extends HistoryModel
 	
 	public $masterClass=SchedulesEntries::class;
 	
-	public $linksSchema=[
-		'schedule_id'=>[Schedules::class,'entries_ids','loader'=>'master']
-	];
-	
     /**
      * {@inheritdoc}
      */

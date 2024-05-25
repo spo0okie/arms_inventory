@@ -39,7 +39,15 @@ class Aces extends ArmsModel
 	
 	public static $noAccessName='нет доступа';
 	
-	
+	/**
+	 * {@inheritdoc}
+	 */
+	public $linksSchema=[
+		'access_types_ids' => AccessTypes::class,
+		'comps_ids' =>	[Comps::class,'aces_ids'],
+		'users_ids' =>	[Users::class,'aces_ids'],
+		'acls_id' =>	[Acls::class,'aces_ids'],
+	];
 
     /**
      * {@inheritdoc}

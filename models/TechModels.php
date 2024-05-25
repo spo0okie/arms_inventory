@@ -51,6 +51,12 @@ class TechModels extends ArmsModel
 	private static $all_items=null;
 	private static $names_cache=null;
 	
+	public $linksSchema=[
+		'type_id'=>TechTypes::class,
+		'manufacturers_id'=>Manufacturers::class,
+		'scans_id'=>Scans::class,
+	];
+	
 	/** @inheritdoc   */
 	protected static $syncableFields=[
 		'name',

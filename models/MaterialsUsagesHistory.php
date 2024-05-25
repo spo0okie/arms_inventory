@@ -32,11 +32,6 @@ class MaterialsUsagesHistory extends HistoryModel
 	public static $titles='Изменения расходов материалов';
 	
 	public $masterClass=MaterialsUsages::class;
-	
-	public $linksSchema=[
-		'techs_id'=>[Techs::class,'materials_usages_ids'],
-		'materials_id'=>[Materials::class,'usages_ids'],
-	];
 
     /**
      * {@inheritdoc}

@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\traits\MaintenanceJobsModelCalcFieldsTrait;
+
 /**
  * This is the model class for table "maintenance_reqs_history".
  *
@@ -24,20 +26,12 @@ namespace app\models;
  */
 class MaintenanceJobsHistory extends HistoryModel
 {
-
+	use MaintenanceJobsModelCalcFieldsTrait;
+	
 	public static $title='Изменения регламентного обслуживания';
 	public static $titles='Изменения регламентного обслуживания';
 	
 	public $masterClass=MaintenanceJobs::class;
-	
-	public $linksSchema=[
-		'services_ids'=>[Services::class,'maintenance_jobs_ids'],
-		'comps_ids'=>[Comps::class,'maintenance_jobs_ids'],
-		'techs_ids'=>[Techs::class,'maintenance_jobs_ids'],
-		'reqs_ids'=>[MaintenanceReqs::class,'jobs_ids'],
-		'services_id' => Services::class,
-		'schedules_id' => Schedules::class,
-	];
 
     /**
      * {@inheritdoc}

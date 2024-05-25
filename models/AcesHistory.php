@@ -29,17 +29,6 @@ class AcesHistory extends HistoryModel
 	public $masterClass=Aces::class;
 	
 	/**
-	 * {@inheritdoc}
-	 */
-	public $linksSchema=[
-		'access_types_ids' => AccessTypes::class,
-		'comps_ids' =>	[Comps::class,'aces_ids'],
-		'users_ids' =>	[Users::class,'aces_ids'],
-		'acls_id' =>	[Acls::class,'aces_ids'],
-	];
-	
-	
-	/**
      * {@inheritdoc}
      */
     public static function tableName()

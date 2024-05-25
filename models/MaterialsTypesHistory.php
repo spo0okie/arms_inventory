@@ -29,10 +29,6 @@ class MaterialsTypesHistory extends HistoryModel
 	public static $titles='Изменения категорий материалов';
 	
 	public $masterClass=MaterialsTypes::class;
-	
-	public $linksSchema=[
-		'scans_id'=>Scans::class,
-	];
 
     /**
      * {@inheritdoc}
