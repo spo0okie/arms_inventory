@@ -14,8 +14,8 @@ class M240129130314HistoryJournalsTechs extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->addColumnIfNotExist('techs','updated_at',$this->timestamp());
-		$this->addColumnIfNotExist('techs','updated_by',$this->string(32));
+		$this->addColumnIfNotExists('techs','updated_at',$this->timestamp());
+		$this->addColumnIfNotExists('techs','updated_by',$this->string(32));
 		
 		$this->createTable('techs_history',[
 			'id'=>$this->primaryKey(),
@@ -118,7 +118,7 @@ class M240129130314HistoryJournalsTechs extends ArmsMigration
      */
     public function safeDown()
     {
-        $this->dropColumnIfExist('techs','updated_by');
+        $this->dropColumnIfExists('techs','updated_by');
 	
 		$this->dropTable('techs_history');
 		$this->dropTable('tech_models_history');

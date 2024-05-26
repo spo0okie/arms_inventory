@@ -14,19 +14,19 @@ class M240225074103HistoryJournalsAcls extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->addColumnIfNotExist('aces','updated_at',$this->timestamp(),true);
-		$this->addColumnIfNotExist('aces','updated_by',$this->string(32),true);
+		$this->addColumnIfNotExists('aces','updated_at',$this->timestamp(),true);
+		$this->addColumnIfNotExists('aces','updated_by',$this->string(32),true);
 	
-		$this->addColumnIfNotExist('acls','updated_at',$this->timestamp(),true);
-		$this->addColumnIfNotExist('acls','updated_by',$this->string(32),true);
+		$this->addColumnIfNotExists('acls','updated_at',$this->timestamp(),true);
+		$this->addColumnIfNotExists('acls','updated_by',$this->string(32),true);
 	
-		$this->addColumnIfNotExist('schedules','updated_at',$this->timestamp(),true);
-		$this->addColumnIfNotExist('schedules','updated_by',$this->string(32),true);
-		$this->dropColumnIfExist('schedules','created_at');
+		$this->addColumnIfNotExists('schedules','updated_at',$this->timestamp(),true);
+		$this->addColumnIfNotExists('schedules','updated_by',$this->string(32),true);
+		$this->dropColumnIfExists('schedules','created_at');
 	
-		$this->addColumnIfNotExist('schedules_entries','updated_at',$this->timestamp(),true);
-		$this->addColumnIfNotExist('schedules_entries','updated_by',$this->string(32),true);
-		$this->dropColumnIfExist('schedules_entries','created_at');
+		$this->addColumnIfNotExists('schedules_entries','updated_at',$this->timestamp(),true);
+		$this->addColumnIfNotExists('schedules_entries','updated_by',$this->string(32),true);
+		$this->dropColumnIfExists('schedules_entries','created_at');
 	
 		$this->createTable('aces_history',[
 			'id'=>$this->primaryKey(),
@@ -123,12 +123,12 @@ class M240225074103HistoryJournalsAcls extends ArmsMigration
 		$this->createIndex('schedules_history-updated_at','schedules_history','updated_at');
 		$this->createIndex('schedules_history-updated_by','schedules_history','updated_by');
 	
-		$this->addColumnIfNotExist('services_history','acls_ids',$this->text());
-		$this->addColumnIfNotExist('services_history','maintenance_jobs_ids',$this->text());
+		$this->addColumnIfNotExists('services_history','acls_ids',$this->text());
+		$this->addColumnIfNotExists('services_history','maintenance_jobs_ids',$this->text());
 
-		$this->addColumnIfNotExist('techs_history','acls_ids',$this->text());
-		$this->addColumnIfNotExist('techs_history','maintenance_jobs_ids',$this->text());
-		$this->addColumnIfNotExist('techs_history','archived',$this->boolean());
+		$this->addColumnIfNotExists('techs_history','acls_ids',$this->text());
+		$this->addColumnIfNotExists('techs_history','maintenance_jobs_ids',$this->text());
+		$this->addColumnIfNotExists('techs_history','archived',$this->boolean());
 	}
 
     /**
@@ -136,16 +136,16 @@ class M240225074103HistoryJournalsAcls extends ArmsMigration
      */
     public function safeDown()
     {
-		$this->dropColumnIfExist('services_history','acls_ids');
-		$this->dropColumnIfExist('services_history','maintenance_jobs_ids');
-		$this->dropColumnIfExist('techs_history','acls_ids');
-		$this->dropColumnIfExist('techs_history','archived');
-		$this->dropColumnIfExist('techs_history','maintenance_jobs_ids');
+		$this->dropColumnIfExists('services_history','acls_ids');
+		$this->dropColumnIfExists('services_history','maintenance_jobs_ids');
+		$this->dropColumnIfExists('techs_history','acls_ids');
+		$this->dropColumnIfExists('techs_history','archived');
+		$this->dropColumnIfExists('techs_history','maintenance_jobs_ids');
 
-		$this->dropColumnIfExist('aces','updated_at');
-		$this->dropColumnIfExist('aces','updated_by');
-		$this->dropColumnIfExist('acls','updated_at');
-		$this->dropColumnIfExist('acls','updated_by');
+		$this->dropColumnIfExists('aces','updated_at');
+		$this->dropColumnIfExists('aces','updated_by');
+		$this->dropColumnIfExists('acls','updated_at');
+		$this->dropColumnIfExists('acls','updated_by');
 	
 		$this->dropTable('aces_history');
 		$this->dropTable('acls_history');

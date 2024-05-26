@@ -60,12 +60,12 @@ class m230821_160259_init_empty_tables extends ArmsMigration
 	
 		$this->alterColumn('users','Login',$this->string(32));
 		
-		$this->addColumnIfNotExist('manufacturers_dict','updated_at',$this->timestamp());
-		$this->addColumnIfNotExist('manufacturers_dict','updated_by',$this->string(32));
-		$this->dropFkIfExist('manufacturers','manufacturers_dict');
+		$this->addColumnIfNotExists('manufacturers_dict','updated_at',$this->timestamp());
+		$this->addColumnIfNotExists('manufacturers_dict','updated_by',$this->string(32));
+		$this->dropFkIfExists('manufacturers','manufacturers_dict');
 	
 		$this->renameColumn('manufacturers','created_at','updated_at');
-		$this->addColumnIfNotExist('manufacturers','updated_by',$this->string(32));
+		$this->addColumnIfNotExists('manufacturers','updated_by',$this->string(32));
     }
 
     /**
@@ -75,11 +75,11 @@ class m230821_160259_init_empty_tables extends ArmsMigration
     {
 		$this->alterColumn('users','Login',$this->string(255));
 	
-		$this->dropColumnIfExist('manufacturers_dict','updated_at');
-		$this->dropColumnIfExist('manufacturers_dict','updated_by');
+		$this->dropColumnIfExists('manufacturers_dict','updated_at');
+		$this->dropColumnIfExists('manufacturers_dict','updated_by');
 	
 		$this->renameColumn('manufacturers','updated_at','created_at');
-		$this->dropColumnIfExist('manufacturers','updated_by');
+		$this->dropColumnIfExists('manufacturers','updated_by');
     }
 
     /*

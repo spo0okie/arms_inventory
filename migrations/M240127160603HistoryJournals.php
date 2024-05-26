@@ -25,10 +25,10 @@ class M240127160603HistoryJournals extends ArmsMigration
 		$this->alterColumn('maintenance_jobs','updated_at',$this->timestamp());
 		$this->alterColumn('maintenance_jobs_history','updated_at',$this->timestamp());
 		
-		$this->addColumnIfNotExist('maintenance_reqs_history','is_backup',$this->boolean());
+		$this->addColumnIfNotExists('maintenance_reqs_history','is_backup',$this->boolean());
 	
-		$this->addColumnIfNotExist('services','updated_at',$this->timestamp());
-		$this->addColumnIfNotExist('services','updated_by',$this->string(32));
+		$this->addColumnIfNotExists('services','updated_at',$this->timestamp());
+		$this->addColumnIfNotExists('services','updated_by',$this->string(32));
 		
 		$this->createTable('services_history',[
 			'id'=>$this->primaryKey(),
@@ -90,8 +90,8 @@ class M240127160603HistoryJournals extends ArmsMigration
     {
         $this->dropTable('services_history');
 
-		$this->dropColumnIfExist('services','updated_at');
-		$this->dropColumnIfExist('services','updated_by');
+		$this->dropColumnIfExists('services','updated_at');
+		$this->dropColumnIfExists('services','updated_by');
     }
 
     /*

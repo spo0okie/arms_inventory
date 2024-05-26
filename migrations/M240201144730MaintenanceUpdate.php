@@ -14,12 +14,12 @@ class M240201144730MaintenanceUpdate extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->addColumnIfNotExist('maintenance_reqs','archived',$this->boolean(),true);
-		$this->addColumnIfNotExist('maintenance_reqs_history','archived',$this->boolean());
-		$this->addColumnIfNotExist('maintenance_jobs','archived',$this->boolean(),true);
-		$this->addColumnIfNotExist('maintenance_jobs_history','archived',$this->boolean());
-		$this->addColumnIfNotExist('attaches','maintenance_reqs_id',$this->integer(),true);
-		$this->addColumnIfNotExist('attaches','maintenance_jobs_id',$this->integer(),true);
+		$this->addColumnIfNotExists('maintenance_reqs','archived',$this->boolean(),true);
+		$this->addColumnIfNotExists('maintenance_reqs_history','archived',$this->boolean());
+		$this->addColumnIfNotExists('maintenance_jobs','archived',$this->boolean(),true);
+		$this->addColumnIfNotExists('maintenance_jobs_history','archived',$this->boolean());
+		$this->addColumnIfNotExists('attaches','maintenance_reqs_id',$this->integer(),true);
+		$this->addColumnIfNotExists('attaches','maintenance_jobs_id',$this->integer(),true);
     }
 
     /**
@@ -27,12 +27,12 @@ class M240201144730MaintenanceUpdate extends ArmsMigration
      */
     public function safeDown()
     {
-		$this->dropColumnIfExist('maintenance_reqs','archived');
-		$this->dropColumnIfExist('maintenance_reqs_history','archived');
-		$this->dropColumnIfExist('maintenance_jobs','archived');
-		$this->dropColumnIfExist('maintenance_jobs_history','archived');
-		$this->dropColumnIfExist('attaches','maintenance_reqs_id');
-		$this->dropColumnIfExist('attaches','maintenance_jobs_id');
+		$this->dropColumnIfExists('maintenance_reqs','archived');
+		$this->dropColumnIfExists('maintenance_reqs_history','archived');
+		$this->dropColumnIfExists('maintenance_jobs','archived');
+		$this->dropColumnIfExists('maintenance_jobs_history','archived');
+		$this->dropColumnIfExists('attaches','maintenance_reqs_id');
+		$this->dropColumnIfExists('attaches','maintenance_jobs_id');
     }
 
     /*

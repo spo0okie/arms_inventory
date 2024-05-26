@@ -14,16 +14,16 @@ class M240123153514UpdateTableDocs extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->addColumnIfNotExist('contracts_states','paid',$this->boolean()->defaultValue(0),true);
-		$this->addColumnIfNotExist('contracts_states','unpaid',$this->boolean()->defaultValue(0),true);
+		$this->addColumnIfNotExists('contracts_states','paid',$this->boolean()->defaultValue(0),true);
+		$this->addColumnIfNotExists('contracts_states','unpaid',$this->boolean()->defaultValue(0),true);
 		$this->execute('update contracts_states set paid=1 where `code` like "state_payed%"');
 		$this->execute('update contracts_states set unpaid=1 where `code` like "state_paywait_%"');
 		$this->execute('update contracts_states set unpaid=1 where `code` = "state_payed_partial"');
 	
-		$this->addColumnIfNotExist('contracts','pay_id',$this->string(),true);
-		$this->addColumnIfNotExist('contracts','techs_delivery',$this->integer(),true);
-		$this->addColumnIfNotExist('contracts','materials_delivery',$this->integer(),true);
-		$this->addColumnIfNotExist('contracts','lics_delivery',$this->integer(),true);
+		$this->addColumnIfNotExists('contracts','pay_id',$this->string(),true);
+		$this->addColumnIfNotExists('contracts','techs_delivery',$this->integer(),true);
+		$this->addColumnIfNotExists('contracts','materials_delivery',$this->integer(),true);
+		$this->addColumnIfNotExists('contracts','lics_delivery',$this->integer(),true);
 		
     }
 
@@ -32,13 +32,13 @@ class M240123153514UpdateTableDocs extends ArmsMigration
      */
     public function safeDown()
     {
-		$this->dropColumnIfExist('contracts_states','paid');
-		$this->dropColumnIfExist('contracts_states','unpaid');
+		$this->dropColumnIfExists('contracts_states','paid');
+		$this->dropColumnIfExists('contracts_states','unpaid');
 
-		$this->dropColumnIfExist('contracts','pay_id');
-		$this->dropColumnIfExist('contracts','techs_delivery');
-		$this->dropColumnIfExist('contracts','materials_delivery');
-		$this->dropColumnIfExist('contracts','lics_delivery');
+		$this->dropColumnIfExists('contracts','pay_id');
+		$this->dropColumnIfExists('contracts','techs_delivery');
+		$this->dropColumnIfExists('contracts','materials_delivery');
+		$this->dropColumnIfExists('contracts','lics_delivery');
     }
 
     /*

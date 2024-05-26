@@ -15,8 +15,8 @@ class M240328034135CompsHistory extends ArmsMigration
 	 */
 	public function safeUp()
 	{
-		$this->addColumnIfNotExist('comps','updated_at',$this->timestamp(),true);
-		$this->addColumnIfNotExist('comps','updated_by',$this->string(32),true);
+		$this->addColumnIfNotExists('comps','updated_at',$this->timestamp(),true);
+		$this->addColumnIfNotExists('comps','updated_by',$this->string(32),true);
 		
 		$this->createTable('comps_history',[
 			'id'=>$this->primaryKey(),
@@ -60,7 +60,7 @@ class M240328034135CompsHistory extends ArmsMigration
 	 */
 	public function safeDown()
 	{
-		$this->dropColumnIfExist('comps','updated_by');
+		$this->dropColumnIfExists('comps','updated_by');
 		$this->dropTable('comps_history');
 	}
 	

@@ -42,10 +42,10 @@ class m210228_121450_table_ports extends ArmsMigration
     public function safeDown()
     {
 		if (!is_null($table=$this->db->getTableSchema('{{%ports}}'))) {
-			$this->dropFkIfExist('fk-ports_tech',		'ports');
-			$this->dropFkIfExist('fk-ports_link_tech',	'ports');
-			$this->dropFkIfExist('fk-ports_link_arms',	'ports');
-			$this->dropFkIfExist('fk-ports_link_port',	'ports');
+			$this->dropFkIfExists('fk-ports_tech',		'ports');
+			$this->dropFkIfExists('fk-ports_link_tech',	'ports');
+			$this->dropFkIfExists('fk-ports_link_arms',	'ports');
+			$this->dropFkIfExists('fk-ports_link_port',	'ports');
 			$this->dropTable('{{%ports}}');
 		}
     }

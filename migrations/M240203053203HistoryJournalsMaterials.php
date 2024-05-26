@@ -14,14 +14,14 @@ class M240203053203HistoryJournalsMaterials extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->addColumnIfNotExist('materials','updated_at',$this->timestamp(),true);
-		$this->addColumnIfNotExist('materials','updated_by',$this->string(32),true);
-		$this->addColumnIfNotExist('materials_types','updated_at',$this->timestamp(),true);
-		$this->addColumnIfNotExist('materials_types','updated_by',$this->string(32),true);
-		$this->addColumnIfNotExist('materials_usages','updated_at',$this->timestamp(),true);
-		$this->addColumnIfNotExist('materials_usages','updated_by',$this->string(32),true);
-		$this->addColumnIfNotExist('techs_history','materials_usages_ids',$this->text());
-		$this->dropColumnIfExist('materials_usages','arms_id');
+		$this->addColumnIfNotExists('materials','updated_at',$this->timestamp(),true);
+		$this->addColumnIfNotExists('materials','updated_by',$this->string(32),true);
+		$this->addColumnIfNotExists('materials_types','updated_at',$this->timestamp(),true);
+		$this->addColumnIfNotExists('materials_types','updated_by',$this->string(32),true);
+		$this->addColumnIfNotExists('materials_usages','updated_at',$this->timestamp(),true);
+		$this->addColumnIfNotExists('materials_usages','updated_by',$this->string(32),true);
+		$this->addColumnIfNotExists('techs_history','materials_usages_ids',$this->text());
+		$this->dropColumnIfExists('materials_usages','arms_id');
 		
 		$this->createTable('materials_types_history',[
 			'id'=>$this->primaryKey(),
@@ -96,14 +96,14 @@ class M240203053203HistoryJournalsMaterials extends ArmsMigration
 		$this->dropTable('materials_history');
 		$this->dropTable('materials_types_history');
 		$this->dropTable('materials_usages_history');
-		$this->dropColumnIfExist('materials','updated_at');
-		$this->dropColumnIfExist('materials','updated_by');
-		$this->dropColumnIfExist('materials_types','updated_at');
-		$this->dropColumnIfExist('materials_types','updated_by');
-		$this->dropColumnIfExist('materials_usages','updated_at');
-		$this->dropColumnIfExist('materials_usages','updated_by');
-		$this->dropColumnIfExist('techs_history','materials_usages_ids');
-		$this->addColumnIfNotExist('materials_usages','arms_id',$this->integer(),true);
+		$this->dropColumnIfExists('materials','updated_at');
+		$this->dropColumnIfExists('materials','updated_by');
+		$this->dropColumnIfExists('materials_types','updated_at');
+		$this->dropColumnIfExists('materials_types','updated_by');
+		$this->dropColumnIfExists('materials_usages','updated_at');
+		$this->dropColumnIfExists('materials_usages','updated_by');
+		$this->dropColumnIfExists('techs_history','materials_usages_ids');
+		$this->addColumnIfNotExists('materials_usages','arms_id',$this->integer(),true);
     }
 
     /*

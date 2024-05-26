@@ -14,8 +14,8 @@ class M240125162320UpdateTableTechs extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->addColumnIfNotExist('techs','domain_id',$this->integer(),true);
-		$this->addColumnIfNotExist('techs','hostname',$this->string(128),true);
+		$this->addColumnIfNotExists('techs','domain_id',$this->integer(),true);
+		$this->addColumnIfNotExists('techs','hostname',$this->string(128),true);
     }
 
     /**
@@ -23,8 +23,8 @@ class M240125162320UpdateTableTechs extends ArmsMigration
      */
     public function safeDown()
     {
-		$this->dropColumnIfExist('techs','domain_id');
-		$this->dropColumnIfExist('techs','hostname');
+		$this->dropColumnIfExists('techs','domain_id');
+		$this->dropColumnIfExists('techs','hostname');
     }
 
     /*

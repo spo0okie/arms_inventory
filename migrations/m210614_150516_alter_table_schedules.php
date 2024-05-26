@@ -12,8 +12,8 @@ class m210614_150516_alter_table_schedules extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->addColumnIfNotExist('schedules','parent_id',$this->integer()->Null(),true);
-		$this->addColumnIfNotExist('schedules','history',$this->text());
+		$this->addColumnIfNotExists('schedules','parent_id',$this->integer()->Null(),true);
+		$this->addColumnIfNotExists('schedules','history',$this->text());
     }
 
     /**
@@ -21,8 +21,8 @@ class m210614_150516_alter_table_schedules extends ArmsMigration
      */
     public function safeDown()
     {
-		$this->dropColumnIfExist('schedules','parent_id');
-		$this->dropColumnIfExist('schedules','history');
+		$this->dropColumnIfExists('schedules','parent_id');
+		$this->dropColumnIfExists('schedules','history');
     }
 
     /*

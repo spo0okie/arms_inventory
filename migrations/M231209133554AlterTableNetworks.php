@@ -16,10 +16,10 @@ class M231209133554AlterTableNetworks extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->addColumnIfNotExist('networks','archived',$this->boolean(),true);
-		$this->addColumnIfNotExist('networks','links',$this->text());
-		$this->addColumnIfNotExist('networks','ranges',$this->text());
-		$this->addColumnIfNotExist('networks','text_dhcp',$this->text());
+		$this->addColumnIfNotExists('networks','archived',$this->boolean(),true);
+		$this->addColumnIfNotExists('networks','links',$this->text());
+		$this->addColumnIfNotExists('networks','ranges',$this->text());
+		$this->addColumnIfNotExists('networks','text_dhcp',$this->text());
 	
 		$query=new Query();
 		$networks=$query->select('*')->from('networks')->all();
@@ -40,10 +40,10 @@ class M231209133554AlterTableNetworks extends ArmsMigration
      */
     public function safeDown()
     {
-		$this->dropColumnIfExist('networks','archived');
-		$this->dropColumnIfExist('networks','links');
-		$this->dropColumnIfExist('networks','ranges');
-		$this->dropColumnIfExist('networks','text_dhcp');
+		$this->dropColumnIfExists('networks','archived');
+		$this->dropColumnIfExists('networks','links');
+		$this->dropColumnIfExists('networks','ranges');
+		$this->dropColumnIfExists('networks','text_dhcp');
     }
 
     /*

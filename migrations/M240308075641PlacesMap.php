@@ -14,8 +14,8 @@ class M240308075641PlacesMap extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->addColumnIfNotExist('places','map',$this->text());
-		$this->addColumnIfNotExist('places','map_id',$this->integer());
+		$this->addColumnIfNotExists('places','map',$this->text());
+		$this->addColumnIfNotExists('places','map_id',$this->integer());
     }
 
     /**
@@ -23,8 +23,8 @@ class M240308075641PlacesMap extends ArmsMigration
      */
     public function safeDown()
     {
-		$this->dropColumnIfExist('places','map');
-		$this->dropColumnIfExist('places','map_id');
+		$this->dropColumnIfExists('places','map');
+		$this->dropColumnIfExists('places','map_id');
     }
 
     /*

@@ -13,18 +13,18 @@ class m220630_173032_alter_tables_prov_tel extends ArmsMigration
     public function safeUp()
     {
         
-        $this->dropFkIfExist('org_inet_ibfk_2','org_inet');
-		$this->dropColumnIfExist('org_inet','prov_tel_id');
-		$this->dropColumnIfExist('org_inet','contracts_id');
+        $this->dropFkIfExists('org_inet_ibfk_2','org_inet');
+		$this->dropColumnIfExists('org_inet','prov_tel_id');
+		$this->dropColumnIfExists('org_inet','contracts_id');
 
         $this->createIndex('services_id','org_inet','services_id');
 		$this->createIndex('networks_id','org_inet','networks_id');
 
-		$this->dropFkIfExist('org_phones_ibfk_1','org_phones');
-		$this->dropFkIfExist('org_phones_ibfk_3','org_phones');
+		$this->dropFkIfExists('org_phones_ibfk_1','org_phones');
+		$this->dropFkIfExists('org_phones_ibfk_3','org_phones');
     
-		$this->dropColumnIfExist('org_phones','prov_tel_id');
-		$this->dropColumnIfExist('org_phones','contracts_id');
+		$this->dropColumnIfExists('org_phones','prov_tel_id');
+		$this->dropColumnIfExists('org_phones','contracts_id');
 	
 		$this->createIndex('services_id','org_phones','services_id');
 
@@ -41,10 +41,10 @@ class m220630_173032_alter_tables_prov_tel extends ArmsMigration
      */
     public function safeDown()
     {
-		$this->addColumnIfNotExist('org_inet','prov_tel_id',$this->integer());
-		$this->addColumnIfNotExist('org_inet','contracts_id',$this->integer());
-		$this->addColumnIfNotExist('org_phones','prov_tel_id',$this->integer());
-		$this->addColumnIfNotExist('org_phones','contracts_id',$this->integer());
+		$this->addColumnIfNotExists('org_inet','prov_tel_id',$this->integer());
+		$this->addColumnIfNotExists('org_inet','contracts_id',$this->integer());
+		$this->addColumnIfNotExists('org_phones','prov_tel_id',$this->integer());
+		$this->addColumnIfNotExists('org_phones','contracts_id',$this->integer());
 	
 		if (is_null($this->db->getTableSchema('prov_tel'))) {
 			$this->execute(<<<SQL

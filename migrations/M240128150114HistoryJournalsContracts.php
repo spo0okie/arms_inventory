@@ -14,8 +14,8 @@ class M240128150114HistoryJournalsContracts extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->addColumnIfNotExist('contracts','updated_at',$this->timestamp());
-		$this->addColumnIfNotExist('contracts','updated_by',$this->string(32));
+		$this->addColumnIfNotExists('contracts','updated_at',$this->timestamp());
+		$this->addColumnIfNotExists('contracts','updated_by',$this->string(32));
   
 		$this->createTable('contracts_history',[
 			'id'=>$this->primaryKey(),
@@ -65,8 +65,8 @@ class M240128150114HistoryJournalsContracts extends ArmsMigration
     public function safeDown()
     {
         $this->dropTable('contracts_history');
-		$this->dropColumnIfExist('contracts','updated_at');
-		$this->dropColumnIfExist('contracts','updated_by');
+		$this->dropColumnIfExists('contracts','updated_at');
+		$this->dropColumnIfExists('contracts','updated_by');
     }
 
     /*
