@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
-use app\helpers\StringHelper;
 use yii\db\ActiveRecord;
 
 /**
@@ -388,69 +387,6 @@ class HistoryModel extends ArmsModel
 		
 		return in_array($attr,$this->changedAttributes);
 	}
-
-	/**
-	 * Является ли аттрибут ссылкой
-	 * в linksClasses должно быть проставлено на какой класс ссылка
-	 * @param string $attr
-	 * @return bool
-	 */
-	public function attributeIsLink(string $attr){
-		return isset($this->getLinksSchema()[$attr]);
-	}
-	
-	/**
-	 * Схема атрибута ссылки
-	 * @param string $attr
-	 * @return array
-	 */
-	public function attributeLinkSchema(string $attr){
-		$linkSchema=$this->getLinksSchema();
-		if (isset($linkSchema[$attr])) {
-			return is_array($linkSchema[$attr])?
-				$linkSchema[$attr]:
-				[$linkSchema[$attr]];
-		}
-		return [];
-	}
-	
-	/**
-	 * На какой класс ссылается аттрибут
-	 * @param string $attr аттрибут
-	 * @return string
-	 */
-	public function attributeLinkClass(string $attr) {
-		return $this->attributeLinkSchema($attr)[0];	//первым элементом всегда идет класс
-	}
-	
-	/**
-	 * Какой атрибут объекта-ссылки ссылается обратно на нас
-	 * @param string $attr
-	 * @return array|false|mixed
-	 */
-	public function attributeReverseLink(string $attr) {
-		$schema=$this->attributeLinkSchema($attr);
-		if (isset($schema[1])) return $schema[1]; //вторым элементом всегда идет обратная ссылка
-		if (isset($schema['reverseLink'])) return $schema['reverseLink']; //либо так
-		return false;
-	}
-	
-	/**
-	 * Как называется getter в мастер классе, который загружает объекты-ссылки
-	 * @param string $attr
-	 * @return string|false
-	 */
-	public function attributeLinkLoader(string $attr) {
-		if (!$this->attributeIsLink($attr)) return false;
-		
-		$schema=$this->attributeLinkSchema($attr);
-		if (isset($schema['loader'])) return $schema['loader']; //если указан то и славно
-		
-		if ($loader=StringHelper::linkId2Getter($attr)) return $loader;
-		
-		return false;
-	}
-	
 	
 	/**
 	 * Атрибут является ссылкой на объект, который журналирует обратную ссылку на этот объект.

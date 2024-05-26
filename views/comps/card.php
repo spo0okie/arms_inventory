@@ -1,5 +1,6 @@
 <?php
 
+use app\components\IsArchivedObjectWidget;
 use app\components\IsHistoryObjectWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
@@ -22,6 +23,18 @@ if (is_object($model->domain))
 else
 	$domain='- ошибочный домен -';
 
+$rcIcon=Html::tag('i','',['class'=>"fas fa-sign-in-alt"]);
+$remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible)?
+	Html::tag('span',$rcIcon,[
+		'class'=>'text-muted',
+		'qtip_ttip'=>'Сетевой доступ к ОС/ВМ отсутствует, т.к. она находится в изолированном окружении/песочнице',
+		'qtip_side'=>'bottom',
+	]):
+	Html::a($rcIcon,'remotecontrol://'.$model->fqdn,[
+		'qtip_ttip'=>'Удаленное управление {$model->fqdn}',
+		'qtip_side'=>'bottom',
+	]);
+
 if (!mb_strlen($domain))
 	$domain='- не в домене -';
 	
@@ -31,13 +44,14 @@ if (!mb_strlen($domain))
 		<span class="unit-status <?= $model->updatedRenderClass ?> href" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()"><?= $model->updatedText ?></span>
 		<br />
 	<?php } ?>
+	<?= IsArchivedObjectWidget::widget(['model'=>$model]) ?>
 
 <h1>
 	<span class="small"><?= $domain ?>\</span><?=
 		LinkObjectWidget::widget([
 			'model'=>$model,
 			'name'=>$model->renderName(),
-			'nameSuffix'=>Html::a("<i class=\"fas fa-sign-in-alt\" title='Удаленное управление {$model->fqdn}' ></i>",'remotecontrol://'.$model->fqdn),
+			'nameSuffix'=>$remoteControl,
 			'hideUndeletable'=>false,
 		])
 	?>

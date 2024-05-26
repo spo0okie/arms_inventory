@@ -44,7 +44,8 @@ trait AttributeDataModelTrait
 	public function attributeIsInheritable($attr) {
 		return $this->getAttributeData($attr)['is_inheritable']??false;
 	}
-	
+
+
 	public function attributeData() {
 		return [];
 	}
@@ -89,6 +90,7 @@ trait AttributeDataModelTrait
 				return $data[0];
 			elseif (isset($data['label']))	//либо под конкретным индексом
 				return $data['label'];
+			else return null;
 		}
 		return $data;
 	}
@@ -105,6 +107,19 @@ trait AttributeDataModelTrait
 				$data = $this->getAttributeData($key);
 				if ($label = $this->fetchAttributeLabel($data)) {
 					$this->attributeLabelsCache[$key] = $label;
+				}
+			}
+			foreach ($this->getLinksSchema() as $key=>$data) {
+				if (isset($this->attributeLabelsCache[$key])) continue;
+				$class=$this->attributeLinkClass($key);
+				if (substr($key,strlen($key)-3)=='_id') {
+					if (property_exists($class,'title'))
+						$this->attributeLabelsCache[$key] = $class::$title;
+				}
+				
+				if (substr($key,strlen($key)-4)=='_ids') {
+					if (property_exists($class,'titles'))
+						$this->attributeLabelsCache[$key] = $class::$titles;
 				}
 			}
 		}

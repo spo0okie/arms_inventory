@@ -12,22 +12,19 @@ use app\models\traits\CompsModelCalcFieldsTrait;
  * @property string|null $name
  * @property string|null $description
  * @property string|null $links
- * @property string|null $services_ids
- * @property string|null $comps_ids
- * @property string|null $techs_ids
  * @property string|null $updated_at
  * @property string|null $updated_by
  * @property string|null $updated_comment
  * @property string sname
  */
-class CompsHistory extends HistoryModel
+class SandboxesHistory extends HistoryModel
 {
 	use CompsModelCalcFieldsTrait;
 	
-	public static $title='Изменения ОС/ВМ';
-	public static $titles='Изменения ОС/ВМ';
+	public static $title='Изменения Окружения/Песочницы';
+	public static $titles='Изменения Окружений/Песочниц';
 	
-	public $masterClass=Comps::class;
+	public $masterClass=Sandboxes::class;
 	
 	
     /**
@@ -35,11 +32,7 @@ class CompsHistory extends HistoryModel
      */
     public static function tableName()
     {
-        return 'comps_history';
+        return 'sandboxes_history';
     }
 	
-	public $responsible=null;
-	public $supportTeam=[];
-	public $netIps=[];
-	public $lastThreeLogins=[];
 }

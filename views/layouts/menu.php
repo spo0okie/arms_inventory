@@ -27,6 +27,7 @@ use app\models\OrgPhones;
 use app\models\Partners;
 use app\models\Places;
 use app\models\Ports;
+use app\models\Sandboxes;
 use app\models\Schedules;
 use app\models\Segments;
 use app\models\ServiceConnections;
@@ -127,6 +128,7 @@ NavBar::begin([
 					['label' => 'АРМы', 'url' => ['/arms/index']],
 					['label' => 'ОС', 'url' => ['/comps/index']],
 					['label' => 'Домены', 'url' => ['/domains/index']],
+					['label' => Sandboxes::$titles, 'url' => ['/sandboxes/index']],
 					['label' => LoginJournal::$title, 'url' => ['/login-journal/index']],
 					['label' => 'Дубликаты', 'url' => ['/comps/dupes?sort=name']],
 					['label' => 'Софт',

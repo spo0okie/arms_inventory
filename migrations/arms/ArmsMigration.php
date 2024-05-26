@@ -2,6 +2,7 @@
 
 namespace app\migrations\arms;
 
+use app\helpers\ArrayHelper;
 use yii\db\Migration;
 
 /**
@@ -9,7 +10,7 @@ use yii\db\Migration;
  */
 class ArmsMigration extends Migration
 {
-	function addColumnIfNotExist($table,$column,$type,$index=false)
+	function addColumnIfNotExists($table, $column, $type, $index=false)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (!isset($tableSchema->columns[$column])) {
@@ -19,7 +20,7 @@ class ArmsMigration extends Migration
 		}
 	}
 	
-	function dropColumnIfExist($table,$column)
+	function dropColumnIfExists($table, $column)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (isset($tableSchema->columns[$column])) {
@@ -27,7 +28,7 @@ class ArmsMigration extends Migration
 		}
 	}
 	
-	function dropFkIfExist($name,$table)
+	function dropFkIfExists($name, $table)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (isset($tableSchema->foreignKeys[$name])) {
@@ -45,6 +46,18 @@ class ArmsMigration extends Migration
 	{
 		if ($this->tableExists($table))
 			$this->dropTable($table);
+	}
+	
+	function indexExists($name,$table) {
+		$command = $this->getDb()->createCommand('show index from '.$table);
+		$tableIndexes = $command->queryAll();
+		return count(ArrayHelper::findByField($tableIndexes,'Key_name',$name));
+	}
+	
+	function dropIndexIfExists($name, $table)
+	{
+		if ($this->indexExists($name,$table))
+			$this->dropIndex($name,$table);
 	}
 	
 	/**

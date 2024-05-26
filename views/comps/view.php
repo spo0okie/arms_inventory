@@ -47,6 +47,7 @@ foreach ($model->swList->items as $item) {
 }
 
 	$absorbTitle="Связать(поглотить) клона с этой ОС: недостающие свойства и связанные объекты клона перейдут к этой ОС. Сам клон будет удален";
+	$archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 ?>
 
 <div class="comps-view row">
@@ -84,12 +85,11 @@ foreach ($model->swList->items as $item) {
 
 	</div>
 	<div class="col-md-6">
-		<span class="float-end text-end">
+		<div class="text-end">
 			<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
 			<br />
-			<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
-		</span>
-
+			<?= $archWidget ?>
+		</div>
 		<div class="software_settings">
 			<h3>Софт</h3>
 			<?php // echo '<pre>'; var_dump($model->swList->items); echo '</pre>'; ?>

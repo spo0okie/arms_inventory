@@ -19,6 +19,7 @@ use yii\db\StaleObjectException;
  *
  * @property int $id Идентификатор
  * @property int $domain_id Домен
+ * @property int $sandbox_id Окружение
  * @property string $name Имя
  * @property string $os ОС
  * @property string $fqdn FQDN
@@ -78,6 +79,7 @@ use yii\db\StaleObjectException;
  * @property ServiceConnections $outgoingConnections
  * @property ServiceConnections $incomingConnectionsEffective
  * @property ServiceConnections $outgoingConnectionsEffective
+ * @property Sandboxes $sandbox
  */
 class Comps extends ArmsModel
 {
@@ -102,8 +104,25 @@ class Comps extends ArmsModel
     
     public function extraFields()
 	{
-		return ['responsible','supportTeam','fqdn','domain','site','place','arm','services','servicesNames'];
+		return ['responsible','supportTeam','fqdn','domain','site','place','arm','services','servicesNames','sandbox'];
 	}
+	
+	public $linksSchema=[
+		'arm_id' =>						Techs::class,
+		'domain_id' =>					Domains::class,
+		'user_id' =>					Users::class,
+		'sandbox_id' =>					Sandboxes::class,
+		
+		'services_ids'=>		[Services::class,'comps_ids'],
+		'aces_ids'=>			[Aces::class,'comps_ids'],
+		'acls_ids'=>			[Acls::class,'comp_ids'],
+		'lic_groups_ids' =>		[LicGroups::class,'comp_ids'],
+		'lic_items_ids' =>		[LicItems::class,'comp_ids'],
+		'lic_keys_ids' =>		[LicKeys::class,'comp_ids'],
+		
+		'maintenance_reqs_ids'=>[MaintenanceReqs::class,'comps_ids'],
+		'maintenance_jobs_ids'=>[MaintenanceJobs::class,'comps_ids'],
+	];
 
     /**
      * @inheritdoc
@@ -116,7 +135,8 @@ class Comps extends ArmsModel
 			}],
             [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids','maintenance_jobs_ids'], 'each', 'rule'=>['integer']],
             [['name', 'os','domain_id'], 'required'],
-            [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived'], 'integer'],
+			[['sandbox_id'],'default','value'=>null],
+            [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived','sandbox_id'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
             [['updated_at', 'comment','external_links'], 'safe'],
 			[['raw_version'], 'string', 'max' => 32],
@@ -132,7 +152,13 @@ class Comps extends ArmsModel
 				return MacsHelper::fixList($value);
 			}],
 	
-			[['domain_id', 'name'], 'unique', 'targetAttribute' => ['domain_id', 'name']],
+			[
+				['domain_id', 'name', 'sandbox_id'],
+				'unique',
+				'targetAttribute' => ['domain_id', 'name', 'sandbox_id'],
+				'skipOnEmpty'=>false,
+				'message' => 'В этом домене этого окружения/песочницы уже есть такой hostname'
+			],
 			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::class, 'targetAttribute' => ['arm_id' => 'id']],
 			[['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['user_id' => 'id']],
             [['domain_id'], 'exist', 'skipOnError' => true, 'targetClass' => Domains::class, 'targetAttribute' => ['domain_id' => 'id']],
@@ -188,6 +214,11 @@ class Comps extends ArmsModel
             'arm_id' => [
             	'АРМ',
 				'indexHint' => 'ПК на котором установлена ОС<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'sandbox_id'=>[
+				'placeholder'=>'ОС не изолирована в песочнице',
+				'hint' => 'Изолированное окружение в которое помещена ОС.<br/>'
+						.'Позволяет вести учет клонов/ копий ВМ восстановленных из архива и т.п.'
 			],
 			'services_ids' => [
 				'Сервисы',
@@ -332,13 +363,23 @@ class Comps extends ArmsModel
 	{
 		return $this->hasOne(Domains::class, ['id' => 'domain_id']);
 	}
+	
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getSandbox()
+	{
+		return $this->hasOne(Sandboxes::class, ['id' => 'sandbox_id']);
+	}
+	
 	/**
 	 * @return ActiveQuery
 	 */
 	public function getDupes()
 	{
 		return $this->hasmany(Comps::class, ['name' => 'name'])
-			->where(['not',['id'=>$this->id]]);
+			->where(['not',['id'=>$this->id]])
+			->andWhere(['sandbox_id'=>$this->sandbox_id]);
 	}
 	
 	

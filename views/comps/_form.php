@@ -4,6 +4,7 @@ use app\helpers\FieldsHelper;
 use app\models\Domains;
 use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
+use app\models\Sandboxes;
 use app\models\Services;
 use app\models\Techs;
 use app\models\Users;
@@ -31,16 +32,18 @@ if (!isset($modalParent)) $modalParent=null;
 	]); ?>
 
 	<div class="row">
-		<div class="col-md-6">
+		<div class="col-md-4">
 			<?= FieldsHelper::Select2Field($form,$model, 'domain_id',[
 				'data'=> Domains::fetchNames(),
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-				],
 			]) ?>
 		</div>
-		<div class="col-md-6">
+		<div class="col-md-4">
 			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+		</div>
+		<div class="col-md-4">
+			<?= FieldsHelper::Select2Field($form,$model, 'sandbox_id',[
+				'data'=> Sandboxes::fetchNames(),
+			]) ?>
 		</div>
 	</div>
 	<div class="row">

@@ -189,7 +189,9 @@ trait CompsModelCalcFieldsTrait
 	
 	public function renderName($fqdn=false)
 	{
-		return $fqdn?mb_strtolower($this->fqdn):mb_strtoupper($this->name);
+		$suffix=is_object($this->sandbox)?$this->sandbox->suffix:'';
+		return ($fqdn?mb_strtolower($this->fqdn):mb_strtoupper($this->name))
+			.$suffix;
 	}
 	
 	public function getFormattedMac() {

@@ -19,7 +19,7 @@ use app\models\ArmsModel;
 trait AttributeLinksModelTrait
 {
 	/**
-	 * @var array[] Ссылками на объекты каких классов являются атрибуты
+	 * @var array схема связей моделей через ссылки
 	 * $linksSchema=[
 	 * 		'services_ids'=>[
 	 * 			Service::class,		//на какой класс ссылаемся
@@ -32,6 +32,10 @@ trait AttributeLinksModelTrait
 	 * ];
 	 */
 	public $linksSchema=[];
+	
+	public function getLinksSchema() {
+		return $this->linksSchema;
+	}
 	
 	/**
 	 * @var string[] Обратный индекс загрузчик => атрибут со ссылками (собирается при инициализации)
@@ -63,7 +67,7 @@ trait AttributeLinksModelTrait
 	 * @return bool
 	 */
 	public function attributeIsLink(string $attr){
-		return isset($this->linksSchema[$attr]);
+		return isset($this->getLinksSchema()[$attr]);
 	}
 	
 	/**
@@ -72,10 +76,11 @@ trait AttributeLinksModelTrait
 	 * @return array
 	 */
 	public function attributeLinkSchema(string $attr){
-		if (isset($this->linksSchema[$attr])) {
-			return is_array($this->linksSchema[$attr])?
-				$this->linksSchema[$attr]:
-				[$this->linksSchema[$attr]];
+		$linkSchema=$this->getLinksSchema();
+		if (isset($linkSchema[$attr])) {
+			return is_array($linkSchema[$attr])?
+				$linkSchema[$attr]:
+				[$linkSchema[$attr]];
 		}
 		return [];
 	}
