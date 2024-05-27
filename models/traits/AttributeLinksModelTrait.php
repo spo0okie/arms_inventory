@@ -9,6 +9,7 @@ namespace app\models\traits;
 
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
+use voskobovich\linker\LinkerBehavior;
 
 /**
  * Trait ExternalDataModelTrait
@@ -41,6 +42,80 @@ trait AttributeLinksModelTrait
 	 * @var string[] Обратный индекс загрузчик => атрибут со ссылками (собирается при инициализации)
 	 */
 	protected $linksLoaders=[];
+	
+	/**
+	 * @var array Кэш флага атрибута "обратная ссылка"
+	 */
+	protected $reverseLinksCache=[];
+	
+	
+	/**
+	 * В списке поведений прикручиваем many-to-many контрагентов
+	 * @return array
+	 */
+	public function relationsBehaviour()
+	{
+		$relations=[];
+		
+		foreach ($this->getLinksSchema() as $attribute=>$data) {
+			if (StringHelper::endsWith($attribute,'_ids')) {
+				if ($loader=$this->attributeLinkLoader($attribute)) {
+					$relations[$attribute]=$loader;
+				}
+			}
+		}
+		
+		return	[
+			'class' => LinkerBehavior::class,
+			'relations' => $relations,
+		];
+	}
+	
+	/**
+	 * Признак того что исходя из схемы ссылок атрибут является обратной ссылкой
+	 * (множество объектов указанных в этом аттрибуте ссылаются на него)
+	 * many-2-one, many-2-many
+	 * @param $attr
+	 * @return bool
+	 */
+	public function attributeIsReverseLink($attr) {
+		if (isset($this->reverseLinksCache[$attr]))
+			return $this->reverseLinksCache[$attr];
+		
+		$data=$this->getAttributeData($attr);
+		if (isset($data['is_reverseLink'])) {
+			return $this->reverseLinksCache[$attr]=$data['is_reverseLink'];
+		}
+		
+		//если аттрибут выглядит как ссылка на несколько объектов
+		//(ссылка на один может иметь обратную ссылку, но тогда это one-2-many, и это можно удалять без последствий)
+		if (StringHelper::endsWith($attr,'_ids')) {
+			//если там есть обратная ссылка (хоть какая, с этой то стороны точно множественная)
+			if ($this->attributeReverseLink($attr)) {
+				return $this->reverseLinksCache[$attr]=true;
+			}
+		}
+		return $this->reverseLinksCache[$attr]=false;
+	}
+	
+	/**
+	 * Возвращает ссылки на объекты ссылающиеся на этот
+	 * по схеме one-to-many и many-to-many
+	 * @return array
+	 */
+	public function reverseLinks() {
+		$links=[];
+		foreach ($this->getLinksSchema() as $attribute=>$data) {
+			if ($this->attributeIsReverseLink($attribute)) {
+				if ($loader=$this->attributeLinkLoader($attribute)) {
+					$links[]=$this->$loader;
+				};
+			}
+		}
+		return $links;
+	}
+	
+	
 	
 	/**
 	 * Загрузить связанный объект
@@ -142,5 +217,39 @@ trait AttributeLinksModelTrait
 		foreach ($models as $model) $names[]=$model->$name;
 		sort($names);
 		return implode($glue,$names);
+	}
+	
+	
+	/**
+	 * Поменять в атрибуте ссылку с одного объекта на другой
+	 * @param string  $attr Поле-ссылка (user_ids,comp_id,service_id,...)
+	 * @param integer $old_id Значение которое надо изменить
+	 * @param integer $new_id На какое значение
+	 * @return boolean
+	 */
+	public function attributeLinkRedirect(string $attr, int $old_id, int $new_id) {
+		if (is_array($this->$attr)) {	//если поле - массив ссылок
+			$this->$attr=array_merge(array_diff($this->$attr,[$old_id]),[$new_id]);
+		} else {
+			$this->$attr=$new_id;
+		}
+		return $this->save();
+	}
+	
+	/**
+	 * Перенаправить атрибут обратную-ссылку с себя на другой объект
+	 * Например если какие-то ACL ссылаются на меня, то в этих ссылках поменять себя на другой объект
+	 * @param string $attr Атрибут, который надо перенаправить
+	 * @param int $new_id
+	 */
+	public function attributeReverseLinkRedirect(string $attr, int $new_id) {
+		$loader=$this->attributeLinkLoader($attr);			//как нам загрузить объекты ссылающиеся на нас
+		$reverseLink=$this->attributeReverseLink($attr);	//в каком поле у этих объектов ссылка на нас
+		$linkingObjects=$this->$loader;						//грузим все объекты
+		foreach ($linkingObjects as $object) {
+			/** @var ArmsModel $object */
+			//перенаправляем там нужный аттрибут на новый ID
+			$object->attributeLinkRedirect($reverseLink,$this->id,$new_id);
+		}
 	}
 }

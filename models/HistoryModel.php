@@ -61,6 +61,15 @@ class HistoryModel extends ArmsModel
 	}
 	
 	/**
+	 * Откручиваем поведения для many-2-many ссылок, т.к. тут все по другому
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return [];
+	}
+	
+	/**
 	 * @var string[] Обратный индекс загрузчик => атрибут со ссылками (собирается при инициализации)
 	 */
 	protected $linksLoaders=[];

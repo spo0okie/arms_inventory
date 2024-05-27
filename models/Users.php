@@ -4,7 +4,6 @@ namespace app\models;
 
 use app\helpers\QueryHelper;
 use Exception;
-use voskobovich\linker\LinkerBehavior;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
@@ -96,7 +95,7 @@ class Users extends ArmsModel implements IdentityInterface
 	public static $WTypes = [
 		1=>['Основное трудоустройство','Осн.'],
 	    2=>['Совместительство внутреннее','Совм.'],
-		3=>['Совместительство внешние','Внеш.'],
+		3=>['Совместительство внешнее','Внеш.'],
 		4=>['ДГПХ','ДГПХ',],
 		5=>['Инвалид','Инв.',],
 		6=>['Пенсионер','Пенс.',],
@@ -139,33 +138,26 @@ class Users extends ArmsModel implements IdentityInterface
 		]);
 	}
 	
-	
-	/**
-	 * В списке поведений прикручиваем many-to-many контрагентов
-	 * @return array
-	 */
-	public function behaviors()
-	{
-		return [
-			[
-				'class' => LinkerBehavior::class,
-				'relations' => [
-					'netIps_ids' => 'netIps',
-					'aces_ids' => 'aces',
-					'contracts_ids' => 'contracts',
-					'support_services_ids' => 'supportServices',
-					'infrastructure_support_services_ids' => 'infrastructureSupportServices',
-					'services_ids' => 'services',								//one-2-many
-					'techs_ids' => 'techs',										//one-2-many
-					'it_techs_ids' => 'techsIt',								//one-2-many
-					'head_techs_ids' => 'techsHead',							//one-2-many
-					'responsible_techs_ids' => 'techsResponsible',				//one-2-many
-					'infrastructure_services_ids' => 'infrastructureServices',	//one-2-many
-					'materials_ids' => 'materials',								//one-2-many
-				]
-			]
-		];
-	}
+	public $linksSchema=[
+		'netIps_ids' =>								[NetIps::class,'users_ids'],
+		'aces_ids' => 								[Aces::class,'users_ids'],
+		'lic_groups_ids' => 						[LicGroups::class,'users_ids'],
+		'lic_keys_ids' => 							[LicKeys::class,'users_ids'],
+		'lic_items_ids' =>			 				[LicItems::class,'users_ids'],
+		'contracts_ids' => 							[Contracts::class,'users_ids'],
+		'comps_ids' =>								[Comps::class,'user_id'],
+		'services_ids' => 							[Services::class,'responsible_id'],
+		'support_services_ids' =>			 		[Services::class,'support_ids'],
+		'infrastructure_services_ids' =>			[Services::class,'infrastructure_responsible_id'],
+		'infrastructure_support_services_ids' =>	[Services::class,'infrastructure_support_id'],
+		'techs_ids' => 								[Techs::class,'user_id'],
+		'it_techs_ids' => 							[Techs::class,'it_staff_id','loader'=>'techsIt'],
+		'head_techs_ids' =>							[Techs::class,'head_id','loader'=>'techsHead'],
+		'responsible_techs_ids' =>					[Techs::class,'responsible_id','loader'=>'techsResponsible'],
+		'materials_ids' =>							[Materials::class,'it_staff_id'],
+		'logons_ids' =>								[LoginJournal::class,'users_id'],
+	];
+ 
 	
 
 	/**
@@ -204,68 +196,55 @@ class Users extends ArmsModel implements IdentityInterface
 	public function attributeData()
 	{
 		return array_merge(parent::attributeData(),[
+			'arms' => 'АРМ',
+			'Bday' => 'День рождения',
+			'Doljnost' => 'Должность',
+			'Email' => ['E-Mail','absorb'=>'ifEmpty'],
 			'employee_id' => [
 				'Таб. №',
 				'hint'=>'Табельный номер сотрудника<br>(конкретно этого его трудоустройства)'
+			],
+			'Ename' => 'Полное имя',
+			'ips' => ['Привязанные IP адреса','absorb'=>'ifEmpty'],
+			'LastThreeLogins' => 'Входы',
+			'Login' => 'Логин (AD)',
+			'logon_ids' => ['absorb'=>false], //вручную переключим
+			'manager_id' => 'Руководитель',
+			'Mobile' => ['Мобильный тел','absorb'=>'ifEmpty'],
+			'nosync' => [
+				'Отключить синхронизацию',
+				'hint'=>'Запрет внешнему скрипту синхронизации с кадровой БД обновлять эту запись<br>'.
+					'<i>(Должно быть реализовано во внешнем скрипте)</i>',
+			],
+			'notepad' => [
+				'Записная книжка',
+				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого объекта',
+				'absorb'=>'ifEmpty',
 			],
 			'org_id' => 'Организация',
 			'org_name'=>['alias'=>'org_id'],
 			'Orgeh' => 'Подразделение',
 			'orgStruct_name' => ['alias'=>'Orgeh'],
-			'Doljnost' => 'Должность',
-			'Ename' => 'Полное имя',
+			'Persg' => 'Тип трудоустройства',
+			'Phone' => ['Внутренний тел','absorb'=>'ifEmpty'],
+			'private_phone' => ['Личный тел','absorb'=>'ifEmpty'],
 			'shortName' => [
 				'Короткое имя',
 				'indexHint'=>'Отображаться будет "Фамилия И.О.",<br>'.
 					'поиск будет вестись по полному имени.<br>'.
 					QueryHelper::$stringSearchHint
 			],
-			'Persg' => 'Тип трудоустройства',
-			'Uvolen' => 'Уволен',
-			'Login' => 'Логин (AD)',
-			'Email' => 'E-Mail',
-			'Phone' => 'Внутренний тел',
-			'Mobile' => 'Мобильный тел',
-			'work_phone' => 'Городской рабочий тел',
-			'private_phone' => 'Личный тел',
-			'Bday' => 'День рождения',
-			'manager_id' => 'Руководитель',
-			'nosync' => [
-				'Отключить синхронизацию',
-				'hint'=>'Запрет внешнему скрипту синхронизации с кадровой БД обновлять эту запись<br>'.
-					'<i>(Должно быть реализовано во внешнем скрипте)</i>',
-			],
-			'arms' => 'АРМ',
 			'techs' => 'Оборудование',
 			'uid' => ['Идентификатор','hint'=>'Уникальный идентификатор человека.<br>ИНН / СНИЛС / MD5(ИНН) и т.п.'],
-			'ips' => 'Привязанные IP адреса',
-			'LastThreeLogins' => 'Входы',
+			'Uvolen' => 'Уволен',
+			'work_phone' => ['Городской рабочий тел','absorb'=>'ifEmpty'],
+			
+			'access_token'=>['absorb'=>'ifEmpty'],
+			'auth_key'=>['absorb'=>'ifEmpty'],
+			'password'=>['absorb'=>'ifEmpty'],
 		]);
 	}
 	
-	/**
-	 * Список всех объектов ссылающихся на этот
-	 * @return array
-	 */
-	public function reverseLinks() {
-		return [
-			$this->aces,
-			$this->techs,
-			$this->techsResponsible,
-			$this->techsHead,
-			$this->techsIt,
-			$this->comps,
-			$this->licGroups,
-			$this->licKeys,
-			$this->licItems,
-			$this->materials,
-			$this->services,
-			$this->infrastructureServices,
-			$this->supportServices,
-			$this->infrastructureSupportServices,
-			$this->contracts,
-		];
-	}
 	
 	/**
 	 * Возвращает привязанные элементы доступа
@@ -634,7 +613,11 @@ class Users extends ArmsModel implements IdentityInterface
 			->andWhere(['!=','comps_id','NULL'])
 			->orderBy('id desc')->one();
 	}
-
+	
+	public function getLogons() {
+		return $this->hasMany(LoginJournal::class,['users_id'=>'id']);
+	}
+	
 	public function getLastThreeLogins() {
 		return LoginJournal::fetchUniqComps($this->id);
 	}
@@ -720,87 +703,11 @@ class Users extends ArmsModel implements IdentityInterface
 	 */
 	public function absorbUser(Users $user) {
 		
-		foreach ($user->aces as $ace){
-			$ace->users_ids=array_merge(array_diff($ace->users_ids,[$user->id]),[$this->id]);
-			$ace->save();
-		}
-		
-		foreach ($user->techs as $tech){
-			$tech->user_id=$this->id;
-			$tech->save();
-		}
-		
-		foreach ($user->techsResponsible as $tech) {
-			$tech->responsible_id=$this->id;
-			$tech->save();
-		}
-		
-		foreach ($user->techsHead as $tech) {
-			$tech->head_id=$this->id;
-			$tech->save();
-		}
-		
-		foreach($user->techsIt as $tech) {
-			$tech->it_staff_id=$this->id;
-			$tech->save();
-		}
-		
-		foreach ($user->comps as $comp) {
-			$comp->user_id=$this->id;
-			$comp->save();
-		}
-		
-		foreach ($user->licGroups as $licGroup) {
-			$licGroup->users_ids=array_merge(array_diff($licGroup->users_ids,[$user->id]),[$this->id]);
-			$licGroup->save();
-		}
-		
-		foreach ($user->licKeys as $licKey) {
-			$licKey->users_ids=array_merge(array_diff($licKey->users_ids,[$user->id]),[$this->id]);
-			$licKey->save();
-		}
-		
-		foreach ($user->licItems as $licItem) {
-			$licItem->users_ids=array_merge(array_diff($licItem->users_ids,[$user->id]),[$this->id]);
-			$licItem->save();
-		}
-		
-		foreach ($user->materials as $material) {
-			$material->it_staff_id=$this->id;
-			$material->save();
-		}
-		
-		foreach ($user->services as $service) {
-			$service->responsible_id=$this->id;
-			$service->save();
-		}
-		
-		foreach ($user->infrastructureServices as $service) {
-			$service->infrastructure_user_id=$this->id;
-			$service->save();
-		}
-		
-		foreach ($this->infrastructureServices as $service) {
-			$service->support_ids=array_merge(array_diff($service->support_ids,[$user->id]),[$this->id]);
-			$service->save();
-		}
-		
-		foreach ($this->infrastructureSupportServices as $service) {
-			$service->infrastructure_support_ids=array_merge(array_diff($service->infrastructure_support_ids,[$user->id]),[$this->id]);
-			$service->save();
-		}
-
-		foreach ($user->contracts as $contract) {
-			$contract->users_ids=array_merge(array_diff($contract->users_ids,[$user->id]),[$this->id]);
-			$contract->save();
-		}
-		
-		$stringAttributes=['Phone','Email','work_phone','Mobile','private_phone','ips','notepad','password','auth_key','access_token'];
-		foreach ($stringAttributes as $attr) //забираем себе те поля, которые тут не проставлены
-			if (!$this->$attr || $this->$attr==$user->$attr) {
-				$this->$attr=$user->$attr;	$user->$attr='';
-			}
 		$user->Login='';
+		$this->absorbModel($user);
+		
+		//журнал огромный и по одной записи менять это гемор
+		LoginJournal::updateAll(['users_id'=>$this->id],['users_id'=>$user->id]);
 
 		//Если мы используем RBAC модель доступа, то переназначаем все роли новому логину
 		if (Yii::$app->params['useRBAC']) {
@@ -809,11 +716,7 @@ class Users extends ArmsModel implements IdentityInterface
 			}
 			Yii::$app->authManager->revokeAll($user->id);
 		}
-
-		
-		$user->save();
 		$this->save();
-		
 	}
 	
 	public function beforeSave($insert)

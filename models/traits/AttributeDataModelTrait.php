@@ -7,6 +7,7 @@
 namespace app\models\traits;
 
 
+use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
@@ -36,6 +37,48 @@ trait AttributeDataModelTrait
 	 */
 	protected $attributeLabelsCache;
 	
+	
+	/**
+	 * Массив описания полей
+	 */
+	public function attributeData()
+	{
+		return [
+			'id' => [
+				'Идентификатор',
+			],
+			'comment' => [
+				'Примечание',
+				'hint' => 'Краткое пояснение по этому объекту',
+			],
+			'notepad' => [
+				'Записная книжка',
+				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого объекта',
+			],
+			'history' => ['alias'=>'notepad'],
+			'links' => [
+				'Ссылки',
+				'hint' => UrlListWidget::$hint,
+			],
+			'archived' => [
+				'Перенесено в архив',
+				'hint' => 'Помечается если в работе более не используется, но для истории запись лучше сохранить',
+			],
+			'updated_at' => [
+				'Время изменения',
+				'hint' => 'Дата/время изменения объекта в БД'
+			],
+			'updated_by'=>[
+				'Редактор',
+				'hint' => 'Автор последних изменений объекта'
+			],
+			'external_links' => [
+				'Доп. связи',
+				'hint' => 'JSON структура с дополнительными объектами и ссылками на внешние информационные системы',
+			]
+		];
+	}
+	
 	/**
 	 * Является ли аттрибут наследуемым (от объекта родителя)
 	 * @param $attr
@@ -44,10 +87,25 @@ trait AttributeDataModelTrait
 	public function attributeIsInheritable($attr) {
 		return $this->getAttributeData($attr)['is_inheritable']??false;
 	}
-
-
-	public function attributeData() {
-		return [];
+	
+	/**
+	 * Является ли аттрибут наследуемым (от объекта родителя)
+	 * @param $attr
+	 * @return false|mixed
+	 */
+	public function attributeIsAbsorbable($attr) {
+		$data=$this->getAttributeData($attr);
+		//если явно указано какой атрибут
+		if (isset($data['absorb'])) {
+			//если указано импортировать только поверх пустого
+			if ($data['absorb']=='ifEmpty') {
+				return empty($this->$attr);
+			}
+			//возвращаем что указано
+			return $data['absorb'];
+		}
+		//обратные ссылки по умолчанию надо отбирать, остальное нет
+		return $this->attributeIsReverseLink($attr);
 	}
 	
 	public function getAttributeData($attr)
@@ -112,12 +170,12 @@ trait AttributeDataModelTrait
 			foreach ($this->getLinksSchema() as $key=>$data) {
 				if (isset($this->attributeLabelsCache[$key])) continue;
 				$class=$this->attributeLinkClass($key);
-				if (substr($key,strlen($key)-3)=='_id') {
+				if (StringHelper::endsWith($key,'_id')) {
 					if (property_exists($class,'title'))
 						$this->attributeLabelsCache[$key] = $class::$title;
 				}
 				
-				if (substr($key,strlen($key)-4)=='_ids') {
+				if (StringHelper::endsWith($key,'_ids')) {
 					if (property_exists($class,'titles'))
 						$this->attributeLabelsCache[$key] = $class::$titles;
 				}
@@ -296,6 +354,27 @@ trait AttributeDataModelTrait
 		foreach ($this->getDynamicPlaceholdersAttrs() as $attr)
 			$placeholders[$attr]=$this->getAttributePlaceholder($attr);
 		return $placeholders;
+	}
+	
+	/**
+	 * очищает атрибут $attr
+	 * смотрит в схему, чтобы понимать может ли быть атрибут быть NULL
+	 * если может то ставит NULL
+	 * если не может, то строковые значения очищает
+	 * @param $attr
+	 */
+	public function attributeClear($attr) {
+		$column=static::getTableSchema()->getColumn($attr);
+		
+		if ($column->allowNull) {
+			$this->$attr=null;
+			return;
+		}
+		
+		if ($column->type=='string') {
+			$this->$attr='';
+			return;
+		}
 	}
 	
 	/**

@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\components\UrlListWidget;
 use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelper;
@@ -12,9 +11,12 @@ use app\models\traits\AttributeLinksModelTrait;
 use app\models\traits\ExternalDataModelTrait;
 use DateTime;
 use DateTimeZone;
+use Throwable;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Exception;
+use yii\db\StaleObjectException;
 use yii\web\View;
 
 /**
@@ -82,55 +84,17 @@ class ArmsModel extends ActiveRecord
 	
 	/** @var string поле которое сравнивается  */
 	public static $syncTimestamp='updated_at';
+
 	
 	/**
-	 * Массив описания полей
-	 */
-	public function attributeData()
-	{
-		return [
-			'id' => [
-				'Идентификатор',
-			],
-			'comment' => [
-				'Примечание',
-				'hint' => 'Краткое пояснение по этому объекту',
-			],
-			'notepad' => [
-				'Записная книжка',
-				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого объекта',
-			],
-			'history' => ['alias'=>'notepad'],
-			'links' => [
-				'Ссылки',
-				'hint' => UrlListWidget::$hint,
-			],
-			'archived' => [
-				'Перенесено в архив',
-				'hint' => 'Помечается если в работе более не используется, но для истории запись лучше сохранить',
-			],
-			'updated_at' => [
-				'Время изменения',
-				'hint' => 'Дата/время изменения объекта в БД'
-			],
-			'updated_by'=>[
-				'Редактор',
-				'hint' => 'Автор последних изменений объекта'
-			],
-			'external_links' => [
-				'Доп. связи',
-				'hint' => 'JSON структура с дополнительными объектами и ссылками на внешние информационные системы',
-			]
-		];
-	}
-	
-	/**
-	 * Возвращает ссылки на объекты ссылающиеся на этот
-	 * по схеме one-to-many и many-to-many
+	 * Прикручиваем поведения для many-2-many ссылок
 	 * @return array
 	 */
-	public function reverseLinks() {
-		return [];
+	public function behaviors()
+	{
+		return [
+			$this->relationsBehaviour(),
+		];
 	}
 	
 	/**
@@ -589,5 +553,45 @@ class ArmsModel extends ActiveRecord
 				'model'=>$this
 			])
 		);
+	}
+	
+	/**
+	 * Отобрать себе все абсорбируемые поля у другой модели этого же класса
+	 * @param ArmsModel $model
+	 * @param false     $delete
+	 * @throws Throwable
+	 * @throws Exception
+	 * @throws StaleObjectException
+	 */
+	public function absorbModel(ArmsModel $model, $delete=false) {
+		//перебираем аттрибуты-ссылки
+		foreach ($this->linksSchema as $attribute=>$schema) {
+			//если их нужно отбирать
+			if ($this->attributeIsAbsorbable($attribute)) {
+				//отбираем
+				if ($this->attributeIsReverseLink($attribute))
+					$model->attributeReverseLinkRedirect($attribute,$this->id);
+				else
+					$this->$attribute=$model->$attribute;
+			}
+		}
+
+		//перебираем аттрибуты-значения
+		foreach ($this->attributes as $attribute=>$value) {
+			//если их нужно отбирать
+			if ($this->attributeIsAbsorbable($attribute)) {
+				//отбираем:
+				//берем себе значение
+				$this->$attribute=$model->$attribute;
+				//чистим его у второй модели
+				$model->attributeClear($attribute);
+			}
+		}
+		
+		if ($delete) {	//если надо удалить ограбленного - удаляем
+			$model->delete();
+		} else {		//иначе сохраняем его в обомжелом виде
+			$model->save();
+		}
 	}
 }

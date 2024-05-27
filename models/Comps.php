@@ -108,11 +108,12 @@ class Comps extends ArmsModel
 	}
 	
 	public $linksSchema=[
-		'arm_id' =>						Techs::class,
-		'domain_id' =>					Domains::class,
-		'user_id' =>					Users::class,
-		'sandbox_id' =>					Sandboxes::class,
+		'arm_id' =>				Techs::class,
+		'domain_id' =>			Domains::class,
+		'user_id' =>			Users::class,
+		'sandbox_id' =>			Sandboxes::class,
 		
+		'linked_arms_ids'=>		[Techs::class,'comp_id'],
 		'services_ids'=>		[Services::class,'comps_ids'],
 		'aces_ids'=>			[Aces::class,'comps_ids'],
 		'acls_ids'=>			[Acls::class,'comp_ids'],
@@ -179,11 +180,13 @@ class Comps extends ArmsModel
 				'IP Адрес',
 				'indexHint' => 'IP адреса сетевых интерфейсов настроенных в ОС<br/>'.QueryHelper::$stringSearchHint,
 			],
-			'domain_id' => 'Домен',
+			'ip_ignore' => ['absorb'=>'ifEmpty'],
+			'domain_id' => ['Домен','absorb'=>'ifEmpty'],
 			'user_id' => [
 				'Пользователь',
 				'hint' => 'Имеет смысл только для серверов и виртуальных машин в случае, '
-					.'<br>если пользователь операционной системы отличается от пользователя АРМ'
+					.'<br>если пользователь операционной системы отличается от пользователя АРМ',
+				'absorb'=>'ifEmpty'
 			],
 			'user' => ['alias'=>'user'],
             'name' => [
@@ -209,11 +212,12 @@ class Comps extends ArmsModel
 	        	'Скрипт',
 				'indexHint' => 'Скрипт, который внес последние данные по этой ОС<br/>'.QueryHelper::$stringSearchHint,
 			],
-            'exclude_hw' => 'Скрытое из паспорта железо',
-            'ignore_hw' => 'Виртуальная машина',
+            'exclude_hw' => ['Скрытое из паспорта железо','absorb'=>'ifEmpty'],
+            'ignore_hw' => ['Виртуальная машина','absorb'=>'ifEmpty'],
             'arm_id' => [
             	'АРМ',
 				'indexHint' => 'ПК на котором установлена ОС<br/>'.QueryHelper::$stringSearchHint,
+				'absorb'=>'ifEmpty',
 			],
 			'sandbox_id'=>[
 				'placeholder'=>'ОС не изолирована в песочнице',
@@ -225,7 +229,7 @@ class Comps extends ArmsModel
 				'hint' => 'Какие сервисы развернуты на этой ОС',
 				'indexHint' => '{same}<br />'.QueryHelper::$stringSearchHint,
 			],
-            'comment' => 'Комментарий',
+            'comment' => ['Комментарий','absorb'=>'ifEmpty'],
             'updated_at' => 'Время обновления',
 			'archived' => [
 				'Архивирован',
@@ -248,7 +252,8 @@ class Comps extends ArmsModel
 			],
 			'places_id' => [
 				'Помещение',
-				'indexHint' => 'Помещение, в котором размещено оборудование'
+				'indexHint' => 'Помещение, в котором размещено оборудование',
+				'absorb'=>'ifEmpty',
 			],
 			'maintenance_reqs_ids'=>[
 				MaintenanceReqs::$titles,
@@ -612,58 +617,12 @@ class Comps extends ArmsModel
 	 * @throws StaleObjectException
 	 */
 	public function absorbComp(Comps $comp) {
-		$fields=[
-			'domain_id',
-			'os',
-			'fqdn',
-			'raw_hw',
-			'raw_soft',
-			'raw_version',
-			'exclude_hw',
-			'ignore_hw',
-			'ip',
-			'ip_ignore',
-			'arm_id',
-			'user_id',
-			'comment',
-			'updated_at',
-		];
-		foreach ($fields as $field) {
-			if ((empty($this->$field) || !$this->$field) && !empty($comp->$field)) {
-				//error_log("absorbing [$field] '{$comp->$field}' -> '{$this->$field}'");
-				$this->$field=$comp->$field;
-			} //else error_log(  "skipping  [$field] '{$comp->$field}' -> '{$this->$field}'");
-			
-		}
 		
-		foreach ($comp->logins as $login) {
-			$login->comps_id=$this->id;
-			$login->save(false);
-		}
+		//журнал огромный и по одной записи менять это гемор
+		LoginJournal::updateAll(['comps_id'=>$this->id],['users_id'=>$comp->id]);
 		
-		foreach ($comp->services as $service) {
-			$serviceComps=$service->comps_ids;
-			if (($key = array_search($comp->id, $serviceComps)) !== false) {
-				//отрываем поглощаемый комп
-				unset($serviceComps[$key]);
-			}
-			
-			if (($key = array_search($this->id, $serviceComps)) === false) {
-				//привязываем этот комп
-				$serviceComps[]=$this->id;
-			}
-
-			$service->comps_ids=$serviceComps;
-			//сохраняем изменения
-			$service->save();
-		}
-		
-		foreach ($comp->linkedArms as $arm) {
-			$arm->comp_id=$this->id;
-			$arm->save();
-		}
-		
-		$comp->delete();
+		//полглощаем все поля и ссылки переданной ОС и удаляем ее
+		$this->absorbModel($comp,true);
 		$this->save();
 	}
 	
@@ -798,16 +757,4 @@ class Comps extends ArmsModel
 	
 	public function getInServicesName() {return strtolower($this->fqdn);}
 	
-	public function reverseLinks()
-	{
-		return [
-			'ПО закреплено в паспортах ОС'=>$this->soft,
-			$this->licGroups,
-			$this->licItems,
-			$this->licKeys,
-			$this->services,
-			'Доступы с этого ПК'=>$this->aces,
-			'Доступы к этому ПК'=>$this->acls,
-		];
-	}
 }

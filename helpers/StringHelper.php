@@ -69,4 +69,6 @@ class StringHelper extends BaseStringHelper {
 		$then = mb_substr($string, 1, null, $encoding);
 		return mb_strtolower($firstChar, $encoding) . $then;
 	}
+	
+	
 }
