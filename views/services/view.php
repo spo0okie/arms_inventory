@@ -50,7 +50,16 @@ if (count($model->children)||count($model->comps)||count($model->techs)) {
 				$.get("/web/services/os-list?id={$model->id}", function(data) {
 				    jQuery("#serviceCompsList").hide().html(data);
 				    setTimeout(function (){jQuery("#serviceCompsList").fadeToggle();ExpandableCardInitAll();},500)
-				})
+					//let \$tabLink=$('li#tab-serviceComps').children('a');
+					//let \$export=$('div.servicesCompsIndexExport').children('div.btn-group');
+					//let \$exportButton=\$export.children('button').removeClass('btn').detach();
+					//let \$exportUl=\$export.children('ul').on('mouseOver',function(e){e.stopPropagation(); return false;}).detach();
+					//console.log(\$export);
+					//console.log(\$exportButton);
+					//\$exportButton.appendTo(\$tabLink);
+					//\$exportUl.appendTo(\$tabLink);
+					//\$tabLink.append(\$exportButton+\$exportUl);
+				});
 			})
 		</script>
 HTML,

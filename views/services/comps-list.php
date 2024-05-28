@@ -204,7 +204,7 @@ $vmRes=[
 			'class' => 'd-none',
 		],
 		'gridOptions' => [
-			'layout'=>'{dynagrid}{items}',
+			'layout'=>'{dynagrid}{items}<div class="servicesCompsIndexExport">{export}</div>',
 			'showFooter' => true,
 			'pjax' => true,
 			'pjaxSettings' => ['options'=>[
