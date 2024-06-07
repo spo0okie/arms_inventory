@@ -4,6 +4,7 @@ use app\components\DynaGridWidget;
 use app\components\TabsWidget;
 use app\models\Comps;
 use yii\data\ArrayDataProvider;
+use yii\helpers\Html;
 use yii\web\YiiAsset;
 
 /* @var $this yii\web\View */
@@ -28,6 +29,10 @@ $tabs[]=[
 		'header' => false,
 		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
+		'createButton' => Html::a('Добавить', ['comps/create','Comps'=>['sandbox_id'=>$model->id]], [
+			'class' => 'btn btn-success open-in-modal-form',
+			'data-reload-page-on-submit'=>1
+		]),
 		'dataProvider' => new ArrayDataProvider(['allModels'=>$model->comps]),
 		'model' => new Comps()
 	]),
