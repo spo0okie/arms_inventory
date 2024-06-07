@@ -25,6 +25,7 @@ class MapItemForm extends Model
 	public $width;
 	public $height;
 	
+	public function getLinksSchema(){return[];}
 
     /**
      * @return array the validation rules.
