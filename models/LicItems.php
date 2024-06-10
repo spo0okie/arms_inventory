@@ -107,7 +107,7 @@ class LicItems extends ArmsModel
 	public function rules()
     {
         return [
-            [['descr', 'count'], 'required'],
+            [['descr', 'count','lic_group_id'], 'required'],
 	        [['contracts_ids','arms_ids','comps_ids','users_ids'], 'each', 'rule'=>['integer']],
 	        [['lic_group_id',  'count'], 'integer'],
             [['active_from', 'active_to', 'created_at', 'comment', 'linkComment'], 'safe'],
