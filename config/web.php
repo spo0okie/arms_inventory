@@ -2,14 +2,16 @@
 
 use kartik\datecontrol\Module;
 use yii\helpers\ArrayHelper;
+use yii\web\ForbiddenHttpException;
+use yii\web\View;
 
 $params = ArrayHelper::merge(
 	require __DIR__ . '/params.php',
-	require __DIR__ . '/params-local.php',
+	require __DIR__ . '/params-local.php'
 );
 $db = ArrayHelper::merge(
 	require __DIR__ . '/db.php',
-	require __DIR__ . '/db-local.php',
+	require __DIR__ . '/db-local.php'
 );
 $ldap = require __DIR__ . '/ldap.php';
 
@@ -28,10 +30,10 @@ $config = [
 		'assetManager' => [
 			'bundles' => [
 				'yii\web\JqueryAsset' => [
-					'jsOptions' => [ 'position' => \yii\web\View::POS_HEAD ],
+					'jsOptions' => [ 'position' => View::POS_HEAD ],
 				],
 				'kartik\select2\Select2Asset' => [
-					'jsOptions' => [ 'position' => \yii\web\View::POS_HEAD ],
+					'jsOptions' => [ 'position' => View::POS_HEAD ],
 				],
 			]
 		],
@@ -98,6 +100,7 @@ $config = [
 						'login-journal'=>'api/login-journal',
 						'manufacturers'=>'api/manufacturers',
 						'manufacturers-dict'=>'api/manufacturers-dict',
+						'net-ips'=>'api/net-ips',
 						'org-struct'=>'api/org-struct',
 						'partners'=>'api/partners',
 						'phones'=>'api/phones',
@@ -143,8 +146,8 @@ $config = [
 		    'userModelLoginField'=>'Login',
 			'beforeCreateController'=>function($route){
 				/** @var string $route The route consisting of module, controller and action IDs. */
-				if (!is_object($user=\Yii::$app->user->identity) || !$user->isAdmin())
-					throw new \yii\web\ForbiddenHttpException('Access denied');
+				if (!is_object($user= Yii::$app->user->identity) || !$user->isAdmin())
+					throw new ForbiddenHttpException('Access denied');
 				return $route;
 			}
 	    ],
@@ -179,7 +182,7 @@ $config = [
     'params' => $params,
 ];
 
-\Yii::$container->set('yii\data\Pagination', ['pageSizeLimit' => [0, 10000]]);
+Yii::$container->set('yii\data\Pagination', ['pageSizeLimit' => [0, 10000]]);
 
 if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
