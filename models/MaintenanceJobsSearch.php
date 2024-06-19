@@ -81,9 +81,9 @@ class MaintenanceJobsSearch extends MaintenanceJobs
             'schedules_id' => $this->schedules_id,
         ]);
 	
-		$filter->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'description', $this->description])
-            ->andFilterWhere(['like', 'links', $this->links])
+		$filter->andFilterWhere(['like', 'maintenance_jobs.name', $this->name])
+            ->andFilterWhere(['like', 'maintenance_jobs.description', $this->description])
+            ->andFilterWhere(['like', 'maintenance_jobs.links', $this->links])
             ->andFilterWhere(QueryHelper::querySearchString(['AND/OR',
 				'IFNULL(comps.name,"")',
 				'IFNULL(techs.num,"")',
