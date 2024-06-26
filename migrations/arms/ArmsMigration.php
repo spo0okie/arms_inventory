@@ -54,6 +54,11 @@ class ArmsMigration extends Migration
 		return count(ArrayHelper::findByField($tableIndexes,'Key_name',$name));
 	}
 	
+	public function getTableStatus($table) {
+		$command = $this->getDb()->createCommand("show table status where Name = '$table'");
+		return $command->queryOne();
+	}
+	
 	function dropIndexIfExists($name, $table)
 	{
 		if ($this->indexExists($name,$table))
@@ -102,6 +107,14 @@ class ArmsMigration extends Migration
 			);
 		}
 	}
-
+	
+	
+	/** @noinspection SqlResolve */
+	public function convertTableToInnoDb($table) {
+		$status=$this->getTableStatus($table);
+		if (strtolower($status['Engine']??'')!=='innodb') {
+			$this->db->createCommand("alter table `$table` engine = InnoDB")->execute();
+		}
+	}
 
 }

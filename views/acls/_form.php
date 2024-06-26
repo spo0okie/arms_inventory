@@ -2,6 +2,7 @@
 
 use app\models\Comps;
 use app\models\NetIps;
+use app\models\Networks;
 use app\models\Services;
 use app\models\Techs;
 use kartik\markdown\MarkdownEditor;
@@ -18,16 +19,18 @@ use yii\helpers\Url;
 if (!isset($modalParent)) $modalParent=null;
 
 /** @noinspection JSUnusedLocalSymbolsInspection */
+/** @noinspection JSUnusedLocalSymbols */
 $js= <<<JS
 commentInput="input#acls-comment";
 compInput="select#acls-comps_id";
 techInput="select#acls-techs_id";
 ipInput="select#acls-ips_id";
+netInput="select#acls-networks_id";
 srvInput="select#acls-services_id";
 function onInputUpdate(input) {
     //console.log("clearing not "+input+": "+$(input).val())
     if ($(input).val()) {
-        [commentInput,compInput,techInput,ipInput,srvInput].forEach(item => {
+        [commentInput,compInput,techInput,ipInput,srvInput,netInput].forEach(item => {
             if (item !== input) {
                 //console.log("clearing "+item)
             	$(item).val("").trigger("change");
@@ -136,6 +139,18 @@ $selectOptions= [
 								'active'=>(bool)$model->ips_id
 							],
 							[
+								'label'=>'IP сеть',
+								'content'=>$form->field($model, 'networks_id')->widget(Select2::class, [
+									'data' => Networks::fetchNames(),
+									'options' => [
+										'placeholder' => 'Выберите IP сеть',
+										'onchange' => 'onInputUpdate(netInput)',
+									],
+									'pluginOptions' => $selectOptions,
+								]),
+								'active'=>(bool)$model->networks_id
+							],
+							[
 								'label'=>'Сервис',
 								'content'=>$form->field($model, 'services_id')->widget(Select2::class, [
 									'data' => Services::fetchNames(),
@@ -153,7 +168,7 @@ $selectOptions= [
 									'maxlength' => true,
 									'onchange'=>'onInputUpdate(commentInput)'
 								]),
-								'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->ips_id)
+								'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->ips_id||$model->networks_id)
 							],
 						],
 						'position'=>TabsX::POS_ABOVE,
@@ -172,12 +187,12 @@ $selectOptions= [
 	
 	
 	<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
-	<?= Html::Button('Применить',	[
-			'class' => 'btn btn-primary',
-			'onClick' => '$("form#acls-form").attr("action",
-				$("#acls-form").attr("action") + ($("#acls-form").attr("action").indexOf("?")>=0?"&":"?") +	"accept=1"
-			); $("form#acls-form").trigger("submit");'
-		]) ?>
+	<?php /* Html::Button('Применить',	[
+		'class' => 'btn btn-primary',
+		'onClick' => '$("form#acls-form").attr("action",
+			$("#acls-form").attr("action") + ($("#acls-form").attr("action").indexOf("?")>=0?"&":"?") +	"accept=1"
+		); $("form#acls-form").trigger("submit");'
+	]) */ ?>
 
     <?php ActiveForm::end(); ?>
 

@@ -1,14 +1,16 @@
 <?php
 
+use app\components\DynaGridWidget;
+use app\models\Acls;
 use yii\helpers\Html;
-use kartik\grid\GridView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\AclsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-\yii\helpers\Url::remember();
+Url::remember();
 
-$this->title = \app\models\Acls::$titles;
+$this->title = Acls::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
@@ -20,29 +22,10 @@ $renderer=$this;
     <p>
         <?= Html::a('Создать', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            [
-                'attribute'=>'id',
-                'format'=>'raw',
-                'value'=>function($data) use ($renderer){
-                    return $renderer->render('item',['model'=>$data]);
-                }
-            ],
-            'schedules_id',
-            'services_id',
-            'ips_id',
-            'comps_id',
-            'techs_id',
-            'comment:ntext',
-            //'notepad:ntext',
-
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
+	
+	<?= DynaGridWidget::widget([
+		'dataProvider' => $dataProvider,
+		'filterModel' => $searchModel,
+		'columns' => include 'columns.php',
+	]); ?>
 </div>

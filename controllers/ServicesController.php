@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\helpers\ArrayHelper;
+use app\models\AcesSearch;
 use app\models\CompsSearch;
 use app\models\Places;
 use app\models\ServiceConnectionsSearch;
@@ -222,6 +223,72 @@ class ServicesController extends ArmsBaseController
 		));
 		
 		return $this->renderAjax('connections-list', [
+			'searchModel'=>$searchModel,
+			'dataProvider' => $dataProvider,
+			'model' => $model
+		]);
+	}
+	
+	/**
+	 * Список связей в сервисе (с учетом вложенных)
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionAcesList(int $id)
+	{
+		/** @var Services $model */
+		$model=$this->findModel($id);
+		
+		// Модели полноценного поиска нужны для подгрузки всех joinWith
+		$searchModel=new AcesSearch();
+		
+		// получаем всех детей
+		$children=$model->getChildrenRecursive();
+		
+		$ids=is_array($children)?ArrayHelper::getArrayField($children,'id'):[];
+		$ids[]=$model->id;
+		
+		
+		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(
+			Yii::$app->request->queryParams,
+			['AcesSearch'=>['services_subject_ids'=>$ids]]
+		));
+		
+		return $this->renderAjax('aces-list', [
+			'searchModel'=>$searchModel,
+			'dataProvider' => $dataProvider,
+			'model' => $model
+		]);
+	}
+
+	/**
+	 * Список связей в сервисе (с учетом вложенных)
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionAclsList(int $id)
+	{
+		/** @var Services $model */
+		$model=$this->findModel($id);
+		
+		// Модели полноценного поиска нужны для подгрузки всех joinWith
+		$searchModel=new AcesSearch();
+		
+		// получаем всех детей
+		$children=$model->getChildrenRecursive();
+		
+		$ids=is_array($children)?ArrayHelper::getArrayField($children,'id'):[];
+		$ids[]=$model->id;
+		
+		
+		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(
+			Yii::$app->request->queryParams,
+			['AcesSearch'=>['services_resource_ids'=>$ids]]
+		));
+		
+		return $this->renderAjax('aces-list', [
 			'searchModel'=>$searchModel,
 			'dataProvider' => $dataProvider,
 			'model' => $model

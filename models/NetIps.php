@@ -403,15 +403,19 @@ class NetIps extends ArmsModel
 	
 	/**
 	 * Имея текстовый список IP возвращает ids объектов IP адресов
-	 * @param $text
+	 * @param      $text
+	 * @param bool $skipNetMasks
 	 * @return int[]
 	 */
-	public static function fetchIpIds($text) {
+	public static function fetchIpIds($text,$skipNetMasks=false) {
 		if (!count($items=explode("\n",$text))) return[];
 		$ids=[];
 		foreach ($items as $item) {
 			$item=trim($item);
-			if (strlen($item)) $ids[]=NetIps::fetchByTextAddr($item);
+			if (strlen($item)) {
+				if (strpos($item,'/')===false || !$skipNetMasks)
+					$ids[]=NetIps::fetchByTextAddr($item);
+			}
 		}
 		return $ids;
 	}
@@ -441,7 +445,7 @@ class NetIps extends ArmsModel
 		//проверяем вхождение
 		try {
 			$ip=new PhpIP\IPv4(static::removeMask($text_addr));
-		} catch (Exception $e) {
+		} /** @noinspection PhpRedundantCatchClauseInspection */ catch (Exception $e) {
 			return false;
 		}
 		
@@ -478,6 +482,11 @@ class NetIps extends ArmsModel
 		return '';
 	}
 	
+	/**
+	 * проверяет что все строки текстового атрибута $attribute это валидные IP адреса
+	 * @param $model
+	 * @param $attribute
+	 */
 	public static function validateInput(&$model,$attribute) {
 		$items=explode("\n",$model->$attribute);
 		$ipValidator = new IpValidator(['ipv6'=>false,'subnet'=>null]);

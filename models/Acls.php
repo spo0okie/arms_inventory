@@ -5,7 +5,6 @@ namespace app\models;
 
 
 use app\models\traits\AclsModelCalcFieldsTrait;
-use voskobovich\linker\LinkerBehavior;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -14,6 +13,7 @@ use yii\helpers\ArrayHelper;
  * @property int $id
  * @property int $schedules_id
  * @property int $services_id
+ * @property int $networks_id
  * @property int $ips_id
  * @property int $comps_id
  * @property int $techs_id
@@ -25,6 +25,7 @@ use yii\helpers\ArrayHelper;
  * @property Comps		$comp
  * @property Techs		$tech
  * @property NetIps		$ip
+ * @property Networks	$network
  * @property Services	$service
  * @property Aces[]		$aces
  * @property AccessTypes[] $accessTypes
@@ -55,6 +56,8 @@ class Acls extends ArmsModel
 		'aces_ids'=>[Aces::class,'acls_id'],
 		'schedules_id'=>[Schedules::class,'acls_ids'],
 		'services_id'=>[Services::class,'acls_ids'],
+		'networks_id'=>[Networks::class,'acls_ids'],
+		'ips_id'=>[NetIps::class,'acls_ids'],
 		'comps_id'=>[Comps::class,'acls_ids'],
 		'techs_id'=>[Techs::class,'acls_ids'],
 	];
@@ -74,30 +77,22 @@ class Acls extends ArmsModel
 			'aces'
 		]);
 	}
-	/**
-	 * В списке поведений прикручиваем many-to-many связи
-	 * @return array
-	 */
-	public function behaviors()
-	{
-		return [
-			[
-				'class' => LinkerBehavior::class,
-				'relations' => [
-					'aces_ids' => 'aces', //это не many-2-many. Мне просто нужно _ids поле
-				]
-			]
-		];
-	}
+	
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['schedules_id', 'services_id', 'ips_id', 'comps_id', 'techs_id'], 'integer'],
+            [['schedules_id', 'services_id', 'ips_id', 'comps_id', 'techs_id','networks_id'], 'integer'],
             [['notepad'], 'string'],
             [['comment'], 'string', 'max' => 255],
+			[['services_id', 'ips_id', 'comps_id', 'techs_id','networks_id','comment'],
+				'validateRequireOneOf',
+				'skipOnEmpty' => false,
+				'params'=>['attrs'=>['services_id', 'ips_id', 'comps_id', 'techs_id','networks_id','comment']]
+			]
+			
         ];
     }
 
@@ -109,7 +104,8 @@ class Acls extends ArmsModel
         return [
             'schedules_id' => 'Расписание доступа',
             'services_id' => ['Сервис','К какому сервису нужно предоставить доступ'],
-            'ips_id' => ['IP адрес','IP адрес к которому предоставляется доступ',],
+			'ips_id' => ['IP адрес','IP адрес к которому предоставляется доступ',],
+			'networks_id' => ['IP сеть','IP сеть к которой предоставляется доступ',],
             'comps_id' => ['ОС','Имя компьютера (Операционной Системы) к которому предоставляется доступ'],
             'techs_id' => ['Оборудование','Инвентарный номер оборудования к которому предоставляется доступ'],
             'comment' => ['Описание','Описание ресурса к которому предоставляется доступ (просто текст без привязки к объекту БД)'],
@@ -139,6 +135,11 @@ class Acls extends ArmsModel
 	public function getIp() {
 		return $this->hasOne(NetIps::class, ['id' => 'ips_id'])
 			->from(['ips_resources'=>NetIps::tableName()]);
+	}
+
+	public function getNetwork() {
+		return $this->hasOne(Networks::class, ['id' => 'networks_id'])
+			->from(['networks_resources'=>Networks::tableName()]);
 	}
 	
 	public function getAces() {

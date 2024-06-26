@@ -6,6 +6,7 @@
 
 //use kartik\nav\NavX;
 use app\models\AccessTypes;
+use app\models\Aces;
 use app\models\Acls;
 use app\models\Contracts;
 use app\models\ContractsStates;
@@ -108,6 +109,7 @@ NavBar::begin([
 			],
 			['label' => 'Доступы',
 				'items' => [
+					['label' => Aces::$titles, 'url' => ['/aces/index']],
 					['label' => Acls::$titles, 'url' => ['/acls/index']],
 					['label' => Acls::$scheduleTitles, 'url' => ['/scheduled-access/index']],
 					['label' => AccessTypes::$titles, 'url' => ['/access-types/index']],

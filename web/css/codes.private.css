@@ -1,12 +1,17 @@
 
 /* РАСКРАСКА СЕГМЕНТОВ СЕТИ */
+/* нужно учитывать отображение на основном (белом) фоне, в тултипе, в темном заголовке */
 span.segment_open {background-color: lightgreen; border-radius: 7px}
-div.arms-card div span.segment_open {background-color: seagreen;}
+.nav-header span.segment_open,
+.nav-header span.segment_open a {color: #25333d;}
 
 span.segment_closed {background-color: pink; border-radius: 7px}
-div.arms-card div span.segment_closed {background-color: indianred}
+.nav-header span.segment_closed,
+.nav-header span.segment_closed a {color: #25333d;}
 
 span.segment_common {background-color: lightskyblue; border-radius: 7px}
+.nav-header span.segment_common,
+.nav-header span.segment_common a {color: #25333d;}
 
 span.segment_ext {background-color:yellow; border-radius: 7px;}
 

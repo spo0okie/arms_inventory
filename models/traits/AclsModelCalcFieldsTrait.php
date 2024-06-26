@@ -13,6 +13,7 @@ namespace app\models\traits;
 use app\helpers\ArrayHelper;
 use app\models\Acls;
 use app\models\Places;
+use yii\web\View;
 
 /**
  * @package app\models\traits
@@ -139,5 +140,43 @@ trait AclsModelCalcFieldsTrait
 			$this->attrsCache['sname']=Acls::$emptyComment;
 		
 		return $this->attrsCache['sname'];
+	}
+	
+	
+	/**
+	 * Отрисовать все оборудование и ОС этого сервиса
+	 * @param View  $view
+	 * @param array $options
+	 * @return array
+	 */
+	public function renderNodes(View $view,$options=[])
+	{
+		if (strlen($this->comment))
+			return [$this->comment];
+		
+		if (($this->comps_id) and is_object($this->comp))
+			return [$this->comp->renderItem($view, $options)];
+		
+		if (($this->techs_id) and is_object($this->tech))
+			return [$this->tech->renderItem($view, $options)];
+	
+		if (($this->services_id) and is_object($this->service))
+			return $this->service->renderNodes($view, $options);
+		
+		if (($this->ips_id) and is_object($this->ip))
+			return [$this->ip->renderItem($view, $options)];
+		
+		if (($this->networks_id) and is_object($this->network))
+			return [$this->network->renderItem($view, $options)];
+
+		return [];
+	}
+	
+	public function hasIpAccess(){
+		/** @var Acls $this */
+		foreach ($this->aces as $ace) {
+			if ($ace->hasIpAccess()) return true;
+		}
+		return false;
 	}
 }

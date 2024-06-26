@@ -3,15 +3,15 @@
 use app\components\ItemObjectWidget;
 use app\components\LinkObjectWidget;
 use yii\helpers\Html;
-//use dosamigos\selectize\SelectizeDropDownList;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Comps */
 
 if (!isset($static_view)) $static_view=true;
-if (!isset($fqdn)) $fqdn=false;
-if (!isset($icon)) $icon=false;
+if (!isset($fqdn))	$fqdn=false;
+if (!isset($icon))	$icon=false;
 if (!isset($rc)) 	$rc=false;
+if (!isset($show_ips))	$show_ips=false;
 
 if (is_object($model)) {
 	if (!isset($name)) $name=$model->renderName($fqdn);
@@ -34,4 +34,15 @@ if (is_object($model)) {
 			'noSpaces'=>true
 		]),
 	]);
+	
+	if ($show_ips) {
+		if (!isset($ips_options)) $ips_options=[];
+		if (!isset($ips_glue)) $ips_glue=', ';
+		if (!isset($ips_prefix)) $ips_prefix=': ';
+		$items=[];
+		foreach ($model->netIps as $ip) {
+			$items[]=$ip->renderItem($this,$ips_options);
+		}
+		echo $ips_prefix.implode($ips_glue,$items);
+	}
 } else echo "Отсутствует";

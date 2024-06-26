@@ -1,13 +1,15 @@
 <?php
 
+use app\models\AccessTypes;
 use yii\helpers\Html;
 use kartik\grid\GridView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-\yii\helpers\Url::remember();
+Url::remember();
 
-$this->title = \app\models\AccessTypes::$titles;
+$this->title = AccessTypes::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
@@ -25,14 +27,14 @@ $renderer=$this;
             //['class' => 'yii\grid\SerialColumn'],
 
             //'id',
-            'code',
-            [
-                'attribute'=>'name',
-                'format'=>'raw',
-                'value'=>function($data) use ($renderer){
-                    return $renderer->render('item',['model'=>$data]);
-                }
-            ],
+			[
+				'attribute'=>'name',
+				'format'=>'raw',
+				'value'=>function($data) use ($renderer){
+					return $renderer->render('item',['model'=>$data]);
+				}
+			],
+			'code',
             'comment:ntext',
             'notepad:ntext',
 

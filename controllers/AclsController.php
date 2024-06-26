@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\components\assets\ArmsFormAsset;
+use app\models\Aces;
 use Yii;
 use app\models\Acls;
 
@@ -44,4 +46,47 @@ class AclsController extends ArmsBaseController
 			['/scheduled-access/view','id'=>$schedules_id]:
 			['/scheduled-access/index-acl'];
     }
+	
+	
+	/**
+	 * По той простой причине, что создавать просто ACL без единого ACE это не интуитивно и надо сразу указывать
+	 * КТО, КУДА и КАКОЙ доступ имеет, мы сделали форму сразу для ACL+ACE
+	 * If creation is successful, the browser will be redirected to the 'view' page.
+	 * @return mixed
+	 */
+	public function actionCreate()
+	{
+		$this->view->registerAssetBundle(ArmsFormAsset::class);
+		/** @var Acls $model */
+		$model = new $this->modelClass();
+		$ace = new Aces();
+		
+		if ($model->load(Yii::$app->request->post())){
+			if($model->validate()) {
+				if ($ace->load(Yii::$app->request->post())){
+					if($ace->validate()) {
+						//успех по обеим моделям
+						$model->save();
+						$model->refresh();
+						$ace->acls_id=$model->id;
+						$ace->save();
+						return $this->defaultReturn($this->routeOnUpdate($model), [$model]);
+					} else {
+						//неудача по ACE
+						$model->load(Yii::$app->request->get());
+						$ace->load(Yii::$app->request->get());
+						return $this->defaultRender('create', ['model' => $model,'ace'=>$ace]);
+					}
+				}
+				//успех ACL, отсутствует ACE
+				$model->save();
+				return $this->defaultReturn($this->routeOnUpdate($model), [$model]);
+			}
+		}
+		
+		//неудача ACL
+		$model->load(Yii::$app->request->get());
+		$ace->load(Yii::$app->request->get());
+		return $this->defaultRender('create', ['model' => $model,'ace'=>$ace]);
+	}
 }

@@ -1,7 +1,7 @@
 <?php
 
+use app\components\LinkObjectWidget;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\AccessTypes */
@@ -12,27 +12,35 @@ if (!isset($static_view)) $static_view=false;
 ?>
 
 <h1>
-	<?= Html::encode($model->name) ?>
-	<?= $static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['access-types/update','id'=>$model->id])) ?>
-	<?php  if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['access-types/delete', 'id' => $model->id], [
-		'data' => [
-			'confirm' => 'Удалить этот элемент? Действие необратимо',
-			'method' => 'post',
-		],
+	<?= LinkObjectWidget::widget([
+		'model'=>$model,
+		'hideUndeletable'=>false,
 	]) ?>
 </h1>
 
-<?= Html::encode($model->comment) ?>
+<?php
+	echo Html::encode($model->comment);
+	
+	$flags=[];
+	foreach (['is_app','is_ip','is_phone','is_vpn'] as $attr) {
+		if ($model->$attr) {
+			$flags[]='<li>'.$model->getAttributeLabel($attr).'</li>';
+		}
+	}
+	if (count($flags))
+		echo '<ul>'.implode($flags).'</ul>';
 
-<?php if (strlen($model->notepad)) {
+if ($model->ip_params_def)
+	echo "<strong>Сетевые параметры по умолчанию:</strong> {$model->ip_params_def}";
+
+if (strlen($model->notepad)) {
 	echo '<p>'.Yii::$app->formatter->asNtext($model->notepad).'</p>';
-} ?>
+}
 
-<?php if (count($model->children)) {
+if (count($model->children)) {
 	echo '<h4>'.$model->getAttributeLabel('children').'</h4>';
 	echo '<ul>';
 	foreach ($model->children as $child)
 		echo '<li>'.$this->render('item',['model'=>$child,'static_view'=>true]).'</li>';
 	echo '</ul>';
-} ?>
-
+}

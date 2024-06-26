@@ -13,6 +13,7 @@ use app\components\ItemObjectWidget;
 use app\components\LinkObjectWidget;
 use app\models\Techs;
 if (!isset($static_view)) $static_view=false;
+if (!isset($show_ips))	$show_ips=false;
 
 if (!empty($model)) {
 	
@@ -29,4 +30,15 @@ if (!empty($model)) {
 			'noSpaces'=>true,
 		])
 	]);
+	
+	if ($show_ips) {
+		if (!isset($ips_options)) $ips_options=[];
+		if (!isset($ips_glue)) $ips_glue=', ';
+		if (!isset($ips_prefix)) $ips_prefix=': ';
+		$items=[];
+		foreach ($model->netIps as $ip) {
+			$items[]=$ip->renderItem($this,$ips_options);
+		}
+		echo $ips_prefix.implode($ips_glue,$items);
+	}
 }

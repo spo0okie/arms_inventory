@@ -16,6 +16,7 @@ use app\models\Scans;
 use app\models\Schedules;
 use app\models\Services;
 use app\models\Users;
+use yii\web\View;
 
 /**
  * @package app\models\traits
@@ -380,5 +381,19 @@ trait ServicesModelCalcFieldsTrait
 		return $name;
 	}
 	
-	
+	/**
+	 * Отрисовать все оборудование и ОС этого сервиса
+	 * @param View  $view
+	 * @param array $options
+	 * @return array
+	 */
+	public function renderNodes(View $view,$options=[]) {
+		$items=[];
+		foreach ($this->comps as $comp)
+			$items[]=$comp->renderItem($view,$options);
+		foreach ($this->techs as $tech) {
+			$items[]=$tech->renderItem($view,$options);
+		}
+		return $items;
+	}
 }

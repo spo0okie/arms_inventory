@@ -203,7 +203,7 @@ class Networks extends ArmsModel
 	 */
 	public function getSname()
 	{
-		return $this->text_addr. ($this->name?('('.$this->name.')'):'');
+		return $this->text_addr. ($this->name?(' ('.$this->name.')'):'');
 	}
 	
 	
@@ -484,6 +484,29 @@ class Networks extends ArmsModel
 	}
 	
 	/**
+	 * Имея текстовый список IP/MASK возвращает ids объектов IP сетей
+	 * @param      $text
+	 * @return int[]
+	 */
+	public static function fetchNetworkIds($text) {
+		if (!count($items=explode("\n",$text))) return[];
+		$ids=[];
+		foreach ($items as $item) {
+			$item=trim($item);
+			if (strlen($item)) {
+				if (strpos($item,'/')!==false) {
+					/** @var Networks $network */
+					$network=static::find()->where(['text_addr'=>$item])->one();
+					if (is_object($network))
+						$ids[]=$network->id;
+				}
+				
+			}
+		}
+		return $ids;
+	}
+	
+	/**
 	 * @inheritdoc
 	 */
 	public function beforeSave($insert)
@@ -520,6 +543,28 @@ class Networks extends ArmsModel
 			foreach ($totalIps as $ip) $ip->save();
 		}
 		
+	}
+	
+	/**
+	 * проверяет что все строки текстового атрибута $attribute, содержащие маску это существующие IP сети
+	 * @param $model
+	 * @param $attribute
+	 */
+	public static function validateInput(&$model,$attribute) {
+		//сначала проверим, что тут нет посторонних строк, только адреса с маской или без
+		NetIps::validateInput($model,$attribute);
+		/** @var ArmsModel $model */
+		//если есть строки которые вообще не являются адресами, то дальше не проверяем
+		if ($model->hasErrors($attribute)) return;
+		$items=explode("\n",$model->$attribute);
+		foreach ($items as $item) if (strlen(trim($item))) {
+			if (strpos($item, '/') !== false) {
+				/** @var Networks $network */
+				$network = static::find()->where(['text_addr' => $item])->one();
+				if (!is_object($network))
+					$model->addError($attribute, "Сеть $item не найдена в инвентаризации. Нельзя предоставить доступ не объявленной сети");
+			}
+		}
 	}
 	
 	

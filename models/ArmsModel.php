@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
+use app\helpers\FieldsHelper;
 use app\helpers\RestHelper;
 use app\helpers\StringHelper;
 use app\models\traits\AttributeDataModelTrait;
@@ -209,6 +210,27 @@ class ArmsModel extends ActiveRecord
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Требовать выставления как минимум одного аттрибута из нескольких
+	 * $params должно содержать поле 'attrs' => ['comp_ids','comment','user_id'];
+	 * обязательно при прописывании валидатора надо добавлять параметр 'skipOnEmpty' => false
+	 * иначе валидация пустых полей будет пропущена
+	 * @param       $attribute
+	 * @param array $params
+	 * @return bool
+	 * @noinspection PhpUnusedParameterInspection
+	 */
+	public function validateRequireOneOf($attribute, $params=[]) {
+		foreach ($params['attrs']??[] as $attr) {
+			//если аттрибут не пуст, то как минимум один заполнен
+			if (!FieldsHelper::attrIsEmpty($this,$attr)) return true;
+		}
+		foreach ($params['attrs']??[] as $attr) {
+			$this->addError($attr,$params['message']??'Как минимум один аттрибут должен быть заполнен');
+		}
+		return false;
 	}
 	
 	public function silentSave($runValidation = true) {

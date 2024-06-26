@@ -10,7 +10,6 @@ namespace app\models\traits;
 
 
 use app\models\Aces;
-use app\models\HistoryModel;
 
 /**
  * @package app\models\traits
@@ -18,8 +17,9 @@ use app\models\HistoryModel;
 
 trait AcesModelCalcFieldsTrait
 {
+	static $NAME_MISSING='Пояснение отсутствует';
 	/**
-	 * Типы доступа
+	 * Типы доступа (ничего не понял, нельзя же 2 раза выбрать один тип доступа для одного ACE)
 	 */
 	public function getAccessTypesUniq()
 	{
@@ -32,7 +32,7 @@ trait AcesModelCalcFieldsTrait
 	}
 	
 	/**
-	 * Набор пользователей
+	 * Набор пользователей (и два раза пользователя нельзя выбрать. как так?? зачем это?)
 	 */
 	public function getUsersUniq()
 	{
@@ -90,12 +90,9 @@ trait AcesModelCalcFieldsTrait
 	 */
 	public function getSname()
 	{
-		if ($this->comment) return $this->comment;
-		if ($this instanceof HistoryModel) return 'ACE#'.$this->master_id;
-		return 'ACE#'.$this->id;
+		if ($this->name) return $this->name;
+		return static::$NAME_MISSING;
 	}
-	
-	public function getName(){return $this->sname;}
 	
 	
 }

@@ -13,55 +13,7 @@ use yii\helpers\Url;
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
 
-$items=[];
-$hasIp=$model->hasIpAccess();
-$hasPhone=$model->hasPhoneAccess();
-
-foreach ($model->users as $user) {
-	
-	if ($hasPhone)
-		$rendered = $this->render('/users/item', ['model' => $user, 'static_view' => true, 'icon' => true, 'name' => $user->shortName.(strlen($user->Phone)?' ('.$user->Phone.')':'')]);
-	else
-		$rendered = $this->render('/users/item', ['model' => $user, 'static_view' => true, 'icon' => true, 'short' => true]);
-	
-	if ($hasIp) {
-		$ips=[];
-		foreach ($user->netIps as $ip) {
-			$ips[$ip->sname] = $this->render('/net-ips/item', ['model' => $ip, 'static_view' => true, 'icon' => true, 'no_class' => true]);
-			$items[$ip->sname]='';
-		}
-		if (count($ips)) $rendered.=': '.implode(', ',$ips);
-	}
-	
-	
-	$items[$user->shortName]=$rendered;
-}
-
-foreach ($model->comps as $comp) {
-	$rendered = $this->render('/comps/item', ['model' => $comp, 'static_view' => true, 'icon' => true]);
-	
-	if ($hasIp) {
-		$ips=[];
-		foreach ($comp->netIps as $ip) {
-			$ips[$ip->sname] = $this->render('/net-ips/item', ['model' => $ip, 'static_view' => true, 'icon' => true, 'no_class' => true]);
-			$items[$ip->sname]='';
-		}
-		if (count($ips)) $rendered.=': '.implode(', ',$ips);
-	}
-	$items[$comp->name]=$rendered;
-}
-
-foreach ($model->netIps as $ip) {
-	if (!isset($items[$ip->sname]))
-		$items[$ip->sname]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true,'no_class'=>true]);
-}
-
-if (strlen($model->comment))
-	$items[$model->comment]='<span class="text-wrap">'.$model->comment.'</span>';
-
-ksort($items,SORT_STRING);
-
-
+$items=include('resources.php');
 
 $accessTypes=[];
 

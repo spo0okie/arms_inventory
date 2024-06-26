@@ -1,12 +1,14 @@
 <?php
 
+use app\components\DynaGridWidget;
+use app\models\Aces;
 use yii\helpers\Html;
-use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $searchModel app\models\AcesSearch */
 
-$this->title = \app\models\Aces::$titles;
+$this->title = Aces::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
@@ -18,24 +20,9 @@ $renderer=$this;
         <?= Html::a('Создать', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?= GridView::widget([
+    <?= DynaGridWidget::widget([
         'dataProvider' => $dataProvider,
-        'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            [
-                'attribute'=>'id',
-                'format'=>'raw',
-                'value'=>function($data) use ($renderer){
-                    return $renderer->render('item',['model'=>$data]);
-                }
-            ],
-            'acls_id',
-            'ips:ntext',
-            'comment:ntext',
-            'notepad:ntext',
-
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
+		'filterModel' => $searchModel,
+        'columns' => include 'columns.php',
     ]); ?>
 </div>

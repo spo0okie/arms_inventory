@@ -67,14 +67,12 @@ HTML,
 	
 }
 
-if (count($model->children)||count($model->incomingConnections)||count($model->outgoingConnections)) {
-	DynaGridWidget::handleSave('service-connections-list');
-	
+	DynaGridWidget::handleSave('services-aces-list');
 	$tabs[]=[
-		'id'=>'serviceConnections',
-		'label'=>'Связи <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-connections-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+		'id'=>'serviceAces',
+		'label'=>'Доступ отсюда <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-aces-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
 		'content'=><<<HTML
-		<div id="serviceConnectionsList">
+		<div id="serviceAcesList">
 		
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
@@ -82,16 +80,38 @@ if (count($model->children)||count($model->incomingConnections)||count($model->o
 		</div>
 		<script>
 			$(document).ready(function() {
-				$.get("/web/services/connections-list?id={$model->id}", function(data) {
-				    jQuery("#serviceConnectionsList").hide().html(data);
-				    setTimeout(function (){jQuery("#serviceConnectionsList").fadeToggle();ExpandableCardInitAll();},500)
+				$.get("/web/services/aces-list?id={$model->id}", function(data) {
+				    jQuery("#serviceAcesList").hide().html(data);
+				    setTimeout(function (){jQuery("#serviceAcesList").fadeToggle();ExpandableCardInitAll();},500)
 				})
 			})
 		</script>
 HTML,
 	];
-	
-}
+
+
+DynaGridWidget::handleSave('services-acls-list');
+$tabs[]=[
+	'id'=>'serviceAcls',
+	'label'=>'Доступы сюда <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-acls-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+	'content'=><<<HTML
+		<div id="serviceAclsList">
+		
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
+		<script>
+			$(document).ready(function() {
+				$.get("/web/services/acls-list?id={$model->id}", function(data) {
+				    jQuery("#serviceAclsList").hide().html(data);
+				    setTimeout(function (){jQuery("#serviceAclsList").fadeToggle();ExpandableCardInitAll();},500)
+				})
+			})
+		</script>
+HTML,
+];
+
 
 TabsWidget::addWikiLinks($tabs,$model->links);
 

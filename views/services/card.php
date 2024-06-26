@@ -192,14 +192,14 @@ if(!$static_view) { ?>
 				],[
 					'class'=>'btn btn-success m-0'
 				]).
-				Html::a('Добавить вх. связь',[
-					'/service-connections/create','ServiceConnections'=>['target_id'=>$model->id]
+				Html::a('Добавить вх. доступ',[
+					'/acls/create','Acls'=>['services_id'=>$model->id]
 				],[
 					'class'=>'btn btn-success m-0 open-in-modal-form',
 					'data-reload-page-on-submit'=>1
 				]).
-				Html::a('Добавить исх. связь',[
-					'/service-connections/create','ServiceConnections'=>['initiator_id'=>$model->id]
+				Html::a('Добавить исх. доступ',[
+					'/acls/create','Aces'=>['services_ids'=>[$model->id]]
 				],[
 					'class'=>'btn btn-success m-0 open-in-modal-form',
 					'data-reload-page-on-submit'=>1

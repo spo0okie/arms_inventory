@@ -20,6 +20,7 @@ if (!empty($model)) {
 	
 	echo ItemObjectWidget::widget([
 		'model'=>$model,
+		'item_class'=>$class,
 		'archived_class'=>'text-decoration-line-through',
 		'link'=> LinkObjectWidget::widget([
 			'model'=>$model,

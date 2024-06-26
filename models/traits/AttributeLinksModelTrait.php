@@ -25,6 +25,7 @@ trait AttributeLinksModelTrait
 	 * 		'services_ids'=>[
 	 * 			Service::class,		//на какой класс ссылаемся
 	 * 			'acls_ids',			//если там есть обратная ссылка, то в каком аттрибуте
+	 * 			'updater',			//updater для many-2-many таблицы https://github.com/voskobovich/yii2-linker-behavior?tab=readme-ov-file#custom-junction-table-values
 	 * 		],
 	 * 		'user_id'=>[
 	 * 			Users::class,
@@ -58,9 +59,17 @@ trait AttributeLinksModelTrait
 		$relations=[];
 		
 		foreach ($this->getLinksSchema() as $attribute=>$data) {
+			if (!is_array($data)) $data=[$data];
 			if (StringHelper::endsWith($attribute,'_ids')) {
 				if ($loader=$this->attributeLinkLoader($attribute)) {
-					$relations[$attribute]=$loader;
+					$relation=[
+						$loader,
+					];
+					if (isset($data['updater'])) {
+						//если мы в схему отношений впихнули апдейтер, то вот тут мы его заталкиваем в behaviour
+						$relation['updater']=$data['updater'];
+					}
+					$relations[$attribute]=$relation;
 				}
 			}
 		}
