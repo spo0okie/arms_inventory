@@ -8,11 +8,8 @@ namespace app\models\traits;
 
 
 
-use app\helpers\ArrayHelper;
 use app\models\MaintenanceReqs;
 use app\models\Scans;
-use app\models\Services;
-use app\models\Techs;
 use app\models\Users;
 
 /**
@@ -57,18 +54,22 @@ trait MaintenanceReqsModelCalcFieldsTrait
 	 */
 	public static function filterEffective(array $reqs)
 	{
+		$effective=[];
 		//проверяем всех
 		foreach ($reqs as $req) {
+			//ибо иначе прописанное свойство absorbed сохраняется в объекте, который один на множество компов
+			$req1=clone $req;
 			//со всеми
-			foreach ($reqs as $test) {
+			foreach ($reqs as $req2) {
 				//если элемент входит в набор удовлетворяемых требований - помечаем его
-				if ($req->isSatisfiedByReq($test)) {
-					$req->absorbed=$test->id;
+				if ($req1->isSatisfiedByReq($req2)) {
+					$req1->absorbed=$req2->id;
 					break;
 				}
 			}
+			$effective[]=$req1;
 		}
-		return $reqs;
+		return $effective;
 	}
 	
 	public function getArchivedOrAbsorbed() {
