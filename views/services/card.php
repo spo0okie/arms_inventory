@@ -148,7 +148,7 @@ if(!$static_view) { ?>
 
 		<?= $this->render('card-support',['model'=>$model,'static_view'=>$static_view]) ?>
 		
-		<?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
+		<?php /* $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) */ ?>
 		
 		<?php if (is_array($model->orgInets) && count($model->orgInets)) { ?>
 			<h4>Предоставляет ввод(ы) интернет:</h4>
@@ -235,7 +235,7 @@ if(!$static_view) { ?>
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
-		<?= ModelFieldWidget::widget([
+		<?php /* ModelFieldWidget::widget([
 			'model'=>$model, 'field'=>'incomingConnections',
 			'itemViewPath'=>'/service-connections/part',
 			'lineBr'=>true,
@@ -249,7 +249,7 @@ if(!$static_view) { ?>
 			'lineBr'=>true,
 			'item_options'=>['static_view'=>$static_view,'self'=>true,'source'=>'target'],
 			'card_options'=>['cardClass'=>'mb-3'],
-		]) ?>
+		]) */ ?>
 
 		<?php if (is_object($model->partner)) { ?>
 			<hr/>

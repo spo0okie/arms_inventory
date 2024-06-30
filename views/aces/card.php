@@ -1,7 +1,7 @@
 <?php
 
 use app\components\HistoryWidget;
-use app\helpers\ArrayHelper;
+use app\components\ListObjectsWidget;
 use app\models\Aces;
 use kartik\markdown\Markdown;
 use yii\helpers\Html;
@@ -12,8 +12,6 @@ use yii\helpers\Url;
 
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
-
-$items=include('resources.php');
 
 $accessTypes=[];
 
@@ -26,8 +24,18 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 <div class="card w-100 my-2 ace-card shadow-sm g-0" id="ace_card_<?= $model->id ?>">
 	<div class="d-flex g-0">
 		<div class="p-2 text-wrap flex-fill small">
-			<?php if (count($items)) {
-				echo ArrayHelper::implode(' <br /> ',$items);
+			<?php if (count($model->getSubjects())) {
+				echo ListObjectsWidget::widget([
+					'models'=>$model->getSubjects(),
+					'title'=>false,
+					'item_options'=>[
+						'static_view'=>true,
+						'show_ips'=>$model->hasIpAccess(),
+						'show_phone'=>$model->hasPhoneAccess(),
+						'short'=>true,
+					],
+					'card_options'=>['cardClass'=>'m-0 p-0'],
+				]);
 			} else { ?>
 				<span class="text-center divider2-striped">
 					<span class="ace-card p-1">

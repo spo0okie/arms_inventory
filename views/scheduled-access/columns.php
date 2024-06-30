@@ -1,5 +1,7 @@
 <?php
 
+use app\components\ModelFieldWidget;
+use app\models\Schedules;
 use yii\helpers\Html;
 
 
@@ -9,51 +11,43 @@ use yii\helpers\Html;
 
 $renderer=$this;
 return [
+	//Субъекты
 	'objects'=>[
 		'value'=>function($data) use ($renderer) {
-			$items=[];
-			if (count($data->acls)) foreach ($data->acls as $acl) {
-				foreach ($acl->aces as $ace) {
-					foreach ($ace->users as $user)
-						$items[$user->shortName]=$this->render('/users/item',['model'=>$user,'static_view'=>true,'icon'=>true,'short'=>true]);
-					
-					foreach ($ace->comps as $comp)
-						$items[$comp->name]=$this->render('/comps/item',['model'=>$comp,'static_view'=>true,'icon'=>true]);
-					
-					foreach ($ace->netIps as $ip)
-						$items[$ip->sname]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true,'no_class'=>true]);
-					
-					if (strlen($ace->comment))
-						$items[$ace->comment]=$ace->comment;
-					
-					ksort($items,SORT_STRING);
-				}
-			}
-			ksort($items,SORT_STRING);
-			return \app\components\ExpandableCardWidget::widget(['content'=>implode('<br />',$items)]);
+			$aces=$data->aces;
+			return ModelFieldWidget::widget([
+				'models'=>$aces,
+				'field'=>'subjects',
+				'title'=>false,
+				'card_options'=>['cardClass'=>'m-0 p-0'],
+				'lineBr'=>false,
+				'item_options'=>['static_view'=>true,'icon'=>true,'no_class'=>true,'short'=>true],
+				'glue'=>'<br>',
+			]);
 		}
 	],
 	'resources'=>[
 		'value'=>function($data) use ($renderer) {
-			$output=[];
-			if (count($data->acls)) foreach ($data->acls as $acl) {
-				$output[$acl->sname]=$renderer->render('/acls/resource',['model'=>$acl,'static_view'=>true]);
-			}
-			return \app\components\ExpandableCardWidget::widget(['content'=>implode('<br />',$output)]);
+			return ModelFieldWidget::widget([
+				'models'=>$data->acls,
+				'field'=>'resource',
+				'title'=>false,
+				'card_options'=>['cardClass'=>'m-0 p-0'],
+				'lineBr'=>false,
+				'item_options'=>['static_view'=>false,'icon'=>true,'no_class'=>true,'short'=>true],
+				'glue'=>'<br>',
+			]);
 		}
 	],
 	'name'=>[
 		'value'=>function($data) use ($renderer) {
-			$output=[Html::a($data->name,['view','id'=>$data->id])];
-			if ($data->description) $output[]=$data->description;
-			//if ($data->history) $output[]=Markdown::convert($data->history);
-			return implode('<br />',$output);
+			return $data->renderItem($renderer,['static_view'=>false,'noDelete'=>true]);
 		}
 	],
 	'accessPeriods'=>[
 		'value'=>function($data) use ($renderer) {
 			/**
-			 * @var $data \app\models\Schedules
+			 * @var $data Schedules
 			 */
 			$output=[];
 			if (is_array($periods=$data->findPeriods(null,null)) && count($periods))
@@ -71,7 +65,7 @@ return [
 		},
 		'contentOptions'=>function ($data) {
 			/**
-			 * @var $data \app\models\Schedules
+			 * @var $data Schedules
 			 */
 			$working=$data->isWorkTime( date('Y-m-d'),date('H:i:s'));
 			return [
@@ -81,47 +75,40 @@ return [
 	],
 	'acePartners'=>[
 		'value'=>function($data) use ($renderer) {
-			/**
-			 * @var $data \app\models\Schedules
-			 */
-			$items=[];
-			if (count($data->acePartners)) foreach ($data->acePartners as $partner) {
-				$items[]=$this->render('/partners/item',['model'=>$partner,'static_view'=>true]);
-			}
-			ksort($items,SORT_STRING);
-			return implode('<br />',$items);
-		}
+			return ModelFieldWidget::widget([
+				'model'=>$data,
+				'field'=>'acePartners',
+				'title'=>false,
+				'card_options'=>['cardClass'=>'m-0 p-0'],
+				'item_options'=>['static_view'=>true],
+			]);		}
 	],
 	'aclSegments'=>[
 		'value'=>function($data) use ($renderer) {
-			/**
-			 * @var $data \app\models\Schedules
-			 */
-			$items=[];
-			if (count($data->aclSegments)) foreach ($data->aclSegments as $segment) {
-				$items[]=$this->render('/segments/item',['model'=>$segment,'static_view'=>true]);
-			}
-			ksort($items,SORT_STRING);
-			return implode('<br />',$items);
+			return ModelFieldWidget::widget([
+				'model'=>$data,
+				'field'=>'aclSegments',
+				'title'=>false,
+				'card_options'=>['cardClass'=>'m-0 p-0'],
+				'item_options'=>['static_view'=>true],
+			]);
 		}
 	],
 	'aceDepartments'=>[
 		'value'=>function($data) {
-			/**
-			 * @var $data \app\models\Schedules
-			 */
-			$items=[];
-			if (count($data->aceDepartments)) foreach ($data->aceDepartments as $department) {
-				$items[]=$this->render('/org-struct/item',['model'=>$department,'static_view'=>true]);
-			}
-			ksort($items,SORT_STRING);
-			return implode('<br />',$items);
+			return ModelFieldWidget::widget([
+				'model'=>$data,
+				'field'=>'aceDepartments',
+				'title'=>false,
+				'card_options'=>['cardClass'=>'m-0 p-0'],
+				'item_options'=>['static_view'=>true],
+			]);
 		}
 	],
 	'aclSites'=>[
 		'value'=>function($data) use ($renderer) {
 			/**
-			 * @var $data \app\models\Schedules
+			 * @var $data Schedules
 			 */
 			$items=[];
 			if (count($data->aclSites)) foreach ($data->aclSites as $site) {
@@ -134,12 +121,14 @@ return [
 	'accessTypes'=>[
 		'value'=>function($data) use ($renderer) {
 			/**
-			 * @var $data \app\models\Schedules
+			 * @var $data Schedules
 			 */
 			$items=[];
-			if (count($data->accessTypes)) foreach ($data->accessTypes as $type) {
-				$items[]=$this->render('/access-types/item',['model'=>$type,'static_view'=>true]);
-			}
+			foreach ($data->acls as $acl)
+				foreach ($acl->aces as $ace )
+					foreach ($ace->accessTypes as $type) {
+						$items[$type->id]=$this->render('/access-types/item',['model'=>$type,'static_view'=>true]);
+					}
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);
 		}

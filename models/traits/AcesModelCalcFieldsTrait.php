@@ -9,6 +9,7 @@ namespace app\models\traits;
 
 
 
+use app\helpers\ArrayHelper;
 use app\models\Aces;
 
 /**
@@ -18,31 +19,6 @@ use app\models\Aces;
 trait AcesModelCalcFieldsTrait
 {
 	static $NAME_MISSING='Пояснение отсутствует';
-	/**
-	 * Типы доступа (ничего не понял, нельзя же 2 раза выбрать один тип доступа для одного ACE)
-	 */
-	public function getAccessTypesUniq()
-	{
-		/** @var Aces $this */
-		if (!is_array($this->accessTypes)) return[];
-		$types=[];
-		foreach ($this->accessTypes as $type)
-			$types[$type->id]=$type;
-		return $types;
-	}
-	
-	/**
-	 * Набор пользователей (и два раза пользователя нельзя выбрать. как так?? зачем это?)
-	 */
-	public function getUsersUniq()
-	{
-		/** @var Aces $this */
-		if (!is_array($this->users)) return[];
-		$users=[];
-		foreach ($this->users as $user)
-			$users[$user->id]=$user;
-		return $users;
-	}
 	
 	/**
 	 * Набор пользователей
@@ -50,9 +26,9 @@ trait AcesModelCalcFieldsTrait
 	public function getDepartments()
 	{
 		/** @var Aces $this */
-		if (!is_array($this->usersUniq)) return[];
+		if (!is_array($this->users)) return[];
 		$departments=[];
-		foreach ($this->usersUniq as $user)
+		foreach ($this->users as $user)
 			if (is_object($department=$user->orgStruct))
 				$departments[$department->id]=$department;
 		return $departments;
@@ -70,7 +46,7 @@ trait AcesModelCalcFieldsTrait
 	
 	public function hasIpAccess(){
 		/** @var Aces $this */
-		foreach ($this->accessTypesUniq as $accessType) {
+		foreach ($this->accessTypes as $accessType) {
 			if ($accessType->isIpRecursive) return true;
 		}
 		return false;
@@ -78,7 +54,7 @@ trait AcesModelCalcFieldsTrait
 	
 	public function hasPhoneAccess(){
 		/** @var Aces $this */
-		foreach ($this->accessTypesUniq as $accessType) {
+		foreach ($this->accessTypes as $accessType) {
 			if ($accessType->isTelephonyRecursive) return true;
 		}
 		return false;
@@ -94,5 +70,54 @@ trait AcesModelCalcFieldsTrait
 		return static::$NAME_MISSING;
 	}
 	
+	/**
+	 * Возвращает все субъекты досутпа одним списком
+	 */
+	public function getSubjects() {
+		/** @var Aces $this */
+		if (isset($this->attrsCache['subjects']))
+			return $this->attrsCache['subjects'];
+		$this->attrsCache['subjects']=[];
+		foreach ($this->users as $subject)
+			$this->attrsCache['subjects'][$subject->uuid()] = $subject;
+		foreach ($this->comps as $subject)
+			$this->attrsCache['subjects'][$subject->uuid()] = $subject;
+		foreach ($this->services as $subject)
+			$this->attrsCache['subjects'][$subject->uuid()] = $subject;
+		foreach ($this->netIps as $subject)
+			$this->attrsCache['subjects'][$subject->uuid()] = $subject;
+		foreach ($this->networks as $subject)
+			$this->attrsCache['subjects'][$subject->uuid()] = $subject;
+		return $this->attrsCache['subjects'];
+	}
+	
+	/**
+	 * Возвращает все узлы субъектов доступа (сервисы разворачиваются в ОС и оборудование)
+	 */
+	public function getNodes() {
+		/** @var Aces $this */
+		if (isset($this->attrsCache['nodes']))
+			return $this->attrsCache['nodes'];
+		$this->attrsCache['nodes']=[];
+		foreach ($this->users as $subject)
+			$this->attrsCache['nodes'][$subject->uuid()] = $subject;
+		foreach ($this->comps as $subject)
+			$this->attrsCache['nodes'][$subject->uuid()] = $subject;
+		foreach ($this->netIps as $subject)
+			$this->attrsCache['nodes'][$subject->uuid()] = $subject;
+		foreach ($this->networks as $subject)
+			$this->attrsCache['nodes'][$subject->uuid()] = $subject;
+		foreach ($this->services as $service)
+			$this->attrsCache['nodes']=ArrayHelper::recursiveOverride(
+				$this->attrsCache['nodes'],
+				$service->nodesRecursive
+			);
+		return $this->attrsCache['nodes'];
+		
+	}
+	
+	public function getArchived() {
+		return false;
+	}
 	
 }

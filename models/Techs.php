@@ -6,6 +6,7 @@ use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
+use app\models\traits\AclsFieldTrait;
 use app\models\traits\TechsModelCalcFieldsTrait;
 use voskobovich\linker\LinkerBehavior;
 use Yii;
@@ -131,7 +132,7 @@ use yii\db\ActiveQuery;
 
 class Techs extends ArmsModel
 {
-	use TechsModelCalcFieldsTrait;	//различные вычисляемые поля
+	use TechsModelCalcFieldsTrait,AclsFieldTrait;	//различные вычисляемые поля
 	
 	public $renderedInFrontRack=[];	//позиции в передней корзине где уже отрендерилось
 	public $renderedInBackRack=[];	//тоже самое в задней корзине

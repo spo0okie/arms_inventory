@@ -24,6 +24,7 @@ class ModelFieldWidget extends Widget
 	 * @var ArmsModel модель, поле которой нам нужно
 	 */
 	public $model;
+	public $models;
 	public $field;				//поле модели, которое нам нужно
 	public $title;				//заголовок поля
 	public $show_archived;		//флаг отображения архивного элемента
@@ -37,26 +38,39 @@ class ModelFieldWidget extends Widget
 	public $modelClass;			//класс объектов из списка значений поля
 	public $raw_items=false;
 	
-	private $data;
+	private $data=[];
+	
+	public function loadModelData($model) {
+		if ($this->field==='links') {
+			$links=new UrlListWidget(['list'=>$model->links]);
+			$links->renderItems();
+			$this->data = array_merge($this->data,$links->rendered);
+			$this->raw_items=true;
+		} else {
+			//вытаскиваем поле в отдельную переменную, чтобы больше не городить такое
+			$newData=$this->model->{$this->field};
+			if (is_array($newData)) {
+				$this->data=array_merge($this->data,$newData);
+			} else {
+				if (!empty($newData))
+					$this->data[]=$newData;
+			}
+		}
+		
+	}
 	
 	public function init(){
 		parent::init();
 		
-		if (!isset($this->data)) {
-			if ($this->field==='links') {
-				$links=new UrlListWidget(['list'=>$this->model->links]);
-				$links->renderItems();
-				$this->data = $links->rendered;
-				$this->raw_items=true;
-			} else {
-				//вытаскиваем поле в отдельную переменную, чтобы больше не городить такое
-				$this->data=$this->model->{$this->field};
-			}
+		if (is_array($this->models)) {
+			$this->model=reset($this->models);
+			foreach ($this->models as $model)
+				$this->loadModelData($model);
+		} else {
+			$this->loadModelData($this->model);
 		}
 		
-		if (!is_array($this->data)) {
-			$this->data=empty($this->data)?[]:[$this->data];
-		};
+		
 		
 		if (!isset($this->title)) {
 			$this->title=$this->model->getAttributeLabel($this->field);

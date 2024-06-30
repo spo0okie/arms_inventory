@@ -16,7 +16,6 @@ use app\models\Scans;
 use app\models\Schedules;
 use app\models\Services;
 use app\models\Users;
-use yii\web\View;
 
 /**
  * @package app\models\traits
@@ -382,18 +381,28 @@ trait ServicesModelCalcFieldsTrait
 	}
 	
 	/**
-	 * Отрисовать все оборудование и ОС этого сервиса
-	 * @param View  $view
-	 * @param array $options
+	 * Вернуть все узлы входящие в сервис
 	 * @return array
 	 */
-	public function renderNodes(View $view,$options=[]) {
+	public function getNodes() {
 		$items=[];
 		foreach ($this->comps as $comp)
-			$items[]=$comp->renderItem($view,$options);
-		foreach ($this->techs as $tech) {
-			$items[]=$tech->renderItem($view,$options);
-		}
+			$items[$comp->uuid()]=$comp;
+		foreach ($this->techs as $tech)
+			$items[$tech->uuid()]=$tech;
+		return $items;
+	}
+	
+	/**
+	 * Вернуть все узлы входящие в сервис
+	 * @return array
+	 */
+	public function getNodesRecursive() {
+		$items=[];
+		foreach ($this->compsRecursive as $comp)
+			$items[$comp->uuid()]=$comp;
+		foreach ($this->techsRecursive as $tech)
+			$items[$tech->uuid()]=$tech;
 		return $items;
 	}
 }

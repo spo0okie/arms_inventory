@@ -19,7 +19,7 @@ if (!isset($static_view)) $static_view=false;
 				<?= $this->render('ace-cards',['model'=>$model,'static_view'=>$static_view]) ?>
 			</div>
 			<div class="col-md-3 py-2">
-				<h5 class="card-title"><?= $this->render('resource',['model'=>$model])?></h5>
+				<h5 class="card-title"><?= $this->render('item',['model'=>$model,'static_view'=>true])?></h5>
 				<div class="row">
 					<div class="btn-group " role="group">
 						<?php //Html::a('<span class="fas fa-plus"></span>',['aces/create','acls_id'=>$model->id],['class'=>'btn btn-primary btn-sm']) ?>

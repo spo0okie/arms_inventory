@@ -98,6 +98,8 @@ class ServiceConnectionsSearch extends ServiceConnections
 			->andFilterWhere(QueryHelper::querySearchString('service_connections.comment', $this->comment))
             //->andFilterWhere(['like', 'updated_by', $this->updated_by])
 		;
+		
+		$query->orderBy(['service_connections.target_id'=>SORT_DESC]);
         
         
         return $dataProvider;

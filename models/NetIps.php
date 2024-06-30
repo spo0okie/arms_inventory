@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\traits\AclsFieldTrait;
 use PhpIP;
 use Throwable;
 use voskobovich\linker\LinkerBehavior;
@@ -37,7 +38,7 @@ use yii\validators\IpValidator;
  */
 class NetIps extends ArmsModel
 {
-
+	use AclsFieldTrait;
 	//private $network_cache=null;
 	
 	public static $title='IP адрес';

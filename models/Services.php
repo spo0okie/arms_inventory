@@ -6,6 +6,7 @@ use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\QueryHelper;
 use app\helpers\StringHelper;
+use app\models\traits\AclsFieldTrait;
 use app\models\traits\ServicesModelCalcFieldsTrait;
 use voskobovich\linker\LinkerBehavior;
 use yii\db\ActiveQuery;
@@ -60,10 +61,12 @@ use yii\db\ActiveQuery;
  *
  * @property Comps[]    $comps
  * @property Comps[]    $compsRecursive
- * @property Services[] $depends
- * @property Services[] $dependants
  * @property Techs[]    $techs
  * @property Techs[]    $techsRecursive
+ * @property Techs[]    $nodes
+ * @property Techs[]    $nodesRecursive
+ * @property Services[] $depends
+ * @property Services[] $dependants
  * @property Techs[]    $arms
  * @property Places     $place
  * @property Places[]   $armPlaces
@@ -108,7 +111,7 @@ use yii\db\ActiveQuery;
  */
 class Services extends ArmsModel
 {
-	use ServicesModelCalcFieldsTrait;
+	use ServicesModelCalcFieldsTrait,AclsFieldTrait;
 	
 	public static $titles='Сервисы/услуги';
 	public static $title='Сервис/услуга';

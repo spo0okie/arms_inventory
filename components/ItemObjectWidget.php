@@ -22,7 +22,7 @@ use yii\base\Widget;
 class ItemObjectWidget extends Widget
 {
 	public $model;				//модель на которую ссылаемся
-	public $link=null;			//ссылка на модель (Html::a)
+	public $link;				//ссылка на модель (Html::a)
 	public $show_archived=null;	//флаг отображения архивного элемента
 	public $archivedProperty='archived'; //какое свойство объекта означает признак "архивирован"
 	public $archived=null;		//явное указание что объект архивирован
@@ -33,7 +33,10 @@ class ItemObjectWidget extends Widget
 	{
 
 		//если прямо не сказано что за класс элемента - стряпаем сами
-		if (is_null($this->item_class)) $this->item_class= StringHelper::class2Id(get_class($this->model)).'-item';
+		if (is_null($this->item_class)) {
+			if (is_object($this->model))
+				$this->item_class= StringHelper::class2Id(get_class($this->model)).'-item';
+		}
 
 		//к архивному классу кроме оформительской части всегда должен быть добавлен флажок архивного элемента
 		//(для переключателя отображения)
@@ -45,9 +48,9 @@ class ItemObjectWidget extends Widget
 			ShowArchivedWidget::$defaultValue
 		);
 		
-		if (is_null($this->link)) $this->link=LinkObjectWidget::widget(['model'=>$this->model]);
+		if (!isset($this->link)) $this->link=LinkObjectWidget::widget(['model'=>$this->model]);
 		
-		if (is_null($this->archived)) {
+		if (!isset($this->archived)) {
 			$archivedProperty = $this->archivedProperty;
 			$archived = $this->model->hasProperty($archivedProperty) ? $this->model->$archivedProperty : false;
 		} else {

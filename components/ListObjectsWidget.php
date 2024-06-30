@@ -36,6 +36,7 @@ class ListObjectsWidget extends Widget
 	public $itemViewPath;		//путь для рендера элемента
 	public $modelClass;
 	public $raw_items=false;	//не конвертировать текстовые итемы в HTML (уже сконверчены)
+	public $unique=true;		//показывать только уникальные модели (пропускать повторяющиеся)
 	
 	private $model;
 	private $empty;
@@ -122,18 +123,26 @@ class ListObjectsWidget extends Widget
 			$model=$models[$i];
 			$allArchived=$allArchived&&$this->isArchived($model);
 			if (is_object($model)) {
+				$itemUUID=$model->uuid();
+				//если мы его уже добавляли, но хотим только уникальные, то пропускаем
+				if ($this->unique && isset($listItems[$itemUUID])) continue;
+				
 				if (isset($this->itemViewPath)) //если у нас явно указан путь рендер файла - используем его
-					$listItems[]=$this->render($this->itemViewPath,ArrayHelper::recursiveOverride([
+					$listItems[$itemUUID]=$this->render($this->itemViewPath,ArrayHelper::recursiveOverride([
 						'model'=>$model,'show_archived'=>$this->show_archived
 					],$this->item_options));
 				else //если рендер файл не заявлен, используем внутримодельный
-					$listItems[]=$model->renderItem($this->view,ArrayHelper::recursiveOverride([
+					$listItems[$itemUUID]=$model->renderItem($this->view,ArrayHelper::recursiveOverride([
 						'show_archived'=>$this->show_archived
 					],$this->item_options));
-			} elseif (!$this->raw_items) {
-				$listItems[]=Yii::$app->formatter->asText($model);
 			} else {
-				$listItems[]=$model;
+				//если мы его уже добавляли, но хотим только уникальные, то пропускаем
+				if ($this->unique && isset($listItems[$model])) continue;
+				if (!$this->raw_items) {
+					$listItems[$model]=Yii::$app->formatter->asText($model);
+				} else {
+					$listItems[$model]=$model;
+				}
 			}
 			// -- разделитель --
 			//если это не последний элемент

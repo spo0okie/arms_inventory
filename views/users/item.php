@@ -8,12 +8,15 @@
 
 /* @var Users $model */
 
+use app\components\ItemObjectWidget;
 use app\components\LinkObjectWidget;
 use app\models\Users;
 
 if (!isset($icon)) $icon=false;
 if (!isset($static_view)) $static_view=true;
 if (!isset($noDelete)) $noDelete=false;
+if (!isset($show_phone)) $show_phone=false;
+if (!isset($show_ips))	$show_ips=false;
 
 if (is_object($model)) {
 	if (!isset($name)) {
@@ -23,12 +26,27 @@ if (is_object($model)) {
 			$name=$model->Ename;
 	}
 	
-	if ($icon) $name='<span class="fas fa-user small"></span>'.$name;
-?>
-
-<span class="users-item object-item <?= $model->Uvolen?'uvolen':'' ?>">
+	if ($show_phone && strlen($model->Phone)) {
+		$name.=' ('.$model->Phone.')';
+	}
 	
-	<?= LinkObjectWidget::widget(['model'=>$model,'name'=>$name,'static'=>$static_view,'noDelete'=>$noDelete]) ?>
-</span>
-
-<?php } else echo "Отсутствует";
+	if ($icon) $name='<span class="fas fa-user small"></span>'.$name;
+	
+	echo ItemObjectWidget::widget([
+		'model'=>$model,
+		'archived_class'=>'uvolen',
+		'link'=> LinkObjectWidget::widget(['model'=>$model,'name'=>$name,'static'=>$static_view,'noDelete'=>$noDelete])
+	]);
+	
+	if ($show_ips) {
+		echo ItemObjectWidget::widget([
+			'link'=>$this->render('/net-ips/model-ips',[
+				'model'=>$model,
+				'options'=>	isset($ips_options)?$ips_options:[],
+				'glue'=>	isset($ips_glue)?$ips_glue:', ',
+				'prefix'=>	isset($ips_prefix)?$ips_prefix:': ',
+			]),
+			'archived'=>false,//$model->archived,
+		]);
+	}
+} else echo "Отсутствует";

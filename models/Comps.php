@@ -5,6 +5,7 @@ namespace app\models;
 use app\helpers\ArrayHelper;
 use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
+use app\models\traits\AclsFieldTrait;
 use app\models\traits\CompsModelCalcFieldsTrait;
 use Throwable;
 use voskobovich\linker\LinkerBehavior;
@@ -83,7 +84,7 @@ use yii\db\StaleObjectException;
  */
 class Comps extends ArmsModel
 {
-	use CompsModelCalcFieldsTrait;
+	use CompsModelCalcFieldsTrait,AclsFieldTrait;
 	
 	public static $title='Операционная система';
 	public static $titles='Операционные системы';

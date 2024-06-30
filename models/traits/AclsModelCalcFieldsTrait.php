@@ -13,7 +13,6 @@ namespace app\models\traits;
 use app\helpers\ArrayHelper;
 use app\models\Acls;
 use app\models\Places;
-use yii\web\View;
 
 /**
  * @package app\models\traits
@@ -110,10 +109,10 @@ trait AclsModelCalcFieldsTrait
 	
 	public function getAccessTypes() {
 		/** @var Acls $this */
-		if (isset($this->aces)) return [];
+		if (!count($this->aces)) return [];
 		$types=[];
 		foreach ($this->aces as $ace) {
-			$types= ArrayHelper::recursiveOverride($types,$ace->accessTypesUniq);
+			$types= ArrayHelper::recursiveOverride($types,$ace->accessTypes);
 		}
 		return $types;
 	}
@@ -144,38 +143,71 @@ trait AclsModelCalcFieldsTrait
 	
 	
 	/**
-	 * Отрисовать все оборудование и ОС этого сервиса
-	 * @param View  $view
-	 * @param array $options
+	 * вернуть все оборудование и ОС этого сервиса
 	 * @return array
 	 */
-	public function renderNodes(View $view,$options=[])
+	public function getNodes()
 	{
 		if (strlen($this->comment))
 			return [$this->comment];
 		
 		if (($this->comps_id) and is_object($this->comp))
-			return [$this->comp->renderItem($view, $options)];
+			return [$this->comp];
 		
 		if (($this->techs_id) and is_object($this->tech))
-			return [$this->tech->renderItem($view, $options)];
-	
+			return [$this->tech];
+		
 		if (($this->services_id) and is_object($this->service))
-			return $this->service->renderNodes($view, $options);
+			return $this->service->getNodes();
 		
 		if (($this->ips_id) and is_object($this->ip))
-			return [$this->ip->renderItem($view, $options)];
+			return [$this->ip];
 		
 		if (($this->networks_id) and is_object($this->network))
-			return [$this->network->renderItem($view, $options)];
-
+			return [$this->network];
+		
 		return [];
+	}
+	
+	/**
+	 * вернуть ресурс к которому привязан ACL
+	 * @return array
+	 */
+	public function getResource()
+	{
+		if (strlen($this->comment))
+			return $this->comment;
+		
+		if (($this->comps_id) and is_object($this->comp))
+			return $this->comp;
+		
+		if (($this->techs_id) and is_object($this->tech))
+			return $this->tech;
+		
+		if (($this->services_id) and is_object($this->service))
+			return $this->service;
+		
+		if (($this->ips_id) and is_object($this->ip))
+			return $this->ip;
+		
+		if (($this->networks_id) and is_object($this->network))
+			return $this->network;
+		
+		return null;
 	}
 	
 	public function hasIpAccess(){
 		/** @var Acls $this */
 		foreach ($this->aces as $ace) {
 			if ($ace->hasIpAccess()) return true;
+		}
+		return false;
+	}
+	
+	public function hasPhoneAccess(){
+		/** @var Acls $this */
+		foreach ($this->aces as $ace) {
+			if ($ace->hasPhoneAccess()) return true;
 		}
 		return false;
 	}

@@ -18,12 +18,10 @@ use yii\helpers\Html;
  * @property string $sname
  * @property Acls	$acl
  * @property Users[]	$users
- * @property Users[]	$usersUniq
  * @property Departments[]	$departments
  * @property Comps[]	$comps
  * @property NetIps[]	$netIps
  * @property AccessTypes[] $accessTypes
- * @property AccessTypes[] $accessTypesUniq
  * @property Partners[] $partners
  * @property Networks[] $networks
  * @property Services[] $services

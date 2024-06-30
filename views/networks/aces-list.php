@@ -7,24 +7,24 @@
 
 use app\components\DynaGridWidget;
 use app\components\ShowArchivedWidget;
-use app\models\ServiceConnections;
+use app\models\Aces;
 use app\models\Services;
 
 //эта страничка вызывается из другой, где есть этот виджет,
 //поэтому хак со сменой поведения архивных элементов по умолчанию делаем руками, а не автоматом
 ShowArchivedWidget::$defaultValue=false;
 $static_view=false;
-$columns=include $_SERVER['DOCUMENT_ROOT'].'/views/service-connections/columns.php';
+$columns=include $_SERVER['DOCUMENT_ROOT'].'/views/aces/columns.php';
 
 ?>
-<div class="network-connections-index">
+<div class="network-aces-index">
 	<?= DynaGridWidget::widget([
 		'id' => 'network-connections-list',
 		'pageUrl'=>['/services/view','id'=>$model->id],
-		'model' => new ServiceConnections(),
+		'model' => new Aces(),
 		'panel' => false,
 		'columns' => $columns,
-		'defaultOrder' => ['initiator_service','initiator_nodes','initiator_details','comment','target_service','target_nodes','target_details',],
+		//'defaultOrder' => ['initiator_service','initiator_nodes','initiator_details','comment','target_service','target_nodes','target_details',],
 		//'filterModel' => $searchModel,
 		'dataProvider' => $dataProvider,
 		'toggleButtonGrid'=>[

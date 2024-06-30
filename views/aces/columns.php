@@ -3,35 +3,50 @@
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
+use app\components\ModelFieldWidget;
+
 $renderer=$this;
 $glue='<br/>';
 return [
 	//['class' => 'yii\grid\SerialColumn'],
 	
-	[
-		'attribute'=>'subjects',
-		'value'=>function($data) use ($glue) {
-			/** @noinspection PhpUnusedLocalVariableInspection */
-			$model=$data;
-			/** @noinspection PhpUnusedLocalVariableInspection */
-			$hasIp=false;
-			/** @noinspection PhpUnusedLocalVariableInspection */
-			$hasPhone=false;
-			$items=include 'resources.php';
-			return implode($glue,$items);
-		}
-	],
-	[
-		'attribute'=>'subject_nodes',
+	'subject_nodes'=>[
 		'value'=>function($data) use ($glue){
-			/** @noinspection PhpUnusedLocalVariableInspection */
-			$model=$data;
-			$items=include 'resource-nodes.php';
-			return implode($glue,$items);
+			return ModelFieldWidget::widget([
+				'model'=>$data,
+				'field'=>'nodes',
+				'title'=>false,
+				'card_options'=>['cardClass'=>'m-0 p-0'],
+				'lineBr'=>false,
+				'item_options'=>[
+					'static_view'=>true,
+					'show_ips'=>$data->hasIpAccess(),
+					'show_phone'=>$data->hasPhoneAccess(),
+					'short'=>true,
+				],
+				'glue'=>'<br>'
+			]);
 		}
 	],
-	[
-		'attribute'=>'access_types',
+	'subjects'=>[
+		'value'=>function($data) use ($glue) {
+			return ModelFieldWidget::widget([
+				'model'=>$data,
+				'field'=>'subjects',
+				'title'=>false,
+				'card_options'=>['cardClass'=>'m-0 p-0'],
+				'lineBr'=>false,
+				'item_options'=>[
+					'static_view'=>true,
+					'show_ips'=>$data->hasIpAccess(),
+					'show_phone'=>$data->hasPhoneAccess(),
+					'short'=>true,
+				],
+				'glue'=>'<br>'
+			]);
+		}
+	],
+	'access_types'=>[
 		'value'=>function($data) use ($renderer,$glue){
 			$items=[];
 			foreach ($data->accessTypes as $type) {
@@ -45,31 +60,35 @@ return [
 			return implode($glue,$items);
 		}
 	],
-	[
-		'attribute'=>'name',
+	'name'=>[
 		'value'=>function($data) use ($renderer){
 			return $renderer->render('/aces/item',['model'=>$data,'static_view'=>false,'modal'=>true]);
 		}
 	],
-	[
-		'attribute'=>'resource',
+	'resource'=>[
 		'value'=>function($data) use ($renderer,$glue){
 			if (is_object($data->acl))
 				return $renderer->render('/acls/item',['model'=>$data->acl,'static_view'=>false,'modal'=>true]);
 			return '';
 		}
 	],
-	[
-		'attribute'=>'resource_nodes',
+	'resource_nodes'=>[
 		'value'=>function($data) use ($renderer,$glue){
-			if (is_object($data->acl))
-				return implode($glue,$data->acl->renderNodes($renderer,[
+			if (is_object($data->acl)) return ModelFieldWidget::widget([
+				'model'=>$data->acl,
+				'field'=>'nodes',
+				'title'=>false,
+				'card_options'=>['cardClass'=>'m-0 p-0'],
+				'lineBr'=>false,
+				'item_options'=>[
 					'static_view'=>true,
-					'show_ips'=>$data->hasIpAccess(),
-					'ips_prefix'=>':<br>',
-					'ips_glue'=>'<br>',
-					'ips_options'=>['class'=>'ms-2','static_view'=>true]
-				]));
+					'show_ips'=>$data->acl->hasIpAccess(),
+					'ips_prefix'=>':',
+					'ips_glue'=>',',
+					'ips_options'=>['static_view'=>true]
+				],
+				'glue'=>$glue,
+			]);
 			return '';
 		}
 	],

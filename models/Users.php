@@ -758,4 +758,8 @@ class Users extends ArmsModel implements IdentityInterface
 		}
 	}
 	
+	public function getIsArchived() {
+		return $this->Uvolen;
+	}
+	
 }

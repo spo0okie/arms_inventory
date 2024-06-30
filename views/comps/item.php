@@ -36,13 +36,14 @@ if (is_object($model)) {
 	]);
 	
 	if ($show_ips) {
-		if (!isset($ips_options)) $ips_options=[];
-		if (!isset($ips_glue)) $ips_glue=', ';
-		if (!isset($ips_prefix)) $ips_prefix=': ';
-		$items=[];
-		foreach ($model->netIps as $ip) {
-			$items[]=$ip->renderItem($this,$ips_options);
-		}
-		echo $ips_prefix.implode($ips_glue,$items);
+		echo ItemObjectWidget::widget([
+			'link'=>$this->render('/net-ips/model-ips',[
+				'model'=>$model,
+				'options'=>	isset($ips_options)?$ips_options:[],
+				'glue'=>	isset($ips_glue)?$ips_glue:', ',
+				'prefix'=>	isset($ips_prefix)?$ips_prefix:': ',
+			]),
+			'archived'=>$model->archived,
+		]);
 	}
 } else echo "Отсутствует";

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\models\traits\AclsFieldTrait;
 use PhpIP;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
@@ -39,6 +40,7 @@ use yii\db\ActiveQuery;
  * @property NetDomains $netDomain
  * @property Segments $segment
  * @property NetIps $firstUnusedIp
+ * @property Acls[] $acls
  * @property NetIps[] $ips
  * @property NetIps[] $ipsByAddr
  * @property OrgInet[] $orgInets
@@ -48,7 +50,7 @@ use yii\db\ActiveQuery;
  */
 class Networks extends ArmsModel
 {
-	
+	use AclsFieldTrait;
 	private $_IPv4Block=null;
 	private $ips_cache=null;
 	private $first_unused_cache=null;
@@ -227,6 +229,14 @@ class Networks extends ArmsModel
 			->viaTable('{{%org_inets_in_networks}}', ['networks_id' => 'id']);
 	}
 	
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getAcls()
+	{
+		return $this->hasMany(Acls::class, ['networks_id' => 'id']);
+	}
+	
 	public function getComps()
 	{
 		if (isset($this->attrsCache['comps'])) return $this->attrsCache['comps'];
@@ -255,23 +265,49 @@ class Networks extends ArmsModel
 		return $this->attrsCache['techs']=$techs;
 	}
 	
-	public function getIncomingConnections()
+	public function getIncomingAcesEffective()
 	{
-		if (isset($this->attrsCache['incomingConnections'])) return $this->attrsCache['incomingConnections'];
-		$connections=[];
-		foreach ($this->comps as $comp) {
-			foreach ($comp->incomingConnectionsEffective as $connection) {
-				$connections[$connection->id]=$connection;
-			}
-		}
+		
 
-		foreach ($this->techs as $tech) {
-			foreach ($tech->incomingConnectionsEffective as $connection) {
-				$connections[$connection->id]=$connection;
+		if (isset($this->attrsCache['incomingAcesEffective']))
+			return $this->attrsCache['incomingAcesEffective'];
+		
+		$this->attrsCache['incomingAcesEffective']=$this->getIncomingAces();
+		
+		foreach ($this->ips as $ip) {
+			$this->attrsCache['incomingAcesEffective']=ArrayHelper::recursiveOverride(
+				$this->attrsCache['incomingAcesEffective'],
+				$ip->getIncomingAces()
+			);
+			
+			foreach ($ip->comps as $comp) {
+				$this->attrsCache['incomingAcesEffective']=ArrayHelper::recursiveOverride(
+					$this->attrsCache['incomingAcesEffective'],
+					$comp->getIncomingAces()
+				);
+				foreach ($comp->services as $service) {
+					$this->attrsCache['incomingAcesEffective']=ArrayHelper::recursiveOverride(
+						$this->attrsCache['incomingAcesEffective'],
+						$service->getIncomingAces()
+					);
+				}
+			}
+
+			foreach ($ip->techs as $tech) {
+				$this->attrsCache['incomingAcesEffective']=ArrayHelper::recursiveOverride(
+					$this->attrsCache['incomingAcesEffective'],
+					$tech->getIncomingAces()
+				);
+				foreach ($tech->services as $service) {
+					$this->attrsCache['incomingAcesEffective']=ArrayHelper::recursiveOverride(
+						$this->attrsCache['incomingAcesEffective'],
+						$service->getIncomingAces()
+					);
+				}
 			}
 		}
 		
-		return $this->attrsCache['incomingConnections']=$connections;
+		return $this->attrsCache['incomingAcesEffective'];
 	}
 	
 	/**

@@ -2,10 +2,10 @@
 
 namespace app\controllers;
 
+use app\models\AcesSearch;
 use app\models\NetIps;
 use app\models\Networks;
 use app\models\NetworksSearch;
-use app\models\ServiceConnectionsSearch;
 use Yii;
 use yii\web\NotFoundHttpException;
 
@@ -92,19 +92,23 @@ class NetworksController extends ArmsBaseController
 		$model=$this->findModel($id);
 		
 		// Модели полноценного поиска нужны для подгрузки всех joinWith
-		$searchModel=new ServiceConnectionsSearch();
+		$searchModel=new AcesSearch();
 		
 		// получаем всех детей
-		$connections=$model->getIncomingConnections();
+		$aces=$model->getIncomingAcesEffective();
 		
-		$ids=array_keys($connections);
+		foreach ($aces as $id=>$ace) {
+			if (!$ace->hasIpAccess()) unset($aces[$id]);
+		}
+		
+		$ids=array_keys($aces);
 
 		$dataProvider = $searchModel->search(array_merge(
 			Yii::$app->request->queryParams,
-			['ServiceConnectionsSearch'=>['ids'=>$ids]]
+			['AcesSearch'=>['ids'=>$ids]]
 		));
 		
-		return $this->renderAjax('connections-list', [
+		return $this->renderAjax('aces-list', [
 			'searchModel'=>$searchModel,
 			'dataProvider' => $dataProvider,
 			'model' => $model

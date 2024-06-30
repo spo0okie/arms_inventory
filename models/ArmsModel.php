@@ -531,7 +531,7 @@ class ArmsModel extends ActiveRecord
 	}
 	
 	/**
-	 * Признак того, что эта модель имеет статус "архивировано"
+	 * Признак того, что эта модель может иметь статус "архивировано"
 	 * @return bool
 	 */
 	public function getCanBeArchived() {
@@ -539,6 +539,10 @@ class ArmsModel extends ActiveRecord
 		return $this->attrsCache['canBeArchived']=$this->hasProperty('archived');
 	}
 	
+	/**
+	 * Признак того, что эта модель имеет статус "архивировано"
+	 * @return bool
+	 */
 	public function getIsArchived() {
 		return $this->canBeArchived && $this->archived;
 	}
@@ -616,4 +620,21 @@ class ArmsModel extends ActiveRecord
 			$model->save();
 		}
 	}
+	
+	/**
+	 * Чтобы один массив можно было наполнить уникальными моделями разных классов индексируем его по uuid
+	 * @param $model
+	 * @return string
+	 */
+	public static function getUUID($model) {
+		return get_class($model).'#'.$model->id;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function uuid() {
+		return static::getUUID($this);
+	}
+	
 }

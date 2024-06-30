@@ -11,6 +11,7 @@ use yii\data\ActiveDataProvider;
  */
 class AcesSearch extends Aces
 {
+	public $ids;
 	public $subjects;
 	public $resource;
 	public $access_types;
@@ -33,6 +34,7 @@ class AcesSearch extends Aces
 				'services_subject_ids',
 				'services_resource_ids'
 			], 'safe'],
+			[['ids'],'each','rule'=>['integer']]
         ];
     }
 
@@ -82,6 +84,14 @@ class AcesSearch extends Aces
             // $query->where('0=1');
             return $dataProvider;
         }
+	
+		//если ИД указаны, то ограничиваем
+		if (isset($this->ids) && is_array($this->ids)) {
+			if (count($this->ids))
+				$query->andFilterWhere(['aces.id'=>$this->ids]);
+			else //если они пустые, то блокируем дальнейший поиск
+				$query->where('0=1');
+		}
 
         // grid filtering conditions
         $query->andFilterWhere([

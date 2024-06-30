@@ -12,6 +12,7 @@ namespace app\models\traits;
 use app\helpers\ArrayHelper;
 use app\helpers\DateTimeHelper;
 use app\helpers\TimeIntervalsHelper;
+use app\models\Acls;
 use app\models\ArmsModel;
 use app\models\Schedules;
 use app\models\SchedulesEntries;
@@ -22,6 +23,7 @@ use yii\data\ArrayDataProvider;
 
 /**
  * @package app\models\traits
+ * @property Acls[] $acls
  * @property ArmsModel[] $usedBy
  * @property boolean $isPrivate
  * @property Services[] $services
@@ -43,6 +45,18 @@ trait SchedulesModelCalcFieldsTrait
 			$this->attrsCache['isAcl']=is_array($this->acls) && count($this->acls);
 		}
 		return $this->attrsCache['isAcl'];
+	}
+	
+	public function getAces() {
+		if (isset($this->attrsCache['aces']))
+			return $this->attrsCache['aces'];
+		
+		$this->attrsCache['aces']=[];
+		foreach ($this->acls as $acl)
+			foreach ($acl->aces as $ace)
+				$this->attrsCache['aces'][]=$ace;
+			
+		return $this->attrsCache['aces'];
 	}
 	
 	public function getIsOverride() {
@@ -810,5 +824,14 @@ trait SchedulesModelCalcFieldsTrait
 		}
 		
 		return $this->attrsCache['isPrivate'];
+	}
+	
+	
+	/**
+	 * Путь до папки views
+	 * @return mixed|string
+	 */
+	public function getViewsPath() {
+		return $this->isAcl?'scheduled-access':'schedules';
 	}
 }
