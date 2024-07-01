@@ -65,6 +65,13 @@ return [
 			return $renderer->render('/aces/item',['model'=>$data,'static_view'=>false,'modal'=>true]);
 		}
 	],
+	'schedule'=>[
+		'value'=>function($data) use ($renderer){
+			if (is_object($data->acl) && is_object($data->acl->schedule))
+				return $renderer->render('/scheduled-access/item',['model'=>$data->acl->schedule,'static_view'=>false,'modal'=>true]);
+			return '<i>отсутствует</i>';
+		}
+	],
 	'resource'=>[
 		'value'=>function($data) use ($renderer,$glue){
 			if (is_object($data->acl))

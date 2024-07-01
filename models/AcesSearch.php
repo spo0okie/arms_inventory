@@ -68,6 +68,7 @@ class AcesSearch extends Aces
 			'acl.tech',
 			'acl.ip',
 			'acl.network',
+			'acl.schedule',
 			'accessTypes'
 		]);
 
