@@ -31,7 +31,7 @@ if (
 }
 
 
-return [
+$columns=[
 	'attach'=>[
 		'value' => function ($data) use ($renderer) {
 			return $renderer->render('/techs/map/item-attachments', ['model' => $data]);
@@ -214,3 +214,11 @@ return [
 	]
 
 ];
+
+if (Yii::$app->params['techs.hostname.enable']??false) {
+	$columns['hostname']=[
+		'attribute'=>'hostname'
+	];
+}
+
+return $columns;

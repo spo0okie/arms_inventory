@@ -40,7 +40,8 @@ class TechsSearch extends Techs
 
 			], 'integer'],
             [[
-            	'num',
+				'num',
+				'hostname',
 
 				'inv_num',
 				'inv_sn',
@@ -115,13 +116,18 @@ class TechsSearch extends Techs
 		//строка полной маркировки такая сложная, т.к. надо проверить что каждая компонента не NULL
 		//т.к. CONCAT в который передали хоть один NULL верент ответом также NULL
 		$mark='CONCAT(IFNULL(techs.sn,""), ", ", IFNULL(techs.inv_num,""), ", " , IFNULL(techs.uid,""))';
+		$num='UCASE(CONCAT(IFNULL(techs.hostname,""), IFNULL(techs.num,"")))';
 
 		$sort=[
 			//'defaultOrder' => ['num'=>SORT_ASC],
 			'attributes'=>[
-				'num',
+				'num'=>[
+					'asc'=>[$num=>SORT_ASC],
+					'desc'=>[$num=>SORT_DESC],
+				],
 				'inv_num',
 				'sn',
+				'hostname',
 				'uid',
 				'inv_sn'=>[
 					'asc'=>[$mark=>SORT_ASC],
@@ -197,7 +203,8 @@ class TechsSearch extends Techs
 		
         $query
 			->andFilterWhere(['techs.id'=>$this->ids])
-			->andFilterWhere(QueryHelper::querySearchString('techs.num', $this->num))
+			->andFilterWhere(QueryHelper::querySearchString($num, $this->num))
+			->andFilterWhere(QueryHelper::querySearchString('techs.hostname', $this->hostname))
 
 			->andFilterWhere(QueryHelper::querySearchString('techs.inv_num', $this->inv_num))
 			->andFilterWhere(QueryHelper::querySearchString('techs.sn', $this->sn))
