@@ -48,7 +48,7 @@ class ModelFieldWidget extends Widget
 			$this->raw_items=true;
 		} else {
 			//вытаскиваем поле в отдельную переменную, чтобы больше не городить такое
-			$newData=$this->model->{$this->field};
+			$newData=$model->{$this->field};
 			if (is_array($newData)) {
 				$this->data=array_merge($this->data,$newData);
 			} else {
