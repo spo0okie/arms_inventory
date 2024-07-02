@@ -25,7 +25,7 @@ class ServicesController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'view'=>['index-by-users','card','card-support','json-preview','os-list','connections-list'],
+			'view'=>['index-by-users','card','card-support','json-preview','os-list','aces-list'],
 		]);
 	}
 	
