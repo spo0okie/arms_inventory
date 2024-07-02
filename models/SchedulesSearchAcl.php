@@ -82,7 +82,7 @@ class SchedulesSearchAcl extends Schedules
         }
 	
 	
-		$query->andFilterWhere(['or like', 'CONCAT(schedules.name,schedules.description,schedules.history)', StringHelper::explode($this->name,'|',true,true)]);
+		$query->andFilterWhere(['or like', 'CONCAT(IFNULL(schedules.name,""),IFNULL(schedules.description,""),IFNULL(schedules.history,""))', StringHelper::explode($this->name,'|',true,true)]);
 	
 		$query->andFilterWhere(['or like', 'CONCAT(partners.bname," ",partners.uname)', StringHelper::explode($this->acePartners,'|',true,true)]);
 		
