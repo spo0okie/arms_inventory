@@ -11,6 +11,7 @@
 if (!isset($options)) $options=[];
 if (!isset($glue)) $glue=', ';
 if (!isset($prefix)) $prefix=': ';
+if (!isset($options['static_view'])) $options['static_view']=true;
 $items=[];
 foreach ($model->netIps as $ip) {
 	$items[]=$ip->renderItem($this,$options);
