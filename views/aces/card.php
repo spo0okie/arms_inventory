@@ -34,7 +34,9 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 						'show_phone'=>$model->hasPhoneAccess(),
 						'short'=>true,
 					],
+					'lineBr'=>false,
 					'card_options'=>['cardClass'=>'m-0 p-0'],
+					'glue'=>'<br>'
 				]);
 			} else { ?>
 				<span class="text-center divider2-striped">
