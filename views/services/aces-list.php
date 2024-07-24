@@ -5,6 +5,10 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $model Services */
 
+/* @var $mode string */
+if (!isset($mode)) $mode='aces';
+
+
 use app\components\DynaGridWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Aces;
@@ -17,9 +21,9 @@ $static_view=false;
 $columns=include $_SERVER['DOCUMENT_ROOT'].'/views/aces/columns.php';
 
 ?>
-<div class="service-aces-index">
+<div class="service-<?= $mode ?>-index">
 	<?= DynaGridWidget::widget([
-		'id' => 'service-connections-list',
+		'id' => 'service-'.$mode.'-list',
 		'pageUrl'=>['/services/view','id'=>$model->id],
 		'model' => new Aces(),
 		'panel' => false,

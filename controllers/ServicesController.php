@@ -258,7 +258,8 @@ class ServicesController extends ArmsBaseController
 		return $this->renderAjax('aces-list', [
 			'searchModel'=>$searchModel,
 			'dataProvider' => $dataProvider,
-			'model' => $model
+			'model' => $model,
+			'mode' => 'aces'
 		]);
 	}
 
@@ -291,7 +292,8 @@ class ServicesController extends ArmsBaseController
 		return $this->renderAjax('aces-list', [
 			'searchModel'=>$searchModel,
 			'dataProvider' => $dataProvider,
-			'model' => $model
+			'model' => $model,
+			'mode' => 'acls'
 		]);
 	}
 }
