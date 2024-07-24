@@ -88,6 +88,8 @@ trait AcesModelCalcFieldsTrait
 			$this->attrsCache['subjects'][$subject->uuid()] = $subject;
 		foreach ($this->networks as $subject)
 			$this->attrsCache['subjects'][$subject->uuid()] = $subject;
+		if ($this->comment)
+			$this->attrsCache['subjects'][$this->comment] = $this->comment;
 		return $this->attrsCache['subjects'];
 	}
 	
