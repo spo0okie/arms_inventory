@@ -67,7 +67,7 @@ HTML,
 	
 }
 
-	DynaGridWidget::handleSave('services-aces-list');
+	DynaGridWidget::handleSave('service-aces-list');
 	$tabs[]=[
 		'id'=>'serviceAces',
 		'label'=>'Доступ отсюда <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-aces-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
@@ -90,7 +90,7 @@ HTML,
 	];
 
 
-DynaGridWidget::handleSave('services-acls-list');
+DynaGridWidget::handleSave('service-acls-list');
 $tabs[]=[
 	'id'=>'serviceAcls',
 	'label'=>'Доступы сюда <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-acls-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
