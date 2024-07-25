@@ -11,10 +11,11 @@ if (!isset($class)) $class='';
 if (!isset($static_view)) $static_view=false;
 if (!isset($icon)) $icon=false;
 if (!isset($no_class)) $no_class=false;
+if (!isset($rendered_comment)) $rendered_comment='';
 
 if (!empty($model)) {
 	if (!$no_class&&is_object($model->network)) $class.=' '.$model->network->segmentCode;
-	if (!isset($name)) $name=$model->sname;
+	if (!isset($name)) $name=$model->getSname($rendered_comment);
 	if ($icon) $name='<span class="fas fa-network-wired small"></span>'.$name;
 	
 	

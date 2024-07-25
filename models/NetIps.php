@@ -131,11 +131,16 @@ class NetIps extends ArmsModel
 	
 	/**
 	 * Name for search
+	 * @param string $ignoreHint
 	 * @return string
 	 */
-	public function getSname()
+	public function getSname($ignoreHint='')
 	{
-		return $this->text_addr.(empty($this->name)?'':(' ('.$this->name.')'));
+		$hint=$this->name;
+		if ($ignoreHint && strtolower($ignoreHint)==strtolower($hint)) {
+			$hint='';
+		}
+		return $this->text_addr.(empty($hint)?'':(' ('.$hint.')'));
 	}
 	
 	/**
