@@ -38,6 +38,7 @@ if (is_object($model)) {
 	
 	if ($show_ips) {
 		if (!isset($ips_options)) $ips_options=[];
+		//говорим скрывать имя компа из IP адреса чтобы не было задвоения имени
 		if (!isset($ips_options['rendered_comment'])) $ips_options['rendered_comment']=$name;
 		echo ItemObjectWidget::widget([
 			'link'=>$this->render('/net-ips/model-ips',[
