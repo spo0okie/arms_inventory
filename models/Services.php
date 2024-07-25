@@ -106,8 +106,7 @@ use yii\db\ActiveQuery;
  * @property MaintenanceReqs $backupReqs
  * @property MaintenanceReqs $otherReqs
  * @property MaintenanceJobs $maintenanceJobs
- * @property ServiceConnections $incomingConnections
- * @property ServiceConnections $outgoingConnections
+
  */
 class Services extends ArmsModel
 {
@@ -141,6 +140,7 @@ class Services extends ArmsModel
 		'infrastructure_support_ids' =>	[Users::class,'infrastructure_support_services_ids','loader'=>'infrastructureSupport'],
 		'contracts_ids' => 				[Contracts::class,'services_ids'],
 		'acls_ids' => 					[Acls::class,'services_id'],
+		'aces_ids' => 					[Aces::class,'services_ids'],
 		
 		'responsible_id' =>				[Users::class,'services_ids'],
 		'infrastructure_user_id' =>		[Users::class,'infrastructure_services_ids','loader'=>'infrastructureResponsible'],
@@ -452,7 +452,7 @@ class Services extends ArmsModel
     }
     
 	
-	public function reverseLinks()
+	/*public function reverseLinks()
 	{
 		return [
 			$this->children,
@@ -465,7 +465,7 @@ class Services extends ArmsModel
 			$this->orgInets,
 			$this->orgPhones
 		];
-	}
+	}*/
 	
 	/**
 	 * Возвращает все варианты написания/названия сервиса
@@ -590,21 +590,6 @@ class Services extends ArmsModel
 			->viaTable('{{%services_depends}}', ['service_id' => 'id']);
 	}
 	
-	/**
-	 * Возвращает входящие соединения
-	 */
-	public function getIncomingConnections()
-	{
-		return $this->hasMany(ServiceConnections::class, ['target_id'=>'id']);
-	}
-	
-	/**
-	 * Возвращает входящие соединения
-	 */
-	public function getOutgoingConnections()
-	{
-		return $this->hasMany(ServiceConnections::class, ['initiator_id'=>'id']);
-	}
 	
 	/**
 	 * Возвращает команду техподдержки
@@ -788,6 +773,15 @@ class Services extends ArmsModel
 	}
 	
 	
+	/**
+	 * Привязанные сервисы
+	 */
+	public function getAces()
+	{
+		return $this->hasMany(Aces::class, ['id' => 'aces_id'])
+			->from(['services_aces'=>Aces::tableName()])
+			->viaTable('{{%services_in_aces}}', ['services_id' => 'id']);
+	}
 	/**
 	 * @return ActiveQuery
 	 */
