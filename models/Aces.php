@@ -50,7 +50,7 @@ class Aces extends ArmsModel
 		'access_types_ids' => [AccessTypes::class,'aces_ids'],
 		'comps_ids' =>		[Comps::class,'aces_ids'],
 		'users_ids' =>		[Users::class,'aces_ids'],
-		'services_ids' =>	[Services::class,'4aces_ids'],
+		'services_ids' =>	[Services::class,'aces_ids'],
 		'networks_ids' =>	[Networks::class,'aces_ids'],
 		'netIps_ids' =>		[NetIps::class,'aces_ids'],
 		'acls_id' =>		[Acls::class,'aces_ids'],

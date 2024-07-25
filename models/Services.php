@@ -8,7 +8,6 @@ use app\helpers\QueryHelper;
 use app\helpers\StringHelper;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\ServicesModelCalcFieldsTrait;
-use voskobovich\linker\LinkerBehavior;
 use yii\db\ActiveQuery;
 
 /**
@@ -157,7 +156,7 @@ class Services extends ArmsModel
 	 * В списке поведений прикручиваем many-to-many contracts
 	 * @return array
 	 */
-	public function behaviors()
+	/*public function behaviors()
 	{
 		return [
 			[
@@ -177,7 +176,7 @@ class Services extends ArmsModel
 				]
 			]
 		];
-	}
+	}*/
 
 	public function extraFields()
 	{
