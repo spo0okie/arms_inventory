@@ -1,20 +1,22 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\components\HintIconWidget;
+use app\components\ShowArchivedWidget;
 use app\components\UrlParamSwitcherWidget;
+use app\models\Services;
 use yii\helpers\Html;
-use kartik\grid\GridView;
-use yii\widgets\Pjax;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ServicesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $models \app\models\Services[] */
+/* @var $models Services[] */
 /* @var $switchParentCount */
 /* @var $switchArchivedCount */
 
-\yii\helpers\Url::remember();
-$this->title = \app\models\Services::$titles;
+Url::remember();
+$this->title = Services::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 $models=$dataProvider->models;
 
@@ -61,14 +63,15 @@ if (true) {
 				'hintOn'=>'Показать дочерние сервисы',
 				'label'=>'Дочерние',
 				'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
-				'labelBadge'=>$switchParentDelta
+				'labelBadge'=>$switchParentDelta,
+				'state'=>(bool)($searchModel->parent_id),
 			]).
-			' // '.\app\components\ShowArchivedWidget::widget([
+			' // '. ShowArchivedWidget::widget([
 				'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
 				'labelBadge'=>$switchArchivedDelta
 			]).
 			' // '.Html::a('Распределение по сотрудникам','index-by-users'),
-		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Services','cssClass'=>'btn']),
+		'hintButton' => HintIconWidget::widget(['model'=>'\app\models\Services','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

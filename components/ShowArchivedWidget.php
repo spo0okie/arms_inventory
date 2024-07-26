@@ -49,7 +49,7 @@ JS;
 	
 	public function init() {
 		parent::init();
-		static::$defaultValue=false;
+		static::$defaultValue=false||$this->state;
 	}
 	
 }

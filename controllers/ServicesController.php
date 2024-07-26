@@ -6,7 +6,6 @@ use app\helpers\ArrayHelper;
 use app\models\AcesSearch;
 use app\models\CompsSearch;
 use app\models\Places;
-use app\models\ServiceConnectionsSearch;
 use app\models\TechsSearch;
 use Yii;
 use app\models\Services;
@@ -82,21 +81,45 @@ class ServicesController extends ArmsBaseController
 	{
 		
 		$searchModel = new ServicesSearch();
-
+		
+		//признак того, что свойства ниже указаны явно (не равны значениям по умолчанию)
+		$direct_parent=Yii::$app->request->get('showChildren','unset')!='unset';
+		//$direct_archived=Yii::$app->request->get('showArchived','unset')!='unset';
+		
 		$searchModel->parent_id=Yii::$app->request->get('showChildren',false);
 		$searchModel->archived=Yii::$app->request->get('showArchived',false);
 		
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		if (!$dataProvider->totalCount) {
+			//допустим с нашими параметрами ничего не нашлось
+			if (!$direct_parent && !$searchModel->parent_id) {
+				//если дочерние неявно отключены, то смотрим что будет вместе с ними
+				$switchParent=clone $searchModel;
+				$switchParent->parent_id=!$switchParent->parent_id;
+				$switchParentData=$switchParent->search(Yii::$app->request->queryParams);
+				$switchParentCount=$switchParentData->totalCount;
+				if ($switchParentCount) {
+					//если есть дочерние, то заменяем текущий поиск на поиск с дочерними
+					//и устанавливаем количество записей без дочерних как альтернативное
+					$switchParentCount=$dataProvider->totalCount;
+					$searchModel=$switchParent;
+					$dataProvider=$switchParentData;
+				}
+			}
+		}
+		
 		//ищем тоже самое но с дочерними в противоположном положении
-		$switchParent=clone $searchModel;
-		$switchParent->parent_id=!$switchParent->parent_id;
-		$switchParentCount=$switchParent->search(Yii::$app->request->queryParams)->totalCount;
+		if (!isset($switchParentCount)) {
+			$switchParent=clone $searchModel;
+			$switchParent->parent_id=!$switchParent->parent_id;
+			$switchParentCount=$switchParent->search(Yii::$app->request->queryParams)->totalCount;
+		}
 		
 		//ищем тоже самое но с дочерними в противоположном положении
 		$switchArchived=clone $searchModel;
 		$switchArchived->archived=!$switchArchived->archived;
 		$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams)->totalCount;
 		
-		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		$this->view->params['layout-container'] = 'container-fluid';
 		
 		Services::cacheAllItems();
@@ -196,38 +219,6 @@ class ServicesController extends ArmsBaseController
 
 
 
-	/**
-	 * Список связей в сервисе (с учетом вложенных)
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 */
-	public function actionConnectionsList(int $id)
-	{
-		/** @var Services $model */
-		$model=$this->findModel($id);
-		
-		// Модели полноценного поиска нужны для подгрузки всех joinWith
-		$searchModel=new ServiceConnectionsSearch();
-		
-		// получаем всех детей
-		$children=$model->getChildrenRecursive();
-		
-		$ids=is_array($children)?ArrayHelper::getArrayField($children,'id'):[];
-		$ids[]=$model->id;
-		
-		
-		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(
-			Yii::$app->request->queryParams,
-			['ServiceConnectionsSearch'=>['services_ids'=>$ids]]
-		));
-		
-		return $this->renderAjax('connections-list', [
-			'searchModel'=>$searchModel,
-			'dataProvider' => $dataProvider,
-			'model' => $model
-		]);
-	}
 	
 	/**
 	 * Список связей в сервисе (с учетом вложенных)

@@ -42,7 +42,8 @@ $renderer=$this;
 		'filterModel' => $searchModel,
 		'toolButton'=> '<span class="p-2">'. ShowArchivedWidget::widget([
 			'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
-			'labelBadge'=>$switchArchivedDelta
+			'labelBadge'=>$switchArchivedDelta,
+			'state'=>$searchModel->archived
 		]).'<span>',
 	]) ?>
 </div>

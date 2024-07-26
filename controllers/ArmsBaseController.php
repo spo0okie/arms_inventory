@@ -186,7 +186,48 @@ class ArmsBaseController extends Controller
 		
 		return $behaviors;
     }
-
+	
+	/**
+	 * Инициирует поиск с учетом наличия переключателя архивных записей
+	 * @param $searchModel
+	 * @param $dataProvider
+	 * @param $switchArchivedCount
+	 */
+    public function archivedSearchInit(&$searchModel,&$dataProvider,&$switchArchivedCount)
+	{
+		$searchModel->archived= Yii::$app->request->get('showArchived',$this->defaultShowArchived);
+		
+		//признак того, что свойства ниже указаны явно (не равны значениям по умолчанию)
+		$direct_archived=Yii::$app->request->get('showArchived','unset')!='unset';
+		
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		if (!$dataProvider->totalCount) {
+			if (!$direct_archived && !$searchModel->archived) {
+				//если архивные неявно отключены, то смотрим что будет вместе с ними
+				$switchArchived=clone $searchModel;
+				$switchArchived->archived=!$switchArchived->archived;
+				$switchArchivedData=$switchArchived->search(Yii::$app->request->queryParams);
+				$switchArchivedCount=$switchArchivedData->totalCount;
+				if ($switchArchivedCount) {
+					//если есть архивные, то заменяем текущий поиск на поиск с архивными
+					//и устанавливаем количество записей без архивных как альтернативное
+					$switchArchivedCount=$dataProvider->totalCount;
+					$searchModel=$switchArchived;
+					$dataProvider=$switchArchivedData;
+				}
+			}
+			
+		}
+		
+		if (!isset($switchArchivedCount)) {
+			//ищем тоже самое но с архивными в противоположном положении
+			$switchArchived=clone $searchModel;
+			$switchArchived->archived=!$switchArchived->archived;
+			$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams)->totalCount;
+		}
+		
+	}
+    
     /**
      * Lists all Arms models.
      * @return mixed
@@ -197,14 +238,17 @@ class ArmsBaseController extends Controller
     	
     	if (class_exists($searchModelClass)) {
 			$searchModel = new $searchModelClass();
-			$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 			
-			if ($searchModel->hasAttribute('archived'))
-				$searchModel->archived= Yii::$app->request->get('showArchived',$this->defaultShowArchived);
+			if ($searchModel->hasAttribute('archived')) {
+				$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount);
+			} else {
+				$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+			}
 			
 			return $this->render('index', [
 				'searchModel' => $searchModel,
 				'dataProvider' => $dataProvider,
+				'switchArchivedCount' => $switchArchivedCount??null,
 			]);
 			
 		} else {

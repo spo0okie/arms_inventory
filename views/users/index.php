@@ -43,9 +43,10 @@ $renderer=$this;
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 		'toolButton'=> '<span class="p-2">'. ShowArchivedWidget::widget([
-				'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
-				'labelBadge'=>$switchArchivedDelta
-			]).'<span>',
+			'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
+			'labelBadge'=>$switchArchivedDelta,
+			'state'=>$searchModel->archived
+		]).'<span>',
 	]) ?>
 	
 	

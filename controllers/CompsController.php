@@ -6,7 +6,6 @@ use app\models\Domains;
 use Throwable;
 use Yii;
 use app\models\Comps;
-use app\models\CompsSearch;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\Query;
@@ -39,7 +38,6 @@ class CompsController extends ArmsBaseController
     /**
      * Lists all Comps models.
      * @return mixed
-     */
     public function actionIndex()
     {
         $searchModel = new CompsSearch();
@@ -58,6 +56,7 @@ class CompsController extends ArmsBaseController
 			'switchArchivedCount' => $switchArchivedCount,
         ]);
     }
+	 */
 	
     /**
      * Lists all Comps models.
