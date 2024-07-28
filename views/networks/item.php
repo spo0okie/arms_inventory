@@ -22,7 +22,7 @@ if (is_object($model)) {
 		'archived_class' => 'text-decoration-line-through',
 		'link' => LinkObjectWidget::widget([
 			'model' => $model,
-			//'noDelete'=>true,
+			'noDelete'=>true,
 			'static' => $static_view,
 			'name' => $name,
 			'noSpaces' => true

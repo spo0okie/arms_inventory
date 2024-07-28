@@ -5,8 +5,10 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Segments */
 
-$this->title = 'Новый сегмент';
-$this->params['breadcrumbs'][] = ['label' => \app\models\Segments::$titles, 'url' => ['index']];
+if (!isset($modalParent)) $modalParent=null;
+
+$this->title = "Новый ".app\models\Segments::$title;
+$this->params['breadcrumbs'][] = ['label' => app\models\Segments::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="segments-create">
@@ -15,6 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
+		'modalParent' => $modalParent,
     ]) ?>
 
 </div>

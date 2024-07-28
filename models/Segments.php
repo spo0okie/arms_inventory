@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
-use voskobovich\linker\LinkerBehavior;
 use yii\db\ActiveQuery;
 
 /**
@@ -43,21 +42,11 @@ class Segments extends ArmsModel
         ];
     }
 	
-    /**
-	 * В списке поведений прикручиваем many-to-many ссылки
-	 * @return array
-	 */
-	public function behaviors()
-	{
-		return [
-			[
-				'class' => LinkerBehavior::class,
-				'relations' => [
-					'services_ids' => 'services',		//one-2-many
-				]
-			]
-		];
-	}
+	public $linksSchema=[
+		'services_ids' =>				[Services::class,'segment_id'],
+		'networks_ids' =>				[Networks::class,'segment_id'],
+	];
+	
 	/**
 	 * {@inheritdoc}
 	 */
@@ -80,6 +69,14 @@ class Segments extends ArmsModel
 			'history' => [
 				'Подробное описание',
 				'hint' => 'Подробное описание, чтобы увидеть надо будет открыть описание сегмента',
+			],
+			'services_count'=>[
+				'Σ Сервисов',
+				'indexHint'=>'Количество сервисов в этом сегменте инфраструктуры'
+			],
+			'networks_count'=>[
+				'Σ Сетей',
+				'indexHint'=>'Количество сетей в этом сегменте инфраструктуры'
 			],
 		]);
 	}
@@ -108,14 +105,6 @@ class Segments extends ArmsModel
 			->orderBy(['name'=>SORT_ASC])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
-	}
-	
-	public function reverseLinks()
-	{
-		return [
-			$this->networks,
-			$this->services
-		];
 	}
 	
 }
