@@ -4,6 +4,7 @@
 namespace app\components;
 
 
+use Yii;
 use yii\bootstrap5\Tabs;
 use yii\helpers\Html;
 
@@ -18,6 +19,11 @@ class TabsWidget extends Tabs
 	{
 		//что в куках записано про открытую вкладку (или берем по умолчанию)
 		$cookieTab=$_COOKIE[$this->cookieName]??$this->defaultItem;
+		
+		//если имя вкладки передано через УРЛ то делаем оверрайд сохраненного в куках значения
+		if (($hrefTab= Yii::$app->request->get('tab','unset'))!='unset') {
+			$cookieTab=$hrefTab;
+		}
 		
 		$counter=0;
 		$first=null;
@@ -39,7 +45,7 @@ class TabsWidget extends Tabs
 				$items[$i]['active']=true;
 			}
 			
-			$items[$i]['options']['id']='tab-'.$tabId;
+			//$items[$i]['options']['id']='tab-'.$tabId.'-content';
 			
 			//if (!isset($this->tabs[$i]['label'])) $this->tabs[$i]['label']='Tab '.$counter;
 			$items[$i]['headerOptions']=['onClick'=>'document.cookie = "'.$this->cookieName.'='.$tabId.'"','id'=>'tab-'.$tabId];
