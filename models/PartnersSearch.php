@@ -2,10 +2,9 @@
 
 namespace app\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Partners;
+use yii\helpers\StringHelper;
 
 /**
  * PartnersSearch represents the model behind the search form of `app\models\Partners`.
@@ -82,11 +81,11 @@ class PartnersSearch extends Partners
         ]);
 
         $query
-			->andFilterWhere(['or like', 'CONCAT(inn,"/",kpp)', \yii\helpers\StringHelper::explode($this->inn_kpp,'|',true,true)])
-			->andFilterWhere(['or like', 'CONCAT(uname,bname)', \yii\helpers\StringHelper::explode($this->sname,'|',true,true)])
-			->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
-			->andFilterWhere(['or like', 'cabinet_url', \yii\helpers\StringHelper::explode($this->cabinet_url,'|',true,true)])
-			->andFilterWhere(['or like', 'support_tel', \yii\helpers\StringHelper::explode($this->support_tel,'|',true,true)]);
+			->andFilterWhere(['or like', 'CONCAT(inn,"/",kpp)', StringHelper::explode($this->inn_kpp,'|',true,true)])
+			->andFilterWhere(['or like', 'CONCAT(uname,bname,alias)', StringHelper::explode($this->sname,'|',true,true)])
+			->andFilterWhere(['or like', 'comment', StringHelper::explode($this->comment,'|',true,true)])
+			->andFilterWhere(['or like', 'cabinet_url', StringHelper::explode($this->cabinet_url,'|',true,true)])
+			->andFilterWhere(['or like', 'support_tel', StringHelper::explode($this->support_tel,'|',true,true)]);
 
         return $dataProvider;
     }

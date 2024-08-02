@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\FieldsHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 
@@ -15,41 +16,39 @@ if (!isset($modalParent)) $modalParent=null;
 	
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'uname') ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'uname') ?>
+			<div class="row">
+				<div class="col-md-10">
+					<?= FieldsHelper::TextInputField($form,$model, 'bname') ?>
+				</div>
+				<div class="col-md-2">
+					<?=  FieldsHelper::TextInputField($form,$model, 'prefix') ?>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<?= FieldsHelper::TextInputField($form,$model,  'inn') ?>
+				</div>
+				<div class="col-md-6">
+					<?= FieldsHelper::TextInputField($form,$model,  'kpp') ?>
+				</div>
+			</div>
 		</div>
-		<div class="col-md-4">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'bname') ?>
-		</div>
-		<div class="col-md-2">
-			<?=  \app\helpers\FieldsHelper::TextInputField($form,$model, 'prefix') ?>
+		<div class="col-md-6">
+			<?= FieldsHelper::TextAutoresizeField($form,$model,  'alias') ?>
+			<?= FieldsHelper::TextAutoresizeField($form,$model,  'cabinet_url') ?>
+			<?= FieldsHelper::TextAutoresizeField($form,$model,  'support_tel') ?>
 		</div>
 	</div>
 	
 
-	<div class="row">
-		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,  'inn') ?>
-		</div>
-		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model,  'kpp') ?>
-		</div>
-	</div>
 
-
-	<div class="row">
-		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,  'cabinet_url') ?>
-		</div>
-		<div class="col-md-6 form-text text-muted">
-			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,  'support_tel') ?>
-		</div>
-	</div>
 
 
 
 	<div class="row">
 		<div class="col-md-6">
-		    <?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,  'comment',['lines' => 6]) ?>
+		    <?= FieldsHelper::TextAutoresizeField($form,$model,  'comment',['lines' => 6]) ?>
 			<br>
 			<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
 			

@@ -24,6 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
 			<?= $this->render('card',['model'=>$model]) ?>
 		</div>
 		<div class="col-md-6">
+			<?= $this->render('/attaches/model-list',compact(['model'])) ?>
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'services']) ?>
 			<?= ModelFieldWidget::widget([
 				'model'=>$model,

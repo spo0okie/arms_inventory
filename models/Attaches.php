@@ -51,6 +51,7 @@ class Attaches extends ActiveRecord
 					'lic_items_id',
 					'lic_keys_id',
 					'contracts_id',
+					'partners_id',
 					'places_id',
 					'schedules_id',
 					'tech_models_id',
@@ -64,27 +65,7 @@ class Attaches extends ActiveRecord
 			//[['uploadedFile'], 'file'],
         ];
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'techs_id' => 'Techs ID',
-            'services_id' => 'Services ID',
-            'lic_types_id' => 'Lic Types ID',
-            'lic_groups_id' => 'Lic Groups ID',
-            'lic_items_id' => 'Lic Items ID',
-            'lic_keys_id' => 'Lic Keys ID',
-            'contracts_id' => 'Contracts ID',
-            'places_id' => 'Places ID',
-            'schedules_id' => 'Schedules ID',
-            'filename' => 'Filename',
-        ];
-    }
-	
+    
 	
 	/**
 	 * Сохраняет файл
