@@ -134,7 +134,24 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 			)
 		);
 	}
-
+	
+	/**
+	 * Записывает значение в древовидный архив
+	 * @param array $array		исходный архив в котором ищем
+	 * @param array $path		путь ['options','pluginOptions','multiple']
+	 */
+	public static function unsetTreeValue(array &$array,array $path) {
+		if (!count($path)) return;
+		$key=array_shift($path);
+		//если мы обошли весь путь, то удаляем элемент
+		if (!count($path)) {
+			unset ($array[$key]);
+			return;
+		}
+		//иначе передаем рекурсивно ветвь и укороченный путь
+		self::unsetTreeValue($array[$key],$path);
+	}
+	
 	/**
 	 * Записывает значение по умолчанию в древовидный архив (если не установлено)
 	 * @param array $array		исходный архив в котором ищем

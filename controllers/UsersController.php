@@ -46,10 +46,10 @@ class UsersController extends ArmsBaseController
 		
 		//убираем те параметры, которые не выводятся в таблицу
 		if (!DynaGridWidget::tableColumnIsVisible('users-index','Ename'))
-			ArrayHelper::setTreeValue($params,['UsersSearch','Ename'],null);
+			ArrayHelper::unsetTreeValue($params,['UsersSearch','Ename']);
 		
 		if (!DynaGridWidget::tableColumnIsVisible('users-index','shortName'))
-			ArrayHelper::setTreeValue($params,['UsersSearch','shortName'],null);
+			ArrayHelper::unsetTreeValue($params,['UsersSearch','shortName']);
 		
 		//обновляем текущий Url с исправленными параметрами
 		Yii::$app->request->setUrl(Url::to(['index'],$params));

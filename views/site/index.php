@@ -32,7 +32,7 @@ $this->title = 'Инвентаризация';
 		</p>
 
 		<p>
-			<?= SearchFieldWidget::widget(['model'=>'Contracts','field'=>'fullname','label'=>'Документы:\&gt; ']) ?>
+			<?= SearchFieldWidget::widget(['model'=>'Contracts','field'=>'name','label'=>'Документы:\&gt; ']) ?>
 		</p>
 	</div>
 	
