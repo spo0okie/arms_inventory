@@ -58,6 +58,7 @@ use yii\db\ActiveQuery;
  * @property string     $firstUnpaid
  *
  *
+ * @property Comps[]    $provideComps
  * @property Comps[]    $comps
  * @property Comps[]    $compsRecursive
  * @property Techs[]    $techs
@@ -132,6 +133,7 @@ class Services extends ArmsModel
 	public $linksSchema=[
 		'depends_ids' =>				[Services::class,'dependants_ids'],
 		'comps_ids' =>					[Comps::class,'services_ids'],
+		'provide_comps_ids' =>			[Comps::class,'platform_id'],
 		'techs_ids' =>					[Techs::class,'services_ids'],
 		'maintenance_reqs_ids'=>		[MaintenanceReqs::class,'services_ids'],
 		'maintenance_jobs_ids'=>		[MaintenanceJobs::class,'services_ids'],
@@ -441,12 +443,7 @@ class Services extends ArmsModel
 				'placeholder' => 'Не обслуживается',
 			],
 			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
-			'incomingConnections'=>[
-				'Входящие связи',
-			],
-			'outgoingConnections'=>[
-				'Исходящие связи',
-			],
+
         ];
     }
     
@@ -655,6 +652,14 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
 			->viaTable('comps_in_services', ['services_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает ос которые предоставляются этой услугой
+	 */
+	public function getProvideComps()
+	{
+		return $this->hasMany(Comps::class, ['platform_id' => 'id']);
 	}
 	
 	

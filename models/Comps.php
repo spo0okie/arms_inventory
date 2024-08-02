@@ -8,7 +8,6 @@ use app\helpers\QueryHelper;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\CompsModelCalcFieldsTrait;
 use Throwable;
-use voskobovich\linker\LinkerBehavior;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
@@ -35,6 +34,9 @@ use yii\db\StaleObjectException;
  * @property string $ip_ignore Игнорировать IP адреса
  * @property int $arm_id Рабочее место
  * @property int $user_id Пользователь
+ * @property int[] $admins_ids Администраторы
+ * @property int $platform_id ID Облачного сервиса
+ * @property Services $platform облачный сервис
  * @property string   $comment Комментарий
  * @property string   $updated_at Время обновления
  * @property boolean  $isIgnored Софт находится в списке игнорируемого ПО
@@ -51,6 +53,7 @@ use yii\db\StaleObjectException;
  * @property Users    $user
  * @property Users                  $responsible
  * @property Users[]                $supportTeam
+ * @property Users[]                $admins
  * @property Domains                $domain
  * @property string                 $updatedRenderClass
  * @property string         $updatedText
@@ -76,10 +79,6 @@ use yii\db\StaleObjectException;
  * @property MaintenanceReqs $maintenanceReqs
  * @property MaintenanceJobs $maintenanceJobs
  * @property MaintenanceReqs $effectiveMaintenanceReqs
- * @property ServiceConnections $incomingConnections
- * @property ServiceConnections $outgoingConnections
- * @property ServiceConnections $incomingConnectionsEffective
- * @property ServiceConnections $outgoingConnectionsEffective
  * @property Sandboxes $sandbox
  */
 class Comps extends ArmsModel
@@ -113,14 +112,24 @@ class Comps extends ArmsModel
 		'domain_id' =>			Domains::class,
 		'user_id' =>			Users::class,
 		'sandbox_id' =>			Sandboxes::class,
+		'platform_id' =>		[Services::class,'provide_comps_ids'],
 		
 		'linked_arms_ids'=>		[Techs::class,'comp_id'],
 		'services_ids'=>		[Services::class,'comps_ids'],
+		'admins_ids'=>			[Users::class,'admin_comps_ids'],
 		'aces_ids'=>			[Aces::class,'comps_ids'],
 		'acls_ids'=>			[Acls::class,'comp_ids'],
 		'lic_groups_ids' =>		[LicGroups::class,'comp_ids'],
 		'lic_items_ids' =>		[LicItems::class,'comp_ids'],
 		'lic_keys_ids' =>		[LicKeys::class,'comp_ids'],
+		'netIps_ids' => 		[NetIps::class,'comps_ids'],
+		
+		'soft_ids' => 			[Soft::class,'comps_ids','loader'=>'soft',
+			'updater' => ['class' => ManyToManySmartUpdater::class,],
+		],
+		'softHits_ids' => 		[Soft::class,'hits_ids',
+			'updater' => ['class' => ManyToManySmartUpdater::class,],
+		],
 		
 		'maintenance_reqs_ids'=>[MaintenanceReqs::class,'comps_ids'],
 		'maintenance_jobs_ids'=>[MaintenanceJobs::class,'comps_ids'],
@@ -135,7 +144,7 @@ class Comps extends ArmsModel
 			['name', 'filter', 'filter' => function ($value) {
 				return Domains::validateHostname($value,$this);
 			}],
-            [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids','maintenance_jobs_ids'], 'each', 'rule'=>['integer']],
+            [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids','maintenance_jobs_ids','admins_ids'], 'each', 'rule'=>['integer']],
             [['name', 'os','domain_id'], 'required'],
 			[['sandbox_id'],'default','value'=>null],
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived','sandbox_id'], 'integer'],
@@ -164,6 +173,15 @@ class Comps extends ArmsModel
 			[['arm_id'], 'exist', 'skipOnError' => true, 'targetClass' => Techs::class, 'targetAttribute' => ['arm_id' => 'id']],
 			[['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['user_id' => 'id']],
             [['domain_id'], 'exist', 'skipOnError' => true, 'targetClass' => Domains::class, 'targetAttribute' => ['domain_id' => 'id']],
+			[['arm_id','platform_id'], function () {
+				if ($this->arm_id && $this->platform_id) {
+					$this->addError('arm_id', 'ОС не может работать на оборудовании и предоставляться услугой одновременно');
+					$this->addError('platform_id', 'ОС не может работать на оборудовании и предоставляться услугой одновременно');
+				} else {
+					$this->clearErrors('arm_id');
+					$this->clearErrors('platform_id');
+				}
+			}, 'skipOnEmpty'=> false]
         ];
     }
 
@@ -185,9 +203,15 @@ class Comps extends ArmsModel
 			'domain_id' => ['Домен','absorb'=>'ifEmpty'],
 			'user_id' => [
 				'Пользователь',
-				'hint' => 'Имеет смысл только для серверов и виртуальных машин в случае, '
-					.'<br>если пользователь операционной системы отличается от пользователя АРМ',
-				'absorb'=>'ifEmpty'
+				'hint' => 'Имеет смысл только для серверов и ВМ в случае, '
+					.'<br>если пользователь ОС отличается от пользователя АРМ',
+				'absorb'=>'ifEmpty',
+				'placeholder' => function () {
+        			if (is_object($this->arm) && is_object($this->arm->user)) {
+        				return ($this->arm->user->shortName.' (пользователь АРМ)');
+					}
+        			return 'Использовать пользователя АРМ';
+				}
 			],
 			'user' => ['alias'=>'user'],
             'name' => [
@@ -217,8 +241,9 @@ class Comps extends ArmsModel
             'ignore_hw' => ['Виртуальная машина','absorb'=>'ifEmpty'],
             'arm_id' => [
             	'АРМ',
-				'indexHint' => 'ПК на котором установлена ОС<br/>'.QueryHelper::$stringSearchHint,
+				'indexHint' => 'ПК/сервер или облачная платформа на которой работает эта ОС<br/>'.QueryHelper::$stringSearchHint,
 				'absorb'=>'ifEmpty',
+				'placeholder' => 'Выберите АРМ/сервер'
 			],
 			'sandbox_id'=>[
 				'placeholder'=>'ОС не изолирована в песочнице',
@@ -261,7 +286,8 @@ class Comps extends ArmsModel
 				'hint'=>'Какие предъявлены требования по обслуживанию ОС/ВМ.'
 					.'<br>По хорошему требования должны предъявлять сервисы, '
 					.'<br>работающие на ОС/ВМ, но можно задать их и явно',
-				'indexHint'=>'{same}'
+				'indexHint'=>'{same}',
+				'placeholder' => 'Получать из сервисов',
 			],
 			'maintenanceReqs'=>['alias'=>'maintenance_reqs_ids'],
 			'effectiveMaintenanceReqs'=>[
@@ -274,47 +300,35 @@ class Comps extends ArmsModel
 			'maintenance_jobs_ids'=>[
 				MaintenanceJobs::$titles,
 				'hint'=>'Какие операции регламентного обслуживания проводятся над этой ОС/ВМ',
-				'indexHint'=>'{same}'
+				'indexHint'=>'{same}',
+				'placeholder' => 'Отсутствует',
 			],
 			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
 			'lics' => [
 				'Лицензии',
 				'hint' => 'Все привязанные лицензии:<br>Типы лицензий, закупки, ключи',
 				'indexHint' => '{same}',
+			],
+			'platform_id'=>[
+				'Предоставляется услугой',
+				'hint'=>'Если эта ОС/ВМ запущена на облачной платформе виртуализации/датацентре и указать АРМ невозможно,'
+					.'<br/> то можно указать какой услугой предоставляются вычислительные мощности для нее.',
+				'placeholder' => function () {
+					return 'Работает на нашем оборудовании '.(is_object($this->arm)?(' '.$this->arm->num):'');
+				}
+			
+			],
+			'admins_ids'=>[
+				'Предоставлены полномочия администратора',
+				'hint'=>'Если административные привилегии на этой ОС/ВМ выданы рядовым пользователям,'
+					.'<br>то необходимо перечислить их здесь. (Состав ИТ отдела перечислять не нужно)',
+				'placeholder'=>'Только у ИТ отдела'
 			]
 
 		]);
     }
 
 
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => LinkerBehavior::class,
-                'relations' => [
-					'soft_ids' => [
-						'soft',
-						'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-					'softHits_ids' => [
-						'softHits',
-						'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-					'netIps_ids' => 'netIps',
-					'services_ids' => 'services',
-					'aces_ids' => 'aces',
-					'acls_ids' => 'acls',	//one-2-many
-					'lic_groups_ids' => 'licGroups',
-					'lic_items_ids' => 'licItems',
-					'lic_keys_ids' => 'licKeys',
-					'maintenance_reqs_ids' => 'maintenanceReqs',
-					'maintenance_jobs_ids' => 'maintenanceJobs',
-                ]
-            ]
-        ];
-    }
-	
 	
 	/**
 	 * @return ActiveQuery
@@ -332,27 +346,6 @@ class Comps extends ArmsModel
 		return $this->hasMany(Techs::class, ['comp_id' => 'id']);
 	}
 	
-	/**
-	 * Входящие соединения (явно объявленные на этот комп)
-	 * @return ActiveQuery
-	 * @throws InvalidConfigException
-	 */
-	public function getIncomingConnections()
-	{
-		return $this->hasMany(ServiceConnections::class, ['id' => 'connection_id'])
-			->viaTable('comps_in_targets', ['comps_id' => 'id']);
-	}
-	
-	/**
-	 * Исходящие соединения (явно объявленные с этого компа)
-	 * @return ActiveQuery
-	 * @throws InvalidConfigException
-	 */
-	public function getOutgoingConnections()
-	{
-		return $this->hasMany(ServiceConnections::class, ['id' => 'connection_id'])
-			->viaTable('comps_in_initiators', ['comps_id' => 'id']);
-	}
 	
 	/**
 	 * @return ActiveQuery
@@ -400,7 +393,7 @@ class Comps extends ArmsModel
 	}
 	
 	/**
-	 * Возвращает закрепленное на компе ПО
+	 * Возвращает обнаруженное на компе ПО
 	 */
 	public function getSoftHits()
 	{
@@ -410,12 +403,30 @@ class Comps extends ArmsModel
 	}
 	
 	/**
-	 * Возвращает закрепленное на компе ПО
+	 * Возвращает работающие на компе сервисы
 	 */
 	public function getServices()
 	{
 		return $this->hasMany(Services::class, ['id' => 'services_id'])
 			->viaTable('{{%comps_in_services}}', ['comps_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает работающие на компе сервисы
+	 */
+	public function getPlatform()
+	{
+		return $this->hasOne(Services::class, ['id' => 'platform_id'])
+			->from(['platforms'=>Services::tableName()]);
+	}
+	
+	/**
+	 * Возвращает список админов
+	 */
+	public function getAdmins()
+	{
+		return $this->hasMany(Users::class, ['id' => 'users_id'])
+			->viaTable('{{%admins_in_comps}}', ['comps_id' => 'id']);
 	}
 	
 	//нужно только для сортировки моделей внутри ArrayDataProvider
@@ -640,6 +651,8 @@ class Comps extends ArmsModel
 
 			/* взаимодействие с NetIPs */
 			$this->netIps_ids=NetIps::fetchIpIds($this->ip);
+			
+			if ($this->platform_id) $this->arm_id=null;
 			
 			//грузим старые значения записи
 			$old=static::findOne($this->id);

@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\FieldsHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 
@@ -14,14 +15,18 @@ if (!isset($modalParent)) $modalParent=null;
     <?php $form = ActiveForm::begin(); ?>
 
 	<div class="row">
-		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+		<div class="col-md-4">
+			<?= FieldsHelper::TextInputField($form,$model, 'name') ?>
 		</div>
 		<div class="col-md-3">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'prefix') ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'prefix') ?>
 		</div>
 		<div class="col-md-3">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'code') ?>
+			<?= FieldsHelper::TextInputField($form,$model, 'code') ?>
+		</div>
+		<div class="col-md-2">
+			<br>
+			<?= FieldsHelper::CheckboxField($form,$model, 'hide_menu') ?>
 		</div>
 	</div>
 
@@ -29,7 +34,7 @@ if (!isset($modalParent)) $modalParent=null;
 	
 	<div class="row">
 		<div class="col-md-9">
-			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'comment',['lines' => 8,]) ?>
+			<?= FieldsHelper::TextAutoresizeField($form,$model,'comment',['lines' => 8,]) ?>
 
 		</div>
 		<div class="col-md-3">
@@ -38,10 +43,10 @@ if (!isset($modalParent)) $modalParent=null;
 					Может выполнять роли
 				</div>
 				<div class="card-body">
-					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'is_computer') ?>
-					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'is_display') ?>
-					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'is_ups') ?>
-					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'is_phone') ?>
+					<?= FieldsHelper::CheckboxField($form,$model,'is_computer') ?>
+					<?= FieldsHelper::CheckboxField($form,$model,'is_display') ?>
+					<?= FieldsHelper::CheckboxField($form,$model,'is_ups') ?>
+					<?= FieldsHelper::CheckboxField($form,$model,'is_phone') ?>
 				</div>
 			</div>
 		</div>
@@ -49,9 +54,9 @@ if (!isset($modalParent)) $modalParent=null;
 
 
 
-	<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'comment_name') ?>
+	<?= FieldsHelper::TextInputField($form,$model, 'comment_name') ?>
 
-	<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'comment_hint') ?>
+	<?= FieldsHelper::TextInputField($form,$model, 'comment_hint') ?>
 	
 	<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
 	

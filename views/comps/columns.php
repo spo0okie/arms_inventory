@@ -33,7 +33,9 @@ return [
 	],
 	'arm_id' => [
 		'value' => function ($data) use ($renderer) {
-			return is_object($data->arm) ? $renderer->render('/techs/item', ['model' => $data->arm,'static_view'=>true]) : null;
+			if (is_object($data->arm)) return $renderer->render('/techs/item', ['model' => $data->arm,'static_view'=>true]);
+			if (is_object($data->platform)) return $renderer->render('/services/item', ['model' => $data->platform,'static_view'=>true]);
+			return '';
 		},
 	],
 	'ip' => [

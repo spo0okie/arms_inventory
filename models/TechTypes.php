@@ -2,7 +2,8 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "tech_types".
@@ -59,7 +60,7 @@ class TechTypes extends ArmsModel
     {
         return [
 	        [['code', 'name', 'comment'], 'required'],
-			[['is_computer','is_phone','is_display','is_ups'],'boolean'],
+			[['is_computer','is_phone','is_display','is_ups','hide_menu'],'boolean'],
             [['comment'], 'string'],
 	        [['code', 'name'], 'string', 'max' => 128,'min'=>2],
 	        [['comment_hint'], 'string', 'max' => 128],
@@ -143,12 +144,16 @@ class TechTypes extends ArmsModel
 					'При прикреплении к АРМ будет трактоваться как дисплей<br>'.
 					'<i>Прим: монитор, проектор, ТВ</i>',
 			],
+			'hide_menu' => [
+				'Не отображать в меню',
+				'Скрыть этот элемент из списка категорий оборудования в главном меню'
+			]
 		];
 	}
 
 
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getTechModels()
 	{
@@ -173,13 +178,23 @@ class TechTypes extends ArmsModel
 		foreach ($this->techModels as $model) $sum+=$model->usages;
 		return $sum;
 	}
-
+	
 	public static function fetchNames()
 	{
 		$list = static::find()
 			->select(['id', 'name'])
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
+		return ArrayHelper::map($list, 'id', 'name');
+	}
+	
+	public static function fetchMenuNames()
+	{
+		$list = static::find()
+			->select(['id', 'name','hide_menu'])
+			->where('NOT ifnull(hide_menu,0)=1')
+			->orderBy(['name'=>SORT_ASC])
+			->all();
+		return ArrayHelper::map($list, 'id', 'name');
 	}
 	
 	

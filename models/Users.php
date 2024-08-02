@@ -48,6 +48,7 @@ use yii\web\IdentityInterface;
  *
  * @property Aces[]      $aces
  * @property Comps[]     $comps
+ * @property Comps[]     $adminComps
  * @property Comps[]     $compsFromServices
  * @property Comps[]     $compsFromTechs
  * @property Comps[]     $compsTotal
@@ -146,6 +147,7 @@ class Users extends ArmsModel implements IdentityInterface
 		'lic_items_ids' =>			 				[LicItems::class,'users_ids'],
 		'contracts_ids' => 							[Contracts::class,'users_ids'],
 		'comps_ids' =>								[Comps::class,'user_id'],
+		'admin_comps_ids' =>						[Comps::class,'admins_ids'],
 		'services_ids' => 							[Services::class,'responsible_id'],
 		'support_services_ids' =>			 		[Services::class,'support_ids'],
 		'infrastructure_services_ids' =>			[Services::class,'infrastructure_responsible_id'],
@@ -446,6 +448,16 @@ class Users extends ArmsModel implements IdentityInterface
 	public function getComps()
 	{
 		return $this->hasMany(Comps::class, ['user_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает сервисы, за которые отвечает пользователь
+	 * @return ActiveQuery
+	 */
+	public function getAdminComps()
+	{
+		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
+			->viaTable('{{%admins_in_comps}}', ['users_id' => 'id']);
 	}
 	
 	/**

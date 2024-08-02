@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;
 use app\models\Domains;
 use app\models\MaintenanceJobs;
@@ -9,7 +10,6 @@ use app\models\Services;
 use app\models\Techs;
 use app\models\Users;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
 
 
 
@@ -22,13 +22,12 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="comps-form">
 
-    <?php $form = ActiveForm::begin([
-		'enableClientValidation' => false,
-		'enableAjaxValidation' => true,
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
 		'validateOnBlur' => true,
 		'validateOnChange' => true,
 		'validateOnSubmit' => true,
-		'validationUrl' => $model->isNewRecord?['comps/validate']:['comps/validate','id'=>$model->id],
+		'id'=>'comps-form'
 	]); ?>
 
 	<div class="row">
@@ -46,11 +45,11 @@ if (!isset($modalParent)) $modalParent=null;
 			]) ?>
 		</div>
 	</div>
+
 	<div class="row">
-		<div class="col-md-6">
-			<?= FieldsHelper::Select2Field($form,$model,'arm_id', [
-				'data' => Techs::fetchArmNames(),
-				'options' => ['placeholder' => 'Выберите АРМ',],
+		<div class="col-md-4">
+			<?= FieldsHelper::Select2Field($form,$model, 'user_id', [
+				'data' => Users::fetchWorking($model->user_id),
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'allowClear' => true,
@@ -58,19 +57,46 @@ if (!isset($modalParent)) $modalParent=null;
 				]
 			]) ?>
 		</div>
-		<div class="col-md-6">
-			<?= FieldsHelper::Select2Field($form,$model, 'user_id', [
-				'data' => Users::fetchWorking($model->user_id),
-				'options' => ['placeholder' => 'Пользователь АРМ',],
+		<div class="col-md-8">
+			<?= FieldsHelper::Select2Field($form,$model,'admins_ids', [
+				'data' => Users::fetchWorking($model->admins_ids),
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'allowClear' => true,
-					'multiple' => false
+					'multiple' => true
 				]
 			]) ?>
 		</div>
 	</div>
 
+	<div class="row">
+		<div class="col-md-6">
+			<?= FieldsHelper::Select2Field($form,$model,'arm_id', [
+				'data' => Techs::fetchArmNames(),
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => false
+				],
+				'options'=>[
+					'onchange'=>"$('#comps-form').yiiActiveForm('validateAttribute', 'comps-platform_id')",
+				],
+			]) ?>
+		</div>
+		<div class="col-md-6">
+			<?= FieldsHelper::Select2Field($form,$model, 'platform_id', [
+				'data' => Services::fetchNames(),
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => true,
+					'multiple' => false
+				],
+				'options'=>[
+					'onchange'=>"$('#comps-form').yiiActiveForm('validateAttribute', 'comps-arm_id')",
+				],
+			]) ?>
+		</div>
+	</div>
 	<div class="row">
 		<div class="col-md-6">
 			<?= FieldsHelper::CheckboxField($form,$model, 'ignore_hw') ?>
@@ -95,7 +121,6 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-md-3">
 			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
 				'data' => MaintenanceReqs::fetchNames(),
-				'options' => ['placeholder' => 'Получать из сервисов',],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'allowClear' => true,
@@ -106,7 +131,6 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-md-3">
 			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_jobs_ids', [
 				'data' => MaintenanceJobs::fetchNames(),
-				'options' => ['placeholder' => 'Отсутствуют',],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
 					'allowClear' => true,
@@ -142,6 +166,6 @@ if (!isset($modalParent)) $modalParent=null;
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

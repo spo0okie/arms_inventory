@@ -63,6 +63,14 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			]);
 			
 			echo ListObjectsWidget::widget([
+				'models' => $model->adminComps,
+				'title' => 'Выданы полномочия администратора:',
+				'item_options' => ['static_view' => $static_view, ],
+				'card_options' => ['cardClass' => 'mb-3'],
+				'lineBr'=> false,
+			]);
+			
+			echo ListObjectsWidget::widget([
 				'models' => $model->techsHead,
 				'title' => 'АРМ/оборудование числящиеся за подчиненными:',
 				'item_options' => ['static_view' => $static_view, ],

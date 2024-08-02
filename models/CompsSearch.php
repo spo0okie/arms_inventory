@@ -60,6 +60,7 @@ class CompsSearch extends Comps
 				'arm.place',
 				'arm.user',
 				'arm.state',
+				'platform',
 				'domain',
 				'soft',
 				'softHits',
@@ -78,8 +79,8 @@ class CompsSearch extends Comps
 				'name',
 				'raw_version',
 				'arm_id'=>[
-					'asc'=>['techs.num'=>SORT_ASC],
-					'desc'=>['techs.num'=>SORT_DESC],
+					'asc'=>['CONCAT(ifnull(techs.num,""),ifnull(platforms.name,""))'=>SORT_ASC],
+					'desc'=>['CONCAT(ifnull(techs.num,""),ifnull(platforms.name,""))'=>SORT_DESC],
 				],
 				'services_ids'=>[
 					'asc'=>['services.name'=>SORT_ASC],
@@ -134,7 +135,11 @@ class CompsSearch extends Comps
             ->andFilterWhere(QueryHelper::querySearchString('raw_version', $this->raw_version))
 			->andFilterWhere(QueryHelper::querySearchString('comps.ip', $this->ip))
 			->andFilterWhere(QueryHelper::querySearchString('comps.mac', $this->mac))
-            ->andFilterWhere(QueryHelper::querySearchString('arms.num', $this->arm_id))
+            ->andFilterWhere(['or',
+				QueryHelper::querySearchString('techs.num', $this->arm_id),
+				QueryHelper::querySearchString('platforms.name', $this->arm_id),
+				QueryHelper::querySearchString('platforms.search_text', $this->arm_id),
+			])
 			->andFilterWhere(QueryHelper::querySearchString('comment', $this->comment))
 			->andFilterWhere(['or',
 				QueryHelper::querySearchString('services.name', $this->services_ids),

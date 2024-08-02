@@ -66,16 +66,32 @@ if (!mb_strlen($domain))
 	<?php if (count($model->supportTeam)) { ?>
 		<strong>Поддержка:</strong>
 		<?php
-			$support=[];
-			foreach ($model->supportTeam as $mate) $support[]= $this->render('/users/item',['model'=>$mate,'static_view'=>true,'short'=>true]);
-			echo implode(', ',$support);
+		$support=[];
+		foreach ($model->supportTeam as $mate) $support[]= $this->render('/users/item',['model'=>$mate,'static_view'=>true,'short'=>true]);
+		echo implode(', ',$support);
+		?>
+		<br />
+	<?php } ?>
+	<?php if (count($model->admins)) { ?>
+		<strong>Полномочия администратора:</strong>
+		<?php
+		$admins=[];
+		foreach ($model->admins as $mate) $admins[]= $this->render('/users/item',['model'=>$mate,'static_view'=>true,'short'=>true]);
+		echo implode(', ',$admins);
 		?>
 		<br />
 	<?php } ?>
 	<?= Yii::$app->formatter->asNtext($model->comment??'') ?>
 </div>
 <div class="d-flex flex-row flex-wrap mb-3">
-	<?php if(!$no_arm) { ?>
+	<?php if (is_object($model->platform)) {?>
+		<div class="pe-5">
+			<h4>Платформа</h4>
+			<p>
+				<?= $this->render('/services/item',['model'=>$model->platform,'static_view'=>$static_view]) ?>
+			</p>
+		</div>
+	<?php } elseif (!$no_arm) { ?>
 		<div class="pe-5">
 			<h4>АРМ</h4>
 			<p>

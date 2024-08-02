@@ -43,7 +43,7 @@ use yii\helpers\Html;
 use yii\web\View;
 
 $techTypes=[];
-foreach (TechTypes::fetchNames() as $idx=> $typeName)
+foreach (TechTypes::fetchMenuNames() as $idx=> $typeName)
 	$techTypes[]=['label'=>$typeName,'url' => ['/tech-types/view','id'=>$idx]];
 
 if (count($techTypes)) $techTypes[]='-';

@@ -6,7 +6,6 @@
 namespace app\models\traits;
 
 
-use app\models\Comps;
 use app\models\HwList;
 use app\models\HwListItem;
 use app\models\MaintenanceReqs;
@@ -199,51 +198,4 @@ trait CompsModelCalcFieldsTrait
 		return Techs::formatMacs($this->mac);
 	}
 	
-	/**
-	 * Получить соединения
-	 * @param string $direction направление соединений incoming / outgoing
-	 * @param string $nodeSide с какой стороны участвует нода target / initiator
-	 * @return array|mixed
-	 */
-	public function getEffectiveConnections(string $direction, string $nodeSide)
-	{
-		$directAttr=$direction.'Connections';
-		$nodeAttr=$nodeSide.'Comps';
-		$cacheAttr=$directAttr.'Effective';
-		
-		if (isset($this->attrsCache[$cacheAttr])) return $this->attrsCache[$cacheAttr];
-		/** @var Comps $this */
-		$connections=[];
-		
-		//выбираем прямые соединения
-		foreach ($this->$directAttr as $connection)
-			$connections[$connection->id]=$connection;
-		
-		//выбираем сервисы где не объявлены компы
-		foreach ($this->services as $service) {
-			foreach ($service->$directAttr as $connection) {
-				if (empty($connection->$nodeAttr)) {
-					$connections[$connection->id]=$connection;
-				}
-			}
-		}
-		return $this->attrsCache[$cacheAttr]=$connections;
-		
-	}
-	
-	/**
-	 * Получить входящие соединения
-	 * @return array|mixed
-	 */
-	public function getIncomingConnectionsEffective() {
-		return $this->getEffectiveConnections('incoming','target');
-	}
-	
-	/**
-	 * Получить входящие соединения
-	 * @return array|mixed
-	 */
-	public function getOutgoingConnectionsEffective() {
-		return $this->getEffectiveConnections('outgoing','initiator');
-	}
 }
