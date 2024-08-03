@@ -88,6 +88,10 @@ class MaterialsTypes extends ArmsModel
 				'Остаток',
 				'indexHint' => 'Суммарный остаток всех материалов этого типа',
 			],
+			'count' => [
+				'Учтено',
+				'indexHint' => 'Сумма всех учтенных материалов этого типа',
+			],
 			'units' => [
 				'Ед. изм',
 				'hint' => 'Единицы измерения материалов этой категории (штуки/метры/килограммы)',
@@ -117,7 +121,17 @@ class MaterialsTypes extends ArmsModel
 		return $rest;
 	}
 	
-
+	public function getCount()
+	{
+		$rest=0;
+		
+		foreach ($this->materials as $material)
+			$rest+=$material->count;
+		
+		return $rest;
+	}
+	
+	
 	public static function fetchNames(){
 		$list= static::find()->orderBy('name')
 			//->joinWith('place')

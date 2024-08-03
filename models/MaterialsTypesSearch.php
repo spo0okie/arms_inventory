@@ -39,9 +39,20 @@ class MaterialsTypesSearch extends MaterialsTypes
      */
     public function search($params)
     {
-        $query = MaterialsTypes::find();
+		$query = MaterialsTypes::find()
+			->with([
+				'materials.usages',
+				'materials.children'
+			]);
 
-        // add conditions that should always apply here
+		$filter = MaterialsTypes::find()
+			->select('DISTINCT(materials_types.id)')
+			->joinWith([
+				'materials.usages'
+			]);
+	
+	
+		// add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -57,20 +68,23 @@ class MaterialsTypesSearch extends MaterialsTypes
             // $query->where('0=1');
             return $dataProvider;
         }
-
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'scans_id' => $this->scans_id,
-            'updated_at' => $this->updated_at,
-        ]);
-
-        $query->andFilterWhere(QueryHelper::querySearchString( 'code', $this->code))
+        
+        $filter->andFilterWhere(QueryHelper::querySearchString( 'code', $this->code))
             ->andFilterWhere(QueryHelper::querySearchString('name', $this->name))
             ->andFilterWhere(QueryHelper::querySearchString('units', $this->units))
             ->andFilterWhere(QueryHelper::querySearchString('comment', $this->comment))
             ;
-
+	
+		if ($filter->where) {
+			//выбираем ID отфильтрованных записей
+			$filterSubQuery=$filter
+				->createCommand()
+				->rawSql;
+		
+			//фильтруем запрос данных по этим ID
+			$query
+				->where('materials_types.id in ('.$filterSubQuery.')');
+		}
         return $dataProvider;
     }
 }
