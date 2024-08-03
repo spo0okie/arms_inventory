@@ -1,27 +1,34 @@
 <?php
 
+use app\models\Contracts;
+use app\models\Currency;
+use app\models\Materials;
+use app\models\MaterialsTypes;
+use app\models\Places;
+use app\models\Users;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 use kartik\date\DatePicker;
 use kartik\typeahead\Typeahead;
 use yii\helpers\Url;
+use yii\web\JsExpression;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Materials */
 /* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
 
-$places=\app\models\Places::fetchNames();
+$places= Places::fetchNames();
 $places['']='- помещение не назначено -';
 asort($places);
 if (empty($model->date)) $model->date=date('Y-m-d',time());
 $hidden=' style="display:none" ';
 
 if ($model->isNewRecord) {
-	$formActionSave=\yii\helpers\Url::to(['materials/create','return'=>'previous']);
+	$formActionSave= Url::to(['materials/create','return'=>'previous']);
 } else {
-	$formActionSave=\yii\helpers\Url::to(['materials/update','id'=>$model->id,'return'=>'previous']);
+	$formActionSave= Url::to(['materials/update','id'=>$model->id,'return'=>'previous']);
 }
 
 ?>
@@ -77,7 +84,7 @@ if ($model->isNewRecord) {
         <div class="col-md-6">
 			<div id="source_parent" <?= empty($model->parent_id)?$hidden:'' ?>>
 				<?= $form->field($model, 'parent_id')->widget(Select2::className(), [
-					'data' => \app\models\Materials::fetchNames(),
+					'data' => Materials::fetchNames(),
 					'options' => ['placeholder' => 'Выберите источник этого материала',],
 					'toggleAllSettings'=>['selectLabel'=>null],
 					'pluginOptions' => [
@@ -90,7 +97,7 @@ if ($model->isNewRecord) {
 			<div id="source_new" class="row" <?= !empty($model->parent_id)?$hidden:'' ?>>
 				<div class="col-md-3">
 					<?= $form->field($model, 'currency_id')->widget(Select2::classname(), [
-						'data' => \app\models\Currency::fetchNames(),
+						'data' => Currency::fetchNames(),
 						'options' => ['placeholder' => 'RUR'],
 						'toggleAllSettings'=>['selectLabel'=>null],
 						'pluginOptions' => [
@@ -104,7 +111,7 @@ if ($model->isNewRecord) {
 					<?= $form->field($model,'cost')->textInput() ?>
 				</div>
 				<div class="col-md-3">
-					<?= $form->field($model,'charge')->textInput()->hint(\app\models\Contracts::chargeCalcHtml('materials','cost','charge')) ?>
+					<?= $form->field($model,'charge')->textInput()->hint(Contracts::chargeCalcHtml('materials','cost','charge')) ?>
 				</div>
 			</div>
 			
@@ -112,12 +119,12 @@ if ($model->isNewRecord) {
         </div>
     </div>
 	<div <?= empty($model->parent_id)?$hidden:'' ?> id="materials-model-hint" class="alert alert-striped text-center" role="alert">
-		<big>Если выбрано взятие материала из другого источника, то соответственно категория и модель те же, что и в источнике</big>
+		<span class="fs-3">Если выбрано взятие материала из другого источника, то соответственно категория и модель те же, что и в источнике</span>
 	</div>
 	<div class="row" id="materials-model-selector" <?= !empty($model->parent_id)?$hidden:'' ?>>
 		<div class="col-md-6">
 			<?= $form->field($model, 'type_id')->widget(Select2::className(), [
-				'data' => \app\models\MaterialsTypes::fetchNames(),
+				'data' => MaterialsTypes::fetchNames(),
 				'options' => ['placeholder' => 'Выберите тип',],
 				'toggleAllSettings'=>['selectLabel'=>null],
 				'pluginOptions' => [
@@ -141,7 +148,7 @@ if ($model->isNewRecord) {
 						'prefetch' => Url::to(['materials/search-list','type'=>$model->type_id]),
 						'remote' => [
 							'url' => Url::to(['materials/search-list']) . '?name=%QUERY&type=%TYPE_ID',
-							'prepare' => new \yii\web\JsExpression('function(query, settings) {return settings.url.replace("%QUERY", query).replace("%TYPE_ID", $("#materials-type_id").val());}'),
+							'prepare' => new JsExpression('function(query, settings) {return settings.url.replace("%QUERY", query).replace("%TYPE_ID", $("#materials-type_id").val());}'),
 						]
 					]
 				]			]); ?>
@@ -151,8 +158,8 @@ if ($model->isNewRecord) {
     <div class="row">
         <div class="col-md-6">
 	        <?= $form->field($model, 'it_staff_id')->widget(Select2::className(), [
-		        'data' => \app\models\Users::fetchWorking($model->it_staff_id),
-		        'options' => ['placeholder' => 'сотрудник не назначен',],
+		        'data' => Users::fetchWorking($model->it_staff_id),
+		        'options' => ['placeholder' => 'Кто отвечает?',],
 		        'toggleAllSettings'=>['selectLabel'=>null],
 		        'pluginOptions' => [
 					'dropdownParent' => $modalParent,
@@ -162,12 +169,21 @@ if ($model->isNewRecord) {
 	        ]) ?>
         </div>
         <div class="col-md-6">
-	        <?= $form->field($model, 'places_id')->dropDownList($places) ?>
+	        <?= $form->field($model, 'places_id')->widget(Select2::className(), [
+				'data' => Places::fetchNames(),
+				'options' => ['placeholder' => 'Где хранится?',],
+				'toggleAllSettings'=>['selectLabel'=>null],
+				'pluginOptions' => [
+					'dropdownParent' => $modalParent,
+					'allowClear' => false,
+					'multiple' => false
+				]
+			]) ?>
         </div>
     </div>
 
 	<?= $form->field($model, 'contracts_ids')->widget(Select2::className(), [
-		'data' => \app\models\Contracts::fetchNames(),
+		'data' => Contracts::fetchNames(),
 		'options' => ['placeholder' => 'Выберите документы о поступлении этого материала',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
@@ -189,7 +205,7 @@ if ($model->isNewRecord) {
     
 	<?php ActiveForm::end();
 	$js=<<<JS
-	$('#materials-form').on('beforeSubmit', function (e) {
+	$('#materials-form').on('beforeSubmit', function () {
 		if ($('#materialSource1').is(':checked')) $('#materials-parent_id').val('');
 		return true;
 	});

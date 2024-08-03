@@ -88,7 +88,7 @@ class Materials extends ArmsModel
 			[['cost','charge'], 'number'],
 			[['currency_id'],'default','value'=>1],
             [['parent_id', 'it_staff_id', 'count', 'type_id', 'places_id'], 'integer'],
-            [['date', 'count', 'places_id'  ], 'required'],
+            [['date', 'count', 'places_id', 'it_staff_id'  ], 'required'],
 	        //подмена категории и модели, если установлен источник материалов
 	        ['type_id', 'filter', 'filter' => function ($value) {return empty($this->parent_id)?$value:$this->parent->type_id;}],
 	        ['model', 'filter', 'filter' => function ($value) {return empty($this->parent_id)?$value:$this->parent->model;}],
