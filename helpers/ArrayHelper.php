@@ -145,11 +145,13 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		$key=array_shift($path);
 		//если мы обошли весь путь, то удаляем элемент
 		if (!count($path)) {
-			unset ($array[$key]);
+			if (isset($array[$key]))
+				unset ($array[$key]);
 			return;
 		}
 		//иначе передаем рекурсивно ветвь и укороченный путь
-		self::unsetTreeValue($array[$key],$path);
+		if (isset($array[$key]))
+			self::unsetTreeValue($array[$key],$path);
 	}
 	
 	/**
