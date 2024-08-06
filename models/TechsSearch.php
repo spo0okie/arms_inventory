@@ -96,7 +96,7 @@ class TechsSearch extends Techs
             	'place',
 				'comp.netIps.network',
 				'comps',
-				'netIps.network',
+				'netIps.network.segment',
 				'user.orgStruct',
 				'model.manufacturer',
 				'model.type',
