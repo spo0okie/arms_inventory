@@ -129,7 +129,7 @@ $columns=[
 				foreach ($data->netIps as $ip)
 					$output[$ip->addr]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true]);
 				
-				return implode('<br />',$output);
+				return ExpandableCardWidget::widget(['content'=>implode('<br />',$output)]);
 			}
 			return null;
 		},
