@@ -4,13 +4,16 @@
  * User: Spookie
  * Date: 02.03.2018
  * Time: 14:14
- * @var \app\models\Techs 	$model
- * @var \app\models\Techs[]	$techs
+ * @var Techs 	$model
+ * @var Techs[]	$techs
  * @var yii\web\View        $this
  * @var string              $cabinet_col первая колнка - название помещения
  */
 
 //подгружаем все ОС АРМа
+use app\helpers\ArrayHelper;
+use app\models\Techs;
+
 $comps=$model->comps;
 //если ни одной не нашли, то создаем массив из пустого элемента чтобы вывести данные по АРМ без ОС
 if (!count($comps)) $comps=[0=>null];
@@ -100,18 +103,18 @@ for ($i=0; $i<count($comps); $i++) {
 				$renderServices=$comp->services;
 				\yii\helpers\ArrayHelper::multisort($renderServices,['name']);
 				foreach ($renderServices as $svc)
-					$services[]=$this->render('/services/item',['model'=>$svc,'show_archived'=>$show_archived]);
+					$services[]=$this->render('/services/item',['model'=>$svc,'show_archived'=>$show_archived,'noDelete'=>true]);
 			}
 			
 				
 			if (isset($comp->user))
-				$services[]='<span class="fas fa-user small grayed-out href"></span> '.$this->render('/users/item',['model'=>$comp->user]);
+				$services[]='<span class="fas fa-user small grayed-out href"></span> '.$this->render('/users/item',['model'=>$comp->user,'noDelete'=>true]);
 			
 			if (!empty($comp->comment))
 				$services[]='<span class="grayed-out href"><span class="fas fa-comment small"></span> '.$comp->comment.'</span>';
 	
 			?>
-            <td colspan="2" class="arm_services <?= $archClass ?> " <?= $archDisplay ?>"><?= implode(' ',$services); ?></td>
+            <td colspan="2" class="arm_services <?= $archClass ?> " <?= $archDisplay ?>><?= implode(' ',$services); ?></td>
         <?php } else if (!$i) { ?>
 
             <td class="arm_uname <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspan ?>>
@@ -127,7 +130,7 @@ for ($i=0; $i<count($comps); $i++) {
 							'name'=>strlen($tech->comment)?$tech->comment:$tech->attachModel->shortest
 						]);
 		            	$tech->num='rendered';
-		            	\app\helpers\ArrayHelper::deleteByField($techs,'num','rendered');
+		            	ArrayHelper::deleteByField($techs,'num','rendered');
 					}
 		            
 		            echo implode('<br />',$phones);
@@ -160,7 +163,7 @@ for ($i=0; $i<count($comps); $i++) {
 								'static_view' => true
 							]);
 							$tech->num='rendered';
-							\app\helpers\ArrayHelper::deleteByField($techs,'id',$tech->id);
+							ArrayHelper::deleteByField($techs,'id',$tech->id);
 						}
 					}
 					?>
@@ -173,7 +176,7 @@ for ($i=0; $i<count($comps); $i++) {
 								'static_view' => true
 							]);
 							$tech->num='rendered';
-							\app\helpers\ArrayHelper::deleteByField($techs,'id',$tech->id);
+							ArrayHelper::deleteByField($techs,'id',$tech->id);
 						}
 					}
 					?>
