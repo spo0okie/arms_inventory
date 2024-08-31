@@ -62,11 +62,8 @@ if (is_object($model)) {
 		}
 	}
 	
-	if (!empty($crop_parent)) {
-		$dividers=['-',':','::','/','\\','>','->'];
+	if (!empty($crop_parent))
 		$name=$model->getNameWithoutParent($name);
-		
-	}
 	
 	echo ItemObjectWidget::widget([
 		'model'=>$model,
