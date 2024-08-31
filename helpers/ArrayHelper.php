@@ -382,4 +382,26 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		);
 	}
 	
+	/**
+	 * Делает trim для всех элементов массива
+	 * @param      $array
+	 * @param      $characters
+	 * @param bool $deleteEmpty удалять элементы массива если они стали пустыми после trim
+	 * @return array
+	 */
+	public static function trimEach($array,$characters,$deleteEmpty=true) {
+		$trimmed=[];
+		foreach ($array as $i=>$item) {
+			if (is_string($item)) {
+				$item=StringHelper::trim($item,$characters);
+				if (strlen($item) || !$deleteEmpty) {
+					$trimmed[$i]=$item;
+				}
+			} else {
+				$trimmed[$i]=$item;
+			}
+		}
+		return $trimmed;
+	}
+	
 }
