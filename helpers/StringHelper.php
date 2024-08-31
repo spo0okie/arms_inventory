@@ -70,5 +70,88 @@ class StringHelper extends BaseStringHelper {
 		return mb_strtolower($firstChar, $encoding) . $then;
 	}
 	
+	/**
+	 * Делает trim, только в качестве символов для удаления можно передать массив со словами
+	 * @param $string string
+	 * @param $characters string|array
+	 * @return string
+	 */
+	public static function trim(string $string,$characters) {
+		if (is_string($characters)) {
+			return trim($string,$characters);
+		}
+		
+		if (!is_array($characters))
+			return $string;
+		
+		foreach ($characters as $character) {
+			$charLen=strlen($character);
+			if (StringHelper::startsWith($string,$character)) {
+				$string=substr($string,$charLen);
+			}
+			
+			if (StringHelper::endsWith($string,$character)) {
+				$string=substr($string,0,strlen($string)-$charLen);
+			}
+		}
+		return $string;
+	}
+	
+	/**
+	 * Разбиваем строку в массив токенов
+	 * Опционально делаем trim токенов
+	 * Опционально пропускаем пустые
+	 * Опционально добавляем сами разделители в токены
+	 *
+	 * @param string $string String to be exploded.
+	 * @param string|array $delimiter Разделитель, можно передать массив вида [' ',"\t",'--']
+	 * @param mixed $trim Whether to trim each element. Can be:
+	 *   - boolean - to trim normally;
+	 *   - string - custom characters to trim. Will be passed as a second argument to `trim()` function.
+	 *   - callable - will be called for each value instead of trim. Takes the only argument - value.
+	 * @param bool $skipEmpty Whether to skip empty strings between delimiters. Default is false.
+	 * @param bool $keepDividers добавлять разделители в качестве токенов
+	 * @return array
+	 * @since 2.0.4
+	 */
+	public static function explode($string, $delimiter = ',', $trim = true, $skipEmpty = false, $keepDividers = false) {
+		if (is_string($delimiter))
+			return parent::explode($string, $delimiter, $trim, $skipEmpty);
+		
+		$result=[$string];
+		foreach ($delimiter as $item) {
+			$dLen=strlen($item);
+			$exploded=[];
+			foreach ($result as $token) {
+				while (($pos=strpos($token,$item))!==false) {
+					$exploded[]=substr($token,0,$pos);
+					if ($keepDividers) $exploded[]=$item;
+					$token=substr($token,$pos+$dLen);
+				}
+				$exploded[]=$token;
+			}
+			$result=$exploded;
+		}
+		
+		if ($trim !== false) {
+			if ($trim === true) {
+				$trim = 'trim';
+			} elseif (!is_callable($trim)) {
+				$trim = function ($v) use ($trim) {
+					return trim($v, $trim);
+				};
+			}
+			$result = array_map($trim, $result);
+		}
+		
+		if ($skipEmpty) {
+			// Wrapped with array_values to make array keys sequential after empty values removing
+			$result = array_values(array_filter($result, function ($value) {
+				return $value !== '';
+			}));
+		}
+		
+		return $result;
+	}
 	
 }
