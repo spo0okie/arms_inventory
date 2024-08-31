@@ -315,15 +315,19 @@ trait ServicesModelCalcFieldsTrait
 	public function getNameWithoutParent($name='')
 	{
 		if (!strlen($name)) $name = $this->name;
-		$dividers = ['-', ':', '::', '/', '\\', '>', '->'];
+		$dividers = ['->', '::', '-', ':',  '/', '\\', '>', ' '];
 		if (is_object($this->parentService)) {
 			//разбиваем имя на слова
 			$tokens = StringHelper::explode($name, ' ', true, true);
+			//убираем разделители
+			
 			foreach ($this->parentService->getAliases() as $alias) {
 				//разбиваем альяс на слова
 				$aliasTokens = StringHelper::explode($alias, ' ', true, true);
 				//если слова альяса это первые слова имени
-				if (array_intersect_assoc($aliasTokens, $tokens) == $aliasTokens) {
+				$aliasName=StringHelper::trim(mb_strtolower(implode($aliasTokens)),$dividers);
+				$testName=StringHelper::trim(mb_strtolower(implode(array_slice($tokens, 0,count($aliasTokens)))),$dividers);
+				if ($testName==$aliasName) {
 					//собственно нашли совпадение
 					
 					//убираем альяс из начала имени (откусываем в качестве имени правый набор слов после альяса)
