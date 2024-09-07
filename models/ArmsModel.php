@@ -233,6 +233,12 @@ class ArmsModel extends ActiveRecord
 		return false;
 	}
 	
+	/**
+	 * Сохранить без обновления журнала
+	 * @param bool $runValidation
+	 * @return bool
+	 * @throws Exception
+	 */
 	public function silentSave($runValidation = true) {
 		$this->doNotChangeAuthor=true;
 		return $this->save($runValidation);
@@ -635,6 +641,21 @@ class ArmsModel extends ActiveRecord
 	 */
 	public function uuid() {
 		return static::getUUID($this);
+	}
+	
+	/**
+	 * Построить ветку(граф) от модели до корня дерева
+	 * (для моделей с древовидной связью через атрибут "родитель")
+	 * @param object $model модель
+	 * @param string $parentAttr аттрибут через который можно получить родителя
+	 * @return array
+	 */
+	public static function buildTreeBranch(object $model, string $parentAttr) {
+		$chain=[$model];
+		while (is_object($model=$model->$parentAttr)) {
+			$chain[]=$model;
+		}
+		return $chain;
 	}
 	
 }

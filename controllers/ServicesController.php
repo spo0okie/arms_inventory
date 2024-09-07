@@ -238,8 +238,7 @@ class ServicesController extends ArmsBaseController
 		$children=$model->getChildrenRecursive();
 		
 		$ids=is_array($children)?ArrayHelper::getArrayField($children,'id'):[];
-		$ids[]=$model->id;
-		
+		$ids=array_merge($ids,ArrayHelper::getArrayField(Services::buildTreeBranch($model,'parentService'),'id'));
 		
 		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(
 			Yii::$app->request->queryParams,
@@ -272,7 +271,7 @@ class ServicesController extends ArmsBaseController
 		$children=$model->getChildrenRecursive();
 		
 		$ids=is_array($children)?ArrayHelper::getArrayField($children,'id'):[];
-		$ids[]=$model->id;
+		$ids=array_merge($ids,ArrayHelper::getArrayField(Services::buildTreeBranch($model,'parentService'),'id'));
 		
 		
 		$dataProvider = $searchModel->search(ArrayHelper::recursiveOverride(
