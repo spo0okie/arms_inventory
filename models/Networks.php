@@ -332,7 +332,7 @@ class Networks extends ArmsModel
 	/**
 	 * @return PhpIP\IPv4Block
 	 */
-	private function IPv4Block()
+	public function IPv4Block()
 	{
 		if (is_object($this->_IPv4Block)) return $this->_IPv4Block;
 		return $this->_IPv4Block=PhpIP\IPv4Block::create($this->text_addr);
@@ -366,6 +366,11 @@ class Networks extends ArmsModel
 	public function getReadableLastIp()
 	{
 		return $this->IPv4Block()->getLastIp()->minus(1)->humanReadable();
+	}
+	
+	public function containsIp($ip)
+	{
+		return $ip->isIn($this);
 	}
 
 	public function getMaxHosts()

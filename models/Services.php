@@ -142,6 +142,7 @@ class Services extends ArmsModel
 		'contracts_ids' => 				[Contracts::class,'services_ids'],
 		'acls_ids' => 					[Acls::class,'services_id'],
 		'aces_ids' => 					[Aces::class,'services_ids'],
+		'children_ids' =>				[Services::class,'parent_id','loader'=>'children'],
 		
 		'responsible_id' =>				[Users::class,'services_ids'],
 		'infrastructure_user_id' =>		[Users::class,'infrastructure_services_ids','loader'=>'infrastructureResponsible'],

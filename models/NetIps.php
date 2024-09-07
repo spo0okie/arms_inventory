@@ -513,6 +513,19 @@ class NetIps extends ArmsModel
 	}
 	
 	/**
+	 * @return PhpIP\IPv4
+	 */
+	private function IPv4()
+	{
+		if (isset($this->attrsCache['IPv4'])) return $this->attrsCache['IPv4'];
+		return $this->attrsCache['IPv4']=PhpIP\IPv4::create($this->text_addr);
+	}
+	
+	public function isIn(Networks $network) {
+		return $this->IPv4()->isIn($network->IPv4Block());
+	}
+	
+	/**
 	 * Возвращает список всех элементов
 	 * @return array|mixed|null
 	 */
