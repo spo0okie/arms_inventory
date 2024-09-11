@@ -1,11 +1,4 @@
-<p align="center">
-    <a href="https://github.com/yiisoft" target="_blank">
-        <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
-    </a>
-    <h1 align="center">БД для инвентаризации ИТ инфрастуктуры</h1>
-    <h4 align="center">на базе Yii 2 Basic Project Template</h4>
-    <br>
-</p>
+# БД для инвентаризации ИТ инфрастуктуры
 
 FEATURES/ВОЗМОЖНОСТИ
 - [Учет оборудования](https://inventory.reviakin.net/web/techs/index)
@@ -30,8 +23,8 @@ FEATURES/ВОЗМОЖНОСТИ
 REQUIREMENTS/ТРЕБОВАНИЯ
 ------------
 
-Минимальная версия PHP 7.1
-MySql 5.5.3
+PHP 7.4  
+MariaDB 10
 
 
 INSTALLATION/УСТАНОВКА
