@@ -186,10 +186,12 @@ class Services extends ArmsModel
 		return [
 			'responsibleName',
 			'infrastructureResponsibleName',
+			'infrastructureSupportNames',
+			'infrastructureResponsibleRecursive',
+			'infrastructureSupportRecursive',
 			'supportScheduleName',
 			'providingScheduleName',
 			'supportNames',
-			'infrastructureSupportNames',
 			'segmentName',
 		];
 	}
