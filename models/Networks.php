@@ -340,12 +340,12 @@ class Networks extends ArmsModel
 	
 	public function getReadableNetMask()
 	{
-		return $this->IPv4Block()->getMask()->humanReadable();
+		return $this->IPv4Block()->getNetmask()->humanReadable();
 	}
 	
 	public function getReadableWildcard()
 	{
-		return $this->IPv4Block()->getMask()->bit_negate()->humanReadable();
+		return $this->IPv4Block()->getNetmask()->bit_negate()->humanReadable();
 	}
 	
 	public function getReadableNetworkIp()
@@ -555,7 +555,7 @@ class Networks extends ArmsModel
 		if (parent::beforeSave($insert)) {
 			$addr=new PhpIP\IPv4Block($this->text_addr);
 			$this->addr=$addr->getNetworkAddress()->numeric();
-			$this->mask=$addr->getPrefix();
+			$this->mask=$addr->getPrefixLength();
 			$this->text_addr=$addr->getNetworkAddress()->humanReadable().'/'.$this->mask;
 			
 			if (!empty($this->text_router)) $this->router=ip2long($this->text_router);

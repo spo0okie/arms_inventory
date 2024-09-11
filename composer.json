@@ -64,7 +64,7 @@
     "edvlerblog/yii2-adldap-module": "^6.0.0",
     "a1inani/yii2-modal-ajax": "@dev",
 	"spo0okie/yii2-rbac-plus": "dev-master",
-    "rlanvin/php-ip": "^2.1",
+    "rlanvin/php-ip": "^3.0",
 	"thomaspark/bootswatch": "dev-master",
     "ext-http": "*",
     "ext-intl": "*"
