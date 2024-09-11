@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "departments".
@@ -12,7 +12,7 @@ use Yii;
  * @property string    $comment Комментарии
  *
  */
-class Departments extends \yii\db\ActiveRecord
+class Departments extends ArmsModel
 {
 	public static $title='Подразделение';
 	public static $titles='Подразделения';
@@ -60,6 +60,6 @@ class Departments extends \yii\db\ActiveRecord
             //->select(['id','name'])
             ->orderBy(['name'=>SORT_ASC])
             ->all();
-        return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
+        return ArrayHelper::map($list, 'id', 'name');
     }
 }
