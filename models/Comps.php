@@ -238,7 +238,12 @@ class Comps extends ArmsModel
 				'indexHint' => 'Скрипт, который внес последние данные по этой ОС<br/>'.QueryHelper::$stringSearchHint,
 			],
             'exclude_hw' => ['Скрытое из паспорта железо','absorb'=>'ifEmpty'],
-            'ignore_hw' => ['Виртуальная машина','absorb'=>'ifEmpty'],
+            'ignore_hw' => [
+            	'Виртуальная машина',
+				'indexLabel'=>'VM',
+				'hint'=>'Является виртуальной машиной',
+				'absorb'=>'ifEmpty'
+			],
             'arm_id' => [
             	'АРМ',
 				'indexHint' => 'ПК/сервер или облачная платформа на которой работает эта ОС<br/>'.QueryHelper::$stringSearchHint,

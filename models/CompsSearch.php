@@ -25,7 +25,7 @@ class CompsSearch extends Comps
         return [
 			[['ids'],'each','rule'=>['integer']],
             [['id', 'domain_id','soft_ids','linkedSoft_ids','softHits_ids'], 'integer'],
-            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id','archived','services_ids'], 'safe'],
+            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id','archived','services_ids','ignore_hw'], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
 				$macs=explode("\n",$value);
 				foreach ($macs as $i=>$mac) {
@@ -155,6 +155,7 @@ class CompsSearch extends Comps
 			->andFilterWhere(QueryHelper::querySearchString('raw_hw', $this->raw_hw))
 			->andFilterWhere(QueryHelper::querySearchNumberOrDate('comps.updated_at',$this->updated_at))
 			->andFilterWhere(['soft.id'=>$this->soft_ids])
+			->andFilterWhere(['comps.ignore_hw'=>$this->ignore_hw])
 			->andFilterWhere(['installed_soft.id'=>$this->softHits_ids])
 			->andFilterWhere(['or',
 				['installed_soft.id'=>$this->linkedSoft_ids],

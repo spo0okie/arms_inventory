@@ -139,5 +139,10 @@ return [
 			foreach ($data->licKeys as $item) $items[]=$renderer->render('/lic-keys/item',['model'=>$item]);
 			return count($items)?ExpandableCardWidget::widget(['content'=>implode('<br>',$items),'cardClass'=>'line-br']):'';
 		},
+	],
+	'ignore_hw'=>[
+		'class' => '\kartik\grid\BooleanColumn',
+		'trueLabel' => 'Y',
+		'falseLabel' => 'N',
 	]
 ];
