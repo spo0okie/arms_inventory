@@ -46,6 +46,7 @@ class ServicesSearch extends Services
 				'compsAndTechs',
 				'maintenanceJobs',
 				'maintenanceReqs',
+				'weight'
 			], 'safe'],
         ];
     }
@@ -143,6 +144,7 @@ class ServicesSearch extends Services
 				QueryHelper::querySearchString('services.search_text',$this->name),
 				QueryHelper::querySearchString( 'services.description', $this->name),
 			])
+			->andFilterWhere(QueryHelper::querySearchNumberOrDate('services.weight', $this->weight))
 			->andFilterWhere(QueryHelper::querySearchString('segments.name', $this->segment))
 			->andFilterWhere(QueryHelper::querySearchString('comps.name', $this->comps))
 			->andFilterWhere(QueryHelper::querySearchString(['AND/OR','techs.num','techs.hostname'],$this->techs))
