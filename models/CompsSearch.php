@@ -135,17 +135,24 @@ class CompsSearch extends Comps
             ->andFilterWhere(QueryHelper::querySearchString('raw_version', $this->raw_version))
 			->andFilterWhere(QueryHelper::querySearchString('comps.ip', $this->ip))
 			->andFilterWhere(QueryHelper::querySearchString('comps.mac', $this->mac))
-            ->andFilterWhere(['or',
-				QueryHelper::querySearchString('techs.num', $this->arm_id),
-				QueryHelper::querySearchString('platforms.name', $this->arm_id),
-				QueryHelper::querySearchString('platforms.search_text', $this->arm_id),
-			])
+            ->andFilterWhere(QueryHelper::querySearchString([
+            	'AND/OR',
+				'IFNULL(techs.num,"")','IFNULL(platforms.name,"")', 'IFNULL(platforms.search_text,"")'],
+				$this->arm_id
+			))
 			->andFilterWhere(QueryHelper::querySearchString('comment', $this->comment))
-			->andFilterWhere(['or',
+			/*->andFilterWhere(['or',
 				QueryHelper::querySearchString('services.name', $this->services_ids),
 				QueryHelper::querySearchString('services.search_text',$this->services_ids),
 				QueryHelper::querySearchString( 'services.description', $this->services_ids),
-			])
+			])*/
+			->andFilterWhere(QueryHelper::querySearchString(
+				[
+					'AND/OR',
+					'IFNULL(services.name,"")', 'IFNULL(services.search_text,"")', 'IFNULL(services.description,"")'
+				],
+				$this->services_ids
+			))
 			->andFilterWhere(QueryHelper::querySearchString('getplacepath({{places}}.id)', $this->places_id))
 			->andFilterWhere(['or',
 				QueryHelper::querySearchString('os', $this->os),

@@ -14,6 +14,11 @@ class QueryHelper
 	'<li><strong>&amp;</strong> (амперсанд/and) - И</li>'.
 	'<li><strong>!</strong> (восклицательный зн.) - НЕ</li>'.
 	'</ul>'.
+	'Можно также использовать следующие подстановки:'.
+	'<ul>'.
+	'<li><strong>*</strong> (звездочка) - должно присутствовать любое непустое значение</li>'.
+	'<li><strong>-</strong> (минус) - отсутствовать какое либо значение</li>'.
+	'</ul>'.
 	'<i>Примеры:<br />'.
 	'<strong>Siemens &amp; !NX &amp; !teamcenter</strong> - Siemens, но не NX и не Teamcenter<br/>'.
 	'<strong>Debian | Ubuntu</strong> - Debian или Ubuntu<br/>'.
@@ -97,9 +102,14 @@ class QueryHelper
 	 */
 	static function likeToken($token,$param) {
 		if (!strlen($token)) return ['like',$param,$token];
-		if (strpos($token,'!')===0) {
+		$tokenParse=true;
+		if (strpos($token,'!')===0 || $token==='-') {
 			$operator='not like';
-			$token=trim(substr($token,1));
+			if ($token=='-') {
+				$token='%_%';
+				$tokenParse=false; //токен
+			} else
+				$token=trim(substr($token,1));
 			//Если мы ищем когда должно быть не похоже - то это каждое поле
 			if (is_array($param) && isset($param[0]) && $param[0]==='AND/OR')
 				$param[0]='AND';
@@ -110,15 +120,20 @@ class QueryHelper
 				$param[0]='OR';
 		}
 
-		if ($token==='*') $token='%_%';
+		if ($token==='*') {
+			$token='%_%';
+			$tokenParse=false;
+		}
 
-		if (strpos($token,'^')===0) {
-			$token=substr($token,1);
-		} else $token='%'.$token;
-		
-		if (strpos($token,'$')===strlen($token)-1) {
-			$token=substr($token,0,strlen($token)-1);
-		} else $token=$token.'%';
+		if ($tokenParse) {
+			if (strpos($token,'^')===0) {
+				$token=substr($token,1);
+			} else $token='%'.$token;
+			
+			if (strpos($token,'$')===strlen($token)-1) {
+				$token=substr($token,0,strlen($token)-1);
+			} else $token=$token.'%';
+		}
 		
 		//return [$operator,$param,static::macroStringToUnescape($token),false];
 		return static::parseArrayInParam($operator,$param,static::macroStringToUnescape($token));
