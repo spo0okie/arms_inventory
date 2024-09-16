@@ -8,6 +8,7 @@ use app\helpers\QueryHelper;
 use app\helpers\StringHelper;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\ServicesModelCalcFieldsTrait;
+use Yii;
 use yii\db\ActiveQuery;
 
 /**
@@ -913,33 +914,45 @@ class Services extends ArmsModel
 		$team=[];
 		if (is_array($services) && count($services)) {
 			/** @var $service Services */
-			foreach ($services as $service) if(is_object($service) && !$service->archived) {
-				
-				$responsible=null;
-				//сначала проверяем ответственного за инфраструктуру
-				if (is_object($service->infrastructureResponsibleRecursive)) {
-					$responsible=$service->infrastructureResponsibleRecursive;
-					//уже потом за сам сервис
-				} elseif (is_object($service->responsibleRecursive)) {
-					$responsible=$service->responsibleRecursive;
-				}
-				//ответственные за сервисы на машине
-				if (is_object($responsible)) $team[$responsible->id]=$responsible;
-				
-				
-				$support=[];
-				//сначала проверяем ответственного за инфраструктуру
-				if (count($service->infrastructureSupportRecursive)) {
-					$support=$service->infrastructureSupportRecursive;
-					//уже потом за сам сервис
-				} elseif (count($service->supportRecursive)) {
-					$support=$service->supportRecursive;
-				}
-				//поддержка сервисов на машине
-				if (count($support)) {
-					foreach ($support as $item) {
-						if (is_object($item))
-							$team[$item->id]=$item;
+			foreach ($services as $service) {
+				$weightLimit= Yii::$app->params['support.service.min.weight']??0;
+				if(
+					is_object($service)			//сервис есть
+					&&							//и
+					!$service->archived			//не в архиве
+					&& (						//и
+						!$weightLimit					//нет лимита на вес
+						||								//или
+						$weightLimit<$service->weight	//он превышен
+					)
+				) {
+					
+					$responsible=null;
+					//сначала проверяем ответственного за инфраструктуру
+					if (is_object($service->infrastructureResponsibleRecursive)) {
+						$responsible=$service->infrastructureResponsibleRecursive;
+						//уже потом за сам сервис
+					} elseif (is_object($service->responsibleRecursive)) {
+						$responsible=$service->responsibleRecursive;
+					}
+					//ответственные за сервисы на машине
+					if (is_object($responsible)) $team[$responsible->id]=$responsible;
+					
+					
+					$support=[];
+					//сначала проверяем ответственного за инфраструктуру
+					if (count($service->infrastructureSupportRecursive)) {
+						$support=$service->infrastructureSupportRecursive;
+						//уже потом за сам сервис
+					} elseif (count($service->supportRecursive)) {
+						$support=$service->supportRecursive;
+					}
+					//поддержка сервисов на машине
+					if (count($support)) {
+						foreach ($support as $item) {
+							if (is_object($item))
+								$team[$item->id]=$item;
+						}
 					}
 				}
 			}
