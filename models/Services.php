@@ -405,6 +405,12 @@ class Services extends ArmsModel
 					.'<li> определения наиболее весомых сервисов на сервере для выбора ответственного за сервер</li>'
 					.'<li> распределения ресурсов VM между сервисами на ней</li>'
 					.'</ul>'
+					.(
+						(\Yii::$app->params['support.service.min.weight']??0)?
+						(
+							'Команды обслуживания сервисов весом менее <b>'.Yii::$app->params['support.service.min.weight'].'</b> не будут привлекаться к обслуживанию ОС и оборудования на которых развернут сервис'
+						):''
+					)
 			],
 			'maintenance_reqs_ids'=>[
 				MaintenanceReqs::$titles,
