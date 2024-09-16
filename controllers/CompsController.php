@@ -2,11 +2,11 @@
 
 namespace app\controllers;
 
+use app\models\CompsSearch;
 use app\models\Domains;
 use Throwable;
 use Yii;
 use app\models\Comps;
-use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\db\StaleObjectException;
@@ -74,16 +74,18 @@ class CompsController extends ArmsBaseController
 		foreach ($dupes as $item) $ids=array_merge($ids , explode(',',$item['ids']));
 	
 		// add conditions that should always apply here
-		
-		$query=Comps::find()->where(['id'=>$ids]);
-		$dataProvider = new ActiveDataProvider([
-			'query' => $query,
-			'pagination' => ['pageSize' => 100,],
-		]);
+	
+		$searchModel=new CompsSearch();
+		$dataProvider=$searchModel->search(['CompsSearch'=>['ids'=>$ids]]);
+			//Comps::find()->where();
+		//$dataProvider = new ActiveDataProvider([
+		//	'query' => $query,
+		//	'pagination' => ['pageSize' => 100,],
+		//]);
 	
         return $this->render('index', [
             'dataProvider' => $dataProvider,
-			'searchModel' => null
+			'searchModel' => $searchModel,
         ]);
     }
 	
