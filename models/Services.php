@@ -196,6 +196,7 @@ class Services extends ArmsModel
 			'supportScheduleName',
 			'providingScheduleName',
 			'segmentName',
+			'nameWithoutParent',
 		];
 	}
 	
