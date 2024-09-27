@@ -104,7 +104,19 @@ class Comps extends ArmsModel
     
     public function extraFields()
 	{
-		return ['responsible','supportTeam','fqdn','domain','site','place','arm','services','servicesNames','sandbox'];
+		return [
+			'responsible',
+			'supportTeam',
+			'fqdn',
+			'domain',
+			'site',
+			'place',
+			'arm',
+			'services',
+			'servicesNames',
+			'sandbox',
+			'renderFqdn'
+		];
 	}
 	
 	public $linksSchema=[

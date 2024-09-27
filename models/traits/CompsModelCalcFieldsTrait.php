@@ -193,6 +193,11 @@ trait CompsModelCalcFieldsTrait
 			.$suffix;
 	}
 	
+	public function getRenderFqdn()
+	{
+		return $this->renderName(true);
+	}
+	
 	public function getFormattedMac() {
 		
 		return Techs::formatMacs($this->mac);
