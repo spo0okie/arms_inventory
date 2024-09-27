@@ -197,6 +197,8 @@ class Services extends ArmsModel
 			'providingScheduleName',
 			'segmentName',
 			'nameWithoutParent',
+			'comps',
+			'techs'
 		];
 	}
 	
