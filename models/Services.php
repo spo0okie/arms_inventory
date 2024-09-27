@@ -156,31 +156,6 @@ class Services extends ArmsModel
 		'currency_id' =>				Currency::class,
 	];
 	
-	/**
-	 * В списке поведений прикручиваем many-to-many contracts
-	 * @return array
-	 */
-	/*public function behaviors()
-	{
-		return [
-			[
-				'class' => LinkerBehavior::class,
-				'relations' => [
-					'depends_ids' => 'depends',
-					'dependants_ids' => 'dependants', //same but reverse
-					'comps_ids' => 'comps',
-					'techs_ids' => 'techs',
-					'maintenance_reqs_ids' => 'maintenanceReqs',
-					'maintenance_jobs_ids' => 'maintenanceJobs',
-					'support_ids' => 'support',
-					'infrastructure_support_ids' => 'infrastructureSupport',
-					'contracts_ids' => 'contracts',
-					'acls_ids' => 'acls', 			//one-2-many
-					'children_ids' => 'children',	//one-2-many
-				]
-			]
-		];
-	}*/
 
 	public function extraFields()
 	{
@@ -196,6 +171,7 @@ class Services extends ArmsModel
 			'supportScheduleName',
 			'providingScheduleName',
 			'segmentName',
+			'segmentRecursive',
 			'nameWithoutParent',
 			'comps',
 			'techs'
