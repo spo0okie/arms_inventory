@@ -91,8 +91,8 @@ class SchedulesSearchAcl extends Schedules
 		$query->andFilterWhere(['or like', 'access_types.name', StringHelper::explode($this->accessTypes,'|',true,true)]);
 	
 		$query->andFilterWhere(['or',
-			['or like', 'comps_objects.name', StringHelper::explode($this->objects,'|',true,true)],
-			['or like', 'users_objects.Ename', StringHelper::explode($this->objects,'|',true,true)],
+			['or like', 'comps_subjects.name', StringHelper::explode($this->objects,'|',true,true)],
+			['or like', 'users_subjects.Ename', StringHelper::explode($this->objects,'|',true,true)],
 			['or like', 'aces.ips', StringHelper::explode($this->objects,'|',true,true)],
 			['or like', 'aces.comment', StringHelper::explode($this->objects,'|',true,true)],
 		]);
