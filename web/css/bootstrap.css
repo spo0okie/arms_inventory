@@ -78,3 +78,12 @@ div.invalid-feedback {
     transparent 75%, transparent) 0 0 / 40px 40px rgba(128,240,128, .2);
     color: #666;
 }
+
+
+/* https://github.com/select2/select2/pull/4898#issuecomment-408568031 (немного подкорректированный) */
+.select2 .select2-selection.select2-selection--multiple .select2-search.select2-search--inline {
+    width: 100% !important;
+}
+.select2 .select2-selection.select2-selection--multiple .select2-search.select2-search--inline .select2-search__field {
+    width: 100% !important;
+}
