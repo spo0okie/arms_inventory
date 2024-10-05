@@ -127,4 +127,23 @@ class BaseRestController extends ActiveController
 		return $this->searchFilter()->all();
 	}
 	
+	/**
+	 * CORS support
+	 * https://www.yiiframework.com/wiki/175/how-to-create-a-rest-api
+	 *
+	 */
+	public function actionPreflight() {
+		$content_type = 'application/json';
+		$status = 200;
+		$message = 'OK';
+		
+		// set the status
+		$status_header = 'HTTP/1.1 ' . $status . ' ' . $message;
+		header($status_header);
+		
+		//header("Access-Control-Allow-Origin: *");
+		header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+		header("Access-Control-Allow-Headers: Authorization");
+		header('Content-type: ' . $content_type);
+	}
 }

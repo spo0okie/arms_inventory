@@ -119,6 +119,7 @@ $config = [
                 ],
                 'api/domains/<id:[\.\w-]+>' => 'api/domains/view',
                 'api/comps/<domain:[\w-]+>/<name:[\w-]+>' => 'api/comps/search',
+				'OPTIONS api/<controller:\w+>/<action:\w+>' => 'api/<controller>/preflight'
             ],
         ],
 	    'i18n' => [
