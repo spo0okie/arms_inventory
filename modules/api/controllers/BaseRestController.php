@@ -43,7 +43,7 @@ class BaseRestController extends ActiveController
 			"index-$class"=>['index','filter'],						//чтение объектов этого класса  списком
 			"update-$class"=>['create','update','upload'],			//обновление объектов этого класса
 			"delete-$class"=>['delete'],							//удаление объектов этого класса
-			ArmsBaseController::PERM_ANONYMOUS=>[],
+			ArmsBaseController::PERM_ANONYMOUS=>['preflight'],		//проверка разрешений CORS (делается до авторизации)
 			ArmsBaseController::PERM_AUTHENTICATED=>[],
 		];
 	}
