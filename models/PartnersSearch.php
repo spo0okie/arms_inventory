@@ -52,12 +52,12 @@ class PartnersSearch extends Partners
         $sort = [
 			'attributes'=>[
 				'sname'=>[
-					'asc'=>['CONCAT(uname,bname)'=>SORT_ASC],
+					'asc'=>['CONCAT(IFNULL(uname,""),IFNULL(bname,""))'=>SORT_ASC],
 					'desc'=>['CONCAT(uname,bname)'=>SORT_DESC],
 				],
 				'inn_kpp'=>[
-					'asc'=>['CONCAT(inn,"/",kpp)'=>SORT_ASC],
-					'desc'=>['CONCAT(inn,"/",kpp)'=>SORT_DESC],
+					'asc'=>['CONCAT(IFNULL(inn,""),"/",IFNULL(kpp,""))'=>SORT_ASC],
+					'desc'=>['CONCAT(IFNULL(inn,""),"/",IFNULL(kpp,""))'=>SORT_DESC],
 				],
 			],
 		];
@@ -81,8 +81,8 @@ class PartnersSearch extends Partners
         ]);
 
         $query
-			->andFilterWhere(['or like', 'CONCAT(inn,"/",kpp)', StringHelper::explode($this->inn_kpp,'|',true,true)])
-			->andFilterWhere(['or like', 'CONCAT(uname,bname,alias)', StringHelper::explode($this->sname,'|',true,true)])
+			->andFilterWhere(['or like', 'CONCAT(IFNULL(inn,""),"/",IFNULL(kpp,""))', StringHelper::explode($this->inn_kpp,'|',true,true)])
+			->andFilterWhere(['or like', 'CONCAT(IFNULL(uname,""),IFNULL(bname,""),IFNULL(alias,""))', StringHelper::explode($this->sname,'|',true,true)])
 			->andFilterWhere(['or like', 'comment', StringHelper::explode($this->comment,'|',true,true)])
 			->andFilterWhere(['or like', 'cabinet_url', StringHelper::explode($this->cabinet_url,'|',true,true)])
 			->andFilterWhere(['or like', 'support_tel', StringHelper::explode($this->support_tel,'|',true,true)]);
