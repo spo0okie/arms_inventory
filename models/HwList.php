@@ -173,18 +173,21 @@ class HwList {
     }
 
     public static function shortenCPUDescr($descr) {
-		$descr=str_replace('Core(TM)2 Duo','С-2Duo',$descr);
-		$descr=str_replace('Pentium III Xeon','P3 Xeon',$descr);
+		$descr=str_replace('Core(TM)2 Duo','',$descr);
+		$descr=str_replace('Pentium III Xeon','',$descr);
 		
-    	$words=explode(' ',$descr);
+    	$words=explode(' ',trim($descr));
     	unset($words[0]);
     	foreach ($words as $i=>$word) {
 		    if ($word=='CPU') unset($words[$i]);
 			elseif ($word=='Processor') unset($words[$i]);
+			elseif ($word=='Gen') unset($words[$i]);
 			elseif ($word=='Intel') unset($words[$i]);
+			elseif ($word=='Intel(R)') unset($words[$i]);
 			elseif ($word=='Core(TM)') unset($words[$i]);
 			elseif ($word=='Atom(TM)') unset($words[$i]);
 		    elseif ($word=='Xeon(R)') unset($words[$i]);
+			elseif ($word=='Dual-Core') unset($words[$i]);
 		    elseif ($word=='Core') unset($words[$i]);
 		    elseif ($word=='Dual') unset($words[$i]);
 		    elseif ($word=='COMPUTE') unset($words[$i]);
@@ -257,7 +260,7 @@ class HwList {
 	    if (!$ram) return '';
 	    return ((int)$ram < 1024)?
 			(int)($ram).'MiB'
-			:(int)($ram/1024).'GiB';
+			:round($ram/1024,0).'GiB';
     }
 	
     public function getHddGb() {
