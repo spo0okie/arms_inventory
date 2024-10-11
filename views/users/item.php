@@ -35,6 +35,7 @@ if (is_object($model)) {
 	echo ItemObjectWidget::widget([
 		'model'=>$model,
 		'archived_class'=>'uvolen',
+		'archivedProperty'=>'Uvolen',
 		'link'=> LinkObjectWidget::widget(['model'=>$model,'name'=>$name,'static'=>$static_view,'noDelete'=>$noDelete])
 	]);
 	
