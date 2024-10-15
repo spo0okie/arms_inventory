@@ -26,6 +26,19 @@ class StringHelper extends BaseStringHelper {
 		return Inflector::camel2id(static::className($class));
 	}
 	
+	//признак что это слово исключение в множественном числе
+	public static function pluralSpecial($word) {
+		if (array_search(strtolower($word),array_values(Inflector::$specials))!==false)
+			return true;
+		return false;
+	}
+	
+	//тоже что что и в инфлекторе, но проверяет что это не множественное слово-исключение
+	public static function pluralize($word) {
+		if (static::pluralSpecial($word)) return $word;
+		return Inflector::pluralize($word);
+	}
+	
 	/**
 	 * Конвертирует acl_list_ids => aclList
 	 * если нет суффиксов _id / _ids, то возвращает NULL
@@ -38,7 +51,7 @@ class StringHelper extends BaseStringHelper {
 		}
 		
 		if (substr($attr,strlen($attr)-4)=='_ids') {
-			return lcfirst(Inflector::pluralize(Inflector::camelize(substr($attr,0,strlen($attr)-4))));
+			return lcfirst(static::pluralize(Inflector::camelize(substr($attr,0,strlen($attr)-4))));
 		}
 		
 		return null;
