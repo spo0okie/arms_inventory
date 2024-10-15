@@ -130,6 +130,7 @@ class Contracts extends ArmsModel
 		'state_id' => ContractsStates::class,
 		'currency_id' => Currency::class,
 		'parent_id' =>		[Contracts::class,'children_ids'],
+		'children_ids' =>	[Contracts::class,'parent_id'],
 		'partners_ids' =>	[Partners::class,'contracts_ids'],
 		'lics_ids' =>		[LicItems::class,'contracts_ids'],
 		'techs_ids' =>		[Techs::class,'contracts_ids'],
