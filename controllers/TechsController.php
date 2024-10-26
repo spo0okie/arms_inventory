@@ -48,6 +48,11 @@ class TechsController extends ArmsBaseController
 				'model' => $model,
 			]);
 		}
+		if (($model = Techs::findOne(['hostname'=>$name])) !== null) {
+			return $this->renderPartial('item', [
+				'model' => $model,
+			]);
+		}
 		throw new NotFoundHttpException('The requested tech not found');
 	}
 
