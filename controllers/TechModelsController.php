@@ -75,12 +75,20 @@ class TechModelsController extends ArmsBaseController
 			}
 		}
 		
+		if (($model = TechModels::findOne(['short'=>$name,'manufacturers_id'=>$man_id])) !== null) {
+			return $this->renderPartial('item', [
+				'model' => $model,
+				'long'	=> $long,
+			]);
+		}
+
 		if (($model = TechModels::findOne(['name'=>$name,'manufacturers_id'=>$man_id])) !== null) {
 			return $this->renderPartial('item', [
 				'model' => $model,
 				'long'	=> $long,
 			]);
 		}
+
 		throw new NotFoundHttpException('The requested model not found within that manufacturer');
 	}
 	
