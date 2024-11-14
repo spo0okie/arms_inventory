@@ -68,6 +68,7 @@ use yii\db\ActiveQuery;
  * @property Users $head
  * @property Users $admResponsible
  * @property Users $responsible
+ * @property Users $servicesResponsible ответственный за оборудование без учета ответственных за инфраструктуру в сервисаах
  * @property Users $user
  * @property Users $itStaff
  *
@@ -202,7 +203,16 @@ class Techs extends ArmsModel
     public function extraFields()
 	{
 		return [
-			'site','comp','supportTeam','responsible','stateName','model','manufacturer','type' //площадка - помещение верхнего уровня относительно помещения где размещено оборудование
+			'site',
+			'comp',
+			'supportTeam',
+			'responsible',
+			'servicesResponsible',
+			'servicesSupportTeam',
+			'stateName',
+			'model',
+			'manufacturer',
+			'type'
 		];
 	}
 	

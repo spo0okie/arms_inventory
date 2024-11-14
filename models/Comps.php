@@ -51,9 +51,11 @@ use yii\db\StaleObjectException;
  * @property Techs    $linkedArms
  * @property Comps[]  $dupes
  * @property Users    $user
- * @property Users                  $responsible
- * @property Users[]                $supportTeam
- * @property Users[]                $admins
+ * @property Users		$responsible ответственный за ОС на основании сервисов на ней
+ * @property Users      $servicesResponsible ответственный за ОС на основании сервисов на ней без учета отв. за инфраструктуру
+ * @property Users[]    $supportTeam
+ * @property Users[]    $servicesSupportTeam
+ * @property Users[]    $admins
  * @property Domains                $domain
  * @property string                 $updatedRenderClass
  * @property string         $updatedText
@@ -107,6 +109,8 @@ class Comps extends ArmsModel
 		return [
 			'responsible',
 			'supportTeam',
+			'servicesResponsible',
+			'servicesSupportTeam',
 			'fqdn',
 			'domain',
 			'site',
@@ -612,6 +616,16 @@ class Comps extends ArmsModel
 		
 		return Services::responsibleFrom($this->services);
 	}
+
+	/**
+	 * @return Users
+	 */
+	public function getServicesResponsible()
+	{
+		if (is_object($this->user)) return $this->user;
+		
+		return Services::responsibleFrom($this->services,true);
+	}
 	
 	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
@@ -631,7 +645,23 @@ class Comps extends ArmsModel
 		return array_values($team);
 	}
 	
-	
+	/**
+	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
+	 * @return Users[]
+	 * @noinspection UnusedElement
+	 */
+	public function getServicesSupportTeam()
+	{
+		$team=Services::supportTeamFrom($this->services,true);
+		if (is_object($this->user)) $team[$this->user->id]=$this->user;
+		
+		//убираем из команды ответственного за ОС
+		if (is_object($responsible=$this->servicesResponsible)) {
+			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
+		}
+		
+		return array_values($team);
+	}
 	
 	public static function fetchNames(){
 		$list= static::find()

@@ -861,11 +861,12 @@ class Services extends ArmsModel
 	}
 	
 	/**
-	 * Возвращает ответственного исходя из пачки сервисов на узле
-	 * @param $services
+	 * Возвращает ответственного за инфраструктуру исходя из пачки сервисов на узле
+	 * @param      $services
+	 * @param bool $ignoreIS //игонрировать ответственных за инфраструктуру при расчете
 	 * @return Users|mixed|null
 	 */
-	public static function responsibleFrom($services) {
+	public static function responsibleFrom($services,$ignoreIS=false) {
 		if (is_array($services) && count($services)) {
 			$persons=[];
 			$rating=[];
@@ -874,7 +875,7 @@ class Services extends ArmsModel
 				
 				$responsible=null;
 				//сначала проверяем ответственного за инфраструктуру
-				if (is_object($service->infrastructureResponsibleRecursive)) {
+				if (!$ignoreIS && is_object($service->infrastructureResponsibleRecursive)) {
 					$responsible=$service->infrastructureResponsibleRecursive;
 					//уже потом за сам сервис
 				} elseif (is_object($service->responsibleRecursive)) {
@@ -895,7 +896,9 @@ class Services extends ArmsModel
 		return null;
 	}
 	
-	public static function supportTeamFrom($services) {
+	
+	
+	public static function supportTeamFrom($services,$ignoreIS=false) {
 		$team=[];
 		if (is_array($services) && count($services)) {
 			/** @var $service Services */
@@ -914,7 +917,7 @@ class Services extends ArmsModel
 					
 					$responsible=null;
 					//сначала проверяем ответственного за инфраструктуру
-					if (is_object($service->infrastructureResponsibleRecursive)) {
+					if (!$ignoreIS && is_object($service->infrastructureResponsibleRecursive)) {
 						$responsible=$service->infrastructureResponsibleRecursive;
 						//уже потом за сам сервис
 					} elseif (is_object($service->responsibleRecursive)) {
@@ -926,7 +929,7 @@ class Services extends ArmsModel
 					
 					$support=[];
 					//сначала проверяем ответственного за инфраструктуру
-					if (count($service->infrastructureSupportRecursive)) {
+					if (!$ignoreIS && count($service->infrastructureSupportRecursive)) {
 						$support=$service->infrastructureSupportRecursive;
 						//уже потом за сам сервис
 					} elseif (count($service->supportRecursive)) {

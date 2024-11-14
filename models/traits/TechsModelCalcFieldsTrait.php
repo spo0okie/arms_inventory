@@ -78,6 +78,17 @@ trait TechsModelCalcFieldsTrait
 	}
 	
 	/**
+	 * @return Users
+	 */
+	public function getServicesResponsible()
+	{
+		/** @var Techs $this */
+		if (is_object($user=Services::responsibleFrom($this->services,true))) return $user;
+		
+		return $this->itStaff;
+	}
+	
+	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
 	 * @return Users[]
 	 * @noinspection PhpUnused
@@ -89,6 +100,24 @@ trait TechsModelCalcFieldsTrait
 		
 		//убираем из команды ответственного за ОС
 		if (is_object($responsible=$this->responsible)) {
+			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
+		}
+		
+		return array_values($team);
+	}
+	
+	/**
+	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
+	 * @return Users[]
+	 * @noinspection PhpUnused
+	 */
+	public function getServicesSupportTeam()
+	{
+		/** @var Techs $this */
+		$team=Services::supportTeamFrom($this->services,true);
+		
+		//убираем из команды ответственного за ОС
+		if (is_object($responsible=$this->servicesResponsible)) {
 			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
 		}
 		
