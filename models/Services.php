@@ -867,6 +867,7 @@ class Services extends ArmsModel
 	 * @return Users|mixed|null
 	 */
 	public static function responsibleFrom($services,$ignoreIS=false) {
+		$weightLimit= Yii::$app->params['support.service.min.weight']??0;
 		if (is_array($services) && count($services)) {
 			$persons=[];
 			$rating=[];
@@ -875,7 +876,8 @@ class Services extends ArmsModel
 				
 				$responsible=null;
 				//сначала проверяем ответственного за инфраструктуру
-				if (!$ignoreIS && is_object($service->infrastructureResponsibleRecursive)) {
+				//(либо если он игнорируется то проверяем ответственного за сервисы, но только для "весомых" сервисов
+				if ((!$ignoreIS || $weightLimit<$service->weight) && is_object($service->infrastructureResponsibleRecursive)) {
 					$responsible=$service->infrastructureResponsibleRecursive;
 					//уже потом за сам сервис
 				} elseif (is_object($service->responsibleRecursive)) {
