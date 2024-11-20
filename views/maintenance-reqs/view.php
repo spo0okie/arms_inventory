@@ -24,20 +24,21 @@ $this->params['breadcrumbs'][] = $this->title;
 YiiAsset::register($this);
 
 $this->params['headerContent']=
-	'<div class="float-end text-end">'
-		.'<small class="opacity-75">'.HistoryWidget::widget(['model'=>$model]).'</small>'
-		.'<br>'
-		.ShowArchivedWidget::widget()
-	.'</div>'
 	
-	.'<div class="flex-row d-flex">'
-		.'<div class="me-5">'
+	'<div class="flex-row d-flex flex-nowrap align-content-stretch">'
+		.'<div class="me-5 flex-shrink-1">'
 			.'<h1>'
 				.LinkObjectWidget::widget([
 					'model'=>$model,
 					'confirmMessage' => 'Действительно удалить эти требования?',
 					'undeletableMessage'=>'Нельзя удалить эту требования обслуживания, т.к. есть привязанные к ним объекты',
 				])
+				.($model->is_backup?
+					'<span qtip_ttip="Это требование по резервному копированию"><i class="fas fa-archive text-muted"></i></span> ':'')
+				.($model->spread_comps?
+					'<span qtip_ttip="Требование обслуживания сервисов автоматически распространяется<br> на ОС/ВМ, на которых эти сервисы работают"><i class="fas fa-laptop-code text-muted"></i></span> ':'')
+				.($model->spread_techs?
+					'<span qtip_ttip="Требование обслуживания сервисов автоматически распространяется<br> на оборудование, на котором эти сервисы работают"><i class="fas fa-print text-muted" ></i></span>':'')
 			.'</h1>'
 			.Yii::$app->formatter->asNtext($model->description)
 		.'</div>'
@@ -45,12 +46,12 @@ $this->params['headerContent']=
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'includes'])
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'includedBy'])
 		.'</div>'
-		.'<div class="me-5">'
-			.($model->is_backup?'<i class="fas fa-archive"></i> Резервное копирование<br>':'')
-			.($model->spread_comps?'<i class="fas fa-laptop-code"></i> Распространяется на ОС/ВМ<br>':'')
-			.($model->spread_techs?'<i class="fas fa-print"></i> Распространяется на оборудование<br>':'')
-		.'</div>'
-		.'<div class="flex-fill">'
+		.'<div class="flex-fill flex-lg-shrink-0">'
+			.'<div class="float-end text-end">'
+				.'<small class="opacity-75 ">'.HistoryWidget::widget(['model'=>$model]).'</small>'
+				.'<br>'
+				.ShowArchivedWidget::widget()
+			.'</div>'
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'links'])
 			.$this->render('/attaches/model-list',['model'=>$model,'static_view'=>false])
 		.'</div>'

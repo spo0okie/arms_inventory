@@ -68,16 +68,18 @@ class HistoryWidget extends Widget
 				$tokens[]=explode(' ',$this->updated_at)[0]; //если не показываем, то только дату
 			}
 		}
-		
-		$info=count($tokens)?$this->prefix.implode(', ',$tokens):$this->empty;
-		
 		//если у нас ведется история по этому классу, то оформляем ссылку
-		if ($this->showIcon && !$this->calledOnHistory && class_exists($this->historyClass))
-			$info.=' '.Html::a($this->icon,[
-				'history/journal',
-				'class'=>$this->historyClass,
-				'id'=>$this->model->id
-			],$this->iconOptions);
-		return $info;
+		if ($this->showIcon && !$this->calledOnHistory && class_exists($this->historyClass)) {
+			if (!count($tokens)) $tokens=[''];
+			$tokens[count($tokens)-1].=' '.Html::a($this->icon,[
+					'history/journal',
+					'class'=>$this->historyClass,
+					'id'=>$this->model->id
+				],$this->iconOptions);
+		}
+		
+		foreach ($tokens as $i=>$token) $tokens[$i]='<span class="text-nowrap">'.$token.'</span>';
+		
+		return count($tokens)?$this->prefix.implode(' ',$tokens):$this->empty;
 	}
 }
