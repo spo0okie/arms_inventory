@@ -133,6 +133,11 @@ class SiteController extends Controller
 		$page = str_replace('href=\'/','href=\'' . $wikiUrl , $page);
 		$page = str_replace('src="/',  'src="' . $wikiUrl , $page);
 		$page = str_replace('src=\'/', 'src=\'' . $wikiUrl , $page);
+		$page = preg_replace_callback('|qtip_ajxhrf="/lib/exe/ajax.php\?call=inventory&action=ttip&data=([^"]+)"|',
+			function($matches) {
+				//return "replace";
+				return 'qtip_ajxhrf="/web'.urldecode($matches[1]).'"';
+			}, $page);
 		
 		$folded_code=<<<JS
 jQuery(function() {
