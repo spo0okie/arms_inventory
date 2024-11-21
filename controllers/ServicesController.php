@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\ModelFieldWidget;
 use app\helpers\ArrayHelper;
 use app\models\AcesSearch;
 use app\models\CompsSearch;
@@ -72,6 +73,17 @@ class ServicesController extends ArmsBaseController
 		]);
 	}
 	
+	/**
+	 * Displays a tooltip for single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionCardMaintenanceReqs(int $id)
+	{
+		$model=$this->findModel($id);
+		return ModelFieldWidget::widget(['model'=>$model,'field'=>'backupReqs','title'=>false]);
+	}
 	
 	/**
 	 * Lists all Services models.
