@@ -42,7 +42,7 @@ $this->params['headerContent']=
 			.'</h1>'
 			.Yii::$app->formatter->asNtext($model->description)
 		.'</div>'
-		.'<div class="me-5">'
+		.'<div class="me-5 flex-lg-shrink-0">'
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'includes'])
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'includedBy'])
 		.'</div>'
