@@ -25,6 +25,7 @@ use yii\db\ActiveQuery;
  * @property int $is_service
  * @property string $notebook
  * @property string $links
+ * @property string $linksRecursive
  * @property int $responsible_id
  * @property string $responsibleName
  * @property int $infrastructure_user_id

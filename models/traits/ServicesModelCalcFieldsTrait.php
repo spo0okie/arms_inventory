@@ -95,11 +95,19 @@ trait ServicesModelCalcFieldsTrait
 		if (is_object($this->responsibleRecursive)) return $this->responsibleRecursive->Ename;
 		return null;
 	}
-
+	
 	public function getResponsibleRecursive() {
 		return $this->findRecursiveAttr(
 			'responsible',
 			'responsibleRecursive',
+			'parentService'
+		);
+	}
+	
+	public function getLinksRecursive() {
+		return $this->findRecursiveAttr(
+			'links',
+			'linksRecursive',
 			'parentService'
 		);
 	}

@@ -113,7 +113,7 @@ HTML,
 ];
 
 
-TabsWidget::addWikiLinks($tabs,$model->links);
+TabsWidget::addWikiLinks($tabs,$model->linksRecursive);
 
 echo TabsWidget::widget([
 	'items'=>$tabs,

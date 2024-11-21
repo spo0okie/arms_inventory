@@ -143,7 +143,7 @@ if(!$static_view) { ?>
 		<div class="mb-3">
 			<?= Yii::$app->formatter->asNtext($model->description) ?>
 		</div>
-		<?= UrlListWidget::Widget(['list'=>$model->links]) ?>
+		<?= UrlListWidget::Widget(['list'=>$model->linksRecursive]) ?>
 		<br />
 
 		<?= $this->render('card-support',['model'=>$model,'static_view'=>$static_view]) ?>
