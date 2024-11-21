@@ -6,6 +6,7 @@ use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
 use app\components\StripedAlertWidget;
 use yii\helpers\Html;
+use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\MaintenanceJobs */
@@ -25,7 +26,7 @@ use yii\helpers\Html;
 						'undeletableMessage'=>'Нельзя удалить эту схему обслуживания, т.к. есть привязанные к ней объекты',
 				]) ?>
 			</h1>
-			<?= Yii::$app->formatter->asNtext($model->description) ?>
+			<?= Markdown::convert($model->description) ?>
 		</div>
 		<div class="me-5">
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'service']) ?>

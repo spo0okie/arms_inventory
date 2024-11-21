@@ -12,6 +12,7 @@ use app\models\Techs;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Url;
 use yii\web\YiiAsset;
+use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\MaintenanceReqs */
@@ -40,7 +41,7 @@ $this->params['headerContent']=
 				.($model->spread_techs?
 					'<span qtip_ttip="Требование обслуживания сервисов автоматически распространяется<br> на оборудование, на котором эти сервисы работают"><i class="fas fa-print text-muted" ></i></span>':'')
 			.'</h1>'
-			.Yii::$app->formatter->asNtext($model->description)
+			.Markdown::convert($model->description,[])
 		.'</div>'
 		.'<div class="me-5 flex-lg-shrink-0">'
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'includes'])

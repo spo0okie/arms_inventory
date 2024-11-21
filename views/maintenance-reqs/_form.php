@@ -22,33 +22,33 @@ use yii\bootstrap5\ActiveForm;
 		//'action' => Yii::$app->request->getQueryString(),
 	]); ?>
 	<div class="row">
-		<div class="col-3">
+		<div class="col-4">
 			<?= FieldsHelper::TextInputField($form,$model, 'name') ?>
 			<?= FieldsHelper::CheckboxField($form,$model, 'is_backup') ?>
 			<?= FieldsHelper::CheckboxField($form,$model, 'spread_comps') ?>
 			<?= FieldsHelper::CheckboxField($form,$model, 'spread_techs') ?>
+			<?= FieldsHelper::Select2Field($form,$model,'includes_ids',[
+				'data'=> MaintenanceReqs::fetchNames(),
+				//'hintModel'=>'auto',
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
+			<?= FieldsHelper::Select2Field($form,$model,'included_ids',[
+				'data'=> MaintenanceReqs::fetchNames(),
+				//'hintModel'=>'auto',
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
 		</div>
-		<div class="col-9">
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'description') ?>
+		<div class="col-8">
+			<?= FieldsHelper::MarkdownField($form,$model, 'description',['height'=>140]) ?>
 			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links') ?>
 		</div>
 	</div>
-	<?= FieldsHelper::Select2Field($form,$model,'includes_ids',[
-		'data'=> MaintenanceReqs::fetchNames(),
-		//'hintModel'=>'auto',
-		'pluginOptions' => [
-			'allowClear' => true,
-			'multiple' => true
-		]
-	]) ?>
-	<?= FieldsHelper::Select2Field($form,$model,'included_ids',[
-		'data'=> MaintenanceReqs::fetchNames(),
-		//'hintModel'=>'auto',
-		'pluginOptions' => [
-			'allowClear' => true,
-			'multiple' => true
-		]
-	]) ?>
 	
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

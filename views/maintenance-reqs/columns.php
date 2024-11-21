@@ -2,7 +2,7 @@
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-
+use kartik\markdown\Markdown;
 
 
 
@@ -16,7 +16,11 @@ return [
 			return $renderer->render('item',['model'=>$data]);
 		},
 	],
-	'description'=>['format' =>'text'],
+	'description'=>[
+		'value'=>function($data) use ($renderer){
+			return Markdown::convert($data->description,[]);
+		},
+	],
 	/*'services'=>[
 		'value'=>function($data) use ($renderer){
 			return ModelFieldWidget::widget([

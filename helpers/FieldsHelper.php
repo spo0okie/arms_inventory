@@ -248,7 +248,11 @@ class FieldsHelper
 			->field($model, $attr)
 			->widget(MarkdownEditor::class,
 				ArrayHelper::recursiveOverride([
-					'showExport'=>false
+					'showExport'=>false,
+					'footer'=>'<div class = "btn-toolbar pull-right float-right me-2">{buttons}</div>'
+						.'<div class="kv-md-hint">{message}</div>'.
+						'<div class="clearfix"></div>',
+					'footerOptions'=>['class' => 'kv-md-footer d-flex'],
 				],$options)
 			)
 			->label($label,$labelOptions)

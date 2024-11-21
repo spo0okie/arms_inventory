@@ -40,16 +40,8 @@ use yii\bootstrap5\ActiveForm;
 	</div>
 	<div class="row">
 		<div class="col-8">
-			<?= FieldsHelper::Select2Field($form,$model, 'reqs_ids', [
-				'data' => app\models\MaintenanceReqs::fetchNames(),
-				'options' => [
-					'placeholder' => 'Никакие'
-				],
-				'pluginOptions' => [
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<?= FieldsHelper::MarkdownField($form,$model, 'description',['height'=>140]) ?>
+
 		</div>
 		<div class="col-4">
 			<?= FieldsHelper::Select2Field($form,$model, 'schedules_id', [
@@ -62,16 +54,17 @@ use yii\bootstrap5\ActiveForm;
 					'multiple' => false
 				]
 			]) ?>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-8">
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'description',['lines'=>2]) ?>
-
-		</div>
-		<div class="col-4">
+			<?= FieldsHelper::Select2Field($form,$model, 'reqs_ids', [
+				'data' => app\models\MaintenanceReqs::fetchNames(),
+				'options' => [
+					'placeholder' => 'Никакие'
+				],
+				'pluginOptions' => [
+					'allowClear' => true,
+					'multiple' => true
+				]
+			]) ?>
 			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links',['lines'=>2]) ?>
-
 		</div>
 	</div>
 	<?= FieldsHelper::Select2Field($form,$model, 'services_ids', [

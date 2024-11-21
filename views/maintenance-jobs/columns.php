@@ -3,7 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-
+use kartik\markdown\Markdown;
 use app\components\ExpandableCardWidget;
 use app\models\Schedules;
 
@@ -16,7 +16,11 @@ return [
 			return $renderer->render('item',['model'=>$data]);
 		},
 	],
-	'description'=>['format' =>'ntext'],
+	'description'=>[
+		'value'=>function($data) use ($renderer){
+			return Markdown::convert($data->description,[]);
+		},
+	],
 	'schedule'=>[
 		'value'=>function($data) use ($renderer){
 			/** @var Schedules $schedule */
