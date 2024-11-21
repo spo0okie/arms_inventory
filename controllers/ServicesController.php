@@ -82,7 +82,14 @@ class ServicesController extends ArmsBaseController
 	public function actionCardMaintenanceReqs(int $id)
 	{
 		$model=$this->findModel($id);
-		return ModelFieldWidget::widget(['model'=>$model,'field'=>'backupReqs','title'=>false]);
+		return ModelFieldWidget::widget([
+			'model'=>$model,
+			'field'=>'backupReqs',
+			'title'=>false,
+			'item_options'=>[
+				'static_view'=>true
+			]
+		]);
 	}
 	
 	/**
