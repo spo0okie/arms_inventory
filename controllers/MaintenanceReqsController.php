@@ -56,19 +56,19 @@ class MaintenanceReqsController extends ArmsBaseController
 	 */
 	public function actionList()
 	{
-		$ouput=[];
-		$ouput[]='<table>';
-		foreach (($this->modelClass)::find()->All() as $item) {
-			$ouput[]='<tr>';
-				$ouput[]='<td>';
-					$ouput[]=$item->renderItem($this->view);
-				$ouput[]='</td>';
-				$ouput[]='<td>';
-					$ouput[]=Markdown::convert($item->description);
-				$ouput[]='</td>';
-			$ouput[]='</tr>';
+		$output=[];
+		$output[]='<table>';
+		foreach (MaintenanceReqs::find()->orderBy(['name'=>SORT_ASC])->All() as $item) {
+			$output[]='<tr>';
+				$output[]='<td>';
+					$output[]=$item->renderItem($this->view);
+				$output[]='</td>';
+				$output[]='<td>';
+					$output[]=Markdown::convert($item->description);
+				$output[]='</td>';
+			$output[]='</tr>';
 		}
-		$ouput[]='</table>';
-		return implode("\n",$ouput);
+		$output[]='</table>';
+		return implode("\n",$output);
 	}
 }
