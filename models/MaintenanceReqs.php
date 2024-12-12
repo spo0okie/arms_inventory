@@ -259,7 +259,7 @@ class MaintenanceReqs extends ArmsModel
     }
 	
 	
-	public function reverseLinks()
+	/*public function reverseLinks()
 	{
 		return [
 			$this->services,
@@ -268,6 +268,6 @@ class MaintenanceReqs extends ArmsModel
 			$this->includes,
 			$this->includedBy
 		];
-	}
+	}*/
 	
 }

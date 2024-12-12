@@ -7,6 +7,7 @@ use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
 use app\components\TabsWidget;
 use app\models\Comps;
+use app\models\MaintenanceJobs;
 use app\models\Services;
 use app\models\Techs;
 use yii\data\ArrayDataProvider;
@@ -104,6 +105,18 @@ $tabs[]=[
 	]),
 ];
 
+$tabs[]=[
+	'id'=>'jobs',
+	'label'=>'Обслуживание '.$badge.count($model->jobs).'</span>',
+	'content'=>DynaGridWidget::widget([
+		'id' => 'reqs-jobs',
+		'header' => false,
+		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/maintenance-jobs/columns.php',
+		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
+		'dataProvider' => new ArrayDataProvider(['allModels'=>$model->jobs]),
+		'model' => new MaintenanceJobs()
+	]),
+];
 
 TabsWidget::addWikiLinks($tabs,$model->links);
 

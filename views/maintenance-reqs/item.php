@@ -21,7 +21,7 @@ if ($model instanceof HistoryModel) {
 if (!empty($model)) {
 	if (!isset($name)) $name=$model->name;
 	
-	if ($model->absorbed) $ttip['absorbedBy']=$model->absorbed;
+	if (isset($model->absorbed) && $model->absorbed) $ttip['absorbedBy']=$model->absorbed;
 	
 	if (isset($jobs) && !$model->archived && !$model->absorbed) {	//архивные и поглощенные не проверяем
 		$satisfied=false;
