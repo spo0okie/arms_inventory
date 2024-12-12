@@ -5,6 +5,7 @@ namespace app\controllers;
 
 use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
+use kartik\markdown\Markdown;
 use Yii;
 use yii\web\NotFoundHttpException;
 
@@ -15,6 +16,12 @@ use yii\web\NotFoundHttpException;
 class MaintenanceReqsController extends ArmsBaseController
 {
 	public $modelClass=MaintenanceReqs::class;
+	public function accessMap()
+	{
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['list'],
+		]);
+	}
 	
 	/**
 	 * Displays a tooltip for single model.
@@ -39,5 +46,29 @@ class MaintenanceReqsController extends ArmsBaseController
 			'job' => $satisfiedBy?MaintenanceJobs::findOne($satisfiedBy):null,
 			'absorbed' => $absorbedBy?MaintenanceReqs::findOne($absorbedBy):null,
 		]);
+	}
+	
+	/**
+	 * Displays a tooltip for single model.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionList()
+	{
+		$ouput=[];
+		$ouput[]='<table>';
+		foreach (($this->modelClass)::find()->All() as $item) {
+			$ouput[]='<tr>';
+				$ouput[]='<td>';
+					$ouput[]=$item->renderItem($this->view);
+				$ouput[]='</td>';
+				$ouput[]='<td>';
+					$ouput[]=Markdown::convert($item->description);
+				$ouput[]='</td>';
+			$ouput[]='</tr>';
+		}
+		$ouput[]='</table>';
+		return implode("\n",$ouput);
 	}
 }
