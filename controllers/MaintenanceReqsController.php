@@ -61,7 +61,7 @@ class MaintenanceReqsController extends ArmsBaseController
 		foreach (MaintenanceReqs::find()->orderBy(['name'=>SORT_ASC])->All() as $item) {
 			$output[]='<tr>';
 				$output[]='<td>';
-					$output[]=$item->renderItem($this->view);
+					$output[]=$item->renderItem($this->view,['static_view'=>true]);
 				$output[]='</td>';
 				$output[]='<td>';
 					$output[]=Markdown::convert($item->description);
