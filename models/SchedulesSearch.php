@@ -4,7 +4,7 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Schedules;
+use yii\helpers\StringHelper;
 
 /**
  * SchedulesSearch represents the model behind the search form of `\app\models\Schedules`.
@@ -61,7 +61,7 @@ class SchedulesSearch extends Schedules
         }
 	
 	
-		$query->andFilterWhere(['or like', 'name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)]);
+		$query->andFilterWhere(['or like', 'schedules.name', StringHelper::explode($this->name,'|',true,true)]);
             //->andFilterWhere(['like', 'comment', $this->comment]);
 
         return new ActiveDataProvider([
