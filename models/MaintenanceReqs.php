@@ -111,7 +111,7 @@ class MaintenanceReqs extends ArmsModel
             [['links'], 'string'],
             [['updated_at', 'updated_by'], 'safe'],
             [['name'], 'string', 'max' => 255],
-            [['description'], 'string', 'max' => 768],
+            [['description'], 'string'],
 			//[['comps_ids'],'each', 'rule'=>['integer']],
 			[['includes_ids','included_ids'],'each', 'rule'=>['integer']],
 			['includes_ids',function ($attribute){
