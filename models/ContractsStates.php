@@ -44,6 +44,7 @@ class ContractsStates extends ArmsModel
         return [
             [['code', 'name', 'descr'], 'required'],
             [['descr'], 'string'],
+			[['paid','unpaid'],'boolean'],
             [['code'], 'string', 'max' => 64],
             [['name'], 'string', 'max' => 128],
             [['code'], 'unique'],
