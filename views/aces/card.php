@@ -71,6 +71,7 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 							'showUser'=>false,
 							'showDate'=>false,
 							'empty'=>'',
+							'prefix'=>'',
 							'iconOptions'=>['class'=>'btn btn-sm text-white ace-access-buttons'],
 						])?>
 						<?=  Html::a('<span class="fas fa-trash"/>', ['aces/delete', 'id' => $model->id,'return'=>'previous'], [

@@ -39,6 +39,7 @@ if (!isset($static_view)) $static_view=false;
 							'showUser'=>false,
 							'showDate'=>false,
 							'empty'=>'',
+							'prefix'=>'',
 							'iconOptions'=>['class'=>'btn btn-sm btn-primary'],
 						])?>
 						<?= Html::a('<span class="fas fa-trash"/>', ['acls/delete', 'id' => $model->id], [
