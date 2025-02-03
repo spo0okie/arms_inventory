@@ -81,6 +81,10 @@ class MaintenanceJobsSearch extends MaintenanceJobs
             'schedules_id' => $this->schedules_id,
         ]);
 	
+		if (!$this->archived) {
+			$query->andWhere(['not',['maintenance_jobs.archived'=>1]]);
+		}
+	
 		$filter->andFilterWhere(['like', 'maintenance_jobs.name', $this->name])
             ->andFilterWhere(['like', 'maintenance_jobs.description', $this->description])
             ->andFilterWhere(['like', 'maintenance_jobs.links', $this->links])
