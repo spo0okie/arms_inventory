@@ -129,8 +129,8 @@ class Domains extends ArmsModel
 			return [static::findByFQDN($domainFqdn),$compName,$domainFqdn];
 		}
 		
-		//nor any of above
-		return [false,$name,''];
+		//nor any of above -> act as MS WORKGROUP PC
+		return [static::findByName('workgroup'),$name,'workgroup'];
 	}
 	
 	
