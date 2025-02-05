@@ -111,7 +111,7 @@ class Domains extends ArmsModel
 	public static function fetchFromCompName($name,$defaultDomain='') {
 		$slashPos=mb_strpos($name,'\\');
 		$dotPos=mb_strpos($name,'.');
-		if ($slashPos && $dotPos) return false;
+		if ($slashPos && $dotPos && !$defaultDomain) return false;
 
 		//DOMAIN\comp
 		if ($slashPos) {
