@@ -367,22 +367,30 @@ class Soft extends ArmsModel
 		parent::afterSave($insert, $changedAttributes);
 		if (static::$disable_rescan || $this->doNotRescan) return;
 		
-		$items=ArrayHelper::explode("\n",$this->items);
-		if (!count($items)) return;
-		
-		if (count($items)==1)
-			$where=['regexp','raw_soft',$items[0]];
-		else {
-			$where=['or'];
-			foreach ($items as $item)
-				$where[]=['regexp','raw_soft',$item];
+		if (//если поменялся состав
+			array_key_exists('items',$changedAttributes)
+			||//или дополнительный составл
+			array_key_exists('additional',$changedAttributes)
+			||//или это новый элемент
+			$insert
+		) {
+			$items=ArrayHelper::explode("\n",$this->items);
+			if (!count($items)) return;
+			
+			if (count($items)==1)
+				$where=['regexp','raw_soft',$items[0]];
+			else {
+				$where=['or'];
+				foreach ($items as $item)
+					$where[]=['regexp','raw_soft',$item];
+			}
+			/** @var Comps $comps */
+			$comps=Comps::find()
+				->where($where)
+				->all();
+			//TODO: вот это надо вынести в background очередь
+			foreach ($comps as $comp) $comp->silentSave();
 		}
-		/** @var Comps $comps */
-		$comps=Comps::find()
-			->where($where)
-			->all();
-		
-		foreach ($comps as $comp) $comp->silentSave();
 	}
 	
 	public static function fetchAll(){
