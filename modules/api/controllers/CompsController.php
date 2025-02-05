@@ -55,7 +55,7 @@ class CompsController extends BaseRestController
 			return $this->runAction('update',['id'=>$loader->id]);
 		}
 		
-		$search=Comps::findByAnyName($loader->name);
+		$search=Comps::findByAnyName($loader->name,'workgroup');
 		if (is_object($search)&&$search->id) {
 			return $this->runAction('update',['id'=>$search->id]);
 		}

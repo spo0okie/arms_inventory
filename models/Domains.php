@@ -104,10 +104,11 @@ class Domains extends ArmsModel
 	 * false в случае ошибки формата имени компа
 	 * вместо имени домена false если имя домена не найдено в имени компа
 	 * вместо имени домена null если имя домена есть, но он не найден
-	 * @param $name
+	 * @param      $name
+	 * @param string $defaultDomain	можно передать домен по умолчанию (если его нет в имени явно)
 	 * @return array|false
 	 */
-	public static function fetchFromCompName($name) {
+	public static function fetchFromCompName($name,$defaultDomain='') {
 		$slashPos=mb_strpos($name,'\\');
 		$dotPos=mb_strpos($name,'.');
 		if ($slashPos && $dotPos) return false;
@@ -129,8 +130,12 @@ class Domains extends ArmsModel
 			return [static::findByFQDN($domainFqdn),$compName,$domainFqdn];
 		}
 		
-		//nor any of above -> act as MS WORKGROUP PC
-		return [static::findByName('workgroup'),$name,'workgroup'];
+		//nor any of above -> act as MS WORKGROUP PC (if passed as defaultDomain)
+		if ($defaultDomain)
+			return [static::findByName($defaultDomain),$name,$defaultDomain];
+		
+		//no domain (if no default)
+		return [false,$name,''];
 	}
 	
 	

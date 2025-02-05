@@ -486,12 +486,13 @@ class Comps extends ArmsModel
 	
 	/**
 	 * Найти комп по полному имени (Domain\comp или comp.domain.local)
-	 * @param $name
+	 * @param        $name
+	 * @param string $defaultDomain домен который присвоить ОС, если не найден домен в $name
 	 * @return ActiveRecord|Comps|null|false
 	 * @noinspection PhpUnusedLocalVariableInspection
 	 */
-	public static function findByAnyName($name) {
-		$nameParse=Domains::fetchFromCompName($name);
+	public static function findByAnyName($name,$defaultDomain='') {
+		$nameParse=Domains::fetchFromCompName($name,$defaultDomain);
 		if (!is_array($nameParse)) return false;	//ошибка формата имени компа
 		[$domain_id,$compName,$domainName]=$nameParse;
 		if (is_null($domain_id)) return null;		//не найден домен => не найден комп в этом домене
