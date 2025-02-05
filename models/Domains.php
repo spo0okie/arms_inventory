@@ -145,9 +145,9 @@ class Domains extends ArmsModel
 	 * @param Comps|Techs $object
 	 * @return string
 	 */
-	public static function validateHostname(string $hostname, $object) {
+	public static function validateHostname(string $hostname, $object, $defaultDomain='') {
 		/* убираем посторонние символы из MAC*/
-		$parseName=Domains::fetchFromCompName($hostname);
+		$parseName=Domains::fetchFromCompName($hostname,$defaultDomain);
 		if ($parseName===false) $object->addError('name','Некорректный формат hostname');
 		if (is_array($parseName)) {
 			$domain_id=$parseName[0];
