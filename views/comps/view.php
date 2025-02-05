@@ -4,6 +4,7 @@
 /* @var $model app\models\Comps */
 
 use app\components\HistoryWidget;
+use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Comps;
 use app\models\HwListItem;
@@ -92,7 +93,13 @@ foreach ($model->swList->items as $item) {
 		</div>
 		<div class="software_settings">
 			<h3>Софт</h3>
-			<?php // echo '<pre>'; var_dump($model->swList->items); echo '</pre>'; ?>
+			<?php
+			echo ModelFieldWidget::widget([
+				'model'=>$model,
+				'field'=>'softRescans',
+				'card_options'=>['cardClass'=>'alert-striped mb-3'],
+			]);
+			?>
 			<table>
 			<tr id="ignored_toggle">
 				<td colspan="4">

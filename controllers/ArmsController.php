@@ -2,16 +2,14 @@
 
 namespace app\controllers;
 
+use app\models\HwListItem;
 use app\models\ManufacturersDict;
 use Yii;
-use app\models\OldArms;
-use app\models\OldArmsSearch;
-use yii\web\Controller;
+use yii\filters\AccessControl;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\bootstrap5\ActiveForm;
 use yii\web\Response;
-use yii\helpers\Url;
 
 /**
  * ArmsController implements the CRUD actions for Arms model.
@@ -34,13 +32,13 @@ class ArmsController extends ArmsBaseController
 			]
 		];
 		if (!empty(Yii::$app->params['useRBAC'])) $behaviors['access']=[
-			'class' => \yii\filters\AccessControl::className(),
+			'class' => AccessControl::className(),
 			'rules' => [
 				['allow' => true, 'actions'=>['create','create-apply','update','update-apply','delete','unlink','updhw','rmhw'], 'roles'=>['editor']],
 				['allow' => true, 'actions'=>['index','view','ttip','ttip-hw','validate','contracts'], 'roles'=>['@','?']],
 			],
 			'denyCallback' => function ($rule, $action) {
-				throw new  \yii\web\ForbiddenHttpException('Access denied');
+				throw new  ForbiddenHttpException('Access denied');
 			}
 		];
 		return $behaviors;
@@ -67,26 +65,6 @@ class ArmsController extends ArmsBaseController
 	}
 
 	
-
-	/**
-	 * Creates a new model.
-	 * If creation is successful, the browser will be redirected to the 'view' page.
-	 * @return mixed
-	 */
-	public function actionCreateApply()
-	{
-		//if (!\app\models\Users::isAdmin()) {throw new  \yii\web\ForbiddenHttpException('Access denied');}
-
-		$model = new OldArms();
-
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			return $this->redirect(['update', 'id' => $model->id]);
-		}
-
-		return $this->render('create', [
-			'model' => $model,
-		]);
-	}
 	
 
 	/**
@@ -117,7 +95,7 @@ class ArmsController extends ArmsBaseController
     /**
      * Обновляем элемент оборудования
      * @param $id
-     * @return string|\yii\web\Response
+     * @return string|Response
      * @throws NotFoundHttpException
      */
     public function actionUpdhw($id){
@@ -132,7 +110,7 @@ class ArmsController extends ArmsBaseController
 	            //error_log('signing all');
                 $model->hwList->signAll();
             }else {
-                $newItem = new \app\models\HwListItem();
+                $newItem = new HwListItem();
                 $newItem->loadArr($_GET);
                 $model->hwList->add($newItem);
             }
@@ -147,7 +125,7 @@ class ArmsController extends ArmsBaseController
     /**
      * Удаляем элемент оборудования
      * @param $id
-     * @return string|\yii\web\Response
+     * @return string|Response
      * @throws NotFoundHttpException
      */
     public function actionRmhw($id){

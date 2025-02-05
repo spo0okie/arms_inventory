@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\helpers\ArrayHelper;
 use voskobovich\linker\LinkerBehavior;
+use Yii;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
 use yii\db\Query;
@@ -388,8 +389,19 @@ class Soft extends ArmsModel
 			$comps=Comps::find()
 				->where($where)
 				->all();
-			//TODO: вот это надо вынести в background очередь
-			foreach ($comps as $comp) $comp->silentSave();
+			if (Yii::$app->params['soft.deferred_rescan'])	{
+				//отложенный рескан
+				foreach ($comps as $comp) {
+					$queue=new CompsRescanQueue([
+						'soft_id'=>$this->id,
+						'comps_id'=>$comp->id
+					]);
+					$queue->save();
+				}
+			} else {
+				//моментальный
+				foreach ($comps as $comp) $comp->silentSave();
+			}
 		}
 	}
 	

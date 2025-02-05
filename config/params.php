@@ -54,5 +54,7 @@ return [
 	
 	'services.no_backup.warn'=>true,	//ругаться если у сервиса не объявлены требования на бэкап
 	
+	'soft.deferred_rescan'=>false,
+	
 	'sms.enable'=>false,
 ];

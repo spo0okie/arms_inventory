@@ -82,6 +82,7 @@ use yii\db\StaleObjectException;
  * @property MaintenanceJobs $maintenanceJobs
  * @property MaintenanceReqs $effectiveMaintenanceReqs
  * @property Sandboxes $sandbox
+ * @property CompsRescanQueue $softRescans
  */
 class Comps extends ArmsModel
 {
@@ -139,6 +140,7 @@ class Comps extends ArmsModel
 		'lic_items_ids' =>		[LicItems::class,'comp_ids'],
 		'lic_keys_ids' =>		[LicKeys::class,'comp_ids'],
 		'netIps_ids' => 		[NetIps::class,'comps_ids'],
+		'softRescan_ids' => 	[CompsRescanQueue::class,'comps_id'],
 		
 		'soft_ids' => 			[Soft::class,'comps_ids','loader'=>'soft',
 			'updater' => ['class' => ManyToManySmartUpdater::class,],
@@ -344,6 +346,9 @@ class Comps extends ArmsModel
 				'hint'=>'Если административные привилегии на этой ОС/ВМ выданы рядовым пользователям,'
 					.'<br>то необходимо перечислить их здесь. (Состав ИТ отдела перечислять не нужно)',
 				'placeholder'=>'Только у ИТ отдела'
+			],
+			'softRescans'=>[
+				'Ожидается сканирование ПО'
 			]
 
 		]);
@@ -509,6 +514,10 @@ class Comps extends ArmsModel
 	
 	public function getLogins() {
 		return $this->hasmany(LoginJournal::class, ['comps_id' => 'id']);
+	}
+	
+	public function getSoftRescans() {
+		return $this->hasmany(CompsRescanQueue::class, ['comps_id' => 'id']);
 	}
 	
 	/**
@@ -766,6 +775,8 @@ class Comps extends ArmsModel
 			$arm->save();
 		}
 		
+		foreach ($this->softRescans as $queue) $queue->delete();
+
 		return true;
 	}
 	
@@ -775,6 +786,7 @@ class Comps extends ArmsModel
 	public function afterSave($insert,$changedAttributes)
 	{
 		parent::afterSave($insert,$changedAttributes);
+		foreach ($this->softRescans as $queue) $queue->delete();
 		//если в новом арме не назначена основная ОС, то назначим эту
 		if (!is_null($this->arm_id)) {
 			if (is_object($arm=$this->arm)) {

@@ -8,6 +8,7 @@
 namespace app\console\commands;
 
 use app\models\Comps;
+use app\models\CompsRescanQueue;
 use yii\console\Controller;
 use yii\console\ExitCode;
 
@@ -34,7 +35,7 @@ class CompsController extends Controller
 
 	public function actionFixDupes()
 	{
-		if (is_array($comps=\app\models\Comps::find()->all()))
+		if (is_array($comps= Comps::find()->all()))
 			foreach ($comps as $comp)
 				if ($comp->domain_id && is_array($dupes=$comp->dupes) && count($dupes)) {
 					foreach ($dupes as $dupe) if (!$dupe->domain_id) {
@@ -48,9 +49,30 @@ class CompsController extends Controller
 	
 	public function actionResave()
 	{
-		foreach (\app\models\Comps::find()->all() as $comp) {
+		foreach (Comps::find()->all() as $comp) {
 			/** @var Comps $comp */
 			$comp->silentSave();
+		}
+		
+		return ExitCode::OK;
+	}
+
+	public function actionRescan($count=100)
+	{
+		$queue=CompsRescanQueue::find()
+			->groupBy(['comps_id'])
+			->limit($count)
+			->all();
+		
+		foreach ($queue as $item) {
+			/** @var Comps $comp */
+			$comp=Comps::findOne($item->comps_id);
+			if (is_object($comp)) {
+				echo $comp->fqdn."\n";
+				$comp->silentSave();
+			} else {
+				echo $item->comp_id." missing \n";
+			}
 		}
 		
 		return ExitCode::OK;
