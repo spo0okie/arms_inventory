@@ -388,14 +388,24 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		</div>
 		<div class="row">
 			<div class="col-md-6" >
-				<?= FieldsHelper::Select2Field($form,$model,'it_staff_id', [
+				<?= Yii::$app->params['techs.managementService.enable']?
+				FieldsHelper::Select2Field($form,$model,'management_service_id', [
+					'data' => Services::fetchProviderNames(),
+					'hintModel'=>'Services',
+					'options' => ['placeholder' => 'Выберите услугу сопровождения',],
+					'pluginOptions' => [
+						'dropdownParent' => $modalParent,
+					]
+				]):
+				FieldsHelper::Select2Field($form,$model,'it_staff_id', [
 					'data' => Users::fetchWorking(),
 					'hintModel'=>'Users',
 					'options' => ['placeholder' => 'Выберите сотрудника',],
 					'pluginOptions' => [
 						'dropdownParent' => $modalParent,
 					]
-				]) ?>
+				])
+				?>
 			</div>
 			<div class="col-md-6" >
 				<?= FieldsHelper::Select2Field($form,$model,'responsible_id', [

@@ -80,7 +80,6 @@ if (is_object($model->state)) { ?>
 			Помещение: <?= $this->render('/places/item',['model'=>$model->place]) ?> <br />
 			Пользователь: <?= $this->render('/users/item',['model'=>$model->user]) ?> <br />
 			<?= is_object($model->head)?('Руководитель отдела:'.$this->render('/users/item',['model'=>$model->head]).'<br/>'):'' ?>
-			<?= is_object($model->itStaff)?('Сотрудник ИТ:'.$this->render('/users/item',['model'=>$model->itStaff]).'<br/>'):'' ?>
 			<?= is_object($model->admResponsible)?($model->getAttributeLabel('responsible_id').':'.$this->render('/users/item',['model'=>$model->admResponsible]).'<br/>'):'' ?>
 		</p>
 	</div>

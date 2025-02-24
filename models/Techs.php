@@ -105,6 +105,7 @@ use yii\db\ActiveQuery;
  * @property Contracts[] $contracts
  * @property Services[] $services
  * @property Services[] $compsServices
+ * @property Services   $managementService
  * @property LicItems[] $licItems
  * @property LicKeys[] $licKeys
  * @property LicGroups[] $licGroups
@@ -392,6 +393,10 @@ class Techs extends ArmsModel
 				'label'=>'Руководитель отдела',
 				'hint' => 'Руководитель отдела сотрудника которому установлено',
 			],
+			'management_service_id'=>[
+				'Услуга сопровождения',
+				'hint'=>'ИТ услуга в рамках которой сопровождается это оборудование/АРМ на месте установки (local management)'
+			],
 			
 			'ip' => [
 				'IP адреса',
@@ -421,7 +426,7 @@ class Techs extends ArmsModel
 					.'этом оборудовании, но можно задать их и явно.'
 			],
 			'effectiveMaintenanceReqs'=>[
-				'Обслуживание',
+				MaintenanceReqs::$titles,
 				'indexHint'=>'Какие предъявлены требования по обслуживанию.'
 					.'<br>Как распространенные с сервисов, так и заданные явно. '
 					.'<br>Избыточно предъявленные требования помечаются как "архивные"'
@@ -466,7 +471,7 @@ class Techs extends ArmsModel
             [['model_id'], 'required'],
 			[['model_id', 'state_id', 'scans_id', 'departments_id','comp_id','domain_id'], 'integer'],
 			[['installed_id', 'arms_id', 'places_id','partners_id'], 'integer'],
-			[['user_id', 'responsible_id', 'head_id', 'it_staff_id'], 'integer'],
+			[['user_id', 'responsible_id', 'head_id', 'it_staff_id','management_service_id'], 'integer'],
 			[['installed_back','full_length'],'boolean'],
 
 	        [['contracts_ids','lic_items_ids','lic_groups_ids','lic_keys_ids','maintenance_reqs_ids','maintenance_jobs_ids','services_ids'], 'each', 'rule'=>['integer']],
@@ -868,11 +873,16 @@ class Techs extends ArmsModel
 
 	
 	/**
-	 * @return ActiveQuery
+	 * @return Users|null|ActiveQuery
 	 */
 	public function getItStaff()
 	{
-		return $this->hasOne(Users::class, ['id' => 'it_staff_id']);
+		if (!\Yii::$app->params['techs.managementService.enable'])
+			return $this->hasOne(Users::class, ['id' => 'it_staff_id']);
+			
+		if (!is_object($this->managementService)) return null;
+		
+		return $this->managementService->responsible;
 	}
 	
 	/**
@@ -1091,6 +1101,14 @@ class Techs extends ArmsModel
 	{
 		return $this->hasMany(Services::class, ['id' => 'service_id'])
 			->viaTable('{{%techs_in_services}}', ['tech_id' => 'id']);
+	}
+
+	/**
+	 * Возвращает сервис сопровождения оборудования
+	 */
+	public function getManagementService()
+	{
+		return $this->hasOne(Services::class, ['id' => 'management_service_id']);
 	}
 	
 	//нужно только для сортировки моделей внутри ArrayDataProvider

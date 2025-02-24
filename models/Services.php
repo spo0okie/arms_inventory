@@ -628,6 +628,14 @@ class Services extends ArmsModel
 		return $this->hasMany(Techs::class, ['id' => 'tech_id'])
 			->viaTable('{{%techs_in_services}}', ['service_id' => 'id']);
 	}
+
+	/**
+	 * Возвращает сопровождаемое этой услугой оборудование
+	 */
+	public function getSupportingTechs()
+	{
+		return $this->hasMany(Techs::class, ['management_service_id' => 'id']);
+	}
 	
 	/**
 	 * Возвращает группу ответственных за сервис

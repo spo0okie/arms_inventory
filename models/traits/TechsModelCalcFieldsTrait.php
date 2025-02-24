@@ -14,6 +14,7 @@ use app\models\Scans;
 use app\models\Services;
 use app\models\Techs;
 use app\models\Users;
+use Yii;
 
 /**
  * @package app\models\traits
@@ -96,7 +97,10 @@ trait TechsModelCalcFieldsTrait
 	public function getSupportTeam()
 	{
 		/** @var Techs $this */
-		$team=Services::supportTeamFrom($this->services);
+		$team=Services::supportTeamFrom(
+			(count($this->services)||!Yii::$app->params['techs.managementService.enable'])?
+				$this->services:
+				[$this->managementService]);
 		
 		//убираем из команды ответственного за ОС
 		if (is_object($responsible=$this->responsible)) {
