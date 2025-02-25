@@ -59,7 +59,13 @@ if ((count($totalComps)+count($totalTechs))>10)
 return [
 	'name' => [
 		'value' => function ($data) {
-			return $this->render('/services/item', ['model' => $data,'noDelete'=>true,'icon'=>true]);
+			$prefix='';
+			if ($depth=$data->treeDepth) {
+				$depth--;
+				$prefix='└';
+				for (; $depth; $depth--) $prefix='　'.$prefix;
+			}
+			return $prefix.$this->render('/services/item', ['model' => $data,'noDelete'=>true,'icon'=>true]);
 		},
 	],
 	'segment' => [
@@ -156,7 +162,7 @@ return [
 				'model'=>$data,
 				'field'=>'maintenanceReqsRecursive',
 				'title'=>false,
-				//'item_options'=>['static_view'=>true,'jobs'=>$data->maintenanceJobs] //удовлетворение самих сервисов не интересно
+				'card_options'=>['cardClass'=>'m-0']
 			]);
 		},
 	],

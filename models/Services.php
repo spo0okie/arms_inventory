@@ -114,6 +114,9 @@ class Services extends ArmsModel
 {
 	use ServicesModelCalcFieldsTrait,AclsFieldTrait;
 	
+	public $treeChildren=null;
+    public $treeDepth=null;
+	
 	public static $titles='Сервисы/услуги';
 	public static $title='Сервис/услуга';
 

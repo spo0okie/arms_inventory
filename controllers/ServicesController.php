@@ -167,10 +167,48 @@ class ServicesController extends ArmsBaseController
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 		$this->view->params['layout-container'] = 'container-fluid';
 		
+
 		return $this->render('list-by-users', [
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,
 			'disabled_ids'=>$disabled_ids
+		]);
+	}
+	
+	/**
+	 * Lists all Services models.
+	 * @return mixed
+	 */
+	public function actionIndexTree()
+	{
+		Services::cacheAllItems();
+		$searchModel = new ServicesSearch();
+		$searchModel->parent_id=true;  //в т.ч. дочерние
+		//$searchModel->archived=false; //должен отсутствовать
+		
+		//ищем тоже самое но с дочерними в противоположном положении
+		$switchArchived=clone $searchModel;
+		$switchArchived->archived=!$switchArchived->archived;
+		$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams)->totalCount;
+
+
+
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$this->view->params['layout-container'] = 'container-fluid';
+		
+		$models=[];
+		ArrayHelper::sortFlatTree(ArrayHelper::buildSortedTree($dataProvider->models),$models);
+		
+		$arrDataProvider=new ArrayDataProvider([
+			'allModels'=>$models,
+			'pagination'=>false
+		]);
+		
+		
+		return $this->render('full-tree', [
+			'searchModel' => $searchModel,
+			'dataProvider' => $arrDataProvider,
+			'switchArchivedCount' => $switchArchivedCount,
 		]);
 	}
 	

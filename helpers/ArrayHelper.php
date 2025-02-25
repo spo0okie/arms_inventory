@@ -404,4 +404,62 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		return $trimmed;
 	}
 	
+	/**
+	 * Из одномерного массива хранящего объекты, связанные в дерево через [parent_id=>id]
+	 * Формирует многомерный массив в котором дочерние элементы складываются в поле $childrenAttr своих родителей
+	 * Также каждому объекту добавляется поле $depthAttr c глубиной вложенности в дерево
+	 * @param array    $elements		исходный список элементов
+	 * @param string   $parentAttr
+	 * @param string   $childrenAttr
+	 * @param string   $depthAttr
+	 * @return array|mixed
+	 */
+	public static function buildSortedTree(
+		array $elements,
+		$parentAttr='parent_id',
+		$childrenAttr='treeChildren',
+		$depthAttr='treeDepth'
+	) {
+		
+		// Группируем элементы по parent_id ($parentAttr)
+		// получаются группы потомков одного уровня с одним родителем
+		$tree = [];
+		foreach ($elements as $element) {
+			$tree[$element->$parentAttr][] = $element;
+		}
+		
+		// Рекурсивная функция сборки дерева с добавлением уровня вложенности
+		$buildTree = function ($parentId, $depth = 0) use (
+			&$buildTree,
+			&$tree,
+//			&$elementsSort,
+			&$childrenAttr,
+			&$depthAttr
+		) {
+			$sorted = $tree[$parentId] ?? [];
+//			usort($sorted, $elementsSort);	//сортируем элементы в своей группе
+			foreach ($sorted as &$node) {			//каждому элементу в группе проставляем
+				$node->$depthAttr = $depth;			//глубину
+				$node->$childrenAttr = $buildTree($node->id, $depth + 1); //потомков
+			}
+			return $sorted;
+		};
+		
+		return $buildTree(null);
+	}
+	
+	public static function sortFlatTree(
+		array $elements,
+		array &$sorted,
+		$parentAttr='parent_id',
+		$childrenAttr='treeChildren',
+		$depthAttr='treeDepth'
+	) {
+		foreach ($elements as $node) {
+			$sorted[]=$node;
+			static::sortFlatTree($node->$childrenAttr,$sorted,$parentAttr,$childrenAttr,$depthAttr);
+		}
+	}
+	
+	
 }
