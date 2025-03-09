@@ -54,7 +54,18 @@ class LoginJournal extends ArmsModel
     public function rules()
     {
         return [
-            [['time'], 'safe'],
+			['time', 'filter', 'filter' => function ($value) {
+				if (is_numeric($this->time)) {
+					if ($this->local_time) {
+						$this->time += (time()-$this->local_time);
+					}
+					if ($this->time>(time()+5)) {
+						$this->addError('time', 'Unable add logon event in future');
+					}
+					$this->time = gmdate('Y-m-d H:i:s',$this->time);
+				}
+			}],
+			[['time'],'safe'],
             [['comp_name', 'user_login'], 'required'],
             [['comps_id','type','local_time'], 'integer'],
             [['comp_name', 'user_login'], 'string', 'max' => 128],
@@ -143,13 +154,6 @@ class LoginJournal extends ArmsModel
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
-			if (is_numeric($this->time)) {
-				if ($this->local_time) {
-					$this->time += (time()-$this->local_time);
-				}
-				$this->time = gmdate('Y-m-d H:i:s',$this->time);
-			}
-			
 			if (!isset($this->comps_id)) {
 				if (is_object($comp=\app\models\Comps::findByAnyName($this->comp_name))) {
 					/** @var Comps $comp */

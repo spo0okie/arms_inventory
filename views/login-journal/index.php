@@ -1,5 +1,6 @@
 <?php
 
+use app\models\LoginJournal;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 
@@ -7,7 +8,7 @@ use kartik\grid\GridView;
 /* @var $searchModel app\models\LoginJournalSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = \app\models\LoginJournal::$title;
+$this->title = LoginJournal::$title;
 $this->params['breadcrumbs'][] = $this->title;
 $renderer=$this;
 ?>
@@ -31,7 +32,7 @@ $renderer=$this;
 		        'value' => function($data) use($renderer){return (is_null($data->comp))?null:$renderer->render('/comps/item',['model'=>$data->comp]);}
 	        ],
 	        'comp_name',
-            'time',
+            'time:datetime',
 			[
 				'attribute'=>'type',
 				'format'=>'raw',
