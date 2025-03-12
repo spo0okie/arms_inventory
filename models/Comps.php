@@ -199,7 +199,11 @@ class Comps extends ArmsModel
 					$this->clearErrors('arm_id');
 					$this->clearErrors('platform_id');
 				}
-			}, 'skipOnEmpty'=> false]
+			}, 'skipOnEmpty'=> false],
+			[
+				['arm_id'], 'required', 'when' => function($model){return (boolean)count($model->soft);},
+				'message' => 'В паспорте АРМ есть оборудование привязанное к этой ОС. Нельзя отвязать ее от АРМ'
+			],
         ];
     }
 
