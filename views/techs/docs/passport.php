@@ -28,7 +28,7 @@ $manufacturers= Manufacturers::fetchNames();
     $signed=[];
 
 
-    foreach ($model->comps as $comp) {
+    foreach ($model->comps as $comp) if (!$comp->archived) {
 
 
         if (count($comp->swList->items)) {

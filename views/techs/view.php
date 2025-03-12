@@ -2,6 +2,7 @@
 
 use app\components\HistoryWidget;
 use app\components\IsArchivedObjectWidget;
+use app\components\ShowArchivedWidget;
 use app\models\Ports;
 use app\models\Techs;
 use yii\helpers\Html;
@@ -15,6 +16,7 @@ Url::remember();
 $this->title = $model->num;
 $this->params['breadcrumbs'][] = ['label' => Techs::$title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+$archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 
 ?>
 <div class="techs-view">
@@ -25,7 +27,9 @@ $this->params['breadcrumbs'][] = $this->title;
 		</div>
 		<div class="col-md-6">
 			<div class="float-end text-end">
-				<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
+				<div class="text-end">
+					<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
+				</div>
 				<h1 class="text-end">
 					<?php if ($model->isComputer) foreach (Yii::$app->params['arms.docs'] as $doc=>$params) if (is_array($params)) {
 						echo Html::a($params['icon']??'<i class="fas fa-file"></i>',['docs','id'=>$model->id,'doc'=>$doc],[
@@ -47,6 +51,9 @@ $this->params['breadcrumbs'][] = $this->title;
 					]) ?>
 					
 				</h1>
+				<div class="text-end">
+					<?= $archWidget ?>
+				</div>
 			</div>
 			<div>
 				<?php if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
