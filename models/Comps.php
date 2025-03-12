@@ -201,7 +201,7 @@ class Comps extends ArmsModel
 				}
 			}, 'skipOnEmpty'=> false],
 			[
-				['arm_id'], 'required', 'when' => function($model){return (boolean)count($model->soft);},
+				['arm_id'], 'required', 'when' => function($model){return count($model->soft) && $model->isAttributeChanged('arm_id');},
 				'message' => 'В паспорте АРМ есть оборудование привязанное к этой ОС. Нельзя отвязать ее от АРМ'
 			],
         ];
