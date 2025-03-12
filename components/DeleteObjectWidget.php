@@ -56,8 +56,8 @@ class DeleteObjectWidget extends Widget
 		}
 		
 		if (is_null($this->links)) {
-			$this->links=$this->model->hasMethod('reverseLinks')?
-				$this->model->reverseLinks():[];
+			$this->links=$this->model->hasMethod('nonDeletableReverseLinks')?
+				$this->model->nonDeletableReverseLinks():[];
 		}
 		
 		$this->options['data'] = [

@@ -25,11 +25,11 @@ trait AttributeLinksModelTrait
 	 * 		'services_ids'=>[
 	 * 			Service::class,		//на какой класс ссылаемся
 	 * 			'acls_ids',			//если там есть обратная ссылка, то в каком аттрибуте
-	 * 			'updater',			//updater для many-2-many таблицы https://github.com/voskobovich/yii2-linker-behavior?tab=readme-ov-file#custom-junction-table-values
-	 * 		],
-	 * 		'user_id'=>[
-	 * 			Users::class,
-	 * 			'loader'=>'user'	//как загрузчик этого объекта называется в мастер-классе
+	 *			'updater' => ['class' => ManyToManySmartUpdater::class,], //Если запись в many-2-many таблицу делается кастомным способом
+	 *								//Передается в behaviors()
+	 *								//https://github.com/voskobovich/yii2-linker-behavior?tab=readme-ov-file#custom-junction-table-values
+	 * 			'loader'=>'servicesList',//как загрузчик этого объекта называется, если он не формируется автоматически из названия ссылки
+	 * 			'deleteable'=>true,	//можно ли удалять объект с такими ссылками (если ссылки удаляются в beforeDelete)
 	 * 		],
 	 * ];
 	 */
@@ -124,7 +124,24 @@ trait AttributeLinksModelTrait
 		return $links;
 	}
 	
-	
+	/**
+	 * Возвращает ссылки на объекты ссылающиеся на этот
+	 * по схеме one-to-many и many-to-many
+	 * которые не удаляются автоматически при удалении модели
+	 * @return array
+	 */
+	public function nonDeletableReverseLinks() {
+		$links=[];
+		foreach ($this->getLinksSchema() as $attribute=>$data) {
+			if ($this->attributeIsReverseLink($attribute)) {
+				
+				if (!($data['deletable']??false) && $loader=$this->attributeLinkLoader($attribute)) {
+					$links[]=$this->$loader;
+				};
+			}
+		}
+		return $links;
+	}
 	
 	/**
 	 * Загрузить связанный объект

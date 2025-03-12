@@ -131,7 +131,7 @@ class Comps extends ArmsModel
 		'sandbox_id' =>			Sandboxes::class,
 		'platform_id' =>		[Services::class,'provide_comps_ids'],
 		
-		'linked_arms_ids'=>		[Techs::class,'comp_id'],
+		'linked_arms_ids'=>		[Techs::class,'comp_id','deletable'=>true],
 		'services_ids'=>		[Services::class,'comps_ids'],
 		'admins_ids'=>			[Users::class,'admin_comps_ids'],
 		'aces_ids'=>			[Aces::class,'comps_ids'],
@@ -139,13 +139,13 @@ class Comps extends ArmsModel
 		'lic_groups_ids' =>		[LicGroups::class,'comp_ids'],
 		'lic_items_ids' =>		[LicItems::class,'comp_ids'],
 		'lic_keys_ids' =>		[LicKeys::class,'comp_ids'],
-		'netIps_ids' => 		[NetIps::class,'comps_ids'],
+		'netIps_ids' => 		[NetIps::class,'comps_ids','deletable'=>true],
 		'softRescan_ids' => 	[CompsRescanQueue::class,'comps_id'],
 		
 		'soft_ids' => 			[Soft::class,'comps_ids','loader'=>'soft',
-			'updater' => ['class' => ManyToManySmartUpdater::class,],
+			'updater' => ['class' => ManyToManySmartUpdater::class],
 		],
-		'softHits_ids' => 		[Soft::class,'hits_ids',
+		'softHits_ids' => 		[Soft::class,'hits_ids','deletable'=>true,
 			'updater' => ['class' => ManyToManySmartUpdater::class,],
 		],
 		
