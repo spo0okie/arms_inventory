@@ -13,7 +13,6 @@ use app\components\DynaGridWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Aces;
 use app\models\Services;
-use yii\helpers\Html;
 
 //эта страничка вызывается из другой, где есть этот виджет,
 //поэтому хак со сменой поведения архивных элементов по умолчанию делаем руками, а не автоматом
@@ -21,18 +20,6 @@ ShowArchivedWidget::$defaultValue=false;
 $static_view=false;
 $columns=include $_SERVER['DOCUMENT_ROOT'].'/views/aces/columns.php';
 
-echo ($mode=='acls')?Html::a('Добавить вх. доступ',[
-		'/acls/create','Acls'=>['services_id'=>$model->id]
-],[
-	'class'=>'badge text-bg-success m-0 open-in-modal-form',
-	'data-reload-page-on-submit'=>1
-]):
-Html::a('Добавить исх. доступ',[
-	'/acls/create','Aces'=>['services_ids'=>[$model->id]]
-],[
-	'class'=>'badge text-bg-success m-0 open-in-modal-form',
-	'data-reload-page-on-submit'=>1
-])
 ?>
 <div class="service-<?= $mode ?>-index">
 	<?= DynaGridWidget::widget([

@@ -4,6 +4,7 @@ use app\components\assets\DynaGridWidgetAsset;
 use app\components\DynaGridWidget;
 use app\components\TabsWidget;
 use app\models\Services;
+use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\web\YiiAsset;
@@ -36,7 +37,11 @@ $tabs[]=[
 	'id'=>'serviceChildren',
 	'label'=>'Состав сервиса'
 		.'<i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-children-tree-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-	'content'=><<<HTML
+	'content'=>Html::a('Добавить субсервис',[
+		'create','Services'=>['parent_id'=>$model->id]
+	],[
+		'class'=>'badge text-bg-success m-0'
+	]).<<<HTML
 		<div id="serviceChildrenTree">
 		
 			<div class="spinner-border" role="status">
@@ -94,7 +99,12 @@ HTML,
 	$tabs[]=[
 		'id'=>'serviceAces',
 		'label'=>'Доступ отсюда <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-aces-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-		'content'=><<<HTML
+		'content'=>Html::a('Добавить исходящий доступ',[
+			'/acls/create','Aces'=>['services_ids'=>[$model->id]]
+		],[
+			'class'=>'badge text-bg-success m-0 open-in-modal-form',
+			'data-reload-page-on-submit'=>1
+		]).<<<HTML
 		<div id="serviceAcesList">
 		
 			<div class="spinner-border" role="status">
@@ -117,7 +127,12 @@ DynaGridWidget::handleSave('service-acls-list');
 $tabs[]=[
 	'id'=>'serviceAcls',
 	'label'=>'Доступы сюда <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-acls-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-	'content'=><<<HTML
+	'content'=>Html::a('Добавить входящий доступ',[
+		'/acls/create','Acls'=>['services_id'=>$model->id]
+	],[
+		'class'=>'badge text-bg-success m-0 open-in-modal-form',
+		'data-reload-page-on-submit'=>1
+	]).<<<HTML
 		<div id="serviceAclsList">
 		
 			<div class="spinner-border" role="status">

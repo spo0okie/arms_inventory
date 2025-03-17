@@ -17,14 +17,6 @@ use yii\helpers\Html;
 $renderer=$this;
 
 
-//var_dump($dataProvider->query->createCommand()->getRawSql());
-//var_dump($dataProvider->models[7]->arms);
-
-echo Html::a('Добавить субсервис',[
-	'create','Services'=>['parent_id'=>$model->id]
-],[
-	'class'=>'badge text-bg-success m-0'
-]);
 
 // Добавляем JS-код в страницу
 $this->registerJs(<<<JS
