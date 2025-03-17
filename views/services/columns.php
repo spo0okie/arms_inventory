@@ -1,6 +1,7 @@
 <?php
 
 use app\components\ModelFieldWidget;
+use app\components\TableTreePrefixWidget;
 use app\components\UrlListWidget;
 use app\models\Services;
 
@@ -59,14 +60,16 @@ if ((count($totalComps)+count($totalTechs))>10)
 return [
 	'name' => [
 		'value' => function ($data) {
-			$prefix='';
+			$name=$this->render('/services/item', ['model' => $data,'noDelete'=>true,'icon'=>true]);
 			if ($depth=$data->treeDepth) {
-				$depth--;
-				$prefix='└';
-				for (; $depth; $depth--) $prefix='　'.$prefix;
+				return TableTreePrefixWidget::widget(['prefix'=>$data->treePrefix]).$name.'</span>';
 			}
-			return $prefix.$this->render('/services/item', ['model' => $data,'noDelete'=>true,'icon'=>true]);
+			return $name;
 		},
+		'contentOptions'=>function($data){return ['class'=>'name_col '.($data->treeDepth?
+			'tree-col p-0 overflow-hidden position-relative'
+			:''
+		) ];}
 	],
 	'segment' => [
 		'value' => function ($data) {return $this->render('/segments/item', ['model' => $data->segmentRecursive]);},

@@ -11,6 +11,7 @@ use yii\data\ActiveDataProvider;
  */
 class ServicesSearch extends Services
 {
+	public $ids;
 	public $sites;
 	public $comps;
 	public $techs;
@@ -30,8 +31,9 @@ class ServicesSearch extends Services
     public function rules()
     {
         return [
-	        [['id', 'is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
+	        [['is_end_user', 'responsible_id', 'providing_schedule_id', 'support_schedule_id'], 'integer'],
 			[['responsible_ids'], 'each', 'rule'=>['integer']],
+			['id','validateIntegerOrArrayOfInteger'],
             [[
             	'name',
 				'description',
@@ -130,7 +132,8 @@ class ServicesSearch extends Services
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+			//'services.id' => $this->id,
+			'services.id' => $this->ids,
 			'services.segment_id' => $this->segment_id,
 			'is_end_user' => $this->is_end_user,
 	        'responsible_id' => $this->responsible_id,

@@ -31,15 +31,13 @@ DynaGridWidgetAsset::register($this);
 
 $tabs=[];
 
-if (count($model->children)||count($model->comps)||count($model->techs)) {
-		
-	DynaGridWidget::handleSave('services-comps-index');
-	
-	$tabs[]=[
-		'id'=>'serviceComps',
-		'label'=>'Оборудование и ОС <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#services-comps-index-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-		'content'=><<<HTML
-		<div id="serviceCompsList">
+DynaGridWidget::handleSave('service-children-tree');
+$tabs[]=[
+	'id'=>'serviceChildren',
+	'label'=>'Состав сервиса'
+		.'<i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-children-tree-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+	'content'=><<<HTML
+		<div id="serviceChildrenTree">
 		
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
@@ -47,25 +45,50 @@ if (count($model->children)||count($model->comps)||count($model->techs)) {
 		</div>
 		<script>
 			$(document).ready(function() {
-				$.get("/web/services/os-list?id={$model->id}", function(data) {
-				    jQuery("#serviceCompsList").hide().html(data);
-				    setTimeout(function (){jQuery("#serviceCompsList").fadeToggle();ExpandableCardInitAll();},500)
-					//let \$tabLink=$('li#tab-serviceComps').children('a');
-					//let \$export=$('div.servicesCompsIndexExport').children('div.btn-group');
-					//let \$exportButton=\$export.children('button').removeClass('btn').detach();
-					//let \$exportUl=\$export.children('ul').on('mouseOver',function(e){e.stopPropagation(); return false;}).detach();
-					//console.log(\$export);
-					//console.log(\$exportButton);
-					//\$exportButton.appendTo(\$tabLink);
-					//\$exportUl.appendTo(\$tabLink);
-					//\$tabLink.append(\$exportButton+\$exportUl);
-				});
+				$.get("/web/services/children-tree?id={$model->id}", function(data) {
+				    jQuery("#serviceChildrenTree").hide().html(data);
+				    setTimeout(function (){jQuery("#serviceChildrenTree").fadeToggle();ExpandableCardInitAll();},500)
+				})
 			})
 		</script>
 HTML,
+];
+
+
+
+DynaGridWidget::handleSave('services-comps-index');
+
+$tabs[]=[
+	'id'=>'serviceComps',
+	'label'=>'Оборудование и ОС <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#services-comps-index-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+	'content'=><<<HTML
+	<div id="serviceCompsList">
+	
+		<div class="spinner-border" role="status">
+			<span class="visually-hidden">Loading...</span>
+		</div>
+	</div>
+	<script>
+		$(document).ready(function() {
+			$.get("/web/services/os-list?id={$model->id}", function(data) {
+				jQuery("#serviceCompsList").hide().html(data);
+				setTimeout(function (){jQuery("#serviceCompsList").fadeToggle();ExpandableCardInitAll();},500)
+				//let \$tabLink=$('li#tab-serviceComps').children('a');
+				//let \$export=$('div.servicesCompsIndexExport').children('div.btn-group');
+				//let \$exportButton=\$export.children('button').removeClass('btn').detach();
+				//let \$exportUl=\$export.children('ul').on('mouseOver',function(e){e.stopPropagation(); return false;}).detach();
+				//console.log(\$export);
+				//console.log(\$exportButton);
+				//\$exportButton.appendTo(\$tabLink);
+				//\$exportUl.appendTo(\$tabLink);
+				//\$tabLink.append(\$exportButton+\$exportUl);
+			});
+		})
+	</script>
+HTML,
 	];
 	
-}
+
 
 	DynaGridWidget::handleSave('service-aces-list');
 	$tabs[]=[

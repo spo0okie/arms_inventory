@@ -234,6 +234,19 @@ class ArmsModel extends ActiveRecord
 	}
 	
 	/**
+	 * Проверяет, что аттрибут или integer или их массив
+	 * @param $attribute
+	 */
+	public function validateIntegerOrArrayOfInteger($attribute)
+	{
+		if (!is_int($this->$attribute) &&
+			!(is_array($this->$attribute) &&
+				count(array_filter($this->$attribute, 'is_int')) == count($this->$attribute))) {
+			$this->addError($attribute, 'ID должен быть целым числом или массивом целых чисел');
+		}
+	}
+	
+	/**
 	 * Сохранить без обновления журнала
 	 * @param bool $runValidation
 	 * @return bool

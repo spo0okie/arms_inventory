@@ -343,4 +343,48 @@ class ServicesController extends ArmsBaseController
 			'mode' => 'acls'
 		]);
 	}
+
+	/**
+	 * Список связей в сервисе (с учетом вложенных)
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionChildrenTree(int $id)
+	{
+		/** @var Services $model */
+		$model=$this->findModel($id);
+		
+		// получаем всех детей
+		$children=$model->getChildrenRecursive();
+		
+		$searchModel = new ServicesSearch();
+		$searchModel->parent_id=true;  //в т.ч. дочерние
+		$searchModel->ids=array_merge(ArrayHelper::getArrayField($children,'id'),[$id]);  //только эти
+		
+		
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		
+		$models=[];
+		ArrayHelper::sortFlatTree(ArrayHelper::buildSortedTree(
+			$dataProvider->models,
+			'parent_id',
+			'treeChildren',
+			'treeDepth',
+			$model->parent_id
+		),$models);
+		
+		$arrDataProvider=new ArrayDataProvider([
+			'allModels'=>$models,
+			'pagination'=>false
+		]);
+		
+		
+		return $this->renderAjax('children-tree', [
+			'model' => $model,
+			'dataProvider' => $arrDataProvider,
+			//'switchArchivedCount' => $switchArchivedCount,
+		]);
+	}
+	
 }

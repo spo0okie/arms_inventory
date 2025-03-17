@@ -1,6 +1,5 @@
 <?php
 
-use app\components\ExpandableCardWidget;
 use app\components\IsArchivedObjectWidget;
 use app\components\IsHistoryObjectWidget;
 use app\components\HistoryWidget;
@@ -148,7 +147,6 @@ if(!$static_view) { ?>
 
 		<?= $this->render('card-support',['model'=>$model,'static_view'=>$static_view]) ?>
 		
-		<?php /* $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) */ ?>
 		
 		<?php if (is_array($model->orgInets) && count($model->orgInets)) { ?>
 			<h4>Предоставляет ввод(ы) интернет:</h4>
@@ -175,37 +173,6 @@ if(!$static_view) { ?>
 
 	</div>
 	<div class="col-md-6">
-		
-		<div class="mb-3">
-			<?php if (count($children)) { ?>
-				<?= ExpandableCardWidget::widget([
-					'content'=>'<h4>Содержит в составе:</h4>'.$this->render('/services/tree-list',['model'=>$model]),
-					'cardClass'=>'mb-1',
-				]) ?>
-			<?php } else {?>
-				<p class="mb-1">Нет суб-сервисов</p>
-			<?php } ?>
-			
-			<?= $static_view?'':(
-				Html::a('Добавить суб-сервис',[
-					'create','Services'=>['parent_id'=>$model->id]
-				],[
-					'class'=>'btn btn-success m-0'
-				]).
-				Html::a('Добавить вх. доступ',[
-					'/acls/create','Acls'=>['services_id'=>$model->id]
-				],[
-					'class'=>'btn btn-success m-0 open-in-modal-form',
-					'data-reload-page-on-submit'=>1
-				]).
-				Html::a('Добавить исх. доступ',[
-					'/acls/create','Aces'=>['services_ids'=>[$model->id]]
-				],[
-					'class'=>'btn btn-success m-0 open-in-modal-form',
-					'data-reload-page-on-submit'=>1
-				])
-			)?>
-		</div>
 		
 		<?= ListObjectsWidget::widget([
 			'models'=>$comps,

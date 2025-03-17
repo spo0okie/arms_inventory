@@ -15,4 +15,43 @@ span.contract_state_cell {white-space: nowrap; overflow: hidden; max-width: 25em
 {
     color: white;
 }
+/*
+.tree-column {
+    position: relative;
+    white-space: nowrap;
+}
 
+.tree-line {
+    display: inline-block;
+    width: 10px;
+    height: 1em;
+    border-left: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    position: relative;
+    margin-right: 5px;
+}*/
+
+.table-tree-prefix {
+    position: absolute;
+    width: 15px;
+}
+
+/* Горизонтальная линия */
+.table-tree-h-line {
+    position: absolute;
+    left: 5px; /* Смещаем вправо для соединения */
+    top: 9px;
+    width: 10px;
+    height: 1px;
+    background: #333;
+}
+
+/* Вертикальная линия */
+.table-tree-v-line {
+    position: absolute;
+    left: 5px; /* Совпадает с горизонтальной */
+    top: 0;
+    width: 1px;
+    background: #333;
+    height: 100%;
+}
