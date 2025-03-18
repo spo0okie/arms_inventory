@@ -284,6 +284,13 @@ class ArmsBaseController extends Controller
 		]);
 	}
 	
+	public function actionItemByName($name)
+	{
+		return $this->renderPartial('item', [
+			'model' => $this->findByName($name),
+			'static_view'=>true
+		]);
+	}
 	
 	/**
 	 * Displays a tooltip for single model.
@@ -316,6 +323,7 @@ class ArmsBaseController extends Controller
 			'model' => $this->findModel($id),
 		]);
 	}
+	
 
     /**
      * Validates  model on update.
@@ -446,9 +454,19 @@ class ArmsBaseController extends Controller
 			return $model;
 		}
 		
-		throw new NotFoundHttpException('The requested page does not exist.');
+		throw new NotFoundHttpException('The requested object does not exist.');
 	}
 	
+	protected function findByName(string $name)
+	{
+		if (($model = ($this->modelClass)::find()->where(['name'=>$name])->one()) !== null) {
+			return $model;
+		}
+		
+		throw new NotFoundHttpException('Object with requested name does not exist.');
+	}
+	
+
 	/**
 	 * Finds the Arms model based on its primary key value.
 	 * If the model is not found, a 404 HTTP exception will be thrown.

@@ -102,7 +102,7 @@ class CompsController extends ArmsBaseController
 		]);
 	}
 	
-	public function actionItemByName($name)
+	/*public function actionItemByName($name)
 	{
 		$nameParts=Domains::fetchFromCompName($name);
 		
@@ -125,7 +125,7 @@ class CompsController extends ArmsBaseController
 		}
 		
 		return $this->renderPartial('item', ['model' => $model	,'static_view'=>true]);
-	}
+	}*/
 	
 	
 	/**
@@ -308,5 +308,30 @@ class CompsController extends ArmsBaseController
 		
 		return $this->redirect(['/comps/view', 'id' => $model->id]);
 	}
-
+	
+	
+	protected function findByName(string $name)
+	{
+		$nameParts=Domains::fetchFromCompName($name);
+		
+		if ($nameParts===false) {
+			throw new BadRequestHttpException('Invalid comp name format');
+		}
+		
+		$domain_id=$nameParts[0];
+		$compName=$nameParts[1];
+		$domainName=$nameParts[2];
+		
+		if (is_null($domain_id)) {
+			throw new NotFoundHttpException("Domain $domainName not found");
+		} elseif ($domain_id===false) {
+			if (is_null($model = Comps::findOne(['name'=>$compName]))) {
+				throw new NotFoundHttpException("Computer $compName not found");
+			}
+		} elseif (is_null($model = Comps::findOne(['name'=>$compName,'domain_id'=>$domain_id]))) {
+			throw new NotFoundHttpException("Computer $compName not found in domain $domainName");
+		}
+		
+		return $model;
+	}
 }
