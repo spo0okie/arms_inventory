@@ -62,8 +62,10 @@ class TechModelsController extends ArmsBaseController
 	}
 	
 	
-	public function actionItemByName($name,$manufacturer,$long=false)
+	public function actionItemByName($name)
 	{
+		$manufacturer=Yii::$app->request->get('manufacturer');
+		$long=Yii::$app->request->get('long');
 		/// производитель
 		//ищем в словаре
 		if (is_null($man_id= ManufacturersDict::fetchManufacturer($manufacturer))) {
