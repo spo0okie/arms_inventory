@@ -147,7 +147,14 @@ if (!isset($modalParent)) $modalParent=null;
         <span onclick="$('#comps_advanced_settings').toggle()" class="href">Расширенные настройки</span>
     </p>
     <div id="comps_advanced_settings" style="display: none">
-        <?= $form->field($model, 'os')->textInput(['maxlength' => true]) ?>
+		<div class="row">
+			<div class="col-md-10">
+				<?= $form->field($model, 'os')->textInput(['maxlength' => true]) ?>
+			</div>
+			<div class="col-md-2">
+				<?= $form->field($model, 'raw_version')->textInput(['maxlength' => true]) ?>
+			</div>
+		</div>
 		<div class="row">
 			<div class="col-md-6">
 				<?= $form->field($model, 'ip')->textarea(['rows' => 2]) ?>
