@@ -72,19 +72,10 @@ $model->addItem($model->add_item);
 		</div>
 	</div>
 
-
-	<div class="text-center">
-		<blockquote class="small">
-			<p>Некоторые люди, столкнувшись с проблемой, думают: «О, а использую-ка я регулярные выражения». Теперь у них есть две проблемы.</p>
-			<footer>Джейми Завински</footer>
-		</blockquote>
-	</div>
-
-
 	<h3>Описание ПО</h3>
 	
-	<?= FieldsHelper::TextAutoresizeField($form,$model, 'comment',[
-		'lines' => 4,
+	<?= FieldsHelper::MarkdownField($form,$model, 'comment',[
+		'height'=>150
 	]) ?>
 
 	<div class="form-group">
