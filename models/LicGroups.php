@@ -2,7 +2,10 @@
 
 namespace app\models;
 
+use app\models\links\LicLinks;
+use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "lic_groups".
@@ -66,7 +69,7 @@ class LicGroups extends ArmsModel
             [['lic_types_id'], 'integer'],
             [['created_at','comment','linkComment'], 'safe'],
             [['descr',], 'string', 'max' => 255],
-	        [['lic_types_id'], 'exist', 'skipOnError' => true, 'targetClass' => LicTypes::className(), 'targetAttribute' => ['lic_types_id' => 'id']],
+	        [['lic_types_id'], 'exist', 'skipOnError' => true, 'targetClass' => LicTypes::class, 'targetAttribute' => ['lic_types_id' => 'id']],
         ];
     }
 
@@ -77,9 +80,10 @@ class LicGroups extends ArmsModel
     {
         return [
 	        'soft_ids' => [
-	        	'Программные продукты',
+	        	'Лицензируемое ПО',
 				'hint' => 'Какие программные продукты затрагиваются лицензией. Не менее одного продукта. Если лицензия дает право на несколько продуктов (правило даунгрейда или иные) нужно перечислить их все.',
 			],
+			'soft'=>['alias'=>'soft_ids'],
 			'lic_types_id' => [
 				'Схема лицензирования',
 				'hint' => 'Какая схема лицензирования используется во всех закупках лицензий этого типа',
@@ -116,82 +120,62 @@ class LicGroups extends ArmsModel
 
 
 	/**
-	 * В списке поведений прикручиваем many-to-many контрагентов
+	 * Описание связей с другими классами
 	 * @return array
 	 */
-	public function behaviors()
+	public function getLinksSchema()
 	{
 		$model=$this;
 		return [
-			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
-				'relations' => [
-					'soft_ids' => 'soft',
-					'arms_ids' => [
-						'arms',
-						'updater' => [
-							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
-							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
-						],
-					],
-					'comps_ids' => [
-						'comps',
-						'updater' => [
-							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
-							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
-						],
-					],
-					'users_ids' => [
-						'users',
-						'updater' => [
-							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
-							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
-						],
-					],
-				]
-			]
+			'soft_ids' => [Soft::class,'lic_groups_ids','loader'=>'soft'],
+			'arms_ids' => [Techs::class,'lic_groups_ids', 'updater' => [
+				'class' => ManyToManySmartUpdater::class,
+				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
+			]],
+			'comps_ids' => [Comps::class,'lic_groups_ids','updater' => [
+				'class' => ManyToManySmartUpdater::class,
+				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
+			]],
+			'users_ids' => [Users::class,'lic_groups_ids','updater' => [
+				'class' => ManyToManySmartUpdater::class,
+				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
+			]],
 		];
 	}
-
-	public function getSoftIds()
-	{
-		return $this->soft_ids;
-	}
-	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getSoft()
 	{
-		return $this->hasMany(Soft::className(), ['id' => 'soft_id'])
+		return $this->hasMany(Soft::class, ['id' => 'soft_id'])
 			->viaTable('{{%soft_in_lics}}', ['lics_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getArms()
 	{
-		return $this->hasMany(Techs::className(), ['id' => 'arms_id'])
+		return $this->hasMany(Techs::class, ['id' => 'arms_id'])
 			->viaTable('{{%lic_groups_in_arms}}', ['lic_groups_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getComps()
 	{
-		return $this->hasMany(Comps::className(), ['id' => 'comps_id'])
+		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
 			->viaTable('{{%lic_groups_in_comps}}', ['lic_groups_id' => 'id']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getUsers()
 	{
-		return $this->hasMany(Users::className(), ['id' => 'users_id'])
+		return $this->hasMany(Users::class, ['id' => 'users_id'])
 			->viaTable('{{%lic_groups_in_users}}', ['lic_groups_id' => 'id']);
 	}
 	
@@ -253,19 +237,19 @@ class LicGroups extends ArmsModel
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getLicType()
 	{
-		return $this->hasOne(LicTypes::className(), ['id' => 'lic_types_id']);
+		return $this->hasOne(LicTypes::class, ['id' => 'lic_types_id']);
 	}
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLicItems()
     {
-        return $this->hasMany(LicItems::className(), ['lic_group_id' => 'id']);
+        return $this->hasMany(LicItems::class, ['lic_group_id' => 'id']);
     }
 
     public function getName() {return $this->descr; }

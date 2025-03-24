@@ -3,9 +3,11 @@
 namespace app\models\links;
 
 use app\models\Users;
+use Closure;
+use Yii;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
-use yii\db\Query;
 use yii\helpers\Inflector;
 
 /**
@@ -74,17 +76,20 @@ class LicLinks extends ActiveRecord
 	public function getObjName() {
 		switch (static::$obj){
 			case 'arms':
+				/** @noinspection PhpPossiblePolymorphicInvocationInspection */
 				return $this->object->num;
 			case 'comps':
+				/** @noinspection PhpPossiblePolymorphicInvocationInspection */
 				return $this->object->name;
 			case 'users':
+				/** @noinspection PhpPossiblePolymorphicInvocationInspection */
 				return $this->object->Ename;
 		}
 		return null;
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getObject()
 	{
@@ -92,7 +97,7 @@ class LicLinks extends ActiveRecord
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getLic()
 	{
@@ -101,23 +106,24 @@ class LicLinks extends ActiveRecord
 	
 	public function getLicComment()
 	{
+		/** @noinspection PhpPossiblePolymorphicInvocationInspection */
 		return $this->lic->comment;
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getCreator()
 	{
-		return $this->hasOne(\app\models\Users::className(), ['id' => $this->created_by]);
+		return $this->hasOne(Users::class, ['id' => 'created_by']);
 	}
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getUpdater()
 	{
-		return $this->hasOne(\app\models\Users::className(), ['id' => $this->updated_by]);
+		return $this->hasOne(Users::class, ['id' => 'updated_by']);
 	}
 	
 	
@@ -139,7 +145,7 @@ class LicLinks extends ActiveRecord
 	 * Возвращает правила обновления полей в промежуточных таблицах many-to-many связей
 	 * https://github.com/voskobovich/yii2-linker-behavior
 	 * @param $model
-	 * @return \Closure[]
+	 * @return Closure[]
 	 */
 	public static function fieldsBehaviour($model) {
 		return [
@@ -156,27 +162,27 @@ class LicLinks extends ActiveRecord
 			//так что тут такое не рассматриваем
 			'created_at' => function($updater, $relatedPk, $rowCondition){
 				if ($rowCondition->isNewRecord)
-					return new \yii\db\Expression('NOW()');
+					return new Expression('NOW()');
 				else
 					return $rowCondition->oldValue;
 			},
 			'updated_at' => function($updater, $relatedPk, $rowCondition){
 			if ($rowCondition->isNewRecord)
-				return new \yii\db\Expression('NOW()');
+				return new Expression('NOW()');
 			else
 				return $rowCondition->oldValue;
 			},
 			//аналогично с пользователями
 			'created_by' => function($updater, $relatedPk, $rowCondition){
 			if ($rowCondition->isNewRecord)
-				return \Yii::$app->user->id;
+				return Yii::$app->user->id;
 			else
 				return $rowCondition->oldValue;
 			},
 			//аналогично с пользователями
 			'updated_by' => function($updater, $relatedPk, $rowCondition){
 				if ($rowCondition->isNewRecord)
-					return \Yii::$app->user->id;
+					return Yii::$app->user->id;
 				else
 					return $rowCondition->oldValue;
 			},
@@ -187,11 +193,13 @@ class LicLinks extends ActiveRecord
 	 * Найти все связанные с лицензией объекты
 	 * @param $lic string тип лицензии (groups/items/keys)
 	 * @param $licId integer идентификатор объекта лицензии
+	 * @return array
 	 */
 	public static function findForLic(string $lic, int $licId) {
 		$objs=[];
 		foreach (self::$objTypes as $objType) {
 			$objClass='\app\\models\\links\\'.static::linksClassName($lic,$objType);
+			/** @noinspection PhpUndefinedMethodInspection */
 			$objs=array_merge($objs,$objClass::findLinks($licId));
 		}
 		return $objs;
@@ -227,6 +235,7 @@ class LicLinks extends ActiveRecord
 		foreach ($objTypes as $objType) {
 			foreach ($licTypes as $licType) {
 				$objClass = '\app\\models\\links\\'.static::linksClassName($licType, $objType);
+				/** @noinspection PhpUndefinedMethodInspection */
 				foreach ($objClass::findLinks($licId,$objId) as $item) {
 					if (!is_null($productId)) {
 						if (array_search($productId,$item->lic->softIds)!==false) {
@@ -241,18 +250,18 @@ class LicLinks extends ActiveRecord
 		return $items;
 	}
 	
-	public static function updateLink(string $lic, string $obj, int $id, string $comment) {
+	/*public static function updateLink(string $lic, string $obj, int $id, string $comment) {
 		$link=new LicLinks($lic,$obj);
-		\Yii::$app->db->createCommand()->update(
+		Yii::$app->db->createCommand()->update(
 			$link->tableName(),
 			[
 				'comment'=>$comment,
-				'updated_by'=>\Yii::$app->user->id,
-				'updated_at'=>new \yii\db\Expression('NOW()')
+				'updated_by'=> Yii::$app->user->id,
+				'updated_at'=>new Expression('NOW()')
 			],
 			['id'=>$id]
 		)->execute();
-	}
+	}*/
 	
 	public function beforeSave($insert)
 	{
@@ -260,10 +269,10 @@ class LicLinks extends ActiveRecord
 			$this->created_at=new Expression('NOW()');
 		
 		if (is_null($this->created_by))
-			$this->created_by=\Yii::$app->user->id;
+			$this->created_by= Yii::$app->user->id;
 		
 		$this->updated_at=new Expression('NOW()');
-		$this->updated_by=\Yii::$app->user->id;
+		$this->updated_by= Yii::$app->user->id;
 
 		return parent::beforeSave($insert);
 		

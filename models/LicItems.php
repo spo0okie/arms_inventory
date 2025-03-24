@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\models\links\LicLinks;
-use voskobovich\linker\LinkerBehavior;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -66,37 +65,24 @@ class LicItems extends ArmsModel
 	 * В списке поведений прикручиваем many-to-many contracts
 	 * @return array
 	 */
-	public function behaviors()
+	public function getLinksSchema()
 	{
 		$model=$this;
 		return [
-			[
-				'class' => LinkerBehavior::class,
-				'relations' => [
-					'contracts_ids' => 'contracts',
-					'arms_ids' => [
-						'arms',
-						'updater' => [
-							'class' => ManyToManySmartUpdater::class,
-							'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
-						],
-					],
-					'comps_ids' => [
-						'comps',
-						'updater' => [
-							'class' => ManyToManySmartUpdater::class,
-							'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
-						],
-					],
-					'users_ids' => [
-						'users',
-						'updater' => [
-							'class' => ManyToManySmartUpdater::class,
-							'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
-						],
-					],
-				]
-			]
+			'contracts_ids' => [Contracts::class,'lics_ids'],
+			'arms_ids' => [Techs::class,'lic_items_ids', 'updater' => [
+				'class' => ManyToManySmartUpdater::class,
+				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
+			]],
+			'comps_ids' => [Comps::class,'lic_items_ids', 'updater' => [
+				'class' => ManyToManySmartUpdater::class,
+				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
+			]],
+			'users_ids' => [Users::class,'lic_items_ids', 'updater' => [
+				'class' => ManyToManySmartUpdater::class,
+				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
+			]],
+			'licKeys_ids' => [LicKeys::class,'lic_items_id', 'loader'=>'keys'],
 		];
 	}
 
@@ -160,6 +146,7 @@ class LicItems extends ArmsModel
 				'Документы',
 				'hint' => 'Желательно привязать документы на основании которых лицензии были приобретены (заявки, счета, акты)',
 			],
+			'contracts' => ['alias' => 'contracts_ids'],
 	        'active_from' => [
 				'Дата / Начало периода действия',
 				'hint' => 'С какого момента лицензия считается действительной',
@@ -225,7 +212,7 @@ class LicItems extends ArmsModel
         return $this->hasOne(LicGroups::class, ['id' => 'lic_group_id']);
     }
 	
-	
+	public function getName(){return $this->descr;}
 	/**
 	 * Возвращает набор документов
 	 * @return ActiveQuery

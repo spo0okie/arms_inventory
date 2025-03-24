@@ -3,29 +3,35 @@
 namespace app\models;
 
 
+use app\models\links\LicLinks;
+use voskobovich\linker\updaters\ManyToManySmartUpdater;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
+
 /**
  * This is the model class for table "lic_keys".
  *
  * @property int $id id
- * @property int $lic_items_id Закупка
- * @property array $softIds Ссылка на софт
- * @property array                $arms_ids
- * @property array                $comps_ids Ссылка на ОСи
- * @property array                $users_ids Ссылка на пользователей
- * @property string               $key_text Ключ
- * @property string               $keyShort начало и конец ключа (чтобы не палить везде ключ целиком)
- * @property string               $comment Допольнительно
- * @property string               $sname
- * @property string               $dname
- * @property \app\models\LicItems $licItem закупка
- * @property Techs[]	          $arms АРМы
- * @property Comps[]              $comps
- * @property Users[]              $users
+ * @property int      $lic_items_id Закупка
+ * @property array    $softIds Ссылка на софт
+ * @property array    $arms_ids
+ * @property array    $comps_ids Ссылка на ОСи
+ * @property array    $users_ids Ссылка на пользователей
+ * @property string   $key_text Ключ
+ * @property string   $keyShort начало и конец ключа (чтобы не палить везде ключ целиком)
+ * @property string   $comment Допольнительно
+ * @property string   $sname
+ * @property string   $dname
+ * @property LicItems $licItem закупка
+ * @property Techs[]  $arms АРМы
+ * @property Comps[]  $comps
+ * @property Users[]  $users
  */
 class LicKeys extends ArmsModel
 {
-
+	
 	public static $title='Лиц. ключи';
+	public static $titles='Лиц. ключи';
 	
 	public $linkComment=null; //комментарий, добавляемый при привязке лицензий
     /**
@@ -40,36 +46,22 @@ class LicKeys extends ArmsModel
 	 * В списке поведений прикручиваем many-to-many contracts
 	 * @return array
 	 */
-	public function behaviors()
+	public function getLinksSchema()
 	{
 		$model=$this;
 		return [
-			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
-				'relations' => [
-					'arms_ids' => [
-						'arms',
-						'updater' => [
-							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
-							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
-						],
-					],
-					'comps_ids' => [
-						'comps',
-						'updater' => [
-							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
-							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
-						],
-					],
-					'users_ids' => [
-						'users',
-						'updater' => [
-							'class' => \voskobovich\linker\updaters\ManyToManySmartUpdater::className(),
-							'viaTableAttributesValue' => \app\models\links\LicLinks::fieldsBehaviour($model),
-						],
-					],
-				]
-			]
+			'arms_ids' => [Techs::class,'lic_keys_ids', 'updater' => [
+				'class' => ManyToManySmartUpdater::className(),
+				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
+			]],
+			'comps_ids' => [Comps::class,'lic_keys_ids', 'updater' => [
+				'class' => ManyToManySmartUpdater::className(),
+				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
+			]],
+			'users_ids' => [Users::class,'lic_keys_ids', 'updater' => [
+				'class' => ManyToManySmartUpdater::className(),
+				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
+			]],
 		];
 	}
 
@@ -132,8 +124,8 @@ class LicKeys extends ArmsModel
 	
 	/**
 	 * Возвращает АРМы, к которым может быть привязан ключ
-	 * @return \yii\db\ActiveQuery
-	 * @throws \yii\base\InvalidConfigException
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getArms()
 	{
@@ -144,8 +136,8 @@ class LicKeys extends ArmsModel
 	
 	/**
 	 * Возвращает АРМы, к которым может быть привязан ключ
-	 * @return \yii\db\ActiveQuery
-	 * @throws \yii\base\InvalidConfigException
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getComps()
 	{
@@ -156,8 +148,8 @@ class LicKeys extends ArmsModel
 	
 	/**
 	 * Возвращает АРМы, к которым может быть привязан ключ
-	 * @return \yii\db\ActiveQuery
-	 * @throws \yii\base\InvalidConfigException
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
 	 */
 	public function getUsers()
 	{
@@ -167,7 +159,7 @@ class LicKeys extends ArmsModel
 	
 	
 	/**
-	 * @return \yii\db\ActiveQuery
+	 * @return ActiveQuery
 	 */
 	public function getLicItem()
 	{
@@ -199,6 +191,11 @@ class LicKeys extends ArmsModel
 	public function getDname()
 	{
 		return $this->licItem->licGroup->descr.' /'.$this->licItem->descr.' /'.$this->keyShort;
+	}
+	
+	public function getName()
+	{
+		return $this->keyShort;
 	}
 	
 	public function getSoftIds()

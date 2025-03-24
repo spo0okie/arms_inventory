@@ -1,7 +1,7 @@
 <?php
 
-use yii\helpers\Html;
-use kartik\grid\GridView;
+use app\components\ModelFieldWidget;
+use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
@@ -15,69 +15,27 @@ if (!isset($linksData)) $linksData=null;
 ?>
 
 
-    <br />
+<h3>
+	<?= $this->render('/lic-groups/item',['model'=>$model->licGroup,'static_view'=>$static_view]) ?>
+	<br />
+	<h4> Закупка: </h4>
+	<?= $this->render('/lic-items/item',['model'=>$model,'static_view'=>$static_view,'name'=>$model->descr,'noDelete'=>false]) ?>
 
-    <?php  $this->render('/lic-groups/card-att',[
-        'model'=>$model,
-        'static_view'=>$static_view,
-		'licGroup'=>$model->licGroup,
-        'unlink_href'=>['/lic-items/unlink','id'=>$model->id],
-		'linksData'=>$linksData,
-    ])  ?>
-
-	<?php if (isset($linksData) && $linksData->count) { ?>
-		<h4>Привязки</h4>
-		<?= $this->render('/lic-links/obj-list', ['dataProvider' => $linksData]); ?>
-	<?php } ?>
-
-    <?php if (!$static_view) { ?>
-
-    <h4>Лицензионные ключи:</h4>
-    <?php
-		echo GridView::widget([
-			'dataProvider' => $keys,
-			'columns' => [
-				['class' => 'yii\grid\SerialColumn'],
-				[
-					'attribute' => 'key_text',
-					'format' => 'raw',
-					'value' => function ($item) use ($renderer, $static_view) {
-						return $renderer->render('/lic-keys/item', ['model' => $item, 'static_view' => $static_view]);
-					}
-				],
-				[
-					'attribute' => 'links',
-					'format' => 'raw',
-					'value' => function ($item) use ($renderer) {
-						$output = '';
-						foreach ($item->arms as $arm)
-							$output .= ' ' . $renderer->render('/techs/item', ['model' => $arm,'icon'=>true,'static_view'=>true]);
-						foreach ($item->comps as $comp)
-							$output .= ' ' . $renderer->render('/comps/item', ['model' => $comp,'icon'=>true,'static_view'=>true]);
-						foreach ($item->users as $user)
-							$output .= ' ' . $renderer->render('/users/item', ['model' => $user,'icon'=>true,'static_view'=>true]);
-						return $output;
-					}
-				],
-				'comment'
-			],
-		]);
-		
-		
-		echo Html::a('Добавить ключ',
-			['/lic-keys/create','LicKeys[lic_items_id]'=>$model->id],
-			['class'=>'open-in-modal-form btn btn-success','data-reload-page-on-submit'=>1]
-		);
-	 
-	}?>
-
+</h3>
+<?= ModelFieldWidget::widget([
+	'model'=>$model,
+	'field'=>'contracts',
+	'show_empty'=>true,
+	'glue'=>'<br>',
+	'message_on_empty'=>'<div class="alert-striped text-center w-100 p-2">
+			<span class="fas fa-exclamation-triangle"></span>
+				ОТСУТСТВУЮТ
+			<span class="fas fa-exclamation-triangle"></span>
+		</div>'
+]) ?>
 <br />
-<br />
-
-<?= $this->render('/contracts/model-list',['model'=>$model,'static_view'=>$static_view,'link'=>'lics_ids']) ?>
-
 
 <h4>Комментарий:</h4>
 <p>
-	<?= Yii::$app->formatter->asNtext($model->comment) ?>
+	<?= Markdown::convert($model->comment,[]) ?>
 </p>

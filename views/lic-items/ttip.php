@@ -11,7 +11,6 @@
 
 ?>
 <div class="lics-ttip ttip-card">
-<?= $this->render('hdr', ['model'=>$model,'static_view'=>true]) ?>
-<?= $this->render('stat',['model'=>$model]) ?>
 <?= $this->render('card',['model'=>$model,'static_view'=>true]) ?>
+<?= $this->render('stat',['model'=>$model]) ?>
 </div>

@@ -34,6 +34,7 @@ class ModelFieldWidget extends Widget
 	public $lineBr=true;		//переносить строку между элементами
 	public $glue=' ';			//чем разделять элементы
 	public $show_empty=false;	//отображать заголовок если список пуст
+	public $message_on_empty='';//отображать сообщение вместо списка, если он пуст
 	public $itemViewPath;		//путь для рендера элемента
 	public $modelClass;			//класс объектов из списка значений поля
 	public $raw_items=false;
@@ -89,6 +90,7 @@ class ModelFieldWidget extends Widget
 			'lineBr'=>$this->lineBr,
 			'glue'=>$this->glue,
 			'show_empty'=>$this->show_empty,
+			'message_on_empty'=>$this->message_on_empty,
 			'itemViewPath'=>$this->itemViewPath,
 			'modelClass'=>$this->modelClass,
 			'raw_items'=>$this->raw_items

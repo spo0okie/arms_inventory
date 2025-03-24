@@ -2,6 +2,8 @@
 
 /* @var $this yii\web\View */
 
+use app\components\ExpandableCardWidget;
+
 $renderer=$this;
 return [
 	[
@@ -19,12 +21,16 @@ return [
 		}
 	],
 	[
-		'attribute' => 'arms_ids',
+		'attribute' => 'links',
 		'format' => 'raw',
 		'value' => function ($item) use ($renderer) {
 			$output = '';
 			foreach ($item->arms as $arm)
-				$output .= ' ' . $renderer->render('/techs/item', ['model' => $arm]);
+				$output .= ' ' . $renderer->render('/techs/item', ['model' => $arm,'icon'=>true,'static_view'=>true]);
+			foreach ($item->comps as $comp)
+				$output .= ' ' . $renderer->render('/comps/item', ['model' => $comp,'icon'=>true,'static_view'=>true]);
+			foreach ($item->users as $user)
+				$output .= ' ' . $renderer->render('/users/item', ['model' => $user,'icon'=>true,'static_view'=>true]);
 			return $output;
 		}
 	],
@@ -32,7 +38,7 @@ return [
 		'attribute'=>'comment',
 		'format'=>'raw',
 		'value'=>function($item) {
-			return \app\components\ExpandableCardWidget::widget([
+			return ExpandableCardWidget::widget([
 				'content'=>Yii::$app->formatter->asNtext($item->comment)
 			]);
 		}

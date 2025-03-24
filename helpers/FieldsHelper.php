@@ -308,4 +308,29 @@ class FieldsHelper
 		
 		return empty($model->$attr);
 	}
+	
+	/**
+	 * Добавляет к колонкам класса (те которые для таблицы отображающей список моделей класса)
+	 * колонки класса аттрибута. Например к колонкам АРМа может добавить колонки его пользователя
+	 * тогда можно к АРМу вывести не только имя пользователя, но и отдел, табельник, подразделение
+	 * @param $columns
+	 * @param $field
+	 * @param $fieldColumns
+	 */
+	public static function addFieldColumns($columns,$field,$fieldColumns){
+		foreach ($fieldColumns as $column=>$options) {
+			if (is_numeric($column)) {
+				$columns[]=$field.'.'.$options;
+			} else {
+				$myOptions=[];
+				foreach ($options as $param=>$value) {
+					$myOptions[$param]=is_callable($value)?
+						function($item) use ($value) {return $value($item->object);}:
+						$value;
+				}
+				$columns[$field.'.'.$column]=$myOptions;
+			}
+		}
+		return $columns;
+	}
 }

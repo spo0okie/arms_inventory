@@ -1,9 +1,16 @@
 <?php
 
+use app\helpers\FieldsHelper;
+use app\models\Comps;
+use app\models\Contracts;
+use app\models\LicGroups;
+use app\models\Techs;
+use app\models\Users;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 use kartik\date\DatePicker;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
@@ -26,7 +33,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 <div class="lic-items-form">
 
     <?php $form = ActiveForm::begin([
-	    'action' => $model->isNewRecord?\yii\helpers\Url::to(['lic-items/create']):\yii\helpers\Url::to(['lic-items/update','id'=>$model->id]),
+	    'action' => $model->isNewRecord? Url::to(['lic-items/create']): Url::to(['lic-items/update','id'=>$model->id]),
 	    'enableClientValidation' => false,
 	    'enableAjaxValidation' => true,
 	    'validationUrl' => $model->isNewRecord?['lic-items/validate']:['lic-items/validate','id'=>$model->id],
@@ -38,7 +45,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
     <div class="row">
         <div class="col-md-6" >
             <?= $form->field($model, 'lic_group_id')->widget(Select2::className(), [
-                'data' => \app\models\LicGroups::fetchNames(),
+                'data' => LicGroups::fetchNames(),
                 'options' => ['placeholder' => 'Выберите группу',],
                 'toggleAllSettings'=>['selectLabel'=>null],
                 'pluginOptions' => [
@@ -77,10 +84,10 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
     </div>
 	
 	
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'arms_ids', [
-		'data' => \app\models\Techs::fetchArmNames(),
+	<?= FieldsHelper::Select2Field($form,$model, 'arms_ids', [
+		'data' => Techs::fetchArmNames(),
 		'options' => ['placeholder' => 'Выберите АРМы',],
-		'classicHint'=>\app\models\Contracts::fetchArmsHint($model->contracts_ids,'licitems'),
+		'classicHint'=> Contracts::fetchArmsHint($model->contracts_ids,'licitems'),
 		'classicHintOptions'=>['id'=>'arms_id-hint'],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
@@ -91,8 +98,8 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
 	
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model,  'users_ids', [
-		'data' => \app\models\Users::fetchWorking(),
+	<?= FieldsHelper::Select2Field($form,$model,  'users_ids', [
+		'data' => Users::fetchWorking(),
 		'options' => ['placeholder' => 'Выберите пользователей',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
@@ -103,8 +110,8 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
 	
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'comps_ids', [
-		'data' => \app\models\Comps::fetchNames(),
+	<?= FieldsHelper::Select2Field($form,$model, 'comps_ids', [
+		'data' => Comps::fetchNames(),
 		'options' => ['placeholder' => 'Выберите операционные системы',],
 		'toggleAllSettings'=>['selectLabel'=>null],
 		'pluginOptions' => [
@@ -119,7 +126,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
 
 	<?= $form->field($model, 'contracts_ids')->widget(Select2::className(), [
-		'data' => \app\models\Contracts::fetchNames(),
+		'data' => Contracts::fetchNames(),
 		'options' => [
 			'placeholder' => 'Выберите документы',
 			'onchange' => 'fetchArmsFromDocs();'
@@ -132,8 +139,8 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		]
 	]) ?>
 	
-	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'comment',[
-		'lines' => 4,
+	<?= FieldsHelper::MarkdownField($form,$model,'comment',[
+		'height' => 130,
 	]) ?>
 
 

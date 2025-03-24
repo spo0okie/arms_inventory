@@ -33,6 +33,7 @@ class ListObjectsWidget extends Widget
 	public $lineBr=true;		//переносить строку между элементами
 	public $glue=' ';			//чем разделять элементы
 	public $show_empty=false;	//отображать заголовок если список пуст
+	public $message_on_empty='';//отображать сообщение вместо списка, если он пуст
 	public $itemViewPath;		//путь для рендера элемента
 	public $modelClass;
 	public $raw_items=false;	//не конвертировать текстовые итемы в HTML (уже сконверчены)
@@ -164,6 +165,7 @@ class ListObjectsWidget extends Widget
 		}
 		
 		$content=implode('',$listItems);
+		if (!$content) $content=$this->message_on_empty;
 		
 		
 		if ($this->title) {

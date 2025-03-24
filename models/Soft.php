@@ -94,7 +94,7 @@ class Soft extends ArmsModel
                 'class' => LinkerBehavior::class,
                 'relations' => [
                     'softLists_ids' => 'softLists',
-					'licGroups_ids' => 'licGroups',
+					'lic_groups_ids' => 'licGroups',
 					'comps_ids' => 'comps',
 					'hits_ids' => 'hits',
                 ]
