@@ -32,11 +32,11 @@ DynaGridWidgetAsset::register($this);
 
 $tabs=[];
 
-DynaGridWidget::handleSave('service-children-tree');
+DynaGridWidget::handleSave('services-index');
 $tabs[]=[
 	'id'=>'serviceChildren',
 	'label'=>'Состав сервиса'
-		.'<i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-children-tree-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+		.'<i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#services-index-grid-modal" class="small fas fa-wrench fa-fw"></i>',
 	'content'=>Html::a('Добавить субсервис',[
 		'create','Services'=>['parent_id'=>$model->id]
 	],[
