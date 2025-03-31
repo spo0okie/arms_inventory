@@ -238,7 +238,7 @@ class LicLinks extends ActiveRecord
 				/** @noinspection PhpUndefinedMethodInspection */
 				foreach ($objClass::findLinks($licId,$objId) as $item) {
 					if (!is_null($productId)) {
-						if (array_search($productId,$item->lic->softIds)!==false) {
+						if (array_search($productId,$item->lic->soft_ids)!==false) {
 							$items[]=$item;
 						}
 					} else {
