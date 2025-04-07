@@ -54,7 +54,7 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
 <tr class="hardware_item <?= implode(' ',$classes) ?>" title="<?= $hint ?>" <?= $style ?>>
     <td>
         <?= $item->title ?>
-        <?php if (!is_null($item->manufacturer_id)){ ?>
+        <?php if (!is_null($item->manufacturer_id) && isset($manufacturers[$item->manufacturer_id])){ ?>
             <?= Html::a($manufacturers[$item->manufacturer_id],
                 ['/manufacturers/view','id'=>$item->manufacturer_id],
                 ['title' => 'Перейти к производителю']
