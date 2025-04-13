@@ -37,7 +37,7 @@ use yii\web\View;
  * @property boolean $canBeArchived может иметь статус архивировано
  * @property boolean $isArchived может иметь статус архивировано и он выставлен
  * @property string $external_links Внешние ссылки
- * @property string $historyClass Класс который хранит журнал изменений моделей класса
+ * @property string $historyClass Класс, который хранит журнал изменений моделей класса
  * @property string $controllerPath Путь до контроллера (для URI)
  * @property string $viewsPath Путь до папки Views (для рендера)
  
