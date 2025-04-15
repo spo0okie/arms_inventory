@@ -121,5 +121,20 @@ class SoftController extends ArmsBaseController
 				'items'=>$items,
 			]);
 	}
+	
+	/**
+	 * Updates an existing TechModels model.
+	 * If update is successful, the browser will be redirected to the 'view' page.
+	 * @param int $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	public function actionUploads(int $id)
+	{
+		$model = $this->findModel($id);
+		return $this->render('uploads', [
+			'model' => $model,
+		]);
+	}
     
 }

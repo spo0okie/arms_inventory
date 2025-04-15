@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Places;
+use app\models\Soft;
 use app\models\TechModels;
 use app\models\Techs;
 use Throwable;
@@ -129,6 +130,9 @@ class ScansController extends ArmsBaseController
 			case 'places_id':
 				$model = Places::findOne($link_id);
 				break;
+			case 'soft_id':
+				$model = Soft::findOne($link_id);
+				break;
 			default:
 				$model=null;
 		}
@@ -166,6 +170,7 @@ class ScansController extends ArmsBaseController
 		$model->lic_items_id=null;
 		$model->arms_id=null;
 		$model->techs_id=null;
+		$model->soft_id=null;
         $model->save();
 
         //вместо удаления отвязываем ото всех и сохраняем. Осиротевший скан может понадобиться при работе с журналами

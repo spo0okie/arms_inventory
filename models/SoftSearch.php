@@ -43,7 +43,12 @@ class SoftSearch extends Soft
     public function search(array $params)
     {
         $query = Soft::find()
-			->joinWith(['manufacturer','softLists'/*,'comps','licGroups'*/]);
+			->joinWith(['manufacturer','softLists',])
+			->with(['comps','licGroups','licItems']);
+		
+		$filter = Soft::find()
+			->select('DISTINCT(soft.id)')
+			->joinWith(['manufacturer','softLists','comps','licGroups','licItems']);
 
         // add conditions that should always apply here
 
@@ -79,17 +84,27 @@ class SoftSearch extends Soft
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
+        $filter->andFilterWhere([
             'id' => $this->id,
             'manufacturers_id' => $this->manufacturers_id,
 			//'created_at' => $this->created_at,
 			'soft_in_lists.list_id' => $this->softLists_ids,
         ]);
-
-        $query
+		
+		$filter
 			->andFilterWhere(['or like', 'CONCAT(manufacturers.name,soft.descr)', StringHelper::explode($this->descr,'|',true,true)])
             ->andFilterWhere(['or like', 'comment', StringHelper::explode($this->comment,'|',true,true)])
             ->andFilterWhere(['or like', 'items', StringHelper::explode($this->items,'|',true,true)]);
+		
+		if($filter->where) {
+			$filterSubQuery=$filter
+				->createCommand()
+				->rawSql;
+			
+			//фильтруем запрос данных по этим ID
+			$query
+				->where('soft.id in ('.$filterSubQuery.')');
+		}
 
         return $dataProvider;
     }

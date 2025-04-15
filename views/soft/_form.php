@@ -34,10 +34,16 @@ $model->addItem($model->add_item);
 			]) ?>
 			
 			<?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
+			<?= $form->field($model, 'softLists_ids')->checkboxList(SoftLists::listAll(), ['multiple' => true]) ?>
 
 		</div>
 		<div class="col-md-6">
-			<?= $form->field($model, 'softLists_ids')->dropDownList(SoftLists::listAll(), ['multiple' => true]) ?>
+			<?= FieldsHelper::MarkdownField($form,$model, 'comment',[
+				'height'=>100
+			]) ?>
+			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links',[
+				'lines'=>2
+			]) ?>
 		</div>
 	</div>
 
@@ -72,11 +78,7 @@ $model->addItem($model->add_item);
 		</div>
 	</div>
 
-	<h3>Описание ПО</h3>
 	
-	<?= FieldsHelper::MarkdownField($form,$model, 'comment',[
-		'height'=>150
-	]) ?>
 
 	<div class="form-group">
 		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

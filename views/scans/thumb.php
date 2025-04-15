@@ -11,7 +11,7 @@ use yii\helpers\Html;
 	$model_id=$model->id;
 
 if (!isset($tile_class)) $tile_class='scans-thumb-tile';
-if (!isset($img_class)) $img_class='scans-thumb-img';
+if (!isset($img_class)) $img_class='img-thumbnail';
 
 if (!isset($static_view)) $static_view=false;
 ?>

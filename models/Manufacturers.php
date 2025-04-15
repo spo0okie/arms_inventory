@@ -50,6 +50,12 @@ class Manufacturers extends ArmsModel
     {
         return 'manufacturers';
     }
+	
+	public $linksSchema=[
+		'soft_ids'=>[Soft::class, 'manufacturers_id','loader'=>'soft'],
+		'tech_models_ids'=>[TechModels::class, 'manufacturers_id'],
+		'manufacturers_dicts_ids'=>[ManufacturersDict::class, 'manufacturers_id'],
+	];
 
     /**
      * @inheritdoc
@@ -155,6 +161,9 @@ class Manufacturers extends ArmsModel
 		return $this->hasMany(ManufacturersDict::className(), ['manufacturers_id' => 'id']);
 	}
 	
+	/**
+	 * @return Manufacturers[]
+	 */
 	public static function fetchAll(){
 		if (is_null(static::$all_items)) {
 			$tmp=static::find()->all();

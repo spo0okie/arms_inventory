@@ -1,6 +1,7 @@
 <?php
 
 use app\components\LinkObjectWidget;
+use app\components\UrlListWidget;
 use kartik\markdown\Markdown;
 use yii\helpers\Html;
 
@@ -10,10 +11,14 @@ use yii\helpers\Html;
 if (!isset($static_view)) $static_view=false;
 ?>
 
-
-
 <h1>
-	<?= $this->render('/manufacturers/item',['model'=>$model->manufacturer]) ?>
+	<?= LinkObjectWidget::widget([
+		'model'=>$model->manufacturer,
+		//'name'=>$model->descr,
+		'static'=>true,
+		//'confirm' => 'Удалить этот сервис? Это действие необратимо!',
+		'hideUndeletable'=>false
+	]) ?>
 	<?= LinkObjectWidget::widget([
 		'model'=>$model,
 		'name'=>$model->descr,
@@ -23,35 +28,42 @@ if (!isset($static_view)) $static_view=false;
 	]) ?>
 </h1>
 
-<div class="row>">
-	<div class="col-lg-6 col-md-12">
-		<?php if (isset($hitlist) && ($hitlist!=='null')) { ?>
-			<h4>Список regexp совпадений:</h4>
-			<p>
-				<?= Yii::$app->formatter->asNtext($hitlist) ?>
-			</p>
-			<br />
+<?= Markdown::convert($model->comment) ?>
+<?php if (is_array($model->softLists)&&count($model->softLists)) { ?>
+	<ul>
+		<?php foreach ($model->softLists as $item) { ?>
+			<li><?= Html::a($item->descr,['soft-lists/view','id'=>$item->id]) ?></li>
 		<?php } ?>
+	</ul>
+<?php } else { ?>
+	Отсутствуют
+<?php } ?>
 
-		<h4>Основные компоненты входящие в продукт</h4>
-		<p><?= Yii::$app->formatter->asNtext($model->items) ?></p>
-		<br />
+<?php if ($static_view && is_array($model->scans)&&count($model->scans)) echo $this->render('/scans/thumb',[
+	'model'=>$model->scans[0],
+	'soft_id'=>$model->id,
+	'static_view'=>true
+]); ?>
 
-		<h4>Дополнительные компоненты входящие в продукт</h4>
-		<p><?= Yii::$app->formatter->asNtext($model->additional) ?></p>
-		<br />
+<?php if ($model->links) { ?>
+	<h4>Ссылки:</h4>
+	<p class="mb-4">
+		<?= UrlListWidget::Widget(['list'=>$model->links]) ?>
+	</p>
+<?php } ?>
 
-		<h4>Членство в списках ПО</h4>
-		<p>
-			<?php if (is_array($model->softLists)&&count($model->softLists)) foreach ($model->softLists as $item) { ?>
-				<?= Html::a($item->descr,['soft-lists/view','id'=>$item->id]) ?><br/>
-			
-			<?php } else { ?>
-				Отсутствуют
-			<?php } ?>
-		</p>
-	</div>
-	<div class="col-lg-6 col-md-12">
-		<?= Markdown::convert($model->comment) ?>
-	</div>
-</div>
+<?php if (isset($hitlist) && ($hitlist!=='null')) { ?>
+	<h4>Список regexp совпадений:</h4>
+	<p class="mb-4">
+		<?= Yii::$app->formatter->asNtext($hitlist) ?>
+	</p>
+<?php } ?>
+
+
+<h5>Regexp основных элементов ПО</h5>
+<p class="mb-4"><?= Yii::$app->formatter->asNtext($model->items) ?></p>
+
+<?php if ($model->additional) { ?>
+	<h5>Regexp Дополнительных компонент ПО</h5>
+	<p class="mb-4"><?= Yii::$app->formatter->asNtext($model->additional) ?></p>
+<?php } ?>

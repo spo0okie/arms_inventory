@@ -2,8 +2,8 @@
 
 namespace app\models;
 
+use Adldap\Models\Computer;
 use app\helpers\ArrayHelper;
-use voskobovich\linker\LinkerBehavior;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
@@ -30,7 +30,8 @@ use yii\helpers\StringHelper;
  *
  * @property Soft[] $comps Массив объектов компов, на которые ПО внесено в паспорт
  * @property Soft[] $hits Массив объектов компов, на которые установлено ПО
- * @property LicGroups[] $licGroups
+ * @property-read LicGroups[] $licGroups
+ * @property-read ActiveQuery $licItems
  * @property Manufacturers $manufacturer
  */
 class Soft extends ArmsModel
@@ -53,6 +54,7 @@ class Soft extends ArmsModel
 		'additional',
 		'updated_at',
 		'updated_by',
+		'links',
 	];
 	
 	/** @inheritdoc */
@@ -70,6 +72,14 @@ class Soft extends ArmsModel
 	{
 		return['name'];
 	}
+	
+	public $linksSchema=[
+		'softLists_ids'=>[SoftLists::class, 'soft_ids'],
+		'comps_ids'=>[Computer::class, 'soft_ids'],
+		'hits_ids'=>[Computer::class, 'softHits_ids'],
+		'licGroups_ids'=>[LicGroups::class, 'soft_ids'],
+	];
+	
     /**
      * @inheritdoc
      */
@@ -80,25 +90,10 @@ class Soft extends ArmsModel
             [['manufacturers_id', 'descr'], 'required'],
             [['manufacturers_id'], 'integer'],
             [['items','additional'], 'string'],
-            [['created_at','add_item'], 'safe'],
+            [['created_at','add_item','links'], 'safe'],
             [['descr', 'comment'], 'string', 'max' => 255],
 			[['descr', 'manufacturers_id'], 'unique', 'targetAttribute' => ['descr', 'manufacturers_id']],
             [['manufacturers_id'], 'exist', 'skipOnError' => true, 'targetClass' => Manufacturers::class, 'targetAttribute' => ['manufacturers_id' => 'id']],
-        ];
-    }
-
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => LinkerBehavior::class,
-                'relations' => [
-                    'softLists_ids' => 'softLists',
-					'lic_groups_ids' => 'licGroups',
-					'comps_ids' => 'comps',
-					'hits_ids' => 'hits',
-                ]
-            ]
         ];
     }
 
@@ -107,35 +102,36 @@ class Soft extends ArmsModel
      */
     public function attributeData()
     {
-        return [
+        return ArrayHelper::merge(parent::attributeData(),[
             'id' => 'Идентификатор',
             'manufacturers_id' => 'Разработчик',
             'descr' => 'Наименование',
-            'comment' => 'Комментарий',
+            'comment' => 'Описание ПО',
             'items' => 'Основные элементы входящие в пакет ПО',
             'additional' => 'Дополнительные элементы входящие в пакет ПО',
 	        'softLists_ids' => 'В списках ПО',
 	        'created_at' => 'Дата добавления',
 			'hitsCount'=>[
-				'Уст.',
+				'Обнаружено',
 				'indexHint'=>'Количество обнаруженных установок продукта',
 			],
 			'compsCount'=>[
-				'Пасп.',
+				'Паспортов',
 				'indexHint'=>'Количество внесений продукта в паспорта АРМ'
 			],
-        ];
+			'licGroupsCount'=>[
+				'Типов лицензий',
+				'indexHint'=>'Количество типов лицензий, включающих данное ПО',
+			],
+			'licCount'=>[
+				'Лицензий',
+				'indexHint'=>'Количество лицензий, включающих данное ПО'
+			],
+        ]);
     }
-
-	public function reverseLinks()
-	{
-		return [
-			'ПО закреплено в паспортах ОС'=>$this->comps,
-			$this->licGroups,
-		];
-	}
 	
 	/**
+	 * Типы лицензий включающие данное ПО
 	 * @return ActiveQuery
 	 * @throws InvalidConfigException
 	 */
@@ -144,6 +140,34 @@ class Soft extends ArmsModel
 		return $this->hasMany(LicGroups::class, ['id' => 'lics_id'])
 			->viaTable('{{%soft_in_lics}}', ['soft_id' => 'id']);
     }
+	
+	/**
+	 * Количество типов лицензий включающих данное ПО
+	 * @return int
+	 */
+	public function getLicGroupsCount() {return count($this->licGroups);}
+	
+	/**
+	 * Закупки лицензий этого ПО
+	 * @return ActiveQuery
+	 */
+	public function getLicItems()
+	{
+		return $this->hasMany(LicItems::class, ['lic_group_id' => 'id'])
+			->via('licGroups');
+	}
+	
+	/**
+	 * Количество лицензий данного ПО
+	 * @return integer
+	 */
+	public function getLicCount() {
+    	$count = 0;
+    	foreach ($this->licItems as $item) {
+        	$count += $item->count;
+    	}
+    	return $count;
+	}
 
     /**
      * @return ActiveQuery
@@ -186,6 +210,8 @@ class Soft extends ArmsModel
 		}
 		return count($this->comps);
 	}
+	
+	
 	/**
 	 * Возвращает набор компов, в которых находится ПО
 	 */
@@ -198,11 +224,24 @@ class Soft extends ArmsModel
 		return $this->hasMany(Comps::class, ['id' => 'comp_id'])
 			->viaTable('{{%soft_hits}}', ['soft_id' => 'id']);
 	}
+	
 	public function getHitsCount() {return count($this->hits);}
 	
 	public function getName()
 	{
 		return	is_object($this->manufacturer)?$this->manufacturer->name.' '.$this->descr:$this->descr;
+	}
+	
+	/**
+	 * Возвращает набор сканов в договоре
+	 */
+	public function getScans()
+	{
+		$scans=Scans::find()->where(['soft_id' => $this->id ])->all();
+		$scans_sorted=[];
+		foreach ($scans as $scan) if($scan->id == $this->scans_id) $scans_sorted[]=$scan;
+		foreach ($scans as $scan) if($scan->id != $this->scans_id) $scans_sorted[]=$scan;
+		return $scans_sorted;
 	}
 	
 	/**

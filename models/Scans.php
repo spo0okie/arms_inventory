@@ -78,7 +78,17 @@ class Scans extends ArmsModel
     {
         return [
 			//[['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id','arms_id','techs_id'], 'default', 'value'=>null],
-			[['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id','arms_id','techs_id'], 'integer'],
+			[[
+				'contracts_id',
+				'places_id',
+				'tech_models_id',
+				'material_models_id',
+				'lic_types_id',
+				'lic_items_id',
+				'arms_id',
+				'techs_id',
+				'soft_id',
+			], 'integer'],
 	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'on' => 'create'],
         ];
     }
@@ -234,7 +244,9 @@ class Scans extends ArmsModel
 		$bytes=$this->fileSize;
 		$sz = 'BKMGTP';
 		$factor = floor((strlen($bytes) - 1) / 3);
-		return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];	}
+		/** @noinspection PhpIllegalStringOffsetInspection */
+		return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+	}
 	
 	/**
 	 * Возвращает разрешение превью файла

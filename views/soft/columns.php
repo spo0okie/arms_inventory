@@ -20,6 +20,7 @@ return [
 		}
 	],
 	'comment',
-	//'hitsCount',
-	//'compsCount',
+	'hitsCount',
+	'compsCount',
+	'licGroupsCount',
 ];

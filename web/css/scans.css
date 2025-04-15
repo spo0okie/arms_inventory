@@ -14,7 +14,7 @@ div.scans-thumb-tiles{
 /* плитка */
 div.scans-thumb-tile{
     display: inline-block;
-    width: 164px;
+    /*width: 164px;*/
     height: 164px;
     min-height: 164px;
     margin: 8px;
@@ -25,13 +25,13 @@ div.scans-thumb-tile{
 /* картинка в плитке */
 div.scans-thumb-img{
     display: inline-block;
-    width: 162px;
+    /*width: 162px;*/
     min-height: 162px;
     height: 162px;
     text-align: center;
     /*border: lightgrey solid 1px;
-    border-radius: 3px;*/
-    position: relative;
+    border-radius: 3px;
+    position: relative;*/
 }
 div.scans-thumb-img > span.upload-scan {
     font-size:24px;

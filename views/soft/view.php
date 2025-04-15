@@ -1,6 +1,9 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\components\HistoryWidget;
+use app\components\TabsWidget;
+use app\models\LicGroups;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -21,40 +24,60 @@ foreach ($licProvider->models as $lic) {
 }
 
 $nonAgreedClass=($model->isFree||$model->isIgnored)?'':'table-warning';
-?>
-<div class="row">
-	<div class="col-md-6">
-		<?= $this->render('card',['model'=>$model]) ?>
-	</div>
-	<div class="col-md-6">
-		<h4>Совместимые лицензии</h4>
-		<?= DynaGridWidget::widget([
-			'id' => 'soft-lic-groups-list',
-			'columns' => include $_SERVER['DOCUMENT_ROOT'].'/views/lic-groups/columns.php',
-			//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
-			'dataProvider' => $licProvider,
-			'panel'=>false
-		]) ?>
-		<?= count($licProvider->models)?('<span class="h5">Итого активных лицензий: '.$keysCount.'</span>'):'' ?>
-	</div>
-</div>
+$scans='';
+foreach ($model->scans??[] as $scan) $scans.= $this->render('/scans/thumb',[
+	'model'=>$scan,
+	'soft_id'=>$model->id,
+	'static_view'=>true
+]);
 
-<?= DynaGridWidget::widget([
-	'header'=>'Установки',
-	'id' => 'soft-comps-list',
-	'columns' => array_merge(include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php', [
-		'softAgreed'=>[
-			'header'=>'В паспорте',
-			'value'=>function($comp) use ($model) {
-				return array_search($model->id,$comp->soft_ids)?'да':'нет';
-			},
-			'contentOptions'=>function($comp) use ($model,$nonAgreedClass) {
-				return ['class'=>array_search($model->id,$comp->soft_ids)?'table-success':$nonAgreedClass];
-			},
-		]
+$this->params['headerContent']=$this->render('header',['model'=>$model]);
+
+$badge='<span class="badge rounded-pill p-1 m-1 bg-secondary opacity-25">';
+
+$tabs=[];
+$tabs[]=[
+	'id'=>'hits',
+	'label'=>'Обнаружения '.$badge.count($model->hits).'</span>',
+	'content'=>DynaGridWidget::widget([
+		'header'=>'Установки',
+		'id' => 'soft-comps-list',
+		'columns' => array_merge(include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php', [
+			'softAgreed'=>[
+				'header'=>'В паспорте',
+				'value'=>function($comp) use ($model) {
+					return array_search($model->id,$comp->soft_ids)?'да':'нет';
+				},
+				'contentOptions'=>function($comp) use ($model,$nonAgreedClass) {
+					return ['class'=>array_search($model->id,$comp->soft_ids)?'table-success':$nonAgreedClass];
+				},
+			]
+		]),
+		'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version','softAgreed'],
+		'dataProvider' => $dataProvider,
+		'filterModel' => $searchModel,
+		//'panel'=>true
 	]),
-	'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version','softAgreed'],
-	'dataProvider' => $dataProvider,
-	'filterModel' => $searchModel,
-	//'panel'=>true
-]) ?>
+];
+
+$tabs[]=[
+	'id'=>'licGroups',
+	'label'=>'Совместимые лицензии '.$badge.count($model->licGroups).'</span>',
+	'content'=>DynaGridWidget::widget([
+		'id' => 'soft-lic-groups-list',
+		'header'=>'Типы лицензий',
+		'columns' => include $_SERVER['DOCUMENT_ROOT'].'/views/lic-groups/columns.php',
+		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
+		'dataProvider' => $licProvider,
+		'createButton'=>count($licProvider->models)?('Активных лицензий: '.$keysCount):'',
+		'model'=>new LicGroups(),
+	]),
+];
+
+TabsWidget::addWikiLinks($tabs,$model->links);	//добавляем из вики
+
+$this->params['navTabs']=$tabs;
+$this->params['tabsParams']=[
+	'cookieName'=>'soft-view-tab-'.$model->id,
+];
+
