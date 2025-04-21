@@ -358,7 +358,9 @@ class Comps extends ArmsModel
 			],
 			'vm_uuid' => [
 				'VMWare UUID',
-				'indexHint' => 'UUID виртуальной машины в VMWare<br/>'.QueryHelper::$stringSearchHint,
+				'indexHint' => 'UUID виртуальной машины в VMWare'//.QueryHelper::$stringSearchHint,
+				//Поисковые запросы по этому полю не поддерживаются, т.к. оно не выделено в отдельный столбец,
+				//а является частью поля 'external_links' компа.
 			]
 
 		]);
