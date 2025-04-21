@@ -16,6 +16,7 @@ class CompsSearch extends Comps
 	public $services_ids;
 	public $linkedSoft_ids;
 	public $ids;
+	public $vm_uuid;
 
     /**
      * @inheritdoc
@@ -25,7 +26,23 @@ class CompsSearch extends Comps
         return [
 			[['ids'],'each','rule'=>['integer']],
             [['id', 'domain_id','soft_ids','linkedSoft_ids','softHits_ids'], 'integer'],
-            [['name', 'os', 'raw_hw', 'raw_soft', 'raw_version', 'comment', 'updated_at', 'arm_id','ip','mac','places_id','archived','services_ids','ignore_hw'], 'safe'],
+            [[
+				'name',
+				'os',
+				'raw_hw',
+				'raw_soft',
+				'raw_version',
+				'comment',
+				'updated_at',
+				'arm_id',
+				'ip',
+				'mac',
+				'places_id',
+				'archived',
+				'services_ids',
+				'ignore_hw',
+				'vm_uuid'
+			], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
 				$macs=explode("\n",$value);
 				foreach ($macs as $i=>$mac) {
@@ -141,6 +158,7 @@ class CompsSearch extends Comps
 				$this->arm_id
 			))
 			->andFilterWhere(QueryHelper::querySearchString('comment', $this->comment))
+			->andFilterWhere(QueryHelper::querySearchString('comps.external_links', $this->vm_uuid))
 			/*->andFilterWhere(['or',
 				QueryHelper::querySearchString('services.name', $this->services_ids),
 				QueryHelper::querySearchString('services.search_text',$this->services_ids),

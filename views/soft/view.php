@@ -2,6 +2,7 @@
 
 use app\components\DynaGridWidget;
 use app\components\HistoryWidget;
+use app\components\ModelFieldWidget;
 use app\components\TabsWidget;
 use app\models\LicGroups;
 use yii\helpers\Html;
@@ -39,7 +40,11 @@ $tabs=[];
 $tabs[]=[
 	'id'=>'hits',
 	'label'=>'Обнаружения '.$badge.count($model->hits).'</span>',
-	'content'=>DynaGridWidget::widget([
+	'content'=> (
+			count($model->compRescans)?
+				(\app\components\StripedAlertWidget::widget(['title'=>'Данные устарели, ожидается фоновое сканирование '.count($model->compRescans).' компьютеров']))
+			:'')
+		.DynaGridWidget::widget([
 		'header'=>'Установки',
 		'id' => 'soft-comps-list',
 		'columns' => array_merge(include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php', [

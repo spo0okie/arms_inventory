@@ -355,6 +355,10 @@ class Comps extends ArmsModel
 			],
 			'softRescans'=>[
 				'Ожидается сканирование ПО'
+			],
+			'vm_uuid' => [
+				'VMWare UUID',
+				'indexHint' => 'UUID виртуальной машины в VMWare<br/>'.QueryHelper::$stringSearchHint,
 			]
 
 		]);

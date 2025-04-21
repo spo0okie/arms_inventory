@@ -33,6 +33,7 @@ use yii\helpers\StringHelper;
  * @property-read LicGroups[] $licGroups
  * @property-read ActiveQuery $licItems
  * @property Manufacturers $manufacturer
+ * @property CompsRescanQueue $compRescans
  */
 class Soft extends ArmsModel
 {
@@ -176,7 +177,12 @@ class Soft extends ArmsModel
     {
         return $this->hasOne(Manufacturers::class, ['id' => 'manufacturers_id']);
     }
-
+	
+	
+	public function getCompRescans() {
+		return $this->hasmany(CompsRescanQueue::class, ['soft_id' => 'id']);
+	}
+	
     /**
      * @return string
      */

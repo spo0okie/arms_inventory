@@ -1,6 +1,6 @@
 <?php
 
-use kartik\grid\GridView;
+use app\components\DynaGridWidget;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -17,7 +17,7 @@ $renderer=$this;
 
     <?= $this->render('card',['model'=>$model]) ?>
 
-	<?= \app\components\DynaGridWidget::widget([
+	<?= DynaGridWidget::widget([
 		'id'=>'list-soft-index',
 		'header'=>$this->title,
 		'createButton'=>Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),

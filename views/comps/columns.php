@@ -144,5 +144,8 @@ return [
 		'class' => '\kartik\grid\BooleanColumn',
 		'trueLabel' => 'Y',
 		'falseLabel' => 'N',
+	],
+	'vm_uuid'=>[
+		'value'=>function ($data) {return $data->getExternalItem(['VMWare.UUID']);},
 	]
 ];
