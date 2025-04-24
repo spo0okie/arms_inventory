@@ -5,7 +5,6 @@
 
 use app\components\GridColumns\ExpandableCardColumn;
 use kartik\markdown\Markdown;
-use app\components\ExpandableCardWidget;
 use app\models\Schedules;
 
 if(!isset($static_view))$static_view=false;
