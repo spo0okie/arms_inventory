@@ -12,6 +12,8 @@ class ExpandableCardWidget extends Widget
 	public $initialExpand=false;
 	public $maxHeight='150';
 	public $cardClass='';
+	public $outerTag='div';
+	public $innerTag='div';
 	public $switchOnlyOnButton=false;
 	
 	private $currentClass=null;
@@ -26,9 +28,17 @@ class ExpandableCardWidget extends Widget
 	
 	public function run()
 	{
-		return '<div class="expandable-card-outer '.$this->currentClass.' '.$this->cardClass.'" data-expandable-max-height="'.$this->maxHeight.'">'.
-			'<div class="expandable-card-content">'.$this->content.'</div>'.
-			'</div>';
+		return Html::tag(
+			$this->outerTag,
+			Html::tag(
+				$this->innerTag,
+				$this->content,
+				['class'=>'expandable-card-content']
+			),[
+				'class'=>'expandable-card-outer '.$this->currentClass.' '.$this->cardClass,
+				'data-expandable-max-height'=>$this->maxHeight
+			]
+		);
 	}
 	
 }
