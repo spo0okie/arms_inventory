@@ -3,7 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-use app\components\GridColumns\ExpandableCardColumn;
+use app\components\gridColumns\ExpandableCardColumn;
 use kartik\markdown\Markdown;
 use app\models\Schedules;
 

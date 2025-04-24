@@ -1,17 +1,14 @@
 <?php
 
-namespace app\components\GridColumns;
+namespace app\components\gridColumns;
 
 use app\components\ExpandableCardWidget;
 use app\helpers\ArrayHelper;
 use Closure;
 use kartik\grid\DataColumn;
-use yii\helpers\Html;
 
 class ExpandableCardColumn extends DataColumn
 {
-
-	
 	
 	public function renderDataCell($model, $key, $index)
 	{
