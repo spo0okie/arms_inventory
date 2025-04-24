@@ -3,6 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
+use app\components\GridColumns\ExpandableCardColumn;
 use kartik\markdown\Markdown;
 use app\components\ExpandableCardWidget;
 use app\models\Schedules;
@@ -17,6 +18,7 @@ return [
 		},
 	],
 	'description'=>[
+		'class'=>ExpandableCardColumn::class,
 		'value'=>function($data) use ($renderer){
 			return Markdown::convert($data->description,[]);
 		},
@@ -37,6 +39,7 @@ return [
 		},
 	],
 	'objects'=>[
+		'class'=>ExpandableCardColumn::class,
 		'value'=>function($data) use ($renderer){
 			$output=[];
 			foreach ($data->comps as $comp) {
@@ -49,9 +52,7 @@ return [
 				$output[$service->name]=$renderer->render('/services/item',['model'=>$service,'static_view'=>false]);
 			}
 			ksort($output);
-			return ExpandableCardWidget::widget([
-				'content'=>implode('<br />',$output)
-			]);
+			return implode('<br />',$output);
 		},
 	],
 ];
