@@ -8,7 +8,7 @@ use yii\helpers\Inflector;
 class StringHelper extends BaseStringHelper {
 	
 	/**
-	 * Возвращает короткое имя класса без неймспейса
+	 * Возвращает короткое имя класса без namespace
 	 * @param $classPath
 	 * @return mixed|string
 	 */
@@ -26,14 +26,14 @@ class StringHelper extends BaseStringHelper {
 		return Inflector::camel2id(static::className($class));
 	}
 	
-	//признак что это слово исключение в множественном числе
+	//признак, что это слово исключение в множественном числе
 	public static function pluralSpecial($word) {
 		if (array_search(strtolower($word),array_values(Inflector::$specials))!==false)
 			return true;
 		return false;
 	}
 	
-	//тоже что что и в инфлекторе, но проверяет что это не множественное слово-исключение
+	//тоже что и в inflector, но проверяет что это не множественное слово-исключение
 	public static function pluralize($word) {
 		if (static::pluralSpecial($word)) return $word;
 		return Inflector::pluralize($word);
