@@ -192,7 +192,7 @@ trait AttributeLinksModelTrait
 	 * @return string
 	 */
 	public function attributeLinkClass(string $attr) {
-		return $this->attributeLinkSchema($attr)[0];	//первым элементом всегда идет класс
+		return $this->attributeLinkSchema($attr)[0]??null;	//первым элементом всегда идет класс
 	}
 	
 	/**
