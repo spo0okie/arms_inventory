@@ -44,7 +44,7 @@ class ArmsBaseController extends Controller
 			'editable'=>[
 				'class' => EditableColumnAction::class,		// action class name
 				'modelClass' => $this->modelClass,			// the update model class
-			]
+			],
 		]);
 	}
 	
@@ -144,11 +144,9 @@ class ArmsBaseController extends Controller
 			'class' => AccessControl::class,
 			'rules' => $rules,
 			'denyCallback' => function ($rule, $action) {
-				//$user=is_object(\Yii::$app->user->identity)?\Yii::$app->user->identity->Login:'anon';
-				//error_log("{$action->id} denied for user $user");
-				//if (Yii::$app->request->isAjax) return $this->defaultReturn('site/error',[]);
+
 				throw new  ForbiddenHttpException('Access denied');
-			}
+			},
 		];
 	}
 	
@@ -166,12 +164,7 @@ class ArmsBaseController extends Controller
 			],
 			'authenticator' => [
 				'class' => HttpBasicAuth::class,
-				'optional'=> /*(
-					Yii::$app->user->isGuest &&	(
-						!empty(Yii::$app->params['authorizedView']) ||
-						!empty(Yii::$app->params['useRBAC'])
-					)
-				)?[]:*/['*'],
+				'optional'=> ['*'],
 				'auth' => function ($login, $password) {
 					/** @var $user Users */
 					$user = Users::find()->where(['Login' => $login])->one();
@@ -280,7 +273,7 @@ class ArmsBaseController extends Controller
 	{
 		return $this->renderPartial('item', [
 			'model' => $this->findModel($id),
-			'static_view'=>true
+			'static_view'=>true,
 		]);
 	}
 	
@@ -288,7 +281,7 @@ class ArmsBaseController extends Controller
 	{
 		return $this->renderPartial('item', [
 			'model' => $this->findByName($name),
-			'static_view'=>true
+			'static_view'=>true,
 		]);
 	}
 	
@@ -354,7 +347,7 @@ class ArmsBaseController extends Controller
     public function routeOnUpdate($model) {
     	return [
     		Yii::$app->request->get('accept')?'update':'view',
-			'id'=>$model->id
+			'id'=>$model->id,
 		];
 	}
 	
@@ -409,7 +402,7 @@ class ArmsBaseController extends Controller
         		return $model;
 			}
 			return $this->defaultReturn($this->routeOnUpdate($model),[
-				$model
+				$model,
 			]);
         }
 
@@ -442,6 +435,38 @@ class ArmsBaseController extends Controller
     }
 	
 	/**
+	 * Возвращает класс модели по имени
+	 * @param $class
+	 * @return string
+	 * @throws NotFoundHttpException
+	 *
+	 */
+	public static function findClass($class)
+	{
+		if (!str_contains($class,'\\')) {
+			$class="app\\models\\$class";
+		}
+		
+		if (!class_exists($class)) {
+			throw new NotFoundHttpException("Class $class not found");
+		}
+		
+		return $class;
+	}
+	
+	public static function findClassModel($class,$id)
+	{
+		$class=static::findClass($class);
+
+		/** @var $class ArmsModel */
+		if (($model = ($class)::findOne($id)) !== null) {
+			return $model;
+		}
+		
+		throw new NotFoundHttpException("$class [$id] does not exist.");
+	}
+	
+	/**
 	 * Finds the Arms model based on its primary key value.
 	 * If the model is not found, a 404 HTTP exception will be thrown.
 	 * @param int $id
@@ -450,11 +475,7 @@ class ArmsBaseController extends Controller
 	 */
 	protected function findModel(int $id)
 	{
-		if (($model = ($this->modelClass)::findOne($id)) !== null) {
-			return $model;
-		}
-		
-		throw new NotFoundHttpException('The requested object does not exist.');
+		return static::findClassModel($this->modelClass,$id);
 	}
 	
 	protected function findByName(string $name)
