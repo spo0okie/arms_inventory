@@ -9,6 +9,7 @@
 namespace app\components;
 
 use app\assets\DokuWikiAsset;
+use app\helpers\WikiHelper;
 use Yii;
 use yii\base\Widget;
 
@@ -23,29 +24,7 @@ class WikiPageWidget extends Widget
 	public $item=null; //какой найденный в списке ссылок урл выводить (если несколько ссылок на вики)
 	public static $hint='Список ссылок (по одной в строке) с описанием. Последнее слово в строке - ссылка, все остальные - описание. Пример: "описание сервиса https://wiki.domain.local/services:inventory".';
 	
-	private static $confluencePage='/pages/viewpage.action?pageId=';
-	
-	public static function urlIsWiki($url) {
-		return (!empty(Yii::$app->params['wikiUrl'])
-			&&
-			!empty(Yii::$app->params['wikiUser'])
-			&&
-			!empty(Yii::$app->params['wikiPass'])
-			&&
-			strpos($url, Yii::$app->params['wikiUrl']) === 0
-		);
-	}
-	
-	public static function urlIsConfluence($url) {
-		return (!empty(Yii::$app->params['confluenceUrl'])
-			&&
-			!empty(Yii::$app->params['confluenceUser'])
-			&&
-			!empty(Yii::$app->params['confluencePass'])
-			&&
-			strpos($url, Yii::$app->params['confluenceUrl'].static::$confluencePage) === 0
-		);
-	}
+
 	
 	/**
 	 * Из списка ссылок вытаскивает только те, которые ведут на вики в формате
@@ -65,10 +44,10 @@ class WikiPageWidget extends Widget
 			$name=$link['descr'];
 			
 			//если это доку или конфлю, добавляем ее в вывод
-			if (static::urlIsWiki($url)) {
+			if (WikiHelper::urlIsWiki($url)) {
 				//попытаемся вытащить имя из URL
 				$links[$name]=$url;
-			} elseif (static::urlIsConfluence($url)) {
+			} elseif (WikiHelper::urlIsConfluence($url)) {
 				$links[$name]=$url;
 			}
 		}
@@ -86,23 +65,34 @@ class WikiPageWidget extends Widget
 		$id='wikiPage'.static::$counter++;
 			
 		//DokuWiki
-		if (static::urlIsWiki($url)) {
-			//$cache = Yii::$app->cache;
+		if (WikiHelper::urlIsWiki($url)) {
+
 			$pageName=substr($url,strlen(Yii::$app->params['wikiUrl']));
 			DokuWikiAsset::register($this->view);
 
-			return '<div id="'.$id.'" class="dokuwiki"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>'.
-				'<script>$.get("'.'/web/site/wiki?pageName='.$pageName.'", function(data) {$("#'.$id.'").html(data);})</script>';
+			return '<div id="'.$id.'" class="dokuwiki">
+				<div class="spinner-border" role="status">
+					<span class="visually-hidden">Loading...</span>
+				</div>
+			</div>
+			<script>
+				$.get(
+                    "/web/wiki/page?pageName='.$pageName.'",
+                    function(data) {
+                    	$("#'.$id.'").html(data);
+                    	'.(DokuWikiAsset::$dokuWikiInit).'
+                    })
+			</script>';
 			
 		}
 		
 		//Confluence
-		if (static::urlIsConfluence($url)) {
-			//$cache = Yii::$app->cache;
-			$pageName=substr($url,strlen(Yii::$app->params['confluenceUrl'].static::$confluencePage));
+		if (WikiHelper::urlIsConfluence($url)) {
+
+			$pageName=substr($url,strlen(Yii::$app->params['confluenceUrl'].WikiHelper::$confluencePage));
 			
 			return '<div id="'.$id.'"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>'.
-				'<script>$.get("'.'/web/site/wiki?api=confluence&pageName='.$pageName.'", function(data) {$("#'.$id.'").html(data);})</script>';
+				'<script>$.get("/web/wiki/page?api=confluence&pageName='.$pageName.'", function(data) {$("#'.$id.'").html(data);})</script>';
 			
 		}
 		

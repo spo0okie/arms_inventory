@@ -1,0 +1,3 @@
+function dokuWikiInit() {
+    foldedInit();
+}

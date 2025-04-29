@@ -28,7 +28,7 @@ span.indicator {
     background-position: right -45px;
 }
 
-/* below style rules are created by javascript
+/* below style rules are created by javascript */
 .folded.hidden { display: none; }
 .folder span.indicator { visibility: visible; }
-*/
+

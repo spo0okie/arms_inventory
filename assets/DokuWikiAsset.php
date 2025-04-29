@@ -18,6 +18,15 @@ use yii\web\View;
  */
 class DokuWikiAsset extends AssetBundle
 {
+	/**
+	 * @var string Функция инициализации DokuWiki JS
+	 */
+	public static $dokuWikiInit='dokuWikiInit();';
+	/**
+	 * @var string Inline код вызова инициализации DokuWiki JS
+	 */
+	public static $dokuWikiInitInline='<script type="text/javascript">dokuWikiInit()</script>';
+
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
@@ -30,7 +39,11 @@ class DokuWikiAsset extends AssetBundle
     ];
     public $js = [
 		'js/doku/folded.js',
+		'js/doku/init.js',
     ];
 	public $cssOptions = [];
-	public $jsOptions = [View::POS_END];
+	public $jsOptions = [View::POS_BEGIN];
+	public $publishOptions = [
+		'forceCopy' => YII_DEBUG,
+	];
 }

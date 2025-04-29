@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\WikiHelper;
 use app\models\ui\PasswordForm;
 use app\models\Users;
 use Yii;
@@ -70,111 +71,23 @@ class SiteController extends Controller
 	/**
 	 * Displays homepage.
 	 *
-	 * @param        $pageName
+	 * @param string $pageName
 	 * @param string $api
 	 * @return string
 	 */
-	public function actionWiki($pageName,$api='doku')
+	public function actionWiki($pageName,$api=WikiHelper::DOKUWIKI)
 	{
 		$wikiUrl='';
 		$page=[];
-		if ($api=='doku') {
-			$wikiUrl= Yii::$app->params['wikiUrl'];
-			/** @noinspection PhpComposerExtensionStubsInspection */
-			$arrContextOptions = [
-				"http" => [
-					"header" => "Authorization: Basic " . base64_encode(Yii::$app->params['wikiUser'] . ":" . Yii::$app->params['wikiPass']),
-					'method' => 'POST',
-					'content' => xmlrpc_encode_request(
-						'wiki.getPageHTML',
-						urldecode($pageName),
-						['encoding'=>'utf-8','escaping'=>[]]
-					),
-				],"ssl" => ["verify_peer" => false,"verify_peer_name" => false,],
-			];
-			$page = @file_get_contents($wikiUrl.'lib/exe/xmlrpc.php',
-				false,
-				stream_context_create($arrContextOptions)
-			);
-			if ($page===false) return "Ошибка получения детального описания из Wiki";
-			/** @noinspection PhpComposerExtensionStubsInspection */
-			$page=xmlrpc_decode($page,'utf-8');
-		}
+		if ($api=='doku')
+			$page=WikiHelper::fetchXmlRpc('wiki.getPageHTML',urldecode($pageName));
 		
-		if ($api=='confluence') {
-			$wikiUrl= Yii::$app->params['confluenceUrl'];
-			$arrContextOptions = [
-				"http" => [
-					"header" => "Authorization: Basic " . base64_encode(Yii::$app->params['confluenceUser'] . ":" . Yii::$app->params['confluencePass']),
-				],"ssl" => ["verify_peer" => false,	"verify_peer_name" => false,],
-			];
-			$page = @file_get_contents($wikiUrl.'/rest/api/content/'.$pageName.'?expand=body.storage',
-				false,
-				stream_context_create($arrContextOptions)
-			);
-			if ($page===false) return "Ошибка получения детального описания из Wiki";
-			
-			$page=json_decode($page);
-			if (
-				!is_object($page)
-				||
-				!property_exists($page,'body')
-				||
-				!property_exists($page->body,'storage')
-				||
-				!property_exists($page->body->storage,'value')
-			) return "Ошибка расшифровки JSON детального описания из Wiki";
-			$page=$page->body->storage->value;
-		}
+		if ($api=='confluence')
+			$page = WikiHelper::fetchConfluence($pageName);
+
+		if ($page===false) return "Ошибка получения детального описания из Wiki";
 		
-		if (is_array($page)) return print_r($page,true);
-		
-		$page = str_replace('href="/', 'href="' . $wikiUrl , $page);
-		$page = str_replace('href=\'/','href=\'' . $wikiUrl , $page);
-		$page = str_replace('src="/',  'src="' . $wikiUrl , $page);
-		$page = str_replace('src=\'/', 'src=\'' . $wikiUrl , $page);
-		$page = preg_replace_callback('|qtip_ajxhrf="/lib/exe/ajax.php\?call=inventory&action=ttip&data=([^"]+)"|',
-			function($matches) {
-				//return "replace";
-				return 'qtip_ajxhrf="/web'.urldecode($matches[1]).'"';
-			}, $page);
-		
-		$folded_code=<<<JS
-jQuery(function() {
-    // containers for localised reveal/hide strings,
-    // populated from the content set by the action plugin
-    jQuery('a.folder[href*="#folded_"]').attr('title', folded_reveal);
-
-    /*
-     * toggle the folded element via className change also adjust the classname and
-     * title tooltip on the folding link
-     */
-    jQuery('.dokuwiki .folder').click(function folded_toggle(evt) {
-        let id = this.href.match(/#(.*)$/)[1];
-        let \$id = jQuery(document.getElementById(id));
-
-        if (\$id.hasClass('hidden')) {
-            \$id.addClass('open').removeClass('hidden');
-            jQuery(this)
-                .addClass('open')
-                .attr('title', folded_hide);
-        } else {
-            \$id.addClass('hidden').removeClass('open');
-            jQuery(this)
-                .removeClass('open')
-                .attr('title', folded_reveal);
-        }
-
-        evt.preventDefault();
-        return false;
-    });
-});
-
-JS;
-
-		return $page
-			.'<style type="text/css" media="screen">.folded.hidden { display: none; } .folder .indicator { visibility: visible; } </style>'
-			.'<script>'.$folded_code.'</script>';
+		return WikiHelper::parseWikiHtml($page, WikiHelper::wikiUrl($api));
 	}
 	
 	/**

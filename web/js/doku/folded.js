@@ -16,10 +16,9 @@ const folded_hidelong	= 'скрыть содержимое';
 /*
  * run on document load, setup everything we need
  */
-jQuery(function() {
+function foldedInit() {
     // containers for localised reveal/hide strings,
     // populated from the content set by the action plugin
-
     jQuery('a.folder[href*="#folded_"]').attr('title', folded_reveal);
 
     /*
@@ -27,8 +26,8 @@ jQuery(function() {
      * title tooltip on the folding link
      */
     jQuery('.dokuwiki .folder').click(function folded_toggle(evt) {
-        var id = this.href.match(/#(.*)$/)[1];
-        var $id = jQuery(document.getElementById(id));
+        let id = this.href.match(/#(.*)$/)[1];
+        let $id = jQuery(document.getElementById(id));
 
         if ($id.hasClass('hidden')) {
             $id.addClass('open').removeClass('hidden');
@@ -45,7 +44,7 @@ jQuery(function() {
         evt.preventDefault();
         return false;
     });
-});
+}
 
 function fold_unfold_all() {
     var i;
@@ -88,7 +87,7 @@ function fold_unfold_all() {
 // support graceful js degradation, this hides the folded blocks from view
 // before they are shown,
 // whilst still allowing non-js user to see any folded content.
-document.write('<style type="text/css" media="screen"><!--/*--><![CDATA[/*><!--*/ .folded.hidden { display: none; } .folder .indicator { visibility: visible; } /*]]>*/--></style>');
+//document.write('<style type="text/css" media="screen"><!--/*--><![CDATA[/*><!--*/ .folded.hidden { display: none; } .folder .indicator { visibility: visible; } /*]]>*/--></style>');
 
 
 
