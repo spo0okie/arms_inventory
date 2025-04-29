@@ -250,11 +250,15 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 	 * @param array  $objArray
 	 * @param string $field
 	 * @param null   $default
+	 * @param bool   $skipMissing пропускать элементы, у которых поле $field не задано
 	 * @return array
 	 */
-	public static function getArrayField(array $objArray, string $field, $default=null) {
+	public static function getArrayField(array $objArray, string $field, $default=null, $skipMissing=false) {
 		$result=[];
-		foreach ($objArray as $obj) $result[]=static::getField($obj,$field,$default);
+		foreach ($objArray as $obj) {
+			$value=static::getField($obj,$field,$default);
+			if ($value!==$default || !$skipMissing) $result[]=$value;
+		}
 		return $result;
 	}
 	
