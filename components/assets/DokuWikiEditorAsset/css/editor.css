@@ -1,0 +1,21 @@
+.dokuwiki-editor {
+    margin-bottom: 15px;
+}
+
+.dokuwiki-toolbar {
+    margin-bottom: 5px;
+}
+
+.dokuwiki-toolbar button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.dokuwiki-textarea {
+    width: 100%;
+    min-height: 200px;
+    font-family: monospace;
+}
