@@ -61,41 +61,6 @@ class MaintenanceReqs extends ArmsModel
 		'included_ids'=>[MaintenanceReqs::class,'includes_ids','loader'=>'includedBy'],
 	];
 
-	public function behaviors()
-	{
-		return [
-			[
-				'class' => LinkerBehavior::class,
-				'relations' => [
-					'comps_ids' => [
-						'comps',
-						//'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-					'includes_ids' => [
-						'includes',
-						//'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-					'jobs_ids' => [
-						'jobs',
-						//'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-					'included_ids' => [
-						'includedBy',
-						//'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-					'services_ids' => [
-						'services',
-						//'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-					'techs_ids' => [
-						'techs',
-						//'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-				]
-			]
-		];
-	}
-
     
     /**
      * {@inheritdoc}
@@ -150,6 +115,7 @@ class MaintenanceReqs extends ArmsModel
             'description' => [
 				'Описание',
 				'hint'=>'Описание требований по регламентному обслуживанию',
+				'type'=>'text',
 			],
 			'is_backup' => [
 				'Относится к резервному копированию',
@@ -176,13 +142,15 @@ class MaintenanceReqs extends ArmsModel
 			'includes' => [
 				'Перекрывает требования',
 				'hint'=>'Какие еще требования будут удовлетворены выполнением этих требований',
-				'indexHint'=>'{same}'
+				'indexHint'=>'{same}',
+				'placeholder'=>'Никакие не перекрывает',
 			],
 			'includes_ids'=>['alias'=>'includes'],
 			'includedBy' => [
 				'Перекрывается требованиями',
 				'hint'=>'Выполнением каких других требований удовлетворяются это требование',
-				'indexHint'=>'{same}'
+				'indexHint'=>'{same}',
+				'placeholder'=>'Никакими не перекрывается',
 			],
 			'included_ids'=>['alias'=>'includedBy'],
 			'services'=>'Сервисы',

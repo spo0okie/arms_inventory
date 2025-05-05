@@ -123,7 +123,6 @@ class Aces extends ArmsModel
 	public function attributeData()
 	{
 		return [
-			'id' => 'ID',
 			'acls_id' => 'ACL',
 			'name' => [
 				'Пояснение',

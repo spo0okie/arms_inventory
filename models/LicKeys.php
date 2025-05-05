@@ -50,6 +50,7 @@ class LicKeys extends ArmsModel
 	{
 		$model=$this;
 		return [
+			'lic_items_id' => [LicItems::class,'lic_keys_ids'],
 			'arms_ids' => [Techs::class,'lic_keys_ids', 'updater' => [
 				'class' => ManyToManySmartUpdater::className(),
 				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
@@ -85,23 +86,31 @@ class LicKeys extends ArmsModel
 	public function attributeData()
 	{
 		return [
-			'id' => 'ID',
+			'comment' => [
+				'Комментарии',
+				'comment' => 'Все что стоит знать об этом ключе кроме информации в остальных полях',
+				'type' => 'text'
+			],
 			'lic_items_id' => [
 				'Закупка',
-				'hint' => 'К какой закупке лицензий относятся эти ключи. Тут надо внимательно отнестись, чтобы не вносить путанницу.',
+				'hint' => 'К какой закупке лицензий относятся эти ключи. Тут надо внимательно отнестись, чтобы не вносить путаницу.',
+				'placeholder' => 'Выберите закупку',
 			],
 			'lic_item' => ['alias'=>'lic_items_id',	],
 			'arms_ids' => [
-				'Привязанный(е) АРМ(ы)',
+				'Привязанные АРМ(ы)',
 				'hint' => 'К какому рабочему ПК привязан ключ',
+				'placeholder' => 'Ключ не привязан к АРМ',
 			],
 			'comps_ids' => [
-				'Привязанная(ые) ОС(и)',
+				'Привязанные ОС/ВМ',
 				'hint' => 'К какой операционной системе привязан ключ',
+				'placeholder' => 'Ключ не привязан к ОС/ВМ',
 			],
 			'users_ids' => [
 				'Привязанный(е) пользователь(и)',
 				'hint' => 'К какому пользователю(пользователям) привязан ключ',
+				'placeholder' => 'Ключ не привязан к пользователям',
 			],
 			'links' => [
 				'Привязки',
@@ -109,10 +118,7 @@ class LicKeys extends ArmsModel
 			'key_text' => [
 				'Ключ',
 				'hint' => 'Текст ключа / серийный номер / чтобы то ни было, что используется для активации продукта',
-			],
-			'comment' => [
-				'Комментарии',
-				'comment' => 'Все что стоит знать об этом ключе кроме информации в остальных полях',
+				'placeholder' => 'Введите ключ',
 			],
 			'linkComment' => [
 				'Пояснение к добавляемым привязкам',

@@ -299,9 +299,20 @@ class SchedulesEntries extends ArmsModel
 	public function attributeData()
 	{
 		return ArrayHelper::recursiveOverride(parent::attributeData(),[
-			'schedule_id' => [
-				'Расписание',
-				'hint' => 'Расписание, к которому относится запись',
+			'graph' => static::$label_graph,
+			
+			'comment' => [
+				'Комментарий',
+				'hint' => 'Отображается в общем списке',
+			],
+			'date' => [
+				$this->is_period?'Начало':'День/Дата',
+				'hint' => $this->is_period?'Дата/время начала периода':'День/Дата',
+			],
+			'day' => static::$label_day,
+			'date_end' => [
+				'Окончание',
+				'hint' => 'Дата/время окончания периода',
 			],
 			'is_period' => [
 				'Период',
@@ -315,29 +326,14 @@ class SchedulesEntries extends ArmsModel
 			],
 			'is_work_Y' => $this->isAcl?'Доступ предоставляется':'Рабочий период',
 			'is_work_N' => $this->isAcl?'Доступ запрещается':'Нерабочий период',
-			
-			'date' => [
-				$this->is_period?'Начало':'День/Дата',
-				'hint' => $this->is_period?'Дата/время начала периода':'День/Дата',
-			],
-			'day' => static::$label_day,
-			'date_end' => [
-				'Окончание',
-				'hint' => 'Дата/время окончания периода',
-			],
 			'schedule' => [
 				static::$label_schedule,
-				'hint' => 'График работы/отключения в формате "ЧЧ:ММ-ЧЧ:ММ,ЧЧ:ММ-ЧЧ:ММ", или прочерк (минус) для выходного.<br />Примеры/заготовки: '.static::scheduleSamplesHtml(),
+				'hint' => 'График работы/отключения в формате "ЧЧ:ММ-ЧЧ:ММ,ЧЧ:ММ-ЧЧ:ММ", или прочерк (минус) для выходного.',
+				'classicHint'=>'Примеры/заготовки: '.static::scheduleSamplesHtml(),
 			],
-			'graph' => static::$label_graph,
-			
-			'comment' => [
-				'Комментарий',
-				'hint' => 'Отображается в общем списке',
-			],
-			'history' => [
-				'Дополнительные заметки',
-				'hint' => 'Чтобы увидеть надо будет провалиться в запись или навести мышь',
+			'schedule_id' => [
+				'Расписание',
+				'hint' => 'Расписание, к которому относится запись',
 			],
 		]);
 	}

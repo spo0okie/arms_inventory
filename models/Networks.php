@@ -91,12 +91,18 @@ class Networks extends ArmsModel
 			['text_dhcp', 'filter', 'filter' => function ($value) {
 				return NetIps::filterInput($value);
 			}],
-            [['vlan_id', 'segments_id', 'addr', 'mask', 'router', 'dhcp','archived'], 'integer'],
             [['name'], 'string', 'max' => 255],
 			[['comment','notepad','links','ranges'], 'safe'],
+			[['vlan_id', 'segments_id', 'addr', 'mask', 'router', 'dhcp','archived'], 'integer'],
 			[['segments_id'], 'exist', 'skipOnError' => true, 'targetClass' => Segments::class, 'targetAttribute' => ['segments_id' => 'id']],
 		];
     }
+	
+	public $linksSchema=[
+		'vlan_id'=>		[NetVlans::class,'networks_ids'],
+		'segments_id'=>	[Segments::class,'networks_ids'],
+		'org_inets_ids'=>[OrgInet::class,'networks_id'],
+	];
 	
 	/**
 	 * {@inheritdoc}
@@ -112,11 +118,13 @@ class Networks extends ArmsModel
 			'vlan_id' => [
 				'Vlan',
 				'hint' => 'В каком Vlan находится эта сеть',
+				'placeholder' => 'Выберите VLAN',
 			],
 			'vlan' => ['alias'=>'vlan_id'],
 			'segments_id' => [
 				Segments::$title,
 				'hint' => 'К какому сегменту относится эта сеть',
+				'placeholder' => 'Выберите Сегмент ИТ',
 			],
 			'segment' => ['alias'=>'segments_id'],
 			'domain_id' => [
@@ -167,6 +175,7 @@ class Networks extends ArmsModel
 			'notepad' => [
 				'Подробно',
 				'hint' => 'Подробное описание сети',
+				'type' => 'text',
 			],
 			'readableWildcard' => ['Обратная маска'],
 			'readableNetworkIp' => ['IP сети'],

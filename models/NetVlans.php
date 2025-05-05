@@ -47,6 +47,11 @@ class NetVlans extends ArmsModel
 			[['comment'], 'safe'],
         ];
     }
+	
+	public $linksSchema=[
+		'domain_id'=>[NetDomains::class,'net_vlans_ids'],
+		'networks_ids'=>[Networks::class,'vlan_id'],
+	];
 
     /**
      * {@inheritdoc}
@@ -73,14 +78,12 @@ class NetVlans extends ArmsModel
 				'Домен L2',
 				'hint' => 'В каком L2 домене находится этот Vlan'
 				. '<br><i>(Для разделения VLAN с одинаковыми номерами, но в разных доменах)</i>',
-			],
-			'segment_id' => [
-				'Сегмент ИТ',
-				'hint' => 'К какому сегменту ИТ инфраструктуры относится этот Vlan',
+				'placeholder' => 'Выберите L2 Домен',
 			],
 			'comment' => [
 				'Пояснение',
 				'comment' => 'Все что нужно знать об этом Vlan, но что не ясно из названия',
+				'type' => 'text',
 			],
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\Forms\ArmsForm;
 use Yii;
 
 /**
@@ -21,7 +22,7 @@ use Yii;
  * @property Techs   $linkTech
  * @property Techs   $tech
  */
-class Ports extends \yii\db\ActiveRecord
+class Ports extends ArmsModel
 {
 	public $link_arms_id;
 	public $link_techs_id;
@@ -46,7 +47,7 @@ class Ports extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['techs_id', 'arms_id', 'link_techs_id', 'link_arms_id'], 'integer'],
+            [['techs_id', 'link_techs_id'], 'integer'],
 			[['link_ports_id'],function ($attribute, $params, $validator) {
 				if (
 					!empty($this->link_ports_id)
@@ -67,33 +68,40 @@ class Ports extends \yii\db\ActiveRecord
         ];
     }
 	
+	public $linksSchema=[
+		'techs_id'=>[Techs::class,'ports_ids'],
+		'link_ports_id'=>[Ports::class,'link_ports_id'],
+	];
+	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
-			'id' => 'ID',
-			'techs_id' => 'На устройстве',
-			'name' => 'Наименование',
-			'comment' => 'Комментарий',
-			'link_techs_id' => 'Подсоединенное устройство',
-			'link_ports_id' => 'Порт на устройстве',
-		];
-	}
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'ID',
-			'techs_id' => 'На каком устройстве расположен порт',
-			'name' => 'Номер или маркировка порта (1/24/Combo 1/iLO/Console/Management)',
-			'comment' => 'Детали по порту / соединению до удаленного устройства',
-			'link_arms_id' => 'Подсоединенный АРМ',
-			'link_techs_id' => 'Подсоединенное устройство',
-			'link_ports_id' => 'Если оставить пустым, то будет объявлено соединение с устройством, без указания конкретного порта',
+			'techs_id' => [
+				'На устройстве',
+				'hint' => 'На каком устройстве расположен порт',
+				'placeholder' => 'Выберите устройство',
+			],
+			'name' => [
+				'Наименование',
+				'hint' => 'Номер или маркировка порта (1/24/Combo 1/iLO/Console/Management)',
+			],
+			'comment' => [
+				'Комментарий',
+				'hint' => 'Детали по порту / соединению до удаленного устройства',
+			],
+			'link_techs_id' => [
+				'Подсоединенное устройство',
+				'hint' => 'Подсоединенное устройство',
+				'placeholder' => 'Выберите устройство',
+			],
+			'link_ports_id' => [
+				'Порт на устройстве',
+				'hint' => 'Если оставить пустым, то будет объявлено соединение с устройством, без указания конкретного порта',
+				'placeholder' => 'Укажите порт на устройстве',
+			],
 		];
 	}
 	

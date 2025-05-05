@@ -11,10 +11,12 @@ use Yii;
  * @property string $fingerprint Отпечаток 
  * @property string $comment Комментарий
  */
-class HwIgnore extends \yii\db\ActiveRecord
+class HwIgnore extends ArmsModel
 {
 
     private static $all_items=null;
+	public static $title='Игнорируемое оборудование';
+	public static $titles='Игнорируемое оборудование';
 
     public static function fetchAll(){
         if (is_null(static::$all_items)) {

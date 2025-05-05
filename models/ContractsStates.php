@@ -36,6 +36,10 @@ class ContractsStates extends ArmsModel
         return 'contracts_states';
     }
 
+	public $linksSchema=[
+		'contracts_ids'=>[Contracts::class,'state_id'],
+	];
+	
     /**
      * {@inheritdoc}
      */
@@ -62,30 +66,35 @@ class ContractsStates extends ArmsModel
 			],
             'code' => [
             	'код',
-				'hint'=>'используется для CSS раскраски'
+				'hint'=>'используется для CSS раскраски',
 			],
             'name' => [
             	'Состояние',
-				'hint'=>'Короткое имя состояния документа'
+				'hint'=>'Короткое имя состояния документа',
 			],
             'descr' => [
             	'Описание',
-				'hint'=>'Пояснение к состоянию'
+				'hint'=>'Пояснение к состоянию',
 			],
 			'paid'=>[
 				'Оплачен',
 				'hint'=>'Полностью или частично.'
 					.'<br>Оборудование, лицензии и материалы по счетам будут считаться "в доставке"'
-					.'<br>и отмечаться недоставленными, пока не будут привязаны к документу'
+					.'<br>и отмечаться недоставленными, пока не будут привязаны к документу',
 			],
 			'unpaid'=>[
 				'Ожидает оплаты',
 				'hint'=>'Полностью или частично.'
 					.'<br>Счета с таким статусом привязанные к договору, по которому предоставляется услуга'
-					.'<br>будут формировать сумму долга по оплате услуги'
+					.'<br>будут формировать сумму долга по оплате услуги',
 			],
         ];
     }
+	
+	public function getContracts()
+	{
+		return $this->hasMany(Contracts::class,['state_id'=>'id']);
+	}
 
     public static function fetchStatuses() {
     	if (!is_null(static::$cache)) return static::$cache;

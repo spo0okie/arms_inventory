@@ -122,25 +122,14 @@ DELIMITER ;
         ];
     }
 	
-	
-	/**
-	 * В списке поведений прикручиваем many-to-many ссылки
-	 * @return array
-	 */
-	public function behaviors()
-	{
-		return [
-			[
-				'class' => LinkerBehavior::class,
-				'relations' => [
-					'materials_ids' => 'materials',		//one-2-many
-					'services_ids' => 'services',		//one-2-many
-					'techs_ids' => 'techs',				//one-2-many
-				]
-			]
-		];
-	}
-	
+	public $linksSchema=[
+		'parent_id'=>[Places::class,'children_ids'],
+		'services_ids'=>[Services::class,'places_id'],
+		'techs_id'=>[Techs::class,'places_id'],
+		'materials_ids'=>[Materials::class,'places_id'],
+		'net_domains_ids'=>[NetDomains::class,'places_id'],
+		'org_inets_ids'=>[OrgInet::class,'places_id','loader'=>'inets']
+	];
 	
 	/**
      * @inheritdoc
@@ -151,6 +140,7 @@ DELIMITER ;
 	        'parent' => [
 	        	'Родитель',
 				'hint' => 'Помещение внутри которого находится это',
+				'placeholder'=>'Выберите родительское помещение',
 			],
             'name' => [
             	'Полное имя',
@@ -159,19 +149,25 @@ DELIMITER ;
 			'short' => [
 				'Короткое имя',
 				'hint' => 'Сокращенное название помещения для вывода в узких местах',
+				'is_inheritable'=>true,
 			],
             'addr' => [
             	'Адрес',
 				'hint' => 'Если не указан, то наследуется адрес родительского помещения',
+				'is_inheritable'=>true,
 			],
             'prefix' => [
             	'Префикс',
 				'hint' => 'Будет использоваться для генерации инвентарных номеров при заведении нового оборудования в этом помещении. Если не задать - используется родительский префикс. Если изменить, то старые инвентарные номера останутся неизменны.',
+				'is_inheritable'=>true,
 			],
 			'map_id'=>[
 				'Карта помещения',
 				'hint' => 'Карта/план помещения. Выбирается из прикрепленных к помещению изображений'
 			],
+			'comment' => [
+				'type'=>'text'
+			]
         ]);
     }
 
@@ -265,6 +261,14 @@ DELIMITER ;
 	{
 		return $this->hasMany(Materials::class, ['places_id' => 'id'])
 			->from(['places_materials'=>Materials::tableName()]);
+	}
+	
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getNetDomains()
+	{
+		return $this->hasMany(NetDomains::class, ['places_id' => 'id']);
 	}
 	
 	/**

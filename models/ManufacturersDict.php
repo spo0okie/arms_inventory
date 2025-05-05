@@ -35,6 +35,10 @@ class ManufacturersDict extends ArmsModel
     {
         return 'manufacturers_dict';
     }
+	
+	public $linksSchema=[
+		'manufacturers_id' => [Manufacturers::class,'manufacturers_dicts_ids']
+	];
 
     /**
      * @inheritdoc

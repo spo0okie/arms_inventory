@@ -57,28 +57,10 @@ class Materials extends ArmsModel
 		'type_id' =>		[MaterialsTypes::class,'materials_ids'],
 		'places_id' =>		[Places::class,'materials_ids'],
 		'it_staff_id' =>	[Users::class,'materials_ids'],
+		'children_ids'=>	[Materials::class,'parent_id'],
 		'currency_id' =>	Currency::class
 	];
  
-	/**
-	 * В списке поведений прикручиваем many-to-many ссылки
-	 * @return array
-	 */
-	public function behaviors()
-	{
-		return [
-			[
-				'class' => LinkerBehavior::class,
-				'relations' => [
-					'contracts_ids' => 'contracts',
-					'usages_ids' => 'usages',			//one-2-many
-					'children_ids' => 'children',		//one-2-many
-				]
-			]
-		];
-	}
-
-
     /**
      * {@inheritdoc}
      */
@@ -108,16 +90,21 @@ class Materials extends ArmsModel
 	public function attributeData()
 	{
 		return [
-			'id' => [
-				'Идентификатор',
+			'cost' => [
+				'Стоимость',
+				'hint' => 'Суммарная за все поступление, не за единицу материала!'
 			],
+			'charge' => 'НДС',
 			'parent_id' => [
 				'Взято из',
-				'hint' => 'Если указать источник поступления материалов, то этот материал будет считаться частично перемещенным из источника (как деление армии в героях)',
+				'hint' => 'Если указать источник поступления материалов, то этот материал<br>'
+					.'будет считаться частично перемещенным из указанного источника.<br>'
+					.'(как деление армии в Heroes 3)',
+				'placeholder' => 'Выберите источник этого материала'
 			],
 			'date' => [
 				'Дата поступления',
-				'hint' => 'Когда произошло поступление этого материала',
+				'hint' => 'Когда материал поступил в ИТ отдел',
 			],
 			'count' => [
 				'Количество',
@@ -125,7 +112,6 @@ class Materials extends ArmsModel
 			],
 			'used' => [
 				'Использовано',
-				//'type_id' => 'Тип материалов',
 			],
 			'rest' => [
 				'Остаток',
@@ -133,6 +119,9 @@ class Materials extends ArmsModel
 			],
 			'type_id' => [
 				'Тип материалов',
+				'hint' => 'Тип материалов, например: кабель, разъем, блок питания и т.п.<br>'
+					.'Если тип не найден, то его можно создать в разделе "Категории материалов"',
+				'placeholder' => 'Укажите тип материалов'
 			],
 			'type'=>['alias'=>'type_id'],
 			'model' => [
@@ -142,15 +131,18 @@ class Materials extends ArmsModel
 			'places_id' => [
 				'Помещение',
 				'hint' => 'Где хранятся поступившие материалы',
+				'placeholder' => 'Укажите где хранятся материалы'
 			],
 			'place'=>['alias'=>'places_id'],
 			'it_staff_id' => [
 				'Сотрудник службы ИТ',
 				'hint' => 'Кто отвечает за хранение материалов',
+				'placeholder' => 'Укажите ответственного сотрудника'
 			],
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Все что нужно знать, но не влезло в остальные поля',
+				'type' => 'text',
 			],
 			'history' => [
 				'Записная книжка',
@@ -158,13 +150,13 @@ class Materials extends ArmsModel
 			'contracts_ids' => [
 				'Документы',
 				'hint' => 'Документы, привязанные к поступлению или хранению материала (расходные привязываются к расходам материала)',
+				'placeholder' => 'Выберите документы о поступлении этого материала'
 			],
-			'currency_id' => 'Валюта',
-			'cost' => [
-				'Стоимость',
-				'hint' => 'Суммарная за все, не удельная'
+			'currency_id' => [
+				'Валюта',
+				'hint' => 'В какой валюте заявлена стоимость поступившего материала',
+				'placeholder' => 'RUR'
 			],
-			'charge' => 'НДС',
 			'materials_usages_ids' => 'Расход'
 		];
 	}

@@ -16,6 +16,10 @@ use yii\helpers\ArrayHelper;
  */
 class Domains extends ArmsModel
 {
+	
+	public static $title='Домен';
+	public static $titles='Домены';
+	
     /**
      * @inheritdoc
      */
@@ -37,11 +41,16 @@ class Domains extends ArmsModel
             [['name', 'fqdn'], 'unique', 'targetAttribute' => ['name', 'fqdn']],
         ];
     }
+	
+	public $linksSchema=[
+		'comps_ids'=>[Comps::class,'domain_id'],
+		'techs_ids'=>[Techs::class,'domain_id'],
+	];
 
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
             'id' => 'Идентификатор',
@@ -50,9 +59,19 @@ class Domains extends ArmsModel
             'comment' => 'Комментарий',
         ];
     }
-    
-
-    public static function fetchNames(){
+	
+	public function getComps()
+	{
+		return $this->hasMany(Comps::class,['domain_id'=>'id']);
+	}
+	public function getTechs()
+	{
+		return $this->hasMany(Techs::class,['domain_id'=>'id']);
+	}
+	
+	
+	
+	public static function fetchNames(){
         $list= static::find()
             ->select(['id','name'])
             ->all();

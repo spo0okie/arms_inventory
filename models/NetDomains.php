@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "net_domains".
@@ -38,32 +39,34 @@ class NetDomains extends ArmsModel
 			[['comment'], 'safe'],
         ];
     }
+	
+	public $linksSchema=[
+		'places_id'=>[Places::class,'net_domains_ids'],
+		'net_vlans_ids'=>[NetVlans::class,'domain_id'],
+	];
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
             'id' => 'ID',
-			'name' => 'Название домена',
-			'places_id' => 'Помещение',
-			'comment' => 'Пояснение',
+			'name' => [
+				'Название домена',
+				'hint' => 'Скорее всего пояснение по территориальному расположению сети',
+			],
+			'places_id' => [
+				'Помещение',
+				'hint' => 'Помещение/площадка где локализован этот L2 Домен',
+			],
+			'comment' => [
+				'Пояснение',
+				'hint' => 'Все что нужно знать об этом домене, но что не ясно из названия',
+				'type' => 'text',
+			],
         ];
     }
-	
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'ID',
-			'name' => 'Скорее всего пояснение по территориальному расположению сети',
-			'comment' => 'Все что нужно знать об этом домене, но что не ясно из названия',
-			'places_id' => 'Помещение/площадка где локализован этот L2 Домен',
-		];
-	}
 	
 	/**
 	 * Place
@@ -83,6 +86,6 @@ class NetDomains extends ArmsModel
 		$list = static::find()
 			->orderBy('name')
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
+		return ArrayHelper::map($list, 'id', 'name');
 	}
 }

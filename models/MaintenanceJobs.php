@@ -49,42 +49,14 @@ class MaintenanceJobs extends ArmsModel
     }
 	
 	public $linksSchema=[
-		'services_ids'=>[Services::class,'maintenance_jobs_ids'],
-		'comps_ids'=>[Comps::class,'maintenance_jobs_ids'],
-		'techs_ids'=>[Techs::class,'maintenance_jobs_ids'],
+		'services_ids'=>[Services::class,'maintenance_jobs_ids','updater' => ['class' => ManyToManySmartUpdater::class,]],
+		'comps_ids'=>[Comps::class,'maintenance_jobs_ids','updater' => ['class' => ManyToManySmartUpdater::class,]],
+		'techs_ids'=>[Techs::class,'maintenance_jobs_ids','updater' => ['class' => ManyToManySmartUpdater::class,],],
 		'reqs_ids'=>[MaintenanceReqs::class,'jobs_ids'],
 		'services_id' => Services::class,
 		'schedules_id' => Schedules::class,
 	];
     
-    public function behaviors()
-	{
-		return [
-			[
-				'class' => LinkerBehavior::class,
-				'relations' => [
-					'comps_ids' => [
-						'comps',
-						'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-					'reqs_ids' => [
-						'reqs',
-						//'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-					'services_ids' => [
-						'services',
-						'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-					'techs_ids' => [
-						'techs',
-						'updater' => ['class' => ManyToManySmartUpdater::class,],
-					],
-				]
-			]
-		];
-	}
-
-
 	/**
      * {@inheritdoc}
      */
@@ -115,16 +87,20 @@ class MaintenanceJobs extends ArmsModel
             'description' => [
 				'Описание',
 				'hint'=>'Описание регламентных операций с пояснением деталей',
+				'type'=>'text',
 			],
             'schedules_id' => [
 				'Расписание',
 				'hint'=>'Расписание когда производятся регламентные операции',
+				'placeholder'=>'Без расписания',
 			],
             'schedule' => ['alias'=>'schedules_id'],
             'services_id' => [
 				'В рамках сервиса',
-				'hint'=>'В рамках какого сервиса производятся операции обслуживания.'
-					.'<br>Нужно для определения ответственного',
+				'hint'=>'В рамках какого сервиса/услуги производятся операции обслуживания.<br>'
+					.'Нужно для определения ответственного и поддержки<br>'
+					.'Если подходящего сервиса/услуги нет, то нужно завести',
+				'placeholder'=>'Укажите сервис, в рамках которого производится обслуживание'
 			],
 			'service' => ['alias'=>'services_id'],
             'links' => [
@@ -134,21 +110,25 @@ class MaintenanceJobs extends ArmsModel
 			'reqs_ids' => [
 				'Выполняет требования',
 				'hint'=>'Какие требования по регламентному обслуживания выполняет эта операция',
+				'placeholder'=>'Никакие не выполняет',
 			],
 			'reqs' => ['alias'=>'reqs_ids'],
 			'comps_ids' => [
 				'ОС/ВМ',
 				'hint'=>'Обслуживаемые в рамках этой регламентной операции',
+			'placeholder'=>'ОС/ВМ не обслуживаются',
 			],
 			'comps' => ['alias'=>'comps_ids'],
 			'techs_ids' => [
 				'Оборудование',
 				'hint'=>'Обслуживаемое в рамках этой регламентной операции',
+				'placeholder'=>'Оборудование не обслуживается',
 			],
 			'techs' => ['alias'=>'techs_ids'],
 			'services_ids' => [
 				'Сервисы',
 				'hint'=>'Обслуживаемые в рамках этой регламентной операции',
+				'placeholder'=>'Сервисы не обслуживаются',
 			],
 			'services' => ['alias'=>'services_ids'],
 			'responsible' => ['Ответственный'],

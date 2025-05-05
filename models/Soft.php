@@ -6,6 +6,7 @@ use Adldap\Models\Computer;
 use app\helpers\ArrayHelper;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\bootstrap5\Html;
 use yii\db\ActiveQuery;
 use yii\db\Query;
 use yii\helpers\StringHelper;
@@ -79,6 +80,7 @@ class Soft extends ArmsModel
 		'comps_ids'=>[Computer::class, 'soft_ids'],
 		'hits_ids'=>[Computer::class, 'softHits_ids'],
 		'licGroups_ids'=>[LicGroups::class, 'soft_ids'],
+		'manufacturers_id'=>[Manufacturers::class, 'soft_ids'],
 	];
 	
     /**
@@ -107,9 +109,29 @@ class Soft extends ArmsModel
             'id' => 'Идентификатор',
             'manufacturers_id' => 'Разработчик',
             'descr' => 'Наименование',
-            'comment' => 'Описание ПО',
-            'items' => 'Основные элементы входящие в пакет ПО',
-            'additional' => 'Дополнительные элементы входящие в пакет ПО',
+            'comment' => [
+				'Описание ПО',
+				'type'=>'text'
+			],
+			'notes' => [
+				'Информация ИТ',
+				'hint'=>'Детали ИТ отдела о применении этого ПО, распространении на ПК, пояснения, веселые истории и т.п.',
+			],
+            'items' => [
+				'Основные элементы входящие в пакет ПО',
+				'classicHint'=>'<strong>Внимание!</strong> Элементы, составляющие пакет ПО, вносятся как regexp выражения. '
+					.'Это означает что многие символы являются служебными и должны быть экранированы.<br />'
+					.'Например <strong>\( \. \+</strong> и т.п. Более подробно читать '
+					.html::a('тут','https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F')
+			],
+            'additional' => [
+				'Дополнительные элементы входящие в пакет ПО',
+				'classicHint'=>'Если в списке ПО на компьютере обнаружатся основные компоненты продукта (те что выше), '
+					.'то из него вместе с основными будут также исключены и дополнительные (те что ниже). '
+					.'В дополнительные надо включать разделяемые между несколькими продуктами компоненты, '
+					.'которые сами по себе полноценным продуктом не являются. '
+					.'Например сервисы обновления.'
+			],
 	        'softLists_ids' => 'В списках ПО',
 	        'created_at' => 'Дата добавления',
 			'hitsCount'=>[
@@ -118,7 +140,7 @@ class Soft extends ArmsModel
 			],
 			'compsCount'=>[
 				'Паспортов',
-				'indexHint'=>'Количество внесений продукта в паспорта АРМ'
+				'indexHint'=>'Количество внесений продукта в паспорта АРМ',
 			],
 			'licGroupsCount'=>[
 				'Типов лицензий',
@@ -126,7 +148,7 @@ class Soft extends ArmsModel
 			],
 			'licCount'=>[
 				'Лицензий',
-				'indexHint'=>'Количество лицензий, включающих данное ПО'
+				'indexHint'=>'Количество лицензий, включающих данное ПО',
 			],
         ]);
     }
@@ -374,7 +396,7 @@ class Soft extends ArmsModel
     /**
      * Возвращает массив ключ=>значение запрошенных/всех записей таблицы
      * @param array|null $items список элементов для вывода
-     * @return array
+     * @return string[]
      */
     public static function listItemsWithPublisher($items=null)
     {
@@ -382,12 +404,18 @@ class Soft extends ArmsModel
         $query = static::find()->select(['soft.id', 'CONCAT(`manufacturers`.`name`, \' \', `soft`.`descr`) as `fullDescr`'])->asArray();
         if (!is_null($items)) $query->filterWhere(['soft.id'=>$items]);
         $query->leftJoin('manufacturers','`soft`.`manufacturers_id` = `manufacturers`.`id`');
-        //var_dump($query->all());
-        //return $query->all();
-	    $list=\yii\helpers\ArrayHelper::map($query->all(), 'id', 'fullDescr');
+	    $list=\app\helpers\ArrayHelper::map($query->all(), 'id', 'fullDescr');
 	    asort ($list);
         return $list;
     }
+	
+	/**
+	 * @inheritdoc
+	 */
+	public static function fetchNames()
+	{
+		return self::listItemsWithPublisher();
+	}
 	
 	/**
 	 * @inheritdoc
@@ -439,7 +467,7 @@ class Soft extends ArmsModel
 				foreach ($comps as $comp) {
 					$queue=new CompsRescanQueue([
 						'soft_id'=>$this->id,
-						'comps_id'=>$comp->id
+						'comps_id'=>$comp->id,
 					]);
 					$queue->save();
 				}

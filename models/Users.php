@@ -140,6 +140,7 @@ class Users extends ArmsModel implements IdentityInterface
 	}
 	
 	public $linksSchema=[
+		'org_id'=>									[Partners::class,'users_ids'],
 		'netIps_ids' =>								[NetIps::class,'users_ids'],
 		'aces_ids' => 								[Aces::class,'users_ids'],
 		'lic_groups_ids' => 						[LicGroups::class,'users_ids'],
@@ -223,7 +224,11 @@ class Users extends ArmsModel implements IdentityInterface
 				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого объекта',
 				'absorb'=>'ifEmpty',
 			],
-			'org_id' => 'Организация',
+			'org_id' => [
+				'Организация',
+				'Контрагент в котором числится этот сотрудник/пользователь',
+				'placeholder' => 'Организация',
+			],
 			'org_name'=>['alias'=>'org_id'],
 			'Orgeh' => 'Подразделение',
 			'orgStruct_name' => ['alias'=>'Orgeh'],

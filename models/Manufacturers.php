@@ -73,13 +73,13 @@ class Manufacturers extends ArmsModel
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeData()
     {
         return [
             'id' => 'Идентификатор',
-            'name' => 'Название',
-            'full_name' => 'Полное название',
-            'comment' => 'Комментарий',
+            'name' => ['Название','hint'=>'Короткое обозначение производителя для отображения в списках'],
+            'full_name' => ['Полное название','hint'=>'Полное название производителя для исключения совпадений'],
+            'comment' => ['Комментарий','hint'=>'Дополнительная информация о производителе (кто такой, чем знаменит и т.д.)'],
             'created_at' => 'Время создания',
         ];
     }
