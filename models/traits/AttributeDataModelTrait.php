@@ -229,7 +229,6 @@ trait AttributeDataModelTrait
 			$this->getAttributeData($attribute)
 		)) return $label;
 		
-		/** @noinspection PhpUndefinedClassInspection */
 		return parent::getAttributeLabel($attribute);
 	}
 	
@@ -243,7 +242,6 @@ trait AttributeDataModelTrait
 		if ($hint=$this->fetchAttributeHint(
 			$this->getAttributeData($attribute)
 		)) return $hint;
-		/** @noinspection PhpUndefinedClassInspection */
 		return parent::getAttributeHint($attribute);
 	}
 	
