@@ -51,7 +51,6 @@ use yii\db\ActiveQuery;
  * @property int $it_staff_id Сотрудник ИТ
  * @property int $departments_id Подразделение
  * @property int $armTechsCount Количество техники в арм
- 
  * @property boolean $isComputer является компьютером (исходя из модели оборудования)
  * @property boolean $isVoipPhone является телефоном (исходя из модели оборудования)
  * @property boolean $isUps является UPS (исходя из модели оборудования)
@@ -59,9 +58,8 @@ use yii\db\ActiveQuery;
  * @property boolean $archived Списано
  * @property boolean $full_length Вся глубина корзины
  * @property boolean $installed_back Установлено с обратной стороны
-
  * @property array $contracts_ids Список документов
- * @property array $netIps_ids Список IP
+ * @property array $net_ips_ids Список IP
  * @property array $portsList
  * @property array $ddPortsList
  *
@@ -75,6 +73,7 @@ use yii\db\ActiveQuery;
  * @property Places $place
  * @property Places $effectivePlace
  * @property Places $origPlace
+ * @property Domains $domain
  * @property Comps $comp
  * @property Comps $hwComp
  * @property Comps[] $comps
@@ -97,7 +96,6 @@ use yii\db\ActiveQuery;
  * @property integer $monitorsCount
  * @property integer $upsCount
  * @property integer $voipPhonesCount
-
  * @property Departments $department
  *
  * @property TechModels $model
@@ -117,14 +115,10 @@ use yii\db\ActiveQuery;
  * @property int $scans_id Картинка - предпросмотр
  * @property Scans[] $scans
  * @property Scans $preview
- 
  * @property HwList $hwList
- 
- * @property MaintenanceReqs $maintenanceReqs
- * @property MaintenanceReqs $effectiveMaintenanceReqs
- 
- * @property MaintenanceJobs $maintenanceJobs
-
+ * @property MaintenanceReqs[] $maintenanceReqs
+ * @property MaintenanceReqs[] $effectiveMaintenanceReqs
+ * @property MaintenanceJobs[] $maintenanceJobs
  */
 
 class Techs extends ArmsModel
@@ -146,10 +140,10 @@ class Techs extends ArmsModel
 	private static $defaultNumMaxLen=15;	//максимальная длина инвентарного номера (если получится уложиться убирая нули в числовой части)
 	
 	private static $armInheritance=[		//поля которые наследуются у оборудования подключенного к АРМ
-		'places_id','user_id','it_staff_id','head_id','responsible_id','departments_id'
+		'places_id','user_id','it_staff_id','head_id','responsible_id','departments_id',
 	];
 	private static $installInheritance=[	//поля которые наследуются у оборудования установленного в другое
-		'places_id'
+		'places_id',
 	];
 	//private $state_cache=null;
 	private $type_cache=null;
@@ -177,10 +171,12 @@ class Techs extends ArmsModel
 		'lic_groups_ids' =>			[LicGroups::class,'techs_ids'],
 		'maintenance_reqs_ids' =>	[MaintenanceReqs::class,'techs_ids'],
 		'maintenance_jobs_ids' =>	[MaintenanceJobs::class,'techs_ids'],
+		'net_ips_ids' =>			[NetIps::class,'techs_ids'],
 		'acls_ids' =>				[Acls::class,'techs_id'],
+		'ports_ids' =>				[Ports::class,'techs_id'],
 		
 		'materials_usages_ids' => 	[MaterialsUsages::class,'techs_id'],
-		'domain_id'=>Domains::class,
+		'domain_id'=>				Domains::class,
 		
 		'model_id' =>				[TechModels::class,'loader'=>'model'],
 		'arms_id' =>				[Techs::class,'arm_techs_ids'],
@@ -192,6 +188,7 @@ class Techs extends ArmsModel
 		'head_id' =>				[Users::class,'head_techs_ids'],
 		'responsible_id' =>			[Users::class,'responsible_techs_ids','loader'=>'admResponsible'],
 		'it_staff_id' =>			[Users::class,'it_techs_ids'],
+		'management_service_id' =>	[Services::class,'techs_ids'],
 		
 		'state_id' =>				TechStates::class,
 		'scans_id' =>				Scans::class,
@@ -213,7 +210,7 @@ class Techs extends ArmsModel
 			'stateName',
 			'model',
 			'manufacturer',
-			'type'
+			'type',
 		];
 	}
 	
@@ -224,10 +221,161 @@ class Techs extends ArmsModel
 	public function attributeData()
 	{
 		return ArrayHelper::recursiveOverride(parent::attributeData(),[
-			'id' => ['Идентификатор'],
+			'admResponsible'=>['alias'=>'responsible'],
+			'arms_id' => [
+				'Рабочее место',
+				'hint' => 'Рабочее место, к которому прикреплено оборудование',
+				'placeholder' => 'Не входит в состав АРМ, используется самостоятельно',
+			],
 			'attach' => ['Связи'],
+			'comp_hw' => [
+				'label'=>'Комплектация',
+				'indexHint' => 'Строка оборудования обнаруженного <b>в основной ОС</b><br>'.
+					'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку'.
+					'<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'comp_id' => [
+				'label'=>'Основная ОС',
+				'indexLabel'=>'ОС',
+				'hint' => 'Какую ОС отображать в паспорте',
+				'indexHint' => 'Поиск ведется <b>только по основной</b> операционной системе.<br>'.
+					'Найти АРМ по неосновной ОС можно через Компьютеры->ОС'.
+					'<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'comment' => [
+				'Примечание',
+				'hint' => 'Краткое пояснение по этому оборудованию',
+			],
+			'contracts_ids' => [
+				'Связанные документы',
+				'hint' => 'Счета, накладные, фотографии серийных номеров и т.п.',
+				'placeholder' => 'Выберите документы о поступлении этого оборудования'
+			],
+			'departments_id' => [
+				'label'=>'Подразделение',
+				'hint' => 'Закрепить оборудование/АРМ за подразделением.<br><i>'.Departments::$hint.'</i>',
+				'indexHint' => 'Подразделение, за которым закреплено.<br><i>'
+					.Departments::$hint.
+					'</i><hr/>'.QueryHelper::$stringSearchHint,
+				'placeholder' => 'Выберите подразделение',
+			],
 			'domain_id' => 'Домен',
-
+			'effectiveMaintenanceReqs'=>[
+				MaintenanceReqs::$titles,
+				'indexHint'=>'Какие предъявлены требования по обслуживанию.'.
+					'<br>Как распространенные с сервисов, так и заданные явно. '.
+					'<br>Избыточно предъявленные требования помечаются как "архивные"',
+			],
+			'full_length'=>[
+				'Полноразмерный модуль',
+				'hint'=>'Устройство занимает всю глубину корзины/шкафа.<br>'.
+					'В случае двусторонней корзины будет считаться что занимает обе стороны',
+			],
+			'head_id' => [
+				'label'=>'Руководитель отдела',
+				'hint' => 'Руководитель отдела сотрудника которому установлено',
+				'placeholder' => 'Не закреплено за отделом',
+			],
+			'history' => [
+				'Записная книжка',
+				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого оборудования/АРМ',
+			],
+			'id' => ['Идентификатор'],
+			'installed_back'=>[
+				'Установлено с обратной стороны',
+				'hint'=>'Устройство установлено с задней стенки. <br>'.
+					'Либо в заднюю корзину либо в переднюю, но с обратной стороны',
+			],
+			'installed_id'=>[
+				'Установлено в',
+				'hint'=>'Если это устройство установлено в другое, то нужно указать в какое',
+				'placeholder' => 'Не является модулем для другого устройства',
+			],
+			'installed_pos'=>[
+				'Места установки',
+				'hint'=>'Позиция этого устройства в корзине/шкафу<br>'.
+					'Номера посадочных мест, которые занимает устройства<br>'.
+					'(лицевая сторона, если позиции для обратной стороны отличаются)<br>'.
+					'Одно или несколько через тире, можно несколько позиций через запятую<br>'.
+					'<b>Пример 1:</b> 2 - занимает юнит №2<br>'.
+					'<b>Пример 2:</b> 1-2 - занимает юниты с 1го по 2й<br>'.
+					'<b>Пример 3:</b> 1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й',
+			],
+			'installed_pos_end'=>[
+				'C обр. стороны',
+				'hint'=>'Если обратная сторона устройства занимает другие позиции,<br>'.
+					'то тут нужно указать номера посадочных мест для обратной стороны<br>'.
+					'Одно или несколько через тире, можно несколько позиций через запятую<br>'.
+					'<b>Пример 1:</b> 2 - занимает юнит №2<br>'.
+					'<b>Пример 2:</b> 1-2 - занимает юниты с 1го по 2й<br>'.
+					'<b>Пример 3:</b> 1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й',
+			],
+			'inv_num' => [
+				'Бухг. номер',
+				'hint' => 'Бухгалтерский инвентарный / номенклатурный номер.',
+			],
+			'inv_sn' => [
+				'label'=>'Бух/SN/Доп.',
+				'indexHint' => 'Серийный, бухгалтерский инвентарный/номенклатурный, дополнительный номера через запятую<br>'.
+					'Искать можно по всем номерам сразу<br/>'.QueryHelper::$stringSearchHint,
+			],
+			'ip' => [
+				'IP адреса',
+				'hint' => 'По одному в строке',
+			],
+			'is_server' => [
+				'label'=>'Сервер',
+				'hint' => 'Это оборудование формирует сервер, на котором выполняются какие-то сервисы (будет отмечено другим оформлением, возможно повесить сервисы)',
+			],
+			'it_staff_id' => [
+				'Сотрудник службы ИТ',
+				'hint' => 'Сотрудник службы ИТ, который отвечает за обслуживание оборудования/рабочего места на месте установки',
+				'placeholder' => 'Отсутствует сопровождение оборудования на месте установки',
+			],
+			'lics' => [
+				'Лицензии',
+				'hint' => 'Все привязанные лицензии:<br>Типы лицензий, закупки, ключи',
+				'indexHint' => '{same}',
+			],
+			'mac' => [
+				'MAC адреса',
+				'hint' => 'MAC адреса сетевых интерфейсов оборудования<br>'.
+					'Заполняются по одному в строке',
+			],
+			'management_service_id'=>[
+				'Услуга сопровождения',
+				'hint'=>'ИТ услуга в рамках которой сопровождается это оборудование/АРМ на месте установки (local management)',
+				'placeholder' => 'Отсутствует сопровождение оборудования на месте установки',
+			],
+			'maintenance_jobs_ids'=>[
+				MaintenanceJobs::$titles,
+				'hint'=>'Какие операции регламентного обслуживания проводятся над этим оборудованием',
+				'indexHint'=>'{same}',
+				'placeholder' => 'Отсутствует',
+			],
+			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
+			'maintenance_reqs_ids'=>[
+				MaintenanceReqs::$titles,
+				'hint'=>'Какие предъявлены требования по обслуживанию этого оборудования '
+					.'<br>По хорошему требования должны предъявлять сервисы, работающие на '
+					.'этом оборудовании, но можно задать их и явно.',
+				'placeholder'=>function () {
+					if (count($this->effectiveMaintenanceReqs)){
+						return implode(', ',ArrayHelper::getArrayField($this->effectiveMaintenanceReqs,'name')).' (из сервисов)';
+					}
+					return 'Получать из сервисов (нет требований)';
+				},
+			],
+			'materials_usages_ids' => 'Использованные материалы',
+			'model' => ['alias'=>'model_id'],
+			'model_id' => [
+				'Модель оборудования',
+				'hint' => 'Модель устанавливаемого оборудования / компьютера.<br>'.
+					'Если нужная модель отсутствует в списке, то нужно сначала завести в ее в соотв. категории оборудования',
+				'indexHint' => 'Модель системного блока / ноутбука / сервера<br>'.
+					'Производитель в таблице не выводится, но при поиске учитывается'.
+					'<br/>'.QueryHelper::$stringSearchHint,
+			],
 			'num' => [
 				'Инвентарный номер',
 				'indexLabel'=>'Инв. номер',
@@ -238,30 +386,6 @@ class Techs extends ArmsModel
 				'indexHint' => 'Внутренний инвентарный номер в службе ИТ.<br/>'.
 					QueryHelper::$stringSearchHint,
 			],
-
-			'inv_num' => [
-				'Бухг. номер',
-				'hint' => 'Бухгалтерский инвентарный / номенклатурный номер.',
-			],
-			'inv_sn' => [
-				'label'=>'Бух/SN/Доп.',
-				'indexHint' => 'Серийный, бухгалтерский инвентарный/номенклатурный, дополнительный номера через запятую<br>'.
-					'Искать можно по всем номерам сразу<br/>'.QueryHelper::$stringSearchHint,
-			],
-			'sn' => [
-				'Серийный номер',
-				'hint' => 'Серийный номер оборудования. Если явно нет, то MAC/IMEI/и т.п. чтобы можно было однозначно идентифицировать оборудование',
-			],
-			
-			'model_id' => [
-				'Модель оборудования',
-				'hint' => 'Модель устанавливаемого оборудования / компьютера.<br>'.
-					'Если нужная модель отсутствует в списке, то нужно сначала завести в ее в соотв. категории оборудования',
-				'indexHint' => 'Модель системного блока / ноутбука / сервера<br>'.
-					'Производитель в таблице не выводится, но при поиске учитывается'.
-					'<br/>'.QueryHelper::$stringSearchHint,
-			],
-			'model' => ['alias'=>'model_id'],
 			'partners_id' => [
 				'Организация',
 				'hint' => 'Организация в которую приобретено оборудование / компьютер.<br>'.
@@ -269,96 +393,41 @@ class Techs extends ArmsModel
 				'indexHint' => '{same}'.
 					'<br/>'.QueryHelper::$stringSearchHint,
 			],
+			'place'=>['alias'=>'places_id'],
+			'places_id' => [
+				'Помещение',
+				'hint' => 'Помещение, куда установлено',
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
+				'placeholder' => 'Выберите помещение где находится оборудование',
+			],
+			'responsible_id' => [
+				'label'=>'Адм.Ответственный',
+				'hint' => 'Административно ответственный. Указывается, если пользователю выдаются административные полномочия.<br/>'.
+					'В таком случае ответственное лицо самостоятельно несет ответственность за любые нелегитимные действия этого АРМ/оборудования.<br />'.
+					'Также в этом случае в паспорте появится дополнительный пункт, в котором ответственное лицо должно расписаться.',
+				'placeholder' => 'Административные полномочия не переданы (сохранены за ИТ отделом)',
+			],
+			'services_ids' => [
+				'Сервисы',
+				'hint' => 'Работу каких сервисов обеспечивает это оборудование',
+				'indexHint' => '{same}<br />'.QueryHelper::$stringSearchHint,
+				'placeholder' => 'Не участвует в работе сервисов',
+			],
+			'sn' => [
+				'Серийный номер',
+				'hint' => 'Серийный номер оборудования. Если явно нет, то MAC/IMEI/и т.п. чтобы можно было однозначно идентифицировать оборудование',
+			],
 			'specs' => [
 				'Тех. спецификация',
 				'hint' => 'Спецификация оборудования в случае, если модель оборудования не полностью определяет комплектацию каждого отдельного экземпляра',
 			],
-			'installed_id'=>[
-				'Установлено в',
-				'hint'=>'Если это устройство установлено в другое, то нужно указать в какое'
-			],
-			'installed_pos'=>[
-				'Места установки',
-				'hint'=>'Позиция этого устройства в корзине/шкафу<br>'.
-					'Номера посадочных мест, которые занимает устройства<br>'.
-					'(лицевая сторона, если позиции для обратной стороны отличаются)<br>'.
-					'Одно или несколько через тире, можно несколько позиций через запятую<br>'.
-					'<b>Пример 1:</b> 2 - занимает юнит №2<br>'.
-					'<b>Пример 2:</b> 1-2 - занимает юниты с 1го по 2й<br>'.
-					'<b>Пример 3:</b> 1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й'
-			],
-			'installed_pos_end'=>[
-				'C обр. стороны',
-				'hint'=>'Если обратная сторона устройства занимает другие позиции,<br>'.
-					'то тут нужно указать номера посадочных мест для обратной стороны<br>'.
-					'Одно или несколько через тире, можно несколько позиций через запятую<br>'.
-					'<b>Пример 1:</b> 2 - занимает юнит №2<br>'.
-					'<b>Пример 2:</b> 1-2 - занимает юниты с 1го по 2й<br>'.
-					'<b>Пример 3:</b> 1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й'
-			],
-			'installed_back'=>[
-				'Установлено с обратной стороны',
-				'hint'=>'Устройство установлено с задней стенки. <br>'.
-					'Либо в заднюю корзину либо в переднюю, но с обратной стороны'
-			],
-			'full_length'=>[
-				'Полноразмерный модуль',
-				'hint'=>'Устройство занимает всю глубину корзины/шкафа.<br>'.
-					'В случае двусторонней корзины будет считаться что занимает обе стороны'
-			],
-			'uid' => [
-				Yii::$app->params['techs.uidLabel']??'Доп. маркировка',
-				'hint'=>Yii::$app->params['techs.uidHint']??'Какая-либо дополнительная маркировка нанесенная на оборудование',
-			],
-			'comp_id' => [
-				'label'=>'Основная ОС',
-				'indexLabel'=>'ОС',
-				'hint' => 'Какую ОС отображать в паспорте',
-				'indexHint' => 'Поиск ведется <b>только по основной</b> операционной системе.<br>'.
-					'Найти АРМ по неосновной ОС можно через Компьютеры->ОС'.
-					'<br/>'.QueryHelper::$stringSearchHint,
-			],
-			'comp_hw' => [
-				'label'=>'Комплектация',
-				'indexHint' => 'Строка оборудования обнаруженного <b>в основной ОС</b><br>'.
-					'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку'.
-					'<br/>'.QueryHelper::$stringSearchHint,
-			],
-			'is_server' => [
-				'label'=>'Сервер',
-				'hint' => 'Это оборудование формирует сервер, на котором выполняются какие-то сервисы (будет отмечено другим оформлением, возможно повесить сервисы)',
-			],
-
+			'state' => ['Статус'],
 			'state_id' => [
 				'Состояние',
 				'hint' => 'Состояние, в котором в данный момент находится оборудование',
 				'indexHint' => 'Статус этого АРМ/оборудования<br>'.
 					'Можно выбрать несколько из выпадающего списка <br>'.
-					'Позиции выбираются кликом'
-			],
-			'state' => ['Статус'],
-
-			'arms_id' => [
-				'Рабочее место',
-				'hint' => 'Рабочее место, к которому прикреплено оборудование',
-			],
-
-			'places_id' => [
-				'Помещение',
-				'hint' => 'Помещение, куда установлено',
-				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
-			],
-			'place'=>['alias'=>'places_id'],
-
-			'contracts_ids' => [
-				'Связанные документы',
-				'hint' => 'Счета, накладные, фотографии серийных номеров и т.п.',
-			],
-
-			'user_id' => [
-				'Пользователь',
-				'hint' => 'Сотрудник которому установлено',
-				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
+					'Позиции выбираются кликом',
 			],
 			'user' => ['alias'=>'user_id'],
 			'user_dep' => [
@@ -366,90 +435,25 @@ class Techs extends ArmsModel
 				'hint' => 'Отдел в котором числится пользователь',
 				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
 			],
+			'user_id' => [
+				'Пользователь',
+				'hint' => 'Сотрудник которому установлено',
+				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
+				'placeholder' => 'Нет пользователя оборудования/АРМа',
+			],
 			'user_position' => [
 				'Должность',
 				'hint' => 'Должность пользователя АРМ/оборудования',
 				'indexHint' => '{same}<br/>'.QueryHelper::$stringSearchHint,
 			],
-			'departments_id' => [
-				'label'=>'Подразделение',
-				'hint' => 'Закрепить оборудование/АРМ за подразделением.<br><i>'.Departments::$hint.'</i>',
-				'indexHint' => 'Подразделение, за которым закреплено.<br><i>'
-					.Departments::$hint.
-					'</i><hr/>'.QueryHelper::$stringSearchHint,
-			],
-			'it_staff_id' => [
-				'Сотрудник службы ИТ',
-				'hint' => 'Сотрудник службы ИТ, который отвечает за обслуживание оборудования/рабочего места',
-			],
-			'responsible_id' => [
-				'label'=>'Адм.Ответственный',
-				'hint' => 'Административно ответственный. Указывается, если пользователю выдаются административные полномочия.<br/>'.
-					'В таком случае ответственное лицо самостоятельно несет ответственность за любые нелегитимные действия этого АРМ/оборудования.<br />'.
-					'Также в этом случае в паспорте появится дополнительный пункт, в котором ответственное лицо должно расписаться.',
-			],
-			'admResponsible'=>['alias'=>'responsible'],
-			'head_id' => [
-				'label'=>'Руководитель отдела',
-				'hint' => 'Руководитель отдела сотрудника которому установлено',
-			],
-			'management_service_id'=>[
-				'Услуга сопровождения',
-				'hint'=>'ИТ услуга в рамках которой сопровождается это оборудование/АРМ на месте установки (local management)'
-			],
-			
-			'ip' => [
-				'IP адреса',
-				'hint' => 'По одному в строке',
-			],
-			'mac' => [
-				'MAC адреса',
-				'hint' => 'MAC адреса сетевых интерфейсов оборудования<br>'.
-					'Заполняются по одному в строке',
+			'uid' => [
+				Yii::$app->params['techs.uidLabel']??'Доп. маркировка',
+				'hint'=>Yii::$app->params['techs.uidHint']??'Какая-либо дополнительная маркировка нанесенная на оборудование',
 			],
 			'url' => [
 				'Ссылки',
 				'hint' => UrlListWidget::$hint,
 			],
-			'comment' => [
-				'Примечание',
-				'hint' => 'Краткое пояснение по этому оборудованию',
-			],
-			'history' => [
-				'Записная книжка',
-				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого оборудования/АРМ',
-			],
-			'maintenance_reqs_ids'=>[
-				MaintenanceReqs::$titles,
-				'hint'=>'Какие предъявлены требования по обслуживанию этого оборудования '
-					.'<br>По хорошему требования должны предъявлять сервисы, работающие на '
-					.'этом оборудовании, но можно задать их и явно.'
-			],
-			'effectiveMaintenanceReqs'=>[
-				MaintenanceReqs::$titles,
-				'indexHint'=>'Какие предъявлены требования по обслуживанию.'
-					.'<br>Как распространенные с сервисов, так и заданные явно. '
-					.'<br>Избыточно предъявленные требования помечаются как "архивные"'
-			],
-			'maintenance_jobs_ids'=>[
-				MaintenanceJobs::$titles,
-				'hint'=>'Какие операции регламентного обслуживания проводятся над этим оборудованием',
-				'indexHint'=>'{same}'
-			],
-			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
-			
-			'services_ids' => [
-				'Сервисы',
-				'hint' => 'Работу каких сервисов обеспечивает это оборудование',
-				'indexHint' => '{same}<br />'.QueryHelper::$stringSearchHint,
-			],
-
-			'materials_usages_ids' => 'Использованные материалы',
-			'lics' => [
-				'Лицензии',
-				'hint' => 'Все привязанные лицензии:<br>Типы лицензий, закупки, ключи',
-				'indexHint' => '{same}',
-			]
 		]);
 	}
 	
@@ -518,33 +522,7 @@ class Techs extends ArmsModel
 			}],
         ];
     }
-
-	/**
-	 * В списке поведений прикручиваем many-to-many контрагентов
-	 * @return array
-	 */
-	public function behaviors()
-	{
-		return [
-			[
-				'class' => LinkerBehavior::class,
-				'relations' => [
-					'contracts_ids' => 'contracts',
-					'services_ids' => 'services',
-					'netIps_ids' => 'netIps',
-					'lic_items_ids' => 'licItems',
-					'lic_keys_ids' => 'licKeys',
-					'lic_groups_ids' => 'licGroups',
-					'maintenance_reqs_ids' => 'maintenanceReqs',
-					'maintenance_jobs_ids' => 'maintenanceJobs',
-					'acls_ids' => 'acls', //one-2-many
-					'materials_usages_ids' => 'materialsUsages', //one-2-many
-					'arm_techs_ids' => 'armTechs', 				 //one-2-many
-					'installed_techs_ids' => 'installedTechs', 	 //one-2-many
-				]
-			]
-		];
-	}
+	
 	
 	/**
 	 * Возвращает массив размеров числовой части номера в зависимости от количества токенов
@@ -728,10 +706,17 @@ class Techs extends ArmsModel
 			->from(['arms_comps'=>Comps::tableName()])
 			->orderBy([
 				'arms_comps.ignore_hw'=>SORT_ASC,
-				'arms_comps.name'=>SORT_ASC
+				'arms_comps.name'=>SORT_ASC,
 			]);
 	}
 	
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getDomain()
+	{
+		return $this->hasOne(Domains::class, ['id' => 'domain_id']);
+	}
 	
 	//возвращает список ОС таким образом, что та, на которую указывает сам АРМ будет первой
 	public function getSortedComps()
@@ -1158,7 +1143,7 @@ class Techs extends ArmsModel
 			$model_ports[$port->name]=[
 				'port_name'=>$port->name,
 				'port_comment'=>$port->comment,
-				'port_link'=>$port
+				'port_link'=>$port,
 			];
 		}
 		
@@ -1171,7 +1156,7 @@ class Techs extends ArmsModel
 		foreach ($this->portsList as $name=>$port) {
 			$out[]=[
 				'id'=>is_object($port['port_link'])?$port['port_link']->id:"create:$name",
-				'name'=>$name
+				'name'=>$name,
 			];
 		}
 		return $out;
@@ -1283,13 +1268,13 @@ class Techs extends ArmsModel
 			}
 			
 			/* взаимодействие с NetIPs */
-			$this->netIps_ids=NetIps::fetchIpIds($this->ip);
+			$this->net_ips_ids=NetIps::fetchIpIds($this->ip);
 			
 			//грузим старые значения записи
 			$old=static::findOne($this->id);
 			if (!is_null($old)) {
 				//находим все IP адреса которые от этой ОС отвалились
-				$removed = array_diff($old->netIps_ids, $this->netIps_ids);
+				$removed = array_diff($old->net_ips_ids, $this->net_ips_ids);
 				//если есть отвязанные от это ос адреса
 				if (count($removed)) foreach ($removed as $id) {
 					//если он есть в БД
@@ -1366,7 +1351,7 @@ class Techs extends ArmsModel
 	//имя в списке оборудования и ОС сервиса (для сортировки)
 	public function getInServicesName() {return mb_strtolower($this->model->nameWithVendor);}
 	
-	public function reverseLinks()
+	/*public function reverseLinks()
 	{
 		return [
 			$this->comps,
@@ -1377,8 +1362,8 @@ class Techs extends ArmsModel
 			$this->licItems,
 			$this->licGroups,
 			$this->licKeys,
-			$this->ports
+			$this->ports,
 		];
-	}
+	}*/
 	
 }
