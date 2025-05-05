@@ -203,6 +203,7 @@ class Techs extends ArmsModel
 		return [
 			'site',
 			'comp',
+			'fqdn',
 			'supportTeam',
 			'responsible',
 			'servicesResponsible',
