@@ -2,6 +2,8 @@
 namespace app\components;
 
 use app\components\assets\DynaGridWidgetAsset;
+use app\components\gridColumns\DefaultColumn;
+use app\components\gridColumns\ItemColumn;
 use app\helpers\ArrayHelper;
 use app\models\ArmsModel;
 use app\models\ui\UiTablesCols;
@@ -10,6 +12,8 @@ use kartik\dynagrid\DynaGrid;
 use kartik\dynagrid\DynaGridStore;
 use kartik\dynagrid\models\DynaGridConfig;
 use kartik\dynagrid\Module;
+use kartik\grid\BooleanColumn;
+use kartik\grid\DataColumn;
 use kartik\grid\GridView;
 use NumberFormatter;
 use Yii;
@@ -225,27 +229,30 @@ JS;
 		return $columns;
 	}
 	
+	/**
+	 * Заполняет определение колонки аттрибутами по умолчанию
+	 * @param $attr
+	 * @param $data
+	 * @return array|mixed
+	 * @throws \Throwable
+	 */
 	public function defaultColumn($attr,$data=[]) {
 		if (!isset($data['attribute']))
 			$data['attribute']=$attr;
 		
-		$attribute=isset($data['modelAttribute'])?
-			$data['modelAttribute']:
-			$data['attribute'];
-		
+		$attribute=$data['modelAttribute']??$data['attribute'];
 		
 		if (!isset($data['format']))
 			$data['format']='raw';
 		
-		//custom class if not set
+		//задаем класс колонки по умолчанию
 		$data=ArrayHelper::setTreeDefaultValue($data,['contentOptions','class'],$attr.'_col');
 		
+		//создаем ID колонки по умолчанию для resizable-columns
 		$colId=str_replace('-','_',$data['attribute']);
-		
-		//column id for resizable-column
 		$data=ArrayHelper::setTreeDefaultValue($data,['headerOptions','data-resizable-column-id'],$colId);
 		
-		//fetching saved column width
+		//Расставляем ширины колонок
 		if (UiTablesCols::colWidthsExist($this->id)) {
 			//если ширина сохранена - проставляем ее
 			if ($width=UiTablesCols::fetchColWidth($this->id,$colId)) {
@@ -257,9 +264,7 @@ JS;
 			}
 		}
 		
-		
-		$model=isset($data['model'])?
-			$data['model']:$this->model;
+		$model=$data['model']??$this->model;
 		
 		$data['label']=AttributeHintWidget::widget([
 			'model'=>$model,
@@ -272,9 +277,25 @@ JS;
 		unset($data['hint']);
 		unset($data['model']);
 		unset($data['modelAttribute']);
+		
+		if (!isset($data['class']) && !isset($data['value'])  && $model->hasMethod('attributeIsLink') && $model->attributeIsLink($attr)) {
+			$data['class']=DefaultColumn::class;
+		}
+		
+		if (!isset($data['class']) && !isset($data['value'])  && $model->hasMethod('getAttributeType')) {
+			switch ($model->getAttributeType($attr)) {
+				case 'boolean': $data['class']=BooleanColumn::class; break;
+				case 'text': $data['class']=DefaultColumn::class; break;
+			}
+		}
+		
+		if (!isset($data['class']) && !isset($data['value']) && $attr==='name') {
+			$data['class']=ItemColumn::class;
+		}
 
 		return $data;
 	}
+	
 	
 	
 	public function prepareColumns() {
