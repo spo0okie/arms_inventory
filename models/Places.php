@@ -17,10 +17,10 @@ use app\helpers\ArrayHelper;
  * @property string      $fullName Полное название
  * @property string      $prefTree Префикс с резервированием родительским.
  * @property string      $addr Адрес
- * @property Techs       $techsRecursive
+ * @property Techs[]     $techsRecursive
  * @property Places      $top помещение самого верхнего уровня над текущим
  * @property Places      $parent родительское помещения
- * @property Techs       $techs техника размещенная в этом помещении
+ * @property Techs[]     $techs техника размещенная в этом помещении
  * @property string      $prefix Префикс
  * @property string      $short Короткое имя
  * @property string      $map
@@ -306,7 +306,10 @@ DELIMITER ;
 		return $children;
 		//return $this->children_cache = $this->hasMany(Places::class, ['parent_id' => 'id']);
 	}
-
+	
+	/**
+	 * @return array
+	 */
 	public static function fetchAll(){
 		if (!is_null(static::$all_items)) return static::$all_items;
 		static::$all_items=[];
