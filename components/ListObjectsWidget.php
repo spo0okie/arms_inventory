@@ -32,7 +32,7 @@ class ListObjectsWidget extends Widget
 	public $archived;			//признак того что весь список состоит из архивных элементов
 	public $lineBr=true;		//переносить строку между элементами
 	public $glue=' ';			//чем разделять элементы
-	public $show_empty=false;	//отображать заголовок если список пуст
+	public $show_empty=false;	//отображать виджет если список пуст
 	public $message_on_empty='';//отображать сообщение вместо списка, если он пуст
 	public $itemViewPath;		//путь для рендера элемента
 	public $modelClass;
