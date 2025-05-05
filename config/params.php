@@ -25,6 +25,17 @@ return [
 		'Bday' => 'SAP',
 		'manager_id' => 'SAP',
 	],
+	'textFields'=>[
+		'default'=>'text',
+		'Aces.notepad'=>'markdown',
+		'Acls.notepad'=>'markdown',
+		'MaintenanceJobs.description'=>'markdown',
+		'MaintenanceReqs.description'=>'markdown',
+		'Networks.notepad'=>'markdown',
+		'Schedules.history'=>'markdown',
+		'Segments.history'=>'markdown',
+		'Users.notepad'=>'markdown',
+	],
 	'schedulesTZShift'=>3600*3,
 	'contractsPayDocFormat'=>'Формат имени счетов следующий:<br>'.
 		'<i>Счет №&lt;номер счета&gt; - ЗНП&lt;номер ЗНП&gt; - СЗ№&lt;номер Служебки по которой все это началось&gt; '.
