@@ -1,8 +1,9 @@
 <?php
 
+use app\components\Forms\ArmsForm;
+use app\models\Contracts;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgInet */
@@ -13,43 +14,33 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="org-inet-form">
 
-    <?php $form = ActiveForm::begin([
-	    'action' => $model->isNewRecord?\yii\helpers\Url::to(['org-inet/create']):\yii\helpers\Url::to(['org-inet/update','id'=>$model->id]),
+    <?php $form = ArmsForm::begin([
+	    'action' => $model->isNewRecord? Url::to(['org-inet/create']): Url::to(['org-inet/update','id'=>$model->id]),
+		'model' => $model
     ]); ?>
     <div class="row">
         <div class="col-md-6">
 			<div class="row">
 				<div class="col-md-7">
-					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+					<?= $form->field($model, 'name') ?>
 				</div>
 				<div class="col-md-5">
-					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'account') ?>
+					<?= $form->field($model, 'account') ?>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="col-md-7">
-					<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'services_id', [
-						'data' => \app\models\Services::fetchProviderNames(),
-						'options' => ['placeholder' => 'Выберите услугу связи',],
-						'pluginOptions' => [
-							'dropdownParent' => $modalParent,
-							'allowClear' => false,
-							'multiple' => false
-						]
-					]) ?>
+					<?= $form->field($model, 'services_id')->select2() ?>
 				</div>
 				<div class="col-md-3">
-					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'cost') ?>
+					<?= $form->field($model, 'cost') ?>
 				</div>
 				<div class="col-md-2">
-					<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'charge',[
-						'staticHint'=>\app\models\Contracts::chargeCalcHtml('orginet','cost','charge')
-					]) ?>
+					<?= $form->field($model, 'charge')
+					->classicHint(Contracts::chargeCalcHtml('orginet','cost','charge')) ?>
 				</div>
-				<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment',[
-					'lines' => 2,
-				]) ?>
+				<?= $form->field($model, 'comment')->text(['rows' => 2,]) ?>
 			</div>
 
             <div class="form-group">
@@ -57,29 +48,12 @@ if (!isset($modalParent)) $modalParent=null;
             </div>
         </div>
         <div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'places_id', [
-				'data' => \app\models\Places::fetchNames(),
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => false,
-					'multiple' => false
-				]
-			]) ?>
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'networks_ids', [
-				'data' => \app\models\Networks::fetchNames(),
-				'options' => ['placeholder' => 'Выберите предоставляемую подсеть',],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => false,
-					'multiple' => true
-				]
-			]) ?>
+			<?= $form->field($model, 'places_id')->select2() ?>
+			<?= $form->field($model,'networks_ids')->select2() ?>
 			
-			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'history',[
-				'lines' => 2,
-			]) ?>
+			<?= $form->field($model, 'history')->text(['rows' => 2,]) ?>
 			<div class="float-end">
-				<?= \app\helpers\FieldsHelper::CheckboxField($form,$model,'archived') ?>
+				<?= $form->field($model,'archived')->checkbox() ?>
 			</div>
 		</div>
     </div>
@@ -88,6 +62,6 @@ if (!isset($modalParent)) $modalParent=null;
 
 
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

@@ -51,7 +51,7 @@ return [
 			$items=[];
 			foreach ($data->accessTypes as $type) {
 				$params=$data->getIpParams()[$type->id]??null;
-				$items[]=$renderer->render('/access-types/item',[
+				$items[]=$renderer->render('/layouts/item',[
 					'model'=>$type,
 					'static_view'=>true,
 					'suffix'=>$params?': '.$params:'',

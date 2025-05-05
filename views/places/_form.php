@@ -1,10 +1,10 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use app\helpers\ArrayHelper;
 use app\helpers\FieldsHelper;
 use app\models\Places;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 use yii\web\JsExpression;
 
@@ -22,36 +22,27 @@ if ($model->parent_id)
 
 <div class="places-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin(['model'=>$model]); ?>
 
 	<div class="row">
 		<div class="col-5">
-			<?= $form->field($model, 'parent_id')->widget(Select2::class, [
-				'data' => Places::fetchNames(),
-				'options' => ['placeholder' => 'Выберите родительское помещение',],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
+			<?= $form->field($model, 'parent_id')->select2() ?>
 		</div>
 		<div class="col-5">
-			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+			<?= $form->field($model, 'name') ?>
 		</div>
 		<div class="col-2">
-			<?= $form->field($model, 'short')->textInput(['maxlength' => true]) ?>
+			<?= $form->field($model, 'short') ?>
 		</div>
 	</div>
 
 
 	<div class="row">
 		<div class="col-8">
-			<?= $form->field($model, 'addr')->textInput(['maxlength' => true,'placeholder'=>($model->parent_id)?$model->parent->addr:'']) ?>
+			<?= $form->field($model, 'addr') ?>
 		</div>
 		<div class="col-2">
-			<?= $form->field($model, 'prefix')->textInput(['maxlength' => true,'placeholder'=>($model->parent_id)?$model->parent->prefix:'']) ?>
+			<?= $form->field($model, 'prefix') ?>
 		</div>
 		<div class="col-2">
 			<?= $form->field($model, 'map_id')->widget(Select2::class, [
@@ -72,7 +63,7 @@ if ($model->parent_id)
 
 
 
-	<?= FieldsHelper::TextAutoresizeField($form,$model,'comment',['lines'=>3]) ?>
+	<?= $form->field($model,'comment')->textAutoresize() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
@@ -85,6 +76,6 @@ if ($model->parent_id)
 		<?= FieldsHelper::TextAutoresizeField($form,$model,'map',['lines'=>3]) ?>
 	</div>
 	
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

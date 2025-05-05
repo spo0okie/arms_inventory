@@ -14,5 +14,4 @@ use yii\helpers\Html;
 	</h1>
 	
 	<?= $this->render('card',['model'=>$model,'static_view'=>true]) ?>
-	<?= $this->render('notepad',['model'=>$model,'static_view'=>true]) ?>
 </div>

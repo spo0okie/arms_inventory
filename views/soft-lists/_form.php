@@ -1,5 +1,7 @@
 <?php
 
+use app\components\Forms\ArmsForm;
+use app\helpers\FieldsHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
@@ -12,28 +14,18 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="soft-lists-form">
 
-    <?php $form = ActiveForm::begin([
-		//'enableClientValidation' => false,	//чтобы отключить валидацию через JS в браузере
-		//'enableAjaxValidation' => true,		//чтобы включить валидацию на сервере ajax запросы
-		//'id' => 'soft-lists-form',
-		//'validationUrl' => $model->isNewRecord?	//URL валидации на стороне сервера
-			//['soft-lists/validate']:	//для новых моделей
-			//['soft-lists/validate','id'=>$model->id], //для существующих
-		//'action' => Yii::$app->request->getQueryString(),
-	]); ?>
+    <?php $form = ArmsForm::begin(['model'=>$model]); ?>
 
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'name') ?>
 
-    <?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'descr') ?>
 	
-	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'comment', [
-		'lines' => 4,
-	]) ?>
+	<?= $form->field($model, 'comment')->text() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

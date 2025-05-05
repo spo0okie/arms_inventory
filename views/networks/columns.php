@@ -1,5 +1,6 @@
 <?php
 
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 
@@ -40,5 +41,10 @@ return [
 		'contentOptions' => ['class' => 'usage_col']
 			
 	],
-	'comment'
+	'comment'=>[
+		'value' => function ($data) use ($renderer) {
+			return TextFieldWidget::widget(['model'=>$data,'field'=>'comment']);
+		},
+		'contentOptions' => ['class' => 'comment_col']
+	],
 ];

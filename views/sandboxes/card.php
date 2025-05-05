@@ -4,6 +4,7 @@ use app\components\HistoryWidget;
 use app\components\IsArchivedObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\LinkObjectWidget;
+use app\components\TextFieldWidget;
 
 
 /* @var $this yii\web\View */
@@ -31,6 +32,6 @@ if (!isset($static_view)) $static_view=false;
 	</div>
 <?php
 	echo ModelFieldWidget::widget(['model'=>$model,'field'=>'suffix']);
-	echo ModelFieldWidget::widget(['model'=>$model,'field'=>'notepad']);
+	echo TextFieldWidget::widget(['model'=>$model,'field'=>'notepad']);
 	echo ModelFieldWidget::widget(['model'=>$model,'field'=>'links']);
 

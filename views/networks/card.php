@@ -5,6 +5,7 @@
 
 use app\components\LinkObjectWidget;
 use app\components\StripedAlertWidget;
+use app\components\TextFieldWidget;
 
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
@@ -17,7 +18,7 @@ if (!isset($static_view)) $static_view=false;
 		'name'=>$model->sname
 	])?>
 </h1>
-<p class="mb-2"><?= Yii::$app->formatter->asNtext($model->comment) ?></p>
+<p class="mb-2"><?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?></p>
 
 <?php if ($model->archived) { echo StripedAlertWidget::widget(['title'=>'СЕТЬ ПЕРЕНЕСЕНА В АРХИВ']); }?>
 	<h4>

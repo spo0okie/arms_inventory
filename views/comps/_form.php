@@ -1,13 +1,6 @@
 <?php
 
 use app\components\Forms\ArmsForm;
-use app\helpers\FieldsHelper;
-use app\models\Domains;
-use app\models\MaintenanceJobs;
-use app\models\MaintenanceReqs;
-use app\models\Sandboxes;
-use app\models\Services;
-use app\models\Techs;
 use app\models\Users;
 use yii\helpers\Html;
 
@@ -32,116 +25,64 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<div class="row">
 		<div class="col-md-4">
-			<?= FieldsHelper::Select2Field($form,$model, 'domain_id',[
-				'data'=> Domains::fetchNames(),
-			]) ?>
+			<?= $form->field($model, 'domain_id')->select2() ?>
 		</div>
 		<div class="col-md-4">
-			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+			<?= $form->field($model, 'name') ?>
 		</div>
 		<div class="col-md-4">
-			<?= FieldsHelper::Select2Field($form,$model, 'sandbox_id',[
-				'data'=> Sandboxes::fetchNames(),
-			]) ?>
+			<?= $form->field($model,  'sandbox_id')->select2() ?>
 		</div>
 	</div>
 
 	<div class="row">
 		<div class="col-md-4">
-			<?= FieldsHelper::Select2Field($form,$model, 'user_id', [
+			<?= $form->field($model,  'user_id')->select2([
 				'data' => Users::fetchWorking($model->user_id),
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
 			]) ?>
 		</div>
 		<div class="col-md-8">
-			<?= FieldsHelper::Select2Field($form,$model,'admins_ids', [
+			<?= $form->field($model, 'admins_ids')->select2([
 				'data' => Users::fetchWorking($model->admins_ids),
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
 			]) ?>
 		</div>
 	</div>
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= FieldsHelper::Select2Field($form,$model,'arm_id', [
-				'data' => Techs::fetchArmNames(),
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				],
-				'options'=>[
-					'onchange'=>"$('#comps-form').yiiActiveForm('validateAttribute', 'comps-platform_id')",
-				],
-			]) ?>
+			<?= $form->field($model, 'arm_id')->select2(['options'=>[
+				'onchange'=>"$('#comps-form').yiiActiveForm('validateAttribute', 'comps-platform_id')",
+			]]) ?>
 		</div>
 		<div class="col-md-6">
-			<?= FieldsHelper::Select2Field($form,$model, 'platform_id', [
-				'data' => Services::fetchNames(),
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				],
-				'options'=>[
-					'onchange'=>"$('#comps-form').yiiActiveForm('validateAttribute', 'comps-arm_id')",
-				],
-			]) ?>
+			<?= $form->field($model, 'platform_id')->select2(['options'=>[
+				'onchange'=>"$('#comps-form').yiiActiveForm('validateAttribute', 'comps-arm_id')",
+			]]) ?>
 		</div>
 	</div>
 	<div class="row">
 		<div class="col-md-6">
-			<?= FieldsHelper::CheckboxField($form,$model, 'ignore_hw') ?>
+			<?= $form->field($model, 'ignore_hw')->checkbox() ?>
 		</div>
 		<div class="col-md-6 float-end">
-			<?= FieldsHelper::CheckboxField($form,$model,'archived') ?>
+			<?= $form->field($model, 'archived')->checkbox() ?>
 		</div>
 	</div>
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= FieldsHelper::Select2Field($form,$model, 'services_ids', [
-				'data' => Services::fetchNames(),
-				'options' => ['placeholder' => 'Нет сервисов',],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<?= $form->field($model, 'services_ids')->select2() ?>
 		</div>
 		<div class="col-md-3">
-			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
-				'data' => MaintenanceReqs::fetchNames(),
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<?= $form->field($model, 'maintenance_reqs_ids')->select2() ?>
 		</div>
 		<div class="col-md-3">
-			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_jobs_ids', [
-				'data' => MaintenanceJobs::fetchNames(),
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<?= $form->field($model,  'maintenance_jobs_ids')->select2() ?>
 		</div>
 	</div>
 
 
-	<?= FieldsHelper::TextAutoresizeField($form,$model, 'comment',['lines'=>2]) ?>
+	<?= $form->field($model,  'comment')->text(['rows'=>2]) ?>
 
     <p>
         <span onclick="$('#comps_advanced_settings').toggle()" class="href">Расширенные настройки</span>
@@ -149,23 +90,23 @@ if (!isset($modalParent)) $modalParent=null;
     <div id="comps_advanced_settings" style="display: none">
 		<div class="row">
 			<div class="col-md-10">
-				<?= $form->field($model, 'os')->textInput(['maxlength' => true]) ?>
+				<?= $form->field($model, 'os') ?>
 			</div>
 			<div class="col-md-2">
-				<?= $form->field($model, 'raw_version')->textInput(['maxlength' => true]) ?>
+				<?= $form->field($model, 'raw_version') ?>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-md-6">
-				<?= $form->field($model, 'ip')->textarea(['rows' => 2]) ?>
+				<?= $form->field($model, 'ip')->textAutoresize(['rows' => 2]) ?>
 			</div>
 			<div class="col-md-6">
-				<?= $form->field($model, 'mac')->textarea(['rows' => 2]) ?>
+				<?= $form->field($model, 'mac')->textAutoresize(['rows' => 2]) ?>
 			</div>
 		</div>
-        <?= $form->field($model, 'raw_hw')->textarea(['rows' => 10]) ?>
-		<?= $form->field($model, 'raw_soft')->textarea(['rows' => 10]) ?>
-		<?= $form->field($model, 'external_links')->textarea(['rows' => 10]) ?>
+        <?= $form->field($model, 'raw_hw')->textAutoresize(['rows' => 10]) ?>
+		<?= $form->field($model, 'raw_soft')->textAutoresize(['rows' => 10]) ?>
+		<?= $form->field($model, 'external_links')->textAutoresize(['rows' => 10]) ?>
     </div>
 
 

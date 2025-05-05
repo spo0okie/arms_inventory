@@ -1,9 +1,7 @@
 <?php
 
-use app\helpers\FieldsHelper;
-use app\models\MaintenanceReqs;
-use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
+use app\components\Forms\ArmsForm;
+use yii\bootstrap5\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\MaintenanceReqs */
@@ -12,41 +10,21 @@ use yii\bootstrap5\ActiveForm;
 
 <div class="maintenance-reqs-form">
 
-    <?php $form = ActiveForm::begin([
-		//'enableClientValidation' => false,	//чтобы отключить валидацию через JS в браузере
-		//'enableAjaxValidation' => true,		//чтобы включить валидацию на сервере ajax запросы
-		//'id' => 'maintenance-reqs-form',
-		//'validationUrl' => $model->isNewRecord?	//URL валидации на стороне сервера
-			//['maintenance-reqs/validate']:	//для новых моделей
-			//['maintenance-reqs/validate','id'=>$model->id], //для существующих
-		//'action' => Yii::$app->request->getQueryString(),
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
 	]); ?>
 	<div class="row">
 		<div class="col-4">
-			<?= FieldsHelper::TextInputField($form,$model, 'name') ?>
-			<?= FieldsHelper::CheckboxField($form,$model, 'is_backup') ?>
-			<?= FieldsHelper::CheckboxField($form,$model, 'spread_comps') ?>
-			<?= FieldsHelper::CheckboxField($form,$model, 'spread_techs') ?>
-			<?= FieldsHelper::Select2Field($form,$model,'includes_ids',[
-				'data'=> MaintenanceReqs::fetchNames(),
-				//'hintModel'=>'auto',
-				'pluginOptions' => [
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model,'included_ids',[
-				'data'=> MaintenanceReqs::fetchNames(),
-				//'hintModel'=>'auto',
-				'pluginOptions' => [
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<?= $form->field($model, 'name') ?>
+			<?= $form->field($model, 'is_backup')->checkbox() ?>
+			<?= $form->field($model, 'spread_comps')->checkbox() ?>
+			<?= $form->field($model, 'spread_techs')->checkbox() ?>
+			<?= $form->field($model,'includes_ids')->select2() ?>
+			<?= $form->field($model,'included_ids')->select2() ?>
 		</div>
 		<div class="col-8">
-			<?= FieldsHelper::MarkdownField($form,$model, 'description',['height'=>140]) ?>
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links') ?>
+			<?= $form->field($model, 'description')->text(['height'=>140,'rows'=>10]) ?>
+			<?= $form->field($model, 'links')->textAutoresize() ?>
 		</div>
 	</div>
 	
@@ -54,6 +32,6 @@ use yii\bootstrap5\ActiveForm;
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

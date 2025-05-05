@@ -1,10 +1,7 @@
 <?php
 
-use app\helpers\FieldsHelper;
-use app\models\Segments;
-use kartik\markdown\MarkdownEditor;
+use app\components\Forms\ArmsForm;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
@@ -19,70 +16,49 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 
 <div class="networks-form">
 	
-	<?php $form = ActiveForm::begin([
+	<?php $form = ArmsForm::begin([
 		'enableClientValidation' => false,   //чтобы отключить валидацию через JS в браузере
 		'enableAjaxValidation' => true,       //чтобы включить валидацию на сервере ajax запросы
 		'id' => 'networks-form',
 		'validationUrl' => $model->isNewRecord?['networks/validate']:['networks/validate','id'=>$model->id], //URL валидации на стороне сервера
+		'model' => $model
 	]); ?>
 	<div class="row">
 		<div class="col-md-6">
 			<div class="row">
 				<div class="col-md-6">
-					<?= FieldsHelper::TextInputField($form,$model, 'text_addr') ?>
+					<?= $form->field($model, 'text_addr') ?>
 				</div>
 				<div class="col-md-6">
-					<?= FieldsHelper::TextInputField($form,$model, 'name') ?>
+					<?= $form->field($model, 'name') ?>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-6">
-					<?= FieldsHelper::Select2Field($form,$model,  'segments_id', [
-						'data' => Segments::fetchNames(),
-						'options' => [
-							'placeholder' => 'Выберите Сегмент ИТ',
-						],
-						'pluginOptions' => [
-							'dropdownParent' => $modalParent,
-							'allowClear' => true,
-							'multiple' => false
-						]
-					]) ?>
+					<?= $form->field($model,  'segments_id')->select2() ?>
 				</div>
 				<div class="col-md-6">
-					<?= FieldsHelper::Select2Field($form,$model, 'vlan_id', [
-						'data' => app\models\NetVlans::fetchNames(),
-						'options' => [
-							'placeholder' => 'Выберите VLAN',
-						],
-						'pluginOptions' => [
-							'dropdownParent' => $modalParent,
-							'allowClear' => true,
-							'multiple' => false
-						]
-					]) ?>
+					<?= $form->field($model, 'vlan_id')->select2() ?>
 				</div>
 			</div>
-			<?= FieldsHelper::TextInputField($form,$model,  'comment') ?>
+			<?= $form->field($model,  'comment') ?>
 		</div>
 		<div class="col-md-3">
-			<?= FieldsHelper::TextInputField($form,$model,  'text_router') ?>
-			<?= FieldsHelper::TextAutoresizeField($form,$model,  'text_dhcp',['lines'=>2]) ?>
+			<?= $form->field($model,  'text_router') ?>
+			<?= $form->field($model,  'text_dhcp')->textAutoresize(['rows'=>2]) ?>
 		</div>
 		<div class="col-md-3">
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'ranges',['lines'=>2]) ?>
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links') ?>
-			<?= FieldsHelper::CheckboxField($form,$model, 'archived') ?>
+			<?= $form->field($model, 'ranges')->textAutoresize(['rows'=>2]) ?>
+			<?= $form->field($model, 'links')->textAutoresize() ?>
+			<?= $form->field($model, 'archived')->checkbox() ?>
 		</div>
 	</div>
 
-	<?= $form->field($model, 'notepad')->widget(MarkdownEditor::class, [
-		'showExport'=>false
-	]) ?>
+	<?= $form->field($model, 'notepad')->text() ?>
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

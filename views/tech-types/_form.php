@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
@@ -12,21 +13,21 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="tech-types-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin(['model'=>$model]); ?>
 
 	<div class="row">
 		<div class="col-md-4">
-			<?= FieldsHelper::TextInputField($form,$model, 'name') ?>
+			<?= $form->field($model, 'name') ?>
 		</div>
 		<div class="col-md-3">
-			<?= FieldsHelper::TextInputField($form,$model, 'prefix') ?>
+			<?= $form->field($model, 'prefix') ?>
 		</div>
 		<div class="col-md-3">
-			<?= FieldsHelper::TextInputField($form,$model, 'code') ?>
+			<?= $form->field($model, 'code') ?>
 		</div>
-		<div class="col-md-2">
+		<div class="col-md-2 mt-3">
 			<br>
-			<?= FieldsHelper::CheckboxField($form,$model, 'hide_menu') ?>
+			<?= $form->field($model, 'hide_menu')->checkbox() ?>
 		</div>
 	</div>
 
@@ -34,7 +35,7 @@ if (!isset($modalParent)) $modalParent=null;
 	
 	<div class="row">
 		<div class="col-md-9">
-			<?= FieldsHelper::TextAutoresizeField($form,$model,'comment',['lines' => 8,]) ?>
+			<?= $form->field($model,'comment')->textAutoresize(['rows' => 8,]) ?>
 
 		</div>
 		<div class="col-md-3">
@@ -43,10 +44,10 @@ if (!isset($modalParent)) $modalParent=null;
 					Может выполнять роли
 				</div>
 				<div class="card-body">
-					<?= FieldsHelper::CheckboxField($form,$model,'is_computer') ?>
-					<?= FieldsHelper::CheckboxField($form,$model,'is_display') ?>
-					<?= FieldsHelper::CheckboxField($form,$model,'is_ups') ?>
-					<?= FieldsHelper::CheckboxField($form,$model,'is_phone') ?>
+					<?= $form->field($model,'is_computer')->checkbox() ?>
+					<?= $form->field($model,'is_display')->checkbox() ?>
+					<?= $form->field($model,'is_ups')->checkbox() ?>
+					<?= $form->field($model,'is_phone')->checkbox() ?>
 				</div>
 			</div>
 		</div>
@@ -54,13 +55,13 @@ if (!isset($modalParent)) $modalParent=null;
 
 
 
-	<?= FieldsHelper::TextInputField($form,$model, 'comment_name') ?>
+	<?= $form->field($model, 'comment_name') ?>
 
-	<?= FieldsHelper::TextInputField($form,$model, 'comment_hint') ?>
+	<?= $form->field($model, 'comment_hint') ?>
 	
 	<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
 	
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 
 </div>

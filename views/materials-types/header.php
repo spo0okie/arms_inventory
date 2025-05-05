@@ -3,6 +3,7 @@
 use app\components\HintIconWidget;
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -20,7 +21,7 @@ use yii\widgets\DetailView;
 				'links'=>[$model->materials],
 			]) ?>
 		</h1>
-		<p>	<?= $model->comment ?> </p>
+		<p>	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?> </p>
 	</div>
 	<div class="me-5">
 		<?= DetailView::widget([

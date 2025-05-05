@@ -1,14 +1,15 @@
 <?php
 
+use app\models\HwIgnore;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\HwIgnore */
 
-$this->title = 'Update Hw Ignore: {nameAttribute}';
-$this->params['breadcrumbs'][] = ['label' => 'Hw Ignores', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->title = 'Обновление';
+$this->params['breadcrumbs'][] = ['label' => HwIgnore::$titles, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->comment, 'url' => ['view', 'id' => $model->id]];
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="hw-ignore-update">
 

@@ -1,5 +1,6 @@
 <?php
 
+use app\components\formInputs\DokuWikiEditor;
 use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;
 use app\models\Comps;
@@ -10,7 +11,6 @@ use app\models\MaintenanceReqs;
 use app\models\Partners;
 use app\models\Places;
 use app\models\Schedules;
-use app\models\Segments;
 use app\models\Services;
 use app\models\Techs;
 use app\models\Users;
@@ -19,7 +19,6 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
-/* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
 
 $segmentPlaceholder='Выберите сегмент ИТ инфраструктуры предприятия';
@@ -42,18 +41,10 @@ if (!$model->is_service) $model->is_service=0;
 
 	<div class="row">
 		<div class="col-md-5">
-			<?= FieldsHelper::TextInputField($form,$model, 'name') ?>
+			<?= $form->field($model, 'name') ?>
 		</div>
 		<div class="col-md-5">
-			<?= FieldsHelper::Select2Field($form,$model, 'parent_id', [
-				'data' => Services::fetchNames(),
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
+			<?= $form->field($model, 'parent_id')->select2() ?>
 		</div>
 		<div class="col-md-2">
 			<?= $form->field($model, 'is_service')->radioList([0=>'Услуга',1=>'Сервис'],[
@@ -70,214 +61,75 @@ if (!$model->is_service) $model->is_service=0;
 
     <div class="row">
         <div class="col-md-4">
-	        <?= FieldsHelper::CheckboxField($form,$model, 'is_end_user') ?>
-			<?= FieldsHelper::Select2Field($form,$model, 'segment_id', [
-				'data' => Segments::fetchNames(),
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model, 'providing_schedule_id', [
-				'data' => Schedules::fetchNames(),
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model, 'support_schedule_id', [
-				'data' => Schedules::fetchNames(),
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model,'responsible_id', [
-				'data' => Users::fetchWorking(),
-				'hintModel'=>'Users',
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model,'infrastructure_user_id', [
-				'data' => Users::fetchWorking(),
-				'hintModel'=>'Users',
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model,'places_id', [
-				'data' => Places::fetchNames(),
-				'hintModel'=>'Places',
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-				],
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model,'partners_id', [
-				'data' => Partners::fetchNames(),
-				'hintModel'=>'Partners',
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-				],
-			]) ?>
+	        <?= $form->field($model, 'is_end_user')->checkbox() ?>
+			<?= $form->field($model, 'segment_id')->select2() ?>
+			<?= $form->field($model, 'providing_schedule_id')->select2() ?>
+			<?= $form->field($model, 'support_schedule_id')->select2() ?>
+			<?= $form->field($model, 'responsible_id')->select2() ?>
+			<?= $form->field($model, 'infrastructure_user_id')->select2() ?>
+			<?= $form->field($model, 'places_id')->select2() ?>
+			<?= $form->field($model, 'partners_id')->select2() ?>
 			<div class="row">
 				<div class="col-md-3">
-					<?= FieldsHelper::Select2Field($form,$model,'currency_id', [
-						'data' => Currency::fetchNames(),
-						'toggleAllSettings'=>['selectLabel'=>null],
-						'pluginOptions' => [
-							'dropdownParent' => $modalParent,
-							'allowClear' => false,
-							'multiple' => false
-						],
-					]) ?>
+					<?= $form->field($model,'currency_id')->select2(['allowClear'=>false]) ?>
 				</div>
 				<div class="col-md-6">
-					<?= FieldsHelper::TextInputField($form,$model,'cost') ?>
+					<?= $form->field($model,'cost') ?>
 				</div>
 				<div class="col-md-3">
-					<?= $form->field($model,'charge')->textInput()->hint(Contracts::chargeCalcHtml('services','cost','charge')) ?>
+					<?= $form->field($model,'charge')
+						->classicHint(Contracts::chargeCalcHtml('services','cost','charge')) ?>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-4">
-					<?= FieldsHelper::TextInputField($form,$model,'vm_cores') ?>
+					<?= $form->field($model,'vm_cores') ?>
 				</div>
 				<div class="col-md-4">
-					<?= FieldsHelper::TextInputField($form,$model,'vm_ram') ?>
+					<?= $form->field($model,'vm_ram') ?>
 				</div>
 				<div class="col-md-4">
-					<?= FieldsHelper::TextInputField($form,$model,'vm_hdd') ?>
+					<?= $form->field($model,'vm_hdd') ?>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-6">
-					<?= FieldsHelper::TextInputField($form,$model,'weight') ?>
+					<?= $form->field($model,'weight') ?>
 				</div>
 				<div class="col-md-6 p-3 align-content-end">
 					<br/>
-					<?= FieldsHelper::CheckboxField($form,$model, 'archived') ?>
+					<?= $form->field($model, 'archived')->checkbox() ?>
 				</div>
 			</div>
 
 
 		</div>
         <div class="col-md-8">
-			<?= FieldsHelper::TextAutoresizeField($form,$model,'search_text',['lines' => 1,]) ?>
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'description',['lines' => 2,]) ?>
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links',[	'lines' => 1,]) ?>
-			<?= FieldsHelper::Select2Field($form,$model, 'support_ids', [
-				'data' => Users::fetchWorking(),
-				'hintModel'=>'Users',
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model, 'infrastructure_support_ids', [
-				'data' => Users::fetchWorking(),
-				'hintModel'=>'Users',
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model, 'depends_ids', [
-				'data' => Services::fetchNames(),
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'hintModel'=>'Services',
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model, 'comps_ids', [
-				'data' => Comps::fetchNames(),
-				'hintModel'=>'Comps',
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model, 'techs_ids', [
-				'data' => Techs::fetchNames(),
-				'hintModel'=>'Techs',
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<?= $form->field($model,'search_text')->textAutoresize(['rows' => 1,]) ?>
+			<?= $form->field($model,'description')->textAutoresize(['rows' => 2,]) ?>
+			<?= $form->field($model,'links')->textAutoresize(['rows' => 1,]) ?>
+			<?= $form->field($model,'support_ids')->select2() ?>
+			<?= $form->field($model,'infrastructure_support_ids')->select2() ?>
+			<?= $form->field($model,'depends_ids')->select2() ?>
+			<?= $form->field($model,'comps_ids')->select2() ?>
+			<?= $form->field($model,'techs_ids')->select2() ?>
 			<div class="row">
 				<div class="col-6">
-					<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
-						'data' => MaintenanceReqs::fetchNames(),
-						'hintModel'=>'MaintenanceReqs',
-						'toggleAllSettings'=>['selectLabel'=>null],
-						'pluginOptions' => [
-							'dropdownParent' => $modalParent,
-							'allowClear' => true,
-							'multiple' => true
-						]
-					]) ?>
+					<?= $form->field($model,'maintenance_reqs_ids')->select2() ?>
 				</div>
 				<div class="col-6">
-					<?= FieldsHelper::Select2Field($form,$model, 'maintenance_jobs_ids', [
-						'data' => MaintenanceJobs::fetchNames(),
-						'hintModel'=>'MaintenanceReqs',
-						'toggleAllSettings'=>['selectLabel'=>null],
-						'pluginOptions' => [
-							'dropdownParent' => $modalParent,
-							'allowClear' => true,
-							'multiple' => true
-						]
-					]) ?>
+					<?= $form->field($model, 'maintenance_jobs_ids')->select2() ?>
 
 				</div>
 			</div>
-			<?= FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
-				'data' => Contracts::fetchNames(),
-				'hintModel'=>'Contracts',
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<?= $form->field($model, 'contracts_ids')->select2() ?>
         </div>
     </div>
 
 	<div class="form-group">
 		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
 	</div>
-	<?= $form->field($model, 'notebook')->widget(MarkdownEditor::className(), [
-		'showExport'=>false
-	]) ?>
+	<?= $form->field($model, 'notebook')->text() ?>
 
 
 

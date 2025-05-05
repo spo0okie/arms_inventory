@@ -4,13 +4,10 @@
  * Содержимое формы вынесено в отдельный файл, т.к. может быть использовано и в форме ACE и в форме ACL
  */
 
+use app\components\Forms\ActiveField;
 use app\models\AccessTypes;
-use app\models\Comps;
-use app\models\Services;
 use app\models\Users;
 use yii\helpers\Html;
-use \app\helpers\FieldsHelper;
-use yii\helpers\Url;
 use yii\web\View;
 
 /* @var $this yii\web\View */
@@ -91,25 +88,15 @@ $this->registerJs('updateAccessTypes()');
 			<div class="card bg-light">
 				<div class="card-header">Кому предоставляется доступ</div>
 				<div class="card-body">
-					<?= FieldsHelper::Select2Field($form, $model, 'users_ids', [
-						'data' => Users::fetchWorking(),
-						'itemsHintsUrl'=> Url::to(['/users/ttip','q'=>'dummyVar']),
-						'pluginOptions' => ['dropdownParent' => $modalParent,'multiple' => true],
-					]) ?>
+					<?= $form->field($model,'users_ids')->select2(['data' => Users::fetchWorking()]) ?>
 					
-					<?= FieldsHelper::Select2Field($form, $model, 'comps_ids', [
-						'data' => Comps::fetchNames(),
-						'pluginOptions' => ['dropdownParent' => $modalParent,'multiple' => true],
-					]) ?>
+					<?= $form->field($model, 'comps_ids')->select2() ?>
 					
-					<?= FieldsHelper::Select2Field($form, $model, 'services_ids', [
-						'data' => Services::fetchNames(),
-						'pluginOptions' => ['dropdownParent' => $modalParent,'multiple' => true],
-					]) ?>
+					<?= $form->field($model, 'services_ids')->select2() ?>
 					
-					<?= FieldsHelper::TextAutoresizeField($form,$model,'ips',['lines' => 1]) ?>
+					<?= $form->field($model,'ips')->textAutoresize(['rows' => 1]) ?>
 					
-					<?= FieldsHelper::TextInputField($form,$model, 'comment') ?>
+					<?= $form->field($model, 'comment') ?>
 				</div>
 			</div>
 
@@ -120,7 +107,7 @@ $this->registerJs('updateAccessTypes()');
 			<div class="card bg-light mb-3">
 				<div class="card-header">Зачем предоставляется доступ</div>
 				<div class="card-body">
-					<?= FieldsHelper::TextInputField($form,$model, 'name');?>
+					<?= $form->field($model,'name');?>
 				</div>
 			</div>
 			<!-- https://www.yiiframework.com/doc/api/2.0/yii-helpers-basehtml#activeCheckboxList()-detail -->
@@ -128,17 +115,16 @@ $this->registerJs('updateAccessTypes()');
 				<div class="card-header"><?= Html::tag(
 						'span',
 						'Какой этим объектам предоставляется доступ',
-						FieldsHelper::toolTipOptions(
+						ActiveField::hintTipOptions(
 							'Типы предоставляемого доступа' ,
 							$model->getAttributeHint('access_types_ids')
 						)
 					)?>
 				</div>
 				<div class="card-body">
-					<?= FieldsHelper::CheckboxListField($form,$model, 'access_types_ids',[
-						'data'=> AccessTypes::fetchNames(),
+					<?= $form->field($model, 'access_types_ids')->checkboxList(AccessTypes::fetchNames(),[
 						'onchange'=>'updateAccessTypes()',
-					]);?>
+					]) ?>
 					<div id="ace-ip-params">
 						<?php foreach ($model->accessTypes as $type) if ($type->is_ip) { ?>
 							<div class="input-group" id="access_type_<?= $type->id ?>_param" data-type-id="<?= $type->id ?>">
@@ -151,7 +137,7 @@ $this->registerJs('updateAccessTypes()');
 				</div>
 			</div>
 			<hr />
-			<?= FieldsHelper::MarkdownField($form,$model, 'notepad',['height'=>100]) ?>
+			<?= $form->field($model, 'notepad')->text(['height'=>100,'rows'=>6]) ?>
 		</div>
 		<?= $form->field($model,"acls_id")->hiddenInput()->label(false)->hint(false) ?>
 	</div>

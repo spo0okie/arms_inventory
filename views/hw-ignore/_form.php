@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 
@@ -11,7 +12,9 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="hw-ignore-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
+	]); ?>
 
     <?= $form->field($model, 'fingerprint')->textInput(['maxlength' => true]) ?>
 
@@ -21,6 +24,6 @@ if (!isset($modalParent)) $modalParent=null;
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

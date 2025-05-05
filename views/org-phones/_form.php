@@ -1,8 +1,9 @@
 <?php
 
+use app\components\Forms\ArmsForm;
+use app\models\Contracts;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
+
 
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgPhones */
@@ -12,72 +13,58 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="org-phones-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
+	]); ?>
 
 	Номер телефона, предоставляемый услугой связи
     <div class="row">
         <div class="col-md-2">
-	        <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'country_code') ?>
+	        <?= $form->field($model, 'country_code') ?>
         </div>
         <div class="col-md-3">
-	        <?= \app\helpers\FieldsHelper::TextInputField($form,$model,'city_code') ?>
+	        <?= $form->field($model,'city_code') ?>
         </div>
         <div class="col-md-7">
-	        <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'local_code') ?>
+	        <?= $form->field($model, 'local_code') ?>
         </div>
     </div>
 
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'places_id', [
-				'data' => \app\models\Places::fetchNames(),
-				'options' => ['placeholder' => 'Выберите помещение',],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => false,
-					'multiple' => false
-				]
-			]) ?>
+			<?= $form->field($model,'places_id')->select2() ?>
 		</div>
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'services_id', [
-				'data' => \app\models\Services::fetchProviderNames(),
-				'options' => ['placeholder' => 'Выберите услугу предоставляющую номер',],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => false,
-					'multiple' => false
-				]
-			]) ?>
+			<?= $form->field($model, 'services_id')->select2() ?>
 		</div>
 
 	</div>
 
     <div class="row">
         <div class="col-md-4">
-	        <?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'account')->textInput(['maxlength' => true]) ?>
+	        <?= $form->field($model, 'account') ?>
         </div>
 		<div class="col-md-4">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'cost')->textInput() ?>
+			<?= $form->field($model, 'cost') ?>
 		</div>
 		<div class="col-md-2">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'charge',[
-				'classicHint'=>\app\models\Contracts::chargeCalcHtml('orgphones','cost','charge')
-			])?>
+			<?= $form->field($model, 'charge')
+				->classicHint(Contracts::chargeCalcHtml('orgphones','cost','charge'))
+			?>
 		</div>
 		<div class="col-md-2 pt-3">
 			<br />
-			<?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'archived')?>
+			<?= $form->field($model, 'archived')->checkbox() ?>
 		</div>
     </div>
 
-    <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'comment')->text(['rows' => 6]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

@@ -127,7 +127,7 @@ return [
 			foreach ($data->acls as $acl)
 				foreach ($acl->aces as $ace )
 					foreach ($ace->accessTypes as $type) {
-						$items[$type->id]=$this->render('/access-types/item',['model'=>$type,'static_view'=>true]);
+						$items[$type->id]=$this->render('/layouts/item',['model'=>$type,'static_view'=>true]);
 					}
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);

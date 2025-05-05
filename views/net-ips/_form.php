@@ -1,8 +1,7 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\NetIps */
@@ -12,28 +11,21 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="net-ips-form">
 
-    <?php $form = ActiveForm::begin([
-		//'enableClientValidation' => false,	//чтобы отключить валидацию через JS в браузере
-		//'enableAjaxValidation' => true,		//чтобы включить валидацию на сервере ajax запросы
-		//'id' => 'net-ips-form',
-		//'validationUrl' => $model->isNewRecord?	//URL валидации на стороне сервера
-			//['net-ips/validate']:	//для новых моделей
-			//['net-ips/validate','id'=>$model->id], //для существующих
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
 	]); ?>
-
-    <?php // $form->field($model, 'addr')->textInput() ?>
-
-    <?php // $form->field($model, 'mask')->textInput() ?>
 
 	<div class="row">
 		<div class="col-md-2">
-			<?= $form->field($model, 'text_addr')->textInput(['maxlength' => true]) ?>
+			<?= $form->field($model, 'text_addr') ?>
 		</div>
-		<div class="col-md-4">
-			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+		
+		<div class="col-md-3">
+			<?= $form->field($model, 'name') ?>
 		</div>
-		<div class="col-md-6">
-			<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+		
+		<div class="col-md-7">
+			<?= $form->field($model, 'comment') ?>
 		</div>
 	</div>
 
@@ -41,6 +33,6 @@ if (!isset($modalParent)) $modalParent=null;
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

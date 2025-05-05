@@ -1,8 +1,10 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
+use app\components\formInputs\DokuWikiEditor;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\MaintenanceJobs */
@@ -11,99 +13,39 @@ use yii\bootstrap5\ActiveForm;
 
 <div class="maintenance-jobs-form">
 
-    <?php $form = ActiveForm::begin([
-		//'enableClientValidation' => false,	//чтобы отключить валидацию через JS в браузере
-		//'enableAjaxValidation' => true,		//чтобы включить валидацию на сервере ajax запросы
-		//'id' => 'maintenance-jobs-form',
-		//'validationUrl' => $model->isNewRecord?	//URL валидации на стороне сервера
-			//['maintenance-jobs/validate']:	//для новых моделей
-			//['maintenance-jobs/validate','id'=>$model->id], //для существующих
-		//'action' => Yii::$app->request->getQueryString(),
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
 	]); ?>
 
 	<div class="row">
 		<div class="col-8">
-			<?= FieldsHelper::TextInputField($form,$model, 'name') ?>
+			<?= $form->field($model, 'name') ?>
 		</div>
 		<div class="col-4">
-			<?= FieldsHelper::Select2Field($form,$model, 'services_id', [
-				'data' => app\models\Services::fetchNames(),
-				'options' => [
-					'placeholder' => 'Сервис отсутствует'
-				],
-				'pluginOptions' => [
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
+			<?= $form->field($model, 'services_id')->select2() ?>
 		</div>
 	</div>
 	<div class="row">
 		<div class="col-8">
-			<?= FieldsHelper::MarkdownField($form,$model, 'description',['height'=>140]) ?>
+			<?= $form->field($model, 'description')->text(['rows'=>6]) ?>
 
 		</div>
 		<div class="col-4">
-			<?= FieldsHelper::Select2Field($form,$model, 'schedules_id', [
-				'data' => app\models\Schedules::fetchNames(),
-				'options' => [
-					'placeholder' => 'Расписание отсутствует'
-				],
-				'pluginOptions' => [
-					'allowClear' => true,
-					'multiple' => false
-				]
-			]) ?>
-			<?= FieldsHelper::Select2Field($form,$model, 'reqs_ids', [
-				'data' => app\models\MaintenanceReqs::fetchNames(),
-				'options' => [
-					'placeholder' => 'Никакие'
-				],
-				'pluginOptions' => [
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links',['lines'=>2]) ?>
+			<?= $form->field($model, 'schedules_id')->select2() ?>
+			<?= $form->field($model, 'reqs_ids')->select2() ?>
+			<?= $form->field($model, 'links')->textAutoresize(['rows'=>2]) ?>
 		</div>
 	</div>
-	<?= FieldsHelper::Select2Field($form,$model, 'services_ids', [
-		'data' => app\models\Services::fetchNames(),
-		'options' => [
-			'placeholder' => 'Сервисы не обслуживаются'
-		],
-		'pluginOptions' => [
-			'allowClear' => true,
-			'multiple' => true
-		]
-	]) ?>
-	<?= FieldsHelper::Select2Field($form,$model, 'comps_ids', [
-		'data' => app\models\Comps::fetchNames(),
-		'options' => [
-			'placeholder' => 'ОС/ВМ не обслуживаются'
-		],
-		'pluginOptions' => [
-			'allowClear' => true,
-			'multiple' => true
-		]
-	]) ?>
-	<?= FieldsHelper::Select2Field($form,$model, 'techs_ids', [
-		'data' => app\models\Techs::fetchNames(),
-		'options' => [
-			'placeholder' => 'Оборуд. не обслуживается'
-		],
-		'pluginOptions' => [
-			'allowClear' => true,
-			'multiple' => true
-		]
-	]) ?>
+	<?= $form->field($model, 'services_ids')->select2() ?>
+	<?= $form->field($model, 'comps_ids')->select2() ?>
+	<?= $form->field($model, 'techs_ids')->select2() ?>
 	<div class="float-end">
-		<?= FieldsHelper::CheckboxField($form,$model,'archived') ?>
+		<?= $form->field($model,'archived')->checkbox() ?>
 	</div>
     <div class="form-group">
         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

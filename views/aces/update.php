@@ -8,9 +8,6 @@ use yii\helpers\Html;
 $this->title = 'Правка записи доступа: ' . $model->sname;
 $this->render('/acls/breadcrumbs',['model'=>$model->acl,'static_view'=>false]);
 $this->params['breadcrumbs'][] = ['label' => $model->sname, 'url' => ['view', 'id' => $model->id]];
-//$this->params['breadcrumbs'][] = $this->title;
-
-//$this->params['breadcrumbs'][] = ['label' => \app\models\Aces::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = 'Правка';
 ?>
 <div class="aces-update">

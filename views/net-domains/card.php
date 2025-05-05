@@ -1,5 +1,6 @@
 <?php
 
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -19,5 +20,5 @@ if (!isset($static_view)) $static_view=false;
 		],
 	]) ?>
 </h1>
-<?= Yii::$app->formatter->asNtext($model->comment) ?>
+<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
 

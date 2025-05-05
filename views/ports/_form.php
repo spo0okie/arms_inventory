@@ -1,10 +1,13 @@
 <?php
 
 use app\components\DeleteObjectWidget;
+use app\components\Forms\ArmsForm;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use kartik\select2\Select2;
 use kartik\depdrop\DepDrop;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Ports */
@@ -15,7 +18,7 @@ if (!empty($model->link_ports_id) && is_object($model->linkPort)) {
 	$model->link_techs_id=$model->linkPort->techs_id;
 	$model->link_arms_id=$model->linkPort->arms_id;
 	//echo $model->link_techs_id."/".$model->link_arms_id;
-};
+}
 /*
 $switchToTech=<<<JS
 	$("#type_switcher_arm").prop('checked',false);
@@ -43,27 +46,22 @@ JS;
 
 <div class="ports-form">
 
-    <?php $form = ActiveForm::begin([
-		//'enableClientValidation' => false,	//чтобы отключить валидацию через JS в браузере
-		//'enableAjaxValidation' => true,		//чтобы включить валидацию на сервере ajax запросы
-		//'id' => 'ports-form',
-		//'validationUrl' => $model->isNewRecord?	//URL валидации на стороне сервера
-			//['ports/validate']:	//для новых моделей
-			//['ports/validate','id'=>$model->id], //для существующих
+    <?php $form = ArmsForm::begin([
+		'model'=>$model
 	]); ?>
 	
 	<?= $form->field($model, 'techs_id')->hiddenInput()->label(false)->hint(false); ?>
 	
 	<?php if (strlen($model->name) && (!$model->hasErrors('name'))) { ?>
 		<?= $form->field($model, 'name')->hiddenInput()->label(false)->hint(false); ?>
-		<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+		<?= $form->field($model, 'comment') ?>
 	<?php } else { ?>
 		<div class="row">
 			<div class="col-md-3">
-				<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+				<?= $form->field($model, 'name') ?>
 			</div>
 			<div class="col-md-9">
-				<?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+				<?= $form->field($model, 'comment') ?>
 			</div>
 		</div>
 	<?php } ?>
@@ -72,27 +70,19 @@ JS;
 	
 	<div class="row">
 		<div id="link_to_tech" class="col-md-8">
-			<?=	$form->field($model, 'link_techs_id')->widget(Select2::className(), [
-				'data' => app\models\Techs::fetchNames(),
+			<?=	$form->field($model, 'link_techs_id')->select2([
 				'options' => [
-					'placeholder' => 'Выберите Устройство',
 					'id'=>'link_techs_id',
 					'onclear' => $clearPort,
 				],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => false
-				]
 			]) ?>
 		</div>
 
 		<div id="link_to_port" class="col-md-4">
 			<?= $form->field($model, 'link_ports_id')->widget(DepDrop::className(), [
-				//'data' => app\models\Ports::fetchNames(),
 				'type' => DepDrop::TYPE_SELECT2,
 				'data' => is_object($model->linkPort)?
-					\yii\helpers\ArrayHelper::map($model->linkPort->tech->ddPortsList,'id','name')
+					ArrayHelper::map($model->linkPort->tech->ddPortsList,'id','name')
 					:null,
 				'options'=>[
 					'placeholder' => 'Выберите '.$model->getAttributeLabel('link_ports_id'),
@@ -103,7 +93,7 @@ JS;
 					'allowClear' => true,
 					'multiple' => false,
 					'loading' => false,
-					'url'=>\yii\helpers\Url::to(['/ports/port-list'])
+					'url'=> Url::to(['/ports/port-list'])
 				]
 			]) ?>
 		</div>
@@ -120,6 +110,6 @@ JS;
 		]) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;
 use app\models\ui\SmsForm;
 use yii\helpers\Html;
@@ -19,7 +20,7 @@ $title='Отправка SMS сообщения';
 <h1><?= $title ?></h1>
 <div class="sms-form disable-on-submit">
 
-    <?php $form = ActiveForm::begin([
+    <?php $form = ArmsForm::begin([
 	    'id'=>'sms-form',
 	    'enableClientValidation' => false,
 	    //'enableAjaxValidation' => true,
@@ -31,17 +32,16 @@ $title='Отправка SMS сообщения';
     ]); ?>
 	<div class="row">
 		<div class="col-3">
-			<?= FieldsHelper::TextInputField($form,$model,'phone') ?>
+			<?= $form->field($model,'phone') ?>
 			<div class="form-group">
 				<?= Html::submitButton('Отправить', ['class' => 'btn btn-success spinner-on-submit']) ?>
 			</div>
 		</div>
 		<div class="col-9">
-			<?= FieldsHelper::TextAutoresizeField($form,$model,'text') ?>
-
+			<?= $form->field($model,'text')->textAutoresize() ?>
 		</div>
 	</div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

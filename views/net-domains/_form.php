@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 
@@ -11,25 +12,25 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="net-domains-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
+	]); ?>
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+			<?= $form->field($model, 'name') ?>
 		</div>
 		<div class="col-md-6">
-			<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'places_id',[
-				'data'=>\app\models\Places::fetchNames()
-			]) ?>
+			<?= $form->field($model, 'places_id')->select2() ?>
 		</div>
 	</div>
 
-    <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'comment')->text(['rows' => 6]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

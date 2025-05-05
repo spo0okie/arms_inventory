@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;
 use app\models\Contracts;
 use app\models\Departments;
@@ -129,7 +130,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 
 <div class="techs-form">
 
-    <?php $form = ActiveForm::begin([
+    <?php $form = ArmsForm::begin([
 	    'id'=>'techs-edit-form',
 	    'enableClientValidation' => false,
 	    'enableAjaxValidation' => true,
@@ -146,16 +147,16 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 
     <div class="row">
         <div class="col-md-3" >
-			<?= FieldsHelper::TextInputField($form,$model, 'num') ?>
+			<?= $form->field($model, 'num') ?>
         </div>
         <div class="col-md-3" >
-			<?= FieldsHelper::TextInputField($form,$model, 'inv_num') ?>
+			<?= $form->field($model, 'inv_num') ?>
         </div>
 		<div class="col-md-3" >
-			<?= FieldsHelper::TextInputField($form,$model, 'sn') ?>
+			<?= $form->field($model, 'sn') ?>
 		</div>
 		<div class="col-md-3" >
-			<?= FieldsHelper::TextInputField($form,$model, 'uid') ?>
+			<?= $form->field($model, 'uid') ?>
 		</div>
     </div>
 	
@@ -163,15 +164,10 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		Yii::$app->params['techs.hostname.enable'] && !(is_object($model->model) && $model->model->getIsPC())) { ?>
 		<div class="row">
 			<div class="col-6">
-				<?= $form->field($model, 'hostname')->textInput(['maxlength' => true]) ?>
+				<?= $form->field($model, 'hostname') ?>
 			</div>
 			<div class="col-6">
-				<?= FieldsHelper::Select2Field($form,$model, 'domain_id',[
-					'data'=> Domains::fetchNames(),
-					'pluginOptions' => [
-						'dropdownParent' => $modalParent,
-					],
-				]) ?>
+				<?= $form->field($model, 'domain_id') ?>
 			</div>
 		</div>
 	<?php } ?>
@@ -266,19 +262,16 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 
 	<div class="row">
 		<div class="col-md-6" >
-			<?= FieldsHelper::TextAutoresizeField($form,$model,'ip',['lines' => 2,]) ?>
+			<?= $form->field($model,'ip')->textAutoresize(['rows' => 2,]) ?>
 		</div>
 		<div class="col-md-6" >
-			<?= FieldsHelper::TextAutoresizeField($form,$model,'mac',['lines' => 1,]) ?>
+			<?= $form->field($model,'mac')->textAutoresize(['rows' => 1,]) ?>
 		</div>
 	</div>
 
 	<div class="row">
 		<div class="col-md-6"  id="tech-arms-selector" <?= ($model->installed_id)?$hidden:'' ?>>
-			<?= FieldsHelper::Select2Field($form,$model, 'arms_id', [
-				'data' => Techs::fetchArmNames(),
-				'hintModel'=>'Techs',
-				'options' => ['placeholder' => 'Выберите АРМ в состав которого входит это оборудование',],
+			<?= $form->field($model, 'arms_id')->select2([
 				'pluginEvents' =>[
 					'change'=>'function(){
                         if ($("#techs-arms_id").val()) {
@@ -287,41 +280,35 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
                             $("#tech-users-selector, #tech-installed-selector, #tech-departments-selector, #tech-place-selector").show();
                         }
                     }'
-				],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-				]
-			])->hint(Contracts::fetchArmsHint($model->contracts_ids,'techs'),['id'=>'arms_id-hint']) ?>
+				]])
+				->classicHint(Contracts::fetchArmsHint($model->contracts_ids,'techs'),['id'=>'arms_id-hint']) ?>
 		</div>
 		<div class="col-md-6" id="tech-installed-param" <?= ($model->installed_id)?'':$hidden ?>>
 			<div class="row float-right	">
 				<div class="col-md-6 ">
-					<?= FieldsHelper::CheckboxField($form,$model,'full_length',[
+					<?= $form->field($model,'full_length')->checkbox([
 						'onchange'=>'{
-						if ($("#techs-full_length").is(":checked")) {
-							$("#tech-installed-pos-end").show();
-						} else {
-							$("#tech-installed-pos-end").hide();
-						}
-						console.log("click");
-					}'
+							if ($("#techs-full_length").is(":checked")) {
+								$("#tech-installed-pos-end").show();
+							} else {
+								$("#tech-installed-pos-end").hide();
+							}
+							console.log("click");
+						}'
 					]) ?>
-					<?= FieldsHelper::CheckboxField($form,$model,'installed_back') ?>
+					<?= $form->field($model,'installed_back')->checkbox() ?>
 				</div>
 				<div class="col-md-3" id="tech-installed-pos">
-					<?= FieldsHelper::TextInputField($form,$model,'installed_pos') ?>
+					<?= $form->field($model,'installed_pos') ?>
 				</div>
 				<div class="col-md-3" id="tech-installed-pos-end" <?= ($model->full_length)?'':$hidden ?>>
-					<?= FieldsHelper::TextInputField($form,$model,'installed_pos_end') ?>
+					<?= $form->field($model,'installed_pos_end') ?>
 				</div>
 				
 			</div>
 		</div>
 		<div class="col-md-6" id="tech-installed-selector" <?= ($model->arms_id)?$hidden:'' ?>>
-			<?= FieldsHelper::Select2Field($form,$model,'installed_id', [
-				'data' => Techs::fetchNames(),
-				'hintModel'=>'Techs',
-				'options' => ['placeholder' => 'Выберите оборудование куда установлено это устройство',],
+			<?= $form->field($model,'installed_id')->select2([
 				'pluginEvents' =>[
                     'change'=>'function(){
                         if ($("#techs-installed_id").val()) {
@@ -333,152 +320,70 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
                         }
                     }'
                 ],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-				]
 			]) ?>
 		</div>
 	</div>
 
 	<div class="row" id="tech-departments-selector" <?= ($model->arms_id)?$hidden:'' ?>>
 		<div class="col-md-6" id="tech-place-selector" <?= ($model->arms_id||$model->installed_id)?$hidden:'' ?>>
-			<?= FieldsHelper::Select2Field($form,$model, 'places_id', [
-				'data' => Places::fetchNames(),
-				'hintModel'=>'Places',
-				'options' => ['placeholder' => 'Выберите помещение',],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-				]
-			]) ?>
+			<?= $form->field($model, 'places_id') ?>
 		</div>
 		<div class="col-md-6">
-			<?= Yii::$app->params['departments.enable']?FieldsHelper::Select2Field($form,$model, 'departments_id', [
-				'data' => Departments::fetchNames(),
-				'options' => ['placeholder' => 'Выберите подразделение',],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-				]
-			]):'' ?>
+			<?= Yii::$app->params['departments.enable']?$form->field($model, 'departments_id'):'' ?>
 		</div>
 	</div>
 	
     <div id="tech-users-selector" <?= ($model->arms_id)?$hidden:'' ?>>
 		<div class="row">
 			<div class="col-md-6" >
-				<?= FieldsHelper::Select2Field($form,$model, 'user_id', [
-					'data' => Users::fetchWorking(),
-					'hintModel'=>'Users',
-					'options' => ['placeholder' => 'Выберите сотрудника',],
-					'pluginOptions' => [
-						'dropdownParent' => $modalParent,
-					]
-				]) ?>
+				<?= $form->field($model, 'user_id') ?>
 
 			</div>
 			<div class="col-md-6" >
-				<?= FieldsHelper::Select2Field($form,$model, 'head_id', [
-					'data' => Users::fetchWorking(),
-					'hintModel'=>'Users',
-					'options' => ['placeholder' => 'Выберите сотрудника',],
-					'pluginOptions' => [
-						'dropdownParent' => $modalParent,
-					]
-				]) ?>
+				<?= $form->field($model, 'head_id') ?>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-md-6" >
 				<?= Yii::$app->params['techs.managementService.enable']?
-				FieldsHelper::Select2Field($form,$model,'management_service_id', [
-					'data' => Services::fetchProviderNames(),
-					'hintModel'=>'Services',
-					'options' => ['placeholder' => 'Выберите услугу сопровождения',],
-					'pluginOptions' => [
-						'dropdownParent' => $modalParent,
-					]
-				]):
-				FieldsHelper::Select2Field($form,$model,'it_staff_id', [
-					'data' => Users::fetchWorking(),
-					'hintModel'=>'Users',
-					'options' => ['placeholder' => 'Выберите сотрудника',],
-					'pluginOptions' => [
-						'dropdownParent' => $modalParent,
-					]
-				])
+					$form->field($model,'management_service_id'):
+					$form->field($model,'it_staff_id')->select2(['data' => Users::fetchWorking()])
 				?>
 			</div>
 			<div class="col-md-6" >
-				<?= FieldsHelper::Select2Field($form,$model,'responsible_id', [
-					'data' => Users::fetchWorking(),
-					'hintModel'=>'Users',
-					'options' => ['placeholder' => 'Выберите сотрудника',],
-					'pluginOptions' => [
-						'dropdownParent' => $modalParent,
-					]
-				]) ?>
+				<?= $form->field($model,'responsible_id')->select2(['data' => Users::fetchWorking()]) ?>
 			</div>
 		</div>
     </div>
 	<div class="row">
 		<div class="col-md-6">
-			<?= FieldsHelper::Select2Field($form,$model, 'services_ids', [
-				'data' => Services::fetchNames(),
-				'options' => ['placeholder' => 'Нет сервисов',],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<?= $form->field($model, 'services_ids') ?>
 		</div>
 		<div class="col-md-3">
-			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_reqs_ids', [
-				'data' => MaintenanceReqs::fetchNames(),
-				'options' => ['placeholder' => 'Получать из сервисов',],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<?= $form->field($model, 'maintenance_reqs_ids') ?>
 		</div>
 		<div class="col-md-3">
-			<?= FieldsHelper::Select2Field($form,$model, 'maintenance_jobs_ids', [
-				'data' => MaintenanceJobs::fetchNames(),
-				'options' => ['placeholder' => 'Отсутствуют',],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => true,
-					'multiple' => true
-				]
-			]) ?>
+			<?= $form->field($model, 'maintenance_jobs_ids') ?>
 		</div>
 	</div>
 	
-	<?= FieldsHelper::Select2Field($form,$model, 'contracts_ids', [
-		'data' => Contracts::fetchNames(),
-		'hintModel'=>'Contracts',
+	<?=  $form->field($model, 'contracts_ids')->select2([
 		'options' => [
-            'placeholder' => 'Выберите документы',
 			'onchange' => 'fetchArmsFromDocs();'
-        ],
-		'pluginOptions' => [
-			'allowClear' => true,
-			'multiple' => true
-		]
+        ]
 	])?>
 	
 	
 	
-	<?= FieldsHelper::TextAutoresizeField($form,$model,'url',['lines' => 2,]) ?>
+	<?=  $form->field($model,'url')->textAutoresize(['rows' => 2,]) ?>
 	
-	<?= FieldsHelper::TextAutoresizeField($form,$model,'history',['lines' => 3,]) ?>
+	<?=  $form->field($model,'history')->text(['rows' => 3,]) ?>
 
 
 	<div class="form-group">
         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

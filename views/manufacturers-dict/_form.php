@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;
 use app\models\Manufacturers;
 use yii\helpers\Html;
@@ -14,24 +15,20 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="manufacturers-dict-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
+	]); ?>
 
-    <?= FieldsHelper::TextInputField($form,$model, 'word') ?>
+    <?= $form->field($model, 'word') ?>
 
 
-    <?= FieldsHelper::Select2Field($form,$model, 'manufacturers_id',[
-    	'data'=> Manufacturers::fetchNames(),
-		'pluginOptions'=>[
-			'modalParent'=>$modalParent
-		]
-	]) ?>
-
+    <?= $form->field($model, 'manufacturers_id')->select2() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
     <p>Нет нужного производителя в списке? - нажимайте
         <?php

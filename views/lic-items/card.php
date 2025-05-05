@@ -1,6 +1,7 @@
 <?php
 
 use app\components\ModelFieldWidget;
+use app\components\TextFieldWidget;
 use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
@@ -37,5 +38,5 @@ if (!isset($linksData)) $linksData=null;
 
 <h4>Комментарий:</h4>
 <p>
-	<?= Markdown::convert($model->comment,[]) ?>
+	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
 </p>

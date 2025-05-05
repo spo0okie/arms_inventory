@@ -1,15 +1,8 @@
 <?php
 
-use app\helpers\FieldsHelper;
-use app\models\Comps;
-use app\models\NetIps;
-use app\models\Networks;
-use app\models\Services;
-use app\models\Techs;
+use app\components\Forms\ArmsForm;
 use kartik\tabs\TabsX;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
@@ -42,22 +35,12 @@ JS;
 
 $this->registerJs($js,yii\web\View::POS_HEAD);
 
-$selectOptions= [
-	'dropdownParent' => $modalParent,
-	'allowClear' => false,
-	'multiple' => false,
-];
 ?>
 
 <div class="acls-form">
-    <?php $form = ActiveForm::begin([
-		//'enableClientValidation' => false,	//чтобы отключить валидацию через JS в браузере
-		//'enableAjaxValidation' => true,		//чтобы включить валидацию на сервере ajax запросы
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
 		'id' => 'acls-form',
-		//'validationUrl' => $model->isNewRecord?	//URL валидации на стороне сервера
-			//['acls/validate']:	//для новых моделей
-			//['acls/validate','id'=>$model->id], //для существующих
-		//'action' => Yii::$app->request->getQueryString(),
 	]); ?>
 	<?= $form->field($model,'schedules_id')->hiddenInput()->label(false)->hint(false) ?>
 
@@ -99,62 +82,27 @@ $selectOptions= [
 						'items'=>[
 							[
 								'label'=>'ОС',
-								'content'=>$form->field($model, 'comps_id')->widget(Select2::class, [
-									'data' => Comps::fetchNames(),
-									'options' => [
-										'placeholder' => 'Выберите ОС',
-										'onchange' => 'onInputUpdate(compInput)',
-									],
-									'pluginOptions' => $selectOptions,
-								]),
+								'content'=>$form->field($model, 'comps_id')->select2(['options'=>['onchange' => 'onInputUpdate(compInput)']]),
 								'active'=>(bool)$model->comps_id
 							],
 							[
 								'label'=>'Оборудование',
-								'content'=>$form->field($model, 'techs_id')->widget(Select2::class, [
-									'data' => Techs::fetchNames(),
-									'options' => [
-										'placeholder' => 'Выберите оборудование',
-										'onchange' => 'onInputUpdate(techInput)',
-									],
-									'pluginOptions' => $selectOptions,
-								]),
+								'content'=>$form->field($model, 'techs_id')->select2(['options'=>['onchange' => 'onInputUpdate(techInput)']]),
 								'active'=>(bool)$model->techs_id
 							],
 							[
 								'label'=>'IP адрес',
-								'content'=>$form->field($model, 'ips_id')->widget(Select2::class, [
-									'data' => NetIps::fetchNames(),
-									'options' => [
-										'placeholder' => 'Выберите IP',
-										'onchange' => 'onInputUpdate(ipInput)',
-									],
-									'pluginOptions' => $selectOptions,
-								]),
+								'content'=>$form->field($model, 'ips_id')->select2(['options'=>['onchange' => 'onInputUpdate(ipInput)']]),
 								'active'=>(bool)$model->ips_id
 							],
 							[
 								'label'=>'IP сеть',
-								'content'=>$form->field($model, 'networks_id')->widget(Select2::class, [
-									'data' => Networks::fetchNames(),
-									'options' => [
-										'placeholder' => 'Выберите IP сеть',
-										'onchange' => 'onInputUpdate(netInput)',
-									],
-									'pluginOptions' => $selectOptions,
-								]),
+								'content'=>$form->field($model, 'networks_id')->select2(['options'=>['onchange' => 'onInputUpdate(netInput)']]),
 								'active'=>(bool)$model->networks_id
 							],
 							[
 								'label'=>'Сервис',
-								'content'=>$form->field($model, 'services_id')->widget(Select2::class, [
-									'data' => Services::fetchNames(),
-									'options' => [
-										'placeholder' => 'Выберите сервис',
-										'onchange' => 'onInputUpdate(srvInput)',
-									],
-									'pluginOptions' => $selectOptions,
-								]),
+								'content'=>$form->field($model, 'services_id')->select2(['options'=>['onchange' => 'onInputUpdate(srvInput)']]),
 								'active'=>(bool)$model->services_id
 							],
 							[
@@ -174,7 +122,7 @@ $selectOptions= [
 					]) ?>
 				</div>
 			</div>
-			<?= FieldsHelper::MarkdownField($form,$model, 'notepad',['height'=>100]) ?>
+			<?= $form->field($model, 'notepad')->text(['height'=>100,'rows'=>6]) ?>
 		</div>
 	</div>
 	
@@ -187,6 +135,6 @@ $selectOptions= [
 			); $("form#acls-form").trigger("submit");'
 		]) ?>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

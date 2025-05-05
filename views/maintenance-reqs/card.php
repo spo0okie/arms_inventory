@@ -3,6 +3,7 @@
 use app\components\IsHistoryObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\LinkObjectWidget;
+use app\components\TextFieldWidget;
 use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
@@ -28,7 +29,7 @@ if ($model->spread_techs) $spread[]='<b>оборудование</b>';
 </h1>
 
 <div class="mb-3">
-	<?= Markdown::convert($model->description,[]) ?>
+	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'description']) ?>
 	<?php if (count($spread)) { ?>
 		<p>
 			Закрепленные за сервисами требования распространяются также на <?= implode(' и ', $spread)?> обеспечивающих работу сервисов.

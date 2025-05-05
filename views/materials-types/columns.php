@@ -7,6 +7,7 @@
 
 /* @var $this yii\web\View */
 
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 
 $renderer = $this;
@@ -20,7 +21,7 @@ return [
 	],
 	'comment' => [
 		'value' => function ($data) {
-			return Html::a($data->comment,['materials-types/view','id'=>$data->id]);
+			return TextFieldWidget::widget(['model'=>$data,'field'=>'comment']);
 		},
 	],
 	'count' => [

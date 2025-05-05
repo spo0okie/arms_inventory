@@ -11,30 +11,8 @@ $this->params['breadcrumbs'][] = ['label' => app\models\Departments::$title, 'ur
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 
-$deleteable=true; //тут переопределить возможность удаления элемента
 ?>
 <div class="departments-view">
-
-    <h1>
-	    <?= Html::encode($this->title) ?>
-	    <?= Html::a('<span class=\"fas fa-pencil-alt\"></span>', ['update', 'id' => $model->id]) ?>
-	    <?php  if($deleteable) echo Html::a('<span class="fas fa-trash"></span>', ['users/delete', 'id' => $model->id], [
-		    'data' => [
-			    'confirm' => 'Удалить этот элемент?',
-			    'method' => 'post',
-		    ],
-	    ]) ?>
-
-
-    </h1>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'id',
-            'name',
-            'comment:ntext',
-        ],
-    ]) ?>
+	<?= $this->render('card',['model'=>$model]) ?>
 
 </div>

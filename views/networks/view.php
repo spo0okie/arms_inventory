@@ -2,6 +2,7 @@
 
 use app\components\DynaGridWidget;
 use app\components\TabsWidget;
+use app\components\TextFieldWidget;
 use kartik\markdown\Markdown;
 use yii\helpers\Url;
 use yii\web\YiiAsset;
@@ -23,7 +24,7 @@ $notepadRender='';
 $notepadLines=0;
 $notepad=strlen(trim($model->notepad));
 if ($notepad) {
-	$notepadRender=Markdown::convert($model->notepad);
+	$notepadRender=TextFieldWidget::widget(['model'=>$model,'field'=>'notepad']);
 	$notepadLines=count(explode("\n",trim($model->notepad)));
 }
 $notepadCompact=$notepadLines<=Yii::$app->params['networkInlineDescriptionLimit'];
@@ -31,7 +32,7 @@ $notepadCompact=$notepadLines<=Yii::$app->params['networkInlineDescriptionLimit'
 $segmentRender='';
 $segmentLines=0;
 if (is_object($model->segment) && trim($model->segment->history)) {
-	$segmentRender=Markdown::convert($model->segment->history);
+	$segmentRender=TextFieldWidget::widget(['model'=>$model->segment,'field'=>'history']);
 	$segmentLines=count(explode("\n",trim($model->segment->history)));
 }
 $segmentCompact=$segmentLines<=Yii::$app->params['networkInlineDescriptionLimit'];

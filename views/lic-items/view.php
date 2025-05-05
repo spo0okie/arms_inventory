@@ -3,6 +3,7 @@
 use app\components\DynaGridWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
+use app\components\TextFieldWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\FieldsHelper;
 use app\models\LicGroups;
@@ -51,7 +52,7 @@ $this->params['headerContent']=
 				'hideUndeletable' => false,
 			])
 			.'</h3>'
-			.Markdown::convert($model->comment,[])
+			.TextFieldWidget::widget(['model'=>$model,'field'=>'comment'])
 			.'<hr/>'
 			.ModelFieldWidget::widget([
 				'model'=>$model,

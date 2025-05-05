@@ -2,6 +2,7 @@
 
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
+use app\components\TextFieldWidget;
 use app\models\LicGroupsSearch;
 use kartik\markdown\Markdown;
 use yii\data\ActiveDataProvider;
@@ -22,7 +23,7 @@ echo
 	'static'=>true
 ])
 .'</h1>'
-.Markdown::convert($model->comment,[])
+.TextFieldWidget::widget(['model'=>$model,'field'=>'comment'])
 .ModelFieldWidget::widget([
 	'model'=>$model,
 	'field'=>'soft',

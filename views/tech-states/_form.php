@@ -1,5 +1,7 @@
 <?php
 
+use app\components\Forms\ArmsForm;
+use app\helpers\FieldsHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 
@@ -11,27 +13,27 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="tech-states-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin(['model'=>$model]); ?>
 
 	<div class="row">
 		<div class="col-md-5">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
+			<?= $form->field($model, 'name') ?>
 		</div>
 		<div class="col-md-5">
-			<?= \app\helpers\FieldsHelper::TextInputField($form,$model, 'code') ?>
+			<?= $form->field($model, 'code') ?>
 		</div>
-		<div class="col-md-2 pt-3">
-			<br />
-			<?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'archived') ?>
+		<div class="col-md-2 mt-3">
+			<br>
+			<?= $form->field($model, 'archived')->checkbox() ?>
 		</div>
 	</div>
 	
-    <?= \app\helpers\FieldsHelper::TextAutoresizeField($form, $model, 'descr',['lines' => 6]) ?>
+    <?= $form->field($model, 'descr')->text() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

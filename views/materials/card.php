@@ -7,6 +7,7 @@
  */
 
 use app\components\LinkObjectWidget;
+use app\components\TextFieldWidget;
 use app\models\Materials;
 use app\models\MaterialsUsages;
 use yii\bootstrap5\Modal;
@@ -34,7 +35,7 @@ if (!isset($hide_places)) $hide_places=false;
 		]) ?>
 	</h1>
 
-	<p>	<?= Yii::$app->formatter->asNtext($model->comment) ?> </p>
+	<p>	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?> </p>
 	<p>
 		<strong>Поступило</strong> <?= $model->date?> <b><?= $model->count?><?= $model->type->units?></b>
 		<?php if ($static_view) { ?>

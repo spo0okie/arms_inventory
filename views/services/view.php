@@ -26,7 +26,13 @@ DynaGridWidgetAsset::register($this);
 <div class="services-view">
 
     <?= $this->render('card',['model'=>$model]) ?>
-	
+	<?php if (strlen($model->notebook)) { ?>
+		<h4>Записная книжка:</h4>
+		<p>
+			<?= \app\components\WikiTextWidget::widget(['model'=>$model,'field'=>'notebook']) ?>
+		</p>
+		<br />
+	<?php } ?>
 </div>
 <?php
 

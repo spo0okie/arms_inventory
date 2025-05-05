@@ -138,7 +138,7 @@ return [
 			 */
 			$items=[];
 			if (count($data->accessTypes)) foreach ($data->accessTypes as $type) {
-				$items[]=$this->render('/access-types/item',['model'=>$type,'static_view'=>true]);
+				$items[]=$this->render('/layouts/item',['model'=>$type,'static_view'=>true]);
 			}
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);

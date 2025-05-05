@@ -6,6 +6,7 @@
  * Time: 2:49
  */
 
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -35,6 +36,6 @@ use yii\helpers\Html;
 
 <?php if ($model->comment) { ?>
 	<h4><?= $model->getAttributeLabel('comment')?> </h4>
-	<?= \Yii::$app->formatter->asNtext($model->comment) ?>
+	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
 <?php } ?>
 

@@ -1,6 +1,7 @@
 <?php
 
 use app\components\HistoryWidget;
+use app\components\TextFieldWidget;
 use kartik\markdown\Markdown;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -10,7 +11,6 @@ use yii\helpers\Url;
 
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
-
 ?>
 
 <div class="card w-100 px-2 acl-card shadow mb-1" id="acl_card_<?= $model->id ?>">
@@ -18,6 +18,7 @@ if (!isset($static_view)) $static_view=false;
 			<div class="col-md-9">
 				<?= $this->render('ace-cards',['model'=>$model,'static_view'=>$static_view]) ?>
 			</div>
+			
 			<div class="col-md-3 py-2">
 				<h5 class="card-title"><?= $this->render('item',['model'=>$model,'static_view'=>true])?></h5>
 				<div class="row">
@@ -54,5 +55,5 @@ if (!isset($static_view)) $static_view=false;
 
 			</div>
 		</div>
-	<small><?= Markdown::convert($model->notepad) ?></small>
+	<small><?= TextFieldWidget::widget(['model'=>$model,'field'=>'notepad']) ?></small>
 </div>

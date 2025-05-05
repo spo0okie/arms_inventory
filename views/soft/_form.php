@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;
 use app\models\Manufacturers;
 use app\models\SoftLists;
@@ -18,32 +19,19 @@ $model->addItem($model->add_item);
 
 <div class="soft-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin(['model'=>$model]); ?>
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= $form->field($model, 'manufacturers_id')->widget(Select2::class, [
-				'data' => Manufacturers::fetchNames(),
-				'options' => ['placeholder' => 'Выберите производителя',],
-				'toggleAllSettings'=>['selectLabel'=>null],
-				'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-					'allowClear' => false,
-					'multiple' => false
-				]
-			]) ?>
+			<?= $form->field($model, 'manufacturers_id')->select2() ?>
 			
 			<?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
 			<?= $form->field($model, 'softLists_ids')->checkboxList(SoftLists::listAll(), ['multiple' => true]) ?>
 
 		</div>
 		<div class="col-md-6">
-			<?= FieldsHelper::MarkdownField($form,$model, 'comment',[
-				'height'=>100
-			]) ?>
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links',[
-				'lines'=>2
-			]) ?>
+			<?= $form->field($model, 'comment')->text() ?>
+			<?= $form->field($model, 'links')->textAutoresize(['rows'=>2]) ?>
 		</div>
 	</div>
 
@@ -52,39 +40,19 @@ $model->addItem($model->add_item);
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'items', [
-				'lines' => 4,
-			]) ?>
+			<?= $form->field($model, 'items')->textAutoresize() ?>
 
 		</div>
 		<div class="col-md-6">
-			<br/>
-				Внимание! Элементы, составляющие пакет ПО, вносятся как regexp выражения. Это означает что многие символы являются служебными и должны быть экранированы.<br />
-				Например \( \. \+ и т.п. Более подробно читать <?= html::a('тут','https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F') ?><br />
+			<?= $form->field($model, 'additional')->textAutoresize() ?>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-md-6">
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'additional', [
-				'lines' => 4,
-			]) ?>
-
-		</div>
-		<div class="col-md-6">
-			<br />
-				Если в списке ПО на компьютере обнаружатся основные компоненты продукта (те что выше), то из него вместе с основными будут также исключены и дополнительные (те что ниже).
-				В дополнительные надо включать разделяемые между несколькими продуктами компоненты, которые сами по себе полноценным продуктом не являются.
-				Например сервисы обновления.
-		</div>
-	</div>
-
-	
 
 	<div class="form-group">
 		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 	
-	<?php ActiveForm::end(); ?>
+	<?php ArmsForm::end(); ?>
 
 
 	

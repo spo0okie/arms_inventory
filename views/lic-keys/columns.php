@@ -34,13 +34,5 @@ return [
 			return $output;
 		}
 	],
-	[
-		'attribute'=>'comment',
-		'format'=>'raw',
-		'value'=>function($item) {
-			return ExpandableCardWidget::widget([
-				'content'=>Yii::$app->formatter->asNtext($item->comment)
-			]);
-		}
-	],
+	'comment',
 ];

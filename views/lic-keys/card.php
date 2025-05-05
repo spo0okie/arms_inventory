@@ -1,5 +1,6 @@
 <?php
 
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -43,4 +44,4 @@ $deleteable=!count($arms);
 	<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
 
 	<h4>Комментарий:</h4>
-	<?= Yii::$app->formatter->asNtext($model->comment) ?>
+	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>

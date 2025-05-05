@@ -6,6 +6,7 @@
  * Time: 2:49
  */
 
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -31,5 +32,4 @@ $deleteable=true; //тут переопределить возможность �
 			КПП: <?= $model->kpp ?>
 		<?php } ?>
 	</p>
-
 	<?= $this->render('support',['model'=>$model]) ?>

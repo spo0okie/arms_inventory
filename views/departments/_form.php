@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 
@@ -11,16 +12,18 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="departments-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
+	]); ?>
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'comment')->text(['rows' => 6]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

@@ -11,5 +11,5 @@ use yii\helpers\Html;
 		<?= Html::encode($model->sname) ?>
 	</h1>
 
-	<?= $this->render('notepad',['model'=>$model,'static_view'=>true]) ?>
+	<?= $this->render('card',['model'=>$model,'static_view'=>true]) ?>
 </div>

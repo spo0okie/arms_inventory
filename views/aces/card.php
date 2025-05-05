@@ -2,6 +2,7 @@
 
 use app\components\HistoryWidget;
 use app\components\ListObjectsWidget;
+use app\components\TextFieldWidget;
 use app\models\Aces;
 use kartik\markdown\Markdown;
 use yii\helpers\Html;
@@ -88,7 +89,7 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 	</div>
 	<?php if ($model->notepad) { ?>
 		<div class="p-1 small text-wrap border-top">
-			<?=  Markdown::convert($model->notepad) ?>
+			<?=  TextFieldWidget::widget(['model'=>$model,'field'=>'notepad']) ?>
 		</div>
 	<?php } ?>
 

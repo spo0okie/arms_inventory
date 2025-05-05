@@ -6,6 +6,7 @@ use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
 use app\components\TabsWidget;
+use app\components\TextFieldWidget;
 use app\models\Comps;
 use app\models\MaintenanceJobs;
 use app\models\Services;
@@ -42,7 +43,7 @@ $this->params['headerContent']=
 				.($model->spread_techs?
 					'<span qtip_ttip="Требование обслуживания сервисов автоматически распространяется<br> на оборудование, на котором эти сервисы работают"><i class="fas fa-print text-muted" ></i></span>':'')
 			.'</h1>'
-			.Markdown::convert($model->description,[])
+			.TextFieldWidget::widget(['model'=>$model,'field'=>'description'])
 		.'</div>'
 		.'<div class="me-5 flex-lg-shrink-0">'
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'includes'])

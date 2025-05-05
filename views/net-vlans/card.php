@@ -1,5 +1,6 @@
 <?php
 
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -21,7 +22,7 @@ if (!isset($static_view)) $static_view=false;
 		],
 	]) ?>
 </h1>
-<?= Yii::$app->formatter->asNtext($model->comment) ?>
+<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
 <br /><br />
 
 <h4>L2 Домен</h4>

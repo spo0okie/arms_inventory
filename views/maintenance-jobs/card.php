@@ -3,6 +3,7 @@
 use app\components\IsHistoryObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\LinkObjectWidget;
+use app\components\TextFieldWidget;
 use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
@@ -18,7 +19,7 @@ if (!isset($static_view)) $static_view=false;
 		'model'=>$model,
 	]) ?>
 </h1>
-<?= Markdown::convert($model->description) ?>
+<?= TextFieldWidget::widget(['model'=>$model,'field'=>'description']) ?>
 <?= ModelFieldWidget::widget(['model'=>$model,'field'=>'service']) ?>
 <?= ModelFieldWidget::widget(['model'=>$model,'field'=>'responsible']) ?>
 <?= ModelFieldWidget::widget(['model'=>$model,'field'=>'support']) ?>

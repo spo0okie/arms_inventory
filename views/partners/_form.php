@@ -1,8 +1,8 @@
 <?php
 
-use app\helpers\FieldsHelper;
+use app\components\Forms\ArmsForm;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
+
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Partners */
@@ -12,32 +12,34 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="partners-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
+	]); ?>
 	
 	<div class="row">
 		<div class="col-md-6">
-			<?= FieldsHelper::TextInputField($form,$model, 'uname') ?>
+			<?= $form->field($model, 'uname') ?>
 			<div class="row">
 				<div class="col-md-10">
-					<?= FieldsHelper::TextInputField($form,$model, 'bname') ?>
+					<?= $form->field($model, 'bname') ?>
 				</div>
 				<div class="col-md-2">
-					<?=  FieldsHelper::TextInputField($form,$model, 'prefix') ?>
+					<?= $form->field($model, 'prefix') ?>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-6">
-					<?= FieldsHelper::TextInputField($form,$model,  'inn') ?>
+					<?= $form->field($model,  'inn') ?>
 				</div>
 				<div class="col-md-6">
-					<?= FieldsHelper::TextInputField($form,$model,  'kpp') ?>
+					<?= $form->field($model,  'kpp') ?>
 				</div>
 			</div>
 		</div>
 		<div class="col-md-6">
-			<?= FieldsHelper::TextAutoresizeField($form,$model,  'alias') ?>
-			<?= FieldsHelper::TextAutoresizeField($form,$model,  'cabinet_url') ?>
-			<?= FieldsHelper::TextAutoresizeField($form,$model,  'support_tel') ?>
+			<?= $form->field($model,  'alias')->textAutoresize(['rows'=>1]) ?>
+			<?= $form->field($model,  'cabinet_url')->textAutoresize(['rows'=>1]) ?>
+			<?= $form->field($model,  'support_tel')->textAutoresize(['rows'=>1]) ?>
 		</div>
 	</div>
 	
@@ -48,7 +50,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<div class="row">
 		<div class="col-md-6">
-		    <?= FieldsHelper::TextAutoresizeField($form,$model,  'comment',['lines' => 6]) ?>
+		    <?= $form->field($model,  'comment')->text(['rows' => 6]) ?>
 			<br>
 			<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
 			
@@ -71,6 +73,6 @@ if (!isset($modalParent)) $modalParent=null;
 	</div>
 
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

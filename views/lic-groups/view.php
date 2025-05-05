@@ -8,6 +8,7 @@ use app\components\DynaGridWidget;
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
+use app\components\TextFieldWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\FieldsHelper;
 use app\models\LicGroups;
@@ -40,7 +41,7 @@ $this->params['headerContent']=
 					'undeletableMessage'=>'Нельзя удалить этот тип лицензий, т.к. есть привязанные к нему объекты',
 				])
 			.'</h3>'
-			.Markdown::convert($model->comment,[])
+			.TextFieldWidget::widget(['model'=>$model,'field'=>'comment'])
 		.'</div>'
 		.'<div class="me-5 flex-lg-grow-0">'
 			.ModelFieldWidget::widget([

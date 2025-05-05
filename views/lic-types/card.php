@@ -1,5 +1,7 @@
 <?php
 
+use app\components\TextFieldWidget;
+use app\components\UrlListWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -26,7 +28,7 @@ $deleteable=!count($model->licGroups);
 
 
 <p>
-	<?= Yii::$app->formatter->asNtext($model->comment) ?>
+	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
 </p>
 
 <br />
@@ -34,7 +36,7 @@ $deleteable=!count($model->licGroups);
 <div class="row">
 	<div class="col-md-6">
 		<h4>Ссылки:</h4>
-		<?= \app\components\UrlListWidget::Widget(['list'=>$model->links]) ?>
+		<?= UrlListWidget::Widget(['list'=>$model->links]) ?>
 	</div>
 	<div class="col-md-6">
 		<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>

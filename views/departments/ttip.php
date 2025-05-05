@@ -9,17 +9,5 @@ use yii\widgets\DetailView;
 
 ?>
 <div class="departments-ttip ttip-card">
-    <h1>
-	    <?= Html::encode($this->title) ?>
-    </h1>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'id',
-            'name',
-            'comment:ntext',
-        ],
-    ]) ?>
-
+    <?= $this->render('card',['model'=>$model]) ?>
 </div>

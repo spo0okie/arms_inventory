@@ -10,7 +10,7 @@ use yii\helpers\Html;
 
 $this->title = "Новый ". Aces::$title;
 
-//если есть ACL то отплясываем от него
+//если есть ACL, то отплясываем от него
 if (is_object($model->acl)) {
 	if($model->acl->schedules_id) {
 		$this->params['breadcrumbs'][] = ['label' => Acls::$scheduleTitles, 'url' => ['schedules/index-acl']];
@@ -19,7 +19,7 @@ if (is_object($model->acl)) {
 	 	$this->params['breadcrumbs'][] = ['label' => Acls::$titles, 'url' => ['acls/index']];
  	}
 	$this->params['breadcrumbs'][] = ['label'=>$model->acl->sname,'url' => ['acls/view','id'=>$model->acls_id]];
-} else { //если нет, то отпрлясываем от ACE
+} else { //если нет, то отплясываем от ACE
 	$this->params['breadcrumbs'][] = ['label' => Aces::$titles, 'url' => ['aces/index']];
 }
 ?>

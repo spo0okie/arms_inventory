@@ -1,8 +1,12 @@
 <?php
 
+use app\components\Forms\ArmsForm;
+use app\models\Contracts;
+use app\models\Techs;
+use app\models\Users;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicKeys */
@@ -24,69 +28,51 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
 <div class="lic-keys-form">
 
-	<?php $form = ActiveForm::begin([
-		'action' => $model->isNewRecord?\yii\helpers\Url::to(['lic-keys/create']):\yii\helpers\Url::to(['lic-keys/update','id'=>$model->id]),
+	<?php $form = ArmsForm::begin([
+		'action' => $model->isNewRecord? Url::to(['lic-keys/create']): Url::to(['lic-keys/update','id'=>$model->id]),
+		'model'=>$model
 	]); ?>
 
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'lic_items_id', [
-		'data' => \app\models\LicItems::fetchNames(),
+	<?= $form->field($model, 'lic_items_id')->select2([
 		'options' => [
-            'placeholder' => 'Выберите закупку',
 			'onchange' => 'fetchArmsFromDocs();'
         ],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => false,
-		]
 	]) ?>
 
-	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form, $model, 'key_text',['lines' => 1,]) ?>
+	<?= $form->field($model, 'key_text')->text(['rows' => 1,]) ?>
 
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'arms_ids', [
-		'data' => \app\models\Techs::fetchArmNames(),
-		'options' => ['placeholder' => 'Выберите АРМы',],
-		'classicHint' => \app\models\Contracts::fetchArmsHint(is_object($model->licItem)?$model->licItem->contracts_ids:null ,'lickeys'),
-		'classicHintOptions'=> ['id'=>'arms_id-hint'],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => true,
-			'multiple' => true
-		],
-		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
-	]); ?>
+	<?= $form->field($model, 'arms_ids')
+		->select2([
+			'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
+			'data' => Techs::fetchArmNames(),
+		])
+		->classicHint(
+			Contracts::fetchArmsHint(
+				is_object($model->licItem)?$model->licItem->contracts_ids:null ,
+				'lickeys'
+			),[
+				'id'=>'arms_id-hint'
+			]
+		);
+	?>
 
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'users_ids', [
-		'data' => \app\models\Users::fetchWorking(),
-		'options' => ['placeholder' => 'Выберите пользователей',],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => true,
-			'multiple' => true
-		],
+	<?= $form->field($model, 'users_ids')->select2([
+		'data' => Users::fetchWorking(),
 		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
 	
-	<?= \app\helpers\FieldsHelper::Select2Field($form,$model, 'comps_ids', [
-		'data' => \app\models\Comps::fetchNames(),
-		'options' => ['placeholder' => 'Выберите операционные системы',],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => true,
-			'multiple' => true
-		],
+	<?= $form->field($model, 'comps_ids')->select2([
 		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
 	
-	<?= $form->field($model, 'linkComment',['options'=>['style'=>'display:none','id'=>'linkComment']])->textInput(['maxlength' => true]) ?>
+	<?= $form->field($model, 'linkComment',['options'=>['style'=>'display:none','id'=>'linkComment']]) ?>
 
-
-
-	<?= \app\helpers\FieldsHelper::TextAutoresizeField($form, $model, 'comment',['lines' => 4,]) ?>
+	<?= $form->field($model, 'comment')->text(['rows' => 4,]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

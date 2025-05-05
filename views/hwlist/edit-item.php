@@ -4,14 +4,20 @@
  * User: Spookie
  * Date: 07.03.2018
  * Time: 23:02
- * @var \app\models\HwListItem $item отображаемый элемент
- * @var \app\models\OldArms    $model объект компьютера или АРМа, из которого вызвано
+ * @var HwListItem $item отображаемый элемент
+ * @var OldArms    $model объект компьютера или АРМа, из которого вызвано
  * @var array                  $manufacturers список производителей
  * @var bool                   $addItem признак того, что это не настоящий элемент а пустышка для добавления элемента в паспорт
  */
+
+use app\models\HwListItem;
+use app\models\Manufacturers;
+use app\models\OldArms;
 use yii\bootstrap5\Modal;
+use yii\helpers\BaseHtml;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
+use yii\helpers\Url;
 
 if (!isset($static_view)) $static_view=false;
 ?>
@@ -21,7 +27,7 @@ if (!isset($static_view)) $static_view=false;
 		//'action' => ['techs/updhw','id'=>$model->id,'uid'=>$item->uid],
 		//'method' => 'get',
 		'options'=>[
-			'onsubmit'=>'window.location.replace("'.\yii\helpers\Url::to([
+			'onsubmit'=>'window.location.replace("'. Url::to([
 				'techs/updhw',
 				'id'=>$model->id,
 				'uid'=>$item->uid
@@ -55,17 +61,17 @@ if (!isset($static_view)) $static_view=false;
 			</td>
 			</thead>
 			<tr>
-				<td><?= \yii\helpers\BaseHtml::input('string','title',$item->title,['class'=>'form-control']) ?></td>
-				<td><?= \yii\helpers\BaseHtml::dropDownList('manufacturer_id',$item->manufacturer_id,\app\models\Manufacturers::fetchNames() ,['class'=>'form-control']) ?></td>
-				<td><?= \yii\helpers\BaseHtml::input('string','manual_name',$item->manual_name,['class'=>'form-control']) ?></td>
-				<td><?= \yii\helpers\BaseHtml::input('string','manual_sn',$item->manual_sn,['class'=>'form-control']) ?></td>
-				<td><?= \yii\helpers\BaseHtml::input('string','inv_num',$item->inv_num,['class'=>'form-control']) ?></td>
+				<td><?= BaseHtml::input('string','title',$item->title,['class'=>'form-control']) ?></td>
+				<td><?= BaseHtml::dropDownList('manufacturer_id',$item->manufacturer_id, Manufacturers::fetchNames() ,['class'=>'form-control']) ?></td>
+				<td><?= BaseHtml::input('string','manual_name',$item->manual_name,['class'=>'form-control']) ?></td>
+				<td><?= BaseHtml::input('string','manual_sn',$item->manual_sn,['class'=>'form-control']) ?></td>
+				<td><?= BaseHtml::input('string','inv_num',$item->inv_num,['class'=>'form-control']) ?></td>
 			</tr>
 		</table>
 
 
 		<div class="form-group">
-			<p><?= \yii\helpers\BaseHtml::checkbox('hidden',$item->hidden,['label'=>'Скрыть элемент из паспорта']) ?></p>
+			<p><?= BaseHtml::checkbox('hidden',$item->hidden,['label'=>'Скрыть элемент из паспорта']) ?></p>
 			<?= Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) ?>
 		</div>
 

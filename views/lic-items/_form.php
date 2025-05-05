@@ -1,15 +1,9 @@
 <?php
 
-use app\helpers\FieldsHelper;
-use app\models\Comps;
+use app\components\Forms\ArmsForm;
 use app\models\Contracts;
-use app\models\LicGroups;
-use app\models\Techs;
 use app\models\Users;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
-use kartik\select2\Select2;
-use kartik\date\DatePicker;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
@@ -32,122 +26,71 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
 <div class="lic-items-form">
 
-    <?php $form = ActiveForm::begin([
+    <?php $form = ArmsForm::begin([
 	    'action' => $model->isNewRecord? Url::to(['lic-items/create']): Url::to(['lic-items/update','id'=>$model->id]),
 	    'enableClientValidation' => false,
 	    'enableAjaxValidation' => true,
 	    'validationUrl' => $model->isNewRecord?['lic-items/validate']:['lic-items/validate','id'=>$model->id],
-
+		'model'=>$model,
     ]); ?>
 
-	<?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
 
     <div class="row">
-        <div class="col-md-6" >
-            <?= $form->field($model, 'lic_group_id')->widget(Select2::className(), [
-                'data' => LicGroups::fetchNames(),
-                'options' => ['placeholder' => 'Выберите группу',],
-                'toggleAllSettings'=>['selectLabel'=>null],
-                'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-                    'allowClear' => false,
-                    'multiple' => false
-                ]
-            ]) ?>
+        <div class="col-md-3" >
+            <?= $form->field($model, 'lic_group_id')->select2() ?>
         </div>
-        <div class="col-md-6" >
-	        <?= $form->field($model, 'count')->textInput() ?>
+        <div class="col-md-9" >
+			<?= $form->field($model, 'descr') ?>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6" >
-	        <?= $form->field($model, 'active_from')->widget(DatePicker::classname(), [
-		        'options' => ['placeholder' => 'Введите дату ...'],
-		        'pluginOptions' => [
-			        'autoclose'=>true,
-					'weekStart' => '1',
-			        'format' => 'yyyy-mm-dd'
-		        ]
-	        ]); ?>
-        </div>
-        <div class="col-md-6" >
-	        <?= $form->field($model, 'active_to')->widget(DatePicker::classname(), [
-		        'options' => ['placeholder' => 'Введите дату ...'],
-		        'pluginOptions' => [
-			        'autoclose'=>true,
-					'weekStart' => '1',
-			        'format' => 'yyyy-mm-dd'
-		        ]
-	        ]); ?>
-        </div>
-    </div>
+	<div class="row">
+		<div class="col-md-11" >
+			<?= $form->field($model, 'contracts_ids')->select2([
+				'options' => ['onchange' => 'fetchArmsFromDocs();'],
+			]) ?>
+		</div>
+		<div class="col-md-1" >
+			<?= $form->field($model, 'count')?>
+		</div>
+	</div>
 	
+	<div class="row">
+		<div class="col-md-6" >
+			<?= $form->field($model, 'active_from')->date(); ?>
+		</div>
+		<div class="col-md-6" >
+			<?= $form->field($model, 'active_to')->date(); ?>
+		</div>
+	</div>
+
+
+
+	<?= $form->field($model, 'arms_ids')
+		->select2(['pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}']])
+		->classicHint(Contracts::fetchArmsHint($model->contracts_ids,'licitems'),['id'=>'arms_id-hint'])
+	?>
 	
-	<?= FieldsHelper::Select2Field($form,$model, 'arms_ids', [
-		'data' => Techs::fetchArmNames(),
-		'options' => ['placeholder' => 'Выберите АРМы',],
-		'classicHint'=> Contracts::fetchArmsHint($model->contracts_ids,'licitems'),
-		'classicHintOptions'=>['id'=>'arms_id-hint'],
-		'toggleAllSettings'=>['selectLabel'=>null],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => true,
-			'multiple' => true
-		],
-		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
-	]) ?>
-	
-	<?= FieldsHelper::Select2Field($form,$model,  'users_ids', [
+	<?= $form->field($model,  'users_ids')->select2([
 		'data' => Users::fetchWorking(),
-		'options' => ['placeholder' => 'Выберите пользователей',],
-		'toggleAllSettings'=>['selectLabel'=>null],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => true,
-			'multiple' => true
-		],
 		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
 	
-	<?= FieldsHelper::Select2Field($form,$model, 'comps_ids', [
-		'data' => Comps::fetchNames(),
-		'options' => ['placeholder' => 'Выберите операционные системы',],
-		'toggleAllSettings'=>['selectLabel'=>null],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => true,
-			'multiple' => true
-		],
+	<?= $form->field($model, 'comps_ids')->select2([
 		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
 	
-	<?= $form->field($model, 'linkComment',['options'=>['style'=>'display:none','id'=>'linkComment']])->textInput(['maxlength' => true]) ?>
+	<?= $form->field($model, 'linkComment',['options'=>['style'=>'display:none','id'=>'linkComment']]) ?>
 
-
-	<?= $form->field($model, 'contracts_ids')->widget(Select2::className(), [
-		'data' => Contracts::fetchNames(),
-		'options' => [
-			'placeholder' => 'Выберите документы',
-			'onchange' => 'fetchArmsFromDocs();'
-		],
-		'toggleAllSettings'=>['selectLabel'=>null],
-		'pluginOptions' => [
-			'dropdownParent' => $modalParent,
-			'allowClear' => true,
-			'multiple' => true
-		]
-	]) ?>
 	
-	<?= FieldsHelper::MarkdownField($form,$model,'comment',[
-		'height' => 130,
-	]) ?>
+	
+	<?= $form->field($model,'comment')->text(['height' => 130,'rows'=>9]) ?>
 
 
     <div class="form-group">
         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

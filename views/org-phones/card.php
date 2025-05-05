@@ -7,7 +7,9 @@
  */
 
 
-
+use app\components\LinkObjectWidget;
+use app\components\StripedRowWidget;
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -25,15 +27,15 @@ if (is_object($model->service) && is_object($model->service->currency)) {
 if (!$content_only){ ?>
 	<div
 		class="<?= $static_view?'me-1 mb-1 p-1':'me-2 mb-2 p-2'?> <?= $model->archived?'archived-item':''?> org-phones-card"
-		<?= ($model->archived&&!(\Yii::$app->request->get('showArchived')))?'style="display:none"':'' ?>>
+		<?= ($model->archived&&!(Yii::$app->request->get('showArchived')))?'style="display:none"':'' ?>>
 <?php } ?>
 
 	
-		<?php if ($model->archived) echo \app\components\StripedRowWidget::widget(['title'=>'АРХИВИРОВАН']) ?>
+		<?php if ($model->archived) echo StripedRowWidget::widget(['title'=>'АРХИВИРОВАН']) ?>
 	
 		<div class="float-end">
 			<h3>
-				<?= \app\components\LinkObjectWidget::widget([
+				<?= LinkObjectWidget::widget([
 					'model'=>$model,
 					'name'=>'',
 					'static'=>$static_view,
@@ -44,7 +46,7 @@ if (!$content_only){ ?>
 		</div>
 		<h3><?= $model->title ?></h3>
 		
-		<p>	<?= \Yii::$app->formatter->asNtext($model->untitledComment) ?> </p>
+		<p>	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'untitledComment']) ?> </p>
 		<p>
 			Стоимость: <span class="badge bg-success"><?= number_format((int)$model->cost,0,'',' ').$currency ?></span>
 			<?php if ($model->charge) { ?>

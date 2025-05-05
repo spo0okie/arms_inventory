@@ -5,6 +5,7 @@
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -166,7 +167,7 @@ echo ListObjectsWidget::widget([
 <?php if (strlen(trim($model->comment))) { ?>
 <h4>Комментарий:</h4>
 <p>
-	<?= nl2br(htmlspecialchars($model->comment)) ?>
+	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
 </p>
 
 <br />

@@ -1,6 +1,7 @@
 <?php
 
 use app\components\ExpandableCardWidget;
+use app\components\TextFieldWidget;
 use kartik\markdown\Markdown;
 
 /* @var $this yii\web\View */
@@ -18,12 +19,12 @@ use kartik\markdown\Markdown;
 			(Yii::$app->params['networkDescribeSegment']==='auto' && !$model->notepad)
 		) {
 			if (is_object($model->segment) && $model->segment->history) {
-				$descr.= Markdown::convert($model->segment->history);
+				$descr.= TextFieldWidget::widget(['model'=>$model->segment,'field'=>'history']);
 			}
 		}
 		
 		if ($model->notepad) {
-			$descr.= Markdown::convert($model->notepad);
+			$descr.= TextFieldWidget::widget(['model'=>$model,'field'=>'notepad']);
 		}
 		
 		if ($descr) echo ExpandableCardWidget::widget([

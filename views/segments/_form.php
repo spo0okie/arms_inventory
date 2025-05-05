@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use kartik\markdown\MarkdownEditor;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
@@ -32,16 +33,16 @@ $defaultCss=[
 
 <div class="segments-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin(['model'=>$model]); ?>
 
 	<div class="row">
 		<div class="col-md-6">
-			<?= app\helpers\FieldsHelper::TextInputField($form,$model, 'name') ?>
-			<?= app\helpers\FieldsHelper::TextInputField($form,$model, 'code') ?>
+			<?= $form->field($model, 'name') ?>
+			<?= $form->field($model, 'code') ?>
 		</div>
 		<div class="col-md-6">
-			<?= app\helpers\FieldsHelper::TextInputField($form,$model,'description') ?>
-			<?= app\helpers\FieldsHelper::TextAutoresizeField($form,$model,'links') ?>
+			<?= $form->field($model,'description') ?>
+			<?= $form->field($model,'links')->textAutoresize() ?>
 		</div>
 	</div>
 	<div class="d-flex flex-row flex-wrap">
@@ -53,14 +54,12 @@ $defaultCss=[
 		?>
 	</div>
 
-	<?= $form->field($model, 'history')->widget(MarkdownEditor::className(), [
-		'showExport'=>false
-	]) ?>
+	<?= $form->field($model, 'history')->text() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

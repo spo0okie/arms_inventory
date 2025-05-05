@@ -240,11 +240,5 @@ if(!$static_view) { ?>
 	</div>
 </div>
 
-<?php if (!$static_view && strlen($model->notebook)) { ?>
-    <h4>Записная книжка:</h4>
-    <p>
-		<?= Markdown::convert($model->notebook) ?>
-    </p>
-    <br />
-<?php } ?>
+
 

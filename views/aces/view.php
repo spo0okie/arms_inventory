@@ -16,5 +16,4 @@ YiiAsset::register($this);
 ?>
 <div class="aces-view">
 	<?= $this->render('card',['model'=>$model]) ?>
-	<?= $this->render('notepad',['model'=>$model]) ?>
 </div>

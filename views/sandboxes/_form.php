@@ -1,5 +1,6 @@
 <?php
 
+use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
@@ -12,37 +13,31 @@ use yii\bootstrap5\ActiveForm;
 
 <div class="sandboxes-form">
 
-    <?php $form = ActiveForm::begin([
-		//'enableClientValidation' => false,	//чтобы отключить валидацию через JS в браузере
-		//'enableAjaxValidation' => true,		//чтобы включить валидацию на сервере ajax запросы
-		//'id' => 'sandboxes-form',
-		//'validationUrl' => $model->isNewRecord?	//URL валидации на стороне сервера
-			//['sandboxes/validate']:	//для новых моделей
-			//['sandboxes/validate','id'=>$model->id], //для существующих
-		//'action' => Yii::$app->request->getQueryString(),
+    <?php $form = ArmsForm::begin([
+		'model'=>$model
 	]); ?>
 
 
 	<div class="row">
 		<div class="col-8">
-			<?= FieldsHelper::TextInputField($form,$model,  'name') ?>
+			<?= $form->field($model,  'name') ?>
 		</div>
 		<div class="col-2">
-			<?= FieldsHelper::TextInputField($form,$model, 'suffix') ?>
+			<?= $form->field($model, 'suffix') ?>
 		</div>
-		<div class="col-2">
-			<?= FieldsHelper::CheckboxField($form,$model, 'network_accessible') ?>
-			<?= FieldsHelper::CheckboxField($form,$model, 'archived') ?>
+		<div class="col-2 mt-3">
+			<?= $form->field($model, 'network_accessible')->checkbox() ?>
+			<?= $form->field($model, 'archived')->checkbox() ?>
 		</div>
 	</div>
 
 
 	<div class="row">
 		<div class="col-8">
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'notepad') ?>
+			<?= $form->field($model, 'notepad')->text() ?>
 		</div>
 		<div class="col-4">
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'links') ?>
+			<?= $form->field($model, 'links')->textAutoresize() ?>
 		</div>
 	</div>
 	
@@ -53,6 +48,6 @@ use yii\bootstrap5\ActiveForm;
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

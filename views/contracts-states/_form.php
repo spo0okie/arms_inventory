@@ -1,8 +1,7 @@
 <?php
 
-use app\helpers\FieldsHelper;
+use app\components\Forms\ArmsForm;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\ContractsStates */
@@ -12,27 +11,29 @@ if (!isset($modalParent)) $modalParent=null;
 
 <div class="contracts-states-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ArmsForm::begin([
+		'model'=>$model,
+	]); ?>
 
 	<div class="row">
 		<div class="col-3">
-			<?= FieldsHelper::TextInputField($form,$model,'code') ?>
+			<?= $form->field($model,'code') ?>
 		</div>
 		<div class="col-7">
-			<?= FieldsHelper::TextInputField($form,$model,'name') ?>
+			<?= $form->field($model,'name') ?>
 		</div>
-		<div class="col-2">
-			<?= FieldsHelper::CheckboxField($form,$model,'paid') ?>
-			<?= FieldsHelper::CheckboxField($form,$model,'unpaid') ?>
+		<div class="col-2 mt-3">
+			<?= $form->field($model,'paid')->checkbox() ?>
+			<?= $form->field($model,'unpaid')->checkbox() ?>
 		</div>
 	</div>
     
-    <?= $form->field($model, 'descr')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'descr')->text(['rows' => 6]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

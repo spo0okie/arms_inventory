@@ -16,12 +16,7 @@ return [
 			return $renderer->render('item',['model'=>$data]);
 		},
 	],
-	'description'=>[
-		'class'=>ExpandableCardColumn::class,
-		'value'=>function($data) use ($renderer){
-			return Markdown::convert($data->description,[]);
-		},
-	],
+	'description',
 	'schedule'=>[
 		'value'=>function($data) use ($renderer){
 			/** @var Schedules $schedule */

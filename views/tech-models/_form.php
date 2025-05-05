@@ -1,6 +1,7 @@
 <?php
 
 use app\components\CollapsableCardWidget;
+use app\components\Forms\ArmsForm;
 use app\components\RackConstructorWidget;
 use app\helpers\FieldsHelper;
 use app\models\Manufacturers;
@@ -45,7 +46,7 @@ if (Yii::$app->request->get('return'))
 
 <div class="tech-models-form">
 
-    <?php $form = ActiveForm::begin([
+    <?php $form = ArmsForm::begin([
         'id'=>'tech_models-edit-form',
 	    'enableClientValidation' => false,
 	    'enableAjaxValidation' => true,
@@ -56,6 +57,7 @@ if (Yii::$app->request->get('return'))
 	    //'options' => ['enctype' => 'multipart/form-data'],
 		//Вот это вот снизу зачем интересно? видимо для вставки в качестве модального окна
 	    'action' => Url::to($formAction),
+		'model'=>$model,
     ]); ?>
 
     <?php
@@ -73,48 +75,29 @@ if (Yii::$app->request->get('return'))
 
     <div class="row">
         <div class="col-md-6" >
-            <?= FieldsHelper::Select2Field($form,$model, 'type_id', [
-                'data' => TechTypes::fetchNames(),
+            <?= $form->field($model, 'type_id')->select2([
                 'options' => [
-					'placeholder' => 'Выберите тип оборудования',
 					'onchange' => 'techSwitchDescr();'
 				],
-                //'toggleAllSettings'=>['selectLabel'=>null],
-                'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-                    'allowClear' => false,
-                    'multiple' => false
-                ]
             ]) ?>
         </div>
         <div class="col-md-6" >
-			<?= FieldsHelper::Select2Field($form,$model, 'manufacturers_id', [
-                'data' => Manufacturers::fetchNames(),
-                'options' => ['placeholder' => 'Выберите производителя',],
-                //'toggleAllSettings'=>['selectLabel'=>null],
-                'pluginOptions' => [
-					'dropdownParent' => $modalParent,
-                    'allowClear' => false,
-                    'multiple' => false
-                ]
-            ]) ?>
+			<?= $form->field($model, 'manufacturers_id') ?>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-8" >
-	        <?= FieldsHelper::TextInputField($form,$model, 'name') ?>
+	        <?= $form->field($model, 'name') ?>
         </div>
         <div class="col-md-4" >
-			<?= FieldsHelper::TextInputField($form,$model,'short')?>
+			<?= $form->field($model,'short')?>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-8" >
-			<?= FieldsHelper::TextAutoresizeField($form,$model, 'comment', [
-				'lines' => 4,
-			]) ?>
+			<?= $form->field($model, 'comment')->text() ?>
 			<?= $form->field($model, 'individual_specs')->checkbox() ?>
         </div>
         <div class="col-md-4" >
@@ -174,6 +157,6 @@ if (Yii::$app->request->get('return'))
         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php ArmsForm::end(); ?>
 
 </div>

@@ -7,6 +7,7 @@
  */
 
 use app\components\LinkObjectWidget;
+use app\components\TextFieldWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\MaterialsUsages */
@@ -50,3 +51,6 @@ if (!isset($static_view)) $static_view=false;
     </p>
     <br />
 <?php }
+
+
+echo TextFieldWidget::widget(['model'=>$model,'field'=>'history']) ?>

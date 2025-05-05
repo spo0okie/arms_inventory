@@ -7,7 +7,9 @@
  */
 
 
-
+use app\components\LinkObjectWidget;
+use app\components\StripedRowWidget;
+use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -23,15 +25,15 @@ if (is_object($model->service) && is_object($model->service->currency)) {
 if (!$content_only){ ?>
 <div
 		class="<?= $static_view?'me-1 mb-1 p-1':'me-2 mb-2 p-2'?> <?= $model->archived?'archived-item':''?> org-phones-card"
-	<?= ($model->archived&&!(\Yii::$app->request->get('showArchived')))?'style="display:none"':'' ?>>
+	<?= ($model->archived&&!(Yii::$app->request->get('showArchived')))?'style="display:none"':'' ?>>
 	<?php } ?>
 	
 	
-	<?php if ($model->archived) echo \app\components\StripedRowWidget::widget(['title'=>'АРХИВИРОВАН']) ?>
+	<?php if ($model->archived) echo StripedRowWidget::widget(['title'=>'АРХИВИРОВАН']) ?>
 
 	<h3>
 
-	<?= \app\components\LinkObjectWidget::widget([
+	<?= LinkObjectWidget::widget([
 		'model'=>$model,
 		'modal'=>true,
 		'confirmMessage'=>'Удалить этот ввод интернет? Это действие необратимо!',
@@ -39,7 +41,7 @@ if (!$content_only){ ?>
 	]) ?>
 	</h3>
 
-	<p>	<?= \Yii::$app->formatter->asNtext($model->comment) ?> </p>
+	<p>	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?> </p>
 	<p>
 		Стоимость: <span class="badge bg-success"><?= number_format((int)$model->cost,0,'',' ').$currency ?></span>
 		<?php if ($model->charge) { ?>
@@ -64,7 +66,7 @@ if (!$content_only){ ?>
 	<?php if ($model->history) { ?>
 		<p>
 		<strong>Заметки:</strong><br />
-		<?= \Yii::$app->formatter->asNtext(trim($model->history)) ?>
+		<?= TextFieldWidget::widget(['model'=>$model,'field'=>'history']) ?>
 		</p>
 	<?php } ?>
 <?php if (!$content_only){ ?>

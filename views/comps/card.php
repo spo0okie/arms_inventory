@@ -4,6 +4,7 @@ use app\components\IsArchivedObjectWidget;
 use app\components\IsHistoryObjectWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
+use app\components\TextFieldWidget;
 use app\models\HistoryModel;
 use yii\helpers\Html;
 
@@ -81,7 +82,7 @@ if (!mb_strlen($domain))
 		?>
 		<br />
 	<?php } ?>
-	<?= Yii::$app->formatter->asNtext($model->comment??'') ?>
+	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
 </div>
 <div class="d-flex flex-row flex-wrap mb-3">
 	<?php if (is_object($model->platform)) {?>

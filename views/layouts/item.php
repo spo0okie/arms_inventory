@@ -17,13 +17,10 @@ if (!empty($model)) {
 		'model'=>$model,
 		'item_class'=>$class,
 		//'archived_class'=>'text-decoration-line-through',
-		'link'=> LinkObjectWidget::widget([
-			'name'=>$name,
-			'nameSuffix'=>$suffix,
-			'model'=>$model,
-			'noDelete'=>!$show_delete,
-			'static'=>$static_view,
-		]),
+		'name'=>$name,
+		'nameSuffix'=>$suffix,
+		'noDelete'=>!$show_delete,
+		'static'=>$static_view,
 	]);
 }
 

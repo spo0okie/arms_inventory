@@ -6,8 +6,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\HwIgnore */
 
-$this->title = 'Create Hw Ignore';
-$this->params['breadcrumbs'][] = ['label' => 'Hw Ignores', 'url' => ['index']];
+$this->title = 'Добавление игнорируемого оборудования';
+$this->params['breadcrumbs'][] = ['label' => \app\models\HwIgnore::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="hw-ignore-create">
