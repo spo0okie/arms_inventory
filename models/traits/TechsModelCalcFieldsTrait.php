@@ -51,6 +51,13 @@ trait TechsModelCalcFieldsTrait
 		return $this->hostname?$this->hostname:$this->num;
 	}
 	
+	
+	public function getFqdn()
+	{
+		if (!$this->hostname) return '';
+		return strtolower(is_object($this->domain)?$this->hostname.'.'.$this->domain->fqdn:$this->hostname);
+	}
+	
 	/**
 	 * Возвращает набор сканов в договоре
 	 */
