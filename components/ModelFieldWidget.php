@@ -26,6 +26,7 @@ class ModelFieldWidget extends Widget
 	public $model;
 	public $models;
 	public $field;				//поле модели, которое нам нужно
+	public $fieldType;			//тип поля (если нам надо переопределить или отрендерить как...)
 	public $title;				//заголовок поля
 	public $show_archived;		//флаг отображения архивного элемента
 	public $item_options=[];	//опции для рендера элемента
@@ -33,29 +34,45 @@ class ModelFieldWidget extends Widget
 	public $archived;			//признак того что весь список состоит из архивных элементов
 	public $lineBr=true;		//переносить строку между элементами
 	public $glue=' ';			//чем разделять элементы
-	public $show_empty=false;	//отображать заголовок если список пуст
+	public $show_empty=false;	//отображать карточку если список пуст
 	public $message_on_empty='';//отображать сообщение вместо списка, если он пуст
 	public $itemViewPath;		//путь для рендера элемента
 	public $modelClass;			//класс объектов из списка значений поля
-	public $raw_items=false;
+	public $raw_items=false;	//не конвертировать текстовые items в HTML (уже сконвертированы)
 	
 	private $data=[];
 	
+	/**
+	 * Загружает в свой накопитель $data данные из модели
+	 * @param ArmsModel $model
+	 * @return void
+	 */
 	public function loadModelData($model) {
-		if ($this->field==='links') {
-			$links=new UrlListWidget(['list'=>$model->links]);
-			$links->renderItems();
-			$this->data = array_merge($this->data,$links->rendered);
-			$this->raw_items=true;
+		switch ($this->fieldType) {
+			case 'text':
+				$this->data[]=TextFieldWidget::widget(['model'=>$model,'field'=>$this->field]);
+				$this->raw_items=true;
+				return;
+			case 'urls':
+				$links=new UrlListWidget(['list'=>$model->links]);
+				$links->renderItems();
+				$this->data = array_merge($this->data,$links->rendered);
+				$this->raw_items=true;
+				return;
+		}
+		
+		$field=$this->field;
+		if ($model->hasMethod('attributeIsLink') && $model->attributeIsLink($field)) {
+			$field=$model->attributeLinkLoader($field);
+		}
+		
+		//вытаскиваем поле в отдельную переменную, чтобы больше не городить такое
+		$modelData=$model->{$field};
+		if (is_array($modelData)) {
+			$this->data=array_merge($this->data,$modelData);
 		} else {
-			//вытаскиваем поле в отдельную переменную, чтобы больше не городить такое
-			$newData=$model->{$this->field};
-			if (is_array($newData)) {
-				$this->data=array_merge($this->data,$newData);
-			} else {
-				if (!empty($newData))
-					$this->data[]=$newData;
-			}
+			if (!empty($modelData))
+				$this->data[]=$modelData;
 		}
 		
 	}
@@ -63,6 +80,10 @@ class ModelFieldWidget extends Widget
 	public function init(){
 		parent::init();
 		
+		if (!isset($this->fieldType)) {
+			$this->fieldType=$this->model->getAttributeType($this->field);
+		}
+
 		if (is_array($this->models)) {
 			$this->model=reset($this->models);
 			foreach ($this->models as $model)
@@ -70,8 +91,6 @@ class ModelFieldWidget extends Widget
 		} else {
 			$this->loadModelData($this->model);
 		}
-		
-		
 		
 		if (!isset($this->title)) {
 			$this->title=$this->model->getAttributeLabel($this->field);
