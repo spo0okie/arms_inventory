@@ -15,26 +15,26 @@ use yii\base\Widget;
 
 
 /**
-* Class ItemObjectWidget
+ * Class ItemObjectWidget
+ * То же самое что LinkObjectWidget, только еще
+ *   - оборачивает в SPAN
+ *   - может скрывать архивные элементы
+ *   - прикручивает дополнительный класс к архивному элементу
  * @package app\components
  * @property ArmsModel $model
  */
-class ItemObjectWidget extends Widget
+class ItemObjectWidget extends LinkObjectWidget
 {
-	public $model;				//модель на которую ссылаемся
 	public $link;				//ссылка на модель (Html::a)
 	public $show_archived=null;	//флаг отображения архивного элемента
-	public $archivedProperty='archived'; //какое свойство объекта означает признак "архивирован"
-	public $archived=null;		//явное указание что объект архивирован
-	public $archived_class='text-muted text-decoration-line-through';	//класс который добавлять к архивному элементу
-	public $item_class=null;	//класс который добавлять к элементу
+	public $archived_class='text-muted text-decoration-line-through';	//класс, который добавлять к архивному элементу
+	public $item_class=null;	//класс, который добавлять к элементу
 
 	public function run()
 	{
 
-		//если прямо не сказано что за класс элемента - стряпаем сами
-		if (is_null($this->item_class)) {
-			if (is_object($this->model))
+		//если прямо не сказано, что за класс элемента - стряпаем сами
+		if (is_null($this->item_class) && is_object($this->model)) {
 				$this->item_class= StringHelper::class2Id(get_class($this->model)).'-item';
 		}
 
@@ -48,18 +48,12 @@ class ItemObjectWidget extends Widget
 			ShowArchivedWidget::$defaultValue
 		);
 		
-		if (!isset($this->link)) $this->link=LinkObjectWidget::widget(['model'=>$this->model]);
+		//если мы не подменили ссылку, то формируем ее
+		if (!isset($this->link)) $this->link=parent::run();
 		
-		if (!isset($this->archived)) {
-			$archivedProperty = $this->archivedProperty;
-			$archived = $this->model->hasProperty($archivedProperty) ? $this->model->$archivedProperty : false;
-		} else {
-			$archived=$this->archived;
-		}
-
-		$display=($archived&&!$this->show_archived)?'style="display:none"':'';
+		$display=($this->archived&&!$this->show_archived)?'style="display:none"':'';
 		
-		$cssClass='object-item '. $this->item_class.' '.($archived?$this->archived_class:'');
+		$cssClass='object-item '. $this->item_class.' '.($this->archived?$this->archived_class:'');
 		
 		return "<span class=\"$cssClass\" $display>{$this->link}</span> ";
 	}

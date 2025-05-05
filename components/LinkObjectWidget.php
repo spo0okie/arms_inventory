@@ -5,7 +5,8 @@ use app\models\ArmsModel;
 use app\models\HistoryModel;
 use Yii;
 use yii\base\Widget;
-use yii\helpers\Html;use yii\helpers\Inflector;use yii\helpers\StringHelper;
+use yii\helpers\Html;
+use app\helpers\StringHelper;
 use yii\helpers\Url;
 
 class LinkObjectWidget extends Widget
@@ -16,8 +17,10 @@ class LinkObjectWidget extends Widget
 	public $deleteHint=null;
 	public $undeletableMessage=null;
 	public $confirmMessage=null;
-	public $hideUndeletable=null;	//скрывать замочек неудаляемого объекта (null значит скрывать если задано $undeletableMessage)
-	public $archived=null;
+	public $hideUndeletable=null;			//скрывать замочек неудаляемого объекта (null значит скрывать если задано $undeletableMessage)
+	public $archived=null;					//явное указание, что объект архивирован
+	public $archivedProperty='archived';	//какое свойство объекта означает признак "архивирован"
+	
 	/**
 	 * @var bool Отключить pjax. Есть проблема, когда Grid работает в режиме Pjax и содержит ссылки, то они по умолчанию
 	 * тоже открываются в этом pjax блоке. Сценариев где такое нужно по умолчанию я не нашел, и поэтому по умолчанию
@@ -57,19 +60,24 @@ class LinkObjectWidget extends Widget
 	public function init()
 	{
 		parent::init();
+		$id=null;
 		
 		//для объектов класса истории это мастер_ид, для обычных это ид
-		$id=$this->model->master_id??$this->model->id;
-		$controller=$this->controller??
-			Inflector::camel2id(StringHelper::basename($this->model->masterClass??get_class($this->model)));
+		if (is_object($this->model)) {
+			$id=$this->model->master_id??$this->model->id;
+		}
 		
-		if (!isset($this->url)) {
-			$this->url=Url::to(['/'.$controller.'/view','id'=>$id]);
+		if (!$this->controller && is_object($this->model)) {
+			$this->controller= StringHelper::class2Id($this->model->masterClass ?? get_class($this->model));
+		}
+		
+		if (!isset($this->url) && $this->controller && $id) {
+			$this->url=Url::to(['/'.$this->controller.'/view','id'=>$id]);
 			$this->samePage=(
 				(
-					Yii::$app->controller->route==$controller.'/view'
+					Yii::$app->controller->route==$this->controller.'/view'
 					||
-					Yii::$app->controller->route==$controller.'/ttip'
+					Yii::$app->controller->route==$this->controller.'/ttip'
 				)
 				&&
 				Yii::$app->request->get('id')==$id
@@ -78,31 +86,32 @@ class LinkObjectWidget extends Widget
 			$this->url=Url::to($this->url);
 		}
 		
-		if (!isset($this->ttipUrl)) {
+		if (!isset($this->ttipUrl) && $this->controller && $id) {
 			$this->ttipUrl=$this->model instanceof HistoryModel?
-				Url::to([$controller.'/ttip','id'=>$id,'timestamp'=>$this->model->updated_at]):
-				Url::to([$controller.'/ttip','id'=>$id]);
+				Url::to([$this->controller.'/ttip','id'=>$id,'timestamp'=>$this->model->updated_at]):
+				Url::to([$this->controller.'/ttip','id'=>$id]);
 		}
 		
-		if (!isset($this->updateUrl)) {
-			$this->updateUrl=Url::to([$controller.'/update','id'=>$id]);
+		if (!isset($this->updateUrl) && $this->controller && $id) {
+			$this->updateUrl=Url::to([$this->controller.'/update','id'=>$id]);
 		}
 		
-		if (!isset($this->deleteUrl)) {
-			$this->deleteUrl=Url::to([$controller.'/delete','id'=>$id]);
+		if (!isset($this->deleteUrl) && $this->controller && $id) {
+			$this->deleteUrl=Url::to([$this->controller.'/delete','id'=>$id]);
 		}
 		
-		$this->samePage=$this->samePage|| Yii::$app->request->url==$this->url;
+		$this->samePage=$this->samePage || Yii::$app->request->url==$this->url;
 		
-		if (is_null($this->name)) {
+		if (is_null($this->name) && is_object($this->model)) {
 			$this->name = $this->model->name;
 		}
 		$this->name=$this->namePrefix.
 			Html::tag('span',$this->name,['class'=>'item-name'])
 			.$this->nameSuffix;
 		
-		if (is_null($this->archived)) {
-			$this->archived=$this->model->hasAttribute('archived')&&$this->model->getAttribute('archived');
+		if (!isset($this->archived) && is_object($this->model) && $this->archivedProperty) {
+			$archivedProperty = $this->archivedProperty;
+			$this->archived = $this->model->hasProperty($archivedProperty) ? $this->model->$archivedProperty : false;
 		}
 		
 		if (is_null($this->cssClass) && $this->archived)
@@ -134,7 +143,7 @@ class LinkObjectWidget extends Widget
 				]);
 		} else $deleteObject='';
 		
-		//если мы уже на этой странице то не делаем ссылки
+		//если мы уже на этой странице, то не делаем ссылки
 		return (
 				$this->samePage?
 				$this->name
