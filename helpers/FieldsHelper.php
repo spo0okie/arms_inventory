@@ -287,27 +287,7 @@ class FieldsHelper
 			->hint($hint,$hintOptions);
 	}
 	
-	/**
-	 * Проверяем что поле $attr у модели не заполнено
-	 * @param $model
-	 * @param $attr
-	 * @return bool
-	 */
-	public static function attrIsEmpty($model,$attr) {
-		if (StringHelper::endsWith($attr,'_ids')) {
-			//такие аттрибуты это массивы, они должны содержать хоть один элемент
-			if (!is_array($model->$attr)) return true; //не массив
-			if (!count($model->$attr)) return true; //пустой
-		}
-		
-		if (StringHelper::endsWith($attr,'_id')) {
-			//такие аттрибуты это ссылки, они должны указывать на что-то отличное от нуля
-			if (!is_numeric($model->$attr)) return true; //не число
-			if (!($model->$attr>0)) return true; //ноль
-		}
-		
-		return empty($model->$attr);
-	}
+
 	
 	/**
 	 * Добавляет к колонкам класса (те которые для таблицы отображающей список моделей класса)

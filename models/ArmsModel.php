@@ -13,6 +13,7 @@ use app\models\traits\ExternalDataModelTrait;
 use DateTime;
 use DateTimeZone;
 use Throwable;
+use voskobovich\linker\LinkerBehavior;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -47,8 +48,20 @@ class ArmsModel extends ActiveRecord
 {
 	use ExternalDataModelTrait,AttributeDataModelTrait,AttributeLinksModelTrait;
 	
+	/** @var string как называется один экземпляр модели (для страницы Create -> Новый объект) */
 	public static $title='Объект';
+	
+	/** @var string как называется список моделей (для страницы Index) */
 	public static $titles='Объекты';
+	
+	/** @var string надпись на кнопке создания нового объекта в списке */
+	public static $addButtonText='Добавить';
+	
+	/** @var null|string подсказка для кнопки создания нового объекта */
+	public static $addButtonHint=null;
+	
+	/** @var string Префикс для страницы Create (Новый $title) */
+	public static $newItemPrefix='Новый';
 	
 	public const searchableOrHint='<br><i>HINT: Можно искать несколько вариантов, разделив их вертикальной</i> <b>|</b> <i>чертой</i>';
 	
@@ -87,6 +100,9 @@ class ArmsModel extends ActiveRecord
 	public static $syncTimestamp='updated_at';
 
 	
+	const SCENARIO_VALIDATION = 'validation';
+	
+	
 	/**
 	 * Прикручиваем поведения для many-2-many ссылок
 	 * @return array
@@ -109,7 +125,7 @@ class ArmsModel extends ActiveRecord
 		$list= static::find()
 			//->select(['id','name'])
 			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+		return ArrayHelper::map($list, 'id', 'sname');
 	}
 
 	public function getSname(){
@@ -213,6 +229,28 @@ class ArmsModel extends ActiveRecord
 	}
 	
 	/**
+	 * Проверяем что поле $attr у модели не заполнено
+	 * @param $model
+	 * @param $attr
+	 * @return bool
+	 */
+	public static function attrIsEmpty($model,$attr) {
+		if (StringHelper::endsWith($attr,'_ids')) {
+			//такие аттрибуты это массивы, они должны содержать хоть один элемент
+			if (!is_array($model->$attr)) return true; //не массив
+			if (!count($model->$attr)) return true; //пустой
+		}
+		
+		if (StringHelper::endsWith($attr,'_id')) {
+			//такие аттрибуты это ссылки, они должны указывать на что-то отличное от нуля
+			if (!is_numeric($model->$attr)) return true; //не число
+			if (!($model->$attr>0)) return true; //ноль
+		}
+		
+		return empty($model->$attr);
+	}
+	
+	/**
 	 * Требовать выставления как минимум одного аттрибута из нескольких
 	 * $params должно содержать поле 'attrs' => ['comp_ids','comment','user_id'];
 	 * обязательно при прописывании валидатора надо добавлять параметр 'skipOnEmpty' => false
@@ -225,7 +263,7 @@ class ArmsModel extends ActiveRecord
 	public function validateRequireOneOf($attribute, $params=[]) {
 		foreach ($params['attrs']??[] as $attr) {
 			//если аттрибут не пуст, то как минимум один заполнен
-			if (!FieldsHelper::attrIsEmpty($this,$attr)) return true;
+			if (!static::attrIsEmpty($this,$attr)) return true;
 		}
 		foreach ($params['attrs']??[] as $attr) {
 			$this->addError($attr,$params['message']??'Как минимум один аттрибут должен быть заполнен');
@@ -544,7 +582,7 @@ class ArmsModel extends ActiveRecord
 		foreach (array_reverse($chain) as $item) {
 			$view->params['breadcrumbs'][]=[
 				'label'=>$item->$label,
-				'url'=>[$viewPath,'id'=>$item->id]
+				'url'=>[$viewPath,'id'=>$item->id],
 			];
 		}
 	}
@@ -592,10 +630,12 @@ class ArmsModel extends ActiveRecord
 	 * @return string
 	 */
 	public function renderItem(View $view,$options=[]) {
+		$path="/{$this->viewsPath}/item";
+		if (!is_file($_SERVER['DOCUMENT_ROOT'].'/views'.$path.'.php')) $path='/layouts/item';
 		return $view->render(
-			"/{$this->viewsPath}/item",
+			$path,
 			ArrayHelper::recursiveOverride($options,[
-				'model'=>$this
+				'model'=>$this,
 			])
 		);
 	}
@@ -669,6 +709,33 @@ class ArmsModel extends ActiveRecord
 			$chain[]=$model;
 		}
 		return $chain;
+	}
+	
+	/**
+	 * Добавляем наш сценарий валидации с тем же набором атрибутов, что и для основного
+	 * @return array|array[]
+	 */
+	public function scenarios()
+	{
+		$scenarios=parent::scenarios();
+		$scenarios[static::SCENARIO_VALIDATION]=$scenarios[static::SCENARIO_DEFAULT];
+		return $scenarios;
+	}
+	
+	public function __get($name)
+	{
+		//если мы в режиме валидации
+		if ($this->getScenario()===static::SCENARIO_VALIDATION) {
+			//это значит что в модель "предзагружены" все аттрибуты которые нужны для валидации
+			//но many-2-many геттеры не умеют работать с такими предзагруженными значениями
+			//они работают прямо с таблицами из БД, и им пофиг на валидируемые значения
+			//проверяем, не пытаемся ли мы открыть загрузчик many-2-many
+			if ($link=$this->attributeIsLoader($name)) {
+				if (StringHelper::endsWith($link,'_ids'))
+					return $this->attributeFetchLinks($link,$this->$link);
+			}
+		}
+		return parent::__get($name);
 	}
 	
 }
