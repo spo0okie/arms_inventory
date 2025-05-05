@@ -174,9 +174,8 @@ ul.ul-dropfree div.drop {
 
 /* ПРОЧЕЕ */
 
-.href {
-    cursor: pointer;
-}
+.href {cursor: pointer;}
+.form-text.text-muted .href {text-decoration: underline}
 
 .cursor-default {
     cursor: default;
