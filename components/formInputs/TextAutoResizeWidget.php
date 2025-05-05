@@ -1,7 +1,10 @@
 <?php
-namespace app\components;
+namespace app\components\formInputs;
 
+use app\components\yii;
+use yii\base\Model;
 use yii\base\Widget;
+use yii\helpers\Html;
 
 class TextAutoResizeWidget extends Widget
 {
@@ -17,13 +20,13 @@ class TextAutoResizeWidget extends Widget
 	
 	/**
 	 * Форма в которой создаем поле
-	 * @var yii\widgets\ActiveForm
+	 * @var \yii\widgets\ActiveForm
 	 */
 	public $form;
 	
 	/**
-	 * модель для которой собираем форму
-	 * @var  yii\db\ActiveRecord
+	 * модель, для которой собираем форму
+	 * @var  Model
 	 */
 	public $model;
 	
@@ -35,6 +38,7 @@ class TextAutoResizeWidget extends Widget
 	
 	public function run()
 	{
+		$inputId = $this->options['id'] ?? Html::getInputId($this->model, $this->attribute);
 		
 		return $this->render('TextAutoResize', [
 			'form'	=> $this->form,
