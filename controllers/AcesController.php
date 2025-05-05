@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-use app\components\assets\ArmsFormAsset;
+use app\components\Forms\assets\ArmsFormAsset;
 use app\models\AccessTypes;
 use app\models\Aces;
 use app\models\Acls;

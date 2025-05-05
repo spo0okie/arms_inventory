@@ -2,8 +2,8 @@
 
 namespace app\controllers;
 
-use app\components\assets\ArmsFormAsset;
 use app\components\Forms\ArmsForm;
+use app\components\Forms\assets\ArmsFormAsset;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
@@ -15,12 +15,12 @@ use yii\data\ActiveDataProvider;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\filters\auth\HttpBasicAuth;
+use yii\filters\VerbFilter;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
-use yii\helpers\Url;
 
 /**
  * ArmsController implements the CRUD actions for Arms model.
@@ -227,7 +227,10 @@ class ArmsBaseController extends Controller
      */
     public function actionIndex()
     {
+		$model= new $this->modelClass();
     	$searchModelClass=$this->modelClass.'Search';
+		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'index.php')?
+			'index':'/layouts/index';
     	
     	if (class_exists($searchModelClass)) {
 			$searchModel = new $searchModelClass();
@@ -238,15 +241,15 @@ class ArmsBaseController extends Controller
 				$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 			}
 			
-			return $this->render('index', [
+			return $this->render($view, [
 				'searchModel' => $searchModel,
 				'dataProvider' => $dataProvider,
 				'switchArchivedCount' => $switchArchivedCount??null,
+				'model' => $model
 			]);
 			
 		} else {
 			$query=($this->modelClass)::find();
-			$model= new $this->modelClass();
 			if ($model->hasAttribute('archived')) {
 				if (!Yii::$app->request->get('showArchived',$this->defaultShowArchived))
 					$query->where(['not',['IFNULL(archived,0)'=>1]]);
@@ -257,8 +260,9 @@ class ArmsBaseController extends Controller
 				'pagination' => ['pageSize' => 100,],
 			]);
 			
-			return $this->render('index', [
+			return $this->render($view, [
 				'dataProvider' => $dataProvider,
+				'model' => $model
 			]);
 		}
     }
@@ -271,7 +275,10 @@ class ArmsBaseController extends Controller
 	 */
 	public function actionItem(int $id)
 	{
-		return $this->renderPartial('item', [
+		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'item.php')?
+			'item':'/layouts/item';
+		
+		return $this->renderPartial($view, [
 			'model' => $this->findModel($id),
 			'static_view'=>true,
 		]);
@@ -279,7 +286,10 @@ class ArmsBaseController extends Controller
 	
 	public function actionItemByName($name)
 	{
-		return $this->renderPartial('item', [
+		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'item.php')?
+			'item':'/layouts/item';
+
+		return $this->renderPartial($view, [
 			'model' => $this->findByName($name),
 			'static_view'=>true,
 		]);
@@ -293,12 +303,15 @@ class ArmsBaseController extends Controller
 	 */
 	public function actionTtip(int $id)
 	{
+		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'ttip.php')?
+			'ttip':'/layouts/ttip';
+		
 		if ($t=Yii::$app->request->get('timestamp')) {
-			return $this->renderPartial('ttip', [
+			return $this->renderPartial($view, [
 				'model' => $this->findJournalRecord($id,$t),
 			]);
 		}
-		return $this->renderPartial('ttip', [
+		return $this->renderPartial($view, [
 			'model' => $this->findModel($id),
 		]);
 	}
@@ -312,7 +325,9 @@ class ArmsBaseController extends Controller
 	 */
 	public function actionView(int $id)
 	{
-		return $this->defaultRender('view', [
+		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'view.php')?
+			'view':'/layouts/view';
+		return $this->defaultRender($view, [
 			'model' => $this->findModel($id),
 		]);
 	}
@@ -331,6 +346,7 @@ class ArmsBaseController extends Controller
         else
             $model = new $this->modelClass();
 
+		$model->setScenario(ArmsModel::SCENARIO_VALIDATION);
         if ($model->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ArmsForm::validate($model);
@@ -380,8 +396,11 @@ class ArmsBaseController extends Controller
 			return $this->defaultReturn($this->routeOnUpdate($model),[$model]);
 		}
 		
+		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'create.php')?
+			'create':'/layouts/create';
+		
 		$model->load(Yii::$app->request->get());
-		return $this->defaultRender('create', ['model' => $model,]);
+		return $this->defaultRender($view, ['model' => $model,]);
 	}
 
 	/**
@@ -396,6 +415,9 @@ class ArmsBaseController extends Controller
 		$this->view->registerAssetBundle(ArmsFormAsset::class);
         $model = $this->findModel($id);
 
+		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'update.php')?
+			'update':'/layouts/update';
+
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
         	if (in_array('application/json',Yii::$app->request->acceptableContentTypes)) {
         		Yii::$app->response->format=Response::FORMAT_JSON;
@@ -407,7 +429,7 @@ class ArmsBaseController extends Controller
         }
 
 		$model->load(Yii::$app->request->get());
-		return $this->defaultRender('update', ['model' => $model,]);
+		return $this->defaultRender($view, ['model' => $model,]);
     }
 	
 	
