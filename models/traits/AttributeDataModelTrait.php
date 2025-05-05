@@ -54,6 +54,7 @@ trait AttributeDataModelTrait
 			'notepad' => [
 				'Записная книжка',
 				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого объекта',
+				'type' => 'text'
 			],
 			'history' => ['alias'=>'notepad'],
 			'links' => [
@@ -66,16 +67,16 @@ trait AttributeDataModelTrait
 			],
 			'updated_at' => [
 				'Время изменения',
-				'hint' => 'Дата/время изменения объекта в БД'
+				'hint' => 'Дата/время изменения объекта в БД',
 			],
 			'updated_by'=>[
 				'Редактор',
-				'hint' => 'Автор последних изменений объекта'
+				'hint' => 'Автор последних изменений объекта',
 			],
 			'external_links' => [
 				'Доп. связи',
 				'hint' => 'JSON структура с дополнительными объектами и ссылками на внешние информационные системы',
-			]
+			],
 		];
 	}
 	
@@ -123,10 +124,19 @@ trait AttributeDataModelTrait
 					$this->attributeDataCache[$attr]=['alias'=>$getter];
 					//возвращаем данные по геттеру
 					return $this->getAttributeData($getter);
-				} else {
-					$this->attributeDataCache[$attr]=null;
 				}
 			}
+			//проверяем в обратную сторону aclsList => acls_list_ids
+			if ($link=$this->attributeIsLoader($attr)) {
+				//если есть данные для исходного аттрибута
+				if (isset($this->attributeDataCache[$link])) {
+					//сохраняем как ссылку
+					$this->attributeDataCache[$attr]=['alias'=>$link];
+					//возвращаем данные по исходному аттрибуту
+					return $this->getAttributeData($link);
+				}
+			}
+			$this->attributeDataCache[$attr]=null;
 			return null;
 		}
 		
@@ -218,6 +228,7 @@ trait AttributeDataModelTrait
 		if ($label=$this->fetchAttributeLabel(
 			$this->getAttributeData($attribute)
 		)) return $label;
+		
 		/** @noinspection PhpUndefinedClassInspection */
 		return parent::getAttributeLabel($attribute);
 	}
@@ -234,6 +245,29 @@ trait AttributeDataModelTrait
 		)) return $hint;
 		/** @noinspection PhpUndefinedClassInspection */
 		return parent::getAttributeHint($attribute);
+	}
+	
+	public function getAttributeType($attribute)
+	{
+		if ($type=$this->getAttributeData($attribute)['type']??false) {
+			return $type;
+		}
+		if ($this->attributeIsLink($attribute)) {
+			return 'link';
+		}
+		
+		if (StringHelper::startsWith($attribute,'is_')) {
+			return 'boolean';
+		}
+		
+		switch ($attribute) {
+			case 'ips': return 'ips';
+			case 'macs': return 'macs';
+			case 'links':
+			case 'urls': return 'urls';
+		}
+		
+		return 'string';
 	}
 
 	/**
