@@ -57,10 +57,12 @@ trait MaintenanceReqsModelCalcFieldsTrait
 		$effective=[];
 		//проверяем всех
 		foreach ($reqs as $req) {
+			if ($req->archived) continue;	//пропускаем архивные
 			//ибо иначе прописанное свойство absorbed сохраняется в объекте, который один на множество компов
 			$req1=clone $req;
 			//со всеми
 			foreach ($reqs as $req2) {
+				if ($req2->archived) continue;	//пропускаем архивные
 				//если элемент входит в набор удовлетворяемых требований - помечаем его
 				if ($req1->isSatisfiedByReq($req2)) {
 					$req1->absorbed=$req2->id;
