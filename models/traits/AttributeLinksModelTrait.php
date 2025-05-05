@@ -172,6 +172,19 @@ trait AttributeLinksModelTrait
 	}
 	
 	/**
+	 * Является ли аттрибут загрузчиком для ссылки
+	 * в linksClasses должно быть проставлено на какой класс ссылка
+	 * @param string $loader
+	 * @return string|false
+	 */
+	public function attributeIsLoader(string $loader){
+		foreach ($this->getLinksSchema() as $attr=>$schema) {
+			if ($loader===$this->attributeLinkLoader($attr)) return $attr;
+		};
+		return false;
+	}
+
+	/**
 	 * Схема атрибута ссылки
 	 * @param string $attr
 	 * @return array
