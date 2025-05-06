@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\helpers\WikiHelper;
+use app\models\ui\WikiCache;
 use app\models\Users;
 use Yii;
 use yii\filters\auth\HttpBasicAuth;
@@ -19,7 +20,8 @@ class WikiController extends Controller
 		return [
 			ArmsBaseController::PERM_VIEW=>[
 				'page',
-				'render-field'
+				'render-field',
+				'invalidate-page',
 			],
 		];
 	}
@@ -75,9 +77,18 @@ class WikiController extends Controller
 
 		if ($page===false) return "Ошибка получения детального описания из Wiki";
 		
-		return WikiHelper::parseWikiHtml($page, WikiHelper::wikiUrl($api));
+		$parsed=WikiHelper::parseWikiHtml($page, WikiHelper::wikiUrl($api));
+		
+		$cache=WikiCache::fetchCache($pageName);
+		$cache->data=$parsed;
+		//$cache->dependencies ='|'.implode('|', WikiCache::extractDependencies($text)).'|';
+		$cache->valid=0;	//по умолчанию кэш считаем не валидным.
+		// т.е. он будет подгружен, но сразу запросит обновление данных из вики
+		
+		return $parsed;
 	}
 	
+
 	/**
 	 * Renders model field via dokuwiki
 	 *
@@ -91,9 +102,55 @@ class WikiController extends Controller
 		$model=ArmsBaseController::findClassModel($class,$id);
 		$text=$model->$field;
 		
+		//отправляем данные на рендер
 		$page = WikiHelper::dokuwikiRender($text);
 		if ($page===false) return "Error rendering via dokuwiki";
+		//правим ссылки
+		$parsed=WikiHelper::parseWikiHtml($page, Yii::$app->params['wikiUrl']);
 		
-		return WikiHelper::parseWikiHtml($page, Yii::$app->params['wikiUrl']);
+		$cache=WikiCache::fetchCache(
+			WikiCache::internalPath($class, $id, $field)
+		);
+		
+		$cache->data=$parsed;
+		$cache->dependencies ='|'.implode('|', WikiCache::extractDependencies($text)).'|';
+		$cache->valid=1;
+		
+		$cache->save();
+		return $parsed;
+	}
+	
+	/**
+	 * Обозначает кэш обновленной страницы как устаревший
+	 * @param string $pageName
+	 * @return string
+	 */
+	public function actionInvalidatePage($pageName)
+	{
+		$count=0;
+
+		//основная страничка
+		$page=WikiCache::find()
+			->where(['page'=>$pageName])
+			->one();
+		
+		if ($page) {
+			$page->valid=0;
+			$page->save();
+			$count++;
+		}
+		
+		//странички ссылающиеся на нее (через {{page>...}})
+		$dependants=WikiCache::find()
+			->where(['like','dependencies','|'.$pageName.'|'])
+			->all();
+
+		foreach ($dependants as $dependant) {
+			$dependant->valid=0;
+			$dependant->save();
+			$count++;
+		}
+		
+		return $count.' pages invalidated';
 	}
 }

@@ -11,11 +11,17 @@ namespace app\components;
 use app\assets\DokuWikiAsset;
 use app\helpers\StringHelper;
 use app\helpers\WikiHelper;
+use app\models\ui\WikiCache;
 use Yii;
 use yii\base\Widget;
 
 class WikiTextWidget extends Widget
 {
+	// Заглушка для ожидания загрузки данных
+	const PLACEHOLDER='<div class="spinner-border" role="status">'
+		.'<span class="visually-hidden">Loading...</span>'
+		.'</div>';
+	
 	public $model;
 	public $field;
 	
@@ -26,19 +32,28 @@ class WikiTextWidget extends Widget
 		$id=StringHelper::class2Id($class)
 			.'-'.$this->model->id
 			.'-'.StringHelper::class2Id($this->field);
+		
+		$cache=WikiCache::fetchCache(
+			WikiCache::internalPath($class, $this->model->id, $this->field)
+		);
+		
+		//данные - либо из кэша, либо надпись "Loading..."
+		$data=$cache->data??static::PLACEHOLDER;
+		//кладем данные в контент блок
+		$content='<div id="'.$id.'" class="dokuwiki">'.$data.'</div>';
+		
+		//если данные требуют обновления - добавляем скрипт обновления контент-блока
+		if (!$cache->valid) $content.='<script>
+			$.get(
+				"/web/wiki/render-field?class='.urlencode($class).'&id='.$this->model->id.'&field='.$this->field.'",
+				function(data) {
+					$("#'.$id.'").html(data);
+					'.(DokuWikiAsset::$dokuWikiInit).'
+				}
+            )
+		</script>';
+		
+		return $content;
 			
-			return '<div id="'.$id.'" class="dokuwiki">
-				<div class="spinner-border" role="status">
-					<span class="visually-hidden">Loading...</span>
-				</div>
-			</div>
-			<script>
-				$.get(
-                    "/web/wiki/render-field?class='.urlencode($class).'&id='.$this->model->id.'&field='.$this->field.'",
-                    function(data) {
-                    	$("#'.$id.'").html(data);
-                    	'.(DokuWikiAsset::$dokuWikiInit).'
-                    })
-			</script>';
 	}
 }
