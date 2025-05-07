@@ -26,7 +26,13 @@
             
                 // Get rid of scrollbars and disable WebKit resizing:
             let $textarea = jQuery(this);
-            $textarea.css({resize:'none','overflow-y':'hidden'}).removeAttr('rows');
+            $textarea
+                .css({
+                    resize:'none',
+                    'overflow-y':'hidden',
+                    'box-sizing':'border-box'
+                })
+                .removeAttr('rows');
 
             // Need clone of textarea, hidden off-screen:
             const $clone = $textarea.clone().removeAttr('id').removeAttr('name').css({
@@ -34,6 +40,7 @@
                 top: 0,
                 left: -99999,
                 height: '',
+                'box-sizing':'border-box'
             }).attr('tabIndex','-1').insertBefore($textarea);
 
             let lastScrollTop = null;
@@ -54,7 +61,7 @@
                 //console.log($textarea.attr('class'));
                 $clone
                     .attr('class', $textarea.attr('class'))
-                    .css('width', $textarea.width() + 'px')
+                    .width($textarea.width())
                     .val(textLines.join("\n"))
                     .scrollTop(10000);
 
