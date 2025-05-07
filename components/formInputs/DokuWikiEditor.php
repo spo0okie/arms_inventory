@@ -26,12 +26,20 @@ class DokuWikiEditor extends InputWidget
 			'rows' => $this->rows
 		]);
 		
-		//добавляем авторесайз
 
 		
 		$this->view->registerJs(
-			"$('#$inputId').autoResize({extraSpace:25}).trigger('change.dynSiz');".
-			"initToolbar('dokuwiki-toolbar-container','$inputId',toolbar);"
+			//добавляем авторесайз
+			"$('#$inputId').autoResize({extraSpace:25}).trigger('change.dynSiz');"
+			//скрипты с библиотеками подгружаются не всегда сразу, поэтому инициализируем тулбар
+			//тогда, когда функции уже загружены
+			."window.waitToolbarFunction = setInterval(() => {
+    			if (typeof initToolbar === 'function') {
+        			clearInterval(window.waitToolbarFunction); // Останавливаем проверку
+        			window.waitToolbarFunction=undefined;
+        			initToolbar('dokuwiki-toolbar-container','$inputId',toolbar);
+    			}
+			}, 400);"
 		);
 		
 		$this->initDokuWikiToolbar();
