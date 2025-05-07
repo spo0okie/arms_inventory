@@ -13,7 +13,7 @@ class DokuWikiEditorAsset extends AssetBundle
 	];
 	public function init() {
 		$this->js=[
-			['js/buttons.js',['position' => \yii\web\View::POS_HEAD]],
+			['js/buttons.js',['position' => \yii\web\View::POS_BEGIN]],
 			\Yii::$app->params['wikiUrl'].'lib/scripts/helpers.js',
 			\Yii::$app->params['wikiUrl'].'lib/scripts/edit.js',
 			\Yii::$app->params['wikiUrl'].'lib/scripts/linkwiz.js',

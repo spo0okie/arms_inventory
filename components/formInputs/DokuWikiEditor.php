@@ -43,10 +43,10 @@ class DokuWikiEditor extends InputWidget
 		// Регистрируем JS/CSS
 		DokuWikiEditorAsset::register($this->view);
 		$this->view->registerJs(
-			"let DOKU_BASE='".\Yii::$app->params['wikiUrl']."';"
-			."let LANG={};"
-			."let JSINFO = {act: 'edit',id: 'inventory_internal.sys',};"
-			,View::POS_HEAD
+			"window.DOKU_BASE='".\Yii::$app->params['wikiUrl']."';"
+			."window.LANG={};"
+			."window.JSINFO = {act: 'edit',id: 'inventory_internal.sys'};"
+			,View::POS_BEGIN
 		);
 	}
 }
