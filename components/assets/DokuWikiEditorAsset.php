@@ -8,9 +8,7 @@ class DokuWikiEditorAsset extends AssetBundle
 {
 	
 	public $sourcePath = __DIR__ . '/DokuWikiEditorAsset';
-	public $css = [
-		'css/editor.css',
-	];
+
 	public function init() {
 		$this->js=[
 			['js/buttons.js',['position' => \yii\web\View::POS_BEGIN]],
