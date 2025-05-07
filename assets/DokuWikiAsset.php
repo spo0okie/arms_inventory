@@ -37,6 +37,7 @@ class DokuWikiAsset extends AssetBundle
 		'css/doku/sxh.css',
 		'css/doku/folded.css',
 		'css/doku/manual.css',
+		'css/doku/custom.css',
     ];
     public $js = [
 		'js/doku/folded.js',

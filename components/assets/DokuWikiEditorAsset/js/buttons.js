@@ -107,11 +107,12 @@ var toolbar = [{
     ],
     "block": true
 }, {
-    "type": "linkwiz",
+    "type": "format",
     "title": "Внутренняя ссылка",
     "icon": "link.png",
     "key": "l",
     "open": "[[",
+    "sample": "папка:страница#секция|описание ссылки",
     "close": "]]",
     "block": false
 }, {
