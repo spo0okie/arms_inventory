@@ -134,9 +134,9 @@ return [
 		'value'=>function ($data) use ($renderer) {
 			/** @var Techs $data */
 			$items=[];
-			foreach ($data->licItems as $item) $items[]=$renderer->render('/lic-items/item',['model'=>$item]);
-			foreach ($data->licGroups as $item) $items[]=$renderer->render('/lic-groups/item',['model'=>$item]);
-			foreach ($data->licKeys as $item) $items[]=$renderer->render('/lic-keys/item',['model'=>$item]);
+			foreach ($data->licItems as $item) $items[]=$item->renderItem($renderer);
+			foreach ($data->licGroups as $item) $items[]=$item->renderItem($renderer);
+			foreach ($data->licKeys as $item) $items[]=$item->renderItem($renderer);
 			return count($items)?ExpandableCardWidget::widget(['content'=>implode('<br>',$items),'cardClass'=>'line-br']):'';
 		},
 	],
