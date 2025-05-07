@@ -30,6 +30,7 @@ class DokuWikiAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
+		'css/doku/screen.css',
 		'css/doku/wrap.css',
 		'css/doku/geshi.code.css',
 		'css/doku/tag.css',

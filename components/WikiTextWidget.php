@@ -11,6 +11,7 @@ namespace app\components;
 use app\assets\DokuWikiAsset;
 use app\helpers\StringHelper;
 use app\helpers\WikiHelper;
+use app\models\ArmsModel;
 use app\models\ui\WikiCache;
 use Yii;
 use yii\base\Widget;
@@ -22,6 +23,7 @@ class WikiTextWidget extends Widget
 		.'<span class="visually-hidden">Loading...</span>'
 		.'</div>';
 	
+	/** @var ArmsModel */
 	public $model;
 	public $field;
 	
@@ -42,8 +44,13 @@ class WikiTextWidget extends Widget
 		//кладем данные в контент блок
 		$content='<div id="'.$id.'" class="dokuwiki">'.$data.'</div>';
 		
+		$outdated=false;
+		if ($this->model->hasAttribute('updated_at')) {
+			$outdated=$this->model->updated_at>$cache->updated_at;
+		}
+		
 		//если данные требуют обновления - добавляем скрипт обновления контент-блока
-		if (!$cache->valid) $content.='<script>
+		if ($outdated || !$cache->valid) $content.='<script>
 			$.get(
 				"/web/wiki/render-field?class='.urlencode($class).'&id='.$this->model->id.'&field='.$this->field.'",
 				function(data) {

@@ -19,5 +19,8 @@ class Select2ArmsAsset extends AssetBundle
 	public $js = ['select2arms/js/select2custom.js', ];
 	public $css = ['select2arms/css/select2custom.css', ];
     public $jsOptions = [ 'position' => \yii\web\View::POS_HEAD ];
-    public $depends = ['kartik\select2\Select2Asset',];
+    public $depends = [
+		'kartik\select2\Select2Asset',
+		'yii\web\JqueryAsset',
+	];
 }

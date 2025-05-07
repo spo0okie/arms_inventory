@@ -3,6 +3,7 @@ namespace app\components\formInputs;
 
 use app\components\assets\DokuWikiEditorAsset;
 use yii\helpers\Html;
+use yii\web\View;
 use yii\widgets\InputWidget;
 
 class DokuWikiEditor extends InputWidget
@@ -10,8 +11,6 @@ class DokuWikiEditor extends InputWidget
 	public $rows=4;
 	public function run()
 	{
-		// Регистрируем JS/CSS
-		DokuWikiEditorAsset::register($this->view);
 		
 		// ID текстового поля
 		$inputId = $this->options['id'] ?? Html::getInputId($this->model, $this->attribute);
@@ -19,7 +18,7 @@ class DokuWikiEditor extends InputWidget
 		$this->rows = max($this->rows??4, count(explode("\n", $this->model->{$this->attribute})));
 		
 		// Выводим HTML
-		echo Html::beginTag('div', ['class' => 'dokuwiki-editor']);
+		echo Html::tag('div','', ['id' => 'dokuwiki-toolbar-container']);
 		//echo $this->renderToolbar();
 		echo Html::activeTextarea($this->model, $this->attribute, [
 			'id' => $inputId,
@@ -28,21 +27,26 @@ class DokuWikiEditor extends InputWidget
 		]);
 		
 		//добавляем авторесайз
-		$this->view->registerJs("$('#$inputId').autoResize({extraSpace:25}).trigger('change.dynSiz');");
+
 		
-		echo Html::endTag('div');
+		$this->view->registerJs(
+			"$('#$inputId').autoResize({extraSpace:25}).trigger('change.dynSiz');".
+			"initToolbar('dokuwiki-toolbar-container','$inputId',toolbar);"
+		);
+		
+		$this->initDokuWikiToolbar();
 	}
 	
-	protected function renderToolbar()
+	protected function initDokuWikiToolbar()
 	{
-		return <<<HTML
-<div class="dokuwiki-toolbar">
-    <button type="button" data-command="bold"><b>B</b></button>
-    <button type="button" data-command="italic"><i>I</i></button>
-    <button type="button" data-command="heading">H</button>
-    <button type="button" data-command="link">Link</button>
-    <button type="button" data-command="code">Code</button>
-</div>
-HTML;
+	
+		// Регистрируем JS/CSS
+		DokuWikiEditorAsset::register($this->view);
+		$this->view->registerJs(
+			"let DOKU_BASE='".\Yii::$app->params['wikiUrl']."';"
+			."let LANG={};"
+			."let JSINFO = {act: 'edit',id: 'inventory_internal.sys',};"
+			,View::POS_HEAD
+		);
 	}
 }

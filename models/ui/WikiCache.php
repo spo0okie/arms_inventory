@@ -35,7 +35,7 @@ class WikiCache extends ArmsModel
 		return [
 			[['page','dependencies'], 'string', 'max' => 255],
 			['valid', 'boolean'],
-			['dependencies','unique'],
+			['page','unique'],
 			[['page'], 'required'],
 			[['valid'], 'default', 'value' => 1],
 		];
