@@ -43,7 +43,7 @@
                 //$textarea = jQuery(this);
                 if (!$textarea.is(":visible")) {
                     //У нас невидимый объект. Откладываем ресайз пока не станет видимым, иначе ничего не сработает
-                    console.log("invisible!?");
+                    //console.log("invisible!?");
                     setTimeout(updateSize,200);
                     return;
                 }
@@ -51,7 +51,7 @@
                 let textLines=$textarea.val().split("\n");
                 while (textLines.length<settings.minLines) textLines.push('fake');
 
-                console.log($textarea.attr('class'));
+                //console.log($textarea.attr('class'));
                 $clone
                     .attr('class', $textarea.attr('class'))
                     .css('width', $textarea.width() + 'px')
