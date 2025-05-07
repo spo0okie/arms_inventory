@@ -3,6 +3,7 @@
 namespace app\components\Forms;
 
 use app\components\formInputs\DokuWikiEditor;
+use app\components\formInputs\TextAutoResizeWidget;
 use app\components\Forms\assets\Select2FieldAsset;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
@@ -172,16 +173,8 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	 */
 	public function textAutoresize ($options = ['rows'=>4])
 	{
-		$inputId=$this->getInputId();
-		$this->form->getView()->registerJs("$('#$inputId').autoResize({extraSpace:25}).trigger('change.dynSiz');");
-		$options['rows'] = max($options['rows']??4, count(explode("\n", $this->model->{$this->attribute})));
-		$placeholder = '';
-		if ($this->model->hasMethod('getAttributePlaceholder')) {
-			$placeholder=$this->model->getAttributePlaceholder($this->attribute);
-		}
-		return $this->textarea(array_merge([
-			'placeholder'=>$placeholder,
-		],$options));
+
+		return $this->widget(TextAutoResizeWidget::class,$options);
 	}
 	
 
@@ -243,9 +236,9 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			$pluginOptions['templateSelection']=new JsExpression('function(item){return formatSelect2ItemHint(item,"'.$itemsHintsUrl.'")}');
 			$pluginOptions['escapeMarkup']=new JsExpression('function(m) { return m; }');
 			if ($pluginOptions['multiple']??false)
-				$pluginOptions['selectionAdapter']=new JsExpression('$.fn.select2.amd.require("QtippedMultipleSelectionAdapter")');
+				$pluginOptions['selectionAdapter']=new JsExpression('jQuery.fn.select2.amd.require("QtippedMultipleSelectionAdapter")');
 			else
-				$pluginOptions['selectionAdapter']=new JsExpression('$.fn.select2.amd.require("QtippedSingleSelectionAdapter")');
+				$pluginOptions['selectionAdapter']=new JsExpression('jQuery.fn.select2.amd.require("QtippedSingleSelectionAdapter")');
 			
 		}
 		

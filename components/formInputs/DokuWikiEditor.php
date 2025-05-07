@@ -2,6 +2,7 @@
 namespace app\components\formInputs;
 
 use app\components\assets\DokuWikiEditorAsset;
+use app\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\InputWidget;
@@ -9,31 +10,29 @@ use yii\widgets\InputWidget;
 class DokuWikiEditor extends InputWidget
 {
 	public $rows=4;
+	
 	public function run()
 	{
+		$inputId=$this->options['id']??Html::getInputId($this->model, $this->attribute);
 		
-		// ID текстового поля
-		$inputId = $this->options['id'] ?? Html::getInputId($this->model, $this->attribute);
-		
-		$this->rows = max($this->rows??4, count(explode("\n", $this->model->{$this->attribute})));
-		
-		// Выводим HTML
+		// Выводим тулбар (наполняется позже через JS)
 		echo Html::tag('div','', ['id' => 'dokuwiki-toolbar-container']);
-		//echo $this->renderToolbar();
-		echo Html::activeTextarea($this->model, $this->attribute, [
-			'id' => $inputId,
-			'class' => 'form-control dokuwiki-textarea',
-			'rows' => $this->rows
+
+		echo TextAutoResizeWidget::widget([
+			'model'=>$this->model,
+			'attribute'=>$this->attribute,
+			'options'=>ArrayHelper::recursiveOverride([
+				'rows' => $this->rows,
+				'class' => 'form-control dokuwiki-textarea',
+			],$this->options)
 		]);
 		
 
 		
 		$this->view->registerJs(
-			//добавляем авторесайз
-			"$('#$inputId').autoResize({extraSpace:25}).trigger('change.dynSiz');"
 			//скрипты с библиотеками подгружаются не всегда сразу, поэтому инициализируем тулбар
 			//тогда, когда функции уже загружены
-			."window.waitToolbarFunction = setInterval(() => {
+			"window.waitToolbarFunction = setInterval(() => {
     			if (typeof initToolbar === 'function') {
         			clearInterval(window.waitToolbarFunction); // Останавливаем проверку
         			window.waitToolbarFunction=undefined;
