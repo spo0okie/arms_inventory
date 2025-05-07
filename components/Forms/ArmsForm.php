@@ -51,6 +51,7 @@ class ArmsForm extends ActiveForm
 	
 	public function init()
 	{
+		parent::init();
 		
 		//если модель есть, а класса нет, вытаскиваем класс
 		if (isset($this->model) && !isset($this->modelClass)) {
@@ -71,11 +72,10 @@ class ArmsForm extends ActiveForm
 			$this->options['id'].='-form';
 		}
 		
-		parent::init();
 	}
 	
 	/**
-	 * добавляет к данным валидации значения плейсхолдеров для формы, которые могли измениться
+	 * Добавляет к данным валидации значения плейсхолдеров для формы, которые могли измениться
 	 * после изменения данных (динамических плейсхолдеров)
 	 * @param       $model
 	 * @param array $result
