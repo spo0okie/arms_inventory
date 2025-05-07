@@ -23,7 +23,7 @@
 */
 
 
-$.fn.select2.amd.define("CountChoicesSelectionAdapter", [
+jQuery.fn.select2.amd.define("CountChoicesSelectionAdapter", [
         "select2/utils",
         "select2/selection/multiple",
         "select2/selection/placeholder",
@@ -33,11 +33,11 @@ $.fn.select2.amd.define("CountChoicesSelectionAdapter", [
     ],
     function(Utils, MultipleSelection, Placeholder, EventRelay, SingleSelection, AllowClear) {
 
-        function CountChoicesSelectionAdapter() {MultipleSelection.__super__.constructor.apply(this, arguments);};
+        function CountChoicesSelectionAdapter() {MultipleSelection.__super__.constructor.apply(this, arguments);}
         Utils.Extend(CountChoicesSelectionAdapter, MultipleSelection);
 
         //подменяем рендер на Сингловый (в то время как вообще вся компонента - мултипл)
-        CountChoicesSelectionAdapter.prototype.render = function(data) {
+        CountChoicesSelectionAdapter.prototype.render = function() {
             return SingleSelection.prototype.render.call(this);
         }
 
@@ -76,7 +76,7 @@ $.fn.select2.amd.define("CountChoicesSelectionAdapter", [
 
 
 
-$.fn.select2.amd.define("QtippedMultipleSelectionAdapter", [
+jQuery.fn.select2.amd.define("QtippedMultipleSelectionAdapter", [
         "select2/utils",
         "select2/selection/multiple",
         "select2/selection/placeholder",
@@ -88,7 +88,7 @@ $.fn.select2.amd.define("QtippedMultipleSelectionAdapter", [
 
         function QtippedMultipleSelectionAdapter() {
             MultipleSelection.__super__.constructor.apply(this, arguments);
-        };
+        }
 
         Utils.Extend(QtippedMultipleSelectionAdapter, MultipleSelection);
 
@@ -100,14 +100,14 @@ $.fn.select2.amd.define("QtippedMultipleSelectionAdapter", [
             //let $selection=this.selectionContainer();
             let $rendered = this.$selection.find('.select2-selection__rendered');
             $rendered.find('li').each(function(i,item){
-                let qtipped=$(item).find('span[qtip_ajxhrf]');
+                let qtipped=jQuery(item).find('span[qtip_ajxhrf]');
                 if (qtipped.length) {
-                    let $qtipped=$(qtipped[0]);
+                    let $qtipped=jQuery(qtipped[0]);
                     let href=$qtipped.attr('qtip_ajxhrf');
                     $qtipped.removeAttr('qtip_ajxhrf');
                     if ($qtipped.hasClass('tooltipstered')) $qtipped.tooltipster('destroy');
-                    $(item).attr('qtip_ajxhrf',href);
-                    $(item).attr('title','')
+                    jQuery(item).attr('qtip_ajxhrf',href);
+                    jQuery(item).attr('title','')
 
                 }
             })
@@ -121,7 +121,7 @@ $.fn.select2.amd.define("QtippedMultipleSelectionAdapter", [
         return QtippedMultipleSelectionAdapter;
     });
 
-$.fn.select2.amd.define("QtippedSingleSelectionAdapter", [
+jQuery.fn.select2.amd.define("QtippedSingleSelectionAdapter", [
         "select2/utils",
         "select2/selection/single",
         "select2/selection/placeholder",
@@ -133,7 +133,7 @@ $.fn.select2.amd.define("QtippedSingleSelectionAdapter", [
 
         function QtippedSingleSelectionAdapter() {
             SingleSelection.__super__.constructor.apply(this, arguments);
-        };
+        }
 
         //создаем свой селект на основе сингла
         Utils.Extend(QtippedSingleSelectionAdapter,SingleSelection);
@@ -146,7 +146,7 @@ $.fn.select2.amd.define("QtippedSingleSelectionAdapter", [
             //let $selection=this.selectionContainer();
             let item = this.$selection.find('.select2-selection__rendered');
             if (item.length) {
-                let $item=$(item[0]);
+                let $item=jQuery(item[0]);
                 //если внутри выбранного элемента у нас есть нормальная Ajax подсказка то убираем title
                 if ($item.find('span[qtip_ajxhrf]').length) $item.attr('title','');
             }

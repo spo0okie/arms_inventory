@@ -23,4 +23,7 @@ class Select2ArmsAsset extends AssetBundle
 		'kartik\select2\Select2Asset',
 		'yii\web\JqueryAsset',
 	];
+	public $publishOptions = [
+		'forceCopy' => YII_DEBUG,
+	];
 }
