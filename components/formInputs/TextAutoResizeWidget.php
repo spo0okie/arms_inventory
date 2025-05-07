@@ -1,10 +1,6 @@
 <?php
 namespace app\components\formInputs;
 
-use app\components\yii;
-use app\models\ArmsModel;
-use yii\base\Model;
-use yii\base\Widget;
 use yii\helpers\Html;
 use yii\widgets\InputWidget;
 
@@ -23,7 +19,7 @@ class TextAutoResizeWidget extends InputWidget
 		//количество строк используем в авторесайзе как минимальное, меньше которого не ресайзить
 		$this->getView()->registerJs("jQuery('#$inputId')"
 			.".autoResize({extraSpace:14,minLines:$rows})"
-			.".trigger('change.dynSiz');"
+			//.".trigger('change.dynSiz');"
 		);
 		
 		//пересчитываем количество строк для первоначального отображения textarea в нужную высоту
