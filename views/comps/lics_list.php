@@ -14,11 +14,11 @@ if (!isset($glue)) $glue='<br />';
 $output=[];
 
 foreach ($model->licGroups as $licGroup)
-	$output[]=$this->render('/lic-groups/item',['model'=>$licGroup,'static_view'=>$static_view]);
+	$output[]=$licGroup->renderItem($this,['static_view'=>$static_view]);
 foreach ($model->licItems as $licItem)
-	$output[]=$this->render('/lic-items/item',['model'=>$licItem,'static_view'=>$static_view,'name'=>$licItem->dname]);
+	$output[]=$licItem->renderItem($this,['static_view'=>$static_view,'name'=>$licItem->dname]);
 foreach ($model->licKeys as $licKey)
-	$output[]=$this->render('/lic-keys/item',['model'=>$licKey,'static_view'=>$static_view,'name'=>$licKey->dname]);
+	$output[]=$licKey->renderItem($this,['static_view'=>$static_view,'name'=>$licKey->dname]);
 
 if (count($output)) {
 ?>
