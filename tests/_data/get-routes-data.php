@@ -16,8 +16,9 @@ return [
 	//Этот надо как-то хитро тестировать со всеми моделями
 	'/^history\/.*$/' => '{skipTest}',
 	//хз как его тестировать пока
-	'/^sms\/.*$/' => '{skipTest}',
 	'/^lic-links\/.*$/' => '{skipTest}',
+	'/^sms\/.*$/' => '{skipTest}',
+	'/^site\/.*$/' => '{skipTest}',
 	'/^ui-tables-cols\/.*$/' => '{skipTest}',
 	'/^wiki\/.*$/' => '{skipTest}',
 	//его наверно вообще надо удалить
@@ -48,6 +49,14 @@ return [
 	'/^scans\/thumb$/' => '{skipTest}', //TODO: нужно восстановление БД
 	'/^scheduled-access\/status$/' => '?id={anyId}',
 	'/^schedules-entries\/create$/' => '?id={anyId}&SchedulesEntries[schedule_id]=1',//нужно расписание
+	'/^services\/(aces\-list|acls\-list|card|card\-support|card\-maintenance\-reqs|children\-tree|json\-preview|os\-list)$/' => '?id={anyId}',
+	'/^soft\/select\-update$/' => '{skipTest}', //TODO: сделать тест - это GET метод
+	'/^tech\-(models|types)\/hint\-.*$/' => '?id={anyId}',
+	'/^tech\-models\/item-by-name$/' => '?name=SPA 504G&manufacturer=Cisco',
+	'/^techs\/(docs|edithw|invnum|port\-list|updhw|rmhw)$/' => '{skipTest}', //TODO: сделать тест - это GET метод
+	'/^techs\/(rack-unit|rack-unit-validate)$/' => '{skipTest}', //TODO: сделать тест - это GET метод
+	'/^techs\/ttip\-hw$/' => '?id={anyId}', //TODO: сделать тест - это GET метод
+	'/^users\/item\-by\-login$/' => '?login=admin',
 	//стандартные методы
 	'/^[a-z0-9\-]+\/(view|item|ttip|update|card|uploads)$/' => '?id={anyId}',
 	'/^[a-z0-9\-]+\/item-by-name$/' => '?name={anyName}',

@@ -24,6 +24,10 @@ class SoftController extends ArmsBaseController
 		]);
 	}
 	
+	public function disabledActions()
+	{
+		return ['item-by-name','ttip'];
+	}
 	
 	/**
 	 * Displays a single Soft model ttip.

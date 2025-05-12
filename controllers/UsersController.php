@@ -84,19 +84,4 @@ class UsersController extends ArmsBaseController
 		throw new NotFoundHttpException('The requested page does not exist.');
 	}
 	
-	/**
-	 * Lists all Users models.
-	 * @return mixed
-	 */
-	public function actionLogins()
-	{
-		$searchModel = new UsersSearch();
-		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-		return $this->render('logins', [
-			'searchModel' => $searchModel,
-			'dataProvider' => $dataProvider,
-		]);
-	}
-
 }

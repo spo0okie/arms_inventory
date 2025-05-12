@@ -20,7 +20,11 @@ class TechTypesController extends ArmsBaseController
 		]);
 	}
 	
-
+	public function disabledActions()
+	{
+		return ['ttip'];
+	}
+	
     /**
      * Displays a single TechTypes model.
      * @param integer $id
