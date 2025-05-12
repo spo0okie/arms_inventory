@@ -16,6 +16,10 @@ use yii\web\Response;
 class LicGroupsController extends ArmsBaseController
 {
 	public $modelClass=LicGroups::class;
+	public function disabledActions()
+	{
+		return ['item-by-name',];
+	}
 
     /**
      * Displays a single LicGroups model.

@@ -49,7 +49,7 @@ class ArmsForm extends ActiveForm
 		$view->registerJs("jQuery('#$id').on('ajaxComplete', armsFormAjaxComplete);");
 	}
 	
-	public function init()
+	public function init(): void
 	{
 		parent::init();
 		

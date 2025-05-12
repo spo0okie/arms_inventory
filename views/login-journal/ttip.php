@@ -28,7 +28,7 @@ use yii\widgets\DetailView;
 					if (is_object($comp=$data->comp))
 						return Html::a($data->compName.'&nbsp;<span class="fas fa-eye"/>',['/comps/view','id'=>$comp->id]).
 							'&nbsp;'.Html::a('<span class="fas fa-pencil-alt"/>',['/comps/update','id'=>$comp->id]).
-							'&nbsp;'.Html::a('<span class="fas fa-log-in"/>','remotecontrol://'.$data->compFqdn);
+							'&nbsp;'.Html::a('<span class="fas fa-log-in"/>','remotecontrol://'.$data->comp->fqdn);
 					return $data->compName;
 				}
 			],

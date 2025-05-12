@@ -29,7 +29,10 @@ class ScansController extends ArmsBaseController
 		]);
 	}
 	
-
+	public function disabledActions()
+	{
+		return ['item-by-name','update'];
+	}
 
 	/**
 	 * Validates Manufacturers model on update.

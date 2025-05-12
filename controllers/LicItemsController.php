@@ -28,6 +28,11 @@ class LicItemsController extends ArmsBaseController
 		]);
 	}
 	
+	public function disabledActions()
+	{
+		return ['item-by-name',];
+	}
+	
 	/**
 	 * Возвращает IDs оборудования связанного с закупкой (через документы)
 	 * @param int    $id
@@ -51,10 +56,10 @@ class LicItemsController extends ArmsBaseController
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionContracts(int $id)
+	/*public function actionContracts(int $id)
 	{
 		return $this->renderAjax('contracts', ['model' => $this->findModel($id)]);
-	}
+	}*/
 
 
 	/**

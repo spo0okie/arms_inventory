@@ -24,15 +24,15 @@
         // Only textarea's auto-resize:
         this.filter('textarea').each(function(){
             
-                // Get rid of scrollbars and disable WebKit resizing:
+            //получаем оригинальный textarea
             let $textarea = jQuery(this);
-            $textarea
+            $textarea                   //устанавливаем
                 .css({
-                    resize:'none',
-                    'overflow-y':'hidden',
-                    'box-sizing':'border-box'
+                    resize:'none',              //отключение уголка ресайза в углу
+                    'overflow-y':'hidden',      //скрываем полосы прокрутки (чтобы не моргали)
+                    'box-sizing':'border-box'   //позволяет учитывать padding и border в ширине
                 })
-                .removeAttr('rows');
+                .removeAttr('rows');            //это больше не надо
 
             // Need clone of textarea, hidden off-screen:
             const $clone = $textarea.clone().removeAttr('id').removeAttr('name').css({

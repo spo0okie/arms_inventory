@@ -9,5 +9,10 @@ use app\models\MaterialsUsages;
  */
 class MaterialsUsagesController extends ArmsBaseController
 {
+	public function disabledActions()
+	{
+		return ['item-by-name',];
+	}
+	
 	public $modelClass=MaterialsUsages::class;
 }

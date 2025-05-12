@@ -15,7 +15,12 @@ use yii\web\Response;
 class MaterialsController extends ArmsBaseController
 {
 	public $modelClass=Materials::class;
- 
+	
+	public function disabledActions()
+	{
+		return ['item-by-name','ttip'];
+	}
+	
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[

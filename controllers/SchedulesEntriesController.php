@@ -13,9 +13,13 @@ use yii\web\NotFoundHttpException;
  */
 class SchedulesEntriesController extends ArmsBaseController
 {
-	public $modelClass='app\models\SchedulesEntries';
+	public $modelClass=SchedulesEntries::class;
 	
-
+	public function disabledActions()
+	{
+		return ['item-by-name','view'];
+	}
+	
 	/**
 	 * Displays a single model ttip.
 	 * @param int $id

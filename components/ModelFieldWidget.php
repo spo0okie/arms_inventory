@@ -80,16 +80,16 @@ class ModelFieldWidget extends Widget
 	public function init(){
 		parent::init();
 		
-		if (!isset($this->fieldType)) {
-			$this->fieldType=$this->model->getAttributeType($this->field);
-		}
-
 		if (is_array($this->models)) {
 			$this->model=reset($this->models);
 			foreach ($this->models as $model)
 				$this->loadModelData($model);
 		} else {
 			$this->loadModelData($this->model);
+		}
+		
+		if (!isset($this->fieldType) && is_object($this->model)) {
+			$this->fieldType=$this->model->getAttributeType($this->field);
 		}
 		
 		if (!isset($this->title)) {

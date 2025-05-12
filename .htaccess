@@ -1,10 +1,21 @@
 <IfModule mod_rewrite.c>
     Options +FollowSymlinks
     RewriteEngine On
+
+    # Убираем слэш в конце URL
     RewriteCond %{REQUEST_URI} ^/.*
     RewriteRule ^(.*)/$ /$1 [L,R=301]
-    RewriteRule ^(.*)$ web/$1 [L]
+
+    # Перенаправляем всё в папку web, если ещё не там
     RewriteCond %{REQUEST_URI} !^/web/
+    RewriteRule ^(.*)$ web/$1 [L]
+
+    # Внутри папки web:
+    # Разрешаем доступ к index-test.php напрямую
+    RewriteCond %{REQUEST_URI} ^/web/index-test\.php
+    RewriteRule ^ - [L]
+
+	# Если не файл и не директория — направляем в index.php
     RewriteCond %{REQUEST_FILENAME} !-f [OR]
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^.*$ web/index.php

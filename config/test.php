@@ -14,38 +14,21 @@ $db = ArrayHelper::merge(
 /**
  * Application configuration shared by all test types
  */
-return [
-    'id' => 'basic-tests',
-    'basePath' => dirname(__DIR__),  
-    'aliases' => [
-        '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
-    ],  
-    'language' => 'en-US',
+$config=ArrayHelper::merge(	require __DIR__ . '/web.php',[
+    'id' => 'arms-tests',
     'components' => [
         'db' => $db,
-        'mailer' => [
-            'useFileTransport' => true,
-        ],
-        'assetManager' => [            
-            'basePath' => __DIR__ . '/../web/assets',
-        ],
         'urlManager' => [
             'showScriptName' => true,
         ],
-        'user' => [
-            'identityClass' => 'app\models\User',
-        ],        
         'request' => [
             'cookieValidationKey' => 'test',
             'enableCsrfValidation' => false,
-            // but if you absolutely need it set cookie domain to localhost
-            /*
-            'csrfCookie' => [
-                'domain' => 'localhost',
-            ],
-            */
-        ],        
+        ],
     ],
     'params' => $params,
-];
+]);
+
+Yii::$classMap['yii\helpers\Url'] = dirname(__DIR__) . '/helpers/Url.php';
+
+return $config;

@@ -15,7 +15,7 @@ class TabsWidget extends Tabs
 	public $encodeLabels=false;
 	
 	
-	public function prepareItems(array &$items, string $prefix = '')
+	public function prepareItems(array &$items, string $prefix = ''): void
 	{
 		//что в куках записано про открытую вкладку (или берем по умолчанию)
 		$cookieTab=$_COOKIE[$this->cookieName]??$this->defaultItem;

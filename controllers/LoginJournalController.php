@@ -9,5 +9,11 @@ use app\models\LoginJournal;
  */
 class LoginJournalController extends ArmsBaseController
 {
+	public function disabledActions()
+	{
+		//все CRUD операции делаются через REST API
+		return ['item-by-name','item','create','update','delete','view'];
+	}
+	
 	public $modelClass=LoginJournal::class;
 }

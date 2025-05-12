@@ -17,6 +17,11 @@ class AcesController extends ArmsBaseController
 {
 	public $modelClass=Aces::class;
 	
+	public function disabledActions()
+	{
+		return ['item-by-name',];
+	}
+	
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[

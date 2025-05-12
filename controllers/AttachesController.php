@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\ArrayHelper;
 use app\models\Attaches;
 use Throwable;
 use Yii;
@@ -15,6 +16,11 @@ use yii\web\UploadedFile;
  */
 class AttachesController extends ArmsBaseController
 {
+	
+	public function disabledActions()
+	{
+		return ['index','update','item','view','ttip','item-by-name',];
+	}
 
     /**
      * Creates a new Scans model.

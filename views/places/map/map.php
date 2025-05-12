@@ -17,7 +17,7 @@ ContextMenuAsset::register($this);
 
 const MAP_SIZE=1100;
 
-if (is_object($model->mapImage)) {
+if (is_object($model->mapImage) && $model->mapImage->fileExists) {
 	$bg=$model->mapImage;
 	$srcWidth=$bg->getImageWidth();
 	$srcHeight=$bg->getImageHeight();

@@ -15,10 +15,10 @@ if (!isset($modalParent)) $modalParent=null;
     <?php $form = ArmsForm::begin([
 		'model'=>$model,
 	]); ?>
+	
+	<?= $form->field($model, 'comment') ?>
 
-    <?= $form->field($model, 'fingerprint')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'fingerprint') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

@@ -15,6 +15,11 @@ class AclsController extends ArmsBaseController
 {
 	public $modelClass=Acls::class;
 	
+	public function disabledActions()
+	{
+		return ['item-by-name',];
+	}
+	
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[

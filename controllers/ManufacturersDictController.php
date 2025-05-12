@@ -9,5 +9,10 @@ use app\models\ManufacturersDict;
  */
 class ManufacturersDictController extends ArmsBaseController
 {
+	public function disabledActions()
+	{
+		return ['item-by-name','ttip'];
+	}
+	
 	public $modelClass=ManufacturersDict::class;
 }

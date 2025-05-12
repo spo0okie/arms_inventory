@@ -22,7 +22,7 @@ class ManufacturersDict extends ArmsModel
 	static protected $syncableFields=[
 		'word',
 		'updated_at',
-		'updated_by'
+		'updated_by',
 	];
 	
 	/** @inheritdoc */
@@ -37,7 +37,7 @@ class ManufacturersDict extends ArmsModel
     }
 	
 	public $linksSchema=[
-		'manufacturers_id' => [Manufacturers::class,'manufacturers_dicts_ids']
+		'manufacturers_id' => [Manufacturers::class,'manufacturers_dicts_ids'],
 	];
 
     /**
@@ -73,6 +73,11 @@ class ManufacturersDict extends ArmsModel
     {
         return $this->hasOne(Manufacturers::className(), ['id' => 'manufacturers_id']);
     }
+	
+	public function getName()
+	{
+		return $this->word;
+	}
 
     public function beforeSave($insert) {
         //нам все слова нужны в нижнем регистре чтобы искать регистронезависимо

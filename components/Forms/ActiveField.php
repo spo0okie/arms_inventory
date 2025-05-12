@@ -64,7 +64,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	 * @param $options
 	 * @return $this|ActiveField
 	 */
-	public function label($label = null, $options = [])
+	public function label($label = null, $options = []): \yii\bootstrap5\ActiveField
 	{
 		if ($label === false) {
 			$this->labelText = '';
@@ -128,7 +128,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	 * Тут мы всовываем всю магию по засовыванию подсказок в label
 	 * @return $this
 	 */
-	protected function renderLabelParts(string $label = null, array $options = [])
+	protected function renderLabelParts(string $label = null, array $options = []):void
 	{
 		//если у нас не вызывался метод label() или hint(), то вызываем их
 		if (is_null($this->labelText)) $this->label();
@@ -140,7 +140,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			$this->parts['{beginLabel}'] = '';
 			$this->parts['{labelTitle}'] = '';
 			$this->parts['{endLabel}'] = '';
-			return $this;
+			return;
 		}
 		
 		$label = $this->labelText;
@@ -163,7 +163,6 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 		parent::renderLabelParts($label,$this->labelOptions);
 		//Собираем вместе label из bootstrap5 частей, т.к. мы его не рендерили методе label (как сделано у родителя)
 		$this->parts['{label}']=strtr('{beginLabel}{labelTitle}{endLabel}',$this->parts);
-		return $this;
 	}
 	
 	/**
@@ -309,7 +308,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 		}
 	}
 	
-	public function checkboxList($items,$options=[])
+	public function checkboxList($items,$options=[]): \yii\bootstrap5\ActiveField
 	{
 		$options=array_merge([
 			'class'=>'card d-flex flex-wrap flex-row pt-2 pb-1',

@@ -16,7 +16,10 @@ use yii\web\NotFoundHttpException;
 class LicKeysController extends ArmsBaseController
 {
 	public $modelClass=LicKeys::class;
-
+	public function disabledActions()
+	{
+		return ['item-by-name',];
+	}
     /**
      * Displays a single LicKeys model.
      * @param int $id

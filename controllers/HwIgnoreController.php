@@ -15,4 +15,9 @@ use yii\filters\VerbFilter;
 class HwIgnoreController extends ArmsBaseController
 {
 	public $modelClass=HwIgnore::class;
+	public function disabledActions()
+	{
+		return ['item','item-by-name',];
+	}
+	
 }

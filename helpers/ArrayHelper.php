@@ -76,6 +76,24 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		}
 	}
 	
+	
+	/**
+	 * Ищет значение в ассоциативном массиве, где ключи — регулярные выражения.
+	 *
+	 * @param array<string, mixed> $regexMap Ассоциативный массив вида [/regexp/ => значение]
+	 * @param string $searchKey Строка, которую проверяем на соответствие ключам-регуляркам
+	 * @return mixed|null Возвращает найденное значение или null, если совпадений нет
+	 */
+	public static function findByRegexKey(array $regexMap, string $searchKey, $default=null)
+	{
+		foreach ($regexMap as $regex => $value) {
+			if (preg_match($regex, $searchKey)) {
+				return $value;
+			}
+		}
+		return $default;
+	}
+	
 	/**
 	 * Возвращает значение из древовидного архива
 	 * или $default если значения нет

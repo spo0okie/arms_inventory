@@ -30,11 +30,11 @@ $deleteable=!count($arms);
 	<?php } ?>
 </h1>
 	<h4>Группа лицензий:</h4>
-	<?= $this->render('/lic-groups/item',['model'=>$model->licItem->licGroup,'static_view'=>$static_view]) ?>
+	<?= $model->licItem->licGroup->renderItem($this,['static_view'=>$static_view]) ?>
 	<br />
 
 	<h4>Закупка:</h4>
-	<?= $this->render('/lic-items/item',['model'=>$model->licItem,'static_view'=>$static_view,'name'=>$model->licItem->descr]) ?>
+	<?= $model->licItem->renderItem($this,['static_view'=>$static_view,'name'=>$model->licItem->descr]) ?>
 	<br />
 
 	<h4>Ключ:</h4>

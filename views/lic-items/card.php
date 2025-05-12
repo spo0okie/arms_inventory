@@ -1,5 +1,6 @@
 <?php
 
+use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\TextFieldWidget;
 use kartik\markdown\Markdown;
@@ -17,10 +18,14 @@ if (!isset($linksData)) $linksData=null;
 
 
 <h3>
-	<?= $this->render('/lic-groups/item',['model'=>$model->licGroup,'static_view'=>$static_view]) ?>
+	<?= $model->licGroup->renderItem($this,['static_view'=>$static_view]) ?>
 	<br />
 	<h4> Закупка: </h4>
-	<?= $this->render('/lic-items/item',['model'=>$model,'static_view'=>$static_view,'name'=>$model->descr,'noDelete'=>false]) ?>
+	<?= LinkObjectWidget::widget([
+		'model'=>$model,
+		'static'=>$static_view,
+		'undeletableMessage'=>'Закупка используется'
+	]) ?>
 
 </h3>
 <?= ModelFieldWidget::widget([

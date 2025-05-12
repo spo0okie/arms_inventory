@@ -88,10 +88,10 @@ class ArmsBaseController extends Controller
 	 * Отрендерить страничку в обычном или Ajax режиме в зависимости от запроса
 	 * @param      $path
 	 * @param      $params
-	 * @param null $ajaxParams
+	 * @param array $ajaxParams
 	 * @return string
 	 */
-	public function defaultRender($path,$params,$ajaxParams=null) {
+	public function defaultRender($path,$params,$ajaxParams=[]) {
 		//если параметры для режима Ajax не заданы, то те же что и для обычного
 		if (is_null($ajaxParams)) $ajaxParams=$params;
 		
@@ -151,16 +151,31 @@ class ArmsBaseController extends Controller
 	}
 	
 	/**
+	 * Возвращает список отключенных методов
+	 * (которые будут унаследованы, но отключены в дочерних классах)
+	 * @return array
+	 */
+	public function disabledActions()
+	{
+		return [];
+	}
+	
+	/**
      * @inheritdoc
      */
     public function behaviors()
     {
+		$disabledActionsVerbs=[];
+		foreach ($this->disabledActions() as $action) {
+			$disabledActionsVerbs[$action]=[];
+		};
 		$behaviors=[
 			'verbs' => [
 				'class' => VerbFilter::class,
-				'actions' => [
+				'actions' => array_merge([
 					'delete' => ['POST'],
-				],
+					'validate' => ['POST'],
+				],$disabledActionsVerbs),
 			],
 			'authenticator' => [
 				'class' => HttpBasicAuth::class,
@@ -245,7 +260,7 @@ class ArmsBaseController extends Controller
 				'searchModel' => $searchModel,
 				'dataProvider' => $dataProvider,
 				'switchArchivedCount' => $switchArchivedCount??null,
-				'model' => $model
+				'model' => $model,
 			]);
 			
 		} else {
@@ -262,7 +277,7 @@ class ArmsBaseController extends Controller
 			
 			return $this->render($view, [
 				'dataProvider' => $dataProvider,
-				'model' => $model
+				'model' => $model,
 			]);
 		}
     }

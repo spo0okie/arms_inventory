@@ -45,10 +45,10 @@ $deleteable=!count($model->licGroups);
 
 <br />
 
+<h4>Группы лицензий:</h4>
 <p>
-	<h4>Группы лицензий:</h4>
 	<?php foreach ($model->licGroups as $licGroup) { ?>
-		<?= $this->render('/lic-groups/item',['model'=>$licGroup]) ?> <br />
+		<?= $licGroup->renderItem($this,['model'=>$licGroup]) ?> <br />
 	<?php }	?>
 </p>
 

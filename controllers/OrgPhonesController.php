@@ -14,6 +14,11 @@ class OrgPhonesController extends ArmsBaseController
 	
 	public $modelClass=OrgPhones::class;
 	
+	public function disabledActions()
+	{
+		return ['item-by-name',];
+	}
+	
 	public function routeOnUpdate($model)
 	{
 		/** @var OrgPhones $model */

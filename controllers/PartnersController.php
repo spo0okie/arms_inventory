@@ -16,7 +16,12 @@ class PartnersController extends ArmsBaseController
 {
 	public $modelClass=Partners::class;
 	
-    /**
+	public function disabledActions()
+	{
+		return ['item-by-name',];
+	}
+	
+	/**
      * Displays a single Partners model.
      * @param integer $id
      * @return mixed
