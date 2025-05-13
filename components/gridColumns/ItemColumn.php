@@ -8,15 +8,24 @@ use app\helpers\ArrayHelper;
 use app\models\ArmsModel;
 use Closure;
 use kartik\grid\DataColumn;
+use yii\helpers\Html;
 
 class ItemColumn extends DataColumn
 {
-	public function init()
+	
+	public function renderDataCell($model, $key, $index)
 	{
-		//по умолчанию переносим текст
-		if (!isset($this->contentOptions['class'])) $this->contentOptions['class']='text-wrap';
-		parent::init();
+		if ($this->contentOptions instanceof Closure) {
+			$options = call_user_func($this->contentOptions, $model, $key, $index, $this);
+		} else {
+			$options = $this->contentOptions;
+		}
+		
+		$options=ArrayHelper::recursiveOverride(['class'=>'text-wrap'], $options);
+		
+		return Html::tag('td', $this->renderDataCellContent($model, $key, $index), $options);
 	}
+	
 	public function renderDataCellContent($model, $key, $index)
 	{
 		if ($this->options instanceof Closure) {
