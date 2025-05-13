@@ -62,9 +62,14 @@ class LinkObjectWidget extends Widget
 		parent::init();
 		$id=null;
 		
-		//для объектов класса истории это мастер_ид, для обычных это ид
 		if (is_object($this->model)) {
-			$id=$this->model->master_id??$this->model->id;
+			$id=$this->model->id;
+			if ($this->model instanceof HistoryModel) {
+				//для объектов класса истории ID Это мастер_ид
+				$id=$this->model->master_id;
+				$this->noDelete=true;	//также отключаем удаление (особенно поиск рекурсивных ссылок в нем)
+				$this->noUpdate=true;	//и редактирование
+			}
 		}
 		
 		if (!$this->controller && is_object($this->model)) {
