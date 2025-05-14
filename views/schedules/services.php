@@ -20,13 +20,13 @@ if (count($services)||count($acls)||count($jobs)) {
 				if (isset($service['provide'])) $mode[]='предоставление';
 				if (isset($service['support'])) $mode[]='поддержка';
 				
-				$render[]=$this->render('/services/item',['model'=>$service['obj'],'static_view'=>$static_view]).' - '.implode(', ',$mode).' сервиса';
+				$render[]=$service['obj']->renderItem($this,['static_view'=>$static_view]).' - '.implode(', ',$mode).' сервиса';
 			}
 			foreach ($jobs as $job) {
-				$render[]=$this->render('/maintenance-jobs/item',['model'=>$job,'static_view'=>$static_view]).' - график выполнения';
+				$render[]=$job->renderItem($this,['static_view'=>$static_view]).' - график выполнения';
 			}
 			foreach ($acls as $acl) {
-				$render[]=$this->render('/acls/item',['model'=>$acl,'static_view'=>$static_view]).' - расписание предоставления доступа';
+				$render[]=$acl->renderItem($this,['static_view'=>$static_view]).' - расписание предоставления доступа';
 			}
 			echo implode('<br />',$render);
 			?>
