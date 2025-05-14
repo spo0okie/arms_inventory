@@ -93,7 +93,7 @@ class ArmsBaseController extends Controller
 	 */
 	public function defaultRender($path,$params,$ajaxParams=[]) {
 		//если параметры для режима Ajax не заданы, то те же что и для обычного
-		if (is_null($ajaxParams)) $ajaxParams=$params;
+		if (empty($ajaxParams)) $ajaxParams=$params;
 		
 		//добавляем modalParent по умолчанию
 		$ajaxParams=ArrayHelper::recursiveOverride(['modalParent' => '#modal_form_loader'],$ajaxParams);
