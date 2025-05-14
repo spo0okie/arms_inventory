@@ -48,6 +48,10 @@ class ModelFieldWidget extends Widget
 	 * @return void
 	 */
 	public function loadModelData($model) {
+		if (!isset($this->fieldType) && is_object($this->model)) {
+			$this->fieldType=$this->model->getAttributeType($this->field);
+		}
+		
 		switch ($this->fieldType) {
 			case 'text':
 				$this->data[]=TextFieldWidget::widget(['model'=>$model,'field'=>$this->field]);
@@ -86,10 +90,6 @@ class ModelFieldWidget extends Widget
 				$this->loadModelData($model);
 		} else {
 			$this->loadModelData($this->model);
-		}
-		
-		if (!isset($this->fieldType) && is_object($this->model)) {
-			$this->fieldType=$this->model->getAttributeType($this->field);
 		}
 		
 		if (!isset($this->title)) {

@@ -40,7 +40,8 @@ class WikiTextWidget extends Widget
 		);
 		
 		//данные - либо из кэша, либо надпись "Loading..."
-		$data=$cache->data??static::PLACEHOLDER;
+		$data=$cache->data;
+		if (!$data) $data=$this->model->{$this->field};
 		//кладем данные в контент блок
 		$content='<div id="'.$id.'" class="dokuwiki">'.$data.'</div>';
 		
