@@ -24,11 +24,7 @@ return [
 				$descr=$schedule->description?
 					$schedule->description:
 					$schedule->workTimeDescription;
-				return $renderer->render('/schedules/item',[
-					'model'=>$data->schedule,
-					'name'=>$descr
-				]);
-				
+				return $schedule->renderItem($this,['name'=>$descr]);
 			} return null;
 		},
 	],
@@ -37,13 +33,13 @@ return [
 		'value'=>function($data) use ($renderer){
 			$output=[];
 			foreach ($data->comps as $comp) {
-				$output[$comp->sname]=$renderer->render('/comps/item',['model'=>$comp,'static_view'=>false]);
+				$output[$comp->sname]=$comp->renderItem($this,['static_view'=>false]);
 			}
 			foreach ($data->techs as $tech) {
-				$output[$tech->sname]=$renderer->render('/techs/item',['model'=>$tech,'static_view'=>false]);
+				$output[$tech->sname]=$tech->renderItem($this,['static_view'=>false]);
 			}
 			foreach ($data->services as $service) {
-				$output[$service->name]=$renderer->render('/services/item',['model'=>$service,'static_view'=>false]);
+				$output[$service->name]=$service->renderItem($this,['static_view'=>false]);
 			}
 			ksort($output);
 			return implode('<br />',$output);
