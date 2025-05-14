@@ -41,8 +41,10 @@ class Materials extends ArmsModel
 	
 	public static $title="ЗиП и Материалы";
 	public static $titles="ЗиП и Материалы";
-
-    /**
+	public static $nameAttr='model';
+	
+	
+	/**
      * {@inheritdoc}
      */
     public static function tableName()

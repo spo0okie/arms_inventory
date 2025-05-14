@@ -63,6 +63,13 @@ class ArmsModel extends ActiveRecord
 	/** @var string Префикс для страницы Create (Новый $title) */
 	public static $newItemPrefix='Новый';
 	
+	/**
+	 * @var string Атрибут, который считается именем модели.
+	 * Его будет выводить ->renderItem,
+	 * по нему будет искать search-by-name
+	 */
+	public static $nameAttr='name';
+	
 	public const searchableOrHint='<br><i>HINT: Можно искать несколько вариантов, разделив их вертикальной</i> <b>|</b> <i>чертой</i>';
 	
 	
@@ -127,7 +134,11 @@ class ArmsModel extends ActiveRecord
 			->all();
 		return ArrayHelper::map($list, 'id', 'sname');
 	}
-
+	
+	public function getName(){
+		return $this->{static::$nameAttr};
+	}
+	
 	public function getSname(){
 		return $this->name;
 	}

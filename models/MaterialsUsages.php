@@ -30,6 +30,7 @@ class MaterialsUsages extends ArmsModel
 	public static $title='Расход материалов';
 	public static $titles='Расход материалов';
 	public static $helptitle="ЗиП и Материалы:расход";
+	public static $nameAttr='to';
 
 
 	/**

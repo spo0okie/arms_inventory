@@ -27,6 +27,7 @@ class MaterialsHistory extends HistoryModel
 
 	public static $title='Изменения ЗИП и материалов';
 	public static $titles='Изменения ЗИП и материалов';
+	public static $nameAttr='model';
 	
 	public $masterClass=Materials::class;
 	

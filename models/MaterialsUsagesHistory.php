@@ -30,6 +30,7 @@ class MaterialsUsagesHistory extends HistoryModel
 
 	public static $title='Изменения расхода материалов';
 	public static $titles='Изменения расходов материалов';
+	public static $nameAttr='to';
 	
 	public $masterClass=MaterialsUsages::class;
 
