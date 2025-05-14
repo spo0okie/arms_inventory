@@ -39,6 +39,7 @@ class MaintenanceJobs extends ArmsModel
 	
 	public static $title='Регламентное обслуживание';
 	public static $titles='Регламентное обслуживание';
+	public static $newItemPrefix='Новое';
 
     /**
      * {@inheritdoc}
