@@ -6,10 +6,13 @@ use yii\base\InvalidConfigException;
 
 class PageAccessCest
 {
-	public $routes=[];
 	
 	public function _before(AcceptanceTester $I)
-    {
+	{
+	}
+	
+	protected function routesProvider()
+	{
 		$routes = [];
 		$params=require __DIR__.'/../_data/get-routes-data.php';
 		
@@ -60,7 +63,7 @@ class PageAccessCest
 							throw new InvalidConfigException($controllerClass.' error loading sample model for '.$action);
 						$routeParams=str_replace('{anyId}',$model->id,$routeParams);
 					}
-
+					
 					if (str_contains($routeParams,'{anyName}')) {
 						if (is_null($model))
 							throw new InvalidConfigException($controllerClass.' error loading sample model for '.$action);
@@ -69,20 +72,23 @@ class PageAccessCest
 					
 					if ($routeParams) $route.=$routeParams;
 					
-					$routes[] = $route;
+					$routes[] = ['route'=>$route];
 				}
 				
 				
 			}
 		}
-		$this->routes=$routes;
+		return $routes;
 	}
 	
-	public function testAllGetRoutesAccessible(AcceptanceTester $I)
+	/**
+	 * @dataProvider routesProvider
+	 * @return void
+	 */
+	public function testAllGetRoutesAccessible(AcceptanceTester $I, \Codeception\Example $example)
 	{
-		foreach ($this->routes as $route) {
-			$I->amOnPage("/$route");
-			$I->seeResponseCodeIs(200,"GET $route is accessible");
-		}
+		$route=$example['route'];
+		$I->amOnPage("/$route");
+		$I->seeResponseCodeIs(200,"GET $route is accessible");
 	}
 }
