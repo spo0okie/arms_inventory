@@ -89,7 +89,7 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                [
+                [//надо написать тесты для REST запросов и попробовать убрать эти правила, оставить только общие
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [
 						'comps'=>'api/comps',
@@ -119,7 +119,12 @@ $config = [
                 ],
                 'api/domains/<id:[\.\w-]+>' => 'api/domains/view',
                 'api/comps/<domain:[\w-]+>/<name:[\w-]+>' => 'api/comps/search',
-				'OPTIONS api/<controller:\w+>/<action:\w+>' => 'api/<controller>/preflight'
+				'GET,HEAD api/<controller:[\w-]+>/<id:\w+>' => 'api/<controller>/view',
+				'PUT,PATCH api/<controller:[\w-]+>/<id:\w+>' => 'api/<controller>/update',
+				'DELETE api/<controller:[\w-]+>/<id:\w+>' => 'api/<controller>/delete',
+				'POST api/<controller:[\w-]+>/<id:\w+>' => 'api/<controller>/create',
+				'GET,HEAD api/<controller:[\w-]+>' => 'api/<controller>/index',
+				'OPTIONS api/<controller:[\w-]+>/<action:[\w-]+>' => 'api/<controller>/preflight'
             ],
         ],
 	    'i18n' => [
