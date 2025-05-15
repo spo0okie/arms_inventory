@@ -4,7 +4,6 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 use app\components\gridColumns\ExpandableCardColumn;
-use kartik\markdown\Markdown;
 use app\models\Schedules;
 
 if(!isset($static_view))$static_view=false;
@@ -12,9 +11,7 @@ $renderer = $this;
 
 return [
 	'name'=>[
-		'value'=>function($data) use ($renderer){
-			return $renderer->render('item',['model'=>$data]);
-		},
+		'options'=>['modal'=>true],
 	],
 	'description',
 	'schedule'=>[
