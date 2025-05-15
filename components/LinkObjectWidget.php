@@ -32,7 +32,7 @@ class LinkObjectWidget extends Widget
 	public $noDelete=false;
 	public $noUpdate=false;
 	public $noSpaces=false;	//убирать пробелы перед редактированием и корзиной (в monospace выглядит стремно)
-	public $modal=false;
+	public $modal=false;	//редактировать в модальном окне
 
 	/**
 	 * @var $model ArmsModel|HistoryModel
