@@ -125,6 +125,20 @@ trait AttributeLinksModelTrait
 	}
 	
 	/**
+	 * Возвращает атрибуты-загрузчики ссылок
+	 * @return string[]
+	 */
+	public function getLinkLoadersAttrs() {
+		$loaders=[];
+		foreach ($this->getLinksSchema() as $attribute=>$data) {
+			if ($loader = $this->attributeLinkLoader($attribute)) {
+				$loaders[] = $loader;
+			}
+		}
+		return $loaders;
+	}
+	
+	/**
 	 * Возвращает ссылки на объекты ссылающиеся на этот
 	 * по схеме one-to-many и many-to-many
 	 * которые не удаляются автоматически при удалении модели
@@ -290,5 +304,17 @@ trait AttributeLinksModelTrait
 			//перенаправляем там нужный аттрибут на новый ID
 			$object->attributeLinkRedirect($reverseLink,$this->id,$new_id);
 		}
+	}
+	
+	/**
+	 * Добавляет к родительским extra-fields поля-ссылки
+	 * @return string[]
+	 */
+	public function extraFields()
+	{
+		$fields = $this->getLinkLoadersAttrs();
+		
+		$fields=array_combine($fields, $fields);
+		return array_merge(parent::extraFields(),$fields);
 	}
 }
