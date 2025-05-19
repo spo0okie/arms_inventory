@@ -8,7 +8,7 @@
 
  **/
 if (typeof Base64 === 'undefined') {
-    let Base64 = {
+    Base64 = {
 
         // private property
         _keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
