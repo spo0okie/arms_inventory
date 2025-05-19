@@ -18,6 +18,7 @@ use yii\db\ActiveQuery;
 use yii\filters\auth\HttpBasicAuth;
 use yii\rest\ActiveController;
 use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
 
 class BaseRestController extends ActiveController
 {
@@ -120,7 +121,9 @@ class BaseRestController extends ActiveController
 				return $class::findByAnyName($value);
 			}
 		}
-		return $this->searchFilter()->one();
+		$result=$this->searchFilter()->one();
+		if (!$result) throw new NotFoundHttpException('Nothing found');
+		return $result;
 	}
 	
 	public function actionFilter() {

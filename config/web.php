@@ -113,12 +113,12 @@ $config = [
 						'tech-types'=>'api/tech-types',
 						'users'=>'api/users',
                     ],
-					
                     'pluralize' => false,
                     'prefix' => 'api'
                 ],
                 'api/domains/<id:[\.\w-]+>' => 'api/domains/view',
                 'api/comps/<domain:[\w-]+>/<name:[\w-]+>' => 'api/comps/search',
+				'GET,HEAD api/<controller:[\w-]+>/search' => 'api/<controller>/search',
 				'GET,HEAD api/<controller:[\w-]+>/<id:\w+>' => 'api/<controller>/view',
 				'PUT,PATCH api/<controller:[\w-]+>/<id:\w+>' => 'api/<controller>/update',
 				'DELETE api/<controller:[\w-]+>/<id:\w+>' => 'api/<controller>/delete',
