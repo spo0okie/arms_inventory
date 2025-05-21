@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\DynaGridWidget;
 use app\components\Forms\ArmsForm;
 use app\components\Forms\assets\ArmsFormAsset;
 use app\helpers\ArrayHelper;
@@ -197,24 +198,25 @@ class ArmsBaseController extends Controller
 	
 	/**
 	 * Инициирует поиск с учетом наличия переключателя архивных записей
-	 * @param $searchModel
-	 * @param $dataProvider
-	 * @param $switchArchivedCount
+	 * @param      $searchModel
+	 * @param      $dataProvider
+	 * @param      $switchArchivedCount
+	 * @param string[]|null $columns
 	 */
-    public function archivedSearchInit(&$searchModel,&$dataProvider,&$switchArchivedCount)
+    public function archivedSearchInit(&$searchModel,&$dataProvider,&$switchArchivedCount,$columns=null)
 	{
 		$searchModel->archived= Yii::$app->request->get('showArchived',$this->defaultShowArchived);
 		
 		//признак того, что свойства ниже указаны явно (не равны значениям по умолчанию)
 		$direct_archived=Yii::$app->request->get('showArchived','unset')!='unset';
 		
-		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$dataProvider = $searchModel->search(Yii::$app->request->queryParams,$columns);
 		if (!$dataProvider->totalCount) {
 			if (!$direct_archived && !$searchModel->archived) {
 				//если архивные неявно отключены, то смотрим что будет вместе с ними
 				$switchArchived=clone $searchModel;
 				$switchArchived->archived=!$switchArchived->archived;
-				$switchArchivedData=$switchArchived->search(Yii::$app->request->queryParams);
+				$switchArchivedData=$switchArchived->search(Yii::$app->request->queryParams,$columns);
 				$switchArchivedCount=$switchArchivedData->totalCount;
 				if ($switchArchivedCount) {
 					//если есть архивные, то заменяем текущий поиск на поиск с архивными
@@ -228,10 +230,10 @@ class ArmsBaseController extends Controller
 		}
 		
 		if (!isset($switchArchivedCount)) {
-			//ищем тоже самое но с архивными в противоположном положении
+			//ищем то же самое, но с архивными в противоположном положении
 			$switchArchived=clone $searchModel;
 			$switchArchived->archived=!$switchArchived->archived;
-			$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams)->totalCount;
+			$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams,$columns)->totalCount;
 		}
 		
 	}
@@ -246,14 +248,16 @@ class ArmsBaseController extends Controller
     	$searchModelClass=$this->modelClass.'Search';
 		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'index.php')?
 			'index':'/layouts/index';
-    	
+   
+		$columns=DynaGridWidget::fetchVisibleAttributes($model,StringHelper::class2Id($this->modelClass).'-index');
+		
     	if (class_exists($searchModelClass)) {
 			$searchModel = new $searchModelClass();
 			
 			if ($searchModel->hasAttribute('archived')) {
-				$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount);
+				$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount,$columns);
 			} else {
-				$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+				$dataProvider = $searchModel->search(Yii::$app->request->queryParams,$columns);
 			}
 			
 			return $this->render($view, [

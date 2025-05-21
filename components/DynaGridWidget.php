@@ -98,6 +98,25 @@ class DynaGridWidget extends DynaGrid
 		return static::$visibleColumnsCache[$id]=isset($data['keys'])?$data['keys']:null;
 	}
 	
+	/**
+	 * Конвертирует видимые колонки в видимые атрибуты
+	 * (т.к. в бд хранятся хэши от колонок, а не сами колонки)
+	 * @param string $id
+	 * @param ArmsModel $model
+	 * @return mixed
+	 * @throws InvalidConfigException
+	 */
+	public static function fetchVisibleAttributes($model,$id,$default=null) {
+		$visible=[];
+		foreach (array_keys($model->attributeData()) as $attr) {
+			if (static::tableColumnIsVisible($id,$attr,$default)) {
+				$visible[]=$attr;
+			}
+		}
+		return $visible;
+	}
+	
+	
 	public function columnIsVisible($col,$visibleColumns) {
 		if (is_null($visibleColumns)) return true;
 		return !(array_search($this->getColumnKey($col),$visibleColumns)===false);
@@ -282,10 +301,11 @@ JS;
 			$data['class']=DefaultColumn::class;
 		}
 		
-		if (!isset($data['class']) && !isset($data['value'])  && $model->hasMethod('getAttributeType')) {
+		if (!isset($data['class']) && !isset($data['value']) && $model->hasMethod('getAttributeType')) {
 			switch ($model->getAttributeType($attr)) {
 				case 'boolean': $data['class']=BooleanColumn::class; break;
 				case 'text': $data['class']=DefaultColumn::class; break;
+				default: $data['class']=$attr==='name'?ItemColumn::class:DefaultColumn::class; break;
 			}
 		}
 		
@@ -408,7 +428,7 @@ JS;
 	}
 	
 	/**
-	 * Проверяет будет ли отрендерена колонка $columnName в таблице $tableId
+	 * Проверяет, будет ли отрендерена колонка $columnName в таблице $tableId
 	 * если колонки выводимые по умолчанию это $defaultColumns
 	 * @param string     $tableId
 	 * @param string     $columnName
@@ -417,13 +437,13 @@ JS;
 	 */
 	public static function tableColumnIsVisible(string $tableId, string $columnName, $defaultColumns=null) {
 		$visibleColumns=DynaGridWidget::fetchVisibleColumns($tableId);
-		//если у нас загрузились настройки колонок таблицы то работаем с ними
+		//если у нас загрузились настройки колонок таблицы, то работаем с ними
 		if (is_array($visibleColumns)) {
 			if (!isset (static::$instance)) static::$instance = new static();
 			return static::$instance->columnIsVisible($columnName,$visibleColumns);
 		}
 		
-		//если настроек таблицы нет но есть колонки по умолчанию работаем с ними
+		//если настроек таблицы нет, но есть колонки по умолчанию работаем с ними
 		if (!empty($defaultColumns)) {
 			//есть ли эта колонка в списке по умолчанию
 			return !(array_search($columnName,$defaultColumns)===false);

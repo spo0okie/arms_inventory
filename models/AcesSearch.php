@@ -54,55 +54,38 @@ class AcesSearch extends Aces
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params,$columns=null)
     {
-        $query = Aces::find()
-		->joinWith([
-			'users',
-			'comps',
-			'networks',
-			'services',
-			'netIps',
-			'acl.service',
-			'acl.comp',
-			'acl.tech',
-			'acl.ip',
-			'acl.network',
-			'acl.schedule',
-			'accessTypes'
-		]);
+	
+		[$query,$filter]=(new Aces())->prepareSearch($columns);
 
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
-
+        $dataProvider = new ActiveDataProvider(['query' => $query]);
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 	
 		//если ИД указаны, то ограничиваем
 		if (isset($this->ids) && is_array($this->ids)) {
 			if (count($this->ids))
-				$query->andFilterWhere(['aces.id'=>$this->ids]);
+				$filter->andFilterWhere(['aces.id'=>$this->ids]);
 			else //если они пустые, то блокируем дальнейший поиск
-				$query->where('0=1');
+				$filter->where('0=1');
 		}
 
         // grid filtering conditions
-        $query->andFilterWhere([
+		$filter->andFilterWhere([
             'id' => $this->id,
 			'services_subjects.id' => $this->services_subject_ids,
 			'services_resources.id' => $this->services_resource_ids,
             'updated_at' => $this->updated_at,
         ]);
-
-        $query
+		
+		$filter
 			->andFilterWhere(['or',
 				QueryHelper::querySearchString('users_subjects.Ename', $this->subjects),
 				QueryHelper::querySearchString('comps_subjects.name', $this->subjects),
@@ -119,6 +102,11 @@ class AcesSearch extends Aces
 			])
 			->andFilterWhere(QueryHelper::querySearchString('aces.name', $this->name))
 			->andFilterWhere(QueryHelper::querySearchString('access_types.name', $this->access_types));
+		
+		if ($filter->where) {
+			//фильтруем запрос данных по ID из фильтра, который мы только что получили при помощи разных WHERE
+			$query->where(static::tableName().'.id in ('.$filter->createCommand()->rawSql.')');
+		}
 
         return $dataProvider;
     }

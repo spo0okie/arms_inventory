@@ -737,7 +737,7 @@ class ArmsModel extends ActiveRecord
 	{
 		//если мы в режиме валидации
 		if ($this->getScenario()===static::SCENARIO_VALIDATION) {
-			//это значит что в модель "предзагружены" все аттрибуты которые нужны для валидации
+			//это значит что в модель "предзагружены" все аттрибуты которые нужны для валидации,
 			//но many-2-many геттеры не умеют работать с такими предзагруженными значениями
 			//они работают прямо с таблицами из БД, и им пофиг на валидируемые значения
 			//проверяем, не пытаемся ли мы открыть загрузчик many-2-many
@@ -749,4 +749,21 @@ class ArmsModel extends ActiveRecord
 		return parent::__get($name);
 	}
 	
+	/**
+	 * Подготавливает запросы для поиска и загрузки списка моделей
+	 * @param $columns
+	 * @return array
+	 */
+	public function prepareSearch($columns)
+	{
+		//для загрузки данных (с пагинацией)
+		$query = static::find();
+		//для поиска/фильтра (без пагинации, но с возможностью фильтровать по связанным объектам)
+		$filter = static::find()->select('DISTINCT('.static::tableName().'.id)');
+		if (count($joins=$this->attributesJoins($columns))) {
+			$query->with($joins);
+			$filter->joinWith($joins);
+		};
+		return [$query,$filter,$joins];
+	}
 }
