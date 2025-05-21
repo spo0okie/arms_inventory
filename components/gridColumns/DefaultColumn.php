@@ -23,6 +23,9 @@ class DefaultColumn extends DataColumn
 		$options=ArrayHelper::merge([
 			'model'=>$model,
 			'field'=>$this->attribute,
+			'item_options'=>[
+				'static_view'=>true,
+			],
 			'card_options'=>[
 				'cardClass' => 'p-1 text-wrap',
 				'outerTag' => 'td',
