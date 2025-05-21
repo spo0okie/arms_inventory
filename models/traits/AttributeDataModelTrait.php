@@ -233,7 +233,7 @@ trait AttributeDataModelTrait
 	}
 	
 	/**
-	 * Переопределено, с тем же смыслом что и выше, чтобы получить не объявленные алиасы
+	 * Переопределено, с тем же смыслом, что и выше, чтобы получить не объявленные алиасы
 	 * @param $attribute
 	 * @return array|mixed|string|null
 	 */
@@ -416,7 +416,7 @@ trait AttributeDataModelTrait
 	 * @param string $name какой аттрибут у объектов использовать как имя
 	 * @return string
 	 */
-	public function renderAttributeToText(string $attr,$glue=', ',$name='name') {
+	public function renderAttributeToText(string $attr, $glue=', ', $name='name' ) {
 		$value=$this->$attr;
 
 		if (empty($value) && $this->attributeIsInheritable($attr)) {
@@ -437,6 +437,40 @@ trait AttributeDataModelTrait
 			} else
 				return (string)($this->$attr);
 		}
+	}
+	
+	
+	
+	/**
+	 * Возвращает список джоинов, которые нужно сделать для загрузки атрибута (при использовании joinWith)
+	 * @param string $attribute
+	 * @return string[]
+	 */
+	public function getAttributeJoins($attribute)
+	{
+		$item=$this->getAttributeData($attribute);
+		if (is_array($item) && isset($item['join'])) {
+			$join=$item['join'];
+			return is_array($join)?$join:[$join];
+		}
+		return [];
+	}
+	
+	/**
+	 * Возвращает список джоинов, которые нужно сделать для загрузки запрошенных аттрибутов
+	 * @param string[]|null $attributes
+	 * @return string[]
+	 */
+	public function attributesJoins($attributes=null) {
+		$joins=[];
+		//если вместо списка атрибутов передали null, то проверяем все атрибуты
+		if (is_null($attributes)) {
+			$attributes=array_keys($this->attributeData());
+		}
+		foreach ($attributes as $attribute) {
+			$joins=array_merge($joins,$this->getAttributeJoins($attribute));
+		}
+		return array_unique($joins);
 	}
 	
 }
