@@ -11,59 +11,45 @@ return [
 	//['class' => 'yii\grid\SerialColumn'],
 	
 	'subject_nodes'=>[
-		'value'=>function($data) use ($glue){
-			return ModelFieldWidget::widget([
-				'model'=>$data,
-				'field'=>'nodes',
-				'title'=>false,
-				'card_options'=>['cardClass'=>'m-0 p-0'],
-				'lineBr'=>false,
-				'item_options'=>[
-					'static_view'=>true,
-					'show_ips'=>$data->hasIpAccess(),
-					'show_phone'=>$data->hasPhoneAccess(),
-					'short'=>true,
-				],
-				'glue'=>'<br>'
-			]);
-		}
+		'contentOptions'=>function($data) use ($glue){ return [
+			'field'=>'nodes',
+			'lineBr'=>false,
+			'card_options'=>['cardClass' => 'p-1 text-nowrap',],
+			'item_options'=>[
+				'show_ips'=>$data->hasIpAccess(),
+				'show_phone'=>$data->hasPhoneAccess(),
+				'short'=>true,
+			],
+			'glue'=>$glue
+		];}
 	],
 	'subjects'=>[
-		'value'=>function($data) use ($glue) {
-			return ModelFieldWidget::widget([
-				'model'=>$data,
-				'field'=>'subjects',
-				'title'=>false,
-				'card_options'=>['cardClass'=>'m-0 p-0'],
-				'lineBr'=>false,
-				'item_options'=>[
-					'static_view'=>true,
-					'show_ips'=>$data->hasIpAccess(),
-					'show_phone'=>$data->hasPhoneAccess(),
-					'short'=>true,
-				],
-				'glue'=>'<br>'
-			]);
-		}
+		'contentOptions'=>function($data) use ($glue){ return [
+			'card_options'=>['cardClass' => 'p-1 text-nowrap',],
+			'lineBr'=>false,
+			'item_options'=>[
+				'show_ips'=>$data->hasIpAccess(),
+				'show_phone'=>$data->hasPhoneAccess(),
+				'short'=>true,
+			],
+			'glue'=>$glue
+		];}
 	],
 	'access_types'=>[
 		'value'=>function($data) use ($renderer,$glue){
 			$items=[];
 			foreach ($data->accessTypes as $type) {
 				$params=$data->getIpParams()[$type->id]??null;
-				$items[]=$renderer->render('/layouts/item',[
-					'model'=>$type,
+				$items[]=$type->renderItem($renderer,[
 					'static_view'=>true,
 					'suffix'=>$params?': '.$params:'',
 				]);
 			}
 			return implode($glue,$items);
-		}
+		},
 	],
 	'name'=>[
-		'value'=>function($data) use ($renderer){
-			return $renderer->render('/aces/item',['model'=>$data,'static_view'=>false,'modal'=>true]);
-		}
+		'contentOptions'=>['static_view'=>false,'modal'=>true]
 	],
 	'schedule'=>[
 		'value'=>function($data) use ($renderer){
@@ -80,24 +66,18 @@ return [
 		}
 	],
 	'resource_nodes'=>[
-		'value'=>function($data) use ($renderer,$glue){
-			if (is_object($data->acl)) return ModelFieldWidget::widget([
-				'model'=>$data->acl,
-				'field'=>'nodes',
-				'title'=>false,
-				'card_options'=>['cardClass'=>'m-0 p-0'],
-				'lineBr'=>false,
-				'item_options'=>[
-					'static_view'=>true,
-					'show_ips'=>$data->acl->hasIpAccess(),
-					'ips_prefix'=>':',
-					'ips_glue'=>',',
-					'ips_options'=>['static_view'=>true]
-				],
-				'glue'=>$glue,
-			]);
-			return '';
-		}
+		'contentOptions'=>function($data) use ($glue){ return [
+			'model'=>$data->acl,
+			'field'=>'nodes',
+			'lineBr'=>false,
+			'item_options'=>[
+				'show_ips'=>is_object($data->acl)?$data->acl->hasIpAccess():false,
+				'ips_prefix'=>':',
+				'ips_glue'=>',',
+				'ips_options'=>['static_view'=>true]
+			],
+			'glue'=>$glue,
+		];}
 	],
 
 	//['class' => 'yii\grid\ActionColumn'],

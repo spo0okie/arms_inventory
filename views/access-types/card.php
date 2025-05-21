@@ -38,7 +38,7 @@ if (count($model->children)) {
 	echo '<h4>'.$model->getAttributeLabel('children').'</h4>';
 	echo '<ul>';
 	foreach ($model->children as $child)
-		echo '<li>'.$this->render('item',['model'=>$child,'static_view'=>true]).'</li>';
+		echo '<li>'.$child->renderItem($this,['static_view'=>true]).'</li>';
 	echo '</ul>';
 }
 
