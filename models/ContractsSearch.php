@@ -52,7 +52,7 @@ class ContractsSearch extends Contracts
 	 * @param null  $tableId
 	 * @return ActiveDataProvider
 	 */
-    public function search($params,$tableId='contracts-index')
+    public function search($params,$columns=null)
     {
         $query = Contracts::find()->with([
 			'currency',
@@ -71,11 +71,11 @@ class ContractsSearch extends Contracts
 		$showPayIdInName=true;
 		$showDateInName=true;
 
-		if (!empty($tableId)) {
-			$showUsersInName=!DynaGridWidget::tableColumnIsVisible($tableId,'users',Contracts::$defaultColumns);
-			$showPartnersInName=!DynaGridWidget::tableColumnIsVisible($tableId,'partners',Contracts::$defaultColumns);
-			$showPayIdInName=!DynaGridWidget::tableColumnIsVisible($tableId,'pay_id',Contracts::$defaultColumns);
-			$showDateInName=!DynaGridWidget::tableColumnIsVisible($tableId,'date',Contracts::$defaultColumns);
+		if (is_array($columns)) {
+			$showUsersInName=in_array('users',$columns);
+			$showPartnersInName=in_array('partners',$columns);
+			$showPayIdInName=in_array('pay_id',$columns);
+			$showDateInName=in_array('date',$columns);
 		}
 	
 	

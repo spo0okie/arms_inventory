@@ -45,7 +45,7 @@ if (
 <div class="schedule-next-days-modeling mb-4">
 <h2>В ближайшие <?= $days_forward ?> дней есть изменения в расписании</h2>
 <p>
-	праздничные дни/ аварийные простои / смена недельного графика работы и т.п.<br>
+	Праздничные дни/ аварийные простои / смена недельного графика работы и т.п.<br>
 	Посмотрите внимательно график на ближайшие <?= $days_forward ?> дней
 </p>
 	<table class="table table-condensed table-hover table-borderless">
@@ -61,7 +61,7 @@ if (
 				//если есть расписание
 				if (isset($day['sources']['master']) && is_object($master=$day['sources']['master'])) {
 					/** @var Schedules $master */
-					if ($master->id==$model->id) {    //если это тоже самое
+					if ($master->id==$model->id) {    //если это то же самое
 						$tokens[] = 'Основное';        //говорим что основное
 					} elseif ($master->isOverride) {    //если это период с другим расписанием
 						if (strlen(trim($master->description)))

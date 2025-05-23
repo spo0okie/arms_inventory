@@ -69,6 +69,37 @@ class SchedulesController extends BaseRestController
 	}
 	
 	/**
+	 * Возвращает список расписаний на день на все дни от $startDate до $endDate
+	 * @param integer $id расписание
+	 * @param string|null $startDate '2025-05-01'
+	 * @param string|null $endDate '2025-06-01'
+	 * @return mixed
+	 */
+	public function actionDaysSchedules($id,$startDate=null,$endDate=null) {
+
+		$model=$this->findModel($id);
+		
+		//генерируем даты по умолчанию
+		if (is_null($startDate)) $startDate=gmdate('Y-m-d',time());
+		if (is_null($endDate)) $endDate=gmdate('Y-m-d',time()+86400*7);
+		
+		$days=[];
+		$startTime=strtotime($startDate);
+		$endTime=strtotime($endDate);
+		$daysCount=min(round(($endTime-$startTime)/86400),730); //максимум 2 года
+
+		for ($i=0; $i<=$daysCount; $i++) {
+			$date=date('Y-m-d',$startTime+86400*$i);
+			$day=$model->getDateEntryRecursive($date);
+			if (is_object($day)) {
+				$days[$date]=$day->schedule;
+			}
+		}
+		return $days;
+	}
+		
+	
+	/**
 	 * Finds the Schedules model based on its primary key value.
 	 * If the model is not found, a 404 HTTP exception will be thrown.
 	 * @param integer $id

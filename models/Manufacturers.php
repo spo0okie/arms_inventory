@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -23,8 +23,6 @@ class Manufacturers extends ArmsModel
 {
 
 	private $all_names=[];
-
-    public static $CACHE_TIME=15;
 
     private static $all_items=null;
     private static $names_cache=null;
@@ -85,7 +83,7 @@ class Manufacturers extends ArmsModel
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getManufacturersDicts()
     {
@@ -122,7 +120,7 @@ class Manufacturers extends ArmsModel
     }
 
 	/**
-	 * возвращает количество символов слева, которое надо откусить от названия, чтобы убрать оттуда
+	 * Возвращает количество символов слева, которое надо откусить от названия, чтобы убрать оттуда
 	 * название производителя (для случаев, когда названия производителя есть и в продукте)
 	 * типа Microsoft Office от Microsoft
 	 * @param string $name название продукта
@@ -130,17 +128,17 @@ class Manufacturers extends ArmsModel
 	 */
     public function cutManufacturer($name) {
     	$cut=0;
-    	$namelen=strlen($name);
+    	$nameLen=strlen($name);
 		$low=mb_strtolower($name);
 	    $test='['.$low.'] ';
 	    $this->fillAllNames();
 	    //перебираем все элементы
 		foreach ($this->all_names as $item) {
-			$test.=' ('.$item['low'].')';
+			//$test.=' ('.$item['low'].')';
 			//если название производителя не длиннее продукта
-			if (($itemlen=strlen($item['low']))<$namelen) {
-				//если продукт начинается с этой строки то откусываем не меньше чем длинна названия произв
-				if (strcmp(substr($low,0,$itemlen),$item['low'])==0) $cut=max($cut,$itemlen);
+			if (($itemLen=strlen($item['low']))<$nameLen) {
+				//если продукт начинается с этой строки, то откусываем не меньше чем длинна названия произв
+				if (strcmp(substr($low,0,$itemLen),$item['low'])==0) $cut=max($cut,$itemLen);
 			}
 		}
 		//return $test;
@@ -148,17 +146,17 @@ class Manufacturers extends ArmsModel
     }
 	
 	public function getSoft() {
-		return \app\models\Soft::find()->where(['manufacturers_id' => $this->id])->orderBy('descr')->all();
-		//return $this->hasMany(Soft::className(), ['manufacturers_id' => 'id']);
+		//return \app\models\Soft::find()->where(['manufacturers_id' => $this->id])->orderBy('descr')->all();
+		return $this->hasMany(Soft::class, ['manufacturers_id' => 'id']);
 	}
 	
 	public function getTechModels() {
-		return \app\models\TechModels::find()->where(['manufacturers_id' => $this->id])->orderBy('name')->all();
-		//return $this->hasMany(Soft::className(), ['manufacturers_id' => 'id']);
+		//return \app\models\TechModels::find()->where(['manufacturers_id' => $this->id])->orderBy('name')->all();
+		return $this->hasMany(Soft::class, ['manufacturers_id' => 'id']);
 	}
 	
 	public function getDict() {
-		return $this->hasMany(ManufacturersDict::className(), ['manufacturers_id' => 'id']);
+		return $this->hasMany(ManufacturersDict::class, ['manufacturers_id' => 'id']);
 	}
 	
 	/**
@@ -195,7 +193,7 @@ class Manufacturers extends ArmsModel
 	}
 	
 	/**
-	 * возвращает элементы, поле которые имеет значение value
+	 * Возвращает элементы, поле которые имеет значение value
 	 * @param $field
 	 * @param $value
 	 * @return array
@@ -215,22 +213,21 @@ class Manufacturers extends ArmsModel
 	public function cropVendorName($name){
 		$orig=$name;
 		$full=mb_strtolower($name);
-		$vendor=mb_strtolower($this->name).' ';	//убираем регистр и добавляем пробел,
-												//т.к. вендор должен быть отдельным словом и при этом не последним
+		$vendor=mb_strtolower($this->name).' ';	//Убираем регистр и добавляем пробел,
+												//так как вендор должен быть отдельным словом и при этом не последним
 		if (mb_strpos($full,$vendor)===0) {
 			//название продукта начинается с имени производителя
 			$name=trim(mb_substr($name,mb_strlen($vendor)));
 		} else {
 			//проверяем все синонимы написания производителя
 			foreach ($this->manufacturersDicts as $dict) {
-				$vendor=mb_strtolower($dict->word).' '; //убираем регистр и добавляем пробел, также как и выше
+				$vendor=mb_strtolower($dict->word).' '; //убираем регистр и добавляем пробел, так же как и выше
 				if (mb_strpos($full,$vendor)===0) {
 					$name=trim(mb_substr($name,mb_strlen($vendor)));
 				}
 			}
 		}
 		return mb_strlen($name)>3?$name:$orig;
-		
 	}
 	
 }
