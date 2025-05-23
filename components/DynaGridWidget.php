@@ -26,7 +26,7 @@ use yii\web\JsExpression;
 class DynaGridWidget extends DynaGrid
 {
 
-	//куда то подгружать настройки таблиц, чтобы заранее знать в контроллере какие колонки будут выводиться
+	//куда-то подгружать настройки таблиц, чтобы заранее знать в контроллере какие колонки будут выводиться
 	public static $visibleColumnsCache=[];
 	public static $instance;
 	
@@ -164,6 +164,8 @@ class DynaGridWidget extends DynaGrid
 					NumberFormatter::CURRENCY_SYMBOL => '',
 				],
 			],
+			'export'=>['options'=>['class'=>'btn btn-light border-secondary']],
+			'exportConfig'=>[GridView::EXCEL=>[],GridView::CSV=>[],GridView::JSON=>[],GridView::TEXT=>[]],
 			'panel'=>$this->panel ?? [
 					'type' => GridView::TYPE_DEFAULT,
 					'heading' => $this->header,
