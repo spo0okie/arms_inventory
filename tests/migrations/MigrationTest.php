@@ -78,16 +78,21 @@ class MigrationTest extends Unit
 	
 	private function createMigrationDatabase()
 	{
+		codecept_debug('Creating temporary migration database...');
 		$this->rootDb->open();
 		$this->rootDb->createCommand("CREATE DATABASE IF NOT EXISTS yii2_migrations_test")->execute();
 		$this->rootDb->close();
+		codecept_debug('Complete');
 	}
 	
 	private function dropMigrationDatabase()
 	{
+		codecept_debug('Dropping temporary migration database...');
+		Yii::$app->db->close(); // Закрываем подключение к основной БД, чтобы не было конфликтов
 		$this->rootDb->open();
 		$this->rootDb->createCommand("DROP DATABASE IF EXISTS yii2_migrations_test")->execute();
 		$this->rootDb->close();
+		codecept_debug('Complete');
 	}
 	
 }
