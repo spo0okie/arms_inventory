@@ -1,0 +1,12 @@
+actor: MigrationsTester
+modules:
+    enabled:
+        - \Helper\Migrations
+        - Asserts
+        - Yii2:
+              part: [ orm, fixtures ]
+    config:
+        Yii2:
+            configFile: 'config/test-migrations.php'
+            cleanup: false
+#bootstrap: _bootstrap.php

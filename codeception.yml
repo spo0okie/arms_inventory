@@ -5,7 +5,6 @@ paths:
     data: tests/_data
     helpers: tests/_support
 settings:
-    bootstrap: _bootstrap.php
     memory_limit: 1024M
     colors: true
 modules:
@@ -13,6 +12,7 @@ modules:
         Yii2:
             configFile: 'config/test.php'
             cleanup: false
+bootstrap: _bootstrap.php
 
 # To enable code coverage:
 #coverage:

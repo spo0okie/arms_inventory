@@ -1,0 +1,11 @@
+actor: UnitTester
+modules:
+  enabled:
+    - Asserts
+    - Yii2:
+        part: [orm, fixtures]
+  config:
+    Yii2:
+      configFile: 'config/test-console.php'
+      cleanup: false
+bootstrap: _bootstrap.php

@@ -35,7 +35,10 @@ $config = [
 		'errorHandler'=>[
 			'class'=>'app\console\ErrorHandler',
 		],
-	   
+		'user' => [
+			'class' => 'app\models\Users',
+			'identityClass' => 'app\models\Users',
+		],
     ],
     'params' => $params,
 	'controllerMap' => [
