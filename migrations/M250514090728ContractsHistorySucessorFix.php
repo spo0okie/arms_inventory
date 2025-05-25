@@ -11,7 +11,10 @@ class M250514090728ContractsHistorySucessorFix extends ArmsMigration
      */
     public function safeUp()
     {
-		$this->renameColumn('contracts_history','is_sucessor','is_successor');
+		$tableSchema = $this->db->getTableSchema('contracts_history');
+		if (!isset($tableSchema->columns['is_successor']) && isset($tableSchema->columns['is_sucessor'])) {
+			$this->renameColumn('contracts_history','is_sucessor','is_successor');
+		}
     }
 
     /**
