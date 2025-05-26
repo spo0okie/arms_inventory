@@ -1,10 +1,7 @@
 <?php
 
-//Подгружаем наше Yii2 приложение для тестов, так как нам нужны хелперы, а также генераторы тестовых запросов
-
-if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
-	require_once __DIR__ . '/../../vendor/autoload.php';
-	require_once __DIR__ . '/../../vendor/yiisoft/yii2/Yii.php';
-	$config = require __DIR__ . '/../../config/test.php';
-	new yii\web\Application($config);
-}
+//Подгружаем наше Yii2 приложение для тестов
+new yii\web\Application(require __DIR__ . '/../../config/test.php');
+//загружаем в него демо БД
+$sql = file_get_contents(__DIR__ . '/../_data/arms_demo.sql');
+Yii::$app->db->createCommand($sql)->execute();

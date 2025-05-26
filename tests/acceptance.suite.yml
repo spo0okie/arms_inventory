@@ -1,8 +1,14 @@
 actor: AcceptanceTester
 modules:
     enabled:
+        - Yii2:
+              part: [ orm, fixtures ]
         - PhpBrowser:
         - \Helper\Acceptance
     config:
         PhpBrowser:
             url: http://localhost:8081/web/index-test.php
+        Yii2:
+            configFile: 'config/test.php'
+            cleanup: false
+bootstrap: _bootstrap.php

@@ -17,6 +17,8 @@ use yii\web\UploadedFile;
 class AttachesController extends ArmsBaseController
 {
 	
+	public $modelClass=Attaches::class;
+	
 	public function disabledActions()
 	{
 		return ['index','update','item','view','ttip','item-by-name',];
