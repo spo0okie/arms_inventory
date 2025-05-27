@@ -22,7 +22,7 @@ use app\components\formInputs\DokuWikiEditor;
 			<?= $form->field($model, 'name') ?>
 		</div>
 		<div class="col-4">
-			<?= $form->field($model, 'services_id')->select2() ?>
+			<?= $form->field($model, 'parent_id')->select2() ?>
 		</div>
 	</div>
 	<div class="row">
@@ -31,6 +31,7 @@ use app\components\formInputs\DokuWikiEditor;
 
 		</div>
 		<div class="col-4">
+			<?= $form->field($model, 'services_id')->select2() ?>
 			<?= $form->field($model, 'schedules_id')->select2() ?>
 			<?= $form->field($model, 'reqs_ids')->select2() ?>
 			<?= $form->field($model, 'links')->textAutoresize(['rows'=>2]) ?>

@@ -279,8 +279,17 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	 */
 	public static function textFieldType ($class,$attribute)
 	{
-		return \Yii::$app->params['textFields'][StringHelper::className($class).'.'.$attribute]??
-			\Yii::$app->params['textFields']['default'];
+		if (isset(\Yii::$app->params['textFields'][StringHelper::className($class).'.'.$attribute]))
+			return \Yii::$app->params['textFields'][StringHelper::className($class).'.'.$attribute];
+		
+		if (StringHelper::endsWith($attribute,'Recursive')) {
+			//если это рекурсивное поле, то смотрим на его базовое поле
+			$baseAttribute=substr($attribute,0,strlen($attribute)-strlen('Recursive'));
+			if (isset(\Yii::$app->params['textFields'][StringHelper::className($class).'.'.$baseAttribute]))
+				return \Yii::$app->params['textFields'][StringHelper::className($class).'.'.$baseAttribute];
+		}
+		
+		return \Yii::$app->params['textFields']['default'];
 	}
 	
 	

@@ -136,6 +136,11 @@ trait AttributeDataModelTrait
 					return $this->getAttributeData($link);
 				}
 			}
+			//проверяем для рекурсивных аттрибутов somethingRecursive -> something
+			if (StringHelper::endsWith($attr,'Recursive')) {
+				$simple=substr($attr,0,strlen($attr)-strlen('Recursive'));
+				return ($this->getAttributeData($simple));
+			}
 			$this->attributeDataCache[$attr]=null;
 			return null;
 		}

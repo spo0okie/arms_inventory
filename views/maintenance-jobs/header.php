@@ -27,20 +27,21 @@ use kartik\markdown\Markdown;
 						'undeletableMessage'=>'Нельзя удалить эту схему обслуживания, т.к. есть привязанные к ней объекты',
 				]) ?>
 			</h1>
-			<?= TextFieldWidget::widget(['model'=>$model,'field'=>'description']) ?>
+			<?php if($model->parent_id) { ?><h4>Входит в состав: <?= $model->parent->renderItem($this,['static_view'=>true]) ?></h4> <?php } ?>
+			<?= TextFieldWidget::widget(['model'=>$model,'field'=>'descriptionRecursive']) ?>
 		</div>
 		<div class="me-5">
-			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'service']) ?>
+			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'serviceRecursive']) ?>
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'responsible']) ?>
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'support']) ?>
 		</div>
 		<div class="me-5">
 			<div class="mb-3">
 				<h4>Расписание</h4>
-				<?php if (is_object($model->schedule)) {
+				<?php if (is_object($model->scheduleRecursive)) {
 					echo Html::a(
-					$model->schedule->description?$model->schedule->description:
-						$this->render('/schedules/week-description',['model'=>$model->schedule]),
+					$model->scheduleRecursive->description?$model->scheduleRecursive->description:
+						$this->render('/schedules/week-description',['model'=>$model->scheduleRecursive]),
 						'#',
 						['onclick'=>'$("li#tab-schedule").children("a.nav-link").tab("show");$("li#tab-schedule").click();']
 					);
@@ -48,7 +49,7 @@ use kartik\markdown\Markdown;
 					echo StripedAlertWidget::widget(['title'=> Html::a('создать',['schedules/create','attach_job'=>$model->id],['class'=>'open-in-modal-form word-wrap','data-reload-page-on-submit'=>1])]);
 				} ?>
 			</div>
-			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'reqs']) ?>
+			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'reqsRecursive']) ?>
 		</div>
 		<div>
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'links']) ?>

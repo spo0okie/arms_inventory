@@ -8,6 +8,7 @@ namespace app\models\traits;
 
 
 
+use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
 use app\models\Scans;
 use app\models\Users;
@@ -24,13 +25,13 @@ trait MaintenanceJobsModelCalcFieldsTrait
 {
 	public function getResponsible()
 	{
-		if (is_object($this->service)) return $this->service->responsibleRecursive;
+		if (is_object($this->serviceRecursive)) return $this->serviceRecursive->responsibleRecursive;
 		return null;
 	}
 	
 	public function getSupport()
 	{
-		if (is_object($this->service)) return $this->service->supportRecursive;
+		if (is_object($this->serviceRecursive)) return $this->serviceRecursive->supportRecursive;
 		return null;
 	}
 	
@@ -49,6 +50,45 @@ trait MaintenanceJobsModelCalcFieldsTrait
 			}
 		}
 		return $this->attrsCache['isBackup'];
+	}
+	
+	public function getServiceRecursive()
+	{
+		/** @var MaintenanceJobs $this */
+		return $this->findRecursiveAttr(
+			'service',
+			'serviceRecursive',
+			'parent'
+		);
+	}
+
+	public function getScheduleRecursive()
+	{
+		/** @var MaintenanceJobs $this */
+		return $this->findRecursiveAttr(
+			'schedule',
+			'scheduleRecursive',
+			'parent'
+		);
+	}
+	
+	public function getReqsRecursive()
+	{
+		/** @var MaintenanceJobs $this */
+		return $this->findRecursiveAttr(
+			'reqs',
+			'reqsRecursive',
+			'parent'
+		);
+	}
+	
+	public function getDescriptionRecursive()
+	{
+		$description=$this->description;
+		/** @var MaintenanceJobs $this */
+		if (strpos($description,'{{PARENT}}')===false) return $description;
+		$parent=is_object($this->parent)?$this->parent->description:'';
+		return str_replace('{{PARENT}}', $parent, $description);
 	}
 	
 	/**
