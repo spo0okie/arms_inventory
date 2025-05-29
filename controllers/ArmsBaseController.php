@@ -38,6 +38,9 @@ class ArmsBaseController extends Controller
 	const PERM_EDIT='edit';
 	const PERM_VIEW='view';
 	
+	public $additionalCreateButton='';
+	public $additionalToolButton='';
+	
 	
 	public function actions()
 	{
@@ -264,6 +267,8 @@ class ArmsBaseController extends Controller
 				'searchModel' => $searchModel,
 				'dataProvider' => $dataProvider,
 				'switchArchivedCount' => $switchArchivedCount??null,
+				'additionalCreateButton' => $this->additionalCreateButton,
+				'additionalToolButton' => $this->additionalToolButton,
 				'model' => $model,
 			]);
 			
@@ -282,6 +287,8 @@ class ArmsBaseController extends Controller
 			return $this->render($view, [
 				'dataProvider' => $dataProvider,
 				'model' => $model,
+				'additionalCreateButton' => $this->additionalCreateButton,
+				'additionalToolButton' => $this->additionalToolButton,
 			]);
 		}
     }
