@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\QueryHelper;
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -67,6 +68,7 @@ class MaintenanceJobsSearch extends MaintenanceJobs
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+			'pagination' => ['pageSize' => Yii::$app->request->get('per-page',100),],
         ]);
 
         $this->load($params);

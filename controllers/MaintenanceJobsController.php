@@ -42,14 +42,13 @@ class MaintenanceJobsController extends ArmsBaseController
 		
 		
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-		$this->view->params['layout-container'] = 'container-fluid';
+		//$this->view->params['layout-container'] = 'container-fluid';
 		
 		$models=[];
 		ArrayHelper::sortFlatTree(ArrayHelper::buildSortedTree($dataProvider->models),$models);
 		
 		$arrDataProvider=new ArrayDataProvider([
 			'allModels'=>$models,
-			'pagination'=>false,
 		]);
 		
 		
