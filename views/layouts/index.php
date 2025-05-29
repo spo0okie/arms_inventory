@@ -5,6 +5,7 @@ use app\components\HintIconWidget;
 use app\components\ShowArchivedWidget;
 use app\helpers\StringHelper;
 use yii\bootstrap5\Html;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ArmsModel */
@@ -12,6 +13,7 @@ use yii\bootstrap5\Html;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $switchArchivedCount */
 
+Url::remember();
 
 $modelClass=get_class($model);
 $searchClass=StringHelper::className($modelClass).'Search';
