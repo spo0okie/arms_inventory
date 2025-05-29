@@ -12,6 +12,7 @@ use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
 use app\models\Scans;
 use app\models\Users;
+use yii\db\ActiveQuery;
 
 /**
  * @package app\models\traits
@@ -99,14 +100,28 @@ trait MaintenanceJobsModelCalcFieldsTrait
 	public function satisfiesReq(MaintenanceReqs $req)
 	{
 		if (!is_array($this->reqs)) return false;	//если она не удовлетворяет ничему, то и искомому тоже не удовлетворяет
-		foreach ($this->reqs as $test) {			//если это требование перечислено явно в этой операции то успех
+		foreach ($this->reqsRecursive as $test) {			//если это требование перечислено явно в этой операции то успех
 			if ($req->id == $test->id) return true;
 		}
-		//явно не перечислено, тогда поищем может это требование удовлетворяется другими требованиями и они перечислены явно
+		//явно не перечислено, тогда поищем, может это требование удовлетворяется другими требованиями, и они перечислены явно
 		foreach ($req->satisfiedBy() as $parent) {
 			if ($this->satisfiesReq($parent)) return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Все потомки (включая потомков потомков)
+	 * @return MaintenanceJobs[]|ActiveQuery
+	 */
+	public function getChildrenRecursive()
+	{
+		$items=$this->children??[];
+		$result=$items;
+		foreach ($items as $item) {
+			$result=array_merge($result,$item->getChildrenRecursive());
+		}
+		return $result;
 	}
 	
 }

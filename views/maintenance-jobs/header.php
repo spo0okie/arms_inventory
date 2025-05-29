@@ -37,7 +37,7 @@ use kartik\markdown\Markdown;
 		</div>
 		<div class="me-5">
 			<div class="mb-3">
-				<h4>Расписание</h4>
+				<?= ModelFieldWidget::renderFieldTitle($model,'schedule',$this) ?>
 				<?php if (is_object($model->scheduleRecursive)) {
 					echo Html::a(
 					$model->scheduleRecursive->description?$model->scheduleRecursive->description:

@@ -28,6 +28,7 @@ use yii\db\ActiveQuery;
  * @property MaintenanceReqs[] $reqs
  * @property MaintenanceReqs[] $reqsRecursive
  * @property MaintenanceJobs $parent
+ * @property MaintenanceJobs[] $children
  * @property Services[] $services
  * @property Services $service
  * @property Services $serviceRecursive
@@ -45,8 +46,12 @@ class MaintenanceJobs extends ArmsModel
 	public static $title='Регламентное обслуживание';
 	public static $titles='Регламентное обслуживание';
 	public static $newItemPrefix='Новое';
-
-    /**
+	
+	public $treeChildren=null;
+	public $treeDepth=null;
+	public $treePrefix=null;
+	
+	/**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -94,6 +99,11 @@ class MaintenanceJobs extends ArmsModel
 				'Название',
 				'hint'=>'Понятное имя для регламентного обслуживания',
 			],
+			'children' => [
+				'Дочерние',
+				'hint'=>'Дочерние операции регламентного обслуживания<br>'
+					.'входящие в состав этого обслуживания',
+			],
 			'comps_ids' => [
 				'ОС/ВМ',
 				'hint'=>'Обслуживаемые в рамках этой регламентной операции',
@@ -121,7 +131,7 @@ class MaintenanceJobs extends ArmsModel
 				'placeholder'=>'Никакие не выполняет',
 				'is_inheritable'=>true,
 			],
-			'responsible' => ['Ответственный'],
+			'responsible' => ['Ответственный','Кто отвечает за это регламентное обслуживание'],
             'schedules_id' => [
 				'Расписание',
 				'hint'=>'Расписание когда производятся регламентные операции',
@@ -141,7 +151,7 @@ class MaintenanceJobs extends ArmsModel
 				'hint'=>'Обслуживаемые в рамках этой регламентной операции',
 				'placeholder'=>'Сервисы не обслуживаются',
 			],
-			'support' => ['Поддержка'],
+			'support' => ['Поддержка','Команда поддержки регламентного обслуживания'],
 			'techs_ids' => [
 				'Оборудование',
 				'hint'=>'Обслуживаемое в рамках этой регламентной операции',

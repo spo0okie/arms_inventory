@@ -4,6 +4,7 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 use app\components\gridColumns\ExpandableCardColumn;
+use app\components\TableTreePrefixWidget;
 use app\models\Schedules;
 
 if(!isset($static_view))$static_view=false;
@@ -11,13 +12,24 @@ $renderer = $this;
 
 return [
 	'name'=>[
+		'value' => function ($data) use($renderer) {
+			$name=$data->renderItem($renderer,['noDelete'=>true]);
+			if ($data->treeDepth) {
+				return TableTreePrefixWidget::widget(['prefix'=>$data->treePrefix]).$name.'</span>';
+			}
+			return $name;
+		},
+		'contentOptions'=>function($data){return ['class'=>'name_col '.($data->treeDepth?
+			'tree-col p-0 overflow-hidden position-relative'
+			:''
+		) ];},
 		'options'=>['modal'=>true],
 	],
-	'description',
+	'descriptionRecursive',
 	'schedule'=>[
 		'value'=>function($data) use ($renderer){
 			/** @var Schedules $schedule */
-			if (is_object($schedule=$data->schedule)) {
+			if (is_object($schedule=$data->scheduleRecursive)) {
 				$descr=$schedule->description?
 					$schedule->description:
 					$schedule->workTimeDescription;

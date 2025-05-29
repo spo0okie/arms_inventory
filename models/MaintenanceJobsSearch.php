@@ -11,7 +11,8 @@ use yii\data\ActiveDataProvider;
  */
 class MaintenanceJobsSearch extends MaintenanceJobs
 {
-	
+
+	public $ids;
 	public $objects;
 	public $schedule;
 	
@@ -78,6 +79,7 @@ class MaintenanceJobsSearch extends MaintenanceJobs
         
         // наполняем фильтр всякими WHERE
 		$filter->andFilterWhere([
+			'maintenance_jobs.id' => $this->ids,
             'schedules_id' => $this->schedules_id,
         ]);
 	

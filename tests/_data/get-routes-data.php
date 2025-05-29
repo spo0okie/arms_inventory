@@ -41,6 +41,7 @@ return [
 	'/^lic-items\/hint-arms$/' => ['GET'=>['id'=>'{anyId}','form'=>'test']],//в тестовой БД там есть оборудование привязанное через документ
 	'/^lic-items\/contracts$/' => ['GET'=>['id'=>'{anyId}']],//TODO: зачем этот метод?
 	'/^lic-keys\/create$/' => ['GET'=>['LicKeys'=>['lic_items_id'=>1]]], //для создания лиц ключа обязательно нужна закупка
+	'/^maintenance-jobs\/children-tree$/' => ['GET'=>['id'=>'{anyId}']],
 	'/^materials\/ttips$/' => ['GET'=>['ids'=>'{anyId}']],
 	'/^net-ips\/item-by-name$/' => ['GET'=>['name'=>'10.20.1.10']],
 	'/^networks\/item-by-name$/' => ['GET'=>['name'=>'10.20.1.0/24']],
