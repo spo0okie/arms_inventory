@@ -21,7 +21,7 @@ class MaintenanceJobsController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'view'=>['index-tree'],
+			'view'=>['children-tree','index-tree'],
 		]);
 	}
 	
