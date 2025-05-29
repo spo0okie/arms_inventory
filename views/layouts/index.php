@@ -17,6 +17,8 @@ $modelClass=get_class($model);
 $searchClass=StringHelper::className($modelClass).'Search';
 $classId=StringHelper::class2Id($modelClass);
 
+if (!isset($additionalCreateButton)) $additionalCreateButton='';
+if (!isset($additionalToolButton)) $additionalToolButton='';
 
 $this->title = $modelClass::$titles??$modelClass::$title??'Список';
 $this->params['breadcrumbs'][] = $this->title;
@@ -51,18 +53,18 @@ if (isset(Yii::$app->request->get()[$searchClass])) {
 				'class' => 'btn btn-success',
 				'title' => $modelClass::$addButtonHint??null,
 			]
-		),
+		).$additionalCreateButton,
 		'hintButton' => HintIconWidget::widget([
 			'model'=>$modelClass,
 			'cssClass'=>'btn'
 		]),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel??null,
-		'toolButton'=> $model->hasAttribute('archived')?
+		'toolButton'=> $additionalToolButton.($model->hasAttribute('archived')?
 			'<span class="p-2">'. ShowArchivedWidget::widget([
 				'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
 				'labelBadge'=>$switchArchivedDelta,
 				'state'=>$searchModel->archived
-			]).'<span>':'',
+			]).'<span>':''),
 	]) ?>
 </div>
