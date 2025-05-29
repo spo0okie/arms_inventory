@@ -248,7 +248,8 @@ class MaintenanceJobs extends ArmsModel
 			WikiCache::invalidateParentReference($this,'description');
 		}
 		if (isset($changedAttributes['description'])) {
-			//если изменилось описание, то сбрасываем кэш описания у прямых потомков
+			//если изменилось описание, то сбрасываем кэш описания свой и у прямых потомков
+			WikiCache::invalidateParentReference($this,'description');
 			foreach ($this->children as $item)
 				WikiCache::invalidateParentReference($item,'description');
 		}
