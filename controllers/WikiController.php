@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\StringHelper;
 use app\helpers\WikiHelper;
 use app\models\ui\WikiCache;
 use app\models\Users;
@@ -109,7 +110,7 @@ class WikiController extends Controller
 		$parsed=WikiHelper::parseWikiHtml($page, Yii::$app->params['wikiUrl']);
 		
 		$cache=WikiCache::fetchCache(
-			WikiCache::internalPath($class, $id, $field)
+			WikiCache::internalPath($class, $id, StringHelper::removeSuffix($field))
 		);
 		
 		$cache->data=$parsed;
