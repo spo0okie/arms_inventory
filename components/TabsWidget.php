@@ -13,14 +13,26 @@ class TabsWidget extends Tabs
 	public $cookieName='nonameTabs';
 	public $defaultItem='tab1';
 	public $encodeLabels=false;
+	public const badgeStart='<span class="badge rounded-pill p-1 m-1 bg-secondary opacity-25">';
+	public const badgeEnd='</span>';
 	
+	
+	public static function attrTabLabel($model,$attr,$view)
+	{
+		[$title,$options]=ModelFieldWidget::fieldTitle($model,$attr,$view);
+		$label=Html::tag('span',$title,$options);
+		if (is_array($model->$attr)) {
+			$label.=TabsWidget::badgeStart.count($model->$attr).TabsWidget::badgeEnd;
+		}
+		return $label;
+	}
 	
 	public function prepareItems(array &$items, string $prefix = ''): void
 	{
 		//что в куках записано про открытую вкладку (или берем по умолчанию)
 		$cookieTab=$_COOKIE[$this->cookieName]??$this->defaultItem;
 		
-		//если имя вкладки передано через УРЛ то делаем оверрайд сохраненного в куках значения
+		//если имя вкладки передано через URL, то делаем оверрайд сохраненного в куках значения
 		if (($hrefTab= Yii::$app->request->get('tab','unset'))!='unset') {
 			$cookieTab=$hrefTab;
 		}
@@ -72,7 +84,7 @@ class TabsWidget extends Tabs
 			
 			$editLink=Html::tag('i','',[
 				'class'=>"fas fa-pencil-alt ps-1",
-				'onClick'=>'window.open("'.$url.'?do=edit'.'","_blank");'
+				'onClick'=>'window.open("'.$url.'?do=edit'.'","_blank");',
 			]);
 			
 			$tabs[]=[

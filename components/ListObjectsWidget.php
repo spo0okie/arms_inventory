@@ -25,6 +25,7 @@ class ListObjectsWidget extends Widget
 {
 	public $models;				//модели, список которых нам нужен
 	public $title;				//заголовок списка
+	public $title_options=[];	//заголовок списка
 	public $show_archived;		//флаг отображения архивного элемента
 	public $item_options=[];	//опции для рендера элемента
 	public $card=true;			//завернуть все в разворачиваемую карточку
@@ -169,17 +170,17 @@ class ListObjectsWidget extends Widget
 		
 		
 		if ($this->title) {
-			//если явно не заявлено что вся карточка архивная, то выставляем то что выяснили в процессе
+			//если явно не заявлено что вся карточка архивная, то выставляем то, что выяснили в процессе
 			if (!isset($this->archived)) $this->archived=$allArchived;
 
 			//заголовок
 			$content=Html::tag(
 				'h4',
 				$this->title,
-				[
+				ArrayHelper::recursiveOverride([
 					'class'=>($this->archived && !$this->show_empty)?ShowArchivedWidget::$itemClass:'',
 					'style'=>HtmlHelper::ArchivedDisplay($this,$this->show_empty||$this->show_archived),
-				]
+				],$this->title_options)
 			).$content;
 		}
 		

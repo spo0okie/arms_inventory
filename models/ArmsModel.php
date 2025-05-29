@@ -553,6 +553,36 @@ class ArmsModel extends ActiveRecord
 		return $this->recursiveCache[$recursiveAttr] = $empty;
 	}
 	
+	/**
+	 * Возвращает узел в дереве предков в котором задан наследуемый атрибут
+	 * @param string $attr
+	 * @param string|null $parentAttr
+	 * @return int|null
+	 */
+	public function findRecursiveAttrNode(string $attr, $parentAttr=null) {
+		//проверяем для рекурсивных аттрибутов somethingRecursive -> something
+		if (StringHelper::endsWith($attr,'Recursive')) {
+			$attr=substr($attr,0,strlen($attr)-strlen('Recursive'));
+		}
+		
+		if (isset($this->recursiveCache[$attr.'::node']))
+			return $this->recursiveCache[$attr.'::node'];
+		
+		//атрибут ссылка на предка
+		if (is_null($parentAttr)) $parentAttr=$this->parentAttr;
+		
+		$test=$this;
+		while (is_object($test)) {
+			$value=$test->$attr;
+			if (is_object($value)||(is_array($value)&&count($value))||!empty($value)) {
+				return $this->recursiveCache[$attr.'::node']=$test;
+			}
+			//переключаемся на родителя
+			$test=$test->$parentAttr;
+		}
+		return $this->recursiveCache[$attr.'::node']=null;
+	}
+	
 	public function externalData() {}
 	
 	/**

@@ -10,8 +10,11 @@
 
 namespace app\components;
 
+use app\components\Forms\ActiveField;
+use app\helpers\ArrayHelper;
 use app\models\ArmsModel;
 use yii\base\Widget;
+use yii\helpers\Html;
 
 /**
 * Class ItemObjectWidget
@@ -28,6 +31,7 @@ class ModelFieldWidget extends Widget
 	public $field;				//поле модели, которое нам нужно
 	public $fieldType;			//тип поля (если нам надо переопределить или отрендерить как...)
 	public $title;				//заголовок поля
+	public $title_options=[];	//опции для рендера заголовка
 	public $show_archived;		//флаг отображения архивного элемента
 	public $item_options=[];	//опции для рендера элемента
 	public $card_options=['cardClass'=>'mb-3'];	//опции для рендера карточки
@@ -81,6 +85,45 @@ class ModelFieldWidget extends Widget
 		
 	}
 	
+	/**
+	 * @param ArmsModel $model
+	 * @param string $field
+	 * @return array
+	 */
+	public static function fieldTitle($model,$field,$view)
+	{
+		$options=[];
+		$label=$model->getAttributeLabel($field);
+		$hint=$model->getAttributeHint($field);
+		
+		if ($model->attributeIsInheritable($field)) {
+			//если атрибут наследуемый, то дописываем явно задано значение или унаследовано
+			$inheritedFrom=$model->findRecursiveAttrNode($field);
+			$hint.='<br><strong>Наследуемый атрибут</strong>: ';
+			if (is_object($inheritedFrom)) {
+				if ($model->id===$inheritedFrom->id)
+					$hint.='значение задано явно';
+				else {
+					$hint.='унаследовано от '.$inheritedFrom->renderItem($view,['static_view'=>true]);
+				}
+			} else {
+				$hint.='не задан ни на одном из узлов ветви.';
+			}
+			
+		}
+		
+		if (!empty($hint)) {
+			$options=ActiveField::hintTipOptions($label,$hint);
+		}
+		return [$label,$options];
+	}
+	
+	public static function renderFieldTitle($model,$field,$view,$tag='h4')
+	{
+		[$title,$options]=static::fieldTitle($model,$field,$view);
+		return Html::tag($tag,$title,$options);
+	}
+	
 	public function init(){
 		parent::init();
 		
@@ -93,9 +136,9 @@ class ModelFieldWidget extends Widget
 		}
 		
 		if (!isset($this->title)) {
-			$this->title=$this->model->getAttributeLabel($this->field);
+			[$this->title,$title_options]=static::fieldTitle($this->model,$this->field,$this->view);
+			$this->title_options=ArrayHelper::recursiveOverride($title_options,$this->title_options);
 		}
-		
 	}
 	
 	public function run()
@@ -103,6 +146,7 @@ class ModelFieldWidget extends Widget
 		return ListObjectsWidget::widget([
 			'models'=>$this->data,
 			'title'=>$this->title,
+			'title_options'=>$this->title_options,
 			'item_options'=>$this->item_options,
 			'card_options'=>$this->card_options,
 			'archived'=>$this->archived,
@@ -112,7 +156,7 @@ class ModelFieldWidget extends Widget
 			'message_on_empty'=>$this->message_on_empty,
 			'itemViewPath'=>$this->itemViewPath,
 			'modelClass'=>$this->modelClass,
-			'raw_items'=>$this->raw_items
+			'raw_items'=>$this->raw_items,
 		]);
 	}
 }
