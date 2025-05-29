@@ -35,8 +35,8 @@ class WikiTextWidget extends Widget
 			.'-'.$this->model->id
 			.'-'.StringHelper::class2Id($this->field);
 		
-		$cache=WikiCache::fetchCache(
-			WikiCache::internalPath($class, $this->model->id, $this->field)
+		$cache=WikiCache::fetchCache( //при кэшировании всегда ссылаемся на оригинальный атрибут без суффикса Recursive
+			WikiCache::internalPath($class, $this->model->id, StringHelper::removeSuffix($this->field))
 		);
 		
 		//данные - либо из кэша, либо надпись "Loading..."

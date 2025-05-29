@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\helpers\ArrayHelper;
 use app\models\traits\MaintenanceJobsModelCalcFieldsTrait;
+use app\models\ui\WikiCache;
 use voskobovich\linker\LinkerBehavior;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use yii\base\InvalidConfigException;
@@ -238,5 +239,18 @@ class MaintenanceJobs extends ArmsModel
 			$this->comps,
 			
 		];
+	}
+	
+	public function afterSave($insert, $changedAttributes)
+	{
+		if (isset($changedAttributes['parent_id'])) {
+			//если изменился родитель, то сбрасываем свой кэш описания
+			WikiCache::invalidateParentReference($this,'description');
+		}
+		if (isset($changedAttributes['description'])) {
+			//если изменилось описание, то сбрасываем кэш описания у прямых потомков
+			foreach ($this->children as $item)
+				WikiCache::invalidateParentReference($item,'description');
+		}
 	}
 }

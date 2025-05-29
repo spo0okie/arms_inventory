@@ -4,6 +4,7 @@ namespace app\models\ui;
 
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
+use yii\db\Exception;
 
 /**
  * @property string $page
@@ -54,6 +55,31 @@ class WikiCache extends ArmsModel
 			.':'.$id
 			.':'
 			.$field;
+	}
+	
+	/**
+	 * Если текст содержит ссылку на родителя, то кэш сбрасывается
+	 * @param ArmsModel $model
+	 * @param string    $field
+	 * @return void
+	 * @throws Exception
+	 */
+	public static function invalidateParentReference($model, $field)
+	{
+		$cache=static::fetchCache(
+			static::internalPath(get_class($model), $model->id, $field)
+		);
+		
+		//если кэша нет или он не валидный, то ничего не делаем
+		//(если кэша нет, то создается новая запись, по умолчанию не валидная)
+		if (!$cache->valid) return;
+		//если текста в поле нет, то ничего не делаем
+		if (!$text=$model->$field) return;
+		//если в тексте ссылки на предка нет, то ничего не делаем
+		if (strpos($text, '{{PARENT}}')===false) return;
+		//инвалидируем кэш
+		$cache->valid=false;
+		$cache->save();
 	}
 	
 	/**
