@@ -167,4 +167,16 @@ class StringHelper extends BaseStringHelper {
 		return $result;
 	}
 	
+	/**
+	 * Убирает суффикс из строки, если он там есть
+	 * @param $string
+	 * @param $suffix
+	 * @return false|mixed|string
+	 */
+	public static function removeSuffix($string,$suffix='Recursive')
+	{
+		if (static::endsWith($string,$suffix))
+			$string=substr($string,0,strlen($string)-strlen($suffix));
+		return $string;
+	}
 }
