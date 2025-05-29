@@ -121,6 +121,18 @@ class ArmsModel extends ActiveRecord
 		];
 	}
 	
+	public function extraFields()
+	{
+		$fields = array_unique(
+			array_merge(
+				array_keys(parent::extraFields()),
+				array_keys($this->getLinksSchema()) //все ссылки many-2-many
+			)
+		);
+		
+		return array_combine($fields, $fields);
+	}
+	
 	/**
 	 * @return ActiveQuery
 	 */
