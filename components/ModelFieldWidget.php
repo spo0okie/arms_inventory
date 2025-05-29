@@ -60,6 +60,7 @@ class ModelFieldWidget extends Widget
 			case 'text':
 				$this->data[]=TextFieldWidget::widget(['model'=>$model,'field'=>$this->field]);
 				$this->raw_items=true;
+				$this->lineBr=false;	//иначе вставленные в wiki-render элементы будут обрывать строку
 				return;
 			case 'urls':
 				$links=new UrlListWidget(['list'=>$model->links]);
