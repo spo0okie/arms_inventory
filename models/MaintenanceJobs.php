@@ -229,20 +229,9 @@ class MaintenanceJobs extends ArmsModel
 		return $this->hasOne(Schedules::class, ['id' => 'schedules_id']);
 	}
 	
-	
-	public function reverseLinks()
-	{
-		return [
-			$this->reqs,
-			$this->services,
-			$this->techs,
-			$this->comps,
-			
-		];
-	}
-	
 	public function afterSave($insert, $changedAttributes)
 	{
+		parent::afterSave($insert, $changedAttributes);
 		if (isset($changedAttributes['parent_id'])) {
 			//если изменился родитель, то сбрасываем свой кэш описания
 			WikiCache::invalidateParentReference($this,'description');
