@@ -14,8 +14,8 @@ class SchedulesController extends BaseRestController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'view'=>['status','meta-status','next-meta'],
-			'view-schedules'=>['status','meta-status','next-meta'],
+			'view'=>['status','meta-status','next-meta','days-schedules'],
+			'view-schedules'=>['status','meta-status','next-meta','days-schedules'],
 		]);
 	}
 	
