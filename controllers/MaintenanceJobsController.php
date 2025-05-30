@@ -50,6 +50,7 @@ class MaintenanceJobsController extends ArmsBaseController
 		
 		$arrDataProvider=new ArrayDataProvider([
 			'allModels'=>$models,
+			'pagination'=>false
 		]);
 		
 		
