@@ -33,6 +33,8 @@ class MaintenanceJobsController extends ArmsBaseController
 	{
 		MaintenanceJobs::cacheAllItems();
 		$searchModel = new MaintenanceJobsSearch();
+		//Отключаем пагинацию, так как дерево можно построить только целиком
+		$searchModel->disablePagination=true;
 		
 		//ищем то же самое, но с дочерними в противоположном положении
 		$switchArchived=clone $searchModel;
