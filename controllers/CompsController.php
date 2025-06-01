@@ -72,6 +72,7 @@ class CompsController extends ArmsBaseController
 			->all();
 		$ids=[];
 		foreach ($dupes as $item) $ids=array_merge($ids , explode(',',$item['ids']));
+		if (!count($ids)) $ids=[-1];
 	
 		// add conditions that should always apply here
 	
@@ -83,9 +84,10 @@ class CompsController extends ArmsBaseController
 		//	'pagination' => ['pageSize' => 100,],
 		//]);
 	
-        return $this->render('index', [
+        return $this->render('/layouts/index', [
             'dataProvider' => $dataProvider,
 			'searchModel' => $searchModel,
+			'model' => new Comps(),
         ]);
     }
 	
