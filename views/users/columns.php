@@ -59,7 +59,7 @@ return [
 			} else {
 				$items=[];
 				foreach ($arms as $arm)
-					if ($arm->model->type->is_computer)
+					if ($arm->model->type->is_computer??false)
 						$items[]=$renderer->render('/techs/item',['model'=>$arm,'static_view'=>true]);
 				return implode('<br />',$items);
 			}

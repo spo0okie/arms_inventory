@@ -68,7 +68,8 @@
     "codeception/codeception": "^4.2@beta",
     "codeception/module-yii2": "^1.1",
     "codeception/module-phpbrowser": "^1.0",
-    "codeception/module-asserts": "^1.0"
+    "codeception/module-asserts": "^1.0",
+    "codeception/module-rest": "2.0.x-dev"
   },
   "config": {
     "process-timeout": 1800,

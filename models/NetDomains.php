@@ -72,11 +72,16 @@ class NetDomains extends ArmsModel
 	 * Place
 	 * @return Networks|ActiveQuery
 	 */
+	public function getNetVlans()
+	{
+		return $this->hasMany(NetVlans::class, ['domain_id' => 'id']);
+	}
+	
 	public function getPlace()
 	{
 		return $this->hasOne(Places::class, ['id' => 'places_id']);
 	}
-	
+
 	/**
 	 * Возвращает список всех доменов
 	 * @return array|mixed|null

@@ -154,25 +154,25 @@ trait TechsModelCalcFieldsTrait
 	public function getIsComputer() {
 		/** @var Techs $this */
 		if (isset($this->attrsCache['isComputer'])) return $this->attrsCache['isComputer'];
-		return $this->model->type->is_computer;
+		return $this->model->type->is_computer??false;
 	}
 	
 	public function getIsVoipPhone() {
 		/** @var Techs $this */
 		if (isset($this->attrsCache['isVoipPhone'])) return $this->attrsCache['isVoipPhone'];
-		return $this->model->type->is_phone;
+		return $this->model->type->is_phone??false;
 	}
 	
 	public function getIsUps() {
 		/** @var Techs $this */
 		if (isset($this->attrsCache['isUps'])) return $this->attrsCache['isUps'];
-		return $this->model->type->is_ups;
+		return $this->model->type->is_ups??false;
 	}
 	
 	public function getIsMonitor() {
 		/** @var Techs $this */
 		if (isset($this->attrsCache['isMonitor'])) return $this->attrsCache['isMonitor'];
-		return $this->model->type->is_display;
+		return $this->model->type->is_display??false;
 	}
 	
 	/**

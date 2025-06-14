@@ -15,7 +15,7 @@ $archClass=$model->archived?'archived-item':'';
 $archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
 
 ?>
-<tr class="tech tech_<?= $model->type->code ?>">
+<tr class="tech tech_<?= $model->type->code??'type_err' ?>">
 	<?php if (isset($cabinet_col)) echo $cabinet_col; ?>
 	
     <td class="tech_whitespace <?= $archClass ?>" <?= $archDisplay ?> colspan="2" ></td>
@@ -23,10 +23,10 @@ $archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
         <?= is_object($model->user)?$model->user->fullName:'' ?>
     </td>
     <td class="arm_uphone <?= $archClass ?>" <?= $archDisplay ?>>
-        <?= $this->render('/tech-types/item',['model'=>$model->model->type]) ?>
+        <?= is_object($model->model->type??null)?$model->model->type->renderItem($this):'' ?>
     </td>
     <td class="arm_model <?= $archClass ?>" <?= $archDisplay ?>>
-        <?= $this->render('/tech-models/item',['model'=>$model->model,'compact'=>true]) ?>
+        <?= $model->model->renderItem($this,['compact'=>true]) ?>
     </td>
     <td class="hardware <?= $archClass ?>" <?= $archDisplay ?>>
         <?= $this->render('/techs/item',['model'=>$model]) ?>
@@ -34,7 +34,7 @@ $archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
     <td class="attachments <?= $archClass ?>" <?= $archDisplay ?>>
 	    <?= $this->render('/techs/map/item-attachments',['model'=>$model]) ?>
     </td>
-    <td class="item_status <?= strlen($model->stateName)?$model->state->code:'' ?> <?= $archClass ?>" <?= $archDisplay ?>>
+    <td class="item_status <?= strlen($model->stateName)?($model->state->code??''):'' ?> <?= $archClass ?>" <?= $archDisplay ?>>
         <?= $model->stateName ?>
     </td>
     <td class="item_ip <?= $archClass ?>" <?= $archDisplay ?>>

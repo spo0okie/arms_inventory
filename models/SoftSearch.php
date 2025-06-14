@@ -93,8 +93,8 @@ class SoftSearch extends Soft
 		
 		$filter
 			->andFilterWhere(['or like', 'CONCAT(manufacturers.name,soft.descr)', StringHelper::explode($this->descr,'|',true,true)])
-            ->andFilterWhere(['or like', 'comment', StringHelper::explode($this->comment,'|',true,true)])
-            ->andFilterWhere(['or like', 'items', StringHelper::explode($this->items,'|',true,true)]);
+            ->andFilterWhere(['or like', 'soft.comment', StringHelper::explode($this->comment,'|',true,true)])
+            ->andFilterWhere(['or like', 'soft.items', StringHelper::explode($this->items,'|',true,true)]);
 		
 		if($filter->where) {
 			$filterSubQuery=$filter

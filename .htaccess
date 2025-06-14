@@ -15,6 +15,9 @@
     RewriteCond %{REQUEST_URI} ^/web/index-test\.php
     RewriteRule ^ - [L]
 
+    RewriteCond %{REQUEST_URI} ^/web/index-test-acceptnance\.php
+    RewriteRule ^ - [L]
+
 	# Если не файл и не директория — направляем в index.php
     RewriteCond %{REQUEST_FILENAME} !-f [OR]
     RewriteCond %{REQUEST_FILENAME} !-d

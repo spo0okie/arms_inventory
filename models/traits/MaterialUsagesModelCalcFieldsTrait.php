@@ -21,13 +21,13 @@ trait MaterialUsagesModelCalcFieldsTrait
 	public function getCost()
 	{
 		/** @var MaterialsUsages $this */
-		return ($this->material->count)?$this->material->cost/$this->material->count*$this->count:null;
+		return ($this->material->count??null)?$this->material->cost/$this->material->count*$this->count:null;
 	}
 	
 	public function getCharge()
 	{
 		/** @var MaterialsUsages $this */
-		return ($this->material->count)?$this->material->charge/$this->material->count*$this->count:null;
+		return ($this->material->count??null)?$this->material->charge/$this->material->count*$this->count:null;
 	}
 	
 	/**
@@ -36,7 +36,7 @@ trait MaterialUsagesModelCalcFieldsTrait
 	public function getCurrency()
 	{
 		/** @var MaterialsUsages $this */
-		return $this->material->currency;
+		return $this->material->currency??null;
 	}
 	
 	/**

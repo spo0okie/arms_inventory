@@ -3,12 +3,13 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Май 25 2025 г., 10:37
+-- Время создания: Июн 06 2025 г., 18:54
 -- Версия сервера: 8.0.31
 -- Версия PHP: 7.4.33
 
 SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -101,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `access_in_aces` (
   `id` int NOT NULL AUTO_INCREMENT,
   `access_types_id` int NOT NULL,
   `aces_id` int NOT NULL,
-  `ip_params` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ip_params` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-access_in_aces_ace_id` (`aces_id`),
   KEY `idx-access_in_aces_access_id` (`access_types_id`)
@@ -128,27 +129,29 @@ INSERT INTO `access_in_aces` (`id`, `access_types_id`, `aces_id`, `ip_params`) V
 DROP TABLE IF EXISTS `access_types`;
 CREATE TABLE IF NOT EXISTS `access_types` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `code` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text COLLATE utf8mb4_general_ci,
+  `code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `is_ip` tinyint(1) DEFAULT '0',
   `is_phone` tinyint(1) DEFAULT '0',
   `is_vpn` tinyint(1) DEFAULT '0',
   `is_app` tinyint(1) DEFAULT '0',
-  `ip_params_def` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ip_params_def` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `access_types`
 --
 
 INSERT INTO `access_types` (`id`, `code`, `name`, `comment`, `notepad`, `is_ip`, `is_phone`, `is_vpn`, `is_app`, `ip_params_def`) VALUES
-(1, 'full', 'Полный', NULL, NULL, 0, 0, 0, 0, NULL),
+(1, 'read', 'Чтение', '', '', 0, 0, 0, 0, ''),
 (2, 'read', 'Чтение', NULL, NULL, 0, 0, 0, 0, NULL),
 (3, 'write', 'Запись', NULL, NULL, 0, 0, 0, 0, NULL),
-(4, 'vpn', 'Ovpn', 'OpenVPN', '', 1, 0, 1, 0, NULL);
+(4, 'vpn', 'Ovpn', 'OpenVPN', '', 1, 0, 1, 0, NULL),
+(6, 'full', 'Полный', '', '', 0, 0, 0, 0, ''),
+(7, 'full', 'Полный', '', '', 0, 0, 0, 0, '');
 
 -- --------------------------------------------------------
 
@@ -176,12 +179,12 @@ DROP TABLE IF EXISTS `aces`;
 CREATE TABLE IF NOT EXISTS `aces` (
   `id` int NOT NULL AUTO_INCREMENT,
   `acls_id` int DEFAULT NULL,
-  `ips` text COLLATE utf8mb4_general_ci,
-  `comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text COLLATE utf8mb4_general_ci,
+  `ips` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-aces_acl_id` (`acls_id`),
   KEY `idx-aces-updated_at` (`updated_at`),
@@ -209,19 +212,19 @@ CREATE TABLE IF NOT EXISTS `aces_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `acls_id` int DEFAULT NULL,
-  `users_ids` text COLLATE utf8mb4_general_ci,
-  `comps_ids` text COLLATE utf8mb4_general_ci,
-  `access_types_ids` text COLLATE utf8mb4_general_ci,
-  `ips` text COLLATE utf8mb4_general_ci,
-  `services_ids` text COLLATE utf8mb4_general_ci,
-  `networks_ids` text COLLATE utf8mb4_general_ci,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `users_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `access_types_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `ips` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `networks_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `aces_history-master_id` (`master_id`),
   KEY `aces_history-updated_at` (`updated_at`),
@@ -253,12 +256,12 @@ CREATE TABLE IF NOT EXISTS `acls` (
   `ips_id` int DEFAULT NULL,
   `comps_id` int DEFAULT NULL,
   `techs_id` int DEFAULT NULL,
-  `comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text COLLATE utf8mb4_general_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `networks_id` int DEFAULT NULL,
-  `links` text COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `idx-acls_schedule_id` (`schedules_id`),
   KEY `idx-acls_service_id` (`services_id`),
@@ -290,19 +293,19 @@ CREATE TABLE IF NOT EXISTS `acls_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `schedules_id` int DEFAULT NULL,
   `services_id` int DEFAULT NULL,
   `ips_id` int DEFAULT NULL,
   `comps_id` int DEFAULT NULL,
   `techs_id` int DEFAULT NULL,
-  `aces_ids` text COLLATE utf8mb4_general_ci,
+  `aces_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `networks_id` int DEFAULT NULL,
-  `links` text COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `acls_history-master_id` (`master_id`),
   KEY `acls_history-updated_at` (`updated_at`),
@@ -360,7 +363,7 @@ CREATE TABLE IF NOT EXISTS `attaches` (
   `contracts_id` int DEFAULT NULL,
   `places_id` int DEFAULT NULL,
   `schedules_id` int DEFAULT NULL,
-  `filename` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `users_id` int DEFAULT NULL,
   `tech_models_id` int DEFAULT NULL,
   `maintenance_reqs_id` int DEFAULT NULL,
@@ -379,14 +382,15 @@ CREATE TABLE IF NOT EXISTS `attaches` (
   KEY `idx-attaches-maintenance_reqs_id` (`maintenance_reqs_id`),
   KEY `idx-attaches-maintenance_jobs_id` (`maintenance_jobs_id`),
   KEY `idx-attaches-partners_id` (`partners_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `attaches`
 --
 
 INSERT INTO `attaches` (`id`, `techs_id`, `services_id`, `lic_types_id`, `lic_groups_id`, `lic_items_id`, `lic_keys_id`, `contracts_id`, `places_id`, `schedules_id`, `filename`, `users_id`, `tech_models_id`, `maintenance_reqs_id`, `maintenance_jobs_id`, `partners_id`) VALUES
-(7, NULL, 23, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '7-gay-running.gif', NULL, NULL, NULL, NULL, NULL);
+(7, NULL, 23, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '7-gay-running.gif', NULL, NULL, NULL, NULL, NULL),
+(8, NULL, 21, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '8-159421b32a1f93c37dfb3d2b48ad9675.jpg', NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -396,8 +400,8 @@ INSERT INTO `attaches` (`id`, `techs_id`, `services_id`, `lic_types_id`, `lic_gr
 
 DROP TABLE IF EXISTS `auth_assignment`;
 CREATE TABLE IF NOT EXISTS `auth_assignment` (
-  `item_name` varchar(64) COLLATE utf8mb3_unicode_ci NOT NULL,
-  `user_id` varchar(64) COLLATE utf8mb3_unicode_ci NOT NULL,
+  `item_name` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `user_id` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   `created_at` int DEFAULT NULL,
   PRIMARY KEY (`item_name`,`user_id`),
   KEY `idx-auth_assignment-user_id` (`user_id`)
@@ -421,10 +425,10 @@ INSERT INTO `auth_assignment` (`item_name`, `user_id`, `created_at`) VALUES
 
 DROP TABLE IF EXISTS `auth_item`;
 CREATE TABLE IF NOT EXISTS `auth_item` (
-  `name` varchar(64) COLLATE utf8mb3_unicode_ci NOT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   `type` smallint NOT NULL,
-  `description` text COLLATE utf8mb3_unicode_ci,
-  `rule_name` varchar(64) COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci,
+  `rule_name` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
   `data` blob,
   `created_at` int DEFAULT NULL,
   `updated_at` int DEFAULT NULL,
@@ -453,8 +457,8 @@ INSERT INTO `auth_item` (`name`, `type`, `description`, `rule_name`, `data`, `cr
 
 DROP TABLE IF EXISTS `auth_item_child`;
 CREATE TABLE IF NOT EXISTS `auth_item_child` (
-  `parent` varchar(64) COLLATE utf8mb3_unicode_ci NOT NULL,
-  `child` varchar(64) COLLATE utf8mb3_unicode_ci NOT NULL,
+  `parent` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `child` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   PRIMARY KEY (`parent`,`child`),
   KEY `child` (`child`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
@@ -479,7 +483,7 @@ INSERT INTO `auth_item_child` (`parent`, `child`) VALUES
 
 DROP TABLE IF EXISTS `auth_rule`;
 CREATE TABLE IF NOT EXISTS `auth_rule` (
-  `name` varchar(64) COLLATE utf8mb3_unicode_ci NOT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
   `data` blob,
   `created_at` int DEFAULT NULL,
   `updated_at` int DEFAULT NULL,
@@ -581,39 +585,39 @@ CREATE TABLE IF NOT EXISTS `comps_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `arm_id` int DEFAULT NULL,
   `domain_id` int DEFAULT NULL,
-  `name` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `os` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `raw_hw` text COLLATE utf8mb4_general_ci,
-  `raw_soft` mediumtext COLLATE utf8mb4_general_ci,
-  `raw_version` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `ip` text COLLATE utf8mb4_general_ci,
-  `mac` text COLLATE utf8mb4_general_ci,
-  `ip_ignore` text COLLATE utf8mb4_general_ci,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `os` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `raw_hw` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `raw_soft` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `raw_version` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ip` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `mac` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `ip_ignore` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `user_id` int DEFAULT NULL,
-  `external_links` text COLLATE utf8mb4_general_ci,
+  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `archived` tinyint(1) DEFAULT NULL,
-  `services_ids` text COLLATE utf8mb4_general_ci,
-  `aces_ids` text COLLATE utf8mb4_general_ci,
-  `acls_ids` text COLLATE utf8mb4_general_ci,
-  `lic_groups_ids` text COLLATE utf8mb4_general_ci,
-  `lic_items_ids` text COLLATE utf8mb4_general_ci,
-  `lic_keys_ids` text COLLATE utf8mb4_general_ci,
-  `maintenance_reqs_ids` text COLLATE utf8mb4_general_ci,
-  `maintenance_jobs_ids` text COLLATE utf8mb4_general_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `aces_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `lic_groups_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `lic_items_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `lic_keys_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `maintenance_reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `sandbox_id` int DEFAULT NULL,
   `platform_id` int DEFAULT NULL,
-  `admins_ids` text COLLATE utf8mb4_general_ci,
+  `admins_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `comps_history-master_id` (`master_id`),
   KEY `comps_history-updated_at` (`updated_at`),
   KEY `comps_history-updated_by` (`updated_by`),
   KEY `idx-comps_history-sandbox_id` (`sandbox_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `comps_history`
@@ -632,7 +636,14 @@ INSERT INTO `comps_history` (`id`, `master_id`, `updated_at`, `updated_by`, `upd
 (10, 20, '2025-05-15 10:55:40', NULL, NULL, 'arm_id,domain_id,name,os,raw_hw,raw_version,ip,mac,services_ids,maintenance_jobs_ids', 1, 1, 'MSK-OVPN', 'Debian GNU/Linux 10 (buster)', '{\"processor\": \"virtual 2 cores\",\"cores\":\"2\"}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"0\",\"serial\":\"\"}}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"8\",\"serial\":\"\"}}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"0\",\"serial\":\"\"}}\r\n,\r\n{\"memorybank\": {\"manufacturer\":\"Not Specified\",\"capacity\":\"2048\",\"serial\":\"Not Specified\"}}', NULL, '0.6.4nix', '10.0.0.2', 'b290658acc66', NULL, NULL, NULL, 0, '16,17', NULL, NULL, NULL, NULL, NULL, NULL, '1', NULL, NULL, NULL),
 (11, 21, '2025-05-15 10:55:40', NULL, NULL, 'arm_id,domain_id,name,os,raw_hw,raw_version,ip,mac,services_ids,maintenance_jobs_ids', 2, 1, 'msk-gw', 'Debian GNU/Linux 10 (buster)', '{\"processor\": \"virtual 2 cores\",\"cores\":\"2\"}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"0\",\"serial\":\"\"}}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"8\",\"serial\":\"\"}}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"0\",\"serial\":\"\"}}\r\n,\r\n{\"memorybank\": {\"manufacturer\":\"Not Specified\",\"capacity\":\"2048\",\"serial\":\"Not Specified\"}}', NULL, '0.6.4nix', '55.66.77.77\n55.66.77.81', '325a1b3baa0c', NULL, NULL, NULL, 0, '6,7', NULL, NULL, NULL, NULL, NULL, NULL, '1', NULL, NULL, NULL),
 (12, 24, '2025-05-15 10:55:40', NULL, NULL, 'arm_id,domain_id,name,os,raw_hw,raw_version,ip,mac,services_ids,maintenance_jobs_ids', 33, 1, 'chl-gw', 'Debian GNU/Linux 10 (buster)', '{\"processor\": \"virtual 2 cores\",\"cores\":\"2\"}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"0\",\"serial\":\"\"}}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"8\",\"serial\":\"\"}}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"0\",\"serial\":\"\"}}\r\n,\r\n{\"memorybank\": {\"manufacturer\":\"Not Specified\",\"capacity\":\"2048\",\"serial\":\"Not Specified\"}}', NULL, '0.6.4nix', '66.77.88.98', 'd62ce4c50d4a\nc6130dcc91bc', NULL, NULL, NULL, 0, '6,7', NULL, NULL, NULL, NULL, NULL, NULL, '1', NULL, NULL, NULL),
-(13, 25, '2025-05-15 10:55:40', NULL, NULL, 'arm_id,domain_id,name,os,raw_hw,raw_version,ip,mac,services_ids,maintenance_jobs_ids', 34, 1, 'chl-ovpn', 'Debian GNU/Linux 10 (buster)', '{\"processor\": \"virtual 2 cores\",\"cores\":\"2\"}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"0\",\"serial\":\"\"}}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"8\",\"serial\":\"\"}}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"0\",\"serial\":\"\"}}\r\n,\r\n{\"memorybank\": {\"manufacturer\":\"Not Specified\",\"capacity\":\"2048\",\"serial\":\"Not Specified\"}}', NULL, '0.6.4nix', '10.0.0.1', 'b290658aee66', NULL, NULL, NULL, 0, '16,17', NULL, NULL, NULL, NULL, NULL, NULL, '1', NULL, NULL, NULL);
+(13, 25, '2025-05-15 10:55:40', NULL, NULL, 'arm_id,domain_id,name,os,raw_hw,raw_version,ip,mac,services_ids,maintenance_jobs_ids', 34, 1, 'chl-ovpn', 'Debian GNU/Linux 10 (buster)', '{\"processor\": \"virtual 2 cores\",\"cores\":\"2\"}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"0\",\"serial\":\"\"}}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"8\",\"serial\":\"\"}}\r\n,\r\n{\"harddisk\": {\"model\":\"Virtual\",\"size\":\"0\",\"serial\":\"\"}}\r\n,\r\n{\"memorybank\": {\"manufacturer\":\"Not Specified\",\"capacity\":\"2048\",\"serial\":\"Not Specified\"}}', NULL, '0.6.4nix', '10.0.0.1', 'b290658aee66', NULL, NULL, NULL, 0, '16,17', NULL, NULL, NULL, NULL, NULL, NULL, '1', NULL, NULL, NULL),
+(14, 3, '2025-05-29 11:32:40', NULL, NULL, 'maintenance_jobs_ids', 1, 1, 'MSK-DC1', '10.0.20348 Майкрософт Windows Server 2022 Standard', '{\"motherboard\":{\"manufacturer\":\"Microsoft Corporation\", \"product\":\"Virtual Machine\", \"serial\":\"4945-8879-0977-6354-3000-3309-50\"}},\r\n{\"processor\":{\"model\":\"Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz\", \"cores\":\"1\"}},\r\n{\"memorybank\":{\"manufacturer\":\"Microsoft Corporation\", \"capacity\":\"3968\"}},\r\n{\"memorybank\":{\"manufacturer\":\"Microsoft Corporation\", \"capacity\":\"128\"}},\r\n{\"harddisk\":{\"model\":\"Microsoft Virtual Disk\",\"size\":\"70\"}},\r\n{\"videocard\":{\"name\":\"Microsoft Hyper-V Video\",\"ram\":\"\"}},\r\n{\"videocard\":{\"name\":\"Microsoft Remote Display Adapter\",\"ram\":\"\"}},\r\n{\"Monitor\":{\"DeviceID\":\"062E\",\"ManufactureDate\":\"11/2011\",\"SerialNumber\":\"Not Present in EDID\",\"ModelName\":\"HyperVMonitor\",\"Version\":\"1.4\",\"VESAID\":\"MSH062E\",\"PNPID\":\"5&1a097cd8&0&UID5527112\"}}', '{\"publisher\":\"Корпорация Майкрософт\", \"name\":\"Microsoft Edge\"},{\"publisher\":\"\", \"name\":\"Microsoft Edge Update\"},{\"publisher\":\"Microsoft\", \"name\":\"Майкрософт Windows Server 2022 Standard\"}', '0.15', '10.20.75.10', '00155d330500', NULL, NULL, NULL, 0, '12,14,15', NULL, NULL, NULL, NULL, NULL, NULL, '1,3', NULL, NULL, NULL),
+(15, 5, '2025-05-29 11:32:40', NULL, NULL, 'arm_id,domain_id,name,os,raw_hw,raw_soft,raw_version,ip,mac,maintenance_jobs_ids', 5, 1, 'wks-03', '10.0.19045 Майкрософт Windows 10 Pro', '{\"motherboard\":{\"manufacturer\":\"Intel Corporation\", \"product\":\"NUC7JYB\", \"serial\":\"GEJY14900ACN\"}},{\"processor\":{\"model\":\"Intel(R) Celeron(R) J4025 CPU @ 2.00GHz\", \"cores\":\"2\"}},{\"memorybank\":{\"manufacturer\":\"Kingston\", \"capacity\":\"8192\"}},{\"harddisk\":{\"model\":\"KINGSTON SA400S37240G\",\"size\":\"240\"}},{\"videocard\":{\"name\":\"Intel(R) UHD Graphics 600\",\"ram\":\"1024\"}}', '{\"publisher\":\"CANON INC.\", \"name\":\"Canon Laser Printer/Scanner/Fax Extended Survey Program\"},{\"publisher\":\"The Document Foundation\", \"name\":\"LibreOffice 7.4.1.2\"},{\"publisher\":\"Microsoft Corporation\", \"name\":\"Microsoft Update Health Tools\"},{\"publisher\":\"CANON INC.\", \"name\":\"Canon MF240 Series\"},{\"publisher\":\"Microsoft Corporation\", \"name\":\"Update for Windows 10 for x64-based Systems (KB5001716)\"},{\"publisher\":\"CANON INC.\", \"name\":\"Canon MF Scan Utility\"},{\"publisher\":\"\\\"Лаборатория Касперского\\\"\", \"name\":\"Агент администрирования Kaspersky Security Center\"},{\"publisher\":\"Корпорация Майкрософт\", \"name\":\"Microsoft Edge\"},{\"publisher\":\"\", \"name\":\"Microsoft Edge Update\"},{\"publisher\":\"Корпорация Майкрософт\", \"name\":\"Среда выполнения Microsoft Edge WebView2 Runtime\"},{\"publisher\":\"Bitrix, Inc\", \"name\":\"Bitrix24\"},{\"publisher\":\"LiteManagerTeam\", \"name\":\"LiteManager Pro - Server\"},{\"publisher\":\"IBM\", \"name\":\"Lotus Notes 8.5.3 (Basic) ru\"},{\"publisher\":\"АО \\\"Лаборатория Касперского\\\"\", \"name\":\"Kaspersky Endpoint Security для Windows\"},{\"publisher\":\"Mail.ru LLC\", \"name\":\"ICQ (версия 23.2.0.48119)\"},{\"publisher\":\"Корпорация Майкрософт\", \"name\":\"Среда выполнения Microsoft Edge WebView2 Runtime\"},{\"publisher\":\"Microsoft Corporation\", \"name\":\"Microsoft OneDrive\"},{\"publisher\":\"Yandex\", \"name\":\"Yandex\"},{\"publisher\":\"Яндекс\", \"name\":\"Кнопка \\\"Яндекс\\\" на панели задач\"},{\"publisher\":\"Microsoft\", \"name\":\"Майкрософт Windows 10 Pro\"}', '0.15', '10.20.100.23', '005056b4d780', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '3', NULL, NULL, NULL),
+(16, 1, '2025-05-29 17:34:34', NULL, NULL, 'arm_id,domain_id,name,os,raw_hw,raw_version,ip,mac,services_ids,maintenance_jobs_ids', 1, 1, 'MSK-ESXi1', 'VMware ESXi, v6.7.0', '{\"motherboard\":{\"manufacturer\":\"HP\", \"product\":\"ProLiant DL380 Gen9\", \"serial\":\"6CU541X8EB\"}},{\"processor\":{\"model\":\"Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz\", \"cores\":\"14\"}},{\"processor\":{\"model\":\"Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz\", \"cores\":\"14\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}}', NULL, '0.9powercli', '10.20.1.30', '00155d3b7933', NULL, NULL, NULL, 0, '9', NULL, NULL, NULL, NULL, NULL, NULL, '3', NULL, NULL, NULL),
+(17, 2, '2025-05-29 17:34:34', NULL, NULL, 'arm_id,domain_id,name,os,raw_hw,raw_version,ip,mac,services_ids,maintenance_jobs_ids', 2, 1, 'MSK-ESXi2', 'VMware ESXi, v6.7.0', '{\"motherboard\":{\"manufacturer\":\"HP\", \"product\":\"ProLiant DL380 Gen9\", \"serial\":\"6CU541X8FA\"}},{\"processor\":{\"model\":\"Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz\", \"cores\":\"14\"}},{\"processor\":{\"model\":\"Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz\", \"cores\":\"14\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}},{\"memorybank\":{\"manufacturer\":\"HP     \", \"capacity\":\"32768\"}}', NULL, '0.9powercli', '10.20.1.31', '00155d3b7941', NULL, NULL, NULL, 0, '9', NULL, NULL, NULL, NULL, NULL, NULL, '3', NULL, NULL, NULL),
+(18, 4, '2025-05-29 17:34:34', NULL, NULL, 'maintenance_jobs_ids', 1, 1, 'MSK-FSRV', '10.0.20348 Майкрософт Windows Server 2022 Standard', '{\"motherboard\":{\"manufacturer\":\"Microsoft Corporation\", \"product\":\"Virtual Machine\", \"serial\":\"4945-8879-0977-6354-3000-3309-52\"}},{\"processor\":{\"model\":\"Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz\", \"cores\":\"1\"}},{\"memorybank\":{\"manufacturer\":\"Microsoft Corporation\", \"capacity\":\"3968\"}},{\"memorybank\":{\"manufacturer\":\"Microsoft Corporation\", \"capacity\":\"128\"}},{\"harddisk\":{\"model\":\"Microsoft Virtual Disk\",\"size\":\"69\"}},{\"harddisk\":{\"model\":\"Microsoft Virtual Disk\",\"size\":\"215\"}},{\"videocard\":{\"name\":\"Microsoft Hyper-V Video\",\"ram\":\"\"}},{\"videocard\":{\"name\":\"Microsoft Remote Display Adapter\",\"ram\":\"\"}},{\"Monitor\":{\"DeviceID\":\"062E\",\"ManufactureDate\":\"11/2011\",\"SerialNumber\":\"Not Present in EDID\",\"ModelName\":\"HyperVMonitor\",\"Version\":\"1.4\",\"VESAID\":\"MSH062E\",\"PNPID\":\"5&1a097cd8&0&UID5527112\"}}', NULL, '0.15', '10.20.75.16', '00155d330512', NULL, NULL, NULL, 0, '13', NULL, NULL, NULL, NULL, NULL, NULL, '1,3', NULL, NULL, NULL),
+(19, 3, '2025-05-29 17:34:34', NULL, NULL, 'maintenance_jobs_ids', 1, 1, 'MSK-DC1', '10.0.20348 Майкрософт Windows Server 2022 Standard', '{\"motherboard\":{\"manufacturer\":\"Microsoft Corporation\", \"product\":\"Virtual Machine\", \"serial\":\"4945-8879-0977-6354-3000-3309-50\"}},\r\n{\"processor\":{\"model\":\"Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz\", \"cores\":\"1\"}},\r\n{\"memorybank\":{\"manufacturer\":\"Microsoft Corporation\", \"capacity\":\"3968\"}},\r\n{\"memorybank\":{\"manufacturer\":\"Microsoft Corporation\", \"capacity\":\"128\"}},\r\n{\"harddisk\":{\"model\":\"Microsoft Virtual Disk\",\"size\":\"70\"}},\r\n{\"videocard\":{\"name\":\"Microsoft Hyper-V Video\",\"ram\":\"\"}},\r\n{\"videocard\":{\"name\":\"Microsoft Remote Display Adapter\",\"ram\":\"\"}},\r\n{\"Monitor\":{\"DeviceID\":\"062E\",\"ManufactureDate\":\"11/2011\",\"SerialNumber\":\"Not Present in EDID\",\"ModelName\":\"HyperVMonitor\",\"Version\":\"1.4\",\"VESAID\":\"MSH062E\",\"PNPID\":\"5&1a097cd8&0&UID5527112\"}}', '{\"publisher\":\"Корпорация Майкрософт\", \"name\":\"Microsoft Edge\"},{\"publisher\":\"\", \"name\":\"Microsoft Edge Update\"},{\"publisher\":\"Microsoft\", \"name\":\"Майкрософт Windows Server 2022 Standard\"}', '0.15', '10.20.75.10', '00155d330500', NULL, NULL, NULL, 0, '12,14,15', NULL, NULL, NULL, NULL, NULL, NULL, '1', NULL, NULL, NULL),
+(20, 5, '2025-05-29 17:34:34', NULL, NULL, 'maintenance_jobs_ids', 5, 1, 'wks-03', '10.0.19045 Майкрософт Windows 10 Pro', '{\"motherboard\":{\"manufacturer\":\"Intel Corporation\", \"product\":\"NUC7JYB\", \"serial\":\"GEJY14900ACN\"}},{\"processor\":{\"model\":\"Intel(R) Celeron(R) J4025 CPU @ 2.00GHz\", \"cores\":\"2\"}},{\"memorybank\":{\"manufacturer\":\"Kingston\", \"capacity\":\"8192\"}},{\"harddisk\":{\"model\":\"KINGSTON SA400S37240G\",\"size\":\"240\"}},{\"videocard\":{\"name\":\"Intel(R) UHD Graphics 600\",\"ram\":\"1024\"}}', '{\"publisher\":\"CANON INC.\", \"name\":\"Canon Laser Printer/Scanner/Fax Extended Survey Program\"},{\"publisher\":\"The Document Foundation\", \"name\":\"LibreOffice 7.4.1.2\"},{\"publisher\":\"Microsoft Corporation\", \"name\":\"Microsoft Update Health Tools\"},{\"publisher\":\"CANON INC.\", \"name\":\"Canon MF240 Series\"},{\"publisher\":\"Microsoft Corporation\", \"name\":\"Update for Windows 10 for x64-based Systems (KB5001716)\"},{\"publisher\":\"CANON INC.\", \"name\":\"Canon MF Scan Utility\"},{\"publisher\":\"\\\"Лаборатория Касперского\\\"\", \"name\":\"Агент администрирования Kaspersky Security Center\"},{\"publisher\":\"Корпорация Майкрософт\", \"name\":\"Microsoft Edge\"},{\"publisher\":\"\", \"name\":\"Microsoft Edge Update\"},{\"publisher\":\"Корпорация Майкрософт\", \"name\":\"Среда выполнения Microsoft Edge WebView2 Runtime\"},{\"publisher\":\"Bitrix, Inc\", \"name\":\"Bitrix24\"},{\"publisher\":\"LiteManagerTeam\", \"name\":\"LiteManager Pro - Server\"},{\"publisher\":\"IBM\", \"name\":\"Lotus Notes 8.5.3 (Basic) ru\"},{\"publisher\":\"АО \\\"Лаборатория Касперского\\\"\", \"name\":\"Kaspersky Endpoint Security для Windows\"},{\"publisher\":\"Mail.ru LLC\", \"name\":\"ICQ (версия 23.2.0.48119)\"},{\"publisher\":\"Корпорация Майкрософт\", \"name\":\"Среда выполнения Microsoft Edge WebView2 Runtime\"},{\"publisher\":\"Microsoft Corporation\", \"name\":\"Microsoft OneDrive\"},{\"publisher\":\"Yandex\", \"name\":\"Yandex\"},{\"publisher\":\"Яндекс\", \"name\":\"Кнопка \\\"Яндекс\\\" на панели задач\"},{\"publisher\":\"Microsoft\", \"name\":\"Майкрософт Windows 10 Pro\"}', '0.15', '10.20.100.23', '005056b4d780', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -720,7 +731,7 @@ CREATE TABLE IF NOT EXISTS `comps_rescan_queue` (
   `comps_id` int NOT NULL,
   `soft_id` int NOT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `comps_rescan_queue_comps` (`comps_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -736,20 +747,20 @@ CREATE TABLE IF NOT EXISTS `contracts` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
   `parent_id` int DEFAULT NULL COMMENT 'Родительский договор',
   `is_successor` int DEFAULT '0',
-  `name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Название документа',
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Название документа',
   `date` date DEFAULT NULL COMMENT 'Начало периода действия',
   `end_date` date DEFAULT NULL COMMENT 'Конец периода действия',
-  `comment` text COLLATE utf8mb4_unicode_ci COMMENT 'Комментарий',
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Комментарий',
   `state_id` int DEFAULT NULL,
   `total` decimal(15,2) DEFAULT NULL,
   `charge` decimal(15,2) DEFAULT NULL,
   `currency_id` int NOT NULL DEFAULT '1',
-  `pay_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pay_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `techs_delivery` int DEFAULT NULL,
   `materials_delivery` int DEFAULT NULL,
   `lics_delivery` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `parent` (`parent_id`),
   KEY `name` (`name`),
@@ -788,30 +799,30 @@ CREATE TABLE IF NOT EXISTS `contracts_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `partners_ids` text COLLATE utf8mb4_general_ci,
-  `lics_ids` text COLLATE utf8mb4_general_ci,
-  `techs_ids` text COLLATE utf8mb4_general_ci,
-  `services_ids` text COLLATE utf8mb4_general_ci,
-  `materials_ids` text COLLATE utf8mb4_general_ci,
-  `users_ids` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `partners_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `lics_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `materials_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `users_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `parent_id` int DEFAULT NULL,
   `is_successor` tinyint(1) DEFAULT NULL,
   `date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
-  `name` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `state_id` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `total` decimal(15,2) DEFAULT NULL,
   `charge` decimal(15,2) DEFAULT NULL,
   `currency_id` int DEFAULT NULL,
-  `pay_id` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `pay_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `techs_delivery` int DEFAULT NULL,
   `materials_delivery` int DEFAULT NULL,
   `lics_delivery` int DEFAULT NULL,
-  `children_ids` text COLLATE utf8mb4_general_ci,
+  `children_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `contracts_history-master_id` (`master_id`),
   KEY `contracts_history-updated_at` (`updated_at`),
@@ -1030,11 +1041,11 @@ INSERT INTO `contracts_states` (`id`, `code`, `name`, `descr`, `paid`, `unpaid`)
 DROP TABLE IF EXISTS `currency`;
 CREATE TABLE IF NOT EXISTS `currency` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `symbol` varchar(12) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `code` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text COLLATE utf8mb4_general_ci,
+  `symbol` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1056,18 +1067,19 @@ INSERT INTO `currency` (`id`, `symbol`, `code`, `name`, `comment`, `notepad`) VA
 DROP TABLE IF EXISTS `departments`;
 CREATE TABLE IF NOT EXISTS `departments` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `name` varchar(64) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Подразделение',
-  `comment` text COLLATE utf8mb4_general_ci COMMENT 'Комментарии',
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Подразделение',
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'Комментарии',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `departments`
 --
 
 INSERT INTO `departments` (`id`, `name`, `comment`) VALUES
-(1, 'Тестовое подразделение', 'Тестовое примечание к тестовому подразделению');
+(1, 'Тестовое подразделение', 'Тестовое примечание к тестовому подразделению'),
+(2, 'Второе тестовое подразделение', 'Минимум для теста нужно два');
 
 -- --------------------------------------------------------
 
@@ -1106,14 +1118,15 @@ CREATE TABLE IF NOT EXISTS `hw_ignore` (
   `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fingerprint` (`fingerprint`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Список игнорируемого железа';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Список игнорируемого железа';
 
 --
 -- Дамп данных таблицы `hw_ignore`
 --
 
 INSERT INTO `hw_ignore` (`id`, `fingerprint`, `comment`) VALUES
-(1, 'videocard\\|dameware\\|dameware development mirror driver 64-bit mib\\|', 'DameWare Development Mirror Driver');
+(1, 'videocard\\|dameware\\|dameware development mirror driver 64-bit mib\\|', 'DameWare Development Mirror Driver'),
+(2, 'monitor\\|HyperVMonitor\\|HyperVMonitor\\|Not Present in EDID', 'HyperV - это не физический монитор, скорее драйвер какой-то');
 
 -- --------------------------------------------------------
 
@@ -1302,7 +1315,6 @@ INSERT INTO `lic_groups` (`id`, `lic_types_id`, `descr`, `comment`, `updated_at`
 (2, 2, 'Win Server Datacenter 2012R2', '', '2023-09-08 15:31:54', NULL),
 (3, 3, 'MS SQL 2014 Enterprise', '', '2023-09-08 15:31:54', NULL),
 (4, 4, 'Лицензии на HelpDesk Litemanager для ИТ', '', '2023-09-08 15:31:54', NULL),
-(5, 5, 'Altium Designer плавающие лицензии', '', '2023-09-08 15:31:54', NULL),
 (6, 1, 'Лицензии на КриптоПро CSP', '', '2023-09-08 15:31:54', NULL),
 (7, 6, 'Лицензии на SCAD Office 21 USB', '', '2023-09-08 15:31:54', NULL),
 (9, 6, 'Лицензии на Гранд-смету USB', '', '2023-09-08 15:31:54', NULL),
@@ -1311,8 +1323,7 @@ INSERT INTO `lic_groups` (`id`, `lic_types_id`, `descr`, `comment`, `updated_at`
 (24, 8, 'MS Access 2016', 'MS Access 2016', '2023-09-08 15:31:54', NULL),
 (25, 1, '1С Предприятие 8.3', '1С Предприятие 8.3\r\nКонфигурации: Бухгалтерия предприятия КОРП 3.0\r\nЗарплата и управление персоналом КОРП 2.5 клиентская лицензия', '2023-09-15 15:15:15', 'admin'),
 (29, 1, 'Adobe Photoshop CS6', 'Adobe Photoshop CS6', '2023-09-08 15:31:55', NULL),
-(30, 1, 'КОМПАС-3D V8', '', '2023-09-08 15:31:55', NULL),
-(31, 9, 'КОМПАС-График v17', '', '2023-09-08 15:31:55', NULL),
+(31, 9, 'КОМПАС-График v17', '', '2025-06-05 11:53:59', NULL),
 (33, 1, 'CorelDRAW Graphics 2017', '', '2023-09-08 15:31:55', NULL),
 (34, 1, 'CorelDRAW Graphics 2019', '', '2023-09-08 15:31:55', NULL),
 (42, 1, 'Microsoft Windows 7 Professional OEM', 'Microsoft Windows 7 Professional приобретенные вместе с ПК', '2023-09-08 15:31:55', NULL),
@@ -1339,11 +1350,11 @@ CREATE TABLE IF NOT EXISTS `lic_groups_in_arms` (
   `id` int NOT NULL AUTO_INCREMENT,
   `arms_id` int NOT NULL,
   `lic_groups_id` int NOT NULL,
-  `comment` text COLLATE utf8mb4_unicode_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `arms_id` (`arms_id`),
   KEY `lics_id` (`lic_groups_id`)
@@ -1360,11 +1371,11 @@ CREATE TABLE IF NOT EXISTS `lic_groups_in_comps` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_groups_id` int DEFAULT NULL,
   `comps_id` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1386,11 +1397,11 @@ CREATE TABLE IF NOT EXISTS `lic_groups_in_users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_groups_id` int DEFAULT NULL,
   `users_id` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1413,7 +1424,7 @@ CREATE TABLE IF NOT EXISTS `lic_items` (
   `scans_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `lic_group_id` (`lic_group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COMMENT='Лицензии';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COMMENT='Лицензии';
 
 --
 -- Дамп данных таблицы `lic_items`
@@ -1421,7 +1432,8 @@ CREATE TABLE IF NOT EXISTS `lic_items` (
 
 INSERT INTO `lic_items` (`id`, `lic_group_id`, `descr`, `count`, `comment`, `active_from`, `active_to`, `created_at`, `scans_id`) VALUES
 (1, 1, 'OEM Windows 10 в комплекте с NUC-ами', 22, '', NULL, NULL, '2023-09-13 15:29:17', NULL),
-(2, 62, 'VMWare в Москву', 3, 'На самом деле лицензия одна, но на три узла', NULL, NULL, '2023-09-15 15:11:39', NULL);
+(2, 62, 'VMWare в Москву', 3, 'На самом деле лицензия одна, но на три узла', NULL, NULL, '2023-09-15 15:11:39', NULL),
+(4, 6, 'Для бухгалтерии', 2, '', NULL, NULL, '2025-06-06 18:53:48', NULL);
 
 -- --------------------------------------------------------
 
@@ -1434,15 +1446,15 @@ CREATE TABLE IF NOT EXISTS `lic_items_in_arms` (
   `id` int NOT NULL AUTO_INCREMENT,
   `arms_id` int NOT NULL,
   `lic_items_id` int NOT NULL,
-  `comment` text COLLATE utf8mb4_unicode_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `arms_id` (`arms_id`),
   KEY `lics_id` (`lic_items_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Дамп данных таблицы `lic_items_in_arms`
@@ -1450,7 +1462,9 @@ CREATE TABLE IF NOT EXISTS `lic_items_in_arms` (
 
 INSERT INTO `lic_items_in_arms` (`id`, `arms_id`, `lic_items_id`, `comment`, `updated_by`, `updated_at`, `created_by`, `created_at`) VALUES
 (8, 2, 2, NULL, NULL, NULL, NULL, NULL),
-(9, 1, 2, NULL, NULL, NULL, NULL, NULL);
+(9, 1, 2, NULL, NULL, NULL, NULL, NULL),
+(10, 5, 4, '', NULL, '2025-06-06 18:53:48', NULL, '2025-06-06 18:53:48'),
+(11, 6, 4, '', NULL, '2025-06-06 18:53:48', NULL, '2025-06-06 18:53:48');
 
 -- --------------------------------------------------------
 
@@ -1463,11 +1477,11 @@ CREATE TABLE IF NOT EXISTS `lic_items_in_comps` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_items_id` int DEFAULT NULL,
   `comps_id` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1482,11 +1496,11 @@ CREATE TABLE IF NOT EXISTS `lic_items_in_users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_items_id` int DEFAULT NULL,
   `users_id` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1533,11 +1547,11 @@ CREATE TABLE IF NOT EXISTS `lic_keys_in_arms` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
   `lic_keys_id` int NOT NULL,
   `arms_id` int NOT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-lic_keys_in_arms-lic_keys_id` (`lic_keys_id`),
   KEY `idx-lic_keys_in_arms-lic_arms_id` (`arms_id`)
@@ -1570,11 +1584,11 @@ CREATE TABLE IF NOT EXISTS `lic_keys_in_comps` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_keys_id` int DEFAULT NULL,
   `comps_id` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1589,11 +1603,11 @@ CREATE TABLE IF NOT EXISTS `lic_keys_in_users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_keys_id` int DEFAULT NULL,
   `users_id` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1608,11 +1622,11 @@ CREATE TABLE IF NOT EXISTS `lic_types` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
   `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `descr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `links` text COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `scans_id` int DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Типы лицензирования';
@@ -1643,23 +1657,24 @@ DROP TABLE IF EXISTS `login_journal`;
 CREATE TABLE IF NOT EXISTS `login_journal` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Дата и время',
-  `comp_name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Компьютер',
+  `comp_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Компьютер',
   `comps_id` int DEFAULT NULL,
-  `user_login` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Пользователь',
+  `user_login` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Пользователь',
   `users_id` int DEFAULT NULL,
   `type` int DEFAULT '0',
   `local_time` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `comps_id` (`comps_id`),
   KEY `users_id` (`users_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Журнал входа в систему';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Журнал входа в систему';
 
 --
 -- Дамп данных таблицы `login_journal`
 --
 
 INSERT INTO `login_journal` (`id`, `time`, `comp_name`, `comps_id`, `user_login`, `users_id`, `type`, `local_time`) VALUES
-(1, '2025-05-09 14:30:27', 'wks-03', 5, 'NinaBelozerova', 2, 0, NULL);
+(1, '2025-05-09 14:30:27', 'wks-03', 5, 'NinaBelozerova', 2, 0, NULL),
+(2, '2025-06-05 14:09:41', 'wks-04', 6, 'SerafimaBrovina', 4, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -1670,28 +1685,32 @@ INSERT INTO `login_journal` (`id`, `time`, `comp_name`, `comps_id`, `user_login`
 DROP TABLE IF EXISTS `maintenance_jobs`;
 CREATE TABLE IF NOT EXISTS `maintenance_jobs` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text COLLATE utf8mb4_general_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `schedules_id` int DEFAULT NULL,
   `services_id` int DEFAULT NULL,
-  `links` text COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
+  `parent_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `maintenance_jobs-name` (`name`),
   KEY `maintenance_jobs-description` (`description`(768)),
   KEY `maintenance_jobs-schedules_id` (`schedules_id`),
   KEY `maintenance_jobs-services_id` (`services_id`),
-  KEY `idx-maintenance_jobs-archived` (`archived`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  KEY `idx-maintenance_jobs-archived` (`archived`),
+  KEY `idx-maintenance_jobs-parent_id` (`parent_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `maintenance_jobs`
 --
 
-INSERT INTO `maintenance_jobs` (`id`, `name`, `description`, `schedules_id`, `services_id`, `links`, `updated_at`, `updated_by`, `archived`) VALUES
-(1, 'Veeam Backup GFS 7-3', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', 9, 26, NULL, '2025-05-15 10:55:40', NULL, 0);
+INSERT INTO `maintenance_jobs` (`id`, `name`, `description`, `schedules_id`, `services_id`, `links`, `updated_at`, `updated_by`, `archived`, `parent_id`) VALUES
+(1, 'Veeam Backup GFS 7-3-0', '0_о\r\n**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm730.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', 9, 26, NULL, '2025-06-06 05:17:37', NULL, 0, NULL),
+(2, 'Veeam Backup GFS 7-3-3', '{{PARENT}}\r\n----\r\n**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3-3** по субботам и инкрементное по вс-пт в 20:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm733.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии, 3 ежегодных) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', NULL, NULL, NULL, '2025-05-27 11:48:16', NULL, 0, 1),
+(3, 'klg-vbr\\mail_7-0-3-0', '1111!!!', NULL, NULL, NULL, '2025-05-29 17:34:34', NULL, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -1703,35 +1722,48 @@ DROP TABLE IF EXISTS `maintenance_jobs_history`;
 CREATE TABLE IF NOT EXISTS `maintenance_jobs_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(1024) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `schedules_id` int DEFAULT NULL,
   `services_id` int DEFAULT NULL,
-  `links` text COLLATE utf8mb4_general_ci,
-  `services_ids` text COLLATE utf8mb4_general_ci,
-  `comps_ids` text COLLATE utf8mb4_general_ci,
-  `techs_ids` text COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `archived` tinyint(1) DEFAULT NULL,
-  `reqs_ids` text COLLATE utf8mb4_general_ci,
+  `reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `parent_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `maintenance_jobs_history-master_id` (`master_id`),
   KEY `maintenance_jobs_history-updated_by` (`updated_by`),
-  KEY `maintenance_jobs_history-updated_at` (`updated_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  KEY `maintenance_jobs_history-updated_at` (`updated_at`),
+  KEY `idx-maintenance_jobs_history-parent_id` (`parent_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `maintenance_jobs_history`
 --
 
-INSERT INTO `maintenance_jobs_history` (`id`, `master_id`, `name`, `description`, `schedules_id`, `services_id`, `links`, `services_ids`, `comps_ids`, `techs_ids`, `updated_at`, `updated_by`, `updated_comment`, `changed_attributes`, `archived`, `reqs_ids`) VALUES
-(1, 1, 'Veeam Backup GFS 7-3', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-09 14:43:53', NULL, NULL, 'name,description,archived', 0, NULL),
-(2, 1, 'Veeam Backup GFS 7-3', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', NULL, 26, NULL, NULL, NULL, NULL, '2025-05-09 14:44:11', NULL, NULL, 'services_id,reqs_ids', 0, '1'),
-(3, 1, 'Veeam Backup GFS 7-3', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', 9, 26, NULL, NULL, NULL, NULL, '2025-05-09 14:44:47', NULL, NULL, 'schedules_id', 0, '1'),
-(4, 1, 'Veeam Backup GFS 7-3', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', 9, 26, NULL, NULL, '3,4,15,16,17,18,19,20,21,24,25', NULL, '2025-05-15 10:55:40', NULL, NULL, 'comps_ids', 0, '1');
+INSERT INTO `maintenance_jobs_history` (`id`, `master_id`, `name`, `description`, `schedules_id`, `services_id`, `links`, `services_ids`, `comps_ids`, `techs_ids`, `updated_at`, `updated_by`, `updated_comment`, `changed_attributes`, `archived`, `reqs_ids`, `parent_id`) VALUES
+(1, 1, 'Veeam Backup GFS 7-3', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-09 14:43:53', NULL, NULL, 'name,description,archived', 0, NULL, NULL),
+(2, 1, 'Veeam Backup GFS 7-3', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', NULL, 26, NULL, NULL, NULL, NULL, '2025-05-09 14:44:11', NULL, NULL, 'services_id,reqs_ids', 0, '1', NULL),
+(3, 1, 'Veeam Backup GFS 7-3', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', 9, 26, NULL, NULL, NULL, NULL, '2025-05-09 14:44:47', NULL, NULL, 'schedules_id', 0, '1', NULL),
+(4, 1, 'Veeam Backup GFS 7-3', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', 9, 26, NULL, NULL, '3,4,15,16,17,18,19,20,21,24,25', NULL, '2025-05-15 10:55:40', NULL, NULL, 'comps_ids', 0, '1', NULL),
+(5, 1, 'Veeam Backup GFS 7-3-0', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm730.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', 9, 26, NULL, NULL, '3,4,15,16,17,18,19,20,21,24,25', NULL, '2025-05-25 16:04:32', NULL, NULL, 'name,description', 0, '1', NULL),
+(6, 2, 'Veeam Backup GFS 7-3-3', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3-3** по субботам и инкрементное по вс-пт в 20:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm733.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии, 3 ежегодных) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', NULL, 26, NULL, NULL, NULL, NULL, '2025-05-25 16:05:43', NULL, NULL, 'name,description,services_id,archived,reqs_ids', 0, '2', NULL),
+(7, 1, 'Veeam Backup GFS 7-3-0', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm730.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', 9, 26, NULL, NULL, '3,4,15,16,17,18,19,20,21,24,25', NULL, '2025-05-26 16:30:30', NULL, NULL, 'parent_id', 0, '1', 2),
+(8, 1, 'Veeam Backup GFS 7-3-0', '**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm730.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', 9, 26, NULL, NULL, '3,4,15,16,17,18,19,20,21,24,25', NULL, '2025-05-26 17:14:53', NULL, NULL, 'parent_id', 0, '1', NULL),
+(9, 2, 'Veeam Backup GFS 7-3-3', '{{PARENT}}\r\n**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3-3** по субботам и инкрементное по вс-пт в 20:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm733.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии, 3 ежегодных) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-26 17:35:15', NULL, NULL, 'description,services_id,reqs_ids,parent_id', 0, NULL, 1),
+(10, 2, 'Veeam Backup GFS 7-3-3', '{{PARENT}}\r\n\r\n**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3-3** по субботам и инкрементное по вс-пт в 20:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm733.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии, 3 ежегодных) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-27 11:45:46', NULL, NULL, 'description', 0, NULL, 1),
+(11, 2, 'Veeam Backup GFS 7-3-3', '{{PARENT}}\r\n----\r\n**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3-3** по субботам и инкрементное по вс-пт в 20:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm733.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии, 3 ежегодных) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-27 11:48:16', NULL, NULL, 'description', 0, NULL, 1),
+(12, 3, 'klg-vbr\\mail_7-0-3-0', 'Veeam Job klg-vbr\\mail_7-0-3-0\r\n{{PARENT}}\r\n', NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-29 04:48:20', NULL, NULL, 'name,description,archived,parent_id', 0, NULL, 1),
+(13, 3, 'klg-vbr\\mail_7-0-3-0', 'Veeam Job klg-vbr\\mail_7-0-3-0\r\n{{PARENT}}\r\n', NULL, NULL, NULL, NULL, '3,5', NULL, '2025-05-29 11:32:39', NULL, NULL, 'comps_ids', 0, NULL, 1),
+(14, 3, 'klg-vbr\\mail_7-0-3-0', '1111!!!', NULL, NULL, NULL, NULL, '1,2,4', NULL, '2025-05-29 17:34:34', NULL, NULL, 'description,comps_ids', 0, NULL, 1),
+(15, 1, 'Veeam Backup GFS 7-3-0', '0_о\r\n**Сервер выполнения** - msk-veeam. Выполняет полное резервное копирование серверов в задании **Backup GFS 7-3** по субботам и инкрементное по вс-пт в 22:00 МСК.  \r\n**Содержание бэкапа** - полный срез ВМ на момент создания снэпшота при бэкапе.  \r\n**Папка резервной копии** - \\\\msk-nas\\backups\\vm730.  \r\n**Прореживание** - осуществляется самим Veeam согласно политике GFS (7 ежедневных точек восстановления, 3 ежемесячных копии) в самом задании.  \r\n**Мониторинг** - ведется при помощи Zabbix проверкой статуса задания, если статус FAILED - зажигается триггер, оповещаются ответственные за резервное копирование.', 9, 26, NULL, NULL, '3,4,15,16,17,18,19,20,21,24,25', NULL, '2025-06-06 05:16:50', NULL, NULL, 'description', 0, '1', NULL);
 
 -- --------------------------------------------------------
 
@@ -1748,15 +1780,18 @@ CREATE TABLE IF NOT EXISTS `maintenance_jobs_in_comps` (
   UNIQUE KEY `maintenance_jobs_in_comps-m2m` (`comps_id`,`jobs_id`),
   KEY `maintenance_jobs_in_comps-comps_id` (`comps_id`),
   KEY `maintenance_jobs_in_comps-jobs_id` (`jobs_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `maintenance_jobs_in_comps`
 --
 
 INSERT INTO `maintenance_jobs_in_comps` (`id`, `comps_id`, `jobs_id`) VALUES
+(14, 1, 3),
+(15, 2, 3),
 (1, 3, 1),
 (2, 4, 1),
+(16, 4, 3),
 (3, 15, 1),
 (4, 16, 1),
 (5, 17, 1),
@@ -1810,27 +1845,28 @@ CREATE TABLE IF NOT EXISTS `maintenance_jobs_in_techs` (
 DROP TABLE IF EXISTS `maintenance_reqs`;
 CREATE TABLE IF NOT EXISTS `maintenance_reqs` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text COLLATE utf8mb4_general_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `is_backup` tinyint(1) DEFAULT '0',
   `spread_comps` tinyint(1) DEFAULT '1',
   `spread_techs` tinyint(1) DEFAULT '1',
-  `links` text COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `maintenance_reqs-name` (`name`),
   KEY `maintenance_reqs-description` (`description`(768)),
   KEY `idx-maintenance_reqs-archived` (`archived`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `maintenance_reqs`
 --
 
 INSERT INTO `maintenance_reqs` (`id`, `name`, `description`, `is_backup`, `spread_comps`, `spread_techs`, `links`, `updated_at`, `updated_by`, `archived`) VALUES
-(1, 'Бэкап ВМ 7/3', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 1, 0, NULL, '2025-05-09 14:33:30', NULL, NULL);
+(1, 'Бэкап ВМ 7/3/0', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 1, 0, NULL, '2025-05-25 16:02:54', NULL, NULL),
+(2, 'Бэкап ВМ 7/3/3', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежегодных, 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 1, 0, NULL, '2025-05-25 16:03:37', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1842,28 +1878,28 @@ DROP TABLE IF EXISTS `maintenance_reqs_history`;
 CREATE TABLE IF NOT EXISTS `maintenance_reqs_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(1024) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `spread_comps` tinyint(1) DEFAULT NULL,
   `spread_techs` tinyint(1) DEFAULT NULL,
-  `links` text COLLATE utf8mb4_general_ci,
-  `services_ids` text COLLATE utf8mb4_general_ci,
-  `comps_ids` text COLLATE utf8mb4_general_ci,
-  `techs_ids` text COLLATE utf8mb4_general_ci,
-  `includes_ids` text COLLATE utf8mb4_general_ci,
-  `included_ids` text COLLATE utf8mb4_general_ci,
-  `jobs_ids` text COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `includes_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `included_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `is_backup` tinyint(1) DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `maintenance_reqs_history-master_id` (`master_id`),
   KEY `maintenance_reqs_history-updated_by` (`updated_by`),
   KEY `maintenance_reqs_history-updated_at` (`updated_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `maintenance_reqs_history`
@@ -1871,7 +1907,12 @@ CREATE TABLE IF NOT EXISTS `maintenance_reqs_history` (
 
 INSERT INTO `maintenance_reqs_history` (`id`, `master_id`, `name`, `description`, `spread_comps`, `spread_techs`, `links`, `services_ids`, `comps_ids`, `techs_ids`, `includes_ids`, `included_ids`, `jobs_ids`, `updated_at`, `updated_by`, `updated_comment`, `changed_attributes`, `is_backup`, `archived`) VALUES
 (1, 1, 'Бэкап ВМ 7/3', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-09 14:33:30', NULL, NULL, 'name,description,spread_comps,spread_techs,is_backup', 1, NULL),
-(2, 1, 'Бэкап ВМ 7/3', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 0, NULL, NULL, NULL, NULL, NULL, NULL, '1', '2025-05-09 14:44:11', NULL, NULL, 'jobs_ids', 1, NULL);
+(2, 1, 'Бэкап ВМ 7/3', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 0, NULL, NULL, NULL, NULL, NULL, NULL, '1', '2025-05-09 14:44:11', NULL, NULL, 'jobs_ids', 1, NULL),
+(3, 1, 'Бэкап ВМ 7/3/0', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 0, NULL, NULL, NULL, NULL, NULL, NULL, '1', '2025-05-25 16:02:54', NULL, NULL, 'name', 1, NULL),
+(4, 2, 'Бэкап ВМ 7/3/3', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежегодных, 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 0, NULL, NULL, NULL, NULL, '1', NULL, NULL, '2025-05-25 16:03:37', NULL, NULL, 'name,description,spread_comps,spread_techs,includes_ids,is_backup', 1, NULL),
+(5, 1, 'Бэкап ВМ 7/3/0', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 0, NULL, NULL, NULL, NULL, NULL, '2', '1', '2025-05-25 16:03:37', NULL, NULL, 'included_ids', 1, NULL),
+(6, 2, 'Бэкап ВМ 7/3/3', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежегодных, 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 0, NULL, NULL, NULL, NULL, '1', NULL, '2', '2025-05-25 16:05:43', NULL, NULL, 'jobs_ids', 1, NULL),
+(7, 2, 'Бэкап ВМ 7/3/3', 'Кратковременное хранение с ежедневным бэкапом за неделю  \r\n**стратегия GFS  - 3 ежегодных, 3 ежемесячных, 7 ежедневных точек восстановления**', 1, 0, NULL, NULL, NULL, NULL, '1', NULL, NULL, '2025-05-26 17:35:15', NULL, NULL, 'jobs_ids', 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -1905,14 +1946,14 @@ CREATE TABLE IF NOT EXISTS `maintenance_reqs_in_jobs` (
   UNIQUE KEY `maintenance_reqs_in_jobs-m2m` (`reqs_id`,`jobs_id`),
   KEY `maintenance_reqs_in_jobs-reqs_id` (`reqs_id`),
   KEY `maintenance_reqs_in_jobs-jobs_id` (`jobs_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `maintenance_reqs_in_jobs`
 --
 
 INSERT INTO `maintenance_reqs_in_jobs` (`id`, `reqs_id`, `jobs_id`) VALUES
-(3, 1, 1);
+(10, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -1929,7 +1970,14 @@ CREATE TABLE IF NOT EXISTS `maintenance_reqs_in_reqs` (
   UNIQUE KEY `maintenance_reqs_in_reqs-m2m` (`reqs_id`,`includes_id`),
   KEY `maintenance_reqs_in_reqs-reqs_id` (`reqs_id`),
   KEY `maintenance_reqs_in_reqs-includes_id` (`includes_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Дамп данных таблицы `maintenance_reqs_in_reqs`
+--
+
+INSERT INTO `maintenance_reqs_in_reqs` (`id`, `reqs_id`, `includes_id`) VALUES
+(1, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -1978,7 +2026,7 @@ CREATE TABLE IF NOT EXISTS `manufacturers` (
   `full_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `name_2` (`name`)
@@ -3230,7 +3278,7 @@ CREATE TABLE IF NOT EXISTS `materials` (
   `charge` float DEFAULT NULL,
   `currency_id` int NOT NULL DEFAULT '1',
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-materials-it_staff_id` (`it_staff_id`),
   KEY `idx-materials-places_id` (`places_id`),
@@ -3262,28 +3310,28 @@ CREATE TABLE IF NOT EXISTS `materials_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `parent_id` int DEFAULT NULL,
   `date` date DEFAULT NULL,
   `count` int DEFAULT NULL,
   `type_id` int DEFAULT NULL,
-  `model` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `model` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `places_id` int DEFAULT NULL,
   `it_staff_id` int DEFAULT NULL,
   `currency_id` int DEFAULT NULL,
   `cost` float DEFAULT NULL,
   `charge` float DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
-  `history` text COLLATE utf8mb4_general_ci,
-  `contracts_ids` text COLLATE utf8mb4_general_ci,
-  `usages_ids` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `contracts_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `usages_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `materials_history-master_id` (`master_id`),
   KEY `materials_history-updated_at` (`updated_at`),
   KEY `materials_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `materials_history`
@@ -3291,7 +3339,8 @@ CREATE TABLE IF NOT EXISTS `materials_history` (
 
 INSERT INTO `materials_history` (`id`, `master_id`, `updated_at`, `updated_by`, `updated_comment`, `changed_attributes`, `parent_id`, `date`, `count`, `type_id`, `model`, `places_id`, `it_staff_id`, `currency_id`, `cost`, `charge`, `comment`, `history`, `contracts_ids`, `usages_ids`) VALUES
 (1, 4, '2025-05-14 06:52:45', NULL, NULL, 'parent_id,date,count,type_id,model,places_id,it_staff_id,currency_id,comment', 3, '2023-03-02', 150, 2, 'Cabeus UTP-4 cat 5.e', 8, 1, 1, NULL, NULL, 'Передали в Чел. на всякий случай', NULL, NULL, NULL),
-(2, 9, '2025-05-14 09:15:53', NULL, NULL, 'date,count,type_id,model,places_id,it_staff_id,currency_id,cost,charge,contracts_ids,usages_ids', NULL, '2021-12-28', 25, 4, 'Набор MK270', 6, 6, 1, 28175, 4695.83, NULL, NULL, '4', '1');
+(2, 9, '2025-05-14 09:15:53', NULL, NULL, 'date,count,type_id,model,places_id,it_staff_id,currency_id,cost,charge,contracts_ids,usages_ids', NULL, '2021-12-28', 25, 4, 'Набор MK270', 6, 6, 1, 28175, 4695.83, NULL, NULL, '4', '1'),
+(3, 2, '2025-05-25 16:07:23', NULL, NULL, 'date,count,type_id,model,places_id,it_staff_id,currency_id,comment,usages_ids', NULL, '2022-09-13', 300, 2, 'Cabeus UTP-4 cat 5.e', 6, 6, 1, NULL, NULL, 'По результатам инвентаризации. Монтажники походу оставили', NULL, NULL, '2');
 
 -- --------------------------------------------------------
 
@@ -3308,7 +3357,7 @@ CREATE TABLE IF NOT EXISTS `materials_types` (
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `scans_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-materials_types-code` (`code`),
   KEY `idx-materials_types-name` (`name`),
@@ -3337,13 +3386,13 @@ CREATE TABLE IF NOT EXISTS `materials_types_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `code` varchar(12) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `units` varchar(16) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `code` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `units` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `scans_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `materials_types_history-master_id` (`master_id`),
@@ -3374,20 +3423,21 @@ CREATE TABLE IF NOT EXISTS `materials_usages` (
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-materials_usages-materials_id` (`materials_id`),
   KEY `idx-materials_usages-techs_id` (`techs_id`),
   KEY `idx-materials_usages-updated_at` (`updated_at`),
   KEY `idx-materials_usages-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `materials_usages`
 --
 
 INSERT INTO `materials_usages` (`id`, `materials_id`, `count`, `date`, `techs_id`, `comment`, `history`, `updated_at`, `updated_by`) VALUES
-(1, 9, 1, '2022-12-29', 6, 'Замена вышедшей из строя клавиатуры', 'Пользователь пролил кофе на клавиатуру', '2025-05-14 09:15:53', NULL);
+(1, 9, 1, '2022-12-29', 6, 'Замена вышедшей из строя клавиатуры', 'Пользователь пролил кофе на клавиатуру', '2025-05-14 09:15:53', NULL),
+(2, 2, 10, '2025-05-25', 41, 'Проложил отдельную витуху 10м до места установки', '', '2025-05-25 16:07:23', NULL);
 
 -- --------------------------------------------------------
 
@@ -3400,27 +3450,28 @@ CREATE TABLE IF NOT EXISTS `materials_usages_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `materials_id` int DEFAULT NULL,
   `count` int DEFAULT NULL,
   `date` date DEFAULT NULL,
   `techs_id` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
-  `history` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `materials_usages_history-master_id` (`master_id`),
   KEY `materials_usages_history-updated_at` (`updated_at`),
   KEY `materials_usages_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `materials_usages_history`
 --
 
 INSERT INTO `materials_usages_history` (`id`, `master_id`, `updated_at`, `updated_by`, `updated_comment`, `changed_attributes`, `materials_id`, `count`, `date`, `techs_id`, `comment`, `history`) VALUES
-(1, 1, '2025-05-14 09:15:53', NULL, NULL, 'materials_id,count,date,techs_id,comment,history', 9, 1, '2022-12-29', 6, 'Замена вышедшей из строя клавиатуры', 'Пользователь пролил кофе на клавиатуру');
+(1, 1, '2025-05-14 09:15:53', NULL, NULL, 'materials_id,count,date,techs_id,comment,history', 9, 1, '2022-12-29', 6, 'Замена вышедшей из строя клавиатуры', 'Пользователь пролил кофе на клавиатуру'),
+(2, 2, '2025-05-25 16:07:23', NULL, NULL, 'materials_id,count,date,techs_id,comment', 2, 10, '2025-05-25', 41, 'Проложил отдельную витуху 10м до места установки', NULL);
 
 -- --------------------------------------------------------
 
@@ -3430,7 +3481,7 @@ INSERT INTO `materials_usages_history` (`id`, `master_id`, `updated_at`, `update
 
 DROP TABLE IF EXISTS `migration`;
 CREATE TABLE IF NOT EXISTS `migration` (
-  `version` varchar(180) COLLATE utf8mb4_general_ci NOT NULL,
+  `version` varchar(180) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `apply_time` int DEFAULT NULL,
   PRIMARY KEY (`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -3598,7 +3649,8 @@ INSERT INTO `migration` (`version`, `apply_time`) VALUES
 ('app\\migrations\\M250414164449ScansAddSoft', 1746711712),
 ('app\\migrations\\M250425033845CompsSoftMediumtext', 1746711712),
 ('app\\migrations\\M250505122356WikiCache', 1746711712),
-('app\\migrations\\M250514090728ContractsHistorySucessorFix', 1747214006);
+('app\\migrations\\M250514090728ContractsHistorySucessorFix', 1747214006),
+('app\\migrations\\M250526150239MaintenanceJobsHierachy', 1748273958);
 
 -- --------------------------------------------------------
 
@@ -3609,20 +3661,20 @@ INSERT INTO `migration` (`version`, `apply_time`) VALUES
 DROP TABLE IF EXISTS `networks`;
 CREATE TABLE IF NOT EXISTS `networks` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `vlan_id` int DEFAULT NULL,
-  `text_addr` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `text_addr` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `addr` int UNSIGNED DEFAULT NULL,
   `mask` int UNSIGNED DEFAULT NULL,
   `router` int UNSIGNED DEFAULT NULL,
   `dhcp` int UNSIGNED DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `segments_id` int DEFAULT NULL,
-  `notepad` text COLLATE utf8mb4_general_ci,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `archived` tinyint(1) DEFAULT NULL,
-  `links` text COLLATE utf8mb4_general_ci,
-  `ranges` text COLLATE utf8mb4_general_ci,
-  `text_dhcp` text COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `ranges` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `text_dhcp` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `idx-networks-vlan_id` (`vlan_id`),
   KEY `idx-networks-addr` (`addr`),
@@ -3685,8 +3737,8 @@ CREATE TABLE IF NOT EXISTS `networks_in_aces` (
 DROP TABLE IF EXISTS `net_domains`;
 CREATE TABLE IF NOT EXISTS `net_domains` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `places_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `net_domains-places-idx` (`places_id`)
@@ -3711,9 +3763,9 @@ CREATE TABLE IF NOT EXISTS `net_ips` (
   `id` int NOT NULL AUTO_INCREMENT,
   `addr` int UNSIGNED DEFAULT NULL,
   `mask` int DEFAULT NULL,
-  `text_addr` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `text_addr` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `networks_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-net_ips-addr` (`addr`),
@@ -3812,11 +3864,11 @@ INSERT INTO `net_ips` (`id`, `addr`, `mask`, `text_addr`, `comment`, `name`, `ne
 DROP TABLE IF EXISTS `net_vlans`;
 CREATE TABLE IF NOT EXISTS `net_vlans` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `vlan` int DEFAULT NULL,
   `domain_id` int DEFAULT NULL,
   `segment_id` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `idx-net_vlans-domain_id` (`domain_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -3875,18 +3927,18 @@ INSERT INTO `orgs` (`id`, `name`, `short`, `comment`) VALUES
 DROP TABLE IF EXISTS `org_inet`;
 CREATE TABLE IF NOT EXISTS `org_inet` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `name` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Имя',
-  `ip_addr` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'IP Адрес',
-  `ip_mask` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Маска подсети',
-  `ip_gw` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Шлюз по умолчанию',
-  `ip_dns1` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '1й DNS сервер',
-  `ip_dns2` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '2й DNS сервер',
-  `type` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Тип подключения',
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Имя',
+  `ip_addr` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'IP Адрес',
+  `ip_mask` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Маска подсети',
+  `ip_gw` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Шлюз по умолчанию',
+  `ip_dns1` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '1й DNS сервер',
+  `ip_dns2` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '2й DNS сервер',
+  `type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Тип подключения',
   `static` tinyint(1) DEFAULT NULL COMMENT 'Статический?',
-  `comment` text COLLATE utf8mb4_unicode_ci COMMENT 'Дополнительно',
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Дополнительно',
   `places_id` int DEFAULT NULL COMMENT 'Помещение',
-  `account` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Аккаунт, л/с',
-  `history` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'История',
+  `account` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Аккаунт, л/с',
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'История',
   `cost` decimal(15,2) DEFAULT NULL,
   `charge` decimal(15,2) DEFAULT NULL,
   `services_id` int DEFAULT NULL,
@@ -3941,12 +3993,12 @@ INSERT INTO `org_inets_in_networks` (`id`, `org_inets_id`, `networks_id`) VALUES
 DROP TABLE IF EXISTS `org_phones`;
 CREATE TABLE IF NOT EXISTS `org_phones` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `country_code` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Код страны',
-  `city_code` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Код города',
-  `local_code` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Местный номер',
+  `country_code` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Код страны',
+  `city_code` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Код города',
+  `local_code` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Местный номер',
   `places_id` int DEFAULT NULL COMMENT 'Помещение',
-  `account` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `comment` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Комментарий',
+  `account` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Комментарий',
   `cost` decimal(15,2) DEFAULT NULL,
   `charge` decimal(15,2) DEFAULT NULL,
   `services_id` int DEFAULT NULL,
@@ -4017,12 +4069,12 @@ CREATE TABLE IF NOT EXISTS `partners` (
   `uname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `bname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `cabinet_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `support_tel` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `prefix` varchar(5) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cabinet_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `support_tel` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prefix` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `alias` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `alias` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `inn` (`inn`),
   KEY `kpp` (`kpp`),
@@ -4188,13 +4240,13 @@ DROP TABLE IF EXISTS `places`;
 CREATE TABLE IF NOT EXISTS `places` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
   `parent_id` int DEFAULT NULL COMMENT 'Предок',
-  `name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Название',
-  `addr` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Адрес',
-  `prefix` varchar(5) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Префикс',
-  `short` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Короткое имя',
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Название',
+  `addr` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Адрес',
+  `prefix` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Префикс',
+  `short` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Короткое имя',
   `scans_id` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_unicode_ci,
-  `map` text COLLATE utf8mb4_unicode_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `map` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `map_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `parent` (`parent_id`)
@@ -4230,8 +4282,8 @@ CREATE TABLE IF NOT EXISTS `ports` (
   `id` int NOT NULL AUTO_INCREMENT,
   `techs_id` int DEFAULT NULL,
   `arms_id` int DEFAULT NULL,
-  `name` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `link_ports_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-ports-name` (`name`),
@@ -4275,23 +4327,24 @@ INSERT INTO `ports` (`id`, `techs_id`, `arms_id`, `name`, `comment`, `link_ports
 DROP TABLE IF EXISTS `sandboxes`;
 CREATE TABLE IF NOT EXISTS `sandboxes` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `suffix` varchar(12) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `suffix` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `network_accessible` tinyint(1) DEFAULT NULL,
-  `notepad` text COLLATE utf8mb4_general_ci,
-  `links` text COLLATE utf8mb4_general_ci,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `archived` tinyint(1) DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `sandboxes`
 --
 
 INSERT INTO `sandboxes` (`id`, `name`, `suffix`, `network_accessible`, `notepad`, `links`, `archived`, `updated_at`, `updated_by`) VALUES
-(1, 'Тестовая песочница 1С', '1C_TEST', 0, NULL, NULL, 0, '2025-05-09 14:48:25', NULL);
+(1, 'Тестовая песочница 1С', '1C_TEST', 0, NULL, NULL, 0, '2025-05-09 14:48:25', NULL),
+(2, 'Тестовая песочница ИТ', 'TEST', 0, NULL, NULL, 0, '2025-05-25 16:22:38', NULL);
 
 -- --------------------------------------------------------
 
@@ -4304,28 +4357,30 @@ CREATE TABLE IF NOT EXISTS `sandboxes_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `archived` tinyint(1) DEFAULT NULL,
-  `name` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `suffix` varchar(12) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `suffix` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `network_accessible` tinyint(1) DEFAULT NULL,
-  `notepad` text COLLATE utf8mb4_general_ci,
-  `links` text COLLATE utf8mb4_general_ci,
-  `comps_ids` text COLLATE utf8mb4_general_ci,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `sandboxes_history-master_id` (`master_id`),
   KEY `sandboxes_history-updated_at` (`updated_at`),
   KEY `sandboxes_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `sandboxes_history`
 --
 
 INSERT INTO `sandboxes_history` (`id`, `master_id`, `updated_at`, `updated_by`, `updated_comment`, `changed_attributes`, `archived`, `name`, `suffix`, `network_accessible`, `notepad`, `links`, `comps_ids`) VALUES
-(1, 1, '2025-05-09 14:48:25', NULL, NULL, 'archived,name,suffix,network_accessible', 0, 'Тестовая песочница 1С', '1C_TEST', 0, NULL, NULL, NULL);
+(1, 1, '2025-05-09 14:48:25', NULL, NULL, 'archived,name,suffix,network_accessible', 0, 'Тестовая песочница 1С', '1C_TEST', 0, NULL, NULL, NULL),
+(2, 2, '2025-05-25 16:22:20', NULL, NULL, 'archived,name,network_accessible', 0, 'Тесто', NULL, 0, NULL, NULL, NULL),
+(3, 2, '2025-05-25 16:22:38', NULL, NULL, 'name,suffix', 0, 'Тестовая песочница ИТ', 'TEST', 0, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -4481,15 +4536,15 @@ INSERT INTO `scans` (`id`, `contracts_id`, `format`, `file`, `places_id`, `tech_
 DROP TABLE IF EXISTS `schedules`;
 CREATE TABLE IF NOT EXISTS `schedules` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `parent_id` int DEFAULT NULL,
-  `history` text COLLATE utf8mb4_general_ci,
-  `start_date` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `end_date` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `start_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `end_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `override_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-schedules_parent_id` (`parent_id`),
   KEY `idx-schedules-updated_at` (`updated_at`),
@@ -4575,15 +4630,15 @@ CREATE TABLE IF NOT EXISTS `schedules_entries_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `history` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `schedule_id` int DEFAULT NULL,
-  `date` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `date_end` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `schedule` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `date_end` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `schedule` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `is_period` tinyint(1) DEFAULT NULL,
   `is_work` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -4611,22 +4666,22 @@ CREATE TABLE IF NOT EXISTS `schedules_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `history` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `parent_id` int DEFAULT NULL,
   `override_id` int DEFAULT NULL,
-  `start_date` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `end_date` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `entries_ids` text COLLATE utf8mb4_general_ci,
-  `providing_services_ids` text COLLATE utf8mb4_general_ci,
-  `support_services_ids` text COLLATE utf8mb4_general_ci,
-  `acls_ids` text COLLATE utf8mb4_general_ci,
-  `maintenance_jobs_ids` text COLLATE utf8mb4_general_ci,
-  `overrides_ids` text COLLATE utf8mb4_general_ci,
+  `start_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `end_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `entries_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `providing_services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `support_services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `overrides_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `schedules_history-master_id` (`master_id`),
   KEY `schedules_history-updated_at` (`updated_at`),
@@ -4658,12 +4713,12 @@ INSERT INTO `schedules_history` (`id`, `master_id`, `updated_at`, `updated_by`, 
 DROP TABLE IF EXISTS `segments`;
 CREATE TABLE IF NOT EXISTS `segments` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `code` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `history` text COLLATE utf8mb4_general_ci,
+  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `archived` tinyint(1) DEFAULT NULL,
-  `links` text COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `idx-segments-archived` (`archived`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -4712,15 +4767,15 @@ CREATE TABLE IF NOT EXISTS `services` (
   `archived` int NOT NULL DEFAULT '0',
   `is_service` tinyint(1) DEFAULT '1',
   `currency_id` int NOT NULL DEFAULT '1',
-  `search_text` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `search_text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `weight` int NOT NULL DEFAULT '100',
   `infrastructure_user_id` int DEFAULT NULL,
-  `external_links` text COLLATE utf8mb4_general_ci,
+  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `vm_cores` int DEFAULT NULL,
   `vm_ram` int DEFAULT NULL,
   `vm_hdd` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-services-is_end_user` (`is_end_user`),
   KEY `idx-services_responsible` (`responsible_id`),
@@ -4800,20 +4855,20 @@ CREATE TABLE IF NOT EXISTS `services_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `name` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_general_ci,
-  `search_text` text COLLATE utf8mb4_general_ci,
-  `external_links` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `search_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `is_end_user` tinyint(1) DEFAULT NULL,
   `is_service` tinyint(1) DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   `cost` float DEFAULT NULL,
   `charge` float DEFAULT NULL,
-  `links` text COLLATE utf8mb4_general_ci,
-  `notebook` text COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `notebook` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `weight` int DEFAULT NULL,
   `vm_cores` int DEFAULT NULL,
   `vm_ram` int DEFAULT NULL,
@@ -4827,16 +4882,16 @@ CREATE TABLE IF NOT EXISTS `services_history` (
   `partners_id` int DEFAULT NULL,
   `places_id` int DEFAULT NULL,
   `currency_id` int DEFAULT NULL,
-  `comps_ids` text COLLATE utf8mb4_general_ci,
-  `techs_ids` text COLLATE utf8mb4_general_ci,
-  `depends_ids` text COLLATE utf8mb4_general_ci,
-  `support_ids` text COLLATE utf8mb4_general_ci,
-  `contracts_ids` text COLLATE utf8mb4_general_ci,
-  `infrastructure_support_ids` text COLLATE utf8mb4_general_ci,
-  `maintenance_reqs_ids` text COLLATE utf8mb4_general_ci,
-  `acls_ids` text COLLATE utf8mb4_general_ci,
-  `maintenance_jobs_ids` text COLLATE utf8mb4_general_ci,
-  `aces_ids` text COLLATE utf8mb4_general_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `depends_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `support_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `contracts_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `infrastructure_support_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `maintenance_reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `aces_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `services_history-master_id` (`master_id`),
   KEY `services_history-updated_at` (`updated_at`),
@@ -4887,11 +4942,11 @@ CREATE TABLE IF NOT EXISTS `soft` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
   `manufacturers_id` int DEFAULT NULL,
   `descr` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `items` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `additional` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'Links associated with the software',
   `scans_id` int DEFAULT NULL COMMENT 'ID of the software preview image',
@@ -4934,7 +4989,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (27, 3, 'Windows Resource Kit Tools', '', 'Windows Resource Kit Tools - .*', '', '2018-02-05 05:41:25', NULL, NULL, NULL, NULL),
 (28, 3, 'Silverlight', '', 'Microsoft Silverlight', '', '2018-02-05 05:41:48', NULL, NULL, NULL, NULL),
 (29, 3, 'Orca', 'Программа редактирования пакетов установки MSI', 'Orca', '', '2018-02-05 05:42:31', NULL, NULL, NULL, NULL),
-(30, 11, 'Shockwave Player', 'Flash Player и Shockwave Player - бесплатные приложения от Adobe для показа продвинутого веб-контента.', 'Adobe Shockwave Player \\d+\\..*\nAdobe Shockwave Player \\+ Authorware Web Player', '', '2023-08-30 05:20:26', 'reviakin.a', NULL, NULL, NULL),
 (31, 11, 'Reader 9', '', 'Adobe Reader 9\\.\\d+ - \\w+\nAdobe Reader 9 - Russian', '', '2023-08-30 13:51:40', NULL, NULL, NULL, NULL),
 (32, 11, 'AIR', 'Платформа для запуска флэш приложений без браузера. Бесплатно', 'Adobe AIR', '', '2018-02-05 05:52:21', NULL, NULL, NULL, NULL),
 (33, 3, 'Office 2007 Professional Plus', '', 'Microsoft Office Professional Plus 2007\nMicrosoft Office Профессиональный плюс 2007', 'Microsoft Office 2007 Service Pack 3 \\(SP3\\)\nMicrosoft Office Proofing Tools 2007 Service Pack 3 \\(SP3\\)\nUpdate for Microsoft Office 2007 suites \\(KB\\d+\\) 32-Bit Edition\nMicrosoft Office Proof \\(\\w+\\) 2007\nSecurity Update for Microsoft Office \\w+ 2007 \\(KB\\d+\\) 32-Bit Edition.*\nMicrosoft Office \\w+ MUI \\(\\w+\\) 2007\nMicrosoft Office 2007 Primary Interop Assemblies\nCompatibility Pack for the 2007 Office system', '2023-08-30 13:51:40', NULL, NULL, NULL, NULL),
@@ -4952,7 +5006,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (45, 18, 'NX 9', '', 'Siemens NX 9.\\d+', '', '2018-02-05 13:40:34', NULL, NULL, NULL, NULL),
 (46, 3, 'Skype', 'IM клиент с сервисом аудио и видео звонков и конференций', 'Skype™ \\d+\\.\\d+\nSkype, версия \\d+\\.\\d+', 'Skype Click to Call', '2023-08-30 13:51:41', NULL, NULL, NULL, NULL),
 (47, 19, 'OpenVPN', '', 'OpenVPN \\d+\\.\\d+\\..*', 'TAP\\-Windows \\d+\\.\\d+\\..*', '2018-02-05 13:48:23', NULL, NULL, NULL, NULL),
-(48, 20, 'Site Administration', 'Система управления АТС Avaya', 'Avaya Integrated Management Site Administration', 'Avaya Integrated Management Administration Tools \\d+\\.\\d+ SP\\d+', '2018-02-05 13:51:40', NULL, NULL, NULL, NULL),
 (49, 21, 'C++ Redistributables', '', 'Intel\\(R\\) C\\+\\+ Redistributables (for Windows\\*)? on Intel\\(R\\) 64', '', '2018-02-05 14:01:03', NULL, NULL, NULL, NULL),
 (50, 22, 'XenCenter', 'Консоль управления виртуализацией от Citrix', 'Citrix XenCenter', '', '2018-02-05 14:02:00', NULL, NULL, NULL, NULL),
 (51, 23, 'qBittorrent', 'Бесплатный клиент bitTorrent', 'qBittorrent \\d+\\.\\d+\\.\\d+', '', '2018-02-05 14:05:01', NULL, NULL, NULL, NULL),
@@ -5005,7 +5058,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (98, 45, 'V2V Image Converter V8', 'Конвертер образов виртуальных машин', 'StarWind V2V Image Converter V8\\.\\d+.*', '', '2023-09-05 05:39:18', NULL, NULL, NULL, NULL),
 (99, 46, 'Flash', 'Программа прошивки телефонов Xiaomi', 'XiaoMiFlash', '', '2023-09-05 05:39:18', NULL, NULL, NULL, NULL),
 (100, 18, 'Teamcenter EDA', 'Интеграция приложения ECAD в Teamcenter', 'Teamcenter EDA 1 .*', '', '2023-09-05 05:39:18', NULL, NULL, NULL, NULL),
-(101, 47, 'Designer 15', '', 'Altium Designer 15', 'TeighaX 3\\.\\d+', '2018-03-05 08:32:35', NULL, NULL, NULL, NULL),
 (102, 48, 'Free Cam 8', 'iSpring Free Cam помогает быстро создавать видеозаписи, редактировать их и размещать на YouTube в один клик', 'iSpring Free Cam 8', '', '2023-09-05 05:39:18', NULL, NULL, NULL, NULL),
 (103, 49, 'TeighaX', 'Библиотека доступа к проприетарным CAD форматам', 'TeighaX \\d\\.\\d+', '', '2023-09-05 05:39:18', NULL, NULL, NULL, NULL),
 (104, 3, 'Windows 8.1 Professional', '', 'Майкрософт Windows 8\\.1 Профессиональная\nMicrosoft Windows 8\\.1 Pro', '', '2023-08-30 13:51:42', NULL, NULL, NULL, NULL),
@@ -5014,13 +5066,11 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (107, 50, 'Agent', 'OCS inventory NG - бесплатное программное обеспечение. OCS-NG собирает информацию об аппаратном и программном обеспечении сетевых машин, работающих с клиентской программой OCS («Агент инвентаризации OCS»). GNU GPL.', 'OCS Inventory (NG )?Agent \\d+\\.\\d+\\.\\d+\\.\\d+(-utf8)?', '', '2023-09-05 05:39:18', NULL, NULL, NULL, NULL),
 (108, 21, 'Processor Graphics', 'Драйвер видео', 'Intel\\(R\\) Processor Graphics', 'Intel\\(R\\) SDK for OpenCL - CPU Only Runtime Package', '2023-09-05 05:39:18', NULL, NULL, NULL, NULL),
 (109, 51, 'Reader', 'Бесплатное прикладное программное обеспечение для просмотра электронных документов в стандарте PDF', 'Foxit Reader', 'Foxit Cloud', '2023-09-05 05:39:19', 'reviakin.a', NULL, NULL, NULL),
-(110, 47, 'Designer 16', '', 'Altium Designer 16', '', '2018-03-06 13:44:16', NULL, NULL, NULL, NULL),
 (111, 52, '3DMark', '', '3DMark\nFuturemark SystemInfo', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (112, 53, 'PL-2303 USB-to-Serial', 'Драйвер для железки конвертера USB-RS232', 'PL-2303 USB-to-Serial', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (113, 54, 'Mini Remote Control Service', 'Платное ПО', 'DameWare Mini Remote Control Service', '', '2023-09-05 05:39:19', 'reviakin.a', NULL, NULL, NULL),
 (114, 55, 'MB Drivers', '', 'ASUS Product Register Program\nASUSUpdate\nPC Probe II\nEPU-6 Engine', 'AI Suite', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (115, 56, 'LibreOffice', 'Свободно распространяемый офисный пакет с открытым исходным кодом', 'LibreOffice \\d\\.\\d\\.\\d\\.\\d', 'LibreOffice [0-9.]* Help Pack .*', '2023-10-27 04:55:23', 'admin', NULL, NULL, NULL),
-(116, 57, 'КОМПАС-3D V17', 'куплено, режим 2D', 'КОМПАС-3D v17\\.1( x64)?', '', '2018-03-07 05:47:07', NULL, NULL, NULL, NULL),
 (117, 58, '', 'Бесплатная программа с закрытым кодом для записи CD, DVD, HD DVD и Blu-Ray дисков.', 'CDBurnerXP', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (118, 59, 'AIMP3', 'Бесплатный аудиопроигрыватель', 'AIMP3', '', '2023-09-05 05:39:19', 'reviakin.a', NULL, NULL, NULL),
 (119, 60, 'PC Connectivity Solution', '', 'PC Connectivity Solution\nПакет драйверов Windows - Nokia pccsmcfd LegacyDriver .*\nNokia Connectivity Cable Driver\nNokia Suite', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
@@ -5031,7 +5081,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (124, 65, 'Python', '', 'Python \\d\\.\\d+\\.\\d+', 'PyQt GPL v\\d+\\.\\d+\\.\\d+ for Python v\\d+\\.\\d+ \\(x\\d+\\)', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (125, 66, 'Xming', 'Порт (Linux) Х-сервера под Windows. free', 'Xming \\d+\\.\\d+\\.\\d+\\.\\d+\nXming-fonts \\d+\\.\\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (126, 67, 'PCB Toolkit', 'Donateware. Free', 'Saturn PCB Design, Inc\\. - PCB Toolkit\nSaturn PCB Toolkit .*', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
-(127, 47, 'Designer Summer 09', 'Куплено (вроде бы) 3 шт. ', 'Altium Designer Summer 09', 'Altium Designer - Board Level Libraries', '2018-03-13 06:01:53', NULL, NULL, NULL, NULL),
 (128, 68, 'FreeCAD', 'Бесплатное ПО. Лицензия GNU GPL', 'FreeCAD \\d+\\.\\d+ - A free open source CAD system', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (129, 57, 'КОМПАС-3D Viewer V16', 'Бесплатное ПО', 'КОМПАС-3D Viewer V16', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (130, 69, 'Octave', 'Лицензия GNU GPLv3. GNU Octave - это программное обеспечение с высокоуровневым языком программирования , в основном предназначенным для численных вычислений .', 'Octave \\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
@@ -5039,7 +5088,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (132, 3, 'Office 2013 Professional Plus', '', 'Microsoft Office профессиональный плюс 2013', 'Microsoft Office 2003 Web Components', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (133, 70, 'Голосовой помощник Алиса', '', 'Голосовой помощник Алиса', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (134, 57, 'КОМПАС-3D Viewer V17', 'Бесплатное ПО', 'КОМПАС-3D Viewer v17', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
-(135, 71, 'АСРН2006', 'Автоматизированная Система Расчета Надежности Редакция 2006 года. Есть лицензионный компакт-диск в НТЦ3', 'АСРН2006', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (136, 72, 'NPort Administration Suite', 'ПО для управления железками от MOXA - бесплатное', 'NPort Administration Suite Ver\\d+\\.\\d+', 'NPort Windows Driver Manager', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (137, 73, 'Inkscape', 'Свободный векторный редактор', 'Inkscape \\d+\\.\\d+', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (138, 7, 'Earth Pro', 'Бесплатное', 'Google Earth Pro\nGoogle Планета Земля', '', '2023-09-05 05:39:19', 'reviakin.a', NULL, NULL, NULL),
@@ -5061,7 +5109,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (154, 89, '', 'ofzPCB: FREE 3D Gerber Viewer Самый быстрый, простой и интуитивный способ проверить дизайн Вашей печатной платы перед отправкой на производство', 'ZofzPCB', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (155, 90, 'ViewMate', 'ViewMate Gerber Viewer (free версия)', 'ViewMate \\d+\\.\\d+', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (156, 91, 'AkelPad', 'Свободный текстовый редактор с открытым исходным кодом для операционных систем Microsoft Windows, но может свободно быть запущен под Wine и работать под управлением Unix-подобных операционных систем, таких как Linux. Распространяется под лицензией BSD. ', 'AkelPad [0-9.]*$\nAkelPad [0-9.]* \\(64-bit\\)\nAkelPad \\d+\\.\\d+\\.\\d+-x64\nAkelPad \\(64-bit\\)', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
-(157, 62, 'Delphi 7', 'Проприетарная', 'Borland Delphi 7', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (158, 4, 'MySQL Server', 'GNU GPL 2', 'MySQL Server \\d+.\\d+\nMySQL Installer - Community', 'MySQL Utilities\nMySQL For Excel .*\nMySQL Connector Net .*\nMySQL for Visual Studio .*\nMySQL Workbench .*\nMySQL Connector C\\+\\+ .*\nMySQL Connector J\nMySQL Connector\\/ODBC .*\nMySQL Notifier .*\nMySQL Connector\\/C .*\nMySQL Examples and Samples .*\nMySQL Documents .*', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (159, 4, 'Java SE Development Kit', 'Бесплатно распространяемый компанией Oracle Corporation комплект разработчика приложений на языке Java', 'Java(\\(TM\\))? SE Development Kit \\d+\\.\\d+\\.\\d+ \\(64-bit\\)\nJava SE Development Kit \\d+ Update \\d+( \\(64-bit\\))?\nJava\\(TM\\) SE Development Kit \\d+ Update \\d+ \\(64-bit\\)', '', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
 (160, 3, 'SQL Server 2012 Express (LocalDB)', 'Express бесплатный', 'Microsoft SQL Server 2012 Express LocalDB', 'Microsoft System CLR Types for SQL Server 2012.*\nMicrosoft SQL Server 2012 Native Client\nMicrosoft SQL Server 2012 T-SQL Language Service\nMicrosoft SQL Server 2012 Data-Tier App Framework.*\nMicrosoft SQL Server 2012 Management Objects.*\nMicrosoft SQL Server 2012 Transact-SQL ScriptDom.*\nMicrosoft SQL Server Data Tools (Build Utilities )?- \\w+ \\(12.*\nMicrosoft SQL Server 2012 Command Line Utilities\nSQL Server System CLR Types', '2023-09-05 05:39:19', NULL, NULL, NULL, NULL),
@@ -5083,10 +5130,7 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (176, 100, 'Возмещение НДС Налогоплательщик', '', 'ПК \"Возмещение НДС Налогоплательщик\" .*\nПечать НД с PDF\\d+ \\d+\\.\\d+\\.\\d+ \\(пакет\\)\nДекларация 201\\d', 'RosreestrXML', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
 (177, 21, 'OpenCL CPU Runtime', '', 'Intel\\(R\\) OpenCL CPU Runtime', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
 (178, 3, 'Office 365', '', 'Microsoft Office 365 - ru-ru\nMicrosoft 365 - ru-ru', 'Office 16 Click-to-Run Localization Component\nOffice 16 Click-to-Run Extensibility Component\nOffice 16 Click-to-Run Licensing Component\nMicrosoft Visual Studio 2010 Tools for Office Runtime \\(x64\\)\nЯзыковой пакет Microsoft Visual Studio 2010 Tools для среды выполнения Office \\(x64\\) - RUS', '2023-09-05 05:39:20', 'reviakin.a', NULL, NULL, NULL),
-(179, 57, 'КОМПАС-3D V8', 'куплено. Режим 2D', 'КОМПАС-3D V8', '', '2018-04-18 08:59:09', NULL, NULL, NULL, NULL),
-(180, 101, '2008', 'Куплено (вроде бы)', 'SolidWorks 2008( x64 Edition)? SP\\d+\neDrawings 2008\nCOSMOSMotion 2008( x64 Edition)? SP\\d+\nCOSMOSWorks 2008( x64 Edition)? SP\\d+\nSolidWorks Explorer 2008( sp\\d+)( x64 Edition)?', 'SolidWorks 2D Editor\nPhotoView 360\nSolidWorks 2008 Quadro Patch', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
 (181, 102, '', 'Платное ПО Search?. Разраб. intermech.ru.', 'Intermech', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
-(182, 103, 'Quartus II 11', 'Куплено', 'Quartus II 11\\.0sp1', 'Nios II EDS 11.0', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
 (183, 104, 'SQLite ODBC Driver for Win64', 'This is an open source ODBC driver for the wonderful SQLite 2.8.* and SQLite 3.* Database Engine/Library.', 'SQLite ODBC Driver for Win64', '', '2023-09-05 05:39:20', 'reviakin.a', NULL, NULL, NULL),
 (184, 105, 'MWI 2016', 'Бесплатное ПО для рассчета топологии печатных плат. The MWI-2017 software is free', 'MWI 2016', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
 (185, 106, '3DxWare 10', 'ПО к железу от 3Dconnexion', '3Dconnexion 3DxWare 10 \\(64-bit\\)', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
@@ -5109,7 +5153,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (202, 116, 'Monitor Drivers', '', 'Samsung_MonSetup', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
 (203, 4, 'Primavera P6 Optional Client R8.1', '', 'Primavera P6 Optional Client R8\\.1', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
 (204, 117, 'scilab', 'Свободная альтернатива Матлаб', 'scilab-\\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
-(205, 47, 'P-CAD 2006 Viewer', '', 'P-CAD 2006 Viewer', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
 (206, 118, 'Драйверы Guardant', '', 'Драйверы Guardant x\\d{2}', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
 (207, 119, 'ABC-4', 'Автоматизация Выпуска Смет', 'ABC-4.*', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
 (208, 120, 'Sentinel Runtime', '', 'Sentinel Runtime\nSentinel System Driver Installer.*', '', '2023-09-05 05:39:20', NULL, NULL, NULL, NULL),
@@ -5144,8 +5187,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (237, 136, 'Genius', 'Каталог инструмента Vargus', 'VargusGen', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (238, 137, 'Free Video Call Recorder for Skype', '\"Программа абсолютно бесплатна\"', 'Free Video Call Recorder for Skype version \\d+\\.\\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (239, 138, 'ToolExpert', 'Каталог инструмента Fraisa', 'ToolExpert Web-Setup', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
-(240, 47, 'Designer 14', '', 'Altium Designer 14', '', '2018-05-02 08:09:21', NULL, NULL, NULL, NULL),
-(241, 47, 'P-CAD 2006', 'Altium P-CAD 2006 Suite (сетевая) - куплено 5 лицензий', 'P-CAD 2006', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (242, 57, 'КОМПАС-3D Viewer V11', 'КОМПАС-3D Viewer позволяет, не приобретая коммерческой лицензии, просмотреть 3D-модель или чертеж, созданные в системе КОМПАС-3D или КОМПАС-График. Это абсолютно бесплатная система, которую вы можете использовать на рабочем месте или домашнем компьютере.', 'КОМПАС-3D Viewer V11', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (243, 101, 'DWGeditor', 'DWGeditor is free with the purchase of SolidWorks software.', 'DWGeditor', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (244, 139, 'КриптоАРМ', '\"КриптоАРМ Старт\" не требует регистрации и не ограничена временем ее использования. \"КриптоАРМ Стандарт\" и \"КриптоАРМ СтандартPRO\" требуют ввода лицензионного ключа.', 'КриптоАРМ', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
@@ -5153,8 +5194,7 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (246, 82, 'ECE Radar', '', 'ECE Radar, версия,*', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (247, 141, 'doxygen', 'Генератор документации программного кода. Лиц GNU', 'doxygen \\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (248, 142, 'Dr.Explain', 'You may use the free unregistered copy of the Dr.Explain software as long as you wish. The free unregistered copy is almost fully functional though all output images are watermarked. To use all the benefits of the program please order the Dr.Explain licen', 'Dr.Explain', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
-(249, 123, 'FT_Prog', 'FT_PROG is a free EEPROM programming utility for use with FTDI devices.  It is used for modifying EEPROM contents that store the FTDI device descriptors to customize designs.  FT_PROG also includes the capability of programming the Vinculum firmware.', 'FT_Prog', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL);
-INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `additional`, `updated_at`, `updated_by`, `archived`, `links`, `scans_id`) VALUES
+(249, 123, 'FT_Prog', 'FT_PROG is a free EEPROM programming utility for use with FTDI devices.  It is used for modifying EEPROM contents that store the FTDI device descriptors to customize designs.  FT_PROG also includes the capability of programming the Vinculum firmware.', 'FT_Prog', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (250, 143, 'WinSCP', 'Свободный графический клиент протоколов SFTP и SCP, предназначенный для Windows. Распространяется по лицензии GNU GPL. Обеспечивает защищённое копирование файлов между компьютером и серверами, поддерживающими эти протоколы', 'WinSCP \\d+\\.\\d+\\.\\d+\nWinSCP plugin for FAR.*', '', '2023-09-05 05:39:21', 'reviakin.a', NULL, NULL, NULL),
 (251, 144, 'Bouml', 'Редактор UML схем. Since the release 7.0 BOUML is again a free software.', 'Bouml \\d+\\.\\d+', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (252, 145, 'Inno Setup', 'Система создания инсталляторов для Windows программ с открытым исходным кодом. Впервые выпущенный в 1997 году, Inno Setup сегодня конкурирует и даже превосходит многие коммерческие установщики по функциональности и стабильности', 'Inno Setup, версия .*', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
@@ -5165,18 +5205,15 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (257, 96, 'Клиент СУБД Firebird', '', 'Клиент СУБД Firebird \\d+\\.\\d+', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (258, 120, 'Aladdin Monitor', '', 'Aladdin Monitor \\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (259, 120, 'HASP License Manager', '', 'HASP License Manager', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
-(260, 3, 'Visio 2007 Professional', '', 'Microsoft Office Visio Профессиональный 2007', 'Compatibility Pack for the 2007 Office system', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
+(260, 3, 'Visio 2007 Professional', '', 'Microsoft Office Visio Профессиональный 2007', 'Compatibility Pack for the 2007 Office system', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL);
+INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `additional`, `updated_at`, `updated_by`, `archived`, `links`, `scans_id`) VALUES
 (261, 41, 'QuickTime Alternative', 'QuickTime Alternative (codec)', 'QT Lite \\d+\\.\\d+\\.\\d+\nQuickTime Alternative \\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
-(262, 51, 'PDF Editor', 'Shareware. Платная', 'Foxit PDF Editor', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
-(263, 51, 'PDF IFilter', 'Shareware. Платная', 'Foxit PDF IFilter', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (264, 101, 'viewer', 'eDrawings is free software that lets you view and print eDrawings(eDRW, ePRT, eASM), native SolidWorks documents (sldprt, sldasm, slddrw) , DXF, and DWG format files.', 'SolidWorks viewer', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (265, 149, 'Rainlendar', 'Версия Lite бесплатна, версия The Pro version of Rainlendar requires a license file to operate fully.', 'Rainlendar2 \\(remove only\\)', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (266, 83, 'Obzor304', 'Идет в комплекте с железкой Обзор', 'Obzor304 v.*', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (267, 83, 'S2VNA', 'Очередное ПО для приборов от Планар. ПО предоставляется по запросу.', 'S2VNA v\\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (268, 150, 'ModelSim-Altera 6 Starter Edition', 'Free. No license required', 'ModelSim-Altera 6\\.\\d+. \\(Quartus II \\d+\\.\\d+\\) Starter Edition', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
-(269, 151, 'Lingvo 12', 'Куплено определенное количество. 25шт', 'ABBYY Lingvo 12 \\w+ Edition', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (270, 72, 'NPort Windows Driver Manager', '', 'NPort Windows Driver Manager', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
-(271, 152, 'Code Composer Studio', 'Куплено (вроде бы) не менее 3 шт. With the release of CCSv7 all previous v4, v5 and v6 releases are free of charge.', 'Code Composer Studio v\\d+\\.\\d+\nCode Composer Studio \\d+\\.\\d+', 'DSP\\/BIOS \\d+\\.\\d+\\.\\d+\\.\\d+', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (272, 153, 'COM Port Toolkit', 'Shareware ПО для отладки работы COM порта. COM Port Toolkit is available for FREE downloading and using for 30-day trial period. When this period expires you must uninstall it from your system. ', 'COM Port Toolkit \\d+\\.\\d+', '', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (273, 154, 'iTunes', '', 'iTunes', 'Apple Mobile Device Support\nПоддержка программ Apple \\(\\d{2} бит\\)', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
 (274, 154, 'Bonjour', '', 'Bonjour', 'Apple Software Update', '2023-09-05 05:39:21', NULL, NULL, NULL, NULL),
@@ -5196,7 +5233,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (288, 162, 'VRazvedke', 'Какаято хрень от васяна для просмотра закрытых страниц вконтакта, бесплатная', 'VRazvedke', '', '2023-09-05 05:39:22', NULL, NULL, NULL, NULL),
 (289, 163, 'WebMoney Keeper Classic', 'Бесплатное ПО. Keeper WinPro – программа для управления кошельками и работы с системой WebMoney.', 'WebMoney Keeper Classic \\d+\\.\\d+\\.\\d+\\.\\d+\nWebMoney Keeper WinPro', '', '2023-09-05 05:39:22', NULL, NULL, NULL, NULL),
 (290, 164, 'Viewpoint Media Player', 'Какое то adware типа плагина для IE', 'Viewpoint Media Player', '', '2023-09-05 05:39:22', NULL, NULL, NULL, NULL),
-(291, 165, 'WebMoney Advisor', 'WebMoney Advisor - расширение для веб-браузера, разработанное для участников системы расчетов WebMoney Transfer. WebMoney Advisor встраивается в интерфейс Вашего браузера (Internet Explorer 6.0+, Mozilla Firefox 3.5+, Opera 11+ или Chrome 9+) в виде специ', 'WebMoney Advisor', '', '2023-09-05 05:39:22', NULL, NULL, NULL, NULL),
 (292, 166, 'WebMoney Agent', '', 'WebMoney Agent', '', '2023-09-05 05:39:22', NULL, NULL, NULL, NULL),
 (293, 167, '', 'The GNU General Public License is a free, copyleft license for software and other kinds of works. ', 'TortoiseGit \\d+\\.\\d+\\.\\d+\\.\\d+ \\(\\d{2} bit\\)', '', '2023-09-05 05:39:22', NULL, NULL, NULL, NULL),
 (294, 168, 'Html5 geolocation provider', '', 'Html5 geolocation provider', '', '2023-09-05 05:39:22', NULL, NULL, NULL, NULL),
@@ -5283,7 +5319,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (375, 32, 'Display Control Panel', '', 'NVIDIA Display Control Panel', '', '2023-09-05 05:39:23', NULL, NULL, NULL, NULL),
 (376, 3, 'Visio 2016 Professional', '', 'Microsoft Visio профессиональный 2016.*', '', '2023-09-05 05:39:23', NULL, NULL, NULL, NULL),
 (377, 101, 'eDrawings 2016', 'Free', 'eDrawings 2016$\neDrawings 2016 x64$', 'SOLIDWORKS 2017 Document Manager API\nSOLIDWORKS 2016 Document Manager API.*', '2023-09-05 05:39:23', NULL, NULL, NULL, NULL),
-(378, 198, 'MathType 6', 'Проприетарная, Shareware - интерактивный редактор формул', 'MathType 6', '', '2023-09-05 05:39:23', NULL, NULL, NULL, NULL),
 (379, 151, 'Lingvo x6', '', 'ABBYY Lingvo x6', 'Lernout & Hauspie TruVoice American English TTS Engine\nL&H TTS3000.*', '2023-09-05 05:39:23', NULL, NULL, NULL, NULL),
 (380, 199, 'TeXstudio', 'Licensed under the GPL v2. Being open source, you are free to use and to modify it as you like.', 'TeXstudio.*', '', '2023-09-05 05:39:23', NULL, NULL, NULL, NULL),
 (381, 200, 'SMath Studio', 'Free. Tiny, powerful, free mathematical program with WYSIWYG editor and complete units of measurements support.', 'SMath Studio', '', '2023-09-05 05:39:23', NULL, NULL, NULL, NULL),
@@ -5350,14 +5385,12 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (442, 220, 'Foundation', '', 'Foundation', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
 (443, 192, 'nanoCAD Конструкции 4', '', 'nanoCAD Конструкции 4.*', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
 (444, 221, 'DAEMON Tools Lite', 'Lite-версия бесплатна для «домашнего» некоммерческого использования', 'DAEMON Tools Lite', '', '2023-09-05 05:39:24', 'reviakin.a', NULL, NULL, NULL),
-(445, 222, 'Mindjet MindManager Pro 6', 'Платная программа, не куплена. is the industry leading mapping software that helps people and businesses visualize information', 'Mindjet MindManager Pro \\d', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
 (446, 57, 'КОМПАС-Менеджер 5', '', 'КОМПАС-Менеджер 5', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
 (447, 223, 'Free WAV to MP3 Converter', 'Free', 'Free WAV to MP3 Converter \\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
 (448, 27, 'Advanced Port Scanner v1.3', 'Бесплатный сканер портов', 'Advanced Port Scanner v\\d+.\\d+', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
 (449, 7, 'Earth', '', 'Google Earth', '', '2023-09-05 05:39:24', 'reviakin.a', NULL, NULL, NULL),
 (450, 3, 'SQL Server 2008 R2', 'Бесплатный только MS SQL Server Express 2008 R2', 'Microsoft SQL Server 2008 R2', 'Файлы поддержки установки Microsoft SQL Server .*\nMicrosoft SQL Server Native Client\nMicrosoft SQL Server VSS Writer\nУстановка Microsoft SQL Server 2008 R2.*\nФайлы поддержки программы установки Microsoft SQL Server 2008\nPrevious Versions Client\nСобственный клиент Microsoft SQL Server 2008 R2\nСлужбы синхр\\. контроля версий Microsoft SQL Server VSS Writer\nПолитики Microsoft SQL Server 2008 R2\nMicrosoft SQL Server Compact 3.5 SP2 .*\nMicrosoft SQL Server Browser\nMicrosoft Report Viewer Redistributable 2008 SP1.*\nФайлы поддержки программы установки Microsoft SQL Server 20xx\nMicrosoft SQL Server 2008 Setup Support Files', '2023-08-30 13:51:45', NULL, NULL, NULL, NULL),
 (451, 224, 'CloneCD', 'Условно бесплатное ПО (shareware) - программы которые можно бесплатно скачать и использовать определенный промежуток времени', 'CloneCD\nCloneCD \\d+\\.\\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
-(452, 225, 'RAD Studio', 'Есть 1 лицензия на CodeGear RAD studio 2007 Prof', 'RAD Studio', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
 (453, 131, 'Модуль GPS для ДубльГИС', '', 'Модуль GPS для ДубльГИС', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
 (454, 226, 'Opera', '', 'Opera \\d+\\.\\d+\nOpera Stable', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
 (455, 227, 'HTML Help Workshop', '', 'HTML Help Workshop', '', '2023-09-05 05:39:24', NULL, NULL, NULL, NULL),
@@ -5401,7 +5434,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (493, 239, 'ImgBurn', 'First and foremost, ImgBurn is a freeware tool. You cannot bundle it with your own commercial application and you cannot sell it in any way, shape or form. As an individual, you\'re allowed to use it anywhere you like - be it at home or at work.', 'ImgBurn', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (494, 81, 'Амиго', 'что-то вроде вируса:)', 'Амиго', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (495, 101, '2014 Document Manager API', 'The SolidWorks Document Manager API requires a license key that is only available via the SolidWorks customer portal to SolidWorks customers who are currently under subscription.', 'SolidWorks 2014 Document Manager API', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
-(496, 240, 'CIMCO Edit V6', 'Платное ПО', 'CIMCO Edit V6', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (497, 108, 'pdfsam', 'ПО \"PDFsam Basic\" - free, open source. Но идет с платным модулем(снять галку) PDFsam Enhanced. ПО \"PDFsam Visual\" - платная.', 'pdfsam', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (498, 101, 'eDrawings 2014', 'Программа просмотра eDrawings Viewer, доступная в бесплатной и коммерческой версии (eDrawings Professional).', 'eDrawings 2014', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (499, 11, 'Acrobat DC', '', 'Adobe Acrobat DC', '', '2023-09-05 05:39:25', 'reviakin.a', NULL, NULL, NULL),
@@ -5418,12 +5450,9 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (510, 103, 'Пакет драйверов Windows', '', 'Пакет драйверов Windows - Altera \\(WinUSB\\)', '', '2023-09-05 05:39:25', 'reviakin.a', NULL, NULL, NULL),
 (511, 245, 'ARM DS-5', 'Может ставится в месте с quartus или отдельно. DS-5 Community This free edition of DS-5. Платные версии - \"Professional\" и \"Ultimate\". ', 'ARM DS-5 v5', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (512, 103, 'SDK for OpenCL *', '', 'Altera SDK for OpenCL \\d+\\.\\d+\\.\\d+\\.\\d{3}', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
-(513, 103, 'Quartus Prime 15', 'Сетевая лицензия', 'Quartus Prime 15', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (514, 103, 'ModelSim-Altera Starter Edition 15', 'ModelSim*-Intel® FPGA Starter Edition Software - Free no license required', 'ModelSim-Altera Starter Edition 15', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (515, 103, 'ModelSim-Altera Starter Edition 16', 'ModelSim*-Intel® FPGA Starter Edition Software - Free no license required', 'ModelSim-Altera Starter Edition 16', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
-(516, 103, 'Quartus Prime Programmer and Tools 15', 'Сетевая лицензия', 'Quartus Prime Programmer and Tools 15', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (517, 103, 'Quartus Prime Programmer and Tools 16', 'Additional Software for Quartus Prime Standard Edition', 'Quartus Prime Programmer and Tools 16', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
-(518, 103, 'Quartus Prime Standard Edition 15', 'Сетевая лицензия', 'Quartus Prime Standard Edition 15', 'ModelSim-Altera Starter Edition 15', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (519, 103, 'Quartus Prime Standard Edition 16', '', 'Quartus Prime Standard Edition 16', 'ModelSim-Altera Starter Edition 16', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
 (520, 103, 'SoC Embedded Design Suite (EDS) 15', 'Платное ПО. Среда SoC EDS доступна как в бесплатном варианте с ограничениями (Web Edition), так и в полном варианте (Subscription Edition)', 'SoC Embedded Design Suite \\(EDS\\) 15', '', '2023-09-05 05:39:25', 'reviakin.a', NULL, NULL, NULL),
 (521, 246, '4D VIEW', '', '4D VIEW', '', '2023-09-05 05:39:25', NULL, NULL, NULL, NULL),
@@ -5460,8 +5489,7 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (552, 154, 'Mobile Device Support', '', 'Apple Mobile Device Support', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (553, 262, 'Windows Driver Package - STMicroelectronics USBDevice  (12/05/2012 13.54.20.543)', '', 'Windows Driver Package - STMicroelectronics USBDevice  \\(\\d+\\/\\d+\\/\\d{4} \\d+\\.\\d+\\.\\d+\\.\\d{3}\\)', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (554, 262, 'Windows Driver Package - STMicroelectronics USBDevice  (*)', '', 'Windows Driver Package - STMicroelectronics USBDevice  \\(\\d+\\/\\d+\\/\\d{4} \\d+\\.\\d+\\.\\d+\\.\\d{3}\\)', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
-(555, 152, 'Пакет драйверов Windows - Texas Instruments, Inc. (usbser) Ports  (*)', '', 'Пакет драйверов Windows - Texas Instruments, Inc\\. \\(usbser\\) Ports  \\(\\d+\\/\\d+\\/\\d{4} \\d+\\.\\d+\\.\\d{4}\\)', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL);
-INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `additional`, `updated_at`, `updated_by`, `archived`, `links`, `scans_id`) VALUES
+(555, 152, 'Пакет драйверов Windows - Texas Instruments, Inc. (usbser) Ports  (*)', '', 'Пакет драйверов Windows - Texas Instruments, Inc\\. \\(usbser\\) Ports  \\(\\d+\\/\\d+\\/\\d{4} \\d+\\.\\d+\\.\\d{4}\\)', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (556, 262, 'Windows Driver Package - STMicroelectronics (WinUSB) STLinkWinUSB  (*)', '', 'Windows Driver Package - STMicroelectronics \\(WinUSB\\) STLinkWinUSB  \\(\\d+\\/\\d+\\/\\d{4} \\d+\\.\\d+\\)', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (557, 264, 'CamStudio', 'You can download and use it completely free - yep - completely 100% free for your personal and commercial projects as CamStudio and the Codec are released under the GPL', 'CamStudio', 'CamStudio Lossless Codec v\\d+\\.\\d+', '2023-09-05 05:39:26', 'reviakin.a', NULL, NULL, NULL),
 (558, 265, 'Driver Files', '', 'Atmel Driver Files\nAtmel LibUSB0 Driver\nAtmel Segger USB Drivers\nAtmel WinDriver\nAtmel WinUSB', '', '2023-09-05 05:39:26', 'reviakin.a', NULL, NULL, NULL),
@@ -5478,15 +5506,14 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (569, 270, 'USBPcap', 'USBPcap is an open-source USB sniffer for Windows.', 'USBPcap \\d+\\.\\d+\\.\\d+.\\d+', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (570, 152, 'XDCtools 3.23.03.53', 'Бесплатное ПО', 'XDCtools \\d+\\.\\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (571, 152, 'Code Composer Studio v5', 'With the release of CCSv7 all previous v4, v5 and v6 releases are free of charge.', 'Code Composer Studio v5', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
-(572, 271, 'DWGSee Pro', 'ТРИАЛЬНАЯ. Не бесплатная: https://www.dwgsee.com/price.html', 'DWGSee Pro \\d{4}\nDWGSee DWG Viewer', '', '2023-09-05 05:39:26', 'reviakin.a', NULL, NULL, NULL),
 (573, 272, 'Emulation Device Drivers for Windows', 'Starting with Code Composer Ctudio v4, Blackhawk support (device drivers and updates) has been include with the TI distribution media and download.', 'Blackhawk Emulation Device Drivers for Windows', '', '2023-09-05 05:39:26', 'reviakin.a', NULL, NULL, NULL),
-(574, 103, 'Quartus II 12 Programmer and SignalTap II', 'Quartus II Programmer and SignalTap II это Additional Software для Quartus II Web Edition', 'Quartus II 12\\.1sp1 Programmer and SignalTap II', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (575, 3, 'OneDrive', '', 'Microsoft OneDrive', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (576, 273, 'Avast Free Antivirus', 'Free in business. www.avast.com/eula', 'Avast Free Antivirus', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (577, 263, 'J-Link V610n', 'Free', 'J-Link V610n', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (578, 262, 'STM32CubeMX', 'Бесплатное ПО', 'STM32CubeMX', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (579, 274, 'GNU Tools for ARM Embedded Processors', 'Бесплатное ПО', 'GNU Tools for ARM Embedded Processors', '', '2023-09-05 05:39:26', 'reviakin.a', NULL, NULL, NULL),
-(580, 275, 'GNU ARM Eclipse Build Tools', ' GNU GENERAL PUBLIC LICENSE GPLv3 GPLv2', 'GNU ARM Eclipse Build Tools', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
+(580, 275, 'GNU ARM Eclipse Build Tools', ' GNU GENERAL PUBLIC LICENSE GPLv3 GPLv2', 'GNU ARM Eclipse Build Tools', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL);
+INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `additional`, `updated_at`, `updated_by`, `archived`, `links`, `scans_id`) VALUES
 (581, 245, 'Keil µVision4', 'Платное ПО, но есть бесплатная ограниченная лицензия. Keil development development tools without a current product license run as a Lite/Evaluation edition and have the following restrictions: http://www.keil.com/demo/limits.asp', 'Keil µVision4', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
 (582, 3, 'Hotfix KB', '', '\\(KB\\d{6,9}\\)', '', '2023-09-05 05:39:26', 'reviakin.a', NULL, NULL, NULL),
 (583, 276, 'B1 Free Archiver', 'Бесплатное ПО. Архиватор', 'B1 Free Archiver', '', '2023-09-05 05:39:26', NULL, NULL, NULL, NULL),
@@ -5508,7 +5535,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (599, 284, 'XP Tweaker 1.50', 'Бесплатное ПО', 'XP Tweaker 1\\.50', '', '2023-09-05 05:39:27', NULL, NULL, NULL, NULL),
 (600, 285, 'softMCCS', 'Free', 'softMCCS', '', '2023-09-05 05:39:27', 'reviakin.a', NULL, NULL, NULL),
 (601, 286, 'RiDoc 4.3.7.1', 'Платное ПО. Используйте RiDoc 30 дней БЕСПЛАТНО в режиме полного функционала (без ограничений) для ознакомления возможностей программы*.', 'RiDoc 4\\.3\\.7\\.1', '', '2023-09-05 05:39:27', NULL, NULL, NULL, NULL),
-(602, 160, 'AutoCAD 2009', 'Куплено', 'AutoCAD 2009 - Русский', '', '2023-09-05 05:39:27', NULL, NULL, NULL, NULL),
 (603, 287, 'Flash Magic', 'You may install and use an unlimited number of copies of Flash Magic. Flash Magic is provided free as a DEVELOPMENT TOOL ONLY. It is NOT LICENSED FOR PRODUCTION, TESTING OR IN FIELD USE.  ', 'Flash Magic \\d+\\.\\d+', '', '2023-09-05 05:39:27', 'reviakin.a', NULL, NULL, NULL),
 (604, 288, 'MPLAB C18 v3.22 Student Edition', 'если вы загрузите «Студенческое издание» Программного обеспечения из Интернета, вы можете устанавливать и использовать такую ​​версию Программного обеспечения на неограниченном количестве компьютеры для коммерческого или образовательного использования.', 'MPLAB C18 v\\d+\\.\\d+ Student Edition', '', '2023-09-05 05:39:27', NULL, NULL, NULL, NULL),
 (605, 288, 'MPLAB Tools', 'Бесплатное', 'MPLAB Tools', '', '2023-09-05 05:39:27', 'reviakin.a', NULL, NULL, NULL),
@@ -5582,7 +5608,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (673, 324, '', 'Платное ПО. WinImage is shareware. You may evaluate it for a period of 30 days. After 30 days, you need to register it if you intend to continue using WinImage.', 'WinImage', '', '2023-09-05 05:39:28', NULL, NULL, NULL, NULL),
 (674, 325, 'Prism Video File Converter', 'Платное ПО. Non-commercial home use only', 'Prism Video File Converter', '', '2023-09-05 05:39:28', NULL, NULL, NULL, NULL),
 (675, 326, 'PhotoLine 16.5.0.0', 'Платное ПО. You are allowed to use this version for 30 days for testing. There are few little limitations in the testing time', 'PhotoLine 16.5.0.0', '', '2023-09-05 05:39:28', NULL, NULL, NULL, NULL),
-(676, 103, 'Quartus II 12.0 Programmer and SignalTap II (Build 178)', 'Можно скачать из Additional Software для программы \"Quartus II Web Edition\"', 'Quartus II 12.0 Programmer and SignalTap II \\(Build 178\\)', '', '2023-09-05 05:39:28', NULL, NULL, NULL, NULL),
 (677, 3, 'Windows SDK AddOn', '', 'Windows SDK AddOn', '', '2023-09-05 05:39:28', NULL, NULL, NULL, NULL),
 (678, 327, 'OpenSSH for Windows (remove only)', '', 'OpenSSH for Windows \\(remove only\\)', '', '2023-09-05 05:39:28', NULL, NULL, NULL, NULL),
 (679, 3, 'Visual Studio 2017', 'Бесплатна Community Edition и Express. См. условия лицензии программного обеспечения Microsoft Visual Studio 2017 («программное обеспечение»), так как они регулируют использование этого дополнительного компонента. Продолжительность пробного периода — 30 д', 'Microsoft Visual Studio 2017', '', '2023-09-05 05:39:28', NULL, NULL, NULL, NULL),
@@ -5619,7 +5644,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (710, 152, 'bios 6_53_02_00', 'Бесплатно. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:...', 'bios 6_53_02_00', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (711, 347, 'CoreUtils', 'Бесплатное ПО', 'GnuWin32: CoreUtils', '', '2023-09-05 05:39:29', 'reviakin.a', NULL, NULL, NULL),
 (712, 347, 'Make', 'Бесплатное ПО. Make: GNU make utility to maintain groups of programs', 'GnuWin32: Make-\\d+\\.\\d+', '', '2023-09-05 05:39:29', 'reviakin.a', NULL, NULL, NULL),
-(713, 348, 'STM8 Free Special Edition and STM32 32K C Compilers', 'Бесплатно. Starting March 2016, the popular Cosmic STM8 compiler becomes free with no technical limitations and also includes a toolchain for the STM32 limited to 32kb. Limited to one year license, renewable, support included (stm8 only).', 'COSMIC STM8  Free Special Edition and STM32 32K C Compilers', '', '2023-09-05 05:39:29', 'reviakin.a', NULL, NULL, NULL),
 (714, 128, 'Business Explorer', '', 'SAP Business Explorer', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (715, 349, 'Captura', 'Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify...', 'Captura v\\d+\\.\\d+\\.\\d+', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (716, 55, 'TurboV', '', 'TurboV', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
@@ -5629,7 +5653,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (720, 3, 'SQL Server Browser for SQL Server 2012', '', 'SQL Server Browser for SQL Server 2012', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (721, 350, 'Nmap', 'The Npcap License allows end users to download, install, and use Npcap from our site for free.', 'Nmap \\d+\\.\\d+', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (722, 18, 'Teamcenter Applications for Microsoft Office', '', 'Teamcenter Applications for Microsoft Office', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
-(723, 351, 'ADEM CAD/CAM/CAPP 9.0', 'Платное ПО', 'ADEM CAD\\/CAM\\/CAPP 9\\.0', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (724, 352, 'MMANA-GAL Basic, версия 3', 'Базовая версия MMANA-GAL бесплатна и свободна только для некоммерческого использования (например, радиолюбительских и приватных целей). Для любых других применений должна использоваться лицензированная MMANA-GAL RPO.', 'MMANA-GAL_Basic, версия 3', '', '2023-09-05 05:39:29', 'reviakin.a', NULL, NULL, NULL),
 (725, 3, 'Office Live Meeting 2007', '', 'Microsoft Office Live Meeting 2007', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (726, 283, 'USBwave12', 'ПО для железки USB-WAVE12 Elan 12.5MHz USB pen-style Function Generator', 'USBwave12', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
@@ -5641,7 +5664,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (732, 356, 'AusLogics Disk Defrag', '', 'AusLogics Disk Defrag', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (733, 357, 'WIDCOMM Bluetooth Software', 'WIDCOMM Bluetooth Software - бесплатное приложение Bluetooth', 'WIDCOMM Bluetooth Software', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (734, 100, 'Программа Spu_orb (remove only)', '', 'QIP Infium 2.0.9018 RC3\nПрограмма Spu_orb (remove only)', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
-(735, 358, 'Fraps', 'Fraps is proprietary and commercial software, but it is free to use for frame rate display and benchmarking, and free to use with limitations for video capture (30 second time limit, watermark) and screen capture (BMP format only).', 'Fraps', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (736, 359, 'DSO-2090 USB(V*.*.*.*)', 'Драйвер к железке - цифровой осциллограф', 'DSO-2090 USB\\(V\\d+\\.\\d+\\.\\d+.\\d+\\)', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (737, 292, 'ChipProgLPT Programmer 4', '', 'Phyton ChipProgLPT Programmer 4', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
 (738, 292, 'ChipProgUSB Programmer 5', 'ПО для железки, идет с железкой', 'Phyton ChipProgUSB Programmer 5', '', '2023-09-05 05:39:29', NULL, NULL, NULL, NULL),
@@ -5663,8 +5685,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (754, 312, 'MAGNET Office', 'Для камеральной обработки полевых геодезических измерений, полученных различными приборами', 'MAGNET Office v.[0-9.]*$', '', '2023-09-05 05:39:30', NULL, NULL, NULL, NULL),
 (755, 330, 'SketchUp 8', 'Бесплатная для некоммерческого использования', 'SketchUp 8$', '', '2023-09-05 05:39:30', NULL, NULL, NULL, NULL),
 (756, 57, 'КОМПАС-3D Viewer V15', '', 'КОМПАС-3D Viewer V15', '', '2023-09-05 05:39:30', NULL, NULL, NULL, NULL),
-(757, 51, 'PhantomPDF', 'Только платные версии ПО', 'Foxit PhantomPDF$', '', '2018-10-31 07:40:21', NULL, NULL, NULL, NULL),
-(758, 51, 'PhantomPDF Standard', 'Платное ПО', 'Foxit PhantomPDF Standard', '', '2023-09-05 05:39:30', NULL, NULL, NULL, NULL),
 (759, 192, 'nanoCAD СПДС 9.0 x64', '', 'nanoCAD СПДС 9.0 x64', '', '2018-11-01 07:54:37', NULL, NULL, NULL, NULL),
 (760, 369, 'Python 3', 'Без ограничений в любых приложениях, включая проприетарные', 'Python 3[0-9.]* \\(Anaconda3 [0-9.]* 64-bit\\)', '', '2023-09-05 05:39:30', NULL, NULL, NULL, NULL),
 (761, 370, 'IrfanView', 'Бесплатный просмотрщик изображений', 'IrfanView', '', '2023-09-05 05:39:30', NULL, NULL, NULL, NULL),
@@ -5698,11 +5718,9 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (789, 391, 'Stardock Start8', 'Платная. Замена кнопки пуск для вин8', 'Stardock Start8', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (790, 392, '-Win-Client-Pack', 'Бесплатный', 'UNetLab-Win-Client-Pack', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (791, 4, 'MySQL Workbench CE', 'Community Edition — распространяется под свободной лицензией GNU GPL', 'MySQL Workbench [0-9.]* CE$', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
-(792, 393, 'ActivePerl 5', 'ПЛАТНАЯ! Версия COMMUNITY EDITION бесплатная, но она \"non-production deployments\"', 'ActivePerl 5[0-9.]* Build [0-9]*$\nActivePerl 5[0-9.]* Build [0-9]* \\(64-bit\\)', '', '2023-09-05 05:39:31', 'reviakin.a', NULL, NULL, NULL),
 (793, 394, 'ConEmu', 'Бесплатный. Эмулятор терминала для операционной системы Windows', 'ConEmu [0-9.gx]*$', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (794, 7, 'Backup and Sync from Google', 'Бесплатно', 'Backup and Sync from Google', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (795, 395, 'AnVir Task Manager', 'Бесплатная системная утилита, которая позволяет контролировать всё, что запущено на компьютере', 'AnVir Task Manager', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
-(796, 221, 'Astroburn Lite', 'ПЛАТНАЯ для коммерческого', 'Astroburn Lite', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (797, 396, 'Brennig\'s', 'Бесплатная программа для просмотра мультимедийных файлов', 'Brennig\'s [0-9.]*$', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (798, 388, 'CraftWare', 'FREE, fast, easy-to-use slicer software that converts your digital 3D object into a .gcode toolpath format understood by most 3D printers', 'CraftWare 1[0-9.]*$', '', '2023-09-05 05:39:31', 'reviakin.a', NULL, NULL, NULL),
 (799, 397, 'Dev-C++', 'Свободная интегрированная среда разработки приложений для языков программирования C/C++.', 'Dev-C\\+\\+', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
@@ -5718,14 +5736,12 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (809, 405, 'Proteus Professional', 'ПЛАТНАЯ', 'Proteus Professional', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (810, 406, 'calibre', 'Свободное и открытое программное обеспечение для чтения, создания и хранения в электронной библиотеке электронных книг', 'calibre$', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (811, 407, 'Qualcomm USB Drivers For Windows', '', 'Qualcomm USB Drivers For Windows', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
-(812, 408, 'GoToMeeting', 'ПЛАТНОЕ. Бесплатно использовать этот продукт в течение испытательного периода', 'GoToMeeting [0-9.]*$', '', '2023-09-05 05:39:31', 'reviakin.a', NULL, NULL, NULL),
 (813, 409, '', 'Бесплатная система мгновенного обмена текстовыми сообщениями ', 'WhatsApp', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (814, 410, 'Bandicam', '', 'Bandicam', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (815, 3, 'Office 365 ProPlus', '', 'Microsoft Office 365 ProPlus - ru-ru', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (816, 411, 'RADEX Data Center *', 'ПО для счетчика Гейгера', 'RADEX Data Center [0-9.]*\\, версия RADEX Data Center [0-9.]*', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (817, 412, 'x86_64-posix-seh-rt', 'GNU GPL. Порт линух утилит под винду', 'x86_64-[0-9.]*-posix-seh-rt_v\\d+-rev\\d+', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (818, 57, 'КОМПАС-3D Viewer v18', 'Бесплатный', 'КОМПАС-3D Viewer v18 x64\nКОМПАС-3D Viewer v18.1 x64', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
-(819, 180, 'eReader', 'Для доступа к лекциям?', 'Cisco eReader', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (820, 3, 'SQL Server 2008', '', 'Microsoft SQL Server 2008', 'Microsoft SQL Server VSS Writer\nMicrosoft SQL Server 2008 Native Client\nMicrosoft SQL Server 2008 Browser\nMicrosoft Visual Basic PowerPacks 10.0', '2023-08-30 13:51:47', NULL, NULL, NULL, NULL),
 (821, 3, 'Visual C++ 2008, экспресс-выпуск', '', 'Microsoft Visual C\\+\\+ 2008, экспресс-выпуск', '', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
 (822, 3, 'SQL Server 2014 Express LocalDB', 'Express бесплатный', 'Microsoft SQL Server 2014 Express LocalDB', 'Microsoft SQL Server 2014 Transact-SQL ScriptDom\nMicrosoft SQL Server 2014 T-SQL Language Service', '2023-09-05 05:39:31', NULL, NULL, NULL, NULL),
@@ -5754,8 +5770,7 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (845, 317, 'Kaspersky Endpoint Security 10 для Windows', '', 'Kaspersky Endpoint Security 10 для Windows', 'Агент администрирования Kaspersky Security Center', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
 (846, 128, 'JNet', 'Java 1.7 requires JNET installation as part of GUI installer (SAP GUI for Windows 7.20)', 'SAP JNet', '', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
 (847, 425, 'Delta Design 2.6', 'Платная. САПР, реализующая сквозной цикл проектирования печатных плат', 'Delta Design 2.6', '', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
-(848, 262, 'STM8CubeMX', '', 'STM8CubeMX', '', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL);
-INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `additional`, `updated_at`, `updated_by`, `archived`, `links`, `scans_id`) VALUES
+(848, 262, 'STM8CubeMX', '', 'STM8CubeMX', '', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
 (849, 3, 'Project 2007 Professional', '', 'Microsoft Office Project Профессиональный 2007', 'Compatibility Pack for the 2007 Office system', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
 (850, 16, 'USB Audio', 'Фиг знает че это, но что-то в ноуте', 'Realtek USB Audio', '', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
 (851, 3, 'Local Administrator Password Solution', '', 'Local Administrator Password Solution', '', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
@@ -5795,9 +5810,7 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (885, 3, 'Windows Server 2012 R2 Datacenter', '', 'Microsoft Windows Server 2012 R2 Datacenter', '', '2020-11-10 16:59:52', NULL, NULL, NULL, NULL),
 (886, 3, 'Windows Server 2012 R2 Standard', '', 'Microsoft Windows Server 2012 R2 Standard', '', '2020-11-10 17:00:31', NULL, NULL, NULL, NULL),
 (887, 3, 'Windows Server 2008 Standard', '', 'Microsoft Windows Server 2008 Standard', '', '2020-11-10 17:02:37', NULL, NULL, NULL, NULL),
-(888, 47, 'P-CAD 2002', '', 'P-CAD 2002', '', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
 (889, 2, 'Processor Driver', '', 'AMD Processor Driver', 'ATI - Software Uninstall Utility', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
-(890, 260, 'CorelDRAW Graphics Suite 12', 'надо сносить', 'CorelDRAW Graphics Suite 12', '', '2023-09-05 05:39:32', 'reviakin.a', NULL, NULL, NULL),
 (891, 3, 'Office 2003 Professional', '', 'Microsoft Office - профессиональный выпуск версии 2003', 'Compatibility Pack for the 2007 Office system\nMicrosoft Office 2003 Web Components', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
 (892, 260, 'WinZip', '', 'WinZip', '', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
 (893, 3, 'Visio 2003 Professional', '', 'Microsoft Office Visio Professional 2003', '', '2023-09-05 05:39:32', NULL, NULL, NULL, NULL),
@@ -5807,7 +5820,8 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (897, 260, 'CorelDRAW Graphics Suite 2019', '', 'CorelDRAW Graphics Suite 2019', 'Corel Graphics - Windows Shell Extension\nGhostscript GPL', '2023-09-03 08:15:14', 'reviakin.a', NULL, NULL, NULL),
 (898, 22, 'Пакет драйверов Windows', 'Для работы внутри Xen', 'Пакет драйверов Windows - Citrix\nCitrix Xen Windows x64 PV Drivers\nCitrix XenServer Windows Guest Agent', '', '2023-09-05 05:39:33', NULL, NULL, NULL, NULL),
 (899, 253, 'Предприятие 8.3', '', '1C:Предприятие 8 \\(8.3', '', '2023-08-31 03:38:46', 'reviakin.a', NULL, NULL, NULL),
-(900, 260, 'CorelDRAW Graphics Suite X6', '', 'CorelDRAW Graphics Suite X6', 'Corel Graphics - Windows Shell Extension', '2023-09-05 05:39:33', 'reviakin.a', NULL, NULL, NULL),
+(900, 260, 'CorelDRAW Graphics Suite X6', '', 'CorelDRAW Graphics Suite X6', 'Corel Graphics - Windows Shell Extension', '2023-09-05 05:39:33', 'reviakin.a', NULL, NULL, NULL);
+INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `additional`, `updated_at`, `updated_by`, `archived`, `links`, `scans_id`) VALUES
 (901, 317, 'Kaspersky Security для Windows Server', '', 'Kaspersky Security .* для Windows Server', '', '2023-09-05 05:39:33', NULL, NULL, NULL, NULL),
 (902, 260, 'CorelDRAW Graphics Suite 2017', '', 'CorelDRAW Graphics Suite 2017', 'Corel Graphics - Windows Shell Extension\nGhostscript GPL', '2023-09-03 08:14:52', 'reviakin.a', NULL, NULL, NULL),
 (903, 260, 'Ghostscript GPL', 'Идет в комплекте с корелом. Видимо остается после удаления', 'Ghostscript GPL', '', '2023-09-05 05:39:33', NULL, NULL, NULL, NULL),
@@ -5865,10 +5879,8 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (955, 3, 'System CLR Types для SQL Server *', '', 'Microsoft System CLR Types для SQL Server *', '', '2023-09-05 05:39:34', NULL, NULL, NULL, NULL),
 (956, 447, 'FileZilla Client', 'программное обеспечение с открытым исходным кодом, которое распространяется бесплатно в соответствии с условиями Стандартной общественной лицензии GNU.', 'FileZilla Client', '', '2023-09-05 05:39:34', NULL, NULL, NULL, NULL),
 (957, 448, 'Пакет драйверов Windows', '', 'Пакет драйверов Windows - Copper Mountain Technologies', '', '2023-09-05 05:39:34', 'reviakin.a', NULL, NULL, NULL),
-(958, 449, 'Uninstall Tool', 'free trial', 'Uninstall Tool', '', '2023-09-05 05:39:34', NULL, NULL, NULL, NULL),
 (959, 450, 'Revo Uninstaller', 'Revo Uninstaller FREEWARE. Версия Pro платная', 'Revo Uninstaller', '', '2023-09-05 05:39:34', NULL, NULL, NULL, NULL),
 (960, 35, 'ePrint SW', '', 'HP ePrint SW', '', '2023-09-05 05:39:34', NULL, NULL, NULL, NULL),
-(961, 451, 'Akamai NetSession Interface', 'Наверное лучше удалять, ставится без спроса с различным ПО, по тихому как вирус, ПО для отправки данных для различных производителей софта https://itblog21.ru/chto-takoe-akamai-netsession-interface/', 'Akamai NetSession Interface', '', '2023-09-05 05:39:34', NULL, NULL, NULL, NULL),
 (962, 3, 'Visual Studio 2007 Tools for Applications - ENU', '', 'Microsoft Visual Studio 2007 Tools for Applications - ENU', '', '2023-09-05 05:39:34', NULL, NULL, NULL, NULL),
 (963, 3, 'Visual Studio 2005 Tools for Office', '', 'Visual Studio 2005 Tools for Office', '', '2023-09-05 05:39:34', 'reviakin.a', NULL, NULL, NULL),
 (964, 413, 'Free Audio Converter', '', 'Free Audio Converter', '', '2023-09-05 05:39:34', NULL, NULL, NULL, NULL),
@@ -5919,7 +5931,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (1009, 3, 'Project', '', 'Microsoft Project - ru-ru', '', '2023-09-05 05:39:35', NULL, NULL, NULL, NULL),
 (1010, 190, 'ГРАНД-Смета 2021', '', 'ГРАНД-Смета, версия 2021', '', '2021-10-17 18:19:38', NULL, NULL, NULL, NULL),
 (1011, 18, 'NX', 'Почему-то в версии 19 мажорная версия перестала входить в название продукта.', 'Siemens NX', '', '2021-10-20 05:45:48', NULL, NULL, NULL, NULL),
-(1012, 47, 'Designer 20', 'Входит в список типового ПО с авг 2021', 'Altium Designer 20', '', '2021-10-20 05:50:05', NULL, NULL, NULL, NULL),
 (1013, 466, 'The Bat! Professional', '', 'The Bat! Professional', '', '2023-09-05 05:39:35', NULL, NULL, NULL, NULL),
 (1014, 467, 'Git', 'GNU GPL 2', 'Git', '', '2023-09-05 05:39:35', 'reviakin.a', NULL, NULL, NULL),
 (1015, 461, 'Sound Blaster Play!', 'Драйвер для дискретной звуковой карты', 'Sound Blaster Play', '', '2023-09-05 05:39:35', NULL, NULL, NULL, NULL),
@@ -5929,7 +5940,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (1019, 21, 'Quartus Prime Lite Edition (Free)', '', 'Quartus Prime Lite Edition \\(Free\\)', '', '2023-09-05 05:39:35', NULL, NULL, NULL, NULL),
 (1020, 471, 'OCCT', 'OCCT is the most popular all-in-one stability check & stress test tool available.', 'OCCT', '', '2023-09-05 05:39:35', NULL, NULL, NULL, NULL),
 (1021, 472, 'Digilent Software', 'Проприетарное бесплатное ПО для работы с платами', 'Digilent Software', '', '2023-09-05 05:39:35', NULL, NULL, NULL, NULL),
-(1022, 47, 'TASKING C Compiler for 8051', 'Платный, куплена 1 сетевая лицензия', 'TASKING C Compiler for 8051', 'TASKING FLEXlm License Manager', '2023-09-05 05:39:35', NULL, NULL, NULL, NULL),
 (1023, 473, 'AWR Design Environment 14', 'Платное. The AWR Design Environment platform provides RF/microwave engineers with integrated high-frequency circuit (Microwave Office), system (VSS), and EM (AXIEM/Analyst) simulation technologies and design automation', 'AWR Design Environment 14', '', '2023-09-05 05:39:35', NULL, NULL, NULL, NULL),
 (1024, 130, 'RapidDeveloper S', 'Компонент TC10', 'RapidDeveloper S', '', '2023-09-05 05:39:35', NULL, NULL, NULL, NULL),
 (1025, 151, 'FlexiCapture 12 Stations', '', 'ABBYY FlexiCapture 12 Stations', '', '2023-09-05 05:39:35', NULL, NULL, NULL, NULL),
@@ -5952,8 +5962,6 @@ INSERT INTO `soft` (`id`, `manufacturers_id`, `descr`, `comment`, `items`, `addi
 (1042, 479, 'Device Driver', '', 'Advantech Device Driver', '', '2023-09-05 05:39:36', NULL, NULL, NULL, NULL),
 (1043, 482, 'OPC Core Components Redistributable', 'Бесплатное https://opcfoundation.org/license/redistributables/1.3/index.html', 'OPC Core Components Redistributable', '', '2023-09-05 05:39:36', NULL, NULL, NULL, NULL),
 (1044, 483, 'LIRA-SAPR 2019 R2', '', 'LIRA-SAPR 2019 R2', '', '2023-09-05 05:39:36', NULL, NULL, NULL, NULL),
-(1045, 484, 'Фундамент', 'Фундаменты', 'Base', '', '2021-10-28 08:48:15', NULL, NULL, NULL, NULL),
-(1046, 484, 'Plate', '', 'Plate', '', '2023-09-05 05:39:36', NULL, NULL, NULL, NULL),
 (1047, 483, 'ESPRI 2014 R3', '', 'ESPRI 2014 R3', '', '2023-09-05 05:39:36', NULL, NULL, NULL, NULL),
 (1048, 485, 'ФОК+ЛЕНТ-ПК Версия 2010 года', '', 'ФОК\\+ЛЕНТ\\-ПК Версия 2010 года', '', '2023-09-05 05:39:36', NULL, NULL, NULL, NULL),
 (1049, 486, 'SAPFIR 2019 R2', '', 'SAPFIR 2019 R2', '', '2023-09-05 05:39:36', NULL, NULL, NULL, NULL),
@@ -6201,19 +6209,12 @@ INSERT INTO `soft_in_lics` (`id`, `soft_id`, `lics_id`) VALUES
 (139, 698, 3),
 (140, 820, 3),
 (141, 926, 4),
-(142, 101, 5),
-(143, 110, 5),
-(144, 127, 5),
-(145, 240, 5),
-(146, 1012, 5),
 (148, 1035, 7),
 (150, 1010, 9),
 (212, 15, 22),
 (213, 370, 23),
 (214, 1066, 24),
 (219, 1074, 29),
-(220, 179, 30),
-(221, 116, 31),
 (223, 902, 33),
 (224, 897, 34),
 (233, 79, 60),
@@ -6270,14 +6271,15 @@ CREATE TABLE IF NOT EXISTS `soft_lists` (
   `comment` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Списки ПО';
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Списки ПО';
 
 --
 -- Дамп данных таблицы `soft_lists`
 --
 
 INSERT INTO `soft_lists` (`id`, `name`, `descr`, `comment`) VALUES
-(1, 'soft_agreed', 'Согласованное ПО', 'ПО из этого списка может быть установлено и внесено в паспорт');
+(1, 'soft_agreed', 'Согласованное ПО', 'ПО из этого списка может быть установлено и внесено в паспорт'),
+(2, 'warning', 'Запрещенное ПО', 'ПО запрещенное к установке');
 
 -- --------------------------------------------------------
 
@@ -6422,14 +6424,14 @@ CREATE TABLE IF NOT EXISTS `techs_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `num` varchar(16) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `inv_num` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `sn` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `uid` varchar(16) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `hostname` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `num` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `inv_num` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sn` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `uid` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `hostname` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `domain_id` int DEFAULT NULL,
   `model_id` int DEFAULT NULL,
   `arms_id` int DEFAULT NULL,
@@ -6444,27 +6446,27 @@ CREATE TABLE IF NOT EXISTS `techs_history` (
   `departments_id` int DEFAULT NULL,
   `comp_id` int DEFAULT NULL,
   `partners_id` int DEFAULT NULL,
-  `ip` varchar(512) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `mac` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `installed_pos` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `installed_pos_end` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `url` text COLLATE utf8mb4_general_ci,
-  `comment` text COLLATE utf8mb4_general_ci,
-  `history` text COLLATE utf8mb4_general_ci,
-  `specs` text COLLATE utf8mb4_general_ci,
-  `hw` text COLLATE utf8mb4_general_ci,
-  `external_links` text COLLATE utf8mb4_general_ci,
+  `ip` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `mac` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `installed_pos` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `installed_pos_end` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `specs` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `hw` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `installed_back` tinyint(1) DEFAULT NULL,
   `full_length` tinyint(1) DEFAULT NULL,
-  `contracts_ids` text COLLATE utf8mb4_general_ci,
-  `services_ids` text COLLATE utf8mb4_general_ci,
-  `lic_items_ids` text COLLATE utf8mb4_general_ci,
-  `lic_keys_ids` text COLLATE utf8mb4_general_ci,
-  `lic_groups_ids` text COLLATE utf8mb4_general_ci,
-  `maintenance_reqs_ids` text COLLATE utf8mb4_general_ci,
-  `materials_usages_ids` text COLLATE utf8mb4_general_ci,
-  `acls_ids` text COLLATE utf8mb4_general_ci,
-  `maintenance_jobs_ids` text COLLATE utf8mb4_general_ci,
+  `contracts_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `lic_items_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `lic_keys_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `lic_groups_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `maintenance_reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `materials_usages_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `archived` tinyint(1) DEFAULT NULL,
   `management_service_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -6472,7 +6474,7 @@ CREATE TABLE IF NOT EXISTS `techs_history` (
   KEY `techs_history-updated_at` (`updated_at`),
   KEY `techs_history-updated_by` (`updated_by`),
   KEY `idx-techs_history-management_service_id` (`management_service_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `techs_history`
@@ -6541,7 +6543,8 @@ INSERT INTO `techs_history` (`id`, `master_id`, `updated_at`, `updated_by`, `upd
 (60, 60, '2025-05-23 11:27:12', NULL, NULL, 'num,sn,model_id,arms_id,places_id,user_id,it_staff_id,state_id,external_links,contracts_ids', 'ЧЕЛ-ИБП-0002', NULL, '3B1629X15437', NULL, NULL, NULL, 69, 8, NULL, 9, 12, NULL, NULL, 1, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[]', 0, 0, '4', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
 (61, 61, '2025-05-23 11:27:12', NULL, NULL, 'num,sn,model_id,arms_id,places_id,user_id,head_id,state_id,external_links,contracts_ids', 'ЧЕЛ-ИБП-0003', NULL, '3B1629X15438', NULL, NULL, NULL, 69, 9, NULL, 9, 13, 4, NULL, NULL, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[]', 0, 0, '4', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
 (62, 62, '2025-05-23 11:27:12', NULL, NULL, 'num,sn,model_id,arms_id,places_id,user_id,head_id,it_staff_id,state_id,external_links,contracts_ids', 'ЧЕЛ-ИБП-0004', NULL, '3B1629X15439', NULL, NULL, NULL, 69, 10, NULL, 10, 14, 5, NULL, 1, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[]', 0, 0, '4', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
-(63, 63, '2025-05-23 11:27:12', NULL, NULL, 'num,sn,model_id,arms_id,places_id,user_id,state_id,external_links,contracts_ids', 'ЧЕЛ-ИБП-0005', NULL, '3B1629X1543A', NULL, NULL, NULL, 69, 11, NULL, 10, 15, NULL, NULL, NULL, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[]', 0, 0, '4', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
+(63, 63, '2025-05-23 11:27:12', NULL, NULL, 'num,sn,model_id,arms_id,places_id,user_id,state_id,external_links,contracts_ids', 'ЧЕЛ-ИБП-0005', NULL, '3B1629X1543A', NULL, NULL, NULL, 69, 11, NULL, 10, 15, NULL, NULL, NULL, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[]', 0, 0, '4', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(64, 41, '2025-05-25 16:07:23', NULL, NULL, 'materials_usages_ids', 'МСК-ПРН-0001', NULL, 'VCF8955916', NULL, NULL, NULL, 53, NULL, NULL, 3, NULL, NULL, NULL, NULL, 5, NULL, NULL, NULL, NULL, '10.20.40.10', '0017c87697b1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[]', 0, 0, '4', NULL, NULL, NULL, NULL, NULL, '2', NULL, NULL, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -6590,21 +6593,21 @@ CREATE TABLE IF NOT EXISTS `tech_models` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
   `type_id` int DEFAULT NULL,
   `manufacturers_id` int DEFAULT NULL,
-  `name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Модель',
-  `short` varchar(24) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Короткое имя',
-  `links` text COLLATE utf8mb4_unicode_ci COMMENT 'Ссылки',
-  `comment` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Комментарий',
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Модель',
+  `short` varchar(24) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Короткое имя',
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Ссылки',
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Комментарий',
   `individual_specs` int DEFAULT '0',
-  `ports` text COLLATE utf8mb4_unicode_ci,
+  `ports` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `scans_id` int DEFAULT NULL,
-  `front_rack_layout` text COLLATE utf8mb4_unicode_ci,
+  `front_rack_layout` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `contain_front_rack` tinyint(1) DEFAULT '0',
   `front_rack_two_sided` tinyint(1) DEFAULT '0',
-  `back_rack_layout` text COLLATE utf8mb4_unicode_ci,
+  `back_rack_layout` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `contain_back_rack` tinyint(1) DEFAULT '0',
   `back_rack_two_sided` tinyint(1) DEFAULT '0',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
@@ -7012,9 +7015,9 @@ CREATE TABLE IF NOT EXISTS `tech_models_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `type_id` int DEFAULT NULL,
   `manufacturers_id` int DEFAULT NULL,
   `scans_id` int DEFAULT NULL,
@@ -7024,13 +7027,13 @@ CREATE TABLE IF NOT EXISTS `tech_models_history` (
   `front_rack_two_sided` tinyint(1) DEFAULT NULL,
   `back_rack_two_sided` tinyint(1) DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
-  `name` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `short` varchar(24) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `links` text COLLATE utf8mb4_general_ci,
-  `comment` text COLLATE utf8mb4_general_ci,
-  `ports` text COLLATE utf8mb4_general_ci,
-  `front_rack_layout` text COLLATE utf8mb4_general_ci,
-  `back_rack_layout` text COLLATE utf8mb4_general_ci,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `short` varchar(24) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `ports` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `front_rack_layout` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `back_rack_layout` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `tech_models_history-master_id` (`master_id`),
   KEY `tech_models_history-updated_at` (`updated_at`),
@@ -7086,7 +7089,7 @@ CREATE TABLE IF NOT EXISTS `tech_types` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
   `code` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Код',
   `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Название',
-  `prefix` varchar(16) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prefix` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Комментарий',
   `comment_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `comment_hint` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -7095,7 +7098,7 @@ CREATE TABLE IF NOT EXISTS `tech_types` (
   `is_ups` tinyint(1) DEFAULT '0',
   `is_display` tinyint(1) DEFAULT '0',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   `hide_menu` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -7143,10 +7146,10 @@ INSERT INTO `tech_types` (`id`, `code`, `name`, `prefix`, `comment`, `comment_na
 
 DROP TABLE IF EXISTS `ui_dynagrid`;
 CREATE TABLE IF NOT EXISTS `ui_dynagrid` (
-  `id` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Unique dynagrid setting identifier',
-  `filter_id` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Filter setting identifier',
-  `sort_id` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Sort setting identifier',
-  `data` varchar(5000) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Json encoded data for the dynagrid configuration',
+  `id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Unique dynagrid setting identifier',
+  `filter_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Filter setting identifier',
+  `sort_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Sort setting identifier',
+  `data` varchar(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Json encoded data for the dynagrid configuration',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -7155,8 +7158,12 @@ CREATE TABLE IF NOT EXISTS `ui_dynagrid` (
 --
 
 INSERT INTO `ui_dynagrid` (`id`, `filter_id`, `sort_id`, `data`) VALUES
+('comps-index_', NULL, NULL, '{\"page\":\"20\",\"theme\":\"panel-primary\",\"keys\":[\"e04112b1\",\"815e4826\",\"8432c01f\",\"fec7ddce\",\"6043e090\",\"d72dfff6\",\"a67558c3\",\"ff7e2279\"],\"filter\":\"\",\"sort\":\"\"}'),
 ('contracts-index_', NULL, NULL, '{\"page\":\"100\",\"theme\":\"panel-success\",\"keys\":[\"e04112b1\",\"608b6dcd\",\"d17677bd\",\"382ea44d\",\"d3dfbda5\"],\"filter\":\"\",\"sort\":\"\"}'),
+('maintenance-jobs-index_', NULL, NULL, '{\"page\":\"200\",\"theme\":\"panel-primary\",\"keys\":[\"e04112b1\",\"f6bc3db2\",\"7e9692ec\"],\"filter\":\"\",\"sort\":\"\"}'),
 ('networks-index_', NULL, NULL, '{\"page\":100,\"theme\":\"panel-primary\",\"keys\":[\"e04112b1\",\"940318f0\",\"744d892a\",\"7027b453\",\"27f9b629\",\"b2715e5a\"],\"filter\":\"\",\"sort\":\"\"}'),
+('services-index_', NULL, NULL, '{\"page\":100,\"theme\":\"panel-primary\",\"keys\":[\"e04112b1\",\"7d7e01b7\",\"940318f0\",\"a71a2a92\",\"b027c4c9\",\"1fa83a3a\"],\"filter\":null,\"sort\":\"\"}'),
+('soft-index_', NULL, NULL, '{\"page\":\"1000\",\"theme\":\"panel-primary\",\"keys\":[\"ee6a33ae\",\"744d892a\",\"448b7fcc\",\"7a706434\"],\"filter\":\"\",\"sort\":\"\"}'),
 ('techs-index_', NULL, NULL, '{\"page\":\"100\",\"theme\":\"panel-primary\",\"keys\":[\"c15b98b6\",\"07c0f858\",\"bddd5274\",\"8ff1ef6e\",\"b5633c6c\",\"b6d29147\",\"608b6dcd\",\"8432c01f\",\"815e4826\",\"9b8d8098\",\"7e1fbe19\",\"d7ffff64\",\"82347bee\",\"744d892a\",\"d3dfbda5\"],\"filter\":\"\",\"sort\":\"\"}');
 
 -- --------------------------------------------------------
@@ -7185,10 +7192,10 @@ CREATE TABLE IF NOT EXISTS `ui_dynagrid_dtl` (
 DROP TABLE IF EXISTS `ui_tables_cols`;
 CREATE TABLE IF NOT EXISTS `ui_tables_cols` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `table` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `column` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `table` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `column` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `user_id` int DEFAULT NULL,
-  `value` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-ui_tables_cols-table` (`table`),
   KEY `idx-ui_tables_cols-column` (`column`),
@@ -7433,20 +7440,25 @@ CREATE TABLE IF NOT EXISTS `user_groups` (
 DROP TABLE IF EXISTS `wiki_cache`;
 CREATE TABLE IF NOT EXISTS `wiki_cache` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `page` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `dependencies` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `page` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `dependencies` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `valid` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `idx-wiki_cache-page` (`page`(250))
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Дамп данных таблицы `wiki_cache`
 --
 
 INSERT INTO `wiki_cache` (`id`, `page`, `dependencies`, `updated_at`, `valid`) VALUES
-(1, '_internal.sys_:maintenance-jobs:1:description', '||', '2025-05-15 10:55:41', 1);
+(1, '_internal.sys_:maintenance-jobs:1:description', '||', '2025-05-29 10:34:51', 1),
+(2, '_internal.sys_:maintenance-jobs:2:description', '||', '2025-05-29 08:37:25', 0),
+(3, '_internal.sys_:maintenance-jobs:2:descriptionRecursive', '||', '2025-05-27 11:48:18', 1),
+(4, '_internal.sys_:maintenance-jobs:1:descriptionRecursive', '||', '2025-05-29 09:08:01', 1),
+(5, '_internal.sys_:maintenance-jobs:3:descriptionRecursive', '||', '2025-05-29 11:32:42', 1),
+(6, '_internal.sys_:maintenance-jobs:3:description', '||', '2025-05-29 10:34:23', 0);
 
 --
 -- Ограничения внешнего ключа сохраненных таблиц
@@ -7642,6 +7654,7 @@ ALTER TABLE `soft_in_lics`
   ADD CONSTRAINT `soft_in_lics_ibfk_1` FOREIGN KEY (`soft_id`) REFERENCES `soft` (`id`),
   ADD CONSTRAINT `soft_in_lics_ibfk_2` FOREIGN KEY (`lics_id`) REFERENCES `lic_groups` (`id`);
 SET FOREIGN_KEY_CHECKS=1;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

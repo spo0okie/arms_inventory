@@ -10,7 +10,8 @@ return [
 		'attribute'=>'place',
 		'format'=>'raw',
 		'value' => function($data) use($renderer){
-			return $renderer->render('/places/item',['model'=>$data->material->place,'full'=>true]);
+			$place=$data->material->place??null;
+			return is_object($place)?$place->renderItem($renderer,['full'=>true]):null;
 		}
 	],
 	[
@@ -24,7 +25,7 @@ return [
 		'attribute'=>'count',
 		'format'=>'raw',
 		'value' => function($data) use($renderer){
-			return $data->count.' '.$data->material->type->units;
+			return $data->count.' '.($data->material->type->units??'type_error');
 		}
 	],
 	[

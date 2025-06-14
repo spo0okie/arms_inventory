@@ -8,8 +8,8 @@ use yii\bootstrap5\Html;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\ArmsModel */
 /* @var $model app\models\ArmsModel */
+/* @var $searchModel app\models\ArmsModel */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $switchArchivedCount */
 
@@ -62,8 +62,9 @@ if (isset(Yii::$app->request->get()[$searchClass])) {
 		]),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel??null,
-		'toolButton'=> $additionalToolButton.($model->hasAttribute('archived')?
-			'<span class="p-2">'. ShowArchivedWidget::widget([
+		'toolButton'=> $additionalToolButton
+			.(($model->hasAttribute('archived')&&is_object($searchModel??null))?	//если у нас есть атрибут "архивный" и фильтр
+			'<span class="p-2">'. ShowArchivedWidget::widget([			//то отображаем виджет
 				'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
 				'labelBadge'=>$switchArchivedDelta,
 				'state'=>$searchModel->archived

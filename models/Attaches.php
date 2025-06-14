@@ -23,7 +23,7 @@ use yii\web\UploadedFile;
  * @property string|null $fullFname
  * @property UploadedFile $uploadedFile
  */
-class Attaches extends ActiveRecord
+class Attaches extends ArmsModel
 {
 	
 	public $uploadedFile;

@@ -135,6 +135,11 @@ class LoginJournal extends ArmsModel
 			return mb_strtolower($tokens[1]).' (пользователь не найден в БД)';
 		}
 	}
+	
+	public function getName()
+	{
+		return $this->userDescr.'->'.$this->compName;
+	}
 
 
 	/**

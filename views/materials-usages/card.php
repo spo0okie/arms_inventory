@@ -44,7 +44,7 @@ if (!isset($static_view)) $static_view=false;
     <p class="mb-3">
 	    <?= $this->render('/materials/item',['model'=>$model->material]) ?>
         <br />
-        <?= abs($model->count) ?> <?= $model->material->type->units ?> <?= $model->count<0?'получено':'израсходовано' ?>
+        <?= abs($model->count) ?> <?= $model->material->type->units??'' ?> <?= $model->count<0?'получено':'израсходовано' ?>
     </p>
 
 

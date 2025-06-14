@@ -104,9 +104,10 @@ class SchedulesEntriesController extends ArmsBaseController
     	
         $item->delete();
 	
-		return (is_object($schedule) && $schedule->isAcl)?
+		return is_object($schedule)?($schedule->isAcl?
 			$this->redirect(['/scheduled-access/view', 'id' => $schedule->id]):
-			$this->redirect(['/schedules/view', 'id' => $schedule->id]);
+			$this->redirect(['/schedules/view', 'id' => $schedule->id])
+		):$this->redirect(['/schedules/index']);
     }
 
 

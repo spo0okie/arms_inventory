@@ -147,6 +147,7 @@ class LicGroups extends ArmsModel
 				'class' => ManyToManySmartUpdater::class,
 				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
 			]],
+			'lic_types_id' => [LicTypes::class, 'lic_groups_ids'],
 		];
 	}
 	

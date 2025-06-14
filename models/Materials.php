@@ -287,7 +287,7 @@ class Materials extends ArmsModel
 	 */
 	public function getTypeName()
 	{
-		return $this->type->name.': '.$this->model;
+		return ($this->type->name??'type_error').': '.$this->model;
 	}
 
 

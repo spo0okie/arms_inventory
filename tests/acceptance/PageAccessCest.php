@@ -2,15 +2,18 @@
 
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
+use Codeception\TestInterface;
 use yii\base\InvalidConfigException;
 
 class PageAccessCest
 {
+	public $savedModels=[];
+	public $rootDb;
 	
-	public function _before(AcceptanceTester $I)
+	public function _failed($test, $fail)
 	{
+		Helper\Acceptance::$testsFailed = true;
 	}
-	
 	/**
 	 * Возвращает объект контроллера по имени файла
 	 * и reflectionClass контроллера
@@ -72,6 +75,40 @@ class PageAccessCest
 		return [$model,$otherModel];
 	}
 	
+	protected function getModel($controller,$params)
+	{
+		codecept_debug('getModels for controller: '.get_class($controller));
+		if (property_exists($controller,'modelClass')) {
+			// Если контроллер имеет атрибут modelClass, то получаем его
+			$modelClass = $controller->modelClass;
+			codecept_debug('modelClass: '.$modelClass);
+			if ($modelClass) {
+				return $modelClass::find()->where($params)->one();
+			}
+		}
+		return null;
+	}
+	
+	protected function dropReverseLinks($model)
+	{
+		if (is_null($model)) return;
+		$needUpdate=false;
+		foreach ($model->getLinksSchema() as $attribute=>$data) {
+			if (StringHelper::endsWith($attribute,'_ids')) {
+				codecept_debug('Dropping '.get_class($model).' reverse link: '.$attribute);
+				$model->$attribute=[];
+				$needUpdate=true;
+			}
+		}
+		if ($needUpdate) {
+			codecept_debug('Dropping reverse links for model: '.get_class($model).' id: '.$model->id);
+			if (!$model->save(false)) {
+				throw new InvalidConfigException('Error saving model after dropping reverse links: '.print_r($model->getErrors(),true));
+			}
+			codecept_debug('Dropping reverse links for model: '.get_class($model).' id: '.$model->id.' SUCCESS');
+		}
+	}
+	
 	/**
 	 * Возвращает список атрибутов, которые надо заполнять в форме для модели
 	 * @param \app\models\ArmsModel $model
@@ -107,14 +144,16 @@ class PageAccessCest
 	
 	/**
 	 * Наполняет шаблоны в параметрах значениями
+	 *
 	 * @param array $params
 	 * @param array $models
 	 * @return void
+	 * @throws InvalidConfigException
 	 */
 	protected function templateRouteParams(&$params,$models)
 	{
 		foreach ($params as $verb=>$verbParams) {
-			foreach ($verbParams as $param=>$value) {
+			if (is_array($verbParams)) foreach ($verbParams as $param=>$value) {
 				switch ($value) {
 					case '{anyId}':
 						if (is_null($models[0]))
@@ -143,66 +182,161 @@ class PageAccessCest
 						unset($params[$verb][$param]); //убираем параметр с макросом, так как его заменяем множество параметров
 						$params[$verb][StringHelper::className(get_class($models[1]))]=$this->fillForm($this->getFormAttributes($models[1]),$models[1]);
 						break;
+					default:
+						if (is_string($value) && preg_match('/{(\w+)ModelParams}}/', $value, $matches)) {
+							//если в значении параметра есть макрос, то заменяем его на параметры модели
+							$name=$matches[1];
+							if (isset($models[$name])) {
+								$model=$models[$name];
+								$params[$verb][StringHelper::className(get_class($model))]=$this->fillForm($this->getFormAttributes($model),$model);
+							} else {
+								throw new InvalidConfigException("Error loading model '$model' in route params");
+							}
+						}
+						if (is_array($value)) {
+							$this->templateRouteParams($params[$verb], $models);
+						}
 				}
 			}
 		}
 	}
 	
+	/**
+	 * Подготавливает маршруты, которые есть у приложения чтобы их протестировать
+	 * Эта функция через phpDoc указана у теста testAllRoutesAccessible как dataProvider
+	 * И по логике codeception она вызывается до _beforeSuite
+	 * А нам в ней нужно рабочее приложение с развернутой тестовой БД
+	 * поэтому инициализации приложения и его БД перенесено в эту функцию
+	 * @return array
+	 * @throws InvalidConfigException
+	 */
 	protected function routesProvider()
 	{
 		$routes = [];
 		$params=require __DIR__.'/../_data/get-routes-data.php';
+		Helper\Yii2::initFromFilename('test-acceptance.php');
+		codecept_debug('Initializing Suite DB...');
+		//Подготавливаем временную БД
+		Helper\Database::dropYiiDb();
+		Helper\Database::prepareYiiDb();
+		Helper\Database::loadSqlDump(__DIR__ . '/../_data/arms_demo.sql');
 		
 		//перебираем все файлы контроллеров
-		foreach (scandir(Yii::getAlias('@app/controllers')) as $file) {
+		foreach (scandir(__DIR__.'/../../controllers') as $file) {
 			codecept_debug($file);
 			$controller=$this->getController($file);
 			if (is_object($controller)) {
-				$models=$this->getModels($controller);
+				if (!$controller instanceof \app\controllers\ArmsBaseController /*|| !$controller instanceof \app\controllers\LicItemsController*/) {
+					continue;
+				}
 				
 				foreach ($this->getActions($controller) as $action) {
 					$actionId=StringHelper::class2Id($action);
 					
 					// Проверяем, разрешён ли GET
 					$verbs = $controller->behaviors()['verbs']['actions'][$actionId] ?? ['GET'];
-					if (!in_array('GET', $verbs)) continue;
+					if (!count($verbs)) continue;	//если получили [] - значит действие отключено и всегда будет возвращать 405
 					
 					$route=StringHelper::class2Id($controller->id).'/'.$actionId;
 					
-					$routeParams=ArrayHelper::findByRegexKey($params,$route,[]);
 					
-					if ($routeParams==='{skipTest}') continue;
+					$variant=0;
 					
-					try {
-						$this->templateRouteParams($routeParams,$models);
-					} catch (InvalidConfigException $e) {
-						//дополняем информацию маршрутом на котором произошла ошибка
-						throw new InvalidConfigException("Error in route '$route': ".$e->getMessage());
+					while (!is_null($routeParams=ArrayHelper::findByRegexKey(
+						$params,
+						$route.($variant?"[$variant]":''),	//если это не нулевой вариант, то дописываем суффикс[N]
+						$variant?null:[]							//если это нулевой вариант, то по умолчанию он может быть и без параметров
+					))) {
+						
+						//codecept_debug($route.($variant?"[$variant]":''));
+						//codecept_debug(print_r($routeParams,true));
+						
+						if ($routeParams === '{skipTest}') continue 2;
+						
+						$routeParams['route'] = $route;
+						$routeParams['controller'] = $controller;
+						$routes[] = $routeParams;
+						
+						$variant++;
 					}
-					
-					$routeParams['route']=$route;
-					$routes[] = $routeParams;
 				}
 				
 				
 			}
 		}
+		usort($routes, function ($a, $b) {
+			$priority = ['delete', 'validate', 'update', 'create', 'view'];
+			[$controllerA,$actionA]=explode('/', $a['route']);
+			[$controllerB,$actionB]=explode('/', $b['route']);
+			
+			if ($controllerA!==$controllerB) return $controllerA<=>$controllerB;
+			
+			$indexA = array_search($actionA, $priority);
+			$indexB = array_search($actionB, $priority);
+			
+			// Если окончание не найдено, ставим в конец
+			$indexA = $indexA !== false ? $indexA : PHP_INT_MAX;
+			$indexB = $indexB !== false ? $indexB : PHP_INT_MAX;
+			
+			return $indexA <=> $indexB;
+		});
 		return $routes;
 	}
 	
 	/**
 	 * @dataProvider routesProvider
 	 * @return void
+	 * @noRollback
 	 */
 	public function testAllRoutesAccessible(AcceptanceTester $I, \Codeception\Example $example)
 	{
+		$I->stopFollowingRedirects();
 		$route=$example['route'];
-		$getParams=$example['GET']??[];
+		$controller=$example['controller'];
+		$modelClass=$controller->modelClass;
+		if (!isset($this->savedModels[$modelClass])) $this->savedModels[$modelClass]=[];
+		
+		$models=\yii\helpers\ArrayHelper::merge(
+			$this->getModels($controller),$this->savedModels[$modelClass]
+		);
+		
+		$routeParams=(array)$example->getIterator();
+		try {
+			$this->templateRouteParams($routeParams, $models);
+		} catch (InvalidConfigException $e) {
+			//дополняем информацию маршрутом на котором произошла ошибка
+			throw new InvalidConfigException("Error in route '$route': " . $e->getMessage());
+		}
+
+		if (!is_null($saveModel=$routeParams['saveModel']??null)) {
+			$this->savedModels[$modelClass][$saveModel['storeAs']]=$this->getModel($controller,$saveModel['model']);
+		}
+		
+		if (!is_null($dropReverseLinks=$routeParams['dropReverseLinks']??null)) {
+			$this->dropReverseLinks($this->getModel($controller,$dropReverseLinks));
+		}
+		
+		$getParams=$routeParams['GET']??[];
 		$getParams[0]='/'.$route;
 		$route=\yii\helpers\Url::toRoute($getParams);
+		
+		$postParams=$routeParams['POST']??null;
+		$code=$example['response']??200;
+		
+		
+		$message='';
+		if (is_null($postParams)) {
+			$I->amOnPage($route);
+			$message="GET $route is accessible";
+			
+		} else {
+			$I->sendPOST($route, $postParams);
+			$message="POST data $route is nominal";
+		}
 
-		$postParams=$example['POST']??[];
-		$I->amOnPage('/web'.$route);
-		$I->seeResponseCodeIs(200,"GET $route is accessible");
+		if (is_array($code))
+			$I->seeResponseCodeIsBetween(min($code),max($code),$message);
+		else
+			$I->seeResponseCodeIs($code,$message);
 	}
 }

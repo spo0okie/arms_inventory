@@ -26,10 +26,10 @@ if (is_object($model)) {
 	>
         <?= \yii\helpers\Html::a(
 	        ($date?$model->date.' ':'').
-			($from?($model->material->place->fullName):'').
+			($from?($model->material->place->fullName??''):'').
 			(($from&&$material)?' \ ':'').
-			($material?($model->material->type->name.':'.$model->material->model):'').
-			($count?(' <span class="badge bg-secondary">'.$model->count.$model->material->type->units.'</span>'):'').
+			($material?($model->material->typeName??'material_error'):'').
+			($count?(' <span class="badge bg-secondary">'.$model->count.($model->material->type->units??'').'</span>'):'').
 			($cost&&$model->cost?('<span class="badge bg-success">'.$model->cost.$model->currency->symbol.'</span>'):'').
             (($count&$to)?' -&gt; ':'').
             ($to?$model->to:''),

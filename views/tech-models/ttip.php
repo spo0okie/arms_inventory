@@ -17,7 +17,7 @@ use yii\helpers\Html;
 		
 		<?= IsHistoryObjectWidget::widget(['model'=>$model]) ?>
 		<h1><?= Html::a($model->manufacturer->name.' '.$model->name,['/tech-models/view','id'=>$model->id]) ?></h1>
-		<?= $this->render('/tech-types/item',['model'=>$model->type]) ?>
+		<?= $model->type->renderItem($this) ?>
 		<p>
 			<?= Yii::$app->formatter->asNtext($model->comment) ?>
 		</p>

@@ -18,7 +18,7 @@ class MaterialsController extends ArmsBaseController
 	
 	public function disabledActions()
 	{
-		return ['item-by-name','ttip'];
+		return ['item-by-name'];
 	}
 	
 	public function accessMap()
@@ -73,6 +73,10 @@ class MaterialsController extends ArmsBaseController
 			'hide_usages' => Yii::$app->request->get('hide_usages'),
 			'hide_places' => Yii::$app->request->get('hide_places'),
 		]);
+	}
+	
+	public function actionTtip($id) {
+		return $this->actionTtips($id);
 	}
 	
 	/**
