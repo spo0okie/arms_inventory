@@ -2,6 +2,7 @@ actor: MigrationsTester
 modules:
     enabled:
         - \Helper\Migrations
+        - \Helper\Database
         - Asserts
         - Yii2:
               part: [ orm, fixtures ]
@@ -9,4 +10,4 @@ modules:
         Yii2:
             configFile: 'config/test-migrations.php'
             cleanup: false
-#bootstrap: _bootstrap.php
+bootstrap: _bootstrap.php
