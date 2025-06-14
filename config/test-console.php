@@ -2,9 +2,10 @@
 //конфиг для консольного теста
 use yii\helpers\ArrayHelper;
 
-$db=ArrayHelper::merge(
-	require __DIR__ . '/test_db.php',
-	require __DIR__ . '/test_db-local.php'
+$db = \app\helpers\ArrayHelper::merge(
+	require __DIR__ . '/db.php',
+	require __DIR__ . '/db-local.php',
+	['dsn'=>'mysql:host=127.0.0.1;dbname=arms_test', 'username' => 'root',    'password' => '',]
 );
 
 /**
