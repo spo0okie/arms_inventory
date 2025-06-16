@@ -7,15 +7,15 @@ use yii\helpers\FileHelper;
 class HistoryPagesCest
 {
 	
-    public function _before(AcceptanceTester $I)
-    {
-		
-    }
+	public function _failed($test, $fail)
+	{
+		Helper\Acceptance::$testsFailed = true;
+	}
 	
 	protected function classesProvider()
 	{
 		$classes=[];
-		$modelsPath = Yii::getAlias('@app/models');
+		$modelsPath = __DIR__.'/../../models';
 		$modelFiles = FileHelper::findFiles($modelsPath, [
 			'only' => ['*.php'],
 			'recursive' => true,
