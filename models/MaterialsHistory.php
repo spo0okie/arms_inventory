@@ -38,8 +38,11 @@ class MaterialsHistory extends HistoryModel
     {
         return 'materials_history';
     }
-
-
-    
+	
+	
+	public function getTypeName()
+	{
+		return ($this->type->name??'type_error').': '.$this->model;
+	}
 
 }
