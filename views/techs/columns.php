@@ -211,6 +211,9 @@ $columns=[
 			foreach ($data->licKeys as $item) $items[]=$renderer->render('/lic-keys/item',['model'=>$item]);
 			return count($items)?ExpandableCardWidget::widget(['content'=>implode('<br>',$items),'cardClass'=>'line-br']):'';
 		},
+	],
+	'itStaff' =>[
+		'contentOptions' => ['item_options'=>['short'=>true]],
 	]
 
 ];
