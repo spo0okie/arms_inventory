@@ -13,8 +13,8 @@ use app\models\traits\ExternalDataModelTrait;
 use DateTime;
 use DateTimeZone;
 use Throwable;
-use voskobovich\linker\LinkerBehavior;
 use Yii;
+use yii\base\UnknownPropertyException;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Exception;
@@ -595,6 +595,34 @@ class ArmsModel extends ActiveRecord
 		return $this->recursiveCache[$attr.'::node']=null;
 	}
 	
+	/**
+	 * Возвращает текстовое поле в котором может быть указано {{PARENT}} и оно будет заменено на значение
+	 * этого поля в родителе модели (имеет смысл только в моделях с иерархией)
+	 * @param string    $field	поле (например comment) в котором может быть {{PARENT}}
+	 * @param string|null    $recursiveField рекурсивное поле (например commentRecursive) в котором {{PARENT}} будет уже заменено
+	 * @return string|null
+	 */
+	public function textRecursiveField(string $field, $recursiveField=null)
+	{
+		$PARENT='{{PARENT}}';
+		$text=$this->$field;
+		if (strpos($text,$PARENT)===false) return $text;
+		
+		$parentAttr=$this->parentAttr;
+		if (!$this->canGetProperty($parentAttr)) return $text;
+		/** @var ArmsModel $parent */
+		$parent=$this->$parentAttr;
+		$parentText='';
+		
+		if (is_object($parent)) {
+			$parentText=$recursiveField?
+				$parent->$recursiveField:
+				$parent->textRecursiveField($field);
+		};
+		
+		return str_replace($PARENT, $parentText, $text);
+	}
+	
 	public function externalData() {}
 	
 	/**
@@ -788,7 +816,32 @@ class ArmsModel extends ActiveRecord
 					return $this->attributeFetchLinks($link,$this->$link);
 			}
 		}
-		return parent::__get($name);
+		
+		
+		try {
+			return parent::__get($name);
+		} catch (UnknownPropertyException $e) {
+			//если мы не нашли свойство
+			//если это рекурсивный аттрибут, и у модели есть ссылка на родителя
+			if (StringHelper::endsWith($name,'Recursive') && $this->canGetProperty($this->parentAttr)) {
+				//разбираемся к какому атрибуту у нас добавлена рекурсия
+				$plain=StringHelper::removeSuffix($name,'Recursive');
+				//и есть ли у нас такой атрибут
+				if ($this->canGetProperty($plain)) {
+					//выясняем какой у него тип
+					$type=$this->getAttributeType($plain);
+					
+					//для текста мы просто заменяем {{PARENT}} на родительское значение этого же поля
+					if ($type==='text')
+						return $this->textRecursiveField($plain,$name);
+					
+					//если аттрибут наследуемый, то вытаскиваем его значение рекурсивно
+					if ($this->attributeIsInheritable($plain))
+						return $this->findRecursiveAttr($plain,$name);
+				}
+			}
+			throw $e;
+		}
 	}
 	
 	/**

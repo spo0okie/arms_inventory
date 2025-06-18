@@ -53,9 +53,9 @@ trait MaintenanceJobsModelCalcFieldsTrait
 		return $this->attrsCache['isBackup'];
 	}
 	
-	public function getServiceRecursive()
+	/*public function getServiceRecursive()
 	{
-		/** @var MaintenanceJobs $this */
+		/** @var MaintenanceJobs $this
 		return $this->findRecursiveAttr(
 			'service',
 			'serviceRecursive',
@@ -65,7 +65,7 @@ trait MaintenanceJobsModelCalcFieldsTrait
 
 	public function getScheduleRecursive()
 	{
-		/** @var MaintenanceJobs $this */
+		/** @var MaintenanceJobs $this
 		return $this->findRecursiveAttr(
 			'schedule',
 			'scheduleRecursive',
@@ -75,7 +75,7 @@ trait MaintenanceJobsModelCalcFieldsTrait
 	
 	public function getReqsRecursive()
 	{
-		/** @var MaintenanceJobs $this */
+		/** @var MaintenanceJobs $this
 		return $this->findRecursiveAttr(
 			'reqs',
 			'reqsRecursive',
@@ -83,27 +83,28 @@ trait MaintenanceJobsModelCalcFieldsTrait
 		);
 	}
 	
-	public function getDescriptionRecursive()
+	/*public function getDescriptionRecursive()
 	{
-		$description=$this->description;
-		/** @var MaintenanceJobs $this */
-		if (strpos($description,'{{PARENT}}')===false) return $description;
-		$parent=is_object($this->parent)?$this->parent->description:'';
-		return str_replace('{{PARENT}}', $parent, $description);
-	}
+		return $this->textRecursiveField('description','descriptionRecursive');
+	}*/
 	
 	/**
 	 * Удовлетворяет ли эта операция обслуживания требованию из аргумента
 	 * @param MaintenanceReqs $req
-	 * @return false
+	 * @return bool
 	 */
 	public function satisfiesReq(MaintenanceReqs $req)
 	{
-		if (!is_array($this->reqs)) return false;	//если она не удовлетворяет ничему, то и искомому тоже не удовлетворяет
-		foreach ($this->reqsRecursive as $test) {			//если это требование перечислено явно в этой операции то успех
+		//если она не удовлетворяет ничему, то и искомому тоже не удовлетворяет
+		if (!is_array($this->reqs)) return false;
+		
+		//если это требование перечислено явно в этой операции, то успех
+		foreach ($this->reqsRecursive as $test) {
 			if ($req->id == $test->id) return true;
 		}
-		//явно не перечислено, тогда поищем, может это требование удовлетворяется другими требованиями, и они перечислены явно
+		
+		//явно не перечислено, тогда проверяем что
+		//это требование удовлетворяется другими требованиями, и они перечислены явно
 		foreach ($req->satisfiedBy() as $parent) {
 			if ($this->satisfiesReq($parent)) return true;
 		}
@@ -111,7 +112,7 @@ trait MaintenanceJobsModelCalcFieldsTrait
 	}
 	
 	/**
-	 * Все потомки (включая потомков потомков)
+	 * Все потомки (включая потомков от потомков)
 	 * @return MaintenanceJobs[]|ActiveQuery
 	 */
 	public function getChildrenRecursive()
