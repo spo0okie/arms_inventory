@@ -7,6 +7,7 @@ use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;use app\components\ShowArchivedWidget;
 use app\components\StripedAlertWidget;
+use app\components\TextFieldWidget;
 use app\components\UrlListWidget;
 use app\models\Services;
 use yii\helpers\Html;
@@ -68,8 +69,6 @@ if(!$static_view) { ?>
 				(в т.ч. НДС: <?= $model->sumCharge.''.$model->currency->symbol ?>)
 			<?php } ?> / мес.<br/>
 		<?php }
-		//var_dump(\app\models\ContractsStates::fetchUnpaidIds());
-		//var_dump($model->docs[0]->allChildren);
 		if (count($model->totalUnpaid)) {
 			$debt=[];
 			foreach ($model->totalUnpaid as $currency=>$total)
@@ -140,7 +139,7 @@ if(!$static_view) { ?>
 		</div>
 		
 		<div class="mb-3">
-			<?= Yii::$app->formatter->asNtext($model->description) ?>
+			<?= TextFieldWidget::widget(['model'=>$model,'field'=>'description']) ?>
 		</div>
 		<?= UrlListWidget::Widget(['list'=>$model->linksRecursive]) ?>
 		<br />

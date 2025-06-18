@@ -3,6 +3,7 @@
 use app\components\assets\DynaGridWidgetAsset;
 use app\components\DynaGridWidget;
 use app\components\TabsWidget;
+use app\components\TextFieldWidget;
 use app\models\Services;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -29,7 +30,7 @@ DynaGridWidgetAsset::register($this);
 	<?php if (strlen($model->notebook)) { ?>
 		<h4>Записная книжка:</h4>
 		<p>
-			<?= \app\components\WikiTextWidget::widget(['model'=>$model,'field'=>'notebook']) ?>
+			<?= TextFieldWidget::widget(['model'=>$model,'field'=>'notebook']) ?>
 		</p>
 		<br />
 	<?php } ?>

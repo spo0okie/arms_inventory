@@ -2,6 +2,7 @@
 
 use app\components\ModelFieldWidget;
 use app\components\TableTreePrefixWidget;
+use app\components\TextFieldWidget;
 use app\components\UrlListWidget;
 use app\models\Services;
 
@@ -76,7 +77,10 @@ return [
 	],
 	'description' => [
 		'value' => function ($data) {
-			return UrlListWidget::Widget(['list'=>$data->links]).' '.$data->description;
+			return \app\helpers\ArrayHelper::implode('<br>',[
+				TextFieldWidget::widget(['model'=>$data,'field'=>'description']),
+				UrlListWidget::Widget(['list'=>$data->links])
+			]);
 		},
 	],
 	'responsible' => [
