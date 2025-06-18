@@ -4,6 +4,7 @@ namespace app\models\ui;
 
 use app\models\Places;
 use app\models\traits\AttributeDataModelTrait;
+use app\models\traits\AttributeLinksModelTrait;
 use stdClass;
 use yii\base\Model;
 
@@ -14,7 +15,7 @@ use yii\base\Model;
  */
 class MapItemForm extends Model
 {
-	use AttributeDataModelTrait;
+	use AttributeDataModelTrait,AttributeLinksModelTrait;
 	
 	public $place_id;	//куда добавляем
 	public $item_type;	//тип объекта на карте
