@@ -660,7 +660,7 @@ class Comps extends ArmsModel
 	{
 		//берем сервисы ОС
 		$services=$this->services;
-		if (is_object($managementService=$this->arm->managementService)) {
+		if (is_object($managementService=$this->arm->managementService??null)) {
 			//если есть сервис управления АРМ, то берем его в сервисы
 			$services[]=$managementService;
 		}
