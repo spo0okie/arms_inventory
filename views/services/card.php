@@ -139,7 +139,7 @@ if(!$static_view) { ?>
 		</div>
 		
 		<div class="mb-3">
-			<?= TextFieldWidget::widget(['model'=>$model,'field'=>'description']) ?>
+			<?= TextFieldWidget::widget(['model'=>$model,'field'=>'descriptionRecursive']) ?>
 		</div>
 		<?= UrlListWidget::Widget(['list'=>$model->linksRecursive]) ?>
 		<br />

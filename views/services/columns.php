@@ -78,7 +78,7 @@ return [
 	'description' => [
 		'value' => function ($data) {
 			return \app\helpers\ArrayHelper::implode('<br>',[
-				TextFieldWidget::widget(['model'=>$data,'field'=>'description']),
+				TextFieldWidget::widget(['model'=>$data,'field'=>'descriptionRecursive']),
 				UrlListWidget::Widget(['list'=>$data->links])
 			]);
 		},
