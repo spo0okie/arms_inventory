@@ -74,14 +74,7 @@ return [
 		}
 	],
 	'acePartners'=>[
-		'value'=>function($data) use ($renderer) {
-			return ModelFieldWidget::widget([
-				'model'=>$data,
-				'field'=>'acePartners',
-				'title'=>false,
-				'card_options'=>['cardClass'=>'m-0 p-0'],
-				'item_options'=>['static_view'=>true],
-			]);		}
+		'contentOptions'=>['glue'=>'<br>',]
 	],
 	'aclSegments'=>[
 		'value'=>function($data) use ($renderer) {
@@ -95,15 +88,7 @@ return [
 		}
 	],
 	'aceDepartments'=>[
-		'value'=>function($data) {
-			return ModelFieldWidget::widget([
-				'model'=>$data,
-				'field'=>'aceDepartments',
-				'title'=>false,
-				'card_options'=>['cardClass'=>'m-0 p-0'],
-				'item_options'=>['static_view'=>true],
-			]);
-		}
+		'contentOptions'=>['glue'=>'<br>',]
 	],
 	'aclSites'=>[
 		'value'=>function($data) use ($renderer) {
