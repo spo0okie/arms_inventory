@@ -629,9 +629,16 @@ class Comps extends ArmsModel
 	 */
 	public function getResponsible()
 	{
+		//если есть явно закрепленный юзер за ОС
 		if (is_object($this->user)) return $this->user;
 		
-		return Services::responsibleFrom($this->services);
+		//если есть ответственный за сервисы на компе - возвращаем его
+		if ($servicesResponsible=$this->servicesResponsible) {
+			return $servicesResponsible;
+		}
+		
+		//последний вариант смотрим, кто сопровождает АРМ
+		return $this->arm->managementService->responsible??null;
 	}
 
 	/**
@@ -651,7 +658,14 @@ class Comps extends ArmsModel
 	 */
 	public function getSupportTeam()
 	{
-		$team=Services::supportTeamFrom($this->services);
+		//берем сервисы ОС
+		$services=$this->services;
+		if (is_object($managementService=$this->arm->managementService)) {
+			//если есть сервис управления АРМ, то берем его в сервисы
+			$services[]=$managementService;
+		}
+		
+		$team=Services::supportTeamFrom($services);
 		if (is_object($this->user)) $team[$this->user->id]=$this->user;
 		
 		//убираем из команды ответственного за ОС
