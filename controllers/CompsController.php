@@ -163,6 +163,48 @@ class CompsController extends ArmsBaseController
 		]);
 	}
 	
+	/**
+	 * Добавляет к поисковому запросу ПК фильтры where на основании его имени
+	 * DOMAIN\computer, computer.domain.local или отдельно передав домен
+	 * возвращаем описание ошибки для 404 (если не найдется)
+	 * @param        $query
+	 * @param string $name
+	 * @param        $domain
+	 * @return string
+	 * @throws BadRequestHttpException
+	 * @throws NotFoundHttpException
+	 */
+	public static function nameFilter($query, string $name, $domain=null){
+		
+		$name=strtoupper($name);
+		
+		if ($domain) {
+			$domain_id=Domains::findByAnyName($domain);
+			$compName=$name;
+			$domainName=$domain;
+		} else {
+			$nameParse=Domains::fetchFromCompName($name);
+			if (!is_array($nameParse)) throw new BadRequestHttpException("Incorrect comp name $name");
+			
+			[$domain_id,$compName,$domainName]=$nameParse;
+		}
+		
+		if (is_null($domain_id)) throw new NotFoundHttpException("Domain $domainName not found");
+		
+		$notFoundDescription="Comp with name '$compName'";
+		$query->where(['LOWER(name)'=>mb_strtolower($compName)]);
+		
+		$notFoundDescription.=" not found";
+		
+		//добавляем фильтрацию по домену если он есть
+		if ($domain_id!==false) {
+			//добавляем домен к условию поиска
+			$query->andFilterWhere(['domain_id'=>$domain_id]);
+			$notFoundDescription.=" in domain $domainName";
+		}
+		
+		return $notFoundDescription;
+	}
 
 	/**
 	 * Найти ОС по имени DOMAIN\computer, computer.domain.local или отдельно передав домен
@@ -174,23 +216,8 @@ class CompsController extends ArmsBaseController
 	 */
 	public static function searchModel(string $name, $domain=null, $ip=null){
 		
-		$name=strtoupper($name);
-
-		if ($domain) {
-			$domain_id=Domains::findByAnyName($domain);
-			$compName=$name;
-			$domainName=$domain;
-		} else {
-			$nameParse=Domains::fetchFromCompName($name);
-			if (!is_array($nameParse)) throw new BadRequestHttpException("Incorrect comp name $name");
-			
-			[$domain_id,$compName,$domainName]=$nameParse;
-		}
-
-		if (is_null($domain_id)) throw new NotFoundHttpException("Domain $domainName not found");
-
-		$notFoundDescription="Comp with name '$compName'";
-		$query= Comps::find()->where(['LOWER(name)'=>mb_strtolower($compName)]);
+		$query= Comps::find();
+		$notFoundDescription=static::nameFilter($query, $name, $domain);
 		
 		//добавляем фильтрацию по IP если он есть
 		if (!is_null($ip)) {
@@ -201,12 +228,6 @@ class CompsController extends ArmsBaseController
 		
 		$notFoundDescription.=" not found";
 		
-		//добавляем фильтрацию по домену если он есть
-		if ($domain_id!==false) {
-			//добавляем домен к условию поиска
-			$query->andFilterWhere(['domain_id'=>$domain_id]);
-			$notFoundDescription.=" in domain $domainName";
-		}
 		
 		$model = $query->one();
 		
@@ -314,7 +335,8 @@ class CompsController extends ArmsBaseController
 	
 	protected function findByName(string $name)
 	{
-		$nameParts=Domains::fetchFromCompName($name);
+		return static::searchModel($name);
+		/*$nameParts=Domains::fetchFromCompName($name);
 		
 		if ($nameParts===false) {
 			throw new BadRequestHttpException('Invalid comp name format');
@@ -334,6 +356,6 @@ class CompsController extends ArmsBaseController
 			throw new NotFoundHttpException("Computer $compName not found in domain $domainName");
 		}
 		
-		return $model;
+		return $model;*/
 	}
 }

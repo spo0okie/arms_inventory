@@ -31,8 +31,15 @@ class CompsController extends BaseRestController
 	
 	public $modelClass='app\models\Comps';
 	
+	public static $searchFields=[
+		'name'=>'name',
+		'ip'=>'ip',
+		'mac'=>'mac',
+	];
+	
 	public function actionSearch($name=null,$domain=null,$ip=null) {
-		return \app\controllers\CompsController::searchModel($name,$domain,$ip);
+		if ($name) return \app\controllers\CompsController::searchModel($name,$domain,$ip);
+		return parent::actionSearch();
 	}
 	
 	public function actionFilter(){
