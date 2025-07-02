@@ -17,9 +17,11 @@ use app\models\MaintenanceReqs;
  * @package app\models\traits
  * @property MaintenanceJobs[] $maintenanceJobs
  * @property MaintenanceReqs[] $effectiveMaintenanceReqs
- * @property int $effectiveMaintenanceReqsCount
+ * @property MaintenanceReqs[] $backupReqs
  * @property MaintenanceReqs[] $unsatisfiedMaintenanceReqs
- * @property int $unsatisfiedMaintenanceReqsCount
+ * @property MaintenanceReqs[] $unsatisfiedBackupReqs
+ * @property int $backupReqsCount
+ * @property int $unsatisfiedBackupReqsCount
  */
 
 trait UnsatisfiedMaintenanceFieldTrait
@@ -31,27 +33,68 @@ trait UnsatisfiedMaintenanceFieldTrait
 	 */
 	public function getUnsatisfiedMaintenanceReqs()
 	{
-		$reqs=[];
-		foreach ($this->effectiveMaintenanceReqs as $req) {
-			if (!$req->isSatisfiedByJobs($this->maintenanceJobs)) $reqs[]=$req;
+		/** @var Comps $this */
+		if (!isset($this->attrsCache['unsatisfiedMaintenanceReqs'])) {
+			$this->attrsCache['unsatisfiedMaintenanceReqs']=[];
+
+			foreach ($this->effectiveMaintenanceReqs as $req) {
+				if (!$req->isSatisfiedByJobs($this->maintenanceJobs)) $this->attrsCache['unsatisfiedMaintenanceReqs'][]=$req;
+			}
+			
 		}
-		return $reqs;
+		return $this->attrsCache['unsatisfiedMaintenanceReqs'];
 	}
 	
+	/**
+	 * Требования по резервному копированию на узле
+	 * @return MaintenanceReqs[]
+	 */
+	public function getBackupReqs()
+	{
+		/** @var Comps $this */
+		if (!isset($this->attrsCache['backupReqs'])) {
+			$this->attrsCache['backupReqs']=[];
+			
+			foreach ($this->effectiveMaintenanceReqs as $req) {
+				if ($req->is_backup) $this->attrsCache['backupReqs'][]=$req;
+			}
+			
+		}
+		return $this->attrsCache['backupReqs'];
+	}
+	
+	/**
+	 * Неудовлетворенные требования по резервному копированию на узле
+	 * @return MaintenanceReqs[]
+	 */
+	public function getUnsatisfiedBackupReqs()
+	{
+		/** @var Comps $this */
+		if (!isset($this->attrsCache['unsatisfiedBackupReqs'])) {
+			$this->attrsCache['unsatisfiedBackupReqs']=[];
+			
+			foreach ($this->unsatisfiedMaintenanceReqs as $req) {
+				if ($req->is_backup) $this->attrsCache['unsatisfiedBackupReqs'][]=$req;
+			}
+			
+		}
+		return $this->attrsCache['unsatisfiedBackupReqs'];
+	}
+
 	/**
 	 * Количество эффективных требований предъявляемых к узлу
 	 * @return int
 	 */
-	public function getEffectiveMaintenanceReqsCount() {
-		return count ($this->effectiveMaintenanceReqs);
+	public function getBackupReqsCount() {
+		return count ($this->backupReqs);
 	}
 	
 	/**
 	 * Количество не удовлетворенных требований предъявляемых к узлу
 	 * @return int
 	 */
-	public function getUnsatisfiedMaintenanceReqsCount() {
-		return count ($this->unsatisfiedMaintenanceReqs);
+	public function getUnsatisfiedBackupReqsCount() {
+		return count ($this->unsatisfiedBackupReqs);
 	}
 	
 }

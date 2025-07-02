@@ -202,9 +202,8 @@ class Techs extends ArmsModel
     public function extraFields()
 	{
 		return [
-			'comp',
-			'effectiveMaintenanceReqs',
-			'effectiveMaintenanceReqsCount',
+			'backupReqs',
+			'backupReqsCount',
 			'fqdn',
 			'manufacturer',
 			'model',
@@ -216,8 +215,7 @@ class Techs extends ArmsModel
 			'stateName',
 			'supportTeam',
 			'type',
-			'unsatisfiedMaintenanceReqs',
-			'unsatisfiedMaintenanceReqsCount'
+			'unsatisfiedBackupReqsCount'
 		];
 	}
 	

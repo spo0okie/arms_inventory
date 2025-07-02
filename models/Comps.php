@@ -112,9 +112,9 @@ class Comps extends ArmsModel
 	{
 		return [
 			'arm',
+			'backupReqs',
+			'backupReqsCount',
 			'domain',
-			'effectiveMaintenanceReqs',
-			'effectiveMaintenanceReqsCount',
 			'fqdn',
 			'place',
 			'responsible',
@@ -127,8 +127,7 @@ class Comps extends ArmsModel
 			'servicesSupportTeam',
 			'site',
 			'supportTeam',
-			'unsatisfiedMaintenanceReqs',
-			'unsatisfiedMaintenanceReqsCount'
+			'unsatisfiedBackupReqsCount'
 		];
 	}
 	
