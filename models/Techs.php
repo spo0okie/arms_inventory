@@ -201,16 +201,17 @@ class Techs extends ArmsModel
     public function extraFields()
 	{
 		return [
-			'site',
 			'comp',
 			'fqdn',
-			'supportTeam',
+			'manufacturer',
+			'model',
 			'responsible',
+			'servicesCount',
 			'servicesResponsible',
 			'servicesSupportTeam',
+			'site',
 			'stateName',
-			'model',
-			'manufacturer',
+			'supportTeam',
 			'type',
 		];
 	}

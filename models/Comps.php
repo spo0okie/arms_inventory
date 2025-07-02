@@ -118,6 +118,7 @@ class Comps extends ArmsModel
 			'place',
 			'arm',
 			'services',
+			'servicesCount',
 			'servicesNames',
 			'sandbox',
 			'renderFqdn'
