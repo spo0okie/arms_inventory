@@ -135,6 +135,11 @@ trait TechsModelCalcFieldsTrait
 		return array_values($team);
 	}
 	
+	public function getServicesCount()
+	{
+		return count($this->services);
+	}
+	
 	/**
 	 * Возвращает название поля комментарий
 	 */
