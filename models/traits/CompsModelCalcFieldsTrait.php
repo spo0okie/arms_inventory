@@ -203,4 +203,9 @@ trait CompsModelCalcFieldsTrait
 		return Techs::formatMacs($this->mac);
 	}
 	
+	public function getServicesCount()
+	{
+		return count($this->services);
+	}
+	
 }
