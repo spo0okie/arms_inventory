@@ -8,6 +8,7 @@ use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\TechsModelCalcFieldsTrait;
+use app\models\traits\UnsatisfiedMaintenanceFieldTrait;
 use voskobovich\linker\LinkerBehavior;
 use Yii;
 use yii\db\ActiveQuery;
@@ -123,10 +124,10 @@ use yii\db\ActiveQuery;
 
 class Techs extends ArmsModel
 {
-	use TechsModelCalcFieldsTrait,AclsFieldTrait;	//различные вычисляемые поля
+	use TechsModelCalcFieldsTrait,AclsFieldTrait,UnsatisfiedMaintenanceFieldTrait;	//различные вычисляемые поля
 	
 	public $renderedInFrontRack=[];	//позиции в передней корзине где уже отрендерилось
-	public $renderedInBackRack=[];	//тоже самое в задней корзине
+	public $renderedInBackRack=[];	//то же самое в задней корзине
 	
 	public static $title='Оборудование';
 	public static $titles='Оборудование';
@@ -202,6 +203,8 @@ class Techs extends ArmsModel
 	{
 		return [
 			'comp',
+			'effectiveMaintenanceReqs',
+			'effectiveMaintenanceReqsCount',
 			'fqdn',
 			'manufacturer',
 			'model',
@@ -213,6 +216,8 @@ class Techs extends ArmsModel
 			'stateName',
 			'supportTeam',
 			'type',
+			'unsatisfiedMaintenanceReqs',
+			'unsatisfiedMaintenanceReqsCount'
 		];
 	}
 	

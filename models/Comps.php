@@ -7,6 +7,7 @@ use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\CompsModelCalcFieldsTrait;
+use app\models\traits\UnsatisfiedMaintenanceFieldTrait;
 use Throwable;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use yii\base\InvalidConfigException;
@@ -78,15 +79,17 @@ use yii\db\StaleObjectException;
  * @property LicItems[]     $licItems
  * @property LicKeys[]      $licKeys
  * @property Soft[]         $soft
- * @property MaintenanceReqs $maintenanceReqs
- * @property MaintenanceJobs $maintenanceJobs
- * @property MaintenanceReqs $effectiveMaintenanceReqs
+ * @property MaintenanceReqs[] $maintenanceReqs
+ * @property MaintenanceJobs[] $maintenanceJobs
+ * @property MaintenanceReqs[] $effectiveMaintenanceReqs
+ * @property MaintenanceReqs[] $unsatisfiedMaintenanceReqs
+ * @property int $unsatisfiedMaintenanceReqsCount
  * @property Sandboxes $sandbox
  * @property CompsRescanQueue $softRescans
  */
 class Comps extends ArmsModel
 {
-	use CompsModelCalcFieldsTrait,AclsFieldTrait;
+	use CompsModelCalcFieldsTrait,AclsFieldTrait,UnsatisfiedMaintenanceFieldTrait;
 	
 	public static $title='Операционная система';
 	public static $titles='Операционные системы';
@@ -108,20 +111,24 @@ class Comps extends ArmsModel
     public function extraFields()
 	{
 		return [
-			'responsible',
-			'supportTeam',
-			'servicesResponsible',
-			'servicesSupportTeam',
-			'fqdn',
-			'domain',
-			'site',
-			'place',
 			'arm',
+			'domain',
+			'effectiveMaintenanceReqs',
+			'effectiveMaintenanceReqsCount',
+			'fqdn',
+			'place',
+			'responsible',
+			'renderFqdn',
+			'sandbox',
 			'services',
 			'servicesCount',
 			'servicesNames',
-			'sandbox',
-			'renderFqdn'
+			'servicesResponsible',
+			'servicesSupportTeam',
+			'site',
+			'supportTeam',
+			'unsatisfiedMaintenanceReqs',
+			'unsatisfiedMaintenanceReqsCount'
 		];
 	}
 	

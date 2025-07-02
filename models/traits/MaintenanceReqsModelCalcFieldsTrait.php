@@ -8,6 +8,7 @@ namespace app\models\traits;
 
 
 
+use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
 use app\models\Scans;
 use app\models\Users;
@@ -35,6 +36,11 @@ trait MaintenanceReqsModelCalcFieldsTrait
 		return is_array($included)?$included:[];
 	}
 	
+	/**
+	 * Удовлетворяется ли требование другим требованием
+	 * @param $req
+	 * @return bool
+	 */
 	public function isSatisfiedByReq($req) {
 		//нужно проверить что $req входит в массив непосредственно удовлетворяемых требований
 		//либо удовлетворяется ими
@@ -44,6 +50,27 @@ trait MaintenanceReqsModelCalcFieldsTrait
 		}
 		//TODO: Обработать состояние AllItemsLoaded, которое должно включать подгрузку не только самой таблицы,
 		// но и таблиц many-2-many ссылок
+		return false;
+	}
+	
+	/**
+	 * Удовлетворяется ли требование регламентным обслуживанием
+	 * @param MaintenanceJobs $job
+	 * @return bool
+	 */
+	public function isSatisfiedByJob($job) {
+		return $job->satisfiesReq($this);
+	}
+	
+	/**
+	 * Удовлетворяется ли требование регламентными обслуживаниями
+	 * @param MaintenanceJobs[] $jobs
+	 * @return bool
+	 */
+	public function isSatisfiedByJobs($jobs) {
+		foreach ($jobs as $job) {
+			if ($this->isSatisfiedByJob($job)) return true;
+		}
 		return false;
 	}
 	
