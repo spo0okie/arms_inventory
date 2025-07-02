@@ -1,0 +1,18 @@
+actor: ApiTester
+modules:
+    enabled:
+        - Yii2:
+              part: [ orm, fixtures ]
+              configFile: 'config/test-api.php'
+              transaction: false
+              cleanup: false
+              entryUrl: http://localhost:8081/web/index-test-api.php
+        - REST:
+              depends: PhpBrowser
+              url: http://localhost:8081/web/api
+        - \Helper\Acceptance:
+              depends:
+                  - \Helper\Database
+                  - \Helper\Yii2
+        - \Helper\Rest
+bootstrap: _bootstrap.php
