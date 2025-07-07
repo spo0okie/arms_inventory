@@ -21,13 +21,13 @@ use yii\bootstrap5\Modal;
 	
 	<?php if (count($licKeys) || count($licItems) || count ($licGroups)) {
 		foreach ($licKeys as $key)
-			echo $this->render('/lic-keys/item',['model'=>$key,'static_view'=>$static_view,'name'=>$key->sname]).'<br />';
+			echo $key->renderItem($this,['static_view'=>$static_view,'name'=>$key->sname]).'<br />';
 		
 		foreach ($licItems as $item)
-			echo $this->render('/lic-items/item',['model'=>$item,'static_view'=>$static_view,'name'=>$item->sname]).'<br />';
+			echo $item->renderItem($this,['static_view'=>$static_view,'name'=>$item->sname]).'<br />';
 
 		foreach ($licGroups as $group)
-			echo  $this->render('/lic-groups/item',['model'=>$group,'static_view'=>$static_view]).'<br />';
+			echo  $group->renderItem($this,['static_view'=>$static_view]).'<br />';
 
 	} else { ?>
         отсутствуют
