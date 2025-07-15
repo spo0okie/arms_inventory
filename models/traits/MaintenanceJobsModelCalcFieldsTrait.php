@@ -99,7 +99,7 @@ trait MaintenanceJobsModelCalcFieldsTrait
 		if (!is_array($this->reqs)) return false;
 		
 		//если это требование перечислено явно в этой операции, то успех
-		foreach ($this->reqsRecursive as $test) {
+		foreach ($this->reqsRecursive??[] as $test) {
 			if ($req->id == $test->id) return true;
 		}
 		
