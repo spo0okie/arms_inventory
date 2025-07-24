@@ -256,7 +256,7 @@ JS;
 		}
 		
 		
-		return parent::run();
+		parent::run();
 		
 	}
 	
