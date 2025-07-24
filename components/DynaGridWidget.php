@@ -55,6 +55,11 @@ class DynaGridWidget extends DynaGrid
 	 */
 	public $pageUrl;
 	
+	/**
+	 * @var boolean признак необходимости отобразить все колонки игнорируя сохраненную конфигурацию или по умолчанию
+	 */
+	public $_showAllColumns=false;
+	
 	
 	/**
 	 * данные
@@ -83,6 +88,27 @@ class DynaGridWidget extends DynaGrid
 		'iconRemove' => ['remove', 'times'],
 	];
 	
+	/**
+	 * Перекрываем родительский метод, чтобы отобразить все колонки, если $_showAllColumns
+	 * @param $config
+	 * @return void
+	 * @throws InvalidConfigException
+	 */
+	protected function loadGridConfig($config = [])
+	{
+		if ($config === false) {
+			$this->_visibleKeys = []; //take visible keys from grid config
+			$this->_pageSize = $this->_module->defaultPageSize; //take pagesize from module configuration
+			if (!$this->_showAllColumns) foreach ($this->_columns as $key => $column) {
+				if (static::canReorder($column) && static::isVisible($column)) {
+					$this->_visibleKeys[] = $key;
+				}
+			}
+		} else {
+			if ($this->_showAllColumns) $config['keys'] = false;
+			$this->parseData($config);
+		}
+	}
 	
 	public static function fetchVisibleColumns($id) {
 		if (isset(static::$visibleColumnsCache[$id])) return static::$visibleColumnsCache[$id];
@@ -99,7 +125,7 @@ class DynaGridWidget extends DynaGrid
 	}
 	
 	/**
-	 * Конвертирует видимые колонки в видимые атрибуты
+	 * Конвертирует видимые колонки в видимые атрибуты (нужно для контроллеров, для формирования поиска и Join)
 	 * (т.к. в бд хранятся хэши от колонок, а не сами колонки)
 	 * @param string $id
 	 * @param ArmsModel $model
@@ -125,6 +151,7 @@ class DynaGridWidget extends DynaGrid
 	
 	protected function initWidget()
 	{
+		if (YII_ENV=='test') $this->_showAllColumns=true;
 		parent::initWidget();
 		if (is_null($this->visibleColumns))
 			$this->visibleColumns=static::fetchVisibleColumns($this->id);
@@ -299,7 +326,8 @@ JS;
 		unset($data['model']);
 		unset($data['modelAttribute']);
 		
-		if (!isset($data['class']) && !isset($data['value'])  && $model->hasMethod('attributeIsLink') && $model->attributeIsLink($attr)) {
+		//TODO: тут у нас никак не обрабатываются варианты ссылки на поля другого объекта типа 'user.licKeys'
+		if (!isset($data['class']) && !isset($data['value']) && $model->hasMethod('attributeIsLink') && $model->attributeIsLink($attr)) {
 			$data['class']=DefaultColumn::class;
 		}
 		
