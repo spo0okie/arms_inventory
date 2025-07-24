@@ -10,8 +10,8 @@ use kartik\grid\GridView;
 $renderer=$this;
 return [
 	'employee_id',
-	'Ename'=>[	'value' => function($data) use($renderer) {return $renderer->render('/users/item',['model'=>$data]);}	],
-	'shortName'=>[	'value' => function($data) use($renderer) {return $renderer->render('/users/item',['model'=>$data,'short'=>true]);}],
+	'Ename'		=>[	'value' => function($data) use($renderer) {return $renderer->render('/users/item',['model'=>$data]);}	],
+	'shortName'	=>[	'value' => function($data) use($renderer) {return $renderer->render('/users/item',['model'=>$data,'short'=>true]);}],
 	'Doljnost',
 	'org_name'=>[
 		'value' => function($data) use($renderer){
@@ -73,4 +73,8 @@ return [
 			return implode(", ",$tokens);
 		}
 	],
+	'acls',
+	'scheduledAccess',
+	'netIps',
+	'lics',
 ];
