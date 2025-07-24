@@ -206,20 +206,21 @@ class ArmsBaseController extends Controller
 	 * @param      $switchArchivedCount
 	 * @param string[]|null $columns
 	 */
-    public function archivedSearchInit(&$searchModel,&$dataProvider,&$switchArchivedCount,$columns=null)
+    public function archivedSearchInit(&$searchModel,&$dataProvider,&$switchArchivedCount,$columns=null,$params=null)
 	{
 		$searchModel->archived= Yii::$app->request->get('showArchived',$this->defaultShowArchived);
 		
 		//признак того, что свойства ниже указаны явно (не равны значениям по умолчанию)
 		$direct_archived=Yii::$app->request->get('showArchived','unset')!='unset';
 		
-		$dataProvider = $searchModel->search(Yii::$app->request->queryParams,$columns);
+		if (is_null($params)) $params=Yii::$app->request->queryParams;
+		$dataProvider = $searchModel->search($params,$columns);
 		if (!$dataProvider->totalCount) {
 			if (!$direct_archived && !$searchModel->archived) {
 				//если архивные неявно отключены, то смотрим что будет вместе с ними
 				$switchArchived=clone $searchModel;
 				$switchArchived->archived=!$switchArchived->archived;
-				$switchArchivedData=$switchArchived->search(Yii::$app->request->queryParams,$columns);
+				$switchArchivedData=$switchArchived->search($params,$columns);
 				$switchArchivedCount=$switchArchivedData->totalCount;
 				if ($switchArchivedCount) {
 					//если есть архивные, то заменяем текущий поиск на поиск с архивными
@@ -236,7 +237,7 @@ class ArmsBaseController extends Controller
 			//ищем то же самое, но с архивными в противоположном положении
 			$switchArchived=clone $searchModel;
 			$switchArchived->archived=!$switchArchived->archived;
-			$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams,$columns)->totalCount;
+			$switchArchivedCount=$switchArchived->search($params,$columns)->totalCount;
 		}
 		
 	}
