@@ -10,6 +10,7 @@ namespace app\models\traits;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use voskobovich\linker\LinkerBehavior;
+use yii\base\UnknownPropertyException;
 
 /**
  * Trait ExternalDataModelTrait
@@ -37,6 +38,57 @@ trait AttributeLinksModelTrait
 	
 	public function getLinksSchema() {
 		return $this->linksSchema;
+	}
+	
+	protected static $linkedModelsPrototypes=[];
+	
+	/**
+	 * Принимает на вход аттрибут в виде цепочки ссылок 'user.org.name'
+	 * Возвращает массив из двух элементов: [new Partners(),'name']
+	 * @param $attr
+	 * @return array|void
+	 */
+	public function getLinkedAttr($attr)
+	{
+		//если в пути нет разделителя, то это наш собственный аттрибут
+		if (strpos($attr, '.') === false) {
+			return [$this,$attr];
+		}
+		
+		$tokens = explode('.', $attr);		//разбиваем на токены
+		$attr = array_shift($tokens); 		//берем первый токен
+		$linkAttr=implode('.',$tokens);	//остальные токены собираем в суб-аттрибут внутри первого аттрибута-ссылки
+		
+		if (isset(static::$linkedModelsPrototypes[$attr])) {
+			//если у нас уже есть прототип модели, то возвращаем его
+			return static::$linkedModelsPrototypes[$attr]->getLinkedAttr($linkAttr);
+		}
+		
+		if (($origAttr=$this->attributeIsLoader($attr))===false) {
+			//если маршрут сделан не через загрузчик relation-атрибута, значит пройти по этой ссылке мы не сможем
+			throw new UnknownPropertyException('Getting property: ' . get_class($this) . '::' . $attr.'.'.$linkAttr.', but "'.$attr.'" is not a link loader.');
+		}
+		
+		//ранее мы проверили что наш атрибут это валидный загрузчик relation аттрибута, для которого описана схема ссылки
+		//загружаем класс
+		$linkClass=$this->attributeLinkClass($origAttr);
+		
+		/** @var ArmsModel $linkModel */
+		$model=new $linkClass();
+		if (!$model->hasMethod('getLinkedAttr')) {
+			//если в классе ссылки нет такого метода, то и ссылкой он не является
+			throw new UnknownPropertyException('Getting property: ' . get_class($this) . '::' . $attr.'.'.$linkAttr.', but '.$linkClass.' loaded via "'.$attr.'" has not "getLinkedAttr" method.');
+		}
+		
+		static::$linkedModelsPrototypes[$attr]=$model;
+		return $model->getLinkedAttr($linkAttr);
+	}
+	
+	protected function getLinksSchemaItem($attr,$default=null)
+	{
+		[$model,$attr]=$this->getLinkedAttr($attr);
+		
+		return $model->getLinksSchema()[$attr]??$default;
 	}
 	
 	/**
@@ -182,7 +234,7 @@ trait AttributeLinksModelTrait
 	 * @return bool
 	 */
 	public function attributeIsLink(string $attr){
-		return isset($this->getLinksSchema()[$attr]);
+		return $this->getLinksSchemaItem($attr,false)!==false;
 	}
 	
 	/**
@@ -193,8 +245,8 @@ trait AttributeLinksModelTrait
 	 */
 	public function attributeIsLoader(string $loader){
 		foreach ($this->getLinksSchema() as $attr=>$schema) {
-			if ($loader===$this->attributeLinkLoader($attr)) return $attr;
-		};
+			if ($loader===$this->attributeLinkLoader($attr,$schema)) return $attr;
+		}
 		return false;
 	}
 
@@ -239,11 +291,11 @@ trait AttributeLinksModelTrait
 	 * @param string $attr
 	 * @return string|false
 	 */
-	public function attributeLinkLoader(string $attr) {
-		if (!$this->attributeIsLink($attr)) return false;
+	public function attributeLinkLoader(string $attr,$schema=null) {
+		if (is_null($schema) && !$this->attributeIsLink($attr)) return false;
 		
-		$schema=$this->attributeLinkSchema($attr);
-		if (isset($schema['loader'])) return $schema['loader']; //если указан то и славно
+		if (is_null($schema)) $schema=$this->attributeLinkSchema($attr);
+		if (isset($schema['loader'])) return $schema['loader']; //если указан, то и славно
 		
 		if ($loader=StringHelper::linkId2Getter($attr)) return $loader;
 		

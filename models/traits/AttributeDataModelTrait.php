@@ -115,6 +115,13 @@ trait AttributeDataModelTrait
 			$this->attributeDataCache=$this->attributeData();
 		}
 		
+		if (strpos($attr, '.') !== false) {
+			//если аттрибут с точкой, то это ссылка на атрибут связанного объекта
+			//вытаскиваем этот объект и его атрибут
+			[$model,$attr]=$this->getLinkedAttr($attr);
+			return $model->getAttributeData($attr);
+		}
+		
 		if (!isset($this->attributeDataCache[$attr])) {
 			//проверяем нет ли возможности подменить ссылку на геттер acls_list_ids => aclsList
 			if ($getter=StringHelper::linkId2Getter($attr)) {
@@ -255,7 +262,12 @@ trait AttributeDataModelTrait
 		if ($type=$this->getAttributeData($attribute)['type']??false) {
 			return $type;
 		}
+		
 		if ($this->attributeIsLink($attribute)) {
+			return 'link';
+		}
+
+		if ($this->attributeIsLoader($attribute)) {
 			return 'link';
 		}
 		

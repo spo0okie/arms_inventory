@@ -76,7 +76,7 @@ class ModelFieldWidget extends Widget
 		}
 		
 		//вытаскиваем поле в отдельную переменную, чтобы больше не городить такое
-		$modelData=$model->{$field};
+		$modelData=ArrayHelper::getValue($model,$field);
 		if (is_array($modelData)) {
 			$this->data=array_merge($this->data,$modelData);
 		} else {
