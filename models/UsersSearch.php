@@ -42,14 +42,11 @@ class UsersSearch extends Users
      *
      * @return ActiveDataProvider
      */
-    public function search(array $params)
-    {
-        $query = Users::find()->joinWith([
-        	'orgStruct',
-			'org',
-			'techs.model.type',
-		]);
-	
+	public function search($params,$columns=null)
+	{
+		
+		[$query,$filter]=(new Users())->prepareSearch($columns);
+		
 		$sort=[
 			//'defaultOrder' => ['num'=>'E'],
 			'attributes'=>[
@@ -93,11 +90,11 @@ class UsersSearch extends Users
         }
         
         if (!$this->archived) {
-        	$query
+			$filter
 				->andFilterWhere(['users.Uvolen'=>0]);
 		}
-        
-        $query
+		
+		$filter
 			->andFilterWhere(['users.Orgeh'=>$this->Orgeh])
 			->andFilterWhere(['users.org_id'=>$this->org_id])
 	        ->andFilterWhere(QueryHelper::querySearchString('employee_id',$this->employee_id))
@@ -110,7 +107,12 @@ class UsersSearch extends Users
 			->andFilterWhere(QueryHelper::querySearchString(['OR','users.Mobile','users.private_phone'], $this->Mobile))
 			->andFilterWhere(QueryHelper::querySearchString('partners.bname',$this->org_name))
 			->andFilterWhere(QueryHelper::querySearchString('org_struct.name',$this->orgStruct_name));
-	
+		
+		if ($filter->where) {
+			//фильтруем запрос данных по ID из фильтра, который мы только что получили при помощи разных WHERE
+			$query->where(static::tableName().'.id in ('.$filter->createCommand()->rawSql.')');
+		}
+		
 		$totalQuery=clone $query;
 	
 		return new ActiveDataProvider([

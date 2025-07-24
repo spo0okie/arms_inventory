@@ -135,7 +135,7 @@ class Users extends ArmsModel implements IdentityInterface
 			'licKeys',
 			'licItems',
 			'licGroups',
-			'netIps'
+			'netIps',
 		]);
 	}
 	
@@ -199,21 +199,49 @@ class Users extends ArmsModel implements IdentityInterface
 	public function attributeData()
 	{
 		return array_merge(parent::attributeData(),[
-			'arms' => 'АРМ',
+			'arms' => [
+				'АРМ',
+				'join'=>['techs.model.type','techs.state']
+			],
+			'acls' => [
+				'Доступ к',
+				'indexHint'=>'К каким ресурсам пользователю предоставлен доступ',
+				'join'=>[
+					'aces.acl.schedule',
+					'aces.acl.comp.sandbox',
+					'aces.acl.comp.domain',
+					'aces.acl.tech',
+					'aces.acl.network',
+					'aces.acl.service',
+					'aces.acl.ip',
+				],
+			],
 			'Bday' => 'День рождения',
 			'Doljnost' => 'Должность',
 			'Email' => ['E-Mail','absorb'=>'ifEmpty'],
 			'employee_id' => [
 				'Таб. №',
-				'hint'=>'Табельный номер сотрудника<br>(конкретно этого его трудоустройства)'
+				'hint'=>'Табельный номер сотрудника<br>(конкретно этого его трудоустройства)',
 			],
 			'Ename' => 'Полное имя',
-			'ips' => ['Привязанные IP адреса','absorb'=>'ifEmpty'],
+			'ips' => [
+				'Привязанные IP адреса',
+				'indexLabel' => 'IPs',
+				'indexHint' => 'Привязанные к пользователю IP адреса',
+				'absorb'=>'ifEmpty',
+				'join'=>['netIps.network.segment']
+			],
 			'LastThreeLogins' => 'Входы',
+			'lics'=>[
+				'Лицензии',
+				'indexHint'=>'Назначенные пользователю лицензии',
+				'join'=>['licItems','licGroups','licKeys'],
+			],
 			'Login' => 'Логин (AD)',
 			'logon_ids' => ['absorb'=>false], //вручную переключим
 			'manager_id' => 'Руководитель',
 			'Mobile' => ['Мобильный тел','absorb'=>'ifEmpty'],
+			'netIps' => ['alias'=>'ips'],
 			'nosync' => [
 				'Отключить синхронизацию',
 				'hint'=>'Запрет внешнему скрипту синхронизации с кадровой БД обновлять эту запись<br>'.
@@ -228,20 +256,36 @@ class Users extends ArmsModel implements IdentityInterface
 				'Организация',
 				'Контрагент в котором числится этот сотрудник/пользователь',
 				'placeholder' => 'Организация',
+				'join'=>['org']
 			],
 			'org_name'=>['alias'=>'org_id'],
-			'Orgeh' => 'Подразделение',
+			'Orgeh' => [
+				'Подразделение',
+				'join'=>['orgStruct']
+			],
 			'orgStruct_name' => ['alias'=>'Orgeh'],
 			'Persg' => 'Тип трудоустройства',
-			'Phone' => ['Внутренний тел','absorb'=>'ifEmpty'],
+			'Phone' => [
+				'Внутренний тел',
+				'absorb'=>'ifEmpty',
+				'join'=>['techs.model.type','techs.state']
+			],
 			'private_phone' => ['Личный тел','absorb'=>'ifEmpty'],
+			'scheduledAccess'=> [
+				'Вр. доcтупы',
+				'indexHint' => 'Предоставленные пользователю временные доступы',
+				'join' => 'scheduledAccess'
+			],
 			'shortName' => [
 				'Короткое имя',
 				'indexHint'=>'Отображаться будет "Фамилия И.О.",<br>'.
 					'поиск будет вестись по полному имени.<br>'.
-					QueryHelper::$stringSearchHint
+					QueryHelper::$stringSearchHint,
 			],
-			'techs' => 'Оборудование',
+			'techs' => [
+				'Оборудование',
+				'join'=>['techs.model.type','techs.state']
+			],
 			'uid' => ['Идентификатор','hint'=>'Уникальный идентификатор человека.<br>ИНН / СНИЛС / MD5(ИНН) и т.п.'],
 			'Uvolen' => 'Уволен',
 			'work_phone' => ['Городской рабочий тел','absorb'=>'ifEmpty'],
@@ -264,7 +308,19 @@ class Users extends ArmsModel implements IdentityInterface
 			->viaTable('{{%users_in_aces}}', ['users_id' => 'id']);
 	}
 	
-
+	public function getAcls()
+	{
+		return $this->hasMany(Acls::class, ['id'=>'acls_id'])->from(['users_acls'=>Acls::tableName()])
+			->via('aces');
+	}
+	
+	public function getScheduledAccess()
+	{
+		return $this->hasMany(Schedules::class, ['id'=>'schedules_id'])->from(['users_scheduled_access'=>Schedules::tableName()])
+			->via('acls');
+	}
+	
+	
 	/**
      * @return ActiveQuery
      */
@@ -334,6 +390,10 @@ class Users extends ArmsModel implements IdentityInterface
 	{
 		return $this->hasMany(LicKeys::class, ['id' => 'lic_keys_id'])
 			->viaTable('{{%lic_keys_in_users}}', ['users_id' => 'id']);
+	}
+	
+	public function getLics() {
+		return array_merge($this->licGroups,$this->licItems,$this->licKeys);
 	}
 	
 	/**

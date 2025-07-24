@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\components\DynaGridWidget;
 use app\helpers\ArrayHelper;
+use app\helpers\StringHelper;
 use Yii;
 use app\models\Users;
 use app\models\UsersSearch;
@@ -36,9 +37,11 @@ class UsersController extends ArmsBaseController
 		 * У нас есть 2 поля ФИО для вывода в таблице shortName и Ename (причем оба могут быть скрыты)
 		 *
 		 * Но поиск на главной заполняет только одно поле (short). Может получиться так что в открытой таблице
-		 * будут отфильтрованные денные но не будет видно по какому полю. Вот это мы и пытаемся разрулить
+		 * будут отфильтрованные данные, но не будет видно по какому полю. Вот это мы и пытаемся разрулить
 		 */
 		$params=Yii::$app->request->queryParams;
+		
+		$columns=DynaGridWidget::fetchVisibleAttributes(new Users(),StringHelper::class2Id($this->modelClass).'-index');
 		
 		//если выставлен поиск по short, то добавляем поиск по Ename
 		if ($name=ArrayHelper::getTreeValue($params,['UsersSearch','shortName']))
@@ -56,12 +59,15 @@ class UsersController extends ArmsBaseController
 		
 		//дальше все как обычно
 		$searchModel = new UsersSearch();
-		$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount);
+		
+		$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount,$columns,$params);
 		
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,
-			'switchArchivedCount' => $switchArchivedCount,
+			'switchArchivedCount' => $switchArchivedCount??null,
+			'additionalCreateButton' => $this->additionalCreateButton,
+			'additionalToolButton' => $this->additionalToolButton,
 		]);
 	}
 	
