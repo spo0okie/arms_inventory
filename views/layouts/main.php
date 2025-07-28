@@ -3,7 +3,7 @@
 /* @var $this View */
 /* @var $content string */
 
-use a1inani\yii2ModalAjax\ModalAjax;
+use spo0okie\yii2ModalAjax\ModalAjax;
 use app\components\Alert;
 use app\components\TabsWidget;
 use app\models\Users;
@@ -93,7 +93,9 @@ $this->beginPage() ?>
 	<div class="container container-large">
 		<span class="float-start">&copy; Инвентаризация <?= date('Y') ?></span>
 
-		<span class="float-end"><?= Yii::powered() ?></span>
+		<span class="float-end"><?= Yii::t('yii', 'Powered by {yii}', [
+				'yii' => '<a href="https://www.yiiframework.com/" rel="external">' . Yii::t('yii', 'Yii Framework') . '</a>',
+			]) ?></span>
 	</div>
 </footer>
 
@@ -206,16 +208,21 @@ echo ModalAjax::widget([
 		ModalAjax::EVENT_MODAL_SUBMIT => new JsExpression($js),
 		//ModalAjax::EVENT_MODAL_SUBMIT_COMPLETE => new \yii\web\JsExpression($js3),
 	],
-]); ?>
+]);
 
-<?php $this->endBody();
+$this->endBody();
 
 $js = <<<JS
 //$('.modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
 
 //более универсальный фикс
 //https://github.com/kartik-v/yii2-widget-select2/issues/341
-bootstrap.Modal.prototype._initializeFocusTrap = function () { return { activate: function () { }, deactivate: function () { } } };
+bootstrap.Modal.prototype._initializeFocusTrap = function () {
+    return {
+        activate: function () { },
+        deactivate: function () { }
+    }
+};
 JS;
 $this->registerJs($js, View::POS_END);
 
