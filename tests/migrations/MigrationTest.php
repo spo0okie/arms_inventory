@@ -33,6 +33,7 @@ class MigrationTest extends Unit
 			ob_start();
 			$result=Yii::$app->runAction('migrate/up', [
 				'migrationPath' => '@yii/rbac/migrations/',
+				'migrationNamespaces' => [],
 				'interactive' => 0,
 			]);
 			$output = ob_get_clean();
@@ -53,7 +54,7 @@ class MigrationTest extends Unit
 			// Запускаем миграции (неинтерактивно)
 			ob_start();
 			$result=Yii::$app->runAction('migrate/up', [
-				//'migrationPath' => '@app/migrations',
+				'migrationNamespaces' => ['app\migrations'],
 				'interactive' => 0,
 			]);
 			$output = ob_get_clean();
