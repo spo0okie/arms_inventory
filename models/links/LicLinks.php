@@ -2,6 +2,7 @@
 
 namespace app\models\links;
 
+use app\models\ArmsModel;
 use app\models\Users;
 use Closure;
 use Yii;
@@ -26,7 +27,7 @@ use yii\helpers\Inflector;
  * @property Users $creator
  * @property Users $updater
  */
-class LicLinks extends ActiveRecord
+class LicLinks extends ArmsModel
 {
 	public $obj_name;
 	//public $object;
@@ -70,6 +71,13 @@ class LicLinks extends ActiveRecord
 	public static function licClass(){		return Inflector::camelize(static::licTableName());}
 	public static function linksClass(){	return Inflector::camelize(static::tableName());}
 	
+	public function getLinksSchema()
+	{
+		return [
+			static::licIdField()=>'\\app\\models\\'.static::licClass(),
+			static::objIdField()=>['\\app\\models\\'.static::objClass(),'loader'=>'object'],
+		];
+	}
 	
 	public function getObjType() {return static::$obj;}
 	public function getLicType() {return static::$lic;}
@@ -276,5 +284,24 @@ class LicLinks extends ActiveRecord
 
 		return parent::beforeSave($insert);
 		
+	}
+	
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+		
+		/** @var ArmsModel $object */
+		if (is_object($object=$this->object)) {
+			if ($object->hasMethod('historyCommit'))
+				$object->historyCommit();
+			
+		}
+		
+		/** @var ArmsModel $lic */
+		if (is_object($lic=$this->lic)) {
+			if ($object->hasMethod('historyCommit'))
+				$object->historyCommit();
+			
+		}
 	}
 }
