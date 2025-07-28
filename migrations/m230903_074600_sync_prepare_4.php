@@ -7,47 +7,47 @@ use yii\db\Migration;
  */
 class m230903_074600_sync_prepare_4 extends Migration
 {
-	function addColumnIfNotExist($table,$column,$type,$index=false)
+	function addColumnIfNotExist($table, $column, $type, $index = false)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (!isset($tableSchema->columns[$column])) {
-			$this->addColumn($table,$column,$type);
-			if ($index) $this->createIndex("idx-$table-$column",$table,$column);
+			$this->addColumn($table, $column, $type);
+			if ($index) $this->createIndex("idx-$table-$column", $table, $column);
 			
 		}
 	}
 	
-	function dropColumnIfExist($table,$column)
+	function dropColumnIfExist($table, $column)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (isset($tableSchema->columns[$column])) {
-			$this->dropColumn($table,$column);
+			$this->dropColumn($table, $column);
 		}
 	}
 	
-	function dropFkIfExist($table,$name)
+	function dropFkIfExist($table, $name)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (isset($tableSchema->foreignKeys[$name])) {
-			$this->dropForeignKey($name,$table);
+			$this->dropForeignKey($name, $table);
 		}
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		$this->addColumnIfNotExist('partners','updated_at',$this->timestamp());
-		$this->addColumnIfNotExist('partners','updated_by',$this->string(32));
+		$this->addColumnIfNotExist('partners', 'updated_at', $this->timestamp());
+		$this->addColumnIfNotExist('partners', 'updated_by', $this->string(32));
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
-		$this->dropColumnIfExist('partners','updated_at');
-		$this->dropColumnIfExist('partners','updated_by');
+		$this->dropColumnIfExist('partners', 'updated_at');
+		$this->dropColumnIfExist('partners', 'updated_by');
 	}
 }

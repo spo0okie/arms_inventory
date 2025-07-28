@@ -7,43 +7,42 @@ use yii\db\Migration;
  */
 class m210220_133458_alter_table_segments extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-		$table=$this->db->getTableSchema('segments');
-	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
+		$table = $this->db->getTableSchema('segments');
+		
 		if (!isset($table->columns['code'])) {
-			$this->addColumn('segments','code',$this->string());
+			$this->addColumn('segments', 'code', $this->string());
 		}
-
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-		$table=$this->db->getTableSchema('segments');
+	}
 	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		$table = $this->db->getTableSchema('segments');
+		
 		if (isset($table->columns['code'])) {
-			$this->dropColumn('segments','code');
+			$this->dropColumn('segments', 'code');
 		}
-    }
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	}
 
-    }
+	public function down()
+	{
+		echo "m210220_133458_alter_table_segments cannot be reverted.\n";
 
-    public function down()
-    {
-        echo "m210220_133458_alter_table_segments cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

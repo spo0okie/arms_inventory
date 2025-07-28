@@ -9,23 +9,23 @@ use app\migrations\arms\ArmsMigration;
  */
 class M240518080913CreateSandboxes extends ArmsMigration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
 		if (!$this->tableExists('sandboxes')) {
-			$this->createTable('sandboxes',[
-				'id'=>$this->primaryKey(),
-				'name'=>$this->string(64),
-				'suffix'=>$this->string(12),
-				'network_accessible'=>$this->boolean(),
-				'notepad'=>$this->text(),
-				'links'=>$this->text(),
-				'archived'=>$this->boolean(),
-			
-				'updated_at'=>$this->timestamp(),
-				'updated_by'=>$this->string(32),
+			$this->createTable('sandboxes', [
+				'id' => $this->primaryKey(),
+				'name' => $this->string(64),
+				'suffix' => $this->string(12),
+				'network_accessible' => $this->boolean(),
+				'notepad' => $this->text(),
+				'links' => $this->text(),
+				'archived' => $this->boolean(),
+				
+				'updated_at' => $this->timestamp(),
+				'updated_by' => $this->string(32),
 			]);
 			
 			if (!$this->tableExists('sandboxes_history')) {
@@ -36,13 +36,13 @@ class M240518080913CreateSandboxes extends ArmsMigration
 					'updated_by' => $this->string(32),
 					'updated_comment' => $this->string(),
 					'changed_attributes' => $this->text(),
-					'archived'=>$this->boolean(),
+					'archived' => $this->boolean(),
 					
-					'name'=>$this->string(64),
-					'suffix'=>$this->string(12),
-					'network_accessible'=>$this->boolean(),
-					'notepad'=>$this->text(),
-					'links'=>$this->text(),
+					'name' => $this->string(64),
+					'suffix' => $this->string(12),
+					'network_accessible' => $this->boolean(),
+					'notepad' => $this->text(),
+					'links' => $this->text(),
 					'comps_ids' => $this->text(),
 				]);
 				$this->createIndex('sandboxes_history-master_id', 'sandboxes_history', 'master_id');
@@ -50,38 +50,37 @@ class M240518080913CreateSandboxes extends ArmsMigration
 				$this->createIndex('sandboxes_history-updated_by', 'sandboxes_history', 'updated_by');
 			}
 		}
+		
+		$this->addColumnIfNotExists('comps', 'sandbox_id', $this->integer()->null(), true);
+		$this->addColumnIfNotExists('comps_history', 'sandbox_id', $this->integer()->null(), true);
+		
+		$this->dropFkIfExists('domains', 'comps');
+		$this->dropIndexIfExists('domainname', 'comps');
+	}
 	
-		$this->addColumnIfNotExists('comps','sandbox_id',$this->integer()->null(),true);
-		$this->addColumnIfNotExists('comps_history','sandbox_id',$this->integer()->null(),true);
-	
-		$this->dropFkIfExists('domains','comps');
-		$this->dropIndexIfExists('domainname','comps');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-		$this->dropColumnIfExists('comps','sandbox_id');
-		$this->dropColumnIfExists('comps','sandbox_id');
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		$this->dropColumnIfExists('comps', 'sandbox_id');
+		$this->dropColumnIfExists('comps', 'sandbox_id');
 		$this->dropTableIfExists('sandboxes_history');
 		$this->dropTableIfExists('sandboxes');
-		
-    }
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	}
 
-    }
+	public function down()
+	{
+		echo "M240518080913CreateSandboxes cannot be reverted.\n";
 
-    public function down()
-    {
-        echo "M240518080913CreateSandboxes cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

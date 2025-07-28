@@ -7,10 +7,10 @@ use yii\db\Migration;
  */
 class m220402_185406_alter_table_schedules extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-	public function safeUp()
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
 	{
 		$table = $this->db->getTableSchema('schedules');
 		if (!isset($table->columns['start_date']))
@@ -20,14 +20,13 @@ class m220402_185406_alter_table_schedules extends Migration
 		if (!isset($table->columns['override_id']))
 			$this->addColumn('schedules', 'override_id', $this->integer()->null());
 		
-		$this->alterColumn('schedules_entries', 'schedule',$this->string(255));
-		
+		$this->alterColumn('schedules_entries', 'schedule', $this->string(255));
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
 		$table = $this->db->getTableSchema('schedules');
 		if (isset($table->columns['start_date']))
@@ -36,8 +35,8 @@ class m220402_185406_alter_table_schedules extends Migration
 			$this->dropColumn('schedules', 'end_date');
 		if (isset($table->columns['override_id']))
 			$this->dropColumn('schedules', 'override_id');
-
-		$this->alterColumn('schedules_entries', 'schedule',$this->string(64));
+		
+		$this->alterColumn('schedules_entries', 'schedule', $this->string(64));
 		
 		$table = $this->db->getTableSchema('schedules_entries');
 		if (isset($table->columns['users_id']))
@@ -47,19 +46,19 @@ class m220402_185406_alter_table_schedules extends Migration
 			$this->dropTable('users_in_schedules_entries');
 		}
 	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	}
 
-    }
+	public function down()
+	{
+		echo "m220402_185406_alter_table_schedules cannot be reverted.\n";
 
-    public function down()
-    {
-        echo "m220402_185406_alter_table_schedules cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

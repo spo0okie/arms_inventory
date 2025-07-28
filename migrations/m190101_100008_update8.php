@@ -10,9 +10,9 @@ class m190101_100008_update8 extends Migration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		$table=$this->db->getTableSchema('{{%org_struct}}');
+		$table = $this->db->getTableSchema('{{%org_struct}}');
 		
 		if (!isset($table->columns['org_id'])) {
 			//добавляем ссылку на организацию в оргструктуре
@@ -21,7 +21,7 @@ class m190101_100008_update8 extends Migration
 			$this->addPrimaryKey('', 'org_struct', ['id', 'org_id']);
 		}
 		
-		$table=$this->db->getTableSchema('{{%users}}');
+		$table = $this->db->getTableSchema('{{%users}}');
 		if (!isset($table->columns['employee_id'])) {
 			//добавляем отдельное поле табельный в пользователях
 			$this->addColumn('{{%users}}', 'employee_id', $this->string(16)->notNull()->comment('Табельный номер')->after('id')->append('COLLATE utf8mb4_unicode_ci'));
@@ -43,12 +43,10 @@ class m190101_100008_update8 extends Migration
 			$this->addColumn('{{%users}}', 'resign_date', $this->string(16)->Null()->comment('Дата увольнения')->after('employ_date')->append('COLLATE utf8mb4_unicode_ci'));
 		}
 		
-		$table=$this->db->getTableSchema('{{%login_journal}}');
-		if (isset($table->foreignKeys['login_journal_ibfk_1'])) $this->dropForeignKey('{{%login_journal_ibfk_1}}','{{%login_journal}}');
-		if (isset($table->foreignKeys['login_journal_ibfk_2'])) $this->dropForeignKey('{{%login_journal_ibfk_2}}','{{%login_journal}}');
-		
-		/** @noinspection SqlWithoutWhere */
-		$sql=<<<SQL
+		$table = $this->db->getTableSchema('{{%login_journal}}');
+		if (isset($table->foreignKeys['login_journal_ibfk_1'])) $this->dropForeignKey('{{%login_journal_ibfk_1}}', '{{%login_journal}}');
+		if (isset($table->foreignKeys['login_journal_ibfk_2'])) $this->dropForeignKey('{{%login_journal_ibfk_2}}', '{{%login_journal}}');
+		$sql = <<<SQL
 			SET FOREIGN_KEY_CHECKS=0;
 			SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 			SET AUTOCOMMIT = 0;
@@ -84,39 +82,34 @@ class m190101_100008_update8 extends Migration
 			SET FOREIGN_KEY_CHECKS=1;
 SQL;
 		$this->execute($sql);
-
-		//меняем тип ключа в пользователях на классику (вместо табельного)
-		$this->alterColumn('users','id',$this->integer(16)->notNull());
-		$this->alterColumn('arms','user_id',$this->integer(16)->notNull());
-		$this->alterColumn('arms','it_staff_id',$this->integer(16)->notNull());
-		$this->alterColumn('arms','head_id',$this->integer(16)->notNull());
-		$this->alterColumn('arms','responsible_id',$this->integer(16)->notNull());
-		$this->alterColumn('login_journal','users_id',$this->integer(16)->notNull());
-		$this->alterColumn('users_in_groups','users_id',$this->integer(16)->notNull());
-		$this->alterColumn('materials','it_staff_id',$this->integer(16)->notNull());
-		$this->alterColumn('techs','user_id',$this->integer(16)->notNull());
-		$this->alterColumn('techs','it_staff_id',$this->integer(16)->notNull());
+		$this->alterColumn('users', 'id', $this->integer(16)->notNull());
+		$this->alterColumn('arms', 'user_id', $this->integer(16)->notNull());
+		$this->alterColumn('arms', 'it_staff_id', $this->integer(16)->notNull());
+		$this->alterColumn('arms', 'head_id', $this->integer(16)->notNull());
+		$this->alterColumn('arms', 'responsible_id', $this->integer(16)->notNull());
+		$this->alterColumn('login_journal', 'users_id', $this->integer(16)->notNull());
+		$this->alterColumn('users_in_groups', 'users_id', $this->integer(16)->notNull());
+		$this->alterColumn('materials', 'it_staff_id', $this->integer(16)->notNull());
+		$this->alterColumn('techs', 'user_id', $this->integer(16)->notNull());
+		$this->alterColumn('techs', 'it_staff_id', $this->integer(16)->notNull());
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
-		$this->alterColumn('users','id',$this->string(16)->notNull());
-		$this->alterColumn('arms','user_id',$this->string(16)->notNull());
-		$this->alterColumn('arms','it_staff_id',$this->string(16)->notNull());
-		$this->alterColumn('arms','head_id',$this->string(16)->notNull());
-		$this->alterColumn('arms','responsible_id',$this->string(16)->notNull());
-		$this->alterColumn('login_journal','users_id',$this->string(16)->notNull());
-		$this->alterColumn('users_in_groups','users_id',$this->string(16)->notNull());
-		$this->alterColumn('materials','it_staff_id',$this->string(16)->notNull());
-		$this->alterColumn('techs','user_id',$this->string(16)->notNull());
-		$this->alterColumn('techs','it_staff_id',$this->string(16)->notNull());
-		
-		/** @noinspection SqlResolve */
-		/** @noinspection SqlWithoutWhere */
-		$sql=<<<SQL
+		$this->alterColumn('users', 'id', $this->string(16)->notNull());
+		$this->alterColumn('arms', 'user_id', $this->string(16)->notNull());
+		$this->alterColumn('arms', 'it_staff_id', $this->string(16)->notNull());
+		$this->alterColumn('arms', 'head_id', $this->string(16)->notNull());
+		$this->alterColumn('arms', 'responsible_id', $this->string(16)->notNull());
+		$this->alterColumn('login_journal', 'users_id', $this->string(16)->notNull());
+		$this->alterColumn('users_in_groups', 'users_id', $this->string(16)->notNull());
+		$this->alterColumn('materials', 'it_staff_id', $this->string(16)->notNull());
+		$this->alterColumn('techs', 'user_id', $this->string(16)->notNull());
+		$this->alterColumn('techs', 'it_staff_id', $this->string(16)->notNull());
+		$sql = <<<SQL
 			SET FOREIGN_KEY_CHECKS=0;
 			SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 			SET AUTOCOMMIT = 0;
@@ -149,16 +142,14 @@ SQL;
 			SET FOREIGN_KEY_CHECKS=1;
 SQL;
 		$this->execute($sql);
-
-		//вот это вот тоже хз как пройдет если уже есть совпадения между организациями
-		$table=$this->db->getTableSchema('{{%org_struct}}');
+		$table = $this->db->getTableSchema('{{%org_struct}}');
 		
 		if (isset($table->columns['org_id'])) {
 			$this->dropPrimaryKey('PRIMARY', 'org_struct');
 			$this->addPrimaryKey('', 'org_struct', ['id']);
 		}
 		
-		$table=$this->db->getTableSchema('{{%users}}');
+		$table = $this->db->getTableSchema('{{%users}}');
 		
 		if (isset($table->columns['org_id']))
 			$this->dropColumn('users', 'org_id');
@@ -169,9 +160,9 @@ SQL;
 		if (isset($table->columns['resign_date']))
 			$this->dropColumn('users', 'resign_date');
 		
-
-		$this->dropColumn('org_struct','org_id');
+		
+		$this->dropColumn('org_struct', 'org_id');
 	}
-
+	
 	
 }

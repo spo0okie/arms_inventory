@@ -7,13 +7,12 @@ use yii\db\Migration;
  */
 class m190101_100000_update0 extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-		/** @noinspection SqlResolve */
-		$sql= /** @lang MySQL */
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
+		$sql = /** @lang MySQL */
 			<<<SQL
 set names utf8mb4;
 
@@ -119,31 +118,31 @@ CREATE TABLE `contracts_in_materials` (
 SET FOREIGN_KEY_CHECKS = 1;
 
 SQL;
-	    $this->execute($sql);
-    }
+		$this->execute($sql);
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		echo "m190101_100000_update0 cannot be reverted.\n";
+		
+		return false;
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-        echo "m190101_100000_update0 cannot be reverted.\n";
+	}
 
-        return false;
-    }
+	public function down()
+	{
+		echo "m191124_100710_update0 cannot be reverted.\n";
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m191124_100710_update0 cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

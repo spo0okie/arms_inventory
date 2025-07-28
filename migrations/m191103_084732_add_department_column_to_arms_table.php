@@ -14,10 +14,10 @@ class m191103_084732_add_department_column_to_arms_table extends Migration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		$table=$this->db->getTableSchema('{{%arms}}');
-
+		$table = $this->db->getTableSchema('{{%arms}}');
+		
 		if (!isset($table->columns['departments_id'])) {
 			$this->addColumn(
 				'{{%arms}}',    //правим АРМы
@@ -33,8 +33,6 @@ class m191103_084732_add_department_column_to_arms_table extends Migration
 				'departments_id'
 			);
 		}
-		
-		// add foreign key for table `{{%department}}`
 		$this->addForeignKey(
 			'{{%fk-arms-department}}',
 			'{{%arms}}',
@@ -48,12 +46,9 @@ class m191103_084732_add_department_column_to_arms_table extends Migration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
-		
-		$table=$this->db->getTableSchema('{{%arms}}');
-		
-		// drops foreign key for table `{{%department}}`
+		$table = $this->db->getTableSchema('{{%arms}}');
 		if (isset($table->foreignKeys['fk-arms-department'])) $this->dropForeignKey(
 			'{{%fk-arms-department}}',
 			'{{%arms}}'

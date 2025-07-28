@@ -8,29 +8,26 @@ use yii\db\Migration;
  */
 class m220916_122729_add_mac_column_to_arms_table extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-		Yii::$app->urlManager->scriptUrl='https://localhost';
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
+		Yii::$app->urlManager->scriptUrl = 'https://localhost';
 		$table = $this->db->getTableSchema('{{%arms}}');
-		if (!isset($table->columns['mac'])){
+		if (!isset($table->columns['mac'])) {
 			$this->addColumn('{{%arms}}', 'mac', $this->string()->null());
 		}
-	
-		/** @noinspection SqlWithoutWhere */
 		$this->execute('update `arms` inner join `comps` on `comps`.`id`=`arms`.`comp_id` set `arms`.`mac`=`comps`.`mac`');
-    
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
 		$table = $this->db->getTableSchema('{{%arms}}');
 		if (isset($table->columns['mac']))
-	        $this->dropColumn('{{%arms}}', 'mac');
-    }
+			$this->dropColumn('{{%arms}}', 'mac');
+	}
 }

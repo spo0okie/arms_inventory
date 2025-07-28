@@ -7,37 +7,37 @@ use yii\db\Migration;
  */
 class m230520_101000_alter_table_attaches extends Migration
 {
-	function addColumnIfNotExist($table,$column,$type,$index=false)
+	function addColumnIfNotExist($table, $column, $type, $index = false)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (!isset($tableSchema->columns[$column])) {
-			$this->addColumn($table,$column,$type);
-			if ($index) $this->createIndex("idx-$table-$column",$table,$column);
+			$this->addColumn($table, $column, $type);
+			if ($index) $this->createIndex("idx-$table-$column", $table, $column);
 			
 		}
 	}
 	
-	function dropColumnIfExist($table,$column)
+	function dropColumnIfExist($table, $column)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (isset($tableSchema->columns[$column])) {
-			$this->dropColumn($table,$column);
+			$this->dropColumn($table, $column);
 		}
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		$this->addColumnIfNotExist('attaches','tech_models_id',$this->integer()->null());
+		$this->addColumnIfNotExist('attaches', 'tech_models_id', $this->integer()->null());
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
-		$this->dropColumnIfExist('attaches','tech_models');
+		$this->dropColumnIfExist('attaches', 'tech_models');
 	}
 }

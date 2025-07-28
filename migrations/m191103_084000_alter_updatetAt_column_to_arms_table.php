@@ -8,11 +8,11 @@ use yii\db\Migration;
  */
 class m191103_084000_alter_updatetAt_column_to_arms_table extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
 		$this->alterColumn(
 			'{{%arms}}',
 			'{{%updated_at}}',
@@ -20,33 +20,33 @@ class m191103_084000_alter_updatetAt_column_to_arms_table extends Migration
 				->defaultExpression('CURRENT_TIMESTAMP')
 				->append('ON UPDATE CURRENT_TIMESTAMP')
 		);
-    }
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		$this->alterColumn(
+			'{{%arms}}',
+			'{{%updated_at}}',
+			$this->timestamp()
+				->defaultValue(null)
+		);
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-	    $this->alterColumn(
-		    '{{%arms}}',
-		    '{{%updated_at}}',
-		    $this->timestamp()
-			    ->defaultValue(null)
-	    );
-    }
+	}
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	public function down()
+	{
+		echo "m191103_085902_alter_updatetAt_column_to_arms_table cannot be reverted.\n";
 
-    }
-
-    public function down()
-    {
-        echo "m191103_085902_alter_updatetAt_column_to_arms_table cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

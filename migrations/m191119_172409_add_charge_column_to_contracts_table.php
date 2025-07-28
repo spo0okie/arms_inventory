@@ -10,17 +10,17 @@ class m191119_172409_add_charge_column_to_contracts_table extends Migration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		$this->addColumn('{{%contracts}}','charge',$this->integer()->null());
+		$this->addColumn('{{%contracts}}', 'charge', $this->integer()->null());
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
-		$this->dropColumn('{{%contracts}}','charge');
+		$this->dropColumn('{{%contracts}}', 'charge');
 	}
-
+	
 }

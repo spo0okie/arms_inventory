@@ -8,19 +8,19 @@ use yii\db\Migration;
  */
 class m191119_145841_add_cost_column_to_org_inet_table extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-	    $this->addColumn('{{%org_inet}}','cost',$this->integer()->null());
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-	    $this->dropColumn('{{%org_inet}}','cost');
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
+		$this->addColumn('{{%org_inet}}', 'cost', $this->integer()->null());
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		$this->dropColumn('{{%org_inet}}', 'cost');
+	}
 }

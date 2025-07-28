@@ -7,11 +7,11 @@ use yii\db\Migration;
  */
 class m230520_060415_users_in_contracts extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
 		if (is_null($table = $this->db->getTableSchema('users_in_contracts'))) {
 			$this->createTable('users_in_contracts', [
 				'id' => $this->primaryKey(),
@@ -19,34 +19,33 @@ class m230520_060415_users_in_contracts extends Migration
 				'contracts_id' => $this->integer()->notNull(),
 			]);
 			
-			$this->createIndex('idx-users_in_contracts-users_id','users_in_contracts','users_id');
-			$this->createIndex('idx-users_in_contracts-contracts_id','users_in_contracts','contracts_id');
+			$this->createIndex('idx-users_in_contracts-users_id', 'users_in_contracts', 'users_id');
+			$this->createIndex('idx-users_in_contracts-contracts_id', 'users_in_contracts', 'contracts_id');
 		}
-
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
 		if (!is_null($table = $this->db->getTableSchema('users_in_contracts'))) {
 			$this->dropTable('users_in_contracts');
 		}
-    }
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	}
 
-    }
+	public function down()
+	{
+		echo "m230520_060415_users_in_contracts cannot be reverted.\n";
 
-    public function down()
-    {
-        echo "m230520_060415_users_in_contracts cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

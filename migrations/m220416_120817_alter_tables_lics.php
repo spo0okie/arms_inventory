@@ -7,10 +7,10 @@ use yii\db\Migration;
  */
 class m220416_120817_alter_tables_lics extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
 	{
 		if (is_null($table = $this->db->getTableSchema('lic_items_in_comps'))) {
 			$this->createTable('lic_items_in_comps', [
@@ -60,49 +60,48 @@ class m220416_120817_alter_tables_lics extends Migration
 			]);
 		}
 	}
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
 		if (!is_null($this->db->getTableSchema('lic_items_in_comps')))
 			$this->dropTable('lic_items_in_comps');
 		
-	
+		
 		if (!is_null($this->db->getTableSchema('lic_items_in_users')))
 			$this->dropTable('lic_items_in_users');
 		
-	
+		
 		if (!is_null($this->db->getTableSchema('lic_groups_in_comps')))
 			$this->dropTable('lic_groups_in_comps');
 		
-	
+		
 		if (!is_null($this->db->getTableSchema('lic_groups_in_users')))
 			$this->dropTable('lic_groups_in_users');
 		
-	
+		
 		if (!is_null($this->db->getTableSchema('lic_keys_in_comps')))
 			$this->dropTable('lic_keys_in_comps');
 		
-	
+		
 		if (!is_null($this->db->getTableSchema('lic_keys_in_users')))
 			$this->dropTable('lic_keys_in_users');
-		
-    }
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	}
 
-    }
+	public function down()
+	{
+		echo "m220416_120817_alter_tables_lics cannot be reverted.\n";
 
-    public function down()
-    {
-        echo "m220416_120817_alter_tables_lics cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

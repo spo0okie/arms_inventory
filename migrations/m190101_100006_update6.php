@@ -10,10 +10,8 @@ class m190101_100006_update6 extends Migration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		
-		
 		if (is_null($table = $this->db->getTableSchema('materials_types'))) {
 			$this->createTable('materials_types', [
 				'id' => $this->primaryKey()->comment('id'),
@@ -50,7 +48,7 @@ class m190101_100006_update6 extends Migration
 				'comment' => $this->text()->Null()->append(' COLLATE utf8mb4_unicode_ci'),
 				'history' => $this->text()->Null()->append(' COLLATE utf8mb4_unicode_ci'),
 			], 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
-		
+			
 			$this->createIndex(
 				'{{%idx-materials-it_staff_id}}',
 				'{{%materials}}',
@@ -70,18 +68,18 @@ class m190101_100006_update6 extends Migration
 			);
 		}
 		
-		if (is_null($table=$this->db->getTableSchema('materials_usages'))) {
-			$this->createTable('materials_usages',[
-				'id'    => $this->primaryKey()->comment('id'),
-				'materials_id'  => $this->integer()->notNull()->comment('Материал'),
-				'count'  => $this->integer()->notNull()->comment('Количество'),
-				'date'  => $this->date()->notNull()->comment('Дата расхода'),
-				'arms_id'  => $this->integer()->Null()->comment('АРМ'),
-				'techs_id'  => $this->integer()->Null()->comment('Оборудование'),
-				'comment'=>$this->text()->Null()->append(' COLLATE utf8mb4_unicode_ci'),
-				'history'=>$this->text()->Null()->append(' COLLATE utf8mb4_unicode_ci'),
-			],'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
-		
+		if (is_null($table = $this->db->getTableSchema('materials_usages'))) {
+			$this->createTable('materials_usages', [
+				'id' => $this->primaryKey()->comment('id'),
+				'materials_id' => $this->integer()->notNull()->comment('Материал'),
+				'count' => $this->integer()->notNull()->comment('Количество'),
+				'date' => $this->date()->notNull()->comment('Дата расхода'),
+				'arms_id' => $this->integer()->Null()->comment('АРМ'),
+				'techs_id' => $this->integer()->Null()->comment('Оборудование'),
+				'comment' => $this->text()->Null()->append(' COLLATE utf8mb4_unicode_ci'),
+				'history' => $this->text()->Null()->append(' COLLATE utf8mb4_unicode_ci'),
+			], 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+			
 			$this->createIndex(
 				'{{%idx-materials_usages-materials_id}}',
 				'{{%materials_usages}}',
@@ -101,16 +99,15 @@ class m190101_100006_update6 extends Migration
 			);
 			
 		}
-		
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
-		if (!is_null($table=$this->db->getTableSchema('materials_usages'))) $this->dropTable('materials_usages');
-		if (!is_null($table=$this->db->getTableSchema('materials'))) $this->dropTable('materials');
-		if (!is_null($table=$this->db->getTableSchema('materials_types'))) $this->dropTable('materials_types');
+		if (!is_null($table = $this->db->getTableSchema('materials_usages'))) $this->dropTable('materials_usages');
+		if (!is_null($table = $this->db->getTableSchema('materials'))) $this->dropTable('materials');
+		if (!is_null($table = $this->db->getTableSchema('materials_types'))) $this->dropTable('materials_types');
 	}
 }

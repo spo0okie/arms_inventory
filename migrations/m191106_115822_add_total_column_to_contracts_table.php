@@ -7,19 +7,19 @@ use yii\db\Migration;
  */
 class m191106_115822_add_total_column_to_contracts_table extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-    	$this->addColumn('{{%contracts}}','total',$this->integer()->null());
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-	    $this->dropColumn('{{%contracts}}','total');
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
+		$this->addColumn('{{%contracts}}', 'total', $this->integer()->null());
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		$this->dropColumn('{{%contracts}}', 'total');
+	}
 }

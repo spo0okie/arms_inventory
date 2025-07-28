@@ -9,11 +9,11 @@ use app\migrations\arms\ArmsMigration;
  */
 class M250505122356WikiCache extends ArmsMigration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
 		$this->createTable('wiki_cache', [
 			'id' => $this->primaryKey(),
 			'page' => $this->string()->notNull(),
@@ -21,32 +21,32 @@ class M250505122356WikiCache extends ArmsMigration
 			'updated_at' => $this->dateTime(),
 			'valid' => $this->boolean()->notNull()->defaultValue(1),
 		]);
-
+		
 		$this->createIndex('idx-wiki_cache-page', 'wiki_cache', 'page');
-    }
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		$this->dropTableIfExists('wiki_cache');
+		
+		return false;
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-        $this->dropTableIfExists('wiki_cache');
+	}
 
-        return false;
-    }
+	public function down()
+	{
+		echo "M250505122356WikiCache cannot be reverted.\n";
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "M250505122356WikiCache cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

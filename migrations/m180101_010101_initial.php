@@ -11,13 +11,13 @@ use yii\db\Migration;
  */
 class m180101_010101_initial extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-	$sql= /** @lang MySQL */
-		<<<SQL
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
+		$sql = /** @lang MySQL */
+			<<<SQL
 set names utf8mb4;
 
 CREATE TABLE `arms` (
@@ -1127,15 +1127,15 @@ ALTER TABLE `techs`
   ADD CONSTRAINT `techs_ibfk_5` FOREIGN KEY (`state_id`) REFERENCES `tech_states` (`id`);
 COMMIT;
 SQL;
-	    $this->execute($sql);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-        $sql= /** @lang MySQL */
+		$this->execute($sql);
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		$sql = /** @lang MySQL */
 			<<<SQL
 		DROP TABLE IF EXISTS arms;
 		DROP TABLE IF EXISTS comps;
@@ -1173,21 +1173,21 @@ SQL;
 		DROP TABLE IF EXISTS tech_types;
 		DROP TABLE IF EXISTS users;
 SQL;
-	    $this->execute($sql);
-        }
+		$this->execute($sql);
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	}
 
-    }
+	public function down()
+	{
+		echo "m191123_164814_initial cannot be reverted.\n";
 
-    public function down()
-    {
-        echo "m191123_164814_initial cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

@@ -7,34 +7,34 @@ use yii\db\Migration;
  */
 class m230321_054524_alter_table_comps extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-		$this->alterColumn('comps','name',$this->string(128));
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
+		$this->alterColumn('comps', 'name', $this->string(128));
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		$this->alterColumn('comps', 'name', $this->string(32));
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-		$this->alterColumn('comps','name',$this->string(32));
-    }
+	}
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	public function down()
+	{
+		echo "m230321_054524_alter_table_comps cannot be reverted.\n";
 
-    }
-
-    public function down()
-    {
-        echo "m230321_054524_alter_table_comps cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

@@ -7,12 +7,11 @@ use yii\db\Migration;
  */
 class m210614_063518_create_table_schedules extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
 		if (is_null($table = $this->db->getTableSchema('schedules_entries'))) {
 			$this->createTable('schedules_entries', [
 				'[[id]]' => $this->primaryKey(),
@@ -30,37 +29,35 @@ class m210614_063518_create_table_schedules extends Migration
 				'[[created_at]]' => $this->timestamp(),
 				//'[[updated_at]]'	=> $this->timestamp()
 			], 'DEFAULT CHARSET=utf8');
-		
+			
 			$this->createIndex('{{%idx-schedules_days_org_id}}', '{{%schedules_entries}}', '[[schedule_id]]');
 			$this->createIndex('{{%idx-schedules_days_date}}', '{{%schedules_entries}}', '[[date]]');
 			$this->createIndex('{{%idx-schedules_days_end_date}}', '{{%schedules_entries}}', '[[date_end]]');
 			$this->createIndex('{{%idx-schedules_days_is_period}}', '{{%schedules_entries}}', '[[is_period]]');
 			$this->createIndex('{{%idx-schedules_days_is_work}}', '{{%schedules_entries}}', '[[is_work]]');
 		}
+	}
 	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		if (!is_null($table = $this->db->getTableSchema('schedules_entries'))) $this->dropTable('{{%schedules_entries}}');
+	}
 	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
+
 	}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-		if (!is_null($table=$this->db->getTableSchema('schedules_entries'))) $this->dropTable('{{%schedules_entries}}');
-    }
+	public function down()
+	{
+		echo "m210614_063518_create_table_schedules cannot be reverted.\n";
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m210614_063518_create_table_schedules cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

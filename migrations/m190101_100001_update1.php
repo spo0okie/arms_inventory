@@ -10,18 +10,17 @@ class m190101_100001_update1 extends Migration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
+		if (is_null($table = $this->db->getTableSchema('contracts_states'))) $this->createTable('contracts_states', [
+			'id' => $this->primaryKey()->comment('id'),
+			'code' => $this->string(64)->notNull()->unique()->comment('Код')->append(' COLLATE utf8mb4_unicode_ci'),
+			'name' => $this->string(128)->notNull()->unique()->comment('Наименование')->append(' COLLATE utf8mb4_unicode_ci'),
+			'descr' => $this->text()->comment('Описание')->append(' COLLATE utf8mb4_unicode_ci')
+		], 'ENGINE=InnoDB');
 		
-		if (is_null($table=$this->db->getTableSchema('contracts_states'))) $this->createTable('contracts_states',[
-			'id'    => $this->primaryKey()->comment('id'),
-			'code'  => $this->string(64)->notNull()->unique()->comment('Код')->append(' COLLATE utf8mb4_unicode_ci'),
-			'name'  => $this->string(128)->notNull()->unique()->comment('Наименование')->append(' COLLATE utf8mb4_unicode_ci'),
-			'descr'=>$this->text()->comment('Описание')->append(' COLLATE utf8mb4_unicode_ci')
-		],'ENGINE=InnoDB');
+		$table = $this->db->getTableSchema('{{%contracts}}');
 		
-		$table=$this->db->getTableSchema('{{%contracts}}');
-
 		if (!isset($table->columns['state_id'])) {
 			$this->addColumn(
 				'{{%contracts}}',    //правим АРМы
@@ -36,8 +35,6 @@ class m190101_100001_update1 extends Migration
 				'state_id'
 			);
 		}
-		
-		// add foreign key for table `{{%department}}`
 		$this->addForeignKey(
 			'{{%fk-contracts-state}}',
 			'{{%contracts}}',
@@ -51,12 +48,9 @@ class m190101_100001_update1 extends Migration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
-		
-		$table=$this->db->getTableSchema('{{%contracts}}');
-		
-		// drops foreign key for table `{{%department}}`
+		$table = $this->db->getTableSchema('{{%contracts}}');
 		if (isset($table->foreignKeys['fk-contracts-state'])) $this->dropForeignKey(
 			'{{%fk-contracts-state}}',
 			'{{%contracts}}'
@@ -64,8 +58,7 @@ class m190101_100001_update1 extends Migration
 		
 		
 		if (isset($table->columns['state_id_id'])) $this->dropColumn('{{%contracts}}', 'state_id');
-
-		if (!is_null($table=$this->db->getTableSchema('contracts_states'))) $this->dropTable('contracts_states');
 		
+		if (!is_null($table = $this->db->getTableSchema('contracts_states'))) $this->dropTable('contracts_states');
 	}
 }

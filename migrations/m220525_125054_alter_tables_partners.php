@@ -7,35 +7,35 @@ use yii\db\Migration;
  */
 class m220525_125054_alter_tables_partners extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-	public function safeUp()
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
 	{
 		$this->alterColumn('partners', 'inn', $this->bigInteger(12));
 	}
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
+	
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
 		$this->alterColumn('partners', 'inn', $this->integer(10));
-    }
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	}
 
-    }
+	public function down()
+	{
+		echo "m220525_125054_alter_tables_partners cannot be reverted.\n";
 
-    public function down()
-    {
-        echo "m220525_125054_alter_tables_partners cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

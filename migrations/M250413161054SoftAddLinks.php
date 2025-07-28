@@ -12,7 +12,7 @@ class M250413161054SoftAddLinks extends ArmsMigration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
 		$this->addColumnIfNotExists('soft', 'links', $this->text()->comment('Links associated with the software'));
 		$this->addColumnIfNotExists('soft', 'scans_id', $this->integer()->comment('ID of the software preview image'));
@@ -21,7 +21,7 @@ class M250413161054SoftAddLinks extends ArmsMigration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
 		$this->dropColumnIfExists('soft', 'links');
 		$this->dropColumnIfExists('soft', 'scans_id');

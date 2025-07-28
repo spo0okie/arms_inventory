@@ -12,15 +12,15 @@ class M250414164449ScansAddSoft extends ArmsMigration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		$this->addColumnIfNotExists('scans', 'soft_id', $this->integer()->comment('Soft ID associated with the scan'),true);
+		$this->addColumnIfNotExists('scans', 'soft_id', $this->integer()->comment('Soft ID associated with the scan'), true);
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
 		$this->dropColumnIfExists('scans', 'soft_id');
 	}

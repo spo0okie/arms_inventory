@@ -10,15 +10,15 @@ class m210621_131426_alter_table_services extends ArmsMigration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		$this->addColumnIfNotExists('services', 'parent_id', $this->integer()->null(),true);
+		$this->addColumnIfNotExists('services', 'parent_id', $this->integer()->null(), true);
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
 		$this->dropColumnIfExists('services', 'parent_id');
 	}

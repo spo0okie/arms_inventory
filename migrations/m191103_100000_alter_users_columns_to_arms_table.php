@@ -14,30 +14,30 @@ use yii\db\Migration;
  */
 class m191103_100000_alter_users_columns_to_arms_table extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-	    $this->alterColumn('{{%arms}}','{{%user_id}}',$this->integer()->defaultValue(null)	);
-	    $this->alterColumn('{{%arms}}','{{%it_staff_id}}',$this->integer()->defaultValue(null)	);
-	    $this->alterColumn('{{%arms}}','{{%head_id}}',$this->integer()->defaultValue(null)	);
-	    $this->alterColumn('{{%arms}}','{{%responsible_id}}',$this->integer()->defaultValue(null));
-	    $this->alterColumn('{{%techs}}','{{%user_id}}',$this->integer()->defaultValue(null));
-	    $this->alterColumn('{{%techs}}','{{%it_staff_id}}',$this->integer()->defaultValue(null));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-	    $this->alterColumn('{{%arms}}','{{%user_id}}',$this->integer()->notNull());
-	    $this->alterColumn('{{%arms}}','{{%it_staff_id}}',$this->integer()->notNull());
-	    $this->alterColumn('{{%arms}}','{{%head_id}}',$this->integer()->notNull());
-	    $this->alterColumn('{{%arms}}','{{%responsible_id}}',$this->integer()->notNull());
-	    $this->alterColumn('{{%techs}}','{{%user_id}}',$this->integer()->notNull());
-	    $this->alterColumn('{{%techs}}','{{%it_staff_id}}',$this->integer()->notNull());
-    }
-
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
+		$this->alterColumn('{{%arms}}', '{{%user_id}}', $this->integer()->defaultValue(null));
+		$this->alterColumn('{{%arms}}', '{{%it_staff_id}}', $this->integer()->defaultValue(null));
+		$this->alterColumn('{{%arms}}', '{{%head_id}}', $this->integer()->defaultValue(null));
+		$this->alterColumn('{{%arms}}', '{{%responsible_id}}', $this->integer()->defaultValue(null));
+		$this->alterColumn('{{%techs}}', '{{%user_id}}', $this->integer()->defaultValue(null));
+		$this->alterColumn('{{%techs}}', '{{%it_staff_id}}', $this->integer()->defaultValue(null));
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		$this->alterColumn('{{%arms}}', '{{%user_id}}', $this->integer()->notNull());
+		$this->alterColumn('{{%arms}}', '{{%it_staff_id}}', $this->integer()->notNull());
+		$this->alterColumn('{{%arms}}', '{{%head_id}}', $this->integer()->notNull());
+		$this->alterColumn('{{%arms}}', '{{%responsible_id}}', $this->integer()->notNull());
+		$this->alterColumn('{{%techs}}', '{{%user_id}}', $this->integer()->notNull());
+		$this->alterColumn('{{%techs}}', '{{%it_staff_id}}', $this->integer()->notNull());
+	}
+	
 }

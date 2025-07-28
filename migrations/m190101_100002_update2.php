@@ -10,36 +10,16 @@ class m190101_100002_update2 extends Migration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		
-		/*
-		 *
-			CREATE TABLE `lic_keys` (
-			  `id` int(11) NOT NULL COMMENT 'id',
-			  `lic_items_id` int(11) NOT NULL COMMENT 'Закупка',
-			  `key_text` mediumtext COLLATE utf8mb4_unicode_ci,
-			  `comment` mediumtext COLLATE utf8mb4_unicode_ci
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+		if (is_null($table = $this->db->getTableSchema('lic_keys'))) {
+			$this->createTable('lic_keys', [
+				'id' => $this->primaryKey()->comment('id'),
+				'lic_items_id' => $this->integer()->notNull()->comment('Закупка'),
+				'key_text' => $this->text()->notNull()->comment('Наименование')->append(' COLLATE utf8mb4_unicode_ci'),
+				'comment' => $this->text()->comment('Комментарий')->append(' COLLATE utf8mb4_unicode_ci')
+			], 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 			
-			-- new table `lic_keys_in_arms`
-			
-			CREATE TABLE `lic_keys_in_arms` (
-			  `id` int(11) NOT NULL,
-			  `lic_keys_id` int(11) NOT NULL,
-			  `arms_id` int(11) NOT NULL
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-		 */
-		
-		
-		if (is_null($table=$this->db->getTableSchema('lic_keys'))) {
-			$this->createTable('lic_keys',[
-				'id'    => $this->primaryKey()->comment('id'),
-				'lic_items_id'  => $this->integer()->notNull()->comment('Закупка'),
-				'key_text'  => $this->text()->notNull()->comment('Наименование')->append(' COLLATE utf8mb4_unicode_ci'),
-				'comment'=>$this->text()->comment('Комментарий')->append(' COLLATE utf8mb4_unicode_ci')
-			],'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
-
 			$this->createIndex(
 				'{{%idx-lic_keys-lic_items}}',
 				'{{%lic_keys}}',
@@ -57,13 +37,13 @@ class m190101_100002_update2 extends Migration
 			
 		}
 		
-		if (is_null($table=$this->db->getTableSchema('lic_keys_in_arms'))) {
-			$this->createTable('lic_keys_in_arms',[
-				'id'    => $this->primaryKey()->comment('id'),
-				'lic_keys_id'  => $this->integer()->notNull(),
-				'arms_id'  => $this->integer()->notNull(),
-			],'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
-
+		if (is_null($table = $this->db->getTableSchema('lic_keys_in_arms'))) {
+			$this->createTable('lic_keys_in_arms', [
+				'id' => $this->primaryKey()->comment('id'),
+				'lic_keys_id' => $this->integer()->notNull(),
+				'arms_id' => $this->integer()->notNull(),
+			], 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+			
 			$this->createIndex(
 				'{{%idx-lic_keys_in_arms-lic_keys_id}}',
 				'{{%lic_keys_in_arms}}',
@@ -76,15 +56,14 @@ class m190101_100002_update2 extends Migration
 				'arms_id'
 			);
 		}
-		
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
-		if (!is_null($table=$this->db->getTableSchema('lic_keys_in_arms'))) $this->dropTable('lic_keys_in_arms');
-		if (!is_null($table=$this->db->getTableSchema('lic_keys'))) $this->dropTable('lic_keys');
+		if (!is_null($table = $this->db->getTableSchema('lic_keys_in_arms'))) $this->dropTable('lic_keys_in_arms');
+		if (!is_null($table = $this->db->getTableSchema('lic_keys'))) $this->dropTable('lic_keys');
 	}
 }

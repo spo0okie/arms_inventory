@@ -7,43 +7,43 @@ use yii\db\Migration;
  */
 class m230527_052818_add_external_links extends Migration
 {
-	function addColumnIfNotExist($table,$column,$type,$index=false)
+	function addColumnIfNotExist($table, $column, $type, $index = false)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (!isset($tableSchema->columns[$column])) {
-			$this->addColumn($table,$column,$type);
-			if ($index) $this->createIndex("idx-$table-$column",$table,$column);
+			$this->addColumn($table, $column, $type);
+			if ($index) $this->createIndex("idx-$table-$column", $table, $column);
 			
 		}
 	}
 	
-	function dropColumnIfExist($table,$column)
+	function dropColumnIfExist($table, $column)
 	{
 		$tableSchema = $this->db->getTableSchema($table);
 		if (isset($tableSchema->columns[$column])) {
-			$this->dropColumn($table,$column);
+			$this->dropColumn($table, $column);
 		}
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		$this->addColumnIfNotExist('services','external_links',$this->text()->null());
-		$this->addColumnIfNotExist('techs','external_links',$this->text()->null());
-		$this->addColumnIfNotExist('comps','external_links',$this->text()->null());
-		$this->addColumnIfNotExist('users','external_links',$this->text()->null());
+		$this->addColumnIfNotExist('services', 'external_links', $this->text()->null());
+		$this->addColumnIfNotExist('techs', 'external_links', $this->text()->null());
+		$this->addColumnIfNotExist('comps', 'external_links', $this->text()->null());
+		$this->addColumnIfNotExist('users', 'external_links', $this->text()->null());
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
-		$this->dropColumnIfExist('services','external_links');
-		$this->dropColumnIfExist('techs','external_links');
-		$this->dropColumnIfExist('comps','external_links');
-		$this->dropColumnIfExist('users','external_links');
+		$this->dropColumnIfExist('services', 'external_links');
+		$this->dropColumnIfExist('techs', 'external_links');
+		$this->dropColumnIfExist('comps', 'external_links');
+		$this->dropColumnIfExist('users', 'external_links');
 	}
 }

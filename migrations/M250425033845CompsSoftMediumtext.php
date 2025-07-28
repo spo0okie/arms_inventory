@@ -9,36 +9,36 @@ use app\migrations\arms\ArmsMigration;
  */
 class M250425033845CompsSoftMediumtext extends ArmsMigration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
 		$this->alterColumn('comps', 'raw_soft', 'mediumtext');
 		$this->alterColumn('comps_history', 'raw_soft', 'mediumtext');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
 		$this->alterColumn('comps', 'raw_soft', $this->text());
 		$this->alterColumn('comps_history', 'raw_soft', $this->text());
-    }
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	}
 
-    }
+	public function down()
+	{
+		echo "M250425033845CompsSoftMediumtext cannot be reverted.\n";
 
-    public function down()
-    {
-        echo "M250425033845CompsSoftMediumtext cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

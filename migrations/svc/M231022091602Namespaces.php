@@ -9,36 +9,36 @@ use yii\db\Migration;
  */
 class M231022091602Namespaces extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
 		$this->execute("update migration set version=CONCAT('app\\\\migrations\\\\',version)");
-    }
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		echo "M231022091602Namespaces cannot be reverted.\n";
+		
+		return false;
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-        echo "M231022091602Namespaces cannot be reverted.\n";
+	}
 
-        return false;
-    }
+	public function down()
+	{
+		echo "M231022091602Namespaces cannot be reverted.\n";
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "M231022091602Namespaces cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }

@@ -10,12 +10,12 @@ class m190101_100007_update7 extends Migration
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeUp()
+	public function up()
 	{
-		$this->alterColumn('{{%arms}}','updated_at',$this->timestamp()->null()->defaultExpression('CURRENT_TIMESTAMP'));
+		$this->alterColumn('{{%arms}}', 'updated_at', $this->timestamp()->null()->defaultExpression('CURRENT_TIMESTAMP'));
 		$this->execute("UPDATE `arms` SET updated_at=NULL where updated_at<'1960-01-01 00:00:00'");
-
-		$this->addColumn('{{%arms}}','is_server',$this->boolean());
+		
+		$this->addColumn('{{%arms}}', 'is_server', $this->boolean());
 		
 		
 		$this->createIndex(
@@ -23,18 +23,17 @@ class m190101_100007_update7 extends Migration
 			'{{%arms}}',
 			'is_server'
 		);
-		
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function safeDown()
+	public function down()
 	{
-		$this->alterColumn('{{%arms}}','updated_at',$this->timestamp()->null()->defaultValue(null));
+		$this->alterColumn('{{%arms}}', 'updated_at', $this->timestamp()->null()->defaultValue(null));
 		$this->execute("UPDATE `arms` SET updated_at=NULL where updated_at<'1960-01-01 00:00:00'");
-
-		$table=$this->db->getTableSchema('{{%arms}}');
+		
+		$table = $this->db->getTableSchema('{{%arms}}');
 		if (isset($table->columns['is_server'])) $this->dropColumn('{{%arms}}', 'is_server');
 	}
 }

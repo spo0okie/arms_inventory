@@ -7,12 +7,12 @@ use yii\db\Migration;
  */
 class m220117_054532_add_services_recursive_segment_search extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function safeUp()
-    {
-		$sql=<<<SQL
+	/**
+	 * {@inheritdoc}
+	 */
+	public function up()
+	{
+		$sql = <<<SQL
     	set names utf8mb4;
 DROP FUNCTION IF EXISTS getServiceSegment;
 DROP PROCEDURE IF EXISTS getServiceSegment;
@@ -35,35 +35,34 @@ BEGIN
     RETURN res;
 END;
 SQL;
-	
+		
 		$this->execute($sql);
-
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-		$sql=<<<SQL
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function down()
+	{
+		$sql = <<<SQL
 DROP FUNCTION IF EXISTS getServiceSegment;
 DROP PROCEDURE IF EXISTS getServiceSegment;
 SQL;
 		$this->execute($sql);
-    }
+	}
+	
+	/*
+	// Use up()/down() to run migration code without a transaction.
+	public function up()
+	{
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
+	}
 
-    }
+	public function down()
+	{
+		echo "m220117_054532_add_services_recursive_segment_search cannot be reverted.\n";
 
-    public function down()
-    {
-        echo "m220117_054532_add_services_recursive_segment_search cannot be reverted.\n";
-
-        return false;
-    }
-    */
+		return false;
+	}
+	*/
 }
