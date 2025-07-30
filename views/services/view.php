@@ -9,6 +9,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\web\YiiAsset;
+use app\components\ShowArchivedWidget;
+
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
@@ -38,7 +40,7 @@ DynaGridWidgetAsset::register($this);
 <?php
 
 $tabs=[];
-
+$showArchived = ShowArchivedWidget::isOn();
 DynaGridWidget::handleSave('services-index');
 $tabs[]=[
 	'id'=>'serviceChildren',
@@ -57,7 +59,7 @@ $tabs[]=[
 		</div>
 		<script>
 			$(document).ready(function() {
-				$.get("/web/services/children-tree?id={$model->id}", function(data) {
+				$.get("/web/services/children-tree?id={$model->id}&showArchived={$showArchived}", function(data) {
 				    jQuery("#serviceChildrenTree").hide().html(data);
 				    setTimeout(function (){jQuery("#serviceChildrenTree").fadeToggle();ExpandableCardInitAll();},500)
 				})

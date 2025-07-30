@@ -361,6 +361,7 @@ class ServicesController extends ArmsBaseController
 		$searchModel = new ServicesSearch();
 		$searchModel->parent_id=true;  //в т.ч. дочерние
 		$searchModel->ids=array_merge(ArrayHelper::getArrayField($children,'id'),[$id]);  //только эти
+		$searchModel->archived=Yii::$app->request->get('showArchived',false);
 		
 		
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);

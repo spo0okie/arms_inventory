@@ -5,13 +5,14 @@ use app\components\IsHistoryObjectWidget;
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
-use app\components\ModelFieldWidget;use app\components\ShowArchivedWidget;
+use app\components\ModelFieldWidget;
+use app\components\ShowArchivedWidget;
 use app\components\StripedAlertWidget;
 use app\components\TextFieldWidget;
 use app\components\UrlListWidget;
 use app\models\Services;
 use yii\helpers\Html;
-use kartik\markdown\Markdown;
+
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
@@ -33,7 +34,7 @@ if(!$static_view) { ?>
 <span class="float-end text-end">
 	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
 	<br />
-	<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
+	<?= ShowArchivedWidget::widget(['reload'=>true]) ?>
 </span>
 <?php } ?>
 <?= IsHistoryObjectWidget::widget(['model'=>$model]) ?>

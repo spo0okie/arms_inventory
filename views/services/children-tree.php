@@ -65,6 +65,7 @@ JS
 
 	<?= DynaGridWidget::widget([
 		'id' => 'services-index',
+		'model' => new Services(),
 		'header' => Html::encode($this->title),
 		'columns' => require 'columns.php',
 		'defaultOrder' => ['name','sites','segment','providingSchedule','supportSchedule','responsible','compsAndTechs'],
