@@ -326,13 +326,12 @@ JS;
 		unset($data['model']);
 		unset($data['modelAttribute']);
 		
-		//TODO: тут у нас никак не обрабатываются варианты ссылки на поля другого объекта типа 'user.licKeys'
-		if (!isset($data['class']) && !isset($data['value']) && $model->hasMethod('attributeIsLink') && $model->attributeIsLink($attr)) {
+		if (!isset($data['class']) && !isset($data['value']) && $model?->hasMethod('attributeIsLink') && $model->attributeIsLink($attr)) {
 			$data['class']=DefaultColumn::class;
 		}
 		
-		if (!isset($data['class']) && !isset($data['value']) && $model->hasMethod('getAttributeType')) {
-			switch ($model->getAttributeType($attr)) {
+		if (!isset($data['class']) && !isset($data['value']) && $model?->hasMethod('getAttributeType')) {
+			switch ($model?->getAttributeType($attr)) {
 				case 'boolean': $data['class']=BooleanColumn::class; break;
 				case 'text': $data['class']=DefaultColumn::class; break;
 				default: $data['class']=$attr==='name'?ItemColumn::class:DefaultColumn::class; break;
