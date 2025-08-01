@@ -15,6 +15,8 @@ class AcesSearch extends Aces
 	public $subjects;
 	public $resource;
 	public $access_types;
+	public $archived;
+	
 	public $services_subject_ids;
 	public $services_resource_ids;
 	

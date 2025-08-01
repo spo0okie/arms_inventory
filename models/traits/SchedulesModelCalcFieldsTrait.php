@@ -226,8 +226,7 @@ trait SchedulesModelCalcFieldsTrait
 	 * все привязанные периоды к расписанию
 	 * @return array
 	 */
-	public function getPeriods() {
-		/** @var Schedules $this */
+	/*public function getPeriods() {
 		if (!isset($this->attrsCache['periods'])) {
 			$this->attrsCache['periods']=[];
 			foreach ($this->entries as $entry)
@@ -235,7 +234,7 @@ trait SchedulesModelCalcFieldsTrait
 					$this->attrsCache['periods'][]=$entry;
 		}
 		return $this->attrsCache['periods'];
-	}
+	}*/
 	
 	/**
 	 * Ищет график работы на конкретный день учитывая родительские расписания и перекрытия
@@ -624,7 +623,7 @@ trait SchedulesModelCalcFieldsTrait
 			$dateScheduleEntry->load([
 				'is_period'=>0,
 				'schedule'=>'-',
-				'date'=>'def'
+				'date'=>'def',
 			],'');
 		} else $dateScheduleEntry=clone $dateScheduleEntry;
 		
@@ -653,7 +652,6 @@ trait SchedulesModelCalcFieldsTrait
 		
 		//рабочие интервалы в формате unixtime формируем сначала из графика на день
 		$positive=$dateScheduleEntry->getIntervals($date);
-		//var_dump($positive);
 		$posPeriods=[];
 		
 		//нерабочих изначально нет, их ищем в периодах
@@ -696,8 +694,8 @@ trait SchedulesModelCalcFieldsTrait
 		$dateScheduleEntry->schedule=$strSchedule;
 		//возвращаем комплексный массив данных
 		return [
-			'schedule' => $strSchedule,
-			'day' => $dateScheduleEntry,
+			'schedule' => $strSchedule,		//расписание в рабочем виде
+			'day' => $dateScheduleEntry,	//запись расписания на день
 			'posPeriods' => $posPeriods,
 			'negPeriods' => $negPeriods,
 			'sources'	 => $sources,
@@ -730,6 +728,11 @@ trait SchedulesModelCalcFieldsTrait
 			gmdate('Y-m-d',time()+ Yii::$app->params['schedulesTZShift']),
 			gmdate('H:i',time()+ Yii::$app->params['schedulesTZShift'])
 		);
+	}
+	
+	public function getAclStatus()
+	{
+	
 	}
 	
 	/**

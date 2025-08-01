@@ -101,8 +101,8 @@ class Schedules extends ArmsModel
 					'maintenance_jobs_ids' => 'maintenanceJobs',		//для ведения истории
 					'overrides_ids' => 'overrides',						//
 					'children_ids' => 'children',						//
-				]
-			]
+				],
+			],
 		];
 	}
 	
@@ -112,49 +112,49 @@ class Schedules extends ArmsModel
 			'providing'=>'Услуга/сервис предоставляется',
 			'support'=>'Услуга/сервис поддерживается',
 			'job'=>'Выполняется',
-			'working'=>'Рабочее время'
+			'working'=>'Рабочее время',
 		],
 		'usage_complete'=>[
 			'acl'=>'Доступ предоставлялся',
 			'providing'=>'Услуга/сервис предоставлялся',
 			'support'=>'Услуга/сервис поддерживался',
 			'job'=>'Выполнялось',
-			'working'=>'Рабочее время было'
+			'working'=>'Рабочее время было',
 		],
 		'usage_will_be'=>[
 			'acl'=>'Доступ будет предоставляться',
 			'providing'=>'Услуга/сервис будет предоставляться',
 			'support'=>'Услуга/сервис будет поддерживаться',
 			'job'=>'Будет выполняться',
-			'working'=>'Рабочее время будет'
+			'working'=>'Рабочее время будет',
 		],
 		'nodata'=>[
 			'acl'=>'Доступ не предоставляется никогда',
 			'providing'=>'Услуга/сервис не предоставляется никогда',
 			'support'=>'Услуга/сервис не поддерживается никогда',
 			'job'=>'Не выполняется никогда',
-			'working'=>'Рабочее время отсутствует (не работает никогда)'
+			'working'=>'Рабочее время отсутствует (не работает никогда)',
 		],
 		'always'=>[
 			'acl'=>'всегда',
 			'providing'=>'без перерывов (24/7)',
 			'support'=>'без перерывов (24/7)',
 			'job'=>'всегда (24/7)',
-			'working'=>'всегда (24/7)'
+			'working'=>'всегда (24/7)',
 		],
 		'period_start'=>[
 			'acl'=>'Начало периода предоставления доступа (если есть)',
 			'providing'=>'Дата начала предоставления услуги (если есть)',
 			'support'=>'Дата начала поддержки услуги (если есть)',
 			'job'=>'Дата начала выполнения обслуживания (если есть)',
-			'working'=>'Дата начала действия расписания (если есть)'
+			'working'=>'Дата начала действия расписания (если есть)',
 		],
 		'period_end'=>[
 			'acl'=>'Конец периода предоставления доступа (если есть)',
 			'providing'=>'Дата окончания предоставления услуги (если есть)',
 			'job'=>'Дата окончания выполнения обслуживания (если есть)',
 			'support'=>'Дата окончания поддержки услуги (если есть)',
-			'working'=>'Дата окончания действия расписания (если есть)'
+			'working'=>'Дата окончания действия расписания (если есть)',
 		],
 		'override_start'=>'Дата начала действия измененного расписания (обязательно)',
 		'override_end'=>'Дата возвращения расписания к исходному (не обязательно)',
@@ -213,7 +213,7 @@ class Schedules extends ArmsModel
 			'accessTypes' => [
 				'Тип доступа', //для ACLs
 				'indexHint' => 'Все типы доступа к ресурсам, которые присутствуют в этом временном доступе'.
-					static::searchableOrHint
+					static::searchableOrHint,
 			],
 			'accessPeriods' => 'Активность доступа', //для ACLs
 			'aceDepartments' => [
@@ -226,16 +226,16 @@ class Schedules extends ArmsModel
 				'indexHint' => 'Контрагенты, которым предоставляется доступ.<br>'.
 					'(определяются на основании трудоустройства пользователей, которым предоставлен доступ).<br>',
 				'Можно искать как по юр. названию так и по названию бренда'.
-				static::searchableOrHint
+				static::searchableOrHint,
 			],
 			'aclSites' => [
 				'Площадки', //для ACLs
-				'indexHint' => 'Площадки, на которых расположены ресурсы, к которым предоставляется доступ'
+				'indexHint' => 'Площадки, на которых расположены ресурсы, к которым предоставляется доступ',
 				//static::searchableOrHint
 			],
 			'aclSegments' => [
 				'Сегменты', //для ACLs
-				'indexHint' => 'Сегменты ИТ инфраструктуры, в которых расположены ресурсы, к которым предоставляется доступ'
+				'indexHint' => 'Сегменты ИТ инфраструктуры, в которых расположены ресурсы, к которым предоставляется доступ',
 				//static::searchableOrHint
 			],
 			'acls' => 'ACL',
@@ -250,7 +250,7 @@ class Schedules extends ArmsModel
 			],
 			'end_date'=>[
 				'Дата окончания',
-				'placeholder' => 'Конец периода'
+				'placeholder' => 'Конец периода',
 			],
 			'entries' => 'Даты/периоды',
 			'history' => [
@@ -261,13 +261,13 @@ class Schedules extends ArmsModel
 			'maintenanceJobs'=>['Регл. работы','indexHint'=>'Регламентные работы выполняющиеся по этому расписанию',],
 			'name' => [
 				'name' => 'Как-то надо назвать это расписание',
-				'Наименование'
+				'Наименование',
 			],
 			'objects' => [
 				'Субъекты', //для ACLs
 				'indexHint' => 'Все субъекты которым предоставляется доступ.<br>'.
 					'Поиск по этому полю ведется без учета кому какой доступ'.
-					static::searchableOrHint
+					static::searchableOrHint,
 			],
 			'overrides' => 'Периоды - исключения',
 			'override' => ['Перекрывает','indexHint'=>'Если является расписанием-перекрытием, то какое расписание перекрывает'],
@@ -282,11 +282,11 @@ class Schedules extends ArmsModel
 				'Ресурсы', //для ACLs
 				'indexHint' => 'Все ресурсы к которым предоставляется доступ.<br>'.
 					'Поиск по этому полю ведется без учета к какому ресурсу какой доступ'.
-					static::searchableOrHint
+					static::searchableOrHint,
 			],
 			'start_date'=>[
 				'Дата начала',
-				'placeholder' => 'Начало периода'
+				'placeholder' => 'Начало периода',
 			],
 			'supportServices'=>['Поддерж. сервисы','indexHint'=>'Сервисы поддерживаемые по этому расписанию',],
 			'workTimeDescription' => [
@@ -307,12 +307,12 @@ class Schedules extends ArmsModel
 		return SchedulesEntries::find()
 			->Where(['not',['in', 'date', ['1','2','3','4','5','6','7','def']]])
 			->andWhere([
-				'is_period'=>0
+				'is_period'=>0,
 			])
 			->andWhere(['in','schedule_id',array_keys($this->parentsChain)])
 			->andWhere(is_null($end)?
 				[
-					'>=', 'UNIX_TIMESTAMP(date)', $start
+					'>=', 'UNIX_TIMESTAMP(date)', $start,
 				]:
 				['and',
 					['<=', 'UNIX_TIMESTAMP(date)', $end],
@@ -331,7 +331,7 @@ class Schedules extends ArmsModel
 		$query= SchedulesEntries::find()
 			->where([
 				'schedule_id'=>$this->id,
-				'is_period'=>1
+				'is_period'=>1,
 			]);
 		
 		if ($start || $end)
@@ -339,7 +339,7 @@ class Schedules extends ArmsModel
 				[
 					'or',
 					['<=', 'UNIX_TIMESTAMP(date)', $end],
-					['date'=>null]
+					['date'=>null],
 				],
 				[
 					'or',
@@ -367,6 +367,12 @@ class Schedules extends ArmsModel
 	public function getParent()
 	{
 		return $this->hasOne(Schedules::class, ['id' => 'parent_id']);
+	}
+	
+	public function getPeriods()
+	{
+		return $this->hasMany(SchedulesEntries::class, ['schedule_id' => 'id'])
+			->andOnCondition(['is_period'=>1]);
 	}
 	
 	/**

@@ -84,7 +84,7 @@ $tabs[]=[
 	</div>
 	<script>
 		$(document).ready(function() {
-			$.get("/web/services/os-list?id={$model->id}", function(data) {
+			$.get("/web/services/os-list?id={$model->id}&showArchived={$showArchived}", function(data) {
 				jQuery("#serviceCompsList").hide().html(data);
 				setTimeout(function (){jQuery("#serviceCompsList").fadeToggle();ExpandableCardInitAll();},500)
 				//let \$tabLink=$('li#tab-serviceComps').children('a');
@@ -122,7 +122,7 @@ HTML,
 		</div>
 		<script>
 			$(document).ready(function() {
-				$.get("/web/services/aces-list?id={$model->id}", function(data) {
+				$.get("/web/services/aces-list?id={$model->id}&showArchived={$showArchived}", function(data) {
 				    jQuery("#serviceAcesList").hide().html(data);
 				    setTimeout(function (){jQuery("#serviceAcesList").fadeToggle();ExpandableCardInitAll();},500)
 				})
@@ -150,7 +150,7 @@ $tabs[]=[
 		</div>
 		<script>
 			$(document).ready(function() {
-				$.get("/web/services/acls-list?id={$model->id}", function(data) {
+				$.get("/web/services/acls-list?id={$model->id}&showArchived={$showArchived}", function(data) {
 				    jQuery("#serviceAclsList").hide().html(data);
 				    setTimeout(function (){jQuery("#serviceAclsList").fadeToggle();ExpandableCardInitAll();},500)
 				})
