@@ -17,7 +17,8 @@ if (is_object($model)) { ?>
 		'model'=>$model,
 		'modal'=>true,
 		'noDelete'=>true,
-		'name'=>($icon?'<i class="fas fa-globe"></i>':'').$name
+		'name'=>($icon?'<i class="fas fa-globe"></i>':'').$name,
+		'static'=>$static_view,
 	]) ?>
 	</span>
 

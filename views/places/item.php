@@ -35,7 +35,8 @@ if (is_object($model)) {
 			'model'=>$model,
 			'modal'=>true,
 			'noDelete'=>true,
-			'name'=>$short?$model->short:$model->name
+			'name'=>$short?$model->short:$model->name,
+			'static'=>$static_view,
 		]);
     } ?>
 </span>

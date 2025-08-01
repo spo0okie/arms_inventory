@@ -23,7 +23,7 @@ use yii\widgets\DetailView;
 	<div class="org-phones mb-2">
         <?php
 			foreach ($model->phones as $phone)
-				echo $phone->renderItem($this,['icon'=>true]);
+				echo $phone->renderItem($this,['icon'=>true,'show_archived'=>false,'static_view'=>true]);
 		?>
     </div>
 	<?php } ?>
@@ -33,7 +33,7 @@ use yii\widgets\DetailView;
 	<div class="org-phones mb-2">
 		<?php
 			foreach ($model->inets as $inet)
-				echo $inet->renderItem($this,['icon'=>true]);
+				echo $inet->renderItem($this,['icon'=>true,'show_archived'=>false,'static_view'=>true]);
 
 		?>
     </div>
