@@ -22,18 +22,18 @@ if (is_object($model)) {
         $tokens=[];
         $item=$model;
         do {
-            $tokens[]=Html::a(
-                $item->short,
-                ['/places/view','id'=>$item->id],
-                ['qtip_ttip'=>$item->name,]
-            );
-            $item=\app\models\Places::fetchItem($item->parent_id);
+			$tokens[]=LinkObjectWidget::widget([
+				'model'=>$item,
+				'noDelete'=>true,
+				'name'=>$item->short,
+				'static'=>$static_view,
+			]);
+			$item=$item->parent;
         } while (is_object($item));
         echo implode($items_glue,array_reverse($tokens));
     } else {
 	    echo LinkObjectWidget::widget([
 			'model'=>$model,
-			'modal'=>true,
 			'noDelete'=>true,
 			'name'=>$short?$model->short:$model->name,
 			'static'=>$static_view,
