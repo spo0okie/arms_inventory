@@ -3,18 +3,22 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgPhones */
 
+use app\components\LinkObjectWidget;
+use yii\helpers\Url;
+
 if (!isset($href)) $href=false;
 if (!isset($static_view)) $static_view=true;
 if (!isset($show_archived)) $show_archived=true;
+if (!isset($icon)) $icon=false;
 
 if (is_object($model)) { ?>
     <span class="org-phones-item cursor-default <?= $model->archived?'text-muted text-decoration-line-through archived-item':'' ?>" <?= $model->archived&&!$show_archived?'style="display:none"':'' ?> >
-		<?= \app\components\LinkObjectWidget::widget([
+		<?= LinkObjectWidget::widget([
 			'model'=>$model,
-			'name'=>$model->title,
+			'name'=>($icon?'<i class="fas fa-phone"></i>':'').$model->title,
 			'static'=>$static_view,
 			'modal'=>true,
-			'url'=>\yii\helpers\Url::to(['/services/view','id'=>$model->services_id,'showArchived'=>$model->archived]),
+			'url'=> Url::to(['/services/view','id'=>$model->services_id,'showArchived'=>$model->archived]),
 		]) ?>
 	</span>
 

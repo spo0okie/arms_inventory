@@ -1,5 +1,6 @@
 <?php
 
+use app\components\LinkObjectWidget;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -11,6 +12,7 @@ use yii\helpers\Html;
 
 if (!isset($static_view)) $static_view=true;
 if (!isset($items_glue)) $items_glue='/';
+if (!isset($short)) $short=false;
 
 if (is_object($model)) {
 
@@ -29,12 +31,12 @@ if (is_object($model)) {
         } while (is_object($item));
         echo implode($items_glue,array_reverse($tokens));
     } else {
-	    echo Html::a(
-		    isset($short)?$model->short:$model->name,
-            ['/places/view','id'=>$model->id],
-            ['qtip_ttip'=>$model->name,]
-        );
-		if (!$static_view) echo Html::a('<span class="fas fa-pencil-alt"/>',['/places/update','id'=>$model->id]);
+	    echo LinkObjectWidget::widget([
+			'model'=>$model,
+			'modal'=>true,
+			'noDelete'=>true,
+			'name'=>$short?$model->short:$model->name
+		]);
     } ?>
 </span>
 

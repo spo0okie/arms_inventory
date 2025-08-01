@@ -11,8 +11,39 @@ use yii\widgets\DetailView;
 
     <h1>
         <?= Html::encode($model->name) ?>
-        <?php // Html::a('<span class="fas fa-pencil-alt"></span>', ['update', 'id' => $model->id]) ?>
     </h1>
+	
+	<?php if(strlen($model->addr)) { ?>
+		<div class="places-addr mb-2">
+            <span class="fas fa-envelope"></span><?= Html::encode($model->addr) ?>
+        </div>
+	<?php } ?>
+	
+	<?php if (count($model->phones)) { ?>
+	<div class="org-phones mb-2">
+        <?php
+			foreach ($model->phones as $phone)
+				echo $phone->renderItem($this,['icon'=>true]);
+		?>
+    </div>
+	<?php } ?>
 
-	<?= ''//Html::a('<span class="fas fa-plus-circle"></span>Добавить новое оборудование', ['update', 'id' => $model->id]) ?>
+	
+	<?php if (count($model->inets)) { ?>
+	<div class="org-phones mb-2">
+		<?php
+			foreach ($model->inets as $inet)
+				echo $inet->renderItem($this,['icon'=>true]);
+
+		?>
+    </div>
+	<?php } ?>
+
+	
+	<?php if(strlen($model->comment)) { ?>
+		<div class="places-comment mb-2">
+            <span class="fas fa-info-circle"></span><?= Html::encode($model->comment) ?>
+        </div>
+	<?php } ?>
+	
 </div>
