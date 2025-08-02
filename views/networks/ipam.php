@@ -152,6 +152,7 @@ $this->registerJs(<<<JS
             //console.log(column.dataset.column??0,${minPrefix}-2);
             const prefix=column.dataset.column??32
 			if (prefix<Math.min(${minPrefix}-2, ${maxPrefix}+9)) {
+				const columnRect = column.getBoundingClientRect();
 				const cells = column.querySelectorAll('.ipam-cell');
 				let activeFoundTop = false;
 				let activeFoundBottom = false;
@@ -174,10 +175,16 @@ $this->registerJs(<<<JS
                         )
 					) {
 						link.classList.add('fixed-cidr');
-						const columnRect = column.getBoundingClientRect();
 						const visibleTop = Math.max(rect.top, viewportTop);
 						const visibleBottom = Math.min(rect.bottom, viewportBottom);
-						const top=visibleTop+(visibleBottom-visibleTop-linkRect.height)/2;
+                        //const hiddenTop=Math.max(0,viewportTop-rect.top)
+                        //const hiddenBottom=Math.max(0,rect.bottom-viewportBottom);
+                        //if (hiddenTop>0&&hiddenBottom>0) console.log(hiddenTop,hiddenBottom); else console.log(rect.top,rect.bottom);
+						const top=visibleTop+(visibleBottom-visibleTop-linkRect.height)*(
+                            //(hiddenTop>0&&hiddenBottom>0)?
+                            //(hiddenBottom)/(hiddenTop+hiddenBottom):
+                            0.5
+                            );
 						link.style.left = columnRect.left + 'px';
 						link.style.width = columnRect.width + 'px';
 						link.style.top = top + 'px';
