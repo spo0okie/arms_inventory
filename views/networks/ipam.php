@@ -127,9 +127,7 @@ $this->registerCss(<<<CSS
     font-size: 11px;
     position: sticky;
     top: 0;
-    /* background: white;  чтобы не просвечивало */
     z-index: 1;
-    padding: 2px;
 }
 
 .cidr-link:hover {
@@ -140,7 +138,7 @@ $this->registerCss(<<<CSS
   position: fixed !important;
   z-index: 999;
   text-align: center;
-  font-size: 11px;
+  overflow: hidden;
 }
 
 CSS);
