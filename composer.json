@@ -37,7 +37,6 @@
     "ext-json": "*",
     "ext-mbstring": "*",
     "ext-imagick": "*",
-    "ext-http": "*",
     "ext-intl": "*",
     "yiisoft/yii2": "~2",
     "yiisoft/yii2-bootstrap5": "dev-master",
