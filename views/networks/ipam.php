@@ -64,12 +64,12 @@ for ($prefix = $maxPrefix; $prefix <= $minPrefix; $prefix++) {
 	foreach ($blocks as [$addr, $p]) {
 		$model = $map[$addr][$p] ?? null;
 		$heightPercent = 100 / $blockCount;
-		$heightPx = $height / $blockCount;
+		$heightPx = ($height / $blockCount) -2; //убираем отступ из высоты
 		$cidr = long2ip($addr) . '/' . $p;
 		
 		echo Html::beginTag('span', [
 			'class' => 'ipam-cell ' . ($model ? $model->segmentCode : 'empty'),
-			'style' => "height: {$heightPercent}%;",
+			'style' => "height: {$heightPx}px;",
 			'data-cidr'=>$cidr,
 		]);
 		
@@ -94,8 +94,6 @@ echo Html::endTag('div');
 $this->registerCss(<<<CSS
 .ipam-wrapper {
     display: flex;
-    /*height: 800px; /* или auto + min-height
-    border: 1px solid #aaa; */
 }
 .ipam-column {
     display: flex;
