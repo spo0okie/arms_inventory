@@ -20,7 +20,7 @@ class NetworksController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'view'=>['incoming-connections-list'],
+			'view'=>['incoming-connections-list','ipam'],
 		]);
 	}
 	
@@ -113,5 +113,15 @@ class NetworksController extends ArmsBaseController
 			'dataProvider' => $dataProvider,
 			'model' => $model
 		]);
+	}
+	
+	public function actionIpam()
+	{
+		$baseIp = Yii::$app->request->get('baseIp', '192.168.0.0');
+		$minPrefix = (int) Yii::$app->request->get('minPrefix', 29);
+		$maxPrefix = (int) Yii::$app->request->get('maxPrefix', 24);
+		
+		$models = Networks::find()->all();
+		return $this->render('ipam', compact('models','baseIp','minPrefix','maxPrefix'));
 	}
 }

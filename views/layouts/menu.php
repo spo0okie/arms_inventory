@@ -58,6 +58,14 @@ if (count($places)) $places[]='-';
 $places[]=['label' => 'Список помещений','url' => ['/places/index']];
 	
 
+$ipams=[];
+foreach (Yii::$app->params['ipamRanges'] as $ipamRange) {
+	$ipams[]=[
+		'label'=>'IPAM '.$ipamRange['baseIp'].'/'.$ipamRange['maxPrefix'],
+		'url'=>array_merge(['/networks/ipam'],$ipamRange)
+	];
+}
+
 NavBar::begin([
 	'brandLabel' => '<i class="fas fa-dice-d6"></i> '.Yii::$app->name,
 	'brandUrl' => Yii::$app->homeUrl,
@@ -114,14 +122,14 @@ NavBar::begin([
 				]
 			],
 			['label' => 'Сети',
-				'items' => [
+				'items' => array_merge([
 					['label' => Ports::$titles, 'url' => ['/ports/index']],
 					['label' => NetIps::$titles, 'url' => ['/net-ips/index']],
 					['label' => Networks::$titles, 'url' => ['/networks/index']],
 					['label' => NetVlans::$titles, 'url' => ['/net-vlans/index']],
 					['label' => NetDomains::$titles, 'url' => ['/net-domains/index']],
 					['label' => Segments::$titles, 'url' => ['/segments/index']],
-				],
+				],$ipams)
 			],
 			['label' => 'Компьютеры',
 				'items' => [

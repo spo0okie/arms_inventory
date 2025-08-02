@@ -69,4 +69,10 @@ return [
 	'soft.deferred_rescan'=>false,
 	
 	'sms.enable'=>false,
+	
+	'ipamRanges'=>[
+		['baseIp'=>'10.0.0.0','maxPrefix'=>8,'minPrefix'=>16],
+		['baseIp'=>'192.168.0.0','maxPrefix'=>16,'minPrefix'=>24],
+		['baseIp'=>'172.16.0.0','maxPrefix'=>16,'minPrefix'=>24],
+	]
 ];

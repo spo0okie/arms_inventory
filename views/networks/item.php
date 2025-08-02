@@ -27,6 +27,7 @@ if (is_object($model)) {
 			'name' => $name,
 			'noSpaces' => true
 		]),
+		'item_class'=>$class??''
 	]);
 	
 }
