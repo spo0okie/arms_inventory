@@ -188,6 +188,8 @@ $this->registerJs(<<<JS
 					} else {
 						link.classList.remove('fixed-cidr');
 						link.style.top = '';
+						link.style.left = '';
+						link.style.width = '';
 					}
 				}
 			}
