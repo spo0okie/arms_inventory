@@ -193,7 +193,7 @@ $config = [
 
 Yii::$container->set('yii\data\Pagination', ['pageSizeLimit' => [0, 10000]]);
 
-if (YII_ENV_DEV) {
+if (YII_ENV==='dev') {
     // configuration adjustments for 'dev' environment
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
