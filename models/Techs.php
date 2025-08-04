@@ -212,6 +212,7 @@ class Techs extends ArmsModel
 			'servicesResponsible',
 			'servicesSupportTeam',
 			'site',
+			'state',
 			'stateName',
 			'supportTeam',
 			'type',
