@@ -17,8 +17,8 @@ class LoginJournalSearch extends LoginJournal
     public function rules()
     {
         return [
-            [['id', 'comps_id'], 'integer'],
-            [['time', 'comp_name', 'user_login', 'users_id'], 'safe'],
+            [['type'], 'integer'],
+            [['time', 'comp_name', 'user_login', 'users_id', 'comps_id'], 'safe'],
         ];
     }
 
@@ -42,7 +42,7 @@ class LoginJournalSearch extends LoginJournal
     {
         $query = LoginJournal::find()
         ->joinWith('user')
-        ->joinWith('comp');
+        ->joinWith('comp.arm');
 
         // add conditions that should always apply here
 
@@ -62,7 +62,7 @@ class LoginJournalSearch extends LoginJournal
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            'type' => $this->type,
             'time' => $this->time,
         ]);
 

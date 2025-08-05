@@ -24,18 +24,22 @@ $renderer=$this;
 	        [
 		        'attribute'=>'АРМ',
 		        'format'=>'raw',
-		        'value' => function($data) use($renderer){return (is_null($data->comp)||is_null($data->comp->arm))?null:$renderer->render('/techs/item',['model'=>$data->comp->arm]);}
+		        'value' => function($data) use($renderer){return $data?->comp?->arm?->renderItem($renderer);}
 	        ],
 	        [
 		        'attribute'=>'comps_id',
 		        'format'=>'raw',
-		        'value' => function($data) use($renderer){return (is_null($data->comp))?null:$renderer->render('/comps/item',['model'=>$data->comp]);}
+		        'value' => function($data) use($renderer){return $data?->comp?->renderItem($renderer);}
 	        ],
 	        'comp_name',
             'time:datetime',
 			[
 				'attribute'=>'type',
 				'format'=>'raw',
+				'filter'=>[
+					0 => 'CON',
+					1 => 'RDP',
+				],
 				'value' => function($data) use($renderer){
     				switch ($data->type) {
 						case 0: return 'CON';
@@ -48,7 +52,7 @@ $renderer=$this;
 	        [
 		        'attribute'=>'users_id',
 		        'format'=>'raw',
-		        'value' => function($data) use($renderer){return (is_null($data->user))?null:$renderer->render('/users/item',['model'=>$data->user]);}
+		        'value' => function($data) use($renderer){return $data->user?->renderItem($renderer);}
 	        ],
         ],
     ]); ?>
