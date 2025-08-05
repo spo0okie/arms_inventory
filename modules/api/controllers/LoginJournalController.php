@@ -72,7 +72,6 @@ class LoginJournalController extends BaseRestController
 			$loader->comp_name,
 			$loader->time,
 			$loader->type,
-			$loader->local_time
 		);
 		if (is_object($exist)) throw new ConflictHttpException("Record already exist {$exist->id}");
 	
