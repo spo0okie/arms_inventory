@@ -18,7 +18,7 @@ class LoginJournalSearch extends LoginJournal
     {
         return [
             [['type'], 'integer'],
-            [['time', 'comp_name', 'user_login', 'users_id', 'comps_id'], 'safe'],
+            [['time', 'calc_time', 'comp_name', 'user_login', 'users_id', 'comps_id'], 'safe'],
         ];
     }
 
@@ -63,7 +63,8 @@ class LoginJournalSearch extends LoginJournal
         // grid filtering conditions
         $query->andFilterWhere([
             'type' => $this->type,
-            'time' => $this->time,
+			'time' => $this->time,
+			'calc_time' => $this->calc_time,
         ]);
 
         $query->andFilterWhere(['or like', 'comp_name', \yii\helpers\StringHelper::explode($this->comp_name,'|',true,true)])

@@ -32,7 +32,7 @@ $renderer=$this;
 		        'value' => function($data) use($renderer){return $data?->comp?->renderItem($renderer);}
 	        ],
 	        'comp_name',
-            'time:datetime',
+            'calc_time:datetime',
 			[
 				'attribute'=>'type',
 				'format'=>'raw',

@@ -11,6 +11,8 @@ use yii\db\Query;
  *
  * @property int $id id
  * @property string $time Дата и время
+ * @property string $calc_time Дата и время (скорректированное, если обнаружены сбитые часы у клиента)
+ * @property string $created_at время внесения записи
  * @property string $age Возраст события
  * @property string $comp_name Компьютер
  * @property int $comps_id ID Компьютера
@@ -31,11 +33,11 @@ class LoginJournal extends ArmsModel
 	public static $title='Входы в ПК';
 	//public $local_time;
 	
-	/*
+	/**
 	 * Максимальный сдвиг во времени, который все еще квалифицируется как та-же запись
-	 * сдвиг во времени может формироваться из-за коррекции времени события в за счет сравнения
+	 * сдвиг во времени может формироваться из-за коррекции времени события за счет сравнения
 	 * timestamp отправки сообщения (фиксируется на клиенте) и получения (фиксируется на сервере)
-	 * За счет этого нивелируется ошибка заложенная в клиентских отметках времени при сбитых часах
+	 * За счет этого нивелируется ошибка заложенная в клиентских отметках времени при сбитых часах,
 	 * но накладывается ошибка времени доставки. Поэтому необходим небольшой "люфт"
 	 */
 	public static $maxTimeShift=5;
@@ -54,22 +56,10 @@ class LoginJournal extends ArmsModel
     public function rules()
     {
         return [
-			['time', 'filter', 'filter' => function ($value) {
-				if (is_numeric($this->time)) {
-					if ($this->local_time) {
-						$this->time += (time()-$this->local_time);
-					}
-					if ($this->time>(time()+5)) {
-						$this->addError('time', 'Unable add logon event in future');
-					}
-					$this->time = gmdate('Y-m-d H:i:s',$this->time);
-				}
-			}],
-			[['time'],'safe'],
+			[['time','local_time','created_at'],'safe'],
             [['comp_name', 'user_login'], 'required'],
-            [['comps_id','type','local_time'], 'integer'],
+            [['users_id','comps_id','type','local_time'], 'integer'],
             [['comp_name', 'user_login'], 'string', 'max' => 128],
-            [['users_id'], 'string', 'max' => 16],
             [['users_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['users_id' => 'id']],
             [['comps_id'], 'exist', 'skipOnError' => true, 'targetClass' => Comps::class, 'targetAttribute' => ['comps_id' => 'id']],
         ];
@@ -82,10 +72,16 @@ class LoginJournal extends ArmsModel
     {
         return [
             'id' => 'ID',
-            'time' => 'Время входа',
+			'calc_time' => [
+				'Время входа',
+				'indexHint'=>'Скорректированное время входа: если в момент получения записи <br>'
+				.'было обнаружено значительное расхождение часов клиента с часами сервера, <br>'
+				.'то время было скорректировано на сдвиг времени между клиентом и сервером'
+			],
 	        'comp_name' => 'Имя ОС',
 	        'comp' => 'Компьютер',
             'comps_id' => 'Компьютер',
+			'time' => 'Время входа',
             'user_login' => 'Логин',
 	        'users_id' => 'Пользователь',
 			'user' => 'Пользователь',
@@ -158,30 +154,54 @@ class LoginJournal extends ArmsModel
 
 	public function beforeSave($insert)
 	{
-		if (parent::beforeSave($insert)) {
-			if (!isset($this->comps_id)) {
-				if (is_object($comp=\app\models\Comps::findByAnyName($this->comp_name))) {
-					/** @var Comps $comp */
-					$this->comps_id = $comp->id;
-				}
+		if (!parent::beforeSave($insert)) {
+			return false;
+		}
+		
+		if ($insert && empty($this->created_at)) {
+			$this->created_at = gmdate('Y-m-d H:i:s');
+		}
+		
+		// Корректировка calc_time
+		if (is_numeric($this->time)) {
+			if ($this->local_time && abs(time() - $this->local_time) > 90) {
+				// У клиента сильно сбито время: добавляем смещение времени на разницу между сервером и клиентом
+				$this->calc_time = gmdate('Y-m-d H:i:s',$this->time + (time()-$this->local_time));
+			} else  {
+				$this->calc_time = gmdate('Y-m-d H:i:s', $this->time);
+			}
+
+			if (strtotime($this->calc_time) > time() + static::$maxTimeShift) {
+				$this->addError('calc_time', 'Unable to add logon event in future');
+				return false;
 			}
 			
-			if (!isset($this->users_id)) {
-				$user_tokens=explode('\\',$this->user_login);
-				if (count($user_tokens)==2) {
-					//$domain_id = \app\models\Domains::findByName($user_tokens[0]);
-					$user = \app\models\Users::findByLogin($user_tokens[1]);
-					if (is_object($user))
-						/** @var Users $user */
-						$this->users_id = $user->id;
-				}
+			// В любом случае преобразуем time → datetime
+			$this->time = gmdate('Y-m-d H:i:s', $this->time);
+		}
+		
+		if (!isset($this->comps_id)) {
+			if (is_object($comp= Comps::findByAnyName($this->comp_name))) {
+				/** @var Comps $comp */
+				$this->comps_id = $comp->id;
 			}
-			return true;
-		} else return false;
+		}
+		
+		if (!isset($this->users_id)) {
+			$user_tokens=explode('\\',$this->user_login);
+			if (count($user_tokens)==2) {
+				//$domain_id = \app\models\Domains::findByName($user_tokens[0]);
+				$user = Users::findByLogin($user_tokens[1]);
+				if (is_object($user))
+					/** @var Users $user */
+					$this->users_id = $user->id;
+			}
+		}
+		return true;
 	}
 	
 	/**
-	 * запрашивает последние уникальные входы пользователя на машины
+	 * Запрашивает последние уникальные входы пользователя на машины
 	 * @param int $user_id
 	 * @param int $limit
 	 * @return array|ActiveRecord[]
@@ -207,7 +227,7 @@ class LoginJournal extends ArmsModel
 	}
 	
 	/**
-	 * запрашивает последние уникальные входы пользователей на машину
+	 * Запрашивает последние уникальные входы пользователей на машину
 	 * @param int $comp_id
 	 * @param int $limit
 	 * @return array|ActiveRecord[]
