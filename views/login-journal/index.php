@@ -16,26 +16,24 @@ $renderer=$this;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= GridView::widget([
+    <?= \app\components\DynaGridWidget::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
 	        'id',
-	        [
-		        'attribute'=>'АРМ',
-		        'format'=>'raw',
+	        'АРМ'=>[
 		        'value' => function($data) use($renderer){return $data?->comp?->arm?->renderItem($renderer);}
 	        ],
-	        [
-		        'attribute'=>'comps_id',
-		        'format'=>'raw',
+	        'comps_id'=>[
 		        'value' => function($data) use($renderer){return $data?->comp?->renderItem($renderer);}
 	        ],
 	        'comp_name',
-            'calc_time:datetime',
-			[
-				'attribute'=>'type',
-				'format'=>'raw',
+			'calc_time'=>['format'=>'datetime'],
+			'time'=>['format'=>'datetime'],
+			'local_time'=>['format'=>'datetime','value'=> function($data) {
+				return $data->local_time ? gmdate('Y-m-d H:i:s', $data->local_time) : null;
+			}],
+			'type'=>[
 				'filter'=>[
 					0 => 'CON',
 					1 => 'RDP',
@@ -49,11 +47,10 @@ $renderer=$this;
     			}
 			],
             'user_login',
-	        [
-		        'attribute'=>'users_id',
-		        'format'=>'raw',
+	        'users_id'=>[
 		        'value' => function($data) use($renderer){return $data->user?->renderItem($renderer);}
 	        ],
         ],
+		'defaultOrder'=>['comps_id','comp_name','calc_time','user_login','users_id'],
     ]); ?>
 </div>

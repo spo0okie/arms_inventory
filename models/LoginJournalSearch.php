@@ -48,7 +48,7 @@ class LoginJournalSearch extends LoginJournal
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-	        'sort'=> ['defaultOrder' => ['id'=>SORT_DESC]],
+	        'sort'=> ['defaultOrder' => ['calc_time'=>SORT_DESC,'id'=>SORT_DESC]],
 		    'pagination' => ['pageSize' => 100,],
         ]);
 
