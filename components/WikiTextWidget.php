@@ -26,6 +26,7 @@ class WikiTextWidget extends Widget
 	/** @var ArmsModel */
 	public $model;
 	public $field;
+	public $outerClass='';
 	
 	public function run()
 	{
@@ -44,7 +45,7 @@ class WikiTextWidget extends Widget
 		$data=$cache->data;
 		if (!$data) $data=$this->model->{$this->field};
 		//кладем данные в контент блок
-		$content='<div id="'.$id.'" class="dokuwiki">'.$data.'</div>';
+		$content='<div id="'.$id.'" class="dokuwiki '.$this->outerClass.'">'.$data.'</div>';
 		
 		$outdated=false;
 		if ($this->model->hasAttribute('updated_at')) {

@@ -77,10 +77,11 @@ return [
 	],
 	'description' => [
 		'value' => function ($data) {
-			return \app\helpers\ArrayHelper::implode('<br>',[
-				TextFieldWidget::widget(['model'=>$data,'field'=>'descriptionRecursive']),
-				UrlListWidget::Widget(['list'=>$data->links])
-			]);
+			$descr=TextFieldWidget::widget(['model'=>$data,'field'=>'descriptionRecursive','outerClass'=>'mb-0']);
+			$urls=UrlListWidget::Widget(['list'=>$data->links]);
+			if ($descr && $urls && !\app\helpers\StringHelper::endsWith($descr,'</div>',false))
+				$descr.='<br>';
+			return $descr.$urls;
 		},
 	],
 	'responsible' => [

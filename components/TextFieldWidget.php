@@ -20,6 +20,7 @@ class TextFieldWidget extends Widget
 {
 	public $model;
 	public $field;
+	public $outerClass='';
 	
 	public function run()
 	{
@@ -27,7 +28,11 @@ class TextFieldWidget extends Widget
 			case 'markdown':
 				return Markdown::convert($this->model->{$this->field});
 			case 'dokuwiki':
-				return WikiTextWidget::widget(['model'=>$this->model,'field'=>$this->field]);
+				return WikiTextWidget::widget([
+					'model'=>$this->model,
+					'field'=>$this->field,
+					'outerClass'=>$this->outerClass
+				]);
 			default:
 				return Yii::$app->formatter->asNtext($this->model->{$this->field});
 		}
