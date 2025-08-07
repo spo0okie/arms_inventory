@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\components\DynaGridWidget;
+use app\helpers\StringHelper;
 use app\models\Acls;
 use app\models\Places;
 use app\models\SchedulesSearchAcl;
@@ -30,14 +32,17 @@ class ScheduledAccessController extends ArmsBaseController
 	 */
 	public function actionIndex()
 	{
-		Services::cacheAllItems();
-		Places::cacheAllItems();
+		//Services::cacheAllItems();
+		//Places::cacheAllItems();
 		$searchModel = new SchedulesSearchAcl();
-		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$model= new $this->modelClass();
+		$columns=DynaGridWidget::fetchVisibleAttributes($model,StringHelper::class2Id($this->modelClass).'-index');
+		$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount,$columns);
 		
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,
+			'switchArchivedCount' => $switchArchivedCount??null,
 		]);
 	}
 	

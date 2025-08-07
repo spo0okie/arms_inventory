@@ -269,7 +269,7 @@ class SchedulesEntries extends ArmsModel
 				'when'=>function ($model) {return empty($model->date) && empty($model->date_end);},
 				'enableClientValidation' => false,
 			],
-			[['date','date_end'],'date','format'=>'php:Y-m-d H:i:s', 'on'=>static::SCENARIO_PERIOD,],
+			[['date','date_end'],'date','format'=>'php:Y-m-d', 'on'=>static::SCENARIO_PERIOD,],
 			[['date','date_end'],function ($attribute)
 				{
 					if (!empty($this->date) && !empty($this->date_end)) {

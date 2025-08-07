@@ -19,6 +19,8 @@ class SchedulesSearchAcl extends Schedules
 	public $acePartners;
 	public $aceDepartments;
 	
+	public $archived;
+	
     /**
      * {@inheritdoc}
      */
@@ -26,6 +28,7 @@ class SchedulesSearchAcl extends Schedules
     {
         return [
             [['id'], 'integer'],
+			['archived','boolean'],
             [['name', 'comment', 'created_at','objects','resources','aclPartners','accessTypes','acePartners','aceDepartments'], 'safe'],
         ];
     }
@@ -63,6 +66,7 @@ class SchedulesSearchAcl extends Schedules
 			'acls.service.orgPhones',
 			'acls.ip',
 			'acls.network',
+			'periods'
 		])
 		->where('acls.id')
 		->andWhere(['schedules.override_id'=>null]);
@@ -81,6 +85,27 @@ class SchedulesSearchAcl extends Schedules
 			]);
         }
 	
+		if (!$this->archived??false) {
+			$query->andWhere([
+				'exists',
+				(new \yii\db\Query())
+					->from('schedules_entries sp1')
+					->where('sp1.schedule_id = schedules.id')
+					->andWhere(['sp1.is_work' => 1])
+					->andWhere(['<=', 'sp1.date', date('Y-m-d')])
+					->andWhere(['>=', 'sp1.date_end', date('Y-m-d')])
+			]);
+			
+			$query->andWhere([
+				'not exists',
+				(new \yii\db\Query())
+					->from('schedules_entries sp2')
+					->where('sp2.schedule_id = schedules.id')
+					->andWhere(['sp2.is_work' => 0])
+					->andWhere(['<=', 'sp2.date', date('Y-m-d')])
+					->andWhere(['>=', 'sp2.date_end',date('Y-m-d')])
+			]);
+		}
 	
 		$query->andFilterWhere(['or like', 'CONCAT(IFNULL(schedules.name,""),IFNULL(schedules.description,""),IFNULL(schedules.history,""))', StringHelper::explode($this->name,'|',true,true)]);
 	

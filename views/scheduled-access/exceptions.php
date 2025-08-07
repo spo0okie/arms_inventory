@@ -15,15 +15,32 @@ $daysSearchModel->schedule_id = $model->id;
 $daysDataProvider = $daysSearchModel->search([]);
 $renderer=$this;
 
+$isWorkTime=$model->isWorkTime( date('Y-m-d'),date('H:i:s'));
 
-echo '<h2>Периоды предоставления / отзыва доступа</h2>';
 
+?>
+<div class="d-flex flex-row justify-content align-items-stretch">
+	<div class="flex-fill">
+		<h2>Периоды доступа</h2>
+	</div>
+	<div class="flex-fill">
+		<?= Html::a('Добавить период', [
+			'/schedules-entries/create',
+			'SchedulesEntries[schedule_id]' => $model->id,
+			'SchedulesEntries[is_period]' => 1,
+		], ['class' => 'btn btn-success mb-1'])?>
+	</div>
+	<div class="px-3 py-0 my-0 flex-fill d-flex align-items-center <?= $isWorkTime?'bg-green-striped':'bg-red-striped' ?>"
+		 qtip_ttip="<?= $isWorkTime?
+			 'В настоящее время доступ по этому расписанию предоставляется':
+			 'В настоящее время отсутствует/отозван доступ по этому расписанию'
+		 ?>">
+		<span class="text-center w-100 fw-bold"><?= $isWorkTime?'Сейчас доступ есть':'Сейчас доступа нет' ?></span>
+	</div>
+</div>
 
-echo Html::a('Добавить период предоставления/отзыва доступа', [
-	'/schedules-entries/create',
-	'SchedulesEntries[schedule_id]' => $model->id,
-	'SchedulesEntries[is_period]' => 1,
-], ['class' => 'btn btn-success mb-1']);
+<?php
+
 
 
 echo GridView::widget([

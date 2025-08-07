@@ -372,7 +372,18 @@ class Schedules extends ArmsModel
 	public function getPeriods()
 	{
 		return $this->hasMany(SchedulesEntries::class, ['schedule_id' => 'id'])
-			->andOnCondition(['is_period'=>1]);
+			->andOnCondition(['is_period'=>1])
+			->from(['schedules_periods'=>SchedulesEntries::tableName()]);
+	}
+	
+	public function getPosPeriods()
+	{
+		return $this->getPeriods()->andOnCondition(['is_work'=>1]);
+	}
+	
+	public function getNegPeriods()
+	{
+		return $this->getPeriods()->andOnCondition(['is_work'=>0]);
 	}
 	
 	/**
