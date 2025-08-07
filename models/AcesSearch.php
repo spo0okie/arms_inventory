@@ -87,6 +87,34 @@ class AcesSearch extends Aces
             'updated_at' => $this->updated_at,
         ]);
 		
+		if (!($this->archived ?? false)) {
+			$filter->andWhere([
+				'or',
+				['acls.schedules_id' => null], // Нет расписания
+				[ // Есть расписание — проверяем, что оно активно
+					'and',
+					[
+						'exists',
+						(new \yii\db\Query())
+							->from('schedules_entries sp1')
+							->where('sp1.schedule_id = schedules.id')
+							->andWhere(['sp1.is_work' => 1])
+							->andWhere(['<=', 'sp1.date', date('Y-m-d')])
+							->andWhere(['>=', 'sp1.date_end', date('Y-m-d')])
+					],
+					[
+						'not exists',
+						(new \yii\db\Query())
+							->from('schedules_entries sp2')
+							->where('sp2.schedule_id = schedules.id')
+							->andWhere(['sp2.is_work' => 0])
+							->andWhere(['<=', 'sp2.date', date('Y-m-d')])
+							->andWhere(['>=', 'sp2.date_end',date('Y-m-d')])
+					]
+				]
+			]);
+		}
+		
 		$filter
 			->andFilterWhere(['or',
 				QueryHelper::querySearchString('users_subjects.Ename', $this->subjects),

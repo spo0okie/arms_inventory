@@ -323,6 +323,7 @@ class ServicesController extends ArmsBaseController
 		
 		// Модели полноценного поиска нужны для подгрузки всех joinWith
 		$searchModel=new AcesSearch();
+		$searchModel->archived=Yii::$app->request->get('showArchived',false);
 		
 		// получаем всех детей
 		$children=$model->getChildrenRecursive();
