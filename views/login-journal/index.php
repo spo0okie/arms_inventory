@@ -28,9 +28,10 @@ $renderer=$this;
 		        'value' => function($data) use($renderer){return $data?->comp?->renderItem($renderer);}
 	        ],
 	        'comp_name',
-			'calc_time'=>['format'=>'datetime'],
-			'time'=>['format'=>'datetime'],
-			'local_time'=>['format'=>'datetime','value'=> function($data) {
+			'calc_time',
+			'time',
+			'created_at',
+			'local_time'=>['value'=> function($data) {
 				return $data->local_time ? gmdate('Y-m-d H:i:s', $data->local_time) : null;
 			}],
 			'type'=>[
