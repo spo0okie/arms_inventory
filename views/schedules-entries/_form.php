@@ -42,13 +42,13 @@ JS;
 			<div class="col-md-4">
 				<?= $form->field($model, 'date')->date([
 					'options' => ['placeholder' => 'Начало периода'],
-					'type'=>DateControl::FORMAT_DATETIME,
+					'type'=>DateControl::FORMAT_DATE,
 				]); ?>
 			</div>
 			<div class="col-md-4">
 				<?= $form->field($model, 'date_end')->date([
 					'options' => ['placeholder' => 'Конец периода'],
-					'type'=>DateControl::FORMAT_DATETIME,
+					'type'=>DateControl::FORMAT_DATE,
 				]); ?>
 			</div>
 			<div class="col-md-4">
