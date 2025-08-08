@@ -124,7 +124,7 @@ class TabsWidget extends Tabs
 				            const \$countSpan = \$li.find("a span.count");
                             
                             if (totalCount !== null && \$countSpan.length) {
-                                const bg= totalCount === "0" ? "bg-secondary" : "bg-warning";
+                                const bg= totalCount === "0" ? "bg-warning" : "bg-warning";
                 				\$countSpan.html(`
                     				<span class="badge rounded-pill \${bg} px-1 mx-1">\${totalCount}</span>
                 				`);
@@ -132,9 +132,9 @@ class TabsWidget extends Tabs
 
 							// Затемняем вкладку, если строк 0
 							if (totalCount === "0") {
-								\$li.addClass("opacity-50"); // Пример класса
+								\$li.addClass("muted-tab"); // Пример класса
 							} else {
-								\$li.removeClass("opacity-50");
+								\$li.removeClass("muted-tab");
 							}
 						}
 					});

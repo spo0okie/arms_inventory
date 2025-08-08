@@ -255,3 +255,8 @@ span.archived-card-alert {
     padding: 0;
     background: repeating-linear-gradient(120deg, transparent,transparent 5px,currentColor 6px, currentColor 10px, transparent 11px);
 }
+
+li.muted-tab {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
