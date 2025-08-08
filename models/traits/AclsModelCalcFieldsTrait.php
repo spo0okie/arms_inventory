@@ -23,7 +23,7 @@ trait AclsModelCalcFieldsTrait
 	public function getName(){return $this->sname;}
 	
 	/**
-	 * организации получающие доступ
+	 * Организации получающие доступ
 	 * @return array
 	 */
 	public function getPartners() {
@@ -41,7 +41,7 @@ trait AclsModelCalcFieldsTrait
 	}
 	
 	/**
-	 * подразделения получающие доступ
+	 * Подразделения получающие доступ
 	 * @return array
 	 */
 	public function getDepartments() {
@@ -143,7 +143,7 @@ trait AclsModelCalcFieldsTrait
 	
 	
 	/**
-	 * вернуть все оборудование и ОС этого сервиса
+	 * Вернуть все оборудование и ОС этого сервиса
 	 * @return array
 	 */
 	public function getNodes()
@@ -158,7 +158,7 @@ trait AclsModelCalcFieldsTrait
 			return [$this->tech];
 		
 		if (($this->services_id) and is_object($this->service))
-			return $this->service->getNodes();
+			return $this->service->getNodesRecursive();
 		
 		if (($this->ips_id) and is_object($this->ip))
 			return [$this->ip];
@@ -170,8 +170,8 @@ trait AclsModelCalcFieldsTrait
 	}
 	
 	/**
-	 * вернуть ресурс к которому привязан ACL
-	 * @return array
+	 * Вернуть ресурс к которому привязан ACL
+	 * @return array|string|null
 	 */
 	public function getResource()
 	{
