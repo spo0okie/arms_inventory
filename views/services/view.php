@@ -44,119 +44,62 @@ $showArchived = ShowArchivedWidget::isOn();
 DynaGridWidget::handleSave('services-index');
 $tabs[]=[
 	'id'=>'serviceChildren',
-	'label'=>'Состав сервиса'
+	'label'=>'Состав сервиса <span class="count"></span>'
 		.'<i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#services-index-grid-modal" class="small fas fa-wrench fa-fw"></i>',
 	'content'=>Html::a('Добавить субсервис',[
 		'create','Services'=>['parent_id'=>$model->id]
 	],[
 		'class'=>'badge text-bg-success m-0'
-	]).<<<HTML
-		<div id="serviceChildrenTree">
-		
-			<div class="spinner-border" role="status">
-				<span class="visually-hidden">Loading...</span>
-			</div>
-		</div>
-		<script>
-			$(document).ready(function() {
-				$.get("/web/services/children-tree?id={$model->id}&showArchived={$showArchived}", function(data) {
-				    jQuery("#serviceChildrenTree").hide().html(data);
-				    setTimeout(function (){jQuery("#serviceChildrenTree").fadeToggle();ExpandableCardInitAll();},500)
-				})
-			})
-		</script>
-HTML,
+	]).TabsWidget::ajaxLoadItems(
+		'serviceChildren',
+		"/web/services/children-tree?id={$model->id}&showArchived={$showArchived}"
+	)
 ];
 
 
 
 DynaGridWidget::handleSave('services-comps-index');
-
 $tabs[]=[
 	'id'=>'serviceComps',
-	'label'=>'Оборудование и ОС <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#services-comps-index-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-	'content'=><<<HTML
-	<div id="serviceCompsList">
-	
-		<div class="spinner-border" role="status">
-			<span class="visually-hidden">Loading...</span>
-		</div>
-	</div>
-	<script>
-		$(document).ready(function() {
-			$.get("/web/services/os-list?id={$model->id}&showArchived={$showArchived}", function(data) {
-				jQuery("#serviceCompsList").hide().html(data);
-				setTimeout(function (){jQuery("#serviceCompsList").fadeToggle();ExpandableCardInitAll();},500)
-				//let \$tabLink=$('li#tab-serviceComps').children('a');
-				//let \$export=$('div.servicesCompsIndexExport').children('div.btn-group');
-				//let \$exportButton=\$export.children('button').removeClass('btn').detach();
-				//let \$exportUl=\$export.children('ul').on('mouseOver',function(e){e.stopPropagation(); return false;}).detach();
-				//console.log(\$export);
-				//console.log(\$exportButton);
-				//\$exportButton.appendTo(\$tabLink);
-				//\$exportUl.appendTo(\$tabLink);
-				//\$tabLink.append(\$exportButton+\$exportUl);
-			});
-		})
-	</script>
-HTML,
-	];
+	'label'=>'Оборудование и ОС <span class="count"></span> <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#services-comps-index-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+	'content'=>TabsWidget::ajaxLoadItems(
+		'serviceComps',
+			"/web/services/os-list?id={$model->id}&showArchived={$showArchived}"
+	)
+];
 	
 
 
-	DynaGridWidget::handleSave('service-aces-list');
-	$tabs[]=[
-		'id'=>'serviceAces',
-		'label'=>'Доступ отсюда <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-aces-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-		'content'=>Html::a('Добавить исходящий доступ',[
-			'/acls/create','Aces'=>['services_ids'=>[$model->id]]
-		],[
-			'class'=>'badge text-bg-success m-0 open-in-modal-form',
-			'data-reload-page-on-submit'=>1
-		]).<<<HTML
-		<div id="serviceAcesList">
-		
-			<div class="spinner-border" role="status">
-				<span class="visually-hidden">Loading...</span>
-			</div>
-		</div>
-		<script>
-			$(document).ready(function() {
-				$.get("/web/services/aces-list?id={$model->id}&showArchived={$showArchived}", function(data) {
-				    jQuery("#serviceAcesList").hide().html(data);
-				    setTimeout(function (){jQuery("#serviceAcesList").fadeToggle();ExpandableCardInitAll();},500)
-				})
-			})
-		</script>
-HTML,
-	];
+DynaGridWidget::handleSave('service-aces-list');
+$tabs[]=[
+	'id'=>'serviceAces',
+	'label'=>'Доступ отсюда <span class="count"></span> <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-aces-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+	'content'=>Html::a('Добавить исходящий доступ',[
+		'/acls/create','Aces'=>['services_ids'=>[$model->id]]
+	],[
+		'class'=>'badge text-bg-success m-0 open-in-modal-form',
+		'data-reload-page-on-submit'=>1
+	]).TabsWidget::ajaxLoadItems(
+		'serviceAces',
+		"/web/services/aces-list?id={$model->id}&showArchived={$showArchived}"
+	)
+];
 
 
 DynaGridWidget::handleSave('service-acls-list');
 $tabs[]=[
 	'id'=>'serviceAcls',
-	'label'=>'Доступы сюда <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-acls-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+	'label'=>'Доступы сюда <span class="count"></span> <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-acls-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
 	'content'=>Html::a('Добавить входящий доступ',[
 		'/acls/create','Acls'=>['services_id'=>$model->id]
 	],[
 		'class'=>'badge text-bg-success m-0 open-in-modal-form',
 		'data-reload-page-on-submit'=>1
-	]).<<<HTML
-		<div id="serviceAclsList">
-		
-			<div class="spinner-border" role="status">
-				<span class="visually-hidden">Loading...</span>
-			</div>
-		</div>
-		<script>
-			$(document).ready(function() {
-				$.get("/web/services/acls-list?id={$model->id}&showArchived={$showArchived}", function(data) {
-				    jQuery("#serviceAclsList").hide().html(data);
-				    setTimeout(function (){jQuery("#serviceAclsList").fadeToggle();ExpandableCardInitAll();},500)
-				})
-			})
-		</script>
-HTML,
+	]).TabsWidget::ajaxLoadItems(
+		'serviceAcls',
+		"/web/services/acls-list?id={$model->id}&showArchived={$showArchived}"
+	)
+
 ];
 
 

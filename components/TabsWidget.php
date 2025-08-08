@@ -96,4 +96,50 @@ class TabsWidget extends Tabs
 			$tabNumber++;
 		}
 	}
+	
+	public static function ajaxLoadItems($tab,$url) {
+		return <<<HTML
+			<div id="{$tab}Content">
+				<div class="spinner-border" role="status">
+					<span class="visually-hidden">Loading...</span>
+				</div>
+			</div>
+			<script>
+				$(document).ready(function() {
+					$.ajax({
+						url: "{$url}",
+						method: "GET",
+						success: function(data, textStatus, jqXHR) {
+							const totalCount = jqXHR.getResponseHeader("X-Pagination-Total-Count");
+				
+							// Обновляем содержимое
+							jQuery("#{$tab}Content").hide().html(data);
+							setTimeout(function () {
+								jQuery("#{$tab}Content").fadeToggle();
+								ExpandableCardInitAll();
+							}, 500);
+
+                            //ищем
+							const \$li = $("li#tab-{$tab}");
+				            const \$countSpan = \$li.find("a span.count");
+                            
+                            if (totalCount !== null && \$countSpan.length) {
+                                const bg= totalCount === "0" ? "bg-secondary" : "bg-warning";
+                				\$countSpan.html(`
+                    				<span class="badge rounded-pill \${bg} px-1 mx-1">\${totalCount}</span>
+                				`);
+            				}
+
+							// Затемняем вкладку, если строк 0
+							if (totalCount === "0") {
+								\$li.addClass("opacity-50"); // Пример класса
+							} else {
+								\$li.removeClass("opacity-50");
+							}
+						}
+					});
+				});
+			</script>
+HTML;
+	}
 }

@@ -268,6 +268,9 @@ class ServicesController extends ArmsBaseController
 			],
 			'pagination' => false,
 		]);
+
+		Yii::$app->response->headers->set('X-Pagination-Total-Count', $dataProvider->totalCount);
+
 		return $this->renderAjax('comps-list', [
 			'model'=>$model,
 			'dataProvider' => $dataProvider,
@@ -301,6 +304,8 @@ class ServicesController extends ArmsBaseController
 			Yii::$app->request->queryParams,
 			['AcesSearch'=>['services_subject_ids'=>$ids]]
 		));
+		
+		Yii::$app->response->headers->set('X-Pagination-Total-Count', $dataProvider->totalCount);
 		
 		return $this->renderAjax('aces-list', [
 			'searchModel'=>$searchModel,
@@ -337,6 +342,8 @@ class ServicesController extends ArmsBaseController
 			['AcesSearch'=>['services_resource_ids'=>$ids]]
 		));
 		
+		Yii::$app->response->headers->set('X-Pagination-Total-Count', $dataProvider->totalCount);
+
 		return $this->renderAjax('aces-list', [
 			'searchModel'=>$searchModel,
 			'dataProvider' => $dataProvider,
@@ -381,6 +388,7 @@ class ServicesController extends ArmsBaseController
 			'pagination'=>false
 		]);
 		
+		Yii::$app->response->headers->set('X-Pagination-Total-Count', $arrDataProvider->totalCount);
 		
 		return $this->renderAjax('children-tree', [
 			'model' => $model,
