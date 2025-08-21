@@ -53,15 +53,15 @@ class ArmsBaseController extends Controller
 	}
 	
 	/**
-	 * Карта доступа с какими полномочиями что можно делать
+	 * Карта доступа с какими полномочиями, что можно делать
 	 * @return array
 	 */
 	public function accessMap() {
 		$class=StringHelper::class2Id($this->modelClass);
 		return [
-			self::PERM_VIEW=>['index','view','search','ttip','item-by-name','item'],			//чтение всего
+			self::PERM_VIEW=>['index','view','search','ttip','item-by-name','item','async-grid'],			//чтение всего
 			self::PERM_EDIT=>['create','update','delete','validate','unlink','editable'],	//редактирование всего
-			self::PERM_VIEW.'-'.$class=>['index','view','search','ttip','item-by-name','item'],	//чтение объектов этого класса
+			self::PERM_VIEW.'-'.$class=>['index','view','search','ttip','item-by-name','item','async-grid'],	//чтение объектов этого класса
 			self::PERM_EDIT.'-'.$class=>['create','update','delete','validate','unlink'],		//редактирование объектов этого класса
 			self::PERM_ANONYMOUS=>[],
 			self::PERM_AUTHENTICATED=>[],
@@ -72,7 +72,7 @@ class ArmsBaseController extends Controller
 	 * Что должен вернуть контроллер
 	 * @param array $defaultPath путь куда вернуться если вызов не Ajax и не указано previous
 	 * @param mixed $ajaxObject какой объект вернуть если вызов Ajax
-	 * @param bool  $previous признак что если в вызове есть return=previous то туда и возвращаемся
+	 * @param bool  $previous признак того, что в вызове есть return=previous и туда и надо возвращаться
 	 * @return array|Response
 	 */
 	public function defaultReturn(array $defaultPath, $ajaxObject, $previous=true) {
@@ -200,6 +200,39 @@ class ArmsBaseController extends Controller
     }
 	
 	/**
+	 * Ищет в переданном наборе параметров параметр SearchOverride, которым перекрывает
+	 * параметры поиска в основном массиве
+	 * если передано searchModel, то проверяет, что SearchOverride перекрывает именно атрибуты для этого класса
+	 * @param array         $params
+	 * @param object|string $searchModel
+	 * @return array
+	 */
+	public function searchParamsOverride(array $params, object|string $searchModel=''): array
+	{
+		if (is_object($searchModel))
+			$searchModel=StringHelper::className(get_class($searchModel));
+
+		//если перекрытие параметров поиска есть
+		if (isset($params['SearchOverride'])) {
+			
+			$override=$params['SearchOverride'];
+			unset($params['SearchOverride']);
+			
+			//Если указано имя поисковой модели, и override его не содержит,
+			//то складываем все параметры внутрь поискового класса, т.к. перекрыть надо именно его
+			if ($searchModel && !isset($override[$searchModel]))
+				$override=[$searchModel=>$override];
+			
+			$params=ArrayHelper::recursiveOverride(
+				$params,
+				$override
+			);
+		}
+		
+		return $params;
+	}
+	
+	/**
 	 * Инициирует поиск с учетом наличия переключателя архивных записей
 	 * @param      $searchModel
 	 * @param      $dataProvider
@@ -214,6 +247,9 @@ class ArmsBaseController extends Controller
 		$direct_archived=Yii::$app->request->get('showArchived','unset')!='unset';
 		
 		if (is_null($params)) $params=Yii::$app->request->queryParams;
+		
+		$params=$this->searchParamsOverride($params,$searchModel);
+		
 		$dataProvider = $searchModel->search($params,$columns);
 		if (!$dataProvider->totalCount) {
 			if (!$direct_archived && !$searchModel->archived) {
@@ -258,7 +294,7 @@ class ArmsBaseController extends Controller
     	if (class_exists($searchModelClass)) {
 			$searchModel = new $searchModelClass();
 			
-			if ($searchModel->hasAttribute('archived')) {
+			if ($searchModel->hasAttribute('archived') || $searchModel->canGetProperty('archived')) {
 				$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount,$columns);
 			} else {
 				$dataProvider = $searchModel->search(Yii::$app->request->queryParams,$columns);
@@ -294,6 +330,41 @@ class ArmsBaseController extends Controller
 		}
     }
 	
+	/**
+	 * Renders only Grid of index
+	 * @return mixed
+	 */
+	public function actionAsyncGrid($source)
+	{
+		/** @var ArmsModel $model */
+		$model= new $this->modelClass();
+		
+		$searchModelClass=$this->modelClass.'Search';
+		$classId=StringHelper::class2Id($this->modelClass);
+		$gridId=Yii::$app->request->get('gridId', $classId.'-list');
+		
+		$columns=DynaGridWidget::fetchVisibleAttributes($model,$gridId);
+		
+		if (class_exists($searchModelClass)) {
+			/** @var ArmsModel $searchModel */
+			$searchModel = new $searchModelClass();
+			
+			if ($searchModel->hasAttribute('archived') || $searchModel->canGetProperty('archived')) {
+				$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount,$columns);
+			} else {
+				$dataProvider = $searchModel->search(
+					$this->searchParamsOverride(Yii::$app->request->queryParams,$searchModel),
+					$columns
+				);
+			}
+			Yii::$app->response->headers->set('X-Pagination-Total-Count', $dataProvider->totalCount);
+			return $this->renderAjax('/layouts/async-grid', compact('gridId','source','model','searchModel','dataProvider'));
+			
+		} else {
+			throw new NotFoundHttpException("Search class $searchModelClass not found");
+		}
+	}
+
 	/**
 	 * Displays a item for single model.
 	 * @param int  $id
