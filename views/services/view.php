@@ -41,66 +41,39 @@ DynaGridWidgetAsset::register($this);
 
 $tabs=[];
 $showArchived = ShowArchivedWidget::isOn();
-DynaGridWidget::handleSave('services-index');
-$tabs[]=[
-	'id'=>'serviceChildren',
-	'label'=>'Состав сервиса <span class="count"></span>'
-		.'<i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#services-index-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-	'content'=>Html::a('Добавить субсервис',[
+
+$tabs[]=TabsWidget::asyncDynagridTab('serviceChildren','services-index','Состав сервиса',
+	"/web/services/children-tree?id={$model->id}&showArchived={$showArchived}",
+	Html::a('Добавить субсервис',[
 		'create','Services'=>['parent_id'=>$model->id]
 	],[
 		'class'=>'badge text-bg-success m-0'
-	]).TabsWidget::ajaxLoadItems(
-		'serviceChildren',
-		"/web/services/children-tree?id={$model->id}&showArchived={$showArchived}"
-	)
-];
+	])
+);
 
+$tabs[]=TabsWidget::asyncDynagridTab('serviceComps','services-comps-index','Оборудование и ОС',
+	"/web/services/os-list?id={$model->id}&showArchived={$showArchived}"
+);
 
-
-DynaGridWidget::handleSave('services-comps-index');
-$tabs[]=[
-	'id'=>'serviceComps',
-	'label'=>'Оборудование и ОС <span class="count"></span> <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#services-comps-index-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-	'content'=>TabsWidget::ajaxLoadItems(
-		'serviceComps',
-			"/web/services/os-list?id={$model->id}&showArchived={$showArchived}"
-	)
-];
-	
-
-
-DynaGridWidget::handleSave('service-aces-list');
-$tabs[]=[
-	'id'=>'serviceAces',
-	'label'=>'Доступ отсюда <span class="count"></span> <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-aces-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-	'content'=>Html::a('Добавить исходящий доступ',[
+$tabs[]=TabsWidget::asyncDynagridTab('serviceAces','service-aces-list', 'Доступ отсюда',
+	"/web/services/aces-list?id={$model->id}&showArchived={$showArchived}",
+	Html::a('Добавить исходящий доступ',[
 		'/acls/create','Aces'=>['services_ids'=>[$model->id]]
 	],[
 		'class'=>'badge text-bg-success m-0 open-in-modal-form',
 		'data-reload-page-on-submit'=>1
-	]).TabsWidget::ajaxLoadItems(
-		'serviceAces',
-		"/web/services/aces-list?id={$model->id}&showArchived={$showArchived}"
-	)
-];
+	])
+);
 
-
-DynaGridWidget::handleSave('service-acls-list');
-$tabs[]=[
-	'id'=>'serviceAcls',
-	'label'=>'Доступы сюда <span class="count"></span> <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-acls-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
-	'content'=>Html::a('Добавить входящий доступ',[
+$tabs[]=TabsWidget::asyncDynagridTab('serviceAcls','service-acls-list', 'Доступы сюда',
+	"/web/services/acls-list?id={$model->id}&showArchived={$showArchived}",
+	Html::a('Добавить входящий доступ',[
 		'/acls/create','Acls'=>['services_id'=>$model->id]
 	],[
 		'class'=>'badge text-bg-success m-0 open-in-modal-form',
 		'data-reload-page-on-submit'=>1
-	]).TabsWidget::ajaxLoadItems(
-		'serviceAcls',
-		"/web/services/acls-list?id={$model->id}&showArchived={$showArchived}"
-	)
-
-];
+	])
+);
 
 
 TabsWidget::addWikiLinks($tabs,$model->linksRecursive);
@@ -114,7 +87,7 @@ echo TabsWidget::widget([
 	]
 ]);
 
-//после перезагрузки PJAX элементов. Можно убрать в layout
+//После перезагрузки PJAX элементов. Можно убрать в layout
 $this->registerJs(<<<JS
 	$(document).on('pjax:success', function() {
 	    ExpandableCardInitAll();

@@ -32,32 +32,12 @@ return [
 			]);
 		}
 	],
-	'pay_id'=>[
-		'value'=>function($data) {
-			return $data->pay_id;
-		}
-	],
-	'date'=>[
-		'value'=>function($data) {
-			return $data->datePart;
-		}
-	],
+	'pay_id',
+	'date'=>['value'=>function($data) {return $data->datePart;}],
 	'users'=>[
-		'value'=>function($data) use ($renderer) {
-			return ModelFieldWidget::widget([
-				'model'=>$data,
-				'field'=>'users',
-				'title'=>false,
-				'item_options'=>['short'=>true],
-				'card_options'=>[]
-			]);
-		}
+		'contentOptions'=>['item_options'=>['short'=>true],]
 	],
-	'partners'=>[
-		'value'=>function($data) use ($renderer) {
-			return ModelFieldWidget::widget(['model'=>$data,'field'=>'partners','title'=>false,'card_options'=>[]]);
-		}
-	],
+	'partners',
 	'state_id'=>[
 		'filter'=> ContractsStates::fetchNames(),
 		'contentOptions' => ['class' => 'contracts-state-column'],
@@ -152,19 +132,19 @@ return [
 	'techsCount'=>[
 		'contentOptions' => ['class' => 'contracts-1attach-column'],
 		'value'=>function($data){
-			return $data->techsCount?$data->techsCount:'';
+			return $data->techsCount??'';
 		},
 	],
 	'materialsCount'=>[
 		'contentOptions' => ['class' => 'contracts-1attach-column'],
 		'value'=>function($data){
-			return $data->materialsCount?$data->materialsCount:'';
+			return $data->materialsCount??'';
 		},
 	],
 	'licsCount'=>[
 		'contentOptions' => ['class' => 'contracts-1attach-column'],
 		'value'=>function($data){
-			return $data->licsCount?$data->licsCount:'';
+			return $data->licsCount??'';
 		},
 	],
 	'deliveryStatus'=>[

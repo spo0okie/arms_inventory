@@ -97,6 +97,15 @@ class TabsWidget extends Tabs
 		}
 	}
 	
+	
+	/**
+	 * Формирует content вкладки для асинхронной подгрузки в нее данных.
+	 * Если в заголовке вкладки будет span с классом count, а в ответе сервера будет X-Pagination-Total-Count,
+	 * то заполнит это поле количеством элементов, которые вернулись в ответе.
+	 * @param string $tab ID вкладки
+	 * @param string $url URL для AJAX запроса, который вернет содержимое вкладки
+	 * @return string
+	 */
 	public static function ajaxLoadItems($tab,$url) {
 		return <<<HTML
 			<div id="{$tab}Content">
@@ -141,5 +150,33 @@ class TabsWidget extends Tabs
 				});
 			</script>
 HTML;
+	}
+	
+	/**
+	 * Возвращает элемент вкладки для асинхронной подгрузки таблицы.
+	 * @param string $id ID вкладки
+	 * @param string $gridId ID DynagridWidget, который будет на подгруженном URL
+	 * @param string $label Название вкладки
+	 * @param string $staticContent статичный контент перед подгружаемым
+	 * @param string $url URL для подгрузки
+	 * @param $options
+	 * @return array
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public static function asyncDynagridTab($id, $gridId, $label, $url, $staticContent='', $options=[]) {
+		$item=[
+			'id'=>$id,
+			'label'=>"$label"
+				.'<span class="count"></span>'
+				.'<i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#'.$gridId.'-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+			'content'=>$staticContent
+				.TabsWidget::ajaxLoadItems($id,$url)
+		
+		];
+		//поскольку мы асинхронно подгрузим таблицу, она может сохранять свои настройки
+		//причем обработчик сохранения в той странице которая подгружается асинхронно, а не в этой
+		//поэтому добавляем обработчик сохранения настроек в эту страницу
+		DynaGridWidget::handleSave($gridId);
+		return $item;
 	}
 }
