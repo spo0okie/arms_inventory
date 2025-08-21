@@ -295,7 +295,7 @@ class Contracts extends ArmsModel
 					.'</ul>они указывается в отдельных полях',
 				'indexHint' => 'Можно искать по имени, дате, названию контрагента и комментарию к документу<br />'
 					.QueryHelper::$stringSearchHint,
-				'join'=>['children','techs','materials','licItems','services','partners','users'],
+				'join'=>['children','techs','materials','licItems','services','partners','users','successor',],
 			],
 			'partners' => ['alias' => 'partners_ids'],
 			'partners_ids' => [
