@@ -8,6 +8,7 @@
  */
 
 use app\components\ItemObjectWidget;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Schedules */
@@ -23,6 +24,7 @@ if (!empty($model)) {
 		'archivedProperty'=>'Uvolen',
 		'name'=>$name,
 		'static'=>$static_view,
+		'ttipUrl'=> Url::to(['scheduled-access/ttip','id'=>$model->id]),
 	]);
 } else {
 	echo $empty;
