@@ -88,28 +88,41 @@ class AcesSearch extends Aces
         ]);
 		
 		if (!($this->archived ?? false)) {
+			$filter->joinWith(['acl.schedule']);
 			$filter->andWhere([
 				'or',
 				['acls.schedules_id' => null], // Нет расписания
 				[ // Есть расписание — проверяем, что оно активно
 					'and',
 					[
-						'exists',
+						'exists',											//есть такие периоды у которых
 						(new \yii\db\Query())
 							->from('schedules_entries sp1')
 							->where('sp1.schedule_id = schedules.id')
-							->andWhere(['sp1.is_work' => 1])
-							->andWhere(['<=', 'sp1.date', date('Y-m-d')])
-							->andWhere(['>=', 'sp1.date_end', date('Y-m-d')])
+							->andWhere(['sp1.is_work' => 1])				//период рабочий
+							->andWhere(['or',
+								['sp1.date'=>null],							//начала нет
+								['<=', 'sp1.date', date('Y-m-d')]	//или оно раньше чем сейчас
+							])
+							->andWhere(['or',
+								['sp1.date_end'=>null],							//конца нет
+								['>=', 'sp1.date_end', date('Y-m-d')]	//или он позже чем сейчас
+							])
 					],
 					[
-						'not exists',
+						'not exists',										//нет таких периодов у которых
 						(new \yii\db\Query())
 							->from('schedules_entries sp2')
 							->where('sp2.schedule_id = schedules.id')
-							->andWhere(['sp2.is_work' => 0])
-							->andWhere(['<=', 'sp2.date', date('Y-m-d')])
-							->andWhere(['>=', 'sp2.date_end',date('Y-m-d')])
+							->andWhere(['sp2.is_work' => 0])				//период нерабочий
+							->andWhere(['or',
+								['sp2.date'=>null],							//начала нет
+								['<=', 'sp2.date', date('Y-m-d')]	//или оно раньше чем сейчас
+							])
+							->andWhere(['or',
+								['sp2.date_end'=>null],							//конца нет
+								['>=', 'sp2.date_end', date('Y-m-d')]	//или он позже чем сейчас
+							])
 					]
 				]
 			]);
