@@ -189,7 +189,8 @@ class Contracts extends ArmsModel
 		return [
 			'attach' => [
 				'Связи',
-				'indexHint' => 'Привязанные к документу объекты'
+				'indexHint' => 'Привязанные к документу объекты',
+				'join'=>['children','techs','materials','licItems','services'],
 			],
 			'charge' => 'в т.ч. НДС',
 			'comment' => [
@@ -227,6 +228,7 @@ class Contracts extends ArmsModel
 				'indexHint' => 'Статус поставки: все ли ожидаемые материалы,'
 					.'<br>лицензии, оборудования по этому документу поступили'
 					.'<br>(привязаны к документу)',
+				'join'=>['techs','materials','licItems'],
 			],
 			'end_date' => [
 				'Окончание',
@@ -248,19 +250,21 @@ class Contracts extends ArmsModel
 			'id' => 'ID',
 			'is_successor' => [
 				'Заменяет основной документ',
-				'hint' => 'Если флажок стоит, значит этот документ не дополняет, а заменяет основной<br>'
-					.'например доп соглашение к договору с новыми тарифами, заменяет предыдущее доп. соглашение'
+				'hint' => 'Если флажок стоит, значит этот документ не дополняет, а заменяет основной.<br>'
+					.'Например, доп. соглашение к договору с новыми тарифами, заменяет предыдущее доп. соглашение'
 			],
 			'licsCount' => [
 				'Привязано лицензий',
 				'indexLabel' => '<span class="fas fa-award"></span>',
 				'indexHint' => 'Сколько лицензий поступило по этому документу'
 					.'<br>(привязано к документу)',
+				'join'=>['licItems'],
 			],
 			'lics_ids' => [
 				'Лицензии',
 				'hint' => 'С какими закупками лицензий связан документ (если связан)',
-				'placeholder'=>'Выберите закупки лицензий связанные с документом'
+				'placeholder'=>'Выберите закупки лицензий связанные с документом',
+				'join'=>['licItems'],
 			],
 			'lics_delivery' => [
 				'Пост. лиц.',
@@ -273,6 +277,7 @@ class Contracts extends ArmsModel
 				'indexLabel' => '<i class="fas fa-box-open"></i>',
 				'indexHint' => 'Сколько материалов поступило по этому документу'
 					.'<br>(привязано к документу)',
+				'join'=>['materials'],
 			],
 			'materials_delivery' => [
 				'Пост. матер.',
@@ -283,18 +288,20 @@ class Contracts extends ArmsModel
 			'name' => [
 				'Название документа',
 				'hint' => 'Полное название документа как в нем написано (Счет № / договор № / накладная / и т.д.).<br>'
-					.''.(isset(Yii::$app->params['contractsPayDocFormat'])?Yii::$app->params['contractsPayDocFormat']:'')
+					.(isset(Yii::$app->params['contractsPayDocFormat'])?Yii::$app->params['contractsPayDocFormat']:'')
 					.'В имени документа <b>не надо указывать:</b><ul>'
 					.'<li>Дату</li>'
 					.'<li>Контрагента</li>'
 					.'</ul>они указывается в отдельных полях',
 				'indexHint' => 'Можно искать по имени, дате, названию контрагента и комментарию к документу<br />'
-					.QueryHelper::$stringSearchHint
+					.QueryHelper::$stringSearchHint,
+				'join'=>['children','techs','materials','licItems','services','partners','users'],
 			],
 			'partners' => ['alias' => 'partners_ids'],
 			'partners_ids' => [
 				'Контрагенты',
 				'hint' => 'Если отсутствуют, значит документ внутренний',
+				'join'=>['partners'],
 			],
 			'parent_id' => [
 				'Основной документ',
@@ -302,6 +309,7 @@ class Contracts extends ArmsModel
 					.'Для актов/УПД/накладных тут надо указать счет<br>'
 					.'Для счетов и доп.соглашений имеет смысл указывать договор',
 				'placeholder' => 'Основной документ не назначен',
+				'join'=>['parent'],
 			],
 			'pay_id' => [
 				Yii::$app->params['docs.pay_id.name'],
@@ -312,11 +320,13 @@ class Contracts extends ArmsModel
 			'scans_ids' => [
 				'Сканы',
 				'hint' => 'Отсканированная версия документа',
+				'join'=>['scans'],
 			],
 			'services_ids' => [
 				'Сервисы',
 				'hint' => 'С какими сервисами связан документ (если связан)',
-				'placeholder'=>'Выберите сервисы связанные с документом'
+				'placeholder'=>'Выберите сервисы связанные с документом',
+				'join'=>['services'],
 			],
 			'state_id' => [
 				'Статус',
@@ -328,6 +338,7 @@ class Contracts extends ArmsModel
 				'indexLabel' => '<i class="fas fa-print"></i>',
 				'indexHint' => 'Сколько оборудования поступило по этому документу'
 					.'<br>(привязано к документу)',
+				'join'=>['techs'],
 			],
 			'techs_delivery' => [
 				'Пост. оборуд.',
@@ -338,7 +349,8 @@ class Contracts extends ArmsModel
 			'techs_ids' => [
 				'Оборудование',
 				'hint' => 'С каким оборудованием связан документ (если связан)',
-				'placeholder'=>'Выберите оборудование связанное с документом'
+				'placeholder'=>'Выберите оборудование связанное с документом',
+				'join'=>['techs'],
 			],
 			'total' => [
 				'Сумма',
@@ -354,7 +366,8 @@ class Contracts extends ArmsModel
 			'users_ids' => [
 				'Пользователи',
 				'hint' => 'С какими пользователями связан документ (если связан)',
-				'placeholder'=>'Укажите пользователей связанных с документом'
+				'placeholder'=>'Укажите пользователей связанных с документом',
+				'join'=>['users'],
 			],
 		];
 	}
