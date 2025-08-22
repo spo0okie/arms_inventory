@@ -280,15 +280,14 @@ class ServicesController extends ArmsBaseController
 
 
 	
-	/**
+	/*
 	 * Список связей в сервисе (с учетом вложенных)
 	 * @param integer $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionAcesList(int $id)
+	/*public function actionAcesList(int $id)
 	{
-		/** @var Services $model */
 		$model=$this->findModel($id);
 		
 		// Модели полноценного поиска нужны для подгрузки всех joinWith
@@ -321,9 +320,8 @@ class ServicesController extends ArmsBaseController
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
-	public function actionAclsList(int $id)
+	/*public function actionAclsList(int $id)
 	{
-		/** @var Services $model */
 		$model=$this->findModel($id);
 		
 		// Модели полноценного поиска нужны для подгрузки всех joinWith
@@ -350,7 +348,7 @@ class ServicesController extends ArmsBaseController
 			'model' => $model,
 			'mode' => 'acls'
 		]);
-	}
+	}*/
 
 	/**
 	 * Список связей в сервисе (с учетом вложенных)

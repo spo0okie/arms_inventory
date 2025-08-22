@@ -4,9 +4,14 @@
 namespace app\components;
 
 
+use app\helpers\StringHelper;
+use app\models\ArmsModel;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\base\UnknownPropertyException;
 use yii\bootstrap5\Tabs;
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 class TabsWidget extends Tabs
 {
@@ -107,6 +112,7 @@ class TabsWidget extends Tabs
 	 * @return string
 	 */
 	public static function ajaxLoadItems($tab,$url) {
+		if (is_array($url)) $url= Url::to($url);
 		return <<<HTML
 			<div id="{$tab}Content">
 				<div class="spinner-border" role="status">
@@ -154,16 +160,16 @@ HTML;
 	
 	/**
 	 * Возвращает элемент вкладки для асинхронной подгрузки таблицы.
-	 * @param string $id ID вкладки
-	 * @param string $gridId ID DynagridWidget, который будет на подгруженном URL
-	 * @param string $label Название вкладки
-	 * @param string $staticContent статичный контент перед подгружаемым
-	 * @param string $url URL для подгрузки
-	 * @param $options
+	 * @param string       $id ID вкладки
+	 * @param string       $gridId ID DynagridWidget, который будет на подгруженном URL
+	 * @param string       $label Название вкладки
+	 * @param string|array $url URL для подгрузки
+	 * @param string       $staticContent статичный контент перед подгружаемым
 	 * @return array
-	 * @throws \yii\base\InvalidConfigException
+	 * @throws InvalidConfigException
 	 */
-	public static function asyncDynagridTab($id, $gridId, $label, $url, $staticContent='', $options=[]) {
+	public static function asyncDynagridTab(string $id, string $gridId, string $label, string|array $url, string $staticContent=''): array
+	{
 		$item=[
 			'id'=>$id,
 			'label'=>"$label"
@@ -178,5 +184,53 @@ HTML;
 		//поэтому добавляем обработчик сохранения настроек в эту страницу
 		DynaGridWidget::handleSave($gridId);
 		return $item;
+	}
+	
+	
+	public static function asyncDynagridPropertyTab(
+		ArmsModel $model,
+		string $property,
+		bool|null $showArchived=null,
+		array $filter=[],
+		string $linkClass='',
+		$label='',
+		$staticContent=''
+	): array
+	{
+		$classId=StringHelper::class2Id($model::class);
+		$propertyId=StringHelper::class2Id($property);
+		
+		//если мы не сказали какой класс мы подгружаем в Dynagrid для нашего property - выясняем через linksSchema
+		if (!$linkClass) {
+			$propertyLink=$model->attributeIsLoader($property);
+			if (!$propertyLink) throw new UnknownPropertyException("Property '$property' is not a link in model ".get_class($model));
+			$linkClass=StringHelper::class2Id($model->attributeLinkClass($propertyLink));
+		}
+		
+		//если мы не заполнили фильтр, как выбрать только связанные с данным объектом элементы, то генерируем фильтр на основании linksSchema
+		if (!count($filter)) {
+			$propertyLink=$model->attributeIsLoader($property);
+			if (!$propertyLink) throw new UnknownPropertyException("Property '$property' is not a link in model ".get_class($model));
+			$reverseLink=$model->attributeReverseLink($propertyLink);
+			if (!$reverseLink) throw new UnknownPropertyException("Reverse link of property '$propertyLink' is undefined in model ".get_class($model));
+			if (StringHelper::endsWith($reverseLink,'_ids'))
+				$filter=[$reverseLink=>[$model->id]];
+			else
+				$filter=[$reverseLink=>$model->id];
+		}
+		
+		$tabId=$classId.'-'.$propertyId;
+		$gridId=$classId.'-'.$propertyId.'-list';
+		if (!$label) $label=$model->getAttributeLabel($property);
+		$url=[
+			$linkClass.'/async-grid',
+			'SearchOverride'=>$filter,
+			'source'=> Url::currentNonRecursive(),
+			'gridId'=>$gridId,
+		];
+		if (!is_null($showArchived))
+			$url['showArchived']=$showArchived;
+		
+		return static::asyncDynagridTab($tabId,	$gridId, $label, $url, $staticContent);
 	}
 }

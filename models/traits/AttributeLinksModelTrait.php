@@ -40,18 +40,19 @@ trait AttributeLinksModelTrait
 		return $this->linksSchema;
 	}
 	
-	protected static $linkedModelsPrototypes=[];
+	protected static array $linkedModelsPrototypes=[];
 	
 	/**
 	 * Принимает на вход аттрибут в виде цепочки ссылок 'user.org.name'
 	 * Возвращает массив из двух элементов: [new Partners(),'name']
 	 * @param $attr
 	 * @return array|void
+	 * @throws UnknownPropertyException
 	 */
 	public function getLinkedAttr($attr)
 	{
 		//если в пути нет разделителя, то это наш собственный аттрибут
-		if (strpos($attr, '.') === false) {
+		if (!str_contains($attr, '.')) {
 			return [$this,$attr];
 		}
 		
@@ -106,7 +107,7 @@ trait AttributeLinksModelTrait
 	 * В списке поведений прикручиваем many-to-many контрагентов
 	 * @return array
 	 */
-	public function relationsBehaviour()
+	public function relationsBehaviour(): array
 	{
 		$relations=[];
 		
@@ -139,10 +140,11 @@ trait AttributeLinksModelTrait
 	 * @param $attr
 	 * @return bool
 	 */
-	public function attributeIsReverseLink($attr) {
+	public function attributeIsReverseLink($attr):bool {
 		if (isset($this->reverseLinksCache[$attr]))
 			return $this->reverseLinksCache[$attr];
 		
+		/** @var array $data */
 		$data=$this->getAttributeData($attr);
 		if (isset($data['is_reverseLink'])) {
 			return $this->reverseLinksCache[$attr]=$data['is_reverseLink'];
@@ -151,7 +153,7 @@ trait AttributeLinksModelTrait
 		//если аттрибут выглядит как ссылка на несколько объектов
 		//(ссылка на один может иметь обратную ссылку, но тогда это one-2-many, и это можно удалять без последствий)
 		if (StringHelper::endsWith($attr,'_ids')) {
-			//если там есть обратная ссылка (хоть какая, с этой то стороны точно множественная)
+			//если там есть обратная ссылка (хоть какая, с этой-то стороны точно множественная)
 			if ($this->attributeReverseLink($attr)) {
 				return $this->reverseLinksCache[$attr]=true;
 			}
@@ -277,7 +279,7 @@ trait AttributeLinksModelTrait
 	/**
 	 * Какой атрибут объекта-ссылки ссылается обратно на нас
 	 * @param string $attr
-	 * @return array|false|mixed
+	 * @return string|false
 	 */
 	public function attributeReverseLink(string $attr) {
 		$schema=$this->attributeLinkSchema($attr);
