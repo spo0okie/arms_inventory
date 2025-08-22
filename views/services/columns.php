@@ -62,12 +62,16 @@ return [
 	'name' => [
 		'value' => function ($data) {
 			$name=$this->render('/services/item', ['model' => $data,'noDelete'=>true,'icon'=>true]);
-			if ($depth=$data->treeDepth) {
-				return TableTreePrefixWidget::widget(['prefix'=>$data->treePrefix]).$name.'</span>';
+			if ($data->treeDepth || count((array)$data->treeChildren)) {
+				return TableTreePrefixWidget::widget([
+						'prefix'=>$data->treePrefix,
+						'children'=>count($data->treeChildren)
+					])
+					.$name.'</span>';
 			}
 			return $name;
 		},
-		'contentOptions'=>function($data){return ['class'=>'name_col '.($data->treeDepth?
+		'contentOptions'=>function($data){return ['class'=>'name_col '.($data->treeDepth || count((array)$data->treeChildren)?
 			'tree-col p-0 overflow-hidden position-relative'
 			:''
 		) ];}

@@ -7,7 +7,8 @@ use yii\helpers\Html;
 class TableTreePrefixWidget extends Widget
 {
 	
-	public $prefix='';
+	public string $prefix='';
+	public bool $children=false;
 	
 	private function treeItem($pos=0,$content='',$height=400) {
 		$pos*=15;
@@ -20,6 +21,13 @@ class TableTreePrefixWidget extends Widget
 	private function vLine() {
 		return Html::tag('span','',[
 			'class'=>'table-tree-v-line'
+		]);
+	}
+
+	private function childrenLine() {
+		return Html::tag('span','',[
+			'class'=>'table-tree-v-line',
+			'style'=>'top: 20px;'
 		]);
 	}
 	
@@ -41,13 +49,21 @@ class TableTreePrefixWidget extends Widget
 	
 	public function run()
 	{
+		if (!$this->prefix) {
+			return;
+		}
+		
+		$this->prefix=mb_substr($this->prefix,1);
+		if ($this->prefix===' ') $this->prefix='';
 		$output='';
 		$pos=0;
 		foreach (mb_str_split($this->prefix) as $symbol) {
 			$output.=$this->symbolReplace($symbol,$pos++);
 		}
+		if ($this->children) $output.= $this->treeItem($pos,$this->childrenLine());
 		$padding=$pos*15;
 		$output.="<span style='padding-left:${padding}px'>";
+		
 		echo $output;
 	}
 	
