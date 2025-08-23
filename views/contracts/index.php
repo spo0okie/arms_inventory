@@ -19,7 +19,7 @@ $filter= Html::tag('span','Отфильтровать:',['class'=>'btn']).
 	Html::a('УПД',['index','ContractsSearch[fullname]'=>'упд'],['class'=>'btn btn-default']).' // '.
 	Html::a('договоры',['index','ContractsSearch[fullname]'=>'договор'],['class'=>'btn btn-default']);
 
-$tableId='contracts-index';
+$gridId='contracts-index';
 ?>
 <div class="contracts-index">
 

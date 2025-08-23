@@ -9,13 +9,13 @@ use app\models\Currency;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ContractsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $tableId string */
+/* @var $gridId string */
 
 $renderer=$this;
-$showUsersInName=!DynaGridWidget::tableColumnIsVisible($tableId,'users',Contracts::$defaultColumns);
-$showPartnersInName=!DynaGridWidget::tableColumnIsVisible($tableId,'partners',Contracts::$defaultColumns);
-$showPayIdInName=!DynaGridWidget::tableColumnIsVisible($tableId,'pay_id',Contracts::$defaultColumns);
-$showDateInName=!DynaGridWidget::tableColumnIsVisible($tableId,'date',Contracts::$defaultColumns);
+$showUsersInName=!DynaGridWidget::tableColumnIsVisible($gridId,'users',Contracts::$defaultColumns);
+$showPartnersInName=!DynaGridWidget::tableColumnIsVisible($gridId,'partners',Contracts::$defaultColumns);
+$showPayIdInName=!DynaGridWidget::tableColumnIsVisible($gridId,'pay_id',Contracts::$defaultColumns);
+$showDateInName=!DynaGridWidget::tableColumnIsVisible($gridId,'date',Contracts::$defaultColumns);
 return [
 	'name'=>[
 		'value'=>function($data) use ($renderer,$showPartnersInName,$showUsersInName,$showPayIdInName,$showDateInName) {
