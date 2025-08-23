@@ -79,6 +79,7 @@ return [
 	//стандартные методы
 	'/^[a-z0-9\-]+\/(view|item|ttip|card|uploads)$/' => ['GET'=>['id'=>'{anyId}']],
 	'/^[a-z0-9\-]+\/item-by-name$/' => ['GET'=>['name'=>'{anyName}']],
+	'/^[a-z0-9\-]+\/async-grid$/' => ['GET'=>['source'=>'http://1.1.1.1'],'response'=>['404','200']],
 	'/^[a-z0-9\-]+\/delete$/' => [
 		'GET'=>['id' => '{anyId}'],	//удаляем любую имеющуюся модель
 		'POST'=>[],					//делаем это POST запросом

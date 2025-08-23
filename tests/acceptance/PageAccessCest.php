@@ -14,6 +14,7 @@ class PageAccessCest
 	{
 		Helper\Acceptance::$testsFailed = true;
 	}
+	
 	/**
 	 * Возвращает объект контроллера по имени файла
 	 * и reflectionClass контроллера
@@ -226,7 +227,7 @@ class PageAccessCest
 			codecept_debug($file);
 			$controller=$this->getController($file);
 			if (is_object($controller)) {
-				if (!$controller instanceof \app\controllers\ArmsBaseController /*|| !$controller instanceof \app\controllers\LicItemsController*/) {
+				if (!$controller instanceof \app\controllers\ArmsBaseController) {
 					continue;
 				}
 				
@@ -254,7 +255,7 @@ class PageAccessCest
 						if ($routeParams === '{skipTest}') continue 2;
 						
 						$routeParams['route'] = $route;
-						$routeParams['controller'] = $controller;
+						$routeParams['controller'] = $file;
 						$routes[] = $routeParams;
 						
 						$variant++;
@@ -292,7 +293,7 @@ class PageAccessCest
 	{
 		$I->stopFollowingRedirects();
 		$route=$example['route'];
-		$controller=$example['controller'];
+		$controller=$this->getController($example['controller']);
 		$modelClass=$controller->modelClass;
 		if (!isset($this->savedModels[$modelClass])) $this->savedModels[$modelClass]=[];
 		
