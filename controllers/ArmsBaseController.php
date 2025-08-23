@@ -294,7 +294,7 @@ class ArmsBaseController extends Controller
     	if (class_exists($searchModelClass)) {
 			$searchModel = new $searchModelClass();
 			
-			if ($searchModel->hasAttribute('archived') || $searchModel->canGetProperty('archived')) {
+			if ($searchModel->hasAttribute('archived') || $searchModel->canSetProperty('archived')) {
 				$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount,$columns);
 			} else {
 				$dataProvider = $searchModel->search(Yii::$app->request->queryParams,$columns);
@@ -349,7 +349,7 @@ class ArmsBaseController extends Controller
 			/** @var ArmsModel $searchModel */
 			$searchModel = new $searchModelClass();
 			
-			if ($searchModel->hasAttribute('archived') || $searchModel->canGetProperty('archived')) {
+			if ($searchModel->hasAttribute('archived') || $searchModel->canSetProperty('archived')) {
 				$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount,$columns);
 			} else {
 				$dataProvider = $searchModel->search(
