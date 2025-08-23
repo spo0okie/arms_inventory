@@ -11,7 +11,7 @@ $renderer=$this;
 return [
 	'name'=> [
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('item', ['model' => $data]);
+			return $renderer->render('/networks/item', ['model' => $data]);
 		}
 	],
 	'segment'=> [
@@ -36,7 +36,7 @@ return [
 	],
 	'usage'=>[
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('used', ['model' => $data]);
+			return $renderer->render('/networks/used', ['model' => $data]);
 		},
 		'contentOptions' => ['class' => 'usage_col']
 			
