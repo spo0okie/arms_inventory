@@ -12,12 +12,18 @@ use app\helpers\StringHelper;
 /* @var $source */
 
 $modelClass=get_class($model);
+$columnsFile=$_SERVER['DOCUMENT_ROOT'].'/views/'.StringHelper::className($modelClass).'/columns.php';
+
+if (!file_exists($columnsFile)) {
+	throw new \yii\web\HttpException(404,'Grid columns file missing: "'.$columnsFile.'"');
+}
+
 echo DynaGridWidget::widget([
 	'id' => $gridId,
 	'pageUrl'=>$source,
 	'model' => $model,
 	'panel' => false,
-	'columns' => include $_SERVER['DOCUMENT_ROOT'].'/views/'.StringHelper::className($modelClass).'/columns.php',
+	'columns' => include $columnsFile,
 	'defaultOrder' => $modelClass::$defaultColumns??[],
 	'filterModel' => $searchModel,
 	'dataProvider' => $dataProvider,
