@@ -1,5 +1,6 @@
 <?php
 
+use app\components\ExpandableCardWidget;
 use app\components\IsArchivedObjectWidget;
 use app\components\IsHistoryObjectWidget;
 use app\components\HistoryWidget;
@@ -48,6 +49,7 @@ if(!$static_view) { ?>
 		'hideUndeletable'=>false
 	]) ?>
 </h1>
+
 <div class="row">
 	<div class="col-md-6">
 		<h4>
@@ -225,15 +227,12 @@ if(!$static_view) { ?>
 			<?= $this->render('/partners/support',['model'=>$model->partner]) ?>
 		<?php } ?>
 		
-		<?php if (count($contracts)) { ?>
-			<h4>Карта связей документов</h4>
-			<p>
-				<?php foreach($contracts as $contract)
-					echo $this->render('/contracts/tree-map',['model'=>$contract,'show_payment'=>true])
-				?>
-			</p>
-			<br/>
-		<?php } ?>
+		<?php if (count($contracts)) {
+			$treeContent='<h4>Карта связей документов</h4>';
+			foreach($contracts as $contract)
+				$treeContent.= $this->render('/contracts/tree-map',['model'=>$contract,'show_payment'=>true]);
+			echo ExpandableCardWidget::widget(['content'=>$treeContent,'maxHeight'=>300]);
+		} ?>
 
 		<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
 
