@@ -29,13 +29,12 @@ use yii\helpers\Html;
 	<div>
 		<h4><?= $model->getAttributeLabel('support_tel')?> </h4>
 		<?= \Yii::$app->formatter->asNtext($model->support_tel) ?>
-		<br />
 	</div>
 <?php } ?>
 </div>
 
 <?php if ($model->comment) { ?>
 	<h4><?= $model->getAttributeLabel('comment')?> </h4>
-	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
+	<div class="mb-3"><?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?></div>
 <?php } ?>
 

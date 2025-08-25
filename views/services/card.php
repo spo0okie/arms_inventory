@@ -231,7 +231,7 @@ if(!$static_view) { ?>
 			$treeContent='<h4>Карта связей документов</h4>';
 			foreach($contracts as $contract)
 				$treeContent.= $this->render('/contracts/tree-map',['model'=>$contract,'show_payment'=>true]);
-			echo ExpandableCardWidget::widget(['content'=>$treeContent,'maxHeight'=>300]);
+			echo ExpandableCardWidget::widget(['content'=>$treeContent,'maxHeight'=>300,'cardClass'=>'mb-3']);
 		} ?>
 
 		<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
