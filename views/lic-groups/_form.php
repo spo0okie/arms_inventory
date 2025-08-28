@@ -2,6 +2,7 @@
 
 use app\components\Forms\ArmsForm;
 use app\models\Soft;
+use app\models\Techs;
 use yii\bootstrap5\Html;
 
 
@@ -17,8 +18,15 @@ if (!isset($modalParent)) $modalParent=null;
 		'model'=>$model,
 	]); ?>
 	
-	<?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
 
+	<div class="row">
+		<div class="col-md-8">
+			<?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
+		</div>
+		<div class="col-md-4">
+			<?= $form->field($model, 'services_id')->select2() ?>
+		</div>
+	</div>
 	<div class="row">
 		<div class="col-md-8">
 			<?= $form->field($model, 'soft_ids')->select2() ?>
@@ -29,7 +37,7 @@ if (!isset($modalParent)) $modalParent=null;
 	</div>
 	
 	<?= $form->field($model, 'arms_ids')->select2([
-		'data'=>\app\models\Techs::fetchArmNames(),	//только АРМы
+		'data'=> Techs::fetchArmNames(),	//только АРМы
 		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
 	
@@ -40,6 +48,7 @@ if (!isset($modalParent)) $modalParent=null;
 	<?= $form->field($model, 'comps_ids')->select2([
 		'pluginEvents' =>['change'=>'function(){$("#linkComment").show("highlight",1600)}'],
 	]) ?>
+	
 
 	<?= $form->field($model, 'linkComment',['options'=>['style'=>'display:none','id'=>'linkComment']]) ?>
 

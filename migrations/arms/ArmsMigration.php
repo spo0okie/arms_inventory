@@ -69,7 +69,7 @@ class ArmsMigration extends Migration
 	 * @param $tableName string maintenance_reqs_in_techs
 	 * @param $links array ['techs_id'=>'techs','reqs_id'=>'maintenance_reqs']
 	 */
-	function createMany2ManyTable(string $tableName, array $links)
+	function createMany2ManyTable(string $tableName, array $links,$additionalFields=[])
 	{
 		//если у нас числовые ключи
 		if (isset($links[0])) {
@@ -80,11 +80,11 @@ class ArmsMigration extends Migration
 			$tables=array_values($links);
 		}
 		$this->dropTableIfExists($tableName);
-		$this->createTable($tableName,[
+		$this->createTable($tableName,array_merge([
 			'id'=>$this->primaryKey(),
 			$keys[0]=>$this->integer(),
 			$keys[1]=>$this->integer(),
-		],'engine=InnoDB');
+		],$additionalFields),'engine=InnoDB');
 		$this->createIndex($tableName.'-'.$keys[0],$tableName,$keys[0]);
 		$this->createIndex($tableName.'-'.$keys[1],$tableName,$keys[1]);
 		$this->createIndex($tableName.'-m2m',$tableName,$keys,true);

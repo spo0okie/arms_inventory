@@ -30,10 +30,10 @@ echo
 	'show_empty'=>true,
 	'glue'=>'<br>',
 	'message_on_empty'=>'<div class="alert-striped text-center w-100 p-2">
-					<span class="fas fa-exclamation-triangle"></span>
-						ОТСУТСТВУЮТ
-					<span class="fas fa-exclamation-triangle"></span>
-				</div>'
+		<span class="fas fa-exclamation-triangle"></span>
+			ОТСУТСТВУЮТ
+		<span class="fas fa-exclamation-triangle"></span>
+	</div>'
 ])
 //.ModelFieldWidget::widget(['model'=>$model,'field'=>'includedBy'])
 .$this->render('/attaches/model-list',compact(['model','static_view']))

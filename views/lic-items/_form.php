@@ -39,19 +39,22 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
         <div class="col-md-3" >
             <?= $form->field($model, 'lic_group_id')->select2() ?>
         </div>
-        <div class="col-md-9" >
+        <div class="col-md-8" >
 			<?= $form->field($model, 'descr') ?>
         </div>
+		<div class="col-md-1" >
+			<?= $form->field($model, 'count')?>
+		</div>
     </div>
 
 	<div class="row">
-		<div class="col-md-11" >
+		<div class="col-md-9" >
 			<?= $form->field($model, 'contracts_ids')->select2([
 				'options' => ['onchange' => 'fetchArmsFromDocs();'],
 			]) ?>
 		</div>
-		<div class="col-md-1" >
-			<?= $form->field($model, 'count')?>
+		<div class="col-md-3" >
+			<?= $form->field($model, 'services_id')->select2() ?>
 		</div>
 	</div>
 	

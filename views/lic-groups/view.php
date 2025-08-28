@@ -41,7 +41,8 @@ $this->params['headerContent']=
 					'undeletableMessage'=>'Нельзя удалить этот тип лицензий, т.к. есть привязанные к нему объекты',
 				])
 			.'</h3>'
-			.TextFieldWidget::widget(['model'=>$model,'field'=>'comment'])
+			.TextFieldWidget::widget(['model'=>$model,'field'=>'comment','outerClass'=>'mb-3'])
+			.ModelFieldWidget::widget(['model'=>$model,'field'=>'service'])
 		.'</div>'
 		.'<div class="me-5 flex-lg-grow-0">'
 			.ModelFieldWidget::widget([
@@ -55,10 +56,11 @@ $this->params['headerContent']=
 					<span class="fas fa-exclamation-triangle"></span>
 				</div>'
 			])
-			//.ModelFieldWidget::widget(['model'=>$model,'field'=>'includedBy'])
+			.$this->render('/attaches/model-list',compact(['model','static_view']))
 		.'</div>'
 		.'<div class="me-5 flex-lg-shrink-1">'
-			.$this->render('/attaches/model-list',compact(['model','static_view']))
+			.ModelFieldWidget::widget(['model'=>$model,'field'=>'responsible', 'item_options'=>['short'=>true]])
+			.ModelFieldWidget::widget(['model'=>$model,'field'=>'support', 'item_options'=>['short'=>true]])
 		.'</div>'
 		.'<div class="flex-fill flex-lg-shrink-0">'
 			.'<div class="float-end text-end">'

@@ -152,6 +152,8 @@ class Services extends ArmsModel
 		'children_ids' =>				[Services::class,'parent_id','loader'=>'children'],
 		'org_inets_ids'=>				[OrgInet::class,'services_id'],
 		'org_phones_ids'=>				[OrgPhones::class,'services_id'],
+		'lic_groups'=>					[LicGroups::class,'services_id'],
+		'lic_items'=>					[LicItems::class,'services_id'],
 		
 		'responsible_id' =>				[Users::class,'services_ids'],
 		'infrastructure_user_id' =>		[Users::class,'infrastructure_services_ids','loader'=>'infrastructureResponsible'],
@@ -636,6 +638,21 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(Techs::class, ['id' => 'tech_id'])
 			->viaTable('{{%techs_in_services}}', ['service_id' => 'id']);
+	}
+	/**
+	 * Возвращает закрепленные на компе лицензии
+	 */
+	public function getLicGroups()
+	{
+		return $this->hasMany(LicGroups::class, ['services_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает закрепленные на компе лицензии
+	 */
+	public function getLicItems()
+	{
+		return $this->hasMany(LicItems::class, ['services_id' => 'id']);
 	}
 	
 	/**

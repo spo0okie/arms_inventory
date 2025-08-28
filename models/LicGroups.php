@@ -6,6 +6,7 @@ use app\helpers\ArrayHelper;
 use app\models\links\LicLinks;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
 
 /**
@@ -28,7 +29,8 @@ use yii\db\ActiveQuery;
  * @property int        $usedCount общее количество используемых лицензий (активных занятых)
  * @property int        $freeCount общее количество доступных лицензий (активных не занятых)
  *
- * @property Soft       $soft
+ * @property Soft $soft
+ * @property Services $service
  * @property LicItems[] $licItems
  * @property LicTypes   $licType
  * @property Techs[] 	 $arms
@@ -37,6 +39,8 @@ use yii\db\ActiveQuery;
  */
 class LicGroups extends ArmsModel
 {
+	use traits\LicGroupsModelCalcFieldsTrait;
+	
 	public static $titles='Типы лицензий';
 	public static $title='Тип лицензий';
 	public $linkComment=null; //комментарий, добавляемый при привязке лицензий
@@ -67,7 +71,7 @@ class LicGroups extends ArmsModel
         return [
             [['lic_types_id', 'descr'], 'required'],
 	        [['soft_ids','arms_ids','comps_ids','users_ids'], 'each', 'rule'=>['integer']],
-            [['lic_types_id'], 'integer'],
+            [['lic_types_id','services_id'], 'integer'],
             [['created_at','comment','linkComment'], 'safe'],
             [['descr',], 'string', 'max' => 255],
 	        [['lic_types_id'], 'exist', 'skipOnError' => true, 'targetClass' => LicTypes::class, 'targetAttribute' => ['lic_types_id' => 'id']],
@@ -80,47 +84,56 @@ class LicGroups extends ArmsModel
     public function attributeData()
     {
         return [
-	        'soft_ids' => [
-	        	'Лицензируемое ПО',
-				'hint' => 'Какие программные продукты затрагиваются лицензией. Не менее одного продукта. Если лицензия дает право на несколько продуктов (правило даунгрейда или иные) нужно перечислить их все.',
-				'placeholder' => 'Набирайте название для поиска',
-			],
-			'soft'=>['alias'=>'soft_ids'],
-			'lic_types_id' => [
-				'Схема лицензирования',
-				'hint' => 'Какая схема лицензирования используется во всех закупках лицензий этого типа',
-				'placeholder' => 'Выберите схему',
-			],
 			'arms_ids' => [
 				'АРМы, куда распределять лицензии',
 				'hint' => 'Свободные (не назначенные через закупки или ключи) лицензии этого типа будут распределяться на АРМ из списка',
 				'placeholder' => 'Не закреплено за АРМ\'ами',
-			],
-			'comps_ids' => [
-				'ОС/ВМ, куда распределять лицензии',
-				'hint' => 'Свободные (не назначенные через закупки или ключи) лицензии этого типа будут распределяться на ОС из списка',
-				'placeholder' => 'Не  закреплено за ОС/ВМ',
-			],
-			'users_ids' => [
-				'Пользователи, на которых распределять лицензии',
-				'hint' => 'Свободные (не назначенные через закупки или ключи) лицензии этого типа будут распределяться на Пользователей из списка',
-				'placeholder' => 'Не  закреплено за пользователями',
-			],
-            'descr' => [
-            	'Описание',
-				'hint' => 'Описание группы лицензий. Не слишком длинное, должно в полной мере отражать что это за группа лицензий. Например все коробочные MS Office 2016 H&B / Все VL Microsoft Windows 10 pro',
-			],
-			'linkComment' => [
-				'Пояснение к добавляемым привязкам',
-				'hint' => 'На каком основании эти лицензии закрепляются за добавленными выше объектами. Чтобы спустя время не было вопросов, а кто и зачем эту лицензию туда выделил (уже существующие привязки не меняются, только новые)',
 			],
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Комментарий. Все что нужно знать об этой группе лицензий. Длина не ограничена.',
 				'type' => 'text',
 			],
+			'comps_ids' => [
+				'ОС/ВМ, куда распределять лицензии',
+				'hint' => 'Свободные (не назначенные через закупки или ключи) лицензии этого типа будут распределяться на ОС из списка',
+				'placeholder' => 'Не  закреплено за ОС/ВМ',
+			],
             'created_at' => [
             	'Время создания',
+			],
+			'descr' => [
+				'Описание',
+				'hint' => 'Описание группы лицензий. Не слишком длинное, должно в полной мере отражать что это за группа лицензий. Например все коробочные MS Office 2016 H&B / Все VL Microsoft Windows 10 pro',
+			],
+			'lic_types_id' => [
+				'Схема лицензирования',
+				'hint' => 'Какая схема лицензирования используется во всех закупках лицензий этого типа',
+				'placeholder' => 'Выберите схему',
+			],
+			'linkComment' => [
+				'Пояснение к добавляемым привязкам',
+				'hint' => 'На каком основании эти лицензии закрепляются за добавленными выше объектами. Чтобы спустя время не было вопросов, а кто и зачем эту лицензию туда выделил (уже существующие привязки не меняются, только новые)',
+			],
+			'responsible' => ['Ответственный','Кто отвечает за эту лицензию'],
+			'services_id' => [
+				'Относится к сервису',
+				'hint'=>'В рамках какого сервиса/услуги производится/сопровождается лицензирование.<br>'
+					.'Нужно для определения ответственного: кто должен следить за актуальностью лицензии<br>'
+					.'Если подходящего сервиса/услуги нет, то желательно завести',
+				'placeholder' => 'Не относится ни к какому сервису',
+			],
+			'soft_ids' => [
+				'Лицензируемое ПО',
+				'hint' => 'Какие программные продукты затрагиваются лицензией. Не менее одного продукта. Если лицензия дает право на несколько продуктов (правило даунгрейда или иные) нужно перечислить их все.',
+				'placeholder' => 'Набирайте название для поиска',
+			],
+			'soft'=>['alias'=>'soft_ids'],
+			'support' => ['Поддержка','Команда замещающая ответственного на время его отсутствия'],
+			'users_ids' => [
+				'Пользователи, на которых распределять лицензии',
+				'hint' => 'Свободные (не назначенные через закупки или ключи) лицензии этого типа будут распределяться на Пользователей из списка',
+				'placeholder' => 'Не  закреплено за пользователями',
 			],
         ];
     }
@@ -147,6 +160,7 @@ class LicGroups extends ArmsModel
 				'class' => ManyToManySmartUpdater::class,
 				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
 			]],
+			'services_id' => [Services::class,'lic_groups_ids'],
 			'lic_types_id' => [LicTypes::class, 'lic_groups_ids'],
 		];
 	}
@@ -185,6 +199,15 @@ class LicGroups extends ArmsModel
 	{
 		return $this->hasMany(Users::class, ['id' => 'users_id'])
 			->viaTable('{{%lic_groups_in_users}}', ['lic_groups_id' => 'id']);
+	}
+	
+	/**
+	 * Возвращает сервис, к которому относится лицензия
+	 * @return ActiveQuery
+	 */
+	public function getService()
+	{
+		return $this->hasOne(Services::className(), ['id' => 'services_id']);
 	}
 	
 	/**
