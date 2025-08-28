@@ -5,6 +5,7 @@ namespace app\components\Forms;
 use app\components\formInputs\DokuWikiEditor;
 use app\components\formInputs\TextAutoResizeWidget;
 use app\components\Forms\assets\Select2FieldAsset;
+use app\controllers\ArmsBaseController;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
@@ -213,15 +214,24 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			
 			//но если у нас есть модель
 			if ($linkClass) {
-				$classId=StringHelper::class2id($linkClass);
-				//и если у этой модели есть ttip
-				if (
-					file_exists($_SERVER['DOCUMENT_ROOT'].'/views/'.$classId.'/card.php')
-					||
-					file_exists($_SERVER['DOCUMENT_ROOT'].'/views/'.$classId.'/ttip.php')
-				) {
-					//то строим ссылку
-					$itemsHintsUrl = Url::to([ $classId. '/ttip', 'q' => 'dummy']);
+				/** @var ArmsBaseController $controller */
+				if (class_exists($controllerClass= StringHelper::class2Controller($linkClass))) {
+					$controller=new $controllerClass(\Yii::$app->id, \Yii::$app);
+					$classId=StringHelper::class2id($linkClass);
+					if (
+						//если метод ttip не заблокирован
+						!in_array('ttip', $controller->disabledActions())
+						&&
+						(//и если у этой модели есть ttip
+							
+							file_exists($_SERVER['DOCUMENT_ROOT'].'/views/'.$classId.'/card.php')
+							||
+							file_exists($_SERVER['DOCUMENT_ROOT'].'/views/'.$classId.'/ttip.php')
+						)
+					) {
+						//то строим ссылку
+						$itemsHintsUrl = Url::to([ $classId. '/ttip', 'q' => 'dummy']);
+					}
 				}
 			}
 		}
