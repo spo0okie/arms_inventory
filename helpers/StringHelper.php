@@ -8,6 +8,16 @@ use yii\helpers\Inflector;
 class StringHelper extends BaseStringHelper {
 	
 	/**
+	 * Формирует имя класса контроллера на основе имени класса модели.
+	 * @param string $class Полное имя класса модели.
+	 * @return string Имя класса контроллера.
+	 */
+	public static function class2Controller(string $class):string
+	{
+		return 'app\\controllers\\' . static::className($class) . 'Controller';
+	}
+	
+	/**
 	 * Возвращает короткое имя класса без namespace
 	 * @param $classPath
 	 * @return mixed|string
