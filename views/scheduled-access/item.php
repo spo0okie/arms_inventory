@@ -24,6 +24,7 @@ if (!empty($model)) {
 		'archivedProperty'=>'Uvolen',
 		'name'=>$name,
 		'static'=>$static_view,
+		'url'=> Url::to(['scheduled-access/view','id'=>$model->id]),
 		'ttipUrl'=> Url::to(['scheduled-access/ttip','id'=>$model->id]),
 	]);
 } else {
