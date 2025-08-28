@@ -15,6 +15,7 @@ use app\helpers\WikiHelper;
 use kartik\markdown\Markdown;
 use Yii;
 use yii\base\Widget;
+use yii\helpers\Html;
 
 class TextFieldWidget extends Widget
 {
@@ -34,7 +35,13 @@ class TextFieldWidget extends Widget
 					'outerClass'=>$this->outerClass
 				]);
 			default:
-				return Yii::$app->formatter->asNtext($this->model->{$this->field});
+				return $this->outerClass?
+					Html::tag(
+						'div',
+						Yii::$app->formatter->asNtext($this->model->{$this->field}),
+						['class'=>$this->outerClass]
+					):
+					Yii::$app->formatter->asNtext($this->model->{$this->field});
 		}
 	}
 }
