@@ -41,11 +41,17 @@ class NetVlans extends ArmsModel
     public function rules()
     {
         return [
-            [['vlan', 'domain_id', 'segment_id'], 'integer'],
-			[['vlan', 'domain_id'], 'unique', 'targetAttribute' => ['vlan', 'domain_id'],'message'=>'Такая комбинация домена и Vlan уже есть'],
+            [['domain_id'], 'integer'],
+			[
+				['vlan', 'domain_id'], 'unique',
+				'targetAttribute' => ['vlan', 'domain_id'],
+				'message'=>'Такая комбинация домена и Vlan уже есть',
+				'when' => fn($model)=> !str_contains($model->vlan, '-') // Проверяем, что VLAN не является диапазоном
+			],
 			[['name'], 'string', 'max' => 255],
 			[['comment'], 'safe'],
-        ];
+			[['vlan'], 'validateVlanRange'], // Добавляем валидацию диапазона
+		];
     }
 	
 	public $linksSchema=[
@@ -64,15 +70,19 @@ class NetVlans extends ArmsModel
 			],
 			'name' => [
 				'Название',
-				'hint' => 'Понятное обозначение' . Networks::$latinNameHint,
+				'hint' => 'Понятное обозначение<br>'
+					.'Можно использовать макрос {VLAN} для подстановки номера Vlan<br>'
+					.'(удобно при создании нескольких VLAN указанием диапазона в поле Vlan ID)<br>'
+					.Networks::$latinNameHint,
 			],
 			'networks_ids' => [
 				'Сети',
 			],
             'vlan' => [
             	'Vlan ID',
-				'hint' => 'Номер Vlan от 1 до 4094'
-				. '<br><i>(0, 1002-1005 и 4095 зарезервированы)</i>',
+				'hint' => 'Номер Vlan от 1 до 4094<br>'
+					.'При указании диапазона (например 10-20) будут созданы все Vlan в этом диапазоне<br>'
+					. '<i>(0, 1002-1005 и 4095 зарезервированы)</i>',
 			],
 			'domain_id' => [
 				'Домен L2',
@@ -87,7 +97,33 @@ class NetVlans extends ArmsModel
 			],
         ];
     }
-
+	
+	
+	/**
+	 * Валидация диапазона VLAN.
+	 * @param string $attribute
+	 * @param array $params
+	 */
+	public function validateVlanRange($attribute, $params)
+	{
+		if (strpos($this->$attribute, '-') !== false) {
+			if (!$this->isNewRecord) {
+				$this->addError($attribute, 'Диапазон VLAN можно задавать только при создании.');
+				return;
+			}
+			
+			[$start, $end] = explode('-', $this->$attribute);
+			$start = (int)$start;
+			$end = (int)$end;
+			
+			if ($start < 1 || $end > 4096 || $start > $end) {
+				$this->addError($attribute, 'Диапазон VLAN должен быть в пределах 1-4096 и корректным.');
+			}
+		} elseif ($this->$attribute < 1 || $this->$attribute > 4096) {
+			$this->addError($attribute, 'VLAN должен быть в пределах 1-4096.');
+		}
+	}
+	
 	/**
 	 * @return ActiveQuery
 	 */
@@ -135,5 +171,37 @@ class NetVlans extends ArmsModel
 			->orderBy('name')
 			->all();
 		return ArrayHelper::map($list, 'id', 'sname');
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function beforeSave($insert)
+	{
+		if (parent::beforeSave($insert)) {
+			if (str_contains($this->vlan, '-')) {
+				[$start, $end] = explode('-', $this->vlan);
+				$start = (int)$start;
+				$end = (int)$end;
+				
+				for ($vlan = $start; $vlan <= $end-1; $vlan++) {
+					$model = new self();
+					$model->attributes = $this->attributes;
+					$model->vlan = $vlan;
+					$model->save(); // Сохраняем
+				}
+				
+				//оставляем себе последний VLAN вместо диапазона
+				$this->vlan = $vlan;
+				
+			}
+			
+			$this->name=str_replace('{VLAN}',$this->vlan,$this->name);
+			
+			
+			return true;
+		}
+		
+		return false;
 	}
 }
