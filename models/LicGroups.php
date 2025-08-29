@@ -57,8 +57,9 @@ class LicGroups extends ArmsModel
     public static $syncableDirectLinks=['lic_types_id'=>'LicTypes'];
     public static $syncableMany2ManyLinks=['soft_ids'=>'Soft,licGroups_ids'];
     public static $syncKey='descr';
-    
-    public function extraFields()
+	public static $nameAttr='descr';
+	
+	public function extraFields()
 	{
 		return ['soft_ids'];
 	}

@@ -55,6 +55,9 @@ class LicItems extends ArmsModel
 	
 	public $linkComment=null; //комментарий, добавляемый при привязке лицензий
 
+	public static $nameAttr='descr';
+	
+	
     /**
      * {@inheritdoc}
      */
@@ -179,7 +182,7 @@ class LicItems extends ArmsModel
 				'hint'=>'В рамках какого сервиса/услуги производится/сопровождается лицензирование.<br>'
 					.'Нужно для определения ответственного: кто должен следить за актуальностью лицензии<br>'
 					.'Если подходящего сервиса/услуги нет, то желательно завести',
-				'placeholder' => $this?->licGroup?->service->name.' (из типа лиц.)'??'Не относится ни к какому сервису',
+				'placeholder' => is_null($name=$this?->licGroup?->service?->name)?'Не относится ни к какому сервису':($name.' (из типа лиц.)'),
 			],
 			'status' => [
 				'Состояние',

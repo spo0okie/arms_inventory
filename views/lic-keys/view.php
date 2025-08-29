@@ -27,14 +27,14 @@ $this->params['headerContent']=
 	'<div class="flex-row d-flex flex-nowrap align-content-stretch">'
 		.'<div class="me-5 flex-lg-shrink-1">'
 			.'<h3>'
-				.LinkObjectWidget::widget([
+				/*.LinkObjectWidget::widget([
 					'model'=>$model->licItem->licGroup,
 					'static' => true,
 				]).' / '
 				.LinkObjectWidget::widget([
 					'model'=>$model->licItem,
 					'static' => true,
-				]).' / '
+				]).' / '*/
 				.LinkObjectWidget::widget([
 					'model'=>$model,
 					'hideUndeletable' => false,

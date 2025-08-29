@@ -1,6 +1,7 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\TextFieldWidget;
@@ -77,7 +78,7 @@ $this->params['headerContent']=
 	.'</div>'
 	.'<div class="flex-fill flex-lg-shrink-0">'
 		.'<div class="float-end text-end">'
-		//.'<small class="opacity-75 ">'.HistoryWidget::widget(['model'=>$model]).'</small>'
+		.'<small class="opacity-75 ">'.HistoryWidget::widget(['model'=>$model]).'</small>'
 		.$this->render('stat',['model'=>$model])
 		.'</div>'
 	.'</div>'

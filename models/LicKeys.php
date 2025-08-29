@@ -4,6 +4,7 @@ namespace app\models;
 
 
 use app\models\links\LicLinks;
+use app\models\traits\LicKeysModelCalcFieldsTrait;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
@@ -29,6 +30,7 @@ use yii\db\ActiveQuery;
  */
 class LicKeys extends ArmsModel
 {
+	use LicKeysModelCalcFieldsTrait;
 	
 	public static $title='Лиц. ключи';
 	public static $titles='Лиц. ключи';
@@ -173,41 +175,7 @@ class LicKeys extends ArmsModel
 	}
 
 
-	/**
-	 *
-	 */
-	public function getKeyShort(){
-		if (strlen($this->key_text)<=10) return $this->key_text;
-		return substr($this->key_text,0,5).' ... '.substr($this->key_text,-5,5);
-	}
-	
-	/**
-	 * Search name
-	 * @return string
-	 */
-	public function getSname()
-	{
-		return $this->licItem->licGroup->descr.' /'.$this->licItem->fullDescr.' /'.$this->keyShort;
-	}
-	
-	/**
-	 * Display name
-	 * @return string
-	 */
-	public function getDname()
-	{
-		return $this->licItem->licGroup->descr.' /'.$this->licItem->descr.' /'.$this->keyShort;
-	}
-	
-	public function getName()
-	{
-		return $this->keyShort;
-	}
-	
-	public function getSoftIds()
-	{
-		return $this->licItem->softIds;
-	}
+
 	
 	/**
 	 * @inheritdoc
