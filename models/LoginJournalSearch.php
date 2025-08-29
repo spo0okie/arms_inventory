@@ -2,9 +2,11 @@
 
 namespace app\models;
 
+use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\LoginJournal;
+use yii\helpers\StringHelper;
 
 /**
  * LoginJournalSearch represents the model behind the search form of `app\models\LoginJournal`.
@@ -61,17 +63,14 @@ class LoginJournalSearch extends LoginJournal
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'type' => $this->type,
-			'time' => $this->time,
-			'calc_time' => $this->calc_time,
-        ]);
-
-        $query->andFilterWhere(['or like', 'comp_name', \yii\helpers\StringHelper::explode($this->comp_name,'|',true,true)])
-            ->andFilterWhere(['or like', 'user_login', \yii\helpers\StringHelper::explode($this->user_login,'|',true,true)])
-	        ->andFilterWhere(['or like', 'users.Ename', \yii\helpers\StringHelper::explode($this->users_id,'|',true,true)])
-	        ->andFilterWhere(['or like', 'comps.name', \yii\helpers\StringHelper::explode($this->comps_id,'|',true,true)]);
-
+        $query->andFilterWhere(['type' => $this->type,]);
+		$query->andFilterWhere(QueryHelper::querySearchNumberOrDate('time',$this->time));
+		$query->andFilterWhere(QueryHelper::querySearchNumberOrDate('calc_time',$this->calc_time));
+		$query->andFilterWhere(QueryHelper::querySearchString('comp_name',$this->comp_name));
+		$query->andFilterWhere(QueryHelper::querySearchString('user_login',$this->user_login));
+		$query->andFilterWhere(QueryHelper::querySearchString('users.Ename',$this->users_id));
+		$query->andFilterWhere(QueryHelper::querySearchString('comps.name',$this->comps_id));
+		
         return $dataProvider;
     }
 }

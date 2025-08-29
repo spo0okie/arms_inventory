@@ -226,7 +226,8 @@ class Comps extends ArmsModel
 				'Предоставлены полномочия администратора',
 				'hint' => 'Если административные привилегии на этой ОС/ВМ выданы рядовым пользователям,<br>'
 					.'то необходимо перечислить их здесь. (Состав ИТ отдела перечислять не нужно)',
-				'placeholder' => 'Только у ИТ отдела'
+				'placeholder' => 'Только у ИТ отдела',
+				'join'=> ['admins'],
 			],
 			'archived' => [
 				'Архивирован',
@@ -240,7 +241,8 @@ class Comps extends ArmsModel
 				'indexHint' => 'ПК/сервер или облачная платформа на которой работает эта ОС<br/>'
 					.QueryHelper::$stringSearchHint,
 				'absorb' => 'ifEmpty',
-				'placeholder' => 'Выберите АРМ/сервер'
+				'placeholder' => 'Выберите АРМ/сервер',
+				'join' => ['arm','platform']
 			],
 			'comment' => ['Комментарий', 'absorb' => 'ifEmpty','type'=>'text'],
 			'domain_id' => ['Домен', 'absorb' => 'ifEmpty'],
@@ -333,7 +335,13 @@ class Comps extends ArmsModel
 			'softRescans' => [
 				'Ожидается сканирование ПО'
 			],
-			'updated_at' => 'Время обновления',
+			'updated_at' => [
+				'Время обновления',
+				'indexHint' => 'Когда в последний раз эта запись обновлялась<br/>'
+					.'(либо когда в последний раз эта ОС сообщала о себе в инвентаризацию,<br/>'
+					.'либо когда в последний раз вручную правили запись)<br/>'
+					.QueryHelper::$dateSearchHint,
+			],
 			'user' => ['alias' => 'user'],
 			'user_id' => [
 				'Пользователь',
@@ -477,7 +485,7 @@ class Comps extends ArmsModel
 	}
 	
 	/**
-	 * Возвращает закрепленное на компе ПО
+	 * Возвращает закрепленные на компе лицензии
 	 */
 	public function getLicGroups()
 	{
@@ -486,7 +494,7 @@ class Comps extends ArmsModel
 	}
 	
 	/**
-	 * Возвращает закрепленное на компе ПО
+	 * Возвращает закрепленные на компе лицензии
 	 */
 	public function getLicItems()
 	{
@@ -495,7 +503,7 @@ class Comps extends ArmsModel
 	}
 
 	/**
-	 * Возвращает закрепленное на компе ПО
+	 * Возвращает закрепленные на компе лицензии
 	 */
 	public function getLicKeys()
 	{
