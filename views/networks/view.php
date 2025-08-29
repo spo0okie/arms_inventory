@@ -1,6 +1,7 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\components\HistoryWidget;
 use app\components\TabsWidget;
 use app\components\TextFieldWidget;
 use kartik\markdown\Markdown;
@@ -59,6 +60,9 @@ $this->params['headerContent'] =
 			$this->params['headerContent']
 			.= '</div>'
 		.'<div class="pe-0 text-nowrap">'
+				.'<span class="float-end text-end">'
+				.'<small class="opacity-75">'.HistoryWidget::widget(['model'=>$model]).'</small><br>'
+				.'</span>'
 			.$this->render('calc',['model'=>$model])
 		.'</div>'
 	.'</div>';

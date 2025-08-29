@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\helpers\ArrayHelper;
 use app\models\traits\AclsFieldTrait;
+use app\models\traits\NetworksModelCalcFieldsTrait;
 use PhpIP;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
@@ -50,7 +51,7 @@ use yii\db\ActiveQuery;
  */
 class Networks extends ArmsModel
 {
-	use AclsFieldTrait;
+	use AclsFieldTrait,NetworksModelCalcFieldsTrait;
 	private $_IPv4Block=null;
 	private $ips_cache=null;
 	private $first_unused_cache=null;
@@ -473,15 +474,7 @@ class Networks extends ArmsModel
 		return $this->hasOne(Segments::class, ['id' => 'segments_id']);
 	}
 	
-	/**
-	 * CSS код сегмента к которому относится VLAN
-	 * @return string
-	 */
-	public function getSegmentCode()
-	{
-		if (is_object($segment=$this->segment)) return $segment->code;
-		return '';
-	}
+
 	
 	/**
 	 * занято адресов

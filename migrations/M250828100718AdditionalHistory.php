@@ -72,10 +72,6 @@ class M250828100718AdditionalHistory extends ArmsMigration
 			'notepad' => $this->text(),
 			'ranges' => $this->text(),
 			'links' => $this->text(),
-			'addr' => $this->integer(),
-			'mask' => $this->integer(),
-			'router' => $this->integer(),
-			'dhcp' => $this->integer(),
 			'archived' => $this->boolean(),
 			
 			// Поля из linksSchema

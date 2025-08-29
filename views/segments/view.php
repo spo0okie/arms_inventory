@@ -1,5 +1,6 @@
 <?php
 
+use app\components\HistoryWidget;
 use app\components\ShowArchivedWidget;
 use app\components\TabsWidget;
 use app\models\Segments;
@@ -28,12 +29,18 @@ $segmentCompact=$segmentLines<=Yii::$app->params['networkInlineDescriptionLimit'
 
 if ($model->history && $segmentCompact) {
 	$this->params['headerContent'] = '<div class="mx-4 pb-2">'
-		. '<span class="float-end">' . ShowArchivedWidget::widget() . '</span>'
+		. '<span class="float-end text-end">'
+			.'<small class="opacity-75">'.HistoryWidget::widget(['model'=>$model]).'</small><br>'
+			.ShowArchivedWidget::widget()
+		.'</span>'
 		. $this->render('card', ['model' => $model])
 		. '</div>';
 } else {
 	$this->params['headerContent'] = '<div class="mx-4 pb-2">'
-		. '<span class="float-end">' . ShowArchivedWidget::widget() . '</span>'
+		. '<span class="float-end text-end">'
+			.'<small class="opacity-75">'.HistoryWidget::widget(['model'=>$model]).'</small><br>'
+			.ShowArchivedWidget::widget()
+		.'</span>'
 		. $this->render('header-compact', ['model' => $model])
 		. '</div>';
 }
