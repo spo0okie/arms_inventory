@@ -33,6 +33,8 @@ phpunit.phar
 
 tests/_output/*
 tests/_support/_generated
+tests/_data/*.bak
+tests/log/*
 
 web/scans/*
 !web/scans/.htaccess

@@ -796,7 +796,7 @@ CREATE TABLE `contracts_in_lics` (
   PRIMARY KEY (`id`),
   KEY `contracts_id` (`contracts_id`),
   KEY `lics_id` (`lics_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -805,7 +805,7 @@ CREATE TABLE `contracts_in_lics` (
 
 LOCK TABLES `contracts_in_lics` WRITE;
 /*!40000 ALTER TABLE `contracts_in_lics` DISABLE KEYS */;
-INSERT INTO `contracts_in_lics` VALUES (1,4,1),(2,3,2);
+INSERT INTO `contracts_in_lics` VALUES (1,4,1),(4,3,2);
 /*!40000 ALTER TABLE `contracts_in_lics` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1148,8 +1148,10 @@ CREATE TABLE `lic_groups` (
   `comment` text,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `updated_by` varchar(32) DEFAULT NULL,
+  `services_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `lic_types_id` (`lic_types_id`)
+  KEY `lic_types_id` (`lic_types_id`),
+  KEY `idx-lic_groups-services_id` (`services_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb3 COMMENT='Группы лицензий';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1159,8 +1161,47 @@ CREATE TABLE `lic_groups` (
 
 LOCK TABLES `lic_groups` WRITE;
 /*!40000 ALTER TABLE `lic_groups` DISABLE KEYS */;
-INSERT INTO `lic_groups` VALUES (1,1,'Microsoft Windows 10 Pro OEM','Группа OEM лицензий на WIndows 10 Pro приобретенных с ПК ','2023-09-08 15:31:53',NULL),(2,2,'Win Server Datacenter 2012R2','','2023-09-08 15:31:54',NULL),(3,3,'MS SQL 2014 Enterprise','','2023-09-08 15:31:54',NULL),(4,4,'Лицензии на HelpDesk Litemanager для ИТ','','2023-09-08 15:31:54',NULL),(6,1,'Лицензии на КриптоПро CSP','','2023-09-08 15:31:54',NULL),(7,6,'Лицензии на SCAD Office 21 USB','','2023-09-08 15:31:54',NULL),(9,6,'Лицензии на Гранд-смету USB','','2023-09-08 15:31:54',NULL),(22,8,'MS Office 2016 Standard VL','MS Office 2016 Standard VL','2023-09-08 15:31:54',NULL),(23,8,'MS Visio 2016 Standard VL','MS Visio 2016 Standard VL','2023-09-08 15:31:54',NULL),(24,8,'MS Access 2016','MS Access 2016','2023-09-08 15:31:54',NULL),(25,1,'1С Предприятие 8.3','1С Предприятие 8.3\r\nКонфигурации: Бухгалтерия предприятия КОРП 3.0\r\nЗарплата и управление персоналом КОРП 2.5 клиентская лицензия','2023-09-15 15:15:15','admin'),(29,1,'Adobe Photoshop CS6','Adobe Photoshop CS6','2023-09-08 15:31:55',NULL),(31,9,'КОМПАС-График v17','','2025-06-05 11:53:59',NULL),(33,1,'CorelDRAW Graphics 2017','','2023-09-08 15:31:55',NULL),(34,1,'CorelDRAW Graphics 2019','','2023-09-08 15:31:55',NULL),(42,1,'Microsoft Windows 7 Professional OEM','Microsoft Windows 7 Professional приобретенные вместе с ПК','2023-09-08 15:31:55',NULL),(43,1,'MS Office 2010 Std','MS Office 2010 Std','2023-09-08 15:31:55',NULL),(44,1,'MS Office 2013 Std','MS Office 2013 Std','2023-09-08 15:31:55',NULL),(45,1,'MS Project 2016 Std','MS Project 2016 Std','2023-09-08 15:31:55',NULL),(46,1,'MS Visio 2010 Std','MS Visio 2010 Std','2023-09-08 15:31:55',NULL),(47,1,'Microsoft Windows Pro 8.1 x64','Microsoft Windows Pro 8.1 x64','2023-09-08 15:31:55',NULL),(48,8,'Microsoft Windows Pro 8.1 x64 VLSC','Microsoft Windows Pro 8.1 x64 VLSC','2023-09-08 15:31:55',NULL),(54,10,'Kaspersky Endpoint Security для бизнеса','Kaspersky Endpoint Security для бизнеса\r\n','2023-09-08 15:31:55',NULL),(55,10,'Kaspersky Security для почтовых серверов','Kaspersky Security для почтовых серверов','2023-09-08 15:31:55',NULL),(56,10,'Kaspersky Security для банкоматов и точек мгновенной оплаты','Kaspersky Security для банкоматов и точек мгновенной оплаты','2023-09-08 15:31:55',NULL),(60,1,'Microsoft Windows 7 Professional 64-bit Рус.(OEM)','Microsoft Windows 7 Professional 64-bit Рус.(OEM)','2023-09-15 13:08:35',NULL),(62,1,'VMWare vSphere Essentials','Позволяет установить VMWare ESXi на три ноды и vCenter','2023-09-15 15:10:37','admin');
+INSERT INTO `lic_groups` VALUES (1,1,'Microsoft Windows 10 Pro OEM','Группа OEM лицензий на WIndows 10 Pro приобретенных с ПК ','2023-09-08 15:31:53',NULL,NULL),(2,2,'Win Server Datacenter 2012R2','','2023-09-08 15:31:54',NULL,NULL),(3,3,'MS SQL 2014 Enterprise','','2023-09-08 15:31:54',NULL,NULL),(4,4,'Лицензии на HelpDesk Litemanager для ИТ','','2023-09-08 15:31:54',NULL,NULL),(6,1,'Лицензии на КриптоПро CSP','','2023-09-08 15:31:54',NULL,NULL),(7,6,'Лицензии на SCAD Office 21 USB','','2023-09-08 15:31:54',NULL,NULL),(9,6,'Лицензии на Гранд-смету USB','','2023-09-08 15:31:54',NULL,NULL),(22,8,'MS Office 2016 Standard VL','MS Office 2016 Standard VL','2023-09-08 15:31:54',NULL,NULL),(23,8,'MS Visio 2016 Standard VL','MS Visio 2016 Standard VL','2023-09-08 15:31:54',NULL,NULL),(24,8,'MS Access 2016','MS Access 2016','2023-09-08 15:31:54',NULL,NULL),(25,1,'1С Предприятие 8.3','1С Предприятие 8.3\r\nКонфигурации: Бухгалтерия предприятия КОРП 3.0\r\nЗарплата и управление персоналом КОРП 2.5 клиентская лицензия','2025-08-29 07:24:02','admin',18),(29,1,'Adobe Photoshop CS6','Adobe Photoshop CS6','2023-09-08 15:31:55',NULL,NULL),(31,9,'КОМПАС-График v17','','2025-06-05 11:53:59',NULL,NULL),(33,1,'CorelDRAW Graphics 2017','','2023-09-08 15:31:55',NULL,NULL),(34,1,'CorelDRAW Graphics 2019','','2023-09-08 15:31:55',NULL,NULL),(42,1,'Microsoft Windows 7 Professional OEM','Microsoft Windows 7 Professional приобретенные вместе с ПК','2023-09-08 15:31:55',NULL,NULL),(43,1,'MS Office 2010 Std','MS Office 2010 Std','2023-09-08 15:31:55',NULL,NULL),(44,1,'MS Office 2013 Std','MS Office 2013 Std','2023-09-08 15:31:55',NULL,NULL),(45,1,'MS Project 2016 Std','MS Project 2016 Std','2023-09-08 15:31:55',NULL,NULL),(46,1,'MS Visio 2010 Std','MS Visio 2010 Std','2023-09-08 15:31:55',NULL,NULL),(47,1,'Microsoft Windows Pro 8.1 x64','Microsoft Windows Pro 8.1 x64','2023-09-08 15:31:55',NULL,NULL),(48,8,'Microsoft Windows Pro 8.1 x64 VLSC','Microsoft Windows Pro 8.1 x64 VLSC','2023-09-08 15:31:55',NULL,NULL),(54,10,'Kaspersky Endpoint Security для бизнеса','Kaspersky Endpoint Security для бизнеса\r\n','2023-09-08 15:31:55',NULL,NULL),(55,10,'Kaspersky Security для почтовых серверов','Kaspersky Security для почтовых серверов','2023-09-08 15:31:55',NULL,NULL),(56,10,'Kaspersky Security для банкоматов и точек мгновенной оплаты','Kaspersky Security для банкоматов и точек мгновенной оплаты','2023-09-08 15:31:55',NULL,NULL),(60,1,'Microsoft Windows 7 Professional 64-bit Рус.(OEM)','Microsoft Windows 7 Professional 64-bit Рус.(OEM)','2023-09-15 13:08:35',NULL,NULL),(62,1,'VMWare vSphere Essentials','Позволяет установить VMWare ESXi на три ноды и vCenter','2023-09-15 15:10:37','admin',NULL);
 /*!40000 ALTER TABLE `lic_groups` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `lic_groups_history`
+--
+
+DROP TABLE IF EXISTS `lic_groups_history`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lic_groups_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `master_id` int DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `updated_by` varchar(32) DEFAULT NULL,
+  `updated_comment` varchar(255) DEFAULT NULL,
+  `changed_attributes` text,
+  `descr` varchar(255) DEFAULT NULL,
+  `comment` text,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `lic_types_id` int DEFAULT NULL,
+  `services_id` int DEFAULT NULL,
+  `arms_ids` text,
+  `comps_ids` text,
+  `users_ids` text,
+  PRIMARY KEY (`id`),
+  KEY `lic_groups_history-master_id` (`master_id`),
+  KEY `lic_groups_history-updated_at` (`updated_at`),
+  KEY `lic_groups_history-updated_by` (`updated_by`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lic_groups_history`
+--
+
+LOCK TABLES `lic_groups_history` WRITE;
+/*!40000 ALTER TABLE `lic_groups_history` DISABLE KEYS */;
+INSERT INTO `lic_groups_history` VALUES (1,25,'2025-08-29 07:24:02','admin',NULL,'descr,comment,lic_types_id,services_id,comps_ids','1С Предприятие 8.3','1С Предприятие 8.3\r\nКонфигурации: Бухгалтерия предприятия КОРП 3.0\r\nЗарплата и управление персоналом КОРП 2.5 клиентская лицензия',NULL,1,18,NULL,'17',NULL);
+/*!40000 ALTER TABLE `lic_groups_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1270,8 +1311,14 @@ CREATE TABLE `lic_items` (
   `active_to` date DEFAULT NULL COMMENT 'Окончание периода действия',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Время создания',
   `scans_id` int DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `updated_by` varchar(32) DEFAULT NULL,
+  `services_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `lic_group_id` (`lic_group_id`),
+  KEY `idx-lic_items-updated_at` (`updated_at`),
+  KEY `idx-lic_items-updated_by` (`updated_by`),
+  KEY `idx-lic_items-services_id` (`services_id`),
   CONSTRAINT `lic_groups` FOREIGN KEY (`lic_group_id`) REFERENCES `lic_groups` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COMMENT='Лицензии';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1282,8 +1329,52 @@ CREATE TABLE `lic_items` (
 
 LOCK TABLES `lic_items` WRITE;
 /*!40000 ALTER TABLE `lic_items` DISABLE KEYS */;
-INSERT INTO `lic_items` VALUES (1,1,'OEM Windows 10 в комплекте с NUC-ами',22,'',NULL,NULL,'2023-09-13 15:29:17',NULL),(2,62,'VMWare в Москву',3,'На самом деле лицензия одна, но на три узла',NULL,NULL,'2023-09-15 15:11:39',NULL),(4,6,'Для бухгалтерии',2,'',NULL,NULL,'2025-06-06 18:53:48',NULL);
+INSERT INTO `lic_items` VALUES (1,1,'OEM Windows 10 в комплекте с NUC-ами',22,'',NULL,NULL,'2023-09-13 15:29:17',NULL,NULL,NULL,NULL),(2,62,'VMWare в Москву',3,'На самом деле лицензия одна, но на три узла',NULL,NULL,'2023-09-15 15:11:39',NULL,'2025-08-29 07:24:39',NULL,5),(4,6,'Для бухгалтерии',2,'',NULL,NULL,'2025-06-06 18:53:48',NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `lic_items` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `lic_items_history`
+--
+
+DROP TABLE IF EXISTS `lic_items_history`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lic_items_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `master_id` int DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `updated_by` varchar(32) DEFAULT NULL,
+  `updated_comment` varchar(255) DEFAULT NULL,
+  `changed_attributes` text,
+  `descr` varchar(255) DEFAULT NULL,
+  `count` int DEFAULT NULL,
+  `comment` text,
+  `active_from` date DEFAULT NULL,
+  `active_to` date DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `lic_group_id` int DEFAULT NULL,
+  `services_id` int DEFAULT NULL,
+  `contracts_ids` text,
+  `arms_ids` text,
+  `comps_ids` text,
+  `users_ids` text,
+  `licKeys_ids` text,
+  PRIMARY KEY (`id`),
+  KEY `lic_items_history-master_id` (`master_id`),
+  KEY `lic_items_history-updated_at` (`updated_at`),
+  KEY `lic_items_history-updated_by` (`updated_by`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lic_items_history`
+--
+
+LOCK TABLES `lic_items_history` WRITE;
+/*!40000 ALTER TABLE `lic_items_history` DISABLE KEYS */;
+INSERT INTO `lic_items_history` VALUES (1,2,'2025-08-29 07:24:39',NULL,NULL,'descr,count,comment,created_at,lic_group_id,services_id,contracts_ids,arms_ids','VMWare в Москву',3,'На самом деле лицензия одна, но на три узла',NULL,NULL,'2023-09-15 15:11:39',62,5,'3','1,2',NULL,NULL,NULL);
+/*!40000 ALTER TABLE `lic_items_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1388,8 +1479,12 @@ CREATE TABLE `lic_keys` (
   `lic_items_id` int NOT NULL COMMENT 'Закупка',
   `key_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Наименование',
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Комментарий',
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-lic_keys-lic_items` (`lic_items_id`),
+  KEY `idx-lic_keys-updated_at` (`updated_at`),
+  KEY `idx-lic_keys-updated_by` (`updated_by`),
   CONSTRAINT `fk-lic_keys_lic_items` FOREIGN KEY (`lic_items_id`) REFERENCES `lic_items` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1400,8 +1495,45 @@ CREATE TABLE `lic_keys` (
 
 LOCK TABLES `lic_keys` WRITE;
 /*!40000 ALTER TABLE `lic_keys` DISABLE KEYS */;
-INSERT INTO `lic_keys` VALUES (1,1,'1975f377-87a5-49d3-b051-c9ed8b070d23','наклейка на корпусе'),(2,1,'87f2c59b-bea6-462c-b0ab-27d561e8dc31','наклейка на корпусе'),(3,1,'8c925267-b9a7-4b84-bb64-bbd742000fa7','наклейка на корпусе'),(4,1,'0f8351f1-45a9-494c-958f-04b907e5d13d','наклейка на корпусе'),(5,1,'8628efaa-5d7d-4896-b4a1-76cda5afc9c8','наклейка на корпусе'),(6,1,'8af67a4a-5097-41e5-a35a-c0c19682e658','наклейка в серверной, надо наклеить'),(7,1,'9e126ad6-e0c6-4ad7-a8cd-351f6466bd21','наклейка в серверной, надо наклеить'),(8,1,'3d517bba-a08f-41a9-9deb-c5b4fdda5a39','прошит в БИОС'),(9,1,'9fddab17-c867-4887-8abc-b7c0e989985f','прошит в БИОС'),(10,1,'96f24a6d-62c8-4bce-ba04-7b64a59dc148','наклейка потерялась');
+INSERT INTO `lic_keys` VALUES (1,1,'1975f377-87a5-49d3-b051-c9ed8b070d23','наклейка на корпусе',NULL,NULL),(2,1,'87f2c59b-bea6-462c-b0ab-27d561e8dc31','наклейка на корпусе',NULL,NULL),(3,1,'8c925267-b9a7-4b84-bb64-bbd742000fa7','наклейка на корпусе',NULL,NULL),(4,1,'0f8351f1-45a9-494c-958f-04b907e5d13d','наклейка на корпусе',NULL,NULL),(5,1,'8628efaa-5d7d-4896-b4a1-76cda5afc9c8','наклейка на корпусе',NULL,NULL),(6,1,'8af67a4a-5097-41e5-a35a-c0c19682e658','наклейка в серверной, надо наклеить',NULL,NULL),(7,1,'9e126ad6-e0c6-4ad7-a8cd-351f6466bd21','наклейка в серверной, надо наклеить',NULL,NULL),(8,1,'3d517bba-a08f-41a9-9deb-c5b4fdda5a39','прошит в БИОС',NULL,NULL),(9,1,'9fddab17-c867-4887-8abc-b7c0e989985f','прошит в БИОС',NULL,NULL),(10,1,'96f24a6d-62c8-4bce-ba04-7b64a59dc148','наклейка стерлась','2025-08-29 07:25:37',NULL);
 /*!40000 ALTER TABLE `lic_keys` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `lic_keys_history`
+--
+
+DROP TABLE IF EXISTS `lic_keys_history`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lic_keys_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `master_id` int DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `updated_by` varchar(32) DEFAULT NULL,
+  `updated_comment` varchar(255) DEFAULT NULL,
+  `changed_attributes` text,
+  `key_text` text,
+  `comment` text,
+  `lic_items_id` int DEFAULT NULL,
+  `arms_ids` text,
+  `comps_ids` text,
+  `users_ids` text,
+  PRIMARY KEY (`id`),
+  KEY `lic_keys_history-master_id` (`master_id`),
+  KEY `lic_keys_history-updated_at` (`updated_at`),
+  KEY `lic_keys_history-updated_by` (`updated_by`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lic_keys_history`
+--
+
+LOCK TABLES `lic_keys_history` WRITE;
+/*!40000 ALTER TABLE `lic_keys_history` DISABLE KEYS */;
+INSERT INTO `lic_keys_history` VALUES (1,10,'2025-08-29 07:25:37',NULL,NULL,'key_text,comment,lic_items_id,arms_ids','96f24a6d-62c8-4bce-ba04-7b64a59dc148','наклейка стерлась',1,'7',NULL,NULL);
+/*!40000 ALTER TABLE `lic_keys_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2268,7 +2400,7 @@ CREATE TABLE `migration` (
 
 LOCK TABLES `migration` WRITE;
 /*!40000 ALTER TABLE `migration` DISABLE KEYS */;
-INSERT INTO `migration` VALUES ('app\\migrations\\m000000_000000_base',1693800995),('app\\migrations\\m140506_102106_rbac_init',1693800996),('app\\migrations\\m170907_052038_rbac_add_index_on_auth_assignment_user_id',1693800996),('app\\migrations\\m180101_010101_initial',1693801002),('app\\migrations\\m180523_151638_rbac_updates_indexes_without_prefix',1693800996),('app\\migrations\\m190101_100000_update0',1693801003),('app\\migrations\\m190101_100001_update1',1693801003),('app\\migrations\\m190101_100002_update2',1693801004),('app\\migrations\\m190101_100003_update3',1693801004),('app\\migrations\\m190101_100004_update4',1693801004),('app\\migrations\\m190101_100005_update5',1693801004),('app\\migrations\\m190101_100006_update6',1693801005),('app\\migrations\\m190101_100007_update7',1693801005),('app\\migrations\\m190101_100008_update8',1693801006),('app\\migrations\\m190101_100009_update9',1693801006),('app\\migrations\\m191101_192502_departments',1693801006),('app\\migrations\\m191103_084000_alter_updatetAt_column_to_arms_table',1693801006),('app\\migrations\\m191103_084732_add_department_column_to_arms_table',1693801006),('app\\migrations\\m191103_100000_alter_users_columns_to_arms_table',1693801007),('app\\migrations\\m191103_203015_add_procedures_for_places',1693801007),('app\\migrations\\m191106_115822_add_total_column_to_contracts_table',1693801007),('app\\migrations\\m191119_145841_add_cost_column_to_org_inet_table',1693801007),('app\\migrations\\m191119_172027_add_charge_column_to_org_inet_table',1693801007),('app\\migrations\\m191119_172409_add_charge_column_to_contracts_table',1693801007),('app\\migrations\\m191120_062411_float_prices',1693801008),('app\\migrations\\m191120_095815_add_cost_column_to_org_phones_table',1693801008),('app\\migrations\\m191204_062411_decimal_prices',1693801009),('app\\migrations\\m191208_164401_add_default_ip_values_in_comps',1693801009),('app\\migrations\\m191208_173041_fix_many_2_many',1693801009),('app\\migrations\\m191208_173041_fix_users_id',1693801009),('app\\migrations\\m191219_100000_add_users_employ_date',1693801009),('app\\migrations\\m191219_100001_fix_materials_id',1693801009),('app\\migrations\\m191219_100002_fix_contracts_in_materials_id',1693801010),('app\\migrations\\m200121_080000_add_users_auth_key',1693801010),('app\\migrations\\m200317_033238_create_user_in_services',1693801010),('app\\migrations\\m200317_040048_create_table_schedules',1693801010),('app\\migrations\\m200317_043845_alter_services_table',1693801010),('app\\migrations\\m200409_110543_rbac_update_mssql_trigger',1693800996),('app\\migrations\\m200508_064827_create_table_segments',1693801010),('app\\migrations\\m200508_160608_alter_table_services',1693801011),('app\\migrations\\m200525_200810_create_table_techs_in_services',1693801011),('app\\migrations\\m200616_205619_alter_table_techs_format_mac',1693801011),('app\\migrations\\m200712_185556_add_permissions',1693801011),('app\\migrations\\m200727_123910_alter_table_comps_add_user',1693801011),('app\\migrations\\m201023_064548_contracts_sucessor_default',1693801011),('app\\migrations\\m201024_153753_add_tech_specs',1693801011),('app\\migrations\\m201025_174509_add_tech_model_specs',1693801011),('app\\migrations\\m201202_154535_alter_lic_types_add_links',1693801011),('app\\migrations\\m210214_154227_table_net_domains',1693801011),('app\\migrations\\m210216_155422_table_net_vlans',1693801011),('app\\migrations\\m210216_165001_table_networks',1693801011),('app\\migrations\\m210220_133458_alter_table_segments',1693801011),('app\\migrations\\m210220_171805_create_table_netAddr',1693801011),('app\\migrations\\m210222_174038_alter_table_net_ips',1693801011),('app\\migrations\\m210228_121450_table_ports',1693801012),('app\\migrations\\m210301_135145_alter_table_tech_models',1693801012),('app\\migrations\\m210302_161545_alter_table_net_ips',1693801012),('app\\migrations\\m210310_174301_move_vlans_link',1693801012),('app\\migrations\\m210310_184119_alter_comment_column_in_soft_table',1693801012),('app\\migrations\\m210612_143410_alter_techs_table',1693801012),('app\\migrations\\m210614_063518_create_table_schedules',1693801012),('app\\migrations\\m210614_150516_alter_table_schedules',1693801012),('app\\migrations\\m210617_064650_alter_table_segments',1693801013),('app\\migrations\\m210621_131426_alter_table_services',1693801013),('app\\migrations\\m210716_120416_alter_table_comps',1693801013),('app\\migrations\\m210824_132508_alter_table_scans',1693801013),('app\\migrations\\m210825_125020_create_table_access',1693801014),('app\\migrations\\m210825_130339_alter_table_scans',1693801014),('app\\migrations\\m210831_093619_alter_table_users',1693801014),('app\\migrations\\m210911_113706_alter_table_services',1693801014),('app\\migrations\\m210921_035506_create_table_currency',1693801014),('app\\migrations\\m211002_062719_alter_table_services',1693801014),('app\\migrations\\m211003_141509_alter_table_partners',1693801014),('app\\migrations\\m220117_054532_add_services_recursive_segment_search',1693801014),('app\\migrations\\m220303_120730_alter_table_orgphones',1693801014),('app\\migrations\\m220303_191454_alter_table_org_inets',1693801014),('app\\migrations\\m220327_073551_alter_table_comps',1693801014),('app\\migrations\\m220329_055419_alter_table_users',1693801014),('app\\migrations\\m220402_185406_alter_table_schedules',1693801015),('app\\migrations\\m220410_134409_alter_table_services',1693801015),('app\\migrations\\m220414_105653_alter_tables_lics',1693801015),('app\\migrations\\m220416_120817_alter_tables_lics',1693801015),('app\\migrations\\m220421_075705_alter_table_org_inets',1693801015),('app\\migrations\\m220504_172124_alter_tables_lics',1693801016),('app\\migrations\\m220525_125054_alter_tables_partners',1693801016),('app\\migrations\\m220630_173032_alter_tables_prov_tel',1693801016),('app\\migrations\\m220816_104950_add_weight_column_to_services_table',1693801016),('app\\migrations\\m220818_073405_alter_table_users',1693801016),('app\\migrations\\m220819_132459_alter_table_net_domains',1693801016),('app\\migrations\\m220916_122729_add_mac_column_to_arms_table',1693801016),('app\\migrations\\m220929_173411_add_cost_column_to_materials_table',1693801016),('app\\migrations\\m221007_163802_add_archive_columns',1693801016),('app\\migrations\\m221024_153826_add_comment_column_to_places_table',1693801016),('app\\migrations\\m221111_174828_alter_table_access_types',1693801016),('app\\migrations\\m221122_151334_alter_table_ports',1693801016),('app\\migrations\\m230109_130226_alter_table_techs',1693801016),('app\\migrations\\m230206_063303_alter_table_comps',1693801016),('app\\migrations\\m230223_090652_alter_table_techs',1693801017),('app\\migrations\\m230223_102334_alter_table_tech_types',1693801017),('app\\migrations\\m230224_080124_alter_table_tech_models_add_racks',1693801017),('app\\migrations\\m230224_081112_migrate_arms2techs',1693801017),('app\\migrations\\m230302_180857_create_tables_dynagrid',1693801017),('app\\migrations\\m230321_054524_alter_table_comps',1693801017),('app\\migrations\\m230413_101124_alter_table_techs_add_pos_end',1693801017),('app\\migrations\\m230511_094545_alter_table_login_journal',1693801017),('app\\migrations\\m230512_124513_alter_table_login_journal',1693801017),('app\\migrations\\m230513_125905_create_table_attaches',1693801018),('app\\migrations\\m230520_060357_alter_table_attaches',1693801018),('app\\migrations\\m230520_060415_users_in_contracts',1693801018),('app\\migrations\\m230520_101000_alter_table_attaches',1693801018),('app\\migrations\\m230526_181446_alter_table_services',1693801018),('app\\migrations\\m230527_052818_add_external_links',1693801018),('app\\migrations\\m230531_100639_alter_table_users',1693801018),('app\\migrations\\m230620_113027_create_table_ips_in_users',1693801018),('app\\migrations\\m230622_170155_alter_table_comps',1693801018),('app\\migrations\\m230628_041251_create_table_org_inets_in_networks',1693801018),('app\\migrations\\m230708_045732_alter_table_partners',1693801018),('app\\migrations\\m230713_070612_alter_table_techs',1693801018),('app\\migrations\\m230802_162919_alter_table_networks',1693801018),('app\\migrations\\m230821_160259_init_empty_tables',1693801019),('app\\migrations\\m230828_123950_sync_prepare_2',1693801019),('app\\migrations\\m230831_174800_sync_prepare_3',1693801019),('app\\migrations\\m230903_074600_sync_prepare_4',1693801019),('app\\migrations\\m230903_114346_local_auth',1693836271),('app\\migrations\\m230905_045527_sync_prepare_5',1694186973),('app\\migrations\\m230923_092107_user_sync_prepare',1696260413),('app\\migrations\\m231006_070638_user_rest_unify',1698205001),('app\\migrations\\m231020_074646_alter_table_org_struct',1698205001),('app\\migrations\\M231109084405FixAutoincrement',1701232623),('app\\migrations\\M231209133554AlterTableNetworks',1702308017),('app\\migrations\\M231217071124AlterTableSegments',1702809741),('app\\migrations\\M231226142737CreateTableJobs',1705863174),('app\\migrations\\M240123153514UpdateTableDocs',1707115301),('app\\migrations\\M240125162320UpdateTableTechs',1707115301),('app\\migrations\\M240127160603HistoryJournals',1707115302),('app\\migrations\\M240128150114HistoryJournalsContracts',1707115303),('app\\migrations\\M240129130314HistoryJournalsTechs',1707115303),('app\\migrations\\M240201144730MaintenanceUpdate',1707115304),('app\\migrations\\M240203053203HistoryJournalsMaterials',1707115307),('app\\migrations\\M240225074103HistoryJournalsAcls',1709223405),('app\\migrations\\M240229060301HistoryJournalsAclsFix',1709223405),('app\\migrations\\M240308075641PlacesMap',1710320479),('app\\migrations\\M240328034135CompsHistory',1722769178),('app\\migrations\\M240401113410ServiceConnections',1722769178),('app\\migrations\\M240518080913CreateSandboxes',1722769179),('app\\migrations\\M240526102940MaintenanceJobsReqsHistory',1722769179),('app\\migrations\\M240612053628AclExtend',1722769180),('app\\migrations\\M240725041322CleanUnused',1722769180),('app\\migrations\\M240730162325CompsAdmins',1722769180),('app\\migrations\\M240802093936PartnersAliases',1722769181),('app\\migrations\\M241015093726ContractsHistoryAddChildren',1746711711),('app\\migrations\\M241225123824MaintenanceDescr',1746711711),('app\\migrations\\M250205141617CompsRescanQueue',1746711711),('app\\migrations\\M250224152754TechsSupportService',1746711711),('app\\migrations\\M250413161054SoftAddLinks',1746711712),('app\\migrations\\M250414164449ScansAddSoft',1746711712),('app\\migrations\\M250425033845CompsSoftMediumtext',1746711712),('app\\migrations\\M250505122356WikiCache',1746711712),('app\\migrations\\M250514090728ContractsHistorySucessorFix',1747214006),('app\\migrations\\M250526150239MaintenanceJobsHierachy',1748273958),('app\\migrations\\M250805150713LoginJournalIndexes',1755942761),('app\\migrations\\M250806065520LoginJournalCalcTime',1755942761);
+INSERT INTO `migration` VALUES ('app\\migrations\\m000000_000000_base',1693800995),('app\\migrations\\m140506_102106_rbac_init',1693800996),('app\\migrations\\m170907_052038_rbac_add_index_on_auth_assignment_user_id',1693800996),('app\\migrations\\m180101_010101_initial',1693801002),('app\\migrations\\m180523_151638_rbac_updates_indexes_without_prefix',1693800996),('app\\migrations\\m190101_100000_update0',1693801003),('app\\migrations\\m190101_100001_update1',1693801003),('app\\migrations\\m190101_100002_update2',1693801004),('app\\migrations\\m190101_100003_update3',1693801004),('app\\migrations\\m190101_100004_update4',1693801004),('app\\migrations\\m190101_100005_update5',1693801004),('app\\migrations\\m190101_100006_update6',1693801005),('app\\migrations\\m190101_100007_update7',1693801005),('app\\migrations\\m190101_100008_update8',1693801006),('app\\migrations\\m190101_100009_update9',1693801006),('app\\migrations\\m191101_192502_departments',1693801006),('app\\migrations\\m191103_084000_alter_updatetAt_column_to_arms_table',1693801006),('app\\migrations\\m191103_084732_add_department_column_to_arms_table',1693801006),('app\\migrations\\m191103_100000_alter_users_columns_to_arms_table',1693801007),('app\\migrations\\m191103_203015_add_procedures_for_places',1693801007),('app\\migrations\\m191106_115822_add_total_column_to_contracts_table',1693801007),('app\\migrations\\m191119_145841_add_cost_column_to_org_inet_table',1693801007),('app\\migrations\\m191119_172027_add_charge_column_to_org_inet_table',1693801007),('app\\migrations\\m191119_172409_add_charge_column_to_contracts_table',1693801007),('app\\migrations\\m191120_062411_float_prices',1693801008),('app\\migrations\\m191120_095815_add_cost_column_to_org_phones_table',1693801008),('app\\migrations\\m191204_062411_decimal_prices',1693801009),('app\\migrations\\m191208_164401_add_default_ip_values_in_comps',1693801009),('app\\migrations\\m191208_173041_fix_many_2_many',1693801009),('app\\migrations\\m191208_173041_fix_users_id',1693801009),('app\\migrations\\m191219_100000_add_users_employ_date',1693801009),('app\\migrations\\m191219_100001_fix_materials_id',1693801009),('app\\migrations\\m191219_100002_fix_contracts_in_materials_id',1693801010),('app\\migrations\\m200121_080000_add_users_auth_key',1693801010),('app\\migrations\\m200317_033238_create_user_in_services',1693801010),('app\\migrations\\m200317_040048_create_table_schedules',1693801010),('app\\migrations\\m200317_043845_alter_services_table',1693801010),('app\\migrations\\m200409_110543_rbac_update_mssql_trigger',1693800996),('app\\migrations\\m200508_064827_create_table_segments',1693801010),('app\\migrations\\m200508_160608_alter_table_services',1693801011),('app\\migrations\\m200525_200810_create_table_techs_in_services',1693801011),('app\\migrations\\m200616_205619_alter_table_techs_format_mac',1693801011),('app\\migrations\\m200712_185556_add_permissions',1693801011),('app\\migrations\\m200727_123910_alter_table_comps_add_user',1693801011),('app\\migrations\\m201023_064548_contracts_sucessor_default',1693801011),('app\\migrations\\m201024_153753_add_tech_specs',1693801011),('app\\migrations\\m201025_174509_add_tech_model_specs',1693801011),('app\\migrations\\m201202_154535_alter_lic_types_add_links',1693801011),('app\\migrations\\m210214_154227_table_net_domains',1693801011),('app\\migrations\\m210216_155422_table_net_vlans',1693801011),('app\\migrations\\m210216_165001_table_networks',1693801011),('app\\migrations\\m210220_133458_alter_table_segments',1693801011),('app\\migrations\\m210220_171805_create_table_netAddr',1693801011),('app\\migrations\\m210222_174038_alter_table_net_ips',1693801011),('app\\migrations\\m210228_121450_table_ports',1693801012),('app\\migrations\\m210301_135145_alter_table_tech_models',1693801012),('app\\migrations\\m210302_161545_alter_table_net_ips',1693801012),('app\\migrations\\m210310_174301_move_vlans_link',1693801012),('app\\migrations\\m210310_184119_alter_comment_column_in_soft_table',1693801012),('app\\migrations\\m210612_143410_alter_techs_table',1693801012),('app\\migrations\\m210614_063518_create_table_schedules',1693801012),('app\\migrations\\m210614_150516_alter_table_schedules',1693801012),('app\\migrations\\m210617_064650_alter_table_segments',1693801013),('app\\migrations\\m210621_131426_alter_table_services',1693801013),('app\\migrations\\m210716_120416_alter_table_comps',1693801013),('app\\migrations\\m210824_132508_alter_table_scans',1693801013),('app\\migrations\\m210825_125020_create_table_access',1693801014),('app\\migrations\\m210825_130339_alter_table_scans',1693801014),('app\\migrations\\m210831_093619_alter_table_users',1693801014),('app\\migrations\\m210911_113706_alter_table_services',1693801014),('app\\migrations\\m210921_035506_create_table_currency',1693801014),('app\\migrations\\m211002_062719_alter_table_services',1693801014),('app\\migrations\\m211003_141509_alter_table_partners',1693801014),('app\\migrations\\m220117_054532_add_services_recursive_segment_search',1693801014),('app\\migrations\\m220303_120730_alter_table_orgphones',1693801014),('app\\migrations\\m220303_191454_alter_table_org_inets',1693801014),('app\\migrations\\m220327_073551_alter_table_comps',1693801014),('app\\migrations\\m220329_055419_alter_table_users',1693801014),('app\\migrations\\m220402_185406_alter_table_schedules',1693801015),('app\\migrations\\m220410_134409_alter_table_services',1693801015),('app\\migrations\\m220414_105653_alter_tables_lics',1693801015),('app\\migrations\\m220416_120817_alter_tables_lics',1693801015),('app\\migrations\\m220421_075705_alter_table_org_inets',1693801015),('app\\migrations\\m220504_172124_alter_tables_lics',1693801016),('app\\migrations\\m220525_125054_alter_tables_partners',1693801016),('app\\migrations\\m220630_173032_alter_tables_prov_tel',1693801016),('app\\migrations\\m220816_104950_add_weight_column_to_services_table',1693801016),('app\\migrations\\m220818_073405_alter_table_users',1693801016),('app\\migrations\\m220819_132459_alter_table_net_domains',1693801016),('app\\migrations\\m220916_122729_add_mac_column_to_arms_table',1693801016),('app\\migrations\\m220929_173411_add_cost_column_to_materials_table',1693801016),('app\\migrations\\m221007_163802_add_archive_columns',1693801016),('app\\migrations\\m221024_153826_add_comment_column_to_places_table',1693801016),('app\\migrations\\m221111_174828_alter_table_access_types',1693801016),('app\\migrations\\m221122_151334_alter_table_ports',1693801016),('app\\migrations\\m230109_130226_alter_table_techs',1693801016),('app\\migrations\\m230206_063303_alter_table_comps',1693801016),('app\\migrations\\m230223_090652_alter_table_techs',1693801017),('app\\migrations\\m230223_102334_alter_table_tech_types',1693801017),('app\\migrations\\m230224_080124_alter_table_tech_models_add_racks',1693801017),('app\\migrations\\m230224_081112_migrate_arms2techs',1693801017),('app\\migrations\\m230302_180857_create_tables_dynagrid',1693801017),('app\\migrations\\m230321_054524_alter_table_comps',1693801017),('app\\migrations\\m230413_101124_alter_table_techs_add_pos_end',1693801017),('app\\migrations\\m230511_094545_alter_table_login_journal',1693801017),('app\\migrations\\m230512_124513_alter_table_login_journal',1693801017),('app\\migrations\\m230513_125905_create_table_attaches',1693801018),('app\\migrations\\m230520_060357_alter_table_attaches',1693801018),('app\\migrations\\m230520_060415_users_in_contracts',1693801018),('app\\migrations\\m230520_101000_alter_table_attaches',1693801018),('app\\migrations\\m230526_181446_alter_table_services',1693801018),('app\\migrations\\m230527_052818_add_external_links',1693801018),('app\\migrations\\m230531_100639_alter_table_users',1693801018),('app\\migrations\\m230620_113027_create_table_ips_in_users',1693801018),('app\\migrations\\m230622_170155_alter_table_comps',1693801018),('app\\migrations\\m230628_041251_create_table_org_inets_in_networks',1693801018),('app\\migrations\\m230708_045732_alter_table_partners',1693801018),('app\\migrations\\m230713_070612_alter_table_techs',1693801018),('app\\migrations\\m230802_162919_alter_table_networks',1693801018),('app\\migrations\\m230821_160259_init_empty_tables',1693801019),('app\\migrations\\m230828_123950_sync_prepare_2',1693801019),('app\\migrations\\m230831_174800_sync_prepare_3',1693801019),('app\\migrations\\m230903_074600_sync_prepare_4',1693801019),('app\\migrations\\m230903_114346_local_auth',1693836271),('app\\migrations\\m230905_045527_sync_prepare_5',1694186973),('app\\migrations\\m230923_092107_user_sync_prepare',1696260413),('app\\migrations\\m231006_070638_user_rest_unify',1698205001),('app\\migrations\\m231020_074646_alter_table_org_struct',1698205001),('app\\migrations\\M231109084405FixAutoincrement',1701232623),('app\\migrations\\M231209133554AlterTableNetworks',1702308017),('app\\migrations\\M231217071124AlterTableSegments',1702809741),('app\\migrations\\M231226142737CreateTableJobs',1705863174),('app\\migrations\\M240123153514UpdateTableDocs',1707115301),('app\\migrations\\M240125162320UpdateTableTechs',1707115301),('app\\migrations\\M240127160603HistoryJournals',1707115302),('app\\migrations\\M240128150114HistoryJournalsContracts',1707115303),('app\\migrations\\M240129130314HistoryJournalsTechs',1707115303),('app\\migrations\\M240201144730MaintenanceUpdate',1707115304),('app\\migrations\\M240203053203HistoryJournalsMaterials',1707115307),('app\\migrations\\M240225074103HistoryJournalsAcls',1709223405),('app\\migrations\\M240229060301HistoryJournalsAclsFix',1709223405),('app\\migrations\\M240308075641PlacesMap',1710320479),('app\\migrations\\M240328034135CompsHistory',1722769178),('app\\migrations\\M240401113410ServiceConnections',1722769178),('app\\migrations\\M240518080913CreateSandboxes',1722769179),('app\\migrations\\M240526102940MaintenanceJobsReqsHistory',1722769179),('app\\migrations\\M240612053628AclExtend',1722769180),('app\\migrations\\M240725041322CleanUnused',1722769180),('app\\migrations\\M240730162325CompsAdmins',1722769180),('app\\migrations\\M240802093936PartnersAliases',1722769181),('app\\migrations\\M241015093726ContractsHistoryAddChildren',1746711711),('app\\migrations\\M241225123824MaintenanceDescr',1746711711),('app\\migrations\\M250205141617CompsRescanQueue',1746711711),('app\\migrations\\M250224152754TechsSupportService',1746711711),('app\\migrations\\M250413161054SoftAddLinks',1746711712),('app\\migrations\\M250414164449ScansAddSoft',1746711712),('app\\migrations\\M250425033845CompsSoftMediumtext',1746711712),('app\\migrations\\M250505122356WikiCache',1746711712),('app\\migrations\\M250514090728ContractsHistorySucessorFix',1747214006),('app\\migrations\\M250526150239MaintenanceJobsHierachy',1748273958),('app\\migrations\\M250805150713LoginJournalIndexes',1755942761),('app\\migrations\\M250806065520LoginJournalCalcTime',1755942761),('app\\migrations\\M250828100718AdditionalHistory',1756450679);
 /*!40000 ALTER TABLE `migration` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2349,7 +2481,7 @@ CREATE TABLE `net_vlans` (
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `idx-net_vlans-domain_id` (`domain_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2358,7 +2490,7 @@ CREATE TABLE `net_vlans` (
 
 LOCK TABLES `net_vlans` WRITE;
 /*!40000 ALTER TABLE `net_vlans` DISABLE KEYS */;
-INSERT INTO `net_vlans` VALUES (1,'msk_ovpn_vlan',50,1,NULL,''),(2,'msk_open_vlan',100,1,NULL,''),(3,'msk_closed_vlan',101,1,NULL,''),(4,'msk_dmz_vlan',200,1,NULL,''),(5,'chl_ovpn_vlan',50,2,NULL,''),(6,'chl_srv_vlan',75,2,NULL,''),(7,'chl_open_lan',100,2,NULL,''),(8,'msk_srv_vlan',75,1,NULL,''),(9,'chl_it_vlan',30,2,NULL,'для сети ИТ'),(10,'msk_voip_vlan',7,1,NULL,''),(11,'chl_voip_vlan',7,2,NULL,''),(12,'chl_mgmt_clan',1,2,NULL,''),(13,'chl_prn_vlan',40,2,NULL,''),(15,'msk_mgmt_vlan',1,1,NULL,''),(16,'msk_prn_vlan',40,1,NULL,''),(17,'msk_prov1_vlan',201,1,NULL,''),(18,'chl_prov1_vlan',399,2,NULL,'');
+INSERT INTO `net_vlans` VALUES (1,'msk_ovpn_vlan',50,1,NULL,''),(2,'msk_open_vlan',100,1,NULL,''),(3,'msk_closed_vlan',101,1,NULL,''),(4,'msk_dmz_vlan',200,1,NULL,''),(5,'chl_ovpn_vlan',50,2,NULL,''),(6,'chl_srv_vlan',75,2,NULL,''),(7,'chl_open_lan',100,2,NULL,''),(8,'msk_srv_vlan',75,1,NULL,''),(9,'chl_it_vlan',30,2,NULL,'для сети ИТ'),(10,'msk_voip_vlan',7,1,NULL,''),(11,'chl_voip_vlan',7,2,NULL,''),(12,'chl_mgmt_clan',1,2,NULL,''),(13,'chl_prn_vlan',40,2,NULL,''),(15,'msk_mgmt_vlan',1,1,NULL,''),(16,'msk_prn_vlan',40,1,NULL,''),(17,'msk_prov1_vlan',201,1,NULL,''),(18,'chl_prov1_vlan',399,2,NULL,''),(20,'msk_surv_vlan',90,1,NULL,'');
 /*!40000 ALTER TABLE `net_vlans` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2385,6 +2517,8 @@ CREATE TABLE `networks` (
   `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `ranges` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `text_dhcp` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-networks-vlan_id` (`vlan_id`),
   KEY `idx-networks-addr` (`addr`),
@@ -2394,6 +2528,8 @@ CREATE TABLE `networks` (
   KEY `idx-networks-dhcp` (`dhcp`),
   KEY `idx-networks-segments_id` (`segments_id`),
   KEY `idx-networks-archived` (`archived`),
+  KEY `idx-networks-updated_at` (`updated_at`),
+  KEY `idx-networks-updated_by` (`updated_by`),
   CONSTRAINT `fk-networks-segments_id` FOREIGN KEY (`segments_id`) REFERENCES `segments` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2404,8 +2540,51 @@ CREATE TABLE `networks` (
 
 LOCK TABLES `networks` WRITE;
 /*!40000 ALTER TABLE `networks` DISABLE KEYS */;
-INSERT INTO `networks` VALUES (1,'MSK_SRV_LAN',8,'10.20.75.0/24',169102080,24,169102081,169085450,'Сеть общих сервисов Мск',NULL,'',0,'','1-50 static\r\n51-100 dhcp','10.20.75.10\n10.20.75.11'),(2,'CHL_SRV_LAN',6,'10.50.75.0/24',171068160,24,171068161,171068170,'Сеть общих сервисов Чел',NULL,'',0,'','1-50 static\r\n51-100 dhcp','10.50.75.10'),(3,'CHL_IT_LAN',9,'10.50.30.0/24',171056640,24,171056641,171068170,'IT сеть Челябинск',NULL,'',0,'','1-50 static\r\n51-100 dhcp','10.50.75.10'),(4,'CHL_MGMT_LAN',12,'10.50.1.0/24',171049216,24,171049217,171068170,'Сеть управления Чел',NULL,'',0,'','1-100 static\r\n101-200 dhcp','10.50.75.10'),(5,'CHL_OPEN_LAN',7,'10.50.100.0/23',171074560,23,171074561,171068170,'Открытая сеть',NULL,'### IPAM\r\n  * Сервера - до 20го адреса включительно\r\n  * Клиенты - от 21 до 510',0,'','1-20 static servers\r\n21-100 dhcp clients','10.50.75.10'),(6,'CHL_OVPN_LAN',5,'10.50.50.0/24',171061760,24,171061761,171061761,'Сеть клиентов OpenVPN Чел',NULL,'### IPAM\r\nНа OpenVPN за каждым клиентом фиксируется статический адрес через CCD\r\n\r\n### Дополнительно\r\nКаждый клиент может получить дополнительный доступ на фаерволе на уровне IP после согласования служебки через ИБ',NULL,NULL,NULL,'10.50.50.1'),(7,'CHL_PRN_LAN',13,'10.50.40.0/24',171059200,24,171059201,171068170,'Сеть принтеров Чел',NULL,'',NULL,NULL,NULL,'10.50.75.10'),(8,'CHL_VOIP_LAN',11,'10.50.7.0/24',171050752,24,171050753,171068170,'Сеть телефонии Чел',NULL,'',NULL,NULL,NULL,'10.50.75.10'),(9,'MSK_CLOSED_LAN',3,'10.20.101.0/24',169108736,24,169108737,169102090,'Закрытая сеть Мск',NULL,'',0,'','1-50 static\r\n51-100 dhcp','10.20.75.10\n10.20.75.11'),(10,'MSK_DMZ_LAN',4,'55.66.77.80/28',927092048,28,927092049,NULL,'Сеть DMZ сервисов Мск',NULL,'',NULL,NULL,NULL,''),(11,'MSK_DOMRU_LAN',17,'55.66.77.76/30',927092044,30,927092045,NULL,'Подключение Домр.РУ Мск',NULL,'',NULL,NULL,NULL,''),(12,'MSK_MGMT_LAN',15,'10.20.1.0/24',169083136,24,169083137,169102090,'Сеть управления Мск',NULL,'',0,'','1-50 static\r\n51-200 dhcp','10.20.75.10\n10.20.75.11'),(13,'MSK_OPEN_LAN',2,'10.20.100.0/24',169108480,24,169108481,169102090,'Открытая сеть Мск',NULL,'',0,'','1-20 static\r\n21-100 dhcp','10.20.75.10\n10.20.75.11'),(14,'MSK_OVPN_LAN',1,'10.20.50.0/24',169095680,24,169095681,169095681,'Сеть OpenVPN МСК',NULL,'### Назначение сети\r\nПодключение клиентов в изолированную сеть с доступом до ограниченного количества ресурсов\r\n\r\n### Доступ\r\n- Терминальный сервер 1С\r\n- Телефония\r\n- Мониторинг\r\n\r\nвсе остальные подключения только через служебку согласованную в ИБ\r\n',0,'','1-20 reserved\r\n21-40 admin\r\n41-100 users','10.20.50.1'),(15,'MSK_PRN_LAN',16,'10.20.40.0/24',169093120,24,169093121,169102090,'Сеть принтеров Мск',NULL,'',0,'','','10.20.75.10\n10.20.75.11'),(16,'MSK_VOIP_LAN',10,'10.20.7.0/24',169084672,24,169084673,169102090,'Сеть телефонии Мск',NULL,'',0,'','','10.20.75.10\n10.20.75.11'),(17,'CHL_RT_LAN',18,'66.77.88.96/30',1112365152,30,1112365153,NULL,'Челябинский ввод интернет',NULL,'',NULL,NULL,NULL,''),(18,'S2S_VPN_LAN',NULL,'10.0.0.0/30',167772160,30,NULL,NULL,'Для соединения VPN серверов между собой',11,'',NULL,NULL,NULL,NULL),(19,'MSK_SURV_LAN',NULL,'10.20.33.0/24',169091328,24,169091329,169102090,'Сеть видеонаблюдения',12,'',0,'','1-9 static\r\n10-100 dhcp','10.20.75.10\n10.20.75.11');
+INSERT INTO `networks` VALUES (1,'MSK_SRV_LAN',8,'10.20.75.0/24',169102080,24,169102081,169085450,'Сеть общих сервисов Мск',NULL,'',0,'','1-50 static\r\n51-100 dhcp','10.20.75.10\n10.20.75.11',NULL,NULL),(2,'CHL_SRV_LAN',6,'10.50.75.0/24',171068160,24,171068161,171068170,'Сеть общих сервисов Чел',NULL,'',0,'','1-50 static\r\n51-100 dhcp','10.50.75.10',NULL,NULL),(3,'CHL_IT_LAN',9,'10.50.30.0/24',171056640,24,171056641,171068170,'IT сеть Челябинск',NULL,'',0,'','1-50 static\r\n51-100 dhcp','10.50.75.10',NULL,NULL),(4,'CHL_MGMT_LAN',12,'10.50.1.0/24',171049216,24,171049217,171068170,'Сеть управления Чел',NULL,'',0,'','1-100 static\r\n101-200 dhcp','10.50.75.10',NULL,NULL),(5,'CHL_OPEN_LAN',7,'10.50.100.0/23',171074560,23,171074561,171068170,'Открытая сеть',NULL,'### IPAM\r\n  * Сервера - до 20го адреса включительно\r\n  * Клиенты - от 21 до 510',0,'','1-20 static servers\r\n21-100 dhcp clients','10.50.75.10',NULL,NULL),(6,'CHL_OVPN_LAN',5,'10.50.50.0/24',171061760,24,171061761,171061761,'Сеть клиентов OpenVPN Чел',NULL,'### IPAM\r\nНа OpenVPN за каждым клиентом фиксируется статический адрес через CCD\r\n\r\n### Дополнительно\r\nКаждый клиент может получить дополнительный доступ на фаерволе на уровне IP после согласования служебки через ИБ',NULL,NULL,NULL,'10.50.50.1',NULL,NULL),(7,'CHL_PRN_LAN',13,'10.50.40.0/24',171059200,24,171059201,171068170,'Сеть принтеров Чел',NULL,'',NULL,NULL,NULL,'10.50.75.10',NULL,NULL),(8,'CHL_VOIP_LAN',11,'10.50.7.0/24',171050752,24,171050753,171068170,'Сеть телефонии Чел',NULL,'',NULL,NULL,NULL,'10.50.75.10',NULL,NULL),(9,'MSK_CLOSED_LAN',3,'10.20.101.0/24',169108736,24,169108737,169102090,'Закрытая сеть Мск',NULL,'',0,'','1-50 static\r\n51-100 dhcp','10.20.75.10\n10.20.75.11',NULL,NULL),(10,'MSK_DMZ_LAN',4,'55.66.77.80/28',927092048,28,927092049,NULL,'Сеть DMZ сервисов Мск',NULL,'',NULL,NULL,NULL,'',NULL,NULL),(11,'MSK_DOMRU_LAN',17,'55.66.77.76/30',927092044,30,927092045,NULL,'Подключение Домр.РУ Мск',NULL,'',NULL,NULL,NULL,'',NULL,NULL),(12,'MSK_MGMT_LAN',15,'10.20.1.0/24',169083136,24,169083137,169102090,'Сеть управления Мск',NULL,'',0,'','1-50 static\r\n51-200 dhcp','10.20.75.10\n10.20.75.11',NULL,NULL),(13,'MSK_OPEN_LAN',2,'10.20.100.0/24',169108480,24,169108481,169102090,'Открытая сеть Мск',NULL,'',0,'','1-20 static\r\n21-100 dhcp','10.20.75.10\n10.20.75.11',NULL,NULL),(14,'MSK_OVPN_LAN',1,'10.20.50.0/24',169095680,24,169095681,169095681,'Сеть OpenVPN МСК',NULL,'### Назначение сети\r\nПодключение клиентов в изолированную сеть с доступом до ограниченного количества ресурсов\r\n\r\n### Доступ\r\n- Терминальный сервер 1С\r\n- Телефония\r\n- Мониторинг\r\n\r\nвсе остальные подключения только через служебку согласованную в ИБ\r\n',0,'','1-20 reserved\r\n21-40 admin\r\n41-100 users','10.20.50.1',NULL,NULL),(15,'MSK_PRN_LAN',16,'10.20.40.0/24',169093120,24,169093121,169102090,'Сеть принтеров Мск',NULL,'',0,'','','10.20.75.10\n10.20.75.11',NULL,NULL),(16,'MSK_VOIP_LAN',10,'10.20.7.0/24',169084672,24,169084673,169102090,'Сеть телефонии Мск',NULL,'',0,'','','10.20.75.10\n10.20.75.11',NULL,NULL),(17,'CHL_RT_LAN',18,'66.77.88.96/30',1112365152,30,1112365153,NULL,'Челябинский ввод интернет',NULL,'',NULL,NULL,NULL,'',NULL,NULL),(18,'S2S_VPN_LAN',NULL,'10.0.0.0/30',167772160,30,NULL,NULL,'Для соединения VPN серверов между собой',11,'',NULL,NULL,NULL,NULL,NULL,NULL),(19,'MSK_SURV_LAN',20,'10.20.33.0/24',169091328,24,169091329,169102090,'Сеть видеонаблюдения',12,'',0,'','1-9 static\r\n10-100 dhcp','10.20.75.10','2025-08-29 07:41:54',NULL);
 /*!40000 ALTER TABLE `networks` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `networks_history`
+--
+
+DROP TABLE IF EXISTS `networks_history`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `networks_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `master_id` int DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `updated_by` varchar(32) DEFAULT NULL,
+  `updated_comment` varchar(255) DEFAULT NULL,
+  `changed_attributes` text,
+  `name` varchar(255) DEFAULT NULL,
+  `text_addr` varchar(255) DEFAULT NULL,
+  `text_router` varchar(255) DEFAULT NULL,
+  `text_dhcp` varchar(255) DEFAULT NULL,
+  `comment` text,
+  `notepad` text,
+  `ranges` text,
+  `links` text,
+  `archived` tinyint(1) DEFAULT NULL,
+  `vlan_id` int DEFAULT NULL,
+  `segments_id` int DEFAULT NULL,
+  `org_inets_ids` text,
+  PRIMARY KEY (`id`),
+  KEY `networks_history-master_id` (`master_id`),
+  KEY `networks_history-updated_at` (`updated_at`),
+  KEY `networks_history-updated_by` (`updated_by`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `networks_history`
+--
+
+LOCK TABLES `networks_history` WRITE;
+/*!40000 ALTER TABLE `networks_history` DISABLE KEYS */;
+INSERT INTO `networks_history` VALUES (1,19,'2025-08-29 07:41:54',NULL,NULL,'name,text_addr,text_router,text_dhcp,comment,ranges,archived,vlan_id,segments_id','MSK_SURV_LAN','10.20.33.0/24','10.20.33.1','10.20.75.10','Сеть видеонаблюдения',NULL,'1-9 static\r\n10-100 dhcp',NULL,0,20,12,NULL);
+/*!40000 ALTER TABLE `networks_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -3024,8 +3203,12 @@ CREATE TABLE `segments` (
   `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `archived` tinyint(1) DEFAULT NULL,
   `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx-segments-archived` (`archived`)
+  KEY `idx-segments-archived` (`archived`),
+  KEY `idx-segments-updated_at` (`updated_at`),
+  KEY `idx-segments-updated_by` (`updated_by`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3035,8 +3218,44 @@ CREATE TABLE `segments` (
 
 LOCK TABLES `segments` WRITE;
 /*!40000 ALTER TABLE `segments` DISABLE KEYS */;
-INSERT INTO `segments` VALUES (1,'Открытый','Для компьютеров с доступом в интернет','segment_open','### Назначение сегмента\r\nВ этом сегменте находятся компьютеры с доступом в интернет, но без доступа к ресурсам закрытого сегмента',NULL,NULL),(2,'Сеть принтеров','Для принтеров','segment_prn','### Назначение сегмента\r\nСегмент для принтеров необходим для возможности печати на принтеры только с серверов печати и блокировки доступа пользователей к печатному оборудованию напрямую\r\n\r\n### Доступ\r\n- Из сети серверов открыт\r\n- Из остальных закрыт сетей закрыт\r\n- Печать из остальных сетей через сервера печати в сети серверов \r\n- Исходящие SMB соединения до файловых серверов и в интернет по порту SMTP для возможности сетевого сканирования  ',NULL,NULL),(3,'Клиентский VPN','Для сетей VPN клиентов','segment_guest_dmz','### Назначение сегмента\r\nПоскольку с другого конца клиентского VPN может быть BYOD устройство (а на самом деле в основном они и есть), то все их IP адреса должны быть помещены в некий гостевой DMZ с фильтрацией доступа в остальные сегменты.\r\n\r\n### Доступ\r\n  * до ресурсов доступных из интернет\r\n  * до корпоративного портала и чата\r\n  * терминальных сервисов без буфера обмена и монтирования устройств',NULL,NULL),(4,'Закрытый','Закрытые ресурсы','segment_closed','### Назначение сегмента\r\nЗакрытые ресурсы, представляющие собой коммерческую тайну и клиентские устройства с доступом к ней и без доступа в интернет и в открытый сегмент.\r\n\r\n### Доступ\r\n  * До сети серверов для доступа к инфраструктурным сервисам  \r\n  * До прокси сервера где через белый список доступ до серверов обновлений\r\n  * До сервера печати где доступ только к принтерам через сервис контроля печати',NULL,NULL),(5,'Внешний DMZ','Для сервисов доступных из интернет','segment_ext_dmz','### Назначение сегмента\r\nОграничение доступа серверов доступных из интернет к остальной сети, для ограничения масштабов взлома при прорыве внешнего контура\r\n\r\n### Доступ\r\n  * До инфраструктурных сервисов\r\n  * Для каждого сервиса также индивидуальный доступ',NULL,NULL),(6,'Сеть серверов','Ресурсы доступные для всех','segment_common','### Назначение сегмента\r\nВ этом сегменте расположены сервисы, которые должны быть доступны и из закрытого и из открытого сегментов\r\n\r\n### Доступ\r\nОтовсюду но только по адресам/портам размещенных сервисов',NULL,NULL),(7,'VoIP','Для устройств VoIP','segment_voip','### Назначение сегмента\r\nВ сетях этого сегмента должен быть настроен DHCP autoprovision (опция 66) для автоматического подключения телефонов к АТС\r\n\r\n### Доступ\r\nСервер телефонии может бросать исходящие соединения наружу по SIP (+RTP), также нужен проброс входящих SIP (+RTP) с белого списка (провайдеров телефонии) на сервер телефонии для входящих вызовов.  \r\nОстальной доступ ограничен, т.к. телефония очень финансово чувствительна ко взлому  \r\n(сразу начнутся звонки в Бразилию, Китай и т.п. где в течение дня можно получить счет на сотни тыс.р.)',NULL,NULL),(8,'IT сегмент','Сеть для рабочих мест админов','segment_it_lan','### Назначение сегмента\r\nОрганизация доступа сисадминов до всей инфраструктуры\r\n\r\n### Доступ\r\nИз этого сегмента полный доступ во все остальные  \r\nВ этот сегмент только RDP доступ с VPN адресов админов до своих машин для удаленной работы  \r\n(взлом узлов этой сети чрезвычайно опасен, т.к. даст далее доступ до всей сети)',NULL,NULL),(9,'Сегмент управления','Для управления устройствами','segment_mgmt','### Назначение сегмента\r\nРазмещение адресов интерфейсов управления оборудованием\r\n\r\n### Доступ\r\nТолько ИТ из сети\r\nИсходящие соединения только до инфраструктурных сервисов',NULL,NULL),(10,'Внешний','Для внешних подключений','segment_ext','### Назначение сегмента\r\nТут находятся очевидно все сервисы доступные напрямую из интернет\r\n\r\n### Доступ\r\nПоскольку тут сервисы имеют внешний адрес с доступом из интернет, и это не DMZ, то фаервол нужно ставить на каждый узел отдельно',NULL,NULL),(11,'Межсайтовый VPN','Для связи между площадками','segment_intersite_vpn','',NULL,NULL),(12,'Сегмент видеонаблюдения','','segment_skud','',NULL,NULL);
+INSERT INTO `segments` VALUES (1,'Открытый','Для компьютеров с доступом в интернет','segment_open','### Назначение сегмента\r\nВ этом сегменте находятся компьютеры с доступом в интернет, но без доступа к ресурсам закрытого сегмента',NULL,NULL,NULL,NULL),(2,'Сеть принтеров','Для принтеров','segment_prn','### Назначение сегмента\r\nСегмент для принтеров необходим для возможности печати на принтеры только с серверов печати и блокировки доступа пользователей к печатному оборудованию напрямую\r\n\r\n### Доступ\r\n- Из сети серверов открыт\r\n- Из остальных закрыт сетей закрыт\r\n- Печать из остальных сетей через сервера печати в сети серверов \r\n- Исходящие SMB соединения до файловых серверов и в интернет по порту SMTP для возможности сетевого сканирования  ',NULL,NULL,NULL,NULL),(3,'Клиентский VPN','Для сетей VPN клиентов','segment_guest_dmz','### Назначение сегмента\r\nПоскольку с другого конца клиентского VPN может быть BYOD устройство (а на самом деле в основном они и есть), то все их IP адреса должны быть помещены в некий гостевой DMZ с фильтрацией доступа в остальные сегменты.\r\n\r\n### Доступ\r\n  * до ресурсов доступных из интернет\r\n  * до корпоративного портала и чата\r\n  * терминальных сервисов без буфера обмена и монтирования устройств',NULL,NULL,NULL,NULL),(4,'Закрытый','Закрытые ресурсы','segment_closed','### Назначение сегмента\r\nЗакрытые ресурсы, представляющие собой коммерческую тайну и клиентские устройства с доступом к ней и без доступа в интернет и в открытый сегмент.\r\n\r\n### Доступ\r\n  * До сети серверов для доступа к инфраструктурным сервисам  \r\n  * До прокси сервера где через белый список доступ до серверов обновлений\r\n  * До сервера печати где доступ только к принтерам через сервис контроля печати',NULL,NULL,NULL,NULL),(5,'Внешний DMZ','Для сервисов доступных из интернет','segment_ext_dmz','### Назначение сегмента\r\nОграничение доступа серверов доступных из интернет к остальной сети, для ограничения масштабов взлома при прорыве внешнего контура\r\n\r\n### Доступ\r\n  * До инфраструктурных сервисов\r\n  * Для каждого сервиса также индивидуальный доступ',NULL,NULL,NULL,NULL),(6,'Сеть серверов','Ресурсы доступные для всех','segment_common','### Назначение сегмента\r\nВ этом сегменте расположены сервисы, которые должны быть доступны и из закрытого и из открытого сегментов\r\n\r\n### Доступ\r\nОтовсюду но только по адресам/портам размещенных сервисов',NULL,NULL,NULL,NULL),(7,'VoIP','Для устройств VoIP','segment_voip','### Назначение сегмента\r\nВ сетях этого сегмента должен быть настроен DHCP autoprovision (опция 66) для автоматического подключения телефонов к АТС\r\n\r\n### Доступ\r\nСервер телефонии может бросать исходящие соединения наружу по SIP (+RTP), также нужен проброс входящих SIP (+RTP) с белого списка (провайдеров телефонии) на сервер телефонии для входящих вызовов.  \r\nОстальной доступ ограничен, т.к. телефония очень финансово чувствительна ко взлому  \r\n(сразу начнутся звонки в Бразилию, Китай и т.п. где в течение дня можно получить счет на сотни тыс.р.)',NULL,NULL,NULL,NULL),(8,'IT сегмент','Сеть для рабочих мест админов','segment_it_lan','### Назначение сегмента\r\nОрганизация доступа сисадминов до всей инфраструктуры\r\n\r\n### Доступ\r\nИз этого сегмента полный доступ во все остальные  \r\nВ этот сегмент только RDP доступ с VPN адресов админов до своих машин для удаленной работы  \r\n(взлом узлов этой сети чрезвычайно опасен, т.к. даст далее доступ до всей сети)',NULL,NULL,NULL,NULL),(9,'Сегмент управления','Для управления устройствами','segment_mgmt','### Назначение сегмента\r\nРазмещение адресов интерфейсов управления оборудованием\r\n\r\n### Доступ\r\nТолько ИТ из сети\r\nИсходящие соединения только до инфраструктурных сервисов',NULL,NULL,NULL,NULL),(10,'Внешний','Для внешних подключений','segment_ext','### Назначение сегмента\r\nТут находятся очевидно все сервисы доступные напрямую из интернет\r\n\r\n### Доступ\r\nПоскольку тут сервисы имеют внешний адрес с доступом из интернет, и это не DMZ, то фаервол нужно ставить на каждый узел отдельно',NULL,NULL,NULL,NULL),(11,'Межсайтовый VPN','Для связи между площадками','segment_intersite_vpn','',NULL,NULL,NULL,NULL),(12,'Сегмент видеонаблюдения','Видеокамеры, регистраторы','segment_skud','',NULL,'','2025-08-29 07:29:54',NULL);
 /*!40000 ALTER TABLE `segments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `segments_history`
+--
+
+DROP TABLE IF EXISTS `segments_history`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `segments_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `master_id` int DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `updated_by` varchar(32) DEFAULT NULL,
+  `updated_comment` varchar(255) DEFAULT NULL,
+  `changed_attributes` text,
+  `name` varchar(32) DEFAULT NULL,
+  `code` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `history` text,
+  `links` text,
+  PRIMARY KEY (`id`),
+  KEY `segments_history-master_id` (`master_id`),
+  KEY `segments_history-updated_at` (`updated_at`),
+  KEY `segments_history-updated_by` (`updated_by`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `segments_history`
+--
+
+LOCK TABLES `segments_history` WRITE;
+/*!40000 ALTER TABLE `segments_history` DISABLE KEYS */;
+INSERT INTO `segments_history` VALUES (1,12,'2025-08-29 07:29:54',NULL,NULL,'name,code,description','Сегмент видеонаблюдения','segment_skud','Видеокамеры, регистраторы',NULL,NULL);
+/*!40000 ALTER TABLE `segments_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -3177,11 +3396,13 @@ CREATE TABLE `services_history` (
   `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `aces_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `lic_items_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `lic_groups_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `services_history-master_id` (`master_id`),
   KEY `services_history-updated_at` (`updated_at`),
   KEY `services_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3190,7 +3411,7 @@ CREATE TABLE `services_history` (
 
 LOCK TABLES `services_history` WRITE;
 /*!40000 ALTER TABLE `services_history` DISABLE KEYS */;
-INSERT INTO `services_history` VALUES (1,20,'2024-03-18 17:06:55','admin',NULL,'name,description,is_service,weight,responsible_id,providing_schedule_id,support_schedule_id,segment_id,currency_id,comps_ids,support_ids,acls_ids','Мониторинг инфраструктуры','Zabbix',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,1,NULL,1,3,6,NULL,NULL,NULL,1,'33',NULL,NULL,'6,9',NULL,NULL,NULL,'5',NULL,NULL),(2,20,'2024-03-19 03:42:25','admin',NULL,'acls_ids','Мониторинг инфраструктуры','Zabbix',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,1,NULL,1,3,6,NULL,NULL,NULL,1,'33',NULL,NULL,'6,9',NULL,NULL,NULL,NULL,NULL,NULL),(3,26,'2025-05-09 14:38:05',NULL,NULL,'name,description,is_end_user,is_service,archived,weight,responsible_id,providing_schedule_id,support_schedule_id,segment_id,currency_id,support_ids','Резервное копирование','Резервное копирование VM при помощи Veeam',NULL,NULL,0,0,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,1,NULL,1,2,9,NULL,NULL,NULL,1,NULL,NULL,NULL,'6',NULL,NULL,NULL,NULL,NULL,NULL),(4,26,'2025-05-09 14:38:42',NULL,NULL,'external_links,is_service','Резервное копирование','Резервное копирование VM при помощи Veeam',NULL,'[]',0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,1,NULL,1,2,9,NULL,NULL,NULL,1,NULL,NULL,NULL,'6',NULL,NULL,NULL,NULL,NULL,NULL),(5,26,'2025-05-09 14:42:12',NULL,NULL,'comps_ids','Резервное копирование','Резервное копирование VM при помощи Veeam',NULL,'[]',0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,1,NULL,1,2,9,NULL,NULL,NULL,1,'41',NULL,NULL,'6',NULL,NULL,NULL,NULL,NULL,NULL),(6,4,'2025-05-23 11:27:10',NULL,NULL,'name,description,is_service,weight,parent_id,currency_id,techs_ids','Локальная сеть (LAN)','Коммутация устройств',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,3,NULL,NULL,1,NULL,'12,14,22,23',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(7,6,'2025-05-23 11:27:10',NULL,NULL,'name,description,search_text,is_service,weight,parent_id,currency_id,comps_ids,techs_ids','Маршрутизация','Управление маршрутизацией','routing',NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,3,NULL,NULL,1,'21,24','12,14',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(8,7,'2025-05-23 11:27:10',NULL,NULL,'name,description,is_service,weight,parent_id,currency_id,comps_ids,techs_ids','Сетевой экран','Настройка сетевых ограничений',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,3,NULL,NULL,1,'21,24','12,14',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(9,15,'2025-05-23 11:27:10',NULL,NULL,'name,description,is_service,weight,parent_id,currency_id,comps_ids,techs_ids','DHCP сервер','Раздача адресов сетевым устройствам',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,3,NULL,NULL,1,'3,32','14',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(10,21,'2025-05-23 11:27:11',NULL,NULL,'name,description,is_service,weight,responsible_id,providing_schedule_id,support_schedule_id,segment_id,currency_id,techs_ids,support_ids','Видеонаблюдение','Регистратор + камеры',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,6,NULL,1,2,12,NULL,NULL,NULL,1,NULL,'36,37,38,39,40',NULL,'1',NULL,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `services_history` VALUES (1,20,'2024-03-18 17:06:55','admin',NULL,'name,description,is_service,weight,responsible_id,providing_schedule_id,support_schedule_id,segment_id,currency_id,comps_ids,support_ids,acls_ids','Мониторинг инфраструктуры','Zabbix',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,1,NULL,1,3,6,NULL,NULL,NULL,1,'33',NULL,NULL,'6,9',NULL,NULL,NULL,'5',NULL,NULL,NULL,NULL),(2,20,'2024-03-19 03:42:25','admin',NULL,'acls_ids','Мониторинг инфраструктуры','Zabbix',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,1,NULL,1,3,6,NULL,NULL,NULL,1,'33',NULL,NULL,'6,9',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(3,26,'2025-05-09 14:38:05',NULL,NULL,'name,description,is_end_user,is_service,archived,weight,responsible_id,providing_schedule_id,support_schedule_id,segment_id,currency_id,support_ids','Резервное копирование','Резервное копирование VM при помощи Veeam',NULL,NULL,0,0,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,1,NULL,1,2,9,NULL,NULL,NULL,1,NULL,NULL,NULL,'6',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(4,26,'2025-05-09 14:38:42',NULL,NULL,'external_links,is_service','Резервное копирование','Резервное копирование VM при помощи Veeam',NULL,'[]',0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,1,NULL,1,2,9,NULL,NULL,NULL,1,NULL,NULL,NULL,'6',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(5,26,'2025-05-09 14:42:12',NULL,NULL,'comps_ids','Резервное копирование','Резервное копирование VM при помощи Veeam',NULL,'[]',0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,1,NULL,1,2,9,NULL,NULL,NULL,1,'41',NULL,NULL,'6',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(6,4,'2025-05-23 11:27:10',NULL,NULL,'name,description,is_service,weight,parent_id,currency_id,techs_ids','Локальная сеть (LAN)','Коммутация устройств',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,3,NULL,NULL,1,NULL,'12,14,22,23',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(7,6,'2025-05-23 11:27:10',NULL,NULL,'name,description,search_text,is_service,weight,parent_id,currency_id,comps_ids,techs_ids','Маршрутизация','Управление маршрутизацией','routing',NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,3,NULL,NULL,1,'21,24','12,14',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(8,7,'2025-05-23 11:27:10',NULL,NULL,'name,description,is_service,weight,parent_id,currency_id,comps_ids,techs_ids','Сетевой экран','Настройка сетевых ограничений',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,3,NULL,NULL,1,'21,24','12,14',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(9,15,'2025-05-23 11:27:10',NULL,NULL,'name,description,is_service,weight,parent_id,currency_id,comps_ids,techs_ids','DHCP сервер','Раздача адресов сетевым устройствам',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,3,NULL,NULL,1,'3,32','14',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(10,21,'2025-05-23 11:27:11',NULL,NULL,'name,description,is_service,weight,responsible_id,providing_schedule_id,support_schedule_id,segment_id,currency_id,techs_ids,support_ids','Видеонаблюдение','Регистратор + камеры',NULL,NULL,0,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,6,NULL,1,2,12,NULL,NULL,NULL,1,NULL,'36,37,38,39,40',NULL,'1',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(11,18,'2025-08-29 07:24:02','admin',NULL,'name,description,is_end_user,is_service,weight,responsible_id,providing_schedule_id,support_schedule_id,segment_id,currency_id,comps_ids,support_ids','Кластер 1С','Трехзвенка БД - Сервер - Клиент',NULL,NULL,1,1,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,9,NULL,4,4,4,NULL,NULL,NULL,1,'17,18,19',NULL,NULL,'1',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(12,5,'2025-08-29 07:24:39',NULL,NULL,'name,description,weight,responsible_id,providing_schedule_id,support_schedule_id,segment_id,currency_id,support_ids','Управление виртуализацией','Все услуги и сервисы по виртуализации',NULL,NULL,0,0,0,NULL,NULL,NULL,NULL,100,NULL,NULL,NULL,9,NULL,1,2,9,NULL,NULL,NULL,1,NULL,NULL,NULL,'1',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `services_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3331,7 +3552,7 @@ CREATE TABLE `soft_in_lics` (
   KEY `lics_id` (`lics_id`),
   CONSTRAINT `soft_in_lics_ibfk_1` FOREIGN KEY (`soft_id`) REFERENCES `soft` (`id`),
   CONSTRAINT `soft_in_lics_ibfk_2` FOREIGN KEY (`lics_id`) REFERENCES `lic_groups` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=265 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=266 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3340,7 +3561,7 @@ CREATE TABLE `soft_in_lics` (
 
 LOCK TABLES `soft_in_lics` WRITE;
 /*!40000 ALTER TABLE `soft_in_lics` DISABLE KEYS */;
-INSERT INTO `soft_in_lics` VALUES (129,76,1),(130,880,2),(131,882,2),(132,883,2),(133,884,2),(134,885,2),(135,886,2),(136,887,2),(137,163,3),(138,450,3),(139,698,3),(140,820,3),(141,926,4),(148,1035,7),(150,1010,9),(212,15,22),(213,370,23),(214,1066,24),(219,1074,29),(223,902,33),(224,897,34),(233,79,60),(234,43,43),(235,174,44),(236,224,45),(237,501,46),(239,104,47),(240,104,48),(245,169,6),(247,752,54),(249,927,55),(250,927,56),(263,899,25);
+INSERT INTO `soft_in_lics` VALUES (129,76,1),(130,880,2),(131,882,2),(132,883,2),(133,884,2),(134,885,2),(135,886,2),(136,887,2),(137,163,3),(138,450,3),(139,698,3),(140,820,3),(141,926,4),(148,1035,7),(150,1010,9),(212,15,22),(213,370,23),(214,1066,24),(219,1074,29),(223,902,33),(224,897,34),(233,79,60),(234,43,43),(235,174,44),(236,224,45),(237,501,46),(239,104,47),(240,104,48),(245,169,6),(247,752,54),(249,927,55),(250,927,56),(265,899,25);
 /*!40000 ALTER TABLE `soft_in_lics` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4228,4 +4449,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-23 14:52:47
+-- Dump completed on 2025-08-29 12:42:07
