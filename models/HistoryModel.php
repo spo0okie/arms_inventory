@@ -57,7 +57,7 @@ class HistoryModel extends ArmsModel
 	 */
 	public function getLinksSchema() {
 		if (isset($this->attrsCache['linkSchema'])) return $this->attrsCache['linkSchema'];
-		return $this->attrsCache['linkSchema']=$this->masterInstance->linksSchema;
+		return $this->attrsCache['linkSchema']=$this->masterInstance->getLinksSchema();
 	}
 	
 	/**
