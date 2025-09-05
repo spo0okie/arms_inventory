@@ -14,6 +14,8 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\ui\LoginForm;
 
+require_once Yii::getAlias('@app/swagger/swagger.php');
+
 class SiteController extends Controller
 {
     /**
@@ -31,6 +33,11 @@ class SiteController extends Controller
                         'allow' => true,
                         'roles' => ['@'],
                     ],
+					[
+						'actions' => ['api-doc','api-json'],
+						'allow' => true,
+						'roles' => 'admin'
+					]
                 ],
             ],
             'verbs' => [
@@ -55,6 +62,21 @@ class SiteController extends Controller
                 'class' => 'yii\captcha\CaptchaAction',
                 'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
             ],
+			'api-doc' => [
+				'class' => 'light\swagger\SwaggerAction',
+				'restUrl' => \yii\helpers\Url::to(['/site/api-json'], true),
+			],
+			'api-json' => [
+				'class' => 'app\components\swagger\ArmsSwaggerApiAction',
+				'scanDir' => [
+					Yii::getAlias('@app/swagger'),
+					Yii::getAlias('@app/modules/api/controllers'),
+					//Yii::getAlias('@app/models'),
+				],
+				'scanOptions' => [
+			
+				],
+			],
         ];
     }
 

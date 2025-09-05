@@ -178,6 +178,20 @@ class StringHelper extends BaseStringHelper {
 	}
 	
 	/**
+	 * Убирает префикс из строки, если он там есть
+	 * @param $string
+	 * @param $prefix
+	 * @return false|mixed|string
+	 */
+	public static function removePrefix($string, $prefix='action')
+	{
+		if (static::startsWith($string, $prefix)) {
+			$string = substr($string, strlen($prefix));
+		}
+		return $string;
+	}
+	
+	/**
 	 * Убирает суффикс из строки, если он там есть
 	 * @param $string
 	 * @param $suffix
@@ -189,4 +203,5 @@ class StringHelper extends BaseStringHelper {
 			$string=substr($string,0,strlen($string)-strlen($suffix));
 		return $string;
 	}
+	
 }

@@ -33,7 +33,7 @@
   ],
 
   "require": {
-    "php": ">=8.0",
+    "php": ">=8.1",
     "ext-json": "*",
     "ext-mbstring": "*",
     "ext-imagick": "*",
@@ -62,7 +62,10 @@
     "spo0okie/yii2-modal-ajax": "@dev",
 	"spo0okie/yii2-rbac-plus": "dev-master",
     "rlanvin/php-ip": "^3.0",
-	"thomaspark/bootswatch": "dev-master"
+	"thomaspark/bootswatch": "dev-master",
+    "zircote/swagger-php": "^4.0",
+    "light/yii2-swagger": "~3.0",
+    "doctrine/annotations": "2.0.x-dev"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.0.0",

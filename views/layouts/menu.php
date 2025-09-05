@@ -181,6 +181,7 @@ echo Nav::widget([
 						['label' => 'Роли', 		'url' => ['/rbac/role']],
 						['label' => 'Правила', 		'url' => ['/rbac/rule']],
 						['label' => 'Разрешения', 	'url' => ['/rbac/permission']],
+						['label' => 'Документация API', 	'url' => ['/site/api-doc']],
 					],
 				]:'',
 			Yii::$app->user->isGuest ?
