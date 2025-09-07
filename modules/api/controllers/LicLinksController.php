@@ -3,6 +3,8 @@
 namespace app\modules\api\controllers;
 
 
+use app\controllers\ArmsBaseController;
+use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use app\models\links\LicLinks;
 use yii\web\NotFoundHttpException;
@@ -11,6 +13,10 @@ class LicLinksController extends BaseRestController
 {
 
 	public $modelClass='app\models\links\LicLinks';
+	public function disabledActions()
+	{
+		return ['index','view','update','create','delete'];
+	}
 	
 	/** @noinspection PhpMethodNotFoundInspection */
 	public function actionSearch(

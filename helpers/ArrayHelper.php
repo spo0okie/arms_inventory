@@ -29,7 +29,8 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		$default=(array)$default;
 		foreach ($custom as $key=>$value) {
 			if (is_array($value)) {
-				$default[$key]=isset($default[$key])&&count($value)&&!array_is_list($value)?
+				$is_list=array_is_list($value);
+				$default[$key]=isset($default[$key])&&count($value)&&!$is_list?
 					static::recursiveOverride($default[$key],$value):
 					$value;
 			} else {

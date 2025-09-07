@@ -6,18 +6,28 @@ use app\controllers\ArmsBaseController;
 use app\models\Techs;
 use app\models\Users;
 use yii\web\NotFoundHttpException;
+use OpenApi\Attributes as OA;
 
-
+/**
+ * @OA\Tag(
+ *   name="{controller}",
+ *   description="Телефоны пользователей"
+ * )
+ */
 class PhonesController extends BaseRestController
 {
 	
+	public function disabledActions()
+	{
+		return ['index','view','update','create','delete','search','filter'];
+	}
 	public $viewActions=['search-by-user','search-by-num'];
 	public function accessMap()
 	{
 		return [
 			'view'=>$this->viewActions,
 			'view-phones'=>$this->viewActions,
-			ArmsBaseController::PERM_ANONYMOUS=>[]
+			ArmsBaseController::PERM_ANONYMOUS=>[],
 		];
 	}
 	
@@ -25,12 +35,21 @@ class PhonesController extends BaseRestController
 		return $this->viewActions;
 	}
 	
-	/**
-	 * @param $num
-	 * @return mixed|string|null
-	 * @throws NotFoundHttpException
-	 * @noinspection PhpUnusedElementInspection
-	 */
+	#[OA\Get(
+		path: "/web/api/phones/search-by-num",
+		summary: "Поиск имени пользователя по номеру телефона",
+		parameters: [new OA\Parameter(
+			name: "num",
+			description: "Искомый номер телефона",
+			in: "query",
+			required: true,
+			schema: new OA\Schema(type: "string")
+		)],
+		responses: [
+			new OA\Response(response: 200, description: "OK"),
+			new OA\Response(response: 404, description: "Не найдено"),
+		]
+	)]
 	public function actionSearchByNum($num){
 		//ищем телефонный аппарат по номеру
 		$tech = Techs::find()
@@ -55,7 +74,7 @@ class PhonesController extends BaseRestController
 		$user= Users::find()
 			->where([
 				'phone'=>$num,
-				'Uvolen'=>false
+				'Uvolen'=>false,
 			])
 			->one();
 		/**
@@ -67,6 +86,30 @@ class PhonesController extends BaseRestController
 		throw new NotFoundHttpException("not found");
 	}
 	
+	#[OA\Get(
+		path: "/web/api/{controller}/search-by-user",
+		summary: "Поиск номера телефона по ID или логину пользователя",
+		parameters: [
+			new OA\Parameter(
+				name: "id",
+				description: "ID пользователя",
+				in: "query",
+				required: true,
+				schema: new OA\Schema(type: "integer")
+			),
+			new OA\Parameter(
+				name: "login",
+				description: "Login пользователя",
+				in: "query",
+				required: true,
+				schema: new OA\Schema(type: "string")
+			),
+		],
+		responses: [
+			new OA\Response(response: 200, description: "OK"),
+			new OA\Response(response: 404, description: "Не найдено"),
+		]
+	)]
 	public function actionSearchByUser($id=null,$login=null){
 		//ищем пользователя
 		if ($id)

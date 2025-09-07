@@ -122,7 +122,7 @@ class Aces extends ArmsModel
 	 */
 	public function attributeData()
 	{
-		return [
+		return ArrayHelper::recursiveOverride(parent::attributeData(),[
 			'acls_id' => 'ACL',
 			'access_types_ids' => [
 				AccessTypes::$titles,
@@ -202,7 +202,7 @@ class Aces extends ArmsModel
 					'Сотрудников других организаций можно также добавить в '.Html::a('список пользователей',['/users/index']),
 				'join' => ['users'],
 			],
-		];
+		]);
 	}
 	
 	

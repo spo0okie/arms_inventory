@@ -40,6 +40,28 @@ class BaseRestController extends ActiveController
 	public static $searchOrder=[]; 					//порядок в котором сортировать поиск
 	
 	/**
+	 * Действия которые отключены в контроллере (для блокировки в потомках)
+	 * @return array
+	 */
+	public function disabledActions()
+	{
+		return [];
+	}
+	
+	/**
+	 * Проверяем доступность $action в этом контроллере
+	 * @param $action
+	 * @return void
+	 * @throws \yii\web\ForbiddenHttpException
+	 */
+	public function checkDisabledActions($action)
+	{
+		if (in_array($action, $this->disabledActions(), true)) {
+			throw new \yii\web\ForbiddenHttpException("Action $action is disabled.");
+		}
+	}
+	
+	/**
 	 * Карта доступа с какими полномочиями, что можно делать
 	 * @return array
 	 */
@@ -123,10 +145,24 @@ class BaseRestController extends ActiveController
 	
 	#[OA\Get(
 		path: "/web/api/{controller}/search",
-		summary: "Поиск одного объекта по набору полей",
-		responses: [new OA\Response(response: 200, description: "OK")]
+		summary: "Поиск одного объекта по набору полей.",
+		parameters: [
+			new OA\Parameter(
+				name: "{searchFields}",
+				description: "Фильтр по атрибутам модели",
+				
+				in: "query",
+				required: false,
+			)
+		],
+		responses: [
+			new OA\Response(response: 200, description: "OK"),
+			new OA\Response(response: 403, description: "Доступ запрещен"),
+			new OA\Response(response: 404, description: "Ничего не найдено")
+		]
 	)]
 	public function actionSearch() {
+		$this->checkDisabledActions('search');
 		foreach (static::$searchFields as $param=>$field) {
 			if ($field===static::SEARCH_BY_ANY_NAME && ($value= Yii::$app->request->get($param))) {
 				$class=$this->modelClass;
@@ -139,7 +175,25 @@ class BaseRestController extends ActiveController
 		return $result;
 	}
 	
+	#[OA\Get(
+		path: "/web/api/{controller}/filter",
+		summary: "Поиск нескольких объектов по набору полей.",
+		parameters: [
+			new OA\Parameter(
+				name: "{searchFields}",
+				description: "Фильтр по атрибутам модели",
+				in: "query",
+				required: false,
+			)
+		],
+		responses: [
+			new OA\Response(response: 200, description: "OK"),
+			new OA\Response(response: 403, description: "Доступ запрещен"),
+			new OA\Response(response: 404, description: "Ничего не найдено"),
+		]
+	)]
 	public function actionFilter() {
+		$this->checkDisabledActions('filter');
 		return $this->searchFilter()->all();
 	}
 	
@@ -166,10 +220,14 @@ class BaseRestController extends ActiveController
 	#[OA\Get(
 		path: "/web/api/{controller}/",
 		summary: "Список всех элементов",
-		responses: [new OA\Response(response: 200, description: "OK")]
+		responses: [
+			new OA\Response(response: 200, description: "OK"),
+			new OA\Response(response: 403, description: "Доступ запрещен"),
+		]
 	)]
-	public function actionsIndex()
+	public function actionIndex()
 	{
+		$this->checkDisabledActions('index');
 		$this->actions()['index']->run();
 	}
 	
@@ -185,21 +243,35 @@ class BaseRestController extends ActiveController
 		)],
 		responses: [
 			new OA\Response(response: 200, description: "OK"),
+			new OA\Response(response: 403, description: "Доступ запрещен"),
 			new OA\Response(response: 404, description: "Элемент ID не найден"),
 		]
 	)]
 	public function actionView($id)
 	{
-		$this->actions()['index']->run($id);
+		$this->checkDisabledActions('view');
+		$this->actions()['view']->run($id);
 	}
 	
 	#[OA\Post(
 		path: "/web/api/{controller}/",
 		summary: "Создать новый элемент",
-		responses: [new OA\Response(response: 201, description: "OK")]
+		requestBody: new OA\RequestBody(
+			required: true,
+			content: new OA\MediaType(
+				mediaType: "application/json",
+				schema: new OA\Schema(ref: "#/components/schemas/{model}")
+			),
+		),
+		responses: [
+			new OA\Response(response: 201, description: "OK"),
+			new OA\Response(response: 403, description: "Доступ запрещен"),
+			new OA\Response(response: 422, description: "Предоставлены неверные данные"),
+		]
 	)]
 	public function actionCreate()
 	{
+		$this->checkDisabledActions('create');
 		$this->actions()['create']->run();
 	}
 	
@@ -215,11 +287,14 @@ class BaseRestController extends ActiveController
 		)],
 		responses: [
 			new OA\Response(response: 200, description: "OK"),
+			new OA\Response(response: 403, description: "Доступ запрещен"),
 			new OA\Response(response: 404, description: "Элемент ID не найден"),
+			new OA\Response(response: 422, description: "Предоставлены неверные данные"),
 		]
 	)]
 	public function actionUpdate($id)
 	{
+		$this->checkDisabledActions('update');
 		$this->actions()['update']->run($id);
 	}
 	
@@ -228,11 +303,13 @@ class BaseRestController extends ActiveController
 		summary: "Удалить элемент с указанным ID",
 		responses: [
 			new OA\Response(response: 204, description: "OK"),
+			new OA\Response(response: 403, description: "Доступ запрещен"),
 			new OA\Response(response: 404, description: "Элемент ID не найден"),
 		]
 	)]
 	public function actionDelete($id)
 	{
+		$this->checkDisabledActions('delete');
 		$this->actions()['delete']->run($id);
 	}
 }

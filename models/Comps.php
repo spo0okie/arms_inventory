@@ -8,6 +8,7 @@ use app\helpers\QueryHelper;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\CompsModelCalcFieldsTrait;
 use app\models\traits\UnsatisfiedMaintenanceFieldTrait;
+use OpenApi\Attributes\Schema;
 use Throwable;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use yii\base\InvalidConfigException;
@@ -342,7 +343,6 @@ class Comps extends ArmsModel
 					.'либо когда в последний раз вручную правили запись)<br/>'
 					.QueryHelper::$dateSearchHint,
 			],
-			'user' => ['alias' => 'user'],
 			'user_id' => [
 				'Пользователь',
 				'hint' => 'Имеет смысл только для серверов и ВМ в случае, '

@@ -11,6 +11,7 @@ use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
+use OpenApi\Annotations\Property;
 use yii\base\Model;
 
 /**
@@ -54,28 +55,39 @@ trait AttributeDataModelTrait
 			'notepad' => [
 				'Записная книжка',
 				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого объекта',
-				'type' => 'text'
+				'type' => 'text',
 			],
 			'history' => ['alias'=>'notepad'],
 			'links' => [
 				'Ссылки',
 				'hint' => UrlListWidget::$hint,
+				'type'=>'urls',
 			],
 			'archived' => [
 				'Перенесено в архив',
+				'type'=>'boolean',
 				'hint' => 'Помечается если в работе более не используется, но для истории запись лучше сохранить',
 			],
 			'updated_at' => [
 				'Время изменения',
 				'hint' => 'Дата/время изменения объекта в БД',
+				'type' => 'datetime',
+				'readOnly' => true
 			],
 			'updated_by'=>[
 				'Редактор',
-				'hint' => 'Автор последних изменений объекта',
+				'type' => 'string',
+				'apiLabel' => 'Автор последних изменений в БД (username)',
+				'readOnly' => true
 			],
 			'external_links' => [
 				'Доп. связи',
-				'hint' => 'JSON структура с дополнительными объектами и ссылками на внешние информационные системы',
+				'type' => 'json_object',
+				'hint' => 'JSON структура с дополнительными объектами и ссылками на внешние информационные системы. '
+					.'Хранятся в виде JSON структуры. При записи значений старые узлы структуры объединяются с новыми. '
+					.'Запись {"link1":"value1"} изменит во всем наборе ссылок только "link1", остальные останутся без изменений. '
+					.'Для удаления элемента из структуры надо записать для него пустое значение, например {"link1":""}. '
+					.'Запись пустой строки или пустого JSON {} не меняет никаких значений.',
 			],
 		];
 	}
@@ -257,6 +269,14 @@ trait AttributeDataModelTrait
 		return parent::getAttributeHint($attribute);
 	}
 	
+	/**
+	 * Определяет тип атрибута
+	 * специальные типы:
+	 * - ips, macs, urls - правильно оформленные строки
+	 * - link: ссылка на другую модель - надо смотреть в linkSchema, чтобы узнать класс модели
+	 * @param $attribute
+	 * @return string
+	 */
 	public function getAttributeType($attribute)
 	{
 		if ($type=$this->getAttributeData($attribute)['type']??false) {
@@ -276,10 +296,22 @@ trait AttributeDataModelTrait
 		}
 		
 		switch ($attribute) {
+			case 'id': return 'integer';
 			case 'ips': return 'ips';
 			case 'macs': return 'macs';
 			case 'links':
 			case 'urls': return 'urls';
+		}
+		
+		foreach ($this->rules() as $rule) {
+			if (in_array($attribute, (array)$rule[0])) {
+				switch ($rule[1]) {
+					case 'integer': return 'integer';
+					case 'number': return 'number';
+					case 'boolean': return 'boolean';
+					case 'string': return 'string';
+				}
+			}
 		}
 		
 		return 'string';
@@ -318,6 +350,39 @@ trait AttributeDataModelTrait
 		return null;
 	}
 	
+	/**
+	 * Возвращает наименование атрибута для API документации
+	 * @param $attribute
+	 * @return string
+	 */
+	public function getAttributeApiLabel($attribute)
+	{
+		$item=$this->getAttributeData($attribute);
+		if (is_array($item) && isset($item['apiLabel']))
+			return $item['apiLabel'];
+		/** @var $this Model */
+		return $this->getAttributeIndexLabel($attribute);
+	}
+	
+	
+	/**
+	 * Возвращает описание атрибута для API документации
+	 * @param $attribute
+	 * @return string
+	 */
+	public function getAttributeApiHint($attribute)
+	{
+		$item=$this->getAttributeData($attribute);
+		if (isset($item['apiHint']))
+			/** @var $this Model */
+			return str_replace(
+				'{same}',
+				$this->getAttributeHint($attribute),
+				$item['apiHint']
+			);
+		return $this->getAttributeIndexHint($attribute);
+	}
+
 	/**
 	 * Вернуть локальный плейсхолдер без учета предков
 	 * @param $attr
@@ -488,6 +553,183 @@ trait AttributeDataModelTrait
 			$joins=array_merge($joins,$this->getAttributeJoins($attribute));
 		}
 		return array_unique($joins);
+	}
+	
+	/**
+	 * Возвращает OpenApi\Annotations\Property для атрибута модели
+	 * @param $attribute
+	 * @return Property
+	 */
+	public function generateAttributeAnnotation($attribute,$context): Property
+	{
+		$data=$this->getAttributeData($attribute);
+		$name=$this->getAttributeApiLabel($attribute);
+		$description='';
+		if ($hint=$this->getAttributeApiHint($attribute)) {
+			$description.="\n$hint";
+		}
+		
+		$template=[];
+		switch ($type=$this->getAttributeType($attribute)) {
+			case 'boolean': $template=[
+				'type' => 'boolean',
+				'format' => 'integer',
+				'enum' => [0,1],
+				'example' => 1,
+			];
+				if (!isset($data['fieldList'])) $description.="\n0 - false, 1 - true";
+				break;
+			
+			case 'toggle': $template=[
+				'type' => 'integer',
+				'format' => 'integer',
+				'enum' => [0,1],
+				'example' => 1,
+			];
+				break;
+			
+			case 'list':
+			case 'radios': $template=[
+				'type' => 'integer',
+				'format' => 'integer',
+				'example' => 1,
+			];
+				break;
+			
+			case 'text':
+			case 'ntext':
+			case 'string': $template=[
+				'type' => 'string',
+			];
+				break;
+			
+			case 'json_object': $template=[
+				'type' => 'string',
+				'format' => 'json object',
+			];
+				break;
+			
+			case 'json_array': $template=[
+				'type' => 'string',
+				'format' => 'json array',
+			];
+				break;
+			
+			case 'date': $template=[
+				'type' => 'string',
+				'format' => 'date',
+				'example' => '2020-01-31',
+			];
+				break;
+				
+			case 'datetime': $template=[
+				'type' => 'string',
+				'format' => 'date-time',
+				'example' => '2020-01-31 23:59:59',
+			];
+				break;
+				
+			case 'ips': $template=[
+				'type' => 'string',
+				'example' => '192.168.0.1/24',
+			];
+				$description.="\n".'IP адреса (опционально с маской подсети). По одному в строке. ';
+				break;
+				
+			case 'macs': $template=[
+				'type' => 'string',
+				'example' => '00:1A:2B:3C:4D:5E',
+			];
+				$description.="\n".'MAC адреса. По одному в строке. ';
+				break;
+				
+			case 'urls': $template=[
+				'type' => 'string',
+				'example' => 'Ссылка на пример https://example.com/some/page',
+			];
+				$description.="\n".UrlListWidget::$APIhint;
+				break;
+				
+			case 'link':
+				$class=StringHelper::className($this->attributeLinkClass($attribute));
+				if ($this->attributeIsLoader($attribute)) {
+					//если это атрибут загрузчик, то это RO свойство содержащее другой объект
+					$template = [
+						'type' => 'object',
+						'ref' => '#/components/schemas/' . $class,
+						'readOnly' => true,
+					];
+				} else {
+					//иначе это сам атрибут ссылка (_id / _ids)
+					if (StringHelper::endsWith($attribute, '_ids')) {
+						$name .= ' (ссылки)';
+						//если множественная ссылка
+						$template = [
+							'type' => 'array',
+							'@items' => [
+								'type' => 'integer',
+								'example' => 123,
+								'description' => "ID объектов $class",
+							],
+						];
+					} elseif (StringHelper::endsWith($attribute, '_id')) {
+						$name .= ' (ссылка)';
+						$template = [
+							'type' => 'integer',
+							'example' => 123,
+						];
+						$description.= "\nID объекта $class";
+					}
+				}
+				break;
+			default: $template=[
+				'type' => $type,
+			];
+				break;
+		}
+		
+		if (isset($data['fieldList'])) {
+			$fieldList=$data['fieldList'];
+			if (is_callable($fieldList)) $fieldList=$fieldList();
+			if (is_array($fieldList) && count($fieldList)>0) {
+				$template['enum']=array_keys($fieldList);
+				$template['example']=array_key_first($fieldList);
+				$description.="\nВозможные значения:\n".implode(', ',array_map(function($k,$v){return "$k - $v";},array_keys($fieldList),$fieldList));
+			}
+		}
+		
+		if ($template['type']==='string') {
+			foreach ($this->rules() as $rule) {
+				if (
+					in_array($attribute,(array)$rule[0])
+				&&
+					$rule[1] === 'string'
+				&&
+					isset($rule['max'])
+				) {
+					$template['maxLength']=$rule['max'];
+				}
+			}
+		}
+		
+		if (isset($data['is_inheritable']) && $data['is_inheritable']) {
+			$description.="\n".'Атрибут наследуется от родительского объекта, если не задан явно.';
+		}
+		
+		if ($data['readOnly']??false) {
+			$template['readOnly']=true;
+		}
+
+		if ($data['writeOnly']??false) {
+			$template['writeOnly']=true;
+		}
+		
+		if ($description) $name.=": $description";
+		$template['property']=$attribute;
+		$template['description']=$name;
+		$template['_context']=$context;
+		
+		return new Property($template);
 	}
 	
 }
