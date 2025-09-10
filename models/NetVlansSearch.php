@@ -80,7 +80,7 @@ class NetVlansSearch extends NetVlans
 			->andFilterWhere(['or like', $vlanName, \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
 			->andFilterWhere(['or like', 'net_domains.name', \yii\helpers\StringHelper::explode($this->domain_id,'|',true,true)])
 			->andFilterWhere(['or like', 'concat(networks.text_addr,"/",networks.mask,"(",IFNULL(networks.name,""))', \yii\helpers\StringHelper::explode($this->networks_ids,'|',true,true)])
-            ->andFilterWhere(['or like', 'comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
+            ->andFilterWhere(['or like', 'net_vlans.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }
