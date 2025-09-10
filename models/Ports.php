@@ -70,6 +70,7 @@ class Ports extends ArmsModel
 	
 	public $linksSchema=[
 		'techs_id'=>[Techs::class,'ports_ids'],
+		'link_techs_id'=>[Techs::class,'techs_id'],
 		'link_ports_id'=>[Ports::class,'link_ports_id'],
 	];
 	
