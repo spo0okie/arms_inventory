@@ -22,6 +22,7 @@ class TechsSearch extends Techs
 	public $user_position;
 	public $user_dep;
 	public $comp_hw;
+	public $comp_updated_at;
 	public $is_computer;
 	
 	
@@ -55,6 +56,7 @@ class TechsSearch extends Techs
 	
 				'comp_id',
 				'comp_hw',
+				'comp_updated_at',
 
 				'partners_id',
 				
@@ -218,6 +220,7 @@ class TechsSearch extends Techs
 	
 			->andFilterWhere(QueryHelper::querySearchString('comps.name', $this->comp_id))
 			->andFilterWhere(QueryHelper::querySearchString('comps.raw_hw',$this->comp_hw))
+			->andFilterWhere(QueryHelper::querySearchNumberOrDate('comps.updated_at',$this->comp_updated_at))
 	
 	
 			->andFilterWhere(QueryHelper::querySearchString('concat(manufacturers.name," ",tech_models.name)',$this->model))

@@ -245,6 +245,10 @@ class Comps extends ArmsModel
 				'placeholder' => 'Выберите АРМ/сервер',
 				'join' => ['arm','platform']
 			],
+			'arm_state'=>[
+				'Статус АРМ',
+				'indexHint'=>'Статус АРМ на котором работает эта ОС',
+			],
 			'comment' => ['Комментарий', 'absorb' => 'ifEmpty','type'=>'text'],
 			'domain_id' => ['Домен', 'absorb' => 'ifEmpty'],
 			'exclude_hw' => ['Скрыто из паспорта железо', 'absorb' => 'ifEmpty'],

@@ -13,14 +13,18 @@
 use app\components\ExpandableCardWidget;
 use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;
+use app\helpers\ArrayHelper;
 use app\models\Comps;
 use app\models\Manufacturers;
 use app\models\Techs;
 use yii\helpers\Html;
+
+
 if(!isset($static_view))$static_view=false;
 $renderer = $this;
 $manufacturers= Manufacturers::fetchNames();
-
+$armsColumns=include __DIR__.'/../techs/columns.php';
+$armStatus=$armsColumns['state_id'];
 return [
 	'name' => [
 		'value' => function ($data) use ($renderer,$static_view) {
@@ -38,6 +42,11 @@ return [
 			return '';
 		},
 	],
+	'arm_state' => array_merge($armsColumns['state_id'],[
+		'value' => function ($data) use ($renderer) {
+			return $data?->arm?->state?->renderItem($renderer);
+		},
+	]),
 	'ip' => [
 		'value' => function ($data) use ($renderer) {
 			if (is_object($data)) {

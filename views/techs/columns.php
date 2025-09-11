@@ -116,6 +116,10 @@ $columns=[
 		},
 	],
 	
+	'comp_updated_at' => [
+		'value' => 'comp.updated_at',
+	],
+	
 	'ip' => [
 		'value' => function ($data) use ($renderer) {
 			if (is_object($data)) {
