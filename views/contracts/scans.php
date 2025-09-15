@@ -18,7 +18,7 @@ if (!isset($static_view)) $static_view=false;
                 'model'=>$scan,
                 'contracts_id'=>$model->id,
                 'static_view'=>$static_view,
-                'show_preview_max_size'=>640*1024
+                'show_preview_max_size'=>Yii::$app->params['docs.max_preview_size']
             ]);
     ?>
 </p>

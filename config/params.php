@@ -61,6 +61,7 @@ return [
 	'docs.pay_id.enable'=>false,
 	'docs.pay_id.name'=>'ЗНП',
 	'docs.name.instruction'=>false,
+	'docs.max_preview_size'=>2*1024*1024,	//предельный размер документа который автоматически подгружается в форму
 	
 	'user.name_as_uid.enable'=>false,	//запрещаем использование полного ФИО как ключ для переназначения логина
 	
