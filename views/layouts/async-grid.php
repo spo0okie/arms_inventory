@@ -12,7 +12,7 @@ use app\helpers\StringHelper;
 /* @var $source */
 
 $modelClass=get_class($model);
-$columnsFile=$_SERVER['DOCUMENT_ROOT'].'/views/'.StringHelper::className($modelClass).'/columns.php';
+$columnsFile=$_SERVER['DOCUMENT_ROOT'].'/views/'.StringHelper::class2Id($modelClass).'/columns.php';
 
 if (!file_exists($columnsFile)) {
 	throw new \yii\web\HttpException(404,'Grid columns file missing: "'.$columnsFile.'"');
