@@ -1183,8 +1183,14 @@ class Techs extends ArmsModel
 	 */
 	public function getSname()
 	{
-		$tokens=[$this->num];
-		if (is_object($this->comp)) $tokens[]=$this->comp->name;
+		if (is_object($this->comp)) {
+			$tokens=[
+				$this->num,
+				$this->comp->name
+			];
+		} else {
+			$tokens=[$this->name];
+		}
 		if (is_object($this->user)) $tokens[]=$this->user->shortName;
 		if (!is_object($this->comp)) {
 			
@@ -1364,19 +1370,5 @@ class Techs extends ArmsModel
 	//имя в списке оборудования и ОС сервиса (для сортировки)
 	public function getInServicesName() {return mb_strtolower($this->model->nameWithVendor);}
 	
-	/*public function reverseLinks()
-	{
-		return [
-			$this->comps,
-			$this->armTechs,
-			$this->installedTechs,
-			$this->materialsUsages,
-			$this->contracts,
-			$this->licItems,
-			$this->licGroups,
-			$this->licKeys,
-			$this->ports,
-		];
-	}*/
 	
 }
