@@ -33,7 +33,7 @@ use app\components\RackWidget;
 use app\models\Techs;
 ?>
 
-<tr height="<?= $height ?>%" style="font-size: <?= $fontSize ?>px">
+<tr style="height:<?= $height ?>%" style="font-size: <?= $fontSize ?>px">
 <?php
 	//если рисуем переднюю сторону, то слева направо, а если зад, то наоборот
 	for ($c=0; $c<count($rack->cols); $c++) {
@@ -68,7 +68,7 @@ use app\models\Techs;
 				if (!$row) {
 					$width=$rack->getWidthPercent($col['size']);
 					$rowspan=$rack->getTotalRows();
-					echo "<td width=\"$width%\" rowspan=\"$rowspan\" >&nbsp;</td>";
+					echo "<td style=\"width:$width%\" rowspan=\"$rowspan\" >&nbsp;</td>";
 				}
 				break;
 		}

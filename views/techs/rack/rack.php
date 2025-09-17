@@ -1,7 +1,7 @@
 <?php
 
-use a1inani\yii2ModalAjax\ModalAjax;
 use app\components\RackWidget;
+use spo0okie\yii2ModalAjax\ModalAjax;
 use yii\web\JsExpression;
 
 /* @var $this yii\web\View */

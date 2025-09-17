@@ -32,16 +32,18 @@ if (is_object($rack) && is_object($rack->model)) {
 	$labels=[];
 }
 
-
+$fontHeight=min (($rack->smallestUnitHeight-2)*$height/$rack->getTotalHeight()*0.8,16);
 
 //echo $rack->getTotalWidth()."x".$rack->getTotalHeight().'<br />';
 ?>
-<table class="rack-widget" id="rack-<?= $id ?>" width="<?= $width ?>" height="<?= $height ?>">
+<table class="rack-widget" id="rack-<?= $id ?>" style="width:<?= $width ?>px; height:<?= $height ?>px; font-size: <?= $fontHeight ?>px;">
 	<tbody>
 		<?php foreach ($rack->rows as $row) {
 			switch ($row['type']) {
 				case 'units':
 					for ($i=0; $i<$row['count']; $i++) {
+						$stackHeightPx=$rack->getHeightPercent($row['size'])*($height-2); //высота одного юнита в процентах от всей высоты шкафа
+						$trHeight="calc({$stackHeightPx}px / {$row['count']})";	//высота строки таблицы в процентах от всей высоты шкафа (минус бордеры по 1px каждый)
 						echo $this->render('tr-units',[
 							'row'=>$y,
 							'sectionRow'=>$i,
@@ -50,7 +52,7 @@ if (is_object($rack) && is_object($rack->model)) {
 							'models'=>$models,
 							'labels'=>$labels,
 							'evenLabelShift'=>$evenLabelShift,
-							'height'=>$rack->getHeightPercent($row['size']/$row['count']),
+							'height'=>$trHeight,
 							'totalHeight'=>$height
 						]);
 						$y++;

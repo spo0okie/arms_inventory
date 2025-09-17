@@ -12,6 +12,6 @@
 use yii\helpers\Html;
 
 ?>
-<tr height="<?= $height ?>%">
+<tr style="height:<?= $height ?>%">
 	<td colspan="<?= $rack->getTotalCols() ?>"></td>
 </tr>

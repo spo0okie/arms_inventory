@@ -14,6 +14,6 @@
 use yii\helpers\Html;
 $fontSize=min($titleHeight*0.7,22);
 ?>
-<tr height="<?= $height ?>%" style="font-size: <?= $fontSize ?>px">
+<tr style="font-size: <?= $fontSize ?>px; height:<?= $height ?>%">
 	<td class="rack-title" colspan="<?= $rack->getTotalCols() ?>"><?= $rack->title ?></td>
 </tr>

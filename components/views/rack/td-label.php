@@ -13,4 +13,4 @@
 use yii\helpers\Html;
 
 ?>
-	<td class="rack-unit-label rack-<?= $rackId ?>-unit-<?= $unitId ?>-label" width="<?= $width ?>%"><?= $unitId ?></td>
+	<td class="rack-unit-label rack-<?= $rackId ?>-unit-<?= $unitId ?>-label" style="width:<?= $width ?>%"><?= $unitId ?></td>

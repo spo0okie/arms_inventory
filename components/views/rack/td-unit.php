@@ -134,7 +134,7 @@ if (!$skip) {
 		<?= $contentClass ?>
 		<?= $techInstalled?'':'open-in-modal-form' ?>
 	"
-	width="<?= $width ?>%"
+	style="width:<?= $width ?>%"
 	id="rack-<?= $rack->id ?>-unit-<?= $unitId ?>"
 	colspan="<?= $colspan ?>"
 	rowspan="<?= $rowspan ?>"
