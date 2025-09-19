@@ -8,6 +8,7 @@
 
 /* @var $width */
 /* @var $height */
+/* @var $cssHeight */
 /* @var $col */
 /* @var $row */
 /* @var $sectionRow */

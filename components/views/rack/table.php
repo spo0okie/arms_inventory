@@ -42,7 +42,7 @@ $fontHeight=min (($rack->smallestUnitHeight-2)*$height/$rack->getTotalHeight()*0
 			switch ($row['type']) {
 				case 'units':
 					for ($i=0; $i<$row['count']; $i++) {
-						$stackHeightPx=$rack->getHeightPercent($row['size'])*($height-2); //высота одного юнита в процентах от всей высоты шкафа
+						$stackHeightPx=$rack->getHeightPercent($row['size'])/100*($height-2); //высота одного юнита в процентах от всей высоты шкафа
 						$trHeight="calc({$stackHeightPx}px / {$row['count']})";	//высота строки таблицы в процентах от всей высоты шкафа (минус бордеры по 1px каждый)
 						echo $this->render('tr-units',[
 							'row'=>$y,
@@ -52,7 +52,8 @@ $fontHeight=min (($rack->smallestUnitHeight-2)*$height/$rack->getTotalHeight()*0
 							'models'=>$models,
 							'labels'=>$labels,
 							'evenLabelShift'=>$evenLabelShift,
-							'height'=>$trHeight,
+							'height'=>$stackHeightPx/$row['count'],
+							'cssHeight'=>$trHeight,
 							'totalHeight'=>$height
 						]);
 						$y++;

@@ -14,6 +14,13 @@ class HistoryPagesCest
 	
 	protected function classesProvider()
 	{
+		Helper\Yii2::initFromFilename('test-acceptance.php');
+		codecept_debug('Initializing Suite/HistoryTest DB...');
+		//Подготавливаем временную БД
+		Helper\Database::dropYiiDb();
+		Helper\Database::prepareYiiDb();
+		Helper\Database::loadSqlDump(__DIR__ . '/../_data/arms_demo.sql');
+		
 		$classes=[];
 		$modelsPath = __DIR__.'/../../models';
 		$modelFiles = FileHelper::findFiles($modelsPath, [

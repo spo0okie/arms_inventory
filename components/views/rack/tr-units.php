@@ -7,6 +7,7 @@
  */
 
 /* @var $height */
+/* @var $cssHeight */
 /* @var $totalHeight */
 /* @var $row */
 /* @var $sectionRow */
@@ -33,7 +34,7 @@ use app\components\RackWidget;
 use app\models\Techs;
 ?>
 
-<tr style="height:<?= $height ?>%" style="font-size: <?= $fontSize ?>px">
+<tr style="height:<?= $cssHeight ?>" style="font-size: <?= $fontSize ?>px">
 <?php
 	//если рисуем переднюю сторону, то слева направо, а если зад, то наоборот
 	for ($c=0; $c<count($rack->cols); $c++) {
@@ -49,6 +50,7 @@ use app\models\Techs;
 					echo $this->render('td-unit',[
 						'width'=>$width,
 						'height'=>$height,
+						'cssHeight'=>$cssHeight,
 						'models'=>$models,
 						'labels'=>$labels,
 						'col'=>$x,
