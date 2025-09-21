@@ -279,8 +279,7 @@ class Users extends ArmsModel implements IdentityInterface
 			'shortName' => [
 				'Короткое имя',
 				'indexHint'=>'Отображаться будет "Фамилия И.О.",<br>'.
-					'поиск будет вестись по полному имени.<br>'.
-					QueryHelper::$stringSearchHint,
+					'поиск будет вестись по полному имени',
 			],
 			'techs' => [
 				'Оборудование',

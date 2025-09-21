@@ -344,8 +344,7 @@ class Services extends ArmsModel
 				'indexHint' => '{same}<br />'.
 					'При поиске также ищет в полях '.
 					'<strong>"Другие варианты названия"</strong> и '.
-					'<strong>"Описание"</strong><br />'.
-					QueryHelper::$stringSearchHint,
+					'<strong>"Описание"</strong>',
 			],
 			'notebook' => [
 				'Подробно',
@@ -385,7 +384,7 @@ class Services extends ArmsModel
 				'is_inheritable'=>true,
 				'placeholder' => 'Ответственный не назначен',
 				'indexLabel'=>'Отв., поддержка',
-				'indexHint'=>'Поиск по ответственному или поддержке сервиса или инфраструктуры сервиса.<br />'.QueryHelper::$stringSearchHint,
+				'indexHint'=>'Поиск по ответственному или поддержке сервиса или инфраструктуры сервиса',
 			],
 			'segment_id' => [
 				'Сегмент ИТ',

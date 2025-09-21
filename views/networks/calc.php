@@ -29,6 +29,7 @@ if (!isset($static_view)) $static_view=false;
 				<td><?= AttributeHintWidget::widget([
 						'model'=>$model,
 						'attribute'=>$attr,
+						'mode'=>'grid'
 					]) ?></td>
 				<td><?= $model->$attr ?></td>
 			</tr>

@@ -319,6 +319,7 @@ JS;
 			'attribute'=>$attribute,
 			'label'=>$data['label']??null,
 			'hint'=>$data['hint']??null,
+			'mode'=>$this->tableColumnIsSearchable($attribute)?'search':'grid',
 		]);
 		$data['encodeLabel']=false;
 		
@@ -480,5 +481,26 @@ JS;
 		
 		//иначе выводится все что есть
 		return true;
+	}
+	
+	/**
+	 * Проверяет, имеет ли атрибут фильтрационное поле ввода.
+	 *
+	 * @param string $attribute
+	 * @return bool
+	 */
+	protected function tableColumnIsSearchable(string $attribute): bool
+	{
+		if ($this->filterModel === null) {
+			return false;
+		}
+		
+		// filterModel должен быть экземпляром yii\base\Model
+		if (!$this->filterModel instanceof \yii\base\Model) {
+			return false;
+		}
+		
+		// атрибут должен считаться "активным" для фильтрации
+		return $this->filterModel->isAttributeActive($attribute);
 	}
 }

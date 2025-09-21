@@ -239,8 +239,7 @@ class Comps extends ArmsModel
 			],
 			'arm_id' => [
 				'АРМ',
-				'indexHint' => 'ПК/сервер или облачная платформа на которой работает эта ОС<br/>'
-					.QueryHelper::$stringSearchHint,
+				'indexHint' => 'ПК/сервер или облачная платформа на которой работает эта ОС',
 				'absorb' => 'ifEmpty',
 				'placeholder' => 'Выберите АРМ/сервер',
 				'join' => ['arm','platform']
@@ -260,8 +259,7 @@ class Comps extends ArmsModel
 			],
 			'ip' => [
 				'IP Адрес',
-				'indexHint' => 'IP адреса сетевых интерфейсов настроенных в ОС<br/>'
-					.QueryHelper::$stringSearchHint,
+				'indexHint' => 'IP адреса сетевых интерфейсов настроенных в ОС',
 			],
 			'ip_ignore' => ['absorb' => 'ifEmpty'],
 			'lics' => [
@@ -271,8 +269,7 @@ class Comps extends ArmsModel
 			],
 			'mac' => [
 				'MAC Адрес',
-				'indexHint' => 'MAC адреса сетевых интерфейсов настроенных в ОС<br/>'
-					.QueryHelper::$stringSearchHint,
+				'indexHint' => 'MAC адреса сетевых интерфейсов настроенных в ОС',
 			],
 			'maintenance_jobs_ids' => [
 				MaintenanceJobs::$titles,
@@ -293,13 +290,12 @@ class Comps extends ArmsModel
 				'Имя компьютера',
 				'indexHint' => 'Сетевое имя компьютера настроенное в ОС.<br>'
 					.'Домен не выводится, но при поиске можно указывать.<br>'
-					.'Вводимый текст ищется в строке формата DOMAIN\\computer<br>'.QueryHelper::$stringSearchHint,
+					.'Вводимый текст ищется в строке формата DOMAIN\\computer',
 			],
 			'os' => [
 				'Наименование и версия операционной системы',
 				'indexHint' => 'В таблице в этой ячейке выводится только наименование ОС,<br>'
-					.'но поиск ведется также и по софту (в сыром, а не отформатированном виде)<br>'
-					.QueryHelper::$stringSearchHint,
+					.'но поиск ведется также и по софту (в сыром, а не отформатированном виде)',
 			],
 			'places_id' => [
 				'Помещение',
@@ -317,14 +313,12 @@ class Comps extends ArmsModel
 			'raw_hw' => [
 				'Hardware',
 				'indexHint' => 'Строка оборудования обнаруженного Операционной Системой<br>'
-					.'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку<br/>'
-					.QueryHelper::$stringSearchHint,
+					.'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку',
 			],
 			'raw_soft' => 'Отпечаток софта (заполняется скриптом)',
 			'raw_version' => [
 				'Скрипт',
-				'indexHint' => 'Скрипт, который внес последние данные по этой ОС<br/>'
-					.QueryHelper::$stringSearchHint,
+				'indexHint' => 'Скрипт, который внес последние данные по этой ОС',
 			],
 			'sandbox_id' => [
 				'placeholder' => 'ОС не изолирована в песочнице',
@@ -334,7 +328,7 @@ class Comps extends ArmsModel
 			'services_ids' => [
 				'Сервисы',
 				'hint' => 'Какие сервисы развернуты на этой ОС',
-				'indexHint' => '{same}<br />'.QueryHelper::$stringSearchHint,
+				'indexHint' => '{same}',
 				'placeholder' => 'Нет сервисов',
 			],
 			'softRescans' => [

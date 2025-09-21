@@ -9,10 +9,12 @@ namespace app\models\traits;
 
 use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
+use app\helpers\QueryHelper;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use OpenApi\Annotations\Property;
 use yii\base\Model;
+use yii\base\UnknownPropertyException;
 
 /**
  * Trait ExternalDataModelTrait
@@ -121,6 +123,11 @@ trait AttributeDataModelTrait
 		return $this->attributeIsReverseLink($attr);
 	}
 	
+	/**
+	 * @param $attr
+	 * @return string[]|null
+	 * @throws \yii\base\UnknownPropertyException
+	 */
 	public function getAttributeData($attr)
 	{
 		if (!isset($this->attributeDataCache)) {
@@ -276,8 +283,9 @@ trait AttributeDataModelTrait
 	 * - link: ссылка на другую модель - надо смотреть в linkSchema, чтобы узнать класс модели
 	 * @param $attribute
 	 * @return string
+	 * @throws UnknownPropertyException
 	 */
-	public function getAttributeType($attribute)
+	public function getAttributeType($attribute,$default='string')
 	{
 		if ($type=$this->getAttributeData($attribute)['type']??false) {
 			return $type;
@@ -297,10 +305,15 @@ trait AttributeDataModelTrait
 		
 		switch ($attribute) {
 			case 'id': return 'integer';
+			case 'ip':
 			case 'ips': return 'ips';
+			case 'mac':
 			case 'macs': return 'macs';
 			case 'links':
 			case 'urls': return 'urls';
+			case 'name':
+			case 'comment': return 'string';
+			case 'notepad': return 'text';
 		}
 		
 		foreach ($this->rules() as $rule) {
@@ -314,9 +327,23 @@ trait AttributeDataModelTrait
 			}
 		}
 		
-		return 'string';
+		return $default;
 	}
 
+	/**
+	 * Возвращает наименование атрибута для формы просмотра
+	 * @param $attribute
+	 * @return string
+	 */
+	public function getAttributeViewLabel($attribute)
+	{
+		$item=$this->getAttributeData($attribute);
+		if (is_array($item) && isset($item['viewLabel']))
+			return $item['viewLabel'];
+		/** @var $this Model */
+		return $this->getAttributeLabel($attribute);
+	}
+	
 	/**
 	 * Возвращает наименование атрибута для формы поиска
 	 * @param $attribute
@@ -328,20 +355,26 @@ trait AttributeDataModelTrait
 		if (is_array($item) && isset($item['indexLabel']))
 			return $item['indexLabel'];
 		/** @var $this Model */
-		return $this->getAttributeLabel($attribute);
+		return $this->getAttributeViewLabel($attribute);
 	}
 	
-	
 	/**
-	 * Возвращает описание атрибута для формы поиска
+	 * Возвращает описание атрибута для формы просмотра
 	 * @param $attribute
 	 * @return string
+	 * @throws UnknownPropertyException
 	 */
-	public function getAttributeIndexHint($attribute)
+	public function getAttributeViewHint($attribute)
 	{
+		/** @var $this Model */
 		$item=$this->getAttributeData($attribute);
+		if (isset($item['viewHint']))
+			return str_replace(
+				'{same}',
+				$this->getAttributeHint($attribute),
+				$item['viewHint']
+			);
 		if (isset($item['indexHint']))
-			/** @var $this Model */
 			return str_replace(
 				'{same}',
 				$this->getAttributeHint($attribute),
@@ -349,6 +382,66 @@ trait AttributeDataModelTrait
 			);
 		return null;
 	}
+	
+	/**
+	 * Возвращает описание атрибута для формы grid
+	 * @param $attribute
+	 * @return string
+	 * @throws UnknownPropertyException
+	 */
+	public function getAttributeIndexHint($attribute)
+	{
+		/** @var $this Model */
+		$item=$this->getAttributeData($attribute);
+		if (isset($item['indexHint']))
+			return str_replace(
+				'{same}',
+				$this->getAttributeHint($attribute),
+				$item['indexHint']
+			);
+		if (isset($item['viewHint']))
+			return str_replace(
+				'{same}',
+				$this->getAttributeHint($attribute),
+				$item['viewHint']
+			);
+		return null;
+	}
+	
+	/**
+	 * Возвращает описание атрибута для формы grid
+	 * @param $attribute
+	 * @return string
+	 * @throws UnknownPropertyException
+	 */
+	public function getAttributeSearchHint($attribute)
+	{
+		/** @var $this Model */
+		$item=$this->getAttributeData($attribute);
+		if (isset($item['searchHint']))
+			return str_replace(
+				'{same}',
+				$this->getAttributeHint($attribute),
+				$item['searchHint']
+			);
+		switch ($this->getAttributeType($attribute,null)) {
+			case 'text':
+			case 'ntext':
+			case 'string':
+			case 'ips':  //по сути тоже просто текст
+			case 'macs': //когданить мы родим диапазоны МАКов и для них будет отдельный поиск
+			case 'urls': //по сути тоже просто текст
+			case 'link': //обычно подразумевает поиск по имени связанных объектов
+				return QueryHelper::$stringSearchHint;
+			case 'date':
+			case 'datetime':
+				return QueryHelper::$dateSearchHint;
+			case 'number':
+				return QueryHelper::$numberSearchHint;
+		}
+		return '';
+	}
+	
 	
 	/**
 	 * Возвращает наименование атрибута для API документации

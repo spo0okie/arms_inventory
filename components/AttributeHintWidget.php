@@ -1,6 +1,7 @@
 <?php
 namespace app\components;
 
+use app\helpers\ArrayHelper;
 use app\helpers\FieldsHelper;
 use app\models\ArmsModel;
 use yii\base\Widget;
@@ -23,57 +24,108 @@ class AttributeHintWidget extends Widget
 
 	public $hint;			//подсказка
 	
-	public $index=true;		//метка не для формы, а для вывода в шапке таблицы
+	public $mode='grid';	//режим отображения (grid|search|form|view)
+	
 	
 	public function run()
 	{
-		
-		if (!is_null($this->hint) && strlen($this->hint)) {
-			$fieldFullName=
-				is_object($this->model)
-					?
-					$this->model->getAttributeLabel($this->attribute)
-					:
-					$this->label;
-			
+		//если у нас есть хинт, то возвращаем его с тултипом
+		if (!empty($this->hint)) {
 			return Html::tag(
 				'span',
 				$this->label,
-				FieldsHelper::toolTipOptions($fieldFullName,$this->hint)
+				FieldsHelper::toolTipOptions($this->label,$this->hint)
 			);
-		} else return $this->label;
+		}
+		
+		return $this->label;
+	}
+	
+	
+	public function prepareLabel():string {
+		//если метка уже есть, то и хорошо
+		if (!empty($this->label)) return $this->label;
+		
+		//пытаемся получить метку из модели
+		if (is_object($this->model)) {
+			switch ($this->mode) {
+				case 'search':
+				case 'grid':
+					return $this->firstMethod(
+						['getAttributeIndexLabel','getAttributeLabel'],
+						Inflector::camel2words($this->attribute, true)
+					);
+				
+				case 'form':
+					return $this->firstMethod(
+						['getAttributeLabel'],
+						Inflector::camel2words($this->attribute, true)
+					);
+				case 'view':
+					return $this->firstMethod(
+						['getAttributeViewLabel','getAttributeLabel'],
+						Inflector::camel2words($this->attribute, true)
+					);
+			}
+		}
+
+		//если не получилось, то просто из имени аттрибута
+		return Inflector::camel2words($this->attribute, true);
+	}
+	
+	public function prepareHint():string {
+		//если подсказка уже есть, то и хорошо
+		if (!empty($this->hint)) return $this->hint;
+		
+		//пытаемся получить метку из модели
+		if (is_object($this->model)) {
+			switch ($this->mode) {
+				case 'search':
+					$hint=(string)$this->firstMethod(
+						['getAttributeIndexHint','getAttributeHint'],''
+					);
+					$searchHint=(string)$this->firstMethod(
+						['getAttributeSearchHint'],''
+					);
+					return ArrayHelper::implode('<hr/>',[$hint,$searchHint]);
+					
+				case 'grid':
+					return (string)$this->firstMethod(
+						['getAttributeIndexHint','getAttributeHint'],
+						Inflector::camel2words($this->attribute, true)
+					);
+				
+				case 'form':
+					return (string)$this->firstMethod(
+						['getAttributeHint'],
+						Inflector::camel2words($this->attribute, true)
+					);
+					
+				case 'view':
+					return (string)$this->firstMethod(
+						['getAttributeViewHint','getAttributeHint'],
+						Inflector::camel2words($this->attribute, true)
+					);
+			}
+		}
+		return '';
+	}
+
+	private function firstMethod($methods,$default)
+	{
+		foreach ($methods as $method) {
+			if (method_exists($this->model, $method)) {
+				return $this->model->$method($this->attribute);
+			}
+		}
+		return $default;
 	}
 	
 	
 	public function init() {
 		
-		$model=$this->model;
-		
-		if (
-			is_null($this->label)
-		) {
-			if (is_object($model)) {
-				$this->label=($this->index&&method_exists($model,'getAttributeIndexLabel'))
-				?
-				$model->getAttributeIndexLabel($this->attribute)
-				:
-				$model->getAttributeLabel($this->attribute);
-			} else {
-				$this->label=Inflector::camel2words($this->attribute, true);
-			}
-		}
-		
-		//$this->label=Html::encode($this->label);
-		
-		$hintMethod=$this->index?'getAttributeIndexHint':'getAttributeHint';
-		
-		if (
-			!is_null($this->label) &&
-			is_object($model) &&
-			method_exists($model,$hintMethod)
-		) {
-			$this->hint=$model->$hintMethod($this->attribute);
-		}
+		$this->label=$this->prepareLabel();
+		$this->hint=$this->prepareHint();
 
 	}
 	
