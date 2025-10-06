@@ -152,7 +152,7 @@ class Manufacturers extends ArmsModel
 	
 	public function getTechModels() {
 		//return \app\models\TechModels::find()->where(['manufacturers_id' => $this->id])->orderBy('name')->all();
-		return $this->hasMany(Soft::class, ['manufacturers_id' => 'id']);
+		return $this->hasMany(TechModels::class, ['manufacturers_id' => 'id']);
 	}
 	
 	public function getDict() {
