@@ -17,7 +17,7 @@ class QueryHelper
 	'Можно также использовать следующие подстановки:'.
 	'<ul>'.
 	'<li><strong>*</strong> (звездочка) - должно присутствовать любое непустое значение</li>'.
-	'<li><strong>-</strong> (минус) - отсутствовать какое либо значение</li>'.
+	'<li><strong>-</strong> (минус) - отсутствовать какое-либо значение</li>'.
 	'</ul>'.
 	'<i>Примеры:<br />'.
 	'<strong>Siemens &amp; !NX &amp; !teamcenter</strong> - Siemens, но не NX и не Teamcenter<br/>'.
