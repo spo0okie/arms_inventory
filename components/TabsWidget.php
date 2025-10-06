@@ -18,7 +18,7 @@ class TabsWidget extends Tabs
 	public $cookieName='nonameTabs';
 	public $defaultItem='tab1';
 	public $encodeLabels=false;
-	public const badgeStart='<span class="badge rounded-pill p-1 m-1 bg-secondary opacity-25">';
+	public const badgeStart='<span class="badge rounded-pill bg-warning px-1 mx-1">';
 	public const badgeEnd='</span>';
 	
 	
@@ -65,7 +65,7 @@ class TabsWidget extends Tabs
 			//$items[$i]['options']['id']='tab-'.$tabId.'-content';
 			
 			//if (!isset($this->tabs[$i]['label'])) $this->tabs[$i]['label']='Tab '.$counter;
-			$items[$i]['headerOptions']=['onClick'=>'document.cookie = "'.$this->cookieName.'='.$tabId.'"','id'=>'tab-'.$tabId];
+			$items[$i]['headerOptions']=array_merge($items[$i]['headerOptions']??[],['onClick'=>'document.cookie = "'.$this->cookieName.'='.$tabId.'"','id'=>'tab-'.$tabId]);
 		}
 		
 		parent::prepareItems($items, $prefix);
@@ -176,7 +176,7 @@ HTML;
 				.'<span class="count"></span>'
 				.'<i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#'.$gridId.'-grid-modal" class="small fas fa-wrench fa-fw"></i>',
 			'content'=>$staticContent
-				.TabsWidget::ajaxLoadItems($id,$url)
+				.TabsWidget::ajaxLoadItems($id,$url),
 		
 		];
 		//поскольку мы асинхронно подгрузим таблицу, она может сохранять свои настройки
