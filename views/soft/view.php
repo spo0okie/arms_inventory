@@ -34,12 +34,12 @@ foreach ($model->scans??[] as $scan) $scans.= $this->render('/scans/thumb',[
 
 $this->params['headerContent']=$this->render('header',['model'=>$model]);
 
-$badge='<span class="badge rounded-pill p-1 m-1 bg-secondary opacity-25">';
+$badge='<span class="badge rounded-pill p-1 m-1 bg-warning">';
 
 $tabs=[];
 $tabs[]=[
 	'id'=>'hits',
-	'label'=>'Обнаружения '.$badge.count($model->hits).'</span>',
+	'label'=>'Обнаружения '.TabsWidget::badgeStart.$dataProvider->count.TabsWidget::badgeEnd,
 	'content'=> (
 			count($model->compRescans)?
 				(\app\components\StripedAlertWidget::widget(['title'=>'Данные устарели, ожидается фоновое сканирование '.count($model->compRescans).' компьютеров']))
@@ -63,11 +63,12 @@ $tabs[]=[
 		'filterModel' => $searchModel,
 		//'panel'=>true
 	]),
+	'headerOptions'=>['class'=>!$dataProvider->count?'muted-tab':'']
 ];
 
 $tabs[]=[
 	'id'=>'licGroups',
-	'label'=>'Совместимые лицензии '.$badge.count($model->licGroups).'</span>',
+	'label'=>'Совместимые лицензии '.TabsWidget::badgeStart.count($model->licGroups).TabsWidget::badgeEnd,
 	'content'=>DynaGridWidget::widget([
 		'id' => 'soft-lic-groups-list',
 		'header'=>'Типы лицензий',
@@ -77,6 +78,7 @@ $tabs[]=[
 		'createButton'=>count($licProvider->models)?('Активных лицензий: '.$keysCount):'',
 		'model'=>new LicGroups(),
 	]),
+	'headerOptions'=>['class'=>!count($model->licGroups)?'muted-tab':''],
 ];
 
 TabsWidget::addWikiLinks($tabs,$model->links);	//добавляем из вики
