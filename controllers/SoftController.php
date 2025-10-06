@@ -26,7 +26,7 @@ class SoftController extends ArmsBaseController
 	
 	public function disabledActions()
 	{
-		return ['item-by-name','ttip'];
+		return ['item-by-name'];
 	}
 	
 	/**
