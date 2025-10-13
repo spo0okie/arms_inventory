@@ -1,0 +1,19 @@
+actor: AcceptanceExtraTester
+modules:
+    enabled:
+        - Yii2:
+            part: [ orm, fixtures ]
+            configFile: 'config/test-acceptance.php'
+            transaction: false
+            cleanup: false
+            entryUrl: http://localhost:8081/web/index-test-acceptance.php
+        - PhpBrowser:
+            url: http://localhost:8081/web/index-test-acceptance.php
+        - REST:
+            depends: PhpBrowser
+            url: http://localhost:8081
+        - \Helper\Acceptance:
+            depends:
+                - \Helper\Database
+                - \Helper\Yii2
+bootstrap: _bootstrap.php
