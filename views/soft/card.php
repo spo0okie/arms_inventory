@@ -28,7 +28,7 @@ if (!isset($static_view)) $static_view=false;
 	]) ?>
 </h1>
 
-<?= Markdown::convert($model->comment) ?>
+<?= Yii::$app->formatter->asNtext($model->comment) ?>
 <?php if (is_array($model->softLists)&&count($model->softLists)) { ?>
 	<ul>
 		<?php foreach ($model->softLists as $item) { ?>
@@ -52,18 +52,7 @@ if (!isset($static_view)) $static_view=false;
 	</p>
 <?php } ?>
 
-<?php if (isset($hitlist) && ($hitlist!=='null')) { ?>
-	<h4>Список regexp совпадений:</h4>
-	<p class="mb-4">
-		<?= Yii::$app->formatter->asNtext($hitlist) ?>
-	</p>
-<?php } ?>
-
-
-<h5>Regexp основных элементов ПО</h5>
-<p class="mb-4"><?= Yii::$app->formatter->asNtext($model->items) ?></p>
-
-<?php if ($model->additional) { ?>
-	<h5>Regexp Дополнительных компонент ПО</h5>
-	<p class="mb-4"><?= Yii::$app->formatter->asNtext($model->additional) ?></p>
-<?php } ?>
+<?= \app\components\ModelFieldWidget::widget([
+	'model'=>$model,
+	'field'=>'notepad',
+]) ?>

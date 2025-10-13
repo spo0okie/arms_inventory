@@ -52,6 +52,7 @@ class Soft extends ArmsModel
 	protected static $syncableFields=[
 		'descr',
 		'comment',
+		'notepad',
 		'items',
 		'additional',
 		'updated_at',
@@ -94,7 +95,8 @@ class Soft extends ArmsModel
             [['manufacturers_id'], 'integer'],
             [['items','additional'], 'string'],
             [['created_at','add_item','links'], 'safe'],
-            [['descr', 'comment'], 'string', 'max' => 255],
+			[['descr', 'comment'], 'string', 'max' => 255],
+			[['notepad'], 'string'],
 			[['descr', 'manufacturers_id'], 'unique', 'targetAttribute' => ['descr', 'manufacturers_id']],
             [['manufacturers_id'], 'exist', 'skipOnError' => true, 'targetClass' => Manufacturers::class, 'targetAttribute' => ['manufacturers_id' => 'id']],
         ];
@@ -105,17 +107,28 @@ class Soft extends ArmsModel
      */
     public function attributeData()
     {
-        return ArrayHelper::merge(parent::attributeData(),[
+        return array_merge(parent::attributeData(),[
             'id' => 'Идентификатор',
             'manufacturers_id' => 'Разработчик',
-            'descr' => 'Наименование',
-            'comment' => [
-				'Описание ПО',
-				'type'=>'text'
+            'descr' => [
+				'Наименование',
 			],
-			'notes' => [
-				'Информация ИТ',
-				'hint'=>'Детали ИТ отдела о применении этого ПО, распространении на ПК, пояснения, веселые истории и т.п.',
+            'comment' => [
+				'Краткое описание',
+				'indexLabel'=>'Пояснение',
+				'hint'=>'Краткое пояснение по этому ПО: назначение, платное/бесплатное',
+				'type'=>'string'
+			],
+			'notepad' => [
+				'Подробное описание',
+				'type'=>'text',
+				'hint'=>'Подробное описание по этому ПО:<ul>'
+					.'<li>Отличия от своих аналогов</li>'
+					.'<li>Детали ИТ отдела о применении этого ПО</li>'
+					.'<li>Особенности распространения на ПК, пояснения</li>'
+					.'<li>Известные проблемы</li>'
+					.'<li>Прочие особенности</li>'
+				.'</ul>',
 			],
             'items' => [
 				'Основные элементы входящие в пакет ПО',
