@@ -25,6 +25,5 @@
 </IfModule> 
 
 <Limit GET POST PUT DELETE>
-    Order allow,deny
-    Allow from all
+    Require all granted
 </Limit>
