@@ -13,7 +13,7 @@ rem -------------------------------------------------------------
 
 set YII_PATH=%~dp0
 
-if "%PHP_COMMAND%" == "" set PHP_COMMAND=c:\wamp\bin\php\php7.4.33\php.exe
+if "%PHP_COMMAND%" == "" set PHP_COMMAND=php.exe
 
 "%PHP_COMMAND%" "%YII_PATH%yii" %*
 
