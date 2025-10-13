@@ -11,20 +11,6 @@ return [
 	'useRBAC'=>false,   		//включить RBAC и выдавать админа только тем кому назначено
 	'localAuth'=>false,   		//включить локальную БД паролей
 	'authorizedView'=>false,	//запретить доступ без авторизации
-	'userSyncFields'=>[
-		'Orgeh' => 'SAP',
-		'Doljnost' => 'SAP',
-		'Ename' => 'SAP',
-		'Persg' => 'SAP',
-		'Uvolen' => 'SAP',
-		'Login' => 'AD',
-		'Email' => 'AD',
-		'Phone' => 'AD',
-		'Mobile' => 'AD',
-		'work_phone' => 'AD',
-		'Bday' => 'SAP',
-		'manager_id' => 'SAP',
-	],
 	'textFields'=>[
 		'default'=>'text',
 		'Aces.notepad'=>'markdown',
@@ -34,6 +20,7 @@ return [
 		'Networks.notepad'=>'markdown',
 		'Schedules.history'=>'markdown',
 		'Segments.history'=>'markdown',
+		'Soft.notepad'=>'markdown',
 		'Users.notepad'=>'markdown',
 	],
 	'schedulesTZShift'=>3600*3,
@@ -75,5 +62,8 @@ return [
 		['baseIp'=>'10.0.0.0','maxPrefix'=>8,'minPrefix'=>16],
 		['baseIp'=>'192.168.0.0','maxPrefix'=>16,'minPrefix'=>24],
 		['baseIp'=>'172.16.0.0','maxPrefix'=>16,'minPrefix'=>24],
-	]
+	],
+	
+	'llm.openai.key'=>'',
+	'llm.openai.proxy'=>'',
 ];

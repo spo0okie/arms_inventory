@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\llm\LlmClient;
 use app\helpers\ArrayHelper;
 use app\models\CompsSearch;
 use app\models\LicGroupsSearch;
@@ -20,7 +21,7 @@ class SoftController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'edit'=>['select-update'],
+			'edit'=>['select-update','generate-description'],
 		]);
 	}
 	
@@ -139,6 +140,38 @@ class SoftController extends ArmsBaseController
 		return $this->render('uploads', [
 			'model' => $model,
 		]);
+	}
+	
+	public function actionGenerateDescription()
+	{
+		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		
+		$name = Yii::$app->request->post('name');
+		$manufacturer = Yii::$app->request->post('manufacturer');
+		
+		if (!$name) {
+			return ['error' => 'Не указано имя ПО'];
+		}
+		
+		if (!$manufacturer) {
+			return ['error' => 'Не указан разработчик'];
+		}
+		
+		$vendor=\app\models\Manufacturers::findOne($manufacturer);
+		$generator = new LlmClient();
+		$result = $generator->generateSoftwareDescription($vendor->name.' '.$name);
+		
+		if (!$result || !is_array($result)) {
+			return ['error' => 'Не удалось получить описание'];
+		}
+		
+		$result['comment']= preg_replace('/программное\s+обеспечение/ui', 'ПО',
+				preg_replace('/.$/','', $result['short']).', '
+			.$result['cost']
+			.' ('.$result['license'].')'
+		);
+		
+		return ['success' => true, 'data' => $result];
 	}
     
 }

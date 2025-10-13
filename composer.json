@@ -65,7 +65,10 @@
 	"thomaspark/bootswatch": "dev-master",
     "zircote/swagger-php": "^4.0",
     "light/yii2-swagger": "~3.0",
-    "doctrine/annotations": "2.0.x-dev"
+    "doctrine/annotations": "2.0.x-dev",
+    "openai-php/client": "dev-main",
+    "guzzlehttp/guzzle": "7.9.x-dev",
+    "guzzlehttp/psr7": "2.7.x-dev"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.0.0",
@@ -80,7 +83,8 @@
   "config": {
     "process-timeout": 1800,
     "allow-plugins": {
-      "yiisoft/yii2-composer": true
+      "yiisoft/yii2-composer": true,
+      "php-http/discovery": true
     }
   },
   "scripts": {
