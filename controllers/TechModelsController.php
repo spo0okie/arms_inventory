@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\llm\LlmClient;
 use app\components\RackWidget;
 use app\helpers\FieldsHelper;
 use app\models\Manufacturers;
@@ -184,6 +185,39 @@ class TechModelsController extends ArmsBaseController
 		return $this->render('uploads', [
 			'model' => $model,
 		]);
+	}
+	
+	
+	public function actionGenerateDescription()
+	{
+		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		
+		$name = Yii::$app->request->post('name');
+		$manufacturer = Yii::$app->request->post('manufacturer');
+		$type = Yii::$app->request->post('type');
+		
+		if (!$name) {
+			return ['error' => 'Не указана модель'];
+		}
+		
+		if (!$manufacturer) {
+			return ['error' => 'Не указан производитель'];
+		}
+		
+		if (!$type) {
+			return ['error' => 'Не указан тип оборудования'];
+		}
+		
+		$vendor=\app\models\Manufacturers::findOne($manufacturer);
+		$techType=\app\models\TechTypes::findOne($type);
+		$generator = new LlmClient();
+		$result = $generator->generateTechModelDescription($techType->name, $vendor->name.' '.$name,$techType->comment);
+		
+		if (!$result) {
+			return ['error' => 'Не удалось получить описание'];
+		}
+		
+		return ['success' => true, 'data' => $result];
 	}
 	
 }

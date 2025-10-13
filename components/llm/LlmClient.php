@@ -39,6 +39,11 @@ class LlmClient
 	}
 	
 	
+	/**
+	 * Сгенерировать описание программного обеспечения в формате JSON
+	 * @param string $name
+	 * @return array|null
+	 */
 	public function generateSoftwareDescription(string $name): ?array
 	{
 		$prompt = "Создай описание программного обеспечения \"$name\" в формате JSON:
@@ -62,4 +67,30 @@ class LlmClient
 		$json = $response->choices[0]->message->content ?? null;
 		return $json ? json_decode($json, true) : null;
 	}
+	
+	
+	public function generateTechModelDescription(string $type, string $name, string $tpl): string
+	{
+		$prompt = <<<PROMPT
+Заполни краткое техническое описание устройства типа "$type" (модель "$name") по шаблону ниже.
+
+Шаблон:
+$tpl
+
+Ответ должен быть в виде текстового блока (plain text) строго по структуре шаблона, без пояснений.
+PROMPT;
+		
+		
+		
+		$response = $this->client->chat()->create([
+			'model' => 'gpt-4o-mini', // дешёвая и качественная модель
+			'messages' => [
+				['role' => 'system', 'content' => 'Ты — эксперт по инвентаризации IT-оборудования.'],
+				['role' => 'user', 'content' => $prompt],
+			],
+		]);
+		
+		return trim($response->choices[0]->message->content);
+	}
+	
 }

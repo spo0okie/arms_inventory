@@ -105,13 +105,16 @@ if (Yii::$app->request->get('return'))
 				Подсказка для описания модели
 			</label>
 			<br />
-			<div id="comment-hint" class="hint-block">
+			<div id="comment-hint" class="hint-block mb-3">
 				
 				<?= is_null($model->type_id)?
 					$model->getAttributeHint('comment'):
 					Yii::$app->formatter->asNtext($model->type->comment)
 				 ?>
 			</div>
+			<?php if (\app\components\llm\LlmClient::available()) { ?>
+				<button type="button" id="btn-generate" class="btn btn-secondary">Сгенерировать описание</button>
+			<?php } ?>
         </div>
     </div>
 	
@@ -160,3 +163,36 @@ if (Yii::$app->request->get('return'))
     <?php ArmsForm::end(); ?>
 
 </div>
+<?php
+$js = <<<JS
+$('#btn-generate').on('click', function() {
+    const manufacturer	= $('#techmodels-manufacturers_id').val();
+    const type			= $('#techmodels-type_id').val();
+    const name			= $('#techmodels-name').val();
+
+    if (!name) {alert('Заполните наименование модели'); return; }
+    if (!manufacturer) {alert('Укажите производителя'); return; }
+    if (!type) {alert('Укажите тип оборудования'); return; }
+
+    $(this).prop('disabled', true).text('Генерация...');
+
+    $.post('/web/tech-models/generate-description', {manufacturer, type, name})
+        .done(function(resp) {
+            if (resp.error) {
+                alert(resp.error);
+                return;
+            }
+            const data = resp.data;
+            if (data) {
+                if (!$('#techmodels-comment').val()) $('#techmodels-comment').val(data || '');
+            }
+        })
+        .fail(function() {
+            alert('Ошибка при обращении к серверу');
+        })
+        .always(function() {
+            $('#btn-generate').prop('disabled', false).text('Сгенерировать описание');
+        });
+});
+JS;
+$this->registerJs($js);
