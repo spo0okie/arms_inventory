@@ -14,27 +14,23 @@ class DefaultColumn extends DataColumn
 	
 	public function renderDataCell($model, $key, $index)
 	{
-		if ($this->contentOptions instanceof Closure) {
-			$options = call_user_func($this->contentOptions, $model, $key, $index, $this);
-		} else {
-			$options = $this->contentOptions;
-		}
+		$cellOptions = $this->fetchContentOptions($model, $key, $index);
+		
 		/** @var ArmsModel $model */
-		$options=ArrayHelper::merge([
+		return ModelFieldWidget::widget([
 			'model'=>$model,
 			'field'=>$this->attribute,
 			'item_options'=>[
 				'static_view'=>true,
 			],
 			'card_options'=>[
-				'cardClass' => 'p-1 text-wrap',
+				'cardClass' => 'p-1 text-wrap '.($cellOptions['class']??''),
 				'outerTag' => 'td',
 			],
 			'show_empty'=>true,
 			'title'=>false
-		],$options);
+		]);
 		
-		return ModelFieldWidget::widget($options);
 	}
 	
 }
