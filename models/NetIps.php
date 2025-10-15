@@ -414,6 +414,7 @@ class NetIps extends ArmsModel
 	 * @return int[]
 	 */
 	public static function fetchIpIds($text,$skipNetMasks=false) {
+		if (!$text) return [];
 		if (!count($items=explode("\n",$text))) return[];
 		$ids=[];
 		foreach ($items as $item) {
