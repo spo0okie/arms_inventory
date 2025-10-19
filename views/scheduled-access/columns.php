@@ -90,11 +90,13 @@ return [
 	'aceDepartments'=>[
 		'contentOptions'=>['glue'=>'<br>',]
 	],
+	/*
+	отключено, ибо дофига сложно вытаскивать площадки из всех ресурсов (особенно сервисов)
 	'aclSites'=>[
 		'value'=>function($data) use ($renderer) {
 			/**
 			 * @var $data Schedules
-			 */
+			 
 			$items=[];
 			if (count($data->aclSites)) foreach ($data->aclSites as $site) {
 				$items[]=$this->render('/places/item',['model'=>$site,'static_view'=>true,'short'=>true]);
@@ -102,7 +104,7 @@ return [
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);
 		}
-	],
+	],*/
 	'accessTypes'=>[
 		'value'=>function($data) use ($renderer) {
 			/**

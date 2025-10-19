@@ -49,44 +49,64 @@ class SchedulesSearchAcl extends Schedules
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params,$columns=null)
     {
-        $query = Schedules::find()
-		->joinWith([
-			'acls.aces.comps',
-			'acls.aces.users.org',
-			'acls.aces.users.orgStruct',
-			'acls.aces.netIps',
-			'acls.aces.networks',
-			'acls.aces.accessTypes',
-			'acls.aces.services',
-			'acls.comp',
-			'acls.tech',
-			'acls.service.orgInets',
-			'acls.service.orgPhones',
-			'acls.ip',
-			'acls.network',
-			'periods'
-		])
+		$query = Schedules::find()
+			->with([
+				'acls.aces.comps',
+				'acls.aces.users.org',
+				'acls.aces.users.orgStruct',
+				'acls.aces.netIps',
+				'acls.aces.networks',
+				'acls.aces.accessTypes',
+				'acls.aces.services',
+				'acls.comp',
+				'acls.tech',
+				'acls.service.orgInets',
+				'acls.service.orgPhones',
+				'acls.ip',
+				'acls.network',
+				'periods'
+			])
 		->where('acls.id')
 		->andWhere(['schedules.override_id'=>null]);
+		
+		$filter = Schedules::find()
+			->select('DISTINCT(schedules.id)')
+			->joinWith([
+				'acls.aces.comps',
+				'acls.aces.users.org',
+				'acls.aces.users.orgStruct',
+				'acls.aces.netIps',
+				'acls.aces.networks',
+				'acls.aces.accessTypes',
+				'acls.aces.services',
+				'acls.comp',
+				'acls.tech',
+				'acls.service.orgInets',
+				'acls.service.orgPhones',
+				'acls.ip',
+				'acls.network',
+				'periods'
+			])
+			->where('acls.id')
+			->andWhere(['schedules.override_id'=>null]);
 
         // add conditions that should always apply here
 
         $this->load($params);
-
+		
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+			'sort'=> ['defaultOrder' => ['id'=>SORT_DESC]]
+		]);
+		
         if (!$this->validate()) {
-			//$totalQuery=clone $query;
-            return new ActiveDataProvider([
-				'query' => $query,
-				//'totalCount' => $totalQuery->count('distinct(schedules.id)'),
-				'pagination' => false,
-				'sort'=> ['defaultOrder' => ['id'=>SORT_DESC]]
-			]);
+			return $dataProvider;
         }
 	
 		if (!$this->archived??false) {
-			$query->andWhere([
+			$filter->andWhere([
 				'exists',
 				(new \yii\db\Query())
 					->from('schedules_entries sp1')
@@ -102,7 +122,7 @@ class SchedulesSearchAcl extends Schedules
 					])
 			]);
 			
-			$query->andWhere([
+			$filter->andWhere([
 				'not exists',
 				(new \yii\db\Query())
 					->from('schedules_entries sp2')
@@ -118,36 +138,36 @@ class SchedulesSearchAcl extends Schedules
 					])
 			]);
 		}
-	
-		$query->andFilterWhere(['or like', 'CONCAT(IFNULL(schedules.name,""),IFNULL(schedules.description,""),IFNULL(schedules.history,""))', StringHelper::explode($this->name,'|',true,true)]);
-	
-		$query->andFilterWhere(['or like', 'CONCAT(partners.bname," ",partners.uname)', StringHelper::explode($this->acePartners,'|',true,true)]);
 		
-		$query->andFilterWhere(['or like', 'org_struct.name', StringHelper::explode($this->aceDepartments,'|',true,true)]);
-
-		$query->andFilterWhere(['or like', 'access_types.name', StringHelper::explode($this->accessTypes,'|',true,true)]);
-	
-		$query->andFilterWhere(['or',
+		$filter->andFilterWhere(['or like', 'CONCAT(IFNULL(schedules.name,""),IFNULL(schedules.description,""),IFNULL(schedules.history,""))', StringHelper::explode($this->name,'|',true,true)]);
+		
+		$filter->andFilterWhere(['or like', 'CONCAT(partners.bname," ",partners.uname)', StringHelper::explode($this->acePartners,'|',true,true)]);
+		
+		$filter->andFilterWhere(['or like', 'org_struct.name', StringHelper::explode($this->aceDepartments,'|',true,true)]);
+		
+		$filter->andFilterWhere(['or like', 'access_types.name', StringHelper::explode($this->accessTypes,'|',true,true)]);
+		
+		$filter->andFilterWhere(['or',
 			['or like', 'comps_subjects.name', StringHelper::explode($this->objects,'|',true,true)],
 			['or like', 'users_subjects.Ename', StringHelper::explode($this->objects,'|',true,true)],
 			['or like', 'aces.ips', StringHelper::explode($this->objects,'|',true,true)],
 			['or like', 'aces.comment', StringHelper::explode($this->objects,'|',true,true)],
 		]);
-	
-		$query->andFilterWhere(['or',
+		
+		$filter->andFilterWhere(['or',
 			['or like', 'comps_resources.name', StringHelper::explode($this->resources,'|',true,true)],
 			['or like', 'services_resources.name', StringHelper::explode($this->resources,'|',true,true)],
 			['or like', 'techs_resources.num', StringHelper::explode($this->resources,'|',true,true)],
 			['or like', 'ips_resources.text_addr', StringHelper::explode($this->resources,'|',true,true)],
 			['or like', 'acls.comment', StringHelper::explode($this->resources,'|',true,true)],
 		]);
-	
+		
+		if ($filter->where) {
+			//фильтруем запрос данных по ID из фильтра, который мы только что получили при помощи разных WHERE
+			$query->where('schedules.id in ('.$filter->createCommand()->rawSql.')');
+		}
+		
 		//$totalQuery=clone $query;
-		return new ActiveDataProvider([
-			'query' => $query,
-			//'totalCount' => $totalQuery->count('distinct(schedules.id)'),
-			'pagination' => false,
-			'sort'=> ['defaultOrder' => ['id'=>SORT_DESC]]
-		]);
+		return $dataProvider;
     }
 }
