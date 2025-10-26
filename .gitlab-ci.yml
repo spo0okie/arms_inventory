@@ -1,0 +1,77 @@
+#этапы pipleine
+stages:
+  - build
+  - test
+
+image: docker:27
+
+services:
+  - docker:dind  # Docker-in-Docker для сборки и запуска контейнеров
+
+
+# Переменные окружения для всех jobs
+variables:
+  # Базовый Docker-образ, который будет использоваться для выполнения job
+  PHP_IMAGE: "php:8.2-cli"
+
+  # Разрешает Composer работать от имени root (внутри контейнера GitLab Runner)
+  COMPOSER_ALLOW_SUPERUSER: "1"
+
+  # Каталог кэша для Composer — чтобы ускорить повторные сборки
+  COMPOSER_CACHE_DIR: "/tmp/composer-cache"
+
+  DOCKER_DRIVER: overlay2    # если не указать, то docker-in-docker может использовать неоптимальный vfs
+  DOCKER_TLS_CERTDIR: ""     # отключаем TLS, чтобы docker-compose работал с dind
+
+# ------------------------------------------------------------------------------
+# СБОРКА DOCKER-ОБРАЗА
+# ------------------------------------------------------------------------------
+build-app:
+  stage: build
+  script:
+    - echo "===> Сборка Docker-образа приложения"
+    - docker build -t spo0okie/inventory:v2 -f docker/Dockerfile docker
+
+    - echo "===> Сохранение образа как tar"
+    - docker save -o arms-app.tar spo0okie/inventory:v2
+
+  artifacts:
+    paths:
+      - arms-app.tar
+    expire_in: 1 hour
+  only:
+    - branches
+    - merge_requests
+
+# ------------------------------------------------------------------------------
+# ТЕСТ DOCKER-ОБРАЗА
+# ------------------------------------------------------------------------------
+test-app:
+  stage: test
+  dependencies:
+    - build-app
+  script:
+    - echo "===> Установка docker-compose"
+    - apk add --no-cache docker-compose
+
+    - echo "===> Загрузка Docker-образа из артефакта"
+    - docker load -i arms-app.tar
+
+    - echo "===> Проверка docker-compose"
+    - docker-compose -f docker/docker-compose.yml config
+
+    - echo "===> Запуск контейнеров"
+    - docker-compose -f docker/docker-compose.yml up -d
+
+    - echo "===> Ожидание MySQL..."
+    - sleep 20
+
+    - echo "===> Запуск тестов"
+    - docker exec $(docker ps -qf "name=arms-app") php vendor/bin/codecept run acceptance || (docker logs $(docker ps -qf "name=arms-app"); false)
+
+    - echo "===> Остановка окружения"
+    - docker-compose -f docker/docker-compose.yml down -v
+
+  only:
+    - branches
+    - merge_requests

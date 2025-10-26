@@ -1,0 +1,47 @@
+# Последняя версия docker-compose
+version: '3.7'
+
+# именованую сеточку делаем, чтобы не рандом бридж
+networks:
+  arms:
+
+# Создаем отдельные контейнеры
+services:
+  # Контейнер с веб-приложением
+  arms-app:
+    image: spo0okie/inventory:v1
+    # Показываем наружу 80 порт как 8088
+    ports:
+      - "8088:8088"
+    # Подключаем к общей сети с другими контейнерами
+    networks: [arms]
+    # Линкуем внешнюю папку с исходниками внутрь
+    volumes:
+      - "./log:/var/log/apache2"
+      - "./config/params.php:/var/www/arms/config/params-local.php"
+      - "./config/ldap.php:/var/www/arms/config/ldap.php"
+      - "./config/web.php:/var/www/arms/config/web-local.php"
+      - "./files:/var/www/arms/web/scans"
+      - "./runtime:/var/www/arms/runtime"
+    depends_on:
+      - arms-db
+
+  # контейнер с БД
+  arms-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      # вообще он нафиг не нужон, но это mandatory параметр судя по доке
+      MYSQL_ROOT_PASSWORD: please_change_me_ASAP
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+      MYSQL_DATABASE: arms
+      MYSQL_USER: arms-user
+      MYSQL_PASSWORD: arms-password
+      MYSQL_INITDB_SKIP_TZINFO: 1
+    # выносим дб во вне контейнера чтобы не слетела при обновлении или пересоздании
+    # в принципе можно и именованным вольюмом обойтись
+    volumes:
+      - "./db:/var/lib/mysql"
+      - "./config/mysql.cnf:/etc/mysql/conf.d/00-arms-init.cnf"
+    # Подключаем к общей сети с другими контейнерами
+    networks: [arms]
