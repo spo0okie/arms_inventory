@@ -5,10 +5,6 @@ stages:
 
 image: docker:27
 
-services:
-  - docker:dind  # Docker-in-Docker для сборки и запуска контейнеров
-
-
 # Переменные окружения для всех jobs
 variables:
   # Базовый Docker-образ, который будет использоваться для выполнения job
@@ -19,9 +15,6 @@ variables:
 
   # Каталог кэша для Composer — чтобы ускорить повторные сборки
   COMPOSER_CACHE_DIR: "/tmp/composer-cache"
-
-  DOCKER_DRIVER: overlay2    # если не указать, то docker-in-docker может использовать неоптимальный vfs
-  DOCKER_TLS_CERTDIR: ""     # отключаем TLS, чтобы docker-compose работал с dind
 
 # ------------------------------------------------------------------------------
 # СБОРКА DOCKER-ОБРАЗА
