@@ -36,8 +36,13 @@ class SiteController extends Controller
 					[
 						'actions' => ['api-doc','api-json'],
 						'allow' => true,
-						'roles' => 'admin'
-					]
+						'roles' => 'admin',
+					],
+					[
+						'actions' => ['app-info'],
+						'allow' => true,
+						'roles' => 'admin',
+					],
                 ],
             ],
             'verbs' => [
@@ -202,5 +207,15 @@ class SiteController extends Controller
 		return $this->render('password', [
 			'model' => $model,
 		]);
+	}
+	
+	public function actionAppInfo()
+	{
+		phpinfo();
+		
+		echo "<h2>App params</h2>";
+		echo "<pre>";
+		var_dump(Yii::$app->params);
+		echo "</pre>";
 	}
 }
