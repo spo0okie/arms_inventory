@@ -342,8 +342,6 @@ class Scans extends ArmsModel
 	 * @throws ImagickException
 	 */
 	public static function prepThumb($orig,$thumb,$width,$height){
-		$width=$width?$width:null;
-		$height=$height?$height:null;
 		if (!file_exists($_SERVER['DOCUMENT_ROOT'].$thumb)) {
 			if (!file_exists($_SERVER['DOCUMENT_ROOT'].$orig))
 				return static::$NO_ORIG_ERR;
