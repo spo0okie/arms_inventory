@@ -63,18 +63,20 @@ class ScansController extends ArmsBaseController
      */
     public function actionCreate()
     {
-        $model = new Scans();
+        $model = new Scans(['scenario' => 'create']);
 
 	    if ($model->load(Yii::$app->request->post())) {
 		    $model->scanFile = UploadedFile::getInstance($model, 'scanFile');
 		    if (!$model->validate()) {
 		    	$errors=[];
-			    foreach ($model->getErrors() as $attribute => $errors) {
-				    $errors[yii\helpers\Html::getInputId($model, $attribute)] = $errors;
+				$flattenedErrors=[];
+			    foreach ($model->getErrors() as $attribute => $error) {
+				    $errors[yii\helpers\Html::getInputId($model, $attribute)] = $error;
+					$flattenedErrors=array_merge($flattenedErrors,$error);
 			    }
 			    Yii::$app->response->format = Response::FORMAT_JSON;
 			    return (object)[
-			    	'error'=>'не прошло валидацию',
+			    	'error'=>'не прошло валидацию: '.implode(';',array_values($flattenedErrors)),
 				    'validation'=>$errors
 			    ];
 

@@ -48,7 +48,8 @@ class Scans extends ArmsModel
 	 */
 	public static string $NO_ORIG_ERR='err_no_orig';
 	public static string $RENDERING_ERR='err_rendering';
-	//public static $PDF_ORIG_ERR='pdf_no_orig';
+	
+	public static $supportedFormats=['png','jpg','jpeg','pdf','gif','bmp','tiff',];
 	public $scanFile;
 
 	public static $viewThumbSizes=[512,512];
@@ -78,7 +79,6 @@ class Scans extends ArmsModel
     public function rules()
     {
         return [
-			//[['contracts_id','places_id','tech_models_id','material_models_id','lic_types_id','lic_items_id','arms_id','techs_id'], 'default', 'value'=>null],
 			[[
 				'contracts_id',
 				'places_id',
@@ -90,7 +90,7 @@ class Scans extends ArmsModel
 				'techs_id',
 				'soft_id',
 			], 'integer'],
-	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg, pdf, gif', 'on' => 'create'],
+	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => static::$supportedFormats, 'on' => 'create'],
         ];
     }
 
@@ -325,7 +325,7 @@ class Scans extends ArmsModel
 		if (!file_exists($_SERVER['DOCUMENT_ROOT'].$thumbName)) {
 			if (!$this->fileExists)
 				return static::$NO_ORIG_ERR;
-			self::prepThumb($this->fullFname,$thumbName,$width,$height);
+			$thumbName=self::prepThumb($this->fullFname,$thumbName,$width,$height);
 		}
 
 		return $thumbName;
@@ -350,7 +350,7 @@ class Scans extends ArmsModel
 			$format=self::cutExtension($thumb);
 			try {
 				$im=new Imagick($_SERVER['DOCUMENT_ROOT'] . $orig.($ext=='pdf'?'[0]':''));
-			} catch (ImagickException $e) {
+			} catch (\Exception $e) {
 				return static::$RENDERING_ERR;
 			}
 			$im->setImageColorspace(255); // prevent image colors from inverting
@@ -377,7 +377,7 @@ class Scans extends ArmsModel
 		if (!file_exists($_SERVER['DOCUMENT_ROOT'] . $this->getFullFname())) return null;
 		try {
 			$im=new Imagick($_SERVER['DOCUMENT_ROOT'] . $this->getFullFname());
-		} catch (ImagickException $e) {
+		} catch (\Exception $e) {
 			return [0,0];
 		}
 		$this->attrsCache['imageSize']=[$im->getImageWidth(),$im->getImageHeight()];

@@ -8,6 +8,9 @@
 //$view_max_height=800;
 
 
+use app\models\Scans;
+use yii\helpers\Html;
+
 if (!isset($show_preview)) $show_preview=false;
 if (isset($show_preview_max_size)) $show_preview=$model->fileSize<$show_preview_max_size;
 if (!$model->fileExists) {
@@ -59,7 +62,12 @@ if (!$model->fileExists) {
         <br />
 
         <br />Предпросмотр:<br />
-        <img src="<?= $model->viewThumb ?>" />
-
-	<?php }
+		<?php
+		$img=$model->viewThumb;
+		echo match ($img) {
+			Scans::$NO_ORIG_ERR => Html::img(Scans::noThumb(), ['title' => "Ошибка: файл " . $model->shortFname . " не обнаружен!"]),
+			Scans::$RENDERING_ERR => Html::img(Scans::noThumb(), ['title' => "Ошибка: файл " . $model->shortFname . " не удается отрисовать!"]),
+			default => Html::img($model->idxThumb),
+		};
+	 }
 } ?>
