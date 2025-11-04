@@ -31,18 +31,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Настройка Apache
 RUN rm -f /etc/apache2/apache2.conf && rm -Rf /etc/apache2/sites-enabled/*
-COPY apache/apache.conf /etc/apache2/apache2.conf
-COPY apache/site.conf /etc/apache2/sites-enabled/site.conf
-COPY etc/php-custom.ini /usr/local/etc/php/conf.d/99-custom.ini
+COPY docker/apache/apache.conf /etc/apache2/apache2.conf
+COPY docker/apache/site.conf /etc/apache2/sites-enabled/site.conf
+COPY docker/etc/php-custom.ini /usr/local/etc/php/conf.d/99-custom.ini
 
 # Imagick политика
-COPY etc/imagick-policy.xml /etc/ImageMagick-6/policy.xml
+COPY docker/etc/imagick-policy.xml /etc/ImageMagick-6/policy.xml
 
 # Добавляем приложение (см. .dockerignore)
 #RUN mkdir /var/www/.composer && chown -R www-data:www-data /var/www
-COPY --chown=www-data:www-data .. /var/www/arms
+COPY --chown=www-data:www-data . /var/www/arms
 RUN rm -f /var/www/arms/web/index*
-COPY prod/index.php /var/www/arms/web/index.php
+COPY docker/prod/index.php /var/www/arms/web/index.php
 
 
 # Установка зависимостей
@@ -52,7 +52,7 @@ RUN su -s /bin/sh www-data -c "php composer.phar install --no-dev --optimize-aut
     rm -rf /var/www/.composer
 
 # Скрипт запуска
-COPY script/run.sh /bin/arms-run.sh
+COPY docker/script/run.sh /bin/arms-run.sh
 RUN chmod 555 /bin/arms-run.sh
 
 CMD ["arms-run.sh"]
