@@ -43,11 +43,10 @@ COPY --chown=www-data:www-data .. /var/www/arms
 RUN rm -f /var/www/arms/web/index*
 COPY prod/index.php /var/www/arms/web/index.php
 
-# Ключ для композера временно
-COPY composer/composer.phar /var/www/arms/composer.phar
 
 # Установка зависимостей
 WORKDIR /var/www/arms
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/var/www/arms --filename=composer.phar
 RUN su -s /bin/sh www-data -c "php composer.phar install --no-dev --optimize-autoloader -n" && \
     rm -rf /var/www/.composer
 
