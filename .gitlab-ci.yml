@@ -21,13 +21,14 @@ variables:
 # ------------------------------------------------------------------------------
 build-app:
   stage: build
-  before_script:
-    - mkdir -p ~/.docker
-    - test -f /etc/docker/daemon.json && cp /etc/docker/daemon.json ~/.docker/config.json && echo "daemon.json copied" || echo "daemon.json not found"
 
   script:
     - echo "===> Сборка Docker-образа приложения"
-    - docker build -t spo0okie/inventory:v2 -f docker/Dockerfile docker
+    - docker build \
+      --build-arg HTTP_PROXY=$HTTP_PROXY \
+      --build-arg HTTPS_PROXY=$HTTPS_PROXY \
+      --build-arg NO_PROXY=$NO_PROXY \
+      -t spo0okie/inventory:v2 -f docker/Dockerfile docker || sleep 99999
 
     - echo "===> Сохранение образа как tar"
     - docker save -o arms-app.tar spo0okie/inventory:v2
