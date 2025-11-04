@@ -211,11 +211,6 @@ class SiteController extends Controller
 	
 	public function actionAppInfo()
 	{
-		phpinfo();
-		
-		echo "<h2>App params</h2>";
-		echo "<pre>";
-		var_dump(Yii::$app->params);
-		echo "</pre>";
+		return $this->render('app-info');
 	}
 }
