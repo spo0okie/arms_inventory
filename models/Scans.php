@@ -46,7 +46,8 @@ class Scans extends ArmsModel
 	/*
 	 * Ошибка потерянного изображения
 	 */
-	public static $NO_ORIG_ERR='err_no_orig';
+	public static string $NO_ORIG_ERR='err_no_orig';
+	public static string $RENDERING_ERR='err_rendering';
 	//public static $PDF_ORIG_ERR='pdf_no_orig';
 	public $scanFile;
 
@@ -349,16 +350,14 @@ class Scans extends ArmsModel
 			
 			$ext=self::cutExtension($orig);
 			$format=self::cutExtension($thumb);
-			$im=new Imagick($_SERVER['DOCUMENT_ROOT'] . $orig.($ext=='pdf'?'[0]':''));
+			try {
+				$im=new Imagick($_SERVER['DOCUMENT_ROOT'] . $orig.($ext=='pdf'?'[0]':''));
+			} catch (ImagickException $e) {
+				return static::$RENDERING_ERR;
+			}
 			$im->setImageColorspace(255); // prevent image colors from inverting
 			$im->setImageColorSpace(Imagick::COLORSPACE_SRGB); //иначе у белых JPG становился розовый фон
 			$im->setimageformat($format);
-			if ($width&&$height) {
-				if ($im->getImageWidth()>$im->getImageHeight())
-					$height=0;
-				else
-					$width=0;
-			}
 			if ($ext=='pdf') {
 				$bg=new Imagick();
 				$bg->setResolution($im->getImageWidth(),$im->getImageHeight());
@@ -378,7 +377,11 @@ class Scans extends ArmsModel
 	public function getImageSize() {
 		if (isset($this->attrsCache['imageSize'])) return $this->attrsCache['imageSize'];
 		if (!file_exists($_SERVER['DOCUMENT_ROOT'] . $this->getFullFname())) return null;
-		$im=new Imagick($_SERVER['DOCUMENT_ROOT'] . $this->getFullFname());
+		try {
+			$im=new Imagick($_SERVER['DOCUMENT_ROOT'] . $this->getFullFname());
+		} catch (ImagickException $e) {
+			return [0,0];
+		}
 		$this->attrsCache['imageSize']=[$im->getImageWidth(),$im->getImageHeight()];
 		$im->clear();
 		$im->destroy();

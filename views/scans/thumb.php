@@ -22,11 +22,16 @@ if (!isset($static_view)) $static_view=false;
             echo Html::img(Scans::noThumb(),['title'=>"Ошибка: файл ".$model->shortFname." не обнаружен!"]);
         } else {
 	        $hint = 'Файл в формате ' . strtoupper($model->format) . '. Размер ' . $model->humanFileSize;
-	        echo Html::a(
-		        Html::img($model->idxThumb,
-                    ['title'=>$hint]),
-		        $model->fullFname
-	        );
+			$img=$model->idxThumb;
+			echo match ($img) {
+				Scans::$NO_ORIG_ERR => Html::img(Scans::noThumb(), ['title' => "Ошибка: файл " . $model->shortFname . " не обнаружен!"]),
+				Scans::$RENDERING_ERR => Html::img(Scans::noThumb(), ['title' => "Ошибка: файл " . $model->shortFname . " не удается отрисовать!"]),
+				default => Html::a(
+					Html::img($model->idxThumb,
+						['title' => $hint]),
+					$model->fullFname
+				),
+			};
         }
 
         if (!$static_view) { ?>
