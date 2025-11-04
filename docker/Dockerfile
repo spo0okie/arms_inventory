@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libldap2-dev \
     && docker-php-ext-install \
         intl pdo pdo_mysql zip gd mbstring xml bcmath gmp ldap curl \
+    && pear config-set http_proxy "$HTTP_PROXY" \
     && pecl install imagick \
     && docker-php-ext-enable imagick \
     && a2enmod rewrite headers \
