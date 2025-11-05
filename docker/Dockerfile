@@ -3,8 +3,8 @@ FROM php:8.2-apache
 ENV TZ=Europe/Moscow
 
 # передаем токен github в виде аргумента CLI
-ARG COMPOSER_GITHUB_TOKEN
-ENV COMPOSER_AUTH='{"github-oauth":{"github.com":"${COMPOSER_GITHUB_TOKEN}"}}'
+#ARG COMPOSER_GITHUB_TOKEN
+#ENV COMPOSER_AUTH=
 
 # Установка всех зависимостей в одном слое + очистка кэша
 # git для composer
