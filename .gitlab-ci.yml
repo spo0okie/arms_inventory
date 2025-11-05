@@ -26,9 +26,9 @@ build-app:
     - echo "===> Сборка Docker-образа приложения"
     - |
       docker build \
-      --build-arg HTTP_PROXY=$HTTP_PROXY \ 
+      --build-arg HTTP_PROXY=$HTTP_PROXY \
       --build-arg HTTPS_PROXY=$HTTPS_PROXY \
-      --build-arg COMPOSER_AUTH=={"github-oauth":{"github.com":"$COMPOSER_GITHUB_TOKEN"}} \
+      --build-arg COMPOSER_AUTH={"github-oauth":{"github.com":"$COMPOSER_GITHUB_TOKEN"}} \
       -t spo0okie/inventory:v2 -f docker/Dockerfile . || sleep 99999
 
     - echo "===> Сохранение образа как tar"
