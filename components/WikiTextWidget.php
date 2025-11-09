@@ -41,9 +41,11 @@ class WikiTextWidget extends Widget
 			WikiCache::internalPath($class, $this->model->id,$field)
 		);
 		
-		//данные - либо из кэша, либо надпись "Loading..."
+		//данные - либо из кэша, либо отображаем предварительно сырые
 		$data=$cache->data;
-		if (!$data) $data=$this->model->{$this->field};
+		$rawData=$this->model->{$this->field};
+		$emptyData=trim($rawData)=='';
+		if (!$data) $data=$rawData;
 		//кладем данные в контент блок
 		$content='<div id="'.$id.'" class="dokuwiki '.$this->outerClass.'">'.$data.'</div>';
 		
@@ -53,7 +55,7 @@ class WikiTextWidget extends Widget
 		}
 		
 		//если данные требуют обновления - добавляем скрипт обновления контент-блока
-		if ($outdated || !$cache->valid) $content.='<script>
+		if (!$emptyData && ($outdated || !$cache->valid)) $content.='<script>
 			$.get(
 				"/web/wiki/render-field?class='.urlencode($class).'&id='.$this->model->id.'&field='.$this->field.'",
 				function(data) {
