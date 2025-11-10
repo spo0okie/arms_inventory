@@ -1,7 +1,7 @@
 <?php
 
 use app\components\LinkObjectWidget;
-use kartik\markdown\Markdown;
+use app\components\TextFieldWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Segments */
@@ -28,7 +28,7 @@ if (!isset($static_view)) $static_view=false;
 	<!--	<hr/> -->
 	<h4><?= $model->getAttributeLabel('history') ?></h4>
 	<p>
-		<?= Markdown::convert($model->history) ?>
+		<?= TextFieldWidget::widget(['model'=>$model,'field'=>'history']) ?>
 	</p>
 </div>
 <?php } ?>
