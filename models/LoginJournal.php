@@ -199,7 +199,6 @@ class LoginJournal extends ArmsModel
 		}
 		
 		if (!isset($this->comps_id)) {
-			echo "searching comp\n";
 			if (is_object($comp= Comps::findByAnyName($this->comp_name))) {
 				/** @var Comps $comp */
 				$this->comps_id = $comp->id;
