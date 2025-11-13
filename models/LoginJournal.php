@@ -180,8 +180,8 @@ class LoginJournal extends ArmsModel
 			$this->created_at = gmdate('Y-m-d H:i:s');
 		}
 		
-		// Корректировка calc_time
-		if (is_numeric($this->time)) {
+		// Корректировка calc_time (кроме silentSave)
+		if (!$this->doNotChangeAuthor && is_numeric($this->time)) {
 			if ($this->local_time && abs(time() - $this->local_time) > 90) {
 				// У клиента сильно сбито время: добавляем смещение времени на разницу между сервером и клиентом
 				$this->calc_time = gmdate('Y-m-d H:i:s',$this->time + (time()-$this->local_time));
@@ -199,6 +199,7 @@ class LoginJournal extends ArmsModel
 		}
 		
 		if (!isset($this->comps_id)) {
+			echo "searching comp\n";
 			if (is_object($comp= Comps::findByAnyName($this->comp_name))) {
 				/** @var Comps $comp */
 				$this->comps_id = $comp->id;

@@ -130,14 +130,16 @@ class Domains extends ArmsModel
 	public static function fetchFromCompName($name,$defaultDomain='') {
 		$slashPos=mb_strpos($name,'\\');
 		$dotPos=mb_strpos($name,'.');
-		if ($slashPos && $dotPos && !$defaultDomain) return false;
+		if (!$slashPos && !$dotPos && !$defaultDomain) return false;
 
 		//DOMAIN\comp
 		if ($slashPos) {
 			$tokens=explode('\\',$name);
 			if (count($tokens)>2) return false;
-			
-			return [static::findByName($tokens[0]),$tokens[1],$tokens[0]];
+			$domain_id=(mb_strpos($tokens[0],'.')!==false)?
+				(static::findByFQDN($tokens[0])):	//FQDN\comp ¯\_(ツ)_/¯
+				(static::findByName($tokens[0]));	//DOMAIN\comp
+			return [$domain_id,$tokens[1],$tokens[0]];
 		}
 		
 		//FQDN
