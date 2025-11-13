@@ -77,4 +77,14 @@ class CompsController extends Controller
 		
 		return ExitCode::OK;
 	}
+	
+	public function actionFind($name)
+	{
+		if (is_object($comp= Comps::findByAnyName($name))) {
+			/** @var Comps $comp */
+			echo "{$comp->id}\n";
+			return ExitCode::OK;
+		}
+		return ExitCode::UNAVAILABLE;
+	}
 }
