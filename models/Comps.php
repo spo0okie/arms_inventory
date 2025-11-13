@@ -722,7 +722,7 @@ class Comps extends ArmsModel
 	public function absorbComp(Comps $comp) {
 		
 		//журнал огромный и по одной записи менять это гемор
-		LoginJournal::updateAll(['comps_id'=>$this->id],['users_id'=>$comp->id]);
+		LoginJournal::updateAll(['comps_id'=>$this->id],['comps_id'=>$comp->id]);
 		
 		//поглощаем все поля и ссылки переданной ОС и удаляем ее
 		$this->absorbModel($comp,true);
