@@ -19,10 +19,6 @@ $services=$model->services;
 $deleteable=!count($services);
 $fqdn=mb_strtolower($model->fqdn);
 
-if (is_object($model->domain))
-	$domain=$model->domain->name;
-else
-	$domain='- ошибочный домен -';
 
 $rcIcon=Html::tag('i','',['class'=>"fas fa-sign-in-alt"]);
 $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible)?
@@ -36,9 +32,6 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 		'qtip_side'=>'bottom',
 	]);
 
-if (!mb_strlen($domain))
-	$domain='- не в домене -';
-	
 	if ($model instanceof HistoryModel) {
 		echo IsHistoryObjectWidget::widget(['model'=>$model]);
 	} else { ?>
@@ -48,14 +41,15 @@ if (!mb_strlen($domain))
 	<?= IsArchivedObjectWidget::widget(['model'=>$model]) ?>
 
 <h1>
-	<span class="small"><?= $domain ?>\</span><?=
-		LinkObjectWidget::widget([
+	<?= LinkObjectWidget::widget([
 			'model'=>$model,
-			'name'=>$model->renderName(),
+			'name'=>$this->render('/domains/hostname',[
+				'model'=>$model,
+				'hostname'=>$model->name
+			]),
 			'nameSuffix'=>$remoteControl,
 			'hideUndeletable'=>false,
-		])
-	?>
+	]) ?>
 </h1>
 
 <div>
