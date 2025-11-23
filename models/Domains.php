@@ -162,14 +162,21 @@ class Domains extends ArmsModel
 	
 	/**
 	 * Проверка hostname для разных форматов ввода
-	 * @param string      $hostname
-	 * @param Comps|Techs $object
+	 * @param string      $hostname для валидации
+	 * @param Comps|Techs $object объект, в который пишем ошибки
+	 * @param string      $attr атрибут для записи ошибки
 	 * @return string
 	 */
-	public static function validateHostname(string $hostname, $object, $defaultDomain='') {
+	public static function validateHostname(
+		string $hostname,
+		Techs|Comps $object,
+		string $attr='name'
+	): string
+	{
+		$defaultDomain=$object->domainName??($object->isNewRecord?\Yii::$app->params['domains.default']:'');
 		/* убираем посторонние символы из MAC*/
 		$parseName=Domains::fetchFromCompName($hostname,$defaultDomain);
-		if ($parseName===false) $object->addError('name','Некорректный формат hostname');
+		if ($parseName===false) $object->addError($attr,'Некорректный формат hostname или нет домена');
 		if (is_array($parseName)) {
 			$domain_id=$parseName[0];
 			if (!is_null($domain_id) && ($domain_id!==false)){

@@ -168,7 +168,7 @@ class Comps extends ArmsModel
     {
         return [
 			['name', 'filter', 'filter' => function ($value) {
-				return Domains::validateHostname($value,$this,$this->isNewRecord?'workgroup':'');
+				return Domains::validateHostname($value,$this);
 			}],
             [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids','maintenance_jobs_ids','admins_ids'], 'each', 'rule'=>['integer']],
             [['name', 'os','domain_id'], 'required'],
