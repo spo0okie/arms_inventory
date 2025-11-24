@@ -17,7 +17,7 @@ class DefaultColumn extends DataColumn
 		$cellOptions = $this->fetchContentOptions($model, $key, $index);
 		
 		/** @var ArmsModel $model */
-		return ModelFieldWidget::widget([
+		return ModelFieldWidget::widget(ArrayHelper::customize([
 			'model'=>$model,
 			'field'=>$this->attribute,
 			'item_options'=>[
@@ -29,7 +29,7 @@ class DefaultColumn extends DataColumn
 			],
 			'show_empty'=>true,
 			'title'=>false
-		]);
+		],$cellOptions));
 		
 	}
 	
