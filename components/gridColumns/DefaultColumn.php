@@ -16,8 +16,14 @@ class DefaultColumn extends DataColumn
 	{
 		$cellOptions = $this->fetchContentOptions($model, $key, $index);
 		
+		//убираем все свойства, которые не относятся к нашему рендеру
+		$cellOptions = array_filter($cellOptions,
+			fn($key) => property_exists(ModelFieldWidget::class, $key),
+			ARRAY_FILTER_USE_KEY
+		);
+		
 		/** @var ArmsModel $model */
-		return ModelFieldWidget::widget(ArrayHelper::customize([
+		return ModelFieldWidget::widget(ArrayHelper::recursiveOverride([
 			'model'=>$model,
 			'field'=>$this->attribute,
 			'item_options'=>[
