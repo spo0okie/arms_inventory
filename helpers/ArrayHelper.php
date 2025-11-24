@@ -39,6 +39,30 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 		}
 		return $default;
 	}
+
+	/**
+	 * Кастомизация исходного массива (в отличие от recursiveOverride не добавляет новых значений)
+	 * @param array $default
+	 * @param array $custom
+	 * @return array
+	 */
+	public static function customize(array $default, array $custom): array
+	{
+		$result = [];
+		foreach ($default as $k=>$v) {
+			if (isset($custom[$k])) {
+				if (is_array($v) && is_array($custom[$k])) {
+					$result[$k] = static::recursiveOverride($v, $custom[$k]);
+				} else {
+					$result[$k] = $custom[$k];
+				}
+			} else {
+				$result[$k] = $v;
+			}
+		}
+		return $result;
+	}
+	
 	
 	/**
 	 * Возвращает из массива элементов те, у которых field==value
@@ -505,6 +529,4 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 			static::sortFlatTree($node->$childrenAttr, $sorted, $childrenAttr, $prefixAttr, $newPrefix);
 		}
 	}
-	
-	
 }
