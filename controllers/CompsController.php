@@ -183,7 +183,7 @@ class CompsController extends ArmsBaseController
 			$compName=$name;
 			$domainName=$domain;
 		} else {
-			$nameParse=Domains::fetchFromCompName($name);
+			$nameParse=Domains::fetchFromCompName($name,'',true);
 			if (!is_array($nameParse)) throw new BadRequestHttpException("Incorrect comp name $name");
 			
 			[$domain_id,$compName,$domainName]=$nameParse;

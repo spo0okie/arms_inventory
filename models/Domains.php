@@ -127,10 +127,14 @@ class Domains extends ArmsModel
 	 * @param string $defaultDomain	можно передать домен по умолчанию (если его нет в имени явно)
 	 * @return array|false
 	 */
-	public static function fetchFromCompName($name,$defaultDomain='') {
+	public static function fetchFromCompName($name,$defaultDomain='',$enableEmptyDomain=false) {
 		$slashPos=mb_strpos($name,'\\');
 		$dotPos=mb_strpos($name,'.');
-		if (!$slashPos && !$dotPos && !$defaultDomain) return false;
+		if (!$slashPos && !$dotPos && !$defaultDomain) {
+			if ($enableEmptyDomain)	return [false,$name,''];//no domain
+			
+			return false;
+		}
 
 		//DOMAIN\comp
 		if ($slashPos) {
@@ -151,12 +155,9 @@ class Domains extends ArmsModel
 			return [static::findByFQDN($domainFqdn),$compName,$domainFqdn];
 		}
 		
-		//nor any of above -> act as MS WORKGROUP PC (if passed as defaultDomain)
-		if ($defaultDomain)
-			return [static::findByName($defaultDomain),$name,$defaultDomain];
+		//nor any of above -> act as MS WORKGROUP PC
+		return [static::findByName($defaultDomain),$name,$defaultDomain];
 		
-		//no domain (if no default)
-		return [false,$name,''];
 	}
 	
 	
