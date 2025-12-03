@@ -3,7 +3,6 @@
 namespace app\helpers;
 
 use Yii;
-use function Symfony\Component\String\s;
 
 class WikiHelper
 {
@@ -70,23 +69,21 @@ class WikiHelper
 		return '';
 	}
 	
-	/** @noinspection PhpComposerExtensionStubsInspection */
-	public static function fetchXmlRpc($method, $params)
+	public static function fetchJsonRpc($method, $params)
 	{
 		$wikiUrl = Yii::$app->params['wikiUrl'];
-	
 		$arrContextOptions = [
 			"http" => [
 				"header" => "Authorization: Basic " . base64_encode(
 					Yii::$app->params['wikiUser'] . ":" .
 					Yii::$app->params['wikiPass']
-				),
+				)."\r\n"
+					.'Content-Type: application/json',
 				'method' => 'POST',
-				'content' => xmlrpc_encode_request(
-					$method,
-					$params,
-					['encoding' => 'utf-8', 'escaping' => []]
-				),
+				'content' => json_encode([
+					'method' => $method,
+					'params' => $params,
+				],JSON_UNESCAPED_UNICODE),
 			],
 			"ssl" => [
 				"verify_peer" => false,
@@ -95,13 +92,12 @@ class WikiHelper
 		];
 		
 		$page = @file_get_contents(
-			$wikiUrl . 'lib/exe/xmlrpc.php',
+			$wikiUrl . 'lib/exe/jsonrpc.php',
 			false,
 			stream_context_create($arrContextOptions)
 		);
 		if ($page === false) return false;
-		
-		return xmlrpc_decode($page, 'utf-8');
+		return json_decode($page, true)['result']??false;
 	}
 	
 	public static function dokuwikiRender($text) {

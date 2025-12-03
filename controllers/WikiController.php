@@ -71,7 +71,7 @@ class WikiController extends Controller
 	{
 		$page=[];
 		if ($api=='doku')
-			$page=WikiHelper::fetchXmlRpc('wiki.getPageHTML',urldecode($pageName));
+			$page=WikiHelper::fetchJsonRpc('wiki.getPageHTML',['id'=>$pageName]);
 		
 		if ($api=='confluence')
 			$page = WikiHelper::fetchConfluence($pageName);
