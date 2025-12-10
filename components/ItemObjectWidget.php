@@ -11,7 +11,7 @@ namespace app\components;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use Yii;
-use yii\base\Widget;
+use yii\helpers\Html;
 
 
 /**
@@ -28,7 +28,8 @@ class ItemObjectWidget extends LinkObjectWidget
 	public $link;				//ссылка на модель (Html::a)
 	public $show_archived=null;	//флаг отображения архивного элемента
 	public $archived_class='text-muted text-decoration-line-through';	//класс, который добавлять к архивному элементу
-	public $item_class=null;	//класс, который добавлять к элементу
+	public $item_class=null;	//класс, который добавлять к элементу для обозначения его модели
+	public $style='';
 
 	public function run()
 	{
@@ -51,10 +52,15 @@ class ItemObjectWidget extends LinkObjectWidget
 		//если мы не подменили ссылку, то формируем ее
 		if (!isset($this->link)) $this->link=parent::run();
 		
-		$display=($this->archived&&!$this->show_archived)?'style="display:none"':'';
+		if ($this->archived&&!$this->show_archived)
+			StringHelper::appendToDelimitedString($this->style,'display:none',';');
 		
 		$cssClass='object-item '. $this->item_class.' '.($this->archived?$this->archived_class:'');
 		
-		return "<span class=\"$cssClass\" $display>{$this->link}</span> ";
+		return Html::tag('span',$this->link,[
+			'class'=>$cssClass,
+			'style'=>$this->style,
+		]);
+		
 	}
 }
