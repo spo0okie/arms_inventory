@@ -1,11 +1,99 @@
 <?php
 
 /**
- * Формирование меток и подсказок из единого массива + алиасы
+ * Trait AttributeDataModelTrait
+ *
+ * ОПИСАНИЕ СИСТЕМЫ МЕТАДАННЫХ ARMS.
+ *
+ * Метод attributeData() должен возвращать массив со структурой:
+ *
+ *   '<attr>' => [
+ *       //Атрибуты отображаются в следующих основных сценариях:
+ *       //  - form (заполнение) поиск значений:label,hint
+ *       //  - view (просмотр) поиск значений:viewLabel->label,viewHint->indexHint->''
+ *       //  - grid (заголовок в таблице) поиск значений:indexLabel->viewLabel->label,indexHint->viewHint->''
+ *       //  - search (заголовок в таблице с фильтром) значение: indexHint()+(searchHint->'')
+ *       //  - api (формирование документации) поиск значений:apiLabel->label,apiHint->hint
+ *
+ *       //метка атрибута
+ *       //позже транслируется в attributeLabels, используется в отображении атрибута в формах
+ *       'label'=>'Модель ПК',
+ *       //позже транслируется в attributeHints, используется для пояснения атрибута в формах
+ *       'hint'=>'Модель системного блока / ноутбука. '
+ *            .'<br>Если нужная модель отсутствует в списке, то нужно сначала завести в ее в соответствующей категории оборудования',
+ *
+ *       //метка атрибута для GRID
+ *       //позже транслируется в attributeIndexLabels, используется в отображении атрибута в списках
+ *       //рекомендуется использовать более короткое название атрибута чем 'label', так как должен умещаться в ширину колонки
+ *       'indexLabel' => 'Имя для Grid',
+ *       //позже транслируется в attributeIndexHints, используется для пояснения атрибута в списках
+ *       //если отсутствует, то используется значение из hint
+ *       //макрос {same} будет заменен на значение в hint
+ *       'indexHint'  => 'Подсказка для Grid',
+ *       //подсказка для поиска. Добавляется к indexHint если в GRID включен поиск
+ *       'searchHint' => 'Имена модели можно перечислить через вертикальную черту &quot;|&quot;',
+ *
+ *       'viewLabel'  => 'Имя в карточке объекта',
+ *       'viewHint'   => 'Подсказка в карточке',
+ *
+ *       'apiLabel'   => 'Имя для документации API',
+ *       'apiHint'    => 'Описание для документации API',
+ *
+ *       //тип Input этого аттрибута в форме редактирования (и при выводе через ModelFieldWidget)
+ *       //  - boolean - да / нет (чекбокс)
+ *       //  - toggle - это как boolean, но только для 0 и 1 есть свои названия, напр сервис/услуга
+ *       //  - radios - это как toggle, только значений может быть больше 2
+ *       //  - list - это как radios, только значений прям много и оформляется в виде dropdown
+ *       //  - ntext - textarea (простой текст без форматирования с конвертацией nl -> <br> при рендере)
+ *       //  - text - текст с форматированием (какой формат прописывается в параметрах)
+ *       //  - date - дата
+ *       //  - datetime - дата/время
+ *       //  - ips - список IP
+ *       //  - macs - список MAC
+ *       //  - urls - список URL
+ *       //  - link - одиночная ссылка
+ *       //  - number - число (ввод через обычный input/поиск числовой)
+ *       //  - string - обычный текст (по умолчанию)
+ *       'type' => 'toggle',
+ *       //список констант-значений атрибута (для toggle/radios/list)
+ *       'fieldList' => ['Услуга','Сервис'],
+ *
+ *       //чем заполнить селектор в форме, если значение не введено
+ *       'placeholder' => 'Модель ПК не выбрана',
+ *
+ *       //поле наследуемое (если не задано в этом объекте, то значение берется из родителя)
+ *       'is_inheritable'=>true,
+ *
+ *       //атрибут только для чтения (updated_at, раскрытые ссылки) -> для API документации
+ *       'readOnly'=>true,
+ *
+ *       //атрибут только для записи (пароль) -> для API документации
+ *       'writeOnly'=>true,
+ *
+ *       //при вызове функции absorb это поле нужно поглощать из переданного объекта
+ *       // - false - нет (по умолчанию для полей - "не обратных ссылок")
+ *       // - 'ifEmpty' - если локальное значение отсутствует, то принимать с поглощаемого объекта
+ *       // - true - да (по умолчанию для полей, являющихся обратными ссылками)
+ *       'absorb'=>true,
+ *
+ *       //какие связи нужно подгружать (join) при отображении этого атрибута в списке (для жадной загрузки + поиск)
+ *       'join'=>['techModel','techType']
+ *   ]
+ *
+ * Рекурсивные атрибуты
+ *
+ *   Атрибут вида "<attr>Recursive":
+ *   - возвращает значение <attr> из иерархии родителей (parentAttr)
+ *   - используется для отображения наследуемых полей, плейсхолдеров и поиска
+ *
+ *   Основные методы:
+ *    - findRecursiveAttr()
+ *    - findRecursiveAttrNode()
+ *    - getAttributeInheritablePlaceholder()
+ *    - renderAttributeToText()
  */
 
 namespace app\models\traits;
-
 
 use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
@@ -15,12 +103,6 @@ use app\models\ArmsModel;
 use OpenApi\Annotations\Property;
 use yii\base\Model;
 use yii\base\UnknownPropertyException;
-
-/**
- * Trait ExternalDataModelTrait
- * @package app\models\traits
- * @property string $external_links
- */
 
 trait AttributeDataModelTrait
 {
@@ -42,7 +124,7 @@ trait AttributeDataModelTrait
 	
 	
 	/**
-	 * Массив описания полей
+	 * Массив описания полей (по умолчанию для ArmsModel)
 	 */
 	public function attributeData()
 	{
@@ -98,6 +180,7 @@ trait AttributeDataModelTrait
 	 * Является ли аттрибут наследуемым (от объекта родителя)
 	 * @param $attr
 	 * @return false|mixed
+	 * @throws UnknownPropertyException
 	 */
 	public function attributeIsInheritable($attr) {
 		return $this->getAttributeData($attr)['is_inheritable']??false;
@@ -107,6 +190,7 @@ trait AttributeDataModelTrait
 	 * Является ли аттрибут наследуемым (от объекта родителя)
 	 * @param $attr
 	 * @return false|mixed
+	 * @throws UnknownPropertyException
 	 */
 	public function attributeIsAbsorbable($attr) {
 		$data=$this->getAttributeData($attr);
@@ -124,9 +208,10 @@ trait AttributeDataModelTrait
 	}
 	
 	/**
+	 * Возвращает все метаданные атрибута из attributeData()
 	 * @param $attr
 	 * @return string[]|null
-	 * @throws \yii\base\UnknownPropertyException
+	 * @throws UnknownPropertyException
 	 */
 	public function getAttributeData($attr)
 	{
@@ -179,7 +264,7 @@ trait AttributeDataModelTrait
 	}
 	
 	/**
-	 * Вытаскиваем название аттрибута из данных
+	 * Вытаскиваем название аттрибута из метаданных
 	 * @param $data
 	 * @return mixed|null
 	 */
@@ -195,7 +280,7 @@ trait AttributeDataModelTrait
 	}
 	
 	/**
-	 * Генерирует набор меток из массива данных
+	 * Генерирует набор меток из массива метаданных
 	 * @return array
 	 */
 	public function attributeLabels()
@@ -225,6 +310,11 @@ trait AttributeDataModelTrait
 		return $this->attributeLabelsCache;
 	}
 	
+	/**
+	 * Вытащить подсказку из метаданных
+	 * @param $data
+	 * @return mixed|null
+	 */
 	public function fetchAttributeHint($data) {
 		if (is_array($data)) {
 			if (isset($data[1])) return $data[1];
@@ -232,10 +322,11 @@ trait AttributeDataModelTrait
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Генерирует набор подсказок из массива данных
 	 * @return array
+	 * @throws UnknownPropertyException
 	 */
 	public function attributeHints()
 	{
@@ -249,10 +340,11 @@ trait AttributeDataModelTrait
 	
 	/**
 	 * Переопределено, для того, чтобы мы могли получить описание аттрибута по динамическим алиасам
-	 * т.е. если у нас есть данные для aclsList, но нет данных для acls_list_ids, то мы все равно можем получить данные
+	 * Если у нас есть метаданные для aclsList, но нет данных для acls_list_ids, то мы все равно можем получить данные
 	 * для последних, хоть явно их и не задавали
 	 * @param $attribute
 	 * @return array|mixed|string|null
+	 * @throws UnknownPropertyException
 	 */
 	public function getAttributeLabel($attribute) {
 		/** @var ArmsModel $this */
@@ -267,6 +359,7 @@ trait AttributeDataModelTrait
 	 * Переопределено, с тем же смыслом, что и выше, чтобы получить не объявленные алиасы
 	 * @param $attribute
 	 * @return array|mixed|string|null
+	 * @throws UnknownPropertyException
 	 */
 	public function getAttributeHint($attribute) {
 		/** @var ArmsModel $this */
@@ -281,7 +374,8 @@ trait AttributeDataModelTrait
 	 * специальные типы:
 	 * - ips, macs, urls - правильно оформленные строки
 	 * - link: ссылка на другую модель - надо смотреть в linkSchema, чтобы узнать класс модели
-	 * @param $attribute
+	 * @param string $attribute
+	 * @param string $default
 	 * @return string
 	 * @throws UnknownPropertyException
 	 */
@@ -329,11 +423,12 @@ trait AttributeDataModelTrait
 		
 		return $default;
 	}
-
+	
 	/**
 	 * Возвращает наименование атрибута для формы просмотра
 	 * @param $attribute
 	 * @return string
+	 * @throws UnknownPropertyException
 	 */
 	public function getAttributeViewLabel($attribute)
 	{
@@ -348,6 +443,7 @@ trait AttributeDataModelTrait
 	 * Возвращает наименование атрибута для формы поиска
 	 * @param $attribute
 	 * @return string
+	 * @throws UnknownPropertyException
 	 */
 	public function getAttributeIndexLabel($attribute)
 	{
@@ -447,6 +543,7 @@ trait AttributeDataModelTrait
 	 * Возвращает наименование атрибута для API документации
 	 * @param $attribute
 	 * @return string
+	 * @throws UnknownPropertyException
 	 */
 	public function getAttributeApiLabel($attribute)
 	{
@@ -462,6 +559,7 @@ trait AttributeDataModelTrait
 	 * Возвращает описание атрибута для API документации
 	 * @param $attribute
 	 * @return string
+	 * @throws UnknownPropertyException
 	 */
 	public function getAttributeApiHint($attribute)
 	{

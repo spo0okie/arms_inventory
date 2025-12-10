@@ -4,7 +4,6 @@ namespace app\models;
 
 use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
-use app\helpers\FieldsHelper;
 use app\helpers\RestHelper;
 use app\helpers\StringHelper;
 use app\models\traits\AttributeDataModelTrait;
@@ -22,7 +21,12 @@ use yii\db\StaleObjectException;
 use yii\web\View;
 
 /**
- * This is the model class for table "arms".
+ * ArmsModel — базовый класс всех моделей ARMS.
+ *
+ * Компоненты вынесены в трейты:
+ *  - AttributeDataModelTrait      - атрибуты модели и работа с ними
+ *  - AttributeLinksModelTrait     - схема связей с другими моделями
+ *  - ExternalDataModelTrait       - методы работы с JSON-like атрибутами-ссылками на объекты во внешних ИС
  *
  * @property int $id Идентификатор
  * @property string $name Имя экземпляра
@@ -41,7 +45,6 @@ use yii\web\View;
  * @property string $historyClass Класс, который хранит журнал изменений моделей класса
  * @property string $controllerPath Путь до контроллера (для URI)
  * @property string $viewsPath Путь до папки Views (для рендера)
- 
  * @property int $secondsSinceUpdate Секунды с момента обновления
  */
 class ArmsModel extends ActiveRecord
@@ -73,7 +76,8 @@ class ArmsModel extends ActiveRecord
 	public const searchableOrHint='<br><i>HINT: Можно искать несколько вариантов, разделив их вертикальной</i> <b>|</b> <i>чертой</i>';
 	
 	
-	protected $historyClass;	//если заполнить, то будет сохранять историю в моделях этого класса
+	/** @var string если заполнить, то будет сохранять историю в моделях этого класса */
+	protected $historyClass;
 	
 	/** @var array Кэш для рекурсивного поиска поля (Когда значение может быть в родителе и в его родителе или ...) */
 	protected $recursiveCache=[];
@@ -81,6 +85,8 @@ class ArmsModel extends ActiveRecord
 	/** @var array Кэш для вычисляемых аттрибутов */
 	protected $attrsCache=[];
 	
+	
+	/** @var null|array Кэш для загрузки всех элементов через cacheAllItems() */
 	protected static $allItems=null;
 	
 	/** @var bool при сохранении не менять отметку времени и не менять время обновления */
@@ -111,7 +117,7 @@ class ArmsModel extends ActiveRecord
 	
 	
 	/**
-	 * Прикручиваем поведения для many-2-many ссылок
+	 * Прикручиваем поведения для many-2-many ссылок из AttributeLinksModelTrait
 	 * @return array
 	 */
 	public function behaviors()
@@ -121,6 +127,10 @@ class ArmsModel extends ActiveRecord
 		];
 	}
 	
+	/**
+	 * Сразу добавляем в набор дополнительных полей все ссылки на другие модели из AttributeLinksModelTrait
+	 * @return array
+	 */
 	public function extraFields()
 	{
 		$fields = array_unique(
@@ -134,12 +144,17 @@ class ArmsModel extends ActiveRecord
 	}
 	
 	/**
+	 * Базовая работа с вложениями
 	 * @return ActiveQuery
 	 */
 	public function getAttaches() {
 		return $this->hasMany(Attaches::class,[static::tableName().'_id'=>'id'	]);
 	}
 	
+	/**
+	 * Возвращает массив ['id'=>'имя'] моделей (регулярно используется для Select2)
+	 * @return array
+	 */
 	public static function fetchNames(){
 		$list= static::find()
 			//->select(['id','name'])
@@ -147,35 +162,73 @@ class ArmsModel extends ActiveRecord
 		return ArrayHelper::map($list, 'id', 'sname');
 	}
 	
+	/**
+	 * Геттер для атрибута $name
+	 * для моделей у которых нет атрибута name в таблице
+	 * @return string
+	 */
 	public function getName(){
 		return $this->{static::$nameAttr};
 	}
 	
+	/**
+	 * Геттер для атрибута $sname (имя для поиска)
+	 * по умолчанию возвращает $name
+	 * в дочерних моделях может быть перекрыт более развернутой информацией о модели
+	 * @return string
+	 */
 	public function getSname(){
 		return $this->name;
 	}
 	
+	/**
+	 * Возвращает время прошедшее с обновления модели
+	 * @return int
+	 * @throws \Exception
+	 */
 	public function getSecondsSinceUpdate() {
 		$updated = new	DateTime($this->updated_at,	new DateTimeZone('UTC') );
 		return time()-$updated->format('U');
 	}
 	
-	
+	/**
+	 * Признак того, что есть загруженный кэш всех моделей этого класса
+	 * @return bool
+	 */
 	public static function allItemsLoaded() {
 		return !is_null(static::$allItems);
 	}
 	
+	/**
+	 * Загрузить все модели в кэш
+	 * Полезно только для моделей без или с малым количеством связей, так как они не грузятся в кэш
+	 * @return void
+	 */
 	public static function cacheAllItems() {
 		if (!static::allItemsLoaded())
 			static::$allItems=ArrayHelper::index(static::find()->all(),'id');
 	}
 	
+	/**
+	 * Вернуть кэш всех моделей
+	 * если модели не загружены в кэш то в зависимости от значения $autoload
+	 *  - вернет null (autoload=false, по умолчанию)
+	 *  - загрузит в кэш и вернет все модели (autoload=true)
+	 * @param boolean $autoload формировать ли кэш, если он не загружен (иначе вернет null)
+	 * @return array|null
+	 */
 	public static function getAllItems($autoload=false) {
 		if (!static::allItemsLoaded() && $autoload)
 			static::cacheAllItems();
 		return static::$allItems;
 	}
 	
+	/**
+	 * Вернуть одну модель из кэша
+	 * @param integer $id ID модели
+	 * @param boolean $autoload формировать ли кэш, если он не загружен (иначе вернет null)
+	 * @return mixed|null
+	 */
 	public static function getLoadedItem($id,$autoload=false) {
 		if (!static::allItemsLoaded()) {
 			if ($autoload)
@@ -188,12 +241,12 @@ class ArmsModel extends ActiveRecord
 	
 	/**
 	 * Валидация отсутствия рекурсии при построении ссылок на родителей
-	 * @param       $attribute - аттрибут с id другого объекта
+	 * @param string $attribute - аттрибут с id другого объекта
 	 * @param array $params
 	 * в параметрах надо указать 'params'=>[
-	 *     	'getLink'=>'parentService',    	//обязательно! - метод которым получить не id а объект
+	 *     	'getLink'=>'parentService',    	//обязательно! - метод, которым получить не id, а объект
 	 *     	'initialLink'=>ArmsModel[],    	//можно передать первую итерацию ссылок, т.к. LinkerBehaviour читает ссылки
-	 * 										//из базы а не из переменной, и несохраненные в БД ссылки через getter не получить
+	 * 										//из базы, а не из переменной, и несохраненные в БД ссылки через getter не получить
 	 *		'origin'						//кому будем писать ошибки валидации (инициатор валидации)
 	 * 		'object'						//чьи аттрибуты проверяем
 	 * 		'attributeChain'				//накопленные значения поля за время движения по рекурсии
@@ -360,6 +413,12 @@ class ArmsModel extends ActiveRecord
 		$journal->journalDeletion($this,$initiator);
 	}
 	
+	/**
+	 * Кастомизируем afterSave, чтобы добавить запись о новом состоянии модели в журнал
+	 * @param $insert
+	 * @param $changedAttributes
+	 * @return void
+	 */
 	public function afterSave($insert, $changedAttributes)
 	{
 		parent::afterSave($insert, $changedAttributes);
@@ -367,6 +426,10 @@ class ArmsModel extends ActiveRecord
 		$this->historyCommit(); //журналирование изменений
 	}
 	
+	/**
+	 * Кастомизируем afterDelete, чтобы добавить в журнал запись об удалении модели
+	 * @return void
+	 */
 	public function afterDelete()
 	{
 		parent::afterDelete();
@@ -374,6 +437,15 @@ class ArmsModel extends ActiveRecord
 		$this->historyEnd(); //журналирование удаления
 	}
 	
+	/**
+	 * Кастомизируем beforeSave, чтобы обработать стандартное поведение полей
+	 * - updated_at
+	 * - updated_by
+	 * - external_links
+	 * если они есть в этой модели
+	 * @param $insert
+	 * @return bool
+	 */
 	public function beforeSave($insert)
 	{
 		if (!parent::beforeSave($insert)) return false;
@@ -498,11 +570,21 @@ class ArmsModel extends ActiveRecord
 		return $query->all();
 	}
 	
+	/**
+	 * Возвращает следующее значение integer атрибута из таблицы
+	 * ищет максимальное значение атрибута в таблице и возвращает на 1 больше
+	 * @param string $field
+	 * @return integer
+	 */
 	public static function fetchNextValue($field) {
 		$max=static::find()->select("MAX(CAST(`$field` as SIGNED))")->scalar();
 		return ++$max;
 	}
 	
+	/**
+	 * Возвращает следующий id модели
+	 * @return int
+	 */
 	public static function fetchNextId() {
 		return static::fetchNextValue('id');
 	}
