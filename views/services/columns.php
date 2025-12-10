@@ -182,4 +182,9 @@ return [
 		'value' => function ($data) {return ModelFieldWidget::widget(['model'=>$data,'field'=>'maintenanceJobs','title'=>false,'item_options'=>['static_view'=>true]]);},
 	],
 	'weight',
+	'tags' => [
+		'contentOptions' => [
+			'lineBr'=>false
+		],
+	]
 ];

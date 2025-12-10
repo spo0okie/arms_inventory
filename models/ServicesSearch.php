@@ -15,6 +15,7 @@ class ServicesSearch extends Services
 	public $sites;
 	public $comps;
 	public $techs;
+	public $tags;
 	public $compsAndTechs;
 	public $maintenanceReqs;
 	public $maintenanceJobs;
@@ -48,7 +49,8 @@ class ServicesSearch extends Services
 				'compsAndTechs',
 				'maintenanceJobs',
 				'maintenanceReqs',
-				'weight'
+				'weight',
+				'tags'
 			], 'safe'],
         ];
     }
@@ -97,6 +99,7 @@ class ServicesSearch extends Services
 				'support',
 				'infrastructureSupport',
 				'maintenanceReqs',
+				'tags'
 			])
 			->join('LEFT JOIN','segments','segments.id=getServiceSegment(services.id)');
 		
@@ -154,6 +157,7 @@ class ServicesSearch extends Services
 			->andFilterWhere(QueryHelper::querySearchString(['AND/OR','comps.name','techs.num','techs.hostname'], $this->compsAndTechs))
 			->andFilterWhere(QueryHelper::querySearchString('providing_schedule.name', $this->providingSchedule))
 			->andFilterWhere(QueryHelper::querySearchString('support_schedule.name', $this->supportSchedule))
+			->andFilterWhere(QueryHelper::querySearchString('tags.name',$this->tags))
 	        ->andFilterWhere([
 	        	'or',
 					QueryHelper::querySearchString('getplacepath(places_in_svc_arms.id)', $this->sites),

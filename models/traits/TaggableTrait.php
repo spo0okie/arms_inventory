@@ -2,8 +2,11 @@
 
 namespace app\models\traits;
 
+use app\models\links\TagsLinks;
 use app\models\Tags;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
 
 /**
  * Трейт для добавления функционала тегов к моделям
@@ -21,22 +24,29 @@ trait TaggableTrait
      * @var array Виртуальный атрибут для работы с формами
      */
     public $tag_ids;
-    
-    /**
-     * Связь с тегами через junction table
-     * Должна быть реализована в модели:
-     * 
-     * public function getTags() {
-     *     return $this->hasMany(Tags::class, ['id' => 'tag_id'])
-     *         ->viaTable('tags_links', ['model_id' => 'id'], function($query) {
-     *             $query->andWhere(['model_class' => static::class]);
-     *         });
-     * }
-     * 
-     * @return \yii\db\ActiveQuery
-     */
-    abstract public function getTags();
-    
+	
+	
+	/**
+	 * Нам нужно предварительно отфильтровать наш junction table чтобы остались только записи по текущему классу
+	 * @return ActiveQuery
+	 */
+	public function getTagLinks()
+	{
+		return $this->hasMany(TagsLinks::class, ['model_id' => 'id'])
+			->onCondition(['tags_links.model_class' => static::class]);
+	}
+	
+	/**
+	 * Связь с тегами через junction table
+	 * @return ActiveQuery
+	 * @throws InvalidConfigException
+	 */
+	public function getTags()
+	{
+		return $this->hasMany(Tags::class, ['id' => 'tag_id'])
+			->via('tagLinks');
+	}
+	
     /**
      * Возвращает массив ID тегов для использования в формах
      * 

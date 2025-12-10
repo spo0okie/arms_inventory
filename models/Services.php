@@ -413,6 +413,13 @@ class Services extends ArmsModel
 				'is_inheritable'=>true,
 				'placeholder' => 'Расписание отсутствует'
 			],
+			'tags' => [
+				'Теги',
+				'hint' => 'Метки для удобной группировки и поиска сервисов/услуг',
+				'indexHint' => '{same}',
+				'placeholder' => 'Нет тегов',
+				'join'=>'tags'
+			],
 			'techs_ids' => [
 				'Оборудование',
 				'hint' => 'На каком оборудовании выполняется этот сервис',
@@ -844,17 +851,6 @@ class Services extends ArmsModel
 		return $this->hasMany(OrgPhones::class, ['services_id' => 'id']);
 	}
 	
-	/**
-	 * Связь с тегами через junction table
-	 * @return ActiveQuery
-	 */
-	public function getTags()
-	{
-		return $this->hasMany(Tags::class, ['id' => 'tag_id'])
-			->viaTable('tags_links', ['model_id' => 'id'], function($query) {
-				$query->andWhere(['model_class' => static::class]);
-			});
-	}
 	
 	/**
 	 * После сохранения модели сохраняем теги
