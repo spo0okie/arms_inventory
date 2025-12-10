@@ -34,6 +34,8 @@ $contracts=$model->contracts;
 echo IsArchivedObjectWidget::widget(['model'=>$model]);
 if(!$static_view) { ?>
 <span class="float-end text-end">
+
+	<span class="me-3"><?= TagsWidget::widget(['model'=>$model]) ?></span>
 	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
 	<br />
 	<?= ShowArchivedWidget::widget(['reload'=>true]) ?>
@@ -48,8 +50,7 @@ if(!$static_view) { ?>
 		'static'=>$static_view,
 		//'confirm' => 'Удалить этот сервис? Это действие необратимо!',
 		'hideUndeletable'=>false
-	])
-	.TagsWidget::widget(['model'=>$model])?>
+	])?>
 
 </h1>
 

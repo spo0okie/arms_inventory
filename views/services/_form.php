@@ -29,6 +29,8 @@ $infrastructureResponsiblePlaceholder='Выберите ответственно
 $infrastructureSupportPlaceholder='Выберите сотрудников поддержки инфраструктуры';
 $parentPlaceholder=' (насл. из основного сервиса/услуги)';
 
+$tags=$model->tags_ids;
+
 if (!$model->is_service) $model->is_service=0;
 
 ?>
@@ -101,6 +103,7 @@ if (!$model->is_service) $model->is_service=0;
 					<?= $form->field($model, 'archived')->checkbox() ?>
 				</div>
 			</div>
+			<?= $form->field($model, 'tags_ids') ?>
 
 
 		</div>
@@ -123,8 +126,7 @@ if (!$model->is_service) $model->is_service=0;
 				</div>
 			</div>
 			<?= $form->field($model, 'contracts_ids')->select2() ?>
-			<?= $form->field($model, 'tag_ids') ?>
-			     </div>
+		</div>
     </div>
 
 	<div class="form-group">

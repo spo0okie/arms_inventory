@@ -138,7 +138,7 @@ class Services extends ArmsModel
 	protected static $allItems=null;
 	
 	public $linksSchema=[
-		'tag_ids' =>					[Tags::class, null, 'loader' => 'tags'],
+		'tags_ids' =>					[Tags::class,'services_ids', 'loader' => 'tags'],
 		'depends_ids' =>				[Services::class,'dependants_ids'],
 		'comps_ids' =>					[Comps::class,'services_ids'],
 		'provide_comps_ids' =>			[Comps::class,'platform_id'],

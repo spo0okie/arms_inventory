@@ -19,7 +19,7 @@ if (is_object($model)) {
 		'model'=>$model,
 		'link'=> LinkObjectWidget::widget([
 			'model'=>$model,
-			'static'=>$static_view??false,
+			'static'=>$static_view??true,
 			'noDelete'=>$noDelete??true,
 			"hideUndeletable"=>$hideUndeletable??true,
 			'hrefOptions'=>['style'=>"color: {$textColor}"]
