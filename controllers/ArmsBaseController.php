@@ -24,21 +24,114 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
- * ArmsController implements the CRUD actions for Arms model.
+ * Базовый контроллер ARMS для всех моделей, наследуемых от ArmsModel.
+ *
+ * Назначение:
+ * -----------
+ * Этот класс реализует универсальный CRUD-контроллер, который:
+ *  - обеспечивает типовое поведение для всех моделей ARMS;
+ *  - автоматически использует стандартные view-файлы (`/layouts/*`), если
+ *    в папке контроллера нет кастомных шаблонов;
+ *  - реализует единый механизм отображения, валидации и обработки форм ARMS;
+ *  - поддерживает синхронный и Ajax-режимы (render/renderAjax);
+ *  - объединяет механику списков, карточек объекта, всплывающих подсказок (ttip),
+ *    асинхронных таблиц (async-grid) и CRUD-операций.
+ *
+ * Требования к дочерним контроллерам:
+ *  ----------------------------------
+ *  - Контроллер обязан определить `$modelClass` - имя класса модели ARMS.
+ *  - Все CRUD-действия будут работать автоматически, если не переопределены.
+ *  - При необходимости можно отключить отдельные actions через disabledActions().
+ *  - При наличии кастомного view файла (напр `<controller>/index.php` или `<controller>/view.php`)
+ *    используется кастомный шаблон; иначе - стандартный `/layouts/*`.
+ *
+ * Доступ и авторизация:
+ * ---------------------
+ * Механизм доступа централизован через:
+ *  - accessMap() - карта полномочий на actions (view/edit/view-class/edit-class);
+ *  - buildAccessRules() - генерация правил Yii AccessControl;
+ *  - HttpBasicAuth - поддержка HTTP Basic API-доступа;
+ *  - параметр Yii::$app->params['useRBAC'] — интеграция с RBAC.
+ *
+ * Предусмотрены специальные полномочия:
+ *  - PERM_ANONYMOUS      — доступ для гостей;
+ *  - PERM_AUTHENTICATED  — доступ для авторизованных без явных прав;
+ *  - PERM_VIEW / PERM_EDIT — глобальные права;
+ *  - PERM_VIEW-<model> / PERM_EDIT-<model> — права на конкретные модели.
+ *
+ * Обработка запросов и навигация:
+ * ------------------------------
+ *  - defaultRender() — автоматически выбирает render()/renderAjax();
+ *  - defaultReturn() — единый механизм “куда вернуть пользователя”
+ *    после успешного create/update/delete, включая return=previous;
+ *  - routeOnUpdate()/routeOnDelete() — точки расширения для навигации
+ *    после CRUD-операций.
+ *
+ * Поддержка поиска и фильтрации:
+ * ------------------------------
+ *  - archivedSearchInit() — расширенный режим поиска с учётом архивных записей,
+ *    переключателем и fallback-логикой при пустом результате;
+ *  - searchParamsOverride() — механизм SearchOverride для подмены параметров
+ *    поисковой модели, включая корректную маршрутизацию override'ов
+ *    для разных Search-классов.
+ *
+ * Поддержка списков и таблиц:
+ * ---------------------------
+ *  - actionIndex()        — список объектов, с autodetect кастомных view;
+ *  - actionAsyncGrid()    — асинхронный рендер DynaGrid с X-Pagination-Total-Count;
+ *  - интеграция с DynaGridWidget и fetchVisibleAttributes().
+ *
+ * Поддержка чтения отдельных объектов:
+ * ------------------------------------
+ *  - actionItem() / actionItemByName() — рендер мини-карточки модели;
+ *  - actionTtip() — рендер tooltip-представления (включая по журналу версий);
+ *  - findModel(), findByName(), findJournalRecord() — централизованные
+ *    методы загрузки данных, с корректными 404.
+ *
+ * Поддержка форм и API:
+ * ---------------------
+ *  - actionValidate() — Ajax-валидация модели (ArmsForm + SCENARIO_VALIDATION);
+ *  - actionCreate()/actionUpdate() — автоподключение ArmsFormAsset,
+ *    JSON-ответы для REST-клиентов;
+ *
+ * Поведение по умолчанию:
+ * -----------------------
+ * Контроллер реализует полный набор CRUD, готовый для использования
+ * без создания шаблонов и без написания кода, если модель корректно
+ * оформлена и наследует ArmsModel.
+ *
+ * Этот класс является обязательным базовым контроллером для всех CRUD
+ * и определяет архитектурный подход ARMS к работе с моделями, формами,
+ * поиском, листингами и доступами.
  */
 class ArmsBaseController extends Controller
 {
+	
+	/** @var string класс модели, операции с которой реализует контроллер */
 	public $modelClass;
+	
+	/** @var bool показывать ли по умолчанию архивированные модели */
 	public $defaultShowArchived=false;
 	
 	
-	//как в карте доступов обозначать анонимный и авторизованный
+	//как в карте доступов обозначать анонимный и авторизованный доступы
 	const PERM_ANONYMOUS='@anonymous';
 	const PERM_AUTHENTICATED='@authorized';
 	const PERM_EDIT='edit';
 	const PERM_VIEW='view';
 	
+	/**
+	 * @var string HTML код, который будет добавлен на стандартную index страницу
+	 * справа от (после) кнопки добавления/создания модели
+	 * см views/layouts/index.php
+	 */
 	public $additionalCreateButton='';
+	
+	/**
+	 * @var string HTML код, который будет добавлен на стандартную index страницу
+	 * слева от (перед) кнопкой настроек либо перед переключателем архивных элементов (если он отображается)
+	 * см views/layouts/index.php
+	 */
 	public $additionalToolButton='';
 	
 	
@@ -53,17 +146,23 @@ class ArmsBaseController extends Controller
 	}
 	
 	/**
-	 * Карта доступа с какими полномочиями, что можно делать
+	 * Карта доступа с какими полномочиями, какие actions можно делать
 	 * @return array
 	 */
 	public function accessMap() {
 		$class=StringHelper::class2Id($this->modelClass);
 		return [
-			self::PERM_VIEW=>['index','view','search','ttip','item-by-name','item','async-grid'],			//чтение всего
-			self::PERM_EDIT=>['create','update','delete','validate','unlink','editable'],	//редактирование всего
-			self::PERM_VIEW.'-'.$class=>['index','view','search','ttip','item-by-name','item','async-grid'],	//чтение объектов этого класса
-			self::PERM_EDIT.'-'.$class=>['create','update','delete','validate','unlink'],		//редактирование объектов этого класса
+			//чтение всего для полномочий view
+			self::PERM_VIEW=>['index','view','search','ttip','item-by-name','item','async-grid'],
+			//редактирование всего для полномочий edit
+			self::PERM_EDIT=>['create','update','delete','validate','unlink','editable'],
+			//чтение объектов этого класса для полномочий view-$class
+			self::PERM_VIEW.'-'.$class=>['index','view','search','ttip','item-by-name','item','async-grid'],
+			//редактирование объектов этого класса для полномочий edit-$class
+			self::PERM_EDIT.'-'.$class=>['create','update','delete','validate','unlink'],
+			//анонимный доступ по умолчанию ничего не разрешает
 			self::PERM_ANONYMOUS=>[],
+			//авторизованный доступ без явных полномочий по умолчанию ничего не разрешает
 			self::PERM_AUTHENTICATED=>[],
 		];
 	}
