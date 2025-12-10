@@ -32,6 +32,7 @@ use app\models\Sandboxes;
 use app\models\Schedules;
 use app\models\Segments;
 use app\models\Services;
+use app\models\Tags;
 use app\models\TechModels;
 use app\models\Techs;
 use app\models\TechTypes;
@@ -111,6 +112,7 @@ NavBar::begin([
 					['label' => MaintenanceReqs::$titles, 'url' => ['/maintenance-reqs/index']],
 					['label' => MaintenanceJobs::$titles, 'url' => ['/maintenance-jobs/index']],
 					['label' => Schedules::$titles, 'url' => ['/schedules/index']],
+					['label' => Tags::$titles, 'url' => ['/tags/index']],
 				]
 			],
 			['label' => 'Доступы',

@@ -9,6 +9,7 @@ use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
 use app\components\StripedAlertWidget;
+use app\components\TagsWidget;
 use app\components\TextFieldWidget;
 use app\components\UrlListWidget;
 use app\models\Services;
@@ -47,7 +48,9 @@ if(!$static_view) { ?>
 		'static'=>$static_view,
 		//'confirm' => 'Удалить этот сервис? Это действие необратимо!',
 		'hideUndeletable'=>false
-	]) ?>
+	])
+	.TagsWidget::widget(['model'=>$model])?>
+
 </h1>
 
 <div class="row">

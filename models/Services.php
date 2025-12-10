@@ -8,6 +8,7 @@ use app\helpers\QueryHelper;
 use app\helpers\StringHelper;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\ServicesModelCalcFieldsTrait;
+use app\models\traits\TaggableTrait;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -112,7 +113,7 @@ use yii\db\ActiveQuery;
  */
 class Services extends ArmsModel
 {
-	use ServicesModelCalcFieldsTrait,AclsFieldTrait;
+	use ServicesModelCalcFieldsTrait, AclsFieldTrait, TaggableTrait;
 	
 	public $treeChildren=null;
 	public $treeDepth=null;
@@ -137,6 +138,7 @@ class Services extends ArmsModel
 	protected static $allItems=null;
 	
 	public $linksSchema=[
+		'tag_ids' =>					[Tags::class, null, 'loader' => 'tags'],
 		'depends_ids' =>				[Services::class,'dependants_ids'],
 		'comps_ids' =>					[Comps::class,'services_ids'],
 		'provide_comps_ids' =>			[Comps::class,'platform_id'],
@@ -205,7 +207,7 @@ class Services extends ArmsModel
 			[['cost','charge'], 'number'],
 			[['currency_id'],'default','value'=>1],
             [['name', 'description', 'is_end_user'], 'required'],
-	        [['depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids','maintenance_reqs_ids','maintenance_jobs_ids'], 'each', 'rule'=>['integer']],
+	        [['tag_ids','depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids','maintenance_reqs_ids','maintenance_jobs_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
 			[['vm_cores','vm_ram','vm_hdd','places_id','partners_id','places_id','archived','currency_id','weight'],'integer'],
 			[['weight'],'default', 'value' => '100'],
@@ -840,6 +842,38 @@ class Services extends ArmsModel
 	public function getOrgPhones()
 	{
 		return $this->hasMany(OrgPhones::class, ['services_id' => 'id']);
+	}
+	
+	/**
+	 * Связь с тегами через junction table
+	 * @return ActiveQuery
+	 */
+	public function getTags()
+	{
+		return $this->hasMany(Tags::class, ['id' => 'tag_id'])
+			->viaTable('tags_links', ['model_id' => 'id'], function($query) {
+				$query->andWhere(['model_class' => static::class]);
+			});
+	}
+	
+	/**
+	 * После сохранения модели сохраняем теги
+	 * {@inheritdoc}
+	 */
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+		$this->saveTagsAfterSave();
+	}
+	
+	/**
+	 * После удаления модели удаляем связи с тегами
+	 * {@inheritdoc}
+	 */
+	public function afterDelete()
+	{
+		parent::afterDelete();
+		$this->deleteTagsAfterDelete();
 	}
 	
 
