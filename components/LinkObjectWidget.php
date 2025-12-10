@@ -141,17 +141,17 @@ class LinkObjectWidget extends Widget
 					'hideUndeletable'=>$this->hideUndeletable,
 					'links'=>$this->links,
 					'url'=>$this->deleteUrl,
-					'options'=>[
+					'options'=>array_merge($this->hrefOptions,[
 						'cssClass'=>$this->cssClass,
 						'data'=>$this->noPjax?['pjax'=>0]:[],
-					],
+					]),
 				]);
 		} else $deleteObject='';
 		
 		//если мы уже на этой странице, то не делаем ссылки
 		return (
 				$this->samePage?
-				$this->name
+				Html::tag('span',$this->name,$this->hrefOptions)
 				:
 				Html::a($this->name,$this->url,$this->hrefOptions)
 			).(
@@ -161,10 +161,10 @@ class LinkObjectWidget extends Widget
 						'updateHint'=>$this->updateHint,
 						'modal'=>$this->modal,
 						'url'=>$this->updateUrl,
-							'options'=>[
-								'cssClass'=>$this->cssClass,
-								'data'=>$this->noPjax?['pjax'=>0]:[],
-							],
+						'options'=>array_merge($this->hrefOptions,[
+							'cssClass'=>$this->cssClass,
+							'data'=>$this->noPjax?['pjax'=>0]:[],
+						]),
 					])
 				:''
 			).$deleteObject;
