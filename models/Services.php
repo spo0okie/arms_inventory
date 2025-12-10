@@ -138,7 +138,11 @@ class Services extends ArmsModel
 	protected static $allItems=null;
 	
 	public $linksSchema=[
-		'tags_ids' =>					[Tags::class,'services_ids', 'loader' => 'tags'],
+		'tags_ids' =>					[Tags::class,'services_ids', 'loader' => 'tags','updater'=>[
+			'viaTableAttributesValue' => [
+				'model_class' => Services::class,
+			],
+		]],
 		'depends_ids' =>				[Services::class,'dependants_ids'],
 		'comps_ids' =>					[Comps::class,'services_ids'],
 		'provide_comps_ids' =>			[Comps::class,'platform_id'],
@@ -207,7 +211,7 @@ class Services extends ArmsModel
 			[['cost','charge'], 'number'],
 			[['currency_id'],'default','value'=>1],
             [['name', 'description', 'is_end_user'], 'required'],
-	        [['tag_ids','depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids','maintenance_reqs_ids','maintenance_jobs_ids'], 'each', 'rule'=>['integer']],
+	        [['tags_ids','depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids','maintenance_reqs_ids','maintenance_jobs_ids'], 'each', 'rule'=>['integer']],
 	        [['description', 'notebook','links'], 'string'],
 			[['vm_cores','vm_ram','vm_hdd','places_id','partners_id','places_id','archived','currency_id','weight'],'integer'],
 			[['weight'],'default', 'value' => '100'],
@@ -851,28 +855,6 @@ class Services extends ArmsModel
 		return $this->hasMany(OrgPhones::class, ['services_id' => 'id']);
 	}
 	
-	
-	/**
-	 * После сохранения модели сохраняем теги
-	 * {@inheritdoc}
-	 */
-	public function afterSave($insert, $changedAttributes)
-	{
-		parent::afterSave($insert, $changedAttributes);
-		$this->saveTagsAfterSave();
-	}
-	
-	/**
-	 * После удаления модели удаляем связи с тегами
-	 * {@inheritdoc}
-	 */
-	public function afterDelete()
-	{
-		parent::afterDelete();
-		$this->deleteTagsAfterDelete();
-	}
-	
-
 	
 	
 	
