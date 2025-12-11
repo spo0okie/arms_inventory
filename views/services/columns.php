@@ -186,5 +186,6 @@ return [
 		'contentOptions' => [
 			'lineBr'=>false
 		],
-	]
+	],
+	'updated_at'
 ];

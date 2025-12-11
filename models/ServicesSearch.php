@@ -50,7 +50,8 @@ class ServicesSearch extends Services
 				'maintenanceJobs',
 				'maintenanceReqs',
 				'weight',
-				'tags'
+				'tags',
+				'updated_at'
 			], 'safe'],
         ];
     }
@@ -158,6 +159,7 @@ class ServicesSearch extends Services
 			->andFilterWhere(QueryHelper::querySearchString('providing_schedule.name', $this->providingSchedule))
 			->andFilterWhere(QueryHelper::querySearchString('support_schedule.name', $this->supportSchedule))
 			->andFilterWhere(QueryHelper::querySearchString('tags.name',$this->tags))
+			->andFilterWhere(QueryHelper::querySearchNumberOrDate('services.updated_at',$this->updated_at))
 	        ->andFilterWhere([
 	        	'or',
 					QueryHelper::querySearchString('getplacepath(places_in_svc_arms.id)', $this->sites),

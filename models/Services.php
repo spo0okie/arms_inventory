@@ -233,7 +233,7 @@ class Services extends ArmsModel
      */
     public function attributeData()
     {
-        return [
+        return array_merge(parent::attributeData(), [
 			'archived' => [
 				'Архивирован',
 				'hint' => 'Если сервис/услуга более не используется, но для истории его описание лучше сохранить - то его можно просто заархивировать, чтобы не отсвечивал',
@@ -459,7 +459,7 @@ class Services extends ArmsModel
 					'(Если на этот сервис запланированы ресурсы виртуализации)'
 			],
 
-        ];
+        ]);
     }
     
 	
