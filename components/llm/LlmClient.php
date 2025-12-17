@@ -5,39 +5,51 @@ namespace app\components\llm;
 use OpenAI;
 class LlmClient
 {
-	private $client;
+	private LlmProviderInterface $provider;
 	
 	/**
 	 * Возвращает true, если LLM доступны для использования
 	 * @return boolean
 	 */
-	public static function available()
+	public static function available(): bool
 	{
-		return strlen(\Yii::$app->params['llm.openai.key']??'')>0;
+		return OpenAiProvider::available()
+			|| GigaChatProvider::available();
 	}
 	
 	public function __construct()
 	{
-		$apiKey = \Yii::$app->params['llm.openai.key'];
-		$proxy = \Yii::$app->params['llm.openai.proxy']??'';
-		if ($proxy) {
-			
-			$this->client = OpenAI::factory()
-				->withApiKey($apiKey)
-				->withHttpClient(new \GuzzleHttp\Client([
-					'proxy' => [
-						'http' => $proxy,
-						'https' => $proxy,
-					],
-					'timeout' => 30,
-				]))
-				->make();
+		if (OpenAiProvider::available()) {
+			$this->provider = new OpenAiProvider();
+		} elseif (GigaChatProvider::available()) {
+			$this->provider = new GigaChatProvider();
 		} else {
-			$this->client = OpenAI::client($apiKey);
-			
+			throw new \RuntimeException('No LLM providers available');
 		}
 	}
 	
+	/**
+	 * Убирает markdown-оформление блока с JSON (```json ... ```)
+	 * @param string $text
+	 * @return string
+	 */
+	public static function stripMarkdownJsonFence(string $text): string
+	{
+		$text = trim($text);
+		/*
+		^```            начало строки + ```
+		(?:json)?       необязательное слово "json"
+		\s*             перевод строки / пробелы
+		(.*?)           сам JSON (ленивый захват)
+		\s*				перевод строки / пробелы
+		```$            закрывающие ```
+		 */
+		return preg_replace(
+			'/^```(?:json)?\s*(.*?)\s*```$/si',
+			'$1',
+			$text
+		) ?? $text;
+	}
 	
 	/**
 	 * Сгенерировать описание программного обеспечения в формате JSON
@@ -55,17 +67,11 @@ class LlmClient
           \"links\": \"URL сайта программы\",
         }";
 		
-		$response = $this->client->chat()->create([
-			'model' => 'gpt-4o-mini', // дешёвая и качественная модель
-			'messages' => [
-				['role' => 'system', 'content' => 'Ты помощник, описывающий программное обеспечение в нейтральном техническом стиле.'],
-				['role' => 'user', 'content' => $prompt],
-			],
-			'response_format' => ['type' => 'json_object'],
-		]);
+		$system='Ты помощник, описывающий программное обеспечение в нейтральном техническом стиле.';
 		
-		$json = $response->choices[0]->message->content ?? null;
-		return $json ? json_decode($json, true) : null;
+		$response = $this->provider->prompt($prompt, $system);
+		$response = static::stripMarkdownJsonFence($response);
+		return $response ? json_decode($response, true) : null;
 	}
 	
 	
@@ -79,18 +85,10 @@ $tpl
 
 Ответ должен быть в виде текстового блока (plain text) строго по структуре шаблона, без пояснений.
 PROMPT;
+		$system='Ты — эксперт по инвентаризации IT-оборудования.';
 		
 		
-		
-		$response = $this->client->chat()->create([
-			'model' => 'gpt-4o-mini', // дешёвая и качественная модель
-			'messages' => [
-				['role' => 'system', 'content' => 'Ты — эксперт по инвентаризации IT-оборудования.'],
-				['role' => 'user', 'content' => $prompt],
-			],
-		]);
-		
-		return trim($response->choices[0]->message->content);
+		return $this->provider->prompt($prompt, $system);
 	}
 	
 }

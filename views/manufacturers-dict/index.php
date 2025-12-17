@@ -30,7 +30,7 @@ $manufacturers=\app\models\Manufacturers::fetchNames();
             [
                 'attribute'=>'manufacturers_id',
                 'format'=>'raw',
-                'value' => function($data) use ($manufacturers) {return $manufacturers[$data['id']];}
+                'value' => function($data) use ($manufacturers) {return $manufacturers[$data['manufacturers_id']]??'- missing -';}
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

@@ -7,13 +7,14 @@ use app\migrations\arms\ArmsMigration;
 /**
  * Создание таблицы tags_links для полиморфных связей тегов с объектами
  */
-class m251210_083100_create_tags_links_table extends ArmsMigration
+class M251210083100_create_tags_links_table extends ArmsMigration
 {
     /**
      * {@inheritdoc}
      */
-    public function safeUp()
+    public function up()
     {
+		if ($this->tableExists('tags_links')) return true;
         $this->createTable('tags_links', [
             'id' => $this->primaryKey(),
             'tag_id' => $this->integer()->notNull()->comment('ID тега'),
@@ -39,7 +40,7 @@ class m251210_083100_create_tags_links_table extends ArmsMigration
     /**
      * {@inheritdoc}
      */
-    public function safeDown()
+    public function down()
     {
         $this->dropTableIfExists('tags_links');
     }

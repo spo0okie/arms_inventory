@@ -5,7 +5,7 @@ use app\helpers\StringHelper;
 use Codeception\TestInterface;
 use yii\base\InvalidConfigException;
 
-class PageAccessCest
+class ExtraPageAccessCest
 {
 	public $savedModels=[];
 	public $rootDb;

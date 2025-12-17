@@ -7,13 +7,14 @@ use app\migrations\arms\ArmsMigration;
 /**
  * Создание таблицы tags для системы тегов
  */
-class m251210_083000_create_tags_table extends ArmsMigration
+class M251210083000_create_tags_table extends ArmsMigration
 {
     /**
      * {@inheritdoc}
      */
-    public function safeUp()
+    public function up()
     {
+		if ($this->tableExists('tags')) return true;
         $this->createTable('tags', [
             'id' => $this->primaryKey(),
             'name' => $this->string(32)->notNull()->comment('Название тега'),
@@ -38,7 +39,7 @@ class m251210_083000_create_tags_table extends ArmsMigration
     /**
      * {@inheritdoc}
      */
-    public function safeDown()
+    public function down()
     {
         $this->dropTableIfExists('tags');
     }

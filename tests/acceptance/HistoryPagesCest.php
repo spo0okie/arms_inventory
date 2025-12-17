@@ -56,6 +56,7 @@ class HistoryPagesCest
 		//выбираем самый часто изменяемый master_id для этого класса
 		$id=$className::find()
 			->select(['master_id', 'cnt' => 'COUNT(*)'])
+			->where('exists (SELECT 1 FROM '.$masterClass::tableName().' m WHERE m.id = '.$className::tableName().'.master_id)')
 			->groupBy('master_id')
 			->orderBy(['cnt' => SORT_DESC])
 			->limit(1)
