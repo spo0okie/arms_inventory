@@ -5,12 +5,12 @@ namespace app\config;
 defined('YII_DEBUG') or define('YII_DEBUG', true);
 defined('YII_ENV_DEV') or define('YII_ENV_DEV', true);
 
-$params = \yii\helpers\ArrayHelper::merge(
+$testParams = \yii\helpers\ArrayHelper::merge(
 	require __DIR__ . '/params.php',
 	require __DIR__ . '/params-local.php'
 );
 
-$db = \yii\helpers\ArrayHelper::merge(
+$testDb = \yii\helpers\ArrayHelper::merge(
 	require __DIR__ . '/db.php',
 	require __DIR__ . '/db-local.php',
 	['dsn'=>'mysql:host=127.0.0.1;dbname=arms_test', 'username' => 'root',    'password' => '',]
@@ -22,8 +22,8 @@ $db = \yii\helpers\ArrayHelper::merge(
 $config=\yii\helpers\ArrayHelper::merge(require __DIR__ . '/web.php',[
     'id' => 'arms-tests',
     'components' => [
-        'db' => $db,
-		'db_root' => array_merge($db,[
+        'db' => $testDb,
+		'db_root' => array_merge($testDb,[
 			'dsn' => 'mysql:host=127.0.0.1',
 		]),
 		'urlManager' => [
@@ -52,7 +52,7 @@ $config=\yii\helpers\ArrayHelper::merge(require __DIR__ . '/web.php',[
 			//'allowedIPs' => ['127.0.0.1', '::1'],
 		],
 	],
-    'params' => $params,
+    'params' => $testParams,
 ]);
 
 \Yii::$classMap['yii\helpers\Url'] = dirname(__DIR__) . '/helpers/Url.php';

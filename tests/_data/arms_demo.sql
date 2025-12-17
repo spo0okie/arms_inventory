@@ -21,9 +21,9 @@
 
 /*!40000 DROP DATABASE IF EXISTS `arms_test_crud`*/;
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `arms_test_crud` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `arms_test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 
-USE `arms_test_crud`;
+USE `arms_test`;
 
 --
 -- Table structure for table `access_in_aces`

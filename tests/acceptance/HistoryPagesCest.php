@@ -14,7 +14,7 @@ class HistoryPagesCest
 	
 	protected function classesProvider()
 	{
-		Helper\Yii2::initFromFilename('test-acceptance.php');
+		Helper\Yii2::initFromFilename('test-web.php');
 		codecept_debug('Initializing Suite/HistoryTest DB...');
 		//Подготавливаем временную БД
 		Helper\Database::dropYiiDb();

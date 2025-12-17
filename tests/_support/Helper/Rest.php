@@ -9,7 +9,7 @@ class Rest extends \Codeception\Module
 	public function _beforeSuite($settings = array())
 	{
 		//$params=require __DIR__.'/../_data/get-routes-data.php';
-		Yii2::initFromFilename('test-api.php');
+		Yii2::initFromFilename('test-web.php');
 		codecept_debug('Initializing Suite DB...');
 		//Подготавливаем временную БД
 		Database::dropYiiDb();
@@ -20,9 +20,9 @@ class Rest extends \Codeception\Module
 	
 	public function _afterSuite()
 	{
-		if (static::$testsFailed) return;
+		//if (static::$testsFailed) return;
 		// После завершения тестов удаляем тестовую БД
-		Yii2::initFromFilename('test-api.php');
-		Database::dropYiiDb();
+		//Yii2::initFromFilename('test-api.php');
+		//Database::dropYiiDb();
 	}
 }

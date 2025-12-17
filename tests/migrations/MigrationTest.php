@@ -14,6 +14,8 @@ class MigrationTest extends Unit
 	{
 		parent::setUp();
 		
+		\Helper\Database::dropYiiDb();
+		
 		// Создаем БД (если её нет)
 		\Helper\Database::prepareYiiDb();
 	}
@@ -33,7 +35,7 @@ class MigrationTest extends Unit
 			ob_start();
 			$result=Yii::$app->runAction('migrate/up', [
 				'migrationPath' => '@yii/rbac/migrations/',
-				'migrationNamespaces' => [],
+				//'migrationNamespaces' => [],
 				'interactive' => 0,
 			]);
 			$output = ob_get_clean();

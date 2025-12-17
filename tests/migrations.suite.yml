@@ -8,7 +8,7 @@ modules:
               part: [ orm, fixtures ]
     config:
         Yii2:
-            configFile: 'config/test-migrations.php'
+            configFile: 'config/test-console.php'
             cleanup: false
             transaction: false
 bootstrap: _bootstrap.php

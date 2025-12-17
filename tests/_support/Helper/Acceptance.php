@@ -18,9 +18,9 @@ class Acceptance extends \Codeception\Module
 	
 	public function _afterSuite()
 	{
-		if (static::$testsFailed) return;
+		//if (static::$testsFailed) return;
 		// После завершения тестов удаляем тестовую БД
-		Yii2::initFromFilename('test-acceptance.php');
-		Database::dropYiiDb();
+		//Yii2::initFromFilename('test-web.php');
+		//Database::dropYiiDb();
 	}
 }

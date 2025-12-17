@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../vendor/yiisoft/yii2/Yii.php';
 require_once __DIR__ .'/../../vendor/autoload.php';
 
 codecept_debug('Initializing Extra acceptance tests DB...');
-Helper\Yii2::initFromFilename('test-acceptance.php');
+Helper\Yii2::initFromFilename('test-web.php');
 codecept_debug('Initializing Suite/HistoryTest DB...');
 //Подготавливаем временную БД
 Helper\Database::dropYiiDb();

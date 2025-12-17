@@ -20,6 +20,6 @@ class CompsCest
 		$I->sendGET('/comps/search', ['name' => 'msk-esxi1']);
 		$I->seeResponseCodeIs(200);
 		$I->seeResponseIsJson();
-		$I->seeResponseContainsJson(['name' => 'MSK-ESXI1']);
+		$I->seeResponseContainsJson(['name' => 'MSK-ESXi1']);
 	}
 }

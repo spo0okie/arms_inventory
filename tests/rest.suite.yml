@@ -3,10 +3,10 @@ modules:
     enabled:
         - Yii2:
               part: [ orm, fixtures ]
-              configFile: 'config/test-api.php'
+              configFile: 'config/test-web.php'
               transaction: false
               cleanup: false
-              entryUrl: http://localhost:8081/web/index-test-api.php
+              entryUrl: http://localhost:8081/web/index-test.php
         - REST:
               depends: PhpBrowser
               url: http://localhost:8081/web/api

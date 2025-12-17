@@ -3,12 +3,12 @@ modules:
     enabled:
         - Yii2:
             part: [ orm, fixtures ]
-            configFile: 'config/test-acceptance.php'
+            configFile: 'config/test-web.php'
             transaction: false
             cleanup: false
-            entryUrl: http://localhost:8081/web/index-test-acceptance.php
+            entryUrl: http://localhost:8081/web/index-test.php
         - PhpBrowser:
-            url: http://localhost:8081/web/index-test-acceptance.php
+            url: http://localhost:8081/web/index-test.php
         - REST:
             depends: PhpBrowser
             url: http://localhost:8081

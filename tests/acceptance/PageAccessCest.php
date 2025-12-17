@@ -2,7 +2,6 @@
 
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
-use Codeception\TestInterface;
 use yii\base\InvalidConfigException;
 
 class PageAccessCest
@@ -215,7 +214,7 @@ class PageAccessCest
 	{
 		$routes = [];
 		$params=require __DIR__.'/../_data/get-routes-data.php';
-		Helper\Yii2::initFromFilename('test-acceptance.php');
+		Helper\Yii2::initFromFilename('test-web.php');
 		codecept_debug('Initializing Suite DB...');
 		//Подготавливаем временную БД
 		Helper\Database::dropYiiDb();

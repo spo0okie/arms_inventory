@@ -1,0 +1,10 @@
+actor: UnitTester
+modules:
+    enabled:
+        - Asserts
+        - Yii2:
+            part: [orm, fixtures, email]
+            configFile: 'config/test-web.php'
+            transaction: false
+            cleanup: false
+bootstrap: _bootstrap.php
