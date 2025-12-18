@@ -24,7 +24,8 @@
 
 **Основные тесты:**
 - [`PageAccessCest.php`](acceptance/PageAccessCest.php) - автоматическая проверка всех маршрутов приложения (GET/POST)
-- [`HistoryPagesCest.php`](acceptance/HistoryPagesCest.php) - проверка страниц истории изменений моделей
+- [`HistoryPagesCest.php`](acceptance/HistoryPagesCest.php) - проверка доступности истории изменений моделей
+- [`AuthorizationModesCest.php`](acceptance/AuthorizationModesCest.php) - тесты различных режимов авторизации
 
 **Extra тесты:** (`acceptance-extra/`)
 Дополнительные acceptance тесты с расширенной конфигурацией.

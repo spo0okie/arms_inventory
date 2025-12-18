@@ -26,4 +26,16 @@ class ExtraPageAccessCest
 		$I->amOnPage('/techs/view?id=18');
 		$I->seeResponseCodeIs(200,"Techs rack render OK");
 	}
+	
+	public function testTechsServerRender(AcceptanceExtraTester $I)
+	{
+		$I->amOnPage('/techs/view?id=1');
+		$I->seeResponseCodeIs(200,"Techs server render OK");
+	}
+	
+	public function testCompsRender(AcceptanceExtraTester $I)
+	{
+		$I->amOnPage('/techs/view?id=3');
+		$I->seeResponseCodeIs(200,"Windows server render OK");
+	}
 }
