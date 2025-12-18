@@ -117,6 +117,7 @@ class ArmsBaseController extends Controller
 	//как в карте доступов обозначать анонимный и авторизованный доступы
 	const PERM_ANONYMOUS='@anonymous';
 	const PERM_AUTHENTICATED='@authorized';
+	const PERM_EVERYONE='@everyone';
 	const PERM_EDIT='edit';
 	const PERM_VIEW='view';
 	
@@ -223,12 +224,23 @@ class ArmsBaseController extends Controller
 		$rules=[];
 		foreach ($map as $permission=>$actions) {
 			$rule=['allow'=>true, 'actions'=>$actions];
+			
+			//если разграничение прав отключено, то
+			if (empty(Yii::$app->params['useRBAC'])) {
+				//в зависимости от требования "авторизации для просмотра" все будет доступно
+				$permission=(Yii::$app->params['authorizedView']??false)?
+					self::PERM_AUTHENTICATED:	//авторизованным пользователям
+					self::PERM_EVERYONE;		//анонимным пользователям
+			}
 			switch ($permission) {
 				case self::PERM_AUTHENTICATED:
 					$rule['roles']=['@'];
 					break;
 				case self::PERM_ANONYMOUS:
 					$rule['roles']=['?'];
+					break;
+				case self::PERM_EVERYONE:
+					$rule['roles']=['?','@'];
 					break;
 				/** @noinspection PhpMissingBreakStatementInspection */
 				case 'view':
@@ -292,8 +304,8 @@ class ArmsBaseController extends Controller
 			],
 		];
 		
-		if (!empty(Yii::$app->params['useRBAC']))
-			$behaviors['access']=static::buildAccessRules($this->accessMap());
+		//if (!(empty(Yii::$app->params['useRBAC']) && empty(Yii::$app->params['authorizedView'])))
+		$behaviors['access']=static::buildAccessRules($this->accessMap());
 		
 		return $behaviors;
     }

@@ -45,12 +45,14 @@ class SiteController extends Controller
 					],
                 ],
             ],
-            'verbs' => [
+            /*'verbs' => [
+            	//отключил требование POST для logout, чтобы можно было разлогиниваться
+            	//в тестовом сценарии через I->amOnPage('/site/logout')
                 'class' => VerbFilter::class,
                 'actions' => [
                     'logout' => ['post'],
                 ],
-            ],
+            ],*/
         ];
     }
 
@@ -129,13 +131,21 @@ class SiteController extends Controller
         }
 
         $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-        	$return=Yii::$app->request->get('return');
-			if ($return) {
-				return $this->redirect($return);
+		//если нам передали POST данные для логина
+        if ($model->load(Yii::$app->request->post())) {
+			//пробуем залогиниться
+			if ($model->login()) {
+				$return = Yii::$app->request->get('return');
+				if ($return) {
+					return $this->redirect($return);
+				} else {
+					return $this->goBack();
+				}
 			} else {
-				return $this->goBack();
+				//возвращаем 401
+				Yii::$app->response->statusCode = 401;
 			}
+			
         }
         return $this->render('login', [
             'model' => $model,

@@ -7,7 +7,8 @@ defined('YII_ENV_DEV') or define('YII_ENV_DEV', true);
 
 $testParams = \yii\helpers\ArrayHelper::merge(
 	require __DIR__ . '/params.php',
-	require __DIR__ . '/params-local.php'
+	require __DIR__ . '/params-local.php',
+	require __DIR__ . '/params-test.php'
 );
 
 $testDb = \yii\helpers\ArrayHelper::merge(
@@ -21,6 +22,7 @@ $testDb = \yii\helpers\ArrayHelper::merge(
  */
 $config=\yii\helpers\ArrayHelper::merge(require __DIR__ . '/web.php',[
     'id' => 'arms-tests',
+	'bootstrap' => ['debug'],
     'components' => [
         'db' => $testDb,
 		'db_root' => array_merge($testDb,[
