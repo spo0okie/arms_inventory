@@ -21,7 +21,7 @@ class SoftController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'edit'=>['select-update','generate-description'],
+			'edit'=>['select-update','generate-description','uploads'],
 		]);
 	}
 	

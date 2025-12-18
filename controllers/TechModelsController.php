@@ -26,7 +26,7 @@ class TechModelsController extends ArmsBaseController
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			'view'=>['hint-comment','hint-template','hint-description',],
-			'edit'=>['uploads','render-rack']
+			'edit'=>['uploads','render-rack','generate-description']
 		]);
 	}
 	
