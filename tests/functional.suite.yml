@@ -1,0 +1,10 @@
+actor: FunctionalTester
+modules:
+    enabled:
+        - Yii2:
+            part: [orm, fixtures, email]
+            configFile: 'config/test-web.php'
+            transaction: true
+            cleanup: true
+        - Asserts
+bootstrap: _bootstrap.php
