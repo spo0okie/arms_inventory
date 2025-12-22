@@ -369,4 +369,64 @@ trait AttributeLinksModelTrait
 		$fields=array_combine($fields, $fields);
 		return array_merge(parent::extraFields(),$fields);
 	}
+	
+	/**
+	 * Процедура обрыва всех обратных связей (для принудительного удаления из БД)
+	 * Используется пока только в тестах. Оч деликатная процедура.
+	 * Возвращает список вычищенных обратных ссылок
+	 * @return array
+	 */
+	public function clearReverseLinks()
+	{
+		$needSave=false;
+		$wipedData=[];
+		foreach ($this->getLinksSchema() as $attr=>$schema) {
+			if (!str_ends_with($attr,'_ids')) continue;
+			$reverseLink=$this->attributeReverseLink($attr);
+			if (!str_ends_with($reverseLink,'_id')) {
+				$this->$attr=[];
+				$needSave=true;
+				continue;
+			}
+			$class=$this->attributeLinkClass($attr);
+			$wipedData[$attr]=$this->$attr;
+			$models=$class::find()->where([$reverseLink=>$this->id])->all();
+			foreach ($models as $model) {
+				$model->$reverseLink=null;
+				$model->save(false);
+			}
+		}
+		if ($needSave) {$this->save(false);}
+		return $wipedData;
+	}
+	
+	/**
+	 * Прикручивает модели оторванные от одной модели в функции выше к другой
+	 * Предполагается, что перед удалением мы запоминаем оторванные модели, удаляем объект.
+	 * Потом создаем новый и привязываем оторванные модели к новому
+	 * @param $wipedData
+	 * @return void
+	 */
+	public function restoreReverseLinks($wipedData)
+	{
+		$needSave=false;
+		foreach ($wipedData as $attr=>$value) {
+			$reverseLink=$this->attributeReverseLink($attr);
+			$class=$this->attributeLinkClass($attr);
+			if (!str_ends_with($reverseLink,'_id')) {
+				$this->$attr=$value;
+				$needSave=true;
+				continue;
+			}
+			
+			$models=$class::find()->where(['id'=>$value])->all();
+			foreach ($models as $model) {
+				$model->$reverseLink=$this->id;
+				$model->save(false);
+			}
+		}
+		if ($needSave) {$this->save(false);}
+	}
+	
+	
 }

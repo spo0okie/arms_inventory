@@ -52,16 +52,6 @@ class AuthorizationModesCest
 	}
     public function _before(AcceptanceTester $I)
     {
-        // Сохраняем оригинальные параметры
-        $this->originalParams = [
-            'useRBAC' => Yii::$app->params['useRBAC'] ?? false,
-            'localAuth' => Yii::$app->params['localAuth'] ?? false,
-            'authorizedView' => Yii::$app->params['authorizedView'] ?? false,
-        ];
-        
-        // Включаем локальную авторизацию для тестов
-        Yii::$app->params['localAuth'] = true;
-        
         // Создаем тестового пользователя
         $this->testUser = Users::findByLogin('test_user');
 		if ($this->testUser === null) {
@@ -193,12 +183,12 @@ class AuthorizationModesCest
         $I->amOnPage("/comps/view?id={$this->testComp->id}");
         $I->seeResponseCodeIs(200);
         
-        // Редактирование должно требовать прав (403)
+        // Редактирование должно требовать авторизации (401)
         $I->amOnPage('/techs/create');
-        $I->seeResponseCodeIs(403);
+        $I->seeResponseCodeIs(401);
         
         $I->amOnPage("/techs/update?id={$this->testTech->id}");
-        $I->seeResponseCodeIs(403);
+        $I->seeResponseCodeIs(401);
 		
 		$this->login($I);
 		
@@ -232,18 +222,18 @@ class AuthorizationModesCest
 		
 		$this->logout($I);
 		$this->revokeRoles();
-        // Без авторизации все должно возвращать 403
+        // Без авторизации все должно возвращать 401
         $I->amOnPage('/comps/index');
-        $I->seeResponseCodeIs(403);
+        $I->seeResponseCodeIs(401);
         
         $I->amOnPage("/comps/view?id={$this->testComp->id}");
-        $I->seeResponseCodeIs(403);
+        $I->seeResponseCodeIs(401);
         
         $I->amOnPage('/comps/create');
-        $I->seeResponseCodeIs(403);
+        $I->seeResponseCodeIs(401);
         
         $I->amOnPage("/comps/update?id={$this->testComp->id}");
-        $I->seeResponseCodeIs(403);
+        $I->seeResponseCodeIs(401);
 
 		//после входа все еще ничего не доступно
 		$this->login($I);
@@ -288,7 +278,7 @@ class AuthorizationModesCest
 		
 		// Без авторизации ничего не доступно
 		$I->amOnPage('/comps/index');
-		$I->seeResponseCodeIs(403);
+		$I->seeResponseCodeIs(401);
 					
 		$this->login($I);
 		

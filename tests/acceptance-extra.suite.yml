@@ -12,8 +12,4 @@ modules:
         - REST:
             depends: PhpBrowser
             url: http://localhost:8081
-        - \Helper\Acceptance:
-            depends:
-                - \Helper\Database
-                - \Helper\Yii2
 bootstrap: _bootstrap.php

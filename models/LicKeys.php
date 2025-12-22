@@ -54,15 +54,15 @@ class LicKeys extends ArmsModel
 		return [
 			'lic_items_id' => [LicItems::class,'lic_keys_ids'],
 			'arms_ids' => [Techs::class,'lic_keys_ids', 'updater' => [
-				'class' => ManyToManySmartUpdater::className(),
+				'class' => ManyToManySmartUpdater::class,
 				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
 			]],
 			'comps_ids' => [Comps::class,'lic_keys_ids', 'updater' => [
-				'class' => ManyToManySmartUpdater::className(),
+				'class' => ManyToManySmartUpdater::class,
 				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
 			]],
 			'users_ids' => [Users::class,'lic_keys_ids', 'updater' => [
-				'class' => ManyToManySmartUpdater::className(),
+				'class' => ManyToManySmartUpdater::class,
 				'viaTableAttributesValue' => LicLinks::fieldsBehaviour($model),
 			]],
 		];
@@ -137,7 +137,7 @@ class LicKeys extends ArmsModel
 	 */
 	public function getArms()
 	{
-		return $this->hasMany(Techs::className(), ['id' => 'arms_id'])
+		return $this->hasMany(Techs::class, ['id' => 'arms_id'])
 			->viaTable('{{%lic_keys_in_arms}}', ['lic_keys_id' => 'id']);
 	}
 	
@@ -149,7 +149,7 @@ class LicKeys extends ArmsModel
 	 */
 	public function getComps()
 	{
-		return $this->hasMany(Comps::className(), ['id' => 'comps_id'])
+		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
 			->viaTable('{{%lic_keys_in_comps}}', ['lic_keys_id' => 'id']);
 	}
 	
@@ -161,7 +161,7 @@ class LicKeys extends ArmsModel
 	 */
 	public function getUsers()
 	{
-		return $this->hasMany(Users::className(), ['id' => 'users_id'])
+		return $this->hasMany(Users::class, ['id' => 'users_id'])
 			->viaTable('{{%lic_keys_in_users}}', ['lic_keys_id' => 'id']);
 	}
 	
@@ -171,7 +171,7 @@ class LicKeys extends ArmsModel
 	 */
 	public function getLicItem()
 	{
-		return $this->hasOne(LicItems::className(), ['id' => 'lic_items_id']);
+		return $this->hasOne(LicItems::class, ['id' => 'lic_items_id']);
 	}
 
 
@@ -185,9 +185,10 @@ class LicKeys extends ArmsModel
 		if (parent::beforeSave($insert)) {
 			//fix: https://github.com/spo0okie/arms_inventory/issues/16
 			//если привязаны к АРМ,
-			if (is_array($this->arms_ids)&&count($this->arms_ids)) {
+			//и есть licItem (а как его может не быть вы спросите, а так: если мы делаем clearReverseLinks()
+			if (is_array($this->arms_ids)&&count($this->arms_ids)&&($this->licItem)) {
 				//то ищем эти АРМ в закупке и группе
-				if (count($licArms=array_intersect($this->arms_ids,$this->licItem->arms_ids))) {
+				if (count($licArms=array_intersect($this->arms_ids,$this->licItem->arms_ids??[]))) {
 					$this->licItem->arms_ids=array_diff($this->licItem->arms_ids,$licArms);
 					$this->licItem->save();
 				}

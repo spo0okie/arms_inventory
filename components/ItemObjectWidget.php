@@ -53,7 +53,7 @@ class ItemObjectWidget extends LinkObjectWidget
 		if (!isset($this->link)) $this->link=parent::run();
 		
 		if ($this->archived&&!$this->show_archived)
-			StringHelper::appendToDelimitedString($this->style,'display:none',';');
+			StringHelper::appendToDelimitedString($this->style,';','display:none');
 		
 		$cssClass='object-item '. $this->item_class.' '.($this->archived?$this->archived_class:'');
 		

@@ -45,7 +45,9 @@ use yii\web\IdentityInterface;
  * @property string		$uid
  * @property string		$ips
  * @property array		$netIps_ids
- *
+ * @property array $lic_groups_ids Массив ID привязанных типов лицензий
+ * @property array $lic_items_ids Массив ID привязанных закупок лицензий
+ * @property array $lic_keys_ids Массив ID привязанных лицензионных ключей
  * @property Aces[]      $aces
  * @property Comps[]     $comps
  * @property Comps[]     $adminComps
@@ -129,9 +131,9 @@ class Users extends ArmsModel implements IdentityInterface
 			'ln',
 			'orgStruct',
 			'org',
-			'licKeys_ids',
-			'licItems_ids',
-			'licGroups_ids',
+			'lic_keys_ids',
+			'lic_items_ids',
+			'lic_groups_ids',
 			'licKeys',
 			'licItems',
 			'licGroups',
@@ -151,8 +153,8 @@ class Users extends ArmsModel implements IdentityInterface
 		'admin_comps_ids' =>						[Comps::class,'admins_ids'],
 		'services_ids' => 							[Services::class,'responsible_id'],
 		'support_services_ids' =>			 		[Services::class,'support_ids'],
-		'infrastructure_services_ids' =>			[Services::class,'infrastructure_responsible_id'],
-		'infrastructure_support_services_ids' =>	[Services::class,'infrastructure_support_id'],
+		'infrastructure_services_ids' =>			[Services::class,'infrastructure_user_id'],
+		'infrastructure_support_services_ids' =>	[Services::class,'infrastructure_support_ids'],
 		'techs_ids' => 								[Techs::class,'user_id'],
 		'it_techs_ids' => 							[Techs::class,'it_staff_id','loader'=>'techsIt'],
 		'head_techs_ids' =>							[Techs::class,'head_id','loader'=>'techsHead'],

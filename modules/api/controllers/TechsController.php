@@ -17,7 +17,7 @@ class TechsController extends BaseRestController
     
     public $modelClass='app\models\Techs';
 	
-	public function accessMap()
+	public function accessMap(): array
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			'view'=>['search-by-mac','search-by-user']

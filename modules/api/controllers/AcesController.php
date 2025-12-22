@@ -11,21 +11,11 @@ class AcesController extends BaseRestController
 {
     
     public $modelClass=Aces::class;
-    
-    /*public function accessMap()
-	{
-		return array_merge_recursive(parent::accessMap(),[
-			ArmsBaseController::PERM_AUTHENTICATED=>['whoami']
-		]);
-	}*/
 	
-	public static $searchJoin=[
-		'accessTypes',
-	];
-	
-	public static $searchFields=[
+	public static array $searchFields=[
 		'id',
-		'accessTypeName'=>'access_types.name',
+		'accessTypes',
+		'accessTypeName'=>'accessTypes',
 	];
 	
 }

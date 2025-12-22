@@ -25,7 +25,7 @@ class SoftListsController extends ArmsBaseController
     public function actionView(int $id)
     {
 		$searchModel = new SoftSearch();
-		$searchModel->softLists_ids=[$id];
+		$searchModel->soft_lists_ids=[$id];
 		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
     	
         return $this->render('view', [

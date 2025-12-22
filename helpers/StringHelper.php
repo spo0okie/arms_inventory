@@ -203,41 +203,23 @@ class StringHelper extends BaseStringHelper {
 			$string=substr($string,0,strlen($string)-strlen($suffix));
 		return $string;
 	}
+
 	/**
 	 * Добавляет элемент к строке, содержащей несколько элементов через разделитель
-	 * Если элемент уже присутствует в строке, он не будет добавлен повторно
-	 * 
+	 *
 	 * @param string $string Исходная строка с элементами
-	 * @param string $element Элемент для добавления
+	 * @param string ...$elements Элементы для добавления
 	 * @param string $delimiter Разделитель элементов (по умолчанию запятая)
-	 * @param bool $trim Обрезать пробелы у элементов при проверке (по умолчанию true)
 	 * @return string Строка с добавленным элементом
 	 * 
-	 * @example
-	 * StringHelper::appendToDelimitedString('apple,banana', 'orange') // 'apple,banana,orange'
-	 * StringHelper::appendToDelimitedString('apple,banana', 'apple') // 'apple,banana'
-	 * StringHelper::appendToDelimitedString('', 'apple') // 'apple'
-	 * StringHelper::appendToDelimitedString('apple; banana', 'orange', '; ') // 'apple; banana; orange'
 	 */
-	public static function appendToDelimitedString(string $string, string $element, string $delimiter = ',', bool $trim = true): string
+	public static function appendToDelimitedString(string $string, string $delimiter, string ...$elements): string
 	{
-		// Если строка пустая, возвращаем только элемент
-		if (empty($string)) {
-			return $element;
+		if ($string !== '') {
+			array_unshift($elements, $string);
 		}
 		
-		// Разбиваем строку на элементы
-		$elements = static::explode($string, $delimiter, $trim, true);
-		
-		// Проверяем, есть ли уже такой элемент
-		$elementToCheck = $trim ? trim($element) : $element;
-		if (!in_array($elementToCheck, $elements, true)) {
-			// Добавляем элемент
-			$elements[] = $elementToCheck;
-		}
-		
-		// Собираем строку обратно
-		return implode($delimiter, $elements);
+		return ArrayHelper::implode($delimiter, $elements);
 	}
 	
 	

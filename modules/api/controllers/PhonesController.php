@@ -17,12 +17,12 @@ use OpenApi\Attributes as OA;
 class PhonesController extends BaseRestController
 {
 	
-	public function disabledActions()
+	public function disabledActions(): array
 	{
 		return ['index','view','update','create','delete','search','filter'];
 	}
 	public $viewActions=['search-by-user','search-by-num'];
-	public function accessMap()
+	public function accessMap(): array
 	{
 		return [
 			'view'=>$this->viewActions,
@@ -37,7 +37,7 @@ class PhonesController extends BaseRestController
 	
 	#[OA\Get(
 		path: "/web/api/phones/search-by-num",
-		summary: "Поиск имени пользователя по номеру телефона",
+		summary: "Поиск имени пользователя по внутреннему номеру телефона",
 		parameters: [new OA\Parameter(
 			name: "num",
 			description: "Искомый номер телефона",
@@ -46,7 +46,18 @@ class PhonesController extends BaseRestController
 			schema: new OA\Schema(type: "string")
 		)],
 		responses: [
-			new OA\Response(response: 200, description: "OK"),
+			new OA\Response(
+				response: 200,
+				description: "OK",
+				content: new OA\MediaType(
+					mediaType: "text/plain",
+					schema: new OA\Schema(
+						description: "Полные ФИО пользователя",
+						type: "string",
+						example: "Иванов Иван Иванович"
+					)
+				)
+			),
 			new OA\Response(response: 404, description: "Не найдено"),
 		]
 	)]
@@ -88,26 +99,37 @@ class PhonesController extends BaseRestController
 	
 	#[OA\Get(
 		path: "/web/api/{controller}/search-by-user",
-		summary: "Поиск номера телефона по ID или логину пользователя",
+		summary: "Поиск внутреннего номера телефона по ID или логину пользователя",
 		parameters: [
 			new OA\Parameter(
 				name: "id",
 				description: "ID пользователя",
 				in: "query",
-				required: true,
+				required: false,
 				schema: new OA\Schema(type: "integer")
 			),
 			new OA\Parameter(
 				name: "login",
 				description: "Login пользователя",
 				in: "query",
-				required: true,
+				required: false,
 				schema: new OA\Schema(type: "string")
 			),
 		],
 		responses: [
-			new OA\Response(response: 200, description: "OK"),
-			new OA\Response(response: 404, description: "Не найдено"),
+			new OA\Response(
+				response: 200,
+				description: "OK",
+				content: new OA\MediaType(
+					mediaType: "text/plain",
+					schema: new OA\Schema(
+						description: "Внутренний номер телефона пользователя: может быть несколько через запятую с пробелом, а может быть пустая строка (если запрошенный пользователь найден, но телефона у него нет)",
+						type: "string",
+						example: "1100, 1405"
+					)
+				)
+			),
+			new OA\Response(response: 404, description: "Такой пользователь не найден"),
 		]
 	)]
 	public function actionSearchByUser($id=null,$login=null){

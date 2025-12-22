@@ -22,7 +22,7 @@ $model->addItem($model->add_item);
 			<?= $form->field($model, 'manufacturers_id')->select2() ?>
 			
 			<?= $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
-			<?= $form->field($model, 'softLists_ids')->checkboxList(SoftLists::listAll(), ['multiple' => true]) ?>
+			<?= $form->field($model, 'soft_lists_ids')->checkboxList(SoftLists::listAll(), ['multiple' => true]) ?>
 
 			<h3>Распознавание установленного ПО</h3>
 			

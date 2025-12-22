@@ -46,44 +46,38 @@ $this->beginPage() ?>
 <div class="wrap">
 
 	<?= $this->render('menu') ?>
-	<?php if ($path=='site/login' || Users::isViewer()) {
-		if (isset($this->params['navTabs'])) { ?>
-			<div class="nav-header">
-				<?= Breadcrumbs::widget([
-					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-				]) ?>
-				<?= Alert::widget() ?>
-				<?= $this->params['headerWidgets']??'' ?>
-				<div class="px-5"><?= $this->params['headerContent'] ?></div>
-			</div>
-			<?= TabsWidget::widget(array_merge([
-				'items'=>$this->params['navTabs'],
-				'options'=>['class'=>'nav-header'],
-				'itemOptions'=>['class'=>'px-5'],	//делаем такой же отступ как в шапке
-			],$this->params['tabsParams']??[])); ?>
-		<?php } elseif (isset($this->params['headerContent'])) { ?>
-			<div class="nav-header">
-				<?= Breadcrumbs::widget([
-					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-				]) ?>
-				<?= Alert::widget() ?>
-				<div class="px-5"><?= $this->params['headerContent'] ?></div>
-			</div>
-			<div class="<?= $containerClass ?>">
-				<?= $content ?>
-			</div>
-		<?php } else { ?>
-			<div class="<?= $containerClass ?>">
-				<?= Breadcrumbs::widget([
-					'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-				]) ?>
-				<?= Alert::widget() ?>
-				<?= $content ?>
-			</div>
-		<?php }
-	} else { ?>
+	<?php if (isset($this->params['navTabs'])) { ?>
+		<div class="nav-header">
+			<?= Breadcrumbs::widget([
+				'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+			]) ?>
+			<?= Alert::widget() ?>
+			<?= $this->params['headerWidgets']??'' ?>
+			<div class="px-5"><?= $this->params['headerContent'] ?></div>
+		</div>
+		<?= TabsWidget::widget(array_merge([
+			'items'=>$this->params['navTabs'],
+			'options'=>['class'=>'nav-header'],
+			'itemOptions'=>['class'=>'px-5'],	//делаем такой же отступ как в шапке
+		],$this->params['tabsParams']??[])); ?>
+	<?php } elseif (isset($this->params['headerContent'])) { ?>
+		<div class="nav-header">
+			<?= Breadcrumbs::widget([
+				'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+			]) ?>
+			<?= Alert::widget() ?>
+			<div class="px-5"><?= $this->params['headerContent'] ?></div>
+		</div>
 		<div class="<?= $containerClass ?>">
-			<?= $this->render('/site/access-denied') ?>
+			<?= $content ?>
+		</div>
+	<?php } else { ?>
+		<div class="<?= $containerClass ?>">
+			<?= Breadcrumbs::widget([
+				'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+			]) ?>
+			<?= Alert::widget() ?>
+			<?= $content ?>
 		</div>
 	<?php } ?>
 

@@ -7,15 +7,16 @@
  */
 /* @var $this yii\web\View */
 
+use yii\helpers\Url;
+
 $path=Yii::$app->request->getUrl();
-//$params=Yii::$app->request->getParams()
 ?>
 
 <div class="site-access-denied row col align-self-center">
 	
 	<div class="body-content">
 		
-		<?= $this->render('_about') ?>
+		<?= $this->render('../_about') ?>
 
 		<div class="row">
 			<div class="col-lg-3">
@@ -29,7 +30,7 @@ $path=Yii::$app->request->getUrl();
 						<h5>Доступ к этой секции закрыт, т.к. у вас недостаточно прав.</h5>
 						<p class="p-3">Возможно необходимо авторизоваться под более привилегированной учетной записью или запросить права в отделе ИТ.</p>
 						<!--suppress HtmlUnknownTarget -->
-						<a class="btn btn-danger" href="/web/site/login?return=<?= $path ?>">Авторизоваться</a>
+						<a class="btn btn-danger" href="<?= Url::to(['site/login']) ?>?return=<?= $path ?>">Авторизоваться</a>
 					</div>
 				</div>
 			</div>

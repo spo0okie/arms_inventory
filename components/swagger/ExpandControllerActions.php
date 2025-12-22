@@ -1,11 +1,14 @@
 <?php
 namespace app\components\swagger;
 
-//добавляет к описанию контроллера описания из его предка
+/**
+ * Добавляет к описанию контроллера описания из его предка.
+ * Раскрывает макросы (которые обязательно должны быть у предка, т.к. при наследовании многое должно из общего стать частным)
+ */
 
+use app\controllers\ArmsBaseController;
 use app\helpers\StringHelper;
 use OpenApi\Analysis;
-use OpenApi\Annotations\OpenApi;
 use OpenApi\Attributes as OA;
 use OpenApi\Context;
 
@@ -17,28 +20,26 @@ class ExpandControllerActions
 		//перебираем обнаруженные классы
 		foreach ($analysis->classes as $fqcn => $definition) {
 			// возможно namespace mismatch
-			if (!class_exists($fqcn)) {
-				continue;
-			}
+			if (!class_exists($fqcn)) continue;
 			
 			//пропускаем те что не контроллеры
-			if (!is_subclass_of($fqcn, \yii\web\Controller::class)) {
-				continue;
-			}
+			if (!is_subclass_of($fqcn, \yii\web\Controller::class)) continue;
 			
-			
-			// ищем предков
 			$methods = $definition['methods'];
+
+			// ищем предков
 			$ancestors = $analysis->getSuperClasses($fqcn);
 			foreach ($ancestors as $ancestorFqcn => $ancestorDef) {
 				$ancestorCtx = $ancestorDef['context'] ?? null;
-				if (!$ancestorCtx || !is_iterable($ancestorCtx->annotations)) {
-					continue;
-				}
+
+				//пропускаем предков у которых нет аннотаций
+				if (!$ancestorCtx || !is_iterable($ancestorCtx->annotations)) continue;
 				
+				/** @var ArmsBaseController $controller */
 				$controller=new $fqcn(\Yii::$app->id, \Yii::$app);
 				$disabledActions=$controller->disabledActions();
-				//добавляем аннотации самого класса предка
+				
+				//добавляем аннотации Тегов самого класса предка
 				foreach ($ancestorCtx->annotations as $ann) {
 					if (
 						$ann instanceof \OpenApi\Annotations\Tag
@@ -61,24 +62,33 @@ class ExpandControllerActions
 				if (empty($ancestorMethods)) continue; //если нечего смотреть - пропускаем
 				
 				foreach ($ancestorMethods as $methodName => $methodCtx) {
-					//$methodCtx = $methodDef['context'] ?? null;
-					if (in_array($methodName, $methods)) {
-						//этот метод переопределен в потомке - пропускаем
-						continue;
+					if (in_array($methodName, array_keys($methods))) {
+						//continue;
+						//этот метод переопределен в потомке
+						$childMethodCtx = $methods[$methodName] ?? null;
+						//если в потомке есть аннотации - пропускаем
+						if ($childMethodCtx && is_iterable($childMethodCtx->annotations) && count($childMethodCtx->annotations)) {
+							continue;
+						}
 					}
+					
+					//аннотаций нет
 					if (!$methodCtx || !is_iterable($methodCtx->annotations)) {
 						continue;
 					}
 					
-					if (str_starts_with($methodName,'action')) {
-						$action=lcfirst(StringHelper::removePrefix($methodName,'action'));
-						if (in_array($action,$disabledActions)) {
-							continue;
-						}
-					} else {
-						//не экшен - пропускаем
+					//определяем - экшен это или нет
+					if (!str_starts_with($methodName,'action')) {
 						continue;
 					}
+					
+					$action=lcfirst(StringHelper::removePrefix($methodName,'action'));
+					
+					//если этот метод в этом потомке запрещен - пропускаем
+					if (in_array($action,$disabledActions)) {
+						continue;
+					}
+					
 					
 					//добавляем аннотации методов предка
 					foreach ($methodCtx->annotations as $ann) {
@@ -89,25 +99,26 @@ class ExpandControllerActions
 							$ann instanceof OA\Patch) {
 							// переносим аннотацию в потомка
 							/** @var Context $newCtx */
-							$newCtx = clone $definition['context'];
-							$newCtx->method = $methodName;
-							$newCtx->class = $fqcn;
-							$clone = $this->deepCloneAnnotation($ann,$newCtx);
-							//$clone->_context=$newCtx;
-							$analysis->addAnnotation($clone, $definition['context']);
+							$newCtx = clone $definition['context'];	// клонируем контекст из предка
+							$newCtx->method = $methodName;			// указываем метод
+							$newCtx->class = $fqcn;					// указываем класс
+							$clone = $this->deepCloneAnnotation($ann,$newCtx); //клонируем аннотацию (со всеми вложенными)
+							$analysis->addAnnotation($clone, $definition['context']); // добавляем в анализ
 						}
 					}
 				}
 			}
 		}
-		
-		foreach ($analysis->getAnnotationsOfType(\OpenApi\Annotations\Operation::class) as $operation) {
-			$this->expandSearchFields($operation,$analysis);
-		}
 	}
 	
 	
-	private function deepCloneAnnotation($ann, Context $newCtx): object
+	/**
+	 * Глубокое клонирование аннотации с заменой контекста
+	 * @param         $ann
+	 * @param Context $newCtx
+	 * @return mixed
+	 */
+	public static function deepCloneAnnotation($ann, Context $newCtx): object
 	{
 		$clone = clone $ann;
 		$clone->_context = $newCtx;
@@ -117,59 +128,20 @@ class ExpandControllerActions
 			if (is_array($value)) {
 				$newArr = [];
 				foreach ($value as $k => $v) {
-					if (is_object($v) && $v instanceof \OpenApi\Annotations\AbstractAnnotation) {
-						$newArr[$k] = $this->deepCloneAnnotation($v, $newCtx);
+					if ($v instanceof \OpenApi\Annotations\AbstractAnnotation) {
+						$newArr[$k] = static::deepCloneAnnotation($v, $newCtx);
 					} else {
 						$newArr[$k] = is_object($v) ? clone $v : $v;
 					}
 				}
 				$clone->$prop = $newArr;
-			} elseif (is_object($value) && $value instanceof \OpenApi\Annotations\AbstractAnnotation) {
-				$clone->$prop = $this->deepCloneAnnotation($value, $newCtx);
+			} elseif ($value instanceof \OpenApi\Annotations\AbstractAnnotation) {
+				$clone->$prop = static::deepCloneAnnotation($value, $newCtx);
 			} elseif (is_object($value)) {
 				$clone->$prop = clone $value;
 			}
 		}
 		
 		return $clone;
-	}
-	
-	private function expandSearchFields(\OpenApi\Annotations\Operation $operation,$analysis): void
-	{
-		$ctx = $operation->_context;
-		if (!$ctx || !$ctx->class) {
-			return;
-		}
-		
-		$controllerClass = $ctx->class;
-		if (!class_exists($controllerClass)) {
-			return;
-		}
-		
-		if (!is_array($operation->parameters)) {
-			return;
-		}
-		
-		$expanded = [];
-		foreach ($operation->parameters as $param) {
-			if ($param instanceof OA\Parameter && $param->name === '{searchFields}') {
-				//$param->_unmerged = ['removed'];; // подсказка анализатору "не включать"
-				// если у контроллера определены поля
-				if (property_exists($controllerClass, 'searchFields')) {
-					foreach ($controllerClass::$searchFields as $name => $field) {
-						$fieldName=is_numeric($name)?$field:$name;
-						$clone=$this->deepCloneAnnotation($param,$param->_context);
-						$clone->name=$fieldName;
-						$clone->description="Фильтр по полю {$fieldName}";
-						//$clone->schema=new OA\Schema(type: "string");
-						$expanded[]=$clone;
-					}
-				}
-				$analysis->annotations->detach($param);
-			} else {
-				$expanded[] = $param;
-			}
-		}
-		$operation->parameters = $expanded;
 	}
 }

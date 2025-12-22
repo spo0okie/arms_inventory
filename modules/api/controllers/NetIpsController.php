@@ -14,7 +14,7 @@ use yii\web\NotFoundHttpException;
 class NetIpsController extends BaseRestController
 {
 	public $modelClass='app\models\NetIps';
-	public function accessMap()
+	public function accessMap(): array
 	{
 		$class=StringHelper::class2Id($this->modelClass);
 		return array_merge_recursive(parent::accessMap(),[
@@ -23,7 +23,7 @@ class NetIpsController extends BaseRestController
 		]);
 	}
 	
-	public static $searchFields=[	//набор полей по которым можно делать поиск с маппингом в SQL поля
+	public static array $searchFields=[	//набор полей по которым можно делать поиск с маппингом в SQL поля
 		'name'=>'name',
 		'addr'=>'text_addr',
 		'comment'=>'comment',

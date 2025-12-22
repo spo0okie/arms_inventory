@@ -59,10 +59,6 @@ class LicGroups extends ArmsModel
     public static $syncKey='descr';
 	public static $nameAttr='descr';
 	
-	public function extraFields()
-	{
-		return ['soft_ids'];
-	}
 	
 	/**
      * @inheritdoc
@@ -163,6 +159,7 @@ class LicGroups extends ArmsModel
 			]],
 			'services_id' => [Services::class,'lic_groups_ids'],
 			'lic_types_id' => [LicTypes::class, 'lic_groups_ids'],
+			'lic_items_ids' => [LicItems::class, 'lic_group_id'],
 		];
 	}
 	

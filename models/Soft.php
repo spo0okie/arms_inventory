@@ -26,6 +26,7 @@ use yii\helpers\StringHelper;
  * @property array $softLists_ids Массив ID списков ПО, в которые включено ПО
  * @property array $comps_ids Массив ID компов, на которые закреплено ПО
  * @property array $hits_ids Массив ID компов, на которые установлено ПО
+ * @property array $lic_groups_ids Типы лицензий включающие данное ПО
  * @property bool $isFree входит в список бесплатного ПО
  * @property bool $isIgnored входит в список игнорируемого ПО
  *
@@ -77,10 +78,10 @@ class Soft extends ArmsModel
 	}
 	
 	public $linksSchema=[
-		'softLists_ids'=>[SoftLists::class, 'soft_ids'],
+		'soft_lists_ids'=>[SoftLists::class, 'soft_ids'],
 		'comps_ids'=>[Computer::class, 'soft_ids'],
 		'hits_ids'=>[Computer::class, 'softHits_ids'],
-		'licGroups_ids'=>[LicGroups::class, 'soft_ids'],
+		'lic_groups_ids'=>[LicGroups::class, 'soft_ids'],
 		'manufacturers_id'=>[Manufacturers::class, 'soft_ids'],
 	];
 	
@@ -90,7 +91,7 @@ class Soft extends ArmsModel
     public function rules()
     {
         return [
-            [['softLists_ids','comps_ids'], 'each', 'rule'=>['integer']],
+            [['soft_lists_ids','comps_ids'], 'each', 'rule'=>['integer']],
             [['manufacturers_id', 'descr'], 'required'],
             [['manufacturers_id'], 'integer'],
             [['items','additional'], 'string'],

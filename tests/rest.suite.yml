@@ -9,10 +9,6 @@ modules:
               entryUrl: http://localhost:8081/web/index-test.php
         - REST:
               depends: PhpBrowser
-              url: http://localhost:8081/web/api
-        - \Helper\Acceptance:
-              depends:
-                  - \Helper\Database
-                  - \Helper\Yii2
+              url: http://localhost:8081/web/index-test.php/api
         - \Helper\Rest
 bootstrap: _bootstrap.php

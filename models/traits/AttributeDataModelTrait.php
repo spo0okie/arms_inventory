@@ -70,6 +70,9 @@
  *       //атрибут только для записи (пароль) -> для API документации
  *       'writeOnly'=>true,
  *
+ *       //пример сырых данных для API документации
+ *       'example'=>'Пример значения',
+ *
  *       //при вызове функции absorb это поле нужно поглощать из переданного объекта
  *       // - false - нет (по умолчанию для полей - "не обратных ссылок")
  *       // - 'ifEmpty' - если локальное значение отсутствует, то принимать с поглощаемого объекта
@@ -78,6 +81,11 @@
  *
  *       //какие связи нужно подгружать (join) при отображении этого атрибута в списке (для жадной загрузки + поиск)
  *       'join'=>['techModel','techType']
+ *
+ *       //как искать это поле в поисковом запросе (если не задано, то в SQL запрос подставится RAW имя атрибута)
+ *       //используется в REST API методах search и filter
+ *       //должно быть корректным именем поля в SQL запросе (с учетом имен таблиц и столбцов SQL)
+ *       'filter'=>'tech_models.name'
  *   ]
  *
  * Рекурсивные атрибуты
@@ -156,13 +164,13 @@ trait AttributeDataModelTrait
 				'Время изменения',
 				'hint' => 'Дата/время изменения объекта в БД',
 				'type' => 'datetime',
-				'readOnly' => true
+				'readOnly' => true,
 			],
 			'updated_by'=>[
 				'Редактор',
 				'type' => 'string',
 				'apiLabel' => 'Автор последних изменений в БД (username)',
-				'readOnly' => true
+				'readOnly' => true,
 			],
 			'external_links' => [
 				'Доп. связи',
@@ -205,6 +213,17 @@ trait AttributeDataModelTrait
 		}
 		//обратные ссылки по умолчанию надо отбирать, остальное нет
 		return $this->attributeIsReverseLink($attr);
+	}
+	
+	/**
+	 * Признак того, что аттрибут расширенный (из extraFields) и его API вернет только при перечислении
+	 * в параметре expand
+	 * @param $attr
+	 * @return bool
+	 */
+	public function attributeIsExtra($attr):bool
+	{
+		return !in_array($attr, $this->attributes()) && in_array($attr, $this->extraFields());
 	}
 	
 	/**
@@ -573,7 +592,7 @@ trait AttributeDataModelTrait
 			);
 		return $this->getAttributeIndexHint($attribute);
 	}
-
+	
 	/**
 	 * Вернуть локальный плейсхолдер без учета предков
 	 * @param $attr
@@ -747,180 +766,18 @@ trait AttributeDataModelTrait
 	}
 	
 	/**
-	 * Возвращает OpenApi\Annotations\Property для атрибута модели
-	 * @param $attribute
-	 * @return Property
+	 * Возвращает имя поля для фильтрации в запросах (если задано в метаданных)
+	 * иначе считаем что атрибут и есть имя поля в SQL таблице
+	 * @param string $attribute
+	 * @return string
+	 * @throws UnknownPropertyException
 	 */
-	public function generateAttributeAnnotation($attribute,$context): Property
+	public function getAttributeFilter(string $attribute): string
 	{
-		$data=$this->getAttributeData($attribute);
-		$name=$this->getAttributeApiLabel($attribute);
-		$description='';
-		if ($hint=$this->getAttributeApiHint($attribute)) {
-			$description.="\n$hint";
+		$item=$this->getAttributeData($attribute);
+		if (is_array($item) && isset($item['filter'])) {
+			return $item['filter'];
 		}
-		
-		$template=[];
-		switch ($type=$this->getAttributeType($attribute)) {
-			case 'boolean': $template=[
-				'type' => 'boolean',
-				'format' => 'integer',
-				'enum' => [0,1],
-				'example' => 1,
-			];
-				if (!isset($data['fieldList'])) $description.="\n0 - false, 1 - true";
-				break;
-			
-			case 'toggle': $template=[
-				'type' => 'integer',
-				'format' => 'integer',
-				'enum' => [0,1],
-				'example' => 1,
-			];
-				break;
-			
-			case 'list':
-			case 'radios': $template=[
-				'type' => 'integer',
-				'format' => 'integer',
-				'example' => 1,
-			];
-				break;
-			
-			case 'text':
-			case 'ntext':
-			case 'string': $template=[
-				'type' => 'string',
-			];
-				break;
-			
-			case 'json_object': $template=[
-				'type' => 'string',
-				'format' => 'json object',
-			];
-				break;
-			
-			case 'json_array': $template=[
-				'type' => 'string',
-				'format' => 'json array',
-			];
-				break;
-			
-			case 'date': $template=[
-				'type' => 'string',
-				'format' => 'date',
-				'example' => '2020-01-31',
-			];
-				break;
-				
-			case 'datetime': $template=[
-				'type' => 'string',
-				'format' => 'date-time',
-				'example' => '2020-01-31 23:59:59',
-			];
-				break;
-				
-			case 'ips': $template=[
-				'type' => 'string',
-				'example' => '192.168.0.1/24',
-			];
-				$description.="\n".'IP адреса (опционально с маской подсети). По одному в строке. ';
-				break;
-				
-			case 'macs': $template=[
-				'type' => 'string',
-				'example' => '00:1A:2B:3C:4D:5E',
-			];
-				$description.="\n".'MAC адреса. По одному в строке. ';
-				break;
-				
-			case 'urls': $template=[
-				'type' => 'string',
-				'example' => 'Ссылка на пример https://example.com/some/page',
-			];
-				$description.="\n".UrlListWidget::$APIhint;
-				break;
-				
-			case 'link':
-				$class=StringHelper::className($this->attributeLinkClass($attribute));
-				if ($this->attributeIsLoader($attribute)) {
-					//если это атрибут загрузчик, то это RO свойство содержащее другой объект
-					$template = [
-						'type' => 'object',
-						'ref' => '#/components/schemas/' . $class,
-						'readOnly' => true,
-					];
-				} else {
-					//иначе это сам атрибут ссылка (_id / _ids)
-					if (StringHelper::endsWith($attribute, '_ids')) {
-						$name .= ' (ссылки)';
-						//если множественная ссылка
-						$template = [
-							'type' => 'array',
-							'@items' => [
-								'type' => 'integer',
-								'example' => 123,
-								'description' => "ID объектов $class",
-							],
-						];
-					} elseif (StringHelper::endsWith($attribute, '_id')) {
-						$name .= ' (ссылка)';
-						$template = [
-							'type' => 'integer',
-							'example' => 123,
-						];
-						$description.= "\nID объекта $class";
-					}
-				}
-				break;
-			default: $template=[
-				'type' => $type,
-			];
-				break;
-		}
-		
-		if (isset($data['fieldList'])) {
-			$fieldList=$data['fieldList'];
-			if (is_callable($fieldList)) $fieldList=$fieldList();
-			if (is_array($fieldList) && count($fieldList)>0) {
-				$template['enum']=array_keys($fieldList);
-				$template['example']=array_key_first($fieldList);
-				$description.="\nВозможные значения:\n".implode(', ',array_map(function($k,$v){return "$k - $v";},array_keys($fieldList),$fieldList));
-			}
-		}
-		
-		if ($template['type']==='string') {
-			foreach ($this->rules() as $rule) {
-				if (
-					in_array($attribute,(array)$rule[0])
-				&&
-					$rule[1] === 'string'
-				&&
-					isset($rule['max'])
-				) {
-					$template['maxLength']=$rule['max'];
-				}
-			}
-		}
-		
-		if (isset($data['is_inheritable']) && $data['is_inheritable']) {
-			$description.="\n".'Атрибут наследуется от родительского объекта, если не задан явно.';
-		}
-		
-		if ($data['readOnly']??false) {
-			$template['readOnly']=true;
-		}
-
-		if ($data['writeOnly']??false) {
-			$template['writeOnly']=true;
-		}
-		
-		if ($description) $name.=": $description";
-		$template['property']=$attribute;
-		$template['description']=$name;
-		$template['_context']=$context;
-		
-		return new Property($template);
+		return $attribute;
 	}
-	
 }

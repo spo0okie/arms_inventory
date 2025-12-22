@@ -127,9 +127,11 @@ class Aces extends ArmsModel
 			'access_types_ids' => [
 				AccessTypes::$titles,
 				'indexHint'=>'Какой доступ субъекты получают к ресурсам',
-				'join' => ['accessTypes'],
+				'join' => ['accessTypes'],			//для поиска или вывода в таблице нужно заджойнить типы доступа
+				'filter' => 'access_types.name'		//при поиске ищем по имени типа доступа
 			],
 			'access_types' => ['alias'=>'access_types_ids'],
+			'accessTypes' => ['alias'=>'access_types_ids'],
 			'comment' => [
 				'Прочее',
 				'hint' => 'Если есть какие-то объекты, предоставления доступа которым не получается учесть через поля выше,<br> вписываем их текстом сюда',

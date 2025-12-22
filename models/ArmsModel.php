@@ -6,6 +6,7 @@ use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelper;
 use app\helpers\StringHelper;
+use app\models\traits\AttributeAnnotationModelTrait;
 use app\models\traits\AttributeDataModelTrait;
 use app\models\traits\AttributeLinksModelTrait;
 use app\models\traits\ExternalDataModelTrait;
@@ -49,7 +50,10 @@ use yii\web\View;
  */
 class ArmsModel extends ActiveRecord
 {
-	use ExternalDataModelTrait,AttributeDataModelTrait,AttributeLinksModelTrait;
+	use ExternalDataModelTrait,
+		AttributeDataModelTrait,
+		AttributeLinksModelTrait,
+		AttributeAnnotationModelTrait;
 	
 	/** @var string как называется один экземпляр модели (для страницы Create -> Новый объект) */
 	public static $title='Объект';

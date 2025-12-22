@@ -6,55 +6,29 @@ use app\helpers\WikiHelper;
 use app\models\ui\PasswordForm;
 use app\models\Users;
 use Yii;
-use yii\filters\AccessControl;
-use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use yii\filters\VerbFilter;
 use app\models\ui\LoginForm;
+use app\components\actions\ArmsErrorAction;
 
 require_once Yii::getAlias('@app/swagger/swagger.php');
 
-class SiteController extends Controller
+class SiteController extends ArmsBaseController
 {
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'only' => ['logout'],
-                'rules' => [
-                    [
-                        'actions' => ['logout'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-					[
-						'actions' => ['api-doc','api-json'],
-						'allow' => true,
-						'roles' => 'admin',
-					],
-					[
-						'actions' => ['app-info'],
-						'allow' => true,
-						'roles' => 'admin',
-					],
-                ],
-            ],
-            /*'verbs' => [
-            	//отключил требование POST для logout, чтобы можно было разлогиниваться
-            	//в тестовом сценарии через I->amOnPage('/site/logout')
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],*/
-        ];
-    }
+    public function accessMap()
+	{
+		return [
+			ArmsBaseController::PERM_AUTHENTICATED => ['logout'],
+			ArmsBaseController::PERM_EVERYONE => ['login','error'],
+			'view' => ['index','wiki','rack-test'],
+			//ArmsBaseController::PERM_EVERYONE => [],
+			'admin' => ['api-doc','api-json','app-info','password-set'],
+		];
+	}
 
     /**
      * @inheritdoc
@@ -63,11 +37,7 @@ class SiteController extends Controller
     {
         return [
             'error' => [
-                'class' => 'yii\web\ErrorAction',
-            ],
-            'captcha' => [
-                'class' => 'yii\captcha\CaptchaAction',
-                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
+                'class' => 'app\components\actions\ArmsErrorAction',
             ],
 			'api-doc' => [
 				'class' => 'light\swagger\SwaggerAction',
@@ -78,10 +48,6 @@ class SiteController extends Controller
 				'scanDir' => [
 					Yii::getAlias('@app/swagger'),
 					Yii::getAlias('@app/modules/api/controllers'),
-					//Yii::getAlias('@app/models'),
-				],
-				'scanOptions' => [
-			
 				],
 			],
         ];

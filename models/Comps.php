@@ -46,6 +46,9 @@ use yii\db\StaleObjectException;
  * @property array    $soft_ids Массив ID ПО, которое внесено в паспорт
  * @property array    $netIps_ids Массив ID IP
  * @property array    $comps Массив объектов ПО, которое установлено на компе
+ * @property array    $lic_groups_ids Массив ID привязанных типов лицензий
+ * @property array    $lic_items_ids Массив ID привязанных закупок лицензий
+ * @property array    $lic_keys_ids Массив ID привязанных лицензионных ключей
  * @property boolean  $isWindows ОС относится к семейству Windows
  * @property boolean  $isLinux ОС относится к семейству Linux
  * @property boolean  $archived

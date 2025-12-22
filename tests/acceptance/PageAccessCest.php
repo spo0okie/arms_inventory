@@ -11,7 +11,7 @@ class PageAccessCest
 	
 	public function _failed($test, $fail)
 	{
-		Helper\Acceptance::$testsFailed = true;
+		//Helper\Acceptance::$testsFailed = true;
 	}
 	
 	/**
@@ -109,38 +109,7 @@ class PageAccessCest
 		}
 	}
 	
-	/**
-	 * Возвращает список атрибутов, которые надо заполнять в форме для модели
-	 * @param \app\models\ArmsModel $model
-	 * @return array
-	 */
-	protected function getFormAttributes($model)
-	{
-		$attributes=$model->attributes();
-		foreach ($model->getLinksSchema() as $attribute => $schema) {
-			// Если атрибут заканчивается на _ids, то это точно не junction_table
-			if (!StringHelper::endsWith($attribute,'_ids')) continue;
-			//проверяем обратную ссылку
-			$reverseLink=$model->attributeReverseLink($attribute);
-			//она должна тоже заканчиваться на _ids
-			if (!$reverseLink) continue;
-			if (!StringHelper::endsWith($reverseLink,'_ids')) continue;
-			//это junction_table атрибут и его тоже надо в форме выводить
-			codecept_debug($attribute.' is junction_table attribute with ' .$schema[0].'::'.$reverseLink);
-			$attributes[]=$attribute;
-		}
-		return $attributes;
-	}
-	
-	protected function fillForm($attrs,$model,$skip=['id'])
-	{
-		$form=[];
-		foreach ($attrs as $attribute) {
-			if (in_array($attribute,$skip)) continue;
-			$form[$attribute]=$model->$attribute;
-		}
-		return $form;
-	}
+
 	
 	/**
 	 * Наполняет шаблоны в параметрах значениями
@@ -174,13 +143,18 @@ class PageAccessCest
 						if (is_null($models[0]))
 							throw new InvalidConfigException('error loading single model');
 						unset($params[$verb][$param]); //убираем параметр с макросом, так как его заменяем множество параметров
-						$params[$verb][StringHelper::className(get_class($models[0]))]=$this->fillForm($this->getFormAttributes($models[0]),$models[0]);
+						$params[$verb][StringHelper::className(get_class($models[0]))]=Helper\ModelData::fillForm(
+							Helper\ModelData::getFormAttributes($models[0]),
+							$models[0]);
 						break;
 					case '{otherModelParams}':
 						if (is_null($models[1]))
 							throw new InvalidConfigException('error loading second model');
 						unset($params[$verb][$param]); //убираем параметр с макросом, так как его заменяем множество параметров
-						$params[$verb][StringHelper::className(get_class($models[1]))]=$this->fillForm($this->getFormAttributes($models[1]),$models[1]);
+						$params[$verb][StringHelper::className(get_class($models[1]))]=Helper\ModelData::fillForm(
+							Helper\ModelData::getFormAttributes($models[1]),
+							$models[1]
+						);
 						break;
 					default:
 						if (is_string($value) && preg_match('/{(\w+)ModelParams}}/', $value, $matches)) {
@@ -188,7 +162,10 @@ class PageAccessCest
 							$name=$matches[1];
 							if (isset($models[$name])) {
 								$model=$models[$name];
-								$params[$verb][StringHelper::className(get_class($model))]=$this->fillForm($this->getFormAttributes($model),$model);
+								$params[$verb][StringHelper::className(get_class($model))]=Helper\ModelData::fillForm(
+									Helper\ModelData::getFormAttributes($model),
+									$model
+								);
 							} else {
 								throw new InvalidConfigException("Error loading model '$model' in route params");
 							}

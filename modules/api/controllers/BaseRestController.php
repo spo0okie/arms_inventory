@@ -14,13 +14,17 @@ use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use app\models\Users;
 use Yii;
+use yii\base\UnknownPropertyException;
+use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use yii\filters\auth\HttpBasicAuth;
+use yii\filters\ContentNegotiator;
 use yii\rest\ActiveController;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
-
 use OpenApi\Attributes as OA;
+use yii\web\Response;
 
 /**
  * @OA\Tag(
@@ -34,16 +38,15 @@ class BaseRestController extends ActiveController
 	
 	public $modelClass='app\models\ArmsModel';
 
-	public static $searchFields=['name'=>'name'];	//набор полей по которым можно делать поиск с маппингом в SQL поля
-	public static $searchFieldsLike=[];				//набор полей по которым можно делать Like поиск
-	public static $searchJoin=[];					//что нужно join-ить для поиска
-	public static $searchOrder=[]; 					//порядок в котором сортировать поиск
+	public static array $searchFields=['name'=>'name'];		//набор полей по которым можно делать поиск с маппингом в атрибуты модели
+	public static array $searchFieldsLike=[];				//набор полей по которым можно делать Like поиск
+	public static array $searchOrder=[]; 					//порядок в котором сортировать поиск
 	
 	/**
 	 * Действия которые отключены в контроллере (для блокировки в потомках)
 	 * @return array
 	 */
-	public function disabledActions()
+	public function disabledActions(): array
 	{
 		return [];
 	}
@@ -54,7 +57,7 @@ class BaseRestController extends ActiveController
 	 * @return void
 	 * @throws \yii\web\ForbiddenHttpException
 	 */
-	public function checkDisabledActions($action)
+	public function checkDisabledActions($action): void
 	{
 		if (in_array($action, $this->disabledActions(), true)) {
 			throw new \yii\web\ForbiddenHttpException("Action $action is disabled.");
@@ -65,7 +68,8 @@ class BaseRestController extends ActiveController
 	 * Карта доступа с какими полномочиями, что можно делать
 	 * @return array
 	 */
-	public function accessMap() {
+	public function accessMap(): array
+	{
 		$class=StringHelper::class2Id($this->modelClass);
 		return [
 			'edit'=>['create','update','delete','upload'],			//редактирование всего
@@ -95,6 +99,14 @@ class BaseRestController extends ActiveController
 				'except' => $this->accessMap()[ArmsBaseController::PERM_ANONYMOUS],	//отключаем авторизацию для действий доступных без нее
 			];
 		}
+		$behaviors['contentNegotiator'] = [
+			'class' => ContentNegotiator::class,
+			'formats' => [
+				'application/json' => Response::FORMAT_JSON,
+				'text/plain'       => Response::FORMAT_RAW,
+			],
+		];
+		
 		return $behaviors;
 	}
 	
@@ -102,32 +114,30 @@ class BaseRestController extends ActiveController
 	 * Строит поисковый запрос исходя из полей которые переданы в запросе
 	 * @return ActiveQuery
 	 * @throws BadRequestHttpException
+	 * @throws UnknownPropertyException
 	 */
-	public function searchFilter() {
-		$class=$this->modelClass;
+	public function searchFilter(): ActiveQuery
+	{
+		
 		/** @var ArmsModel $class */
+		$class=$this->modelClass;
+		$model=new $class();
 		$search=$class::find();
-		/** @var $search ActiveQuery */
-		
-		foreach (static::$searchJoin as $field) {
-			$search->joinWith($field);
-		}
-		
 		
 		$filtersCount=0; //счетчик примененных фильтров
-		foreach (static::$searchFields as $param=>$field) {
-			$value= Yii::$app->request->get($param);
+		foreach (static::$searchFields as $param=>$attr) {
+			if (is_numeric($param)) {$param=$attr;}		//на случай если объявили ['id','name'] без маппинга
+			$value= Yii::$app->request->get($param);	//проверяем запрашивали фильтр по параметру
 			if (!is_null($value)) {
-				$search->andWhere([$field=>$value]);
 				$filtersCount++;
-			}
-		}
-		
-		foreach (static::$searchFieldsLike as $param=>$field) {
-			$value= Yii::$app->request->get($param);
-			if (!is_null($value)) {
-				$search->andWhere(['Like',$field,$value]);
-				$filtersCount++;
+
+				//поисковый параметр задан, поэтому нам нужно подтянуть джойны и отфильтровать по нужному полю
+				$search->joinWith($model->getAttributeJoins($attr));
+				
+				if (in_array($param,static::$searchFieldsLike))		//если этот параметр предназначен для неточной фильтрации
+					$search->andWhere(['like',$model->getAttributeFilter($attr),$value]);	//ищем через like
+				else												//иначе
+					$search->andWhere([$model->getAttributeFilter($attr)=>$value]);			//ищем строго
 			}
 		}
 		
@@ -135,7 +145,7 @@ class BaseRestController extends ActiveController
 			throw new BadRequestHttpException('Empty search filter');
 		}
 		
-		if (count(static::$searchOrder)) {
+		if (count(static::$searchOrder)) {	//если задана сортировка - сортируем
 			$search->orderBy(static::$searchOrder);
 		}
 		
@@ -156,12 +166,20 @@ class BaseRestController extends ActiveController
 			)
 		],
 		responses: [
-			new OA\Response(response: 200, description: "OK"),
-			new OA\Response(response: 403, description: "Доступ запрещен"),
-			new OA\Response(response: 404, description: "Ничего не найдено")
+			new OA\Response(
+				response: 200,
+				description: "OK",
+				content: new OA\MediaType(
+					mediaType: "application/json",
+					schema: new OA\Schema(
+						ref: "#/components/schemas/{model}"
+					)
+				)
+			),
+			new OA\Response(response: 404, description: "Ничего не найдено по запросу")
 		]
 	)]
-	public function actionSearch() {
+	public function actionSearch(): ActiveRecord {
 		$this->checkDisabledActions('search');
 		foreach (static::$searchFields as $param=>$field) {
 			if ($field===static::SEARCH_BY_ANY_NAME && ($value= Yii::$app->request->get($param))) {
@@ -187,14 +205,26 @@ class BaseRestController extends ActiveController
 			)
 		],
 		responses: [
-			new OA\Response(response: 200, description: "OK"),
-			new OA\Response(response: 403, description: "Доступ запрещен"),
-			new OA\Response(response: 404, description: "Ничего не найдено"),
+			new OA\Response(
+				response: 200,
+				description: "OK",
+				content: new OA\MediaType(
+					mediaType: "application/json",
+					schema: new OA\Schema(
+						type: "array",
+						items: new OA\Items(
+							ref: "#/components/schemas/{model}"
+						)
+					)
+				),
+			),
+			new OA\Response(response: 404, description: "Ничего не найдено по запросу"),
 		]
 	)]
-	public function actionFilter() {
+	public function actionFilter(): ActiveDataProvider
+	{
 		$this->checkDisabledActions('filter');
-		return $this->searchFilter()->all();
+		return new ActiveDataProvider(['query' => $this->searchFilter()]);
 	}
 	
 	/**
@@ -220,9 +250,24 @@ class BaseRestController extends ActiveController
 	#[OA\Get(
 		path: "/web/api/{controller}/",
 		summary: "Список всех элементов",
+		parameters: [
+			new OA\Parameter(name: "{expand}"),
+			new OA\Parameter(name: "{pagination}"),
+		],
 		responses: [
-			new OA\Response(response: 200, description: "OK"),
-			new OA\Response(response: 403, description: "Доступ запрещен"),
+			new OA\Response(
+				response: 200,
+				description: "OK",
+				content: new OA\MediaType(
+					mediaType: "application/json",
+					schema: new OA\Schema(
+						type: "array",
+						items: new OA\Items(
+							ref: "#/components/schemas/{model}"
+						)
+					)
+				),
+			),
 		]
 	)]
 	public function actionIndex()
@@ -234,17 +279,27 @@ class BaseRestController extends ActiveController
 	#[OA\Get(
 		path: "/web/api/{controller}/{id}",
 		summary: "Прочитать элемент по ID",
-		parameters: [new OA\Parameter(
-			name: "id",
-			description: "ID элемента",
-			in: "path",
-			required: true,
-			schema: new OA\Schema(type: "integer")
-		)],
+		parameters: [
+			new OA\Parameter(
+				name: "id",
+				description: "ID элемента",
+				in: "path",
+				required: true,
+				schema: new OA\Schema(type: "integer")
+			),
+			new OA\Parameter(name: "{expand}"),
+		],
 		responses: [
-			new OA\Response(response: 200, description: "OK"),
-			new OA\Response(response: 403, description: "Доступ запрещен"),
-			new OA\Response(response: 404, description: "Элемент ID не найден"),
+			new OA\Response(
+				response: 200,
+				description: "OK",
+				content: new OA\MediaType(
+					mediaType: "application/json",
+					schema: new OA\Schema(
+						ref: "#/components/schemas/{model}"
+					)
+				)			),
+			new OA\Response(response: 404, description: "Элемент с таким ID не найден"),
 		]
 	)]
 	public function actionView($id)
@@ -264,8 +319,14 @@ class BaseRestController extends ActiveController
 			),
 		),
 		responses: [
-			new OA\Response(response: 201, description: "OK"),
-			new OA\Response(response: 403, description: "Доступ запрещен"),
+			new OA\Response(
+				response: 201,
+				description: "OK",
+				content: new OA\MediaType(
+					mediaType: "application/json",
+					schema: new OA\Schema(ref: "#/components/schemas/{model}")
+				),
+			),
 			new OA\Response(response: 422, description: "Предоставлены неверные данные"),
 		]
 	)]
@@ -278,6 +339,13 @@ class BaseRestController extends ActiveController
 	#[OA\Put(
 		path: "/web/api/{controller}/{id}",
 		summary: "Обновить элемент с указанным ID",
+		requestBody: new OA\RequestBody(
+			required: true,
+			content: new OA\MediaType(
+				mediaType: "application/json",
+				schema: new OA\Schema(ref: "#/components/schemas/{model}")
+			),
+		),
 		parameters: [new OA\Parameter(
 			name: "id",
 			description: "ID элемента",
@@ -286,9 +354,15 @@ class BaseRestController extends ActiveController
 			schema: new OA\Schema(type: "integer")
 		)],
 		responses: [
-			new OA\Response(response: 200, description: "OK"),
-			new OA\Response(response: 403, description: "Доступ запрещен"),
-			new OA\Response(response: 404, description: "Элемент ID не найден"),
+			new OA\Response(
+				response: 200,
+				description: "OK",
+				content: new OA\MediaType(
+					mediaType: "application/json",
+					schema: new OA\Schema(ref: "#/components/schemas/{model}")
+				),
+			),
+			new OA\Response(response: 404, description: "Элемент с таким ID не найден"),
 			new OA\Response(response: 422, description: "Предоставлены неверные данные"),
 		]
 	)]
@@ -303,8 +377,7 @@ class BaseRestController extends ActiveController
 		summary: "Удалить элемент с указанным ID",
 		responses: [
 			new OA\Response(response: 204, description: "OK"),
-			new OA\Response(response: 403, description: "Доступ запрещен"),
-			new OA\Response(response: 404, description: "Элемент ID не найден"),
+			new OA\Response(response: 404, description: "Элемент с таким ID не найден"),
 		]
 	)]
 	public function actionDelete($id)

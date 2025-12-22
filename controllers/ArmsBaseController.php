@@ -22,6 +22,7 @@ use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\web\UnauthorizedHttpException;
 
 /**
  * Базовый контроллер ARMS для всех моделей, наследуемых от ArmsModel.
@@ -219,19 +220,46 @@ class ArmsBaseController extends Controller
 		Yii::$app->request->setQueryParams($newParams);
 	}
 	
-	/** @noinspection PhpUnusedParameterInspection */
+	/**
+	 * Корректирует роль доступа в зависимости от настроек приложения
+	 * согласно https://wiki.reviakin.net/инвентаризация:настройка#авторизация
+	 * @param string $permission
+	 * @return string
+	 */
+	public static function customizeAccessPermission(string $permission):string {
+		//анонимный доступ не меняем, он в любой ситуации для всех
+		if ($permission===self::PERM_ANONYMOUS || $permission===self::PERM_EVERYONE) return $permission;
+		//если разграничение прав отключено, то
+		if (empty(Yii::$app->params['useRBAC'])) {
+			//в зависимости от требования "авторизации для просмотра" все будет доступно
+			return (Yii::$app->params['authorizedView']??false)?
+				self::PERM_AUTHENTICATED:	//авторизованным пользователям
+				self::PERM_EVERYONE;		//анонимным пользователям
+		} else {
+			//разграничение прав включено
+			if (//но если
+				empty(Yii::$app->params['authorizedView']) &&	//для просмотра не нужно авторизовываться
+				str_starts_with($permission,'view')				//и мы как раз рассматриваем права на просмотр
+			) return self::PERM_EVERYONE;					//то разрешаем всем авторизованным
+		}
+		return $permission;
+	}
+	
+	/**
+	 * Принимает на вход упрощенную карту вида [
+	 * 		'permission1'=>['action1','action2',...],
+	 * 		'permission2'=>['action4','action5',...],
+	 * ] а отдает правила доступа для AccessControl, которые можно вставлять в behaviors[access]
+	 * @param $map
+	 * @return array
+	 */
 	public static function buildAccessRules($map) {
 		$rules=[];
 		foreach ($map as $permission=>$actions) {
 			$rule=['allow'=>true, 'actions'=>$actions];
 			
-			//если разграничение прав отключено, то
-			if (empty(Yii::$app->params['useRBAC'])) {
-				//в зависимости от требования "авторизации для просмотра" все будет доступно
-				$permission=(Yii::$app->params['authorizedView']??false)?
-					self::PERM_AUTHENTICATED:	//авторизованным пользователям
-					self::PERM_EVERYONE;		//анонимным пользователям
-			}
+			$permission=static::customizeAccessPermission($permission);
+			
 			switch ($permission) {
 				case self::PERM_AUTHENTICATED:
 					$rule['roles']=['@'];
@@ -242,14 +270,6 @@ class ArmsBaseController extends Controller
 				case self::PERM_EVERYONE:
 					$rule['roles']=['?','@'];
 					break;
-				/** @noinspection PhpMissingBreakStatementInspection */
-				case 'view':
-					//отрабатываем комбинацию !authorizedView && useRBAC дающую права просмотра всем аутентифицированным
-					//https://wiki.reviakin.net/инвентаризация:настройка#авторизация
-					if (
-						empty(Yii::$app->params['authorizedView']) &&
-						!empty(Yii::$app->params['useRBAC'])
-					) $rule['roles']=['?'];
 				default:
 					$rule['permissions']=[$permission];
 			}
@@ -259,8 +279,10 @@ class ArmsBaseController extends Controller
 			'class' => AccessControl::class,
 			'rules' => $rules,
 			'denyCallback' => function ($rule, $action) {
-
-				throw new  ForbiddenHttpException('Access denied');
+				if (\Yii::$app->user->isGuest)
+					throw new  UnauthorizedHttpException('Unauthorized access');
+				else
+					throw new  ForbiddenHttpException('Access denied');
 			},
 		];
 	}

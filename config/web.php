@@ -125,7 +125,7 @@ $config = [
 				'GET,HEAD api/<controller:[\w-]+>/<id:\d+>' => 'api/<controller>/view',
 				'PUT,PATCH api/<controller:[\w-]+>/<id:\d+>' => 'api/<controller>/update',
 				'DELETE api/<controller:[\w-]+>/<id:\d+>' => 'api/<controller>/delete',
-				'POST api/<controller:[\w-]+>/<id:\d+>' => 'api/<controller>/create',
+				'POST api/<controller:[\w-]+>' => 'api/<controller>/create',
 				'GET,HEAD api/<controller:[\w-]+>' => 'api/<controller>/index',
 				'OPTIONS api/<controller:[\w-]+>/<action:[\w-]+>' => 'api/<controller>/preflight'
             ],

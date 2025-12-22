@@ -8,10 +8,7 @@ use OpenApi\Generator;
 use OpenApi\Pipeline;
 use OpenApi\Processors\BuildPaths;
 use OpenApi\Util;
-use yii\base\Action;
-use yii\helpers\FileHelper;
-use ReflectionClass;
-use ReflectionMethod;
+
 
 class ArmsSwaggerApiAction extends SwaggerApiAction
 {
@@ -43,7 +40,7 @@ class ArmsSwaggerApiAction extends SwaggerApiAction
 			
 			->withProcessor(function (Pipeline $pipeline) {
 				// Добавим построение путей из и имен и методов контроллеров Yii2
-				$pipeline->insert(new Yii2RouteProcessor(), BuildPaths::class);
+				$pipeline->insert(new ExpandMacrosProcessor(), BuildPaths::class);
 			})
 			->withProcessor(function (Pipeline $pipeline) {
 				// Добавим построение путей из и имен и методов контроллеров Yii2
@@ -53,7 +50,11 @@ class ArmsSwaggerApiAction extends SwaggerApiAction
 			})
 			->withProcessor(function (Pipeline $pipeline) {
 				// Добавим построение схем моделей
-				$pipeline->insert(new ArmsModelSchemaProcessor(), BuildPaths::class);
+				$pipeline->insert(new GenerateModelSchemaProcessor(), BuildPaths::class);
+			})
+			->withProcessor(function (Pipeline $pipeline) {
+				// Добавим стандартные коды ответов на ошибки
+				$pipeline->insert(new AddStandardErrorResponsesProcessor(), BuildPaths::class);
 			})
 		;
 		

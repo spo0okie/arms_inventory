@@ -9,7 +9,7 @@ use yii\helpers\StringHelper;
 /**
  * SchedulesSearch represents the model behind the search form of `\app\models\Schedules`.
  */
-class SchedulesSearchAcl extends Schedules
+class SchedulesAclSearch extends Schedules
 {
 	
 	public $objects;

@@ -14,14 +14,14 @@ class UsersController extends BaseRestController
     
     public $modelClass='app\models\Users';
     
-    public function accessMap()
+    public function accessMap(): array
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			ArmsBaseController::PERM_AUTHENTICATED=>['whoami']
 		]);
 	}
 	
-	public static $searchFields=[
+	public static array $searchFields=[
 		'id',
 		'Ename'=>'Ename',
 		'name'=>'Ename',
@@ -34,17 +34,17 @@ class UsersController extends BaseRestController
 		'uvolen'=>'Uvolen',
 	];
 	
-	public static $searchFieldsLike=[
+	public static array $searchFieldsLike=[
 		'mobile'=>'mobile'
 	];
 	
-	public static $searchOrder=[
+	public static array $searchOrder=[
 		'Uvolen'=>SORT_ASC,
 		'Persg'=>SORT_ASC,
 	];
 	
 	/**
-	 * возвращает идентификатор авторизованного пользователя
+	 * Возвращает идентификатор авторизованного пользователя
 	 * @return IdentityInterface|null
 	 */
 	public function actionWhoami() {

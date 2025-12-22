@@ -1,0 +1,41 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: spookie
+ * Date: 22.12.2025
+ * Time: 19:34
+ */
+/* @var $this yii\web\View */
+
+use yii\helpers\Url;
+
+$path=Yii::$app->request->getUrl();
+?>
+
+<div class="site-access-denied row col align-self-center">
+	
+	<div class="body-content">
+		
+		<?= $this->render('../_about') ?>
+
+		<div class="row">
+			<div class="col-lg-3">
+			</div>
+			<div class="col-lg-6 text-center">
+				<div class="card text-center border-danger ">
+					<div class="card-header bg-danger">
+						<h2 class="card-title">Доступ закрыт</h2>
+					</div>
+					<div class="card-body">
+						<h5>Доступ к этой секции закрыт, т.к. вы не авторизованы.</h5>
+						<p class="p-3">Для доступа к этой секции необходимо авторизоваться.</p>
+						<a class="btn btn-danger" href="<?= Url::to(['site/login']) ?>?return=<?= $path ?>">Авторизоваться</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3">
+			</div>
+		</div>
+	
+	</div>
+</div>

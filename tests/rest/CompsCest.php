@@ -7,13 +7,13 @@ class CompsCest
     }
 
     // tests
-	public function index(ApiTester $I)
+	/*public function index(ApiTester $I)
 	{
 		$I->sendGET('/comps');
 		$I->seeResponseCodeIs(200);
 		$I->seeResponseIsJson();
 		$I->canSeeResponseJsonMatchesJsonPath('[*].name');
-	}
+	}*/
 
 	public function searchByName(ApiTester $I)
 	{

@@ -11,7 +11,7 @@ use yii\helpers\StringHelper;
  */
 class SoftSearch extends Soft
 {
-	public $softList_ids;
+	public $soft_lists_ids;
 
     /**
      * @inheritdoc
@@ -19,7 +19,7 @@ class SoftSearch extends Soft
     public function rules()
     {
         return [
-            [['id', 'manufacturers_id','softList_ids'], 'integer'],
+            [['id', 'manufacturers_id','soft_lists_ids'], 'integer'],
             [['descr', 'comment', 'items', 'created_at'], 'safe'],
         ];
     }
@@ -88,7 +88,7 @@ class SoftSearch extends Soft
             'id' => $this->id,
             'manufacturers_id' => $this->manufacturers_id,
 			//'created_at' => $this->created_at,
-			'soft_in_lists.list_id' => $this->softLists_ids,
+			'soft_in_lists.list_id' => $this->soft_lists_ids,
         ]);
 		
 		$filter

@@ -215,6 +215,7 @@ class Schedules extends ArmsModel
 				'indexHint' => 'Все типы доступа к ресурсам, которые присутствуют в этом временном доступе'.
 					static::searchableOrHint,
 				'join'=>['acls.aces.accessTypes'],
+				'filter'=>'access_types.name',
 			],
 			'accessPeriods' => [
 				'Активность доступа', //для ACLs

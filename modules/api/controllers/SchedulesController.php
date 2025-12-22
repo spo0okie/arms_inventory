@@ -11,7 +11,7 @@ class SchedulesController extends BaseRestController
 {
 	public $modelClass=Schedules::class;
 	
-	public function accessMap()
+	public function accessMap(): array
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			'view'=>['status','meta-status','next-meta','days-schedules'],
@@ -19,8 +19,7 @@ class SchedulesController extends BaseRestController
 		]);
 	}
 	
-	public static $searchJoin=['acls.aces.accessTypes'];
-	public static $searchFields=['accessTypeName'=>'access_types.name'];
+	public static array $searchFields=['accessTypeName'=>'accessTypes'];
 	
 	/**
 	 * Displays a single model status

@@ -15,7 +15,7 @@ class LoginJournalController extends BaseRestController
     
     public $modelClass='app\models\LoginJournal';
 	
-	public function accessMap()
+	public function accessMap(): array
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			'update-login-journal'=>['push']
@@ -43,7 +43,8 @@ class LoginJournalController extends BaseRestController
 	 * @param int|null   $local_time
 	 * @return LoginJournal|null|ActiveRecord
 	 */
-    public function actionSearch(string $user_login=null, string $comp_name=null, string $time=null, int $type=0, $local_time=null){
+    public function actionSearch(string $user_login=null, string $comp_name=null, string $time=null, int $type=0, $local_time=null):ActiveRecord
+	{
     	//если вместе с отметкой времени входа в ПК передана текущая отметка времени
 		// - корректируем ее на сдвиг текущего времени ПК относительно текущего времени сервера
 		//(случай сбитых часов на ПК)
