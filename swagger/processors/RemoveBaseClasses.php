@@ -1,9 +1,8 @@
 <?php
 
-namespace app\components\swagger;
+namespace app\swagger\processors;
 
 use OpenApi\Analysis;
-use OpenApi\Generator;
 
 class RemoveBaseClasses
 {

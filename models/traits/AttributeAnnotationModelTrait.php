@@ -11,7 +11,7 @@ namespace app\models\traits;
 use app\components\UrlListWidget;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
-use OpenApi\Annotations\Property;
+use yii\base\Model;
 use yii\base\UnknownPropertyException;
 
 trait AttributeAnnotationModelTrait
@@ -28,7 +28,6 @@ trait AttributeAnnotationModelTrait
 	 */
 	public function getAttributeApiExample(string $attribute, mixed $default=null)
 	{
-		/** @var ArmsModel $this */
 		$item=$this->getAttributeData($attribute);
 		//если пример описан в метаданных, то возвращаем его
 		if (isset($item['example']))
@@ -37,33 +36,68 @@ trait AttributeAnnotationModelTrait
 		return $default;
 	}
 	
-	
 	/**
-	 * Возвращает OpenApi\Annotations\Property для атрибута модели
+	 * Возвращает наименование атрибута для API документации
 	 * @param $attribute
-	 * @param $context
-	 * @return Property
+	 * @return string
 	 * @throws UnknownPropertyException
 	 */
-	public function generateAttributeAnnotation($attribute,$context): Property
+	public function getAttributeApiLabel($attribute)
 	{
-		$delimiter="; ";
+		$item=$this->getAttributeData($attribute);
+		if (is_array($item) && isset($item['apiLabel']))
+			return $item['apiLabel'];
+		
+		return $this->getAttributeLabel($attribute);
+	}
+	
+	
+	/**
+	 * Возвращает описание атрибута для API документации
+	 * @param $attribute
+	 * @return string
+	 * @throws UnknownPropertyException
+	 */
+	public function getAttributeApiHint($attribute)
+	{
+		$item=$this->getAttributeData($attribute);
+		if (isset($item['apiHint']))
+			/** @var $this Model */
+			return str_replace(
+				'{same}',
+				$this->getAttributeHint($attribute),
+				$item['apiHint']
+			);
+			
+		if ($hint=$this->getAttributeViewHint($attribute))
+			return $hint;
+	
+		return $this->getAttributeHint($attribute);
+	}
+	
+	/**
+	 * Возвращает OpenApi\Annotations\Property для описания свойств метода чтения модели
+	 * @param $attribute
+	 * @return array
+	 * @throws UnknownPropertyException
+	 */
+	public function generateRWAttributeAnnotation($attribute): array
+	{
+		$delimiter="<br>";
 		/** @var ArmsModel $this */
 		$data=$this->getAttributeData($attribute);
 		$name=$this->getAttributeApiLabel($attribute);
 		$hint=$this->getAttributeApiHint($attribute);
 		$type=$this->getAttributeType($attribute);
 		
-		$description=$hint??'';
-		if ($this->attributeIsExtra($attribute)) {
-			$description=StringHelper::appendToDelimitedString(
-				$description,$delimiter,
-				"ДОПОЛНИТЕЛЬНОЕ ПОЛЕ: нужно запрашивать явно через параметр expand"
-			);
+		$template=[];
+		$descriptionRead=[];
+		$descriptionWrite=[];
+		if ($hint) {
+			$descriptionRead[]=$hint;
+			$descriptionWrite[]=$hint;
 		}
 		
-		
-		$template=[];
 		switch ($type) {
 			case 'boolean':
 			case 'toggle':
@@ -73,13 +107,11 @@ trait AttributeAnnotationModelTrait
 					'enum' => [0,1],
 					'example' => $this->getAttributeApiExample($attribute,1)
 				];
-				if (!isset($data['fieldList']) && $type==='boolean')
-					$description=StringHelper::appendToDelimitedString(
-						$description,$delimiter,
-						"0 - false, 1 - true"
-					);
+				if (!isset($data['fieldList']) && $type==='boolean') {
+					$descriptionRead[]="0 - false, 1 - true";
+					$descriptionWrite[]="0 - false, 1 - true";
+				}
 				break;
-			
 			
 			case 'list':
 			case 'radios':
@@ -132,10 +164,8 @@ trait AttributeAnnotationModelTrait
 					'type' => 'string',
 					'example' => '192.168.0.1/24',
 				];
-				$description=StringHelper::appendToDelimitedString(
-					$description,$delimiter,
-					'IP адреса (опционально с маской подсети). По одному в строке.'
-				);
+				$descriptionRead[]='IP адреса разделенные переносом строки.';
+				$descriptionWrite[]='IP адреса (опционально с маской подсети). По одному в строке.';
 				break;
 				
 			case 'macs':
@@ -143,10 +173,8 @@ trait AttributeAnnotationModelTrait
 					'type' => 'string',
 					'example' => '00:1A:2B:3C:4D:5E',
 				];
-				$description=StringHelper::appendToDelimitedString(
-					$description,$delimiter,
-					'MAC адреса. По одному в строке.'
-				);
+				$descriptionRead[]='MAC адреса. По одному в строке.';
+				$descriptionWrite[]='MAC адреса. По одному в строке.';
 				break;
 				
 			case 'urls':
@@ -154,10 +182,8 @@ trait AttributeAnnotationModelTrait
 					'type' => 'string',
 					'example' => 'Ссылка на пример https://example.com/some/page',
 				];
-				$description=StringHelper::appendToDelimitedString(
-					$description,$delimiter,
-					UrlListWidget::$APIhint
-				);
+				$descriptionRead[]=UrlListWidget::$APIhint;
+				$descriptionWrite[]=UrlListWidget::$APIhint;
 				break;
 				
 			case 'link':
@@ -165,35 +191,38 @@ trait AttributeAnnotationModelTrait
 					
 					$class=StringHelper::className($this->attributeLinkClass($link));
 					//если это атрибут загрузчик, то это RO свойство содержащее другой объект
-					$template = [
-						'type' => 'object',
-						'ref' => '#/components/schemas/' . $class,
-						'readOnly' => true,
-					];
+					if (StringHelper::endsWith($link, '_ids')) {
+						$template=[
+							'type' => 'array',
+							'items' => ['type' => 'object',],
+						];
+						$descriptionRead[]="Массив объектов $class (см. соответствующую схему)";
+					} else {
+						$template=[
+							'type' => 'object',
+						];
+						$descriptionRead[]="Объект $class (см. соответствующую схему)";
+					}
+
 				} else {
 					$class=StringHelper::className($this->attributeLinkClass($attribute));
 					//иначе это сам атрибут ссылка (_id / _ids)
 					if (StringHelper::endsWith($attribute, '_ids')) {
-						$name .= ' (ссылки)';
+						$name .= ' (IDs)';
 						//если множественная ссылка
 						$template = [
 							'type' => 'array',
-							'items' => [
-								'type' => 'integer',
-								'example' => static::$intSample++,
-								'description' => "IDs объектов $class",
-							],
+							'items' => ['type' => 'integer',],
+							'example' => [static::$intSample++,static::$intSample++],
 						];
+						$descriptionRead[]="Массив идентификаторов (ID) объектов класса $class";
 					} elseif (StringHelper::endsWith($attribute, '_id')) {
-						$name .= ' (ссылка)';
+						$name .= ' (ID)';
 						$template = [
 							'type' => 'integer',
 							'example' => static::$intSample++,
 						];
-						$description=StringHelper::appendToDelimitedString(
-							$description,$delimiter,
-							"ID объекта $class"
-						);
+						$descriptionRead[]="Идентификатор (ID) объекта класса $class";
 					}
 				}
 				break;
@@ -215,11 +244,10 @@ trait AttributeAnnotationModelTrait
 			if (is_array($fieldList) && count($fieldList)>0) {
 				$template['enum']=array_keys($fieldList);
 				$template['example']=array_key_first($fieldList);
-				$description=StringHelper::appendToDelimitedString(
-					$description,$delimiter,
-					"Возможные значения:",
-					implode(', ',array_map(function($k,$v){return "$k - $v";},array_keys($fieldList),$fieldList))
-				);
+				$listDescription="Возможные значения:"
+					.implode(', ',array_map(function($k,$v){return "$k - $v";},array_keys($fieldList),$fieldList));
+				$descriptionWrite[]=$listDescription;
+				$descriptionRead[]=$listDescription;
 			}
 		}
 		
@@ -239,12 +267,15 @@ trait AttributeAnnotationModelTrait
 		}
 		
 		if (isset($data['is_inheritable']) && $data['is_inheritable']) {
-			$description=StringHelper::appendToDelimitedString(
-				$description,$delimiter,
-				'Атрибут наследуется от родительского объекта, если не задан явно.'
-			);
+			$descriptionRead[]='Атрибут наследуется от родительского объекта, если не задан явно.';
 		}
 		
+		
+		$validators=$this->getActiveValidators($attribute);
+		if (empty($validators)) {
+			$template['readOnly']=true;
+		}
+
 		if ($data['readOnly']??false) {
 			$template['readOnly']=true;
 		}
@@ -253,12 +284,17 @@ trait AttributeAnnotationModelTrait
 			$template['writeOnly']=true;
 		}
 		
-		if ($description) $name.=": $description";
-		$template['property']=$attribute;
-		$template['description']=$name;
-		$template['_context']=$context;
+		if ($this->attributeIsExtra($attribute)) {
+			$descriptionRead[]="ДОПОЛНИТЕЛЬНОЕ ПОЛЕ: нужно запрашивать явно через параметр expand";
+		}
 		
-		return new Property($template);
+		$template['property']=$attribute;
+		$template['descriptionRead']=$name;
+			if (count($descriptionRead)) $template['descriptionRead'].=': '.implode($delimiter,$descriptionRead);
+		$template['descriptionWrite']=$name;
+			if (count($descriptionWrite))$template['descriptionWrite'].=': '.implode($delimiter,$descriptionWrite);
+		
+		return $template;
 	}
 
 	/**

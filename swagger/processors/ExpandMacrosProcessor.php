@@ -1,9 +1,9 @@
 <?php
-namespace app\components\swagger;
+namespace app\swagger\processors;
 
 use app\helpers\StringHelper;
-use OpenApi\Annotations as OA;
 use OpenApi\Analysis;
+use OpenApi\Annotations as OA;
 use OpenApi\Generator;
 
 class ExpandMacrosProcessor

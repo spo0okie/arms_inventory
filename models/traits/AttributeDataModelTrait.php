@@ -140,6 +140,12 @@ trait AttributeDataModelTrait
 			'id' => [
 				'Идентификатор',
 			],
+			'code'=>[
+				'Код',
+				'hint'=>'Человекочитаемый и безопасный для URL идентификатор объекта. '
+					.'Удобно использовать в API чтобы не зависеть от переименования объектов (если код при этом сохраняется)',
+				'apiHint'=>'{same}'
+			],
 			'comment' => [
 				'Примечание',
 				'hint' => 'Краткое пояснение по этому объекту',
@@ -158,7 +164,7 @@ trait AttributeDataModelTrait
 			'archived' => [
 				'Перенесено в архив',
 				'type'=>'boolean',
-				'hint' => 'Помечается если в работе более не используется, но для истории запись лучше сохранить',
+				'hint' => 'Помечается, если в работе этот объект более не используется, но для истории запись о нем лучше сохранить',
 			],
 			'updated_at' => [
 				'Время изменения',
@@ -171,6 +177,7 @@ trait AttributeDataModelTrait
 				'type' => 'string',
 				'apiLabel' => 'Автор последних изменений в БД (username)',
 				'readOnly' => true,
+				'example' => 'v.pupkin'
 			],
 			'external_links' => [
 				'Доп. связи',
@@ -557,41 +564,7 @@ trait AttributeDataModelTrait
 		return '';
 	}
 	
-	
-	/**
-	 * Возвращает наименование атрибута для API документации
-	 * @param $attribute
-	 * @return string
-	 * @throws UnknownPropertyException
-	 */
-	public function getAttributeApiLabel($attribute)
-	{
-		$item=$this->getAttributeData($attribute);
-		if (is_array($item) && isset($item['apiLabel']))
-			return $item['apiLabel'];
-		/** @var $this Model */
-		return $this->getAttributeIndexLabel($attribute);
-	}
-	
-	
-	/**
-	 * Возвращает описание атрибута для API документации
-	 * @param $attribute
-	 * @return string
-	 * @throws UnknownPropertyException
-	 */
-	public function getAttributeApiHint($attribute)
-	{
-		$item=$this->getAttributeData($attribute);
-		if (isset($item['apiHint']))
-			/** @var $this Model */
-			return str_replace(
-				'{same}',
-				$this->getAttributeHint($attribute),
-				$item['apiHint']
-			);
-		return $this->getAttributeIndexHint($attribute);
-	}
+
 	
 	/**
 	 * Вернуть локальный плейсхолдер без учета предков

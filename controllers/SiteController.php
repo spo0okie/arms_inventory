@@ -3,14 +3,13 @@
 namespace app\controllers;
 
 use app\helpers\WikiHelper;
+use app\models\ui\LoginForm;
 use app\models\ui\PasswordForm;
 use app\models\Users;
 use Yii;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use app\models\ui\LoginForm;
-use app\components\actions\ArmsErrorAction;
 
 require_once Yii::getAlias('@app/swagger/swagger.php');
 
@@ -44,10 +43,16 @@ class SiteController extends ArmsBaseController
 				'restUrl' => \yii\helpers\Url::to(['/site/api-json'], true),
 			],
 			'api-json' => [
-				'class' => 'app\components\swagger\ArmsSwaggerApiAction',
+				'class' => 'app\swagger\action\ArmsSwaggerApiAction',
 				'scanDir' => [
 					Yii::getAlias('@app/swagger'),
 					Yii::getAlias('@app/modules/api/controllers'),
+				],
+				'scanOptions'=>[
+					'exclude'=>[
+						Yii::getAlias('@app/swagger/action'),
+						Yii::getAlias('@app/swagger/pipeline'),
+					]
 				],
 			],
         ];

@@ -58,7 +58,7 @@ class CompsController extends BaseRestController
 			required: true,
 			content: new OA\MediaType(
 				mediaType: "application/json",
-				schema: new OA\Schema(ref: "#/components/schemas/{model}")
+				schema: new OA\Schema(ref: "#/components/schemas/{model}(write)")
 			),
 		),
 		responses: [
@@ -67,7 +67,7 @@ class CompsController extends BaseRestController
 				description: "OK (создано)",
 				content: new OA\MediaType(
 					mediaType: "application/json",
-					schema: new OA\Schema(ref: "#/components/schemas/{model}")
+					schema: new OA\Schema(ref: "#/components/schemas/{model}(read)")
 				),
 			),
 			new OA\Response(
@@ -75,7 +75,7 @@ class CompsController extends BaseRestController
 				description: "OK (обновлено)",
 				content: new OA\MediaType(
 					mediaType: "application/json",
-					schema: new OA\Schema(ref: "#/components/schemas/{model}")
+					schema: new OA\Schema(ref: "#/components/schemas/{model}(read)")
 				),
 			),
 			new OA\Response(response: 422, description: "Предоставлены неверные данные"),

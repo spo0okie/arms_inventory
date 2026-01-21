@@ -1,5 +1,5 @@
 <?php
-namespace app\components\swagger;
+namespace app\swagger\processors;
 
 /**
  * Добавляет к описанию контроллера описания из его предка.

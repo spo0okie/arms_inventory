@@ -137,10 +137,15 @@ class ArmsModel extends ActiveRecord
 	 */
 	public function extraFields()
 	{
+		$links=[];
+		foreach ($this->getLinksSchema() as $link=>$schema) {
+			$links[]=$link;
+			$links[]=$this->attributeLinkLoader($link,$schema);
+		}
 		$fields = array_unique(
 			array_merge(
 				array_keys(parent::extraFields()),
-				array_keys($this->getLinksSchema()) //все ссылки many-2-many
+				$links //все ссылки many-2-many
 			)
 		);
 		

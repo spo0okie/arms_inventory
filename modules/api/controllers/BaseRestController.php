@@ -172,7 +172,7 @@ class BaseRestController extends ActiveController
 				content: new OA\MediaType(
 					mediaType: "application/json",
 					schema: new OA\Schema(
-						ref: "#/components/schemas/{model}"
+						ref: "#/components/schemas/{model}(read)"
 					)
 				)
 			),
@@ -213,7 +213,7 @@ class BaseRestController extends ActiveController
 					schema: new OA\Schema(
 						type: "array",
 						items: new OA\Items(
-							ref: "#/components/schemas/{model}"
+							ref: "#/components/schemas/{model}(read)"
 						)
 					)
 				),
@@ -263,7 +263,7 @@ class BaseRestController extends ActiveController
 					schema: new OA\Schema(
 						type: "array",
 						items: new OA\Items(
-							ref: "#/components/schemas/{model}"
+							ref: "#/components/schemas/{model}(read)"
 						)
 					)
 				),
@@ -296,7 +296,7 @@ class BaseRestController extends ActiveController
 				content: new OA\MediaType(
 					mediaType: "application/json",
 					schema: new OA\Schema(
-						ref: "#/components/schemas/{model}"
+						ref: "#/components/schemas/{model}(read)"
 					)
 				)			),
 			new OA\Response(response: 404, description: "Элемент с таким ID не найден"),
@@ -315,7 +315,7 @@ class BaseRestController extends ActiveController
 			required: true,
 			content: new OA\MediaType(
 				mediaType: "application/json",
-				schema: new OA\Schema(ref: "#/components/schemas/{model}")
+				schema: new OA\Schema(ref: "#/components/schemas/{model}(write)")
 			),
 		),
 		responses: [
@@ -324,7 +324,7 @@ class BaseRestController extends ActiveController
 				description: "OK",
 				content: new OA\MediaType(
 					mediaType: "application/json",
-					schema: new OA\Schema(ref: "#/components/schemas/{model}")
+					schema: new OA\Schema(ref: "#/components/schemas/{model}(read)")
 				),
 			),
 			new OA\Response(response: 422, description: "Предоставлены неверные данные"),
@@ -343,7 +343,7 @@ class BaseRestController extends ActiveController
 			required: true,
 			content: new OA\MediaType(
 				mediaType: "application/json",
-				schema: new OA\Schema(ref: "#/components/schemas/{model}")
+				schema: new OA\Schema(ref: "#/components/schemas/{model}(write)")
 			),
 		),
 		parameters: [new OA\Parameter(
@@ -359,7 +359,7 @@ class BaseRestController extends ActiveController
 				description: "OK",
 				content: new OA\MediaType(
 					mediaType: "application/json",
-					schema: new OA\Schema(ref: "#/components/schemas/{model}")
+					schema: new OA\Schema(ref: "#/components/schemas/{model}(read)")
 				),
 			),
 			new OA\Response(response: 404, description: "Элемент с таким ID не найден"),

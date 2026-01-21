@@ -1,8 +1,13 @@
 <?php
-namespace app\components\swagger;
+namespace app\swagger\action;
 
 use app\helpers\ArrayHelper;
 use app\modules\api\controllers\BaseRestController;
+use app\swagger\processors\AddStandardErrorResponsesProcessor;
+use app\swagger\processors\ExpandControllerActions;
+use app\swagger\processors\ExpandMacrosProcessor;
+use app\swagger\processors\GenerateModelSchemaProcessor;
+use app\swagger\processors\RemoveBaseClasses;
 use light\swagger\SwaggerApiAction;
 use OpenApi\Generator;
 use OpenApi\Pipeline;

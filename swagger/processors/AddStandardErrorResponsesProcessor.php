@@ -1,9 +1,9 @@
 <?php
 
-namespace app\components\swagger;
+namespace app\swagger\processors;
 
-use OpenApi\Annotations as OA;
 use OpenApi\Analysis;
+use OpenApi\Annotations as OA;
 
 /**
  * Процессор для добавления стандартных кодов ответов на ошибки в OpenAPI документацию

@@ -1,14 +1,16 @@
 <?php
 
-namespace app\components\swagger;
+namespace app\swagger\processors;
 
+use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
 use app\models\ArmsModel;
 use app\models\HistoryModel;
 use app\models\links\LicLinks;
-use OpenApi\Annotations as OA;
 use OpenApi\Analysis;
+use OpenApi\Annotations as OA;
 use OpenApi\Generator;
+use OpenApi\Annotations\Property;
 use ReflectionClass;
 use Yii;
 use yii\helpers\FileHelper;
@@ -33,30 +35,41 @@ class GenerateModelSchemaProcessor
 	
 		foreach ($this->apiModels() as $modelClass) {
 			$model = new $modelClass();
+			$class=StringHelper::basename($modelClass);
 			
-			$schema = new OA\Schema([
-				'schema' => (new ReflectionClass($modelClass))->getShortName(),
+			$schemaRW = new OA\Schema([
+				'schema' => (new ReflectionClass($modelClass))->getShortName().'(write)',
 				'type' => 'object',
 				'_context' => $analysis->context,
 				'properties' => [],
 			]);
+			$schemaRO = new OA\Schema([
+				'schema' => (new ReflectionClass($modelClass))->getShortName().'(read)',
+				'type' => 'object',
+				'_context' => $analysis->context,
+				'properties' => [],
+			]);
+
+			//формируем набор атрибутов (из стандартных и расширенных)
+			$attributes=array_unique(array_merge(
+				$model->attributes(),
+				$model->extraFields()
+			));
 			
-			$attributes=$model->attributes();
 			sort($attributes);
 			foreach ($attributes as $attr) {
-				$schema->properties[$attr] = $model->generateAttributeAnnotation($attr,$analysis->context);
-			}
-			
-			// Обработка extraFields
-			$extraFields = $model->extraFields();
-			if (!empty($extraFields)) {
-				foreach ($extraFields as $field) {
-					// Пропускаем поля, которые уже есть в основных атрибутах
-					if (in_array($field, $attributes)) continue;
-					
-					// Генерируем аннотацию для дополнительного поля
-					$schema->properties[$field] = $model->generateAttributeAnnotation($field, $analysis->context);
-				}
+				$template=$model->generateRWAttributeAnnotation($attr);
+				$descriptionRead=ArrayHelper::remove($template,'descriptionRead');
+				$descriptionWrite=ArrayHelper::remove($template,'descriptionWrite');
+				$template['_context']=$analysis->context;
+				$templateRead=$template;
+				$templateWrite=$template;
+				$templateRead['description']=$descriptionRead;
+				$templateWrite['description']=$descriptionWrite;
+				if (!($template['writeOnly']??false))
+					$schemaRO->properties[$attr] = new Property($templateRead);
+				if (!($template['readOnly']??false))
+					$schemaRW->properties[$attr] = new Property($templateWrite);
 			}
 			
 			if ($analysis->openapi->components===Generator::UNDEFINED)
@@ -64,8 +77,11 @@ class GenerateModelSchemaProcessor
 
 			if ($analysis->openapi->components->schemas===Generator::UNDEFINED)
 				$analysis->openapi->components->schemas=[];
-
-			$analysis->openapi->components->schemas[] = $schema;
+			
+			$schemaRO->description="Объект класса $class (поля доступные для чтения)";
+			$schemaRW->description="Объект класса $class (поля доступные для записи)";
+			$analysis->openapi->components->schemas[] = $schemaRW;
+			$analysis->openapi->components->schemas[] = $schemaRO;
 		}
 	}
 	

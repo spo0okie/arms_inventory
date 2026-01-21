@@ -16,13 +16,9 @@
 ### Functional тесты (`functional/`)
 Функциональные тесты контроллеров и взаимодействия компонентов.
 
-**Примеры:**
-- [`TagsControllerCest.php`](functional/TagsControllerCest.php) - тесты контроллера Tags (CRUD операции, валидация)
-
 ### Acceptance тесты (`acceptance/`)
 Функциональные тесты доступности страниц через браузер.
 
-**Основные тесты:**
 - [`PageAccessCest.php`](acceptance/PageAccessCest.php) - автоматическая проверка всех маршрутов приложения (GET/POST)
 - [`HistoryPagesCest.php`](acceptance/HistoryPagesCest.php) - проверка доступности истории изменений моделей
 - [`AuthorizationModesCest.php`](acceptance/AuthorizationModesCest.php) - тесты различных режимов авторизации
