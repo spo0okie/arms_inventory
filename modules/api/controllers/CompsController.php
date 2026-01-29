@@ -48,7 +48,8 @@ class CompsController extends BaseRestController
 	{
 		$searchModel = new CompsSearch();
 		$searchModel->archived= Yii::$app->request->get('showArchived',false);
-		return new ActiveDataProvider(['query'=>$searchModel->search(Yii::$app->request->queryParams)]);
+		$params = Yii::$app->request->queryParams;
+		return $searchModel->search($params);
     }
 	
 	#[OA\Post(

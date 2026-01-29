@@ -198,5 +198,6 @@ class CompsSearch extends Comps
 			'totalCount' => $totalQuery->count('distinct(comps.id)'),
 			'pagination' => ['pageSize' => Yii::$app->request->get('per-page',100),],
 			'sort'=> $sort,
-		]);    }
+		]);
+	}
 }
