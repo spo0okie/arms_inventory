@@ -103,8 +103,8 @@ class BaseRestController extends ActiveController
 			'class' => ContentNegotiator::class,
 			'formats' => [
 				'application/json' => Response::FORMAT_JSON,
-				'application/x-www-form-urlencoded' => Response::FORMAT_JSON,
-				'text/plain'       => Response::FORMAT_JSON,
+				'text/plain'       => Response::FORMAT_RAW,
+				'*/*'              => Response::FORMAT_JSON,
 			],
 		];
 		
