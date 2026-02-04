@@ -104,7 +104,7 @@ class BaseRestController extends ActiveController
 			'formats' => [
 				'application/json' => Response::FORMAT_JSON,
 				'application/x-www-form-urlencoded' => Response::FORMAT_JSON,
-				'text/plain'       => Response::FORMAT_RAW,
+				'text/plain'       => Response::FORMAT_JSON,
 			],
 		];
 		
