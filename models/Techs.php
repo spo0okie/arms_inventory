@@ -202,8 +202,10 @@ class Techs extends ArmsModel
     public function extraFields()
 	{
 		return [
+			'archived',
 			'backupReqs',
 			'backupReqsCount',
+			'effectiveUser',
 			'fqdn',
 			'manufacturer',
 			'model',

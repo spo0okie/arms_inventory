@@ -237,6 +237,21 @@ trait TechsModelCalcFieldsTrait
 	}
 	
 	/**
+	 * Возвращает эффективного пользователя для оборудования
+	 *  - сначала ищет явно заданного пользователя
+	 *  - потом проверяет если оборудование установленно в другое оборудование, то передает запрос на него
+	 *  - потом проверяет если оборудование является частью АРМа, то передает запрос на арм
+	 * @return \app\models\Users
+	 */
+	public function getEffectiveUser()
+	{
+		if (is_object($this->user)) return $this->user;
+		if (is_object($this->installation)) return $this->installation->effectiveUser;
+		if (is_object($this->arm)) return $this->arm->effectiveUser;
+		return null;
+	}
+	
+	/**
 	 * Возвращает комментарий порта из шаблона модели
 	 * @param string $port
 	 * @return mixed|null
