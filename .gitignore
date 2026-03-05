@@ -39,3 +39,6 @@ tests/log/*
 web/scans/*
 !web/scans/.htaccess
 
+/test*.bat
+/cloud*.cmd
+!/tests/*.bat

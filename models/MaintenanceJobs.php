@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\helpers\ArrayHelper;
 use app\models\traits\MaintenanceJobsModelCalcFieldsTrait;
+use app\modules\schedules\models\Schedules;
 use app\models\ui\WikiCache;
 use voskobovich\linker\LinkerBehavior;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;

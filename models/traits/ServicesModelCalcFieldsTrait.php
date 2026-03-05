@@ -13,7 +13,7 @@ use app\helpers\StringHelper;
 use app\models\Contracts;
 use app\models\MaintenanceReqs;
 use app\models\Scans;
-use app\models\Schedules;
+use app\modules\schedules\models\Schedules;
 use app\models\Services;
 use app\models\Users;
 

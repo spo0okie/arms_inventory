@@ -2,7 +2,7 @@
 
 namespace app\modules\api\controllers;
 
-use app\models\Schedules;
+use app\modules\schedules\models\Schedules;
 use Yii;
 use yii\web\NotFoundHttpException;
 

@@ -29,7 +29,7 @@ use app\models\Partners;
 use app\models\Places;
 use app\models\Ports;
 use app\models\Sandboxes;
-use app\models\Schedules;
+use app\modules\schedules\models\Schedules;
 use app\models\Segments;
 use app\models\Services;
 use app\models\Tags;
@@ -111,7 +111,7 @@ NavBar::begin([
 					['label' => Services::$titles, 'url' => ['/services/index']],
 					['label' => MaintenanceReqs::$titles, 'url' => ['/maintenance-reqs/index']],
 					['label' => MaintenanceJobs::$titles, 'url' => ['/maintenance-jobs/index']],
-					['label' => Schedules::$titles, 'url' => ['/schedules/index']],
+					['label' => Schedules::$titles, 'url' => ['/schedules/schedules/index']],
 					['label' => Tags::$titles, 'url' => ['/tags/index']],
 				]
 			],
@@ -119,7 +119,7 @@ NavBar::begin([
 				'items' => [
 					['label' => Aces::$titles, 'url' => ['/aces/index']],
 					['label' => Acls::$titles, 'url' => ['/acls/index']],
-					['label' => Acls::$scheduleTitles, 'url' => ['/scheduled-access/index']],
+					['label' => Acls::$scheduleTitles, 'url' => ['/schedules/scheduled-access/index']],
 					['label' => AccessTypes::$titles, 'url' => ['/access-types/index']],
 				]
 			],

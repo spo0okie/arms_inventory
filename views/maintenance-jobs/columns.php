@@ -5,7 +5,7 @@
 
 use app\components\gridColumns\ExpandableCardColumn;
 use app\components\TableTreePrefixWidget;
-use app\models\Schedules;
+use app\modules\schedules\models\Schedules;
 
 if(!isset($static_view))$static_view=false;
 $renderer = $this;

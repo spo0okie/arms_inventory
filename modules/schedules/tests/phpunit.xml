@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+    bootstrap="_bootstrap.php"
+    colors="true"
+    stopOnFailure="false"
+>
+    <testsuites>
+        <testsuite name="schedules-unit">
+            <directory>unit/</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <const name="YII_DEBUG" value="true"/>
+        <const name="YII_ENV" value="test"/>
+    </php>
+</phpunit>

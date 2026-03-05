@@ -5,6 +5,7 @@ namespace app\models;
 
 
 use app\models\traits\AclsModelCalcFieldsTrait;
+use app\modules\schedules\models\Schedules;
 use yii\helpers\ArrayHelper;
 
 /**

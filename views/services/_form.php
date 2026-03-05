@@ -10,7 +10,7 @@ use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
 use app\models\Partners;
 use app\models\Places;
-use app\models\Schedules;
+use app\modules\schedules\models\Schedules;
 use app\models\Services;
 use app\models\Techs;
 use app\models\Users;

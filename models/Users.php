@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\QueryHelper;
+use app\modules\schedules\models\Schedules;
 use Exception;
 use Yii;
 use yii\base\InvalidConfigException;

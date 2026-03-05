@@ -141,8 +141,9 @@ $config = [
     ],
     'modules' => [
         'api'       => ['class' => 'app\modules\api\Rest'],
-		'gridview'  => ['class' => 'kartik\grid\Module'],
-		'dynagrid'	=> [
+  'schedules' => ['class' => 'app\modules\schedules\Module'],
+  'gridview'  => ['class' => 'kartik\grid\Module'],
+  'dynagrid'	=> [
 			'class' => '\kartik\dynagrid\Module',
 			'minPageSize' => 20,
 			'maxPageSize' => 1000,
