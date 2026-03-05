@@ -574,8 +574,8 @@ class SchedulesEntries extends \app\models\ArmsModel
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
-			if (!strlen($this->date)) $this->date=null;
-			if (!strlen($this->date_end)) $this->date_end=null;
+			if (!$this->date) $this->date=null;
+			if (!$this->date_end) $this->date_end=null;
 			return true;
 		} else return false;
 	}

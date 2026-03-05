@@ -15,13 +15,13 @@ return [
 			if (count($data->acls)) foreach ($data->acls as $acl) {
 				foreach ($acl->aces as $ace) {
 					foreach ($ace->users as $user)
-						$items[$user->shortName]=$this->render('/users/item',['model'=>$user,'static_view'=>true,'icon'=>true,'short'=>true]);
+						$items[$user->shortName]=$this->render('@app/views/users/item',['model'=>$user,'static_view'=>true,'icon'=>true,'short'=>true]);
 					
 					foreach ($ace->comps as $comp)
-						$items[$comp->name]=$this->render('/comps/item',['model'=>$comp,'static_view'=>true,'icon'=>true]);
+						$items[$comp->name]=$this->render('@app/views/comps/item',['model'=>$comp,'static_view'=>true,'icon'=>true]);
 					
 					foreach ($ace->netIps as $ip)
-						$items[$ip->sname]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true,'no_class'=>true]);
+						$items[$ip->sname]=$this->render('@app/views/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true,'no_class'=>true]);
 					
 					if (strlen($ace->comment))
 						$items[$ace->comment]=$ace->comment;
@@ -37,7 +37,7 @@ return [
 		'value'=>function($data) use ($renderer) {
 			$output=[];
 			if (count($data->acls)) foreach ($data->acls as $acl) {
-				$output[$acl->sname]=$renderer->render('/acls/resource',['model'=>$acl,'static_view'=>true]);
+				$output[$acl->sname]=$renderer->render('@app/views/acls/resource',['model'=>$acl,'static_view'=>true]);
 			}
 			return \app\components\ExpandableCardWidget::widget(['content'=>implode('<br />',$output)]);
 		}
@@ -86,7 +86,7 @@ return [
 			 */
 			$items=[];
 			if (count($data->acePartners)) foreach ($data->acePartners as $partner) {
-				$items[]=$this->render('/partners/item',['model'=>$partner,'static_view'=>true]);
+				$items[]=$this->render('@app/views/partners/item',['model'=>$partner,'static_view'=>true]);
 			}
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);
@@ -99,7 +99,7 @@ return [
 			 */
 			$items=[];
 			if (count($data->aclSegments)) foreach ($data->aclSegments as $segment) {
-				$items[]=$this->render('/segments/item',['model'=>$segment,'static_view'=>true]);
+				$items[]=$this->render('@app/views/segments/item',['model'=>$segment,'static_view'=>true]);
 			}
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);
@@ -112,7 +112,7 @@ return [
 			 */
 			$items=[];
 			if (count($data->aceDepartments)) foreach ($data->aceDepartments as $department) {
-				$items[]=$this->render('/org-struct/item',['model'=>$department,'static_view'=>true]);
+				$items[]=$this->render('@app/views/org-struct/item',['model'=>$department,'static_view'=>true]);
 			}
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);
@@ -125,7 +125,7 @@ return [
 			 */
 			$items=[];
 			if (count($data->aclSites)) foreach ($data->aclSites as $site) {
-				$items[]=$this->render('/places/item',['model'=>$site,'static_view'=>true,'short'=>true]);
+				$items[]=$this->render('@app/views/places/item',['model'=>$site,'static_view'=>true,'short'=>true]);
 			}
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);
@@ -138,7 +138,7 @@ return [
 			 */
 			$items=[];
 			if (count($data->accessTypes)) foreach ($data->accessTypes as $type) {
-				$items[]=$this->render('/layouts/item',['model'=>$type,'static_view'=>true]);
+				$items[]=$this->render('@app/views/layouts/item',['model'=>$type,'static_view'=>true]);
 			}
 			ksort($items,SORT_STRING);
 			return implode('<br />',$items);

@@ -318,7 +318,7 @@ class ArmsBaseController extends Controller
 				'class' => HttpBasicAuth::class,
 				'optional'=> ['*'],
 				'auth' => function ($login, $password) {
-					/** @var $user Users */
+					/** @var Users $user */
 					$user = Users::find()->where(['Login' => $login])->one();
 					if ($user && $user->validatePassword($password)) return $user;
 					return null;

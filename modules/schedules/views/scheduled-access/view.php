@@ -54,7 +54,7 @@ YiiAsset::register($this);
 		</div>
 		<div class="col-md-6">
 			<?= $this->render('exceptions',['model'=>$model]) ?>
-			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
+			<?= $this->render('@app/views/attaches/model-list',compact(['model','static_view'])) ?>
 			<?php if (strlen($model->history)) { ?>
 				<br /><br />
 				<h3>Записная книжка:</h3>

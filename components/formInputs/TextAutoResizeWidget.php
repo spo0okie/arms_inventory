@@ -24,7 +24,7 @@ class TextAutoResizeWidget extends InputWidget
 		
 		//пересчитываем количество строк для первоначального отображения textarea в нужную высоту
 		//(после первоначального авторесайза этот атрибут вообще будет убран, он далее используется в minLines)
-		$this->options['rows'] = max($rows, count(explode("\n", $this->model->{$this->attribute})));
+		$this->options['rows'] = max($rows, count(explode("\n", $this->model->{$this->attribute}??'')));
 		
 		//подгружаем плейсхолдер
 		$placeholder = '';

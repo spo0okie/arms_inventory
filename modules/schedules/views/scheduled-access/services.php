@@ -18,7 +18,7 @@ if (count($services)) {
 					if (isset($service['provide'])) $mode[]='предоставление';
 					if (isset($service['support'])) $mode[]='поддержка';
 					
-					$render[]=$this->render('/services/item',['model'=>$service['obj'],'static_view'=>$static_view]).' - '.implode(', ',$mode);
+					$render[]=$this->render('@app/views/services/item',['model'=>$service['obj'],'static_view'=>$static_view]).' - '.implode(', ',$mode);
 				}
 				echo implode('<br />',$render);
 			?>

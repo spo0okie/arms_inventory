@@ -41,4 +41,4 @@ web/scans/*
 
 /test*.bat
 /cloud*.cmd
-!/tests/*.bat
+!yii.bat

@@ -80,7 +80,7 @@ if (
 				if (isset($meta->user)) {
 					if (is_object($user= Users::findOne(['Login'=>$meta->user]))) {
 						//var_dump($user);
-						$bar['hint'].='<br>'.$this->render('/users/item',['model'=>$user,'short'=>true]);
+						$bar['hint'].='<br>'.$this->render('@app/views/users/item',['model'=>$user,'short'=>true]);
 					} else
 						$bar['hint'].='<br>'.$meta->user;
 				}

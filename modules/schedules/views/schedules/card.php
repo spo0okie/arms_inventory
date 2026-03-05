@@ -39,7 +39,7 @@ if (!isset($static_view)) $static_view=false;
 				'models'=>$model->childrenNonOverrides,
 				'title'=>$model->getAttributeLabel('children')
 			]) ?>
-			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
+			<?= $this->render('@app/views/attaches/model-list',compact(['model','static_view'])) ?>
 		</div>
 		<div class="col-md-6">
 			<?= $this->render('week/list',['model'=>$model])?>

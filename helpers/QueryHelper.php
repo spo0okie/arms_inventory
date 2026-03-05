@@ -208,7 +208,7 @@ class QueryHelper
 	public static function querySearchString($param,$string) {
 		//var_dump(static::tokenizeString($string,$param,[static::class,'likeToken']));
 		//return [];
-		return static::tokenizeString($string,$param,[static::class,'likeToken']);
+		return static::tokenizeString($string??'',$param,[static::class,'likeToken']);
 	}
 	
 	
@@ -218,6 +218,6 @@ class QueryHelper
 	 * @return array
 	 */
 	public static function querySearchNumberOrDate($param,$string) {
-		return static::tokenizeString($string,$param,[static::class,'lessOrGreaterToken']);
+		return static::tokenizeString($string??'',$param,[static::class,'lessOrGreaterToken']);
 	}
 }

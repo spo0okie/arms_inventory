@@ -144,9 +144,11 @@ trait SchedulesModelCalcFieldsTrait
 	 * @return bool
 	 */
 	public function matchDate($date) {
+		if (!$date) return false;		//нету ножек - нет варенья
+
 		/** @var Schedules $this */
-		if (!is_int($date))			//если передано не числом
-			$date=strtotime($date); //конвертируем в Unixtime
+		if (is_string($date))			//если передано не числом
+			$date=strtotime($date);     //конвертируем в Unixtime
 		//начало есть и оно позже даты
 		if ($this->startsAfterDate($date)) return false;
 		

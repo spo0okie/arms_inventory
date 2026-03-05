@@ -61,7 +61,7 @@ class SchedulesSearch extends Schedules
         }
 	
 	
-		$query->andFilterWhere(['or like', 'schedules.name', StringHelper::explode($this->name,'|',true,true)]);
+		$query->andFilterWhere(['or like', 'schedules.name', StringHelper::explode($this->name??'','|',true,true)]);
             //->andFilterWhere(['like', 'comment', $this->comment]);
 
         return new ActiveDataProvider([

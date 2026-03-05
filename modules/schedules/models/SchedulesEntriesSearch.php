@@ -2,6 +2,7 @@
 
 namespace app\modules\schedules\models;
 
+use app\helpers\QueryHelper;
 use yii\data\ActiveDataProvider;
 use yii\helpers\StringHelper;
 
@@ -67,8 +68,8 @@ class SchedulesEntriesSearch extends SchedulesEntries
 				['like', 'date', $this->date],
 				['like', 'date_end', $this->date]
 			])
-            ->andFilterWhere(['or like', 'schedule', StringHelper::explode($this->schedule,'|',true,true)])
-            ->andFilterWhere(['or like', 'comment', StringHelper::explode($this->comment,'|',true,true)]);
+            ->andFilterWhere(QueryHelper::querySearchString('schedule',$this->schedule))
+            ->andFilterWhere(QueryHelper::querySearchString('comment',$this->comment));
 
         return $dataProvider;
     }
