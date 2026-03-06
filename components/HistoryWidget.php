@@ -55,7 +55,7 @@ class HistoryWidget extends Widget
 		$tokens=[];
 		if ($this->showUser) {
 			//если у нас есть объект пользователя, то это самый ништяк
-			if (isset($this->user)) $tokens[] = $this->render('/users/item', ['model' => $this->user, 'static_view' => true, 'short' => true]);
+			if (isset($this->user)) $tokens[] = $this->render('@app/views/users/item', ['model' => $this->user, 'static_view' => true, 'short' => true]);
 			//если пользователя нет, но есть логин, то тоже збс
 			elseif (isset($this->updated_by)) $tokens[]=$this->updated_by;
 		}

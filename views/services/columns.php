@@ -162,10 +162,10 @@ return [
 		},
 	],
 	'providingSchedule' => [
-		'value' => function ($data) {return $this->render('/schedules/item',['model'=>$data->providingScheduleRecursive,'static_view'=>true,'empty'=>'']);},
+		'value' => function ($data) {return $this->render('/schedules/schedules/item',['model'=>$data->providingScheduleRecursive,'static_view'=>true,'empty'=>'']);},
 	],
 	'supportSchedule' => [
-		'value' => function ($data) {return $this->render('/schedules/item',['model'=>$data->supportScheduleRecursive,'static_view'=>true,'empty'=>'']);},
+		'value' => function ($data) {return $this->render('/schedules/schedules/item',['model'=>$data->supportScheduleRecursive,'static_view'=>true,'empty'=>'']);},
 	],
 	'maintenanceReqs' => [
 		'value' => function ($data) {

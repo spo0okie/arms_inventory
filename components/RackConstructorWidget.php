@@ -65,6 +65,10 @@ class RackConstructorWidget extends Widget
 	
 	public function run()
 	{
+		// Обеспечиваем корректную инициализацию rack даже если она пустая
+		if (empty($this->rack)) {
+			$this->rack = $this->rackDefault;
+		}
 		return $this->render('rack/form',[
 			'form'		=>$this->form,
 			'model'		=>$this->model,

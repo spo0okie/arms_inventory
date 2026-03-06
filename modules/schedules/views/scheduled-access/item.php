@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Рендер элемента расписания
  * Created by PhpStorm.

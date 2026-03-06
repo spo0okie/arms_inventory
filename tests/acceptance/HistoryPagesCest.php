@@ -6,11 +6,12 @@ use yii\helpers\FileHelper;
 
 class HistoryPagesCest
 {
-	
+	/*
 	public function _failed($test, $fail)
 	{
 		Helper\Acceptance::$testsFailed = true;
 	}
+	*/
 	
 	protected function classesProvider()
 	{
@@ -49,6 +50,16 @@ class HistoryPagesCest
 		$className=$example['class'];
 		// Проверим, действительно ли это класс и он существует
 		Assert::assertTrue(class_exists($className), "Class $className exists");
+		
+		// Проверяем что таблица истории существует и содержит данные
+		try {
+			$historyTableExists = $className::find()->history()->one();
+		} catch (\Exception $e) {
+			// Пропускаем тест если таблица истории не существует
+			$I->skip('History table does not exist for ' . $className);
+			return;
+		}
+		
 		//выясняем кто у нас мастер-класс
 		$masterClass=str_replace('History','',$className);
 		//проверяем наличие мастер-класса

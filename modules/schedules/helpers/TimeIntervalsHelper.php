@@ -6,21 +6,6 @@ namespace app\modules\schedules\helpers;
 class TimeIntervalsHelper {
 	
 	// МАТЕМАТИКА ИНТЕРВАЛОВ //
-	/*public static function interval2Schedule($interval)
-	{
-		return date('H:i',$interval[0]).'-'.date('H:i',$interval[1]);
-	}
-	
-	public static function schedule2Interval($schedule,$date)
-	{
-		//var_dump($schedule);
-		$tokens=explode('-',$schedule);
-		return [
-			strtotime($date.' '.$tokens[0]),
-			strtotime($date.' '.$tokens[1]),
-		];
-		
-	}*/
 	
 	/**
 	 * Приводим интервал вида [22:00-06:00] к математически корректному [22:00-30:00]

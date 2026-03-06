@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use app\modules\schedules\models\SchedulesEntries;
 use yii\bootstrap5\Alert;

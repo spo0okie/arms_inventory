@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;

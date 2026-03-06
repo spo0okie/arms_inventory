@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use app\components\IsHistoryObjectWidget;
 use kartik\grid\GridView;

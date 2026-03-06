@@ -792,7 +792,7 @@ class ArmsModel extends ActiveRecord
 	public function getViewsPath() {
 		if (isset($this->attrsCache['viewsPath'])) return $this->attrsCache['viewsPath'];
 		$class=($this instanceof HistoryModel)?$this->masterClass:get_class($this);
-		return $this->attrsCache['viewsPath']=StringHelper::class2Id($class);
+		return $this->attrsCache['viewsPath']=StringHelper::class2ViewsPath($class);
 	}
 	
 	/**
@@ -803,7 +803,7 @@ class ArmsModel extends ActiveRecord
 	 */
 	public function renderItem(View $view,$options=[]) {
 		$path="/{$this->viewsPath}/item";
-		if (!is_file($_SERVER['DOCUMENT_ROOT'].'/views'.$path.'.php')) $path='/layouts/item';
+		if (!is_file($_SERVER['DOCUMENT_ROOT'].$path.'.php')) $path='//layouts/item';
 		return $view->render(
 			$path,
 			ArrayHelper::recursiveOverride($options,[

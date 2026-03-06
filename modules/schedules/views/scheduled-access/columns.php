@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use app\components\ModelFieldWidget;
 use app\modules\schedules\models\Schedules;

@@ -2,6 +2,9 @@
 
 namespace app\config;
 
+// Подавляем deprecated warnings для PHP 8.2 совместимости
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 defined('YII_DEBUG') or define('YII_DEBUG', true);
 defined('YII_ENV_DEV') or define('YII_ENV_DEV', true);
 

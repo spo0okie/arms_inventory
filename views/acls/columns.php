@@ -69,7 +69,7 @@ return [
 	'schedule'=>[
 		'value'=>function($data) use ($renderer,$glue){
 			if (is_object($data) && is_object($data->schedule))
-				return $renderer->render('/scheduled-access/item',['model'=>$data->schedule,'static_view'=>false,'modal'=>true]);
+				return $renderer->render('/schedules/scheduled-access/item',['model'=>$data->schedule,'static_view'=>false,'modal'=>true]);
 			return '';
 		}
 	],

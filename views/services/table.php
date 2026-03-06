@@ -220,7 +220,7 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($column,$renderer) {
 					$columnRecursive="${column}Recursive";
 					return is_object($data->$columnRecursive)?
-						$renderer->render('/schedules/item',['model'=>$data->$columnRecursive,'static_view'=>true])
+						$renderer->render('/schedules/schedules/item',['model'=>$data->$columnRecursive,'static_view'=>true])
 						:null;
 				},
 				'contentOptions' => ['class' => $column . '_col']

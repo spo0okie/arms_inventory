@@ -88,7 +88,7 @@ if(!$static_view) { ?>
 		$schedules=[];
 		if (!empty($model->providingScheduleRecursive)) {
 			echo '<strong>Время предоставления: </strong>'
-				.$this->render('/schedules/item',[
+				.$this->render('/schedules/schedules/item',[
 					'model'=>$model->providingScheduleRecursive,
 					'name'=>$model->providingScheduleRecursive->usageWorkTimeDescription
 				]);
@@ -118,7 +118,7 @@ if(!$static_view) { ?>
 		
 		if (!empty($model->supportScheduleRecursive)) {
 			if (!empty($model->providingScheduleRecursive)) echo '<br />';
-			echo '<strong>Время поддержки:</strong> '.$this->render('/schedules/item',['model'=>$model->supportScheduleRecursive]);
+			echo '<strong>Время поддержки:</strong> '.$this->render('/schedules/schedules/item',['model'=>$model->supportScheduleRecursive]);
 		} ?>
 			<?php
 			if (

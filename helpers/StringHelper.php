@@ -9,31 +9,64 @@ class StringHelper extends BaseStringHelper {
 	
 	/**
 	 * Формирует имя класса контроллера на основе имени класса модели.
-	 * @param string $class Полное имя класса модели.
+	 * Поддерживает как приложение (app\models\Foo -> app\controllers\FooController),
+	 * так и модули (app\modules\api\models\Bar -> app\modules\api\controllers\BarController).
+	 * @param string $fqcn Полное имя класса модели.
 	 * @return string Имя класса контроллера.
 	 */
-	public static function class2Controller(string $class):string
+	public static function class2Controller(string $fqcn):string
 	{
-		return 'app\\controllers\\' . static::className($class) . 'Controller';
+		// Пытаемся найти models\ в пути и заменить на controllers\
+		if (preg_match('#^(.*)\\\\models\\\\([^\\\\]+)$#', $fqcn, $m)) {
+			return $m[1] . '\\controllers\\' . $m[2] . 'Controller';
+		}
+		// Fallback для случаев, когда нет models/ в пути
+		return 'app\\controllers\\' . static::className($fqcn) . 'Controller';
 	}
 	
 	/**
 	 * Возвращает короткое имя класса без namespace
-	 * @param $classPath
+	 * @param $fqcn
 	 * @return mixed|string
 	 */
-	public static function className($classPath) {
-		$tokens=explode('\\',$classPath);
+	public static function className($fqcn) {
+		$tokens=explode('\\',$fqcn);
 		return end($tokens);
 	}
 	
 	/**
-	 * Конвертирует app\modules\OrgStruct в org-struct
-	 * @param $class
+	 * Конвертирует app\models\OrgStruct в org-struct
+	 * @param $fqcn
 	 * @return string
 	 */
-	public static function class2Id($class) {
-		return Inflector::camel2id(static::className($class));
+	public static function class2Id($fqcn) {
+		return Inflector::camel2id(static::className($fqcn));
+	}
+
+	/**
+	 * путь до views файлов контроллера для модели (для рендера)
+	 * Конвертирует app\models\OrgStruct -> views/org-struct
+	 * Конвертирует app\modules\schedules\models\OrgStruct -> modules/schedules/views/org-struct
+	 * @param $fqcn
+	 * @return string
+	 */
+	public static function class2ViewsPath($fqcn) {
+		$tokens=explode('\\',$fqcn);
+		$pathTokens=['@app'];
+		if ($tokens[0]=='app') array_shift($tokens); else throw new \Exception("Invalid model FQCN: $fqcn", 1);
+		if ($tokens[0]=='modules') {
+			$pathTokens[]=array_shift($tokens); //modules
+			$pathTokens[]=array_shift($tokens); //schedules
+		} elseif ($tokens[0]=='models') {
+			array_shift($tokens); //models
+		} else {
+			throw new \Exception("Invalid model FQCN: $fqcn", 1);
+		}
+		
+		$className=array_pop($tokens);
+		$pathTokens[]='views';
+		$pathTokens[]=Inflector::camel2id($className);
+		return implode('/',$pathTokens);
 	}
 	
 	//признак, что это слово исключение в множественном числе

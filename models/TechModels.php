@@ -454,10 +454,10 @@ class TechModels extends ArmsModel
 		$comment_hint=is_object($type)?$type->comment_hint:null;
 		$typeModel=new Techs();
 		return [
-			'name'=>strlen($comment_name)?
+			'name'=>strlen($comment_name ?? '')?
 				$comment_name:
 				$typeModel->attributeLabels()['comment'],
-			'hint'=>strlen($comment_hint)?
+			'hint'=>strlen($comment_hint ?? '')?
 				$comment_hint:
 				$typeModel->attributeHints()['comment'],
 		];

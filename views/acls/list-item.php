@@ -5,7 +5,7 @@
 /* @var $model app\models\Acls */
 
 $header=is_object($model->schedule)?
-	$this->render('/scheduled-access/item',['model'=>$model->schedule,'static_view'=>true]).':'
+	$this->render('/schedules/scheduled-access/item',['model'=>$model->schedule,'static_view'=>true]).':'
 	:
 	'Доступ к '.$this->render('/acls/item',['model'=>$model]).':';
 

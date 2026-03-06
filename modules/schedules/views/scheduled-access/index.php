@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use app\components\DynaGridWidget;
 use app\components\ShowArchivedWidget;

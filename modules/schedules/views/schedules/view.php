@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use app\models\Acls;
 use app\modules\schedules\models\Schedules;
