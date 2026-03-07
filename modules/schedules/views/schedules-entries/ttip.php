@@ -4,8 +4,8 @@ use app\components\IsHistoryObjectWidget;
 use app\modules\schedules\models\SchedulesEntries;
 use yii\helpers\Html;
 
-/* @var $this yii\web\View */
-/* @var $model app\modules\schedules\models\SchedulesEntries */
+/** @var yii\web\View $this */
+/** @var app\modules\schedules\models\SchedulesEntries $model */
 
 if ($model->is_period) {
 	$name=$model->getPeriodSchedule();
@@ -22,12 +22,13 @@ if ($model->is_period) {
 <div class="schedules-entries-ttip ttip-card">
 	<?= IsHistoryObjectWidget::widget(compact('model')) ?>
 	<h1><?= Html::encode($name) ?> : <?= $model->comment ?></h1>
-	<b>
-	<?php if ($model->is_period) {
+	<b><?php 
+	if ($model->is_period) {
 		echo ($model->is_work?'Рабочий период':'Нерабочий период').' из расписания';
-	} else echo 'Из расписания'; ?>
-	</b>:
-	<?= $this->render('/schedules/schedules/item',['model'=>is_object($model->master)?$model->master->base:null,'static_view'=>true]) ?>
+	} else {
+		echo 'Из расписания'; 
+	}?></b>:
+	<?= is_object($model->master) ? $model->master->base->renderItem($this,['static_view'=>true]):'- расписание отсутствует -' ?>
 	<p><?= $model->history ?></p>
 	<br />
 	<?php if (isset($positive) && is_array($positive) && count($positive)) {

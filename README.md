@@ -1,6 +1,7 @@
 # БД для инвентаризации ИТ инфрастуктуры
 
-FEATURES/ВОЗМОЖНОСТИ
+## FEATURES/ВОЗМОЖНОСТИ
+
 - [Учет оборудования](https://inventory.reviakin.net/web/techs/index)
   - [Учет используемых на предприятии моделей оборудования](https://inventory.reviakin.net/web/tech-models/index)
   - [Компоновка стоек и шкафов](https://inventory.reviakin.net/web/techs/view?id=18)
@@ -19,21 +20,22 @@ FEATURES/ВОЗМОЖНОСТИ
 - [Учет временных доступов](https://inventory.reviakin.net/web/scheduled-access/view?id=6)
   - [В т.ч. сотрудникам внешних организаций](https://inventory.reviakin.net/web/partners/view?id=2)
 
+## REQUIREMENTS/ТРЕБОВАНИЯ
 
-REQUIREMENTS/ТРЕБОВАНИЯ
-------------
-
-PHP 7.4  
+PHP 8.1
 MariaDB 10
 
-
-INSTALLATION/УСТАНОВКА
-------------
+## INSTALLATION/УСТАНОВКА
 
 [Установка](https://wiki.reviakin.net/%D0%B8%D0%BD%D0%B2%D0%B5%D0%BD%D1%82%D0%B0%D1%80%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F:%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0)
 
-CONFIGURATION/НАСТРОЙКА
--------------
+## CONFIGURATION/НАСТРОЙКА
 
 [Настройка](https://wiki.reviakin.net/%D0%B8%D0%BD%D0%B2%D0%B5%D0%BD%D1%82%D0%B0%D1%80%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F:%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0)
 
+## Дополнительная документация
+
+- [Структура проекта](structure.md)
+- [Стандарты кодирования](standards.md)
+- [Тесты](tests/readme.md)
+- [Swagger/OpenAPI](swagger/readme.md)

@@ -23,11 +23,13 @@
 ## Технологический стек
 
 ### Backend
+
 - **PHP**: 8.1+
 - **Framework**: Yii2
 - **База данных**: MariaDB 10
 
 ### Frontend
+
 - **Bootstrap 5**: основной UI-фреймворк
 - **Kartik-v виджеты**: расширенные компоненты для Yii2
   - DynaGrid: динамические таблицы с настройкой колонок
@@ -36,23 +38,13 @@
   - FileInput: загрузка файлов
   - Markdown: работа с markdown-разметкой
 
-### Интеграции
-- **LDAP/Active Directory**: аутентификация через edvlerblog/yii2-adldap-module
-- **OpenAI API**: генерация описаний через openai-php/client
-- **Swagger**: документация API через zircote/swagger-php
-
-### Разработка и тестирование
-- **Codeception**: функциональное и REST API тестирование
-- **Gii**: генератор кода Yii2
-- **Debug**: панель отладки Yii2
-
 ---
 
 ## Структура директорий
 
 ### Корневой уровень
 
-```
+```text
 arms/
 ├── assets/              # Frontend-ресурсы (JS, CSS, изображения)
 ├── components/          # Переиспользуемые компоненты приложения
@@ -91,53 +83,6 @@ arms/
 - Архивирование записей
 - История изменений
 
-**Основные контроллеры:**
-
-#### Оборудование
-- [`TechsController`](controllers/TechsController.php) - учет физического оборудования
-- [`TechModelsController`](controllers/TechModelsController.php) - модели оборудования
-- [`TechTypesController`](controllers/TechTypesController.php) - типы оборудования
-- [`PortsController`](controllers/PortsController.php) - порты оборудования
-
-#### Компьютеры и ПО
-- [`CompsController`](controllers/CompsController.php) - компьютеры/операционные системы
-- [`SoftController`](controllers/SoftController.php) - программное обеспечение
-- [`SoftListsController`](controllers/SoftListsController.php) - списки установленного ПО
-- [`HwIgnoreController`](controllers/HwIgnoreController.php) - игнорируемое оборудование
-
-#### Лицензии
-- [`LicGroupsController`](controllers/LicGroupsController.php) - группы лицензий
-- [`LicItemsController`](controllers/LicItemsController.php) - лицензионные продукты
-- [`LicKeysController`](controllers/LicKeysController.php) - лицензионные ключи
-- [`LicTypesController`](controllers/LicTypesController.php) - типы лицензий
-- [`LicLinksController`](controllers/LicLinksController.php) - привязка лицензий к объектам
-
-#### Сеть
-- [`NetworksController`](controllers/NetworksController.php) - сети
-- [`NetIpsController`](controllers/NetIpsController.php) - IP-адреса
-- [`NetVlansController`](controllers/NetVlansController.php) - VLAN-ы
-- [`NetDomainsController`](controllers/NetDomainsController.php) - сетевые домены
-- [`DomainsController`](controllers/DomainsController.php) - доменные имена
-
-#### Организационная структура
-- [`DepartmentsController`](controllers/DepartmentsController.php) - подразделения
-- [`UsersController`](controllers/UsersController.php) - пользователи
-- [`UserGroupsController`](controllers/UserGroupsController.php) - группы пользователей
-- [`OrgStructController`](controllers/OrgStructController.php) - оргструктура
-
-#### Сервисы и контракты
-- [`ServicesController`](controllers/ServicesController.php) - ИТ-сервисы
-- [`ContractsController`](controllers/ContractsController.php) - договоры
-- [`PartnersController`](controllers/PartnersController.php) - партнеры/поставщики
-- [`ManufacturersController`](controllers/ManufacturersController.php) - производители
-
-#### Прочее
-- [`SiteController`](controllers/SiteController.php) - главная страница, ошибки
-- [`HistoryController`](controllers/HistoryController.php) - журнал изменений
-- [`LoginJournalController`](controllers/LoginJournalController.php) - журнал входов
-- [`WikiController`](controllers/WikiController.php) - Wiki-страницы
-- [`AttachesController`](controllers/AttachesController.php) - прикрепленные файлы
-
 ---
 
 ### `/models` - Модели данных
@@ -152,11 +97,13 @@ arms/
 - Валидацию и кастомные правила
 
 **Модели соответствуют контроллерам:**
+
 - Каждый контроллер работает со своей моделью
 - Для моделей с поиском есть Search-классы (например, [`CompsSearch`](models/CompsSearch.php))
 - Для моделей с историей есть History-классы (например, [`CompsHistory`](models/CompsHistory.php))
 
 **Вспомогательные директории:**
+
 - [`models/links/`](models/links) - модели связующих таблиц many-to-many
 - [`models/traits/`](models/traits) - переиспользуемые трейты
 - [`models/ui/`](models/ui) - модели UI-настроек
@@ -176,6 +123,7 @@ arms/
 - [`WikiTextWidget`](components/WikiTextWidget.php) - рендеринг Wiki-разметки
 
 **Специализированные виджеты:**
+
 - [`LinkObjectWidget`](components/LinkObjectWidget.php) - ссылка на объект
 - [`ListObjectsWidget`](components/ListObjectsWidget.php) - список связанных объектов
 - [`DeleteObjectWidget`](components/DeleteObjectWidget.php) - кнопка удаления
@@ -185,16 +133,8 @@ arms/
 
 [`components/llm/LlmClient`](components/llm/LlmClient.php) - клиент для работы с OpenAI API:
 
-```php
-// Генерация описания ПО
-$llm = new LlmClient();
-$description = $llm->generateSoftwareDescription("Microsoft Office");
-
-// Генерация описания модели оборудования
-$description = $llm->generateTechModelDescription($type, $model, $template);
-```
-
 **Возможности:**
+
 - Автоматическая генерация описаний программного обеспечения
 - Генерация технических характеристик оборудования
 - Поддержка proxy для доступа к OpenAI API
@@ -203,6 +143,7 @@ $description = $llm->generateTechModelDescription($type, $model, $template);
 #### Формы
 
 [`components/Forms/`](components/Forms) - компоненты для работы с формами:
+
 - [`ArmsForm`](components/Forms/ArmsForm.php) - базовый класс форм
 - Валидация через Ajax
 - Динамические поля (зависимые выпадающие списки)
@@ -210,6 +151,7 @@ $description = $llm->generateTechModelDescription($type, $model, $template);
 #### Колонки Grid
 
 [`components/gridColumns/`](components/gridColumns) - кастомные колонки для таблиц:
+
 - Колонки с кастомной фильтрацией
 - Редактируемые колонки inline
 - Связанные колонки (отображение данных из связанных таблиц)
@@ -247,6 +189,7 @@ CLI-команды для административных задач:
 - [`OrgStructController`](console/commands/OrgStructController.php) - работа с оргструктурой
 
 **Использование:**
+
 ```bash
 php yii comps/rescan              # Пересканировать компьютеры
 php yii sync/pull-soft            # Синхронизировать ПО
@@ -262,6 +205,7 @@ php yii rbac/init                 # Инициализация RBAC
 [`modules/api/Rest`](modules/api/Rest.php) - RESTful API для программного доступа:
 
 **Особенности:**
+
 - Автоматическое создание контроллеров для моделей
 - Поддержка стандартных REST-операций (GET, POST, PUT, DELETE)
 - Фильтрация и поиск
@@ -269,7 +213,8 @@ php yii rbac/init                 # Инициализация RBAC
 - Swagger-документация
 
 **Endpoints:**
-```
+
+```text
 GET    /api/comps              # Список компьютеров
 GET    /api/comps/123          # Компьютер по ID
 POST   /api/comps              # Создать компьютер
@@ -279,6 +224,7 @@ GET    /api/comps/search       # Поиск
 ```
 
 **Доступные ресурсы API:**
+
 - comps, contracts, domains
 - lic-groups, lic-types, login-journal
 - manufacturers, net-ips, org-struct
@@ -292,7 +238,7 @@ GET    /api/comps/search       # Поиск
 
 Каждая модель имеет набор стандартных представлений:
 
-```
+```text
 views/{model-name}/
 ├── index.php        # Список (таблица)
 ├── view.php         # Просмотр одного объекта
@@ -306,67 +252,34 @@ views/{model-name}/
 ```
 
 **Общие layouts:**
+
 - [`views/layouts/main.php`](views/layouts/main.php) - основной layout
 - [`views/layouts/menu.php`](views/layouts/menu.php) - главное меню
-- [`views/layouts/index.php`](views/layouts/index.php) - layout для списков
-- [`views/layouts/view.php`](views/layouts/view.php) - layout для просмотра
-
----
-
-### `/migrations` - Миграции БД
-
-Миграции для версионирования структуры базы данных:
-
-```bash
-php yii migrate/create create_comps_table
-php yii migrate/up
-php yii migrate/down
-```
-
-**Namespace-based миграции:**
-```php
-'migrationNamespaces' => [
-    'app\migrations',  // Основные миграции
-],
-```
+- [`views/layouts/index.php`](views/layouts/index.php) - общий layout для списков моделей, для которых нет индивидуального
+- [`views/layouts/view.php`](views/layouts/view.php) - общий layout для просмотра моделей, для которых нет индивидуального
 
 ---
 
 ### `/tests` - Тесты
 
-Тестирование через Codeception:
-
-```
-tests/
-├── acceptance/          # Acceptance-тесты
-├── acceptance-extra/    # Дополнительные acceptance-тесты
-├── rest/               # REST API тесты
-├── migrations/         # Тесты миграций
-├── _data/             # Тестовые данные
-└── _support/          # Вспомогательные классы
-```
-
-**Запуск тестов:**
-```bash
-vendor/bin/codecept run unit
-vendor/bin/codecept run functional
-vendor/bin/codecept run acceptance
-vendor/bin/codecept run rest
-```
+Подробное описание в [`tests/readme.md`](tests/readme.md)
 
 ---
 
 ## Ключевые архитектурные решения
 
-### Базовый контроллер 
+### Базовый контроллер
+
 [`ArmsBaseController`](controllers/ArmsBaseController.php)
 
 Все контроллеры наследуются от базового, который предоставляет:
+
 - CRUD операции (index,view,delete,update,create)
 - async-grid - аналогично index, но без layout для отдачи в другие формы (через ajax)
 - RBAC контроль доступа, выбрасывает исключения 403 и 401 в случае отсутствия доступа (см. buildAccessRules)
 
 **Карта доступа:**
+
 ```php
 public function accessMap() {
     return [
@@ -376,10 +289,10 @@ public function accessMap() {
 }
 ```
 
-### Базовая модель 
+### Базовая модель
 
 Все модели наследуются от базовой: [`ArmsModel`](models/ArmsModel.php)
-Оч подробно документирована; также документированы все использованные в ней трейты. 
+Оч подробно документирована; также документированы все использованные в ней трейты.
 
 ### История изменений (History Journal)
 
@@ -393,6 +306,7 @@ class CompsHistory extends HistoryModel
 ```
 
 **Просмотр истории:**
+
 ```php
 $history = CompsHistory::find()
     ->where(['comps_id' => $id])
@@ -426,6 +340,7 @@ class Service extends ArmsModel
 ```
 
 **Использование:**
+
 ```php
 $service->user_ids = [1, 2, 3];  // Привязка
 $service->save();
@@ -436,6 +351,7 @@ $service->save();
 Управление доступом через [`spo0okie/yii2-rbac-plus`](https://github.com/spo0okie/yii2-rbac-plus):
 
 **Проверка прав:**
+
 ```php
 if (Yii::$app->user->can('edit-comps')) {
     // Разрешено редактирование компьютеров
@@ -443,38 +359,20 @@ if (Yii::$app->user->can('edit-comps')) {
 ```
 
 **Управление через интерфейс:**
+
 - `/rbac/` - управление ролями и разрешениями
 - `/rbac/assignments` - назначение ролей пользователям
 
 ### 6. DynaGrid - динамические таблицы
 
 Пользователи могут настраивать:
+
 - Какие колонки показывать
 - Порядок колонок
 - Сортировку по умолчанию
 - Фильтры
 
 Настройки сохраняются в БД на пользователя.
-
-### 7. Wiki-функционал
-
-Встроенная wiki для документации:
-
-```php
-// Рендеринг wiki-страницы
-echo WikiPageWidget::widget([
-    'page' => 'installation',
-]);
-
-// Парсинг wiki-разметки
-$html = WikiHelper::parse($wikiText);
-```
-
-**Особенности:**
-- Внутренние ссылки `[[Страница]]`
-- Прикрепление файлов
-- История версий
-- Поиск по wiki
 
 ---
 
@@ -518,17 +416,11 @@ $html = WikiHelper::parse($wikiText);
 
 #### Локальные конфигурации (не в git)
 
+Используются для возможности совмещения персональных настроек инстанса с default настройками, хранящимися в git.
+
 - `config/db-local.php` - подключение к БД
 - `config/web-local.php` - локальные настройки web
 - `config/params-local.php` - параметры приложения
-
-**Пример `params-local.php`:**
-```php
-return [
-    'useRBAC' => true,                    // Использовать RBAC
-    'authorizedView' => false,            // Просмотр только для авторизованных
-];
-```
 
 ---
 
@@ -587,18 +479,10 @@ public function actionIndex() { ... }
 
 **Доступ к документации:** `/swagger/`
 
----
+### 4. Wiki (dokuwiki)
 
-## Батники для разработки/тестирования
-
-В корне проекта есть удобные батники:
-
-- `test.bat` - запуск всех тестов
-- `test-api.bat` - запуск REST API тестов
-- `test-crud.bat` - запуск CRUD тестов
-- `test-mig.bat` - запуск тестов миграций
-- `testDBdump.bat` - дамп тестовой БД
-- `testDBupdate.bat` - обновление тестовой БД
+- Рендер ссылок на Wiki-страницы в описаниях объектов
+- Возможность использования dokuwiki как внешний renderer для описаний объектов. Такое описание будет аснинхронно отправлено в интегрированную вики, отрендерено там и подгружено обратно в ARMS для отображения.
 
 ---
 
@@ -611,6 +495,7 @@ docker-compose up -d
 ```
 
 **Сервисы:**
+
 - Web-сервер (Apache/Nginx)
 - PHP-FPM
 - MariaDB
@@ -620,56 +505,32 @@ docker-compose up -d
 
 ## Документация
 
+- [Структура проекта](structure.md)
+- [Стандарты кодирования](standards.md)
+- [Тесты](tests/readme.md)
+- [Swagger/OpenAPI](swagger/readme.md)
+
 ### Встроенная документация REST API доступна по адресу: `/site/`
 
 ### Внешние ссылки
 
 - [Wiki проекта](https://wiki.reviakin.net/инвентаризация)
 - [Demo](https://inventory.reviakin.net/)
-- [Yii2 Documentation](https://www.yiiframework.com/doc/guide/2.0/en)
 
 ---
 
 ## Поддержка и разработка
 
-### Логирование
-
-Логи находятся в [`runtime/logs/`](runtime/logs):
-- `app.log` - основной лог приложения
-- `error.log` - ошибки
-
-### Debug панель
-
-В режиме разработки доступна debug-панель Yii2:
-- Профайлер запросов
-- SQL-запросы
-- Логи
-- Переменные приложения
-
-**Доступ:** нижняя часть страницы, иконка Yii
-
 ### Структура кода
 
 **Стандарты:**
+
 - PSR-4 autoloading
 - PSR-2 code style (частично)
 - Документация методов через PHPDoc
 
 **Best practices:**
+
 - DRY (Don't Repeat Yourself)
 - SOLID принципы
 - MVC паттерн
-
----
-
-## Заключение
-
-ARMS - это комплексная система управления ИТ-инфраструктурой с:
-
-✅ **Богатым функционалом** - от учета "железа" до управления лицензиями
-✅ **Гибкой архитектурой** - легко расширяется и кастомизируется
-✅ **Современными технологиями** - Yii2, REST API, OpenAI
-✅ **Безопасностью** - RBAC, LDAP, аудит
-✅ **Удобством** - интуитивный интерфейс, быстрый поиск, история
-
-Система активно развивается и используется для управления ИТ-инфраструктурой предприятий различного масштаба.

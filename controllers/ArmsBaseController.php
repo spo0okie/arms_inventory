@@ -491,7 +491,7 @@ class ArmsBaseController extends Controller
 				);
 			}
 			Yii::$app->response->headers->set('X-Pagination-Total-Count', $dataProvider->totalCount);
-			return $this->renderAjax('/layouts/async-grid', compact('gridId','source','model','searchModel','dataProvider'));
+			return $this->renderAjax('//layouts/async-grid', compact('gridId','source','model','searchModel','dataProvider'));
 			
 		} else {
 			throw new NotFoundHttpException("Search class $searchModelClass not found");

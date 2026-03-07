@@ -91,7 +91,8 @@ return [
 	'responsible' => [
 		//'header' => 'Отв., поддержка.',
 		'value' => function ($data) {
-			/** @var $data Services */
+			/** @var Services $data  */
+
 			$output = [];
 			if (is_object($data->responsibleRecursive))
 				$output[] = '<div class="pe-2"><strong>'.$this->render('/users/item', ['model' => $data->responsibleRecursive,'short'=>true]).'</strong></div>';
@@ -162,10 +163,10 @@ return [
 		},
 	],
 	'providingSchedule' => [
-		'value' => function ($data) {return $this->render('/schedules/schedules/item',['model'=>$data->providingScheduleRecursive,'static_view'=>true,'empty'=>'']);},
+		'value' => function ($data) {return $data->providingScheduleRecursive?$data->providingScheduleRecursive->renderItem($this,['static_view'=>true,'empty'=>'']):null;},
 	],
 	'supportSchedule' => [
-		'value' => function ($data) {return $this->render('/schedules/schedules/item',['model'=>$data->supportScheduleRecursive,'static_view'=>true,'empty'=>'']);},
+		'value' => function ($data) {return $data->supportScheduleRecursive?$data->supportScheduleRecursive->renderItem($this,['static_view'=>true,'empty'=>'']):null;},
 	],
 	'maintenanceReqs' => [
 		'value' => function ($data) {

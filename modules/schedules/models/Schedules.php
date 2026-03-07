@@ -9,6 +9,7 @@ use yii\data\ArrayDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use app\helpers\ArrayHelper;
+use app\helpers\StringHelper;
 
 /**
  * Hint: В оформлении расписания надо придерживаться правила, что расписание отвечает на вопрос когда?
@@ -319,6 +320,18 @@ class Schedules extends \app\models\ArmsModel
 		];
 	}
 	
+	/**
+	 * Путь до папки views
+	 * перекрываем т.к. у нас есть 2 типа рендеров для расписания доступа более специфичные шаблоны по специальному пути
+	 * @return mixed|string
+	 */
+	public function getViewsPath() {
+		if (isset($this->attrsCache['viewsPath'])) return $this->attrsCache['viewsPath'];
+		return $this->attrsCache['viewsPath']=StringHelper::class2ViewsPath($this->isAcl?
+			'app\modules\schedules\models\ScheduledAccess':
+			'app\modules\schedules\models\Schedules'
+		);
+	}
 
 	/**
 	 * Находим исключения в расписании в указанный период
@@ -400,11 +413,19 @@ class Schedules extends \app\models\ArmsModel
 			->from(['schedules_periods'=>SchedulesEntries::tableName()]);
 	}
 	
+	/**
+	 * Рабочие периоды
+	 * @return ActiveQuery
+	 */
 	public function getPosPeriods()
 	{
 		return $this->getPeriods()->andOnCondition(['is_work'=>1]);
 	}
 	
+	/**
+	 * Нерабочие периоды
+	 * @return ActiveQuery
+	 */
 	public function getNegPeriods()
 	{
 		return $this->getPeriods()->andOnCondition(['is_work'=>0]);

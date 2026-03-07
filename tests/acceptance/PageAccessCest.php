@@ -18,13 +18,20 @@ class PageAccessCest
 	 * Возвращает объект контроллера по имени файла
 	 * и reflectionClass контроллера
 	 * @param $file
-	 * @return array
+	 * @param $moduleName
+	 * @return ArmsBaseController|null
 	 */
-	protected function getController($file)
+	protected function getController($file, $moduleName = null)
 	{
-		$controllerNamespace = 'app\\controllers';
+		if ($moduleName) {
+			$controllerNamespace = "app\\modules\\{$moduleName}\\controllers";
+		} else {
+			$controllerNamespace = 'app\\controllers';
+		}
+		
 		if (preg_match('/([A-Za-z0-9]+)Controller\.php$/', $file, $matches)) {
-			$controllerId = lcfirst(str_replace('Controller', '', $matches[1]));
+			$controllerName = str_replace('Controller', '', $matches[1]);
+			$controllerId = lcfirst($controllerName);
 			$controllerClass = "$controllerNamespace\\{$matches[1]}Controller";
 			
 			if (class_exists($controllerClass)) return new $controllerClass($controllerId, Yii::$app);
@@ -184,6 +191,10 @@ class PageAccessCest
 	 * И по логике codeception она вызывается до _beforeSuite
 	 * А нам в ней нужно рабочее приложение с развернутой тестовой БД
 	 * поэтому инициализации приложения и его БД перенесено в эту функцию
+	 * 
+	 * Опциональный параметр "class" ограничивает тестирование определенным классом модели.
+	 * Если передан параметр, будут протестированы только маршруты для этого класса.
+	 * 
 	 * @return array
 	 * @throws InvalidConfigException
 	 */
@@ -198,49 +209,24 @@ class PageAccessCest
 		Helper\Database::prepareYiiDb();
 		Helper\Database::loadSqlDump(__DIR__ . '/../_data/arms_demo.sql');
 		
-		//перебираем все файлы контроллеров
-		foreach (scandir(__DIR__.'/../../controllers') as $file) {
-			codecept_debug($file);
-			$controller=$this->getController($file);
-			if (is_object($controller)) {
-				if (!$controller instanceof \app\controllers\ArmsBaseController) {
-					continue;
+		// Получаем опциональный фильтр по классу модели из окружения (если передан)
+		$classFilter = getenv('TEST_CLASS_FILTER') ?: null;
+		
+		// Сканируем основные контроллеры
+		$this->scanControllers(__DIR__.'/../../controllers', null, $routes, $params, $classFilter);
+		
+		// Сканируем контроллеры модулей
+		$modulesDir = __DIR__.'/../../modules';
+		if (is_dir($modulesDir)) {
+			foreach (scandir($modulesDir) as $moduleName) {
+				if ($moduleName === '.' || $moduleName === '..') continue;
+				$moduleControllersDir = $modulesDir . '/' . $moduleName . '/controllers';
+				if (is_dir($moduleControllersDir)) {
+					$this->scanControllers($moduleControllersDir, $moduleName, $routes, $params, $classFilter);
 				}
-				
-				foreach ($this->getActions($controller) as $action) {
-					$actionId=StringHelper::class2Id($action);
-					
-					// Проверяем, разрешён ли GET
-					$verbs = $controller->behaviors()['verbs']['actions'][$actionId] ?? ['GET'];
-					if (!count($verbs)) continue;	//если получили [] - значит действие отключено и всегда будет возвращать 405
-					
-					$route=StringHelper::class2Id($controller->id).'/'.$actionId;
-					
-					
-					$variant=0;
-					
-					while (!is_null($routeParams=ArrayHelper::findByRegexKey(
-						$params,
-						$route.($variant?"[$variant]":''),	//если это не нулевой вариант, то дописываем суффикс[N]
-						$variant?null:[]							//если это нулевой вариант, то по умолчанию он может быть и без параметров
-					))) {
-						
-						//codecept_debug($route.($variant?"[$variant]":''));
-						//codecept_debug(print_r($routeParams,true));
-						
-						if ($routeParams === '{skipTest}') continue 2;
-						
-						$routeParams['route'] = $route;
-						$routeParams['controller'] = $file;
-						$routes[] = $routeParams;
-						
-						$variant++;
-					}
-				}
-				
-				
 			}
 		}
+		
 		usort($routes, function ($a, $b) {
 			$priority = ['delete', 'validate', 'update', 'create', 'view'];
 			[$controllerA,$actionA]=explode('/', $a['route']);
@@ -261,6 +247,76 @@ class PageAccessCest
 	}
 	
 	/**
+	 * Сканирует директорию контроллеров и добавляет маршруты в массив
+	 * @param string $controllersDir Директория с контроллерами
+	 * @param string|null $moduleName Имя модуля (null для основных контроллеров)
+	 * @param array &$routes Массив маршрутов для добавления
+	 * @param array $params Параметры маршрутов из конфигурации
+	 * @param string|null $classFilter Опциональный фильтр по класси модели (имя класса, например "Comps")
+	 * @return void
+	 * @throws InvalidConfigException
+	 */
+	protected function scanControllers($controllersDir, $moduleName, &$routes, $params, $classFilter = null)
+	{
+		foreach (scandir($controllersDir) as $file) {
+			codecept_debug($file);
+			$controller=$this->getController($file, $moduleName);
+			if (is_object($controller)) {
+				if (!$controller instanceof \app\controllers\ArmsBaseController) {
+					continue;
+				}
+				
+				// Если задан фильтр по классу, пропускаем контроллеры с другим классом модели
+				if ($classFilter !== null) {
+					$modelClass = $controller->modelClass ?? '';
+					// Получаем имя класса из полного пути (например "app\models\Comps" -> "Comps")
+					$modelClassName = substr(strrchr($modelClass, '\\'), 1) ?: $modelClass;
+					if ($modelClassName !== $classFilter) {
+						codecept_debug("Skipping controller with modelClass: $modelClass (filter: $classFilter)");
+						continue;
+					}
+				}
+				
+				foreach ($this->getActions($controller) as $action) {
+					$actionId=StringHelper::class2Id($action);
+					
+					// Проверяем, разрешён ли GET
+					$verbs = $controller->behaviors()['verbs']['actions'][$actionId] ?? ['GET'];
+					if (!count($verbs)) continue;	//если получили [] - значит действие отключено и всегда будет возвращать 405
+					
+					// Формируем маршрут для этого контроллера/действия 
+					//(префикс модуля никогда не ставим, т.к. придерживаемся плоского URL, а не иерархического)
+					$route=StringHelper::class2Id($controller->id).'/'.$actionId;
+					
+					
+					$variant=0;
+					
+					while (!is_null($routeParams=ArrayHelper::findByRegexKey(
+						$params,
+						$route.($variant?"[$variant]":''),	//если это не нулевой вариант, то дописываем суффикс[N]
+						$variant?null:[]							//если это нулевой вариант, то по умолчанию он может быть и без параметров
+					))) {
+						
+						//codecept_debug($route.($variant?"[$variant]":''));
+						//codecept_debug(print_r($routeParams,true));
+						
+						if ($routeParams === '{skipTest}') continue 2;
+						
+						$routeParams['route'] = $route;
+						$routeParams['controller'] = $file;
+						$routeParams['moduleName'] = $moduleName;
+						$routes[] = $routeParams;
+						
+						$variant++;
+					}
+				}
+				
+				
+			}
+		}
+	}
+	
+	/**
 	 * @dataProvider routesProvider
 	 * @return void
 	 * @noRollback
@@ -269,7 +325,7 @@ class PageAccessCest
 	{
 		$I->stopFollowingRedirects();
 		$route=$example['route'];
-		$controller=$this->getController($example['controller']);
+		$controller=$this->getController($example['controller'], $example['moduleName'] ?? null);
 		$modelClass=$controller->modelClass;
 		if (!isset($this->savedModels[$modelClass])) $this->savedModels[$modelClass]=[];
 		

@@ -19,23 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'createButton' => Html::a('Новое', ['create'], ['class' => 'btn btn-success']),
-        'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            //'id',
-            [
-                'attribute'=>'name',
-                'format'=>'raw',
-                'value'=>function($data) {
-                    return Html::a($data->name,['view','id'=>$data->id]);
-                }
-            ],
-
-            'description',
-            'workTimeDescription',
-
-            //['class' => 'yii\grid\ActionColumn'],
-        ],
+        'columns' => require __DIR__.'/columns.php',
     ]); ?>
 
 

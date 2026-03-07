@@ -92,19 +92,10 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                // Schedules module routes (backward compatibility)
-                'schedules' => 'schedules/schedules/index',
-                'schedules/<action:\w+>' => 'schedules/schedules/<action>',
-                'schedules/<action:\w+>/<id:\d+>' => 'schedules/schedules/<action>',
-
-                'schedules-entries' => 'schedules/schedules-entries/index',
-                'schedules-entries/<action:\w+>' => 'schedules/schedules-entries/<action>',
-                'schedules-entries/<action:\w+>/<id:\d+>' => 'schedules/schedules-entries/<action>',
-
-                'scheduled-access' => 'schedules/scheduled-access/index',
-                'scheduled-access/<action:\w+>' => 'schedules/scheduled-access/<action>',
-                'scheduled-access/<action:\w+>/<id:\d+>' => 'schedules/scheduled-access/<action>',
-
+                // перечисляем контроллеры которые затолкали внутрь модуля Schedules
+				'<controller:(schedules|schedules-entries|scheduled-access)>' => 'schedules/<controller>/index',
+				'<controller:(schedules|schedules-entries|scheduled-access)>/<action:[\w-]+>' => 'schedules/<controller>/<action>',
+				'<controller:(schedules|schedules-entries|scheduled-access)>/<action:[\w-]+>/<id:\d+>' => 'schedules/<controller>/<action>',
                 [//надо написать тесты для REST запросов и попробовать убрать эти правила, оставить только общие
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [
@@ -169,6 +160,7 @@ $config = [
 		    'userModelLoginField'=>'Login',
 			'beforeCreateController'=>function($route){
 				/** @var string $route The route consisting of module, controller and action IDs. */
+				/** @var Users $user */
 				if (!is_object($user= Yii::$app->user->identity) || !$user->isAdmin())
 					throw new ForbiddenHttpException('Access denied');
 				return $route;

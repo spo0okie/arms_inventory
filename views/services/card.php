@@ -88,10 +88,10 @@ if(!$static_view) { ?>
 		$schedules=[];
 		if (!empty($model->providingScheduleRecursive)) {
 			echo '<strong>Время предоставления: </strong>'
-				.$this->render('/schedules/schedules/item',[
-					'model'=>$model->providingScheduleRecursive,
-					'name'=>$model->providingScheduleRecursive->usageWorkTimeDescription
-				]);
+				.$model->providingScheduleRecursive->renderItem(
+					$this,
+					['name'=>$model->providingScheduleRecursive->usageWorkTimeDescription]
+				);
 			if (!$static_view && count($model->providingScheduleRecursive->getServicesArr())>1) { ?>
 				<span onmouseenter="$('#private_schedule').show()" onmouseleave="$('#private_schedule').hide()">
 					<span qtip_ttip="Это расписание используется более чем для одного сервиса. <br> Невозможно добавлять периоды недоступности сервиса">
@@ -117,8 +117,10 @@ if(!$static_view) { ?>
 
 		
 		if (!empty($model->supportScheduleRecursive)) {
-			if (!empty($model->providingScheduleRecursive)) echo '<br />';
-			echo '<strong>Время поддержки:</strong> '.$this->render('/schedules/schedules/item',['model'=>$model->supportScheduleRecursive]);
+			if (!empty($model->providingScheduleRecursive)) 
+				echo '<br />';
+			echo '<strong>Время поддержки:</strong> '.
+				$model->supportScheduleRecursive->renderItem($this);
 		} ?>
 			<?php
 			if (

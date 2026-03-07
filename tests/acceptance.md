@@ -294,22 +294,25 @@ routesProvider()
 
 ```bash
 # Запуск всех acceptance тестов
-vendor/bin/codecept run acceptance
+php vendor/bin/codecept run acceptance
 
 # Запуск расширенных acceptance тестов
-vendor/bin/codecept run acceptance-extra
+php vendor/bin/codecept run acceptance-extra
 
 # Запуск конкретного теста
-vendor/bin/codecept run acceptance PageAccessCest
+php vendor/bin/codecept run acceptance PageAccessCest
 
 # Запуск конкретного метода теста
-vendor/bin/codecept run acceptance "PageAccessCest:testPageAccess"
+php vendor/bin/codecept run acceptance "PageAccessCest:testPageAccess"
 
 # Запуск тестов истории
-vendor/bin/codecept run acceptance HistoryPagesCest
+php vendor/bin/codecept run acceptance HistoryPagesCest
 
 # Запуск с детальным выводом
-vendor/bin/codecept run acceptance --debug
+php vendor/bin/codecept run acceptance --debug
+
+# Сокращенный вывод для просмотра только сбойных тестов
+php vendor/bin/codecept run acceptance --ext dotReporter
 ```
 
 ### Опции запуска
