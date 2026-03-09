@@ -178,13 +178,28 @@ flowchart TD
 
 ### Алгоритмическое описание работы со скомпилированным расписанием
 
-#### Метод `getPeriods(date_tsm)` — получить периоды, перекрывающие дату
+#### Метод `getDatePeriods(date_tsm)` — получить периоды, попадающие в дату
 
-возвращает периоды которые заканчиваются не раньше конца дня и начинаются не позже начала дня, т.е. перекрывают день
+возвращает периоды которые заканчиваются не раньше начала дня и начинаются не позже конца дня, т.е. попадают в день
 
-#### Метод `getPeriodsIntervals(date_tsm)` — получить интервалы периодов, перекрывающих дату
+```mermaid
+flowchart TD
+    A["getPeriods(date_tsm)"] --> B["dayStart = tsmToDateTsm(date_tsm)<br>Получить начало дня"]
+    B --> C["dayEnd = dayStart + 1440<br>Конец дня (начало + 24ч)"]
+    C --> D["periods = schedule.periods<br>Получить все периоды"]
+    D --> E{i = 0}
+    E --> F{"periods[i].end_tsm > dayStart ||<br>periods[i].start_tsm < dayEnd?"}
+    F -->|Да| G["Добавить periods[i] в result"]
+    F -->|Нет| H
+    G --> H["i++"]
+    H --> I{"i < periods.length?"}
+    I -->|Да| E
+    I -->|Нет| J["Вернуть result"]
+```
 
-Возвращает набор интервалов в пределах дня date_tsm, полученных от перекрывающих день периодов. 
+#### Метод `getDatePeriodsIntervals(date_tsm)` — получить интервалы периодов, перекрывающих дату
+
+Возвращает набор интервалов в пределах дня date_tsm, полученных от перекрывающих день периодов.
 
 ```json
 {
@@ -197,60 +212,76 @@ flowchart TD
 }
 ```
 
-#### Метод `getDateIntervals(tsm)` — получить интервалы расписания на дату
+```mermaid
+flowchart TD
+    A["getDatePeriodsIntervals(date_tsm)"] --> B["periods = getDatePeriods(date_tsm)<br>Получить периоды, перекрывающие дату"]
+    B --> C["dayStart = tsmToDateTsm(date_tsm)<br>Начало дня"]
+    C --> D["dayEnd = dayStart + 1440<br>Конец дня"]
+    D --> E["positive = []<br>negative = []"]
+    E --> F{i = 0}
+    F --> H["intervalStart = max(periods[i].start_tsm, dayStart)"]
+    H --> I["intervalEnd = min(periods[i].end_tsm, dayEnd)"]
+    I --> G{"periods[i].is_work?"}
+    G --> |Да| J["Добавить [intervalStart-dayStart, intervalEnd-dayStart, meta] в positive"]
+    G --> |Нет| M["Добавить [intervalStart-dayStart, intervalEnd-dayStart, meta] в negative"]
+    J --> N
+    M --> N["i++"]
+    N --> O{"i < periods.length?"}
+    O -->|Да| F
+    O -->|Нет| P["Вернуть {positive, negative}"]
+```
+
+#### Метод `getDateIntervals(date_tsm)` — получить интервалы расписания на дату
 
 ```mermaid
 flowchart TD
-    A["getDateIntervals(tsm)"] --> B["tsm=tsmToDateTsm(tsm)<br>Получить tsm начала дня для tsm"] 
-    B --> C{"inBounds(tsm, main)?<br>Попадает ли tsm в границы основного расписания?"}
+    A["getDateIntervals(date_tsm)"] --> B["date_tsm=date_tsmToDateTsm(date_tsm)<br>Получить date_tsm начала дня для date_tsm"] 
+    B --> C{"inBounds(date_tsm, main)?<br>Попадает ли date_tsm в границы основного расписания?"}
     C -->|Нет| D("return []<br>Дата вне границ расписания, значит нет рабочих интервалов")
-    C -->|Да| E["schedule = findOverride(tsm)<br>Выбрать override/main на дату"]
-    E --> I{tsm есть в schedule.dates?}
+    C -->|Да| E["schedule = findOverride(date_tsm)<br>Выбрать override/main на дату"]
+    E --> I{date_tsm есть в schedule.dates?}
     I -->|Да| J[копируем интервалы из entry]
-    I -->|Нет| K{"dayOfWeek(tsm) есть в schedule.weekdays?"}
+    I -->|Нет| K{"dayOfWeek(date_tsm) есть в schedule.weekdays?"}
     K -->|Да| J
     K -->|Нет| L{Есть schedule.default?}
     L -->|Да| J
     L -->|Нет| Empty["интервалы=[]"] --> M
-    J --> M{"getPeriodsIntervals(date) Найти periods попадающие в date"}
+    J --> M["getDatePeriodsIntervals(date_tsm) Найти позитивные и негативные интервалы из periods попадающих в date_tsm"]
 
-    M --> N{Есть periods?}
-    N -->|Да| O[наложить перекрывающие интервалы на интервалы расписания]
-    O --> P
-    N -->|Нет| Q[Использовать base intervals]
-    Q --> P[Вернуть полученные интервалы]
+    M --> O[наложить перекрывающие интервалы на интервалы расписания]
+    O --> P[Вернуть полученные интервалы]
     
 ```
 
-#### Метод `isWorkDay(date)` — проверка рабочего дня на дату
+#### Метод `isWorkDay(date_tsm)` — проверка рабочего дня на дату
 
 ```mermaid
 flowchart TD
-    A["isWorkDay(date)"] --> C["getDateIntervals(date) получаем рабочие интервалы на дату"]
+    A["isWorkDay(date_tsm)"] --> C["getDateIntervals(date_tsm) получаем рабочие интервалы на дату"]
     C -->|Пустой набор| D[Вернуть false]
     C -->|Не пустой набор| E[Вернуть true]
 ```
 
-#### Метод `isWorkTime(dateTime)` — проверка рабочего времени на дату-время
+#### Метод `isWorkTime(tsm)` — проверка рабочего времени на дату-время
 
 ```mermaid
 flowchart TD
-    A["isWorkTime(dateTime)"] --> B[Разделить на дату и время]
-    B --> C["getDateIntervals(date) получаем рабочие интервалы на дату"]
-    C --> S{time внутри какого-либо interval?}
-    S -->|Да| T[Вернуть true]
-    S -->|Нет| R[Вернуть false]
+    A["isWorkTime(tsm)"] --> B[Разделить на дату и время]
+    B --> C["intervals=getDateIntervals(tsm) получаем рабочие интервалы на дату"]
+    C --> D["interval=intervalsContains(intervals, tsm)"]
+    D --> S("return interval!==null)<br>Вернуть входит ли время в какой-либо из рабочих интервалов")
 ```
 
-#### Метод `getMeta(dateTime)` — получение метаданных
+#### Метод `getMeta(tsm)` — получение метаданных
 
 ```mermaid
 flowchart TD
-    A["getMeta(dateTime)"] --> B[Разделить на дату и время]
-    B --> C["getDateIntervals(date) получаем рабочие интервалы на дату"]
-    C --> S{time внутри какого-либо interval?}
-    S -->|Да| T[Вернуть meta этого интервала]
-    S -->|Нет| R[Вернуть null]
+    A["getMeta(tsm)"] --> B[Разделить на дату и время]
+    B --> C["getDateIntervals(tsm) получаем рабочие интервалы на дату"]
+    C --> D["interval=intervalsContains(intervals, tsm)"]
+    D --> S{"interval!==null?"}
+    S -->|Да| T[return inteval.meta]
+    S -->|Нет| R[return null]
 ```
 
 #### Метод `nextWorkingDateTime(dateTime)` — ближайшее рабочее время
@@ -306,7 +337,7 @@ flowchart TD
 
 | Функция | Описание | Использование |
 | ------- | -------- | ------------- |
-| `intervalsContains(intervals, tsm)` | Проверить, содержит ли любой интервал время | isWorkTime, getMeta |
+| `intervalsContains(intervals, tsm)` | Из набора интервалов вернуть тот, который содержит tsm (null, если не содержит) | isWorkTime, getMeta |
 | `intervalsIntersect(a, b)` | Пересечение двух интервалов | applyPeriods |
 | `intervalsMerge(intervals)` | Объединить пересекающиеся интервалы | applyPeriods |
 | `intervalsSubtract(base, remove)` | Вычесть интервалы (для period is_work=false) | applyPeriods |
@@ -316,9 +347,9 @@ flowchart TD
 
 | Функция | Описание | Использование |
 | ------- | -------- | ------------- |
-| `inBounds(tsm, bounds)` | Проверить, попадает ли tsm в границы bounds.start ... bounds.end | findOverrides, findPeriods |
-| `findPeriod(tsm, is_work?)` | Найти период, перекрывающий tsm | findPeriod, getDateIntervals |
-| `findOverrides(tsm)` | Найти **override**, перекрывающий tsm | findOverride, getDateIntervals |
+| `inBounds(tsm, bounds)` | Проверить, попадает ли tsm в границы bounds.start ... bounds.end | getDateIntervals, findOverride |
+| `findPeriod(tsm, is_work?)` | Найти период, перекрывающий tsm | nextWorkingDateTime |
+| `findOverride(tsm)` | Найти **override**, перекрывающий tsm | getDateIntervals |
 | `findNearest(candidates, tsm)` | Найти ближайший элемент не левее tsm | firstEntry |
 | `nextOverride(tsm)` | Найти ближайший **override**, заканчивающийся не левее tsm | firstEntry |
 | `nextWorkDateEntry(tsm)` | Найти ближайшую **запись на дату**, содержащую рабчие интервалы, заканчивающиеся не левее tsm | firstEntry |
@@ -328,7 +359,7 @@ flowchart TD
 
 | Функция | Описание | Использование |
 | ------- | -------- | ------------- |
-| `dayOfWeek(tsm)` | День недели (1-7) | firstEntry |
+| `dayOfWeek(tsm)` | День недели (1-7) от Unix epoch | firstEntry |
 
 #### 5. Алгоритмические
 
@@ -337,6 +368,40 @@ flowchart TD
 | `applyPeriodsToDay(intervals, periods, dateTsm)` | Наложить periods на интервалы дня | getDateIntervals |
 | `getEntryIntervals(target, dateTsm)` | Получить intervals для даты (weekday/date/default) | getDateIntervals |
 | `calculateEntryStart(entry, dateTsm)` | Вычислить абсолютный start для записи | firstEntry |
+
+#### Метод `inBounds(tsm, bounds)` — проверка попадания tsm в границы
+
+Проверяет, попадает ли tsm в интервал от bounds.start до bounds.end
+
+```mermaid
+flowchart TD
+    A["inBounds(tsm, bounds)"] --> B{"bounds.start_tsm !== null &&<br>tsm < bounds.start_tsm?"}
+    B -->|Да| C["return false<br>tsm раньше границы"]
+    B -->|Нет| D{"bounds.end_tsm !== null &&<br>tsm >= bounds.end_tsm?"}
+    D -->|Да| E["return false<br>tsm позже границы"]
+    D -->|Нет| F["return true<br>tsm внутри границ"]
+```
+
+#### Метод `applyPeriodsToDay(baseIntervals, periods, dateTsm)` — наложение периодов на интервалы дня
+
+```mermaid
+flowchart TD
+    A["applyPeriodsToDay(baseIntervals, periods, dateTsm)"] --> B["intervals = [...baseIntervals]<br>Копируем базовые интервалы"]
+    B --> C["posIntervals = periods.positive<br>Получаем положительные периоды (is_work=true)"]
+    C --> D["negIntervals = periods.negative<br>Получаем отрицательные периоды (is_work=false)"]
+    D --> E{i = 0}
+    E --> F["Добавить posIntervals[i] к intervals"]
+    F --> G["i++"]
+    G --> H{"i < posIntervals.length?"}
+    H -->|Да| E
+    H -->|Нет| J{i = 0}
+    J --> K["Вычесть negIntervals[i] из intervals"]
+    K --> L["i++"]
+    L --> M{"i < negIntervals.length?"}
+    M -->|Да| J
+    M -->|Нет| N["intervalsMerge(intervals)<br>Объединить пересекающиеся"]
+    N --> O["Вернуть intervals"]
+```
 
 #### Метод `firstEntry(pos, target, main)` — поиск ближайшего к pos элемента в расписании target
 
