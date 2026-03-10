@@ -245,7 +245,7 @@ class ScheduleRuntime {
             const target = this.findOverride(pos);
             
             // Ищем ближайшую рабочую запись в выбранном расписании
-            const entry = this.firstEntry(pos, target);
+            const entry = this.nextRecord(pos, target);
             
             if (entry === null) {
                 // Нет рабочих записей — пропускаем расписание и ищем дальше
@@ -637,7 +637,7 @@ class ScheduleRuntime {
                 const filteredEntry = this.filterBefore(entry, pos);
                 
                 if (filteredEntry.intervals.length > 0) {
-                    return entry;
+                    return filteredEntry;
                 }
             }
         }
@@ -694,7 +694,7 @@ class ScheduleRuntime {
         const isMain = (target === this.main);
 
 		//из чего будем выбирать ближайшую запись
-		candidates=[]
+		candidates = [];
 
 		//ищем ближайший рабочий период
 		const period = this.nextPeriod(pos, true);
@@ -711,7 +711,7 @@ class ScheduleRuntime {
 			candidates.push(weekEntry);
 		}		
               
-        // Для main: ищем oтакже записи которые бывают только в нем: override, dates
+        // Для main: ищем также записи которые бывают только в нем: override, dates
         if (isMain) {
             // следующее расписание-перекрытие
             const override = this.nextOverride(pos);
@@ -870,38 +870,6 @@ function intervalsContains(intervals, tsm) {
 }
 
 /**
- * intervalsMerge — объединить пересекающиеся интервалы
- * 
- * @param {Array} intervals - массив интервалов [[start, end, meta], ...]
- * @returns {Array} объединённые интервалы
- */
-function intervalsMerge(intervals) {
-    if (!intervals || intervals.length === 0) return [];
-    if (intervals.length === 1) return [...intervals];
-    
-    // Сортируем по start
-    const sorted = [...intervals].sort((a, b) => a[0] - b[0]);
-    
-    const result = [sorted[0]];
-    
-    for (let i = 1; i < sorted.length; i++) {
-        const current = sorted[i];
-        const last = result[result.length - 1];
-        
-        // Если текущий интервал пересекается с последним — объединяем
-        if (current[0] <= last[1]) {
-            last[1] = Math.max(last[1], current[1]);
-            // Объединяем метаданные (текущие перезаписывают предыдущие)
-            last[2] = { ...last[2], ...current[2] };
-        } else {
-            result.push(current);
-        }
-    }
-    
-    return result;
-}
-
-/**
  * intervalsSubtract — вычесть интервал из массива интервалов
  * 
  * @param {Array} intervals - массив интервалов [[start, end, meta], ...]
@@ -999,7 +967,6 @@ if (typeof module !== 'undefined' && module.exports) {
         dayOfWeek,
         inBounds,
         intervalsContains,
-        intervalsMerge,
         intervalsSubtract,
         intervalsAdd
     };
@@ -1014,7 +981,6 @@ if (typeof window !== 'undefined') {
     window.dayOfWeek = dayOfWeek;
     window.inBounds = inBounds;
     window.intervalsContains = intervalsContains;
-    window.intervalsMerge = intervalsMerge;
     window.intervalsSubtract = intervalsSubtract;
     window.intervalsAdd = intervalsAdd;
 }
