@@ -141,7 +141,9 @@ class ScheduleRuntime {
      * schedule.isWorkDay('2024-01-15 10:00') // true/false (время игнорируется)
      */
     isWorkDay(date) {
-        const intervals = this.getDateIntervals(date);
+        const tsm = strToTsm(date);
+        if (tsm === null) return false;
+        const intervals = this.getDateIntervals(tsm);
         return intervals.length > 0;
     }
 
@@ -359,27 +361,27 @@ class ScheduleRuntime {
      * @returns {Array} Массив периодов
      */
     getDatePeriods(dateTsm) {
-        // Вычисляем границы дня
-        const dayStart = tsmToDateTsm(dateTsm);
-        const dayEnd = dayStart + MINUTES_IN_DAY;
-        
-        const result = [];
-        
-        // Периоды существуют ТОЛЬКО в main
-        const periods = this.main.periods || [];
-        
-        // Фильтруем периоды, перекрывающие день
-        for (const period of periods) {
-            // Период попадает в день, если:
-            // - заканчивается НЕ РАНЬШЕ начала дня (end_tsm >= dayStart)
-            // ИЛИ
-            // - начинается РАНЬШЕ конца дня (start_tsm < dayEnd)
-            if (period.end_tsm >= dayStart || period.start_tsm < dayEnd) {
-                result.push(period);
-            }
-        }
-        
-        return result;
+    // Вычисляем границы дня
+    const dayStart = tsmToDateTsm(dateTsm);
+    const dayEnd = dayStart + MINUTES_IN_DAY;
+    
+    const result = [];
+    
+    // Периоды существуют ТОЛЬКО в main
+    const periods = this.main.periods || [];
+    
+    // Фильтруем периоды, перекрывающие день
+    for (const period of periods) {
+    // Период попадает в день, если:
+    // - заканчивается НЕ РАНЬШЕ начала дня (end_tsm > dayStart)
+    // И
+    // - начинается РАНЬШЕ конца дня (start_tsm < dayEnd)
+    if (period.end_tsm > dayStart && period.start_tsm < dayEnd) {
+    result.push(period);
+    }
+    }
+    
+    return result;
     }
 
     /**
@@ -762,7 +764,8 @@ function strToTsm(str) {
         str += ' 00:00';
     }
     
-    const date = new Date(str.replace(' ', 'T'));
+    // Парсим как UTC
+    const date = new Date(str.replace(' ', 'T') + 'Z');
     if (isNaN(date.getTime())) return null;
     
     // Конвертируем в минуты от epoch
@@ -936,21 +939,37 @@ function intervalsSubtract(intervals, subtract) {
  * @returns {Array} результирующие интервалы
  */
 function intervalsAdd(intervals, override) {
-    if (!intervals || intervals.length === 0) {
-        return override ? [[...override]] : [];
+  // If intervals is empty, result depends on override
+  if (!intervals || intervals.length === 0) {
+    if (!override || override.length === 0 || override[1] <= override[0]) {
+      return [];
     }
-    
-    if (!override || override[1] <= override[0]) {
-        return [...intervals];
+    return [[...override]];
+  }
+
+  // If override is empty or invalid, return copy of intervals
+  if (!override || override.length === 0 || override[1] <= override[0]) {
+    return [...intervals];
+  }
+
+  // 1. Вычитаем override из интервалов (освобождаем место)
+  let result = intervalsSubtract(intervals, override);
+
+  // 2. Добавляем override в массив БЕЗ MERGE, сохраняя сортировку по началу интервала
+  const overrideStart = override[0];
+  let inserted = false;
+  for (let i = 0; i < result.length; i++) {
+    if (result[i][0] > overrideStart) {
+      result.splice(i, 0, [...override]);
+      inserted = true;
+      break;
     }
-    
-    // 1. Вычитаем override из интервалов (освобождаем место)
-    let result = intervalsSubtract(intervals, override);
-    
-    // 2. Добавляем override в массив
+  }
+  if (!inserted) {
     result.push([...override]);
-    
-    return result;
+  }
+
+  return result;
 }
 
 // =============================================================================
