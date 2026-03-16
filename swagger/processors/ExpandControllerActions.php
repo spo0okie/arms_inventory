@@ -101,9 +101,9 @@ class ExpandControllerActions
 							/** @var Context $newCtx */
 							$newCtx = clone $definition['context'];	// клонируем контекст из предка
 							$newCtx->method = $methodName;			// указываем метод
-							$newCtx->class = $fqcn;					// указываем класс
-							$clone = $this->deepCloneAnnotation($ann,$newCtx); //клонируем аннотацию (со всеми вложенными)
-							$analysis->addAnnotation($clone, $definition['context']); // добавляем в анализ
+							$newCtx->class = StringHelper::className($fqcn);			// указываем класс
+							$clone = $this->deepCloneAnnotation($ann,$newCtx);			//клонируем аннотацию (со всеми вложенными)
+							$analysis->addAnnotation($clone, $definition['context']);	// добавляем в анализ
 						}
 					}
 				}

@@ -27,6 +27,7 @@ use OpenApi\Attributes as OA;
 use yii\web\Response;
 
 /**
+ * @method array actions() - для получения стандартных действий ActiveController (index, view, create, update, delete)
  * @OA\Tag(
  *   name="{controller}",
  *   description="{model->titles}"
@@ -91,7 +92,7 @@ class BaseRestController extends ActiveController
 			$behaviors['authenticator'] = [
 				'class' => HttpBasicAuth::class,
 				'auth' => function ($login, $password) {
-					/** @var $user Users */
+					/** @var Users $user */
 					$user = Users::find()->where(['Login' => $login])->one();
 					if ($user && $user->validatePassword($password)) return $user;
 					return null;

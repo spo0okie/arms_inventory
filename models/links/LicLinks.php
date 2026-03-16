@@ -78,6 +78,16 @@ class LicLinks extends ArmsModel
 			static::objIdField()=>['\\app\\models\\'.static::objClass(),'loader'=>'object'],
 		];
 	}
+
+	// добавил т.к. это используется в LicLincsController (REST)
+	public function attributeData()
+	{		
+		return array_merge(parent::attributeData(),[
+			'product_id' => 'ID лицензируемого программного обеспечения (Soft)',
+			'comp_name' => 'Имя компьютера (FQDN или DOMAIN\hostname)',
+			'user_login' => 'Логин пользователя',
+		]);
+	}
 	
 	public function getObjType() {return static::$obj;}
 	public function getLicType() {return static::$lic;}

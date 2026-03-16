@@ -33,7 +33,9 @@ class GenerateModelSchemaProcessor
 	public function __invoke(Analysis $analysis): void
 	{
 	
-		foreach ($this->apiModels() as $modelClass) {
+		$classes=array_merge($this->apiModels(),$this->apiModels('Schedules'));
+
+		foreach ($classes as $modelClass) {
 			$model = new $modelClass();
 			$class=StringHelper::basename($modelClass);
 			
@@ -89,17 +91,23 @@ class GenerateModelSchemaProcessor
 	 * Возвращает список моделей, схемы которых нужно сгенерировать для API
 	 * @return array
 	 */
-	private function apiModels(): array
+	private function apiModels($module=''): array
 	{
 		$list=[];
-		foreach (FileHelper::findFiles(Yii::getAlias('@app/models'), [
+		$path=Yii::getAlias('@app/models');
+		$nsPrefix="app\\models\\";
+		if ($module) {
+			$path=Yii::getAlias('@app')."/modules/$module/models";
+			$nsPrefix="app\\modules\\$module\\models\\";
+		}
+		foreach (FileHelper::findFiles($path, [
 			'only' => ['*.php'],
 			'recursive'=>false
 		]) as $file) {
-			$modelClass = 'app\\models\\'
+			$modelClass = $nsPrefix
 				.str_replace('/', '\\',
 					StringHelper::removeSuffix(
-						substr($file, strlen(Yii::getAlias('@app/models') . '/')),
+						substr($file, strlen($path . '/')),
 						'.php'
 					)
 				);

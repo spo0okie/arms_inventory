@@ -188,6 +188,10 @@ class LicItems extends ArmsModel
 				'Состояние',
 			],
 			'support' => ['Поддержка','Команда замещающая ответственного на время его отсутствия'],
+			//search fields
+			'comp_name' => 'Имя компьютера (FQDN или DOMAIN\hostname)',
+			'user_login' => 'Логин пользователя',
+			'product_id' => 'ID лицензируемого программного обеспечения (Soft)',
         ];
     }
 

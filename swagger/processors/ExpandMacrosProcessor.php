@@ -2,9 +2,11 @@
 namespace app\swagger\processors;
 
 use app\helpers\StringHelper;
+use app\modules\api\controllers\BaseRestController;
 use OpenApi\Analysis;
 use OpenApi\Annotations as OA;
 use OpenApi\Generator;
+use Throwable;
 
 class ExpandMacrosProcessor
 {
@@ -91,7 +93,22 @@ class ExpandMacrosProcessor
 	public static function macroSubstitute(string $string, string $controller, ?string $action=null): string
 	{
 		$controllerId = StringHelper::class2Id(StringHelper::removeSuffix($controller, 'Controller'));
+		$controllerClass="app\\modules\\api\\controllers\\$controller";
 		$modelClass='app\\models\\'.StringHelper::className(StringHelper::removeSuffix($controller, 'Controller'));
+		
+		
+		try {
+			if (!class_exists($controllerClass)) return $string;
+			$controller=new $controllerClass(\Yii::$app->id, \Yii::$app);
+			if (! $controller instanceof BaseRestController) return $string;
+			$modelClass=$controller->modelClass??false;
+		} catch (Throwable $e) {
+			return $string;
+		}
+
+		if (!$modelClass) return $string;
+		
+		
 		$replacements=[
 			'{controller}'=>$controllerId,
 			'{model}'=>StringHelper::className($modelClass),
@@ -119,9 +136,9 @@ class ExpandMacrosProcessor
 	{
 		$ctx = $operation->_context;
 		//если нет контекста или класса, то выходим
-		if (!$ctx || !$ctx->class) return;
+		if (!$ctx || !$ctx->class || !$ctx->namespace) return;
 
-		$controllerClass = $ctx->class;
+		$controllerClass = $ctx->namespace .'\\'. $ctx->class;
 		//если такого контроллера нет, то выходим
 		if (!class_exists($controllerClass)) return;
 
