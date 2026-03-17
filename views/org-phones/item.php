@@ -3,7 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgPhones */
 
-use app\components\LinkObjectWidget;
+use app\components\ItemObjectWidget;
 use yii\helpers\Url;
 
 if (!isset($href)) $href=false;
@@ -11,15 +11,15 @@ if (!isset($static_view)) $static_view=true;
 if (!isset($show_archived)) $show_archived=true;
 if (!isset($icon)) $icon=false;
 
-if (is_object($model)) { ?>
-    <span class="org-phones-item cursor-default <?= $model->archived?'text-muted text-decoration-line-through archived-item':'' ?>" <?= $model->archived&&!$show_archived?'style="display:none"':'' ?> >
-		<?= LinkObjectWidget::widget([
-			'model'=>$model,
-			'name'=>($icon?'<i class="fas fa-phone"></i>':'').$model->title,
-			'static'=>$static_view,
-			'modal'=>true,
-			'url'=> Url::to(['/services/view','id'=>$model->services_id,'showArchived'=>$model->archived]),
-		]) ?>
-	</span>
-
-<?php } else echo "Отсутствует";
+if (is_object($model)) {
+	echo ItemObjectWidget::widget([
+		'model'=>$model,
+		'name'=>$model->title,
+		'namePrefix'=>$icon?'<i class="fas fa-phone"></i>':'',
+		'static'=>$static_view,
+		'modal'=>true,
+		'url'=> Url::to(['/services/view','id'=>$model->services_id,'showArchived'=>$model->archived]),
+		'item_class'=>'org-phones-item cursor-default',
+		'show_archived'=>$show_archived,
+	]);
+} else echo "Отсутствует";

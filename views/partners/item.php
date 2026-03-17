@@ -8,7 +8,8 @@
 
 /* @var \app\models\Partners $model */
 
-use yii\helpers\Html;
+use app\components\ItemObjectWidget;
+use yii\helpers\Url;
 if (is_object($model)) {
 	if (!isset($static_view)) $static_view=false;
 	if (!isset($name)) $name=null;
@@ -22,13 +23,10 @@ if (is_object($model)) {
 			break;
 		default: $modelName = $name;
 	}
-	?>
-
-	<span class="partners-item"
-		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['/partners/ttip','id'=>$model->id])?>"
-	>
-		<?= Html::a($modelName,['partners/view','id'=>$model->id]) ?>
-		<?= $static_view?'':Html::a('<span class="fas fa-pencil-alt"></span>',['partners/update','id'=>$model->id]) ?>
-	</span>
-	<?php
+	echo ItemObjectWidget::widget([
+		'model'=>$model,
+		'name'=>$modelName,
+		'static'=>$static_view,
+		'ttipUrl'=>Url::to(['/partners/ttip','id'=>$model->id]),
+	]);
 }

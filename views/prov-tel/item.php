@@ -8,12 +8,12 @@
 
 /* @var \app\models\ProvTel $model */
 
-use yii\helpers\Html;
+use app\components\ItemObjectWidget;
+use yii\helpers\Url;
 ?>
 
-<span class="prov_tel-item"
-      qtip_ajxhrf="<?= \yii\helpers\Url::to(['/prov-tel/ttip','id'=>$model->id])?>"
->
-	<?= Html::a($model->name,['prov-tel/view','id'=>$model->id]) ?>
-	<?= Html::a('<span class="fas fa-pencil-alt"></span>',['prov-tel/update','id'=>$model->id]) ?>
-</span>
+<?= ItemObjectWidget::widget([
+	'model'=>$model,
+	'name'=>$model->name,
+	'ttipUrl'=>Url::to(['/prov-tel/ttip','id'=>$model->id]),
+]) ?>

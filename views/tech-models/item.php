@@ -10,7 +10,7 @@
 
 if (!isset($static_view)) $static_view=true;
 
-use yii\helpers\Html;
+use app\components\ItemObjectWidget;
 if (is_object($model)) {
 	if ($short??false)
 		$name=$model->shortest;
@@ -21,14 +21,10 @@ if (is_object($model)) {
 			.(strlen($model->short)?$model->short:$model->name);
     else
 		$name=$model->name;
-    ?>
-
-<span class="tech_model-item">
-	<?= \app\components\LinkObjectWidget::widget([
+	echo ItemObjectWidget::widget([
 		'model'=>$model,
 		'name'=>$name,
-		'static'=>$static_view
-	]) ?>
-</span>
-
-<?php }
+		'static'=>$static_view,
+		'item_class'=>'tech_model-item',
+	]);
+}

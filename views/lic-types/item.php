@@ -9,22 +9,16 @@
 /* @var \app\models\LicTypes $model */
 /* @var $this yii\web\View */
 
-use yii\helpers\Html;
+use app\components\ItemObjectWidget;
+use yii\helpers\Url;
 if (!isset($static_view)) $static_view=false;
 
-if (is_object($model)) { ?>
-	
-	<span class="lic_types-item">
-	<?= Html::a($model->descr,
-		['lic-types/view','id'=>$model->id],
-		[
-			'qtip_ajxhrf'=>$static_view?null:\yii\helpers\Url::to(['/lic-types/ttip','id'=>$model->id]),
-			//'class'=>$active?"contract_active":"contract_inactive",
-		]
-	) ?>
-	
-	<?=
-		$static_view?'':(Html::a('<span class="fas fa-pencil-alt"></span>',['lic-types/update','id'=>$model->id]))
-	?>
-</span>
-<?php } else echo "Отсутствует";
+if (is_object($model)) {
+	$ttipUrl=$static_view?null:Url::to(['/lic-types/ttip','id'=>$model->id]);
+	echo ItemObjectWidget::widget([
+		'model'=>$model,
+		'name'=>$model->descr,
+		'static'=>$static_view,
+		'ttipUrl'=>$ttipUrl,
+	]);
+} else echo "Отсутствует";

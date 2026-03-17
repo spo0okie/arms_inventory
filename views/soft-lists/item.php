@@ -1,18 +1,17 @@
 <?php
 
-use yii\helpers\Html;
+use app\components\ItemObjectWidget;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\SoftLists */
 
 if (!empty($model)) {
 	if (!isset($name)) $name=$model->descr;
-	?>
-
-	<span class="soft-lists-item"
-		  qtip_ajxhrf="<?= \yii\helpers\Url::to(['soft-lists/ttip','id'=>$model->id]) ?>"
-	>
-		<?=  Html::a($name,['soft-lists/view','id'=>$model->id]) ?>
-		<?=  Html::a('<span class="fas fa-pencil-alt"></span>',['soft-lists/update','id'=>$model->id,'return'=>'previous']) ?>
-	</span>
-<?php } ?>
+	echo ItemObjectWidget::widget([
+		'model'=>$model,
+		'name'=>$name,
+		'ttipUrl'=>Url::to(['soft-lists/ttip','id'=>$model->id]),
+		'updateUrl'=>['soft-lists/update','id'=>$model->id,'return'=>'previous'],
+	]);
+}
