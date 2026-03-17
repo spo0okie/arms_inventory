@@ -14,7 +14,7 @@ class LicGroupsController extends BaseRestController
 	public function actionSearch($product_id=null,$comp_name=null,$user_login=null): ActiveRecord{
 		return LicLinksController::filterQuery(
 			LicGroups::find(),
-			'group',
+			'groups',
 			$product_id,
 			$user_login,
 			$comp_name
@@ -24,7 +24,7 @@ class LicGroupsController extends BaseRestController
 	public function actionFilter($product_id=null,$comp_name=null,$user_login=null): ActiveDataProvider{
 		return new ActiveDataProvider(['query' => LicLinksController::filterQuery(
 			LicGroups::find(),
-			'group',
+			'groups',
 			$product_id,
 			$user_login,
 			$comp_name
