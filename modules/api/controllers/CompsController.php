@@ -39,7 +39,7 @@ class CompsController extends BaseRestController
 		'mac'=>'mac',
 	];
 	
-	public function actionSearch($name=null,$domain=null,$ip=null): ActiveRecord {
+	public function actionSearch($name=null,$domain=null,$ip=null): ActiveRecord|null {
 		if ($name) return \app\controllers\CompsController::searchModel($name,$domain,$ip);
 		return parent::actionSearch();
 	}

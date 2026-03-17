@@ -182,7 +182,7 @@ class BaseRestController extends ActiveController
 			new OA\Response(response: 404, description: "Ничего не найдено по запросу")
 		]
 	)]
-	public function actionSearch(): ActiveRecord {
+	public function actionSearch(): ActiveRecord|null {
 		$this->checkDisabledActions('search');
 		foreach (static::$searchFields as $param=>$field) {
 			if ($field===static::SEARCH_BY_ANY_NAME && ($value= Yii::$app->request->get($param))) {

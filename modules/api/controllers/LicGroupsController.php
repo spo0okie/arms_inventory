@@ -11,7 +11,7 @@ class LicGroupsController extends BaseRestController
 
 	public $modelClass='app\models\LicGroups';
 	
-	public function actionSearch($product_id=null,$comp_name=null,$user_login=null): ActiveRecord{
+	public function actionSearch($product_id=null,$comp_name=null,$user_login=null): ActiveRecord|null {
 		return LicLinksController::filterQuery(
 			LicGroups::find(),
 			'groups',

@@ -141,7 +141,7 @@ class LicLinksController extends BaseRestController
 		int $objId=null,
 		string $objName=null,
 		int $licId=null
-	): ActiveRecord {
+	): ActiveRecord|null {
 		//return $productId;
 		
 		if (!$objId && $objName) {

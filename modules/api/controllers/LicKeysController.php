@@ -16,7 +16,7 @@ class LicKeysController extends BaseRestController
 
 	public $modelClass='app\models\LicKeys';
 	
-	public function actionSearch($product_id=null,$comp_name=null,$user_login=null): ActiveRecord{
+	public function actionSearch($product_id=null,$comp_name=null,$user_login=null): ActiveRecord|null {
 		return LicLinksController::filterQuery(
 			LicKeys::find(),
 			'keys',
