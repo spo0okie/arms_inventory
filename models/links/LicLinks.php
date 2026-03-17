@@ -256,7 +256,7 @@ class LicLinks extends ArmsModel
 				/** @noinspection PhpUndefinedMethodInspection */
 				foreach ($objClass::findLinks($licId,$objId) as $item) {
 					if (!is_null($productId)) {
-						if (array_search($productId,$item->lic->soft_ids)!==false) {
+						if (array_search($productId,$item->lic->softIds)!==false) {
 							$items[]=$item;
 						}
 					} else {

@@ -163,7 +163,7 @@ class LicLinksController extends BaseRestController
 			$licenseType,
 			$objId,
 			$licId
-		);
+		)[0]??null;
 	}
 
 }

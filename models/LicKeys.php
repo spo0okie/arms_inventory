@@ -91,7 +91,7 @@ class LicKeys extends ArmsModel
 			'comment' => [
 				'Комментарии',
 				'comment' => 'Все что стоит знать об этом ключе кроме информации в остальных полях',
-				'type' => 'text'
+				'type' => 'text',
 			],
 			'lic_items_id' => [
 				'Закупка',
@@ -180,6 +180,10 @@ class LicKeys extends ArmsModel
 	}
 
 
+	public function getSoftIds ()
+	{
+		return $this->licItem->softIds;
+	}
 
 	
 	/**

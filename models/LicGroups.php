@@ -164,6 +164,14 @@ class LicGroups extends ArmsModel
 	}
 	
 	/**
+	 * Для совместимости с licItems и licKeys
+	 * @return array
+	 */
+	function getSoftIds() {
+		return $this->soft_ids;
+	}
+	
+	/**
 	 * @return ActiveQuery
 	 */
 	public function getSoft()
