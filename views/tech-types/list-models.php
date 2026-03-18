@@ -2,7 +2,8 @@
 
 use yii\bootstrap5\Modal;
 use yii\helpers\Html;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\TechTypes */
 
@@ -18,7 +19,7 @@ use yii\helpers\Html;
 			<?php foreach ($techModels as $techModel) { ?>
 				<tr>
 					<td>
-						<?= $this->render('/tech-models/item',['model'=>$techModel,'long'=>true]) ?><br />
+						<?= ModelWidget::widget(['model'=>$techModel,'options'=>['long'=>true]]) ?><br />
 					</td>
 					<td>
 						<?= $techModel->usages ?>
@@ -50,4 +51,6 @@ use yii\helpers\Html;
 		</p>
 	</div>
 </div>
+
+
 

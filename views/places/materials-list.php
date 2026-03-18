@@ -9,7 +9,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $models app\models\Materials[] */
 
@@ -35,9 +36,11 @@ if (count($materials)) {
 		}?>
         <td colspan="10">
             <div>
-	            <?php /* foreach ($materials as $item) echo $this->render('/materials/item',['model'=>$item,'material'=>true,'rest'=>true]).'<br />';*/ ?>
+	            <?php /* foreach ($materials as $item) echo ModelWidget::widget(['model'=>$item,'options'=>['material'=>true,'rest'=>true]]).'<br />';*/ ?>
 	            <?php foreach ($groups as $group) echo $this->render('/materials/group',['models'=>$group,'material'=>true,'rest'=>true]).'<br />'; ?>
             </div>
         </td>
     </tr>
 <?php } ?>
+
+

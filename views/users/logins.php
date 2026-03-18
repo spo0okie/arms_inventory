@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\UsersSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -44,7 +45,7 @@ $renderer=$this;
                         if (count($arms)) {
 	                        $items=[];
 	                        foreach ($arms as $arm) {
-		                        $items[]=$renderer->render('/techs/item',['model'=>$arm]);
+		                        $items[]=ModelWidget::widget(['model'=>$arm]);
 	                        }
 	                        return implode('<br />',$items);
                         } else {
@@ -80,3 +81,5 @@ $renderer=$this;
         ],
     ]); ?>
 </div>
+
+

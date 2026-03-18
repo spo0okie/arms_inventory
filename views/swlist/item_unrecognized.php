@@ -14,7 +14,8 @@ use app\models\Manufacturers;
 use app\models\Soft;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-
+
+use app\components\widgets\page\ModelWidget;
 if (!isset($item['manufacturers_id'])) $item['manufacturers_id']=null;
 
 /*вывод производителя*/
@@ -25,7 +26,7 @@ if (!isset($item['manufacturers_id'])) $item['manufacturers_id']=null;
 <?php if (!is_null($item['manufacturers_id'])){
     //если производитель определен, то выводим его из таблицы производителей в виде "кнопочки"
     $dev= Manufacturers::fetchItem($item['manufacturers_id']);
-    echo $this->render('/manufacturers/item',['model'=>$dev]);
+    echo ModelWidget::widget(['model'=>$dev]);
 } else {
     //иначе выводим производителя из отпечатка сканирования и предлагаем кнопочку чтобы его добавить в таблицу
     echo $item['publisher']; //название
@@ -113,3 +114,5 @@ if (
 </td>
 <td class="passport_tools"></td>
 </tr>
+
+

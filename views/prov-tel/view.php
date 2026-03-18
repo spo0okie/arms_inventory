@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\ProvTel */
 
@@ -38,7 +39,7 @@ $deleteable=!(count($org_inet)||count($org_phones));
         <h4>Городские телефоны</h4>
         <p>
 			<?php foreach ($org_phones as $phone) {
-				echo $this->render('/org-phones/item',['model'=>$phone]).'<br/>';
+				echo ModelWidget::widget(['model'=>$phone]).'<br/>';
 			} ?>
         </p>
 	<?php } ?>
@@ -47,7 +48,7 @@ $deleteable=!(count($org_inet)||count($org_phones));
         <h4>Подключения интернет</h4>
         <p>
 			<?php foreach ($org_inet as $inet) {
-				echo $this->render('/org-inet/item',['model'=>$inet]).'<br/>';
+				echo ModelWidget::widget(['model'=>$inet]).'<br/>';
 			} ?>
         </p>
 	<?php } ?>
@@ -56,3 +57,5 @@ $deleteable=!(count($org_inet)||count($org_phones));
 
 
 </div>
+
+

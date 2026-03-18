@@ -12,7 +12,8 @@ use app\components\StripedRowWidget;
 use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgInet */
 
@@ -52,12 +53,12 @@ if (!$content_only){ ?>
 
 <?php if (count($model->networks)) { ?>
 	<strong>Подсети:</strong>
-	<?php foreach ($model->networks as $network) echo $this->render('/networks/item',['model'=>$network,'class'=>'text-nowrap']).'' ?>
+	<?php foreach ($model->networks as $network) echo ModelWidget::widget(['model'=>$network,'options'=>['class'=>'text-nowrap']]).'' ?>
 	<br />
 <?php } ?>
 
 	<strong>Место подключения:</strong>
-	<?= $this->render('/places/item',['model'=>$model->place , 'full'=>true, 'static_view'=>$static_view]) ?>
+	<?= ModelWidget::widget(['model'=>$model->place,'options'=>['full'=>true, 'static_view'=>$static_view]]) ?>
 	<br />
 
 	<strong><?= $model->getAttributeLabel('account')?></strong>
@@ -72,3 +73,5 @@ if (!$content_only){ ?>
 <?php if (!$content_only){ ?>
 	</div>
 <?php } ?>
+
+

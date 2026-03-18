@@ -8,7 +8,8 @@ use app\components\ListObjectsWidget;
 use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\helpers\Url;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
 
@@ -100,7 +101,7 @@ JS;
         <h4>Связанные документы:</h4>
         <p>
 			<?php foreach ($children as $child) {
-				echo $this->render('/contracts/item', ['model' => $child, 'static_view' => $static_view]) . '<br/>';
+				echo ModelWidget::widget(['model'=>$child,'options'=>['static_view' => $static_view]]) . '<br/>';
 			} ?>
         </p>
         <br/>
@@ -115,7 +116,7 @@ JS;
 
 <?php
     //отладка формирования цепочки связей
-    //foreach ($model->successorsChain as $item) echo $this->render('/contracts/item',['model'=>$item]);
+    //foreach ($model->successorsChain as $item) echo ModelWidget::widget(['model'=>$item]);
 ?>
 
 
@@ -180,3 +181,5 @@ echo ListObjectsWidget::widget([
 </div>
 
 <?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
+
+

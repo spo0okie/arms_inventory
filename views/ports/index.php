@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\PortsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -31,7 +32,7 @@ $renderer=$this;
 				'attribute'=>'techs_id',
 				'format'=>'raw',
 				'value'=>function($data) use ($renderer){
-					return $renderer->render('/techs/item',['model'=>$data->tech]);
+					return ModelWidget::widget(['model'=>$data->tech]);
 				}
 			],
             [
@@ -53,7 +54,7 @@ $renderer=$this;
 							'reverse' => true,
 						]);
 					} elseif (is_object($data->linkTech)) {
-						return $renderer->render('/techs/item', ['model' => $data->linkTech]);
+						return ModelWidget::widget(['model'=>$data->linkTech]);
 					}
 				}
 			],
@@ -62,3 +63,5 @@ $renderer=$this;
         ],
     ]); ?>
 </div>
+
+

@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Comps */
 if (!isset($modalParent)) $modalParent=null;
 $domain = is_object($model->domain)?$model->domain->name:'- не в домене - ';
-$name=$domain.'\\'.mb_strtolower($model->name);
+$name=$domain.''.mb_strtolower($model->name);
 $this->title = 'Правка: '.$name;
 $this->params['breadcrumbs'][] = ['label' => \app\models\Comps::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $name, 'url' => ['view', 'id' => $model->id]];
@@ -22,3 +22,4 @@ $this->params['breadcrumbs'][] = 'Правка';
 	]) ?>
 
 </div>
+

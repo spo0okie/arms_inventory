@@ -13,7 +13,8 @@
 //подгружаем все ОС АРМа
 use app\helpers\ArrayHelper;
 use app\models\Techs;
-
+
+use app\components\widgets\page\ModelWidget;
 $comps=$model->comps;
 //если ни одной не нашли, то создаем массив из пустого элемента чтобы вывести данные по АРМ без ОС
 if (!count($comps)) $comps=[0=>null];
@@ -84,7 +85,7 @@ for ($i=0; $i<count($comps); $i++) {
 		
 		
 		<?php if (!$i) { ?>
-            <td class="arm_id <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspan ?>><?= $this->render('/techs/item',['model'=>$model]) ?></td>
+            <td class="arm_id <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspan ?>><?= ModelWidget::widget(['model'=>$model]) ?></td>
 	    <?php } ?>
 	    
 	    <?php //если у нас есть ОС, то зададим ячейке класс свежести данных об этой ОС
@@ -94,7 +95,7 @@ for ($i=0; $i<count($comps); $i++) {
 			$archDisplay=((is_object($comp)&&$comp->archived || $model->archived)&&!$show_archived)?'style="display:none"':'';
 	
 		?>
-        <td class="arm_hostname <?= $age_class ?> <?= $archClass ?>" <?=$archDisplay ?>><?= is_object($comp)?$this->render('/comps/item',['model'=>$comp]):'' ?></td>
+        <td class="arm_hostname <?= $age_class ?> <?= $archClass ?>" <?=$archDisplay ?>><?= is_object($comp)?ModelWidget::widget(['model'=>$comp]):'' ?></td>
 
 		
         <?php if (count($model->compsServices)) {
@@ -103,12 +104,12 @@ for ($i=0; $i<count($comps); $i++) {
 				$renderServices=$comp->services;
 				\yii\helpers\ArrayHelper::multisort($renderServices,['name']);
 				foreach ($renderServices as $svc)
-					$services[]=$this->render('/services/item',['model'=>$svc,'show_archived'=>$show_archived,'noDelete'=>true]);
+					$services[]=ModelWidget::widget(['model'=>$svc,'options'=>['show_archived'=>$show_archived,'noDelete'=>true]]);
 			}
 			
 				
 			if (isset($comp->user))
-				$services[]='<span class="fas fa-user small grayed-out href"></span> '.$this->render('/users/item',['model'=>$comp->user,'noDelete'=>true]);
+				$services[]='<span class="fas fa-user small grayed-out href"></span> '.ModelWidget::widget(['model'=>$comp->user,'options'=>['noDelete'=>true]]);
 			
 			if (!empty($comp->comment))
 				$services[]='<span class="grayed-out href"><span class="fas fa-comment small"></span> '.$comp->comment.'</span>';
@@ -118,7 +119,7 @@ for ($i=0; $i<count($comps); $i++) {
         <?php } else if (!$i) { ?>
 
             <td class="arm_uname <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspan ?>>
-                <?= (is_object($model->user))?$this->render('/users/item',['model'=>$model->user]):'' ?>
+                <?= (is_object($model->user))?ModelWidget::widget(['model'=>$model->user]):'' ?>
             </td>
 
             <td class="arm_uphone <?= count($voipPhones)?'tech_voip_phone':'' ?>  <?= $archClass?>" <?= $archDisplay ?> <?= $rowspan ?>>
@@ -142,7 +143,7 @@ for ($i=0; $i<count($comps); $i++) {
 	    <?php if (!is_object($comp) || !$comp->ignore_hw) {
 	    	if (!$i&&(array_search('arm_model',$skip)===false)) { ?>
             <td class="arm_model <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspanPhys ?>>
-				<?= $this->render('/tech-models/item',['model'=>$model->model,'compact'=>true]) ?>
+				<?= ModelWidget::widget(['model'=>$model->model,'options'=>['compact'=>true]]) ?>
 			</td>
         <?php }} else { ?>
 			<td class="arm_model <?= $archClass ?>" <?= $archDisplay ?>>
@@ -208,3 +209,5 @@ for ($i=0; $i<count($comps); $i++) {
     </tr>
 
 <?php }
+
+

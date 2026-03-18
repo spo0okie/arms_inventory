@@ -3,7 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-use app\components\ModelFieldWidget;
+use app\components\widgets\page\ModelWidget;
 
 $renderer=$this;
 $glue='<br/>';
@@ -61,7 +61,7 @@ return [
 	'resource'=>[
 		'value'=>function($data) use ($renderer,$glue){
 			if (is_object($data->acl))
-				return $renderer->render('/acls/item',['model'=>$data->acl,'static_view'=>false,'modal'=>true]);
+				return ModelWidget::widget(['model'=>$data->acl,'options'=>['static_view'=>false,'modal'=>true]]);
 			return '';
 		}
 	],
@@ -82,3 +82,4 @@ return [
 
 	//['class' => 'yii\grid\ActionColumn'],
 ];
+

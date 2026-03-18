@@ -7,7 +7,8 @@ use app\models\Services;
 use app\models\Users;
 use yii\helpers\Html;
 use yii\helpers\Url;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ServicesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -28,7 +29,7 @@ $render_columns=[
 		'attribute' => 'name',
 		'format' => 'raw',
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/services/item', ['model' => $data,'noDelete'=>true]);
+			return ModelWidget::widget(['model'=>$data,'options'=>['noDelete'=>true]]);
 		},
 	],
 	[
@@ -151,3 +152,5 @@ echo DynaGridWidget::widget([
 ]);
 
 echo '</div>';
+
+

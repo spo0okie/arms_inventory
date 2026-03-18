@@ -3,7 +3,8 @@
 use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\LicKeys */
 /* @var $linksData \yii\data\ArrayDataProvider */
@@ -16,7 +17,7 @@ $deleteable=!count($arms);
 ?>
 
 <h1>
-    Ключ <?= $this->render('/lic-keys/item',['model'=>$model,'static_view'=>$static_view]) ?>
+    Ключ <?= ModelWidget::widget(['model'=>$model,'options'=>['static_view'=>$static_view]]) ?>
 
     <?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
         'data' => [
@@ -45,3 +46,5 @@ $deleteable=!count($arms);
 
 	<h4>Комментарий:</h4>
 	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
+
+

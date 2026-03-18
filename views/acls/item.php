@@ -1,6 +1,7 @@
 <?php
 
 use app\components\UpdateObjectWidget;
+use app\components\widgets\page\ModelWidget;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -20,15 +21,15 @@ if (!empty($model)) {
 		]);
 	}
 	if (($model->comps_id) and is_object($model->comp))
-		echo $this->render('/comps/item',['model'=>$model->comp,'static_view'=>true]).$update;
+		echo ModelWidget::widget(['model'=>$model->comp,'options'=>['static_view'=>true]]).$update;
 	elseif (($model->techs_id) and is_object($model->tech))
-		echo $this->render('/techs/item',['model'=>$model->tech,'static_view'=>true]).$update;
+		echo ModelWidget::widget(['model'=>$model->tech,'options'=>['static_view'=>true]]).$update;
 	elseif (($model->services_id) and is_object($model->service))
-		echo $this->render('/services/item',['model'=>$model->service,'static_view'=>true]).$update;
+		echo ModelWidget::widget(['model'=>$model->service,'options'=>['static_view'=>true]]).$update;
 	elseif (($model->ips_id) and is_object($model->ip))
-		echo $this->render('/net-ips/item',['model'=>$model->ip,'static_view'=>true]).$update;
+		echo ModelWidget::widget(['model'=>$model->ip,'options'=>['static_view'=>true]]).$update;
 	elseif (($model->networks_id) and is_object($model->network))
-		echo $this->render('/networks/item',['model'=>$model->network,'static_view'=>true]).$update;
+		echo ModelWidget::widget(['model'=>$model->network,'options'=>['static_view'=>true]]).$update;
 	else {
 		if (!isset($name)) $name=$model->sname;
 	?>
@@ -40,3 +41,4 @@ if (!empty($model)) {
 		</span>
 	<?php }
 } ?>
+

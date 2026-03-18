@@ -1,4 +1,6 @@
 <?php
+
+use app\components\widgets\page\ModelWidget;
 /**
  * Список адресов машины
  * User: aareviakin
@@ -17,7 +19,9 @@ if (!isset($static_view)) $static_view=false;
 <?php
 	$output=[];
 	foreach ($model->netIps as $ip) {
-		$output[]=$this->render('/net-ips/item',['model'=>$ip]);
+		$output[]=ModelWidget::widget(['model'=>$ip]);
 	}
 	echo implode('<br />',$output);
+
+
 

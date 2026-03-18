@@ -13,7 +13,7 @@ use yii\helpers\Url;
 
 $domain = is_object($model->domain)?$model->domain->name:'- не в домене - ';
 
-$this->title = 'ОС '.$domain.'\\'.strtolower($model->name);
+$this->title = 'ОС '.$domain.''.strtolower($model->name);
 $this->params['breadcrumbs'][] = ['label' => Comps::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 Url::remember();

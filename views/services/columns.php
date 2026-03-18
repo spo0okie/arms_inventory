@@ -5,7 +5,8 @@ use app\components\TableTreePrefixWidget;
 use app\components\TextFieldWidget;
 use app\components\UrlListWidget;
 use app\models\Services;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ServicesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -30,19 +31,19 @@ foreach ($dataProvider->models as $service) {
 	}
 	
 	if (is_object($service->responsibleRecursive)) if (!isset($totalSupport[$service->responsibleRecursive->id]))
-		$totalSupport[$service->responsibleRecursive->id]=$renderer->render('/users/item', ['model' => $service->responsibleRecursive,'short'=>true]);
+		$totalSupport[$service->responsibleRecursive->id]=ModelWidget::widget(['model'=>$service->responsibleRecursive,'options'=>['short'=>true]]);
 
 	if (is_array($service->supportRecursive))
 		foreach ($service->supportRecursive as $user) if (!isset($totalSupport[$user->id]))
-			$totalSupport[$user->id]=$renderer->render('/users/item', ['model' => $user,'short'=>true]);
+			$totalSupport[$user->id]=ModelWidget::widget(['model'=>$user,'options'=>['short'=>true]]);
 	
 	if (is_array($service->comps))
 		foreach ($service->comps as $comp) if (!isset($totalComps[$comp->id]))
-			$totalComps[$comp->id]=$renderer->render('/comps/item', ['model' => $comp,'short'=>true]);
+			$totalComps[$comp->id]=ModelWidget::widget(['model'=>$comp,'options'=>['short'=>true]]);
 
 	if (is_array($service->techs))
 		foreach ($service->techs as $tech) if (!isset($totalTechs[$tech->id]))
-		$totalTechs[$tech->id]=$renderer->render('/techs/item', ['model' => $tech,'short'=>true]);
+		$totalTechs[$tech->id]=ModelWidget::widget(['model'=>$tech,'options'=>['short'=>true]]);
 }
 
 $totalSupportRendered=implode(', ',$totalSupport);
@@ -61,7 +62,7 @@ if ((count($totalComps)+count($totalTechs))>10)
 return [
 	'name' => [
 		'value' => function ($data) {
-			$name=$this->render('/services/item', ['model' => $data,'noDelete'=>true,'icon'=>true]);
+			$name=ModelWidget::widget(['model'=>$data,'options'=>['noDelete'=>true,'icon'=>true]]);
 			if ($data->treeDepth || count((array)$data->treeChildren)) {
 				return TableTreePrefixWidget::widget([
 						'prefix'=>$data->treePrefix,
@@ -77,7 +78,7 @@ return [
 		) ];}
 	],
 	'segment' => [
-		'value' => function ($data) {return $this->render('/segments/item', ['model' => $data->segmentRecursive]);},
+		'value' => function ($data) {return ModelWidget::widget(['model'=>$data->segmentRecursive]);},
 	],
 	'description' => [
 		'value' => function ($data) {
@@ -95,16 +96,16 @@ return [
 
 			$output = [];
 			if (is_object($data->responsibleRecursive))
-				$output[] = '<div class="pe-2"><strong>'.$this->render('/users/item', ['model' => $data->responsibleRecursive,'short'=>true]).'</strong></div>';
+				$output[] = '<div class="pe-2"><strong>'.ModelWidget::widget(['model'=>$data->responsibleRecursive,'options'=>['short'=>true]]).'</strong></div>';
 			
 			if (is_object($data->infrastructureResponsibleRecursive))
-				$output[] = '<div class="pe-2"><strong>'.$this->render('/users/item', ['model' => $data->infrastructureResponsibleRecursive,'short'=>true]).'</strong></div>';
+				$output[] = '<div class="pe-2"><strong>'.ModelWidget::widget(['model'=>$data->infrastructureResponsibleRecursive,'options'=>['short'=>true]]).'</strong></div>';
 			
 			if (is_array($data->supportRecursive)) foreach ($data->supportRecursive as $user)
-				$output[] = '<div class="pe-2">'.$this->render('/users/item', ['model' => $user,'short'=>true]).'</div>';
+				$output[] = '<div class="pe-2">'.ModelWidget::widget(['model'=>$user,'options'=>['short'=>true]]).'</div>';
 			
 			if (is_array($data->infrastructureSupportRecursive)) foreach ($data->infrastructureSupportRecursive as $user)
-				$output[] = '<div class="pe-2">'.$this->render('/users/item', ['model' => $user,'short'=>true]).'</div>';
+				$output[] = '<div class="pe-2">'.ModelWidget::widget(['model'=>$user,'options'=>['short'=>true]]).'</div>';
 			
 			return '<div class="d-flex flex-wrap">'. implode(' ', $output).'</div>';
 		},
@@ -114,7 +115,7 @@ return [
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->arms)) foreach ($data->arms as $arm)
-				$output[] = '<div class="pe-2">'.$this->render('/techs/item', ['model' => $arm,'static_view'=>true]).'</div>';
+				$output[] = '<div class="pe-2">'.ModelWidget::widget(['model'=>$arm,'options'=>['static_view'=>true]]).'</div>';
 			return '<div class="d-flex flex-wrap">'. implode(' ', $output).'</div>';
 		},
 	],
@@ -122,7 +123,7 @@ return [
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->comps)) foreach ($data->comps as $comp)
-				$output[] = '<div class="pe-2">'.$this->render('/comps/item', ['model' => $comp,'static_view'=>true]).'</div>';
+				$output[] = '<div class="pe-2">'.ModelWidget::widget(['model'=>$comp,'options'=>['static_view'=>true]]).'</div>';
 			return '<div class="d-flex flex-wrap">'. implode(' ', $output).'</div>';
 		},
 	],
@@ -130,7 +131,7 @@ return [
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->techs)) foreach ($data->techs as $tech)
-				$output[] = '<div class="pe-2">'.$this->render('/techs/item', ['model' => $tech,'static_view'=>true]).'</div>';
+				$output[] = '<div class="pe-2">'.ModelWidget::widget(['model'=>$tech,'options'=>['static_view'=>true]]).'</div>';
 			return '<div class="d-flex flex-wrap">'. implode(' ', $output).'</div>';
 		},
 	],
@@ -138,9 +139,9 @@ return [
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->comps)) foreach ($data->comps as $comp)
-				$output[] = '<div class="pe-2">'.$this->render('/comps/item', ['model' => $comp,'static_view'=>true]).'</div>';
+				$output[] = '<div class="pe-2">'.ModelWidget::widget(['model'=>$comp,'options'=>['static_view'=>true]]).'</div>';
 			if (is_array($data->techs)) foreach ($data->techs as $tech)
-				$output[] = '<div class="pe-2">'.$this->render('/techs/item', ['model' => $tech,'static_view'=>true]).'</div>';
+				$output[] = '<div class="pe-2">'.ModelWidget::widget(['model'=>$tech,'options'=>['static_view'=>true]]).'</div>';
 			return '<div class="d-flex flex-wrap">'.implode(' ', $output).'</div>';
 		},
 		'footer' => $totalCompsAndTechsRendered,
@@ -150,7 +151,7 @@ return [
 		'value' => function ($data) {
 			$output = [];
 			if (is_array($data->places)) foreach ($data->places as $place)
-				$output[] = $this->render('/places/item', ['model' => $place,'short'=>true,'static_view'=>true]);
+				$output[] = ModelWidget::widget(['model'=>$place,'options'=>['short'=>true,'static_view'=>true]]);
 			return count($output) ? implode(', ', $output) : null;
 		},
 	],*/
@@ -158,7 +159,7 @@ return [
 		'value' => function ($data) use ($renderer) {
 			$output = [];
 			if (is_array($data->sitesRecursive)) foreach ($data->sitesRecursive as $site)
-				$output[] = '<div class="pe-2">'.$renderer->render('/places/item', ['model' => $site,'short'=>true]).'</div>';
+				$output[] = '<div class="pe-2">'.ModelWidget::widget(['model'=>$site,'options'=>['short'=>true]]).'</div>';
 			return '<div class="d-flex flex-wrap">'.implode(' ', $output).'</div>';
 		},
 	],
@@ -190,3 +191,5 @@ return [
 	],
 	'updated_at'
 ];
+
+

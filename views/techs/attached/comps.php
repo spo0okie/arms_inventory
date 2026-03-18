@@ -6,7 +6,8 @@
 
 use yii\helpers\Html;
 use yii\bootstrap5\Modal;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\OldArms */
     $comps = $model->comps;
@@ -18,9 +19,11 @@ use yii\bootstrap5\Modal;
 <p>
 	<?php if (is_array($comps) && count ($comps)) {
 		foreach ($comps as $comp) { ?>
-			<?= $this->render('/comps/item',['model'=>$comp,'static_view'=>$static_view]) ?><br/>
+			<?= ModelWidget::widget(['model'=>$comp,'options'=>['static_view'=>$static_view]]) ?><br/>
 		<?php } } else { ?>
         отсутствуют
 	<?php }?>
 </p>
+
+
 

@@ -3,7 +3,8 @@
 use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\NetVlans */
 
@@ -26,7 +27,9 @@ if (!isset($static_view)) $static_view=false;
 <br /><br />
 
 <h4>L2 Домен</h4>
-<?= $this->render('/net-domains/item',['model'=>$model->netDomain]) ?>
+<?= ModelWidget::widget(['model'=>$model->netDomain]) ?>
+
+
 
 
 

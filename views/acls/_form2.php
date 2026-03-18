@@ -1,6 +1,7 @@
 <?php
 
 use app\components\Forms\ArmsForm;
+use app\components\widgets\page\ModelWidget;
 use kartik\tabs\TabsX;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -56,7 +57,7 @@ $this->registerJs($js,yii\web\View::POS_HEAD);
 						<div id="aces-list">
 							
 							<?php foreach ($model->aces as $ace) {
-								echo $this->render('/aces/card', ['model' => $ace]);
+								echo ModelWidget::widget(['model'=>$ace,'view'=>'card']);
 							}?>
 						</div>
 						
@@ -138,3 +139,4 @@ $this->registerJs($js,yii\web\View::POS_HEAD);
     <?php ArmsForm::end(); ?>
 
 </div>
+

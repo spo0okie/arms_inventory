@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ports */
 
@@ -28,7 +29,7 @@ if (is_object($model->linkPort)) {
 		<tr>
 			<td class="text-end align-top">
 				<h2>
-					<?= $this->render('/ports/item',['model'=>$model,'static_view'=>$static_view,'include_tech'=>true,'badge'=>true]) ?>
+					<?= ModelWidget::widget(['model'=>$model,'options'=>['static_view'=>$static_view,'include_tech'=>true,'badge'=>true]]) ?>
 				</h2>
 			</td>
 			<td rowspan="3">
@@ -46,7 +47,7 @@ if (is_object($model->linkPort)) {
 		<tr>
 			<td class="text-end align-bottom">
 				<h4 class="p-0 m-0">
-					<?= $this->render('/ports/item',['model'=>$model->linkPort,'static_view'=>$static_view,'include_tech'=>true,'badge'=>true]); ?>
+					<?= ModelWidget::widget(['model'=>$model->linkPort,'options'=>['static_view'=>$static_view,'include_tech'=>true,'badge'=>true]]); ?>
 				</h4>
 			</td>
 			<td></td>
@@ -71,7 +72,7 @@ if (is_object($model->linkPort)) {
 	<table>
 		<tr>
 			<td>
-				<?= $this->render('/ports/item',['model'=>$model,'static_view'=>$static_view,'include_tech'=>true,'badge'=>true]) ?>
+				<?= ModelWidget::widget(['model'=>$model,'options'=>['static_view'=>$static_view,'include_tech'=>true,'badge'=>true]]) ?>
 			</td>
 			<td class="p-2">
 				<?= $model->comment?(' - '.Yii::$app->formatter->asNtext($model->comment)):''?>
@@ -83,3 +84,5 @@ if (is_object($model->linkPort)) {
 	</div>
 
 <?php }
+
+

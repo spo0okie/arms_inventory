@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
@@ -27,7 +28,7 @@ $renderer=$this;
 				'attribute'=>'name',
 				'format'=>'raw',
 				'value'=>function($data) use ($renderer) {
-    				return $renderer->render('/tech-states/item',['model'=>$data]).
+    				return ModelWidget::widget(['model'=>$data]).
 						\app\components\LinkObjectWidget::widget([
 							'model'=>$data,
 							'name'=>false,
@@ -47,3 +48,5 @@ $renderer=$this;
         ],
     ]); ?>
 </div>
+
+

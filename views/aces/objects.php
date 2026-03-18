@@ -1,7 +1,6 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\widgets\page\ModelWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Aces */
@@ -12,15 +11,16 @@ $items=[];
 
 
 foreach ($model->users as $user)
-	$items[]=$this->render('/users/item',['model'=>$user,'static_view'=>true,'icon'=>true]);
+	$items[]= ModelWidget::widget(['model'=>$user,'options'=>['static_view'=>true,'icon'=>true]]);
 
 foreach ($model->comps as $comp)
-	$items[]=$this->render('/comps/item',['model'=>$comp,'static_view'=>true,'icon'=>true]);
+	$items[]= ModelWidget::widget(['model'=>$comp,'options'=>['static_view'=>true,'icon'=>true]]);
 
 foreach ($model->netIps as $ip)
-	$items[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'icon'=>true]);
+	$items[]= ModelWidget::widget(['model'=>$ip,'options'=>['static_view'=>true,'icon'=>true]]);
 
 if (!count($items) && $empty)
 	$items[]=$empty;
 
 echo implode($glue,$items);
+

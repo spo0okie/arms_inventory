@@ -2,7 +2,8 @@
 
 use app\helpers\HtmlHelper;
 use yii\helpers\Html;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
 $static_view=true;
@@ -40,8 +41,8 @@ if (is_object($model->state)) {
 			<?php if (strlen($model->inv_num)) {?>
 				<span class="serial">Инв.№: <?= $model->inv_num ?></span><br/>
 			<?php } ?>
-			Модель:<?= $this->render('/tech-models/item',['model'=>$model->model,'static_view'=>true]) ?><br />
-			Помещение:<?= $this->render('/places/item',['model'=>$model->place,'static_view'=>true,'full'=>true,'items_glue'=>' &gt; ']) ?><br />
+			Модель:<?= ModelWidget::widget(['model'=>$model->model,'options'=>['static_view'=>true]]) ?><br />
+			Помещение:<?= ModelWidget::widget(['model'=>$model->place,'options'=>['static_view'=>true,'full'=>true,'items_glue'=>' &gt; ']]) ?><br />
 		</div>
 		<?php if (strlen($model->comment)) { ?>
 			<div class="col-md-6">
@@ -79,7 +80,7 @@ if (is_object($model->state)) {
 					'static_view'=>$static_view,
 					'no_arm'=>true,
 					'no_abbr'=>true,
-					'ips_glue'=>' \\\\ ',
+					'ips_glue'=>' \\ ',
 				]) ?></div>
 			<?php } } else { ?>
 			отсутствуют
@@ -105,7 +106,7 @@ if (is_object($model->state)) {
 				<?php foreach ($model->ports as $port) {
 					//echo '<span class="fas fa-solid fa-network-wired"></span>'.
 					echo '<span class="fas fa-solid fa-square-full"></span> '.
-						$this->render('/ports/item',['model'=>$port,'reverse'=>true,'modal'=>true,]).
+						ModelWidget::widget(['model'=>$port,'options'=>['reverse'=>true,'modal'=>true]]).
 						//' <span class="fas fa-solid fa-arrows-left-right"></span> '.
 						' ❱❱❱ '.
 						$this->render('/ports/item',[
@@ -122,9 +123,9 @@ if (is_object($model->state)) {
 
 	<?php if (!$no_users) { ?>
 		<h4>Сотрудники:</h4>
-		Пользователь:<?= is_object($model->user)?$this->render('/users/item',['model'=>$model->user]):'-не назначен-' ?><br/>
-		<?= is_object($model->head)?('Руководитель отдела:'.$this->render('/users/item',['model'=>$model->head]).'<br/>'):'' ?>
-		<?= is_object($model->admResponsible)?($model->getAttributeLabel('responsible_id').':'.$this->render('/users/item',['model'=>$model->admResponsible]).'<br/>'):'' ?>
+		Пользователь:<?= is_object($model->user)?ModelWidget::widget(['model'=>$model->user]):'-не назначен-' ?><br/>
+		<?= is_object($model->head)?('Руководитель отдела:'.ModelWidget::widget(['model'=>$model->head]).'<br/>'):'' ?>
+		<?= is_object($model->admResponsible)?($model->getAttributeLabel('responsible_id').':'.ModelWidget::widget(['model'=>$model->admResponsible]).'<br/>'):'' ?>
 		<br />
 	<?php } ?>
 
@@ -143,8 +144,10 @@ if (is_object($model->state)) {
     <?= $this->render('arm-history',['model'=>$model,'static_view'=>$static_view]) ?>
 	
 	<?php if (is_object($model->itStaff)) { ?>
-		<span class="it-staff">Сотрудник ИТ: <?= $this->render('/users/item',['model'=>$model->itStaff]) ?></span>
+		<span class="it-staff">Сотрудник ИТ: <?= ModelWidget::widget(['model'=>$model->itStaff]) ?></span>
 	<?php } ?>
 	
 
 </div>
+
+

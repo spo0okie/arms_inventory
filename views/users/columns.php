@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\UsersSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -10,17 +11,17 @@ use kartik\grid\GridView;
 $renderer=$this;
 return [
 	'employee_id',
-	'Ename'		=>[	'value' => function($data) use($renderer) {return $renderer->render('/users/item',['model'=>$data]);}	],
-	'shortName'	=>[	'value' => function($data) use($renderer) {return $renderer->render('/users/item',['model'=>$data,'short'=>true]);}],
+	'Ename'		=>[	'value' => function($data) use($renderer) {return ModelWidget::widget(['model'=>$data]);}	],
+	'shortName'	=>[	'value' => function($data) use($renderer) {return ModelWidget::widget(['model'=>$data,'options'=>['short'=>true]]);}],
 	'Doljnost',
 	'org_name'=>[
 		'value' => function($data) use($renderer){
 			if (!is_object($data->org)) return null;
-			return $renderer->render('/partners/item',['model'=>$data->org,'static_view'=>true]);
+			return ModelWidget::widget(['model'=>$data->org,'options'=>['static_view'=>true]]);
 		}
 	],
 	'orgStruct_name'=>[
-		'value' => function($data) use($renderer){return $renderer->render('/org-struct/item',['model'=>$data->orgStruct]);}
+		'value' => function($data) use($renderer){return ModelWidget::widget(['model'=>$data->orgStruct]);}
 	],
 	'Login',
 	'Email'=>['format'=>'email'],
@@ -33,7 +34,7 @@ return [
 				$items=[];
 				foreach ($techs as $tech)
 					if ($tech->isVoipPhone && strlen($tech->comment))
-						$items[]=$renderer->render('/techs/item',['model'=>$tech,'static_view'=>true,'name'=>$tech->comment]);
+						$items[]=ModelWidget::widget(['model'=>$tech,'options'=>['static_view'=>true,'name'=>$tech->comment]]);
 				return count($items)?implode(' ',$items):$data->Phone;
 			}
 		}
@@ -46,7 +47,7 @@ return [
 			} else {
 				$items=[];
 				foreach ($arms as $arm)
-					$items[]=$renderer->render('/techs/item',['model'=>$arm,'static_view'=>true]);
+					$items[]=ModelWidget::widget(['model'=>$arm,'options'=>['static_view'=>true]]);
 				return implode('<br />',$items);
 			}
 		}
@@ -60,7 +61,7 @@ return [
 				$items=[];
 				foreach ($arms as $arm)
 					if ($arm->model->type->is_computer??false)
-						$items[]=$renderer->render('/techs/item',['model'=>$arm,'static_view'=>true]);
+						$items[]=ModelWidget::widget(['model'=>$arm,'options'=>['static_view'=>true]]);
 				return implode('<br />',$items);
 			}
 		}
@@ -78,3 +79,5 @@ return [
 	'netIps',
 	'lics',
 ];
+
+

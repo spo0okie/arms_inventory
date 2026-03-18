@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\UserGroups */
 
@@ -51,7 +52,7 @@ $deleteable=!count($support)&&!count($services);
     <p>
 		<?php
 		foreach ($users as $user)
-			echo $this->render('/users/item',['model'=>$user,'static_view'=>$static_view]).'<br />';
+			echo ModelWidget::widget(['model'=>$user,'options'=>['static_view'=>$static_view]]).'<br />';
 		?>
     </p>
     <br />
@@ -62,7 +63,7 @@ $deleteable=!count($support)&&!count($services);
     <p>
 		<?php
 		foreach ($services as $service)
-			echo $this->render('/services/item',['model'=>$service,'static_view'=>$static_view]).'<br />';
+			echo ModelWidget::widget(['model'=>$service,'options'=>['static_view'=>$static_view]]).'<br />';
 		?>
     </p>
     <br />
@@ -75,4 +76,6 @@ $deleteable=!count($support)&&!count($services);
     </p>
     <br />
 <?php } ?>
+
+
 

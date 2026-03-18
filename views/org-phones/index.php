@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
@@ -26,12 +27,12 @@ $renderer=$this;
 			'comment',
 			'places_id' => [
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('/places/item', ['model' => $data->place, 'static_view'=>true]);
+					return ModelWidget::widget(['model'=>$data->place,'options'=>['static_view'=>true]]);
 				}
 			],
 			'services_id' => [
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('/services/item', ['model' => $data->service, 'href'=>true]);
+					return ModelWidget::widget(['model'=>$data->service,'options'=>['href'=>true]]);
 				}
 			],
 			'account',
@@ -43,3 +44,5 @@ $renderer=$this;
 		'header'=>$this->title,
 	]); ?>
 </div>
+
+

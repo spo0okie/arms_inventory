@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\NetIps */
 
@@ -29,17 +30,17 @@ echo empty($model->comment)?'':Yii::$app->formatter->asNtext($model->comment);
 $objects=[];
 
 if (is_array($model->comps) && count ($model->comps)) {
-	foreach ($model->comps as $comp) $objects[]=$this->render('/comps/item',['model'=>$comp]);
+	foreach ($model->comps as $comp) $objects[]=ModelWidget::widget(['model'=>$comp]);
 }
 
 if (is_array($model->techs) && count ($model->techs)) {
 	$techs=[];
-	foreach ($model->techs as $tech) $objects[]=$this->render('/techs/item',['model'=>$tech]);
+	foreach ($model->techs as $tech) $objects[]=ModelWidget::widget(['model'=>$tech]);
 }
 
 if (is_array($model->users) && count ($model->users)) {
 	$users=[];
-	foreach ($model->users as $user) $objects[]=$this->render('/users/item',['model'=>$user]);
+	foreach ($model->users as $user) $objects[]=ModelWidget::widget(['model'=>$user]);
 }
 
 if (count($objects)) echo '<h4>привязан к:'.implode(', ',$objects).'</h4><br />';
@@ -52,6 +53,8 @@ if (count($objects)) echo '<h4>привязан к:'.implode(', ',$objects).'</h
 <?php if (is_object($model->network)) { ?>
 <hr>
 <h4>Сеть:</h4>
-<?= $this->render('/networks/card',['model'=>$model->network]) ?>
+<?= ModelWidget::widget(['model'=>$model->network,'view'=>'card']) ?>
 
 <?php }
+
+

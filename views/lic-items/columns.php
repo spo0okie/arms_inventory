@@ -1,5 +1,6 @@
 <?php
 
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 $renderer=$this;
 return [
@@ -8,9 +9,11 @@ return [
 		'attribute'=>'descr',
 		'format'=>'raw',
 		'value'=>function($item) use ($renderer){
-			return $renderer->render('/lic-items/item',['model'=>$item,'name'=>$item->descr]);
+			return ModelWidget::widget(['model'=>$item,'options'=>['name'=>$item->descr]]);
 		}
 	],
 	'comment',
 	'status'
 ];
+
+

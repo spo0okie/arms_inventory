@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\bootstrap5\Modal;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\OldArms */
 
@@ -55,7 +56,7 @@ $deletable = !count ($licItems) && !count($licGroups) && !count($comps) && !coun
             </div>
             <div class="col-md-2">
                 <h4>Помещение</h4>
-		        <?= $this->render('/places/item',['model'=>$model->place,'full'=>true]) ?>
+		        <?= ModelWidget::widget(['model'=>$model->place,'options'=>['full'=>true]]) ?>
             </div>
             <div class="col-md-4">
                 <h4>Материалы и ЗиП</h4>
@@ -63,7 +64,7 @@ $deletable = !count ($licItems) && !count($licGroups) && !count($comps) && !coun
 				$materialsUsages=$model->materialsUsages;
 				\app\helpers\ArrayHelper::multisort($materialsUsages,'date',SORT_DESC);
 				foreach($materialsUsages as $usage)
-					echo $this->render('/materials-usages/item',['model'=>$usage,'material'=>true,'count'=>true,'cost'=>true,'date'=>true]).'<br />';
+					echo ModelWidget::widget(['model'=>$usage,'options'=>['material'=>true,'count'=>true,'cost'=>true,'date'=>true]]).'<br />';
 				?>
             </div>
             <div class="col-md-5">
@@ -76,3 +77,5 @@ $deletable = !count ($licItems) && !count($licGroups) && !count($comps) && !coun
     <?= $this->render('passport',compact('model')) ?>
 
 </div>
+
+

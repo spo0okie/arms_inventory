@@ -6,7 +6,8 @@
 use app\components\LinkObjectWidget;
 use app\components\StripedAlertWidget;
 use app\components\TextFieldWidget;
-
+
+use app\components\widgets\page\ModelWidget;
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
 
@@ -24,7 +25,7 @@ if (!isset($static_view)) $static_view=false;
 	<h4>
 		<?php if (is_object($model->segment)) { ?>
 			<span class="text-nowrap me-3">
-				Сегмент: <?= $this->render('/segments/item',['model'=>$model->segment]) ?>
+				Сегмент: <?= ModelWidget::widget(['model'=>$model->segment]) ?>
 			</span>
 		<?php } ?>
 		
@@ -35,12 +36,12 @@ if (!isset($static_view)) $static_view=false;
 
 		<?php if (is_object($model->netVlan)) { ?>
 			<span class="text-nowrap me-3">
-				VLAN: <?= $this->render('/net-vlans/item',['model'=>$model->netVlan]) ?>
+				VLAN: <?= ModelWidget::widget(['model'=>$model->netVlan]) ?>
 			</span>
 			<?php if (is_object($model->netVlan)) { ?>
 				<span class="text-nowrap me-3"> // </span>
 				<span class="text-nowrap ">
-					L2 Домен: <?= $this->render('/net-domains/item',['model'=>$model->netDomain]) ?>
+					L2 Домен: <?= ModelWidget::widget(['model'=>$model->netDomain]) ?>
 				</span>
 			<?php } ?>
 		<?php } ?>
@@ -49,7 +50,7 @@ if (!isset($static_view)) $static_view=false;
 
 	<?php if (count($model->orgInets)) {?>
 		<h4>Относится к вводу интернет: <?php foreach ($model->orgInets as $inet)
-				echo $this->render('/org-inet/item',['model'=>$inet])
+				echo ModelWidget::widget(['model'=>$inet])
 			?></h4>
 	<?php } ?>
 
@@ -67,4 +68,6 @@ if (!isset($static_view)) $static_view=false;
 		<?= $this->render('used',['model'=>$model]) ?>
 	</div>
 </div>
+
+
 

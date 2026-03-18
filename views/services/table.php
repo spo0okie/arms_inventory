@@ -3,7 +3,8 @@
 use app\components\UrlListWidget;
 use app\models\Services;
 use kartik\grid\GridView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ServicesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -28,19 +29,19 @@ foreach ($dataProvider->models as $model) {
 	}
 	
 	if (is_object($model->responsibleRecursive)) if (!isset($totalSupport[$model->responsibleRecursive->id]))
-		$totalSupport[$model->responsibleRecursive->id]=$renderer->render('/users/item', ['model' => $model->responsibleRecursive,'short'=>true]);
+		$totalSupport[$model->responsibleRecursive->id]=ModelWidget::widget(['model'=>$model->responsibleRecursive,'options'=>['short'=>true]]);
 
 	if (is_array($model->supportRecursive))
 		foreach ($model->supportRecursive as $user) if (!isset($totalSupport[$user->id]))
-			$totalSupport[$user->id]=$renderer->render('/users/item', ['model' => $user,'short'=>true]);
+			$totalSupport[$user->id]=ModelWidget::widget(['model'=>$user,'options'=>['short'=>true]]);
 	
 	if (is_array($model->comps))
 		foreach ($model->comps as $comp) if (!isset($totalComps[$comp->id]))
-			$totalComps[$comp->id]=$renderer->render('/comps/item', ['model' => $comp,'short'=>true]);
+			$totalComps[$comp->id]=ModelWidget::widget(['model'=>$comp,'options'=>['short'=>true]]);
 
 	if (is_array($model->techs))
 		foreach ($model->techs as $tech) if (!isset($totalTechs[$tech->id]))
-		$totalTechs[$tech->id]=$renderer->render('/techs/item', ['model' => $tech,'short'=>true]);
+		$totalTechs[$tech->id]=ModelWidget::widget(['model'=>$tech,'options'=>['short'=>true]]);
 }
 
 $totalSupportRendered=implode(', ',$totalSupport);
@@ -66,7 +67,7 @@ foreach ($columns as $column) {
 				//'header' => 'Инв. номер',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('/services/item', ['model' => $data,'crop_site'=>true]);
+					return ModelWidget::widget(['model'=>$data,'options'=>['crop_site'=>true]]);
 				},
 				'contentOptions' => ['class' => $column . '_col']
 			];
@@ -78,11 +79,11 @@ foreach ($columns as $column) {
 				//'header' => 'Инв. номер',
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('/segments/item', ['model' => $data->segmentRecursive,'crop_site'=>true]);
+					return ModelWidget::widget(['model'=>$data->segmentRecursive,'options'=>['crop_site'=>true]]);
 					
 					/*return is_null($data->segment)?
 						'<span class="fas fa-ban-circle"></span>Без польз. доступа':
-						$renderer->render('/segments/item', ['model' => $data->segment,'crop_site'=>true]);*/
+						ModelWidget::widget(['model'=>$data->segment,'options'=>['crop_site'=>true]]);*/
 				},
 				'contentOptions' => ['class' => $column . '_col']
 			];
@@ -107,9 +108,9 @@ foreach ($columns as $column) {
 				'format' => 'raw',
 				'value' => function ($data) use ($renderer) {
 					$output = [];
-					if (is_object($data->responsibleRecursive)) $output[] = '<strong>'.$renderer->render('/users/item', ['model' => $data->responsibleRecursive,'short'=>true]).'</strong>';
+					if (is_object($data->responsibleRecursive)) $output[] = '<strong>'.ModelWidget::widget(['model'=>$data->responsibleRecursive,'options'=>['short'=>true]]).'</strong>';
 					if (is_array($data->supportRecursive)) foreach ($data->supportRecursive as $user)
-						$output[] = $renderer->render('/users/item', ['model' => $user,'short'=>true]);
+						$output[] = ModelWidget::widget(['model'=>$user,'options'=>['short'=>true]]);
 					return count($output) ? implode(', ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col'],
@@ -126,7 +127,7 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($renderer) {
 					$output = [];
 					if (is_array($data->arms)) foreach ($data->arms as $arm)
-						$output[] = $renderer->render('/techs/item', ['model' => $arm,'short'=>true]);
+						$output[] = ModelWidget::widget(['model'=>$arm,'options'=>['short'=>true]]);
 					return count($output) ? implode(', ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
@@ -141,7 +142,7 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($renderer) {
 					$output = [];
 					if (is_array($data->comps)) foreach ($data->comps as $comp)
-						$output[] = $renderer->render('/comps/item', ['model' => $comp,'short'=>true]);
+						$output[] = ModelWidget::widget(['model'=>$comp,'options'=>['short'=>true]]);
 					return count($output) ? implode(', ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
@@ -155,7 +156,7 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($renderer) {
 					$output = [];
 					if (is_array($data->techs)) foreach ($data->techs as $tech)
-						$output[] = $renderer->render('/techs/item', ['model' => $tech,'short'=>true]);
+						$output[] = ModelWidget::widget(['model'=>$tech,'options'=>['short'=>true]]);
 					return count($output) ? implode(', ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
@@ -170,9 +171,9 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($renderer) {
 					$output = [];
 					if (is_array($data->comps)) foreach ($data->comps as $comp)
-						$output[] = $renderer->render('/comps/item', ['model' => $comp,'short'=>true]);
+						$output[] = ModelWidget::widget(['model'=>$comp,'options'=>['short'=>true]]);
 					if (is_array($data->techs)) foreach ($data->techs as $tech)
-						$output[] = $renderer->render('/techs/item', ['model' => $tech,'short'=>true]);
+						$output[] = ModelWidget::widget(['model'=>$tech,'options'=>['short'=>true]]);
 					return count($output) ? implode(', ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col'],
@@ -188,7 +189,7 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($renderer) {
 					$output = [];
 					if (is_array($data->places)) foreach ($data->places as $place)
-						$output[] = $renderer->render('/places/item', ['model' => $place,'short'=>true]);
+						$output[] = ModelWidget::widget(['model'=>$place,'options'=>['short'=>true]]);
 					return count($output) ? implode(', ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
@@ -203,7 +204,7 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($renderer) {
 					$output = [];
 					if (is_array($data->sitesRecursive)) foreach ($data->sitesRecursive as $site)
-						$output[] = $renderer->render('/places/item', ['model' => $site,'short'=>true]);
+						$output[] = ModelWidget::widget(['model'=>$site,'options'=>['short'=>true]]);
 					return count($output) ? implode(' ', $output) : null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
@@ -239,3 +240,5 @@ echo GridView::widget([
 	'columns' => $render_columns,
 	'showFooter' => true,
 ]);
+
+

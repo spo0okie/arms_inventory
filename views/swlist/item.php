@@ -1,4 +1,6 @@
 <?php
+
+use app\components\widgets\page\ModelWidget;
 /**
  * Created by PhpStorm.
  * User: Spookie
@@ -39,10 +41,10 @@ $dev=\app\models\Manufacturers::fetchItem($product->manufacturers_id);
 <tr class="software_item <?= implode(' ',$classes) ?>" <?= $style ?>>
     <td class="os-name"><?= $model->name ?></td>
     <td class="manufacturer">
-        <?= $this->render('/manufacturers/item',['model'=>$dev]) ?>
+        <?= ModelWidget::widget(['model'=>$dev]) ?>
     </td>
     <td class="product">
-		<?= $this->render('/soft/item',['model'=>$product,'hitlist'=>$hitlist]) ?>
+		<?= ModelWidget::widget(['model'=>$product,'options'=>['hitlist'=>$hitlist]]) ?>
     </td>
     <td class="passport_tools">
         <?php
@@ -64,3 +66,5 @@ $dev=\app\models\Manufacturers::fetchItem($product->manufacturers_id);
         ?>
     </td>
 </tr>
+
+

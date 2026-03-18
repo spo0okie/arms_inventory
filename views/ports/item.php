@@ -1,7 +1,8 @@
 <?php
 
 use yii\helpers\Html;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Ports */
 
@@ -26,7 +27,7 @@ if (!empty($modal)) {
 if (!empty($model)) {
 	if ($include_tech && !$reverse) {
 		if (!is_null($model->tech))
-			echo $this->render('/techs/item', ['model'=>$model->tech,'static_view'=>true]).\app\models\Ports::$tech_postfix;
+			echo ModelWidget::widget(['model'=>$model->tech,'options'=>['static_view'=>true]]).\app\models\Ports::$tech_postfix;
 		
 	}
 
@@ -52,7 +53,9 @@ if (!empty($model)) {
 	
 	if ($include_tech && $reverse) {
 		if (!is_null($model->tech))
-			echo \app\models\Ports::$tech_postfix.' '.$this->render('/techs/item', ['model'=>$model->tech,'static_view'=>true]);
+			echo \app\models\Ports::$tech_postfix.' '.ModelWidget::widget(['model'=>$model->tech,'options'=>['static_view'=>true]]);
 		
 	}
 } ?>
+
+

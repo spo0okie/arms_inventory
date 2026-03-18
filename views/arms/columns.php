@@ -9,7 +9,8 @@
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\web\JsExpression;
-
+
+use app\components\widgets\page\ModelWidget;
 $renderer = $this;
 $manufacturers=\app\models\Manufacturers::fetchNames();
 
@@ -17,19 +18,19 @@ return [
 	
 	'num' => [
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/arms/item', ['model' => $data]);
+			return ModelWidget::widget(['model'=>$data]);
 		},
 	],
 	'model_name' => [
 		'value' => function ($data) use ($renderer) {
 			return is_object($data->techModel) ?
-				$renderer->render('/tech-models/item', ['model' => $data->techModel, 'static_view' => true]) :
+				ModelWidget::widget(['model'=>$data->techModel,'options'=>['static_view' => true]]) :
 				null;
 		},
 	],
 	'comp_id' => [
 		'value' => function ($data) use ($renderer) {
-			return is_object($data->comp) ? $renderer->render('/comps/item', ['model' => $data->comp]) : null;
+			return is_object($data->comp) ? ModelWidget::widget(['model'=>$data->comp]) : null;
 		},
 		'contentOptions'=>function ($data) {return [
 			'class'=>'arm_hostname '.$data->updatedRenderClass
@@ -45,7 +46,7 @@ return [
 			if (is_object($data->comp)) {
 				$output=[];
 				foreach ($data->comp->netIps as $ip)
-					$output[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true]);
+					$output[]=ModelWidget::widget(['model'=>$ip,'options'=>['static_view'=>true]]);
 				return implode(' ',$output);
 			}
 			return null;
@@ -68,7 +69,7 @@ return [
 	'user_id' => [
 		'value' => function ($data) use ($renderer) {
 			return is_object($data->user)?
-				$renderer->render('/users/item', ['model' => $data->user]):
+				ModelWidget::widget(['model'=>$data->user]):
 				null;
 		},
 	],
@@ -82,7 +83,7 @@ return [
 	],
 	'places_id' => [
 		'value' => function ($data) use ($renderer) {
-			return is_object($data->place) ? $renderer->render('/places/item', ['model' => $data->place, 'full' => 1]) : null;
+			return is_object($data->place) ? ModelWidget::widget(['model'=>$data->place,'options'=>['full' => 1]]) : null;
 		},
 	],
 	'userDep' => [
@@ -102,7 +103,7 @@ return [
 	],
 	'state_id' => [
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/tech-states/item', ['model' => $data->state]);
+			return ModelWidget::widget(['model'=>$data->state]);
 		},
 		'filterType'=>GridView::FILTER_SELECT2,
 		'filter'=>\app\models\TechStates::fetchNames(),
@@ -177,3 +178,5 @@ return [
 	
 	]
 ];
+
+

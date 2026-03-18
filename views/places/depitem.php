@@ -1,4 +1,6 @@
 <?php
+
+use app\components\widgets\page\ModelWidget;
 /**
  * Created by PhpStorm.
  * User: aareviakin
@@ -14,9 +16,11 @@ $i=0;
 foreach ($models['techs'] as $tech) {
 	if ($i++) echo '<br />';
 	
-	echo $this->render('/techs/item',['model'=>$tech,'static_view'=>true]);
+	echo ModelWidget::widget(['model'=>$tech,'options'=>['static_view'=>true]]);
 	
 	if (is_object($tech->user)) {
-		echo '('.$this->render('/users/item', ['model' => $tech->user,'short'=>true]).')';
+		echo '('.ModelWidget::widget(['model'=>$tech->user,'options'=>['short'=>true]]).')';
 	}
 }
+
+

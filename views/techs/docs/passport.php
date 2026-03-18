@@ -12,7 +12,8 @@ use app\models\Manufacturers;
 use app\models\Techs;
 use yii\helpers\Html;
 use yii\helpers\Url;
-
+
+use app\components\widgets\page\ModelWidget;
 Url::remember();
 
 $manufacturers= Manufacturers::fetchNames();
@@ -80,7 +81,7 @@ $manufacturers= Manufacturers::fetchNames();
             </tr>
             <tr>
                 <td>Модель:</td>
-                <td><?= $this->render('/tech-models/item',['model'=>$model->model]) ?></td>
+                <td><?= ModelWidget::widget(['model'=>$model->model]) ?></td>
                 <td>Серийный номер:</td>
                 <td><?= $model->sn ?></td>
             </tr>
@@ -270,4 +271,6 @@ $manufacturers= Manufacturers::fetchNames();
     </div>
 
 </div>
+
+
 

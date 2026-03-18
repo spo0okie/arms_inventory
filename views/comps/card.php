@@ -5,6 +5,7 @@ use app\components\IsHistoryObjectWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\TextFieldWidget;
+use app\components\widgets\page\ModelWidget;
 use app\models\HistoryModel;
 use yii\helpers\Html;
 
@@ -57,12 +58,12 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 	<span id="comp<?= $model->id ?>-updated-info" class="update-timestamp" style="display: none">Последнее обновление данных <?= $model->updated_at ?> (v. <?= $model->raw_version ?>)</span>
 </div>
 <div class="mb-3">
-	<?= is_object($model->responsible)?'<strong>Ответственный:</strong>'.$this->render('/users/item',['model'=>$model->responsible,'static_view'=>true]).'<br />':'' ?>
+	<?= is_object($model->responsible)?'<strong>Ответственный:</strong>'. ModelWidget::widget(['model'=>$model->responsible,'options'=>['static_view'=>true]]).'<br />':'' ?>
 	<?php if (count($model->supportTeam)) { ?>
 		<strong>Поддержка:</strong>
 		<?php
 		$support=[];
-		foreach ($model->supportTeam as $mate) $support[]= $this->render('/users/item',['model'=>$mate,'static_view'=>true,'short'=>true]);
+		foreach ($model->supportTeam as $mate) $support[]= ModelWidget::widget(['model'=>$mate,'options'=>['static_view'=>true,'short'=>true]]);
 		echo implode(', ',$support);
 		?>
 		<br />
@@ -71,7 +72,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 		<strong>Полномочия администратора:</strong>
 		<?php
 		$admins=[];
-		foreach ($model->admins as $mate) $admins[]= $this->render('/users/item',['model'=>$mate,'static_view'=>true,'short'=>true]);
+		foreach ($model->admins as $mate) $admins[]= ModelWidget::widget(['model'=>$mate,'options'=>['static_view'=>true,'short'=>true]]);
 		echo implode(', ',$admins);
 		?>
 		<br />
@@ -83,7 +84,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 		<div class="pe-5">
 			<h4>Платформа</h4>
 			<p>
-				<?= $this->render('/services/item',['model'=>$model->platform,'static_view'=>$static_view]) ?>
+				<?= ModelWidget::widget(['model'=>$model->platform,'options'=>['static_view'=>$static_view]]) ?>
 			</p>
 		</div>
 	<?php } elseif (!$no_arm) { ?>
@@ -91,7 +92,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 			<h4>АРМ</h4>
 			<p>
 				<?php if (is_object($model->arm)) { ?>
-					<?= $this->render('/techs/item',['model'=>$model->arm,'static_view'=>$static_view]) ?>
+					<?= ModelWidget::widget(['model'=>$model->arm,'options'=>['static_view'=>$static_view]]) ?>
 				<?php } else { ?>
 					не назначен
 				<?php } ?>
@@ -141,3 +142,4 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 	}?>
 </div>
 <?php }
+

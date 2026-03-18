@@ -19,7 +19,8 @@ use app\models\Manufacturers;
 use app\models\Techs;
 use yii\helpers\Html;
 
-
+
+use app\components\widgets\page\ModelWidget;
 if(!isset($static_view))$static_view=false;
 $renderer = $this;
 $manufacturers= Manufacturers::fetchNames();
@@ -28,7 +29,7 @@ $armStatus=$armsColumns['state_id'];
 return [
 	'name' => [
 		'value' => function ($data) use ($renderer,$static_view) {
-			return $renderer->render('/comps/item', ['model' => $data,'icon'=>true,'static_view'=>$static_view]);
+			return ModelWidget::widget(['model'=>$data,'options'=>['icon'=>true,'static_view'=>$static_view]]);
 		},
 		'contentOptions'=>function ($data) {return [
 			'class'=>'arm_hostname '.$data->updatedRenderClass
@@ -37,8 +38,8 @@ return [
 	],
 	'arm_id' => [
 		'value' => function ($data) use ($renderer) {
-			if (is_object($data->arm)) return $renderer->render('/techs/item', ['model' => $data->arm,'static_view'=>true]);
-			if (is_object($data->platform)) return $renderer->render('/services/item', ['model' => $data->platform,'static_view'=>true]);
+			if (is_object($data->arm)) return ModelWidget::widget(['model'=>$data->arm,'options'=>['static_view'=>true]]);
+			if (is_object($data->platform)) return ModelWidget::widget(['model'=>$data->platform,'options'=>['static_view'=>true]]);
 			return '';
 		},
 	],
@@ -56,7 +57,7 @@ return [
 					$name=strtolower($ip->name);
 					//выводим пояснение к IP только если он не поясняет про FQDN или hostname нашей ОС
 					$sname=$ip->text_addr.(trim($name) && $name!=strtolower($data->name) && $name!=strtolower($data->fqdn)?' ('.$ip->name.')':'');
-					$output[]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true,'name'=>$sname]);
+					$output[]=ModelWidget::widget(['model'=>$ip,'options'=>['static_view'=>true,'name'=>$sname]]);
 				}
 				return ExpandableCardWidget::widget([
 					'content'=>implode('<br />',$output)
@@ -68,7 +69,7 @@ return [
 	'user_id' => [
 		'value' => function ($data) use ($renderer) {
 			return is_object($data->arm) && is_object($data->arm->user)?
-				$renderer->render('/users/item', ['model' => $data->arm->user]) : null;
+				ModelWidget::widget(['model'=>$data->arm->user]) : null;
 		},
 	],
 	'user_position' => [
@@ -83,7 +84,7 @@ return [
 		'model' => new Techs(),
 		'value' => function ($data) use ($renderer) {
 			return (is_object($data->arm)&&is_object($data->arm->place)) ?
-				$renderer->render('/places/item', ['model' => $data->arm->place, 'full' => 1])
+				ModelWidget::widget(['model'=>$data->arm->place,'options'=>['full' => 1]])
 				: null;
 		},
 	],
@@ -158,3 +159,5 @@ return [
 		'value'=>function ($data) {return $data->getExternalItem(['VMWare.UUID']);},
 	]
 ];
+
+

@@ -1,4 +1,6 @@
 <?php
+
+use app\components\widgets\page\ModelWidget;
 /**
  * Created by PhpStorm.
  * User: Spookie
@@ -29,7 +31,7 @@ $archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
         <?= $model->model->renderItem($this,['compact'=>true]) ?>
     </td>
     <td class="hardware <?= $archClass ?>" <?= $archDisplay ?>>
-        <?= $this->render('/techs/item',['model'=>$model]) ?>
+        <?= ModelWidget::widget(['model'=>$model]) ?>
     </td>
     <td class="attachments <?= $archClass ?>" <?= $archDisplay ?>>
 	    <?= $this->render('/techs/map/item-attachments',['model'=>$model]) ?>
@@ -54,3 +56,5 @@ $archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
 		<?php } ?>
     </td>
 </tr>
+
+

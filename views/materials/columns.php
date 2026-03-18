@@ -6,14 +6,15 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 use app\models\Materials;
-
+
+use app\components\widgets\page\ModelWidget;
 $renderer=$this;
 if (!isset($showTypes)) $showTypes=true; //показывать тип материалов в имени
 
 return [
 	'place'=>[
 		'value' => function($data) use($renderer){
-			return $renderer->render('/places/item',['model'=>$data->place,'full'=>true]);
+			return ModelWidget::widget(['model'=>$data->place,'options'=>['full'=>true]]);
 		}
 	],
 	'model'=>[
@@ -33,3 +34,5 @@ return [
 		'label'=>'Поступило',
 	]
 ];
+
+

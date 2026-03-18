@@ -1,7 +1,8 @@
 <?php
 
 use yii\helpers\Html;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
 /* @var $ip app\models\NetIps */
@@ -56,16 +57,16 @@ $ip=$model->ipsByAddr[$model->addr+$i]??null;
 if (is_object($ip)) {
 	?>
 	<td <?= $class ?>>
-		<?= $this->render('/net-ips/item',['model'=>$ip]) ?>
+		<?= ModelWidget::widget(['model'=>$ip]) ?>
 	</td>
 	<td <?= $class ?>>
 		<?php
 		if (is_array($ip->comps)) foreach ($ip->comps as $comp)
-			echo $this->render('/comps/item',['model'=>$comp,'static_view'=>false]);
+			echo ModelWidget::widget(['model'=>$comp,'options'=>['static_view'=>false]]);
 		if (is_array($ip->techs)) foreach ($ip->techs as $tech)
-			echo $this->render('/techs/item',['model'=>$tech,'static_view'=>false]);
+			echo ModelWidget::widget(['model'=>$tech,'options'=>['static_view'=>false]]);
 		if (is_array($ip->users)) foreach ($ip->users as $user)
-			echo $this->render('/users/item',['model'=>$user,'short'=>true,'static_view'=>false,'noDelete'=>true]);
+			echo ModelWidget::widget(['model'=>$user,'options'=>['short'=>true,'static_view'=>false,'noDelete'=>true]]);
 		echo $ip->name;
 		?>
 	</td>
@@ -80,3 +81,5 @@ if (is_object($ip)) {
 <?php } ?>
 
 </tr>
+
+

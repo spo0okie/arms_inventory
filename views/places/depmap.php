@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
@@ -22,7 +23,7 @@ $render_columns=[
 		'header'=>'Площадка',
 		'format'=>'raw',
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/places/item', ['model' => $data->top, 'full' => 1]);
+			return ModelWidget::widget(['model'=>$data->top,'options'=>['full' => 1]]);
 		}
 	]
 ];
@@ -165,3 +166,5 @@ $defaultExportConfig = [
 	]); ?>
 
 </div>
+
+

@@ -1,4 +1,6 @@
 <?php
+
+use app\components\widgets\page\ModelWidget;
 /**
  * Вывод строки портов
  * User: aareviakin
@@ -49,7 +51,7 @@
 					'reverse'=>true,
 				]).'</td>';
 		} elseif (is_object($port_link->linkTech)) {
-			echo '<td></td><td>'.$this->render('/techs/item',['model'=>$port_link->linkTech]).'</td>';
+			echo '<td></td><td>'.ModelWidget::widget(['model'=>$port_link->linkTech]).'</td>';
 		} else {
 			echo '<td colspan="2"></td>';
 		}
@@ -58,4 +60,6 @@
 		</td>
 	<?php }?>
 </tr>
+
+
 

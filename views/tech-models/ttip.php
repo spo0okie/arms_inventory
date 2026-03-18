@@ -3,14 +3,15 @@
 use app\components\IsHistoryObjectWidget;
 use app\components\UrlListWidget;
 use yii\helpers\Html;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\TechModels */
 ?>
 <div class="tech-models-ttip ttip-row">
 	<?php if (is_object($model->preview)) { ?>
 		<div class="ttip-preview">
-			<?= $this->render('/scans/ttip',['model'=>$model->preview]) ?>
+			<?= ModelWidget::widget(['model'=>$model->preview,'view'=>'ttip']) ?>
 		</div>
 	<?php } ?>
 	<div class="ttip-card">
@@ -31,3 +32,5 @@ use yii\helpers\Html;
 
 	</div>
 </div>
+
+

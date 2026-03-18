@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 \yii\helpers\Url::remember();
@@ -25,20 +26,20 @@ $renderer=$this;
 			],
 			'places_id' => [
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('/places/item', ['model' => $data->place, 'static_view'=>true,'short'=>true]);
+					return ModelWidget::widget(['model'=>$data->place,'options'=>['static_view'=>true,'short'=>true]]);
 				}
 			],
 			'networks_ids' => [
 				'value' => function ($data) use ($renderer) {
 					$output=[];
 					foreach ($data->networks as $network)
-						$output[]=$this->render('/networks/item',['model'=>$network, 'static_view'=>true]);
+						$output[]=ModelWidget::widget(['model'=>$network,'options'=>['static_view'=>true]]);
 					return implode('<br />',$output);
 				},
 			],
 			'services_id' => [
 				'value' => function ($data) use ($renderer) {
-					return $renderer->render('/services/item', ['model' => $data->service, 'href'=>true]);
+					return ModelWidget::widget(['model'=>$data->service,'options'=>['href'=>true]]);
 				}
 			],
 			'account' => [
@@ -75,3 +76,5 @@ $renderer=$this;
 		'toolButton'=> '<span class="p-2">'.\app\components\ShowArchivedWidget::widget().'<span>',
     ]); ?>
 </div>
+
+

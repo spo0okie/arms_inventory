@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgInet */
 
@@ -14,11 +15,13 @@ $static_view=true;
 	<hr />
 	<h4>Услуга связи</h4>
 	<p>
-		<?= $this->render('/services/item',['model'=>$model->service ,'static_view'=>$static_view]) ?>
+		<?= ModelWidget::widget(['model'=>$model->service,'options'=>['static_view'=>$static_view]]) ?>
 	</p>
 
 
 	<h4>Провайдер</h4>
-	<?= is_object($model->partner)?$this->render('/partners/card',['model'=>$model->partner,'static_view'=>$static_view]):'' ?>
+	<?= is_object($model->partner)?ModelWidget::widget(['model'=>$model->partner,'view'=>'card','options'=>['static_view'=>$static_view]]):'' ?>
 
 </div>
+
+

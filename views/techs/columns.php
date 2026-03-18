@@ -14,7 +14,8 @@ use app\models\TechTypes;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\web\JsExpression;
-
+
+use app\components\widgets\page\ModelWidget;
 if (!isset($searchModel)) $searchModel=new TechsSearch();
 if(!isset($static_view)) $static_view=false;
 
@@ -40,7 +41,7 @@ $columns=[
 
 	'num'=> [
 		'value' => function ($data) use ($renderer,$static_view) {
-			return $renderer->render('/techs/item', ['model' => $data,'static_view'=>$static_view]);
+			return ModelWidget::widget(['model'=>$data,'options'=>['static_view'=>$static_view]]);
 		}
 	],
 	
@@ -73,7 +74,7 @@ $columns=[
 	
 	'user' => [
 		'value' => function ($data) use ($renderer) {
-			return is_object($data->user)?$renderer->render('/users/item', ['model' => $data->user,'short'=>true]):null;
+			return is_object($data->user)?ModelWidget::widget(['model'=>$data->user,'options'=>['short'=>true]]):null;
 		}
 	],
 	
@@ -86,7 +87,7 @@ $columns=[
 	'user_dep' => [
 		'value' => function ($data) use ($renderer) {
 			return (is_object($data->user) && is_object($data->user->orgStruct)) ?
-				$renderer->render('/org-struct/item',['model'=>$data->user->orgStruct]):null;
+				ModelWidget::widget(['model'=>$data->user->orgStruct]):null;
 		},
 	],
 	'departments_id' => [
@@ -97,13 +98,13 @@ $columns=[
 
 	'partners_id' => [
 		'value' => function ($data) use ($renderer) {
-			return (is_object($data->partner)) ? $renderer->render('/partners/item', ['model' => $data->partner,'static_view'=>true]) :null;
+			return (is_object($data->partner)) ? ModelWidget::widget(['model'=>$data->partner,'options'=>['static_view'=>true]]) :null;
 		},
 	],
 	
 	'comp_id' => [
 		'value' => function ($data) use ($renderer) {
-			return is_object($data->comp) ? $renderer->render('/comps/item', ['model' => $data->comp]) : null;
+			return is_object($data->comp) ? ModelWidget::widget(['model'=>$data->comp]) : null;
 		},
 		'contentOptions'=>function ($data) {return [
 			'class'=>'arm_hostname '.$data->updatedRenderClass
@@ -127,11 +128,11 @@ $columns=[
 				
 				if (is_object($data->comp)) {
 					foreach ($data->comp->netIps as $ip)
-						$output[$ip->addr]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true]);
+						$output[$ip->addr]=ModelWidget::widget(['model'=>$ip,'options'=>['static_view'=>true]]);
 				}
 				
 				foreach ($data->netIps as $ip)
-					$output[$ip->addr]=$this->render('/net-ips/item',['model'=>$ip,'static_view'=>true]);
+					$output[$ip->addr]=ModelWidget::widget(['model'=>$ip,'options'=>['static_view'=>true]]);
 				
 				return ExpandableCardWidget::widget(['content'=>implode('<br />',$output)]);
 			}
@@ -146,12 +147,12 @@ $columns=[
 	
 	'model' => [
 		'value' => function ($data) use ($renderer) {
-			return is_object($data->model) ? $renderer->render('/tech-models/item', ['model' => $data->model, 'long' => true]) : null;
+			return is_object($data->model) ? ModelWidget::widget(['model'=>$data->model,'options'=>['long' => true]]) : null;
 		}
 	],
 	'place' => [
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/places/item', ['model' => $data->place, 'full' => true]);
+			return ModelWidget::widget(['model'=>$data->place,'options'=>['full' => true]]);
 		}
 	],
 	'services_ids' => [
@@ -167,7 +168,7 @@ $columns=[
 	
 	'state_id' => [
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/tech-states/item', ['model' => $data->state]);
+			return ModelWidget::widget(['model'=>$data->state]);
 		},
 		'filterType'=>GridView::FILTER_SELECT2,
 		'filter'=> TechStates::fetchNames(),
@@ -210,9 +211,9 @@ $columns=[
 		'value'=>function ($data) use ($renderer) {
 			/** @var Techs $data */
 			$items=[];
-			foreach ($data->licItems as $item) $items[]=$renderer->render('/lic-items/item',['model'=>$item]);
-			foreach ($data->licGroups as $item) $items[]=$renderer->render('/lic-groups/item',['model'=>$item]);
-			foreach ($data->licKeys as $item) $items[]=$renderer->render('/lic-keys/item',['model'=>$item]);
+			foreach ($data->licItems as $item) $items[]=ModelWidget::widget(['model'=>$item]);
+			foreach ($data->licGroups as $item) $items[]=ModelWidget::widget(['model'=>$item]);
+			foreach ($data->licKeys as $item) $items[]=ModelWidget::widget(['model'=>$item]);
 			return count($items)?ExpandableCardWidget::widget(['content'=>implode('<br>',$items),'cardClass'=>'line-br']):'';
 		},
 	],
@@ -229,3 +230,5 @@ if (Yii::$app->params['techs.hostname.enable']??false) {
 }
 
 return $columns;
+
+

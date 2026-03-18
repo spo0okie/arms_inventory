@@ -3,7 +3,8 @@
 use app\components\TextFieldWidget;
 use app\models\OrgInet;
 use yii\helpers\Url;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgInet */
 Url::remember();
@@ -14,7 +15,7 @@ $this->params['breadcrumbs'][] = ['label' => OrgInet::$titles, 'url' => ['index'
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="org-inet-view">
-	<?= $this->render('/services/card',['model'=>$model->service ,'static_view'=>$static_view]) ?>
+	<?= ModelWidget::widget(['model'=>$model->service,'view'=>'card','options'=>['static_view'=>$static_view]]) ?>
 	<?php if (strlen($model->service->notebook)) { ?>
 		<h4>Записная книжка:</h4>
 		<p>
@@ -23,3 +24,5 @@ $this->params['breadcrumbs'][] = $this->title;
 		<br />
 	<?php } ?>
 </div>
+
+

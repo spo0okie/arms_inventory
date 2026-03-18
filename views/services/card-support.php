@@ -2,14 +2,15 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
 
 if (!isset($static_view)) $static_view=false;
 ?>
 <h4>
-	Ответственный: <?= $this->render('/users/item',['model'=>$model->responsibleRecursive,'static_view'=>true]) ?>
+	Ответственный: <?= ModelWidget::widget(['model'=>$model->responsibleRecursive,'options'=>['static_view'=>true]]) ?>
 </h4>
 <?php if (is_array($model->supportRecursive) && count($model->supportRecursive)) { ?>
 	<p>
@@ -17,7 +18,7 @@ if (!isset($static_view)) $static_view=false;
 		<?php
 		$users=[];
 		foreach ($model->supportRecursive as $user)
-			$users[]=$this->render('/users/item',['model'=>$user,'static_view'=>true]);
+			$users[]=ModelWidget::widget(['model'=>$user,'options'=>['static_view'=>true]]);
 		echo implode(", ",$users);
 		?>
 	</p>
@@ -26,7 +27,7 @@ if (!isset($static_view)) $static_view=false;
 if (is_object($model->infrastructureResponsibleRecursive)) { ?>
 	<h4>
 		Отв. за инфраструктуру: <?=
-			$this->render('/users/item',['model'=>$model->infrastructureResponsibleRecursive,'static_view'=>true])
+			ModelWidget::widget(['model'=>$model->infrastructureResponsibleRecursive,'options'=>['static_view'=>true]])
 		?>
 	</h4>
 <?php }
@@ -37,9 +38,11 @@ if (is_array($model->infrastructureSupportRecursive) && count($model->infrastruc
 		<?php
 		$users=[];
 		foreach ($model->infrastructureSupportRecursive as $user)
-			$users[]=$this->render('/users/item',['model'=>$user,'static_view'=>true]);
+			$users[]=ModelWidget::widget(['model'=>$user,'options'=>['static_view'=>true]]);
 		echo implode(", ",$users);
 		?>
 	</p>
 	<br />
 <?php }
+
+

@@ -9,7 +9,8 @@
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\TextFieldWidget;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\MaterialsUsages */
 
@@ -42,7 +43,7 @@ if (!isset($static_view)) $static_view=false;
 
     <h4><?= $model->attributeLabels()['materials_id'] ?></h4>
     <p class="mb-3">
-	    <?= $this->render('/materials/item',['model'=>$model->material]) ?>
+	    <?= ModelWidget::widget(['model'=>$model->material]) ?>
         <br />
         <?= abs($model->count) ?> <?= $model->material->type->units??'' ?> <?= $model->count<0?'получено':'израсходовано' ?>
     </p>
@@ -51,9 +52,11 @@ if (!isset($static_view)) $static_view=false;
 <?php if (!empty($model->techs_id)) { ?>
     <h4><?= $model->attributeLabels()['techs_id'] ?></h4>
     <p class="mb-3">
-		<?= $this->render('/techs/item',['model'=>$model->tech]) ?>
+		<?= ModelWidget::widget(['model'=>$model->tech]) ?>
     </p>
 <?php }
 
 
 echo TextFieldWidget::widget(['model'=>$model,'field'=>'history']) ?>
+
+

@@ -5,7 +5,8 @@ use app\models\HistoryModel;
 use app\components\ListObjectsWidget;
 use yii\data\ActiveDataProvider;
 use yii\web\View;
-
+
+use app\components\widgets\page\ModelWidget;
 /** @var View $this */
 /** @var HistoryModel $instance */
 /** @var ActiveDataProvider $dataProvider */
@@ -71,7 +72,7 @@ if (in_array('updated_by',$attributes)) {
 		'value'=>function($data) use($renderer) {
 			/** @var HistoryModel $data */
 			if (is_object($user=$data->getUpdatedByUser())) {
-				return $renderer->render('/users/item',['model'=>$user,'short'=>true,'static_view'=>true]);
+				return ModelWidget::widget(['model'=>$user,'options'=>['short'=>true,'static_view'=>true]]);
 			}
 			return $data->updated_by;
 		}
@@ -114,3 +115,5 @@ foreach ($attributes as $attribute) {
 }
 
 return $columns;
+
+

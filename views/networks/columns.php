@@ -3,7 +3,8 @@
 use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 $renderer=$this;
 
@@ -11,17 +12,17 @@ $renderer=$this;
 return [
 	'name'=> [
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/networks/item', ['model' => $data]);
+			return ModelWidget::widget(['model'=>$data]);
 		}
 	],
 	'segment'=> [
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/segments/item', ['model' => $data->segment]);
+			return ModelWidget::widget(['model'=>$data->segment]);
 		}
 	],
 	 'vlan' => [
 		'value' => function ($data) use ($renderer) {
-			return $renderer->render('/net-vlans/item', ['model' => $data->netVlan]);
+			return ModelWidget::widget(['model'=>$data->netVlan]);
 		},
 		'contentOptions' => [
 			'class' => 'text-right'
@@ -30,7 +31,7 @@ return [
 	'domain'=>[
 		'value' => function ($data) use ($renderer) {
 			if (is_object($data->netVlan) && is_object($data->netVlan->netDomain))
-				return $renderer->render('/net-domains/item', ['model' => $data->netVlan->netDomain]);
+				return ModelWidget::widget(['model'=>$data->netVlan->netDomain]);
 			return null;
 		}
 	],
@@ -48,3 +49,5 @@ return [
 		'contentOptions' => ['class' => 'comment_col']
 	],
 ];
+
+

@@ -5,7 +5,8 @@ use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
 $model_id=$model->id;
@@ -39,7 +40,7 @@ if (is_object($model->state)) { ?>
 <div class="d-flex flex-row">
 	<div class="pe-5">
 		<?php if (!$no_model) { ?>
-			Модель: <?= $this->render('/tech-models/item',['model'=>$model->model,'long'=>1]) ?> <br />
+			Модель: <?= ModelWidget::widget(['model'=>$model->model,'options'=>['long'=>1]]) ?> <br />
 			Серийный №: <?= $model->sn ?> <br />
 			Бухг. инв. №: <?= $model->inv_num ?> <br />
 			<?php if (strlen($model->comment)){
@@ -66,12 +67,12 @@ if (is_object($model->state)) { ?>
 	</div>
 	<div class="pe-1">
 		<h4>Тех. обслуживание:</h4>
-		<?= is_object($model->responsible)?'<strong>Ответственный:</strong>'.$this->render('/users/item',['model'=>$model->responsible,'static_view'=>true]).'<br />':'' ?>
+		<?= is_object($model->responsible)?'<strong>Ответственный:</strong>'.ModelWidget::widget(['model'=>$model->responsible,'options'=>['static_view'=>true]]).'<br />':'' ?>
 		<?php if (count($model->supportTeam)) { ?>
 			<strong>Поддержка:</strong>
 			<?php
 			$support=[];
-			foreach ($model->supportTeam as $mate) $support[]= $this->render('/users/item',['model'=>$mate,'static_view'=>true,'short'=>true]);
+			foreach ($model->supportTeam as $mate) $support[]= ModelWidget::widget(['model'=>$mate,'options'=>['static_view'=>true,'short'=>true]]);
 			echo implode(', ',$support);
 			?>
 			<br />
@@ -84,12 +85,12 @@ if (is_object($model->state)) { ?>
 	<div class="pe-5">
 		<h4>Место установки и сотрудники:</h4>
 		<p>
-			<?= is_object($model->arm)?('АРМ: '.$this->render('/techs/item',['model'=>$model->arm]).'<br />'):'' ?>
-			<?= is_object($model->installation)?('Установлено в: '.$this->render('/techs/item',['model'=>$model->installation]).'<br />'):'' ?>
-			Помещение: <?= $this->render('/places/item',['model'=>$model->place]) ?> <br />
-			Пользователь: <?= $this->render('/users/item',['model'=>$model->user]) ?> <br />
-			<?= is_object($model->head)?('Руководитель отдела:'.$this->render('/users/item',['model'=>$model->head]).'<br/>'):'' ?>
-			<?= is_object($model->admResponsible)?($model->getAttributeLabel('responsible_id').':'.$this->render('/users/item',['model'=>$model->admResponsible]).'<br/>'):'' ?>
+			<?= is_object($model->arm)?('АРМ: '.ModelWidget::widget(['model'=>$model->arm]).'<br />'):'' ?>
+			<?= is_object($model->installation)?('Установлено в: '.ModelWidget::widget(['model'=>$model->installation]).'<br />'):'' ?>
+			Помещение: <?= ModelWidget::widget(['model'=>$model->place]) ?> <br />
+			Пользователь: <?= ModelWidget::widget(['model'=>$model->user]) ?> <br />
+			<?= is_object($model->head)?('Руководитель отдела:'.ModelWidget::widget(['model'=>$model->head]).'<br/>'):'' ?>
+			<?= is_object($model->admResponsible)?($model->getAttributeLabel('responsible_id').':'.ModelWidget::widget(['model'=>$model->admResponsible]).'<br/>'):'' ?>
 		</p>
 	</div>
 	
@@ -171,9 +172,11 @@ if (is_object($model->state)) { ?>
 	$materialsUsages=$model->materialsUsages;
 	ArrayHelper::multisort($materialsUsages,'date',SORT_DESC);
 	foreach($materialsUsages as $materialsUsage) {
-        echo $this->render('/materials-usages/item',['model'=>$materialsUsage,'material'=>true,'count'=>true,'cost'=>true,'date'=>true]).'<br />';
+        echo ModelWidget::widget(['model'=>$materialsUsage,'options'=>['material'=>true,'count'=>true,'cost'=>true,'date'=>true]]).'<br />';
     } ?>
 </p>
 
 <h4>Заметки:</h4>
 <?= Yii::$app->formatter->asNtext($model->history) ?><br />
+
+

@@ -1,5 +1,6 @@
 <?php
 
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $arrFooter array */
 /* @var $searchModel app\models\MaterialsUsagesSearch */
@@ -51,7 +52,7 @@ return [
 		'attribute'=>'material',
 		'format'=>'raw',
 		'value' => function($data) use($renderer){
-			return $renderer->render('/materials/item',['model'=>$data->material,'from'=>false]);
+			return ModelWidget::widget(['model'=>$data->material,'options'=>['from'=>false]]);
 		}
 	],
 	[
@@ -89,8 +90,10 @@ return [
 		'attribute'=>'to',
 		'format'=>'raw',
 		'value' => function($data) use($renderer){
-			return $renderer->render('/materials-usages/item',['model'=>$data,'to'=>true,'date'=>false]);
+			return ModelWidget::widget(['model'=>$data,'options'=>['to'=>true,'date'=>false]]);
 		}
 	],
 	'date',
 ];
+
+

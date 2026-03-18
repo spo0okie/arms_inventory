@@ -8,7 +8,8 @@
 
 use yii\bootstrap5\Modal;
 use yii\helpers\Html;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var \app\models\Techs $model */
 
 if (!isset($static_view)) $static_view=false;
@@ -17,7 +18,7 @@ if (!isset($static_view)) $static_view=false;
 <p>
 
     <?php if(is_array($contracts = $model->contracts) && count($contracts)) foreach ($contracts as $contract) {
-        echo $this->render('/contracts/item',['model'=>$contract]).'<br />';
+        echo ModelWidget::widget(['model'=>$contract]).'<br />';
     } else { ?>
         отсутствуют<br />
     <?php }
@@ -72,3 +73,5 @@ JS;
     <?php } ?>
 
 </p>
+
+

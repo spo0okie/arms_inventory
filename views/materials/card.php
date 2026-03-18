@@ -11,7 +11,8 @@ use app\components\TextFieldWidget;
 use app\models\Materials;
 use app\models\MaterialsUsages;
 use yii\bootstrap5\Modal;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Materials */
 
@@ -75,7 +76,7 @@ if (!isset($hide_places)) $hide_places=false;
 		<h4><?= $model->getAttributeLabel('contracts_ids')?> </h4>
 		<p>
 			<?php foreach ($model->contracts as $contract) { ?>
-				<?= $this->render('/contracts/item',['model'=>$contract]) ?><br />
+				<?= ModelWidget::widget(['model'=>$contract]) ?><br />
 			<?php } ?>
 		</p>
 		<br/>
@@ -83,18 +84,18 @@ if (!isset($hide_places)) $hide_places=false;
 
 	<?php if (!$hide_places) { ?>
 		<h4>Местонахождение</h4>
-		<p><?= $this->render('/places/item',['model'=>$model->place,'full'=>true]) ?></p>
+		<p><?= ModelWidget::widget(['model'=>$model->place,'options'=>['full'=>true]]) ?></p>
 		<br/>
 	<?php } ?>
 
 	<h4>Ответственный</h4>
-	<p><?= $this->render('/users/item',['model'=>$model->itStaff]) ?></p>
+	<p><?= ModelWidget::widget(['model'=>$model->itStaff]) ?></p>
 	<br/>
 	
 	<?php if (!$hide_usages) { ?>
 		<?php if (!empty($model->parent_id)) { ?>
 			<h4>Частично перемещено из</h4>
-			<p><?= $this->render('/materials/item',['model'=>$model->parent,'full'=>true]) ?> </p>
+			<p><?= ModelWidget::widget(['model'=>$model->parent,'options'=>['full'=>true]]) ?> </p>
 			<br/>
 		<?php } ?>
 	
@@ -102,7 +103,7 @@ if (!isset($hide_places)) $hide_places=false;
 			<h4>Частично перемещено в</h4>
 			<p>
 				<?php foreach ($model->children as $child) { ?>
-					<?= $this->render('/materials/item',['model'=>$child,'from'=>true]) ?> (<?= $child->count?><?= $model->type->units?>) <br />
+					<?= ModelWidget::widget(['model'=>$child,'options'=>['from'=>true]]) ?> (<?= $child->count?><?= $model->type->units?>) <br />
 				<?php } ?>
 			</p>
 			<br/>
@@ -112,7 +113,7 @@ if (!isset($hide_places)) $hide_places=false;
 			<h4>Частично израсходовано в</h4>
 			<p>
 				<?php foreach ($model->usages as $usage) { ?>
-					<?= $this->render('/materials-usages/item',['model'=>$usage,'count'=>true,'to'=>true,'date'=>true]) ?> <br />
+					<?= ModelWidget::widget(['model'=>$usage,'options'=>['count'=>true,'to'=>true,'date'=>true]]) ?> <br />
 				<?php } ?>
 			</p>
 			<br/>
@@ -147,3 +148,5 @@ if (!isset($hide_places)) $hide_places=false;
 
 
 </div>
+
+

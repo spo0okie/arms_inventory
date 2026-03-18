@@ -4,10 +4,13 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
 
+use app\components\ItemObjectWidget;
+use app\components\widgets\page\ModelWidget;
+
 $header=is_object($model->schedule)?
-	$this->render('/schedules/scheduled-access/item',['model'=>$model->schedule,'static_view'=>true]).':'
+	ModelWidget::widget(['model'=>$model->schedule, 'options'=>['static_view'=>true]]).':'
 	:
-	'Доступ к '.$this->render('/acls/item',['model'=>$model]).':';
+	'Доступ к '. ModelWidget::widget(['model'=>$model]).':';
 
 $content="<h5>$header</h5>";
 		
@@ -21,8 +24,9 @@ if (is_object($model->schedule)) {
 	$inactive=!$model->schedule->isWorkTime(date('Y-m-d'),date('H:i:s'));
 } else $inactive=false;
 
-echo \app\components\ItemObjectWidget::widget([
+echo ItemObjectWidget::widget([
 	'model'=>$model,
 	'link'=>$content,
 	'archived'=>$inactive
 ]);
+

@@ -3,7 +3,8 @@
 use app\components\DynaGridWidget;
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 $renderer=$this;
 return [
@@ -12,7 +13,7 @@ return [
 			if (is_array($data->networks)) {
 				$output=[];
 				foreach ($data->networks as $network)
-					$output[]=$renderer->render('/networks/item',['model'=>$network]);
+					$output[]=ModelWidget::widget(['model'=>$network]);
 				return implode('<br />',$output);
 			}
 			return '';
@@ -32,7 +33,7 @@ return [
 	'vlan',
 	'domain_id'=>[
 		'value'=>function($data) use ($renderer){
-			return $renderer->render('/net-domains/item',['model'=>$data->netDomain]);
+			return ModelWidget::widget(['model'=>$data->netDomain]);
 		},
 		'contentOptions'=>[
 			'class'=>'text-center'
@@ -40,3 +41,5 @@ return [
 	],
 	'comment',
 ];
+
+

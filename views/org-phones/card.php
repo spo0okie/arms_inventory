@@ -12,7 +12,8 @@ use app\components\StripedRowWidget;
 use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgPhones */
 
@@ -56,10 +57,12 @@ if (!$content_only){ ?>
 		</p>
 		
 		<strong>Место подключения:</strong>
-		<?= $this->render('/places/item',['model'=>$model->place , 'full'=>true, 'static_view'=>$static_view]) ?>
+		<?= ModelWidget::widget(['model'=>$model->place,'options'=>['full'=>true, 'static_view'=>$static_view]]) ?>
 		<br />
 		<strong><?= $model->getAttributeLabel('account')?></strong>
 		<?= $model->account ?>
 <?php if (!$content_only){ ?>
 	</div>
 <?php } ?>
+
+

@@ -3,7 +3,8 @@
 use app\components\ListObjectsWidget;
 use app\helpers\ArrayHelper;
 use kartik\markdown\Markdown;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Users */
 
@@ -37,8 +38,8 @@ if (!isset($static_view)) $static_view=false;
 	?>
     <p>
 	    <?= ArrayHelper::implode(' / ',[
-			$this->render('/partners/item',['model'=>$model->org,'static_view'=>true]),
-			$this->render('/org-struct/item',['model'=>$model->orgStruct,'chain'=>true]),
+			ModelWidget::widget(['model'=>$model->org,'options'=>['static_view'=>true]]),
+			ModelWidget::widget(['model'=>$model->orgStruct,'options'=>['chain'=>true]]),
 			$model->Doljnost
 		]) ?>
 		
@@ -101,3 +102,5 @@ if (!isset($static_view)) $static_view=false;
 	</p>
 	<br />
 <?php }
+
+

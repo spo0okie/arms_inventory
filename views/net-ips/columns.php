@@ -1,5 +1,6 @@
 <?php
 
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 $renderer=$this;
 return [
@@ -10,13 +11,13 @@ return [
 	],
 	'network'=>[
 		'value'=>function($data) use ($renderer){
-			return $renderer->render('/networks/item',['model'=>$data->network]);
+			return ModelWidget::widget(['model'=>$data->network]);
 		}
 	],
 	'vlan'=>[
 		'value'=>function($data) use ($renderer){
 			if (is_object($data->network))
-				return $renderer->render('/net-vlans/item',['model'=>$data->network->netVlan]);
+				return ModelWidget::widget(['model'=>$data->network->netVlan]);
 			return null;
 		}
 	],
@@ -25,13 +26,13 @@ return [
 			$objects=[];
 			
 			if (is_array($data->comps) && count($data->comps)) {
-				foreach ($data->comps as $comp) $objects[]=$renderer->render('/comps/item',['model'=>$comp,'static_view'=>false]);
+				foreach ($data->comps as $comp) $objects[]=ModelWidget::widget(['model'=>$comp,'options'=>['static_view'=>false]]);
 			}
 			if (is_array($data->techs) && count($data->techs)) {
-				foreach ($data->techs as $tech) $objects[]=$renderer->render('/techs/item',['model'=>$tech,'static_view'=>false]);
+				foreach ($data->techs as $tech) $objects[]=ModelWidget::widget(['model'=>$tech,'options'=>['static_view'=>false]]);
 			}
 			if (is_array($data->users) && count($data->users)) {
-				foreach ($data->users as $user) $objects[]=$renderer->render('/users/item',['model'=>$user,'short'=>true,'static_view'=>false,'noDelete'=>true]);
+				foreach ($data->users as $user) $objects[]=ModelWidget::widget(['model'=>$user,'options'=>['short'=>true,'static_view'=>false,'noDelete'=>true]]);
 			}
 			
 			if (count($objects)) return implode(', ',$objects);
@@ -40,3 +41,5 @@ return [
 	],
 	'comment',
 ];
+
+

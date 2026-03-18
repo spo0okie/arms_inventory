@@ -8,7 +8,8 @@
 
 use yii\bootstrap5\Modal;
 use yii\helpers\Html;
-
+
+use app\components\widgets\page\ModelWidget;
 /** @var yii\web\View $this */
 /** @var \app\models\ArmsModel $model */
 
@@ -20,7 +21,7 @@ if (!isset($link)) $link=$model::tableName().'_ids';
 <p>
 	
 	<?php if(is_array($contracts = $model->contracts) && count($contracts)) foreach ($contracts as $contract) {
-		echo $this->render('/contracts/item',['model'=>$contract]).'<br />';
+		echo ModelWidget::widget(['model'=>$contract]).'<br />';
 	}
 	
 	if (!$static_view) {
@@ -73,3 +74,5 @@ JS;
 	<?php } ?>
 
 </p>
+
+

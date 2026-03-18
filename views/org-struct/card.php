@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgStruct */
 
@@ -15,7 +16,9 @@ use yii\widgets\DetailView;
 <?php
 $chain=[];
 if (is_object($model->partner)) {
-	$chain[]=$this->render('/partners/item',['model'=>$model->partner,'static_view'=>true]);
+	$chain[]=ModelWidget::widget(['model'=>$model->partner,'options'=>['static_view'=>true]]);
 }
 foreach ($model->chain as $item) $chain[]=$item->name;
 echo implode(' → ',$chain);
+
+

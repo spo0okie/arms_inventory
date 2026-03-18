@@ -15,7 +15,8 @@ use app\components\UrlListWidget;
 use app\models\Services;
 use yii\helpers\Html;
 
-
+
+use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
 
@@ -66,7 +67,7 @@ if(!$static_view) { ?>
 				echo $model->is_end_user? Services::$user_job_title: Services::$tech_job_title;
 			} ?>
 			
-			<?=	(is_object($model->segmentRecursive))?" // Сегмент ИТ: ".$this->render('/segments/item',['model'=>$model->segmentRecursive,'static_view'=>true]):'' ?>
+			<?=	(is_object($model->segmentRecursive))?" // Сегмент ИТ: ".ModelWidget::widget(['model'=>$model->segmentRecursive,'options'=>['static_view'=>true]]):'' ?>
 			<?php if (is_object($model->parentService))  echo "<br /> Входит в состав: {$this->render('item',['model'=>$model->parentService])}"; ?>
 		</h4>
 		<div class="mb-3">
@@ -160,7 +161,7 @@ if(!$static_view) { ?>
 			<h4>Предоставляет ввод(ы) интернет:</h4>
 			<p>
 				<?php foreach ($model->orgInets as $inet)
-					echo $this->render('/org-inet/card',['model'=>$inet,'static_view'=>$static_view]);
+					echo ModelWidget::widget(['model'=>$inet,'view'=>'card','options'=>['static_view'=>$static_view]]);
 				?>
 			</p>
 			<br />
@@ -171,7 +172,7 @@ if(!$static_view) { ?>
 			<div class="d-flex flex-row flex-wrap p-0">
 				<?php foreach ($model->orgPhones as $phone) { ?>
 				
-						<?= $this->render('/org-phones/card',['model'=>$phone,'static_view'=>$static_view,'href'=>true]) ?>
+						<?= ModelWidget::widget(['model'=>$phone,'view'=>'card','options'=>['static_view'=>$static_view,'href'=>true]]) ?>
 				
 				<?php } ?>
 			</div>
@@ -228,7 +229,7 @@ if(!$static_view) { ?>
 
 		<?php if (is_object($model->partner)) { ?>
 			<hr/>
-			<h2>Контрагент: <?= $this->render('/partners/item',['model'=>$model->partner]) ?></h2>
+			<h2>Контрагент: <?= ModelWidget::widget(['model'=>$model->partner]) ?></h2>
 			
 			<?= $this->render('/partners/support',['model'=>$model->partner]) ?>
 		<?php } ?>
@@ -244,6 +245,8 @@ if(!$static_view) { ?>
 
 	</div>
 </div>
+
+
 
 
 
