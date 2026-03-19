@@ -5,6 +5,7 @@ use app\components\TextFieldWidget;
 use kartik\markdown\Markdown;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use app\components\widgets\page\ModelWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
@@ -20,7 +21,7 @@ if (!isset($static_view)) $static_view=false;
 			</div>
 			
 			<div class="col-md-3 py-2">
-				<h5 class="card-title"><?= $this->render('item',['model'=>$model,'static_view'=>true])?></h5>
+				<h5 class="card-title"><?= ModelWidget::widget(['model'=>$model,'options'=>['static_view'=>true]])?></h5>
 				<div class="row">
 					<div class="btn-group " role="group">
 						<?php //Html::a('<span class="fas fa-plus"></span>',['aces/create','acls_id'=>$model->id],['class'=>'btn btn-primary btn-sm']) ?>

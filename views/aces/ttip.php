@@ -1,6 +1,7 @@
 <?php
 
 use app\components\IsHistoryObjectWidget;
+use app\components\widgets\page\ModelWidget;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -13,5 +14,5 @@ use yii\helpers\Html;
 		<?= Html::encode($model->sname) ?>
 	</h1>
 	
-	<?= $this->render('card',['model'=>$model,'static_view'=>true]) ?>
+	<?= ModelWidget::widget(['model'=>$model,'static_view'=>true,'view'=>'card']) ?>
 </div>

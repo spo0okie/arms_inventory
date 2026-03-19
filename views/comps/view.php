@@ -10,6 +10,7 @@ use app\models\Comps;
 use app\models\HwListItem;
 use app\models\Manufacturers;
 use yii\helpers\Url;
+use app\components\widgets\page\ModelWidget;
 
 $domain = is_object($model->domain)?$model->domain->name:'- не в домене - ';
 
@@ -75,7 +76,7 @@ foreach ($model->swList->items as $item) {
 			<?php if (count($model->dupes)) { ?>
 				<h3>Подозрение на дубликаты в БД</h3>
 				<?php foreach ($model->dupes as $comp) { ?>
-					<?= $this->render('item',['model'=>$comp]) ?>
+ 					<?= ModelWidget::widget(['model'=>$comp]) ?>
 					<?= yii\helpers\Html::a('<span class="fas fa-link" title="'.$absorbTitle.'"></span>',
 						['/comps/absorb','id'=>$model->id,'absorb_id'=>$comp->id]
 					) ?>

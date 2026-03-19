@@ -5,15 +5,16 @@
 
 //\yii\helpers\Url::remember();
 
+use app\components\widgets\page\ModelWidget;
 use yii\web\YiiAsset;
 
 $this->title = $model->sname;
 if (is_object($model->acl))
-	$this->render('/acls/breadcrumbs',['model'=>$model->acl,'static_view'=>false]);
+	ModelWidget::widget(['model'=>$model->acl,'static_view'=>false, 'view'=>'breadcrumbs']);
 $this->params['breadcrumbs'][] = $this->title;
 YiiAsset::register($this);
 
 ?>
 <div class="aces-view">
-	<?= $this->render('card',['model'=>$model]) ?>
+	<?= ModelWidget::widget(['model'=>$model,'view'=>'card']) ?>
 </div>

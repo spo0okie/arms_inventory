@@ -15,12 +15,29 @@ class ModelWidget extends Widget
 	public ?ArmsModel $model;
 	
 	public string $view='item';				//какую ее форму отрендерить (по умолчанию item)
+											//имя относительно папки с view-файлами модели
 	public array $options=[];				//опции рендера
 	public string $empty='- отсутствует -';	//что вывести если модель пустая
 	
 
 	private string $modelViewsPath;			//где у модели сложены view-файлы
 	private string $modelViewPath;			//путь к конкретному view-файлу
+	
+	/**
+	 * Переопределяем конструктор компонента, чтобы все лишние атрибуты автоматически попадали в options
+	 * @param $config
+	 */
+	public function __construct($config = [])
+	{
+		foreach ($config as $key => $value) {
+			if (!property_exists($this, $key)) {
+				$this->options[$key] = $value;
+				unset($config[$key]);
+			}
+		}
+		
+		parent::__construct($config);
+	}
 
 	public function init(): void {
 		if (is_null($this->model)) return;	//если у нас нет модели, значит мы просто вернем emtpy
@@ -36,7 +53,7 @@ class ModelWidget extends Widget
 		if (!is_file(str_replace('@app',$_SERVER['DOCUMENT_ROOT'],$this->modelViewPath.'.php'))) {
 			
 			//в случае неудачи пытаемся сделать fallback на общие рендер файлы
-			$this->modelViewPath='@app/views/layouts/'.$this->view.'.php';
+			$this->modelViewPath='@app/views/layouts/'.$this->view;
 			
 			//проверяем возможность fallback
 			if (!is_file(str_replace('@app',$_SERVER['DOCUMENT_ROOT'],$this->modelViewPath.'.php'))) {

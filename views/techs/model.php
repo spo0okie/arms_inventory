@@ -12,7 +12,7 @@ use app\components\widgets\page\ModelWidget;
 	<h3><?= ModelWidget::widget(['model'=>$model->model,'options'=>['long'=>1]]) ?></h3>
 	
 	<?php if ($model->model->contain_front_rack || $model->model->contain_back_rack) {
-		echo $this->render('rack/rack',['model'=>$model]);
+		echo ModelWidget::widget(['model'=>$model, 'view'=>'rack/rack', 'options'=>[]]);
 	}?>
 	
 	<?= ModelWidget::widget(['model'=>$model->model->preview,'view'=>'ttip']) ?>

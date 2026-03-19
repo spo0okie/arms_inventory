@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\widgets\page\ModelWidget;
 use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelper;
@@ -802,6 +803,7 @@ class ArmsModel extends ActiveRecord
 	 * @return string
 	 */
 	public function renderItem(View $view,$options=[]) {
+		return ModelWidget::widget(['model'=>$this,'options'=>$options]);
 		$path="/{$this->viewsPath}/item";
 		if (!is_file($_SERVER['DOCUMENT_ROOT'].$path.'.php')) $path='//layouts/item';
 		return $view->render(

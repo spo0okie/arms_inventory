@@ -319,7 +319,7 @@ describe('intervalsAdd', () => {
         expect(result).toEqual([
             [480, 550, {}],
             [550, 750, {duty: "test"}],
-            [700, 1020, {}]
+            [750, 1020, {}]
         ]);
     });
     
@@ -331,7 +331,7 @@ describe('intervalsAdd', () => {
         expect(result).toEqual([
             [480, 600, {}],
             [600, 900, {}],
-            [780, 1020, {}]
+            [900, 1020, {}]
         ]);
     });
     
@@ -347,17 +347,17 @@ describe('intervalsAdd', () => {
         expect(result).toEqual([[480, 1020, {}]]);
     });
     
-      test('Integration: все три интервала отдельно БЕЗ склейки', () => {
-          const intervals = [[480, 600, {}], [700, 1020, {}]];
-          const override = [500, 750, {}];
-          const result = intervalsAdd(intervals, override);
-          
-          expect(result).toEqual([
-              [480, 500, {}],
-              [500, 750, {}],
-              [700, 1020, {}]
-          ]);
-      });
+       test('Integration: все три интервала отдельно БЕЗ склейки', () => {
+           const intervals = [[480, 600, {}], [700, 1020, {}]];
+           const override = [500, 750, {}];
+           const result = intervalsAdd(intervals, override);
+           
+           expect(result).toEqual([
+               [480, 500, {}],
+               [500, 750, {}],
+               [750, 1020, {}]
+           ]);
+       });
 });
 
 describe('ScheduleRuntime - базовые тесты', () => {

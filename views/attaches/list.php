@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use app\components\widgets\page\ModelWidget;
 
 /** @var yii\web\View $this */
 /** @var app\models\Attaches[] $models */
@@ -11,5 +12,5 @@ if (!isset($glue)) $glue='<br />';
 
 $items=[];
 foreach ($models as $model)
-	$items[]=$this->render('item',compact(['model','static_view']));
+	$items[]=ModelWidget::widget(['model'=>$model]);
 	echo implode($glue,$items);

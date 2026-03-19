@@ -6,6 +6,7 @@
 use app\components\ListObjectsWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Users;
+use app\components\widgets\page\ModelWidget;
 use yii\helpers\Url;
 
 $this->title = $model->Ename;
@@ -27,12 +28,12 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 		</span>
 	<div class="row">
 		<div class="col-md-4">
-			<?= $this->render('card',['model'=>$model,'static_view'=>false]) ?>
+			<?= ModelWidget::widget(['model'=>$model, 'view'=>'card', 'static_view'=>false]) ?>
 		</div>
 		<div class="col-md-4">
 			<h2>Рабочее место</h2>
 			<?php foreach ($model->techs as $arm) if ($arm->isComputer)
-				echo $this->render('/techs/compact',['model'=>$arm,'no_users'=>true,'no_specs'=>true,'show_archived'=>$show_archived])?>
+				echo ModelWidget::widget(['model'=>$arm, 'view'=>'compact', 'no_users'=>true,'no_specs'=>true,'show_archived'=>$show_archived])?>
 		</div>
 		<div class="col-md-4">
 			<br/>
@@ -119,9 +120,9 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			
 			?>
 			
-			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
+			<?= $this->render('/attaches/model-list',['model'=>$model, 'static_view'=>$static_view]) ?>
 
-			<?= Users::isAdmin()?$this->render('roles',['model'=>$model,'static_view'=>false]):'' ?>
+			<?= Users::isAdmin()?ModelWidget::widget(['model'=>$model, 'view'=>'roles', 'options'=>['static_view'=>false]]):'' ?>
 
 		</div>
 	</div>

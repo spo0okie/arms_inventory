@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use app\components\widgets\page\ModelWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
@@ -25,8 +26,8 @@ $acesContent[]=
 
 <tr>
 	<td class="acl-resource" rowspan="<?= count($acesContent) ?>">
-		<?= $this->render('item',['model'=>$model]) ?>
-	</td>
+ 		<?= ModelWidget::widget(['model'=>$model]) ?>
+ 	</td>
 <?php
 	$row=0;
 	foreach ($acesContent as $aceContent) {

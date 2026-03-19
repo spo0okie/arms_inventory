@@ -68,7 +68,7 @@ if(!$static_view) { ?>
 			} ?>
 			
 			<?=	(is_object($model->segmentRecursive))?" // Сегмент ИТ: ".ModelWidget::widget(['model'=>$model->segmentRecursive,'options'=>['static_view'=>true]]):'' ?>
-			<?php if (is_object($model->parentService))  echo "<br /> Входит в состав: {$this->render('item',['model'=>$model->parentService])}"; ?>
+			<?php if (is_object($model->parentService))  echo "<br /> Входит в состав: {ModelWidget::widget(['model'=>$model->parentService])}"; ?>
 		</h4>
 		<div class="mb-3">
 		<?php if ($model->sumTotals) { ?>

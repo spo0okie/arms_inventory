@@ -15,7 +15,7 @@ use app\components\widgets\page\ModelWidget;
 		</div>
 	<?php } ?>
 	<div class="ttip-card">
-		<?= $this->render('card',['model'=>$model,'static_view'=>true]) ?>
+		<?= ModelWidget::widget(['model'=>$model, 'view'=>'card', 'options'=>['static_view'=>true]]) ?>
 	</div>
 </div>
 

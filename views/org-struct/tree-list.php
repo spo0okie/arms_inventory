@@ -11,6 +11,7 @@
 /* @var $tree_level integer */
 
 use yii\helpers\Html;
+use app\components\widgets\page\ModelWidget;
 
 if (!isset($tree_level)) $tree_level=0;
 
@@ -20,7 +21,7 @@ if (count($models)) {?>
 			$children=$model->children;
 			//рисуем элемент ?>
 			<li>
-                <?= $this->render('item',['model'=>$model,'static_view'=>false]) ?>
+                <?= ModelWidget::widget(['model'=>$model]) ?>
 				<?= Html::a(
 					'<span class="fas fa-plus-circle"></span>',
 					['org-struct/create','OrgStruct[parent_hr_id]'=>$model->hr_id,'OrgStruct[org_id]'=>$model->org_id],

@@ -6,6 +6,8 @@
  * Time: 19-36
  */
 
+use app\components\widgets\page\ModelWidget;
+
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
 /* @var $selected_id integer */
@@ -46,10 +48,10 @@ JS;
 		break;
 	case 'chain-up':
 		//ЦЕПОЧКА ДО КОРНЯ
-		$output=$this->render('item',['model'=>$model,'show_payment'=>$show_payment]);
+		$output=ModelWidget::widget(['model'=>$model]);
 		while (is_object($model->parent)) {
 			$model=$model->parent;
-			$output=$this->render('item',['model'=>$model,'show_payment'=>$show_payment]).'<ul class="contracts_tree tree"><li>'.$output.'</li></ul>';
+			$output=ModelWidget::widget(['model'=>$model]).'<ul class="contracts_tree tree"><li>'.$output.'</li></ul>';
 		}
 		echo $output;
 		break;

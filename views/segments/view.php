@@ -3,6 +3,7 @@
 use app\components\HistoryWidget;
 use app\components\ShowArchivedWidget;
 use app\components\TabsWidget;
+use app\components\widgets\page\ModelWidget;
 use app\models\Segments;
 use kartik\markdown\Markdown;
 use yii\web\YiiAsset;
@@ -33,16 +34,16 @@ if ($model->history && $segmentCompact) {
 			.'<small class="opacity-75">'.HistoryWidget::widget(['model'=>$model]).'</small><br>'
 			.ShowArchivedWidget::widget()
 		.'</span>'
-		. $this->render('card', ['model' => $model])
-		. '</div>';
+		.ModelWidget::widget(['model' => $model,'view'=>'card'])
+		.'</div>';
 } else {
 	$this->params['headerContent'] = '<div class="mx-4 pb-2">'
 		. '<span class="float-end text-end">'
 			.'<small class="opacity-75">'.HistoryWidget::widget(['model'=>$model]).'</small><br>'
 			.ShowArchivedWidget::widget()
 		.'</span>'
-		. $this->render('header-compact', ['model' => $model])
-		. '</div>';
+		.ModelWidget::widget(['model' => $model,'view'=>'header-compact'])
+		.'</div>';
 }
 
 

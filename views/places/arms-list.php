@@ -1,7 +1,8 @@
 <?php
-
+ 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use app\components\widgets\page\ModelWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Places */
@@ -30,7 +31,7 @@ yii\helpers\ArrayHelper::multisort($techs,'num');
 
 $content='';
 
-$cabinet_col='<td class="places-arms-cabinet" rowspan="0">'.$this->render('item',['model'=>$model,'short'=>true]).'</td>';
+$cabinet_col='<td class="places-arms-cabinet" rowspan="0">'.ModelWidget::widget(['model'=>$model]).'</td>';
 
 foreach ($arms as $arm ) {
 	$content.=$this->render(

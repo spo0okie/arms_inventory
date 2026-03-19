@@ -6,6 +6,8 @@
  * Time: 10:52
  */
 
+use app\components\widgets\page\ModelWidget;
+
 /* @var $this yii\web\View */
 /* @var $models app\models\Places[] */
 /* @var $parent_id integer */
@@ -27,7 +29,7 @@ if (count($filtered)) {
 		<?php foreach ($filtered as $model) {
 			//рисуем элемент ?>
 			<li>
-                <?= $this->render('item',['model'=>$model,'static_view'=>false]) ?>
+                <?= ModelWidget::widget(['model'=>$model, 'options'=>['static_view'=>false]]) ?>
 				<?= \yii\helpers\Html::a(
 					'<span class="fas fa-plus-circle"></span>',
 					['places/create','Places[parent_id]'=>$model->id],

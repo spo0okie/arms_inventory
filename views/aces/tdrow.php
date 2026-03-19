@@ -33,7 +33,7 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 ?>
 
 <td class="ACE access">
-	<?= $this->render('item',['model'=>$model,'name'=>implode(', ',$accessTypes),'show_delete'=>!$static_view]) ?>
+	<?= ModelWidget::widget(['model'=>$model, 'name'=>implode(', ',$accessTypes), 'show_delete'=>!$static_view]) ?>
 </td>
 
 <td class="ACE objects">

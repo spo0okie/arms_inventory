@@ -1,14 +1,18 @@
 <?php
 
+use app\components\widgets\page\ModelWidget;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Aces */
 
 $this->title = 'Правка записи доступа: ' . $model->sname;
-$this->render('/acls/breadcrumbs',['model'=>$model->acl,'static_view'=>false]);
+
+ModelWidget::widget(['model'=>$model->acl,'view'=>'breadcrumbs', 'options'=>['static_view'=>false]]);
+
 $this->params['breadcrumbs'][] = ['label' => $model->sname, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Правка';
+
 ?>
 <div class="aces-update">
 

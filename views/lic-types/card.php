@@ -4,6 +4,7 @@ use app\components\TextFieldWidget;
 use app\components\UrlListWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use app\components\widgets\page\ModelWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicTypes */
@@ -12,7 +13,7 @@ if (!isset($static_view)) $static_view=false;
 $deleteable=!count($model->licGroups);
 ?>
 <h1>
-	<?= $this->render('item',compact('model')) ?>
+	<?= ModelWidget::widget(['model'=>$model]) ?>
 
 	<?php if(!$static_view&&$deleteable) echo Html::a('<span class="fas fa-trash"/>', ['delete', 'id' => $model->id], [
 		'data' => [

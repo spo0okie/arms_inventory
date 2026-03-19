@@ -41,7 +41,7 @@ if (is_object($model)) {
 	
 	if ($show_ips) {
 		echo ItemObjectWidget::widget([
-			'link'=>$this->render('/net-ips/model-ips',[
+			'link'=>$this->render('@app/views/net-ips/model-ips',[
 				'model'=>$model,
 				'options'=>	isset($ips_options)?$ips_options:[],
 				'glue'=>	isset($ips_glue)?$ips_glue:', ',

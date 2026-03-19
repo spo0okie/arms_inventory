@@ -7,6 +7,7 @@ use app\models\Ports;
 use app\models\Techs;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use app\components\widgets\page\ModelWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
@@ -23,7 +24,7 @@ $archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 	<?= IsArchivedObjectWidget::widget(['model'=>$model,'title'=>'Это оборудование перенесено в архив']) ?>
 	<div class="row">
 		<div class="col-md-6">
-			<?= $this->render('card',['model'=>$model,'static_view'=>false,'no_model'=>true]) ?>
+			<?= ModelWidget::widget(['model'=>$model, 'view'=>'card', 'options'=>['static_view'=>false, 'no_model'=>true]]) ?>
 		</div>
 		<div class="col-md-6">
 			<div class="float-end text-end">
@@ -57,12 +58,12 @@ $archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 			</div>
 			<div>
 				<?php if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
-					echo $this->render('/scans/thumb',['model'=>$scan,'static_view'=>true]);
+					echo ModelWidget::widget(['model'=>$scan, 'view'=>'/scans/thumb', 'options'=>['static_view'=>true]]);
 				?>
 			</div>
-			<?= $this->render('model',['model'=>$model]) ?>
+			<?= ModelWidget::widget(['model'=>$model, 'view'=>'model', 'options'=>[]]) ?>
 			<h4><?= Ports::$titles ?></h4>
-			<?= $this->render('ports',['model'=>$model,'static_view'=>false]) ?>
+			<?= ModelWidget::widget(['model'=>$model, 'view'=>'ports', 'options'=>['static_view'=>false]]) ?>
 		</div>
 	</div>
 </div>
