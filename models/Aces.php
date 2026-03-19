@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\base\ArmsModel;
 use app\models\traits\AcesModelCalcFieldsTrait;
 use Yii;
 use app\helpers\ArrayHelper;

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\models\base\ArmsModel;
 use app\models\traits\MaintenanceJobsModelCalcFieldsTrait;
 use app\modules\schedules\models\Schedules;
 use app\models\ui\WikiCache;

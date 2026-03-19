@@ -12,7 +12,7 @@ use app\helpers\ArrayHelper;
 use app\helpers\DateTimeHelper;
 use app\modules\schedules\helpers\TimeIntervalsHelper;
 use app\models\Acls;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\modules\schedules\models\Schedules;
 use app\modules\schedules\models\SchedulesEntries;
 use app\models\Services;
@@ -22,15 +22,15 @@ use yii\data\ArrayDataProvider;
 
 /**
  * @package app\modules\schedules\models\traits
- * @property Acls[] $acls
- * @property ArmsModel[] $usedBy
- * @property boolean $isPrivate
- * @property Services[] $services
- * @property boolean isAcl
- * @property boolean isOverride
- * @property integer startUnixTime
- * @property integer endUnixTime
- * @property integer status
+ * @property Acls[]                       $acls
+ * @property \app\models\base\ArmsModel[] $usedBy
+ * @property boolean                      $isPrivate
+ * @property Services[]                   $services
+ * @property boolean                      isAcl
+ * @property boolean                      isOverride
+ * @property integer                      startUnixTime
+ * @property integer                      endUnixTime
+ * @property integer                      status
  */
 
 trait SchedulesModelCalcFieldsTrait

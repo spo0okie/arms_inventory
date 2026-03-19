@@ -3,6 +3,7 @@
 namespace app\models;
 
 
+use app\models\base\ArmsModel;
 use yii\helpers\ArrayHelper;
 
 /**

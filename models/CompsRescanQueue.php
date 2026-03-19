@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\models\base\ArmsModel;
 
 /**
  * This is the model class for table "comps_rescan_queue".

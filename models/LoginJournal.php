@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\QueryHelper;
+use app\models\base\ArmsModel;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;

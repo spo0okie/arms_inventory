@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\models\base\ArmsModel;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\NetworksModelCalcFieldsTrait;
 use PhpIP;

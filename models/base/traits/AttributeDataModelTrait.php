@@ -101,13 +101,13 @@
  *    - renderAttributeToText()
  */
 
-namespace app\models\traits;
+namespace app\models\base\traits;
 
 use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\QueryHelper;
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use OpenApi\Annotations\Property;
 use yii\base\Model;
 use yii\base\UnknownPropertyException;
@@ -388,7 +388,7 @@ trait AttributeDataModelTrait
 	 * @throws UnknownPropertyException
 	 */
 	public function getAttributeHint($attribute) {
-		/** @var ArmsModel $this */
+		/** @var \app\models\base\ArmsModel $this */
 		if ($hint=$this->fetchAttributeHint(
 			$this->getAttributeData($attribute)
 		)) return $hint;

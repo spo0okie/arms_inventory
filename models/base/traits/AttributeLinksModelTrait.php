@@ -2,11 +2,11 @@
 
 
 
-namespace app\models\traits;
+namespace app\models\base\traits;
 
 
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use voskobovich\linker\LinkerBehavior;
 use yii\base\UnknownPropertyException;
 
@@ -213,16 +213,16 @@ trait AttributeLinksModelTrait
 	 * Загрузить связанный объект
 	 * @param $attr
 	 * @param $id
-	 * @return ArmsModel|null
+	 * @return \app\models\base\ArmsModel|null
 	 */
 	public function attributeFetchLink($attr,$id) {
-		/** @var ArmsModel $class */
+		/** @var \app\models\base\ArmsModel $class */
 		$class=$this->attributeLinkClass($attr);
 		return $class::findOne($id);
 	}
 	
 	public function attributeFetchLinks($attr,$ids) {
-		/** @var ArmsModel $class */
+		/** @var \app\models\base\ArmsModel $class */
 		$class=$this->attributeLinkClass($attr);
 		return $class::findAll($ids);
 	}
@@ -352,7 +352,7 @@ trait AttributeLinksModelTrait
 		$reverseLink=$this->attributeReverseLink($attr);	//в каком поле у этих объектов ссылка на нас
 		$linkingObjects=$this->$loader;						//грузим все объекты
 		foreach ($linkingObjects as $object) {
-			/** @var ArmsModel $object */
+			/** @var \app\models\base\ArmsModel $object */
 			//перенаправляем там нужный аттрибут на новый ID
 			$object->attributeLinkRedirect($reverseLink,$this->id,$new_id);
 		}

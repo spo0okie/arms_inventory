@@ -6,7 +6,7 @@ namespace app\components\Forms;
 
 use app\components\Forms\assets\ArmsFormAsset;
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use yii\bootstrap5\ActiveForm;
 use yii\helpers\Html;
 
@@ -86,7 +86,7 @@ class ArmsForm extends ActiveForm
 		$models = [$model];
 		$placeholders=[];
 
-		/* @var $model ArmsModel */
+		/* @var $model \app\models\base\ArmsModel */
 		foreach ($models as $model) {
 			foreach ($model->getDynamicPlaceholders() as $attribute => $placeholder) {
 				$placeholders[Html::getInputId($model, $attribute)] = $placeholder;

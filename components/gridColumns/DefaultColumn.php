@@ -5,7 +5,7 @@ namespace app\components\gridColumns;
 use app\components\ExpandableCardWidget;
 use app\components\ModelFieldWidget;
 use app\helpers\ArrayHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use Closure;
 use kartik\grid\DataColumn;
 
@@ -22,7 +22,7 @@ class DefaultColumn extends DataColumn
 			ARRAY_FILTER_USE_KEY
 		);
 		
-		/** @var ArmsModel $model */
+		/** @var \app\models\base\ArmsModel $model */
 		return ModelFieldWidget::widget(ArrayHelper::recursiveOverride([
 			'model'=>$model,
 			'field'=>$this->attribute,

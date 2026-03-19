@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\base\ArmsModel;
 use app\models\traits\MaterialUsagesModelCalcFieldsTrait;
 
 /**

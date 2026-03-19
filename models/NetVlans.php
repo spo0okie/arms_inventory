@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\base\ArmsModel;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 

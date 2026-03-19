@@ -4,7 +4,7 @@ use app\helpers\StringHelper;
 use yii\web\YiiAsset;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\ArmsModel */
+/* @var $model \app\models\base\ArmsModel */
 
 $this->title = $model->name;
 

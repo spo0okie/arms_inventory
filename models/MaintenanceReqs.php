@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\base\ArmsModel;
 use app\models\traits\MaintenanceReqsModelCalcFieldsTrait;
 use kartik\grid\BooleanColumn;
 use voskobovich\linker\LinkerBehavior;

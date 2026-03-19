@@ -1,7 +1,7 @@
 <?php
 namespace app\components;
 
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use yii\base\Widget;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
@@ -19,7 +19,7 @@ class UpdateObjectWidget extends Widget
 	public $modal=false;
 
 	/**
-	 * @var $model ArmsModel
+	 * @var $model \app\models\base\ArmsModel
 	 */
 	public $model=null;
 	public $url=null;

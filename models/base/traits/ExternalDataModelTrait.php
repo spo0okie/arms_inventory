@@ -3,11 +3,11 @@
  * Работа с полем-JSON структурой
  */
 
-namespace app\models\traits;
+namespace app\models\base\traits;
 
 
 use app\helpers\ArrayHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 
 /**
  * Trait ExternalDataModelTrait

@@ -3,7 +3,7 @@
 namespace app\models\ui;
 
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use yii\db\Exception;
 
 /**
@@ -59,8 +59,8 @@ class WikiCache extends ArmsModel
 	
 	/**
 	 * Если текст содержит ссылку на родителя, то кэш сбрасывается
-	 * @param ArmsModel $model
-	 * @param string    $field
+	 * @param \app\models\base\ArmsModel $model
+	 * @param string                     $field
 	 * @return void
 	 * @throws Exception
 	 */

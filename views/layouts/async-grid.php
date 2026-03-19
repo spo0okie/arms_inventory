@@ -5,8 +5,8 @@ use app\helpers\StringHelper;
 
 
 /** @var yii\web\View $this */
-/* @var $model app\models\ArmsModel */
-/* @var $searchModel app\models\ArmsModel */
+/* @var $model \app\models\base\ArmsModel */
+/* @var $searchModel \app\models\base\ArmsModel */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $gridId string */
 /* @var $source */

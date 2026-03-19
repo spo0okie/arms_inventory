@@ -8,8 +8,8 @@ use yii\bootstrap5\Html;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\ArmsModel */
-/* @var $searchModel app\models\ArmsModel */
+/* @var $model \app\models\base\ArmsModel */
+/* @var $searchModel \app\models\base\ArmsModel */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $switchArchivedCount */
 

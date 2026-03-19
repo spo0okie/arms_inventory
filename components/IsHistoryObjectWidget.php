@@ -7,7 +7,7 @@
 namespace app\components;
 
 
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\HistoryModel;
 use yii\base\Widget;
 use yii\helpers\Html;

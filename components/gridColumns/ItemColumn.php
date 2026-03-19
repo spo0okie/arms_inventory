@@ -5,7 +5,7 @@ namespace app\components\gridColumns;
 use app\components\ExpandableCardWidget;
 use app\components\ItemObjectWidget;
 use app\helpers\ArrayHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use Closure;
 use kartik\grid\DataColumn;
 use yii\helpers\Html;
@@ -35,7 +35,7 @@ class ItemColumn extends DataColumn
 		}
 		
 		$options['model']=$model;
-		/** @var ArmsModel $model */
+		/** @var \app\models\base\ArmsModel $model */
 		return $model->renderItem($this->grid->view, $options);
 	}
 	

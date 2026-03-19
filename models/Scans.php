@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\console\commands\SyncController;
 use app\helpers\RestHelper;
+use app\models\base\ArmsModel;
 use Imagick;
 use ImagickException;
 use Yii;

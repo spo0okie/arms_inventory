@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\components\UrlListWidget;
+use app\models\base\ArmsModel;
 use Yii;
 use yii\db\ActiveQuery;
 

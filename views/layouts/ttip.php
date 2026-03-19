@@ -1,6 +1,6 @@
 <?php
 /* @var $this yii\web\View */
-/* @var $model app\models\ArmsModel */
+/* @var $model \app\models\base\ArmsModel */
 
 use app\helpers\StringHelper;
 

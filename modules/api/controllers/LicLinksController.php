@@ -8,7 +8,7 @@ use app\models\Soft;
 use app\models\Users;
 use http\Exception\BadMethodCallException;
 use OpenApi\Attributes as OA;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\links\LicLinks;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -147,7 +147,7 @@ class LicLinksController extends BaseRestController
 		if (!$objId && $objName) {
 			$objClass=ucfirst($objectType);
 			$objClass="app\\models\\$objClass";
-			/** @var ArmsModel $objClass */
+			/** @var \app\models\base\ArmsModel $objClass */
 			$obj=$objClass::findByAnyName($objName);
 			if (!is_object($obj)) {
 				throw new NotFoundHttpException("$objectType $objName not found");

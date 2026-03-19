@@ -4,6 +4,7 @@ namespace app\models;
 
 use Adldap\Models\Computer;
 use app\helpers\ArrayHelper;
+use app\models\base\ArmsModel;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\bootstrap5\Html;

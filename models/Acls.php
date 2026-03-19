@@ -4,6 +4,7 @@ namespace app\models;
 
 
 
+use app\models\base\ArmsModel;
 use app\models\traits\AclsModelCalcFieldsTrait;
 use app\modules\schedules\models\Schedules;
 use yii\helpers\ArrayHelper;

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\QueryHelper;
+use app\models\base\ArmsModel;
 use app\modules\schedules\models\Schedules;
 use Exception;
 use Yii;

@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\components\UrlListWidget;
 use app\console\commands\SyncController;
+use app\models\base\ArmsModel;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 

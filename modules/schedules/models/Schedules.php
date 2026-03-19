@@ -53,7 +53,7 @@ use app\helpers\StringHelper;
  * @property \app\models\MaintenanceJobs[] $maintenanceJobs
  * @property ArrayDataProvider $WeekDataProvider
  */
-class Schedules extends \app\models\ArmsModel
+class Schedules extends \app\models\base\ArmsModel
 {
 	use SchedulesModelCalcFieldsTrait;
 	

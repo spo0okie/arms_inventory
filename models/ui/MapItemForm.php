@@ -3,8 +3,8 @@
 namespace app\models\ui;
 
 use app\models\Places;
-use app\models\traits\AttributeDataModelTrait;
-use app\models\traits\AttributeLinksModelTrait;
+use app\models\base\traits\AttributeDataModelTrait;
+use app\models\base\traits\AttributeLinksModelTrait;
 use stdClass;
 use yii\base\Model;
 

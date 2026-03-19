@@ -6,6 +6,7 @@ use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
+use app\models\base\ArmsModel;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\TechsModelCalcFieldsTrait;
 use app\models\traits\UnsatisfiedMaintenanceFieldTrait;

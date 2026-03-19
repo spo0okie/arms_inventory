@@ -5,7 +5,7 @@ namespace app\components;
 
 
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\base\UnknownPropertyException;

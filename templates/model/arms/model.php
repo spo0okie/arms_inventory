@@ -97,7 +97,7 @@ public static $titles='<?= $className ?>ы';
     {
         return array_merge(parent::attributeData(),[
 	<?php
-	$model=new \app\models\ArmsModel();
+	$model=new \app\models\base\ArmsModel();
 	$defaultKeys=array_keys($model->attributeData());
 	foreach ($labels as $name => $label) if (array_search($name,$defaultKeys)===false) {
 		echo "\t\t\t'$name' => [\n\t\t\t\t" . $generator->generateString($label) . ",\n\t\t\t\t'hint'=>'$name hint',\n\t\t\t],\n";

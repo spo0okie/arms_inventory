@@ -3,6 +3,8 @@
 namespace app\models;
 
 
+use app\models\base\ArmsModel;
+
 /**
  * This is the model class for table "tech_states".
  *

@@ -4,7 +4,7 @@ namespace app\models\ui;
 
 use app\helpers\ArrayHelper;
 use app\models\Techs;
-use app\models\traits\AttributeDataModelTrait;
+use app\models\base\traits\AttributeDataModelTrait;
 use yii\base\Model;
 
 /**

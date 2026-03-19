@@ -3,6 +3,7 @@
 namespace app\models;
 
 
+use app\models\base\ArmsModel;
 use app\models\links\LicLinks;
 use app\models\traits\LicKeysModelCalcFieldsTrait;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;

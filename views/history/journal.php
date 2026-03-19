@@ -2,7 +2,7 @@
 
 use app\components\DynaGridWidget;
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\HistoryModel;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
@@ -12,7 +12,7 @@ use yii\web\View;
 /** @var View $this */
 /** @var ActiveDataProvider $dataProvider */
 /** @var HistoryModel $instance */
-/** @var ArmsModel $master */
+/** @var \app\models\base\ArmsModel $master */
 /** @var string $class */
 
 $this->params['layout-container'] = 'container-fluid';

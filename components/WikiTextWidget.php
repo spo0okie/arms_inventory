@@ -11,7 +11,7 @@ namespace app\components;
 use app\assets\DokuWikiAsset;
 use app\helpers\StringHelper;
 use app\helpers\WikiHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\ui\WikiCache;
 use Yii;
 use yii\base\Widget;
@@ -23,7 +23,7 @@ class WikiTextWidget extends Widget
 		.'<span class="visually-hidden">Loading...</span>'
 		.'</div>';
 	
-	/** @var ArmsModel */
+	/** @var \app\models\base\ArmsModel */
 	public $model;
 	public $field;
 	public $outerClass='';

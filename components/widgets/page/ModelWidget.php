@@ -1,7 +1,7 @@
 <?php
 namespace app\components\widgets\page;
 
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use yii\base\Widget;
 
 /**
@@ -11,7 +11,7 @@ use yii\base\Widget;
 
 class ModelWidget extends Widget
 {
-	/** @var ?ArmsModel $model Модель которую надо отрендерить */
+	/** @var ?\app\models\base\ArmsModel $model Модель которую надо отрендерить */
 	public ?ArmsModel $model;
 	
 	public string $view='item';				//какую ее форму отрендерить (по умолчанию item)

@@ -1,7 +1,7 @@
 <?php
 namespace app\components;
 
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\HistoryModel;
 use Yii;
 use yii\base\Widget;
@@ -35,7 +35,7 @@ class LinkObjectWidget extends Widget
 	public $modal=false;	//редактировать в модальном окне
 
 	/**
-	 * @var $model ArmsModel|HistoryModel
+	 * @var $model \app\models\base\ArmsModel|HistoryModel
 	 */
 	public $model=null;		//модель на которую делаем ссылку
 	public $links=null;		//имена полей обратных ссылок (кто ссылается на этот объект), чтобы понять можно ли его удалить или нет

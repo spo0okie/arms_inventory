@@ -3,7 +3,7 @@
 use app\components\ItemObjectWidget;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\ArmsModel */
+/* @var $model \app\models\base\ArmsModel */
 
 if (!empty($model)) {
 	echo ItemObjectWidget::widget([

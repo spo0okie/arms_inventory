@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
+use app\models\base\ArmsModel;
 use app\modules\schedules\models\Schedules;
 use app\helpers\QueryHelper;
 use app\helpers\StringHelper;

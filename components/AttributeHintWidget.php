@@ -3,7 +3,7 @@ namespace app\components;
 
 use app\helpers\ArrayHelper;
 use app\helpers\FieldsHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use yii\base\Widget;
 use yii\helpers\Html;
 use yii\helpers\Inflector;

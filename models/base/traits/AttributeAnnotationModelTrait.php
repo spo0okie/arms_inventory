@@ -6,11 +6,11 @@
  * Методы для генерации аннотаций атрибутов модели для OpenAPI документации
  */
 
-namespace app\models\traits;
+namespace app\models\base\traits;
 
 use app\components\UrlListWidget;
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use yii\base\Model;
 use yii\base\UnknownPropertyException;
 
@@ -84,7 +84,7 @@ trait AttributeAnnotationModelTrait
 	public function generateRWAttributeAnnotation($attribute): array
 	{
 		$delimiter="<br>";
-		/** @var ArmsModel $this */
+		/** @var \app\models\base\ArmsModel $this */
 		$data=$this->getAttributeData($attribute);
 		$name=$this->getAttributeApiLabel($attribute);
 		$hint=$this->getAttributeApiHint($attribute);
@@ -307,7 +307,7 @@ trait AttributeAnnotationModelTrait
 	public function generateSearchParameterAnnotation($attribute,$context): \OpenApi\Annotations\Parameter
 	{
 		$delimiter="; ";
-		/** @var ArmsModel $this */
+		/** @var \app\models\base\ArmsModel $this */
 		$data=$this->getAttributeData($attribute);
 		$name=$this->getAttributeApiLabel($attribute);
 		$hint=$this->getAttributeApiHint($attribute);

@@ -12,7 +12,7 @@ namespace app\models\ui;
  * @property string $value
  * @property integer $user_id
  */
-class UiTablesCols extends \app\models\ArmsModel
+class UiTablesCols extends \app\models\base\ArmsModel
 {
 	
 	private static $cache=[];

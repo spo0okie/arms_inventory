@@ -9,7 +9,8 @@
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\web\JsExpression;
-
+
+
 use app\components\widgets\page\ModelWidget;
 $renderer = $this;
 $manufacturers=\app\models\Manufacturers::fetchNames();
@@ -41,7 +42,7 @@ return [
 		'model' => new \app\models\Comps(),
 		'hint' => 'IP адреса <b>основной ОС</b> этого АРМ.<br>'.
 		'Найти остальные ОС по IP можно через '.Html::a('список ОС',['/comps/index']).
-		\app\models\ArmsModel::searchableOrHint,
+		\app\models\base\ArmsModel::searchableOrHint,
 		'value' => function ($data) use ($renderer) {
 			if (is_object($data->comp)) {
 				$output=[];
@@ -58,7 +59,7 @@ return [
 		'model' => new \app\models\Comps(),
 		'hint' => 'MAC адреса <b>основной ОС</b> этого АРМ.<br>'.
 			'Найти остальные ОС по MAC можно через '.Html::a('список ОС',['/comps/index']).
-			\app\models\ArmsModel::searchableOrHint,
+			\app\models\base\ArmsModel::searchableOrHint,
 		'value' => function ($data) use ($renderer) {
 			if (is_object($data->comp)) {
 				return $data->comp->formattedMac;

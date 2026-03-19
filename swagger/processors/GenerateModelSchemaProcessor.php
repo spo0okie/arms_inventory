@@ -4,7 +4,7 @@ namespace app\swagger\processors;
 
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\HistoryModel;
 use app\models\links\LicLinks;
 use OpenApi\Analysis;

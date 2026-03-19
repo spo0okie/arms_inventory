@@ -11,7 +11,7 @@ namespace app\components;
 use app\helpers\ArrayHelper;
 use app\helpers\HtmlHelper;
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use Yii;
 use yii\base\Widget;
 use yii\helpers\Html;

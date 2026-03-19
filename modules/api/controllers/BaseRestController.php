@@ -11,7 +11,7 @@ namespace app\modules\api\controllers;
 
 use app\controllers\ArmsBaseController;
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\Users;
 use Yii;
 use yii\base\UnknownPropertyException;
@@ -37,7 +37,7 @@ class BaseRestController extends ActiveController
 {
 	const SEARCH_BY_ANY_NAME='@search-by-any';
 	
-	public $modelClass='app\models\ArmsModel';
+	public $modelClass= 'app\models\base\ArmsModel';
 
 	public static array $searchFields=['name'=>'name'];		//набор полей по которым можно делать поиск с маппингом в атрибуты модели
 	public static array $searchFieldsLike=[];				//набор полей по которым можно делать Like поиск
@@ -122,7 +122,7 @@ class BaseRestController extends ActiveController
 	public function searchFilter(): ActiveQuery
 	{
 		
-		/** @var ArmsModel $class */
+		/** @var \app\models\base\ArmsModel $class */
 		$class=$this->modelClass;
 		$model=new $class();
 		$search=$class::find();
@@ -187,7 +187,7 @@ class BaseRestController extends ActiveController
 		foreach (static::$searchFields as $param=>$field) {
 			if ($field===static::SEARCH_BY_ANY_NAME && ($value= Yii::$app->request->get($param))) {
 				$class=$this->modelClass;
-				/** @var ArmsModel $class */
+				/** @var \app\models\base\ArmsModel $class */
 				return $class::findByAnyName($value);
 			}
 		}

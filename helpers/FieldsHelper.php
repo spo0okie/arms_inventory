@@ -5,7 +5,7 @@ namespace app\helpers;
 
 
 use app\components\assets\FieldsHelperAsset;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use Exception;
 use kartik\date\DatePicker;
 use kartik\markdown\MarkdownEditor;

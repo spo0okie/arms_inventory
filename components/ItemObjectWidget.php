@@ -9,7 +9,7 @@
 namespace app\components;
 
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use Yii;
 use yii\helpers\Html;
 
@@ -21,7 +21,7 @@ use yii\helpers\Html;
  *   - может скрывать архивные элементы
  *   - прикручивает дополнительный класс к архивному элементу
  * @package app\components
- * @property ArmsModel $model
+ * @property \app\models\base\ArmsModel $model
  */
 class ItemObjectWidget extends LinkObjectWidget
 {

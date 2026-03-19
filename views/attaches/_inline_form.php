@@ -6,7 +6,7 @@ use yii\widgets\ActiveForm;
 /** @var yii\web\View $this */
 /** @var app\models\Attaches $model */
 /** @var yii\widgets\ActiveForm $form */
-/** @var \app\models\ArmsModel $linkModel */
+/** @var \app\models\base\ArmsModel $linkModel */
 /** @var string $link */
 
 if (!isset($active)) $active=false;

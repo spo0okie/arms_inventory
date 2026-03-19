@@ -11,8 +11,8 @@ use yii\web\JsExpression;
 /* @var $this yii\web\View */
 /* @var $model app\models\ui\MapItemForm */
 /* @var $mapImage Scans */
-/* @var $techs app\models\ArmsModel[] */
-/* @var $places app\models\ArmsModel[] */
+/* @var $techs \app\models\base\ArmsModel[] */
+/* @var $places \app\models\base\ArmsModel[] */
 /* @var $form yii\widgets\ActiveForm */
 
 

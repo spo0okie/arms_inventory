@@ -7,12 +7,12 @@
 namespace app\components;
 
 
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use yii\base\Widget;
 
 class IsArchivedObjectWidget extends Widget
 {
-	/** @var ArmsModel */
+	/** @var \app\models\base\ArmsModel */
 	public $model;					//какой объект проверяем
 	public $title;					//что выводить в алерт
 	

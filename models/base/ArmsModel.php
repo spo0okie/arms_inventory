@@ -1,16 +1,18 @@
 <?php
 
-namespace app\models;
+namespace app\models\base;
 
 use app\components\widgets\page\ModelWidget;
 use app\console\commands\SyncController;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelper;
 use app\helpers\StringHelper;
-use app\models\traits\AttributeAnnotationModelTrait;
-use app\models\traits\AttributeDataModelTrait;
-use app\models\traits\AttributeLinksModelTrait;
-use app\models\traits\ExternalDataModelTrait;
+use app\models\Attaches;
+use app\models\HistoryModel;
+use app\models\base\traits\AttributeAnnotationModelTrait;
+use app\models\base\traits\AttributeDataModelTrait;
+use app\models\base\traits\AttributeLinksModelTrait;
+use app\models\base\traits\ExternalDataModelTrait;
 use DateTime;
 use DateTimeZone;
 use Throwable;

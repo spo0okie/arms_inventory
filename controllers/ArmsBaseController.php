@@ -7,7 +7,7 @@ use app\components\Forms\ArmsForm;
 use app\components\Forms\assets\ArmsFormAsset;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\Users;
 use kartik\grid\EditableColumnAction;
 use Throwable;
@@ -469,7 +469,7 @@ class ArmsBaseController extends Controller
 	 */
 	public function actionAsyncGrid($source)
 	{
-		/** @var ArmsModel $model */
+		/** @var \app\models\base\ArmsModel $model */
 		$model= new $this->modelClass();
 		
 		$searchModelClass=$this->modelClass.'Search';
@@ -711,7 +711,7 @@ class ArmsBaseController extends Controller
 	{
 		$class=static::findClass($class);
 
-		/** @var $class ArmsModel */
+		/** @var $class \app\models\base\ArmsModel */
 		if (($model = ($class)::findOne($id)) !== null) {
 			return $model;
 		}
@@ -723,7 +723,7 @@ class ArmsBaseController extends Controller
 	 * Finds the Arms model based on its primary key value.
 	 * If the model is not found, a 404 HTTP exception will be thrown.
 	 * @param int $id
-	 * @return ArmsModel the loaded model
+	 * @return \app\models\base\ArmsModel the loaded model
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
 	protected function findModel(int $id)
@@ -746,7 +746,7 @@ class ArmsBaseController extends Controller
 	 * If the model is not found, a 404 HTTP exception will be thrown.
 	 * @param int $id
 	 * @param     $timestamp
-	 * @return ArmsModel the loaded model
+	 * @return \app\models\base\ArmsModel the loaded model
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
 	protected function findJournalRecord(int $id, $timestamp)

@@ -50,7 +50,7 @@ use yii\validators\DateValidator;
  *
  * @property Schedules $master
  */
-class SchedulesEntries extends \app\models\ArmsModel
+class SchedulesEntries extends \app\models\base\ArmsModel
 {
 	use ScheduleEntriesModelCalcFieldsTrait;
 	const SCENARIO_PERIOD='scenario_period';

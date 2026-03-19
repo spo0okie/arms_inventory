@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\base\ArmsModel;
 use voskobovich\linker\LinkerBehavior;
 use yii\db\ActiveQuery;
 

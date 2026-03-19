@@ -1,7 +1,7 @@
 <?php
 namespace app\components;
 
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use yii\base\Widget;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;

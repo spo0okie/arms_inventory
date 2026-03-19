@@ -5,7 +5,7 @@ use app\components\assets\DynaGridWidgetAsset;
 use app\components\gridColumns\DefaultColumn;
 use app\components\gridColumns\ItemColumn;
 use app\helpers\ArrayHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\ui\UiTablesCols;
 use kartik\base\Lib;
 use kartik\dynagrid\DynaGrid;
@@ -69,7 +69,7 @@ class DynaGridWidget extends DynaGrid
 	
 	/**
 	 * фильтр
-	 * @var ArmsModel
+	 * @var \app\models\base\ArmsModel
 	 */
 	public $filterModel;
 	public $model;
@@ -127,8 +127,8 @@ class DynaGridWidget extends DynaGrid
 	/**
 	 * Конвертирует видимые колонки в видимые атрибуты (нужно для контроллеров, для формирования поиска и Join)
 	 * (т.к. в бд хранятся хэши от колонок, а не сами колонки)
-	 * @param string $id
-	 * @param ArmsModel $model
+	 * @param string                     $id
+	 * @param \app\models\base\ArmsModel $model
 	 * @return mixed
 	 * @throws InvalidConfigException
 	 */

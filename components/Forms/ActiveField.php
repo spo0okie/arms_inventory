@@ -8,7 +8,7 @@ use app\components\Forms\assets\Select2FieldAsset;
 use app\controllers\ArmsBaseController;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use kartik\datecontrol\DateControl;
 use kartik\markdown\MarkdownEditor;
 use kartik\select2\Select2;

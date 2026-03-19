@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\ArrayHelper;
+use app\models\base\ArmsModel;
 use app\models\links\LicLinks;
 use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use Yii;

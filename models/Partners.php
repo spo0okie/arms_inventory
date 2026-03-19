@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\components\UrlListWidget;
+use app\models\base\ArmsModel;
 use voskobovich\linker\LinkerBehavior;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;

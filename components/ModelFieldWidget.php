@@ -12,19 +12,19 @@ namespace app\components;
 
 use app\components\Forms\ActiveField;
 use app\helpers\ArrayHelper;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use yii\base\Widget;
 use yii\helpers\Html;
 
 /**
 * Class ItemObjectWidget
  * @package app\components
- * @property ArmsModel[] $models
+ * @property \app\models\base\ArmsModel[] $models
  */
 class ModelFieldWidget extends Widget
 {
 	/**
-	 * @var ArmsModel модель, поле которой нам нужно
+	 * @var \app\models\base\ArmsModel модель, поле которой нам нужно
 	 */
 	public $model;
 	public $models;
@@ -48,7 +48,7 @@ class ModelFieldWidget extends Widget
 	
 	/**
 	 * Загружает в свой накопитель $data данные из модели
-	 * @param ArmsModel $model
+	 * @param \app\models\base\ArmsModel $model
 	 * @return void
 	 */
 	public function loadModelData($model) {

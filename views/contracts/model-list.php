@@ -8,10 +8,11 @@
 
 use yii\bootstrap5\Modal;
 use yii\helpers\Html;
-
+
+
 use app\components\widgets\page\ModelWidget;
 /** @var yii\web\View $this */
-/** @var \app\models\ArmsModel $model */
+/** @var \app\models\base\ArmsModel $model */
 
 if (!isset($static_view)) $static_view=false;
 if (!isset($link)) $link=$model::tableName().'_ids';

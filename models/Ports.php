@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\components\Forms\ArmsForm;
+use app\models\base\ArmsModel;
 use Yii;
 
 /**

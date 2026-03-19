@@ -10,7 +10,7 @@ namespace app\console\commands;
 use app\console\ConsoleException;
 use app\helpers\ArrayHelper;
 use app\helpers\RestHelperException;
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\Soft;
 use yii\console\Controller;
 use app\helpers\RestHelper;

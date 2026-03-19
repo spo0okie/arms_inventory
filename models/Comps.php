@@ -5,6 +5,7 @@ namespace app\models;
 use app\helpers\ArrayHelper;
 use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
+use app\models\base\ArmsModel;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\CompsModelCalcFieldsTrait;
 use app\models\traits\UnsatisfiedMaintenanceFieldTrait;

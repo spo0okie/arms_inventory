@@ -2,7 +2,7 @@
 
 namespace app\models\links;
 
-use app\models\ArmsModel;
+use app\models\base\ArmsModel;
 use app\models\Users;
 use Closure;
 use Yii;
@@ -300,7 +300,7 @@ class LicLinks extends ArmsModel
 	{
 		parent::afterSave($insert, $changedAttributes);
 		
-		/** @var ArmsModel $object */
+		/** @var \app\models\base\ArmsModel $object */
 		if (is_object($object=$this->object)) {
 			if ($object->hasMethod('historyCommit'))
 				$object->historyCommit();

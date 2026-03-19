@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\QueryHelper;
+use app\models\base\ArmsModel;
 use voskobovich\linker\LinkerBehavior;
 use Yii;
 use yii\base\InvalidConfigException;

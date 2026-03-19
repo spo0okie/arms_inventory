@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\StringHelper;
+use app\models\base\ArmsModel;
 use Yii;
 use yii\helpers\Inflector;
 

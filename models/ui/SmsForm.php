@@ -2,7 +2,7 @@
 
 namespace app\models\ui;
 
-use app\models\traits\AttributeDataModelTrait;
+use app\models\base\traits\AttributeDataModelTrait;
 use Yii;
 use yii\base\Model;
 

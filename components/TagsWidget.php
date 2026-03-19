@@ -24,7 +24,7 @@ use yii\helpers\Html;
 class TagsWidget extends Widget
 {
     /**
-     * @var \app\models\ArmsModel Модель с трейтом TaggableTrait
+     * @var \app\models\base\ArmsModel Модель с трейтом TaggableTrait
      */
     public $model;
     
