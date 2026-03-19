@@ -72,7 +72,7 @@ class HistoryWidget extends Widget
 		if ($this->showIcon && !$this->calledOnHistory && class_exists($this->historyClass)) {
 			if (!count($tokens)) $tokens=[''];
 			$tokens[count($tokens)-1].=' '.Html::a($this->icon,[
-					'history/journal',
+					'/history/journal',
 					'class'=>$this->historyClass,
 					'id'=>$this->model->id
 				],$this->iconOptions);

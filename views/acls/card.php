@@ -24,9 +24,8 @@ if (!isset($static_view)) $static_view=false;
 				<h5 class="card-title"><?= ModelWidget::widget(['model'=>$model,'options'=>['static_view'=>true]])?></h5>
 				<div class="row">
 					<div class="btn-group " role="group">
-						<?php //Html::a('<span class="fas fa-plus"></span>',['aces/create','acls_id'=>$model->id],['class'=>'btn btn-primary btn-sm']) ?>
 						<?=  Html::a('<span class="fas fa-plus"></span>',[
-							'aces/create',
+							'/aces/create',
 							'Aces[acls_id]'=>$model->id,
 						],[
 							'class' => 'btn btn-primary btn-sm open-in-modal-form',
@@ -35,7 +34,7 @@ if (!isset($static_view)) $static_view=false;
 							'data-update-url' => Url::to(['/acls/view','id'=>$model->id]),
 						]) ?>
 						
-						<?= Html::a('<span class="fas fa-pencil-alt"></span>',['acls/update','id'=>$model->id],['class'=>'btn btn-primary btn-sm']) ?>
+						<?= Html::a('<span class="fas fa-pencil-alt"></span>',['/acls/update','id'=>$model->id],['class'=>'btn btn-primary btn-sm']) ?>
 						<?= HistoryWidget::widget([
 							'model'=>$model,
 							'showUser'=>false,
@@ -44,7 +43,7 @@ if (!isset($static_view)) $static_view=false;
 							'prefix'=>'',
 							'iconOptions'=>['class'=>'btn btn-sm btn-primary'],
 						])?>
-						<?= Html::a('<span class="fas fa-trash"/>', ['acls/delete', 'id' => $model->id], [
+						<?= Html::a('<span class="fas fa-trash"/>', ['/acls/delete', 'id' => $model->id], [
 							'data' => [
 								'confirm' => 'Удалить этот элемент? Действие необратимо',
 								'method' => 'post',
