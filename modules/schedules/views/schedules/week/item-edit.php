@@ -1,5 +1,6 @@
 <?php
 
+use app\components\widgets\page\ModelWidget;
 use app\modules\schedules\models\SchedulesEntries;
 use yii\bootstrap5\Alert;
 use yii\grid\GridView;
@@ -96,7 +97,7 @@ $today=Yii::$app->request->get('date')?
 		[//диаграмма
 			'header'=> SchedulesEntries::$label_graph,
 			'value'=>function($data,$day) use ($renderer,$model) {
-				return $renderer->render('/schedules-entries/stripe',['model'=>$data,'schedule'=>$model]);
+				return ModelWidget::widget(['model'=>$data,'schedule'=>$model,'view'=>'stripe']);
 			},
 			'format'=>'raw',
 			'contentOptions' => function($data,$day) use ($model) {return[
