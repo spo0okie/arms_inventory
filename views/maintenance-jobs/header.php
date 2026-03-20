@@ -6,6 +6,7 @@ use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
 use app\components\StripedAlertWidget;
 use app\components\TextFieldWidget;
+use app\components\widgets\page\ModelWidget;
 use yii\helpers\Html;
 use kartik\markdown\Markdown;
 
@@ -41,7 +42,7 @@ use kartik\markdown\Markdown;
 				<?php if (is_object($model->scheduleRecursive)) {
 					echo Html::a(
 					$model->scheduleRecursive->description?$model->scheduleRecursive->description:
-						$this->render('/schedules/week-description',['model'=>$model->scheduleRecursive]),
+						ModelWidget::widget(['model'=>$model->scheduleRecursive,'view'=>'week-description']),
 						'#',
 						['onclick'=>'$("li#tab-schedule").children("a.nav-link").tab("show");$("li#tab-schedule").click();']
 					);

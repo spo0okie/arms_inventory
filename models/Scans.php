@@ -403,14 +403,14 @@ class Scans extends ArmsModel
 	{
 		$w=static::$idxThumbSizes[0];
 		$h=static::$idxThumbSizes[1];
-		return static::prepThumb('/web/scans/pdf_file.png',"/web/scans/thumbs/pdf_file_thumb_${w}x${h}.png",$w,$h);
+		return static::prepThumb('/web/scans/pdf_file.png',"/web/scans/thumbs/pdf_file_thumb_{$w}x{$h}.png",$w,$h);
 	}
 
 	public static function noThumb()
 	{
 		$w=static::$idxThumbSizes[0];
 		$h=static::$idxThumbSizes[1];
-		return static::prepThumb('/web/scans/no_file.png',"/web/scans/thumbs/no_file_thumb_${w}x${h}.png",$w,$h);
+		return static::prepThumb('/web/scans/no_file.png',"/web/scans/thumbs/no_file_thumb_{$w}x{$h}.png",$w,$h);
 	}
 	
 	/**
