@@ -118,11 +118,12 @@ php vendor/bin/codecept run --coverage
 ## 5. Существующие тесты
 
 ### Unit тесты
-
+ 
 | Тест | Файл | Описание |
 |------|------|----------|
 | TagsTest | [`unit/models/TagsTest.php`](unit/models/TagsTest.php) | Тесты модели Tags: создание, валидация, генерация slug, цвета |
 | TagsSearchTest | [`unit/models/TagsSearchTest.php`](unit/models/TagsSearchTest.php) | Тесты поиска и фильтрации тегов |
+| ModelTypeSafetyTest | [`unit/models/ModelTypeSafetyTest.php`](unit/models/ModelTypeSafetyTest.php) | Проверяет что все safe атрибуты моделей, унаследованных от ArmsModel, имеют явно указанный тип в метаданных. Важно для обеспечения корректной работы генераторов моделей в acceptance тестах. |
 
 ### Acceptance тесты
 
