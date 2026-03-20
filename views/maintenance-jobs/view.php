@@ -3,6 +3,7 @@
 use app\components\DynaGridWidget;
 use app\components\ModelFieldWidget;
 use app\components\TabsWidget;
+use app\components\widgets\page\ModelWidget;
 use app\models\Comps;
 use app\models\MaintenanceJobs;
 use app\models\Services;
@@ -100,7 +101,7 @@ if (is_object($model->scheduleRecursive)) {
 	$tabs[]=[
 		'id'=>'schedule',
 		'label'=>'Расписание выполнения',
-		'content'=>$this->render('/schedules/card',['model'=>$model->scheduleRecursive,'static_view'=>false]),
+		'content'=>ModelWidget::widget(['model'=>$model->scheduleRecursive,'static_view'=>false,'view'=>'card']),
 	];
 }
 
