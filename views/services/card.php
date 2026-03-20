@@ -15,7 +15,8 @@ use app\components\UrlListWidget;
 use app\models\Services;
 use yii\helpers\Html;
 
-
+
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
@@ -68,7 +69,7 @@ if(!$static_view) { ?>
 			} ?>
 			
 			<?=	(is_object($model->segmentRecursive))?" // Сегмент ИТ: ".ModelWidget::widget(['model'=>$model->segmentRecursive,'options'=>['static_view'=>true]]):'' ?>
-			<?php if (is_object($model->parentService))  echo "<br /> Входит в состав: {ModelWidget::widget(['model'=>$model->parentService])}"; ?>
+			<?php if (is_object($model->parentService))  echo "<br /> Входит в состав: ".ModelWidget::widget(['model'=>$model->parentService]); ?>
 		</h4>
 		<div class="mb-3">
 		<?php if ($model->sumTotals) { ?>
