@@ -101,32 +101,27 @@ class NetIps extends ArmsModel
 	/**
 	 * {@inheritdoc}
 	 */
-	public function attributeLabels()
+	public function attributeData()
 	{
 		return [
 			'id' => 'ID',
 			'addr' => 'Адрес',
 			'mask' => 'Маска',
-			'name' => 'Имя',
+			'name' => [
+				'Имя',
+				'hint'=>'Сюда можно записать имя узла для которого адрес зарезервирован'
+			],
 			'network' => 'Сеть',
 			'attached' => 'Прикреплено к',
-			'text_addr' => 'Адрес',
-			'comment' => 'Комментарий',
-		];
-	}
-	
-	/**
-	 * {@inheritdoc}
-	 */
-	public function attributeHints()
-	{
-		return [
-			'id' => 'ID',
-			'addr' => 'Адрес',
-			'mask' => 'Маска',
-			'name' => 'Сюда можно записать имя узла для которого адрес зарезервирован',
-			'text_addr' => 'Также можно указать маску',
-			'comment' => 'Комментировать то можно что угодно. Чем IP адрес плох',
+			'text_addr' => [
+				'Адрес',
+				'hint'=>'Также можно указать маску',
+				'type'=>'ip'
+			],
+			'comment' => [
+				'Комментарий',
+				'hint' => 'Комментировать то можно что угодно. Чем IP адрес плох',
+			]
 		];
 	}
 	

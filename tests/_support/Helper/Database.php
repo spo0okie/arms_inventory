@@ -102,7 +102,7 @@ class Database extends \Codeception\Module
 		return $commands;
 	}
 
-	public static  function loadSqlDump($fileName)
+	public static function loadSqlDump($fileName=__DIR__ . '/../../_data/arms_demo.sql')
 	{
 		$commands=static::parseSqlDump($fileName);
 		// Выполняем все команды по порядку

@@ -110,6 +110,12 @@ class Soft extends ArmsModel
     public function attributeData()
     {
         return array_merge(parent::attributeData(),[
+			'add_item'=>[
+				'Добавить элемент',
+				'hint' => 'В UI не используется. '
+					.'Нужен для передачи новой строки в список regexp выражений в форме редактирования (_form)',
+				'type' => 'string'
+			],
             'id' => 'Идентификатор',
             'manufacturers_id' => 'Разработчик',
             'descr' => [

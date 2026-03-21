@@ -157,10 +157,13 @@ class ModelTypeSafetyTest extends Unit
     public function dataProviderSafeAttributesWithExplicitType(): array
     {
         // Инициализируем Yii перед запуском DataProvider
-        if (!self::initYii()) {
+        /*if (!self::initYii()) {
             echo "Yii initialization failed\n";
             return [];
-        }
+        }*/
+
+		\Helper\Yii2::initFromFileName('test-console.php');
+		\Helper\Database::loadSqlDump();
         
         // Подключаем ArmsModel напрямую, чтобы был доступен для проверки наследования
         $armsModelPath = codecept_root_dir() . '/models/base/ArmsModel.php';
@@ -238,7 +241,7 @@ class ModelTypeSafetyTest extends Unit
     {
         try {
             // Инициализируем Yii если ещё не инициализирован
-            self::initYii();
+            //self::initYii();
             
             // Подключаем ArmsModel если ещё не подключен
             $armsModelPath = codecept_root_dir() . '/models/base/ArmsModel.php';
@@ -268,32 +271,4 @@ class ModelTypeSafetyTest extends Unit
         }
     }
 
-    /**
-     * Выводит статистику после всех тестов
-     */
-    public function testSummary(): void
-    {
-        // Инициализируем Yii для вывода
-        self::initYii();
-        
-        $totalChecked = count(self::$checkedItems);
-        
-        // Группируем по классам
-        $byClass = [];
-        foreach (self::$checkedItems as $item) {
-            $className = $item['class'];
-            if (!isset($byClass[$className])) {
-                $byClass[$className] = [];
-            }
-            $byClass[$className][] = $item['attribute'];
-        }
-
-        echo "\n\n=== Проверено атрибутов: {$totalChecked} ===\n\n";
-        
-        foreach ($byClass as $className => $attributes) {
-            echo "{$className}: " . implode(', ', $attributes) . "\n";
-        }
-        
-        echo "\n";
-    }
 }

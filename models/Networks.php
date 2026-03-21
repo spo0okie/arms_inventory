@@ -113,58 +113,30 @@ class Networks extends ArmsModel
 	{
 		return ArrayHelper::recursiveOverride(parent::attributeData(),[
 			'id' => 'ID',
-			'name' => [
-				'Название сети',
-				'hint' => 'Короткое понятное название' . static::$latinNameHint,
+			'addr' => ['alias'=>'text_addr'],
+			'comment' => [
+				'Описание',
+				'hint' => 'Короткое описание сети',
 			],
-			'vlan_id' => [
-				'Vlan',
-				'hint' => 'В каком Vlan находится эта сеть',
-				'placeholder' => 'Выберите VLAN',
-			],
-			'vlan' => ['alias'=>'vlan_id'],
-			'segments_id' => [
-				Segments::$title,
-				'hint' => 'К какому сегменту относится эта сеть',
-				'placeholder' => 'Выберите Сегмент ИТ',
-			],
-			'segment' => ['alias'=>'segments_id'],
+			'dhcp' => ['alias'=>'text_dhcp'],
 			'domain_id' => [
 				'Домен',
 			],
 			'domain' => ['alias'=>'domain_id'],
-			'netDomain' => ['alias'=>'domain_id'],
-			'addr' => [
-				'Адрес',
-				'hint' => 'Адрес сети (в понятной нотации 192.168.0.0)',
-			],
-			'usage' => [
-				'Занято',
-			],
-			'text_addr' => [
-				'Адрес и маска',
-				'hint' => 'Адрес и маска сети (в десятичной нотации 192.168.1.0/24)',
-			],
 			'mask' => [
 				'Маска',
 				'hint' => 'Маска сети (в понятной нотации 255.255.255.0)',
 			],
-			'readableNetMask' => ['alias'=>'mask'],
-			'router' => [
-				'Шлюз',
-				'hint' => 'Кто является шлюзом в сети (опционально)',
+			'maxHosts' => ['Допустимое количество узлов'],
+			'netDomain' => ['alias'=>'domain_id'],
+			'name' => [
+				'Название сети',
+				'hint' => 'Короткое понятное название' . static::$latinNameHint,
 			],
-			'text_router' => ['alias'=>'router'],
-			'readableRouter' => ['alias'=>'router'],
-			'dhcp' => [
-				'DHCP сервер',
-				'hint' => 'Кто является DHCP сервером (опционально)',
-			],
-			'readableDhcp' => ['alias'=>'dhcp'],
-			'text_dhcp' => ['alias'=>'dhcp'],
-			'comment' => [
-				'Описание',
-				'hint' => 'Короткое описание сети',
+			'notepad' => [
+				'Подробно',
+				'hint' => 'Подробное описание сети',
+				'type' => 'text',
 			],
 			'ranges' => [
 				'Диапазоны',
@@ -173,18 +145,46 @@ class Networks extends ArmsModel
 					.'1-29 Статика<br>'
 					.'30-249 DHCP<br>'
 					.'250-254 Резерв',
+				'type'=>'text'
 			],
-			'notepad' => [
-				'Подробно',
-				'hint' => 'Подробное описание сети',
-				'type' => 'text',
-			],
-			'readableWildcard' => ['Обратная маска'],
-			'readableNetworkIp' => ['IP сети'],
+			'readableBroadcastIp' => ['Широковещательный IP'],
+			'readableDhcp' => ['alias'=>'dhcp'],
 			'readableFirstIp' => ['Первый доступный IP'],
 			'readableLastIp' => ['Последний доступный IP'],
-			'readableBroadcastIp' => ['Широковещательный IP'],
-			'maxHosts' => ['Допустимое количество узлов'],
+			'readableNetMask' => ['alias'=>'mask'],
+			'readableNetworkIp' => ['IP сети'],
+			'readableRouter' => ['alias'=>'text_router'],
+			'readableWildcard' => ['Обратная маска'],
+			'router' => ['alias'=>'text_router'],
+			'text_addr' => [
+				'Адрес и маска',
+				'hint' => 'Адрес и маска сети (в десятичной нотации 192.168.1.0/24)',
+				'type' => 'ip',
+			],
+			'text_dhcp' => [
+				'DHCP сервер',
+				'hint' => 'Кто является DHCP сервером (опционально)',
+				'type' => 'ip',
+			],
+			'text_router' => [
+				'Шлюз',
+				'hint' => 'Кто является шлюзом в сети (опционально)',
+				'type' => 'ip',
+			],
+			'usage' => [
+				'Занято',
+			],
+			'vlan_id' => [
+				'Vlan',
+				'hint' => 'В каком Vlan находится эта сеть',
+				'placeholder' => 'Выберите VLAN',
+			],
+			'segments_id' => [
+				Segments::$title,
+				'hint' => 'К какому сегменту относится эта сеть',
+				'placeholder' => 'Выберите Сегмент ИТ',
+			],
+			'segment' => ['alias'=>'segments_id'],
 		]);
 	}
 	

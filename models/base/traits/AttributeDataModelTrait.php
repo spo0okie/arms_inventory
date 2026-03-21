@@ -54,6 +54,7 @@
  *       //  - link - одиночная ссылка
  *       //  - number - число (ввод через обычный input/поиск числовой)
  *       //  - string - обычный текст (по умолчанию)
+ *       //  - string[] - массив строк (не используется в UI, для API/генаратора)
  *       'type' => 'toggle',
  *       //список констант-значений атрибута (для toggle/radios/list)
  *       'fieldList' => ['Услуга','Сервис'],
@@ -424,16 +425,23 @@ trait AttributeDataModelTrait
 		}
 		
 		switch ($attribute) {
-			case 'id': return 'integer';
+			case 'id':
+			case 'count': return 'integer';
 			case 'ip':
 			case 'ips': return 'ips';
 			case 'mac':
 			case 'macs': return 'macs';
 			case 'links':
+			case 'url':
 			case 'urls': return 'urls';
 			case 'name':
+			case 'created_by':
+			case 'updated_by':
 			case 'comment': return 'string';
 			case 'notepad': return 'text';
+			case 'updated_at':
+			case 'created_at': return 'datetime';
+			case 'date': return 'date';
 		}
 		
 		foreach ($this->rules() as $rule) {
