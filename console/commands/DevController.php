@@ -7,6 +7,7 @@
 
 namespace app\console\commands;
 
+use app\helpers\ModelHelper;
 use yii\console\Controller;
 
 /**
@@ -17,14 +18,29 @@ use yii\console\Controller;
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @since 2.0
  */
-class HelloController extends Controller
+class DevController extends Controller
 {
     /**
      * This command echoes what you have entered as the message.
      * @param string $message the message to be echoed.
      */
-    public function actionIndex($message = 'hello world')
+    public function actionTypes()
     {
-        echo $message . "\n";
+		$types=[];
+        $classes=ModelHelper::getModelClasses();
+		foreach ($classes as $class) {
+			$model=new $class();
+			$attribureData=$model->attributeData();
+			foreach ($attribureData as $attr=>$data) {
+				if (isset($data['type'])) {
+					$type=$data['type'];
+					if (!isset($types[$type])) {
+						$types[$type]=['c'=>1,'path'=>$class.'->'.$attr];
+					} else
+						$types[$type]['c']++;					
+				}
+			}
+		}
+		print_r($types);
     }
 }

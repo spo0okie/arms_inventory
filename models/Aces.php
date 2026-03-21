@@ -210,7 +210,6 @@ class Aces extends ArmsModel
 				'Субъекты',
 				'indexHint' => 'Субъекты доступа: кто получает доступ',
 				'join' => ['users','comps','services','netIps','networks'],
-				'type' => 'link',
 			],
 			'subject_nodes' => [
 				'Узлы субъектов',
@@ -222,7 +221,7 @@ class Aces extends ArmsModel
 			'users_ids' => [
 				Users::$titles,
 				'hint' => Users::$titles.', которым предоставляется доступ<br>'.
-					'Сотрудников других организаций можно также добавить в '.Html::a('список пользователей',['/users/index']),
+					'Сотрудников других организаций можно также добавить в список пользователей',
 				'join' => ['users'],
 			],
 		]);

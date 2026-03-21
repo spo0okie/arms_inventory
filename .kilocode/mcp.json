@@ -1,1 +1,1 @@
-{"mcpServers":{"filesystem":{"command":"npx","args":["-y","@modelcontextprotocol/server-filesystem","C:\\Joker\\Works\\arms"],"alwaysAllow":["read_text_file","directory_tree","read_multiple_files","read_file","edit_file","write_file","list_directory","search_files","create_directory"]}}}
+{"mcpServers":{"filesystem":{"command":"npx","args":["-y","@modelcontextprotocol/server-filesystem","C:\\Joker\\Works\\arms"],"alwaysAllow":["read_text_file","directory_tree","read_multiple_files","read_file","edit_file","list_directory","search_files","create_directory","write_file"]}}}
