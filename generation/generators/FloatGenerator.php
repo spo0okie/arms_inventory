@@ -7,7 +7,7 @@ namespace app\generation\generators;
  */
 class NumberGenerator implements GeneratorInterface
 {
-    public function generate(array $params): mixed
+    public static function generate(array $params): mixed
     {
         //если нужен пустой атрибут
         if ($params['empty']??false) {
@@ -19,9 +19,9 @@ class NumberGenerator implements GeneratorInterface
 
         //получаем границы значений
         $min = $params['min'] ?? 0;
-        $max = $params['max'] ?? 1000;
+        $max = $params['max'] ?? 100000;
         
         //генерируем случайное число
-        return random_int($min, $max);
+        return random_int($min, $max)/100;
     }
 }

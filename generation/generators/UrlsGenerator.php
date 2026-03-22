@@ -7,7 +7,7 @@ namespace app\generation\generators;
  */
 class UrlsGenerator implements GeneratorInterface
 {
-    public function generate(array $params): mixed
+    public static function generate(array $params): mixed
     {
         //если нужен пустой атрибут
         if ($params['empty']??false) {
@@ -23,18 +23,20 @@ class UrlsGenerator implements GeneratorInterface
         
         $urls = [];
         for ($i = 0; $i < $count; $i++) {
-            $urls[] = $this->randomUrl();
+			$prefix=TextGenerator::randomWords(0,4,false);
+			if ($prefix) $prefix.=' ';
+            $urls[] = $prefix.self::randomUrl();
         }
         
         //возвращаем строку с URL через запятую
-        return implode(', ', $urls);
+        return implode("\n", $urls);
     }
 
     /**
      * Генерирует случайный URL
      * @return string
      */
-    protected function randomUrl(): string
+    public static function randomUrl(): string
     {
         //генерируем случайный домен и путь
         $domains = ['example.com', 'test.org', 'demo.net', 'site.ru', 'host.io'];

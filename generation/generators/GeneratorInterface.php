@@ -12,5 +12,5 @@ interface GeneratorInterface
      * - не содержит бизнес-логики
      * - не обращается к БД
      */
-    public function generate(array $params): mixed;
+    public static function generate(array $params): mixed;
 }

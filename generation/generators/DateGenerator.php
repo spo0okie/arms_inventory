@@ -7,7 +7,7 @@ namespace app\generation\generators;
  */
 class DateGenerator implements GeneratorInterface
 {
-    public function generate(array $params): mixed
+    public static function generate(array $params): mixed
     {
         //если нужен пустой атрибут
         if ($params['empty']??false) {

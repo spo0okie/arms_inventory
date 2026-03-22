@@ -9,11 +9,11 @@
  *
  *   '<attr>' => [
  *       //Атрибуты отображаются в следующих основных сценариях:
- *       //  - form (заполнение) поиск значений:label,hint
- *       //  - view (просмотр) поиск значений:viewLabel->label,viewHint->indexHint->''
- *       //  - grid (заголовок в таблице) поиск значений:indexLabel->viewLabel->label,indexHint->viewHint->''
+ *       //  - form (заполнение) поиск значений:label, hint
+ *       //  - view (просмотр) поиск значений:viewLabel->label, viewHint->indexHint->''
+ *       //  - index (заголовок в таблице) поиск значений:indexLabel->viewLabel->label, indexHint->viewHint->''
  *       //  - search (заголовок в таблице с фильтром) значение: indexHint()+(searchHint->'')
- *       //  - api (формирование документации) поиск значений:apiLabel->label,apiHint->hint
+ *       //  - api (формирование документации) поиск значений:apiLabel->label, apiHint->hint
  *
  *       //метка атрибута
  *       //позже транслируется в attributeLabels, используется в отображении атрибута в формах
@@ -39,23 +39,26 @@
  *       'apiLabel'   => 'Имя для документации API',
  *       'apiHint'    => 'Описание для документации API',
  *
- *       //тип Input этого аттрибута в форме редактирования (и при выводе через ModelFieldWidget)
- *       //  - boolean - да / нет (чекбокс)
- *       //  - toggle - это как boolean, но только для 0 и 1 есть свои названия, напр сервис/услуга
- *       //  - radios - это как toggle, только значений может быть больше 2
- *       //  - list - это как radios, только значений прям много и оформляется в виде dropdown
- *       //  - ntext - textarea (простой текст без форматирования с конвертацией nl -> <br> при рендере)
- *       //  - text - текст с форматированием (какой формат прописывается в параметрах)
- *       //  - date - дата
- *       //  - datetime - дата/время
- *       //  - ips - список IP
- *       //  - macs - список MAC
- *       //  - urls - список URL
- *       //  - link - одиночная ссылка
- *       //  - number - число (ввод через обычный input/поиск числовой)
- *       //  - string - обычный текст (по умолчанию)
- *       //  - string[] - массив строк (не используется в UI, для API/генаратора)
- *       'type' => 'toggle',
+ *       //тип этого атрибута при хранении (в API и для генератора моделей)
+ *       //  - boolean -> да / нет (default input чекбокс)
+ *       //  - integer - целое число (default input - text input)
+ *       //  - float - число с плавающей точкой (default input - text input)
+ *       //  - string - строка до 255 знаков (default input - text input)
+ *       //  - text - текст больше 255 знаков (default input textArea (autoresize))
+ *       //    - ips - список IP через перенос строки (default input - textArea (autoresize))
+ *       //    - macs - список MAC через перенос строки (default input - textArea (autoresize))
+ *       //    - urls - список URL через перенос строки (default input - textArea (autoresize))
+ *       //    - json - json структура внутри text (default input - textArea (autoresize))
+ *       //  - date - дата (default input - date)
+ *       //  - datetime - дата/время (default input date time)
+ *       //  - string[] - массив строк (default input отсутствует)
+ *                        Пока использовался только для передачи дополнительных параметров в junction table
+ *                        В чистом виде в БД не пишется
+ *       'type' => 'string',
+ *
+ *       TODO: добавить кастомный input
+ *       'input' => 'toggle'	//radios/list
+ *
  *       //список констант-значений атрибута (для toggle/radios/list)
  *       'fieldList' => ['Услуга','Сервис'],
  *

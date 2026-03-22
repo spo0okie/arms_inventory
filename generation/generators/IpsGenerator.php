@@ -7,7 +7,7 @@ namespace app\generation\generators;
  */
 class IpsGenerator implements GeneratorInterface
 {
-    public function generate(array $params): mixed
+    public static function generate(array $params): mixed
     {
         //если нужен пустой атрибут
         if ($params['empty']??false) {
@@ -23,7 +23,7 @@ class IpsGenerator implements GeneratorInterface
         
         $ips = [];
         for ($i = 0; $i < $count; $i++) {
-            $ips[] = $this->randomIp();
+            $ips[] = self::randomIp();
         }
         
         //возвращаем набор строк с IP
@@ -34,7 +34,7 @@ class IpsGenerator implements GeneratorInterface
      * Генерирует случайный IPv4 адрес
      * @return string
      */
-    protected function randomIp(): string
+    public static function randomIp(): string
     {
         //генерируем IP в частных сетях
         //10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16

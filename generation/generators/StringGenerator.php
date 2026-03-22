@@ -4,7 +4,7 @@ namespace app\generation\generators;
 
 class StringGenerator implements GeneratorInterface
 {
-    public function generate(array $params): mixed
+    public static function generate(array $params): mixed
     {
 		//если нужен пустой атрибут
 		if ($params['empty']??false) {
@@ -19,10 +19,10 @@ class StringGenerator implements GeneratorInterface
 
         $length = random_int($min, $max);
 
-        return $this->randomString($length);
+        return self::randomString($length);
     }
 
-    protected function randomString(int $length): string
+    public static function randomString(int $length): string
     {
         // максимально простой и быстрый вариант
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

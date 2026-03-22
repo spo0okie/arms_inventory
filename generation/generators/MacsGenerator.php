@@ -7,7 +7,7 @@ namespace app\generation\generators;
  */
 class MacsGenerator implements GeneratorInterface
 {
-    public function generate(array $params): mixed
+    public static function generate(array $params): mixed
     {
         //если нужен пустой атрибут
         if ($params['empty']??false) {
@@ -23,18 +23,18 @@ class MacsGenerator implements GeneratorInterface
         
         $macs = [];
         for ($i = 0; $i < $count; $i++) {
-            $macs[] = $this->randomMac();
+            $macs[] = self::randomMac();
         }
         
         //возвращаем строку с MAC через запятую
-        return implode(', ', $macs);
+        return implode("\n", $macs);
     }
 
     /**
      * Генерирует случайный MAC адрес
      * @return string
      */
-    protected function randomMac(): string
+    public static function randomMac(): string
     {
         //генерируем локальный MAC адрес (бит 8-й бит = 1)
         //формат: XX:XX:XX:XX:XX:XX

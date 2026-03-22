@@ -8,7 +8,7 @@ namespace app\generation\generators;
  */
 class TextGenerator implements GeneratorInterface
 {
-    public function generate(array $params): mixed
+    public static function generate(array $params): mixed
     {
         //если нужен пустой атрибут
         if ($params['empty']??false) {
@@ -22,48 +22,64 @@ class TextGenerator implements GeneratorInterface
         $min = $params['min'] ?? 10;
         $max = $params['max'] ?? 50;
 
-        $length = random_int($min, $max);
-        
-        return $this->randomFormattedText($length);
+        $lineCount = random_int($min, $max);
+
+        $lines = [];
+
+        for ($i = 0; $i < $lineCount; $i++) {
+            $lines[] = self::randomWords();
+        }
+
+        return implode("\n", $lines);
     }
 
     /**
-     * Генерирует текст с простым форматированием (HTML)
-     * @param int $lineCount количество строк
+     * Возвращает случайный текст из Lorem-слов
+     * @param int $minWords    минимальное количество слов
+     * @param int $maxWords    максимальное количество слов
      * @return string
      */
-    protected function randomFormattedText(int $lineCount): string
+    public static function randomWords($minWords = 3, $maxWords = 10, $formated=true): string
     {
-        $lines = [];
-        $words = ['Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 
+		$wordCount = random_int($minWords, $maxWords);
+		$words = [];
+		for ($j = 0; $j < $wordCount; $j++) {
+			$word=self::randomWord();
+			if ($formated) $word=self::randomFormat($word);
+			$words[]=$word;
+		}
+        return implode(' ',$words);
+    }
+
+    /**
+     * Возвращает случайное Lorem-слово
+     * @return string
+     */
+    public static function randomWord(): string
+    {
+        $words = ['Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur',
                   'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor',
                   'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua'];
-        
-        for ($i = 0; $i < $lineCount; $i++) {
-            $wordCount = random_int(3, 10);
-            $lineWords = [];
-            for ($j = 0; $j < $wordCount; $j++) {
-                $lineWords[] = $words[random_int(0, count($words) - 1)];
-            }
-            $text = implode(' ', $lineWords);
-            
-            //добавляем простое форматирование
-            $format = random_int(0, 3);
-            switch ($format) {
-                case 0:
-                    $lines[] = "<p>{$text}</p>";
-                    break;
-                case 1:
-                    $lines[] = "<strong>{$text}</strong>";
-                    break;
-                case 2:
-                    $lines[] = "<em>{$text}</em>";
-                    break;
-                default:
-                    $lines[] = $text;
-            }
+
+        return $words[random_int(0, count($words) - 1)];
+    }
+
+    /**
+     * Применяет случайное форматирование к строке
+     * @param string $text
+     * @return string
+     */
+    public static function randomFormat(string $text): string
+    {
+        switch (random_int(0, 3)) {
+            case 0:
+                return "<p>{$text}</p>";
+            case 1:
+                return "<strong>{$text}</strong>";
+            case 2:
+                return "<em>{$text}</em>";
+            default:
+                return $text;
         }
-        
-        return implode("\n", $lines);
     }
 }
