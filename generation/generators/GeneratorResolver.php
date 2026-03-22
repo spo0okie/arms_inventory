@@ -6,7 +6,7 @@ use app\models\base\ArmsModel;
 
 class GeneratorResolver
 {
-	public static function resolve(ArmsModel $model, array $attribute): string
+	public static function resolve(ArmsModel $model, string $attribute): string
 	{
 		$attributeData=$model->getAttributeData($attribute);
 		

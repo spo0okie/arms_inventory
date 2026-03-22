@@ -119,7 +119,6 @@ class ArmsModel extends ActiveRecord
 	/** @var string поле которое сравнивается  */
 	public static $syncTimestamp='updated_at';
 
-	
 	const SCENARIO_VALIDATION = 'validation';
 	
 	
@@ -133,6 +132,16 @@ class ArmsModel extends ActiveRecord
 			$this->relationsBehaviour(),
 		];
 	}
+
+	/** 
+	 * список ролей которые может реализовать модель (для генерации)
+	 */
+	public static function roles(): array
+	{
+		return[];
+	}
+
+
 	
 	/**
 	 * Сразу добавляем в набор дополнительных полей все ссылки на другие модели из AttributeLinksModelTrait

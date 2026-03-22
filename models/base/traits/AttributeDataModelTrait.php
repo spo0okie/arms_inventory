@@ -764,4 +764,47 @@ trait AttributeDataModelTrait
 		}
 		return $attribute;
 	}
+
+	/**
+	 * Возвращает true если атрибут обязательный (required)
+	 */
+	public function getAttributeIsRequired(string $attribute): bool
+	{
+		$cache='attributeIsRequired|'.$attribute;
+		if (isset($this->attrsCache[$cache]))
+			return $this->attrsCache[$cache];
+		// Проверяем через rules
+		foreach ($this->rules() as $rule) {
+			if (in_array($attribute, (array)$rule[0])) {
+				if ($rule[1] === 'required') {
+					return $this->attrsCache[$cache]=false;
+				}
+			}
+		}
+		
+		return $this->attrsCache[$cache]=true;
+	}
+
+	/**
+	 * Возвращает true если атрибут может быть null
+	 * @param string $attribute
+	 * @return bool
+	 */
+	public function getAttributeIsNullable(string $attribute): bool
+	{
+		$cache='attributeIsNullable|'.$attribute;
+		if (isset($this->attrsCache[$cache]))
+			return $this->attrsCache[$cache];
+
+		if ($this->getAttributeIsRequired($attribute))
+			return $this->attrsCache[$cache]=false;
+	
+		// Проверяем через schema таблицы
+		$schema = $this->getTableSchema();
+		if ($schema !== null && $schema->getColumn($attribute) !== null) {
+			return $this->attrsCache[$cache]=$schema->getColumn($attribute)->allowNull;
+		}
+		
+		return $this->attrsCache[$cache]=true;		
+	}
 }

@@ -1,6 +1,94 @@
 # Идея генеративного механизма создания моделей
 
-Решаемая проблема:
+> **Статус реализации:** В работе — первый этап (генераторы атрибутов) завершён ✅
+
+---
+
+## Реализованные компоненты
+
+### Генераторы атрибутов (Этап 1) ✅
+
+Создан базовый слой генераторов значений для всех используемых в проекте типов атрибутов, кроме типа "связь", который требует генерации моделей.
+
+### Интерфейс генератора
+
+```php
+interface GeneratorInterface
+{
+    public static function generate(array $params): mixed;
+}
+```
+
+### GeneratorResolver
+
+Класс `GeneratorResolver` отвечает за выбор генератора:
+
+- По типу атрибута из `attributeData()`
+- Поддержка кастомных генераторов через `generator` в attributeData
+- Маппинг типов → генераторы
+
+### Тестирование
+
+Создан unit-тест `GeneratorResolverTest` проверяющий покрытие всех типов атрибутов моделей генераторами
+
+---
+
+## Следующие этапы
+
+### Этап 2: ModelFactory ✅ РЕАЛИЗОВАН
+
+Создан класс [`ModelFactory`](generation/ModelFactory.php:1):
+
+```php
+use app\generation\ModelFactory;
+
+// Простое создание модели
+$model = ModelFactory::create(ModelClass::class);
+
+// С переопределениями
+$model = ModelFactory::create(ModelClass::class, [], [
+    'overrides' => ['name' => 'Тестовое имя'],
+]);
+
+// С preset для связей
+$model = ModelFactory::create(Techs::class, [], [
+    'role' => 'pc',  // Создаст связанные TechType -> TechModel
+]);
+```
+
+**Возможности:**
+- Pipeline: instantiate → generate attributes → apply presets → validate → save
+- Retry логика при валидации и сохранении
+- Поддержка preset-ов (ролей) для создания связанных моделей
+- Автоматический обход типичных ошибок валидации
+
+---
+
+### Этап 2: ModelFactory (в очереди)
+
+Создание фабрики моделей с pipeline:
+
+1. instantiate model
+2. generate attributes (AttributeGenerator)
+3. apply presets (role), overrides
+4. apply ModelResolver
+5. validate
+6. retry if fail
+7. save
+8. retry if fail
+
+### Этап 3: ModelResolver (в очереди)
+
+Пост-обработка модели:
+
+1. Attribute-level fixes (null/required)
+2. Relation fixes (FK, связи)
+3. Domain fixes (бизнес-логика)
+
+---
+
+## Решаемая проблема
+
 Текущий механизм acceptance тестов хоть и пытается быть генеративным, но по сути опирается на фиксированные Mock данные которые нужно постоянно обновлять. Поэтому тесты всегда запаздывают за кодом и часть проблем пролетает через тестирование в прод.
 
 Цель: перейти при прохождении acceptance тестов от тестовой предазполненной Mock данными БД к возможности создания моделей на лету по запросу. Модели вовсе не обязательно должны содержать сколь нибудь осмысленные данные, т.к. вся суть acceptance тестов - провека собирается ли страница или падает (ошибка 500)
