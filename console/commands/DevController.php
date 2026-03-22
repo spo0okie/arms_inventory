@@ -26,21 +26,7 @@ class DevController extends Controller
      */
     public function actionTypes()
     {
-		$types=[];
-        $classes=ModelHelper::getModelClasses();
-		foreach ($classes as $class) {
-			$model=new $class();
-			$attribureData=$model->attributeData();
-			foreach ($attribureData as $attr=>$data) {
-				if (isset($data['type'])) {
-					$type=$data['type'];
-					if (!isset($types[$type])) {
-						$types[$type]=['c'=>1,'path'=>$class.'->'.$attr];
-					} else
-						$types[$type]['c']++;					
-				}
-			}
-		}
+		$types=ModelHelper::getModelAtributesTypes();	
 		print_r($types);
     }
 }

@@ -159,17 +159,17 @@ class Networks extends ArmsModel
 			'text_addr' => [
 				'Адрес и маска',
 				'hint' => 'Адрес и маска сети (в десятичной нотации 192.168.1.0/24)',
-				'type' => 'ip',
+				'type' => 'ips',
 			],
 			'text_dhcp' => [
 				'DHCP сервер',
 				'hint' => 'Кто является DHCP сервером (опционально)',
-				'type' => 'ip',
+				'type' => 'ips',
 			],
 			'text_router' => [
 				'Шлюз',
 				'hint' => 'Кто является шлюзом в сети (опционально)',
-				'type' => 'ip',
+				'type' => 'ips',
 			],
 			'usage' => [
 				'Занято',

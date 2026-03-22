@@ -185,7 +185,7 @@ trait AttributeDataModelTrait
 			],
 			'external_links' => [
 				'Доп. связи',
-				'type' => 'json_object',
+				'type' => 'json',
 				'hint' => 'JSON структура с дополнительными объектами и ссылками на внешние информационные системы. '
 					.'Хранятся в виде JSON структуры. При записи значений старые узлы структуры объединяются с новыми. '
 					.'Запись {"link1":"value1"} изменит во всем наборе ссылок только "link1", остальные останутся без изменений. '
@@ -240,7 +240,7 @@ trait AttributeDataModelTrait
 	/**
 	 * Возвращает все метаданные атрибута из attributeData()
 	 * @param $attr
-	 * @return string[]|null
+	 * @return array|null
 	 * @throws UnknownPropertyException
 	 */
 	public function getAttributeData($attr)

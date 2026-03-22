@@ -116,7 +116,7 @@ class NetIps extends ArmsModel
 			'text_addr' => [
 				'Адрес',
 				'hint'=>'Также можно указать маску',
-				'type'=>'ip'
+				'type'=>'ips'
 			],
 			'comment' => [
 				'Комментарий',

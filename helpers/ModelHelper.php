@@ -127,4 +127,31 @@ class ModelHelper
         return $modelClasses;
     }
 
+	/**
+	 * Возвращает список типов атрибутов моделей
+	 * @param array|null $modelClasses Список классов моделей (по умолчанию все модели из models,modules)
+	 * @return array Список типов атрибутов моделей в формате 
+	 * 				['type'=>['count'=>количество использований,'sample'=>пример где используется]]
+	 */
+	public static function getModelAtributesTypes(?array $modelClasses=null): array {
+		$types=[];
+		if ($modelClasses === null)
+			$modelClasses = self::getModelClasses();
+		foreach ($modelClasses as $modelClass) {
+			$model=new $modelClass();
+			$attribureData=$model->attributeData();
+			foreach ($attribureData as $attr=>$data) {
+				if (isset($data['type'])) {
+					$type=$data['type'];
+					if (!isset($types[$type])) {
+						$types[$type]=['count'=>1,'sample'=>$modelClass.'->'.$attr];
+					} else
+						$types[$type]['count']++;
+				}
+			}
+		}
+		
+		return $types;
+	}
+
 }

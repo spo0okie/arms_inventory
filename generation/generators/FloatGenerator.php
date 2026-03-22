@@ -3,9 +3,9 @@
 namespace app\generation\generators;
 
 /**
- * Генератор для типа number (числа)
+ * Генератор для типа float
  */
-class NumberGenerator implements GeneratorInterface
+class FloatGenerator implements GeneratorInterface
 {
     public static function generate(array $params): mixed
     {
