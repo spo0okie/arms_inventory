@@ -42,40 +42,37 @@ interface GeneratorInterface
 ```php
 use app\generation\ModelFactory;
 
-// Простое создание модели
+// Модель с заполненными атрибутами (по умолчанию)
 $model = ModelFactory::create(ModelClass::class);
 
-// С переопределениями
+// Модель с пустыми атрибутами (nullable)
 $model = ModelFactory::create(ModelClass::class, [], [
-    'overrides' => ['name' => 'Тестовое имя'],
+    'empty' => true,
 ]);
 
-// С preset для связей
+// С переопределениями атрибутов
+$model = ModelFactory::create(ModelClass::class, [], [
+    'overrides' => [
+        'name' => 'Тестовое имя',
+        'model_id' => 123,  // Связь нужно указать вручную
+    ],
+]);
+
+// С preset для связей (если модель поддерживает roles())
 $model = ModelFactory::create(Techs::class, [], [
-    'role' => 'pc',  // Создаст связанные TechType -> TechModel
+    'role' => 'pc',  // Требует реализации static function roles() в модели
 ]);
 ```
 
 **Возможности:**
 - Pipeline: instantiate → generate attributes → apply presets → validate → save
-- Retry логика при валидации и сохранении
-- Поддержка preset-ов (ролей) для создания связанных моделей
+- Retry логика при валидации и сохранении (до 7 попыток)
+- Сценарии: `empty` — пустая/заполненная модель
+- Presets (роли) — требуют реализации в модели через `static function roles()`
+- Связи (`_id`, `_ids`) — указываются вручную через `overrides`
 - Автоматический обход типичных ошибок валидации
 
 ---
-
-### Этап 2: ModelFactory (в очереди)
-
-Создание фабрики моделей с pipeline:
-
-1. instantiate model
-2. generate attributes (AttributeGenerator)
-3. apply presets (role), overrides
-4. apply ModelResolver
-5. validate
-6. retry if fail
-7. save
-8. retry if fail
 
 ### Этап 3: ModelResolver (в очереди)
 

@@ -18,9 +18,16 @@ class StringArrayGenerator implements GeneratorInterface
             return [];
         }
 
-        //генерируем массив строк
-        //по умолчанию 1-5 элементов
-        $count = $params['count'] ?? random_int(1, 5);
+		//детерминизм
+		if ($params['seed'] !== null) {
+ 			mt_srand($params['seed']);
+		}
+
+        //количество записей в атрибуте
+        $min = $params['min'] ?? 1;
+        $max = $params['max'] ?? 5;
+        $count = mt_rand($min, $max);
+
         
         $result = [];
         for ($i = 0; $i < $count; $i++) {            

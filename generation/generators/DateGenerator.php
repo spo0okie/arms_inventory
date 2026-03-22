@@ -17,6 +17,11 @@ class DateGenerator implements GeneratorInterface
             return null;
         }
 
+		//детерминизм
+		if ($params['seed'] !== null) {
+ 			mt_srand($params['seed']);
+		}
+
         //генерируем случайную дату
         //по умолчанию: от 2020-01-01 до текущей даты
         $minDate = $params['min'] ?? '2020-01-01';
@@ -25,7 +30,7 @@ class DateGenerator implements GeneratorInterface
         $minTimestamp = strtotime($minDate);
         $maxTimestamp = strtotime($maxDate);
         
-        $randomTimestamp = random_int($minTimestamp, $maxTimestamp);
+        $randomTimestamp = mt_rand($minTimestamp, $maxTimestamp);
         
         return date('Y-m-d', $randomTimestamp);
     }

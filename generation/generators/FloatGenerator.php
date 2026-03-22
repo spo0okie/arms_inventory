@@ -17,11 +17,16 @@ class FloatGenerator implements GeneratorInterface
             return 0;
         }
 
+		//детерминизм
+		if ($params['seed'] !== null) {
+ 			mt_srand($params['seed']);
+		}
+
         //получаем границы значений
         $min = $params['min'] ?? 0;
         $max = $params['max'] ?? 100000;
         
         //генерируем случайное число
-        return random_int($min, $max)/100;
+        return mt_rand($min, $max)/100;
     }
 }

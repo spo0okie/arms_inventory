@@ -17,9 +17,15 @@ class MacsGenerator implements GeneratorInterface
             return '';
         }
 
-        //генерируем список MAC адресов
-        //по умолчанию 1-3 MAC адреса
-        $count = $params['count'] ?? random_int(1, 3);
+		//детерминизм
+		if ($params['seed'] !== null) {
+ 			mt_srand($params['seed']);
+		}
+
+        //количество записей в атрибуте
+        $min = $params['min'] ?? 1;
+        $max = $params['max'] ?? 5;
+        $count = mt_rand($min, $max);
         
         $macs = [];
         for ($i = 0; $i < $count; $i++) {
@@ -39,12 +45,12 @@ class MacsGenerator implements GeneratorInterface
         //генерируем локальный MAC адрес (бит 8-й бит = 1)
         //формат: XX:XX:XX:XX:XX:XX
         $bytes = [
-            random_int(0, 255),
-            random_int(0, 255),
-            random_int(0, 255),
-            random_int(0, 255),
-            random_int(0, 255),
-            random_int(0, 255),
+            mt_rand(0, 255),
+            mt_rand(0, 255),
+            mt_rand(0, 255),
+            mt_rand(0, 255),
+            mt_rand(0, 255),
+            mt_rand(0, 255),
         ];
         
         //устанавливаем локальный бит (2-й бит)

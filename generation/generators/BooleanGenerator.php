@@ -17,7 +17,12 @@ class BooleanGenerator implements GeneratorInterface
             return false;
         }
 
+		//детерминизм
+		if ($params['seed'] !== null) {
+ 			mt_srand($params['seed']);
+		}
+
         //генерируем случайное булево значение
-        return random_int(0, 1) === 1;
+        return mt_rand(0, 1) === 1;
     }
 }

@@ -18,11 +18,16 @@ class TextGenerator implements GeneratorInterface
             return '';
         }
 
-        //генерируем текст с форматированием (простой HTML)
+		//детерминизм
+		if ($params['seed'] !== null) {
+ 			mt_srand($params['seed']);
+		}
+
+		//генерируем текст с форматированием (простой HTML)
         $min = $params['min'] ?? 10;
         $max = $params['max'] ?? 50;
 
-        $lineCount = random_int($min, $max);
+        $lineCount = mt_rand($min, $max);
 
         $lines = [];
 
@@ -41,7 +46,7 @@ class TextGenerator implements GeneratorInterface
      */
     public static function randomWords($minWords = 3, $maxWords = 10, $formated=true): string
     {
-		$wordCount = random_int($minWords, $maxWords);
+		$wordCount = mt_rand($minWords, $maxWords);
 		$words = [];
 		for ($j = 0; $j < $wordCount; $j++) {
 			$word=self::randomWord();
@@ -61,7 +66,7 @@ class TextGenerator implements GeneratorInterface
                   'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor',
                   'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua'];
 
-        return $words[random_int(0, count($words) - 1)];
+        return $words[mt_rand(0, count($words) - 1)];
     }
 
     /**
@@ -71,7 +76,7 @@ class TextGenerator implements GeneratorInterface
      */
     public static function randomFormat(string $text): string
     {
-        switch (random_int(0, 3)) {
+        switch (mt_rand(0, 3)) {
             case 0:
                 return "<p>{$text}</p>";
             case 1:

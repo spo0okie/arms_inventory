@@ -14,10 +14,15 @@ class StringGenerator implements GeneratorInterface
 			return '';
 		}
 
+		//детерминизм
+		if ($params['seed'] !== null) {
+ 			mt_srand($params['seed']);
+		}
+
         $min = $params['min'] ?? 5;
         $max = $params['max'] ?? 20;
 
-        $length = random_int($min, $max);
+        $length = mt_rand($min, $max);
 
         return self::randomString($length);
     }
@@ -31,7 +36,7 @@ class StringGenerator implements GeneratorInterface
         $maxIndex = strlen($chars) - 1;
 
         for ($i = 0; $i < $length; $i++) {
-            $result .= $chars[random_int(0, $maxIndex)];
+            $result .= $chars[mt_rand(0, $maxIndex)];
         }
 
         return $result;

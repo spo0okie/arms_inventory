@@ -43,6 +43,11 @@ class ModelFactory
 	 * Максимальное количество попыток сохранения
 	 */
 	public const MAX_SAVE_RETRIES = 7;
+
+	/**
+	 * Seed для генерации
+	 */
+	protected static int $seed=0;
 	
 	/**
 	 * Создать модель с автоматически сгенерированными атрибутами.
@@ -57,9 +62,10 @@ class ModelFactory
 	{
 		$options = array_merge([
 			'empty' => false,           // Генерировать пустые значения (nullable)
-			'role' => null,            // Preset для связей (например 'pc' для Techs)
+			'role' => null,             // Preset для связей (например 'pc' для Techs)
 			'overrides' => [],          // Переопределение конкретных атрибутов
 			'save' => true,             // Сохранять ли модель в БД
+			'seed' => null,             // Seed для детерминизма (если null - случайный)
 			'validateRetries' => self::MAX_VALIDATE_RETRIES,
 			'saveRetries' => self::MAX_SAVE_RETRIES,
 		], $options);
@@ -71,6 +77,10 @@ class ModelFactory
 			throw new Exception('ModelFactory работает только с моделями наследующими ArmsModel');
 		}
 		
+		// Логируем seed для возможности воспроизведения
+		static::$seed = $options['seed'] ?? random_int(1, 1000);
+		Yii::debug("ModelFactory: seed=".static::$seed." для " . get_class($model), 'generation');
+
 		// Генерируем атрибуты
 		self::generateAttributes($model, $options);
 		
@@ -135,8 +145,12 @@ class ModelFactory
 				continue;
 			}
 			
+			// Определяем параметры для генератора
+			//тут никаких кастомизаций, только empty или нет
+			$params=['empty' => $options['empty']??false];
+
 			// Генерируем значение
-			$value = self::generateAttributeValue($model, $attribute, $attrData, $options);
+			$value = self::generateAttributeValue($model, $attribute, $params);
 			$model->$attribute = $value;
 		}
 	}
@@ -166,17 +180,18 @@ class ModelFactory
 	 *
 	 * @param ArmsModel $model Модель
 	 * @param string $attribute Имя атрибута
-	 * @param array $attrData Метаданные атрибута
 	 * @param array $options Опции генерации
+	 * @param int $seed Seed для детерминизма
 	 * @return mixed Сгенерированное значение
 	 */
-	protected static function generateAttributeValue(ArmsModel $model, string $attribute, array $attrData, array $options): mixed
+	protected static function generateAttributeValue(ArmsModel $model, string $attribute, array $params): mixed
 	{
 		// Определяем параметры для генератора
-		$params = [
-			'empty' => $options['empty'],
-			'nullable' => $model->getAttributeIsNullable($attribute),
-		];
+		if (!isset($params['nullable'])) 
+			$params['nullable'] = $model->getAttributeIsNullable($attribute);
+		
+		if (!isset($params['seed']))
+			$params['seed'] = static::$seed++;
 		
 		// Получаем класс генератора
 		try {
@@ -188,7 +203,7 @@ class ModelFactory
 		
 		// Генерируем значение
 		/** @var GeneratorInterface $generatorClass */
-		return $generatorClass::generate($attrData);
+		return $generatorClass::generate($params);
 	}
 
 	
@@ -282,6 +297,8 @@ class ModelFactory
 					$params = [
 						'empty' => false,
 						'nullable' => $model->getAttributeIsNullable($attribute),
+						// Используем новый seed при перегенерации
+						'seed' => random_int(1, PHP_INT_MAX),
 					];
 					
 					/** @var GeneratorInterface $generator */

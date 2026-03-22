@@ -18,14 +18,19 @@ class JsonGenerator implements GeneratorInterface
             
             return '{}';
         }
+		
+		//детерминизм
+		if ($params['seed'] !== null) {
+ 			mt_srand($params['seed']);
+		}
 
         //получаем количество полей в объекте
-        $minFields = $params['minFields'] ?? 1;
-        $maxFields = $params['maxFields'] ?? 5;
-        $fieldCount = random_int($minFields, $maxFields);
+        $min = $params['min'] ?? 1;
+        $max = $params['max'] ?? 5;
+        $count = mt_rand($min, $max);
 
         //генерируем случайный ассоциативный массив
-        $data = self::generateRandomObject($fieldCount);
+        $data = self::generateRandomObject($count);
 
         //кодируем в JSON строку
         return json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -41,23 +46,23 @@ class JsonGenerator implements GeneratorInterface
         
         for ($i = 0; $i < $fieldCount; $i++) {
             //выбираем имя поля
-            $fieldName = $fieldNames[random_int(0, count($fieldNames) - 1)] . '_' . random_int(1, 100);
+            $fieldName = $fieldNames[mt_rand(0, count($fieldNames) - 1)] . '_' . mt_rand(1, 100);
             
             //генерируем случайное значение (различные типы)
-            $valueType = random_int(0, 3);
+            $valueType = mt_rand(0, 3);
             
             switch ($valueType) {
                 case 0: //строка
-                    $result[$fieldName] = StringGenerator::randomString(random_int(5, 20));
+                    $result[$fieldName] = StringGenerator::randomString(mt_rand(5, 20));
                     break;
                 case 1: //число
-                    $result[$fieldName] = random_int(1, 1000);
+                    $result[$fieldName] = mt_rand(1, 1000);
                     break;
                 case 2: //булево
-                    $result[$fieldName] = random_int(0, 1) === 1;
+                    $result[$fieldName] = mt_rand(0, 1) === 1;
                     break;
                 case 3: //массив
-                    $result[$fieldName] = [random_int(1, 10), random_int(1, 10), random_int(1, 10)];
+                    $result[$fieldName] = [mt_rand(1, 10), mt_rand(1, 10), mt_rand(1, 10)];
                     break;
             }
         }

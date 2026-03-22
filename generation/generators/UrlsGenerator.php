@@ -17,9 +17,15 @@ class UrlsGenerator implements GeneratorInterface
             return '';
         }
 
-        //генерируем список URL
-        //по умолчанию 1-3 URL
-        $count = $params['count'] ?? random_int(1, 3);
+		//детерминизм
+		if ($params['seed'] !== null) {
+ 			mt_srand($params['seed']);
+		}
+
+        //количество записей в атрибуте
+        $min = $params['min'] ?? 1;
+        $max = $params['max'] ?? 5;
+        $count = mt_rand($min, $max);
         
         $urls = [];
         for ($i = 0; $i < $count; $i++) {
@@ -42,11 +48,11 @@ class UrlsGenerator implements GeneratorInterface
         $domains = ['example.com', 'test.org', 'demo.net', 'site.ru', 'host.io'];
         $paths = ['/page', '/api/v1/resource', '/docs', '/blog/post', '/user/profile'];
         
-        $domain = $domains[random_int(0, count($domains) - 1)];
-        $path = $paths[random_int(0, count($paths) - 1)];
+        $domain = $domains[mt_rand(0, count($domains) - 1)];
+        $path = $paths[mt_rand(0, count($paths) - 1)];
         
         //добавляем случайный протокол
-        $protocol = random_int(0, 1) === 0 ? 'http' : 'https';
+        $protocol = mt_rand(0, 1) === 0 ? 'http' : 'https';
         
         return "{$protocol}://{$domain}{$path}";
     }

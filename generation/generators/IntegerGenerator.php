@@ -17,11 +17,16 @@ class IntegerGenerator implements GeneratorInterface
             return 0;
         }
 
+		//детерминизм
+		if ($params['seed'] !== null) {
+ 			mt_srand($params['seed']);
+		}
+
         //получаем границы значений
         $min = $params['min'] ?? 0;
         $max = $params['max'] ?? 1000;
         
         //генерируем случайное целое число
-        return random_int($min, $max);
+        return mt_rand($min, $max);
     }
 }
