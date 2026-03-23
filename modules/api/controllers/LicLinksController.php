@@ -26,7 +26,7 @@ class LicLinksController extends BaseRestController
 	public $modelClass='app\models\links\LicLinks';
 	public function disabledActions(): array
 	{
-		return ['index','filter','view','update','create','delete'];
+		return ['index','view','update','create','delete'];
 	}
 	
 	public static function filterQuery(
