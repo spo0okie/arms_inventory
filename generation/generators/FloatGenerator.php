@@ -2,7 +2,7 @@
 
 namespace app\generation\generators;
 
-use app\generation\AttributeContext;
+use app\generation\context\AttributeContext;
 
 /**
  * Генератор дробных чисел

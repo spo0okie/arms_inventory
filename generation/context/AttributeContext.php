@@ -1,7 +1,8 @@
 <?php
 
-namespace app\generation;
+namespace app\generation\context;
 
+use app\generation\context\GenerationContext;
 use app\models\base\ArmsModel;
 
 /**

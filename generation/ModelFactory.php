@@ -2,9 +2,13 @@
 
 namespace app\generation;
 
+use app\generation\context\AttributeContext;
+use app\generation\context\GenerationContext;
+use app\generation\exceptions\ModelGenerationException;
 use app\generation\generators\GeneratorInterface;
 use app\generation\generators\GeneratorResolver;
 use app\models\base\ArmsModel;
+use Random\RandomException;
 use Yii;
 use yii\base\Exception;
 use yii\db\ActiveRecord;
@@ -43,17 +47,17 @@ class ModelFactory
 	 * Максимальное количество попыток сохранения
 	 */
 	public const MAX_SAVE_RETRIES = 7;
-
+	
 	/**
 	 * Создать модель с автоматически сгенерированными атрибутами.
 	 *
-	 * @param string|ActiveRecord $modelClass Класс модели или экземпляр
-	 * @param array $config Конфигурация модели (как для Yii2::createObject)
-	 * @param array $options Опции генерации
-	 * @return ActiveRecord|null Созданная модель или null при неудаче
+	 * @param string $modelClass Класс модели или экземпляр
+	 * @param array            $options Опции генерации
+	 * @return ArmsModel|null Созданная модель или null при неудаче
 	 * @throws Exception
+	 * @throws RandomException
 	 */
-	public static function create(string|ArmsModel $modelClass, array $config = [], array $options = []): ?ArmsModel
+	public static function create(string $modelClass, array $options = []): ?ArmsModel
 	{
 		$options = array_merge([
 			'empty' => false,           // Генерировать пустые значения (nullable)
@@ -68,37 +72,49 @@ class ModelFactory
 		// Устанавливаем seed для детерминизма
 		$baseSeed = $options['seed'] ?? random_int(1, 100000);
 		
+		$lastError = null;
 		for ($i = 0; $i < $options['validateRetries']; $i++) {
 			for ($j = 0; $j < $options['saveRetries']; $j++) {
 
 				//новый seed на каждую попытку
 				$options['seed'] = $baseSeed + $i*$options['saveRetries'] + $j;
-
-				$model = self::createOnce($modelClass, $config, $options);
-
-				if ($model !== null) {
-
-					if ($options['save']) {
-						try {
-							if ($model->save(false)) {
-								return $model;
-							}
-						} catch (\Throwable) {
-							Yii::debug("ModelFactory: save retry {$i} для {$modelClass}", 'generation');
-							continue;
+				
+				$result = self::createOnce($modelClass, $options);
+				
+				if ($result->isSuccess()) {
+					
+					$model = $result->model;
+					if ($options['save']){ try {
+						if ($model->save(false)) {
+							return $model;
 						}
-					} else { //no save
+					} catch (\Throwable) {
+						Yii::debug("ModelFactory: save retry {$i} для {$modelClass}", 'generation');
+						$lastError = new ModelGenerationException(
+							modelClass: $modelClass,
+							stage: 'create/save',
+							errors: $model->getErrors(),
+							seed: $options['seed']
+						);
+						continue;
+					}} else { //no save
 						return $model;
 					}
-				}
-
+				} else $lastError = $result->error;
 			}
 			Yii::debug("ModelFactory: validate retry {$i} для {$modelClass}", 'generation');
 		}
 
 		Yii::error("ModelFactory: не удалось создать модель {$modelClass}", 'generation');
-
-		return null;
+		
+		if ($lastError) throw $lastError;
+		
+		throw new ModelGenerationException(
+			modelClass: $modelClass,
+			stage: 'create',
+			errors: ['Не удалось создать модель после всех попыток'],
+			seed: $options['seed'],
+		);
 	}
 	
 	/**
@@ -111,7 +127,7 @@ class ModelFactory
 	protected static function generateAttributes(ArmsModel $model, GenerationContext $context, array $options): void
 	{
 		foreach ($model->safeAttributes() as $attribute) {
-
+			
 			// Пропускаем служебные атрибуты
 			if (self::isSystemAttribute($attribute)) {
 				continue;
@@ -124,8 +140,13 @@ class ModelFactory
 			
 			// Получаем данные атрибута
 			$attributeData = $model->getAttributeData($attribute);
-			if ($attributeData === null) {
-				continue;
+			if (!is_array($attributeData)) {
+				throw new ModelGenerationException(
+					modelClass: get_class($model),
+					stage: 'generateAttributes/getAttributesData',
+					errors: ['invalid attribute data: '.print_r($attributeData, true)],
+					seed: $options['seed'],
+				);
 			}
 			
 			// Пропускаем readonly атрибуты
@@ -140,10 +161,20 @@ class ModelFactory
 				model: $model,
 				generationContext: $context,
 			);
-
+			
 			// Получаем генератор и генерируем значение
-			$generator = GeneratorResolver::resolve($attrContext);
-			$model->$attribute = $generator->generate($attrContext);
+			try {
+				$generator = GeneratorResolver::resolve($attrContext);
+				$model->$attribute = $generator->generate($attrContext);
+			} catch (\Throwable $e) {
+				throw new ModelGenerationException(
+					modelClass: get_class($model),
+					stage: 'generateAttributes',
+					seed: $context->seed,
+					attribute: $attribute,
+					previous: $e
+				);
+			}
 		}
 	}
 	
@@ -208,12 +239,16 @@ class ModelFactory
 		}
 	}
 		
-	private static function createOnce(string|ArmsModel $modelClass, array $config, array $options): ?ArmsModel
+	private static function createOnce(string $modelClass, array $options): ModelGenerationResult
 	{
-		$model = Yii::createObject(array_merge(['class' => $modelClass], $config));
-
+		$model = Yii::createObject(['class' => $modelClass]);
+		
 		if (!$model instanceof ArmsModel) {
-			throw new Exception('ModelFactory работает только с ArmsModel');
+			throw new ModelGenerationException(
+				modelClass: $modelClass,
+				stage: 'createOnce::createObject',
+				errors:['ModelFactory работает только с ArmsModel']
+			);
 		}
 
 		$context = new GenerationContext(
@@ -224,75 +259,107 @@ class ModelFactory
 		);
 
 		Yii::debug("ModelFactory: seed={$context->seed} для " . get_class($model), 'generation');
-
-		self::generateAttributes($model, $context, $options);	//заполняем атрибуты
-
-		self::applyRelations($model, $context);					//заполняем связи
-
-		if (!empty($options['role'])) {
-			self::applyPreset($model, $options['role']);
+		
+		try {
+			self::generateAttributes($model, $context, $options);    //заполняем атрибуты
+			
+			self::applyRelations($model, $context);                    //заполняем связи
+			
+			if (!empty($options['role'])) {
+				self::applyPreset($model, $options['role']);
+			}
+			
+			if (!empty($options['overrides'])) {
+				self::applyOverrides($model, $options['overrides']);
+			}
+			
+			// только validate, без retry
+			if (!$model->validate()) {
+				return new ModelGenerationResult(
+					model: null,
+					error: new ModelGenerationException(
+						modelClass: $modelClass,
+						stage: 'createOnce/validate',
+						errors: $model->getErrors(),
+						seed: $context->seed,
+					)
+				);
+			}
+			return new ModelGenerationResult($model,null);
+		} catch (ModelGenerationException $e) {
+			return new ModelGenerationResult(null,$e);
 		}
-
-		if (!empty($options['overrides'])) {
-			self::applyOverrides($model, $options['overrides']);
-		}
-
-		// только validate, без retry
-		if (!$model->validate()) {
-			return null;
-		}
-
-		return $model;
 	}
 
 	protected static function applyRelations(ArmsModel $model, GenerationContext $context): void
-{
-    if (!method_exists($model, 'linksSchema')) {
-        return;
-    }
+	{
+		if (!method_exists($model, 'linksSchema')) {
+			return;
+		}
 
-    if ($context->depth >= $context->maxDepth) {
-        return;
-    }
+		if ($context->depth >= $context->maxDepth) {
+			return;
+		}
 
-    foreach ($model->linksSchema() as $attribute => $config) {
+		foreach ($model->linksSchema() as $attribute => $config) {
 
-        // если уже задан (например preset или override)
-        if (!empty($model->$attribute)) {
-            continue;
-        }
+			// если уже задан (например preset или override)
+			if (!empty($model->$attribute)) {
+				continue;
+			}
 
-        $class = $config['class'] ?? null;
-        if (!$class) {
-            continue;
-        }
-		
-		$empty = $config['empty'] //если мы собираем пустую модель
-			&& !$model->getAttributeIsRequired($attribute)		//и эта связь не обязательная
-			&& $model->getAttributeIsNullable($attribute);		//и может быть null
-		if ($empty) {
-			continue;											//пропускаем ее
-		}		
+			$class = $config['class'] ?? null;
+			if (!$class) {
+				continue;
+			}
+			
+			$empty = $config['empty'] //если мы собираем пустую модель
+				&& !$model->getAttributeIsRequired($attribute)		//и эта связь не обязательная
+				&& $model->getAttributeIsNullable($attribute);		//и может быть null
+			if ($empty) {
+				continue;											//пропускаем ее
+			}		
 
-        $role = $config['role'] ?? null;
-
-        $related = self::create(
-            $class,
-            [],
-            [
-                'seed' => $context->seed + crc32($attribute),
-                'empty' => $context->empty,
-                'role' => $role,
-                'save' => true,
-                // увеличиваем глубину
-                'depth' => $context->depth + 1,
-                'maxDepth' => $context->maxDepth,
-            ]
-        );
-
-        if ($related) {
-            $model->$attribute = $related->primaryKey;
-        }
-    }
-}
+			$role = $config['role'] ?? null;
+			
+			try {
+				$related = self::create(
+					$class,
+					[
+						'seed' => $context->seed + crc32($attribute),
+						'empty' => $context->empty,
+						'role' => $role,
+						'save' => true,
+						// увеличиваем глубину
+						'depth' => $context->depth + 1,
+						'maxDepth' => $context->maxDepth,
+					]
+				);
+			} catch (ModelGenerationException $e) {
+				throw new ModelGenerationException(
+					modelClass: get_class($model),
+					stage: 'applyRelations',
+					seed: $context->seed,
+					attribute: $attribute,
+					relatedClass: $class,
+					depth: $context->depth,
+					previous: $e
+				);
+			}
+			
+			if ($related) {
+				$model->$attribute = $related->primaryKey;
+			} else {
+				throw new ModelGenerationException(
+					modelClass: get_class($model),
+					stage: 'applyRelations',
+					errors: ['Failed to create relation model'],
+					seed: $context->seed,
+					attribute: $attribute,
+					relatedClass: $class,
+					depth: $context->depth
+				);
+			}
+		}
+	}
 }

@@ -2,7 +2,7 @@
 
 namespace app\generation\generators;
 
-use app\generation\AttributeContext;
+use app\generation\context\AttributeContext;
 use app\models\base\ArmsModel;
 
 /**

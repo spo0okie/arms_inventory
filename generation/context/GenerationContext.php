@@ -1,6 +1,6 @@
 <?php
 
-namespace app\generation;
+namespace app\generation\context;
 
 /**
  * Контекст генерации на уровне всей модели
