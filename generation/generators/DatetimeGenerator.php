@@ -2,36 +2,40 @@
 
 namespace app\generation\generators;
 
+use app\generation\AttributeContext;
+
 /**
- * Генератор для типа datetime (дата и время)
+ * Генератор дат и времени
  */
 class DatetimeGenerator implements GeneratorInterface
 {
-    public static function generate(array $params): mixed
+    /**
+     * {@inheritdoc}
+     */
+    public function generate(AttributeContext $context): mixed
     {
-        //если нужен пустой атрибут
-        if ($params['empty']??false) {
-            //если атрибут может быть null
-            if ($params['nullable']??false) return null;
-            
-            return null;
+        // Режим пустых значений
+        if ($context->generationContext->empty) {
+            return $context->isNullable() ? null : date('Y-m-d H:i:s');
         }
 
-		//детерминизм
-		if ($params['seed'] !== null) {
- 			mt_srand($params['seed']);
-		}
+        $config = $context->generatorConfig();
 
-        //генерируем случайную дату и время
-        //по умолчанию: от 2020-01-01 00:00:00 до текущей даты
-        $minDate = $params['min'] ?? '2020-01-01 00:00:00';
-        $maxDate = $params['max'] ?? date('Y-m-d H:i:s');
+        // Детерминированная генерация
+        $seed = $context->generationContext->seed + crc32($context->attribute);
+        mt_srand($seed);
 
-        $minTimestamp = strtotime($minDate);
-        $maxTimestamp = strtotime($maxDate);
+        $minYear = $config['min_year'] ?? 2020;
+        $maxYear = $config['max_year'] ?? date('Y');
         
-        $randomTimestamp = mt_rand($minTimestamp, $maxTimestamp);
+        $year = mt_rand($minYear, $maxYear);
+        $month = mt_rand(1, 12);
+        $day = mt_rand(1, 28);
+        $hour = mt_rand(0, 23);
+        $minute = mt_rand(0, 59);
+        $second = mt_rand(0, 59);
         
-        return date('Y-m-d H:i:s', $randomTimestamp);
+		mt_srand(); // сброс
+        return sprintf('%04d-%02d-%02d %02d:%02d:%02d', $year, $month, $day, $hour, $minute, $second);
     }
 }

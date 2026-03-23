@@ -45,11 +45,6 @@ class ModelFactory
 	public const MAX_SAVE_RETRIES = 7;
 
 	/**
-	 * Seed для генерации
-	 */
-	protected static int $seed=0;
-	
-	/**
 	 * Создать модель с автоматически сгенерированными атрибутами.
 	 *
 	 * @param string|ActiveRecord $modelClass Класс модели или экземпляр
@@ -77,12 +72,17 @@ class ModelFactory
 			throw new Exception('ModelFactory работает только с моделями наследующими ArmsModel');
 		}
 		
+		// Создаём контекст генерации
+		$context = new GenerationContext(
+			empty: $options['empty'] ?? false,
+			seed: $options['seed'] ?? random_int(1, 100000),
+		);
+		
 		// Логируем seed для возможности воспроизведения
-		static::$seed = $options['seed'] ?? random_int(1, 1000);
-		Yii::debug("ModelFactory: seed=".static::$seed." для " . get_class($model), 'generation');
+		Yii::debug("ModelFactory: seed={$context->seed} для " . get_class($model), 'generation');
 
 		// Генерируем атрибуты
-		self::generateAttributes($model, $options);
+		self::generateAttributes($model, $context, $options);
 		
 		// Применяем preset (роль)
 		if (!empty($options['role'])) {
@@ -117,13 +117,13 @@ class ModelFactory
 	 * Сгенерировать атрибуты модели на основе их типов.
 	 *
 	 * @param ArmsModel $model Модель для заполнения
-	 * @param array $options Опции генерации
+	 * @param GenerationContext $context Контекст генерации
+	 * @param array $options Опции генерации (для overrides)
 	 */
-	protected static function generateAttributes(ArmsModel $model, array $options): void
+	protected static function generateAttributes(ArmsModel $model, GenerationContext $context, array $options): void
 	{
-		$attributeData = $model->attributeData();
-		
-		foreach ($attributeData as $attribute => $data) {
+		foreach ($model->safeAttributes() as $attribute) {
+
 			// Пропускаем служебные атрибуты
 			if (self::isSystemAttribute($attribute)) {
 				continue;
@@ -135,23 +135,27 @@ class ModelFactory
 			}
 			
 			// Получаем данные атрибута
-			$attrData = $model->getAttributeData($attribute);
-			if ($attrData === null) {
+			$attributeData = $model->getAttributeData($attribute);
+			if ($attributeData === null) {
 				continue;
 			}
 			
 			// Пропускаем readonly атрибуты
-			if (isset($attrData['readOnly']) && $attrData['readOnly']) {
+			if (!empty($attributeData['readOnly'])) {
 				continue;
 			}
 			
-			// Определяем параметры для генератора
-			//тут никаких кастомизаций, только empty или нет
-			$params=['empty' => $options['empty']??false];
+			// Создаём контекст атрибута
+			$attrContext = new AttributeContext(
+				attribute: $attribute,
+				attributeData: $attributeData,
+				model: $model,
+				generationContext: $context,
+			);
 
-			// Генерируем значение
-			$value = self::generateAttributeValue($model, $attribute, $params);
-			$model->$attribute = $value;
+			// Получаем генератор и генерируем значение
+			$generator = GeneratorResolver::resolve($attrContext);
+			$model->$attribute = $generator->generate($attrContext);
 		}
 	}
 	
@@ -173,37 +177,6 @@ class ModelFactory
 		];
 		
 		return in_array($attribute, $systemAttributes);
-	}
-	
-	/**
-	 * Сгенерировать значение для одного атрибута.
-	 *
-	 * @param ArmsModel $model Модель
-	 * @param string $attribute Имя атрибута
-	 * @param array $options Опции генерации
-	 * @param int $seed Seed для детерминизма
-	 * @return mixed Сгенерированное значение
-	 */
-	protected static function generateAttributeValue(ArmsModel $model, string $attribute, array $params): mixed
-	{
-		// Определяем параметры для генератора
-		if (!isset($params['nullable'])) 
-			$params['nullable'] = $model->getAttributeIsNullable($attribute);
-		
-		if (!isset($params['seed']))
-			$params['seed'] = static::$seed++;
-		
-		// Получаем класс генератора
-		try {
-			$generatorClass = GeneratorResolver::resolve($model, $attribute);
-		} catch (\Exception $e) {
-			Yii::warning("ModelFactory: не найден генератор для атрибута {$attribute}: " . $e->getMessage(), 'generation');
-			return null;
-		}
-		
-		// Генерируем значение
-		/** @var GeneratorInterface $generatorClass */
-		return $generatorClass::generate($params);
 	}
 
 	
@@ -293,17 +266,21 @@ class ModelFactory
 						continue;
 					}
 					
-					$generatorClass = GeneratorResolver::resolve($model, $attribute);
-					$params = [
-						'empty' => false,
-						'nullable' => $model->getAttributeIsNullable($attribute),
-						// Используем новый seed при перегенерации
-						'seed' => random_int(1, PHP_INT_MAX),
-					];
+					// Создаём контекст генерации для исправления
+					$context = new GenerationContext(
+						empty: false,
+						seed: random_int(1, PHP_INT_MAX),
+					);
 					
-					/** @var GeneratorInterface $generator */
-					$generator = new $generatorClass();
-					$newValue = $generator::generate($params);
+					$attrContext = new AttributeContext(
+						attribute: $attribute,
+						attributeData: $attrData,
+						model: $model,
+						generationContext: $context,
+					);
+					
+					$generator = GeneratorResolver::resolve($attrContext);
+					$newValue = $generator->generate($attrContext);
 					$model->$attribute = $newValue;
 					
 				} catch (\Exception $e) {

@@ -2,27 +2,18 @@
 
 namespace app\generation\generators;
 
+use app\generation\AttributeContext;
+
+/**
+ * Интерфейс генератора атрибутов
+ */
 interface GeneratorInterface
 {
     /**
-     * Генерация значения атрибута.
+     * Сгенерировать значение атрибута
      *
-     * Требования:
-     * - не бросает исключения в нормальном сценарии
-     * - не содержит бизнес-логики
-     * - не обращается к БД
-	 * $params = [
-     * 		// режим генерации (пустое ли значение нужно и выглядит ли пустое как null)
-     *     'empty' => bool,
-     *     'nullable' => bool,
-     * 
-     * 		// типовые ограничения (уже извлечены снаружи)
-     *     'min' => int|float|null,
-     *     'max' => int|float|null,
-     * 
-     * 		// детерминизм
-     *     'seed' => int|null,
-     * ];
+     * @param AttributeContext $context Контекст генерации
+     * @return mixed Сгенерированное значение
      */
-    public static function generate(array $params): mixed;
+    public function generate(AttributeContext $context): mixed;
 }

@@ -2,43 +2,42 @@
 
 namespace app\generation\generators;
 
+use app\generation\AttributeContext;
+
+/**
+ * Генератор строк
+ */
 class StringGenerator implements GeneratorInterface
 {
-    public static function generate(array $params): mixed
+    /**
+     * {@inheritdoc}
+     */
+    public function generate(AttributeContext $context): mixed
     {
-		//если нужен пустой атрибут
-		if ($params['empty']??false) {
-			//если атрибут может быть null
-			if ($params['nullable']??false) return null;
-			
-			return '';
-		}
-
-		//детерминизм
-		if ($params['seed'] !== null) {
- 			mt_srand($params['seed']);
-		}
-
-        $min = $params['min'] ?? 5;
-        $max = $params['max'] ?? 20;
-
-        $length = mt_rand($min, $max);
-
-        return self::randomString($length);
-    }
-
-    public static function randomString(int $length): string
-    {
-        // максимально простой и быстрый вариант
-        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
-        $result = '';
-        $maxIndex = strlen($chars) - 1;
-
-        for ($i = 0; $i < $length; $i++) {
-            $result .= $chars[mt_rand(0, $maxIndex)];
+        // Режим пустых значений
+        if ($context->generationContext->empty) {
+            return $context->isNullable() ? null : '';
         }
 
+        $config = $context->generatorConfig();
+
+        // Детерминированная генерация
+        $seed = $context->generationContext->seed + crc32($context->attribute);
+        mt_srand($seed);
+
+        $minLength = $config['min_length'] ?? 5;
+        $maxLength = $config['max_length'] ?? 20;
+        $length = mt_rand($minLength, $maxLength);
+
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $result = '';
+        $charsLength = strlen($chars);
+
+        for ($i = 0; $i < $length; $i++) {
+            $result .= $chars[mt_rand(0, $charsLength - 1)];
+        }
+
+		mt_srand(); // сброс
         return $result;
     }
 }

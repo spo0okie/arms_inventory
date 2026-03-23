@@ -2,40 +2,48 @@
 
 namespace app\generation\generators;
 
+use app\generation\AttributeContext;
+
 /**
- * Генератор для типа string[] (массив строк)
- * Используется для API/генератора, не используется в UI
+ * Генератор массивов строк (string[])
  */
 class StringArrayGenerator implements GeneratorInterface
 {
-    public static function generate(array $params): mixed
+    /**
+     * {@inheritdoc}
+     */
+    public function generate(AttributeContext $context): mixed
     {
-        //если нужен пустой атрибут
-        if ($params['empty']??false) {
-            //если атрибут может быть null
-            if ($params['nullable']??false) return null;
-            
-            return [];
+        // Режим пустых значений
+        if ($context->generationContext->empty) {
+            return $context->isNullable() ? null : [];
         }
 
-		//детерминизм
-		if ($params['seed'] !== null) {
- 			mt_srand($params['seed']);
-		}
+        $config = $context->generatorConfig();
 
-        //количество записей в атрибуте
-        $min = $params['min'] ?? 1;
-        $max = $params['max'] ?? 5;
-        $count = mt_rand($min, $max);
+        // Детерминированная генерация
+        $seed = $context->generationContext->seed + crc32($context->attribute);
+        mt_srand($seed);
 
-        
+        $minItems = $config['min_items'] ?? 1;
+        $maxItems = $config['max_items'] ?? 5;
+        $itemCount = mt_rand($minItems, $maxItems);
+
         $result = [];
-        for ($i = 0; $i < $count; $i++) {            
-            $result[] = StringGenerator::generate($params);
+        for ($i = 0; $i < $itemCount; $i++) {
+            $minLen = $config['min_length'] ?? 3;
+            $maxLen = $config['max_length'] ?? 10;
+            $len = mt_rand($minLen, $maxLen);
+            
+            $chars = 'abcdefghijklmnopqrstuvwxyz';
+            $str = '';
+            for ($j = 0; $j < $len; $j++) {
+                $str .= $chars[mt_rand(0, strlen($chars) - 1)];
+            }
+            $result[] = $str;
         }
-        
+
+		mt_srand(); // сброс
         return $result;
     }
-
-    
 }

@@ -2,71 +2,93 @@
 
 namespace app\generation\generators;
 
+use app\generation\AttributeContext;
+
 /**
- * Генератор для типа ips (список IP адресов)
+ * Генератор IP-адресов
  */
 class IpsGenerator implements GeneratorInterface
 {
-    public static function generate(array $params): mixed
+    /**
+     * {@inheritdoc}
+     */
+    public function generate(AttributeContext $context): mixed
     {
-        //если нужен пустой атрибут
-        if ($params['empty']??false) {
-            //если атрибут может быть null
-            if ($params['nullable']??false) return null;
-            
-            return '';
+        // Режим пустых значений
+        if ($context->generationContext->empty) {
+            return $context->isNullable() ? null : '';
         }
 
-		//детерминизм
-		if ($params['seed'] !== null) {
- 			mt_srand($params['seed']);
-		}
+        $config = $context->generatorConfig();
 
-        //количество записей в атрибуте
-        $min = $params['min'] ?? 1;
-        $max = $params['max'] ?? 5;
-        $count = mt_rand($min, $max);
+        // Детерминированная генерация
+        $seed = $context->generationContext->seed + crc32($context->attribute);
+        mt_srand($seed);
+
+        $count = $config['count'] ?? 1;
+        $result = [];
         
-        $ips = [];
         for ($i = 0; $i < $count; $i++) {
-            $ips[] = self::randomIp();
+            // Приватные диапазоны: 10.x.x.x, 172.16-31.x.x, 192.168.x.x
+            $range = $config['range'] ?? 'private';
+            
+            $ip = match ($range) {
+                'private' => $this->generatePrivateIP(),
+                'public' => $this->generatePublicIP(),
+                'ipv6' => $this->generateIPv6(),
+                default => $this->generatePrivateIP(),
+            };
+            
+            $result[] = $ip;
         }
-        
-        //возвращаем набор строк с IP
-        return implode("\n", $ips);
+
+		mt_srand(); // сброс
+		return implode("\n", $result);
     }
 
-    /**
-     * Генерирует случайный IPv4 адрес
-     * @return string
-     */
-    public static function randomIp(): string
+    private function generatePrivateIP(): string
     {
-        //генерируем IP в частных сетях
-        //10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
-        $range = mt_rand(0, 2);
+        $ranges = [
+            [10, 10],           // 10.0.0.0/8
+            [172, 16, 31],     // 172.16.0.0/12
+            [192, 168],        // 192.168.0.0/16
+        ];
         
-        switch ($range) {
-            case 0:
-                //10.0.0.0/8
-                return sprintf('10.%d.%d.%d', 
-                    mt_rand(0, 255),
-                    mt_rand(0, 255),
-                    mt_rand(1, 254)
-                );
-            case 1:
-                //172.16.0.0/12
-                return sprintf('172.%d.%d.%d', 
-                    mt_rand(16, 31),
-                    mt_rand(0, 255),
-                    mt_rand(1, 254)
-                );
-            default:
-                //192.168.0.0/16
-                return sprintf('192.168.%d.%d', 
-                    mt_rand(0, 255),
-                    mt_rand(1, 254)
-                );
+        $selected = $ranges[mt_rand(0, count($ranges) - 1)];
+        
+        if (count($selected) === 2) {
+            return sprintf('%d.%d.%d.%d', 
+                $selected[0], 
+                $selected[1], 
+                mt_rand(1, 254), 
+                mt_rand(1, 254)
+            );
+        } else {
+            return sprintf('%d.%d.%d.%d', 
+                $selected[0], 
+                $selected[1], 
+                $selected[2], 
+                mt_rand(1, 254)
+            );
         }
+    }
+
+    private function generatePublicIP(): string
+    {
+        return sprintf('%d.%d.%d.%d',
+            mt_rand(1, 223),
+            mt_rand(0, 255),
+            mt_rand(0, 255),
+            mt_rand(1, 254)
+        );
+    }
+
+    private function generateIPv6(): string
+    {
+        $segments = [];
+        for ($i = 0; $i < 8; $i++) {
+            $segments[] = sprintf('%x', mt_rand(0, 65535));
+        }
+        return implode(':', $segments);
     }
 }

@@ -2,58 +2,75 @@
 
 namespace app\generation\generators;
 
+use app\generation\AttributeContext;
+
 /**
- * Генератор для типа urls (список URL адресов)
+ * Генератор URL-адресов
  */
 class UrlsGenerator implements GeneratorInterface
 {
-    public static function generate(array $params): mixed
+    /**
+     * {@inheritdoc}
+     */
+    public function generate(AttributeContext $context): mixed
     {
-        //если нужен пустой атрибут
-        if ($params['empty']??false) {
-            //если атрибут может быть null
-            if ($params['nullable']??false) return null;
-            
-            return '';
+        // Режим пустых значений
+        if ($context->generationContext->empty) {
+            return $context->isNullable() ? null : '';
         }
 
-		//детерминизм
-		if ($params['seed'] !== null) {
- 			mt_srand($params['seed']);
-		}
+        $config = $context->generatorConfig();
 
-        //количество записей в атрибуте
-        $min = $params['min'] ?? 1;
-        $max = $params['max'] ?? 5;
-        $count = mt_rand($min, $max);
+        // Детерминированная генерация
+        $seed = $context->generationContext->seed + crc32($context->attribute);
+        mt_srand($seed);
+
+        $count = $config['count'] ?? 1;
+        $protocols = $config['protocols'] ?? ['https'];
+        $domains = $config['domains'] ?? ['example.com', 'test.org', 'demo.net'];
         
-        $urls = [];
+        $result = [];
+        
         for ($i = 0; $i < $count; $i++) {
-			$prefix=TextGenerator::randomWords(0,4,false);
-			if ($prefix) $prefix.=' ';
-            $urls[] = $prefix.self::randomUrl();
+            $protocol = $protocols[mt_rand(0, count($protocols) - 1)];
+            $domain = $domains[mt_rand(0, count($domains) - 1)];
+            $path = $this->generatePath();
+            
+            $url = $protocol . '://' . $domain . $path;
+            $result[] = $url;
         }
-        
-        //возвращаем строку с URL через запятую
-        return implode("\n", $urls);
+
+ 		mt_srand(); // сброс
+		return implode("\n", $result);
     }
 
-    /**
-     * Генерирует случайный URL
-     * @return string
-     */
-    public static function randomUrl(): string
+    private function generatePath(): string
     {
-        //генерируем случайный домен и путь
-        $domains = ['example.com', 'test.org', 'demo.net', 'site.ru', 'host.io'];
-        $paths = ['/page', '/api/v1/resource', '/docs', '/blog/post', '/user/profile'];
+        $segments = mt_rand(1, 4);
+        $path = '';
         
-        $domain = $domains[mt_rand(0, count($domains) - 1)];
-        $path = $paths[mt_rand(0, count($paths) - 1)];
+        for ($i = 0; $i < $segments; $i++) {
+            if ($i > 0) {
+                $path .= '/';
+            }
+            $path .= $this->randomString(mt_rand(3, 12));
+        }
         
-        //добавляем случайный протокол
-        $protocol = mt_rand(0, 1) === 0 ? 'http' : 'https';
+        // Иногда добавляем файл
+        if (mt_rand(0, 1)) {
+            $path .= '.' . ['html', 'php', 'json', 'xml'][mt_rand(0, 3)];
+        }
         
-        return "{$protocol}://{$domain}{$path}";
+        return $path;
+    }
+
+    private function randomString(int $length): string
+    {
+        $chars = 'abcdefghijklmnopqrstuvwxyz';
+        $result = '';
+        for ($i = 0; $i < $length; $i++) {
+            $result .= $chars[mt_rand(0, strlen($chars) - 1)];
+        }
+        return $result;
     }
 }

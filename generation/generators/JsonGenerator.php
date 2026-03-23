@@ -2,72 +2,53 @@
 
 namespace app\generation\generators;
 
+use app\generation\AttributeContext;
+
 /**
- * Генератор для типа json (JSON-строка)
- * 
- * Генерирует случайный JSON-объект (ассоциативный массив)
+ * Генератор JSON данных
  */
 class JsonGenerator implements GeneratorInterface
 {
-    public static function generate(array $params): mixed
+    /**
+     * {@inheritdoc}
+     */
+    public function generate(AttributeContext $context): mixed
     {
-        //если нужен пустой атрибут
-        if ($params['empty']??false) {
-            //если атрибут может быть null
-            if ($params['nullable']??false) return null;
-            
-            return '{}';
+        // Режим пустых значений
+        if ($context->generationContext->empty) {
+            return $context->isNullable() ? null : '{}';
         }
-		
-		//детерминизм
-		if ($params['seed'] !== null) {
- 			mt_srand($params['seed']);
-		}
 
-        //получаем количество полей в объекте
-        $min = $params['min'] ?? 1;
-        $max = $params['max'] ?? 5;
-        $count = mt_rand($min, $max);
+        $config = $context->generatorConfig();
 
-        //генерируем случайный ассоциативный массив
-        $data = self::generateRandomObject($count);
+        // Детерминированная генерация
+        $seed = $context->generationContext->seed + crc32($context->attribute);
+        mt_srand($seed);
 
-        //кодируем в JSON строку
-        return json_encode($data, JSON_UNESCAPED_UNICODE);
+        $keys = $config['keys'] ?? ['key1', 'key2', 'key3'];
+        $result = [];
+        
+        foreach ($keys as $key) {
+            $type = $config['key_types'][$key] ?? 'string';
+            $result[$key] = $this->generateValue($type);
+        }
+
+		mt_srand(); // сброс
+        return json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
     /**
-     * Генерация случайного объекта (ассоциативного массива)
+     * Генерировать значение по типу
      */
-    private static function generateRandomObject(int $fieldCount): array
+    private function generateValue(string $type): mixed
     {
-        $result = [];
-        $fieldNames = ['name', 'value', 'id', 'type', 'status', 'data', 'config', 'options', 'meta', 'settings'];
-        
-        for ($i = 0; $i < $fieldCount; $i++) {
-            //выбираем имя поля
-            $fieldName = $fieldNames[mt_rand(0, count($fieldNames) - 1)] . '_' . mt_rand(1, 100);
-            
-            //генерируем случайное значение (различные типы)
-            $valueType = mt_rand(0, 3);
-            
-            switch ($valueType) {
-                case 0: //строка
-                    $result[$fieldName] = StringGenerator::randomString(mt_rand(5, 20));
-                    break;
-                case 1: //число
-                    $result[$fieldName] = mt_rand(1, 1000);
-                    break;
-                case 2: //булево
-                    $result[$fieldName] = mt_rand(0, 1) === 1;
-                    break;
-                case 3: //массив
-                    $result[$fieldName] = [mt_rand(1, 10), mt_rand(1, 10), mt_rand(1, 10)];
-                    break;
-            }
-        }
-
-        return $result;
+        return match ($type) {
+            'string' => 'value_' . mt_rand(1, 100),
+            'integer' => mt_rand(1, 1000),
+            'float' => mt_rand(1, 1000) / 10,
+            'boolean' => (bool) mt_rand(0, 1),
+            'array' => [mt_rand(1, 10), mt_rand(1, 10)],
+            default => 'value',
+        };
     }
-
 }

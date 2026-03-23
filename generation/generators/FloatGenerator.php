@@ -2,31 +2,36 @@
 
 namespace app\generation\generators;
 
+use app\generation\AttributeContext;
+
 /**
- * Генератор для типа float
+ * Генератор дробных чисел
  */
 class FloatGenerator implements GeneratorInterface
 {
-    public static function generate(array $params): mixed
+    /**
+     * {@inheritdoc}
+     */
+    public function generate(AttributeContext $context): mixed
     {
-        //если нужен пустой атрибут
-        if ($params['empty']??false) {
-            //если атрибут может быть null
-            if ($params['nullable']??false) return null;
-            
-            return 0;
+        // Режим пустых значений
+        if ($context->generationContext->empty) {
+            return $context->isNullable() ? null : 0.0;
         }
 
-		//детерминизм
-		if ($params['seed'] !== null) {
- 			mt_srand($params['seed']);
-		}
+        $config = $context->generatorConfig();
 
-        //получаем границы значений
-        $min = $params['min'] ?? 0;
-        $max = $params['max'] ?? 100000;
-        
-        //генерируем случайное число
-        return mt_rand($min, $max)/100;
+        $min = $config['min'] ?? 0;
+        $max = $config['max'] ?? 1000;
+        $decimals = $config['decimals'] ?? 2;
+
+        // Детерминированная генерация
+        $seed = $context->generationContext->seed + crc32($context->attribute);
+        mt_srand($seed);
+
+        $value = mt_rand($min * pow(10, $decimals), $max * pow(10, $decimals));
+
+		mt_srand(); // сброс
+        return $value / pow(10, $decimals);
     }
 }
