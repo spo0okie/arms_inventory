@@ -10,6 +10,9 @@ use http\Exception\BadMethodCallException;
 use OpenApi\Attributes as OA;
 use app\models\base\ArmsModel;
 use app\models\links\LicLinks;
+use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
+use yii\data\BaseDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\web\BadRequestHttpException;
@@ -164,6 +167,81 @@ class LicLinksController extends BaseRestController
 			$objId,
 			$licId
 		)[0]??null;
+	}
+	#[OA\Get(
+		path: "/web/api/{controller}/search",
+		summary: "Поиск привязки лицензии к объекту.",
+		parameters: [
+			new OA\Parameter(
+				name: "productId",
+				description: "ID лицензируемого продукта",
+				in: "query",
+				required: false,
+			),
+			new OA\Parameter(
+				name: "objectType",
+				description: "Тип объекта к которому привязана лицензия (АРМы, пользователи, компьютеры)",
+				in: "query",
+				required: false,
+				schema: new OA\Schema(
+					type: "string",
+					enum: ['arms','users','comps']
+				)
+			),
+			new OA\Parameter(
+				name: "licenseType",
+				description: "Тип лицензий к которому привязан объект (тип лицензий, закупка, лиц. ключ)",
+				in: "query",
+				required: false,
+				schema: new OA\Schema(
+					type: "string",
+					enum: ['groups','items','keys']
+				)
+			),
+		],
+		responses: [
+			new OA\Response(
+				response: 200,
+				description: "OK",
+				content: new OA\MediaType(
+					mediaType: "application/json",
+				)
+			
+			),
+			new OA\Response(response: 404, description: "Ничего не найдено")
+		]
+	)]
+
+	public function actionFilter(
+		int $productId=null,
+		string $objectType=null,
+		string $licenseType=null,
+		int $objId=null,
+		string $objName=null,
+		int $licId=null
+	): BaseDataProvider {
+		//return $productId;
+		
+		if (!$objId && $objName) {
+			$objClass=ucfirst($objectType);
+			$objClass="app\\models\\$objClass";
+			/** @var \app\models\base\ArmsModel $objClass */
+			$obj=$objClass::findByAnyName($objName);
+			if (!is_object($obj)) {
+				throw new NotFoundHttpException("$objectType $objName not found");
+			}
+			$objId=$obj->id;
+		}
+		
+		//var_dump($this->behaviors());
+		
+		return new ArrayDataProvider(['allModels'=>LicLinks::findProductLicenses(
+			$productId,
+			$objectType,
+			$licenseType,
+			$objId,
+			$licId
+		)]);
 	}
 
 }

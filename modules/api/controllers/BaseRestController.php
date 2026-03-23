@@ -16,6 +16,7 @@ use app\models\Users;
 use Yii;
 use yii\base\UnknownPropertyException;
 use yii\data\ActiveDataProvider;
+use yii\data\BaseDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\filters\auth\HttpBasicAuth;
@@ -224,7 +225,7 @@ class BaseRestController extends ActiveController
 			new OA\Response(response: 404, description: "Ничего не найдено по запросу"),
 		]
 	)]
-	public function actionFilter(): ActiveDataProvider
+	public function actionFilter(): BaseDataProvider
 	{
 		$this->checkDisabledActions('filter');
 		return new ActiveDataProvider(['query' => $this->searchFilter()]);
