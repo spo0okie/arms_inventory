@@ -64,53 +64,41 @@ class ModelFactory
 			'validateRetries' => self::MAX_VALIDATE_RETRIES,
 			'saveRetries' => self::MAX_SAVE_RETRIES,
 		], $options);
+				
+		// Устанавливаем seed для детерминизма
+		$baseSeed = $options['seed'] ?? random_int(1, 100000);
 		
-		// Создаём экземпляр модели
-		$model = Yii::createObject(array_merge(['class' => $modelClass], $config));
-		
-		if (!$model instanceof ArmsModel) {
-			throw new Exception('ModelFactory работает только с моделями наследующими ArmsModel');
-		}
-		
-		// Создаём контекст генерации
-		$context = new GenerationContext(
-			empty: $options['empty'] ?? false,
-			seed: $options['seed'] ?? random_int(1, 100000),
-		);
-		
-		// Логируем seed для возможности воспроизведения
-		Yii::debug("ModelFactory: seed={$context->seed} для " . get_class($model), 'generation');
+		for ($i = 0; $i < $options['validateRetries']; $i++) {
+			for ($j = 0; $j < $options['saveRetries']; $j++) {
 
-		// Генерируем атрибуты
-		self::generateAttributes($model, $context, $options);
-		
-		// Применяем preset (роль)
-		if (!empty($options['role'])) {
-			self::applyPreset($model, $options['role']);
-		}
-		
-		// Применяем переопределения
-		if (!empty($options['overrides'])) {
-			self::applyOverrides($model, $options['overrides']);
-		}
-		
-		// Валидация с retry
-		$validateSuccess = self::validateWithRetry($model, $options['validateRetries']);
-		if (!$validateSuccess) {
-			Yii::error('ModelFactory: не удалось создать валидную модель ' . get_class($model), 'generation');
-			return null;
-		}
-		
-		// Сохранение с retry
-		if ($options['save']) {
-			$saveSuccess = self::saveWithRetry($model, $options['saveRetries']);
-			if (!$saveSuccess) {
-				Yii::error('ModelFactory: не удалось сохранить модель ' . get_class($model), 'generation');
-				return null;
+				//новый seed на каждую попытку
+				$options['seed'] = $baseSeed + $i*$options['saveRetries'] + $j;
+
+				$model = self::createOnce($modelClass, $config, $options);
+
+				if ($model !== null) {
+
+					if ($options['save']) {
+						try {
+							if ($model->save(false)) {
+								return $model;
+							}
+						} catch (\Throwable) {
+							Yii::debug("ModelFactory: save retry {$i} для {$modelClass}", 'generation');
+							continue;
+						}
+					} else { //no save
+						return $model;
+					}
+				}
+
 			}
+			Yii::debug("ModelFactory: validate retry {$i} для {$modelClass}", 'generation');
 		}
-		
-		return $model;
+
+		Yii::error("ModelFactory: не удалось создать модель {$modelClass}", 'generation');
+
+		return null;
 	}
 	
 	/**
@@ -219,105 +207,92 @@ class ModelFactory
 			$model->$attribute = $value;
 		}
 	}
-	
-	/**
-	 * Валидация с механизмом повторных попыток.
-	 *
-	 * @param ArmsModel $model Модель
-	 * @param int $maxRetries Максимум попыток
-	 * @return bool Успех валидации
-	 */
-	protected static function validateWithRetry(ArmsModel $model, int $maxRetries): bool
-	{
-		for ($i = 0; $i < $maxRetries; $i++) {
-			if ($model->validate()) {
-				return true;
-			}
-			
-			// Пробуем исправить ошибки валидации
-			if (!$model->hasErrors()) {
-				continue;
-			}
-			
-			$errors = $model->getErrors();
-			Yii::debug("ModelFactory: попытка валидации $i неудачна, ошибки: " . json_encode($errors), 'generation');
-			
-			// Пробуем исправить типичные проблемы
-			self::fixValidationErrors($model, $errors);
-		}
 		
-		return $model->validate();
-	}
-	
-	/**
-	 * Попытаться исправить типичные ошибки валидации.
-	 *
-	 * @param ArmsModel $model Модель
-	 * @param array $errors Ошибки валидации
-	 */
-	protected static function fixValidationErrors(ArmsModel $model, array $errors): void
+	private static function createOnce(string|ArmsModel $modelClass, array $config, array $options): ?ArmsModel
 	{
-		foreach ($errors as $attribute => $messages) {
-			foreach ($messages as $message) {
-				// Пробуем перегенерировать проблемный атрибут
-				try {
-					$attrData = $model->getAttributeData($attribute);
-					if ($attrData === null) {
-						continue;
-					}
-					
-					// Создаём контекст генерации для исправления
-					$context = new GenerationContext(
-						empty: false,
-						seed: random_int(1, PHP_INT_MAX),
-					);
-					
-					$attrContext = new AttributeContext(
-						attribute: $attribute,
-						attributeData: $attrData,
-						model: $model,
-						generationContext: $context,
-					);
-					
-					$generator = GeneratorResolver::resolve($attrContext);
-					$newValue = $generator->generate($attrContext);
-					$model->$attribute = $newValue;
-					
-				} catch (\Exception $e) {
-					// Игнорируем ошибки при исправлении
-				}
-			}
+		$model = Yii::createObject(array_merge(['class' => $modelClass], $config));
+
+		if (!$model instanceof ArmsModel) {
+			throw new Exception('ModelFactory работает только с ArmsModel');
 		}
-		
-		// Очищаем ошибки для повторной валидации
-		$model->clearErrors();
-	}
-	
-	/**
-	 * Сохранение с механизмом повторных попыток.
-	 *
-	 * @param ArmsModel $model Модель
-	 * @param int $maxRetries Максимум попыток
-	 * @return bool Успех сохранения
-	 */
-	protected static function saveWithRetry(ArmsModel $model, int $maxRetries): bool
-	{
-		for ($i = 0; $i < $maxRetries; $i++) {
-			try {
-				if ($model->save(false)) { // false = без валидации (уже провалидировали)
-					return true;
-				}
-			} catch (\Throwable $e) {
-				Yii::warning("ModelFactory: ошибка сохранения попытка $i: " . $e->getMessage(), 'generation');
-			}
-			
-			// При ошибке сохранения пробуем ещё раз с валидацией
-			$model->clearErrors();
-			if (!$model->validate()) {
-				self::fixValidationErrors($model, $model->getErrors());
-			}
+
+		$context = new GenerationContext(
+			empty: $options['empty'] ?? false,
+			seed: $options['seed'] ?? random_int(1, 100000),
+			depth: $options['depth'] ?? 0,
+    		maxDepth: $options['maxDepth'] ?? 2,
+		);
+
+		Yii::debug("ModelFactory: seed={$context->seed} для " . get_class($model), 'generation');
+
+		self::generateAttributes($model, $context, $options);	//заполняем атрибуты
+
+		self::applyRelations($model, $context);					//заполняем связи
+
+		if (!empty($options['role'])) {
+			self::applyPreset($model, $options['role']);
 		}
-		
-		return false;
+
+		if (!empty($options['overrides'])) {
+			self::applyOverrides($model, $options['overrides']);
+		}
+
+		// только validate, без retry
+		if (!$model->validate()) {
+			return null;
+		}
+
+		return $model;
 	}
+
+	protected static function applyRelations(ArmsModel $model, GenerationContext $context): void
+{
+    if (!method_exists($model, 'linksSchema')) {
+        return;
+    }
+
+    if ($context->depth >= $context->maxDepth) {
+        return;
+    }
+
+    foreach ($model->linksSchema() as $attribute => $config) {
+
+        // если уже задан (например preset или override)
+        if (!empty($model->$attribute)) {
+            continue;
+        }
+
+        $class = $config['class'] ?? null;
+        if (!$class) {
+            continue;
+        }
+		
+		$empty = $config['empty'] //если мы собираем пустую модель
+			&& !$model->getAttributeIsRequired($attribute)		//и эта связь не обязательная
+			&& $model->getAttributeIsNullable($attribute);		//и может быть null
+		if ($empty) {
+			continue;											//пропускаем ее
+		}		
+
+        $role = $config['role'] ?? null;
+
+        $related = self::create(
+            $class,
+            [],
+            [
+                'seed' => $context->seed + crc32($attribute),
+                'empty' => $context->empty,
+                'role' => $role,
+                'save' => true,
+                // увеличиваем глубину
+                'depth' => $context->depth + 1,
+                'maxDepth' => $context->maxDepth,
+            ]
+        );
+
+        if ($related) {
+            $model->$attribute = $related->primaryKey;
+        }
+    }
+}
 }
