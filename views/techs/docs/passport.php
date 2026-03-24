@@ -12,7 +12,8 @@ use app\models\Manufacturers;
 use app\models\Techs;
 use yii\helpers\Html;
 use yii\helpers\Url;
-
+
+
 use app\components\widgets\page\ModelWidget;
 Url::remember();
 
@@ -35,26 +36,27 @@ $manufacturers= Manufacturers::fetchNames();
         if (count($comp->swList->items)) {
             $comp->swList->sortByName();
             foreach ($comp->swList->items as $item) {
+				$rendered=$this->render('/swlist/item',['model'=>$comp, 'item'=>$item]);
 	            if ($item['ignored']) {
-		            $ignored[] = ModelWidget::widget(['model'=>$comp, 'view'=>'/swlist/item', 'options'=>['item'=>$item]]);
+		            $ignored[] = $rendered;
 	            } elseif ($item['free']) {
-		            $free[] = ModelWidget::widget(['model'=>$comp, 'view'=>'/swlist/item', 'options'=>['item'=>$item]]);
+		            $free[] = $rendered;
                 } else {
 		            if ($item['saved']) {
-			            $signed[] = ModelWidget::widget(['model'=>$comp, 'view'=>'/swlist/item', 'options'=>['item'=>$item]]);
+			            $signed[] = $rendered;
 		            } else {
 			            if ($item['agreed'])
-				            $agreed[] = ModelWidget::widget(['model'=>$comp, 'view'=>'/swlist/item', 'options'=>['item'=>$item]]);
+				            $agreed[] = $rendered;
 
 			            if (!$item['agreed'])
-				            $unagreed[] = ModelWidget::widget(['model'=>$comp, 'view'=>'/swlist/item', 'options'=>['item'=>$item]]);
+				            $unagreed[] = $rendered;
 		            }
 	            }
             }
         }
-         if (is_object($comp->swList) && is_array($comp->swList->data)) foreach ($comp->swList->data as $item) {
-             $unknown[] = ModelWidget::widget(['model'=>$comp, 'view'=>'/swlist/item_unrecognized', 'options'=>['item'=>$item]]);
-         }
+        if (is_object($comp->swList) && is_array($comp->swList->data)) foreach ($comp->swList->data as $item) {
+            $unknown[] = $this->render('/swlist/item_unrecognized',['model'=>$comp, 'item'=>$item]);
+        }
     }
 
 ?>
@@ -112,7 +114,7 @@ $manufacturers= Manufacturers::fetchNames();
 	    if (count($ignored)) { ?>
             <div class="soft_ignored passport_tools">
                 <h3 id="ignored_hdr">Игнорируемое ПО</h3>
-                <div id="ignored_items"><?= ModelWidget::widget(['model'=>$model, 'view'=>'/swlist/2cols-list', 'options'=>['items'=>$ignored]]) ?></div>
+                <div id="ignored_items"><?= $this->render('/swlist/2cols-list',['model'=>$model, 'items'=>$ignored]) ?></div>
 	            <?php foreach ($model->comps as $comp) {
 		            if ($comp->swList->hasSavedIgnored()) echo Html::a('Убрать из паспорта игнорируемое ПО на '.$comp->name,
 			            ['/comps/rmsw','id'=>$comp->id,'items'=>implode(',',$comp->swList->getSavedIgnored())],
@@ -131,7 +133,7 @@ $manufacturers= Manufacturers::fetchNames();
         if (count($free)) { ?>
             <div class="soft_ignored passport_tools">
                 <h3 id="free_hdr">Бесплатное ПО</h3>
-                <div id="free_items"><?= ModelWidget::widget(['model'=>$model, 'view'=>'/swlist/2cols-list', 'options'=>['items'=>$free]]) ?></div>
+                <div id="free_items"><?= $this->render('/swlist/2cols-list',['model'=>$model, 'items'=>$free]) ?></div>
 	            <?php foreach ($model->comps as $comp) {
 		            if ($comp->swList->hasSavedFree()) echo Html::a('Убрать из паспорта бесплатное ПО на '.$comp->name,
 			            ['/comps/rmsw','id'=>$comp->id,'items'=>implode(',',$comp->swList->getSavedFree())],
@@ -150,14 +152,14 @@ $manufacturers= Manufacturers::fetchNames();
         if (count($unknown)) { ?>
         <div class="soft_unknown passport_tools">
             <h3 id="unknown_hdr">На компьютере обнаружено неизвестное ПО</h3>
-            <div id="unknown_items"><?= ModelWidget::widget(['model'=>$model, 'view'=>'/swlist/list', 'options'=>['items'=>$unknown]]) ?></div>
+            <div id="unknown_items"><?= $this->render('/swlist/2cols-list',['model'=>$model, 'items'=>$unknown]) ?></div>
         </div>
         <?php }
 
         if (count($unagreed)) { ?>
             <div class="soft_unagreed passport_tools">
                 <h3 id="unagreed_hdr">На компьютере обнаружено ПО не из реестра</h3>
-                <div id="unagreed_items"><?= ModelWidget::widget(['model'=>$model, 'view'=>'/swlist/2cols-list', 'options'=>['items'=>$unagreed]]) ?></div>
+                <div id="unagreed_items"><?= $this->render('/swlist/2cols-list',['model'=>$model, 'items'=>$unagreed]) ?></div>
             </div>
         <?php }
 
