@@ -11,22 +11,24 @@ use app\helpers\ModelHelper;
 use yii\console\Controller;
 
 /**
- * This command echoes the first argument that you have entered.
- *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * Контроллер для разработки, можно тут прокручивать код
  */
 class DevController extends Controller
 {
     /**
-     * This command echoes what you have entered as the message.
-     * @param string $message the message to be echoed.
+     * Вывести все типы объявленные в ArmsModel потомках
      */
-    public function actionTypes()
+    public function actionTypes(): void
     {
 		$types=ModelHelper::getModelAtributesTypes();	
 		print_r($types);
     }
+
+	/**
+	 * Вывести все классы от ArmsModel
+	 */
+	public function actionModels() : void {
+		$models = ModelHelper::getModelClasses();
+		print_r($models);
+	}
 }

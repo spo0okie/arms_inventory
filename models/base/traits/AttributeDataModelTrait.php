@@ -286,7 +286,7 @@ trait AttributeDataModelTrait
 			return null;
 		}
 		
-		$data=$this->attributeDataCache[$attr];
+		$data=(array)$this->attributeDataCache[$attr];
 		if (!isset($data['alias'])) return $data;
 		if ($data['alias']==$attr) return $data; //no recursion!
 		

@@ -137,6 +137,11 @@ class ModelFactory
 			if (isset($options['overrides'][$attribute])) {
 				continue;
 			}
+
+			// Пропускаем связи, т.к. они заполняются в другом месте
+			if ($model->attributeIsLink($attribute)) {
+				continue;
+			}
 			
 			// Получаем данные атрибута
 			$attributeData = $model->getAttributeData($attribute);
@@ -169,7 +174,7 @@ class ModelFactory
 			} catch (\Throwable $e) {
 				throw new ModelGenerationException(
 					modelClass: get_class($model),
-					stage: 'generateAttributes',
+					stage: 'generateAttributes/generate',
 					seed: $context->seed,
 					attribute: $attribute,
 					previous: $e

@@ -20,13 +20,12 @@ class ModelGenerationException extends \Exception
 	protected function buildMessage(): string
 	{
 		return sprintf(
-			"Model build failed: %s\n "
-			."seed=%d\n"
-			."stage=%s\n"
-			."attr=%s\n"
-			."related=%s\n"
-			."depth=%s\n"
-			."errors=%s",
+			"Model build failed: %s (seed=%d)\n"
+			."stage: %s\n"
+			."attr: %s\n"
+			."related: %s\n"
+			."depth: %s\n"
+			."errors: %s",
 			$this->modelClass,
 			$this->seed ?? -1,
 			$this->stage,

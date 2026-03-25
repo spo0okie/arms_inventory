@@ -56,7 +56,7 @@ class ModelHelper
             $files = FileHelper::findFiles($directory, [
                 'only' => ['*.php'],
                 'recursive' => true,
-                'exclude' => self::EXCLUDED_DIRS,
+                'except' => self::EXCLUDED_DIRS,
             ]);
 
             foreach ($files as $file) {
