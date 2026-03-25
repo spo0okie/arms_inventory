@@ -268,7 +268,7 @@ class ModelFactory
 		try {
 			self::generateAttributes($model, $context, $options);    //заполняем атрибуты
 			
-			self::applyRelations($model, $context);                    //заполняем связи
+			self::applyRelations($model, $context, $options);          //заполняем связи
 			
 			if (!empty($options['role'])) {
 				self::applyPreset($model, $options['role']);
@@ -296,9 +296,9 @@ class ModelFactory
 		}
 	}
 
-	protected static function applyRelations(ArmsModel $model, GenerationContext $context): void
+	protected static function applyRelations(ArmsModel $model, GenerationContext $context, array $options): void
 	{
-		if (!method_exists($model, 'linksSchema')) {
+		if (!method_exists($model, 'getLinksSchema')) {
 			return;
 		}
 
@@ -306,24 +306,37 @@ class ModelFactory
 			return;
 		}
 
-		foreach ($model->linksSchema() as $attribute => $config) {
-
-			// если уже задан (например preset или override)
-			if (!empty($model->$attribute)) {
+		foreach ($model->getLinksSchema() as $attribute => $config) {
+			
+			// many-to-many и reverse-ссылки пока не генерируем
+			if (str_ends_with($attribute, '_ids')) {
 				continue;
 			}
 
-			$class = $config['class'] ?? null;
+			// если уже задан (например preset или override)
+			if (array_key_exists('overrides', $options) && array_key_exists($attribute, $options['overrides'])) {
+				continue;
+			}
+
+			if ($model->$attribute !== null) {
+				continue;
+			}
+
+			if (!is_array($config)) {
+				$config = [$config];
+			}
+
+			$class = $config['class'] ?? ($config[0] ?? null);
 			if (!$class) {
 				continue;
 			}
 			
-			$empty = $config['empty'] //если мы собираем пустую модель
-				&& !$model->getAttributeIsRequired($attribute)		//и эта связь не обязательная
-				&& $model->getAttributeIsNullable($attribute);		//и может быть null
-			if ($empty) {
-				continue;											//пропускаем ее
-			}		
+			$skipEmpty = $context->empty								// если собираем пустую модель
+				&& !$model->getAttributeIsRequired($attribute)			// связь не обязательна
+				&& $model->getAttributeIsNullable($attribute);			// и может быть null
+			if ($skipEmpty) {
+				continue;
+			}
 
 			$role = $config['role'] ?? null;
 			
@@ -353,7 +366,7 @@ class ModelFactory
 			}
 			
 			if ($related) {
-				$model->$attribute = $related->primaryKey;
+				$model->$attribute = $related->getPrimaryKey();
 			} else {
 				throw new ModelGenerationException(
 					modelClass: get_class($model),
