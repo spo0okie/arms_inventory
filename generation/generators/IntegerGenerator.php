@@ -15,14 +15,14 @@ class IntegerGenerator implements GeneratorInterface
     public function generate(AttributeContext $context): mixed
     {
         // Режим пустых значений
-        if ($context->generationContext->empty) {
+        if ($context->empty) {
             return $context->isNullable() ? null : 0;
         }
 
         $config = $context->generatorConfig();
 
-        $min = $config['min'] ?? 0;
-        $max = $config['max'] ?? 1000;
+        $min = $context->min ?? 0;
+        $max = $context->max ?? 1000;
 
         // Детерминированная генерация на основе seed + имя атрибута
         $seed = $context->generationContext->seed + crc32($context->attribute);

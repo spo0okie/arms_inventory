@@ -15,7 +15,7 @@ class UrlsGenerator implements GeneratorInterface
     public function generate(AttributeContext $context): mixed
     {
         // Режим пустых значений
-        if ($context->generationContext->empty) {
+        if ($context->empty) {
             return $context->isNullable() ? null : '';
         }
 
@@ -25,8 +25,11 @@ class UrlsGenerator implements GeneratorInterface
         $seed = $context->generationContext->seed + crc32($context->attribute);
         mt_srand($seed);
 
-        $count = $config['count'] ?? 1;
-        $protocols = $config['protocols'] ?? ['https'];
+		$min = $context->min ?? 1;
+		$max = $context->max ?? 4;
+        $count = mt_rand($min, $max);
+		
+        $protocols = $config['protocols'] ?? ['https','http'];
         $domains = $config['domains'] ?? ['example.com', 'test.org', 'demo.net'];
         
         $result = [];

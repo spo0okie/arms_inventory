@@ -15,7 +15,7 @@ class StringGenerator implements GeneratorInterface
     public function generate(AttributeContext $context): mixed
     {
         // Режим пустых значений
-        if ($context->generationContext->empty) {
+        if ($context->empty) {
             return $context->isNullable() ? null : '';
         }
 
@@ -25,9 +25,9 @@ class StringGenerator implements GeneratorInterface
         $seed = $context->generationContext->seed + crc32($context->attribute);
         mt_srand($seed);
 
-        $minLength = $config['min_length'] ?? 5;
-        $maxLength = $config['max_length'] ?? 20;
-        $length = mt_rand($minLength, $maxLength);
+		$min = $context->min ?? 5;
+		$max = $context->max ?? 20;
+        $length = mt_rand($min, $max);
 
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $result = '';

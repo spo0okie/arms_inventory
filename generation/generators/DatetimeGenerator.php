@@ -15,7 +15,7 @@ class DatetimeGenerator implements GeneratorInterface
     public function generate(AttributeContext $context): mixed
     {
         // Режим пустых значений
-        if ($context->generationContext->empty) {
+        if ($context->empty) {
             return $context->isNullable() ? null : date('Y-m-d H:i:s');
         }
 

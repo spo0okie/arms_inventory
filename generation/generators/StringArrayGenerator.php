@@ -15,7 +15,7 @@ class StringArrayGenerator implements GeneratorInterface
     public function generate(AttributeContext $context): mixed
     {
         // Режим пустых значений
-        if ($context->generationContext->empty) {
+        if ($context->empty) {
             return $context->isNullable() ? null : [];
         }
 
@@ -25,14 +25,14 @@ class StringArrayGenerator implements GeneratorInterface
         $seed = $context->generationContext->seed + crc32($context->attribute);
         mt_srand($seed);
 
-        $minItems = $config['min_items'] ?? 1;
-        $maxItems = $config['max_items'] ?? 5;
-        $itemCount = mt_rand($minItems, $maxItems);
+		$min = $context->min ?? 2;
+		$max = $context->max ?? 8;
+        $itemCount = mt_rand($min, $max);
 
         $result = [];
         for ($i = 0; $i < $itemCount; $i++) {
-            $minLen = $config['min_length'] ?? 3;
-            $maxLen = $config['max_length'] ?? 10;
+            $minLen = $config['min_length'] ?? 10;
+            $maxLen = $config['max_length'] ?? 20;
             $len = mt_rand($minLen, $maxLen);
             
             $chars = 'abcdefghijklmnopqrstuvwxyz';

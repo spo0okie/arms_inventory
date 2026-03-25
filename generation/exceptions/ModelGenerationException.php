@@ -19,7 +19,7 @@ class ModelGenerationException extends \Exception
 	
 	protected function buildMessage(): string
 	{
-		return sprintf(
+		$message = sprintf(
 			"Model build failed: %s (seed=%d)\n"
 			."stage: %s\n"
 			."attr: %s\n"
@@ -34,5 +34,11 @@ class ModelGenerationException extends \Exception
 			$this->depth ?? '-',
 			json_encode($this->errors, JSON_UNESCAPED_UNICODE)
 		);
+		
+		if ($this->previous) {
+			$message .= "\nprevious: " . $this->previous->getMessage();
+		}
+		
+		return $message;
 	}
 }

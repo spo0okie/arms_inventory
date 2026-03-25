@@ -15,7 +15,7 @@ class MacsGenerator implements GeneratorInterface
     public function generate(AttributeContext $context): mixed
     {
         // Режим пустых значений
-        if ($context->generationContext->empty) {
+        if ($context->empty) {
             return $context->isNullable() ? null : '';
         }
 
@@ -25,7 +25,9 @@ class MacsGenerator implements GeneratorInterface
         $seed = $context->generationContext->seed + crc32($context->attribute);
         mt_srand($seed);
 
-        $count = $config['count'] ?? 1;
+		$min = $context->min ?? 1;
+		$max = $context->max ?? 4;
+        $count = mt_rand($min, $max);
         $result = [];
         
         for ($i = 0; $i < $count; $i++) {

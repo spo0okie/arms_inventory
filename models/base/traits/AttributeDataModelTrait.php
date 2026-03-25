@@ -773,11 +773,12 @@ trait AttributeDataModelTrait
 		$cache='attributeIsRequired|'.$attribute;
 		if (isset($this->attrsCache[$cache]))
 			return $this->attrsCache[$cache];
+		
 		// Проверяем через rules
 		foreach ($this->rules() as $rule) {
-			if (in_array($attribute, (array)$rule[0])) {
+			if (in_array($attribute, (array)$rule[0], true)) {
 				if ($rule[1] === 'required') {
-					return $this->attrsCache[$cache]=false;
+					return $this->attrsCache[$cache]=true;
 				}
 			}
 		}

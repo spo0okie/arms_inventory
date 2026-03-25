@@ -10,9 +10,13 @@ use app\models\base\ArmsModel;
  */
 class AttributeContext
 {
-    public function __construct(
-        public readonly string $attribute,
-        public readonly array $attributeData,
+	public $min=null;						//min значение/длина
+	public $max=null;						//max значение/длина
+
+	public function __construct(
+        public readonly string $attribute,		//атрибут
+        public readonly array $attributeData,	//метаданные
+		public readonly bool $empty=false,		//нужно ли пустой
         public readonly ArmsModel $model,
         public readonly GenerationContext $generationContext,
     ) {}

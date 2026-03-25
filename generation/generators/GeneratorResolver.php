@@ -53,6 +53,7 @@ class GeneratorResolver
             'date'      => new DateGenerator(),
             'datetime'  => new DateTimeGenerator(),
             'float'     => new FloatGenerator(),
+            'number'    => new FloatGenerator(),
             'integer'   => new IntegerGenerator(),
             'ips'       => new IpsGenerator(),
             'json'      => new JsonGenerator(),

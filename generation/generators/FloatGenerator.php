@@ -15,15 +15,15 @@ class FloatGenerator implements GeneratorInterface
     public function generate(AttributeContext $context): mixed
     {
         // Режим пустых значений
-        if ($context->generationContext->empty) {
+        if ($context->empty) {
             return $context->isNullable() ? null : 0.0;
         }
 
         $config = $context->generatorConfig();
 
-        $min = $config['min'] ?? 0;
-        $max = $config['max'] ?? 1000;
-        $decimals = $config['decimals'] ?? 2;
+        $min = $context->min ?? 0;
+        $max = $context->min ?? 10000;
+        $decimals = 2;
 
         // Детерминированная генерация
         $seed = $context->generationContext->seed + crc32($context->attribute);

@@ -15,7 +15,7 @@ class JsonGenerator implements GeneratorInterface
     public function generate(AttributeContext $context): mixed
     {
         // Режим пустых значений
-        if ($context->generationContext->empty) {
+        if ($context->empty) {
             return $context->isNullable() ? null : '{}';
         }
 
@@ -25,7 +25,7 @@ class JsonGenerator implements GeneratorInterface
         $seed = $context->generationContext->seed + crc32($context->attribute);
         mt_srand($seed);
 
-        $keys = $config['keys'] ?? ['key1', 'key2', 'key3'];
+        $keys = ['key1', 'key2', 'key3'];
         $result = [];
         
         foreach ($keys as $key) {
