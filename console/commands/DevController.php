@@ -24,6 +24,14 @@ class DevController extends Controller
 		print_r($types);
     }
 
+    /**
+     * Вывести все rules объявленные в ArmsModel потомках
+     */
+    public function actionRules(): void
+    {
+		print_r(ModelHelper::getModelAtributesRules());
+    }
+
 	/**
 	 * Вывести все классы от ArmsModel
 	 */

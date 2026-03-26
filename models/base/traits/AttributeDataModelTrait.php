@@ -451,7 +451,7 @@ trait AttributeDataModelTrait
 			if (in_array($attribute, (array)$rule[0])) {
 				switch ($rule[1]) {
 					case 'integer': return 'integer';
-					case 'number': return 'number';
+					case 'number': return 'float';
 					case 'boolean': return 'boolean';
 					case 'string': return 'string';
 				}

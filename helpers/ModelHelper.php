@@ -138,11 +138,12 @@ class ModelHelper
 		if ($modelClasses === null)
 			$modelClasses = self::getModelClasses();
 		foreach ($modelClasses as $modelClass) {
+			/** @var ArmsModel $model */
 			$model=new $modelClass();
 			$attribureData=$model->attributeData();
 			foreach ($attribureData as $attr=>$data) {
-				if (isset($data['type'])) {
-					$type=$data['type'];
+				$type=$model->getAttributeType($attr,null);
+				if (!is_null($type)) {
 					if (!isset($types[$type])) {
 						$types[$type]=['count'=>1,'sample'=>$modelClass.'->'.$attr];
 					} else
@@ -152,6 +153,40 @@ class ModelHelper
 		}
 		
 		return $types;
+	}
+
+	/**
+	 * Возвращает список правил валидации моделей
+	 * @param array|null $modelClasses Список классов моделей (по умолчанию все модели из models,modules)
+	 * @return array Список правил в формате 
+	 * 				['rule name'=>['count'=>количество использований,'sample'=>пример где используется]]
+	 */
+	public static function getModelAtributesRules(?array $modelClasses=null): array {
+		if ($modelClasses === null)
+			$modelClasses = self::getModelClasses();
+		$rules = [];
+		$closures = [];
+		foreach ($modelClasses as $modelClass) {
+			/** @var ArmsModel $model */
+			$model=new $modelClass();
+			foreach ($model->rules() as $rule) {
+				$name=$rule[1];
+				$attrs=(array)($rule[0]);
+				if (is_callable($name)) {
+					$closures[]=[$modelClass.'->'.$attrs[0]];
+					continue;
+				}
+				if (!is_string($name))
+					Throw new \Exception('Неожиданный формат правила валидации в '.$modelClass.': '.print_r($rule,true));
+				if (!isset($rules[$name])) {
+					$rules[$name]=['count'=>1,'sample'=>$modelClass.'->'.$attrs[0]];
+				} else
+					$rules[$name]['count']++;
+				
+			}
+		}
+		$rules['closures']=['count'=>count($closures),'sample'=>$closures];
+		return $rules;
 	}
 
 }
