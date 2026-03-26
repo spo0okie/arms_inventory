@@ -783,7 +783,7 @@ trait AttributeDataModelTrait
 			}
 		}
 		
-		return $this->attrsCache[$cache]=true;
+		return $this->attrsCache[$cache]=false;
 	}
 
 	/**

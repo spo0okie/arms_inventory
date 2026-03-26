@@ -16,7 +16,7 @@ class BooleanGenerator implements GeneratorInterface
     {
         // Режим пустых значений
         if ($context->empty) {
-            return $context->isNullable() ? null : false;
+            return $context->isNullable() ? null : 0;
         }
 
         // Детерминированная генерация
@@ -26,6 +26,6 @@ class BooleanGenerator implements GeneratorInterface
 		$value=mt_rand(0, 1);
 		
 		mt_srand(); // сброс
-        return (bool)$value; 
+        return $value; 
     }
 }

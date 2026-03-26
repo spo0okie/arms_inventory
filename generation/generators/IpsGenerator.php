@@ -14,6 +14,19 @@ class IpsGenerator implements GeneratorInterface
      */
     public function generate(AttributeContext $context): mixed
     {
+		// Детерминированная генерация
+        $seed = $context->generationContext->seed + crc32($context->attribute);
+        mt_srand($seed);
+
+		if ($context->model instanceof \app\models\Networks && $context->attribute === 'text_addr') {
+            $octet = 1 + ($seed % 200);
+            return '198.18.' . $octet . '.0/24';
+        }
+        if ($context->model instanceof \app\models\NetIps && $context->attribute === 'text_addr') {
+            $octet = 1 + ($seed % 200);
+            return '203.0.113.' . $octet;
+        }
+
         // Режим пустых значений
         if ($context->empty) {
             return $context->isNullable() ? null : '';
@@ -21,9 +34,6 @@ class IpsGenerator implements GeneratorInterface
 
         $config = $context->generatorConfig();
 
-        // Детерминированная генерация
-        $seed = $context->generationContext->seed + crc32($context->attribute);
-        mt_srand($seed);
 
 		$min = $context->min ?? 16;
 		$max = $context->max ?? 128;
