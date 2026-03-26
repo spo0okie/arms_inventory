@@ -2,6 +2,8 @@
 
 namespace app\types;
 
+use app\generation\context\AttributeContext;
+use app\generation\generators\StringGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
@@ -41,5 +43,11 @@ class StringType implements AttributeTypeInterface
 	public function samples(): array
 	{
 		return [];
+	}
+
+	public function generate(AttributeContext $context): mixed
+	{
+		$generator = new StringGenerator();
+		return $generator->generate($context);
 	}
 }

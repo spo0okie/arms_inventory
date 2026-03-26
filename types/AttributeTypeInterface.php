@@ -1,9 +1,10 @@
-<?php
+﻿<?php
 
 namespace app\types;
 
-use app\models\base\ArmsModel;
+use app\generation\context\AttributeContext;
 use app\generation\generators\GeneratorInterface;
+use app\models\base\ArmsModel;
 use yii\web\View;
 
 /**
@@ -14,7 +15,7 @@ use yii\web\View;
  * - Метаданные атрибута должны обрабатываться на уровне модели/формы,
  *   сюда передаются только параметры типа (typeParams).
  */
-interface AttributeTypeInterface
+interface AttributeTypeInterface extends GeneratorInterface
 {
 	/**
 	 * Уникальное имя типа (для логов/отладки/реестра).
@@ -56,7 +57,7 @@ interface AttributeTypeInterface
 	public function samples(): array;
 
 	/**
-	 * Генератор для данного типа атрибута.
+	 * Генератор для данного типа атрибута (совместим с GeneratorInterface).
 	 */
-	public function generator(): ?GeneratorInterface;
+	public function generate(AttributeContext $context): mixed;
 }
