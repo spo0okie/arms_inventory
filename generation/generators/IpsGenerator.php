@@ -25,9 +25,9 @@ class IpsGenerator implements GeneratorInterface
         $seed = $context->generationContext->seed + crc32($context->attribute);
         mt_srand($seed);
 
-		$min = $context->min ?? 1;
-		$max = $context->max ?? 4;
-        $count = mt_rand($min, $max);
+		$min = $context->min ?? 16;
+		$max = $context->max ?? 128;
+        $count = mt_rand($min/16, $max/16);
         $result = [];
         
         for ($i = 0; $i < $count; $i++) {

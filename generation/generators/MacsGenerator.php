@@ -25,10 +25,10 @@ class MacsGenerator implements GeneratorInterface
         $seed = $context->generationContext->seed + crc32($context->attribute);
         mt_srand($seed);
 
-		$min = $context->min ?? 1;
-		$max = $context->max ?? 4;
-        $count = mt_rand($min, $max);
-        $result = [];
+		$min = $context->min ?? 18;
+		$max = $context->max ?? 128;
+        $count = mt_rand($min/18, $max/18);
+		$result = [];
         
         for ($i = 0; $i < $count; $i++) {
             $mac = sprintf(

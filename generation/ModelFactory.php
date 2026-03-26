@@ -41,12 +41,12 @@ class ModelFactory
 	/**
 	 * Максимальное количество попыток валидации
 	 */
-	public const MAX_VALIDATE_RETRIES = 1;
+	public const MAX_VALIDATE_RETRIES = 3;
 	
 	/**
 	 * Максимальное количество попыток сохранения
 	 */
-	public const MAX_SAVE_RETRIES = 1;
+	public const MAX_SAVE_RETRIES = 3;
 	
 	/**
 	 * Создать модель с автоматически сгенерированными атрибутами.
@@ -467,6 +467,7 @@ class ModelFactory
 						stage: 'createOnce/validate',
 						errors: $model->getErrors(),
 						seed: $context->seed,
+						values: array_intersect_key($model->getAttributes(),$model->getErrors())
 					)
 				);
 			}
