@@ -239,14 +239,17 @@ class Services extends ArmsModel
 			'archived' => [
 				'Архивирован',
 				'hint' => 'Если сервис/услуга более не используется, но для истории его описание лучше сохранить - то его можно просто заархивировать, чтобы не отсвечивал',
+				'typeClass' => \app\types\BooleanType::class,
 			],
 			'aces_ids' => [
 				'Доступы отсюда',
 				'hint' => 'Исходящие доступы от этого сервиса/услуги к другим сервисам/услугам',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'acls_ids' => [
 				'Доступы сюда',
 				'hint' => 'Входящие доступы к этому сервису/услуге от других сервисов/услуг',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'arms' => [
 				'Физ. сервера',
@@ -262,12 +265,14 @@ class Services extends ArmsModel
 			'charge' => [
 				'НДС',
 				'hint' => 'налог',
+				'typeClass' => \app\types\FloatType::class,
 			],
 			'comps_ids' => [
 				'Серверы',
 				'hint' => 'На каких серверах выполняется этот сервис/услуга',
 				'indexHint' => '{same}',//<br />'.QueryHelper::$stringSearchHint,
 				'placeholder' => 'Выберите серверы',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'compsAndTechs'=> [
 				'Серв./Оборуд.',
@@ -277,20 +282,24 @@ class Services extends ArmsModel
 				Contracts::$titles,
 				'hint' => 'Привязанные к услуге документы. Нужно привязать только договор, а все счета/акты/доп.соглашения уже привязывать к договору',
 				'placeholder' => 'Нет связанных документов',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'cost' => [
 				'Стоимость',
 				'hint' => 'Стоимость услуги в месяц. (если понадобится другой период - обращайтесь к разработчику)',
+				'typeClass' => \app\types\FloatType::class,
 			],
 			'currency_id' => [
 				'Валюта',
 				'hint' => 'Ед. изм. стоим.',
-				'placeholder' => 'RUR'
+				'placeholder' => 'RUR',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'depends_ids' => [
 				'Зависит от сервисов/услуг',
 				'hint' => 'От работы каких сервисов зависит работа этого сервиса/предоставление услуги',
 				'placeholder' => 'Не зависит ни от каких сервисов',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'description' => [
 				'Краткое описание',
@@ -299,6 +308,7 @@ class Services extends ArmsModel
 					.'Все детали тут описывать не нужно. Их нужно описать в поле "Подробно" или <br>'
 					.'в поле ниже вставить ссылку на вики страничку с детальным описанием.',
 				'type' => 'text',
+				'typeClass' => \app\types\TextType::class,
 			],
 			'infrastructure_user_id' => [
 				'Ответственный за инфраструктуру',
@@ -308,6 +318,7 @@ class Services extends ArmsModel
 					$this->responsibleRecursive->name.' (отв. за сервис, включая инфраструктуру)':
 					'Тот же, кто отвечает за сервис (ответственность не разделяется)';
 				},
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'infrastructure_support_ids' => [
 				'Поддержка инфраструктуры',
@@ -318,23 +329,29 @@ class Services extends ArmsModel
 					$this->renderAttributeToText('support_ids',', ').' (поддерживают сервис, включая инфраструктуру)':
 					'Те же, кто поддерживает сервис (ответственность не разделяется)';
 				}
+				,
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'is_end_user' => [
 				'Предоставляется пользователям',
 				'hint' => 'Предоставляется ли этот сервис пользователям (иначе используется другими сервисами)',
+				'typeClass' => \app\types\BooleanType::class,
 			],
 			'is_service' => [
 				'Тип объекта',
+				'typeClass' => \app\types\BooleanType::class,
 			],
 			'links' => [
 				'Ссылки',
 				'hint' => UrlListWidget::$hint.' Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
+				'typeClass' => \app\types\UrlsType::class,
 			],
 			'maintenance_jobs_ids'=>[
 				MaintenanceJobs::$titles,
 				'hint'=>'Какие операции регламентного обслуживания проводятся над этим сервисом',
 				'indexHint'=>'{same}',
 				'placeholder' => 'Не обслуживается',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'maintenance_reqs_ids'=>[
 				MaintenanceReqs::$titles,
@@ -344,6 +361,7 @@ class Services extends ArmsModel
 				'indexHint'=>'{same}',
 				'is_inheritable'=>true,
 				'placeholder' => 'Не требует обслуживания',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'maintenanceReqsRecursive'=>['alias'=>'maintenance_reqs_ids'],
 			'name' => [
@@ -353,11 +371,13 @@ class Services extends ArmsModel
 					'При поиске также ищет в полях '.
 					'<strong>"Другие варианты названия"</strong> и '.
 					'<strong>"Описание"</strong>',
+				'typeClass' => \app\types\StringType::class,
 			],
 			'notebook' => [
 				'Подробно',
 				'hint' => 'Можно сохранять тут подробное описание сервиса',
-				'type' => 'text'
+				'type' => 'text',
+				'typeClass' => \app\types\TextType::class,
 			],
 			'otherReqs'=>[
 				'Требования по обслуживанию',
@@ -368,23 +388,27 @@ class Services extends ArmsModel
 				'Основной сервис/услуга',
 				'hint' => 'Здесь можно указать в состав какого, более крупного сервиса, входит этот сервис',
 				'placeholder' => 'Выберите основной сервис/услугу',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'partners_id' => [
 				Partners::$title,
 				'hint' => 'Если услуга/сервис оказывается каким-либо контрагентом (иначе внутренняя)',
-				'placeholder' => 'Отсутствует: сервис/услуга предоставляется ИТ отделом'
+				'placeholder' => 'Отсутствует: сервис/услуга предоставляется ИТ отделом',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'partner' => ['alias'=>'partners_id'],
 			'places_id' => [
 				Places::$title,
 				'hint' => 'Привязать сервис/услугу к помещению. Иначе помещение будет косвенно выясняться на основании расположения серверов и оборудования',
 				'placeholder' => 'Определять автоматически из расположения серверов и оборудования',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'providing_schedule_id' => [
 	        	'Время предоставления',
 				'hint' => 'Расписание, когда сервисом могут воспользоваться пользователи или другие сервисы',
 				'is_inheritable'=>true,
-				'placeholder' => 'Расписание отсутствует'
+				'placeholder' => 'Расписание отсутствует',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'responsible_id' => [
 				'Ответственный',
@@ -393,44 +417,51 @@ class Services extends ArmsModel
 				'placeholder' => 'Ответственный не назначен',
 				'indexLabel'=>'Отв., поддержка',
 				'indexHint'=>'Поиск по ответственному или поддержке сервиса или инфраструктуры сервиса',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'segment_id' => [
 				'Сегмент ИТ',
 				'hint' => 'Сегмент ИТ инфраструктуры к которому относится этот сервис',
 				'is_inheritable'=>true,
-				'placeholder' => 'Сегмент инфраструктуры не объявлен'
+				'placeholder' => 'Сегмент инфраструктуры не объявлен',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'search_text' => [
 				'Альясы',
 				'hint' => 'Какие еще названия используются в отношении этого сервиса (по одному в строку). '
 					.'<br>Нужно для лучшей работы поиска (искать будет не только по основному названию но и по этим).'
 					.'<br>Также при построении дерева сервисов имена и альясы родителей скрывается из дочерних сервисов (для краткости)',
+				'typeClass' => \app\types\TextType::class,
 			],
 			'sites' => ['Площадки'],
 			'support_ids' => [
 				'Поддержка',
 				'hint' => 'Дополнительные члены команды по поддержке сервиса/оказанию услуги',
 				'is_inheritable'=>true,
-				'placeholder' => 'Поддержка отсутствует'
+				'placeholder' => 'Поддержка отсутствует',
+				'typeClass' => \app\types\LinkType::class,
 			],
 	        'support_schedule_id' => [
 	        	'Время поддержки',
 				'hint' => 'Расписание, когда нужно реагировать на сбои в работе сервиса',
 				'is_inheritable'=>true,
-				'placeholder' => 'Расписание отсутствует'
+				'placeholder' => 'Расписание отсутствует',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'tags' => [
 				'Теги',
 				'hint' => 'Метки для удобной группировки и поиска сервисов/услуг',
 				'indexHint' => '{same}',
 				'placeholder' => 'Нет тегов',
-				'join'=>'tags'
+				'join'=>'tags',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'techs_ids' => [
 				'Оборудование',
 				'hint' => 'На каком оборудовании выполняется этот сервис',
 				'indexHint' => '{same}',//<br />'.QueryHelper::$stringSearchHint,
 				'placeholder' => 'Выберите оборудование',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'weight' => [
 				'Вес',
@@ -444,21 +475,29 @@ class Services extends ArmsModel
 							'Команды обслуживания сервисов весом менее <b>'.Yii::$app->params['support.service.min.weight'].'</b> не будут привлекаться к обслуживанию ОС и оборудования на которых развернут сервис'
 						):''
 					)
+				,
+				'typeClass' => \app\types\FloatType::class,
 			],
 			'vm_cores' => [
 				'Выделено VM CPU',
 				'hint' => 'Количество ядер VM резервированное/запланированное для этого сервиса.<br>'.
 					'(Если на этот сервис запланированы ресурсы виртуализации)'
+				,
+				'typeClass' => \app\types\IntegerType::class,
 			],
 			'vm_ram' => [
 				'Выделено VM RAM',
 				'hint' => 'Объем VM RAM в GiB зарезервированный/запланированный для этого сервиса.<br>'.
 					'(Если на этот сервис запланированы ресурсы виртуализации)'
+				,
+				'typeClass' => \app\types\IntegerType::class,
 			],
 			'vm_hdd' => [
 				'Выделено VM HDD',
 				'hint' =>'Объем дискового пространства VM в GiB зарезервированный/запланированный для этого сервиса.<br>'.
 					'(Если на этот сервис запланированы ресурсы виртуализации)'
+				,
+				'typeClass' => \app\types\IntegerType::class,
 			],
 
         ]);

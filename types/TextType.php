@@ -3,29 +3,29 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\StringGenerator;
+use app\generation\generators\TextGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
 
-class StringType implements AttributeTypeInterface
+class TextType implements AttributeTypeInterface
 {
 	public static function name(): string
 	{
-		return 'string';
+		return 'text';
 	}
 
 	public function renderInput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
 		$inputOptions = $options['inputOptions'] ?? [];
-		return Html::activeTextInput($model, $attribute, $inputOptions);
+		return Html::activeTextarea($model, $attribute, $inputOptions);
 	}
 
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
 		$value = $model->$attribute ?? null;
 		if (is_array($value)) {
-			$value = implode(', ', $value);
+			$value = implode("\n", $value);
 		}
 		return Html::encode((string)$value);
 	}
@@ -47,7 +47,7 @@ class StringType implements AttributeTypeInterface
 
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new StringGenerator();
+		$generator = new TextGenerator();
 		return $generator->generate($context);
 	}
 }

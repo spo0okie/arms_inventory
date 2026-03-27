@@ -93,44 +93,52 @@ class LicKeys extends ArmsModel
 				'Комментарии',
 				'comment' => 'Все что стоит знать об этом ключе кроме информации в остальных полях',
 				'type' => 'text',
+				'typeClass' => \app\types\TextType::class,
 			],
 			'lic_items_id' => [
 				'Закупка',
 				'hint' => 'К какой закупке лицензий относятся эти ключи. Тут надо внимательно отнестись, чтобы не вносить путаницу.',
 				'placeholder' => 'Выберите закупку',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'lic_item' => ['alias'=>'lic_items_id',	],
 			'arms_ids' => [
 				'Привязанные АРМ(ы)',
 				'hint' => 'К какому рабочему ПК привязан ключ',
 				'placeholder' => 'Ключ не привязан к АРМ',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'comps_ids' => [
 				'Привязанные ОС/ВМ',
 				'hint' => 'К какой операционной системе привязан ключ',
 				'placeholder' => 'Ключ не привязан к ОС/ВМ',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'users_ids' => [
 				'Привязанный(е) пользователь(и)',
 				'hint' => 'К какому пользователю(пользователям) привязан ключ',
 				'placeholder' => 'Ключ не привязан к пользователям',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'links' => [
 				'Привязки',
+				'typeClass' => \app\types\UrlsType::class,
 			],
 			'key_text' => [
 				'Ключ',
 				'hint' => 'Текст ключа / серийный номер / чтобы то ни было, что используется для активации продукта',
 				'placeholder' => 'Введите ключ',
+				'typeClass' => \app\types\StringType::class,
 			],
 			'linkComment' => [
 				'Пояснение к добавляемым привязкам',
 				'hint' => 'На каком основании эти лицензии закрепляются за добавленными выше объектами. Чтобы спустя время не было вопросов, а кто и зачем эту лицензию туда выделил (уже существующие привязки не меняются, только новые)',
+				'typeClass' => \app\types\StringType::class,
 			],
 			//search fields
-			'comp_name' => 'Имя компьютера (FQDN или DOMAIN\hostname)',
-			'user_login' => 'Логин пользователя',
-			'product_id' => 'ID лицензируемого программного обеспечения (Soft)',
+			'comp_name' => ['Имя компьютера (FQDN или DOMAIN\\hostname)','typeClass'=>\app\types\StringType::class],
+			'user_login' => ['Логин пользователя','typeClass'=>\app\types\StringType::class],
+			'product_id' => ['ID лицензируемого программного обеспечения (Soft)','typeClass'=>\app\types\IntegerType::class],
 
 		];
 	}

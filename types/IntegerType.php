@@ -3,16 +3,16 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\StringGenerator;
+use app\generation\generators\IntegerGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
 
-class StringType implements AttributeTypeInterface
+class IntegerType implements AttributeTypeInterface
 {
 	public static function name(): string
 	{
-		return 'string';
+		return 'integer';
 	}
 
 	public function renderInput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
@@ -24,15 +24,12 @@ class StringType implements AttributeTypeInterface
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
 		$value = $model->$attribute ?? null;
-		if (is_array($value)) {
-			$value = implode(', ', $value);
-		}
 		return Html::encode((string)$value);
 	}
 
 	public function apiSchema(): array
 	{
-		return ['type' => 'string'];
+		return ['type' => 'integer'];
 	}
 
 	public function gridColumnClass(): ?string
@@ -42,12 +39,12 @@ class StringType implements AttributeTypeInterface
 
 	public function samples(): array
 	{
-		return [];
+		return [1];
 	}
 
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new StringGenerator();
+		$generator = new IntegerGenerator();
 		return $generator->generate($context);
 	}
 }

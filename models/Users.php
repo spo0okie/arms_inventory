@@ -220,14 +220,15 @@ class Users extends ArmsModel implements IdentityInterface
 					'aces.acl.ip',
 				],
 			],
-			'Bday' => 'День рождения',
-			'Doljnost' => 'Должность',
-			'Email' => ['E-Mail','absorb'=>'ifEmpty'],
+			'Bday' => ['День рождения','typeClass'=>\app\types\DateType::class],
+			'Doljnost' => ['Должность','typeClass'=>\app\types\StringType::class],
+			'Email' => ['E-Mail','absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
 			'employee_id' => [
 				'Таб. №',
 				'hint'=>'Табельный номер сотрудника<br>(конкретно этого его трудоустройства)',
+				'typeClass'=>\app\types\StringType::class,
 			],
-			'Ename' => 'Полное имя',
+			'Ename' => ['Полное имя','typeClass'=>\app\types\StringType::class],
 			'ips' => [
 				'Привязанные IP адреса',
 				'indexLabel' => 'IPs',
@@ -241,40 +242,45 @@ class Users extends ArmsModel implements IdentityInterface
 				'indexHint'=>'Назначенные пользователю лицензии',
 				'join'=>['licItems','licGroups','licKeys'],
 			],
-			'Login' => 'Логин (AD)',
+			'Login' => ['Логин (AD)','typeClass'=>\app\types\StringType::class],
 			'logon_ids' => ['absorb'=>false], //вручную переключим
-			'manager_id' => 'Руководитель',
-			'Mobile' => ['Мобильный тел','absorb'=>'ifEmpty'],
+			'manager_id' => ['Руководитель','typeClass'=>\app\types\LinkType::class],
+			'Mobile' => ['Мобильный тел','absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
 			'netIps' => ['alias'=>'ips'],
 			'nosync' => [
 				'Отключить синхронизацию',
 				'hint'=>'Запрет внешнему скрипту синхронизации с кадровой БД обновлять эту запись<br>'.
 					'<i>(Должно быть реализовано во внешнем скрипте)</i>',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'notepad' => [
 				'Записная книжка',
 				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого объекта',
 				'absorb'=>'ifEmpty',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'org_id' => [
 				'Организация',
 				'Контрагент в котором числится этот сотрудник/пользователь',
 				'placeholder' => 'Организация',
-				'join'=>['org']
+				'join'=>['org'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'org_name'=>['alias'=>'org_id'],
 			'Orgeh' => [
 				'Подразделение',
-				'join'=>['orgStruct']
+				'join'=>['orgStruct'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'orgStruct_name' => ['alias'=>'Orgeh'],
-			'Persg' => 'Тип трудоустройства',
+			'Persg' => ['Тип трудоустройства','typeClass'=>\app\types\StringType::class],
 			'Phone' => [
 				'Внутренний тел',
 				'absorb'=>'ifEmpty',
-				'join'=>['techs.model.type','techs.state']
+				'join'=>['techs.model.type','techs.state'],
+				'typeClass'=>\app\types\StringType::class,
 			],
-			'private_phone' => ['Личный тел','absorb'=>'ifEmpty'],
+			'private_phone' => ['Личный тел','absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
 			'scheduledAccess'=> [
 				'Вр. доcтупы',
 				'indexHint' => 'Предоставленные пользователю временные доступы',
@@ -284,18 +290,19 @@ class Users extends ArmsModel implements IdentityInterface
 				'Короткое имя',
 				'indexHint'=>'Отображаться будет "Фамилия И.О.",<br>'.
 					'поиск будет вестись по полному имени',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'techs' => [
 				'Оборудование',
 				'join'=>['techs.model.type','techs.state']
 			],
-			'uid' => ['Идентификатор','hint'=>'Уникальный идентификатор человека.<br>ИНН / СНИЛС / MD5(ИНН) и т.п.'],
-			'Uvolen' => 'Уволен',
-			'work_phone' => ['Городской рабочий тел','absorb'=>'ifEmpty'],
+			'uid' => ['Идентификатор','hint'=>'Уникальный идентификатор человека.<br>ИНН / СНИЛС / MD5(ИНН) и т.п.','typeClass'=>\app\types\StringType::class],
+			'Uvolen' => ['Уволен','typeClass'=>\app\types\BooleanType::class],
+			'work_phone' => ['Городской рабочий тел','absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
 			
-			'access_token'=>['absorb'=>'ifEmpty'],
-			'auth_key'=>['absorb'=>'ifEmpty'],
-			'password'=>['absorb'=>'ifEmpty'],
+			'access_token'=>['absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
+			'auth_key'=>['absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
+			'password'=>['absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
 		]);
 	}
 	

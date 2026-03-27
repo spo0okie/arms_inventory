@@ -143,45 +143,53 @@ trait AttributeDataModelTrait
 		return [
 			'id' => [
 				'Идентификатор',
+				'typeClass' => \app\types\IntegerType::class,
 			],
 			'code'=>[
 				'Код',
 				'hint'=>'Человекочитаемый и безопасный для URL идентификатор объекта. '
 					.'Удобно использовать в API чтобы не зависеть от переименования объектов (если код при этом сохраняется)',
-				'apiHint'=>'{same}'
+				'apiHint'=>'{same}',
+				'typeClass' => \app\types\StringType::class,
 			],
 			'comment' => [
 				'Примечание',
 				'hint' => 'Краткое пояснение по этому объекту',
+				'typeClass' => \app\types\StringType::class,
 			],
 			'notepad' => [
 				'Записная книжка',
 				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого объекта',
 				'type' => 'text',
+				'typeClass' => \app\types\TextType::class,
 			],
 			'history' => ['alias'=>'notepad'],
 			'links' => [
 				'Ссылки',
 				'hint' => UrlListWidget::$hint,
 				'type'=>'urls',
+				'typeClass' => \app\types\UrlsType::class,
 			],
 			'archived' => [
 				'Перенесено в архив',
 				'type'=>'boolean',
 				'hint' => 'Помечается, если в работе этот объект более не используется, но для истории запись о нем лучше сохранить',
+				'typeClass' => \app\types\BooleanType::class,
 			],
 			'updated_at' => [
 				'Время изменения',
 				'hint' => 'Дата/время изменения объекта в БД',
 				'type' => 'datetime',
 				'readOnly' => true,
+				'typeClass' => \app\types\DatetimeType::class,
 			],
 			'updated_by'=>[
 				'Редактор',
 				'type' => 'string',
 				'apiLabel' => 'Автор последних изменений в БД (username)',
 				'readOnly' => true,
-				'example' => 'v.pupkin'
+				'example' => 'v.pupkin',
+				'typeClass' => \app\types\StringType::class,
 			],
 			'external_links' => [
 				'Доп. связи',
@@ -191,6 +199,7 @@ trait AttributeDataModelTrait
 					.'Запись {"link1":"value1"} изменит во всем наборе ссылок только "link1", остальные останутся без изменений. '
 					.'Для удаления элемента из структуры надо записать для него пустое значение, например {"link1":""}. '
 					.'Запись пустой строки или пустого JSON {} не меняет никаких значений.',
+				'typeClass' => \app\types\JsonType::class,
 			],
 		];
 	}

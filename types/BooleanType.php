@@ -3,36 +3,33 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\StringGenerator;
+use app\generation\generators\BooleanGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
 
-class StringType implements AttributeTypeInterface
+class BooleanType implements AttributeTypeInterface
 {
 	public static function name(): string
 	{
-		return 'string';
+		return 'boolean';
 	}
 
 	public function renderInput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
 		$inputOptions = $options['inputOptions'] ?? [];
-		return Html::activeTextInput($model, $attribute, $inputOptions);
+		return Html::activeCheckbox($model, $attribute, $inputOptions);
 	}
 
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
 		$value = $model->$attribute ?? null;
-		if (is_array($value)) {
-			$value = implode(', ', $value);
-		}
-		return Html::encode((string)$value);
+		return Html::encode($value ? '1' : '0');
 	}
 
 	public function apiSchema(): array
 	{
-		return ['type' => 'string'];
+		return ['type' => 'boolean'];
 	}
 
 	public function gridColumnClass(): ?string
@@ -42,12 +39,12 @@ class StringType implements AttributeTypeInterface
 
 	public function samples(): array
 	{
-		return [];
+		return [0, 1];
 	}
 
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new StringGenerator();
+		$generator = new BooleanGenerator();
 		return $generator->generate($context);
 	}
 }

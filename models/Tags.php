@@ -89,23 +89,27 @@ class Tags extends ArmsModel
                 'hint' => 'Название тега (до 32 символов)',
                 'indexLabel' => 'Тег',
                 'type' => 'string',
+                'typeClass' => \app\types\StringType::class,
             ],
             'slug' => [
                 'label' => 'Slug',
                 'hint' => 'Уникальный идентификатор (генерируется автоматически из названия)',
                 'type' => 'string',
                 'readOnly' => true,
+                'typeClass' => \app\types\StringType::class,
             ],
             'color' => [
                 'label' => 'Цвет',
                 'hint' => 'Цвет фона тега в формате HEX (#RRGGBB). Цвет текста подбирается автоматически для обеспечения контрастности.',
                 'indexLabel' => 'Цвет',
                 'type' => 'string',
+                'typeClass' => \app\types\StringType::class,
             ],
             'description' => [
                 'label' => 'Описание',
                 'hint' => 'Краткое описание назначения тега (до 255 символов)',
                 'type' => 'string',
+                'typeClass' => \app\types\StringType::class,
             ],
             'usage_count' => [
                 'label' => 'Использований',
@@ -113,12 +117,14 @@ class Tags extends ArmsModel
                 'indexLabel' => 'Исп.',
                 'type' => 'integer',
                 'readOnly' => true,
+                'typeClass' => \app\types\IntegerType::class,
             ],
             'services_ids' => [
                 'label' => 'Сервисы',
                 'hint' => 'Сервисы, помеченные этим тегом',
                 'indexLabel' => 'Сервисы',
                 'placeholder' => 'Нет связанных сервисов',
+                'typeClass' => \app\types\LinkType::class,
             ],
         ]);
     }

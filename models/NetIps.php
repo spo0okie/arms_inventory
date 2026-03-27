@@ -105,23 +105,26 @@ class NetIps extends ArmsModel
 	public function attributeData()
 	{
 		return [
-			'id' => 'ID',
-			'addr' => 'Адрес',
-			'mask' => 'Маска',
+			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
+			'addr' => ['Адрес','typeClass'=>\app\types\IntegerType::class],
+			'mask' => ['Маска','typeClass'=>\app\types\IntegerType::class],
 			'name' => [
 				'Имя',
-				'hint'=>'Сюда можно записать имя узла для которого адрес зарезервирован'
+				'hint'=>'Сюда можно записать имя узла для которого адрес зарезервирован',
+				'typeClass'=>\app\types\StringType::class,
 			],
-			'network' => 'Сеть',
-			'attached' => 'Прикреплено к',
+			'network' => ['Сеть','typeClass'=>\app\types\StringType::class],
+			'attached' => ['Прикреплено к','typeClass'=>\app\types\StringType::class],
 			'text_addr' => [
 				'Адрес',
 				'hint'=>'Также можно указать маску',
-				'type'=>'ips'
+				'type'=>'ips',
+				'typeClass'=>\app\types\IpsType::class,
 			],
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Комментировать то можно что угодно. Чем IP адрес плох',
+				'typeClass'=>\app\types\StringType::class,
 			]
 		];
 	}

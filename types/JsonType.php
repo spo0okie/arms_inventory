@@ -3,36 +3,33 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\StringGenerator;
+use app\generation\generators\JsonGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
 
-class StringType implements AttributeTypeInterface
+class JsonType implements AttributeTypeInterface
 {
 	public static function name(): string
 	{
-		return 'string';
+		return 'json';
 	}
 
 	public function renderInput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
 		$inputOptions = $options['inputOptions'] ?? [];
-		return Html::activeTextInput($model, $attribute, $inputOptions);
+		return Html::activeTextarea($model, $attribute, $inputOptions);
 	}
 
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
 		$value = $model->$attribute ?? null;
-		if (is_array($value)) {
-			$value = implode(', ', $value);
-		}
 		return Html::encode((string)$value);
 	}
 
 	public function apiSchema(): array
 	{
-		return ['type' => 'string'];
+		return ['type' => 'string', 'format' => 'json'];
 	}
 
 	public function gridColumnClass(): ?string
@@ -47,7 +44,7 @@ class StringType implements AttributeTypeInterface
 
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new StringGenerator();
+		$generator = new JsonGenerator();
 		return $generator->generate($context);
 	}
 }
