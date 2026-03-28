@@ -308,6 +308,7 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 			'date' => [
 				$this->is_period?'Начало':'День/Дата',
 				'hint' => $this->is_period?'Дата/время начала периода':'День/Дата',
+				'typeClass'=>\app\types\ScheduleDayType::class,
 			],
 			'day' => static::$label_day,
 			'date_end' => [
@@ -330,6 +331,7 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 				static::$label_schedule,
 				'hint' => 'График работы/отключения в формате "ЧЧ:ММ-ЧЧ:ММ,ЧЧ:ММ-ЧЧ:ММ", или прочерк (минус) для выходного.',
 				'classicHint'=>'Примеры/заготовки: '.static::scheduleSamplesHtml(),
+				'typeClass'=>\app\types\ScheduleType::class,
 			],
 			'schedule_id' => [
 				'Расписание',

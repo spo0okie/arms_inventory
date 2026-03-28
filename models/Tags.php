@@ -103,7 +103,7 @@ class Tags extends ArmsModel
                 'hint' => 'Цвет фона тега в формате HEX (#RRGGBB). Цвет текста подбирается автоматически для обеспечения контрастности.',
                 'indexLabel' => 'Цвет',
                 'type' => 'string',
-                'typeClass' => \app\types\StringType::class,
+                'typeClass' => \app\types\ColorType::class,
             ],
             'description' => [
                 'label' => 'Описание',

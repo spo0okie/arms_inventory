@@ -222,7 +222,7 @@ class Users extends ArmsModel implements IdentityInterface
 			],
 			'Bday' => ['День рождения','typeClass'=>\app\types\DateType::class],
 			'Doljnost' => ['Должность','typeClass'=>\app\types\StringType::class],
-			'Email' => ['E-Mail','absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
+			'Email' => ['E-Mail','absorb'=>'ifEmpty','typeClass'=>\app\types\EmailType::class],
 			'employee_id' => [
 				'Таб. №',
 				'hint'=>'Табельный номер сотрудника<br>(конкретно этого его трудоустройства)',

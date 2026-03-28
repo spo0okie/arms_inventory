@@ -130,7 +130,7 @@ class Partners extends ArmsModel
 					. UrlListWidget::$hint,
 				'typeClass'=>\app\types\UrlsType::class,
 			],
-			'support_tel' => ['Телефоны тех.поддержки','typeClass'=>\app\types\StringType::class],
+			'support_tel' => ['Телефоны тех.поддержки','typeClass'=>\app\types\PhoneType::class],
 			'docs' => ['Документы','typeClass'=>\app\types\LinkType::class]
         ];
     }

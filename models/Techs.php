@@ -307,7 +307,7 @@ class Techs extends ArmsModel
 				'hostname',
 				'hint' => 'Если устройство сетевое, то тут можно указать его hostname',
 				'type' => 'string',
-				'typeClass'=>\app\types\StringType::class,
+				'typeClass'=>\app\types\HostnameType::class,
 			],
 			'hw' => [
 				'Закрепленное оборудование',
@@ -434,7 +434,8 @@ class Techs extends ArmsModel
 					'(нужно выбрать помещение и модель оборудования)<br/>'.
 					'Вручную заполнять только если на то есть основания.',
 				'indexHint' => 'Внутренний инвентарный номер в службе ИТ.',
-				'type'=>'string'
+				'type'=>'string',
+				'typeClass'=>\app\types\InvNumType::class,
 			],
 			'partners_id' => [
 				'Организация',
@@ -466,6 +467,7 @@ class Techs extends ArmsModel
 				'Серийный номер',
 				'hint' => 'Серийный номер оборудования. Если явно нет, то MAC/IMEI/и т.п. чтобы можно было однозначно идентифицировать оборудование',
 				'type'=>'string',
+				'typeClass'=>\app\types\SerialNumberType::class,
 			],
 			'specs' => [
 				'Тех. спецификация',

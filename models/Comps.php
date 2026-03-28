@@ -305,7 +305,7 @@ class Comps extends ArmsModel
 				'indexHint' => 'Сетевое имя компьютера настроенное в ОС.<br>'
 					.'Домен не выводится, но при поиске можно указывать.<br>'
 					.'Вводимый текст ищется в строке формата DOMAIN\\computer',
-				'typeClass'=>\app\types\StringType::class,
+				'typeClass'=>\app\types\HostnameType::class,
 			],
 			'os' => [
 				'Наименование и версия операционной системы',

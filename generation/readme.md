@@ -1,13 +1,6 @@
-# 📌 Идея генеративного механизма создания моделей
+# Идея генеративного механизма создания моделей
 
-> **Статус реализации:**
-> Этап 1 (генераторы) ✅
-> Этап 2 (ModelFactory + retry + context) ✅
-> Этап 3 (relations / linksSchema) → в работе
-
----
-
-## 🎯 Цель
+## Цель
 
 Перейти от:
 
@@ -23,7 +16,7 @@ SQL dump + фикстуры
 
 ---
 
-## 🧱 Общая архитектура
+## Общая архитектура
 
 ## Pipeline (актуальный)
 
@@ -39,13 +32,14 @@ createOnce():
 3. apply relations (WIP)
 4. apply presets (role)
 5. apply overrides
-6. validate
-7. (save снаружи)
+6. model resolver
+7. validate
+8. save (опционально)
 ```
 
 ---
 
-## 🔑 Основные компоненты
+## Основные компоненты
 
 ---
 
@@ -101,7 +95,7 @@ GeneratorResolverTest:
 
 ---
 
-## 🧠 Context (ключевая часть)
+## Context (ключевая часть)
 
 ---
 
@@ -151,7 +145,7 @@ class AttributeContext
 
 ---
 
-## 🏗 ModelFactory ✅
+## ModelFactory ✅
 
 ---
 
@@ -193,7 +187,6 @@ $model = ModelFactory::create(Techs::class, [], [
 ```text
 - генераторы используют mt_srand (глобальное состояние)
 - нет защиты от циклов (visited)
-- relations ещё не реализованы
 ```
 
 ---
@@ -235,6 +228,7 @@ generateAttributes
 → applyRelations
 → presets
 → overrides
+→ ModelResolve
 ```
 
 ---
@@ -392,10 +386,10 @@ visited (позже)
 
 ---
 
-### ModelResolver (переоценить)
+### ModelResolver
 
 ```text
-возможно не нужен как отдельный слой
+Должен контролировать что при генерации соблюдены инварианты модели
 ```
 
 ---

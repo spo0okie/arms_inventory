@@ -88,7 +88,7 @@ class OrgPhones extends ArmsModel
 			],
 	        'account' => 'Аккаунт, л/с',
 	        'sname' => 'Полный номер для поиска',
-	        'fullNum' => 'Номер телефона',
+	        'fullNum' => ['Номер телефона','typeClass'=>\app\types\PhoneType::class],
 	        'cost' => [
 	        	'Стоимость',
 				'hint' => 'Стоимость номера в месяц (планируемая стоимость, если величина плавает)',
