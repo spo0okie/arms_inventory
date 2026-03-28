@@ -112,31 +112,36 @@ class Networks extends ArmsModel
 	public function attributeData()
 	{
 		return ArrayHelper::recursiveOverride(parent::attributeData(),[
-			'id' => 'ID',
+			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
 			'addr' => ['alias'=>'text_addr'],
 			'comment' => [
 				'Описание',
 				'hint' => 'Короткое описание сети',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'dhcp' => ['alias'=>'text_dhcp'],
 			'domain_id' => [
 				'Домен',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'domain' => ['alias'=>'domain_id'],
 			'mask' => [
 				'Маска',
 				'hint' => 'Маска сети (в понятной нотации 255.255.255.0)',
+				'typeClass'=>\app\types\StringType::class,
 			],
-			'maxHosts' => ['Допустимое количество узлов'],
+			'maxHosts' => ['Допустимое количество узлов','typeClass'=>\app\types\IntegerType::class],
 			'netDomain' => ['alias'=>'domain_id'],
 			'name' => [
 				'Название сети',
 				'hint' => 'Короткое понятное название' . static::$latinNameHint,
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'notepad' => [
 				'Подробно',
 				'hint' => 'Подробное описание сети',
 				'type' => 'text',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'ranges' => [
 				'Диапазоны',
@@ -145,44 +150,48 @@ class Networks extends ArmsModel
 					.'1-29 Статика<br>'
 					.'30-249 DHCP<br>'
 					.'250-254 Резерв',
-				'type'=>'text'
+				'type'=>'text',
+				'typeClass'=>\app\types\TextType::class,
 			],
-			'readableBroadcastIp' => ['Широковещательный IP'],
+			'readableBroadcastIp' => ['Широковещательный IP','typeClass'=>\app\types\IpsType::class],
 			'readableDhcp' => ['alias'=>'dhcp'],
-			'readableFirstIp' => ['Первый доступный IP'],
-			'readableLastIp' => ['Последний доступный IP'],
+			'readableFirstIp' => ['Первый доступный IP','typeClass'=>\app\types\IpsType::class],
+			'readableLastIp' => ['Последний доступный IP','typeClass'=>\app\types\IpsType::class],
 			'readableNetMask' => ['alias'=>'mask'],
-			'readableNetworkIp' => ['IP сети'],
+			'readableNetworkIp' => ['IP сети','typeClass'=>\app\types\IpsType::class],
 			'readableRouter' => ['alias'=>'text_router'],
-			'readableWildcard' => ['Обратная маска'],
+			'readableWildcard' => ['Обратная маска','typeClass'=>\app\types\StringType::class],
 			'router' => ['alias'=>'text_router'],
 			'text_addr' => [
 				'Адрес и маска',
 				'hint' => 'Адрес и маска сети (в десятичной нотации 192.168.1.0/24)',
 				'type' => 'ips',
+				'typeClass'=>\app\types\IpsType::class,
 			],
 			'text_dhcp' => [
 				'DHCP сервер',
 				'hint' => 'Кто является DHCP сервером (опционально)',
 				'type' => 'ips',
+				'typeClass'=>\app\types\IpsType::class,
 			],
 			'text_router' => [
 				'Шлюз',
 				'hint' => 'Кто является шлюзом в сети (опционально)',
 				'type' => 'ips',
+				'typeClass'=>\app\types\IpsType::class,
 			],
-			'usage' => [
-				'Занято',
-			],
+			'usage' => ['Занято','typeClass'=>\app\types\IntegerType::class],
 			'vlan_id' => [
 				'Vlan',
 				'hint' => 'В каком Vlan находится эта сеть',
 				'placeholder' => 'Выберите VLAN',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'segments_id' => [
 				Segments::$title,
 				'hint' => 'К какому сегменту относится эта сеть',
 				'placeholder' => 'Выберите Сегмент ИТ',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'segment' => ['alias'=>'segments_id'],
 		]);

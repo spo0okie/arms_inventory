@@ -273,7 +273,7 @@ class Users extends ArmsModel implements IdentityInterface
 				'typeClass'=>\app\types\LinkType::class,
 			],
 			'orgStruct_name' => ['alias'=>'Orgeh'],
-			'Persg' => ['Тип трудоустройства','typeClass'=>\app\types\StringType::class],
+			'Persg' => ['Тип трудоустройства','typeClass'=>\app\types\IntegerType::class],
 			'Phone' => [
 				'Внутренний тел',
 				'absorb'=>'ifEmpty',

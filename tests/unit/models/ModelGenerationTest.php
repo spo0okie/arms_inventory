@@ -9,7 +9,7 @@ use Codeception\Test\Unit;
 /**
  * Тест для проверки, что все модели ArmsModel могут быть собраны генератором
  */
-class ModelTypeSafetyTest extends Unit
+class ModelGenerationTest extends Unit
 {
     /** @var \UnitTester */
     protected $tester;

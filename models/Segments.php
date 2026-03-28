@@ -54,26 +54,21 @@ class Segments extends ArmsModel
 	public function attributeData()
 	{
 		return ArrayHelper::recursiveOverride(parent::attributeData(),[
-			'id' => 'ID',
 			'code' => [
 				'Код CSS',
 				'hint' => 'Название класса CSS для раскраски.',
-			],
-			'name' => [
-				'Название',
-				'hint' => 'Понятное человеку название',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'description' => [
 				'Короткое описание',
 				'hint' => 'Короткое описание сегмента, выводится в общем списке',
+				'typeClass'=>\app\types\StringType::class,
 			],
-			'services_count'=>[
-				'Σ Сервисов',
-				'indexHint'=>'Количество сервисов в этом сегменте инфраструктуры'
-			],
-			'networks_count'=>[
-				'Σ Сетей',
-				'indexHint'=>'Количество сетей в этом сегменте инфраструктуры'
+			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
+			'name' => [
+				'Название',
+				'hint' => 'Понятное человеку название',
+				'typeClass'=>\app\types\StringType::class,
 			],
 		]);
 	}

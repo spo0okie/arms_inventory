@@ -88,45 +88,50 @@ class Partners extends ArmsModel
     public function attributeData()
     {
         return [
-            'id' => 'id',
-			'inn' => 'ИНН',
-			'kpp' => 'КПП',
-			'inn_kpp' => 'ИНН/КПП',
+            'id' => ['id','typeClass'=>\app\types\IntegerType::class],
+			'inn' => ['ИНН','typeClass'=>\app\types\StringType::class],
+			'kpp' => ['КПП','typeClass'=>\app\types\StringType::class],
+			'inn_kpp' => ['ИНН/КПП','typeClass'=>\app\types\StringType::class],
             'uname' => [
             	'Юр. название',
 				'hint' => 'Как в документах, только форму собственности не расписываем,<br>'
-					.'пишем сокращенно: АО "Рога &amp; Копыта" (Не Акционерное Общество)'
+					.'пишем сокращенно: АО "Рога &amp; Копыта" (Не Акционерное Общество)',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'bname' => [
 				'Бренд',
 				'hint'=>'Каким красивым словом они сами себя называют вместо "ИП Пупкин",<br>'
-					. 'или как все привыкли их называть'
+					. 'или как все привыкли их называть',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'alias' => [
 				'Дополнительные названия (алиасы)',
-				'hint'=>'Какими еще словами их можно назвать? Будет использоваться при поиске'
+				'hint'=>'Какими еще словами их можно назвать? Будет использоваться при поиске',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'prefix' => ['Префикс','hint'=>'Префикс для инв. номера оборудования, закрепленного за этой организацией<br>'
 				. 'Нужно заполнять, только если<ul>'
 				. '<li>Наш ИТ отдел обслуживает эту организацию (и ее оборудование)</li>'
 				. '<li>Инв. номер оборудования включает в себя префикс организации</li>'
-				. '</ul>'
+				. '</ul>','typeClass'=>\app\types\StringType::class
 			],
-			'sname' => 'Короткое название',
-			'fname' => 'Полное название',
+			'sname' => ['Короткое название','typeClass'=>\app\types\StringType::class],
+			'fname' => ['Полное название','typeClass'=>\app\types\StringType::class],
             'comment' => [
             	'Комментарий',
 				'hint' => 'Желательно указать любую полезную информацию с кем и какие вопросы решать с этим контрагентом.<br>'
 				 . 'Кто персональный менеджер, кто технарь, кто бухгалтер, адреса, явки, пароли',
 				'type' => 'text',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'cabinet_url' => [
 				'Ссылки',
 				'hint'=>'Ссылки на сайт, личный кабинет, форму обращений в тех. поддержку и прочие важные ссылки.<br>'
-					. UrlListWidget::$hint
+					. UrlListWidget::$hint,
+				'typeClass'=>\app\types\UrlsType::class,
 			],
-			'support_tel' => 'Телефоны тех.поддержки',
-			'docs' => 'Документы'
+			'support_tel' => ['Телефоны тех.поддержки','typeClass'=>\app\types\StringType::class],
+			'docs' => ['Документы','typeClass'=>\app\types\LinkType::class]
         ];
     }
 	

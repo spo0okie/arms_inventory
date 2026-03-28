@@ -235,12 +235,14 @@ class Techs extends ArmsModel
 				'Рабочее место',
 				'hint' => 'Рабочее место, к которому прикреплено оборудование',
 				'placeholder' => 'Не входит в состав АРМ, используется самостоятельно',
+				'typeClass'=>\app\types\LinkType::class,
 			],
-			'attach' => ['Связи'],
+			'attach' => ['Связи','typeClass'=>\app\types\LinkType::class],
 			'comp_hw' => [
 				'label'=>'Комплектация',
 				'indexHint' => 'Строка оборудования обнаруженного <b>в основной ОС</b><br>'.
 					'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку',
+				'typeClass'=>\app\types\JsonType::class,
 			],
 			'comp_id' => [
 				'label'=>'Основная ОС',
@@ -248,20 +250,24 @@ class Techs extends ArmsModel
 				'hint' => 'Какую ОС отображать в паспорте',
 				'indexHint' => 'Поиск ведется <b>только по основной</b> операционной системе.<br>'.
 					'Найти АРМ по неосновной ОС можно через Компьютеры->ОС',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'comp_updated_at' => [
 				'label'=>'Дата обн. ОС',
 				'indexHint' => 'Когда в последний раз обновлялась ОС привязанная к оборудованию',
 				'type'=>'date',
+				'typeClass'=>\app\types\DatetimeType::class,
 			],
 			'comment' => [
 				'Примечание',
 				'hint' => 'Краткое пояснение по этому оборудованию',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'contracts_ids' => [
 				'Связанные документы',
 				'hint' => 'Счета, накладные, фотографии серийных номеров и т.п.',
-				'placeholder' => 'Выберите документы о поступлении этого оборудования'
+				'placeholder' => 'Выберите документы о поступлении этого оборудования',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'departments_id' => [
 				'label'=>'Подразделение',
@@ -270,49 +276,58 @@ class Techs extends ArmsModel
 					.Departments::$hint.
 					'</i>',
 				'placeholder' => 'Выберите подразделение',
+				'typeClass'=>\app\types\LinkType::class,
 			],
-			'domain_id' => 'Домен',
+			'domain_id' => ['Домен','typeClass'=>\app\types\LinkType::class],
 			'effectiveMaintenanceReqs'=>[
 				MaintenanceReqs::$titles,
 				'indexHint'=>'Какие предъявлены требования по обслуживанию.'.
 					'<br>Как распространенные с сервисов, так и заданные явно. '.
 					'<br>Избыточно предъявленные требования помечаются как "архивные"',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'full_length'=>[
 				'Полноразмерный модуль',
 				'hint'=>'Устройство занимает всю глубину корзины/шкафа.<br>'.
 					'В случае двусторонней корзины будет считаться что занимает обе стороны',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'head_id' => [
 				'label'=>'Руководитель отдела',
 				'hint' => 'Руководитель отдела сотрудника которому установлено',
 				'placeholder' => 'Не закреплено за отделом',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'history' => [
 				'Записная книжка',
 				'hint' => 'Все важные и не очень заметки и примечания по жизненному циклу этого оборудования/АРМ',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'hostname' => [
 				'hostname',
 				'hint' => 'Если устройство сетевое, то тут можно указать его hostname',
-				'type' => 'string'
+				'type' => 'string',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'hw' => [
 				'Закрепленное оборудование',
 				'hint' => 'В UI и форме в явном виде отсутствует. '
 					.'Используется в АРМ для закрепления списка комплектующих в паспорте',
 				'type' => 'text',
+				'typeClass'=>\app\types\TextType::class,
 			],
-			'id' => ['Идентификатор'],
+			'id' => ['Идентификатор','typeClass'=>\app\types\IntegerType::class],
 			'installed_back'=>[
 				'Установлено с обратной стороны',
 				'hint'=>'Устройство установлено с задней стенки. <br>'.
 					'Либо в заднюю корзину либо в переднюю, но с обратной стороны',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'installed_id'=>[
 				'Установлено в',
 				'hint'=>'Если это устройство установлено в другое, то нужно указать в какое',
 				'placeholder' => 'Не является модулем для другого устройства',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'installed_pos'=>[
 				'Места установки',
@@ -323,6 +338,7 @@ class Techs extends ArmsModel
 					'<b>Пример 1:</b> 2 - занимает юнит №2<br>'.
 					'<b>Пример 2:</b> 1-2 - занимает юниты с 1го по 2й<br>'.
 					'<b>Пример 3:</b> 1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'installed_pos_end'=>[
 				'C обр. стороны',
@@ -332,25 +348,30 @@ class Techs extends ArmsModel
 					'<b>Пример 1:</b> 2 - занимает юнит №2<br>'.
 					'<b>Пример 2:</b> 1-2 - занимает юниты с 1го по 2й<br>'.
 					'<b>Пример 3:</b> 1-2,5-7 - занимает юниты с 1го по 2й и с 5го по 7й',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'inv_num' => [
 				'Бухг. номер',
 				'hint' => 'Бухгалтерский инвентарный / номенклатурный номер.',
-				'type'=>'string'
+				'type'=>'string',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'inv_sn' => [
 				'label'=>'Бух/SN/Доп.',
 				'indexHint' => 'Серийный, бухгалтерский инвентарный/номенклатурный, дополнительный номера через запятую<br>'.
 					'Искать можно по всем номерам сразу',
-				'type'=>'string'
+				'type'=>'string',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'ip' => [
 				'IP адреса',
 				'hint' => 'По одному в строке',
+				'typeClass'=>\app\types\IpsType::class,
 			],
 			'is_server' => [
 				'label'=>'Сервер',
 				'hint' => 'Это оборудование формирует сервер, на котором выполняются какие-то сервисы (будет отмечено другим оформлением, возможно повесить сервисы)',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'it_staff_id' => [
 				'Сотрудник службы ИТ',
@@ -358,16 +379,19 @@ class Techs extends ArmsModel
 				'hint' => 'Сотрудник службы ИТ, который отвечает за обслуживание оборудования/рабочего места на месте установки',
 				'indexHint'=> '{same}',
 				'placeholder' => 'Отсутствует сопровождение оборудования на месте установки',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'lics' => [
 				'Лицензии',
 				'hint' => 'Все привязанные лицензии:<br>Типы лицензий, закупки, ключи',
 				'indexHint' => '{same}',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'mac' => [
 				'MAC адреса',
 				'hint' => 'MAC адреса сетевых интерфейсов оборудования<br>'.
 					'Заполняются по одному в строке',
+				'typeClass'=>\app\types\MacsType::class,
 			],
 			'management_service_id'=>[
 				'Услуга сопровождения',

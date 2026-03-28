@@ -233,53 +233,62 @@ class Comps extends ArmsModel
 					.'то необходимо перечислить их здесь. (Состав ИТ отдела перечислять не нужно)',
 				'placeholder' => 'Только у ИТ отдела',
 				'join'=> ['admins'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'archived' => [
 				'Архивирован',
 				'hint' => 'Если эта ОС уже не используется, но на нее есть ссылки из других объектов <br />'.
 					'(например есть заархивированный сервис, который был развернут на этой ОС),<br />'.
 					'то можно не удалять ее, а заархивировать, чтобы не разрушать взаимосвязи объектов<br />'.
-					'ОС останется в БД для истории, но не будет попадаться на глаза, если явно не попросить'
+					'ОС останется в БД для истории, но не будет попадаться на глаза, если явно не попросить',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'arm_id' => [
 				'АРМ',
 				'indexHint' => 'ПК/сервер или облачная платформа на которой работает эта ОС',
 				'absorb' => 'ifEmpty',
 				'placeholder' => 'Выберите АРМ/сервер',
-				'join' => ['arm','platform']
+				'join' => ['arm','platform'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'arm_state'=>[
 				'Статус АРМ',
 				'indexHint'=>'Статус АРМ на котором работает эта ОС',
+				'typeClass'=>\app\types\StringType::class,
 			],
-			'comment' => ['Комментарий', 'absorb' => 'ifEmpty','type'=>'text'],
-			'domain_id' => ['Домен', 'absorb' => 'ifEmpty'],
-			'exclude_hw' => ['Скрыто из паспорта железо', 'absorb' => 'ifEmpty'],
+			'comment' => ['Комментарий', 'absorb' => 'ifEmpty','type'=>'text','typeClass'=>\app\types\TextType::class],
+			'domain_id' => ['Домен', 'absorb' => 'ifEmpty','typeClass'=>\app\types\LinkType::class],
+			'exclude_hw' => ['Скрыто из паспорта железо', 'absorb' => 'ifEmpty','typeClass'=>\app\types\TextType::class],
 			'ignore_hw' => [
 				'Виртуальная машина',
 				'indexLabel' => 'VM',
 				'hint' => 'Является виртуальной машиной',
-				'absorb' => 'ifEmpty'
+				'absorb' => 'ifEmpty',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'ip' => [
 				'IP Адрес',
 				'indexHint' => 'IP адреса сетевых интерфейсов настроенных в ОС',
+				'typeClass'=>\app\types\IpsType::class,
 			],
-			'ip_ignore' => ['absorb' => 'ifEmpty'],
+			'ip_ignore' => ['absorb' => 'ifEmpty','typeClass'=>\app\types\IpsType::class],
 			'lics' => [
 				'Лицензии',
 				'hint' => 'Все привязанные лицензии:<br>Типы лицензий, закупки, ключи',
 				'indexHint' => '{same}',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'mac' => [
 				'MAC Адрес',
 				'indexHint' => 'MAC адреса сетевых интерфейсов настроенных в ОС',
+				'typeClass'=>\app\types\MacsType::class,
 			],
 			'maintenance_jobs_ids' => [
 				MaintenanceJobs::$titles,
 				'hint' => 'Какие операции регламентного обслуживания проводятся над этой ОС/ВМ',
 				'indexHint' => '{same}',
 				'placeholder' => 'Отсутствует',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'maintenanceReqs' => ['alias' => 'maintenance_reqs_ids'],
 			'maintenance_reqs_ids' => [
@@ -289,22 +298,26 @@ class Comps extends ArmsModel
 					.'работающие на ОС/ВМ, но можно задать их и явно',
 				'indexHint' => '{same}',
 				'placeholder' => 'Получать из сервисов',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'name' => [
 				'Имя компьютера',
 				'indexHint' => 'Сетевое имя компьютера настроенное в ОС.<br>'
 					.'Домен не выводится, но при поиске можно указывать.<br>'
 					.'Вводимый текст ищется в строке формата DOMAIN\\computer',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'os' => [
 				'Наименование и версия операционной системы',
 				'indexHint' => 'В таблице в этой ячейке выводится только наименование ОС,<br>'
 					.'но поиск ведется также и по софту (в сыром, а не отформатированном виде)',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'places_id' => [
 				'Помещение',
 				'indexHint' => 'Помещение, в котором размещено оборудование',
 				'absorb' => 'ifEmpty',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'platform_id' => [
 				'Предоставляется услугой',
@@ -318,25 +331,30 @@ class Comps extends ArmsModel
 				'Hardware',
 				'indexHint' => 'Строка оборудования обнаруженного Операционной Системой<br>'
 					.'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку',
+				'typeClass'=>\app\types\JsonType::class,
 			],
-			'raw_soft' => 'Отпечаток софта (заполняется скриптом)',
+			'raw_soft' => ['Отпечаток софта (заполняется скриптом)','typeClass'=>\app\types\JsonType::class],
 			'raw_version' => [
 				'Скрипт',
 				'indexHint' => 'Скрипт, который внес последние данные по этой ОС',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'sandbox_id' => [
 				'placeholder' => 'ОС не изолирована в песочнице',
 				'hint' => 'Изолированное окружение в которое помещена ОС.<br/>'
-					.'Позволяет вести учет клонов/ копий ВМ восстановленных из архива и т.п.'
+					.'Позволяет вести учет клонов/ копий ВМ восстановленных из архива и т.п.',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'services_ids' => [
 				'Сервисы',
 				'hint' => 'Какие сервисы развернуты на этой ОС',
 				'indexHint' => '{same}',
 				'placeholder' => 'Нет сервисов',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'softRescans' => [
-				'Ожидается сканирование ПО'
+				'Ожидается сканирование ПО',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'updated_at' => [
 				'Время обновления',
@@ -344,6 +362,7 @@ class Comps extends ArmsModel
 					.'(либо когда в последний раз эта ОС сообщала о себе в инвентаризацию,<br/>'
 					.'либо когда в последний раз вручную правили запись)<br/>'
 					.QueryHelper::$dateSearchHint,
+				'typeClass'=>\app\types\DatetimeType::class,
 			],
 			'user_id' => [
 				'Пользователь',
@@ -355,25 +374,30 @@ class Comps extends ArmsModel
 						return ($this->arm->user->shortName.' (пользователь АРМ)');
 					}
 					return 'Использовать пользователя АРМ';
-				}
+				},
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'vCpuCores' => [
 				'vCPU',
-				'indexHint' => 'Количество CPU ядер VM'
+				'indexHint' => 'Количество CPU ядер VM',
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'vHddGb' => [
 				'vHDD',
-				'indexHint' => 'Объем дискового пространства (GB)'
+				'indexHint' => 'Объем дискового пространства (GB)',
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'vRamGb' => [
 				'vRAM',
-				'indexHint' => 'Оперативная память VM (GB)'
+				'indexHint' => 'Оперативная память VM (GB)',
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'vm_uuid' => [
 				'VMWare UUID',
-				'indexHint' => 'UUID виртуальной машины в VMWare'//.QueryHelper::$stringSearchHint,
+				'indexHint' => 'UUID виртуальной машины в VMWare',//QueryHelper::$stringSearchHint,
 				//Поисковые запросы по этому полю не поддерживаются, т.к. оно не выделено в отдельный столбец,
 				//а является частью поля 'external_links' компа.
+				'typeClass'=>\app\types\StringType::class,
 			],
 		]);
     }

@@ -109,14 +109,14 @@ class MaintenanceReqs extends ArmsModel
     public function attributeData()
     {
 		return array_merge(parent::attributeData(),[
-            'name' => [
-				'Название',
-				'hint'=>'Короткое наименование требований по обслуживанию',
-			],
-            'description' => [
+			'archived' => ['Архивирован','typeClass'=>\app\types\BooleanType::class],
+			'comps'=>['Операционные системы/ВМ','typeClass'=>\app\types\LinkType::class],
+			'comps_ids'=>['alias'=>'comps'],
+			'description' => [
 				'Описание',
 				'hint'=>'Описание требований по регламентному обслуживанию',
 				'type'=>'text',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'is_backup' => [
 				'Относится к резервному копированию',
@@ -125,6 +125,7 @@ class MaintenanceReqs extends ArmsModel
 				'indexHint'=>'{same}',
 				'indexLabel'=>'<i class="fas fa-archive"></i>',
 				'column'=>['class'=>BooleanColumn::class],
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'spread_comps' => [
 				'Распространяется на ОС',
@@ -140,11 +141,13 @@ class MaintenanceReqs extends ArmsModel
 				'hint'=>'При прикреплении требований к сервису, автоматически предъявлять эти требования к оборудованию на которых он работает. (не распространяется АРМ на которых крутятся операционные системы)',
 				'column'=>['class'=>BooleanColumn::class],
 			],
+			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
 			'includes' => [
 				'Перекрывает требования',
 				'hint'=>'Какие еще требования будут удовлетворены выполнением этих требований',
 				'indexHint'=>'{same}',
 				'placeholder'=>'Никакие не перекрывает',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'includes_ids'=>['alias'=>'includes'],
 			'includedBy' => [
@@ -152,19 +155,22 @@ class MaintenanceReqs extends ArmsModel
 				'hint'=>'Выполнением каких других требований удовлетворяются это требование',
 				'indexHint'=>'{same}',
 				'placeholder'=>'Никакими не перекрывается',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'included_ids'=>['alias'=>'includedBy'],
-			'services'=>'Сервисы',
-			'services_ids'=>['alias'=>'services'],
-			'comps'=>'Операционные системы/ВМ',
-			'comps_ids'=>['alias'=>'comps'],
-			'techs'=>'Оборудование',
+			'techs'=>['Оборудование','typeClass'=>\app\types\LinkType::class],
 			'techs_ids'=>['alias'=>'techs'],
-			'jobs'=>MaintenanceJobs::$titles
-        ]);
+			'jobs'=>[MaintenanceJobs::$titles,'typeClass'=>\app\types\LinkType::class],
+			'name' => [
+				'Название',
+				'hint'=>'Короткое наименование требований по обслуживанию',
+				'typeClass'=>\app\types\StringType::class,
+			],
+			'services'=>['Сервисы','typeClass'=>\app\types\LinkType::class],
+			'services_ids'=>['alias'=>'services'],
+		]);
     }
-	
-	
+
 	/**
 	 * @return ActiveQuery
 	 * @throws InvalidConfigException

@@ -255,12 +255,14 @@ class Services extends ArmsModel
 				'Физ. сервера',
 				'indexHint'=>'АРМ/оборудование, на которых крутятся ОС/ВМ, на которых крутится сервис'
 					.'<br>(Не то же самое, что оборудование на котом крутится сервис.)'
-					.'<br>Это не прямая, а косвенная связь. При миграции ВМ это список может меняться'
+					.'<br>Это не прямая, а косвенная связь. При миграции ВМ это список может меняться',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'backupReqs'=>[
 				'Требования по резервному копированию',
 				'indexHint'=>'Какие требования по бэкапам предъявляет сервис',
 				'indexLabel'=>'Рез. треб.',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'charge' => [
 				'НДС',
@@ -276,7 +278,8 @@ class Services extends ArmsModel
 			],
 			'compsAndTechs'=> [
 				'Серв./Оборуд.',
-				'indexHint' => 'Серверы и оборудование на которых выполняется этот сервис'
+				'indexHint' => 'Серверы и оборудование на которых выполняется этот сервис',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'contracts_ids' => [
 				Contracts::$titles,
@@ -328,8 +331,7 @@ class Services extends ArmsModel
 				'placeholder' => function() {return count($this->getSupportRecursive())?
 					$this->renderAttributeToText('support_ids',', ').' (поддерживают сервис, включая инфраструктуру)':
 					'Те же, кто поддерживает сервис (ответственность не разделяется)';
-				}
-				,
+				},
 				'typeClass' => \app\types\LinkType::class,
 			],
 			'is_end_user' => [
@@ -383,6 +385,7 @@ class Services extends ArmsModel
 				'Требования по обслуживанию',
 				'indexHint'=>'Какие требования по регламентному обслуживанию предъявляет сервис',
 				'indexLabel'=>'Обсл. треб.',
+				'typeClass' => \app\types\LinkType::class,
 			],
 			'parent_id' => [
 				'Основной сервис/услуга',
@@ -433,7 +436,7 @@ class Services extends ArmsModel
 					.'<br>Также при построении дерева сервисов имена и альясы родителей скрывается из дочерних сервисов (для краткости)',
 				'typeClass' => \app\types\TextType::class,
 			],
-			'sites' => ['Площадки'],
+			'sites' => ['Площадки','typeClass' => \app\types\LinkType::class],
 			'support_ids' => [
 				'Поддержка',
 				'hint' => 'Дополнительные члены команды по поддержке сервиса/оказанию услуги',

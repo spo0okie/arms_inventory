@@ -97,6 +97,20 @@ class SoftLists extends ArmsModel
         ];
     }
 
+	/**
+	 * @inheritdoc
+	 */
+	public function attributeData()
+	{
+		return [
+			'comment' => ['Комментарий','typeClass'=>\app\types\TextType::class],
+			'created_at' => ['Дата добавления','typeClass'=>\app\types\DatetimeType::class],
+			'descr' => ['Описание','typeClass'=>\app\types\StringType::class],
+			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
+			'name' => ['Служебное имя','typeClass'=>\app\types\StringType::class],
+		];
+	}
+
     /**
      * Возвращает набор списков, в которых находится ПО
      */

@@ -114,18 +114,21 @@ class Soft extends ArmsModel
 				'Добавить элемент',
 				'hint' => 'В UI не используется. '
 					.'Нужен для передачи новой строки в список regexp выражений в форме редактирования (_form)',
-				'type' => 'string'
+				'type' => 'string',
+				'typeClass'=>\app\types\StringType::class,
 			],
-            'id' => 'Идентификатор',
-            'manufacturers_id' => 'Разработчик',
+            'id' => ['Идентификатор','typeClass'=>\app\types\IntegerType::class],
+            'manufacturers_id' => ['Разработчик','typeClass'=>\app\types\LinkType::class],
             'descr' => [
 				'Наименование',
+				'typeClass'=>\app\types\StringType::class,
 			],
             'comment' => [
 				'Краткое описание',
 				'indexLabel'=>'Пояснение',
 				'hint'=>'Краткое пояснение по этому ПО: назначение, платное/бесплатное',
-				'type'=>'string'
+				'type'=>'string',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'notepad' => [
 				'Подробное описание',
@@ -137,6 +140,7 @@ class Soft extends ArmsModel
 					.'<li>Известные проблемы</li>'
 					.'<li>Прочие особенности</li>'
 				.'</ul>',
+				'typeClass'=>\app\types\TextType::class,
 			],
             'items' => [
 				'Основные элементы входящие в пакет ПО',

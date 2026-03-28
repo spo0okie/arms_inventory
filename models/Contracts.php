@@ -216,12 +216,14 @@ class Contracts extends ArmsModel
 			'currency' => ['alias' => 'currency_id'],
 			'currency_id' => [
 				'Валюта',
-				'hint' => 'В какой валюте обозначены сумма и НДС в документе'
+				'hint' => 'В какой валюте обозначены сумма и НДС в документе',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'date' => [
 				'Дата',
 				'hint' => 'Дата документа<br>'
 					.'или начало действия, если есть срок действия документа',
+				'typeClass'=>\app\types\DateType::class,
 			],
 			'deliveryStatus' => [
 				'Статус поставки',
@@ -234,25 +236,29 @@ class Contracts extends ArmsModel
 			'end_date' => [
 				'Окончание',
 				'hint' => 'Если документ имеет срок действия, то до какой даты - указываем тут',
+				'typeClass'=>\app\types\DateType::class,
 			],
 			'float_charge' => [
 				'(float)НДС',
 				'indexHint' => 'НДС в виде числа без разделителей и валюты<br />'
 					.'(удобно для выгрузки в Excel, т.к. нормально суммируется в выгрузке)',
 				'visible' => false,
+				'typeClass'=>\app\types\FloatType::class,
 			],
 			'float_total' => [
 				'(float)Сумма',
 				'indexHint' => 'Сумма документа в виде числа без разделителей и валюты<br />'
 					.'(удобно для выгрузки в Excel, т.к. нормально суммируется в выгрузке)',
 				'visible' => false,
+				'typeClass'=>\app\types\FloatType::class,
 			],
 			'fullname' => ['alias' => 'name'],
-			'id' => 'ID',
+			'id' => ['Идентификатор','typeClass'=>\app\types\IntegerType::class],
 			'is_successor' => [
 				'Заменяет основной документ',
 				'hint' => 'Если флажок стоит, значит этот документ не дополняет, а заменяет основной.<br>'
-					.'Например, доп. соглашение к договору с новыми тарифами, заменяет предыдущее доп. соглашение'
+					.'Например, доп. соглашение к договору с новыми тарифами, заменяет предыдущее доп. соглашение',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'licsCount' => [
 				'Привязано лицензий',
@@ -260,18 +266,21 @@ class Contracts extends ArmsModel
 				'indexHint' => 'Сколько лицензий поступило по этому документу'
 					.'<br>(привязано к документу)',
 				'join'=>['licItems'],
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'lics_ids' => [
 				'Лицензии',
 				'hint' => 'С какими закупками лицензий связан документ (если связан)',
 				'placeholder'=>'Выберите закупки лицензий связанные с документом',
 				'join'=>['licItems'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'lics_delivery' => [
 				'Пост. лиц.',
 				'hint' => 'Должно быть поставлено лицензий'
 					.'<br>В документе будет показываться статус ожидается поставка,'
-					.'<br>если количество привязанных к документу лицензий отличается от указанного здесь'
+					.'<br>если количество привязанных к документу лицензий отличается от указанного здесь',
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'materialsCount' => [
 				'Привязано материалов',
@@ -279,12 +288,14 @@ class Contracts extends ArmsModel
 				'indexHint' => 'Сколько материалов поступило по этому документу'
 					.'<br>(привязано к документу)',
 				'join'=>['materials'],
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'materials_delivery' => [
 				'Пост. матер.',
 				'hint' => 'Должно быть поставлено материалов.'
 					.'<br>В документе будет показываться статус ожидается поставка,'
-					.'<br>если количество привязанных к документу материалов отличается от указанного здесь'
+					.'<br>если количество привязанных к документу материалов отличается от указанного здесь',
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'name' => [
 				'Название документа',
@@ -296,12 +307,14 @@ class Contracts extends ArmsModel
 					.'</ul>они указывается в отдельных полях',
 				'indexHint' => 'Можно искать по имени, дате, названию контрагента и комментарию к документу',
 				'join'=>['children','techs','materials','licItems','services','partners','users','successor',],
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'partners' => ['alias' => 'partners_ids'],
 			'partners_ids' => [
 				'Контрагенты',
 				'hint' => 'Если отсутствуют, значит документ внутренний',
 				'join'=>['partners'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'parent_id' => [
 				'Основной документ',
@@ -310,28 +323,33 @@ class Contracts extends ArmsModel
 					.'Для счетов и доп.соглашений имеет смысл указывать договор',
 				'placeholder' => 'Основной документ не назначен',
 				'join'=>['parent'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'pay_id' => [
 				Yii::$app->params['docs.pay_id.name'],
 				'hint' => 'Заявка на платеж,'
-					.'<br>Идентификатор заявки на оплату в реестре оплат казначейства'
+					.'<br>Идентификатор заявки на оплату в реестре оплат казначейства',
+				'typeClass'=>\app\types\StringType::class,
 			],
-			'scanFile' => 'Скан документа',
+			'scanFile' => ['Скан документа','typeClass'=>\app\types\StringType::class],
 			'scans_ids' => [
 				'Сканы',
 				'hint' => 'Отсканированная версия документа',
 				'join'=>['scans'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'services_ids' => [
 				'Сервисы',
 				'hint' => 'С какими сервисами связан документ (если связан)',
 				'placeholder'=>'Выберите сервисы связанные с документом',
 				'join'=>['services'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'state_id' => [
 				'Статус',
 				'hint' => 'Для удобства контроля процессов оплаты',
-				'placeholder' => 'Выберите статус документа'
+				'placeholder' => 'Выберите статус документа',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'techsCount' => [
 				'Привязано оборудования',
@@ -339,18 +357,21 @@ class Contracts extends ArmsModel
 				'indexHint' => 'Сколько оборудования поступило по этому документу'
 					.'<br>(привязано к документу)',
 				'join'=>['techs'],
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'techs_delivery' => [
 				'Пост. оборуд.',
 				'hint' => 'Должно быть поставлено оборудования.'
 					.'<br>В документе будет показываться статус ожидается поставка,'
-					.'<br>если количество привязанного к документу оборудования отличается от указанного здесь'
+					.'<br>если количество привязанного к документу оборудования отличается от указанного здесь',
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'techs_ids' => [
 				'Оборудование',
 				'hint' => 'С каким оборудованием связан документ (если связан)',
 				'placeholder'=>'Выберите оборудование связанное с документом',
 				'join'=>['techs'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'total' => [
 				'Сумма',
@@ -360,7 +381,8 @@ class Contracts extends ArmsModel
 					.'<li>к договору нужно прикреплять счета</li>'
 					.'<li>к счетам закрывающие документы</li>'
 					.'</ul>Сумма при этом должна проставляться только в счетах',
-				'indexHint' => 'Сумма документа<br />'.QueryHelper::$numberSearchHint
+				'indexHint' => 'Сумма документа<br />'.QueryHelper::$numberSearchHint,
+				'typeClass'=>\app\types\FloatType::class,
 			],
 			'users' => ['alias' => 'users_ids'],
 			'users_ids' => [
@@ -368,6 +390,7 @@ class Contracts extends ArmsModel
 				'hint' => 'С какими пользователями связан документ (если связан)',
 				'placeholder'=>'Укажите пользователей связанных с документом',
 				'join'=>['users'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 		];
 	}

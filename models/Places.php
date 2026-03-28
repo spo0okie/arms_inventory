@@ -142,37 +142,45 @@ DELIMITER ;
 	        	'Родитель',
 				'hint' => 'Помещение внутри которого находится это',
 				'placeholder'=>'Выберите родительское помещение',
+				'typeClass'=>\app\types\LinkType::class,
 			],
             'name' => [
             	'Полное имя',
 				'hint' => 'Понятное название помещения без сокращений',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'short' => [
 				'Короткое имя',
 				'hint' => 'Сокращенное название помещения для вывода в узких местах',
 				'is_inheritable'=>true,
+				'typeClass'=>\app\types\StringType::class,
 			],
             'addr' => [
             	'Адрес',
 				'hint' => 'Если не указан, то наследуется адрес родительского помещения',
 				'is_inheritable'=>true,
+				'typeClass'=>\app\types\TextType::class,
 			],
             'prefix' => [
             	'Префикс',
 				'hint' => 'Будет использоваться для генерации инвентарных номеров при заведении нового оборудования в этом помещении. Если не задать - используется родительский префикс. Если изменить, то старые инвентарные номера останутся неизменны.',
 				'is_inheritable'=>true,
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'map_id'=>[
 				'Карта помещения',
-				'hint' => 'Карта/план помещения. Выбирается из прикрепленных к помещению изображений'
+				'hint' => 'Карта/план помещения. Выбирается из прикрепленных к помещению изображений',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'map'=>[
 				'JSON разметка объектов на карте',
 				'hint'=>'Не выводится в UI в явном виде',
 				'type'=>'text',	//вообще JSON, но мы такого типа не объявляли
+				'typeClass'=>\app\types\JsonType::class,
 			],
 			'comment' => [
-				'type'=>'text'
+				'type'=>'text',
+				'typeClass'=>\app\types\TextType::class
 			]
         ]);
     }

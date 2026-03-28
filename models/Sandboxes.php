@@ -68,19 +68,28 @@ public static $titles='Песочницы';
     public function attributeData()
     {
         return array_merge(parent::attributeData(),[
+			'archived' => ['Архивирован','typeClass'=>\app\types\BooleanType::class],
+			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
+			'links' => ['Ссылки','typeClass'=>\app\types\UrlsType::class],
 			'name' => [
 				'Название',
 				'hint'=>'Название изолированного окружения',
-			],
-			'suffix' => [
-				'Суффикс',
-				'hint'=>'Суффикс будет выводится после имен ВМ для отличия клонов в песочнице от продуктивных ВМ',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'network_accessible' => [
 				'Доступно по сети',
 				'hint'=>'Есть ли сетевая связность с этим окружением',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
-        ]);
+			'notepad' => ['Записная книжка','typeClass'=>\app\types\TextType::class],
+			'suffix' => [
+				'Суффикс',
+				'hint'=>'Суффикс будет выводится после имен ВМ для отличия клонов в песочнице от продуктивных ВМ',
+				'typeClass'=>\app\types\StringType::class,
+			],
+			'updated_at' => ['Дата обновления','typeClass'=>\app\types\DatetimeType::class],
+			'updated_by' => ['Обновил','typeClass'=>\app\types\StringType::class],
+		]);
     }
 	
 	/**

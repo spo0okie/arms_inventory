@@ -104,40 +104,54 @@ class Acls extends ArmsModel
     public function attributeData()
     {
         return array_merge(parent::attributeData(),[
-            'schedules_id' => [
+			'aces' => ['ACEs','indexHint'=>'Access Control Entries <br> (Записи кому предоставляется какой доступ)','typeClass'=>\app\types\LinkType::class],
+			'comment' => ['Описание','Описание ресурса к которому предоставляется доступ (просто текст без привязки к объекту БД)','typeClass'=>\app\types\TextType::class],
+			'comps_id' => [
+				'ОС',
+				'Имя компьютера (Операционной Системы) к которому предоставляется доступ',
+				'placeholder'=>'Выберите ОС',
+				'typeClass'=>\app\types\LinkType::class,
+			],
+			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
+			'schedules_id' => [
 				'Расписание доступа',
 				'apiHint'=>'Объект типа Schedule, определяющий временные рамки предоставления доступа',
+				'typeClass'=>\app\types\LinkType::class,
 			],
             'services_id' => [
 				'Сервис',
 				'К какому сервису нужно предоставить доступ (включая дочерние сервисы)',
 				'placeholder'=>'Выберите сервис',
-				'viewHint'=>'Сервис к которому предоставляется доступ (включая дочерние сервисы)'
+				'viewHint'=>'Сервис к которому предоставляется доступ (включая дочерние сервисы)',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'ips_id' => [
 				'IP адрес',
 				'IP адрес к которому предоставляется доступ',
-				'placeholder'=>'Выберите IP адрес'
+				'placeholder'=>'Выберите IP адрес',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'networks_id' => [
 				'IP сеть',
 				'IP сеть к которой предоставляется доступ',
-				'placeholder'=>'Выберите IP сеть'
+				'placeholder'=>'Выберите IP сеть',
+				'typeClass'=>\app\types\LinkType::class,
 			],
             'comps_id' => [
 				'ОС',
 				'Имя компьютера (Операционной Системы) к которому предоставляется доступ',
-				'placeholder'=>'Выберите ОС'
+				'placeholder'=>'Выберите ОС',
+				'typeClass'=>\app\types\LinkType::class,
 			],
             'techs_id' => [
 				'Оборудование',
 				'Оборудование к которому предоставляется доступ',
-				'placeholder'=>'Выберите оборудование'
-				
+				'placeholder'=>'Выберите оборудование',
+				'typeClass'=>\app\types\LinkType::class,
 			],
-            'comment' => ['Описание','Описание ресурса к которому предоставляется доступ (просто текст без привязки к объекту БД)'],
-            'notepad' => 'Записная книжка',
-			'aces' => ['ACEs','indexHint'=>'Access Control Entries <br> (Записи кому предоставляется какой доступ)']
+            'comment' => ['Описание','Описание ресурса к которому предоставляется доступ (просто текст без привязки к объекту БД)','typeClass'=>\app\types\TextType::class],
+            'notepad' => ['Записная книжка','typeClass'=>\app\types\TextType::class],
+			'aces' => ['ACEs','indexHint'=>'Access Control Entries <br> (Записи кому предоставляется какой доступ)','typeClass'=>\app\types\LinkType::class]
         ]);
     }
 	

@@ -54,10 +54,10 @@ class Domains extends ArmsModel
     public function attributeData()
     {
         return [
-            'id' => 'Идентификатор',
-            'name' => 'Имя домена',
-            'fqdn' => 'FQDN',
-            'comment' => 'Комментарий',
+            'id' => ['Идентификатор','typeClass'=>\app\types\IntegerType::class],
+            'name' => ['Имя домена','typeClass'=>\app\types\StringType::class],
+            'fqdn' => ['FQDN','typeClass'=>\app\types\StringType::class],
+            'comment' => ['Комментарий','typeClass'=>\app\types\TextType::class],
         ];
     }
 	

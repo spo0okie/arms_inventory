@@ -98,67 +98,81 @@ class MaintenanceJobs extends ArmsModel
     {
         return ArrayHelper::recursiveOverride(parent::attributeData(),[
 
+			'archived' => ['Архивирован','typeClass'=>\app\types\BooleanType::class],
+			'changed_at' => ['Дата изменения','typeClass'=>\app\types\DatetimeType::class],
             'name' => [
 				'Название',
 				'hint'=>'Понятное имя для регламентного обслуживания',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'children' => [
 				'Дочерние',
 				'hint'=>'Дочерние операции регламентного обслуживания<br>'
 					.'входящие в состав этого обслуживания',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'comps_ids' => [
 				'ОС/ВМ',
 				'hint'=>'Обслуживаемые в рамках этой регламентной операции',
 				'placeholder'=>'ОС/ВМ не обслуживаются',
+				'typeClass'=>\app\types\LinkType::class,
 			],
             'description' => [
 				'Описание',
 				'hint'=>'Описание регламентных операций с пояснением деталей',
 				'type'=>'text',
+				'typeClass'=>\app\types\TextType::class,
 			],
+			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
 			'links' => [
 				'Ссылки',
 				'hint'=>'С информацией по данному обслуживанию',
+				'typeClass'=>\app\types\UrlsType::class,
 			],
-			'objects' => ['Объекты','indexHint'=>'Обслуживаемые объекты'],
+			'objects' => ['Объекты','indexHint'=>'Обслуживаемые объекты','typeClass'=>\app\types\StringType::class],
 			'parent_id' => [
 				'Входит в состав',
 				'hint'=>'Если это обслуживание является частью более общего регламента,<br>'
 					.'то необходимо указать родительское регламентное обслуживание тут.<br>',
 				'placeholder'=>'Не входит в состав других операций',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'reqs_ids' => [
 				'Выполняет требования',
 				'hint'=>'Какие требования по регламентному обслуживания выполняет эта операция',
 				'placeholder'=>'Никакие не выполняет',
 				'is_inheritable'=>true,
+				'typeClass'=>\app\types\LinkType::class,
 			],
-			'responsible' => ['Ответственный','Кто отвечает за это регламентное обслуживание'],
+			'responsible' => ['Ответственный','Кто отвечает за это регламентное обслуживание','typeClass'=>\app\types\LinkType::class],
             'schedules_id' => [
 				'Расписание',
 				'hint'=>'Расписание когда производятся регламентные операции',
 				'placeholder'=>'Без расписания',
 				'is_inheritable'=>true,
+				'typeClass'=>\app\types\LinkType::class,
 			],
             'services_id' => [
 				'В рамках сервиса',
 				'hint'=>'В рамках какого сервиса/услуги производятся операции обслуживания.<br>'
 					.'Нужно для определения ответственного и поддержки<br>'
 					.'Если подходящего сервиса/услуги нет, то нужно завести',
-				'placeholder'=>'Укажите сервис, в рамках которого производится обслуживание',
+					'placeholder'=>'Укажите сервис, в рамках которого производится обслуживание',
 				'is_inheritable'=>true,
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'services_ids' => [
 				'Сервисы',
 				'hint'=>'Обслуживаемые в рамках этой регламентной операции',
 				'placeholder'=>'Сервисы не обслуживаются',
+				'typeClass'=>\app\types\LinkType::class,
 			],
-			'support' => ['Поддержка','Команда поддержки регламентного обслуживания'],
+			'support' => ['Поддержка','Команда поддержки регламентного обслуживания','typeClass'=>\app\types\LinkType::class],
 			'techs_ids' => [
 				'Оборудование',
 				'hint'=>'Обслуживаемое в рамках этой регламентной операции',
 				'placeholder'=>'Оборудование не обслуживается',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 		]);
     }

@@ -126,12 +126,14 @@ class Aces extends ArmsModel
 				'ACL',
 				'hint' => 'К какому ACL (набору правил доступа) относится эта запись доступа (ACE)',
 				'join' => ['acl'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'access_types_ids' => [
 				AccessTypes::$titles,
 				'indexHint'=>'Какой доступ субъекты получают к ресурсам',
 				'join' => ['accessTypes'],			//для поиска или вывода в таблице нужно заджойнить типы доступа
-				'filter' => 'access_types.name'		//при поиске ищем по имени типа доступа
+				'filter' => 'access_types.name',		//при поиске ищем по имени типа доступа
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'access_types' => ['alias'=>'access_types_ids'],
 			'accessTypes' => ['alias'=>'access_types_ids'],
@@ -139,16 +141,20 @@ class Aces extends ArmsModel
 				'Прочее',
 				'hint' => 'Если есть какие-то объекты, предоставления доступа, которые не получается учесть через другие поля,<br> вписываем их текстом сюда',
 				'viewHint' => 'Прочие объекты доступа (текстовое описание)',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'comps_ids' => [
 				'Компьютеры',
 				'hint' => 'Компьютеры/серверы с которых разрешается доступ',
 				'join' => ['comps'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
+			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
 			'ipParams' => [
 				'IP параметры типов доступа',
 				'hint' => 'Вообще не должно вылазить в UI, это служебный атрибут для записи параметров в junction таблицу',
-				'type' => 'string[]'	//генератор его нормально не создаст, это надо будет создавать в ModelResolver
+				'type' => 'string[]',	//генератор его нормально не создаст, это надо будет создавать в ModelResolver
+				'typeClass'=>\app\types\JsonType::class,
 			],
 			'ips' => [
 				'IP адреса и сети',
@@ -157,6 +163,7 @@ class Aces extends ArmsModel
 					.'Для обозначения сетей обязательна маска, например 192.168.1.0/24<br>'
 					.'Для обозначения адресов маска должна отсутствовать, например 192.168.1.1',
 				'join' => ['netIps','networks'],
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'name' => [
 				'Пояснение',
@@ -165,51 +172,60 @@ class Aces extends ArmsModel
 					.'<li>Забирает список пользователей по WEB-API <i>(про доступ одного сервиса к другому)</i></li>'
 					.'<li>Подключается к своему АРМ <i>(про доступ пользователя к ОС)</i></li>'
 					.'<li>Отправляет уведомления по почту <i>(про доступ одного сервиса к другому по SMTP)</i></li>'
-					.'</ul>'
+					.'</ul>',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'netIps_ids' => [
 				'readOnly' => true, //при записи они формируются из поля ips
 				'hint' => 'IP адреса, с которых разрешается доступ.',
 				'apiHint' => '{same} Список ссылок на объекты NetIps из поля ips. '
 					.'При записи все объекты находятся среди существующих либо создаются автоматически',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'networks_ids' => [
 				'readOnly' => true, //при записи они формируются из поля ips
 				'hint' => 'IP сети, с которых разрешается доступ.',
 				'apiHint' => '{same} Список ссылок на объекты Networks. Список формируется при записи поля ips. '
 					.'Если в ips указана отсутствующая в БД сеть, то она выбрасывается из поля ips',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'notepad' => [
 				'Записная книжка',
 				'hint' => 'Если есть какие-то заметки, то можно их записать здесь',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'resource' => [
 				'Ресурс',
 				'indexHint' => 'К какому ресурсу субъект получает доступ',
-				'join'=>['acl.service','acl.comp','acl.tech','acl.ip','acl.network',]
+				'join'=>['acl.service','acl.comp','acl.tech','acl.ip','acl.network',],
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'resource_nodes' => [
 				'Узлы ресурса',
 				'indexHint' => 'К каким узлам ресурса получают доступ субъекты:<br>'
 					.'В случае если доступ предоставляется к сервису, то<br>'
 					.'он автоматически предоставляется и к узлам, на которых сервис крутится',
-				'join'=>['acl.service','acl.comp','acl.tech','acl.ip','acl.network',]
+				'join'=>['acl.service','acl.comp','acl.tech','acl.ip','acl.network',],
+				'typeClass'=>\app\types\StringType::class,
 			],
-			'schedule'=>[
+			'schedule'=> [
 				'Временное ограничение',
 				'Наименование временного доступа в рамках которого действует эта ACE (запись доступа)',
 				'join' => ['acl.schedule'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'services_ids' => [
 				'Сервисы',
 				'hint' => 'Сервисы, которым предоставляется доступ<br>'
 					.'Подразумевает доступ всех узлов, обеспечивающих работу перечисленных сервисов',
 				'join' => ['services'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'subjects' => [
 				'Субъекты',
 				'indexHint' => 'Субъекты доступа: кто получает доступ',
 				'join' => ['users','comps','services','netIps','networks'],
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'subject_nodes' => [
 				'Узлы субъектов',
@@ -217,12 +233,14 @@ class Aces extends ArmsModel
 					.'В случае если доступ предоставляется сервису, то<br>'
 					.'он автоматически предоставляется узлам, на которых сервис крутится',
 				'join' => ['users','comps','services','netIps','networks'],
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'users_ids' => [
 				Users::$titles,
 				'hint' => Users::$titles.', которым предоставляется доступ<br>'.
 					'Сотрудников других организаций можно также добавить в список пользователей',
 				'join' => ['users'],
+				'typeClass'=>\app\types\LinkType::class,
 			],
 		]);
 	}

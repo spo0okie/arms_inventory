@@ -75,12 +75,12 @@ class Manufacturers extends ArmsModel
     public function attributeData()
     {
         return [
-            'id' => 'Идентификатор',
-            'name' => ['Название','hint'=>'Короткое обозначение производителя для отображения в списках'],
-            'full_name' => ['Полное название','hint'=>'Полное название производителя для исключения совпадений'],
-            'comment' => ['Комментарий','hint'=>'Дополнительная информация о производителе (кто такой, чем знаменит и т.д.)'],
-            'created_at' => 'Время создания',
-        ];
+			'comment' => ['Комментарий','hint'=>'Дополнительная информация о производителе (кто такой, чем знаменит и т.д.)','typeClass'=>\app\types\TextType::class],
+			'created_at' => ['Время создания','typeClass'=>\app\types\DatetimeType::class],
+			'full_name' => ['Полное название','hint'=>'Полное название производителя для исключения совпадений','typeClass'=>\app\types\StringType::class],
+			'id' => ['Идентификатор','typeClass'=>\app\types\IntegerType::class],
+			'name' => ['Название','hint'=>'Короткое обозначение производителя для отображения в списках','typeClass'=>\app\types\StringType::class],
+		];
     }
 
     /**
