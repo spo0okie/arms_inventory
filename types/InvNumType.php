@@ -127,13 +127,13 @@ class InvNumType implements AttributeTypeInterface
 		foreach (static::invNumPrefixFormat() as $token) {
 			switch ($token) {
 				case 'place':
-					$tokens[]=$places(mt_rand(0,count($places)-1));
+					$tokens[]=$places[mt_rand(0,count($places)-1)];
 					break;
 				case 'org':
-					$tokens[]=$orgs(mt_rand(0,count($orgs)-1));
+					$tokens[]=$orgs[mt_rand(0,count($orgs)-1)];
 					break;
 				case 'type':
-					$tokens[]=$types(mt_rand(0,count($types)-1));
+					$tokens[]=$types[mt_rand(0,count($types)-1)];
 					break;
 			}
 		}
