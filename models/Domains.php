@@ -176,7 +176,7 @@ class Domains extends ArmsModel
 	): string
 	{
 		$defaultDomain=$object?->domain?->name??($object->isNewRecord?\Yii::$app->params['domains.default']:'');
-		/* убираем посторонние символы из MAC*/
+		/* пытаемся распарсить имя */
 		$parseName=Domains::fetchFromCompName($hostname,$defaultDomain);
 		if ($parseName===false) $object->addError($attr,'Некорректный формат hostname или нет домена');
 		if (is_array($parseName)) {

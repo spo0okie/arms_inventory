@@ -3,7 +3,6 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\EmailGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
@@ -89,7 +88,44 @@ class EmailType implements AttributeTypeInterface
 	 */
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new EmailGenerator();
-		return $generator->generate($context);
+		// Режим пустых значений
+		if ($context->empty) {
+			return $context->isNullable() ? null : '';
+		}
+
+		// Детерминированная генерация на основе seed + имя атрибута
+		$seed = $context->generationContext->seed + crc32($context->attribute);
+		mt_srand($seed);
+
+		// Имена пользователей
+		$users = [
+			'admin', 'support', 'info', 'sales', 'contact',
+			'noreply', 'helpdesk', 'service', 'postmaster', 'webmaster',
+		];
+
+		// Домены
+		$domains = [
+			'example.com', 'example.org', 'example.net',
+			'test.local', 'company.ru', 'org.net',
+		];
+
+		$userIndex = mt_rand(0, count($users) - 1);
+		$domainIndex = mt_rand(0, count($domains) - 1);
+
+		// Генерация случайного числа для уникальности
+		$suffix = mt_rand(1, 99);
+
+		$result = $users[$userIndex] . $suffix . '@' . $domains[$domainIndex];
+
+		mt_srand(); // сброс
+		return $result;
 	}
+
+	public function rules(AttributeRuleContext $context): array
+	{
+		return [
+			new RuleDefinition('string'),
+		];
+	}
+
 }

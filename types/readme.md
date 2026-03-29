@@ -8,12 +8,14 @@
   - рендерить input
   - рендерить output
   - как описывать себя в API
-  - как генерировать данные (для ModelFactory)
+  - **генерировать данные (для ModelFactory)** ✅
   - custom GridColum (если есть)
 - модели в `attributeData()` ссылаются на класс типа ( `'typeClass' => StringType::class`), а не держат логику типов у себя;
 - метаданные конкретного атрибута (label/hint и т.п.) остаются в модели и не смешиваются с типом.
 
 Это уменьшает `switch/case`, локализует знания о типе и упрощает расширение типов.
+
+**Важно:** Начиная с 2026-03-28, Type классы содержат всю логику генерации внутри себя. Генераторы как отдельные классы и `GeneratorResolver` удалены.
 
 ## Текущие типы
 
@@ -283,33 +285,31 @@ Array
 
 Данная секция описывает соответствие между правилами валидации Yii2 и классами типов атрибутов.
 
-### Существующие typeClass
-
 | typeClass | Файл | Описание |
 |-----------|------|----------|
-| `BooleanType` | [`types/BooleanType.php`](types/BooleanType.php) | Логический тип (true/false) |
-| `ColorType` | [`types/ColorType.php`](types/ColorType.php) | Цвет в HEX формате (#RRGGBB) ✅ |
-| `DateType` | [`types/DateType.php`](types/DateType.php) | Дата |
-| `DatetimeType` | [`types/DatetimeType.php`](types/DatetimeType.php) | Дата и время |
-| `EmailType` | [`types/EmailType.php`](types/EmailType.php) | Email адрес ✅ |
-| `FloatType` | [`types/FloatType.php`](types/FloatType.php) | Число с плавающей точкой |
-| `HostnameType` | [`types/HostnameType.php`](types/HostnameType.php) | Имя хоста (FQDN/NetBIOS) ✅ |
-| `IntegerType` | [`types/IntegerType.php`](types/IntegerType.php) | Целое число |
-| `InvNumType` | [`types/InvNumType.php`](types/InvNumType.php) | Инвентарный номер ✅ |
-| `IpsType` | [`types/IpsType.php`](types/IpsType.php) | IP-адрес (IPv4/IPv6) |
-| `JsonType` | [`types/JsonType.php`](types/JsonType.php) | JSON-данные |
-| `LinkType` | [`types/LinkType.php`](types/LinkType.php) | Связь с другой моделью (FK) |
-| `MacsType` | [`types/MacsType.php`](types/MacsType.php) | MAC-адрес |
-| `PhoneType` | [`types/PhoneType.php`](types/PhoneType.php) | Телефонный номер ✅ |
-| `ScheduleDayType` | [`types/ScheduleDayType.php`](types/ScheduleDayType.php) | День недели/дата (1-7, def, Y-m-d) ✅ |
-| `ScheduleType` | [`types/ScheduleType.php`](types/ScheduleType.php) | Расписание (ЧЧ:ММ-ЧЧ:ММ) ✅ |
-| `SerialNumberType` | [`types/SerialNumberType.php`](types/SerialNumberType.php) | Серийный номер ✅ |
-| `StringArrayType` | [`types/StringArrayType.php`](types/StringArrayType.php) | Массив строк |
-| `StringType` | [`types/StringType.php`](types/StringType.php) | Строка |
-| `TextType` | [`types/TextType.php`](types/TextType.php) | Многострочный текст |
-| `UrlsType` | [`types/UrlsType.php`](types/UrlsType.php) | Список URL |
+| `BooleanType` | [`types/BooleanType.php`](BooleanType.php) | Логический тип (true/false) |
+| `ColorType` | [`types/ColorType.php`](ColorType.php) | Цвет в HEX формате (#RRGGBB) ✅ |
+| `DateType` | [`types/DateType.php`](DateType.php) | Дата |
+| `DatetimeType` | [`types/DatetimeType.php`](DatetimeType.php) | Дата и время |
+| `EmailType` | [`types/EmailType.php`](EmailType.php) | Email адрес ✅ |
+| `FloatType` | [`types/FloatType.php`](FloatType.php) | Число с плавающей точкой |
+| `HostnameType` | [`types/HostnameType.php`](HostnameType.php) | Имя хоста (FQDN/NetBIOS) ✅ |
+| `IntegerType` | [`types/IntegerType.php`](IntegerType.php) | Целое число |
+| `InvNumType` | [`types/InvNumType.php`](InvNumType.php) | Инвентарный номер ✅ |
+| `IpsType` | [`types/IpsType.php`](IpsType.php) | IP-адрес (IPv4/IPv6) |
+| `JsonType` | [`types/JsonType.php`](JsonType.php) | JSON-данные |
+| `LinkType` | [`types/LinkType.php`](LinkType.php) | Связь с другой моделью (FK) |
+| `MacsType` | [`types/MacsType.php`](MacsType.php) | MAC-адрес |
+| `PhoneType` | [`types/PhoneType.php`](PhoneType.php) | Телефонный номер ✅ |
+| `ScheduleDayType` | [`types/ScheduleDayType.php`](ScheduleDayType.php) | День недели/дата (1-7, def, Y-m-d) ✅ |
+| `ScheduleType` | [`types/ScheduleType.php`](ScheduleType.php) | Расписание (ЧЧ:ММ-ЧЧ:ММ) ✅ |
+| `SerialNumberType` | [`types/SerialNumberType.php`](SerialNumberType.php) | Серийный номер ✅ |
+| `StringArrayType` | [`types/StringArrayType.php`](StringArrayType.php) | Массив строк |
+| `StringType` | [`types/StringType.php`](StringType.php) | Строка |
+| `TextType` | [`types/TextType.php`](TextType.php) | Многострочный текст |
+| `UrlsType` | [`types/UrlsType.php`](UrlsType.php) | Список URL |
 
-### Соответствие правил валидации typeClass
+**Все Type классы содержат логику генерации внутри себя.**
 
 #### Правила, определяющие тип
 
@@ -369,9 +369,41 @@ Array
 
 ---
 
-## Генераторы
+## Генерация
 
-Каждый тип имеет соответствующий генератор в [`generation/generators/`](generation/generators/):
+Каждый тип реализует метод `generate(AttributeContext $context): mixed` который создаёт значения для данного типа.
+
+Пример реализации в `StringType`:
+
+```php
+public function generate(AttributeContext $context): mixed
+{
+    // Режим пустых значений
+    if ($context->empty) {
+        return $context->isNullable() ? null : '';
+    }
+
+    // Детерминированная генерация на основе seed + имя атрибута
+    $seed = $context->generationContext->seed + crc32($context->attribute);
+    mt_srand($seed);
+
+    $min = $context->min ?? 5;
+    $max = $context->max ?? 20;
+    $length = mt_rand($min, $max);
+
+    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $result = '';
+    
+    for ($i = 0; $i < $length; $i++) {
+        $result .= $chars[mt_rand(0, strlen($chars) - 1)];
+    }
+
+    mt_srand(); // сброс
+    return $result;
+}
+```
+
+---
 
 | Тип | Генератор | Описание |
 |-----|-----------|----------|
@@ -396,3 +428,39 @@ Array
 | `StringType` | `StringGenerator` | Генератор строк |
 | `TextType` | `TextGenerator` | Генератор текста |
 | `UrlsType` | `UrlsGenerator` | Генератор URL |
+
+## Валидация
+
+Внутри типов есть также rules для валидации значений. Чтобы их использовать нужно в ArmsModel
+
+```php
+public function rules(): array
+{
+    $rules = [];
+
+    foreach ($this->attributeTypes() as $attribute => $type) {
+        $ctx = new AttributeRuleContext($this, $attribute, $this->attributeData($attribute));
+
+        foreach ($type->rules($ctx) as $ruleDef) {
+            $rules[] = $ruleDef->toYiiRule($attribute);
+        }
+    }
+
+    // ↓ здесь только бизнес-логика модели
+    return array_merge($rules, [
+        'какие-то базовые правила'
+    ]);
+}
+```
+
+в дочерней модели нужно
+
+```php
+public function rules(): array
+{
+    // ↓ здесь только бизнес-логика модели
+    return array_merge(parent::rules(), [
+        'какие-то базовые правила'
+    ]);
+}
+```

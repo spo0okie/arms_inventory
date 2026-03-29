@@ -5,8 +5,6 @@ namespace app\generation;
 use app\generation\context\AttributeContext;
 use app\generation\context\GenerationContext;
 use app\generation\exceptions\ModelGenerationException;
-use app\generation\generators\GeneratorInterface;
-use app\generation\generators\GeneratorResolver;
 use app\models\base\ArmsModel;
 use Random\RandomException;
 use Yii;
@@ -127,7 +125,7 @@ class ModelFactory
 	 */
 	protected static function generateAttributes(ArmsModel $model, GenerationContext $context, array $options): void
 	{
-		$linksSchema = method_exists($model, 'getLinksSchema') ? $model->getLinksSchema() : [];
+		$linksSchema = $model->getLinksSchema();
 		$existAttributes = [];
 		foreach ($model->rules() as $rule) {
 			if (($rule[1] ?? null) !== 'exist') {
@@ -202,10 +200,10 @@ class ModelFactory
 			self::resolveMaxLength($attrContext);
 			self::resolveMinLength($attrContext);
 			
-			// Получаем генератор и генерируем значение
+			// Получаем тип атрибута и генерируем значение
 			try {
-				$generator = GeneratorResolver::resolve($attrContext);
-				$model->$attribute = $generator->generate($attrContext);
+				$type = $model->getAttributeTypeClass($attribute);
+				$model->$attribute = $type->generate($attrContext);
 			} catch (\Throwable $e) {
 				throw new ModelGenerationException(
 					modelClass: get_class($model),
@@ -339,8 +337,8 @@ class ModelFactory
 				generationContext: $context,
 			);
 
-			$generator = GeneratorResolver::resolve($attrContext);
-			$model->$candidate = $generator->generate($attrContext);
+			$type = $model->getAttributeTypeForGeneration($candidate);
+			$model->$candidate = $type->generate($attrContext);
 			if ($model->$candidate === '0' || $model->$candidate === '' || $model->$candidate === null) {
 				$model->$candidate = 'x';
 			}

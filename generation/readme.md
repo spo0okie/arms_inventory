@@ -68,29 +68,38 @@ interface GeneratorInterface
 
 ---
 
-### GeneratorResolver ✅
+### Attribute Types ✅
 
-Отвечает за выбор генератора:
-
-```text
-1. generator.class из attributeData
-2. fallback по type
-```
-
-Особенности:
+Типы атрибутов (`app\types\*Type`) отвечают за:
 
 ```text
-- кэширует экземпляры генераторов
-- генераторы обязаны быть stateless
+- рендеринг input/output
+- API schema
+- генерацию данных
+- Grid column классы
 ```
+
+Каждый тип реализует `AttributeTypeInterface` который включает `GeneratorInterface`.
+
+---
+
+### GeneratorResolver ❌ УДАЛЕН
+
+Раньше существовал отдельный класс `GeneratorResolver` который выбирал генератор по типу атрибута.
+
+**Теперь:**
+- Типы атрибутов сами содержат логику генерации
+- `ModelFactory` напрямую использует `getAttributeTypeForGeneration()` 
+- Выбор типа происходит по аналогии с `getAttributeType()` но бросает исключение если тип не определён
 
 ---
 
 ### Тестирование
 
 ```text
-GeneratorResolverTest:
-- все типы покрыты генераторами
+GeneratorResolverTest: → TypeGenerationTest
+- все типы атрибутов имеют typeClass
+- все typeClass могут генерировать значения
 ```
 
 ---

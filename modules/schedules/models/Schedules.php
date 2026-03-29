@@ -4,6 +4,7 @@ namespace app\modules\schedules\models;
 
 use app\modules\schedules\models\traits\SchedulesModelCalcFieldsTrait;
 use app\modules\schedules\models\SchedulesEntries;
+use app\types\TextType;
 use voskobovich\linker\LinkerBehavior;
 use yii\data\ArrayDataProvider;
 use yii\db\ActiveQuery;
@@ -190,16 +191,16 @@ class Schedules extends \app\models\base\ArmsModel
 			['start_date','required','on'=>self::SCENARIO_OVERRIDE],
 			[['start_date','end_date'],function ($attribute) {
         		if (!is_object($this->parent)) return;
-        		foreach ($this->parent->overrides as $override){
+        		foreach ($this->parent->overrides as $override) {
         			if ($override->id != $this->id && (
         				$override->matchDate($this->$attribute) ||
-					$this->matchDate($override->start_date) ||
-					$this->matchDate($override->end_date)
-				)) {
-					$this->addError($attribute,'Пересекается с периодом '.$override->getPeriodDescription());
+						$this->matchDate($override->start_date) ||
+						$this->matchDate($override->end_date)
+					)) {
+						$this->addError($attribute,'Пересекается с периодом '.$override->getPeriodDescription());
+					}
 				}
-			}
-		},'on'=>self::SCENARIO_OVERRIDE],
+			},'on'=>self::SCENARIO_OVERRIDE],
 			[['history'],'safe'],
 			[['override_id'],'integer'],
 			[['parent_id'],	'validateRecursiveLink', 'params'=>['getLink' => 'parent']],
@@ -279,6 +280,7 @@ class Schedules extends \app\models\base\ArmsModel
 				'Заметки',
 				'hint' => 'В списке расписаний не видны. Чтобы прочитать надо будет проваливаться в расписание',
 				'type' => 'text',
+				'typeClass' => TextType::class,
 			],
 			'maintenanceJobs'=>['Регл. работы','indexHint'=>'Регламентные работы выполняющиеся по этому расписанию',],
 			'name' => [

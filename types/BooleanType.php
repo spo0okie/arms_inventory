@@ -3,7 +3,6 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\BooleanGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
@@ -44,7 +43,25 @@ class BooleanType implements AttributeTypeInterface
 
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new BooleanGenerator();
-		return $generator->generate($context);
+		// Режим пустых значений
+		if ($context->empty) {
+			return $context->isNullable() ? null : 0;
+		}
+
+		// Детерминированная генерация
+		$seed = $context->generationContext->seed + crc32($context->attribute);
+		mt_srand($seed);
+
+		$value=mt_rand(0, 1);
+		
+		mt_srand(); // сброс
+		return $value;
+	}
+
+	public function rules(AttributeRuleContext $context): array
+	{
+		return [
+			new RuleDefinition('boolean')
+		];
 	}
 }

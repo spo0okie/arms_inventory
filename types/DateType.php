@@ -3,7 +3,6 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\DateGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
@@ -44,7 +43,37 @@ class DateType implements AttributeTypeInterface
 
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new DateGenerator();
-		return $generator->generate($context);
+		// Режим пустых значений
+		if ($context->empty) {
+			return $context->isNullable() ? null : date('Y-m-d');
+		}
+
+		$config = $context->generatorConfig();
+
+		// Детерминированная генерация
+		$seed = $context->generationContext->seed + crc32($context->attribute);
+		mt_srand($seed);
+
+		$minYear = $config['min_year'] ?? 2020;
+		$maxYear = $config['max_year'] ?? date('Y');
+		
+		$year = mt_rand($minYear, $maxYear);
+		$month = mt_rand(1, 12);
+		$day = mt_rand(1, 28); // Безопасный день для всех месяцев
+		
+		mt_srand(); // сброс
+		return sprintf('%04d-%02d-%02d', $year, $month, $day);
 	}
+
+	public function rules(AttributeRuleContext $context): array
+	{
+		return [
+			new RuleDefinition('string',['max'=>'10']),
+			new RuleDefinition('match',[
+				'pattern' => '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/',
+				'message' => 'Дата должна быть в формате YYYY-MM-DD'
+			]),
+		];
+	}
+
 }

@@ -4,17 +4,16 @@ namespace tests\unit\generation;
 
 use app\generation\context\AttributeContext;
 use app\generation\context\GenerationContext;
-use app\generation\generators\GeneratorResolver;
 use app\models\AccessTypes;
 use app\types\TextType;
 use Codeception\Test\Unit;
 
-class GeneratorResolverTypeClassTest extends Unit
+class TypeGenerationTest extends Unit
 {
 	/** @var \UnitTester */
 	protected $tester;
 
-	public function testResolveUsesTypeClass(): void
+	public function testTypeCanGenerate(): void
 	{
 		\Helper\Yii2::initFromFileName('test-console.php');
 		\Helper\Database::loadSqlDump();
@@ -22,6 +21,10 @@ class GeneratorResolverTypeClassTest extends Unit
 		$model = new AccessTypes();
 		$attribute = 'notepad';
 		$attributeData = $model->getAttributeData($attribute);
+
+		$typeInstance = $model->getAttributeTypeForGeneration($attribute);
+		
+		$this->assertInstanceOf(TextType::class, $typeInstance);
 
 		$context = new AttributeContext(
 			attribute: $attribute,
@@ -31,7 +34,7 @@ class GeneratorResolverTypeClassTest extends Unit
 			generationContext: new GenerationContext(seed: 321)
 		);
 
-		$generator = GeneratorResolver::resolve($context);
-		$this->assertInstanceOf(TextType::class, $generator);
+		$value = $typeInstance->generate($context);
+		$this->assertNotNull($value);
 	}
 }

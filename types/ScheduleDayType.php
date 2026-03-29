@@ -3,9 +3,9 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\ScheduleDayGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
+use yii\validators\DateValidator;
 use yii\web\View;
 
 /**
@@ -16,6 +16,18 @@ use yii\web\View;
  */
 class ScheduleDayType implements AttributeTypeInterface
 {
+
+	public static $dayNames = [
+		'1' => 'Пн',
+		'2' => 'Вт',
+		'3' => 'Ср',
+		'4' => 'Чт',
+		'5' => 'Пт',
+		'6' => 'Сб',
+		'7' => 'Вс',
+		'def' => 'по умолч.',
+	];
+
 	/**
 	 * {@inheritdoc}
 	 */
@@ -45,20 +57,9 @@ class ScheduleDayType implements AttributeTypeInterface
 			return '<span class="text-muted">не задано</span>';
 		}
 
-		// День недели
-		$dayNames = [
-			'1' => 'Пн',
-			'2' => 'Вт',
-			'3' => 'Ср',
-			'4' => 'Чт',
-			'5' => 'Пт',
-			'6' => 'Сб',
-			'7' => 'Вс',
-			'def' => 'по умолчанию',
-		];
 
-		if (isset($dayNames[$value])) {
-			return Html::encode($dayNames[$value]);
+		if (isset(static::$dayNames[$value])) {
+			return Html::encode(static::$dayNames[$value]);
 		}
 
 		// Дата в формате Y-m-d
@@ -109,7 +110,38 @@ class ScheduleDayType implements AttributeTypeInterface
 	 */
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new ScheduleDayGenerator();
-		return $generator->generate($context);
+		// Режим пустых значений
+		if ($context->empty) {
+			return $context->isNullable() ? null : '';
+		}
+
+		// Детерминированная генерация на основе seed + имя атрибута
+		$seed = $context->generationContext->seed + crc32($context->attribute);
+		mt_srand($seed);
+
+		// Варианты для генерации
+		$options = array_keys(static::$dayNames);
+
+		$index = mt_rand(0, count($options) - 1);
+		$result = $options[$index];
+
+		mt_srand(); // сброс
+		return $result;
 	}
+
+	public function rules(AttributeRuleContext $context): array
+	{
+		return [
+			new RuleDefinition('string',['max'=>'10']),
+			new RuleDefinition(function($model,$attribute) {
+				if (isset(static::$dayNames[$model->$attribute])) return; //день недели или default - OK
+				$dateValidator=new DateValidator(['format'=>'php:Y-m-d']);
+				if (!$dateValidator->validate($model->$attribute, $error)) {
+					$model->addError($attribute, $error.': '.$model->$attribute);
+					return; // stop on first error
+				}
+			}),
+		];
+	}
+
 }

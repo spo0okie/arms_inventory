@@ -112,6 +112,17 @@ use app\helpers\ArrayHelper;
 use app\helpers\QueryHelper;
 use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
+use app\types\BooleanType;
+use app\types\DatetimeType;
+use app\types\DateType;
+use app\types\FloatType;
+use app\types\IntegerType;
+use app\types\IpsType;
+use app\types\LinkType;
+use app\types\MacsType;
+use app\types\StringType;
+use app\types\TextType;
+use app\types\UrlsType;
 use OpenApi\Annotations\Property;
 use yii\base\Model;
 use yii\base\UnknownPropertyException;
@@ -468,6 +479,69 @@ trait AttributeDataModelTrait
 		}
 		
 		return $default;
+	}
+	
+	/**
+	 * Возвращает объект типа атрибута для генерации.
+	 * Бросает исключение если тип атрибута не может быть определён.
+	 * @param string $attribute
+	 * @return \app\types\AttributeTypeInterface
+	 * @throws \yii\base\UnknownPropertyException
+	 * @throws \Exception
+	 */
+	public function getAttributeTypeClass(string $attribute): \app\types\AttributeTypeInterface
+	{
+		$cache='attributeTypeClass|'.$attribute;
+		if (isset($this->attrsCache[$cache])) return $this->attrsCache[$cache];
+
+		if ($type=$this->getAttributeData($attribute)['typeClass']??false) {
+			return $this->attrsCache[$cache]=new $type();
+		}
+		
+		if ($this->attributeIsLink($attribute)) {
+			return $this->attrsCache[$cache]=new LinkType();
+		}
+		
+		if ($this->attributeIsLoader($attribute)) {
+			return $this->attrsCache[$cache]=new LinkType();
+		}
+		
+		if (StringHelper::startsWith($attribute,'is_')) {
+			return $this->attrsCache[$cache]=new BooleanType();
+		}
+		
+		switch ($attribute) {
+			case 'id':
+			case 'count': return $this->attrsCache[$cache]=new IntegerType();
+			case 'ip':
+			case 'ips': return $this->attrsCache[$cache]=new IpsType();
+			case 'mac':
+			case 'macs': return $this->attrsCache[$cache]=new MacsType();
+			case 'links':
+			case 'url':
+			case 'urls': return $this->attrsCache[$cache]=new UrlsType();
+			case 'name':
+			case 'created_by':
+			case 'updated_by':
+			case 'comment': return $this->attrsCache[$cache]=new StringType();
+			case 'notepad': return $this->attrsCache[$cache]=new TextType();
+			case 'updated_at':
+			case 'created_at': return $this->attrsCache[$cache]=new DatetimeType();
+			case 'date': return $this->attrsCache[$cache]=new DateType();
+		}
+		
+		foreach ($this->rules() as $rule) {
+			if (in_array($attribute, (array)$rule[0])) {
+				switch ($rule[1]) {
+					case 'integer': return $this->attrsCache[$cache]=new IntegerType();
+					case 'number': return $this->attrsCache[$cache]=new FloatType();
+					case 'boolean': return $this->attrsCache[$cache]=new BooleanType();
+					case 'string': return $this->attrsCache[$cache]=new StringType();
+				}
+			}
+		}
+
+		throw new \Exception('Не удалось определить тип атрибута ' . static::class . '->' . $attribute);
 	}
 	
 	/**

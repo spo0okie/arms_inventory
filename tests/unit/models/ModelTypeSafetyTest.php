@@ -105,14 +105,7 @@ class ModelTypeSafetyTest extends Unit
             $model = new $modelClass();
             
             // Получаем метаданные атрибута
-			if (is_null($model->getAttributeType($attributeName,null))) {
-				$this->fail(sprintf(
-                    'У атрибута "%s" модели %s отсутствует информация о типе (key "type") в метаданных',
-                    $attributeName,
-                    $modelClass
-                ));
-            }
-			
+			$typeClass = $model->getAttributeTypeClass($attributeName);			
         } catch (\Exception $e) {
             $this->fail(sprintf(
                 'Не удалось проверить атрибут "%s" модели %s: %s',

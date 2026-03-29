@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\models\base\ArmsModel;
+use app\types\VlanType;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
@@ -86,6 +87,7 @@ class NetVlans extends ArmsModel
 					. '<i>(0, 1002-1005 и 4095 зарезервированы)</i>',
 				'type' => 'integer', 	//вообще можно в форме указывать диапазоны, но это будет обработано
 										//и сконвертировано в множество integer
+				'typeClass' => VlanType::class,
 			],
 			'domain_id' => [
 				'Домен L2',

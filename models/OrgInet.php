@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\models\base\ArmsModel;
+use app\types\TextType;
 use Yii;
 
 /**
@@ -119,6 +120,7 @@ class OrgInet extends ArmsModel
 				'Заметки',
 				'hint' => 'Записная книжка этого подключения',
 				'type' => 'text',
+				'typeClass' => TextType::class,
 			],
 			'comment' => [
 				'Тех.условия',

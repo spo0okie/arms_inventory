@@ -141,36 +141,6 @@ class ArmsModel extends ActiveRecord
 		return[];
 	}
 
-	/**
-	 * Возвращает объект типа атрибута для генерации, если он задан в attributeData (typeClass).
-	 * @param string $attribute
-	 * @return \app\types\AttributeTypeInterface|null
-	 * @throws \yii\base\UnknownPropertyException
-	 */
-	public function getAttributeTypeForGeneration(string $attribute): ?\app\types\AttributeTypeInterface
-	{
-		$data = $this->getAttributeData($attribute);
-		$typeClass = is_array($data) ? ($data['typeClass'] ?? null) : null;
-
-		if (!$typeClass) {
-			return null;
-		}
-
-		if (!class_exists($typeClass)) {
-			throw new \InvalidArgumentException(
-				'Type class not found for ' . static::class . '->' . $attribute . ': ' . $typeClass
-			);
-		}
-
-		if (!is_a($typeClass, \app\types\AttributeTypeInterface::class, true)) {
-			throw new \InvalidArgumentException(
-				'Type class must implement AttributeTypeInterface for ' . static::class . '->' . $attribute . ': ' . $typeClass
-			);
-		}
-
-		return new $typeClass();
-	}
-
 	
 	/**
 	 * Сразу добавляем в набор дополнительных полей все ссылки на другие модели из AttributeLinksModelTrait

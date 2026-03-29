@@ -3,7 +3,6 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\ColorGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
@@ -124,7 +123,51 @@ class ColorType implements AttributeTypeInterface
 	 */
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new ColorGenerator();
-		return $generator->generate($context);
+		// Режим пустых значений
+		if ($context->empty) {
+			return $context->isNullable() ? null : '';
+		}
+
+		// Детерминированная генерация на основе seed + имя атрибута
+		$seed = $context->generationContext->seed + crc32($context->attribute);
+		mt_srand($seed);
+
+		// Предопределённые "хорошие" цвета (web-safe + популярные)
+		$colors = [
+			'#FF5733', // Оранжево-красный
+			'#3498DB', // Синий
+			'#2ECC71', // Зелёный
+			'#E74C3C', // Красный
+			'#9B59B6', // Фиолетовый
+			'#F1C40F', // Жёлтый
+			'#1ABC9C', // Бирюзовый
+			'#34495E', // Тёмно-серый
+			'#E67E22', // Оранжевый
+			'#2980B9', // Тёмно-синий
+			'#27AE60', // Тёмно-зелёный
+			'#C0392B', // Тёмно-красный
+			'#8E44AD', // Тёмно-фиолетовый
+			'#D35400', // Тёмно-оранжевый
+			'#16A085', // Тёмно-бирюзовый
+			'#2C3E50', // Тёмно-синий серый
+		];
+
+		$index = mt_rand(0, count($colors) - 1);
+		$result = $colors[$index];
+
+		mt_srand(); // сброс
+		return $result;
 	}
+
+	public function rules(AttributeRuleContext $context): array
+	{
+		return [
+			new RuleDefinition('string',['max'=>'7']),
+			new RuleDefinition('match',[
+				'pattern' => '/^#[0-9A-Fa-f]{6}$/',
+				'message' => 'Цвет должен быть в формате HEX (#RRGGBB)'
+			])
+		];
+	}
+
 }

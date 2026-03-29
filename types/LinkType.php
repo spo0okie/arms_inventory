@@ -3,7 +3,7 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\LinkGenerator;
+use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
@@ -47,7 +47,23 @@ class LinkType implements AttributeTypeInterface
 
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new LinkGenerator();
-		return $generator->generate($context);
+		$attr = $context->attribute;
+		$isMany = \app\helpers\StringHelper::endsWith($attr, '_ids');
+
+		if ($context->empty) {
+			if ($context->isNullable()) {
+				return null;
+			}
+			return $isMany ? [] : 1;
+		}
+
+		return $isMany ? [1] : 1;
+	}
+
+	public function rules(AttributeRuleContext $context): array
+	{
+		return [
+			new RuleDefinition('integer'),
+		];
 	}
 }

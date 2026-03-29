@@ -60,4 +60,9 @@ interface AttributeTypeInterface extends GeneratorInterface
 	 * Генератор для данного типа атрибута (совместим с GeneratorInterface).
 	 */
 	public function generate(AttributeContext $context): mixed;
+
+	/**
+     * @return RuleDefinition[]
+     */
+    public function rules(AttributeRuleContext $context): array;
 }

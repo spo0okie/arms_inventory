@@ -4,6 +4,8 @@ namespace app\models;
 
 use app\helpers\QueryHelper;
 use app\models\base\ArmsModel;
+use app\types\DatetimeType;
+use DateTime;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;
@@ -104,6 +106,7 @@ class LoginJournal extends ArmsModel
 					.'то в этом поле сохраняется оригинальное значение в часах отправителя<br>'
 					.QueryHelper::$dateSearchHint,
 				'type'=>'datetime',
+				'typeClass'=>DatetimeType::class,
 			],
 			'type' => 'Тип входа',
             'user_login' => [

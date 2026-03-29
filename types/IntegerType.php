@@ -3,7 +3,6 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\generation\generators\IntegerGenerator;
 use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
@@ -44,7 +43,28 @@ class IntegerType implements AttributeTypeInterface
 
 	public function generate(AttributeContext $context): mixed
 	{
-		$generator = new IntegerGenerator();
-		return $generator->generate($context);
+		// Режим пустых значений
+		if ($context->empty) {
+			return $context->isNullable() ? null : 0;
+		}
+
+		$min = $context->min ?? 0;
+		$max = $context->max ?? 1000;
+
+		// Детерминированная генерация на основе seed + имя атрибута
+		$seed = $context->generationContext->seed + crc32($context->attribute);
+		mt_srand($seed);
+
+		$value=mt_rand($min, $max);
+
+		mt_srand(); // сброс
+		return $value;
+	}
+
+	public function rules(AttributeRuleContext $context): array
+	{
+		return [
+			new RuleDefinition('integer'),
+		];
 	}
 }

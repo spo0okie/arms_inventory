@@ -10,6 +10,7 @@ use app\models\base\ArmsModel;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\TechsModelCalcFieldsTrait;
 use app\models\traits\UnsatisfiedMaintenanceFieldTrait;
+use app\types\TextType;
 use voskobovich\linker\LinkerBehavior;
 use Yii;
 use yii\db\ActiveQuery;
@@ -472,7 +473,8 @@ class Techs extends ArmsModel
 			'specs' => [
 				'Тех. спецификация',
 				'hint' => 'Спецификация оборудования в случае, если модель оборудования не полностью определяет комплектацию каждого отдельного экземпляра',
-				'type' => 'text'
+				'type' => 'text',
+				'typeClass' => TextType::class,
 			],
 			'state' => ['Статус'],
 			'state_id' => [
