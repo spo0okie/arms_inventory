@@ -567,7 +567,7 @@ class Techs extends ArmsModel
 			        $this->addError($attribute, "Инвентарный номер {$this->$attribute} уже занят, следующий свободный номер с префиксом $pref - $next");
 		        }
 	        }],
-			['num', 'unique'],
+			['num', 'required'],
 			['sn', 'unique','targetAttribute'=>['sn','model_id'],'message'=>'Оборудование с этим серийным номером уже заведено'],
 			['arms_id',function ($attribute){
 				$this->validateRecursiveLink($attribute, $params=['getLink'=>'arm']);

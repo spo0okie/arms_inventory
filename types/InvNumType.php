@@ -17,15 +17,15 @@ class InvNumType implements AttributeTypeInterface
 {
 
 	//порядок префиксов для инвентарного номера по умолчанию для настройки techs.prefixFormat
-	private static $defaultPrefixFormat=['place','org','type'];	
+	private static array $defaultPrefixFormat=['place','org','type'];
 
 	//количество знаков в цифровой части номера в зависимости
 	//от количества токенов префикса по умолчанию для настройки techs.invNumStrPads
-	private static $defaultNumStrPad=[9,6,4];
+	private static array $defaultNumStrPad=[9,6,4];
 	
 	//максимальная длина инвентарного номера (если получится уложиться
 	//убирая нули в числовой части) по умолчанию для настройки techs.invNumMaxLen
-	private static $defaultNumMaxLen=15;	
+	private static int $defaultNumMaxLen=15;
 
 	/**
 	 * {@inheritdoc}
@@ -84,11 +84,11 @@ class InvNumType implements AttributeTypeInterface
 	public function samples(): array
 	{
 		return [
-			'T-00001',
-			'PC-12345',
-			'MON-42',
-			'NET-001',
-			'SRV-007',
+			'URAL-PC-0001',
+			'PC-DMX-12345',
+			'MON-MSK-0042',
+			'NET-WIFI-0001',
+			'SRV-MAIN-0007',
 		];
 	}
 
@@ -107,7 +107,7 @@ class InvNumType implements AttributeTypeInterface
 		mt_srand($seed);
 
 		// Префиксы для разных типов оборудования
-		$prefixes = [
+		$types = [
 			'PC',     // Персональный компьютер
 			'MON',    // Монитор
 			'NET',    // Сетевое оборудование
@@ -118,21 +118,28 @@ class InvNumType implements AttributeTypeInterface
 			'SW',     // Коммутатор
 			'RTR',    // Маршрутизатор
 		];
-
-		$prefixIndex = mt_rand(0, count($prefixes) - 1);
-		$prefix = $prefixes[$prefixIndex];
-
-		// Серийный номер (3-6 цифр)
-		$serialLength = mt_rand(3, 6);
-		$serial = '';
-		for ($i = 0; $i < $serialLength; $i++) {
-			$serial .= (string)mt_rand(0, 9);
+		
+		
+		$places=['MSK','SPB','NSK','EKB','KZN','RND','SAM','VLD'];
+		$orgs=['DMX','UUL','ZAO','XXN','RNK'];
+		$tokens=[];
+		
+		foreach (static::invNumPrefixFormat() as $token) {
+			switch ($token) {
+				case 'place':
+					$tokens[]=$places(mt_rand(0,count($places)-1));
+					break;
+				case 'org':
+					$tokens[]=$orgs(mt_rand(0,count($orgs)-1));
+					break;
+				case 'type':
+					$tokens[]=$types(mt_rand(0,count($types)-1));
+					break;
+			}
 		}
-
-		$result = $prefix . '-' . $serial;
-
-		mt_srand(); // сброс
-		return $result;
+		
+		//или цепочка из префиксов или пусто
+		return self::formatInvNum(implode('-',$tokens).'-'.mt_rand(0,1000));
 	}
 
 		/**
@@ -151,27 +158,39 @@ class InvNumType implements AttributeTypeInterface
 	}
 	
 	/**
-	 * Возвращает размер числовой части инв. номера в зависимости от количества токенов
+	 * Возвращает размер числовой части инвентарного номера в зависимости от количества токенов
 	 * @param $tokens - количество токенов
 	 * @return int
 	 */
-	public static function getNumStrPad($tokens) {
+	public static function getNumStrPad($tokens):int {
 		$pads=static::invNumStrPads();
 		return $pads[$tokens]??$pads[count($pads)-1];
 	}
 	
-	public static function formatInvNum($value)
+	/**
+	 * Переводит инвентарный номер в стандартный формат
+	 * (приводит к верхнему регистру, дополняет нулями числовую часть)
+	 * @param $value
+	 * @return string
+	 */
+	public static function formatInvNum($value):string
 	{
-		// выполняем определенные действия с переменной, возвращаем преобразованную переменную
+		// разбиваем на токены по дефису, последний токен - числовой, остальные - префиксы
 		$tokens = explode('-', $value);
-		//
+		//определяем размер числовой части в зависимости от количества токенов префикса
 		$num_str_pad = static::getNumStrPad(count($tokens)-1);
-		
+		//числовая часть
 		$num = (int)$tokens[count($tokens) - 1];
+		
+		//собираем отдельно префиксы
 		unset($tokens[count($tokens) - 1]);
 		$prefix=implode('-', $tokens);
+		
+		//ограничиваем размер числовой части, чтобы не превышать максимальную длину инвентарного номера
 		$num_str_pad=min($num_str_pad,static::invNumMaxLen()-mb_strlen($prefix));
+		//добиваем нулями
 		$num = str_pad((string)$num, $num_str_pad, '0', STR_PAD_LEFT);
+		//собираем обратно и приводим к верхнему регистру
 		return mb_strtoupper($prefix . '-' . $num);
 	}
 
@@ -179,7 +198,7 @@ class InvNumType implements AttributeTypeInterface
 	{
 		return [
 			new RuleDefinition('string',['max' => 16]),							//строка не более 16 символов
-	        new RuleDefinition( function ($model,$attribute) {					//проверяем синтаксис
+	        new RuleDefinition(function ($model, $attribute) {					//проверяем синтаксис
         		$tokens=explode('-',$model->$attribute);
 				$nonEmpty=true;
 				foreach ($tokens as $tok) if (!strlen($tok)) $nonEmpty=false;

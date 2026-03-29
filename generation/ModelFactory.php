@@ -337,7 +337,7 @@ class ModelFactory
 				generationContext: $context,
 			);
 
-			$type = $model->getAttributeTypeForGeneration($candidate);
+			$type = $model->getAttributeTypeClass($candidate);
 			$model->$candidate = $type->generate($attrContext);
 			if ($model->$candidate === '0' || $model->$candidate === '' || $model->$candidate === null) {
 				$model->$candidate = 'x';
