@@ -3,7 +3,8 @@
 use app\components\UrlListWidget;
 use app\models\Services;
 use kartik\grid\GridView;
-
+
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ServicesSearch */
@@ -221,7 +222,7 @@ foreach ($columns as $column) {
 				'value' => function ($data) use ($column,$renderer) {
 					$columnRecursive="${column}Recursive";
 					return is_object($data->$columnRecursive)?
-						$renderer->render('/schedules/schedules/item',['model'=>$data->$columnRecursive,'static_view'=>true])
+						ModelWidget::widget(['view'=>'item','model'=>$data->$columnRecursive,'static_view'=>true])
 						:null;
 				},
 				'contentOptions' => ['class' => $column . '_col']
