@@ -171,11 +171,11 @@ class Comps extends ArmsModel
     public function rules()
     {
         return [
+            [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids','maintenance_jobs_ids','admins_ids'], 'each', 'rule'=>['integer']],
+            [['name', 'os','domain_id'], 'required'],
 			['name', 'filter', 'filter' => function ($value) {
 				return Domains::validateHostname($value,$this);
 			}],
-            [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids','maintenance_jobs_ids','admins_ids'], 'each', 'rule'=>['integer']],
-            [['name', 'os','domain_id'], 'required'],
 			[['sandbox_id'],'default','value'=>null],
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived','sandbox_id'], 'integer'],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],

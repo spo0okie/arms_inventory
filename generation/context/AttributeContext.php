@@ -15,7 +15,6 @@ class AttributeContext
 
 	public function __construct(
         public readonly string $attribute,		//атрибут
-        public readonly array $attributeData,	//метаданные
 		public readonly bool $empty=false,		//нужно ли пустой
         public readonly ArmsModel $model,
         public readonly GenerationContext $generationContext,
@@ -26,7 +25,8 @@ class AttributeContext
      */
     public function generatorConfig(): array
     {
-        return $this->attributeData['generator'] ?? [];
+        $attributeData = $this->model->getAttributeData($this->attribute);
+        return is_array($attributeData) ? ($attributeData['generator'] ?? []) : [];
     }
 
     /**
@@ -37,3 +37,9 @@ class AttributeContext
         return $this->model->getAttributeIsNullable($this->attribute);
     }
 }
+
+
+
+
+
+

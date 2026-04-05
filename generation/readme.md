@@ -165,7 +165,7 @@ class AttributeContext
 {
     public function __construct(
         public readonly string $attribute,
-        public readonly array $attributeData,
+        public readonly bool $empty = false,
         public readonly ArmsModel $model,
         public readonly GenerationContext $generationContext,
     ) {}
@@ -173,6 +173,7 @@ class AttributeContext
     public function generatorConfig(): array
     public function isNullable(): bool
 }
+
 ```
 
 ---
@@ -525,3 +526,7 @@ retry — через пересоздание ✅
 - ⚠️ Защита от циклов (visited tracking)
 - ⚠️ Расширенное тестовое покрытие
 - ⚠️ Acceptance tests для контроллеров
+
+
+
+

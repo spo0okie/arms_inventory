@@ -115,19 +115,133 @@ class ModelFactory
 			seed: $options['seed'],
 		);
 	}
-
+	
+	
+	/**
+	 * Генерирует связанную модель для атрибута-связи на основе схемы связей модели (linksSchema).
+	 * @param ArmsModel        $model
+	 * @param AttributeContext $attributeContext
+	 * @return void
+	 * @throws Exception
+	 * @throws ModelGenerationException
+	 * @throws RandomException
+	 */
+	protected static function generateRelation(ArmsModel $model, AttributeContext $attributeContext): void
+	{
+		$attribute=$attributeContext->attribute;
+		$model = $attributeContext->model;
+		$context=$attributeContext->generationContext;
+		
+		if (!$model->attributeIsLink($attribute)) {
+			throw new ModelGenerationException(
+				modelClass: get_class($model),
+				stage: 'generateRelation',
+				errors: ['Атрибут не является связью'],
+				attribute: $attribute
+			);
+		}
+		
+		$class=$model->attributeLinkClass($attribute);	//с кем связь
+		
+		$canGet = $model->canGetProperty($attribute);	//аттрибут читаемый
+		$canSet = $model->canSetProperty($attribute);	//аттрибут устанавливаемый?
+		
+		if ($canGet && !ArmsModel::attrIsEmpty($model,$attribute)) {
+			return;	//атрибут уже заполнен, пропускаем
+		}
+		
+		if (!$canSet) {
+			throw new ModelGenerationException(
+				modelClass: get_class($model),
+				stage: 'generateRelation',
+				errors: ['Атрибут связи не устанавливаемый'],
+				attribute: $attribute,
+				relatedClass: $class
+			);
+		}
+		
+		
+		$isRequired = $model->getAttributeIsRequired($attribute);
+		
+		//если мы уже на максимальной глубине
+		//или генерируем пустую модель,
+		//то заполняем только обязательные связи, остальные пропускаем
+		if (
+			(	//макс глубина
+				($context->depth >= $context->maxDepth)
+				||	//или пустая модель
+				$attributeContext->empty
+			) //не обязательный атрибут
+			&& !$isRequired
+		) {
+			return;
+		}
+		
+		// генерация many-to-many и reverse-ссылок
+		$role = $config['role'] ?? null;
+		
+		try {
+			$related = self::create(
+				$class,
+				[
+					'seed' => $context->seed + crc32($attribute),
+					'empty' => $attributeContext->empty,
+					'role' => $role,
+					'save' => true,
+					// увеличиваем глубину
+					'depth' => $context->depth + 1,
+					'maxDepth' => $context->maxDepth,
+				]
+			);
+		} catch (ModelGenerationException $e) {
+			throw new ModelGenerationException(
+				modelClass: get_class($model),
+				stage: 'applyRelations',
+				seed: $context->seed,
+				attribute: $attribute,
+				relatedClass: $class,
+				depth: $context->depth,
+				previous: $e
+			);
+		}
+		
+		if ($related) {
+			if (str_ends_with($attribute, '_ids')) {
+				$model->$attribute = [$related->getPrimaryKey()];
+			} else {
+				$model->$attribute = $related->getPrimaryKey();
+			}
+			return;
+		}
+		
+		throw new ModelGenerationException(
+			modelClass: get_class($model),
+			stage: 'applyRelation',
+			errors: ['Не удалось создать модель для связи'],
+			seed: $context->seed,
+			attribute: $attribute,
+			relatedClass: $class,
+			depth: $context->depth
+		);
+	}
 	
 	/**
 	 * Сгенерировать значение для атрибута на основе его типа и правил валидации.
 	 */
-	public static function generateAttribute(AttributeContext $context) {
+	public static function generateAttribute(AttributeContext $context): void {
 		$attribute = $context->attribute;	// Атрибут, для которого генерируем значение
 
 		//если есть rules для max и min передаем их в контекст для генератора
 		self::resolveMaxLength($context);
 		self::resolveMinLength($context);
-			
-		// Получаем тип атрибута и генерируем значение
+		
+		//если это связь - то генерим связь
+		if ($context->model->attributeIsLink($attribute)) {
+			self::generateRelation($context->model, $context);
+			return;
+		}
+		
+		// иначе получаем тип атрибута и генерируем значение
 		try {
 			$type = $context->model->getAttributeTypeClass($attribute);
 			$context->model->$attribute = $type->generate($context);
@@ -162,7 +276,8 @@ class ModelFactory
 			}
 		}*/
 
-		foreach ($model->safeAttributes() as $attribute) {
+		$attributes=$model->safeAttributes();
+		foreach ($attributes as $attribute) {
 			
 			// Пропускаем служебные атрибуты
 			if (self::isSystemAttribute($attribute) && !$model->getAttributeIsRequired($attribute)) {
@@ -178,41 +293,15 @@ class ModelFactory
 			if (isset($options['overrides'][$attribute])) {
 				continue;
 			}
-
-			// skip FK from linksSchema (filled in applyRelations)
-			if (is_array($linksSchema) && array_key_exists($attribute, $linksSchema)) {
-				continue;
-			}
-
-			// skip FK with exist in empty (filled in model's afterGenerate)
-			if ($context->empty && isset($existAttributes[$attribute])) {
-				continue;
-			}
-
-			// Пропускаем связи, т.к. они заполняются в другом месте
-			if ($model->attributeIsLink($attribute)) {
-				continue;
-			}
 			
-			// Получаем данные атрибута
-			$attributeData = $model->getAttributeData($attribute);
-			if (!is_array($attributeData)) throw new ModelGenerationException(
-				modelClass: get_class($model),
-				stage: 'generateAttributes/getAttributeData',
-				seed: $context->seed,
-				attribute: $attribute,
-				errors: ['missing attribute data: '.print_r($attributeData, true)],
-			);
-				
 			// Пропускаем readonly атрибуты
-			if (!empty($attributeData['readOnly'])) {
+			if ($model->getAttributeIsReadOnly($attribute)) {
 				continue;
 			}
 			
 			// Создаём контекст атрибута
 			$attrContext = new AttributeContext(
 				attribute: $attribute,
-				attributeData: $attributeData,
 				empty: $context->empty && !$model->getAttributeIsRequired($attribute),
 				model: $model,
 				generationContext: $context,
@@ -309,8 +398,6 @@ class ModelFactory
 		try {
 			self::generateAttributes($model, $context, $options);    //заполняем атрибуты
 			
-			self::applyRelations($model, $context, $options);          //заполняем связи
-			
 			if (!empty($options['role'])) {
 				self::applyPreset($model, $options['role']);
 			}
@@ -340,148 +427,30 @@ class ModelFactory
 			return new ModelGenerationResult(null,$e);
 		}
 	}
-
-	protected static function applyRelations(ArmsModel $model, GenerationContext $context, array $options): void
+	
+	
+	/*protected static function applyRelations(ArmsModel $model, GenerationContext $context, array $options): void
 	{
-		if (!method_exists($model, 'getLinksSchema')) {
-			return;
-		}
-
 		foreach ($model->getLinksSchema() as $attribute => $config) {
-
+			
 			// если уже задан (например preset или override)
 			if (array_key_exists('overrides', $options) && array_key_exists($attribute, $options['overrides'])) {
 				continue;
 			}
-
-			if (!is_array($config)) {
-				$config = [$config];
-			}
-
-			$class = $config['class'] ?? ($config[0] ?? null);
-			if (!$class) {
-				continue;
-			}
 			
-			$canGet = $model->canGetProperty($attribute);
-			$canSet = $model->canSetProperty($attribute);
-			if (!$canGet && !$canSet) {
-				continue;
-			}
-
-			if ($canGet && $model->$attribute !== null) {
-				continue;
-			}
-
-			$isRequired = $model->getAttributeIsRequired($attribute);
-			if ($context->depth >= $context->maxDepth && !$isRequired) {
-				continue;
-			}
-
-			// генерация many-to-many и reverse-ссылок
-			if (str_ends_with($attribute, '_ids')) {
-				$isRequired = $model->getAttributeIsRequired($attribute);
-				$skipEmpty = $context->empty
-					&& !$isRequired
-					&& $model->getAttributeIsNullable($attribute);
-				if ($skipEmpty) {
-					continue;
-				}
-
-				$role = $config['role'] ?? null;
-
-				try {
-					$related = self::create(
-						$class,
-						[
-							'seed' => $context->seed + crc32($attribute),
-							'empty' => $context->empty,
-							'role' => $role,
-							'save' => true,
-							// увеличиваем глубину
-							'depth' => $context->depth + 1,
-							'maxDepth' => $context->maxDepth,
-						]
-					);
-				} catch (ModelGenerationException $e) {
-					throw new ModelGenerationException(
-						modelClass: get_class($model),
-						stage: 'applyRelations',
-						seed: $context->seed,
-						attribute: $attribute,
-						relatedClass: $class,
-						depth: $context->depth,
-						previous: $e
-					);
-				}
-
-				if ($related) {
-					$model->$attribute = [$related->getPrimaryKey()];
-					continue;
-				}
-
-				throw new ModelGenerationException(
-					modelClass: get_class($model),
-					stage: 'applyRelations',
-					errors: ['Failed to create relation model'],
-					seed: $context->seed,
-					attribute: $attribute,
-					relatedClass: $class,
-					depth: $context->depth
-				);
-			}
+			$attrContext = new AttributeContext(
+				attribute: $attribute,
+				empty: $context->empty,
+				model: $model,
+				generationContext: $context,
+			);
 			
-			$skipEmpty = $context->empty								// если собираем пустую модель
-				&& !$isRequired											// связь не обязательна
-				&& $model->getAttributeIsNullable($attribute);		// и может быть null
-			if ($skipEmpty) {
-				continue;
-			}
-
-			$role = $config['role'] ?? null;
+			self::generateRelation($model, $attrContext);
 			
-			try {
-				$related = self::create(
-					$class,
-					[
-						'seed' => $context->seed + crc32($attribute),
-						'empty' => $context->empty,
-						'role' => $role,
-						'save' => true,
-						// увеличиваем глубину
-						'depth' => $context->depth + 1,
-						'maxDepth' => $context->maxDepth,
-					]
-				);
-			} catch (ModelGenerationException $e) {
-				throw new ModelGenerationException(
-					modelClass: get_class($model),
-					stage: 'applyRelations',
-					seed: $context->seed,
-					attribute: $attribute,
-					relatedClass: $class,
-					depth: $context->depth,
-					previous: $e
-				);
-			}
-			
-			if ($related) {
-				$model->$attribute = $related->getPrimaryKey();
-			} else {
-				throw new ModelGenerationException(
-					modelClass: get_class($model),
-					stage: 'applyRelations',
-					errors: ['Failed to create relation model'],
-					seed: $context->seed,
-					attribute: $attribute,
-					relatedClass: $class,
-					depth: $context->depth
-				);
-			}
 		}
-	}
-
-
+	}*/
+	
+	
 	/**
 	 * Добавляет в контекст атрибута min длину для строковых атрибутов на основе правил валидации модели.
 	 */
@@ -512,4 +481,10 @@ class ModelFactory
 
 
 }
+
+
+
+
+
+
 

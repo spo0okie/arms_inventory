@@ -891,4 +891,22 @@ trait AttributeDataModelTrait
 		
 		return $this->attrsCache[$cache]=true;		
 	}
+
+	/**
+	 * Возвращает true если атрибут только для чтения
+	 */
+	public function getAttributeIsReadOnly(string $attribute): bool
+	{
+		$cache='attributeIsReadOnly|'.$attribute;
+		if (isset($this->attrsCache[$cache]))
+			return $this->attrsCache[$cache];
+		
+		$data=$this->getAttributeData($attribute);
+		if (is_array($data) && isset($data['readOnly']) && $data['readOnly']) {
+			return $this->attrsCache[$cache]=true;
+		}
+		
+		return $this->attrsCache[$cache]=false;
+	}
+
 }

@@ -64,8 +64,12 @@ class NetIps extends ArmsModel
     {
         return 'net_ips';
     }
-
-    /**
+	
+	public $linksSchema=[
+		'networks_id'=>[Networks::class],
+	];
+	
+	/**
      * {@inheritdoc}
      */
     public function rules()
@@ -113,7 +117,11 @@ class NetIps extends ArmsModel
 				'hint'=>'Сюда можно записать имя узла для которого адрес зарезервирован',
 				'typeClass'=>\app\types\StringType::class,
 			],
-			'network' => ['Сеть','typeClass'=>\app\types\StringType::class],
+			'network' => [
+				'Сеть',
+				'typeClass'=>\app\types\StringType::class,
+				'readOnly'=>true,	//Его не надо записывать самому. Он заполняется в onBeforeSave
+			],
 			'attached' => ['Прикреплено к','typeClass'=>\app\types\StringType::class],
 			'text_addr' => [
 				'Адрес',

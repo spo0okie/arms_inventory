@@ -49,7 +49,6 @@ class AttributeTypeBasicsTest extends Unit
 		$model = new AccessTypes();
 		$context = new AttributeContext(
 			attribute: 'name',
-			attributeData: [],
 			empty: false,
 			model: $model,
 			generationContext: new GenerationContext(seed: 123)

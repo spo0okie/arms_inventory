@@ -74,29 +74,15 @@ trait ValidationGenerationTrait
                 continue;
             }
 
-            // Check if at least one attribute has a value
-            $hasValue = false;
-            foreach ($attrs as $attr) {
-                if (!static::attrIsEmpty($this, $attr)) {
-                    $hasValue = true;
-                    break;
-                }
-            }
-            
-            if ($hasValue) {
-                continue;
-            }
-
             // Выбираем случайный атрибут из набора для заполнения, остальные оставляем пустыми
             $attrSet= $attrs[mt_rand(0, count($attrs) - 1)];
 
             foreach ($attrs as $attr) {
 				//если атрибут не пустой xor нужный
-				if ((!$this->attributeIsEmpty($attr)) xor ($attr===$attrSet)) {
+				if ((!static::attrIsEmpty($this,$attr)) xor ($attr===$attrSet)) {
 					$attrContext=new AttributeContext(
 						attribute: $attr,
-						attributeData: $this->getAttributeData($attr) ?? [],
-						empty: $attr==$attrSet,	//нужный атрибут заполняем значением, остальные пустотой
+						empty: $attr!==$attrSet,	//нужный атрибут заполняем значением, остальные пустотой
 						model: $this,
 						generationContext: $context
 					);
@@ -188,3 +174,5 @@ trait ValidationGenerationTrait
 		}
 	}
 }
+
+
