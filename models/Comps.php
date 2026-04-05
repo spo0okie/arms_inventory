@@ -5,6 +5,7 @@ namespace app\models;
 use app\helpers\ArrayHelper;
 use app\helpers\MacsHelper;
 use app\helpers\QueryHelper;
+use app\generation\context\GenerationContext;
 use app\models\base\ArmsModel;
 use app\models\traits\AclsFieldTrait;
 use app\models\traits\CompsModelCalcFieldsTrait;
@@ -220,6 +221,15 @@ class Comps extends ArmsModel
 			],
         ];
     }
+
+	public function afterGenerate(GenerationContext $context, array $options = []): void
+	{
+		parent::afterGenerate($context, $options);
+
+		if ($this->arm_id && $this->platform_id) {
+			$this->platform_id = null;
+		}
+	}
 
     /**
      * @inheritdoc

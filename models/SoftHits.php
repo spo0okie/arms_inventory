@@ -25,6 +25,11 @@ use Yii;
  */
 class SoftHits extends ArmsModel
 {
+	public $linksSchema = [
+		'comp_id' => Comps::class,
+		'soft_id' => Soft::class,
+	];
+
 	//флажок того что в этом объекте реально производился поиск
 	private $searched_flag=false;
 

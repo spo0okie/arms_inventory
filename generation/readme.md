@@ -28,13 +28,12 @@ for retry:
 
 createOnce():
 1. instantiate model ✅
-2. generate attributes ✅
-3. apply relations ✅
-4. apply presets (role) ✅
-5. apply overrides ✅
-6. ModelResolver::afterGenerate() ✅
-7. validate ✅
-8. save ✅
+2. generate attributes (incl. relations) ✅
+3. apply presets (role) ✅
+4. apply overrides ✅
+5. ModelResolver::afterGenerate() ✅
+6. validate ✅
+7. save ✅
 ```
 
 **Реализация:** [`ModelFactory.php`](../generation/ModelFactory.php)
@@ -106,13 +105,12 @@ interface GeneratorInterface
 **Методы:**
 - `afterGenerate()` — главный метод, вызываемый после генерации атрибутов
 - `applyRequireOneOfRules()` — обрабатывает правила `validateRequireOneOf`
-- `applyExistRules()` — обрабатывает правила `exist` для FK
+- `exist` в генерации не применяется: FK создаются через relations (`linksSchema`)
 
 **Принцип работы:**
 ```text
 ModelFactory::createOnce():
   → generateAttributes()
-  → applyRelations()
   → applyPreset()
   → applyOverrides()
   → model->afterGenerate() ✅ БИЗНЕС-ЛОГИКА МОДЕЛИ
@@ -226,7 +224,7 @@ $model = ModelFactory::create(Techs::class, [], [
 ✔ подготовка к relations (depth) ✅
 ```
 
-**Реализация:** [`ModelFactory::create()`](ModelFactory.php#L58-L117), [`ModelFactory::generateAttributes()`](ModelFactory.php#L126-L217), [`ModelFactory::applyRelations()`](ModelFactory.php#L478-L616)
+**Реализация:** [`ModelFactory::create()`](ModelFactory.php#L58-L117), [`ModelFactory::generateAttributes()`](ModelFactory.php#L126-L217), [`ModelFactory::generateRelation()`](ModelFactory.php#L144-L238)
 
 ---
 
@@ -235,6 +233,8 @@ $model = ModelFactory::create(Techs::class, [], [
 ```text
 - генераторы используют mt_rand (глобальное состояние) ⚠️
 - нет защиты от циклов (visited) ⚠️
+- ссылки на внешние классы (не ArmsModel) не создаются ⚠️
+- при maxDepth обязательные связи: берётся существующая запись, иначе ошибка ⚠️
 ```
 
 **Файл:** [`ModelFactory.php`](ModelFactory.php#L422-L476)
@@ -267,11 +267,12 @@ public function linksSchema(): array
 
 ```text
 - генераторы НЕ создают модели ✅
-- ModelFactory управляет связями ✅ (applyRelations)
+- ModelFactory управляет связями ✅ (generateRelation)
 - используется depth для ограничения ✅
+- при maxDepth для обязательной связи берётся существующая запись (если нет — ошибка) ✅
 ```
 
-**Реализация:** [`ModelFactory::applyRelations()`](../generation/ModelFactory.php#L478-L616), [`Techs::$linksSchema`](../models/Techs.php#L169-L202)
+**Реализация:** [`ModelFactory::generateRelation()`](../generation/ModelFactory.php#L144-L238), [`Techs::$linksSchema`](../models/Techs.php#L169-L202)
 
 ---
 
@@ -279,7 +280,7 @@ public function linksSchema(): array
 
 ```text
 generateAttributes ✅
-→ applyRelations ✅
+→ relations (generateAttribute) ✅
 → presets ✅
 → overrides ✅
 → validate ✅
@@ -448,7 +449,7 @@ controller → 200 / 302 ⚠️
 ```text
 - linksSchema ✅
 - depth ✅
-- applyRelations() ✅
+- generateRelation() ✅
 ```
 
 **Текущее состояние:** Базовая реализация работает, есть ограничения для сложных графов
@@ -519,7 +520,7 @@ retry — через пересоздание ✅
 - ✅ Overrides для переопределения значений
 - ✅ Детерминизм через seed
 - ✅ Retry через полную регенерацию
-- ✅ Базовые связи (linksSchema, depth, applyRelations)
+- ✅ Базовые связи (linksSchema, depth, generateRelation)
 
 **Требует доработки:**
 - ⚠️ ModelResolver для валидации инвариантов

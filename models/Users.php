@@ -244,7 +244,7 @@ class Users extends ArmsModel implements IdentityInterface
 			],
 			'Login' => ['Логин (AD)','typeClass'=>\app\types\StringType::class],
 			'logon_ids' => ['absorb'=>false], //вручную переключим
-			'manager_id' => ['Руководитель','typeClass'=>\app\types\LinkType::class],
+			'manager_id' => ['Руководитель','typeClass'=>\app\types\StringType::class],
 			'Mobile' => ['Мобильный тел','absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
 			'netIps' => ['alias'=>'ips'],
 			'nosync' => [
@@ -270,7 +270,7 @@ class Users extends ArmsModel implements IdentityInterface
 			'Orgeh' => [
 				'Подразделение',
 				'join'=>['orgStruct'],
-				'typeClass'=>\app\types\LinkType::class,
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'orgStruct_name' => ['alias'=>'Orgeh'],
 			'Persg' => ['Тип трудоустройства','typeClass'=>\app\types\IntegerType::class],

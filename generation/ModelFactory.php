@@ -82,21 +82,35 @@ class ModelFactory
 				if ($result->isSuccess()) {
 					
 					$model = $result->model;
-					if ($options['save']){ try {
-						if ($model->save(false)) {
-							return $model;
+					if ($options['save']) {
+						$disableRescanPrev = null;
+						try {
+							if (class_exists(\app\models\Soft::class)) {
+								$disableRescanPrev = \app\models\Soft::$disable_rescan;
+								\app\models\Soft::$disable_rescan = true;
+							}
+
+							if ($model->save(false)) {
+								return $model;
+							}
+						} catch (\Throwable $e) {
+							Yii::debug("ModelFactory: save retry {$i} for {$modelClass}", 'generation');
+							$errors = $model->getErrors();
+							$errors['exception'][] = $e->getMessage();
+							$lastError = new ModelGenerationException(
+								modelClass: $modelClass,
+								stage: 'create/save',
+								errors: $errors,
+								seed: $options['seed'],
+								previous: $e
+							);
+							continue;
+						} finally {
+							if ($disableRescanPrev !== null) {
+								\app\models\Soft::$disable_rescan = $disableRescanPrev;
+							}
 						}
-					} catch (\Throwable $e) {
-						Yii::debug("ModelFactory: save retry {$i} for {$modelClass}", 'generation');
-						$lastError = new ModelGenerationException(
-							modelClass: $modelClass,
-							stage: 'create/save',
-							errors: $model->getErrors(),
-							seed: $options['seed'],
-							previous: $e
-						);
-						continue;
-					}} else { //no save
+					} else { //no save
 						return $model;
 					}
 				} else $lastError = $result->error;
@@ -162,6 +176,43 @@ class ModelFactory
 		
 		
 		$isRequired = $model->getAttributeIsRequired($attribute);
+
+		if (!is_subclass_of($class, ArmsModel::class)) {
+			if ($isRequired) {
+				throw new ModelGenerationException(
+					modelClass: get_class($model),
+					stage: 'applyRelations',
+					errors: ['Связь с внешним классом не поддерживается генератором'],
+					seed: $context->seed,
+					attribute: $attribute,
+					relatedClass: $class,
+					depth: $context->depth
+				);
+			}
+			return;
+		}
+
+		if ($context->depth >= $context->maxDepth && $isRequired) {
+			$existing = self::findExistingModel($class);
+			if ($existing) {
+				if (str_ends_with($attribute, '_ids')) {
+					$model->$attribute = [$existing->getPrimaryKey()];
+				} else {
+					$model->$attribute = $existing->getPrimaryKey();
+				}
+				return;
+			}
+
+			throw new ModelGenerationException(
+				modelClass: get_class($model),
+				stage: 'applyRelations',
+				errors: ['Достигнут предел глубины при обязательной связи'],
+				seed: $context->seed,
+				attribute: $attribute,
+				relatedClass: $class,
+				depth: $context->depth
+			);
+		}
 		
 		//если мы уже на максимальной глубине
 		//или генерируем пустую модель,
@@ -178,6 +229,7 @@ class ModelFactory
 		}
 		
 		// генерация many-to-many и reverse-ссылок
+		$config = $model->attributeLinkSchema($attribute);
 		$role = $config['role'] ?? null;
 		
 		try {
@@ -223,6 +275,24 @@ class ModelFactory
 			relatedClass: $class,
 			depth: $context->depth
 		);
+	}
+
+	protected static function findExistingModel(string $class): ?ActiveRecord
+	{
+		if (!is_subclass_of($class, ActiveRecord::class)) {
+			return null;
+		}
+
+		$pk = $class::primaryKey();
+		if (!empty($pk)) {
+			$order = [];
+			foreach ($pk as $col) {
+				$order[$col] = SORT_ASC;
+			}
+			return $class::find()->orderBy($order)->one();
+		}
+
+		return $class::find()->one();
 	}
 	
 	/**

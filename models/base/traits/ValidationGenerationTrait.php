@@ -6,8 +6,6 @@ use app\generation\context\AttributeContext;
 use app\generation\context\GenerationContext;
 use app\generation\ModelFactory;
 use app\models\base\ArmsModel;
-use Dom\Attr;
-use yii\base\Model;
 
 /**
  * ValidationGenerationTrait
@@ -28,7 +26,6 @@ trait ValidationGenerationTrait
     public function afterGenerate(GenerationContext $context, array $options = []): void
     {
         $this->applyRequireOneOfRules($context, $options);
-        $this->applyExistRules($options);
     }
 
     /**
@@ -92,73 +89,6 @@ trait ValidationGenerationTrait
         }
     }
 
-    /**
-     * Apply exist rules during generation.
-     * Creates related models for FK attributes that have 'exist' validator.
-     *
-     * @param array $options Generation options
-     */
-    protected function applyExistRules(array $options = []): void
-    {
-        $linksSchema = method_exists($this, 'getLinksSchema') ? $this->getLinksSchema() : [];
-
-        foreach ($this->rules() as $rule) {
-            if (($rule[1] ?? null) !== 'exist') {
-                continue;
-            }
-
-            $attrs = (array)($rule[0] ?? []);
-            $targetClass = $rule['targetClass'] ?? null;
-            $targetAttribute = $rule['targetAttribute'] ?? null;
-            
-            if (!$targetClass) {
-                continue;
-            }
-
-            foreach ($attrs as $attr) {
-                if (!$this->canSetProperty($attr)) {
-                    continue;
-                }
-                
-                if (!static::attrIsEmpty($this, $attr)) {
-                    continue;
-                }
-                
-                // Skip if linksSchema exists (filled via applyRelations)
-                if (is_array($linksSchema) && array_key_exists($attr, $linksSchema)) {
-                    continue;
-                }
-
-                // Create related model
-                $related = \app\generation\ModelFactory::create(
-                    $targetClass,
-                    [
-                        'seed' => ($options['seed'] ?? 0) + crc32($attr),
-                        'empty' => $options['empty'] ?? false,
-                        'save' => true,
-                    ]
-                );
-
-                if (!$related) {
-                    continue;
-                }
-
-                $targetAttr = 'id';
-                if (is_array($targetAttribute)) {
-                    $targetAttr = $targetAttribute[$attr] ?? 'id';
-                } elseif (is_string($targetAttribute)) {
-                    $targetAttr = $targetAttribute;
-                }
-
-                $value = $related->getPrimaryKey();
-                if ($targetAttr !== 'id' && $related->canGetProperty($targetAttr)) {
-                    $value = $related->$targetAttr;
-                }
-
-                $this->$attr = $value;
-            }
-        }
-    }
 
 		
 	/**

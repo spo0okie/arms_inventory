@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\models\base\ArmsModel;
+use app\generation\context\GenerationContext;
 use app\models\traits\AcesModelCalcFieldsTrait;
 use Yii;
 use app\helpers\ArrayHelper;
@@ -115,6 +116,15 @@ class Aces extends ArmsModel
 			]
         ];
     }
+
+	public function afterGenerate(GenerationContext $context, array $options = []): void
+	{
+		parent::afterGenerate($context, $options);
+
+		if (!empty($this->ips)) {
+			$this->ips = '127.0.0.1';
+		}
+	}
 	
 	/**
 	 * {@inheritdoc}

@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\components\UrlListWidget;
 use app\console\commands\SyncController;
+use app\generation\context\GenerationContext;
 use app\models\base\ArmsModel;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
@@ -126,6 +127,19 @@ class TechModels extends ArmsModel
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => TechTypes::className(), 'targetAttribute' => ['type_id' => 'id']],
         ];
     }
+
+	public function afterGenerate(GenerationContext $context, array $options = []): void
+	{
+		parent::afterGenerate($context, $options);
+
+		if ($this->contain_front_rack && $this->front_rack_two_sided && $this->contain_back_rack) {
+			$this->contain_back_rack = 0;
+		}
+
+		if ($this->contain_back_rack && $this->back_rack_two_sided && $this->contain_front_rack) {
+			$this->contain_front_rack = 0;
+		}
+	}
 
 	/**
 	 * {@inheritdoc}

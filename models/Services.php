@@ -479,7 +479,7 @@ class Services extends ArmsModel
 						):''
 					)
 				,
-				'typeClass' => \app\types\FloatType::class,
+				'typeClass' => \app\types\IntegerType::class,
 			],
 			'vm_cores' => [
 				'Выделено VM CPU',
