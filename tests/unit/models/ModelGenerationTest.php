@@ -45,7 +45,7 @@ class ModelGenerationTest extends Unit
 				$this->fail('Не удалось создать модель класса '.$modelClass);
             }			
         } catch (\Exception $e) {
-			$this->fail('Exception при генерации класса '.$modelClass.':'.PHP_EOL.$e->getMessage());
+			$this->fail('Exception при генерации класса '.$modelClass.':'.PHP_EOL.$e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
     }
 }

@@ -123,7 +123,7 @@ class ScheduleDayType implements AttributeTypeInterface
 		$options = array_keys(static::$dayNames);
 
 		$index = mt_rand(0, count($options) - 1);
-		$result = $options[$index];
+		$result = (string)$options[$index];
 
 		mt_srand(); // сброс
 		return $result;

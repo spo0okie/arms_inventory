@@ -13,6 +13,7 @@ use app\models\base\traits\AttributeAnnotationModelTrait;
 use app\models\base\traits\AttributeDataModelTrait;
 use app\models\base\traits\AttributeLinksModelTrait;
 use app\models\base\traits\ExternalDataModelTrait;
+use app\models\base\traits\ValidationGenerationTrait;
 use DateTime;
 use DateTimeZone;
 use Throwable;
@@ -56,7 +57,8 @@ class ArmsModel extends ActiveRecord
 	use ExternalDataModelTrait,
 		AttributeDataModelTrait,
 		AttributeLinksModelTrait,
-		AttributeAnnotationModelTrait;
+		AttributeAnnotationModelTrait,
+		ValidationGenerationTrait;
 	
 	/** @var string как называется один экземпляр модели (для страницы Create -> Новый объект) */
 	public static $title='Объект';
@@ -344,40 +346,6 @@ class ArmsModel extends ActiveRecord
 		}
 		
 		return empty($model->$attr);
-	}
-	
-	/**
-	 * Требовать выставления как минимум одного аттрибута из нескольких
-	 * $params должно содержать поле 'attrs' => ['comp_ids','comment','user_id'];
-	 * обязательно при прописывании валидатора надо добавлять параметр 'skipOnEmpty' => false
-	 * иначе валидация пустых полей будет пропущена
-	 * @param       $attribute
-	 * @param array $params
-	 * @return bool
-	 * @noinspection PhpUnusedParameterInspection
-	 */
-	public function validateRequireOneOf($attribute, $params=[]) {
-		foreach ($params['attrs']??[] as $attr) {
-			//если аттрибут не пуст, то как минимум один заполнен
-			if (!static::attrIsEmpty($this,$attr)) return true;
-		}
-		foreach ($params['attrs']??[] as $attr) {
-			$this->addError($attr,$params['message']??'Как минимум один аттрибут должен быть заполнен');
-		}
-		return false;
-	}
-	
-	/**
-	 * Проверяет, что аттрибут или integer или их массив
-	 * @param $attribute
-	 */
-	public function validateIntegerOrArrayOfInteger($attribute)
-	{
-		if (!is_int($this->$attribute) &&
-			!(is_array($this->$attribute) &&
-				count(array_filter($this->$attribute, 'is_int')) == count($this->$attribute))) {
-			$this->addError($attribute, 'ID должен быть целым числом или массивом целых чисел');
-		}
 	}
 	
 	/**

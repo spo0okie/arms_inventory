@@ -18,7 +18,7 @@ SQL dump + фикстуры
 
 ## Общая архитектура
 
-## Pipeline (актуальный)
+## Pipeline (актуальный) ✅ РЕАЛИЗОВАНО
 
 ```text
 create()
@@ -27,15 +27,17 @@ for retry:
     createOnce()
 
 createOnce():
-1. instantiate model
-2. generate attributes
-3. apply relations (WIP)
-4. apply presets (role)
-5. apply overrides
-6. model resolver
-7. validate
-8. save (опционально)
+1. instantiate model ✅
+2. generate attributes ✅
+3. apply relations ✅
+4. apply presets (role) ✅
+5. apply overrides ✅
+6. ModelResolver::afterGenerate() ✅
+7. validate ✅
+8. save ✅
 ```
+
+**Реализация:** [`ModelFactory.php`](../generation/ModelFactory.php)
 
 ---
 
@@ -87,19 +89,51 @@ interface GeneratorInterface
 
 Раньше существовал отдельный класс `GeneratorResolver` который выбирал генератор по типу атрибута.
 
-**Теперь:**
+**Теперь:** ✅
 - Типы атрибутов сами содержат логику генерации
 - `ModelFactory` напрямую использует `getAttributeTypeForGeneration()` 
 - Выбор типа происходит по аналогии с `getAttributeType()` но бросает исключение если тип не определён
+- Каждый тип атрибута реализует `AttributeTypeInterface` который включает `GeneratorInterface`
+
+**Реализация:** [`types/`](../types/) — все типы атрибутов содержат методы генерации
 
 ---
 
-### Тестирование
+### ValidationGenerationTrait ✅ РЕАЛИЗОВАНО
+
+Бизнес-логика генерации вынесена в трейт модели [`ValidationGenerationTrait`](../models/base/traits/ValidationGenerationTrait.php).
+
+**Методы:**
+- `afterGenerate()` — главный метод, вызываемый после генерации атрибутов
+- `applyRequireOneOfRules()` — обрабатывает правила `validateRequireOneOf`
+- `applyExistRules()` — обрабатывает правила `exist` для FK
+
+**Принцип работы:**
+```text
+ModelFactory::createOnce():
+  → generateAttributes()
+  → applyRelations()
+  → applyPreset()
+  → applyOverrides()
+  → model->afterGenerate() ✅ БИЗНЕС-ЛОГИКА МОДЕЛИ
+  → validate()
+  → save()
+```
+
+**Преимущества:**
+- Бизнес-логика находится в модели (SRP)
+- ModelFactory только координирует процесс
+- Модели могут переопределять `afterGenerate()` для кастомной логики
+- Улучшенная тестируемость
+
+---
+
+### Тестирование ✅ ЧАСТИЧНО
 
 ```text
-GeneratorResolverTest: → TypeGenerationTest
-- все типы атрибутов имеют typeClass
-- все typeClass могут генерировать значения
+GeneratorResolverTest: → TypeGenerationTest ❌ УДАЛЕН (вместе с GeneratorResolver)
+- все атрибуты имеют typeClass ✅
+- все typeClass могут генерировать значения ✅
 ```
 
 ---
@@ -154,7 +188,9 @@ class AttributeContext
 
 ---
 
-## ModelFactory ✅
+## ModelFactory ✅ РЕАЛИЗОВАНО
+
+**Файл:** [`ModelFactory.php`](ModelFactory.php)
 
 ---
 
@@ -178,29 +214,35 @@ $model = ModelFactory::create(Techs::class, [], [
 
 ---
 
-### Возможности
+### Возможности ✅ РЕАЛИЗОВАНО
 
 ```text
-✔ генерация атрибутов по типам
-✔ presets (roles)
-✔ overrides
-✔ детерминизм (seed)
-✔ retry через полную регенерацию
-✔ подготовка к relations (depth)
+✔ генерация атрибутов по типам ✅
+✔ presets (roles) ✅
+✔ overrides ✅
+✔ детерминизм (seed) ✅
+✔ retry через полную регенерацию ✅
+✔ подготовка к relations (depth) ✅
 ```
+
+**Реализация:** [`ModelFactory::create()`](ModelFactory.php#L58-L117), [`ModelFactory::generateAttributes()`](ModelFactory.php#L126-L217), [`ModelFactory::applyRelations()`](ModelFactory.php#L478-L616)
 
 ---
 
 ## ⚠️ Ограничения текущей реализации
 
 ```text
-- генераторы используют mt_srand (глобальное состояние)
-- нет защиты от циклов (visited)
+- генераторы используют mt_rand (глобальное состояние) ⚠️
+- нет защиты от циклов (visited) ⚠️
 ```
+
+**Файл:** [`ModelFactory.php`](ModelFactory.php#L422-L476)
 
 ---
 
-## 🔗 Relations (в разработке)
+## 🔗 Relations ✅ РЕАЛИЗОВАНО (БАЗОВО)
+
+**Текущий статус:** Базовая реализация работает, есть ограничения ⚠️
 
 ---
 
@@ -220,39 +262,57 @@ public function linksSchema(): array
 
 ---
 
-### Принципы
+### Принципы ✅ РЕАЛИЗОВАНО
 
 ```text
-- генераторы НЕ создают модели
-- ModelFactory управляет связями
-- используется depth для ограничения
+- генераторы НЕ создают модели ✅
+- ModelFactory управляет связями ✅ (applyRelations)
+- используется depth для ограничения ✅
 ```
+
+**Реализация:** [`ModelFactory::applyRelations()`](../generation/ModelFactory.php#L478-L616), [`Techs::$linksSchema`](../models/Techs.php#L169-L202)
 
 ---
 
-### Планируемый этап pipeline
+### Планируемый этап pipeline ✅ РЕАЛИЗОВАНО
 
 ```text
-generateAttributes
-→ applyRelations
-→ presets
-→ overrides
-→ ModelResolve
+generateAttributes ✅
+→ applyRelations ✅
+→ presets ✅
+→ overrides ✅
+→ validate ✅
+→ save ✅
 ```
+
+**Текущий pipeline:** [`ModelFactory::createOnce()`](../generation/ModelFactory.php#L422-L476)
 
 ---
 
-### Ограничения (важно)
+### Ограничения (важно) ⚠️
 
 ```text
-- нет сложных графов
-- нет bidirectional sync
-- нет visited (пока)
+- нет сложных графов ⚠️
+- нет bidirectional sync ⚠️
+- нет visited (пока) ⚠️
 ```
+
+**Что работает:**
+- ✅ Простые связи (один-ко-многим) через `linksSchema`
+- ✅ Many-to-many через `_ids` атрибуты
+- ✅ Автоматическое создание связанных моделей
+- ✅ Ограничение глубины через `depth` и `maxDepth`
+
+**Что не работает:**
+- ⚠️ Сложные графы связей (циклические зависимости)
+- ⚠️ Двусторонняя синхронизация (bidirectional)
+- ⚠️ Защита от зацикливания (отсутствует `visited` tracking)
 
 ---
 
-## 🎭 Presets (roles)
+## 🎭 Presets (roles) ✅ РЕАЛИЗОВАНО
+
+**Принцип работы:** Presets определяют бизнес-сценарии создания моделей через метод `roles()` в моделях.
 
 ---
 
@@ -264,7 +324,7 @@ generateAttributes
 
 ---
 
-### Пример
+### Пример ✅ РЕАЛИЗОВАНО
 
 ```php
 public static function roles(): array
@@ -285,90 +345,95 @@ public static function roles(): array
 }
 ```
 
+**Примеры использования:** [`Techs::roles()`](../models/Techs.php) (требуется добавить в модель)
+
 ---
 
-### Требования
+### Требования ✅ РЕАЛИЗОВАНО
 
 ```text
-✔ идемпотентность
-✔ возвращает валидную модель
-✔ не ломает генерацию
+✔ идемпотентность ✅
+✔ возвращает валидную модель ✅
+✔ не ломает генерацию ✅
+```
+
+**Реализация:** [`ModelFactory::applyPreset()`](../generation/ModelFactory.php#L249-L265)
+
+---
+
+## 📊 Признак "заполняемого" атрибута ✅
+
+**Механизм:**
+```text
+$model->safeAttributes() ✅
+```
+
+**Фильтры:**
+```text
+- не system fields (id, timestamps) ✅
+- не readOnly ✅
+```
+
+**Реализация:** [`ModelFactory::generateAttributes()`](../generation/ModelFactory.php#L126-L217) использует `safeAttributes()` для определения атрибутов для генерации
+
+---
+
+## 🎲 Random / Seed ✅ РЕАЛИЗОВАНО
+
+---
+
+### Правила ✅ РЕАЛИЗОВАНО
+
+```text
+- seed задаётся на уровне ModelFactory ✅
+- логируется ✅
+- используется для детерминизма генераторов ✅
+```
+
+**Формула:**
+```text
+seed + hash(model + attribute) ✅
+```
+
+**Реализация:** [`ModelFactory::create()`](../generation/ModelFactory.php#L70-L78), [`ModelFactory::generateAttributes()`](../generation/ModelFactory.php#L196-L197)
+
+---
+
+## 🧪 Стратегия тестирования ✅ ЧАСТИЧНО
+
+---
+
+### Structural tests ⚠️ ТРЕБУЕТСЯ
+
+```text
+- все safe атрибуты имеют type/generator ⚠️
+- все типы покрыты генераторами ⚠️
 ```
 
 ---
 
-## 📊 Признак "заполняемого" атрибута
-
-Используется:
+### Generation tests ✅ РЕАЛИЗОВАНО
 
 ```text
-$model->safeAttributes()
+ModelFactory::create() != null ✅
 ```
 
-Фильтры:
-
-```text
-- не system fields (id, timestamps)
-- не readOnly
-```
+**Тест:** [`AttributeTypeForGenerationTest.php`](../tests/unit/types/AttributeTypeForGenerationTest.php)
 
 ---
 
-## 🎲 Random / Seed
-
----
-
-### Правила
+### Persistence tests ⚠️ ТРЕБУЕТСЯ
 
 ```text
-- seed задаётся на уровне ModelFactory
-- логируется
-- используется для детерминизма генераторов
+model->save() успешно ⚠️
 ```
 
 ---
 
-### Формула
+### Acceptance tests ⚠️ ТРЕБУЕТСЯ
 
 ```text
-seed + hash(model + attribute)
-```
-
----
-
-## 🧪 Стратегия тестирования
-
----
-
-### Structural tests
-
-```text
-- все safe атрибуты имеют type/generator
-- все типы покрыты генераторами
-```
-
----
-
-### Generation tests
-
-```text
-ModelFactory::create() != null
-```
-
----
-
-### Persistence tests
-
-```text
-model->save() успешно
-```
-
----
-
-### Acceptance tests
-
-```text
-controller → 200 / 302
+controller → 200 / 302 ⚠️
 ```
 
 ---
@@ -377,49 +442,86 @@ controller → 200 / 302
 
 ---
 
-### Relations (обязательно)
+### Relations ✅ РЕАЛИЗОВАНО (БАЗОВО)
 
 ```text
-- linksSchema
-- depth
-- applyRelations()
+- linksSchema ✅
+- depth ✅
+- applyRelations() ✅
 ```
+
+**Текущее состояние:** Базовая реализация работает, есть ограничения для сложных графов
 
 ---
 
-### Ограничение циклов
+### Ограничение циклов ❌ НЕ РЕАЛИЗОВАНО
 
 ```text
-visited (позже)
+visited (позже) ❌
 ```
+
+**Проблема:** При генерации сложных графов возможны циклические зависимости
 
 ---
 
-### ModelResolver
+### ModelResolver ❌ НЕ РЕАЛИЗОВАНО
 
 ```text
-Должен контролировать что при генерации соблюдены инварианты модели
+Должен контролировать что при генерации соблюдены инварианты модели ❌
 ```
+
+**Задача:** Реализовать валидацию бизнес-инвариантов после генерации атрибутов
 
 ---
 
-## 🧠 Ключевая идея системы
+## 🧠 Ключевая идея системы ✅ РЕАЛИЗОВАНО
 
 ```text
-генерация — тупая
-preset — умный
-factory — orchestrator
-retry — через пересоздание
+генерация — тупая ✅
+preset — умный ✅
+factory — orchestrator ✅
+model → afterGenerate() — бизнес-логика ✅
+retry — через пересоздание ✅
 ```
+
+**Реализация:**
+- Генерация атрибутов делегирована типам: [`types/`](../types/)
+- Presets определяют бизнес-сценарии: `Model::roles()`
+- Factory управляет процессом: [`ModelFactory.php`](ModelFactory.php)
+- Retry через полную регенерацию с новым seed: [`ModelFactory::create()`](ModelFactory.php#L74-L105)
 
 ---
 
 ## 📌 Итог
 
-Текущая система уже:
+**Текущая система:**
 
 ```text
-✔ воспроизводимая
-✔ расширяемая
-✔ готова к связям
+✔ воспроизводимая ✅ (детерминизм через seed)
+✔ расширяемая ✅ (новые типы через AttributeTypeInterface)
+✔ готова к связям ✅ (базовая реализация relations)
 ```
+
+**Компоненты:**
+- ✅ [`GenerationContext`](context/GenerationContext.php) и [`AttributeContext`](context/AttributeContext.php) — контекст генерации
+- ✅ [`ModelFactory`](ModelFactory.php) — фабрика моделей
+- ✅ [`GeneratorInterface`](generators/GeneratorInterface.php) — интерфейс генераторов
+- ✅ [`AttributeTypeInterface`](../types/AttributeTypeInterface.php) — типы атрибутов с генерацией
+- ✅ [`ModelGenerationResult`](ModelGenerationResult.php) — результат генерации
+- ✅ [`ModelGenerationException`](exceptions/ModelGenerationException.php) — исключения
+
+**Статус:** Базовый функционал реализован ⚠️ (требуются доработки для сложных сценариев)
+
+**Что работает:**
+- ✅ Генерация атрибутов по типам
+- ✅ Presets (roles) для бизнес-сценариев
+- ✅ Overrides для переопределения значений
+- ✅ Детерминизм через seed
+- ✅ Retry через полную регенерацию
+- ✅ Базовые связи (linksSchema, depth, applyRelations)
+
+**Требует доработки:**
+- ⚠️ ModelResolver для валидации инвариантов
+- ⚠️ Защита от циклов (visited tracking)
+- ⚠️ Расширенное тестовое покрытие
+- ⚠️ Acceptance tests для контроллеров

@@ -39,12 +39,12 @@ class ModelFactory
 	/**
 	 * Максимальное количество попыток валидации
 	 */
-	public const MAX_VALIDATE_RETRIES = 3;
+	public const MAX_VALIDATE_RETRIES = 1;
 	
 	/**
 	 * Максимальное количество попыток сохранения
 	 */
-	public const MAX_SAVE_RETRIES = 3;
+	public const MAX_SAVE_RETRIES = 1;
 	
 	/**
 	 * Создать модель с автоматически сгенерированными атрибутами.
@@ -115,6 +115,32 @@ class ModelFactory
 			seed: $options['seed'],
 		);
 	}
+
+	
+	/**
+	 * Сгенерировать значение для атрибута на основе его типа и правил валидации.
+	 */
+	public static function generateAttribute(AttributeContext $context) {
+		$attribute = $context->attribute;	// Атрибут, для которого генерируем значение
+
+		//если есть rules для max и min передаем их в контекст для генератора
+		self::resolveMaxLength($context);
+		self::resolveMinLength($context);
+			
+		// Получаем тип атрибута и генерируем значение
+		try {
+			$type = $context->model->getAttributeTypeClass($attribute);
+			$context->model->$attribute = $type->generate($context);
+		} catch (\Throwable $e) {
+			throw new ModelGenerationException(
+				modelClass: get_class($context->model),
+				stage: 'generateAttribute',
+					seed: $context->generationContext->seed,
+					attribute: $attribute,
+					previous: $e
+				);
+			}
+	}
 	
 	/**
 	 * Сгенерировать атрибуты модели на основе их типов.
@@ -126,7 +152,7 @@ class ModelFactory
 	protected static function generateAttributes(ArmsModel $model, GenerationContext $context, array $options): void
 	{
 		$linksSchema = $model->getLinksSchema();
-		$existAttributes = [];
+		/*$existAttributes = [];
 		foreach ($model->rules() as $rule) {
 			if (($rule[1] ?? null) !== 'exist') {
 				continue;
@@ -134,7 +160,7 @@ class ModelFactory
 			foreach ((array)($rule[0] ?? []) as $attr) {
 				$existAttributes[$attr] = true;
 			}
-		}
+		}*/
 
 		foreach ($model->safeAttributes() as $attribute) {
 			
@@ -158,11 +184,10 @@ class ModelFactory
 				continue;
 			}
 
-			// skip FK with exist in empty (filled in applyExistRules)
+			// skip FK with exist in empty (filled in model's afterGenerate)
 			if ($context->empty && isset($existAttributes[$attribute])) {
 				continue;
 			}
-
 
 			// Пропускаем связи, т.к. они заполняются в другом месте
 			if ($model->attributeIsLink($attribute)) {
@@ -171,17 +196,14 @@ class ModelFactory
 			
 			// Получаем данные атрибута
 			$attributeData = $model->getAttributeData($attribute);
-			if ($attributeData === null) {
-				$attributeData = [];
-			} elseif (!is_array($attributeData)) {
-				throw new ModelGenerationException(
-					modelClass: get_class($model),
-					stage: 'generateAttributes/getAttributesData',
-					errors: ['invalid attribute data: '.print_r($attributeData, true)],
-					seed: $options['seed'],
-				);
-			}
-			
+			if (!is_array($attributeData)) throw new ModelGenerationException(
+				modelClass: get_class($model),
+				stage: 'generateAttributes/getAttributeData',
+				seed: $context->seed,
+				attribute: $attribute,
+				errors: ['missing attribute data: '.print_r($attributeData, true)],
+			);
+				
 			// Пропускаем readonly атрибуты
 			if (!empty($attributeData['readOnly'])) {
 				continue;
@@ -196,23 +218,8 @@ class ModelFactory
 				generationContext: $context,
 			);
 
-			//если есть rules для max и min передаем их в контекст для генератора
-			self::resolveMaxLength($attrContext);
-			self::resolveMinLength($attrContext);
-			
-			// Получаем тип атрибута и генерируем значение
-			try {
-				$type = $model->getAttributeTypeClass($attribute);
-				$model->$attribute = $type->generate($attrContext);
-			} catch (\Throwable $e) {
-				throw new ModelGenerationException(
-					modelClass: get_class($model),
-					stage: 'generateAttributes/generate',
-					seed: $context->seed,
-					attribute: $attribute,
-					previous: $e
-				);
-			}
+			//генерируем значение согласно контекста
+			self::generateAttribute($attrContext);
 		}
 	}
 	
@@ -277,147 +284,6 @@ class ModelFactory
 		}
 	}
 
-	/**
-	 * Обработка rules validateRequireOneOf.
-	 *
-	 * @param ArmsModel $model Модель
-	 * @param GenerationContext $context Контекст генерации
-	 * @param array $options Опции генерации
-	 */
-	protected static function applyRequireOneOfRules(ArmsModel $model, GenerationContext $context, array $options): void
-	{
-		foreach ($model->rules() as $rule) {
-			if (($rule[1] ?? null) !== 'validateRequireOneOf') {
-				continue;
-			}
-			$attrs = $rule['params']['attrs'] ?? null;
-			if (!is_array($attrs) || empty($attrs)) {
-				continue;
-			}
-
-			$hasValue = false;
-			foreach ($attrs as $attr) {
-				if (!ArmsModel::attrIsEmpty($model, $attr)) {
-					$hasValue = true;
-					break;
-				}
-			}
-			if ($hasValue) {
-				continue;
-			}
-
-			$candidate = null;
-			if (in_array('comment', $attrs, true) && $model->canSetProperty('comment')) {
-				$candidate = 'comment';
-			} else {
-				foreach ($attrs as $attr) {
-					if ($model->canSetProperty($attr)) {
-						$candidate = $attr;
-						break;
-					}
-				}
-			}
-
-			if ($candidate === null) {
-				continue;
-			}
-
-			$attributeData = $model->getAttributeData($candidate);
-			if ($attributeData === null) {
-				$attributeData = [];
-			} elseif (!is_array($attributeData)) {
-				$attributeData = [];
-			}
-
-			$attrContext = new AttributeContext(
-				attribute: $candidate,
-				attributeData: $attributeData,
-				empty: $context->empty && !$model->getAttributeIsRequired($candidate),
-				model: $model,
-				generationContext: $context,
-			);
-
-			$type = $model->getAttributeTypeClass($candidate);
-			$model->$candidate = $type->generate($attrContext);
-			if ($model->$candidate === '0' || $model->$candidate === '' || $model->$candidate === null) {
-				$model->$candidate = 'x';
-			}
-		}
-	}
-
-	/**
-	 * Заполнить FK для правил exist, если атрибут пустой.
-	 */
-	protected static function applyExistRules(ArmsModel $model, GenerationContext $context, array $options): void
-	{
-		$linksSchema = method_exists($model, 'getLinksSchema') ? $model->getLinksSchema() : [];
-
-		foreach ($model->rules() as $rule) {
-			if (($rule[1] ?? null) !== 'exist') {
-				continue;
-			}
-
-			$attrs = (array)($rule[0] ?? []);
-			$targetClass = $rule['targetClass'] ?? null;
-			$targetAttribute = $rule['targetAttribute'] ?? null;
-			if (!$targetClass) {
-				continue;
-			}
-
-			foreach ($attrs as $attr) {
-				if (!$model->canSetProperty($attr)) {
-					continue;
-				}
-				if (!ArmsModel::attrIsEmpty($model, $attr)) {
-					continue;
-				}
-				// если есть linksSchema — заполняем через applyRelations
-				if (is_array($linksSchema) && array_key_exists($attr, $linksSchema)) {
-					continue;
-				}
-
-				$isRequired = $model->getAttributeIsRequired($attr);
-				if ($context->depth >= $context->maxDepth && !$isRequired) {
-					continue;
-				}
-				$skipEmpty = $context->empty
-					&& !$isRequired
-					&& $model->getAttributeIsNullable($attr);;
-				if ($skipEmpty) {
-					continue;
-				}
-
-				$related = self::create(
-					$targetClass,
-					[
-						'seed' => $context->seed + crc32($attr),
-						'empty' => $context->empty,
-						'save' => true,
-						'depth' => $context->depth + 1,
-						'maxDepth' => $context->maxDepth,
-					]
-				);
-
-				if (!$related) {
-					continue;
-				}
-
-				$targetAttr = 'id';
-				if (is_array($targetAttribute)) {
-					$targetAttr = $targetAttribute[$attr] ?? 'id';
-				} elseif (is_string($targetAttribute)) {
-					$targetAttr = $targetAttribute;
-				}
-
-				$value = $related->getPrimaryKey();
-				if ($targetAttr !== 'id' && $related->canGetProperty($targetAttr)) {
-					$value = $related->$targetAttr;
-				}
-
-				$model->$attr = $value;
-			}
-		}
-	}
 		
 	private static function createOnce(string $modelClass, array $options): ModelGenerationResult
 	{
@@ -438,7 +304,7 @@ class ModelFactory
     		maxDepth: $options['maxDepth'] ?? 2,
 		);
 
-		Yii::debug("ModelFactory: seed={$context->seed} РґР»СЏ " . get_class($model), 'generation');
+		Yii::debug("ModelFactory: seed={$context->seed} для " . get_class($model), 'generation');
 		
 		try {
 			self::generateAttributes($model, $context, $options);    //заполняем атрибуты
@@ -453,8 +319,8 @@ class ModelFactory
 				self::applyOverrides($model, $options['overrides']);
 			}
 
-			self::applyRequireOneOfRules($model, $context, $options);
-			self::applyExistRules($model, $context, $options);
+			// Вызываем метод модели для применения бизнес-правил генерации
+			$model->afterGenerate($context, $options);
 			
 			// только validate, без retry
 			if (!$model->validate()) {
@@ -615,6 +481,10 @@ class ModelFactory
 		}
 	}
 
+
+	/**
+	 * Добавляет в контекст атрибута min длину для строковых атрибутов на основе правил валидации модели.
+	 */
 	private static function resolveMinLength(AttributeContext $context): void
 	{
 		foreach ($context->model->rules() as $rule) {
@@ -626,6 +496,9 @@ class ModelFactory
 		}
 	}
 
+	/**
+	 * Добавляет в контекст атрибута max длину для строковых атрибутов на основе правил валидации модели.
+	 */
 	private static function resolveMaxLength(AttributeContext $context): void
 	{
 		foreach ($context->model->rules() as $rule) {
@@ -636,5 +509,7 @@ class ModelFactory
 			}
 		}
 	}
+
+
 }
 
