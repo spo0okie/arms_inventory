@@ -164,7 +164,7 @@ class Aces extends ArmsModel
 				'IP параметры типов доступа',
 				'hint' => 'Вообще не должно вылазить в UI, это служебный атрибут для записи параметров в junction таблицу',
 				'type' => 'string[]',	//генератор его нормально не создаст, это надо будет создавать в ModelResolver
-				'typeClass'=>\app\types\JsonType::class,
+				'typeClass'=>\app\types\StringArrayType::class,
 			],
 			'ips' => [
 				'IP адреса и сети',

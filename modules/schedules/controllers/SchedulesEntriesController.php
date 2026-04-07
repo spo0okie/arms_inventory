@@ -13,6 +13,23 @@ use yii\web\NotFoundHttpException;
  */
 class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 {
+	public static function testCreate(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}', 'SchedulesEntries' => ['schedule_id' => 6]],
+			'response' => 200,
+		]];
+	}
+	
+	public static function testUpdate(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
 	public $modelClass=SchedulesEntries::class;
 	
 	public function disabledActions()

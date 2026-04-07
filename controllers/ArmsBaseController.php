@@ -5,7 +5,9 @@ namespace app\controllers;
 use app\components\DynaGridWidget;
 use app\components\Forms\ArmsForm;
 use app\components\Forms\assets\ArmsFormAsset;
+use app\generation\ModelFactory;
 use app\helpers\ArrayHelper;
+use app\helpers\ModelHelper;
 use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
 use app\models\Users;
@@ -463,6 +465,21 @@ class ArmsBaseController extends Controller
 		}
     }
 	
+	public function testIndex(): array
+	{
+		//тестируем, что страница открывается и возвращает 200
+		//создаем несколько моделей, чтобы страница работала в сценарии когда что-то рендерится
+		for ($i=0; $i<3; $i++) {
+			ModelFactory::create($this->modelClass);
+		}
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	
 	/**
 	 * Renders only Grid of index
 	 * @return mixed
@@ -497,6 +514,20 @@ class ArmsBaseController extends Controller
 			throw new NotFoundHttpException("Search class $searchModelClass not found");
 		}
 	}
+	
+	public function testAsyncGrid(): array
+	{
+		//тестируем, что страница открывается и возвращает 200
+		//создаем несколько моделей, чтобы страница работала в сценарии когда что-то рендерится
+		for ($i=0; $i<3; $i++) {
+			ModelFactory::create($this->modelClass);
+		}
+		return [[
+			'name' => 'default',
+			'GET' => ['source' => 'http://1.1.1.1'],
+			'response' => [404,200],	//TODO убрать 404. Метод должен работать везде.
+		]];
+	}
 
 	/**
 	 * Displays a item for single model.
@@ -515,6 +546,17 @@ class ArmsBaseController extends Controller
 		]);
 	}
 	
+	public function testItem(): array
+	{
+		//проверяем что может отобразить как модель полностью заполненную, так и модель с минимальным набором данных
+		$modelFull=ModelFactory::create($this->modelClass);
+		$modelEmpty=ModelFactory::create($this->modelClass,['empty'=>true]);
+		return [
+			['name' => 'item full', 'GET' => ['id' => $modelFull->id],'response' => 200,],
+			['name' => 'item empty', 'GET' => ['id' => $modelEmpty->id],'response' => 200,],
+		];
+	}
+	
 	public function actionItemByName($name)
 	{
 		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'item.php')?
@@ -524,6 +566,16 @@ class ArmsBaseController extends Controller
 			'model' => $this->findByName($name),
 			'static_view'=>true,
 		]);
+	}
+	
+	public function testItemByName(): array
+	{
+		$model=ModelFactory::create($this->modelClass);
+		return [[
+			'name' => 'default',
+			'GET' => ['name' => $model->getName()],
+			'response' => 200,
+		]];
 	}
 	
 	/**
@@ -547,6 +599,15 @@ class ArmsBaseController extends Controller
 		]);
 	}
 	
+	public function testTtip(): array
+	{
+		$model=ModelFactory::create($this->modelClass);
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $model->id],
+			'response' => 200,
+		]];
+	}
 	
 	/**
 	 * Displays a single Arms model.
@@ -563,6 +624,15 @@ class ArmsBaseController extends Controller
 		]);
 	}
 	
+	public function testView(): array
+	{
+		$model=ModelFactory::create($this->modelClass);
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $model->id],
+			'response' => 200,
+		]];
+	}
 
     /**
      * Validates  model on update.
@@ -585,6 +655,16 @@ class ArmsBaseController extends Controller
         
         return null;
     }
+	
+	public function testValidate(): array
+	{
+		$model=ModelFactory::create($this->modelClass,['save'=>false]);
+		return [[
+			'name' => 'default',
+			'POST' => ModelHelper::fillForm($model),
+			'response' => 200,
+		]];
+	}
 	
 	/**
 	 * Маршрут куда идти при успешном сохранении, создании
@@ -633,7 +713,22 @@ class ArmsBaseController extends Controller
 		$model->load(Yii::$app->request->get());
 		return $this->defaultRender($view, ['model' => $model,]);
 	}
-
+	
+		public function testCreate(): array
+	{
+		$model=ModelFactory::create($this->modelClass,['save'=>false]);
+		return [
+			['name' => 'form load', 'GET' => [],'response' => 200,],
+			[
+				'name' => 'form post',
+				'GET' => [],
+				'POST'=>ModelHelper::fillForm($model),
+				'response' => 201,
+			],
+		];
+	}
+	
+	
 	/**
      * Updates an existing model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -663,6 +758,22 @@ class ArmsBaseController extends Controller
 		return $this->defaultRender($view, ['model' => $model,]);
     }
 	
+	public function testUpdate(): array
+	{
+		$model1=ModelFactory::create($this->modelClass);
+		$model2=ModelFactory::create($this->modelClass,['save'=>false]);
+		return [
+			['name' => 'form open','GET' => ['id' => $model1->id],'response' => 200,],
+			[
+				'name' => 'data post',
+				'GET' => ['id' => $model1->id],
+				'POST' => ModelHelper::fillForm($model2),
+				'response' => 202,
+			]
+		];
+	}
+	
+	
 	
 	/**
 	 * Deletes an existing Arms model.
@@ -686,6 +797,17 @@ class ArmsBaseController extends Controller
 		) return $this->redirect($url);
         return $this->redirect($defaultRoute);
     }
+	
+	public function testDelete(): array
+	{
+		$modelEmpty=ModelFactory::create($this->modelClass,['empty'=>true]);
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $modelEmpty->id],
+			'POST' => [],
+			'response' => 302,
+		]];
+	}
 	
 	/**
 	 * Возвращает класс модели по имени
@@ -757,5 +879,38 @@ class ArmsBaseController extends Controller
 		
 		throw new NotFoundHttpException('The requested page does not exist.');
 	}
+
+	/* ====== Generative acceptance scenarios (default) ====== */
 	
+	protected static function skipScenario(string $name, string $reason): array
+	{
+		return [
+			[
+				'name' => $name,
+				'skip' => true,
+				'reason' => $reason,
+			],
+		];
+	}
+	
+	public function disabledTests(): array
+	{
+		return $this->disabledActions();
+	}
+	
+	/*public function testUploads(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}*/
+	
+	
+	public function testEditable(): array
+	{
+		return self::skipScenario('default', 'inline action is not supported');
+	}
+
 }

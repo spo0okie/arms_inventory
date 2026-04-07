@@ -127,7 +127,7 @@ class NetIps extends ArmsModel
 				'Адрес',
 				'hint'=>'Также можно указать маску',
 				'type'=>'ips',
-				'typeClass'=>\app\types\IpsType::class,
+				'typeClass'=>\app\types\IpType::class,
 			],
 			'comment' => [
 				'Комментарий',

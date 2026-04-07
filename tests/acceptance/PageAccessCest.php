@@ -1,13 +1,13 @@
-<?php
+﻿<?php
 
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
+use PHPUnit\Framework\Assert;
+use yii\helpers\Inflector;
 use yii\base\InvalidConfigException;
 
 class PageAccessCest
 {
-	public $savedModels=[];
-	public $rootDb;
 	
 	public function _failed($test, $fail)
 	{
@@ -116,12 +116,9 @@ class PageAccessCest
 		}
 	}
 	
-
-	
 	/**
 	 * Наполняет шаблоны в параметрах значениями
 	 *
-	 * @param array $params
 	 * @param array $models
 	 * @return void
 	 * @throws InvalidConfigException
@@ -149,7 +146,7 @@ class PageAccessCest
 					case '{anyModelParams}':
 						if (is_null($models[0]))
 							throw new InvalidConfigException('error loading single model');
-						unset($params[$verb][$param]); //убираем параметр с макросом, так как его заменяем множество параметров
+						unset($params[$verb][$param]); //убираем параметр с макросом, так как его заменяем множеством параметров
 						$params[$verb][StringHelper::className(get_class($models[0]))]=Helper\ModelData::fillForm(
 							Helper\ModelData::getFormAttributes($models[0]),
 							$models[0]);
@@ -157,14 +154,14 @@ class PageAccessCest
 					case '{otherModelParams}':
 						if (is_null($models[1]))
 							throw new InvalidConfigException('error loading second model');
-						unset($params[$verb][$param]); //убираем параметр с макросом, так как его заменяем множество параметров
+						unset($params[$verb][$param]); //убираем параметр с макросом, так как его заменяем множеством параметров
 						$params[$verb][StringHelper::className(get_class($models[1]))]=Helper\ModelData::fillForm(
 							Helper\ModelData::getFormAttributes($models[1]),
 							$models[1]
 						);
 						break;
 					default:
-						if (is_string($value) && preg_match('/{(\w+)ModelParams}}/', $value, $matches)) {
+						if (is_string($value) && preg_match('/{(\\w+)ModelParams}/', $value, $matches)) {
 							//если в значении параметра есть макрос, то заменяем его на параметры модели
 							$name=$matches[1];
 							if (isset($models[$name])) {
@@ -174,7 +171,7 @@ class PageAccessCest
 									$model
 								);
 							} else {
-								throw new InvalidConfigException("Error loading model '$model' in route params");
+								throw new InvalidConfigException("Error loading model '$name' in route params");
 							}
 						}
 						if (is_array($value)) {
@@ -184,6 +181,7 @@ class PageAccessCest
 			}
 		}
 	}
+
 	
 	/**
 	 * Подготавливает маршруты, которые есть у приложения чтобы их протестировать
@@ -201,19 +199,19 @@ class PageAccessCest
 	protected function routesProvider()
 	{
 		$routes = [];
-		$params=require __DIR__.'/../_data/get-routes-data.php';
 		Helper\Yii2::initFromFilename('test-web.php');
 		codecept_debug('Initializing Suite DB...');
 		//Подготавливаем временную БД
 		Helper\Database::dropYiiDb();
 		Helper\Database::prepareYiiDb();
 		Helper\Database::loadSqlDump(__DIR__ . '/../_data/arms_demo.sql');
+
 		
 		// Получаем опциональный фильтр по классу модели из окружения (если передан)
 		$classFilter = getenv('TEST_CLASS_FILTER') ?: null;
 		
 		// Сканируем основные контроллеры
-		$this->scanControllers(__DIR__.'/../../controllers', null, $routes, $params, $classFilter);
+		$this->scanControllers(__DIR__.'/../../controllers', null, $routes, $classFilter);
 		
 		// Сканируем контроллеры модулей
 		$modulesDir = __DIR__.'/../../modules';
@@ -222,28 +220,20 @@ class PageAccessCest
 				if ($moduleName === '.' || $moduleName === '..') continue;
 				$moduleControllersDir = $modulesDir . '/' . $moduleName . '/controllers';
 				if (is_dir($moduleControllersDir)) {
-					$this->scanControllers($moduleControllersDir, $moduleName, $routes, $params, $classFilter);
+					$this->scanControllers($moduleControllersDir, $moduleName, $routes, $classFilter);
 				}
 			}
 		}
 		
-		usort($routes, function ($a, $b) {
-			$priority = ['delete', 'validate', 'update', 'create', 'view'];
-			[$controllerA,$actionA]=explode('/', $a['route']);
-			[$controllerB,$actionB]=explode('/', $b['route']);
-			
-			if ($controllerA!==$controllerB) return $controllerA<=>$controllerB;
-			
-			$indexA = array_search($actionA, $priority);
-			$indexB = array_search($actionB, $priority);
-			
-			// Если окончание не найдено, ставим в конец
-			$indexA = $indexA !== false ? $indexA : PHP_INT_MAX;
-			$indexB = $indexB !== false ? $indexB : PHP_INT_MAX;
-			
-			return $indexA <=> $indexB;
-		});
 		return $routes;
+	}
+
+	protected function extractVariantIndex(string $route): int
+	{
+		if (preg_match('/\\[(\\d+)\\]$/', $route, $m)) {
+			return (int)$m[1];
+		}
+		return 0;
 	}
 	
 	/**
@@ -251,18 +241,20 @@ class PageAccessCest
 	 * @param string $controllersDir Директория с контроллерами
 	 * @param string|null $moduleName Имя модуля (null для основных контроллеров)
 	 * @param array &$routes Массив маршрутов для добавления
-	 * @param array $params Параметры маршрутов из конфигурации
-	 * @param string|null $classFilter Опциональный фильтр по класси модели (имя класса, например "Comps")
+	 * @param string|null $classFilter Опциональный фильтр по классу модели (имя класса, например "Comps")
 	 * @return void
 	 * @throws InvalidConfigException
 	 */
-	protected function scanControllers($controllersDir, $moduleName, &$routes, $params, $classFilter = null)
+	protected function scanControllers($controllersDir, $moduleName, &$routes, $classFilter = null)
 	{
 		foreach (scandir($controllersDir) as $file) {
 			codecept_debug($file);
 			$controller=$this->getController($file, $moduleName);
 			if (is_object($controller)) {
 				if (!$controller instanceof \app\controllers\ArmsBaseController) {
+					continue;
+				}
+				if (get_class($controller) === \app\controllers\ArmsBaseController::class) {
 					continue;
 				}
 				
@@ -280,42 +272,53 @@ class PageAccessCest
 				foreach ($this->getActions($controller) as $action) {
 					$actionId=StringHelper::class2Id($action);
 					
+					$testDisabled = $controller->disabledTests();
+					if (
+						in_array('*', $testDisabled, true) ||
+						in_array($actionId, $testDisabled, true)
+					){
+						continue;
+					}
+					
+					if (in_array($actionId, $controller->disabledActions(), true)) {
+						continue;
+					}
+					
 					// Проверяем, разрешён ли GET
 					$verbs = $controller->behaviors()['verbs']['actions'][$actionId] ?? ['GET'];
-					if (!count($verbs)) continue;	//если получили [] - значит действие отключено и всегда будет возвращать 405
+					if (!count($verbs)) continue; //если получили [] - значит действие отключено и всегда будет возвращать 405
 					
-					// Формируем маршрут для этого контроллера/действия 
-					//(префикс модуля никогда не ставим, т.к. придерживаемся плоского URL, а не иерархического)
-					$route=StringHelper::class2Id($controller->id).'/'.$actionId;
-					
-					
-					$variant=0;
-					
-					while (!is_null($routeParams=ArrayHelper::findByRegexKey(
-						$params,
-						$route.($variant?"[$variant]":''),	//если это не нулевой вариант, то дописываем суффикс[N]
-						$variant?null:[]							//если это нулевой вариант, то по умолчанию он может быть и без параметров
-					))) {
-						
-						//codecept_debug($route.($variant?"[$variant]":''));
-						//codecept_debug(print_r($routeParams,true));
-						
-						if ($routeParams === '{skipTest}') continue 2;
-						
-						$routeParams['route'] = $route;
-						$routeParams['controller'] = $file;
-						$routeParams['moduleName'] = $moduleName;
-						$routes[] = $routeParams;
-						
-						$variant++;
+					$scenarios = $this->getActionScenarios($controller, $actionId);
+					foreach ($scenarios as $scenario) {
+						$controllerId = StringHelper::class2Id($controller->id);
+						$defaultRoute = $controllerId.'/'.$actionId;
+						$route = $scenario['route'] ?? $defaultRoute;
+						$route = str_replace(['{controllerId}', '{action}'], [$controllerId, $actionId], $route);
+						$scenario['route'] = $route;
+						$scenario['controller'] = $file;
+						$scenario['moduleName'] = $moduleName;
+						$scenario['controllerId'] = $controllerId;
+						$scenario['actionId'] = $actionId;
+						$routes[] = $scenario;
 					}
 				}
-				
 				
 			}
 		}
 	}
 	
+	protected function getActionScenarios($controller, string $actionId): array
+	{
+		$method = 'test' . Inflector::id2camel($actionId, '-');
+		return $controller->$method();
+		/*return [
+			[
+				'name' => 'auto-skip',
+				'skip' => true,
+				'reason' => "No DataProvider method $method",
+			],
+		];*/
+	}
 	/**
 	 * @dataProvider routesProvider
 	 * @return void
@@ -323,6 +326,10 @@ class PageAccessCest
 	 */
 	public function testAllRoutesAccessible(AcceptanceTester $I, \Codeception\Example $example)
 	{
+		if (!empty($example['skip'])) {
+			Assert::markTestSkipped($example['reason'] ?? 'skipped');
+		}
+		
 		$I->stopFollowingRedirects();
 		$route=$example['route'];
 		$controller=$this->getController($example['controller'], $example['moduleName'] ?? null);
@@ -334,12 +341,12 @@ class PageAccessCest
 		);
 		
 		$routeParams=(array)$example->getIterator();
-		try {
+		/*try {
 			$this->templateRouteParams($routeParams, $models);
 		} catch (InvalidConfigException $e) {
 			//дополняем информацию маршрутом на котором произошла ошибка
 			throw new InvalidConfigException("Error in route '$route': " . $e->getMessage());
-		}
+		}*/
 
 		if (!is_null($saveModel=$routeParams['saveModel']??null)) {
 			$this->savedModels[$modelClass][$saveModel['storeAs']]=$this->getModel($controller,$saveModel['model']);

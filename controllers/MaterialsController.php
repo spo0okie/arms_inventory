@@ -14,6 +14,14 @@ use yii\web\Response;
  */
 class MaterialsController extends ArmsBaseController
 {
+	public function testTtips(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['ids' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
 	public $modelClass=Materials::class;
 	
 	public function disabledActions()

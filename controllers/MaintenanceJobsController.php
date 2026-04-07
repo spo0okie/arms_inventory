@@ -16,6 +16,14 @@ use yii\web\NotFoundHttpException;
  */
 class MaintenanceJobsController extends ArmsBaseController
 {
+	public function testChildrenTree(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
 	public $modelClass=MaintenanceJobs::class;
 	
 	public function accessMap()

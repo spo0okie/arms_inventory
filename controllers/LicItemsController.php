@@ -18,6 +18,45 @@ use yii\web\Response;
  */
 class LicItemsController extends ArmsBaseController
 {
+	public function testHintArms(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}', 'form' => 'test'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testContracts(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testDelete(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '4'],
+			'POST' => [],
+			'saveModel' => ['storeAs' => 'deleted', 'model' => ['id' => '4']],
+			'dropReverseLinks' => ['id' => '4'],
+			'response' => 302,
+		]];
+	}
+	
+	public function testLink(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testUnlink(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
 
 	public $modelClass=LicItems::class;
 	

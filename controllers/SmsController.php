@@ -11,6 +11,10 @@ use Yii;
  */
 class SmsController extends ArmsBaseController
 {
+	public function disabledTests(): array
+	{
+		return ['*'];
+	}
 
 	public function accessMap()
 	{

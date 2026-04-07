@@ -188,5 +188,27 @@ class ModelHelper
 		$rules['closures']=['count'=>count($closures),'sample'=>$closures];
 		return $rules;
 	}
+	
+	/**
+	 * Заполняет поля формы значениями из модели
+	 * @param ArmsModel $model
+	 * @param array     $attrs
+	 * @param array     $skip
+	 * @return array
+	 */
+	public static function fillForm(ArmsModel $model,array $attrs=['*'],array $skip=['id']): array
+	{
+		if (in_array('*',$attrs))
+			$attrs=$model->safeAttributes();
+		
+		$form=[];
+		
+		foreach ($attrs as $attribute) {
+			if (in_array($attribute,$skip)) continue;
+			$form[$attribute]=$model->$attribute;
+		}
+		
+		return $form;
+	}
 
 }

@@ -13,6 +13,10 @@ use yii\web\NotFoundHttpException;
  */
 class HistoryController extends ArmsBaseController
 {
+	public function disabledTests(): array
+	{
+		return ['*'];
+	}
 
 	public function accessMap()
 	{

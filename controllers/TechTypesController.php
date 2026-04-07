@@ -11,6 +11,32 @@ use yii\web\NotFoundHttpException;
  */
 class TechTypesController extends ArmsBaseController
 {
+	public function testHintComment(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testHintDescription(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testHintTemplate(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
 	public $modelClass=TechTypes::class;
 
 	public function accessMap()

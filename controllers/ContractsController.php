@@ -18,6 +18,56 @@ use yii\web\Response;
  */
 class ContractsController extends ArmsBaseController
 {
+	public function testHintArms(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['ids' => '7', 'form' => 'test'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testHintParent(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['ids' => '7', 'form' => 'test'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testScans(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testUpdateForm(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testLinkTech(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testLink(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testUnlink(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
 	public $modelClass='\app\models\Contracts';
 	public function accessMap()
 	{

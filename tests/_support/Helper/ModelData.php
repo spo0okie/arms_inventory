@@ -15,6 +15,7 @@ class ModelData extends \Codeception\Module
 	 */
 	public static function getFormAttributes($model)
 	{
+		return $model->safeAttributes();
 		$attributes=$model->attributes();
 		foreach ($model->getLinksSchema() as $attribute => $schema) {
 			// Если атрибут заканчивается на _ids, то это точно не junction_table

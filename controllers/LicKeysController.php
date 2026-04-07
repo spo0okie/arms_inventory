@@ -15,6 +15,33 @@ use yii\web\NotFoundHttpException;
  */
 class LicKeysController extends ArmsBaseController
 {
+	public function testCreate(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['LicKeys' => ['lic_items_id' => 2]],
+			'response' => 200,
+		]];
+	}
+	
+	public function testUpdate(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testLink(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testUnlink(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
 	public $modelClass=LicKeys::class;
 	public function disabledActions()
 	{

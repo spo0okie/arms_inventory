@@ -16,6 +16,15 @@ use yii\web\NotFoundHttpException;
  */
 class PlacesController extends ArmsBaseController
 {
+	public function testMapSet(): array
+	{
+		return self::skipScenario('default', 'requires external map configuration');
+	}
+	
+	public function testMapDelete(): array
+	{
+		return self::skipScenario('default', 'requires external map configuration');
+	}
 	public $modelClass='\app\models\Places';
 	
 	public function accessMap()

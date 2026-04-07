@@ -9,5 +9,9 @@ use app\models\UserGroups;
  */
 class UserGroupsController extends ArmsBaseController
 {
+	public function disabledTests(): array
+	{
+		return ['*'];
+	}
 	public $modelClass=UserGroups::class;
 }

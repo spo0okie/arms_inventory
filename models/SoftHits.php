@@ -73,10 +73,9 @@ class SoftHits extends ArmsModel
     public function rules()
     {
         return [
-            [['id', 'soft_id', 'comp_id', 'hits'], 'required'],
+            [['soft_id', 'comp_id', 'hits'], 'required'],
             [['id', 'soft_id', 'comp_id'], 'integer'],
             [['hits'], 'string'],
-            [['id'], 'unique'],
             [['comp_id'], 'exist', 'skipOnError' => true, 'targetClass' => Comps::className(), 'targetAttribute' => ['comp_id' => 'id']],
             [['soft_id'], 'exist', 'skipOnError' => true, 'targetClass' => Soft::className(), 'targetAttribute' => ['soft_id' => 'id']],
         ];

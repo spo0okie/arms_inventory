@@ -19,6 +19,39 @@ use yii\web\Response;
  */
 class CompsController extends ArmsBaseController
 {
+	public function testTtipHw(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testAbsorb(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testAddsw(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testRmsw(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testIgnoreip(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testUnignoreip(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
 	public $modelClass='app\models\Comps';
 	
     /**

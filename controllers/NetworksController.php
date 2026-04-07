@@ -15,6 +15,23 @@ use yii\web\NotFoundHttpException;
  */
 class NetworksController extends ArmsBaseController
 {
+	public function testItemByName(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['name' => '10.20.1.0/24'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testIncomingConnectionsList(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
 	
 	public $modelClass=Networks::class;
 	public function accessMap()

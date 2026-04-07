@@ -16,6 +16,14 @@ use yii\web\NotFoundHttpException;
  */
 class UsersController extends ArmsBaseController
 {
+	public function testItemByLogin(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['login' => 'guest'],
+			'response' => 200,
+		]];
+	}
 	public $modelClass=Users::class;
 	
 	public function accessMap()

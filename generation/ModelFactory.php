@@ -46,6 +46,8 @@ class ModelFactory
 	 */
 	public const MAX_SAVE_RETRIES = 1;
 	
+	public static int $seed=1000;
+	
 	/**
 	 * Создать модель с автоматически сгенерированными атрибутами.
 	 *
@@ -68,7 +70,7 @@ class ModelFactory
 		], $options);
 				
 		// Устанавливаем seed для детерминизма
-		$baseSeed = $options['seed'] ?? random_int(1, 100000);
+		$baseSeed = $options['seed'] ?? static::$seed++;
 		
 		$lastError = null;
 		for ($i = 0; $i < $options['validateRetries']; $i++) {
@@ -354,7 +356,7 @@ class ModelFactory
 				continue;
 			}
 
-			// Пропускаем неустанавливаемые атрибуты
+			// Пропускаем не устанавливаемые атрибуты
 			if (!$model->canSetProperty($attribute)) {
 				continue;
 			}

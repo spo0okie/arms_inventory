@@ -27,6 +27,15 @@ class AclsController extends ArmsBaseController
 		]);
 	}
 	
+	public function testAceCards(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
 	public function actionAceCards(int $id) {
 		return $this->defaultRender('ace-cards',['model'=>$this->findModel($id)]);
 	}

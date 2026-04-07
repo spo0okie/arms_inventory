@@ -18,6 +18,54 @@ use yii\web\Response;
  */
 class TechsController extends ArmsBaseController
 {
+	public function testDocs(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testEdithw(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testInvnum(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testPortList(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testUpdhw(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testRmhw(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	
+	public function testRackUnit(): array
+	{
+		return self::skipScenario('default', 'requires rack configuration');
+	}
+	
+	public function testRackUnitValidate(): array
+	{
+		return self::skipScenario('default', 'requires rack configuration');
+	}
+	
+	public function testTtipHw(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
 	public $modelClass='app\models\Techs';
 	
 	public function accessMap()

@@ -152,7 +152,6 @@ php vendor/bin/codecept run --coverage
 | Файл | Описание |
 |------|----------|
 | [`_data/arms_demo.sql`](_data/arms_demo.sql) | [Демо-дамп БД для тестов (~630KB)](database.md) |
-| [`_data/get-routes-data.php`](_data/get-routes-data.php) | Конфигурация маршрутов для тестирования |
 
 ### Helpers
 

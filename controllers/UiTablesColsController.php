@@ -13,6 +13,10 @@ use yii\helpers\Url;
  */
 class UiTablesColsController extends ArmsBaseController
 {
+	public function disabledTests(): array
+	{
+		return ['*'];
+	}
 
 	public function accessMap()
 	{

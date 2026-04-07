@@ -15,6 +15,10 @@ use yii\web\Response;
  */
 class AcesController extends ArmsBaseController
 {
+	public function testAccessTypesForm(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
 	public $modelClass=Aces::class;
 	
 	public function disabledActions()

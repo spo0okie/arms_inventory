@@ -440,6 +440,54 @@ controller → 200 / 302 ⚠️
 
 ---
 
+### Формат сценариев для контроллеров (генеративные acceptance)
+
+**Правило:** для каждого `actionXxx()` есть отдельный `testXxx()` в контроллере (наследуется и может быть переопределён).
+
+**Где описывать:** в самом контроллере (или в базовом `ArmsBaseController` для общих CRUD).
+
+**Сигнатура:**
+```php
+public static function testIndex(): array
+```
+
+**Сценарий — ассоциативный массив**. Минимально:
+```php
+return [
+    [
+        'name' => 'default',
+        // route не обязателен: по умолчанию "{controllerId}/{action}"
+        'GET' => [],
+        'response' => 200,
+    ],
+];
+```
+
+**Поля сценария:**
+```text
+name            string   обязательный, уникальный в пределах метода
+route           string   опционально, иначе "{controllerId}/{action}"
+GET             array    GET параметры (опционально)
+POST            array    POST параметры (если есть → будет POST)
+response        int|array ожидаемый код/диапазон (по умолчанию 200)
+skip            bool     пропустить сценарий
+reason          string   причина пропуска
+role            string   роль/режим (опционально, если используется)
+saveModel       array    сохранить модель в контекст (storeAs/model)
+dropReverseLinks array   удалить обратные связи перед delete
+```
+
+**Макросы в параметрах:**
+```text
+{anyId} {otherId} {anyName}
+{anyModelParams} {otherModelParams}
+{replacedModelParams} {deletedModelParams}
+```
+
+**Переопределение:** если дочерний контроллер объявляет `testXxx()`, он полностью заменяет базовый.
+
+---
+
 ## 🚀 Следующие шаги
 
 ---

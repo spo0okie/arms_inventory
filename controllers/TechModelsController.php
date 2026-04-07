@@ -19,6 +19,46 @@ use yii\web\Response;
  */
 class TechModelsController extends ArmsBaseController
 {
+	public function testHintComment(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testHintDescription(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testHintTemplate(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testItemByName(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['name' => 'G430', 'manufacturer' => 'Avaya'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testRenderRack(): array
+	{
+		return self::skipScenario('default', 'requires rack configuration');
+	}
 	
 	public $modelClass='app\models\TechModels';
 	

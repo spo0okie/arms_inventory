@@ -19,6 +19,11 @@ class AttachesController extends ArmsBaseController
 	
 	public $modelClass=Attaches::class;
 	
+	public function testCreate(): array
+	{
+		return self::skipScenario('default', 'file upload required');
+	}
+	
 	public function disabledActions()
 	{
 		return ['index','update','item','view','ttip','item-by-name',];

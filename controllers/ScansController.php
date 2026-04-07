@@ -20,6 +20,10 @@ use yii\bootstrap5\ActiveForm;
  */
 class ScansController extends ArmsBaseController
 {
+	public function testThumb(): array
+	{
+		return self::skipScenario('default', 'requires file system data');
+	}
 	public $modelClass=Scans::class;
 	
 	public function accessMap()

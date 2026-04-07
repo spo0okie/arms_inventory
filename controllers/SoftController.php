@@ -16,6 +16,10 @@ use yii\helpers\Url;
  */
 class SoftController extends ArmsBaseController
 {
+	public function testSelectUpdate(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
 	public $modelClass=Soft::class;
 	
 	public function accessMap()

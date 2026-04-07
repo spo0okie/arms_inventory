@@ -17,6 +17,14 @@ use yii\web\NotFoundHttpException;
  */
 class ScheduledAccessController extends \app\controllers\ArmsBaseController
 {
+	public static function testStatus(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
 	public $modelClass=Schedules::class;
 	public function accessMap()
 	{

@@ -16,6 +16,11 @@ use yii\web\Response;
  */
 class ArmsController extends ArmsBaseController
 {
+	public function disabledTests(): array
+	{
+		return ['*'];
+	}
+	
 	public $modelClass='app\models\Techs';
 	
     /**

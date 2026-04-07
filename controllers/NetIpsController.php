@@ -14,6 +14,14 @@ use yii\web\NotFoundHttpException;
  */
 class NetIpsController extends ArmsBaseController
 {
+	public function testItemByName(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['name' => '10.20.1.11'],
+			'response' => 200,
+		]];
+	}
 
 	public $modelClass=NetIps::class;
 
