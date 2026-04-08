@@ -49,8 +49,7 @@ class BooleanType implements AttributeTypeInterface
 		}
 
 		// Детерминированная генерация
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
+		mt_srand($context->seed());
 
 		$value=mt_rand(0, 1);
 		

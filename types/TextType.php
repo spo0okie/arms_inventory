@@ -52,11 +52,10 @@ class TextType implements AttributeTypeInterface
 		}
 
 		$config = $context->generatorConfig();
-
+		
 		// Детерминированная генерация
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
-
+		mt_srand($context->seed());
+		
 		$min = $context->min ?? 20;
 		$max = $context->max ?? 100;
 		$length = mt_rand($min, $max);

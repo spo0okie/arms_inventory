@@ -40,7 +40,7 @@ class ModelGenerationTest extends Unit
     public function testModelGeneration(string $modelClass): void
     {
         try {            
-			$model=ModelFactory::create($modelClass,['empty'=>true]);
+			$model=ModelFactory::create($modelClass,['empty'=>false]);
 			if (is_null($model)) {
 				$this->fail('Не удалось создать модель класса '.$modelClass);
             }			

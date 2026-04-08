@@ -127,20 +127,6 @@ class MaintenanceReqs extends ArmsModel
 				'column'=>['class'=>BooleanColumn::class],
 				'typeClass'=>\app\types\BooleanType::class,
 			],
-			'spread_comps' => [
-				'Распространяется на ОС',
-				'indexLabel'=>'<i class="fas fa-laptop-code"></i>',
-				'indexHint'=>'{same}',
-				'hint'=>'При прикреплении требований к сервису, автоматически предъявлять эти требования к операционным системам на которых он работает',
-				'column'=>['class'=>BooleanColumn::class],
-			],
-            'spread_techs' => [
-				'Распространяется на оборудование',
-				'indexLabel'=>'<i class="fas fa-screwdriver"></i>',
-				'indexHint'=>'{same}',
-				'hint'=>'При прикреплении требований к сервису, автоматически предъявлять эти требования к оборудованию на которых он работает. (не распространяется АРМ на которых крутятся операционные системы)',
-				'column'=>['class'=>BooleanColumn::class],
-			],
 			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
 			'includes' => [
 				'Перекрывает требования',
@@ -158,8 +144,6 @@ class MaintenanceReqs extends ArmsModel
 				'typeClass'=>\app\types\LinkType::class,
 			],
 			'included_ids'=>['alias'=>'includedBy'],
-			'techs'=>['Оборудование','typeClass'=>\app\types\LinkType::class],
-			'techs_ids'=>['alias'=>'techs'],
 			'jobs'=>[MaintenanceJobs::$titles,'typeClass'=>\app\types\LinkType::class],
 			'name' => [
 				'Название',
@@ -168,6 +152,22 @@ class MaintenanceReqs extends ArmsModel
 			],
 			'services'=>['Сервисы','typeClass'=>\app\types\LinkType::class],
 			'services_ids'=>['alias'=>'services'],
+			'spread_comps' => [
+				'Распространяется на ОС',
+				'indexLabel'=>'<i class="fas fa-laptop-code"></i>',
+				'indexHint'=>'{same}',
+				'hint'=>'При прикреплении требований к сервису, автоматически предъявлять эти требования к операционным системам на которых он работает',
+				'column'=>['class'=>BooleanColumn::class],
+			],
+			'spread_techs' => [
+				'Распространяется на оборудование',
+				'indexLabel'=>'<i class="fas fa-screwdriver"></i>',
+				'indexHint'=>'{same}',
+				'hint'=>'При прикреплении требований к сервису, автоматически предъявлять эти требования к оборудованию на которых он работает. (не распространяется АРМ на которых крутятся операционные системы)',
+				'column'=>['class'=>BooleanColumn::class],
+			],
+			'techs'=>['Оборудование','typeClass'=>\app\types\LinkType::class],
+			'techs_ids'=>['alias'=>'techs'],
 		]);
     }
 

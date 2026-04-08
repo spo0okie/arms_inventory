@@ -36,6 +36,18 @@ class AttributeContext
     {
         return $this->model->getAttributeIsNullable($this->attribute);
     }
+	
+	/**
+	 * Формируем уникальный seed для генерации атрибута, учитывая модель, атрибут и глубину рекурсии
+	 * @return int
+	 */
+	public function seed(): int
+	{
+		return ($this->generationContext->seed
+			+ crc32(get_class($this->model))
+			+ crc32($this->attribute))
+			* ($this->generationContext->depth + 1);
+	}
 }
 
 

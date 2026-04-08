@@ -47,7 +47,7 @@ interface AttributeTypeInterface extends GeneratorInterface
 	public function apiSchema(): array;
 
 	/**
-	 * Класс колонки для Grid, либо null чтобы оставить выбор вызывающему коду.
+	 * Класс колонки для Grid, либо null, чтобы оставить выбор вызывающему коду.
 	 */
 	public function gridColumnClass(): ?string;
 

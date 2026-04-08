@@ -13,7 +13,7 @@ use yii\web\NotFoundHttpException;
  */
 class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 {
-	public static function testCreate(): array
+	public function testCreate(): array
 	{
 		return [[
 			'name' => 'default',
@@ -22,7 +22,7 @@ class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 		]];
 	}
 	
-	public static function testUpdate(): array
+	public function testUpdate(): array
 	{
 		return [[
 			'name' => 'default',

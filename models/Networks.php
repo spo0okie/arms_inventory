@@ -88,6 +88,7 @@ class Networks extends ArmsModel
     public function rules()
     {
         return [
+			[['text_addr'],'required'],
 			[['text_addr'],'ip','ipv6'=>false,'subnet'=>true],
 			[['text_router'], 'ip','ipv6'=>false],
 			['text_dhcp', 'filter', 'filter' => function ($value) {

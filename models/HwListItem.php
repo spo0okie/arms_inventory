@@ -71,7 +71,7 @@ class HwListItem
      * @param HwListItem $item элемент для сравнения
      * @return bool
      */
-    public function isEqualTo(HwListItem $item): boolean {
+    public function isEqualTo(HwListItem $item): bool {
         return 0==strcmp($item->fingerprint,$this->fingerprint);
     }
 

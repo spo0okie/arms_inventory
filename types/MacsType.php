@@ -23,10 +23,9 @@ class MacsType extends TextType
 		if ($context->empty) {
 			return $context->isNullable() ? null : '';
 		}
-
+		
 		// Детерминированная генерация
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
+		mt_srand($context->seed());
 
 		$min = $context->min ?? 18;
 		$max = $context->max ?? 128;

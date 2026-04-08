@@ -68,8 +68,16 @@ class LoginJournal extends ArmsModel
             [['comps_id'], 'exist', 'skipOnError' => true, 'targetClass' => Comps::class, 'targetAttribute' => ['comps_id' => 'id']],
         ];
     }
-
-    /**
+	
+	public function getLinksSchema()
+	{
+		return [
+			'users_id' => [Users::class,'logons_ids',],
+			'comps_id' => Comps::class,
+		];
+	}
+	
+	/**
      * {@inheritdoc}
      */
     public function attributeData()

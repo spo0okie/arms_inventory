@@ -6,7 +6,9 @@ use app\generation\context\AttributeContext;
 use app\generation\context\GenerationContext;
 use app\generation\exceptions\ModelGenerationException;
 use app\models\base\ArmsModel;
+use app\models\Soft;
 use Random\RandomException;
+use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\db\ActiveRecord;
@@ -70,7 +72,7 @@ class ModelFactory
 		], $options);
 				
 		// Устанавливаем seed для детерминизма
-		$baseSeed = $options['seed'] ?? static::$seed++;
+		$baseSeed = $options['seed'] ?? ++static::$seed;
 		
 		$lastError = null;
 		for ($i = 0; $i < $options['validateRetries']; $i++) {
@@ -85,17 +87,13 @@ class ModelFactory
 					
 					$model = $result->model;
 					if ($options['save']) {
-						$disableRescanPrev = null;
+						//отключаем рескан софта
+						Soft::$disable_rescan = true;
 						try {
-							if (class_exists(\app\models\Soft::class)) {
-								$disableRescanPrev = \app\models\Soft::$disable_rescan;
-								\app\models\Soft::$disable_rescan = true;
-							}
-
 							if ($model->save(false)) {
 								return $model;
 							}
-						} catch (\Throwable $e) {
+						} catch (Throwable $e) {
 							Yii::debug("ModelFactory: save retry {$i} for {$modelClass}", 'generation');
 							$errors = $model->getErrors();
 							$errors['exception'][] = $e->getMessage();
@@ -108,9 +106,7 @@ class ModelFactory
 							);
 							continue;
 						} finally {
-							if ($disableRescanPrev !== null) {
-								\app\models\Soft::$disable_rescan = $disableRescanPrev;
-							}
+							Soft::$disable_rescan = false;
 						}
 					} else { //no save
 						return $model;
@@ -322,7 +318,7 @@ class ModelFactory
 		try {
 			$type = $context->model->getAttributeTypeClass($attribute);
 			$context->model->$attribute = $type->generate($context);
-		} catch (\Throwable $e) {
+		} catch (Throwable $e) {
 			throw new ModelGenerationException(
 				modelClass: get_class($context->model),
 				stage: 'generateAttribute',

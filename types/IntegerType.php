@@ -50,10 +50,9 @@ class IntegerType implements AttributeTypeInterface
 
 		$min = $context->min ?? 0;
 		$max = $context->max ?? 1000;
-
-		// Детерминированная генерация на основе seed + имя атрибута
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
+		
+		// Детерминированная генерация
+		mt_srand($context->seed());
 
 		$value=mt_rand($min, $max);
 

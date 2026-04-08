@@ -17,15 +17,14 @@ class IpNetType extends IpType
 
 	public function generate(AttributeContext $context): mixed
 	{
-		// Детерминированная генерация
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
-
 		// Режим пустых значений
 		if ($context->empty) {
 			return $context->isNullable() ? null : '';
 		}
 
+		// Детерминированная генерация
+		mt_srand($context->seed());
+		
 		return $this->generateSubnetAddr();
 	}
 	

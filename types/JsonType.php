@@ -32,10 +32,9 @@ class JsonType extends TextType
 		}
 
 		$config = $context->generatorConfig();
-
+		
 		// Детерминированная генерация
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
+		mt_srand($context->seed());
 
 		$keys = ['key1', 'key2', 'key3'];
 		$result = [];

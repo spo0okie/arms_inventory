@@ -52,10 +52,9 @@ class StringArrayType implements AttributeTypeInterface
 		}
 
 		$config = $context->generatorConfig();
-
+		
 		// Детерминированная генерация
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
+		mt_srand($context->seed());
 
 		$min = $context->min ?? 2;
 		$max = $context->max ?? 8;

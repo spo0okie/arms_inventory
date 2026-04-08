@@ -49,10 +49,9 @@ class DateType implements AttributeTypeInterface
 		}
 
 		$config = $context->generatorConfig();
-
+		
 		// Детерминированная генерация
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
+		mt_srand($context->seed());
 
 		$minYear = $config['min_year'] ?? 2020;
 		$maxYear = $config['max_year'] ?? date('Y');

@@ -101,10 +101,9 @@ class InvNumType implements AttributeTypeInterface
 		if ($context->empty) {
 			return $context->isNullable() ? null : '';
 		}
-
-		// Детерминированная генерация на основе seed + имя атрибута
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
+		
+		// Детерминированная генерация
+		mt_srand($context->seed());
 
 		// Префиксы для разных типов оборудования
 		$types = [

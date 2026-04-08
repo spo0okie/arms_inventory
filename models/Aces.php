@@ -173,7 +173,7 @@ class Aces extends ArmsModel
 					.'Для обозначения сетей обязательна маска, например 192.168.1.0/24<br>'
 					.'Для обозначения адресов маска должна отсутствовать, например 192.168.1.1',
 				'join' => ['netIps','networks'],
-				'typeClass'=>\app\types\TextType::class,
+				'typeClass'=>\app\types\IpsType::class,
 			],
 			'name' => [
 				'Пояснение',

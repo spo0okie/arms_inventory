@@ -46,30 +46,13 @@ class StringType implements AttributeTypeInterface
 
 	public function generate(AttributeContext $context): mixed
 	{
-		if ($context->model instanceof \app\modules\schedules\models\SchedulesEntries && $context->attribute === 'schedule') {
-			return '00:00-23:59';
-		}
-
-		if ($context->model instanceof \app\models\Techs && $context->attribute === 'num') {
-			$seed = $context->generationContext->seed + crc32($context->attribute);
-			$prefix = 'T' . ($seed % 1000);
-			return \app\models\Techs::fetchNextNum($prefix);
-		}
-
-		if (str_contains($context->attribute, 'color') && !$context->isNullable()) {
-			return $this->generateHexColor($context);
-		}
-
 		// Режим пустых значений
 		if ($context->empty) {
 			return $context->isNullable() ? null : '';
 		}
-
-		$config = $context->generatorConfig();
-
+		
 		// Детерминированная генерация
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
+		mt_srand($context->seed());
 
 		$min = $context->min ?? 5;
 		$max = $context->max ?? 20;
