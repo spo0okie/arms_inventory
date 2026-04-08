@@ -28,19 +28,25 @@ class IpsType extends IpType
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 		
 		$min = $context->min ?? 16;
 		$max = $context->max ?? 128;
-		$count = mt_rand($min/16, $max/16);
+		$count = $rng->getInt($min/16, $max/16);
 		$result = [];
 		
 		for ($i = 0; $i < $count; $i++) {
-			$result[] = $this->generatePrivateIP();
+			// Создаём новый randomizer для каждого IP с уникальным seed
+			$ipContext = new AttributeContext(
+				attribute: $context->attribute . '_ip_' . $i,
+				empty: $context->empty,
+				model: $context->model,
+				generationContext: $context->generationContext,
+			);
+			$result[] = $this->generatePrivateIP($ipContext->randomizer());
 		}
 
-		mt_srand(); // сброс
 		return implode("\n", $result);
 	}
 }

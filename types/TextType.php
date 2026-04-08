@@ -53,12 +53,12 @@ class TextType implements AttributeTypeInterface
 
 		$config = $context->generatorConfig();
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 		
 		$min = $context->min ?? 20;
 		$max = $context->max ?? 100;
-		$length = mt_rand($min, $max);
+		$length = $rng->getInt($min, $max);
 
 		$words = ['Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 
 				  'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore',
@@ -71,7 +71,7 @@ class TextType implements AttributeTypeInterface
 			if ($result) {
 				$result .= ' ';
 			}
-			$word=$words[mt_rand(0, count($words) - 1)];
+			$word = AttributeContext::pickRandomValue($words, $rng);
 			if (strlen($result.$word) > $length) {
 				$enough=true;
 			} else {

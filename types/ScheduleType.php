@@ -88,8 +88,8 @@ class ScheduleType implements AttributeTypeInterface
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		// Варианты расписания для генерации
 		$schedules = [
@@ -103,11 +103,7 @@ class ScheduleType implements AttributeTypeInterface
 			'14:00-18:00',           // Вечер
 		];
 
-		$index = mt_rand(0, count($schedules) - 1);
-		$result = $schedules[$index];
-
-		mt_srand(); // сброс
-		return $result;
+		return AttributeContext::pickRandomValue($schedules, $rng);
 	}
 
 

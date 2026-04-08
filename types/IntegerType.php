@@ -51,13 +51,10 @@ class IntegerType implements AttributeTypeInterface
 		$min = $context->min ?? 0;
 		$max = $context->max ?? 1000;
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
-		$value=mt_rand($min, $max);
-
-		mt_srand(); // сброс
-		return $value;
+		return $rng->getInt($min, $max);
 	}
 
 	public function rules(AttributeRuleContext $context): array

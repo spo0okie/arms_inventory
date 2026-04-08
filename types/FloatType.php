@@ -54,12 +54,10 @@ class FloatType implements AttributeTypeInterface
 		$max = $context->max ?? 10000;
 		$decimals = 2;
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
-		$value = mt_rand($min * pow(10, $decimals), $max * pow(10, $decimals));
-
-		mt_srand(); // сброс
+		$value = $rng->getInt($min * pow(10, $decimals), $max * pow(10, $decimals));
 		return $value / pow(10, $decimals);
 	}
 

@@ -48,13 +48,10 @@ class BooleanType implements AttributeTypeInterface
 			return $context->isNullable() ? null : 0;
 		}
 
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
-		$value=mt_rand(0, 1);
-		
-		mt_srand(); // сброс
-		return $value;
+		return $rng->getInt(0, 1);
 	}
 
 	public function rules(AttributeRuleContext $context): array

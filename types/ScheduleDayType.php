@@ -115,17 +115,13 @@ class ScheduleDayType implements AttributeTypeInterface
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		// Варианты для генерации
 		$options = array_keys(static::$dayNames);
 
-		$index = mt_rand(0, count($options) - 1);
-		$result = (string)$options[$index];
-
-		mt_srand(); // сброс
-		return $result;
+		return (string)AttributeContext::pickRandomValue($options, $rng);
 	}
 
 	public function rules(AttributeRuleContext $context): array

@@ -24,28 +24,36 @@ class MacsType extends TextType
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		$min = $context->min ?? 18;
 		$max = $context->max ?? 128;
-		$count = mt_rand($min/18, $max/18);
+		$count = $rng->getInt($min/18, $max/18);
 		$result = [];
 		
 		for ($i = 0; $i < $count; $i++) {
+			// Создаём новый randomizer для каждого MAC с уникальным seed
+			$macContext = new AttributeContext(
+				attribute: $context->attribute . '_mac_' . $i,
+				empty: $context->empty,
+				model: $context->model,
+				generationContext: $context->generationContext,
+			);
+			$macRng = $macContext->randomizer();
+			
 			$mac = sprintf(
 				'%02X:%02X:%02X:%02X:%02X:%02X',
-				mt_rand(0, 255),
-				mt_rand(0, 255),
-				mt_rand(0, 255),
-				mt_rand(0, 255),
-				mt_rand(0, 255),
-				mt_rand(0, 255)
+				$macRng->getInt(0, 255),
+				$macRng->getInt(0, 255),
+				$macRng->getInt(0, 255),
+				$macRng->getInt(0, 255),
+				$macRng->getInt(0, 255),
+				$macRng->getInt(0, 255)
 			);
 			$result[] = $mac;
 		}
 
-		mt_srand(); // сброс
 		return implode("\n", $result);
 	}
 

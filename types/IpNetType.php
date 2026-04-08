@@ -22,16 +22,16 @@ class IpNetType extends IpType
 			return $context->isNullable() ? null : '';
 		}
 
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 		
-		return $this->generateSubnetAddr();
+		return $this->generateSubnetAddr($rng);
 	}
 	
-	protected function generateSubnetAddr(): string {
-		$mask=mt_rand(8, 30);
+	protected function generateSubnetAddr(\Random\Randomizer $rng): string {
+		$mask = $rng->getInt(8, 30);
 		
-		return $this->generatePrivateIP().'/'.$mask;
+		return $this->generatePrivateIP($rng).'/'.$mask;
 	}
 
 }

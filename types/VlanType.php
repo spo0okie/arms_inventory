@@ -26,13 +26,10 @@ class VlanType extends IntegerType
 		$min = $context->min ?? 1;
 		$max = $context->max ?? 4096;
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
-		$value=mt_rand($min, $max);
-
-		mt_srand(); // сброс
-		return $value;
+		return $rng->getInt($min, $max);
 	}
 
 

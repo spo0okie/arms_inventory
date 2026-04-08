@@ -88,8 +88,8 @@ class SerialNumberType extends StringType
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		// Префиксы для серийных номеров
 		$prefixes = [
@@ -97,21 +97,18 @@ class SerialNumberType extends StringType
 		];
 
 		// Длина серийного номера
-		$length = mt_rand(6, 12);
+		$length = $rng->getInt(6, 12);
 		$number = '';
 		for ($i = 0; $i < $length; $i++) {
 			// 50% вероятность цифры, 50% - буквы
-			if (mt_rand(0, 1) === 0) {
-				$number .= (string)mt_rand(0, 9);
+			if ($rng->getInt(0, 1) === 0) {
+				$number .= (string)$rng->getInt(0, 9);
 			} else {
-				$number .= chr(mt_rand(65, 90)); // A-Z
+				$number .= chr($rng->getInt(65, 90)); // A-Z
 			}
 		}
 
-		$prefixIndex = mt_rand(0, count($prefixes) - 1);
-		$result = $prefixes[$prefixIndex] . $number;
-
-		mt_srand(); // сброс
-		return $result;
+		$prefix = AttributeContext::pickRandomValue($prefixes, $rng);
+		return $prefix . $number;
 	}
 }

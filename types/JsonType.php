@@ -33,32 +33,31 @@ class JsonType extends TextType
 
 		$config = $context->generatorConfig();
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		$keys = ['key1', 'key2', 'key3'];
 		$result = [];
 		
 		foreach ($keys as $key) {
 			$type = $config['key_types'][$key] ?? 'string';
-			$result[$key] = $this->generateValue($type);
+			$result[$key] = $this->generateValue($type, $rng);
 		}
 
-		mt_srand(); // сброс
 		return json_encode($result, JSON_UNESCAPED_UNICODE);
 	}
 
 	/**
 	 * Генерировать значение по типу
 	 */
-	private function generateValue(string $type): mixed
+	private function generateValue(string $type, \Random\Randomizer $rng): mixed
 	{
 		return match ($type) {
-			'string' => 'value_' . mt_rand(1, 100),
-			'integer' => mt_rand(1, 1000),
-			'float' => mt_rand(1, 1000) / 10,
-			'boolean' => (bool) mt_rand(0, 1),
-			'array' => [mt_rand(1, 10), mt_rand(1, 10)],
+			'string' => 'value_' . $rng->getInt(1, 100),
+			'integer' => $rng->getInt(1, 1000),
+			'float' => $rng->getInt(1, 1000) / 10,
+			'boolean' => (bool) $rng->getInt(0, 1),
+			'array' => [$rng->getInt(1, 10), $rng->getInt(1, 10)],
 			default => 'value',
 		};
 	}

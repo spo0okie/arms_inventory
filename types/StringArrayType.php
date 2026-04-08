@@ -53,28 +53,27 @@ class StringArrayType implements AttributeTypeInterface
 
 		$config = $context->generatorConfig();
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		$min = $context->min ?? 2;
 		$max = $context->max ?? 8;
-		$itemCount = mt_rand($min, $max);
+		$itemCount = $rng->getInt($min, $max);
 
 		$result = [];
 		for ($i = 0; $i < $itemCount; $i++) {
 			$minLen = $config['min_length'] ?? 10;
 			$maxLen = $config['max_length'] ?? 20;
-			$len = mt_rand($minLen, $maxLen);
+			$len = $rng->getInt($minLen, $maxLen);
 			
 			$chars = 'abcdefghijklmnopqrstuvwxyz';
 			$str = '';
 			for ($j = 0; $j < $len; $j++) {
-				$str .= $chars[mt_rand(0, strlen($chars) - 1)];
+				$str .= $chars[$rng->getInt(0, strlen($chars) - 1)];
 			}
 			$result[] = $str;
 		}
 
-		mt_srand(); // сброс
 		return $result;
 	}
 

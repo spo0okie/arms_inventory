@@ -128,8 +128,8 @@ class ColorType implements AttributeTypeInterface
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		// Предопределённые "хорошие" цвета (web-safe + популярные)
 		$colors = [
@@ -151,11 +151,7 @@ class ColorType implements AttributeTypeInterface
 			'#2C3E50', // Тёмно-синий серый
 		];
 
-		$index = mt_rand(0, count($colors) - 1);
-		$result = $colors[$index];
-
-		mt_srand(); // сброс
-		return $result;
+		return AttributeContext::pickRandomValue($colors, $rng);
 	}
 
 	public function rules(AttributeRuleContext $context): array

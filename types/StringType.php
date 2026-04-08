@@ -51,32 +51,22 @@ class StringType implements AttributeTypeInterface
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		$min = $context->min ?? 5;
 		$max = $context->max ?? 20;
-		$length = mt_rand($min, $max);
+		$length = $rng->getInt($min, $max);
 
 		$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 		$result = '';
 		$charsLength = strlen($chars);
 
 		for ($i = 0; $i < $length; $i++) {
-			$result .= $chars[mt_rand(0, $charsLength - 1)];
+			$result .= $chars[$rng->getInt(0, $charsLength - 1)];
 		}
-
-		mt_srand(); // сброс
+		
 		return $result;
-	}
-
-	private function generateHexColor(AttributeContext $context): string
-	{
-		$seed = $context->generationContext->seed + crc32($context->attribute);
-		mt_srand($seed);
-		$color = sprintf('#%02X%02X%02X', mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255));
-		mt_srand();
-		return $color;
 	}
 
 	public function rules(AttributeRuleContext $context): array

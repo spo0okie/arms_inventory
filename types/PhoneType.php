@@ -94,8 +94,8 @@ class PhoneType implements AttributeTypeInterface
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		// Форматы телефонных номеров
 		$formats = [
@@ -106,20 +106,18 @@ class PhoneType implements AttributeTypeInterface
 			'XXX-XX-XX',                // Внутренний номер
 		];
 
-		$formatIndex = mt_rand(0, count($formats) - 1);
-		$format = $formats[$formatIndex];
+		$format = AttributeContext::pickRandomValue($formats, $rng);
 
 		// Генерация случайных цифр для заполнения
-		$result = preg_replace_callback('/X+/', function ($matches) {
+		$result = preg_replace_callback('/X+/', function ($matches) use ($rng) {
 			$length = strlen($matches[0]);
 			$number = '';
 			for ($i = 0; $i < $length; $i++) {
-				$number .= (string)mt_rand(0, 9);
+				$number .= (string)$rng->getInt(0, 9);
 			}
 			return $number;
 		}, $format);
 
-		mt_srand(); // сброс
 		return $result;
 	}
 

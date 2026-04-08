@@ -90,8 +90,8 @@ class HostnameType implements AttributeTypeInterface
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		// Префиксы для имён хостов
 		$prefixes = [
@@ -109,21 +109,18 @@ class HostnameType implements AttributeTypeInterface
 			'data.local',
 		];
 
-		$prefixIndex = mt_rand(0, count($prefixes) - 1);
-		$domainIndex = mt_rand(0, count($domains) - 1);
+		$prefix = AttributeContext::pickRandomValue($prefixes, $rng);
+		$domain = AttributeContext::pickRandomValue($domains, $rng);
 
 		// Номер (1-99)
-		$number = mt_rand(1, 999999);
+		$number = $rng->getInt(1, 999999);
 
 		// NetBIOS имя (без домена) или FQDN (с доменом)
-		if (mt_rand(0, 1) === 0) {
-			$result = $prefixes[$prefixIndex] . sprintf('%02d', $number);
+		if ($rng->getInt(0, 1) === 0) {
+			return $prefix . sprintf('%02d', $number);
 		} else {
-			$result = $prefixes[$prefixIndex] . sprintf('%02d', $number) . '.' . $domains[$domainIndex];
+			return $prefix . sprintf('%02d', $number) . '.' . $domain;
 		}
-
-		mt_srand(); // сброс
-		return $result;
 	}
 
 	public function rules(AttributeRuleContext $context): array

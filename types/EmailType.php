@@ -93,8 +93,8 @@ class EmailType implements AttributeTypeInterface
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		// Имена пользователей
 		$users = [
@@ -108,16 +108,13 @@ class EmailType implements AttributeTypeInterface
 			'test.local', 'company.ru', 'org.net',
 		];
 
-		$userIndex = mt_rand(0, count($users) - 1);
-		$domainIndex = mt_rand(0, count($domains) - 1);
+		$user = AttributeContext::pickRandomValue($users, $rng);
+		$domain = AttributeContext::pickRandomValue($domains, $rng);
 
 		// Генерация случайного числа для уникальности
-		$suffix = mt_rand(1, 99);
+		$suffix = $rng->getInt(1, 99);
 
-		$result = $users[$userIndex] . $suffix . '@' . $domains[$domainIndex];
-
-		mt_srand(); // сброс
-		return $result;
+		return $user . $suffix . '@' . $domain;
 	}
 
 	public function rules(AttributeRuleContext $context): array

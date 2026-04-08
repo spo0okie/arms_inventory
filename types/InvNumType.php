@@ -102,8 +102,8 @@ class InvNumType implements AttributeTypeInterface
 			return $context->isNullable() ? null : '';
 		}
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		// Префиксы для разных типов оборудования
 		$types = [
@@ -126,19 +126,19 @@ class InvNumType implements AttributeTypeInterface
 		foreach (static::invNumPrefixFormat() as $token) {
 			switch ($token) {
 				case 'place':
-					$tokens[]=$places[mt_rand(0,count($places)-1)];
+					$tokens[]=AttributeContext::pickRandomValue($places, $rng);
 					break;
 				case 'org':
-					$tokens[]=$orgs[mt_rand(0,count($orgs)-1)];
+					$tokens[]=AttributeContext::pickRandomValue($orgs, $rng);
 					break;
 				case 'type':
-					$tokens[]=$types[mt_rand(0,count($types)-1)];
+					$tokens[]=AttributeContext::pickRandomValue($types, $rng);
 					break;
 			}
 		}
 		
 		//или цепочка из префиксов или пусто
-		return self::formatInvNum(implode('-',$tokens).'-'.mt_rand(0,1000));
+		return self::formatInvNum(implode('-',$tokens).'-'.$rng->getInt(0,1000));
 	}
 
 		/**

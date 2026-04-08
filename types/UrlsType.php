@@ -50,12 +50,12 @@ class UrlsType extends TextType
 
 		$config = $context->generatorConfig();
 		
-		// Детерминированная генерация
-		mt_srand($context->seed());
+		// Детерминированная генерация с изолированным RNG
+		$rng = $context->randomizer();
 
 		$min = $context->min ?? 1;
 		$max = $context->max ?? 4;
-		$count = mt_rand($min, $max);
+		$count = $rng->getInt($min, $max);
 		
 		$protocols = $config['protocols'] ?? ['https','http'];
 		$domains = $config['domains'] ?? ['example.com', 'test.org', 'demo.net'];
@@ -63,44 +63,43 @@ class UrlsType extends TextType
 		$result = [];
 		
 		for ($i = 0; $i < $count; $i++) {
-			$protocol = $protocols[mt_rand(0, count($protocols) - 1)];
-			$domain = $domains[mt_rand(0, count($domains) - 1)];
-			$path = $this->generatePath();
+			$protocol = AttributeContext::pickRandomValue($protocols, $rng);
+			$domain = AttributeContext::pickRandomValue($domains, $rng);
+			$path = $this->generatePath($rng);
 			
 			$url = $protocol . '://' . $domain . $path;
 			$result[] = $url;
 		}
 
-		mt_srand(); // сброс
 		return implode("\n", $result);
 	}
 
-	private function generatePath(): string
+	private function generatePath(\Random\Randomizer $rng): string
 	{
-		$segments = mt_rand(1, 4);
+		$segments = $rng->getInt(1, 4);
 		$path = '';
 		
 		for ($i = 0; $i < $segments; $i++) {
 			if ($i > 0) {
 				$path .= '/';
 			}
-			$path .= $this->randomString(mt_rand(3, 12));
+			$path .= $this->randomString($rng->getInt(3, 12), $rng);
 		}
 		
 		// Иногда добавляем файл
-		if (mt_rand(0, 1)) {
-			$path .= '.' . ['html', 'php', 'json', 'xml'][mt_rand(0, 3)];
+		if ($rng->getInt(0, 1)) {
+			$path .= '.' . AttributeContext::pickRandomValue(['html', 'php', 'json', 'xml'], $rng);
 		}
 		
 		return $path;
 	}
 
-	private function randomString(int $length): string
+	private function randomString(int $length, \Random\Randomizer $rng): string
 	{
 		$chars = 'abcdefghijklmnopqrstuvwxyz';
 		$result = '';
 		for ($i = 0; $i < $length; $i++) {
-			$result .= $chars[mt_rand(0, strlen($chars) - 1)];
+			$result .= $chars[$rng->getInt(0, strlen($chars) - 1)];
 		}
 		return $result;
 	}
