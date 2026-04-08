@@ -61,18 +61,27 @@ class IpType implements AttributeTypeInterface
 	protected function generatePrivateIP(): string
 	{
 		$ranges = [
-			[10, 10],           // 10.0.0.0/8
-			[172, 16],		    // 172.16.0.0/12
-			[192, 168],         // 192.168.0.0/16
+			[10, 0, 0, 0, 10, 255, 255, 255],      // 10.0.0.0/8
+			[172, 16, 0, 0, 172, 31, 255, 255],    // 172.16.0.0/12
+			[192, 168, 0, 0, 192, 168, 255, 255],  // 192.168.0.0/16
 		];
 		
 		$selected = $ranges[mt_rand(0, count($ranges) - 1)];
 		
+		// Генерируем IP в выбранном диапазоне
+		// Для 10.0.0.0/8: 10.{0-255}.{0-255}.{1-254}
+		// Для 172.16.0.0/12: 172.{16-31}.{0-255}.{1-254}
+		// Для 192.168.0.0/16: 192.168.{0-255}.{1-254}
+		
+		$octet2 = mt_rand($selected[1], $selected[5]);
+		$octet3 = mt_rand($selected[2], $selected[6]);
+		$octet4 = mt_rand(1, 254);  // .0 и .255 зарезервированы
+		
 		return sprintf('%d.%d.%d.%d',
 			$selected[0],
-			$selected[1],
-			mt_rand(1, 254),
-			mt_rand(1, 254)
+			$octet2,
+			$octet3,
+			$octet4
 		);
 	}
 

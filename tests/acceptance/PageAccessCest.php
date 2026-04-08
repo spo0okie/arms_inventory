@@ -271,7 +271,7 @@ class PageAccessCest
 				
 				foreach ($this->getActions($controller) as $action) {
 					$actionId=StringHelper::class2Id($action);
-					
+					codecept_debug($file.'/'.$actionId);
 					$testDisabled = $controller->disabledTests();
 					if (
 						in_array('*', $testDisabled, true) ||

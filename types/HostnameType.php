@@ -114,7 +114,7 @@ class HostnameType implements AttributeTypeInterface
 		$domainIndex = mt_rand(0, count($domains) - 1);
 
 		// Номер (1-99)
-		$number = mt_rand(1, 99);
+		$number = mt_rand(1, 999999);
 
 		// NetBIOS имя (без домена) или FQDN (с доменом)
 		if (mt_rand(0, 1) === 0) {

@@ -299,6 +299,18 @@ class ArmsBaseController extends Controller
 		return [];
 	}
 	
+	protected array $testModels=[];
+	
+	public function getTestModels(): array
+	{
+		if (empty($this->testModels)) {
+			for ($i=0; $i<5; $i++) {
+				$this->testModels[]=ModelFactory::create($this->modelClass);
+			}
+		}
+		return $this->testModels;
+	}
+	
 	/**
      * @inheritdoc
      */

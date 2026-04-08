@@ -238,7 +238,12 @@ class ModelFactory
 			$related = self::create(
 				$class,
 				[
-					'seed' => $context->seed + crc32($attribute),
+					// Уникальный seed: базовый + хэш модели + хэш атрибута
+					// Это гарантирует что разные модели с одинаковыми связями получат разные seed
+					'seed' => $context->seed 
+						+ crc32(get_class($model)) 
+						+ crc32($attribute)
+						+ $context->depth + 1,
 					'empty' => $attributeContext->empty,
 					'role' => $role,
 					'save' => true,
