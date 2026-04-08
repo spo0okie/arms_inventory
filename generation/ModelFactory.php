@@ -190,6 +190,23 @@ class ModelFactory
 			return;
 		}
 
+		// Проверка на self-reference (связь модели на саму себя)
+		// Структура связей НЕ ДОЛЖНА включать обязательные self-reference атрибуты
+		$isSelfReference = $class === get_class($model);
+		if ($isSelfReference && $isRequired) {
+			throw new ModelGenerationException(
+				modelClass: get_class($model),
+				stage: 'applyRelations',
+				errors: ['Обязательная self-reference связь не поддерживается генератором. ' .
+					'Убедитесь, что linksSchema для "' . $attribute . '" не помечен как required, ' .
+					'или измените структуру модели.'],
+				seed: $context->seed,
+				attribute: $attribute,
+				relatedClass: $class,
+				depth: $context->depth
+			);
+		}
+		
 		if ($context->depth >= $context->maxDepth && $isRequired) {
 			$existing = self::findExistingModel($class);
 			if ($existing) {
