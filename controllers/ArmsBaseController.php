@@ -137,6 +137,25 @@ class ArmsBaseController extends Controller
 	 * см views/layouts/index.php
 	 */
 	public $additionalToolButton='';
+
+	static protected $testDataCache=[];
+	public function getTestData() {
+		if (empty(static::$testDataCache)) {
+			//пустая модель для проверки отображения при отсутствии данных
+			static::$testDataCache['empty']=ModelFactory::create($this->modelClass,['empty'=>true]);
+			//полностью заполненная модель для проверки отображения всех данных
+			static::$testDataCache['full']=ModelFactory::create($this->modelClass,['empty'=>false]);
+			//какую модель обновлять
+			static::$testDataCache['to-update']=ModelFactory::create($this->modelClass,['empty'=>true]);
+			//какую модель удалять
+			static::$testDataCache['to-delete']=ModelFactory::create($this->modelClass,['empty'=>true]);
+			//данные для теста создания модели
+			static::$testDataCache['create']=ModelFactory::create($this->modelClass,['empty'=>false,'save'=>false]);
+			//данные для теста обновления модели
+			static::$testDataCache['update']=ModelFactory::create($this->modelClass,['empty'=>false,'save'=>false]);
+		}
+		return static::$testDataCache;
+	}
 	
 	
 	public function actions()
@@ -299,17 +318,6 @@ class ArmsBaseController extends Controller
 		return [];
 	}
 	
-	protected array $testModels=[];
-	
-	public function getTestModels(): array
-	{
-		if (empty($this->testModels)) {
-			for ($i=0; $i<5; $i++) {
-				$this->testModels[]=ModelFactory::create($this->modelClass);
-			}
-		}
-		return $this->testModels;
-	}
 	
 	/**
      * @inheritdoc
@@ -481,11 +489,9 @@ class ArmsBaseController extends Controller
 	{
 		//тестируем, что страница открывается и возвращает 200
 		//создаем несколько моделей, чтобы страница работала в сценарии когда что-то рендерится
-		for ($i=0; $i<3; $i++) {
-			ModelFactory::create($this->modelClass);
-		}
+		$this->getTestData();
 		return [[
-			'name' => 'default',
+			'name' => 'view index',
 			'GET' => [],
 			'response' => 200,
 		]];
@@ -531,9 +537,7 @@ class ArmsBaseController extends Controller
 	{
 		//тестируем, что страница открывается и возвращает 200
 		//создаем несколько моделей, чтобы страница работала в сценарии когда что-то рендерится
-		for ($i=0; $i<3; $i++) {
-			ModelFactory::create($this->modelClass);
-		}
+		$this->getTestData();
 		return [[
 			'name' => 'default',
 			'GET' => ['source' => 'http://1.1.1.1'],
@@ -561,11 +565,11 @@ class ArmsBaseController extends Controller
 	public function testItem(): array
 	{
 		//проверяем что может отобразить как модель полностью заполненную, так и модель с минимальным набором данных
-		$modelFull=ModelFactory::create($this->modelClass);
-		$modelEmpty=ModelFactory::create($this->modelClass,['empty'=>true]);
+		$full=	$this->getTestData()['full'];
+		$empty=$this->getTestData()['empty'];
 		return [
-			['name' => 'item full', 'GET' => ['id' => $modelFull->id],'response' => 200,],
-			['name' => 'item empty', 'GET' => ['id' => $modelEmpty->id],'response' => 200,],
+			['name' => 'item full',  'GET' => ['id' => $full->id],  'response' => 200,],
+			['name' => 'item empty', 'GET' => ['id' => $empty->id], 'response' => 200,],
 		];
 	}
 	
@@ -582,12 +586,12 @@ class ArmsBaseController extends Controller
 	
 	public function testItemByName(): array
 	{
-		$model=ModelFactory::create($this->modelClass);
-		return [[
-			'name' => 'default',
-			'GET' => ['name' => $model->getName()],
-			'response' => 200,
-		]];
+		$full=	$this->getTestData()['full'];
+		$empty=$this->getTestData()['empty'];
+		return [
+			['name' => 'item by name full',	'GET' => ['name' => $full->getName()],	'response' => 200,],
+			['name' => 'item by name empty',	'GET' => ['name' => $empty->getName()],	'response' => 200,],
+		];
 	}
 	
 	/**
@@ -613,12 +617,12 @@ class ArmsBaseController extends Controller
 	
 	public function testTtip(): array
 	{
-		$model=ModelFactory::create($this->modelClass);
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $model->id],
-			'response' => 200,
-		]];
+		$full=	$this->getTestData()['full'];
+		$empty=$this->getTestData()['empty'];
+		return [
+			['name' => 'ttip full',	 'GET' => ['name' => $full->getName()],	'response' => 200,],
+			['name' => 'ttip empty', 'GET' => ['name' => $empty->getName()],'response' => 200,],
+		];
 	}
 	
 	/**
@@ -638,12 +642,12 @@ class ArmsBaseController extends Controller
 	
 	public function testView(): array
 	{
-		$model=ModelFactory::create($this->modelClass);
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $model->id],
-			'response' => 200,
-		]];
+		$full=	$this->getTestData()['full'];
+		$empty=$this->getTestData()['empty'];
+		return [
+			['name' => 'view full',	 'GET' => ['name' => $full->getName()],	'response' => 200,],
+			['name' => 'view empty', 'GET' => ['name' => $empty->getName()],'response' => 200,],
+		];
 	}
 
     /**
@@ -670,9 +674,9 @@ class ArmsBaseController extends Controller
 	
 	public function testValidate(): array
 	{
-		$model=ModelFactory::create($this->modelClass,['save'=>false]);
+		$model=$this->getTestData()['update'];
 		return [[
-			'name' => 'default',
+			'name' => 'validate data',
 			'POST' => ModelHelper::fillForm($model),
 			'response' => 200,
 		]];
@@ -728,7 +732,7 @@ class ArmsBaseController extends Controller
 	
 		public function testCreate(): array
 	{
-		$model=ModelFactory::create($this->modelClass,['save'=>false]);
+		$model=$this->getTestData()['creat'];
 		return [
 			['name' => 'form load', 'GET' => [],'response' => 200,],
 			[
@@ -772,14 +776,14 @@ class ArmsBaseController extends Controller
 	
 	public function testUpdate(): array
 	{
-		$model1=ModelFactory::create($this->modelClass);
-		$model2=ModelFactory::create($this->modelClass,['save'=>false]);
+		$toUpdate=$this->getTestData()['to-update'];
+		$update=$this->getTestData()['update'];
 		return [
-			['name' => 'form open','GET' => ['id' => $model1->id],'response' => 200,],
+			['name' => 'form open','GET' => ['id' => $toUpdate->id],'response' => 200,],
 			[
 				'name' => 'data post',
-				'GET' => ['id' => $model1->id],
-				'POST' => ModelHelper::fillForm($model2),
+				'GET' => ['id' => $toUpdate->id],
+				'POST' => ModelHelper::fillForm($update),
 				'response' => 202,
 			]
 		];
@@ -812,10 +816,10 @@ class ArmsBaseController extends Controller
 	
 	public function testDelete(): array
 	{
-		$modelEmpty=ModelFactory::create($this->modelClass,['empty'=>true]);
+		$toDelete=$this->getTestData()['to-delete'];
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => $modelEmpty->id],
+			'GET' => ['id' => $toDelete->id],
 			'POST' => [],
 			'response' => 302,
 		]];
