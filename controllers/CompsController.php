@@ -67,29 +67,6 @@ class CompsController extends ArmsBaseController
 			]);
 		
     }
-
-    /**
-     * Lists all Comps models.
-     * @return mixed
-    public function actionIndex()
-    {
-        $searchModel = new CompsSearch();
-        $searchModel->archived= Yii::$app->request->get('showArchived',false);
-	
-		//ищем тоже самое но с дочерними в противоположном положении
-		$switchArchived=clone $searchModel;
-		$switchArchived->archived=!$switchArchived->archived;
-		$switchArchivedCount=$switchArchived->search(Yii::$app->request->queryParams)->totalCount;
-	
-		$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-			'switchArchivedCount' => $switchArchivedCount,
-        ]);
-    }
-	 */
 	
     /**
      * Lists all Comps models.
@@ -111,11 +88,6 @@ class CompsController extends ArmsBaseController
 	
 		$searchModel=new CompsSearch();
 		$dataProvider=$searchModel->search(['CompsSearch'=>['ids'=>$ids]]);
-			//Comps::find()->where();
-		//$dataProvider = new ActiveDataProvider([
-		//	'query' => $query,
-		//	'pagination' => ['pageSize' => 100,],
-		//]);
 	
         return $this->render('/layouts/index', [
             'dataProvider' => $dataProvider,
@@ -123,6 +95,11 @@ class CompsController extends ArmsBaseController
 			'model' => new Comps(),
         ]);
     }
+	
+	public function testDupes(): array
+	{
+		return self::skipScenario('default', 'test not ready yet');
+	}
 	
 	/**
 	 * Displays a item for single model.
@@ -136,32 +113,7 @@ class CompsController extends ArmsBaseController
 			'model' => $this->findModel($id)
 		]);
 	}
-	
-	/*public function actionItemByName($name)
-	{
-		$nameParts=Domains::fetchFromCompName($name);
 		
-		if ($nameParts===false) {
-			throw new BadRequestHttpException('Invalid comp name format');
-		}
-		
-		$domain_id=$nameParts[0];
-		$compName=$nameParts[1];
-		$domainName=$nameParts[2];
-		
-		if (is_null($domain_id)) {
-			throw new NotFoundHttpException("Domain $domainName not found");
-		} elseif ($domain_id===false) {
-			if (is_null($model = Comps::findOne(['name'=>$compName]))) {
-				throw new NotFoundHttpException("Computer $compName not found");
-			}
-		} elseif (is_null($model = Comps::findOne(['name'=>$compName,'domain_id'=>$domain_id]))) {
-			throw new NotFoundHttpException("Computer $compName not found in domain $domainName");
-		}
-		
-		return $this->renderPartial('item', ['model' => $model	,'static_view'=>true]);
-	}*/
-	
 	
 	/**
 	 * Absorb other comp in this
@@ -182,6 +134,7 @@ class CompsController extends ArmsBaseController
 		$model->absorbComp($absorb);
 		return $this->redirect(['view', 'id' => $model->id]);
 	}
+	
 	
 	/**
 	 * Displays a tooltip for hw of single model.
@@ -369,26 +322,5 @@ class CompsController extends ArmsBaseController
 	protected function findByName(string $name)
 	{
 		return static::searchModel($name);
-		/*$nameParts=Domains::fetchFromCompName($name);
-		
-		if ($nameParts===false) {
-			throw new BadRequestHttpException('Invalid comp name format');
-		}
-		
-		$domain_id=$nameParts[0];
-		$compName=$nameParts[1];
-		$domainName=$nameParts[2];
-		
-		if (is_null($domain_id)) {
-			throw new NotFoundHttpException("Domain $domainName not found");
-		} elseif ($domain_id===false) {
-			if (is_null($model = Comps::findOne(['name'=>$compName]))) {
-				throw new NotFoundHttpException("Computer $compName not found");
-			}
-		} elseif (is_null($model = Comps::findOne(['name'=>$compName,'domain_id'=>$domain_id]))) {
-			throw new NotFoundHttpException("Computer $compName not found in domain $domainName");
-		}
-		
-		return $model;*/
 	}
 }

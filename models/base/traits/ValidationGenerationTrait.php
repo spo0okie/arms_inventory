@@ -72,14 +72,14 @@ trait ValidationGenerationTrait
             }
 
             // Выбираем случайный атрибут из набора для заполнения, остальные оставляем пустыми
-            $attrSet= $attrs[mt_rand(0, count($attrs) - 1)];
+            $attrSet= $context->pickRandomValue($attrs);
 
             foreach ($attrs as $attr) {
 				//если атрибут не пустой xor нужный
 				if ((!static::attrIsEmpty($this,$attr)) xor ($attr===$attrSet)) {
 					$attrContext=new AttributeContext(
 						attribute: $attr,
-						empty: $attr!==$attrSet,	//нужный атрибут заполняем значением, остальные пустотой
+						empty: $attr!=$attrSet,	//нужный атрибут заполняем значением, остальные пустотой
 						model: $this,
 						generationContext: $context
 					);

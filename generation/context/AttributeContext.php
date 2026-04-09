@@ -46,14 +46,8 @@ class AttributeContext
 	 * @return Randomizer Изолированный генератор случайных чисел
 	 */
 	public function randomizer(): Randomizer
-	{
-		$seed = (
-			$this->generationContext->seed
-			+ crc32(get_class($this->model))
-			+ crc32($this->attribute)
-		) * ($this->generationContext->depth + 1);
-		
-		return new Randomizer(new Mt19937($seed));
+	{		
+		return new Randomizer(new Mt19937($this->seed()));
 	}
 	
 	/**
@@ -75,7 +69,6 @@ class AttributeContext
 	}
 	
 	/**
-	 * @deprecated Использовать randomizer() вместо seed()
 	 * Формируем уникальный seed для генерации атрибута, учитывая модель, атрибут и глубину рекурсии
 	 * @return int
 	 */

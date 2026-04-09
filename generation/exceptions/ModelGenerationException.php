@@ -36,7 +36,7 @@ class ModelGenerationException extends \Exception
 			$this->depth ?? '-',
 			json_encode($this->errors, JSON_UNESCAPED_UNICODE),
 			json_encode($this->values, JSON_UNESCAPED_UNICODE)
-		).$this->getTraceAsString();
+		)."\n".$this->getTraceAsString();
 		
 		if ($this->previous) {
 			$message .= "\nprevious: " . $this->previous->getMessage().PHP_EOL.$this->previous->getTraceAsString();
