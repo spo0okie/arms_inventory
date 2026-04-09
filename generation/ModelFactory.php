@@ -38,15 +38,17 @@ use yii\db\ActiveRecord;
  */
 class ModelFactory
 {
-	/**
-	 * Максимальное количество попыток валидации
-	 */
-	public const MAX_VALIDATE_RETRIES = 1;
-	
-	/**
-	 * Максимальное количество попыток сохранения
-	 */
-	public const MAX_SAVE_RETRIES = 1;
+	public const defaultOptions = [
+		'empty' => false,           // Генерировать пустые значения (nullable)
+		'role' => null,             // Preset для связей (например 'pc' для Techs)
+		'overrides' => [],          // Переопределение конкретных атрибутов
+		'save' => true,             // Сохранять ли модель в БД
+		'seed' => null,             // Seed для детерминизма (если null - случайный)
+		'validateRetries' => 1,		// Кол-во попыток генерации при провале валидации
+		'saveRetries' => 1,			// Кол-во попыток сохранения модели при ошибке сохранения
+		'depth' => 0,				// Текущая глубина генерации (для внутренних нужд)
+		'maxDepth' => 4,			// Максимальная глубина генерации связанных моделей (для предотвращения бесконечной рекурсии)
+	];
 	
 	public static int $seed=1000;
 	
@@ -61,15 +63,7 @@ class ModelFactory
 	 */
 	public static function create(string $modelClass, array $options = []): ?ArmsModel
 	{
-		$options = array_merge([
-			'empty' => false,           // Генерировать пустые значения (nullable)
-			'role' => null,             // Preset для связей (например 'pc' для Techs)
-			'overrides' => [],          // Переопределение конкретных атрибутов
-			'save' => true,             // Сохранять ли модель в БД
-			'seed' => null,             // Seed для детерминизма (если null - случайный)
-			'validateRetries' => self::MAX_VALIDATE_RETRIES,
-			'saveRetries' => self::MAX_SAVE_RETRIES,
-		], $options);
+		$options = array_merge(self::defaultOptions, $options);
 				
 		// Устанавливаем seed для детерминизма
 		$baseSeed = $options['seed'] ?? ++static::$seed;
@@ -192,8 +186,7 @@ class ModelFactory
 
 		// Проверка на self-reference (связь модели на саму себя)
 		// Структура связей НЕ ДОЛЖНА включать обязательные self-reference атрибуты
-		$isSelfReference = $class === get_class($model);
-		if ($isSelfReference && $isRequired) {
+		if ($class === get_class($model) && $isRequired) {
 			throw new ModelGenerationException(
 				modelClass: get_class($model),
 				stage: 'applyRelations',
@@ -206,29 +199,7 @@ class ModelFactory
 				depth: $context->depth
 			);
 		}
-		
-		if ($context->depth >= $context->maxDepth && $isRequired) {
-			$existing = self::findExistingModel($class);
-			if ($existing) {
-				if (str_ends_with($attribute, '_ids')) {
-					$model->$attribute = [$existing->getPrimaryKey()];
-				} else {
-					$model->$attribute = $existing->getPrimaryKey();
-				}
-				return;
-			}
-
-			throw new ModelGenerationException(
-				modelClass: get_class($model),
-				stage: 'applyRelations',
-				errors: ['Достигнут предел глубины при обязательной связи'],
-				seed: $context->seed,
-				attribute: $attribute,
-				relatedClass: $class,
-				depth: $context->depth
-			);
-		}
-		
+				
 		//если мы уже на максимальной глубине
 		//или генерируем пустую модель,
 		//то заполняем только обязательные связи, остальные пропускаем
@@ -257,7 +228,7 @@ class ModelFactory
 						+ crc32(get_class($model)) 
 						+ crc32($attribute)
 						+ $context->depth + 1,
-					'empty' => $attributeContext->empty,
+					'empty' => $attributeContext->empty || $context->depth < $context->maxDepth,
 					'role' => $role,
 					'save' => true,
 					// увеличиваем глубину
@@ -477,10 +448,10 @@ class ModelFactory
 		}
 
 		$context = new GenerationContext(
-			empty: $options['empty'] ?? false,
-			seed: $options['seed'] ?? random_int(1, 100000),
-			depth: $options['depth'] ?? 0,
-    		maxDepth: $options['maxDepth'] ?? 2,
+			empty: $options['empty'],
+			seed: $options['seed'],
+			depth: $options['depth'],
+    		maxDepth: $options['maxDepth'],
 		);
 
 		Yii::debug("ModelFactory: seed={$context->seed} для " . get_class($model), 'generation');
