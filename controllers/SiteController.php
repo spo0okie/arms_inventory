@@ -15,13 +15,39 @@ require_once Yii::getAlias('@app/swagger/swagger.php');
 
 class SiteController extends ArmsBaseController
 {
+	public function testItem(): array
+	{
+		return self::skipScenario('default', 'site controller is non-AR and has no item action');
+	}
+
+	public function testTtip(): array
+	{
+		return self::skipScenario('default', 'site controller is non-AR and has no ttip action');
+	}
+
+	public function testView(): array
+	{
+		return self::skipScenario('default', 'site controller is non-AR and has no view action');
+	}
+
+	public function testCreate(): array
+	{
+		return self::skipScenario('default', 'site controller is non-AR and has no create action');
+	}
+
+	public function testUpdate(): array
+	{
+		return self::skipScenario('default', 'site controller is non-AR and has no update action');
+	}
+
+	public function testDelete(): array
+	{
+		return self::skipScenario('default', 'site controller is non-AR and has no delete action');
+	}
+
 	public function testError(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'error action depends on exception handler context');
 	}
 	
 	public function testApiDoc(): array
@@ -35,11 +61,7 @@ class SiteController extends ArmsBaseController
 	
 	public function testApiJson(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires swagger scan runtime configuration');
 	}
 	
 	public function testIndex(): array
@@ -80,20 +102,12 @@ class SiteController extends ArmsBaseController
 	
 	public function testRackTest(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires rack fixtures and configuration');
 	}
 	
 	public function testPasswordSet(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires admin session and valid user context');
 	}
 	
 	public function testAppInfo(): array

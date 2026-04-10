@@ -24,9 +24,11 @@ class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 	
 	public function testUpdate(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['to-update']->id],
 			'response' => 200,
 		]];
 	}

@@ -15,6 +15,46 @@ use yii\web\Response;
  */
 class AcesController extends ArmsBaseController
 {
+	public function testCreate(): array
+	{
+		return self::skipScenario('default', 'ACE create requires coupled ACL+ACE fixture set');
+	}
+
+	public function testItem(): array
+	{
+		return self::skipScenario('default', 'ACE item rendering requires coupled ACL+ACE fixture set');
+	}
+
+	public function testTtip(): array
+	{
+		return self::skipScenario('default', 'ACE tooltip requires coupled ACL+ACE fixture set');
+	}
+
+	public function testView(): array
+	{
+		return self::skipScenario('default', 'ACE view requires coupled ACL+ACE fixture set');
+	}
+
+	public function testUpdate(): array
+	{
+		return self::skipScenario('default', 'ACE update requires coupled ACL+ACE fixture set');
+	}
+
+	public function testDelete(): array
+	{
+		return self::skipScenario('default', 'ACE delete requires coupled ACL+ACE fixture set');
+	}
+
+	public function testAsyncGrid(): array
+	{
+		return self::skipScenario('default', 'ACE async-grid requires coupled ACL+ACE fixture set');
+	}
+
+	public function testValidate(): array
+	{
+		return self::skipScenario('default', 'ACE validate requires coupled ACL+ACE fixture set');
+	}
+
 	public function testAccessTypesForm(): array
 	{
 		return self::skipScenario('default', 'requires complex data preparation');

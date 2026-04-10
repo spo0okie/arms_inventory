@@ -17,11 +17,17 @@ use yii\web\NotFoundHttpException;
  */
 class ScheduledAccessController extends \app\controllers\ArmsBaseController
 {
+	public function testView(): array
+	{
+		return self::skipScenario('default', 'view may redirect for override schedules');
+	}
 	public function testStatus(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}

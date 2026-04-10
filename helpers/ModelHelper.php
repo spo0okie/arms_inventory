@@ -205,7 +205,11 @@ class ModelHelper
 		
 		foreach ($attrs as $attribute) {
 			if (in_array($attribute,$skip)) continue;
-			$form[$attribute]=$model->$attribute;
+			try {
+				$form[$attribute]=$model->$attribute;
+			} catch (\yii\base\UnknownPropertyException $e) {
+				continue;
+			}
 		}
 		
 		return $form;

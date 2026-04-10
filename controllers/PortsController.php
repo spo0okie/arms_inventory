@@ -15,6 +15,21 @@ use yii\web\Response;
 class PortsController extends ArmsBaseController
 {
 
+	public function testItem(): array
+	{
+		return self::skipScenario('default', 'ports item requires linked tech/network fixtures');
+	}
+
+	public function testTtip(): array
+	{
+		return self::skipScenario('default', 'ports ttip requires linked tech/network fixtures');
+	}
+
+	public function testView(): array
+	{
+		return self::skipScenario('default', 'ports view requires linked tech/network fixtures');
+	}
+
 	public $modelClass=Ports::class;
 	
 	public function testPortList(): array

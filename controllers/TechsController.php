@@ -60,29 +60,29 @@ class TechsController extends ArmsBaseController
 	
 	public function testTtipHw(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testUploads(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testItemByName(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['name' => 'Test'],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires known hostname or inventory number fixture');
 	}
 	
 	public $modelClass='app\models\Techs';

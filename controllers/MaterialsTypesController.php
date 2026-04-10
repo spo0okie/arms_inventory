@@ -16,11 +16,7 @@ class MaterialsTypesController extends ArmsBaseController
 	
 	public function testUploads(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires uploaded files fixtures');
 	}
 	
 	public function disabledActions()

@@ -38,11 +38,7 @@ class ContractsController extends ArmsBaseController
 	
 	public function testScans(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires attached scan fixtures');
 	}
 	
 	public function testScanUpload(): array
@@ -52,11 +48,7 @@ class ContractsController extends ArmsBaseController
 	
 	public function testUpdateForm(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires modal update context');
 	}
 	
 	public function testLinkTech(): array

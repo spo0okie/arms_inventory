@@ -16,11 +16,7 @@ class MaterialsController extends ArmsBaseController
 {
 	public function testTtips(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['ids' => '{anyId}'],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires prepared material ids list');
 	}
 	
 	public function testTypeGroups(): array

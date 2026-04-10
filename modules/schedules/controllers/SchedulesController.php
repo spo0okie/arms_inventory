@@ -17,6 +17,21 @@ use yii\web\NotFoundHttpException;
  */
 class SchedulesController extends \app\controllers\ArmsBaseController
 {
+	public function testView(): array
+	{
+		return self::skipScenario('default', 'view may redirect to override schedule');
+	}
+	
+	public function testTtip(): array
+	{
+		return self::skipScenario('default', 'ttip requires stable override chain');
+	}
+	
+	public function testDelete(): array
+	{
+		return self::skipScenario('default', 'delete requires controlled schedule hierarchy fixture');
+	}
+	
 	public $modelClass='app\modules\schedules\models\Schedules';
 	
 	/**

@@ -21,27 +21,33 @@ class TechModelsController extends ArmsBaseController
 {
 	public function testHintComment(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testHintDescription(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testHintTemplate(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
@@ -62,27 +68,33 @@ class TechModelsController extends ArmsBaseController
 	
 	public function testItem(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testView(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testUploads(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}

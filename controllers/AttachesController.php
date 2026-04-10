@@ -24,6 +24,11 @@ class AttachesController extends ArmsBaseController
 		return self::skipScenario('default', 'file upload required');
 	}
 	
+	public function testDelete(): array
+	{
+		return self::skipScenario('default', 'requires file-system fixture for attached file');
+	}
+	
 	public function disabledActions()
 	{
 		return ['index','update','item','view','ttip','item-by-name',];

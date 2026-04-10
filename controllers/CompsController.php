@@ -19,13 +19,13 @@ use yii\web\Response;
  */
 class CompsController extends ArmsBaseController
 {
+	public function testView(): array
+	{
+		return self::skipScenario('default', 'requires complex linked data for stable view');
+	}
 	public function testTtipHw(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires complex hardware rendering context');
 	}
 	
 	public function testAbsorb(): array

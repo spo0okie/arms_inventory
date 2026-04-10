@@ -21,7 +21,7 @@ class LoginJournalController extends ArmsBaseController
 	public function disabledActions()
 	{
 		//все CRUD операции делаются через REST API
-		return ['item-by-name','item','create','update','delete','view'];
+		return ['item-by-name','item','create','update','delete','view','ttip'];
 	}
 	
 	public $modelClass=LoginJournal::class;

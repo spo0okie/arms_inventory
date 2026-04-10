@@ -20,9 +20,11 @@ class LicItemsController extends ArmsBaseController
 {
 	public function testHintArms(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}', 'form' => 'test'],
+			'GET' => ['id' => $testData['full']->id, 'form' => 'test'],
 			'response' => 200,
 		]];
 	}

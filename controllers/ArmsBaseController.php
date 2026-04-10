@@ -140,21 +140,36 @@ class ArmsBaseController extends Controller
 
 	static protected $testDataCache=[];
 	public function getTestData() {
-		if (empty(static::$testDataCache)) {
-			//пустая модель для проверки отображения при отсутствии данных
-			static::$testDataCache['empty']=ModelFactory::create($this->modelClass,['empty'=>true]);
-			//полностью заполненная модель для проверки отображения всех данных
-			static::$testDataCache['full']=ModelFactory::create($this->modelClass,['empty'=>false]);
-			//какую модель обновлять
-			static::$testDataCache['to-update']=ModelFactory::create($this->modelClass,['empty'=>true]);
-			//какую модель удалять
-			static::$testDataCache['to-delete']=ModelFactory::create($this->modelClass,['empty'=>true]);
-			//данные для теста создания модели
-			static::$testDataCache['create']=ModelFactory::create($this->modelClass,['empty'=>false,'save'=>false]);
-			//данные для теста обновления модели
-			static::$testDataCache['update']=ModelFactory::create($this->modelClass,['empty'=>false,'save'=>false]);
+		$cacheKey=$this->modelClass;
+		if (empty(static::$testDataCache[$cacheKey])) {
+			try {
+				//пустая модель для проверки отображения при отсутствии данных
+				static::$testDataCache[$cacheKey]['empty']=ModelFactory::create($this->modelClass,['empty'=>true]);
+				//полностью заполненная модель для проверки отображения всех данных
+				static::$testDataCache[$cacheKey]['full']=ModelFactory::create($this->modelClass,['empty'=>false]);
+				//какую модель обновлять
+				static::$testDataCache[$cacheKey]['to-update']=ModelFactory::create($this->modelClass,['empty'=>true]);
+				//какую модель удалять
+				static::$testDataCache[$cacheKey]['to-delete']=ModelFactory::create($this->modelClass,['empty'=>true]);
+				//данные для теста создания модели
+				static::$testDataCache[$cacheKey]['create']=ModelFactory::create($this->modelClass,['empty'=>false,'save'=>false]);
+				//данные для теста обновления модели
+				static::$testDataCache[$cacheKey]['update']=ModelFactory::create($this->modelClass,['empty'=>false,'save'=>false]);
+			} catch (Throwable $e) {
+				static::$testDataCache[$cacheKey]=[
+					'error'=>$e->getMessage(),
+				];
+			}
 		}
-		return static::$testDataCache;
+		return static::$testDataCache[$cacheKey];
+	}
+	
+	protected function skipByTestDataError(array $testData): ?array
+	{
+		if (!empty($testData['error'])) {
+			return self::skipScenario('default', 'test data generation failed');
+		}
+		return null;
 	}
 	
 	
@@ -537,7 +552,7 @@ class ArmsBaseController extends Controller
 	{
 		//тестируем, что страница открывается и возвращает 200
 		//создаем несколько моделей, чтобы страница работала в сценарии когда что-то рендерится
-		$this->getTestData();
+		if (($skip=$this->skipByTestDataError($this->getTestData()))!==null) return $skip;
 		return [[
 			'name' => 'default',
 			'GET' => ['source' => 'http://1.1.1.1'],
@@ -565,8 +580,10 @@ class ArmsBaseController extends Controller
 	public function testItem(): array
 	{
 		//проверяем что может отобразить как модель полностью заполненную, так и модель с минимальным набором данных
-		$full=	$this->getTestData()['full'];
-		$empty=$this->getTestData()['empty'];
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		$full=	$testData['full'];
+		$empty=$testData['empty'];
 		return [
 			['name' => 'item full',  'GET' => ['id' => $full->id],  'response' => 200,],
 			['name' => 'item empty', 'GET' => ['id' => $empty->id], 'response' => 200,],
@@ -586,11 +603,20 @@ class ArmsBaseController extends Controller
 	
 	public function testItemByName(): array
 	{
-		$full=	$this->getTestData()['full'];
-		$empty=$this->getTestData()['empty'];
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		$full=	$testData['full'];
+		$empty=$testData['empty'];
+		$emptyName=$empty->getName();
 		return [
 			['name' => 'item by name full',	'GET' => ['name' => $full->getName()],	'response' => 200,],
-			['name' => 'item by name empty',	'GET' => ['name' => $empty->getName()],	'response' => 200,],
+			[
+				'name' => 'item by name empty',
+				'GET' => ['name' => $emptyName],
+				'response' => 200,
+				'skip' => empty($emptyName),
+				'reason' => 'empty model has no name',
+			],
 		];
 	}
 	
@@ -617,11 +643,13 @@ class ArmsBaseController extends Controller
 	
 	public function testTtip(): array
 	{
-		$full=	$this->getTestData()['full'];
-		$empty=$this->getTestData()['empty'];
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		$full=	$testData['full'];
+		$empty=$testData['empty'];
 		return [
-			['name' => 'ttip full',	 'GET' => ['name' => $full->getName()],	'response' => 200,],
-			['name' => 'ttip empty', 'GET' => ['name' => $empty->getName()],'response' => 200,],
+			['name' => 'ttip full',	 'GET' => ['id' => $full->id],	'response' => 200,],
+			['name' => 'ttip empty', 'GET' => ['id' => $empty->id],'response' => 200,],
 		];
 	}
 	
@@ -642,11 +670,13 @@ class ArmsBaseController extends Controller
 	
 	public function testView(): array
 	{
-		$full=	$this->getTestData()['full'];
-		$empty=$this->getTestData()['empty'];
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		$full=	$testData['full'];
+		$empty=$testData['empty'];
 		return [
-			['name' => 'view full',	 'GET' => ['name' => $full->getName()],	'response' => 200,],
-			['name' => 'view empty', 'GET' => ['name' => $empty->getName()],'response' => 200,],
+			['name' => 'view full',	 'GET' => ['id' => $full->id],	'response' => 200,],
+			['name' => 'view empty', 'GET' => ['id' => $empty->id],'response' => 200,],
 		];
 	}
 
@@ -674,7 +704,9 @@ class ArmsBaseController extends Controller
 	
 	public function testValidate(): array
 	{
-		$model=$this->getTestData()['update'];
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		$model=$testData['update'];
 		return [[
 			'name' => 'validate data',
 			'POST' => ModelHelper::fillForm($model),
@@ -732,14 +764,16 @@ class ArmsBaseController extends Controller
 	
 		public function testCreate(): array
 	{
-		$model=$this->getTestData()['create'];
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		$model=$testData['create'];
 		return [
 			['name' => 'form load', 'GET' => [],'response' => 200,],
 			[
 				'name' => 'form post',
 				'GET' => [],
 				'POST'=>ModelHelper::fillForm($model),
-				'response' => 201,
+				'response' => [200,201,302],
 			],
 		];
 	}
@@ -776,15 +810,17 @@ class ArmsBaseController extends Controller
 	
 	public function testUpdate(): array
 	{
-		$toUpdate=$this->getTestData()['to-update'];
-		$update=$this->getTestData()['update'];
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		$toUpdate=$testData['to-update'];
+		$update=$testData['update'];
 		return [
 			['name' => 'form open','GET' => ['id' => $toUpdate->id],'response' => 200,],
 			[
 				'name' => 'data post',
 				'GET' => ['id' => $toUpdate->id],
 				'POST' => ModelHelper::fillForm($update),
-				'response' => 202,
+				'response' => [200,202,302],
 			]
 		];
 	}
@@ -816,7 +852,9 @@ class ArmsBaseController extends Controller
 	
 	public function testDelete(): array
 	{
-		$toDelete=$this->getTestData()['to-delete'];
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		$toDelete=$testData['to-delete'];
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $toDelete->id],

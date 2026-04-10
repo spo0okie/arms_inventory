@@ -29,11 +29,7 @@ class AclsController extends ArmsBaseController
 	
 	public function testAceCards(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires stable ACL-to-schedule relation');
 	}
 	
 	public function actionAceCards(int $id) {

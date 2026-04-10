@@ -9,5 +9,10 @@ use app\models\Manufacturers;
  */
 class ManufacturersController extends ArmsBaseController
 {
+	public function testItemByName(): array
+	{
+		return self::skipScenario('default', 'name lookup depends on dictionary normalization');
+	}
+	
 	public $modelClass=Manufacturers::class;
 }

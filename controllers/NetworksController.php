@@ -26,9 +26,11 @@ class NetworksController extends ArmsBaseController
 	
 	public function testIncomingConnectionsList(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}

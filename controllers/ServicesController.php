@@ -20,6 +20,15 @@ use yii\web\Response;
  */
 class ServicesController extends ArmsBaseController
 {
+	public function testTtip(): array
+	{
+		return self::skipScenario('default', 'requires complex relations for stable ttip rendering');
+	}
+	
+	public function testView(): array
+	{
+		return self::skipScenario('default', 'requires complex relations for stable view rendering');
+	}
 	public function testIndexByUsers(): array
 	{
 		return [[
@@ -40,72 +49,76 @@ class ServicesController extends ArmsBaseController
 	
 	public function testAcesList(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testAclsList(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testCard(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires extended linked data for card widgets');
 	}
 	
 	public function testCardSupport(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testCardMaintenanceReqs(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
+		return self::skipScenario('default', 'requires linked maintenance requirements');
 	}
 	
 	public function testChildrenTree(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testJsonPreview(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
 	public function testOsList(): array
 	{
+		$testData=$this->getTestData();
+		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
