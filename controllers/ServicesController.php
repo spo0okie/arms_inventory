@@ -20,6 +20,24 @@ use yii\web\Response;
  */
 class ServicesController extends ArmsBaseController
 {
+	public function testIndexByUsers(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	public function testIndexTree(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
 	public function testAcesList(): array
 	{
 		return [[

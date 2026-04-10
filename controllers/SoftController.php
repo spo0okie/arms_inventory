@@ -20,6 +20,52 @@ class SoftController extends ArmsBaseController
 	{
 		return self::skipScenario('default', 'requires complex data preparation');
 	}
+	
+	public function testTtip(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testView(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testCreate(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	public function testUploads(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testGenerateDescription(): array
+	{
+		return [[
+			'name' => 'default',
+			'POST' => ['name' => 'Test', 'manufacturer' => 1],
+			'response' => 200,
+		]];
+	}
+	
 	public $modelClass=Soft::class;
 	
 	public function accessMap()

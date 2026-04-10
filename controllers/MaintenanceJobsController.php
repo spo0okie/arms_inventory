@@ -24,6 +24,15 @@ class MaintenanceJobsController extends ArmsBaseController
 			'response' => 200,
 		]];
 	}
+	
+	public function testIndexTree(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
 	public $modelClass=MaintenanceJobs::class;
 	
 	public function accessMap()

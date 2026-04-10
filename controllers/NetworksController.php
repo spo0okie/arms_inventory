@@ -33,6 +33,15 @@ class NetworksController extends ArmsBaseController
 		]];
 	}
 	
+	public function testIpam(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
 	public $modelClass=Networks::class;
 	public function accessMap()
 	{

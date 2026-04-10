@@ -732,7 +732,7 @@ class ArmsBaseController extends Controller
 	
 		public function testCreate(): array
 	{
-		$model=$this->getTestData()['creat'];
+		$model=$this->getTestData()['create'];
 		return [
 			['name' => 'form load', 'GET' => [],'response' => 200,],
 			[

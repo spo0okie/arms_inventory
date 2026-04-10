@@ -25,6 +25,34 @@ class PlacesController extends ArmsBaseController
 	{
 		return self::skipScenario('default', 'requires external map configuration');
 	}
+	
+	public function testArmmap(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	public function testDepmap(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	public function testUploads(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
 	public $modelClass='\app\models\Places';
 	
 	public function accessMap()

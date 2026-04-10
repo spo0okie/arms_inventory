@@ -17,6 +17,11 @@ class PortsController extends ArmsBaseController
 
 	public $modelClass=Ports::class;
 	
+	public function testPortList(): array
+	{
+		return self::skipScenario('default', 'requires POST depdrop data');
+	}
+	
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[

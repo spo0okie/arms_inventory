@@ -17,6 +17,15 @@ class SegmentsController extends ArmsBaseController
 {
 	public $modelClass=Segments::class;
 	
+	public function testList(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[

@@ -17,6 +17,11 @@ class OrgStructController extends ArmsBaseController
 {
 	public $modelClass=OrgStruct::class;
 
+	public function testDepDrop(): array
+	{
+		return self::skipScenario('default', 'requires POST depdrop data');
+	}
+
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[

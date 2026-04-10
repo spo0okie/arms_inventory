@@ -45,6 +45,11 @@ class ContractsController extends ArmsBaseController
 		]];
 	}
 	
+	public function testScanUpload(): array
+	{
+		return self::skipScenario('default', 'requires file upload test');
+	}
+	
 	public function testUpdateForm(): array
 	{
 		return [[

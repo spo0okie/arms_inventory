@@ -60,6 +60,42 @@ class TechModelsController extends ArmsBaseController
 		return self::skipScenario('default', 'requires rack configuration');
 	}
 	
+	public function testItem(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testView(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testUploads(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testGenerateDescription(): array
+	{
+		return [[
+			'name' => 'default',
+			'POST' => ['name' => 'Test', 'manufacturer' => 1],
+			'response' => 200,
+		]];
+	}
+	
 	public $modelClass='app\models\TechModels';
 	
 	public function accessMap()

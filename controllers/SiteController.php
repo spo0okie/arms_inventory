@@ -15,6 +15,96 @@ require_once Yii::getAlias('@app/swagger/swagger.php');
 
 class SiteController extends ArmsBaseController
 {
+	public function testError(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	public function testApiDoc(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	public function testApiJson(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	public function testIndex(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	public function testWiki(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['pageName' => 'start'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testLogin(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	public function testLogout(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 302,
+		]];
+	}
+	
+	public function testRackTest(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
+	public function testPasswordSet(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testAppInfo(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
     /**
      * @inheritdoc
      */

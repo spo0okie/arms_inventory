@@ -16,6 +16,16 @@ use yii\web\NotFoundHttpException;
 class MaintenanceReqsController extends ArmsBaseController
 {
 	public $modelClass=MaintenanceReqs::class;
+	
+	public function testList(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[

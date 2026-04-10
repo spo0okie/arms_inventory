@@ -14,7 +14,16 @@ class MaterialsTypesController extends ArmsBaseController
 {
 	public $modelClass=MaterialsTypes::class;
 	
-		public function disabledActions()
+	public function testUploads(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function disabledActions()
 	{
 		return ['item-by-name','ttip'];
 	}

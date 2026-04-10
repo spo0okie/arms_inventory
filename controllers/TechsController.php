@@ -66,6 +66,25 @@ class TechsController extends ArmsBaseController
 			'response' => 200,
 		]];
 	}
+	
+	public function testUploads(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}'],
+			'response' => 200,
+		]];
+	}
+	
+	public function testItemByName(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['name' => 'Test'],
+			'response' => 200,
+		]];
+	}
+	
 	public $modelClass='app\models\Techs';
 	
 	public function accessMap()
