@@ -61,6 +61,7 @@ class Ports extends ArmsModel
 				}
 			}],
 			[['techs_id', 'link_techs_id','link_ports_id','name'], 'default','value'=>null],
+			[['name'], 'required'],
 			[['name'], 'unique', 'skipOnError' => true, 'skipOnEmpty'=>false, 'targetAttribute'=>['name','arms_id','techs_id'],'message'=>'Такой порт на этому устройстве уже объявлен'],
 			[['name'], 'string', 'max' => 32],
             [['comment'], 'string', 'max' => 255],

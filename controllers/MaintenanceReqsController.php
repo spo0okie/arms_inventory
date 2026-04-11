@@ -19,11 +19,7 @@ class MaintenanceReqsController extends ArmsBaseController
 	
 	public function testList(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
+		return [[]];
 	}
 	
 	public function accessMap()

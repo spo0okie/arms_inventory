@@ -107,7 +107,7 @@ class SwList {
 
         //сначала выгребаем из общей кучи софт, с распознаваемым разработчиком
         foreach ($this->data as $i => $item) { //перебираем кучу
-            if (!is_null($dev = ManufacturersDict::fetchManufacturer($item['publisher']))) { //если производитель обнаружился
+            if (!is_null($dev = ManufacturersDict::fetchManufacturer($item['publisher']??''))) { //если производитель обнаружился
                 $this->data[$i]['manufacturers_id'] = $dev; //добавляем его в исходные данные
 
                 //заполняем список обнаруженных производителей ПО для дальнейшего поиска программных продуктов
@@ -122,8 +122,9 @@ class SwList {
                 if (array_search($item['name'], $this->products_by_dev[$dev]) === false) {
                     $this->products_by_dev[$dev][] = $item['name'];
                 }
-            } elseif (!strlen($item['publisher'])) {
-                //если производителя нет впринципе, то добавляем продукт в отдельную категорию
+				
+            } elseif (!strlen($item['publisher']??'')) {
+                //если производителя нет в принципе, то добавляем продукт в отдельную категорию
                 $this->products_by_dev['no_dev'][] = $item['name'];
             }
         }

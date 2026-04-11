@@ -140,38 +140,25 @@ class ArmsBaseController extends Controller
 
 	static protected $testDataCache=[];
 	public function getTestData() {
-		$cacheKey=$this->modelClass;
-		if (empty(static::$testDataCache[$cacheKey])) {
-			try {
-				//пустая модель для проверки отображения при отсутствии данных
-				static::$testDataCache[$cacheKey]['empty']=ModelFactory::create($this->modelClass,['empty'=>true]);
-				//полностью заполненная модель для проверки отображения всех данных
-				static::$testDataCache[$cacheKey]['full']=ModelFactory::create($this->modelClass,['empty'=>false]);
-				//какую модель обновлять
-				static::$testDataCache[$cacheKey]['to-update']=ModelFactory::create($this->modelClass,['empty'=>true]);
-				//какую модель удалять
-				static::$testDataCache[$cacheKey]['to-delete']=ModelFactory::create($this->modelClass,['empty'=>true]);
-				//данные для теста создания модели
-				static::$testDataCache[$cacheKey]['create']=ModelFactory::create($this->modelClass,['empty'=>false,'save'=>false]);
-				//данные для теста обновления модели
-				static::$testDataCache[$cacheKey]['update']=ModelFactory::create($this->modelClass,['empty'=>false,'save'=>false]);
-			} catch (Throwable $e) {
-				static::$testDataCache[$cacheKey]=[
-					'error'=>$e->getMessage(),
-				];
-			}
+		$class=$this->modelClass;
+		if (empty(static::$testDataCache[$class])) {
+			//пустая модель для проверки отображения при отсутствии данных
+			static::$testDataCache[$class]['empty']=		ModelFactory::create($class,['empty'=>true]);
+			//полностью заполненная модель для проверки отображения всех данных
+			static::$testDataCache[$class]['full']=			ModelFactory::create($class,['empty'=>false]);
+			//какую модель обновлять
+			static::$testDataCache[$class]['update']=		ModelFactory::create($class,['empty'=>true]);
+			static::$testDataCache[$class]['update-data']=	ModelFactory::create($class,['empty'=>false,'save'=>false]);
+			//какую модель удалять
+			static::$testDataCache[$class]['delete']=		ModelFactory::create($class,['empty'=>true]);
+			//данные для теста создания модели
+			static::$testDataCache[$class]['create']=		ModelFactory::create($class,['empty'=>false,'save'=>false]);
+			//данные для теста валидации модели
+			static::$testDataCache[$class]['validate']=		ModelFactory::create($class,['empty'=>true]);
+			static::$testDataCache[$class]['validate-data']=ModelFactory::create($class,['save'=>false]);
 		}
-		return static::$testDataCache[$cacheKey];
+		return static::$testDataCache[$class];
 	}
-	
-	protected function skipByTestDataError(array $testData): ?array
-	{
-		if (!empty($testData['error'])) {
-			return self::skipScenario('default', 'test data generation failed');
-		}
-		return null;
-	}
-	
 	
 	public function actions()
 	{
@@ -332,8 +319,28 @@ class ArmsBaseController extends Controller
 	{
 		return [];
 	}
-	
-	
+
+	/**
+	 * Возвращает список отключенных тестов
+	 * по умолчанию отключает тесты для всех отключенных методов
+	 * @return array
+	 */
+	public function disabledTests(): array
+	{
+		return $this->disabledActions();
+	}
+
+	/**
+	 * Возвращает вместо списка маршрутов для тестов
+	 * один маршрут-пропуск с указанием причины, по которой тесты отключены
+	 * @param array $testData
+	 * @return array|null
+	 */
+	protected static function skipScenario(string $name, string $reason): array
+	{
+		return [['name' => $name,'skip' => true,'reason' => $reason]];
+	}	
+		
 	/**
      * @inheritdoc
      */
@@ -449,7 +456,7 @@ class ArmsBaseController extends Controller
 	}
     
     /**
-     * Lists all Arms models.
+     * Вывести страницу со списком моделей
      * @return mixed
      */
     public function actionIndex()
@@ -500,21 +507,24 @@ class ArmsBaseController extends Controller
 		}
     }
 	
+	/**
+	 * Тест для страницы со списком моделей: вызывать URI без параметров и убедиться что путь открывается с кодом 200
+	 * @return array
+	 */
 	public function testIndex(): array
 	{
-		//тестируем, что страница открывается и возвращает 200
 		//создаем несколько моделей, чтобы страница работала в сценарии когда что-то рендерится
 		$this->getTestData();
+		//один тест на открытие страницы, без параметров, с кодом 200
 		return [[
 			'name' => 'view index',
-			'GET' => [],
 			'response' => 200,
 		]];
 	}
 	
 	
 	/**
-	 * Renders only Grid of index
+	 * Как index, но для асинхронного рендера только самой таблицы (через DynaGridWidget)
 	 * @return mixed
 	 */
 	public function actionAsyncGrid($source)
@@ -548,21 +558,24 @@ class ArmsBaseController extends Controller
 		}
 	}
 	
+	/**
+	 * Тест для асинхронной таблицы: вызывать URI без параметров и убедиться что путь открывается с кодом 200 или 404
+	 * @return array
+	 */
 	public function testAsyncGrid(): array
 	{
-		//тестируем, что страница открывается и возвращает 200
 		//создаем несколько моделей, чтобы страница работала в сценарии когда что-то рендерится
-		if (($skip=$this->skipByTestDataError($this->getTestData()))!==null) return $skip;
+		$this->getTestData();
 		return [[
-			'name' => 'default',
-			'GET' => ['source' => 'http://1.1.1.1'],
-			'response' => [404,200],	//TODO убрать 404. Метод должен работать везде.
+			'name' => 'async grid',
+			'GET' => ['source' => 'http://10.10.10.10'],
+			'response' => [404,200],	//для моделей без Search класса будет 404, для моделей с Search классом будет 200
 		]];
 	}
 
 	/**
-	 * Displays a item for single model.
-	 * @param int  $id
+	 * Вывести короткое представление модели для отображения в списках, связанных объектах и т.п.
+	 * @param int $id ID модели
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
@@ -577,19 +590,25 @@ class ArmsBaseController extends Controller
 		]);
 	}
 	
+
+	/**
+	 * проверяем, что может отобразить как модель полностью заполненную, так и модель с минимальным набором данных
+	 * оба варианта должны без ошибок отобразиться с кодом 200
+	 */
 	public function testItem(): array
 	{
-		//проверяем что может отобразить как модель полностью заполненную, так и модель с минимальным набором данных
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		$full=	$testData['full'];
-		$empty=$testData['empty'];
+		$empty=	$testData['empty'];
 		return [
 			['name' => 'item full',  'GET' => ['id' => $full->id],  'response' => 200,],
 			['name' => 'item empty', 'GET' => ['id' => $empty->id], 'response' => 200,],
 		];
 	}
 	
+	/**
+	 * Вывести короткое представление модели по имени модели (для интеграции с wiki синтаксисом)
+	 */
 	public function actionItemByName($name)
 	{
 		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'item.php')?
@@ -601,28 +620,38 @@ class ArmsBaseController extends Controller
 		]);
 	}
 	
+	/**
+	 * проверяем, что метод находит и отображает модель по имени, 
+	 * как для полностью заполненной модели, так и для модели с минимальным набором данных
+	 */
 	public function testItemByName(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		$full=	$testData['full'];
-		$empty=$testData['empty'];
+		$empty=	$testData['empty'];
 		$emptyName=$empty->getName();
 		return [
-			['name' => 'item by name full',	'GET' => ['name' => $full->getName()],	'response' => 200,],
+			[
+				'name' => 'item by name full',	
+				'GET' => ['name' => $full->getName()],	
+			],
 			[
 				'name' => 'item by name empty',
 				'GET' => ['name' => $emptyName],
-				'response' => 200,
-				'skip' => empty($emptyName),
+				'skip' => empty($emptyName),		//если имя пустой модели тоже пустое, то тест бессмысленный, пропускаем его
 				'reason' => 'empty model has no name',
 			],
 		];
 	}
 	
 	/**
-	 * Displays a tooltip for single model.
-	 * @param int $id
+	 * Вернуть tooltip карточку модели
+	 * Если передан параметр timestamp, то искать не текущую модель, а запись из журнала изменений модели на момент времени timestamp
+	 * (для отображения истории изменений модели по журналу)
+	 * Если шаблон ttip.php есть в папке контроллера, то использовать его, если нет, то использовать стандартный /layouts/ttip
+	 * (для возможности кастомизации отображения tooltip для конкретной модели)
+	 * @param int $id ID модели
+	 * @param int|null $timestamp
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
@@ -641,21 +670,24 @@ class ArmsBaseController extends Controller
 		]);
 	}
 	
+	/**
+	 * проверяем, что метод находит и отображает tooltip для модели, 
+	 * как для полностью заполненной модели, так и для модели с минимальным набором данных
+	 */
 	public function testTtip(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		$full=	$testData['full'];
-		$empty=$testData['empty'];
+		$empty=	$testData['empty'];
 		return [
 			['name' => 'ttip full',	 'GET' => ['id' => $full->id],	'response' => 200,],
-			['name' => 'ttip empty', 'GET' => ['id' => $empty->id],'response' => 200,],
+			['name' => 'ttip empty', 'GET' => ['id' => $empty->id], 'response' => 200,],
 		];
 	}
 	
 	/**
-	 * Displays a single Arms model.
-	 * @param int $id
+	 * Отображает страницу просмотра конкретной модели
+	 * @param int $id ID модели
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
@@ -668,12 +700,15 @@ class ArmsBaseController extends Controller
 		]);
 	}
 	
+	/**
+	 * Проверяем, что страница просмотра модели открывается и отображает модель, как для полностью заполненной модели, 
+	 * так и для модели с минимальным набором данных
+	 */
 	public function testView(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		$full=	$testData['full'];
-		$empty=$testData['empty'];
+		$empty=	$testData['empty'];
 		return [
 			['name' => 'view full',	 'GET' => ['id' => $full->id],	'response' => 200,],
 			['name' => 'view empty', 'GET' => ['id' => $empty->id],'response' => 200,],
@@ -681,8 +716,8 @@ class ArmsBaseController extends Controller
 	}
 
     /**
-     * Validates  model on update.
-     * @param int|null $id
+     * Проверяем валдиность данных модели через Ajax, не сохраняя модель
+     * @param int|null $id ID модели, если передан, то валидируем существующую модель, если не передан, то валидируем новую модель
      * @return mixed
      * @throws NotFoundHttpException
      */
@@ -702,16 +737,20 @@ class ArmsBaseController extends Controller
         return null;
     }
 	
+	/**
+	 * Тест для Ajax-валидации модели: отправляем данные для валидации и проверяем, что ответ приходит с кодом 200
+	 * для валидации новой модели и для валидации существующей модели
+	 * (для существующей модели передаем id модели в GET параметре, для новой модели не передаем id модели) 
+	 */
 	public function testValidate(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		$model=$testData['update'];
-		return [[
-			'name' => 'validate data',
-			'POST' => ModelHelper::fillForm($model),
-			'response' => 200,
-		]];
+		$data=$testData['validate-data'];
+		return [
+			['name' => 'validate new','POST' => ModelHelper::fillForm($data)],
+			['name' => 'validate existing','POST' => ModelHelper::fillForm($data),'GET' => ['id' => $model->id],],
+		];
 	}
 	
 	/**
@@ -738,8 +777,12 @@ class ArmsBaseController extends Controller
 	
 	
 	/**
-	 * Creates a new model.
-	 * If creation is successful, the browser will be redirected to the 'view' page.
+	 * Создает новую модель. 
+	 * Если данные переданы через POST, то пытается создать модель с этими данными, 
+	 * если данные не переданы, то отображает форму создания модели.
+	 * Если модель успешно создана, то 
+	 *   - возвращает JSON с данными модели для REST-клиентов,
+	 *   - или перенаправляет на страницу просмотра модели для обычных клиентов, если в запросе нет параметра return=previous,
 	 * @return mixed
 	 */
 	public function actionCreate()
@@ -762,27 +805,30 @@ class ArmsBaseController extends Controller
 		return $this->defaultRender($view, ['model' => $model,]);
 	}
 	
-		public function testCreate(): array
+	/**
+	 * Тест для создания модели: открываем страницу создания модели и отправляем данные для создания модели, 
+	 * проверяя, что в обоих случаях приходит код 200 или 201 или 302
+	 */
+	public function testCreate(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
 		$model=$testData['create'];
 		return [
-			['name' => 'form load', 'GET' => [],'response' => 200,],
+			['name' => 'form load'],
 			[
 				'name' => 'form post',
-				'GET' => [],
 				'POST'=>ModelHelper::fillForm($model),
-				'response' => [200,201,302],
+				'response' => [200,302],
 			],
 		];
 	}
 	
 	
 	/**
-     * Updates an existing model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id
+     * Обновляет существующую модель.
+	 * Если данные переданы через POST, то пытается обновить модель с этими данными,
+	 * если данные не переданы, то отображает форму редактирования модели.
+     * @param int $id ID модели
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -808,19 +854,22 @@ class ArmsBaseController extends Controller
 		return $this->defaultRender($view, ['model' => $model,]);
     }
 	
+	/**
+	 * Тест для обновления модели: открываем страницу редактирования модели и отправляем данные для обновления модели, 
+	 * проверяя, что в обоих случаях приходит код 200, 202 или 302
+	 */
 	public function testUpdate(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
-		$toUpdate=$testData['to-update'];
 		$update=$testData['update'];
+		$updateData=$testData['update-data'];
 		return [
-			['name' => 'form open','GET' => ['id' => $toUpdate->id],'response' => 200,],
+			['name' => 'form open','GET' => ['id' => $update->id]],
 			[
 				'name' => 'data post',
-				'GET' => ['id' => $toUpdate->id],
-				'POST' => ModelHelper::fillForm($update),
-				'response' => [200,202,302],
+				'GET' => ['id' => $update->id],
+				'POST' => ModelHelper::fillForm($updateData),
+				'response' => [200,302],
 			]
 		];
 	}
@@ -853,11 +902,10 @@ class ArmsBaseController extends Controller
 	public function testDelete(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
-		$toDelete=$testData['to-delete'];
+		$delete=$testData['delete'];
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => $toDelete->id],
+			'GET' => ['id' => $delete->id],
 			'POST' => [],
 			'response' => 302,
 		]];
@@ -934,33 +982,6 @@ class ArmsBaseController extends Controller
 		throw new NotFoundHttpException('The requested page does not exist.');
 	}
 
-	/* ====== Generative acceptance scenarios (default) ====== */
-	
-	protected static function skipScenario(string $name, string $reason): array
-	{
-		return [
-			[
-				'name' => $name,
-				'skip' => true,
-				'reason' => $reason,
-			],
-		];
-	}
-	
-	public function disabledTests(): array
-	{
-		return $this->disabledActions();
-	}
-	
-	/*public function testUploads(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
-	}*/
-	
 	
 	public function testEditable(): array
 	{

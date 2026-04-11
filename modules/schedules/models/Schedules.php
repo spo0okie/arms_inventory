@@ -11,6 +11,7 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
+use app\types\DateType;
 
 /**
  * Hint: В оформлении расписания надо придерживаться правила, что расписание отвечает на вопрос когда?
@@ -271,6 +272,7 @@ class Schedules extends \app\models\base\ArmsModel
 			'end_date'=>[
 				'Дата окончания',
 				'placeholder' => 'Конец периода',
+				'typeClass' => DateType::class,
 			],
 			'entries' => [
 				'Даты/периоды',
@@ -314,6 +316,7 @@ class Schedules extends \app\models\base\ArmsModel
 			'start_date'=>[
 				'Дата начала',
 				'placeholder' => 'Начало периода',
+				'typeClass' => DateType::class,
 			],
 			'supportServices'=>['Поддерж. сервисы','indexHint'=>'Сервисы поддерживаемые по этому расписанию',],
 			'workTimeDescription' => [

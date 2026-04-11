@@ -61,7 +61,7 @@ class TechsController extends ArmsBaseController
 	public function testTtipHw(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],
@@ -72,7 +72,7 @@ class TechsController extends ArmsBaseController
 	public function testUploads(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],

@@ -99,6 +99,7 @@ class Aces extends ArmsModel
     {
         return [
             [['acls_id'], 'integer'],
+			[['acls_id'], 'required'],
 			[['comps_ids','users_ids','access_types_ids','netIps_ids','services_ids','networks_ids'], 'each', 'rule'=>['integer']],
 			[['ipParams'], 'each', 'rule'=>['string']],
             [['ips', 'notepad','name'], 'string'],
@@ -120,10 +121,7 @@ class Aces extends ArmsModel
 	public function afterGenerate(GenerationContext $context, array $options = []): void
 	{
 		parent::afterGenerate($context, $options);
-
-		if (!empty($this->ips)) {
-			$this->ips = '127.0.0.1';
-		}
+		
 	}
 	
 	/**

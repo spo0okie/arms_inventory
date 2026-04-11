@@ -2,9 +2,12 @@
 
 namespace app\modules\schedules\models;
 
+use app\generation\context\AttributeContext;
+use app\generation\context\GenerationContext;
 use app\helpers\ArrayHelper;
 use app\modules\schedules\helpers\TimeIntervalsHelper;
 use app\modules\schedules\models\traits\ScheduleEntriesModelCalcFieldsTrait;
+use app\types\DateType;
 use Yii;
 use yii\validators\DateValidator;
 
@@ -122,7 +125,7 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 		
 		$tokens=explode(':',$time);
 		
-		if (count($tokens)!==2) return false; //ожидаем именно ЧЧ:ММ , т.е. токенов 2 и никак иначе
+		if (count($tokens)!==2) return false; //ожидаем именно ЧЧ:ММ, то есть токенов 2 и никак иначе
 
 		foreach ($tokens as $token) if (strlen(trim($token))>2) return false; //никаких ЧЧЧ или МММ
 		
@@ -261,7 +264,7 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 				}
 			},'on'=>static::SCENARIO_DAY],
 			
-			//если у нас период, а не расписание на день
+			//если у нас период, а не расписание на день,
 			//то нужно начало и конец периода в нужных форматах
 			[['date','date_end'],'required',
 				'message' => 'У периода должна быть хотя бы одна граница',
@@ -304,6 +307,7 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Отображается в общем списке',
+				'typeClass'=>\app\types\StringType::class,
 			],
 			'date' => [
 				$this->is_period?'Начало':'День/Дата',
@@ -314,16 +318,19 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 			'date_end' => [
 				'Окончание',
 				'hint' => 'Дата/время окончания периода',
+				'typeClass'=>\app\types\DateType::class,
 			],
 			'is_period' => [
 				'Период',
 				'hint' => 'Запись - расписание на день, или более длительный период?',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'is_work' => [
 				'Тип периода',
 				'hint' => $this->isAcl?
 					'Если установлено - права предоставляются, иначе - отзываются':
 					'Если установлено - период рабочий, иначе - нерабочий',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'is_work_Y' => $this->isAcl?'Доступ предоставляется':'Рабочий период',
 			'is_work_N' => $this->isAcl?'Доступ запрещается':'Нерабочий период',
@@ -340,11 +347,29 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 		]);
 	}
 	
+	public function afterGenerate(GenerationContext $context, array $options = []): void
+	{
+		parent::afterGenerate($context, $options);
+		
+		if (!$this->is_period) {
+			$this->date_end = null;
+		} else {
+			$dateType=new DateType();
+			$context=new AttributeContext(
+				'date',
+				false,
+				$this,
+				$context,
+			);
+			$this->date = $dateType->generate($context);
+			$this->date_end = $dateType->generate($context);
+		}
+	}
+	
 	static function strToUnixTime($time) {
 		if (is_null($time) || !strlen($time)) return null;
 		return strtotime($time);
 	}
-	
 	
 	public function getMaster() {
 		return Schedules::findOne($this->schedule_id);

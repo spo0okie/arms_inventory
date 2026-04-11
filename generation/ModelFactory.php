@@ -137,6 +137,7 @@ class ModelFactory
 		$attribute=$attributeContext->attribute;
 		$model = $attributeContext->model;
 		$context=$attributeContext->generationContext;
+		$empty=$attributeContext->empty;
 		
 		if (!$model->attributeIsLink($attribute)) {
 			throw new ModelGenerationException(
@@ -152,7 +153,7 @@ class ModelFactory
 		$canGet = $model->canGetProperty($attribute);	//аттрибут читаемый
 		$canSet = $model->canSetProperty($attribute);	//аттрибут устанавливаемый?
 		
-		if ($canGet && !ArmsModel::attrIsEmpty($model,$attribute)) {
+		if ($canGet && ArmsModel::attrIsEmpty($model,$attribute)===$empty) {
 			return;	//атрибут уже заполнен, пропускаем
 		}
 		
@@ -305,16 +306,17 @@ class ModelFactory
 		// иначе получаем тип атрибута и генерируем значение
 		try {
 			$type = $context->model->getAttributeTypeClass($attribute);
-			$context->model->$attribute = $type->generate($context);
+			$value = $type->generate($context);
+			$context->model->$attribute = $value;
 		} catch (Throwable $e) {
 			throw new ModelGenerationException(
 				modelClass: get_class($context->model),
 				stage: 'generateAttribute',
-					seed: $context->generationContext->seed,
-					attribute: $attribute,
-					previous: $e
-				);
-			}
+				seed: $context->generationContext->seed,
+				attribute: $attribute,
+				previous: $e
+			);
+		}
 	}
 	
 	/**

@@ -57,130 +57,6 @@ class PageAccessCest
 		return $actions;
 	}
 	
-	/**
-	 * Загружает пару моделей для контроллера
-	 * @param $controller
-	 * @return \app\models\ArmsModel[]
-	 */
-	protected function getModels($controller)
-	{
-		$model=null;
-		$otherModel=null;
-		codecept_debug('getModels for controller: '.get_class($controller));
-		if (property_exists($controller,'modelClass')) {
-			// Если контроллер имеет атрибут modelClass, то получаем его
-			$modelClass = $controller->modelClass;
-			codecept_debug('modelClass: '.$modelClass);
-			if ($modelClass) {
-				$model=$modelClass::find()->one();
-				if (is_object($model)) {
-					codecept_debug('model: '.$model->id);
-					$otherModel=$modelClass::find()->where(['not',['id'=>$model->id]])->one();
-				}
-			}
-		}
-		return [$model,$otherModel];
-	}
-	
-	protected function getModel($controller,$params)
-	{
-		codecept_debug('getModels for controller: '.get_class($controller));
-		if (property_exists($controller,'modelClass')) {
-			// Если контроллер имеет атрибут modelClass, то получаем его
-			$modelClass = $controller->modelClass;
-			codecept_debug('modelClass: '.$modelClass);
-			if ($modelClass) {
-				return $modelClass::find()->where($params)->one();
-			}
-		}
-		return null;
-	}
-	
-	protected function dropReverseLinks($model)
-	{
-		if (is_null($model)) return;
-		$needUpdate=false;
-		foreach ($model->getLinksSchema() as $attribute=>$data) {
-			if (StringHelper::endsWith($attribute,'_ids')) {
-				codecept_debug('Dropping '.get_class($model).' reverse link: '.$attribute);
-				$model->$attribute=[];
-				$needUpdate=true;
-			}
-		}
-		if ($needUpdate) {
-			codecept_debug('Dropping reverse links for model: '.get_class($model).' id: '.$model->id);
-			if (!$model->save(false)) {
-				throw new InvalidConfigException('Error saving model after dropping reverse links: '.print_r($model->getErrors(),true));
-			}
-			codecept_debug('Dropping reverse links for model: '.get_class($model).' id: '.$model->id.' SUCCESS');
-		}
-	}
-	
-	/**
-	 * Наполняет шаблоны в параметрах значениями
-	 *
-	 * @param array $models
-	 * @return void
-	 * @throws InvalidConfigException
-	 */
-	protected function templateRouteParams(&$params,$models)
-	{
-		foreach ($params as $verb=>$verbParams) {
-			if (is_array($verbParams)) foreach ($verbParams as $param=>$value) {
-				switch ($value) {
-					case '{anyId}':
-						if (is_null($models[0]))
-							throw new InvalidConfigException('error loading single model');
-						$params[$verb][$param]=$models[0]->id;
-						break;
-					case '{otherId}':
-						if (is_null($models[1]))
-							throw new InvalidConfigException('error loading second model');
-						$params[$verb][$param]=$models[1]->id;
-						break;
-					case '{anyName}':
-						if (is_null($models[0]))
-							throw new InvalidConfigException('error loading single model');
-						$params[$verb][$param]=$models[0]->name;
-						break;
-					case '{anyModelParams}':
-						if (is_null($models[0]))
-							throw new InvalidConfigException('error loading single model');
-						unset($params[$verb][$param]); //убираем параметр с макросом, так как его заменяем множеством параметров
-						$params[$verb][StringHelper::className(get_class($models[0]))]=Helper\ModelData::fillForm(
-							Helper\ModelData::getFormAttributes($models[0]),
-							$models[0]);
-						break;
-					case '{otherModelParams}':
-						if (is_null($models[1]))
-							throw new InvalidConfigException('error loading second model');
-						unset($params[$verb][$param]); //убираем параметр с макросом, так как его заменяем множеством параметров
-						$params[$verb][StringHelper::className(get_class($models[1]))]=Helper\ModelData::fillForm(
-							Helper\ModelData::getFormAttributes($models[1]),
-							$models[1]
-						);
-						break;
-					default:
-						if (is_string($value) && preg_match('/{(\\w+)ModelParams}/', $value, $matches)) {
-							//если в значении параметра есть макрос, то заменяем его на параметры модели
-							$name=$matches[1];
-							if (isset($models[$name])) {
-								$model=$models[$name];
-								$params[$verb][StringHelper::className(get_class($model))]=Helper\ModelData::fillForm(
-									Helper\ModelData::getFormAttributes($model),
-									$model
-								);
-							} else {
-								throw new InvalidConfigException("Error loading model '$name' in route params");
-							}
-						}
-						if (is_array($value)) {
-							$this->templateRouteParams($params[$verb], $models);
-						}
-				}
-			}
-		}
-	}
 
 	
 	/**
@@ -228,13 +104,6 @@ class PageAccessCest
 		return $routes;
 	}
 
-	protected function extractVariantIndex(string $route): int
-	{
-		if (preg_match('/\\[(\\d+)\\]$/', $route, $m)) {
-			return (int)$m[1];
-		}
-		return 0;
-	}
 	
 	/**
 	 * Сканирует директорию контроллеров и добавляет маршруты в массив
@@ -291,9 +160,8 @@ class PageAccessCest
 					$scenarios = $this->getActionScenarios($controller, $actionId);
 					foreach ($scenarios as $scenario) {
 						$controllerId = StringHelper::class2Id($controller->id);
-						$defaultRoute = $controllerId.'/'.$actionId;
-						$route = $scenario['route'] ?? $defaultRoute;
-						$route = str_replace(['{controllerId}', '{action}'], [$controllerId, $actionId], $route);
+						$route = $scenario['route'] ?? '{controller}/{action}';
+						$route = str_replace(['{controller}', '{action}'], [$controllerId, $actionId], $route);
 						$scenario['route'] = $route;
 						$scenario['controller'] = $file;
 						$scenario['moduleName'] = $moduleName;
@@ -311,13 +179,7 @@ class PageAccessCest
 	{
 		$method = 'test' . Inflector::id2camel($actionId, '-');
 		return $controller->$method();
-		/*return [
-			[
-				'name' => 'auto-skip',
-				'skip' => true,
-				'reason' => "No DataProvider method $method",
-			],
-		];*/
+
 	}
 	/**
 	 * @dataProvider routesProvider
@@ -327,51 +189,28 @@ class PageAccessCest
 	public function testAllRoutesAccessible(AcceptanceTester $I, \Codeception\Example $example)
 	{
 		if (!empty($example['skip'])) {
-			Assert::markTestSkipped($example['reason'] ?? 'skipped');
+			Assert::markTestSkipped($example['reason'] ?? 'reason missing');
 		}
 		
 		$I->stopFollowingRedirects();
 		$route=$example['route'];
-		$controller=$this->getController($example['controller'], $example['moduleName'] ?? null);
-		$modelClass=$controller->modelClass;
-		if (!isset($this->savedModels[$modelClass])) $this->savedModels[$modelClass]=[];
 		
-		$models=\yii\helpers\ArrayHelper::merge(
-			$this->getModels($controller),$this->savedModels[$modelClass]
-		);
-		
-		$routeParams=(array)$example->getIterator();
-		/*try {
-			$this->templateRouteParams($routeParams, $models);
-		} catch (InvalidConfigException $e) {
-			//дополняем информацию маршрутом на котором произошла ошибка
-			throw new InvalidConfigException("Error in route '$route': " . $e->getMessage());
-		}*/
-
-		if (!is_null($saveModel=$routeParams['saveModel']??null)) {
-			$this->savedModels[$modelClass][$saveModel['storeAs']]=$this->getModel($controller,$saveModel['model']);
-		}
-		
-		if (!is_null($dropReverseLinks=$routeParams['dropReverseLinks']??null)) {
-			$this->dropReverseLinks($this->getModel($controller,$dropReverseLinks));
-		}
-		
-		$getParams=$routeParams['GET']??[];
+		$getParams=$example['GET']??[];
 		$getParams[0]='/'.$route;
-		$route=\yii\helpers\Url::toRoute($getParams);
+		$fullRoute=\yii\helpers\Url::toRoute($getParams);
 		
-		$postParams=$routeParams['POST']??null;
+		$postParams=$example['POST']??null;
 		$code=$example['response']??200;
 		
 		
 		$message='';
 		if (is_null($postParams)) {
-			$I->amOnPage($route);
+			$I->amOnPage($fullRoute);
 			$message="GET $route is accessible";
 			
 		} else {
-			$I->sendPOST($route, $postParams);
-			$message="POST data $route is nominal";
+			$I->sendPOST($fullRoute, $postParams);
+			$message="POST data $fullRoute is nominal";
 		}
 
 		if (is_array($code))

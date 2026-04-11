@@ -24,7 +24,7 @@ class SoftController extends ArmsBaseController
 	public function testTtip(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],
@@ -35,7 +35,7 @@ class SoftController extends ArmsBaseController
 	public function testView(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],
@@ -55,7 +55,7 @@ class SoftController extends ArmsBaseController
 	public function testUploads(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],

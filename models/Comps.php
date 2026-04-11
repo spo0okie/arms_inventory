@@ -268,7 +268,7 @@ class Comps extends ArmsModel
 			],
 			'comment' => ['Комментарий', 'absorb' => 'ifEmpty','type'=>'text','typeClass'=>\app\types\TextType::class],
 			'domain_id' => ['Домен', 'absorb' => 'ifEmpty','typeClass'=>\app\types\LinkType::class],
-			'exclude_hw' => ['Скрыто из паспорта железо', 'absorb' => 'ifEmpty','typeClass'=>\app\types\TextType::class],
+			'exclude_hw' => ['Скрыто из паспорта железо', 'absorb' => 'ifEmpty','typeClass'=>\app\types\HwListType::class],
 			'ignore_hw' => [
 				'Виртуальная машина',
 				'indexLabel' => 'VM',
@@ -341,9 +341,9 @@ class Comps extends ArmsModel
 				'Hardware',
 				'indexHint' => 'Строка оборудования обнаруженного Операционной Системой<br>'
 					.'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку',
-				'typeClass'=>\app\types\JsonType::class,
+				'typeClass'=>\app\types\HwListType::class,
 			],
-			'raw_soft' => ['Отпечаток софта (заполняется скриптом)','typeClass'=>\app\types\JsonType::class],
+			'raw_soft' => ['Отпечаток софта (заполняется скриптом)','typeClass'=>\app\types\SwListType::class],
 			'raw_version' => [
 				'Скрипт',
 				'indexHint' => 'Скрипт, который внес последние данные по этой ОС',

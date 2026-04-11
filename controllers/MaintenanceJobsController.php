@@ -16,10 +16,6 @@ use yii\web\NotFoundHttpException;
  */
 class MaintenanceJobsController extends ArmsBaseController
 {
-	public function testView(): array
-	{
-		return self::skipScenario('default', 'requires stable linked schedule fixtures');
-	}
 	public function testChildrenTree(): array
 	{
 		return self::skipScenario('default', 'requires stable tree fixtures');
@@ -27,12 +23,9 @@ class MaintenanceJobsController extends ArmsBaseController
 	
 	public function testIndexTree(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
+		return [[]];//default test
 	}
+	
 	public $modelClass=MaintenanceJobs::class;
 	
 	public function accessMap()

@@ -21,29 +21,17 @@ class MaterialsController extends ArmsBaseController
 	
 	public function testTypeGroups(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
+		return [[]]; //default
 	}
 	
 	public function testNameGroups(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
+		return [[]]; //default
 	}
 	
 	public function testSearchList(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['type' => '{anyId}'],
-			'response' => 200,
-		]];
+		return [[]]; //default
 	}
 	
 	public $modelClass=Materials::class;

@@ -50,7 +50,7 @@ class ServicesController extends ArmsBaseController
 	public function testAcesList(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],
@@ -61,7 +61,7 @@ class ServicesController extends ArmsBaseController
 	public function testAclsList(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],
@@ -77,7 +77,7 @@ class ServicesController extends ArmsBaseController
 	public function testCardSupport(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],
@@ -93,7 +93,7 @@ class ServicesController extends ArmsBaseController
 	public function testChildrenTree(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],
@@ -104,7 +104,7 @@ class ServicesController extends ArmsBaseController
 	public function testJsonPreview(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],
@@ -115,7 +115,7 @@ class ServicesController extends ArmsBaseController
 	public function testOsList(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],

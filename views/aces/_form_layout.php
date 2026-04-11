@@ -45,7 +45,7 @@ function updateAccessTypes() {
  	});
  	//передаем в контроллер с типами доступа
  	$.ajax({
- 		url:'/web/aces/access-types-form?'+get_params.join('&'),
+ 		url:'/web/access-types/access-types-form?'+get_params.join('&'),
  	    success: function (data) {
  	    	//console.log(data);
  	    	for (let i in data) if (data.hasOwnProperty(i)) {

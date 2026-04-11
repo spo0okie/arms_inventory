@@ -27,13 +27,13 @@ class AclsController extends ArmsBaseController
 		]);
 	}
 	
+	public function actionAceCards(int $id) {
+		return $this->defaultRender('ace-cards',['model'=>$this->findModel($id)]);
+	}
+	
 	public function testAceCards(): array
 	{
 		return self::skipScenario('default', 'requires stable ACL-to-schedule relation');
-	}
-	
-	public function actionAceCards(int $id) {
-		return $this->defaultRender('ace-cards',['model'=>$this->findModel($id)]);
 	}
 	
 	public function routeOnUpdate($model)

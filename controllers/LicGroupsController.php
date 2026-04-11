@@ -15,17 +15,6 @@ use yii\web\Response;
  */
 class LicGroupsController extends ArmsBaseController
 {
-	public function testDelete(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '9'],
-			'POST' => [],
-			'saveModel' => ['storeAs' => 'deleted', 'model' => ['id' => '9']],
-			'dropReverseLinks' => ['id' => '9'],
-			'response' => 302,
-		]];
-	}
 	
 	public function testLink(): array
 	{

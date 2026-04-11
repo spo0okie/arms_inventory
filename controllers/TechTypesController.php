@@ -32,7 +32,7 @@ class TechTypesController extends ArmsBaseController
 	public function testHintTemplate(): array
 	{
 		$testData=$this->getTestData();
-		if (($skip=$this->skipByTestDataError($testData))!==null) return $skip;
+		
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],

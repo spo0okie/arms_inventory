@@ -1,20 +1,12 @@
-# Генеративные тесты ARMS
+# Генеративный механизм ARMS
 
-Система динамической генерации валидных моделей для автоматического тестирования UI.
+Система динамической генерации валидных моделей.
+Используется для генерации тестовых данных для автоматического тестирования UI.
 
 ## Быстрый старт
 
 ```bash
-# Запуск всех unit-тестов генерации
-vendor/bin/codecept run unit models/DeterministicGenerationTest --verbose
-
-# Запуск всех unit-тестов генерации моделей
-vendor/bin/codecept run unit models/ModelGenerationTest --verbose
-
-# Запуск всех unit-тестов типов атрибутов
-vendor/bin/codecept run unit types/AttributeTypeForGenerationTest --verbose
-
-# Запуск acceptance-тестов
+# Запуск acceptance-тестов с генерацией моделей
 vendor/bin/codecept run acceptance PageAccessCest --verbose
 ```
 
@@ -22,11 +14,7 @@ vendor/bin/codecept run acceptance PageAccessCest --verbose
 
 ## Архитектура
 
-```
-SQL dump + фикстуры  →  Динамическая генерация  →  Проверка UI (200/302)
-```
-
-### Pipeline
+### Pipeline генерации моделей
 
 ```text
 ModelFactory::create()
@@ -36,17 +24,19 @@ ModelFactory::create()
             ├── applyPreset()       [бизнес-сценарии через Model::roles()]
             ├── applyOverrides()    [явные переопределения]
             ├── model->afterGenerate() [бизнес-логика из ValidationGenerationTrait]
-            ├── validate()
+            ├── validate() [c retry при ошибках]
             └── save() [c retry при ошибках]
 ```
 
+В настоящий момент генерация работает с 1 попыткой валидации и сохранения (без retry), так как генерация достаточно стабильная. Но механизм retry оставлен на всякий случай раз уж он уже реализован.
+
 ### Разделение ответственности
 
-```
+```text
 Типы атрибутов (types/*Type)     → тупая генерация значений по правилам
+Model::afterGenerate()           → бизнес-логика модели 
 Model::roles()                   → умный preset с бизнес-сценариями
 ModelFactory                     → оркестратор процесса
-Model::afterGenerate()           → бизнес-логика модели
 ```
 
 ---
@@ -61,7 +51,7 @@ Model::afterGenerate()           → бизнес-логика модели
 // Базовое создание
 $model = ModelFactory::create(Model::class);
 
-// Пустая модель (nullable атрибуты)
+// Пустая модель (не-required атрибуты пустые)
 $model = ModelFactory::create(Model::class, [], ['empty' => true]);
 
 // С переопределениями
@@ -76,22 +66,22 @@ $model = ModelFactory::create(Model::class, [], ['seed' => 42]);
 // Без сохранения в БД
 $model = ModelFactory::create(Model::class, [], ['save' => false]);
 
-// С ограничением глубины связей
-$model = ModelFactory::create(Model::class, [], ['maxDepth' => 1]);
+// С указанием глубины связей
+$model = ModelFactory::create(Model::class, [], ['maxDepth' => 7]);
 ```
 
 ### Опции
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `empty` | bool | `false` | Генерировать nullable значения |
-| `role` | string\|null | `null` | Preset из `Model::roles()` |
-| `overrides` | array | `[]` | Явные значения атрибутов |
-| `save` | bool | `true` | Сохранять в БД |
-| `seed` | int\|null | `null` | Seed для детерминизма |
-| `maxDepth` | int | `2` | Максимальная глубина связей |
-| `validateRetries` | int | `1` | Retry при валидации |
-| `saveRetries` | int | `1` | Retry при сохранении |
+| Опция             | Тип         | По умолчанию | Описание                       |
+| ----------------- | ----------- | ------------ |------------------------------- |
+| `empty`           | bool        | `false`      | Генерировать nullable значения |
+| `role`            | string/null | `null`       | Preset из `Model::roles()`     |
+| `overrides`       | array       | `[]`         | Явные значения атрибутов       |
+| `save`            | bool        | `true`       | Сохранять в БД                 |
+| `seed`            | int/null    | `null`       | Seed для детерминизма          |
+| `maxDepth`        | int         | `2`          | Максимальная глубина связей    |
+| `validateRetries` | int         | `1`          | Retry при валидации            |
+| `saveRetries`     | int         | `1`          | Retry при сохранении           |
 
 ---
 
@@ -123,7 +113,7 @@ class AttributeContext
         public readonly GenerationContext $generationContext,
     ) {}
 
-    public function generatorConfig(): array    // конфиг из rules
+    public function generatorConfig(): array    // конфиг генерации из attributeData
     public function isNullable(): bool          // можно ли null
     public function randomizer(): Randomizer    // изолированный RNG
 }
@@ -143,6 +133,7 @@ $randomizer = new Randomizer(new Mt19937($seed));
 ```
 
 **Свойства:**
+
 - Одинаковый seed → одинаковые модели
 - Без глобального состояния (не использует `mt_srand`)
 - Глубина влияет на seed (разные значения для вложенных моделей)
@@ -173,11 +164,9 @@ public static function linksSchema(): array
 
 ### Принципы
 
-- Генератор **не создаёт модели напрямую** — `ModelFactory` управляет связями
-- Глубина ограничивается через `depth` / `maxDepth`
-- При `maxDepth` обязательные связи берут существующую запись из БД
+- Глубина генерации связей ограничивается через `depth` / `maxDepth`
+- При достижении `maxDepth` создаются только обязательные связи
 - Self-reference поддерживается только как **nullable** связи
-- Циклы предотвращаются через `visited` tracking
 
 ### Self-reference
 
@@ -232,6 +221,7 @@ $pc = ModelFactory::create(Techs::class, [], ['role' => 'pc']);
 ```
 
 **Требования:**
+
 - Идемпотентность
 - Возвращает валидную модель
 - Не ломает генерацию
@@ -250,6 +240,7 @@ interface GeneratorInterface
 ```
 
 **Принципы генераторов:**
+
 - Stateless
 - Не обращаются к БД
 - Не знают про модель целиком
@@ -261,12 +252,13 @@ interface GeneratorInterface
 
 [`ValidationGenerationTrait`](models/base/traits/ValidationGenerationTrait.php) предоставляет методы для бизнес-логики:
 
+Сложная бизнес-логика, которая проверяется нетривиальными правилами в `rules()`, должна быть реализована в `afterGenerate()`: через вызов методов для соответствующих правил (например, `applyRequireOneOfRules()`).
+
 ```php
 // Вызывается после генерации атрибутов, перед валидацией
 public function afterGenerate(GenerationContext $context, array $options): void
 {
     // Пример: applyRequireOneOfRules()
-    // Пример: заполнение вычисляемых полей
 }
 ```
 
@@ -276,12 +268,14 @@ public function afterGenerate(GenerationContext $context, array $options): void
 
 ### Структура
 
-```
+```text
 tests/acceptance/PageAccessCest.php  →  Сканирует все контроллеры
        ↓
-controllers/*Controller.php            →  Описывает test*() сценарии
+controllers/*Controller.php          →  Извлекает соответствующие action методы
        ↓
-action*()                              →  Соответствующие action методы
+action*()                            →  Для каждого action ищет test*() метод
+       ↓
+test*()                              →  Возвращает массив тестовых сценариев
 ```
 
 ### Формат сценария
@@ -290,76 +284,60 @@ action*()                              →  Соответствующие actio
 public function testIndex(): array
 {
     return [
-        [
-            'name'     => 'default',
-            'GET'      => [],
-            'response' => 200,
+        [//один из сценариев. их может быть несколько для одного action
+            'name'     => 'default',                  //пояснение сценария   (например, для разных сценариев)
+            'route'    => '{controller}/{action}',    //тестовый маршрут     (по умолчанию '{controller}/{action}')
+            'GET'      => [],                         //GET параметры        (по умолчанию [] → без параметров)
+            'POST'     => null,                       //POST параметры       (по умолчанию null → не отправлять POST)
+            'response' => [404,200],                  //ожидаемый код ответа (по умолчанию 200)
+            'skip'     => false,                      //пропустить сценарий  (по умолчанию false)
+            'reason'   => '',                         //причина пропуска     (только для skip=true, по умолчанию пустая строка)
         ],
     ];
 }
 ```
 
-### Поля сценария
-
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `name` | string | Уникальный идентификатор |
-| `route` | string | Маршрут (по умолчанию `{controller}/{action}`) |
-| `GET` | array | GET параметры |
-| `POST` | array | POST параметры (если есть → POST) |
-| `response` | int\|array | Ожидаемый код (или диапазон `[404,200]`) |
-| `skip` | bool | Пропустить сценарий |
-| `reason` | string | Причина пропуска |
-| `role` | string | Preset для генерации |
-| `saveModel` | array | Сохранить модель в контекст |
-| `dropReverseLinks` | array | Удалить обратные связи |
-
-### Макросы
-
-```text
-{anyId}                  → id первой модели
-{otherId}               → id второй модели
-{anyName}               → name первой модели
-{anyModelParams}        → все safe атрибуты первой модели
-{otherModelParams}      → все safe атрибуты второй модели
-```
-
-### Базовые сценарии (ArmsBaseController)
+Для того чтобы подготовить данные для тестов используется getTestData() метод, который возвращает массив с данными для тестов.
+Этот метод возвращает массив моделей, часть из которых может быть сохранена в БД для использования ссылок на них через параметры, а часть может быть просто сгенерирована без сохранения для получения их атрибутов.
 
 ```php
-testIndex()      // Создать 3 модели, GET → 200
-testView()       // GET с id → 200
-testCreate()     // GET → 200, POST → 201
-testUpdate()     // GET → 200, POST → 202
-testDelete()     // POST с id пустой модели → 302
-testItem()       // GET с id → 200
-testItemByName() // GET с name → 200
-testTtip()       // GET с id → 200
-testValidate()   // POST данные → 200
-testAsyncGrid()  // GET → [404,200] (TODO: убрать 404)
+public function getTestData() {
+    $class=$this->modelClass;
+    if (empty(static::$testDataCache[$class])) {
+        //пустая модель для проверки отображения при отсутствии данных
+        static::$testDataCache[$class]['empty']=        ModelFactory::create($class,['empty'=>true]);
+        //полностью заполненная модель для проверки отображения всех данных
+        static::$testDataCache[$class]['full']=         ModelFactory::create($class,['empty'=>false]);
+        //какую модель обновлять
+        static::$testDataCache[$class]['update']=       ModelFactory::create($class,['empty'=>true]);
+        static::$testDataCache[$class]['update-data']=  ModelFactory::create($class,['empty'=>false,'save'=>false]);
+        //какую модель удалять
+        static::$testDataCache[$class]['delete']=       ModelFactory::create($class,['empty'=>true]);
+        //данные для теста создания модели
+        static::$testDataCache[$class]['create']=       ModelFactory::create($class,['empty'=>false,'save'=>false]);
+        //данные для теста валидации модели
+        static::$testDataCache[$class]['validate']=     ModelFactory::create($class,['empty'=>true]);
+        static::$testDataCache[$class]['validate-data']=ModelFactory::create($class,['save'=>false]);
+    }
+    return static::$testDataCache[$class];
+}
 ```
 
 ---
 
 ## Тесты
 
-### Unit-тесты
-
-| Файл | Что проверяет |
-|------|--------------|
-| `DeterministicGenerationTest.php` | Детерминизм: одинаковый seed → одинаковые модели |
-| `ModelGenerationTest.php` | Все модели из `ModelHelper::getModelClasses()` создаются |
-| `ModelTypeSafetyTest.php` | Все safe атрибуты имеют тип |
-| `AttributeTypeForGenerationTest.php` | `getAttributeTypeForGeneration()` работает |
-
-### Acceptance-тесты
-
 ```bash
-# Все контроллеры
-vendor/bin/codecept run acceptance PageAccessCest --verbose
 
-# Конкретный контроллер
-TEST_CLASS_FILTER=Comps vendor/bin/codecept run acceptance PageAccessCest --verbose
+# Проверка детерминизма генерации моделей
+vendor/bin/codecept run unit models/DeterministicGenerationTest --verbose
+
+# Запуск всех тестов генерации типов атрибутов
+vendor/bin/codecept run unit types/AttributeTypeForGenerationTest --verbose
+
+# Запуск тестов успешной генерации моделей
+vendor/bin/codecept run unit models/ModelGenerationTest --verbose
+
 ```
 
 ---
@@ -374,26 +352,3 @@ TEST_CLASS_FILTER=Comps vendor/bin/codecept run acceptance PageAccessCest --verb
 | ModelGenerationResult | `generation/ModelGenerationResult.php` | Результат генерации |
 | ModelGenerationException | `generation/exceptions/ModelGenerationException.php` | Исключения |
 | ValidationGenerationTrait | `models/base/traits/ValidationGenerationTrait.php` | Бизнес-логика |
-
----
-
-## Статус
-
-| Компонент | Статус |
-|-----------|--------|
-| Генерация атрибутов | ✅ Готово |
-| Детерминизм (seed) | ✅ Готово |
-| Presets (roles) | ✅ Готово |
-| Overrides | ✅ Готово |
-| Связи (linksSchema) | ✅ Готово |
-| Self-reference | ✅ Готово (nullable only) |
-| Retry-механизм | ✅ Готово |
-| Unit-тесты | ✅ Готово |
-| Acceptance-тесты | ✅ Готово |
-
-### Последний прогон
-
-```
-2026-04-06: php vendor/bin/codecept run acceptance PageAccessCest --fail-fast
-  → OK, skipped: 90, assertions: 603
-```
