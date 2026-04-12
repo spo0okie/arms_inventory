@@ -16,6 +16,9 @@ require_once Yii::getAlias('@app/swagger/swagger.php');
 class SiteController extends ArmsBaseController
 {
 	
+	/**
+	 * Returns acceptance test data map.
+	 */
 	public function getTestData(): array {return [];}
     /**
      * @inheritdoc
@@ -65,9 +68,11 @@ class SiteController extends ArmsBaseController
 	}
 
     /**
-     * Показывает главную страницу приложения.
+     * Отображает главную страницу приложения.
      *
-     * Данные для вызова: GET без параметров.
+     * Требует права 'view'. GET: нет параметров.
+     *
+     * @return string HTML главной страницы
      */
     public function actionIndex()
     {
@@ -75,9 +80,10 @@ class SiteController extends ArmsBaseController
     }
 
 	/**
-	 * Тестовые данные для actionIndex.
+	 * Acceptance test data for Index.
 	 *
-	 * Нужен простой GET без параметров, ожидается 200.
+	 * Проверяет отображение главной страницы без параметров.
+	 * GET: нет. Ожидается HTTP 200.
 	 */
 	public function testIndex(): array
 	{
@@ -85,13 +91,18 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Отдаёт HTML-страницу из Wiki (DokuWiki/Confluence) по имени страницы.
+	 * Отдаёт HTML-контент страницы Wiki по имени.
 	 *
-	 * Для вызова нужен GET-параметр pageName. Дополнительно можно передать api.
+	 * Поддерживает DokuWiki (JSON-RPC) и Confluence (REST API).
+	 * Результат парсится через WikiHelper::parseWikiHtml для корректного отображения ссылок.
 	 *
-	 * @param string $pageName
-	 * @param string $api
-	 * @return string
+	 * GET:
+	 *   pageName (string) — имя страницы в Wiki.
+	 *   api (string, опционально) — тип Wiki: 'doku' (по умолчанию) или 'confluence'.
+	 *
+	 * @param string $pageName Имя страницы Wiki
+	 * @param string $api      Тип Wiki-API: WikiHelper::DOKUWIKI или 'confluence'
+	 * @return string HTML-контент страницы или сообщение об ошибке
 	 */
 	public function actionWiki($pageName,$api=WikiHelper::DOKUWIKI)
 	{
@@ -112,9 +123,12 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionWiki.
+	 * Acceptance test data for Wiki.
 	 *
-	 * Нужен GET-параметр pageName (например, start), ожидается 200.
+	 * Тест зависит от доступности внешней Wiki-системы.
+	 * В dev-окружении Wiki может быть недоступна, и action вернёт сообщение об ошибке —
+	 * это допустимо, HTTP-статус 200 считается успехом (тело ответа не проверяется).
+	 * GET: pageName='start'.
 	 */
 	public function testWiki(): array
 	{
@@ -126,12 +140,18 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-     * Страница входа и обработка авторизации.
+     * Отображает форму входа и обрабатывает авторизацию.
      *
-     * Для GET открывает форму.
-     * Для POST ожидает поля LoginForm и пытается авторизовать пользователя.
+     * GET:
+     *   return (string, опционально) — URL для редиректа после успешного входа.
+     * POST (поля LoginForm):
+     *   username (string) — имя пользователя.
+     *   password (string) — пароль.
+     *   rememberMe (bool, опционально) — сохранить сессию.
+     * При успешной авторизации редиректит на return или goBack().
+     * При неверных данных возвращает форму со статусом 401.
      *
-     * @return Response|string
+     * @return Response|string Форма входа или редирект после авторизации
      */
     public function actionLogin()
     {
@@ -157,9 +177,10 @@ class SiteController extends ArmsBaseController
     }
 
 	/**
-	 * Тестовые данные для actionLogin.
+	 * Acceptance test data for Login.
 	 *
-	 * Нужен GET без параметров, ожидается 200.
+	 * Проверяет отображение формы входа без параметров (GET-запрос).
+	 * Ожидается HTTP 200 с HTML формы.
 	 */
 	public function testLogin(): array
 	{
@@ -171,11 +192,12 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Завершает пользовательскую сессию и перенаправляет на главную.
+	 * Завершает пользовательскую сессию и перенаправляет на главную страницу.
 	 *
-	 * Для вызова достаточно GET без параметров; ожидается redirect (302).
+	 * Требует авторизованного пользователя (PERM_AUTHENTICATED).
+	 * GET: нет параметров. Ответ: редирект на главную (HTTP 302).
 	 *
-	 * @return Response
+	 * @return Response Редирект на главную страницу
 	 */
 	public function actionLogout()
 	{
@@ -184,9 +206,10 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionLogout.
+	 * Acceptance test data for Logout.
 	 *
-	 * Нужен GET без параметров; ожидается 302.
+	 * Проверяет завершение сессии и редирект на главную.
+	 * GET: нет параметров. Ожидается HTTP 302.
 	 */
 	public function testLogout(): array
 	{
@@ -198,11 +221,13 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Рендерит страницу тестовой стойки.
+	 * Отображает тестовую страницу стойки (rack).
 	 *
-	 * Для вызова нужен GET без параметров.
+	 * Рендерит view /places/rack без параметров. Используется для отладки
+	 * компонента отображения стоечного оборудования.
+	 * GET: нет параметров.
 	 *
-	 * @return string|Response
+	 * @return string|Response HTML страницы тестовой стойки
 	 */
 	public function actionRackTest()
 	{
@@ -210,10 +235,11 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionRackTest.
+	 * Acceptance test data for RackTest.
 	 *
-	 * Сейчас тест пропущен, так как для стабильной проверки нужны подготовленные rack/place fixtures
-	 * и предсказуемая конфигурация шаблонов/данных стойки.
+	 * Тест пропущен: для стабильного рендера /places/rack требуются подготовленные
+	 * fixtures с данными стоек (Rack/Place моделей) и предсказуемая конфигурация.
+	 * При наличии rack-fixtures тест можно заменить на GET без параметров с ожидаемым 200.
 	 */
 	public function testRackTest(): array
 	{
@@ -234,15 +260,19 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Форма установки пароля пользователя.
+	 * Отображает форму смены пароля и обрабатывает её отправку.
 	 *
-	 * Для GET нужен параметр id пользователя.
-	 * Для POST требуются поля PasswordForm для выбранного user_id.
+	 * Доступно администратору или самому пользователю (при включённом RBAC).
+	 * GET: id (int) — идентификатор пользователя.
+	 * POST (поля PasswordForm):
+	 *   password (string) — новый пароль.
+	 *   password_repeat (string) — подтверждение пароля.
+	 * При успехе редиректит на страницу пользователя /users/view.
 	 *
-	 * @param int $id
-	 * @return Response|string
-	 * @throws ForbiddenHttpException
-	 * @throws NotFoundHttpException
+	 * @param int $id Идентификатор пользователя
+	 * @return Response|string Форма смены пароля или редирект после успеха
+	 * @throws ForbiddenHttpException если нет прав на смену пароля
+	 * @throws NotFoundHttpException  если пользователь не найден
 	 */
 	public function actionPasswordSet($id)
 	{
@@ -265,11 +295,11 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionPasswordSet.
+	 * Acceptance test data for PasswordSet.
 	 *
-	 * Нужно передать существующий id пользователя и выполнить запрос от пользователя с правами.
-	 * Сейчас тест пропущен, так как в текущем acceptance-контексте нет гарантии стабильной
-	 * admin-сессии и фиксированного user-id, безопасного для изменения пароля.
+	 * Тест пропущен: для проверки требуется admin-сессия и существующий user_id,
+	 * безопасный для изменения пароля в тестовой среде. В acceptance-контексте
+	 * эти условия не гарантированы без специальных fixtures.
 	 */
 	public function testPasswordSet(): array
 	{
@@ -277,9 +307,11 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Рендерит страницу с информацией о приложении.
+	 * Отображает информационную страницу о приложении (версия, окружение, компоненты).
 	 *
-	 * Для вызова нужен GET без параметров.
+	 * Требует права 'admin'. GET: нет параметров.
+	 *
+	 * @return string HTML страницы app-info
 	 */
 	public function actionAppInfo()
 	{
@@ -287,9 +319,10 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionAppInfo.
+	 * Acceptance test data for AppInfo.
 	 *
-	 * Нужен GET без параметров, ожидается 200.
+	 * Проверяет отображение информационной страницы приложения.
+	 * GET: нет параметров. Ожидается HTTP 200.
 	 */
 	public function testAppInfo(): array
 	{
@@ -297,10 +330,12 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionError (external action из actions()).
+	 * Acceptance test data for Error.
 	 *
-	 * Сейчас тест пропущен, потому что actionError корректно проверяется только в контексте
-	 * реально выброшенного исключения и обработчика ошибок Yii.
+	 * Тест пропущен: action 'error' является внешним (ArmsErrorAction) и корректно
+	 * срабатывает только в контексте реально выброшенного исключения через
+	 * обработчик ошибок Yii (errorHandler). Прямой GET-запрос не воспроизводит
+	 * реальный сценарий ошибки.
 	 */
 	public function testError(): array
 	{
@@ -308,9 +343,10 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionApiDoc (external action из actions()).
+	 * Acceptance test data for ApiDoc.
 	 *
-	 * Нужен GET без параметров, ожидается 200.
+	 * Проверяет отображение страницы Swagger UI (light/swagger SwaggerAction).
+	 * GET: нет параметров. Ожидается HTTP 200.
 	 */
 	public function testApiDoc(): array
 	{
@@ -318,10 +354,12 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionApiJson (external action из actions()).
+	 * Acceptance test data for ApiJson.
 	 *
-	 * Сейчас тест пропущен: для стабильной проверки нужен предсказуемый runtime swagger scan
-	 * (пути сканирования, окружение и итоговый набор аннотаций).
+	 * Тест пропущен: ArmsSwaggerApiAction выполняет runtime-сканирование аннотаций
+	 * по директориям swagger/ и modules/api/controllers/. Результат зависит от
+	 * окружения и набора OA-аннотаций, что делает тест нестабильным без фиксации
+	 * итогового JSON-контракта.
 	 */
 	public function testApiJson(): array
 	{
@@ -329,36 +367,66 @@ class SiteController extends ArmsBaseController
 	}
 
 	/**
-	 * SiteController не является AR-контроллером и не реализует item/ttip/view/create/update/delete actions.
+	 * Acceptance test data for Item.
 	 *
-	 * Эти тест-методы определены явно, чтобы генератор тестов имел документированный skip
-	 * вместо неявной попытки автогенерации test-data.
+	 * SiteController — не AR-контроллер, action 'item' отключён через disabledActions().
+	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
 	 */
 	public function testItem(): array
 	{
 		return self::skipScenario('default', 'site controller is non-AR and has no item action');
 	}
 
+	/**
+	 * Acceptance test data for Ttip.
+	 *
+	 * SiteController — не AR-контроллер, action 'ttip' отключён через disabledActions().
+	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
+	 */
 	public function testTtip(): array
 	{
 		return self::skipScenario('default', 'site controller is non-AR and has no ttip action');
 	}
 
+	/**
+	 * Acceptance test data for View.
+	 *
+	 * SiteController — не AR-контроллер, action 'view' отсутствует.
+	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
+	 */
 	public function testView(): array
 	{
 		return self::skipScenario('default', 'site controller is non-AR and has no view action');
 	}
 
+	/**
+	 * Acceptance test data for Create.
+	 *
+	 * SiteController — не AR-контроллер, action 'create' отключён через disabledActions().
+	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
+	 */
 	public function testCreate(): array
 	{
 		return self::skipScenario('default', 'site controller is non-AR and has no create action');
 	}
 
+	/**
+	 * Acceptance test data for Update.
+	 *
+	 * SiteController — не AR-контроллер, action 'update' отключён через disabledActions().
+	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
+	 */
 	public function testUpdate(): array
 	{
 		return self::skipScenario('default', 'site controller is non-AR and has no update action');
 	}
 
+	/**
+	 * Acceptance test data for Delete.
+	 *
+	 * SiteController — не AR-контроллер, action 'delete' отключён через disabledActions().
+	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
+	 */
 	public function testDelete(): array
 	{
 		return self::skipScenario('default', 'site controller is non-AR and has no delete action');

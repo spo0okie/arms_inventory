@@ -8,38 +8,43 @@ use yii\web\NotFoundHttpException;
 
 /**
  * TechTypesController implements the CRUD actions for TechTypes model.
+ *
+ * Управляет типами оборудования: просмотр типа с перечнем экземпляров,
+ * подсказки по шаблонам спецификаций. Action 'ttip' отключён.
  */
 class TechTypesController extends ArmsBaseController
 {
+	/**
+	 * Acceptance test data for HintComment.
+	 *
+	 * ВНИМАНИЕ: используется placeholder '{anyId}' вместо реального ID —
+	 * тест нестабилен при пустой БД. Рекомендуется заменить на getTestData()['full']->id.
+	 */
 	public function testHintComment(): array
 	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
-	}
-	
-	public function testHintDescription(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
-			'response' => 200,
-		]];
-	}
-	
-	public function testHintTemplate(): array
-	{
-		$testData=$this->getTestData();
-		
+		$testData = $this->getTestData();
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
-	public $modelClass=TechTypes::class;
+	
+	/**
+	 * Acceptance test data for HintDescription.
+	 *
+	 * ВНИМАНИЕ: используется placeholder '{anyId}' вместо реального ID —
+	 * тест нестабилен при пустой БД. Рекомендуется заменить на getTestData()['full']->id.
+	 */
+	public function testHintDescription(): array
+	{
+		$testData = $this->getTestData();
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
 
 	public function accessMap()
 	{
@@ -54,10 +59,14 @@ class TechTypesController extends ArmsBaseController
 	}
 	
     /**
-     * Displays a single TechTypes model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * Отображает страницу типа оборудования с перечнем всех экземпляров этого типа.
+     *
+     * Загружает TechsSearch с фильтром type_id=$id для отображения таблицы экземпляров.
+     * GET: id (int) — идентификатор типа оборудования.
+     *
+     * @param int $id Идентификатор типа оборудования
+     * @return string HTML страницы типа оборудования
+     * @throws NotFoundHttpException если тип не найден
      */
     public function actionView(int $id)
     {
@@ -79,14 +88,37 @@ class TechTypesController extends ArmsBaseController
 
 
 	/**
-	 * Displays a single OrgPhones model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Возвращает шаблон-подсказку по заполнению спецификаций для типа оборудования.
+	 *
+	 * Отдаёт форматированный текст поля comment из TechTypes — используется как
+	 * шаблон при заполнении спецификаций экземпляров данного типа.
+	 * GET: id (int) — идентификатор типа оборудования.
+	 *
+	 * @param int $id Идентификатор типа оборудования
+	 * @return string Текст шаблона спецификации (ntext)
+	 * @throws NotFoundHttpException если тип не найден
 	 */
 	public function actionHintTemplate(int $id)
 	{
 		$model=$this->findModel($id);
 		return Yii::$app->formatter->asNtext($model->comment);
+	}	
+	/**
+	 * Acceptance test data for HintTemplate.
+	 *
+	 * Проверяет получение шаблона спецификации для существующего типа оборудования.
+	 * GET: id из getTestData()['full'].
+	 */
+	public function testHintTemplate(): array
+	{
+		$testData=$this->getTestData();
+		
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
 	}
+	public $modelClass=TechTypes::class;
+
 }

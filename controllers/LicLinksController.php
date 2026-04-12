@@ -47,6 +47,9 @@ class LicLinksController extends Controller
 		return $actions;
 	}
 	
+	/**
+	 * actions action.
+	 */
 	public function actions()
 	{
 		return ArrayHelper::merge(parent::actions(), $this->linkActions());

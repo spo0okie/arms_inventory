@@ -12,16 +12,24 @@ use yii\console\Controller;
 use yii\console\ExitCode;
 
 /**
- * This command echoes the first argument that you have entered.
+ * Консольный контроллер для управления записями моделей оборудования (TechModels).
  *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * Использование:
+ *   yii tech-models/resave
  */
 class TechModelsController extends Controller
 {
-	
+	/**
+	 * Пересохраняет все записи моделей оборудования через silentSave().
+	 *
+	 * Применяется для принудительного пересчёта вычисляемых полей и
+	 * обновления зависимостей без изменения данных.
+	 * Выводит имя каждой записи в stdout.
+	 *
+	 * Использование: yii tech-models/resave
+	 *
+	 * @return int ExitCode::OK
+	 */
 	public function actionResave()
 	{
 		foreach (\app\models\TechModels::find()->all() as $model) {

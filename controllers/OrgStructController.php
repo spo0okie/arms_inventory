@@ -12,15 +12,14 @@ use yii\web\Response;
 
 /**
  * OrgStructController implements the CRUD actions for OrgStruct model.
+ *
+ * Управляет организационными структурами (подразделениями) предприятия.
+ * Поддерживает иерархическое дерево подразделений внутри организации
+ * и предоставляет AJAX-бэкенд для Dependent Dropdown.
  */
 class OrgStructController extends ArmsBaseController
 {
 	public $modelClass=OrgStruct::class;
-
-	public function testDepDrop(): array
-	{
-		return self::skipScenario('default', 'requires POST depdrop data');
-	}
 
 	public function accessMap()
 	{
@@ -30,8 +29,11 @@ class OrgStructController extends ArmsBaseController
 	}
 	
 	/**
-	 * Lists all OrgStruct models.
-	 * @param int $org_id Организация, чье расписание показываем
+	 * Отображает список подразделений верхнего уровня выбранной организации.
+	 *
+	 * Выводит только корневые элементы (parent_id = null) в алфавитном порядке.
+	 *
+	 * @param int $org_id GET: ID организации (по умолчанию 1)
 	 * @return mixed
 	 */
     public function actionIndex($org_id=1)
@@ -47,8 +49,12 @@ class OrgStructController extends ArmsBaseController
 	
 	
 	/**
-	 * Displays a single OrgStruct model.
-	 * @param int $id
+	 * Отображает страницу подразделения с перечнем сотрудников.
+	 *
+	 * Инициализирует UsersSearch с фильтрами по org_id и Orgeh (hr_id подразделения),
+	 * чтобы по умолчанию показывать только сотрудников данного подразделения.
+	 *
+	 * @param int $id GET: ID подразделения OrgStruct
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
@@ -72,9 +78,22 @@ class OrgStructController extends ArmsBaseController
     }
 
     /**
-     * Creates a new OrgStruct model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
+     * Создаёт новое подразделение OrgStruct.
+     *
+     * При успешном сохранении редиректит на страницу подразделения,
+     * если GET-параметр return=previous — на предыдущую страницу (Url::previous()).
+     *
      * @return mixed
+     *
+     * GET-параметры:
+     * - return (string, опционально): если 'previous' — редирект на предыдущий URL.
+     *
+     * POST-параметры (через OrgStruct::load):
+     * - OrgStruct[name]     (string, обязательно): название подразделения
+     * - OrgStruct[org_id]   (int):                 ID организации
+     * - OrgStruct[parent_id] (int, опционально):   ID родительского подразделения
+     * - OrgStruct[hr_id]    (string, опционально): код подразделения в системе HR
+     * - прочие поля модели OrgStruct
      */
     public function actionCreate()
     {
@@ -93,9 +112,19 @@ class OrgStructController extends ArmsBaseController
     
 	
 	/**
-	 * Возвращает подразделения организации
-	 * Бэкенд для Dependant Dropdown (меняем орг-ю, меняются подразделения)
-	 * @return array
+	 * AJAX-бэкенд Dependent Dropdown: возвращает список подразделений для выбранных организаций.
+	 *
+	 * Используется виджетом kartik\depdrop\DepDrop: при изменении поля организации
+	 * обновляет список подразделений в зависимом поле.
+	 *
+	 * Ответ всегда в формате JSON:
+	 * - при наличии parents: ['output' => [['id'=>...,'name'=>...], ...], 'selected' => '']
+	 * - при отсутствии данных: ['output' => '', 'selected' => '']
+	 *
+	 * POST-параметры:
+	 * - depdrop_parents (int[], обязательно): массив ID организаций (родительских элементов dropdown)
+	 *
+	 * @return array JSON-ответ для DepDrop
 	 */
 	public function actionDepDrop()
 	{
@@ -120,5 +149,24 @@ class OrgStructController extends ArmsBaseController
 		}
 		return ['output'=>'', 'selected'=>''];
 	}
+	/**
+	 * Acceptance test data for actionDepDrop.
+	 *
+	 * Тест пропущен: actionDepDrop — это AJAX Dependent Dropdown callback.
+	 * Для корректного теста требуется:
+	 *   - POST-запрос с параметром depdrop_parents (массив int[] ID организаций);
+	 *   - наличие в БД хотя бы одной организации (Org) с подразделениями (OrgStruct).
+	 * Acceptance-фреймворк не формирует depdrop-POST автоматически,
+	 * а создание связанного набора Org + OrgStruct через getTestData() не предусмотрено
+	 * для данного контроллера. Заменить skip на реальный тест можно только
+	 * после добавления OrgStruct и Org в ModelFactory.
+	 *
+	 * @return array
+	 */
+	public function testDepDrop(): array
+	{
+		return self::skipScenario('default', 'requires depdrop POST with org IDs and related OrgStruct fixtures');
+	}
+
 	
 }

@@ -15,9 +15,17 @@ class ScansController extends BaseRestController
 	
 	
 	/**
-	 * Creates a new Scans model.
-	 * If creation is successful, the browser will be redirected to the 'view' page.
-	 * @return mixed
+	 * Принимает загруженный файл скана и сохраняет его в БД и на диск.
+	 * Ожидает multipart/form-data с файлом scanFile и опциональным contracts_id.
+	 * Последовательно выполняет валидацию, загрузку файла (upload()) и сохранение модели.
+	 * При ошибке на любом этапе возвращает массив ошибок или JSON-строку с ошибкой.
+	 * При успехе возвращает созданную модель Scans.
+	 *
+	 * POST-параметры:
+	 *   scanFile      — файл скана (multipart upload)
+	 *   contracts_id  — int, ID контракта для привязки (опционально)
+	 *
+	 * @return mixed  Модель Scans при успехе, массив ошибок или строка с ошибкой при неудаче
 	 */
 	public function actionUpload()
 	{
@@ -30,6 +38,18 @@ class ScansController extends BaseRestController
 		return $model;
 	}
 	
+	/**
+	 * Отдаёт файл скана клиенту по его ID.
+	 * Ищет запись Scans по `id`, проверяет наличие файла на диске (fileExists).
+	 * Если файл найден — отправляет его через Response::sendFile().
+	 * Если файл не найден физически — возвращает false без исключения.
+	 *
+	 * GET-параметры:
+	 * @param int $id  ID записи скана (Scans)
+	 *
+	 * @return mixed  Ответ с файлом или false если файл отсутствует на диске
+	 * @throws NotFoundHttpException если запись скана не найдена в БД
+	 */
 	public function actionDownload($id) {
 		$model = Scans::findOne($id);
 		if (!is_object($model)) throw new NotFoundHttpException('Requested scan not found');

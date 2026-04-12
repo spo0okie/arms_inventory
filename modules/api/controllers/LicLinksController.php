@@ -32,6 +32,23 @@ class LicLinksController extends BaseRestController
 		return ['index','view','update','create','delete'];
 	}
 	
+	/**
+	 * Строит запрос для фильтрации лицензионных объектов по продукту, компьютеру и/или пользователю.
+	 * Применяет JOIN с лицензионными связями и фильтры по типу лицензии:
+	 * - 'groups': поиск по ID типов лицензий продукта
+	 * - 'items':  поиск закупок через lic_group_id
+	 * - 'keys':   поиск ключей через JOIN с lic_items и lic_group_id
+	 *
+	 * @param ActiveQuery $query       Базовый запрос для нужной модели (LicGroups/LicItems/LicKeys)
+	 * @param string      $lic_type   Тип лицензии: 'groups', 'items' или 'keys'
+	 * @param mixed       $product_id ID программного продукта (Soft) — обязателен
+	 * @param mixed       $user_login Логин пользователя (Users) — обязателен если нет comp_name
+	 * @param mixed       $comp_name  Имя компьютера (Comps) — обязателен если нет user_login
+	 *
+	 * @return ActiveQuery
+	 * @throws BadRequestHttpException если не передан product_id, comp_name или user_login
+	 * @throws NotFoundHttpException   если компьютер/пользователь/продукт не найден
+	 */
 	public static function filterQuery(
 		ActiveQuery $query,
 		string $lic_type,
@@ -137,6 +154,22 @@ class LicLinksController extends BaseRestController
 			new OA\Response(response: 404, description: "Ничего не найдено")
 		]
 	)]
+	/**
+	 * Возвращает единственную привязку лицензии к объекту.
+	 * Если передан `objName` без `objId` — ищет объект через findByAnyName() по классу `objectType`.
+	 * Делегирует в LicLinks::findProductLicenses() и возвращает первый результат.
+	 *
+	 * GET-параметры:
+	 * @param int|null    $productId    ID программного продукта (Soft)
+	 * @param string|null $objectType  Тип объекта: 'arms', 'users' или 'comps'
+	 * @param string|null $licenseType Тип лицензии: 'groups', 'items' или 'keys'
+	 * @param int|null    $objId       ID объекта (АРМ, пользователь, компьютер)
+	 * @param string|null $objName     Имя объекта для поиска через findByAnyName (если нет objId)
+	 * @param int|null    $licId       ID конкретной лицензии (LicGroups/LicItems/LicKeys)
+	 *
+	 * @return ActiveRecord|null
+	 * @throws NotFoundHttpException если объект по имени не найден
+	 */
 	public function actionSearch(
 		int $productId=null,
 		string $objectType=null,
@@ -212,6 +245,22 @@ class LicLinksController extends BaseRestController
 		]
 	)]
 
+	/**
+	 * Возвращает список привязок лицензий к объекту через ArrayDataProvider.
+	 * Если передан `objName` без `objId` — ищет объект через findByAnyName() по классу `objectType`.
+	 * Делегирует в LicLinks::findProductLicenses().
+	 *
+	 * GET-параметры:
+	 * @param int|null    $productId    ID программного продукта (Soft)
+	 * @param string|null $objectType  Тип объекта: 'arms', 'users' или 'comps'
+	 * @param string|null $licenseType Тип лицензии: 'groups', 'items' или 'keys'
+	 * @param int|null    $objId       ID объекта (АРМ, пользователь, компьютер)
+	 * @param string|null $objName     Имя объекта для поиска через findByAnyName (если нет objId)
+	 * @param int|null    $licId       ID конкретной лицензии (LicGroups/LicItems/LicKeys)
+	 *
+	 * @return BaseDataProvider
+	 * @throws NotFoundHttpException если объект по имени не найден
+	 */
 	public function actionFilter(
 		int $productId=null,
 		string $objectType=null,

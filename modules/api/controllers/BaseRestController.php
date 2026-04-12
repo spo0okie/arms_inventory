@@ -183,6 +183,17 @@ class BaseRestController extends ActiveController
 			new OA\Response(response: 404, description: "Ничего не найдено по запросу")
 		]
 	)]
+	/**
+	 * Возвращает единственный объект модели, найденный по query-параметрам фильтрации.
+	 * Поддерживает специальный режим поиска по любому имени (SEARCH_BY_ANY_NAME).
+	 * Если ни одного объекта не найдено — выбрасывает 404.
+	 *
+	 * GET-параметры: поля из static::$searchFields контроллера-наследника
+	 *
+	 * @return ActiveRecord|null
+	 * @throws BadRequestHttpException если не передан ни один параметр фильтрации
+	 * @throws NotFoundHttpException если объект не найден
+	 */
 	public function actionSearch(): ActiveRecord|null {
 		$this->checkDisabledActions('search');
 		foreach (static::$searchFields as $param=>$field) {
@@ -225,6 +236,15 @@ class BaseRestController extends ActiveController
 			new OA\Response(response: 404, description: "Ничего не найдено по запросу"),
 		]
 	)]
+	/**
+	 * Возвращает список объектов модели, отфильтрованный по query-параметрам.
+	 * Результат оборачивается в ActiveDataProvider для поддержки пагинации.
+	 *
+	 * GET-параметры: поля из static::$searchFields контроллера-наследника
+	 *
+	 * @return BaseDataProvider
+	 * @throws BadRequestHttpException если не передан ни один параметр фильтрации
+	 */
 	public function actionFilter(): BaseDataProvider
 	{
 		$this->checkDisabledActions('filter');
@@ -232,9 +252,12 @@ class BaseRestController extends ActiveController
 	}
 	
 	/**
-	 * CORS support
-	 * https://www.yiiframework.com/wiki/175/how-to-create-a-rest-api
+	 * Обрабатывает CORS preflight-запрос (OPTIONS).
+	 * Устанавливает HTTP-заголовки для разрешения кросс-доменных запросов:
+	 * Access-Control-Allow-Methods и Access-Control-Allow-Headers.
+	 * Действие доступно без авторизации (PERM_ANONYMOUS).
 	 *
+	 * @see https://www.yiiframework.com/wiki/175/how-to-create-a-rest-api
 	 */
 	public function actionPreflight() {
 		$content_type = 'application/json';
@@ -274,6 +297,15 @@ class BaseRestController extends ActiveController
 			),
 		]
 	)]
+	/**
+	 * Возвращает постраничный список всех объектов модели.
+	 * Делегирует выполнение стандартному action 'index' ActiveController.
+	 * Поддерживает параметры expand и pagination.
+	 *
+	 * GET-параметры: expand (список связей через запятую), page, per-page
+	 *
+	 * @return void
+	 */
 	public function actionIndex()
 	{
 		$this->checkDisabledActions('index');
@@ -306,6 +338,16 @@ class BaseRestController extends ActiveController
 			new OA\Response(response: 404, description: "Элемент с таким ID не найден"),
 		]
 	)]
+	/**
+	 * Возвращает один объект модели по его первичному ключу.
+	 * Делегирует выполнение стандартному action 'view' ActiveController.
+	 * Поддерживает параметр expand для включения связанных данных.
+	 *
+	 * GET-параметры:
+	 * @param mixed $id  Первичный ключ записи
+	 *
+	 * @return void
+	 */
 	public function actionView($id)
 	{
 		$this->checkDisabledActions('view');
@@ -334,6 +376,16 @@ class BaseRestController extends ActiveController
 			new OA\Response(response: 422, description: "Предоставлены неверные данные"),
 		]
 	)]
+	/**
+	 * Создаёт новый объект модели из тела запроса.
+	 * Делегирует выполнение стандартному action 'create' ActiveController.
+	 * При успехе возвращает созданный объект с кодом 201.
+	 * При ошибке валидации возвращает 422 с описанием ошибок.
+	 *
+	 * POST/PUT body: поля модели в формате JSON
+	 *
+	 * @return void
+	 */
 	public function actionCreate()
 	{
 		$this->checkDisabledActions('create');
@@ -370,6 +422,19 @@ class BaseRestController extends ActiveController
 			new OA\Response(response: 422, description: "Предоставлены неверные данные"),
 		]
 	)]
+	/**
+	 * Обновляет существующий объект модели по его первичному ключу.
+	 * Делегирует выполнение стандартному action 'update' ActiveController.
+	 * При успехе возвращает обновлённый объект с кодом 200.
+	 * При ошибке валидации возвращает 422.
+	 *
+	 * GET-параметры:
+	 * @param mixed $id  Первичный ключ записи
+	 *
+	 * PUT body: поля модели в формате JSON
+	 *
+	 * @return void
+	 */
 	public function actionUpdate($id)
 	{
 		$this->checkDisabledActions('update');
@@ -384,6 +449,16 @@ class BaseRestController extends ActiveController
 			new OA\Response(response: 404, description: "Элемент с таким ID не найден"),
 		]
 	)]
+	/**
+	 * Удаляет объект модели по его первичному ключу.
+	 * Делегирует выполнение стандартному action 'delete' ActiveController.
+	 * При успехе возвращает код 204 (No Content).
+	 *
+	 * GET-параметры:
+	 * @param mixed $id  Первичный ключ записи
+	 *
+	 * @return void
+	 */
 	public function actionDelete($id)
 	{
 		$this->checkDisabledActions('delete');

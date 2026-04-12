@@ -13,25 +13,6 @@ use yii\web\NotFoundHttpException;
  */
 class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 {
-	public function testCreate(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}', 'SchedulesEntries' => ['schedule_id' => 6]],
-			'response' => 200,
-		]];
-	}
-	
-	public function testUpdate(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['to-update']->id],
-			'response' => 200,
-		]];
-	}
 	public $modelClass=SchedulesEntries::class;
 	
 	public function disabledActions()
@@ -40,10 +21,19 @@ class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 	}
 	
 	/**
-	 * Displays a single model ttip.
-	 * @param int $id
+	 * Отображает всплывающую подсказку для записи расписания (SchedulesEntries).
+	 * Если передан GET-параметр `timestamp`, загружает запись из журнала по ID и времени
+	 * через findJournalRecord(); иначе загружает текущую запись по ID.
+	 * Передаёт в view списки положительных/отрицательных меток для визуализации статуса.
+	 *
+	 * GET-параметры:
+	 * @param int      $id         ID записи SchedulesEntries
+	 * @param int|null $timestamp  Unix-timestamp для поиска в журнале истории (опционально)
+	 * @param array    $positive   Список меток «работает» для отображения в tooltip (опционально)
+	 * @param array    $negative   Список меток «не работает» для отображения в tooltip (опционально)
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если запись не найдена
 	 */
 	public function actionTtip(int $id)
 	{
@@ -63,8 +53,15 @@ class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 	
 
     /**
-     * Creates a new SchedulesDays model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
+     * Создаёт новую запись расписания (SchedulesEntries).
+     * После успешного сохранения перенаправляет:
+     * - на страницу расписания доступа (/schedules/scheduled-access/view), если master — ACL
+     * - на страницу обычного расписания (/schedules/schedules/view) в остальных случаях.
+     * Если POST-данных нет, предзаполняет форму из GET-параметров.
+     *
+     * GET-параметры: поля модели SchedulesEntries (в т.ч. schedule_id)
+     * POST-параметры: поля модели SchedulesEntries через Yii2 load()
+     *
      * @return mixed
      */
     public function actionCreate()
@@ -82,14 +79,37 @@ class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 		return $this->defaultRender('create', ['model' => $model,]);
 			 }
 
-			 /**
-			  * Updates an existing SchedulesDays model.
-			  * If update is successful, the browser will be redirected to the 'view' page.
-			  * @param int $id
-			  * @return mixed
-			  * @throws NotFoundHttpException if the model cannot be found
-			  */
-			 public function actionUpdate(int $id)
+	/**
+	 * Тестирует actionCreate: открывает форму создания записи расписания
+	 * с предзаполненным schedule_id=6. Ожидает HTTP 200 (форма создания).
+	 *
+	 * @return array
+	 */
+	public function testCreate(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => '{anyId}', 'SchedulesEntries' => ['schedule_id' => 6]],
+			'response' => 200,
+		]];
+	}
+
+	/**
+	 * Обновляет существующую запись расписания (SchedulesEntries).
+	 * После успешного сохранения перенаправляет:
+	 * - на /schedules/scheduled-access/view, если master — ACL-расписание
+	 * - на /schedules/schedules/view в остальных случаях.
+	 * Если POST-данных нет, предзаполняет форму из GET-параметров.
+	 *
+	 * GET-параметры:
+	 * @param int $id  ID записи SchedulesEntries
+	 *
+	 * POST-параметры: поля модели SchedulesEntries через Yii2 load()
+	 *
+	 * @return mixed
+	 * @throws NotFoundHttpException если запись не найдена
+	 */
+	public function actionUpdate(int $id)
 	{
 		/** @var SchedulesEntries $model */
 		$model = $this->findModel($id);
@@ -104,13 +124,41 @@ class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 		
 		return $this->defaultRender('update', ['model' => $model,]);
 	}
+
+	/**
+	 * Тестирует actionUpdate: открывает форму редактирования записи расписания.
+	 *
+	 * Использует стандартный ключ getTestData()['update'] — сохранённая минимальная
+	 * запись SchedulesEntries, созданная ModelFactory. Ожидает HTTP 200 (форма редактирования).
+	 *
+	 * Ранее использовался нестандартный ключ 'to-update', которого нет в getTestData(),
+	 * что приводило к PHP Warning и id=null → 400 Bad Request.
+	 *
+	 * @return array
+	 */
+	public function testUpdate(): array
+	{
+		$testData=$this->getTestData();
+
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['update']->id],
+			'response' => 200,
+		]];
+	}
 	
 	/**
-	 * Deletes an existing SchedulesDays model.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param integer $id
+	 * Удаляет запись расписания (SchedulesEntries).
+	 * Запоминает master-расписание до удаления, чтобы определить направление редиректа:
+	 * - на /schedules/scheduled-access/view, если master — ACL-расписание
+	 * - на /schedules/schedules/view, если обычное расписание
+	 * - на /schedules/schedules/index, если master недоступен
+	 *
+	 * GET-параметры:
+	 * @param int $id  ID удаляемой записи SchedulesEntries
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если запись не найдена
 	 * @throws Throwable
 	 * @throws StaleObjectException
 	 */

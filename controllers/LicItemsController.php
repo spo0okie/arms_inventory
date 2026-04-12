@@ -18,48 +18,60 @@ use yii\web\Response;
  */
 class LicItemsController extends ArmsBaseController
 {
-	public function testHintArms(): array
-	{
-		$testData=$this->getTestData();
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id, 'form' => 'test'],
-			'response' => 200,
-		]];
-	}
 	
+	/**
+	 * Acceptance test data for Contracts.
+	 *
+	 * Проверяет страницу контрактов для существующей лицензионной позиции.
+	 * Использует getTestData()['full'] — полностью заполненный экземпляр LicItems,
+	 * сохранённый в БД. Это гарантирует стабильный id без жёсткой зависимости
+	 * от конкретной записи в БД (в отличие от устаревшего макроса {anyId}).
+	 */
 	public function testContracts(): array
 	{
+		$testData = $this->getTestData();
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '{anyId}'],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
+	/**
+	 * Acceptance test data for Delete.
+	 *
+	 * Проверяет удаление лицензионной позиции.
+	 * Использует getTestData()['delete'] — минимальную модель LicItems,
+	 * созданную специально для удаления; её id динамичен и не зависит
+	 * от конкретной записи в БД (в отличие от захардкоженного id=4).
+	 */
 	public function testDelete(): array
 	{
+		$testData = $this->getTestData();
+		$delete = $testData['delete'];
 		return [[
 			'name' => 'default',
-			'GET' => ['id' => '4'],
+			'GET' => ['id' => $delete->id],
 			'POST' => [],
-			'saveModel' => ['storeAs' => 'deleted', 'model' => ['id' => '4']],
-			'dropReverseLinks' => ['id' => '4'],
+			'saveModel' => ['storeAs' => 'deleted', 'model' => ['id' => $delete->id]],
+			'dropReverseLinks' => ['id' => $delete->id],
 			'response' => 302,
 		]];
 	}
 	
+	/**
+	 * Acceptance test data for Link.
+	 *
+	 * Пропускается, так как для теста необходимо:
+	 *  - создать LicItems через getTestData()['full'];
+	 *  - создать и привязать хотя бы один из объектов: Soft, Arms, Users или Comps.
+	 * Без предварительно подготовленных связанных объектов тест привязки
+	 * не может быть выполнен корректно.
+	 */
 	public function testLink(): array
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		return self::skipScenario('default', 'requires LicItems with linked soft/arms/users/comps — prepare via getTestData() and link objects manually');
 	}
-	
-	public function testUnlink(): array
-	{
-		return self::skipScenario('default', 'requires complex data preparation');
-	}
-
-	public $modelClass=LicItems::class;
 	
 	public function accessMap()
 	{
@@ -74,11 +86,18 @@ class LicItemsController extends ArmsBaseController
 	}
 	
 	/**
-	 * Возвращает IDs оборудования связанного с закупкой (через документы)
-	 * @param int    $id
-	 * @param string $form
-	 * @return mixed
-	 * @throws NotFoundHttpException
+	 * Возвращает подсказку (hint) ARM-объектов, связанных с лицензионной позицией через контракты.
+	 *
+	 * Используется для автодополнения поля выбора АРМ в форме редактирования:
+	 * метод находит контракты, привязанные к LicItems, и через них — список
+	 * связанных АРМ, пригодных для привязки.
+	 *
+	 * GET-параметры:
+	 * @param int    $id   Идентификатор LicItems.
+	 * @param string $form Имя формы-получателя подсказки (например, 'LicItems').
+	 *
+	 * @return mixed Сырой HTML/JSON-фрагмент подсказки или null если модель не найдена.
+	 * @throws NotFoundHttpException если LicItems с данным id не найдена
 	 */
 	public function actionHintArms(int $id, string $form)
 	{
@@ -103,11 +122,34 @@ class LicItemsController extends ArmsBaseController
 
 
 	/**
-     * Displays a single LicItems model.
-     * @param int $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+	 * Acceptance test data for HintArms.
+	 *
+	 * Проверяет endpoint подсказки АРМ для существующей лицензионной позиции.
+	 * id берётся из getTestData()['full'] — полностью заполненного экземпляра LicItems,
+	 * сохранённого в БД. Параметр form='test' — произвольное имя формы,
+	 * достаточное для прохождения валидации без реального UI-контекста.
+	 */
+	public function testHintArms(): array
+	{
+		$testData=$this->getTestData();
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id, 'form' => 'test'],
+			'response' => 200,
+		]];
+	}
+	/**
+	 * Страница просмотра лицензионной позиции.
+	 *
+	 * Отображает карточку LicItems, список связанных лицензионных ключей (LicKeys)
+	 * и таблицу привязанных объектов (Soft, Arms, Users, Comps) через LicLinks.
+	 *
+	 * GET-параметры:
+	 * @param int $id Идентификатор LicItems.
+	 *
+	 * @return mixed
+	 * @throws NotFoundHttpException если запись не найдена
+	 */
     public function actionView(int $id)
     {
 	
@@ -136,14 +178,21 @@ class LicItemsController extends ArmsBaseController
     }
 	
 	/**
-	 * Удаляем АРМ или софт из лицензии
-	 * @param int $id
-	 * @param int|null $soft_id
-	 * @param int|null $arms_id
-	 * @param int|null $users_id
-	 * @param int|null $comps_id
+	 * Отвязка объекта от лицензионной позиции.
+	 *
+	 * Удаляет связь одного из объектов (Soft, Arms, Users или Comps) с указанной
+	 * лицензионной позицией и перенаправляет на страницу просмотра позиции.
+	 * Передаётся ровно один из необязательных параметров.
+	 *
+	 * GET-параметры:
+	 * @param int      $id       Идентификатор LicItems.
+	 * @param int|null $soft_id  ID программного обеспечения для отвязки.
+	 * @param int|null $arms_id  ID АРМ для отвязки.
+	 * @param int|null $users_id ID пользователя для отвязки.
+	 * @param int|null $comps_id ID компьютера для отвязки.
+	 *
 	 * @return string|Response
-	 * @throws NotFoundHttpException
+	 * @throws NotFoundHttpException если LicItems с данным id не найдена
 	 */
 	public function actionUnlink(int $id, $soft_id=null, $arms_id=null, $users_id=null, $comps_id=null){
 		/** @var LicItems $model */
@@ -178,7 +227,23 @@ class LicItemsController extends ArmsBaseController
 		if ($updated) $model->save();
 
 		return $this->redirect(['view', 'id' => $model->id]);
+	}	
+	/**
+	 * Acceptance test data for Unlink.
+	 *
+	 * Пропускается, так как для теста необходимо:
+	 *  - создать LicItems через getTestData()['full'];
+	 *  - привязать к ней хотя бы один из объектов: Soft, Arms, Users, Comps;
+	 *  - передать в GET параметр id и соответствующий *_id объекта для отвязки.
+	 * Без предварительно созданных связей проверить логику разрыва невозможно.
+	 */
+	public function testUnlink(): array
+	{
+		return self::skipScenario('default', 'requires LicItems with linked objects — prepare via getTestData() and link objects manually');
 	}
+
+	public $modelClass=LicItems::class;
+
 
 
 }

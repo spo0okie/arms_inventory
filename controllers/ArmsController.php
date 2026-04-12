@@ -16,6 +16,9 @@ use yii\web\Response;
  */
 class ArmsController extends ArmsBaseController
 {
+	/**
+	 * Returns disabled acceptance tests list.
+	 */
 	public function disabledTests(): array
 	{
 		return ['*'];
@@ -49,6 +52,9 @@ class ArmsController extends ArmsBaseController
 		return $behaviors;
     }
     
+    /**
+     * actionIndex action.
+     */
     public function actionIndex()
 	{
 		$this->setQueryParam(['TechsSearch'=>['is_computer'=>true]]);

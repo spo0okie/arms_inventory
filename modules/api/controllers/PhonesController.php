@@ -61,6 +61,21 @@ class PhonesController extends BaseRestController
 			new OA\Response(response: 404, description: "Не найдено"),
 		]
 	)]
+	/**
+	 * Возвращает полное ФИО пользователя по внутреннему номеру телефона.
+	 * Порядок поиска:
+	 * 1. Ищет телефонный аппарат Techs с совпадающим полем comment.
+	 * 2. Если аппарат привязан к АРМу с пользователем — возвращает его ФИО.
+	 * 3. Если аппарат напрямую привязан к пользователю — возвращает его ФИО.
+	 * 4. Ищет не уволенного пользователя с phone === $num.
+	 * При неудаче выбрасывает 404.
+	 *
+	 * GET-параметры:
+	 * @param string $num  Внутренний номер телефона (значение поля comment у Techs или phone у Users)
+	 *
+	 * @return string  Полное ФИО пользователя (Users.Ename)
+	 * @throws NotFoundHttpException если пользователь не найден
+	 */
 	public function actionSearchByNum($num){
 		//ищем телефонный аппарат по номеру
 		$tech = Techs::find()
@@ -132,6 +147,20 @@ class PhonesController extends BaseRestController
 			new OA\Response(response: 404, description: "Такой пользователь не найден"),
 		]
 	)]
+	/**
+	 * Возвращает внутренние номера телефона пользователя в виде строки через запятую.
+	 * Ищет пользователя по `id` или `login`.
+	 * Перебирает VoIP-телефоны, привязанные к оборудованию пользователя (Techs.voipPhones),
+	 * а также телефоны-аппараты с isVoipPhone. Если VoIP-номера не найдены — возвращает Users.Phone.
+	 * При отсутствии пользователя выбрасывает 404.
+	 *
+	 * GET-параметры:
+	 * @param int|null    $id     ID пользователя (Users) — приоритетен
+	 * @param string|null $login  Логин пользователя (Users.Login) — используется если нет id
+	 *
+	 * @return string  Номера телефона через ', ' или пустая строка если телефона нет
+	 * @throws NotFoundHttpException если пользователь не найден
+	 */
 	public function actionSearchByUser($id=null,$login=null){
 		//ищем пользователя
 		if ($id)

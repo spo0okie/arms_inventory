@@ -10,6 +10,11 @@ use yii\web\Response;
 
 /**
  * PortsController implements the CRUD actions for Ports model.
+ *
+ * Управляет сетевыми портами оборудования (Ports).
+ * Порт всегда привязан к Techs (link_techs_id) и может ссылаться
+ * на сетевое соединение. Предоставляет AJAX-бэкенд для Dependent Dropdown
+ * списка портов по выбранному оборудованию.
  */
 class PortsController extends ArmsBaseController
 {
@@ -23,20 +28,25 @@ class PortsController extends ArmsBaseController
 	}
 
 	/**
-	 * Создаёт порт через общий сценарий actionUpdate(null).
+	 * Создаёт новый порт, делегируя выполнение в actionUpdate(null).
 	 *
-	 * Для POST нужны поля Ports (например, link_techs_id и параметры порта)
-	 * с валидными внешними ключами.
+	 * POST-параметры (через Ports::load):
+	 * - Ports[link_techs_id] (int, обязательно): ID оборудования, к которому привязан порт
+	 * - прочие поля модели Ports
+	 *
+	 * @return mixed
 	 */
 	public function actionCreate() {
 		return $this->actionUpdate(null);
 	}
 
 	/**
-	 * Тестовые данные для actionCreate.
+	 * Acceptance test data for actionCreate.
 	 *
-	 * Нужен валидный payload Ports с существующим link_techs_id.
-	 * В текущем автогенеративном прогоне используется базовый тест create из ArmsBaseController.
+	 * Тест создаёт новый порт через стандартный flow ArmsBaseController::testCreate().
+	 * Требует, чтобы ModelFactory корректно генерировал Ports с валидным link_techs_id.
+	 *
+	 * @return array
 	 */
 	public function testCreate(): array
 	{
@@ -44,12 +54,16 @@ class PortsController extends ArmsBaseController
 	}
 
     /**
-     * Обновляет существующий порт или создаёт новый (если id = null).
+     * Создаёт новый порт (id = null) или редактирует существующий (id != null).
      *
-     * Для POST нужен валидный payload модели Ports.
-     * Для GET при id != null должен существовать порт с указанным id.
+     * GET-параметры:
+     * - id (int|null, опционально): ID порта; null означает создание нового
      *
-     * @param int|null $id
+     * POST-параметры (через Ports::load):
+     * - Ports[link_techs_id] (int, обязательно): ID оборудования
+     * - прочие поля модели Ports
+     *
+     * @param int|null $id GET: ID порта (null = создание)
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -68,10 +82,12 @@ class PortsController extends ArmsBaseController
     }
 
 	/**
-	 * Тестовые данные для actionUpdate.
+	 * Acceptance test data for actionUpdate.
 	 *
-	 * Нужен существующий id порта и валидный payload полей для обновления.
-	 * В текущем прогоне используется базовый сценарий update из ArmsBaseController.
+	 * Тест обновляет существующий порт через стандартный сценарий ArmsBaseController::testUpdate().
+	 * Тестовая запись Ports создаётся через getTestData()['full'] перед запросом.
+	 *
+	 * @return array
 	 */
 	public function testUpdate(): array
 	{
@@ -79,11 +95,20 @@ class PortsController extends ArmsBaseController
 	}
 
 	/**
-	 * Возвращает список доступных сетевых портов для выбранного оборудования (depdrop JSON).
+	 * AJAX-бэкенд Dependent Dropdown: возвращает список портов для выбранного оборудования.
 	 *
-	 * Для корректного запроса требуется POST['depdrop_all_params']['link_techs_id'].
+	 * Используется при выборе оборудования в форме, чтобы заполнить поле выбора порта.
+	 * Вызывает Techs::ddPortsList для получения списка в формате DepDrop.
 	 *
-	 * @return array
+	 * POST-параметры:
+	 * - depdrop_all_params[link_techs_id] (int, обязательно): ID оборудования (Techs)
+	 *
+	 * Ответ в формате JSON:
+	 * - при наличии данных: ['output' => [...], 'selected' => '']
+	 * - при отсутствии link_techs_id: ['output' => [], 'selected' => '']
+	 * - при ошибке: ['output' => '', 'selected' => '']
+	 *
+	 * @return array JSON-ответ для DepDrop
 	 */
 	public function actionPortList()
 	{
@@ -103,12 +128,17 @@ class PortsController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionPortList.
+	 * Acceptance test data for actionPortList.
 	 *
-	 * Нужно отправить POST-данные depdrop:
-	 * - depdrop_all_params[link_techs_id] = существующий ID Techs.
-	 * Сейчас тест пропущен, так как acceptance-генератор не формирует depdrop-POST формат
-	 * и не готовит гарантированный комплект связанных Techs/Ports.
+	 * Тест пропущен: actionPortList — AJAX Dependent Dropdown callback.
+	 * Для корректного теста требуется:
+	 *   - POST-запрос с depdrop_all_params[link_techs_id] = существующий ID Techs;
+	 *   - наличие в БД Techs с зарегистрированными портами (Ports).
+	 * Acceptance-фреймворк не формирует depdrop_all_params POST автоматически,
+	 * а подготовить связанный набор Techs + Ports через getTestData() для данного
+	 * контроллера не представляется возможным без расширения ModelFactory.
+	 *
+	 * @return array
 	 */
 	public function testPortList(): array
 	{
@@ -116,10 +146,14 @@ class PortsController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionItem (унаследованного).
+	 * Acceptance test data for actionItem (унаследованного).
 	 *
-	 * Нужен id порта с валидной связью на Techs/Network.
-	 * Сейчас тест пропущен из-за отсутствия стабильного набора связанных фикстур.
+	 * Тест пропущен: карточка порта (item) требует, чтобы порт был привязан
+	 * к существующему оборудованию (Techs) и/или сетевому соединению (Networks).
+	 * Без этих связей шаблон item может выбрасывать исключения при рендере.
+	 * Необходимо расширить ModelFactory для Ports с гарантированным link_techs_id.
+	 *
+	 * @return array
 	 */
 	public function testItem(): array
 	{
@@ -127,10 +161,13 @@ class PortsController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionTtip (унаследованного).
+	 * Acceptance test data for actionTtip (унаследованного).
 	 *
-	 * Нужен id порта с валидной связью на Techs/Network.
-	 * Сейчас тест пропущен из-за отсутствия стабильного набора связанных фикстур.
+	 * Тест пропущен: всплывающая подсказка порта рендерится с данными
+	 * из связанного Techs и Networks. Без валидных связей тест нестабилен.
+	 * Необходимо расширить ModelFactory для Ports с гарантированным link_techs_id.
+	 *
+	 * @return array
 	 */
 	public function testTtip(): array
 	{
@@ -138,10 +175,14 @@ class PortsController extends ArmsBaseController
 	}
 
 	/**
-	 * Тестовые данные для actionView (унаследованного).
+	 * Acceptance test data for actionView (унаследованного).
 	 *
-	 * Нужен id порта с валидной связью на Techs/Network.
-	 * Сейчас тест пропущен из-за отсутствия стабильного набора связанных фикстур.
+	 * Тест пропущен: страница просмотра порта требует валидных связей на Techs/Networks.
+	 * Порт сам по себе (без привязанного оборудования) не имеет осмысленного
+	 * контекста для отображения, что делает тест ненадёжным.
+	 * Необходимо расширить ModelFactory для Ports с гарантированным link_techs_id.
+	 *
+	 * @return array
 	 */
 	public function testView(): array
 	{

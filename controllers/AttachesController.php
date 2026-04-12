@@ -19,16 +19,6 @@ class AttachesController extends ArmsBaseController
 	
 	public $modelClass=Attaches::class;
 	
-	public function testCreate(): array
-	{
-		return self::skipScenario('default', 'file upload required');
-	}
-	
-	public function testDelete(): array
-	{
-		return self::skipScenario('default', 'requires file-system fixture for attached file');
-	}
-	
 	public function disabledActions()
 	{
 		return ['index','update','item','view','ttip','item-by-name',];
@@ -53,7 +43,15 @@ class AttachesController extends ArmsBaseController
     }
 	
 	
+		
 	/**
+	 * Acceptance test data for Create.
+	 */
+	public function testCreate(): array
+	{
+		return self::skipScenario('default', 'file upload required');
+	}
+/**
 	 * Deletes an existing Scans model.
 	 * If deletion is successful, the browser will be redirected to the 'index' page.
 	 * @param int $id
@@ -74,7 +72,15 @@ class AttachesController extends ArmsBaseController
 		return $this->redirect(Url::previous());
     }
 
-    /**
+    	
+	/**
+	 * Acceptance test data for Delete.
+	 */
+	public function testDelete(): array
+	{
+		return self::skipScenario('default', 'requires file-system fixture for attached file');
+	}
+/**
      * Finds the Scans model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $id

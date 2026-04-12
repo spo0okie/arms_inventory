@@ -18,54 +18,6 @@ use yii\web\Response;
  */
 class ContractsController extends ArmsBaseController
 {
-	public function testHintArms(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => ['ids' => '7', 'form' => 'test'],
-			'response' => 200,
-		]];
-	}
-	
-	public function testHintParent(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => ['ids' => '7', 'form' => 'test'],
-			'response' => 200,
-		]];
-	}
-	
-	public function testScans(): array
-	{
-		return self::skipScenario('default', 'requires attached scan fixtures');
-	}
-	
-	public function testScanUpload(): array
-	{
-		return self::skipScenario('default', 'requires file upload test');
-	}
-	
-	public function testUpdateForm(): array
-	{
-		return self::skipScenario('default', 'requires modal update context');
-	}
-	
-	public function testLinkTech(): array
-	{
-		return self::skipScenario('default', 'requires complex data preparation');
-	}
-	
-	public function testLink(): array
-	{
-		return self::skipScenario('default', 'requires complex data preparation');
-	}
-	
-	public function testUnlink(): array
-	{
-		return self::skipScenario('default', 'requires complex data preparation');
-	}
-	public $modelClass='\app\models\Contracts';
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
@@ -77,10 +29,16 @@ class ContractsController extends ArmsBaseController
 	
 	
 	/**
-	 * Возвращает IDs армов с переданными документами
-	 * @param $ids
-	 * @param $form
-	 * @return mixed
+	 * Возвращает HTML-подсказку со списком ARM-объектов для выбора в форме.
+	 *
+	 * Используется в autocomplete/hint-виджетах форм. Делегирует выборку
+	 * методу Contracts::fetchArmsHint() и возвращает сырой HTML через formatter.
+	 *
+	 * GET-параметры:
+	 * @param mixed $ids  Список идентификаторов ARM-объектов через запятую
+	 * @param mixed $form Имя формы, для которой формируется подсказка
+	 *
+	 * @return mixed Сырой HTML-ответ
 	 */
 	public function actionHintArms($ids,$form)
 	{
@@ -88,23 +46,70 @@ class ContractsController extends ArmsBaseController
 	}
 	
 	/**
-	 * Возвращает IDs армов с переданными документами
-	 * @param $ids
-	 * @param $form
-	 * @return mixed
+	 * Тестовые данные приёмочного теста для actionHintArms.
+	 *
+	 * Тест передаёт ids=7 и form=test, ожидает HTTP 200.
+	 * Внимание: тест завязан на конкретный id=7, который должен существовать
+	 * в БД. Для более надёжного теста следует заменить захардкоженный id=7
+	 * на id записи, созданной через getTestData().
+	 *
+	 * @return array массив тестовых сценариев
+	 */
+	public function testHintArms(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['ids' => '7', 'form' => 'test'],
+			'response' => 200,
+		]];
+	}
+	/**
+	 * Возвращает HTML-подсказку со списком родительских договоров для выбора в форме.
+	 *
+	 * Используется в autocomplete/hint-виджетах форм при выборе
+	 * родительского договора. Делегирует выборку Contracts::fetchParentHint()
+	 * и возвращает сырой HTML.
+	 *
+	 * GET-параметры:
+	 * @param mixed $ids  Список идентификаторов договоров через запятую
+	 * @param mixed $form Имя формы, для которой формируется подсказка
+	 *
+	 * @return mixed Сырой HTML-ответ
 	 */
 	public function actionHintParent($ids,$form)
 	{
 		return Yii::$app->formatter->asRaw(Contracts::fetchParentHint($ids,$form));
 	}
 	
-	
-
 	/**
-	 * Displays a single Contracts model.
-	 * @param int $id
+	 * Тестовые данные приёмочного теста для actionHintParent.
+	 *
+	 * Аналогично testHintArms: тест завязан на конкретный id=7.
+	 * Для устойчивого теста рекомендуется заменить ids=7 на идентификатор
+	 * договора, созданного через getTestData().
+	 *
+	 * @return array массив тестовых сценариев
+	 */
+	public function testHintParent(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['ids' => '7', 'form' => 'test'],
+			'response' => 200,
+		]];
+	}
+	
+	/**
+	 * Отображает список сканов (вложений) для заданного договора.
+	 *
+	 * Рендерит представление scans через renderAjax — используется
+	 * для отображения в модальных окнах и AJAX-блоках карточки договора.
+	 *
+	 * GET-параметры:
+	 * @param int $id Идентификатор договора (contracts.id)
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если договор с заданным id не найден
 	 */
 	public function actionScans(int $id)
 	{
@@ -113,10 +118,37 @@ class ContractsController extends ArmsBaseController
 		]);
 	}
 	
+		
 	/**
-	 * Creates a new Contracts model.
-	 * If creation is successful, the browser will be redirected to the 'view' page.
-	 * @return mixed
+	 * Тестовые данные приёмочного теста для actionScans.
+	 *
+	 * Тест пропущен (skip): для проверки необходим договор с прикреплёнными
+	 * сканами. Нужно создать запись Contracts и связанные с ней записи сканов
+	 * (ContractScans), передать id договора, затем проверить наличие сканов
+	 * в возвращаемом HTML.
+	 *
+	 * @return array сценарий skip
+	 */
+	public function testScans(): array
+	{
+		return self::skipScenario('default', 'requires Contracts record with attached ContractScans fixtures');
+	}
+	/**
+	 * Создаёт новый договор (Contracts).
+	 *
+	 * Поддерживает три режима работы:
+	 * - Обычный POST: сохраняет модель, перенаправляет на view или update (если GET apply).
+	 * - AJAX POST: возвращает JSON с результатом валидации или успехом.
+	 * - AJAX GET: рендерит форму создания через renderAjax для модального окна.
+	 *
+	 * GET-параметры:
+	 *   - apply      mixed  Если передан — после сохранения перенаправляет на update вместо view
+	 *   - Contracts[*]     Поля для предзаполнения формы (родительский договор и т.д.)
+	 *
+	 * POST-параметры:
+	 *   - Contracts[*]     Поля модели Contracts для сохранения
+	 *
+	 * @return mixed Редирект, JSON-ответ или рендер формы создания
 	 */
     public function actionCreate()
     {
@@ -157,11 +189,24 @@ class ContractsController extends ArmsBaseController
 
 
 	/**
-	 * Updates an existing Contracts model.
-	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param int $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Редактирует существующий договор (Contracts).
+	 *
+	 * Поддерживает три режима работы:
+	 * - AJAX POST: сохраняет и возвращает JSON (успех или ошибки валидации).
+	 * - AJAX GET: рендерит форму редактирования для модального окна.
+	 * - Обычный POST: сохраняет, перенаправляет на view или update (если GET apply).
+	 *
+	 * GET-параметры:
+	 * @param int  $id    Идентификатор договора (contracts.id)
+	 *
+	 * Дополнительный GET-параметр:
+	 *   - apply  mixed  Если передан — после сохранения перенаправляет на update вместо view
+	 *
+	 * POST-параметры:
+	 *   - Contracts[*]  Поля модели Contracts для обновления
+	 *
+	 * @return mixed Редирект, JSON-ответ или рендер формы редактирования
+	 * @throws NotFoundHttpException если договор с заданным id не найден
 	 */
 	public function actionUpdate(int $id)
 	{
@@ -196,11 +241,16 @@ class ContractsController extends ArmsBaseController
 	}
 
 	/**
-	 * Updates an existing Contracts model.
-	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param int $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Рендерит форму редактирования договора для использования в AJAX/модальном контексте.
+	 *
+	 * Возвращает только разметку формы (_form) без layout через renderAjax.
+	 * Используется при динамической загрузке формы в модальное окно.
+	 *
+	 * GET-параметры:
+	 * @param int $id Идентификатор договора (contracts.id)
+	 *
+	 * @return mixed HTML-разметка формы
+	 * @throws NotFoundHttpException если договор с заданным id не найден
 	 * @noinspection PhpUnusedFunctionInspection
 	 */
 	public function actionUpdateForm(int $id)
@@ -210,12 +260,37 @@ class ContractsController extends ArmsBaseController
 		]);
 	}
 
+		
 	/**
-	 * Deletes an existing Contracts model.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param int $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Тестовые данные приёмочного теста для actionUpdateForm.
+	 *
+	 * Тест пропущен (skip): действие рендерит форму через renderAjax и
+	 * требует корректного AJAX-контекста с заголовком X-Requested-With.
+	 * Для включения теста необходим существующий договор и AJAX-запрос.
+	 * Рекомендуется создать запись Contracts через getTestData() и
+	 * передать её id с AJAX-заголовками.
+	 *
+	 * @return array сценарий skip
+	 */
+	public function testUpdateForm(): array
+	{
+		return self::skipScenario('default', 'requires existing Contracts record and AJAX request context (X-Requested-With header)');
+	}
+	/**
+	 * Удаляет существующий договор (только для администраторов).
+	 *
+	 * Перед удалением каскадно удаляет все прикреплённые сканы договора.
+	 * Доступно только для пользователей с правами admin (Users::isAdmin()).
+	 * После удаления перенаправляет на страницу списка договоров.
+	 *
+	 * GET-параметры:
+	 * @param int $id Идентификатор договора для удаления (contracts.id)
+	 *
+	 * POST-параметры: отсутствуют.
+	 *
+	 * @return mixed Перенаправление на index
+	 * @throws NotFoundHttpException если договор с заданным id не найден
+	 * @throws ForbiddenHttpException если текущий пользователь не admin
 	 * @throws Exception
 	 * @throws Throwable
 	 * @throws StaleObjectException
@@ -239,6 +314,20 @@ class ContractsController extends ArmsBaseController
         return $this->redirect(['index']);
     }
 
+	/**
+	 * Загружает скан (файл-вложение) и прикрепляет его к договору.
+	 *
+	 * Принимает multipart POST-запрос с файлом и идентификатором договора.
+	 * Если contracts_id не передан — возвращает JSON с ошибкой (договор
+	 * ещё не сохранён). Примечание: текущая реализация является заглушкой,
+	 * фактическое сохранение файла не реализовано.
+	 *
+	 * POST-параметры:
+	 *   - contracts_id  int   Идентификатор договора (contracts.id)
+	 *   - file          file  Загружаемый файл скана (multipart/form-data)
+	 *
+	 * @return string JSON-строка с результатом операции
+	 */
 	public function actionScanUpload()
 	{
 		$id=Yii::$app->request->post('contracts_id');
@@ -247,13 +336,36 @@ class ContractsController extends ArmsBaseController
 		else
 			return "{\"error\":\"Якобы сохранено в модель $id\"}";	}
 
+		
 	/**
-	 * Отвязывает документ от объекта.
-	 * @param int $id
-	 * @param int $model_id
-	 * @param string $link
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Тестовые данные приёмочного теста для actionScanUpload.
+	 *
+	 * Тест пропущен (skip): действие требует multipart/form-data POST-запроса
+	 * с файлом. Стандартный HTTP-тест фреймворка не поддерживает загрузку файлов
+	 * без специальной настройки. Для включения теста необходимо реализовать
+	 * передачу UploadedFile через фиктивный файловый массив в $_FILES и
+	 * создать договор через getTestData() для получения корректного contracts_id.
+	 *
+	 * @return array сценарий skip
+	 */
+	public function testScanUpload(): array
+	{
+		return self::skipScenario('default', 'requires multipart file upload; implement via $_FILES mock and create Contracts record via getTestData() for valid contracts_id');
+	}
+	/**
+	 * Отвязывает связанный объект от договора.
+	 *
+	 * Убирает model_id из many-to-many поля договора, указанного через $link.
+	 * Возвращает JSON с кодом результата: 0 — успешно отвязано, 1 — ошибка
+	 * сохранения, 2 — связь не найдена.
+	 *
+	 * GET-параметры:
+	 * @param int    $id       Идентификатор договора (contracts.id)
+	 * @param int    $model_id Идентификатор объекта, который нужно отвязать
+	 * @param string $link     Имя поля-связи в модели Contracts (например, 'techs_ids')
+	 *
+	 * @return mixed JSON-ответ с полями error, code, Message
+	 * @throws NotFoundHttpException если договор с заданным id не найден
 	 */
 	public function actionUnlink(int $id, int $model_id, string $link)
 	{
@@ -283,14 +395,36 @@ class ContractsController extends ArmsBaseController
 		}
 	}
 	
+		
 	/**
-	 * Отвязывает документ от объекта.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param int $id
-	 * @param int $model_id
-	 * @param string $link
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Тестовые данные приёмочного теста для actionUnlink.
+	 *
+	 * Тест пропущен (skip): для проверки необходимы два связанных объекта —
+	 * договор (Contracts) и связанная с ним запись (например, Techs).
+	 * Нужно создать договор с предзаполненным полем $link (например, techs_ids),
+	 * передать id договора, id связанного объекта и имя поля, затем проверить,
+	 * что model_id исчез из поля $link после запроса.
+	 *
+	 * @return array сценарий skip
+	 */
+	public function testUnlink(): array
+	{
+		return self::skipScenario('default', 'requires Contracts record with pre-populated link field and a linked model_id; verify model_id removed from link field after request');
+	}
+	public $modelClass='\app\models\Contracts';
+	/**
+	 * Привязывает объект к договору через указанное поле-связь.
+	 *
+	 * Добавляет model_id в many-to-many поле договора $link, если он
+	 * там ещё не присутствует. Возвращает JSON с кодом 0 и сообщением 'Added'.
+	 *
+	 * GET-параметры:
+	 * @param int    $id       Идентификатор договора (contracts.id)
+	 * @param int    $model_id Идентификатор объекта для привязки
+	 * @param string $link     Имя поля-связи в модели Contracts (например, 'arms_ids')
+	 *
+	 * @return mixed JSON-ответ с полями error, code, Message
+	 * @throws NotFoundHttpException если договор с заданным id не найден
 	 */
 	public function actionLink(int $id, int $model_id, string $link)
 	{
@@ -308,13 +442,34 @@ class ContractsController extends ArmsBaseController
 
 	}
 
+		
 	/**
-	 * Отвязывает документ от объекта.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param int $id
-	 * @param int $techs_id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Тестовые данные приёмочного теста для actionLink.
+	 *
+	 * Тест пропущен (skip): для проверки необходимо создать договор (Contracts)
+	 * и объект для привязки. Нужно передать id договора, id объекта и имя
+	 * поля $link, затем проверить, что model_id появился в соответствующем
+	 * поле договора. Создать тестовые данные можно через getTestData().
+	 *
+	 * @return array сценарий skip
+	 */
+	public function testLink(): array
+	{
+		return self::skipScenario('default', 'requires Contracts record and target model record; pass contract id, model_id and link field name, verify model_id added to link field');
+	}
+	/**
+	 * Привязывает оборудование (Techs) к договору.
+	 *
+	 * Добавляет techs_id в поле techs_ids модели Contracts, если он
+	 * там ещё не присутствует. Специализированная версия actionLink
+	 * для связи с оборудованием. Возвращает JSON с кодом 0 и сообщением 'Added'.
+	 *
+	 * GET-параметры:
+	 * @param int $id       Идентификатор договора (contracts.id)
+	 * @param int $techs_id Идентификатор оборудования (techs.id) для привязки
+	 *
+	 * @return mixed JSON-ответ с полями error, code, Message
+	 * @throws NotFoundHttpException если договор с заданным id не найден
 	 */
 	public function actionLinkTech(int $id, int $techs_id)
 	{
@@ -331,7 +486,22 @@ class ContractsController extends ArmsBaseController
 
 	}
 
+		
 	/**
+	 * Тестовые данные приёмочного теста для actionLinkTech.
+	 *
+	 * Тест пропущен (skip): для проверки необходимо создать договор (Contracts)
+	 * и запись оборудования (Techs). Нужно передать id договора и techs_id,
+	 * затем проверить, что techs_id появился в поле techs_ids договора.
+	 * Оба объекта можно создать через getTestData().
+	 *
+	 * @return array сценарий skip
+	 */
+	public function testLinkTech(): array
+	{
+		return self::skipScenario('default', 'requires Contracts and Techs records; pass contract id and techs_id, verify techs_id added to techs_ids field');
+	}
+/**
      * Finds the Contracts model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $id

@@ -12,19 +12,14 @@ use yii\web\NotFoundHttpException;
 
 /**
  * SegmentsController implements the CRUD actions for Segments model.
+ *
+ * Управляет сетевыми сегментами (Segments).
+ * Предоставляет компактный список сегментов и детальную страницу
+ * с привязанными сетями (Networks) и сервисами (Services).
  */
 class SegmentsController extends ArmsBaseController
 {
 	public $modelClass=Segments::class;
-	
-	public function testList(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
-	}
 	
 	public function accessMap()
 	{
@@ -33,6 +28,17 @@ class SegmentsController extends ArmsBaseController
 		]);
 	}
 	
+	/**
+	 * Отображает компактную таблицу всех сегментов (partial view).
+	 *
+	 * Рендерит шаблон table-compact без пагинации и сортировки.
+	 * Если модель имеет атрибут archived — по умолчанию фильтрует архивные записи.
+	 *
+	 * GET-параметры:
+	 * - showArchived (bool, опционально): если true — включает архивные сегменты
+	 *
+	 * @return mixed
+	 */
 	public function actionList() {
 		$query=($this->modelClass)::find();
 		$model= new $this->modelClass();
@@ -52,9 +58,35 @@ class SegmentsController extends ArmsBaseController
 		]);
 	}
 
+    	
+	/**
+	 * Acceptance test data for actionList.
+	 *
+	 * Открывает компактную таблицу сегментов без параметров.
+	 * Тестовые записи Segments создаются через getTestData() перед запросом.
+	 * Ожидается HTTP 200.
+	 *
+	 * @return array
+	 */
+	public function testList(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
     /**
-     * Displays a single Segments model.
-     * @param integer $id
+     * Отображает страницу сегмента с привязанными сетями и сервисами.
+     *
+     * Инициализирует NetworksSearch (фильтр по segments_id) и ServicesSearch
+     * (фильтр по segment_id), передавая archived из GET.
+     *
+     * GET-параметры:
+     * - id           (int, обязательно):  ID сегмента
+     * - showArchived (bool, опционально): если true — включает архивные сети и сервисы
+     *
+     * @param int $id GET: ID сегмента
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */

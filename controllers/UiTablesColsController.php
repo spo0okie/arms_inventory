@@ -13,6 +13,9 @@ use yii\helpers\Url;
  */
 class UiTablesColsController extends ArmsBaseController
 {
+	/**
+	 * Returns disabled acceptance tests list.
+	 */
 	public function disabledTests(): array
 	{
 		return ['*'];
@@ -25,10 +28,16 @@ class UiTablesColsController extends ArmsBaseController
 	
 	
 	/**
-	 * @param string $table
-	 * @param string $column
-	 * @param int    $user
-	 * @param string $value
+	 * Сохраняет пользовательскую настройку видимости/ширины колонки таблицы.
+	 * Ищет существующую запись по комбинации table+column+user_id; если не находит —
+	 * создаёт новую. Устанавливает поле `value` и сохраняет запись.
+	 *
+	 * GET-параметры:
+	 * @param string $table   Идентификатор таблицы (например, 'comps-index')
+	 * @param string $column  Имя атрибута/колонки модели
+	 * @param int    $user    ID пользователя (Users)
+	 * @param string $value   Сохраняемое значение настройки (ширина, видимость и т.п.)
+	 *
 	 * @return mixed
 	 */
     public function actionSet(string $table, string $column, int $user, string $value)

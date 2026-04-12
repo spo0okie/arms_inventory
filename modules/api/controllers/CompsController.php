@@ -39,11 +39,34 @@ class CompsController extends BaseRestController
 		'mac'=>'mac',
 	];
 	
+	/**
+	 * Возвращает единственную запись компьютера, найденную по имени, домену или IP.
+	 * Если передан `name` — делегирует в CompsController::searchModel() (поиск по hostname/FQDN).
+	 * Иначе использует базовый фильтр по полям из static::$searchFields (name, ip, mac).
+	 *
+	 * GET-параметры:
+	 * @param string|null $name    Имя компьютера или hostname
+	 * @param string|null $domain  Домен (используется только при поиске через searchModel)
+	 * @param string|null $ip      IP-адрес компьютера
+	 *
+	 * @return ActiveRecord|null
+	 */
 	public function actionSearch($name=null,$domain=null,$ip=null): ActiveRecord|null {
 		if ($name) return \app\controllers\CompsController::searchModel($name,$domain,$ip);
 		return parent::actionSearch();
 	}
 	
+	/**
+	 * Возвращает отфильтрованный список компьютеров через CompsSearch.
+	 * Поддерживает параметр `showArchived` для включения архивных записей.
+	 * Все остальные параметры фильтрации передаются через queryParams в CompsSearch::search().
+	 *
+	 * GET-параметры:
+	 *   showArchived — bool, включить архивные записи (по умолчанию: false)
+	 *   + прочие атрибуты CompsSearch
+	 *
+	 * @return ActiveDataProvider
+	 */
 	public function actionFilter(): ActiveDataProvider
 	{
 		$searchModel = new CompsSearch();
@@ -82,6 +105,17 @@ class CompsController extends BaseRestController
 			new OA\Response(response: 422, description: "Предоставлены неверные данные"),
 		]
 	)]
+    /**
+     * Создаёт или обновляет запись компьютера из тела POST-запроса (upsert).
+     * Если в теле передан `id` — выполняет обновление через actionUpdate.
+     * Иначе ищет существующий компьютер по имени (findByAnyName) и обновляет его,
+     * или создаёт новую запись через actionCreate.
+     *
+     * POST body: поля модели Comps в формате JSON (в т.ч. опционально: id)
+     *
+     * @return mixed
+     * @throws BadRequestHttpException если тело запроса не удалось загрузить в модель
+     */
     public function actionPush() {
     	/** @var Comps $loader */
 		$loader = new $this->modelClass();

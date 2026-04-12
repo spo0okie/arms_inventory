@@ -33,15 +33,20 @@ class LoginJournalController extends BaseRestController
 	}
 	
 	/**
-	 * Ищет запись в бд по компу, логину и времени.
-	 * Это не для пользовательских запросов, т.к. время надо передать с точностью для секунды
-	 * Это для скриптов, чтобы можно было понять есть уже нужная запись в журнале или нет.
-	 * @param string|null $user_login
-	 * @param string|null $comp_name
-	 * @param string|null $time
-	 * @param int    $type
-	 * @param int|null   $local_time
-	 * @return LoginJournal|null|ActiveRecord
+	 * Ищет запись журнала входов по компьютеру, логину и времени события.
+	 * Предназначен для использования скриптами сбора данных, а не для UI:
+	 * требует точного указания времени (до секунды) — допустимый сдвиг задан LoginJournal::$maxTimeShift.
+	 * Если передан `local_time` (текущее время клиента) — корректирует `time` на разницу
+	 * с серверным временем (компенсация рассинхронизации часов).
+	 *
+	 * GET-параметры:
+	 * @param string|null $user_login  Логин пользователя (нечувствителен к регистру)
+	 * @param string|null $comp_name   Имя компьютера (нечувствительно к регистру)
+	 * @param string|null $time        Unix-timestamp события входа
+	 * @param int         $type        Тип события (0 — вход, прочие — по конфигурации LoginJournal)
+	 * @param int|null    $local_time  Текущий Unix-timestamp на клиентской машине (для коррекции часов)
+	 *
+	 * @return LoginJournal|ActiveRecord|null
 	 */
     public function actionSearch(string $user_login=null, string $comp_name=null, string $time=null, int $type=0, $local_time=null):ActiveRecord|null
 	{
@@ -59,6 +64,18 @@ class LoginJournalController extends BaseRestController
 			->one();
     }
     
+    /**
+     * Создаёт запись в журнале входов (LoginJournal), если аналогичная запись ещё не существует.
+     * Проверяет наличие дубликата через actionSearch() по user_login, comp_name, time и type.
+     * Если дубликат найден — возвращает 409 Conflict с ID существующей записи.
+     * Иначе делегирует создание в actionCreate().
+     *
+     * POST body: поля модели LoginJournal в формате JSON (user_login, comp_name, time, type)
+     *
+     * @return mixed
+     * @throws BadRequestHttpException если тело запроса не удалось загрузить в модель
+     * @throws ConflictHttpException   если запись с такими данными уже существует
+     */
     public function actionPush() {
 		/** @var LoginJournal $loader */
 		$loader = new $this->modelClass();

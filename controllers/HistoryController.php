@@ -9,10 +9,24 @@ use yii\web\NotFoundHttpException;
 
 
 /**
- * UiTablesColsController implements the CRUD actions for UiTablesCols model.
+ * HistoryController реализует отображение журнала изменений объектов.
+ *
+ * Позволяет просматривать историю изменений любой модели, реализующей
+ * интерфейс HistoryModel, по идентификатору объекта.
  */
 class HistoryController extends ArmsBaseController
 {
+	/**
+	 * Возвращает список отключённых приёмочных тестов.
+	 *
+	 * Все тесты контроллера отключены ('*'): журнал истории работает только
+	 * с реально существующими историческими данными в БД. Без предварительно
+	 * сформированных записей в таблицах истории (master_id, изменённые атрибуты)
+	 * тесты не имеют смысла. Для включения тестов необходимо реализовать
+	 * фикстуры исторических данных для конкретных моделей HistoryModel.
+	 *
+	 * @return array список отключённых тестов (wildcard '*' — все)
+	 */
 	public function disabledTests(): array
 	{
 		return ['*'];
@@ -25,9 +39,22 @@ class HistoryController extends ArmsBaseController
 	
 	
 	/**
-	 * @param string $class
-	 * @param int    $id
-	 * @return mixed
+	 * Отображает журнал изменений для заданного объекта.
+	 *
+	 * Принимает FQCN класса модели-истории и идентификатор объекта-владельца
+	 * (master_id). Проверяет существование класса и его принадлежность к
+	 * HistoryModel. Строит ActiveDataProvider с сортировкой по убыванию id.
+	 *
+	 * GET-параметры:
+	 * @param string $class Полное имя класса (FQCN) модели истории,
+	 *                      например: app\models\history\CompsHistory.
+	 *                      Класс должен реализовывать HistoryModel.
+	 * @param int    $id    Идентификатор объекта-владельца (master_id),
+	 *                      история которого запрашивается.
+	 *
+	 * @return mixed Рендер представления journal
+	 * @throws \yii\web\NotFoundHttpException если класс не найден
+	 * @throws \http\Exception\InvalidArgumentException если класс не является HistoryModel
 	 */
     public function actionJournal(string $class,int $id)
     {

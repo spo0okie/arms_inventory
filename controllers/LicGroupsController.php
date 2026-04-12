@@ -16,26 +16,36 @@ use yii\web\Response;
 class LicGroupsController extends ArmsBaseController
 {
 	
+	/**
+	 * Acceptance test data for Link.
+	 *
+	 * Пропускается, так как для теста необходимо:
+	 *  - создать LicGroup через getTestData()['full'];
+	 *  - создать и привязать хотя бы один из связанных объектов:
+	 *    Soft, Arms, Users или Comps (их IDs передаются через many-to-many).
+	 * Без этих данных тест привязки не может быть выполнен корректно.
+	 */
 	public function testLink(): array
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		return self::skipScenario('default', 'requires LicGroup with linked soft/arms/users/comps — prepare via getTestData() and link objects manually');
 	}
-	
-	public function testUnlink(): array
-	{
-		return self::skipScenario('default', 'requires complex data preparation');
-	}
-	public $modelClass=LicGroups::class;
 	public function disabledActions()
 	{
 		return ['item-by-name',];
 	}
 
     /**
-     * Displays a single LicGroups model.
-     * @param int $id
+     * Страница просмотра группы лицензий.
+     *
+     * Отображает карточку группы, список лицензионных позиций (LicItems),
+     * входящих в группу, а также связанные объекты (Soft, Arms, Users, Comps)
+     * через LicLinks.
+     *
+     * GET-параметры:
+     * @param int $id Идентификатор LicGroups.
+     *
      * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws NotFoundHttpException если запись не найдена
      */
     public function actionView(int $id)
     {
@@ -74,14 +84,22 @@ class LicGroupsController extends ArmsBaseController
 	
 	
 	/**
-	 * Удаляем АРМ или софт из лицензии
-	 * @param int $id
-	 * @param int|null $soft_id
-	 * @param int|null $arms_id
-	 * @param int|null $users_id
-	 * @param int|null $comps_id
+	 * Отвязка объекта от группы лицензий.
+	 *
+	 * Удаляет связь одного из связанных объектов (Soft, Arms, Users или Comps)
+	 * с указанной группой лицензий и перенаправляет на страницу просмотра группы.
+	 * Передаётся ровно один из необязательных параметров — тот объект, связь
+	 * с которым нужно разорвать.
+	 *
+	 * GET-параметры:
+	 * @param int      $id       Идентификатор LicGroups.
+	 * @param int|null $soft_id  ID программного обеспечения для отвязки.
+	 * @param int|null $arms_id  ID АРМ для отвязки.
+	 * @param int|null $users_id ID пользователя для отвязки.
+	 * @param int|null $comps_id ID компьютера для отвязки.
+	 *
 	 * @return string|Response
-	 * @throws NotFoundHttpException
+	 * @throws NotFoundHttpException если LicGroups с данным id не найдена
 	 */
 	public function actionUnlink(int $id, $soft_id=null, $arms_id=null, $users_id=null, $comps_id=null){
 		/** @var LicGroups $model */
@@ -116,6 +134,21 @@ class LicGroupsController extends ArmsBaseController
 		if ($updated) $model->save();
 
 		return $this->redirect(['view', 'id' => $model->id]);
+	}	
+	/**
+	 * Acceptance test data for Unlink.
+	 *
+	 * Пропускается, так как для теста необходимо:
+	 *  - создать LicGroup через getTestData()['full'];
+	 *  - привязать к ней хотя бы один из объектов: Soft, Arms, Users, Comps;
+	 *  - передать в GET параметр id и соответствующий *_id объекта для отвязки.
+	 * Без предварительно созданных связей проверить логику разрыва невозможно.
+	 */
+	public function testUnlink(): array
+	{
+		return self::skipScenario('default', 'requires LicGroup with linked objects — prepare via getTestData() and link objects manually');
 	}
+	public $modelClass=LicGroups::class;
+
 
 }

@@ -17,36 +17,52 @@ use yii\web\Response;
 
 /**
  * ServicesController implements the CRUD actions for Services model.
+ *
+ * Управляет ИТ-сервисами: отображение списков, дерева, карточек, связанного
+ * оборудования/ПО, списков доступа (ACE/ACL) и требований тех.обслуживания.
  */
 class ServicesController extends ArmsBaseController
 {
+	/**
+	 * Acceptance test data for Ttip.
+	 *
+	 * Тест пропущен: вьюха ttip сервиса рендерит связанные данные (owners, tech support,
+	 * parent service и др.), которые требуют полностью заполненной модели с зависимостями.
+	 * Если getTestData()['full'] гарантированно создаёт сервис с этими связями — skip можно заменить.
+	 */
 	public function testTtip(): array
 	{
-		return self::skipScenario('default', 'requires complex relations for stable ttip rendering');
+		$testData = $this->getTestData();
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
 	}
 	
+	/**
+	 * Acceptance test data for View.
+	 *
+	 * Тест пропущен: страница view сервиса рендерит расширенные связанные данные
+	 * (ответственные, техподдержка, связанные объекты). Если getTestData()['full']
+	 * создаёт сервис со всеми нужными связями — skip можно заменить реальным тестом.
+	 */
 	public function testView(): array
 	{
-		return self::skipScenario('default', 'requires complex relations for stable view rendering');
-	}
-	public function testIndexByUsers(): array
-	{
+		$testData = $this->getTestData();
 		return [[
 			'name' => 'default',
-			'GET' => [],
+			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
 	
-	public function testIndexTree(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
-	}
-	
+	/**
+	 * Acceptance test data for AcesList.
+	 *
+	 * Проверяет рендер списка ACE (access control entries) для сервиса.
+	 * GET: id — идентификатор сервиса, полученный из getTestData()['full'].
+	 */
 	public function testAcesList(): array
 	{
 		$testData=$this->getTestData();
@@ -58,6 +74,12 @@ class ServicesController extends ArmsBaseController
 		]];
 	}
 	
+	/**
+	 * Acceptance test data for AclsList.
+	 *
+	 * Проверяет рендер списка ACL (access control list) для сервиса.
+	 * GET: id — идентификатор сервиса, полученный из getTestData()['full'].
+	 */
 	public function testAclsList(): array
 	{
 		$testData=$this->getTestData();
@@ -68,62 +90,6 @@ class ServicesController extends ArmsBaseController
 			'response' => 200,
 		]];
 	}
-	
-	public function testCard(): array
-	{
-		return self::skipScenario('default', 'requires extended linked data for card widgets');
-	}
-	
-	public function testCardSupport(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
-	
-	public function testCardMaintenanceReqs(): array
-	{
-		return self::skipScenario('default', 'requires linked maintenance requirements');
-	}
-	
-	public function testChildrenTree(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
-	
-	public function testJsonPreview(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
-	
-	public function testOsList(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
-	
-	public $modelClass=Services::class;
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
@@ -132,10 +98,14 @@ class ServicesController extends ArmsBaseController
 	}
 	
 	/**
-	 * Displays model fields in JSON.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Возвращает JSON-ответ с содержимым всех extraFields сервиса для отладки.
+	 *
+	 * GET: id (int) — идентификатор сервиса.
+	 * Ответ: JSON-объект, где ключи — имена extraFields, значения — их содержимое.
+	 *
+	 * @param int $id Идентификатор сервиса
+	 * @return array JSON-объект с extraFields сервиса
+	 * @throws NotFoundHttpException если сервис не найден
 	 * @noinspection PhpUnusedElementInspection
 	 */
 	public function actionJsonPreview(int $id)
@@ -149,11 +119,33 @@ class ServicesController extends ArmsBaseController
 		return $response;
 	}
 	
+		
 	/**
-	 * Displays a card for single model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Acceptance test data for JsonPreview.
+	 *
+	 * Проверяет JSON-ответ с extraFields для существующего сервиса.
+	 * GET: id из getTestData()['full'].
+	 */
+	public function testJsonPreview(): array
+	{
+		$testData=$this->getTestData();
+		
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
+	/**
+	 * Рендерит partial-карточку сервиса (card view).
+	 *
+	 * Отображает связанные данные: ответственных (owners), техподдержку,
+	 * место размещения и другие поля сервиса.
+	 * GET: id (int) — идентификатор сервиса.
+	 *
+	 * @param int $id Идентификатор сервиса
+	 * @return string HTML partial карточки сервиса
+	 * @throws NotFoundHttpException если сервис не найден
 	 */
 	public function actionCard(int $id)
 	{
@@ -162,11 +154,29 @@ class ServicesController extends ArmsBaseController
 		]);
 	}
 	
+		
 	/**
-	 * Displays a tooltip for single model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Acceptance test data for Card.
+	 *
+	 * Тест пропущен: card view сервиса рендерит виджеты со связанными данными —
+	 * ответственные (owners), техподдержка (techSupport), parent-сервис и др.
+	 * Для стабильного рендера требуется сервис с полным набором этих связей.
+	 * Если getTestData()['full'] создаёт такой сервис — skip можно заменить реальным тестом.
+	 */
+	public function testCard(): array
+	{
+		return self::skipScenario('default', 'requires extended linked data for card widgets');
+	}
+	/**
+	 * Рендерит partial-карточку технической поддержки сервиса.
+	 *
+	 * Отображает блок информации о техподдержке: ответственных исполнителей,
+	 * контакты и регламенты поддержки конкретного сервиса.
+	 * GET: id (int) — идентификатор сервиса.
+	 *
+	 * @param int $id Идентификатор сервиса
+	 * @return string HTML partial карточки техподдержки
+	 * @throws NotFoundHttpException если сервис не найден
 	 */
 	public function actionCardSupport(int $id)
 	{
@@ -175,11 +185,32 @@ class ServicesController extends ArmsBaseController
 		]);
 	}
 	
+		
 	/**
-	 * Displays a tooltip for single model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Acceptance test data for CardSupport.
+	 *
+	 * Проверяет partial-рендер карточки техподдержки для существующего сервиса.
+	 * GET: id из getTestData()['full'].
+	 */
+	public function testCardSupport(): array
+	{
+		$testData=$this->getTestData();
+		
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
+	/**
+	 * Рендерит виджет со списком требований технического обслуживания для сервиса.
+	 *
+	 * Отображает поле backupReqs сервиса через ModelFieldWidget в режиме static_view.
+	 * GET: id (int) — идентификатор сервиса.
+	 *
+	 * @param int $id Идентификатор сервиса
+	 * @return string HTML-виджет с требованиями тех.обслуживания
+	 * @throws NotFoundHttpException если сервис не найден
 	 */
 	public function actionCardMaintenanceReqs(int $id)
 	{
@@ -194,9 +225,31 @@ class ServicesController extends ArmsBaseController
 		]);
 	}
 	
+		
 	/**
-	 * Lists all Services models.
-	 * @return mixed
+	 * Acceptance test data for CardMaintenanceReqs.
+	 *
+	 * Тест пропущен: для корректного рендера требуется сервис с привязанными
+	 * записями backupReqs (требования тех.обслуживания).
+	 * Если getTestData()['full'] создаёт сервис с такими связями — skip можно заменить.
+	 */
+	public function testCardMaintenanceReqs(): array
+	{
+		return self::skipScenario('default', 'requires linked maintenance requirements');
+	}
+	/**
+	 * Отображает список сервисов с поддержкой фильтрации, дочерних записей и архива.
+	 *
+	 * Логика: если результат пустой и дочерние записи не заданы явно — автоматически
+	 * переключается на вариант с дочерними. Передаёт количество альтернативных
+	 * результатов (switchParentCount, switchArchivedCount) для переключателей в UI.
+	 *
+	 * GET:
+	 *   showChildren (bool, опционально) — включить дочерние сервисы в результат.
+	 *   showArchived (bool, опционально) — показать архивные сервисы.
+	 *   queryParams — любые параметры ServicesSearch для фильтрации.
+	 *
+	 * @return string Страница списка сервисов
 	 */
 	public function actionIndex()
 	{
@@ -255,9 +308,15 @@ class ServicesController extends ArmsBaseController
 	}
 	
 	/**
-	 * Lists all Services models.
-	 * @param array $disabled_ids
-	 * @return mixed
+	 * Отображает список активных сервисов, сгруппированных по ответственным пользователям.
+	 *
+	 * Выбирает только неархивные сервисы с признаком directlySupported,
+	 * включая дочерние. Использует вид list-by-users.
+	 *
+	 * GET: нет специальных параметров (queryParams ServicesSearch для фильтрации).
+	 *
+	 * @param array $disabled_ids Массив ID сервисов, которые нужно пометить как отключённые в UI
+	 * @return string Страница списка сервисов по ответственным
 	 */
 	public function actionIndexByUsers(array $disabled_ids=[])
 	{
@@ -278,8 +337,29 @@ class ServicesController extends ArmsBaseController
 	}
 	
 	/**
-	 * Lists all Services models.
-	 * @return mixed
+	 * Acceptance test data for IndexByUsers.
+	 *
+	 * Проверяет рендер страницы списка сервисов по ответственным.
+	 * GET: нет параметров. Тест проходит при наличии любых (или нулевых) данных в БД.
+	 */
+	public function testIndexByUsers(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	/**
+	 * Отображает полное дерево всех сервисов (включая дочерние) в виде плоского отсортированного списка.
+	 *
+	 * Строит иерархическое дерево из всех сервисов с помощью ArrayHelper::buildSortedTree,
+	 * затем разворачивает его в плоский список (sortFlatTree) для рендера в tabular-виде.
+	 * Передаёт switchArchivedCount для переключателя архивных записей.
+	 *
+	 * GET: queryParams — параметры ServicesSearch для фильтрации.
+	 *
+	 * @return string Страница дерева сервисов
 	 */
 	public function actionIndexTree()
 	{
@@ -314,11 +394,32 @@ class ServicesController extends ArmsBaseController
 		]);
 	}
 	
+		
 	/**
-	 * Список ОС рекурсивно задействованные в сервисе (с учетом вложенных)
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Acceptance test data for IndexTree.
+	 *
+	 * Проверяет рендер страницы полного дерева сервисов.
+	 * GET: нет параметров. Тест проходит при наличии любых (или нулевых) данных в БД.
+	 */
+	public function testIndexTree(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	/**
+	 * AJAX: возвращает список ПК и оборудования, рекурсивно связанных с сервисом.
+	 *
+	 * Собирает compsRecursive и techsRecursive для сервиса, загружает их через
+	 * CompsSearch/TechsSearch (со всеми joinWith), объединяет в один ArrayDataProvider.
+	 * Устанавливает заголовок X-Pagination-Total-Count.
+	 * GET: id (int) — идентификатор сервиса.
+	 *
+	 * @param int $id Идентификатор сервиса
+	 * @return string HTML-таблица со списком ПК и оборудования
+	 * @throws NotFoundHttpException если сервис не найден
 	 */
 	public function actionOsList(int $id)
 	{
@@ -383,7 +484,8 @@ class ServicesController extends ArmsBaseController
 
 	
 	/*
-	 * Список связей в сервисе (с учетом вложенных)
+	 * (Закомментировано) Список ACE-связей в сервисе (с учётом вложенных).
+	 * Функциональность перенесена или временно отключена.
 	 * @param integer $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
@@ -417,7 +519,8 @@ class ServicesController extends ArmsBaseController
 	}
 
 	/**
-	 * Список связей в сервисе (с учетом вложенных)
+	 * (Закомментировано) Список ACL-связей в сервисе (с учётом вложенных).
+	 * Функциональность перенесена или временно отключена.
 	 * @param integer $id
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
@@ -452,11 +555,38 @@ class ServicesController extends ArmsBaseController
 		]);
 	}*/
 
+		
 	/**
-	 * Список связей в сервисе (с учетом вложенных)
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Acceptance test data for OsList.
+	 *
+	 * Проверяет AJAX-рендер списка ПК/оборудования для существующего сервиса.
+	 * GET: id из getTestData()['full']. Тест проходит даже если список пустой.
+	 */
+	public function testOsList(): array
+	{
+		$testData=$this->getTestData();
+		
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
+	
+	public $modelClass=Services::class;
+	/**
+	 * AJAX: возвращает дерево дочерних сервисов для заданного сервиса.
+	 *
+	 * Рекурсивно получает всех потомков, строит отсортированное плоское дерево
+	 * и передаёт его через ArrayDataProvider. Устанавливает X-Pagination-Total-Count.
+	 *
+	 * GET:
+	 *   id (int) — идентификатор родительского сервиса.
+	 *   showArchived (bool, опционально) — включить архивные дочерние сервисы.
+	 *
+	 * @param int $id Идентификатор родительского сервиса
+	 * @return string HTML AJAX-рендер дерева дочерних сервисов
+	 * @throws NotFoundHttpException если сервис не найден
 	 */
 	public function actionChildrenTree(int $id)
 	{
@@ -495,6 +625,23 @@ class ServicesController extends ArmsBaseController
 			'dataProvider' => $arrDataProvider,
 			//'switchArchivedCount' => $switchArchivedCount,
 		]);
+	}	
+	/**
+	 * Acceptance test data for ChildrenTree.
+	 *
+	 * Проверяет AJAX-рендер дерева дочерних сервисов.
+	 * GET: id из getTestData()['full']. Тест проходит даже при отсутствии дочерних.
+	 */
+	public function testChildrenTree(): array
+	{
+		$testData=$this->getTestData();
+		
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
 	}
+
 	
 }

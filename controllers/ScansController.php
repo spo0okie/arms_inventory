@@ -17,14 +17,14 @@ use yii\bootstrap5\ActiveForm;
 
 /**
  * ScansController implements the CRUD actions for Scans model.
+ *
+ * Управляет отсканированными документами и изображениями (Scans).
+ * Поддерживает загрузку файлов, установку thumbnail для связанных объектов
+ * (TechModels, Techs, Places, Soft) и отвязку скана от всех объектов вместо удаления.
+ * Действия item-by-name и update отключены (см. disabledActions).
  */
 class ScansController extends ArmsBaseController
 {
-	public function testThumb(): array
-	{
-		return self::skipScenario('default', 'requires file system data');
-	}
-	public $modelClass=Scans::class;
 	
 	public function accessMap()
 	{
@@ -39,10 +39,22 @@ class ScansController extends ArmsBaseController
 	}
 
 	/**
-	 * Validates Manufacturers model on update.
-	 * @param null $id
-	 * @return mixed
-	 * @throws NotFoundHttpException
+	 * AJAX-валидация формы скана (ActiveForm::validate).
+	 *
+	 * Загружает данные из POST в модель Scans (существующую или новую),
+	 * применяет UploadedFile для поля scanFile и возвращает JSON с ошибками валидации.
+	 *
+	 * GET-параметры:
+	 * - id (int|null, опционально): ID существующего скана для валидации обновления;
+	 *   если не указан — валидируется новая запись.
+	 *
+	 * POST-параметры (через Scans::load):
+	 * - Scans[scanFile] (file, опционально): загружаемый файл скана
+	 * - прочие поля модели Scans
+	 *
+	 * @param int|null $id GET: ID скана (null = новый)
+	 * @return mixed JSON с ошибками валидации или null
+	 * @throws NotFoundHttpException если $id указан, но запись не найдена
 	 */
 	public function actionValidate($id=null)
 	{
@@ -61,8 +73,24 @@ class ScansController extends ArmsBaseController
 	}
 
     /**
-     * Creates a new Scans model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
+     * Загружает новый скан и сохраняет его в БД.
+     *
+     * Принимает multipart POST-запрос, валидирует файл и поля формы.
+     * При ошибках возвращает JSON-объект с полем 'error' и 'validation'.
+     * При успехе возвращает JSON-массив с сохранённой моделью Scans.
+     *
+     * POST-параметры (через Scans::load, scenario='create'):
+     * - Scans[scanFile]      (file, обязательно): загружаемый файл скана
+     * - Scans[contracts_id]  (int, опционально):  ID договора
+     * - Scans[places_id]     (int, опционально):  ID помещения
+     * - Scans[techs_id]      (int, опционально):  ID оборудования
+     * - прочие поля модели Scans
+     *
+     * Ответ:
+     * - JSON-массив [Scans] при успехе
+     * - JSON-объект {'error': string, 'validation': {...}} при ошибке валидации
+     * - строка '{"error":"..."}' при иных ошибках
+     *
      * @return mixed
      */
     public function actionCreate()
@@ -97,9 +125,19 @@ class ScansController extends ArmsBaseController
     }
 	
 	/**
-	 * Updates an existing Scans model.
-	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param integer $id
+	 * Заменяет файл существующего скана.
+	 *
+	 * Загружает новый файл через UploadedFile и сохраняет модель.
+	 * При успехе редиректит на страницу просмотра скана.
+	 *
+	 * GET-параметры:
+	 * - id (int, обязательно): ID скана для замены файла
+	 *
+	 * POST-параметры (через Scans::load):
+	 * - Scans[scanFile] (file, обязательно): новый файл скана
+	 * - прочие поля модели Scans
+	 *
+	 * @param int $id GET: ID скана
 	 * @return mixed
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
@@ -120,11 +158,25 @@ class ScansController extends ArmsBaseController
 	}
 	
 	/**
-	 * Устанавливает переданный по ID скан превьюшкой указанного объекта
-	 * @param integer $id	ID скана
-	 * @param string  $link	тип объекта
-	 * @param integer $link_id ID объекта
-	 * @return mixed
+	 * Устанавливает скан как thumbnail (превью) для указанного объекта.
+	 *
+	 * Находит объект по типу связи ($link) и ID ($link_id), записывает
+	 * ID скана в поле scans_id объекта и сохраняет без валидации.
+	 * Возвращает JSON {'code': '0'} при успехе.
+	 *
+	 * GET-параметры:
+	 * - id      (int, обязательно):    ID скана (Scans)
+	 * - link    (string, обязательно): тип связи:
+	 *                                  'tech_models_id' — TechModels,
+	 *                                  'techs_id'       — Techs,
+	 *                                  'places_id'      — Places,
+	 *                                  'soft_id'        — Soft
+	 * - link_id (int, обязательно):    ID связанного объекта
+	 *
+	 * @param int    $id      GET: ID скана
+	 * @param string $link    GET: тип связи (tech_models_id|techs_id|places_id|soft_id)
+	 * @param int    $link_id GET: ID связанного объекта
+	 * @return mixed JSON {'code': '0'}
 	 * @throws NotFoundHttpException if the model cannot be found
 	 */
 	public function actionThumb(int $id, string $link, int $link_id)
@@ -157,10 +209,39 @@ class ScansController extends ArmsBaseController
 	
 	
 	/**
-	 * Deletes an existing Scans model.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param int|null $id
-	 * @return mixed
+	 * Acceptance test data for actionThumb.
+	 *
+	 * Тест пропущен: для установки thumbnail необходим физически сохранённый файл скана
+	 * на диске (путь задаётся через Scans::fullFname). Без реального файла
+	 * операция технически выполняется (поле scans_id сохраняется), но последующий
+	 * рендер thumbnail вернёт битый путь. Кроме того, acceptance-тест требует
+	 * существующих объектов (TechModels/Techs/Places/Soft) для связывания.
+	 * Необходима поддержка файловой системы в тестовой среде.
+	 *
+	 * @return array
+	 */
+	public function testThumb(): array
+	{
+		return self::skipScenario('default', 'requires physically saved scan file and linked object fixtures');
+	}
+	public $modelClass=Scans::class;
+	/**
+	 * Отвязывает скан от всех объектов (вместо физического удаления).
+	 *
+	 * Обнуляет все внешние ключи скана (contracts_id, places_id, tech_models_id,
+	 * material_models_id, lic_types_id, lic_items_id, arms_id, techs_id, soft_id)
+	 * и сохраняет модель. Физическое удаление файла намеренно отключено —
+	 * "осиротевший" скан сохраняется для истории в журналах.
+	 *
+	 * При AJAX-запросе возвращает JSON {'code': '0'};
+	 * иначе — редиректит на actionIndex.
+	 *
+	 * GET или POST-параметры:
+	 * - id (int|null, опционально): ID скана;
+	 *   если не передан в GET — берётся из POST['key'] (для AJAX-таблиц)
+	 *
+	 * @param int|null $id GET/POST: ID скана
+	 * @return mixed JSON {'code': '0'} или редирект на index
 	 * @throws NotFoundHttpException if the model cannot be found
 	 * @throws Throwable
 	 * @throws StaleObjectException

@@ -14,21 +14,19 @@ use yii\web\NotFoundHttpException;
  */
 class NetIpsController extends ArmsBaseController
 {
-	public function testItemByName(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => ['name' => '10.20.1.11'],
-			'response' => 200,
-		]];
-	}
-
-	public $modelClass=NetIps::class;
-
-    /**
-     * Lists all NetIps models.
-     * @return mixed
-     */
+	/**
+	 * Отображает список IP-адресов с поиском и фильтрацией.
+	 *
+	 * Если результатов по фильтру не найдено и указан текстовый адрес (text_addr),
+	 * выполняется попытка определить принадлежность адреса к существующей сети:
+	 * адрес валидируется, вычисляется его сетевой адрес и, если сеть найдена,
+	 * она отображается отдельным блоком (networkProvider).
+	 *
+	 * GET-параметры (queryParams): любые фильтры модели NetIpsSearch,
+	 * в том числе NetIpsSearch[text_addr] — текстовый IP-адрес для поиска/определения сети.
+	 *
+	 * @return string
+	 */
     public function actionIndex()
     {
         $searchModel = new NetIpsSearch();
@@ -55,6 +53,15 @@ class NetIpsController extends ArmsBaseController
         ]);
     }
     
+	/**
+	 * Отображает inline-карточку IP-адреса (partial) по его текстовому представлению.
+	 *
+	 * GET-параметры:
+	 * @param string $name  IP-адрес в формате x.x.x.x (обязательно).
+	 *
+	 * @return string
+	 * @throws NotFoundHttpException если IP-адрес не найден в БД
+	 */
 	public function actionItemByName($name)
 	{
 		if (($model = NetIps::findOne(['text_addr' => $name])) !== null) {
@@ -62,5 +69,26 @@ class NetIpsController extends ArmsBaseController
 		}
 		throw new NotFoundHttpException('The requested page does not exist.');
 	}
+
+	/**
+	 * Acceptance test data for ItemByName.
+	 *
+	 * Использует text_addr из getTestData()['full'], чтобы не зависеть от захардкоженного
+	 * IP-адреса в БД. Ранее тест использовал '10.20.1.11', который мог отсутствовать
+	 * в тестовом окружении; теперь IP гарантированно создаётся через factory.
+	 */
+	public function testItemByName(): array
+	{
+		$testData = $this->getTestData();
+		return [[
+			'name' => 'default',
+			'GET' => ['name' => $testData['full']->text_addr],
+			'response' => 200,
+		]];
+	}
+
+	public $modelClass=NetIps::class;
+
+    
 	
 }

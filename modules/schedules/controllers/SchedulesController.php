@@ -17,28 +17,18 @@ use yii\web\NotFoundHttpException;
  */
 class SchedulesController extends \app\controllers\ArmsBaseController
 {
-	public function testView(): array
-	{
-		return self::skipScenario('default', 'view may redirect to override schedule');
-	}
-	
-	public function testTtip(): array
-	{
-		return self::skipScenario('default', 'ttip requires stable override chain');
-	}
-	
-	public function testDelete(): array
-	{
-		return self::skipScenario('default', 'delete requires controlled schedule hierarchy fixture');
-	}
-	
 	public $modelClass='app\modules\schedules\models\Schedules';
 	
 	/**
-	 * Displays a single Schedules model.
-	 * @param int  $id
+	 * Отображает страницу просмотра расписания.
+	 * Если расписание является override (isOverride === true), перенаправляет
+	 * на просмотр родительского расписания (override_id), передавая все GET-параметры.
+	 *
+	 * GET-параметры:
+	 * @param int $id  ID расписания (Schedules)
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если расписание не найдено
 	 */
 	public function actionView(int $id)
 	{
@@ -56,8 +46,46 @@ class SchedulesController extends \app\controllers\ArmsBaseController
 	}
 	
 	/**
-	 * Creates a new Schedules model.
-	 * If creation is successful, the browser will be redirected to the 'view' page.
+	 * Тест пропущен: actionView может перенаправить на другое расписание,
+	 * если текущее является override. Требуется фикстура с гарантированно
+	 * не-override записью, которая недоступна через getTestData().
+	 *
+	 * @return array
+	 */
+	public function testView(): array
+	{
+		return self::skipScenario('default', 'view may redirect to override schedule');
+	}
+	
+	/**
+	 * Тест пропущен: actionTtip требует расписания с корректной цепочкой override,
+	 * которая не гарантируется в тестовых данных getTestData().
+	 *
+	 * @return array
+	 */
+	public function testTtip(): array
+	{
+		return self::skipScenario('default', 'ttip requires stable override chain');
+	}
+	
+	/**
+	 * Создаёт новое расписание работы.
+	 * Поддерживает предзаполнение имени через GET-параметры привязки:
+	 * - `attach_service`   — привязка к сервису (providing_schedule_id)
+	 * - `support_service`  — привязка к поддержке сервиса
+	 * - `attach_job`       — привязка к задаче обслуживания (MaintenanceJobs)
+	 * - `override_id`      — создание override-расписания для указанного ID
+	 * Если задано `defaultItemSchedule` — создаёт начальную запись расписания (SchedulesEntries).
+	 * После сохранения перенаправляет на страницу привязанной сущности или на view расписания.
+	 *
+	 * GET-параметры:
+	 *   attach_service  — int, ID сервиса для привязки
+	 *   support_service — int, ID поддерживаемого сервиса
+	 *   attach_job      — int, ID задачи обслуживания
+	 *   override_id     — int, ID переопределяемого расписания
+	 *
+	 * POST-параметры: поля модели Schedules через Yii2 load().
+	 *
 	 * @return mixed
 	 */
 	public function actionCreate()
@@ -134,11 +162,15 @@ class SchedulesController extends \app\controllers\ArmsBaseController
 	
 	
 	/**
-	 * Deletes an existing Schedules model.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param int $id
+	 * Удаляет расписание.
+	 * После удаления перенаправляет на страницу родительского расписания (parent_id),
+	 * если оно существует, иначе — на список расписаний (index).
+	 *
+	 * GET-параметры:
+	 * @param int $id  ID удаляемого расписания (Schedules)
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если расписание не найдено
 	 * @throws Throwable
 	 * @throws StaleObjectException
 	 */
@@ -151,4 +183,16 @@ class SchedulesController extends \app\controllers\ArmsBaseController
 
         return $this->redirect($parent?['view', 'id' => $parent]:['index']);
     }
+
+	/**
+	 * Тест пропущен: actionDelete требует расписания с известной иерархией parent_id.
+	 * Удаление тестовых данных разрушительно, а создание контролируемой иерархии
+	 * недоступно через getTestData().
+	 *
+	 * @return array
+	 */
+	public function testDelete(): array
+	{
+		return self::skipScenario('default', 'delete requires controlled schedule hierarchy fixture');
+	}
 }

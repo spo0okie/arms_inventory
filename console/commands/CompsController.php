@@ -13,19 +13,23 @@ use yii\console\Controller;
 use yii\console\ExitCode;
 
 /**
- * This command echoes the first argument that you have entered.
+ * Консольный контроллер для управления записями компьютеров (Comps).
  *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * Использование:
+ *   yii comps/index
+ *   yii comps/fix-dupes
+ *   yii comps/resave
+ *   yii comps/rescan [count]
+ *   yii comps/find <name>
  */
 class CompsController extends Controller
 {
 	/**
-	 * This command echoes what you have entered as the message.
-	 * @param string $message the message to be echoed.
-	 * @return int Exit code
+	 * Заглушка — точка входа контроллера.
+	 *
+	 * Использование: yii comps/index
+	 *
+	 * @return int ExitCode::OK
 	 */
 	public function actionIndex()
 	{
@@ -33,6 +37,16 @@ class CompsController extends Controller
 	}
 	
 
+	/**
+	 * Находит и поглощает дублирующиеся записи ПК без привязки к домену (domain_id IS NULL).
+	 *
+	 * Для каждого ПК с domain_id ищет дубликаты по имени без domain_id
+	 * и вызывает absorbComp() для их слияния.
+	 *
+	 * Использование: yii comps/fix-dupes
+	 *
+	 * @return int ExitCode::OK
+	 */
 	public function actionFixDupes()
 	{
 		if (is_array($comps= Comps::find()->all()))
@@ -47,6 +61,15 @@ class CompsController extends Controller
 		return ExitCode::OK;
 	}
 	
+	/**
+	 * Пересохраняет все записи ПК через silentSave() без запуска событий истории.
+	 *
+	 * Применяется для массового пересчёта вычисляемых полей.
+	 *
+	 * Использование: yii comps/resave
+	 *
+	 * @return int ExitCode::OK
+	 */
 	public function actionResave()
 	{
 		foreach (Comps::find()->all() as $comp) {
@@ -57,6 +80,17 @@ class CompsController extends Controller
 		return ExitCode::OK;
 	}
 
+	/**
+	 * Обрабатывает очередь пересканирования ПК (CompsRescanQueue).
+	 *
+	 * Для каждой записи очереди вызывает silentSave() соответствующего ПК,
+	 * что инициирует повторное сканирование его данных.
+	 *
+	 * Использование: yii comps/rescan [count]
+	 *
+	 * @param int $count Максимальное количество записей очереди для обработки за один запуск (по умолчанию: 100)
+	 * @return int ExitCode::OK
+	 */
 	public function actionRescan($count=100)
 	{
 		$queue=CompsRescanQueue::find()
@@ -78,6 +112,18 @@ class CompsController extends Controller
 		return ExitCode::OK;
 	}
 	
+	/**
+	 * Ищет ПК по имени (любому формату) и выводит его числовой идентификатор.
+	 *
+	 * Использует Comps::findByAnyName() для поиска по всем вариантам имени.
+	 * При успехе выводит ID в stdout и возвращает OK,
+	 * при отсутствии записи — возвращает UNAVAILABLE.
+	 *
+	 * Использование: yii comps/find <name>
+	 *
+	 * @param string $name Имя ПК (hostname, FQDN или любой поддерживаемый формат)
+	 * @return int ExitCode::OK при успехе, ExitCode::UNAVAILABLE если ПК не найден
+	 */
 	public function actionFind($name)
 	{
 		if (is_object($comp= Comps::findByAnyName($name))) {

@@ -27,10 +27,32 @@ class AclsController extends ArmsBaseController
 		]);
 	}
 	
+	/**
+	 * Отображает список ACE (Access Control Entry) для заданного ACL.
+	 *
+	 * Рендерит представление ace-cards с моделью ACL и всеми
+	 * привязанными к ней записями ACE.
+	 *
+	 * GET-параметры:
+	 * @param int $id Идентификатор ACL-записи (acls.id)
+	 *
+	 * @return mixed
+	 * @throws \yii\web\NotFoundHttpException если ACL с заданным id не найден
+	 */
 	public function actionAceCards(int $id) {
 		return $this->defaultRender('ace-cards',['model'=>$this->findModel($id)]);
 	}
 	
+	/**
+	 * Тестовые данные приёмочного теста для actionAceCards.
+	 *
+	 * Тест пропущен (skip): для корректной проверки необходим сохранённый ACL
+	 * с как минимум одним привязанным ACE. Условие выполнимо через getTestData(),
+	 * если фабрика модели Acls создаёт объект с предзаполненными связанными ACE
+	 * через yii2-linker-behavior. До реализации такой фабрики тест отключён.
+	 *
+	 * @return array сценарий skip
+	 */
 	public function testAceCards(): array
 	{
 		return self::skipScenario('default', 'requires stable ACL-to-schedule relation');
@@ -59,9 +81,24 @@ class AclsController extends ArmsBaseController
 	
 	
 	/**
-	 * По той простой причине, что создавать просто ACL без единого ACE это не интуитивно и надо сразу указывать
-	 * КТО, КУДА и КАКОЙ доступ имеет, мы сделали форму сразу для ACL+ACE
-	 * If creation is successful, the browser will be redirected to the 'view' page.
+	 * Создаёт новую пару ACL + ACE в единой объединённой форме.
+	 *
+	 * Логика: т.к. создавать ACL без хотя бы одного ACE неинтуитивно,
+	 * форма включает поля обеих моделей одновременно. Сначала валидируется
+	 * и сохраняется Acls, затем — Aces с привязкой acls_id. Если ACE-поля
+	 * не переданы, ACL сохраняется без ACE.
+	 *
+	 * POST-параметры (через load):
+	 *   - Acls[*]  — поля модели Acls
+	 *   - Aces[*]  — поля модели Aces (опционально)
+	 *
+	 * GET-параметры (предзаполнение формы):
+	 *   - Acls[*]  — предзаполнение полей ACL
+	 *   - Aces[*]  — предзаполнение полей ACE
+	 *   - accept   — если передан, после сохранения перенаправляет на update
+	 *
+	 * При успехе перенаправляет на страницу расписания (schedules) или view.
+	 *
 	 * @return mixed
 	 */
 	public function actionCreate()

@@ -61,11 +61,17 @@ class WikiController extends Controller
 
 
 	/**
-	 * Displays wiki page HTML.
+	 * Получает HTML-содержимое страницы wiki и возвращает его клиенту.
+	 * Поддерживает два бэкенда: DokuWiki (через JSON-RPC) и Confluence (через REST API).
+	 * Результат сохраняется в WikiCache (помечается как не валидный, чтобы сразу
+	 * запросить актуальные данные при следующем обращении).
+	 * При ошибке получения данных возвращает строку с описанием ошибки.
 	 *
-	 * @param string $pageName
-	 * @param string $api
-	 * @return string
+	 * GET-параметры:
+	 * @param string $pageName  Идентификатор (путь) страницы в wiki
+	 * @param string $api       Тип API-бэкенда: 'doku' (DokuWiki) или 'confluence'
+	 *
+	 * @return string  Отрендеренный HTML страницы или сообщение об ошибке
 	 */
 	public function actionPage($pageName,$api=WikiHelper::DOKUWIKI)
 	{
@@ -91,11 +97,17 @@ class WikiController extends Controller
 	
 
 	/**
-	 * Renders model field via dokuwiki
+	 * Рендерит значение поля модели через DokuWiki и возвращает HTML.
+	 * Загружает модель по классу и ID, берёт текст из указанного поля,
+	 * отправляет на dokuwiki.render, исправляет ссылки и сохраняет результат в WikiCache.
+	 * При ошибке рендеринга возвращает строку "Error rendering via dokuwiki".
 	 *
-	 * @param string $pageName
-	 * @param string $api
-	 * @return string
+	 * GET-параметры:
+	 * @param string $class  Идентификатор класса модели (например, 'comps')
+	 * @param int    $id     ID записи модели
+	 * @param string $field  Имя атрибута модели с wiki-разметкой
+	 *
+	 * @return string  Отрендеренный HTML или строка с ошибкой
 	 */
 	public function actionRenderField($class,$id,$field)
 	{
@@ -122,9 +134,15 @@ class WikiController extends Controller
 	}
 	
 	/**
-	 * Обозначает кэш обновленной страницы как устаревший
-	 * @param string $pageName
-	 * @return string
+	 * Помечает кэш страницы wiki как устаревший (valid=0).
+	 * Инвалидирует как саму страницу, так и все страницы, которые
+	 * включают её через директиву {{page>...}} (зависимости).
+	 * Используется как webhook-callback при обновлении страниц в DokuWiki.
+	 *
+	 * GET-параметры:
+	 * @param string $pageName  Идентификатор (путь) страницы в wiki
+	 *
+	 * @return string  Сообщение о количестве инвалидированных записей кэша
 	 */
 	public function actionInvalidatePage($pageName)
 	{

@@ -13,16 +13,24 @@ use yii\console\Controller;
 use yii\console\ExitCode;
 
 /**
- * This command echoes the first argument that you have entered.
+ * Консольный контроллер для управления записями программного обеспечения (Soft).
  *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * Использование:
+ *   yii soft/resave
  */
 class SoftController extends Controller
 {
-	
+	/**
+	 * Пересохраняет все записи ПО через silentSave() с отключённым кешем и пересканированием.
+	 *
+	 * Перед запуском устанавливает Soft::$disable_cache = true и
+	 * Soft::$disable_rescan = true для предотвращения побочных эффектов.
+	 * Выводит имя каждой записи в stdout.
+	 *
+	 * Использование: yii soft/resave
+	 *
+	 * @return int ExitCode::OK
+	 */
 	public function actionResave()
 	{
 		Soft::$disable_cache=true;

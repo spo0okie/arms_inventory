@@ -14,16 +14,25 @@ use yii\console\Controller;
 use yii\console\ExitCode;
 
 /**
- * This command echoes the first argument that you have entered.
+ * Консольный контроллер для управления учётными записями пользователей (Users).
  *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * Использование:
+ *   yii users/passwd <login>
  */
 class UsersController extends Controller
 {
-	
+	/**
+	 * Интерактивно меняет пароль пользователя через консольный prompt.
+	 *
+	 * Запрашивает новый пароль дважды (с маскировкой символов).
+	 * При несовпадении паролей выводит сообщение об ошибке и завершается с UNSPECIFIED_ERROR.
+	 * При успехе вызывает setPassword() и сохраняет модель.
+	 *
+	 * Использование: yii users/passwd <login>
+	 *
+	 * @param string $login Логин пользователя (Users.login)
+	 * @return int ExitCode::OK при успехе, ExitCode::UNSPECIFIED_ERROR при ошибке
+	 */
 	public function actionPasswd($login)
 	{
 		$user=Users::findByLogin($login);

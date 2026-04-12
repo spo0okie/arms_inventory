@@ -9,6 +9,9 @@ use app\models\UserGroups;
  */
 class UserGroupsController extends ArmsBaseController
 {
+	/**
+	 * Returns disabled acceptance tests list.
+	 */
 	public function disabledTests(): array
 	{
 		return ['*'];

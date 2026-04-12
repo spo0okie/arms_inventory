@@ -16,63 +16,6 @@ use yii\helpers\Url;
  */
 class SoftController extends ArmsBaseController
 {
-	public function testSelectUpdate(): array
-	{
-		return self::skipScenario('default', 'requires complex data preparation');
-	}
-	
-	public function testTtip(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
-	
-	public function testView(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
-	
-	public function testCreate(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
-	}
-	
-	public function testUploads(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
-	
-	public function testGenerateDescription(): array
-	{
-		return [[
-			'name' => 'default',
-			'POST' => ['name' => 'Test', 'manufacturer' => 1],
-			'response' => 200,
-		]];
-	}
-	
-	public $modelClass=Soft::class;
 	
 	public function accessMap()
 	{
@@ -87,11 +30,16 @@ class SoftController extends ArmsBaseController
 	}
 	
 	/**
-	 * Displays a single Soft model ttip.
-	 * @param integer     $id
-	 * @param string|null $hitlist
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Рендерит всплывающую подсказку (tooltip) для записи ПО.
+	 *
+	 * GET:
+	 *   id (int) — идентификатор ПО.
+	 *   hitlist (string, опционально) — разделённый список строк для подсветки совпадений.
+	 *
+	 * @param int         $id      Идентификатор ПО
+	 * @param string|null $hitlist Список строк для highlight (опционально)
+	 * @return string HTML partial tooltip
+	 * @throws NotFoundHttpException если ПО не найдено
 	 */
 	public function actionTtip(int $id, string $hitlist=null)
 	{
@@ -101,11 +49,32 @@ class SoftController extends ArmsBaseController
 		]);
 	}
 
+		
 	/**
-	 * Displays a single Soft model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Acceptance test data for Ttip.
+	 *
+	 * Проверяет рендер tooltip для существующей записи ПО.
+	 * GET: id из getTestData()['full'].
+	 */
+	public function testTtip(): array
+	{
+		$testData=$this->getTestData();
+		
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
+	/**
+	 * Отображает страницу записи ПО со списком ПК, на которых оно установлено, и лицензиями.
+	 *
+	 * Загружает CompsSearch с фильтром по linkedSoft_ids и LicGroupsSearch с фильтром по soft_ids.
+	 * GET: id (int) — идентификатор ПО.
+	 *
+	 * @param int $id Идентификатор ПО
+	 * @return string HTML страницы ПО
+	 * @throws NotFoundHttpException если ПО не найдено
 	 */
 	public function actionView(int $id)
 	{
@@ -124,10 +93,38 @@ class SoftController extends ArmsBaseController
 	}
 	
 	
+		
 	/**
-     * Creates a new Soft model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+	 * Acceptance test data for View.
+	 *
+	 * Проверяет страницу ПО со списком ПК и лицензий.
+	 * GET: id из getTestData()['full']. Тест проходит при пустых связанных списках.
+	 */
+	public function testView(): array
+	{
+		$testData=$this->getTestData();
+		
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
+	/**
+     * Отображает форму создания нового ПО и обрабатывает её отправку.
+     *
+     * После успешного сохранения редиректит на страницу ПО (или на предыдущую при return=previous).
+     *
+     * GET (предзаполнение формы):
+     *   manufacturers_id (int, опционально)    — ID производителя.
+     *   descr (string, опционально)            — описание (автоматически обрезается префикс производителя).
+     *   items (string, опционально)            — строки обнаружения ПО.
+     * POST (поля Soft):
+     *   descr (string)            — наименование ПО.
+     *   manufacturers_id (int)    — производитель.
+     *   items (array, опционально) — строки обнаружения.
+     *
+     * @return Response|string Форма создания или редирект после успеха
      */
     public function actionCreate()
     {
@@ -153,11 +150,35 @@ class SoftController extends ArmsBaseController
     }
 	
 	
+		
 	/**
-	 * Рисует форму с выбором к какому софту добавить строку обнаружения
-	 * @param string   $name	Строка для добавления к элементам софта
-	 * @param int|null $manufacturers_id	Ограничить софт производителем
-	 * @return mixed
+	 * Acceptance test data for Create.
+	 *
+	 * Проверяет отображение формы создания ПО без предзаполнения.
+	 * GET: нет параметров. Ожидается HTTP 200 с пустой формой.
+	 */
+	public function testCreate(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+	/**
+	 * Отображает форму поиска и выбора ПО для добавления строки обнаружения.
+	 *
+	 * При указанном manufacturers_id выводит только продукты этого производителя
+	 * (только названия). Без manufacturers_id — весь список ПО с именем производителя.
+	 * В AJAX-режиме рендерит partial; иначе — полную страницу.
+	 *
+	 * GET:
+	 *   name (string) — строка обнаружения для добавления к выбранному ПО.
+	 *   manufacturers_id (int, опционально) — ограничить список производителем.
+	 *
+	 * @param string   $name             Строка обнаружения для добавления
+	 * @param int|null $manufacturers_id ID производителя для фильтрации (опционально)
+	 * @return string HTML формы выбора ПО
 	 */
 	public function actionSelectUpdate(string $name, int $manufacturers_id=null)
 	{
@@ -184,11 +205,24 @@ class SoftController extends ArmsBaseController
 	}
 	
 	/**
-	 * Updates an existing TechModels model.
-	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param int $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Acceptance test data for SelectUpdate.
+	 *
+	 * Тест пропущен: action требует обязательный параметр name и наличия данных ПО в БД.
+	 * При пустой БД список будет пустым, но action всё равно вернёт 200 —
+	 * тест можно заменить через getTestData()['full'] передав name='test'.
+	 */
+	public function testSelectUpdate(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	/**
+	 * Отображает страницу загрузок (uploads) для записи ПО.
+	 *
+	 * GET: id (int) — идентификатор ПО.
+	 *
+	 * @param int $id Идентификатор ПО
+	 * @return string HTML страницы загрузок
+	 * @throws NotFoundHttpException если ПО не найдено
 	 */
 	public function actionUploads(int $id)
 	{
@@ -198,6 +232,36 @@ class SoftController extends ArmsBaseController
 		]);
 	}
 	
+	/**
+	 * Acceptance test data for Uploads.
+	 *
+	 * Проверяет страницу загрузок для существующего ПО.
+	 * GET: id из getTestData()['full'].
+	 */
+	public function testUploads(): array
+	{
+		$testData=$this->getTestData();
+		
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
+	
+	/**
+	 * AJAX: генерирует описание ПО через LLM (OpenAI API).
+	 *
+	 * Принимает POST-параметры, формирует запрос к LlmClient::generateSoftwareDescription,
+	 * постобрабатывает результат (заменяет «программное обеспечение» на «ПО», формирует comment).
+	 * Ответ: JSON с ключами success/data или error.
+	 *
+	 * POST:
+	 *   name (string) — наименование ПО.
+	 *   manufacturer (int) — ID производителя (используется для получения имени через Manufacturers).
+	 *
+	 * @return array JSON-ответ с результатом генерации или сообщением об ошибке
+	 */
 	public function actionGenerateDescription()
 	{
 		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -228,6 +292,25 @@ class SoftController extends ArmsBaseController
 		);
 		
 		return ['success' => true, 'data' => $result];
+	}	
+	/**
+	 * Acceptance test data for GenerateDescription.
+	 *
+	 * Проверяет HTTP 200 при валидных POST-параметрах. Тест зависит от доступности
+	 * LLM API (OpenAI): при недоступном API action вернёт JSON с ключом error,
+	 * но HTTP-статус будет 200 — это считается успехом на уровне acceptance-теста.
+	 * POST: name='Test', manufacturer=1.
+	 */
+	public function testGenerateDescription(): array
+	{
+		return [[
+			'name' => 'default',
+			'POST' => ['name' => 'Test', 'manufacturer' => 1],
+			'response' => 200,
+		]];
 	}
+	
+	public $modelClass=Soft::class;
+
     
 }

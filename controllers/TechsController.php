@@ -18,46 +18,50 @@ use yii\web\Response;
  */
 class TechsController extends ArmsBaseController
 {
-	public function testDocs(): array
-	{
-		return self::skipScenario('default', 'requires complex data preparation');
-	}
 	
-	public function testEdithw(): array
-	{
-		return self::skipScenario('default', 'requires complex data preparation');
-	}
-	
+	/**
+	 * Тест пропущен: логика генерации инвентарного номера зависит от конфигурации
+	 * системы (шаблоны префиксов, счётчики), которые нельзя воспроизвести без
+	 * полной настройки БД и params. Заменить на реальный тест невозможно через getTestData().
+	 *
+	 * @return array
+	 */
 	public function testInvnum(): array
 	{
 		return self::skipScenario('default', 'requires complex data preparation');
 	}
 	
-	public function testPortList(): array
+	public function accessMap()
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		return array_merge_recursive(parent::accessMap(),[
+			'view'=>['ttip-hw','inv-num','docs'],
+			'edit'=>['uploads','unlink','updhw','rmhw','edithw','port-list','rack-unit','rack-unit-validate'],
+		]);
 	}
 	
-	public function testUpdhw(): array
+	/**
+	 * Отображает всплывающую подсказку с аппаратными компонентами (HW-список) оборудования.
+	 * Рендерит partial-view «ttip-hw» для использования в интерфейсе как tooltip.
+	 *
+	 * GET-параметры:
+	 * @param int $id  ID записи оборудования (Techs)
+	 *
+	 * @return mixed
+	 * @throws NotFoundHttpException если запись не найдена
+	 */
+	public function actionTtipHw(int $id)
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		return $this->renderPartial('ttip-hw', [
+			'model' => $this->findModel($id),
+		]);
 	}
 	
-	public function testRmhw(): array
-	{
-		return self::skipScenario('default', 'requires complex data preparation');
-	}
-	
-	public function testRackUnit(): array
-	{
-		return self::skipScenario('default', 'requires rack configuration');
-	}
-	
-	public function testRackUnitValidate(): array
-	{
-		return self::skipScenario('default', 'requires rack configuration');
-	}
-	
+	/**
+	 * Тестирует actionTtipHw: запрашивает tooltip аппаратных компонентов для записи
+	 * из getTestData()['full']. Ожидает HTTP 200.
+	 *
+	 * @return array
+	 */
 	public function testTtipHw(): array
 	{
 		$testData=$this->getTestData();
@@ -69,45 +73,17 @@ class TechsController extends ArmsBaseController
 		]];
 	}
 	
-	public function testUploads(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
-	
-	public function testItemByName(): array
-	{
-		return self::skipScenario('default', 'requires known hostname or inventory number fixture');
-	}
-	
-	public $modelClass='app\models\Techs';
-	
-	public function accessMap()
-	{
-		return array_merge_recursive(parent::accessMap(),[
-			'view'=>['ttip-hw','inv-num','docs'],
-			'edit'=>['uploads','unlink','updhw','rmhw','edithw','port-list','rack-unit','rack-unit-validate'],
-		]);
-	}
-	
 	/**
-	 * Displays a tooltip for hw of single model.
-	 * @param integer $id
+	 * Отображает карточку оборудования, найденного по инвентарному номеру или hostname.
+	 * Сначала ищет по полю `num`, при неудаче — по полю `hostname`.
+	 * Рендерит partial-view «item» в режиме статичного просмотра (без редактирования).
+	 *
+	 * GET-параметры:
+	 * @param string $name  Инвентарный номер (num) или hostname оборудования
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если запись не найдена ни по одному из полей
 	 */
-	public function actionTtipHw(int $id)
-	{
-		return $this->renderPartial('ttip-hw', [
-			'model' => $this->findModel($id),
-		]);
-	}
-	
 	public function actionItemByName($name)
 	{
 		if (($model = Techs::findOne(['num'=>$name])) !== null) {
@@ -126,14 +102,34 @@ class TechsController extends ArmsBaseController
 	}
 
 
+		
 	/**
-	 * Формирует префикс и возвращает следующий инвентарный номер в этом префиксе
-	 * @param null|int $model_id
-	 * @param null|int $place_id
-	 * @param null|int $org_id
-	 * @param null|int $arm_id
-	 * @param null|int $installed_id
-	 * @return mixed
+	 * Тест пропущен: метод ищет по полям `num` и `hostname`, значения которых
+	 * генерируются автоматически и уникальны для каждого окружения.
+	 * getTestData() не предоставляет эти значения заранее,
+	 * поэтому фиктивный тест невозможен без явной фикстуры с известным num/hostname.
+	 *
+	 * @return array
+	 */
+	public function testItemByName(): array
+	{
+		return self::skipScenario('default', 'requires known hostname or inventory number fixture');
+	}
+	
+	public $modelClass='app\models\Techs';
+	/**
+	 * Генерирует следующий инвентарный номер для оборудования на основе переданного контекста.
+	 * Формирует префикс из комбинации переданных ID и возвращает следующий свободный номер
+	 * в этом префиксе. Ответ в формате JSON.
+	 *
+	 * GET-параметры:
+	 * @param int|null $model_id      ID модели оборудования
+	 * @param int|null $place_id      ID места размещения
+	 * @param int|null $org_id        ID организации
+	 * @param int|null $arm_id        ID АРМа
+	 * @param int|null $installed_id  ID места установки
+	 *
+	 * @return mixed  JSON с следующим инвентарным номером
 	 */
 	public function actionInvNum($model_id=null,$place_id=null,$org_id=null,$arm_id=null,$installed_id=null)
 	{
@@ -144,11 +140,16 @@ class TechsController extends ArmsBaseController
 	
 	
 	/**
-	 * Displays a single Techs model.
-	 * @param int    $id
-	 * @param string $doc
+	 * Отображает печатный документ (паспорт, акт и т.п.) для единицы оборудования.
+	 * Имя документа проверяется по конфигурации `arms.docs` и `techs.docs` из params.
+	 * Рендерит view из подпапки «docs/{doc}».
+	 *
+	 * GET-параметры:
+	 * @param int    $id   ID записи оборудования (Techs)
+	 * @param string $doc  Ключ документа из params['arms.docs'] или params['techs.docs']
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если запись не найдена или документ не разрешён в конфиге
 	 */
     public function actionDocs(int $id, string $doc)
     {
@@ -165,11 +166,25 @@ class TechsController extends ArmsBaseController
 
 	
 	/**
-	 * Updates an existing TechModels model.
-	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param int $id
+	 * Тест пропущен: для работы actionDocs необходимы:
+	 * заполненная запись Techs с корректными данными и настроенный ключ в
+	 * params['arms.docs'] или params['techs.docs']. Это не покрывается getTestData().
+	 *
+	 * @return array
+	 */
+	public function testDocs(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	/**
+	 * Отображает страницу управления загруженными файлами для единицы оборудования.
+	 * Рендерит view «uploads» с моделью Techs.
+	 *
+	 * GET-параметры:
+	 * @param int $id  ID записи оборудования (Techs)
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если запись не найдена
 	 */
 	public function actionUploads(int $id)
 	{
@@ -180,10 +195,33 @@ class TechsController extends ArmsBaseController
 	}
 	
 	
+		
 	/**
-	 * Returns tech available network ports
+	 * Тестирует actionUploads: запрашивает страницу загрузок для записи
+	 * из getTestData()['full']. Ожидает HTTP 200.
+	 *
 	 * @return array
-	 * @throws NotFoundHttpException
+	 */
+	public function testUploads(): array
+	{
+		$testData=$this->getTestData();
+		
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
+	/**
+	 * Возвращает список доступных сетевых портов оборудования для зависимого дропдауна (kartik DepDrop).
+	 * Ожидает POST-данные от виджета: `depdrop_parents[0]` — ID оборудования (Techs).
+	 * Ответ в формате JSON: `{output: [...], selected: ''}`.
+	 *
+	 * POST-параметры:
+	 *   depdrop_parents[0] — int, ID записи оборудования (Techs)
+	 *
+	 * @return array  JSON-ответ для картиковского DepDrop
+	 * @throws NotFoundHttpException если запись оборудования не найдена
 	 */
 	public function actionPortList()
 	{
@@ -206,11 +244,30 @@ class TechsController extends ArmsBaseController
 		return ['output'=>'', 'selected'=>''];
 	}
 	
+		
 	/**
-	 * Обновляем элемент оборудования
-	 * @param $id
+	 * Тест пропущен: actionPortList требует наличия оборудования с настроенными
+	 * сетевыми портами и POST-данных в формате kartik DepDrop. Нельзя воспроизвести
+	 * через getTestData() без дополнительных фикстур портов.
+	 *
+	 * @return array
+	 */
+	public function testPortList(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	/**
+	 * Добавляет или подписывает аппаратный компонент (HW) в списке оборудования.
+	 * Если GET-параметр `uid` === 'sign-all' — подписывает все компоненты HW-списка.
+	 * Иначе создаёт новый HwListItem из GET-параметров и добавляет в hwList модели.
+	 * После сохранения перенаправляет на страницу документа «passport».
+	 *
+	 * GET-параметры:
+	 * @param int    $id   ID записи оборудования (Techs)
+	 * @param string $uid  UID компонента оборудования (или 'sign-all' для подписи всех)
+	 *
 	 * @return string|Response
-	 * @throws NotFoundHttpException
+	 * @throws NotFoundHttpException если запись не найдена
 	 */
 	public function actionUpdhw($id){
 		
@@ -236,11 +293,29 @@ class TechsController extends ArmsBaseController
 		return $this->redirect(['docs', 'id' => $model->id,'doc'=>'passport']);
 	}
 	
+		
 	/**
-	 * Обновляем элемент оборудования
-	 * @param $id
+	 * Тест пропущен: actionUpdhw требует записи Techs с существующим hwList
+	 * и корректного uid компонента. Данные не воспроизводимы через getTestData().
+	 *
+	 * @return array
+	 */
+	public function testUpdhw(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	/**
+	 * Отображает форму редактирования аппаратного компонента (HW) оборудования.
+	 * Ищет компонент по GET-параметру `uid` в hwList оборудования.
+	 * Если компонент не найден — показывает пустую форму создания нового HwListItem.
+	 * При AJAX-запросе рендерит форму внутри модального окна (#modal_form_loader).
+	 *
+	 * GET-параметры:
+	 * @param int    $id   ID записи оборудования (Techs)
+	 * @param string $uid  UID редактируемого компонента в hwList
+	 *
 	 * @return string|Response
-	 * @throws NotFoundHttpException
+	 * @throws NotFoundHttpException если запись оборудования не найдена
 	 */
 	public function actionEdithw($id){
 		
@@ -272,11 +347,28 @@ class TechsController extends ArmsBaseController
 			]);
 	}
 	
+		
 	/**
-	 * Удаляем элемент оборудования
-	 * @param $id
+	 * Тест пропущен: actionEdithw требует записи Techs с заполненным hwList
+	 * и известным uid компонента. Эти данные недоступны через getTestData().
+	 *
+	 * @return array
+	 */
+	public function testEdithw(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	/**
+	 * Удаляет аппаратный компонент из hwList оборудования по его UID.
+	 * Если GET-параметр `uid` не передан или пустой — ничего не делает.
+	 * После удаления и сохранения перенаправляет на документ «passport».
+	 *
+	 * GET-параметры:
+	 * @param int    $id   ID записи оборудования (Techs)
+	 * @param string $uid  UID удаляемого компонента в hwList
+	 *
 	 * @return string|Response
-	 * @throws NotFoundHttpException
+	 * @throws NotFoundHttpException если запись оборудования не найдена
 	 */
 	public function actionRmhw($id){
 		
@@ -294,11 +386,26 @@ class TechsController extends ArmsBaseController
 	}
 	
 	
+		
 	/**
-	 * Validates  model on update.
-	 * @param int|null $id
-	 * @return mixed
-	 * @throws NotFoundHttpException
+	 * Тест пропущен: actionRmhw требует записи Techs с существующим компонентом hwList
+	 * и корректным uid. Удаление тестовых данных разрушительно для других тестов.
+	 * Фикстуры не предусмотрены в getTestData().
+	 *
+	 * @return array
+	 */
+	public function testRmhw(): array
+	{
+		return self::skipScenario('default', 'requires complex data preparation');
+	}
+	/**
+	 * Валидирует форму редактирования юнита стойки (RackUnitForm) через AJAX.
+	 * Загружает POST-данные в RackUnitForm и возвращает результат валидации ActiveForm в JSON.
+	 * Если POST-данных нет — возвращает null.
+	 *
+	 * POST-параметры: поля модели RackUnitForm (tech_rack_id, tech_installed_pos, pos, back, insert_label, label)
+	 *
+	 * @return mixed  JSON с ошибками валидации или null
 	 */
 	public function actionRackUnitValidate()
 	{
@@ -312,6 +419,31 @@ class TechsController extends ArmsBaseController
 		return null;
 	}
 	
+	/**
+	 * Тест пропущен: actionRackUnitValidate требует оборудования типа «стойка»
+	 * с настроенными юнитами. Конфигурация стойки недоступна через getTestData().
+	 *
+	 * @return array
+	 */
+	public function testRackUnitValidate(): array
+	{
+		return self::skipScenario('default', 'requires rack configuration');
+	}
+	
+	/**
+	 * Отображает и обрабатывает форму редактирования содержимого юнита стойки.
+	 * Загружает модель Techs (стойку), формирует RackUnitForm для выбранного юнита.
+	 * Если в стойке уже есть метка для этого юнита — подставляет её в форму.
+	 * При успешном POST-сохранении перенаправляет по routeOnUpdate.
+	 *
+	 * GET-параметры:
+	 * @param int  $id     ID записи стойки (Techs с типом rack)
+	 * @param int  $unit   Номер юнита в стойке
+	 * @param bool $front  true — передняя сторона стойки, false — задняя (по умолчанию: true)
+	 *
+	 * @return mixed
+	 * @throws NotFoundHttpException если запись стойки не найдена
+	 */
 	public function actionRackUnit($id,$unit,$front=true){
 		$model = $this->findModel($id);
 		
@@ -348,5 +480,16 @@ class TechsController extends ArmsBaseController
 			'front'=>$front
 		]);
 	
+	}	
+	/**
+	 * Тест пропущен: actionRackUnit требует записи Techs с типом «стойка» и
+	 * конкретным номером юнита. Конфигурация стойки недоступна через getTestData().
+	 *
+	 * @return array
+	 */
+	public function testRackUnit(): array
+	{
+		return self::skipScenario('default', 'requires rack configuration');
 	}
+
 }

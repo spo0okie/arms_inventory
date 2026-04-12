@@ -17,20 +17,6 @@ use yii\web\NotFoundHttpException;
  */
 class ScheduledAccessController extends \app\controllers\ArmsBaseController
 {
-	public function testView(): array
-	{
-		return self::skipScenario('default', 'view may redirect for override schedules');
-	}
-	public function testStatus(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
 	public $modelClass=Schedules::class;
 	public function accessMap()
 	{
@@ -41,7 +27,12 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 	
 	
 	/**
-	 * Lists all Schedules models.
+	 * Отображает список расписаний доступа (ACL-расписания) с поиском и фильтрацией.
+	 * Использует SchedulesAclSearch и DynaGrid для построения таблицы.
+	 * Поддерживает переключение отображения архивных записей.
+	 *
+	 * GET-параметры: стандартные параметры поиска SchedulesAclSearch через queryParams.
+	 *
 	 * @return mixed
 	 */
 	public function actionIndex()
@@ -61,10 +52,15 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 	}
 	
 	/**
-	 * Displays a single model status
-	 * @param int $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Возвращает текущий статус расписания доступа: активно ли оно прямо сейчас.
+	 * Вычисляет текущее время с учётом сдвига часового пояса из params['schedulesTZShift']
+	 * и вызывает метод isWorkTime() модели Schedules.
+	 *
+	 * GET-параметры:
+	 * @param int $id  ID расписания доступа (Schedules)
+	 *
+	 * @return mixed  Результат isWorkTime(): true/false или строка статуса
+	 * @throws NotFoundHttpException если расписание не найдено
 	 */
 	public function actionStatus(int $id)
 	{
@@ -76,12 +72,33 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 		);
 	}
 	
+	/**
+	 * Тестирует actionStatus: запрашивает статус расписания для записи
+	 * из getTestData()['full']. Ожидает HTTP 200.
+	 *
+	 * @return array
+	 */
+	public function testStatus(): array
+	{
+		$testData=$this->getTestData();
+		
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
 	
 	/**
-	 * Displays a single Schedules model.
-	 * @param int  $id
+	 * Отображает страницу просмотра расписания доступа.
+	 * Если расписание является override (isOverride === true), перенаправляет
+	 * на просмотр родительского расписания (override_id), передавая все GET-параметры.
+	 *
+	 * GET-параметры:
+	 * @param int $id  ID расписания доступа (Schedules)
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если расписание не найдено
 	 */
     public function actionView(int $id)
     {
@@ -99,8 +116,24 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
     }
 	
 	/**
-	 * Creates a new Schedules model.
-	 * If creation is successful, the browser will be redirected to the 'view' page.
+	 * Тест пропущен: actionView может перенаправить на другое расписание,
+	 * если текущее является override. Поведение непредсказуемо без фикстуры
+	 * с гарантированно не-override записью.
+	 *
+	 * @return array
+	 */
+	public function testView(): array
+	{
+		return self::skipScenario('default', 'view may redirect for override schedules');
+	}
+	
+	/**
+	 * Создаёт новое расписание доступа (ACL-расписание).
+	 * После успешного сохранения автоматически создаёт связанную запись Acls
+	 * и перенаправляет на просмотр нового расписания в режиме редактирования ACL.
+	 *
+	 * POST-параметры: поля модели Schedules через Yii2 load().
+	 *
 	 * @return mixed
 	 */
 	public function actionCreate()

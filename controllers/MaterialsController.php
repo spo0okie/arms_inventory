@@ -14,27 +14,6 @@ use yii\web\Response;
  */
 class MaterialsController extends ArmsBaseController
 {
-	public function testTtips(): array
-	{
-		return self::skipScenario('default', 'requires prepared material ids list');
-	}
-	
-	public function testTypeGroups(): array
-	{
-		return [[]]; //default
-	}
-	
-	public function testNameGroups(): array
-	{
-		return [[]]; //default
-	}
-	
-	public function testSearchList(): array
-	{
-		return [[]]; //default
-	}
-	
-	public $modelClass=Materials::class;
 	
 	public function disabledActions()
 	{
@@ -49,8 +28,12 @@ class MaterialsController extends ArmsBaseController
 	}
 	
 	/**
-	 * Lists all Materials models by groups.
-	 * @return mixed
+	 * Отображает список расходных материалов, сгруппированных по типу.
+	 *
+	 * GET-параметры (queryParams): любые фильтры модели MaterialsSearch
+	 * (например, MaterialsSearch[type_id], MaterialsSearch[model] и т.д.).
+	 *
+	 * @return string
 	 */
 	public function actionTypeGroups()
 	{
@@ -64,9 +47,30 @@ class MaterialsController extends ArmsBaseController
 		]);
 	}
 	
+		
 	/**
-	 * Lists all Materials models by groups.
-	 * @return mixed
+	 * Acceptance test data for TypeGroups.
+	 *
+	 * Проверяет рендер страницы без фильтров. Создаёт тестовые данные через getTestData(),
+	 * чтобы список содержал хотя бы одну запись и группировка по типу отрабатывала корректно.
+	 */
+	public function testTypeGroups(): array
+	{
+		$testData = $this->getTestData();
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+
+	/**
+	 * Отображает список расходных материалов, сгруппированных по наименованию (полю model).
+	 *
+	 * GET-параметры (queryParams): любые фильтры модели MaterialsSearch
+	 * (например, MaterialsSearch[type_id], MaterialsSearch[model] и т.д.).
+	 *
+	 * @return string
 	 */
 	public function actionNameGroups()
 	{
@@ -80,11 +84,37 @@ class MaterialsController extends ArmsBaseController
 		]);
 	}
 
+		
 	/**
-	 * Displays a many models ttip.
-	 * @param string $ids
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Acceptance test data for NameGroups.
+	 *
+	 * Проверяет рендер страницы без фильтров. Создаёт тестовые данные через getTestData(),
+	 * чтобы список содержал хотя бы одну запись и группировка по наименованию отрабатывала корректно.
+	 */
+	public function testNameGroups(): array
+	{
+		$testData = $this->getTestData();
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+
+	/**
+	 * Отображает tooltip-карточки для нескольких расходных материалов одновременно.
+	 *
+	 * GET-параметры:
+	 * @param string $ids      Список id через запятую (обязательно), например: "1,2,3".
+	 *                         Передаётся как часть маршрута или GET-параметр.
+	 *                         Если хоть один id не найден — выбрасывается 404.
+	 *
+	 * Дополнительные GET-параметры (опционально):
+	 *   hide_usages — скрыть блок использований в tooltip.
+	 *   hide_places — скрыть блок мест хранения в tooltip.
+	 *
+	 * @return string
+	 * @throws NotFoundHttpException если ни одна из моделей не найдена
 	 */
 	public function actionTtips(string $ids)
 	{
@@ -94,15 +124,45 @@ class MaterialsController extends ArmsBaseController
 			'hide_places' => Yii::$app->request->get('hide_places'),
 		]);
 	}
+
+	/**
+	 * Acceptance test data for Ttips.
+	 *
+	 * Проверяет рендер tooltip для существующего расходного материала.
+	 * Использует id из getTestData()['full'], который гарантированно создан и сохранён в БД.
+	 */
+	public function testTtips(): array
+	{
+		$testData = $this->getTestData();
+		return [[
+			'name' => 'default',
+			'GET' => ['ids' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
 	
+	/**
+	 * Обёртка над actionTtips для отображения tooltip одного расходного материала.
+	 *
+	 * GET-параметры:
+	 * @param int|string $id  Идентификатор расходного материала.
+	 *
+	 * @return string
+	 * @throws NotFoundHttpException если модель не найдена
+	 */
 	public function actionTtip($id) {
 		return $this->actionTtips($id);
 	}
 	
 	/**
-	 * @param string|null $name
-	 * @param int|null $type
-	 * @return mixed
+	 * AJAX-поиск расходных материалов по наименованию внутри заданного типа.
+	 * Возвращает JSON-массив уникальных значений поля model.
+	 *
+	 * GET-параметры:
+	 * @param string|null $name  Строка поиска по полю model (опционально, частичное совпадение LIKE).
+	 * @param int|null    $type  ID типа материала (обязательно); при отсутствии возвращает null.
+	 *
+	 * @return array|null JSON-массив вида [['value' => '...'], ...] или null если $type не задан
 	 */
     public function actionSearchList($name = null,$type = null) {
     	if (empty($type)) return null;
@@ -121,6 +181,25 @@ class MaterialsController extends ArmsBaseController
 		return $out;
 	}
 
+
+		
+	/**
+	 * Acceptance test data for SearchList.
+	 *
+	 * Проверяет AJAX-поиск без строки фильтра по type_id из тестового расходного материала.
+	 * Использует getTestData()['full']->type_id, чтобы тест не зависел от захардкоженных значений.
+	 */
+	public function testSearchList(): array
+	{
+		$testData = $this->getTestData();
+		return [[
+			'name' => 'default',
+			'GET' => ['type' => $testData['full']->type_id],
+			'response' => 200,
+		]];
+	}
+	
+	public $modelClass=Materials::class;
 
 	/**
 	 * Finds the Materials models based on its primary key values.

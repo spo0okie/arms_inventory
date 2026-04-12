@@ -29,6 +29,17 @@ class NetIpsController extends BaseRestController
 		'comment'=>'comment',
 	];
  
+	/**
+	 * Возвращает первый свободный IP-адрес в указанной сети.
+	 * Ищет сеть по текстовому адресу (CIDR или IP-диапазон) и возвращает
+	 * первый незанятый адрес через Networks::$firstUnusedIp.
+	 *
+	 * GET-параметры:
+	 * @param string $text_addr  Текстовое представление сети (поле Networks.text_addr, например '192.168.1.0/24')
+	 *
+	 * @return mixed  Первый свободный IP-адрес
+	 * @throws NotFoundHttpException если сеть с таким адресом не найдена
+	 */
 	public function actionFirstUnused($text_addr){
     	if (!is_object($network=Networks::find()->where(['text_addr'=>$text_addr])->one()))  {
 			throw new NotFoundHttpException("Network $text_addr not found");

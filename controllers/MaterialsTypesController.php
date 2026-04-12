@@ -14,11 +14,6 @@ class MaterialsTypesController extends ArmsBaseController
 {
 	public $modelClass=MaterialsTypes::class;
 	
-	public function testUploads(): array
-	{
-		return self::skipScenario('default', 'requires uploaded files fixtures');
-	}
-	
 	public function disabledActions()
 	{
 		return ['item-by-name','ttip'];
@@ -33,11 +28,16 @@ class MaterialsTypesController extends ArmsBaseController
 	
 	
 	/**
-	 * Updates an existing TechModels model.
-	 * If update is successful, the browser will be redirected to the 'view' page.
-	 * @param int $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Страница управления загруженными файлами для типа расходного материала.
+	 *
+	 * Рендерит представление uploads для указанного типа материала.
+	 * Страница открывается и без прикреплённых файлов — их отсутствие не вызывает ошибку.
+	 *
+	 * GET-параметры:
+	 * @param int $id  Идентификатор типа расходного материала (обязательно).
+	 *
+	 * @return string
+	 * @throws NotFoundHttpException если тип материала не найден
 	 */
 	public function actionUploads(int $id)
 	{
@@ -47,12 +47,37 @@ class MaterialsTypesController extends ArmsBaseController
 		]);
 	}
 	
+		
 	/**
-	 * Displays a single Arms model.
-	 * @param int  $id
-	 * @param null $groupBy
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Acceptance test data for Uploads.
+	 *
+	 * Страница uploads рендерится без ошибок даже при отсутствии прикреплённых файлов.
+	 * Тип материала создаётся через getTestData()['full'], поэтому skip не нужен —
+	 * для открытия страницы достаточно наличия записи MaterialsTypes в БД.
+	 */
+	public function testUploads(): array
+	{
+		$testData = $this->getTestData();
+		return [[
+			'name' => 'default',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
+	}
+
+	/**
+	 * Страница просмотра типа расходного материала со списком материалов данного типа.
+	 *
+	 * Поддерживает два режима отображения списка материалов:
+	 *   - без groupBy (или любое значение кроме 'name'): плоский список через MaterialsSearch::search()
+	 *   - groupBy='name': список, сгруппированный по наименованию, через MaterialsSearch::searchNameGroups()
+	 *
+	 * GET-параметры:
+	 * @param int         $id       Идентификатор типа расходного материала (обязательно).
+	 * @param string|null $groupBy  Режим группировки; поддерживается значение 'name' (опционально).
+	 *
+	 * @return string
+	 * @throws NotFoundHttpException если тип материала не найден
 	 */
 	public function actionView(int $id, $groupBy=null)
 	{

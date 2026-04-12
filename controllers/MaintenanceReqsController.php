@@ -17,11 +17,6 @@ class MaintenanceReqsController extends ArmsBaseController
 {
 	public $modelClass=MaintenanceReqs::class;
 	
-	public function testList(): array
-	{
-		return [[]];
-	}
-	
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
@@ -30,13 +25,26 @@ class MaintenanceReqsController extends ArmsBaseController
 	}
 	
 	/**
-	 * Displays a tooltip for single model.
-	 * @param int  $id
-	 * @param null $satisfiedBy Если удовлетворяется какой-то операцией (это при выводе требований в форме где также выводятся
-	 *                            регламентные операции), то отобразим что требование удовлетворено
-	 * @param null $absorbedBy Если в куче требований оказалось избыточным
+	 * Tooltip для требования технического обслуживания.
+	 *
+	 * Рендерит partial-шаблон 'ttip' с карточкой требования.
+	 * При наличии параметра timestamp рендерит историческую версию записи
+	 * из журнала изменений (findJournalRecord).
+	 * Опциональные параметры позволяют отобразить дополнительный контекст
+	 * прямо в тултипе: какой Job удовлетворяет требование и какой Req его поглощает.
+	 *
+	 * GET-параметры:
+	 * @param int      $id          Идентификатор MaintenanceReqs.
+	 * @param int|null $satisfiedBy ID задания (MaintenanceJobs), которое
+	 *                               удовлетворяет данное требование (опционально).
+	 * @param int|null $absorbedBy  ID другого требования (MaintenanceReqs),
+	 *                               которое поглощает данное требование (опционально).
+	 *                               Передаётся, когда требование является избыточным
+	 *                               в наборе.
+	 *  - timestamp (string, опционально) — метка времени для исторической версии.
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если запись не найдена
 	 */
 	public function actionTtip(int $id, $satisfiedBy=null, $absorbedBy=null)
 	{
@@ -55,10 +63,15 @@ class MaintenanceReqsController extends ArmsBaseController
 	}
 	
 	/**
-	 * Displays a tooltip for single model.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * Рендер таблицы всех требований технического обслуживания.
+	 *
+	 * Возвращает HTML-таблицу со всеми MaintenanceReqs, отсортированными по имени.
+	 * Каждая строка содержит item-виджет требования и markdown-описание.
+	 * Используется для встраивания в другие страницы.
+	 *
+	 * GET-параметры: отсутствуют.
+	 *
+	 * @return string HTML-строка с таблицей всех требований
 	 */
 	public function actionList()
 	{
@@ -76,5 +89,19 @@ class MaintenanceReqsController extends ArmsBaseController
 		}
 		$output[]='</table>';
 		return implode("\n",$output);
+	}	
+	/**
+	 * Acceptance test data for List.
+	 *
+	 * Вызывает action без GET-параметров. Является smoke-тестом: проверяет,
+	 * что таблица требований рендерится с кодом 200.
+	 * Перед вызовом создаются тестовые данные через getTestData()['full'],
+	 * чтобы гарантировать наличие хотя бы одной записи MaintenanceReqs в БД.
+	 */
+	public function testList(): array
+	{
+		$this->getTestData();
+		return [[]];
 	}
+
 }

@@ -16,17 +16,6 @@ use yii\web\NotFoundHttpException;
  */
 class MaintenanceJobsController extends ArmsBaseController
 {
-	public function testChildrenTree(): array
-	{
-		return self::skipScenario('default', 'requires stable tree fixtures');
-	}
-	
-	public function testIndexTree(): array
-	{
-		return [[]];//default test
-	}
-	
-	public $modelClass=MaintenanceJobs::class;
 	
 	public function accessMap()
 	{
@@ -36,7 +25,17 @@ class MaintenanceJobsController extends ArmsBaseController
 	}
 	
 	/**
-	 * Lists all Services models.
+	 * Список заданий технического обслуживания в виде иерархического дерева.
+	 *
+	 * Строит плоское дерево из всех MaintenanceJobs с учётом вложенности (parent_id).
+	 * Пагинация отключена — дерево отображается целиком.
+	 * Также вычисляет количество записей при переключении фильтра архивных заданий
+	 * (для кнопки «показать/скрыть архивные»).
+	 *
+	 * GET-параметры:
+	 *  - showArchived (bool, опционально) — включить архивные задания.
+	 *  - Любые фильтры из MaintenanceJobsSearch (через queryParams).
+	 *
 	 * @return mixed
 	 */
 	public function actionIndexTree()
@@ -73,6 +72,35 @@ class MaintenanceJobsController extends ArmsBaseController
 		]);
 	}
 	
+	/**
+	 * Acceptance test data for IndexTree.
+	 *
+	 * Вызывает action без GET-параметров и без предварительных данных.
+	 * Это минимальный smoke-тест: проверяет, что страница дерева отрисовывается
+	 * с кодом 200 даже при пустой таблице.
+	 *
+	 * Для полноценного теста необходимо создать несколько MaintenanceJobs
+	 * с parent_id через getTestData()['full'] и убедиться, что дерево
+	 * корректно строится и сортируется.
+	 */
+	public function testIndexTree(): array
+	{
+		$this->getTestData();
+		return [[]];//default smoke-test: no GET params, checks 200 with existing data
+	}
+	
+	public $modelClass=MaintenanceJobs::class;
+	
+	/**
+	 * Список заданий технического обслуживания в табличном виде.
+	 *
+	 * Переопределяет базовый actionIndex: добавляет кнопку переключения
+	 * на представление в виде дерева («Дерево» → /maintenance-jobs/index-tree).
+	 *
+	 * GET-параметры: любые фильтры MaintenanceJobsSearch (через queryParams).
+	 *
+	 * @return mixed
+	 */
 	public function actionIndex ()
 	{
 		$this->additionalCreateButton=' // '.Html::a('Дерево','index-tree');
@@ -80,10 +108,17 @@ class MaintenanceJobsController extends ArmsBaseController
 	}
 	
 	/**
-	 * Список связей в сервисе (с учетом вложенных)
-	 * @param integer $id
+	 * Дерево дочерних заданий технического обслуживания.
+	 *
+	 * Рекурсивно собирает все дочерние задания (по parent_id) для указанного
+	 * задания и рендерит их в виде дерева через partial-шаблон 'children-tree'.
+	 * Используется для AJAX-вставки поддерева в родительский список.
+	 *
+	 * GET-параметры:
+	 * @param int $id Идентификатор корневого MaintenanceJobs.
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если задание с данным id не найдено
 	 */
 	public function actionChildrenTree(int $id)
 	{
@@ -120,4 +155,20 @@ class MaintenanceJobsController extends ArmsBaseController
 			//'switchArchivedCount' => $switchArchivedCount,
 		]);
 	}
+
+	/**
+	 * Acceptance test data for ChildrenTree.
+	 *
+	 * Пропускается, так как для теста необходимо:
+	 *  - создать родительское задание через getTestData()['full'];
+	 *  - создать хотя бы одно дочернее задание с parent_id = родительское.
+	 * Если ModelFactory поддерживает атрибут parent_id (можно проверить
+	 * через getTestData()), создание дочернего задания можно реализовать
+	 * без skip. Пока данные для дерева не гарантируются — тест пропускается.
+	 */
+	public function testChildrenTree(): array
+	{
+		return self::skipScenario('default', 'requires parent MaintenanceJob with at least one child (parent_id set) — create via getTestData() if ModelFactory supports parent_id');
+	}
+
 }

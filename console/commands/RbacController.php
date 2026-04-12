@@ -13,8 +13,25 @@ use app\models\Users;
 use yii\console\Controller;
 
 
+/**
+ * Консольный контроллер для управления RBAC (ролями и правами доступа).
+ *
+ * Использование:
+ *   yii rbac/init
+ *   yii rbac/grant <role> <login>
+ *   yii rbac/revoke <role> <login>
+ */
 class RbacController extends Controller
 {
+	/**
+	 * Инициализирует базовую роль RBAC — создаёт роль «admin» в authManager.
+	 *
+	 * Выполняется один раз при первоначальной настройке системы.
+	 *
+	 * Использование: yii rbac/init
+	 *
+	 * @return void
+	 */
 	public function actionInit()
 	{
 		$authManager = \Yii::$app->authManager;
@@ -24,6 +41,17 @@ class RbacController extends Controller
 		$authManager->add($admin);
 	}
 	
+	/**
+	 * Назначает роль RBAC пользователю по логину.
+	 *
+	 * Бросает ConsoleException, если роль или пользователь не найдены.
+	 *
+	 * Использование: yii rbac/grant <role> <login>
+	 *
+	 * @param string $role  Имя роли RBAC (например, «admin»)
+	 * @param string $login Логин пользователя (Users.login)
+	 * @return void
+	 */
 	public function actionGrant($role,$login) {
 		$authManager = \Yii::$app->authManager;
 		
@@ -36,6 +64,17 @@ class RbacController extends Controller
 		echo "OK\n";
 	}
 	
+	/**
+	 * Отзывает роль RBAC у пользователя по логину.
+	 *
+	 * Бросает ConsoleException, если роль или пользователь не найдены.
+	 *
+	 * Использование: yii rbac/revoke <role> <login>
+	 *
+	 * @param string $role  Имя роли RBAC (например, «admin»)
+	 * @param string $login Логин пользователя (Users.login)
+	 * @return void
+	 */
 	public function actionRevoke($role,$login) {
 		$authManager = \Yii::$app->authManager;
 		
@@ -48,6 +87,13 @@ class RbacController extends Controller
 		echo "OK\n";
 	}
 	
+	/**
+	 * Возвращает объект пользователя по логину.
+	 *
+	 * @param string $login Логин пользователя
+	 * @return Users
+	 * @throws ConsoleException Если пользователь не найден
+	 */
 	public function getUser($login) {
 		$user = Users::findByLogin($login);
 		if (!is_object($user))

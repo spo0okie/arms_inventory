@@ -11,19 +11,20 @@ use yii\console\Controller;
 use yii\console\ExitCode;
 
 /**
- * This command echoes the first argument that you have entered.
+ * Консольный контроллер для управления записями АРМ (рабочих мест).
  *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * Использование:
+ *   yii arms/index
+ *   yii arms/re-save
  */
 class ArmsController extends Controller
 {
 	/**
-	 * This command echoes what you have entered as the message.
-	 * @param string $message the message to be echoed.
-	 * @return int Exit code
+	 * Заглушка — точка входа контроллера.
+	 *
+	 * Использование: yii arms/index
+	 *
+	 * @return int ExitCode::OK
 	 */
 	public function actionIndex()
 	{
@@ -31,6 +32,16 @@ class ArmsController extends Controller
 	}
 	
 
+	/**
+	 * Пересохраняет все записи АРМ (Techs) через штатный save().
+	 *
+	 * Применяется для принудительного запуска afterSave-обработчиков
+	 * и пересчёта вычисляемых полей без изменения данных.
+	 *
+	 * Использование: yii arms/re-save
+	 *
+	 * @return int ExitCode::OK
+	 */
 	public function actionReSave()
 	{
 		if (is_array($arms=\app\models\Techs::find()->all()))

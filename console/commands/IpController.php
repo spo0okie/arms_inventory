@@ -11,19 +11,22 @@ use yii\console\Controller;
 use yii\console\ExitCode;
 
 /**
- * This command echoes the first argument that you have entered.
+ * Консольный контроллер для пересчёта IP-данных ПК и оборудования.
  *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * Использование:
+ *   yii ip/index
+ *   yii ip/recalc
+ *   yii ip/recalc-comps
+ *   yii ip/recalc-techs
  */
 class IpController extends Controller
 {
 	/**
-	 * This command echoes what you have entered as the message.
-	 * @param string $message the message to be echoed.
-	 * @return int Exit code
+	 * Заглушка — точка входа контроллера.
+	 *
+	 * Использование: yii ip/index
+	 *
+	 * @return int ExitCode::OK
 	 */
 	public function actionIndex()
 	{
@@ -32,6 +35,11 @@ class IpController extends Controller
 		return ExitCode::OK;
 	}
 	
+	/**
+	 * Пересохраняет все записи ПК для пересчёта IP-данных.
+	 *
+	 * @return void
+	 */
 	private function reCalcComps()
 	{
 		if (is_array($comps=\app\models\Comps::find()->all())) {
@@ -39,6 +47,13 @@ class IpController extends Controller
 		};
 	}
 	
+	/**
+	 * Пересохраняет все записи техники для пересчёта IP-данных.
+	 *
+	 * Выводит в stdout номер и IP для каждой записи.
+	 *
+	 * @return void
+	 */
 	private function reCalcTechs()
 	{
 		if (is_array($techs=\app\models\Techs::find()->all())) {
@@ -49,6 +64,15 @@ class IpController extends Controller
 		};
 	}
 	
+	/**
+	 * Пересчитывает IP-данные для всех ПК и оборудования (Techs).
+	 *
+	 * Последовательно вызывает reCalcComps() и reCalcTechs().
+	 *
+	 * Использование: yii ip/recalc
+	 *
+	 * @return int ExitCode::OK
+	 */
 	public function actionRecalc()
 	{
 		$this->reCalcComps();
@@ -56,12 +80,26 @@ class IpController extends Controller
 		return ExitCode::OK;
 	}
 	
+	/**
+	 * Пересчитывает IP-данные только для ПК (Comps).
+	 *
+	 * Использование: yii ip/recalc-comps
+	 *
+	 * @return int ExitCode::OK
+	 */
 	public function actionRecalcComps()
 	{
 		$this->reCalcComps();
 		return ExitCode::OK;
 	}
 
+	/**
+	 * Пересчитывает IP-данные только для оборудования (Techs).
+	 *
+	 * Использование: yii ip/recalc-techs
+	 *
+	 * @return int ExitCode::OK
+	 */
 	public function actionRecalcTechs()
 	{
 		$this->reCalcTechs();

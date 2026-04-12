@@ -16,14 +16,31 @@ use yii\web\NotFoundHttpException;
 class LicKeysController extends ArmsBaseController
 {
 	
+	/**
+	 * Acceptance test data for Link.
+	 *
+	 * Пропускается, так как для теста необходимо:
+	 *  - создать LicKeys через getTestData()['full'];
+	 *  - привязать к ключу хотя бы один объект (Soft, Arms, Users или Comps).
+	 * Без предварительно созданной связи тест привязки не выполним.
+	 */
 	public function testLink(): array
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		return self::skipScenario('default', 'requires LicKeys with at least one linked object — prepare via getTestData() and link manually');
 	}
 	
+	/**
+	 * Acceptance test data for Unlink.
+	 *
+	 * Пропускается, так как для теста необходимо:
+	 *  - создать LicKeys через getTestData()['full'];
+	 *  - привязать к ключу хотя бы один объект (Soft, Arms, Users или Comps);
+	 *  - передать в GET параметр id и соответствующий *_id объекта для отвязки.
+	 * Без предварительно созданных связей проверить логику разрыва невозможно.
+	 */
 	public function testUnlink(): array
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		return self::skipScenario('default', 'requires LicKeys with linked objects — prepare via getTestData() and link manually');
 	}
 	public $modelClass=LicKeys::class;
 	public function disabledActions()
@@ -31,10 +48,16 @@ class LicKeysController extends ArmsBaseController
 		return ['item-by-name',];
 	}
     /**
-     * Displays a single LicKeys model.
-     * @param int $id
+     * Страница просмотра лицензионного ключа.
+     *
+     * Отображает карточку LicKeys и таблицу объектов, привязанных к ключу
+     * (Soft, Arms, Users, Comps) через LicLinks.
+     *
+     * GET-параметры:
+     * @param int $id Идентификатор LicKeys.
+     *
      * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws NotFoundHttpException если запись не найдена
      */
     public function actionView(int $id)
     {
@@ -60,11 +83,18 @@ class LicKeysController extends ArmsBaseController
     }
 	
 	/**
-	 * Deletes an existing LicKeys model.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param int $id
+	 * Удаление лицензионного ключа.
+	 *
+	 * Удаляет запись LicKeys и перенаправляет на страницу просмотра
+	 * родительской лицензионной позиции (/lic-items/view?id={lic_items_id}).
+	 *
+	 * GET-параметры:
+	 * @param int $id Идентификатор LicKeys.
+	 *
+	 * POST-параметры: пустой POST (требуется VerbFilter).
+	 *
 	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws NotFoundHttpException если LicKeys с данным id не найдена
 	 * @throws Throwable
 	 * @throws StaleObjectException
 	 */

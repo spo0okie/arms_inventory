@@ -16,15 +16,6 @@ use yii\web\NotFoundHttpException;
  */
 class UsersController extends ArmsBaseController
 {
-	public function testItemByLogin(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => ['login' => 'guest'],
-			'response' => 200,
-		]];
-	}
-	public $modelClass=Users::class;
 	
 	public function accessMap()
 	{
@@ -35,7 +26,15 @@ class UsersController extends ArmsBaseController
 	
 
 	/**
-	 * Lists all Users models.
+	 * Отображает список пользователей с поиском и фильтрацией.
+	 * Решает проблему синхронизации поиска по двум полям ФИО (shortName / Ename):
+	 * если поиск задан через `shortName`, он автоматически дублируется в `Ename`
+	 * только если соответствующая колонка видима в текущем DynaGrid-профиле.
+	 * URL обновляется с исправленными параметрами перед рендером.
+	 *
+	 * GET-параметры: стандартные параметры поиска UsersSearch (через queryParams),
+	 *   в том числе: UsersSearch[shortName], UsersSearch[Ename] и прочие атрибуты.
+	 *
 	 * @return mixed
 	 */
 	public function actionIndex()
@@ -80,6 +79,16 @@ class UsersController extends ArmsBaseController
 	}
 	
 	
+	/**
+	 * Отображает карточку пользователя, найденного по логину (поле `Login`).
+	 * Рендерит partial-view «item».
+	 *
+	 * GET-параметры:
+	 * @param string $login  Логин пользователя (Users.Login)
+	 *
+	 * @return mixed
+	 * @throws NotFoundHttpException если пользователь не найден
+	 */
 	public function actionItemByLogin($login)
 	{
 		if (($model = Users::findOne(['Login'=>$login])) !== null) {
@@ -88,7 +97,33 @@ class UsersController extends ArmsBaseController
 		
 		throw new NotFoundHttpException('The requested page does not exist.');
 	}
+	/**
+	 * Тестирует actionItemByLogin: запрашивает карточку пользователя с логином 'guest'.
+	 * Пользователь 'guest' присутствует в окружении по умолчанию (гостевой аккаунт Yii2).
+	 * Ожидает HTTP 200.
+	 *
+	 * @return array
+	 */
+	public function testItemByLogin(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => ['login' => 'guest'],
+			'response' => 200,
+		]];
+	}
+	public $modelClass=Users::class;
 	
+	/**
+	 * Отображает карточку пользователя, найденного по полному имени (поле `Ename`).
+	 * Рендерит partial-view «item».
+	 *
+	 * GET-параметры:
+	 * @param string $name  Полное ФИО пользователя (Users.Ename)
+	 *
+	 * @return mixed
+	 * @throws NotFoundHttpException если пользователь не найден
+	 */
 	public function actionItemByName($name)
 	{
 		if (($model = Users::findOne(['Ename'=>$name])) !== null) {

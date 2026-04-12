@@ -12,16 +12,24 @@ use yii\console\Controller;
 use yii\console\ExitCode;
 
 /**
- * This command echoes the first argument that you have entered.
+ * Консольный контроллер для управления записями организационной структуры (OrgStruct).
  *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * Использование:
+ *   yii org-struct/resave
  */
 class OrgStructController extends Controller
 {
-	
+	/**
+	 * Пересохраняет все записи организационной структуры через silentSave().
+	 *
+	 * Применяется для принудительного пересчёта вычисляемых полей и
+	 * обновления зависимых данных без изменения бизнес-логики.
+	 * Выводит имя каждой записи и результат сохранения (OK / ERR).
+	 *
+	 * Использование: yii org-struct/resave
+	 *
+	 * @return int ExitCode::OK
+	 */
 	public function actionResave()
 	{
 		foreach (\app\models\OrgStruct::find()->all() as $unit) {
