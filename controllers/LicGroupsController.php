@@ -146,7 +146,12 @@ class LicGroupsController extends ArmsBaseController
 	 */
 	public function testUnlink(): array
 	{
-		return self::skipScenario('default', 'requires LicGroup with linked objects — prepare via getTestData() and link objects manually');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id],
+			'response' => 302,
+		]];
 	}
 	public $modelClass=LicGroups::class;
 

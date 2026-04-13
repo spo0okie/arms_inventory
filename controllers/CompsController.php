@@ -147,7 +147,13 @@ class CompsController extends ArmsBaseController
 	 */
 	public function testAbsorb(): array
 	{
-		return self::skipScenario('default', 'requires two persisted Comps records with unique names; pass their ids as id and absorb_id');
+		$target = \app\generation\ModelFactory::create(\app\models\Comps::class, ['empty' => true]);
+		$source = \app\generation\ModelFactory::create(\app\models\Comps::class, ['empty' => true]);
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $target->id, 'absorb_id' => $source->id],
+			'response' => 302,
+		]];
 	}
 	/**
 	 * Отображает tooltip с данными аппаратного обеспечения (HW) ПК.
@@ -313,7 +319,12 @@ class CompsController extends ArmsBaseController
 	 */
 	public function testAddsw(): array
 	{
-		return self::skipScenario('default', 'requires existing Comps record and at least one Softs record; pass comp id and soft ids via GET items');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id],
+			'response' => 302,
+		]];
 	}
 	/**
 	 * Удаляет привязку ПО к ПК.
@@ -362,7 +373,12 @@ class CompsController extends ArmsBaseController
 	 */
 	public function testRmsw(): array
 	{
-		return self::skipScenario('default', 'requires existing Comps record with pre-populated soft_ids; pass comp id and soft ids to remove via GET items');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id],
+			'response' => 302,
+		]];
 	}
 	/**
 	 * Добавляет IP-адрес в список игнорируемых для ПК.
@@ -403,7 +419,12 @@ class CompsController extends ArmsBaseController
 	 */
 	public function testIgnoreip(): array
 	{
-		return self::skipScenario('default', 'requires existing Comps record; pass its id and a test IP address, then verify IP appears in ip_ignore field');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id, 'ip' => '192.0.2.1'],
+			'response' => 302,
+		]];
 	}
 	/**
 	 * Убирает IP-адрес из списка игнорируемых для ПК.
@@ -446,7 +467,12 @@ class CompsController extends ArmsBaseController
 	 */
 	public function testUnignoreip(): array
 	{
-		return self::skipScenario('default', 'requires existing Comps record with pre-populated ip_ignore; pass its id and the IP to remove, then verify IP is absent from ip_ignore');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id, 'ip' => '192.0.2.1'],
+			'response' => 302,
+		]];
 	}
 	public $modelClass='app\models\Comps';
 

@@ -54,7 +54,13 @@ class SchedulesController extends \app\controllers\ArmsBaseController
 	 */
 	public function testView(): array
 	{
-		return self::skipScenario('default', 'view may redirect to override schedule');
+		$testData = $this->getTestData();
+		// empty-модель гарантированно не имеет override_id (null), поэтому не делает redirect
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['empty']->id],
+			'response' => 200,
+		]];
 	}
 	
 	/**
@@ -65,7 +71,11 @@ class SchedulesController extends \app\controllers\ArmsBaseController
 	 */
 	public function testTtip(): array
 	{
-		return self::skipScenario('default', 'ttip requires stable override chain');
+		$testData = $this->getTestData();
+		return [
+			['name' => 'ttip full',  'GET' => ['id' => $testData['full']->id],  'response' => 200],
+			['name' => 'ttip empty', 'GET' => ['id' => $testData['empty']->id], 'response' => 200],
+		];
 	}
 	
 	/**
@@ -185,14 +195,23 @@ class SchedulesController extends \app\controllers\ArmsBaseController
     }
 
 	/**
-	 * Тест пропущен: actionDelete требует расписания с известной иерархией parent_id.
-	 * Удаление тестовых данных разрушительно, а создание контролируемой иерархии
-	 * недоступно через getTestData().
+	 * Тестирует actionDelete: удаление расписания с redirect на index.
+	 *
+	 * SchedulesController и ScheduledAccessController оба используют Schedules::class как modelClass,
+	 * поэтому они делят один testDataCache. Чтобы не зависеть от порядка выполнения тестов
+	 * (ScheduledAccessController может удалить 'delete'-запись из общего кэша раньше),
+	 * создаём отдельную запись напрямую через ModelFactory.
 	 *
 	 * @return array
 	 */
 	public function testDelete(): array
 	{
-		return self::skipScenario('default', 'delete requires controlled schedule hierarchy fixture');
+		$toDelete = \app\generation\ModelFactory::create($this->modelClass, ['empty' => true]);
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $toDelete->id],
+			'POST'     => [],
+			'response' => 302,
+		]];
 	}
 }

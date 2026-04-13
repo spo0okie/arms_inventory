@@ -168,7 +168,13 @@ class MaintenanceJobsController extends ArmsBaseController
 	 */
 	public function testChildrenTree(): array
 	{
-		return self::skipScenario('default', 'requires parent MaintenanceJob with at least one child (parent_id set) — create via getTestData() if ModelFactory supports parent_id');
+		$parent = \app\generation\ModelFactory::create(\app\models\MaintenanceJobs::class, ['empty' => false]);
+		\app\generation\ModelFactory::create(\app\models\MaintenanceJobs::class, ['overrides' => ['parent_id' => $parent->id]]);
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $parent->id],
+			'response' => 200,
+		]];
 	}
 
 }

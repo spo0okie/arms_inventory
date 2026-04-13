@@ -213,7 +213,12 @@ class SoftController extends ArmsBaseController
 	 */
 	public function testSelectUpdate(): array
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		$this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['name' => 'test'],
+			'response' => 200,
+		]];
 	}
 	/**
 	 * Отображает страницу загрузок (uploads) для записи ПО.

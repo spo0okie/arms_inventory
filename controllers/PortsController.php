@@ -157,7 +157,11 @@ class PortsController extends ArmsBaseController
 	 */
 	public function testItem(): array
 	{
-		return self::skipScenario('default', 'ports item requires linked tech/network fixtures');
+		$testData = $this->getTestData();
+		return [
+			['name' => 'item full',  'GET' => ['id' => $testData['full']->id],  'response' => 200],
+			['name' => 'item empty', 'GET' => ['id' => $testData['empty']->id], 'response' => 200],
+		];
 	}
 
 	/**
@@ -171,7 +175,11 @@ class PortsController extends ArmsBaseController
 	 */
 	public function testTtip(): array
 	{
-		return self::skipScenario('default', 'ports ttip requires linked tech/network fixtures');
+		$testData = $this->getTestData();
+		return [
+			['name' => 'ttip full',  'GET' => ['id' => $testData['full']->id],  'response' => 200],
+			['name' => 'ttip empty', 'GET' => ['id' => $testData['empty']->id], 'response' => 200],
+		];
 	}
 
 	/**
@@ -186,7 +194,11 @@ class PortsController extends ArmsBaseController
 	 */
 	public function testView(): array
 	{
-		return self::skipScenario('default', 'ports view requires linked tech/network fixtures');
+		$testData = $this->getTestData();
+		return [
+			['name' => 'view full',  'GET' => ['id' => $testData['full']->id],  'response' => 200],
+			['name' => 'view empty', 'GET' => ['id' => $testData['empty']->id], 'response' => 200],
+		];
 	}
 
 	/**

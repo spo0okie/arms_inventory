@@ -87,9 +87,10 @@ class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 	 */
 	public function testCreate(): array
 	{
+		$testData = $this->getTestData();
 		return [[
-			'name' => 'default',
-			'GET' => ['id' => '{anyId}', 'SchedulesEntries' => ['schedule_id' => 6]],
+			'name'     => 'default',
+			'GET'      => ['SchedulesEntries' => ['schedule_id' => $testData['full']->schedule_id]],
 			'response' => 200,
 		]];
 	}

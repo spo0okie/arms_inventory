@@ -113,7 +113,13 @@ class TechsController extends ArmsBaseController
 	 */
 	public function testItemByName(): array
 	{
-		return self::skipScenario('default', 'requires known hostname or inventory number fixture');
+		$testData = $this->getTestData();
+		$full = $testData['full'];
+		return [[
+			'name'     => 'by num',
+			'GET'      => ['name' => $full->num],
+			'response' => 200,
+		]];
 	}
 	
 	public $modelClass='app\models\Techs';
@@ -302,7 +308,12 @@ class TechsController extends ArmsBaseController
 	 */
 	public function testUpdhw(): array
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id],
+			'response' => 302,
+		]];
 	}
 	/**
 	 * Отображает форму редактирования аппаратного компонента (HW) оборудования.
@@ -356,7 +367,12 @@ class TechsController extends ArmsBaseController
 	 */
 	public function testEdithw(): array
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
 	}
 	/**
 	 * Удаляет аппаратный компонент из hwList оборудования по его UID.
@@ -396,7 +412,12 @@ class TechsController extends ArmsBaseController
 	 */
 	public function testRmhw(): array
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id],
+			'response' => 302,
+		]];
 	}
 	/**
 	 * Валидирует форму редактирования юнита стойки (RackUnitForm) через AJAX.

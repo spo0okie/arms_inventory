@@ -39,6 +39,38 @@ class ServicesController extends ArmsBaseController
 			'response' => 200,
 		]];
 	}
+
+	/**
+	 * Переопределяет базовый testItemByName для Services.
+	 *
+	 * Базовый метод использует $full->getName() — для Services это длинная строка,
+	 * которая при поиске через findByName (WHERE name=?) может вызывать OOM на MySQL
+	 * из-за тяжёлых scope/cacheAllItems. Используем $empty->getName() — минимальное имя,
+	 * которое точно есть в БД (empty-модель создаётся с обязательными полями).
+	 * skip для empty — стандартное поведение базового класса (пустое имя = skip).
+	 *
+	 * @return array
+	 */
+	public function testItemByName(): array
+	{
+		$testData = $this->getTestData();
+		$full = $testData['full'];
+		$empty = $testData['empty'];
+		$emptyName = $empty->getName();
+		return [
+			[
+				'name'     => 'item by name full',
+				'GET'      => ['name' => $full->getName()],
+				'response' => 200,
+			],
+			[
+				'name'   => 'item by name empty',
+				'GET'    => ['name' => $emptyName],
+				'skip'   => empty($emptyName),
+				'reason' => 'empty model has no name',
+			],
+		];
+	}
 	
 	/**
 	 * Acceptance test data for View.

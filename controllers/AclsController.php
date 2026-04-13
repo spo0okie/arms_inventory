@@ -55,7 +55,12 @@ class AclsController extends ArmsBaseController
 	 */
 	public function testAceCards(): array
 	{
-		return self::skipScenario('default', 'requires stable ACL-to-schedule relation');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
 	}
 	
 	public function routeOnUpdate($model)

@@ -124,7 +124,13 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 	 */
 	public function testView(): array
 	{
-		return self::skipScenario('default', 'view may redirect for override schedules');
+		$testData = $this->getTestData();
+		// empty-модель: override_id=null → isOverride=false → рендер view без redirect
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['empty']->id],
+			'response' => 200,
+		]];
 	}
 	
 	/**

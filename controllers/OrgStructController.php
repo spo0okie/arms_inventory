@@ -165,7 +165,12 @@ class OrgStructController extends ArmsBaseController
 	 */
 	public function testDepDrop(): array
 	{
-		return self::skipScenario('default', 'requires depdrop POST with org IDs and related OrgStruct fixtures');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'POST'     => ['depdrop_parents' => [$testData['full']->org_id]],
+			'response' => 200,
+		]];
 	}
 
 	

@@ -131,7 +131,12 @@ class ContractsController extends ArmsBaseController
 	 */
 	public function testScans(): array
 	{
-		return self::skipScenario('default', 'requires Contracts record with attached ContractScans fixtures');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
 	}
 	/**
 	 * Создаёт новый договор (Contracts).
@@ -274,7 +279,12 @@ class ContractsController extends ArmsBaseController
 	 */
 	public function testUpdateForm(): array
 	{
-		return self::skipScenario('default', 'requires existing Contracts record and AJAX request context (X-Requested-With header)');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
 	}
 	/**
 	 * Удаляет существующий договор (только для администраторов).
@@ -350,7 +360,12 @@ class ContractsController extends ArmsBaseController
 	 */
 	public function testScanUpload(): array
 	{
-		return self::skipScenario('default', 'requires multipart file upload; implement via $_FILES mock and create Contracts record via getTestData() for valid contracts_id');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'POST'     => ['contracts_id' => $testData['full']->id],
+			'response' => 200,
+		]];
 	}
 	/**
 	 * Отвязывает связанный объект от договора.
@@ -409,7 +424,12 @@ class ContractsController extends ArmsBaseController
 	 */
 	public function testUnlink(): array
 	{
-		return self::skipScenario('default', 'requires Contracts record with pre-populated link field and a linked model_id; verify model_id removed from link field after request');
+		$testData = $this->getTestData();
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id, 'model_id' => 0, 'link' => 'techs_ids'],
+			'response' => 200,
+		]];
 	}
 	public $modelClass='\app\models\Contracts';
 	/**
@@ -455,7 +475,13 @@ class ContractsController extends ArmsBaseController
 	 */
 	public function testLink(): array
 	{
-		return self::skipScenario('default', 'requires Contracts record and target model record; pass contract id, model_id and link field name, verify model_id added to link field');
+		$testData = $this->getTestData();
+		$tech = \app\generation\ModelFactory::create(\app\models\Techs::class, ['empty' => true]);
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id, 'model_id' => $tech->id, 'link' => 'techs_ids'],
+			'response' => 200,
+		]];
 	}
 	/**
 	 * Привязывает оборудование (Techs) к договору.
@@ -499,7 +525,13 @@ class ContractsController extends ArmsBaseController
 	 */
 	public function testLinkTech(): array
 	{
-		return self::skipScenario('default', 'requires Contracts and Techs records; pass contract id and techs_id, verify techs_id added to techs_ids field');
+		$testData = $this->getTestData();
+		$tech = \app\generation\ModelFactory::create(\app\models\Techs::class, ['empty' => true]);
+		return [[
+			'name'     => 'default',
+			'GET'      => ['id' => $testData['full']->id, 'techs_id' => $tech->id],
+			'response' => 200,
+		]];
 	}
 /**
      * Finds the Contracts model based on its primary key value.
