@@ -2,6 +2,7 @@
 
 namespace app\models\ui;
 
+use app\models\base\ArmsModel;
 use app\models\base\traits\AttributeDataModelTrait;
 use Yii;
 use yii\base\Model;
@@ -11,7 +12,7 @@ use yii\base\Model;
  * @property string $phone номер куда отправлять
  * @property string $text что отправлять
  */
-class SmsForm extends Model
+class SmsForm extends ArmsModel
 {
 	use AttributeDataModelTrait;
 	
