@@ -28,7 +28,7 @@ class SiteController extends ArmsBaseController
 		return [
 			ArmsBaseController::PERM_AUTHENTICATED => ['logout'],
 			ArmsBaseController::PERM_EVERYONE => ['login','error'],
-			'view' => ['index','wiki','rack-test'],
+			'view' => ['index','wiki'],
 			'admin' => ['api-doc','api-json','app-info','password-set'],
 		];
 	}
@@ -64,7 +64,7 @@ class SiteController extends ArmsBaseController
 	
 	public function disabledActions()
 	{
-		return ['create','update','delete','item','item-by-name','ttip','validate','view'];
+		return ['create','update','delete','item','item-by-name','ttip','validate','view','rack-test'];
 	}
 
     /**
@@ -220,31 +220,6 @@ class SiteController extends ArmsBaseController
 		]];
 	}
 
-	/**
-	 * Отображает тестовую страницу стойки (rack).
-	 *
-	 * Рендерит view /places/rack без параметров. Используется для отладки
-	 * компонента отображения стоечного оборудования.
-	 * GET: нет параметров.
-	 *
-	 * @return string|Response HTML страницы тестовой стойки
-	 */
-	public function actionRackTest()
-	{
-		return $this->render('/places/rack');
-	}
-
-	/**
-	 * Acceptance test data for RackTest.
-	 *
-	 * Тест пропущен: для стабильного рендера /places/rack требуются подготовленные
-	 * fixtures с данными стоек (Rack/Place моделей) и предсказуемая конфигурация.
-	 * При наличии rack-fixtures тест можно заменить на GET без параметров с ожидаемым 200.
-	 */
-	public function testRackTest(): array
-	{
-		return self::skipScenario('default', 'requires rack fixtures and configuration');
-	}
 
 	/**
 	 * Finds the Users model based on its primary key value.
@@ -297,13 +272,28 @@ class SiteController extends ArmsBaseController
 	/**
 	 * Acceptance test data for PasswordSet.
 	 *
-	 * Тест пропущен: для проверки требуется admin-сессия и существующий user_id,
-	 * безопасный для изменения пароля в тестовой среде. В acceptance-контексте
-	 * эти условия не гарантированы без специальных fixtures.
+	 * Что делает тестируемый action `password-set`:
+	 * - Загружает пользователя по `id` через `findUser()`.
+	 * - Проверяет право смены пароля (админ или владелец учётной записи при включённом RBAC).
+	 * - При GET рендерит форму смены пароля, при валидном POST — меняет пароль и редиректит.
+	 *
+	 * Что именно проверяем в page-access acceptance:
+	 * 1) Маршрут принимает обязательный параметр `id`.
+	 * 2) Для несуществующего пользователя action возвращает контролируемый HTTP 404,
+	 *    а не 500 (ошибка валидации входа/поиска пользователя обрабатывается корректно).
+	 *
+	 * Почему такой сценарий:
+	 * - Он не меняет реальные пользовательские пароли в тестовой БД.
+	 * - Не требует фикстур с заранее известным безопасным user_id.
+	 * - Валидирует важный негативный путь самого action (guard на входных данных).
 	 */
 	public function testPasswordSet(): array
 	{
-		return self::skipScenario('default', 'requires admin session and valid user context');
+		return [[
+			'name' => 'missing user',
+			'GET' => ['id' => 0],
+			'response' => 404,
+		]];
 	}
 
 	/**
