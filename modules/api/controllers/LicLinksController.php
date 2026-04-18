@@ -3,20 +3,16 @@
 namespace app\modules\api\controllers;
 
 
-use app\models\Comps;
 use app\models\Soft;
 use app\models\Users;
-use http\Exception\BadMethodCallException;
-use OpenApi\Attributes as OA;
-use app\models\base\ArmsModel;
 use app\models\links\LicLinks;
-use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\data\BaseDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
+use OpenApi\Attributes as OA;
 
 class LicLinksController extends BaseRestController
 {
@@ -57,7 +53,7 @@ class LicLinksController extends BaseRestController
 		$comp_name=null
 	): ActiveQuery
 	{
-		if (!in_array($lic_type,LicLinks::$licTypes)) throw new BadMethodCallException("Incorrect license type given");
+		if (!in_array($lic_type,LicLinks::$licTypes)) throw new BadRequestHttpException("Incorrect license type given");
 		if (!$product_id) throw new BadRequestHttpException("No product ID passed");
 		if (!$comp_name && !$user_login) throw new BadRequestHttpException("No login or computer name passed");
 		
@@ -201,9 +197,11 @@ class LicLinksController extends BaseRestController
 			$licId
 		)[0]??null;
 	}
+
+
 	#[OA\Get(
-		path: "/web/api/{controller}/search",
-		summary: "Поиск привязки лицензии к объекту.",
+		path: "/web/api/{controller}/filter",
+		summary: "Фильтрация привязок лицензий к объекту.",
 		parameters: [
 			new OA\Parameter(
 				name: "productId",
