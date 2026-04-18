@@ -14,11 +14,16 @@ use yii\helpers\Url;
 class UiTablesColsController extends ArmsBaseController
 {
 	/**
-	 * Returns disabled acceptance tests list.
+	 * Возвращает список отключенных действий базового CRUD.
+	 *
+	 * Контроллер работает только с endpoint `set`; inherited CRUD-методы
+	 * для этой модели не используются и отключаются точечно.
+	 *
+	 * @return array<string>
 	 */
-	public function disabledTests(): array
+	public function disabledActions(): array
 	{
-		return ['*'];
+		return ['index', 'async-grid', 'item', 'item-by-name', 'ttip', 'view', 'validate', 'create', 'update', 'delete', 'editable'];
 	}
 
 	public function accessMap()
@@ -61,5 +66,51 @@ class UiTablesColsController extends ArmsBaseController
         $model->save();
 			
     }
+
+	/**
+	 * Acceptance test data for Set.
+	 *
+	 * Покрывает:
+	 * - создание новой настройки,
+	 * - повторный вызов (обновление существующей),
+	 * - граничный id пользователя (значение 0).
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function testSet(): array
+	{
+		return [
+			[
+				'name' => 'create-setting',
+				'GET' => [
+					'table' => 'acceptance-grid',
+					'column' => 'name',
+					'user' => 1,
+					'value' => '120',
+				],
+				'response' => 200,
+			],
+			[
+				'name' => 'update-setting',
+				'GET' => [
+					'table' => 'acceptance-grid',
+					'column' => 'name',
+					'user' => 1,
+					'value' => '240',
+				],
+				'response' => 200,
+			],
+			[
+				'name' => 'invalid-user',
+				'GET' => [
+					'table' => 'acceptance-grid',
+					'column' => 'name',
+					'user' => 0,
+					'value' => '300',
+				],
+				'response' => 200,
+			],
+		];
+	}
 
 }

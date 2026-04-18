@@ -16,14 +16,16 @@ use Yii;
 class SmsController extends ArmsBaseController
 {
 	/**
-	 * Returns disabled acceptance tests list.
+	 * Возвращает список отключенных действий базового CRUD.
 	 *
-	 * Все тесты контроллера отключены: actionSend инициирует реальную отправку SMS,
-	 * что неприемлемо при автоматическом запуске acceptance-тестов.
+	 * Контроллер реализует только форму/обработчик отправки SMS.
+	 * Стандартные inherited action отключаем точечно.
+	 *
+	 * @return array<string>
 	 */
-	public function disabledTests(): array
+	public function disabledActions(): array
 	{
-		return ['*'];
+		return ['index', 'async-grid', 'item', 'item-by-name', 'ttip', 'view', 'validate', 'create', 'update', 'delete', 'editable'];
 	}
 
 	public function accessMap()
@@ -55,5 +57,44 @@ class SmsController extends ArmsBaseController
 		}
 		$model->load(Yii::$app->request->get());
 		return $this->defaultRender('send-form', ['model' => $model,]);
+	}
+
+	/**
+	 * Acceptance test data for Send.
+	 *
+	 * Безопасно проверяет:
+	 * - доступность формы (GET),
+	 * - предзаполнение формы (GET),
+	 * - невалидный POST без вызова send().
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function testSend(): array
+	{
+		return [
+			[
+				'name' => 'get-form',
+				'GET' => [],
+				'response' => 200,
+			],
+			[
+				'name' => 'get-prefilled',
+				'GET' => [
+					'phone' => '79991234567',
+					'text' => 'Acceptance prefilled message',
+				],
+				'response' => 200,
+			],
+			[
+				'name' => 'post-invalid',
+				'POST' => [
+					'SmsForm' => [
+						'phone' => '123',
+						'text' => str_repeat('x', 140),
+					],
+				],
+				'response' => 200,
+			],
+		];
 	}
 }

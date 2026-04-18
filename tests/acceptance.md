@@ -25,9 +25,15 @@ controllers/*Controller.php
 
 ---
 
-## Где описывать сценарии
+## Размещение сценариев и описаний
 
-Для action, который участвует в автопроверке, в контроллере должен быть метод:
+- каждый actionXxx в контроллере должен содержать в комментарии понятное описание:
+  - что он делает
+  - какие параметры для этого нужны
+  - какие есть особенности (например, зависит от внешнего состояния, требует определённой роли);
+- для каждого такого actionXxx должен быть метод testXxx(), который 
+  - в комментариях описывает какие задачи он решает и какие кейсы покрывает.
+  - возвращает массив соответствующих сценариев для своего actionXxx.
 
 ```php
 public function testXxx(): array
@@ -98,9 +104,14 @@ php vendor/bin/codecept run tests/acceptance
 # Только PageAccessCest
 php vendor/bin/codecept run tests/acceptance/PageAccessCest.php --verbose
 
-# Фильтр по модели контроллера
-TEST_CLASS_FILTER=Comps php vendor/bin/codecept run tests/acceptance/PageAccessCest.php --verbose
+# Точечный фильтр по маршрутам (controller[/action[/scenario]])
+SET TEST_ROUTES='comps,techs/update,tags/create/form open' && php vendor/bin/codecept run tests/acceptance/PageAccessCest.php --verbose
 ```
+
+`TEST_ROUTES` поддерживает список через запятую:
+- `comps` — все action/scenario контроллера;
+- `techs/update` — все сценарии action `update`;
+- `tags/create/form open` — конкретный сценарий по имени `name`.
 
 ---
 

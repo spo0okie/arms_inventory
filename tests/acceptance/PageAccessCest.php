@@ -8,6 +8,14 @@ use yii\base\InvalidConfigException;
 
 class PageAccessCest
 {
+	/**
+	 * Реестр сценариев, собранных в routesProvider().
+	 * Ключ: controller/action/scenario
+	 * Значение: полный сценарий для исполнения теста.
+	 *
+	 * @var array<string, array>
+	 */
+	protected static array $scenarioRegistry = [];
 	
 	public function _failed($test, $fail)
 	{
@@ -75,6 +83,7 @@ class PageAccessCest
 	protected function routesProvider()
 	{
 		$routes = [];
+		static::$scenarioRegistry = [];
 		Helper\Yii2::initFromFilename('test-web.php');
 		codecept_debug('Initializing Suite DB...');
 		//Подготавливаем временную БД
@@ -84,10 +93,10 @@ class PageAccessCest
 
 		
 		// Получаем опциональный фильтр по классу модели из окружения (если передан)
-		$classFilter = getenv('TEST_CLASS_FILTER') ?: null;
+		$routeFilters = $this->parseRouteFilters(getenv('TEST_ROUTES') ?: '');
 		
 		// Сканируем основные контроллеры
-		$this->scanControllers(__DIR__.'/../../controllers', null, $routes, $classFilter);
+		$this->scanControllers(__DIR__.'/../../controllers', null, $routes, $routeFilters);
 		
 		// Сканируем контроллеры модулей
 		$modulesDir = __DIR__.'/../../modules';
@@ -96,7 +105,7 @@ class PageAccessCest
 				if ($moduleName === '.' || $moduleName === '..') continue;
 				$moduleControllersDir = $modulesDir . '/' . $moduleName . '/controllers';
 				if (is_dir($moduleControllersDir)) {
-					$this->scanControllers($moduleControllersDir, $moduleName, $routes, $classFilter);
+					$this->scanControllers($moduleControllersDir, $moduleName, $routes, $routeFilters);
 				}
 			}
 		}
@@ -110,14 +119,13 @@ class PageAccessCest
 	 * @param string $controllersDir Директория с контроллерами
 	 * @param string|null $moduleName Имя модуля (null для основных контроллеров)
 	 * @param array &$routes Массив маршрутов для добавления
-	 * @param string|null $classFilter Опциональный фильтр по классу модели (имя класса, например "Comps")
 	 * @return void
 	 * @throws InvalidConfigException
 	 */
-	protected function scanControllers($controllersDir, $moduleName, &$routes, $classFilter = null)
+	protected function scanControllers($controllersDir, $moduleName, &$routes, array $routeFilters = [])
 	{
 		foreach (scandir($controllersDir) as $file) {
-			codecept_debug($file);
+			//codecept_debug($file);
 			$controller=$this->getController($file, $moduleName);
 			if (is_object($controller)) {
 				if (!$controller instanceof \app\controllers\ArmsBaseController) {
@@ -125,17 +133,6 @@ class PageAccessCest
 				}
 				if (get_class($controller) === \app\controllers\ArmsBaseController::class) {
 					continue;
-				}
-				
-				// Если задан фильтр по классу, пропускаем контроллеры с другим классом модели
-				if ($classFilter !== null) {
-					$modelClass = $controller->modelClass ?? '';
-					// Получаем имя класса из полного пути (например "app\models\Comps" -> "Comps")
-					$modelClassName = substr(strrchr($modelClass, '\\'), 1) ?: $modelClass;
-					if ($modelClassName !== $classFilter) {
-						codecept_debug("Skipping controller with modelClass: $modelClass (filter: $classFilter)");
-						continue;
-					}
 				}
 				
 				foreach ($this->getActions($controller) as $action) {
@@ -150,6 +147,10 @@ class PageAccessCest
 					}
 					
 					if (in_array($actionId, $controller->disabledActions(), true)) {
+						continue;
+					}
+
+					if (!$this->isActionSelected($controller->id, $actionId, $routeFilters)) {
 						continue;
 					}
 					
@@ -167,12 +168,143 @@ class PageAccessCest
 						$scenario['moduleName'] = $moduleName;
 						$scenario['controllerId'] = $controllerId;
 						$scenario['actionId'] = $actionId;
-						$routes[] = $scenario;
+						if (!isset($scenario['name'])) $scenario['name']='default';
+
+						if (!$this->isScenarioSelected($scenario, $routeFilters)) {
+							continue;
+						}
+
+						$routeRef = $this->registerScenario($scenario);
+						$routes[] = ['routeRef' => $routeRef];
 					}
 				}
 				
 			}
 		}
+	}
+
+	/**
+	 * Быстрая проверка фильтра на уровне controller/action до построения сценариев.
+	 *
+	 * @param string $controllerId
+	 * @param string $actionId
+	 * @param array $routeFilters
+	 * @return bool
+	 */
+	protected function isActionSelected(string $controllerId, string $actionId, array $routeFilters): bool
+	{
+		if (empty($routeFilters)) {
+			return true;
+		}
+		$normalize = static function (string $value): string {
+			return mb_strtolower(trim($value));
+		};
+		$controllerIdNorm = $normalize(StringHelper::class2Id($controllerId));
+		$actionIdNorm = $normalize($actionId);
+		foreach ($routeFilters as $filter) {
+			if ($normalize($filter['controller']) !== $controllerIdNorm) {
+				continue;
+			}
+			if ($filter['action'] !== null && $normalize($filter['action']) !== $actionIdNorm) {
+				continue;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Регистрирует сценарий в локальном реестре и возвращает его ключ.
+	 *
+	 * @param array $scenario
+	 * @return string
+	 */
+	protected function registerScenario(array $scenario): string
+	{
+		$baseRef = implode('/', [
+			$scenario['controllerId'],
+			$scenario['actionId'],
+			$scenario['name'] ?? 'default',
+		]);
+		$routeRef = $baseRef;
+		$i = 2;
+		while (isset(static::$scenarioRegistry[$routeRef])) {
+			$routeRef = $baseRef . '#' . $i;
+			$i++;
+		}
+		static::$scenarioRegistry[$routeRef] = $scenario;
+		return $routeRef;
+	}
+
+	/**
+	 * Разбирает фильтр TEST_ROUTES в массив правил.
+	 *
+	 * Поддерживаемые форматы (через запятую):
+	 * - controller
+	 * - controller/action
+	 * - controller/action/scenario name
+	 *
+	 * @param string $raw
+	 * @return array<int, array{controller:string,action:?string,scenario:?string}>
+	 */
+	protected function parseRouteFilters(string $raw): array
+	{
+		if ($raw === '') {
+			return [];
+		}
+		$filters = [];
+		foreach (explode(',', $raw) as $chunk) {
+			$chunk = trim($chunk);
+			if ($chunk === '') {
+				continue;
+			}
+			[$controller, $action, $scenario] = array_pad(
+				array_map(
+					fn($v) => mb_strtolower(trim($v)),
+					explode('/', $chunk, 3)
+				),
+				3,
+				null
+			);
+			if (!$controller) {
+				continue;
+			}
+			if ($action==='') $action = null;
+			if ($scenario==='') $scenario = null;
+			$filters[] = compact('controller', 'action', 'scenario');
+		}
+		return $filters;
+	}
+
+	/**
+	 * Проверяет, подходит ли сценарий под TEST_ROUTES.
+	 *
+	 * @param array $scenario
+	 * @param array $routeFilters
+	 * @return bool
+	 */
+	protected function isScenarioSelected(array $scenario, array $routeFilters): bool
+	{
+		if (empty($routeFilters)) {
+			return true;
+		}
+
+		$controllerId = mb_strtolower(trim((string)$scenario['controllerId']));
+		$actionId = mb_strtolower(trim((string)$scenario['actionId']));
+		$scenarioName = mb_strtolower(trim((string)($scenario['name'])));
+		foreach ($routeFilters as $filter) {
+			if ($filter['controller'] !== $controllerId) {
+				continue;
+			}
+			if ($filter['action'] !== null && $filter['action'] !== $actionId) {
+				continue;
+			}
+			if ($filter['scenario'] !== null && $filter['scenario'] !== $scenarioName) {
+				continue;
+			}
+			return true;
+		}
+		return false;
 	}
 	
 	protected function getActionScenarios($controller, string $actionId): array
@@ -188,6 +320,11 @@ class PageAccessCest
 	 */
 	public function testAllRoutesAccessible(AcceptanceTester $I, \Codeception\Example $example)
 	{
+		$routeRef = $example['routeRef'] ?? null;
+		Assert::assertNotEmpty($routeRef, 'routeRef is missing in data provider example');
+		Assert::assertArrayHasKey($routeRef, static::$scenarioRegistry, "Scenario {$routeRef} is not registered");
+		$example = static::$scenarioRegistry[$routeRef];
+
 		if (!empty($example['skip'])) {
 			Assert::markTestSkipped($example['reason'] ?? 'reason missing');
 		}
