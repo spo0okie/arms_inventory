@@ -64,7 +64,8 @@ class Manufacturers extends ArmsModel
         return [
             [['name'], 'required'],
             [['created_at'], 'safe'],
-            [['name', 'full_name', 'comment'], 'string', 'max' => 255],
+            [['name'], 'string', 'max' => 128],
+            [['full_name', 'comment'], 'string', 'max' => 255],
             [['name'], 'unique'],
         ];
     }

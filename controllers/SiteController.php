@@ -64,7 +64,7 @@ class SiteController extends ArmsBaseController
 	
 	public function disabledActions()
 	{
-		return ['create','update','delete','item','item-by-name','ttip','validate'];
+		return ['create','update','delete','item','item-by-name','ttip','validate','view'];
 	}
 
     /**
@@ -356,14 +356,31 @@ class SiteController extends ArmsBaseController
 	/**
 	 * Acceptance test data for ApiJson.
 	 *
-	 * Тест пропущен: ArmsSwaggerApiAction выполняет runtime-сканирование аннотаций
-	 * по директориям swagger/ и modules/api/controllers/. Результат зависит от
-	 * окружения и набора OA-аннотаций, что делает тест нестабильным без фиксации
-	 * итогового JSON-контракта.
+	 * Что делает action `api-json`:
+	 * - Выполняет runtime-сканирование OpenAPI-аннотаций в `@app/swagger`
+	 *   и `@app/modules/api/controllers`.
+	 * - Возвращает JSON-документ спецификации Swagger/OpenAPI.
+	 *
+	 * Что именно проверяем в acceptance:
+	 * 1) Маршрут доступен авторизованному пользователю с правом `admin`.
+	 * 2) GET-запрос без параметров отрабатывает без исключений на этапе сканирования.
+	 * 3) Action возвращает успешный HTTP-код 200.
+	 *
+	 * Важно:
+	 * - Здесь намеренно НЕ валидируем полный JSON-контракт OpenAPI (он объёмный и
+	 *   может легитимно меняться при изменении аннотаций).
+	 * - Тест валидирует именно доступность и корректное выполнение action как
+	 *   источника спецификации для `/site/api-doc`.
 	 */
 	public function testApiJson(): array
 	{
-		return self::skipScenario('default', 'requires swagger scan runtime configuration');
+		return [[
+			// Базовый сценарий: целевой action вызывается GET без параметров.
+			// Ожидаем успешную генерацию swagger-спецификации (HTTP 200).
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
 	}
 
 	/**
@@ -386,17 +403,6 @@ class SiteController extends ArmsBaseController
 	public function testTtip(): array
 	{
 		return self::skipScenario('default', 'site controller is non-AR and has no ttip action');
-	}
-
-	/**
-	 * Acceptance test data for View.
-	 *
-	 * SiteController — не AR-контроллер, action 'view' отсутствует.
-	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
-	 */
-	public function testView(): array
-	{
-		return self::skipScenario('default', 'site controller is non-AR and has no view action');
 	}
 
 	/**

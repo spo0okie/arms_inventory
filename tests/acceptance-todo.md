@@ -36,7 +36,7 @@
 - `app\controllers\AttachesController::testDelete()` [action `delete`]
 - `app\controllers\CompsController::testDupes()` [action `dupes`]
 - `app\controllers\CompsController::testTtipHw()` [action `ttip-hw`]
-- `app\controllers\ManufacturersController::testItemByName()` [action `item-by-name`]
+- `app\controllers\ManufacturersController::testItemByName()` [action `item-by-name`] (done)
 - `app\controllers\OrgInetController::testTtip()` [action `ttip`]
 - `app\controllers\OrgInetController::testView()` [action `view`]
 - `app\controllers\PlacesController::testMapDelete()` [action `map-delete`]
@@ -45,7 +45,7 @@
 - `app\controllers\ScansController::testThumb()` [action `thumb`]
 - `app\controllers\ServicesController::testCard()` [action `card`]
 - `app\controllers\ServicesController::testCardMaintenanceReqs()` [action `card-maintenance-reqs`]
-- `app\controllers\SiteController::testApiJson()` [action `api-json`]
+- `app\controllers\SiteController::testApiJson()` [action `api-json`] (done)
 - `app\controllers\SiteController::testError()` [action `error`]
 - `app\controllers\SiteController::testPasswordSet()` [action `password-set`]
 - `app\controllers\SiteController::testRackTest()` [action `rack-test`]
