@@ -353,8 +353,9 @@ class ScheduleRuntime {
      * 
      * Возвращает периоды (periods) из main, которые перекрывают указанный день.
      * Периоды существуют только в main, overrides содержат только недельный график.
-     * Период перекрывает день, если:
-     * - заканчивается НЕ РАНЬШЕ начала дня (end_tsm >= dayStart)
+     * Период перекрывает день (пересечение полуоткрытых интервалов [A,B) ∩ [C,D) ≠ ∅):
+     * - заканчивается ПОЗЖЕ начала дня (end_tsm > dayStart)
+     * И
      * - начинается РАНЬШЕ конца дня (start_tsm < dayEnd)
      * 
      * @param {number} dateTsm - tsm начала дня
@@ -442,18 +443,18 @@ class ScheduleRuntime {
     }
 
     /**
-     * nextOverride — найти ближайший override, заканчивающийся не ранее tsm
-     * 
-     * Ищет первый override с end_tsm >= tsm.
-     * ГАРАНТИЯ: overrides отсортированы по end_tsm при компиляции.
-     * 
+     * nextOverride — найти ближайший override, начинающийся не ранее tsm
+     *
+     * Ищет первый override с start_tsm >= tsm.
+     * ГАРАНТИЯ: overrides отсортированы по start_tsm при компиляции.
+     *
      * @param {number} tsm - timestamp in minutes
      * @returns {Object|null} { type: 'override', start_tsm, end_tsm, intervals } или null
      */
     nextOverride(tsm) {
         // Перебор отсортированного массива, первый подходящий — искомый
         for (const override of this.overrides) {
-            if (override.end_tsm >= tsm) {
+            if (override.start_tsm >= tsm) {
                 return override;
             }
         }
@@ -696,7 +697,7 @@ class ScheduleRuntime {
         const isMain = (target === this.main);
 
 		//из чего будем выбирать ближайшую запись
-		candidates = [];
+		const candidates = [];
 
 		//ищем ближайший рабочий период
 		const period = this.nextPeriod(pos, true);
