@@ -6,6 +6,7 @@ use app\helpers\WikiHelper;
 use app\models\ui\LoginForm;
 use app\models\ui\PasswordForm;
 use app\models\Users;
+use PHPUnit\Framework\Assert;
 use Yii;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -275,24 +276,50 @@ class SiteController extends ArmsBaseController
 	 * Что делает тестируемый action `password-set`:
 	 * - Загружает пользователя по `id` через `findUser()`.
 	 * - Проверяет право смены пароля (админ или владелец учётной записи при включённом RBAC).
-	 * - При GET рендерит форму смены пароля, при валидном POST — меняет пароль и редиректит.
+	 * - При GET рендерит форму смены пароля.
+	 * - При валидном POST (`password` + `passwordRepeat`) обновляет пароль
+	 *   через `PasswordForm::update()` и делает redirect на `/users/view`.
 	 *
-	 * Что именно проверяем в page-access acceptance:
-	 * 1) Маршрут принимает обязательный параметр `id`.
-	 * 2) Для несуществующего пользователя action возвращает контролируемый HTTP 404,
-	 *    а не 500 (ошибка валидации входа/поиска пользователя обрабатывается корректно).
+	 * Что именно проверяем:
+	 * 1) Форма смены пароля открывается (HTTP 200).
+	 * 2) POST с валидной парой паролей завершает action редиректом (HTTP 302).
+	 * 3) После POST пароль пользователя действительно изменён в БД
+	 *    (проверка `Users::validatePassword()` с новым значением).
 	 *
-	 * Почему такой сценарий:
-	 * - Он не меняет реальные пользовательские пароли в тестовой БД.
-	 * - Не требует фикстур с заранее известным безопасным user_id.
-	 * - Валидирует важный негативный путь самого action (guard на входных данных).
+	 * Техническая деталь:
+	 * - Используем динамический user_id из дампа, чтобы не хардкодить конкретного пользователя.
 	 */
 	public function testPasswordSet(): array
 	{
+		$userId=(int)Users::find()->select('id')->orderBy(['id'=>SORT_ASC])->scalar();
+		if (!$userId) {
+			return self::skipScenario('default', 'no users available in acceptance db dump');
+		}
+		$newPassword='Test1234';
+		
 		return [[
-			'name' => 'missing user',
-			'GET' => ['id' => 0],
-			'response' => 404,
+			'name' => 'form open',
+			'GET' => ['id' => $userId],
+			'response' => 200,
+		],[
+			'name' => 'password update',
+			'GET' => ['id' => $userId],
+			'POST' => [
+				'PasswordForm' => [
+					'user_id' => $userId,
+					'password' => $newPassword,
+					'passwordRepeat' => $newPassword,
+				],
+			],
+			'response' => 302,
+			'assert' => static function () use ($userId, $newPassword) {
+				$user=Users::findOne($userId);
+				Assert::assertNotNull($user, 'user must exist after password-set');
+				Assert::assertTrue(
+					$user->validatePassword($newPassword),
+					'password-set must persist new password hash in users table'
+				);
+			},
 		]];
 	}
 
@@ -373,58 +400,4 @@ class SiteController extends ArmsBaseController
 		]];
 	}
 
-	/**
-	 * Acceptance test data for Item.
-	 *
-	 * SiteController — не AR-контроллер, action 'item' отключён через disabledActions().
-	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
-	 */
-	public function testItem(): array
-	{
-		return self::skipScenario('default', 'site controller is non-AR and has no item action');
-	}
-
-	/**
-	 * Acceptance test data for Ttip.
-	 *
-	 * SiteController — не AR-контроллер, action 'ttip' отключён через disabledActions().
-	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
-	 */
-	public function testTtip(): array
-	{
-		return self::skipScenario('default', 'site controller is non-AR and has no ttip action');
-	}
-
-	/**
-	 * Acceptance test data for Create.
-	 *
-	 * SiteController — не AR-контроллер, action 'create' отключён через disabledActions().
-	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
-	 */
-	public function testCreate(): array
-	{
-		return self::skipScenario('default', 'site controller is non-AR and has no create action');
-	}
-
-	/**
-	 * Acceptance test data for Update.
-	 *
-	 * SiteController — не AR-контроллер, action 'update' отключён через disabledActions().
-	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
-	 */
-	public function testUpdate(): array
-	{
-		return self::skipScenario('default', 'site controller is non-AR and has no update action');
-	}
-
-	/**
-	 * Acceptance test data for Delete.
-	 *
-	 * SiteController — не AR-контроллер, action 'delete' отключён через disabledActions().
-	 * Skip задокументирован явно, чтобы генератор тестов не пытался автогенерировать данные.
-	 */
-	public function testDelete(): array
-	{
-		return self::skipScenario('default', 'site controller is non-AR and has no delete action');
-	}
 }

@@ -354,5 +354,9 @@ class PageAccessCest
 			$I->seeResponseCodeIsBetween(min($code),max($code),$message);
 		else
 			$I->seeResponseCodeIs($code,$message);
+		
+		if (isset($example['assert']) && is_callable($example['assert'])) {
+			$example['assert']($I, $example, $route, $fullRoute);
+		}
 	}
 }

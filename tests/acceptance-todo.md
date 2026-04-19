@@ -47,8 +47,8 @@
 - `app\controllers\ServicesController::testCardMaintenanceReqs()` [action `card-maintenance-reqs`]
 - `app\controllers\SiteController::testApiJson()` [action `api-json`] (done)
 - `app\controllers\SiteController::testError()` [action `error`]
-- `app\controllers\SiteController::testPasswordSet()` [action `password-set`]
-- `app\controllers\SiteController::testRackTest()` [action `rack-test`]
+- `app\controllers\SiteController::testPasswordSet()` [action `password-set`] (done)
+- `app\controllers\SiteController::testRackTest()` [action `rack-test`] (removed, deprecated action)
 - `app\controllers\SiteController::testView()` [action `view`]
 - `app\controllers\TechModelsController::testRenderRack()` [action `render-rack`]
 - `app\controllers\TechsController::testDocs()` [action `docs`]
