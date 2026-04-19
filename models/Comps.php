@@ -229,6 +229,22 @@ class Comps extends ArmsModel
 		if ($this->arm_id && $this->platform_id) {
 			$this->platform_id = null;
 		}
+
+		// Согласуем hostname с реально созданным доменом: HostnameType не знает,
+		// какой Domain был сгенерирован через linksSchema, и может выдать FQDN
+		// с «фиктивным» суффиксом (например, `.domain.local`), которого нет в БД.
+		// В таком случае validateHostname не сумеет срезать суффикс и сохранит
+		// name сырым — поиск `comps/item-by-name` потом возвращает 404.
+		if (
+			is_string($this->name) && $this->name !== ''
+			&& is_object($this->domain) && !empty($this->domain->fqdn)
+		) {
+			$dotPos = mb_strpos($this->name, '.');
+			if ($dotPos !== false) {
+				$netbios = mb_substr($this->name, 0, $dotPos);
+				$this->name = $netbios . '.' . $this->domain->fqdn;
+			}
+		}
 	}
 
     /**

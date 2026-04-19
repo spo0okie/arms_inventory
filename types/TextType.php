@@ -65,18 +65,14 @@ class TextType implements AttributeTypeInterface
 				  'magna', 'aliqua', 'Ut', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud',
 				  'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo'];
 		
-		$result = '';        
-		$enough = false;
-		while (!$enough) {
-			if ($result) {
-				$result .= ' ';
-			}
+		$result = '';
+		while (true) {
 			$word = AttributeContext::pickRandomValue($words, $rng);
-			if (strlen($result.$word) > $length) {
-				$enough=true;
-			} else {
-				$result.=$word;
+			$candidate = $result === '' ? $word : $result . ' ' . $word;
+			if (strlen($candidate) > $length) {
+				break;
 			}
+			$result = $candidate;
 		}
 
 		return $result;

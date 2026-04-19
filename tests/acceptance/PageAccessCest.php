@@ -84,7 +84,20 @@ class PageAccessCest
 	{
 		$routes = [];
 		static::$scenarioRegistry = [];
-		Helper\Yii2::initFromFilename('test-web.php');
+		// test-web.php используется также отдельным web/index-test.php сервером, где
+		// debug-модуль безопасен (короткие HTTP-запросы). В codeception-процессе же
+		// Yii живёт весь прогон: testXxx() через ModelFactory::create делают сотни
+		// INSERT/UPDATE, их логи буферизуются yii\debug\LogTarget::messages до shutdown
+		// и только там сериализуются через export(). На ~900 сценариях буфер вырастает
+		// до ~1GB и падает с OOM. Поэтому сам test-web.php не трогаем, а для текущего
+		// инстанса Yii локально отключаем debug-модуль и traceLevel.
+		$config = require __DIR__ . '/../../config/test-web.php';
+		$config['bootstrap'] = array_values(array_diff($config['bootstrap'] ?? [], ['debug']));
+		unset($config['modules']['debug']);
+		if (isset($config['components']['log']['traceLevel'])) {
+			$config['components']['log']['traceLevel'] = 0;
+		}
+		Helper\Yii2::initFromConfig($config);
 		codecept_debug('Initializing Suite DB...');
 		//Подготавливаем временную БД
 		Helper\Database::dropYiiDb();

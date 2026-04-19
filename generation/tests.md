@@ -49,3 +49,19 @@
 ## Прогоны
 - 2026-04-06: `php vendor/bin/codecept run acceptance PageAccessCest --fail-fast`
   - OK, skipped: 90, assertions: 603
+- 2026-04-19: `php vendor/bin/codecept run tests/acceptance/PageAccessCest.php`
+  - Tests: 877, Assertions: 3137, Skipped: 8, Errors: 0, Failures: 0 (пик ~506 MB).
+  - Правки по результатам:
+    - `types/TextType` — результат больше не превышает `max` на 1 символ (баг
+      с хвостовым пробелом ломал генерацию `Domains.comment` и весь
+      `routesProvider()`).
+    - `types/IpNetType` — диапазон масок сужен до `/24..30`, иначе
+      `networks/view` перебирал до 16M адресов и уходил в таймаут.
+    - `Comps::afterGenerate` — подменяет фиктивный FQDN-суффикс HostnameType
+      на `$this->domain->fqdn`, чтобы `validateHostname` стабильно срезал
+      суффикс и сохранял netbios-имя. Закрывает скип
+      `comps/item-by-name/item by name empty`.
+    - `PageAccessCest::routesProvider()` — локально отключает `yii\debug\Module`
+      и `traceLevel` перед созданием Yii-приложения (в test-web.php сам ничего
+      не меняется). Раньше `LogTarget::collect` буферизовал логи всех `testXxx()`
+      до shutdown и падал с OOM на ~1 GB.

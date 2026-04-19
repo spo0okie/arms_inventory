@@ -21,6 +21,56 @@
 - Группа 4 закрыта через единый базовый `testEditable()` (49 контроллеров покрыты
   реальным сценарием, 2 — `Sms`/`UiTablesCols` — помечены `N/A` через `disabledActions`).
 
+Прогон 2026-04-19 (после правок): `php vendor/bin/codecept run tests/acceptance/PageAccessCest.php`
+→ Tests: 877, Assertions: 3137, Skipped: 8, Errors: 0, Failures: 0 (без OOM, пик 506 MB).
+
+## Остаточные skip-сценарии (ожидаемые ограничения)
+
+1. `ArmsBaseController::testItemByName` — автоматический skip `item by name empty`
+   для моделей, у которых у пустой модели `getName()` возвращает пустую строку
+   (7 контроллеров). Снимется само, когда ModelFactory начнёт гарантировать непустое
+   `name` для empty-моделей соответствующих классов.
+2. `OrgInetController::testView` — skip `view empty`: шаблон view требует связанный
+   `Services`, а `linksSchema` OrgInet не помечает `services_id` как required. Закроется
+   после приведения `OrgInet::linksSchema` к новому формату (см. TODO из комментария в
+   OrgInetController).
+
+## Правки инфраструктуры генерации (2026-04-19)
+
+- `types/TextType::generate()` — результат больше не превышает `max` на 1 символ.
+  Баг: хвостовой пробел добавлялся ДО проверки длины, итоговая строка могла быть
+  `$length + 1`. При `max=255` (Domains.comment и др.) валидация падала, что ломало
+  весь `routesProvider()` PageAccessCest.
+- `types/IpNetType::generateSubnetAddr()` — mask сужен с `/8..30` до `/24..30`.
+  Причина: `views/networks/view.php` перебирает все IP подсети (`$model->capacity`
+  строк). `/8` давал 16M итераций и 30-секундный таймаут на `networks/view/view empty`.
+- `Comps::afterGenerate()` — после генерации согласует `name` с реальной созданной
+  связью `domain_id`: если HostnameType выдал FQDN-форму с фиктивным суффиксом
+  (например, `pc01.domain.local`), подменяет суффикс на `$this->domain->fqdn`.
+  Теперь `validateHostname` стабильно срезает суффикс и сохраняет в БД netbios-имя,
+  а `comps/item-by-name` находит ПК по сохранённому имени. Благодаря этому закрыт
+  и базовый скип `item by name empty` (empty Comps тоже получает согласованное имя,
+  т.к. `domain_id` для Comps required и генерируется даже в режиме empty).
+- `PageAccessCest::routesProvider()` — локально модифицирует конфиг Yii перед
+  бутстрапом: удаляет `'debug'` из `bootstrap`, снимает `modules.debug`, обнуляет
+  `components.log.traceLevel`. Сам `config/test-web.php` не трогается — он остаётся
+  общим для `web/index-test.php`, `HistoryPagesCest`, helper'ов и т.д. Причина:
+  `yii\debug\LogTarget::collect()` копит сообщения в `$this->messages` до shutdown
+  (export только при `$final=true`), а codeception-процесс живёт один инстанс Yii
+  на все 877 сценариев ⇒ буфер + панели DbPanel серилизовались до OOM на 1GB.
+  После фикса пик памяти снизился до ~506 MB, Fatal error ушёл.
+
+## Открытые задачи
+
+### 1. Legacy acceptance-Cests (этап 6 `generation/tests.md`, по решению пользователя)
+
+- `tests/acceptance/AuthorizationModesCest.php` — **оставить**. Покрывает режимы
+  авторизации (useRBAC/localAuth/authorizedView), не относится к генеративному покрытию
+  UI-страниц и является отдельным специализированным suite.
+- `tests/acceptance/HistoryPagesCest.php` — **оставить до тех пор, пока
+  `HistoryController` тесты не покроют все модели с историей в том же объёме, что
+  сейчас делает `HistoryPagesCest`**. После этого — удалить.
+
 ## Группа 1. Снять полное отключение `disabledTests('*')` (закрыто)
 
 Общее решение: убрать wildcard в `disabledTests()`, включить тесты для релевантных action, нерелевантные inherited action отключать точечно через `disabledActions()`.

@@ -559,37 +559,11 @@ class CompsController extends ArmsBaseController
 	}
 	public $modelClass='app\models\Comps';
 
-	/**
-	 * Тестовые данные приёмочного теста для actionItemByName.
-	 *
-	 * Тестирует поиск ПК по имени формата DOMAIN\computer или computer.domain.local.
-	 * Метод CompsController::searchModel() парсит домен из имени через
-	 * Domains::fetchFromCompName(), поэтому имя пустой модели может дать 404,
-	 * если её домен не найден в БД. Для надёжного теста используем только 'full'-модель,
-	 * у которой домен гарантированно создан через ModelFactory.
-	 *
-	 * Сценарий empty пропускается (skip): у пустой модели Comps поле name генерируется
-	 * без существующего домена в БД, что ведёт к 404 в nameFilter.
-	 *
-	 * @return array
-	 */
-	public function testItemByName(): array
-	{
-		$testData = $this->getTestData();
-		$full = $testData['full'];
-		return [
-			[
-				'name'     => 'item by name full',
-				'GET'      => ['name' => $full->getName()],
-				'response' => 200,
-			],
-			self::skipScenario(
-				'item by name empty',
-				'empty Comps model has no domain in DB, so nameFilter throws 404; ' .
-				'fix by ensuring ModelFactory creates Comps with a saved Domain'
-			)[0],
-		];
-	}
+	// testItemByName() наследуется из ArmsBaseController. Согласованность
+	// суффикса FQDN с реально созданным доменом обеспечивает
+	// Comps::afterGenerate() — он подменяет случайный фиктивный суффикс
+	// HostnameType на $this->domain->fqdn, чтобы validateHostname корректно
+	// срезал суффикс и сохранял netbios-имя.
 
 	protected function findByName(string $name)
 	{

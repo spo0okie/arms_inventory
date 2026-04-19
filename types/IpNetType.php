@@ -29,8 +29,10 @@ class IpNetType extends IpType
 	}
 	
 	protected function generateSubnetAddr(\Random\Randomizer $rng): string {
-		$mask = $rng->getInt(8, 30);
-		
+		// Узкий диапазон масок: во view сетей строится список всех IP
+		// (capacity = 2^(32-mask)), поэтому широкие подсети приводят к таймаутам.
+		$mask = $rng->getInt(24, 30);
+
 		return $this->generatePrivateIP($rng).'/'.$mask;
 	}
 
