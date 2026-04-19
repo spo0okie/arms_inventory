@@ -130,19 +130,52 @@ class PortsController extends ArmsBaseController
 	/**
 	 * Acceptance test data for actionPortList.
 	 *
-	 * Тест пропущен: actionPortList — AJAX Dependent Dropdown callback.
-	 * Для корректного теста требуется:
-	 *   - POST-запрос с depdrop_all_params[link_techs_id] = существующий ID Techs;
-	 *   - наличие в БД Techs с зарегистрированными портами (Ports).
-	 * Acceptance-фреймворк не формирует depdrop_all_params POST автоматически,
-	 * а подготовить связанный набор Techs + Ports через getTestData() для данного
-	 * контроллера не представляется возможным без расширения ModelFactory.
+	 * Что делает actionPortList:
+	 * - принимает DepDrop POST payload `depdrop_all_params[link_techs_id]`;
+	 * - ищет оборудование (Techs) по переданному ID;
+	 * - возвращает JSON вида `['output' => ..., 'selected' => '']`.
+	 *
+	 * Что проверяет этот тест:
+	 * 1) endpoint не падает на корректном depdrop payload и существующем ID оборудования;
+	 * 2) endpoint корректно обрабатывает depdrop payload без `link_techs_id`;
+	 * 3) endpoint корректно обрабатывает запрос без depdrop payload.
+	 *
+	 * Почему этого достаточно для acceptance-контракта:
+	 * - задача теста на этом уровне — подтвердить доступность UI-action и стабильный
+	 *   HTTP-ответ на ожидаемые формы запроса;
+	 * - бизнес-содержимое списка портов (`output`) зависит от данных в дампе,
+	 *   поэтому здесь проверяется именно устойчивость action и формат входа.
 	 *
 	 * @return array
 	 */
 	public function testPortList(): array
 	{
-		return self::skipScenario('default', 'requires depdrop POST payload and linked Techs fixtures');
+		$testData = $this->getTestData();
+		$techId = (int)($testData['full']->link_techs_id ?? 0);
+		if ($techId <= 0) {
+			$techId = (int)Techs::find()->select('id')->scalar();
+		}
+		if ($techId <= 0) {
+			return self::skipScenario('default', 'no Techs records available in acceptance db dump');
+		}
+
+		return [
+			[
+				'name' => 'depdrop with valid tech id',
+				'POST' => ['depdrop_all_params' => ['link_techs_id' => $techId]],
+				'response' => 200,
+			],
+			[
+				'name' => 'depdrop without tech id',
+				'POST' => ['depdrop_all_params' => []],
+				'response' => 200,
+			],
+			[
+				'name' => 'request without depdrop payload',
+				'POST' => [],
+				'response' => 200,
+			],
+		];
 	}
 
 	/**

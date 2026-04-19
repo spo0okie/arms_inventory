@@ -252,15 +252,51 @@ class TechsController extends ArmsBaseController
 	
 		
 	/**
-	 * Тест пропущен: actionPortList требует наличия оборудования с настроенными
-	 * сетевыми портами и POST-данных в формате kartik DepDrop. Нельзя воспроизвести
-	 * через getTestData() без дополнительных фикстур портов.
+	 * Acceptance test data for actionPortList.
+	 *
+	 * Что делает actionPortList:
+	 * - принимает kartik DepDrop payload `depdrop_parents[0]` (ID оборудования);
+	 * - загружает Techs-модель и возвращает JSON-структуру для dropdown портов.
+	 *
+	 * Что проверяет этот тест:
+	 * 1) endpoint не падает на корректном depdrop payload с существующим Techs ID;
+	 * 2) endpoint устойчив к пустому depdrop payload;
+	 * 3) endpoint устойчив к отсутствию depdrop payload.
+	 *
+	 * Что именно подтверждается как «не падает»:
+	 * - action стабильно отвечает HTTP 200 для ожидаемых вариантов входа,
+	 *   что гарантирует рабочий backend для динамического UI-списка портов.
 	 *
 	 * @return array
 	 */
 	public function testPortList(): array
 	{
-		return self::skipScenario('default', 'requires complex data preparation');
+		$testData = $this->getTestData();
+		$techId = (int)($testData['full']->id ?? 0);
+		if ($techId <= 0) {
+			$techId = (int)Techs::find()->select('id')->scalar();
+		}
+		if ($techId <= 0) {
+			return self::skipScenario('default', 'no Techs records available in acceptance db dump');
+		}
+
+		return [
+			[
+				'name' => 'depdrop with valid tech id',
+				'POST' => ['depdrop_parents' => [$techId]],
+				'response' => 200,
+			],
+			[
+				'name' => 'depdrop with empty parents',
+				'POST' => ['depdrop_parents' => []],
+				'response' => 200,
+			],
+			[
+				'name' => 'request without depdrop payload',
+				'POST' => [],
+				'response' => 200,
+			],
+		];
 	}
 	/**
 	 * Добавляет или подписывает аппаратный компонент (HW) в списке оборудования.
