@@ -2,10 +2,12 @@
 
 namespace app\controllers;
 
+use app\generation\ModelFactory;
 use app\models\Places;
 use app\models\Soft;
 use app\models\TechModels;
 use app\models\Techs;
+use PHPUnit\Framework\Assert;
 use Throwable;
 use Yii;
 use app\models\Scans;
@@ -211,18 +213,99 @@ class ScansController extends ArmsBaseController
 	/**
 	 * Acceptance test data for actionThumb.
 	 *
-	 * Тест пропущен: для установки thumbnail необходим физически сохранённый файл скана
-	 * на диске (путь задаётся через Scans::fullFname). Без реального файла
-	 * операция технически выполняется (поле scans_id сохраняется), но последующий
-	 * рендер thumbnail вернёт битый путь. Кроме того, acceptance-тест требует
-	 * существующих объектов (TechModels/Techs/Places/Soft) для связывания.
-	 * Необходима поддержка файловой системы в тестовой среде.
+	 * Что делает тестируемый action `thumb`:
+	 * - принимает GET-параметры `id` (Scans), `link` (имя FK-поля у целевой модели)
+	 *   и `link_id` (идентификатор целевой модели);
+	 * - по значению `$link` выбирает класс целевой модели:
+	 *   `tech_models_id` → {@see TechModels}, `techs_id` → {@see Techs},
+	 *   `places_id` → {@see Places}, `soft_id` → {@see Soft};
+	 * - находит целевую модель через `findOne($link_id)`, записывает в её поле
+	 *   `scans_id` значение `$id` и сохраняет без валидации (`save(false)`);
+	 * - при неизвестном `$link` или отсутствии целевой модели бросает
+	 *   {@see NotFoundHttpException} (HTTP 404);
+	 * - при успехе возвращает JSON `{"code":"0"}` (HTTP 200).
+	 *
+	 * Физический файл скана action НЕ читает — меняется только FK в БД,
+	 * поэтому для acceptance достаточно валидных моделей Scans/Techs/Places
+	 * без реального файла на диске.
+	 *
+	 * Что именно проверяет каждый сценарий:
+	 * 1) `techs link` — создаём Scans и Techs через ModelFactory, вызываем
+	 *    `/scans/thumb?id=scan.id&link=techs_id&link_id=tech.id`, ожидаем HTTP 200.
+	 *    В assert-колбэке перечитываем Techs из БД и проверяем, что `scans_id`
+	 *    равен id созданного скана — то есть бизнес-эффект action действительно
+	 *    зафиксирован в БД.
+	 * 2) `places link` — аналогично для Places (второй класс target-моделей).
+	 *    Подтверждает, что switch по `$link` корректно обрабатывает не только
+	 *    Techs, но и другие ветки.
+	 * 3) `invalid link` — передаём неизвестное значение `link=unknown_fk`.
+	 *    Ожидаем HTTP 404: switch попадает в default, `$model=null`,
+	 *    action бросает NotFoundHttpException.
+	 * 4) `missing link_id` — передаём корректный `link=techs_id` и
+	 *    несуществующий `link_id` (max(id) + 1000). `findOne()` возвращает null,
+	 *    action бросает NotFoundHttpException, ожидаем HTTP 404.
+	 *
+	 * Почему этого достаточно для acceptance-контракта:
+	 * - покрываются оба «успешных» ветвления switch (Techs, Places), что
+	 *   даёт уверенность в стабильности остальных аналогичных веток
+	 *   (TechModels, Soft) без дублирования сценариев;
+	 * - покрыты оба пути ухода в 404 — неизвестный link и отсутствующий link_id;
+	 * - assert-проверки через БД гарантируют, что 200-й код действительно
+	 *   соответствует успешной записи FK, а не просто отсутствию исключений.
 	 *
 	 * @return array
 	 */
 	public function testThumb(): array
 	{
-		return self::skipScenario('default', 'requires physically saved scan file and linked object fixtures');
+		$scan = ModelFactory::create(Scans::class, ['empty' => true]);
+		$tech = ModelFactory::create(Techs::class, ['empty' => true]);
+		$place = ModelFactory::create(Places::class, ['empty' => true]);
+
+		$scanId = (int)$scan->id;
+		$techId = (int)$tech->id;
+		$placeId = (int)$place->id;
+		$missingId = (int)(Techs::find()->max('id')) + 1000;
+
+		return [
+			[
+				'name' => 'techs link',
+				'GET' => ['id' => $scanId, 'link' => 'techs_id', 'link_id' => $techId],
+				'response' => 200,
+				'assert' => static function () use ($scanId, $techId) {
+					$reloaded = Techs::findOne($techId);
+					Assert::assertNotNull($reloaded, 'Techs row must still exist after thumb');
+					Assert::assertSame(
+						$scanId,
+						(int)$reloaded->scans_id,
+						'thumb must persist scans_id on linked Techs row'
+					);
+				},
+			],
+			[
+				'name' => 'places link',
+				'GET' => ['id' => $scanId, 'link' => 'places_id', 'link_id' => $placeId],
+				'response' => 200,
+				'assert' => static function () use ($scanId, $placeId) {
+					$reloaded = Places::findOne($placeId);
+					Assert::assertNotNull($reloaded, 'Places row must still exist after thumb');
+					Assert::assertSame(
+						$scanId,
+						(int)$reloaded->scans_id,
+						'thumb must persist scans_id on linked Places row'
+					);
+				},
+			],
+			[
+				'name' => 'invalid link',
+				'GET' => ['id' => $scanId, 'link' => 'unknown_fk', 'link_id' => $techId],
+				'response' => 404,
+			],
+			[
+				'name' => 'missing link_id',
+				'GET' => ['id' => $scanId, 'link' => 'techs_id', 'link_id' => $missingId],
+				'response' => 404,
+			],
+		];
 	}
 	public $modelClass=Scans::class;
 	/**

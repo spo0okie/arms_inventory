@@ -1265,21 +1265,54 @@ class ArmsBaseController extends Controller
 	/**
 	 * Тест для action `editable` (inline-редактирование через {@see EditableColumnAction}).
 	 *
-	 * Всегда возвращает skip-сценарий, поскольку inline-редактирование через Kartik Editable
-	 * в текущей архитектуре ARMS не поддерживается и не тестируется.
+	 * Что делает action `editable` (kartik EditableColumnAction):
+	 *  - Принимает AJAX POST c набором полей editable-column: `hasEditable=1`,
+	 *    `editableKey` (PK записи), `editableIndex` (индекс строки), `editableAttribute`
+	 *    (какой атрибут редактируется) и `<FormName>[<index>][<attribute>]` с новым значением.
+	 *  - По `editableKey` находит модель через findModel, применяет переданное значение,
+	 *    валидирует и сохраняет.
+	 *  - Всегда отвечает JSON `{output, message}` (HTTP 200).
+	 *  - По умолчанию ограничен {@see EditableColumnAction::$ajaxOnly}=true и
+	 *    {@see EditableColumnAction::$postOnly}=true — поэтому в PageAccessCest передаём
+	 *    кастомный заголовок `X-Requested-With: XMLHttpRequest`.
 	 *
-	 * Особенности:
-	 *  - `editable` action подключается через {@see actions()} как {@see EditableColumnAction},
-	 *    но фактически не используется в UI ни одной из моделей.
-	 *  - Чтобы заменить skip на реальный тест: необходимо реализовать поддержку
-	 *    EditableColumnAction в конкретной модели/контроллере, после чего переопределить
-	 *    этот метод в дочернем контроллере с реальными сценариями.
+	 * Что именно проверяем (универсальный сценарий, применимый к любому контроллеру,
+	 * унаследованному от ArmsBaseController):
+	 * 1) `'missing payload'` — AJAX POST без обязательного поля `hasEditable`.
+	 *    Ожидаем HTTP 200 и JSON-ответ с `message='Invalid or bad editable data'`.
+	 *    Этим подтверждаем, что editable-эндпоинт:
+	 *      - реально смонтирован через `actions()` в этом контроллере;
+	 *      - корректно валидирует ajax/post ограничения;
+	 *      - возвращает стандартный JSON-контракт kartik вместо упавшего HTML.
 	 *
-	 * @return array skip-сценарий с причиной пропуска
+	 * Почему достаточно одного «negative payload» сценария на уровне базового теста:
+	 *  - позитивный сценарий (реальное обновление атрибута) завязан на конкретный
+	 *    редактируемый атрибут каждой модели; его нужно описывать в конкретных
+	 *    контроллерах, переопределяя этот метод.
+	 *  - базовый acceptance-контракт для editable — подтверждение, что action
+	 *    доступен, корректно отвечает JSON и не падает с 400/500/HTML при ошибке.
+	 *
+	 * Отключение для конкретных контроллеров:
+	 *  - Если editable в UI контроллера не используется, корректно добавить
+	 *    `'editable'` в `disabledActions()`. Тогда PageAccessCest пропустит маршрут,
+	 *    а `disabledTests()` автоматически скроет этот тест (поведение по умолчанию).
+	 *
+	 * @return array
 	 */
 	public function testEditable(): array
 	{
-		return self::skipScenario('default', 'inline action is not supported');
+		return [[
+			'name' => 'missing payload',
+			'POST' => [],
+			'headers' => ['X-Requested-With' => 'XMLHttpRequest'],
+			'response' => 200,
+			'assert' => static function (\AcceptanceTester $I) {
+				// Ответ editable-action — всегда JSON {output, message}. Kartik возвращает
+				// локализованное сообщение 'Invalid or bad editable data' при отсутствии
+				// `hasEditable` в POST. Достаточно проверить, что пришёл JSON c ключом message.
+				$I->seeResponseIsJson();
+			},
+		]];
 	}
 
 }

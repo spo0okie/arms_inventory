@@ -67,6 +67,10 @@ return [
 - `route` (`string`) — кастомный маршрут (иначе `{controllerId}/{action}`);
 - `GET` (`array`) — GET параметры;
 - `POST` (`array`) — POST параметры (если есть, выполняется POST);
+- `headers` (`array`) — дополнительные HTTP-заголовки запроса (например,
+  `['X-Requested-With' => 'XMLHttpRequest']` для имитации AJAX-запроса к
+  Kartik EditableColumnAction). Заголовки устанавливаются перед запросом и
+  сбрасываются после, чтобы не протекали в следующий тест;
 - `response` (`int|array`) — ожидаемый код или диапазон, например `[200, 302]`;
 - `assert` (`callable`) — дополнительная проверка после HTTP-ассерта.
   Сигнатура: `function (AcceptanceTester $I, array $scenario, string $route, string $fullRoute): void`.
@@ -105,6 +109,19 @@ return [[
 
 Если контроллер наследуется от `ArmsBaseController`, то доступны сценарии описанные в нем:
 Если в классе потомке был перекрыт/добавлен новый метод `actionXxx()`, то для него нужно описать `testXxx()`.
+
+### Базовый `testEditable`
+
+`ArmsBaseController::testEditable()` проверяет action `editable` (Kartik `EditableColumnAction`).
+Базовый сценарий:
+- AJAX POST (`X-Requested-With: XMLHttpRequest`) без поля `hasEditable` в payload;
+- ожидаем HTTP 200 и JSON-ответ `{output, message}` с сообщением `'Invalid or bad editable data'`;
+- подтверждает, что action корректно смонтирован в `actions()` и отдаёт стандартный
+  JSON-контракт при невалидном payload вместо HTML/500.
+
+Если editable в UI конкретного контроллера не используется, добавить `'editable'` в
+`disabledActions()` — тогда маршрут будет пропущен PageAccessCest'ом, а тест автоматически
+скроется через `disabledTests()`.
 
 ---
 

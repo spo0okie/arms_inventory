@@ -190,14 +190,51 @@ class ServicesController extends ArmsBaseController
 	/**
 	 * Acceptance test data for Card.
 	 *
-	 * Тест пропущен: card view сервиса рендерит виджеты со связанными данными —
-	 * ответственные (owners), техподдержка (techSupport), parent-сервис и др.
-	 * Для стабильного рендера требуется сервис с полным набором этих связей.
-	 * Если getTestData()['full'] создаёт такой сервис — skip можно заменить реальным тестом.
+	 * Что делает actionCard:
+	 * - находит модель Services по GET `id` через findModel();
+	 * - рендерит partial-шаблон `views/services/card.php` (со связанными виджетами:
+	 *   ответственные, техподдержка, parent-сервис, место размещения и т.д.);
+	 * - при отсутствии сервиса с заданным id бросает NotFoundHttpException (HTTP 404).
+	 *
+	 * Почему тест работает без специальных фикстур:
+	 * - смежные actionCardSupport/actionTtip/testView уже стабильно работают на
+	 *   `getTestData()['full']` — ModelFactory штатно создаёт Services вместе с
+	 *   необходимыми связями через linksSchema;
+	 * - card-шаблон использует те же связи, что и card-support, поэтому
+	 *   full-модель гарантированно покрывает все обращения виджетов.
+	 *
+	 * Что именно проверяем:
+	 * 1) `'card full'` — GET id={full->id}: partial карточки рендерится без ошибок
+	 *    на полностью заполненной модели. Ожидаемый код — 200.
+	 * 2) `'card empty'` — GET id={empty->id}: проверяет устойчивость card-шаблона
+	 *    к минимально заполненной модели (отсутствующие связи). Ожидаемый код — 200.
+	 * 3) `'card missing'` — GET с несуществующим id: action бросает 404 через
+	 *    findModel() до попадания в шаблон.
 	 */
 	public function testCard(): array
 	{
-		return self::skipScenario('default', 'requires extended linked data for card widgets');
+		$testData = $this->getTestData();
+		$full = $testData['full'];
+		$empty = $testData['empty'];
+		$missingId = (int)(Services::find()->max('id')) + 1000;
+
+		return [
+			[
+				'name' => 'card full',
+				'GET' => ['id' => $full->id],
+				'response' => 200,
+			],
+			[
+				'name' => 'card empty',
+				'GET' => ['id' => $empty->id],
+				'response' => 200,
+			],
+			[
+				'name' => 'card missing',
+				'GET' => ['id' => $missingId],
+				'response' => 404,
+			],
+		];
 	}
 	/**
 	 * Рендерит partial-карточку технической поддержки сервиса.
@@ -261,13 +298,49 @@ class ServicesController extends ArmsBaseController
 	/**
 	 * Acceptance test data for CardMaintenanceReqs.
 	 *
-	 * Тест пропущен: для корректного рендера требуется сервис с привязанными
-	 * записями backupReqs (требования тех.обслуживания).
-	 * Если getTestData()['full'] создаёт сервис с такими связями — skip можно заменить.
+	 * Что делает actionCardMaintenanceReqs:
+	 * - находит модель Services по GET `id` через findModel();
+	 * - рендерит ModelFieldWidget для поля `backupReqs` (список требований тех.
+	 *   обслуживания, связанных с сервисом) в режиме `static_view=true`;
+	 * - при отсутствии сервиса с заданным id бросает NotFoundHttpException (HTTP 404).
+	 *
+	 * Что именно проверяем:
+	 * 1) `'maintenance full'` — GET id={full->id}: виджет `backupReqs` рендерится без
+	 *    ошибок на полностью заполненной модели (даже если связанных записей нет,
+	 *    static_view-режим корректно выводит пустое состояние). Код — 200.
+	 * 2) `'maintenance empty'` — GET id={empty->id}: проверяет, что шаблон выдерживает
+	 *    отсутствие связанных maintenance-требований. Код — 200.
+	 * 3) `'maintenance missing'` — GET с несуществующим id: 404 через findModel().
+	 *
+	 * Почему не проверяем непустой список требований:
+	 * - задача acceptance — подтвердить доступность endpoint и безопасный вывод
+	 *   при любом состоянии связанных данных; бизнес-содержимое (конкретные
+	 *   требования) проверяется на уровне модели, а не controller action.
 	 */
 	public function testCardMaintenanceReqs(): array
 	{
-		return self::skipScenario('default', 'requires linked maintenance requirements');
+		$testData = $this->getTestData();
+		$full = $testData['full'];
+		$empty = $testData['empty'];
+		$missingId = (int)(Services::find()->max('id')) + 1000;
+
+		return [
+			[
+				'name' => 'maintenance full',
+				'GET' => ['id' => $full->id],
+				'response' => 200,
+			],
+			[
+				'name' => 'maintenance empty',
+				'GET' => ['id' => $empty->id],
+				'response' => 200,
+			],
+			[
+				'name' => 'maintenance missing',
+				'GET' => ['id' => $missingId],
+				'response' => 404,
+			],
+		];
 	}
 	/**
 	 * Отображает список сервисов с поддержкой фильтрации, дочерних записей и архива.
