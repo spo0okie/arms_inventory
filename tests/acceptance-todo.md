@@ -15,7 +15,7 @@
   `disabledActions(['editable'])`.
 
 Прогон 2026-04-19: `php vendor/bin/codecept run tests/acceptance/PageAccessCest.php`
-→ Tests: 877, Assertions: 3137, Skipped: 8, Errors: 0, Failures: 0, пик ~506 MB.
+→ Tests: 884, Assertions: 3162, Skipped: 7, Errors: 0, Failures: 0, пик ~510 MB.
 
 ## Остаточные skip-сценарии
 
@@ -23,9 +23,29 @@
    для моделей, у которых `empty->getName()` возвращает пустую строку (7 контроллеров).
    Снимется сам, когда ModelFactory начнёт гарантировать непустое `name` для
    empty-моделей соответствующих классов.
-2. `OrgInetController::testView` — skip `view empty`: шаблон view требует
-   связанный `Services`, а `linksSchema` OrgInet не помечает `services_id` как
-   required. Закроется после приведения `OrgInet::linksSchema` к новому формату.
+
+## Содержательные перекрытия базовых test-методов
+
+Базовые `testIndex/testAsyncGrid/testItem/testItemByName/testTtip/testView/testValidate/
+testCreate/testUpdate/testDelete/testEditable` в `ArmsBaseController` закрывают стандартный
+CRUD-контракт. Ниже — места, где контроллер обоснованно перекрывает базовый метод:
+
+- `AttachesController::testCreate/testDelete` — файловые fixture-assertions.
+- `NetIpsController::testItemByName`, `NetworksController::testItemByName` — поиск
+  идёт по `text_addr`, а не по стандартному `name`.
+- `TechModelsController::testItemByName` — поиск по `name` + `manufacturer`.
+- `TechsController::testItemByName` — поиск по `num`.
+- `ScheduledAccessController::testView`, `SchedulesController::testView` — обход
+  redirect'а `actionView` на оригинал расписания при выставленном `override_id`.
+- `SchedulesController::testDelete` — Schedules- и ScheduledAccess-контроллеры
+  делят общий `testDataCache` (оба используют `Schedules::class`); запись `'delete'`
+  удаляется одним, второй вынужден создавать свою через ModelFactory.
+- `SchedulesEntriesController::testCreate` — create-шаблон требует предзаполненный
+  `SchedulesEntries[schedule_id]`, иначе 500.
+- `SchedulesEntriesController::testUpdate` — `fillForm(update-data)` даёт 500 на
+  бизнес-правилах формы; оставлен только сценарий `form open`.
+- `SiteController::testIndex` — у SiteController нет `modelClass`, базовый
+  `getTestData()` не работает.
 
 ## Открытые задачи
 

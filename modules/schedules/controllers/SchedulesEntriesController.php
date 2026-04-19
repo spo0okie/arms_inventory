@@ -80,10 +80,10 @@ class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 			 }
 
 	/**
-	 * Тестирует actionCreate: открывает форму создания записи расписания
-	 * с предзаполненным schedule_id=6. Ожидает HTTP 200 (форма создания).
-	 *
-	 * @return array
+	 * Базовый testCreate открывает форму без параметров, но рендер create-шаблона
+	 * SchedulesEntries падает 500 без предзаполненного schedule_id (мастер-расписание
+	 * требуется для ссылок/редиректов в форме). Передаём GET-параметр
+	 * `SchedulesEntries[schedule_id]` из существующей записи.
 	 */
 	public function testCreate(): array
 	{
@@ -127,27 +127,21 @@ class SchedulesEntriesController extends \app\controllers\ArmsBaseController
 	}
 
 	/**
-	 * Тестирует actionUpdate: открывает форму редактирования записи расписания.
-	 *
-	 * Использует стандартный ключ getTestData()['update'] — сохранённая минимальная
-	 * запись SchedulesEntries, созданная ModelFactory. Ожидает HTTP 200 (форма редактирования).
-	 *
-	 * Ранее использовался нестандартный ключ 'to-update', которого нет в getTestData(),
-	 * что приводило к PHP Warning и id=null → 400 Bad Request.
-	 *
-	 * @return array
+	 * Базовый testUpdate делает два сценария — form open и data post через
+	 * ModelHelper::fillForm(update-data). Для SchedulesEntries второй сценарий падает
+	 * 500, т.к. полная генерация update-data не согласуется с бизнес-правилами формы.
+	 * Оставляем только form open.
 	 */
 	public function testUpdate(): array
 	{
 		$testData=$this->getTestData();
-
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['update']->id],
 			'response' => 200,
 		]];
 	}
-	
+
 	/**
 	 * Удаляет запись расписания (SchedulesEntries).
 	 * Запоминает master-расписание до удаления, чтобы определить направление редиректа:

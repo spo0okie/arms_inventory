@@ -51,22 +51,6 @@ class SoftController extends ArmsBaseController
 
 		
 	/**
-	 * Acceptance test data for Ttip.
-	 *
-	 * Проверяет рендер tooltip для существующей записи ПО.
-	 * GET: id из getTestData()['full'].
-	 */
-	public function testTtip(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
-	/**
 	 * Отображает страницу записи ПО со списком ПК, на которых оно установлено, и лицензиями.
 	 *
 	 * Загружает CompsSearch с фильтром по linkedSoft_ids и LicGroupsSearch с фильтром по soft_ids.
@@ -94,22 +78,6 @@ class SoftController extends ArmsBaseController
 	
 	
 		
-	/**
-	 * Acceptance test data for View.
-	 *
-	 * Проверяет страницу ПО со списком ПК и лицензий.
-	 * GET: id из getTestData()['full']. Тест проходит при пустых связанных списках.
-	 */
-	public function testView(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
 	/**
      * Отображает форму создания нового ПО и обрабатывает её отправку.
      *
@@ -151,20 +119,6 @@ class SoftController extends ArmsBaseController
 	
 	
 		
-	/**
-	 * Acceptance test data for Create.
-	 *
-	 * Проверяет отображение формы создания ПО без предзаполнения.
-	 * GET: нет параметров. Ожидается HTTP 200 с пустой формой.
-	 */
-	public function testCreate(): array
-	{
-		return [[
-			'name' => 'default',
-			'GET' => [],
-			'response' => 200,
-		]];
-	}
 	/**
 	 * Отображает форму поиска и выбора ПО для добавления строки обнаружения.
 	 *

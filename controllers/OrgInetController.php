@@ -59,34 +59,4 @@ class OrgInetController extends ArmsBaseController
 		];
 	}*/
 
-	/**
-	 * Acceptance test data for actionTtip (наследуется из ArmsBaseController).
-	 *
-	 * Что делает actionTtip для OrgInet:
-	 * - находит модель по GET `id` через findModel();
-	 * - рендерит `renderPartial` с layout/ttip или кастомным `views/org-inet/ttip.php`.
-	 *
-	 * Сценарии:
-	 * 1) `'ttip full'` — id полностью заполненной модели. Ожидаемый код — 200.
-	 * 2) `'ttip empty'` — id минимально заполненной модели. Ожидаемый код — 200;
-	 *    ttip-шаблон рассчитан на возможное отсутствие связей (в отличие от view).
-	 */
-	public function testTtip(): array
-	{
-		$testData = $this->getTestData();
-		$full = $testData['full'];
-		$empty = $testData['empty'];
-		return [
-			[
-				'name' => 'ttip full',
-				'GET' => ['id' => $full->id],
-				'response' => 200,
-			],
-			[
-				'name' => 'ttip empty',
-				'GET' => ['id' => $empty->id],
-				'response' => 200,
-			],
-		];
-	}
 }

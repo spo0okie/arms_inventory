@@ -46,38 +46,20 @@ class SchedulesController extends \app\controllers\ArmsBaseController
 	}
 	
 	/**
-	 * Тест пропущен: actionView может перенаправить на другое расписание,
-	 * если текущее является override. Требуется фикстура с гарантированно
-	 * не-override записью, которая недоступна через getTestData().
-	 *
-	 * @return array
+	 * actionView у Schedules может редиректить на другое расписание, если у текущего
+	 * выставлен override_id. `full` из getTestData() имеет override_id → 302, а не 200.
+	 * Поэтому проверяем на `empty`-модели, у которой override_id гарантированно null.
 	 */
 	public function testView(): array
 	{
 		$testData = $this->getTestData();
-		// empty-модель гарантированно не имеет override_id (null), поэтому не делает redirect
 		return [[
 			'name'     => 'default',
 			'GET'      => ['id' => $testData['empty']->id],
 			'response' => 200,
 		]];
 	}
-	
-	/**
-	 * Тест пропущен: actionTtip требует расписания с корректной цепочкой override,
-	 * которая не гарантируется в тестовых данных getTestData().
-	 *
-	 * @return array
-	 */
-	public function testTtip(): array
-	{
-		$testData = $this->getTestData();
-		return [
-			['name' => 'ttip full',  'GET' => ['id' => $testData['full']->id],  'response' => 200],
-			['name' => 'ttip empty', 'GET' => ['id' => $testData['empty']->id], 'response' => 200],
-		];
-	}
-	
+
 	/**
 	 * Создаёт новое расписание работы.
 	 * Поддерживает предзаполнение имени через GET-параметры привязки:
@@ -195,14 +177,10 @@ class SchedulesController extends \app\controllers\ArmsBaseController
     }
 
 	/**
-	 * Тестирует actionDelete: удаление расписания с redirect на index.
-	 *
-	 * SchedulesController и ScheduledAccessController оба используют Schedules::class как modelClass,
-	 * поэтому они делят один testDataCache. Чтобы не зависеть от порядка выполнения тестов
-	 * (ScheduledAccessController может удалить 'delete'-запись из общего кэша раньше),
-	 * создаём отдельную запись напрямую через ModelFactory.
-	 *
-	 * @return array
+	 * SchedulesController и ScheduledAccessController оба используют Schedules::class
+	 * как modelClass и делят общий testDataCache. Если базовый testDelete использует
+	 * `$testData['delete']`, запись может быть уже удалена предыдущим контроллером,
+	 * что даёт 404 вместо 302. Поэтому создаём отдельную запись через ModelFactory.
 	 */
 	public function testDelete(): array
 	{

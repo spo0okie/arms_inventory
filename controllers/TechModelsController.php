@@ -66,24 +66,6 @@ class TechModelsController extends ArmsBaseController
 	}
 	
 	/**
-	 * Acceptance test data for Item.
-	 *
-	 * Проверяет рендер краткой карточки для существующей модели оборудования.
-	 * GET: id из getTestData()['full'].
-	 */
-	public function testItem(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
-	
-	
-	/**
 	 * Рендерит карточку модели оборудования по краткому или полному имени и производителю.
 	 *
 	 * Ищет производителя через ManufacturersDict (словарь), затем через Manufacturers.
@@ -287,22 +269,6 @@ class TechModelsController extends ArmsBaseController
 	}
 	
 		
-	/**
-	 * Acceptance test data for View.
-	 *
-	 * Проверяет страницу модели оборудования со списком экземпляров.
-	 * GET: id из getTestData()['full']. Тест проходит при пустом списке экземпляров.
-	 */
-	public function testView(): array
-	{
-		$testData=$this->getTestData();
-		
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $testData['full']->id],
-			'response' => 200,
-		]];
-	}
 	/**
 	 * Рендерит виджет стойки (RackWidget) по конфигурации из POST.
 	 *

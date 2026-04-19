@@ -38,28 +38,6 @@ class LicItemsController extends ArmsBaseController
 	}
 	
 	/**
-	 * Acceptance test data for Delete.
-	 *
-	 * Проверяет удаление лицензионной позиции.
-	 * Использует getTestData()['delete'] — минимальную модель LicItems,
-	 * созданную специально для удаления; её id динамичен и не зависит
-	 * от конкретной записи в БД (в отличие от захардкоженного id=4).
-	 */
-	public function testDelete(): array
-	{
-		$testData = $this->getTestData();
-		$delete = $testData['delete'];
-		return [[
-			'name' => 'default',
-			'GET' => ['id' => $delete->id],
-			'POST' => [],
-			'saveModel' => ['storeAs' => 'deleted', 'model' => ['id' => $delete->id]],
-			'dropReverseLinks' => ['id' => $delete->id],
-			'response' => 302,
-		]];
-	}
-	
-	/**
 	 * Acceptance test data for Link.
 	 *
 	 * Пропускается, так как для теста необходимо:

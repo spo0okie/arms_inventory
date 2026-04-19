@@ -114,25 +114,22 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
             'model' => $model,
         ]);
     }
-	
+
 	/**
-	 * Тест пропущен: actionView может перенаправить на другое расписание,
-	 * если текущее является override. Поведение непредсказуемо без фикстуры
-	 * с гарантированно не-override записью.
-	 *
-	 * @return array
+	 * actionView редиректит на оригинал расписания, если у текущего выставлен override_id.
+	 * `full` из getTestData() может иметь override_id → 302, а не 200. Поэтому проверяем
+	 * на `empty`-модели, у которой override_id гарантированно null.
 	 */
 	public function testView(): array
 	{
 		$testData = $this->getTestData();
-		// empty-модель: override_id=null → isOverride=false → рендер view без redirect
 		return [[
 			'name'     => 'default',
 			'GET'      => ['id' => $testData['empty']->id],
 			'response' => 200,
 		]];
 	}
-	
+
 	/**
 	 * Создаёт новое расписание доступа (ACL-расписание).
 	 * После успешного сохранения автоматически создаёт связанную запись Acls

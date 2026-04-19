@@ -40,19 +40,6 @@ class PortsController extends ArmsBaseController
 		return $this->actionUpdate(null);
 	}
 
-	/**
-	 * Acceptance test data for actionCreate.
-	 *
-	 * Тест создаёт новый порт через стандартный flow ArmsBaseController::testCreate().
-	 * Требует, чтобы ModelFactory корректно генерировал Ports с валидным link_techs_id.
-	 *
-	 * @return array
-	 */
-	public function testCreate(): array
-	{
-		return parent::testCreate();
-	}
-
     /**
      * Создаёт новый порт (id = null) или редактирует существующий (id != null).
      *
@@ -80,19 +67,6 @@ class PortsController extends ArmsBaseController
 		$model->load(Yii::$app->request->get());
 		return $this->defaultRender('update', ['model' => $model,]);
     }
-
-	/**
-	 * Acceptance test data for actionUpdate.
-	 *
-	 * Тест обновляет существующий порт через стандартный сценарий ArmsBaseController::testUpdate().
-	 * Тестовая запись Ports создаётся через getTestData()['full'] перед запросом.
-	 *
-	 * @return array
-	 */
-	public function testUpdate(): array
-	{
-		return parent::testUpdate();
-	}
 
 	/**
 	 * AJAX-бэкенд Dependent Dropdown: возвращает список портов для выбранного оборудования.
@@ -175,62 +149,6 @@ class PortsController extends ArmsBaseController
 				'POST' => [],
 				'response' => 200,
 			],
-		];
-	}
-
-	/**
-	 * Acceptance test data for actionItem (унаследованного).
-	 *
-	 * Тест пропущен: карточка порта (item) требует, чтобы порт был привязан
-	 * к существующему оборудованию (Techs) и/или сетевому соединению (Networks).
-	 * Без этих связей шаблон item может выбрасывать исключения при рендере.
-	 * Необходимо расширить ModelFactory для Ports с гарантированным link_techs_id.
-	 *
-	 * @return array
-	 */
-	public function testItem(): array
-	{
-		$testData = $this->getTestData();
-		return [
-			['name' => 'item full',  'GET' => ['id' => $testData['full']->id],  'response' => 200],
-			['name' => 'item empty', 'GET' => ['id' => $testData['empty']->id], 'response' => 200],
-		];
-	}
-
-	/**
-	 * Acceptance test data for actionTtip (унаследованного).
-	 *
-	 * Тест пропущен: всплывающая подсказка порта рендерится с данными
-	 * из связанного Techs и Networks. Без валидных связей тест нестабилен.
-	 * Необходимо расширить ModelFactory для Ports с гарантированным link_techs_id.
-	 *
-	 * @return array
-	 */
-	public function testTtip(): array
-	{
-		$testData = $this->getTestData();
-		return [
-			['name' => 'ttip full',  'GET' => ['id' => $testData['full']->id],  'response' => 200],
-			['name' => 'ttip empty', 'GET' => ['id' => $testData['empty']->id], 'response' => 200],
-		];
-	}
-
-	/**
-	 * Acceptance test data for actionView (унаследованного).
-	 *
-	 * Тест пропущен: страница просмотра порта требует валидных связей на Techs/Networks.
-	 * Порт сам по себе (без привязанного оборудования) не имеет осмысленного
-	 * контекста для отображения, что делает тест ненадёжным.
-	 * Необходимо расширить ModelFactory для Ports с гарантированным link_techs_id.
-	 *
-	 * @return array
-	 */
-	public function testView(): array
-	{
-		$testData = $this->getTestData();
-		return [
-			['name' => 'view full',  'GET' => ['id' => $testData['full']->id],  'response' => 200],
-			['name' => 'view empty', 'GET' => ['id' => $testData['empty']->id], 'response' => 200],
 		];
 	}
 
