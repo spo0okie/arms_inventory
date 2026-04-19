@@ -59,7 +59,7 @@ class OrgInet extends ArmsModel
 	{
 		return [
 			[
-				'class' => \voskobovich\linker\LinkerBehavior::className(),
+				'class' => \voskobovich\linker\LinkerBehavior::class,
 				'relations' => [
 					'networks_ids' => 'networks',
 				]
@@ -81,13 +81,14 @@ class OrgInet extends ArmsModel
         return [
 			[['networks_ids'], 'each','rule'=>['integer']],
 			[['static', 'services_id', 'places_id','archived'], 'integer'],
+			[['services_id'], 'required'],
 	        [['cost','charge'], 'number'],
             [['name'], 'required'],
             [['ip_addr', 'ip_mask', 'ip_gw', 'ip_dns1', 'ip_dns2'], 'string', 'max' => 15],
 	        [['comment','history'], 'safe'],
 	        [['name','account'], 'string', 'max' => 64],
 	        [['type'], 'string', 'max' => 32],
-	        [['places_id'], 'exist', 'skipOnError' => true, 'targetClass' => Places::className(), 'targetAttribute' => ['places_id' => 'id']],
+	        [['places_id'], 'exist', 'skipOnError' => true, 'targetClass' => Places::class, 'targetAttribute' => ['places_id' => 'id']],
         ];
     }
 
@@ -170,18 +171,18 @@ class OrgInet extends ArmsModel
 	
 	/**
 	 * @return \yii\db\ActiveQuery
-	 */
+	
 	public function getProvTel()
 	{
-		return $this->hasOne(ProvTel::className(), ['id' => 'prov_tel_id']);
-	}
+		return $this->hasOne(ProvTel::class, ['id' => 'prov_tel_id']);
+	} */
 	
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */
 	public function getService()
 	{
-		return $this->hasOne(Services::className(), ['id' => 'services_id']);
+		return $this->hasOne(Services::class, ['id' => 'services_id']);
 	}
 	
 	/**
@@ -189,7 +190,7 @@ class OrgInet extends ArmsModel
 	 */
 	public function getNetwork()
 	{
-		return $this->hasOne(Networks::className(), ['id' => 'networks_id']);
+		return $this->hasOne(Networks::class, ['id' => 'networks_id']);
 	}
 	
 	/**
@@ -197,8 +198,8 @@ class OrgInet extends ArmsModel
 	 */
 	public function getNetworks()
 	{
-		//return $this->hasOne(Networks::className(), ['id' => 'networks_id']);
-		return $this->hasMany(Networks::className(), ['id' => 'networks_id'])
+		//return $this->hasOne(Networks::class, ['id' => 'networks_id']);
+		return $this->hasMany(Networks::class, ['id' => 'networks_id'])
 			->viaTable('{{%org_inets_in_networks}}', ['org_inets_id' => 'id']);
 	}
 	
@@ -207,7 +208,7 @@ class OrgInet extends ArmsModel
 	 */
 	public function getContract()
 	{
-		return $this->hasOne(Contracts::className(), ['id' => 'contracts_id']);
+		return $this->hasOne(Contracts::class, ['id' => 'contracts_id']);
 	}
 	
 	/**
@@ -215,7 +216,7 @@ class OrgInet extends ArmsModel
 	 */
 	public function getPlace()
 	{
-		return $this->hasOne(Places::className(), ['id' => 'places_id']);
+		return $this->hasOne(Places::class, ['id' => 'places_id']);
 	}
 	
 	/**
@@ -223,7 +224,7 @@ class OrgInet extends ArmsModel
 	 */
 	public function getContracts()
 	{
-		return $this->hasMany(Contracts::className(), ['id' => 'contracts_id'])
+		return $this->hasMany(Contracts::class, ['id' => 'contracts_id'])
 			->viaTable('{{%contracts_in_services}}', ['services_id' => 'services_id']);
 	}
 	
@@ -232,7 +233,7 @@ class OrgInet extends ArmsModel
 	 */
 	public function getPartner()
 	{
-		return $this->hasOne(Partners::className(), ['id' => 'partners_id'])
+		return $this->hasOne(Partners::class, ['id' => 'partners_id'])
 			->viaTable(\app\models\Services::tableName(), ['id' => 'services_id']);
 	}
 }

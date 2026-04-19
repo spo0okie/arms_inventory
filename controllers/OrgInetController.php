@@ -40,7 +40,7 @@ class OrgInetController extends ArmsBaseController
 	 *    исправления `linksSchema` и/или шаблона `views/org-inet/view.php`. Оставляем
 	 *    кейс явно видимым в отчёте, чтобы не потерять задачу.
 	 */
-	public function testView(): array
+	/*public function testView(): array
 	{
 		$testData = $this->getTestData();
 		$full = $testData['full'];
@@ -57,7 +57,7 @@ class OrgInetController extends ArmsBaseController
 					'legacy linksSchema marks services_id as non-required, so empty-model view fails.',
 			],
 		];
-	}
+	}*/
 
 	/**
 	 * Acceptance test data for actionTtip (наследуется из ArmsBaseController).
