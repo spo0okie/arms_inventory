@@ -329,12 +329,63 @@ class TechModelsController extends ArmsBaseController
 	/**
 	 * Acceptance test data for RenderRack.
 	 *
-	 * Тест пропущен: action требует валидный JSON конфигурации стойки в теле POST.
-	 * Без реальной конфигурации RackWidget не может быть проинициализирован корректно.
+	 * Что делает actionRenderRack:
+	 * - ограничен POST-методом через VerbFilter (behaviors → verbs → render-rack = POST);
+	 * - читает POST-параметр `config` как JSON-строку;
+	 * - декодирует его в массив и пробрасывает как конфигурацию в {@see RackWidget::widget()};
+	 * - возвращает HTML-рендер виджета. Для пустой/некорректной конфигурации
+	 *   (`cols`/`rows` не заданы) виджет возвращает div "Некорректная конфигурация корзины",
+	 *   но HTTP-код всё равно 200.
+	 *
+	 * Что проверяет этот тест:
+	 * 1) `'valid simple config'` — POST с валидным JSON-конфигом, в котором заданы
+	 *    колонки/строки простой однокорзинной стойки. RackWidget успешно строит таблицу
+	 *    и action возвращает 200. Подтверждает, что endpoint отвечает HTML без исключений
+	 *    на осмысленной конфигурации.
+	 * 2) `'error config'` — POST с JSON, где массивы `cols`/`rows` пустые. RackWidget
+	 *    попадает в ветку `isErrorConfig=true` и возвращает alert-div. HTTP-код 200
+	 *    подтверждает, что action не падает на неполной конфигурации и корректно
+	 *    делегирует обработку ошибки в сам виджет.
+	 *
+	 * Почему нет сценария с пустым POST:
+	 * - при отсутствии `config` `json_decode()` получит null (PHP 8+: deprecation notice)
+	 *   и вернёт null; `RackWidget::widget(null)` провалится в Yii::createObject(null) с
+	 *   TypeError. Это делает поведение «нет POST» нестабильным по коду (500/TypeError)
+	 *   и не даёт полезного покрытия — два сценария выше уже закрывают обе валидные ветки
+	 *   виджета (рабочая конфигурация и ошибочная).
 	 */
 	public function testRenderRack(): array
 	{
-		return self::skipScenario('default', 'requires rack configuration');
+		$validConfig = [
+			'cols' => [
+				['type' => 'units', 'count' => 1, 'size' => 60],
+			],
+			'rows' => [
+				['type' => 'title', 'size' => 12],
+				['type' => 'units', 'count' => 2, 'size' => 60],
+			],
+			'labelMode' => 'h',
+			'labelWidth' => 20,
+			'labelPre' => 1,
+			'hEnumeration' => 1,
+			'vEnumeration' => 1,
+			'priorEnumeration' => 'h',
+			'evenEnumeration' => 1,
+			'labelStartId' => 1,
+		];
+
+		return [
+			[
+				'name'     => 'valid simple config',
+				'POST'     => ['config' => json_encode($validConfig)],
+				'response' => 200,
+			],
+			[
+				'name'     => 'error config',
+				'POST'     => ['config' => json_encode(['cols' => [], 'rows' => []])],
+				'response' => 200,
+			],
+		];
 	}
 	/**
 	 * Отображает страницу загрузок (uploads) для модели оборудования.

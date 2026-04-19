@@ -338,16 +338,27 @@ class PageAccessCest
 		
 		$postParams=$example['POST']??null;
 		$code=$example['response']??200;
-		
-		
+
+		// Optional extra HTTP headers (scenario key 'headers') — используются, например,
+		// для имитации AJAX-запросов (X-Requested-With) в сценариях kartik Editable.
+		$headers = $example['headers'] ?? [];
+		foreach ($headers as $headerName => $headerValue) {
+			$I->haveHttpHeader($headerName, $headerValue);
+		}
+
 		$message='';
 		if (is_null($postParams)) {
 			$I->amOnPage($fullRoute);
 			$message="GET $route is accessible";
-			
+
 		} else {
 			$I->sendPOST($fullRoute, $postParams);
 			$message="POST data $fullRoute is nominal";
+		}
+
+		// Сбрасываем кастомные заголовки после запроса, чтобы не протекали в следующий тест.
+		foreach ($headers as $headerName => $headerValue) {
+			$I->unsetHttpHeader($headerName);
 		}
 
 		if (is_array($code))

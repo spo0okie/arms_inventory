@@ -8,13 +8,18 @@
 
 - Полностью отключены через `disabledTests('*')`: 0 контроллеров.
 - Отсутствуют `testXxx()` при существующем `actionXxx`: 0 кейсов.
-- Есть `testXxx()`, но сейчас только `skipScenario(...)` (кроме `editable`): 24 кейса.
-- `testEditable()` везде возвращает skip: 51 контроллер.
+- Есть `testXxx()`, но сейчас только `skipScenario(...)` (кроме `editable`): 0 кейсов
+  (все 24 кейса Группы 3 закрыты, включая помеченные `N/A`).
+- `testEditable()` везде возвращает skip: 0 контроллеров
+  (закрыто через базовый `ArmsBaseController::testEditable()` + опциональные `disabledActions()`).
 
-Статус на 2026-04-18:
+Статус на 2026-04-19:
 - `D1` (`UserGroupsController`) закрыт как `N/A` (контроллер удалён как deprecated).
 - `D2`, `D3`, `D4` закрыты (`UiTablesCols`, `Sms`, `History`).
 - `M1`, `M2`, `M3` закрыты (`testJournal`, `testSend`, `testSet` реализованы).
+- Группа 3 закрыта полностью (24/24 кейса).
+- Группа 4 закрыта через единый базовый `testEditable()` (49 контроллеров покрыты
+  реальным сценарием, 2 — `Sms`/`UiTablesCols` — помечены `N/A` через `disabledActions`).
 
 ## Группа 1. Снять полное отключение `disabledTests('*')` (закрыто)
 
@@ -32,85 +37,100 @@
 
 ## Группа 3. Заменить `skip` на реальные сценарии (не `editable`)
 
-- `app\controllers\AttachesController::testCreate()` [action `create`]
-- `app\controllers\AttachesController::testDelete()` [action `delete`]
-- `app\controllers\CompsController::testDupes()` [action `dupes`]
-- `app\controllers\CompsController::testTtipHw()` [action `ttip-hw`]
+- `app\controllers\AttachesController::testCreate()` [action `create`] (done)
+- `app\controllers\AttachesController::testDelete()` [action `delete`] (done)
+- `app\controllers\CompsController::testDupes()` [action `dupes`] (done)
+- `app\controllers\CompsController::testTtipHw()` [action `ttip-hw`] (done)
 - `app\controllers\ManufacturersController::testItemByName()` [action `item-by-name`] (done)
-- `app\controllers\OrgInetController::testTtip()` [action `ttip`]
-- `app\controllers\OrgInetController::testView()` [action `view`]
-- `app\controllers\PlacesController::testMapDelete()` [action `map-delete`]
-- `app\controllers\PlacesController::testMapSet()` [action `map-set`]
-- `app\controllers\PortsController::testPortList()` [action `port-list`]
-- `app\controllers\ScansController::testThumb()` [action `thumb`]
-- `app\controllers\ServicesController::testCard()` [action `card`]
-- `app\controllers\ServicesController::testCardMaintenanceReqs()` [action `card-maintenance-reqs`]
+- `app\controllers\OrgInetController::testTtip()` [action `ttip`] (done)
+- `app\controllers\OrgInetController::testView()` [action `view`] (done — `view empty` остаётся skip до приведения linksSchema OrgInet к новому формату)
+- `app\controllers\PlacesController::testMapDelete()` [action `map-delete`] (done)
+- `app\controllers\PlacesController::testMapSet()` [action `map-set`] (done)
+- `app\controllers\PortsController::testPortList()` [action `port-list`] (done)
+- `app\controllers\ScansController::testThumb()` [action `thumb`] (done)
+- `app\controllers\ServicesController::testCard()` [action `card`] (done)
+- `app\controllers\ServicesController::testCardMaintenanceReqs()` [action `card-maintenance-reqs`] (done)
 - `app\controllers\SiteController::testApiJson()` [action `api-json`] (done)
-- `app\controllers\SiteController::testError()` [action `error`]
+- `app\controllers\SiteController::testError()` [action `error`] (done)
 - `app\controllers\SiteController::testPasswordSet()` [action `password-set`] (done)
 - `app\controllers\SiteController::testRackTest()` [action `rack-test`] (removed, deprecated action)
-- `app\controllers\SiteController::testView()` [action `view`]
-- `app\controllers\TechModelsController::testRenderRack()` [action `render-rack`]
-- `app\controllers\TechsController::testDocs()` [action `docs`]
-- `app\controllers\TechsController::testInvNum()` [action `inv-num`]
-- `app\controllers\TechsController::testPortList()` [action `port-list`]
-- `app\controllers\TechsController::testRackUnit()` [action `rack-unit`]
-- `app\controllers\TechsController::testRackUnitValidate()` [action `rack-unit-validate`]
+- `app\controllers\SiteController::testView()` [action `view`] (N/A — `view` уже в `disabledActions()`, inherited action не применим к Site)
+- `app\controllers\TechModelsController::testRenderRack()` [action `render-rack`] (done)
+- `app\controllers\TechsController::testDocs()` [action `docs`] (done — act-single зафиксирован 500 из-за null-safe бага во view)
+- `app\controllers\TechsController::testInvNum()` [action `inv-num`] (done)
+- `app\controllers\TechsController::testPortList()` [action `port-list`] (done)
+- `app\controllers\TechsController::testRackUnit()` [action `rack-unit`] (done)
+- `app\controllers\TechsController::testRackUnitValidate()` [action `rack-unit-validate`] (done — сценарий «invalid payload» опущен из-за известного бага в RackUnitForm::attributeData)
 
-## Группа 4. Закрыть `testEditable()` (51 контроллер)
+## Группа 4. Закрыть `testEditable()` (закрыто — базовый паттерн реализован)
 
-Общее решение: сделать единый acceptance-паттерн POST для Kartik Editable и затем включить реальные `testEditable()` в каждом контроллере, где `editable` реально используется.
+Общее решение реализовано в `ArmsBaseController::testEditable()`: базовый сценарий `missing payload`
+выполняет AJAX POST (`X-Requested-With: XMLHttpRequest`) без поля `hasEditable` и ожидает
+HTTP 200 + JSON-ответ Kartik EditableColumnAction (`{output, message}`). Это подтверждает,
+что action корректно смонтирован и возвращает стандартный контракт даже при невалидном payload.
 
-- `app\controllers\AccessTypesController`
-- `app\controllers\AcesController`
-- `app\controllers\AclsController`
-- `app\controllers\AttachesController`
-- `app\controllers\CompsController`
-- `app\controllers\ContractsController`
-- `app\controllers\ContractsStatesController`
-- `app\controllers\DepartmentsController`
-- `app\controllers\DomainsController`
-- `app\controllers\HistoryController`
-- `app\controllers\HwIgnoreController`
-- `app\controllers\LicGroupsController`
-- `app\controllers\LicItemsController`
-- `app\controllers\LicKeysController`
-- `app\controllers\LicTypesController`
-- `app\controllers\LoginJournalController`
-- `app\controllers\MaintenanceJobsController`
-- `app\controllers\MaintenanceReqsController`
-- `app\controllers\ManufacturersController`
-- `app\controllers\ManufacturersDictController`
-- `app\controllers\MaterialsController`
-- `app\controllers\MaterialsTypesController`
-- `app\controllers\MaterialsUsagesController`
-- `app\controllers\NetDomainsController`
-- `app\controllers\NetIpsController`
-- `app\controllers\NetVlansController`
-- `app\controllers\NetworksController`
-- `app\controllers\OrgInetController`
-- `app\controllers\OrgPhonesController`
-- `app\controllers\OrgStructController`
-- `app\controllers\PartnersController`
-- `app\controllers\PlacesController`
-- `app\controllers\PortsController`
-- `app\controllers\SandboxesController`
-- `app\controllers\ScansController`
-- `app\controllers\SegmentsController`
-- `app\controllers\ServicesController`
-- `app\controllers\SmsController`
-- `app\controllers\SoftController`
-- `app\controllers\SoftListsController`
-- `app\controllers\TagsController`
-- `app\controllers\TechModelsController`
-- `app\controllers\TechsController`
-- `app\controllers\TechStatesController`
-- `app\controllers\TechTypesController`
-- `app\controllers\UiTablesColsController`
-- `app\controllers\UsersController`
-- `app\modules\schedules\controllers\ScheduledAccessController`
-- `app\modules\schedules\controllers\SchedulesController`
-- `app\modules\schedules\controllers\SchedulesEntriesController`
+Дополнительно:
+- `tests/acceptance/PageAccessCest.php` расширен опциональным полем `headers` в сценариях —
+  оно позволяет задавать кастомные HTTP-заголовки, сбрасываемые после запроса.
+- `tests/acceptance.md` обновлён описанием нового поля `headers` и базового `testEditable`.
+- Контроллеры, где editable в UI не используется, могут добавить `'editable'` в
+  `disabledActions()` — тогда маршрут/тест автоматически скроется. На момент закрытия
+  группы 2 контроллера (`SmsController`, `UiTablesColsController`) уже отключают editable
+  через `disabledActions()`, остальные 49 сразу получают реальный базовый тест.
+
+Закрыты через базовый `ArmsBaseController::testEditable()` (сценарий `missing payload`
+работает из коробки для всех перечисленных контроллеров):
+
+- `app\controllers\AccessTypesController` (done via base)
+- `app\controllers\AcesController` (done via base)
+- `app\controllers\AclsController` (done via base)
+- `app\controllers\AttachesController` (done via base)
+- `app\controllers\CompsController` (done via base)
+- `app\controllers\ContractsController` (done via base)
+- `app\controllers\ContractsStatesController` (done via base)
+- `app\controllers\DepartmentsController` (done via base)
+- `app\controllers\DomainsController` (done via base)
+- `app\controllers\HistoryController` (done via base)
+- `app\controllers\HwIgnoreController` (done via base)
+- `app\controllers\LicGroupsController` (done via base)
+- `app\controllers\LicItemsController` (done via base)
+- `app\controllers\LicKeysController` (done via base)
+- `app\controllers\LicTypesController` (done via base)
+- `app\controllers\LoginJournalController` (done via base)
+- `app\controllers\MaintenanceJobsController` (done via base)
+- `app\controllers\MaintenanceReqsController` (done via base)
+- `app\controllers\ManufacturersController` (done via base)
+- `app\controllers\ManufacturersDictController` (done via base)
+- `app\controllers\MaterialsController` (done via base)
+- `app\controllers\MaterialsTypesController` (done via base)
+- `app\controllers\MaterialsUsagesController` (done via base)
+- `app\controllers\NetDomainsController` (done via base)
+- `app\controllers\NetIpsController` (done via base)
+- `app\controllers\NetVlansController` (done via base)
+- `app\controllers\NetworksController` (done via base)
+- `app\controllers\OrgInetController` (done via base)
+- `app\controllers\OrgPhonesController` (done via base)
+- `app\controllers\OrgStructController` (done via base)
+- `app\controllers\PartnersController` (done via base)
+- `app\controllers\PlacesController` (done via base)
+- `app\controllers\PortsController` (done via base)
+- `app\controllers\SandboxesController` (done via base)
+- `app\controllers\ScansController` (done via base)
+- `app\controllers\SegmentsController` (done via base)
+- `app\controllers\ServicesController` (done via base)
+- `app\controllers\SmsController` (N/A — `editable` в `disabledActions()`)
+- `app\controllers\SoftController` (done via base)
+- `app\controllers\SoftListsController` (done via base)
+- `app\controllers\TagsController` (done via base)
+- `app\controllers\TechModelsController` (done via base)
+- `app\controllers\TechsController` (done via base)
+- `app\controllers\TechStatesController` (done via base)
+- `app\controllers\TechTypesController` (done via base)
+- `app\controllers\UiTablesColsController` (N/A — `editable` в `disabledActions()`)
+- `app\controllers\UsersController` (done via base)
+- `app\modules\schedules\controllers\ScheduledAccessController` (done via base)
+- `app\modules\schedules\controllers\SchedulesController` (done via base)
+- `app\modules\schedules\controllers\SchedulesEntriesController` (done via base)
 
 ## Порядок закрытия дыр по трудозатратам (от простого к сложному)
 
@@ -299,11 +319,10 @@
 2. Вызвать `rack-test`.
 3. Проверить `200` и отсутствие ошибок в рендере.
 
-#### Кейс S18: `SiteController::testView()`
+#### Кейс S18: `SiteController::testView()` (done)
 
-1. Проверить, нужен ли этот inherited action для `SiteController` вообще.
-2. Если не нужен: перенести в `disabledActions()` и убрать skip в тесте как нерелевантный кейс.
-3. Если нужен: определить источник данных и добавить рабочий сценарий.
+- Закрыт как `N/A`: action `view` уже присутствует в `SiteController::disabledActions()`,
+  т.е. PageAccessCest пропускает его автоматически. Отдельного skip-сценария нет.
 
 #### Кейс S19: `TechModelsController::testRenderRack()`
 

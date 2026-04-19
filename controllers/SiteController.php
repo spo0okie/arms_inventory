@@ -349,14 +349,36 @@ class SiteController extends ArmsBaseController
 	/**
 	 * Acceptance test data for Error.
 	 *
-	 * Тест пропущен: action 'error' является внешним (ArmsErrorAction) и корректно
-	 * срабатывает только в контексте реально выброшенного исключения через
-	 * обработчик ошибок Yii (errorHandler). Прямой GET-запрос не воспроизводит
-	 * реальный сценарий ошибки.
+	 * Что делает action `error` (реализация — {@see \app\components\actions\ArmsErrorAction}):
+	 * - наследуется от {@see \yii\web\ErrorAction};
+	 * - если `Yii::$app->errorHandler->exception` задан, пытается подобрать кастомный
+	 *   шаблон `views/site/error/<code>.php` и рендерит его;
+	 * - если исключения нет (прямой GET-запрос без реального error flow),
+	 *   {@see \yii\web\ErrorAction::run()} искусственно создаёт `HttpException(404)`
+	 *   и использует его как контекст; шаблон `views/site/error.php` успешно рендерится,
+	 *   но HTTP-код ответа становится 404 (как «Page not found»).
+	 *
+	 * Маршрут `error` объявлен в `accessMap()` как PERM_EVERYONE, то есть доступен и
+	 * гостям, и авторизованным пользователям — специальный контекст прав не нужен.
+	 *
+	 * Что именно проверяем в acceptance:
+	 * 1) Прямой GET `/site/error` не падает на уровне action/шаблона.
+	 * 2) Ответ возвращается с ожидаемым кодом 404 — подтверждение того, что
+	 *    встроенный fallback ErrorAction (искусственный 404 без реального исключения)
+	 *    отрабатывает штатно и страница ошибки рендерится без фатальных ошибок.
+	 *
+	 * Намеренно НЕ проверяем содержимое страницы и не пытаемся искусственно выбросить
+	 * исключение через errorHandler: задача acceptance — подтвердить доступность
+	 * UI-action как страницы-обёртки для механизма ошибок Yii, а не саму диспетчеризацию
+	 * ошибок фреймворка.
 	 */
 	public function testError(): array
 	{
-		return self::skipScenario('default', 'error action depends on exception handler context');
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 404,
+		]];
 	}
 
 	/**

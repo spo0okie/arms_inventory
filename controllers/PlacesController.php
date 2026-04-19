@@ -301,18 +301,79 @@ class PlacesController extends ArmsBaseController
 	/**
 	 * Acceptance test data for actionMapSet.
 	 *
-	 * Тест пропущен: для работы карты необходимо наличие загруженного плана этажа (floorplan upload).
-	 * Без плана координаты объектов не имеют смысла, а actionMapSet не формирует view —
-	 * только сохраняет позицию и делает редирект. Кроме того, POST-payload MapItemForm
-	 * требует подготовленных данных об объектах (item_type, item_id), которые
-	 * не генерируются автоматически. Необходимо сначала реализовать поддержку
-	 * загрузки планов в тестовой среде.
+	 * Что делает actionMapSet:
+	 * - принимает POST с полями `MapItemForm` (`place_id`, `item_type`, `techs_id|places_id`,
+	 *   `x`, `y`, `width`, `height`);
+	 * - загружает данные в модель формы и вызывает `MapItemForm::itemSet()`, которая
+	 *   находит Places по `place_id`, декодирует JSON-поле `map`, добавляет/обновляет
+	 *   запись об объекте (в группе `item_type` под ключом `<item_type>_id`) и
+	 *   сохраняет Places;
+	 * - делает redirect на `/places/view?id={place_id}` (HTTP 302).
 	 *
-	 * @return array
+	 * Почему физический план этажа НЕ требуется:
+	 * - координаты хранятся как JSON-структура в `places.map` и не зависят от
+	 *   присутствия растрового файла плана на диске. Раньше тест был в skip
+	 *   из-за ошибочного предположения, что для `map-set` нужен загруженный
+	 *   floorplan — на самом деле действие работает чисто на JSON-поле.
+	 *
+	 * Что именно проверяем:
+	 * 1) `'set techs on map'` — POST валидный MapItemForm с `item_type=techs` и id только что
+	 *    созданного оборудования. Ожидаемый код — 302 (redirect на view).
+	 *    В `assert`-колбэке подтверждаем, что свежее Places.map содержит запись
+	 *    `techs->{id}` с переданными координатами.
+	 * 2) `'invalid post'` — POST без обязательных полей. `MapItemForm::load()` вернёт false,
+	 *    `itemSet()` всё равно вызывается, но place_id=null → `Places::findOne(null)` → null
+	 *    → обращение к свойству null вызывает PHP warning → 500.
+	 *    Этот сценарий фиксирует фактическое (хоть и не идеальное) поведение — чтобы
+	 *    будущие изменения action, валидирующие форму перед вызовом itemSet(), были замечены.
 	 */
 	public function testMapSet(): array
 	{
-		return self::skipScenario('default', 'requires floorplan upload and MapItemForm POST payload');
+		$place = \app\generation\ModelFactory::create(Places::class, ['empty' => true]);
+		$tech = \app\generation\ModelFactory::create(\app\models\Techs::class, ['empty' => true]);
+
+		return [
+			[
+				'name' => 'set techs on map',
+				'GET' => ['id' => $place->id],
+				'POST' => [
+					'MapItemForm' => [
+						'place_id'  => $place->id,
+						'item_type' => 'techs',
+						'techs_id'  => $tech->id,
+						'x'         => 10,
+						'y'         => 20,
+						'width'     => 30,
+						'height'    => 40,
+					],
+				],
+				'response' => 302,
+				'assert' => static function () use ($place, $tech) {
+					$fresh = Places::findOne($place->id);
+					\PHPUnit\Framework\Assert::assertNotNull($fresh, 'Place must still exist after map-set');
+					$map = json_decode((string)$fresh->map);
+					\PHPUnit\Framework\Assert::assertIsObject($map, 'places.map must be a JSON object');
+					\PHPUnit\Framework\Assert::assertObjectHasProperty(
+						'techs',
+						$map,
+						'places.map must contain techs group'
+					);
+					\PHPUnit\Framework\Assert::assertObjectHasProperty(
+						(string)$tech->id,
+						$map->techs,
+						'places.map.techs must contain just-added techs id'
+					);
+					\PHPUnit\Framework\Assert::assertSame(10, $map->techs->{$tech->id}->x);
+					\PHPUnit\Framework\Assert::assertSame(20, $map->techs->{$tech->id}->y);
+				},
+			],
+			[
+				'name'     => 'invalid post',
+				'GET'      => ['id' => $place->id],
+				'POST'     => [],
+				'response' => 500,
+			],
+		];
 	}
 
 	/**
@@ -352,16 +413,84 @@ class PlacesController extends ArmsBaseController
 	/**
 	 * Acceptance test data for actionMapDelete.
 	 *
-	 * Тест пропущен по той же причине, что и testMapSet():
-	 * для удаления объекта с карты необходимо, чтобы карта была предварительно
-	 * настроена (загружен план этажа и размещены объекты через actionMapSet).
-	 * Без этих данных выполнение DELETE-сценария бессмысленно.
+	 * Что делает actionMapDelete:
+	 * - находит Places по GET `id` (404 если не найден);
+	 * - декодирует JSON из `places.map`; если в нём есть группа `item_type` и в ней
+	 *   запись с ключом `item_id` — удаляет эту запись и сохраняет Places;
+	 * - если структура неполная (нет группы или id) — тихо пропускает и всё равно
+	 *   делает redirect на `/places/view?id={place_id}`.
 	 *
-	 * @return array
+	 * Фикстура данных:
+	 * - создаём Places через ModelFactory и руками заполняем `places.map` JSON с одной
+	 *   заранее известной записью в группе `techs` под ключом `{tech_id}`. Этого достаточно,
+	 *   чтобы убедиться, что ветка удаления работает и корректно обновляет JSON в БД.
+	 *   Физический план этажа не требуется — `map` хранится в той же таблице places.
+	 *
+	 * Что именно проверяем:
+	 * 1) `'delete existing item'` — GET с id/item_type=techs/item_id={tech->id}, где запись
+	 *    в map-структуре существует. Ожидаемый код — 302 (redirect).
+	 *    Ассертом подтверждаем, что `places.map.techs.{tech->id}` больше не существует.
+	 * 2) `'delete missing item'` — GET с тем же place, но с item_id, которого нет в карте.
+	 *    Ожидаемый код — 302 (тихий пропуск на уровне property_exists). Проверяем, что
+	 *    исходная запись в map-структуре не пострадала.
+	 * 3) `'missing place'` — GET с несуществующим place id → 404 (NotFoundHttpException).
 	 */
 	public function testMapDelete(): array
 	{
-		return self::skipScenario('default', 'requires floorplan upload and pre-placed map items');
+		$place = \app\generation\ModelFactory::create(Places::class, ['empty' => true]);
+		$tech = \app\generation\ModelFactory::create(\app\models\Techs::class, ['empty' => true]);
+		$otherTechId = $tech->id + 7777;
+
+		// Заранее формируем JSON карты с одной записью в группе techs.
+		$initialMap = [
+			'techs' => [
+				(string)$tech->id => [
+					'x' => 5, 'y' => 6, 'width' => 7, 'height' => 8,
+				],
+			],
+		];
+		$place->map = json_encode($initialMap, JSON_UNESCAPED_UNICODE);
+		$place->save(false);
+
+		$missingPlaceId = (int)(Places::find()->max('id')) + 1000;
+
+		return [
+			[
+				'name' => 'delete existing item',
+				'GET' => [
+					'id'        => $place->id,
+					'item_type' => 'techs',
+					'item_id'   => $tech->id,
+				],
+				'response' => 302,
+				'assert' => static function () use ($place, $tech) {
+					$fresh = Places::findOne($place->id);
+					$map = json_decode((string)$fresh->map);
+					\PHPUnit\Framework\Assert::assertFalse(
+						isset($map->techs->{$tech->id}),
+						'map-delete must remove the requested item from places.map'
+					);
+				},
+			],
+			[
+				'name' => 'delete missing item',
+				'GET' => [
+					'id'        => $place->id,
+					'item_type' => 'techs',
+					'item_id'   => $otherTechId,
+				],
+				'response' => 302,
+			],
+			[
+				'name' => 'missing place',
+				'GET' => [
+					'id'        => $missingPlaceId,
+					'item_type' => 'techs',
+					'item_id'   => $tech->id,
+				],
+				'response' => 404,
+			],
+		];
 	}
 
 }
