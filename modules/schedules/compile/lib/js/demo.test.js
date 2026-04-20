@@ -534,6 +534,252 @@ describe('ScheduleRuntime - базовые тесты', () => {
     });
 });
 
+describe('nextOverride — расширенное покрытие', () => {
+    test('Happy Path: override со start_tsm >= tsm', () => {
+        const runtime = new ScheduleRuntime({
+            main: { start_tsm: 0, end_tsm: null, periods: [] },
+            overrides: [
+                { name: 'A', start_tsm: 28419600, end_tsm: 28427000 }
+            ]
+        });
+        const override = runtime.nextOverride(28416600);
+        expect(override.name).toBe('A');
+    });
+
+    test('Happy Path: точное совпадение start_tsm == tsm', () => {
+        const runtime = new ScheduleRuntime({
+            main: { start_tsm: 0, end_tsm: null, periods: [] },
+            overrides: [{ name: 'A', start_tsm: 28419600, end_tsm: 28427000 }]
+        });
+        expect(runtime.nextOverride(28419600).name).toBe('A');
+    });
+
+    test('Happy Path: несколько overrides — возвращается первый с start_tsm >= tsm', () => {
+        const runtime = new ScheduleRuntime({
+            main: { start_tsm: 0, end_tsm: null, periods: [] },
+            overrides: [
+                { name: 'A', start_tsm: 28401120, end_tsm: 28414800 },
+                { name: 'B', start_tsm: 28416600, end_tsm: 28427000 },
+                { name: 'C', start_tsm: 28429200, end_tsm: 28440000 }
+            ]
+        });
+        expect(runtime.nextOverride(28414800).name).toBe('B');
+    });
+
+    test('Edge: все overrides раньше tsm → null', () => {
+        const runtime = new ScheduleRuntime({
+            main: { start_tsm: 0, end_tsm: null, periods: [] },
+            overrides: [
+                { name: 'A', start_tsm: 28401120, end_tsm: 28414800 },
+                { name: 'B', start_tsm: 28416600, end_tsm: 28427000 }
+            ]
+        });
+        expect(runtime.nextOverride(28500000)).toBeNull();
+    });
+
+    test('Empty: пустой overrides → null', () => {
+        const runtime = new ScheduleRuntime({
+            main: { start_tsm: 0, end_tsm: null, periods: [] },
+            overrides: []
+        });
+        expect(runtime.nextOverride(28416600)).toBeNull();
+    });
+});
+
+describe('nextPeriod — строгая семантика end_tsm > tsm', () => {
+    test('Happy Path: период впереди возвращается', () => {
+        const runtime = new ScheduleRuntime({
+            main: {
+                start_tsm: 0, end_tsm: null,
+                periods: [
+                    { start_tsm: 28414680, end_tsm: 28418139, is_work: true }
+                ]
+            },
+            overrides: []
+        });
+        const period = runtime.nextPeriod(28415000, true);
+        expect(period).not.toBeNull();
+    });
+
+    test('Edge: период, заканчивающийся РОВНО в tsm — пропускается', () => {
+        const runtime = new ScheduleRuntime({
+            main: {
+                start_tsm: 0, end_tsm: null,
+                periods: [
+                    { start_tsm: 28414680, end_tsm: 28418139, is_work: true }
+                ]
+            },
+            overrides: []
+        });
+        // end_tsm == tsm → период уже закончился → null
+        expect(runtime.nextPeriod(28418139, true)).toBeNull();
+    });
+
+    test('Empty: пустые periods → null', () => {
+        const runtime = new ScheduleRuntime({
+            main: { start_tsm: 0, end_tsm: null, periods: [] },
+            overrides: []
+        });
+        expect(runtime.nextPeriod(28416600, true)).toBeNull();
+    });
+});
+
+describe('getDatePeriods — граничные случаи', () => {
+    // 2024-01-11 00:00 UTC = 28415520 (28401120 + 10 * 1440)
+    // день [28415520, 28416960)
+
+    test('Edge: период с end_tsm == dayStart НЕ включается', () => {
+        const runtime = new ScheduleRuntime({
+            main: {
+                start_tsm: 0, end_tsm: null,
+                periods: [
+                    { start_tsm: 28414080, end_tsm: 28415520, is_work: true }
+                ]
+            },
+            overrides: []
+        });
+        // period заканчивается ровно в начале дня → не пересекает
+        expect(runtime.getDatePeriods(28415520)).toEqual([]);
+    });
+
+    test('Edge: период [dayStart-1, dayStart+1) минимально пересекает день', () => {
+        const runtime = new ScheduleRuntime({
+            main: {
+                start_tsm: 0, end_tsm: null,
+                periods: [
+                    { start_tsm: 28415519, end_tsm: 28415521, is_work: true }
+                ]
+            },
+            overrides: []
+        });
+        expect(runtime.getDatePeriods(28415520).length).toBe(1);
+    });
+
+    test('Edge: период в следующем дне НЕ включается', () => {
+        const runtime = new ScheduleRuntime({
+            main: {
+                start_tsm: 0, end_tsm: null,
+                periods: [
+                    // 2024-01-12 00:00 → 28416960, конец дня
+                    { start_tsm: 28416960, end_tsm: 28418400, is_work: true }
+                ]
+            },
+            overrides: []
+        });
+        expect(runtime.getDatePeriods(28415520)).toEqual([]);
+    });
+});
+
+describe('nextWorkingDateTime — интеграционные сценарии', () => {
+    const baseSchedule = {
+        main: {
+            name: 'Офис',
+            start_tsm: 28401120,
+            end_tsm: null,
+            default: { intervals: [[480, 1020, {}]] },
+            weekdays: {
+                '6': { intervals: [] },
+                '7': { intervals: [] }
+            },
+            dates: {},
+            periods: []
+        },
+        overrides: []
+    };
+
+    test('Happy Path: текущее рабочее время возвращается как есть', () => {
+        const runtime = new ScheduleRuntime(baseSchedule);
+        // 2024-01-08 (понедельник) 10:00 — рабочее
+        expect(runtime.nextWorkingDateTime('2024-01-08 10:00')).toBe('2024-01-08 10:00');
+    });
+
+    test('Happy Path: вечер вт → утро ср (next day)', () => {
+        const runtime = new ScheduleRuntime(baseSchedule);
+        // 2024-01-09 20:00 (вт, после работы) → 2024-01-10 08:00 (ср, начало работы)
+        expect(runtime.nextWorkingDateTime('2024-01-09 20:00')).toBe('2024-01-10 08:00');
+    });
+
+    test('Happy Path: вечер пт → утро пн (через выходные)', () => {
+        const runtime = new ScheduleRuntime(baseSchedule);
+        // 2024-01-05 20:00 (пт, после работы) → 2024-01-08 08:00 (пн)
+        expect(runtime.nextWorkingDateTime('2024-01-05 20:00')).toBe('2024-01-08 08:00');
+    });
+
+    test('Edge: до начала расписания → start расписания', () => {
+        const runtime = new ScheduleRuntime(baseSchedule);
+        // 2020-01-01 → min = 2024-01-01 08:00 (понедельник)
+        const result = runtime.nextWorkingDateTime('2020-01-01 05:00');
+        expect(result).toBe('2024-01-01 08:00');
+    });
+
+    test('Error: null → null', () => {
+        const runtime = new ScheduleRuntime(baseSchedule);
+        expect(runtime.nextWorkingDateTime(null)).toBeNull();
+    });
+});
+
+describe('filterBefore — не мутирует оригинал', () => {
+    const runtime = new ScheduleRuntime({
+        main: { start_tsm: 0, end_tsm: null, periods: [] },
+        overrides: []
+    });
+
+    test('возвращает клон записи, не меняет исходный intervals', () => {
+        // 2024-01-11 00:00 UTC = 28415520. pos = 15:00 = +900
+        const dateTsm = 28415520;
+        const pos = dateTsm + 900;
+        const original = {
+            date_tsm: dateTsm,
+            intervals: [[480, 720, {}], [780, 1020, {}]],
+            schedule: '08:00-12:00,13:00-17:00'
+        };
+
+        const filtered = runtime.filterBefore(original, pos);
+        // оригинал не изменился
+        expect(original.intervals.length).toBe(2);
+        expect(original.intervals[0]).toEqual([480, 720, {}]);
+        // клон отличается и содержит только неистёкшие интервалы
+        expect(filtered).not.toBe(original);
+        expect(filtered.intervals.length).toBe(1);
+        expect(filtered.intervals[0]).toEqual([780, 1020, {}]);
+    });
+
+    test('запись не на текущий день — возвращает оригинал без изменений', () => {
+        const entry = { date_tsm: 28415520, intervals: [[480, 1020, {}]] };
+        const pos = 28416960 + 600; // другой день
+        const result = runtime.filterBefore(entry, pos);
+        // всё ещё возвращается объект с интервалами, исходный не повреждён
+        expect(result.intervals.length).toBe(1);
+        expect(entry.intervals.length).toBe(1);
+    });
+});
+
+describe('findOverride — граничные и error-cases', () => {
+    test('Edge: точно на start override — включено', () => {
+        const runtime = new ScheduleRuntime({
+            main: { name: 'main', start_tsm: 0, end_tsm: null, periods: [] },
+            overrides: [{ name: 'O', start_tsm: 28416000, end_tsm: 28427000 }]
+        });
+        expect(runtime.findOverride(28416000).name).toBe('O');
+    });
+
+    test('Edge: точно на end override — НЕ включено, fallback в main', () => {
+        const runtime = new ScheduleRuntime({
+            main: { name: 'main', start_tsm: 0, end_tsm: null, periods: [] },
+            overrides: [{ name: 'O', start_tsm: 28416000, end_tsm: 28427000 }]
+        });
+        expect(runtime.findOverride(28427000).name).toBe('main');
+    });
+
+    test('Empty: пустой overrides → main', () => {
+        const runtime = new ScheduleRuntime({
+            main: { name: 'main', start_tsm: 0, end_tsm: null, periods: [] },
+            overrides: []
+        });
+        expect(runtime.findOverride(28416600).name).toBe('main');
+    });
+});
+
 describe('Дополнительные edge cases', () => {
     test('должен корректно обрабатывать расписание без periods', () => {
         const simpleSchedule = {

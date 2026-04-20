@@ -2,6 +2,7 @@
 
 namespace app\modules\schedules\models;
 
+use app\modules\schedules\compile\SchedulesCompiler;
 use app\modules\schedules\models\traits\SchedulesModelCalcFieldsTrait;
 use app\modules\schedules\models\SchedulesEntries;
 use app\types\TextType;
@@ -538,6 +539,69 @@ class Schedules extends \app\models\base\ArmsModel
 		if ($this->isOverride) $this->scenario=self::SCENARIO_OVERRIDE;
 		elseif ($this->isAcl) $this->scenario=self::SCENARIO_ACL;
 		return parent::beforeValidate();
+	}
+
+	/**
+	 * Флаг, помогающий избежать рекурсии при каскадной перекомпиляции.
+	 * @var bool
+	 */
+	private $compiling = false;
+
+	/**
+	 * Перекомпилировать расписание и каскадно — все зависимые (overrides + потомков по parent_id).
+	 *
+	 * Использует прямой UPDATE вместо save(), чтобы:
+	 * - не дёргать повторно afterSave (и тем самым снова запускать компиляцию);
+	 * - не требовать валидации;
+	 * - не задевать updated_at/updated_by, которые не относятся к компиляции.
+	 */
+	public function recompileCascade(array $visited = []): void
+	{
+		if (isset($visited[$this->id]) || $this->compiling) return;
+		$visited[$this->id] = true;
+
+		// Берём свежий экземпляр без кэшированных relations — иначе getOverrides()
+		// вернёт устаревшие данные после того как child был только что сохранён.
+		$fresh = static::findOne($this->id);
+		if ($fresh === null) return;
+
+		$fresh->compiling = true;
+		try {
+			$json = json_encode(SchedulesCompiler::compile($fresh), JSON_UNESCAPED_UNICODE);
+			if ($json === false) return;
+			if ($fresh->compiled_json !== $json) {
+				static::updateAll(['compiled_json' => $json], ['id' => $fresh->id]);
+				$fresh->compiled_json = $json;
+				if ($this !== $fresh) $this->compiled_json = $json;
+			}
+		} finally {
+			$fresh->compiling = false;
+		}
+
+		// Каскад: overrides этого расписания (они участвуют в compiled_json родителя через getOverrides())
+		foreach ($fresh->overrides as $override) {
+			$override->recompileCascade($visited);
+		}
+		// Каскад: дочерние расписания (parent_id = $this->id), не являющиеся overrides
+		foreach ($fresh->childrenNonOverrides as $child) {
+			$child->recompileCascade($visited);
+		}
+	}
+
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+		// Избегаем рекурсии при вызове из recompileCascade
+		if ($this->compiling) return;
+
+		// Если это override — перекомпилировать родителя, потому что compiled_json родителя
+		// содержит overrides в своей структуре.
+		if ($this->isOverride && $this->override_id) {
+			$parent = static::findOne($this->override_id);
+			if ($parent) $parent->recompileCascade();
+		} else {
+			$this->recompileCascade();
+		}
 	}
 	
 	public static function fetchNames(){

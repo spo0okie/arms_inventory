@@ -8,11 +8,11 @@ use RecursiveIteratorIterator;
 use RegexIterator;
 
 /**
- * Тесты качества кода проекта
- * Проверяет отсутствие BOM заголовков в PHP файлах
- * были проблемы при рендере выводе посторонних символов
+ * Проверяет отсутствие UTF-8 BOM заголовков в PHP-файлах проекта.
+ * BOM ломает HTTP-заголовки, сессии и вывод шаблонов, поэтому попадание
+ * такого файла в коммит считается регрессией.
  */
-class CodeQualityTest extends Unit
+class NoBomUnicodeTest extends Unit
 {
     /**
      * @var \UnitTester

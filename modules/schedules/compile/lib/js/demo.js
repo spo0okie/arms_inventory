@@ -268,9 +268,12 @@ class ScheduleRuntime {
                 pos = entry.start_tsm;
                 continue;
             } else {
-                // Это обычная запись (weekday/date) — возвращаем начало первого интервала
-                const dayStart = tsmToDateTsm(pos);
-                return tsmToStr(dayStart + entry.intervals[0][0]);
+                // Это обычная запись (weekday/date) — возвращаем начало первого интервала.
+                // date_tsm записи указывает на день, к которому она привязана (может отличаться от pos).
+                // Если pos уже внутри рабочего интервала — возвращаем pos, не откатываясь назад.
+                const dayStart = entry.date_tsm ?? tsmToDateTsm(pos);
+                const workStart = dayStart + entry.intervals[0][0];
+                return tsmToStr(Math.max(pos, workStart));
             }
         }
 		return null; // Вышли за границы расписания, не найдя рабочее время
@@ -483,10 +486,12 @@ class ScheduleRuntime {
     }
 
     /**
-     * nextPeriod — ближайший период непрерывной работы/простоя заканчивющийся не ранее tsm
-     * 
+     * nextPeriod — ближайший период непрерывной работы/простоя, ещё не закончившийся к tsm
+     *
+     * Условие `end_tsm > tsm` (строгое): период `[start, end)` с `end == tsm` уже закончился,
+     * поэтому он не должен рассматриваться как кандидат "следующего".
      * Периоды существуют только в main, overrides содержат только недельный график.
-     * 
+     *
      * @param {number} tsm - timestamp in minutes
      * @param {boolean|null} isWork - true=ищем work, false=ищем non-work, null=любой
      * @returns {Object|null} Период или null
@@ -494,8 +499,8 @@ class ScheduleRuntime {
     nextPeriod(tsm, isWork = null) {
         // Периоды существуют ТОЛЬКО в main
         for (const period of this.main.periods || []) {
-            // Проверяем пересечение времени с периодом и совпадение по типу (is_work)           
-            if (period.end_tsm >= tsm && (isWork === null || isWork === period.is_work)) {
+            // Проверяем что период ещё не закончился и совпадение по типу (is_work)
+            if (period.end_tsm > tsm && (isWork === null || isWork === period.is_work)) {
                 return period;
             }
         }

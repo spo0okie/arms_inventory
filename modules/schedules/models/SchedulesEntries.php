@@ -243,7 +243,14 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 			//если у нас "расписание на день, а не период"
 			//нужна дата расписания
 			['date',function ($attribute) {
-				if (isset(SchedulesEntries::$days[$this->date])) return;
+				//ключ дня недели или def
+				if (isset(SchedulesEntries::$days[$this->date])) {
+					//уникальность записи на день недели/def внутри одного расписания
+					if (is_object($entry=$this->master->getDayEntry($this->date)) && ($entry->id!=$this->id)) {
+						$this->addError($attribute, 'Расписание на этот день недели уже внесено');
+					}
+					return;
+				}
 				$dateValidator=new DateValidator(['format'=>'php:Y-m-d']);
 				if (!$dateValidator->validate($this->date, $error)) {
 					$this->addError($attribute, $error.': '.$this->date);
@@ -605,6 +612,34 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 			if (!$this->date_end) $this->date_end=null;
 			return true;
 		} else return false;
+	}
+
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+		$this->triggerRecompile();
+	}
+
+	public function afterDelete()
+	{
+		parent::afterDelete();
+		$this->triggerRecompile();
+	}
+
+	/**
+	 * Запустить каскадную перекомпиляцию родительского расписания.
+	 * Используется в afterSave / afterDelete.
+	 */
+	protected function triggerRecompile(): void
+	{
+		$master = $this->master;
+		if (!is_object($master)) return;
+		if ($master->isOverride && $master->override_id) {
+			$parent = Schedules::findOne($master->override_id);
+			if ($parent) $parent->recompileCascade();
+		} else {
+			$master->recompileCascade();
+		}
 	}
 	
 	/**

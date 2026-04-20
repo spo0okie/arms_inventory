@@ -3008,6 +3008,7 @@ CREATE TABLE `schedules` (
   `override_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `compiled_json` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-schedules_parent_id` (`parent_id`),
   KEY `idx-schedules-updated_at` (`updated_at`),
@@ -3021,7 +3022,7 @@ CREATE TABLE `schedules` (
 
 LOCK TABLES `schedules` WRITE;
 /*!40000 ALTER TABLE `schedules` DISABLE KEYS */;
-INSERT INTO `schedules` VALUES (1,'Круглосуточно 24/7','Для сервисов предоставляемых непрерывно',NULL,'','','',NULL,NULL,NULL),(2,'Рабочее время МСК','Рабочее время московского офиса',NULL,'','','',NULL,NULL,NULL),(3,'Рабочее время ЧЕЛ','Рабочее время челябинского офиса',NULL,'','','',NULL,NULL,NULL),(4,'Расписание техподдержки','График дежурства на первой линии',NULL,'','','',NULL,NULL,NULL),(5,'Override for #4','Безруков в отпуске',4,'','2023-09-19','',4,NULL,NULL),(6,'Удаленный доступ коллектива ХЗ к терминалам 1С',NULL,NULL,'',NULL,NULL,NULL,NULL,NULL),(8,'Удаленный доступ ИТ отдела к рабочим местам',NULL,NULL,'',NULL,NULL,NULL,'2024-03-18 15:22:27','admin'),(9,'Расписание veeam Backup GFS 7-3','',NULL,'','','',NULL,'2025-05-09 14:44:47',NULL);
+INSERT INTO `schedules` VALUES (1,'Круглосуточно 24/7','Для сервисов предоставляемых непрерывно',NULL,'','','',NULL,NULL,NULL,NULL),(2,'Рабочее время МСК','Рабочее время московского офиса',NULL,'','','',NULL,NULL,NULL,NULL),(3,'Рабочее время ЧЕЛ','Рабочее время челябинского офиса',NULL,'','','',NULL,NULL,NULL,NULL),(4,'Расписание техподдержки','График дежурства на первой линии',NULL,'','','',NULL,NULL,NULL,NULL),(5,'Override for #4','Безруков в отпуске',4,'','2023-09-19','',4,NULL,NULL,NULL),(6,'Удаленный доступ коллектива ХЗ к терминалам 1С',NULL,NULL,'',NULL,NULL,NULL,NULL,NULL,NULL),(8,'Удаленный доступ ИТ отдела к рабочим местам',NULL,NULL,'',NULL,NULL,NULL,'2024-03-18 15:22:27','admin',NULL),(9,'Расписание veeam Backup GFS 7-3','',NULL,'','','',NULL,'2025-05-09 14:44:47',NULL,NULL);
 /*!40000 ALTER TABLE `schedules` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4319,10 +4320,10 @@ UNLOCK TABLES;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` FUNCTION `getplacepath`(`place_id` INT) RETURNS text CHARSET utf8mb4 COLLATE utf8mb4_general_ci
     DETERMINISTIC
-BEGIN
-    DECLARE res TEXT CHARACTER SET utf8mb4;
-    CALL getplacepath(place_id, res);
-    RETURN res;
+BEGIN
+    DECLARE res TEXT CHARACTER SET utf8mb4;
+    CALL getplacepath(place_id, res);
+    RETURN res;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4341,10 +4342,10 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` FUNCTION `getplacetop`(`place_id` INT) RETURNS int
     DETERMINISTIC
-BEGIN
-    DECLARE res INT;
-    CALL getplacetop(place_id, res);
-    RETURN res;
+BEGIN
+    DECLARE res INT;
+    CALL getplacetop(place_id, res);
+    RETURN res;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4363,10 +4364,10 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` FUNCTION `getServiceSegment`(`itemId` INT) RETURNS int
     DETERMINISTIC
-BEGIN
-    DECLARE res INT;
-	CALL getServiceSegment(itemId, res);
-    RETURN res;
+BEGIN
+    DECLARE res INT;
+	CALL getServiceSegment(itemId, res);
+    RETURN res;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4386,19 +4387,19 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getplacepath`(IN `place_id` INT, OUT `path` TEXT CHARACTER SET utf8mb4)
     READS SQL DATA
     COMMENT 'Recursive path build'
-BEGIN
-    DECLARE placename VARCHAR(20) CHARACTER SET utf8mb4;
-    DECLARE temppath TEXT CHARACTER SET utf8mb4;
-    DECLARE tempparent INT;
-    SET max_sp_recursion_depth = 32;
-    SELECT short, parent_id FROM places WHERE id=place_id INTO placename, tempparent;
-    IF tempparent IS NULL
-    THEN
-        SET path = placename;
-    ELSE
-        CALL getplacepath(tempparent, temppath);
-        SET path = CONCAT(temppath, '/', placename);
-    END IF;
+BEGIN
+    DECLARE placename VARCHAR(20) CHARACTER SET utf8mb4;
+    DECLARE temppath TEXT CHARACTER SET utf8mb4;
+    DECLARE tempparent INT;
+    SET max_sp_recursion_depth = 32;
+    SELECT short, parent_id FROM places WHERE id=place_id INTO placename, tempparent;
+    IF tempparent IS NULL
+    THEN
+        SET path = placename;
+    ELSE
+        CALL getplacepath(tempparent, temppath);
+        SET path = CONCAT(temppath, '/', placename);
+    END IF;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4416,16 +4417,16 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getplacetop`(IN `place_id` INT, OUT `top` INT)
-BEGIN
-    DECLARE tempparent INT;
-    SET max_sp_recursion_depth = 32;
-    SELECT parent_id FROM places WHERE id=place_id INTO tempparent;
-    IF tempparent IS NULL
-    THEN
-        SET top = place_id;
-    ELSE
-        CALL getplacetop(tempparent, top);
-    END IF;
+BEGIN
+    DECLARE tempparent INT;
+    SET max_sp_recursion_depth = 32;
+    SELECT parent_id FROM places WHERE id=place_id INTO tempparent;
+    IF tempparent IS NULL
+    THEN
+        SET top = place_id;
+    ELSE
+        CALL getplacetop(tempparent, top);
+    END IF;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4445,13 +4446,13 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getServiceSegment`(IN `itemId` INT, OUT `resultValue` INT)
     READS SQL DATA
     COMMENT 'Recursive search of NOT NULL segment_id value'
-BEGIN
-  DECLARE parentId INT;
-  SET max_sp_recursion_depth = 32;
-  SELECT segment_id, parent_id FROM services WHERE id=itemId INTO resultValue,parentId;
-  IF (resultValue IS NULL) and (NOT parentId IS NULL) THEN
-    CALL getServiceSegment(parentId,resultValue);
-  END IF;
+BEGIN
+  DECLARE parentId INT;
+  SET max_sp_recursion_depth = 32;
+  SELECT segment_id, parent_id FROM services WHERE id=itemId INTO resultValue,parentId;
+  IF (resultValue IS NULL) and (NOT parentId IS NULL) THEN
+    CALL getServiceSegment(parentId,resultValue);
+  END IF;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
