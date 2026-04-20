@@ -4,6 +4,7 @@ namespace app\modules\api\controllers;
 
 use app\models\Comps;
 use app\models\CompsSearch;
+use PHPUnit\Framework\Assert;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
@@ -134,7 +135,42 @@ class CompsController extends BaseRestController
 		if (is_object($search)&&$search->id) {
 			return $this->runAction('update',['id'=>$search->id]);
 		}
-	
+
 		return $this->runAction('create');
+	}
+
+	/**
+	 * Переопределение testSearch для REST: помимо базового сценария поиска
+	 * по атрибуту сгенерированной модели проверяет, что по известному имени
+	 * из demo-дампа ('msk-esxi1') возвращается запись с name='MSK-ESXi1'.
+	 * Раньше это покрывалось отдельным CompsCest::searchByName.
+	 */
+	public function testSearch(): array
+	{
+		$scenarios = parent::testSearch();
+		$scenarios[] = [
+			'name' => 'search by demo name',
+			'method' => 'GET',
+			'route' => '{controller}/search',
+			'GET' => ['name' => 'msk-esxi1'],
+			'response' => 200,
+			'assert' => static function (\ApiTester $I) {
+				$I->seeResponseIsJson();
+				$I->seeResponseContainsJson(['name' => 'MSK-ESXi1']);
+			},
+		];
+		return $scenarios;
+	}
+
+	/**
+	 * TODO provider для actionPush — пока skip до проработки контракта upsert в тестах.
+	 */
+	public function testPush(): array
+	{
+		return [[
+			'name' => 'push upsert',
+			'skip' => true,
+			'reason' => 'TODO: для actionPush нужен отдельный провайдер (см. tests/rest-todo.md)',
+		]];
 	}
 }

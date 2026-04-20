@@ -1,33 +1,65 @@
-# Задачи тестирования базового REST API test-suite
+# REST acceptance — TODO-трекер
 
-## Общие требования
-- Все методы всех контроллеров не должны возвращать ошибку 500 (Internal Server Error)
-- CRUD операции (create, read, update, delete) должны выполнять свое действие корректно
-- Методы search должны возвращать один объект по заданным критериям
-- Методы filter должны возвращать отфильтрованный список объектов
+Контракт и запуск — см. [tests/rest.md](../rest.md).
+Раннер — `tests/rest/RestAccessCest.php` (генеративный, аналог `PageAccessCest`).
 
-## Стандартный тест для контроллеров с полным CRUD + search + filter
+## Пробелы в покрытии (нет testXxx() провайдера → auto-skip)
 
-Для каждого контроллера из папки `modules/api/controllers`, кроме BaseRestController выполнить типовой набор тестов
-(исключая из проверки методы перечисленные в disabledActions() контроллера)
+- `CompsController::actionPush` — upsert по имени, нужен отдельный провайдер.
+- `LoginJournalController::actionPush` — нужен отдельный провайдер.
+- `NetIpsController::actionFirstUnused` — GET с обязательным `text_addr`.
+- `PhonesController::actionSearchByNum` / `actionSearchByUser` — поиск по
+  номеру/пользователю.
+- `ScansController::actionUpload` / `actionDownload` — multipart upload и бинарное
+  скачивание (нужен отдельный helper).
+- `SchedulesController::actionStatus` / `actionMetaStatus` / `actionNextMeta` /
+  `actionDaysSchedules` — зависят от seed'а графиков.
+- `TechsController::actionSearchByMac` / `actionSearchByUser`.
+- `UsersController::actionWhoami` — требует авторизацию.
 
-### Тестирование CRUD операций
-- Создать новый объект (create)
-- Прочитать созданный объект по ID (view)
-- Обновить объект (update)
-- Удалить объект (delete)
+## Известные провалы (500) — реальные баги production-кода
 
-### Тестирование search и filter
-- Выполнить поиск одного объекта по заданным критериям
-- Выполнить фильтрацию списка объектов по заданным критериям
+Все три failure ниже — не проблемы теста, а подсвеченные генеративным раннером
+дефекты. После фикса соответствующие сценарии пройдут автоматически.
 
-### Данные для Create Update
-Чтобы протестировать Create и Update операции, необходимо подготовить корректные данные для создания и обновления объектов.
-Их можно получить из уже существующих моделей: для каждого контроллера должно быть минимум 2 модели:
-- Запоминаем данные модели 1 и модели 2
-- Удаляем модель 1
-- Обновляем модель 2 с данными модели 1
-- Создаем новую модель с данными модели 2
+### `contracts/search` и `contracts/filter` → 500 `Column 'name' in where clause is ambiguous`
 
-Таким образом используя уже имеющиеся данные мы можем проверить корректность Create и Update операций без необходимости
-сопровождать отдельно тестовые данные.
+`Contracts::find()` джойнит `contracts_in_techs → techs`, `partners_in_contracts →
+partners`, `users_in_contracts → users`, у всех есть столбец `name`. Базовый
+`BaseRestController::searchFilter()` генерирует `WHERE name=?` без префикса
+таблицы, MySQL кидает 1052.
+
+**Fix:** либо в `searchFilter()` использовать
+`{tableName}.{attr}` (`getAttributeFilter()` уже умеет), либо в
+`ContractsController` переопределить `$searchFields` с явными префиксами.
+
+### `lic-items/create` → 500 `Column 'created_at' cannot be null`
+
+`LicItems` не заполняет `created_at` в `beforeSave()`/`behaviors()`, а в БД колонка
+NOT NULL. REST CreateAction полагается на модель. В UI работает потому, что
+форма подсовывает `created_at` через скрытое поле.
+
+**Fix:** добавить в `LicItems` `TimestampBehavior` с `createdAtAttribute`, либо
+`beforeSave()` с `if ($insert) $this->created_at = date(...);`.
+
+## Домены: коллизия URL-правил
+
+`config/web.php` содержит `'api/domains/<id:[\.\w-]+>' => 'api/domains/view'`,
+которое матчится раньше общих `api/<controller>/search|filter` и
+`OPTIONS api/<controller>/<action>`. В итоге для Domains три action'а недоступны:
+- `domains/search` → view с id='search' → 404;
+- `domains/filter` → view с id='filter' → 404;
+- `OPTIONS domains/index` → view с id='index' → 405 MethodNotAllowed.
+
+Пока `DomainsController::disabledTests()` скрывает search/filter/preflight.
+
+**Fix:** либо переставить `search|filter` правила перед fqdn-правилом Domains,
+либо ограничить regex id для Domains так, чтобы он не матчил зарезервированные
+`search|filter` (например, `[\.\w-]+(?<!search)(?<!filter)`).
+
+## Легенда
+
+- Расширяя покрытие, добавляйте провайдеры testXxx() в соответствующий
+  контроллер (см. tests/rest.md).
+- Skip-сценарий помечайте `'skip' => true` + `'reason' => 'TODO: ...'`,
+  чтобы было видно в отчёте.

@@ -437,8 +437,14 @@ class ArmsModel extends ActiveRecord
 	public function beforeSave($insert)
 	{
 		if (!parent::beforeSave($insert)) return false;
-		
-		
+
+		// created_at заполняется только на INSERT и только если не задан явно.
+		// Требуется для REST-создания моделей (POST /api/...), где клиент
+		// обычно не присылает created_at, а в БД колонка NOT NULL.
+		if ($insert && $this->hasProperty('created_at') && empty($this->created_at)) {
+			$this->created_at=gmdate('Y-m-d H:i:s');
+		}
+
 		if ($this->hasProperty('updated_at') && !$this->doNotChangeAuthor) {
 			$this->updated_at=gmdate('Y-m-d H:i:s');
 		}

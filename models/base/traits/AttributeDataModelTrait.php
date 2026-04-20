@@ -833,8 +833,14 @@ trait AttributeDataModelTrait
 	}
 	
 	/**
-	 * Возвращает имя поля для фильтрации в запросах (если задано в метаданных)
-	 * иначе считаем что атрибут и есть имя поля в SQL таблице
+	 * Возвращает имя поля для фильтрации в запросах.
+	 * Порядок:
+	 * 1. Если в метаданных атрибута указан `filter` — он идёт как есть (считается,
+	 *    что автор уже квалифицировал колонку корректно, в т.ч. с префиксом).
+	 * 2. Иначе берём сам `$attribute`.
+	 * 3. Если результат — голое имя колонки и оно есть в таблице этой модели,
+	 *    префиксуем `tableName()`. Это страхует от `Column '...' ambiguous`
+	 *    в запросах с JOIN и эквивалентно в запросах без JOIN.
 	 * @param string $attribute
 	 * @return string
 	 * @throws UnknownPropertyException
@@ -842,10 +848,13 @@ trait AttributeDataModelTrait
 	public function getAttributeFilter(string $attribute): string
 	{
 		$item=$this->getAttributeData($attribute);
-		if (is_array($item) && isset($item['filter'])) {
-			return $item['filter'];
+		$filter=(is_array($item) && isset($item['filter']))?$item['filter']:$attribute;
+
+		if (!str_contains($filter,'.') && $this->hasAttribute($filter)) {
+			$filter=static::tableName().'.'.$filter;
 		}
-		return $attribute;
+
+		return $filter;
 	}
 
 	/**

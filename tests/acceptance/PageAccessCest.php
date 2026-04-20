@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;

@@ -10,6 +10,7 @@ namespace app\modules\api\controllers;
 
 
 use app\controllers\ArmsBaseController;
+use app\generation\ModelFactory;
 use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
 use app\models\Users;
@@ -122,12 +123,12 @@ class BaseRestController extends ActiveController
 	 */
 	public function searchFilter(): ActiveQuery
 	{
-		
+
 		/** @var \app\models\base\ArmsModel $class */
 		$class=$this->modelClass;
 		$model=new $class();
 		$search=$class::find();
-		
+
 		$filtersCount=0; //счетчик примененных фильтров
 		foreach (static::$searchFields as $param=>$attr) {
 			if (is_numeric($param)) {$param=$attr;}		//на случай если объявили ['id','name'] без маппинга
@@ -137,7 +138,7 @@ class BaseRestController extends ActiveController
 
 				//поисковый параметр задан, поэтому нам нужно подтянуть джойны и отфильтровать по нужному полю
 				$search->joinWith($model->getAttributeJoins($attr));
-				
+
 				if (in_array($param,static::$searchFieldsLike))		//если этот параметр предназначен для неточной фильтрации
 					$search->andWhere(['like',$model->getAttributeFilter($attr),$value]);	//ищем через like
 				else												//иначе
@@ -463,5 +464,216 @@ class BaseRestController extends ActiveController
 	{
 		$this->checkDisabledActions('delete');
 		$this->actions()['delete']->run($id);
+	}
+
+	/**
+	 * Кеш тестовых данных (моделей/пейлоадов) по имени класса модели.
+	 * Используется {@see getTestData()} и провайдерами testXxx() для REST acceptance.
+	 *
+	 * @var array<string, array<string, \app\models\base\ArmsModel>>
+	 */
+	protected static array $restTestDataCache = [];
+
+	/**
+	 * Готовит набор моделей и пейлоадов для REST acceptance-сценариев
+	 * (см. tests/rest/RestAccessCest.php). Каждый ключ предназначен под отдельный сценарий,
+	 * чтобы тесты не мешали друг другу (view/update/delete работают на разных id).
+	 *
+	 *  - `view`        — сохранённая модель; её id используется для GET /controller/{id};
+	 *  - `update`      — сохранённая модель; её id используется для PUT /controller/{id};
+	 *  - `delete`      — сохранённая модель; её id используется для DELETE /controller/{id};
+	 *  - `create-data` — сгенерированная, НЕ сохранённая модель; её атрибуты идут в тело POST /controller;
+	 *  - `update-data` — сгенерированная, НЕ сохранённая модель; её атрибуты идут в тело PUT /controller/{id}.
+	 *
+	 * Кешируется по modelClass, чтобы многократные вызовы в рамках одного suite
+	 * не создавали дубли.
+	 *
+	 * @return array<string, ArmsModel>
+	 */
+	public function getTestData(): array
+	{
+		$class = $this->modelClass;
+		if (empty(self::$restTestDataCache[$class])) {
+			self::$restTestDataCache[$class] = [
+				'view'        => ModelFactory::create($class, []),
+				'update'      => ModelFactory::create($class, []),
+				'delete'      => ModelFactory::create($class, []),
+				'create-data' => ModelFactory::create($class, ['save' => false]),
+				'update-data' => ModelFactory::create($class, ['save' => false]),
+			];
+		}
+		return self::$restTestDataCache[$class];
+	}
+
+	/**
+	 * Возвращает список отключённых testXxx() — по умолчанию совпадает с disabledActions().
+	 * Переопределяется в наследнике, если action нужно оставить рабочим, но пропустить тест.
+	 *
+	 * @return array
+	 */
+	public function disabledTests(): array
+	{
+		return $this->disabledActions();
+	}
+
+	/**
+	 * Возвращает пейлоад скрытого skip-сценария (единственный элемент массива).
+	 */
+	protected static function skipScenario(string $name, string $reason): array
+	{
+		return [['name' => $name, 'skip' => true, 'reason' => $reason]];
+	}
+
+	/**
+	 * Безопасно извлекает первое значение поля $searchFields из готовой модели —
+	 * используется провайдерами search/filter для формирования query-параметра.
+	 */
+	protected function pickSearchParam(ArmsModel $model): ?array
+	{
+		foreach (static::$searchFields as $param => $attr) {
+			if (is_numeric($param)) $param = $attr;
+			// Атрибут поиска должен быть реальным столбцом таблицы. Если это только
+			// виртуальный getter/alias — search/filter в actionSearch/actionFilter
+			// упадут SQL-ошибкой (Unknown column), что для acceptance нерелевантно.
+			if (!$model->hasAttribute($attr)) continue;
+			$value = $model->$attr;
+			if ($value === null || $value === '' || is_array($value)) continue;
+			return [$param => (string)$value];
+		}
+		return null;
+	}
+
+	/**
+	 * Базовый testIndex: GET /{controller} → 200.
+	 * Предварительно создаёт набор данных, чтобы список не был пустым.
+	 */
+	public function testIndex(): array
+	{
+		$this->getTestData();
+		return [[
+			'name' => 'list',
+			'method' => 'GET',
+			'route' => '{controller}',
+			'response' => 200,
+		]];
+	}
+
+	/**
+	 * Базовый testView: GET /{controller}/{id} → 200 на существующей модели.
+	 */
+	public function testView(): array
+	{
+		$data = $this->getTestData();
+		return [[
+			'name' => 'view existing',
+			'method' => 'GET',
+			'route' => '{controller}/' . $data['view']->id,
+			'response' => 200,
+		]];
+	}
+
+	/**
+	 * Базовый testCreate: POST /{controller} с валидным пейлоадом → 201.
+	 * Полезные PATCH-расширения (альтернативные пейлоады, 422 на невалид) — в наследниках.
+	 */
+	public function testCreate(): array
+	{
+		$data = $this->getTestData();
+		return [[
+			'name' => 'create valid',
+			'method' => 'POST',
+			'route' => '{controller}',
+			'body' => $data['create-data']->attributes,
+			'response' => [200, 201],
+		]];
+	}
+
+	/**
+	 * Базовый testUpdate: PUT /{controller}/{id} с валидным пейлоадом → 200.
+	 */
+	public function testUpdate(): array
+	{
+		$data = $this->getTestData();
+		return [[
+			'name' => 'update existing',
+			'method' => 'PUT',
+			'route' => '{controller}/' . $data['update']->id,
+			'body' => $data['update-data']->attributes,
+			'response' => [200, 204],
+		]];
+	}
+
+	/**
+	 * Базовый testDelete: DELETE /{controller}/{id} → 204.
+	 */
+	public function testDelete(): array
+	{
+		$data = $this->getTestData();
+		return [[
+			'name' => 'delete existing',
+			'method' => 'DELETE',
+			'route' => '{controller}/' . $data['delete']->id,
+			'response' => [200, 204],
+		]];
+	}
+
+	/**
+	 * Базовый testSearch: GET /{controller}/search?field=value.
+	 * Если у контроллера нет $searchFields — пропускаем.
+	 * Допустимые коды: 200 (нашли), 404 (не нашли) — оба валидны для смоук-проверки action.
+	 */
+	public function testSearch(): array
+	{
+		if (empty(static::$searchFields)) {
+			return static::skipScenario('no search fields', 'static::$searchFields пуст');
+		}
+		$data = $this->getTestData();
+		$param = $this->pickSearchParam($data['view']);
+		if ($param === null) {
+			return static::skipScenario('no usable search value', 'атрибуты searchFields пусты у тестовой модели');
+		}
+		return [[
+			'name' => 'search by ' . array_key_first($param),
+			'method' => 'GET',
+			'route' => '{controller}/search',
+			'GET' => $param,
+			'response' => [200, 404],
+		]];
+	}
+
+	/**
+	 * Базовый testFilter: GET /{controller}/filter?field=value.
+	 * 400 допускается для контроллеров, где filter требует обязательных полей.
+	 */
+	public function testFilter(): array
+	{
+		if (empty(static::$searchFields)) {
+			return static::skipScenario('no search fields', 'static::$searchFields пуст');
+		}
+		$data = $this->getTestData();
+		$param = $this->pickSearchParam($data['view']);
+		if ($param === null) {
+			return static::skipScenario('no usable search value', 'атрибуты searchFields пусты у тестовой модели');
+		}
+		return [[
+			'name' => 'filter by ' . array_key_first($param),
+			'method' => 'GET',
+			'route' => '{controller}/filter',
+			'GET' => $param,
+			'response' => [200, 400],
+		]];
+	}
+
+	/**
+	 * Базовый testPreflight: OPTIONS /{controller}/index → 200 (CORS preflight).
+	 */
+	public function testPreflight(): array
+	{
+		return [[
+			'name' => 'cors preflight',
+			'method' => 'OPTIONS',
+			'route' => '{controller}/index',
+			'response' => 200,
+		]];
 	}
 }
