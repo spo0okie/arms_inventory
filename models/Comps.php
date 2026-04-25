@@ -172,13 +172,14 @@ class Comps extends ArmsModel
     public function rules()
     {
         return [
-            [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids','maintenance_jobs_ids','admins_ids'], 'each', 'rule'=>['integer']],
-            [['name', 'os','domain_id'], 'required'],
-			['name', 'filter', 'filter' => function ($value) {
-				return Domains::validateHostname($value,$this);
-			}],
+			//тут принципиален порядок правил валидации, т.к. validateHostname должен формировать domain_id из name
+			//поэтому порядок правил именно такой: name=>required, validateHostname, domain_id=>required
+            [['name', 'os'], 'required'],
+			['name', 'filter', 'filter' => function ($value) {return Domains::validateHostname($value,$this);}],
+            [['domain_id'], 'required'],
 			[['sandbox_id'],'default','value'=>null],
             [['domain_id', 'arm_id', 'ignore_hw', 'user_id','archived','sandbox_id'], 'integer'],
+            [['soft_ids','netIps_ids','services_ids','maintenance_reqs_ids','maintenance_jobs_ids','admins_ids'], 'each', 'rule'=>['integer']],
             [['raw_hw', 'raw_soft','exclude_hw','raw_version'], 'string'],
             [['updated_at', 'comment','external_links'], 'safe'],
 			[['raw_version'], 'string', 'max' => 32],

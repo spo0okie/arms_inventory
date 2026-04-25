@@ -593,29 +593,29 @@ class Users extends ArmsModel implements IdentityInterface
         return $authKey===$this->authKey;
     }
 	
-	public function setPassword($password)
+	public function setPassword(?string $password): void
 	{
-		return $this->password=password_hash($password,PASSWORD_BCRYPT);
+		$this->password = $password ? password_hash($password, PASSWORD_BCRYPT) : null;
 	}
 
     /**
-     * Validates password
+     * Validates password.
+     * If the user has a local password hash — verifies against it.
+     * Otherwise falls back to LDAP.
      *
      * @param string $password password to validate
      * @return bool if password provided is valid for current user
      */
-    public function validatePassword(string $password)
+    public function validatePassword(string $password): bool
     {
-    	//local backend
-    	if (Yii::$app->params['localAuth']??false) {//Local DB Backend
-			return password_verify($password,$this->password);
+		if (!empty($this->password)) {
+			return password_verify($password, $this->password);
 		}
-    	
-    	//LDAP backend
+
 		if (isset(Yii::$app->ldap)) {
 			return Yii::$app->ldap->auth()->attempt($this->Login, $password);
 		}
-		
+
 		return false;
     }
 

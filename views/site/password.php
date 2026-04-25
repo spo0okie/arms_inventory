@@ -24,6 +24,7 @@ $this->title = 'Смена пароля';
 					</div>
 					<div class="card-body">
 						<h5 class=" text-center m-4">Введите и повторите новый пароль для входа в систему</h5>
+						<p class="text-muted text-center small">Оставьте поля пустыми, чтобы удалить локальный пароль и вернуться к LDAP-аутентификации.</p>
 						<?php $form = ActiveForm::begin([
 							'layout' => 'horizontal',
 						]); ?>

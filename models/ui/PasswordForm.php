@@ -26,9 +26,10 @@ class PasswordForm extends Model
     public function rules()
     {
         return [
-        	['user_id','integer'],
-            [['passwordRepeat', 'password'], 'required'],
-			['password','string', 'min'=>6, 'max'=>64, 'tooShort'=>'Password is too short (minimum is 6 characters)'],
+        	['user_id', 'integer'],
+            [['password', 'passwordRepeat'], 'string', 'max' => 64],
+            ['password', 'string', 'min' => 6, 'tooShort' => 'Password is too short (minimum is 6 characters)',
+                'when' => fn($model) => !empty($model->password)],
             ['passwordRepeat', 'validatePassword'],
         ];
     }
@@ -63,9 +64,9 @@ class PasswordForm extends Model
     public function update()
     {
     	if (!$this->validate()) return false;
-    	$user=$this->getUser();
-		$user->setPassword($this->password);
-	    
+    	$user = $this->getUser();
+		$user->setPassword($this->password ?: null);
+
         return $user->save();
     }
 
