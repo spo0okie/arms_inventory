@@ -99,7 +99,7 @@ class Aces extends ArmsModel
     {
         return [
             [['acls_id'], 'integer'],
-			[['acls_id'], 'required'],
+			[['acls_id'], 'required'], 
 			[['comps_ids','users_ids','access_types_ids','netIps_ids','services_ids','networks_ids'], 'each', 'rule'=>['integer']],
 			[['ipParams'], 'each', 'rule'=>['string']],
             [['ips', 'notepad','name'], 'string'],

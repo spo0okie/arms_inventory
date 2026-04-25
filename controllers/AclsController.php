@@ -115,7 +115,10 @@ class AclsController extends ArmsBaseController
 		
 		if ($model->load(Yii::$app->request->post())){
 			if($model->validate()) {
+				//успех ACL, отсутствует ACE
+				$model->save();
 				if ($ace->load(Yii::$app->request->post())){
+					$ace->acls_id=$model->id;
 					if($ace->validate()) {
 						//успех по обеим моделям
 						$model->save();
@@ -130,8 +133,6 @@ class AclsController extends ArmsBaseController
 						return $this->defaultRender('create', ['model' => $model,'ace'=>$ace]);
 					}
 				}
-				//успех ACL, отсутствует ACE
-				$model->save();
 				return $this->defaultReturn($this->routeOnUpdate($model), [$model]);
 			}
 		}
