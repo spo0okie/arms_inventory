@@ -76,12 +76,13 @@ modules/schedules/
 ├── tests/
 │   ├── readme.md                       — карта unit-тестов модуля
 │   └── unit/                           — внутренние unit-тесты модуля
-├── views/
-│   ├── schedules/                      — шаблоны для SchedulesController
-│   ├── schedules-entries/              — шаблоны для SchedulesEntriesController
-│   └── scheduled-access/               — шаблоны для ScheduledAccessController
-└── migrations/                         — миграции БД (история создания таблиц + добавление compiled_json)
+└── views/
+    ├── schedules/                      — шаблоны для SchedulesController
+    ├── schedules-entries/              — шаблоны для SchedulesEntriesController
+    └── scheduled-access/               — шаблоны для ScheduledAccessController
 ```
+
+> Миграции модуля лежат в общем `/migrations/` корня проекта (см. соглашение в разделе «Структура базы данных» ниже).
 
 ## Ключевые классы
 
@@ -103,6 +104,8 @@ modules/schedules/
 см файл `docs/database.md` для подробного описания структуры таблиц, полей, связей и индексов.
 
 В таблице `schedules` помимо традиционных полей хранится `compiled_json TEXT NULL` — плоский снимок расписания (см. ниже раздел «Компиляция расписаний»).
+
+> **Соглашение по миграциям.** Yii MigrateController в этом проекте настроен на namespace `app\migrations` и каталог `@app/migrations`. Все миграции модуля кладутся в `/migrations/` корня проекта (с namespace `app\migrations`) — `php yii migrate` подхватывает их автоматически. См. [config/console.php](../../config/console.php).
 
 ---
 

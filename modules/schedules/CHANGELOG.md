@@ -13,7 +13,7 @@
 - Namespace изменён: `app\models\Schedules*` → `app\modules\schedules\models\Schedules*`
 - Namespace хелпера изменён: `app\helpers\TimeIntervalsHelper` → `app\modules\schedules\helpers\TimeIntervalsHelper`
 - Контроллеры перенесены: `app\controllers\Schedules*` → `app\modules\schedules\controllers\Schedules*`
-- Миграции перенесены в `modules/schedules/migrations/`
+- Миграции остаются в общем каталоге `/migrations/` корня проекта (namespace `app\migrations`); ранее существовавшая дубль-копия в `modules/schedules/migrations/` удалена как источник путаницы.
 
 ---
 
