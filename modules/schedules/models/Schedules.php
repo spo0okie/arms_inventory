@@ -320,6 +320,14 @@ class Schedules extends \app\models\base\ArmsModel
 				'typeClass' => DateType::class,
 			],
 			'supportServices'=>['Поддерж. сервисы','indexHint'=>'Сервисы поддерживаемые по этому расписанию',],
+			'status' => [
+				'Активно сейчас',
+				'indexHint' => 'Попадает ли текущий момент в рабочее время расписания (расчёт на сервере)',
+			],
+			'statusJs' => [
+				'Активно (live)',
+				'indexHint' => 'Активность расписания, пересчитываемая в браузере каждую минуту по compiled_json',
+			],
 			'workTimeDescription' => [
 				'График по дням',
 			],
@@ -567,7 +575,16 @@ class Schedules extends \app\models\base\ArmsModel
 
 		$fresh->compiling = true;
 		try {
-			$json = json_encode(SchedulesCompiler::compile($fresh), JSON_UNESCAPED_UNICODE);
+			// Сбой компиляции не должен ронять afterSave/save — это нарушит редактирование
+			// расписания. Логируем и продолжаем — потребители compiled_json должны выдержать
+			// устаревшее или отсутствующее значение.
+			try {
+				$compiled = SchedulesCompiler::compile($fresh);
+				$json = json_encode($compiled, JSON_UNESCAPED_UNICODE);
+			} catch (\Throwable $e) {
+				\Yii::error("Schedules#{$fresh->id} compile failed: " . $e->getMessage(), __METHOD__);
+				return;
+			}
 			if ($json === false) return;
 			if ($fresh->compiled_json !== $json) {
 				static::updateAll(['compiled_json' => $json], ['id' => $fresh->id]);

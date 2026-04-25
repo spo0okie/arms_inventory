@@ -34,17 +34,42 @@ class SchedulesCompiler
 		usort($overrides, static fn($a, $b) => ($a['start_tsm'] ?? PHP_INT_MIN) <=> ($b['start_tsm'] ?? PHP_INT_MIN));
 
 		return [
-			'tz'          => 'UTC',
-			'tz_shift_tsm' => 0,
-			'compiled'    => gmdate('Y-m-d\TH:i:s\Z'),
-			'main'        => $main,
-			'overrides'   => $overrides,
+			'tz'           => 'UTC',
+			'tz_shift_tsm' => self::tzShiftMinutes(),
+			'compiled'     => gmdate('Y-m-d\TH:i:s\Z'),
+			'main'         => $main,
+			'overrides'    => $overrides,
 		];
+	}
+
+	/**
+	 * Сдвиг часового пояса расписаний в минутах от UTC.
+	 * Берётся из `Yii::$app->params['schedulesTZShift']` (в секундах), безопасно падает в 0.
+	 *
+	 * Смысл: все строковые даты расписаний (start/end/date/date_end) и времена
+	 * (HH:MM в графике) трактуются как время **этого** часового пояса. В compiled_json
+	 * они записаны как «локальное время, интерпретированное как UTC» — это позволяет
+	 * рантайму работать только с арифметикой минут без привязки к часовым поясам.
+	 * Клиентский рантайм использует `tz_shift_tsm`, чтобы перевести реальный UTC now
+	 * в ту же систему координат.
+	 */
+	public static function tzShiftMinutes(): int
+	{
+		try {
+			$seconds = (int)(\Yii::$app->params['schedulesTZShift'] ?? 0);
+		} catch (\Throwable $e) {
+			$seconds = 0;
+		}
+		return intdiv($seconds, 60);
 	}
 
 	/**
 	 * Построить структуру entity — main-расписание или override.
 	 * Periods включаются только в main (по плану).
+	 *
+	 * Для main-расписания собирается цепочка предков через `parent_id` (без overrides): запись
+	 * текущего расписания переопределяет запись предка по тому же ключу (weekday/date/def).
+	 * Override-расписания не наследуют ничего (работают изолированно).
 	 */
 	private static function buildEntity(Schedules $schedule, bool $includePeriods): array
 	{
@@ -53,28 +78,40 @@ class SchedulesCompiler
 		$dates = [];
 		$periods = [];
 
-		foreach ($schedule->entries as $entry) {
-			if ($entry->is_period) {
-				if ($includePeriods) {
-					$periods[] = self::buildPeriod($entry);
+		// Наследование по parent_id действует только для "чистого" main (не override).
+		// При компиляции override, даже если он передан как $schedule, он не наследует
+		// записи родителя — override изолирован.
+		$sources = ($includePeriods && !$schedule->isOverride)
+			? self::ancestorChain($schedule) // от self к root — для main
+			: [$schedule];                   // override — только сам
+
+		foreach ($sources as $source) {
+			foreach ($source->entries as $entry) {
+				if ($entry->is_period) {
+					if ($includePeriods) {
+						$periods[] = self::buildPeriod($entry);
+					}
+					continue;
 				}
-				continue;
+				$key = (string)$entry->date;
+				if ($key === 'def') {
+					// Дочерний `def` переопределяет родительский
+					if ($default === null) $default = self::buildEntry($entry);
+					continue;
+				}
+				if (in_array($key, self::WEEKDAY_KEYS, true)) {
+					if (!isset($weekdays[$key])) $weekdays[$key] = self::buildEntry($entry);
+					continue;
+				}
+				// Конкретная дата — ключ в минутах от epoch (начало дня)
+				$dateTsm = self::strToDateTsm($key);
+				if ($dateTsm === null) continue;
+				$dKey = (string)$dateTsm;
+				if (isset($dates[$dKey])) continue;
+				$entryData = self::buildEntry($entry);
+				$entryData['date_tsm'] = $dateTsm;
+				$dates[$dKey] = $entryData;
 			}
-			$key = (string)$entry->date;
-			if ($key === 'def') {
-				$default = self::buildEntry($entry);
-				continue;
-			}
-			if (in_array($key, self::WEEKDAY_KEYS, true)) {
-				$weekdays[$key] = self::buildEntry($entry);
-				continue;
-			}
-			// Конкретная дата — ключ в минутах от epoch (начало дня)
-			$dateTsm = self::strToDateTsm($key);
-			if ($dateTsm === null) continue;
-			$entryData = self::buildEntry($entry);
-			$entryData['date_tsm'] = $dateTsm;
-			$dates[(string)$dateTsm] = $entryData;
 		}
 
 		// Сортировки
@@ -98,6 +135,28 @@ class SchedulesCompiler
 			$result['periods'] = $periods;
 		}
 		return $result;
+	}
+
+	/**
+	 * Собрать цепочку расписаний от `$schedule` к корню по `parent_id`.
+	 * Overrides из цепочки исключаются — они не участвуют в наследовании main.
+	 * Защита от циклов: ограничение по глубине 100.
+	 *
+	 * @return Schedules[]
+	 */
+	private static function ancestorChain(Schedules $schedule): array
+	{
+		$chain = [];
+		$seen = [];
+		$current = $schedule;
+		$limit = 100;
+		while ($current !== null && $limit-- > 0) {
+			if (isset($seen[$current->id])) break;
+			$seen[$current->id] = true;
+			if (!$current->isOverride) $chain[] = $current;
+			$current = $current->parent ?? null;
+		}
+		return $chain;
 	}
 
 	/**

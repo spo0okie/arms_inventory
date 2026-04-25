@@ -42,4 +42,4 @@ web/scans/*
 /test*.bat
 /cloud*.cmd
 !yii.bat
-.claude/scheduled_tasks.lock
+.claude/*

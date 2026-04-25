@@ -48,7 +48,7 @@ modules/schedules/
 ├── controllers/
 │   ├── SchedulesController.php         — CRUD расписаний (providingMode: providing/support/job/working)
 │   ├── SchedulesEntriesController.php  — CRUD записей расписания (дни/периоды)
-│   └── ScheduledAccessController.php  — CRUD расписаний доступа (providingMode: acl)
+│   └── ScheduledAccessController.php   — CRUD расписаний доступа (providingMode: acl)
 ├── models/
 │   ├── Schedules.php                   — основная модель расписания
 │   ├── SchedulesEntries.php            — модель записи расписания (день/период)
@@ -62,11 +62,25 @@ modules/schedules/
 │       └── ScheduleEntriesModelCalcFieldsTrait.php  — вычисляемые поля SchedulesEntries
 ├── helpers/
 │   └── TimeIntervalsHelper.php         — математика временных интервалов (слияние, вычитание, пересечение)
+├── compile/                            — подсистема компиляции расписаний в JSON
+│   ├── compile.md                      — спецификация compiled_json и алгоритмов
+│   ├── TODO.md                         — этапы реализации (трекер)
+│   ├── SchedulesCompiler.php           — PHP-компилятор (Schedules → compiled_json)
+│   ├── CompiledScheduleHelper.php      — серверный рантайм для compiled_json
+│   └── lib/js/
+│       ├── demo.js                     — JS-рантайм ScheduleRuntime + утилиты
+│       ├── demo.test.js                — Jest-тесты JS-рантайма
+│       └── schedule-runtime-status.js  — auto-render статуса в grid'е
+├── assets/
+│   └── ScheduleRuntimeAsset.php        — Yii2 AssetBundle для подключения JS-рантайма
+├── tests/
+│   ├── readme.md                       — карта unit-тестов модуля
+│   └── unit/                           — внутренние unit-тесты модуля
 ├── views/
 │   ├── schedules/                      — шаблоны для SchedulesController
 │   ├── schedules-entries/              — шаблоны для SchedulesEntriesController
-│   └── scheduled-access/              — шаблоны для ScheduledAccessController
-└── migrations/                         — 9 миграций БД (история создания таблиц)
+│   └── scheduled-access/               — шаблоны для ScheduledAccessController
+└── migrations/                         — миграции БД (история создания таблиц + добавление compiled_json)
 ```
 
 ## Ключевые классы
@@ -78,12 +92,73 @@ modules/schedules/
 | [`SchedulesModelCalcFieldsTrait`](models/traits/SchedulesModelCalcFieldsTrait.php) | Вычисляемые поля для Schedules |
 | [`ScheduleEntriesModelCalcFieldsTrait`](models/traits/ScheduleEntriesModelCalcFieldsTrait.php) | Вычисляемые поля для SchedulesEntries |
 | [`TimeIntervalsHelper`](helpers/TimeIntervalsHelper.php) | Математика интервалов времени |
+| [`SchedulesCompiler`](compile/SchedulesCompiler.php) | Сериализация расписания (с предками + overrides + periods) в плоский `compiled_json` |
+| [`CompiledScheduleHelper`](compile/CompiledScheduleHelper.php) | PHP-рантайм поверх `compiled_json`: `isWorkDay`, `isWorkTime`, `getMeta`, `nextWorkingDateTime` |
+| [`ScheduleRuntimeAsset`](assets/ScheduleRuntimeAsset.php) | AssetBundle: подключает `demo.js` + `schedule-runtime-status.js` для клиентского рантайма |
 
 ---
 
 ## Структура базы данных
 
 см файл `docs/database.md` для подробного описания структуры таблиц, полей, связей и индексов.
+
+В таблице `schedules` помимо традиционных полей хранится `compiled_json TEXT NULL` — плоский снимок расписания (см. ниже раздел «Компиляция расписаний»).
+
+---
+
+## Компиляция расписаний
+
+Чтобы вместо рекурсивных вычислений по `parent_id`/`override_id`/periods отдавать данные одним JSON-объектом, модуль ведёт **скомпилированную** копию расписания в поле `schedules.compiled_json`. Эта копия пересобирается автоматически:
+
+- `Schedules::afterSave()` → перекомпиляция текущего расписания + каскад по `parent_id`/`override_id`;
+- `SchedulesEntries::afterSave()` / `afterDelete()` → перекомпиляция родительского `Schedules`.
+
+### Жизненный цикл
+
+```text
+Schedules.save() ──► afterSave ──► SchedulesCompiler::compile() ──► compiled_json
+                                  │
+                                  └─► recompileCascade(): дети по parent_id + overrides по override_id
+```
+
+Полная спецификация формата JSON, инвариантов и алгоритмов рантайма — в [`compile/compile.md`](compile/compile.md).
+
+### Серверный рантайм
+
+[`CompiledScheduleHelper`](compile/CompiledScheduleHelper.php) принимает массив или JSON-строку из `compiled_json` и предоставляет публичный API:
+
+```php
+$rt = new CompiledScheduleHelper($schedule->compiled_json);
+$rt->isWorkDay('2024-01-15');             // bool
+$rt->isWorkTime('2024-01-15 10:30');      // bool
+$rt->getMeta('2024-01-15 10:30');         // array|null — meta активного интервала
+$rt->nextWorkingDateTime('2024-01-15 18:00'); // 'YYYY-MM-DD HH:MM' или null
+$rt->nextWorkingMeta('2024-01-15 18:00');     // array|null
+```
+
+### Клиентский рантайм
+
+JS-рантайм `ScheduleRuntime` (`compile/lib/js/demo.js`) — точный порт серверного. Подключается через AssetBundle:
+
+```php
+use app\modules\schedules\assets\ScheduleRuntimeAsset;
+ScheduleRuntimeAsset::register($this);
+```
+
+После регистрации в `window` доступны `ScheduleRuntime`, `strToTsm`, `tsmToStr`, `tsmToDateTsm`, `dayOfWeek`, `inBounds`, `intervalsContains`, `intervalsSubtract`, `intervalsAdd`. В тот же бандл включён `schedule-runtime-status.js`, который автоматически инициализируется на любой странице с элементами:
+
+```html
+<span class="schedule-runtime-status" data-target="#payload-id"></span>
+<script type="application/json" id="payload-id">{ ...compiled_json... }</script>
+```
+
+и каждую минуту перерисовывает их в `●`/`○` через `ScheduleRuntime.isWorkTime()`.
+
+Используется, в частности, в `views/schedules/columns.php` для колонок «Активно сейчас» (серверный расчёт через `CompiledScheduleHelper`) и «Активно (live)» (клиентский, обновляется без перезагрузки).
+
+### Часовой пояс
+
+Все `_tsm` (timestamp-in-minutes) в `compiled_json` хранятся как «локальное время, интерпретированное как UTC». Поле `tz_shift_tsm` — смещение часового пояса, в котором составлены расписания, относительно UTC (в минутах). Для текущего ARMS значение берётся из `Yii::$app->params['schedulesTZShift']` (секунды). Клиентский рантайм использует `tz_shift_tsm`, чтобы сместить реальный UTC браузера в ту же систему координат и получить тот же результат, что и сервер.
 
 ---
 
@@ -282,36 +357,33 @@ flowchart TD
 
 | Проблема | Место | Рекомендация |
 | -------- | ----- | ------------ |
-| **Кэширование расписаний** | `getDateSchedule()`, `getDayEntryRecursive()` | Результаты не кэшируются между вызовами. Для часто запрашиваемых дат (сегодня, завтра) добавить кэш в `$attrsCache` |
+| **Старые методы расчёта** | `getDateSchedule()`, `getDayEntryRecursive()` | Постепенно мигрировать вызовы на `CompiledScheduleHelper`, который читает плоский `compiled_json` без рекурсии и запросов в БД |
 | **N+1 запросов** | При выводе списка сервисов с расписаниями | Использовать `with(['providingSchedule', 'supportSchedule'])` в запросах |
-| **Сложные вычисления интервалов** | `TimeIntervalsHelper::intervalMerge()` | Интервалы на больших периодах (годы) могут создавать тысячи записей |
+| **Сложные вычисления интервалов** | `TimeIntervalsHelper::intervalMerge()` | Интервалы на больших периодах (годы) могут создавать тысячи записей. `CompiledScheduleHelper` предлагает альтернативу — фиксированный набор weekday/date/period в JSON |
 
 ### Архитектурные улучшения
 
 | Проблема | Рекомендация |
 | -------- | ------------ |
 | **Жёсткая привязка к дням недели** | Дополнительные шаблоны расписаний (еженедельно, ежемесячно и пр.) |
-| **Нет временных зон** | `Yii::$app->params['schedulesTZShift']` - костыль. Добавить атрибут `timezone` в таблицу `schedules` и обеспечить поддержку |
+| **Глобальный TZ** | Часовой пояс глобален (`Yii::$app->params['schedulesTZShift']`). Для мультирегиональности добавить колонку `tz` (или `tz_shift_tsm`) в таблицу `schedules` и компилировать с её учётом — поле `tz_shift_tsm` в `compiled_json` уже зарезервировано |
+| **Lua-рантайм для Asterisk** | Запланирован Этапом 6 в [`compile/TODO.md`](compile/TODO.md): порт `isWorkDay`/`isWorkTime`/`getMeta`/`nextWorkingDateTime` на Lua для интеграции с dialplan |
 
 ### UX улучшения
 
-Текущий интерфейс скорее первая заработавшая редакция чем отполированный результат. Надо конкретно посмотреть на все со стороны и возможно упростить и сделать все это удобнее. Добавить JS для оперативного отображения изменений.
+Текущий интерфейс скорее первая заработавшая редакция чем отполированный результат. Надо конкретно посмотреть на все со стороны и возможно упростить и сделать все это удобнее. Колонка «Активно (live)» уже добавлена — на её основе можно расширять интерактивную визуализацию календаря.
 
 ### Код
 
 | Проблема | Место | Рекомендация |
 | -------- | ----- | ------------ |
 | **Дублирование кода** | `ScheduleEntriesModelCalcFieldsTrait::getMergedSchedule()` и `getWorkSchedule()` | Выделить общую логику |
-| **TODO в коде** | [`SchedulesModelCalcFieldsTrait.php:777`](models/traits/SchedulesModelCalcFieldsTrait.php:777) | `nextWorkingMeta()` - некорректная логика с учётом периодов |
-| **Неиспользуемый метод** | [`SchedulesModelCalcFieldsTrait.php:733`](models/traits/SchedulesModelCalcFieldsTrait.php:733) | `getAclStatus()` - пустой метод |
+| **TODO в коде** | [`SchedulesModelCalcFieldsTrait.php:777`](models/traits/SchedulesModelCalcFieldsTrait.php:777) | `nextWorkingMeta()` — некорректная логика с учётом периодов; в `CompiledScheduleHelper::nextWorkingMeta()` уже сделано правильно, можно постепенно мигрировать вызовы |
+| **Неиспользуемый метод** | [`SchedulesModelCalcFieldsTrait.php:733`](models/traits/SchedulesModelCalcFieldsTrait.php:733) | `getAclStatus()` — пустой метод |
 
 ### Тесты
 
-| Проблема | Рекомендация |
-| -------- | ------------ |
-| **Нет unit-тестов** | Добавить тесты на `TimeIntervalsHelper` |
-| **Нет интеграционных тестов** | Добавить тесты на формирование расписания с периодами |
-| **Нет тестов на граничные случаи** | 22:00-06:00, високосные годы, смена часовых поясов |
+Карта тестов и пробелов — в [`tests/readme.md`](tests/readme.md).
 
 ---
 

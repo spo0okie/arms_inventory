@@ -222,6 +222,65 @@ class SchedulesCompilerTest extends Unit
 		$this->assertArrayNotHasKey('periods', $ov);
 	}
 
+	// ------------------------------------------------------------------ parent_id inheritance
+
+	public function testCompileInheritsDefaultFromParent(): void
+	{
+		$parent = $this->createSchedule(['name' => 'Base']);
+		$this->addEntry($parent, ['date' => 'def', 'schedule' => '08:00-17:00']);
+
+		$child = $this->createSchedule(['name' => 'Child', 'parent_id' => $parent->id]);
+
+		$compiled = SchedulesCompiler::compile($child);
+		$this->assertNotNull($compiled['main']['default'], 'Default должен наследоваться от parent');
+		$this->assertSame('08:00-17:00', $compiled['main']['default']['schedule']);
+	}
+
+	public function testCompileChildWeekdayOverridesParent(): void
+	{
+		$parent = $this->createSchedule(['name' => 'Base']);
+		$this->addEntry($parent, ['date' => '1', 'schedule' => '08:00-17:00']);
+
+		$child = $this->createSchedule(['name' => 'Child', 'parent_id' => $parent->id]);
+		$this->addEntry($child, ['date' => '1', 'schedule' => '09:00-18:00']);
+
+		$compiled = SchedulesCompiler::compile($child);
+		$weekdays = $compiled['main']['weekdays'];
+		$this->assertSame('09:00-18:00', $weekdays['1']['schedule'], 'Запись ребёнка должна перекрывать родителя');
+	}
+
+	public function testCompileInheritsWeekdaysWhenChildHasNone(): void
+	{
+		$parent = $this->createSchedule(['name' => 'Base']);
+		$this->addEntry($parent, ['date' => '1', 'schedule' => '08:00-17:00']);
+		$this->addEntry($parent, ['date' => '6', 'schedule' => '-']);
+
+		$child = $this->createSchedule(['name' => 'Child', 'parent_id' => $parent->id]);
+
+		$compiled = SchedulesCompiler::compile($child);
+		$weekdays = $compiled['main']['weekdays'];
+		$this->assertArrayHasKey('1', $weekdays);
+		$this->assertArrayHasKey('6', $weekdays);
+	}
+
+	public function testOverrideDoesNotInheritFromParent(): void
+	{
+		$parent = $this->createSchedule(['name' => 'Root']);
+		$this->addEntry($parent, ['date' => 'def', 'schedule' => '08:00-17:00']);
+
+		$override = $this->createSchedule([
+			'name'        => 'Override',
+			'parent_id'   => $parent->id,
+			'override_id' => $parent->id,
+			'start_date'  => '2024-06-01',
+			'end_date'    => '2024-08-31',
+		]);
+
+		// Компилируем сам override как main — он не должен унаследовать def от parent
+		$compiled = SchedulesCompiler::compile($override);
+		$this->assertNull($compiled['main']['default'], 'Override не наследует default');
+	}
+
 	public function testCompiledJsonIsSerializable(): void
 	{
 		$schedule = $this->createSchedule(['name' => 'Serialize', 'start_date' => '2024-01-01']);

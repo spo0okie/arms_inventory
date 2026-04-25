@@ -35,7 +35,7 @@
   - Сортировки: `periods`/`overrides` по `start_tsm`, `dates` и `weekdays` по ключу.
   - Унификация структуры main и override (periods только в main).
 - [x] Unit-тесты в `tests/unit/modules/schedules/SchedulesCompilerTest.php` (15 тестов).
-- [ ] **Осталось:** сборка цепочки предков `parent_id` до корня в плоский main (сейчас компилируется расписание как есть, без наследования от parent). Требуется отдельное решение (планом не зафиксировано поведение при одинаковых weekday у ребёнка и parent).
+- [x] Сборка цепочки предков `parent_id` до корня в плоский main: запись ребёнка перекрывает запись предка по тому же ключу (weekday/date/def). Override-расписания не наследуют. Защита от циклов `parent_id` на 100 уровней. Тесты: 4 новых.
 
 ## Этап 3. Жизненный цикл компиляции
 
@@ -51,14 +51,15 @@
 - [x] Правка `nextPeriod` применена (на Этапе 0).
 - [x] В `nextWorkingDateTime` исправлено использование `dayStart` — теперь берётся `entry.date_tsm`, а не `tsmToDateTsm(pos)` (иначе для пятницы после работы возвращалось сегодняшнее утро вместо понедельника).
 - [x] `nextWorkingDateTime` теперь корректно возвращает `pos` при попадании в середину рабочего интервала (было: возвращал начало интервала, даже если оно раньше pos).
-- [ ] Ревизия `filterBefore` на предмет мутаций: возвращать клон (сейчас делает — подтвердить тестом).
-- [ ] Упаковать `demo.js` как AssetBundle Yii и подключить к нужным view (календари/графики).
+- [x] Ревизия `filterBefore` на предмет мутаций: тест `filterBefore — не мутирует оригинал` в `demo.test.js`.
+- [x] AssetBundle: `modules/schedules/assets/ScheduleRuntimeAsset.php` с sourcePath на `compile/lib/js/demo.js` — подключается через `ScheduleRuntimeAsset::register($this)`.
+- [ ] Подключить AssetBundle к view (календари/графики) — будет сделано вместе с использованием.
 
 ## Этап 5. PHP `CompiledScheduleHelper` (серверный рантайм)
 
-- [ ] Порт 27 функций из `ScheduleRuntime` в PHP-класс `CompiledScheduleHelper`.
-- [ ] Общая таблица test cases (те же данные, что у JS) в PHPUnit.
-- [ ] Интеграция в контроллеры/helper'ы вместо прямой работы с `SchedulesEntries`.
+- [x] Порт публичного API + всех внутренних/утилитных функций из `ScheduleRuntime` в `modules/schedules/compile/CompiledScheduleHelper.php`. Принимает либо массив, либо JSON-строку.
+- [x] Общая таблица test cases в PHPUnit: `tests/unit/modules/schedules/CompiledScheduleHelperTest.php` — 20 тестов, включая: isWorkDay/isWorkTime/getMeta/nextWorkingDateTime/nextWorkingMeta + findOverride/nextOverride/findPeriod/nextPeriod (строгая семантика `end > tsm`) + intervalsSubtract/intervalsAdd + getDatePeriods граничные случаи.
+- [ ] Интеграция в контроллеры/helper'ы вместо прямой работы с `SchedulesEntries` — отдельная задача, требует точечного рефакторинга и будет выполнена по мере необходимости.
 
 ## Этап 6. Lua-рантайм для Asterisk
 
