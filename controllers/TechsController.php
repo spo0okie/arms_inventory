@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\helpers\ArrayHelper;
 use app\models\HwListItem;
 use app\models\Manufacturers;
+use app\models\ManufacturersDict;
 use app\models\ui\RackUnitForm;
 use Yii;
 use app\models\Techs;
@@ -79,10 +80,18 @@ class TechsController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'view'=>['ttip-hw','inv-num','docs'],
+			'view'=>['ttip-hw','inv-num','docs','arms'],
 			'edit'=>['uploads','unlink','updhw','rmhw','edithw','port-list','rack-unit','rack-unit-validate'],
 		]);
 	}
+
+	   public function actionArms()
+    {
+        $this->setQueryParam(['TechsSearch'=>['is_computer'=>true]]);
+        ManufacturersDict::initCache();
+        return parent::actionIndex();
+    }
+
 	
 	/**
 	 * Отображает всплывающую подсказку с аппаратными компонентами (HW-список) оборудования.

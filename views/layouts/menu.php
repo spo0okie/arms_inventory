@@ -135,7 +135,7 @@ NavBar::begin([
 			],
 			['label' => 'Компьютеры',
 				'items' => [
-					['label' => 'АРМы', 'url' => ['/arms/index']],
+					['label' => 'АРМы', 'url' => ['/techs/arms']],
 					['label' => 'ОС', 'url' => ['/comps/index']],
 					['label' => 'Домены', 'url' => ['/domains/index']],
 					['label' => Sandboxes::$titles, 'url' => ['/sandboxes/index']],
