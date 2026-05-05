@@ -92,7 +92,57 @@ class TechsController extends ArmsBaseController
         return parent::actionIndex();
     }
 
-	
+	/**
+	 * Acceptance test data for actionArms.
+	 *
+	 * Что делает actionArms:
+	 *  - принудительно выставляет в query-параметрах фильтр TechsSearch[is_computer]=true,
+	 *    после чего вызывает родительский actionIndex();
+	 *  - TechsSearch::search() джойнит таблицу `tech_types` и применяет
+	 *    `andFilterWhere(['tech_types.is_computer' => $this->is_computer])`,
+	 *    т.е. список ограничивается железом, чей тип помечен как «компьютер»
+	 *    ({@see app\models\TechTypes::$is_computer}).
+	 *
+	 * Что проверяет тест:
+	 *  - страница `techs/arms` отдаёт 200 при наличии в БД хотя бы пары записей,
+	 *    подпадающих под фильтр (tech_types.is_computer=1). Это гарантирует, что
+	 *    подготовленный JOIN/WHERE и рендер index-вью не падают на непустом датасете.
+	 *
+	 * Подготовка фикстуры:
+	 *  - берём (или создаём) TechType с is_computer=1;
+	 *  - создаём TechModel, привязанную к этому типу;
+	 *  - создаём пару Techs со ссылкой на эту модель — гарантированно пара
+	 *    записей с признаком «компьютер» в выборке.
+	 *
+	 * @return array
+	 */
+	public function testArms(): array
+	{
+		$type = \app\models\TechTypes::findOne(['is_computer' => 1])
+			?: \app\generation\ModelFactory::create(
+				\app\models\TechTypes::class,
+				['overrides' => ['is_computer' => 1]]
+			);
+		$techModel = \app\generation\ModelFactory::create(
+			\app\models\TechModels::class,
+			['overrides' => ['type_id' => $type->id]]
+		);
+		\app\generation\ModelFactory::create(
+			\app\models\Techs::class,
+			['overrides' => ['model_id' => $techModel->id]]
+		);
+		\app\generation\ModelFactory::create(
+			\app\models\Techs::class,
+			['overrides' => ['model_id' => $techModel->id]]
+		);
+
+		return [[
+			'name'     => 'arms list',
+			'response' => 200,
+		]];
+	}
+
+
 	/**
 	 * Отображает всплывающую подсказку с аппаратными компонентами (HW-список) оборудования.
 	 * Рендерит partial-view «ttip-hw» для использования в интерфейсе как tooltip.
