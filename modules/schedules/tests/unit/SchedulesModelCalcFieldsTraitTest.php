@@ -139,100 +139,11 @@ class SchedulesModelCalcFieldsTraitTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // endsBeforeDate
+    // Тесты endsBeforeDate / startsAfterDate / matchDate перенесены в
+    // tests/unit/modules/schedules/SchedulesBoundaryMethodsTest.php — эти
+    // методы теперь живут в самой модели Schedules, а не в трейте
+    // (см. README модуля раздел «Соглашение по моделям и трейтам»).
     // -------------------------------------------------------------------------
-
-    public function testEndsBeforeDateFalseWhenNoEndDate(): void
-    {
-        $stub = $this->makeStub(['end_date' => null]);
-        $this->assertFalse($stub->endsBeforeDate('2024-06-01'));
-    }
-
-    public function testEndsBeforeDateTrueWhenEndBeforeDate(): void
-    {
-        $stub = $this->makeStub(['end_date' => '2024-01-01']);
-        $this->assertTrue($stub->endsBeforeDate('2024-06-01'));
-    }
-
-    public function testEndsBeforeDateFalseWhenEndAfterDate(): void
-    {
-        $stub = $this->makeStub(['end_date' => '2024-12-31']);
-        $this->assertFalse($stub->endsBeforeDate('2024-06-01'));
-    }
-
-    /**
-     * Принимает unixtime вместо строки.
-     */
-    public function testEndsBeforeDateAcceptsUnixtime(): void
-    {
-        $stub = $this->makeStub(['end_date' => '2024-01-01']);
-        $this->assertTrue($stub->endsBeforeDate(strtotime('2024-06-01')));
-    }
-
-    // -------------------------------------------------------------------------
-    // startsAfterDate
-    // -------------------------------------------------------------------------
-
-    public function testStartsAfterDateFalseWhenNoStartDate(): void
-    {
-        $stub = $this->makeStub(['start_date' => null]);
-        $this->assertFalse($stub->startsAfterDate('2024-06-01'));
-    }
-
-    public function testStartsAfterDateTrueWhenStartAfterDate(): void
-    {
-        $stub = $this->makeStub(['start_date' => '2024-12-01']);
-        $this->assertTrue($stub->startsAfterDate('2024-06-01'));
-    }
-
-    public function testStartsAfterDateFalseWhenStartBeforeDate(): void
-    {
-        $stub = $this->makeStub(['start_date' => '2024-01-01']);
-        $this->assertFalse($stub->startsAfterDate('2024-06-01'));
-    }
-
-    // -------------------------------------------------------------------------
-    // matchDate
-    // -------------------------------------------------------------------------
-
-    /**
-     * Расписание без границ перекрывает любую дату.
-     */
-    public function testMatchDateTrueWhenNoBoundaries(): void
-    {
-        $stub = $this->makeStub(['start_date' => null, 'end_date' => null]);
-        $this->assertTrue($stub->matchDate('2024-06-01'));
-    }
-
-    /**
-     * Дата до начала расписания — не перекрывает.
-     */
-    public function testMatchDateFalseWhenBeforeStart(): void
-    {
-        $stub = $this->makeStub(['start_date' => '2024-07-01', 'end_date' => null]);
-        $this->assertFalse($stub->matchDate('2024-06-01'));
-    }
-
-    /**
-     * Дата после конца расписания — не перекрывает.
-     */
-    public function testMatchDateFalseWhenAfterEnd(): void
-    {
-        $stub = $this->makeStub(['start_date' => null, 'end_date' => '2024-05-01']);
-        $this->assertFalse($stub->matchDate('2024-06-01'));
-    }
-
-    /**
-     * Дата внутри границ — перекрывает.
-     */
-    public function testMatchDateTrueWhenInsideBoundaries(): void
-    {
-        $stub = $this->makeStub([
-            'start_date' => '2024-01-01',
-            'end_date'   => '2024-12-31',
-        ]);
-        $this->assertTrue($stub->matchDate('2024-06-01'));
-    }
 
     // -------------------------------------------------------------------------
     // getParentsChain

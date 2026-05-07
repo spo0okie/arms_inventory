@@ -231,8 +231,22 @@ class SchedulesCompiler
 	{
 		if (!preg_match('/\{[^}]*\}/', $token, $m)) return [];
 		$raw = $m[0];
+		// 1. Валидный JSON: {"user":"pupkin"} → массив.
 		$decoded = json_decode($raw, true);
-		return is_array($decoded) ? $decoded : [];
+		if (is_array($decoded)) return $decoded;
+		// 2. Legacy-псевдо-JSON: {user:pupkin,duty:Иванов} — без кавычек.
+		// Парсим вручную: разбиваем по запятым, делим по двоеточию.
+		$inner = trim(substr($raw, 1, -1));
+		if ($inner === '') return [];
+		$result = [];
+		foreach (explode(',', $inner) as $pair) {
+			$pair = trim($pair);
+			if ($pair === '') continue;
+			$parts = explode(':', $pair, 2);
+			if (count($parts) !== 2) continue;
+			$result[trim($parts[0])] = trim($parts[1]);
+		}
+		return $result;
 	}
 
 	/**

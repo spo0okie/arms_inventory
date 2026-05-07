@@ -2,7 +2,10 @@
 
 namespace app\modules\schedules\models;
 
+use app\helpers\DateTimeHelper;
+use app\modules\schedules\compile\CompiledScheduleHelper;
 use app\modules\schedules\compile\SchedulesCompiler;
+use app\modules\schedules\helpers\TimeIntervalsHelper;
 use app\modules\schedules\models\traits\SchedulesModelCalcFieldsTrait;
 use app\modules\schedules\models\SchedulesEntries;
 use app\types\TextType;
@@ -642,5 +645,275 @@ class Schedules extends \app\models\base\ArmsModel
 			$this->overrides,
 			$this->children,
 		];
+	}
+
+	// =========================================================================
+	// Параметрические методы расчёта расписания и работы со временем.
+	// Не являются calc-полями (имеют обязательные параметры или служебные helper'ы),
+	// поэтому живут в самой модели, а не в SchedulesModelCalcFieldsTrait.
+	// SchedulesHistory эти методы НЕ получает — для архивных данных они не имеют смысла.
+	// =========================================================================
+
+	/**
+	 * Расписание заканчивается до даты.
+	 * @param int|string $date
+	 * @return bool
+	 */
+	public function endsBeforeDate($date) {
+		if (!is_int($date)) $date = strtotime($date);
+		return ($this->endUnixTime && $this->endUnixTime < $date);
+	}
+
+	/**
+	 * Расписание начинается после даты.
+	 * @param int|string $date
+	 * @return bool
+	 */
+	public function startsAfterDate($date) {
+		if (!is_int($date)) $date = strtotime($date);
+		return ($this->startUnixTime && $this->startUnixTime > $date);
+	}
+
+	/**
+	 * Расписание перекрывает дату.
+	 * @param int|string $date
+	 * @return bool
+	 */
+	public function matchDate($date) {
+		if (!$date) return false;
+		if (is_string($date)) $date = strtotime($date);
+		if ($this->startsAfterDate($date)) return false;
+		if ($this->endsBeforeDate($date)) return false;
+		return true;
+	}
+
+	/**
+	 * Находит расписание недели, действующее на дату (с учётом overrides).
+	 * @param string|int $date
+	 * @return Schedules|null
+	 */
+	public function getWeekSchedule($date) {
+		foreach ($this->overrides as $override)
+			if ($override->matchDate($date)) return $override;
+		if ($this->matchDate($date)) return $this;
+		return null;
+	}
+
+	/**
+	 * Слово из словаря с учётом providingMode.
+	 * @param string $word
+	 * @return string|array
+	 */
+	public function getDictionary($word) {
+		if (!isset(self::$dictionary[$word])) return $word;
+		return self::$dictionary[$word][$this->getProvidingMode()] ?? self::$dictionary[$word];
+	}
+
+	/**
+	 * Запись на конкретный день недели/дату/'def' в этом расписании (без подъёма по предкам).
+	 * @param string $day
+	 * @return SchedulesEntries|null
+	 */
+	public function getDayEntry($day) {
+		if (!isset($this->attrsCache['daysEntries'])) {
+			$this->attrsCache['daysEntries'] = ['def'=>null,'1'=>null,'2'=>null,'3'=>null,'4'=>null,'5'=>null,'6'=>null,'7'=>null];
+			foreach ($this->entries as $entry)
+				if (!$entry->is_period)
+					$this->attrsCache['daysEntries'][$entry->date] = $entry;
+		}
+		return $this->attrsCache['daysEntries'][$day] ?? null;
+	}
+
+	/**
+	 * Запись на день, поднимаясь по родителям и учитывая overrides.
+	 * @param string $day день недели/'def'
+	 * @param string|null $date если задано — учитывается перекрытие активное на эту дату
+	 * @return SchedulesEntries|null
+	 */
+	public function getDayEntryRecursive($day, $date)
+	{
+		// override ничего не наследует
+		if ($this->isOverride) return $this->getDayEntry($day);
+
+		$period = is_null($date) ? $this : $this->getWeekSchedule($date);
+		if (!is_null($period) && !is_null($daySchedule = $period->getDayEntry($day))) {
+			return $daySchedule;
+		}
+		return is_object($this->parent) ? $this->parent->getDayEntryRecursive($day, $date) : null;
+	}
+
+	/**
+	 * Запись на день недели с fallback на 'def'.
+	 * @param string $weekday
+	 * @param string $date
+	 * @return SchedulesEntries|null
+	 */
+	public function getWeekdayEntryRecursive($weekday, $date)
+	{
+		if (is_null($daySchedule = $this->getDayEntryRecursive($weekday, $date))) {
+			if (is_null($daySchedule = $this->getDayEntryRecursive('def', $date))) return null;
+		}
+		$daySchedule = clone $daySchedule;
+		$daySchedule->requestedWeekDay = $weekday;
+		$daySchedule->requestedDate = $date;
+		return $daySchedule;
+	}
+
+	/**
+	 * Запись на конкретную дату с учётом всей иерархии и overrides (без периодов).
+	 * @param string $date
+	 * @return SchedulesEntries|null
+	 */
+	public function getDateEntryRecursive($date)
+	{
+		if (!is_null($daySchedule = $this->getDayEntryRecursive($date, null))) return $daySchedule;
+		$words = explode('-', $date);
+		if (count($words) < 3) return null;
+		$unixDate = strtotime($date);
+		if (
+			($this->startUnixTime && $unixDate < $this->startUnixTime)
+			||
+			($this->endUnixTime && $unixDate > $this->endUnixTime)
+		) return null;
+		$weekday = date('N', mktime(0, 0, 0, $words[1], $words[2], $words[0]));
+		return $this->getWeekdayEntryRecursive($weekday, $date);
+	}
+
+	/**
+	 * Полное расписание на дату (legacy путь): объединяет график с периодами.
+	 * @param string $date
+	 * @return array
+	 */
+	public function getDateSchedule($date)
+	{
+		$sources = [];
+		$dateScheduleEntry = $this->getDateEntryRecursive($date);
+		if (!is_object($dateScheduleEntry)) {
+			$dateScheduleEntry = new SchedulesEntries();
+			$dateScheduleEntry->load(['is_period'=>0,'schedule'=>'-','date'=>'def'], '');
+		} else {
+			$dateScheduleEntry = clone $dateScheduleEntry;
+		}
+		$dateScheduleEntry->previousDateEntry = $this->getDateEntryRecursive(DateTimeHelper::previousDay($date));
+		$periods = $this->findPeriods(strtotime($date.' 00:00:00'), strtotime($date.' 23:59:59'));
+		if (is_object($dateScheduleEntry->master)) $sources['master'] = $dateScheduleEntry->master;
+		if (count($periods)) $sources['periods'] = $periods;
+
+		$positive = $dateScheduleEntry->getIntervals($date);
+		$posPeriods = [];
+		$negative = [];
+		$negPeriods = [];
+		foreach ($periods as $period) {
+			if (!is_object($period)) continue;
+			if ($period->is_work) {
+				$positive = array_merge($positive, $period->getIntervals($date));
+				$posPeriods[] = $period;
+			} else {
+				$negative = array_merge($negative, $period->getIntervals($date));
+				$negPeriods[] = $period;
+			}
+		}
+		$positive = TimeIntervalsHelper::intervalMerge($positive);
+		if (count($negative)) {
+			$negative = TimeIntervalsHelper::intervalMerge($negative);
+			$positive = TimeIntervalsHelper::intervalsSubtraction($positive, $negative);
+		}
+		TimeIntervalsHelper::intervalsSort($positive);
+		$arSchedule = [];
+		foreach ($positive as $interval) $arSchedule[] = SchedulesEntries::unixIntervalToSchedule($interval);
+		$strSchedule = count($arSchedule) ? implode(',', $arSchedule) : '-';
+		$dateScheduleEntry->schedule = $strSchedule;
+		return [
+			'schedule'   => $strSchedule,
+			'day'        => $dateScheduleEntry,
+			'posPeriods' => $posPeriods,
+			'negPeriods' => $negPeriods,
+			'sources'    => $sources,
+		];
+	}
+
+	/**
+	 * Попадание дата/время в рабочий интервал.
+	 * Возвращает int 0|1, правая граница интервала ВКЛЮЧЕНА (legacy-семантика).
+	 * Реализован поверх CompiledScheduleHelper.
+	 * @param string $date
+	 * @param string $time
+	 * @return int
+	 */
+	public function isWorkTime($date, $time)
+	{
+		$rt = $this->getCompiledRuntime();
+		if ($rt === null) return 0;
+		$dt = $date.' '.$time;
+		if ($rt->isWorkTime($dt)) return 1;
+		// Compiled-рантайм исключает правую границу. Legacy её включает —
+		// проверим точное попадание на end отдельно.
+		$tsm = CompiledScheduleHelper::strToTsm($dt);
+		if ($tsm === null) return 0;
+		$intervals = $rt->getDateIntervals($tsm);
+		$minutesFromDay = $tsm - CompiledScheduleHelper::tsmToDateTsm($tsm);
+		foreach ($intervals as $interval) {
+			if ($interval[1] === $minutesFromDay) return 1;
+		}
+		return 0;
+	}
+
+	/**
+	 * Метаданные активного интервала.
+	 * Возвращает '{}' если время не рабочее или meta пустая, иначе JSON-строка.
+	 * @param string $date
+	 * @param string $time
+	 * @return string
+	 */
+	public function metaAtTime($date, $time)
+	{
+		$rt = $this->getCompiledRuntime();
+		if ($rt === null) return '{}';
+		$meta = $rt->getMeta($date.' '.$time);
+		if (empty($meta)) return '{}';
+		return json_encode($meta, JSON_UNESCAPED_UNICODE);
+	}
+
+	/**
+	 * Метаданные текущего или ближайшего следующего рабочего интервала.
+	 * @param string $date
+	 * @param string $time
+	 * @return string '{}' либо JSON-строка
+	 */
+	public function nextWorkingMeta($date, $time)
+	{
+		$rt = $this->getCompiledRuntime();
+		if ($rt === null) return '{}';
+		$meta = $rt->nextWorkingMeta($date.' '.$time);
+		if (empty($meta)) return '{}';
+		return json_encode($meta, JSON_UNESCAPED_UNICODE);
+	}
+
+	/**
+	 * CompiledScheduleHelper поверх свежего compiled_json (не трейтное calc-поле).
+	 * При наличии id всегда читает свежий compiled_json из БД (in-memory может
+	 * устареть после каскадной перекомпиляции от дочерних SchedulesEntries).
+	 */
+	private function getCompiledRuntime(): ?CompiledScheduleHelper
+	{
+		$compiled = null;
+		if (!empty($this->id)) {
+			$compiled = static::find()->select('compiled_json')->where(['id' => $this->id])->scalar();
+			if ($compiled !== false && $compiled !== null) {
+				$this->compiled_json = $compiled;
+			} else {
+				$compiled = null;
+			}
+		}
+		if (empty($compiled)) $compiled = $this->compiled_json ?? null;
+		if (empty($compiled)) {
+			try {
+				$compiled = SchedulesCompiler::compile($this);
+			} catch (\Throwable $e) {
+				\Yii::error("Schedules#{$this->id} live compile failed: " . $e->getMessage(), __METHOD__);
+				return null;
+			}
+		}
+		return new CompiledScheduleHelper($compiled);
 	}
 }

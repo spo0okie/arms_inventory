@@ -99,6 +99,50 @@ modules/schedules/
 
 ---
 
+## Соглашение по моделям и трейтам
+
+В ARMS почти у каждой основной модели есть парный `*History`-класс, читающий снимок полей из таблицы `*_history`. Чтобы вычисляемые поля (статусы, описания, удобные для шаблонов представления) считались **по тем же правилам** для активной и для архивной записи — общая логика выносится в трейт `<Model>ModelCalcFieldsTrait` и подключается к **обоим** классам:
+
+```text
+Schedules         ─┐
+                   ├── use SchedulesModelCalcFieldsTrait;
+SchedulesHistory  ─┘
+
+SchedulesEntries        ─┐
+                         ├── use ScheduleEntriesModelCalcFieldsTrait;
+SchedulesEntriesHistory ─┘
+```
+
+### Что разрешено в `<Model>ModelCalcFieldsTrait`
+
+Только **вычисляемые поля** — параметрические геттеры `getXxx()`/`isXxx()` без обязательных параметров (опциональные значения по умолчанию допустимы). Они становятся свойствами через магию Yii `__get`, и потребители обращаются к ним как `$model->status`, `$model->workTimeDescription` и т.п. — одинаково и в `Schedules`, и в `SchedulesHistory`.
+
+### Что **НЕ** должно быть в трейте
+
+| Тип | Куда вместо этого |
+| --- | --- |
+| Методы с обязательными параметрами (`isWorkTime($d,$t)`, `matchDate($date)`, `getDictionary($word)`) | В сам класс модели (`Schedules`/`SchedulesEntries`) |
+| Бизнес-операции: lifecycle hooks, recompile, save-сайды (`afterSave`, `recompileCascade`) | В сам класс модели |
+| Private utility-helper'ы, не образующие свойство (`getCompiledRuntime()`) | В сам класс модели |
+
+### Что делать History-классу, если ему какая-то calc-логика не подходит
+
+History-класс **переопределяет** конкретный геттер (или метод) пустой/безопасной заглушкой. Пример из текущего кода — [`SchedulesHistory`](models/SchedulesHistory.php) переопределяет `findExceptions()` и `findPeriods()`, потому что они имеют смысл только для оперативных данных:
+
+```php
+class SchedulesHistory extends \app\models\HistoryModel
+{
+    use SchedulesModelCalcFieldsTrait;
+
+    public function findExceptions(){return [];}
+    public function findPeriods(){return [];}
+}
+```
+
+При добавлении нового calc-поля в трейт сразу прикиньте: «работает ли оно осмысленно на архивных данных?». Если нет — добавьте заглушку в History.
+
+---
+
 ## Структура базы данных
 
 см файл `docs/database.md` для подробного описания структуры таблиц, полей, связей и индексов.

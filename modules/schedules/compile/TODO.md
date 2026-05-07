@@ -63,6 +63,8 @@
 
 ## Этап 6. Lua-рантайм для Asterisk
 
-- [ ] Реализация минимального набора: `isWorkDay`, `isWorkTime`, `getMeta`, `nextWorkingDateTime`.
-- [ ] Чтение `compiled_json` из БД/файла.
-- [ ] Инструкция по интеграции (`modules/schedules/docs/asterisk.md` или аналог).
+- [x] Реализация полного API в `lib/lua/schedule_runtime.lua` (Lua 5.2): `isWorkDay`, `isWorkTime`, `getMeta`, `nextWorkingDateTime`, `nextWorkingMeta` плюс все внутренние методы (порт `demo.js` 1:1, без зависимости от `os.time`/локали).
+- [x] Тесты `lib/lua/schedule_runtime_test.lua`: 105 тестов на самописном минимальном test-runner'е, проходят на `C:\Programs\lua52\lua52.exe`.
+- [x] README модуля: `lib/lua/README.md` (запуск, использование, отличие от JS-порта).
+- [ ] Чтение `compiled_json` из БД/файла (выбор JSON-парсера: `cjson`/`dkjson`/`lua-rapidjson`).
+- [ ] Инструкция по интеграции с Asterisk (`modules/schedules/docs/asterisk.md` или аналог).

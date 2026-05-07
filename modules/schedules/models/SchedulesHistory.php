@@ -43,7 +43,7 @@ class SchedulesHistory extends \app\models\HistoryModel
 	 * @return array
 	 */
 	public function findExceptions(){return [];}
-	
+
 	/**
 	 * Смысл тот же. Это нужно для оперативной работы с расписанием. Можно переделать на работу с уже загруженными данными
 	 * но в контексте архивных данных смысл все равно теряется
@@ -51,4 +51,26 @@ class SchedulesHistory extends \app\models\HistoryModel
 	 */
 	public function findPeriods(){return [];}
 
+	/**
+	 * История не содержит compiled_json, поэтому статус «активно/нет» для архивной записи
+	 * не вычисляется (нет реалтайма). Возвращаем 0 — это соответствует семантике «архив не активен».
+	 * Calc-поле getStatus() в трейте опирается на $this->isWorkTime(), которого в History нет.
+	 * @return int
+	 */
+	public function getStatus() { return 0; }
+
+	/**
+	 * History не содержит compiled_json и не вычисляет рабочее время — заглушка для совместимости.
+	 */
+	public function isWorkTime($date, $time) { return 0; }
+
+	/**
+	 * History не вычисляет meta активного интервала.
+	 */
+	public function metaAtTime($date, $time) { return '{}'; }
+
+	/**
+	 * History не вычисляет meta ближайшего рабочего времени.
+	 */
+	public function nextWorkingMeta($date, $time) { return '{}'; }
 }
