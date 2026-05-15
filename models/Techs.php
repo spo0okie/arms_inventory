@@ -127,21 +127,21 @@ use yii\db\ActiveQuery;
 class Techs extends ArmsModel
 {
 	use TechsModelCalcFieldsTrait,AclsFieldTrait,UnsatisfiedMaintenanceFieldTrait;	//различные вычисляемые поля
-	
+
 	public $renderedInFrontRack=[];	//позиции в передней корзине где уже отрендерилось
 	public $renderedInBackRack=[];	//то же самое в задней корзине
-	
+
 	public static $title='Оборудование';
 	public static $titles='Оборудование';
 	public static $armsTitle='АРМ';
 	public static $armsTitles='АРМы';
-	
+
 	public static $descr='Оргтехника, сетевое оборудование, сервера и вообще все, что является предметом ответственности ИТ службы, имеет материальное представление, но не является АРМом.';
-	
+
 	private static $defaultPrefixFormat=['place','org','type'];	//порядок префиксов для инвентарного номера
 	private static $defaultNumStrPad=[9,6,4];	//количество знаков в цифровой части номера в зависимости от количества токенов префикса
 	private static $defaultNumMaxLen=15;	//максимальная длина инвентарного номера (если получится уложиться убирая нули в числовой части)
-	
+
 	private static $armInheritance=[		//поля, которые наследуются у оборудования подключенного к АРМ
 		'places_id','user_id','it_staff_id','head_id','responsible_id','departments_id',
 	];
@@ -165,7 +165,7 @@ class Techs extends ArmsModel
     {
         return 'techs';
     }
-	
+
 	public $linksSchema=[
 		'contracts_ids' => 			[Contracts::class,'techs_ids'],
 		'services_ids' => 			[Services::class,'techs_ids'],
@@ -177,54 +177,50 @@ class Techs extends ArmsModel
 		'net_ips_ids' =>			[NetIps::class,'techs_ids'],
 		'acls_ids' =>				[Acls::class,'techs_id'],
 		'ports_ids' =>				[Ports::class,'techs_id'],
-		
+
 		'materials_usages_ids' => 	[MaterialsUsages::class,'techs_id'],
 		'domain_id'=>				Domains::class,
-		
+
 		'model_id' =>				[TechModels::class,'loader'=>'model'],
 		'arms_id' =>				[Techs::class,'arm_techs_ids'],
 		'installed_id' =>			[Techs::class,'installed_techs_ids','loader'=>'installation'],
-		
+
 		'places_id' =>				[Places::class,'techs_ids'],
-		
+
 		'user_id' =>				[Users::class,'techs_ids'],
 		'head_id' =>				[Users::class,'head_techs_ids'],
 		'responsible_id' =>			[Users::class,'responsible_techs_ids','loader'=>'admResponsible'],
 		'it_staff_id' =>			[Users::class,'it_techs_ids'],
 		'management_service_id' =>	[Services::class,'techs_ids'],
-		
+
 		'state_id' =>				TechStates::class,
 		'scans_id' =>				Scans::class,
 		'departments_id' =>			Departments::class,
 		'comp_id' =>				Comps::class,
-		
+
 		'partners_id' =>			Partners::class,
 	];
-    
+
     public function extraFields()
 	{
-		return [
+		return array_merge(parent::extraFields(),[
 			'archived',
 			'backupReqs',
 			'backupReqsCount',
 			'effectiveUser',
 			'fqdn',
 			'manufacturer',
-			'model',
-			'responsible',
-			'servicesCount',
 			'servicesResponsible',
 			'servicesSupportTeam',
 			'site',
-			'state',
 			'stateName',
 			'supportTeam',
 			'type',
 			'unsatisfiedBackupReqsCount'
-		];
+		]);
 	}
-	
-	
+
+
 	/**
 	 * {@inheritdoc}
 	 */
@@ -511,9 +507,9 @@ class Techs extends ArmsModel
 			],
 		]);
 	}
-	
-	
-	
+
+
+
 	/**
      * {@inheritdoc}
      */
@@ -537,7 +533,7 @@ class Techs extends ArmsModel
 
 			[['url', 'comment','updated_at','history','hw','specs','external_links'], 'safe'],
 			[['inv_num', 'sn','installed_pos','installed_pos_end'], 'string', 'max' => 128],
-	
+
 			[['ip','mac'], 'string', 'max' => 768],
 			['ip', function ($attribute) {
 				NetIps::validateInput($this,$attribute);
@@ -552,7 +548,7 @@ class Techs extends ArmsModel
 	        ['num', function ($attribute) {
         		$tokens=explode('-',$this->$attribute);
 		        if (count($tokens)>4 || !strlen($tokens[0])) {
-		        	
+
 			        $this->addError($attribute, 'Инвентарный номер должен быть в формате "ПРЕФ1-[ПРЕФ2-][ПРЕФ3-]НОМЕР", где ПРЕФ1-N - префикс филиала/организации/оборудования, НОМЕР - целочисленный номер уникальный для этого набора префиксов.');
 		        }
 	        }],
@@ -577,23 +573,23 @@ class Techs extends ArmsModel
 			}],
         ];
     }
-	
-	
+
+
 	/**
 	 * Возвращает массив размеров числовой части номера в зависимости от количества токенов
 	 */
 	public static function invNumStrPads() {
 		return Yii::$app->params['techs.invNumStrPads']??static::$defaultNumStrPad;
 	}
-	
+
 	public static function invNumMaxLen() {
 		return Yii::$app->params['techs.invNumMaxLen']??static::$defaultNumMaxLen;
 	}
-	
+
 	public static function invNumPrefixFormat() {
 		return Yii::$app->params['techs.prefixFormat']??static::$defaultPrefixFormat;
 	}
-	
+
 	/**
 	 * Возвращает размер числовой части инв. номера в зависимости от количества токенов
 	 * @param $tokens - количество токенов
@@ -603,14 +599,14 @@ class Techs extends ArmsModel
 		$pads=static::invNumStrPads();
 		return $pads[$tokens]??$pads[count($pads)-1];
 	}
-	
+
 	public static function formatInvNum($value)
 	{
 		// выполняем определенные действия с переменной, возвращаем преобразованную переменную
 		$tokens = explode('-', $value);
 		//
 		$num_str_pad = static::getNumStrPad(count($tokens)-1);
-		
+
 		$num = (int)$tokens[count($tokens) - 1];
 		unset($tokens[count($tokens) - 1]);
 		$prefix=implode('-', $tokens);
@@ -618,9 +614,9 @@ class Techs extends ArmsModel
 		$num = str_pad((string)$num, $num_str_pad, '0', STR_PAD_LEFT);
 		return mb_strtoupper($prefix . '-' . $num);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Возвращает первый свободный инвентарный номер с заданным префиксом
 	 * @param string $prefix текущий инв. номер
@@ -630,28 +626,28 @@ class Techs extends ArmsModel
 		//ищем запись с таким префиксом (сортируем по префиксу и выбираем один самый большой)
 		$query=static::find()
 			->where(['like','num',$prefix.'-%',false]);
-		
-		
+
+
 		if (strpos($prefix,'-')===false) //если в переданном префиксе нет "-", то ищем записи в которых
 			$query->andWhere('LOCATE("-",num,'.(mb_strlen($prefix)+2).')=0'); //после первого "-" второго уже нет
 		//иначе он вместо чел-0000018 найдет чел-тел-0002 и все неправильно посчитает
-		
+
 		//$sql=$query->createCommand()->getRawSql();
 		/** @var Techs $last */
 		$last=$query
 			->orderBy(['num'=>SORT_DESC])
 			->one();
-		
+
 		if (is_object($last)) {
 			$tokens = explode('-', $last->num);
 			$subIndex = (int)$tokens[count($tokens)-1] + 1;
 		} else $subIndex=1;
 		//в зависимости от количество токенов в префиксе выбираем длину номерной части
-		
+
 		return static::formatInvNum($prefix.'-'.$subIndex);
-		
+
 	}
-	
+
 	/**
 	 * Формирует префикс инвентарного номера оборудования на основании типа и места установки
 	 * @param $model_id integer модель оборудования
@@ -664,7 +660,7 @@ class Techs extends ArmsModel
 	public static function genInvPrefix(int $model_id, int $place_id, int $org_id, int $arm_id, int $installed_id)
 	{
 		$tokens=[];
-		
+
 		foreach (static::invNumPrefixFormat() as $token) {
 			switch ($token) {
 				case 'place':
@@ -681,7 +677,7 @@ class Techs extends ArmsModel
 						//иначе там где место установки
 						$place= Places::findOne($place_id);
 					}
-					
+
 					if (is_object($place)) {
 						//если нашли место установки, то ищем там префикс
 						$place_token=$place->prefTree;
@@ -711,15 +707,15 @@ class Techs extends ArmsModel
 					break;
 			}
 		}
-		
+
 		//или цепочка из префиксов или пусто
 		return count($tokens)?implode('-',$tokens):'';
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -734,7 +730,7 @@ class Techs extends ArmsModel
 		if (is_object($this->state)) return $this->state->name;
 		return '';
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -742,7 +738,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Comps::class, ['id' => 'comp_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -750,7 +746,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Partners::class, ['id' => 'partners_id']);
 	}
-	
+
 	/**
 	 * Возвращает все ОС привязанные к этому АРМ
 	 * @return ActiveQuery
@@ -764,7 +760,7 @@ class Techs extends ArmsModel
 				'arms_comps.name'=>SORT_ASC,
 			]);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -772,7 +768,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Domains::class, ['id' => 'domain_id']);
 	}
-	
+
 	//возвращает список ОС таким образом, что та, на которую указывает сам АРМ будет первой
 	public function getSortedComps()
 	{
@@ -781,12 +777,12 @@ class Techs extends ArmsModel
 			foreach ($comps as $idx=>$comp)
 				if ($comp->id == $this->comp_id)
 					unset($comps[$idx]);
-			
+
 			array_unshift($comps,$this->comp);
 		}
 		return $comps;
 	}
-	
+
 	public function buildHwAndVms() {
 		if (!is_null($this->hwComp_cache)) return;
 		$this->hwComps_cache=[];
@@ -800,10 +796,10 @@ class Techs extends ArmsModel
 				$this->hwComps_cache[]=$comp;
 			}
 		}
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Возвращает все не виртуальные ОС привязанные к этому АРМ
 	 * @return ActiveQuery
@@ -813,8 +809,8 @@ class Techs extends ArmsModel
 		$this->buildHwAndVms();
 		return $this->hwComps_cache;
 	}
-	
-	
+
+
 	/**
 	 * Возвращает тот комп, с которого снимать железо АРМ
 	 * @return ActiveQuery
@@ -824,8 +820,8 @@ class Techs extends ArmsModel
 		$this->buildHwAndVms();
 		return $this->hwComp_cache;
 	}
-	
-	
+
+
 	/**
 	 * Возвращает все виртуальные ОС привязанные к этому АРМ
 	 * @return ActiveQuery
@@ -835,7 +831,7 @@ class Techs extends ArmsModel
 		$this->buildHwAndVms();
 		return $this->vmComps_cache;
 	}
-	
+
 	/**
 	 * Возвращает все оборудование в виде HwList
 	 */
@@ -848,7 +844,7 @@ class Techs extends ArmsModel
 			$this->hwList_obj->loadFound($this->hwComp->hwList);
 		return $this->hwList_obj;
 	}
-	
+
 	/**
 	 * @return Services[]
 	 */
@@ -863,9 +859,9 @@ class Techs extends ArmsModel
 		}
 		return $this->compsServices_cache;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Возвращает набор сканов в договоре
 	 */
@@ -878,8 +874,8 @@ class Techs extends ArmsModel
 		foreach ($scans as $scan) if($scan->id != $this->scans_id) $scans_sorted[]=$scan;
 		return $scans_sorted;
 	}
-	
-	
+
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -887,7 +883,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasMany(Techs::class, ['arms_id' => 'id'])->from(['arms_techs'=>Techs::tableName()]);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -895,7 +891,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasMany(Techs::class, ['installed_id' => 'id'])->from(['arms_techs'=>Techs::tableName()]);
 	}
-	
+
 	/**
 	 * отфильтровать из переданного массива $models те, которые привязаны к этому АРМ
 	 * @param Techs[] $models
@@ -909,9 +905,9 @@ class Techs extends ArmsModel
 				$filtered[]=$model;
 		return $filtered;
 	}
-	
 
-	
+
+
 	/**
 	 * @return Users|null|ActiveQuery
 	 */
@@ -919,12 +915,12 @@ class Techs extends ArmsModel
 	{
 		if (!\Yii::$app->params['techs.managementService.enable'])
 			return $this->hasOne(Users::class, ['id' => 'it_staff_id']);
-			
+
 		if (!is_object($this->managementService)) return null;
-		
+
 		return $this->managementService->responsible;
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -932,7 +928,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Users::class, ['id' => 'head_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -940,7 +936,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Users::class, ['id' => 'responsible_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -948,7 +944,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Users::class, ['id' => 'user_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -956,7 +952,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Places::class, ['id' => 'places_id']);
 	}
-	
+
 	/**
 	 * @return Places
 	 */
@@ -969,7 +965,7 @@ class Techs extends ArmsModel
 	public function getManufacturer() {
 		return is_object($this->model)?$this->model->manufacturer:null;
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -977,7 +973,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(TechModels::class, ['id' => 'model_id']);
 	}
-	
+
 
 	/**
 	 * @return ActiveQuery
@@ -988,8 +984,8 @@ class Techs extends ArmsModel
 			->from(['attached_tech_models'=>TechModels::tableName()]);
 
 	}
-	
-	
+
+
 	/**
 	 * Возвращает набор документов
 	 */
@@ -998,7 +994,7 @@ class Techs extends ArmsModel
 		return $this->hasMany(LicItems::class, ['id' => 'lic_items_id'])
 			->viaTable('{{%lic_items_in_arms}}', ['arms_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает набор документов
 	 */
@@ -1007,7 +1003,7 @@ class Techs extends ArmsModel
 		return $this->hasMany(LicKeys::class, ['id' => 'lic_keys_id'])
 			->viaTable('{{%lic_keys_in_arms}}', ['arms_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает набор документов
 	 */
@@ -1016,8 +1012,8 @@ class Techs extends ArmsModel
 		return $this->hasMany(LicGroups::class, ['id' => 'lic_groups_id'])
 			->viaTable('{{%lic_groups_in_arms}}', ['arms_id' => 'id']);
 	}
-	
-	
+
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -1025,7 +1021,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasMany(MaterialsUsages::class, ['techs_id' => 'id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -1033,7 +1029,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasMany(Ports::class, ['techs_id' => 'id']);
 	}
-	
+
 	/**
 	 * @return TechTypes
 	 */
@@ -1042,7 +1038,7 @@ class Techs extends ArmsModel
 		if (!is_null($this->type_cache)) return $this->type_cache;
 		return $this->type_cache=$this->model->type;
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -1050,20 +1046,20 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Techs::class, ['id' => 'arms_id']);
 	}
-	
+
 	public function getMaintenanceReqs()
 	{
 		return $this->hasMany(MaintenanceReqs::class, ['id' => 'reqs_id'])
 			->viaTable('maintenance_reqs_in_techs', ['techs_id' => 'id']);
 	}
-	
+
 	public function getMaintenanceJobs()
 	{
 		return $this->hasMany(MaintenanceJobs::class, ['id' => 'jobs_id'])
 			->viaTable('maintenance_jobs_in_techs', ['techs_id' => 'id']);
 	}
-	
-	
+
+
 
 	/**
 	 * @return ActiveQuery
@@ -1072,7 +1068,7 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Techs::class, ['id' => 'installed_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -1080,10 +1076,10 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Departments::class, ['id' => 'departments_id']);
 	}
-	
-	
+
+
 	public static function formatMacs($raw,$glue="\n") {
-		
+
 		$macs=explode("\n",$raw);
 		$formatted=[];
 		foreach ($macs as $k=>$mac) if ($mac) {
@@ -1096,14 +1092,14 @@ class Techs extends ArmsModel
 			$formatted[]=implode(':',$macTokens);
 			//$macs[$k]=
 		}
-		
+
 		return implode($glue,$formatted);
 	}
-	
 
-	
-	
-	
+
+
+
+
 	/**
 	 * Возвращает IP адреса
 	 */
@@ -1112,8 +1108,8 @@ class Techs extends ArmsModel
 		return $this->hasMany(NetIps::class, ['id' => 'ips_id'])->from(['techs_ip'=>NetIps::tableName()])
 			->viaTable('{{%ips_in_techs}}', ['techs_id' => 'id']);
 	}
-	
-	
+
+
 	public function getSegments() {
 		$segments=[];
 		foreach ($this->netIps as $ip)
@@ -1123,7 +1119,7 @@ class Techs extends ArmsModel
 			}
 		return $segments;
 	}
-	
+
 	/**
 	 * Возвращает набор документов
 	 */
@@ -1133,7 +1129,7 @@ class Techs extends ArmsModel
 			->from(['techs_contracts'=>Contracts::tableName()])
 			->viaTable('{{%contracts_in_techs}}', ['techs_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает сервисы
 	 */
@@ -1150,14 +1146,14 @@ class Techs extends ArmsModel
 	{
 		return $this->hasOne(Services::class, ['id' => 'management_service_id']);
 	}
-	
+
 	//нужно только для сортировки моделей внутри ArrayDataProvider
 	public function getServicesNames() {
 		$names=ArrayHelper::getColumn($this->services,'name',false);
 		sort($names);
 		return implode('',$names);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -1165,8 +1161,8 @@ class Techs extends ArmsModel
 	{
 		return $this->hasMany(Acls::class, ['techs_id' => 'id']);
 	}
-	
-	
+
+
 	/**
 	 * Возвращает массив портов (фактически объявленных или потенциально возможных исходя из модели оборудования)
 	 */
@@ -1178,7 +1174,7 @@ class Techs extends ArmsModel
 		//Порты которые объявлены в БД конкретно для этого устройства
 		$custom_ports=$this->ports;
 		if (!is_array($custom_ports)) $custom_ports=[];
-		
+
 		//если корректно пришита модель оборудования и у модели есть набор портов
 		if (is_object($this->model) && count($this->model->portsList)) {
 			//перебираем распарсеные порты
@@ -1192,7 +1188,7 @@ class Techs extends ArmsModel
 				$model_ports[$port_name]=compact('port_name','port_comment','port_link');
 			}
 		}
-		
+
 		//если какие-то порты не ушли через список выше - добавляем их в конец
 		foreach ($custom_ports as $port) {
 			$model_ports[$port->name]=[
@@ -1201,10 +1197,10 @@ class Techs extends ArmsModel
 				'port_link'=>$port,
 			];
 		}
-		
+
 		return $model_ports;
 	}
-	
+
 	public function getDdPortsList()
 	{
 		$out=[];
@@ -1216,9 +1212,9 @@ class Techs extends ArmsModel
 		}
 		return $out;
 	}
-	
 
-	
+
+
 	/**
 	 * Имя для поиска
 	 * @return string
@@ -1235,13 +1231,13 @@ class Techs extends ArmsModel
 		}
 		if (is_object($this->user)) $tokens[]=$this->user->shortName;
 		if (!is_object($this->comp)) {
-			
+
 			$tokens[]='('.$this->type->name.' '.$this->model->getShortWithVendor().')';
 			if (is_object($this->place)) $tokens[]=$this->place->fullName;
 		}
 		return implode(' / ',$tokens);
 	}
-	
+
 	/**
 	 * Проверяет установлено ли оборудование в модуль $unit
 	 * installed_pos может иметь значение 1,2,7-8
@@ -1253,13 +1249,13 @@ class Techs extends ArmsModel
 		if (!$this->full_length) {
 			if (($front == $this->installed_back)) return false;
 		}
-		
+
 		//если смотрим на задницу устройства и для нее другие позиции
 		if ($front==$this->installed_back && $this->installed_pos_end)
 			$intervals=explode(',',$this->installed_pos_end);
 		else
 			$intervals=explode(',',$this->installed_pos);
-		
+
 		foreach ($intervals as $interval) {
 			if (strpos($interval,'-')!==false) {
 				$limits=explode('-',$interval);
@@ -1268,7 +1264,7 @@ class Techs extends ArmsModel
 		}
 		return false;
 	}
-	
+
 	public static function fetchNames(){
 		$list= static::find()
 			->joinWith(['model.type','place','user','comp','model.manufacturer'])
@@ -1276,7 +1272,7 @@ class Techs extends ArmsModel
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}
-	
+
 	public static function fetchArmNames(){
 		$list= static::find()
 			->joinWith(['model.type','place','user','comp'])
@@ -1284,7 +1280,7 @@ class Techs extends ArmsModel
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
 	}
-	
+
 	/**
 	 * @inheritdoc
 	 */
@@ -1300,7 +1296,7 @@ class Techs extends ArmsModel
 					$this->$attr = $this->arm->$attr;
 				}
 			}
-			
+
 			if (is_object($this->installation)) {
 				$this->arms_id=null; //отвязываемся от АРМ (нельзя быть в составе АРМ и шкафа одновременно)
 				//то отвязываемся от собственных помещения
@@ -1309,17 +1305,17 @@ class Techs extends ArmsModel
 					$this->$attr = $this->installation->$attr;
 				}
 			}
-			
+
 			if (!is_null($this->hwList_obj)) {
 				$this->hw=$this->hwList->onlySaved()->saveJSON();
 			}
-			
+
 			$this->mac= MacsHelper::fixList($this->mac);
-			
+
 			//если ОС которая была назначена основной удалена или сменила АРМ
 			if (!is_object($this->comp) || $this->comp->arm_id != $this->id)
 				$this->comp_id = null; //удаляем основную ОС
-			
+
 			//если основной ОС нет, но есть привязанные, то выбираем первую из привязанных как основную
 			if (is_null($this->comp_id) && is_array($comps=$this->comps) && count($comps)) {
 				foreach ($comps as $comp) {
@@ -1327,10 +1323,10 @@ class Techs extends ArmsModel
 					break;
 				}
 			}
-			
+
 			/* взаимодействие с NetIPs */
 			$this->net_ips_ids=NetIps::fetchIpIds($this->ip);
-			
+
 			//грузим старые значения записи
 			$old=static::findOne($this->id);
 			if (!is_null($old)) {
@@ -1346,8 +1342,8 @@ class Techs extends ArmsModel
 		}
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * @inheritdoc
 	 */
@@ -1356,19 +1352,19 @@ class Techs extends ArmsModel
 		if (!parent::beforeDelete()) {
 			return false;
 		}
-		
+
 		//отрываем IP от удаляемого компа
 		foreach ($this->netIps as $ip) {
 			$ip->detachTech($this->id);
 		}
-		
+
 		return true;
 	}
-	
+
 	public function afterSave($insert, $changedAttributes)
 	{
 		parent::afterSave($insert, $changedAttributes);
-		
+
 		//если изменились поля которые наследуются для оборудования входящего в АРМ ($armInheritance)
 		$updateArmInheritance=false;
 		foreach (array_keys($changedAttributes) as $attr) {
@@ -1376,7 +1372,7 @@ class Techs extends ArmsModel
 				$updateArmInheritance=true;
 			}
 		}
-		
+
 		//если изменились поля которые наследуются для оборудования установленного в другое оборудование ($installInheritance)
 		$updateInstallInheritance=false;
 		foreach (array_keys($changedAttributes) as $attr) {
@@ -1384,7 +1380,7 @@ class Techs extends ArmsModel
 				$updateInstallInheritance=true;
 			}
 		}
-		
+
 		//если поля изменились - перебираем все входящие в АРМ экз. оборудования
 		if ($updateArmInheritance) {
 			foreach ($this->armTechs as $tech) {
@@ -1407,10 +1403,10 @@ class Techs extends ArmsModel
 			}
 		}
 	}
-	
-	
+
+
 	//имя в списке оборудования и ОС сервиса (для сортировки)
 	public function getInServicesName() {return mb_strtolower($this->model->nameWithVendor);}
-	
-	
+
+
 }
