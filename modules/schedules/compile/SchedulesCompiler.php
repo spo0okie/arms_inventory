@@ -124,7 +124,7 @@ class SchedulesCompiler
 			'start'     => $schedule->start_date ?: null,
 			'start_tsm' => self::strToTsm($schedule->start_date),
 			'end'       => $schedule->end_date ?: null,
-			'end_tsm'   => self::strToTsm($schedule->end_date),
+			'end_tsm'   => self::endStrToTsm($schedule->end_date),
 			'default'   => $default,
 			// Строковые ключи гарантируют object в JSON; для пустых — явно stdClass.
 			'weekdays'  => $weekdays === [] ? new \stdClass() : $weekdays,
@@ -181,7 +181,7 @@ class SchedulesCompiler
 			'start'     => $entry->date ?: null,
 			'start_tsm' => self::strToTsm($entry->date),
 			'end'       => $entry->date_end ?: null,
-			'end_tsm'   => self::strToTsm($entry->date_end),
+			'end_tsm'   => self::endStrToTsm($entry->date_end),
 			'is_work'   => (bool)$entry->is_work,
 			'comment'   => (string)$entry->comment,
 			'meta'      => new \stdClass(),
@@ -283,6 +283,34 @@ class SchedulesCompiler
 			return intdiv($dt->getTimestamp(), 60);
 		}
 		return null;
+	}
+
+	/**
+	 * Парсинг **правой границы** диапазона дат.
+	 *
+	 * Если строка содержит только дату (без времени) — пользователь интуитивно
+	 * подразумевает «по этот день **включительно**». В compiled-рантайме граница
+	 * полуоткрытая `[start, end)`, поэтому чтобы захватить последний день целиком,
+	 * сдвигаем `end_tsm` на 24 часа вперёд (до 00:00 следующих суток).
+	 *
+	 * Если в строке есть время (`YYYY-MM-DD HH:MM[:SS]`) — берём точное значение
+	 * без сдвига: значит пользователь явно указал момент окончания.
+	 *
+	 * @return int|null
+	 */
+	public static function endStrToTsm(?string $str): ?int
+	{
+		if ($str === null) return null;
+		$trimmed = trim($str);
+		if ($trimmed === '') return null;
+		$tsm = self::strToTsm($trimmed);
+		if ($tsm === null) return null;
+		// Только дата без времени → расширяем до конца дня.
+		// Используем длину строки: 'YYYY-MM-DD' = 10 символов.
+		if (strlen($trimmed) === 10) {
+			return $tsm + 1440;
+		}
+		return $tsm;
 	}
 
 	/**
