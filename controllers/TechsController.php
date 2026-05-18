@@ -142,6 +142,34 @@ class TechsController extends ArmsBaseController
 		]];
 	}
 
+	/**
+	 * Расширенный тест для {@see ArmsBaseController::actionView()}: помимо двух
+	 * стандартных сценариев (full/empty) добавляет третий — с прикреплённым к
+	 * оборудованию сканом. Этот сценарий нужен для покрытия ветки
+	 * views/techs/view.php, где для каждого {@see Techs::getScans()} рендерится
+	 * {@see ModelWidget} с view '/scans/thumb'.
+	 *
+	 * @return array
+	 */
+	public function testView(): array
+	{
+		$base = parent::testView();
+
+		$techWithScan = \app\generation\ModelFactory::create(Techs::class, ['empty' => true]);
+		\app\generation\ModelFactory::create(
+			\app\models\Scans::class,
+			['empty' => true, 'overrides' => ['techs_id' => $techWithScan->id]]
+		);
+
+		$base[] = [
+			'name'     => 'view with scan attached',
+			'GET'      => ['id' => $techWithScan->id],
+			'response' => 200,
+		];
+
+		return $base;
+	}
+
 
 	/**
 	 * Отображает всплывающую подсказку с аппаратными компонентами (HW-список) оборудования.

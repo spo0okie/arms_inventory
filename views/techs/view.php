@@ -58,7 +58,7 @@ $archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 			</div>
 			<div>
 				<?php if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
-					echo ModelWidget::widget(['model'=>$scan, 'view'=>'/scans/thumb', 'options'=>['static_view'=>true]]);
+					echo ModelWidget::widget(['model'=>$scan, 'view'=>'thumb', 'options'=>['static_view'=>true]]);
 				?>
 			</div>
 			<?= ModelWidget::widget(['model'=>$model, 'view'=>'model', 'options'=>[]]) ?>
