@@ -3,20 +3,13 @@
 use app\components\Forms\ArmsForm;
 use app\helpers\FieldsHelper;
 use app\models\Contracts;
-use app\models\Departments;
-use app\models\Domains;
-use app\models\MaintenanceJobs;
-use app\models\MaintenanceReqs;
 use app\models\Partners;
-use app\models\Places;
-use app\models\Services;
-use app\models\Techs;
 use app\models\TechStates;
 use app\models\Users;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
 use app\models\TechModels;
+use app\models\Techs;
 
 /*
  * Для порядку: список жабаскриптовых свистоперделок:
@@ -32,9 +25,10 @@ use app\models\TechModels;
  * для новых моделей подтягивается код формирования инвентарного номера
  */
 
-/* @var $this yii\web\View */
-/* @var $model app\models\Techs */
-/* @var $form yii\widgets\ActiveForm */
+/** @var yii\web\View $this */
+/** @var app\models\Techs $model */
+/** @var yii\widgets\ActiveForm $form */
+
 if (!isset($modalParent)) $modalParent=null;
 
 $hidden=' style="display:none" ';
@@ -66,12 +60,12 @@ $js =  /** @lang JavaScript */ <<<JS
         })
         .fail(function () {console.log("Ошибка получения данных!")});
     }
-    
+
     //меняем подсказки для разных типов оборудования
     function fetchCommentFromModel(){
         let model_id=$("#techs-model_id").val();
         //console.log(model_id);
-        
+
         $.ajax({url: "/web/tech-models/hint-comment?id="+model_id})
         .done(function(data) {
             $('label[for="techs-comment"]')
@@ -81,7 +75,7 @@ $js =  /** @lang JavaScript */ <<<JS
             //$("#comment-hint").html(data['hint']);
         })
         .fail(function () {console.log("Ошибка получения данных!")});
-        
+
 		$.ajax({url: "/web/tech-models/hint-template?id="+model_id})
 			.done(function(data) {
 				if (data==="$no_specs_hint") {
@@ -92,14 +86,14 @@ $js =  /** @lang JavaScript */ <<<JS
 				}
 			})
 			.fail(function () {console.log("Ошибка получения данных!")});
-		
+
 		$.ajax({url: "/web/tech-models/hint-description?id="+model_id})
 			.done(function(data) {
 				$("#model-hint").html(data);
 			})
 			.fail(function () {console.log("Ошибка получения данных!")});
     }
-    
+
 JS;
 $this->registerJs($js, yii\web\View::POS_BEGIN);
 
@@ -159,7 +153,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			<?= $form->field($model, 'uid') ?>
 		</div>
     </div>
-	
+
 	<?php if (
 		Yii::$app->params['techs.hostname.enable'] && !(is_object($model->model) && $model->model->getIsPC())) { ?>
 		<div class="row">
@@ -225,7 +219,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			]) ?>
         </div>
     </div>
-	
+
 	<div class="row " id="techs-specs_settings"
 		<?= (is_object($model) && is_object($model->model) && $model->model->individual_specs)?'':'style="display:none"' ?>
 	>
@@ -272,6 +266,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 	<div class="row">
 		<div class="col-md-6"  id="tech-arms-selector" <?= ($model->installed_id)?$hidden:'' ?>>
 			<?= $form->field($model, 'arms_id')->select2([
+				'data'=>Techs::fetchArmNames(),
 				'pluginEvents' =>[
 					'change'=>'function(){
                         if ($("#techs-arms_id").val()) {
@@ -304,7 +299,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 				<div class="col-md-3" id="tech-installed-pos-end" <?= ($model->full_length)?'':$hidden ?>>
 					<?= $form->field($model,'installed_pos_end') ?>
 				</div>
-				
+
 			</div>
 		</div>
 		<div class="col-md-6" id="tech-installed-selector" <?= ($model->arms_id)?$hidden:'' ?>>
@@ -332,7 +327,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			<?= Yii::$app->params['departments.enable']?$form->field($model, 'departments_id'):'' ?>
 		</div>
 	</div>
-	
+
     <div id="tech-users-selector" <?= ($model->arms_id)?$hidden:'' ?>>
 		<div class="row">
 			<div class="col-md-6" >
@@ -366,17 +361,17 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			<?= $form->field($model, 'maintenance_jobs_ids') ?>
 		</div>
 	</div>
-	
+
 	<?=  $form->field($model, 'contracts_ids')->select2([
 		'options' => [
 			'onchange' => 'fetchArmsFromDocs();'
         ]
 	])?>
-	
-	
-	
+
+
+
 	<?=  $form->field($model,'url')->textAutoresize(['rows' => 2,]) ?>
-	
+
 	<?=  $form->field($model,'history')->text(['rows' => 3,]) ?>
 
 
