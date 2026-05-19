@@ -14,7 +14,8 @@ use app\models\TechTypes;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\web\JsExpression;
-
+
+
 use app\components\widgets\page\ModelWidget;
 if (!isset($searchModel)) $searchModel=new TechsSearch();
 if(!isset($static_view)) $static_view=false;
@@ -40,23 +41,23 @@ $columns=[
 	],
 
 	'num'=> [
-		'value' => function ($data) use ($renderer,$static_view) {
+		'value' => function ($data) use ($static_view) {
 			return ModelWidget::widget(['model'=>$data,'options'=>['static_view'=>$static_view]]);
 		}
 	],
-	
+
 	'sn',
 	'inv_num',
 	'uid',
 	'inv_sn'=>[
 		'value' => function ($data) use ($renderer) {
 			$tokens=[];
-			
+
 			if (strlen($data->sn)) $tokens[]=$data->sn;
 			if (strlen($data->inv_num)) $tokens[]=$data->inv_num;
 			if (strlen($data->uid)) $tokens[]=$data->uid;
 			return Html::encode(implode(', ',$tokens));
-			
+
 		},
 		'contentOptions'=>function ($data) {
 			/* @var $data Techs */
@@ -69,21 +70,21 @@ $columns=[
 					($data->uid?('<br /><strong>'.$data->getAttributeIndexLabel('uid').':</strong> '.$data->uid):'')
 			];
 		},
-	
+
 	],
-	
+
 	'user' => [
 		'value' => function ($data) use ($renderer) {
 			return is_object($data->user)?ModelWidget::widget(['model'=>$data->user,'options'=>['short'=>true]]):null;
 		}
 	],
-	
+
 	'user_position' => [
 		'value' => function ($data) use ($renderer) {
 			return is_object($data->user) ?"<span class='arm_user_position'>{$data->user->Doljnost}</span>": null;
 		},
 	],
-	
+
 	'user_dep' => [
 		'value' => function ($data) use ($renderer) {
 			return (is_object($data->user) && is_object($data->user->orgStruct)) ?
@@ -101,7 +102,7 @@ $columns=[
 			return (is_object($data->partner)) ? ModelWidget::widget(['model'=>$data->partner,'options'=>['static_view'=>true]]) :null;
 		},
 	],
-	
+
 	'comp_id' => [
 		'value' => function ($data) use ($renderer) {
 			return is_object($data->comp) ? ModelWidget::widget(['model'=>$data->comp]) : null;
@@ -110,30 +111,30 @@ $columns=[
 			'class'=>'arm_hostname '.$data->updatedRenderClass
 		];}
 	],
-	
+
 	'comp_hw' => [
 		'value' => function ($data) use ($renderer) {
 			return $renderer->render('/hwlist/shortlist',['model'=>$data->hwList,'arm_id'=>$data->id]);
 		},
 	],
-	
+
 	'comp_updated_at' => [
 		'value' => 'comp.updated_at',
 	],
-	
+
 	'ip' => [
 		'value' => function ($data) use ($renderer) {
 			if (is_object($data)) {
 				$output=[];
-				
+
 				if (is_object($data->comp)) {
 					foreach ($data->comp->netIps as $ip)
 						$output[$ip->addr]=ModelWidget::widget(['model'=>$ip,'options'=>['static_view'=>true]]);
 				}
-				
+
 				foreach ($data->netIps as $ip)
 					$output[$ip->addr]=ModelWidget::widget(['model'=>$ip,'options'=>['static_view'=>true]]);
-				
+
 				return ExpandableCardWidget::widget(['content'=>implode('<br />',$output)]);
 			}
 			return null;
@@ -144,7 +145,7 @@ $columns=[
 			'class'=>'mac_address'
 		]);},
 	],
-	
+
 	'model' => [
 		'value' => function ($data) use ($renderer) {
 			return is_object($data->model) ? ModelWidget::widget(['model'=>$data->model,'options'=>['long' => true]]) : null;
@@ -165,7 +166,7 @@ $columns=[
 			]);
 		},
 	],
-	
+
 	'state_id' => [
 		'value' => function ($data) use ($renderer) {
 			return ModelWidget::widget(['model'=>$data->state]);
@@ -230,5 +231,3 @@ if (Yii::$app->params['techs.hostname.enable']??false) {
 }
 
 return $columns;
-
-

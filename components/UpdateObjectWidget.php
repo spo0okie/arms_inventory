@@ -9,7 +9,7 @@ use yii\helpers\StringHelper;
 
 class UpdateObjectWidget extends Widget
 {
-	
+
 
 	/**
 	 * Сообщение по умолчанию, если объекты не переданы
@@ -19,27 +19,29 @@ class UpdateObjectWidget extends Widget
 	public $modal=false;
 
 	/**
-	 * @var $model \app\models\base\ArmsModel
+	 * @var \app\models\base\ArmsModel $model
 	 */
 	public $model=null;
 	public $url=null;
 	public $options=[];
-	
+
 	public function init() {
 		if (is_null($this->updateHint))
 			$this->updateHint='Редактировать';
-		
+
 		$this->options['qtip_ttip']=$this->updateHint;
-		$this->options['qtip_side']='bottom,top,right,left';
-		
-		
+		$this->options['qtip_side']='right,bottom,top,left';
+		if (isset($this->options['qtip_ajxhrf'])) unset($this->options['qtip_ajxhrf']);
+
+
+
 		if ($this->modal) {
 			if (!isset($this->options['class']))
 				$this->options['class']='';
 			$this->options['class'].=' open-in-modal-form';
 			$this->options['data-reload-page-on-submit']=1;
 		}
-		
+
 		if (is_null($this->url)) $this->url=[
 			'/'.Inflector::camel2id(
 				StringHelper::basename(
@@ -48,9 +50,9 @@ class UpdateObjectWidget extends Widget
 			).'/update',
 			'id' => $this->model->id,
 		];
-	
+
 	}
-	
+
 	public function run()
 	{
 		return Html::a('<span class="fas fa-pencil-alt update-item-button">', $this->url, $this->options);
