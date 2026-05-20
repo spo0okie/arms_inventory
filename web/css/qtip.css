@@ -1,4 +1,14 @@
 /* ТУЛТИПЫ */
+
+/* Скрывает тултип, пока qtip_ajax переустанавливает контент и пересчитывает позицию.
+   visibility, а не display:none — сохраняет layout, чтобы getBoundingClientRect
+   в патче tooltipster продолжал измерять реальный размер.
+   !important — потому что сам tooltipster иногда пишет inline visibility и
+   может вернуть видимость не вовремя. */
+.tooltipster-base.qtip-settling {
+    visibility: hidden !important;
+}
+
 /* Отключено: правило перебивало inline `height`, который tooltipster
    выставляет на тултип, из-за чего реальная высота расходилась с той,
    по которой tooltipster считал координаты, и тултип "сползал" вниз

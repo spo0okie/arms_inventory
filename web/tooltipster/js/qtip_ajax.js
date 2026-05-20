@@ -176,11 +176,13 @@ function attach_qTip(el, force = false) {
 						let st = instance.status();
 						if (st.destroyed || !st.open) return;
 
-						// прячем тултип на время финальной "усадки" — visibility:hidden,
-						// в отличие от display:none, сохраняет layout (getBoundingClientRect
-						// в патче tooltipster всё равно видит реальный размер контента).
+						// Скрываем тултип на время "усадки" через css-класс с !important —
+						// inline visibility, который tooltipster пишет в своих обработчиках
+						// (см. __scrollHandler), его не перебьёт. visibility, а не display:none —
+						// чтобы getBoundingClientRect в патче tooltipster продолжал измерять
+						// реальный размер контента.
 						let tipEl = instance.elementTooltip();
-						if (tipEl) tipEl.style.visibility = "hidden";
+						if (tipEl) tipEl.classList.add("qtip-settling");
 
 						instance.content(data);
 
@@ -194,17 +196,47 @@ function attach_qTip(el, force = false) {
 								});
 						}
 
-						// RAF×2 — даём браузеру довести layout, потом финальный reposition
-						// и единым шагом возвращаем видимость уже на правильной позиции.
-						requestAnimationFrame(function () {
+						// дожидаемся, пока все картинки внутри уже вставленного контента
+						// действительно довели свой layout (.complete + .decode), чтобы
+						// финальный reposition сработал ровно по итоговой высоте.
+						let imgs = $tip.find("img").toArray();
+						let waitImgs = imgs
+							.map(function (img) {
+								if (img.complete && img.naturalWidth > 0) return null;
+								if (typeof img.decode === "function") {
+									return img.decode().catch(function () {});
+								}
+								return new Promise(function (resolve) {
+									let off = function () {
+										img.removeEventListener("load", off);
+										img.removeEventListener("error", off);
+										resolve();
+									};
+									img.addEventListener("load", off);
+									img.addEventListener("error", off);
+								});
+							})
+							.filter(Boolean);
+
+						let finish = function () {
+							let st2 = instance.status();
+							if (st2.destroyed || !st2.open) return;
+							// RAF×2 — даём браузеру довести layout (картинки/шрифты),
+							// потом финальный reposition и единым шагом снимаем
+							// "усадку" уже на правильной позиции и размере.
 							requestAnimationFrame(function () {
-								let st2 = instance.status();
-								if (st2.destroyed || !st2.open) return;
-								instance.reposition();
-								let finalTip = instance.elementTooltip();
-								if (finalTip) finalTip.style.visibility = "";
+								requestAnimationFrame(function () {
+									let st3 = instance.status();
+									if (st3.destroyed || !st3.open) return;
+									instance.reposition();
+									let finalTip = instance.elementTooltip();
+									if (finalTip) finalTip.classList.remove("qtip-settling");
+								});
 							});
-						});
+						};
+
+						if (waitImgs.length === 0) finish();
+						else Promise.all(waitImgs).then(finish, finish);
 
 						$origin.data("loaded", true);
 					};
