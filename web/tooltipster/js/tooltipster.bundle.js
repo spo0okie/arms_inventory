@@ -2426,32 +2426,41 @@ $.Tooltipster.prototype = {
 	 * @returns {mixed|self}
 	 * @public
 	 */
-	content: function(content) {
-		
+	content: function(content, skipReposition) {
+
 		var self = this;
-		
+
 		// getter method
 		if (content === undefined) {
 			return self.__Content;
 		}
 		// setter method
 		else {
-			
+
 			if (!self.__destroyed) {
-				
+
 				// change the content
 				self.__contentSet(content);
-				
+
 				if (self.__Content !== null) {
-					
+
 					// update the tooltip if it is open
 					if (self.__state !== 'closed') {
-						
+
 						// reset the content in the tooltip
 						self.__contentInsert();
-						
-						// reposition and resize the tooltip
-						self.reposition();
+
+						// LOCAL PATCH: optional skipReposition argument lets callers that
+						// will run their own reposition (e.g. after async work like waiting
+						// for images to decode) suppress this automatic one. The default
+						// reposition fires before <img>'s in the new content reach their
+						// natural layout size, so coordinates and inline height/width are
+						// based on an under-measured tooltip — which causes visible flash
+						// with a scrollbar before the next reposition corrects it.
+						if (!skipReposition) {
+							// reposition and resize the tooltip
+							self.reposition();
+						}
 						
 						// if we want to play a little animation showing the content changed
 						if (self.__options.updateAnimation) {

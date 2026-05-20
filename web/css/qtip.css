@@ -5,7 +5,7 @@
    в патче tooltipster продолжал измерять реальный размер.
    !important — потому что сам tooltipster иногда пишет inline visibility и
    может вернуть видимость не вовремя. */
-.tooltipster-base.qtip-settling {
+.qtip-settling {
     visibility: hidden !important;
 }
 

@@ -159,124 +159,96 @@ function attach_qTip(el, force = false) {
 		$load = function (instance, helper) {
 			let $origin = jQuery(helper.tooltip);
 
-			if ($origin.data("loaded") !== true) {
-				jQuery.get($url, function (data) {
-					// порядок такой:
-					//  1) предзагружаем картинки из ответа в кеш, чтобы при вставке HTML
-					//     у <img> сразу были natural-размеры и тултип не "рос" уже после
-					//     первого reposition
-					//  2) instance.content(data) внутри tooltipster триггерит reposition;
-					//     благодаря локальному патчу в tooltipster.bundle.js (realSize
-					//     перед detach -> в SideTip.__reposition) координаты считаются по
-					//     фактической высоте тултипа в DOM
-					//  3) ExpandableCardInit добавляет в тултип absolute-toggle, который
-					//     на flow не влияет, но финальный reposition в RAF*2 страхует от
-					//     любых остаточных layout-shift'ов
-					let setContent = function () {
-						let st = instance.status();
-						if (st.destroyed || !st.open) return;
+			// SideTip-плагин на каждом открытии пересоздаёт DOM-элемент тултипа
+			// (__close сбрасывает _$tooltip = null, __create делает новый), поэтому
+			// в момент functionBefore instance.elementTooltip() ещё null. Чтобы
+			// успеть навесить qtip-settling ДО того, как tooltipster вставит
+			// тултип в body и пользователь увидит промежуточный размер, ловим
+			// событие 'created' — оно триггерится сразу после того, как новый
+			// _$tooltip создан, но ещё до contentInsert/reposition/appendTo(body).
+			// !important в css-правиле нужен потому, что сам tooltipster пишет
+			// inline visibility в своих обработчиках (см. __scrollHandler).
+			if (!instance.__qtipHookBound) {
+				instance.__qtipHookBound = true;
+				instance._on("created", function () {
+					let tip = instance.elementTooltip();
+					if (tip) tip.classList.add("qtip-settling");
+				});
+			}
 
-						// Скрываем тултип на время "усадки" через css-класс с !important —
-						// inline visibility, который tooltipster пишет в своих обработчиках
-						// (см. __scrollHandler), его не перебьёт. visibility, а не display:none —
-						// чтобы getBoundingClientRect в патче tooltipster продолжал измерять
-						// реальный размер контента.
-						let tipEl = instance.elementTooltip();
-						if (tipEl) tipEl.classList.add("qtip-settling");
+			// finalize: запускается и при первом, и при повторном открытии.
+			// К моменту вызова контент уже вставлен в тултип (tooltipster's
+			// __contentInsert + appendTo(body) уже отработали), и можно
+			// инициализировать карточки, дождаться декодирования картинок
+			// и сделать единственный финальный reposition.
+			let finalize = function () {
+				let $tip = jQuery(instance.elementTooltip());
 
-						instance.content(data);
+				if (typeof ExpandableCardInit === "function") {
+					$tip.find(".expandable-card-outer").each(function (index, item) {
+						ExpandableCardInit(item);
+					});
+				}
 
-						let $tip = jQuery(instance.elementTooltip());
-
-						if (typeof ExpandableCardInit === "function") {
-							$tip
-								.find(".expandable-card-outer")
-								.each(function (index, item) {
-									ExpandableCardInit(item);
-								});
+				let waitImgs = $tip
+					.find("img")
+					.toArray()
+					.map(function (img) {
+						if (img.complete && img.naturalWidth > 0) return null;
+						if (typeof img.decode === "function") {
+							return img.decode().catch(function () {});
 						}
+						return new Promise(function (resolve) {
+							let off = function () {
+								img.removeEventListener("load", off);
+								img.removeEventListener("error", off);
+								resolve();
+							};
+							img.addEventListener("load", off);
+							img.addEventListener("error", off);
+						});
+					})
+					.filter(Boolean);
 
-						// дожидаемся, пока все картинки внутри уже вставленного контента
-						// действительно довели свой layout (.complete + .decode), чтобы
-						// финальный reposition сработал ровно по итоговой высоте.
-						let imgs = $tip.find("img").toArray();
-						let waitImgs = imgs
-							.map(function (img) {
-								if (img.complete && img.naturalWidth > 0) return null;
-								if (typeof img.decode === "function") {
-									return img.decode().catch(function () {});
-								}
-								return new Promise(function (resolve) {
-									let off = function () {
-										img.removeEventListener("load", off);
-										img.removeEventListener("error", off);
-										resolve();
-									};
-									img.addEventListener("load", off);
-									img.addEventListener("error", off);
-								});
-							})
-							.filter(Boolean);
-
-						let finish = function () {
+				let finish = function () {
+					let st = instance.status();
+					if (st.destroyed || !st.open) return;
+					// RAF×2 — даём браузеру довести layout (шрифты/последний reflow),
+					// затем reposition по финальной геометрии и убираем "усадку".
+					requestAnimationFrame(function () {
+						requestAnimationFrame(function () {
 							let st2 = instance.status();
 							if (st2.destroyed || !st2.open) return;
-							// RAF×2 — даём браузеру довести layout (картинки/шрифты),
-							// потом финальный reposition и единым шагом снимаем
-							// "усадку" уже на правильной позиции и размере.
-							requestAnimationFrame(function () {
-								requestAnimationFrame(function () {
-									let st3 = instance.status();
-									if (st3.destroyed || !st3.open) return;
-									instance.reposition();
-									let finalTip = instance.elementTooltip();
-									if (finalTip) finalTip.classList.remove("qtip-settling");
-								});
-							});
-						};
-
-						if (waitImgs.length === 0) finish();
-						else Promise.all(waitImgs).then(finish, finish);
-
-						$origin.data("loaded", true);
-					};
-
-					let imgSrcs = [];
-					try {
-						let doc = new DOMParser().parseFromString(data, "text/html");
-						doc.querySelectorAll("img[src]").forEach(function (img) {
-							imgSrcs.push(img.getAttribute("src"));
+							instance.reposition();
+							let finalTip = instance.elementTooltip();
+							if (finalTip) finalTip.classList.remove("qtip-settling");
 						});
-					} catch (e) {
-						imgSrcs = [];
-					}
-
-					if (imgSrcs.length === 0) {
-						setContent();
-						return;
-					}
-
-					let pending = imgSrcs.length;
-					let settled = false;
-					let done = function () {
-						if (settled) return;
-						if (--pending <= 0) {
-							settled = true;
-							setContent();
-						}
-					};
-					// safety: если что-то надолго зависло — всё равно показываем
-					setTimeout(function () {
-						if (settled) return;
-						settled = true;
-						setContent();
-					}, 3000);
-					imgSrcs.forEach(function (src) {
-						let pre = new Image();
-						pre.onload = pre.onerror = done;
-						pre.src = src;
 					});
+				};
+
+				if (waitImgs.length === 0) finish();
+				else Promise.all(waitImgs).then(finish, finish);
+			};
+
+			if ($origin.data("loaded") !== true) {
+				// Первое открытие — тянем контент по ajax.
+				jQuery.get($url, function (data) {
+					let st = instance.status();
+					if (st.destroyed || !st.open) return;
+
+					// content(data, true) — наш патч в tooltipster.bundle.js
+					// подавляет автоматический reposition, который иначе сработал
+					// бы на ещё не "усевшейся" высоте контента (картинки не дошли
+					// до natural size) и зафиксировал бы маленький размер со скроллом.
+					instance.content(data, true);
+					$origin.data("loaded", true);
+					finalize();
 				});
+			} else {
+				// Повторное открытие — контент уже cached в tooltipster.
+				// Ждём, пока tooltipster закончит свой open-flow
+				// (__contentInsert + appendTo body), и догоняем своим финалом.
+				requestAnimationFrame(finalize);
 			}
 		};
 	}
