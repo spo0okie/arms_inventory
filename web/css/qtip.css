@@ -1,82 +1,87 @@
-
-
 /* ТУЛТИПЫ */
-.tooltipster-base {
+/* Отключено: правило перебивало inline `height`, который tooltipster
+   выставляет на тултип, из-за чего реальная высота расходилась с той,
+   по которой tooltipster считал координаты, и тултип "сползал" вниз
+   и закрывал origin. После правок в tooltipster.bundle.js (см. LOCAL PATCH:
+   reposition / __reposition используют realSize вместо ruler-измерения)
+   tooltipster сам выставляет правильный height = фактическому размеру
+   контента, поэтому override больше не нужен. */
+/*.tooltipster-base {
     height: auto !important;
-}
+}*/
 .ttip-row {
-    display: flex;
-    flex-direction: row;
-    vertical-align: top;
-    padding: 0;
-    margin: 0;
+	display: flex;
+	flex-direction: row;
+	vertical-align: top;
+	padding: 0;
+	margin: 0;
 }
 
 .ttip-preview {
-    /*width: 100px;*/
-    /*display: inline-block;*/
-    padding-top: 15px;
-    padding-right: 7px;
-    margin: 0;
+	/*width: 100px;*/
+	/*display: inline-block;*/
+	padding-top: 15px;
+	padding-right: 7px;
+	margin: 0;
 }
 
 .ttip-card {
-    display: inline-block;
-    vertical-align: top;
-    min-width: 250px;
-    padding: 0;
-    margin: 0;
+	display: inline-block;
+	vertical-align: top;
+	min-width: 250px;
+	padding: 0;
+	margin: 0;
 }
 
 .ttip-card h1 {
-    font-size: 14px;
-    font-weight: bold;
-    padding: 0;
-    margin: 0;
+	font-size: 14px;
+	font-weight: bold;
+	padding: 0;
+	margin: 0;
 }
 
 .ttip-card h2 {
-    font-size: 12px;
-    font-weight: bold;
-    padding: 0;
-    margin: 0;
+	font-size: 12px;
+	font-weight: bold;
+	padding: 0;
+	margin: 0;
 }
 .ttip-card p {
-    margin-bottom: 3px;
+	margin-bottom: 3px;
 }
 
 .ttip-card h3 {
-    font-size: 12px;
-    font-weight: bold;
-    padding: 0;
-    margin: 0;
+	font-size: 12px;
+	font-weight: bold;
+	padding: 0;
+	margin: 0;
 }
 
 .ttip-card .h4,
 .ttip-card h4 {
-    font-size: 11px;
-    font-weight: bolder;
-    padding: 0;
-    margin: 0;
+	font-size: 11px;
+	font-weight: bolder;
+	padding: 0;
+	margin: 0;
 }
 
 .ttip-card .h5,
 .ttip-card h5 {
-    font-size: 11px;
-    font-weight: 550;
-    padding: 0;
-    margin: 0;
+	font-size: 11px;
+	font-weight: 550;
+	padding: 0;
+	margin: 0;
 }
 
 .ttip-card hr {
-    padding: 0;
-    margin: 0;
-    color: black;
-    background-color: #222;
-    height: 1px;
-    border: none;
+	padding: 0;
+	margin: 0;
+	color: black;
+	background-color: #222;
+	height: 1px;
+	border: none;
 }
 
 .qtip-wide {
-    width: 500px;
+	width: 500px;
 }

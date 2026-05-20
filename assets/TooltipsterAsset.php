@@ -18,8 +18,11 @@ class TooltipsterAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
 	public $js = [
-		'tooltipster/js/tooltipster.main.min.js',
-		'tooltipster/js/tooltipster.bundle.min.js',
+		// non-min versions: содержат локальные правки (см. reposition / __reposition),
+		// которые используют реальный размер тултипа из DOM вместо измерения через
+		// ruler-clone — это устраняет смещение тултипа при contentAsHTML + ajax.
+		'tooltipster/js/tooltipster.main.js',
+		'tooltipster/js/tooltipster.bundle.js',
 		'tooltipster/js/qtip_ajax.js',
 	];
 	public $jsOptions = [View::POS_HEAD];

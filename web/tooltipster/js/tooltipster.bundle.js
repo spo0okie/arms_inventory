@@ -2829,22 +2829,52 @@ $.Tooltipster.prototype = {
 				// if the tooltip has not been removed from DOM manually (or if it
 				// has been detached on purpose)
 				if (tooltipIsDetached || bodyContains(self._$tooltip)) {
-					
+
+					// LOCAL PATCH: capture the *actual* rendered size of the tooltip
+					// before we detach it. The default measurement path uses a clone
+					// inside .tooltipster-ruler whose layout context can produce a
+					// different size than the real tooltip (especially after the
+					// content was changed via instance.content()). Passing realSize
+					// down to the positioning plugin lets it use the truthful size
+					// and avoid the tooltip overlapping the origin.
+					//
+					// Important: tooltipster keeps inline `height`/`width` on the
+					// tooltip element from the previous reposition, so if we read
+					// getBoundingClientRect() right away we get those *stale* sizes,
+					// not the dimensions the new content actually wants. We clear
+					// them, measure, and let the upcoming reposition write fresh
+					// values. detach() will remove the element from the layout right
+					// after, so the temporary clear is invisible to the user.
+					var realSize = null;
+					if (!tooltipIsDetached && self._$tooltip[0]) {
+						var tipEl = self._$tooltip[0];
+						tipEl.style.height = '';
+						tipEl.style.width = '';
+						var realBcr = tipEl.getBoundingClientRect();
+						if (realBcr.height > 0 && realBcr.width > 0) {
+							realSize = {
+								height: realBcr.height,
+								width: realBcr.width
+							};
+						}
+					}
+
 					if (!tooltipIsDetached) {
 						// detach in case the tooltip overflows the window and adds
 						// scrollbars to it, so __geometry can be accurate
 						self._$tooltip.detach();
 					}
-					
+
 					// refresh the geometry object before passing it as a helper
 					self.__Geometry = self.__geometry();
-					
+
 					// let a plugin fo the rest
 					self._trigger({
 						type: 'reposition',
 						event: event,
 						helper: {
-							geo: self.__Geometry
+							geo: self.__Geometry,
+							realSize: realSize
 						}
 					});
 				}
@@ -3722,11 +3752,26 @@ $.tooltipster._plugin({
 											helper.geo.available[container][side].height - distance.vertical
 										),
 									rulerResults = rulerConfigured.measure();
-								
+
 								testResult.size = rulerResults.size;
+								// LOCAL PATCH: prefer the real size of the tooltip (measured in
+								// the actual DOM before detach, see core.reposition) over the
+								// ruler/clone measurement when it is available and we're in
+								// natural mode. The ruler clone lives in .tooltipster-ruler and
+								// can produce a different shrink-to-fit width/height than the
+								// real tooltip (especially after CSS overrides or post-content
+								// modifications like ExpandableCardInit). Using the real size
+								// keeps the computed coordinate consistent with what the user
+								// actually sees on screen.
+								if (mode == 'natural' && helper.realSize) {
+									testResult.size = {
+										height: helper.realSize.height,
+										width: helper.realSize.width
+									};
+								}
 								testResult.outerSize = {
-									height: rulerResults.size.height + distance.vertical,
-									width: rulerResults.size.width + distance.horizontal
+									height: testResult.size.height + distance.vertical,
+									width: testResult.size.width + distance.horizontal
 								};
 								
 								if (mode == 'natural') {
