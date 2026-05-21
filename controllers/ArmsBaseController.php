@@ -109,28 +109,28 @@ use yii\web\UnauthorizedHttpException;
  */
 class ArmsBaseController extends Controller
 {
-	
+
 	/** @var string класс модели, операции с которой реализует контроллер */
 	public $modelClass;
-	
+
 	/** @var bool показывать ли по умолчанию архивированные модели */
 	public $defaultShowArchived=false;
-	
-	
+
+
 	//как в карте доступов обозначать анонимный и авторизованный доступы
 	const PERM_ANONYMOUS='@anonymous';
 	const PERM_AUTHENTICATED='@authorized';
 	const PERM_EVERYONE='@everyone';
 	const PERM_EDIT='edit';
 	const PERM_VIEW='view';
-	
+
 	/**
 	 * @var string HTML код, который будет добавлен на стандартную index страницу
 	 * справа от (после) кнопки добавления/создания модели
 	 * см views/layouts/index.php
 	 */
 	public $additionalCreateButton='';
-	
+
 	/**
 	 * @var string HTML код, который будет добавлен на стандартную index страницу
 	 * слева от (перед) кнопкой настроек либо перед переключателем архивных элементов (если он отображается)
@@ -186,7 +186,7 @@ class ArmsBaseController extends Controller
 		}
 		return static::$testDataCache[$class];
 	}
-	
+
 	/**
 	 * actions action.
 	 */
@@ -199,7 +199,7 @@ class ArmsBaseController extends Controller
 			],
 		]);
 	}
-	
+
 	/**
 	 * Карта доступа с какими полномочиями, какие actions можно делать
 	 * @return array
@@ -221,7 +221,7 @@ class ArmsBaseController extends Controller
 			self::PERM_AUTHENTICATED=>[],
 		];
 	}
-	
+
 	/**
 	 * Что должен вернуть контроллер
 	 * @param array $defaultPath путь куда вернуться если вызов не Ajax и не указано previous
@@ -241,7 +241,7 @@ class ArmsBaseController extends Controller
 			return $this->redirect($defaultPath);
 		}
 	}
-	
+
 	/**
 	 * Отрендерить страничку в обычном или Ajax режиме в зависимости от запроса
 	 * @param      $path
@@ -252,15 +252,15 @@ class ArmsBaseController extends Controller
 	public function defaultRender($path,$params,$ajaxParams=[]) {
 		//если параметры для режима Ajax не заданы, то те же что и для обычного
 		if (empty($ajaxParams)) $ajaxParams=$params;
-		
+
 		//добавляем modalParent по умолчанию
 		$ajaxParams=ArrayHelper::recursiveOverride(['modalParent' => '#modal_form_loader'],$ajaxParams);
-		
-		return Yii::$app->request->isAjax?
+
+		return Yii::$app->request->isAjax || (Yii::$app->request->get('_layout') === 'ajax')?
 			$this->renderAjax($path,$ajaxParams):
 			$this->render($path,$params);
 	}
-	
+
 	/**
 	 * Устанавливает один параметр запроса
 	 * (из коробки только все одновременно можно установить - пришлось это дописать)
@@ -272,7 +272,7 @@ class ArmsBaseController extends Controller
 		$newParams=ArrayHelper::recursiveOverride($params,$param);
 		Yii::$app->request->setQueryParams($newParams);
 	}
-	
+
 	/**
 	 * Корректирует роль доступа в зависимости от настроек приложения
 	 * согласно https://wiki.reviakin.net/инвентаризация:настройка#авторизация
@@ -297,7 +297,7 @@ class ArmsBaseController extends Controller
 		}
 		return $permission;
 	}
-	
+
 	/**
 	 * Принимает на вход упрощенную карту вида [
 	 * 		'permission1'=>['action1','action2',...],
@@ -310,9 +310,9 @@ class ArmsBaseController extends Controller
 		$rules=[];
 		foreach ($map as $permission=>$actions) {
 			$rule=['allow'=>true, 'actions'=>$actions];
-			
+
 			$permission=static::customizeAccessPermission($permission);
-			
+
 			switch ($permission) {
 				case self::PERM_AUTHENTICATED:
 					$rule['roles']=['@'];
@@ -339,7 +339,7 @@ class ArmsBaseController extends Controller
 			},
 		];
 	}
-	
+
 	/**
 	 * Возвращает список отключенных методов
 	 * (которые будут унаследованы, но отключены в дочерних классах)
@@ -369,8 +369,8 @@ class ArmsBaseController extends Controller
 	protected static function skipScenario(string $name, string $reason): array
 	{
 		return [['name' => $name,'skip' => true,'reason' => $reason]];
-	}	
-		
+	}
+
 	/**
      * @inheritdoc
      */
@@ -399,13 +399,13 @@ class ArmsBaseController extends Controller
 				},
 			],
 		];
-		
+
 		//if (!(empty(Yii::$app->params['useRBAC']) && empty(Yii::$app->params['authorizedView'])))
 		$behaviors['access']=static::buildAccessRules($this->accessMap());
-		
+
 		return $behaviors;
     }
-	
+
 	/**
 	 * Ищет в переданном наборе параметров параметр SearchOverride, которым перекрывает
 	 * параметры поиска в основном массиве
@@ -421,24 +421,24 @@ class ArmsBaseController extends Controller
 
 		//если перекрытие параметров поиска есть
 		if (isset($params['SearchOverride'])) {
-			
+
 			$override=$params['SearchOverride'];
 			unset($params['SearchOverride']);
-			
+
 			//Если указано имя поисковой модели, и override его не содержит,
 			//то складываем все параметры внутрь поискового класса, т.к. перекрыть надо именно его
 			if ($searchModel && !isset($override[$searchModel]))
 				$override=[$searchModel=>$override];
-			
+
 			$params=ArrayHelper::recursiveOverride(
 				$params,
 				$override
 			);
 		}
-		
+
 		return $params;
 	}
-	
+
 	/**
 	 * Инициирует поиск с учетом наличия переключателя архивных записей
 	 * @param      $searchModel
@@ -449,14 +449,14 @@ class ArmsBaseController extends Controller
     public function archivedSearchInit(&$searchModel,&$dataProvider,&$switchArchivedCount,$columns=null,$params=null)
 	{
 		$searchModel->archived= Yii::$app->request->get('showArchived',$this->defaultShowArchived);
-		
+
 		//признак того, что свойства ниже указаны явно (не равны значениям по умолчанию)
 		$direct_archived=Yii::$app->request->get('showArchived','unset')!='unset';
-		
+
 		if (is_null($params)) $params=Yii::$app->request->queryParams;
-		
+
 		$params=$this->searchParamsOverride($params,$searchModel);
-		
+
 		$dataProvider = $searchModel->search($params,$columns);
 		if (!$dataProvider->totalCount) {
 			if (!$direct_archived && !$searchModel->archived) {
@@ -473,18 +473,18 @@ class ArmsBaseController extends Controller
 					$dataProvider=$switchArchivedData;
 				}
 			}
-			
+
 		}
-		
+
 		if (!isset($switchArchivedCount)) {
 			//ищем то же самое, но с архивными в противоположном положении
 			$switchArchived=clone $searchModel;
 			$switchArchived->archived=!$switchArchived->archived;
 			$switchArchivedCount=$switchArchived->search($params,$columns)->totalCount;
 		}
-		
+
 	}
-    
+
     /**
      * Выводит страницу со списком моделей (UI: таблица/список объектов).
      *
@@ -510,18 +510,18 @@ class ArmsBaseController extends Controller
     	$searchModelClass=$this->modelClass.'Search';
 		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'index.php')?
 			'index':'/layouts/index';
-   
+
 		$columns=DynaGridWidget::fetchVisibleAttributes($model,StringHelper::class2Id($this->modelClass).'-index');
-		
+
     	if (class_exists($searchModelClass)) {
 			$searchModel = new $searchModelClass();
-			
+
 			if ($searchModel->hasAttribute('archived') || $searchModel->canSetProperty('archived')) {
 				$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount,$columns);
 			} else {
 				$dataProvider = $searchModel->search(Yii::$app->request->queryParams,$columns);
 			}
-			
+
 			return $this->render($view, [
 				'searchModel' => $searchModel,
 				'dataProvider' => $dataProvider,
@@ -530,19 +530,19 @@ class ArmsBaseController extends Controller
 				'additionalToolButton' => $this->additionalToolButton,
 				'model' => $model,
 			]);
-			
+
 		} else {
 			$query=($this->modelClass)::find();
 			if ($model->hasAttribute('archived')) {
 				if (!Yii::$app->request->get('showArchived',$this->defaultShowArchived))
 					$query->where(['not',['IFNULL(archived,0)'=>1]]);
 			}
-		
+
 			$dataProvider = new ActiveDataProvider([
 				'query' => $query,
 				'pagination' => ['pageSize' => 100,],
 			]);
-			
+
 			return $this->render($view, [
 				'dataProvider' => $dataProvider,
 				'model' => $model,
@@ -551,7 +551,7 @@ class ArmsBaseController extends Controller
 			]);
 		}
     }
-	
+
 	/**
 	 * Тест для {@see actionIndex()}: проверяет, что страница списка моделей открывается без ошибок.
 	 *
@@ -575,8 +575,8 @@ class ArmsBaseController extends Controller
 			'response' => 200,
 		]];
 	}
-	
-	
+
+
 	/**
 	 * Асинхронный рендер только таблицы DynaGrid (без оболочки страницы).
 	 *
@@ -601,17 +601,17 @@ class ArmsBaseController extends Controller
 	{
 		/** @var \app\models\base\ArmsModel $model */
 		$model= new $this->modelClass();
-		
+
 		$searchModelClass=$this->modelClass.'Search';
 		$classId=StringHelper::class2Id($this->modelClass);
 		$gridId=Yii::$app->request->get('gridId', $classId.'-list');
-		
+
 		$columns=DynaGridWidget::fetchVisibleAttributes($model,$gridId);
-		
+
 		if (class_exists($searchModelClass)) {
 			/** @var ArmsModel $searchModel */
 			$searchModel = new $searchModelClass();
-			
+
 			if ($searchModel->hasAttribute('archived') || $searchModel->canSetProperty('archived')) {
 				$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount,$columns);
 			} else {
@@ -622,12 +622,12 @@ class ArmsBaseController extends Controller
 			}
 			Yii::$app->response->headers->set('X-Pagination-Total-Count', $dataProvider->totalCount);
 			return $this->renderAjax('//layouts/async-grid', compact('gridId','source','model','searchModel','dataProvider'));
-			
+
 		} else {
 			throw new NotFoundHttpException("Search class $searchModelClass not found");
 		}
 	}
-	
+
 	/**
 	 * Тест для {@see actionAsyncGrid()}: проверяет корректность асинхронного рендера таблицы.
 	 *
@@ -673,13 +673,13 @@ class ArmsBaseController extends Controller
 	{
 		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'item.php')?
 			'item':'/layouts/item';
-		
+
 		return $this->renderPartial($view, [
 			'model' => $this->findModel($id),
 			'static_view'=>true,
 		]);
 	}
-	
+
 
 	/**
 	 * Тест для {@see actionItem()}: проверяет рендер карточки для двух крайних случаев данных.
@@ -705,7 +705,7 @@ class ArmsBaseController extends Controller
 			['name' => 'item empty', 'GET' => ['id' => $empty->id], 'response' => 200,],
 		];
 	}
-	
+
 	/**
 	 * Выводит короткую карточку модели, найденной по значению атрибута `name`.
 	 *
@@ -733,7 +733,7 @@ class ArmsBaseController extends Controller
 			'static_view'=>true,
 		]);
 	}
-	
+
 	/**
 	 * Тест для {@see actionItemByName()}: проверяет поиск и рендер карточки по имени.
 	 *
@@ -761,8 +761,8 @@ class ArmsBaseController extends Controller
 		$emptyName=$empty->getName();
 		return [
 			[
-				'name' => 'item by name full',	
-				'GET' => ['name' => $full->getName()],	
+				'name' => 'item by name full',
+				'GET' => ['name' => $full->getName()],
 			],
 			[
 				'name' => 'item by name empty',
@@ -772,7 +772,7 @@ class ArmsBaseController extends Controller
 			],
 		];
 	}
-	
+
 	/**
 	 * Выводит tooltip-карточку модели (всплывающее представление).
 	 *
@@ -801,7 +801,7 @@ class ArmsBaseController extends Controller
 	{
 		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'ttip.php')?
 			'ttip':'/layouts/ttip';
-		
+
 		if ($t=Yii::$app->request->get('timestamp')) {
 			return $this->renderPartial($view, [
 				'model' => $this->findJournalRecord($id,$t),
@@ -811,7 +811,7 @@ class ArmsBaseController extends Controller
 			'model' => $this->findModel($id),
 		]);
 	}
-	
+
 	/**
 	 * Тест для {@see actionTtip()}: проверяет рендер tooltip-карточки для двух крайних случаев.
 	 *
@@ -836,7 +836,7 @@ class ArmsBaseController extends Controller
 			['name' => 'ttip empty', 'GET' => ['id' => $empty->id], 'response' => 200,],
 		];
 	}
-	
+
 	/**
 	 * Отображает полную страницу просмотра конкретной модели.
 	 *
@@ -862,7 +862,7 @@ class ArmsBaseController extends Controller
 			'model' => $this->findModel($id),
 		]);
 	}
-	
+
 	/**
 	 * Тест для {@see actionView()}: проверяет рендер страницы просмотра для двух крайних случаев.
 	 *
@@ -920,10 +920,10 @@ class ArmsBaseController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ArmsForm::validate($model);
         }
-        
+
         return null;
     }
-	
+
 	/**
 	 * Тест для {@see actionValidate()}: проверяет Ajax-валидацию для новой и существующей модели.
 	 *
@@ -949,7 +949,7 @@ class ArmsBaseController extends Controller
 			['name' => 'validate existing','POST' => ModelHelper::fillForm($data),'GET' => ['id' => $model->id],],
 		];
 	}
-	
+
 	/**
 	 * Маршрут куда идти при успешном сохранении, создании
 	 * @param $model
@@ -961,7 +961,7 @@ class ArmsBaseController extends Controller
 			'id'=>$model->id,
 		];
 	}
-	
+
 	/**
 	 * Маршрут куда идти при успешном удалении
 	 * @param $model
@@ -971,8 +971,8 @@ class ArmsBaseController extends Controller
 	public function routeOnDelete($model) {
 		return ['index'];
 	}
-	
-	
+
+
 	/**
 	 * Отображает форму создания новой модели и обрабатывает её отправку.
 	 *
@@ -1009,14 +1009,14 @@ class ArmsBaseController extends Controller
 			}
 			return $this->defaultReturn($this->routeOnUpdate($model),[$model]);
 		}
-		
+
 		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'create.php')?
 			'create':'/layouts/create';
-		
+
 		$model->load(Yii::$app->request->get());
 		return $this->defaultRender($view, ['model' => $model,]);
 	}
-	
+
 	/**
 	 * Тест для {@see actionCreate()}: проверяет загрузку формы и создание записи через POST.
 	 *
@@ -1043,8 +1043,8 @@ class ArmsBaseController extends Controller
 			],
 		];
 	}
-	
-	
+
+
 	/**
      * Отображает форму редактирования существующей модели и обрабатывает её отправку.
      *
@@ -1094,7 +1094,7 @@ class ArmsBaseController extends Controller
 		$model->load(Yii::$app->request->get());
 		return $this->defaultRender($view, ['model' => $model,]);
     }
-	
+
 	/**
 	 * Тест для {@see actionUpdate()}: проверяет открытие формы редактирования и POST-обновление.
 	 *
@@ -1124,9 +1124,9 @@ class ArmsBaseController extends Controller
 			]
 		];
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Удаляет существующую модель.
 	 *
@@ -1163,7 +1163,7 @@ class ArmsBaseController extends Controller
 		) return $this->redirect($url);
         return $this->redirect($defaultRoute);
     }
-	
+
 	/**
 	 * Тест для {@see actionDelete()}: проверяет удаление существующей записи через POST.
 	 *
@@ -1189,7 +1189,7 @@ class ArmsBaseController extends Controller
 			'response' => 302,
 		]];
 	}
-	
+
 	/**
 	 * Возвращает класс модели по имени
 	 * @param $class
@@ -1202,14 +1202,14 @@ class ArmsBaseController extends Controller
 		if (!str_contains($class,'\\')) {
 			$class="app\\models\\$class";
 		}
-		
+
 		if (!class_exists($class)) {
 			throw new NotFoundHttpException("Class $class not found");
 		}
-		
+
 		return $class;
 	}
-	
+
 	public static function findClassModel($class,$id)
 	{
 		$class=static::findClass($class);
@@ -1218,10 +1218,10 @@ class ArmsBaseController extends Controller
 		if (($model = ($class)::findOne($id)) !== null) {
 			return $model;
 		}
-		
+
 		throw new NotFoundHttpException("$class [$id] does not exist.");
 	}
-	
+
 	/**
 	 * Finds the Arms model based on its primary key value.
 	 * If the model is not found, a 404 HTTP exception will be thrown.
@@ -1233,16 +1233,16 @@ class ArmsBaseController extends Controller
 	{
 		return static::findClassModel($this->modelClass,$id);
 	}
-	
+
 	protected function findByName(string $name)
 	{
 		if (($model = ($this->modelClass)::find()->where(['name'=>$name])->one()) !== null) {
 			return $model;
 		}
-		
+
 		throw new NotFoundHttpException('Object with requested name does not exist.');
 	}
-	
+
 
 	/**
 	 * Finds the Arms model based on its primary key value.
@@ -1257,11 +1257,11 @@ class ArmsBaseController extends Controller
 		if (($model = ($this->modelClass)::fetchJournalRecord($id,$timestamp)) !== null) {
 			return $model;
 		}
-		
+
 		throw new NotFoundHttpException('The requested page does not exist.');
 	}
 
-	
+
 	/**
 	 * Тест для action `editable` (inline-редактирование через {@see EditableColumnAction}).
 	 *
