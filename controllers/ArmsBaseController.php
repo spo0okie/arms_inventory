@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\assets\AppAsset;
 use app\components\DynaGridWidget;
 use app\components\Forms\ArmsForm;
 use app\components\Forms\assets\ArmsFormAsset;
@@ -256,7 +257,13 @@ class ArmsBaseController extends Controller
 		//добавляем modalParent по умолчанию
 		$ajaxParams=ArrayHelper::recursiveOverride(['modalParent' => '#modal_form_loader'],$ajaxParams);
 
-		return Yii::$app->request->isAjax || (Yii::$app->request->get('_layout') === 'ajax')?
+		//если нам нужно вытащить только контент без хедера и футера
+		if (Yii::$app->request->get('_layout') === 'embed') {
+			AppAsset::register($this->view);
+			$this->layout = '//layouts/embed';
+			return $this->renderAjax($path,$params);
+		}
+		return Yii::$app->request->isAjax?
 			$this->renderAjax($path,$ajaxParams):
 			$this->render($path,$params);
 	}
