@@ -89,11 +89,11 @@ class PhonesController extends BaseRestController
 			if (is_object($arm=$tech->arm)) {
 				//пользователь у АРМа есть?
 				if (is_object($user=$arm->user)) {
-					return $user->Ename;
+					return $user;
 				}
 			}
 			if (is_object($user=$tech->user)) {
-				return $user->Ename;
+				return $user;
 			}
 		}
 		$user= Users::find()
