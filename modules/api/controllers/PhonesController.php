@@ -16,7 +16,7 @@ use OpenApi\Attributes as OA;
  */
 class PhonesController extends BaseRestController
 {
-	
+
 	public function disabledActions(): array
 	{
 		return ['index','view','update','create','delete','search','filter'];
@@ -27,14 +27,14 @@ class PhonesController extends BaseRestController
 		return [
 			'view'=>$this->viewActions,
 			'view-phones'=>$this->viewActions,
-			ArmsBaseController::PERM_ANONYMOUS=>[],
+			ArmsBaseController::PERM_ANONYMOUS=>['preflight'],
 		];
 	}
-	
+
 	public function actions(){
 		return $this->viewActions;
 	}
-	
+
 	#[OA\Get(
 		path: "/web/api/phones/search-by-num",
 		summary: "Поиск имени пользователя по внутреннему номеру телефона",
@@ -108,10 +108,10 @@ class PhonesController extends BaseRestController
 		 */
 		if (is_object($user))
 			return $user->Ename;
-		
+
 		throw new NotFoundHttpException("not found");
 	}
-	
+
 	#[OA\Get(
 		path: "/web/api/{controller}/search-by-user",
 		summary: "Поиск внутреннего номера телефона по ID или логину пользователя",
