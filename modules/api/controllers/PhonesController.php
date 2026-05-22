@@ -37,7 +37,7 @@ class PhonesController extends BaseRestController
 
 
 	#[OA\Get(
-		path: "/web/api/phones/find-by-num",
+		path: "/web/api/phones/search-by-num",
 		summary: "Поиск пользователя по внутреннему номеру телефона",
 		parameters: [new OA\Parameter(
 			name: "num",
@@ -75,7 +75,7 @@ class PhonesController extends BaseRestController
 	 * @return string  Полное ФИО пользователя (Users.Ename)
 	 * @throws NotFoundHttpException если пользователь не найден
 	 */
-	public function actionFindByNum(string $num){
+	public function actionSearchByNum(string $num){
 		//ищем телефонный аппарат по номеру
 		$tech = Techs::find()
 			->where(['comment' => $num ])
@@ -113,7 +113,7 @@ class PhonesController extends BaseRestController
 
 
 	#[OA\Get(
-		path: "/web/api/phones/search-by-num",
+		path: "/web/api/phones/filter-by-num",
 		summary: "Поиск имени пользователя по внутреннему номеру телефона",
 		parameters: [new OA\Parameter(
 			name: "num",
@@ -129,9 +129,10 @@ class PhonesController extends BaseRestController
 				content: new OA\MediaType(
 					mediaType: "text/plain",
 					schema: new OA\Schema(
-						description: "Полные ФИО пользователя",
-						type: "string",
-						example: "Иванов Иван Иванович"
+						type: "array",
+						items: new OA\Items(
+							ref: "#/components/schemas/{model}(read)"
+						)
 					)
 				)
 			),
@@ -150,15 +151,42 @@ class PhonesController extends BaseRestController
 	 * GET-параметры:
 	 * @param string $num  Внутренний номер телефона (значение поля comment у Techs или phone у Users)
 	 *
-	 * @return string  Полное ФИО пользователя (Users.Ename)
+	 * @return array пользователи с подходящим номером телефона
 	 * @throws NotFoundHttpException если пользователь не найден
 	 */
-	public function actionSearchByNum(string $num){
+	public function actionFilterByNum(string $num){
+		/** @var Users[] $users */
+		$users=[];
 		//ищем телефонный аппарат по номеру
-		$user=static::actionFindByNum($num);
-		if (is_object($user))
-			return $user->Ename;
-
+		$techs = Techs::find()
+			->where(['comment' => $num ])
+			->all();
+		/**
+		 * @var Techs[] $techs
+		 */
+		//если нашли
+		if (count($techs)) foreach ($techs as $tech){
+			//он прикреплен к АРМ?
+			if (is_object($arm=$tech->arm)) {
+				//пользователь у АРМа есть?
+				if (is_object($user=$arm->user)) {
+					$users[$user->id]=$user;
+				}
+			}
+			if (is_object($user=$tech->user)) {
+				$users[$user->id]=$user;
+			}
+		}
+		$usersByPhone= Users::find()
+			->where([
+				'phone'=>$num,
+				'Uvolen'=>false,
+			])
+			->all();
+		if (count($usersByPhone)) foreach($usersByPhone as $user) {
+			$users[$user->id]=$user;
+		}
+		if (count($users)) return $users[];
 		throw new NotFoundHttpException("not found");
 	}
 
