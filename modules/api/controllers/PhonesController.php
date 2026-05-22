@@ -21,7 +21,7 @@ class PhonesController extends BaseRestController
 	{
 		return ['index','view','update','create','delete','search','filter'];
 	}
-	public $viewActions=['search-by-user','search-by-num','find-by-num'];
+	public $viewActions=['search-by-user','search-by-num','filter-by-num'];
 	public function accessMap(): array
 	{
 		return [
