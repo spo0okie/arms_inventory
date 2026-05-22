@@ -186,7 +186,7 @@ class PhonesController extends BaseRestController
 		if (count($usersByPhone)) foreach($usersByPhone as $user) {
 			$users[$user->id]=$user;
 		}
-		if (count($users)) return $users;
+		if (count($users)) return array_values($users);
 		throw new NotFoundHttpException("not found");
 	}
 
