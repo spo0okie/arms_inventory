@@ -199,6 +199,9 @@ cd modules/schedules/compile/lib/js && npx jest
 
 | Приоритет | Что | Где |
 | --------- | --- | --- |
+| высокий | **Приоритет над override**: дата-исключение `main` внутри окна override перебивает недельный график override; рабочий/нерабочий период `main` накладывается поверх графика override (`getDateIntervals`, `nextWorkingDateTime`) | `CompiledScheduleHelperTest.php` |
+| высокий | **Паритет legacy↔compiled**: `Schedules::getDateSchedule()` и `CompiledScheduleHelper::getDateIntervals()` дают одинаковый график на сценариях «override + дата-исключение» и «override + период» | новый `ScheduleLegacyCompiledParityTest.php` |
+| высокий | **Компиляция**: перекрытия (`override`) в `compiled_json` не содержат `dates`/`periods`; дата-запись, ошибочно привязанная к override-расписанию, не попадает в его `dates` | `SchedulesCompilerTest.php` |
 | высокий | `SchedulesCompiler::compile()` с **глубокой иерархией** (3+ уровня parent_id) и проверкой защиты от циклов на 100 уровнях | `tests/unit/modules/schedules/SchedulesCompilerTest.php` |
 | высокий | `CompiledScheduleHelper`: расхождение TZ — `tz_shift_tsm != 0`, проверка что серверный/клиентский результат совпадают на одних и тех же входах | новый `CompiledScheduleTimezoneTest.php` |
 | высокий | `getStatus()`/`isWorkTime()` для **колонок grid'а** — интеграционный тест на `views/schedules/columns.php`: серверный и клиентский расчёт должны давать одинаковый ответ для одного и того же `compiled_json` и текущего времени | новый `ScheduleColumnsIntegrationTest.php` |
@@ -213,6 +216,7 @@ cd modules/schedules/compile/lib/js && npx jest
 
 | Приоритет | Что |
 | --------- | --- |
+| высокий | **Приоритет над override**: дата-исключение/период `main` перебивают/накладываются поверх недельного графика override (`getDateIntervals`, `nextWorkingDateTime`); проверить, что результат совпадает с PHP-рантаймом |
 | высокий | Заполнить **все** Test Cases из таблиц `compile.md` — сейчас покрыто только happy-path. Особо: Edge/Error/Integration строки для `getDatePeriods`, `getDatePeriodsIntervals`, `getDateIntervals`, `isWorkDay`, `isWorkTime`, `getMeta`, `nextWorkingDateTime`, `nextWorkingMeta`, `findOverride`, `nextOverride`, `findPeriod`, `nextPeriod`, `nextWorkDateEntry`, `nextWeekDayEntry`, `nextRecord` |
 | высокий | Тест на синхронизацию JS- и PHP-рантайма: общий набор фикстур, оба должны давать одинаковый ответ. Сейчас фикстуры дублируются, что чревато расхождением |
 | средний | Тест на `tz_shift_tsm`: вход «локальное время как UTC», результат совпадает с серверным `CompiledScheduleHelper` |

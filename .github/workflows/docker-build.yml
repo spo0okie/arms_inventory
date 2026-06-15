@@ -1,0 +1,116 @@
+name: Build & Test ARMS image
+
+# Перенос сборки docker-образа из .gitlab-ci.yml в GitHub Actions.
+# Сначала прогоняются тесты (unit + acceptance + rest), и только если они зелёные —
+# собирается (и на master публикуется) docker-образ приложения.
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  IMAGE: spo0okie/inventory
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # ТЕСТЫ (воспроизводят локальный прогон: PHP 8.2 + MySQL + встроенный web-сервер)
+  # ---------------------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "1"
+          MYSQL_DATABASE: arms_test
+          MYSQL_INITDB_SKIP_TZINFO: "1"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uroot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: intl, pdo_mysql, zip, gd, mbstring, xml, bcmath, gmp, ldap, curl, imagick
+          ini-values: error_reporting=E_ALL & ~E_DEPRECATED, memory_limit=1G
+          tools: composer:v2
+
+      # config/*-local.php и ldap.php в репозиторий не входят (gitignored, содержат секреты),
+      # поэтому для прогона тестов создаём минимальные заглушки.
+      # test-web.php всё равно переопределяет db на arms_test/root, так что пустых db-local/params-local достаточно.
+      - name: Create local config stubs
+        run: |
+          printf '<?php return [];\n' > config/params-local.php
+          printf '<?php return [];\n' > config/db-local.php
+          printf '<?php return [];\n' > config/web-local.php
+          printf '<?php return [ "class" => "Edvlerblog\\\\Adldap2\\\\Adldap2Wrapper", "providers" => [ "default" => [ "autoconnect" => false, "config" => [ "hosts" => ["localhost"], "base_dn" => "", "username" => "", "password" => "" ] ] ] ];\n' > config/ldap.php
+
+      - name: Install dependencies
+        env:
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ secrets.COMPOSER_GITHUB_TOKEN || github.token }}"}}'
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      # Схема тестовой БД: грузим демо-дамп проекта (acceptance/rest при старте
+      # пересоздают БД из него самостоятельно, unit'у нужна готовая схема).
+      - name: Load test DB schema
+        run: mysql -h 127.0.0.1 -P 3306 -u root arms_test < tests/_data/arms_demo.sql
+
+      - name: Start test web server (:8081)
+        run: |
+          php -S 127.0.0.1:8081 -t . > /tmp/websrv.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf "http://127.0.0.1:8081/web/index-test.php?r=site/index" > /dev/null && exit 0
+            sleep 1
+          done
+          echo "web server did not start"; cat /tmp/websrv.log; exit 1
+
+      - name: Unit tests
+        run: php vendor/bin/codecept run unit
+
+      - name: Acceptance tests
+        run: php vendor/bin/codecept run acceptance
+
+      - name: REST tests
+        run: php vendor/bin/codecept run rest
+
+  # ---------------------------------------------------------------------------
+  # СБОРКА DOCKER-ОБРАЗА (порт build-app из .gitlab-ci.yml)
+  # ---------------------------------------------------------------------------
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Публикуем образ только при push в master. На PR — только проверяем, что собирается.
+      - name: Login to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build (and push on master)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          tags: ${{ env.IMAGE }}:v1
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          build-args: |
+            COMPOSER_AUTH={"github-oauth":{"github.com":"${{ secrets.COMPOSER_GITHUB_TOKEN || github.token }}"}}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

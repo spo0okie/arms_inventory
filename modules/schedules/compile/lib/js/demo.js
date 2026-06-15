@@ -268,12 +268,24 @@ class ScheduleRuntime {
                 pos = entry.start_tsm;
                 continue;
             } else {
-                // Это обычная запись (weekday/date) — возвращаем начало первого интервала.
-                // date_tsm записи указывает на день, к которому она привязана (может отличаться от pos).
-                // Если pos уже внутри рабочего интервала — возвращаем pos, не откатываясь назад.
+                // weekday / date: кандидат указывает на день; итоговый график дня
+                // считаем через getDateIntervals (учитывает дату-исключение, периоды и
+                // приоритет над перекрытием). Если день нерабочий — идём к следующему.
                 const dayStart = entry.date_tsm ?? tsmToDateTsm(pos);
-                const workStart = dayStart + entry.intervals[0][0];
-                return tsmToStr(Math.max(pos, workStart));
+                const intervals = this.getDateIntervals(dayStart);
+                const minutesFromPos = (dayStart === tsmToDateTsm(pos)) ? (pos - dayStart) : -1;
+                let minStart = null;
+                for (const int of intervals) {
+                    if (int[1] > minutesFromPos) {
+                        const s = dayStart + int[0];
+                        if (minStart === null || s < minStart) minStart = s;
+                    }
+                }
+                if (minStart === null) {
+                    pos = dayStart + MINUTES_IN_DAY;
+                    continue;
+                }
+                return tsmToStr(Math.max(pos, minStart));
             }
         }
 		return null; // Вышли за границы расписания, не найдя рабочее время
@@ -336,19 +348,38 @@ class ScheduleRuntime {
             return []; // Дата вне границ расписания
         }
         
-        // 2. Выбираем расписание (main или override)
-        const target = this.findOverride(dateTsm);
-        
-        // 3. Получаем интервалы из записи (dates → weekdays → default)
-        const baseIntervals = this.getEntryIntervals(target, dateTsm);
-        
-        // 4. Получаем периоды, перекрывающие дату
+        // 2. Дата-исключение из main имеет приоритет над перекрытием
+        //    (дни-исключения существуют только в main).
+        let baseIntervals = this.getDateExceptionIntervals(dateTsm);
+        if (baseIntervals === null) {
+            // 3. Иначе недельный график из перекрытия (если активно) или main.
+            const target = this.findOverride(dateTsm);
+            baseIntervals = this.getEntryIntervals(target, dateTsm);
+        }
+
+        // 4. Получаем периоды, перекрывающие дату (только из main)
         const periods = this.getDatePeriodsIntervals(dateTsm);
-        
+
         // 5. Применяем периоды к интервалам
         const result = this.applyPeriodsToDay(baseIntervals, periods);
-        
+
         return result;
+    }
+
+    /**
+     * getDateExceptionIntervals — интервалы дня-исключения из main
+     *
+     * Дни-исключения существуют только в main и имеют приоритет над перекрытием.
+     * @param {number} dateTsm - tsm начала дня
+     * @returns {Array|null} интервалы или null, если на эту дату исключения нет
+     */
+    getDateExceptionIntervals(dateTsm) {
+        const dates = this.main.dates;
+        const key = String(dateTsm);
+        if (dates && dates[key]) {
+            return dates[key].intervals || [];
+        }
+        return null;
     }
 
     /**
@@ -510,24 +541,16 @@ class ScheduleRuntime {
 	/**
      * getEntryIntervals — получить интервалы расписания из записи на дату
      * 
-     * Ищет интервалы в порядке: dates → weekdays → default (periods/overrides не проверяются)
-     * dates индексируется по date_tsm (строковый ключ в JSON)
+     * Ищет интервалы недельного графика в порядке: weekdays → default.
+     * Дни-исключения (dates) берутся из main в getDateIntervals; periods/overrides не проверяются.
      * 
      * @param {Object} target - main или override
      * @param {number} dateTsm - tsm начала дня
      * @returns {Array} Массив интервалов
      */
     getEntryIntervals(target, dateTsm) {
-        // JSON ключи — строки, поэтому преобразуем number в string
-        // dates: { "28401120": {...}, "28402560": {...} }
-        const dateTsmKey = String(dateTsm);
-        
-        // 1. Ищем в dates (конкретная дата) — ключ dateTsm
-        if (target.dates && target.dates[dateTsmKey]) {
-            return target.dates[dateTsmKey].intervals || [];
-        }
-        
-        // 2. Ищем в weekdays (день недели)
+        // Ищем в weekdays (день недели); дата-исключение здесь НЕ проверяется —
+        // она берётся из main в getDateIntervals.
         const dayOfWeekNum = String(dayOfWeek(dateTsm)); // 1=пн, 7=вс
         if (target.weekdays && target.weekdays[dayOfWeekNum]) {
             return target.weekdays[dayOfWeekNum].intervals || [];
@@ -719,21 +742,21 @@ class ScheduleRuntime {
 			candidates.push(weekEntry);
 		}		
               
-        // Для main: ищем также записи которые бывают только в нем: override, dates
+		// Дни-исключения существуют только в main и имеют приоритет над перекрытием —
+		// рассматриваем их как кандидата всегда, даже когда pos попал в окно override.
+		const dateEntry = this.nextWorkDateEntry(pos, this.main);
+		if (dateEntry) {
+			dateEntry.type = 'date';
+			dateEntry.start_tsm = dateEntry.date_tsm; // для сравнения с периодами и override
+			candidates.push(dateEntry);
+		}
+
+        // Перекрытия бывают только при поиске в main (вложенных override нет)
         if (isMain) {
-            // следующее расписание-перекрытие
             const override = this.nextOverride(pos);
 			if (override) {
 				override.type = 'override';
 				candidates.push(override);
-			}
-
-			// следующая запись по конкретной дате
-            const dateEntry = this.nextWorkDateEntry(pos, target);
-			if (dateEntry) {
-				dateEntry.type = 'date';
-				dateEntry.start_tsm = dateEntry.date_tsm; // для сравнения с периодами и override
-				candidates.push(dateEntry);
 			}
         }
 

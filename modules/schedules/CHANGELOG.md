@@ -9,6 +9,7 @@
 ## [Unreleased]
 
 ### Changed
+- **Приоритет расписания на дату.** Дни-исключения (записи на `YYYY-MM-DD`) и периоды (`is_period=1`) существуют только в основном расписании, но применяются **с приоритетом над перекрытиями** (override). Раньше при активном перекрытии дни-исключения основного расписания игнорировались. Теперь перекрытие меняет только недельный график; дата-исключение перебивает его, периоды накладываются поверх. Единое правило для обоих режимов — legacy `getDateSchedule` (уже работал так) и скомпилированных расписаний. Затронуты: `SchedulesCompiler` (перекрытия больше не несут `dates`), `CompiledScheduleHelper`, JS `ScheduleRuntime` (`compile/lib/js/demo.js`), Lua `compile/lib/lua/schedule_runtime.lua`.
 - Блок выделен в отдельный Yii2-модуль `modules/schedules/`
 - Namespace изменён: `app\models\Schedules*` → `app\modules\schedules\models\Schedules*`
 - Namespace хелпера изменён: `app\helpers\TimeIntervalsHelper` → `app\modules\schedules\helpers\TimeIntervalsHelper`

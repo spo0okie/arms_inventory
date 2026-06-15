@@ -847,6 +847,57 @@ describe('ScheduleRuntime — Edge cases', function()
     end)
 end)
 
+describe('приоритет дат/периодов main над override', function()
+    local d1 = strToTsm('2024-07-01') -- внутри окна override
+    local d2 = strToTsm('2024-07-02')
+    local d3 = strToTsm('2024-07-03')
+    local d4 = strToTsm('2024-07-04')
+    local function build()
+        return ScheduleRuntime.new({
+            tz = 'UTC',
+            main = {
+                name = 'Main',
+                start_tsm = strToTsm('2024-01-01'),
+                end_tsm = nil,
+                default = { schedule = '08:00-17:00', intervals = { { 480, 1020, {} } } },
+                weekdays = {},
+                dates = {
+                    [tostring(d1)] = { date_tsm = d1, schedule = '-',           intervals = {} },
+                    [tostring(d2)] = { date_tsm = d2, schedule = '10:00-12:00', intervals = { { 600, 720, {} } } },
+                },
+                periods = {
+                    { start_tsm = d3 + 600, end_tsm = d3 + 720, is_work = false },
+                },
+            },
+            overrides = {
+                {
+                    name = 'Лето',
+                    start_tsm = strToTsm('2024-06-01'),
+                    end_tsm   = strToTsm('2024-09-01'),
+                    default = { schedule = '09:00-18:00', intervals = { { 540, 1080, {} } } },
+                    weekdays = {},
+                },
+            },
+        })
+    end
+
+    test('дата-исключение-выходной перебивает override', function()
+        assertFalse(build():isWorkDay('2024-07-01'))
+    end)
+    test('дата-исключение с графиком перебивает override', function()
+        assertDeepEq(build():getDateIntervals(d2), { { 600, 720, {} } })
+    end)
+    test('нерабочий период main вычитается поверх графика override', function()
+        assertDeepEq(build():getDateIntervals(d3), { { 540, 600, {} }, { 720, 1080, {} } })
+    end)
+    test('день в окне override без исключений/периодов → график override', function()
+        assertDeepEq(build():getDateIntervals(d4), { { 540, 1080, {} } })
+    end)
+    test('nextWorkingDateTime пропускает выходной-исключение в окне override', function()
+        assertEq(build():nextWorkingDateTime('2024-07-01 00:00'), '2024-07-02 10:00')
+    end)
+end)
+
 -- =============================================================================
 -- Запуск
 -- =============================================================================

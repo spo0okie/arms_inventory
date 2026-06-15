@@ -217,7 +217,9 @@ class SchedulesCompilerTest extends Unit
 		$ov = $compiled['overrides'][0];
 		$this->assertSame('Summer 2024', $ov['name']);
 		$this->assertSame(28620000, $ov['start_tsm']); // 2024-06-01 00:00 UTC
-		$this->assertSame(28751040, $ov['end_tsm']);  // 2024-08-31 00:00 UTC
+		// end_tsm эксклюзивен: дата без времени расширяется до начала следующего дня
+		// (endStrToTsm +1440), чтобы весь end_date входил в окно перекрытия.
+		$this->assertSame(28752480, $ov['end_tsm']);  // 2024-09-01 00:00 UTC
 		// periods не включаются в override
 		$this->assertArrayNotHasKey('periods', $ov);
 	}
