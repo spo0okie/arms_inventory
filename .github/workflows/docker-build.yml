@@ -122,6 +122,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # composer внутри образа делает update (lock в репо нет) и обращается к GitHub API —
+      # без токена упирается в rate-limit. Готовим auth.json и отдаём его как BuildKit-секрет,
+      # чтобы токен не попал в историю образа. github.token хватает для public-пакетов.
+      - name: Prepare composer auth
+        run: echo '{"github-oauth":{"github.com":"${{ secrets.COMPOSER_GITHUB_TOKEN || github.token }}"}}' > "${RUNNER_TEMP}/composer-auth.json"
+
       - name: Build (and push on master)
         uses: docker/build-push-action@v6
         with:
@@ -129,7 +135,7 @@ jobs:
           file: docker/Dockerfile
           tags: ${{ env.IMAGE }}:v1
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-          build-args: |
-            COMPOSER_AUTH={"github-oauth":{"github.com":"${{ secrets.COMPOSER_GITHUB_TOKEN || github.token }}"}}
+          secret-files: |
+            composer_auth=${{ runner.temp }}/composer-auth.json
           cache-from: type=gha
           cache-to: type=gha,mode=max
