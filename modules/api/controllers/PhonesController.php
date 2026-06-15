@@ -16,6 +16,11 @@ use OpenApi\Attributes as OA;
  */
 class PhonesController extends BaseRestController
 {
+	// Контроллер работает с пользователями (actionSearchByNum/ByUser возвращают Users),
+	// поэтому макрос {model} в OpenAPI-аннотациях должен раскрываться в Users — иначе
+	// он берёт базовый ArmsModel, а схемы ArmsModel(read) нет → swagger validate роняет
+	// site/api-json в 500 (см. GenerateModelSchemaProcessor, ArmsModel в исключениях).
+	public $modelClass = 'app\models\Users';
 
 	public function disabledActions(): array
 	{
