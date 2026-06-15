@@ -33,7 +33,11 @@ class GenerateModelSchemaProcessor
 	public function __invoke(Analysis $analysis): void
 	{
 	
-		$classes=array_merge($this->apiModels(),$this->apiModels('Schedules'));
+		// Имя модуля строго в нижнем регистре: реальный каталог modules/schedules и
+		// namespace app\modules\schedules\models. На Linux (регистрозависимая ФС)
+		// 'Schedules' дало бы несуществующий путь/namespace -> схема Schedules(read)
+		// не сгенерировалась бы и api-json упал бы в 500 на нерезолвящемся $ref.
+		$classes=array_merge($this->apiModels(),$this->apiModels('schedules'));
 
 		foreach ($classes as $modelClass) {
 			$model = new $modelClass();
