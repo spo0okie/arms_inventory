@@ -1,10 +1,10 @@
+# syntax=docker/dockerfile:1
 FROM php:8.2-apache
 
 ENV TZ=Europe/Moscow
 
-# передаем токен github в виде аргумента CLI
-#ARG COMPOSER_GITHUB_TOKEN
-#ENV COMPOSER_AUTH=
+# Токен GitHub для composer пробрасывается BuildKit-секретом composer_auth
+# (см. шаг установки зависимостей ниже), чтобы не оседать в истории образа.
 
 # Установка всех зависимостей в одном слое + очистка кэша
 # git для composer
@@ -48,8 +48,18 @@ COPY docker/prod/index.php /var/www/arms/web/index.php
 # Установка зависимостей
 WORKDIR /var/www/arms
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/var/www/arms --filename=composer.phar
-RUN su -s /bin/sh www-data -c "php composer.phar install --no-dev --optimize-autoloader -n" && \
-    rm -rf /var/www/.composer
+# composer.lock в репозитории нет (gitignored) -> composer выполняет update и обращается
+# к GitHub API за dev-master/vcs-пакетами. Без токена это упирается в rate-limit и падает с
+# "Could not authenticate against github.com". Токен берём из BuildKit-секрета composer_auth
+# (содержимое = auth.json), кладём в writable COMPOSER_HOME (домашний /var/www у www-data
+# не записываемый -> иначе "Cannot create cache directory").
+RUN --mount=type=secret,id=composer_auth \
+    export COMPOSER_HOME=/tmp/.composer; \
+    mkdir -p "$COMPOSER_HOME"; \
+    if [ -s /run/secrets/composer_auth ]; then cp /run/secrets/composer_auth "$COMPOSER_HOME/auth.json"; fi; \
+    chown -R www-data:www-data "$COMPOSER_HOME"; \
+    su -s /bin/sh www-data -c "COMPOSER_HOME=$COMPOSER_HOME php composer.phar install --no-dev --optimize-autoloader -n" && \
+    rm -rf "$COMPOSER_HOME"
 
 # Скрипт запуска
 COPY docker/script/run.sh /bin/arms-run.sh
