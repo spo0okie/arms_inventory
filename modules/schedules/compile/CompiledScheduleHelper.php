@@ -104,10 +104,24 @@ class CompiledScheduleHelper
 				$pos = $entry['start_tsm'];
 				continue;
 			}
-			// weekday / date: вернуть max(pos, начало первого интервала)
+			// weekday / date: кандидат указывает на день; итоговый график дня
+			// считаем через getDateIntervals (учитывает дату-исключение, периоды и
+			// приоритет над перекрытием). Если день нерабочий — переходим к следующему.
 			$dayStart = $entry['date_tsm'] ?? self::tsmToDateTsm($pos);
-			$workStart = $dayStart + $entry['intervals'][0][0];
-			return self::tsmToStr(max($pos, $workStart));
+			$intervals = $this->getDateIntervals($dayStart);
+			$minutesFromPos = ($dayStart === self::tsmToDateTsm($pos)) ? ($pos - $dayStart) : -1;
+			$minStart = null;
+			foreach ($intervals as $int) {
+				if ($int[1] > $minutesFromPos) {
+					$s = $dayStart + $int[0];
+					if ($minStart === null || $s < $minStart) $minStart = $s;
+				}
+			}
+			if ($minStart === null) {
+				$pos = $dayStart + self::MINUTES_IN_DAY;
+				continue;
+			}
+			return self::tsmToStr(max($pos, $minStart));
 		}
 		return null;
 	}
@@ -137,10 +151,30 @@ class CompiledScheduleHelper
 		if ($dateTsm === null) return [];
 		if (!self::inBounds($dateTsm, $this->main)) return [];
 
-		$target = $this->findOverride($dateTsm);
-		$base = $this->getEntryIntervals($target, $dateTsm);
+		// Дата-исключение из main имеет приоритет над перекрытием (дни-исключения
+		// существуют только в main). Иначе — недельный график из override/main.
+		$base = $this->getDateExceptionIntervals($dateTsm);
+		if ($base === null) {
+			$target = $this->findOverride($dateTsm);
+			$base = $this->getEntryIntervals($target, $dateTsm);
+		}
 		$periods = $this->getDatePeriodsIntervals($dateTsm);
 		return $this->applyPeriodsToDay($base, $periods);
+	}
+
+	/**
+	 * Интервалы дня-исключения из main или null, если на эту дату исключения нет.
+	 * Дни-исключения существуют только в main и имеют приоритет над перекрытием.
+	 */
+	public function getDateExceptionIntervals(int $dateTsm): ?array
+	{
+		$dates = $this->main['dates'] ?? [];
+		if (is_object($dates)) $dates = (array)$dates;
+		$dKey = (string)$dateTsm;
+		if (!isset($dates[$dKey])) return null;
+		$entry = $dates[$dKey];
+		if (is_object($entry)) $entry = (array)$entry;
+		return $entry['intervals'] ?? [];
 	}
 
 	public function getDatePeriods(int $dateTsm): array
@@ -225,17 +259,12 @@ class CompiledScheduleHelper
 		return null;
 	}
 
+	/**
+	 * Недельный график target на дату: weekdays[dow] → default → [].
+	 * Дни-исключения здесь НЕ проверяются — они берутся из main в getDateIntervals.
+	 */
 	public function getEntryIntervals(array $target, int $dateTsm): array
 	{
-		$dKey = (string)$dateTsm;
-		$dates = $target['dates'] ?? [];
-		if (is_object($dates)) $dates = (array)$dates;
-		if (isset($dates[$dKey])) {
-			$entry = $dates[$dKey];
-			if (is_object($entry)) $entry = (array)$entry;
-			return $entry['intervals'] ?? [];
-		}
-
 		$wdKey = (string)self::dayOfWeek($dateTsm);
 		$weekdays = $target['weekdays'] ?? [];
 		if (is_object($weekdays)) $weekdays = (array)$weekdays;
@@ -334,17 +363,20 @@ class CompiledScheduleHelper
 			$candidates[] = $weekEntry;
 		}
 
+		// Дни-исключения существуют только в main и имеют приоритет над перекрытием —
+		// рассматриваем их как кандидата всегда, даже когда pos попал в окно override.
+		$dateEntry = $this->nextWorkDateEntry($pos, $this->main);
+		if ($dateEntry !== null) {
+			$dateEntry['type'] = 'date';
+			$dateEntry['start_tsm'] = $dateEntry['date_tsm'];
+			$candidates[] = $dateEntry;
+		}
+
 		if ($isMain) {
 			$override = $this->nextOverride($pos);
 			if ($override !== null) {
 				$override['type'] = 'override';
 				$candidates[] = $override;
-			}
-			$dateEntry = $this->nextWorkDateEntry($pos, $target);
-			if ($dateEntry !== null) {
-				$dateEntry['type'] = 'date';
-				$dateEntry['start_tsm'] = $dateEntry['date_tsm'];
-				$candidates[] = $dateEntry;
 			}
 		}
 

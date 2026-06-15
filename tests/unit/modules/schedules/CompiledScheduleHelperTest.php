@@ -242,4 +242,52 @@ class CompiledScheduleHelperTest extends Unit
 		$meta = $rt->nextWorkingMeta('2024-01-05 10:00');
 		$this->assertSame(['user' => 'pupkin'], $meta);
 	}
+
+	/**
+	 * Дни-исключения и периоды main имеют приоритет над перекрытием.
+	 */
+	public function testMainDateExceptionAndPeriodOverrideTheOverride(): void
+	{
+		$d1 = CompiledScheduleHelper::strToTsm('2024-07-01'); // внутри окна override
+		$d2 = CompiledScheduleHelper::strToTsm('2024-07-02');
+		$d3 = CompiledScheduleHelper::strToTsm('2024-07-03');
+		$rt = new CompiledScheduleHelper([
+			'tz' => 'UTC',
+			'main' => [
+				'name' => 'Main',
+				'start_tsm' => CompiledScheduleHelper::strToTsm('2024-01-01'),
+				'end_tsm' => null,
+				'default' => ['schedule' => '08:00-17:00', 'intervals' => [[480, 1020, []]]],
+				'weekdays' => [],
+				'dates' => [
+					(string)$d1 => ['date_tsm' => $d1, 'schedule' => '-', 'intervals' => []],
+					(string)$d2 => ['date_tsm' => $d2, 'schedule' => '10:00-12:00', 'intervals' => [[600, 720, []]]],
+				],
+				'periods' => [
+					// нерабочий период main внутри окна override: 2024-07-03 10:00-12:00
+					['start_tsm' => $d3 + 600, 'end_tsm' => $d3 + 720, 'is_work' => false],
+				],
+			],
+			'overrides' => [
+				[
+					'name' => 'Лето',
+					'start_tsm' => CompiledScheduleHelper::strToTsm('2024-06-01'),
+					'end_tsm' => CompiledScheduleHelper::strToTsm('2024-09-01'),
+					'default' => ['schedule' => '09:00-18:00', 'intervals' => [[540, 1080, []]]],
+					'weekdays' => [],
+				],
+			],
+		]);
+
+		// дата-исключение "-" перебивает недельный график override → выходной
+		$this->assertFalse($rt->isWorkDay('2024-07-01'), 'дата-исключение-выходной перебивает override');
+		// дата-исключение с графиком перебивает override (09:00-18:00 → 10:00-12:00)
+		$this->assertSame([[600, 720, []]], $rt->getDateIntervals($d2));
+		// нерабочий период main вычитается поверх графика override
+		$this->assertSame([[540, 600, []], [720, 1080, []]], $rt->getDateIntervals($d3));
+		// день в окне override без исключений/периодов → график override
+		$this->assertSame([[540, 1080, []]], $rt->getDateIntervals(CompiledScheduleHelper::strToTsm('2024-07-04')));
+		// nextWorkingDateTime: со дня-выходного-исключения внутри override → следующая рабочая дата
+		$this->assertSame('2024-07-02 10:00', $rt->nextWorkingDateTime('2024-07-01 00:00'));
+	}
 }

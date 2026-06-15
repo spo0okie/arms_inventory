@@ -59,6 +59,8 @@
 }
 ```
 
+> **Структура `overrides[]`** содержит только `name`, `start(_tsm)`, `end(_tsm)`, `default`, `weekdays`, `comment` — **без `dates` и без `periods`**. Дни-исключения и периоды существуют только в `main` и применяются поверх перекрытия с более высоким приоритетом (см. метод `getDateIntervals`).
+
 **Пояснение к атрибутам с суффиксом `_tsm`:**
 
 - `_tsm` (timestamp in minutes) — количество минут от Unix epoch (01.01.1970 00:00 UTC)
@@ -173,7 +175,8 @@ flowchart TD
 
 #### 4. Унификация структуры базового расписания и перекрытий
 
-- [ ] Обе сущности должны иметь идентичную структуру: `name`, `start`, `end`, `default`, `weekdays`, `dates`, `periods`, `comment`
+- [ ] Основное расписание (`main`): `name`, `start`, `end`, `default`, `weekdays`, `dates`, `periods`, `comment`
+- [ ] Перекрытие (`override`): `name`, `start`, `end`, `default`, `weekdays`, `comment` — **без `dates` и без `periods`** (дни-исключения и периоды существуют только в `main`, применяются поверх перекрытия — см. «Приоритет источников» в README и метод `getDateIntervals`)
 - [ ] Поле `tz` — часовой пояс (из `schedules` или `Yii::$app->params['schedulesTZShift']`)
 - [ ] Сортировка данных `periods`, `overrides`, `dates`, `weekdays` в структуре для оптимизации поиска (см. ограничения консистентности)
 
@@ -262,7 +265,7 @@ flowchart TD
 | Функция | Описание | Использование |
 | ------- | -------- | ------------- |
 | `dayOfWeek(tsm)` | День недели (1=пн, 7=вс) (только в таблице) | nextWeekDayEntry |
-| `getEntryIntervals(target, dateTsm)` | Интервалы entry на дату (только в таблице) | getDateIntervals |
+| `getEntryIntervals(target, dateTsm)` | Недельный график entry на дату: `weekdays[dow]` → `default` (дата-исключение проверяется отдельно в getDateIntervals по `main.dates`) | getDateIntervals |
 | `nextWeekDayEntry(pos, target)` | Ближайшая запись (entry) по дням недели с фильтром target из позиции | nextRecord, планирование |
 
 ---
@@ -347,7 +350,7 @@ function intervalsAdd(intervals, override) {
 function getDatePeriods(date_tsm) {
     const dayStart = tsmToDateTsm(date_tsm)       // Начало дня (00:00)
     const dayEnd   = dayStart + 1440              // Конец дня (24ч = 1440 мин)
-    const periods  = schedule.periods             // Все периоды расписания
+    const periods  = main.periods                 // периоды существуют только в main
     const result   = []                           // Пустой массив результата
 
     for (const period of periods) {
@@ -377,10 +380,10 @@ function getDatePeriods(date_tsm) {
 | 7 | Edge | Период начинается на следующий день: start_tsm=28429200 (2024-01-12 00:00), end_tsm=28431840 (2024-01-12 23:59), date_tsm=28414800 (2024-01-11) | Период НЕ включён | Период полностью находится в следующем дне |
 | 8 | Edge | Период начался давно, заканчивается внутри дня: start_tsm=28166400 (2023-12-01 00:00), end_tsm=28419300 (2024-01-11 15:00), date_tsm=28414800 | Период включён | Длительный период, охватывающий многие дни, включая целевой день |
 | 9 | Edge | **Новый**: Период начинается и заканчивается внутри одного дня: start_tsm=28416000 (2024-01-11 08:00), end_tsm=28417800 (2024-01-11 10:00), date_tsm=28414800 | Период включён | Полностью внутри дня |
-| 10 | Empty | schedule.periods = [], date_tsm=28414800 | Пустой массив [] | Отсутствие периодов должно вернуть пустой результат |
-| 11 | Empty | schedule.periods = null, date_tsm=28414800 | Пустой массив [] | Null periods должен обрабатываться как отсутствие данных |
-| 12 | Error | date_tsm = null, schedule.periods=[...] | Пустой массив [] | Обработка null входного параметра |
-| 13 | Error | date_tsm = undefined, schedule.periods=[...] | Пустой массив [] | Обработка undefined входного параметра |
+| 10 | Empty | main.periods = [], date_tsm=28414800 | Пустой массив [] | Отсутствие периодов должно вернуть пустой результат |
+| 11 | Empty | main.periods = null, date_tsm=28414800 | Пустой массив [] | Null periods должен обрабатываться как отсутствие данных |
+| 12 | Error | date_tsm = null, main.periods=[...] | Пустой массив [] | Обработка null входного параметра |
+| 13 | Error | date_tsm = undefined, main.periods=[...] | Пустой массив [] | Обработка undefined входного параметра |
 
 #### Метод `getDatePeriodsIntervals(date_tsm)` — получить интервалы периодов, перекрывающих дату
 
@@ -512,20 +515,30 @@ function applyPeriodsToDay(baseIntervals, periods, dateTsm) {
 
 #### Метод `getDateIntervals(date_tsm)` — получить интервалы расписания на дату
 
+Порядок разрешения (реализует «Приоритет источников расписания на дату», см. README):
+
+1. `inBounds(date_tsm, main)` — если дата вне границ основного расписания → `[]`.
+2. **Дата-исключение**: если `date_tsm` есть в `main.dates` — берём её интервалы (приоритет над перекрытием). Дни-исключения хранятся только в `main`.
+3. Иначе **недельный график**: `schedule = findOverride(date_tsm)` (перекрытие, если активно, иначе `main`) → `schedule.weekdays[dow]` → `schedule.default` → `[]`.
+4. **Периоды**: `applyPeriodsToDay()` накладывает поверх результата `positive`/`negative` интервалы из `main.periods` (периоды тоже только в `main`).
+
 ```mermaid
 flowchart TD
     A["getDateIntervals(date_tsm)"] --> B["date_tsm=date_tsmToDateTsm(date_tsm)<br>Получить date_tsm начала дня для date_tsm"] 
     B --> C{"inBounds(date_tsm, main)?<br>Попадает ли date_tsm в границы основного расписания?"}
     C -->|Нет| D("return []<br>Дата вне границ расписания, значит нет рабочих интервалов")
-    C -->|Да| E["schedule = findOverride(date_tsm)<br>Выбрать override/main на дату"]
-    E --> I{date_tsm есть в schedule.dates?}
-    I -->|Да| J[копируем интервалы из entry]
-    I -->|Нет| K{"dayOfWeek(date_tsm) есть в schedule.weekdays?"}
-    K -->|Да| J
-    K -->|Нет| L{Есть schedule.default?}
-    L -->|Да| J
-    L -->|Нет| Empty["интервалы=[]"] --> M
-    J --> M["getDatePeriodsIntervals(date_tsm) Найти позитивные и негативные интервалы из periods попадающих в date_tsm"]
+    C -->|Да| DX{"date_tsm есть в main.dates?<br>дата-исключение — приоритет над перекрытием"}
+    DX -->|Да| J["интервалы = main.dates[date_tsm].intervals"]
+    DX -->|Нет| E["schedule = findOverride(date_tsm)<br>выбрать override/main для недельного графика"]
+    E --> K{"dayOfWeek(date_tsm) есть в schedule.weekdays?"}
+    K -->|Да| J2["интервалы = schedule.weekdays[dow].intervals"]
+    K -->|Нет| L{"есть schedule.default?"}
+    L -->|Да| J3["интервалы = schedule.default.intervals"]
+    L -->|Нет| Empty["интервалы=[]"]
+    J --> M
+    J2 --> M
+    J3 --> M
+    Empty --> M["getDatePeriodsIntervals(date_tsm) — positive/negative интервалы из main.periods, попадающих в date_tsm"]
 
     M --> O[наложить перекрывающие интервалы на интервалы расписания]
     O --> P[Вернуть полученные интервалы]
@@ -553,6 +566,9 @@ flowchart TD
 | 15 | Integration | Вызов после applyPeriodsToDay | Корректные intervals | Проверка интеграции всех вызовов |
 | 16 | Validation | Дублирование записи на один день недели | Exception/Error | ВАЛИДАЦИЯ: нельзя создать 2 записи на один день недели |
 | 17 | Validation | Дублирование записи на одну дату | Exception/Error | ВАЛИДАЦИЯ: нельзя создать 2 записи на одну дату |
+| 18 | Priority | Дата-исключение main внутри окна override (override задаёт рабочий день) | интервалы из `main.dates` | дата-исключение перебивает недельный график override |
+| 19 | Priority | Нерабочий период main (is_work=0) внутри окна override | график override минус период | период main вычитается поверх графика override |
+| 20 | Priority | Рабочий период main (is_work=1) внутри окна override | график override плюс период | период main добавляется поверх графика override |
 
 TODO:
 
@@ -568,7 +584,10 @@ TODO:
   - попасть в дату, которая есть в днях недели базового расписания но отсутствует в override (default отсутствует) -> пустое расписание
   - попасть в дату, которая есть в днях недели базового расписания и есть в днях недели override (default отсутствует) -> расписание из override
   - попасть в дату, которая есть в днях недели базового расписания и отсутствует в днях недели override (default присутствует) -> default расписание из override
-  - попасть в дату, которая есть в датах базового расписания и есть в днях недели override (default отсутствует) -> расписание из даты базового расписания, так как даты имеют приоритет над днями недели, а override не содержит дат
+  - попасть в дату, которая есть в датах базового расписания и есть в днях недели override (default отсутствует) -> расписание из даты базового расписания, так как даты-исключения имеют приоритет над перекрытием (дни-исключения только в main)
+  - попасть в дату-исключение main внутри окна override (override задаёт рабочий день) -> график из даты-исключения main (перебивает недельный график override)
+  - нерабочий период main (is_work=0) перекрывает день внутри окна override -> период вычитается поверх графика override
+  - рабочий период main (is_work=1) внутри окна override -> период добавляется поверх графика override
 - работа с периодами
   - нет периодов -> график не изменяется
   - рабочий период перекрывает день с графиком -> график меняется на "00:00-24:00"
@@ -789,6 +808,8 @@ flowchart TD
 Критерий: date_tsm >= tsm AND (date_tsm + 1440) > tsm.
 ГАРАНТИЯ: target.dates отсортирован по ключу (date_tsm) при компиляции.
 
+> Дни-исключения существуют только в `main`, поэтому `target` здесь — всегда `main` (в том числе когда «активное» на pos расписание — это перекрытие).
+
 **Особенности обработки текущего дня:**
 - Если date_tsm совпадает с датой tsm (текущий день), необходимо отфильтровать интервалы, которые уже завершились к моменту tsm
 - Интервал считается завершённым, если его конец <= минутам от начала дня tsm
@@ -837,13 +858,13 @@ flowchart TD
 
 #### Метод `nextRecord(pos, target)` — поиск ближайшей рабочей записи
 
-Находит в расписании target ближайший справа к pos элемент из набора:
-- periods[is_work=true] - периоды непрерывной работы
-- override (если target это main)
-- дата-исключение с рабочим графиком (если target это main)
-- день из расписания на неделю с рабочим графиком
+Находит ближайший справа к pos элемент из набора:
+- `main.periods[is_work=true]` — периоды непрерывной работы (всегда из main)
+- дата-исключение с рабочим графиком из `main.dates` (всегда из main — приоритет над перекрытием; рассматривается и когда pos попадает в окно override)
+- override (только если target это main)
+- день недели с рабочим графиком из `target` (override или main)
 
-ГАРАНТИЯ: overrides и dates отсортированы при компиляции. Периоды проверяются перебором (необходимо отсортировать при компиляции).
+ГАРАНТИЯ: overrides и dates отсортированы при компиляции. Периоды проверяются перебором (отсортированы по start_tsm при компиляции).
 
 ```mermaid
 flowchart TD
@@ -852,12 +873,13 @@ flowchart TD
     B -->|main| C["override = nextOverride(pos)<br/>nextOverride уже возвращает первый подходящий"]
     B -->|override| C2["override = null"]
     
-    C --> D["dateEntry = nextWorkDateEntry(pos, target)<br/>nextWorkDateEntry уже возвращает первый подходящий"]
+    C --> D["dateEntry = nextWorkDateEntry(pos, main)<br/>дни-исключения ВСЕГДА из main"]
     C2 --> D
     
-    D --> E["period = первый period[is_work=true] с end_tsm > pos<br/>periods отсортированы, первый подходящий — искомый"]
+    D --> E["period = первый main.periods[is_work=true] с end_tsm > pos<br/>periods отсортированы, первый подходящий — искомый"]
     
-    E --> F["candidates = [override, dateEntry, period, weekEntry].filter(Boolean)"]
+    E --> W["weekEntry = nextWeekDayEntry(pos, target)<br/>недельный график из target (override или main)"]
+    W --> F["candidates = [override, dateEntry, period, weekEntry].filter(Boolean)"]
     F --> G{"candidates.length > 0?"}
     G -->|Нет| H["return null<br/>Нет рабочих записей"]
     G -->|Да| I["return candidates с min(start_tsm)<br/>Выбирается ближайший"]
@@ -911,7 +933,9 @@ flowchart TD
 
 #### Метод `findOverride(dateTime)` — поиск перекрытия расписания на дату/время
 
-находит override, который перекрывает dateTime, либо main если такого нет и работаем в этом месте по осноному расписанию
+находит override, который перекрывает dateTime, либо main если такого нет и работаем в этом месте по основному расписанию
+
+> Результат `findOverride` используется только для выбора **недельного графика** (weekdays/default). Дни-исключения (`main.dates`) и периоды (`main.periods`) берутся из `main` независимо и имеют приоритет над перекрытием — см. метод `getDateIntervals`.
 
 ```mermaid
 flowchart TD

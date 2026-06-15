@@ -103,7 +103,9 @@ class SchedulesCompiler
 					if (!isset($weekdays[$key])) $weekdays[$key] = self::buildEntry($entry);
 					continue;
 				}
-				// Конкретная дата — ключ в минутах от epoch (начало дня)
+				// Конкретная дата — ключ в минутах от epoch (начало дня).
+				// Дни-исключения существуют только в main; в override не попадают.
+				if (!$includePeriods) continue;
 				$dateTsm = self::strToDateTsm($key);
 				if ($dateTsm === null) continue;
 				$dKey = (string)$dateTsm;
@@ -128,10 +130,11 @@ class SchedulesCompiler
 			'default'   => $default,
 			// Строковые ключи гарантируют object в JSON; для пустых — явно stdClass.
 			'weekdays'  => $weekdays === [] ? new \stdClass() : $weekdays,
-			'dates'     => $dates === [] ? new \stdClass() : $dates,
 			'comment'   => $schedule->description,
 		];
+		// dates и periods существуют только в main; перекрытия их не несут.
 		if ($includePeriods) {
+			$result['dates']   = $dates === [] ? new \stdClass() : $dates;
 			$result['periods'] = $periods;
 		}
 		return $result;

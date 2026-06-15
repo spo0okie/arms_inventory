@@ -817,3 +817,52 @@ describe('Дополнительные edge cases', () => {
         expect(intervals).toEqual([]);
     });
 });
+
+describe('приоритет дат/периодов main над override', () => {
+    const d1 = strToTsm('2024-07-01'); // внутри окна override
+    const d2 = strToTsm('2024-07-02');
+    const d3 = strToTsm('2024-07-03');
+    const d4 = strToTsm('2024-07-04');
+    const build = () => new ScheduleRuntime({
+        tz: 'UTC',
+        main: {
+            name: 'Main',
+            start_tsm: strToTsm('2024-01-01'),
+            end_tsm: null,
+            default: { schedule: '08:00-17:00', intervals: [[480, 1020, {}]] },
+            weekdays: {},
+            dates: {
+                [String(d1)]: { date_tsm: d1, schedule: '-', intervals: [] },
+                [String(d2)]: { date_tsm: d2, schedule: '10:00-12:00', intervals: [[600, 720, {}]] },
+            },
+            periods: [
+                { start_tsm: d3 + 600, end_tsm: d3 + 720, is_work: false },
+            ],
+        },
+        overrides: [
+            {
+                name: 'Лето',
+                start_tsm: strToTsm('2024-06-01'),
+                end_tsm: strToTsm('2024-09-01'),
+                default: { schedule: '09:00-18:00', intervals: [[540, 1080, {}]] },
+                weekdays: {},
+            },
+        ],
+    });
+
+    test('дата-исключение-выходной перебивает override', () => {
+        expect(build().isWorkDay('2024-07-01')).toBe(false);
+    });
+    test('дата-исключение с графиком перебивает override', () => {
+        expect(build().getDateIntervals(d2)).toEqual([[600, 720, {}]]);
+    });
+    test('нерабочий период main вычитается поверх графика override', () => {
+        expect(build().getDateIntervals(d3)).toEqual([[540, 600, {}], [720, 1080, {}]]);
+    });
+    test('день в окне override без исключений/периодов → график override', () => {
+        expect(build().getDateIntervals(d4)).toEqual([[540, 1080, {}]]);
+    });
+    test('nextWorkingDateTime пропускает выходной-исключение в окне override', () => {
+        expect(build().nextWorkingDateTime('2024-07-01 00:00')).toBe('2024-07-02 10:00');
+    });
+});

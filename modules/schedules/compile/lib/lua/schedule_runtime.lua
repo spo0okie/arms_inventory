@@ -300,9 +300,25 @@ function ScheduleRuntime:nextWorkingDateTime(dateTime)
             elseif entry.type == 'override' then
                 pos = entry.start_tsm
             else
-                local dayStart  = entry.date_tsm or tsmToDateTsm(pos)
-                local workStart = dayStart + entry.intervals[1][1]
-                return tsmToStr(math.max(pos, workStart))
+                -- weekday / date: кандидат указывает на день; итоговый график дня
+                -- считаем через getDateIntervals (учитывает дату-исключение, периоды
+                -- и приоритет над перекрытием). Если день нерабочий — идём дальше.
+                local dayStart = entry.date_tsm or tsmToDateTsm(pos)
+                local intervals = self:getDateIntervals(dayStart)
+                local minutesFromPos = -1
+                if dayStart == tsmToDateTsm(pos) then minutesFromPos = pos - dayStart end
+                local minStart = nil
+                for i = 1, #intervals do
+                    if intervals[i][2] > minutesFromPos then
+                        local s = dayStart + intervals[i][1]
+                        if minStart == nil or s < minStart then minStart = s end
+                    end
+                end
+                if minStart == nil then
+                    pos = dayStart + MINUTES_IN_DAY
+                else
+                    return tsmToStr(math.max(pos, minStart))
+                end
             end
         end
     end
@@ -339,10 +355,26 @@ function ScheduleRuntime:getDateIntervals(date)
 
     if not inBounds(dateTsm, self.main) then return {} end
 
-    local target        = self:findOverride(dateTsm)
-    local baseIntervals = self:getEntryIntervals(target, dateTsm)
-    local periods       = self:getDatePeriodsIntervals(dateTsm)
+    -- Дата-исключение из main имеет приоритет над перекрытием
+    -- (дни-исключения существуют только в main).
+    local baseIntervals = self:getDateExceptionIntervals(dateTsm)
+    if baseIntervals == nil then
+        local target = self:findOverride(dateTsm)
+        baseIntervals = self:getEntryIntervals(target, dateTsm)
+    end
+    local periods = self:getDatePeriodsIntervals(dateTsm)
     return self:applyPeriodsToDay(baseIntervals, periods)
+end
+
+-- Интервалы дня-исключения из main или nil, если на эту дату исключения нет.
+-- Дни-исключения существуют только в main и имеют приоритет над перекрытием.
+function ScheduleRuntime:getDateExceptionIntervals(dateTsm)
+    local dates = self.main.dates
+    local key   = tostring(dateTsm)
+    if dates and dates[key] then
+        return dates[key].intervals or {}
+    end
+    return nil
 end
 
 function ScheduleRuntime:getDatePeriods(dateTsm)
@@ -420,12 +452,9 @@ function ScheduleRuntime:nextPeriod(tsm, isWork)
     return nil
 end
 
+-- Недельный график target: weekdays[dow] -> default -> {}.
+-- Дни-исключения здесь НЕ проверяются — они берутся из main в getDateIntervals.
 function ScheduleRuntime:getEntryIntervals(target, dateTsm)
-    local key = tostring(dateTsm)
-    if target.dates and target.dates[key] then
-        return target.dates[key].intervals or {}
-    end
-
     local dowKey = tostring(dayOfWeek(dateTsm))
     if target.weekdays and target.weekdays[dowKey] then
         return target.weekdays[dowKey].intervals or {}
@@ -528,6 +557,16 @@ function ScheduleRuntime:nextRecord(pos, target)
         candidates[#candidates + 1] = weekEntry
     end
 
+    -- Дни-исключения существуют только в main и имеют приоритет над перекрытием —
+    -- рассматриваем их как кандидата всегда, даже когда pos попал в окно override.
+    local dateEntry = self:nextWorkDateEntry(pos, self.main)
+    if dateEntry then
+        dateEntry.type      = 'date'
+        dateEntry.start_tsm = dateEntry.date_tsm
+        candidates[#candidates + 1] = dateEntry
+    end
+
+    -- Перекрытия бывают только при поиске в main (вложенных override нет)
     if isMain then
         local override = self:nextOverride(pos)
         if override then
@@ -535,13 +574,6 @@ function ScheduleRuntime:nextRecord(pos, target)
             for k, v in pairs(override) do o[k] = v end
             o.type = 'override'
             candidates[#candidates + 1] = o
-        end
-
-        local dateEntry = self:nextWorkDateEntry(pos, target)
-        if dateEntry then
-            dateEntry.type      = 'date'
-            dateEntry.start_tsm = dateEntry.date_tsm
-            candidates[#candidates + 1] = dateEntry
         end
     end
 
