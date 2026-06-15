@@ -237,6 +237,14 @@ class SoftController extends ArmsBaseController
 		}
 		
 		$vendor=\app\models\Manufacturers::findOne($manufacturer);
+
+		// LLM-провайдер может быть не сконфигурирован (нет ключей OpenAI/GigaChat) —
+		// например в CI. Тогда отдаём ошибку в JSON с HTTP 200, а не падаем 500
+		// при создании LlmClient (см. контракт в testGenerateDescription).
+		if (!LlmClient::available()) {
+			return ['error' => 'LLM-провайдеры недоступны'];
+		}
+
 		$generator = new LlmClient();
 		$result = $generator->generateSoftwareDescription($vendor->name.' '.$name);
 		

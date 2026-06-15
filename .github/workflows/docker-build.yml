@@ -61,6 +61,14 @@ jobs:
           COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ secrets.COMPOSER_GITHUB_TOKEN || github.token }}"}}'
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      # Каталоги, которые приложение пишет в рантайме, но которых нет в чистом
+      # checkout (web/scans/* и runtime/* gitignored). Без web/scans/thumbs
+      # Imagick падает на генерации превью (Scans::prepThumb -> WriteBlob Failed).
+      - name: Prepare writable runtime dirs
+        run: |
+          mkdir -p web/scans/thumbs runtime/swagger-temp tests/_output tests/log
+          chmod -R 777 web/scans runtime tests/_output tests/log
+
       # Схема тестовой БД: грузим демо-дамп проекта (acceptance/rest при старте
       # пересоздают БД из него самостоятельно, unit'у нужна готовая схема).
       - name: Load test DB schema
@@ -83,6 +91,17 @@ jobs:
 
       - name: REST tests
         run: php vendor/bin/codecept run rest
+
+      # Артефакты codeception (.fail.html/.fail.json с трейсами) — чтобы разбирать
+      # падения без перепрогона. Загружаем всегда, даже при упавших тестах.
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeception-logs
+          path: tests/log/
+          if-no-files-found: ignore
+          retention-days: 7
 
   # ---------------------------------------------------------------------------
   # СБОРКА DOCKER-ОБРАЗА (порт build-app из .gitlab-ci.yml)
