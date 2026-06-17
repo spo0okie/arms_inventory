@@ -2,10 +2,11 @@
 
 use app\helpers\HtmlHelper;
 use yii\helpers\Html;
-
+
+
 use app\components\widgets\page\ModelWidget;
-/* @var $this yii\web\View */
-/* @var $model app\models\Techs */
+/** @var yii\web\View $this */
+/** @var app\models\Techs $model */
 $static_view=true;
 
 if (!isset($no_users)) $no_users=false;
@@ -61,7 +62,7 @@ if (is_object($model->state)) {
 		<?= $this->render('hw',['model'=>$model,'static_view'=>$static_view]) ?>
 	</div>
 
-	
+
 	<?php if (!$no_specs && is_object($model->model) && $model->model->individual_specs) { ?>
 	<h4>Спецификация:</h4>
 		<?= Yii::$app->formatter->asNtext($model->specs) ?>
@@ -114,7 +115,7 @@ if (is_object($model->state)) {
 							'static_view'=>true,
 							'include_tech'=>true,
 							'reverse'=>true,
-							
+
 						]).' <br />';
 				}?>
 			</div>
@@ -129,25 +130,23 @@ if (is_object($model->state)) {
 		<br />
 	<?php } ?>
 
-	
+
     <?php // $this->render('att-techs',['model'=>$model,'static_view'=>$static_view]) ?>
-    
+
 	<span class="divider2"></span>
-	
+
 	<?php if (strlen($licList=$this->render('/comps/lics_list',['model'=>$model,'static_view'=>$static_view]))) { ?>
 		<div class="data-block tree-level-2">
 			<?= $licList ?>
 		</div>
 	<?php } ?>
-	
-	
+
+
     <?= $this->render('arm-history',['model'=>$model,'static_view'=>$static_view]) ?>
-	
+
 	<?php if (is_object($model->itStaff)) { ?>
 		<span class="it-staff">Сотрудник ИТ: <?= ModelWidget::widget(['model'=>$model->itStaff]) ?></span>
 	<?php } ?>
-	
+
 
 </div>
-
-

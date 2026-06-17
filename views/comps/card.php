@@ -9,8 +9,8 @@ use app\components\widgets\page\ModelWidget;
 use app\models\HistoryModel;
 use yii\helpers\Html;
 
-/* @var $this yii\web\View */
-/* @var $model app\models\Comps */
+/** @var yii\web\View $this */
+/** @var app\models\Comps $model */
 if (!isset($static_view)) $static_view=false;
 if (!isset($no_arm)) $no_arm=false; //спрятать АРМ
 if (!isset($no_abbr)) $no_abbr=false; //спрятать АРМ
@@ -29,7 +29,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 		'qtip_side'=>'bottom',
 	]):
 	Html::a($rcIcon,'remotecontrol://'.$model->fqdn,[
-		'qtip_ttip'=>'Удаленное управление {$model->fqdn}',
+		'qtip_ttip'=>"Удаленное управление {$model->fqdn}",
 		'qtip_side'=>'bottom',
 	]);
 
@@ -102,7 +102,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 	<?= $this->render('ips_list',['model'=>$model,'static_view'=>$static_view,'glue'=>$ips_glue]) ?>
 	<?= $this->render('lics_list',['model'=>$model,'static_view'=>$static_view]) ?>
 </div>
-	
+
 	<?php if (count($model->services)||count($model->effectiveMaintenanceReqs)||count($model->maintenanceJobs)) { ?>
 		<div class="d-flex flex-row flex-wrap">
 			<?= ModelFieldWidget::widget([
@@ -125,7 +125,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 			]) ?>
 		</div>
 	<?php } ?>
-	
+
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 <?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
 
@@ -142,4 +142,3 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 	}?>
 </div>
 <?php }
-
