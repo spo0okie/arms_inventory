@@ -1,7 +1,7 @@
 <?php
 
-/* @var $this yii\web\View */
-/* @var $model app\models\Comps */
+/** @var yii\web\View $this */
+/** @var app\models\Comps $model */
 
 use app\components\HistoryWidget;
 use app\components\ModelFieldWidget;
@@ -14,7 +14,7 @@ use app\components\widgets\page\ModelWidget;
 
 $domain = is_object($model->domain)?$model->domain->name:'- не в домене - ';
 
-$this->title = 'ОС '.$domain.''.strtolower($model->name);
+$this->title = 'ОС '.$domain.'\\'.strtolower($model->name);
 $this->params['breadcrumbs'][] = ['label' => Comps::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 Url::remember();
@@ -34,7 +34,7 @@ foreach ($model->swList->items as $item) {
 		$soft['ignored'][]=$item;
 		continue;
 	}
-	
+
 	if ($item['free']) {
 		$soft['free'][]=$item;
 		continue;
