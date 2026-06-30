@@ -21,7 +21,7 @@ if (is_object($model)) {
 		elseif ($model->isLinux) $icon_html='<span class="fab fa-linux"></span>';
 		//else $name='<span class="far fa-meh-blank"></span>'.$name;
 	}
-	
+
 	echo ItemObjectWidget::widget([
 		'model'=>$model,
 		'archived_class'=>'text-decoration-line-through',
@@ -35,13 +35,13 @@ if (is_object($model)) {
 			'noSpaces'=>true
 		]),
 	]);
-	
+
 	if ($show_ips) {
 		if (!isset($ips_options)) $ips_options=[];
 		//говорим скрывать имя компа из IP адреса чтобы не было задвоения имени
 		if (!isset($ips_options['rendered_comment'])) $ips_options['rendered_comment']=$name;
 		echo ItemObjectWidget::widget([
-			'link'=>$this->render('/net-ips/model-ips',[
+			'link'=>$this->render('//net-ips/model-ips',[
 				'model'=>$model,
 				'options'=>	$ips_options,
 				'glue'=>	isset($ips_glue)?$ips_glue:', ',
