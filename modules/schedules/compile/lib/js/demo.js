@@ -261,8 +261,10 @@ class ScheduleRuntime {
             
             // Определяем тип записи и возвращаем результат
             if (entry.type === 'period') {
-                // Это период работы — возвращаем его начало
-                return tsmToStr(entry.start_tsm);
+                // Период уже активен (start в прошлом) или открыт слева (null) → рабочее
+                // время начинается прямо сейчас (pos), иначе — с его начала.
+                const start = entry.start_tsm;
+                return tsmToStr(start === null ? pos : Math.max(pos, start));
             } else if (entry.type === 'override') {
                 // Нашли override — продолжаем поиск от его начала
                 pos = entry.start_tsm;
@@ -534,7 +536,9 @@ class ScheduleRuntime {
         // Периоды существуют ТОЛЬКО в main
         for (const period of this.main.periods || []) {
             // Проверяем что период ещё не закончился и совпадение по типу (is_work)
-            if (period.end_tsm > tsm && (isWork === null || isWork === period.is_work)) {
+            // null = +inf: открытый период ещё длится, значит остаётся кандидатом
+            const stillRunning = period.end_tsm === null || period.end_tsm > tsm;
+            if (stillRunning && (isWork === null || isWork === period.is_work)) {
                 return period;
             }
         }

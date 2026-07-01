@@ -98,7 +98,10 @@ class CompiledScheduleHelper
 
 			$type = $entry['type'] ?? null;
 			if ($type === 'period') {
-				return self::tsmToStr($entry['start_tsm']);
+				// Период уже активен (start в прошлом) или открыт слева (null) → рабочее время
+				// начинается прямо сейчас (pos), иначе — с его начала.
+				$start = $entry['start_tsm'] ?? null;
+				return self::tsmToStr($start === null ? $pos : max($pos, $start));
 			}
 			if ($type === 'override') {
 				$pos = $entry['start_tsm'];
@@ -257,7 +260,9 @@ class CompiledScheduleHelper
 	public function nextPeriod(int $tsm, ?bool $isWork = null): ?array
 	{
 		foreach ($this->main['periods'] ?? [] as $p) {
-			if (($p['end_tsm'] ?? 0) <= $tsm) continue;
+			// null = +inf: открытый период ещё длится, значит остаётся кандидатом
+			$end = $p['end_tsm'] ?? null;
+			if ($end !== null && $end <= $tsm) continue;
 			if ($isWork !== null && $isWork !== (bool)$p['is_work']) continue;
 			return $p;
 		}
