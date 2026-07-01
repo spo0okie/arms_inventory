@@ -59,71 +59,71 @@ class ArmsModel extends ActiveRecord
 		AttributeLinksModelTrait,
 		AttributeAnnotationModelTrait,
 		ValidationGenerationTrait;
-	
+
 	/** @var string как называется один экземпляр модели (для страницы Create -> Новый объект) */
 	public static $title='Объект';
-	
+
 	/** @var string как называется список моделей (для страницы Index) */
 	public static $titles='Объекты';
-	
+
 	/** @var string надпись на кнопке создания нового объекта в списке */
 	public static $addButtonText='Добавить';
-	
+
 	/** @var null|string подсказка для кнопки создания нового объекта */
 	public static $addButtonHint=null;
-	
+
 	/** @var string Префикс для страницы Create (Новый $title) */
 	public static $newItemPrefix='Новый';
-	
+
 	/**
 	 * @var string Атрибут, который считается именем модели.
 	 * Его будет выводить ->renderItem,
 	 * по нему будет искать search-by-name
 	 */
 	public static $nameAttr='name';
-	
+
 	public const searchableOrHint='<br><i>HINT: Можно искать несколько вариантов, разделив их вертикальной</i> <b>|</b> <i>чертой</i>';
-	
-	
+
+
 	/** @var string если заполнить, то будет сохранять историю в моделях этого класса */
 	protected $historyClass;
-	
+
 	/** @var array Кэш для рекурсивного поиска поля (Когда значение может быть в родителе и в его родителе или ...) */
 	protected $recursiveCache=[];
-	
+
 	/** @var array Кэш для вычисляемых аттрибутов */
 	protected $attrsCache=[];
-	
-	
+
+
 	/** @var null|array Кэш для загрузки всех элементов через cacheAllItems() */
 	protected static $allItems=null;
-	
+
 	/** @var bool при сохранении не менять отметку времени и не менять время обновления */
 	protected $doNotChangeAuthor=false;
 
 	// (для функционала импорта/синхронизации)
-	
+
 	/** @var array поля которые у этой модели можно синхронизировать с удаленной системы */
 	protected static $syncableFields=[];
-	
+
 	/** @var array ссылки других объектов на этот, которые надо синхронизировать */
 	public static $syncableReverseLinks=[];
-	
+
 	/** @var array ссылки этого объекта на другие, которые надо синхронизировать */
 	public static $syncableDirectLinks=[];
-	
+
 	/** @var array many-many ссылки этого объекта на другие, которые надо синхронизировать */
 	public static $syncableMany2ManyLinks=[];
 
 	/** @var string|null ключ, по которому можно найти такой объект на удаленной системе */
 	public static $syncKey='name';
-	
+
 	/** @var string поле которое сравнивается  */
 	public static $syncTimestamp='updated_at';
 
 	const SCENARIO_VALIDATION = 'validation';
-	
-	
+
+
 	/**
 	 * Прикручиваем поведения для many-2-many ссылок из AttributeLinksModelTrait
 	 * @return array
@@ -135,7 +135,7 @@ class ArmsModel extends ActiveRecord
 		];
 	}
 
-	/** 
+	/**
 	 * список ролей которые может реализовать модель (для генерации)
 	 */
 	public static function roles(): array
@@ -143,7 +143,7 @@ class ArmsModel extends ActiveRecord
 		return[];
 	}
 
-	
+
 	/**
 	 * Сразу добавляем в набор дополнительных полей все ссылки на другие модели из AttributeLinksModelTrait
 	 * @return array
@@ -161,10 +161,10 @@ class ArmsModel extends ActiveRecord
 				$links //все ссылки many-2-many
 			)
 		);
-		
+
 		return array_combine($fields, $fields);
 	}
-	
+
 	/**
 	 * Базовая работа с вложениями
 	 * @return ActiveQuery
@@ -172,7 +172,7 @@ class ArmsModel extends ActiveRecord
 	public function getAttaches() {
 		return $this->hasMany(Attaches::class,[static::tableName().'_id'=>'id'	]);
 	}
-	
+
 	/**
 	 * Возвращает массив ['id'=>'имя'] моделей (регулярно используется для Select2)
 	 * @return array
@@ -183,7 +183,7 @@ class ArmsModel extends ActiveRecord
 			->all();
 		return ArrayHelper::map($list, 'id', 'sname');
 	}
-	
+
 	/**
 	 * Геттер для атрибута $name
 	 * для моделей у которых нет атрибута name в таблице
@@ -192,7 +192,7 @@ class ArmsModel extends ActiveRecord
 	public function getName(){
 		return $this->{static::$nameAttr};
 	}
-	
+
 	/**
 	 * Геттер для атрибута $sname (имя для поиска)
 	 * по умолчанию возвращает $name
@@ -202,7 +202,7 @@ class ArmsModel extends ActiveRecord
 	public function getSname(){
 		return $this->name;
 	}
-	
+
 	/**
 	 * Возвращает время прошедшее с обновления модели
 	 * @return int
@@ -212,7 +212,7 @@ class ArmsModel extends ActiveRecord
 		$updated = new	DateTime($this->updated_at,	new DateTimeZone('UTC') );
 		return time()-$updated->format('U');
 	}
-	
+
 	/**
 	 * Признак того, что есть загруженный кэш всех моделей этого класса
 	 * @return bool
@@ -220,7 +220,7 @@ class ArmsModel extends ActiveRecord
 	public static function allItemsLoaded() {
 		return !is_null(static::$allItems);
 	}
-	
+
 	/**
 	 * Загрузить все модели в кэш
 	 * Полезно только для моделей без или с малым количеством связей, так как они не грузятся в кэш
@@ -230,7 +230,7 @@ class ArmsModel extends ActiveRecord
 		if (!static::allItemsLoaded())
 			static::$allItems=ArrayHelper::index(static::find()->all(),'id');
 	}
-	
+
 	/**
 	 * Вернуть кэш всех моделей
 	 * если модели не загружены в кэш то в зависимости от значения $autoload
@@ -244,7 +244,7 @@ class ArmsModel extends ActiveRecord
 			static::cacheAllItems();
 		return static::$allItems;
 	}
-	
+
 	/**
 	 * Вернуть одну модель из кэша
 	 * @param integer $id ID модели
@@ -260,7 +260,7 @@ class ArmsModel extends ActiveRecord
 		}
 		return isset(static::$allItems[$id])?static::$allItems[$id]:null;
 	}
-	
+
 	/**
 	 * Валидация отсутствия рекурсии при построении ссылок на родителей
 	 * @param string $attribute - аттрибут с id другого объекта
@@ -278,20 +278,20 @@ class ArmsModel extends ActiveRecord
 	public function validateRecursiveLink($attribute, $params=[])
 	{
 		$params=(array)$params;
-		
+
 		// кладем инициатора рекурсии в параметры
 		if (!isset($params['origin'])) $params['origin']=$this;
 		//если у нас нет цепочки связей - создаем пустую
 		if (!isset($params['attributeChain']))	$params['attributeChain']=[];
 		//кладем себя в цепочку
 		$params['attributeChain'][]=$this->id;
-		
+
 		//если никакой другой объект не передан, то проверяем себя
 		$object=isset($params['object'])?$params['object']:$this;
-		
+
 		//метод для получения связанного объекта
 		$getLink=$params['getLink']??'parent';
-		
+
 		//если у нас есть ссылка
 		if (!empty($object->$attribute)) {
 			//предположим что у нас тут может быть и _id и _ids, т.к. _ids более общий - используем его
@@ -325,29 +325,8 @@ class ArmsModel extends ActiveRecord
 		}
 		return true;
 	}
-	
-	/**
-	 * Проверяем что поле $attr у модели не заполнено
-	 * @param $model
-	 * @param $attr
-	 * @return bool
-	 */
-	public static function attrIsEmpty($model,$attr) {
-		if (StringHelper::endsWith($attr,'_ids')) {
-			//такие аттрибуты это массивы, они должны содержать хоть один элемент
-			if (!is_array($model->$attr)) return true; //не массив
-			if (!count($model->$attr)) return true; //пустой
-		}
-		
-		if (StringHelper::endsWith($attr,'_id')) {
-			//такие аттрибуты это ссылки, они должны указывать на что-то отличное от нуля
-			if (!is_numeric($model->$attr)) return true; //не число
-			if (!($model->$attr>0)) return true; //ноль
-		}
-		
-		return empty($model->$attr);
-	}
-	
+
+
 	/**
 	 * Сохранить без обновления журнала
 	 * @param bool $runValidation
@@ -358,7 +337,7 @@ class ArmsModel extends ActiveRecord
 		$this->doNotChangeAuthor=true;
 		return $this->save($runValidation);
 	}
-	
+
 	/**
 	 * Возвращает класс журнала этой модели. Либо он должен быть явно задан,
 	 * либо должен существовать класс с суффиксом History
@@ -374,7 +353,7 @@ class ArmsModel extends ActiveRecord
 		if (!class_exists($this->historyClass)) return false;
 		return $this->historyClass;
 	}
-	
+
 	/**
 	 * Записывает в журнал изменения (если они обнаружатся относительно предыдущей записи в журнале)
 	 * @param null $initiator
@@ -382,25 +361,25 @@ class ArmsModel extends ActiveRecord
 	public function historyCommit($initiator=null) {
 		$historyClass=$this->getHistoryClass();
 		if (!$historyClass || $this->doNotChangeAuthor) return;
-		
+
 		//ну что ж, давайте попробуем залепить запись в журнал!
 		/** @var HistoryModel $journal */
 		$journal=new $historyClass();
 		$journal->journal($this,$initiator);
 	}
-	
+
 	/**
 	 * Записывает в журнал отметку об удалении объекта
 	 * @param null $initiator
 	 */
 	public function historyEnd($initiator=null) {
 		if (!($historyClass=$this->getHistoryClass())) return;
-		
+
 		/** @var HistoryModel $journal */
 		$journal=new $historyClass();
 		$journal->journalDeletion($this,$initiator);
 	}
-	
+
 	/**
 	 * Кастомизируем afterSave, чтобы добавить запись о новом состоянии модели в журнал
 	 * @param $insert
@@ -410,10 +389,10 @@ class ArmsModel extends ActiveRecord
 	public function afterSave($insert, $changedAttributes)
 	{
 		parent::afterSave($insert, $changedAttributes);
-		
+
 		$this->historyCommit(); //журналирование изменений
 	}
-	
+
 	/**
 	 * Кастомизируем afterDelete, чтобы добавить в журнал запись об удалении модели
 	 * @return void
@@ -424,7 +403,7 @@ class ArmsModel extends ActiveRecord
 
 		$this->historyEnd(); //журналирование удаления
 	}
-	
+
 	/**
 	 * Кастомизируем beforeSave, чтобы обработать стандартное поведение полей
 	 * - updated_at
@@ -448,22 +427,22 @@ class ArmsModel extends ActiveRecord
 		if ($this->hasProperty('updated_at') && !$this->doNotChangeAuthor) {
 			$this->updated_at=gmdate('Y-m-d H:i:s');
 		}
-		
+
 		if ($this->hasProperty('updated_by') && !$this->doNotChangeAuthor) {
 			if (Yii::$app->hasProperty('user') && is_object(Yii::$app->user) && is_object(Yii::$app->user->identity))
 				/** @noinspection PhpPossiblePolymorphicInvocationInspection */
 				$this->updated_by=Yii::$app->user->identity->Login;
 		}
-		
+
 		if ($this->hasProperty('external_links')) {
 			$this->externalDataBeforeSave();
 		}
-			
-			
+
+
 		return true;
 	}
-	
-	
+
+
 	/**
 	 * Загрузить поля с объекта загруженного с другой системы (такой же инвентори)
 	 * @param array      $remote сам удаленный объект
@@ -475,17 +454,17 @@ class ArmsModel extends ActiveRecord
 	 */
 	public function syncFields(array $remote, array $overrides, string &$log, RestHelper $rest) {
 		$timestamp=static::$syncTimestamp;
-		
+
 		foreach ($overrides as $field=>$value) {
 			if ($this->$field==$value) unset ($overrides[$field]);
 		}
-		
+
 		if (SyncController::$debug) {
 			$class=SyncController::getClassName(static::class);
 			echo "Comparing $class $timestamp: Local={$this->$timestamp} vs Remote={$remote[$timestamp]}\n";
 		}
-		
-		
+
+
 		//если (удаленный объект имеет отметку времени и она больше) или надо поменять (а не синхронизировать) какие-то поля
 		if (($timestamp && $remote[$timestamp] && $remote[$timestamp]>$this->$timestamp) || count($overrides)) {
 			$needUpdate=false;
@@ -515,7 +494,7 @@ class ArmsModel extends ActiveRecord
 		//если менять не надо
 		return null;
 	}
-	
+
 	/**
 	 * Создает объект в локальной системе на основании данных из удаленной
 	 * @param array      $remote сам удаленный объект
@@ -526,13 +505,13 @@ class ArmsModel extends ActiveRecord
 	 * @noinspection PhpUnusedParameterInspection
 	 */
 	public static function syncCreate(array $remote, array $overrides, string &$log, RestHelper $rest) {
-		
+
 		$import=[];
-		
+
 		foreach (static::$syncableFields as $field) {
 			$import[$field]=$remote[$field];
 		}
-		
+
 		foreach ($overrides as $field=>$value) {
 			if (strpos($field,'_ids')==(strlen($field)-4)) {
 				$import[$field] = [$value];
@@ -540,7 +519,7 @@ class ArmsModel extends ActiveRecord
 				$import[$field]=$value;
 			}
 		}
-		
+
 		foreach ($import as $p=>$v) {
 			if (is_array($v)) $v=implode(',',$v);
 			$log.= "[$p=>$v]; ";
@@ -548,7 +527,7 @@ class ArmsModel extends ActiveRecord
 
 		return new static($import);
 	}
-	
+
 	/**
 	 * Как найти локальные объекты по ключу синхронизации
 	 * (который на самом деле никакой не ключ с точки зрения БД)
@@ -563,7 +542,7 @@ class ArmsModel extends ActiveRecord
 		}
 		return $query->all();
 	}
-	
+
 	/**
 	 * Возвращает следующее значение integer атрибута из таблицы
 	 * ищет максимальное значение атрибута в таблице и возвращает на 1 больше
@@ -574,7 +553,7 @@ class ArmsModel extends ActiveRecord
 		$max=static::find()->select("MAX(CAST(`$field` as SIGNED))")->scalar();
 		return ++$max;
 	}
-	
+
 	/**
 	 * Возвращает следующий id модели
 	 * @return int
@@ -582,7 +561,7 @@ class ArmsModel extends ActiveRecord
 	public static function fetchNextId() {
 		return static::fetchNextValue('id');
 	}
-	
+
 	/**
 	 * Поиск объекта по имени
 	 * @param string $name
@@ -593,7 +572,7 @@ class ArmsModel extends ActiveRecord
 			->where(['LOWER(name)'=>strtolower($name)])
 			->one();
 	}
-	
+
 	/**
 	 * @param string $name
 	 * @return ArmsModel|ActiveRecord|null
@@ -602,7 +581,7 @@ class ArmsModel extends ActiveRecord
 	{
 		return static::findByName($name);
 	}
-	
+
 	/**
 	 * Рекурсивный поиск аттрибута в цепочке родителей
 	 * @param string 		$simpleAttr		как называется локальный аттрибут без учета рекурсии
@@ -616,18 +595,18 @@ class ArmsModel extends ActiveRecord
 		//ищем в кэше
 		if (isset($this->recursiveCache[$simpleAttr]))
 			return $this->recursiveCache[$simpleAttr];
-		
+
 		if (!is_null($recursiveAttr)&&isset($this->recursiveCache[$recursiveAttr]))
 			return $this->recursiveCache[$recursiveAttr];
-		
+
 		//ищем у себя
 		$value=$this->$simpleAttr;
 		if (is_object($value)||(is_array($value)&&count($value))||!empty($value))
 			return $this->recursiveCache[$recursiveAttr] = $value;
-		
+
 		//атрибут ссылка на предка
 		if (is_null($parent)) $parent=$this->parentAttr;
-		
+
 		//ищем у родителя
 		if (is_object($this->$parent)) {
 			if (is_null($recursiveAttr)) {
@@ -636,11 +615,11 @@ class ArmsModel extends ActiveRecord
 				return $this->recursiveCache[$recursiveAttr] = $this->$parent->$recursiveAttr;
 			}
 		}
-		
+
 		//запоминаем, что ничего не нашли
 		return $this->recursiveCache[$recursiveAttr] = $empty;
 	}
-	
+
 	/**
 	 * Возвращает узел в дереве предков в котором задан наследуемый атрибут
 	 * @param string $attr
@@ -652,13 +631,13 @@ class ArmsModel extends ActiveRecord
 		if (StringHelper::endsWith($attr,'Recursive')) {
 			$attr=substr($attr,0,strlen($attr)-strlen('Recursive'));
 		}
-		
+
 		if (isset($this->recursiveCache[$attr.'::node']))
 			return $this->recursiveCache[$attr.'::node'];
-		
+
 		//атрибут ссылка на предка
 		if (is_null($parentAttr)) $parentAttr=$this->parentAttr;
-		
+
 		$test=$this;
 		while (is_object($test)) {
 			$value=$test->$attr;
@@ -670,7 +649,7 @@ class ArmsModel extends ActiveRecord
 		}
 		return $this->recursiveCache[$attr.'::node']=null;
 	}
-	
+
 	/**
 	 * Возвращает текстовое поле в котором может быть указано {{PARENT}} и оно будет заменено на значение
 	 * этого поля в родителе модели (имеет смысл только в моделях с иерархией)
@@ -683,24 +662,24 @@ class ArmsModel extends ActiveRecord
 		$PARENT='{{PARENT}}';
 		$text=$this->$field;
 		if (strpos($text,$PARENT)===false) return $text;
-		
+
 		$parentAttr=$this->parentAttr;
 		if (!$this->canGetProperty($parentAttr)) return $text;
 		/** @var ArmsModel $parent */
 		$parent=$this->$parentAttr;
 		$parentText='';
-		
+
 		if (is_object($parent)) {
 			$parentText=$recursiveField?
 				$parent->$recursiveField:
 				$parent->textRecursiveField($field);
 		};
-		
+
 		return str_replace($PARENT, $parentText, $text);
 	}
-	
+
 	public function externalData() {}
-	
+
 	/**
 	 * Вытащить запись журнала на дату
 	 * @param $id
@@ -712,7 +691,7 @@ class ArmsModel extends ActiveRecord
 		$instance=new static();
 		/** @var HistoryModel $historyClass */
 		$historyClass=$instance->getHistoryClass();
-		
+
 		//если класс журнала есть, ищем запись в журнале
 		if ($historyClass) {
 			$record=$historyClass::findOnTimestamp($id,$timestamp);
@@ -722,7 +701,7 @@ class ArmsModel extends ActiveRecord
 		//ищем текущую запись в оперативной таблице (не в журнале)
 		return static::findOne($id);
 	}
-	
+
 	/**
 	 * Построить путь от потомка к предку
 	 * @param View   $view
@@ -743,7 +722,7 @@ class ArmsModel extends ActiveRecord
 			];
 		}
 	}
-	
+
 	/**
 	 * Признак того, что эта модель может иметь статус "архивировано"
 	 * @return bool
@@ -752,7 +731,7 @@ class ArmsModel extends ActiveRecord
 		if (isset($this->attrsCache['canBeArchived'])) return $this->attrsCache['canBeArchived'];
 		return $this->attrsCache['canBeArchived']=$this->hasProperty('archived');
 	}
-	
+
 	/**
 	 * Признак того, что эта модель имеет статус "архивировано"
 	 * @return bool
@@ -760,7 +739,7 @@ class ArmsModel extends ActiveRecord
 	public function getIsArchived() {
 		return $this->canBeArchived && $this->archived;
 	}
-	
+
 	/**
 	 * Путь до контроллера
 	 * @return mixed|string
@@ -769,7 +748,7 @@ class ArmsModel extends ActiveRecord
 		if (isset($this->attrsCache['controllerPath'])) return $this->attrsCache['controllerPath'];
 		return $this->attrsCache['controllerPath']=StringHelper::class2Id(get_class($this));
 	}
-	
+
 	/**
 	 * Путь до папки views
 	 * @return mixed|string
@@ -779,7 +758,7 @@ class ArmsModel extends ActiveRecord
 		$class=($this instanceof HistoryModel)?$this->masterClass:get_class($this);
 		return $this->attrsCache['viewsPath']=StringHelper::class2ViewsPath($class);
 	}
-	
+
 	/**
 	 * Отрендерить элемент
 	 * @param View  $view
@@ -797,7 +776,7 @@ class ArmsModel extends ActiveRecord
 			])
 		);
 	}
-	
+
 	/**
 	 * Отобрать себе все абсорбируемые поля у другой модели этого же класса
 	 * @param ArmsModel $model
@@ -830,14 +809,14 @@ class ArmsModel extends ActiveRecord
 				$model->attributeClear($attribute);
 			}
 		}
-		
+
 		if ($delete) {	//если надо удалить ограбленного - удаляем
 			$model->delete();
 		} else {		//иначе сохраняем его в обомжелом виде
 			$model->save();
 		}
 	}
-	
+
 	/**
 	 * Чтобы один массив можно было наполнить уникальными моделями разных классов индексируем его по uuid
 	 * @param $model
@@ -846,14 +825,14 @@ class ArmsModel extends ActiveRecord
 	public static function getUUID($model) {
 		return get_class($model).'#'.$model->id;
 	}
-	
+
 	/**
 	 * @return string
 	 */
 	public function uuid() {
 		return static::getUUID($this);
 	}
-	
+
 	/**
 	 * Построить ветку(граф) от модели до корня дерева
 	 * (для моделей с древовидной связью через атрибут "родитель")
@@ -868,7 +847,7 @@ class ArmsModel extends ActiveRecord
 		}
 		return $chain;
 	}
-	
+
 	/**
 	 * Добавляем наш сценарий валидации с тем же набором атрибутов, что и для основного
 	 * @return array|array[]
@@ -879,7 +858,7 @@ class ArmsModel extends ActiveRecord
 		$scenarios[static::SCENARIO_VALIDATION]=$scenarios[static::SCENARIO_DEFAULT];
 		return $scenarios;
 	}
-	
+
 	public function __get($name)
 	{
 		//если мы в режиме валидации
@@ -893,8 +872,8 @@ class ArmsModel extends ActiveRecord
 					return $this->attributeFetchLinks($link,$this->$link);
 			}
 		}
-		
-		
+
+
 		try {
 			return parent::__get($name);
 		} catch (UnknownPropertyException $e) {
@@ -907,11 +886,11 @@ class ArmsModel extends ActiveRecord
 				if ($this->canGetProperty($plain)) {
 					//выясняем какой у него тип
 					$type=$this->getAttributeType($plain);
-					
+
 					//для текста мы просто заменяем {{PARENT}} на родительское значение этого же поля
 					if ($type==='text')
 						return $this->textRecursiveField($plain,$name);
-					
+
 					//если аттрибут наследуемый, то вытаскиваем его значение рекурсивно
 					if ($this->attributeIsInheritable($plain))
 						return $this->findRecursiveAttr($plain,$name);
@@ -920,7 +899,7 @@ class ArmsModel extends ActiveRecord
 			throw $e;
 		}
 	}
-	
+
 	/**
 	 * Подготавливает запросы для поиска и загрузки списка моделей
 	 * @param $columns

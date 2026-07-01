@@ -6,6 +6,7 @@ use app\generation\context\AttributeContext;
 use app\generation\context\GenerationContext;
 use app\generation\ModelFactory;
 use app\models\base\ArmsModel;
+use app\helpers\StringHelper;
 
 /**
  * ValidationGenerationTrait
@@ -15,7 +16,7 @@ use app\models\base\ArmsModel;
  */
 trait ValidationGenerationTrait
 {
-	
+
 	/**
 	 * Вызывается после генерации атрибутов в ModelFactory.
 	 * Применяет бизнес-правила, чтобы привести модель в валидное состояние до этапа валидации.
@@ -28,6 +29,28 @@ trait ValidationGenerationTrait
     {
         $this->applyRequireOneOfRules($context, $options);
     }
+
+	/**
+	 * Проверяем что поле $attr у модели не заполнено
+	 * @param $model
+	 * @param $attr
+	 * @return bool
+	 */
+	public static function attrIsEmpty($model,$attr) {
+		if (StringHelper::endsWith($attr,'_ids')) {
+			//такие аттрибуты это массивы, они должны содержать хоть один элемент
+			if (!is_array($model->$attr)) return true; //не массив
+			if (!count($model->$attr)) return true; //пустой
+		}
+
+		if (StringHelper::endsWith($attr,'_id')) {
+			//такие аттрибуты это ссылки, они должны указывать на что-то отличное от нуля
+			if (!is_numeric($model->$attr)) return true; //не число
+			if (!($model->$attr>0)) return true; //ноль
+		}
+
+		return empty($model->$attr);
+	}
 
     /**
      * Валидация того, что как минимум один из набора атрибутов не пустой.
@@ -43,12 +66,12 @@ trait ValidationGenerationTrait
                 return true;
             }
         }
-        
+
         // Add error to all attributes in the set
         foreach ($params['attrs'] ?? [] as $attr) {
             $this->addError($attr, $params['message'] ?? 'Как минимум один аттрибут должен быть заполнен');
         }
-        
+
         return false;
     }
 
@@ -64,20 +87,20 @@ trait ValidationGenerationTrait
             if (($rule[1] ?? null) !== 'validateRequireOneOf') {
                 continue;
             }
-            
+
             $attrs = $rule['params']['attrs'] ?? null;
             if (!is_array($attrs) || empty($attrs)) {
                 continue;
             }
-			
+
             foreach ($attrs as $attr) {
 				//если атрибут не пустой, то вот и славно
 				if (!static::attrIsEmpty($this, $attr)) continue;
 			}
-			
+
 			// Выбираем случайный атрибут из набора для заполнения, остальные оставляем пустыми
 			$attr=$context->pickRandomValue($attrs);
-			
+
 			$attrContext=new AttributeContext(
 				attribute: $attr,
 				empty: false,	//нужный атрибут заполняем
@@ -89,7 +112,7 @@ trait ValidationGenerationTrait
     }
 
 
-		
+
 	/**
 	 * Проверяет, что аттрибут или integer или их массив
 	 * @param $attribute
@@ -103,5 +126,3 @@ trait ValidationGenerationTrait
 		}
 	}
 }
-
-
