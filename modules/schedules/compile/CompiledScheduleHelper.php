@@ -184,8 +184,10 @@ class CompiledScheduleHelper
 		$result = [];
 		$periods = $this->main['periods'] ?? [];
 		foreach ($periods as $p) {
-			// [start, end) ∩ [dayStart, dayEnd) ≠ ∅
-			if (($p['end_tsm'] ?? 0) > $dayStart && ($p['start_tsm'] ?? 0) < $dayEnd) {
+			// [start, end) ∩ [dayStart, dayEnd) ≠ ∅; null = безграничность (как в inBounds)
+			$start = $p['start_tsm'] ?? null;
+			$end = $p['end_tsm'] ?? null;
+			if (($end === null || $end > $dayStart) && ($start === null || $start < $dayEnd)) {
 				$result[] = $p;
 			}
 		}
@@ -200,8 +202,11 @@ class CompiledScheduleHelper
 		$positive = [];
 		$negative = [];
 		foreach ($periods as $p) {
-			$s = max($p['start_tsm'], $dayStart);
-			$e = min($p['end_tsm'], $dayEnd);
+			// Обрезаем период по границам дня; null = безграничность.
+			$ps = $p['start_tsm'] ?? null;
+			$pe = $p['end_tsm'] ?? null;
+			$s = $ps === null ? $dayStart : max($ps, $dayStart);
+			$e = $pe === null ? $dayEnd : min($pe, $dayEnd);
 			$meta = $p['meta'] ?? [];
 			if (is_object($meta)) $meta = (array)$meta;
 			$interval = [$s - $dayStart, $e - $dayStart, $meta];

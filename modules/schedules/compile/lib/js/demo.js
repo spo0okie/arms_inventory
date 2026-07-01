@@ -411,7 +411,10 @@ class ScheduleRuntime {
     // - заканчивается НЕ РАНЬШЕ начала дня (end_tsm > dayStart)
     // И
     // - начинается РАНЬШЕ конца дня (start_tsm < dayEnd)
-    if (period.end_tsm > dayStart && period.start_tsm < dayEnd) {
+    // null = безграничность (как в inBounds)
+    const start = period.start_tsm;
+    const end = period.end_tsm;
+    if ((end === null || end > dayStart) && (start === null || start < dayEnd)) {
     result.push(period);
     }
     }
@@ -438,9 +441,9 @@ class ScheduleRuntime {
         const negative = [];
         
         for (const period of periods) {
-            // Обрезаем период по границам дня
-            const intervalStart = Math.max(period.start_tsm, dayStart);
-            const intervalEnd = Math.min(period.end_tsm, dayEnd);
+            // Обрезаем период по границам дня; null = безграничность
+            const intervalStart = period.start_tsm === null ? dayStart : Math.max(period.start_tsm, dayStart);
+            const intervalEnd = period.end_tsm === null ? dayEnd : Math.min(period.end_tsm, dayEnd);
             
             // Конвертируем в минуты от начала дня
             const startMinute = intervalStart - dayStart;
