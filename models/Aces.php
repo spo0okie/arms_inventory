@@ -409,4 +409,61 @@ class Aces extends ArmsModel
 		$value=ArrayHelper::recursiveOverride($this->getIpParams(),$value);
 		$this->attrsCache['ipParams']=$value;
 	}
+
+	/**
+	 * Копирует содержимое этой записи доступа (субъекты, типы доступа, ip-параметры,
+	 * comment, notepad, name) в другую ACE. Не копирует id и acls_id — их задаёт вызывающий.
+	 *
+	 * IP-субъекты переносятся через текстовое поле ips (на сохранении из него формируются
+	 * netIps_ids/networks_ids). Используется при добавлении ресурса в группу: новый ACL
+	 * получает копию общего набора ACE группы.
+	 *
+	 * @param Aces $target ACE-приёмник (как правило новый, ещё не сохранённый)
+	 */
+	public function copyContentTo(Aces $target): void
+	{
+		$target->name=$this->name;
+		$target->comment=$this->comment;
+		$target->notepad=$this->notepad;
+		$target->ips=$this->ips;
+		$target->users_ids=$this->users_ids ?: [];
+		$target->comps_ids=$this->comps_ids ?: [];
+		$target->services_ids=$this->services_ids ?: [];
+		$target->access_types_ids=$this->access_types_ids ?: [];
+		$ipParams=$this->getIpParams();
+		if ($ipParams) $target->setIpParams($ipParams);
+	}
+
+	/**
+	 * Канонический отпечаток записи доступа (ACE) для сравнения «одинаковости».
+	 *
+	 * Согласно ТЗ групповых ACL (plans/group-acls.md) две ACE одинаковы, если совпадают по:
+	 * набору субъектов (users/comps/services/netIps/networks), типам доступа,
+	 * параметрам доступа (ip_params), комментарию и записной книжке.
+	 * «Пояснение» (name) в сравнение НЕ входит. Порядок элементов не важен.
+	 *
+	 * @return string
+	 */
+	public function aceSignature(): string
+	{
+		$norm=static function($ids){
+			$ids=array_map('intval',(array)$ids);
+			sort($ids);
+			return $ids;
+		};
+		$ipParams=$this->getIpParams();
+		ksort($ipParams);
+		$parts=[
+			'users'    => $norm($this->users_ids),
+			'comps'    => $norm($this->comps_ids),
+			'services' => $norm($this->services_ids),
+			'netips'   => $norm($this->netIps_ids),
+			'networks' => $norm($this->networks_ids),
+			'types'    => $norm($this->access_types_ids),
+			'ipparams' => $ipParams,
+			'comment'  => (string)$this->comment,
+			'notepad'  => (string)$this->notepad,
+		];
+		return md5(json_encode($parts,JSON_UNESCAPED_UNICODE));
+	}
 }

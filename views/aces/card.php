@@ -4,15 +4,17 @@ use app\components\HistoryWidget;
 use app\components\ListObjectsWidget;
 use app\components\TextFieldWidget;
 use app\models\Aces;
-use kartik\markdown\Markdown;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-/* @var $this yii\web\View */
-/* @var $model app\models\Aces */
+/** @var yii\web\View $this */
+/** @var app\models\Aces $model */
+
+/** @var boolean $groupMode режим группового редактирования ACL */
 
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
+if (!isset($groupMode)) $groupMode=false;
 
 $accessTypes=[];
 
@@ -20,6 +22,8 @@ foreach ($model->accessTypes as $accessType)
 	$accessTypes[]=$accessType->name;
 
 if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
+
+
 ?>
 
 <div class="card w-100 my-2 ace-card shadow-sm g-0" id="ace_card_<?= $model->id ?>">
@@ -48,7 +52,7 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 					</span>
 				</span>
 				<span class="row text-center"><small >добавьте записи в этот элемент списка доступа</small></span>
-			
+
 			<?php } ?>
 		</div>
 		<div class="col-md-4 ace-access-card d-flex flex-column pt-2 pull-right">
@@ -56,7 +60,14 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 			<?php if (!$static_view) { ?>
 				<div class="row mt-auto g-0">
 					<div class="btn-group" role="group">
-						<?=  Html::a('<span class="fas fa-pencil-alt"></span>',[
+						<?=  Html::a('<span class="fas fa-pencil-alt"></span>',$groupMode?
+						[
+							'/acls/group-ace-edit',
+							'id'=>$model->acl->id,
+							'ace'=>$model->id,
+							'ajax'=>1,
+							'modal'=>'modal_form_loader'
+						]:[
 							'/aces/update',
 							'id'=>$model->id,
 							'ajax'=>1,
@@ -75,13 +86,20 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 							'prefix'=>'',
 							'iconOptions'=>['class'=>'btn btn-sm text-white ace-access-buttons'],
 						])?>
-						<?=  Html::a('<span class="fas fa-trash"/>', ['aces/delete', 'id' => $model->id,'return'=>'previous'], [
-							'data' => [
-								'confirm' => 'Удалить этого участника доступа? Действие необратимо!',
-								'method' => 'post',
-							],
-							'class'=>'btn btn-sm text-white ace-access-buttons'
-						])?>
+						<?=  Html::a('<span class="fas fa-trash"/>',
+							$groupMode?
+							['/acls/group-ace-delete', 'id' => $model->acl->id, 'ace'=>$model->id, 'return'=>'previous']:
+							['/aces/delete', 'id' => $model->id, 'return'=>'previous'],
+							[
+								'data' => [
+									'confirm' => $groupMode?
+										'Удалить этого участника из доступа ко всем ресурсам группы? Действие необратимо!':
+										'Удалить этого участника доступа? Действие необратимо!',
+									'method' => 'post',
+								],
+								'class'=>'btn btn-sm text-white ace-access-buttons'
+							]
+						)?>
 					</div>
 				</div>
 			<?php } ?>

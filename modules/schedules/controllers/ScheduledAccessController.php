@@ -3,7 +3,9 @@
 namespace app\modules\schedules\controllers;
 
 use app\components\DynaGridWidget;
+use app\generation\ModelFactory;
 use app\helpers\StringHelper;
+use app\models\Aces;
 use app\models\Acls;
 use app\models\Places;
 use app\modules\schedules\models\SchedulesAclSearch;
@@ -123,11 +125,84 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 	public function testView(): array
 	{
 		$testData = $this->getTestData();
-		return [[
+
+		//расписание, где два ACL имеют ОДИНАКОВЫЙ набор ACE → одна группа (компактный рендер)
+		$groupedId=$this->buildScheduleWithAces(['общий доступ','общий доступ']);
+		//расписание, где два ACL имеют РАЗНЫЕ ACE → группы нет (каждый ACL отдельно)
+		$ungroupedId=$this->buildScheduleWithAces(['доступ-1','доступ-2']);
+
+		$scenarios=[[
 			'name'     => 'default',
 			'GET'      => ['id' => $testData['empty']->id],
 			'response' => 200,
 		]];
+
+		if ($groupedId) {
+			$scenarios[]=[
+				'name'     => 'grouped acls',
+				'GET'      => ['id' => $groupedId],
+				'response' => 200,
+				//одинаковые ACE → на странице присутствует групповой рендер
+				'assert'   => static function (\AcceptanceTester $I) {
+					$I->seeResponseContains('acl-group-resources');
+				},
+			];
+			$scenarios[]=[
+				'name'     => 'detailed acls',
+				//переключатель «Детально» (group=0) → плоский рендер без группировки
+				'GET'      => ['id' => $groupedId, 'group' => 0],
+				'response' => 200,
+				'assert'   => static function (\AcceptanceTester $I) {
+					$I->dontSeeResponseContains('acl-group-resources');
+				},
+			];
+		}
+
+		if ($ungroupedId) {
+			$scenarios[]=[
+				'name'     => 'ungrouped acls',
+				'GET'      => ['id' => $ungroupedId],
+				'response' => 200,
+				//разные ACE → группового рендера быть не должно
+				'assert'   => static function (\AcceptanceTester $I) {
+					$I->dontSeeResponseContains('acl-group-resources');
+				},
+			];
+		}
+
+		return $scenarios;
+	}
+
+	/**
+	 * Создаёт расписание доступа с набором ACL (по одному на элемент $aceComments),
+	 * у каждого — отдельный ресурс (Acls.comment) и один ACE с заданным Aces.comment.
+	 * ACL с одинаковым Aces.comment попадут в одну группу.
+	 *
+	 * @param string[] $aceComments комментарий ACE для каждого создаваемого ACL
+	 * @return int|null id созданного расписания или null, если фикстуру создать не удалось
+	 */
+	protected function buildScheduleWithAces(array $aceComments): ?int
+	{
+		try {
+			$schedule=ModelFactory::create(Schedules::class,['empty'=>true]);
+			if (!$schedule) return null;
+
+			foreach ($aceComments as $i=>$aceComment) {
+				$acl=new Acls();
+				$acl->schedules_id=$schedule->id;
+				$acl->comment='ресурс-'.($i+1);	//отдельный ресурс на каждый ACL
+				if (!$acl->save()) return null;
+
+				$ace=new Aces();
+				$ace->acls_id=$acl->id;
+				$ace->comment=$aceComment;		//определяет «одинаковость» ACE
+				if (!$ace->save()) return null;
+			}
+
+			return $schedule->id;
+		} catch (\Throwable $e) {
+			return null;
+		}
 	}
 
 	/**

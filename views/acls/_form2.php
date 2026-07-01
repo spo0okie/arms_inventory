@@ -2,6 +2,12 @@
 
 use app\components\Forms\ArmsForm;
 use app\components\widgets\page\ModelWidget;
+use app\models\Acls;
+use app\models\Comps;
+use app\models\NetIps;
+use app\models\Networks;
+use app\models\Services;
+use app\models\Techs;
 use kartik\tabs\TabsX;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -34,7 +40,9 @@ function onInputUpdate(input) {
 }
 JS;
 
-$this->registerJs($js,yii\web\View::POS_HEAD);
+//mutual-exclusion ресурсов нужен только для одиночного редактирования (TabsX);
+//в форме группового создания ресурсы выбираются мультиселектами и взаимоисключение не нужно
+if (!$model->isNewRecord) $this->registerJs($js,yii\web\View::POS_HEAD);
 
 ?>
 
@@ -42,7 +50,8 @@ $this->registerJs($js,yii\web\View::POS_HEAD);
     <?php $form = ArmsForm::begin([
 		'model'=>$model,
 		'id' => 'acls-form',
-	]); ?>
+		//в форме группового создания валидируем массивы *_ids (сценарий group)
+	] + ($model->isNewRecord?['validationUrl'=>['/acls/validate','scenario'=>Acls::SCENARIO_GROUP]]:[])); ?>
 	<?= $form->field($model,'schedules_id')->hiddenInput()->label(false)->hint(false) ?>
 
 	<div class="for-alert"></div>
@@ -76,53 +85,73 @@ $this->registerJs($js,yii\web\View::POS_HEAD);
 			<?php }?>
 		</div>
 		<div class="<?= $model->isNewRecord?'col-md-4':'col-md-6' ?>">
-			<div class="card bg-light">
-				<div class="card-header">Выберите <b>один</b> ресурс к которому предоставляется доступ</div>
-				<div class="card-body">
-					<?= TabsX::widget([
-						'items'=>[
-							[
-								'label'=>'ОС',
-								'content'=>$form->field($model, 'comps_id')->select2(['options'=>['onchange' => 'onInputUpdate(compInput)']]),
-								'active'=>(bool)$model->comps_id
-							],
-							[
-								'label'=>'Оборудование',
-								'content'=>$form->field($model, 'techs_id')->select2(['options'=>['onchange' => 'onInputUpdate(techInput)']]),
-								'active'=>(bool)$model->techs_id
-							],
-							[
-								'label'=>'IP адрес',
-								'content'=>$form->field($model, 'ips_id')->select2(['options'=>['onchange' => 'onInputUpdate(ipInput)']]),
-								'active'=>(bool)$model->ips_id
-							],
-							[
-								'label'=>'IP сеть',
-								'content'=>$form->field($model, 'networks_id')->select2(['options'=>['onchange' => 'onInputUpdate(netInput)']]),
-								'active'=>(bool)$model->networks_id
-							],
-							[
-								'label'=>'Сервис',
-								'content'=>$form->field($model, 'services_id')->select2(['options'=>['onchange' => 'onInputUpdate(srvInput)']]),
-								'active'=>(bool)$model->services_id
-							],
-							[
-								'label'=>'Другое',
-								'content'=>$form->field($model, 'comment')->textInput([
-									'maxlength' => true,
-									'onchange'=>'onInputUpdate(commentInput)'
-								]),
-								'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->ips_id||$model->networks_id)
-							],
-						],
-						'position'=>TabsX::POS_ABOVE,
-						//'align'=>TabsX::ALIGN_CENTER,
-						'encodeLabels'=>false,
-						'bordered'=>true,
-						
-					]) ?>
+			<?php if ($model->isNewRecord) { ?>
+				<div class="card bg-light">
+					<div class="card-header">Выберите ресурсы, к которым предоставляется доступ<br>
+						<small class="text-muted">можно выбрать несколько ресурсов разных типов — на каждый будет создан отдельный доступ с одинаковым набором ACE</small>
+					</div>
+					<div class="card-body">
+						<?php
+						//Групповые поля выбора ресурсов — массивы *_ids (мультиселект). Валидация
+						//«хотя бы один ресурс» работает корректно (attrIsEmpty для *_ids понимает массивы).
+						?>
+						<?= $form->field($model, 'comps_ids')->select2(['data'=>Comps::fetchNames()])->label('ОС') ?>
+						<?= $form->field($model, 'techs_ids')->select2(['data'=>Techs::fetchNames()])->label('Оборудование') ?>
+						<?= $form->field($model, 'ips_ids')->select2(['data'=>NetIps::fetchNames()])->label('IP адреса') ?>
+						<?= $form->field($model, 'networks_ids')->select2(['data'=>Networks::fetchNames()])->label('IP сети') ?>
+						<?= $form->field($model, 'services_ids')->select2(['data'=>Services::fetchNames()])->label('Сервисы') ?>
+						<?= $form->field($model, 'comment')->textInput(['maxlength' => true])->label('Другое (описание)') ?>
+					</div>
 				</div>
-			</div>
+			<?php } else { ?>
+				<div class="card bg-light">
+					<div class="card-header">Выберите <b>один</b> ресурс к которому предоставляется доступ</div>
+					<div class="card-body">
+						<?= TabsX::widget([
+							'items'=>[
+								[
+									'label'=>'ОС',
+									'content'=>$form->field($model, 'comps_id')->select2(['options'=>['onchange' => 'onInputUpdate(compInput)']]),
+									'active'=>(bool)$model->comps_id
+								],
+								[
+									'label'=>'Оборудование',
+									'content'=>$form->field($model, 'techs_id')->select2(['options'=>['onchange' => 'onInputUpdate(techInput)']]),
+									'active'=>(bool)$model->techs_id
+								],
+								[
+									'label'=>'IP адрес',
+									'content'=>$form->field($model, 'ips_id')->select2(['options'=>['onchange' => 'onInputUpdate(ipInput)']]),
+									'active'=>(bool)$model->ips_id
+								],
+								[
+									'label'=>'IP сеть',
+									'content'=>$form->field($model, 'networks_id')->select2(['options'=>['onchange' => 'onInputUpdate(netInput)']]),
+									'active'=>(bool)$model->networks_id
+								],
+								[
+									'label'=>'Сервис',
+									'content'=>$form->field($model, 'services_id')->select2(['options'=>['onchange' => 'onInputUpdate(srvInput)']]),
+									'active'=>(bool)$model->services_id
+								],
+								[
+									'label'=>'Другое',
+									'content'=>$form->field($model, 'comment')->textInput([
+										'maxlength' => true,
+										'onchange'=>'onInputUpdate(commentInput)'
+									]),
+									'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->ips_id||$model->networks_id)
+								],
+							],
+							'position'=>TabsX::POS_ABOVE,
+							//'align'=>TabsX::ALIGN_CENTER,
+							'encodeLabels'=>false,
+							'bordered'=>true,
+
+						]) ?>
+					</div>
+				</div>
+			<?php } ?>
 			<?= $form->field($model, 'notepad')->text(['height'=>100,'rows'=>6]) ?>
 		</div>
 	</div>
