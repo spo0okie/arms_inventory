@@ -88,6 +88,7 @@ class MaterialsTypes extends ArmsModel
 			'rest' => [
 				'Остаток',
 				'indexHint' => 'Суммарный остаток всех материалов этого типа',
+				'typeClass' => \app\types\IntegerType::class,
 			],
 			'count' => [
 				'Учтено',

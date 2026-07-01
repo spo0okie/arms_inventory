@@ -66,6 +66,17 @@ class Scans extends ArmsModel
 		return ['name','fileSize','fileDate','fileExists'];
 	}
 
+	public function attributeData()
+	{
+		return array_merge(parent::attributeData(), [
+			'file' => ['Место хранения загруженного файла', 'typeClass' => \app\types\StringType::class],
+			'format' => ['typeClass' => \app\types\StringType::class],
+			'fileSize' => ['typeClass' => \app\types\IntegerType::class],
+			'fileDate' => ['typeClass' => \app\types\IntegerType::class],
+			'fileExists' => ['typeClass' => \app\types\BooleanType::class],
+		]);
+	}
+
     /**
      * @inheritdoc
      */

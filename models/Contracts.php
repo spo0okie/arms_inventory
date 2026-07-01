@@ -192,6 +192,7 @@ class Contracts extends ArmsModel
 				'Связи',
 				'indexHint' => 'Привязанные к документу объекты',
 				'join'=>['children','techs','materials','licItems','services'],
+				'typeClass' => \app\types\TextType::class,
 			],
 			'charge' => 'в т.ч. НДС',
 			'comment' => [
@@ -232,6 +233,7 @@ class Contracts extends ArmsModel
 					.'<br>лицензии, оборудования по этому документу поступили'
 					.'<br>(привязаны к документу)',
 				'join'=>['techs','materials','licItems'],
+				'typeClass' => \app\types\StringType::class,
 			],
 			'end_date' => [
 				'Окончание',

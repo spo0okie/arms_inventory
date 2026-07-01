@@ -14,10 +14,9 @@ class DatetimeType implements AttributeTypeInterface
 		return 'datetime';
 	}
 
-	public function renderInput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
+	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
-		$inputOptions = $options['inputOptions'] ?? [];
-		return Html::activeTextInput($model, $attribute, $inputOptions);
+		return $field->datetime();
 	}
 
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed

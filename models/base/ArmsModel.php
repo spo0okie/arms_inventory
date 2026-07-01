@@ -885,7 +885,8 @@ class ArmsModel extends ActiveRecord
 				//и есть ли у нас такой атрибут
 				if ($this->canGetProperty($plain)) {
 					//выясняем какой у него тип
-					$type=$this->getAttributeType($plain);
+					$type=null;
+					try { $type=$this->getAttributeTypeClass($plain)::name(); } catch (\Throwable $e) {}
 
 					//для текста мы просто заменяем {{PARENT}} на родительское значение этого же поля
 					if ($type==='text')

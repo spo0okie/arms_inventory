@@ -97,12 +97,13 @@ class MaterialsUsages extends ArmsModel
 				'Подробно',
 				'hint' => 'Подробности по списанию. Кто инициатор, номер заявки, какие-то нюансы',
 				'type' => 'text',
+				'typeClass' => \app\types\TextType::class,
 			],
-			'sname' => ['Описание',],
-			'place' => ['Откуда',],
-			'to' => ['Куда',],
-			'cost' => 'Стоимость',
-			'charge' => 'в т.ч. НДС',
+			'sname' => ['Описание', 'typeClass' => \app\types\StringType::class],
+			'place' => ['Откуда', 'typeClass' => \app\types\StringType::class],
+			'to' => ['Куда', 'typeClass' => \app\types\StringType::class],
+			'cost' => ['Стоимость', 'typeClass' => \app\types\FloatType::class],
+			'charge' => ['в т.ч. НДС', 'typeClass' => \app\types\FloatType::class],
 		];
 	}
 

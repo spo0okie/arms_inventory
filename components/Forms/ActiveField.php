@@ -378,16 +378,11 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			return $this->select2();
 		}
 		
-		if ($this->model->hasMethod('getAttributeType')) {
-			switch ($this->model->getAttributeType($this->attribute)) {
-				case 'boolean': return $this->checkbox();
-				case 'date': return $this->date();
-				case 'datetime': return $this->datetime();
-				case 'ntext':  return $this->textAutoresize();
-				case 'text':  return $this->text();
-			}
+		if ($this->model->hasMethod('getAttributeTypeClass')) {
+			//виджет ввода выбирает сам тип атрибута (см. types/*::renderInput)
+			return $this->model->getAttributeTypeClass($this->attribute)->renderInput($this);
 		}
-	
+
 		return $this->textInput();
 		
 	}

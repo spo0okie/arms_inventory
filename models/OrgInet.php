@@ -70,7 +70,8 @@ class OrgInet extends ArmsModel
 	public $linksSchema=[
 		'networks_ids'=>	[Networks::class,'org_inets_ids'],
 		'services_id'=>	[Services::class,'org_inets_ids'],
-		'places_id'=>	[Places::class,'org_inets_ids']
+		'places_id'=>	[Places::class,'org_inets_ids'],
+		'networks_id'=>	Networks::class,	//deprecated одиночная ссылка (read-only)
 	];
     
     /**
@@ -132,6 +133,7 @@ class OrgInet extends ArmsModel
 					.'Нужно ли настраивать статикой или выдается по DHCP<br>'
 					.'Прочие детали',
 				'type' => 'text',
+				'typeClass' => \app\types\TextType::class,
 			
 			],
 			'ip_addr' => [
@@ -163,6 +165,7 @@ class OrgInet extends ArmsModel
 			],
 			'totalUnpaid' => [
 				'К оплате',
+				'typeClass' => \app\types\FloatType::class,
 			],
 		];
 	}

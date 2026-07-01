@@ -419,67 +419,7 @@ trait AttributeDataModelTrait
 		return parent::getAttributeHint($attribute);
 	}
 	
-	/**
-	 * Определяет тип атрибута
-	 * специальные типы:
-	 * - ips, macs, urls - правильно оформленные строки
-	 * - link: ссылка на другую модель - надо смотреть в linkSchema, чтобы узнать класс модели
-	 * @param string $attribute
-	 * @param string $default
-	 * @return string
-	 * @throws UnknownPropertyException
-	 */
-	public function getAttributeType($attribute,$default='string')
-	{
-		if ($type=$this->getAttributeData($attribute)['type']??false) {
-			return $type;
-		}
-		
-		if ($this->attributeIsLink($attribute)) {
-			return 'link';
-		}
-
-		if ($this->attributeIsLoader($attribute)) {
-			return 'link';
-		}
-		
-		if (StringHelper::startsWith($attribute,'is_')) {
-			return 'boolean';
-		}
-		
-		switch ($attribute) {
-			case 'id':
-			case 'count': return 'integer';
-			case 'ip':
-			case 'ips': return 'ips';
-			case 'mac':
-			case 'macs': return 'macs';
-			case 'links':
-			case 'url':
-			case 'urls': return 'urls';
-			case 'name':
-			case 'created_by':
-			case 'updated_by':
-			case 'comment': return 'string';
-			case 'notepad': return 'text';
-			case 'updated_at':
-			case 'created_at': return 'datetime';
-			case 'date': return 'date';
-		}
-		
-		foreach ($this->rules() as $rule) {
-			if (in_array($attribute, (array)$rule[0])) {
-				switch ($rule[1]) {
-					case 'integer': return 'integer';
-					case 'number': return 'float';
-					case 'boolean': return 'boolean';
-					case 'string': return 'string';
-				}
-			}
-		}
-		
-		return $default;
-	}
+	//getAttributeType() удалён: тип определяется через getAttributeTypeClass() (объектная система типов)
 	
 	/**
 	 * Возвращает объект типа атрибута для генерации.
@@ -523,6 +463,13 @@ trait AttributeDataModelTrait
 			case 'name':
 			case 'created_by':
 			case 'updated_by':
+			case 'fqdn':		//вычисляемое FQDN (hostname+домен) в разных моделях
+			case 'renderFqdn':
+			case 'fn':			//вычисляемые токены ФИО (Users)
+			case 'ln':
+			case 'mn':
+			case 'nameWithVendor':		//вычисляемые строковые имена
+			case 'nameWithoutParent':
 			case 'comment': return $this->attrsCache[$cache]=new StringType();
 			case 'notepad': return $this->attrsCache[$cache]=new TextType();
 			case 'updated_at':
@@ -540,6 +487,15 @@ trait AttributeDataModelTrait
 				}
 			}
 		}
+
+		//Детерминированные правила по соглашению об именах для вычисляемых (calc) полей,
+		//у которых нет собственной записи в attributeData. Стоят ПОСЛЕ всех способов вывода,
+		//поэтому срабатывают только на атрибутах, тип которых иначе не определён, и не могут
+		//переопределить уже разрешённые типы.
+		if (StringHelper::endsWith($attribute,'Count'))
+			return $this->attrsCache[$cache]=new IntegerType();
+		if (StringHelper::endsWith($attribute,'Name') || StringHelper::endsWith($attribute,'Names'))
+			return $this->attrsCache[$cache]=new StringType();
 
 		throw new \Exception('Не удалось определить тип атрибута ' . static::class . '->' . $attribute);
 	}
@@ -640,22 +596,16 @@ trait AttributeDataModelTrait
 				$this->getAttributeHint($attribute),
 				$item['searchHint']
 			);
-		switch ($this->getAttributeType($attribute,null)) {
-			case 'text':
-			case 'ntext':
-			case 'string':
-			case 'ips':  //по сути тоже просто текст
-			case 'macs': //когданить мы родим диапазоны МАКов и для них будет отдельный поиск
-			case 'urls': //по сути тоже просто текст
-			case 'link': //обычно подразумевает поиск по имени связанных объектов
-				return QueryHelper::$stringSearchHint;
-			case 'date':
-			case 'datetime':
-				return QueryHelper::$dateSearchHint;
-			case 'number':
-				return QueryHelper::$numberSearchHint;
+		//ссылка ищется по имени связанного объекта -> как строка
+		if ($this->attributeIsLink($attribute)) return QueryHelper::$stringSearchHint;
+		try {
+			$schema=$this->getAttributeTypeClass($attribute)->apiSchema();
+		} catch (\Throwable $e) {
+			return QueryHelper::$stringSearchHint;	//тип не выводится (вычисляемое) -> как строку
 		}
-		return '';
+		if (in_array($schema['format']??'', ['date','date-time'])) return QueryHelper::$dateSearchHint;
+		if (in_array($schema['type']??'', ['integer','number'])) return QueryHelper::$numberSearchHint;
+		return QueryHelper::$stringSearchHint;
 	}
 	
 

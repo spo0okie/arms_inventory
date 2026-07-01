@@ -142,7 +142,7 @@ class ModelHelper
 			$model=new $modelClass();
 			$attribureData=$model->attributeData();
 			foreach ($attribureData as $attr=>$data) {
-				$type=$model->getAttributeType($attr,null);
+				try { $type=$model->getAttributeTypeClass($attr)::name(); } catch (\Throwable $e) { $type=null; }
 				if (!is_null($type)) {
 					if (!isset($types[$type])) {
 						$types[$type]=['count'=>1,'sample'=>$modelClass.'->'.$attr];

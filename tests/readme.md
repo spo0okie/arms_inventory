@@ -124,7 +124,7 @@ php vendor/bin/codecept run --coverage
 | TagsTest | [`unit/models/TagsTest.php`](unit/models/TagsTest.php) | Тесты модели Tags: создание, валидация, генерация slug, цвета |
 | TagsSearchTest | [`unit/models/TagsSearchTest.php`](unit/models/TagsSearchTest.php) | Тесты поиска и фильтрации тегов |
 | ModelTypeSafetyTest | [`unit/models/ModelTypeSafetyTest.php`](unit/models/ModelTypeSafetyTest.php) | Проверяет что все safe атрибуты моделей, унаследованных от ArmsModel, имеют явно указанный тип в метаданных. Важно для обеспечения корректной работы генераторов моделей в acceptance тестах. |
-| GeneratorResolverTest | [`unit/generation/GeneratorResolverTest.php`](unit/generation/GeneratorResolverTest.php) | Проверяет что GeneratorResolver может подобрать генератор к каждому типу атрибутов моделей. Использует ModelHelper::getModelAtributesTypes() для получения всех типов и проверяет покрытие генераторами. |
+| ApiSchemaResolvableTest | [`unit/types/ApiSchemaResolvableTest.php`](unit/types/ApiSchemaResolvableTest.php) | Энфорсер строгого резолвинга типов: перебирает все API-атрибуты (read-поверхность и `$searchFields` контроллеров) и падает списком, если у какого-то атрибута тип не выводится. Пришёл на смену удалённому `GeneratorResolver` (см. [`generation/generators/readme.md`](../generation/generators/readme.md)). |
 
 ### Acceptance тесты
 

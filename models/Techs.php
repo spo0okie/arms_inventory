@@ -227,6 +227,15 @@ class Techs extends ArmsModel
 	public function attributeData()
 	{
 		return ArrayHelper::recursiveOverride(parent::attributeData(),[
+			//read-only вычисляемые ссылки (категория C): только вывод
+			'effectiveUser' => ['ref'=>\app\models\Users::class],
+			'manufacturer' => ['ref'=>\app\models\Manufacturers::class],
+			'type' => ['ref'=>\app\models\TechTypes::class],
+			'site' => ['ref'=>\app\models\Places::class],
+			'servicesResponsible' => ['ref'=>\app\models\Users::class],
+			'supportTeam' => ['ref'=>\app\models\Users::class, 'refMulti'=>true],
+			'servicesSupportTeam' => ['ref'=>\app\models\Users::class, 'refMulti'=>true],
+			'backupReqs' => ['ref'=>\app\models\MaintenanceReqs::class, 'refMulti'=>true],
 			'admResponsible'=>['alias'=>'responsible'],
 			'arms_id' => [
 				'Рабочее место',
@@ -485,6 +494,7 @@ class Techs extends ArmsModel
 				'Отдел',
 				'hint' => 'Отдел в котором числится пользователь',
 				'indexHint' => '{same}',
+				'typeClass' => \app\types\StringType::class,
 			],
 			'user_id' => [
 				'Пользователь',
@@ -496,6 +506,7 @@ class Techs extends ArmsModel
 				'Должность',
 				'hint' => 'Должность пользователя АРМ/оборудования',
 				'indexHint' => '{same}',
+				'typeClass' => \app\types\StringType::class,
 			],
 			'uid' => [
 				Yii::$app->params['techs.uidLabel']??'Доп. маркировка',

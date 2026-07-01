@@ -83,6 +83,15 @@ cd modules/schedules/compile/lib/js && npx jest
 | `testGetDatePeriodsBoundary` | период, закончившийся ровно в начале дня, не пересекает день |
 | `testConstructorAcceptsJsonString` | конструктор принимает JSON-строку |
 | `testNextWorkingMeta` | meta ближайшего рабочего времени |
+| `testMainDateExceptionAndPeriodOverrideTheOverride` | дата-исключение/период `main` перебивают график override |
+| `testOpenEndedWorkPeriodIsActive` | **регресс:** рабочий период без даты окончания (`end_tsm=null`) активен, а не выпадает из дня |
+| `testOpenEndedWorkPeriodBeforeStart` | открытый период до старта неактивен; `nextWorkingDateTime`→старт |
+| `testOpenEndedNonWorkPeriodBlocksAccess` | открытый нерабочий период перекрывает доступ навсегда |
+| `testOpenStartWorkPeriodIsActive` | период без даты начала (`start_tsm=null`) активен до конца |
+| `testFullyOpenWorkPeriodAlwaysActive` | период `(null,null)` активен всегда |
+| `testNextPeriodAcceptsOpenEnd` | `nextPeriod` не отбрасывает открытый период |
+| `testNextWorkingDateTimeInsideOpenPeriodReturnsNow` | внутри активного открытого периода «следующее рабочее» = сейчас |
+| `testGetDatePeriodsIntervalsClampsOpenEnd` | открытый конец обрезается по концу дня, не до null/0 |
 
 ### `tests/unit/modules/schedules/SchedulesEntriesValidationTest.php` — валидация записей
 
@@ -163,7 +172,7 @@ cd modules/schedules/compile/lib/js && npx jest
 
 ### `modules/schedules/compile/lib/js/demo.test.js` — JS-рантайм
 
-94 Jest-теста на `ScheduleRuntime` и утилиты.
+107 Jest-тестов на `ScheduleRuntime` и утилиты.
 
 Тематические блоки:
 
@@ -190,6 +199,15 @@ cd modules/schedules/compile/lib/js && npx jest
 | `filterBefore` | возвращает клон, не мутирует оригинал; запись не на текущий день |
 | `findOverride — граничные` | (расширенные кейсы) |
 | `Дополнительные edge cases` | расписание без periods / без default |
+| `открытые периоды (null-границы)` | 8 регресс-кейсов: рабочий/нерабочий период с `start_tsm`/`end_tsm = null` — активность, `nextPeriod`, `nextWorkingDateTime`, обрезка `getDatePeriodsIntervals` |
+
+### `modules/schedules/compile/lib/lua/schedule_runtime_test.lua` — Lua-рантайм
+
+118 тестов (собственный минимальный раннер, запуск `lua52 schedule_runtime_test.lua`) на
+`ScheduleRuntime` — порт `demo.js` на Lua 5.2. Зеркалит блоки JS-сьюта; отдельно
+блок **`открытые периоды (null-границы)`** (8 кейсов) важен тем, что в Lua сравнение
+`nil > number` — не тихий `false`, а runtime-краш, поэтому баг с открытым периодом
+там проявлялся жёстче, чем в PHP/JS.
 
 ---
 
@@ -253,9 +271,10 @@ cd modules/schedules/compile/lib/js && npx jest
 | PHP, модуль | `modules/schedules/tests/unit/SchedulesModelCalcFieldsTraitTest.php` | 25 |
 | PHP, модуль | `modules/schedules/tests/unit/ScheduleEntriesModelCalcFieldsTraitTest.php` | 19 |
 | PHP, проект | `tests/unit/modules/schedules/SchedulesCompilerTest.php` | 19 |
-| PHP, проект | `tests/unit/modules/schedules/CompiledScheduleHelperTest.php` | 20 |
+| PHP, проект | `tests/unit/modules/schedules/CompiledScheduleHelperTest.php` | 29 |
 | PHP, проект | `tests/unit/modules/schedules/SchedulesEntriesValidationTest.php` | 6 |
 | PHP, проект | `tests/unit/modules/schedules/SchedulesOverrideValidationTest.php` | 4 |
 | PHP, проект | `tests/unit/modules/schedules/SchedulesLifecycleTest.php` | 5 |
-| **PHP итого** |  | **183** |
-| JS | `modules/schedules/compile/lib/js/demo.test.js` | 94 |
+| **PHP итого** |  | **192** |
+| JS | `modules/schedules/compile/lib/js/demo.test.js` | 107 |
+| Lua | `modules/schedules/compile/lib/lua/schedule_runtime_test.lua` | 118 |

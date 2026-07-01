@@ -8,8 +8,8 @@ use kartik\markdown\Markdown;
 use yii\helpers\Url;
 use yii\web\YiiAsset;
 
-/* @var $this yii\web\View */
-/* @var $model app\modules\schedules\models\Schedules */
+/** @var yii\web\View $this  */
+/** @var app\modules\schedules\models\Schedules $model */
 
 if (!isset($static_view)) $static_view=false;
 
@@ -44,8 +44,8 @@ YiiAsset::register($this);
 			</h1>
 		</div>
 	</div>
-	
-	
+
+
 	<p><?= $model->description ?></p>
 
 	<div class="row">

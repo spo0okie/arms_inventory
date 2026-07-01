@@ -52,8 +52,15 @@ class ModelFieldWidget extends Widget
 	 * @return void
 	 */
 	public function loadModelData($model) {
-		if (!isset($this->fieldType) && is_object($this->model)) {
-			$this->fieldType=$this->model->getAttributeType($this->field);
+		if (!isset($this->fieldType) && is_object($this->model)
+			&& $this->model->hasMethod('getAttributeTypeClass')
+			&& !$this->model->attributeIsLink($this->field)
+			&& !isset($this->model->getAttributeData($this->field)['ref'])) {
+			//text -> wiki-render, urls -> список ссылок (обрабатываются ниже); тип берём из typeClass.
+			//Ссылки/ref/невыводимое идут generic-путём (как раньше 'link'/'string' проваливались сквозь switch).
+			try {
+				$this->fieldType=$this->model->getAttributeTypeClass($this->field)::name();
+			} catch (\Throwable $e) {}
 		}
 		
 		switch ($this->fieldType) {

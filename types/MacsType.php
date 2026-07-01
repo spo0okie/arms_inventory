@@ -12,6 +12,11 @@ class MacsType extends TextType
 		return 'macs';
 	}
 
+	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
+	{
+		return $field->textInput();
+	}
+
 	public function samples(): array
 	{
 		return ['83aa792053a2','83aa791953a0'];

@@ -67,10 +67,13 @@ modules/schedules/
 │   ├── TODO.md                         — этапы реализации (трекер)
 │   ├── SchedulesCompiler.php           — PHP-компилятор (Schedules → compiled_json)
 │   ├── CompiledScheduleHelper.php      — серверный рантайм для compiled_json
-│   └── lib/js/
-│       ├── demo.js                     — JS-рантайм ScheduleRuntime + утилиты
-│       ├── demo.test.js                — Jest-тесты JS-рантайма
-│       └── schedule-runtime-status.js  — auto-render статуса в grid'е
+│   ├── lib/js/
+│   │   ├── demo.js                     — JS-рантайм ScheduleRuntime + утилиты
+│   │   ├── demo.test.js                — Jest-тесты JS-рантайма
+│   │   └── schedule-runtime-status.js  — auto-render статуса в grid'е
+│   └── lib/lua/
+│       ├── schedule_runtime.lua        — Lua-рантайм ScheduleRuntime (порт demo.js для Asterisk)
+│       └── schedule_runtime_test.lua   — тесты Lua-рантайма
 ├── assets/
 │   └── ScheduleRuntimeAsset.php        — Yii2 AssetBundle для подключения JS-рантайма
 ├── tests/

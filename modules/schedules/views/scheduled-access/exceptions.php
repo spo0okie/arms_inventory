@@ -5,8 +5,8 @@ use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\helpers\Url;
 
-/* @var $this yii\web\View */
-/* @var $model app\modules\schedules\models\Schedules */
+/** @var yii\web\View $this  */
+/** @var app\modules\schedules\models\Schedules $model */
 
 if (!isset($static_view)) $static_view=false;
 
@@ -71,7 +71,7 @@ echo GridView::widget([
 				foreach ($tokens as $i=>$token)
 					$tokens[$i]='<span class="text-nowrap">'.$token.'</span>';
 				return implode(', ',$tokens);
-				
+
 			},
 		],
 		[
@@ -84,7 +84,7 @@ echo GridView::widget([
 				return HistoryWidget::widget(['model'=>$data,'prefix'=>'','showTime'=>false]);
 			},
 		],
-		
+
 		[
 			'class' => 'yii\grid\ActionColumn',
 			'template'=>'{update}{delete}',
@@ -100,4 +100,3 @@ echo GridView::widget([
 		],
 	],
 ]);
-

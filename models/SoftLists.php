@@ -45,6 +45,10 @@ class SoftLists extends ArmsModel
 	public static $syncableMany2ManyLinks=[
 		'soft_ids'=>'Soft,soft_lists_ids'
 	];
+
+	public $linksSchema=[
+		'soft_ids'=>[Soft::class,'soft_lists_ids','loader'=>'soft'],	//relation называется 'soft' (не авто 'softs')
+	];
 	
 	
 	public static $syncTimestamp=null;	//отметок времени в софте нет

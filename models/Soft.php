@@ -84,6 +84,7 @@ class Soft extends ArmsModel
 		'hits_ids'=>[Computer::class, 'softHits_ids'],
 		'lic_groups_ids'=>[LicGroups::class, 'soft_ids'],
 		'manufacturers_id'=>[Manufacturers::class, 'soft_ids'],
+		'scans_id'=>Scans::class,
 	];
 	
     /**
@@ -162,18 +163,22 @@ class Soft extends ArmsModel
 			'hitsCount'=>[
 				'Обнаружено',
 				'indexHint'=>'Количество обнаруженных установок продукта',
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'compsCount'=>[
 				'Паспортов',
 				'indexHint'=>'Количество внесений продукта в паспорта АРМ',
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'licGroupsCount'=>[
 				'Типов лицензий',
 				'indexHint'=>'Количество типов лицензий, включающих данное ПО',
+				'typeClass'=>\app\types\IntegerType::class,
 			],
 			'licCount'=>[
 				'Лицензий',
 				'indexHint'=>'Количество лицензий, включающих данное ПО',
+				'typeClass'=>\app\types\IntegerType::class,
 			],
         ]);
     }

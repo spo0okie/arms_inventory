@@ -28,16 +28,16 @@ ArmsBaseController (base) → Domain Controllers
 ```
 
 **Связность:**
-- Все модели наследуют [`models/ArmsModel.php`](models/ArmsModel.php) (955 строк)
+- Все модели наследуют [`models/base/ArmsModel.php`](models/base/ArmsModel.php)
 - Все контроллеры наследуют [`controllers/ArmsBaseController.php`](controllers/ArmsBaseController.php)
 - Many-to-Many связи через `voskobovich/yii2-linker-behavior`
 - RBAC через `spo0okie/yii2-rbac-plus`
 - Автоматическое журналирование истории (`afterSave`, `afterDelete`)
 
 **Критичные зоны:**
-- [`models/ArmsModel.php`](models/ArmsModel.php) — базовая модель с 4 трейтами
-- [`models/traits/`](models/traits) — метаданные, связи, внешние данные
-- [`components/llm/LlmClient.php`](components/llm/LlmClient.php) — интеграция OpenAI
+- [`models/base/ArmsModel.php`](models/base/ArmsModel.php) — базовая модель с 4 трейтами
+- [`models/base/traits/`](models/base/traits) — метаданные, связи, внешние данные
+- [`components/llm/LlmClient.php`](components/llm/LlmClient.php) — интеграция LLM (провайдеры OpenAI / GigaChat)
 - Синхронизация с удалёнными системами (`console/commands/SyncController.php`)
 
 ---

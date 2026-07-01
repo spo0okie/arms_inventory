@@ -26,12 +26,9 @@ class EmailType implements AttributeTypeInterface
 	/**
 	 * {@inheritdoc}
 	 */
-	public function renderInput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
+	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
-		$inputOptions = $options['inputOptions'] ?? [];
-		$inputOptions['type'] = 'email';
-		$inputOptions['placeholder'] = $inputOptions['placeholder'] ?? 'user@example.com';
-		return Html::activeTextInput($model, $attribute, $inputOptions);
+		return $field->textInput();
 	}
 
 	/**

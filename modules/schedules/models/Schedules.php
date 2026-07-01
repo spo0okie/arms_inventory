@@ -326,13 +326,19 @@ class Schedules extends \app\models\base\ArmsModel
 			'status' => [
 				'Активно сейчас',
 				'indexHint' => 'Попадает ли текущий момент в рабочее время расписания (расчёт на сервере)',
+				'typeClass' => \app\types\BooleanType::class,
 			],
 			'statusJs' => [
 				'Активно (live)',
 				'indexHint' => 'Активность расписания, пересчитываемая в браузере каждую минуту по compiled_json',
+				'typeClass' => \app\types\BooleanType::class,
+			],
+			'compiled_json' => [
+				'typeClass' => \app\types\JsonType::class,
 			],
 			'workTimeDescription' => [
 				'График по дням',
+				'typeClass' => \app\types\TextType::class,
 			],
 		];
 	}

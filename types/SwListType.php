@@ -11,6 +11,11 @@ class SwListType extends TextType
 		return 'soft-list';
 	}
 
+	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
+	{
+		return $field->textInput();
+	}
+
 	public function apiSchema(): array
 	{
 		return ['type' => 'string', 'format' => 'soft-list'];

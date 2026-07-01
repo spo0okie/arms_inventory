@@ -17,18 +17,16 @@ use yii\helpers\ArrayHelper;
  * @property string $domainCode
  * @property int $vlan
  * @property int $domain_id
- * @property int $segment_id
  * @property string $comment
  * @property NetDomains $netDomain
- * @property Segments $segment
  * @property Networks $networks
  */
 class NetVlans extends ArmsModel
 {
-	
+
 	public static $title='Vlan';
 	public static $titles='Vlan\'ы';
-	
+
 	/**
      * {@inheritdoc}
      */
@@ -55,7 +53,7 @@ class NetVlans extends ArmsModel
 			[['vlan'], 'validateVlanRange'], // Добавляем валидацию диапазона
 		];
     }
-	
+
 	public $linksSchema=[
 		'domain_id'=>[NetDomains::class,'net_vlans_ids'],
 		'networks_ids'=>[Networks::class,'vlan_id'],
@@ -99,11 +97,12 @@ class NetVlans extends ArmsModel
 				'Пояснение',
 				'comment' => 'Все что нужно знать об этом Vlan, но что не ясно из названия',
 				'type' => 'text',
+				'typeClass' => \app\types\TextType::class,
 			],
         ];
     }
-	
-	
+
+
 	/**
 	 * Валидация диапазона VLAN.
 	 * @param string $attribute
@@ -116,11 +115,11 @@ class NetVlans extends ArmsModel
 				$this->addError($attribute, 'Диапазон VLAN можно задавать только при создании.');
 				return;
 			}
-			
+
 			[$start, $end] = explode('-', $this->$attribute);
 			$start = (int)$start;
 			$end = (int)$end;
-			
+
 			if ($start < 1 || $end > 4096 || $start > $end) {
 				$this->addError($attribute, 'Диапазон VLAN должен быть в пределах 1-4096 и корректным.');
 			}
@@ -128,7 +127,7 @@ class NetVlans extends ArmsModel
 			$this->addError($attribute, 'VLAN должен быть в пределах 1-4096.');
 		}
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -136,9 +135,9 @@ class NetVlans extends ArmsModel
 	{
 		return $this->hasOne(NetDomains::class, ['id' => 'domain_id']);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * CSS код сегмента к которому относится VLAN
 	 * @return string
@@ -148,7 +147,7 @@ class NetVlans extends ArmsModel
 		if (is_object($domain=$this->netDomain)) return 'net-domain-'.$domain->name;
 		return '';
 	}
-	
+
 	/**
 	 * @return ActiveQuery|Networks
 	 */
@@ -156,7 +155,7 @@ class NetVlans extends ArmsModel
 	{
 		return $this->hasMany(Networks::class, ['vlan_id' => 'id']);
 	}
-	
+
 	/**
 	 * Search name
 	 * @return string
@@ -177,7 +176,7 @@ class NetVlans extends ArmsModel
 			->all();
 		return ArrayHelper::map($list, 'id', 'sname');
 	}
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
@@ -188,25 +187,25 @@ class NetVlans extends ArmsModel
 				[$start, $end] = explode('-', $this->vlan);
 				$start = (int)$start;
 				$end = (int)$end;
-				
+
 				for ($vlan = $start; $vlan <= $end-1; $vlan++) {
 					$model = new self();
 					$model->attributes = $this->attributes;
 					$model->vlan = $vlan;
 					$model->save(); // Сохраняем
 				}
-				
+
 				//оставляем себе последний VLAN вместо диапазона
 				$this->vlan = $vlan;
-				
+
 			}
-			
+
 			$this->name=str_replace('{VLAN}',$this->vlan,$this->name);
-			
-			
+
+
 			return true;
 		}
-		
+
 		return false;
 	}
 }

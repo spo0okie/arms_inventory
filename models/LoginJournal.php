@@ -91,6 +91,7 @@ class LoginJournal extends ArmsModel
 					.'то время было скорректировано на сдвиг времени между клиентом и сервером <br>'
 					.QueryHelper::$dateSearchHint,
 				'type'=>'datetime',
+				'typeClass' => \app\types\DatetimeType::class,
 			],
 	        'comp_name' => 'Имя ОС',
 	        'comp' => 'Компьютер',
@@ -106,6 +107,7 @@ class LoginJournal extends ArmsModel
 				'indexHint'=>'Отметка времени в часах клиента, когда событие было отправлено на сервер.<br>'
 					.'Вместе со <b>временем регистрации</b> дает понимание о расхождении часов сервера и клиента',
 				'type'=>'datetime',
+				'typeClass' => \app\types\IntegerType::class,
 			],
 			'time' => [
 				'Время входа (ориг.)',

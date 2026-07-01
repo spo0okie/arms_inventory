@@ -254,6 +254,14 @@ class Comps extends ArmsModel
     public function attributeData()
     {
         return ArrayHelper::recursiveOverride(parent::attributeData(),[
+			//read-only вычисляемые ссылки (категория C): только вывод
+			'place' => ['ref'=>\app\models\Places::class],
+			'site' => ['ref'=>\app\models\Places::class],
+			'responsible' => ['ref'=>\app\models\Users::class],
+			'servicesResponsible' => ['ref'=>\app\models\Users::class],
+			'supportTeam' => ['ref'=>\app\models\Users::class, 'refMulti'=>true],
+			'servicesSupportTeam' => ['ref'=>\app\models\Users::class, 'refMulti'=>true],
+			'backupReqs' => ['ref'=>\app\models\MaintenanceReqs::class, 'refMulti'=>true],
 			'admins_ids' => [
 				'Предоставлены полномочия администратора',
 				'hint' => 'Если административные привилегии на этой ОС/ВМ выданы рядовым пользователям,<br>'

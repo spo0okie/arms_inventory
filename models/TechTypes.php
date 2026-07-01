@@ -97,11 +97,14 @@ class TechTypes extends ArmsModel
 					'Пример: <i>МСК-000017, СПБ-000102, ЧЕЛ-000033</i>'
 			],
 			
+			'archived' => ['typeClass'=>\app\types\BooleanType::class],
 			'techModelsCount' => [
 				'# Моделей',
+				'typeClass' => \app\types\IntegerType::class,
 			],
 			'usages' => [
 				'# Обор-я',
+				'typeClass' => \app\types\IntegerType::class,
 			],
 			'comment' => [
 				'Шаблон описания моделей',

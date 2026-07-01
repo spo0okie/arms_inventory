@@ -26,12 +26,9 @@ class PhoneType implements AttributeTypeInterface
 	/**
 	 * {@inheritdoc}
 	 */
-	public function renderInput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
+	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
-		$inputOptions = $options['inputOptions'] ?? [];
-		$inputOptions['type'] = 'tel';
-		$inputOptions['placeholder'] = $inputOptions['placeholder'] ?? '+7 (999) 123-45-67';
-		return Html::activeTextInput($model, $attribute, $inputOptions);
+		return $field->textInput();
 	}
 
 	/**

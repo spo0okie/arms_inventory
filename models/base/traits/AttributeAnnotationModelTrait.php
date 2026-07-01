@@ -88,8 +88,7 @@ trait AttributeAnnotationModelTrait
 		$data=$this->getAttributeData($attribute);
 		$name=$this->getAttributeApiLabel($attribute);
 		$hint=$this->getAttributeApiHint($attribute);
-		$type=$this->getAttributeType($attribute);
-		
+
 		$template=[];
 		$descriptionRead=[];
 		$descriptionWrite=[];
@@ -97,140 +96,109 @@ trait AttributeAnnotationModelTrait
 			$descriptionRead[]=$hint;
 			$descriptionWrite[]=$hint;
 		}
-		
-		switch ($type) {
-			case 'boolean':
-			case 'toggle':
-				$template=[
-					'type' => 'boolean',
-					'format' => 'integer',
-					'enum' => [0,1],
-					'example' => $this->getAttributeApiExample($attribute,1)
-				];
-				if (!isset($data['fieldList']) && $type==='boolean') {
-					$descriptionRead[]="0 - false, 1 - true";
-					$descriptionWrite[]="0 - false, 1 - true";
-				}
-				break;
-			
-			case 'list':
-			case 'radios':
-				$template=[
-					'type' => 'integer',
-					'format' => 'integer',
-					'example' => static::$intSample++
-				];
-				break;
-			
-			case 'text':
-			case 'ntext':
-			case 'string':
-				$template=[
-					'type' => 'string',
-				];
-				break;
-			
-			case 'json_object':
-				$template=[
-					'type' => 'string',
-					'format' => 'json object',
-				];
-				break;
-			
-				case 'json_array': $template=[
-					'type' => 'string',
-					'format' => 'json array',
-				];
-				break;
-			
-			case 'date':
-				$template=[
-					'type' => 'string',
-					'format' => 'date',
-					'example' => '2020-01-31',
-				];
-				break;
-				
-			case 'datetime':
-				$template=[
-					'type' => 'string',
-					'format' => 'date-time',
-					'example' => '2020-01-31 23:59:59',
-				];
-				break;
-				
-			case 'ips':
-				$template=[
-					'type' => 'string',
-					'example' => '192.168.0.1/24',
-				];
-				$descriptionRead[]='IP адреса разделенные переносом строки.';
-				$descriptionWrite[]='IP адреса (опционально с маской подсети). По одному в строке.';
-				break;
-				
-			case 'macs':
-				$template=[
-					'type' => 'string',
-					'example' => '00:1A:2B:3C:4D:5E',
-				];
-				$descriptionRead[]='MAC адреса. По одному в строке.';
-				$descriptionWrite[]='MAC адреса. По одному в строке.';
-				break;
-				
-			case 'urls':
-				$template=[
-					'type' => 'string',
-					'example' => 'Ссылка на пример https://example.com/some/page',
-				];
-				$descriptionRead[]=UrlListWidget::$APIhint;
-				$descriptionWrite[]=UrlListWidget::$APIhint;
-				break;
-				
-			case 'link':
-				if ($link=$this->attributeIsLoader($attribute)) {
-					
-					$class=StringHelper::className($this->attributeLinkClass($link));
-					//если это атрибут загрузчик, то это RO свойство содержащее другой объект
-					if (StringHelper::endsWith($link, '_ids')) {
-						$template=[
-							'type' => 'array',
-							'items' => ['type' => 'object',],
-						];
-						$descriptionRead[]="Массив объектов $class (см. соответствующую схему)";
-					} else {
-						$template=[
-							'type' => 'object',
-						];
-						$descriptionRead[]="Объект $class (см. соответствующую схему)";
-					}
 
+		if ($ref=$data['ref']??false) {
+			//read-only вычисляемая ссылка (категория C): только вывод, без ввода/валидации/генерации.
+			//Зеркалит loader-ветку ссылок (object / array-of-object), но не является схемной связью.
+			$class=StringHelper::className($ref);
+			if ($data['refMulti']??false) {
+				$template=['type'=>'array','items'=>['type'=>'object']];
+				$descriptionRead[]="Массив объектов $class (см. соответствующую схему)";
+			} else {
+				$template=['type'=>'object'];
+				$descriptionRead[]="Объект $class (см. соответствующую схему)";
+			}
+		} elseif ($this->attributeIsLink($attribute) || $this->attributeIsLoader($attribute)) {
+			//структурная ссылка (linksSchema): object / array-of-object / id
+			if ($link=$this->attributeIsLoader($attribute)) {
+
+				$class=StringHelper::className($this->attributeLinkClass($link));
+				//если это атрибут загрузчик, то это RO свойство содержащее другой объект
+				if (StringHelper::endsWith($link, '_ids')) {
+					$template=[
+						'type' => 'array',
+						'items' => ['type' => 'object',],
+					];
+					$descriptionRead[]="Массив объектов $class (см. соответствующую схему)";
 				} else {
-					$class=StringHelper::className($this->attributeLinkClass($attribute));
-					//иначе это сам атрибут ссылка (_id / _ids)
-					if (StringHelper::endsWith($attribute, '_ids')) {
-						$name .= ' (IDs)';
-						//если множественная ссылка
-						$template = [
-							'type' => 'array',
-							'items' => ['type' => 'integer',],
-							'example' => [static::$intSample++,static::$intSample++],
-						];
-						$descriptionRead[]="Массив идентификаторов (ID) объектов класса $class";
-					} elseif (StringHelper::endsWith($attribute, '_id')) {
-						$name .= ' (ID)';
-						$template = [
-							'type' => 'integer',
-							'example' => static::$intSample++,
-						];
-						$descriptionRead[]="Идентификатор (ID) объекта класса $class";
-					}
+					$template=[
+						'type' => 'object',
+					];
+					$descriptionRead[]="Объект $class (см. соответствующую схему)";
 				}
-				break;
-			default:
-				$template=[
-					'type' => $type,
-				];
-				break;
+
+			} else {
+				$class=StringHelper::className($this->attributeLinkClass($attribute));
+				//иначе это сам атрибут ссылка (_id / _ids)
+				if (StringHelper::endsWith($attribute, '_ids')) {
+					$name .= ' (IDs)';
+					//если множественная ссылка
+					$template = [
+						'type' => 'array',
+						'items' => ['type' => 'integer',],
+						'example' => [static::$intSample++,static::$intSample++],
+					];
+					$descriptionRead[]="Массив идентификаторов (ID) объектов класса $class";
+				} elseif (StringHelper::endsWith($attribute, '_id')) {
+					$name .= ' (ID)';
+					$template = [
+						'type' => 'integer',
+						'example' => static::$intSample++,
+					];
+					$descriptionRead[]="Идентификатор (ID) объекта класса $class";
+				}
+			}
+		} else {
+			//База типа/формата — единый источник истины через apiSchema() класса-типа.
+			//СТРОГО: бросает исключение, если тип не выводится из объявления/правил (без fallback),
+			//чтобы тесты заставили объявить typeClass явно там, где он не выводится алгоритмически.
+			$tc=$this->getAttributeTypeClass($attribute);
+			$template=$tc->apiSchema();
+			$type=$tc::name();	//тип для декораций ниже (заменяет getAttributeType)
+			//Декорации поверх базовой схемы (примеры/enum/описания, которые несла старая switch-ветка):
+			switch ($type) {
+				case 'boolean':
+				case 'toggle':
+					$template['format']='integer';
+					$template['enum']=[0,1];
+					$template['example']=$this->getAttributeApiExample($attribute,1);
+					if (!isset($data['fieldList']) && $type==='boolean') {
+						$descriptionRead[]="0 - false, 1 - true";
+						$descriptionWrite[]="0 - false, 1 - true";
+					}
+					break;
+				case 'list':
+				case 'radios':
+					$template=[
+						'type' => 'integer',
+						'format' => 'integer',
+						'example' => static::$intSample++
+					];
+					break;
+				case 'date':
+					$template['example']='2020-01-31';
+					break;
+				case 'datetime':
+					$template['example']='2020-01-31 23:59:59';
+					break;
+				case 'ip':
+				case 'ipNet':
+				case 'ips':
+					$template['example']='192.168.0.1/24';
+					$descriptionRead[]='IP адреса разделенные переносом строки.';
+					$descriptionWrite[]='IP адреса (опционально с маской подсети). По одному в строке.';
+					break;
+				case 'macs':
+					$template['example']='00:1A:2B:3C:4D:5E';
+					$descriptionRead[]='MAC адреса. По одному в строке.';
+					$descriptionWrite[]='MAC адреса. По одному в строке.';
+					break;
+				case 'urls':
+					$template['example']='Ссылка на пример https://example.com/some/page';
+					$descriptionRead[]=UrlListWidget::$APIhint;
+					$descriptionWrite[]=UrlListWidget::$APIhint;
+					break;
+			}
 		}
 
 		//если в метаданных есть пример, то используем его, а не тот что сгенерили по умолчанию
@@ -311,145 +279,109 @@ trait AttributeAnnotationModelTrait
 		$data=$this->getAttributeData($attribute);
 		$name=$this->getAttributeApiLabel($attribute);
 		$hint=$this->getAttributeApiHint($attribute);
-		$type=$this->getAttributeType($attribute);
 
 		$description=$hint??'';
 		$schemaTemplate=[];
 
-		switch ($type) {
-			case 'boolean':
-			case 'toggle':
-				$schemaTemplate=[
-					'type' => 'string', // для поиска используем string, чтобы можно было передавать '0','1','true','false'
-					'enum' => ['0','1','true','false'],
-					'example' => '1'
-				];
-				if (!isset($data['fieldList']) && $type==='boolean')
-					$description=StringHelper::appendToDelimitedString(
-						$description,$delimiter,
-						"0 - false, 1 - true"
-					);
-				break;
-
-			case 'list':
-			case 'radios':
-				$schemaTemplate=[
-					'type' => 'string', // для поиска используем string
-					'example' => '1'
-				];
-				break;
-
-			case 'text':
-			case 'ntext':
-			case 'string':
-				$schemaTemplate=[
+		if ($ref=$data['ref']??false) {
+			//read-only вычисляемая ссылка (категория C): поиск по имени связанного объекта
+			$class=StringHelper::className($ref);
+			$schemaTemplate=['type'=>'string'];
+			$description=StringHelper::appendToDelimitedString(
+				$description,$delimiter,
+				"Поиск по имени объекта $class"
+			);
+		} elseif ($this->attributeIsLink($attribute) || $this->attributeIsLoader($attribute)) {
+			if ($link=$this->attributeIsLoader($attribute)) {
+				// при указании loader поиск ведется по имени связанного объекта
+				$schemaTemplate = [
 					'type' => 'string',
 				];
-				break;
-
-			case 'json_object':
-				$schemaTemplate=[
-					'type' => 'string',
-					'format' => 'json object',
-				];
-				break;
-
-			case 'json_array':
-				$schemaTemplate=[
-					'type' => 'string',
-					'format' => 'json array',
-				];
-				break;
-
-			case 'date':
-				$schemaTemplate=[
-					'type' => 'string',
-					'format' => 'date',
-					'example' => '2020-01-31',
-				];
-				break;
-
-			case 'datetime':
-				$schemaTemplate=[
-					'type' => 'string',
-					'format' => 'date-time',
-					'example' => '2020-01-31 23:59:59',
-				];
-				break;
-
-			case 'ips':
-				$schemaTemplate=[
-					'type' => 'string',
-					'example' => '192.168.0.1/24',
-				];
+				$class=StringHelper::className($this->attributeLinkClass($link));
 				$description=StringHelper::appendToDelimitedString(
 					$description,$delimiter,
-					'IP адреса (опционально с маской подсети). По одному в строке.'
+					"Поиск по имени объекта $class"
 				);
-				break;
-
-			case 'macs':
-				$schemaTemplate=[
-					'type' => 'string',
-					'example' => '00:1A:2B:3C:4D:5E',
-				];
-				$description=StringHelper::appendToDelimitedString(
-					$description,$delimiter,
-					'MAC адреса. По одному в строке.'
-				);
-				break;
-
-			case 'urls':
-				$schemaTemplate=[
-					'type' => 'string',
-					'example' => 'Ссылка на пример https://example.com/some/page',
-				];
-				$description=StringHelper::appendToDelimitedString(
-					$description,$delimiter,
-					UrlListWidget::$APIhint
-				);
-				break;
-
-			case 'link':
-				if ($link=$this->attributeIsLoader($attribute)) {
-					// при указании loader поиск ведется по имени связанного объекта
+			} else {
+				$class=StringHelper::className($this->attributeLinkClass($attribute));
+				//иначе это сам атрибут ссылка (_id / _ids)
+				if (StringHelper::endsWith($attribute, '_ids')) {
+					$name .= ' (ссылки)';
+					//для поиска по множественным ссылкам используем string с разделителями
 					$schemaTemplate = [
 						'type' => 'string',
+						'example' => '1,2,3',
+						'description' => "IDs объектов $class через запятую",
 					];
-					$class=StringHelper::className($this->attributeLinkClass($link));
+				} elseif (StringHelper::endsWith($attribute, '_id')) {
+					$name .= ' (ссылка)';
+					$schemaTemplate = [
+						'type' => 'integer',
+						'example' => static::$intSample++,
+					];
 					$description=StringHelper::appendToDelimitedString(
 						$description,$delimiter,
-						"Поиск по имени объекта $class"
+						"ID объекта $class"
 					);
-				} else {
-					$class=StringHelper::className($this->attributeLinkClass($attribute));
-					//иначе это сам атрибут ссылка (_id / _ids)
-					if (StringHelper::endsWith($attribute, '_ids')) {
-						$name .= ' (ссылки)';
-						//для поиска по множественным ссылкам используем string с разделителями
-						$schemaTemplate = [
-							'type' => 'string',
-							'example' => '1,2,3',
-							'description' => "IDs объектов $class через запятую",
-						];
-					} elseif (StringHelper::endsWith($attribute, '_id')) {
-						$name .= ' (ссылка)';
-						$schemaTemplate = [
-							'type' => 'integer',
-							'example' => static::$intSample++,
-						];
+				}
+			}
+		} else {
+			//База типа/формата для поиска — через apiSchema() класса-типа (строго, без fallback).
+			$tc=$this->getAttributeTypeClass($attribute);
+			$schemaTemplate=$tc->apiSchema();
+			$type=$tc::name();	//тип для декораций ниже (заменяет getAttributeType)
+			//Search-специфичные оверрайды/декорации (это search-механика, поэтому здесь, а не в типе):
+			switch ($type) {
+				case 'boolean':
+				case 'toggle':
+					$schemaTemplate=[
+						'type' => 'string', // для поиска используем string, чтобы можно было передавать '0','1','true','false'
+						'enum' => ['0','1','true','false'],
+						'example' => '1'
+					];
+					if (!isset($data['fieldList']) && $type==='boolean')
 						$description=StringHelper::appendToDelimitedString(
 							$description,$delimiter,
-							"ID объекта $class"
+							"0 - false, 1 - true"
 						);
-					}
-				}
-				break;
-			default:
-				$schemaTemplate=[
-					'type' => $type,
-				];
-				break;
+					break;
+				case 'list':
+				case 'radios':
+					$schemaTemplate=[
+						'type' => 'string', // для поиска используем string
+						'example' => '1'
+					];
+					break;
+				case 'date':
+					$schemaTemplate['example']='2020-01-31';
+					break;
+				case 'datetime':
+					$schemaTemplate['example']='2020-01-31 23:59:59';
+					break;
+				case 'ip':
+				case 'ipNet':
+				case 'ips':
+					$schemaTemplate['example']='192.168.0.1/24';
+					$description=StringHelper::appendToDelimitedString(
+						$description,$delimiter,
+						'IP адреса (опционально с маской подсети). По одному в строке.'
+					);
+					break;
+				case 'macs':
+					$schemaTemplate['example']='00:1A:2B:3C:4D:5E';
+					$description=StringHelper::appendToDelimitedString(
+						$description,$delimiter,
+						'MAC адреса. По одному в строке.'
+					);
+					break;
+				case 'urls':
+					$schemaTemplate['example']='Ссылка на пример https://example.com/some/page';
+					$description=StringHelper::appendToDelimitedString(
+						$description,$delimiter,
+						UrlListWidget::$APIhint
+					);
+					break;
+			}
 		}
 
 		//если в метаданных есть пример, то используем его, а не тот что сгенерили по умолчанию

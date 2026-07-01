@@ -14,10 +14,9 @@ class BooleanType implements AttributeTypeInterface
 		return 'boolean';
 	}
 
-	public function renderInput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
+	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
-		$inputOptions = $options['inputOptions'] ?? [];
-		return Html::activeCheckbox($model, $attribute, $inputOptions);
+		return $field->checkbox();
 	}
 
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
@@ -33,7 +32,7 @@ class BooleanType implements AttributeTypeInterface
 
 	public function gridColumnClass(): ?string
 	{
-		return null;
+		return \kartik\grid\BooleanColumn::class;
 	}
 
 	public function samples(): array

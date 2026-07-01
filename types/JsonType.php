@@ -14,6 +14,11 @@ class JsonType extends TextType
 		return 'json';
 	}
 
+	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
+	{
+		return $field->text();	//JSON — многострочный, рендерим textarea
+	}
+
 	public function apiSchema(): array
 	{
 		return ['type' => 'string', 'format' => 'json'];

@@ -87,7 +87,7 @@ class OrgPhones extends ArmsModel
 				'placeholder'=>'Укажите услугу связи, в рамках которой тел. связь',
 			],
 	        'account' => 'Аккаунт, л/с',
-	        'sname' => 'Полный номер для поиска',
+	        'sname' => ['Полный номер для поиска', 'typeClass' => \app\types\StringType::class],
 	        'fullNum' => ['Номер телефона','typeClass'=>\app\types\PhoneType::class],
 	        'cost' => [
 	        	'Стоимость',
@@ -99,6 +99,7 @@ class OrgPhones extends ArmsModel
 				'hint'=>'Любые пояснения о задачах этого номера<br>'
 					.'<b>Первая строка</b> будет вынесена в заголовок, который будет виден в списке номеров',
 				'type'=>'text',
+				'typeClass' => \app\types\TextType::class,
 			],
 			'archived' => [
 				'Архивирован',

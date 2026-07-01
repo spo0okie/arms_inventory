@@ -11,6 +11,11 @@ class HwListType extends TextType
 		return 'hw-list';
 	}
 
+	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
+	{
+		return $field->textInput();
+	}
+
 	public function apiSchema(): array
 	{
 		return ['type' => 'string', 'format' => 'hw-list'];

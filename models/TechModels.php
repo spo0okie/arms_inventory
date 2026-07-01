@@ -162,6 +162,7 @@ class TechModels extends ArmsModel
 				'hint' => 'Описание оборудования наиболее значимые параметры отличающие эту модель от других моделей того же типа оборудования',
 				'typeClass'=>\app\types\TextType::class,
 			],
+			'archived' => ['typeClass'=>\app\types\BooleanType::class],
 			'front_rack_layout'=>[
 				'Конфигурация передней корзины',
 				'hint'=>'Может быть типовая (одна сетка на стенке устройства), в таком случае можно настраивать через конструктор<br>'.

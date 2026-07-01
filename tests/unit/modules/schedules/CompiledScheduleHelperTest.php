@@ -290,4 +290,122 @@ class CompiledScheduleHelperTest extends Unit
 		// nextWorkingDateTime: со дня-выходного-исключения внутри override → следующая рабочая дата
 		$this->assertSame('2024-07-02 10:00', $rt->nextWorkingDateTime('2024-07-01 00:00'));
 	}
+
+	// ------------------------------------------------ открытые периоды (null-границы)
+	//
+	// Регресс на баг: период без даты окончания (end_tsm === null) трактовался как
+	// закончившийся в epoch 0 и выпадал из расчёта — список показывал расписание
+	// активным (SQL-фильтр видит date_end IS NULL), а страница/статус — "доступа нет".
+	// Симметрично проверяем открытый старт (start_tsm === null).
+
+	/**
+	 * Расписание, заданное только периодами (без недельного графика).
+	 */
+	private static function periodRuntime(array $periods): CompiledScheduleHelper
+	{
+		return new CompiledScheduleHelper([
+			'main' => [
+				'start_tsm' => null, 'end_tsm' => null,
+				'default' => null, 'weekdays' => [], 'dates' => [],
+				'periods' => $periods,
+			],
+			'overrides' => [],
+		]);
+	}
+
+	/**
+	 * Период с датами-строками; null → открытая граница (start=-inf / end=+inf).
+	 */
+	private static function period(?string $start, ?string $end, bool $isWork = true): array
+	{
+		return [
+			'start_tsm' => $start === null ? null : CompiledScheduleHelper::strToTsm($start),
+			'end_tsm'   => $end   === null ? null : CompiledScheduleHelper::strToTsm($end),
+			'is_work'   => $isWork,
+			'meta'      => [],
+		];
+	}
+
+	/**
+	 * Открытый рабочий период (с 2023, без окончания) активен в любой день после старта.
+	 */
+	public function testOpenEndedWorkPeriodIsActive(): void
+	{
+		$rt = self::periodRuntime([self::period('2023-01-01', null, true)]);
+		$this->assertTrue($rt->isWorkTime('2024-06-15 12:00'), 'середина дня внутри открытого периода');
+		$this->assertTrue($rt->isWorkTime('2024-06-15 00:00'), 'полночь — левая граница дня');
+		$this->assertTrue($rt->isWorkDay('2024-06-15'));
+		$dayTsm = CompiledScheduleHelper::strToTsm('2024-06-15');
+		$this->assertNotEmpty($rt->getDatePeriods($dayTsm), 'период должен пересекать день');
+	}
+
+	/**
+	 * Открытый рабочий период до старта — неактивен; nextWorkingDateTime указывает на старт.
+	 */
+	public function testOpenEndedWorkPeriodBeforeStart(): void
+	{
+		$rt = self::periodRuntime([self::period('2099-01-01', null, true)]);
+		$this->assertFalse($rt->isWorkTime('2024-06-15 12:00'));
+		$this->assertSame('2099-01-01 00:00', $rt->nextWorkingDateTime('2024-06-15 12:00'));
+	}
+
+	/**
+	 * Открытый НЕрабочий период перекрывает доступ навсегда: работы нет и не будет.
+	 */
+	public function testOpenEndedNonWorkPeriodBlocksAccess(): void
+	{
+		$rt = self::periodRuntime([self::period('2023-01-01', null, false)]);
+		$this->assertFalse($rt->isWorkTime('2024-06-15 12:00'));
+		$this->assertNull($rt->nextWorkingDateTime('2024-06-15 12:00'));
+	}
+
+	/**
+	 * Открытый слева период (без даты начала) активен вплоть до своей даты конца.
+	 */
+	public function testOpenStartWorkPeriodIsActive(): void
+	{
+		$rt = self::periodRuntime([self::period(null, '2099-01-01', true)]);
+		$this->assertTrue($rt->isWorkTime('2024-06-15 12:00'));
+		$this->assertTrue($rt->isWorkTime('1999-01-01 00:00'), 'нет нижней границы');
+	}
+
+	/**
+	 * Полностью открытый рабочий период (null, null) — активен всегда.
+	 */
+	public function testFullyOpenWorkPeriodAlwaysActive(): void
+	{
+		$rt = self::periodRuntime([self::period(null, null, true)]);
+		$this->assertTrue($rt->isWorkTime('2024-06-15 12:00'));
+		$this->assertTrue($rt->isWorkTime('1999-01-01 00:00'));
+	}
+
+	/**
+	 * nextPeriod считает открытый период ещё длящимся кандидатом (null = +inf).
+	 */
+	public function testNextPeriodAcceptsOpenEnd(): void
+	{
+		$rt = self::periodRuntime([self::period('2023-01-01', null, true)]);
+		$this->assertNotNull($rt->nextPeriod(CompiledScheduleHelper::strToTsm('2024-06-15 12:00'), true));
+	}
+
+	/**
+	 * Внутри активного открытого периода "следующее рабочее время" — это сам текущий момент.
+	 */
+	public function testNextWorkingDateTimeInsideOpenPeriodReturnsNow(): void
+	{
+		$rt = self::periodRuntime([self::period('2023-01-01', null, true)]);
+		$this->assertSame('2024-06-15 12:00', $rt->nextWorkingDateTime('2024-06-15 12:00'));
+	}
+
+	/**
+	 * getDatePeriodsIntervals обрезает открытый конец по концу дня (а не до null/0).
+	 */
+	public function testGetDatePeriodsIntervalsClampsOpenEnd(): void
+	{
+		$rt = self::periodRuntime([self::period('2023-01-01', null, true)]);
+		$dayTsm = CompiledScheduleHelper::strToTsm('2024-06-15');
+		$res = $rt->getDatePeriodsIntervals($dayTsm);
+		$this->assertSame([[0, 1440, []]], $res['positive'], 'весь день [0,1440)');
+		$this->assertSame([], $res['negative']);
+	}
 }

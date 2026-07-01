@@ -63,7 +63,7 @@ tech_models              // Модели оборудования
 net_ips                  // IP адреса
 login_journal            // Журнал входов
 comps_history            // История компьютеров
-services_in_users        // Связь сервисы-пользователи
+users_in_services        // Связь сервисы-пользователи (many-to-many, паттерн <many>_in_<owner>)
 ```
 
 ### Типичные типы колонок
@@ -136,7 +136,7 @@ contracts -> contracts_history
 
 ### Автоматическое журналирование
 
-В [`ArmsModel`](models/ArmsModel.php):
+В [`ArmsModel`](models/base/ArmsModel.php):
 
 ```php
 public function afterSave($insert, $changedAttributes)

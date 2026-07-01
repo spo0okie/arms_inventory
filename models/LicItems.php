@@ -75,6 +75,7 @@ class LicItems extends ArmsModel
 	{
 		$model=$this;
 		return [
+			'scans_id' => Scans::class,
 			'contracts_ids' => [Contracts::class,'lics_ids'],
 			'lic_group_id' => [LicGroups::class,'lic_items_ids'],
 			'services_id' => [Services::class,'lic_items_ids'],

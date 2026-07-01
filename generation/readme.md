@@ -52,22 +52,22 @@ ModelFactory                     → оркестратор процесса
 $model = ModelFactory::create(Model::class);
 
 // Пустая модель (не-required атрибуты пустые)
-$model = ModelFactory::create(Model::class, [], ['empty' => true]);
+$model = ModelFactory::create(Model::class, ['empty' => true]);
 
 // С переопределениями
-$model = ModelFactory::create(Model::class, [], ['overrides' => ['name' => 'test']]);
+$model = ModelFactory::create(Model::class, ['overrides' => ['name' => 'test']]);
 
 // С ролью (preset)
-$model = ModelFactory::create(Techs::class, [], ['role' => 'pc']);
+$model = ModelFactory::create(Techs::class, ['role' => 'pc']);
 
 // С указанием seed (детерминизм)
-$model = ModelFactory::create(Model::class, [], ['seed' => 42]);
+$model = ModelFactory::create(Model::class, ['seed' => 42]);
 
 // Без сохранения в БД
-$model = ModelFactory::create(Model::class, [], ['save' => false]);
+$model = ModelFactory::create(Model::class, ['save' => false]);
 
 // С указанием глубины связей
-$model = ModelFactory::create(Model::class, [], ['maxDepth' => 7]);
+$model = ModelFactory::create(Model::class, ['maxDepth' => 7]);
 ```
 
 ### Опции
@@ -79,7 +79,7 @@ $model = ModelFactory::create(Model::class, [], ['maxDepth' => 7]);
 | `overrides`       | array       | `[]`         | Явные значения атрибутов       |
 | `save`            | bool        | `true`       | Сохранять в БД                 |
 | `seed`            | int/null    | `null`       | Seed для детерминизма          |
-| `maxDepth`        | int         | `2`          | Максимальная глубина связей    |
+| `maxDepth`        | int         | `4`          | Максимальная глубина связей    |
 | `validateRetries` | int         | `1`          | Retry при валидации            |
 | `saveRetries`     | int         | `1`          | Retry при сохранении           |
 
@@ -206,7 +206,7 @@ public static function roles(): array
     return [
         'pc' => function($model) {
             // Создаём связанные модели с нужными параметрами
-            $type = ModelFactory::create(TechType::class, [], [
+            $type = ModelFactory::create(TechType::class, [
                 'overrides' => ['is_comp' => true]
             ]);
             $model->type_id = $type->id;
@@ -217,7 +217,7 @@ public static function roles(): array
 
 ```php
 // Использование
-$pc = ModelFactory::create(Techs::class, [], ['role' => 'pc']);
+$pc = ModelFactory::create(Techs::class, ['role' => 'pc']);
 ```
 
 **Требования:**

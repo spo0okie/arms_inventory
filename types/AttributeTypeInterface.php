@@ -29,7 +29,7 @@ interface AttributeTypeInterface extends GeneratorInterface
 	 * @param string $attribute какой атрибут
 	 * @param array $options параметры рендера (label/hint и т.д.)
 	 */
-	public function renderInput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed;
+	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed;
 
 	/**
 	 * Рендер атрибута на форму/grid.

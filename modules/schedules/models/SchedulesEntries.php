@@ -309,8 +309,8 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 	public function attributeData()
 	{
 		return ArrayHelper::recursiveOverride(parent::attributeData(),[
-			'graph' => static::$label_graph,
-			
+			'graph' => [static::$label_graph, 'typeClass' => \app\types\ScheduleType::class],
+
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Отображается в общем списке',
@@ -321,7 +321,7 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 				'hint' => $this->is_period?'Дата/время начала периода':'День/Дата',
 				'typeClass'=>\app\types\ScheduleDayType::class,
 			],
-			'day' => static::$label_day,
+			'day' => [static::$label_day, 'typeClass' => \app\types\StringType::class],
 			'date_end' => [
 				'Окончание',
 				'hint' => 'Дата/время окончания периода',

@@ -2443,7 +2443,6 @@ CREATE TABLE `net_vlans` (
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `vlan` int DEFAULT NULL,
   `domain_id` int DEFAULT NULL,
-  `segment_id` int DEFAULT NULL,
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   KEY `idx-net_vlans-domain_id` (`domain_id`)
@@ -2456,7 +2455,7 @@ CREATE TABLE `net_vlans` (
 
 LOCK TABLES `net_vlans` WRITE;
 /*!40000 ALTER TABLE `net_vlans` DISABLE KEYS */;
-INSERT INTO `net_vlans` VALUES (1,'msk_ovpn_vlan',50,1,NULL,''),(2,'msk_open_vlan',100,1,NULL,''),(3,'msk_closed_vlan',101,1,NULL,''),(4,'msk_dmz_vlan',200,1,NULL,''),(5,'chl_ovpn_vlan',50,2,NULL,''),(6,'chl_srv_vlan',75,2,NULL,''),(7,'chl_open_lan',100,2,NULL,''),(8,'msk_srv_vlan',75,1,NULL,''),(9,'chl_it_vlan',30,2,NULL,'для сети ИТ'),(10,'msk_voip_vlan',7,1,NULL,''),(11,'chl_voip_vlan',7,2,NULL,''),(12,'chl_mgmt_clan',1,2,NULL,''),(13,'chl_prn_vlan',40,2,NULL,''),(15,'msk_mgmt_vlan',1,1,NULL,''),(16,'msk_prn_vlan',40,1,NULL,''),(17,'msk_prov1_vlan',201,1,NULL,''),(18,'chl_prov1_vlan',399,2,NULL,''),(20,'msk_surv_vlan',90,1,NULL,'');
+INSERT INTO `net_vlans` VALUES (1,'msk_ovpn_vlan',50,1,''),(2,'msk_open_vlan',100,1,''),(3,'msk_closed_vlan',101,1,''),(4,'msk_dmz_vlan',200,1,''),(5,'chl_ovpn_vlan',50,2,''),(6,'chl_srv_vlan',75,2,''),(7,'chl_open_lan',100,2,''),(8,'msk_srv_vlan',75,1,''),(9,'chl_it_vlan',30,2,'для сети ИТ'),(10,'msk_voip_vlan',7,1,''),(11,'chl_voip_vlan',7,2,''),(12,'chl_mgmt_clan',1,2,''),(13,'chl_prn_vlan',40,2,''),(15,'msk_mgmt_vlan',1,1,''),(16,'msk_prn_vlan',40,1,''),(17,'msk_prov1_vlan',201,1,''),(18,'chl_prov1_vlan',399,2,''),(20,'msk_surv_vlan',90,1,'');
 /*!40000 ALTER TABLE `net_vlans` ENABLE KEYS */;
 UNLOCK TABLES;
 

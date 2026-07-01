@@ -65,6 +65,7 @@ class NetDomains extends ArmsModel
 				'Пояснение',
 				'hint' => 'Все что нужно знать об этом домене, но что не ясно из названия',
 				'type' => 'text',
+				'typeClass' => \app\types\TextType::class,
 			],
         ];
     }

@@ -99,7 +99,7 @@ arms/
 
 ### `/models` - Модели данных
 
-Модели представляют данные и бизнес-логику. Все модели наследуются от [`ArmsModel`](models/ArmsModel.php), который расширяет `ActiveRecord` и добавляет:
+Модели представляют данные и бизнес-логику. Все модели наследуются от [`ArmsModel`](models/base/ArmsModel.php), который расширяет `ActiveRecord` и добавляет:
 
 - Автоматическое журналирование изменений
 - Работу с many-to-many связями через LinkerBehavior
@@ -149,8 +149,8 @@ arms/
 
 - Автоматическая генерация описаний программного обеспечения
 - Генерация технических характеристик оборудования
-- Поддержка proxy для доступа к OpenAI API
-- Использование модели GPT-4o-mini для экономии
+- Поддержка proxy для доступа к API провайдера
+- Абстракция провайдеров: OpenAI или GigaChat (выбирается по доступности, см. `LlmClient::__construct`)
 
 #### Формы
 
@@ -303,7 +303,7 @@ public function accessMap() {
 
 ### Базовая модель
 
-Все модели наследуются от базовой: [`ArmsModel`](models/ArmsModel.php)
+Все модели наследуются от базовой: [`ArmsModel`](models/base/ArmsModel.php)
 Оч подробно документирована; также документированы все использованные в ней трейты.
 
 ### История изменений (History Journal)
@@ -321,8 +321,8 @@ class CompsHistory extends HistoryModel
 
 ```php
 $history = CompsHistory::find()
-    ->where(['comps_id' => $id])
-    ->orderBy(['timestamp' => SORT_DESC])
+    ->where(['master_id' => $id])
+    ->orderBy(['updated_at' => SORT_DESC])
     ->all();
 ```
 
@@ -346,7 +346,7 @@ class Service extends ArmsModel
     
     public function getUsers() {
         return $this->hasMany(Users::class, ['id' => 'user_id'])
-            ->viaTable('services_users', ['service_id' => 'id']);
+            ->viaTable('{{%users_in_services}}', ['service_id' => 'id']);
     }
 }
 ```
@@ -489,7 +489,7 @@ $description = $llm->generateTechModelDescription(
 public function actionIndex() { ... }
 ```
 
-**Доступ к документации:** `/swagger/`
+**Доступ к документации:** Swagger UI — `/site/api-doc`, OpenAPI JSON — `/site/api-json`
 
 ### 4. Wiki (dokuwiki)
 
@@ -522,7 +522,7 @@ docker-compose up -d
 - [Тесты](tests/readme.md)
 - [Swagger/OpenAPI](swagger/readme.md)
 
-### Встроенная документация REST API доступна по адресу: `/site/`
+### Встроенная документация REST API (Swagger UI) доступна по адресу: `/site/api-doc`
 
 ### Внешние ссылки
 

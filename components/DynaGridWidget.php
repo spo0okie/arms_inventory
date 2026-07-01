@@ -327,20 +327,24 @@ JS;
 		unset($data['model']);
 		unset($data['modelAttribute']);
 		
-		if (!isset($data['class']) && !isset($data['value']) && $model?->hasMethod('attributeIsLink') && $model->attributeIsLink($attr)) {
+		if (!isset($data['class']) && !isset($data['value']) && $model?->hasMethod('attributeIsLink')
+			&& ($model->attributeIsLink($attr) || isset($model->getAttributeData($attr)['ref']))) {
+			//ссылка (linksSchema) или read-only вычисляемая ссылка (ref) — структурно, не тип
 			$data['class']=DefaultColumn::class;
 		}
-		
-		if (!isset($data['class']) && !isset($data['value']) && $model?->hasMethod('getAttributeType')) {
-			switch ($model?->getAttributeType($attr)) {
-				case 'boolean': $data['class']=BooleanColumn::class; break;
-				case 'text': $data['class']=DefaultColumn::class; break;
-				default: $data['class']=$attr==='name'?ItemColumn::class:DefaultColumn::class; break;
-			}
+
+		if (!isset($data['class']) && !isset($data['value']) && $model?->hasMethod('getAttributeTypeClass')) {
+			//класс колонки выбирает сам тип атрибута (см. types/*::gridColumnClass).
+			//Грид — слой отображения: если тип колонки не выводится (напр. вычисляемое
+			//grid-поле search-модели без объявления), падаем на дефолтную колонку ниже,
+			//а не роняем весь грид (строгость типов остаётся на API-контракте).
+			try {
+				$data['class']=$model->getAttributeTypeClass($attr)->gridColumnClass();
+			} catch (\Throwable $e) {}
 		}
-		
-		if (!isset($data['class']) && !isset($data['value']) && $attr==='name') {
-			$data['class']=ItemColumn::class;
+
+		if (!isset($data['class']) && !isset($data['value'])) {
+			$data['class']=$attr==='name'?ItemColumn::class:DefaultColumn::class;
 		}
 
 		return $data;

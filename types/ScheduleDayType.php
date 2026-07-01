@@ -39,11 +39,9 @@ class ScheduleDayType implements AttributeTypeInterface
 	/**
 	 * {@inheritdoc}
 	 */
-	public function renderInput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
+	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
-		$inputOptions = $options['inputOptions'] ?? [];
-		$inputOptions['placeholder'] = $inputOptions['placeholder'] ?? '1-7, def, Y-m-d';
-		return Html::activeTextInput($model, $attribute, $inputOptions);
+		return $field->textInput();
 	}
 
 	/**

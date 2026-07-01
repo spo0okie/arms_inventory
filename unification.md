@@ -4,11 +4,11 @@
 
 ## Модели и метаданные
 
-- **Базовая модель `ArmsModel`** — единая точка для правил, метаданных, истории, синхронизации и общих соглашений модели. Файл: `models/ArmsModel.php`.
-- **Система метаданных атрибутов через `attributeData()`** — единый формат описания полей (label/hint/view/index/api, type, placeholder, наследование, join/filter и т.д.). Файл: `models/traits/AttributeDataModelTrait.php`.
-- **Единая схема связей `linksSchema` + LinkerBehavior** — декларативное описание связей, авто-подключение many-to-many поведения и загрузчиков. Файл: `models/traits/AttributeLinksModelTrait.php`.
-- **Генерация OpenAPI-аннотаций на основе метаданных** — единый способ описания схем API. Файл: `models/traits/AttributeAnnotationModelTrait.php`.
-- **Единый механизм внешних ссылок/JSON-связей** — работа с `external_links` и связями во внешних ИС. Файл: `models/traits/ExternalDataModelTrait.php`.
+- **Базовая модель `ArmsModel`** — единая точка для правил, метаданных, истории, синхронизации и общих соглашений модели. Файл: `models/base/ArmsModel.php`.
+- **Система метаданных атрибутов через `attributeData()`** — единый формат описания полей (label/hint/view/index/api, type, placeholder, наследование, join/filter и т.д.). Файл: `models/base/traits/AttributeDataModelTrait.php`.
+- **Единая схема связей `linksSchema` + LinkerBehavior** — декларативное описание связей, авто-подключение many-to-many поведения и загрузчиков. Файл: `models/base/traits/AttributeLinksModelTrait.php`.
+- **Генерация OpenAPI-аннотаций на основе метаданных** — единый способ описания схем API. Файл: `models/base/traits/AttributeAnnotationModelTrait.php`.
+- **Единый механизм внешних ссылок/JSON-связей** — работа с `external_links` и связями во внешних ИС. Файл: `models/base/traits/ExternalDataModelTrait.php`.
 - **История изменений через `HistoryModel` и `{Model}History`** — единый базовый класс журнала и стандартный набор history-моделей. Файлы: `models/HistoryModel.php`, `models/*History.php`.
 - **Search-модели по шаблону `{Model}Search`** — унифицированный слой поиска/фильтрации. Файлы: `models/*Search.php`.
 - **Набор трейтов вычисляемых полей (`*CalcFieldsTrait`)** — унификация расчётных полей по доменам. Файлы: `models/traits/*CalcFieldsTrait.php`.
@@ -92,7 +92,7 @@
 
 ## Синхронизация и интеграции
 
-- **Единый механизм синхронизации** — общий контроллер синхронизации и унифицированные поля/правила sync в `ArmsModel`. Файлы: `console/commands/SyncController.php`, `models/ArmsModel.php`.
+- **Единый механизм синхронизации** — общий контроллер синхронизации и унифицированные поля/правила sync в `ArmsModel`. Файлы: `console/commands/SyncController.php`, `models/base/ArmsModel.php`.
 
 ## Хелперы
 
