@@ -5,10 +5,10 @@ use app\components\ShowArchivedWidget;
 use app\models\Acls;
 use yii\helpers\Html;
 
-/* @var $this yii\web\View */
-/* @var $searchModel app\modules\schedules\models\SchedulesSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $switchArchivedCount */
+/** @var yii\web\View $this */
+/** @var app\modules\schedules\models\SchedulesSearch $searchModel */
+/** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var integer $switchArchivedCount */
 
 $this->title = Acls::$scheduleTitles;
 $this->params['breadcrumbs'][] = $this->title;
@@ -51,7 +51,7 @@ $renderer=$this;
 			'labelBadge'=>$switchArchivedDelta,
 			'reload'=>true,
 		]).'<span>',
-		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		'createButton' => Html::a('Добавить', ['/acls/create','newSchedule'=>1], ['class' => 'btn btn-success']),
 		//'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Arms','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,

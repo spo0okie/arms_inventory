@@ -7,9 +7,7 @@ use app\generation\ModelFactory;
 use app\helpers\StringHelper;
 use app\models\Aces;
 use app\models\Acls;
-use app\models\Places;
 use app\modules\schedules\models\SchedulesAclSearch;
-use app\models\Services;
 use Yii;
 use app\modules\schedules\models\Schedules;
 use yii\web\NotFoundHttpException;
@@ -26,8 +24,8 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 			'view'=>['status']
 		]);
 	}
-	
-	
+
+
 	/**
 	 * Отображает список расписаний доступа (ACL-расписания) с поиском и фильтрацией.
 	 * Использует SchedulesAclSearch и DynaGrid для построения таблицы.
@@ -45,14 +43,14 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 		$model= new $this->modelClass();
 		$columns=DynaGridWidget::fetchVisibleAttributes($model,StringHelper::class2Id($this->modelClass).'-index');
 		$this->archivedSearchInit($searchModel,$dataProvider,$switchArchivedCount,$columns);
-		
+
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,
 			'switchArchivedCount' => $switchArchivedCount??null,
 		]);
 	}
-	
+
 	/**
 	 * Возвращает текущий статус расписания доступа: активно ли оно прямо сейчас.
 	 * Вычисляет текущее время с учётом сдвига часового пояса из params['schedulesTZShift']
@@ -73,7 +71,7 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 			gmdate('H:i',time()+Yii::$app->params['schedulesTZShift'])
 		);
 	}
-	
+
 	/**
 	 * Тестирует actionStatus: запрашивает статус расписания для записи
 	 * из getTestData()['full']. Ожидает HTTP 200.
@@ -83,14 +81,14 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 	public function testStatus(): array
 	{
 		$testData=$this->getTestData();
-		
+
 		return [[
 			'name' => 'default',
 			'GET' => ['id' => $testData['full']->id],
 			'response' => 200,
 		]];
 	}
-	
+
 	/**
 	 * Отображает страницу просмотра расписания доступа.
 	 * Если расписание является override (isOverride === true), перенаправляет
@@ -111,7 +109,7 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
     		$params['id']=$model->override_id;
     		return $this->redirect(array_merge(['view'],$params));
 		}
-    		
+
         return $this->render('view', [
             'model' => $model,
         ]);
@@ -206,28 +204,31 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 	}
 
 	/**
-	 * Создаёт новое расписание доступа (ACL-расписание).
-	 * После успешного сохранения автоматически создаёт связанную запись Acls
-	 * и перенаправляет на просмотр нового расписания в режиме редактирования ACL.
+	 * Создание нового временного доступа.
 	 *
-	 * POST-параметры: поля модели Schedules через Yii2 load().
+	 * Раньше здесь создавалось «пустое» расписание + пустой ACL (который не проходил валидацию
+	 * и не создавался), из-за чего расписание оставалось без ACL и выпадало из списка доступов
+	 * без пути назад (issue #214). Теперь перенаправляем на форму создания ACL с режимом нового
+	 * расписания: расписание, ACL и ACE создаются вместе и атомарно.
 	 *
-	 * @return mixed
+	 * @return \yii\web\Response
 	 */
 	public function actionCreate()
 	{
-		$model = new Schedules();
-		
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			$acl=new Acls();
-			$acl->schedules_id=$model->id;
-			$acl->save();
-			return $this->redirect(['view', 'id' => $model->id, 'acl_mode'=>1] );
-		}
-		
-		return $this->render('create', [
-			'model' => $model,
-		]);
+		return $this->redirect(['/acls/create','newSchedule'=>1]);
 	}
-	
+
+	/**
+	 * Тест для {@see actionCreate()}: перенаправление на форму создания ACL (новый временный доступ).
+	 *
+	 * @return array
+	 */
+	public function testCreate(): array
+	{
+		return [[
+			'name' => 'redirect to acl form',
+			'response' => 302,
+		]];
+	}
+
 }

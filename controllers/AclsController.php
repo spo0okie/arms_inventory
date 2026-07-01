@@ -207,22 +207,40 @@ class AclsController extends ArmsBaseController
 		$ace = new Aces();
 		$post = Yii::$app->request->post();
 
+		//режим «новый временный доступ» (issue #214): в этой же форме создаётся и расписание,
+		//к которому привязываются создаваемые ACL — чтобы не оставлять расписание без ACL
+		$newSchedule=(bool)(Yii::$app->request->get('newSchedule')??Yii::$app->request->post('newSchedule'));
+		$schedule=$newSchedule?new Schedules():null;
+
 		if ($model->load($post)) {
 			//носитель ACE для повторного отображения формы (с введёнными данными/ошибками)
 			$ace->load($post);
+			if ($schedule) $schedule->load($post);
 
 			$resources=$this->collectResources($post);
 			if (!$resources) {
 				$model->addError('comps_ids','Выберите хотя бы один ресурс, к которому предоставляется доступ');
-				return $this->defaultRender('create', ['model' => $model,'ace'=>$ace]);
+				return $this->defaultRender('create', compact('model','ace','schedule'));
+			}
+			if ($schedule && !$schedule->validate()) {
+				return $this->defaultRender('create', compact('model','ace','schedule'));
 			}
 
 			$transaction=Yii::$app->db->beginTransaction();
 			try {
+				//расписание (если создаём вместе с доступом) — первым, чтобы привязать к нему ACL
+				$schedules_id=$model->schedules_id;
+				if ($schedule) {
+					if (!$schedule->save()) {
+						throw new \RuntimeException('Не удалось сохранить расписание доступа');
+					}
+					$schedules_id=$schedule->id;
+				}
+
 				$created=[];
 				foreach ($resources as [$field,$value]) {
 					$acl=new Acls();
-					$acl->schedules_id=$model->schedules_id;
+					$acl->schedules_id=$schedules_id;
 					$acl->notepad=$model->notepad;
 					$acl->$field=$value;
 					if (!$acl->save()) {
@@ -246,14 +264,15 @@ class AclsController extends ArmsBaseController
 			} catch (\Throwable $e) {
 				$transaction->rollBack();
 				Yii::$app->session->setFlash('error',$e->getMessage());
-				return $this->defaultRender('create', ['model' => $model,'ace'=>$ace]);
+				return $this->defaultRender('create', compact('model','ace','schedule'));
 			}
 		}
 
 		//первичное отображение формы (GET-предзаполнение)
 		$model->load(Yii::$app->request->get());
 		$ace->load(Yii::$app->request->get());
-		return $this->defaultRender('create', ['model' => $model,'ace'=>$ace]);
+		if ($schedule) $schedule->load(Yii::$app->request->get());
+		return $this->defaultRender('create', compact('model','ace','schedule'));
 	}
 
 	/**
@@ -304,6 +323,33 @@ class AclsController extends ArmsBaseController
 				'name' => 'group post',
 				'POST' => ['Acls' => $groupAcls],
 				'response' => [200,302],
+			],
+			//новый временный доступ: форма с полями расписания (issue #214)
+			[
+				'name' => 'new schedule form',
+				'GET'  => ['newSchedule' => 1],
+				'response' => 200,
+			],
+			//создание расписания + ACL + ACE одним submit
+			[
+				'name' => 'new schedule post',
+				'GET'  => ['newSchedule' => 1],
+				'POST' => [
+					'newSchedule' => 1,
+					'Schedules' => ['name' => 'тест-доступ #214'],
+					'Acls'      => array_diff_key($groupAcls,['schedules_id'=>1]),
+					'Aces'      => ['comment' => 'доступ #214'],
+				],
+				'response' => [200,302],
+				'assert' => static function (\AcceptanceTester $I) {
+					//расписание создано и к нему привязан хотя бы один ACL
+					$sch=\app\modules\schedules\models\Schedules::find()->where(['name'=>'тест-доступ #214'])->one();
+					\PHPUnit\Framework\Assert::assertNotNull($sch,'Расписание доступа должно создаться');
+					\PHPUnit\Framework\Assert::assertNotEmpty(
+						Acls::find()->where(['schedules_id'=>$sch->id])->count(),
+						'К новому расписанию должен быть привязан ACL'
+					);
+				},
 			],
 		];
 	}

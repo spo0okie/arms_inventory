@@ -16,7 +16,9 @@ use yii\helpers\Url;
 /* @var $model app\models\Acls */
 /* @var $ace app\models\Aces */
 /* @var $form yii\widgets\ActiveForm */
+/* @var $schedule app\modules\schedules\models\Schedules|null расписание при создании нового временного доступа */
 if (!isset($modalParent)) $modalParent=null;
+if (!isset($schedule)) $schedule=null;
 
 /** @noinspection JSUnusedLocalSymbolsInspection */
 /** @noinspection JSUnusedLocalSymbols */
@@ -54,7 +56,20 @@ if (!$model->isNewRecord) $this->registerJs($js,yii\web\View::POS_HEAD);
 	] + ($model->isNewRecord?['validationUrl'=>['/acls/validate','scenario'=>Acls::SCENARIO_GROUP]]:[])); ?>
 	<?= $form->field($model,'schedules_id')->hiddenInput()->label(false)->hint(false) ?>
 
-	<div class="for-alert"></div>
+	<?php if ($schedule) {
+			//режим создания нового временного доступа: расписание создаётся вместе с ACL (issue #214)
+			echo Html::hiddenInput('newSchedule',1);
+			?>
+			<div class="card bg-light mb-3">
+				<div class="card-header">Новый временный доступ <small class="text-muted">(создаётся вместе с этим доступом)</small></div>
+				<div class="card-body">
+					<?= $form->field($schedule,'name')->hint(Acls::$scheduleNameHint) ?>
+					<?= $form->field($schedule,'history')->text()->classicHint(Acls::$scheduleHistoryHint) ?>
+				</div>
+			</div>
+		<?php } ?>
+
+		<div class="for-alert"></div>
 	<div class="row">
 		<div class="<?= $model->isNewRecord?'col-md-8':'col-md-6' ?>">
 			<?php if ($model->isNewRecord) {

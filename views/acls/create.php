@@ -7,11 +7,14 @@ use yii\web\YiiAsset;
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
 /* @var $ace app\models\Aces */
+/* @var $schedule app\modules\schedules\models\Schedules|null расписание при создании нового временного доступа */
 
-$this->title = "Новый ". Acls::$title;
+if (!isset($schedule)) $schedule=null;
+
+$this->title = $schedule? "Новый ".mb_strtolower(Acls::$scheduleTitle) : "Новый ".Acls::$title;
 
 $this->render('breadcrumbs',['model'=>$model,'show_item'=>false]);
-$this->params['breadcrumbs'][] = 'Новый ACL';
+$this->params['breadcrumbs'][] = $this->title;
 YiiAsset::register($this);
 
 
@@ -23,6 +26,7 @@ YiiAsset::register($this);
     <?= $this->render('_form2', [
         'model' => $model,
 		'ace' => $ace,
+		'schedule' => $schedule,
     ]) ?>
 
 </div>
