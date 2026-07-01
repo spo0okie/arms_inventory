@@ -866,3 +866,64 @@ describe('приоритет дат/периодов main над override', () =
         expect(build().nextWorkingDateTime('2024-07-01 00:00')).toBe('2024-07-02 10:00');
     });
 });
+
+describe('открытые периоды (null-границы)', () => {
+    // Регресс на баг: период без даты окончания (end_tsm === null) трактовался как
+    // закончившийся в epoch 0 и выпадал из расчёта. Симметрично — открытый старт.
+    const periodRuntime = (periods) => new ScheduleRuntime({
+        main: {
+            start_tsm: null, end_tsm: null,
+            default: null, weekdays: {}, dates: {},
+            periods,
+        },
+        overrides: [],
+    });
+    const period = (start, end, isWork) => ({
+        start_tsm: start === null ? null : strToTsm(start),
+        end_tsm: end === null ? null : strToTsm(end),
+        is_work: isWork,
+        meta: {},
+    });
+
+    test('открытый рабочий период активен после старта', () => {
+        const s = periodRuntime([period('2023-01-01', null, true)]);
+        expect(s.isWorkTime('2024-06-15 12:00')).toBe(true);
+        expect(s.isWorkTime('2024-06-15 00:00')).toBe(true);
+        expect(s.isWorkDay('2024-06-15')).toBe(true);
+        expect(s.getDatePeriods(strToTsm('2024-06-15')).length).toBeGreaterThan(0);
+    });
+    test('открытый рабочий период до старта → nextWorkingDateTime=старт', () => {
+        const s = periodRuntime([period('2099-01-01', null, true)]);
+        expect(s.isWorkTime('2024-06-15 12:00')).toBe(false);
+        expect(s.nextWorkingDateTime('2024-06-15 12:00')).toBe('2099-01-01 00:00');
+    });
+    test('открытый нерабочий период перекрывает доступ навсегда', () => {
+        const s = periodRuntime([period('2023-01-01', null, false)]);
+        expect(s.isWorkTime('2024-06-15 12:00')).toBe(false);
+        expect(s.nextWorkingDateTime('2024-06-15 12:00')).toBeNull();
+    });
+    test('открытый слева период активен до даты конца', () => {
+        const s = periodRuntime([period(null, '2099-01-01', true)]);
+        expect(s.isWorkTime('2024-06-15 12:00')).toBe(true);
+        expect(s.isWorkTime('1999-01-01 00:00')).toBe(true);
+    });
+    test('полностью открытый рабочий период активен всегда', () => {
+        const s = periodRuntime([period(null, null, true)]);
+        expect(s.isWorkTime('2024-06-15 12:00')).toBe(true);
+        expect(s.isWorkTime('1999-01-01 00:00')).toBe(true);
+    });
+    test('nextPeriod принимает открытый конец', () => {
+        const s = periodRuntime([period('2023-01-01', null, true)]);
+        expect(s.nextPeriod(strToTsm('2024-06-15 12:00'), true)).not.toBeNull();
+    });
+    test('nextWorkingDateTime внутри открытого периода = текущий момент', () => {
+        const s = periodRuntime([period('2023-01-01', null, true)]);
+        expect(s.nextWorkingDateTime('2024-06-15 12:00')).toBe('2024-06-15 12:00');
+    });
+    test('getDatePeriodsIntervals обрезает открытый конец по концу дня', () => {
+        const s = periodRuntime([period('2023-01-01', null, true)]);
+        const res = s.getDatePeriodsIntervals(strToTsm('2024-06-15'));
+        expect(res.positive).toEqual([[0, 1440, {}]]);
+        expect(res.negative).toEqual([]);
+    });
+});

@@ -898,6 +898,83 @@ describe('приоритет дат/периодов main над override', func
     end)
 end)
 
+describe('открытые периоды (null-границы)', function()
+    -- Регресс на баг: период без даты окончания (end_tsm == nil) в Lua ронял
+    -- сравнение `nil > number` (runtime-ошибка), а по смыслу должен трактоваться
+    -- как +inf (ещё длится). Симметрично проверяем открытый старт (start_tsm == nil).
+
+    -- Расписание, заданное только периодами (без недельного графика).
+    local function periodRuntime(periods)
+        return ScheduleRuntime.new({
+            main = {
+                start_tsm = nil, end_tsm = nil,
+                default = nil, weekdays = {}, dates = {},
+                periods = periods,
+            },
+            overrides = {},
+        })
+    end
+
+    -- Период с датами-строками; nil → открытая граница (start=-inf / end=+inf).
+    local function period(startStr, endStr, isWork)
+        return {
+            start_tsm = startStr and strToTsm(startStr) or nil,
+            end_tsm   = endStr and strToTsm(endStr) or nil,
+            is_work   = isWork,
+            meta      = {},
+        }
+    end
+
+    test('открытый рабочий период активен после старта', function()
+        local s = periodRuntime({ period('2023-01-01', nil, true) })
+        assertTrue(s:isWorkTime('2024-06-15 12:00'), 'середина дня')
+        assertTrue(s:isWorkTime('2024-06-15 00:00'), 'левая граница дня')
+        assertTrue(s:isWorkDay('2024-06-15'))
+        assertGreater(#s:getDatePeriods(strToTsm('2024-06-15')), 0)
+    end)
+
+    test('открытый рабочий период до старта → nextWorkingDateTime=старт', function()
+        local s = periodRuntime({ period('2099-01-01', nil, true) })
+        assertFalse(s:isWorkTime('2024-06-15 12:00'))
+        assertEq(s:nextWorkingDateTime('2024-06-15 12:00'), '2099-01-01 00:00')
+    end)
+
+    test('открытый нерабочий период перекрывает доступ навсегда', function()
+        local s = periodRuntime({ period('2023-01-01', nil, false) })
+        assertFalse(s:isWorkTime('2024-06-15 12:00'))
+        assertNil(s:nextWorkingDateTime('2024-06-15 12:00'))
+    end)
+
+    test('открытый слева период активен до даты конца', function()
+        local s = periodRuntime({ period(nil, '2099-01-01', true) })
+        assertTrue(s:isWorkTime('2024-06-15 12:00'))
+        assertTrue(s:isWorkTime('1999-01-01 00:00'), 'нет нижней границы')
+    end)
+
+    test('полностью открытый рабочий период активен всегда', function()
+        local s = periodRuntime({ period(nil, nil, true) })
+        assertTrue(s:isWorkTime('2024-06-15 12:00'))
+        assertTrue(s:isWorkTime('1999-01-01 00:00'))
+    end)
+
+    test('nextPeriod принимает открытый конец', function()
+        local s = periodRuntime({ period('2023-01-01', nil, true) })
+        assertNotNil(s:nextPeriod(strToTsm('2024-06-15 12:00'), true))
+    end)
+
+    test('nextWorkingDateTime внутри открытого периода = текущий момент', function()
+        local s = periodRuntime({ period('2023-01-01', nil, true) })
+        assertEq(s:nextWorkingDateTime('2024-06-15 12:00'), '2024-06-15 12:00')
+    end)
+
+    test('getDatePeriodsIntervals обрезает открытый конец по концу дня', function()
+        local s   = periodRuntime({ period('2023-01-01', nil, true) })
+        local res = s:getDatePeriodsIntervals(strToTsm('2024-06-15'))
+        assertDeepEq(res.positive, { { 0, 1440, {} } })
+        assertDeepEq(res.negative, {})
+    end)
+end)
+
 -- =============================================================================
 -- Запуск
 -- =============================================================================

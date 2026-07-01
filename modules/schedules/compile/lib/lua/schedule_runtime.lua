@@ -296,7 +296,13 @@ function ScheduleRuntime:nextWorkingDateTime(dateTime)
                     return nil
                 end
             elseif entry.type == 'period' then
-                return tsmToStr(entry.start_tsm)
+                -- Период уже активен (start в прошлом) или открыт слева (nil) → работа
+                -- начинается прямо сейчас (pos), иначе — с его начала.
+                local startTsm = entry.start_tsm
+                if startTsm == nil or startTsm < pos then
+                    return tsmToStr(pos)
+                end
+                return tsmToStr(startTsm)
             elseif entry.type == 'override' then
                 pos = entry.start_tsm
             else
@@ -384,7 +390,9 @@ function ScheduleRuntime:getDatePeriods(dateTsm)
     local periods  = self.main.periods or {}
     for i = 1, #periods do
         local p = periods[i]
-        if p.end_tsm > dayStart and p.start_tsm < dayEnd then
+        -- nil = безграничность (как в inBounds): открытый период пересекает день
+        if (p.end_tsm == nil or p.end_tsm > dayStart)
+            and (p.start_tsm == nil or p.start_tsm < dayEnd) then
             result[#result + 1] = p
         end
     end
@@ -398,8 +406,9 @@ function ScheduleRuntime:getDatePeriodsIntervals(dateTsm)
     local positive, negative = {}, {}
     for i = 1, #periods do
         local p          = periods[i]
-        local s          = math.max(p.start_tsm, dayStart)
-        local e          = math.min(p.end_tsm, dayEnd)
+        -- Обрезаем период по границам дня; nil = безграничность.
+        local s          = (p.start_tsm == nil) and dayStart or math.max(p.start_tsm, dayStart)
+        local e          = (p.end_tsm   == nil) and dayEnd   or math.min(p.end_tsm, dayEnd)
         local interval   = { s - dayStart, e - dayStart, p.meta or {} }
         if p.is_work == true then
             positive[#positive + 1] = interval
@@ -445,7 +454,9 @@ function ScheduleRuntime:nextPeriod(tsm, isWork)
     local periods = self.main.periods or {}
     for i = 1, #periods do
         local p = periods[i]
-        if p.end_tsm > tsm and (isWork == nil or isWork == p.is_work) then
+        -- nil = +inf: открытый период ещё длится, остаётся кандидатом
+        local stillRunning = (p.end_tsm == nil) or (p.end_tsm > tsm)
+        if stillRunning and (isWork == nil or isWork == p.is_work) then
             return p
         end
     end
