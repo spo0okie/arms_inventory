@@ -123,6 +123,41 @@ class CollationConsistencyTest extends Unit
 	}
 
 	/**
+	 * Коллация возврата и строковых параметров хранимых функций/процедур.
+	 *
+	 * ALTER TABLE ... CONVERT TO нормализует только таблицы, но НЕ рутины.
+	 * getplacepath() возвращает TEXT и участвует в LIKE-поиске
+	 * (`getplacepath(places.id) LIKE '%...%'` в CompsSearch/TechsSearch):
+	 * если коллация её возврата отличается от канона, сравнение с литералом
+	 * (коллация соединения) даёт 1267. Возврат функции виден в
+	 * information_schema.parameters как строка с ordinal_position=0.
+	 */
+	public function testAllRoutineParamsUseCanonicalCollation()
+	{
+		$db = $this->dbName();
+		$rows = Yii::$app->db->createCommand(
+			"SELECT specific_name AS routine, ordinal_position AS pos,
+			        COALESCE(parameter_name, '<RETURN>') AS param, collation_name AS coll
+			   FROM information_schema.parameters
+			  WHERE specific_schema = :db
+			    AND collation_name IS NOT NULL
+			    AND collation_name <> :coll
+			  ORDER BY specific_name, ordinal_position",
+			[':db' => $db, ':coll' => self::COLLATION]
+		)->queryAll();
+
+		$offenders = array_map(
+			fn($r) => "{$r['routine']}({$r['param']}) = {$r['coll']}",
+			$rows
+		);
+
+		$this->assertSame([], $offenders, $this->report(
+			count($offenders) . " параметр(ов)/возврат(ов) рутин с неканоничной коллацией (ожидается " . self::COLLATION . "):",
+			$offenders
+		));
+	}
+
+	/**
 	 * Компактное сообщение об ошибке: заголовок + до 50 нарушителей.
 	 */
 	private function report(string $header, array $offenders): string

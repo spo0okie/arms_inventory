@@ -465,23 +465,23 @@ DROP TABLE IF EXISTS `comps`;
 CREATE TABLE `comps` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
   `domain_id` int DEFAULT NULL COMMENT 'Домен',
-  `name` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `os` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ОС',
-  `raw_hw` mediumtext COLLATE utf8mb4_unicode_ci COMMENT 'Отпечаток железа',
-  `raw_soft` longtext COLLATE utf8mb4_unicode_ci,
-  `raw_version` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Версия скрипта отправившего данные',
-  `exclude_hw` mediumtext COLLATE utf8mb4_unicode_ci COMMENT 'Оборудование для исключения из паспорта',
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `os` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ОС',
+  `raw_hw` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Отпечаток железа',
+  `raw_soft` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `raw_version` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Версия скрипта отправившего данные',
+  `exclude_hw` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Оборудование для исключения из паспорта',
   `ignore_hw` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Игнорировать аппаратное обеспечение',
-  `ip` varchar(768) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ip_ignore` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip` varchar(768) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_ignore` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `arm_id` int DEFAULT NULL COMMENT 'Рабочее место',
-  `comment` mediumtext COLLATE utf8mb4_unicode_ci,
+  `comment` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `user_id` int DEFAULT NULL,
-  `mac` varchar(768) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mac` varchar(768) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT '0',
-  `external_links` mediumtext COLLATE utf8mb4_unicode_ci,
-  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `external_links` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sandbox_id` int DEFAULT NULL,
   `platform_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1129,10 +1129,10 @@ DROP TABLE IF EXISTS `lic_groups`;
 CREATE TABLE `lic_groups` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
   `lic_types_id` int DEFAULT NULL,
-  `descr` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Описание',
-  `comment` mediumtext COLLATE utf8mb4_unicode_ci,
+  `descr` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Описание',
+  `comment` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `services_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `lic_types_id` (`lic_types_id`),
@@ -1289,15 +1289,15 @@ DROP TABLE IF EXISTS `lic_items`;
 CREATE TABLE `lic_items` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
   `lic_group_id` int NOT NULL COMMENT 'В группе лицензий',
-  `descr` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Описание закупки',
+  `descr` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Описание закупки',
   `count` int NOT NULL COMMENT 'Количество приобретенных лицензий',
-  `comment` mediumtext COLLATE utf8mb4_unicode_ci,
+  `comment` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `active_from` date DEFAULT NULL COMMENT 'Начало периода действия',
   `active_to` date DEFAULT NULL COMMENT 'Окончание периода действия',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Время создания',
   `scans_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `services_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `lic_group_id` (`lic_group_id`),
@@ -2097,10 +2097,10 @@ DROP TABLE IF EXISTS `manufacturers_dict`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `manufacturers_dict` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `word` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Вариант написания',
+  `word` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Вариант написания',
   `manufacturers_id` int NOT NULL COMMENT 'Производитель',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `word` (`word`),
   KEY `manufacturers_id` (`manufacturers_id`)
@@ -3035,15 +3035,15 @@ DROP TABLE IF EXISTS `schedules_entries`;
 CREATE TABLE `schedules_entries` (
   `id` int NOT NULL AUTO_INCREMENT,
   `schedule_id` int DEFAULT NULL,
-  `date` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `schedule` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `date_end` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `schedule` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date_end` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_period` tinyint(1) DEFAULT NULL,
   `is_work` tinyint(1) DEFAULT NULL,
-  `comment` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `history` mediumtext COLLATE utf8mb4_unicode_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `history` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-schedules_days_org_id` (`schedule_id`),
   KEY `idx-schedules_days_date` (`date`),
@@ -3808,39 +3808,39 @@ DROP TABLE IF EXISTS `techs`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `techs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
-  `num` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Инвентарный номер',
-  `inv_num` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Бухгалтерский инвентарный номер',
+  `num` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Инвентарный номер',
+  `inv_num` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Бухгалтерский инвентарный номер',
   `model_id` int NOT NULL COMMENT 'Модель оборудования',
-  `sn` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Серийный номер',
+  `sn` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Серийный номер',
   `arms_id` int DEFAULT NULL COMMENT 'Рабочее место',
   `places_id` int DEFAULT NULL COMMENT 'Помещение',
   `user_id` int DEFAULT NULL,
   `it_staff_id` int DEFAULT NULL,
-  `ip` varchar(768) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `mac` varchar(768) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip` varchar(768) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mac` varchar(768) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `state_id` int DEFAULT NULL COMMENT 'Состояние',
-  `url` mediumtext COLLATE utf8mb4_unicode_ci COMMENT 'Ссылка',
-  `comment` mediumtext COLLATE utf8mb4_unicode_ci COMMENT 'Комментарий',
-  `history` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Записная кинжка',
-  `specs` mediumtext COLLATE utf8mb4_unicode_ci,
+  `url` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Ссылка',
+  `comment` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Комментарий',
+  `history` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Записная кинжка',
+  `specs` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `scans_id` int DEFAULT NULL,
   `departments_id` int DEFAULT NULL,
   `comp_id` int DEFAULT NULL,
   `installed_id` int DEFAULT NULL,
-  `installed_pos` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `installed_pos` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `head_id` int DEFAULT NULL,
   `responsible_id` int DEFAULT NULL,
-  `hw` mediumtext COLLATE utf8mb4_unicode_ci,
+  `hw` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `installed_pos_end` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `installed_pos_end` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `installed_back` tinyint(1) DEFAULT '0',
   `full_length` tinyint(1) DEFAULT '0',
-  `external_links` mediumtext COLLATE utf8mb4_unicode_ci,
+  `external_links` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `partners_id` int DEFAULT NULL,
-  `uid` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `uid` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `domain_id` int DEFAULT NULL,
-  `hostname` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hostname` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `management_service_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `num` (`num`),
@@ -4009,11 +4009,11 @@ DROP TABLE IF EXISTS `ui_dynagrid_dtl`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ui_dynagrid_dtl` (
-  `id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Unique dynagrid detail setting identifier',
-  `category` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Dynagrid detail setting category "filter" or "sort"',
-  `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Name to identify the dynagrid detail setting',
-  `data` varchar(5000) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Json encoded data for the dynagrid detail configuration',
-  `dynagrid_id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Related dynagrid identifier',
+  `id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Unique dynagrid detail setting identifier',
+  `category` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Dynagrid detail setting category "filter" or "sort"',
+  `name` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Name to identify the dynagrid detail setting',
+  `data` varchar(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Json encoded data for the dynagrid detail configuration',
+  `dynagrid_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Related dynagrid identifier',
   PRIMARY KEY (`id`),
   UNIQUE KEY `tbl_dynagrid_dtl_UK1` (`name`,`category`,`dynagrid_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -4094,31 +4094,31 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `employee_id` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employee_id` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `org_id` int DEFAULT NULL,
-  `Orgeh` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Doljnost` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Ename` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Полное имя',
+  `Orgeh` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Doljnost` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Ename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Полное имя',
   `Persg` int NOT NULL DEFAULT '1',
   `Uvolen` tinyint(1) NOT NULL COMMENT 'Уволен',
-  `Login` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Email` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Phone` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Mobile` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `work_phone` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Bday` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `manager_id` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Login` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Email` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Mobile` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `work_phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Bday` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `manager_id` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `employ_date` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Дата приема',
   `resign_date` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Дата увольнения',
   `nosync` tinyint(1) NOT NULL DEFAULT '0',
-  `auth_key` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `access_token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notepad` mediumtext COLLATE utf8mb4_unicode_ci,
-  `private_phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `external_links` mediumtext COLLATE utf8mb4_unicode_ci,
-  `uid` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ips` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `auth_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `access_token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notepad` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `private_phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `external_links` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `uid` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ips` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `struct_id` (`Orgeh`),
   KEY `dismissed` (`Uvolen`),
@@ -4304,7 +4304,6 @@ UNLOCK TABLES;
 -- Dumping routines for database 'arms_test'
 --
 /*!50003 DROP FUNCTION IF EXISTS `getplacepath` */;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -4312,12 +4311,12 @@ ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `getplacepath`(`place_id` INT) RETURNS text CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
+CREATE DEFINER=`root`@`localhost` FUNCTION `getplacepath`(place_id INT) RETURNS text CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
     DETERMINISTIC
 BEGIN
-    DECLARE res TEXT CHARACTER SET utf8mb4;
+    DECLARE res TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     CALL getplacepath(place_id, res);
     RETURN res;
 END ;;
@@ -4326,9 +4325,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 DROP FUNCTION IF EXISTS `getplacetop` */;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -4336,9 +4333,9 @@ ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `getplacetop`(`place_id` INT) RETURNS int
+CREATE DEFINER=`root`@`localhost` FUNCTION `getplacetop`(place_id INT) RETURNS int
     DETERMINISTIC
 BEGIN
     DECLARE res INT;
@@ -4350,9 +4347,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 DROP FUNCTION IF EXISTS `getServiceSegment` */;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -4360,13 +4355,13 @@ ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `getServiceSegment`(`itemId` INT) RETURNS int
+CREATE DEFINER=`root`@`localhost` FUNCTION `getServiceSegment`(itemId INT) RETURNS int
     DETERMINISTIC
 BEGIN
     DECLARE res INT;
-	CALL getServiceSegment(itemId, res);
+    CALL getServiceSegment(itemId, res);
     RETURN res;
 END ;;
 DELIMITER ;
@@ -4374,9 +4369,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 DROP PROCEDURE IF EXISTS `getplacepath` */;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -4384,14 +4377,14 @@ ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getplacepath`(IN `place_id` INT, OUT `path` TEXT CHARACTER SET utf8mb4)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getplacepath`(IN place_id INT, OUT path TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
     READS SQL DATA
     COMMENT 'Recursive path build'
 BEGIN
-    DECLARE placename VARCHAR(20) CHARACTER SET utf8mb4;
-    DECLARE temppath TEXT CHARACTER SET utf8mb4;
+    DECLARE placename VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    DECLARE temppath TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     DECLARE tempparent INT;
     SET max_sp_recursion_depth = 32;
     SELECT short, parent_id FROM places WHERE id=place_id INTO placename, tempparent;
@@ -4408,9 +4401,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 DROP PROCEDURE IF EXISTS `getplacetop` */;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -4418,9 +4409,11 @@ ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getplacetop`(IN `place_id` INT, OUT `top` INT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getplacetop`(IN place_id INT, OUT top INT)
+    READS SQL DATA
+    COMMENT 'Recursive last parent search'
 BEGIN
     DECLARE tempparent INT;
     SET max_sp_recursion_depth = 32;
@@ -4437,9 +4430,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 DROP PROCEDURE IF EXISTS `getServiceSegment` */;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -4447,9 +4438,9 @@ ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getServiceSegment`(IN `itemId` INT, OUT `resultValue` INT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getServiceSegment`(IN itemId INT, OUT resultValue INT)
     READS SQL DATA
     COMMENT 'Recursive search of NOT NULL segment_id value'
 BEGIN
@@ -4465,7 +4456,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

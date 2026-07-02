@@ -13,7 +13,7 @@ class m220117_054532_add_services_recursive_segment_search extends Migration
 	public function up()
 	{
 		$sql = <<<SQL
-    	set names utf8mb4;
+    	set names utf8mb4 collate utf8mb4_unicode_ci;
 DROP FUNCTION IF EXISTS getServiceSegment;
 DROP PROCEDURE IF EXISTS getServiceSegment;
 CREATE PROCEDURE getServiceSegment(IN itemId INT, OUT resultValue INT)

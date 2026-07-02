@@ -16,13 +16,13 @@ DROP FUNCTION IF EXISTS getplacetop;
 SQL;
 
 	static $getPlacePathProc=<<<SQL
-set names utf8mb4;
-CREATE PROCEDURE getplacepath(IN place_id INT, OUT path TEXT CHARACTER SET utf8mb4)
+set names utf8mb4 collate utf8mb4_unicode_ci;
+CREATE PROCEDURE getplacepath(IN place_id INT, OUT path TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
 COMMENT 'Recursive path build'
 READS SQL DATA
 BEGIN
-    DECLARE placename VARCHAR(20) CHARACTER SET utf8mb4;
-    DECLARE temppath TEXT CHARACTER SET utf8mb4;
+    DECLARE placename VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    DECLARE temppath TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     DECLARE tempparent INT;
     SET max_sp_recursion_depth = 32;
     SELECT short, parent_id FROM places WHERE id=place_id INTO placename, tempparent;
@@ -37,17 +37,17 @@ END;
 SQL;
 	
 	static $getPlacePathFunc=<<<SQL
-set names utf8mb4;
-CREATE FUNCTION getplacepath(place_id INT) RETURNS TEXT CHARACTER SET utf8mb4 DETERMINISTIC
+set names utf8mb4 collate utf8mb4_unicode_ci;
+CREATE FUNCTION getplacepath(place_id INT) RETURNS TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DETERMINISTIC
 BEGIN
-    DECLARE res TEXT CHARACTER SET utf8mb4;
+    DECLARE res TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     CALL getplacepath(place_id, res);
     RETURN res;
 END;
 SQL;
 	
 	static $getPlaceTopProc=<<<SQL
-set names utf8mb4;
+set names utf8mb4 collate utf8mb4_unicode_ci;
 CREATE PROCEDURE getplacetop(IN place_id INT, OUT top INT)
 COMMENT 'Recursive last parent search'
 READS SQL DATA
@@ -65,7 +65,7 @@ END;
 SQL;
 	
 	static $getPlaceTopFunc=<<<SQL
-set names utf8mb4;
+set names utf8mb4 collate utf8mb4_unicode_ci;
 CREATE FUNCTION getplacetop(place_id INT) RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE res INT;
