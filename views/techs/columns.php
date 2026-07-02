@@ -230,4 +230,26 @@ if (Yii::$app->params['techs.hostname.enable']??false) {
 	];
 }
 
+//колонка "Телефон" уместна только в списке АРМ (рабочих мест) - action techs/arms;
+//для оборудования в общем смысле привязанный номер телефона выглядит странно
+if ((Yii::$app->controller?->action?->id ?? null) === 'arms') {
+	$columns['phone']=[
+		'value' => function ($data) use ($renderer) {
+			/** @var Techs $data */
+			$items=[];
+			//сам аппарат является телефоном - прямой линк
+			if ($data->isVoipPhone && strlen($data->comment))
+				$items[]=ModelWidget::widget(['model'=>$data,'options'=>['static_view'=>true,'name'=>$data->comment]]);
+			//телефонные аппараты входящие в состав АРМ - прямой линк
+			foreach ($data->voipPhones as $phone)
+				if (strlen($phone->comment))
+					$items[]=ModelWidget::widget(['model'=>$phone,'options'=>['static_view'=>true,'name'=>$phone->comment]]);
+			//если нашли прямые линки на аппараты - выводим их
+			if (count($items)) return implode(' ',$items);
+			//иначе - внутренний номер привязанного пользователя
+			return is_object($data->user)?$data->user->Phone:null;
+		}
+	];
+}
+
 return $columns;

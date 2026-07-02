@@ -449,6 +449,12 @@ class Techs extends ArmsModel
 					'Если в инвентаризации сопровождаются несколько организаций и нужно разделять оборудование между ними',
 				'indexHint' => '{same}',
 			],
+			'phone' => [
+				'Телефон',
+				'hint' => 'Телефон на рабочем месте',
+				'indexHint' => '{same}',
+				'typeClass' => \app\types\StringType::class,
+			],
 			'place'=>['alias'=>'places_id'],
 			'places_id' => [
 				'Помещение',
