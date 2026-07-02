@@ -24,7 +24,9 @@ class TechsSearch extends Techs
 	public $comp_hw;
 	public $comp_updated_at;
 	public $is_computer;
-	
+	//переключатель показа оборудования в архивных состояниях (см. showArchived в списках)
+	public $archived;
+
 	
 	/**
      * {@inheritdoc}
@@ -33,7 +35,7 @@ class TechsSearch extends Techs
     {
         return [
 			[['ids','state_id'],'each','rule'=>['integer']],
-			[['is_computer'],'boolean'],
+			[['is_computer','archived'],'boolean'],
             [[
 				'type_id',
 				'model_id',
@@ -203,6 +205,19 @@ class TechsSearch extends Techs
         }
 		
 		
+		//по умолчанию не показываем оборудование в архивных состояниях
+		//(tech_states.archived=1). Показать их можно переключателем "Архивные"
+		//(URL-параметр showArchived -> $this->archived), выбором конкретного
+		//статуса, либо запросом явного списка id (напр. связанное с сервисом
+		//оборудование — там пользователь ждёт все выбранные записи).
+		//NULL (оборудование без состояния) остаётся видимым за счёт LEFT JOIN.
+		if (!$this->archived && empty($this->state_id) && empty($this->ids)) {
+			$query->andWhere(['or',
+				['tech_states.archived'=>0],
+				['tech_states.archived'=>null],
+			]);
+		}
+
         $query
 			->andFilterWhere(['techs.id'=>$this->ids])
 			->andFilterWhere(QueryHelper::querySearchString($num, $this->num))

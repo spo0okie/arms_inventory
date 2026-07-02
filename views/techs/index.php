@@ -1,6 +1,7 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\components\ShowArchivedWidget;
 use yii\helpers\Html;
 
 
@@ -9,10 +10,19 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\TechsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $switchArchivedCount int|null */
 $renderer = $this;
 $this->title = \app\models\Techs::$title;
 $this->params['breadcrumbs'][] = $this->title;
 $this->params['layout-container'] = 'container-fluid';
+
+//признак того, что в форму поиска вбиты данные (для цвета бейджа с дельтой)
+$filtered = false;
+foreach ((array)Yii::$app->request->get('TechsSearch', []) as $field) if ($field) $filtered = true;
+
+//насколько больше записей будет при включении архивных
+$switchArchivedDelta = ($switchArchivedCount ?? $dataProvider->totalCount) - $dataProvider->totalCount;
+if ($switchArchivedDelta > 0) $switchArchivedDelta = '+' . $switchArchivedDelta;
 
 ?>
 <div class="techs-index">
@@ -26,6 +36,13 @@ $this->params['layout-container'] = 'container-fluid';
 		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Techs','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
+		'toolButton'=>
+			'<span class="p-2">'. ShowArchivedWidget::widget([			//то отображаем виджет
+				'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
+				'labelBadge'=>$switchArchivedDelta,
+				//'state'=>$searchModel->archived
+			]).'<span>',
+
 	]) ?>
 
 </div>
