@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 9.1.0, for Win64 (x86_64)
 --
--- Host: localhost    Database: arms_test
+-- Host: 127.0.0.1    Database: arms_test
 -- ------------------------------------------------------
 -- Server version	9.1.0
 
@@ -21,7 +21,7 @@
 
 /*!40000 DROP DATABASE IF EXISTS `arms_test`*/;
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `arms_test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `arms_test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 
 USE `arms_test`;
 
@@ -36,11 +36,11 @@ CREATE TABLE `access_in_aces` (
   `id` int NOT NULL AUTO_INCREMENT,
   `access_types_id` int NOT NULL,
   `aces_id` int NOT NULL,
-  `ip_params` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ip_params` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-access_in_aces_ace_id` (`aces_id`),
   KEY `idx-access_in_aces_access_id` (`access_types_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,17 +62,17 @@ DROP TABLE IF EXISTS `access_types`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `access_types` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `is_ip` tinyint(1) DEFAULT '0',
   `is_phone` tinyint(1) DEFAULT '0',
   `is_vpn` tinyint(1) DEFAULT '0',
   `is_app` tinyint(1) DEFAULT '0',
-  `ip_params_def` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ip_params_def` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -99,7 +99,7 @@ CREATE TABLE `access_types_hierarchy` (
   PRIMARY KEY (`id`),
   KEY `access_types_hiera_parents2children` (`parent_id`,`child_id`),
   KEY `access_types_hiera_children2parents` (`child_id`,`parent_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -121,18 +121,18 @@ DROP TABLE IF EXISTS `aces`;
 CREATE TABLE `aces` (
   `id` int NOT NULL AUTO_INCREMENT,
   `acls_id` int DEFAULT NULL,
-  `ips` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `ips` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-aces_acl_id` (`acls_id`),
   KEY `idx-aces-updated_at` (`updated_at`),
   KEY `idx-aces-updated_by` (`updated_by`),
   KEY `idx-aces-name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -156,25 +156,25 @@ CREATE TABLE `aces_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `acls_id` int DEFAULT NULL,
-  `users_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `access_types_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `ips` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `networks_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `users_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `access_types_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `ips` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `networks_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `aces_history-master_id` (`master_id`),
   KEY `aces_history-updated_at` (`updated_at`),
   KEY `aces_history-updated_by` (`updated_by`),
   KEY `idx-aces_history-name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -201,12 +201,12 @@ CREATE TABLE `acls` (
   `ips_id` int DEFAULT NULL,
   `comps_id` int DEFAULT NULL,
   `techs_id` int DEFAULT NULL,
-  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `networks_id` int DEFAULT NULL,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `idx-acls_schedule_id` (`schedules_id`),
   KEY `idx-acls_service_id` (`services_id`),
@@ -216,7 +216,7 @@ CREATE TABLE `acls` (
   KEY `idx-acls-updated_at` (`updated_at`),
   KEY `idx-acls-updated_by` (`updated_by`),
   KEY `idx-acls-networks_id` (`networks_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -240,25 +240,25 @@ CREATE TABLE `acls_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `schedules_id` int DEFAULT NULL,
   `services_id` int DEFAULT NULL,
   `ips_id` int DEFAULT NULL,
   `comps_id` int DEFAULT NULL,
   `techs_id` int DEFAULT NULL,
-  `aces_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `aces_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `networks_id` int DEFAULT NULL,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `acls_history-master_id` (`master_id`),
   KEY `acls_history-updated_at` (`updated_at`),
   KEY `acls_history-updated_by` (`updated_by`),
   KEY `idx-acls_history-networks_id` (`networks_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -286,7 +286,7 @@ CREATE TABLE `admins_in_comps` (
   UNIQUE KEY `admins_in_comps-m2m` (`comps_id`,`users_id`),
   KEY `admins_in_comps-comps_id` (`comps_id`),
   KEY `admins_in_comps-users_id` (`users_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -316,7 +316,7 @@ CREATE TABLE `attaches` (
   `contracts_id` int DEFAULT NULL,
   `places_id` int DEFAULT NULL,
   `schedules_id` int DEFAULT NULL,
-  `filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `users_id` int DEFAULT NULL,
   `tech_models_id` int DEFAULT NULL,
   `maintenance_reqs_id` int DEFAULT NULL,
@@ -335,7 +335,7 @@ CREATE TABLE `attaches` (
   KEY `idx-attaches-maintenance_reqs_id` (`maintenance_reqs_id`),
   KEY `idx-attaches-maintenance_jobs_id` (`maintenance_jobs_id`),
   KEY `idx-attaches-partners_id` (`partners_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -356,12 +356,12 @@ DROP TABLE IF EXISTS `auth_assignment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_assignment` (
-  `item_name` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `user_id` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `item_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` int DEFAULT NULL,
   PRIMARY KEY (`item_name`,`user_id`),
   KEY `idx-auth_assignment-user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -382,17 +382,17 @@ DROP TABLE IF EXISTS `auth_item`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_item` (
-  `name` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `type` smallint NOT NULL,
-  `description` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci,
-  `rule_name` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+  `description` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `rule_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `data` blob,
   `created_at` int DEFAULT NULL,
   `updated_at` int DEFAULT NULL,
   PRIMARY KEY (`name`),
   KEY `rule_name` (`rule_name`),
   KEY `idx-auth_item-type` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -413,11 +413,11 @@ DROP TABLE IF EXISTS `auth_item_child`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_item_child` (
-  `parent` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `child` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `parent` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `child` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`parent`,`child`),
   KEY `child` (`child`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -438,12 +438,12 @@ DROP TABLE IF EXISTS `auth_rule`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_rule` (
-  `name` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `data` blob,
   `created_at` int DEFAULT NULL,
   `updated_at` int DEFAULT NULL,
   PRIMARY KEY (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -465,23 +465,23 @@ DROP TABLE IF EXISTS `comps`;
 CREATE TABLE `comps` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
   `domain_id` int DEFAULT NULL COMMENT 'Домен',
-  `name` varchar(128) DEFAULT NULL,
-  `os` varchar(128) NOT NULL COMMENT 'ОС',
-  `raw_hw` text COMMENT 'Отпечаток железа',
-  `raw_soft` mediumtext,
-  `raw_version` varchar(32) DEFAULT NULL COMMENT 'Версия скрипта отправившего данные',
-  `exclude_hw` text COMMENT 'Оборудование для исключения из паспорта',
+  `name` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `os` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ОС',
+  `raw_hw` mediumtext COLLATE utf8mb4_unicode_ci COMMENT 'Отпечаток железа',
+  `raw_soft` longtext COLLATE utf8mb4_unicode_ci,
+  `raw_version` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Версия скрипта отправившего данные',
+  `exclude_hw` mediumtext COLLATE utf8mb4_unicode_ci COMMENT 'Оборудование для исключения из паспорта',
   `ignore_hw` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Игнорировать аппаратное обеспечение',
-  `ip` varchar(768) DEFAULT NULL,
-  `ip_ignore` varchar(512) DEFAULT NULL,
+  `ip` varchar(768) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_ignore` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `arm_id` int DEFAULT NULL COMMENT 'Рабочее место',
-  `comment` text,
+  `comment` mediumtext COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `user_id` int DEFAULT NULL,
-  `mac` varchar(768) DEFAULT NULL,
+  `mac` varchar(768) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT '0',
-  `external_links` text,
-  `updated_by` varchar(32) DEFAULT NULL,
+  `external_links` mediumtext COLLATE utf8mb4_unicode_ci,
+  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sandbox_id` int DEFAULT NULL,
   `platform_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -491,7 +491,7 @@ CREATE TABLE `comps` (
   KEY `idx-comps-updated_by` (`updated_by`),
   KEY `idx-comps-sandbox_id` (`sandbox_id`),
   KEY `idx-comps-platform_id` (`platform_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb3 COMMENT='Компьютеры';
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Компьютеры';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -515,39 +515,39 @@ CREATE TABLE `comps_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `arm_id` int DEFAULT NULL,
   `domain_id` int DEFAULT NULL,
-  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `os` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `raw_hw` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `raw_soft` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `raw_version` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `ip` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `mac` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `ip_ignore` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `os` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `raw_hw` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `raw_soft` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `raw_version` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `mac` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `ip_ignore` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `user_id` int DEFAULT NULL,
-  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `archived` tinyint(1) DEFAULT NULL,
-  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `aces_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `lic_groups_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `lic_items_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `lic_keys_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `maintenance_reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `aces_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `lic_groups_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `lic_items_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `lic_keys_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `maintenance_reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `sandbox_id` int DEFAULT NULL,
   `platform_id` int DEFAULT NULL,
-  `admins_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `admins_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `comps_history-master_id` (`master_id`),
   KEY `comps_history-updated_at` (`updated_at`),
   KEY `comps_history-updated_by` (`updated_by`),
   KEY `idx-comps_history-sandbox_id` (`sandbox_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -574,7 +574,7 @@ CREATE TABLE `comps_in_aces` (
   PRIMARY KEY (`id`),
   KEY `idx-comps_in_aces_ace_id` (`aces_id`),
   KEY `idx-comps_in_aces_comp_id` (`comps_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -600,7 +600,7 @@ CREATE TABLE `comps_in_services` (
   PRIMARY KEY (`id`),
   KEY `idx-comps_in_services-comps_id` (`comps_id`),
   KEY `idx-comps_in_services-services_id` (`services_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -700,35 +700,35 @@ CREATE TABLE `contracts_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `partners_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `lics_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `materials_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `users_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `partners_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `lics_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `materials_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `users_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `parent_id` int DEFAULT NULL,
   `is_successor` tinyint(1) DEFAULT NULL,
   `date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
-  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `state_id` int DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `total` decimal(15,2) DEFAULT NULL,
   `charge` decimal(15,2) DEFAULT NULL,
   `currency_id` int DEFAULT NULL,
-  `pay_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `pay_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `techs_delivery` int DEFAULT NULL,
   `materials_delivery` int DEFAULT NULL,
   `lics_delivery` int DEFAULT NULL,
-  `children_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `children_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `contracts_history-master_id` (`master_id`),
   KEY `contracts_history-updated_at` (`updated_at`),
   KEY `contracts_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -806,7 +806,7 @@ CREATE TABLE `contracts_in_materials` (
   `contracts_id` int NOT NULL,
   `materials_id` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -833,7 +833,7 @@ CREATE TABLE `contracts_in_services` (
   PRIMARY KEY (`id`),
   KEY `idx-contracts_in_services_cid` (`contracts_id`),
   KEY `idx-contracts_in_services_sid` (`services_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -892,7 +892,7 @@ CREATE TABLE `contracts_states` (
   UNIQUE KEY `name` (`name`),
   KEY `idx-contracts_states-paid` (`paid`),
   KEY `idx-contracts_states-unpaid` (`unpaid`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -914,13 +914,13 @@ DROP TABLE IF EXISTS `currency`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `currency` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `symbol` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `symbol` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -942,11 +942,11 @@ DROP TABLE IF EXISTS `departments`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `departments` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Подразделение',
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'Комментарии',
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Подразделение',
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Комментарии',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -973,7 +973,7 @@ CREATE TABLE `domains` (
   `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`,`fqdn`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Домены';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Домены';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -999,7 +999,7 @@ CREATE TABLE `hw_ignore` (
   `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fingerprint` (`fingerprint`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Список игнорируемого железа';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Список игнорируемого железа';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1026,7 +1026,7 @@ CREATE TABLE `ips_in_aces` (
   PRIMARY KEY (`id`),
   KEY `idx-ips_in_aces_ace_id` (`aces_id`),
   KEY `idx-ips_in_aces_ip_id` (`ips_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1052,7 +1052,7 @@ CREATE TABLE `ips_in_comps` (
   PRIMARY KEY (`id`),
   KEY `idx-ips_in_comps-ips` (`ips_id`),
   KEY `idx-ips_in_comps-comps` (`comps_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1079,7 +1079,7 @@ CREATE TABLE `ips_in_techs` (
   PRIMARY KEY (`id`),
   KEY `idx-ips_in_techs-ips` (`ips_id`),
   KEY `idx-ips_in_techs-techs` (`techs_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=197 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=197 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1106,7 +1106,7 @@ CREATE TABLE `ips_in_users` (
   PRIMARY KEY (`id`),
   KEY `idx-ips_in_users-ips` (`ips_id`),
   KEY `idx-ips_in_users-users` (`users_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1129,15 +1129,15 @@ DROP TABLE IF EXISTS `lic_groups`;
 CREATE TABLE `lic_groups` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
   `lic_types_id` int DEFAULT NULL,
-  `descr` varchar(255) NOT NULL COMMENT 'Описание',
-  `comment` text,
+  `descr` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Описание',
+  `comment` mediumtext COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) DEFAULT NULL,
+  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `services_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `lic_types_id` (`lic_types_id`),
   KEY `idx-lic_groups-services_id` (`services_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb3 COMMENT='Группы лицензий';
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Группы лицензий';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1161,22 +1161,22 @@ CREATE TABLE `lic_groups_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `descr` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `descr` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `lic_types_id` int DEFAULT NULL,
   `services_id` int DEFAULT NULL,
-  `arms_ids` text COLLATE utf8mb4_general_ci,
-  `comps_ids` text COLLATE utf8mb4_general_ci,
-  `users_ids` text COLLATE utf8mb4_general_ci,
+  `arms_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `users_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `lic_groups_history-master_id` (`master_id`),
   KEY `lic_groups_history-updated_at` (`updated_at`),
   KEY `lic_groups_history-updated_by` (`updated_by`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1231,13 +1231,13 @@ CREATE TABLE `lic_groups_in_comps` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_groups_id` int DEFAULT NULL,
   `comps_id` int DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1261,13 +1261,13 @@ CREATE TABLE `lic_groups_in_users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_groups_id` int DEFAULT NULL,
   `users_id` int DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1289,22 +1289,22 @@ DROP TABLE IF EXISTS `lic_items`;
 CREATE TABLE `lic_items` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
   `lic_group_id` int NOT NULL COMMENT 'В группе лицензий',
-  `descr` varchar(255) NOT NULL COMMENT 'Описание закупки',
+  `descr` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Описание закупки',
   `count` int NOT NULL COMMENT 'Количество приобретенных лицензий',
-  `comment` text,
+  `comment` mediumtext COLLATE utf8mb4_unicode_ci,
   `active_from` date DEFAULT NULL COMMENT 'Начало периода действия',
   `active_to` date DEFAULT NULL COMMENT 'Окончание периода действия',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Время создания',
   `scans_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) DEFAULT NULL,
+  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `services_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `lic_group_id` (`lic_group_id`),
   KEY `idx-lic_items-updated_at` (`updated_at`),
   KEY `idx-lic_items-updated_by` (`updated_by`),
   KEY `idx-lic_items-services_id` (`services_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COMMENT='Лицензии';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Лицензии';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1328,27 +1328,27 @@ CREATE TABLE `lic_items_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `descr` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `descr` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `count` int DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `active_from` date DEFAULT NULL,
   `active_to` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `lic_group_id` int DEFAULT NULL,
   `services_id` int DEFAULT NULL,
-  `contracts_ids` text COLLATE utf8mb4_general_ci,
-  `arms_ids` text COLLATE utf8mb4_general_ci,
-  `comps_ids` text COLLATE utf8mb4_general_ci,
-  `users_ids` text COLLATE utf8mb4_general_ci,
-  `licKeys_ids` text COLLATE utf8mb4_general_ci,
+  `contracts_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `arms_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `users_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `licKeys_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `lic_items_history-master_id` (`master_id`),
   KEY `lic_items_history-updated_at` (`updated_at`),
   KEY `lic_items_history-updated_by` (`updated_by`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1404,13 +1404,13 @@ CREATE TABLE `lic_items_in_comps` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_items_id` int DEFAULT NULL,
   `comps_id` int DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1433,13 +1433,13 @@ CREATE TABLE `lic_items_in_users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_items_id` int DEFAULT NULL,
   `users_id` int DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1464,12 +1464,12 @@ CREATE TABLE `lic_keys` (
   `key_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Наименование',
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Комментарий',
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-lic_keys-lic_items` (`lic_items_id`),
   KEY `idx-lic_keys-updated_at` (`updated_at`),
   KEY `idx-lic_keys-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1493,20 +1493,20 @@ CREATE TABLE `lic_keys_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `key_text` text COLLATE utf8mb4_general_ci,
-  `comment` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `key_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `lic_items_id` int DEFAULT NULL,
-  `arms_ids` text COLLATE utf8mb4_general_ci,
-  `comps_ids` text COLLATE utf8mb4_general_ci,
-  `users_ids` text COLLATE utf8mb4_general_ci,
+  `arms_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `users_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `lic_keys_history-master_id` (`master_id`),
   KEY `lic_keys_history-updated_at` (`updated_at`),
   KEY `lic_keys_history-updated_by` (`updated_by`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1530,15 +1530,15 @@ CREATE TABLE `lic_keys_in_arms` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
   `lic_keys_id` int NOT NULL,
   `arms_id` int NOT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-lic_keys_in_arms-lic_keys_id` (`lic_keys_id`),
   KEY `idx-lic_keys_in_arms-lic_arms_id` (`arms_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1562,13 +1562,13 @@ CREATE TABLE `lic_keys_in_comps` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_keys_id` int DEFAULT NULL,
   `comps_id` int DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1591,13 +1591,13 @@ CREATE TABLE `lic_keys_in_users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `lic_keys_id` int DEFAULT NULL,
   `users_id` int DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_by` int DEFAULT NULL,
-  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_by` int DEFAULT NULL,
-  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1620,14 +1620,14 @@ CREATE TABLE `lic_types` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
   `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `descr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `scans_id` int DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Типы лицензирования';
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Типы лицензирования';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1688,13 +1688,13 @@ DROP TABLE IF EXISTS `maintenance_jobs`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `maintenance_jobs` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `schedules_id` int DEFAULT NULL,
   `services_id` int DEFAULT NULL,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   `parent_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1704,7 +1704,7 @@ CREATE TABLE `maintenance_jobs` (
   KEY `maintenance_jobs-services_id` (`services_id`),
   KEY `idx-maintenance_jobs-archived` (`archived`),
   KEY `idx-maintenance_jobs-parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1727,27 +1727,27 @@ DROP TABLE IF EXISTS `maintenance_jobs_history`;
 CREATE TABLE `maintenance_jobs_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `schedules_id` int DEFAULT NULL,
   `services_id` int DEFAULT NULL,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `archived` tinyint(1) DEFAULT NULL,
-  `reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `parent_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `maintenance_jobs_history-master_id` (`master_id`),
   KEY `maintenance_jobs_history-updated_by` (`updated_by`),
   KEY `maintenance_jobs_history-updated_at` (`updated_at`),
   KEY `idx-maintenance_jobs_history-parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1775,7 +1775,7 @@ CREATE TABLE `maintenance_jobs_in_comps` (
   UNIQUE KEY `maintenance_jobs_in_comps-m2m` (`comps_id`,`jobs_id`),
   KEY `maintenance_jobs_in_comps-comps_id` (`comps_id`),
   KEY `maintenance_jobs_in_comps-jobs_id` (`jobs_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1803,7 +1803,7 @@ CREATE TABLE `maintenance_jobs_in_services` (
   UNIQUE KEY `maintenance_jobs_in_services-m2m` (`services_id`,`jobs_id`),
   KEY `maintenance_jobs_in_services-services_id` (`services_id`),
   KEY `maintenance_jobs_in_services-jobs_id` (`jobs_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1830,7 +1830,7 @@ CREATE TABLE `maintenance_jobs_in_techs` (
   UNIQUE KEY `maintenance_jobs_in_techs-m2m` (`techs_id`,`jobs_id`),
   KEY `maintenance_jobs_in_techs-techs_id` (`techs_id`),
   KEY `maintenance_jobs_in_techs-jobs_id` (`jobs_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1851,20 +1851,20 @@ DROP TABLE IF EXISTS `maintenance_reqs`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `maintenance_reqs` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `is_backup` tinyint(1) DEFAULT '0',
   `spread_comps` tinyint(1) DEFAULT '1',
   `spread_techs` tinyint(1) DEFAULT '1',
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `maintenance_reqs-name` (`name`),
   KEY `maintenance_reqs-description` (`description`(768)),
   KEY `idx-maintenance_reqs-archived` (`archived`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1887,28 +1887,28 @@ DROP TABLE IF EXISTS `maintenance_reqs_history`;
 CREATE TABLE `maintenance_reqs_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `spread_comps` tinyint(1) DEFAULT NULL,
   `spread_techs` tinyint(1) DEFAULT NULL,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `includes_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `included_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `includes_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `included_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `is_backup` tinyint(1) DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `maintenance_reqs_history-master_id` (`master_id`),
   KEY `maintenance_reqs_history-updated_by` (`updated_by`),
   KEY `maintenance_reqs_history-updated_at` (`updated_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1936,7 +1936,7 @@ CREATE TABLE `maintenance_reqs_in_comps` (
   UNIQUE KEY `maintenance_reqs_in_comps-m2m` (`reqs_id`,`comps_id`),
   KEY `maintenance_reqs_in_comps-reqs_id` (`reqs_id`),
   KEY `maintenance_reqs_in_comps-comps_id` (`comps_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1963,7 +1963,7 @@ CREATE TABLE `maintenance_reqs_in_jobs` (
   UNIQUE KEY `maintenance_reqs_in_jobs-m2m` (`reqs_id`,`jobs_id`),
   KEY `maintenance_reqs_in_jobs-reqs_id` (`reqs_id`),
   KEY `maintenance_reqs_in_jobs-jobs_id` (`jobs_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1991,7 +1991,7 @@ CREATE TABLE `maintenance_reqs_in_reqs` (
   UNIQUE KEY `maintenance_reqs_in_reqs-m2m` (`reqs_id`,`includes_id`),
   KEY `maintenance_reqs_in_reqs-reqs_id` (`reqs_id`),
   KEY `maintenance_reqs_in_reqs-includes_id` (`includes_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2019,7 +2019,7 @@ CREATE TABLE `maintenance_reqs_in_services` (
   UNIQUE KEY `maintenance_reqs_in_services-m2m` (`reqs_id`,`services_id`),
   KEY `maintenance_reqs_in_services-reqs_id` (`reqs_id`),
   KEY `maintenance_reqs_in_services-services_id` (`services_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2046,7 +2046,7 @@ CREATE TABLE `maintenance_reqs_in_techs` (
   UNIQUE KEY `maintenance_reqs_in_techs-m2m` (`reqs_id`,`techs_id`),
   KEY `maintenance_reqs_in_techs-reqs_id` (`reqs_id`),
   KEY `maintenance_reqs_in_techs-techs_id` (`techs_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2071,11 +2071,11 @@ CREATE TABLE `manufacturers` (
   `full_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `name_2` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=544 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Производители ПО и железа';
+) ENGINE=InnoDB AUTO_INCREMENT=544 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Производители ПО и железа';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2097,14 +2097,14 @@ DROP TABLE IF EXISTS `manufacturers_dict`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `manufacturers_dict` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `word` varchar(255) NOT NULL COMMENT 'Вариант написания',
+  `word` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Вариант написания',
   `manufacturers_id` int NOT NULL COMMENT 'Производитель',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) DEFAULT NULL,
+  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `word` (`word`),
   KEY `manufacturers_id` (`manufacturers_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=654 DEFAULT CHARSET=utf8mb3 COMMENT='Словарь производителей';
+) ENGINE=InnoDB AUTO_INCREMENT=654 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Словарь производителей';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2139,7 +2139,7 @@ CREATE TABLE `materials` (
   `charge` float DEFAULT NULL,
   `currency_id` int NOT NULL DEFAULT '1',
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-materials-it_staff_id` (`it_staff_id`),
   KEY `idx-materials-places_id` (`places_id`),
@@ -2147,7 +2147,7 @@ CREATE TABLE `materials` (
   KEY `idx-materials-currency_id` (`currency_id`),
   KEY `idx-materials-updated_at` (`updated_at`),
   KEY `idx-materials-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2171,28 +2171,28 @@ CREATE TABLE `materials_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `parent_id` int DEFAULT NULL,
   `date` date DEFAULT NULL,
   `count` int DEFAULT NULL,
   `type_id` int DEFAULT NULL,
-  `model` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `model` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `places_id` int DEFAULT NULL,
   `it_staff_id` int DEFAULT NULL,
   `currency_id` int DEFAULT NULL,
   `cost` float DEFAULT NULL,
   `charge` float DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `contracts_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `usages_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `contracts_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `usages_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `materials_history-master_id` (`master_id`),
   KEY `materials_history-updated_at` (`updated_at`),
   KEY `materials_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2220,13 +2220,13 @@ CREATE TABLE `materials_types` (
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `scans_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-materials_types-code` (`code`),
   KEY `idx-materials_types-name` (`name`),
   KEY `idx-materials_types-updated_at` (`updated_at`),
   KEY `idx-materials_types-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2250,19 +2250,19 @@ CREATE TABLE `materials_types_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `code` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `units` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `code` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `units` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `scans_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `materials_types_history-master_id` (`master_id`),
   KEY `materials_types_history-updated_at` (`updated_at`),
   KEY `materials_types_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2291,13 +2291,13 @@ CREATE TABLE `materials_usages` (
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-materials_usages-materials_id` (`materials_id`),
   KEY `idx-materials_usages-techs_id` (`techs_id`),
   KEY `idx-materials_usages-updated_at` (`updated_at`),
   KEY `idx-materials_usages-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2321,20 +2321,20 @@ CREATE TABLE `materials_usages_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `materials_id` int DEFAULT NULL,
   `count` int DEFAULT NULL,
   `date` date DEFAULT NULL,
   `techs_id` int DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `materials_usages_history-master_id` (`master_id`),
   KEY `materials_usages_history-updated_at` (`updated_at`),
   KEY `materials_usages_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2355,10 +2355,10 @@ DROP TABLE IF EXISTS `migration`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `migration` (
-  `version` varchar(180) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `version` varchar(180) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `apply_time` int DEFAULT NULL,
   PRIMARY KEY (`version`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2367,7 +2367,7 @@ CREATE TABLE `migration` (
 
 LOCK TABLES `migration` WRITE;
 /*!40000 ALTER TABLE `migration` DISABLE KEYS */;
-INSERT INTO `migration` VALUES ('app\\migrations\\m000000_000000_base',1693800995),('app\\migrations\\m140506_102106_rbac_init',1693800996),('app\\migrations\\m170907_052038_rbac_add_index_on_auth_assignment_user_id',1693800996),('app\\migrations\\m180101_010101_initial',1693801002),('app\\migrations\\m180523_151638_rbac_updates_indexes_without_prefix',1693800996),('app\\migrations\\m190101_100000_update0',1693801003),('app\\migrations\\m190101_100001_update1',1693801003),('app\\migrations\\m190101_100002_update2',1693801004),('app\\migrations\\m190101_100003_update3',1693801004),('app\\migrations\\m190101_100004_update4',1693801004),('app\\migrations\\m190101_100005_update5',1693801004),('app\\migrations\\m190101_100006_update6',1693801005),('app\\migrations\\m190101_100007_update7',1693801005),('app\\migrations\\m190101_100008_update8',1693801006),('app\\migrations\\m190101_100009_update9',1693801006),('app\\migrations\\m191101_192502_departments',1693801006),('app\\migrations\\m191103_084000_alter_updatetAt_column_to_arms_table',1693801006),('app\\migrations\\m191103_084732_add_department_column_to_arms_table',1693801006),('app\\migrations\\m191103_100000_alter_users_columns_to_arms_table',1693801007),('app\\migrations\\m191103_203015_add_procedures_for_places',1693801007),('app\\migrations\\m191106_115822_add_total_column_to_contracts_table',1693801007),('app\\migrations\\m191119_145841_add_cost_column_to_org_inet_table',1693801007),('app\\migrations\\m191119_172027_add_charge_column_to_org_inet_table',1693801007),('app\\migrations\\m191119_172409_add_charge_column_to_contracts_table',1693801007),('app\\migrations\\m191120_062411_float_prices',1693801008),('app\\migrations\\m191120_095815_add_cost_column_to_org_phones_table',1693801008),('app\\migrations\\m191204_062411_decimal_prices',1693801009),('app\\migrations\\m191208_164401_add_default_ip_values_in_comps',1693801009),('app\\migrations\\m191208_173041_fix_many_2_many',1693801009),('app\\migrations\\m191208_173041_fix_users_id',1693801009),('app\\migrations\\m191219_100000_add_users_employ_date',1693801009),('app\\migrations\\m191219_100001_fix_materials_id',1693801009),('app\\migrations\\m191219_100002_fix_contracts_in_materials_id',1693801010),('app\\migrations\\m200121_080000_add_users_auth_key',1693801010),('app\\migrations\\m200317_033238_create_user_in_services',1693801010),('app\\migrations\\m200317_040048_create_table_schedules',1693801010),('app\\migrations\\m200317_043845_alter_services_table',1693801010),('app\\migrations\\m200409_110543_rbac_update_mssql_trigger',1693800996),('app\\migrations\\m200508_064827_create_table_segments',1693801010),('app\\migrations\\m200508_160608_alter_table_services',1693801011),('app\\migrations\\m200525_200810_create_table_techs_in_services',1693801011),('app\\migrations\\m200616_205619_alter_table_techs_format_mac',1693801011),('app\\migrations\\m200712_185556_add_permissions',1693801011),('app\\migrations\\m200727_123910_alter_table_comps_add_user',1693801011),('app\\migrations\\m201023_064548_contracts_sucessor_default',1693801011),('app\\migrations\\m201024_153753_add_tech_specs',1693801011),('app\\migrations\\m201025_174509_add_tech_model_specs',1693801011),('app\\migrations\\m201202_154535_alter_lic_types_add_links',1693801011),('app\\migrations\\m210214_154227_table_net_domains',1693801011),('app\\migrations\\m210216_155422_table_net_vlans',1693801011),('app\\migrations\\m210216_165001_table_networks',1693801011),('app\\migrations\\m210220_133458_alter_table_segments',1693801011),('app\\migrations\\m210220_171805_create_table_netAddr',1693801011),('app\\migrations\\m210222_174038_alter_table_net_ips',1693801011),('app\\migrations\\m210228_121450_table_ports',1693801012),('app\\migrations\\m210301_135145_alter_table_tech_models',1693801012),('app\\migrations\\m210302_161545_alter_table_net_ips',1693801012),('app\\migrations\\m210310_174301_move_vlans_link',1693801012),('app\\migrations\\m210310_184119_alter_comment_column_in_soft_table',1693801012),('app\\migrations\\m210612_143410_alter_techs_table',1693801012),('app\\migrations\\m210614_063518_create_table_schedules',1693801012),('app\\migrations\\m210614_150516_alter_table_schedules',1693801012),('app\\migrations\\m210617_064650_alter_table_segments',1693801013),('app\\migrations\\m210621_131426_alter_table_services',1693801013),('app\\migrations\\m210716_120416_alter_table_comps',1693801013),('app\\migrations\\m210824_132508_alter_table_scans',1693801013),('app\\migrations\\m210825_125020_create_table_access',1693801014),('app\\migrations\\m210825_130339_alter_table_scans',1693801014),('app\\migrations\\m210831_093619_alter_table_users',1693801014),('app\\migrations\\m210911_113706_alter_table_services',1693801014),('app\\migrations\\m210921_035506_create_table_currency',1693801014),('app\\migrations\\m211002_062719_alter_table_services',1693801014),('app\\migrations\\m211003_141509_alter_table_partners',1693801014),('app\\migrations\\m220117_054532_add_services_recursive_segment_search',1693801014),('app\\migrations\\m220303_120730_alter_table_orgphones',1693801014),('app\\migrations\\m220303_191454_alter_table_org_inets',1693801014),('app\\migrations\\m220327_073551_alter_table_comps',1693801014),('app\\migrations\\m220329_055419_alter_table_users',1693801014),('app\\migrations\\m220402_185406_alter_table_schedules',1693801015),('app\\migrations\\m220410_134409_alter_table_services',1693801015),('app\\migrations\\m220414_105653_alter_tables_lics',1693801015),('app\\migrations\\m220416_120817_alter_tables_lics',1693801015),('app\\migrations\\m220421_075705_alter_table_org_inets',1693801015),('app\\migrations\\m220504_172124_alter_tables_lics',1693801016),('app\\migrations\\m220525_125054_alter_tables_partners',1693801016),('app\\migrations\\m220630_173032_alter_tables_prov_tel',1693801016),('app\\migrations\\m220816_104950_add_weight_column_to_services_table',1693801016),('app\\migrations\\m220818_073405_alter_table_users',1693801016),('app\\migrations\\m220819_132459_alter_table_net_domains',1693801016),('app\\migrations\\m220916_122729_add_mac_column_to_arms_table',1693801016),('app\\migrations\\m220929_173411_add_cost_column_to_materials_table',1693801016),('app\\migrations\\m221007_163802_add_archive_columns',1693801016),('app\\migrations\\m221024_153826_add_comment_column_to_places_table',1693801016),('app\\migrations\\m221111_174828_alter_table_access_types',1693801016),('app\\migrations\\m221122_151334_alter_table_ports',1693801016),('app\\migrations\\m230109_130226_alter_table_techs',1693801016),('app\\migrations\\m230206_063303_alter_table_comps',1693801016),('app\\migrations\\m230223_090652_alter_table_techs',1693801017),('app\\migrations\\m230223_102334_alter_table_tech_types',1693801017),('app\\migrations\\m230224_080124_alter_table_tech_models_add_racks',1693801017),('app\\migrations\\m230224_081112_migrate_arms2techs',1693801017),('app\\migrations\\m230302_180857_create_tables_dynagrid',1693801017),('app\\migrations\\m230321_054524_alter_table_comps',1693801017),('app\\migrations\\m230413_101124_alter_table_techs_add_pos_end',1693801017),('app\\migrations\\m230511_094545_alter_table_login_journal',1693801017),('app\\migrations\\m230512_124513_alter_table_login_journal',1693801017),('app\\migrations\\m230513_125905_create_table_attaches',1693801018),('app\\migrations\\m230520_060357_alter_table_attaches',1693801018),('app\\migrations\\m230520_060415_users_in_contracts',1693801018),('app\\migrations\\m230520_101000_alter_table_attaches',1693801018),('app\\migrations\\m230526_181446_alter_table_services',1693801018),('app\\migrations\\m230527_052818_add_external_links',1693801018),('app\\migrations\\m230531_100639_alter_table_users',1693801018),('app\\migrations\\m230620_113027_create_table_ips_in_users',1693801018),('app\\migrations\\m230622_170155_alter_table_comps',1693801018),('app\\migrations\\m230628_041251_create_table_org_inets_in_networks',1693801018),('app\\migrations\\m230708_045732_alter_table_partners',1693801018),('app\\migrations\\m230713_070612_alter_table_techs',1693801018),('app\\migrations\\m230802_162919_alter_table_networks',1693801018),('app\\migrations\\m230821_160259_init_empty_tables',1693801019),('app\\migrations\\m230828_123950_sync_prepare_2',1693801019),('app\\migrations\\m230831_174800_sync_prepare_3',1693801019),('app\\migrations\\m230903_074600_sync_prepare_4',1693801019),('app\\migrations\\m230903_114346_local_auth',1693836271),('app\\migrations\\m230905_045527_sync_prepare_5',1694186973),('app\\migrations\\m230923_092107_user_sync_prepare',1696260413),('app\\migrations\\m231006_070638_user_rest_unify',1698205001),('app\\migrations\\m231020_074646_alter_table_org_struct',1698205001),('app\\migrations\\M231109084405FixAutoincrement',1701232623),('app\\migrations\\M231209133554AlterTableNetworks',1702308017),('app\\migrations\\M231217071124AlterTableSegments',1702809741),('app\\migrations\\M231226142737CreateTableJobs',1705863174),('app\\migrations\\M240123153514UpdateTableDocs',1707115301),('app\\migrations\\M240125162320UpdateTableTechs',1707115301),('app\\migrations\\M240127160603HistoryJournals',1707115302),('app\\migrations\\M240128150114HistoryJournalsContracts',1707115303),('app\\migrations\\M240129130314HistoryJournalsTechs',1707115303),('app\\migrations\\M240201144730MaintenanceUpdate',1707115304),('app\\migrations\\M240203053203HistoryJournalsMaterials',1707115307),('app\\migrations\\M240225074103HistoryJournalsAcls',1709223405),('app\\migrations\\M240229060301HistoryJournalsAclsFix',1709223405),('app\\migrations\\M240308075641PlacesMap',1710320479),('app\\migrations\\M240328034135CompsHistory',1722769178),('app\\migrations\\M240401113410ServiceConnections',1722769178),('app\\migrations\\M240518080913CreateSandboxes',1722769179),('app\\migrations\\M240526102940MaintenanceJobsReqsHistory',1722769179),('app\\migrations\\M240612053628AclExtend',1722769180),('app\\migrations\\M240725041322CleanUnused',1722769180),('app\\migrations\\M240730162325CompsAdmins',1722769180),('app\\migrations\\M240802093936PartnersAliases',1722769181),('app\\migrations\\M241015093726ContractsHistoryAddChildren',1746711711),('app\\migrations\\M241225123824MaintenanceDescr',1746711711),('app\\migrations\\M250205141617CompsRescanQueue',1746711711),('app\\migrations\\M250224152754TechsSupportService',1746711711),('app\\migrations\\M250413161054SoftAddLinks',1746711712),('app\\migrations\\M250414164449ScansAddSoft',1746711712),('app\\migrations\\M250425033845CompsSoftMediumtext',1746711712),('app\\migrations\\M250505122356WikiCache',1746711712),('app\\migrations\\M250514090728ContractsHistorySucessorFix',1747214006),('app\\migrations\\M250526150239MaintenanceJobsHierachy',1748273958),('app\\migrations\\M250805150713LoginJournalIndexes',1755942761),('app\\migrations\\M250806065520LoginJournalCalcTime',1755942761),('app\\migrations\\M250828100718AdditionalHistory',1756450679),('app\\migrations\\M251006102649SoftAddDescription',1765960846),('app\\migrations\\M251210083000_create_tags_table',1765980662),('app\\migrations\\M251210083100_create_tags_links_table',1765980662),('app\\migrations\\m251210_083000_create_tags_table',1765960846),('app\\migrations\\m251210_083100_create_tags_links_table',1765960846),('app\\migrations\\M251221163631ClearFk',1766335316);
+INSERT INTO `migration` VALUES ('app\\migrations\\m000000_000000_base',1693800995),('app\\migrations\\m140506_102106_rbac_init',1693800996),('app\\migrations\\m170907_052038_rbac_add_index_on_auth_assignment_user_id',1693800996),('app\\migrations\\m180101_010101_initial',1693801002),('app\\migrations\\m180523_151638_rbac_updates_indexes_without_prefix',1693800996),('app\\migrations\\m190101_100000_update0',1693801003),('app\\migrations\\m190101_100001_update1',1693801003),('app\\migrations\\m190101_100002_update2',1693801004),('app\\migrations\\m190101_100003_update3',1693801004),('app\\migrations\\m190101_100004_update4',1693801004),('app\\migrations\\m190101_100005_update5',1693801004),('app\\migrations\\m190101_100006_update6',1693801005),('app\\migrations\\m190101_100007_update7',1693801005),('app\\migrations\\m190101_100008_update8',1693801006),('app\\migrations\\m190101_100009_update9',1693801006),('app\\migrations\\m191101_192502_departments',1693801006),('app\\migrations\\m191103_084000_alter_updatetAt_column_to_arms_table',1693801006),('app\\migrations\\m191103_084732_add_department_column_to_arms_table',1693801006),('app\\migrations\\m191103_100000_alter_users_columns_to_arms_table',1693801007),('app\\migrations\\m191103_203015_add_procedures_for_places',1693801007),('app\\migrations\\m191106_115822_add_total_column_to_contracts_table',1693801007),('app\\migrations\\m191119_145841_add_cost_column_to_org_inet_table',1693801007),('app\\migrations\\m191119_172027_add_charge_column_to_org_inet_table',1693801007),('app\\migrations\\m191119_172409_add_charge_column_to_contracts_table',1693801007),('app\\migrations\\m191120_062411_float_prices',1693801008),('app\\migrations\\m191120_095815_add_cost_column_to_org_phones_table',1693801008),('app\\migrations\\m191204_062411_decimal_prices',1693801009),('app\\migrations\\m191208_164401_add_default_ip_values_in_comps',1693801009),('app\\migrations\\m191208_173041_fix_many_2_many',1693801009),('app\\migrations\\m191208_173041_fix_users_id',1693801009),('app\\migrations\\m191219_100000_add_users_employ_date',1693801009),('app\\migrations\\m191219_100001_fix_materials_id',1693801009),('app\\migrations\\m191219_100002_fix_contracts_in_materials_id',1693801010),('app\\migrations\\m200121_080000_add_users_auth_key',1693801010),('app\\migrations\\m200317_033238_create_user_in_services',1693801010),('app\\migrations\\m200317_040048_create_table_schedules',1693801010),('app\\migrations\\m200317_043845_alter_services_table',1693801010),('app\\migrations\\m200409_110543_rbac_update_mssql_trigger',1693800996),('app\\migrations\\m200508_064827_create_table_segments',1693801010),('app\\migrations\\m200508_160608_alter_table_services',1693801011),('app\\migrations\\m200525_200810_create_table_techs_in_services',1693801011),('app\\migrations\\m200616_205619_alter_table_techs_format_mac',1693801011),('app\\migrations\\m200712_185556_add_permissions',1693801011),('app\\migrations\\m200727_123910_alter_table_comps_add_user',1693801011),('app\\migrations\\m201023_064548_contracts_sucessor_default',1693801011),('app\\migrations\\m201024_153753_add_tech_specs',1693801011),('app\\migrations\\m201025_174509_add_tech_model_specs',1693801011),('app\\migrations\\m201202_154535_alter_lic_types_add_links',1693801011),('app\\migrations\\m210214_154227_table_net_domains',1693801011),('app\\migrations\\m210216_155422_table_net_vlans',1693801011),('app\\migrations\\m210216_165001_table_networks',1693801011),('app\\migrations\\m210220_133458_alter_table_segments',1693801011),('app\\migrations\\m210220_171805_create_table_netAddr',1693801011),('app\\migrations\\m210222_174038_alter_table_net_ips',1693801011),('app\\migrations\\m210228_121450_table_ports',1693801012),('app\\migrations\\m210301_135145_alter_table_tech_models',1693801012),('app\\migrations\\m210302_161545_alter_table_net_ips',1693801012),('app\\migrations\\m210310_174301_move_vlans_link',1693801012),('app\\migrations\\m210310_184119_alter_comment_column_in_soft_table',1693801012),('app\\migrations\\m210612_143410_alter_techs_table',1693801012),('app\\migrations\\m210614_063518_create_table_schedules',1693801012),('app\\migrations\\m210614_150516_alter_table_schedules',1693801012),('app\\migrations\\m210617_064650_alter_table_segments',1693801013),('app\\migrations\\m210621_131426_alter_table_services',1693801013),('app\\migrations\\m210716_120416_alter_table_comps',1693801013),('app\\migrations\\m210824_132508_alter_table_scans',1693801013),('app\\migrations\\m210825_125020_create_table_access',1693801014),('app\\migrations\\m210825_130339_alter_table_scans',1693801014),('app\\migrations\\m210831_093619_alter_table_users',1693801014),('app\\migrations\\m210911_113706_alter_table_services',1693801014),('app\\migrations\\m210921_035506_create_table_currency',1693801014),('app\\migrations\\m211002_062719_alter_table_services',1693801014),('app\\migrations\\m211003_141509_alter_table_partners',1693801014),('app\\migrations\\m220117_054532_add_services_recursive_segment_search',1693801014),('app\\migrations\\m220303_120730_alter_table_orgphones',1693801014),('app\\migrations\\m220303_191454_alter_table_org_inets',1693801014),('app\\migrations\\m220327_073551_alter_table_comps',1693801014),('app\\migrations\\m220329_055419_alter_table_users',1693801014),('app\\migrations\\m220402_185406_alter_table_schedules',1693801015),('app\\migrations\\m220410_134409_alter_table_services',1693801015),('app\\migrations\\m220414_105653_alter_tables_lics',1693801015),('app\\migrations\\m220416_120817_alter_tables_lics',1693801015),('app\\migrations\\m220421_075705_alter_table_org_inets',1693801015),('app\\migrations\\m220504_172124_alter_tables_lics',1693801016),('app\\migrations\\m220525_125054_alter_tables_partners',1693801016),('app\\migrations\\m220630_173032_alter_tables_prov_tel',1693801016),('app\\migrations\\m220816_104950_add_weight_column_to_services_table',1693801016),('app\\migrations\\m220818_073405_alter_table_users',1693801016),('app\\migrations\\m220819_132459_alter_table_net_domains',1693801016),('app\\migrations\\m220916_122729_add_mac_column_to_arms_table',1693801016),('app\\migrations\\m220929_173411_add_cost_column_to_materials_table',1693801016),('app\\migrations\\m221007_163802_add_archive_columns',1693801016),('app\\migrations\\m221024_153826_add_comment_column_to_places_table',1693801016),('app\\migrations\\m221111_174828_alter_table_access_types',1693801016),('app\\migrations\\m221122_151334_alter_table_ports',1693801016),('app\\migrations\\m230109_130226_alter_table_techs',1693801016),('app\\migrations\\m230206_063303_alter_table_comps',1693801016),('app\\migrations\\m230223_090652_alter_table_techs',1693801017),('app\\migrations\\m230223_102334_alter_table_tech_types',1693801017),('app\\migrations\\m230224_080124_alter_table_tech_models_add_racks',1693801017),('app\\migrations\\m230224_081112_migrate_arms2techs',1693801017),('app\\migrations\\m230302_180857_create_tables_dynagrid',1693801017),('app\\migrations\\m230321_054524_alter_table_comps',1693801017),('app\\migrations\\m230413_101124_alter_table_techs_add_pos_end',1693801017),('app\\migrations\\m230511_094545_alter_table_login_journal',1693801017),('app\\migrations\\m230512_124513_alter_table_login_journal',1693801017),('app\\migrations\\m230513_125905_create_table_attaches',1693801018),('app\\migrations\\m230520_060357_alter_table_attaches',1693801018),('app\\migrations\\m230520_060415_users_in_contracts',1693801018),('app\\migrations\\m230520_101000_alter_table_attaches',1693801018),('app\\migrations\\m230526_181446_alter_table_services',1693801018),('app\\migrations\\m230527_052818_add_external_links',1693801018),('app\\migrations\\m230531_100639_alter_table_users',1693801018),('app\\migrations\\m230620_113027_create_table_ips_in_users',1693801018),('app\\migrations\\m230622_170155_alter_table_comps',1693801018),('app\\migrations\\m230628_041251_create_table_org_inets_in_networks',1693801018),('app\\migrations\\m230708_045732_alter_table_partners',1693801018),('app\\migrations\\m230713_070612_alter_table_techs',1693801018),('app\\migrations\\m230802_162919_alter_table_networks',1693801018),('app\\migrations\\m230821_160259_init_empty_tables',1693801019),('app\\migrations\\m230828_123950_sync_prepare_2',1693801019),('app\\migrations\\m230831_174800_sync_prepare_3',1693801019),('app\\migrations\\m230903_074600_sync_prepare_4',1693801019),('app\\migrations\\m230903_114346_local_auth',1693836271),('app\\migrations\\m230905_045527_sync_prepare_5',1694186973),('app\\migrations\\m230923_092107_user_sync_prepare',1696260413),('app\\migrations\\m231006_070638_user_rest_unify',1698205001),('app\\migrations\\m231020_074646_alter_table_org_struct',1698205001),('app\\migrations\\M231109084405FixAutoincrement',1701232623),('app\\migrations\\M231209133554AlterTableNetworks',1702308017),('app\\migrations\\M231217071124AlterTableSegments',1702809741),('app\\migrations\\M231226142737CreateTableJobs',1705863174),('app\\migrations\\M240123153514UpdateTableDocs',1707115301),('app\\migrations\\M240125162320UpdateTableTechs',1707115301),('app\\migrations\\M240127160603HistoryJournals',1707115302),('app\\migrations\\M240128150114HistoryJournalsContracts',1707115303),('app\\migrations\\M240129130314HistoryJournalsTechs',1707115303),('app\\migrations\\M240201144730MaintenanceUpdate',1707115304),('app\\migrations\\M240203053203HistoryJournalsMaterials',1707115307),('app\\migrations\\M240225074103HistoryJournalsAcls',1709223405),('app\\migrations\\M240229060301HistoryJournalsAclsFix',1709223405),('app\\migrations\\M240308075641PlacesMap',1710320479),('app\\migrations\\M240328034135CompsHistory',1722769178),('app\\migrations\\M240401113410ServiceConnections',1722769178),('app\\migrations\\M240518080913CreateSandboxes',1722769179),('app\\migrations\\M240526102940MaintenanceJobsReqsHistory',1722769179),('app\\migrations\\M240612053628AclExtend',1722769180),('app\\migrations\\M240725041322CleanUnused',1722769180),('app\\migrations\\M240730162325CompsAdmins',1722769180),('app\\migrations\\M240802093936PartnersAliases',1722769181),('app\\migrations\\M241015093726ContractsHistoryAddChildren',1746711711),('app\\migrations\\M241225123824MaintenanceDescr',1746711711),('app\\migrations\\M250205141617CompsRescanQueue',1746711711),('app\\migrations\\M250224152754TechsSupportService',1746711711),('app\\migrations\\M250413161054SoftAddLinks',1746711712),('app\\migrations\\M250414164449ScansAddSoft',1746711712),('app\\migrations\\M250425033845CompsSoftMediumtext',1746711712),('app\\migrations\\M250505122356WikiCache',1746711712),('app\\migrations\\M250514090728ContractsHistorySucessorFix',1747214006),('app\\migrations\\M250526150239MaintenanceJobsHierachy',1748273958),('app\\migrations\\M250805150713LoginJournalIndexes',1755942761),('app\\migrations\\M250806065520LoginJournalCalcTime',1755942761),('app\\migrations\\M250828100718AdditionalHistory',1756450679),('app\\migrations\\M251006102649SoftAddDescription',1765960846),('app\\migrations\\m251210_083000_create_tags_table',1765960846),('app\\migrations\\m251210_083100_create_tags_links_table',1765960846),('app\\migrations\\M251210083000_create_tags_table',1765980662),('app\\migrations\\M251210083100_create_tags_links_table',1765980662),('app\\migrations\\M251221163631ClearFk',1766335316);
 /*!40000 ALTER TABLE `migration` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2380,12 +2380,12 @@ DROP TABLE IF EXISTS `net_domains`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `net_domains` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `places_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `net_domains-places-idx` (`places_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2409,16 +2409,16 @@ CREATE TABLE `net_ips` (
   `id` int NOT NULL AUTO_INCREMENT,
   `addr` int unsigned DEFAULT NULL,
   `mask` int DEFAULT NULL,
-  `text_addr` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `text_addr` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `networks_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-net_ips-addr` (`addr`),
   KEY `idx-net_ips-mask` (`mask`),
   KEY `idx-net_ips-text_addr` (`text_addr`),
   KEY `idx-net_ips-networks_id` (`networks_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2440,13 +2440,13 @@ DROP TABLE IF EXISTS `net_vlans`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `net_vlans` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `vlan` int DEFAULT NULL,
   `domain_id` int DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `idx-net_vlans-domain_id` (`domain_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2468,22 +2468,22 @@ DROP TABLE IF EXISTS `networks`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `networks` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `vlan_id` int DEFAULT NULL,
-  `text_addr` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `text_addr` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `addr` int unsigned DEFAULT NULL,
   `mask` int unsigned DEFAULT NULL,
   `router` int unsigned DEFAULT NULL,
   `dhcp` int unsigned DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `segments_id` int DEFAULT NULL,
-  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `archived` tinyint(1) DEFAULT NULL,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `ranges` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `text_dhcp` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `ranges` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `text_dhcp` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-networks-vlan_id` (`vlan_id`),
   KEY `idx-networks-addr` (`addr`),
@@ -2495,7 +2495,7 @@ CREATE TABLE `networks` (
   KEY `idx-networks-archived` (`archived`),
   KEY `idx-networks-updated_at` (`updated_at`),
   KEY `idx-networks-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2519,26 +2519,26 @@ CREATE TABLE `networks_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `text_addr` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `text_router` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `text_dhcp` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_general_ci,
-  `notepad` text COLLATE utf8mb4_general_ci,
-  `ranges` text COLLATE utf8mb4_general_ci,
-  `links` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text_addr` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text_router` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text_dhcp` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `ranges` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `archived` tinyint(1) DEFAULT NULL,
   `vlan_id` int DEFAULT NULL,
   `segments_id` int DEFAULT NULL,
-  `org_inets_ids` text COLLATE utf8mb4_general_ci,
+  `org_inets_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `networks_history-master_id` (`master_id`),
   KEY `networks_history-updated_at` (`updated_at`),
   KEY `networks_history-updated_by` (`updated_by`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2566,7 +2566,7 @@ CREATE TABLE `networks_in_aces` (
   UNIQUE KEY `networks_in_aces-m2m` (`aces_id`,`networks_id`),
   KEY `networks_in_aces-aces_id` (`aces_id`),
   KEY `networks_in_aces-networks_id` (`networks_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2636,7 +2636,7 @@ CREATE TABLE `org_inets_in_networks` (
   PRIMARY KEY (`id`),
   KEY `idx-org_inets_in_networks-networks` (`networks_id`),
   KEY `idx-org_inets_in_networks-inets` (`org_inets_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2707,7 +2707,7 @@ CREATE TABLE `org_struct` (
   KEY `orgStruct-org-index` (`org_id`),
   KEY `idx-org_struct-parent_id` (`parent_id`),
   KEY `idx-org_struct-id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Структурные подразделения';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Структурные подразделения';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2733,7 +2733,7 @@ CREATE TABLE `orgs` (
   `short` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Короткое имя',
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Комментарий',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2760,19 +2760,19 @@ CREATE TABLE `partners` (
   `uname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `bname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `cabinet_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `support_tel` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `prefix` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cabinet_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `support_tel` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `prefix` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `alias` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `alias` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `inn` (`inn`),
   KEY `kpp` (`kpp`),
   KEY `uname` (`uname`(191)),
   KEY `bname` (`bname`(191)),
   KEY `idx-partners-alias` (`alias`)
-) ENGINE=InnoDB AUTO_INCREMENT=114 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Контрагенты';
+) ENGINE=InnoDB AUTO_INCREMENT=114 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Контрагенты';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2856,15 +2856,15 @@ CREATE TABLE `ports` (
   `id` int NOT NULL AUTO_INCREMENT,
   `techs_id` int DEFAULT NULL,
   `arms_id` int DEFAULT NULL,
-  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `link_ports_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-ports-name` (`name`),
   KEY `idx-ports-techs_id` (`techs_id`),
   KEY `idx-ports-link_ports_id` (`link_ports_id`),
   KEY `ports_arms_id` (`arms_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2886,16 +2886,16 @@ DROP TABLE IF EXISTS `sandboxes`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sandboxes` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `suffix` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `suffix` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `network_accessible` tinyint(1) DEFAULT NULL,
-  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `archived` tinyint(1) DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2919,21 +2919,21 @@ CREATE TABLE `sandboxes_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `archived` tinyint(1) DEFAULT NULL,
-  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `suffix` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `suffix` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `network_accessible` tinyint(1) DEFAULT NULL,
-  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `sandboxes_history-master_id` (`master_id`),
   KEY `sandboxes_history-updated_at` (`updated_at`),
   KEY `sandboxes_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2976,7 +2976,7 @@ CREATE TABLE `scans` (
   KEY `idx-scans_techs_id` (`techs_id`),
   KEY `idx-scans_arms_id` (`arms_id`),
   KEY `idx-scans-soft_id` (`soft_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=309 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=309 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2998,21 +2998,21 @@ DROP TABLE IF EXISTS `schedules`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `schedules` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `parent_id` int DEFAULT NULL,
-  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `start_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `end_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `start_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `end_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `override_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `compiled_json` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `compiled_json` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `idx-schedules_parent_id` (`parent_id`),
   KEY `idx-schedules-updated_at` (`updated_at`),
   KEY `idx-schedules-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3035,15 +3035,15 @@ DROP TABLE IF EXISTS `schedules_entries`;
 CREATE TABLE `schedules_entries` (
   `id` int NOT NULL AUTO_INCREMENT,
   `schedule_id` int DEFAULT NULL,
-  `date` varchar(64) DEFAULT NULL,
-  `schedule` varchar(255) DEFAULT NULL,
-  `date_end` varchar(64) DEFAULT NULL,
+  `date` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `schedule` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date_end` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_period` tinyint(1) DEFAULT NULL,
   `is_work` tinyint(1) DEFAULT NULL,
-  `comment` varchar(255) DEFAULT NULL,
-  `history` text,
+  `comment` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `history` mediumtext COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) DEFAULT NULL,
+  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-schedules_days_org_id` (`schedule_id`),
   KEY `idx-schedules_days_date` (`date`),
@@ -3052,7 +3052,7 @@ CREATE TABLE `schedules_entries` (
   KEY `idx-schedules_days_is_work` (`is_work`),
   KEY `idx-schedules_entries-updated_at` (`updated_at`),
   KEY `idx-schedules_entries-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3076,22 +3076,22 @@ CREATE TABLE `schedules_entries_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `schedule_id` int DEFAULT NULL,
-  `date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `date_end` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `schedule` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date_end` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `schedule` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_period` tinyint(1) DEFAULT NULL,
   `is_work` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `schedules_entries_history-master_id` (`master_id`),
   KEY `schedules_entries_history-updated_at` (`updated_at`),
   KEY `schedules_entries_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3115,27 +3115,27 @@ CREATE TABLE `schedules_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `parent_id` int DEFAULT NULL,
   `override_id` int DEFAULT NULL,
-  `start_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `end_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `entries_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `providing_services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `support_services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `overrides_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `start_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `end_date` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `entries_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `providing_services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `support_services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `overrides_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `schedules_history-master_id` (`master_id`),
   KEY `schedules_history-updated_at` (`updated_at`),
   KEY `schedules_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3157,19 +3157,19 @@ DROP TABLE IF EXISTS `segments`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `segments` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `archived` tinyint(1) DEFAULT NULL,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-segments-archived` (`archived`),
   KEY `idx-segments-updated_at` (`updated_at`),
   KEY `idx-segments-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3193,19 +3193,19 @@ CREATE TABLE `segments_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text COLLATE utf8mb4_general_ci,
-  `name` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `code` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `history` text COLLATE utf8mb4_general_ci,
-  `links` text COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `segments_history-master_id` (`master_id`),
   KEY `segments_history-updated_at` (`updated_at`),
   KEY `segments_history-updated_by` (`updated_by`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3244,15 +3244,15 @@ CREATE TABLE `services` (
   `archived` int NOT NULL DEFAULT '0',
   `is_service` tinyint(1) DEFAULT '1',
   `currency_id` int NOT NULL DEFAULT '1',
-  `search_text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `search_text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `weight` int NOT NULL DEFAULT '100',
   `infrastructure_user_id` int DEFAULT NULL,
-  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `vm_cores` int DEFAULT NULL,
   `vm_ram` int DEFAULT NULL,
   `vm_hdd` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-services-is_end_user` (`is_end_user`),
   KEY `idx-services_responsible` (`responsible_id`),
@@ -3264,7 +3264,7 @@ CREATE TABLE `services` (
   KEY `idx-services_places_id` (`places_id`),
   KEY `idx-services_archived` (`archived`),
   KEY `idx-services-currency_id` (`currency_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3291,7 +3291,7 @@ CREATE TABLE `services_depends` (
   PRIMARY KEY (`id`),
   KEY `idx-services_depends-service_id` (`service_id`),
   KEY `idx-services_depends-depends_id` (`depends_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3315,20 +3315,20 @@ CREATE TABLE `services_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `search_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `search_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `is_end_user` tinyint(1) DEFAULT NULL,
   `is_service` tinyint(1) DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   `cost` float DEFAULT NULL,
   `charge` float DEFAULT NULL,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `notebook` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `notebook` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `weight` int DEFAULT NULL,
   `vm_cores` int DEFAULT NULL,
   `vm_ram` int DEFAULT NULL,
@@ -3342,23 +3342,23 @@ CREATE TABLE `services_history` (
   `partners_id` int DEFAULT NULL,
   `places_id` int DEFAULT NULL,
   `currency_id` int DEFAULT NULL,
-  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `depends_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `support_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `contracts_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `infrastructure_support_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `maintenance_reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `aces_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `lic_items_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `lic_groups_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comps_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `techs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `depends_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `support_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `contracts_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `infrastructure_support_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `maintenance_reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `aces_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `lic_items_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `lic_groups_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `services_history-master_id` (`master_id`),
   KEY `services_history-updated_at` (`updated_at`),
   KEY `services_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3386,7 +3386,7 @@ CREATE TABLE `services_in_aces` (
   UNIQUE KEY `services_in_aces-m2m` (`aces_id`,`services_id`),
   KEY `services_in_aces-aces_id` (`aces_id`),
   KEY `services_in_aces-services_id` (`services_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3409,19 +3409,19 @@ CREATE TABLE `soft` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
   `manufacturers_id` int DEFAULT NULL,
   `descr` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `notepad` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `items` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `additional` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'Links associated with the software',
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Links associated with the software',
   `scans_id` int DEFAULT NULL COMMENT 'ID of the software preview image',
   PRIMARY KEY (`id`),
   KEY `manufacturer_id` (`manufacturers_id`),
   KEY `idx-soft-archived` (`archived`)
-) ENGINE=InnoDB AUTO_INCREMENT=1082 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Программное обеспечение';
+) ENGINE=InnoDB AUTO_INCREMENT=1082 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Программное обеспечение';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3449,7 +3449,7 @@ CREATE TABLE `soft_hits` (
   PRIMARY KEY (`id`),
   KEY `comp_id` (`comp_id`),
   KEY `soft_id` (`soft_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Софт автоматически обнаруженный на компах';
+) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Софт автоматически обнаруженный на компах';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3476,7 +3476,7 @@ CREATE TABLE `soft_in_comps` (
   PRIMARY KEY (`id`),
   KEY `soft_id_idx` (`soft_id`),
   KEY `comp_id_idx` (`comp_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COMMENT='Отношение софта и компов';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Отношение софта и компов';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3529,7 +3529,7 @@ CREATE TABLE `soft_in_lists` (
   `list_id` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `soft_id` (`soft_id`,`list_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3556,7 +3556,7 @@ CREATE TABLE `soft_lists` (
   `comment` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Списки ПО';
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Списки ПО';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3578,22 +3578,22 @@ DROP TABLE IF EXISTS `tags`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tags` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Название тега',
-  `slug` varchar(48) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Уникальный идентификатор',
-  `color` varchar(7) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '#007bff' COMMENT 'Цвет фона в HEX формате',
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Описание назначения тега',
+  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Название тега',
+  `slug` varchar(48) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Уникальный идентификатор',
+  `color` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#007bff' COMMENT 'Цвет фона в HEX формате',
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Описание назначения тега',
   `usage_count` int NOT NULL DEFAULT '0' COMMENT 'Количество использований',
   `archived` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Признак архивирования',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Дата создания',
   `updated_at` timestamp NULL DEFAULT NULL COMMENT 'Дата последнего изменения',
-  `updated_by` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Автор последних изменений (username)',
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Автор последних изменений (username)',
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`),
   KEY `idx-tags-slug` (`slug`),
   KEY `idx-tags-usage_count` (`usage_count`),
   KEY `idx-tags-archived` (`archived`),
   KEY `idx-tags-name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Теги для категоризации объектов';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Теги для категоризации объектов';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3616,7 +3616,7 @@ DROP TABLE IF EXISTS `tags_links`;
 CREATE TABLE `tags_links` (
   `id` int NOT NULL AUTO_INCREMENT,
   `tag_id` int NOT NULL COMMENT 'ID тега',
-  `model_class` varchar(255) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Класс модели (полное имя с namespace)',
+  `model_class` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Класс модели (полное имя с namespace)',
   `model_id` int NOT NULL COMMENT 'ID объекта модели',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Дата создания связи',
   PRIMARY KEY (`id`),
@@ -3624,7 +3624,7 @@ CREATE TABLE `tags_links` (
   KEY `idx-tags_links-tag_id` (`tag_id`),
   KEY `idx-tags_links-model` (`model_class`,`model_id`),
   KEY `idx-tags_links-composite` (`tag_id`,`model_class`,`model_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Связи тегов с объектами (полиморфная связь)';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Связи тегов с объектами (полиморфная связь)';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3694,9 +3694,9 @@ CREATE TABLE `tech_models_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `type_id` int DEFAULT NULL,
   `manufacturers_id` int DEFAULT NULL,
   `scans_id` int DEFAULT NULL,
@@ -3706,18 +3706,18 @@ CREATE TABLE `tech_models_history` (
   `front_rack_two_sided` tinyint(1) DEFAULT NULL,
   `back_rack_two_sided` tinyint(1) DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
-  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `short` varchar(24) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `ports` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `front_rack_layout` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `back_rack_layout` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `short` varchar(24) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `ports` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `front_rack_layout` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `back_rack_layout` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `tech_models_history-master_id` (`master_id`),
   KEY `tech_models_history-updated_at` (`updated_at`),
   KEY `tech_models_history-updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3745,7 +3745,7 @@ CREATE TABLE `tech_states` (
   `archived` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `tech_states_archived_index` (`archived`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3769,7 +3769,7 @@ CREATE TABLE `tech_types` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
   `code` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Код',
   `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Название',
-  `prefix` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prefix` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Комментарий',
   `comment_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `comment_hint` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -3778,7 +3778,7 @@ CREATE TABLE `tech_types` (
   `is_ups` tinyint(1) DEFAULT '0',
   `is_display` tinyint(1) DEFAULT '0',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `archived` tinyint(1) DEFAULT NULL,
   `hide_menu` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -3786,7 +3786,7 @@ CREATE TABLE `tech_types` (
   KEY `name` (`name`),
   KEY `idx-tech_types-archived` (`archived`),
   KEY `idx-tech_types-hide_menu` (`hide_menu`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3808,39 +3808,39 @@ DROP TABLE IF EXISTS `techs`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `techs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Идентификатор',
-  `num` varchar(16) DEFAULT NULL COMMENT 'Инвентарный номер',
-  `inv_num` varchar(128) DEFAULT NULL COMMENT 'Бухгалтерский инвентарный номер',
+  `num` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Инвентарный номер',
+  `inv_num` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Бухгалтерский инвентарный номер',
   `model_id` int NOT NULL COMMENT 'Модель оборудования',
-  `sn` varchar(128) DEFAULT NULL COMMENT 'Серийный номер',
+  `sn` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Серийный номер',
   `arms_id` int DEFAULT NULL COMMENT 'Рабочее место',
   `places_id` int DEFAULT NULL COMMENT 'Помещение',
   `user_id` int DEFAULT NULL,
   `it_staff_id` int DEFAULT NULL,
-  `ip` varchar(768) DEFAULT NULL,
-  `mac` varchar(768) DEFAULT NULL,
+  `ip` varchar(768) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mac` varchar(768) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `state_id` int DEFAULT NULL COMMENT 'Состояние',
-  `url` text COMMENT 'Ссылка',
-  `comment` text COMMENT 'Комментарий',
-  `history` text NOT NULL COMMENT 'Записная кинжка',
-  `specs` text,
+  `url` mediumtext COLLATE utf8mb4_unicode_ci COMMENT 'Ссылка',
+  `comment` mediumtext COLLATE utf8mb4_unicode_ci COMMENT 'Комментарий',
+  `history` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Записная кинжка',
+  `specs` mediumtext COLLATE utf8mb4_unicode_ci,
   `scans_id` int DEFAULT NULL,
   `departments_id` int DEFAULT NULL,
   `comp_id` int DEFAULT NULL,
   `installed_id` int DEFAULT NULL,
-  `installed_pos` varchar(128) DEFAULT NULL,
+  `installed_pos` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `head_id` int DEFAULT NULL,
   `responsible_id` int DEFAULT NULL,
-  `hw` text,
+  `hw` mediumtext COLLATE utf8mb4_unicode_ci,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `installed_pos_end` varchar(128) DEFAULT NULL,
+  `installed_pos_end` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `installed_back` tinyint(1) DEFAULT '0',
   `full_length` tinyint(1) DEFAULT '0',
-  `external_links` text,
+  `external_links` mediumtext COLLATE utf8mb4_unicode_ci,
   `partners_id` int DEFAULT NULL,
-  `uid` varchar(16) DEFAULT NULL,
+  `uid` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `domain_id` int DEFAULT NULL,
-  `hostname` varchar(128) DEFAULT NULL,
-  `updated_by` varchar(32) DEFAULT NULL,
+  `hostname` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_by` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `management_service_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `num` (`num`),
@@ -3861,7 +3861,7 @@ CREATE TABLE `techs` (
   KEY `idx-techs-domain_id` (`domain_id`),
   KEY `idx-techs-hostname` (`hostname`),
   KEY `idx-techs-management_service_id` (`management_service_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC COMMENT='Рабочие места';
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='Рабочие места';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3885,14 +3885,14 @@ CREATE TABLE `techs_history` (
   `id` int NOT NULL AUTO_INCREMENT,
   `master_id` int DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `num` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `inv_num` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `sn` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `uid` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `hostname` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changed_attributes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `num` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inv_num` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sn` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `uid` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hostname` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `domain_id` int DEFAULT NULL,
   `model_id` int DEFAULT NULL,
   `arms_id` int DEFAULT NULL,
@@ -3907,27 +3907,27 @@ CREATE TABLE `techs_history` (
   `departments_id` int DEFAULT NULL,
   `comp_id` int DEFAULT NULL,
   `partners_id` int DEFAULT NULL,
-  `ip` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `mac` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `installed_pos` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `installed_pos_end` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `specs` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `hw` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `ip` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mac` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `installed_pos` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `installed_pos_end` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `specs` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `hw` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `external_links` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `installed_back` tinyint(1) DEFAULT NULL,
   `full_length` tinyint(1) DEFAULT NULL,
-  `contracts_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `lic_items_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `lic_keys_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `lic_groups_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `maintenance_reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `materials_usages_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `contracts_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `services_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `lic_items_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `lic_keys_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `lic_groups_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `maintenance_reqs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `materials_usages_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `acls_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `maintenance_jobs_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `archived` tinyint(1) DEFAULT NULL,
   `management_service_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -3935,7 +3935,7 @@ CREATE TABLE `techs_history` (
   KEY `techs_history-updated_at` (`updated_at`),
   KEY `techs_history-updated_by` (`updated_by`),
   KEY `idx-techs_history-management_service_id` (`management_service_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3962,7 +3962,7 @@ CREATE TABLE `techs_in_services` (
   PRIMARY KEY (`id`),
   KEY `idx-techs_in_services_uid` (`tech_id`),
   KEY `idx-techs_in_services_sid` (`service_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3983,12 +3983,12 @@ DROP TABLE IF EXISTS `ui_dynagrid`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ui_dynagrid` (
-  `id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Unique dynagrid setting identifier',
-  `filter_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Filter setting identifier',
-  `sort_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Sort setting identifier',
-  `data` varchar(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Json encoded data for the dynagrid configuration',
+  `id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Unique dynagrid setting identifier',
+  `filter_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Filter setting identifier',
+  `sort_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Sort setting identifier',
+  `data` varchar(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Json encoded data for the dynagrid configuration',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4009,14 +4009,14 @@ DROP TABLE IF EXISTS `ui_dynagrid_dtl`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ui_dynagrid_dtl` (
-  `id` varchar(100) NOT NULL COMMENT 'Unique dynagrid detail setting identifier',
-  `category` varchar(10) NOT NULL COMMENT 'Dynagrid detail setting category "filter" or "sort"',
-  `name` varchar(150) NOT NULL COMMENT 'Name to identify the dynagrid detail setting',
-  `data` varchar(5000) DEFAULT NULL COMMENT 'Json encoded data for the dynagrid detail configuration',
-  `dynagrid_id` varchar(100) NOT NULL COMMENT 'Related dynagrid identifier',
+  `id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Unique dynagrid detail setting identifier',
+  `category` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Dynagrid detail setting category "filter" or "sort"',
+  `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Name to identify the dynagrid detail setting',
+  `data` varchar(5000) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Json encoded data for the dynagrid detail configuration',
+  `dynagrid_id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Related dynagrid identifier',
   PRIMARY KEY (`id`),
   UNIQUE KEY `tbl_dynagrid_dtl_UK1` (`name`,`category`,`dynagrid_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4037,15 +4037,15 @@ DROP TABLE IF EXISTS `ui_tables_cols`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ui_tables_cols` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `table` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `column` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `table` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `column` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` int DEFAULT NULL,
-  `value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx-ui_tables_cols-table` (`table`),
   KEY `idx-ui_tables_cols-column` (`column`),
   KEY `idx-ui_tables_cols-user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4073,7 +4073,7 @@ CREATE TABLE `user_groups` (
   `ad_group` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `sync_time` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4094,31 +4094,31 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `employee_id` varchar(16) DEFAULT NULL,
+  `employee_id` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `org_id` int DEFAULT NULL,
-  `Orgeh` varchar(16) DEFAULT NULL,
-  `Doljnost` varchar(255) DEFAULT NULL,
-  `Ename` varchar(255) NOT NULL COMMENT 'Полное имя',
+  `Orgeh` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Doljnost` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Ename` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Полное имя',
   `Persg` int NOT NULL DEFAULT '1',
   `Uvolen` tinyint(1) NOT NULL COMMENT 'Уволен',
-  `Login` varchar(32) DEFAULT NULL,
-  `Email` varchar(64) DEFAULT NULL,
-  `Phone` varchar(32) DEFAULT NULL,
-  `Mobile` varchar(255) DEFAULT NULL,
-  `work_phone` varchar(32) DEFAULT NULL,
-  `Bday` varchar(16) DEFAULT NULL,
-  `manager_id` varchar(16) DEFAULT NULL,
+  `Login` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Email` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Phone` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Mobile` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `work_phone` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Bday` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `manager_id` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `employ_date` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Дата приема',
   `resign_date` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Дата увольнения',
   `nosync` tinyint(1) NOT NULL DEFAULT '0',
-  `auth_key` varchar(255) DEFAULT NULL,
-  `access_token` varchar(255) DEFAULT NULL,
-  `notepad` text,
-  `private_phone` varchar(255) DEFAULT NULL,
-  `external_links` text,
-  `uid` varchar(64) DEFAULT NULL,
-  `ips` varchar(255) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
+  `auth_key` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `access_token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notepad` mediumtext COLLATE utf8mb4_unicode_ci,
+  `private_phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `external_links` mediumtext COLLATE utf8mb4_unicode_ci,
+  `uid` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ips` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `struct_id` (`Orgeh`),
   KEY `dismissed` (`Uvolen`),
@@ -4127,7 +4127,7 @@ CREATE TABLE `users` (
   KEY `idx-users-employee_id` (`employee_id`),
   KEY `idx-users-org_id` (`org_id`),
   KEY `idx-users-uid` (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4154,7 +4154,7 @@ CREATE TABLE `users_in_aces` (
   PRIMARY KEY (`id`),
   KEY `idx-users_in_aces_ace_id` (`aces_id`),
   KEY `idx-users_in_aces_user_id` (`users_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4181,7 +4181,7 @@ CREATE TABLE `users_in_contracts` (
   PRIMARY KEY (`id`),
   KEY `idx-users_in_contracts-users_id` (`users_id`),
   KEY `idx-users_in_contracts-contracts_id` (`contracts_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4207,7 +4207,7 @@ CREATE TABLE `users_in_groups` (
   PRIMARY KEY (`id`),
   KEY `idx-users_in_groups-users_id` (`users_id`),
   KEY `idx-users_in_groups-groups_id` (`groups_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4233,7 +4233,7 @@ CREATE TABLE `users_in_services` (
   PRIMARY KEY (`id`),
   KEY `idx-users_in_services_uid` (`user_id`),
   KEY `idx-users_in_services_sid` (`service_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4260,7 +4260,7 @@ CREATE TABLE `users_in_svc_infrastructure` (
   PRIMARY KEY (`id`),
   KEY `idx-users_in_svc_infrastructure-services` (`services_id`),
   KEY `idx-users_in_svc_infrastructure-users` (`users_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4301,23 +4301,20 @@ INSERT INTO `wiki_cache` VALUES (1,'_internal.sys_:maintenance-jobs:1:descriptio
 UNLOCK TABLES;
 
 --
--- Dumping events for database 'arms_test'
---
-
---
 -- Dumping routines for database 'arms_test'
 --
 /*!50003 DROP FUNCTION IF EXISTS `getplacepath` */;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `getplacepath`(`place_id` INT) RETURNS text CHARSET utf8mb4 COLLATE utf8mb4_general_ci
+CREATE DEFINER=`root`@`localhost` FUNCTION `getplacepath`(`place_id` INT) RETURNS text CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
     DETERMINISTIC
 BEGIN
     DECLARE res TEXT CHARACTER SET utf8mb4;
@@ -4329,13 +4326,15 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 DROP FUNCTION IF EXISTS `getplacetop` */;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -4351,13 +4350,15 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 DROP FUNCTION IF EXISTS `getServiceSegment` */;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -4373,13 +4374,15 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 DROP PROCEDURE IF EXISTS `getplacepath` */;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -4405,13 +4408,15 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 DROP PROCEDURE IF EXISTS `getplacetop` */;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -4432,13 +4437,15 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 DROP PROCEDURE IF EXISTS `getServiceSegment` */;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -4458,6 +4465,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+ALTER DATABASE `arms_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -4468,4 +4476,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-21 21:42:19
+-- Dump completed

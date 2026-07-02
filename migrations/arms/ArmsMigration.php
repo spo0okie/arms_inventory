@@ -14,6 +14,65 @@ use yii\db\Migration;
 class ArmsMigration extends Migration
 {
 	/**
+	 * Стандарт кодировки и коллации проекта — единая точка.
+	 *
+	 * Все таблицы держим в utf8mb4 / utf8mb4_unicode_ci. Если коллацию не
+	 * фиксировать явно, сервер подставляет свой дефолт (MySQL 9 —
+	 * utf8mb4_0900_ai_ci, MariaDB 11 — utf8mb4_uca1400_ai_ci, старые дампы —
+	 * *_general_ci / utf8mb3_*), коллации становятся разнородными и поисковые
+	 * CONCAT-выражения падают с ошибкой 1267 "Illegal mix of collations".
+	 * Консистентность стережёт tests/unit/db/CollationConsistencyTest.
+	 */
+	const CHARSET   = 'utf8mb4';
+	const COLLATION = 'utf8mb4_unicode_ci';
+
+	/**
+	 * Достраивает опции CREATE TABLE до стандарта проекта (InnoDB + utf8mb4 +
+	 * utf8mb4_unicode_ci). Явно заданные значения не перетираются.
+	 *
+	 * @param string|null $options Исходные опции (например 'engine=InnoDB')
+	 * @return string
+	 */
+	public function tableOptions($options = null)
+	{
+		$options = (string)$options;
+		if (stripos($options, 'engine') === false)
+			$options = 'ENGINE=InnoDB ' . $options;
+		if (stripos($options, 'charset') === false && stripos($options, 'character set') === false)
+			$options .= ' DEFAULT CHARSET=' . static::CHARSET;
+		if (stripos($options, 'collate') === false)
+			$options .= ' COLLATE=' . static::COLLATION;
+		return trim($options);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * Любая таблица, создаваемая через миграции ARMS, по умолчанию получает
+	 * стандартные движок/кодировку/коллацию, чтобы коллации не "уплывали"
+	 * вслед за дефолтом сервера.
+	 */
+	public function createTable($table, $columns, $options = null)
+	{
+		parent::createTable($table, $columns, $this->tableOptions($options));
+	}
+
+	/**
+	 * Приводит существующую таблицу к стандартной кодировке/коллации проекта.
+	 * По аналогии с convertTableToInnoDb() — для нормализующих миграций.
+	 *
+	 * @param string $table Имя таблицы
+	 * @return void
+	 * @noinspection SqlResolve
+	 */
+	public function convertTableToCollation($table)
+	{
+		$this->db->createCommand(
+			"ALTER TABLE `$table` CONVERT TO CHARACTER SET " . static::CHARSET . " COLLATE " . static::COLLATION
+		)->execute();
+	}
+
+	/**
 	 * Добавляет колонку в таблицу, если она еще не существует
 	 *
 	 * @param string $table Имя таблицы
