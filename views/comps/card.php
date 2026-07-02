@@ -46,7 +46,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 			'model'=>$model,
 			'name'=>$this->render('/domains/hostname',[
 				'model'=>$model,
-				'hostname'=>$model->name
+				'hostname'=>$model->renderName()
 			]),
 			'nameSuffix'=>$remoteControl,
 			'hideUndeletable'=>false,

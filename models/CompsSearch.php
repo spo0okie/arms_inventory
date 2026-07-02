@@ -85,7 +85,8 @@ class CompsSearch extends Comps
 				'softHits',
 				'netIps.network.segment',
 				'services.maintenanceReqs',
-				'maintenanceReqs'
+				'maintenanceReqs',
+				'sandbox'
 			]);
 
         // add conditions that should always apply here
@@ -143,7 +144,7 @@ class CompsSearch extends Comps
 			]);
         }
 
-	
+
 		if (!$this->archived) {
 			$query->andWhere(['not',['comps.archived'=>1]]);
 		}
@@ -151,7 +152,7 @@ class CompsSearch extends Comps
         $query
 			->andFilterWhere(['comps.id'=>$this->ids])
 			->andFilterWhere(['tech_states.id'=>$this->arm_state])
-			->andFilterWhere(QueryHelper::querySearchString('concat(IFNULL(domains.name,""),"\\\\",comps.name)', $this->name))
+			->andFilterWhere(QueryHelper::querySearchString('concat(IFNULL(domains.name,""),"\\\\",comps.name,IFNULL(sandboxes.suffix,""))', $this->name))
             ->andFilterWhere(QueryHelper::querySearchString('raw_version', $this->raw_version))
 			->andFilterWhere(QueryHelper::querySearchString('comps.ip', $this->ip))
 			->andFilterWhere(QueryHelper::querySearchString('comps.mac', $this->mac))
@@ -190,9 +191,9 @@ class CompsSearch extends Comps
 				['soft.id'=>$this->linkedSoft_ids]
 			])
 		;
-	
+
 		$totalQuery=clone $query;
-	
+
 		return new ActiveDataProvider([
 			'query' => $query->groupBy('comps.id'),
 			'totalCount' => $totalQuery->count('distinct(comps.id)'),

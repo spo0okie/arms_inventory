@@ -4,17 +4,20 @@ use app\components\ItemObjectWidget;
 use app\components\LinkObjectWidget;
 use yii\helpers\Html;
 
-/* @var $this yii\web\View */
-/* @var $model app\models\Comps */
+/** @var yii\web\View $this */
+/** @var app\models\Comps $model */
 
 if (!isset($static_view)) $static_view=true;
 if (!isset($fqdn))	$fqdn=false;
 if (!isset($icon))	$icon=false;
 if (!isset($rc)) 	$rc=false;
 if (!isset($show_ips))	$show_ips=false;
+if (!isset($show_domain)) $show_domain=false;
 
 if (is_object($model)) {
 	if (!isset($name)) $name=$model->renderName($fqdn);
+	if ($show_domain) $name=$this->render('/domains/hostname',['model'=>$model]);
+
 	$icon_html='';
 	if ($icon) {
 		if ($model->isWindows) $icon_html='<span class="fab fa-windows"></span>';

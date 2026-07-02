@@ -3,10 +3,12 @@
 
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
-/* @var $this yii\web\View */
-/* @var $model app\models\Comps */
-/* @var $static_view boolean */
-/* @var $hostname string */
+/** @var yii\web\View $this */
+/** @var app\models\Comps $model */
+/** @var boolean $static_view */
+/** @var string $hostname */
+
+if (!isset($hostname)) $hostname=$model->name;
 
 $domainClass="small opacity-75";
 
