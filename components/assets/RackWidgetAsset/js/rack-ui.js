@@ -43,6 +43,7 @@ function generateRackConfFor(attr) {
     let labelPre=$('#'+attr+'_labelPre').is(':checked')?1:0;
     let labelPost=$('#'+attr+'_labelPost').is(':checked')?1:0;
     let labelWidth=$('#'+attr+'_labelWidth').val();
+    let labelStartId=parseInt($('#'+attr+'_labelStartId').val())||1;   //номер первого юнита
 
     //------
 
@@ -78,7 +79,8 @@ function generateRackConfFor(attr) {
         labelPre:labelPre,
         labelPost:labelPost,
         labelMode:"h",
-        labelWidth:labelWidth
+        labelWidth:labelWidth,
+        labelStartId:labelStartId
     }
 
     let strData=JSON.stringify(data);

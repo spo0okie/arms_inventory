@@ -126,7 +126,10 @@ class RackWidget extends Widget
 		$evenNum=(($row+1) % 2 == 0)?$this->evenEnumeration:1; //изза того что нумерация с нуля - смысл четности обратный
 		if ($vNum==-1) $row=$height-1-$row;
 		if ($hNum*$evenNum==-1) $col=$width-1-$col;
-		return $row*$width+$col+$this->labelStartId;
+		//стартовый номер юнита (номер первого места). Позволяет разной нумерации
+		//передней/задней корзины. Пустое/некорректное значение => начинаем с 1.
+		$start=is_numeric($this->labelStartId)?(int)$this->labelStartId:1;
+		return $row*$width+$col+$start;
 	}
 	
 	/**

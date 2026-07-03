@@ -8,7 +8,7 @@ use yii\helpers\Html;
  * @var $empty boolean
  * @var $rack RackWidget;
  * @var $rackDefault RackWidget;
- 
+
  */
 
 ?>
@@ -44,12 +44,12 @@ use yii\helpers\Html;
 			<div class="col-md-6">
 				<?= Html::label('По гор.',$attr.'_cols') ?>
 				<?= Html::textInput($attr.'_cols',$rack->simpleCols,['id'=>$attr.'_cols','class'=>'form-control','maxlength'=>3]) ?>
-			
+
 			</div>
 			<div class="col-md-6">
 				<?= Html::label('По верт.',$attr.'_rows') ?>
 				<?= Html::textInput($attr.'_rows',$rack->simpleRows,['id'=>$attr.'_rows','class'=>'form-control','maxlength'=>3]) ?>
-			
+
 			</div>
 		</div>
 	</div>
@@ -153,6 +153,12 @@ use yii\helpers\Html;
 				<div class="form-check">
 					<?= Html::radio($attr.'_evenEnum',$rack->evenEnumeration==-1,['id'=>$attr.'_evenEnumB','class'=>'form-check-input','value'=>'-1']) ?>
 					<?= Html::label('В обратном',$attr.'_evenEnumB',['class'=>'form-check-label']) ?>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-3 m-0 p-1">
+					<?= Html::label('Стартовый №',$attr.'_labelStartId') ?>
+					<?= Html::textInput($attr.'_labelStartId',$rack->labelStartId,['id'=>$attr.'_labelStartId','class'=>'form-control','maxlength'=>4,'title'=>'Номер первого юнита']) ?>
 				</div>
 			</div>
 		</div>
