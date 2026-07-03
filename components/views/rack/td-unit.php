@@ -15,6 +15,7 @@
 /* @var $sectionRowCount */
 /* @var $sectionCol */
 /* @var $sectionColCount */
+/* @var $tableWidth */
 /* @var $rack RackWidget */
 /* @var $models Techs[] */
 /* @var $this yii\web\View */
@@ -114,10 +115,17 @@ if ($rack->labelMode=='h') {
 
 $installedClass='';
 $style='';
+$slotFontStyle='';
 if ($content) {
 	$installedClass='rack-unit-installed';
 	//если у нас высота больше ширины в 2 раза - поворачиваем текст набок
 	if ($width<$height/2) $style='style="writing-mode:vertical-rl;';
+	//подгон шрифта под длину текста в слоте (issue #154): чем длиннее имя в юните,
+	//тем мельче шрифт, чтобы оно влезало. $width — ширина слота в % от таблицы,
+	//$tableWidth — ширина таблицы в px, $height — высота слота в px.
+	$slotText=trim(preg_replace('/\s+/',' ',strip_tags($content)));
+	$slotPxW=$width/100*$tableWidth;
+	$slotFontStyle=';font-size:'.round(RackWidget::fitFontSize($slotPxW,$height,mb_strlen($slotText)),1).'px';
 }
 
 if (!$skip) {
@@ -135,7 +143,7 @@ if (!$skip) {
 		<?= $contentClass ?>
 		<?= $techInstalled?'':'open-in-modal-form' ?>
 	"
-	style="width:<?= $width ?>%"
+	style="width:<?= $width ?>%<?= $slotFontStyle ?>"
 	id="rack-<?= $rack->id ?>-unit-<?= $unitId ?>"
 	colspan="<?= $colspan ?>"
 	rowspan="<?= $rowspan ?>"

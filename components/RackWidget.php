@@ -189,7 +189,26 @@ class RackWidget extends Widget
 		
 		return $this->smallestUnitHeightCache;
 	}
-	
+
+	/**
+	 * Подбирает размер шрифта (px), при котором текст длиной $textLength символов
+	 * влезает в слот $slotWidthPx × $slotHeightPx. Чем длиннее текст в юните — тем
+	 * мельче шрифт (issue #154). Результат в диапазоне [$min, $max].
+	 *
+	 * @param float $slotWidthPx  ширина слота в px (вдоль строки текста)
+	 * @param float $slotHeightPx высота слота в px
+	 * @param int   $textLength   число символов в слоте (0 => текста нет)
+	 * @param float $max          максимальный кегль
+	 * @param float $min          минимальный кегль
+	 * @return float
+	 */
+	public static function fitFontSize($slotWidthPx,$slotHeightPx,$textLength,$max=16,$min=4) {
+		$font=min($max,$slotHeightPx*0.8);                    //шрифт не выше слота
+		if ($textLength>0)
+			$font=min($font,$slotWidthPx/($textLength*0.6));  //и чтобы текст влез по ширине (~0.6em на символ)
+		return max($min,$font);
+	}
+
 	/**
 	 * Считает координаты (Y↓;X→) ячейки в зависимости от его положения в таблице
 	 * @param $row integer Строка в которой расположена ячейка (сверху вниз)

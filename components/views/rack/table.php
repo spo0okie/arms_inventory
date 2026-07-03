@@ -54,7 +54,8 @@ $fontHeight=min (($rack->smallestUnitHeight-2)*$height/$rack->getTotalHeight()*0
 							'evenLabelShift'=>$evenLabelShift,
 							'height'=>$stackHeightPx/$row['count'],
 							'cssHeight'=>$trHeight,
-							'totalHeight'=>$height
+							'totalHeight'=>$height,
+							'tableWidth'=>$width
 						]);
 						$y++;
 					}

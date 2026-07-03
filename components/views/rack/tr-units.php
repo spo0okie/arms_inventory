@@ -9,6 +9,7 @@
 /* @var $height */
 /* @var $cssHeight */
 /* @var $totalHeight */
+/* @var $tableWidth */
 /* @var $row */
 /* @var $sectionRow */
 /* @var $sectionRowCount */
@@ -60,6 +61,7 @@ use app\models\Techs;
 						'sectionColCount'=>$col['count'],
 						'sectionRow'=>$sectionRow,
 						'sectionRowCount'=>$sectionRowCount,
+						'tableWidth'=>$tableWidth,
 					]);
 								
 					$x+=$colShift;
