@@ -53,11 +53,35 @@ class SchedulesController extends \app\controllers\ArmsBaseController
 	public function testView(): array
 	{
 		$testData = $this->getTestData();
-		return [[
-			'name'     => 'default',
-			'GET'      => ['id' => $testData['empty']->id],
-			'response' => 200,
-		]];
+
+		//расписание с перекрытиями — рендерит ветку с пагинацией перекрытий
+		//в секции "Расписание на неделю" (issue #192)
+		$parent = new Schedules(['name' => 'schedule with overrides (#192)']);
+		$parent->save(false);
+		foreach ([['2024-01-01', '2024-03-31'], ['2024-04-01', '2024-06-30']] as [$start, $end]) {
+			$override = new Schedules([
+				'name'        => 'override (#192)',
+				'parent_id'   => $parent->id,
+				'override_id' => $parent->id,
+				'start_date'  => $start,
+				'end_date'    => $end,
+			]);
+			$override->scenario = Schedules::SCENARIO_OVERRIDE;
+			$override->save(false);
+		}
+
+		return [
+			[
+				'name'     => 'default',
+				'GET'      => ['id' => $testData['empty']->id],
+				'response' => 200,
+			],
+			[
+				'name'     => 'with overrides (paginated week list)',
+				'GET'      => ['id' => $parent->id],
+				'response' => 200,
+			],
+		];
 	}
 
 	/**

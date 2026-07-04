@@ -1,6 +1,7 @@
 <?php
 
-use app\components\ExpandableCardWidget;
+use yii\data\ArrayDataProvider;
+use yii\widgets\ListView;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\schedules\models\Schedules */
@@ -12,21 +13,29 @@ $renderer=$this;
 <div class="mb-3">
 
 <?php
-$content=$this->render('item',['model'=>$model]);
+//основное расписание показываем всегда
+echo $this->render('item',['model'=>$model]);
 
-
+//перекрытия (изменения на период: отпуска и т.п.) могут быть многочисленными,
+//поэтому выводим их с пагинацией, как исключения на 1 день (issue #192),
+//а не одним длинным expandable-блоком
 $periods=$model->overrides;
 if (count($periods)) {
-	
-	foreach ($periods as $period) {
-		$content.=$this->render('item',['model'=>$period]);
-	}
-	
+	echo ListView::widget([
+		'dataProvider'=>new ArrayDataProvider([
+			'allModels'=>$periods,
+			'pagination'=>[
+				'pageSize'=>10,
+				//свой параметр, чтобы пагинация перекрытий не конфликтовала
+				//с пагинацией исключений (та использует стандартный "page")
+				'pageParam'=>'week-page',
+			],
+		]),
+		//itemView 'item' резолвится относительно этого файла => week/item.php
+		'itemView'=>'item',
+		'itemOptions'=>['tag'=>false],
+		'layout'=>"{items}\n{pager}",
+	]);
 }
-echo ExpandableCardWidget::widget([
-	'content'=>$content,
-	'maxHeight'=>650,
-	'switchOnlyOnButton'=>true
-]);
 ?>
 </div>
