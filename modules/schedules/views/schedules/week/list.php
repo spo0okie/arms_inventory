@@ -25,7 +25,7 @@ if (count($periods)) {
 		'dataProvider'=>new ArrayDataProvider([
 			'allModels'=>$periods,
 			'pagination'=>[
-				'pageSize'=>10,
+				'pageSize'=>5,
 				//свой параметр, чтобы пагинация перекрытий не конфликтовала
 				//с пагинацией исключений (та использует стандартный "page")
 				'pageParam'=>'week-page',
