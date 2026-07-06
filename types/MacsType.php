@@ -19,7 +19,8 @@ class MacsType extends TextType
 
 	public function samples(): array
 	{
-		return ['83aa792053a2','83aa791953a0'];
+		//одиночные адреса и диапазон «через тире» (issue #120)
+		return ['83aa792053a2','83aa791953a0','001122334400-0011223344ff'];
 	}
 
 	public function generate(AttributeContext $context): mixed

@@ -67,8 +67,9 @@ class TechsSearch extends Techs
 
 				'model',
 				'place',
-	
+
 				'comment',
+				'history',	//записная книжка оборудования (issue #206)
 
 			], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
@@ -226,7 +227,8 @@ class TechsSearch extends Techs
 			->andFilterWhere(QueryHelper::querySearchString('techs.inv_num', $this->inv_num))
 			->andFilterWhere(QueryHelper::querySearchString('techs.sn', $this->sn))
 			->andFilterWhere(QueryHelper::querySearchString('techs.uid', $this->uid))
-			->andFilterWhere(QueryHelper::querySearchString($mark, $this->inv_sn))
+			//поиск по инв-номеру ищет также и по записной книжке оборудования (issue #206)
+			->andFilterWhere(QueryHelper::querySearchString(['AND/OR',$mark,'IFNULL(techs.history,"")'], $this->inv_sn))
 
 			->andFilterWhere(QueryHelper::querySearchString('users.Ename', $this->user))
 			->andFilterWhere(QueryHelper::querySearchString('users.Doljnost', $this->user_position))
@@ -244,16 +246,25 @@ class TechsSearch extends Techs
 			->andFilterWhere(QueryHelper::querySearchString('CONCAT(partners.uname,partners.bname)', $this->partners_id))
 
             ->andFilterWhere(QueryHelper::querySearchString(['OR','comps.ip','techs.ip'], $this->ip))
-			->andFilterWhere(QueryHelper::querySearchString(['OR','comps.mac','techs.mac'], $this->mac))
-	
+
 			->andFilterWhere(['techs.model_id'=>$this->model_id])
 			->andFilterWhere(['techs.state_id'=>$this->state_id])
 			->andFilterWhere(['techs.places_id'=>$this->places_id])
 			->andFilterWhere(['tech_models.type_id'=>$this->type_id])
 			->andFilterWhere(['tech_types.is_computer'=>$this->is_computer])
 
-			->andFilterWhere(QueryHelper::querySearchString('techs.comment', $this->comment));
-	
+			->andFilterWhere(QueryHelper::querySearchString('techs.comment', $this->comment))
+			//отдельный фильтр по записной книжке оборудования (issue #206)
+			->andFilterWhere(QueryHelper::querySearchString('techs.history', $this->history));
+
+		//поиск MAC: обычный LIKE (частичный/точный) ИЛИ вхождение в сохранённый
+		//диапазон MAC (issue #120). Ищем и по MAC оборудования, и по MAC его ОС.
+		if (strlen((string)$this->mac)) {
+			$macLike=QueryHelper::querySearchString(['OR','comps.mac','techs.mac'], $this->mac);
+			$macRange=MacsHelper::rangeMemberCondition(['comps.mac','techs.mac'], $this->mac);
+			$query->andWhere($macRange ? ['or',$macLike,$macRange] : $macLike);
+		}
+
 		$totalQuery=clone $query;
 	
 		return new ActiveDataProvider([

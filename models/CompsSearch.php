@@ -155,7 +155,6 @@ class CompsSearch extends Comps
 			->andFilterWhere(QueryHelper::querySearchString('concat(IFNULL(domains.name,""),"\\\\",comps.name,IFNULL(sandboxes.suffix,""))', $this->name))
             ->andFilterWhere(QueryHelper::querySearchString('raw_version', $this->raw_version))
 			->andFilterWhere(QueryHelper::querySearchString('comps.ip', $this->ip))
-			->andFilterWhere(QueryHelper::querySearchString('comps.mac', $this->mac))
             ->andFilterWhere(QueryHelper::querySearchString([
             	'AND/OR',
 				'IFNULL(techs.num,"")','IFNULL(platforms.name,"")', 'IFNULL(platforms.search_text,"")'],
@@ -191,6 +190,14 @@ class CompsSearch extends Comps
 				['soft.id'=>$this->linkedSoft_ids]
 			])
 		;
+
+		//поиск MAC: обычный LIKE (частичный/точный) ИЛИ вхождение в сохранённый
+		//диапазон MAC (issue #120)
+		if (strlen((string)$this->mac)) {
+			$macLike=QueryHelper::querySearchString('comps.mac', $this->mac);
+			$macRange=\app\helpers\MacsHelper::rangeMemberCondition(['comps.mac'], $this->mac);
+			$query->andWhere($macRange ? ['or',$macLike,$macRange] : $macLike);
+		}
 
 		$totalQuery=clone $query;
 
