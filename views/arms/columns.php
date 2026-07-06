@@ -41,8 +41,7 @@ return [
 		'modelAttribute' => 'ip',
 		'model' => new \app\models\Comps(),
 		'hint' => 'IP адреса <b>основной ОС</b> этого АРМ.<br>'.
-		'Найти остальные ОС по IP можно через '.Html::a('список ОС',['/comps/index']).
-		\app\models\base\ArmsModel::searchableOrHint,
+		'Найти остальные ОС по IP можно через '.Html::a('список ОС',['/comps/index']),
 		'value' => function ($data) use ($renderer) {
 			if (is_object($data->comp)) {
 				$output=[];
@@ -58,8 +57,7 @@ return [
 		'modelAttribute' => 'mac',
 		'model' => new \app\models\Comps(),
 		'hint' => 'MAC адреса <b>основной ОС</b> этого АРМ.<br>'.
-			'Найти остальные ОС по MAC можно через '.Html::a('список ОС',['/comps/index']).
-			\app\models\base\ArmsModel::searchableOrHint,
+			'Найти остальные ОС по MAC можно через '.Html::a('список ОС',['/comps/index']),
 		'value' => function ($data) use ($renderer) {
 			if (is_object($data->comp)) {
 				return $data->comp->formattedMac;

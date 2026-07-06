@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\components\UrlListWidget;
 use app\models\base\ArmsModel;
 use voskobovich\linker\LinkerBehavior;
 use yii\base\InvalidConfigException;
@@ -33,6 +32,12 @@ class Partners extends ArmsModel
 	
 	public static $title="Контрагент";
 	public static $titles="Контрагенты";
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Контрагенты: организации (поставщики, провайдеры, обслуживаемые юрлица) — реквизиты, контакты, документы и услуги.';
+	}
 
 
 	public static $all_items=null; //кэш всей таблицы
@@ -89,8 +94,16 @@ class Partners extends ArmsModel
     {
         return [
             'id' => ['id','typeClass'=>\app\types\IntegerType::class],
-			'inn' => ['ИНН','typeClass'=>\app\types\StringType::class],
-			'kpp' => ['КПП','typeClass'=>\app\types\StringType::class],
+			'inn' => [
+				'ИНН',
+				'hint' => 'Нужен для идентификации контрагента и прикрепления документов',
+				'typeClass'=>\app\types\StringType::class,
+			],
+			'kpp' => [
+				'КПП',
+				'hint' => 'Вместе с ИНН нужен для идентификации контрагента и прикрепления документов',
+				'typeClass'=>\app\types\StringType::class,
+			],
 			'inn_kpp' => ['ИНН/КПП','typeClass'=>\app\types\StringType::class],
             'uname' => [
             	'Юр. название',
@@ -120,17 +133,22 @@ class Partners extends ArmsModel
             'comment' => [
             	'Комментарий',
 				'hint' => 'Желательно указать любую полезную информацию с кем и какие вопросы решать с этим контрагентом.<br>'
-				 . 'Кто персональный менеджер, кто технарь, кто бухгалтер, адреса, явки, пароли',
+				 . 'Кто персональный менеджер, кто технарь, кто бухгалтер, адреса, явки, пароли.<br>'
+				 . 'Удобно просто копировать сюда подписи из почты',
 				'type' => 'text',
 				'typeClass'=>\app\types\TextType::class,
 			],
 			'cabinet_url' => [
 				'Ссылки',
-				'hint'=>'Ссылки на сайт, личный кабинет, форму обращений в тех. поддержку и прочие важные ссылки.<br>'
-					. UrlListWidget::$hint,
+				//формат заполнения подскажет UrlsType (inputHint)
+				'hint'=>'Ссылки на сайт, личный кабинет, форму обращений в тех. поддержку и прочие важные ссылки.',
 				'typeClass'=>\app\types\UrlsType::class,
 			],
-			'support_tel' => ['Телефоны тех.поддержки','typeClass'=>\app\types\PhoneType::class],
+			'support_tel' => [
+				'Телефоны тех.поддержки',
+				'hint' => 'Контактные телефоны тех. поддержки контрагента, выводятся в его карточке',
+				'typeClass'=>\app\types\PhoneType::class,
+			],
 			'docs' => ['Документы','typeClass'=>\app\types\LinkType::class]
         ];
     }

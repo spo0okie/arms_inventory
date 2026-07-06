@@ -66,6 +66,15 @@ class ArmsModel extends ActiveRecord
 	/** @var string как называется список моделей (для страницы Index) */
 	public static $titles='Объекты';
 
+	/**
+	 * Короткое описание сущности (слой 1 документации, см. docs/help/README.md):
+	 * 1-3 предложения — что это и зачем нужно. Показывается тултипом у иконки
+	 * помощи (HintIconWidget) и на странице документации сущности (docs/model).
+	 * Подробное описание (если нужно) — docs/help/models/<class-id>.md (слой 2).
+	 * @return string
+	 */
+	public static function modelDescription(): string {return '';}
+
 	/** @var string надпись на кнопке создания нового объекта в списке */
 	public static $addButtonText='Добавить';
 
@@ -82,7 +91,8 @@ class ArmsModel extends ActiveRecord
 	 */
 	public static $nameAttr='name';
 
-	public const searchableOrHint='<br><i>HINT: Можно искать несколько вариантов, разделив их вертикальной</i> <b>|</b> <i>чертой</i>';
+	//searchableOrHint удалён: общий синтаксис поиска (| & !) показывается
+	//в search-тултипе автоматически (AttributeTooltip, ui-sources.md §0.1)
 
 
 	/** @var string если заполнить, то будет сохранять историю в моделях этого класса */

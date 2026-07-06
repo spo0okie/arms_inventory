@@ -25,6 +25,14 @@ class Sandboxes extends ArmsModel
 public static $title='Песочница';
 public static $titles='Песочницы';
 
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Песочницы — изолированные окружения (например клоны продуктива): '
+			.'отделяют клонированные ВМ от продуктивных, задают суффикс имён '
+			.'и признак сетевой связности.';
+	}
+
     /**
      * {@inheritdoc}
      */
@@ -68,7 +76,12 @@ public static $titles='Песочницы';
     public function attributeData()
     {
         return array_merge(parent::attributeData(),[
-			'archived' => ['Архивирован','typeClass'=>\app\types\BooleanType::class],
+			//TODO-REVIEW: подсказки сгенерированы по коду
+			'archived' => [
+				'Архивирован',
+				'hint'=>'Окружение больше не используется: скрывается из списков, остаётся для истории',
+				'typeClass'=>\app\types\BooleanType::class,
+			],
 			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
 			'links' => ['Ссылки','typeClass'=>\app\types\UrlsType::class],
 			'name' => [
@@ -81,14 +94,22 @@ public static $titles='Песочницы';
 				'hint'=>'Есть ли сетевая связность с этим окружением',
 				'typeClass'=>\app\types\BooleanType::class,
 			],
-			'notepad' => ['Записная книжка','typeClass'=>\app\types\TextType::class],
+			'notepad' => [
+				'Записная книжка',
+				'hint'=>'Заметки по этому окружению',
+				'typeClass'=>\app\types\TextType::class,
+			],
 			'suffix' => [
 				'Суффикс',
 				'hint'=>'Суффикс будет выводится после имен ВМ для отличия клонов в песочнице от продуктивных ВМ',
 				'typeClass'=>\app\types\StringType::class,
 			],
 			'updated_at' => ['Дата обновления','typeClass'=>\app\types\DatetimeType::class],
-			'updated_by' => ['Обновил','typeClass'=>\app\types\StringType::class],
+			'updated_by' => [
+				'Обновил',
+				'hint'=>'Кто последним изменил запись (заполняется автоматически)',
+				'typeClass'=>\app\types\StringType::class,
+			],
 		]);
     }
 	

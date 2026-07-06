@@ -66,10 +66,28 @@ class Scans extends ArmsModel
 		return ['name','fileSize','fileDate','fileExists'];
 	}
 
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Сканы документов и изображения (png/jpg/pdf/...), прикреплённые к объектам '
+			.'системы; для отображения генерируются миниатюры. Служебная модель — '
+			.'файлы загружаются со страниц самих объектов.';
+	}
+
 	public function attributeData()
 	{
+		//TODO-REVIEW: подсказки *_id сгенерированы по коду
 		return array_merge(parent::attributeData(), [
 			'file' => ['Место хранения загруженного файла', 'typeClass' => \app\types\StringType::class],
+			'arms_id' => ['АРМ', 'hint' => 'АРМ, к которому прикреплён скан'],
+			'techs_id' => [Techs::$titles, 'hint' => 'Оборудование, к которому прикреплён скан'],
+			'contracts_id' => [Contracts::$titles, 'hint' => 'Документ, к которому прикреплён скан'],
+			'places_id' => [Places::$titles, 'hint' => 'Помещение, к которому прикреплён скан'],
+			'tech_models_id' => [TechModels::$titles, 'hint' => 'Модель оборудования, к которой прикреплён скан'],
+			'material_models_id' => ['Материалы', 'hint' => 'Позиция ЗИП/материалов, к которой прикреплён скан'],
+			'lic_types_id' => [LicTypes::$titles, 'hint' => 'Схема лицензирования, к которой прикреплён скан'],
+			'lic_items_id' => [LicItems::$titles, 'hint' => 'Закупка лицензий, к которой прикреплён скан'],
+			'soft_id' => ['Программный продукт', 'hint' => 'Программный продукт, к которому прикреплён скан'],
 			'format' => ['typeClass' => \app\types\StringType::class],
 			'fileSize' => ['typeClass' => \app\types\IntegerType::class],
 			'fileDate' => ['typeClass' => \app\types\IntegerType::class],

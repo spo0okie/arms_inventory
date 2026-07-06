@@ -17,10 +17,15 @@ use yii\helpers\ArrayHelper;
  */
 class Domains extends ArmsModel
 {
-	
+
 	public static $title='Домен';
 	public static $titles='Домены';
-	
+
+	public static function modelDescription(): string
+	{
+		return 'Справочник доменов (Windows/AD и чисто сетевых в Linux), в которых числятся операционные системы.';
+	}
+
     /**
      * @inheritdoc
      */
@@ -42,7 +47,7 @@ class Domains extends ArmsModel
             [['name', 'fqdn'], 'unique', 'targetAttribute' => ['name', 'fqdn']],
         ];
     }
-	
+
 	public $linksSchema=[
 		'comps_ids'=>[Comps::class,'domain_id'],
 		'techs_ids'=>[Techs::class,'domain_id'],
@@ -55,12 +60,24 @@ class Domains extends ArmsModel
     {
         return [
             'id' => ['Идентификатор','typeClass'=>\app\types\IntegerType::class],
-            'name' => ['Имя домена','typeClass'=>\app\types\StringType::class],
-            'fqdn' => ['FQDN','typeClass'=>\app\types\StringType::class],
-            'comment' => ['Комментарий','typeClass'=>\app\types\TextType::class],
+			'name' => [
+				'Имя домена',
+				'hint'=>'Короткое (NetBIOS) имя домена',
+				'typeClass'=>\app\types\StringType::class,
+			],
+			'fqdn' => [
+				'FQDN',
+				'hint'=>'Полное DNS-имя домена',
+				'typeClass'=>\app\types\StringType::class,
+			],
+			'comment' => [
+				'Комментарий',
+				'hint'=>'Пояснение по этому домену',
+				'typeClass'=>\app\types\TextType::class,
+			],
         ];
     }
-	
+
 	public function getComps()
 	{
 		return $this->hasMany(Comps::class,['domain_id'=>'id']);
@@ -69,16 +86,16 @@ class Domains extends ArmsModel
 	{
 		return $this->hasMany(Techs::class,['domain_id'=>'id']);
 	}
-	
-	
-	
+
+
+
 	public static function fetchNames(){
         $list= static::find()
             ->select(['id','name'])
             ->all();
         return ArrayHelper::map($list, 'id', 'name');
     }
-	
+
 	/**
 	 * ID домена по имени
 	 * @param $name
@@ -90,7 +107,7 @@ class Domains extends ArmsModel
 		/** @var Domains $domain */
 		return $domain->id;
 	}
-	
+
 	/**
 	 * ID домена по FQDN
 	 * @param $name
@@ -102,7 +119,7 @@ class Domains extends ArmsModel
 		/** @var Domains $domain */
 		return $domain->id;
 	}
-	
+
 	/**
 	 * ID домена по имени или FQDN
 	 * @param $name
@@ -116,9 +133,9 @@ class Domains extends ArmsModel
     	if (!is_null($domain_id=static::findByName($name))) return $domain_id;
     	//ну либо это домен первого уровня
     	return static::findByFQDN($name);
-			
+
 	}
-	
+
 	/**
 	 * Должно вытащить ID домена и вернуть [id домена, имя компа, имя домена]
 	 * false в случае ошибки формата имени компа
@@ -133,7 +150,7 @@ class Domains extends ArmsModel
 		$dotPos=mb_strpos($name,'.');
 		if (!$slashPos && !$dotPos && !$defaultDomain) {
 			if ($enableEmptyDomain)	return [false,$name,''];//no domain
-			
+
 			return false;
 		}
 
@@ -146,7 +163,7 @@ class Domains extends ArmsModel
 				(static::findByName($tokens[0]));	//DOMAIN\comp
 			return [$domain_id,$tokens[1],$tokens[0]];
 		}
-		
+
 		//FQDN
 		if ($dotPos) {
 			$tokens=explode('.',$name);
@@ -155,13 +172,13 @@ class Domains extends ArmsModel
 			$domainFqdn=implode('.',$tokens);
 			return [static::findByFQDN($domainFqdn),$compName,$domainFqdn];
 		}
-		
+
 		//nor any of above -> act as MS WORKGROUP PC
 		return [static::findByName($defaultDomain),$name,$defaultDomain];
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Проверка hostname для разных форматов ввода
 	 * @param string      $hostname для валидации
@@ -188,5 +205,5 @@ class Domains extends ArmsModel
 		}
 		return $hostname;
 	}
-	
+
 }

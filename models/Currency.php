@@ -19,9 +19,14 @@ use yii\helpers\ArrayHelper;
  */
 class Currency extends ArmsModel
 {
-	
+
 	public static $title='Валюта';
 	public static $titles='Валюты';
+
+	public static function modelDescription(): string
+	{
+		return 'Справочник валют для стоимостей (закупки, услуги связи и т.п.).';
+	}
 	/**
      * {@inheritdoc}
      */
@@ -44,6 +49,17 @@ class Currency extends ArmsModel
         ];
     }
 
+	/**
+	 * {@inheritdoc}
+	 */
+	public function attributeData()
+	{
+		return array_merge(parent::attributeData(), [
+			'name' => ['Название','hint'=>'Название валюты (например Рубль)'],
+			'symbol' => ['Символ','hint'=>'Символ валюты для отображения рядом с суммами (₽, $, €)'],
+		]);
+	}
+
     /**
      * {@inheritdoc}
      */
@@ -58,8 +74,8 @@ class Currency extends ArmsModel
             'notepad' => 'Записная книжка',
         ];
     }
-	
-	
+
+
 	/**
 	 * Name for search
 	 * @return string
@@ -68,8 +84,8 @@ class Currency extends ArmsModel
 	{
 		return $this->name;
 	}
-	
-	
+
+
 	/**
 	 * Возвращает список всех элементов
 	 * @return array|mixed|null

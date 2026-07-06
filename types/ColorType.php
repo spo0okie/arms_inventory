@@ -13,7 +13,7 @@ use yii\web\View;
  * Формат: #RRGGBB или #RGB
  * Пример: "#FF5733", "#fff", "#000000"
  */
-class ColorType implements AttributeTypeInterface
+class ColorType extends BaseType
 {
 	/**
 	 * {@inheritdoc}

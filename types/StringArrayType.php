@@ -7,7 +7,7 @@ use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
 
-class StringArrayType implements AttributeTypeInterface
+class StringArrayType extends BaseType
 {
 	public static function name(): string
 	{

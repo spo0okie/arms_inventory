@@ -48,6 +48,12 @@ class MaintenanceJobs extends ArmsModel
 	
 	public static $title='Регламентное обслуживание';
 	public static $titles='Регламентное обслуживание';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Работы регламентного обслуживания: что и по какому расписанию выполняется над оборудованием и сервисами.';
+	}
 	public static $newItemPrefix='Новое';
 	
 	public $treeChildren=null;

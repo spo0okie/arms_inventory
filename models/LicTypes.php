@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\components\UrlListWidget;
 use app\models\base\ArmsModel;
 use Yii;
 use yii\db\ActiveQuery;
@@ -24,6 +23,12 @@ class LicTypes extends ArmsModel
 
 	public static $title='Схема лицензирования';
 	public static $titles='Схемы лицензирования';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Схемы лицензирования: как считается лицензия (на ПК, плавающая, на сокет и т.п.); переиспользуются в типах лицензий.';
+	}
 
     /**
      * @inheritdoc
@@ -72,7 +77,8 @@ class LicTypes extends ArmsModel
 			],
 			'links' => [
 				'Ссылки',
-				'hint' => UrlListWidget::$hint.' Желательно указать ссылку на описание схемы лицензирования в интернете',
+				//формат заполнения подскажет UrlsType (inputHint)
+				'hint' => 'Желательно указать ссылку на описание схемы лицензирования в интернете',
 			],
 			'name' => [
 				'Служебное имя',

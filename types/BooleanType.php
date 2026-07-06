@@ -7,7 +7,7 @@ use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
 
-class BooleanType implements AttributeTypeInterface
+class BooleanType extends BaseType
 {
 	public static function name(): string
 	{

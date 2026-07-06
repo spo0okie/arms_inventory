@@ -27,6 +27,12 @@ class NetVlans extends ArmsModel
 	public static $title='Vlan';
 	public static $titles='Vlan\'ы';
 
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Справочник VLAN: номера VLAN с привязкой к сетям и доменам L2.';
+	}
+
 	/**
      * {@inheritdoc}
      */
@@ -80,9 +86,8 @@ class NetVlans extends ArmsModel
 			],
             'vlan' => [
             	'Vlan ID',
-				'hint' => 'Номер Vlan от 1 до 4094<br>'
-					.'При указании диапазона (например 10-20) будут созданы все Vlan в этом диапазоне<br>'
-					. '<i>(0, 1002-1005 и 4095 зарезервированы)</i>',
+				//формат и границы (1-4094, диапазоны) подскажет VlanType (inputHint)
+				'hint' => 'При указании диапазона будут созданы все Vlan этого диапазона',
 				'type' => 'integer', 	//вообще можно в форме указывать диапазоны, но это будет обработано
 										//и сконвертировано в множество integer
 				'typeClass' => VlanType::class,
@@ -95,7 +100,8 @@ class NetVlans extends ArmsModel
 			],
 			'comment' => [
 				'Пояснение',
-				'comment' => 'Все что нужно знать об этом Vlan, но что не ясно из названия',
+				//был ключ 'comment' вместо 'hint' (опечатка) - подсказка не отображалась
+				'hint' => 'Все что нужно знать об этом Vlan, но что не ясно из названия',
 				'type' => 'text',
 				'typeClass' => \app\types\TextType::class,
 			],

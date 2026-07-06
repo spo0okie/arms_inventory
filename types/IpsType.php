@@ -15,6 +15,13 @@ class IpsType extends IpType
 		return 'ips';
 	}
 
+	public function inputHint(): ?string
+	{
+		return 'В каждой строке — один IPv4-адрес (<b>192.168.1.10</b>) '
+			.'или сеть с маской (<b>192.168.1.0/24</b>). '
+			.'Некорректные строки при сохранении отбрасываются.';
+	}
+
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
 		return $field->textInput();

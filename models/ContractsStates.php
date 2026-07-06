@@ -17,15 +17,20 @@ use app\models\base\ArmsModel;
  */
 class ContractsStates extends ArmsModel
 {
-	
+
 	public static $title='Состояние док-ов';
 	public static $titles='Состояния док-ов';
+
+	public static function modelDescription(): string
+	{
+		return 'Справочник состояний документов.';
+	}
 	public static $description='Состояния жизненного цикла оборудования и иных сущностей в предприятии';
 	//состояния неоплаты документа
 	//public static $unpaidStates=['state_paywait_full','state_payed_partial'];
 	//состояния полной оплаты документа
 	//public static $paidStates=['state_payed_full'];
-	
+
 	private static $cache=null;
 	//private static $unpaidIds=null;
 	//private static $paidIds=null;
@@ -41,7 +46,7 @@ class ContractsStates extends ArmsModel
 	public $linksSchema=[
 		'contracts_ids'=>[Contracts::class,'state_id'],
 	];
-	
+
     /**
      * {@inheritdoc}
      */
@@ -92,7 +97,7 @@ class ContractsStates extends ArmsModel
 			],
         ];
     }
-	
+
 	public function getContracts()
 	{
 		return $this->hasMany(Contracts::class,['state_id'=>'id']);
@@ -105,6 +110,6 @@ class ContractsStates extends ArmsModel
 			->orderBy('name')
 			->all();
 	}
-	
+
 
 }

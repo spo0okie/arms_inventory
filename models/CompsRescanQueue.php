@@ -21,6 +21,12 @@ class CompsRescanQueue extends ArmsModel
 	public static $title='Запланированный рескан';
 	public static $titles='Запланированные ресканы';
 
+	public static function modelDescription(): string
+	{
+		return 'Служебная очередь повторного распознавания ПО: задания на повторный '
+			.'разбор отпечатка софта ОС (например после правки выражений продукта).';
+	}
+
     /**
      * {@inheritdoc}
      */
@@ -56,11 +62,17 @@ class CompsRescanQueue extends ArmsModel
 		return ArrayHelper::recursiveOverride(parent::attributeData(),[
 			'comps_id' => [
 				'OS/VM',
+				'hint' => 'Операционная система, для которой запланирован повторный разбор отпечатка',
 				'indexHint' => 'Операционная система для сканирования',
 			],
 			'soft_id' => [
 				'ПО',
+				'hint' => 'Программный продукт, из-за которого запланирован рескан',
 				'indexHint' => 'Программное обеспечение, которое инициировало повторное сканирование',
+			],
+			'updated_by' => [
+				'Обновил',
+				'hint' => 'Кто создал задание (заполняется автоматически)',
 			],
         ]);
     }

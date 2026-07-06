@@ -14,7 +14,7 @@ use yii\web\View;
  * Формат: hostname или hostname.domain.example
  * Пример: "server01", "dc01.domain.local", "pc-001"
  */
-class HostnameType implements AttributeTypeInterface
+class HostnameType extends BaseType
 {
 	/**
 	 * {@inheritdoc}

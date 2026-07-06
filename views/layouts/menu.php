@@ -174,6 +174,12 @@ echo Nav::widget([
 		'options' => ['class' => ['nav', 'navbar-nav', 'navbar-right']],
 		'dropdownClass' => Dropdown::class,
 		'items' => [
+			Yii::$app->user->isGuest?'':
+				['label' => '<i class="fa fa-question-circle"></i>',
+					'encode'=>false,
+					'url' => ['/docs/index'],
+					'linkOptions'=>['title'=>'Документация'],
+				],
 			Users::isAdmin()?
 				['label' => '<i class="fa fa-cog"></i>',
 					'encode'=>false,

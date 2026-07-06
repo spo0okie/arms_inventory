@@ -17,6 +17,11 @@ class Departments extends ArmsModel
 {
 	public static $title='Подразделение';
 	public static $titles='Подразделения';
+
+	public static function modelDescription(): string
+	{
+		return 'Ручной справочник подразделений — альтернатива загруженной оргструктуре, когда та не отражает функциональную структуру.';
+	}
 	public static $hint='Подразделение в отличие от отделов оргструктуры указывается вручную<br>'.
 		'Используется в случае, когда отделы в оргструктуре неудобно использовать для группировки,<br>'.
 		'или же они не отображают реального разделения на отделы в организации';
@@ -40,6 +45,16 @@ class Departments extends ArmsModel
             [['name'], 'unique'],
         ];
     }
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function attributeData()
+	{
+		return array_merge(parent::attributeData(), [
+			'name' => ['Подразделение','hint'=>'Название подразделения'],
+		]);
+	}
 
     /**
      * {@inheritdoc}

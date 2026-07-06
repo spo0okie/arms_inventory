@@ -26,6 +26,12 @@ class MaterialsTypes extends ArmsModel
 	public static $title='Категория материалов';
 	public static $titles='Категории материалов';
 
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Справочник типов ЗИП и материалов.';
+	}
+
     /**
      * {@inheritdoc}
      */

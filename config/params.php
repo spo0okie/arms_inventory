@@ -2,10 +2,12 @@
 
 return [
 	'adminEmail' => 'reviakin@gmail.com',
+	//wikiUrl используется для рендера пользовательского контента с wiki-разметкой
+	//(WikiController/WikiPageWidget); документация приложения - встроенная (docs/help)
 	'wikiUrl'=>'https://wiki.reviakin.net/',
-	'hintUrl'=>'https://wiki.reviakin.net/инвентаризация:',
 	'wikiUser'=>'',
     'wikiPass'=>'',
+	//'docsOverridePath'=>'/path/to/local/docs',	//каталог переопределения встроенной документации
 	'bsVersion' => '5.x',
 
 	'useRBAC'=>false,   		//включить RBAC и выдавать админа только тем кому назначено

@@ -5,6 +5,7 @@ namespace app\components\Forms;
 use app\components\formInputs\DokuWikiEditor;
 use app\components\formInputs\TextAutoResizeWidget;
 use app\components\Forms\assets\Select2FieldAsset;
+use app\components\AttributeTooltip;
 use app\controllers\ArmsBaseController;
 use app\helpers\ArrayHelper;
 use app\helpers\StringHelper;
@@ -29,6 +30,11 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	 * @var string Подсказка для нашего label
 	 */
 	private $hintText;
+
+	/**
+	 * @var bool тултип label явно отключен через hint(false)
+	 */
+	private $hintDisabled=false;
 	
 	/**
 	 * Наша иконочка в label - признак, что есть подсказка
@@ -94,6 +100,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	{
 		if ($hint === false) {
 			$this->hintText = '';
+			$this->hintDisabled = true;
 			return $this;
 		}
 		
@@ -144,17 +151,22 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 		}
 		
 		$label = $this->labelText;
-		//если у нас есть подсказка, то
-		if ($this->hintText) {
-			//добавляем к label иконку
+		//тултип собирает единый сборщик (ui-sources.md §0.1): смысл + формат типа
+		//+ переходы на подробные страницы. hint(false) отключает тултип целиком.
+		$tooltip = $this->hintDisabled? null : AttributeTooltip::build(
+			$this->model,
+			$this->attribute,
+			AttributeTooltip::MODE_FORM,
+			$this->labelText,
+			$this->hintText?:null
+		);
+		if ($tooltip) {
+			//добавляем к label иконку - признак, что есть подсказка
 			$label .= ' '.static::labelHintIcon;
-			
-			//добавляем к options наш tooltip с подсказкой
 			$this->labelOptions = array_merge(
 				$this->labelOptions,
-				static::hintTipOptions($label, $this->hintText)
+				static::hintTipOptions($tooltip['title'], $tooltip['body'])
 			);
-			
 		}
 		
 		

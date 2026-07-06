@@ -23,6 +23,13 @@ class Segments extends ArmsModel
 	
 	static $titles='Сегменты инфраструктуры';
 	static $title='Сегмент инфраструктуры';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Сегменты ИТ инфраструктуры: области с разными требованиями информационной '
+			.'безопасности; принадлежность объектов выводится из сетей и сервисов.';
+	}
     /**
      * {@inheritdoc}
      */
@@ -65,6 +72,11 @@ class Segments extends ArmsModel
 				'typeClass'=>\app\types\StringType::class,
 			],
 			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
+			'links' => [
+				'hint' => 'Ссылки на связанные страницы и ресурсы.<br>'
+					.'При настроенной интеграции с DokuWiki сюда можно добавить статью вики с описанием сегмента — '
+					.'она будет подгружаться во вкладку при просмотре сегмента и связанных с ним сетей',
+			],
 			'name' => [
 				'Название',
 				'hint' => 'Понятное человеку название',

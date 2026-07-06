@@ -83,6 +83,15 @@ class Users extends ArmsModel implements IdentityInterface
 	public static $names_cache=null;
 	public static $title="Сотрудник";
 	public static $titles="Сотрудники";
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Сотрудники/пользователи: контактные данные, трудоустройство '
+			.'(подразделение, должность, табельный номер) и привязки к АРМ, '
+			.'лицензиям, IP адресам и доступам. '
+			.'Обычно заполняются синхронизацией с кадровой системой.';
+	}
 	
 	private $tokens_cache=null; //имя разбитое на токены
 	
@@ -226,16 +235,35 @@ class Users extends ArmsModel implements IdentityInterface
 				],
 			],
 			'Bday' => ['День рождения','typeClass'=>\app\types\DateType::class],
-			'Doljnost' => ['Должность','typeClass'=>\app\types\StringType::class],
-			'Email' => ['E-Mail','absorb'=>'ifEmpty','typeClass'=>\app\types\EmailType::class],
+			//TODO-REVIEW: подсказки кадровых полей сгенерированы по коду
+			'Doljnost' => [
+				'Должность',
+				'hint'=>'Должность сотрудника.<br>Обычно заполняется синхронизацией с кадровой системой',
+				'typeClass'=>\app\types\StringType::class,
+			],
+			'Email' => [
+				'E-Mail',
+				'hint'=>'Адрес электронной почты сотрудника',
+				'absorb'=>'ifEmpty','typeClass'=>\app\types\EmailType::class,
+			],
 			'employee_id' => [
 				'Таб. №',
 				'hint'=>'Табельный номер сотрудника<br>(конкретно этого его трудоустройства)',
 				'typeClass'=>\app\types\StringType::class,
 			],
-			'Ename' => ['Полное имя','typeClass'=>\app\types\StringType::class],
+			//TODO-REVIEW: подсказки сгенерированы по коду
+			'employ_date' => ['Дата приёма','hint'=>'Дата приёма сотрудника на работу'],
+			'resign_date' => ['Дата увольнения','hint'=>'Дата увольнения сотрудника'],
+			'id' => ['id','hint'=>'Внутренний идентификатор записи'],
+			'netIps_ids' => ['alias'=>'ips'],
+			'Ename' => [
+				'Полное имя',
+				'hint'=>'Полное имя (ФИО) сотрудника',
+				'typeClass'=>\app\types\StringType::class,
+			],
 			'ips' => [
 				'Привязанные IP адреса',
+				'hint' => 'IP адреса, закреплённые за пользователем',
 				'indexLabel' => 'IPs',
 				'indexHint' => 'Привязанные к пользователю IP адреса',
 				'absorb'=>'ifEmpty',
@@ -247,10 +275,23 @@ class Users extends ArmsModel implements IdentityInterface
 				'indexHint'=>'Назначенные пользователю лицензии',
 				'join'=>['licItems','licGroups','licKeys'],
 			],
-			'Login' => ['Логин (AD)','typeClass'=>\app\types\StringType::class],
+			'Login' => [
+				'Логин (AD)',
+				'hint'=>'Учётная запись пользователя в домене/AD',
+				'typeClass'=>\app\types\StringType::class,
+			],
 			'logon_ids' => ['absorb'=>false], //вручную переключим
-			'manager_id' => ['Руководитель','typeClass'=>\app\types\StringType::class],
-			'Mobile' => ['Мобильный тел','absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
+			//TODO-REVIEW: manager_id хранится строкой - подтвердить смысл (идентификатор из кадровой системы?)
+			'manager_id' => [
+				'Руководитель',
+				'hint'=>'Руководитель сотрудника (по данным кадровой системы)',
+				'typeClass'=>\app\types\StringType::class,
+			],
+			'Mobile' => [
+				'Мобильный тел',
+				'hint'=>'Мобильный телефон сотрудника',
+				'absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class,
+			],
 			'netIps' => ['alias'=>'ips'],
 			'nosync' => [
 				'Отключить синхронизацию',
@@ -274,18 +315,29 @@ class Users extends ArmsModel implements IdentityInterface
 			'org_name'=>['alias'=>'org_id'],
 			'Orgeh' => [
 				'Подразделение',
+				'hint'=>'Код подразделения в кадровой системе;<br>связывает сотрудника с оргструктурой',
 				'join'=>['orgStruct'],
 				'typeClass'=>\app\types\StringType::class,
 			],
 			'orgStruct_name' => ['alias'=>'Orgeh'],
-			'Persg' => ['Тип трудоустройства','typeClass'=>\app\types\IntegerType::class],
+			//TODO-REVIEW: значения кодов Persg по коду не выводятся - уточнить
+			'Persg' => [
+				'Тип трудоустройства',
+				'hint'=>'Код типа трудоустройства из кадровой системы',
+				'typeClass'=>\app\types\IntegerType::class,
+			],
 			'Phone' => [
 				'Внутренний тел',
+				'hint'=>'Внутренний телефонный номер сотрудника',
 				'absorb'=>'ifEmpty',
 				'join'=>['techs.model.type','techs.state'],
 				'typeClass'=>\app\types\StringType::class,
 			],
-			'private_phone' => ['Личный тел','absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
+			'private_phone' => [
+				'Личный тел',
+				'hint'=>'Личный телефон сотрудника',
+				'absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class,
+			],
 			'scheduledAccess'=> [
 				'Вр. доcтупы',
 				'indexHint' => 'Предоставленные пользователю временные доступы',
@@ -302,11 +354,22 @@ class Users extends ArmsModel implements IdentityInterface
 				'join'=>['techs.model.type','techs.state']
 			],
 			'uid' => ['Идентификатор','hint'=>'Уникальный идентификатор человека.<br>ИНН / СНИЛС / MD5(ИНН) и т.п.','typeClass'=>\app\types\StringType::class],
-			'Uvolen' => ['Уволен','typeClass'=>\app\types\BooleanType::class],
-			'work_phone' => ['Городской рабочий тел','absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
-			
+			'Uvolen' => [
+				'Уволен',
+				'hint'=>'Признак того, что сотрудник уволен (запись остаётся для истории)',
+				'typeClass'=>\app\types\BooleanType::class,
+			],
+			'work_phone' => [
+				'Городской рабочий тел',
+				'hint'=>'Городской рабочий телефон сотрудника',
+				'absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class,
+			],
+
 			'access_token'=>['absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
-			'auth_key'=>['absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
+			'auth_key'=>[
+				'hint'=>'Служебный ключ авторизации (заполняется автоматически)',
+				'absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class,
+			],
 			'password'=>['absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
 		]);
 	}

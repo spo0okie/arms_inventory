@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\components\UrlListWidget;
 use app\console\commands\SyncController;
 use app\generation\context\GenerationContext;
 use app\models\base\ArmsModel;
@@ -46,6 +45,12 @@ class TechModels extends ArmsModel
 {
 	public static $title='Модель оборудования';
 	public static $titles='Модели оборудования';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Модели оборудования: конкретные модели с производителем, спецификацией и раскладкой посадочных мест.';
+	}
 	public static $descr='Ну модели и модели. Что про них особо сказать';
 	//подсказка, которая передается через JSON если запрошена подсказка оформления спеки для моделей без спек
 	public static $no_specs_hint='NO_SPECS_USE';
@@ -147,6 +152,11 @@ class TechModels extends ArmsModel
 	public function attributeData()
 	{
 		return [
+			//TODO-REVIEW: подсказка сгенерирована по коду
+			'scans_id' => [
+				'Сканы',
+				'hint'=>'Сканы/изображения, прикреплённые к модели (например фото или спецификация)',
+			],
 			'back_rack_layout'=>[
 				'Конфигурация задней корзины',
 				'hint'=>'Может быть типовая (одна сетка на стенке устройства), в таком случае можно настраивать через конструктор<br>'.
@@ -172,7 +182,8 @@ class TechModels extends ArmsModel
 			],
 			'front_rack_two_sided'=>['Двухсторонняя','hint'=>'Посадочные места идут на всю глубину устройства и доступны для установки устройств как спереди так и сзади','typeClass'=>\app\types\BooleanType::class],
 			'individual_specs' => ['Индив. спеки','hint' => 'Признак того что модель не полностью определяет спецификацию оборудования, и для каждого экземпляра ее нужно описывать индивидуально (сервера, СХД, самосборные ПК)','typeClass'=>\app\types\BooleanType::class],
-			'links' => ['Ссылки','hint' => UrlListWidget::$hint,'typeClass'=>\app\types\UrlsType::class],
+			//формат заполнения подскажет UrlsType (inputHint)
+			'links' => ['Ссылки','hint' => 'Ссылки на страницу производителя, спецификации и т.п.','typeClass'=>\app\types\UrlsType::class],
 			'manufacturers_id' => ['Производитель','hint' => 'Производитель этой модели оборудования','typeClass'=>\app\types\LinkType::class],
 			'name' => ['Наименование','hint' => 'Наименование модели (включая комплектацию, если бывают разные) достаточное для точной идентификации при закупке (имя производителя писать не надо)','typeClass'=>\app\types\StringType::class],
 			'ports' => ['Сетевые порты на устройстве','hint' => 'Список Ethernet портов на устройстве, по строке на порт. Первое слово в строке - наименование порта (1/WAN/Lan_1/management), остальные слова - комментарий к порту','typeClass'=>\app\types\TextType::class],

@@ -20,6 +20,12 @@ class NetDomains extends ArmsModel
 {
 	public static $title='L2 Домен';
 	public static $titles='L2 Домены';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Домены L2: группируют VLAN по физическим доменам коммутации.';
+	}
 	
     /**
      * {@inheritdoc}

@@ -34,6 +34,12 @@ class Ports extends ArmsModel
 	
 	public static $title='Сетевой порт';
 	public static $titles='Сетевые порты';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Порты коммутации: порты оборудования и их соединения.';
+	}
     /**
      * {@inheritdoc}
      */

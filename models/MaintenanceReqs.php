@@ -40,6 +40,12 @@ class MaintenanceReqs extends ArmsModel
 
 	public static $title='Требования по обслуживанию';
 	public static $titles='Требования по обслуживанию';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Требования по регламентному обслуживанию: какие регламентные работы должны проводиться над оборудованием/ОС.';
+	}
 	
 	//признак, что в итоговом наборе требований конкретно это можно игнорировать,
 	//т.к. оно удовлетворяется более общим требованием
@@ -109,7 +115,16 @@ class MaintenanceReqs extends ArmsModel
     public function attributeData()
     {
 		return array_merge(parent::attributeData(),[
-			'archived' => ['Архивирован','typeClass'=>\app\types\BooleanType::class],
+			//TODO-REVIEW: подсказки сгенерированы по коду
+			'archived' => [
+				'Архивирован',
+				'hint'=>'Требование больше не действует: скрывается из списков, остаётся для истории',
+				'typeClass'=>\app\types\BooleanType::class,
+			],
+			'updated_by' => [
+				'Обновил',
+				'hint'=>'Кто последним изменил запись (заполняется автоматически)',
+			],
 			'comps'=>['Операционные системы/ВМ','typeClass'=>\app\types\LinkType::class],
 			'comps_ids'=>['alias'=>'comps'],
 			'description' => [

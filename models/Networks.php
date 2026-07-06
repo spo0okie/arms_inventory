@@ -60,6 +60,12 @@ class Networks extends ArmsModel
 	private $ranges_cache=null;
 	
 	public static $titles='Сети';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'IP сети: подсети с масками, сегментами и VLAN; адреса сетей связываются с ОС и оборудованием.';
+	}
 	public static $title='Сеть';
 	
 	public static $latinNameHint='<br>'

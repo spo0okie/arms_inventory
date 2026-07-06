@@ -16,6 +16,13 @@ use Yii;
  */
 class ManufacturersDict extends ArmsModel
 {
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Словарь вариантов написания производителей: сопоставляет строки из '
+			.'отпечатков ПО/железа с каноническим производителем.';
+	}
+
 	static private $cache=[];
 	static private $cacheComplete=false;
 	
@@ -54,6 +61,18 @@ class ManufacturersDict extends ArmsModel
             [['manufacturers_id'], 'exist', 'skipOnError' => true, 'targetClass' => Manufacturers::className(), 'targetAttribute' => ['manufacturers_id' => 'id']],
         ];
     }
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function attributeData()
+	{
+		//TODO-REVIEW: подсказки сгенерированы по коду
+		return array_merge(parent::attributeData(), [
+			'word' => ['Вариант написания','hint'=>'Строка-вариант написания производителя, встречающаяся в отпечатках ПО/железа'],
+			'manufacturers_id' => ['Производитель','hint'=>'Канонический производитель, которому соответствует этот вариант написания'],
+		]);
+	}
 
     /**
      * @inheritdoc

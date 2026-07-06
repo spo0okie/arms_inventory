@@ -22,6 +22,13 @@ class TechStates extends ArmsModel
 	public static $title='Состояния';
 	public static $titles='Состояния';
 	public static $description='Состояния жизненного цикла оборудования и иных сущностей в предприятии';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Справочник состояний оборудования (в ремонте, на хранении, списано и т.п.); '
+			.'состояния с признаком «Архивный» переводят оборудование в архив.';
+	}
 	
 	public static $unknown_code='state_unknown';
 	//public static $unknown_name='';
@@ -56,15 +63,16 @@ class TechStates extends ArmsModel
     {
         return [
             'id' => 'id',
-            'code' => 'Служебное имя',
-			'name' => 'Состояние',
+			//TODO-REVIEW: подсказки сгенерированы по коду
+			'code' => ['Служебное имя','hint'=>'Машинное имя состояния (латиницей, уникальное)'],
+			'name' => ['Состояние','hint'=>'Название состояния, отображаемое рядом с оборудованием'],
 			'archived' => [
 				'Архивный',
 				'hint'=>'Признак того, что оборудование с этим статусом перенесено в архив',
 				'indexLabel'=>'арх.',
 				
 			],
-            'descr' => 'Описание',
+            'descr' => ['Описание','hint'=>'Пояснение, когда применяется это состояние'],
         ];
     }
 

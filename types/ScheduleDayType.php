@@ -14,7 +14,7 @@ use yii\web\View;
  * Формат: ключ из словаря дней недели (1-7, def) ИЛИ дата в формате Y-m-d
  * Пример: "1" (понедельник), "def" (по умолчанию), "2024-03-15"
  */
-class ScheduleDayType implements AttributeTypeInterface
+class ScheduleDayType extends BaseType
 {
 
 	public static $dayNames = [

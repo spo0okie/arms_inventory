@@ -8,7 +8,7 @@ use app\models\NetIps;
 use yii\helpers\Html;
 use yii\web\View;
 
-class IpType implements AttributeTypeInterface
+class IpType extends BaseType
 {
 	public static function name(): string
 	{

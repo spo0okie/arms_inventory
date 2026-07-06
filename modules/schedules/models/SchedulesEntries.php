@@ -60,6 +60,13 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 	const SCENARIO_DAY='scenario_day';
 	static $title='Период расписания';
 	static $titles='Периоды расписаний';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Служебные записи расписаний: конкретные дни/периоды с интервалами '
+			.'времени внутри расписания.';
+	}
 	
 	public static $days=[
 		'def' => "По умолч.",

@@ -7,7 +7,7 @@ use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
 
-class FloatType implements AttributeTypeInterface
+class FloatType extends BaseType
 {
 	public static function name(): string
 	{

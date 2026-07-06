@@ -42,7 +42,14 @@ class Soft extends ArmsModel
 {
 	public static $title='ПО';
 	public static $titles='ПО';
-	
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Программные продукты: распознаются в отпечатках софта операционных систем '
+			.'по regexp-выражениям элементов пакета; связываются с лицензиями и списками ПО.';
+	}
+
 	private static $all_items=null;
 	private static $comps_in_soft=null;
 	public static $disable_cache=false;
@@ -119,9 +126,15 @@ class Soft extends ArmsModel
 				'typeClass'=>\app\types\StringType::class,
 			],
             'id' => ['Идентификатор','typeClass'=>\app\types\IntegerType::class],
-            'manufacturers_id' => ['Разработчик','typeClass'=>\app\types\LinkType::class],
+			//TODO-REVIEW: подсказки сгенерированы по коду
+			'manufacturers_id' => [
+				'Разработчик',
+				'hint'=>'Разработчик (вендор) этого программного продукта',
+				'typeClass'=>\app\types\LinkType::class,
+			],
             'descr' => [
 				'Наименование',
+				'hint'=>'Наименование программного продукта',
 				'typeClass'=>\app\types\StringType::class,
 			],
             'comment' => [
@@ -145,6 +158,8 @@ class Soft extends ArmsModel
 			],
             'items' => [
 				'Основные элементы входящие в пакет ПО',
+				'hint'=>'Regexp-выражения основных элементов пакета: по их совпадению '
+					.'продукт распознаётся в отпечатке софта ОС',
 				'classicHint'=>'<strong>Внимание!</strong> Элементы, составляющие пакет ПО, вносятся как regexp выражения. '
 					.'Это означает что многие символы являются служебными и должны быть экранированы.<br />'
 					.'Например <strong>\( \. \+</strong> и т.п. Более подробно читать '
@@ -152,6 +167,8 @@ class Soft extends ArmsModel
 			],
             'additional' => [
 				'Дополнительные элементы входящие в пакет ПО',
+				'hint'=>'Regexp-выражения дополнительных элементов: исключаются из списка ПО '
+					.'вместе с основными, если основные найдены',
 				'classicHint'=>'Если в списке ПО на компьютере обнаружатся основные компоненты продукта (те что выше), '
 					.'то из него вместе с основными будут также исключены и дополнительные (те что ниже). '
 					.'В дополнительные надо включать разделяемые между несколькими продуктами компоненты, '
@@ -159,6 +176,14 @@ class Soft extends ArmsModel
 					.'Например сервисы обновления.'
 			],
 	        'softLists_ids' => 'В списках ПО',
+			'soft_lists_ids' => [
+				'В списках ПО',
+				'hint'=>'Списки (реестры) ПО, в которые входит этот продукт',
+			],
+			'comps_ids' => [
+				'Обнаружено на ОС',
+				'hint'=>'Операционные системы, на которых обнаружен этот продукт',
+			],
 	        'created_at' => 'Дата добавления',
 			'hitsCount'=>[
 				'Обнаружено',

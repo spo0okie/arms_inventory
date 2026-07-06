@@ -96,9 +96,16 @@ use yii\db\StaleObjectException;
 class Comps extends ArmsModel
 {
 	use CompsModelCalcFieldsTrait,AclsFieldTrait,UnsatisfiedMaintenanceFieldTrait;
-	
+
 	public static $title='Операционная система';
 	public static $titles='Операционные системы';
+
+	public static function modelDescription(): string
+	{
+		return 'Экземпляры операционных систем — на физическом оборудовании и виртуальные. '
+			.'Хранят сетевые параметры (MAC/IP/домен), установленное ПО '
+			.'и связи с оборудованием, пользователями и сервисами.';
+	}
     private $hwList_obj=null;
     private $swList_obj=null;
     private $ip_cache=null;
@@ -113,7 +120,7 @@ class Comps extends ArmsModel
     {
         return 'comps';
     }
-    
+
     public function extraFields()
 	{
 		return [
@@ -136,14 +143,14 @@ class Comps extends ArmsModel
 			'unsatisfiedBackupReqsCount'
 		];
 	}
-	
+
 	public $linksSchema=[
 		'arm_id' =>				Techs::class,
 		'domain_id' =>			Domains::class,
 		'user_id' =>			Users::class,
 		'sandbox_id' =>			Sandboxes::class,
 		'platform_id' =>		[Services::class,'provide_comps_ids'],
-		
+
 		'linked_arms_ids'=>		[Techs::class,'comp_id','deletable'=>true],
 		'services_ids'=>		[Services::class,'comps_ids'],
 		'admins_ids'=>			[Users::class,'admin_comps_ids'],
@@ -154,14 +161,14 @@ class Comps extends ArmsModel
 		'lic_keys_ids' =>		[LicKeys::class,'comp_ids'],
 		'netIps_ids' => 		[NetIps::class,'comps_ids','deletable'=>true],
 		'softRescan_ids' => 	[CompsRescanQueue::class,'comps_id'],
-		
+
 		'soft_ids' => 			[Soft::class,'comps_ids','loader'=>'soft',
 			'updater' => ['class' => ManyToManySmartUpdater::class],
 		],
 		'softHits_ids' => 		[Soft::class,'hits_ids','deletable'=>true,
 			'updater' => ['class' => ManyToManySmartUpdater::class,],
 		],
-		
+
 		'maintenance_reqs_ids'=>[MaintenanceReqs::class,'comps_ids'],
 		'maintenance_jobs_ids'=>[MaintenanceJobs::class,'comps_ids'],
 	];
@@ -186,15 +193,15 @@ class Comps extends ArmsModel
             [['name','os'], 'string', 'max' => 128],
 			[['ip', 'mac'], 'string', 'max' => 768],
 			[['ip_ignore'], 'string', 'max' => 512],
-			
+
 			['ip', 'filter', 'filter' => function ($value) {
 				return NetIps::filterInput($value);
 			}],
-			
+
 			['mac', 'filter', 'filter' => function ($value) {
 				return MacsHelper::fixList($value);
 			}],
-	
+
 			[
 				['domain_id', 'name', 'sandbox_id'],
 				'unique',
@@ -280,6 +287,7 @@ class Comps extends ArmsModel
 			],
 			'arm_id' => [
 				'АРМ',
+				'hint' => 'ПК/сервер или облачная платформа, на которой работает эта ОС',
 				'indexHint' => 'ПК/сервер или облачная платформа на которой работает эта ОС',
 				'absorb' => 'ifEmpty',
 				'placeholder' => 'Выберите АРМ/сервер',
@@ -291,19 +299,45 @@ class Comps extends ArmsModel
 				'indexHint'=>'Статус АРМ на котором работает эта ОС',
 				'typeClass'=>\app\types\StringType::class,
 			],
-			'comment' => ['Комментарий', 'absorb' => 'ifEmpty','type'=>'text','typeClass'=>\app\types\TextType::class],
-			'domain_id' => ['Домен', 'absorb' => 'ifEmpty','typeClass'=>\app\types\LinkType::class],
-			'exclude_hw' => ['Скрыто из паспорта железо', 'absorb' => 'ifEmpty','typeClass'=>\app\types\HwListType::class],
+			'comment' => [
+				'Комментарий',
+				'hint' => 'Заполняется руками; выводится в шапке ОС и в тултипе '
+					.'при наведении на ОС в карте помещений',
+				'absorb' => 'ifEmpty','type'=>'text','typeClass'=>\app\types\TextType::class,
+			],
+			'domain_id' => [
+				'Домен',
+				'hint' => 'Домен операционной системы.<br>'
+					.'Заполняется скриптом; менять руками — только при переводе машины '
+					.'в другой домен, иначе появятся дубли',
+				'absorb' => 'ifEmpty','typeClass'=>\app\types\LinkType::class,
+			],
+			'exclude_hw' => [
+				'Скрытое из паспорта железо',
+				'hint' => 'Элементы отпечатка железа, скрытые из паспорта АРМ',
+				'absorb' => 'ifEmpty','typeClass'=>\app\types\HwListType::class,
+			],
+			'netIps_ids' => [
+				'IP адреса',
+				'hint' => 'Распознанные IP адреса этой ОС (ссылки на объекты IP)',
+			],
+			'soft_ids' => [
+				'Распознанное ПО',
+				'hint' => 'Программные продукты, распознанные в отпечатке софта этой ОС',
+			],
 			'ignore_hw' => [
 				'Виртуальная машина',
 				'indexLabel' => 'VM',
-				'hint' => 'Является виртуальной машиной',
+				'hint' => 'Является виртуальной машиной.<br>'
+					.'Обычно проставляется скриптом PowerCLI; вручную — если синхронизации с гипервизором нет',
 				'absorb' => 'ifEmpty',
 				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'ip' => [
-				'IP Адрес',
-				'indexHint' => 'IP адреса сетевых интерфейсов настроенных в ОС',
+				'IP Адреса',
+				//hint (а не indexHint), чтобы смысловая часть была видна и в форме;
+				//формат заполнения подскажет IpsType (inputHint)
+				'hint' => 'IP адреса сетевых интерфейсов настроенных в ОС',
 				'typeClass'=>\app\types\IpsType::class,
 			],
 			'ip_ignore' => ['absorb' => 'ifEmpty','typeClass'=>\app\types\IpsType::class],
@@ -315,9 +349,8 @@ class Comps extends ArmsModel
 			],
 			'mac' => [
 				'MAC Адрес',
-				'hint' => 'MAC адреса сетевых интерфейсов настроенных в ОС<br>'.
-					'Заполняются по одному в строке.<br>'.
-					'Можно указать диапазон через тире: 00:11:22:33:44:00-00:11:22:33:44:0F',
+				//формат заполнения/поиска подскажет MacsType (inputHint/searchHint)
+				'hint' => 'MAC адреса сетевых интерфейсов настроенных в ОС',
 				'indexHint' => 'MAC адреса сетевых интерфейсов настроенных в ОС',
 				'typeClass'=>\app\types\MacsType::class,
 			],
@@ -340,6 +373,10 @@ class Comps extends ArmsModel
 			],
 			'name' => [
 				'Имя компьютера',
+				'hint' => 'Сетевое имя компьютера, настроенное в ОС '
+					.'(у разных ОС одного АРМ имена должны быть разными).<br>'
+					.'Заполняется скриптом; менять руками — только при переименовании машины, '
+					.'иначе появятся дубли',
 				'indexHint' => 'Сетевое имя компьютера настроенное в ОС.<br>'
 					.'Домен не выводится, но при поиске можно указывать.<br>'
 					.'Вводимый текст ищется в строке формата DOMAIN\\computer',
@@ -347,6 +384,7 @@ class Comps extends ArmsModel
 			],
 			'os' => [
 				'Наименование и версия операционной системы',
+				'hint' => 'Обязательное поле; заполняется скриптом инвентаризации',
 				'indexHint' => 'В таблице в этой ячейке выводится только наименование ОС,<br>'
 					.'но поиск ведется также и по софту (в сыром, а не отформатированном виде)',
 				'typeClass'=>\app\types\StringType::class,
@@ -367,13 +405,21 @@ class Comps extends ArmsModel
 			],
 			'raw_hw' => [
 				'Hardware',
+				'hint' => 'Отпечаток железа, обнаруженного внутри ОС (JSON); заполняется скриптом',
 				'indexHint' => 'Строка оборудования обнаруженного Операционной Системой<br>'
 					.'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку',
 				'typeClass'=>\app\types\HwListType::class,
 			],
-			'raw_soft' => ['Отпечаток софта (заполняется скриптом)','typeClass'=>\app\types\SwListType::class],
+			'raw_soft' => [
+				'Отпечаток софта (заполняется скриптом)',				
+				'hint' => 'Софт, обнаруженный внутри ОС (JSON).<br>'
+					.'Собирается только скриптами Windows-инвентаризации: PowerCLI внутрь ВМ '
+					.'не заглядывает, на Linux сбор софта не реализован',
+				'typeClass'=>\app\types\SwListType::class,
+			],
 			'raw_version' => [
 				'Скрипт',
+				'hint' => 'Версия скрипта инвентаризации, приславшего последние данные по этой ОС',
 				'indexHint' => 'Скрипт, который внес последние данные по этой ОС',
 				'typeClass'=>\app\types\StringType::class,
 			],
@@ -441,7 +487,7 @@ class Comps extends ArmsModel
     }
 
 
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -449,7 +495,7 @@ class Comps extends ArmsModel
 	{
 		return $this->hasOne(Techs::class, ['id' => 'arm_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -457,8 +503,8 @@ class Comps extends ArmsModel
 	{
 		return $this->hasMany(Techs::class, ['comp_id' => 'id']);
 	}
-	
-	
+
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -466,7 +512,7 @@ class Comps extends ArmsModel
 	{
 		return $this->hasOne(Users::class, ['id' => 'user_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -474,7 +520,7 @@ class Comps extends ArmsModel
 	{
 		return $this->hasOne(Domains::class, ['id' => 'domain_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -482,7 +528,7 @@ class Comps extends ArmsModel
 	{
 		return $this->hasOne(Sandboxes::class, ['id' => 'sandbox_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -492,9 +538,9 @@ class Comps extends ArmsModel
 			->where(['not',['id'=>$this->id]])
 			->andWhere(['sandbox_id'=>$this->sandbox_id]);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Возвращает закрепленное на компе ПО
 	 */
@@ -503,7 +549,7 @@ class Comps extends ArmsModel
 		return $this->hasMany(Soft::class, ['id' => 'soft_id'])
 			->viaTable('{{%soft_in_comps}}', ['comp_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает обнаруженное на компе ПО
 	 */
@@ -513,7 +559,7 @@ class Comps extends ArmsModel
 			->from(['installed_soft'=>Soft::tableName()])
 			->viaTable('{{%soft_hits}}', ['comp_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает работающие на компе сервисы
 	 */
@@ -522,7 +568,7 @@ class Comps extends ArmsModel
 		return $this->hasMany(Services::class, ['id' => 'services_id'])
 			->viaTable('{{%comps_in_services}}', ['comps_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает работающие на компе сервисы
 	 */
@@ -531,7 +577,7 @@ class Comps extends ArmsModel
 		return $this->hasOne(Services::class, ['id' => 'platform_id'])
 			->from(['platforms'=>Services::tableName()]);
 	}
-	
+
 	/**
 	 * Возвращает список админов
 	 */
@@ -540,14 +586,14 @@ class Comps extends ArmsModel
 		return $this->hasMany(Users::class, ['id' => 'users_id'])
 			->viaTable('{{%admins_in_comps}}', ['comps_id' => 'id']);
 	}
-	
+
 	//нужно только для сортировки моделей внутри ArrayDataProvider
 	public function getServicesNames() {
 		$names=ArrayHelper::getColumn($this->services,'name',false);
 		sort($names);
 		return implode('',$names);
 	}
-	
+
 	/**
 	 * Возвращает закрепленные на компе лицензии
 	 */
@@ -556,7 +602,7 @@ class Comps extends ArmsModel
 		return $this->hasMany(LicGroups::class, ['id' => 'lic_groups_id'])
 			->viaTable('{{%lic_groups_in_comps}}', ['comps_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает закрепленные на компе лицензии
 	 */
@@ -574,7 +620,7 @@ class Comps extends ArmsModel
 		return $this->hasMany(LicKeys::class, ['id' => 'lic_keys_id'])
 			->viaTable('{{%lic_keys_in_comps}}', ['comps_id' => 'id']);
 	}
-	
+
 	/**
 	 * Найти комп по полному имени (Domain\comp или comp.domain.local)
 	 * @param        $name
@@ -590,22 +636,22 @@ class Comps extends ArmsModel
 
 		$filter=['LOWER(name)'=>strtolower($compName)];
 		if ($domain_id!==false) $filter['domain_id']=$domain_id;
-		
+
 		return static::find()->where($filter)->one();
 	}
-	
+
 	public function getLastThreeLogins() {
 		return LoginJournal::fetchUniqUsers($this->id);
 	}
-	
+
 	public function getLogins() {
 		return $this->hasmany(LoginJournal::class, ['comps_id' => 'id']);
 	}
-	
+
 	public function getSoftRescans() {
 		return $this->hasmany(CompsRescanQueue::class, ['comps_id' => 'id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -613,7 +659,7 @@ class Comps extends ArmsModel
 	{
 		return $this->hasMany(Acls::class, ['comps_id' => 'id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 * @throws InvalidConfigException
@@ -623,20 +669,20 @@ class Comps extends ArmsModel
 		return $this->hasMany(Aces::class, ['id' => 'aces_id'])->from(['comp_aces'=>Aces::tableName()])
 			->viaTable('{{%comps_in_aces}}', ['comps_id' => 'id']);
 	}
-	
+
 	public function getMaintenanceReqs()
 	{
 		return $this->hasMany(MaintenanceReqs::class, ['id' => 'reqs_id'])
 			->viaTable('maintenance_reqs_in_comps', ['comps_id' => 'id']);
 	}
-	
+
 	public function getMaintenanceJobs()
 	{
 		return $this->hasMany(MaintenanceJobs::class, ['id' => 'jobs_id'])
 			->viaTable('maintenance_jobs_in_comps', ['comps_id' => 'id']);
 	}
 
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -645,8 +691,8 @@ class Comps extends ArmsModel
 		return $this->hasOne(Places::class, ['id' => 'places_id'])//->from(['comp_places'=>Places::tableName()])
 			->via('arm');
 	}
-	
-	
+
+
 	/**
 	 * Возвращает IP адреса
 	 */
@@ -655,9 +701,9 @@ class Comps extends ArmsModel
 		return $this->hasMany(NetIps::class, ['id' => 'ips_id'])->from(NetIps::tableName())
 			->viaTable('{{%ips_in_comps}}', ['comps_id' => 'id']);
 	}
-	
-	
-	
+
+
+
 	public function getUpdatedRenderClass() {
 		if (strlen($this->updated_at)) {
 			$data_age=$this->secondsSinceUpdate;
@@ -668,7 +714,7 @@ class Comps extends ArmsModel
 			else return 'over_month_fresh';
 		} else return '';
 	}
-	
+
 	public function getUpdatedText() {
 		if (strlen($this->updated_at)) {
 			$data_age=$this->secondsSinceUpdate;
@@ -677,7 +723,7 @@ class Comps extends ArmsModel
 			else return (int)($data_age/3600/24).' дн.';
 		} else return '';
 	}
-	
+
 	/**
 	 * Возвращает долю веса сервиса (с учетом дочерних)
 	 * @param $serviceId
@@ -694,15 +740,15 @@ class Comps extends ArmsModel
 				$current+=$service->weight;
 			}
 		}
-		
+
 		if (!$total)
 			$this->servicePartialWeightCache[$serviceId]=0; //no services
 		else
 			$this->servicePartialWeightCache[$serviceId]=$current/$total;
-		
+
 		return $this->servicePartialWeightCache[$serviceId];
 	}
-	
+
 	/**
 	 * @return Users
 	 */
@@ -710,12 +756,12 @@ class Comps extends ArmsModel
 	{
 		//если есть явно закрепленный юзер за ОС
 		if (is_object($this->user)) return $this->user;
-		
+
 		//если есть ответственный за сервисы на компе - возвращаем его
 		if ($servicesResponsible=$this->servicesResponsible) {
 			return $servicesResponsible;
 		}
-		
+
 		//последний вариант смотрим, кто сопровождает АРМ
 		return $this->arm->managementService->responsible??null;
 	}
@@ -726,10 +772,10 @@ class Comps extends ArmsModel
 	public function getServicesResponsible()
 	{
 		if (is_object($this->user)) return $this->user;
-		
+
 		return Services::responsibleFrom($this->services,true);
 	}
-	
+
 	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
 	 * @return Users[]
@@ -743,18 +789,18 @@ class Comps extends ArmsModel
 			//если есть сервис управления АРМ, то берем его в сервисы
 			$services[]=$managementService;
 		}
-		
+
 		$team=Services::supportTeamFrom($services);
 		if (is_object($this->user)) $team[$this->user->id]=$this->user;
-		
+
 		//убираем из команды ответственного за ОС
 		if (is_object($responsible=$this->responsible)) {
 			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
 		}
-		
+
 		return array_values($team);
 	}
-	
+
 	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
 	 * @return Users[]
@@ -764,39 +810,39 @@ class Comps extends ArmsModel
 	{
 		$team=Services::supportTeamFrom($this->services,true);
 		if (is_object($this->user)) $team[$this->user->id]=$this->user;
-		
+
 		//убираем из команды ответственного за ОС
 		if (is_object($responsible=$this->servicesResponsible)) {
 			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
 		}
-		
+
 		return array_values($team);
 	}
-	
+
 	public static function fetchNames(){
 		$list= static::find()
 			->select(['id','name'])
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}
-	
+
 	/**
 	 * @param Comps $comp
 	 * @throws Throwable
 	 * @throws StaleObjectException
 	 */
 	public function absorbComp(Comps $comp) {
-		
+
 		//журнал огромный и по одной записи менять это гемор
 		LoginJournal::updateAll(['comps_id'=>$this->id],['comps_id'=>$comp->id]);
-		
+
 		//поглощаем все поля и ссылки переданной ОС и удаляем ее
 		$this->absorbModel($comp,true);
 		$this->save();
 	}
-	
 
-	
+
+
 	/**
 	 * @inheritdoc
 	 */
@@ -808,9 +854,9 @@ class Comps extends ArmsModel
 
 			/* взаимодействие с NetIPs */
 			$this->netIps_ids=NetIps::fetchIpIds($this->ip);
-			
+
 			if ($this->platform_id) $this->arm_id=null;
-			
+
 			//грузим старые значения записи
 			$old=static::findOne($this->id);
 			if (!is_null($old)) {
@@ -819,7 +865,7 @@ class Comps extends ArmsModel
 
 				//если поменялся АРМ, то надо из старого АРМа выкинуть эту ОСь
 				if (!is_null($old->arm) && ($old->arm_id != $this->arm_id)) {
-					
+
 					//если у старого АРМа не только эта операционка привязана - назначим основной другую
 					if (count($old->arm->comps) > 1) {
 						foreach ($old->arm->comps as $comp) {
@@ -844,13 +890,13 @@ class Comps extends ArmsModel
 					if (is_object($ip=NetIps::findOne($id))) $ip->detachComp($this->id);
 				}
 			}
-			
+
 
 		}
 		return true;
 	}
 
-	
+
 	/**
 	 * @inheritdoc
 	 */
@@ -859,27 +905,27 @@ class Comps extends ArmsModel
 		if (!parent::beforeDelete()) {
 			return false;
 		}
-		
+
 		//отключаем рескан чтобы при сохранении софт не привязался обратно
 		Soft::$disable_rescan=true;
 		$this->softHits_ids=[];
 		$this->silentSave(false);
-		
+
 		//отрываем IP от удаляемого компа
 		foreach ($this->netIps as $ip) {
 			$ip->detachComp($this->id);
 		}
-		
+
 		foreach ($this->linkedArms as $arm) {
 			$arm->comp_id=null;
 			$arm->save();
 		}
-		
+
 		foreach ($this->softRescans as $queue) $queue->delete();
 
 		return true;
 	}
-	
+
 	/**
 	 * @inheritdoc
 	 */
@@ -912,12 +958,12 @@ class Comps extends ArmsModel
 		}
 		return true;
 	}
-	
+
 	public function getIsWindows()
 	{
 		return (mb_stripos($this->os,'windows')!==false);
 	}
-	
+
 	public function getIsLinux()
 	{
 		if (mb_stripos($this->os,'debian')!==false) return true;
@@ -928,7 +974,7 @@ class Comps extends ArmsModel
 		if (mb_stripos($this->os,'suse')!==false) return true;
 		return false;
 	}
-	
+
 	public function getInServicesName() {return strtolower($this->fqdn);}
-	
+
 }

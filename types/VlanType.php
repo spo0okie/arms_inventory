@@ -16,6 +16,12 @@ class VlanType extends IntegerType
 		return 'vlan';
 	}
 
+	public function inputHint(): ?string
+	{
+		return 'Номер VLAN от 1 до 4094 <i>(0, 1002-1005 и 4095 зарезервированы)</i>.<br>'
+			.'Диапазон через тире (<b>10-20</b>) можно указать только при создании.';
+	}
+
 	public function generate(AttributeContext $context): mixed
 	{
 		// Режим пустых значений

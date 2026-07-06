@@ -42,6 +42,12 @@ class Acls extends ArmsModel
 	public static $title='Список доступа';
 	public static $titles='Списки доступа';
 
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Списки доступа (ACL): наборы записей доступа к одному ресурсу (сервису, ОС, IP, сети); могут действовать по расписанию.';
+	}
+
 	/*
 	 * Если к расписанию прикрутить ACL - то нужно на него смотреть несколько иначе, это не просто расписание
 	 * а расписание предоставления доступа. В таком случае интерфейс немного надо скорректировать
@@ -148,6 +154,7 @@ class Acls extends ArmsModel
 			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
 			'schedules_id' => [
 				'Расписание доступа',
+				'hint'=>'Расписание, определяющее временные рамки предоставления доступа',
 				'apiHint'=>'Объект типа Schedule, определяющий временные рамки предоставления доступа',
 				'typeClass'=>\app\types\LinkType::class,
 			],
@@ -178,6 +185,8 @@ class Acls extends ArmsModel
 			],
             'notepad' => [
             	'Записная книжка',
+				//TODO-REVIEW: подсказка сгенерирована по коду
+				'hint'=>'Заметки по этому списку доступа',
              	'typeClass'=>\app\types\TextType::class
             ],
         ]);

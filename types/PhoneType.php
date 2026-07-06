@@ -13,7 +13,7 @@ use yii\web\View;
  * Формат: свободный, но типичные форматы:
  * Пример: "+7 (999) 123-45-67", "8-800-123-45-67", "123-45-67"
  */
-class PhoneType implements AttributeTypeInterface
+class PhoneType extends BaseType
 {
 	/**
 	 * {@inheritdoc}

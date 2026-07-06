@@ -44,8 +44,12 @@ class NetIps extends ArmsModel
 	
 	public static $title='IP адрес';
 	public static $titles='IP адреса';
-	
-	public static $inputHint='по одному в строке';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'IP адреса: реестр адресов с привязкой к сетям, ОС, оборудованию и пользователям.';
+	}
 	
 	/**
 	 * @var PhpIP\IPv4Block
@@ -110,8 +114,21 @@ class NetIps extends ArmsModel
 	{
 		return [
 			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
-			'addr' => ['Адрес','typeClass'=>\app\types\IntegerType::class],
-			'mask' => ['Маска','typeClass'=>\app\types\IntegerType::class],
+			//TODO-REVIEW: подсказки сгенерированы по коду
+			'addr' => [
+				'Адрес',
+				'hint'=>'Числовое представление IP адреса (служебное; заполняется из текстового поля)',
+				'typeClass'=>\app\types\IntegerType::class,
+			],
+			'mask' => [
+				'Маска',
+				'hint'=>'Числовое представление маски (служебное)',
+				'typeClass'=>\app\types\IntegerType::class,
+			],
+			'networks_id' => [
+				'Сеть',
+				'hint'=>'IP сеть, к которой относится этот адрес',
+			],
 			'name' => [
 				'Имя',
 				'hint'=>'Сюда можно записать имя узла для которого адрес зарезервирован',

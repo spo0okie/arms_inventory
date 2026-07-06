@@ -19,6 +19,13 @@ class SoftLists extends ArmsModel
 	
 	public static $title = 'Список ПО';
 	public static $titles = 'Списки ПО';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Списки (реестры) ПО — наборы программных продуктов. Служебные списки: '
+			.'согласованное (soft_agreed), игнорируемое (soft_ignore) и бесплатное (soft_free) ПО.';
+	}
 	
 	protected static $soft_in_lists = null;
 
@@ -107,11 +114,24 @@ class SoftLists extends ArmsModel
 	public function attributeData()
 	{
 		return [
-			'comment' => ['Комментарий','typeClass'=>\app\types\TextType::class],
+			//TODO-REVIEW: подсказки сгенерированы по коду
+			'comment' => [
+				'Комментарий',
+				'hint'=>'Пояснение назначения списка',
+				'typeClass'=>\app\types\TextType::class,
+			],
 			'created_at' => ['Дата добавления','typeClass'=>\app\types\DatetimeType::class],
-			'descr' => ['Описание','typeClass'=>\app\types\StringType::class],
+			'descr' => [
+				'Описание',
+				'hint'=>'Человекочитаемое название списка ПО',
+				'typeClass'=>\app\types\StringType::class,
+			],
 			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
-			'name' => ['Служебное имя','typeClass'=>\app\types\StringType::class],
+			'name' => [
+				'Служебное имя',
+				'hint'=>'Машинное имя списка (служебные: soft_agreed, soft_ignore, soft_free)',
+				'typeClass'=>\app\types\StringType::class,
+			],
 		];
 	}
 

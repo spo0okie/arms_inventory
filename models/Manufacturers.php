@@ -23,6 +23,12 @@ use yii\helpers\ArrayHelper;
 class Manufacturers extends ArmsModel
 {
 
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Справочник производителей оборудования и разработчиков ПО.';
+	}
+
 	private $all_names=[];
 
     private static $all_items=null;

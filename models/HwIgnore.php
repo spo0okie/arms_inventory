@@ -9,7 +9,7 @@ use Yii;
  * This is the model class for table "hw_ignore".
  *
  * @property int $id ID
- * @property string $fingerprint Отпечаток 
+ * @property string $fingerprint Отпечаток
  * @property string $comment Комментарий
  */
 class HwIgnore extends ArmsModel
@@ -18,7 +18,13 @@ class HwIgnore extends ArmsModel
     private static $all_items=null;
 	public static $title='Игнорируемое оборудование';
 	public static $titles='Игнорируемое оборудование';
-	
+
+	public static function modelDescription(): string
+	{
+		return 'Отпечатки устройств, которые не нужно учитывать при разборе '
+			.'отпечатка железа ОС (виртуальные и служебные устройства).';
+	}
+
 	/**
 	 * @inheritdoc
 	 */
@@ -26,7 +32,7 @@ class HwIgnore extends ArmsModel
 	{
 		return 'hw_ignore';
 	}
-	
+
 	/**
 	 * @inheritdoc
 	 */
@@ -37,23 +43,30 @@ class HwIgnore extends ArmsModel
 			[['fingerprint', 'comment'], 'string', 'max' => 255],
 		];
 	}
-	
+
 	/**
 	 * @inheritdoc
 	 */
 	public function attributeData()
 	{
 		return [
-			'fingerprint' => 'Отпечаток ',
-			'comment' => 'Пояснение',
+			//TODO-REVIEW: подсказки сгенерированы по коду
+			'fingerprint' => [
+				'Отпечаток',
+				'hint'=>'Строка-отпечаток устройства, которое игнорируется при разборе отпечатка железа',
+			],
+			'comment' => [
+				'Пояснение',
+				'hint'=>'Почему это устройство игнорируется',
+			],
 		];
 	}
-	
+
 	public function getName()
 	{
 		return $this->comment;
 	}
-	
+
     public static function fetchAll(){
         if (is_null(static::$all_items)) {
             $tmp=static::find()->all();
@@ -81,5 +94,5 @@ class HwIgnore extends ArmsModel
         return false;
     }
 
- 
+
 }

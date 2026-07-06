@@ -90,6 +90,12 @@ class Contracts extends ArmsModel
 	
 	public static $title='Документы';
 	public static $titles='Документы';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Документы: договоры, счета, накладные, акты и т.п.; связываются в цепочки через основной документ и привязываются к оборудованию, лицензиям и контрагентам.';
+	}
 	public static $noPartnerSuffix='Внутр. документ';
 	
 	public static $dictionary=[
@@ -194,7 +200,10 @@ class Contracts extends ArmsModel
 				'join'=>['children','techs','materials','licItems','services'],
 				'typeClass' => \app\types\TextType::class,
 			],
-			'charge' => 'в т.ч. НДС',
+			'charge' => [
+				'в т.ч. НДС',
+				'hint' => 'Для счетов: величина НДС, входящая в сумму',
+			],
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Для счетов желательно записывать историю и логистику закупки:<br>'
@@ -237,7 +246,8 @@ class Contracts extends ArmsModel
 			],
 			'end_date' => [
 				'Окончание',
-				'hint' => 'Если документ имеет срок действия, то до какой даты - указываем тут',
+				'hint' => 'Если документ имеет срок действия, то до какой даты - указываем тут.<br>'
+					.'Если проставлена, то дата окончания также выводится в основном списке документов',
 				'typeClass'=>\app\types\DateType::class,
 			],
 			'float_charge' => [
@@ -314,7 +324,9 @@ class Contracts extends ArmsModel
 			'partners' => ['alias' => 'partners_ids'],
 			'partners_ids' => [
 				'Контрагенты',
-				'hint' => 'Если отсутствуют, значит документ внутренний',
+				'hint' => 'Если отсутствуют, значит документ внутренний.<br>'
+					.'Обычно контрагент один, но в общем случае их может быть несколько.<br>'
+					.'Контрагента нужно предварительно завести в списке контрагентов',
 				'join'=>['partners'],
 				'typeClass'=>\app\types\LinkType::class,
 			],
@@ -349,7 +361,8 @@ class Contracts extends ArmsModel
 			],
 			'state_id' => [
 				'Статус',
-				'hint' => 'Для удобства контроля процессов оплаты',
+				'hint' => 'Для удобства контроля процессов оплаты.<br>'
+					.'В списке статусов можно создать дополнительные',
 				'placeholder' => 'Выберите статус документа',
 				'typeClass'=>\app\types\LinkType::class,
 			],
@@ -370,7 +383,9 @@ class Contracts extends ArmsModel
 			],
 			'techs_ids' => [
 				'Оборудование',
-				'hint' => 'С каким оборудованием связан документ (если связан)',
+				'hint' => 'С каким оборудованием связан документ (если связан).<br>'
+					.'Ищется по инвентарному номеру и через назначенного пользователя.<br>'
+					.'Привязка документов сильно упрощает сопровождение большого парка оборудования',
 				'placeholder'=>'Выберите оборудование связанное с документом',
 				'join'=>['techs'],
 				'typeClass'=>\app\types\LinkType::class,
@@ -382,7 +397,8 @@ class Contracts extends ArmsModel
 					.'Вместо этого надо привязывать платежные документы:<ul>'
 					.'<li>к договору нужно прикреплять счета</li>'
 					.'<li>к счетам закрывающие документы</li>'
-					.'</ul>Сумма при этом должна проставляться только в счетах',
+					.'</ul>Сумма при этом должна проставляться только в счетах.<br>'
+					.'Сумма вписывается с учетом НДС',
 				'indexHint' => 'Сумма документа<br />'.QueryHelper::$numberSearchHint,
 				'typeClass'=>\app\types\FloatType::class,
 			],

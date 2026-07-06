@@ -14,6 +14,13 @@ class UrlsType extends TextType
 		return 'urls';
 	}
 
+	public function inputHint(): ?string
+	{
+		return 'Каждая строка — одна ссылка: сначала описание, последнее слово — сам URL '
+			.'(без пробелов, вместо них %20).<br>'
+			.'Пример: <i><b>описание сервиса</b> https://wiki.domain.local/services:inventory</i>';
+	}
+
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
 		return $field->textInput();

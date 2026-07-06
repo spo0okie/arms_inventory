@@ -31,6 +31,12 @@ class AccessTypes extends ArmsModel
 	public static $title='Тип доступа';
 	public static $titles='Типы доступа';
 
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Справочник типов доступа (например RDP, VPN, SSH), которыми описываются записи доступа.';
+	}
+
     /**
      * {@inheritdoc}
      */

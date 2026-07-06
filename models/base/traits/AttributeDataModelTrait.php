@@ -177,7 +177,8 @@ trait AttributeDataModelTrait
 			'history' => ['alias'=>'notepad'],
 			'links' => [
 				'Ссылки',
-				'hint' => UrlListWidget::$hint,
+				//формат заполнения подскажет UrlsType (inputHint)
+				'hint' => 'Ссылки на связанные страницы и ресурсы',
 				'type'=>'urls',
 				'typeClass' => \app\types\UrlsType::class,
 			],
@@ -412,11 +413,31 @@ trait AttributeDataModelTrait
 	 * @throws UnknownPropertyException
 	 */
 	public function getAttributeHint($attribute) {
+		//возвращает ЧИСТУЮ смысловую часть («что это»): композиция с типовыми
+		//подсказками — в сборщике тултипов AttributeTooltip (ui-sources.md §0.1)
 		/** @var \app\models\base\ArmsModel $this */
 		if ($hint=$this->fetchAttributeHint(
 			$this->getAttributeData($attribute)
 		)) return $hint;
 		return parent::getAttributeHint($attribute);
+	}
+
+	/**
+	 * Типовая часть подсказки атрибута: типы объявляют inputHint() (как заполнять)
+	 * и searchHint() (как искать) — один текст на тип, а не в каждой модели
+	 * (контракт: AttributeTypeInterface, дефолты: BaseType).
+	 * Используется сборщиком тултипов AttributeTooltip.
+	 * @param string $attribute
+	 * @param string $method inputHint|searchHint
+	 * @return string|null
+	 */
+	public function getAttributeTypeHint(string $attribute, string $method): ?string {
+		try {
+			$type=$this->getAttributeTypeClass($attribute);
+		} catch (\Throwable $e) {
+			return null;	//тип не выводится (вычисляемое поле) - типовой подсказки нет
+		}
+		return $type->$method()?:null;
 	}
 	
 	//getAttributeType() удалён: тип определяется через getAttributeTypeClass() (объектная система типов)
@@ -603,6 +624,8 @@ trait AttributeDataModelTrait
 		} catch (\Throwable $e) {
 			return QueryHelper::$stringSearchHint;	//тип не выводится (вычисляемое) -> как строку
 		}
+		//чистый дефолт по типу данных: типовая часть (searchHint типа)
+		//подклеивается сборщиком тултипов AttributeTooltip (ui-sources.md §0.1)
 		if (in_array($schema['format']??'', ['date','date-time'])) return QueryHelper::$dateSearchHint;
 		if (in_array($schema['type']??'', ['integer','number'])) return QueryHelper::$numberSearchHint;
 		return QueryHelper::$stringSearchHint;

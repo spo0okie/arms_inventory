@@ -13,7 +13,7 @@ use yii\web\View;
  * Формат: ЧЧ:ММ-ЧЧ:ММ или несколько интервалов через запятую
  * Пример: "09:00-12:00,13:00-18:00" или "-" (нерабочий день)
  */
-class ScheduleType implements AttributeTypeInterface
+class ScheduleType extends BaseType
 {
 	/**
 	 * {@inheritdoc}

@@ -35,6 +35,12 @@ class LicKeys extends ArmsModel
 	
 	public static $title='Лиц. ключи';
 	public static $titles='Лиц. ключи';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Лицензионные ключи: учёт ключей активации с привязкой к закупкам и объектам, где они использованы.';
+	}
 	
 	public $linkComment=null; //комментарий, добавляемый при привязке лицензий
     /**
@@ -91,7 +97,8 @@ class LicKeys extends ArmsModel
 		return [
 			'comment' => [
 				'Комментарии',
-				'comment' => 'Все что стоит знать об этом ключе кроме информации в остальных полях',
+				//был ключ 'comment' вместо 'hint' (опечатка) - подсказка не отображалась
+				'hint' => 'Все что стоит знать об этом ключе кроме информации в остальных полях',
 				'type' => 'text',
 				'typeClass' => \app\types\TextType::class,
 			],

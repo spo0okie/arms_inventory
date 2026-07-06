@@ -1,35 +1,37 @@
 <?php
 namespace app\components;
 
-use app\helpers\ArrayHelper;
 use app\helpers\FieldsHelper;
-use app\models\base\ArmsModel;
 use yii\base\Widget;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
 
+/**
+ * Label атрибута с тултипом для grid/search/view/form контекстов.
+ * Содержимое тултипа собирает единый сборщик AttributeTooltip
+ * (спецификация: ui-sources.md §0.1) — виджет только рендерит.
+ */
 class AttributeHintWidget extends Widget
 {
-	
 
 
 	/**
-	 * @var ArmsModel
+	 * @var \app\models\base\ArmsModel
 	 */
 	public $model;
-	
+
 	public $attribute='name';
-	
+
 	public $label;			//выводимое имя аттрибута
 
-	public $hint;			//подсказка
-	
+	public $hint;			//подсказка (явное переопределение смыслового блока)
+
 	public $mode='grid';	//режим отображения (grid|search|form|view)
-	
-	
+
+
 	public function run()
 	{
-		//если у нас есть хинт, то возвращаем его с тултипом
+		//если у нас есть тултип, то возвращаем label с ним
 		if (!empty($this->hint)) {
 			return Html::tag(
 				'span',
@@ -37,15 +39,15 @@ class AttributeHintWidget extends Widget
 				FieldsHelper::toolTipOptions($this->label,$this->hint)
 			);
 		}
-		
+
 		return $this->label;
 	}
-	
-	
+
+
 	public function prepareLabel():string {
 		//если метка уже есть, то и хорошо
 		if (!empty($this->label)) return $this->label;
-		
+
 		//пытаемся получить метку из модели
 		if (is_object($this->model)) {
 			switch ($this->mode) {
@@ -55,7 +57,7 @@ class AttributeHintWidget extends Widget
 						['getAttributeIndexLabel','getAttributeLabel'],
 						Inflector::camel2words($this->attribute, true)
 					);
-				
+
 				case 'form':
 					return $this->firstMethod(
 						['getAttributeLabel'],
@@ -72,44 +74,6 @@ class AttributeHintWidget extends Widget
 		//если не получилось, то просто из имени аттрибута
 		return Inflector::camel2words($this->attribute, true);
 	}
-	
-	public function prepareHint():string {
-		//если подсказка уже есть, то и хорошо
-		if (!empty($this->hint)) return $this->hint;
-		
-		//пытаемся получить метку из модели
-		if (is_object($this->model)) {
-			switch ($this->mode) {
-				case 'search':
-					$hint=(string)$this->firstMethod(
-						['getAttributeIndexHint','getAttributeHint'],''
-					);
-					$searchHint=(string)$this->firstMethod(
-						['getAttributeSearchHint'],''
-					);
-					return ArrayHelper::implode('<hr/>',[$hint,$searchHint]);
-					
-				case 'grid':
-					return (string)$this->firstMethod(
-						['getAttributeIndexHint','getAttributeHint'],
-						Inflector::camel2words($this->attribute, true)
-					);
-				
-				case 'form':
-					return (string)$this->firstMethod(
-						['getAttributeHint'],
-						Inflector::camel2words($this->attribute, true)
-					);
-					
-				case 'view':
-					return (string)$this->firstMethod(
-						['getAttributeViewHint','getAttributeHint'],
-						Inflector::camel2words($this->attribute, true)
-					);
-			}
-		}
-		return '';
-	}
 
 	private function firstMethod($methods,$default)
 	{
@@ -120,13 +84,21 @@ class AttributeHintWidget extends Widget
 		}
 		return $default;
 	}
-	
-	
+
+
 	public function init() {
-		
+
 		$this->label=$this->prepareLabel();
-		$this->hint=$this->prepareHint();
+		//сборка тела тултипа по режиму (null - тултип не нужен)
+		$tooltip=AttributeTooltip::build(
+			$this->model,
+			$this->attribute,
+			$this->mode,
+			$this->label,
+			$this->hint?:null
+		);
+		$this->hint=$tooltip['body']??'';
 
 	}
-	
+
 }

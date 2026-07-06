@@ -52,6 +52,12 @@ class LicItems extends ArmsModel
 	use LicItemsModelCalcFieldsTrait;
 	
 	public static $titles='Закупленные лицензии';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Закупки лицензий: пачки лицензий с привязкой к документам закупки, количеством и периодом действия.';
+	}
 	public static $title='Закупленные лицензии';
 	
 	public $linkComment=null; //комментарий, добавляемый при привязке лицензий

@@ -57,6 +57,20 @@ interface AttributeTypeInterface extends GeneratorInterface
 	public function samples(): array;
 
 	/**
+	 * Типовая часть подсказки заполнения («как вводить») — лёгкий слой
+	 * документации, см. ui-sources.md §0.1. Это данные типа (один текст на
+	 * все атрибуты этого типа), а не метаданные атрибута. null — нет.
+	 * Дефолтная реализация — в BaseType.
+	 */
+	public function inputHint(): ?string;
+
+	/**
+	 * Типовая часть подсказки поиска («как искать»): только отличия от
+	 * общего синтаксиса поиска. null — нет. Дефолтная реализация — в BaseType.
+	 */
+	public function searchHint(): ?string;
+
+	/**
 	 * Генератор для данного типа атрибута (совместим с GeneratorInterface).
 	 */
 	public function generate(AttributeContext $context): mixed;

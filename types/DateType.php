@@ -7,11 +7,16 @@ use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
 
-class DateType implements AttributeTypeInterface
+class DateType extends BaseType
 {
 	public static function name(): string
 	{
 		return 'date';
+	}
+
+	public function inputHint(): ?string
+	{
+		return 'Дата в формате <b>ГГГГ-ММ-ДД</b>; можно выбрать в календаре.';
 	}
 
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed

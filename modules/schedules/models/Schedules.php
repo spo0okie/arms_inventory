@@ -64,6 +64,12 @@ class Schedules extends \app\models\base\ArmsModel
 	use SchedulesModelCalcFieldsTrait;
 	
 	public static $titles = 'Расписания';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Расписания: календарные графики (рабочие недели, исключения, перекрытия) — используются сервисами, обслуживанием и временными доступами.';
+	}
 	public static $title  = 'Расписание';
 	public static $noData = 'никогда';
 	public static $allDaysTitle = 'ежедн.';
@@ -218,10 +224,10 @@ class Schedules extends \app\models\base\ArmsModel
 	public function attributeData()
 	{
 		return [
+			//общий синтаксис поиска (| & !) показывается в search-тултипе автоматически
 			'accessTypes' => [
 				'Тип доступа', //для ACLs
-				'indexHint' => 'Все типы доступа к ресурсам, которые присутствуют в этом временном доступе'.
-					static::searchableOrHint,
+				'indexHint' => 'Все типы доступа к ресурсам, которые присутствуют в этом временном доступе',
 				'join'=>['acls.aces.accessTypes'],
 				'filter'=>'access_types.name',
 			],
@@ -236,16 +242,15 @@ class Schedules extends \app\models\base\ArmsModel
 			],
 			'acePartners' => [
 				'Контрагенты', //для ACLs
-				'indexHint' => 'Контрагенты, которым предоставляется доступ.<br>'.
-					'(определяются на основании трудоустройства пользователей, которым предоставлен доступ).<br>',
-				'Можно искать как по юр. названию так и по названию бренда'.
-				static::searchableOrHint,
+				//строка про поиск была отдельным элементом массива (выпала из indexHint) - починено
+				'indexHint' => 'Контрагенты, которым предоставляется доступ<br>'.
+					'(определяются на основании трудоустройства пользователей, которым предоставлен доступ).<br>'.
+					'Искать можно как по юр. названию, так и по названию бренда',
 				'join'=>['acls.aces.users.org'],
 			],
 			'aclSites' => [
 				'Площадки', //для ACLs
 				'indexHint' => 'Площадки, на которых расположены ресурсы, к которым предоставляется доступ',
-				//static::searchableOrHint
 				//join просто огромный, и search не сделать
 			],
 			'aclSegments' => [
@@ -256,7 +261,6 @@ class Schedules extends \app\models\base\ArmsModel
 					.'<li>Для IP адресов - сегмент сети (если есть такая сеть)</li>'
 					.'<li>Для оборудования и ОС - сегмент IP адреса(ов)</li>'
 				.'</ul>',
-				//static::searchableOrHint
 				//join просто огромный, и search не сделать
 			],
 			'acls' => [
@@ -292,12 +296,18 @@ class Schedules extends \app\models\base\ArmsModel
 			'name' => [
 				'name' => 'Как-то надо назвать это расписание',
 				'Наименование',
+				//TODO-REVIEW: подсказка сгенерирована по коду
+				'hint' => 'Название расписания/временного доступа',
+			],
+			//TODO-REVIEW: подсказка сгенерирована по коду
+			'override_id' => [
+				'Перекрывает',
+				'hint' => 'Базовое расписание, поверх которого действует это расписание-перекрытие',
 			],
 			'objects' => [
 				'Субъекты', //для ACLs
 				'indexHint' => 'Все субъекты которым предоставляется доступ.<br>'.
-					'Поиск по этому полю ведется без учета кому какой доступ'.
-					static::searchableOrHint,
+					'Поиск по этому полю ведется без учета кому какой доступ',
 			],
 			'overrides' => [
 				'Периоды - исключения',
@@ -314,8 +324,7 @@ class Schedules extends \app\models\base\ArmsModel
 			'resources' => [
 				'Ресурсы', //для ACLs
 				'indexHint' => 'Все ресурсы к которым предоставляется доступ.<br>'.
-					'Поиск по этому полю ведется без учета к какому ресурсу какой доступ'.
-					static::searchableOrHint,
+					'Поиск по этому полю ведется без учета к какому ресурсу какой доступ',
 			],
 			'start_date'=>[
 				'Дата начала',

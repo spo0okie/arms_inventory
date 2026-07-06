@@ -12,6 +12,26 @@ class MacsType extends TextType
 		return 'macs';
 	}
 
+	/**
+	 * Типовая часть подсказки заполнения (см. AttributeDataModelTrait::getAttributeTypeHint):
+	 * подклеивается к специфичному hint каждого mac-атрибута.
+	 */
+	public function inputHint(): ?string
+	{
+		return 'В каждой строке — один адрес (<b>00:11:22:33:44:55</b>) '
+			.'или диапазон адресов через тире (<b>00:11:22:33:44:00-00:11:22:33:44:0F</b>). '
+			.'Разделители внутри адреса не важны.';
+	}
+
+	/**
+	 * Типовая часть подсказки поиска: подклеивается к общему синтаксису поиска.
+	 */
+	public function searchHint(): ?string
+	{
+		return 'Поиск по диапазону — только полным MAC-адресом: '
+			.'частичный MAC, попадающий внутрь диапазона, не находится.';
+	}
+
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
 		return $field->textInput();

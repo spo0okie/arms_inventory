@@ -37,6 +37,38 @@ class Attaches extends ArmsModel
         return 'attaches';
     }
 
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Файлы-вложения (сканы, фотографии, документы), прикреплённые к объектам '
+			.'системы: оборудованию, документам, лицензиям и т.д. '
+			.'Служебная модель — файлы загружаются со страниц самих объектов.';
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function attributeData()
+	{		
+		return array_merge(parent::attributeData(), [
+			'filename' => ['Файл', 'hint' => 'Имя загруженного файла в хранилище вложений (web/scans)'],
+			'techs_id' => [Techs::$titles, 'hint' => 'Оборудование/АРМ, к которому прикреплено вложение'],
+			'services_id' => [Services::$titles, 'hint' => 'Сервис, к которому прикреплено вложение'],
+			'lic_types_id' => [LicTypes::$titles, 'hint' => 'Схема лицензирования, к которой прикреплено вложение'],
+			'lic_groups_id' => [LicGroups::$titles, 'hint' => 'Тип лицензий, к которому прикреплено вложение'],
+			'lic_items_id' => [LicItems::$titles, 'hint' => 'Закупка лицензий, к которой прикреплено вложение'],
+			'lic_keys_id' => [LicKeys::$titles, 'hint' => 'Лицензионный ключ, к которому прикреплено вложение'],
+			'contracts_id' => [Contracts::$titles, 'hint' => 'Документ, к которому прикреплено вложение'],
+			'partners_id' => [Partners::$titles, 'hint' => 'Контрагент, к которому прикреплено вложение'],
+			'places_id' => [Places::$titles, 'hint' => 'Помещение, к которому прикреплено вложение'],
+			'schedules_id' => ['Расписание', 'hint' => 'Расписание/временной доступ, к которому прикреплено вложение'],
+			'tech_models_id' => [TechModels::$titles, 'hint' => 'Модель оборудования, к которой прикреплено вложение'],
+			'users_id' => [Users::$titles, 'hint' => 'Сотрудник, к которому прикреплено вложение'],
+			'maintenance_reqs_id' => [MaintenanceReqs::$titles, 'hint' => 'Регламент обслуживания, к которому прикреплено вложение'],
+			'maintenance_jobs_id' => [MaintenanceJobs::$titles, 'hint' => 'Работа обслуживания, к которой прикреплено вложение'],
+		]);
+	}
+
     /**
      * {@inheritdoc}
      */

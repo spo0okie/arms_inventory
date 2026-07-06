@@ -13,7 +13,7 @@ use yii\web\View;
  * Формат: токены через дефис <тип>-<серийный>
  * Пример: "T-001", "PC-12345", "MON-42"
  */
-class InvNumType implements AttributeTypeInterface
+class InvNumType extends BaseType
 {
 
 	//порядок префиксов для инвентарного номера по умолчанию для настройки techs.prefixFormat

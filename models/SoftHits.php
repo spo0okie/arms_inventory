@@ -50,6 +50,27 @@ class SoftHits extends ArmsModel
         return 'soft_hits';
     }
 
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'Служебная модель распознавания ПО: совпадения regexp-выражений '
+			.'программного продукта со строками отпечатка софта конкретной ОС.';
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function attributeData()
+	{
+		//TODO-REVIEW: подсказки сгенерированы по коду
+		return array_merge(parent::attributeData(), [
+			'id' => ['ID','hint'=>'Внутренний идентификатор записи'],
+			'comp_id' => ['Комп','hint'=>'ОС, в отпечатке софта которой найден продукт'],
+			'soft_id' => ['Продукт','hint'=>'Распознанный программный продукт'],
+			'hits' => ['Совпадения','hint'=>'Найденные совпадения выражений продукта со строками отпечатка'],
+		]);
+	}
+
 	/**
 	 * Сравнение хитов на основании релевантности
 	 * @return integer

@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 use app\models\base\ArmsModel;
 use app\modules\schedules\models\Schedules;
@@ -122,6 +121,12 @@ class Services extends ArmsModel
 	public $treePrefix=null;
 	
 	public static $titles='Сервисы/услуги';
+
+	//TODO-REVIEW: описание сгенерировано по коду
+	public static function modelDescription(): string
+	{
+		return 'ИТ сервисы и услуги: дерево сервисов с ответственными, расписаниями, сегментами и связями с инфраструктурой.';
+	}
 	public static $title='Сервис/услуга';
 
 	public static $user_service_title='Сервис для пользователей';
@@ -341,11 +346,14 @@ class Services extends ArmsModel
 			],
 			'is_service' => [
 				'Тип объекта',
+				//TODO-REVIEW: подсказка сгенерирована по коду - уточнить формулировку услуга/сервис
+				'hint' => 'Что это: сервис (техническая система) или услуга (предоставляется людям)',
 				'typeClass' => \app\types\BooleanType::class,
 			],
 			'links' => [
 				'Ссылки',
-				'hint' => UrlListWidget::$hint.' Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
+				//формат заполнения подскажет UrlsType (inputHint)
+				'hint' => 'Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
 				'typeClass' => \app\types\UrlsType::class,
 			],
 			'maintenance_jobs_ids'=>[

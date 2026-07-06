@@ -13,7 +13,7 @@ use yii\web\View;
  * Формат: user@domain.example
  * Пример: "user@example.com"
  */
-class EmailType implements AttributeTypeInterface
+class EmailType extends BaseType
 {
 	/**
 	 * {@inheritdoc}

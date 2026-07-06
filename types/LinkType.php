@@ -8,11 +8,16 @@ use app\models\base\ArmsModel;
 use yii\helpers\Html;
 use yii\web\View;
 
-class LinkType implements AttributeTypeInterface
+class LinkType extends BaseType
 {
 	public static function name(): string
 	{
 		return 'link';
+	}
+
+	public function searchHint(): ?string
+	{
+		return 'Ищется по имени связанного объекта.';
 	}
 
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
