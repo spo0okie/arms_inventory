@@ -183,6 +183,11 @@ arms/
 - [`FieldsHelper`](helpers/FieldsHelper.php) - работа с полями моделей
 - [`MacsHelper`](helpers/MacsHelper.php) - работа с MAC-адресами
 - [`HtmlHelper`](helpers/HtmlHelper.php) - генерация HTML
+- [`DocsHelper`](helpers/DocsHelper.php) - встроенная документация: поиск/рендер
+  MD-страниц из [`docs/help/`](docs/help/README.md) с учётом каталога
+  переопределений заказчика (`params['docsOverridePath']`); страницы отдаёт
+  [`DocsController`](controllers/DocsController.php), конвенция ведения
+  документации — в [docs/help/README.md](docs/help/README.md)
 
 ---
 
