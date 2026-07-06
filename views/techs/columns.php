@@ -191,6 +191,13 @@ $columns=[
 		'format' => 'ntext',
 		//'value' => function ($data) use ($searchModel){return $data->comment.' '.$searchModel->model_id;}
 	],
+	//записная книжка оборудования (issue #206) — доступна как колонка и для поиска
+	'history'=> [
+		'format' => 'ntext',
+		'value' => function ($data) {
+			return \yii\helpers\StringHelper::truncate((string)$data->history, 200);
+		},
+	],
 	'effectiveMaintenanceReqs' => [
 		'value' => function ($data) {
 			/** @var $data Techs */
