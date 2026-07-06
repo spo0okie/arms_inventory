@@ -1009,6 +1009,7 @@ class ArmsBaseController extends Controller
 		$this->view->registerAssetBundle(ArmsFormAsset::class);
 		$model = new $this->modelClass();
 
+		$model->loadHistoryComment(Yii::$app->request->post());
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			if (isset(Yii::$app->request->acceptableContentTypes['application/json'])) {
 				Yii::$app->response->format=Response::FORMAT_JSON;
@@ -1088,6 +1089,7 @@ class ArmsBaseController extends Controller
 		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'update.php')?
 			'update':'/layouts/update';
 
+		$model->loadHistoryComment(Yii::$app->request->post());
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
         	if (in_array('application/json',Yii::$app->request->acceptableContentTypes)) {
         		Yii::$app->response->format=Response::FORMAT_JSON;

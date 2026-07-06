@@ -290,15 +290,23 @@ class HistoryModel extends ArmsModel
 	public function journal(ArmsModel $record, $initiator=null) {
 		//заполняем запись в журнал
 		$this->fillRecord($record,$initiator);
-		
+
+		//переносим пользовательский комментарий к изменению с мастер-модели (issue #205).
+		//только у инициатора изменений; в связанные журналы он расходится штатно как
+		//initiatorField updated_comment (см. $initiatorFields / fillRecord)
+		if (!isset($initiator) && $this->hasAttribute('updated_comment') && strlen((string)$record->historyComment)) {
+			$this->updated_comment=$record->historyComment;
+		}
+
 		//грузим предыдущую запись
 		$this->loadPrevious();
-		
+
 		//сравниваем
 		$this->compareRecords($this->previous);
-		
-		//ничего важного не изменилось
-		if (!count($this->changedAttributes)) return false;
+
+		//ничего важного не изменилось и нет пользовательского комментария — запись не нужна.
+		//но если пользователь оставил комментарий (issue #205), запись создаём даже без изменений
+		if (!count($this->changedAttributes) && !strlen((string)$this->updated_comment)) return false;
 		
 		if ($this->hasAttribute('changed_attributes')) {
 			$this->changed_attributes=implode(',',$this->changedAttributes);

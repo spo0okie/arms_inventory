@@ -88,6 +88,14 @@ class ArmsModel extends ActiveRecord
 	/** @var string если заполнить, то будет сохранять историю в моделях этого класса */
 	protected $historyClass;
 
+	/**
+	 * @var string|null Пользовательский комментарий к изменению (issue #205).
+	 * Транзиентное поле — НЕ колонка мастер-таблицы. Заполняется из формы
+	 * редактирования и переносится в updated_comment соответствующей
+	 * History-записи при журналировании (см. HistoryModel::journal()).
+	 */
+	public $historyComment;
+
 	/** @var array Кэш для рекурсивного поиска поля (Когда значение может быть в родителе и в его родителе или ...) */
 	protected $recursiveCache=[];
 
@@ -857,6 +865,21 @@ class ArmsModel extends ActiveRecord
 		$scenarios=parent::scenarios();
 		$scenarios[static::SCENARIO_VALIDATION]=$scenarios[static::SCENARIO_DEFAULT];
 		return $scenarios;
+	}
+
+	/**
+	 * Загружает пользовательский комментарий к изменению (issue #205) из данных формы.
+	 * historyComment намеренно НЕ делается safe-атрибутом (иначе он попал бы под
+	 * проверку обязательной типизации и в JSON/REST), поэтому забираем его из POST
+	 * отдельно — прямо перед сохранением в actionCreate()/actionUpdate().
+	 * @param array $data данные запроса (напр. Yii::$app->request->post())
+	 */
+	public function loadHistoryComment($data)
+	{
+		$formName=$this->formName();
+		if (isset($data[$formName]) && array_key_exists('historyComment',$data[$formName])) {
+			$this->historyComment=$data[$formName]['historyComment'];
+		}
 	}
 
 	public function __get($name)
