@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\UserGroups */
 
 $this->title = 'Редактирование группы: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\UserGroups::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\UserGroups::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Редактирование';
 ?>

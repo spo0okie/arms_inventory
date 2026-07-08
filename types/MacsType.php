@@ -3,13 +3,30 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
+use app\helpers\ArrayHelper;
 use app\helpers\MacsHelper;
+use app\models\base\ArmsModel;
+use app\models\Techs;
+use Yii;
+use yii\web\View;
 
 class MacsType extends TextType
 {
 	public static function name(): string
 	{
 		return 'macs';
+	}
+
+	/**
+	 * Форматированный многострочный вывод: каждый адрес/диапазон на своей
+	 * строке в каноническом виде (AA:BB:CC:DD:EE:FF). Работает и от сырого
+	 * значения (mac), и от уже форматированного (formattedMac).
+	 */
+	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
+	{
+		return Yii::$app->formatter->asNtext(
+			Techs::formatMacs(ArrayHelper::getValue($model,$attribute))
+		);
 	}
 
 	/**
@@ -55,7 +72,7 @@ class MacsType extends TextType
 
 		$min = $context->min ?? 18;
 		$max = $context->max ?? 128;
-		$count = $rng->getInt($min/18, $max/18);
+		$count = $rng->getInt(intdiv($min, 18), intdiv($max, 18));
 		$result = [];
 		
 		for ($i = 0; $i < $count; $i++) {

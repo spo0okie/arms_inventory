@@ -47,7 +47,7 @@ if (!$content_only){ ?>
 		</div>
 		<h3><?= $model->title ?></h3>
 		
-		<p>	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'untitledComment']) ?> </p>
+		<p>	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'untitledComment') ?> </p>
 		<p>
 			Стоимость: <span class="badge bg-success"><?= number_format((int)$model->cost,0,'',' ').$currency ?></span>
 			<?php if ($model->charge) { ?>
@@ -60,7 +60,7 @@ if (!$content_only){ ?>
 		<?= ModelWidget::widget(['model'=>$model->place,'options'=>['full'=>true, 'static_view'=>$static_view]]) ?>
 		<br />
 		<strong><?= $model->getAttributeLabel('account')?></strong>
-		<?= $model->account ?>
+		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'account') ?>
 <?php if (!$content_only){ ?>
 	</div>
 <?php } ?>

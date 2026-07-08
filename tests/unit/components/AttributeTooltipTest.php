@@ -4,6 +4,8 @@ namespace tests\unit\components;
 
 use app\components\AttributeTooltip;
 use app\models\Comps;
+use app\models\Segments;
+use app\models\Services;
 use app\models\Techs;
 use Codeception\Test\Unit;
 
@@ -118,5 +120,244 @@ class AttributeTooltipTest extends Unit
 		$tooltip = AttributeTooltip::build(new Techs(), 'url', AttributeTooltip::MODE_FORM);
 		$this->assertNotNull($tooltip);
 		$this->assertStringContainsString('последнее слово — сам URL', $tooltip['body']);
+	}
+
+	/**
+	 * Блок 1б (источник значения): хранимая колонка блока не дает.
+	 */
+	public function testViewModeStoredAttributeGivesNoSource()
+	{
+		$tooltip = AttributeTooltip::build(new Techs(), 'mac', AttributeTooltip::MODE_VIEW);
+		$this->assertNotNull($tooltip);
+		$this->assertStringNotContainsString('вычисляемое поле', $tooltip['body']);
+		$this->assertStringNotContainsString('унаследовано', $tooltip['body']);
+	}
+
+	/**
+	 * Блок 1б: не-колонка помечается как вычисляемое поле, приглушенно
+	 * и только в режиме view.
+	 */
+	public function testViewModeCalculatedAttribute()
+	{
+		$model = new Techs();
+		$tooltip = AttributeTooltip::build($model, 'inv_sn', AttributeTooltip::MODE_VIEW);
+		$this->assertNotNull($tooltip);
+		$this->assertStringContainsString('вычисляемое поле', $tooltip['body']);
+		$this->assertStringContainsString('text-muted', $tooltip['body']);
+
+		foreach ([AttributeTooltip::MODE_FORM, AttributeTooltip::MODE_GRID, AttributeTooltip::MODE_SEARCH] as $mode) {
+			$tooltip = AttributeTooltip::build($model, 'inv_sn', $mode);
+			$this->assertStringNotContainsString('вычисляемое поле', $tooltip['body']??'');
+		}
+	}
+
+	/**
+	 * Блок 1б: у незагруженной записи рекурсивная часть опускается -
+	 * остается «вычисляемое поле» (цепочка наследования зависит от объекта).
+	 */
+	public function testViewModeRecursiveOnNewRecord()
+	{
+		$tooltip = AttributeTooltip::build(new Services(), 'segmentRecursive', AttributeTooltip::MODE_VIEW);
+		$this->assertNotNull($tooltip);
+		$this->assertStringContainsString('вычисляемое поле', $tooltip['body']);
+		$this->assertStringNotContainsString('унаследовано', $tooltip['body']);
+	}
+
+	/**
+	 * Блок 1б: наследуемый атрибут (is_inheritable) со значением в самой записи.
+	 */
+	public function testViewModeRecursiveOwnValue()
+	{
+		$model = new Services();
+		$model->setIsNewRecord(false);
+		$model->populateRelation('segment', new Segments(['name' => 'Свой сегмент']));
+
+		$tooltip = AttributeTooltip::build($model, 'segmentRecursive', AttributeTooltip::MODE_VIEW);
+		$this->assertNotNull($tooltip);
+		$this->assertStringContainsString('наследуемый атрибут', $tooltip['body']);
+		$this->assertStringContainsString('значение задано в этой записи', $tooltip['body']);
+	}
+
+	/**
+	 * Блок 1б: значение унаследовано - ссылка на предка-источника.
+	 * Аннотация одинаково работает и для виртуального <attr>Recursive,
+	 * и для plain-атрибута (alias-разрешение getAttributeData).
+	 */
+	public function testViewModeRecursiveInherited()
+	{
+		$parent = new Services(['name' => 'Родительский сервис']);
+		$parent->setIsNewRecord(false);
+		$parent->populateRelation('segment', new Segments(['name' => 'Сегмент предка']));
+		$parent->populateRelation('parentService', null);
+
+		$model = new Services();
+		$model->setIsNewRecord(false);
+		$model->populateRelation('segment', null);
+		$model->populateRelation('parentService', $parent);
+
+		foreach (['segmentRecursive', 'segment'] as $attr) {
+			$tooltip = AttributeTooltip::build($model, $attr, AttributeTooltip::MODE_VIEW);
+			$this->assertNotNull($tooltip);
+			$this->assertStringContainsString('унаследовано от', $tooltip['body']);
+			//ссылка на предка-источника (не на сегмент)
+			$this->assertStringContainsString('Родительский сервис', $tooltip['body']);
+			$this->assertStringContainsString('services', $tooltip['body']);
+		}
+	}
+
+	/**
+	 * Блок 1б: наследуемый атрибут без значения по всей цепочке.
+	 */
+	public function testViewModeRecursiveUnset()
+	{
+		$parent = new Services();
+		$parent->setIsNewRecord(false);
+		$parent->populateRelation('segment', null);
+		$parent->populateRelation('parentService', null);
+
+		$model = new Services();
+		$model->setIsNewRecord(false);
+		$model->populateRelation('segment', null);
+		$model->populateRelation('parentService', $parent);
+
+		$tooltip = AttributeTooltip::build($model, 'segmentRecursive', AttributeTooltip::MODE_VIEW);
+		$this->assertNotNull($tooltip);
+		$this->assertStringContainsString('не задано ни здесь, ни у предков', $tooltip['body']);
+	}
+
+	/**
+	 * Блок 1б: ссылочный атрибут (значение по хранимой ссылке) не считается
+	 * вычисляемым - блока нет.
+	 */
+	public function testViewModeLinkAttributeGivesNoSource()
+	{
+		$tooltip = AttributeTooltip::build(new Techs(), 'user', AttributeTooltip::MODE_VIEW);
+		$this->assertStringNotContainsString('вычисляемое поле', $tooltip['body'] ?? '');
+	}
+
+	/**
+	 * Подача: AttributeTooltip::icon - единственная точка рендера иконки «?».
+	 * Тултип и pin-поведение (qtip_pin) висят на иконке; пустой тултип
+	 * (build вернул null) - иконки нет.
+	 */
+	public function testIcon()
+	{
+		$this->assertSame('', AttributeTooltip::icon(null));
+
+		$icon = AttributeTooltip::icon(['title' => 'Заголовок', 'body' => 'Тело']);
+		$this->assertStringContainsString('fa-question-circle', $icon);
+		$this->assertStringContainsString('attr-hint-icon', $icon);
+		$this->assertStringContainsString('qtip_pin', $icon);
+		$this->assertStringContainsString('qtip_ttip', $icon);
+		$this->assertStringContainsString('Заголовок', $icon);
+		$this->assertStringContainsString('Тело', $icon);
+
+		//заготовка для JS: те же классы и pin, но без контента
+		$template = AttributeTooltip::iconTemplate();
+		$this->assertStringContainsString('attr-hint-icon', $template);
+		$this->assertStringContainsString('qtip_pin', $template);
+		$this->assertStringNotContainsString('qtip_ttip', $template);
+	}
+
+	/**
+	 * Форма (FieldsHelper::labelOption): тултип-опции на иконке в составе
+	 * label, сами label-опции чистые (qtip на label не вешается).
+	 */
+	public function testFormLabelIconDelivery()
+	{
+		[$label, $options] = \app\helpers\FieldsHelper::labelOption(new Techs(), 'mac', []);
+		$this->assertStringStartsWith('MAC адреса', $label);
+		$this->assertStringContainsString('attr-hint-icon', $label);
+		$this->assertStringContainsString('qtip_ttip', $label);
+		$this->assertSame([], $options);
+	}
+
+	/**
+	 * Grid/search-заголовки (AttributeHintWidget): label чистый, тултип
+	 * на иконке «?» после него.
+	 */
+	public function testAttributeHintWidgetIconDelivery()
+	{
+		$model = new Techs();
+		$out = \app\components\AttributeHintWidget::widget([
+			'model' => $model,
+			'attribute' => 'mac',
+			'mode' => 'grid',
+		]);
+		//label чистый (без обёртки с qtip), тултип на иконке после него
+		$this->assertStringStartsWith($model->getAttributeIndexLabel('mac').' <span', $out);
+		$this->assertStringContainsString('attr-hint-icon', $out);
+		$this->assertStringContainsString('qtip_ttip', $out);
+	}
+
+	/**
+	 * ModelFieldWidget::fieldTitle делегирует сборщику: label по цепочке
+	 * view-режима + иконка «?» с телом тултипа (включая блок 1б);
+	 * options пустые (подача на иконке).
+	 */
+	public function testModelFieldWidgetTitleDelegates()
+	{
+		$model = new Techs();
+		[$label, $options] = \app\components\ModelFieldWidget::fieldTitle($model, 'inv_sn');
+		$this->assertStringStartsWith('Бух/SN/Доп.', $label);
+		$this->assertStringContainsString('attr-hint-icon', $label);
+		$this->assertStringContainsString('qtip_ttip', $label);
+		$this->assertStringContainsString('вычисляемое поле', $label);
+		$this->assertSame([], $options);
+	}
+
+	/**
+	 * ModelFieldWidget::renderFieldValue: режим "только значение" -
+	 * без h4-подписи и карточки, для инлайн-мест свободной вёрстки;
+	 * полная подача при этом сохраняет заголовок.
+	 */
+	public function testRenderFieldValue()
+	{
+		$model = new Techs(['num' => 'ARM-0001']);
+
+		$bare = \app\components\ModelFieldWidget::renderFieldValue($model, 'num');
+		$this->assertStringContainsString('ARM-0001', $bare);
+		$this->assertStringNotContainsString('<h4', $bare);
+		$this->assertStringNotContainsString('card', $bare);
+
+		$full = \app\components\ModelFieldWidget::widget(['model' => $model, 'field' => 'num']);
+		$this->assertStringContainsString('ARM-0001', $full);
+		$this->assertStringContainsString('<h4', $full);
+	}
+
+	/**
+	 * ModelFieldWidget::renderFieldRow: строка «подпись: значение»;
+	 * пустое значение - пустая строка (для implode+array_filter вёрстки):
+	 * пустоту обрабатывает подача, рендер типа на пустом не вызывается.
+	 */
+	public function testRenderFieldRow()
+	{
+		$model = new Techs(['num' => 'ARM-0001']);
+
+		$row = \app\components\ModelFieldWidget::renderFieldRow($model, 'num');
+		$this->assertStringContainsString('Инвентарный номер', $row);
+		$this->assertStringContainsString(': ', $row);
+		$this->assertStringContainsString('ARM-0001', $row);
+		$this->assertStringContainsString('qtip_ttip', $row);
+
+		$this->assertSame('', \app\components\ModelFieldWidget::renderFieldRow($model, 'sn'));
+	}
+
+	/**
+	 * ModelFieldWidget::detailAttribute: конфиг строки DetailView с подписью
+	 * и тултипом от той же точки сборки; формат 'attr:format' сохраняется,
+	 * переопределения конфига работают.
+	 */
+	public function testDetailAttribute()
+	{
+		$model = new Techs();
+		$row = \app\components\ModelFieldWidget::detailAttribute($model, 'inv_sn:ntext', ['visible' => false]);
+		$this->assertEquals('inv_sn:ntext', $row['attribute']);
+		$this->assertStringStartsWith('Бух/SN/Доп.', $row['label']);
+		//подача: тултип на иконке в составе label, captionOptions чистые
+		$this->assertStringContainsString('attr-hint-icon', $row['label']);
+		$this->assertStringContainsString('вычисляемое поле', $row['label']);
+		$this->assertSame([], $row['captionOptions']);
+		$this->assertFalse($row['visible']);
 	}
 }

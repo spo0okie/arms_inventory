@@ -23,7 +23,7 @@ echo
 	'static'=>true
 ])
 .'</h1>'
-.TextFieldWidget::widget(['model'=>$model,'field'=>'comment'])
+.\app\components\ModelFieldWidget::renderFieldValue($model,'comment')
 .ModelFieldWidget::widget([
 	'model'=>$model,
 	'field'=>'soft',

@@ -5,8 +5,8 @@
  */
 ?>
 
-<h4>Заметки:</h4>
+<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'history') ?>
 <p>
-	<?= Yii::$app->formatter->asNtext($model->history) ?>
+	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'history') ?>
 </p>
 

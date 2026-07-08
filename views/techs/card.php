@@ -5,7 +5,7 @@ use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
@@ -21,7 +21,7 @@ $name=$model->hostname?$this->render('/domains/hostname',[
 
 if (is_object($model->state)) { ?>
 	<span class="unit-status <?= $model->state->code ?> "><?= $model->state->name ?></span>
-	
+
 <?php }?>
 
 <?= IsHistoryObjectWidget::widget(['model' => $model,'class'=>'me-2']) ?>
@@ -40,43 +40,44 @@ if (is_object($model->state)) { ?>
 <div class="d-flex flex-row">
 	<div class="pe-5">
 		<?php if (!$no_model) { ?>
-			Модель: <?= ModelWidget::widget(['model'=>$model->model,'options'=>['long'=>1]]) ?> <br />
-			Серийный №: <?= $model->sn ?> <br />
-			Бухг. инв. №: <?= $model->inv_num ?> <br />
-			<?php if (strlen($model->comment)){
-				echo ('<b>'.$model->commentLabel.':</b> '.Yii::$app->formatter->asNtext($model->comment).'<br />');
-			} ?>
-			
+			<?= implode('<br />',array_filter([
+				ModelFieldWidget::renderFieldRow($model,'model_id',['item_options'=>['long'=>1]]),
+				ModelFieldWidget::renderFieldRow($model,'sn'),
+				ModelFieldWidget::renderFieldRow($model,'inv_num'),
+				//label динамический (commentLabel), значение - по правилу
+				strlen((string)$model->comment)?
+					('<b>'.$model->commentLabel.':</b> '.ModelFieldWidget::renderFieldValue($model,'comment')):'',
+			])) ?><br />
+
 			<?php if ($model->model->individual_specs) { ?>
-				<h4>Спецификация:</h4>
-				<?= Yii::$app->formatter->asNtext($model->specs) ?>
+				<?= ModelFieldWidget::renderFieldTitle($model,'specs') ?>
+				<?= ModelFieldWidget::renderFieldValue($model,'specs') ?>
 				<br />
 			<?php } ?>
-		
+
 		<?php } else { ?>
 			<h4>Идентификаторы:</h4>
 			<p>
-				<?= $model->hostname?'Инвентарный №: <strong>'.$model->num.'</strong><br />':'' ?>
-				Серийный №: <?= $model->sn ?> <br />
-				Бухг. инв. №: <?= $model->inv_num ?> <br />
-				<?php if (strlen($model->comment)){
-					echo ('<b>'.$model->commentLabel.':</b> '.Yii::$app->formatter->asNtext($model->comment).'<br />');
-				} ?>
+				<?= implode('<br />',array_filter([
+					$model->hostname?ModelFieldWidget::renderFieldRow($model,'num'):'',
+					ModelFieldWidget::renderFieldRow($model,'sn'),
+					ModelFieldWidget::renderFieldRow($model,'inv_num'),
+					strlen((string)$model->comment)?
+						('<b>'.$model->commentLabel.':</b> '.ModelFieldWidget::renderFieldValue($model,'comment')):'',
+				])) ?>
 			</p>
 		<?php } ?>
 	</div>
 	<div class="pe-1">
 		<h4>Тех. обслуживание:</h4>
-		<?= is_object($model->responsible)?'<strong>Ответственный:</strong>'.ModelWidget::widget(['model'=>$model->responsible,'options'=>['static_view'=>true]]).'<br />':'' ?>
-		<?php if (count($model->supportTeam)) { ?>
-			<strong>Поддержка:</strong>
-			<?php
-			$support=[];
-			foreach ($model->supportTeam as $mate) $support[]= ModelWidget::widget(['model'=>$mate,'options'=>['static_view'=>true,'short'=>true]]);
-			echo implode(', ',$support);
-			?>
-			<br />
-		<?php } ?>
+		<?= implode('<br />',array_filter([
+			ModelFieldWidget::renderFieldRow($model,'responsible',['item_options'=>['static_view'=>true]],'strong'),
+			ModelFieldWidget::renderFieldRow($model,'supportTeam',[
+				'item_options'=>['static_view'=>true,'short'=>true],
+				'glue'=>', ',
+				'lineBr'=>false,
+			],'strong'),
+		])) ?>
 	</div>
 </div>
 
@@ -85,17 +86,19 @@ if (is_object($model->state)) { ?>
 	<div class="pe-5">
 		<h4>Место установки и сотрудники:</h4>
 		<p>
-			<?= is_object($model->arm)?('АРМ: '.ModelWidget::widget(['model'=>$model->arm]).'<br />'):'' ?>
-			<?= is_object($model->installation)?('Установлено в: '.ModelWidget::widget(['model'=>$model->installation]).'<br />'):'' ?>
-			Помещение: <?= ModelWidget::widget(['model'=>$model->place]) ?> <br />
-			Пользователь: <?= ModelWidget::widget(['model'=>$model->user]) ?> <br />
-			<?= is_object($model->head)?('Руководитель отдела:'.ModelWidget::widget(['model'=>$model->head]).'<br/>'):'' ?>
-			<?= is_object($model->admResponsible)?($model->getAttributeLabel('responsible_id').':'.ModelWidget::widget(['model'=>$model->admResponsible]).'<br/>'):'' ?>
+			<?= implode('<br />',array_filter([
+				ModelFieldWidget::renderFieldRow($model,'arms_id'),
+				ModelFieldWidget::renderFieldRow($model,'installed_id'),
+				ModelFieldWidget::renderFieldRow($model,'places_id'),
+				ModelFieldWidget::renderFieldRow($model,'user_id'),
+				ModelFieldWidget::renderFieldRow($model,'head'),
+				ModelFieldWidget::renderFieldRow($model,'responsible_id'),
+			])) ?>
 		</p>
 	</div>
-	
+
 	<?php if ($model->isComputer) echo '<div class="pe-4">'.$this->render('/techs/attached/comps',['model'=>$model]).'</div>' ?>
-	
+
 </div>
 
 
@@ -104,14 +107,15 @@ if (is_object($model->state)) { ?>
 		<?= $this->render('ips_list',compact('model')) ?>
 	</div>
 	<div class="pe-5 mb-3">
-		<h4>MAC адрес(а):</h4>
+		<?= ModelFieldWidget::renderFieldTitle($model,'mac') ?>
 		<p class="mb-0">
-			<?= Yii::$app->formatter->asNtext($model->formattedMac) ?>
+			<?= ModelFieldWidget::renderFieldValue($model,'mac') ?>
 		</p>
 	</div>
-	
+
 	<?php
 	//для оборудования не АРМ выводим в список урл ссылку на IP устройства
+	//композиция двух атрибутов (url+ip) - не атрибут, законное исключение из правила ModelFieldWidget
 	$urls=$model->url;
 	$ips=$model->isComputer?'':$model->ip;
 	if (strlen($urls.$ips)) { ?>
@@ -166,7 +170,7 @@ if (is_object($model->state)) { ?>
 
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 
-<h4>Использованные материалы:</h4>
+<?= ModelFieldWidget::renderFieldTitle($model,'materialsUsages') ?>
 <p>
     <?php
 	$materialsUsages=$model->materialsUsages;
@@ -176,7 +180,5 @@ if (is_object($model->state)) { ?>
     } ?>
 </p>
 
-<h4>Заметки:</h4>
-<?= Yii::$app->formatter->asNtext($model->history) ?><br />
-
-
+<?= ModelFieldWidget::renderFieldTitle($model,'history') ?>
+<?= ModelFieldWidget::renderFieldValue($model,'history') ?><br />

@@ -32,16 +32,12 @@ class EmailType extends BaseType
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * Значение - mailto-ссылка. Пустоту обрабатывает потребитель
+	 * (show_empty/message_on_empty), рендер на пустом не вызывается.
 	 */
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
-		$value = $model->$attribute ?? null;
-		if ($value === null || $value === '') {
-			return '<span class="text-muted">—</span>';
-		}
-
-		$encoded = Html::encode((string)$value);
+		$encoded = Html::encode((string)($model->$attribute ?? ''));
 		return Html::a($encoded, 'mailto:' . $encoded, [
 			'target' => '_blank',
 			'rel' => 'noopener noreferrer',

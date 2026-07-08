@@ -8,7 +8,7 @@ use app\models\base\ArmsModel;
 use Imagick;
 use ImagickException;
 use Yii;
-use yii\helpers\StringHelper;
+use app\helpers\StringHelper;
 
 
 /**
@@ -188,7 +188,7 @@ class Scans extends ArmsModel
 	}
 	
 	public function getName() {
-		$tokens=explode('-',$this->file);
+		$tokens=explode('-',$this->file??'');
 		unset ($tokens[0]);
 		return implode('-',$tokens).'.'.$this->format;
 	}
@@ -214,7 +214,7 @@ class Scans extends ArmsModel
 	 * @return string
 	 */
 	public function getDescr(){
-		$pos=strpos($this->file,'-');
+		$pos=strpos($this->file??'','-');
 		if ($pos) {
 			return substr($this->file,$pos+1);
 		} else return $this->file;
@@ -243,7 +243,7 @@ class Scans extends ArmsModel
 	 */
 	public function getFileExists(){
 		//при синхронизации может сначала создать объект а файл не указать/закачать
-		if (!strlen($this->file)) return false;
+		if (!strlen($this->file??'')) return false;
 		return file_exists($this->fsFname);
 	}
 	

@@ -105,10 +105,26 @@ class HistoryModel extends ArmsModel
 			'updated_comment'=>[
 				'Пояснение',
 				'indexHint'=>'Пояснение к изменениям',
+				'typeClass'=>\app\types\TextType::class,
 			]
 		]);
 	}
-	
+
+	/**
+	 * Типы атрибутов определяет мастер-модель: у истории собственные
+	 * rules (default null + safe), по которым резолвер тип не выведет.
+	 * Сначала штатный резолвинг (attributeData уже мастеровский + свои
+	 * оверрайды), не вышло - добираем резолвером мастера (его rules).
+	 */
+	public function getAttributeTypeClass(string $attribute): \app\types\AttributeTypeInterface
+	{
+		try {
+			return parent::getAttributeTypeClass($attribute);
+		} catch (\Throwable $e) {
+			return $this->masterInstance->getAttributeTypeClass($attribute);
+		}
+	}
+
 	public function rules() {
 		$attributes=array_keys($this->attributes);
 		return [

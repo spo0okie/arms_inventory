@@ -30,10 +30,10 @@ DynaGridWidgetAsset::register($this);
 <div class="services-view">
 
     <?= $this->render('card',['model'=>$model]) ?>
-	<?php if (strlen($model->notebook)) { ?>
+	<?php if (strlen($model->notebook??'')) { ?>
 		<h4>Записная книжка:</h4>
 		<p>
-			<?= TextFieldWidget::widget(['model'=>$model,'field'=>'notebook']) ?>
+			<?= \app\components\ModelFieldWidget::renderFieldValue($model,'notebook') ?>
 		</p>
 		<br />
 	<?php } ?>

@@ -22,7 +22,7 @@ class MacsHelper
 	 */
 	public static function fixList($list) {
 		$macs=[];
-		foreach (explode("\n",$list) as $mac) {
+		foreach (explode("\n",$list??'') as $mac) {
 			/* убираем посторонние символы из MAC*/
 			$fixed=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
 

@@ -1,6 +1,6 @@
 <?php
 
-use app\components\widgets\page\ModelWidget;
+use app\components\ModelFieldWidget;
 /**
  * Список адресов машины
  * User: aareviakin
@@ -14,14 +14,7 @@ if (!isset($static_view)) $static_view=false;
 
 ?>
 
-	<h4>IP адрес(а):</h4>
- 
-<?php
-	$output=[];
-	foreach ($model->netIps as $ip) {
-		$output[]=ModelWidget::widget(['model'=>$ip]);
-	}
-	echo implode('<br />',$output);
+	<?= ModelFieldWidget::renderFieldTitle($model,'ip') ?>
 
-
+<?= ModelFieldWidget::renderFieldValue($model,'netIps',['glue'=>'<br />']) ?>
 

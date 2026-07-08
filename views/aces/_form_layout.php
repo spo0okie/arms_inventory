@@ -4,10 +4,9 @@
  * Содержимое формы вынесено в отдельный файл, т.к. может быть использовано и в форме ACE и в форме ACL
  */
 
-use app\components\Forms\ActiveField;
+use app\components\AttributeTooltip;
 use app\models\AccessTypes;
 use app\models\Users;
-use yii\helpers\Html;
 use yii\web\View;
 
 /* @var $this yii\web\View */
@@ -112,14 +111,12 @@ $this->registerJs('updateAccessTypes()');
 			</div>
 			<!-- https://www.yiiframework.com/doc/api/2.0/yii-helpers-basehtml#activeCheckboxList()-detail -->
 			<div class="card bg-light">
-				<div class="card-header"><?= Html::tag(
-						'span',
-						'Какой этим объектам предоставляется доступ',
-						ActiveField::hintTipOptions(
-							'Типы предоставляемого доступа' ,
-							$model->getAttributeHint('access_types_ids')
-						)
-					)?>
+				<div class="card-header">Какой этим объектам предоставляется доступ
+					<?/*подача подсказки атрибута - иконкой «?» (ui-sources.md §0.1)*/?>
+					<?= AttributeTooltip::icon(AttributeTooltip::build(
+						$model,'access_types_ids',AttributeTooltip::MODE_FORM,
+						'Типы предоставляемого доступа'
+					)) ?>
 				</div>
 				<div class="card-body">
 					<?= $form->field($model, 'access_types_ids')->checkboxList(AccessTypes::fetchNames(),[

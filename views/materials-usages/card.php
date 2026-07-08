@@ -31,7 +31,7 @@ if (!isset($static_view)) $static_view=false;
 </div>
 
 	<p class="mb-3">
-		<strong>Дата:</strong> <?= $model->date ?><br />
+		<strong>Дата:</strong> <?= \app\components\ModelFieldWidget::renderFieldValue($model,'date') ?><br />
 <?php if ($model->cost) { ?>
 		<strong>Стоимость:</strong> <?= $this->render('/contracts/price',[
 			'total'=>$model->cost,
@@ -57,6 +57,6 @@ if (!isset($static_view)) $static_view=false;
 <?php }
 
 
-echo TextFieldWidget::widget(['model'=>$model,'field'=>'history']) ?>
+echo \app\components\ModelFieldWidget::renderFieldValue($model,'history') ?>
 
 

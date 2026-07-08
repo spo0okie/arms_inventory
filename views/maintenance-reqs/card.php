@@ -29,7 +29,7 @@ if ($model->spread_techs) $spread[]='<b>оборудование</b>';
 </h1>
 
 <div class="mb-3">
-	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'description']) ?>
+	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'description') ?>
 	<?php if (count($spread)) { ?>
 		<p>
 			Закрепленные за сервисами требования распространяются также на <?= implode(' и ', $spread)?> обеспечивающих работу сервисов.

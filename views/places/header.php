@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Places */
@@ -13,7 +14,7 @@ $inets=$model->inets;
 
 if (!isset($show_archived)) $show_archived=true;
 
-if (count($phones)||count($inets)||strlen($addr)) {
+if (count($phones)||count($inets)||strlen($addr??'')) {
 ?>
 
 <div class="places-container-hdr-depth<?= $depth ?>">
@@ -33,13 +34,13 @@ if (count($phones)||count($inets)||strlen($addr)) {
 			}
         }?>
     </span>
-	<?php if(strlen($addr)) { ?>
+	<?php if(strlen($addr??'')) { ?>
 		<span class="places-addr">
             <span class="fas fa-envelope"></span><?= Html::encode($addr) ?>
 			<?= Html::a('<i class="fas fa-pencil-alt"></i>',['/places/update','id'=>$model->id],['title'=>'Редактировать помещение']) ?>
         </span>
 	<?php } ?>
-	<?php if(strlen($model->comment)) { ?>
+	<?php if(strlen($model->comment??'')) { ?>
 		<span class="places-comment">
             <span class="fas fa-info-circle"></span><?= Html::encode($model->comment) ?>
 			<?= Html::a('<i class="fas fa-pencil-alt"></i>',['/places/update','id'=>$model->id],['title'=>'Редактировать помещение']) ?>

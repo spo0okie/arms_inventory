@@ -3,6 +3,7 @@
 use app\components\HintIconWidget;
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
+use app\components\ModelFieldWidget;
 use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
@@ -21,14 +22,14 @@ use yii\widgets\DetailView;
 				'links'=>[$model->materials],
 			]) ?>
 		</h1>
-		<p>	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?> </p>
+		<p>	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?> </p>
 	</div>
 	<div class="me-5">
 		<?= DetailView::widget([
 			'model' => $model,
 			'attributes' => [
-				'code',
-				'units',
+				ModelFieldWidget::detailAttribute($model,'code'),
+				ModelFieldWidget::detailAttribute($model,'units'),
 			],
 		]) ?>
 	</div>

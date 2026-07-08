@@ -125,7 +125,7 @@ trait AclsModelCalcFieldsTrait
 	{
 		/** @var Acls $this */
 		if (isset($this->attrsCache['sname'])) return $this->attrsCache['sname'];
-		if (strlen($this->comment))
+		if (strlen($this->comment??''))
 			$this->attrsCache['sname']=$this->comment;
 		elseif (($this->comps_id) and is_object($this->comp))
 			$this->attrsCache['sname']= $this->comp->renderName();

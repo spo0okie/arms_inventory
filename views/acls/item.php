@@ -1,9 +1,8 @@
 <?php
 
+use app\components\ItemObjectWidget;
 use app\components\UpdateObjectWidget;
 use app\components\widgets\page\ModelWidget;
-use yii\helpers\Html;
-use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
@@ -31,14 +30,13 @@ if (!empty($model)) {
 	elseif (($model->networks_id) and is_object($model->network))
 		echo ModelWidget::widget(['model'=>$model->network,'options'=>['static_view'=>true]]).$update;
 	else {
-		if (!isset($name)) $name=$model->sname;
-	?>
-	
-		<span class="acls-item"
-			  qtip_ajxhrf="<?= Url::to(['acls/ttip','id'=>$model->id]) ?>"
-		>
-			<?=  Html::a($name,['acls/view','id'=>$model->id]).$update; ?>
-		</span>
-	<?php }
-} ?>
+		echo ItemObjectWidget::widget([
+			'model'=>$model,
+			'name'=>$name??$model->sname,
+			'noDelete'=>true,
+			'static'=>$static_view,
+			'modal'=>$modal,
+		]);
+	}
+}
 

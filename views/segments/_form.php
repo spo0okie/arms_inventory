@@ -1,7 +1,7 @@
 <?php
 
 use app\components\Forms\ArmsForm;
-use kartik\markdown\MarkdownEditor;
+use app\components\formInputs\MarkdownEditorFix as MarkdownEditor;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 

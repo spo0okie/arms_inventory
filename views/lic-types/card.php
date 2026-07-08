@@ -29,7 +29,7 @@ $deleteable=!count($model->licGroups);
 
 
 <p>
-	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
+	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 </p>
 
 <br />

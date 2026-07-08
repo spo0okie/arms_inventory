@@ -13,7 +13,7 @@ use yii\widgets\DetailView;
         <?= Html::encode($model->name) ?>
     </h1>
 	
-	<?php if(strlen($model->addr)) { ?>
+	<?php if(strlen($model->addr??'')) { ?>
 		<div class="places-addr mb-2">
             <span class="fas fa-envelope"></span><?= Html::encode($model->addr) ?>
         </div>
@@ -40,7 +40,7 @@ use yii\widgets\DetailView;
 	<?php } ?>
 
 	
-	<?php if(strlen($model->comment)) { ?>
+	<?php if(strlen($model->comment??'')) { ?>
 		<div class="places-comment mb-2">
             <span class="fas fa-info-circle"></span><?= Html::encode($model->comment) ?>
         </div>

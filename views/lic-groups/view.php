@@ -41,7 +41,7 @@ $this->params['headerContent']=
 					'undeletableMessage'=>'Нельзя удалить этот тип лицензий, т.к. есть привязанные к нему объекты',
 				])
 			.'</h3>'
-			.TextFieldWidget::widget(['model'=>$model,'field'=>'comment','outerClass'=>'mb-3'])
+			.'<div class="mb-3">'.ModelFieldWidget::renderFieldValue($model,'comment').'</div>'
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'service'])
 		.'</div>'
 		.'<div class="me-5 flex-lg-grow-0">'

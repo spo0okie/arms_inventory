@@ -19,7 +19,8 @@ use app\models\Manufacturers;
 use app\models\Techs;
 use yii\helpers\Html;
 
-
+
+
 use app\components\widgets\page\ModelWidget;
 if(!isset($static_view))$static_view=false;
 $renderer = $this;
@@ -54,7 +55,7 @@ return [
 				$output=[];
 				/* @var $data Comps */
 				foreach ($data->netIps as $ip) {
-					$name=strtolower($ip->name);
+					$name=strtolower($ip->name??'');
 					//выводим пояснение к IP только если он не поясняет про FQDN или hostname нашей ОС
 					$sname=$ip->text_addr.(trim($name) && $name!=strtolower($data->name) && $name!=strtolower($data->fqdn)?' ('.$ip->name.')':'');
 					$output[]=ModelWidget::widget(['model'=>$ip,'options'=>['static_view'=>true,'name'=>$sname]]);

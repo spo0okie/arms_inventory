@@ -4,6 +4,8 @@ namespace app\components;
 
 use app\helpers\DocsHelper;
 use app\helpers\FieldsHelper;
+use Yii;
+use yii\helpers\Html;
 use yii\helpers\Inflector;
 
 /**
@@ -13,6 +15,10 @@ use yii\helpers\Inflector;
  * блока — <br>, пустые блоки пропускаются):
  *  1  смысл («что это»)      — hint/indexHint/viewHint по режиму
  *  1а формат («как вводить») — inputHint() типа, только в form, приглушённо
+ *  1б источник значения      — только в view, приглушённо, автоматически из
+ *     модели: наследуемый атрибут (задано здесь / унаследовано от
+ *     предка-ссылки / не задано) / вычисляемое поле; хранимые колонки
+ *     и ссылочные атрибуты блока не дают
  *  2  поиск («как искать»)   — только в search: явный searchHint attributeData
  *     вытесняет всё; иначе дефолт по типу данных + приглушённый searchHint() типа
  *  3  переходы на слой 2     — ссылки на MD-страницы атрибута и типа
@@ -48,6 +54,12 @@ class AttributeTooltip
 			$format='<span class="text-muted">'.$format.'</span>';
 			$meaning=$meaning? $meaning.'<br>'.$format : $format;
 		}
+
+		//блок 1б: источник значения - только в карточке, приглушенно, продолжением смысла
+		if ($mode===self::MODE_VIEW && ($source=static::valueSourceBlock($model,$attr))) {
+			$source='<span class="text-muted">'.$source.'</span>';
+			$meaning=$meaning? $meaning.'<br>'.$source : $source;
+		}
 		if ($meaning) $blocks[]=$meaning;
 
 		//блок 2: поиск («как искать») - только в колонке с фильтром
@@ -69,13 +81,54 @@ class AttributeTooltip
 	}
 
 	/**
-	 * То же, но сразу qtip-опциями для options=>[] HTML-элемента
-	 * ([] — тултип не нужен).
+	 * Иконка «?» подсказки атрибута — единственная точка ПОДАЧИ тултипа
+	 * (ui-sources.md §0.1, канон разметки): потребители дописывают иконку
+	 * к label, сам label остаётся чистым (без qtip-атрибутов). Тултип
+	 * и pin-поведение (qtip_pin: клик приколачивает тултип, см.
+	 * web/tooltipster/js/qtip_ajax.js) висят на иконке; статусы цветом —
+	 * web/css/qtip.css (.attr-hint-icon / :hover / .qtip-pinned).
+	 * @param array|null $tooltip результат build(); null — иконки нет
 	 */
-	public static function options($model, string $attr, string $mode=self::MODE_FORM, ?string $labelOverride=null, ?string $hintOverride=null): array
+	public static function icon(?array $tooltip): string
 	{
-		$tooltip=static::build($model,$attr,$mode,$labelOverride,$hintOverride);
-		return $tooltip? FieldsHelper::toolTipOptions($tooltip['title'],$tooltip['body']) : [];
+		if (!$tooltip) return '';
+		return Html::tag('span',static::iconGlyph(),array_merge(
+			static::iconOptions(),
+			FieldsHelper::toolTipOptions($tooltip['title'],$tooltip['body'])
+		));
+	}
+
+	/**
+	 * Заготовка иконки без контента тултипа (qtip_ttip) — для JS, который
+	 * подставляет контент динамически (см. views/techs/_form.php).
+	 */
+	public static function iconTemplate(): string
+	{
+		return Html::tag('span',static::iconGlyph(),array_merge(static::iconOptions(),[
+			'qtip_side'=>'top,bottom,right,left',
+			'qtip_theme'=>'tooltipster-shadow tooltipster-shadow-infobox',
+		]));
+	}
+
+	/**
+	 * Глиф — как у иконки помощи страницы (HintIconWidget).
+	 */
+	protected static function iconGlyph(): string
+	{
+		return '<i class="fas fa-question-circle"></i>';
+	}
+
+	/**
+	 * Общие атрибуты span-обёртки иконки; qtip_pin включает pin-поведение.
+	 * Тултип и статусные классы висят на обёртке, а не на самом FA-элементе:
+	 * FontAwesome заменяет <i> на <svg> и пересоздаёт его при изменении
+	 * классов - tooltipster-инстанс и обработчики умирали бы вместе
+	 * со старым элементом (по той же причине HintIconWidget вешает
+	 * тултип на <a>).
+	 */
+	protected static function iconOptions(): array
+	{
+		return ['class'=>'attr-hint-icon','qtip_pin'=>'1'];
 	}
 
 	/**
@@ -144,6 +197,48 @@ class AttributeTooltip
 			$search.=($search?'<br>':'').'<span class="text-muted">'.$typed.'</span>';
 
 		return $search;
+	}
+
+	/**
+	 * Блок 1б «источник значения» (только view) — выводится из модели
+	 * автоматически, руками не пишется:
+	 *  - наследуемый атрибут (is_inheritable; алиасы link_id<->getter и
+	 *    <attr>Recursive разрешает getAttributeData) у загруженной записи —
+	 *    задано здесь / унаследовано от предка (ссылкой) / не задано;
+	 *  - хранимая колонка и ссылочные атрибуты (значение по хранимой
+	 *    ссылке) — блока нет (дефолт не шумит);
+	 *  - прочее (нет колонки) — «вычисляемое поле».
+	 * @return string|null null - блок не нужен
+	 */
+	protected static function valueSourceBlock($model, string $attr): ?string
+	{
+		if (!is_object($model) || !method_exists($model,'hasAttribute')) return null;
+
+		//наследуемый атрибут: где фактически задано значение - интроспекция
+		//конкретной записи, у пустой модели цепочки наследования нет
+		if (!$model->getIsNewRecord()
+			&& method_exists($model,'attributeIsInheritable') && $model->attributeIsInheritable($attr)
+			&& method_exists($model,'findRecursiveAttrNode')
+		) {
+			try {
+				$node=$model->findRecursiveAttrNode($attr);
+				if ($node===$model) return 'наследуемый атрибут: значение задано в этой записи';
+				//предок - стандартным рендером имени объекта (unification.md:
+				//ItemObjectWidget/LinkObjectWidget, samePage-механика)
+				if (is_object($node)) return 'наследуемый атрибут: унаследовано от '
+					.$node->renderItem(Yii::$app->view,['static_view'=>true]);
+				return 'наследуемый атрибут: значение не задано ни здесь, ни у предков';
+			} catch (\Throwable $e) {
+				//цепочка не разрешилась - падаем на общую логику ниже
+			}
+		}
+
+		//хранимые колонки и ссылочные атрибуты - самоочевидно, не шумим
+		if ($model->hasAttribute($attr)) return null;
+		if (method_exists($model,'attributeIsLink') && $model->attributeIsLink($attr)) return null;
+		if (method_exists($model,'attributeIsLoader') && $model->attributeIsLoader($attr)) return null;
+
+		return 'вычисляемое поле';
 	}
 
 	/**

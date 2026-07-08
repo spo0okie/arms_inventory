@@ -32,11 +32,22 @@ interface AttributeTypeInterface extends GeneratorInterface
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed;
 
 	/**
-	 * Рендер атрибута на форму/grid.
+	 * Типовой рендер значения атрибута в местах вывода (карточки view/item,
+	 * свободная вёрстка). Контракт результата:
+	 * - string — готовый HTML значения (рендер сам управляет переносами);
+	 * - array — список готовых HTML-элементов, разделители расставляет
+	 *   потребитель.
+	 * Тип рендерит только значение; подача (карточка/заголовок/список) —
+	 * забота потребителя. Пустое значение тоже подача: потребитель сам
+	 * решает show_empty/message_on_empty и рендер типа НЕ вызывает.
+	 * Ссылочные атрибуты значением не рендерятся: потребитель уводит их
+	 * на объектный путь (renderItem) по метаданным, LinkType на попытку
+	 * рендера бросает исключение.
+	 * Дефолтная реализация (экранированное значение) — в BaseType.
 	 * @param View $view куда рендерить
 	 * @param ArmsModel $model какая модель
 	 * @param string $attribute какой атрибут
-	 * @param array $options параметры рендера (label/hint и т.д.)
+	 * @param array $options параметры рендера (напр. outerClass)
 	 */
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed;
 

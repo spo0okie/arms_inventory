@@ -95,3 +95,20 @@
 .qtip-wide {
 	width: 500px;
 }
+
+/* Иконка «?» подсказки атрибута (AttributeTooltip::icon).
+   Статусы цветом: default — приглушённая, наведение — акцент,
+   qtip-pinned (тултип приколот кликом, см. qtip_ajax.js) — отчётливо
+   другой цвет, чтобы было видно, какие подсказки приколоты. */
+.attr-hint-icon {
+	color: #adb5bd;
+	cursor: pointer;
+}
+
+.attr-hint-icon:hover {
+	color: #0d6efd;
+}
+
+.attr-hint-icon.qtip-pinned {
+	color: #fd7e14;
+}

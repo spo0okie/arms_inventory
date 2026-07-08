@@ -37,33 +37,6 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	private $hintDisabled=false;
 	
 	/**
-	 * Наша иконочка в label - признак, что есть подсказка
-	 */
-	public const labelHintIcon = '<i class="far fa-question-circle"></i>';
-	
-	
-	/**
-	 * Формирует поля для options=>[] для всплывающей подсказки у label
-	 * @param string $title
-	 * @param string $text
-	 * @return array|string[]
-	 */
-	public static function hintTipOptions(string $title, string $text)
-	{
-		return $text ? [
-			'qtip_ttip' => '<div class="card">' .
-				'<div class="card-header">' . $title . '</div>' .
-				'<div class="card-body">' .
-				'<p class="card-text">' . $text . '</p>' .
-				'</div>' .
-				'</div>',
-			'qtip_side' => 'top,bottom,right,left',
-			'qtip_theme' => 'tooltipster-shadow tooltipster-shadow-infobox',
-		] : [];
-	}
-	
-	
-	/**
 	 * В отличие от родительского метода тут не происходит рендер
 	 * Только фиксируем (в $this->labelText) какой текст надо использовать для label
 	 * @param $label
@@ -161,12 +134,9 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			$this->hintText?:null
 		);
 		if ($tooltip) {
-			//добавляем к label иконку - признак, что есть подсказка
-			$label .= ' '.static::labelHintIcon;
-			$this->labelOptions = array_merge(
-				$this->labelOptions,
-				static::hintTipOptions($tooltip['title'], $tooltip['body'])
-			);
+			//иконка «?» рядом с label: тултип и pin-поведение висят на ней,
+			//сам label остаётся чистым (единая подача - AttributeTooltip::icon)
+			$label .= ' '.AttributeTooltip::icon($tooltip);
 		}
 		
 		
@@ -326,7 +296,9 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 		switch (self::textFieldType(get_class($this->model),$this->attribute)) {
 			case 'markdown':
 				ArrayHelper::remove($options,'rows');
-				return $this->widget(MarkdownEditor::class,array_merge([
+				//kartik MarkdownEditor не переваривает null-значение (trim(null) deprecated)
+				if ($this->model->{$this->attribute}===null) $this->model->{$this->attribute}='';
+				return $this->widget(\app\components\formInputs\MarkdownEditorFix::class,array_merge([
 					'showExport'=>false,
 				],$options));
 			case 'dokuwiki':

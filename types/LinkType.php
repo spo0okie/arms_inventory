@@ -5,7 +5,6 @@ namespace app\types;
 use app\generation\context\AttributeContext;
 use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
-use yii\helpers\Html;
 use yii\web\View;
 
 class LinkType extends BaseType
@@ -25,13 +24,17 @@ class LinkType extends BaseType
 		return $field->textInput();
 	}
 
+	/**
+	 * Значение ссылки типом не рендерится: объекты выводятся только
+	 * цепочкой renderItem()/ItemObjectWidget (правило unification.md «имя
+	 * объекта — всегда renderItem»). Потребитель обязан увести ссылочный
+	 * атрибут на объектный путь по метаданным, не доходя до этого вызова;
+	 * попытка отрендерить значением — ошибка использования, роняем громко.
+	 */
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
-		$value = $model->$attribute ?? null;
-		if (is_array($value)) {
-			$value = implode(', ', $value);
-		}
-		return Html::encode((string)$value);
+		throw new \RuntimeException('Ссылочный атрибут '.get_class($model).'::'.$attribute
+			.' рендерится объектным путём (renderItem), а не рендером типа');
 	}
 
 	public function apiSchema(): array

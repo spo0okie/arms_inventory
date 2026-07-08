@@ -28,7 +28,7 @@ if (!isset($static_view)) $static_view=false;
 	]) ?>
 </h1>
 
-<?= Yii::$app->formatter->asNtext($model->comment) ?>
+<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 <?php if (is_array($model->softLists)&&count($model->softLists)) { ?>
 	<ul>
 		<?php foreach ($model->softLists as $item) { ?>

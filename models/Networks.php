@@ -441,7 +441,7 @@ class Networks extends ArmsModel
 		if (is_null($this->ranges_cache)) {
 			$this->ranges_cache=[];
 			$match=null;
-			foreach (explode("\n",$this->ranges) as $line) {
+			foreach (explode("\n",$this->ranges??'') as $line) {
 				if (preg_match('/^(\d+)\s*-\s*(\d+)\s+(.+)$/',$line,$match)===1) {
 					//убираем лишние пробелы
 					$line=preg_replace('/^(\d+)\s*-\s*(\d+)\s+(.+)/', '\1-\2 \3', $line);

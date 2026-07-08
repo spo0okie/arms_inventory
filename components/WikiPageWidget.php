@@ -33,7 +33,7 @@ class WikiPageWidget extends Widget
 	 * @return array
 	 */
 	public static function getLinks($list) {
-		$items = explode("\n", $list);
+		$items = explode("\n",$list??'');
 		$links=[];
 		//перебираем все строки
 		foreach ($items as $item) {

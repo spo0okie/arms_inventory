@@ -370,10 +370,10 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 		} else {
 			$dateType=new DateType();
 			$context=new AttributeContext(
-				'date',
-				false,
-				$this,
-				$context,
+				attribute: 'date',
+				empty: false,
+				model: $this,
+				generationContext: $context,
 			);
 			$this->date = $dateType->generate($context);
 			$this->date_end = $dateType->generate($context);

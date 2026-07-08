@@ -233,7 +233,7 @@ trait ScheduleEntriesModelCalcFieldsTrait {
 	public function getPeriodSchedule() {
 		if (!$this->is_period) return null;
 		
-		if (date('Y-m-d',strtotime($this->date)) == date('Y-m-d',strtotime($this->date_end ))) {
+		if (date('Y-m-d',strtotime($this->date??'')) == date('Y-m-d',strtotime($this->date_end??'' ))) {
 			//начинается и кончается в один день
 			return date('Y-m-d',strtotime($this->date)).' '.date('H:i',strtotime($this->date)).'-'.date('H:i',strtotime($this->date_end));
 		} else {

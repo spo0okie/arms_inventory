@@ -107,6 +107,7 @@ class MaterialsTypes extends ArmsModel
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Все что нужно знать про эту категорию материалов сверх уже внесенной информации',
+				'typeClass'=>\app\types\TextType::class,
 			],
 		];
 	}

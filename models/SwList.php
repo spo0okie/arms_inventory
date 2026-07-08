@@ -242,7 +242,7 @@ class SwList {
      */
     public function loadRaw($data)
     {
-        if (!strlen($data)) return false;
+        if (!strlen($data??'')) return false;
         $this->rawData='['.$data.']';
 
         $json = json_decode($this->rawData,true);

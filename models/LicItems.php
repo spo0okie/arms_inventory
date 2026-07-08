@@ -224,8 +224,8 @@ class LicItems extends ArmsModel
     
 	public function getDatePart()
 	{
-		if (strlen($this->active_from)) {
-			if (strlen($this->active_to))
+		if (strlen($this->active_from??'')) {
+			if (strlen($this->active_to??''))
 				return Yii::$app->formatter->asDate($this->active_from).' - '.Yii::$app->formatter->asDate($this->active_to);
 			else
 				return Yii::$app->formatter->asDate($this->active_from);
@@ -366,10 +366,10 @@ class LicItems extends ArmsModel
 	}
 
 	public function getActive() {
-		if (strlen($this->active_from)) {
+		if (strlen($this->active_from??'')) {
 			if (time()<strtotime($this->active_from)) return false;
 		}
-		if (strlen($this->active_to)) {
+		if (strlen($this->active_to??'')) {
 			if (time()>strtotime($this->active_to)) return false;
 		}
 		return true;
@@ -378,7 +378,7 @@ class LicItems extends ArmsModel
 	public function getStatus() {
 		$message='Ошибка!';
 		if ($this->active) {
-			if (strlen($this->active_to)) {
+			if (strlen($this->active_to??'')) {
 				$message='действ. до '.$this->active_to;
 			} else $message='бессрочная';
 		} else {

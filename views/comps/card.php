@@ -54,48 +54,43 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 </h1>
 
 <div>
-	<?= $model->os ?><br />
+	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'os') ?><br />
 	<span id="comp<?= $model->id ?>-updated-info" class="update-timestamp" style="display: none">Последнее обновление данных <?= $model->updated_at ?> (v. <?= $model->raw_version ?>)</span>
 </div>
 <div class="mb-3">
-	<?= is_object($model->responsible)?'<strong>Ответственный:</strong>'. ModelWidget::widget(['model'=>$model->responsible,'options'=>['static_view'=>true]]).'<br />':'' ?>
-	<?php if (count($model->supportTeam)) { ?>
-		<strong>Поддержка:</strong>
-		<?php
-		$support=[];
-		foreach ($model->supportTeam as $mate) $support[]= ModelWidget::widget(['model'=>$mate,'options'=>['static_view'=>true,'short'=>true]]);
-		echo implode(', ',$support);
-		?>
-		<br />
-	<?php } ?>
-	<?php if (count($model->admins)) { ?>
-		<strong>Полномочия администратора:</strong>
-		<?php
-		$admins=[];
-		foreach ($model->admins as $mate) $admins[]= ModelWidget::widget(['model'=>$mate,'options'=>['static_view'=>true,'short'=>true]]);
-		echo implode(', ',$admins);
-		?>
-		<br />
-	<?php } ?>
-	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
+	<?php $rows=implode('<br />',array_filter([
+		ModelFieldWidget::renderFieldRow($model,'responsible',['item_options'=>['static_view'=>true]],'strong'),
+		ModelFieldWidget::renderFieldRow($model,'supportTeam',[
+			'item_options'=>['static_view'=>true,'short'=>true],
+			'glue'=>', ',
+			'lineBr'=>false,
+		],'strong'),
+		ModelFieldWidget::renderFieldRow($model,'admins_ids',[
+			'item_options'=>['static_view'=>true,'short'=>true],
+			'glue'=>', ',
+			'lineBr'=>false,
+		],'strong'),
+	]));
+	echo $rows?($rows.'<br />'):''; ?>
+	<?= ModelFieldWidget::renderFieldValue($model,'comment') ?>
 </div>
 <div class="d-flex flex-row flex-wrap mb-3">
 	<?php if (is_object($model->platform)) {?>
 		<div class="pe-5">
-			<h4>Платформа</h4>
+			<?= ModelFieldWidget::renderFieldTitle($model,'platform_id') ?>
 			<p>
-				<?= ModelWidget::widget(['model'=>$model->platform,'options'=>['static_view'=>$static_view]]) ?>
+				<?= ModelFieldWidget::renderFieldValue($model,'platform_id',['item_options'=>['static_view'=>$static_view]]) ?>
 			</p>
 		</div>
 	<?php } elseif (!$no_arm) { ?>
 		<div class="pe-5">
-			<h4>АРМ</h4>
+			<?= ModelFieldWidget::renderFieldTitle($model,'arm_id') ?>
 			<p>
-				<?php if (is_object($model->arm)) { ?>
-					<?= ModelWidget::widget(['model'=>$model->arm,'options'=>['static_view'=>$static_view]]) ?>
-				<?php } else { ?>
-					не назначен
-				<?php } ?>
+				<?= ModelFieldWidget::renderFieldValue($model,'arm_id',[
+					'item_options'=>['static_view'=>$static_view],
+					'show_empty'=>true,
+					'message_on_empty'=>'не назначен',
+				]) ?>
 			</p>
 		</div>
 	<?php } ?>

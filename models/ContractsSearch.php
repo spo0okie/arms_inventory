@@ -156,7 +156,7 @@ class ContractsSearch extends Contracts
 			->andFilterWhere(QueryHelper::querySearchString('contracts.date',$this->date))
 			->andFilterWhere(QueryHelper::querySearchString('contracts.pay_id',$this->pay_id));
 	    
-	    if (strlen($this->deliveryStatus)) {
+	    if (strlen($this->deliveryStatus??'')) {
 			if ($this->deliveryStatus)
 				$query->andWhere('ifnull(techs_delivery,0) + ifnull(materials_delivery,0) + ifnull(lics_delivery,0)>0');
 			if (!$this->deliveryStatus)

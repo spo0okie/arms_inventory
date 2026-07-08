@@ -138,6 +138,11 @@ class Acls extends ArmsModel
     {
         return array_merge(parent::attributeData(),[
 			'aces' => ['ACEs','indexHint'=>'Access Control Entries <br> (Записи кому предоставляется какой доступ)','typeClass'=>\app\types\LinkType::class],
+			//read-only вычисляемые ссылки (категория C): гетерогенные значения
+			//(Comps/Techs/Services/строка-комментарий), потому базовый класс
+			'nodes' => ['ref'=>\app\models\base\ArmsModel::class, 'refMulti'=>true],
+			'resource' => ['ref'=>\app\models\base\ArmsModel::class],
+			'accessTypes' => ['ref'=>\app\models\AccessTypes::class, 'refMulti'=>true],
 			//групповые массивы ресурсов (только для формы группового создания/редактирования)
 			'comps_ids' => ['alias'=>'comps_id'],
 			'techs_ids' => ['alias'=>'techs_id'],
@@ -255,7 +260,7 @@ class Acls extends ArmsModel
 	 */
 	public function signature(): string
 	{
-		return md5($this->notepad).$this->acesSignature();
+		return md5($this->notepad??'').$this->acesSignature();
 	}
 
 	/**

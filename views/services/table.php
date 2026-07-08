@@ -220,7 +220,7 @@ foreach ($columns as $column) {
 				//'header' => 'Инв. номер',
 				'format' => 'raw',
 				'value' => function ($data) use ($column,$renderer) {
-					$columnRecursive="${column}Recursive";
+					$columnRecursive="{$column}Recursive";
 					return is_object($data->$columnRecursive)?
 						ModelWidget::widget(['view'=>'item','model'=>$data->$columnRecursive,'static_view'=>true])
 						:null;

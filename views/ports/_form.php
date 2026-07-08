@@ -52,7 +52,7 @@ JS;
 	
 	<?= $form->field($model, 'techs_id')->hiddenInput()->label(false)->hint(false); ?>
 	
-	<?php if (strlen($model->name) && (!$model->hasErrors('name'))) { ?>
+	<?php if (strlen($model->name??'') && (!$model->hasErrors('name'))) { ?>
 		<?= $form->field($model, 'name')->hiddenInput()->label(false)->hint(false); ?>
 		<?= $form->field($model, 'comment') ?>
 	<?php } else { ?>

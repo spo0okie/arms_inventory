@@ -1,5 +1,6 @@
 <?php
 
+use app\components\ModelFieldWidget;
 use app\helpers\HtmlHelper;
 use yii\helpers\Html;
 
@@ -37,19 +38,21 @@ if (is_object($model->state)) {
 	<div class="row">
 		<div class="col-md-<?= strlen($model->comment)?6:12 ?>">
 			<?php if (strlen($model->sn)) {?>
-				<span class="serial">S/N: <?= $model->sn ?></span><br/>
+				<span class="serial">S/N: <?= ModelFieldWidget::renderFieldValue($model,'sn') ?></span><br/>
 			<?php } ?>
 			<?php if (strlen($model->inv_num)) {?>
-				<span class="serial">Инв.№: <?= $model->inv_num ?></span><br/>
+				<span class="serial">Инв.№: <?= ModelFieldWidget::renderFieldValue($model,'inv_num') ?></span><br/>
 			<?php } ?>
-			Модель:<?= ModelWidget::widget(['model'=>$model->model,'options'=>['static_view'=>true]]) ?><br />
-			Помещение:<?= ModelWidget::widget(['model'=>$model->place,'options'=>['static_view'=>true,'full'=>true,'items_glue'=>' &gt; ']]) ?><br />
+			<?= implode('<br />',array_filter([
+				ModelFieldWidget::renderFieldRow($model,'model_id',['item_options'=>['static_view'=>true]]),
+				ModelFieldWidget::renderFieldRow($model,'places_id',['item_options'=>['static_view'=>true,'full'=>true,'items_glue'=>' &gt; ']]),
+			])) ?><br />
 		</div>
 		<?php if (strlen($model->comment)) { ?>
 			<div class="col-md-6">
 				<div class="comment-block" >
 					<img class="exclamation-sign" src="/web/img/exclamation-mark.svg" alt="WARNING"/><br/>
-					<?= $model->comment ?>
+					<?= ModelFieldWidget::renderFieldValue($model,'comment') ?>
 				</div>
 			</div>
 		<?php } ?>
@@ -64,8 +67,8 @@ if (is_object($model->state)) {
 
 
 	<?php if (!$no_specs && is_object($model->model) && $model->model->individual_specs) { ?>
-	<h4>Спецификация:</h4>
-		<?= Yii::$app->formatter->asNtext($model->specs) ?>
+	<?= ModelFieldWidget::renderFieldTitle($model,'specs') ?>
+		<?= ModelFieldWidget::renderFieldValue($model,'specs') ?>
 		<br />
 	<?php } ?>
 
@@ -124,9 +127,11 @@ if (is_object($model->state)) {
 
 	<?php if (!$no_users) { ?>
 		<h4>Сотрудники:</h4>
-		Пользователь:<?= is_object($model->user)?ModelWidget::widget(['model'=>$model->user]):'-не назначен-' ?><br/>
-		<?= is_object($model->head)?('Руководитель отдела:'.ModelWidget::widget(['model'=>$model->head]).'<br/>'):'' ?>
-		<?= is_object($model->admResponsible)?($model->getAttributeLabel('responsible_id').':'.ModelWidget::widget(['model'=>$model->admResponsible]).'<br/>'):'' ?>
+		<?= implode('<br />',array_filter([
+			ModelFieldWidget::renderFieldRow($model,'user_id',['show_empty'=>true,'message_on_empty'=>'-не назначен-']),
+			ModelFieldWidget::renderFieldRow($model,'head'),
+			ModelFieldWidget::renderFieldRow($model,'responsible_id'),
+		])) ?><br />
 		<br />
 	<?php } ?>
 
@@ -144,8 +149,8 @@ if (is_object($model->state)) {
 
     <?= $this->render('arm-history',['model'=>$model,'static_view'=>$static_view]) ?>
 
-	<?php if (is_object($model->itStaff)) { ?>
-		<span class="it-staff">Сотрудник ИТ: <?= ModelWidget::widget(['model'=>$model->itStaff]) ?></span>
+	<?php if ($itStaffRow=ModelFieldWidget::renderFieldRow($model,'it_staff_id')) { ?>
+		<span class="it-staff"><?= $itStaffRow ?></span>
 	<?php } ?>
 
 

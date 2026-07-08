@@ -252,7 +252,7 @@ class TechModels extends ArmsModel
 	
 	public function getPortsList()
 	{
-		if(!count($ports=explode("\n",$this->ports))) return [];
+		if(!count($ports=explode("\n",$this->ports??''))) return [];
 		$model_ports=[];
 		foreach ($ports as $port) {
 			$tokens=explode(' ',$port);
@@ -299,7 +299,7 @@ class TechModels extends ArmsModel
 	
 	public function getShortest()
 	{
-		return strlen($this->short)?$this->short:$this->name;
+		return strlen($this->short??'')?$this->short:$this->name;
 	}
 	
 	

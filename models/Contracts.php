@@ -194,6 +194,19 @@ class Contracts extends ArmsModel
 	public function attributeData()
 	{
 		return [
+			//read-only вычисляемые ссылки: только вывод
+			'successor' => [
+				'Замещён документом',
+				'hint' => 'Документ-преемник: подчинённый документ с флагом «замещает основной» '
+					.'(например, новая редакция договора)',
+				'ref'=>Contracts::class,
+			],
+			'children' => [
+				'Связанные документы',
+				'hint' => 'Документы, для которых этот является основным (счета договора, '
+					.'приложения, новые редакции)',
+				'ref'=>Contracts::class, 'refMulti'=>true,
+			],
 			'attach' => [
 				'Связи',
 				'indexHint' => 'Привязанные к документу объекты',
@@ -206,6 +219,7 @@ class Contracts extends ArmsModel
 			],
 			'comment' => [
 				'Комментарий',
+				'typeClass'=>\app\types\TextType::class,
 				'hint' => 'Для счетов желательно записывать историю и логистику закупки:<br>'
 					.'Записи лучше проставлять рекурсивно, т.к. <b>первая строка комментария выводится в списке рядом со статусом</b><br>'
 					.'(для быстрого уточнения текущего этапа закупки/логистики)<br>'
@@ -702,8 +716,8 @@ class Contracts extends ArmsModel
 
 	public function getDatePart()
 	{
-		if (strlen($this->date)) {
-			if (strlen($this->end_date))
+		if (strlen($this->date??'')) {
+			if (strlen($this->end_date??''))
 				return $this->date.' - '.$this->end_date;
 			else
 				return $this->date;
@@ -714,7 +728,7 @@ class Contracts extends ArmsModel
 	public function getSelfSname()
 	{
 		//var_dump($this->date);
-		$date=strtotime($this->date);
+		$date=strtotime($this->date??'');
 		mb_regex_encoding('utf8');
 		$name=mb_eregi_replace('сч(ё|е)т(-оферта)?( *на *оплату)? *№ *','Счёт № ',$this->name,'i');
 		$name=mb_eregi_replace('(от *)?('.date('d.m.(Y|y)',$date).'|'.date('(Y|y).m.d',$date).') *(г(ода)?)?\.?\s*\-\s*','',$name,'i');
@@ -1023,7 +1037,7 @@ class Contracts extends ArmsModel
 	public static function fetchArmsHint($ids,$form='') {
 
 		if (!is_array($ids))
-			$ids=explode(',',$ids);
+			$ids=explode(',',$ids??'');
 
 		if (!count($ids)) return '';
 

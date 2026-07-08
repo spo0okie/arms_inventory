@@ -20,6 +20,10 @@ class HintIconWidget extends Widget
 	/*
 	 * Иконка помощи по сущности: тултип с коротким описанием (modelDescription),
 	 * клик ведет на страницу встроенной документации сущности (docs/model).
+	 * Если на странице есть инфоблок документации (DocsPanelWidget с id по
+	 * соглашению panelId) - клик раскрывает его, а не уводит со страницы
+	 * (progressive enhancement: обработчик вешает сама панель, без панели
+	 * ссылка работает как обычно).
 	 * Ранее вела на внешнюю wiki (params hintUrl/wikiUrl) - см. plans/help-docs.md.
 	 */
 
@@ -42,9 +46,13 @@ class HintIconWidget extends Widget
 			'hintText' => $this->hintText,
 			'href' => Url::to(['/docs/model','class'=>DocsHelper::modelClassId($model)]),
 			'cssClass' => $this->cssClass,
-			'tooltipOptions' => FieldsHelper::toolTipOptions(
-				$title,
-				$description?:$this->hintText
+			'tooltipOptions' => array_merge(
+				FieldsHelper::toolTipOptions(
+					$title,
+					$description?:$this->hintText
+				),
+				//если на странице есть инфоблок документации - клик раскроет его
+				['data-panel-target'=>'#'.DocsPanelWidget::panelId($model)]
 			),
 		]);
 	}

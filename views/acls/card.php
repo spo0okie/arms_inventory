@@ -92,5 +92,5 @@ if (!isset($static_view)) $static_view=false;
 				<?php } ?>
 			</div>
 		</div>
-	<small><?= TextFieldWidget::widget(['model'=>$model,'field'=>'notepad']) ?></small>
+	<small><?= \app\components\ModelFieldWidget::renderFieldValue($model,'notepad') ?></small>
 </div>

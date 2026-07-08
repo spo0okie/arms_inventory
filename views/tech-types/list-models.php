@@ -40,14 +40,14 @@ use app\components\widgets\page\ModelWidget;
 		<h4><?= $model->getAttributeLabel('comment')?></h4>
 		<i><?= $model->getAttributeHint('comment')?></i>
 		<p>
-			<?= Yii::$app->formatter->asNtext($model->comment) ?>
+			<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 		</p>
 		<br />
 		
 		<h4><?= $model->getAttributeLabel('code')?></h4>
 		<i><?= $model->getAttributeHint('code')?></i>
 		<p>
-			<?= $model->code ?>
+			<?= \app\components\ModelFieldWidget::renderFieldValue($model,'code') ?>
 		</p>
 	</div>
 </div>

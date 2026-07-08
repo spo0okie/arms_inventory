@@ -19,9 +19,7 @@ use yii\helpers\Html;
 	<div class="me-5">
 
 		<h4><?= $model->getAttributeLabel('cabinet_url')?> </h4>
-		<?= \app\components\UrlListWidget::widget([
-				'list'=>$model->cabinet_url,
-		]) ?>
+		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'cabinet_url') ?>
 	</div>
 <?php } ?>
 
@@ -35,6 +33,6 @@ use yii\helpers\Html;
 
 <?php if ($model->comment) { ?>
 	<h4><?= $model->getAttributeLabel('comment')?> </h4>
-	<div class="mb-3"><?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?></div>
+	<div class="mb-3"><?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?></div>
 <?php } ?>
 

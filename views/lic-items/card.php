@@ -43,5 +43,5 @@ if (!isset($linksData)) $linksData=null;
 
 <h4>Комментарий:</h4>
 <p>
-	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
+	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 </p>

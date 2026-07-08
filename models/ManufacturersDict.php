@@ -101,7 +101,7 @@ class ManufacturersDict extends ArmsModel
 
     public function beforeSave($insert) {
         //нам все слова нужны в нижнем регистре чтобы искать регистронезависимо
-        $this->word = mb_strtolower($this->word);
+        $this->word = mb_strtolower($this->word??'');
         return parent::beforeSave($insert);
     }
 
@@ -113,7 +113,7 @@ class ManufacturersDict extends ArmsModel
      * @throws \Throwable
      */
     public static function fetchManufacturer($word){
-    	$word=mb_strtolower($word,'utf-8');
+    	$word=mb_strtolower($word??'','utf-8');
 
     	if (!array_key_exists($word,static::$cache)) {
     		if (!static::$cacheComplete) {

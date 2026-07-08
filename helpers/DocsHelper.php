@@ -119,9 +119,13 @@ class DocsHelper
 		return pathinfo($file, PATHINFO_FILENAME);
 	}
 
+	/** канонические H2-секции модельных страниц (plans/help-inline.md) */
+	const CANON_SECTIONS = ['Список', 'Просмотр', 'Добавление', 'Редактирование', 'Удаление'];
+
 	/**
 	 * Рендерит MD-страницу в HTML: markdown + переписывание относительных ссылок
 	 * на маршруты DocsController (страницы -> docs/page, картинки -> docs/img).
+	 * Готовый HTML кэшируется до изменения файла (ключ включает filemtime).
 	 * @param string $file       абсолютный путь файла
 	 * @param string $relPath    его относительный путь (для резолва ссылок соседей)
 	 * @param bool   $stripTitle убрать первый H1 (для встраивания страницы
@@ -129,10 +133,80 @@ class DocsHelper
 	 */
 	public static function renderPage(string $file, string $relPath, bool $stripTitle = false): string
 	{
-		$content = file_get_contents($file);
-		if ($stripTitle) $content = preg_replace('/^#\s+.*\R/u', '', $content, 1);
-		$html = Markdown::convert($content);
-		return static::rewriteHtmlLinks($html, static::relDir($relPath));
+		return static::renderCached([$file, filemtime($file), $stripTitle], function () use ($file, $stripTitle, $relPath) {
+			$content = file_get_contents($file);
+			if ($stripTitle) $content = preg_replace('/^#\s+.*\R/u', '', $content, 1);
+			$html = Markdown::convert($content);
+			return static::rewriteHtmlLinks($html, static::relDir($relPath));
+		});
+	}
+
+	/**
+	 * Рендерит фрагмент MD-страницы для инфоблока в UI (DocsPanelWidget):
+	 * преамбулу (section=null: от начала без H1 до первого H2) либо тело
+	 * канонической H2-секции (до следующего H2; H3+ остаются внутри).
+	 * Ссылки на другие MD открываются модалкой (класс open-in-modal-form),
+	 * чтобы читатель не покидал страницу. Кэш — как у renderPage.
+	 * @param string      $file    абсолютный путь файла
+	 * @param string      $relPath его относительный путь внутри docs/help
+	 * @param string|null $section null - преамбула, иначе точное имя H2-секции
+	 * @return string '' если секции нет
+	 */
+	public static function renderSection(string $file, string $relPath, ?string $section): string
+	{
+		return static::renderCached([$file, filemtime($file), 'section', $section], function () use ($file, $relPath, $section) {
+			$content = static::extractSection(file_get_contents($file), $section);
+			if (!strlen(trim($content))) return '';
+			$html = Markdown::convert($content);
+			return static::rewriteHtmlLinks(
+				$html,
+				static::relDir($relPath),
+				null,
+				'class="open-in-modal-form"'
+			);
+		});
+	}
+
+	/**
+	 * Вырезает из MD-текста преамбулу (section=null: всё до первого H2,
+	 * первый H1 отбрасывается) или тело H2-секции с указанным заголовком.
+	 * @return string '' если секции нет
+	 */
+	public static function extractSection(string $content, ?string $section): string
+	{
+		$lines = preg_split('/\R/u', $content);
+		$result = [];
+		$collect = $section === null; //преамбулу собираем сразу
+		$skippedTitle = false;
+		foreach ($lines as $line) {
+			//H2 - граница секций (H3+ не граница, остаются внутри)
+			if (preg_match('/^##(?!#)\s*(.+?)\s*$/u', $line, $matches)) {
+				if ($collect) break; //секция кончилась
+				$collect = ($section !== null && $matches[1] === $section);
+				continue; //строка заголовка в тело не входит (заголовок даёт подача)
+			}
+			if (!$collect) continue;
+			//первый H1 преамбулы отбрасываем (заголовок даёт подача)
+			if (!$skippedTitle && $section === null && preg_match('/^#(?!#)/u', $line)) {
+				$skippedTitle = true;
+				continue;
+			}
+			$result[] = $line;
+		}
+		return implode("\n", $result);
+	}
+
+	/**
+	 * Кэш готового HTML: до изменения файла (в ключе filemtime).
+	 * Без кэш-компонента (тесты хелпера без приложения) - рендер напрямую.
+	 * @param array    $key
+	 * @param callable $render
+	 */
+	protected static function renderCached(array $key, callable $render): string
+	{
+		$cache = Yii::$app->cache ?? null;
+		if (!$cache) return $render();
+		return $cache->getOrSet(array_merge(['docsRender'], $key), $render);
 	}
 
 	/**
@@ -148,11 +222,13 @@ class DocsHelper
 	 * Переписывает относительные href/src в HTML: *.md -> страница документации,
 	 * картинки -> отдача картинки. Абсолютные URL, якоря и mailto не трогает.
 	 * @param string        $html
-	 * @param string        $pageDir    каталог текущей страницы внутри docs/help
-	 * @param callable|null $urlBuilder fn(string $action, string $relPath, string $anchor): string
-	 *                                  (для тестов без Yii-приложения)
+	 * @param string        $pageDir     каталог текущей страницы внутри docs/help
+	 * @param callable|null $urlBuilder  fn(string $action, string $relPath, string $anchor): string
+	 *                                   (для тестов без Yii-приложения)
+	 * @param string        $mdLinkExtra дополнительные HTML-атрибуты ссылкам на MD-страницы
+	 *                                   (например 'class="open-in-modal-form"' для инфоблоков)
 	 */
-	public static function rewriteHtmlLinks(string $html, string $pageDir, ?callable $urlBuilder = null): string
+	public static function rewriteHtmlLinks(string $html, string $pageDir, ?callable $urlBuilder = null, string $mdLinkExtra = ''): string
 	{
 		$urlBuilder = $urlBuilder ?? function (string $action, string $relPath, string $anchor) {
 			return Url::to(["/docs/$action", 'path' => $relPath]) . $anchor;
@@ -160,7 +236,7 @@ class DocsHelper
 
 		return preg_replace_callback(
 			'/(href|src)="([^"]+)"/u',
-			function ($matches) use ($pageDir, $urlBuilder) {
+			function ($matches) use ($pageDir, $urlBuilder, $mdLinkExtra) {
 				[$full, $attr, $url] = $matches;
 
 				//не трогаем абсолютные url, якоря, mailto и абсолютные пути
@@ -178,7 +254,8 @@ class DocsHelper
 
 				$ext = strtolower(pathinfo($relPath, PATHINFO_EXTENSION));
 				if ($ext === 'md')
-					return $attr . '="' . $urlBuilder('page', $relPath, $anchor) . '"';
+					return ($mdLinkExtra ? $mdLinkExtra . ' ' : '')
+						. $attr . '="' . $urlBuilder('page', $relPath, $anchor) . '"';
 				if (in_array($ext, static::IMG_EXTENSIONS, true))
 					return $attr . '="' . $urlBuilder('img', $relPath, '') . '"';
 

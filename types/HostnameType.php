@@ -3,10 +3,7 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\models\base\ArmsModel;
 use app\models\Domains;
-use yii\helpers\Html;
-use yii\web\View;
 
 /**
  * Тип для хранения hostname (FQDN или NetBIOS имя).
@@ -30,18 +27,6 @@ class HostnameType extends BaseType
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
 		return $field->textInput();
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
-	{
-		$value = $model->$attribute ?? null;
-		if ($value === null || $value === '') {
-			return '<span class="text-muted">—</span>';
-		}
-		return Html::encode((string)$value);
 	}
 
 	/**

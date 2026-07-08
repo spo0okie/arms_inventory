@@ -62,10 +62,10 @@ class LicTypesSearch extends LicTypes
             //'created_at' => $this->created_at,
         ]);
 
-        $query->andFilterWhere(['or like', 'name', 	\yii\helpers\StringHelper::explode($this->name,'|',true,true)])
-            ->andFilterWhere(['or like', 'descr', 	\yii\helpers\StringHelper::explode($this->descr,'|',true,true)])
-            ->andFilterWhere(['or like', 'comment',	\yii\helpers\StringHelper::explode($this->comment,'|',true,true)])
-            ->andFilterWhere(['or like', 'links', 	\yii\helpers\StringHelper::explode($this->links,'|',true,true)]);
+        $query->andFilterWhere(['or like', 'name', 	\app\helpers\StringHelper::explode($this->name,'|',true,true)])
+            ->andFilterWhere(['or like', 'descr', 	\app\helpers\StringHelper::explode($this->descr,'|',true,true)])
+            ->andFilterWhere(['or like', 'comment',	\app\helpers\StringHelper::explode($this->comment,'|',true,true)])
+            ->andFilterWhere(['or like', 'links', 	\app\helpers\StringHelper::explode($this->links,'|',true,true)]);
 
         return $dataProvider;
     }

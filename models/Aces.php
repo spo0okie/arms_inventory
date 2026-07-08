@@ -240,6 +240,9 @@ class Aces extends ArmsModel
 				'Субъекты',
 				'indexHint' => 'Субъекты доступа: кто получает доступ',
 				'join' => ['users','comps','services','netIps','networks'],
+				//значение - гетерогенный список объектов (ref уводит вывод на объектный
+				//путь renderItem), StringType остаётся для поиска/подсказок
+				'ref'=>\app\models\base\ArmsModel::class, 'refMulti'=>true,
 				'typeClass'=>\app\types\StringType::class,
 			],
 			'subject_nodes' => [
@@ -250,6 +253,9 @@ class Aces extends ArmsModel
 				'join' => ['users','comps','services','netIps','networks'],
 				'typeClass'=>\app\types\StringType::class,
 			],
+			//read-only вычисляемая ссылка (категория C): гетерогенный список
+			//узлов-субъектов (Users/Comps/NetIps/узлы сервисов), потому базовый класс
+			'nodes' => ['ref'=>\app\models\base\ArmsModel::class, 'refMulti'=>true],
 			'users_ids' => [
 				Users::$titles,
 				'hint' => Users::$titles.', которым предоставляется доступ<br>'.

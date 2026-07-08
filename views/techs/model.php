@@ -1,7 +1,7 @@
 <?php
 
-use app\components\UrlListWidget;
-
+use app\components\ModelFieldWidget;
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Techs */
@@ -16,22 +16,22 @@ use app\components\widgets\page\ModelWidget;
 	}?>
 	
 	<?= ModelWidget::widget(['model'=>$model->model->preview,'view'=>'ttip']) ?>
-	<h4>Характеристики</h4>
+	<?= ModelFieldWidget::renderFieldTitle($model->model,'comment') ?>
 	<p>
-		<?= Yii::$app->formatter->asNtext($model->model->comment) ?>
+		<?= ModelFieldWidget::renderFieldValue($model->model,'comment') ?>
 	</p>
 
 	<br />
-	
+
 	<?php if ($model->model->individual_specs) { ?>
-		<h4>Спецификация:</h4>
-		<p><?= Yii::$app->formatter->asNtext($model->specs) ?></p>
+		<?= ModelFieldWidget::renderFieldTitle($model,'specs') ?>
+		<p><?= ModelFieldWidget::renderFieldValue($model,'specs') ?></p>
 		<br />
 	<?php } ?>
 
-	<h4>Ссылки:</h4>
+	<?= ModelFieldWidget::renderFieldTitle($model->model,'links') ?>
 	<p>
-		<?= UrlListWidget::Widget(['list'=>$model->model->links]) ?>
+		<?= ModelFieldWidget::renderFieldValue($model->model,'links') ?>
 	</p>
 </div>
 

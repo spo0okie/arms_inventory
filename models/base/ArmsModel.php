@@ -785,14 +785,6 @@ class ArmsModel extends ActiveRecord
 	 */
 	public function renderItem(View $view,$options=[]) {
 		return ModelWidget::widget(['model'=>$this,'options'=>$options]);
-		$path="/{$this->viewsPath}/item";
-		if (!is_file($_SERVER['DOCUMENT_ROOT'].$path.'.php')) $path='//layouts/item';
-		return $view->render(
-			$path,
-			ArrayHelper::recursiveOverride($options,[
-				'model'=>$this,
-			])
-		);
 	}
 
 	/**

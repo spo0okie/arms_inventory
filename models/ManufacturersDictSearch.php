@@ -63,7 +63,7 @@ class ManufacturersDictSearch extends ManufacturersDict
             'manufacturers_id' => $this->manufacturers_id,
         ]);
 
-        $query->andFilterWhere(['or like', 'word', \yii\helpers\StringHelper::explode($this->word,'|',true,true)]);
+        $query->andFilterWhere(['or like', 'word', \app\helpers\StringHelper::explode($this->word,'|',true,true)]);
 
         return $dataProvider;
     }

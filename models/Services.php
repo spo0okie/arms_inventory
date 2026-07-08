@@ -22,7 +22,6 @@ use yii\db\ActiveQuery;
  * @property string $description
  * @property string $search_text
  * @property int $is_end_user
- * @property int $user_group_id
  * @property int $sla_id
  * @property int $is_service
  * @property string $notebook
@@ -309,6 +308,8 @@ class Services extends ArmsModel
 				'placeholder' => 'Не зависит ни от каких сервисов',
 				'typeClass' => \app\types\LinkType::class,
 			],
+			//read-only вычисляемая ссылка (категория C): обратная сторона depends_ids
+			'dependants' => ['ref'=>Services::class, 'refMulti'=>true],
 			'description' => [
 				'Краткое описание',
 				'indexLabel' => 'Описание',
@@ -732,14 +733,6 @@ class Services extends ArmsModel
 	public function getSupportingTechs()
 	{
 		return $this->hasMany(Techs::class, ['management_service_id' => 'id']);
-	}
-	
-	/**
-	 * Возвращает группу ответственных за сервис
-	 */
-	public function getUserGroup()
-	{
-		return $this->hasOne(UserGroups::class, ['id' => 'user_group_id']);
 	}
 	
 	/**

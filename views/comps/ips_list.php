@@ -22,8 +22,9 @@ if ($glue=='<br />') {
 
 ?>
 
-<?= ListObjectsWidget::widget([
-	'models'=>$model->netIps,
+<?= \app\components\ModelFieldWidget::widget([
+	'model'=>$model,
+	'field'=>'netIps',
 	'title'=>'IP адрес(а)',
 	'lineBr'=>$lineBreak,
 	'glue'=>$glue,
@@ -34,7 +35,8 @@ if ($glue=='<br />') {
 ]) ?>
 
 <div class="pe-5">
-	<h4>MAC адрес(а)</h4>
+	<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'mac') ?>
+	<?php /* значения - ссылками на поиск по MAC (функциональность, не просто вывод значения) */ ?>
 	<p><?php
 		$output=[];
 		foreach (explode("\n",$model->formattedMac) as $mac) {

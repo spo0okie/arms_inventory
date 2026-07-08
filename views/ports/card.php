@@ -22,7 +22,7 @@ if (is_object($model->linkPort)) {
 				<svg width="80" height="40" xmlns="http://www.w3.org/2000/svg">
 					<path d="M0 40 l20 -20 l60 0"  fill="transparent" stroke="black" stroke-width="1%"/>
 				</svg>
-				<?= Yii::$app->formatter->asNtext($model->comment) ?>
+				<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 			</td>
 		</tr>
 		<?php } ?>
@@ -59,7 +59,7 @@ if (is_object($model->linkPort)) {
 					<svg width="80" height="40" xmlns="http://www.w3.org/2000/svg">
 						<path d="M0 0 l20 20 l60 0"  fill="transparent" stroke="black" stroke-width="1%"/>
 					</svg>
-					<?= Yii::$app->formatter->asNtext($model->linkPort->comment) ?>
+					<?= \app\components\ModelFieldWidget::renderFieldValue($model->linkPort,'comment') ?>
 				</td>
 			</tr>
 		<?php } ?>
@@ -75,7 +75,7 @@ if (is_object($model->linkPort)) {
 				<?= ModelWidget::widget(['model'=>$model,'options'=>['static_view'=>$static_view,'include_tech'=>true,'badge'=>true]]) ?>
 			</td>
 			<td class="p-2">
-				<?= $model->comment?(' - '.Yii::$app->formatter->asNtext($model->comment)):''?>
+				<?= $model->comment?(' - '.\app\components\ModelFieldWidget::renderFieldValue($model,'comment')):''?>
 			</td>
 		</tr>
 	</table>

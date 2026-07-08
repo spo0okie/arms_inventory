@@ -2,6 +2,11 @@
 
 namespace app\types;
 
+use app\helpers\ArrayHelper;
+use app\models\base\ArmsModel;
+use yii\helpers\Html;
+use yii\web\View;
+
 /**
  * Базовый класс типов атрибутов — место дефолтных реализаций опциональных
  * возможностей типа. Обязательный контракт описан в AttributeTypeInterface;
@@ -9,6 +14,35 @@ namespace app\types;
  */
 abstract class BaseType implements AttributeTypeInterface
 {
+	/**
+	 * Типовой рендер значения атрибута в местах вывода (контракт —
+	 * см. AttributeTypeInterface::renderOutput). Дефолт — простейший
+	 * рендер, общий для большинства типов: экранированное значение как
+	 * есть, массив значений — списком готовых элементов. Подача
+	 * (карточка, заголовок, разделители, объекты-ссылки) — забота
+	 * потребителя, а не типа. Тип переопределяет метод, когда у него
+	 * есть собственная подача значения (обогащение — точечно по ходу
+	 * аудита карточек, plans/view-hints.md 4в).
+	 */
+	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
+	{
+		return $this->renderPlainValue($model,$attribute);
+	}
+
+	/**
+	 * Простейший рендер значения (экранированный текст, массив —
+	 * список элементов). Вынесен отдельно, чтобы потомки могли отступить
+	 * от рендера своего родителя обратно к стандартному (например,
+	 * наследники TextType до собственного обогащения).
+	 */
+	protected function renderPlainValue(ArmsModel $model, string $attribute): mixed
+	{
+		$value=ArrayHelper::getValue($model,$attribute);
+		if (is_array($value))
+			return array_map(static fn($item)=>Html::encode((string)$item),$value);
+		return Html::encode((string)$value);
+	}
+
 	/**
 	 * Типовая часть подсказки заполнения — «как вводить» (лёгкий слой
 	 * документации, см. ui-sources.md §0.1). Сборщик тултипов подклеивает

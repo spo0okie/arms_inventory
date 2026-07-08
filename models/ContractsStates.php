@@ -82,6 +82,7 @@ class ContractsStates extends ArmsModel
             'descr' => [
             	'Описание',
 				'hint'=>'Пояснение к состоянию',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'paid'=>[
 				'Оплачен',

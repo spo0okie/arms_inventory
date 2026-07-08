@@ -52,7 +52,7 @@ $static_view=false;
 	<div class="row">
 		<div class="col-md-6">
 			<p>
-				<?= Yii::$app->formatter->asNtext($model->comment) ?>
+				<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 			</p>
 			
 		</div>

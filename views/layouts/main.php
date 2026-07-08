@@ -27,6 +27,31 @@ if (isset($this->params['layout-container'])) {
 $request=Yii::$app->urlManager->parseRequest(Yii::$app->request);
 $path=is_array($request)?$request[0]:'';
 
+//инфоблок документации сущности на карточке (plans/help-inline.md): секция
+//«Просмотр» страницы models/<class-id>.md. Класс берём у контроллера
+//(секция контентная, уровня класса) - работает и на кастомных view.php;
+//иконка помощи служит тогглером, пустая секция не рендерит ничего.
+$docsPanelBlock='';
+$ctrl=Yii::$app->controller;
+if ($ctrl && ($ctrl->action->id??null)==='view'
+	&& isset($ctrl->modelClass) && is_subclass_of($ctrl->modelClass,\app\models\base\ArmsModel::class)
+) {
+	$docsPanel=\app\components\DocsPanelWidget::widget([
+		'model'=>$ctrl->modelClass,
+		'sections'=>['Просмотр'],
+	]);
+	if ($docsPanel!=='') {
+		$docsPanelBlock=Html::tag('div',
+			\app\components\HintIconWidget::widget([
+				'model'=>$ctrl->modelClass,
+				'action'=>'view',
+				'hintText'=>'Справка по этой карточке',
+			]).$docsPanel,
+			['class'=>'px-5 mb-2']
+		);
+	}
+}
+
 $this->beginPage() ?>
 
 <!DOCTYPE html>
@@ -52,6 +77,7 @@ $this->beginPage() ?>
 				'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
 			]) ?>
 			<?= Alert::widget() ?>
+			<?= $docsPanelBlock ?>
 			<?= $this->params['headerWidgets']??'' ?>
 			<div class="px-5"><?= $this->params['headerContent'] ?></div>
 		</div>
@@ -66,6 +92,7 @@ $this->beginPage() ?>
 				'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
 			]) ?>
 			<?= Alert::widget() ?>
+			<?= $docsPanelBlock ?>
 			<div class="px-5"><?= $this->params['headerContent'] ?></div>
 		</div>
 		<div class="<?= $containerClass ?>">
@@ -77,6 +104,7 @@ $this->beginPage() ?>
 				'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
 			]) ?>
 			<?= Alert::widget() ?>
+			<?= $docsPanelBlock ?>
 			<?= $content ?>
 		</div>
 	<?php } ?>

@@ -1,16 +1,14 @@
 <?php
 
+use app\components\ModelFieldWidget;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
-
-use app\components\widgets\page\ModelWidget;
+
 /* @var $this yii\web\View */
 /* @var $model app\models\UserGroups */
 
-$support=$model->support;
-$services=$model->services;
+$users=$model->users;
 if (!isset($static_view)) $static_view=false;
-$deleteable=!count($support)&&!count($services);
+$deleteable=!count($users);
 ?>
 <h1>
     <?= Html::encode($model->name) ?>
@@ -25,57 +23,35 @@ $deleteable=!count($support)&&!count($services);
 
 <?php if (strlen($model->ad_group)) { ?>
    <h4>
-       Синхронизируеется с группой AD: <?= $model->ad_group ?>
+       Синхронизируется с группой AD: <?= ModelFieldWidget::renderFieldValue($model,'ad_group') ?>
    </h4>
     (<?= strlen($model->sync_time)?
-        'последняя синхронизация '.Yii::$app->formatter->asDatetime($model->sync_time):
+        'последняя синхронизация '.ModelFieldWidget::renderFieldValue($model,'sync_time'):
         'синхронизация еще ни разу не производилась'
     ?>)
 <?php } ?>
 
 <?php if(!$static_view&&!$deleteable) { ?>
     <p>
-        <span class="fas fa-warning-sign"></span> Невозможно в данный момент удалить эту группу, т.к. в ней присутствуют сотрудники или привязаны сервисы.
+        <span class="fas fa-warning-sign"></span> Невозможно в данный момент удалить эту группу, т.к. в ней присутствуют сотрудники.
     </p>
 <?php } ?>
 <br />
 
 <p>
-	<?= Yii::$app->formatter->asNtext($model->description) ?>
+	<?= ModelFieldWidget::renderFieldValue($model,'description') ?>
 </p>
 <br />
 
-<?php if (count($users)) { ?>
-    <h4>
-        Участники:
-    </h4>
-    <p>
-		<?php
-		foreach ($users as $user)
-			echo ModelWidget::widget(['model'=>$user,'options'=>['static_view'=>$static_view]]).'<br />';
-		?>
-    </p>
-    <br />
-<?php } ?>
+<?= ModelFieldWidget::widget([
+	'model'=>$model,
+	'field'=>'users_ids',
+	'title'=>'Участники:',
+	'item_options'=>['static_view'=>$static_view],
+]) ?>
 
-<?php if (count($services)) { ?>
-    <h4>Отвечает за работоспособность сервисов:</h4>
-    <p>
-		<?php
-		foreach ($services as $service)
-			echo ModelWidget::widget(['model'=>$service,'options'=>['static_view'=>$static_view]]).'<br />';
-		?>
-    </p>
-    <br />
-<?php } ?>
-
-<?php if (!$static_view && strlen($model->notebook)) { ?>
-    <h4>Записная книжка:</h4>
-    <p>
-		<?= Yii::$app->formatter->asNtext($model->notebook) ?>
-    </p>
-    <br />
-<?php } ?>
-
-
-
+<?php if (!$static_view) echo ModelFieldWidget::widget([
+	'model'=>$model,
+	'field'=>'notebook',
+	'title'=>'Записная книжка:',
+]) ?>

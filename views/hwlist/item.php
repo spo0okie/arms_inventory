@@ -33,7 +33,7 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
         $hint='Элемент скрыт из паспорта';
     } else {                                //иначе
         $classes[]='included';              //показываем
-        if (strlen($item->uid)) {                                       //если сохранен
+        if (strlen($item->uid??'')) {                                       //если сохранен
             if ($item->found) {
                 $classes[] = 'saved-found';
                 $hint = 'Элемент сохранен в паспорте и обнаружен мониторингом';
@@ -65,7 +65,7 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
             ) ?>
         <?php } else { ?>
             <?= $item->manufacturer ?>
-            <?= $static_view?'':(strlen($item->manufacturer)? Html::a('<span class="fas fa-wrench"/>',
+            <?= $static_view?'':(strlen($item->manufacturer??'')? Html::a('<span class="fas fa-wrench"/>',
                 ['/manufacturers-dict/create', 'ManufacturersDict'=>['word' => $item->manufacturer],'return'=>'previous'],
                 ['title'=>'Создать производителя','class'=>'passport_tools']
             ):'') ?>
@@ -78,7 +78,7 @@ if (isset($addItem)&&($addItem===true)) {   //если это пустышка
     <td class="passport_tools">
         <?php if(get_class($model) == Techs::class){ //если передан паспорт АРМ, то можем поредактировать железо
             //проверяем есть ли uid у железки, если есть, то она уже сохранена, если нету, то можно сохранить
-            if (strlen($item->uid)) {
+            if (strlen($item->uid??'')) {
                 //УИД есть, значит работаем как с загруженной железкой
 				echo Html::a('<span class="fas fa-pencil-alt"/>',
 					['techs/edithw', 'id'=>$model->id,'uid' => $item->uid],

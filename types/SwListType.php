@@ -3,12 +3,24 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
+use app\models\base\ArmsModel;
+use yii\web\View;
 
 class SwListType extends TextType
 {
 	public static function name(): string
 	{
 		return 'soft-list';
+	}
+
+	/**
+	 * Пока стандартный скаляр-рендер вместо текстового (ntext) рендера
+	 * родительского TextType — паритет с прежним выводом. Обогащение —
+	 * по ходу аудита карточек (4в).
+	 */
+	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
+	{
+		return $this->renderPlainValue($model,$attribute);
 	}
 
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed

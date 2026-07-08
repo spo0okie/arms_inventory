@@ -14,7 +14,7 @@ use app\modules\schedules\models\Schedules;
 use app\models\Services;
 use app\models\Techs;
 use app\models\Users;
-use kartik\markdown\MarkdownEditor;
+use app\components\formInputs\MarkdownEditorFix as MarkdownEditor;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */

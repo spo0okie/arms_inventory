@@ -46,7 +46,7 @@ class CompsSearch extends Comps
 				'vm_uuid'
 			], 'safe'],
 			['mac', 'filter', 'filter' => function ($value) {
-				$macs=explode("\n",$value);
+				$macs=explode("\n",$value??'');
 				foreach ($macs as $i=>$mac) {
 					$macs[$i]=preg_replace('/[^0-9a-f]/', '', mb_strtolower($mac));
 				}

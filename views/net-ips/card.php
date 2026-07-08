@@ -24,8 +24,8 @@ if (!isset($static_view)) $static_view=false;
 </h1>
 
 <?php
-echo empty($model->name)?'':'<h4>'.Yii::$app->formatter->asNtext($model->name).'</h4>';
-echo empty($model->comment)?'':Yii::$app->formatter->asNtext($model->comment);
+echo empty($model->name)?'':'<h4>'.\app\components\ModelFieldWidget::renderFieldValue($model,'name').'</h4>';
+echo empty($model->comment)?'':\app\components\ModelFieldWidget::renderFieldValue($model,'comment');
 
 $objects=[];
 

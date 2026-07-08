@@ -164,7 +164,7 @@ trait CompsModelCalcFieldsTrait
 	//фильтр наложенный пользователем
 	public function getIgnoredIps() {
 		if (!is_null($this->ip_ignore_cache)) return $this->ip_ignore_cache;
-		$this->ip_ignore_cache=explode("\n",$this->ip_ignore);
+		$this->ip_ignore_cache=explode("\n",$this->ip_ignore??'');
 		foreach ($this->ip_ignore_cache as $i=>$ip) $this->ip_ignore_cache[$i]=trim($ip);
 		$this->ip_ignore_cache=array_unique($this->ip_ignore_cache);
 		return $this->ip_ignore_cache;

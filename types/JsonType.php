@@ -14,6 +14,16 @@ class JsonType extends TextType
 		return 'json';
 	}
 
+	/**
+	 * Пока стандартный скаляр-рендер вместо текстового (ntext) рендера
+	 * родительского TextType — паритет с прежним выводом. Обогащение —
+	 * по ходу аудита карточек (4в).
+	 */
+	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
+	{
+		return $this->renderPlainValue($model,$attribute);
+	}
+
 	public function inputHint(): ?string
 	{
 		return 'Значение — структура в формате JSON, например <b>{"key": "value"}</b>.';

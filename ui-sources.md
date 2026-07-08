@@ -30,6 +30,7 @@
 | `inputHint()` — «как вводить» | тултип label в форме: приглушённо после hint атрибута |
 | `searchHint()` — «как искать» | тултип колонки с фильтром: приглушённо после общего синтаксиса поиска |
 | `renderInput()` | виджет ввода в форме (через `autoInput()`) |
+| `renderOutput()` — «как показать значение» | значение атрибута везде, где он выводится через `ModelFieldWidget` (карточки, DetailView, grid через `DefaultColumn`); контракт см. §3 |
 | `gridColumnClass()` | класс/рендер колонки в списках |
 | `apiSchema()`, `samples()` | Swagger/REST API |
 | `types/<type>.md` (слой 2) | ссылка «подробнее о типе: … »» из тултипа атрибута; ссылка со страницы `/docs/model` |
@@ -55,11 +56,8 @@ build(ArmsModel $model, string $attr, string $mode): ?array  // [title, body]
 `views/docs/model.php` — зовут сборщик и ничего не клеят сами.
 
 `getAttributeHint()` при этом возвращает **чистую смысловую часть**
-(только attributeData, без типовых довесков) — композиция уходит из
-уровня данных в сборщик. Макрос `{same}` везде подставляет чистый hint.
-(Сейчас, на этапе 2, композиция временно живёт в `getAttributeHint()`,
-из-за чего формат ввода просачивается в grid/карточку — сборщик это
-устраняет.)
+(только attributeData, без типовых довесков) — композиция живёт в
+сборщике. Макрос `{same}` везде подставляет чистый hint.
 
 ### Блоки тела тултипа
 
@@ -70,6 +68,7 @@ build(ArmsModel $model, string $attr, string $mode): ?array  // [title, body]
 |---|---|---|:-:|:-:|:-:|:-:|
 | 1 | Смысл («что это») | по режиму: `hint` (form); `indexHint → viewHint → hint` (grid/search); `viewHint → indexHint → hint` (view); `{same}` = чистый hint | ✓ | ✓ | ✓ | ✓ |
 | 1а | Формат («как вводить») — продолжение блока 1 через `<br>`, обёрнут `<span class="text-muted">` | `inputHint()` типа | ✓ | — | — | — |
+| 1б | Источник значения («откуда взялось») — продолжение блока 1 через `<br>`, обёрнут `<span class="text-muted">` | автоматически из модели, руками не пишется: наследуемый атрибут (`is_inheritable`; алиасы link↔getter и `<attr>Recursive` разрешаются) у загруженной записи — «наследуемый атрибут: значение задано в этой записи / унаследовано от <renderItem предка — правило unification.md «имя объекта — всегда renderItem»> / значение не задано ни здесь, ни у предков»; прочие не-колонки — «вычисляемое поле»; хранимые колонки и ссылочные атрибуты блока не дают | — | — | — | ✓ |
 | 2 | Поиск («как искать») | явный `searchHint` из attributeData (`{same}` поддерживается) — **если задан, блок состоит только из него**; иначе: дефолт по типу данных (строка/число/дата из `apiSchema()`) `<br>` + muted `searchHint()` типа | — | — | ✓ | — |
 | 3 | Переходы на слой 2 | ссылка «подробнее: <Titles> → <Label> »» ← `models/<class-id>/<attr>.md`; ссылка «подробнее о типе: <H1 страницы> »» ← `types/<type>.md`; каждая — только если файл существует, по одной на строку, класс `open-in-modal-form` | ✓ | ✓ | ✓ | ✓ |
 
@@ -79,8 +78,8 @@ build(ArmsModel $model, string $attr, string $mode): ?array  // [title, body]
 
 ### Условия отображения
 
-- Все блоки пусты → сборщик возвращает `null`: в форме не выводится
-  иконка «?», в grid/view label рендерится без тултип-обёртки.
+- Все блоки пусты → сборщик возвращает `null`: иконка «?» не выводится
+  ни в одном режиме, label рендерится чистым.
 - `hint` пуст, но тип даёт `inputHint()` → блок 1 состоит только из
   muted-формата (тултип есть).
 - Тип атрибута не выводится (вычисляемое поле) → блока 1а нет;
@@ -88,8 +87,43 @@ build(ArmsModel $model, string $attr, string $mode): ?array  // [title, body]
 - Явный `searchHint` в attributeData полностью вытесняет и дефолт,
   и типовую часть поиска (уже закреплено тестом
   `TypeHintCompositionTest::testExplicitSearchHintWins`).
+- Наследуемая часть блока 1б требует загруженной записи (цепочка
+  наследования зависит от конкретного объекта); у пустой модели
+  (например, страница `/docs/model`) наследуемые виртуальные атрибуты
+  показываются как «вычисляемое поле».
+- Блок 1б — единственный источник аннотации наследуемости в UI:
+  потребители (в т.ч. `ModelFieldWidget::fieldTitle`) ничего
+  не дописывают сами.
 
 ### Канон разметки
+
+Подача: тултип атрибута висит НЕ на label, а на иконке «?» рядом с ним
+(по образцу иконки помощи страницы `HintIconWidget`). Иконку рендерит
+единственная точка — `AttributeTooltip::icon()`; потребители
+(`ActiveField::renderLabelParts()`, `FieldsHelper::labelOption()`,
+`AttributeHintWidget`, `ModelFieldWidget::fieldTitle()`) дописывают её
+к label и ничего не вешают на сам label. `build()` вернул `null` —
+иконки нет, label чистый:
+
+```html
+{label} <span class="attr-hint-icon" qtip_pin="1" qtip_ttip="{card}"
+  qtip_side="…" qtip_theme="…"><i class="fas fa-question-circle"></i></span>
+```
+
+qtip-атрибуты и статусные классы — на span-обёртке, НЕ на FA-элементе:
+FontAwesome заменяет `<i>` на `<svg>` и пересоздаёт его при изменении
+классов, убивая tooltipster-инстанс (по той же причине `HintIconWidget`
+вешает тултип на `<a>`).
+
+Поведение иконки (`web/tooltipster/js/qtip_ajax.js`):
+наведение — тултип; клик — «запинить»: тултип не закрывается по
+mouseout, повторный клик отпускает (включается атрибутом `qtip_pin`).
+Статусы цветом (`web/css/qtip.css`): `.attr-hint-icon` — приглушённая,
+`:hover` — акцент, `.qtip-pinned` — приколота (отчётливо другой цвет).
+Для JS, подставляющего контент тултипа динамически, есть заготовка
+`AttributeTooltip::iconTemplate()` (иконка без `qtip_ttip`).
+У иконки помощи страницы (`HintIconWidget`) pin не применяется —
+её клик открывает документацию.
 
 Тултип — bootstrap-карточка (как в `FieldsHelper::toolTipOptions()`):
 
@@ -128,11 +162,18 @@ qtip-атрибуты: `qtip_ttip` (контент), `qtip_side`, `qtip_theme`;
 
 ## 3. Карточка объекта (`view`)
 
+Единая точка вывода атрибута — `ModelFieldWidget` (правило unification.md
+«атрибут — всегда ModelFieldWidget»; формы вызова: полная подача
+`::widget()`, `renderFieldTitle()`, `renderFieldValue()`,
+`renderFieldRow()`, строка DetailView — `detailAttribute()`).
+
 | Элемент | Источник | Код |
 |---|---|---|
-| Label атрибута | `viewLabel → label` | `AttributeHintWidget` mode=view |
-| Тултип атрибута | сборка по §0.1, режим `view` (смысл + переходы) | `AttributeHintWidget` mode=view |
-| Значение атрибута | `renderOutput()` типа; текстовые поля — `TextFieldWidget` (ntext/markdown/dokuwiki по `params['textFields']`) | `TextFieldWidget` |
+| Label атрибута | `viewLabel → label` (цепочка view-режима) | `ModelFieldWidget::fieldTitle()` → `AttributeTooltip` |
+| Тултип атрибута | сборка по §0.1, режим `view` (смысл + блок 1б «источник значения» + переходы) | `ModelFieldWidget::fieldTitle()` → `AttributeTooltip` |
+| Значение атрибута | `renderOutput()` класса типа (`typeClass`), строго: тип не резолвится — рендер падает; текстовые — ntext/markdown/dokuwiki по `params['textFields']` (в `TextType`, `TextFieldWidget` — тонкий делегат) | `ModelFieldWidget::typeRenderedValue()` |
+| Значение-ссылка (link/loader/`ref`) | объектный путь: `renderItem()` каждого объекта (правило «имя объекта — всегда renderItem») | `ModelFieldWidget` → `ListObjectsWidget` |
+| Пустое значение | рендер типа НЕ вызывается; подача пустоты — `show_empty`/`message_on_empty` (по умолчанию карточка/строка скрыта) | `ModelFieldWidget`/`ListObjectsWidget` |
 | Вкладки/блоки wiki | поле `links` объекта — **пользовательский контент**, не документация | `TabsWidget::addWikiLinks()`, `WikiPageWidget` |
 
 ## 4. Выпадающие списки (select2)
@@ -218,18 +259,31 @@ public static function modelDescription(): string
 
 Только концепция — **без разделов по отдельным атрибутам** (короткое
 описание атрибута живёт в hint, длинное — в `models/<class-id>/<attr>.md`;
-страница сущности в приложении рендерит атрибутные страницы автоматически
-в секции «Подробно об атрибутах»).
+на странице `/docs/model` справочник атрибутов генерируется, а атрибутные
+страницы открываются из него ссылками «подробнее» модалкой).
+
+Канонический скелет (plans/help-inline.md): преамбула-концепция + строгие
+опциональные H2 — их точные названия адресуются трансклюзией
+(DocsPanelWidget), опечатку ловит сторож `HelpSectionCanonTest`:
 
 ```markdown
 # <Titles модели>
 
-<Абзац: расширенное назначение — самодостаточное резюме страницы.>
+<Преамбула: что это и зачем, связи — самодостаточное резюме.>   → index-панель, /docs, GitHub
 
-## Как заводится / жизненный цикл
-## Связи с другими сущностями
-## Типовые операции
+## Список          → index-панель (что в списке, навигация, фильтры)
+## Просмотр         → view-панель (композиция карточки: вкладки, блоки)
+## Добавление       → только /docs и GitHub
+## Редактирование   → только /docs и GitHub
+## Удаление         → только /docs и GitHub
 ```
+
+Все H2 опциональны (после view-hints атрибуты самоописательны — секции
+нужны только там, где есть нюанс сверх подсказок полей). Обязательна
+только преамбула. Неканонические H2 допустимы, но в инфоблоки не попадают
+(видны лишь в /docs и на GitHub). Сценарий одного атрибута
+(переименование, архивация) — не секция модельного файла, а
+`models/<class-id>/<attr>.md`.
 
 ### MD атрибута (`docs/help/models/<class-id>/<attr>.md`)
 

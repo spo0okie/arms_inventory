@@ -1,5 +1,6 @@
 <?php
 
+use app\components\ModelFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -28,10 +29,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'id',
-            'code',
-            'name',
-            'descr:ntext',
+            ModelFieldWidget::detailAttribute($model,'id'),
+            ModelFieldWidget::detailAttribute($model,'code'),
+            ModelFieldWidget::detailAttribute($model,'name'),
+            ModelFieldWidget::detailAttribute($model,'descr:ntext'),
         ],
     ]) ?>
 

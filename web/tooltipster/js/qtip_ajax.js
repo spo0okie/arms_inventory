@@ -267,6 +267,30 @@ function attach_qTip(el, force = false) {
 		// размер сразу — поллинговый трекер только зря дёргал reposition и моргал.
 		trackTooltip: false,
 	});
+
+	// Pin-поведение (атрибут qtip_pin — вешает AttributeTooltip::icon):
+	// клик по элементу приколачивает тултип — он перестаёт закрываться по
+	// mouseout; повторный клик отпускает. Статус виден по классу qtip-pinned
+	// (цвета — web/css/qtip.css).
+	if (typeof el.attr("qtip_pin") !== "undefined") {
+		let instance = el.tooltipster("instance");
+		instance.on("close", function (event) {
+			// event.stop() отменяет закрытие (см. _close в tooltipster.bundle.js)
+			if (el.hasClass("qtip-pinned")) event.stop();
+		});
+		// namespace + off: при переинициализации (force) не плодим обработчики
+		el.off("click.qtipPin").on("click.qtipPin", function (e) {
+			// иконка живёт внутри label поля или ссылки сортировки колонки —
+			// клик не должен фокусировать input или дёргать сортировку
+			e.preventDefault();
+			e.stopPropagation();
+			if (el.toggleClass("qtip-pinned").hasClass("qtip-pinned")) {
+				instance.open();
+			} else {
+				instance.close();
+			}
+		});
+	}
 }
 
 function attachAllTTips() {

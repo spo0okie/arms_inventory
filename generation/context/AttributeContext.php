@@ -17,9 +17,9 @@ class AttributeContext
 
 	public function __construct(
         public readonly string $attribute,		//атрибут
-		public readonly bool $empty=false,		//нужно ли пустой
         public readonly ArmsModel $model,
         public readonly GenerationContext $generationContext,
+		public readonly bool $empty=false,		//нужно ли пустой
     ) {}
 
     /**

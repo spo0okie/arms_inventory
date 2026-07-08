@@ -3,9 +3,6 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\models\base\ArmsModel;
-use yii\helpers\Html;
-use yii\web\View;
 
 class StringType extends BaseType
 {
@@ -17,15 +14,6 @@ class StringType extends BaseType
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
 		return $field->textInput();
-	}
-
-	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
-	{
-		$value = $model->$attribute ?? null;
-		if (is_array($value)) {
-			$value = implode(', ', $value);
-		}
-		return Html::encode((string)$value);
 	}
 
 	public function apiSchema(): array

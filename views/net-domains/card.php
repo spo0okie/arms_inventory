@@ -21,5 +21,5 @@ if (!isset($static_view)) $static_view=false;
 		],
 	]) ?>
 </h1>
-<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
+<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 

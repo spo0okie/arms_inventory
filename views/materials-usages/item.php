@@ -19,22 +19,18 @@ if (!isset($date)) $date=false;
 if (!isset($cost)) $cost=false;
 
 if (is_object($model)) {
-	?>
-	<span
-		class="materials-usages-item cursor-default"
-		qtip_ajxhrf="<?= \yii\helpers\Url::to(['/materials-usages/ttip','id'=>$model->id]) ?>"
-	>
-        <?= \yii\helpers\Html::a(
-	        ($date?$model->date.' ':'').
+	echo \app\components\ItemObjectWidget::widget([
+		'model'=>$model,
+		'item_class'=>'materials-usages-item cursor-default',
+		'name'=>
+			($date?$model->date.' ':'').
 			($from?($model->material->place->fullName??''):'').
 			(($from&&$material)?' \ ':'').
 			($material?($model->material->typeName??'material_error'):'').
 			($count?(' <span class="badge bg-secondary">'.$model->count.($model->material->type->units??'').'</span>'):'').
 			($cost&&$model->cost?('<span class="badge bg-success">'.$model->cost.$model->currency->symbol.'</span>'):'').
-            (($count&$to)?' -&gt; ':'').
-            ($to?$model->to:''),
-            ['materials-usages/view','id'=>$model->id]
-        ) ?>
-</span>
-
-<?php } else echo "Отсутствует";
+			(($count&$to)?' -&gt; ':'').
+			($to?$model->to:''),
+		'static'=>true,
+	]);
+} else echo "Отсутствует";

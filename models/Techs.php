@@ -239,10 +239,23 @@ class Techs extends ArmsModel
 			'type' => ['ref'=>\app\models\TechTypes::class],
 			'site' => ['ref'=>\app\models\Places::class],
 			'servicesResponsible' => ['ref'=>\app\models\Users::class],
-			'supportTeam' => ['ref'=>\app\models\Users::class, 'refMulti'=>true],
+			'responsible' => [
+				'Ответственный',
+				'hint' => 'Кто отвечает за обслуживание этого оборудования: ответственный сервиса, '
+					.'в работе которого оборудование участвует, либо закреплённый ИТ-сотрудник',
+				'ref'=>\app\models\Users::class,
+			],
+			'supportTeam' => [
+				'Поддержка',
+				'hint' => 'Команда поддержки: ответственные и поддержка сервисов, '
+					.'в работе которых участвует это оборудование',
+				'ref'=>\app\models\Users::class, 'refMulti'=>true,
+			],
 			'servicesSupportTeam' => ['ref'=>\app\models\Users::class, 'refMulti'=>true],
 			'backupReqs' => ['ref'=>\app\models\MaintenanceReqs::class, 'refMulti'=>true],
-			'admResponsible'=>['alias'=>'responsible'],
+			//admResponsible - загрузчик responsible_id ("Адм.Ответственный"); ранее алиас
+			//указывал на 'responsible' (ответственный техобслуживания) - это другое поле
+			'admResponsible'=>['alias'=>'responsible_id'],
 			'arms_id' => [
 				'Рабочее место',
 				'hint' => 'Рабочее место, к которому прикреплено оборудование',
@@ -759,7 +772,7 @@ class Techs extends ArmsModel
 						//если все ок то берем префикс типа оборудования
 						$tech_token=$model->type->prefix;
 						//если он не пустой то добавляем
-						if (strlen($tech_token)) $tokens[]=$tech_token;
+						if (strlen($tech_token??'')) $tokens[]=$tech_token;
 					}
 					break;
 			}

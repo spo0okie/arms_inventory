@@ -30,7 +30,7 @@ class HwList {
     public function loadRaw($data)
     {
     	//убираем NULL символы из содержимого. такое бывало.
-        $this->rawData = '[' . str_replace("\0",'',$data) . ']'; //дополняем до валидного JSON формата
+        $this->rawData = '[' . str_replace("\0",'',$data??'') . ']'; //дополняем до валидного JSON формата
         $this->data = json_decode($this->rawData, true); //расшифровываем в array
         //$this->items = $this->data;
         //return;
@@ -85,7 +85,7 @@ class HwList {
      * @param string $data
      */
     public function loadJSON($data) {
-        if (!strlen($data)) return; //если данных нет - выходим
+        if (!strlen($data??'')) return; //если данных нет - выходим
 		//$data = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $data);
 		//$json = json_decode($data,true,512,JSON_INVALID_UTF8_IGNORE|JSON_PARTIAL_OUTPUT_ON_ERROR);
 		$json = json_decode($data,true);
@@ -102,7 +102,7 @@ class HwList {
      * @param HwListItem $item
      */
     public function add($item){
-        if (strlen($item->uid)) {
+        if (strlen($item->uid??'')) {
             //если у нас явно указан uid
             if (isset($this->items[$item->uid])) {
                 //если этот элемент у нас уже есть в списке, то вместо добавления
@@ -156,14 +156,14 @@ class HwList {
      */
     public function onlySaved(){
         $saved=new HwList();
-        foreach ($this->items as $item) if (strlen($item->uid)) $saved->add($item);
+        foreach ($this->items as $item) if (strlen($item->uid??'')) $saved->add($item);
         return $saved;
     }
 
     public function hasUnsaved(){
         $unsaved=false;
         foreach ($this->items as $item) {
-            if (!strlen($item->uid)) $unsaved=true;
+            if (!strlen($item->uid??'')) $unsaved=true;
         }
         return $unsaved;
     }

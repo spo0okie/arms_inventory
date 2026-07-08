@@ -79,6 +79,8 @@ class LinkObjectWidget extends Widget
 		if (!isset($this->url) && $this->controller && $id) {
 			$this->url=Url::to(['/'.$this->controller.'/view','id'=>$id]);
 			$this->samePage=(
+				is_object(Yii::$app->controller)
+				&&
 				(
 					Yii::$app->controller->route==$this->controller.'/view'
 					||
@@ -105,7 +107,11 @@ class LinkObjectWidget extends Widget
 			$this->deleteUrl=Url::to([$this->controller.'/delete','id'=>$id]);
 		}
 
-		$this->samePage=$this->samePage || Yii::$app->request->url==$this->url;
+		try {
+			$this->samePage=$this->samePage || Yii::$app->request->url==$this->url;
+		} catch (\yii\base\InvalidConfigException $e) {
+			//вне web-запроса (консоль, тесты) текущего URL нет - мы точно не "на той же странице"
+		}
 
 		if (is_null($this->name) && is_object($this->model)) {
 			$this->name = $this->model->name;
@@ -124,8 +130,10 @@ class LinkObjectWidget extends Widget
 
 
 		$this->hrefOptions['class']=$this->cssClass;
-		$this->hrefOptions['qtip_ajxhrf']=$this->ttipUrl;
-		$this->hrefOptions['qtip_side']='top,bottom,right,left';
+		if (!$this->samePage) {
+			$this->hrefOptions['qtip_ajxhrf']=$this->ttipUrl;
+			$this->hrefOptions['qtip_side']='top,bottom,right,left';
+		}
 
 		if ($this->noPjax) $this->hrefOptions['data']=['pjax'=>0];
 

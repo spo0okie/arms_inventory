@@ -171,6 +171,7 @@ class StringHelper extends BaseStringHelper {
 	 * @since 2.0.4
 	 */
 	public static function explode($string, $delimiter = ',', $trim = true, $skipEmpty = false, $keepDividers = false) {
+		$string=$string??'';	//null (пустые фильтры/атрибуты) разбираем как пустую строку
 		if (is_string($delimiter))
 			return parent::explode($string, $delimiter, $trim, $skipEmpty);
 		

@@ -39,7 +39,7 @@ class IpsType extends IpType
 		
 		$min = $context->min ?? 16;
 		$max = $context->max ?? 128;
-		$count = $rng->getInt($min/16, $max/16);
+		$count = $rng->getInt(intdiv($min, 16), intdiv($max, 16));
 		$result = [];
 		
 		for ($i = 0; $i < $count; $i++) {

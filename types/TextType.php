@@ -2,8 +2,12 @@
 
 namespace app\types;
 
+use app\components\Forms\ActiveField;
+use app\components\WikiTextWidget;
 use app\generation\context\AttributeContext;
 use app\models\base\ArmsModel;
+use kartik\markdown\Markdown;
+use Yii;
 use yii\helpers\Html;
 use yii\web\View;
 
@@ -19,13 +23,30 @@ class TextType extends BaseType
 		return $field->text();
 	}
 
+	/**
+	 * Готовый HTML значения: по настройке params['textFields'] атрибут
+	 * рендерится как markdown, dokuwiki или простой многострочный текст
+	 * (ntext). Единственная точка этой логики: TextFieldWidget делегирует
+	 * сюда. options['outerClass'] — css-класс обёртки (ntext/dokuwiki).
+	 */
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
-		$value = $model->$attribute ?? null;
-		if (is_array($value)) {
-			$value = implode("\n", $value);
+		$outerClass=$options['outerClass']??'';
+		switch (ActiveField::textFieldType(get_class($model),$attribute)) {
+			case 'markdown':
+				return Markdown::convert($model->$attribute);
+			case 'dokuwiki':
+				return WikiTextWidget::widget([
+					'model'=>$model,
+					'field'=>$attribute,
+					'outerClass'=>$outerClass,
+				]);
+			default:
+				$text=Yii::$app->formatter->asNtext($model->$attribute);
+				return $outerClass?
+					Html::tag('div',$text,['class'=>$outerClass]):
+					$text;
 		}
-		return Html::encode((string)$value);
 	}
 
 	public function apiSchema(): array

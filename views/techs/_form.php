@@ -45,7 +45,8 @@ switch (Yii::$app->request->get('type')) {
 }
 
 $no_specs_hint= TechModels::$no_specs_hint;
-$hint_icon=FieldsHelper::labelHintIcon;
+//заготовка иконки «?» без контента - его подставит JS (единая подача тултипов атрибутов)
+$hint_icon=\app\components\AttributeTooltip::iconTemplate();
 /** @var @noinspect $js */
 /** @noinspection JSUnusedLocalSymbols */
 $js =  /** @lang JavaScript */ <<<JS
@@ -68,10 +69,12 @@ $js =  /** @lang JavaScript */ <<<JS
 
         $.ajax({url: "/web/tech-models/hint-comment?id="+model_id})
         .done(function(data) {
-            $('label[for="techs-comment"]')
-            	.html(data['name']+' $hint_icon')
-            	.attr('qtip_ttip',data['hint'])
-            	.tooltipster('destroy');
+            //подача единая: тултип висит на иконке «?», label чистый;
+            //старую иконку гасим, новую (с новым контентом) подхватит attachAllTTips
+            let commentLabel=$('label[for="techs-comment"]');
+            commentLabel.find('.attr-hint-icon.tooltipstered').tooltipster('destroy');
+            commentLabel.html(data['name']+' $hint_icon');
+            commentLabel.find('.attr-hint-icon').attr('qtip_ttip',data['hint']);
             //$("#comment-hint").html(data['hint']);
         })
         .fail(function () {console.log("Ошибка получения данных!")});
@@ -224,7 +227,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		<?= (is_object($model) && is_object($model->model) && $model->model->individual_specs)?'':'style="display:none"' ?>
 	>
 		<div class="col-md-4" >
-			<?= $form->field($model, 'specs')->textarea(['rows' => max(6,count(explode("\n",$model->specs)))]) ?>
+			<?= $form->field($model, 'specs')->textarea(['rows' => max(6,count(explode("\n",$model->specs??'')))]) ?>
 		</div>
 		<div class="col-md-4" >
 			<label class="control-label" >

@@ -32,16 +32,12 @@ class PhoneType extends BaseType
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * Значение - tel-ссылка. Пустоту обрабатывает потребитель
+	 * (show_empty/message_on_empty), рендер на пустом не вызывается.
 	 */
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
-		$value = $model->$attribute ?? null;
-		if ($value === null || $value === '') {
-			return '<span class="text-muted">—</span>';
-		}
-
-		$encoded = Html::encode((string)$value);
+		$encoded = Html::encode((string)($model->$attribute ?? ''));
 		return Html::a($encoded, 'tel:' . preg_replace('/[^0-9+]/', '', $encoded), [
 			'target' => '_blank',
 			'rel' => 'noopener noreferrer',

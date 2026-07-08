@@ -42,7 +42,7 @@ if (!$content_only){ ?>
 	]) ?>
 	</h3>
 
-	<p>	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?> </p>
+	<p>	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?> </p>
 	<p>
 		Стоимость: <span class="badge bg-success"><?= number_format((int)$model->cost,0,'',' ').$currency ?></span>
 		<?php if ($model->charge) { ?>
@@ -62,12 +62,12 @@ if (!$content_only){ ?>
 	<br />
 
 	<strong><?= $model->getAttributeLabel('account')?></strong>
-	<?= $model->account ?>
+	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'account') ?>
 
 	<?php if ($model->history) { ?>
 		<p>
 		<strong>Заметки:</strong><br />
-		<?= TextFieldWidget::widget(['model'=>$model,'field'=>'history']) ?>
+		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'history') ?>
 		</p>
 	<?php } ?>
 <?php if (!$content_only){ ?>

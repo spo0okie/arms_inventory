@@ -6,9 +6,11 @@
 /* @var $html string отрендеренный MD models/<class-id>.md (или '') */
 
 use app\components\AttributeTooltip;
-use app\helpers\DocsHelper;
+use app\components\assets\MermaidAsset;
 use app\helpers\StringHelper;
 use yii\helpers\Html;
+
+MermaidAsset::register($this);
 
 $titles = $model::$titles;
 $this->title = 'Документация: ' . $titles;
@@ -26,7 +28,11 @@ $indexUrl = class_exists($indexController) ? ['/' . $classId . '/index'] : null;
 	<?php } ?>
 </h1>
 
-<?php if ($description = $model::modelDescription()) { ?>
+<?php
+//короткое описание (modelDescription) - слой тултипов; на полной странице
+//документации его роль играет преамбула MD-страницы, показываем только как
+//фолбэк, когда MD-страницы нет (иначе одно и то же дважды)
+if (!$html && ($description = $model::modelDescription())) { ?>
 	<p class="lead"><?= $description ?></p>
 <?php } ?>
 
@@ -70,30 +76,7 @@ $indexUrl = class_exists($indexController) ? ['/' . $classId . '/index'] : null;
 </table>
 
 <?php
-//футер: подробные страницы атрибутов (models/<class-id>/<attr>.md) рендерятся
-//абзацами - страница сущности читается как единый документ, собранный из слоёв
-$attrDetails = [];
-foreach (array_keys($model->attributeData()) as $attr) {
-	$attrPath = DocsHelper::attributePagePath($classId, $attr);
-	if ($file = DocsHelper::findPage($attrPath)) {
-		try {
-			$label = $model->getAttributeLabel($attr);
-		} catch (Throwable $e) {
-			$label = $attr;
-		}
-		$attrDetails[] = [
-			'label' => $label,
-			'html' => DocsHelper::renderPage($file, $attrPath, true),
-		];
-	}
-}
+//подробные страницы атрибутов НЕ разворачиваются здесь вторым сборником:
+//в таблице выше на них уже есть ссылки «подробнее: ...» (блок 3 сборщика),
+//открываются модалками - «ссылка вместо пересказа»
 ?>
-<?php if (count($attrDetails)) { ?>
-	<h2 class="mt-4">Подробно об атрибутах</h2>
-	<?php foreach ($attrDetails as $detail) { ?>
-		<h3 class="mt-3"><?= Html::encode($detail['label']) ?></h3>
-		<div class="docs-page">
-			<?= $detail['html'] ?>
-		</div>
-	<?php } ?>
-<?php } ?>

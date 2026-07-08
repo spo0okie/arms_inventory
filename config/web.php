@@ -92,6 +92,20 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+				//красивые маршруты встроенной документации: зеркалят структуру docs/help
+				//(/docs/models/techs, /docs/page/models/techs/arm_id.md, /docs/img/...)
+				'docs' => 'docs/index',
+				'docs/models/<class:[\w-]+>' => 'docs/model',
+				[
+					'pattern' => 'docs/page/<path:.+>',
+					'route' => 'docs/page',
+					'encodeParams' => false, //path содержит слэши
+				],
+				[
+					'pattern' => 'docs/img/<path:.+>',
+					'route' => 'docs/img',
+					'encodeParams' => false,
+				],
                 // перечисляем контроллеры которые затолкали внутрь модуля Schedules
 				'<controller:(schedules|schedules-entries|scheduled-access)>' => 'schedules/<controller>/index',
 				'<controller:(schedules|schedules-entries|scheduled-access)>/<action:[\w-]+>' => 'schedules/<controller>/<action>',

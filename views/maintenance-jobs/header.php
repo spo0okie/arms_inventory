@@ -29,7 +29,7 @@ use kartik\markdown\Markdown;
 				]) ?>
 			</h1>
 			<?php if($model->parent_id) { ?><h4>Входит в состав: <?= $model->parent->renderItem($this,['static_view'=>true]) ?></h4> <?php } ?>
-			<?= TextFieldWidget::widget(['model'=>$model,'field'=>'descriptionRecursive']) ?>
+			<?= \app\components\ModelFieldWidget::renderFieldValue($model,'descriptionRecursive') ?>
 		</div>
 		<div class="me-5">
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'serviceRecursive']) ?>

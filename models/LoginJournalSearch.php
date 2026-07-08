@@ -6,7 +6,7 @@ use app\helpers\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\LoginJournal;
-use yii\helpers\StringHelper;
+use app\helpers\StringHelper;
 
 /**
  * LoginJournalSearch represents the model behind the search form of `app\models\LoginJournal`.

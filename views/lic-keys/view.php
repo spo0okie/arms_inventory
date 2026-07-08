@@ -42,7 +42,7 @@ $this->params['headerContent']=
 			.'</h3>'
 			.'<pre>'.$model->key_text.'</pre>'
 			.'<hr>'
-			.Markdown::convert($model->comment,[])
+			.Markdown::convert($model->comment??'',[])
 		.'</div>'
 	//.'<div class="me-5 flex-lg-grow-0">'
 	//.'</div>'

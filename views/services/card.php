@@ -26,8 +26,6 @@ If (!is_object($model)) {
 	echo "Сервис/услуга не найдены";
 	return;
 }
-$comps=$model->comps;
-$dependants=$model->dependants;
 $support=$model->support;
 $children=$model->children;
 $contracts=$model->contracts;
@@ -150,7 +148,7 @@ if(!$static_view) { ?>
 		</div>
 		
 		<div class="mb-3">
-			<?= TextFieldWidget::widget(['model'=>$model,'field'=>'descriptionRecursive']) ?>
+			<?= \app\components\ModelFieldWidget::renderFieldValue($model,'descriptionRecursive') ?>
 		</div>
 		<?= UrlListWidget::Widget(['list'=>$model->linksRecursive]) ?>
 		<br />
@@ -184,29 +182,29 @@ if(!$static_view) { ?>
 	</div>
 	<div class="col-md-6">
 		
-		<?= ListObjectsWidget::widget([
-			'models'=>$comps,
+		<?= ModelFieldWidget::widget([
+			'model' => $model, 'field' => 'comps',
 			'title'=>'Выполняется на компьютерах:',
 			'item_options'=>['static_view'=>$static_view,'fqdn'=>true],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
-		<?= ListObjectsWidget::widget([
-			'models'=>$model->techs,
+		<?= ModelFieldWidget::widget([
+			'model' => $model, 'field' => 'techs',
 			'title'=>'Выполняется на оборудовании:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
-		<?= ListObjectsWidget::widget([
-			'models'=>$model->depends,
+		<?= ModelFieldWidget::widget([
+			'model' => $model, 'field' => 'depends',
 			'title'=>'Зависит от сервисов:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
-		<?= ListObjectsWidget::widget([
-			'models'=>$dependants,
+		<?= ModelFieldWidget::widget([
+			'model' => $model, 'field' => 'dependants',
 			'title'=>'Зависимые сервисы:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],

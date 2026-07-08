@@ -189,7 +189,7 @@ class NetVlans extends ArmsModel
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
-			if (str_contains($this->vlan, '-')) {
+			if (str_contains((string)$this->vlan, '-')) {
 				[$start, $end] = explode('-', $this->vlan);
 				$start = (int)$start;
 				$end = (int)$end;
@@ -206,7 +206,9 @@ class NetVlans extends ArmsModel
 
 			}
 
-			$this->name=str_replace('{VLAN}',$this->vlan,$this->name);
+			if ($this->name !== null) {
+				$this->name=str_replace('{VLAN}',(string)$this->vlan,$this->name);
+			}
 
 
 			return true;

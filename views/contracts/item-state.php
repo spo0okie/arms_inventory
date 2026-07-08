@@ -6,7 +6,7 @@ use app\models\Contracts;
 /* @var $model app\models\Contracts */
 
 //тут разбиваем информацию в записной книжке документа на строки
-$history=explode("\n",$model->comment);
+$history=explode("\n",$model->comment??'');
 if (is_object($model)) { ?>
     <span class="contract_state_cell">
     <?php if ($model->state_id) { ?>

@@ -46,7 +46,7 @@ if (!isset($static_view)) $static_view=false;
 			<?= $this->render('exceptions',['model'=>$model])?>
 		</div>
 	</div>
-	<?php if (strlen($model->history)) { ?>
+	<?php if (strlen($model->history??'')) { ?>
 		<h3>Записная книжка:</h3>
 		<p>
 			<?= Markdown::convert($model->history) ?>

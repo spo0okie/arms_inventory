@@ -162,7 +162,7 @@ class NetIps extends ArmsModel
 	public function getSname($ignoreHint='')
 	{
 		$hint=$this->name;
-		if ($ignoreHint && strtolower($ignoreHint)==strtolower($hint)) {
+		if ($ignoreHint && strtolower($ignoreHint??'')==strtolower($hint??'')) {
 			$hint='';
 		}
 		return $this->text_addr.(empty($hint)?'':(' ('.$hint.')'));
@@ -498,7 +498,7 @@ class NetIps extends ArmsModel
 	 * @return string
 	 */
 	public static function filterInput($value) {
-		if (count($items=explode("\n",$value))) {
+		if (count($items=explode("\n",$value??''))) {
 			$validator = new IpValidator();
 			$validator->subnet = null;
 			$validator->ipv6 = false;

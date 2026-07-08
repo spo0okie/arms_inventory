@@ -53,9 +53,9 @@ $columns=[
 		'value' => function ($data) use ($renderer) {
 			$tokens=[];
 
-			if (strlen($data->sn)) $tokens[]=$data->sn;
-			if (strlen($data->inv_num)) $tokens[]=$data->inv_num;
-			if (strlen($data->uid)) $tokens[]=$data->uid;
+			if (strlen($data->sn??'')) $tokens[]=$data->sn;
+			if (strlen($data->inv_num??'')) $tokens[]=$data->inv_num;
+			if (strlen($data->uid??'')) $tokens[]=$data->uid;
 			return Html::encode(implode(', ',$tokens));
 
 		},
@@ -245,11 +245,11 @@ if ((Yii::$app->controller?->action?->id ?? null) === 'arms') {
 			/** @var Techs $data */
 			$items=[];
 			//сам аппарат является телефоном - прямой линк
-			if ($data->isVoipPhone && strlen($data->comment))
+			if ($data->isVoipPhone && strlen($data->comment??''))
 				$items[]=ModelWidget::widget(['model'=>$data,'options'=>['static_view'=>true,'name'=>$data->comment]]);
 			//телефонные аппараты входящие в состав АРМ - прямой линк
 			foreach ($data->voipPhones as $phone)
-				if (strlen($phone->comment))
+				if (strlen($phone->comment??''))
 					$items[]=ModelWidget::widget(['model'=>$phone,'options'=>['static_view'=>true,'name'=>$phone->comment]]);
 			//если нашли прямые линки на аппараты - выводим их
 			if (count($items)) return implode(' ',$items);

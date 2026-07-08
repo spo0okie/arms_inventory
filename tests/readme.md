@@ -108,7 +108,9 @@ php vendor/bin/codecept run --coverage
 
 ### Особенности конфигурации test-web.php
 
-- Подавление deprecated warnings для PHP 8.2: `error_reporting(E_ALL & ~E_DEPRECATED)`
+- `error_reporting(E_ALL)` — deprecated НЕ подавляются: тестовое окружение
+  не мягче боевого, иначе full/empty-сценарии PageAccessCest пропускают
+  депрекейты (strlen(null) и т.п.), которые на dev/prod роняют страницы
 - Тестовая БД: `arms_test` (mysql:host=127.0.0.1)
 - Отключена CSRF валидация: `enableCsrfValidation => false`
 - Debug модуль включён

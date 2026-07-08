@@ -6,7 +6,7 @@ use kartik\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = \app\models\UserGroups::$title;
+$this->title = \app\models\UserGroups::$titles;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-groups-index">

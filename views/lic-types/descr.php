@@ -17,7 +17,7 @@ if (is_object($model)) {
 </h4>
 <?php if (!$static_view) { ?>
 	<p>
-		<?= Yii::$app->formatter->asNtext($model->comment) ?>
+		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 	</p>
 <?php } else echo '<br />' ?>
 <br />

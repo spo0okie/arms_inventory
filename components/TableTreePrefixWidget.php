@@ -14,7 +14,7 @@ class TableTreePrefixWidget extends Widget
 		$pos*=15;
 		return Html::tag('span',$content,[
 			'class'=>'table-tree-prefix',
-			'style'=>"height:${height}px;left:${pos}px"
+			'style'=>"height:{$height}px;left:{$pos}px"
 		]);
 	}
 
@@ -62,7 +62,7 @@ class TableTreePrefixWidget extends Widget
 		}
 		if ($this->children) $output.= $this->treeItem($pos,$this->childrenLine());
 		$padding=$pos*15;
-		$output.="<span style='padding-left:${padding}px'>";
+		$output.="<span style='padding-left:{$padding}px'>";
 		
 		echo $output;
 	}

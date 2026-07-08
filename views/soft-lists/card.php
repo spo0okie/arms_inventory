@@ -22,5 +22,5 @@ if (!isset($static_view)) $static_view=false;
 	]) ?>
 </h1>
 
-<span class="small"><?= $model->name ?></span>
-<p><?= $model->comment ?> </p>
+<span class="small"><?= \app\components\ModelFieldWidget::renderFieldValue($model,'name') ?></span>
+<p><?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?> </p>

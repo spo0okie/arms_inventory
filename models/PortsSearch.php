@@ -76,13 +76,13 @@ class PortsSearch extends Ports
         }
 
         $query
-			->andFilterWhere(['or like', 'ports.name', \yii\helpers\StringHelper::explode($this->name,'|',true,true)])
-			->andFilterWhere(['or like', 'techs.num', \yii\helpers\StringHelper::explode($this->techs_id,'|',true,true)])
+			->andFilterWhere(['or like', 'ports.name', \app\helpers\StringHelper::explode($this->name,'|',true,true)])
+			->andFilterWhere(['or like', 'techs.num', \app\helpers\StringHelper::explode($this->techs_id,'|',true,true)])
 			->andFilterWhere(['or',
-				['or like', 'port_linked_techs.num', \yii\helpers\StringHelper::explode($this->link_techs_id,'|',true,true)],
-				['or like', 'port_linked_ports.name', \yii\helpers\StringHelper::explode($this->link_techs_id,'|',true,true)],
+				['or like', 'port_linked_techs.num', \app\helpers\StringHelper::explode($this->link_techs_id,'|',true,true)],
+				['or like', 'port_linked_ports.name', \app\helpers\StringHelper::explode($this->link_techs_id,'|',true,true)],
 			])
-            ->andFilterWhere(['or like', 'ports.comment', \yii\helpers\StringHelper::explode($this->comment,'|',true,true)]);
+            ->andFilterWhere(['or like', 'ports.comment', \app\helpers\StringHelper::explode($this->comment,'|',true,true)]);
 
         return $dataProvider;
     }

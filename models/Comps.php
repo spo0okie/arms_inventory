@@ -264,13 +264,25 @@ class Comps extends ArmsModel
 			//read-only вычисляемые ссылки (категория C): только вывод
 			'place' => ['ref'=>\app\models\Places::class],
 			'site' => ['ref'=>\app\models\Places::class],
-			'responsible' => ['ref'=>\app\models\Users::class],
+			'responsible' => [
+				'Ответственный',
+				'hint' => 'Кто отвечает за эту ОС: закреплённый пользователь, иначе ответственный '
+					.'сервисов на ней, иначе ответственный сервиса управления АРМ',
+				'ref'=>\app\models\Users::class,
+			],
 			'servicesResponsible' => ['ref'=>\app\models\Users::class],
-			'supportTeam' => ['ref'=>\app\models\Users::class, 'refMulti'=>true],
+			'supportTeam' => [
+				'Поддержка',
+				'hint' => 'Команда поддержки: ответственные и поддержка сервисов этой ОС '
+					.'и сервиса управления АРМ',
+				'ref'=>\app\models\Users::class, 'refMulti'=>true,
+			],
 			'servicesSupportTeam' => ['ref'=>\app\models\Users::class, 'refMulti'=>true],
 			'backupReqs' => ['ref'=>\app\models\MaintenanceReqs::class, 'refMulti'=>true],
+			'effectiveMaintenanceReqs' => ['ref'=>\app\models\MaintenanceReqs::class, 'refMulti'=>true],
 			'admins_ids' => [
 				'Предоставлены полномочия администратора',
+				'viewLabel' => 'Полномочия администратора',
 				'hint' => 'Если административные привилегии на этой ОС/ВМ выданы рядовым пользователям,<br>'
 					.'то необходимо перечислить их здесь. (Состав ИТ отдела перечислять не нужно)',
 				'placeholder' => 'Только у ИТ отдела',
@@ -397,6 +409,7 @@ class Comps extends ArmsModel
 			],
 			'platform_id' => [
 				'Предоставляется услугой',
+				'viewLabel' => 'Платформа',
 				'hint' => 'Если эта ОС/ВМ запущена на облачной платформе виртуализации/датацентре и указать АРМ невозможно,<br>'
 					.'то можно указать какой услугой предоставляются вычислительные мощности для нее.',
 				'placeholder' => function () {

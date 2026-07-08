@@ -53,7 +53,7 @@ $this->params['headerContent']=
 					'hideUndeletable' => false,
 				])
 			.'</h3>'
-			.TextFieldWidget::widget(['model'=>$model,'field'=>'comment'])
+			.\app\components\ModelFieldWidget::renderFieldValue($model,'comment')
 			.'<hr/>'
 			.ModelFieldWidget::widget([
 				'model'=>$model,

@@ -101,6 +101,7 @@ class Ports extends ArmsModel
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Детали по порту / соединению до удаленного устройства',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'link_techs_id' => [
 				'Подсоединенное устройство',
@@ -218,7 +219,7 @@ class Ports extends ArmsModel
 			$reversePort=null;
 			if (!is_numeric($this->link_ports_id)) {
 				//если нам нужно создать порт - создаем
-				if (strlen($this->link_ports_id) && strpos($this->link_ports_id,'create:')===0) {
+				if (strlen($this->link_ports_id??'') && strpos($this->link_ports_id,'create:')===0) {
 					$reversePort=new Ports();
 					$tokens=explode(':',$this->link_ports_id);
 					//нужно создать новый порт с именем
@@ -243,7 +244,7 @@ class Ports extends ArmsModel
 						$reversePort->techs_id=$this->link_techs_id;
 					}
 					
-				} elseif (!strlen(trim($this->comment)) || $this->comment==$tpl) {
+				} elseif (!strlen(trim($this->comment??'')) || $this->comment==$tpl) {
 					//мы вообще ни к чему не привязываемся и у нас даже комментария нет
 					if (!$insert) {
 						//если это обновление (не вставка)

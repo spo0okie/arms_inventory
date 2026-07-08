@@ -148,7 +148,7 @@ trait TechsModelCalcFieldsTrait
 		/** @var Techs $this */
 		if (is_object($model=$this->model)) {
 			if (is_object($type=$model->type)) {
-				if (strlen($type->comment_name))
+				if (strlen($type->comment_name??''))
 					return $type->comment_name;
 			}
 		}

@@ -23,17 +23,17 @@ $showEmpty= Yii::$app->request->get('showEmpty',false);
 
 $notepadRender='';
 $notepadLines=0;
-$notepad=strlen(trim($model->notepad));
+$notepad=strlen(trim($model->notepad??''));
 if ($notepad) {
-	$notepadRender=TextFieldWidget::widget(['model'=>$model,'field'=>'notepad']);
+	$notepadRender=\app\components\ModelFieldWidget::renderFieldValue($model,'notepad');
 	$notepadLines=count(explode("\n",trim($model->notepad)));
 }
 $notepadCompact=$notepadLines<=Yii::$app->params['networkInlineDescriptionLimit'];
 
 $segmentRender='';
 $segmentLines=0;
-if (is_object($model->segment) && trim($model->segment->history)) {
-	$segmentRender=TextFieldWidget::widget(['model'=>$model->segment,'field'=>'history']);
+if (is_object($model->segment) && trim($model->segment->history??'')) {
+	$segmentRender=\app\components\ModelFieldWidget::renderFieldValue($model->segment,'history');
 	$segmentLines=count(explode("\n",trim($model->segment->history)));
 }
 $segmentCompact=$segmentLines<=Yii::$app->params['networkInlineDescriptionLimit'];
@@ -114,7 +114,7 @@ if ($showSegment) {
 	$tabs[]=[
 		'id'=>'segment-description',
 		'label'=>'Описание сегмента',
-		'content'=>Markdown::convert($model->segment->history),
+		'content'=>Markdown::convert($model->segment->history??''),
 	];
 }
 

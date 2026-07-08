@@ -2,6 +2,7 @@
 namespace app\components\widgets\page;
 
 use app\models\base\ArmsModel;
+use Yii;
 use yii\base\Widget;
 
 /**
@@ -50,13 +51,13 @@ class ModelWidget extends Widget
 		$this->modelViewPath=$this->modelViewsPath.'/'.$this->view;
 		
 		//проверяем конечный путь
-		if (!is_file(str_replace('@app',$_SERVER['DOCUMENT_ROOT'],$this->modelViewPath.'.php'))) {
-			
+		if (!is_file(Yii::getAlias($this->modelViewPath.'.php'))) {
+
 			//в случае неудачи пытаемся сделать fallback на общие рендер файлы
 			$this->modelViewPath='@app/views/layouts/'.$this->view;
-			
+
 			//проверяем возможность fallback
-			if (!is_file(str_replace('@app',$_SERVER['DOCUMENT_ROOT'],$this->modelViewPath.'.php'))) {
+			if (!is_file(Yii::getAlias($this->modelViewPath.'.php'))) {
 				
 				//ничего не вышло - паника
 				$class=get_class($this->model);

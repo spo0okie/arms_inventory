@@ -18,9 +18,9 @@ if (!isset($static_view)) $static_view=false;
 			'hideUndeletable'=>false
 		]) ?>
 	</h1>
-	<p class="mb-3"><?= $model->code ?></p>
+	<p class="mb-3"><?= \app\components\ModelFieldWidget::renderFieldValue($model,'code') ?></p>
 	<h4><?= $model->getAttributeLabel('description') ?></h4>
-	<?= Yii::$app->formatter->asNtext($model->description) ?>
+	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'description') ?>
 </div>
 
 <?php if (!$static_view && strlen($model->history)) { ?>
@@ -28,7 +28,7 @@ if (!isset($static_view)) $static_view=false;
 	<!--	<hr/> -->
 	<h4><?= $model->getAttributeLabel('history') ?></h4>
 	<p>
-		<?= TextFieldWidget::widget(['model'=>$model,'field'=>'history']) ?>
+		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'history') ?>
 	</p>
 </div>
 <?php } ?>

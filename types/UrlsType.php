@@ -2,9 +2,9 @@
 
 namespace app\types;
 
+use app\components\UrlListWidget;
 use app\generation\context\AttributeContext;
 use app\models\base\ArmsModel;
-use yii\helpers\Html;
 use yii\web\View;
 
 class UrlsType extends TextType
@@ -26,10 +26,16 @@ class UrlsType extends TextType
 		return $field->textInput();
 	}
 
+	/**
+	 * Список готовых элементов-ссылок (парсинг и рендер строк —
+	 * UrlListWidget) по фактическому значению атрибута; разделители
+	 * между элементами расставляет потребитель. Пусто — пустой список.
+	 */
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
-		$value = $model->$attribute ?? null;
-		return Html::encode((string)$value);
+		$links=new UrlListWidget(['list'=>$model->$attribute]);
+		$links->renderItems();
+		return $links->rendered;
 	}
 
 	public function apiSchema(): array

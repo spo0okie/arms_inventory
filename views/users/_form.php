@@ -6,7 +6,7 @@ use app\models\OrgStruct;
 use app\models\Partners;
 use app\models\Users;
 use kartik\depdrop\DepDrop;
-use kartik\markdown\MarkdownEditor;
+use app\components\formInputs\MarkdownEditorFix as MarkdownEditor;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;

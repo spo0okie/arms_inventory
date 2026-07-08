@@ -185,7 +185,8 @@ class DocsController extends ArmsBaseController
 		return $this->defaultRender('model', [
 			'classId' => $class,
 			'model' => new $modelClass(),
-			'html' => $file ? DocsHelper::renderPage($file, $pagePath) : '',
+			//H1 документа отбрасываем: заголовок странице даёт вьюха (titles модели)
+			'html' => $file ? DocsHelper::renderPage($file, $pagePath, true) : '',
 		]);
 	}
 

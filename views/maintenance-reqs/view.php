@@ -43,7 +43,7 @@ $this->params['headerContent']=
 				.($model->spread_techs?
 					'<span qtip_ttip="Требование обслуживания сервисов автоматически распространяется<br> на оборудование, на котором эти сервисы работают"><i class="fas fa-print text-muted" ></i></span>':'')
 			.'</h1>'
-			.TextFieldWidget::widget(['model'=>$model,'field'=>'description'])
+			.\app\components\ModelFieldWidget::renderFieldValue($model,'description')
 		.'</div>'
 		.'<div class="me-5 flex-lg-shrink-0">'
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'includes'])

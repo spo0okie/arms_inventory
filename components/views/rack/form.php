@@ -25,20 +25,20 @@ use yii\helpers\Html;
 		<?= \app\components\CollapsableCardWidget::widget([
 			'openedTitle'=>'Конструктор',
 			'closedTitle'=>'Конструктор',
-			'initialCollapse'=>!(!strlen($model->$layout) || (is_object($rack) && $rack->isSimpleConfig)),
+			'initialCollapse'=>!(!strlen($model->$layout??'') || (is_object($rack) && $rack->isSimpleConfig)),
 			'content'=>'<div class="card-body">'.$this->render('constructor',[
 				'attr'=>$layout,
 				'form'=>$form,
 				'model'=>$model,
 				'rack'=>$rack,
 				'rackDefault'=>$rackDefault,
-				'empty'=>!strlen($model->$layout)
+				'empty'=>!strlen($model->$layout??'')
 			]).'</div>',
 		]); ?>
 		<?= \app\components\CollapsableCardWidget::widget([
 			'openedTitle'=>'Расширенные настройки',
 			'closedTitle'=>'Расширенные настройки',
-			'initialCollapse'=>!strlen($model->$layout) || (is_object($rack) && $rack->isSimpleConfig),
+			'initialCollapse'=>!strlen($model->$layout??'') || (is_object($rack) && $rack->isSimpleConfig),
 			'content'=>'<div class="card-body">'.
 				\app\helpers\FieldsHelper::TextAutoresizeField($form,$model,$layout,['lines'=>4]).
 				Html::button('Предпросмотр',[
@@ -50,7 +50,7 @@ use yii\helpers\Html;
 	<div class="col-md-6 card p-2" >
 		<div class="card-title">Просмотр</div>
 		<div class="card-body" id="preview-<?= $layout ?>">
-			<?= strlen($model->$layout)?
+			<?= strlen($model->$layout??'')?
 				\app\components\RackWidget::widget(json_decode($model->$layout,true)):
 				Html::tag('div','Отсутствует конфигурация корзины',[
 					'class'=>'alert alert-striped'

@@ -515,7 +515,7 @@ class TechsController extends ArmsBaseController
 		
 		//проверяем передан ли uid
 		$uid=Yii::$app->request->get('uid',null);
-		if (strlen($uid)) {
+		if (strlen($uid??'')) {
 			if ($uid==='sign-all') { //специальная команда на подпись всего оборудования
 				//error_log('signing all');
 				$model->hwList->signAll();
@@ -625,7 +625,7 @@ class TechsController extends ArmsBaseController
 		$model = $this->findModel($id);
 		
 		//проверяем передан ли uid
-		if (strlen(Yii::$app->request->get('uid',null))) {
+		if (strlen(Yii::$app->request->get('uid',''))) {
 			$model->hwList->del(Yii::$app->request->get('uid'));
 			//сохраняем без проверки валидности, т.к. пользователь не может изменить данные
 			$model->save(false);

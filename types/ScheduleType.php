@@ -32,12 +32,14 @@ class ScheduleType extends BaseType
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * «-» (валидная запись «нерабочий день») - приглушённое «выходной»,
+	 * иначе интервалы как есть. Пустоту (не задано) обрабатывает
+	 * потребитель, рендер на пустом не вызывается.
 	 */
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
-		$value = $model->$attribute ?? null;
-		if ($value === '-' || $value === null) {
+		$value = $model->$attribute ?? '';
+		if ($value === '-') {
 			return '<span class="text-muted">выходной</span>';
 		}
 		return Html::encode((string)$value);

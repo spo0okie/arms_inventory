@@ -19,7 +19,7 @@ if (!isset($static_view)) $static_view=false;
 		'model'=>$model,
 	]) ?>
 </h1>
-<?= TextFieldWidget::widget(['model'=>$model,'field'=>'description']) ?>
+<?= \app\components\ModelFieldWidget::renderFieldValue($model,'description') ?>
 <?= ModelFieldWidget::widget(['model'=>$model,'field'=>'service']) ?>
 <?= ModelFieldWidget::widget(['model'=>$model,'field'=>'responsible']) ?>
 <?= ModelFieldWidget::widget(['model'=>$model,'field'=>'support']) ?>

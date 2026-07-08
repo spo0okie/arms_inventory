@@ -3,9 +3,6 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\models\base\ArmsModel;
-use yii\helpers\Html;
-use yii\web\View;
 
 class IntegerType extends BaseType
 {
@@ -17,12 +14,6 @@ class IntegerType extends BaseType
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
 		return $field->textInput();
-	}
-
-	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
-	{
-		$value = $model->$attribute ?? null;
-		return Html::encode((string)$value);
 	}
 
 	public function apiSchema(): array

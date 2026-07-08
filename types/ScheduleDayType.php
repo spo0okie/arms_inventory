@@ -45,16 +45,13 @@ class ScheduleDayType extends BaseType
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * Ключ дня недели - человекочитаемое имя (Пн..Вс/«по умолч.»),
+	 * дата/прочее - как есть. Пустоту обрабатывает потребитель,
+	 * рендер на пустом не вызывается.
 	 */
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
-		$value = $model->$attribute ?? null;
-
-		if ($value === null) {
-			return '<span class="text-muted">не задано</span>';
-		}
-
+		$value = $model->$attribute ?? '';
 
 		if (isset(static::$dayNames[$value])) {
 			return Html::encode(static::$dayNames[$value]);

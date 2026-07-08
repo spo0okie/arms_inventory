@@ -32,14 +32,13 @@ class ColorType extends BaseType
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * Валидный HEX-цвет - badge с контрастным текстом на фоне этого цвета,
+	 * невалидный - как есть. Пустоту обрабатывает потребитель
+	 * (show_empty/message_on_empty), рендер на пустом не вызывается.
 	 */
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
-		$value = $model->$attribute ?? null;
-		if ($value === null || $value === '') {
-			return '<span class="text-muted">—</span>';
-		}
+		$value = $model->$attribute ?? '';
 
 		// Валидация HEX цвета
 		if (preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $value)) {

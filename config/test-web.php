@@ -2,8 +2,10 @@
 
 namespace app\config;
 
-// Подавляем deprecated warnings для PHP 8.2 совместимости
-error_reporting(E_ALL & ~E_DEPRECATED);
+// Deprecated НЕ подавляем: тестовое окружение должно быть не мягче боевого,
+// иначе full/empty-сценарии PageAccessCest не ловят депрекейты (strlen(null)
+// и т.п.), которые на dev/prod роняют страницы в debug-режиме
+error_reporting(E_ALL);
 
 defined('YII_DEBUG') or define('YII_DEBUG', true);
 defined('YII_ENV_DEV') or define('YII_ENV_DEV', true);

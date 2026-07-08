@@ -10,9 +10,9 @@
 
 namespace app\components;
 
-use app\components\Forms\ActiveField;
 use app\helpers\ArrayHelper;
 use app\models\base\ArmsModel;
+use app\types\LinkType;
 use yii\base\Widget;
 use yii\helpers\Html;
 
@@ -29,11 +29,11 @@ class ModelFieldWidget extends Widget
 	public $model;
 	public $models;
 	public $field;				//поле модели, которое нам нужно
-	public $fieldType;			//тип поля (если нам надо переопределить или отрендерить как...)
 	public $title;				//заголовок поля
 	public $title_options=[];	//опции для рендера заголовка
 	public $show_archived;		//флаг отображения архивного элемента
 	public $item_options=[];	//опции для рендера элемента
+	public $card=true;			//завернуть в карточку (false вместе с title=false - режим "только значение")
 	public $card_options=['cardClass'=>'mb-3'];	//опции для рендера карточки
 	public $archived;			//признак того что весь список состоит из архивных элементов
 	public $lineBr=true;		//переносить строку между элементами
@@ -52,31 +52,24 @@ class ModelFieldWidget extends Widget
 	 * @return void
 	 */
 	public function loadModelData($model) {
-		if (!isset($this->fieldType) && is_object($this->model)
-			&& $this->model->hasMethod('getAttributeTypeClass')
-			&& !$this->model->attributeIsLink($this->field)
-			&& !isset($this->model->getAttributeData($this->field)['ref'])) {
-			//text -> wiki-render, urls -> список ссылок (обрабатываются ниже); тип берём из typeClass.
-			//Ссылки/ref/невыводимое идут generic-путём (как раньше 'link'/'string' проваливались сквозь switch).
-			try {
-				$this->fieldType=$this->model->getAttributeTypeClass($this->field)::name();
-			} catch (\Throwable $e) {}
+		//значение атрибута рендерит класс его типа; null - рендера нет (объектный путь/пусто)
+		$rendered=$this->typeRenderedValue($model);
+		if (is_array($rendered)) {
+			//список готовых элементов (например, ссылки UrlsType) - разделители расставит ListObjectsWidget
+			$this->data=array_merge($this->data,$rendered);
+			$this->raw_items=true;
+			return;
 		}
-		
-		switch ($this->fieldType) {
-			case 'text':
-				$this->data[]=TextFieldWidget::widget(['model'=>$model,'field'=>$this->field]);
-				$this->raw_items=true;
-				$this->lineBr=false;	//иначе вставленные в wiki-render элементы будут обрывать строку
-				return;
-			case 'urls':
-				$links=new UrlListWidget(['list'=>$model->links]);
-				$links->renderItems();
-				$this->data = array_merge($this->data,$links->rendered);
-				$this->raw_items=true;
-				return;
+		if ($rendered!==null) {
+			//готовый HTML значения целиком
+			$this->data[]=$rendered;
+			$this->raw_items=true;
+			$this->lineBr=false;	//иначе вставленные в wiki-render элементы будут обрывать строку
+			return;
 		}
-		
+
+		//объектный путь: ссылки/загрузчики/ref - объекты через renderItem
+		//(сюда же пустые значения и модели вне системы типов)
 		$field=$this->field;
 		if ($model->hasMethod('attributeIsLink') && $model->attributeIsLink($field)) {
 			$field=$model->attributeLinkLoader($field);
@@ -94,42 +87,122 @@ class ModelFieldWidget extends Widget
 	}
 	
 	/**
+	 * Значение атрибута в исполнении его типа (AttributeTypeInterface::renderOutput):
+	 * string - готовый HTML, array - список готовых элементов.
+	 * null - типового рендера не будет, дальше объектный/генерик путь:
+	 * ссылка/загрузчик (LinkType) или вычисляемый ref-атрибут (объекты
+	 * выводятся только через renderItem), пустое значение (подача пустоты -
+	 * show_empty/message_on_empty ListObjectsWidget, а не тип), составной
+	 * путь через связь, модель вне системы типов.
+	 * Ошибка описания атрибута (тип не резолвится) роняет рендер -
+	 * такие ошибки ищутся тестами страниц, виджет их не подавляет.
+	 * @param \app\models\base\ArmsModel $model
+	 * @return mixed
+	 */
+	private function typeRenderedValue($model) {
+		if (!is_object($this->model) || !$this->model->hasMethod('getAttributeTypeClass'))
+			return null;	//модель вне системы типов
+
+		if (str_contains($this->field,'.'))
+			return null;	//составной путь через связь: тип принадлежит другой модели, рендерим как есть
+
+		if (isset($this->model->getAttributeData($this->field)['ref']))
+			return null;	//вычисляемый объект-ссылка
+
+		$type=$this->model->getAttributeTypeClass($this->field);
+		if ($type instanceof LinkType) return null;	//ссылка/загрузчик
+
+		if (empty(ArrayHelper::getValue($model,$this->field)))
+			return null;	//пустое значение типом не рендерится
+
+		return $type->renderOutput($this->view,$model,$this->field);
+	}
+
+	/**
+	 * Подпись атрибута для карточки. Содержимое тултипа собирает единый
+	 * AttributeTooltip (ui-sources.md §0.1, режим view): смысл + источник
+	 * значения (наследуемые/вычисляемые, блок 1б) + переходы на встроенную
+	 * документацию. Подача единая: label чистый, тултип и pin-поведение
+	 * висят на иконке «?» в составе label (AttributeTooltip::icon);
+	 * options всегда пустые (оставлены для совместимости вызовов).
 	 * @param ArmsModel $model
 	 * @param string $field
-	 * @return array
+	 * @param mixed $view не используется (оставлен для совместимости вызовов)
+	 * @return array [label, options]
 	 */
-	public static function fieldTitle($model,$field,$view)
+	public static function fieldTitle($model,$field,$view=null)
 	{
-		$options=[];
-		$label=$model->getAttributeLabel($field);
-		$hint=$model->getAttributeHint($field);
-		
-		if ($model->attributeIsInheritable($field)) {
-			//если атрибут наследуемый, то дописываем явно задано значение или унаследовано
-			$inheritedFrom=$model->findRecursiveAttrNode($field);
-			$hint.='<br><strong>Наследуемый атрибут</strong>: ';
-			if (is_object($inheritedFrom)) {
-				if ($model->id===$inheritedFrom->id)
-					$hint.='значение задано явно';
-				else {
-					$hint.='унаследовано от '.$inheritedFrom->renderItem($view,['static_view'=>true]);
-				}
-			} else {
-				$hint.='не задан ни на одном из узлов ветви.';
-			}
-			
-		}
-		
-		if (!empty($hint)) {
-			$options=ActiveField::hintTipOptions($label,$hint);
-		}
-		return [$label,$options];
+		$tooltip=AttributeTooltip::build($model,$field,AttributeTooltip::MODE_VIEW);
+		if (!$tooltip) return [$model->getAttributeLabel($field),[]];
+		return [
+			$tooltip['title'].' '.AttributeTooltip::icon($tooltip),
+			[]
+		];
 	}
-	
-	public static function renderFieldTitle($model,$field,$view,$tag='h4')
+
+	public static function renderFieldTitle($model,$field,$view=null,$tag='h4')
 	{
 		[$title,$options]=static::fieldTitle($model,$field,$view);
 		return Html::tag($tag,$title,$options);
+	}
+
+	/**
+	 * Только значение атрибута - без подписи и карточки, для инлайн-мест
+	 * свободной вёрстки. Типовая логика рендера (text/urls/списки объектов)
+	 * та же, что у полной подачи: атрибут в карточке всегда рендерится
+	 * этим виджетом (правило unification.md), прямые вызовы
+	 * TextFieldWidget/UrlListWidget из вьюх не пишутся.
+	 * @param ArmsModel $model
+	 * @param string    $field
+	 * @param array     $config переопределения конфига виджета
+	 * @return string
+	 */
+	public static function renderFieldValue($model,$field,$config=[])
+	{
+		return static::widget(array_merge([
+			'model'=>$model,
+			'field'=>$field,
+			'title'=>false,
+			'card'=>false,
+		],$config));
+	}
+
+	/**
+	 * Компактная строка «подпись: значение» для свободной вёрстки карточек.
+	 * Пустое значение даёт пустую строку (подпись без значения не выводится),
+	 * поэтому строки удобно собирать через implode('<br />',array_filter([...])).
+	 * @param ArmsModel $model
+	 * @param string    $field
+	 * @param array     $config переопределения конфига виджета значения
+	 * @param string    $tag    тег подписи
+	 * @return string
+	 */
+	public static function renderFieldRow($model,$field,$config=[],$tag='span')
+	{
+		$value=static::renderFieldValue($model,$field,$config);
+		if (!strlen($value)) return '';
+		return static::renderFieldTitle($model,$field,null,$tag).': '.$value;
+	}
+
+	/**
+	 * Конфиг строки yii\widgets\DetailView: подпись и тултип атрибута
+	 * от единого сборщика (см. fieldTitle). Табличная подача DetailView
+	 * сохраняется, источник подписи - тот же, что у всех output-атрибутов.
+	 * Использование:
+	 *   'attributes'=>[ ModelFieldWidget::detailAttribute($model,'code'), ... ]
+	 * @param ArmsModel $model
+	 * @param string    $attr   атрибут, допустим формат DetailView 'attr:format'
+	 * @param array     $config переопределения конфига строки
+	 * @return array
+	 */
+	public static function detailAttribute($model,$attr,$config=[])
+	{
+		[$label,$options]=static::fieldTitle($model,explode(':',$attr)[0]);
+		return array_merge([
+			'attribute'=>$attr,
+			'label'=>$label,
+			'captionOptions'=>$options,
+		],$config);
 	}
 	
 	public function init(){
@@ -156,6 +229,7 @@ class ModelFieldWidget extends Widget
 			'title'=>$this->title,
 			'title_options'=>$this->title_options,
 			'item_options'=>$this->item_options,
+			'card'=>$this->card,
 			'card_options'=>$this->card_options,
 			'archived'=>$this->archived,
 			'lineBr'=>$this->lineBr,

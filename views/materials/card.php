@@ -36,7 +36,7 @@ if (!isset($hide_places)) $hide_places=false;
 		]) ?>
 	</h1>
 
-	<p>	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?> </p>
+	<p>	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?> </p>
 	<p>
 		<strong>Поступило</strong> <?= $model->date?> <b><?= $model->count?><?= $model->type->units?></b>
 		<?php if ($static_view) { ?>

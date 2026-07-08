@@ -4,7 +4,7 @@ namespace app\modules\schedules\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use yii\helpers\StringHelper;
+use app\helpers\StringHelper;
 
 /**
  * SchedulesSearch represents the model behind the search form of `\app\modules\schedules\models\Schedules`.

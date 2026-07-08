@@ -238,6 +238,8 @@ class Schedules extends \app\models\base\ArmsModel
 			'aceDepartments' => [
 				'Подразделения', //для ACLs
 				'indexHint' => 'Подразделения, в которые входят сотрудники, которым предоставлен доступ.',
+				//read-only вычисляемая ссылка (категория C): только вывод
+				'ref'=>\app\models\OrgStruct::class, 'refMulti'=>true,
 				'join'=>['acls.aces.users.orgStruct'],
 			],
 			'acePartners' => [
@@ -246,6 +248,8 @@ class Schedules extends \app\models\base\ArmsModel
 				'indexHint' => 'Контрагенты, которым предоставляется доступ<br>'.
 					'(определяются на основании трудоустройства пользователей, которым предоставлен доступ).<br>'.
 					'Искать можно как по юр. названию, так и по названию бренда',
+				//read-only вычисляемая ссылка (категория C): только вывод
+				'ref'=>\app\models\Partners::class, 'refMulti'=>true,
 				'join'=>['acls.aces.users.org'],
 			],
 			'aclSites' => [
@@ -261,6 +265,8 @@ class Schedules extends \app\models\base\ArmsModel
 					.'<li>Для IP адресов - сегмент сети (если есть такая сеть)</li>'
 					.'<li>Для оборудования и ОС - сегмент IP адреса(ов)</li>'
 				.'</ul>',
+				//read-only вычисляемая ссылка (категория C): только вывод
+				'ref'=>\app\models\Segments::class, 'refMulti'=>true,
 				//join просто огромный, и search не сделать
 			],
 			'acls' => [

@@ -178,4 +178,97 @@ class DocsHelperTest extends Unit
 		$this->assertEquals('Локальная страница', $byPath['models/local-only.md']);
 		$this->assertCount(3, $pages);
 	}
+
+	/** MD-текст модельной страницы для тестов секций */
+	const SECTIONED_MD = "# Заголовок\n\nпреамбула первая\n\nпреамбула [сосед](other.md)\n\n"
+		."## Список\n\nтело списка\n\n### Подраздел списка\n\nвнутри подраздела\n\n"
+		."## Просмотр\n\nтело просмотра";
+
+	/**
+	 * Выделение фрагментов: преамбула без H1, секция с H3 внутри,
+	 * последняя секция файла, отсутствующая секция.
+	 */
+	public function testExtractSection()
+	{
+		//преамбула: H1 отброшен, до первого H2
+		$preamble = DocsHelper::extractSection(static::SECTIONED_MD, null);
+		$this->assertStringContainsString('преамбула первая', $preamble);
+		$this->assertStringNotContainsString('Заголовок', $preamble);
+		$this->assertStringNotContainsString('тело списка', $preamble);
+
+		//секция с H3-подразделом внутри (H3 - не граница)
+		$list = DocsHelper::extractSection(static::SECTIONED_MD, 'Список');
+		$this->assertStringContainsString('тело списка', $list);
+		$this->assertStringContainsString('внутри подраздела', $list);
+		$this->assertStringNotContainsString('тело просмотра', $list);
+		$this->assertStringNotContainsString('## Список', $list);
+
+		//последняя секция файла
+		$view = DocsHelper::extractSection(static::SECTIONED_MD, 'Просмотр');
+		$this->assertStringContainsString('тело просмотра', $view);
+		$this->assertStringNotContainsString('тело списка', $view);
+
+		//отсутствующая секция
+		$this->assertEquals('', DocsHelper::extractSection(static::SECTIONED_MD, 'Удаление'));
+	}
+
+	/**
+	 * renderSection: markdown в HTML, ссылки на MD - модалками
+	 * (класс open-in-modal-form), отсутствующая секция - пустая строка.
+	 */
+	public function testRenderSection()
+	{
+		$file = $this->baseRoot . '/models/sectioned.md';
+		file_put_contents($file, static::SECTIONED_MD);
+
+		$preamble = DocsHelper::renderSection($file, 'models/sectioned.md', null);
+		$this->assertStringContainsString('преамбула первая', $preamble);
+		$this->assertStringContainsString('open-in-modal-form', $preamble);
+		$this->assertStringContainsString('models%2Fother.md', urlencode(urldecode($preamble)));
+
+		$this->assertEquals('', DocsHelper::renderSection($file, 'models/sectioned.md', 'Удаление'));
+	}
+
+	/**
+	 * Сторож mermaid: fenced-блок ```mermaid должен доезжать до
+	 * <code class="mermaid"> в HTML (mermaid-init.js цепляется за него).
+	 * Ловит молчаливую поломку при апгрейде markdown-парсера.
+	 */
+	public function testMermaidFencedBlockSurvives()
+	{
+		$file = $this->baseRoot . '/models/diagram.md';
+		file_put_contents($file, "# T\n\nтекст\n\n```mermaid\ngraph TD\n  A-->B\n```\n");
+
+		$html = DocsHelper::renderSection($file, 'models/diagram.md', null);
+		$this->assertStringContainsString('code class="mermaid"', $html);
+		$this->assertStringContainsString('graph TD', $html);
+	}
+
+	/**
+	 * Кэш рендера: инвалидация по filemtime.
+	 */
+	public function testRenderSectionCache()
+	{
+		$file = $this->baseRoot . '/models/cached.md';
+		file_put_contents($file, "# T\n\nстарый текст\n");
+		touch($file, time() - 10);
+		clearstatcache();
+
+		$this->assertStringContainsString('старый текст',
+			DocsHelper::renderSection($file, 'models/cached.md', null));
+
+		//то же содержимое+mtime - из кэша (подменяем файл, mtime сохраняем)
+		$mtime = filemtime($file);
+		file_put_contents($file, "# T\n\nновый текст\n");
+		touch($file, $mtime);
+		clearstatcache();
+		$this->assertStringContainsString('старый текст',
+			DocsHelper::renderSection($file, 'models/cached.md', null));
+
+		//новый mtime - кэш инвалидирован
+		touch($file, $mtime + 5);
+		clearstatcache();
+		$this->assertStringContainsString('новый текст',
+			DocsHelper::renderSection($file, 'models/cached.md', null));
+	}
 }

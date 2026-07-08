@@ -42,6 +42,6 @@ if (count($model->children)) {
 	echo '</ul>';
 }
 
-if (strlen($model->notepad)) {
-	echo '<p>'.TextFieldWidget::widget(['model'=>$model,'field'=>'notepad']).'</p>';
+if (strlen($model->notepad??'')) {
+	echo '<p>'.\app\components\ModelFieldWidget::renderFieldValue($model,'notepad').'</p>';
 }

@@ -45,6 +45,6 @@ $deleteable=!count($arms);
 	<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
 
 	<h4>Комментарий:</h4>
-	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
+	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 
 

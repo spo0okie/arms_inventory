@@ -14,13 +14,13 @@ use app\components\LinkObjectWidget;
 			'hideUndeletable'=>false
 		]) ?>
 	</h1>
-	<p class="mb-3"><?= $model->code ?></p>
+	<p class="mb-3"><?= \app\components\ModelFieldWidget::renderFieldValue($model,'code') ?></p>
 </div>
 
 <div class="p-0">
 	<h4><?= $model->getAttributeLabel('description') ?></h4>
 	<p>
-		<?= Yii::$app->formatter->asNtext($model->description) ?>
+		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'description') ?>
 	</p>
 </div>
 </div>

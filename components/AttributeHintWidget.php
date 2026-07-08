@@ -1,9 +1,7 @@
 <?php
 namespace app\components;
 
-use app\helpers\FieldsHelper;
 use yii\base\Widget;
-use yii\helpers\Html;
 use yii\helpers\Inflector;
 
 /**
@@ -31,13 +29,11 @@ class AttributeHintWidget extends Widget
 
 	public function run()
 	{
-		//если у нас есть тултип, то возвращаем label с ним
+		//если тултип есть - подача единая: иконка «?» рядом с чистым label,
+		//тултип и pin-поведение висят на иконке (AttributeTooltip::icon)
 		if (!empty($this->hint)) {
-			return Html::tag(
-				'span',
-				$this->label,
-				FieldsHelper::toolTipOptions($this->label,$this->hint)
-			);
+			return $this->label.' '
+				.AttributeTooltip::icon(['title'=>$this->label,'body'=>$this->hint]);
 		}
 
 		return $this->label;

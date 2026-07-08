@@ -224,6 +224,8 @@ class Users extends ArmsModel implements IdentityInterface
 			'acls' => [
 				'Доступ к',
 				'indexHint'=>'К каким ресурсам пользователю предоставлен доступ',
+				//read-only вычисляемая ссылка (категория C): только вывод
+				'ref'=>\app\models\Acls::class, 'refMulti'=>true,
 				'join'=>[
 					'aces.acl.schedule',
 					'aces.acl.comp.sandbox',
@@ -273,8 +275,14 @@ class Users extends ArmsModel implements IdentityInterface
 			'lics'=>[
 				'Лицензии',
 				'indexHint'=>'Назначенные пользователю лицензии',
+				//read-only вычисляемая ссылка (категория C): гетерогенный список
+				//лицензий (LicGroups/LicItems/LicKeys), потому базовый класс
+				'ref'=>\app\models\base\ArmsModel::class, 'refMulti'=>true,
 				'join'=>['licItems','licGroups','licKeys'],
 			],
+			//read-only вычисляемые ссылки (категория C): только вывод
+			'compsFromTechs' => ['ref'=>\app\models\Comps::class, 'refMulti'=>true],
+			'compsTotal' => ['ref'=>\app\models\Comps::class, 'refMulti'=>true],
 			'Login' => [
 				'Логин (AD)',
 				'hint'=>'Учётная запись пользователя в домене/AD',
@@ -341,6 +349,8 @@ class Users extends ArmsModel implements IdentityInterface
 			'scheduledAccess'=> [
 				'Вр. доcтупы',
 				'indexHint' => 'Предоставленные пользователю временные доступы',
+				//read-only вычисляемая ссылка (категория C): только вывод
+				'ref'=>\app\modules\schedules\models\Schedules::class, 'refMulti'=>true,
 				'join' => 'scheduledAccess'
 			],
 			'shortName' => [

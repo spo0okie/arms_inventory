@@ -32,6 +32,6 @@ if (!isset($static_view)) $static_view=false;
 	</div>
 <?php
 	echo ModelFieldWidget::widget(['model'=>$model,'field'=>'suffix']);
-	echo TextFieldWidget::widget(['model'=>$model,'field'=>'notepad']);
+	echo \app\components\ModelFieldWidget::renderFieldValue($model,'notepad');
 	echo ModelFieldWidget::widget(['model'=>$model,'field'=>'links']);
 

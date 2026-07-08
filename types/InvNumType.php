@@ -3,9 +3,6 @@
 namespace app\types;
 
 use app\generation\context\AttributeContext;
-use app\models\base\ArmsModel;
-use yii\helpers\Html;
-use yii\web\View;
 
 /**
  * Тип для хранения инвентарного номера.
@@ -41,18 +38,6 @@ class InvNumType extends BaseType
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
 		return $field->textInput();
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
-	{
-		$value = $model->$attribute ?? null;
-		if ($value === null) {
-			return '<span class="text-muted">—</span>';
-		}
-		return Html::encode((string)$value);
 	}
 
 	/**

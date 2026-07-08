@@ -4,7 +4,7 @@ namespace app\models;
 
 use app\models\base\ArmsModel;
 use yii\db\ActiveRecord;
-use yii\helpers\StringHelper;
+use app\helpers\StringHelper;
 use yii\web\UploadedFile;
 
 /**

@@ -1,23 +1,18 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
+use app\components\ItemObjectWidget;
 
 /** @var yii\web\View $this */
 /** @var app\models\Attaches $model */
 
 if (!isset($static_view)) $static_view = false;
 
-?>
-<span class="attaches-item">
-	<?= Html::a(
-		'<i class="fas fa-file-download"></i> '.$model->name,
-		$model->fullFname,[
-		'target'=>'_blank'
-	]) ?>
-	<?=	\app\components\DeleteObjectWidget::widget([
-		'model'=>$model,
-		'confirmMessage'=>'Удалить приложенный файл? (действие необратимо)'
-	])?>
-</span>
-
+echo ItemObjectWidget::widget([
+	'model'=>$model,
+	'url'=>$model->fullFname,
+	'hrefOptions'=>['target'=>'_blank'],
+	'namePrefix'=>'<i class="fas fa-file-download"></i> ',
+	'noUpdate'=>true,
+	'static'=>$static_view,
+	'confirmMessage'=>'Удалить приложенный файл? (действие необратимо)',
+]);

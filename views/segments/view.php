@@ -23,8 +23,8 @@ $this->params['breadcrumbs'][] = ['label' => Segments::$titles, 'url' => ['index
 $this->params['breadcrumbs'][] = $this->title;
 YiiAsset::register($this);
 
-$segmentRender=Markdown::convert($model->history);
-$segmentLines=count(explode("\n",trim($model->history)));
+$segmentRender=Markdown::convert($model->history??'');
+$segmentLines=count(explode("\n",trim($model->history??'')));
 $segmentCompact=$segmentLines<=Yii::$app->params['networkInlineDescriptionLimit'];
 
 
@@ -56,7 +56,7 @@ if ($model->history && !$segmentCompact) {
 	$tabs[]=[
 		'label'=>'Подробное описание',
 		'id'=>'description',
-		'content'=> Markdown::convert($model->history),
+		'content'=> Markdown::convert($model->history??''),
 	];
 }
 

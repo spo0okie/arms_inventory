@@ -8,40 +8,23 @@
 
 namespace app\components;
 
-use app\assets\DokuWikiAsset;
-use app\components\Forms\ActiveField;
-use app\helpers\StringHelper;
-use app\helpers\WikiHelper;
-use kartik\markdown\Markdown;
-use Yii;
+use app\types\TextType;
 use yii\base\Widget;
-use yii\helpers\Html;
 
 class TextFieldWidget extends Widget
 {
 	public $model;
 	public $field;
 	public $outerClass='';
-	
+
 	public function run()
 	{
-		switch (ActiveField::textFieldType(get_class($this->model),$this->field)) {
-			case 'markdown':
-				return Markdown::convert($this->model->{$this->field});
-			case 'dokuwiki':
-				return WikiTextWidget::widget([
-					'model'=>$this->model,
-					'field'=>$this->field,
-					'outerClass'=>$this->outerClass
-				]);
-			default:
-				return $this->outerClass?
-					Html::tag(
-						'div',
-						Yii::$app->formatter->asNtext($this->model->{$this->field}),
-						['class'=>$this->outerClass]
-					):
-					Yii::$app->formatter->asNtext($this->model->{$this->field});
-		}
+		//логика выбора рендера (ntext/markdown/dokuwiki) живёт в типе text
+		return (new TextType())->renderOutput(
+			$this->view,
+			$this->model,
+			$this->field,
+			['outerClass'=>$this->outerClass]
+		);
 	}
 }

@@ -16,4 +16,4 @@ use app\components\TextFieldWidget;
 		'undeletableMessage'=>'Нельзя удалить это подразделение, т.к. есть привязанные к нему объекты',
 	]) ?>
 </h1>
-<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
+<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>

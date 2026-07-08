@@ -73,6 +73,13 @@ class DynaGridWidget extends DynaGrid
 	 */
 	public $filterModel;
 	public $model;
+
+	/**
+	 * @var bool инфоблок документации сущности (DocsPanelWidget) над таблицей.
+	 * Рендерится только на index-действии (на карточках у грида чужая сущность)
+	 * и только если у сущности есть MD-страница с непустыми преамбулой/«Список».
+	 */
+	public $docsPanel=true;
 	
 	public $visibleColumns;
 	
@@ -172,7 +179,16 @@ class DynaGridWidget extends DynaGrid
 			} elseif (count($models=$this->dataProvider->getModels())) {
 				$this->model=reset($models);
 			}
-			
+
+		}
+
+		//инфоблок документации сущности над таблицей (plans/help-inline.md):
+		//только на index (на карточках грид - чужая сущность); пустой не рендерится
+		if ($this->docsPanel
+			&& $this->model instanceof ArmsModel
+			&& (Yii::$app->controller->action->id??null)==='index'
+		) {
+			echo DocsPanelWidget::widget(['model'=>$this->model]);
 		}
 		
 		//переопределяем рендер конфига на наш кастомный в котором можно передать кастомный путь для формы

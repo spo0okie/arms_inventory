@@ -9,7 +9,7 @@ use kartik\markdown\Markdown;
 
 if (is_object($model)) {
 //разбиваем строку телефонов запятыми
-	$phones=\yii\helpers\StringHelper::explode($model->Phone,',',true,true);
+	$phones=\app\helpers\StringHelper::explode($model->Phone,',',true,true);
 //проверяем привязанное к пользователю оборудование
 	foreach ($model->techs as $tech) {
 		//если это телефон с указанным внутренним номером

@@ -373,7 +373,7 @@ class CompsController extends ArmsBaseController
 
 		//проверяем передан ли a
 		$strItems=Yii::$app->request->get('items',null);
-		if (strlen($strItems)) {
+		if (strlen($strItems??'')) {
 			if ($strItems==='sign-all') {
 				$items=array_keys($model->swList->getAgreed());
 			} else
@@ -434,7 +434,7 @@ class CompsController extends ArmsBaseController
 
         //проверяем передан ли a
         $strItems=Yii::$app->request->get('items',null);
-        if (strlen($strItems)) {
+        if (strlen($strItems??'')) {
             if (is_array($items=explode(',',$strItems))){
                 $model->soft_ids=array_diff($model->soft_ids,$items);
                 $model->silentSave();

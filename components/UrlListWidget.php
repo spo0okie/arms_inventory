@@ -72,7 +72,7 @@ class UrlListWidget extends Widget
 		if (isset($this->parsed)) return;
 		$this->parsed=[];
 		
-		$items=explode("\n",$this->list);
+		$items=explode("\n",$this->list??'');
 		foreach ($items as $item) {
 			$item=trim($item);
 			if (!strlen($item)) continue;

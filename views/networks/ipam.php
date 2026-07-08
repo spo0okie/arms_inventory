@@ -149,9 +149,9 @@ $this->registerJs(<<<JS
 		const viewportBottom = window.innerHeight;
 		
 		document.querySelectorAll('.ipam-column').forEach((column, index) => {
-            //console.log(column.dataset.column??0,${minPrefix}-2);
+            //console.log(column.dataset.column??0,{$minPrefix}-2);
             const prefix=column.dataset.column??32
-			if (prefix<Math.min(${minPrefix}-2, ${maxPrefix}+9)) {
+			if (prefix<Math.min({$minPrefix}-2, {$maxPrefix}+9)) {
 				const columnRect = column.getBoundingClientRect();
 				const cells = column.querySelectorAll('.ipam-cell');
 				let activeFoundTop = false;

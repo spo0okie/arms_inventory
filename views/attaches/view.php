@@ -1,5 +1,6 @@
 <?php
 
+use app\components\ModelFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -28,19 +29,22 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= DetailView::widget([
         'model' => $model,
-        'attributes' => [
-            'id',
-            'techs_id',
-            'services_id',
-            'lic_types_id',
-            'lic_groups_id',
-            'lic_items_id',
-            'lic_keys_id',
-            'contracts_id',
-            'places_id',
-            'schedules_id',
-            'filename',
-        ],
+        'attributes' => array_map(
+            fn($attr)=>ModelFieldWidget::detailAttribute($model,$attr),
+            [
+                'id',
+                'techs_id',
+                'services_id',
+                'lic_types_id',
+                'lic_groups_id',
+                'lic_items_id',
+                'lic_keys_id',
+                'contracts_id',
+                'places_id',
+                'schedules_id',
+                'filename',
+            ]
+        ),
     ]) ?>
 
 </div>

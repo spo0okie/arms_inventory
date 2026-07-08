@@ -4,6 +4,7 @@
 /* @var $model app\models\Users */
 
 use app\components\ListObjectsWidget;
+use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Users;
 use app\components\widgets\page\ModelWidget;
@@ -18,7 +19,8 @@ Url::remember();
 $static_view=false;
 
 $services=$model->services;
-$comps=count($services)?$model->compsTotal:$model->comps;
+//если сотрудник отвечает за сервисы, показываем и ОС этих сервисов (compsTotal)
+$compsField=count($services)?'compsTotal':'comps';
 if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived',false);
 
 ?>
@@ -39,56 +41,56 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			<br/>
 			<?php
 			
-			echo ListObjectsWidget::widget([
-				'models' => $model->services,
+			echo ModelFieldWidget::widget([
+				'model' => $model, 'field' => 'services',
 				'title' => 'Ответственный за сервисы:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
 
-			echo ListObjectsWidget::widget([
-				'models' => $model->infrastructureServices,
+			echo ModelFieldWidget::widget([
+				'model' => $model, 'field' => 'infrastructureServices',
 				'title' => 'Ответственный за инфраструктуру:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
 			
-			echo ListObjectsWidget::widget([
-				'models' => $comps,
+			echo ModelFieldWidget::widget([
+				'model' => $model, 'field' => $compsField,
 				'title' => 'Ответственный за ОС:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
 			
-			echo ListObjectsWidget::widget([
-				'models' => $model->adminComps,
+			echo ModelFieldWidget::widget([
+				'model' => $model, 'field' => 'adminComps',
 				'title' => 'Выданы полномочия администратора:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
 			
-			echo ListObjectsWidget::widget([
-				'models' => $model->techsHead,
+			echo ModelFieldWidget::widget([
+				'model' => $model, 'field' => 'techsHead',
 				'title' => 'АРМ/оборудование числящиеся за подчиненными:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
 			
-			echo ListObjectsWidget::widget([
-				'models' => $model->techsIt,
+			echo ModelFieldWidget::widget([
+				'model' => $model, 'field' => 'techsIt',
 				'title' => 'Обслуживаемое сотрудником оборудование:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
 			
-			echo ListObjectsWidget::widget([
-				'models' => $model->techsResponsible,
+			echo ModelFieldWidget::widget([
+				'model' => $model, 'field' => 'techsResponsible',
 				'title' => 'АРМ/оборудование в ответственности:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
@@ -111,8 +113,8 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'lineBr'=> true,
 			]);
 			
-			echo ListObjectsWidget::widget([
-				'models' => $model->contracts,
+			echo ModelFieldWidget::widget([
+				'model' => $model, 'field' => 'contracts',
 				'title' => 'Документы:',
 				'item_options' => ['static_view' => $static_view, 'user'=>false ],
 				'card_options' => ['cardClass' => 'mb-3'],

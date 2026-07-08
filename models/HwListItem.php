@@ -104,7 +104,7 @@ class HwListItem
      * Элемент подписывается (вносится в паспорт)
      */
     public function sign() {
-        if(!strlen($this->uid)) $this->uid=uniqid();
+        if(!strlen($this->uid??'')) $this->uid=uniqid();
     }
 
     /**
@@ -114,17 +114,17 @@ class HwListItem
     public function toSave() {
         $item=(array)$this;
         unset($item['found']); //это поле нельзя сохранять
-        if (!strlen($item['uid'])) $item['uid']=uniqid(); //а это должно быть обязательно
+        if (!strlen($item['uid']??'')) $item['uid']=uniqid(); //а это должно быть обязательно
         return $item;
     }
 
     public function getName() {
-        if (strlen($this->manual_name)) return $this->manual_name;
+        if (strlen($this->manual_name??'')) return $this->manual_name;
         return $this->product;
     }
 
     public function getSN() {
-        if (strlen($this->manual_sn)) return $this->manual_sn;
+        if (strlen($this->manual_sn??'')) return $this->manual_sn;
         return $this->sn;
     }
 
@@ -167,7 +167,7 @@ class HwListItem
 			        break;
 	        }
         } else {
-	        foreach ($item as $idx=>$val) $item[$idx]=trim($val);
+	        foreach ($item as $idx=>$val) $item[$idx]=trim($val??'');
 	        switch ($this->type) {
 				case static::$TYPE_CPU :
 					/*
@@ -214,7 +214,7 @@ class HwListItem
 	                $this->title = 'Модуль памяти';
 	                $this->manufacturer = $item['manufacturer'];
 		            $this->product = $item['capacity'] . 'MiB';
-		            $this->capacity = (int)trim($item['capacity']);
+		            $this->capacity = (int)trim($item['capacity']??'');
 	                $this->sn = '';
 	                break;
 	            case static::$TYPE_HDD :
@@ -226,7 +226,7 @@ class HwListItem
 	                $this->title = 'Накопитель';
 	                $this->manufacturer = explode(' ', $item['model'])[0];
 	                $this->product = $item['model'] . ' ' . $item['size'] . 'GB';
-		            $this->capacity = (int)trim($item['size']);
+		            $this->capacity = (int)trim($item['size']??'');
 	                $this->sn = isset($item['serial'])?$item['serial']:'';
 	                break;
 	            case static::$TYPE_VIDEOCARD :

@@ -37,7 +37,7 @@
 - **Авто‑resize текстовых полей** — `ActiveField::textAutoresize()` + `TextAutoResizeWidget`. Файл: `components/formInputs/TextAutoResizeWidget.php`.  
   Оценка применения: ~30% форм (14 из 46 `*_form.php`).  
   `ASSUMPTION`: применимо только к длинным/многострочным полям.
-- **Подсказки в label** — `ActiveField::classicHint()` и `hintTipOptions()` для tooltip.  
+- **Подсказки в label** — `ActiveField::classicHint()` (текст под полем) и иконка «?» c тултипом (`AttributeTooltip::icon()`, см. правило «подсказка атрибута — иконка (?)» ниже).  
   Оценка применения: ~17% форм (8 из 46 `*_form.php` используют `classicHint`).  
   `ASSUMPTION`: остальное подтягивается из метаданных `attributeData()` и поэтому не обязательно явно в формах.
 - **Rich‑text/Wiki поля** — `DokuWikiEditor`, `MarkdownEditor`. Файлы: `components/formInputs/DokuWikiEditor.php`, зависимости Kartik Markdown.  
@@ -78,6 +78,69 @@
   - `WikiPageWidget` — вывод Wiki‑страницы. Использовать для вики‑контента.
   - `WikiTextWidget` — рендер Wiki‑разметки. Использовать для текстов с wiki‑синтаксисом.
   - `LinkObjectWidget`/`ListObjectsWidget`/`ItemObjectWidget` — базовый набор для связей и карточек, использовать везде где выводятся объекты‑ссылки.
+
+  **Правило «имя объекта — всегда renderItem»:** везде, где выводится
+  имя-ссылка объекта (элементы списков, ссылки внутри тултипов, аннотация
+  наследования в блоке 1б, item.php моделей), рендер идёт одной цепочкой
+  `$model->renderItem()` → `ModelWidget(view='item')` → `item.php` →
+  `ItemObjectWidget`(`LinkObjectWidget`). Ручные `Html::a` на карточку
+  объекта не пишутся: LinkObjectWidget даёт samePage-механику (на страницах
+  `/view` и `/ttip` самого объекта ссылка не рендерится — в т.ч. это
+  снимает проблему «тултип из тултипа»), единое имя, архивную пометку
+  и объектный тултип.
+  Текущее состояние: все item.php, рендерящие ArmsModel, приведены к правилу
+  (в т.ч. acls, attaches, contracts, materials-usages, org-struct, tech-states).
+  Исключения (item.php, которые рендерят не ArmsModel-объект и потому не могут
+  идти через Item/LinkObjectWidget):
+  - `views/hwlist/item.php` — рендерит `HwListItem` (строка паспорта железа,
+    не ArmsModel, своей карточки/view-страницы нет); это `<tr>` таблицы паспорта
+    с кастомной механикой (edithw/rmhw/updhw, `return=previous`).
+  - `views/swlist/item.php` — рендерит элемент массива `$item` (строка списка ПО,
+    не модель); объекты внутри (Soft, Manufacturers) уже выводятся через
+    `ModelWidget` → их item.php, т.е. по правилу.
+  - `views/soft-hits/item.php` — рендерит массив строк `$items`
+    (plain-text выдача совпадений), объектов-ссылок нет вообще.
+
+  **Правило «атрибут — всегда ModelFieldWidget»** (симметрично правилу
+  renderItem): атрибут модели в карточках (view/card/header) рендерится
+  только через `ModelFieldWidget`:
+  - пара «подпись + значение» → `ModelFieldWidget::widget()` (полная
+    подача: h4-заголовок с тултипом + значение/список);
+  - только подпись (значение свёрстано рядом) →
+    `ModelFieldWidget::renderFieldTitle()`;
+  - только значение (инлайн-место свободной вёрстки) →
+    `ModelFieldWidget::renderFieldValue()` (title=false + card=false,
+    типовая логика та же);
+  - строка `yii\widgets\DetailView` → `ModelFieldWidget::detailAttribute()`.
+  Прямые вызовы `TextFieldWidget`/`UrlListWidget`/`ListObjectsWidget` из
+  вьюх и голый вывод (`Html::encode($model->attr)`, `<?= $model->attr ?>`)
+  не пишутся — виджет резолвит typeClass сам и остаётся единственной
+  точкой подключения `renderOutput()` типов (см. план «attributeData =
+  SSOT»). Подпись и тултип при этом собирает единый `AttributeTooltip`
+  (ui-sources.md §0.1, режим view) — смысл + источник значения + переходы
+  на документацию.
+  Исключения: grid-колонки (свой унифицированный путь
+  `DefaultColumn`+`AttributeTooltip`), ttip-вьюхи (тултипы в тултипе
+  не нужны), композиции, не являющиеся выводом атрибута.
+  Текущее состояние: прямые вызовы из вьюх — TextFieldWidget ×37,
+  ListObjectsWidget ×12, UrlListWidget ×1 — сводятся к правилу
+  постраничным аудитом больших карточек (plans/view-hints.md, этап 4в).
+
+  **Правило «подсказка атрибута — иконка (?)»** (симметрично renderItem
+  и ModelFieldWidget): тултип подсказки атрибута — в форме (label поля),
+  в заголовке grid/search-колонки, в подписи карточки/DetailView — не
+  вешается на label. Рядом с чистым label рендерится иконка «?», и тултип
+  вместе с pin-поведением (клик приколачивает тултип, повторный клик
+  отпускает; статусы цветом — default/hover/pinned) висит только на ней.
+  Иконку рендерит единственная точка — `AttributeTooltip::icon()`
+  (заготовка для динамического JS-контента — `iconTemplate()`); контент
+  собирает `AttributeTooltip::build()` (ui-sources.md §0.1, там же канон
+  разметки иконки), вернул `null` — иконки нет. Ручная разметка
+  тултип-опций на label (`toolTipOptions()` на span/label) для подсказок
+  атрибутов не пишется. Исключения: иконка помощи страницы
+  (`HintIconWidget`) — у неё клик открывает документацию, pin не
+  применяется; объектные тултипы (`qtip_ajxhrf`, мини-карточки) — это
+  тултипы объекта, не подсказки атрибута.
 - **DynaGrid + кастомные колонки** — стандарт табличных списков. Файлы: `components/DynaGridWidget.php`, `components/gridColumns/*.php`.  
   Оценка применения: ~64% (23 из 36 `views/**/index.php` содержат `DynaGridWidget`).  
   `ASSUMPTION`: часть `index.php` (например `views/site/index.php` или узкоспециализированные) может быть исключением.

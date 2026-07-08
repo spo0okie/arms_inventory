@@ -10,7 +10,7 @@ use yii\base\InvalidConfigException;
 use yii\bootstrap5\Html;
 use yii\db\ActiveQuery;
 use yii\db\Query;
-use yii\helpers\StringHelper;
+use app\helpers\StringHelper;
 
 /**
  * This is the model class for table "soft".

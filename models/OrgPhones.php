@@ -109,6 +109,8 @@ class OrgPhones extends ArmsModel
 				'type'=>'text',
 				'typeClass' => \app\types\TextType::class,
 			],
+			//вычисляемый вариант comment без строки-заголовка - метаданные те же
+			'untitledComment' => ['alias'=>'comment'],
 			'archived' => [
 				'Архивирован',
 				'hint'=>'Если номер уже не используется, лучше его заархивировать.<br /> Он останется в БД для истории, но не будет попадаться на глаза, если явно не попросить',

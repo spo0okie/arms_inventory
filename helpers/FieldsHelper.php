@@ -20,9 +20,7 @@ use yii\web\JsExpression;
 
 class FieldsHelper
 {
-	
-	public const labelHintIcon='<i class="far fa-question-circle"></i>';
-	
+
 	/**
 	 * Формирует поля для options=>[] для всплывающей подсказки у label
 	 * @param string $title
@@ -87,12 +85,13 @@ class FieldsHelper
 		$hint=static::cutSingleOption($options,'hint');
 		if (empty($label)) $label=$model->getAttributeLabel($attr);
 		if (!$label) return null;
-		//тултип собирает единый сборщик (ui-sources.md §0.1)
+		//тултип собирает единый сборщик (ui-sources.md §0.1),
+		//подача - иконка «?» рядом с label (тултип висит на ней), label-опции чистые
 		$tooltip=AttributeTooltip::build($model,$attr,AttributeTooltip::MODE_FORM,$label,$hint?:null);
 		if (!$tooltip) return [$label,[]];
 		return [
-			$label.' '.static::labelHintIcon,
-			static::toolTipOptions($tooltip['title'],$tooltip['body'])
+			$label.' '.AttributeTooltip::icon($tooltip),
+			[]
 		];
 	}
 	
@@ -163,7 +162,7 @@ class FieldsHelper
 		$fieldId=strtolower(\yii\helpers\StringHelper::basename($model::className()).'-'.$attr);
 		$form->view->registerJs("$('#$fieldId').autoResize({extraSpace:25,minLines:$lines}).trigger('change.dynSiz');");
 		return $form->field($model, $attr)
-			->textarea(['rows' => max($lines, count(explode("\n", $model->$attr)))])
+			->textarea(['rows' => max($lines, count(explode("\n",$model->$attr??'')))])
 			->label($label,$labelOptions)
 			->hint($hint,$hintOptions);
 	}
@@ -310,6 +309,10 @@ class FieldsHelper
 						function($item) use ($value) {return $value($item->object);}:
 						$value;
 				}
+				//явный attribute колонки указывает на атрибут вложенного объекта,
+				//а не самой модели-ссылки - префиксуем так же, как ключ колонки
+				if (isset($myOptions['attribute']))
+					$myOptions['attribute']=$field.'.'.$myOptions['attribute'];
 				$columns[$field.'.'.$column]=$myOptions;
 			}
 		}

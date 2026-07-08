@@ -29,9 +29,10 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 <div class="card w-100 my-2 ace-card shadow-sm g-0" id="ace_card_<?= $model->id ?>">
 	<div class="d-flex g-0">
 		<div class="p-2 text-wrap flex-fill small">
-			<?php if (count($model->getSubjects())) {
-				echo ListObjectsWidget::widget([
-					'models'=>$model->getSubjects(),
+			<?php if (count($model->subjects)) {
+				echo \app\components\ModelFieldWidget::widget([
+					'model'=>$model,
+					'field'=>'subjects',
 					'title'=>false,
 					'item_options'=>[
 						'static_view'=>true,
@@ -107,7 +108,7 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 	</div>
 	<?php if ($model->notepad) { ?>
 		<div class="p-1 small text-wrap border-top">
-			<?=  TextFieldWidget::widget(['model'=>$model,'field'=>'notepad']) ?>
+			<?=  \app\components\ModelFieldWidget::renderFieldValue($model,'notepad') ?>
 		</div>
 	<?php } ?>
 

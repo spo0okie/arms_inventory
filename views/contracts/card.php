@@ -4,11 +4,10 @@
 
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
-use app\components\ListObjectsWidget;
-use app\components\TextFieldWidget;
+use app\components\ModelFieldWidget;
 use yii\helpers\Html;
 use yii\helpers\Url;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Contracts */
@@ -29,10 +28,12 @@ if (!isset($static_view)) $static_view=false;
 	</h1></div>
 </div>
 
+<?php /* шапка (дата+платёжный №+статус) и сумма (total+НДС+валюта) - композиции
+        нескольких атрибутов, законные исключения из правила ModelFieldWidget */ ?>
 <h4>От: <?= $model->datePart ?>
-	
+
 	<?= $model->pay_id?(' // '.Yii::$app->params['docs.pay_id.name'].':'.$model->pay_id):'' ?>
-	
+
 	<?= $this->render('item-state',compact('model'))?></h4>
 
 
@@ -45,13 +46,13 @@ if (!isset($static_view)) $static_view=false;
 	</h4>
 <?php } ?>
 
-<?php if (!is_null($parent=$model->parent) && $static_view) { ?>
-	<h3>Основной документ: <?= Html::a($parent->name,['view','id'=>$parent->id]) ?></h3>
-<?php } ?>
-
-<?php if (!is_null($sucessor=$model->successor) && $static_view) { ?>
-    <h3>Замещен документом: <?= Html::a($sucessor->name,['view','id'=>$sucessor->id]) ?></h3>
-<?php } ?>
+<?php if ($static_view) {
+	foreach (['parent_id','successor'] as $linkAttr) {
+		if ($row=ModelFieldWidget::renderFieldRow($model,$linkAttr,['item_options'=>['static_view'=>true]])) {
+			echo Html::tag('h3',$row);
+		}
+	}
+} ?>
 
 
 <?php if (!$static_view) { ?>
@@ -96,17 +97,11 @@ JS;
 
 
 <?php if ($static_view) {
-	
-	if (count($children=$model->children)) { ?>
-        <h4>Связанные документы:</h4>
-        <p>
-			<?php foreach ($children as $child) {
-				echo ModelWidget::widget(['model'=>$child,'options'=>['static_view' => $static_view]]) . '<br/>';
-			} ?>
-        </p>
-        <br/>
-		<?php
-	}
+	echo ModelFieldWidget::widget([
+		'model'=>$model, 'field'=>'children',
+		'item_options'=>['static_view'=>$static_view],
+		'card_options'=>['cardClass'=>'mb-3'],
+	]);
 } else {
     ?>
     <h4>Карта связей документов</h4>
@@ -121,54 +116,54 @@ JS;
 
 
 <?php
-echo ListObjectsWidget::widget([
-	'models' => $model->techs,
+echo ModelFieldWidget::widget([
+	'model' => $model, 'field' => 'techs',
 	'title' => 'Прикреплен к АРМ/оборудованию:',
 	'item_options' => ['static_view' => $static_view, 'class'=>'text-nowrap','rc'=>true],
 	'card_options' => ['cardClass' => 'mb-3'],
 	//'lineBr'=> $static_view,
 ]);
 
-echo ListObjectsWidget::widget([
-	'models' => $model->materials,
+echo ModelFieldWidget::widget([
+	'model' => $model, 'field' => 'materials',
 	'title' => 'Прикреплен к поступлениям ЗиП и материалов:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo ListObjectsWidget::widget([
-	'models' => $model->licItems,
+echo ModelFieldWidget::widget([
+	'model' => $model, 'field' => 'licItems',
 	'title' => 'Прикреплен к закупкам лицензий:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo ListObjectsWidget::widget([
-	'models' => $model->services,
+echo ModelFieldWidget::widget([
+	'model' => $model, 'field' => 'services',
 	'title' => 'Прикреплен к услугам:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo ListObjectsWidget::widget([
-	'models' => $model->partners,
+echo ModelFieldWidget::widget([
+	'model' => $model, 'field' => 'partners',
 	'title' => 'Контрагенты:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
-echo ListObjectsWidget::widget([
-	'models' => $model->users,
+echo ModelFieldWidget::widget([
+	'model' => $model, 'field' => 'users',
 	'title' => 'Пользователи:',
 	'item_options' => ['static_view' => $static_view, 'noDelete'=>true],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 ?>
 
-<?php if (strlen(trim($model->comment))) { ?>
-<h4>Комментарий:</h4>
+<?php if (strlen(trim($model->comment??''))) { ?>
+<?= ModelFieldWidget::renderFieldTitle($model,'comment') ?>
 <p>
-	<?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
+	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 </p>
 
 <br />

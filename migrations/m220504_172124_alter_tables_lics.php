@@ -46,7 +46,7 @@ class m220504_172124_alter_tables_lics extends Migration
 	{
 		foreach ($this->lics as $lic)
 			foreach ($this->objs as $obj)
-				$this->upgradeTable("lic_${lic}_in_${obj}");
+				$this->upgradeTable("lic_{$lic}_in_{$obj}");
 		
 		$table = $this->db->getTableSchema('lic_groups_in_arms');
 		if (isset($table->columns['lics_id']))
@@ -69,7 +69,7 @@ class m220504_172124_alter_tables_lics extends Migration
 	{
 		foreach ($this->lics as $lic)
 			foreach ($this->objs as $obj)
-				$this->downgradeTable("lic_${lic}_in_${obj}");
+				$this->downgradeTable("lic_{$lic}_in_{$obj}");
 		
 		$table = $this->db->getTableSchema('lic_groups_in_arms');
 		if (isset($table->columns['lic_groups_id']))

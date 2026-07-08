@@ -53,6 +53,11 @@ class Departments extends ArmsModel
 	{
 		return array_merge(parent::attributeData(), [
 			'name' => ['Подразделение','hint'=>'Название подразделения'],
+			'comment' => [
+				'Комментарии',
+				'hint'=>'Любая дополнительная информация о подразделении',
+				'typeClass'=>\app\types\TextType::class,
+			],
 		]);
 	}
 

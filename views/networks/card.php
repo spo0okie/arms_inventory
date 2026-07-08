@@ -19,7 +19,7 @@ if (!isset($static_view)) $static_view=false;
 		'name'=>$model->sname
 	])?>
 </h1>
-<p class="mb-2"><?= TextFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?></p>
+<p class="mb-2"><?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?></p>
 
 <?php if ($model->archived) { echo StripedAlertWidget::widget(['title'=>'СЕТЬ ПЕРЕНЕСЕНА В АРХИВ']); }?>
 	<h4>
