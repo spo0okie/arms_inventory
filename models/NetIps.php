@@ -45,7 +45,6 @@ class NetIps extends ArmsModel
 	public static $title='IP адрес';
 	public static $titles='IP адреса';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'IP адреса: реестр адресов с привязкой к сетям, ОС, оборудованию и пользователям.';
@@ -114,7 +113,6 @@ class NetIps extends ArmsModel
 	{
 		return [
 			'id' => ['ID','typeClass'=>\app\types\IntegerType::class],
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'addr' => [
 				'Адрес',
 				'hint'=>'Числовое представление IP адреса (служебное; заполняется из текстового поля)',

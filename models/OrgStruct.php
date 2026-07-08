@@ -29,7 +29,6 @@ class OrgStruct extends ArmsModel
 	public static $title='Орг. структура';
 	public static $titles='Орг. структура';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Дерево подразделений организаций; синхронизируется из кадровой системы. '
@@ -72,7 +71,6 @@ class OrgStruct extends ArmsModel
     public function attributeData()
     {
         return [
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'id' => ['id','hint'=>'Внутренний идентификатор записи'],
 			'hr_id' => [
 				'ID подразделения в HR БД',

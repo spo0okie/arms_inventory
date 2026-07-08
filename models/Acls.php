@@ -42,7 +42,6 @@ class Acls extends ArmsModel
 	public static $title='Список доступа';
 	public static $titles='Списки доступа';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Списки доступа (ACL): наборы записей доступа к одному ресурсу (сервису, ОС, IP, сети); могут действовать по расписанию.';
@@ -190,7 +189,6 @@ class Acls extends ArmsModel
 			],
             'notepad' => [
             	'Записная книжка',
-				//TODO-REVIEW: подсказка сгенерирована по коду
 				'hint'=>'Заметки по этому списку доступа',
              	'typeClass'=>\app\types\TextType::class
             ],

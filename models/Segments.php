@@ -24,7 +24,6 @@ class Segments extends ArmsModel
 	static $titles='Сегменты инфраструктуры';
 	static $title='Сегмент инфраструктуры';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Сегменты ИТ инфраструктуры: области с разными требованиями информационной '

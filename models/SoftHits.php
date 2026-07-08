@@ -50,7 +50,6 @@ class SoftHits extends ArmsModel
         return 'soft_hits';
     }
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Служебная модель распознавания ПО: совпадения regexp-выражений '
@@ -62,7 +61,6 @@ class SoftHits extends ArmsModel
 	 */
 	public function attributeData()
 	{
-		//TODO-REVIEW: подсказки сгенерированы по коду
 		return array_merge(parent::attributeData(), [
 			'id' => ['ID','hint'=>'Внутренний идентификатор записи'],
 			'comp_id' => ['Комп','hint'=>'ОС, в отпечатке софта которой найден продукт'],

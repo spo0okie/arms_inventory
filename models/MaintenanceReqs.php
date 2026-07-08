@@ -41,7 +41,6 @@ class MaintenanceReqs extends ArmsModel
 	public static $title='Требования по обслуживанию';
 	public static $titles='Требования по обслуживанию';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Требования по регламентному обслуживанию: какие регламентные работы должны проводиться над оборудованием/ОС.';
@@ -115,7 +114,6 @@ class MaintenanceReqs extends ArmsModel
     public function attributeData()
     {
 		return array_merge(parent::attributeData(),[
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'archived' => [
 				'Архивирован',
 				'hint'=>'Требование больше не действует: скрывается из списков, остаётся для истории',

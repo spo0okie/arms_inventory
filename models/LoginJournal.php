@@ -36,7 +36,6 @@ class LoginJournal extends ArmsModel
 
 	public static $title='Входы в ПК';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Журнал входов в ПК: события входа пользователей в операционные системы, '
@@ -100,7 +99,6 @@ class LoginJournal extends ArmsModel
 				'type'=>'datetime',
 				'typeClass' => \app\types\DatetimeType::class,
 			],
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'comp_name' => ['Имя ОС','hint'=>'Имя компьютера, как оно пришло от клиента в событии входа'],
 			'comp' => 'Компьютер',
 			'comps_id' => ['Компьютер','hint'=>'Распознанная ОС в базе (если имя удалось сопоставить)'],
@@ -127,7 +125,6 @@ class LoginJournal extends ArmsModel
 				'type'=>'datetime',
 				'typeClass'=>DatetimeType::class,
 			],
-			//TODO-REVIEW: перечень типов входа по коду не выводится - уточнить
 			'type' => ['Тип входа','hint'=>'Код типа события входа'],
             'user_login' => [
 				'Логин',

@@ -31,7 +31,6 @@ class Tags extends ArmsModel
     /** @var string Название модели во множественном числе */
     public static $titles = 'Теги';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Теги для маркировки объектов: название, цвет, счётчик использований.';
@@ -132,7 +131,6 @@ class Tags extends ArmsModel
                 'placeholder' => 'Нет связанных сервисов',
                 'typeClass' => \app\types\LinkType::class,
             ],
-			//TODO-REVIEW: подсказка сгенерирована по коду
 			'updated_by' => [
 				'Обновил',
 				'hint' => 'Кто последним изменил запись (заполняется автоматически)',

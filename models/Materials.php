@@ -43,7 +43,6 @@ class Materials extends ArmsModel
 	public static $title="ЗиП и Материалы";
 	public static $titles="ЗиП и Материалы";
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'ЗИП и расходные материалы: партии с количеством, стоимостью и историей использования.';
@@ -99,7 +98,6 @@ class Materials extends ArmsModel
 	public function attributeData()
 	{
 		return [
-			//TODO-REVIEW: подсказки сгенерированы по коду (уточнить: стоимость за единицу или партию?)
 			'charge' => [
 				'НДС',
 				'hint'=>'Сумма НДС в составе стоимости',

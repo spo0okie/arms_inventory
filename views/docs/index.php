@@ -37,6 +37,13 @@ uksort($sections, function ($a, $b) use ($sectionTitles) {
 ?>
 <h1><?= Html::encode($this->title) ?></h1>
 
+<?php if (\app\helpers\DocsHelper::pageExists('guides/getting-started.md')) { ?>
+	<p class="lead">
+		<?= Html::a('▶ С чего начать', ['page', 'path' => 'guides/getting-started.md'], ['class' => 'btn btn-primary']) ?>
+		<span class="text-muted">— если вы здесь впервые.</span>
+	</p>
+<?php } ?>
+
 <?php foreach ($sections as $section => $sectionPages) { ?>
 	<h4 class="mt-4"><?= Html::encode($sectionTitles[$section] ?? $section) ?></h4>
 	<ul>

@@ -37,7 +37,6 @@ class Attaches extends ArmsModel
         return 'attaches';
     }
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Файлы-вложения (сканы, фотографии, документы), прикреплённые к объектам '

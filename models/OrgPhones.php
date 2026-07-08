@@ -35,7 +35,6 @@ class OrgPhones extends ArmsModel
 	public static $title='Телефонный номер';
 	public static $titles='Телефонные номера';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Городские телефонные номера организации: привязка к помещениям '
@@ -77,7 +76,6 @@ class OrgPhones extends ArmsModel
     {
         return [
             'id' => 'ID',
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'country_code' => ['Код страны','hint'=>'Телефонный код страны (например 7)'],
 			'city_code' => ['Код города','hint'=>'Телефонный код города/зоны'],
 			'local_code' => ['Местный номер','hint'=>'Местный (городской) номер без кодов страны и города'],

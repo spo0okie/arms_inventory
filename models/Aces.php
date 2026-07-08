@@ -41,7 +41,6 @@ class Aces extends ArmsModel
 	public static $title='Доступ';
 	public static $titles='Доступы';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Записи доступа (ACE): какие субъекты (пользователи, IP) какой тип доступа получают; группируются в списки доступа (ACL).';

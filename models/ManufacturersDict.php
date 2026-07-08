@@ -16,7 +16,6 @@ use Yii;
  */
 class ManufacturersDict extends ArmsModel
 {
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Словарь вариантов написания производителей: сопоставляет строки из '
@@ -67,7 +66,6 @@ class ManufacturersDict extends ArmsModel
 	 */
 	public function attributeData()
 	{
-		//TODO-REVIEW: подсказки сгенерированы по коду
 		return array_merge(parent::attributeData(), [
 			'word' => ['Вариант написания','hint'=>'Строка-вариант написания производителя, встречающаяся в отпечатках ПО/железа'],
 			'manufacturers_id' => ['Производитель','hint'=>'Канонический производитель, которому соответствует этот вариант написания'],

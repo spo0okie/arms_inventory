@@ -29,7 +29,6 @@ class TechTypes extends ArmsModel
 
 	public static $title='Категории оборудования';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Категории оборудования: классификация моделей с ролями (компьютер/дисплей/ИБП/телефон), префиксами инв. номеров и шаблонами описаний.';

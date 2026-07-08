@@ -50,7 +50,6 @@ class HwIgnore extends ArmsModel
 	public function attributeData()
 	{
 		return [
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'fingerprint' => [
 				'Отпечаток',
 				'hint'=>'Строка-отпечаток устройства, которое игнорируется при разборе отпечатка железа',

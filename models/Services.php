@@ -121,7 +121,6 @@ class Services extends ArmsModel
 	
 	public static $titles='Сервисы/услуги';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'ИТ сервисы и услуги: дерево сервисов с ответственными, расписаниями, сегментами и связями с инфраструктурой.';
@@ -347,7 +346,6 @@ class Services extends ArmsModel
 			],
 			'is_service' => [
 				'Тип объекта',
-				//TODO-REVIEW: подсказка сгенерирована по коду - уточнить формулировку услуга/сервис
 				'hint' => 'Что это: сервис (техническая система) или услуга (предоставляется людям)',
 				'typeClass' => \app\types\BooleanType::class,
 			],

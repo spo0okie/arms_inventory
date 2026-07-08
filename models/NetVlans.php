@@ -27,7 +27,6 @@ class NetVlans extends ArmsModel
 	public static $title='Vlan';
 	public static $titles='Vlan\'ы';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Справочник VLAN: номера VLAN с привязкой к сетям и доменам L2.';

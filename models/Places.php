@@ -80,7 +80,6 @@ DELIMITER ;
 	public static $title="Помещение";
 	public static $titles="Помещения";
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Помещения: дерево локаций (филиал → здание → кабинет) для размещения оборудования и карт рабочих мест.';
@@ -144,7 +143,6 @@ DELIMITER ;
     public function attributeData()
     {
         return ArrayHelper::recursiveOverride(parent::attributeData(),[
-			//TODO-REVIEW: подсказка сгенерирована по коду
 			'scans_id' => [
 				'Сканы',
 				'hint'=>'Сканы/изображения, прикреплённые к помещению (например план помещения)',

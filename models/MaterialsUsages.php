@@ -31,7 +31,6 @@ class MaterialsUsages extends ArmsModel
 	public static $title='Расход материалов';
 	public static $titles='Расход материалов';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Использование материалов: списания из партий ЗИП/материалов с указанием кто, когда и на что.';

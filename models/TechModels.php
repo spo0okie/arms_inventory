@@ -46,7 +46,6 @@ class TechModels extends ArmsModel
 	public static $title='Модель оборудования';
 	public static $titles='Модели оборудования';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Модели оборудования: конкретные модели с производителем, спецификацией и раскладкой посадочных мест.';
@@ -152,7 +151,6 @@ class TechModels extends ArmsModel
 	public function attributeData()
 	{
 		return [
-			//TODO-REVIEW: подсказка сгенерирована по коду
 			'scans_id' => [
 				'Сканы',
 				'hint'=>'Сканы/изображения, прикреплённые к модели (например фото или спецификация)',

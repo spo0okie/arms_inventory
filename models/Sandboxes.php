@@ -25,7 +25,6 @@ class Sandboxes extends ArmsModel
 public static $title='Песочница';
 public static $titles='Песочницы';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Песочницы — изолированные окружения (например клоны продуктива): '
@@ -76,7 +75,6 @@ public static $titles='Песочницы';
     public function attributeData()
     {
         return array_merge(parent::attributeData(),[
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'archived' => [
 				'Архивирован',
 				'hint'=>'Окружение больше не используется: скрывается из списков, остаётся для истории',

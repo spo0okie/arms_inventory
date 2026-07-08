@@ -36,7 +36,6 @@ class LicKeys extends ArmsModel
 	public static $title='Лиц. ключи';
 	public static $titles='Лиц. ключи';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Лицензионные ключи: учёт ключей активации с привязкой к закупкам и объектам, где они использованы.';

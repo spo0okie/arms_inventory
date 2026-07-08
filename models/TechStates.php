@@ -23,7 +23,6 @@ class TechStates extends ArmsModel
 	public static $titles='Состояния';
 	public static $description='Состояния жизненного цикла оборудования и иных сущностей в предприятии';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Справочник состояний оборудования (в ремонте, на хранении, списано и т.п.); '
@@ -63,7 +62,6 @@ class TechStates extends ArmsModel
     {
         return [
             'id' => 'id',
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'code' => ['Служебное имя','hint'=>'Машинное имя состояния (латиницей, уникальное)'],
 			'name' => ['Состояние','hint'=>'Название состояния, отображаемое рядом с оборудованием'],
 			'archived' => [

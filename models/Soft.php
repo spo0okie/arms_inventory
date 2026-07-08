@@ -43,7 +43,6 @@ class Soft extends ArmsModel
 	public static $title='ПО';
 	public static $titles='ПО';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Программные продукты: распознаются в отпечатках софта операционных систем '
@@ -126,7 +125,6 @@ class Soft extends ArmsModel
 				'typeClass'=>\app\types\StringType::class,
 			],
             'id' => ['Идентификатор','typeClass'=>\app\types\IntegerType::class],
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'manufacturers_id' => [
 				'Разработчик',
 				'hint'=>'Разработчик (вендор) этого программного продукта',

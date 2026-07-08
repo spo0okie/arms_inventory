@@ -91,7 +91,6 @@ class Contracts extends ArmsModel
 	public static $title='Документы';
 	public static $titles='Документы';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Документы: договоры, счета, накладные, акты и т.п.; связываются в цепочки через основной документ и привязываются к оборудованию, лицензиям и контрагентам.';

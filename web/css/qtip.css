@@ -102,6 +102,7 @@
    другой цвет, чтобы было видно, какие подсказки приколоты. */
 .attr-hint-icon {
 	color: #adb5bd;
+	font-size: smaller;
 	cursor: pointer;
 }
 

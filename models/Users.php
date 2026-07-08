@@ -84,7 +84,6 @@ class Users extends ArmsModel implements IdentityInterface
 	public static $title="Сотрудник";
 	public static $titles="Сотрудники";
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Сотрудники/пользователи: контактные данные, трудоустройство '
@@ -237,7 +236,6 @@ class Users extends ArmsModel implements IdentityInterface
 				],
 			],
 			'Bday' => ['День рождения','typeClass'=>\app\types\DateType::class],
-			//TODO-REVIEW: подсказки кадровых полей сгенерированы по коду
 			'Doljnost' => [
 				'Должность',
 				'hint'=>'Должность сотрудника.<br>Обычно заполняется синхронизацией с кадровой системой',
@@ -253,7 +251,6 @@ class Users extends ArmsModel implements IdentityInterface
 				'hint'=>'Табельный номер сотрудника<br>(конкретно этого его трудоустройства)',
 				'typeClass'=>\app\types\StringType::class,
 			],
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'employ_date' => ['Дата приёма','hint'=>'Дата приёма сотрудника на работу'],
 			'resign_date' => ['Дата увольнения','hint'=>'Дата увольнения сотрудника'],
 			'id' => ['id','hint'=>'Внутренний идентификатор записи'],
@@ -289,10 +286,10 @@ class Users extends ArmsModel implements IdentityInterface
 				'typeClass'=>\app\types\StringType::class,
 			],
 			'logon_ids' => ['absorb'=>false], //вручную переключим
-			//TODO-REVIEW: manager_id хранится строкой - подтвердить смысл (идентификатор из кадровой системы?)
 			'manager_id' => [
 				'Руководитель',
-				'hint'=>'Руководитель сотрудника (по данным кадровой системы)',
+				'hint'=>'Руководитель сотрудника — идентификатор из кадровой системы '
+					.'(не ссылка на запись этой базы), заполняется синхронизацией',
 				'typeClass'=>\app\types\StringType::class,
 			],
 			'Mobile' => [
@@ -328,7 +325,6 @@ class Users extends ArmsModel implements IdentityInterface
 				'typeClass'=>\app\types\StringType::class,
 			],
 			'orgStruct_name' => ['alias'=>'Orgeh'],
-			//TODO-REVIEW: значения кодов Persg по коду не выводятся - уточнить
 			'Persg' => [
 				'Тип трудоустройства',
 				'hint'=>'Код типа трудоустройства из кадровой системы',

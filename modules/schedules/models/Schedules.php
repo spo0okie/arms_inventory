@@ -65,7 +65,6 @@ class Schedules extends \app\models\base\ArmsModel
 	
 	public static $titles = 'Расписания';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Расписания: календарные графики (рабочие недели, исключения, перекрытия) — используются сервисами, обслуживанием и временными доступами.';
@@ -302,10 +301,8 @@ class Schedules extends \app\models\base\ArmsModel
 			'name' => [
 				'name' => 'Как-то надо назвать это расписание',
 				'Наименование',
-				//TODO-REVIEW: подсказка сгенерирована по коду
 				'hint' => 'Название расписания/временного доступа',
 			],
-			//TODO-REVIEW: подсказка сгенерирована по коду
 			'override_id' => [
 				'Перекрывает',
 				'hint' => 'Базовое расписание, поверх которого действует это расписание-перекрытие',

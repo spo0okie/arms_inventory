@@ -24,7 +24,6 @@ class LicTypes extends ArmsModel
 	public static $title='Схема лицензирования';
 	public static $titles='Схемы лицензирования';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Схемы лицензирования: как считается лицензия (на ПК, плавающая, на сокет и т.п.); переиспользуются в типах лицензий.';

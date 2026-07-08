@@ -20,7 +20,6 @@ class SoftLists extends ArmsModel
 	public static $title = 'Список ПО';
 	public static $titles = 'Списки ПО';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Списки (реестры) ПО — наборы программных продуктов. Служебные списки: '
@@ -114,7 +113,6 @@ class SoftLists extends ArmsModel
 	public function attributeData()
 	{
 		return [
-			//TODO-REVIEW: подсказки сгенерированы по коду
 			'comment' => [
 				'Комментарий',
 				'hint'=>'Пояснение назначения списка',

@@ -44,7 +44,6 @@ class LicGroups extends ArmsModel
 	
 	public static $titles='Типы лицензий';
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Типы лицензий: полное описание варианта лицензии (схема лицензирования + список покрываемого ПО); консолидируют закупки, ключи и привязки.';

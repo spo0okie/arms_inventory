@@ -32,7 +32,6 @@ class Partners extends ArmsModel
 	public static $title="Контрагент";
 	public static $titles="Контрагенты";
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Контрагенты: организации (поставщики, провайдеры, обслуживаемые юрлица) — реквизиты, контакты, документы и услуги.';

@@ -66,7 +66,6 @@ class Scans extends ArmsModel
 		return ['name','fileSize','fileDate','fileExists'];
 	}
 
-	//TODO-REVIEW: описание сгенерировано по коду
 	public static function modelDescription(): string
 	{
 		return 'Сканы документов и изображения (png/jpg/pdf/...), прикреплённые к объектам '
@@ -76,7 +75,6 @@ class Scans extends ArmsModel
 
 	public function attributeData()
 	{
-		//TODO-REVIEW: подсказки *_id сгенерированы по коду
 		return array_merge(parent::attributeData(), [
 			'file' => ['Место хранения загруженного файла', 'typeClass' => \app\types\StringType::class],
 			'arms_id' => ['АРМ', 'hint' => 'АРМ, к которому прикреплён скан'],
