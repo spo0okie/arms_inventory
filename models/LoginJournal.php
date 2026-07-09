@@ -35,6 +35,7 @@ class LoginJournal extends ArmsModel
 {
 
 	public static $title='Входы в ПК';
+	public static $titles='Журнал входов в ПК';
 
 	public static function modelDescription(): string
 	{

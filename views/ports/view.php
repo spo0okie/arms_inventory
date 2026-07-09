@@ -10,7 +10,7 @@ use yii\widgets\DetailView;
 
 $this->title = \app\models\Ports::$port_prefix.$model->name;
 if (is_object($model->tech)){
-	$this->params['breadcrumbs'][] = ['label' => app\models\Techs::$title, 'url' => ['/techs/index']];
+	$this->params['breadcrumbs'][] = ['label' => app\models\Techs::$titles, 'url' => ['/techs/index']];
 	$this->params['breadcrumbs'][] = ['label' => $model->tech->num, 'url' => ['/techs/view','id'=>$model->techs_id]];
 }
 

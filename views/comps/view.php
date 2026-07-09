@@ -15,8 +15,7 @@ use app\components\widgets\page\ModelWidget;
 $domain = is_object($model->domain)?$model->domain->name:'- не в домене - ';
 
 $this->title = 'ОС '.$domain.'\\'.strtolower($model->name);
-$this->params['breadcrumbs'][] = ['label' => Comps::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 Url::remember();
 $manufacturers= Manufacturers::fetchNames();
 $model->swList->sortByName();

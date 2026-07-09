@@ -13,8 +13,7 @@ use yii\web\YiiAsset;
 //\yii\helpers\Url::remember();
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => app\models\Sandboxes::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 YiiAsset::register($this);
 
 $badge='<span class="badge rounded-pill p-1 m-1 bg-secondary opacity-25">';

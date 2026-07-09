@@ -7,7 +7,7 @@ use yii\helpers\Html;
 
 if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Редактирование: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Contracts::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\Contracts::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Редактировать';
 ?>

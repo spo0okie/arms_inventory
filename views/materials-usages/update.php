@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\MaterialsUsages */
 
 $this->title = 'Изм: ' . $model->to;
-$this->params['breadcrumbs'][] = ['label' => \app\models\MaterialsUsages::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\MaterialsUsages::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->to, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Редактирование';
 ?>

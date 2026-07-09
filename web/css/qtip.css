@@ -104,6 +104,7 @@
 	color: #adb5bd;
 	font-size: smaller;
 	cursor: pointer;
+	transition: color .15s ease;
 }
 
 .attr-hint-icon:hover {
@@ -112,4 +113,48 @@
 
 .attr-hint-icon.qtip-pinned {
 	color: #fd7e14;
+}
+
+/* Режим справки страницы (help-mode). См. plans/help-mode.md.
+   Класс help-mode на <body> ставит components/views/docsPanel/panel.php
+   синхронно с раскрытием инфопанели. В режиме приглушённо-серые иконки «?»
+   атрибутов выходят в акцент — пользователь видит карту того, что снабжено
+   пояснениями; мастер-иконка справки страницы читается «нажатой» (тёплый
+   тон = переключатель включён), а её содержимое — синим «доступно к чтению». */
+body.help-mode .attr-hint-icon {
+	color: #0d6efd;
+}
+
+body.help-mode .attr-hint-icon:hover {
+	color: #0a58ca;
+}
+
+/* приколотый кликом тултип всё равно выделяется оранжевым */
+body.help-mode .attr-hint-icon.qtip-pinned {
+	color: #fd7e14;
+}
+
+/* мастер-иконка справки страницы (ссылка с data-panel-target, HintIconWidget):
+   FA рисует глиф как svg с fill:currentColor, поэтому цвет ставим на <a> */
+body.help-mode a[data-panel-target] {
+	color: #fd7e14;
+}
+
+/* Пока режим справки включён, иконки «?» раз в ~7 c дают две мягкие вспышки
+   (подсветка яркости + свечение-ореол) и затихают на ~6 c — ненавязчивое
+   рекуррентное напоминание, что подсказки доступны, особенно для мелких иконок
+   в узких label списков. Пульсируем только filter (цвет не трогаем — hover
+   продолжает работать); приколотые кликом иконки не пульсируют; drop-shadow
+   даёт ореол вокруг самого глифа «?»; в prefers-reduced-motion выключается. */
+@keyframes attr-hint-heartbeat {
+	0%, 6%, 12%, 100% { filter: brightness(1)    drop-shadow(0 0 0 rgba(77,148,255,0)); }
+	3%, 9%            { filter: brightness(1.35) drop-shadow(0 0 5px rgba(77,148,255,.9)); }
+}
+
+body.help-mode .attr-hint-icon:not(.qtip-pinned) {
+	animation: attr-hint-heartbeat 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	body.help-mode .attr-hint-icon { animation: none; }
 }

@@ -28,6 +28,7 @@ class TechTypes extends ArmsModel
 
 
 	public static $title='Категории оборудования';
+	public static $titles='Категории оборудования';
 
 	public static function modelDescription(): string
 	{

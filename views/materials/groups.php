@@ -5,7 +5,6 @@
  */
 
 use app\components\DynaGridWidget;
-use app\components\HintIconWidget;
 use app\models\Materials;
 use yii\helpers\Html;
 
@@ -43,7 +42,6 @@ if ($groupBy=='name') {
 		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success'])
 			.' // '.Html::a('Показать подробно',['index']+Yii::$app->request->get())
 			.' // '.Html::a($otherGroupName,[$otherGroup.'-groups']+Yii::$app->request->get()),
-		'hintButton' => HintIconWidget::widget(['model'=>'\app\models\Materials','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

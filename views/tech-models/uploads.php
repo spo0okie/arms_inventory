@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\TechModels */
 
 $this->title = 'Вложения: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$titles, 'url' => ['/tech-types/index']];
 $this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Вложения';

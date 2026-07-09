@@ -105,6 +105,17 @@ a {text-decoration: none;}
 .hardware_item h4 {display: inline;}
 .software_item .show-on-hover,      .hardware_item .show-on-hover {display: none;}
 .software_item:hover .show-on-hover,.hardware_item:hover .show-on-hover {display: inline-block;}
+/* значки действий у IP-адреса ОС (удалённое управление, скрыть/вернуть) — по наведению */
+.comp-ip-item .ip-action {display: none;}
+.comp-ip-item:hover .ip-action {display: inline-block;}
+.comp-ip-item .ip-action + .ip-action {margin-left: .25em;}
+/* временная подсветка элемента, на который указала ссылка из встроенной документации */
+.doc-anchor-highlight {animation: doc-anchor-pulse 2.2s ease-out; border-radius: 4px;}
+@keyframes doc-anchor-pulse {
+	0%   {box-shadow: 0 0 0 .2rem rgba(255,193,7,.9); background-color: rgba(255,193,7,.30);}
+	60%  {box-shadow: 0 0 0 .2rem rgba(255,193,7,.5); background-color: rgba(255,193,7,.12);}
+	100% {box-shadow: 0 0 0 .2rem rgba(255,193,7,0);  background-color: transparent;}
+}
 
 
 

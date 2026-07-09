@@ -11,7 +11,7 @@ use app\components\DynaGridWidget;
 \yii\helpers\Url::remember();
 
 $this->title = \app\models\Techs::$armsTitles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $this->params['layout-container'] = 'container-fluid';
 $renderer = $this;
 ?>
@@ -36,7 +36,6 @@ $renderer = $this;
 			'inv_sn'
 		],
 		'createButton' => Html::a('Создать АРМ', ['/techs/create'], ['class' => 'btn btn-success']),
-		'hintButton' => \app\components\HintIconWidget::widget(['model'=> '\app\models\Techs','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

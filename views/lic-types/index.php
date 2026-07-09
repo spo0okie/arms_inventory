@@ -11,7 +11,7 @@ use kartik\grid\GridView;
 $renderer=$this;
 
 $this->title = \app\models\LicTypes::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="lic-types-index">
 	
@@ -20,7 +20,6 @@ $this->params['breadcrumbs'][] = $this->title;
 		'header' => Html::encode($this->title),
 		'columns' => include 'columns.php',
 		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
-		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\LicTypes','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

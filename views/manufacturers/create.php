@@ -7,8 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Manufacturers */
 
 $this->title = 'Добавить производителя';
-$this->params['breadcrumbs'][] = ['label' => 'Производители', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="manufacturers-create">
 

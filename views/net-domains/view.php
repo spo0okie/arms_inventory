@@ -7,8 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model app\models\NetDomains */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\NetDomains::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 \yii\web\YiiAsset::register($this);
 
 ?>

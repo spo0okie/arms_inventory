@@ -64,7 +64,7 @@ if (!isset($static_view)) $static_view=false;
 
 	<?php echo ModelFieldWidget::widget([
 		'model' => $model, 'field' => 'compsFromTechs',
-		'title' => 'Привязанные ОС:',
+		'label' => 'Привязанные ОС:',
 		'item_options' => ['static_view' => true, 'class'=>'text-nowrap','rc'=>true],
 		'card_options' => ['cardClass' => 'mb-3'],
 		'lineBr'=> $static_view,
@@ -72,7 +72,7 @@ if (!isset($static_view)) $static_view=false;
 
 	<?php echo ModelFieldWidget::widget([
 		'model' => $model, 'field' => 'netIps',
-		'title' => 'Закрепленные IP:',
+		'label' => 'Закрепленные IP:',
 		'item_options' => ['static_view' => $static_view, 'class'=>'text-nowrap'],
 		'card_options' => ['cardClass' => 'mb-3'],
 		'lineBr'=> $static_view,
@@ -80,7 +80,7 @@ if (!isset($static_view)) $static_view=false;
 
     <?php if (!$static_view) echo ModelFieldWidget::widget([
 		'model' => $model, 'field' => 'techs',
-		'title' => 'АРМ/Оборудование числящиеся за сотрудником:',
+		'label' => 'АРМ/Оборудование числящиеся за сотрудником:',
 		'item_options' => ['static_view' => $static_view, ],
 		'card_options' => ['cardClass' => 'mb-3'],
 		'lineBr'=> false,

@@ -2,15 +2,14 @@
 
 use yii\helpers\Html;
 use yii\bootstrap5\Modal;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\OldArms */
 
 \yii\helpers\Url::remember();
 $this->title = $model->num;
-$this->params['breadcrumbs'][] = ['label' => 'АРМы', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $licGroups=$model->licGroups;
 $licItems=$model->licItems;
 $comps = $model->comps;

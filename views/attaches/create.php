@@ -6,8 +6,7 @@ use yii\helpers\Html;
 /** @var app\models\Attaches $model */
 
 $this->title = 'Create Attaches';
-$this->params['breadcrumbs'][] = ['label' => 'Attaches', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="attaches-create">
 

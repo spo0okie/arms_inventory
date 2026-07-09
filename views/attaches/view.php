@@ -8,8 +8,7 @@ use yii\widgets\DetailView;
 /** @var app\models\Attaches $model */
 
 $this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Attaches', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 \yii\web\YiiAsset::register($this);
 ?>
 <div class="attaches-view">

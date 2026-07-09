@@ -7,8 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model app\models\MaterialsUsages */
 
 $this->title = $model->to;
-$this->params['breadcrumbs'][] = ['label' => \app\models\MaterialsUsages::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 \yii\web\YiiAsset::register($this);
 ?>
 <div class="materials-usages-view">

@@ -10,7 +10,7 @@ use kartik\grid\GridView;
 \yii\helpers\Url::remember();
 
 $this->title = \app\models\NetVlans::$title;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 ?>
 <div class="net-vlans-index">

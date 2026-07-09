@@ -2,14 +2,14 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 \yii\helpers\Url::remember();
 
 $this->title = \app\models\OrgInet::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 ?>
 <div class="org-inet-index">

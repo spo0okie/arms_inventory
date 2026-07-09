@@ -11,7 +11,7 @@ use yii\helpers\Url;
 Url::remember();
 
 $this->title = app\models\Networks::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $panel=true;
 ?>
 <div class="networks-index">

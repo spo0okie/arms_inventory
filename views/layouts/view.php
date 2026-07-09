@@ -11,10 +11,8 @@ $this->title = $model->name;
 $modelClass=get_class($model);
 $classId=StringHelper::class2Id($modelClass);
 
-$indexTitle=$modelClass::$titles??$modelClass::$title??'Список';
-
-$this->params['breadcrumbs'][] = ['label' => $indexTitle, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки [Список → карточка] собираются автоматически в layout из класса
+//контроллера, действия и $this->title (см. views/layouts/main.php)
 
 YiiAsset::register($this);
 

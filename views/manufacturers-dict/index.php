@@ -8,7 +8,7 @@ use kartik\grid\GridView;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Словарь производителей';
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $manufacturers=\app\models\Manufacturers::fetchNames();
 ?>
 <div class="manufacturers-dict-index">

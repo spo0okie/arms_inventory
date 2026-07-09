@@ -9,8 +9,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 
 $this->title = 'Ввод поступления материалов';
-$this->params['breadcrumbs'][] = ['label' => \app\models\Materials::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="materials-create">
 

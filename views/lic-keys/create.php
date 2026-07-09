@@ -7,11 +7,11 @@ use yii\helpers\Html;
 
 $this->title = 'Добавление лиц. ключа';
 if (is_object($model->licItem)) {	
-	$this->params['breadcrumbs'][] = ['label' => \app\models\LicGroups::$title, 'url' => ['lic-groups/index']];
+	$this->params['breadcrumbs'][] = ['label' => \app\models\LicGroups::$titles, 'url' => ['lic-groups/index']];
 	$this->params['breadcrumbs'][] = ['label' => $model->licItem->licGroup->descr, 'url' => ['lic-groups/view','id'=>$model->licItem->lic_group_id]];
 	$this->params['breadcrumbs'][] = ['label' => $model->licItem->descr, 'url' => ['lic-items/view','id'=>$model->lic_items_id]];
 } else {
-	$this->params['breadcrumbs'][] = ['label' => \app\models\LicKeys::$title, 'url' => ['lic-keys/index']];
+	$this->params['breadcrumbs'][] = ['label' => \app\models\LicKeys::$titles, 'url' => ['lic-keys/index']];
 }
 $this->params['breadcrumbs'][] = $this->title;
 ?>

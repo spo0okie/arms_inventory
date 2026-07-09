@@ -13,8 +13,7 @@ use yii\helpers\Html;
 
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => MaterialsTypes::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 
 $this->params['headerContent']=$this->render('header',compact('model'));
 $this->params['layout-container']='container-fluid px-0';

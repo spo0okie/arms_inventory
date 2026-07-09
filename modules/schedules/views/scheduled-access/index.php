@@ -11,7 +11,7 @@ use yii\helpers\Html;
 /** @var integer $switchArchivedCount */
 
 $this->title = Acls::$scheduleTitles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $this->params['layout-container'] = 'container-fluid';
 
 $filtered=false;
@@ -52,7 +52,6 @@ $renderer=$this;
 			'reload'=>true,
 		]).'<span>',
 		'createButton' => Html::a('Добавить', ['/acls/create','newSchedule'=>1], ['class' => 'btn btn-success']),
-		//'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Arms','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

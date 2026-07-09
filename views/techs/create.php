@@ -8,8 +8,7 @@ use yii\helpers\Html;
 
 if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Новое оборудование/АРМ';
-$this->params['breadcrumbs'][] = ['label' => \app\models\Techs::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="techs-create">
 

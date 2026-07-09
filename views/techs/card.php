@@ -134,19 +134,19 @@ if (is_object($model->state)) { ?>
 		<?= ModelFieldWidget::widget([
 			'model'=>$model,
 			'field'=>'services',
-			'title'=>'Участвует в работе сервисов:',
+			'label'=>'Участвует в работе сервисов:',
 			'card_options'=>['cardClass'=>'pe-5 mb-3']
 		]) ?>
 		<?= ModelFieldWidget::widget([
 			'model'=>$model,
 			'field'=>'effectiveMaintenanceReqs',
-			'title'=>'Требует обслуживания:',
+			'label'=>'Требует обслуживания:',
 			'card_options'=>['cardClass'=>'pe-5 mb-3']
 		]) ?>
 		<?= ModelFieldWidget::widget([
 			'model'=>$model,
 			'field'=>'maintenanceJobs',
-			'title'=>'Обслуживается:',
+			'label'=>'Обслуживается:',
 			'card_options'=>['cardClass'=>'pe-5 mb-3']
 		]) ?>
 	</div>

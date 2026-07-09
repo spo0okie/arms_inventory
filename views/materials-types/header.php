@@ -46,14 +46,13 @@ use yii\widgets\DetailView;
 	<div class="flex-fill text-end">
 		<small class="opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
 		<br>
-		<?= HintIconWidget::widget(['model' => '\app\models\Materials', 'cssClass' => 'fs-1 me-2 opacity-50']) ?>
 		<?= Html::a('<i class="fas fa-images fs-1"></i>',['uploads','id'=>$model->id],[
 			'qtip_ttip'=>'Редактировать изображения/фото этой категории материалов',
 			'qtip_side'=>'top'
 		]) ?>
 	</div>
-	
-	
+
+
 
 
 

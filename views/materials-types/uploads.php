@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Materials */
 
 $this->title = 'Изображения: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => Materials::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Materials::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Изображения';
 ?>

@@ -8,8 +8,7 @@ use yii\helpers\Html;
 if (!isset($modalParent)) $modalParent=null;
 
 $this->title = "Новый ".app\models\MaintenanceReqs::$title;
-$this->params['breadcrumbs'][] = ['label' => app\models\MaintenanceReqs::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="maintenance-reqs-create">
 

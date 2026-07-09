@@ -18,7 +18,7 @@ use yii\helpers\Url;
 Url::remember();
 
 $this->title = $model->keyShort;
-$this->params['breadcrumbs'][] = ['label' => LicGroups::$title, 'url' => ['lic-groups/index']];
+$this->params['breadcrumbs'][] = ['label' => LicGroups::$titles, 'url' => ['lic-groups/index']];
 $this->params['breadcrumbs'][] = ['label' => $model->licItem->licGroup->descr, 'url' => ['lic-groups/view','id'=>$model->licItem->lic_group_id]];
 $this->params['breadcrumbs'][] = ['label' => $model->licItem->descr, 'url' => ['lic-items/view','id'=>$model->lic_items_id]];
 $this->params['breadcrumbs'][] = $this->title;

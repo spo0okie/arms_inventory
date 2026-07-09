@@ -9,8 +9,7 @@ use yii\helpers\Html;
 
 if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Добавление операционной системы';
-$this->params['breadcrumbs'][] = ['label' => Comps::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="comps-create">
 

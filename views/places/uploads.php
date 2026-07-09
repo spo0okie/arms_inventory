@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\TechModels */
 
 $this->title = 'Изображения: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => TechTypes::$title, 'url' => ['/places/index']];
+$this->params['breadcrumbs'][] = ['label' => TechTypes::$titles, 'url' => ['/places/index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Изображения';
 ?>

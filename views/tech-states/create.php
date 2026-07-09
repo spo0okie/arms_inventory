@@ -7,8 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\TechStates */
 
 $this->title = 'Новое состояние';
-$this->params['breadcrumbs'][] = ['label' => \app\models\TechStates::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="tech-states-create">
 

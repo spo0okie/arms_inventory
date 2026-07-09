@@ -8,8 +8,7 @@ use app\components\widgets\page\ModelWidget;
 /* @var $model app\models\UserGroups */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\UserGroups::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 \yii\web\YiiAsset::register($this);
 ?>
 <div class="user-groups-view">

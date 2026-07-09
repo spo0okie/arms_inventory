@@ -1,7 +1,6 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\HintIconWidget;
 use app\models\MaintenanceJobs;
 use app\models\Services;
 use yii\helpers\Html;
@@ -69,7 +68,6 @@ JS
 		'header' => Html::encode($this->title),
 		'columns' => require 'columns.php',
 		'createButton' => null,
-		'hintButton' => HintIconWidget::widget(['model'=> MaintenanceJobs::class,'cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'panel' => false,
 		'toggleButtonGrid'=>[

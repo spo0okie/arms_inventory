@@ -8,8 +8,7 @@ use yii\helpers\Html;
 if (!isset($modalParent)) $modalParent=null;
 
 $this->title = "Новая ".mb_strtolower(app\models\Sandboxes::$title);
-$this->params['breadcrumbs'][] = ['label' => app\models\Sandboxes::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="sandboxes-create">
 

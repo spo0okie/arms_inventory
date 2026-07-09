@@ -11,7 +11,7 @@ use yii\helpers\Url;
 Url::remember();
 
 $this->title = Acls::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 ?>
 <div class="acls-index">

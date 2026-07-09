@@ -9,7 +9,7 @@ use kartik\grid\GridView;
 
 
 $this->title = 'Программное обеспечение';
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 $manufacturers=\app\models\Manufacturers::fetchNames();
 ?>

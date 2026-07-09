@@ -9,8 +9,7 @@ $view_max_width=800;
 //$view_max_height=800;
 
 $this->title = $model->descr;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Scans::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $thumbName=$model->viewThumb;
 //$contracts=$model->contracts;
 

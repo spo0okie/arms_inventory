@@ -7,8 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Scans */
 
 $this->title = 'Create Scans';
-$this->params['breadcrumbs'][] = ['label' => 'Scans', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="scans-create">
 

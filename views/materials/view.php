@@ -12,8 +12,7 @@ use yii\web\YiiAsset;
 Url::remember();
 $this->title =  $model->type->name.': '. $model->model;
 
-$this->params['breadcrumbs'][] = ['label' => Materials::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 
 YiiAsset::register($this);
 

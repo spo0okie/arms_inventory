@@ -42,7 +42,6 @@ class DynaGridWidget extends DynaGrid
 	public $header;
 	public $panel;
 	public $createButton;
-	public $hintButton;
 	public $toolButton;
 	public $resizableColumns=true;
 	public $showFooter=false;
@@ -219,7 +218,8 @@ class DynaGridWidget extends DynaGrid
 				['content'=>'{dynagrid}'],
 				//['content'=>'{dynagridFilter}{dynagridSort}{dynagrid}'],
 				['content'=>'{export}'],
-				['content'=>$this->hintButton],
+				//иконка справки страницы переехала в правый край breadcrumbs
+				//(views/layouts/main.php) — единый тогглер для списка и карточки
 			],
 			'condensed' => true,
 			'dataProvider' => $this->dataProvider,

@@ -10,15 +10,12 @@ use yii\helpers\Html;
 $modelClass=get_class($model);
 $classId=StringHelper::class2Id($modelClass);
 
-$indexTitle=$modelClass::$titles??$modelClass::$title??'Список';
-
 $this->title = ($modelClass::$newItemPrefix??'Создание')
 	.' '
 	.mb_strtolower($modelClass::$title??'Объект');
 
-
-$this->params['breadcrumbs'][] = ['label' => $indexTitle, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки [Список → заголовок] собираются автоматически в layout
+//(см. views/layouts/main.php)
 ?>
 <div class="<?= $classId ?>-create">
 

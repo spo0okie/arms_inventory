@@ -17,8 +17,7 @@ use yii\helpers\StringHelper;
  */
 
 $this->title = 'Статистика использования тегов';
-$this->params['breadcrumbs'][] = ['label' => 'Теги', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 
 <div class="tags-statistics">

@@ -12,22 +12,11 @@ MermaidAsset::register($this);
 /* @var $maxHeight string ограничение высоты с внутренним скроллом */
 /* @var $moreUrl array маршрут полной страницы справочника */
 
-//свернута по умолчанию; тогглер - клик по ссылке с data-panel-target;
-//состояние запоминается на клиенте по ключу страницы
-$this->registerJs(<<<JS
-(function(){
-	var key='docsPanel:'+location.pathname+':$panelId';
-	var panel=$('#$panelId');
-	if (localStorage.getItem(key)==='open') panel.show();
-	$(document).on('click','a[data-panel-target="#$panelId"]',function(e){
-		e.preventDefault();
-		panel.slideToggle(150,function(){
-			localStorage.setItem(key,panel.is(':visible')?'open':'closed');
-		});
-	});
-})();
-JS);
-
+//Панель свёрнута по умолчанию (display:none). Тогглер и режим справки
+//(help-mode) обрабатываются ЕДИНЫМ глобальным скриптом в layout
+//(views/layouts/main.php): клик по иконке с data-panel-target всегда
+//переключает подсветку атрибутов, а панель показывает/прячет, если она
+//есть на странице. Здесь — только разметка панели.
 ?>
 <div class="docs-panel" id="<?= $panelId ?>" style="display: none">
 	<div class="card card-body mb-3" style="max-height: <?= $maxHeight ?>; overflow-y: auto;">

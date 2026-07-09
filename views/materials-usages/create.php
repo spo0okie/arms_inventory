@@ -6,8 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\MaterialsUsages */
 
 $this->title = 'Create Materials Usages';
-$this->params['breadcrumbs'][] = ['label' => 'Materials Usages', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="materials-usages-create">
 

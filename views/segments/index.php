@@ -1,7 +1,6 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\HintIconWidget;
 use app\components\ShowArchivedWidget;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -15,7 +14,7 @@ use yii\helpers\Url;
 Url::remember();
 
 $this->title = app\models\Segments::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 
 $filtered=false;
@@ -38,7 +37,6 @@ if (isset($switchArchivedCount)) {
 		'columns' => require 'columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
 		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success','title'=>'Добавить новый элемент']),
-		'hintButton' => HintIconWidget::widget(['model'=>'\app\models\Segments','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 		'toolButton'=> '<span class="p-2">'. ShowArchivedWidget::widget([

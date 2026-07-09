@@ -7,7 +7,7 @@ use app\models\Services;
 use app\models\Users;
 use yii\helpers\Html;
 use yii\helpers\Url;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ServicesSearch */
@@ -18,8 +18,7 @@ use app\components\widgets\page\ModelWidget;
 Url::remember();
 
 $this->title = 'Распределение по сотрудникам';
-$this->params['breadcrumbs'][] = ['label' => Services::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $models=$dataProvider->models;
 
 $renderer=$this;

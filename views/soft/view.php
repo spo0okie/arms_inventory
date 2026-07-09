@@ -15,8 +15,7 @@ use yii\widgets\DetailView;
 /* @var $licProvider yii\data\ActiveDataProvider */
 
 $this->title = (is_object($model->manufacturer)?$model->manufacturer->name.' ':'').$model->descr;
-$this->params['breadcrumbs'][] = ['label' => 'ПО', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 
 $keysCount=0;
 

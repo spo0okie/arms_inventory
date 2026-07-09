@@ -7,8 +7,7 @@ use app\models\OrgPhones;
 /* @var $model app\models\OrgPhones */
 
 $this->title = $model->sname;
-$this->params['breadcrumbs'][] = ['label' => OrgPhones::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="org-phones-view">
 	<?= $this->render('card',['model'=>$model]) ?>

@@ -118,7 +118,7 @@ JS;
 <?php
 echo ModelFieldWidget::widget([
 	'model' => $model, 'field' => 'techs',
-	'title' => 'Прикреплен к АРМ/оборудованию:',
+	'label' => 'Прикреплен к АРМ/оборудованию:',
 	'item_options' => ['static_view' => $static_view, 'class'=>'text-nowrap','rc'=>true],
 	'card_options' => ['cardClass' => 'mb-3'],
 	//'lineBr'=> $static_view,
@@ -126,35 +126,35 @@ echo ModelFieldWidget::widget([
 
 echo ModelFieldWidget::widget([
 	'model' => $model, 'field' => 'materials',
-	'title' => 'Прикреплен к поступлениям ЗиП и материалов:',
+	'label' => 'Прикреплен к поступлениям ЗиП и материалов:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
 echo ModelFieldWidget::widget([
 	'model' => $model, 'field' => 'licItems',
-	'title' => 'Прикреплен к закупкам лицензий:',
+	'label' => 'Прикреплен к закупкам лицензий:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
 echo ModelFieldWidget::widget([
 	'model' => $model, 'field' => 'services',
-	'title' => 'Прикреплен к услугам:',
+	'label' => 'Прикреплен к услугам:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
 echo ModelFieldWidget::widget([
 	'model' => $model, 'field' => 'partners',
-	'title' => 'Контрагенты:',
+	'label' => 'Контрагенты:',
 	'item_options' => ['static_view' => $static_view, ],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);
 
 echo ModelFieldWidget::widget([
 	'model' => $model, 'field' => 'users',
-	'title' => 'Пользователи:',
+	'label' => 'Пользователи:',
 	'item_options' => ['static_view' => $static_view, 'noDelete'=>true],
 	'card_options' => ['cardClass' => 'mb-3'],
 ]);

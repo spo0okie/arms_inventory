@@ -23,6 +23,9 @@ use yii\helpers\ArrayHelper;
 class Manufacturers extends ArmsModel
 {
 
+	public static $title='Производитель';
+	public static $titles='Производители';
+
 	public static function modelDescription(): string
 	{
 		return 'Справочник производителей оборудования и разработчиков ПО.';

@@ -27,29 +27,78 @@ if (isset($this->params['layout-container'])) {
 $request=Yii::$app->urlManager->parseRequest(Yii::$app->request);
 $path=is_array($request)?$request[0]:'';
 
-//инфоблок документации сущности на карточке (plans/help-inline.md): секция
-//«Просмотр» страницы models/<class-id>.md. Класс берём у контроллера
-//(секция контентная, уровня класса) - работает и на кастомных view.php;
-//иконка помощи служит тогглером, пустая секция не рендерит ничего.
+//Справка по странице — единый тогглер (иконка «?») в правом крае breadcrumbs,
+//одинаково на списках и карточках. Иконка и панель развязаны (клик ловится
+//делегированно по data-panel-target, см. docsPanel/panel.php), поэтому панель
+//рендерится там, где ей место: на карточке — блоком под breadcrumbs (ниже),
+//на списке — над таблицей (DynaGridWidget). Класс берём у контроллера.
 $docsPanelBlock='';
+$pageHelpIcon='';
 $ctrl=Yii::$app->controller;
-if ($ctrl && ($ctrl->action->id??null)==='view'
-	&& isset($ctrl->modelClass) && is_subclass_of($ctrl->modelClass,\app\models\base\ArmsModel::class)
-) {
-	$docsPanel=\app\components\DocsPanelWidget::widget([
+if ($ctrl && isset($ctrl->modelClass) && is_subclass_of($ctrl->modelClass,\app\models\base\ArmsModel::class)) {
+	$pageHelpIcon=\app\components\HintIconWidget::widget([
 		'model'=>$ctrl->modelClass,
-		'sections'=>['Просмотр'],
+		'action'=>$ctrl->action->id ?? 'index',
+		'hintText'=>'Справка по этой странице',
 	]);
-	if ($docsPanel!=='') {
-		$docsPanelBlock=Html::tag('div',
-			\app\components\HintIconWidget::widget([
-				'model'=>$ctrl->modelClass,
-				'action'=>'view',
-				'hintText'=>'Справка по этой карточке',
-			]).$docsPanel,
-			['class'=>'px-5 mb-2']
-		);
+
+	//инфопанель «Просмотр» на карточке (plans/help-inline.md): только тело,
+	//тогглер — иконка в breadcrumbs выше; пустая секция не рендерит ничего
+	if (($ctrl->action->id??null)==='view') {
+		$docsPanel=\app\components\DocsPanelWidget::widget([
+			'model'=>$ctrl->modelClass,
+			'sections'=>['Просмотр'],
+		]);
+		if ($docsPanel!=='') {
+			$docsPanelBlock=Html::tag('div',$docsPanel,['class'=>'px-5 mb-2']);
+		}
 	}
+}
+
+//Авто-крошки: если вьюха не задала $this->params['breadcrumbs'] явно, собираем
+//стандартный трейл из модели контроллера + действия + заголовка страницы
+//($this->title вьюха ставит ДО рендера layout). Так крошки есть на ВСЕХ
+//модельных страницах без дублирования кода по вьюхам; более полный/кастомный
+//трейл по-прежнему задаётся явно во вьюхе и перекрывает авто-вывод (напр.
+//update-страница добавляет средним звеном ссылку на карточку объекта).
+if (empty($this->params['breadcrumbs'])
+	&& $ctrl && isset($ctrl->modelClass)
+	&& is_subclass_of($ctrl->modelClass,\app\models\base\ArmsModel::class)
+) {
+	$mc=$ctrl->modelClass;
+	//$titles всегда объявлен (базовый ArmsModel) и осмыслен — этого требует
+	//сторож tests/unit/models/ModelTitlesTest у всех модельных контроллеров
+	$indexTitle=$mc::$titles;
+	$autoCrumbs=[];
+	//на не-index действиях первым пунктом — ссылка на список
+	if (($ctrl->action->id??null)!=='index')
+		$autoCrumbs[]=['label'=>$indexTitle,'url'=>['index']];
+	//текущая страница — её заголовок (для index это уже плюрал), иначе плюрал
+	$autoCrumbs[]=($this->title!==null && $this->title!=='')?$this->title:$indexTitle;
+	$this->params['breadcrumbs']=$autoCrumbs;
+}
+
+//breadcrumbs с иконкой справки в правом крае (иконка — только если у страницы
+//есть docs-модель); используется во всех трёх ветках шапки ниже.
+//Иконку кладём ВНУТРЬ ленты (<li>, прижатый вправо через margin-left:auto,
+//см. page-header.css), чтобы полоса осталась во всю ширину и симметричной —
+//обёртка-флекс ужимала <ol> и ломала бордюрную полосу nav-header.
+$crumbsBar=Breadcrumbs::widget([
+	'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+]);
+if ($pageHelpIcon!=='') {
+	$iconLi=Html::tag('li',$pageHelpIcon,['class'=>'docs-help-crumb']);
+	$crumbsBar=str_contains($crumbsBar,'</ol>')
+		//есть лента крошек — иконку добавляем последним пунктом
+		? str_replace('</ol>',$iconLi.'</ol>',$crumbsBar)
+		//крошек нет (Breadcrumbs вернул пусто) — строим минимальную ленту с
+		//«Главная» (ровно как Yii авто-добавляет на прочих страницах) + иконка,
+		//чтобы полоса была цельной, а иконка не висела голым <li> с маркером
+		: Html::tag('ol',
+			Html::tag('li',Html::a(Yii::t('yii','Home'),Yii::$app->homeUrl),['class'=>'breadcrumb-item'])
+			.$iconLi,
+			['class'=>'breadcrumb']
+		);
 }
 
 $this->beginPage() ?>
@@ -68,14 +117,80 @@ $this->beginPage() ?>
 
 <?php $this->beginBody() ?>
 
+<?php /* Единый тогглер справки страницы. Намеренно отдельным <script> на vanilla JS:
+   отдельный тег исполняется независимо (ошибка в чужом скрипте его не отменит),
+   делегирование на document не требует DOM-ready и jQuery.ready-очереди, а jQuery
+   нужен лишь для анимации панели (к моменту клика уже загружен). Клик по любой иконке
+   справки (a[data-panel-target]) переключает подсветку атрибутов (body.help-mode);
+   панель показывается/прячется, только если она есть на странице (на формах её нет). */ ?>
+<script>
+(function(){
+	function key(){return 'helpMode:'+location.pathname;}
+	document.addEventListener('click',function(e){
+		var a=e.target.closest&&e.target.closest('a[data-panel-target]');
+		if(!a) return;
+		e.preventDefault();
+		var on=!document.body.classList.contains('help-mode');
+		document.body.classList.toggle('help-mode',on);
+		try{localStorage.setItem(key(),on?'on':'off');}catch(_){}
+		var sel=a.getAttribute('data-panel-target'), p=sel&&document.querySelector(sel);
+		if(p){ if(window.jQuery){window.jQuery(p).slideToggle(150);} else {p.style.display=on?'':'none';} }
+	});
+	document.addEventListener('DOMContentLoaded',function(){
+		try{
+			if(localStorage.getItem(key())!=='on') return;
+			document.body.classList.add('help-mode');
+			var a=document.querySelector('a[data-panel-target]'),
+				sel=a&&a.getAttribute('data-panel-target'),
+				p=sel&&document.querySelector(sel);
+			if(p) p.style.display='';
+		}catch(_){}
+	});
+})();
+</script>
+
+<?php /* Подсветка элемента интерфейса по клику на ссылку из встроенной документации.
+   Автор дока связывает строку описания с элементом по ключу: в MD — обычной ссылкой
+   [текст](#doc-anchor:КЛЮЧ) (её href переживает рендер, DocsHelper::rewriteHtmlLinks
+   не трогает якоря) или raw-HTML <a data-doc-anchor="КЛЮЧ">; на самом элементе —
+   атрибут data-doc-anchor="КЛЮЧ". Клик по ссылке скроллит к элементу и подсвечивает
+   его на пару секунд (.doc-anchor-highlight, site.css). Если элемента на странице нет
+   — ссылка ведёт себя как обычная. Отдельный vanilla-<script> по тем же причинам, что
+   и тогглер справки выше (независимое исполнение, делегирование без DOM-ready). */ ?>
+<script>
+(function(){
+	var PREFIX='#doc-anchor:';
+	function keyOf(a){
+		if(a.hasAttribute('data-doc-anchor')) return a.getAttribute('data-doc-anchor');
+		var href=a.getAttribute('href')||'';
+		return href.indexOf(PREFIX)===0 ? decodeURIComponent(href.slice(PREFIX.length)) : null;
+	}
+	function inDocs(el){ return !!(el.closest && el.closest('.docs-panel,.docs-page,.modal')); }
+	document.addEventListener('click',function(e){
+		var a=e.target.closest && e.target.closest('a[href^="'+PREFIX+'"], a[data-doc-anchor]');
+		if(!a) return;
+		var k=keyOf(a); if(!k) return;
+		var esc=(window.CSS&&CSS.escape)?CSS.escape(k):k.replace(/["\\]/g,'\\$&');
+		var list=document.querySelectorAll('[data-doc-anchor="'+esc+'"]'), target=null;
+		//цель — элемент с тем же ключом, но не сама ссылка и не внутри документации
+		for(var i=0;i<list.length;i++){ if(list[i]!==a && !inDocs(list[i])){ target=list[i]; break; } }
+		if(!target) return;
+		e.preventDefault();
+		if(target.scrollIntoView) target.scrollIntoView({behavior:'smooth',block:'center'});
+		target.classList.remove('doc-anchor-highlight');
+		void target.offsetWidth; //рестарт CSS-анимации при повторном клике
+		target.classList.add('doc-anchor-highlight');
+		window.setTimeout(function(){ target.classList.remove('doc-anchor-highlight'); },2200);
+	});
+})();
+</script>
+
 <div class="wrap">
 
 	<?= $this->render('menu') ?>
 	<?php if (isset($this->params['navTabs'])) { ?>
 		<div class="nav-header">
-			<?= Breadcrumbs::widget([
-				'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-			]) ?>
+			<?= $crumbsBar ?>
 			<?= Alert::widget() ?>
 			<?= $docsPanelBlock ?>
 			<?= $this->params['headerWidgets']??'' ?>
@@ -88,9 +203,7 @@ $this->beginPage() ?>
 		],$this->params['tabsParams']??[])); ?>
 	<?php } elseif (isset($this->params['headerContent'])) { ?>
 		<div class="nav-header">
-			<?= Breadcrumbs::widget([
-				'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-			]) ?>
+			<?= $crumbsBar ?>
 			<?= Alert::widget() ?>
 			<?= $docsPanelBlock ?>
 			<div class="px-5"><?= $this->params['headerContent'] ?></div>
@@ -100,9 +213,7 @@ $this->beginPage() ?>
 		</div>
 	<?php } else { ?>
 		<div class="<?= $containerClass ?>">
-			<?= Breadcrumbs::widget([
-				'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-			]) ?>
+			<?= $crumbsBar ?>
 			<?= Alert::widget() ?>
 			<?= $docsPanelBlock ?>
 			<?= $content ?>

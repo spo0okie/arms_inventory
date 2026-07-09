@@ -6,8 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\SoftLists */
 
 $this->title = "Новый ".app\models\SoftLists::$title;
-$this->params['breadcrumbs'][] = ['label' => app\models\SoftLists::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="soft-lists-create">
 

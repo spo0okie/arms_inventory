@@ -9,8 +9,7 @@ use yii\helpers\Html;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = $model->descr;
-$this->params['breadcrumbs'][] = ['label' => 'Списки ПО', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 ?>
 <div class="soft-lists-view">

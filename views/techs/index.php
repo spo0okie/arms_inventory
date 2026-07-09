@@ -13,7 +13,7 @@ use yii\helpers\Html;
 /* @var $switchArchivedCount int|null */
 $renderer = $this;
 $this->title = \app\models\Techs::$title;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $this->params['layout-container'] = 'container-fluid';
 
 //признак того, что в форму поиска вбиты данные (для цвета бейджа с дельтой)
@@ -33,7 +33,6 @@ if ($switchArchivedDelta > 0) $switchArchivedDelta = '+' . $switchArchivedDelta;
 		'columns' => require 'columns.php',
 		'defaultOrder' => ['attach','num','model','sn','mac','ip','state','user','place','inv_num','comment'],
 		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
-		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Techs','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 		'toolButton'=>

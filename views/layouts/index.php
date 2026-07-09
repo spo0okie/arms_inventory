@@ -1,7 +1,6 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\HintIconWidget;
 use app\components\ShowArchivedWidget;
 use app\helpers\StringHelper;
 use yii\bootstrap5\Html;
@@ -23,7 +22,7 @@ if (!isset($additionalCreateButton)) $additionalCreateButton='';
 if (!isset($additionalToolButton)) $additionalToolButton='';
 
 $this->title = $modelClass::$titles??$modelClass::$title??'Список';
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (см. views/layouts/main.php)
 
 
 //если у нас есть разница от переключения флажка "архивные"
@@ -56,10 +55,6 @@ if (isset(Yii::$app->request->get()[$searchClass])) {
 				'title' => $modelClass::$addButtonHint??null,
 			]
 		).$additionalCreateButton,
-		'hintButton' => HintIconWidget::widget([
-			'model'=>$modelClass,
-			'cssClass'=>'btn'
-		]),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel??null,
 		'toolButton'=> $additionalToolButton

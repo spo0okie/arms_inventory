@@ -184,28 +184,28 @@ if(!$static_view) { ?>
 		
 		<?= ModelFieldWidget::widget([
 			'model' => $model, 'field' => 'comps',
-			'title'=>'Выполняется на компьютерах:',
+			'label'=>'Выполняется на компьютерах:',
 			'item_options'=>['static_view'=>$static_view,'fqdn'=>true],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
 		<?= ModelFieldWidget::widget([
 			'model' => $model, 'field' => 'techs',
-			'title'=>'Выполняется на оборудовании:',
+			'label'=>'Выполняется на оборудовании:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
 		<?= ModelFieldWidget::widget([
 			'model' => $model, 'field' => 'depends',
-			'title'=>'Зависит от сервисов:',
+			'label'=>'Зависит от сервисов:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
 		
 		<?= ModelFieldWidget::widget([
 			'model' => $model, 'field' => 'dependants',
-			'title'=>'Зависимые сервисы:',
+			'label'=>'Зависимые сервисы:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>

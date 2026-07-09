@@ -529,9 +529,9 @@ class CompsController extends ArmsBaseController
 		/** @var Comps $model */
 
 		$ignored=explode("\n",$model->ip_ignore);
-		$id=array_search($ip,$ignored);
-		if (!is_null($id)) {
-			unset($ignored[$id]);
+		$key=array_search($ip,$ignored);
+		if ($key!==false) {
+			unset($ignored[$key]);
 			$model->ip_ignore=implode("\n",array_unique($ignored));
 			$model->save();
 		}

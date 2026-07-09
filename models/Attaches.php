@@ -37,6 +37,9 @@ class Attaches extends ArmsModel
         return 'attaches';
     }
 
+	public static $title='Вложение';
+	public static $titles='Вложения';
+
 	public static function modelDescription(): string
 	{
 		return 'Файлы-вложения (сканы, фотографии, документы), прикреплённые к объектам '

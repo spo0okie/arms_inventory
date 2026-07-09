@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\NetVlans */
 
 $this->title = 'Правка: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\NetVlans::$title, 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => \app\models\NetVlans::$titles, 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Правка';
 ?>

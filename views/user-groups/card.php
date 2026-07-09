@@ -46,12 +46,12 @@ $deleteable=!count($users);
 <?= ModelFieldWidget::widget([
 	'model'=>$model,
 	'field'=>'users_ids',
-	'title'=>'Участники:',
+	'label'=>'Участники:',
 	'item_options'=>['static_view'=>$static_view],
 ]) ?>
 
 <?php if (!$static_view) echo ModelFieldWidget::widget([
 	'model'=>$model,
 	'field'=>'notebook',
-	'title'=>'Записная книжка:',
+	'label'=>'Записная книжка:',
 ]) ?>

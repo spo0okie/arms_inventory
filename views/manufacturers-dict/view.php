@@ -8,8 +8,7 @@ use yii\widgets\DetailView;
 /* @var $model app\models\ManufacturersDict */
 
 $this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Manufacturers Dicts', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="manufacturers-dict-view">
 

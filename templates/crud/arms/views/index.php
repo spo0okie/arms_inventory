@@ -13,7 +13,6 @@ echo "<?php\n";
 ?>
 
 use app\components\DynaGridWidget;
-use app\components\HintIconWidget;
 use app\components\ShowArchivedWidget;
 use app\models\<?= $generator->modelClass ?>;
 use yii\helpers\Html;
@@ -51,7 +50,6 @@ if (isset($switchArchivedCount)) {
 		'columns' => require 'columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
 		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success','title'=>'Добавить новый элемент']),
-		'hintButton' => HintIconWidget::widget(['model'=>'\app\models\<?= $generator->modelClass ?>','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 		'toolButton'=> '<span class="p-2">'. ShowArchivedWidget::widget([

@@ -1,7 +1,6 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\HintIconWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Users;
 use yii\helpers\Html;
@@ -28,7 +27,7 @@ if (isset(Yii::$app->request->get()['UsersSearch'])) {
 }
 
 $this->title = Users::$titles;
-//$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 ?>
 <div class="users-index">
@@ -39,7 +38,6 @@ $renderer=$this;
 		'columns' => require 'columns.php',
 		'defaultOrder' => ['employee_id','shortName','Doljnost','orgStruct_name','Login','Email','Phone','arms','Mobile'],
 		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
-		'hintButton' => HintIconWidget::widget(['model'=>'\app\models\Users','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 		'toolButton'=> '<span class="p-2">'. ShowArchivedWidget::widget([

@@ -15,8 +15,7 @@ use yii\helpers\Html;
 if (!isset($contracts)) $contracts=$model->docs;
 
 $this->title = $model->uname;
-$this->params['breadcrumbs'][] = ['label' => 'Контрагенты', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="partners-view">
 	<div class="row">
@@ -48,7 +47,6 @@ $this->params['breadcrumbs'][] = $this->title;
 		'header' => 'Пользователи организации',
 		'defaultOrder' => ['employee_id','shortName','Doljnost','orgStruct_name','Login','Email','Phone','arms','Mobile'],
 		//'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
-		//'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Users','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]):'' ?>

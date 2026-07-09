@@ -34,7 +34,6 @@ $this->render('breadcrumbs',['partner'=>$model->partner,'model'=>$model]);
 		'header' => 'Пользователи подразделения',
 		'defaultOrder' => ['employee_id','shortName','Doljnost','Login','Email','Phone','arms','Mobile'],
 		//'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
-		//'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\Users','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

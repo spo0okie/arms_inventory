@@ -11,7 +11,7 @@ use yii\helpers\Html;
 $this->title = Contracts::$title;
 $this->params['layout-container'] = 'container-fluid';
 
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 $filter= Html::tag('span','Отфильтровать:',['class'=>'btn']).
 	Html::a('счета',['index','ContractsSearch[fullname]'=>'счет'],['class'=>'btn btn-default']).' // '.

@@ -12,8 +12,7 @@ Url::remember();
 
 $static_view=false;
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => OrgInet::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="org-inet-view">
 	<?= ModelWidget::widget(['model'=>$model->service,'view'=>'card','options'=>['static_view'=>$static_view]]) ?>

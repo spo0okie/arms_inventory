@@ -9,8 +9,7 @@ use dosamigos\selectize\SelectizeDropDownList;
 \yii\helpers\Url::remember();
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\Contracts::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 
 ?>
 <div class="contracts-view">

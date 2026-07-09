@@ -7,8 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Soft */
 
 $this->title = 'Добавить ПО';
-$this->params['breadcrumbs'][] = ['label' => 'ПО', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="soft-create">
 

@@ -8,8 +8,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Places */
 
 $this->title = 'Добавить '. Places::$title;
-$this->params['breadcrumbs'][] = ['label' => Places::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="places-create">
 

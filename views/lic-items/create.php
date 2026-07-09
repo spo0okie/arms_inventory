@@ -10,10 +10,10 @@ if (!isset($modalParent)) $modalParent=null;
 $this->title = 'Внесение новой закупки';
 if (!is_null($model->lic_group_id)) {
     //если группа лицензий указана, то опираемся на группц
-	$this->params['breadcrumbs'][] = ['label' => \app\models\LicGroups::$title, 'url' => ['lic-groups/index']];
+	$this->params['breadcrumbs'][] = ['label' => \app\models\LicGroups::$titles, 'url' => ['lic-groups/index']];
 	$this->params['breadcrumbs'][] = ['label' => $model->licGroup->descr, 'url' => ['lic-groups/view','id'=>$model->lic_group_id]];
 } else {
-	$this->params['breadcrumbs'][] = ['label' => \app\models\LicItems::$title, 'url' => ['index']];
+	$this->params['breadcrumbs'][] = ['label' => \app\models\LicItems::$titles, 'url' => ['index']];
 }
 $this->params['breadcrumbs'][] = $this->title;
 ?>

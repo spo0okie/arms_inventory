@@ -15,8 +15,7 @@ use app\components\widgets\page\ModelWidget;
 Url::remember();
 
 $this->title = $model->num;
-$this->params['breadcrumbs'][] = ['label' => Techs::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 
 ?>

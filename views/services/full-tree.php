@@ -1,7 +1,6 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\HintIconWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Services;
 use yii\helpers\Html;
@@ -48,7 +47,6 @@ if (true) {
 			]).
 			' // '.Html::a('Распределение по сотрудникам','index-by-users').
 			' // '.Html::a('Список','index'),
-		'hintButton' => HintIconWidget::widget(['model'=>'\app\models\Services','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

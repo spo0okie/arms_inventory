@@ -66,6 +66,8 @@ class Scans extends ArmsModel
 		return ['name','fileSize','fileDate','fileExists'];
 	}
 
+	public static $titles='Сканы документов';
+
 	public static function modelDescription(): string
 	{
 		return 'Сканы документов и изображения (png/jpg/pdf/...), прикреплённые к объектам '

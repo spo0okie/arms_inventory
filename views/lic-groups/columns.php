@@ -13,6 +13,7 @@ return [
 	[
 		'attribute'=>'itemsCount',
 		'header'=>'Закупок<br/>акт/всего',
+		'headerOptions'=>['qtip_ttip'=>'Активных (не истёкших) закупок / всего закупок этого типа лицензий'],
 		'format'=>'raw',
 		'value'=>function($item) {
 			return $item->activeItemsCount.'/'.count($item->licItems);
@@ -26,6 +27,7 @@ return [
 	[
 		'attribute'=>'keysCount',
 		'header'=>'Ключей<br/>исп/всего',
+		'headerOptions'=>['qtip_ttip'=>'Распределённых (используемых) лицензий / всего активных лицензий этого типа'],
 		'format'=>'raw',
 		'value'=>function($item) {
 			return $item->usedCount.'/'.$item->activeCount;

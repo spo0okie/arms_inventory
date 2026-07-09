@@ -7,8 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Partners */
 
 $this->title = 'Новый контрагент';
-$this->params['breadcrumbs'][] = ['label' => 'Контрагенты', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="partners-create">
 

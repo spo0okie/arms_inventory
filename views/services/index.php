@@ -1,7 +1,6 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\HintIconWidget;
 use app\components\ShowArchivedWidget;
 use app\components\UrlParamSwitcherWidget;
 use app\models\Services;
@@ -17,7 +16,7 @@ use yii\helpers\Url;
 
 Url::remember();
 $this->title = Services::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $models=$dataProvider->models;
 
 $showChildren=Yii::$app->request->get('showChildren',false);
@@ -72,7 +71,6 @@ if (true) {
 			]).
 			' // '.Html::a('Распределение по сотрудникам','index-by-users').
 			' // '.Html::a('Дерево','index-tree'),
-		'hintButton' => HintIconWidget::widget(['model'=>'\app\models\Services','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

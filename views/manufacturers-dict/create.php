@@ -7,8 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\ManufacturersDict */
 
 $this->title = 'Добавить написание производителя';
-$this->params['breadcrumbs'][] = ['label' => 'Словарь производетелей', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="manufacturers-dict-create">
 

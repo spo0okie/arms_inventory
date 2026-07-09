@@ -8,8 +8,7 @@ use yii\widgets\DetailView;
 /* @var $model app\models\TechStates */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\models\TechStates::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="tech-states-view">
 

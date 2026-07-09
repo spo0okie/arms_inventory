@@ -13,8 +13,7 @@ use yii\helpers\Url;
 
 Url::remember();
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => TechTypes::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 
 $techModels=$model->techModels;
 

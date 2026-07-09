@@ -14,8 +14,7 @@ use yii\web\YiiAsset;
 Url::remember();
 
 $this->title = $model->sname;
-$this->params['breadcrumbs'][] = ['label' => app\models\Networks::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 YiiAsset::register($this);
 
 $showEmpty= Yii::$app->request->get('showEmpty',false);

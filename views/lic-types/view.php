@@ -9,8 +9,7 @@ use yii\widgets\DetailView;
 \yii\helpers\Url::remember();
 
 $this->title = $model->descr;
-$this->params['breadcrumbs'][] = ['label' => \app\models\LicTypes::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="lic-types-view">
     <?= $this->render('card',compact('model')) ?>

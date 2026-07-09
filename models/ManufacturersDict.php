@@ -16,6 +16,9 @@ use Yii;
  */
 class ManufacturersDict extends ArmsModel
 {
+	public static $title='Синоним производителя';
+	public static $titles='Синонимы производителей';
+
 	public static function modelDescription(): string
 	{
 		return 'Словарь вариантов написания производителей: сопоставляет строки из '

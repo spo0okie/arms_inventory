@@ -14,8 +14,7 @@ use yii\web\YiiAsset;
 if (!isset($static_view)) $static_view=false;
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => Acls::$scheduleTitles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 Url::remember();
 
 $providingServices=$model->providingServices;

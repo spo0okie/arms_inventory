@@ -19,8 +19,7 @@ use yii\web\YiiAsset;
 Url::remember();
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => app\models\MaintenanceJobs::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 YiiAsset::register($this);
 
 $this->params['headerContent']=$this->render('header',['model'=>$model]);

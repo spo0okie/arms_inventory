@@ -17,6 +17,14 @@ div.nav-header .breadcrumb{
     border-bottom: #3b4a57 1pt solid;
 }
 
+/* иконка справки страницы — последний элемент ленты breadcrumbs, прижатый
+   к правому краю (лента остаётся во всю ширину, полоса симметрична) */
+.breadcrumb .docs-help-crumb{
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
 ul.nav-header {
     background-color: #25333d;
     border-bottom: #3b4a57 2px solid;

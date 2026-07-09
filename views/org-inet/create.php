@@ -7,8 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\OrgInet */
 
 $this->title = 'Новое подключение интернет';
-$this->params['breadcrumbs'][] = ['label' => \app\models\OrgInet::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="org-inet-create">
 

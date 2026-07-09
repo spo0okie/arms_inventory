@@ -20,7 +20,7 @@ Url::remember();
 
 $renderer=$this;
 $this->title = $model->nameWithVendor;
-$this->params['breadcrumbs'][] = ['label' => TechTypes::$title, 'url' => ['/tech-types/index']];
+$this->params['breadcrumbs'][] = ['label' => TechTypes::$titles, 'url' => ['/tech-types/index']];
 $this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['/tech-types/view','id'=>$model->type_id]];
 $this->params['breadcrumbs'][] = $this->title;
 $static_view=false;
@@ -85,7 +85,6 @@ $static_view=false;
 			'class' => 'btn btn-success open-in-modal-form',
 			'data-reload-page-on-submit'=>1
 		]),
-		//'hintButton' => \app\components\HintIconWidget::widget(['model' => '\app\models\Arms', 'cssClass' => 'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

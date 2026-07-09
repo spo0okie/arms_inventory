@@ -2,13 +2,13 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = \app\models\TechStates::$title;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 
 $renderer=$this;
 ?>

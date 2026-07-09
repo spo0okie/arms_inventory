@@ -8,8 +8,7 @@ use yii\helpers\Html;
 if (!isset($modalParent)) $modalParent=null;
 
 $this->title = "Новый ".app\models\Segments::$title;
-$this->params['breadcrumbs'][] = ['label' => app\models\Segments::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="segments-create">
 

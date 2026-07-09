@@ -260,6 +260,37 @@ class AttributeTooltipTest extends Unit
 	}
 
 	/**
+	 * В тултипах объекта (ttip-действиях) иконка «?» атрибута подавляется
+	 * (тултип в тултипе — шум), но остаётся на обычных страницах. Аналогично
+	 * тому, как LinkObjectWidget не делает ссылку на объект на его own view/ttip.
+	 */
+	public function testIconHiddenInTooltipContext()
+	{
+		$tooltip = ['title' => 'Заголовок', 'body' => 'Тело'];
+
+		//вне ttip-действия иконка есть
+		$this->assertStringContainsString('attr-hint-icon', AttributeTooltip::icon($tooltip));
+
+		$prev = \Yii::$app->controller;
+		try {
+			foreach (['ttip', 'ttip-hw', 'ttips'] as $actionId) {
+				$ctrl = new \app\controllers\CompsController('comps', \Yii::$app);
+				$ctrl->action = new \yii\base\Action($actionId, $ctrl);
+				\Yii::$app->controller = $ctrl;
+				$this->assertSame('', AttributeTooltip::icon($tooltip), "иконка должна прятаться в действии $actionId");
+			}
+
+			//не-ttip действие иконку не прячет
+			$ctrl = new \app\controllers\CompsController('comps', \Yii::$app);
+			$ctrl->action = new \yii\base\Action('view', $ctrl);
+			\Yii::$app->controller = $ctrl;
+			$this->assertStringContainsString('attr-hint-icon', AttributeTooltip::icon($tooltip));
+		} finally {
+			\Yii::$app->controller = $prev;
+		}
+	}
+
+	/**
 	 * Форма (FieldsHelper::labelOption): тултип-опции на иконке в составе
 	 * label, сами label-опции чистые (qtip на label не вешается).
 	 */

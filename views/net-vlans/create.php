@@ -6,8 +6,7 @@ use yii\helpers\Html;
 /* @var $model app\models\NetVlans */
 
 $this->title = "Новый ".\app\models\NetVlans::$title;
-$this->params['breadcrumbs'][] = ['label' => \app\models\NetVlans::$title, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 ?>
 <div class="net-vlans-create">
 

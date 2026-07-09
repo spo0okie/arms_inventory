@@ -11,8 +11,7 @@ use app\components\widgets\page\ModelWidget;
 use yii\helpers\Url;
 
 $this->title = $model->Ename;
-$this->params['breadcrumbs'][] = ['label' => Users::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 
 Url::remember();
 
@@ -43,7 +42,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'services',
-				'title' => 'Ответственный за сервисы:',
+				'label' => 'Ответственный за сервисы:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
@@ -51,7 +50,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'infrastructureServices',
-				'title' => 'Ответственный за инфраструктуру:',
+				'label' => 'Ответственный за инфраструктуру:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
@@ -59,7 +58,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => $compsField,
-				'title' => 'Ответственный за ОС:',
+				'label' => 'Ответственный за ОС:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
@@ -67,7 +66,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'adminComps',
-				'title' => 'Выданы полномочия администратора:',
+				'label' => 'Выданы полномочия администратора:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
@@ -75,7 +74,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'techsHead',
-				'title' => 'АРМ/оборудование числящиеся за подчиненными:',
+				'label' => 'АРМ/оборудование числящиеся за подчиненными:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
@@ -83,7 +82,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'techsIt',
-				'title' => 'Обслуживаемое сотрудником оборудование:',
+				'label' => 'Обслуживаемое сотрудником оборудование:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
@@ -91,7 +90,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'techsResponsible',
-				'title' => 'АРМ/оборудование в ответственности:',
+				'label' => 'АРМ/оборудование в ответственности:',
 				'item_options' => ['static_view' => $static_view, ],
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
@@ -115,7 +114,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'contracts',
-				'title' => 'Документы:',
+				'label' => 'Документы:',
 				'item_options' => ['static_view' => $static_view, 'user'=>false ],
 				'card_options' => ['cardClass' => 'mb-3'],
 			]);

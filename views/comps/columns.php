@@ -29,6 +29,7 @@ $armsColumns=include __DIR__.'/../techs/columns.php';
 $armStatus=$armsColumns['state_id'];
 return [
 	'name' => [
+		'headerOptions'=>['qtip_ttip'=>'Цвет ячейки = давность последних данных от скрипта инвентаризации: до часа — ярко-голубой, до суток — бледно-голубой, до недели — зелёный, до месяца — жёлтый, свыше — красный.'],
 		'value' => function ($data) use ($renderer,$static_view) {
 			return ModelWidget::widget(['model'=>$data,'options'=>['icon'=>true,'static_view'=>$static_view]]);
 		},

@@ -10,7 +10,7 @@ use yii\helpers\Html;
 \yii\helpers\Url::remember();
 
 $this->title = app\models\NetIps::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 ?>
 <div class="net-ips-index">

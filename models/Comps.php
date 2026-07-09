@@ -331,7 +331,9 @@ class Comps extends ArmsModel
 			],
 			'netIps_ids' => [
 				'IP адреса',
-				'hint' => 'Распознанные IP адреса этой ОС (ссылки на объекты IP)',
+				'hint' => 'Распознанные IP адреса этой ОС (ссылки на объекты IP).<br>'
+					.'Технический адрес можно скрыть значком «глаз» — он перейдёт '
+					.'в игнорируемые и перестанет учитываться.',
 			],
 			'soft_ids' => [
 				'Распознанное ПО',
@@ -352,7 +354,15 @@ class Comps extends ArmsModel
 				'hint' => 'IP адреса сетевых интерфейсов настроенных в ОС',
 				'typeClass'=>\app\types\IpsType::class,
 			],
-			'ip_ignore' => ['absorb' => 'ifEmpty','typeClass'=>\app\types\IpsType::class],
+			'ip_ignore' => [
+				'Скрытые (игнорируемые) адреса',
+				'hint' => 'Технические адреса ОС (виртуальные интерфейсы, туннели, '
+					.'служебные), скрытые «глазом» из карты адресов. Игнорируемые '
+					.'адреса не попадают в реестр IP, сегменты и поиск оборудования; '
+					.'вернуть адрес можно тем же значком, раскрыв скрытые '
+					.'переключателем «Архивные».',
+				'absorb' => 'ifEmpty','typeClass'=>\app\types\IpsType::class,
+			],
 			'lics' => [
 				'Лицензии',
 				'hint' => 'Все привязанные лицензии:<br>Типы лицензий, закупки, ключи',
@@ -865,8 +875,12 @@ class Comps extends ArmsModel
 			if (!Soft::$disable_rescan) //если только автообновление привязок не блокировано
 			$this->softHits_ids=array_keys($this->swList->items);
 
-			/* взаимодействие с NetIPs */
-			$this->netIps_ids=NetIps::fetchIpIds($this->ip);
+			/* взаимодействие с NetIPs: в реестр адресов (а значит и в сегменты/сети
+			   и в пропагацию поиска оборудования) попадают только НЕ игнорируемые
+			   адреса — ip_ignore вычитается из ip (см. getFilteredIps). Скрытые
+			   «глазом» технические адреса теряют привязку к ОС и уходят из реестра. */
+			$this->ip_cache=$this->ip_ignore_cache=$this->ip_filtered_cache=null;
+			$this->netIps_ids=NetIps::fetchIpIds(implode("\n",$this->filteredIps));
 
 			if ($this->platform_id) $this->arm_id=null;
 

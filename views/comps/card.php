@@ -36,7 +36,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 	if ($model instanceof HistoryModel) {
 		echo IsHistoryObjectWidget::widget(['model'=>$model]);
 	} else { ?>
-		<span class="unit-status <?= $model->updatedRenderClass ?> href" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()"><?= $model->updatedText ?></span>
+		<span class="unit-status <?= $model->updatedRenderClass ?> href" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()" qtip_ttip="Давность последних данных от скрипта инвентаризации.<br>Цвет: до часа — ярко-голубой, до суток — бледно-голубой, до недели — зелёный, до месяца — жёлтый, свыше — красный.<br>Клик — дата обновления и версия скрипта."><?= $model->updatedText ?></span>
 		<br />
 	<?php } ?>
 	<?= IsArchivedObjectWidget::widget(['model'=>$model]) ?>
@@ -103,19 +103,19 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 			<?= ModelFieldWidget::widget([
 				'model'=>$model,
 				'field'=>'services',
-				'title'=>'Участвует в работе сервисов:',
+				'label'=>'Участвует в работе сервисов:',
 				'card_options'=>['cardClass'=>'pe-5 mb-3']
 			]) ?>
 			<?= ModelFieldWidget::widget([
 				'model'=>$model,
 				'field'=>'effectiveMaintenanceReqs',
-				'title'=>'Требует обслуживания:',
+				'label'=>'Требует обслуживания:',
 				'card_options'=>['cardClass'=>'pe-5 mb-3']
 			]) ?>
 			<?= ModelFieldWidget::widget([
 				'model'=>$model,
 				'field'=>'maintenanceJobs',
-				'title'=>'Обслуживается:',
+				'label'=>'Обслуживается:',
 				'card_options'=>['cardClass'=>'pe-5 mb-3']
 			]) ?>
 		</div>
@@ -125,7 +125,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 <?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
 
 <div class="login_journal">
-	<h4>Журнал входов (3 посл)</h4>
+	<h4 qtip_ttip="Три последние записи входа пользователей на эту ОС/ВМ из общего журнала входов.">Журнал входов (3 посл)</h4>
 	<?php
 	$logons=$model->lastThreeLogins;
 	//$logons=$model->logins;

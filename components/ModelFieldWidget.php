@@ -29,7 +29,9 @@ class ModelFieldWidget extends Widget
 	public $model;
 	public $models;
 	public $field;				//поле модели, которое нам нужно
-	public $title;				//заголовок поля
+	public $title;				//заголовок поля (строка «как есть», БЕЗ иконки «?»; false — без заголовка)
+	public $label;				//переопределение ИМЕНИ атрибута в заголовке С сохранением тултипа-иконки «?»
+								//(для нестандартных подписей блока: «Участвует в работе сервисов» и т.п.)
 	public $title_options=[];	//опции для рендера заголовка
 	public $show_archived;		//флаг отображения архивного элемента
 	public $item_options=[];	//опции для рендера элемента
@@ -130,19 +132,19 @@ class ModelFieldWidget extends Widget
 	 * @param mixed $view не используется (оставлен для совместимости вызовов)
 	 * @return array [label, options]
 	 */
-	public static function fieldTitle($model,$field,$view=null)
+	public static function fieldTitle($model,$field,$view=null,$labelOverride=null)
 	{
-		$tooltip=AttributeTooltip::build($model,$field,AttributeTooltip::MODE_VIEW);
-		if (!$tooltip) return [$model->getAttributeLabel($field),[]];
+		$tooltip=AttributeTooltip::build($model,$field,AttributeTooltip::MODE_VIEW,$labelOverride);
+		if (!$tooltip) return [$labelOverride??$model->getAttributeLabel($field),[]];
 		return [
 			$tooltip['title'].' '.AttributeTooltip::icon($tooltip),
 			[]
 		];
 	}
 
-	public static function renderFieldTitle($model,$field,$view=null,$tag='h4')
+	public static function renderFieldTitle($model,$field,$view=null,$tag='h4',$labelOverride=null)
 	{
-		[$title,$options]=static::fieldTitle($model,$field,$view);
+		[$title,$options]=static::fieldTitle($model,$field,$view,$labelOverride);
 		return Html::tag($tag,$title,$options);
 	}
 
@@ -217,7 +219,7 @@ class ModelFieldWidget extends Widget
 		}
 		
 		if (!isset($this->title)) {
-			[$this->title,$title_options]=static::fieldTitle($this->model,$this->field,$this->view);
+			[$this->title,$title_options]=static::fieldTitle($this->model,$this->field,$this->view,$this->label);
 			$this->title_options=ArrayHelper::recursiveOverride($title_options,$this->title_options);
 		}
 	}

@@ -9,10 +9,10 @@ if (!isset($modalParent)) $modalParent=null;
 
 $this->title = 'Новая модель оборудования';
 if ($model->type_id){
-    $this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$title, 'url' => ['/tech-types/index']];
+    $this->params['breadcrumbs'][] = ['label' => \app\models\TechTypes::$titles, 'url' => ['/tech-types/index']];
 	$this->params['breadcrumbs'][] = ['label' => $model->type->name, 'url' => ['/tech-types/view','id'=>$model->type_id]];
 } else {
-	$this->params['breadcrumbs'][] = ['label' => \app\models\TechModels::$title, 'url' => ['/tech-types/index']];
+	$this->params['breadcrumbs'][] = ['label' => \app\models\TechModels::$titles, 'url' => ['/tech-types/index']];
 }
 $this->params['breadcrumbs'][] = $this->title;
 ?>

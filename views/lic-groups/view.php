@@ -25,11 +25,7 @@ Url::remember();
 
 $this->title = $model->descr;
 $static_view=false;
-$breadcrumbs=[];
-$breadcrumbs[] = ['label' => LicGroups::$titles, 'url' => ['index']];
-$breadcrumbs[] = $this->title;
-
-$this->params['breadcrumbs']=$breadcrumbs;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 
 $this->params['headerContent']=
 	'<div class="flex-row d-flex flex-nowrap align-content-stretch">'

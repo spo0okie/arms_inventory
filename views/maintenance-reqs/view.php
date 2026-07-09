@@ -22,8 +22,7 @@ use kartik\markdown\Markdown;
 Url::remember();
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => app\models\MaintenanceReqs::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 YiiAsset::register($this);
 
 $this->params['headerContent']=

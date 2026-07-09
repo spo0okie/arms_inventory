@@ -92,10 +92,28 @@ class AttributeTooltip
 	public static function icon(?array $tooltip): string
 	{
 		if (!$tooltip) return '';
+		//В тултипах (ttip-действиях) иконку «?» не показываем: тултип внутри
+		//тултипа — шум, а место компактное. По той же логике, что LinkObjectWidget
+		//не делает ссылку на объект на его собственных страницах view/ttip.
+		if (static::inTooltipRender()) return '';
 		return Html::tag('span',static::iconGlyph(),array_merge(
 			static::iconOptions(),
 			FieldsHelper::toolTipOptions($tooltip['title'],$tooltip['body'])
 		));
+	}
+
+	/**
+	 * Идёт ли рендер внутри тултипа объекта (ttip-действие: ttip/ttip-hw/ttips).
+	 * В таком контексте иконки «?» атрибутов подавляются (тултип в тултипе — шум).
+	 */
+	protected static function inTooltipRender(): bool
+	{
+		try {
+			$action=Yii::$app->controller->action ?? null;
+		} catch (\Throwable $e) {
+			return false;
+		}
+		return $action!==null && strncmp((string)$action->id,'ttip',4)===0;
 	}
 
 	/**
@@ -115,7 +133,7 @@ class AttributeTooltip
 	 */
 	protected static function iconGlyph(): string
 	{
-		return '<i class="fas fa-question-circle"></i>';
+		return '<i class="far fa-question-circle"></i>';
 	}
 
 	/**

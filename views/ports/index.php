@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\PortsSearch */
@@ -10,7 +10,7 @@ use app\components\widgets\page\ModelWidget;
 \yii\helpers\Url::remember();
 
 $this->title = app\models\Ports::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 ?>
 <div class="ports-index">

@@ -19,8 +19,7 @@ use yii\web\YiiAsset;
 //\yii\helpers\Url::remember();
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => Segments::$titles, 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 YiiAsset::register($this);
 
 $segmentRender=Markdown::convert($model->history??'');

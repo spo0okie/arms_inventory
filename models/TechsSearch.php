@@ -117,6 +117,18 @@ class TechsSearch extends Techs
 			]);
 
         $this->load($params);
+
+		//поиск по IP: адреса ОС берём через привязки ips_in_comps (они уже
+		//вычищены от ip_ignore в Comps::beforeSave), а НЕ из сырого текста
+		//comps.ip — иначе скрытые «глазом» технические адреса всё равно
+		//находились бы в списке оборудования. Отдельный alias comp_ips, чтобы
+		//не конфликтовать с net_ips из joinWith(comp.netIps/netIps). Джойним
+		//только при поиске по IP, чтобы не утяжелять обычный список.
+		if (strlen((string)$this->ip)) {
+			$query
+				->leftJoin('ips_in_comps comp_ips_link','comp_ips_link.comps_id = comps.id')
+				->leftJoin('net_ips comp_ips','comp_ips.id = comp_ips_link.ips_id');
+		}
 	
 		//строка полной маркировки такая сложная, т.к. надо проверить что каждая компонента не NULL
 		//т.к. CONCAT в который передали хоть один NULL верент ответом также NULL
@@ -245,7 +257,7 @@ class TechsSearch extends Techs
 			
 			->andFilterWhere(QueryHelper::querySearchString('CONCAT(partners.uname,partners.bname)', $this->partners_id))
 
-            ->andFilterWhere(QueryHelper::querySearchString(['OR','comps.ip','techs.ip'], $this->ip))
+            ->andFilterWhere(QueryHelper::querySearchString(['OR','comp_ips.text_addr','techs.ip'], $this->ip))
 
 			->andFilterWhere(['techs.model_id'=>$this->model_id])
 			->andFilterWhere(['techs.state_id'=>$this->state_id])

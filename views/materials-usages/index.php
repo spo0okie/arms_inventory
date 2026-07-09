@@ -9,7 +9,7 @@ use yii\helpers\Html;
 $renderer = $this;
 
 $this->title = \app\models\MaterialsUsages::$titles;
-$this->params['breadcrumbs'][] = $this->title;
+//крошки собираются автоматически в layout (views/layouts/main.php)
 
 
 
@@ -21,7 +21,6 @@ $this->params['breadcrumbs'][] = $this->title;
 		'header' => Html::encode($this->title),
 		'columns' => require 'columns.php',
 		//'createButton' => Html::a('Добавить расход', ['create'], ['class' => 'btn btn-success']),
-		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\MaterialsUsages','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

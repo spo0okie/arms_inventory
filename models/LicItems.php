@@ -210,6 +210,7 @@ class LicItems extends ArmsModel
 			],
 			'status' => [
 				'Состояние',
+				'hint' => 'Период действия лицензий закупки (если истёк — с какого числа просрочены) и сколько лицензий распределено из общего количества',
 				'typeClass' => \app\types\StringType::class,
 			],
 			'support' => ['Поддержка','Команда замещающая ответственного на время его отсутствия','typeClass'=>\app\types\StringType::class],
