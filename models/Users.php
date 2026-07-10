@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\helpers\QueryHelper;
 use app\models\base\ArmsModel;
+use app\models\traits\UsersModelCalcFieldsTrait;
 use app\modules\schedules\models\Schedules;
 use Exception;
 use Yii;
@@ -44,6 +45,7 @@ use yii\web\IdentityInterface;
  * @property string		$fn First Name
  * @property string		$mn Middle Name
  * @property string		$shortName Сокращенные И.О.
+ * @property string		$effectivePhone Эффективный номер телефона (явный или через привязанное оборудование)
  * @property string		$uid
  * @property string		$ips
  * @property array		$netIps_ids
@@ -76,7 +78,7 @@ use yii\web\IdentityInterface;
  */
 class Users extends ArmsModel implements IdentityInterface
 {
-
+	use UsersModelCalcFieldsTrait;
 
 	public static $users=[];
 	public static $working_cache=null;
@@ -148,6 +150,7 @@ class Users extends ArmsModel implements IdentityInterface
 			'licItems',
 			'licGroups',
 			'netIps',
+			'effectivePhone',
 		]);
 	}
 	
@@ -290,6 +293,13 @@ class Users extends ArmsModel implements IdentityInterface
 			//read-only вычисляемые ссылки (категория C): только вывод
 			'compsFromTechs' => ['ref'=>\app\models\Comps::class, 'refMulti'=>true],
 			'compsTotal' => ['ref'=>\app\models\Comps::class, 'refMulti'=>true],
+			//read-only вычисляемое поле (категория C): только вывод
+			'effectivePhone' => [
+				'Эффективный тел.',
+				'hint'=>'Номер телефона: сначала ищется VoIP-номер привязанного оборудования, '
+					.'если такого нет — используется внутренний номер (Phone)',
+				'typeClass'=>\app\types\StringType::class,
+			],
 			'Login' => [
 				'Логин (AD)',
 				'hint'=>'Учётная запись пользователя в домене/AD',

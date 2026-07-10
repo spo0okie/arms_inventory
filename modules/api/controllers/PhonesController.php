@@ -256,34 +256,10 @@ class PhonesController extends BaseRestController
 		 * @var $user Users
 		 */
 
-		//если нашли
-		//var_dump($user);
-		$return=[];
-		if (is_object($user)){
-			//он прикреплен к АРМ?
-			$techs=$user->techs;
-			//var_dump($arms);
-			if (is_array($techs)) {
-				//перебираем армы
-				foreach ($techs as $tech) {
-					//ищем у них телефоны
-					$phones = $tech->voipPhones;
-					//var_dump($phones);
-					if (is_array($phones)) foreach ($phones as $phone) {
-						if (strlen($phone->comment) && (int)$phone->comment)
-							$return[(int)$phone->comment] = (int)$phone->comment;
-					}
-					if ($tech->isVoipPhone && strlen($tech->comment) && (int)$tech->comment) {
-						$return[(int)$tech->comment] = (int)$tech->comment;
-					}
-				}
-			}
-			if (count($return))
-				return implode(', ',$return);
-			else
-				return $user->Phone;
-		} else
-		throw new NotFoundHttpException("not found");
+		if (is_object($user))
+			return $user->effectivePhone;
+		else
+			throw new NotFoundHttpException("not found");
 	}
 
 }
