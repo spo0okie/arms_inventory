@@ -12,6 +12,12 @@
     display: block;
 }
 
+/* в заголовке элемента имя-ссылка не должно быть блочным, иначе идущее следом
+   двоеточие (и любой хвост заголовка) переносится на отдельную строку */
+.expandable-card-outer.line-break .expandable-card-content h5 span.object-item{
+    display: inline;
+}
+
 .expandable-card-switch {
     bottom: 0;
     position: absolute;
