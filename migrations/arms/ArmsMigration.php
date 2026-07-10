@@ -61,12 +61,18 @@ class ArmsMigration extends Migration
 	 * Приводит существующую таблицу к стандартной кодировке/коллации проекта.
 	 * По аналогии с convertTableToInnoDb() — для нормализующих миграций.
 	 *
+	 * Сперва гарантирует InnoDB: у MyISAM максимальная длина ключа — 1000 байт,
+	 * и составные индексы, укладывавшиеся в лимит на utf8 (3 байта/символ),
+	 * могут его превысить на utf8mb4 (4 байта/символ) — ALTER CONVERT упадёт
+	 * с ошибкой 1071 "Specified key was too long".
+	 *
 	 * @param string $table Имя таблицы
 	 * @return void
 	 * @noinspection SqlResolve
 	 */
 	public function convertTableToCollation($table)
 	{
+		$this->convertTableToInnoDb($table);
 		$this->db->createCommand(
 			"ALTER TABLE `$table` CONVERT TO CHARACTER SET " . static::CHARSET . " COLLATE " . static::COLLATION
 		)->execute();
