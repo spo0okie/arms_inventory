@@ -34,6 +34,9 @@ class ChainWidget extends Widget
 	public $segments=[];
 	/** @var string разделитель звеньев */
 	public $glue=' / ';
+	/** @var bool рендерить объекты в режиме только-просмотр (без иконок правки/удаления);
+	 *  для цепочки положения — почти всегда true, поэтому это дефолт */
+	public $static=true;
 
 	public function run()
 	{
@@ -59,11 +62,12 @@ class ChainWidget extends Widget
 
 		//типизированный атрибут со скрытой подсказкой «?»
 		if (isset($seg['model'],$seg['field']))
-			return ModelFieldWidget::renderFieldValueHinted($seg['model'],$seg['field']);
+			return ModelFieldWidget::renderFieldValueHinted($seg['model'],$seg['field'],
+				['item_options'=>['static_view'=>$this->static]]);
 
 		//готовый объект-ссылка
 		if (isset($seg['object']) && is_object($seg['object']))
-			return $seg['object']->renderItem($this->view,['static_view'=>true]);
+			return $seg['object']->renderItem($this->view,['static_view'=>$this->static]);
 
 		//произвольный текст
 		if (isset($seg['text']) && strlen((string)$seg['text']))
@@ -84,7 +88,7 @@ class ChainWidget extends Widget
 		$nodes=$node->hasMethod('getChain') ? $node->chain : $this->walkParents($node);
 		$tokens=[];
 		foreach ($nodes as $n)
-			if (is_object($n)) $tokens[]=$n->renderItem($this->view,['static_view'=>true]);
+			if (is_object($n)) $tokens[]=$n->renderItem($this->view,['static_view'=>$this->static]);
 		$html=implode($this->glue,$tokens);
 		if ($html==='') return '';
 
