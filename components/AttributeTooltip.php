@@ -81,6 +81,33 @@ class AttributeTooltip
 	}
 
 	/**
+	 * Тултип для СОСТАВНОГО блока — рендера, собранного из нескольких атрибутов
+	 * кастомной логикой (значение через один тип не выразить). Значение остаётся
+	 * во вьюхе как есть, а «?» над блоком документирует, какие атрибуты в нём
+	 * участвуют: перечисляет их подписи + смысл (block 1 каждого, режим view).
+	 * Так самодокументируемость (element-locality) сохраняется и для композитов.
+	 * @param object      $model
+	 * @param string[]    $fields участвующие атрибуты
+	 * @param string|null $title  заголовок блока (тултипа)
+	 * @param string      $intro  вводная строка над списком атрибутов
+	 * @return array|null ['title'=>string,'body'=>string] либо null — нечего показывать
+	 */
+	public static function buildComposite($model, array $fields, ?string $title, string $intro='Использованы атрибуты:'): ?array
+	{
+		$items=[];
+		foreach ($fields as $field) {
+			$label=static::title($model,$field,self::MODE_VIEW);
+			$meaning=static::meaning($model,$field,self::MODE_VIEW);
+			$items[]='<li><b>'.$label.'</b>'.($meaning? ': '.$meaning : '').'</li>';
+		}
+		if (!count($items)) return null;
+		return [
+			'title'=>$title,
+			'body'=>$intro.'<ul class="mb-0 ps-3">'.implode('',$items).'</ul>',
+		];
+	}
+
+	/**
 	 * Иконка «?» подсказки атрибута — единственная точка ПОДАЧИ тултипа
 	 * (ui-sources.md §0.1, канон разметки): потребители дописывают иконку
 	 * к label, сам label остаётся чистым (без qtip-атрибутов). Тултип

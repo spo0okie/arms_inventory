@@ -73,7 +73,7 @@ if (!isset($hide_places)) $hide_places=false;
 	<br>
 
 	<?php if (!empty($model->contracts_ids)) { ?>
-		<h4><?= $model->getAttributeLabel('contracts_ids')?> </h4>
+		<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'contracts_ids',null,'h4') ?>
 		<p>
 			<?php foreach ($model->contracts as $contract) { ?>
 				<?= ModelWidget::widget(['model'=>$contract]) ?><br />
@@ -83,24 +83,24 @@ if (!isset($hide_places)) $hide_places=false;
 	<?php } ?>
 
 	<?php if (!$hide_places) { ?>
-		<h4>Местонахождение</h4>
+		<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'place',null,'h4','Местонахождение') ?>
 		<p><?= ModelWidget::widget(['model'=>$model->place,'options'=>['full'=>true]]) ?></p>
 		<br/>
 	<?php } ?>
 
-	<h4>Ответственный</h4>
+	<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'itStaff',null,'h4','Ответственный') ?>
 	<p><?= ModelWidget::widget(['model'=>$model->itStaff]) ?></p>
 	<br/>
 	
 	<?php if (!$hide_usages) { ?>
 		<?php if (!empty($model->parent_id)) { ?>
-			<h4>Частично перемещено из</h4>
+			<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'parent',null,'h4','Частично перемещено из') ?>
 			<p><?= ModelWidget::widget(['model'=>$model->parent,'options'=>['full'=>true]]) ?> </p>
 			<br/>
 		<?php } ?>
 	
 		<?php if (!empty($model->children)) { ?>
-			<h4>Частично перемещено в</h4>
+			<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'children',null,'h4','Частично перемещено в') ?>
 			<p>
 				<?php foreach ($model->children as $child) { ?>
 					<?= ModelWidget::widget(['model'=>$child,'options'=>['from'=>true]]) ?> (<?= $child->count?><?= $model->type->units?>) <br />
@@ -110,7 +110,7 @@ if (!isset($hide_places)) $hide_places=false;
 		<?php } ?>
 	
 		<?php if (!empty($model->usages)) { ?>
-			<h4>Частично израсходовано в</h4>
+			<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'usages',null,'h4','Частично израсходовано в') ?>
 			<p>
 				<?php foreach ($model->usages as $usage) { ?>
 					<?= ModelWidget::widget(['model'=>$usage,'options'=>['count'=>true,'to'=>true,'date'=>true]]) ?> <br />

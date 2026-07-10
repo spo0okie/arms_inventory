@@ -158,6 +158,26 @@ class ModelFieldWidget extends Widget
 	}
 
 	/**
+	 * Заголовок СОСТАВНОГО блока — рендера, собранного из нескольких атрибутов
+	 * кастомной логикой (значение одним типом не выразить). Чистый label + иконка
+	 * «?», тултип которой перечисляет участвующие атрибуты и их смысл
+	 * (AttributeTooltip::buildComposite). Санкционированный способ документировать
+	 * композиты (Группа 5 и слитные блоки связей), где вывод значения через
+	 * ModelFieldWidget невозможен, но блок должен оставаться самодокументируемым.
+	 * @param object   $model
+	 * @param string[] $fields участвующие в блоке атрибуты
+	 * @param string   $label  подпись блока
+	 * @param string   $tag    тег заголовка
+	 * @return string
+	 */
+	public static function renderCompositeTitle($model,array $fields,$label,$tag='h4')
+	{
+		$tooltip=AttributeTooltip::buildComposite($model,$fields,$label);
+		$icon=$tooltip ? ' '.AttributeTooltip::icon($tooltip) : '';
+		return Html::tag($tag,$label.$icon);
+	}
+
+	/**
 	 * Только значение атрибута - без подписи и карточки, для инлайн-мест
 	 * свободной вёрстки. Типовая логика рендера (text/urls/списки объектов)
 	 * та же, что у полной подачи: атрибут в карточке всегда рендерится

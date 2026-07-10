@@ -46,7 +46,7 @@ $deleteable=!count($model->licGroups);
 
 <br />
 
-<h4>Группы лицензий:</h4>
+<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'licGroups',null,'h4','Группы лицензий') ?>
 <p>
 	<?php foreach ($model->licGroups as $licGroup) { ?>
 		<?= $licGroup->renderItem($this,['model'=>$licGroup]) ?> <br />

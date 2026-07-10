@@ -87,7 +87,7 @@ if(!$static_view) { ?>
 		<?php
 		$schedules=[];
 		if (!empty($model->providingScheduleRecursive)) {
-			echo '<strong>Время предоставления: </strong>'
+			echo ModelFieldWidget::renderFieldTitle($model,'providingScheduleRecursive',null,'strong','Время предоставления').' '
 				.$model->providingScheduleRecursive->renderItem(
 					$this,
 					['name'=>$model->providingScheduleRecursive->usageWorkTimeDescription]
@@ -119,7 +119,7 @@ if(!$static_view) { ?>
 		if (!empty($model->supportScheduleRecursive)) {
 			if (!empty($model->providingScheduleRecursive)) 
 				echo '<br />';
-			echo '<strong>Время поддержки:</strong> '.
+			echo ModelFieldWidget::renderFieldTitle($model,'supportScheduleRecursive',null,'strong','Время поддержки').' '.
 				$model->supportScheduleRecursive->renderItem($this);
 		} ?>
 			<?php

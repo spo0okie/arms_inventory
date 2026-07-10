@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\NetIps */
@@ -43,7 +43,9 @@ if (is_array($model->users) && count ($model->users)) {
 	foreach ($model->users as $user) $objects[]=ModelWidget::widget(['model'=>$user]);
 }
 
-if (count($objects)) echo '<h4>привязан к:'.implode(', ',$objects).'</h4><br />';
+if (count($objects)) echo '<h4>'
+	.\app\components\ModelFieldWidget::renderCompositeTitle($model,['comps','techs','users'],'Привязан к','span')
+	.': '.implode(', ',$objects).'</h4><br />';
 
 ?>
 

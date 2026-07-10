@@ -28,14 +28,17 @@ if (!isset($static_view)) $static_view=false;
 			$flags[]='<li>'.$model->getAttributeLabel($attr).'</li>';
 		}
 	}
-	if (count($flags))
+	if (count($flags)) {
+		echo \app\components\ModelFieldWidget::renderCompositeTitle($model,['is_app','is_ip','is_phone','is_vpn'],'Категории','h5');
 		echo '<ul>'.implode($flags).'</ul>';
+	}
 
 if ($model->ip_params_def)
-	echo "<strong>Сетевые параметры по умолчанию:</strong> {$model->ip_params_def}";
+	echo \app\components\ModelFieldWidget::renderFieldTitle($model,'ip_params_def',null,'strong','Сетевые параметры по умолчанию')
+		.': '.$model->ip_params_def;
 
 if (count($model->children)) {
-	echo '<h4>'.$model->getAttributeLabel('children').'</h4>';
+	echo \app\components\ModelFieldWidget::renderFieldTitle($model,'children',null,'h4');
 	echo '<ul>';
 	foreach ($model->children as $child)
 		echo '<li>'.$child->renderItem($this,['static_view'=>true]).'</li>';

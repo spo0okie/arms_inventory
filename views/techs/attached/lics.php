@@ -16,7 +16,7 @@ use yii\bootstrap5\Modal;
     $model_id=$model->id;
 ?>
 
-<h4>Назначенные лицензии:</h4>
+<?= \app\components\ModelFieldWidget::renderCompositeTitle($model,['licKeys','licItems','licGroups'],'Назначенные лицензии') ?>
 <p id="arms_<?= $model->id ?>_attached_lics">
 	
 	<?php if (count($licKeys) || count($licItems) || count ($licGroups)) {

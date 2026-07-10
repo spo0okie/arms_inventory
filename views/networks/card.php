@@ -49,7 +49,7 @@ if (!isset($static_view)) $static_view=false;
 
 
 	<?php if (count($model->orgInets)) {?>
-		<h4>Относится к вводу интернет: <?php foreach ($model->orgInets as $inet)
+		<h4><?= \app\components\ModelFieldWidget::renderFieldTitle($model,'orgInets',null,'span','Относится к вводу интернет') ?>: <?php foreach ($model->orgInets as $inet)
 				echo ModelWidget::widget(['model'=>$inet])
 			?></h4>
 	<?php } ?>

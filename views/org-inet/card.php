@@ -52,16 +52,16 @@ if (!$content_only){ ?>
 	</p>
 
 <?php if (count($model->networks)) { ?>
-	<strong>Подсети:</strong>
+	<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'networks',null,'strong','Подсети') ?>:
 	<?php foreach ($model->networks as $network) echo ModelWidget::widget(['model'=>$network,'options'=>['class'=>'text-nowrap']]).'' ?>
 	<br />
 <?php } ?>
 
-	<strong>Место подключения:</strong>
+	<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'place',null,'strong','Место подключения') ?>:
 	<?= ModelWidget::widget(['model'=>$model->place,'options'=>['full'=>true, 'static_view'=>$static_view]]) ?>
 	<br />
 
-	<strong><?= $model->getAttributeLabel('account')?></strong>
+	<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'account',null,'strong') ?>:
 	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'account') ?>
 
 	<?php if ($model->history) { ?>

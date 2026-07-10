@@ -22,7 +22,7 @@ if (!isset($static_view)) $static_view=false;
     </h1>
 	<?= $model->nosync?'<span class="fas fa-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
 	Дата рождения: <?= \app\components\ModelFieldWidget::renderFieldValue($model,'Bday') ?> <br/>
-    Табельный №
+    <?= \app\components\ModelFieldWidget::renderCompositeTitle($model,['employee_id','Persg'],'Табельный №','span') ?>
 	<?= $model->employee_id ?> (<?= $model->Persg ?>)
     -
 	<?php

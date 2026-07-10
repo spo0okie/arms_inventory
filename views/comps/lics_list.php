@@ -23,7 +23,7 @@ foreach ($model->licKeys as $licKey)
 if (count($output)) {
 ?>
 		<div class="pe-5">
-			<h4>Привязанные лицензии</h4>
+			<?= \app\components\ModelFieldWidget::renderCompositeTitle($model,['licGroups','licItems','licKeys'],'Привязанные лицензии') ?>
 			<p>
 				<?= implode($glue,$output) ?>
 			</p>
