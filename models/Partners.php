@@ -28,7 +28,7 @@ use yii\db\ActiveQuery;
  */
 class Partners extends ArmsModel
 {
-	
+
 	public static $title="Контрагент";
 	public static $titles="Контрагенты";
 
@@ -40,7 +40,7 @@ class Partners extends ArmsModel
 
 	public static $all_items=null; //кэш всей таблицы
 	public static $names_cache=null; //кэш сортированных имен
-	
+
 	public static $syncKey='uname';
 	public static $syncableFields=['inn','kpp','uname','bname','cabinet_url','support_tel'];
 
@@ -52,10 +52,11 @@ class Partners extends ArmsModel
     {
         return 'partners';
     }
-	
+
 	public $linksSchema=[
 		'contracts_ids' =>	[Contracts::class,'partners_ids'],
-		'services_ids' =>	[Services::class,'partners_id'],	//one-2-many (обратная ссылка services.partners_id)
+		'services_ids' =>	[Services::class,'partners_id'],
+		'users_ids' =>		[Users::class,'org_id']
 	];
 
     /**
@@ -138,10 +139,10 @@ class Partners extends ArmsModel
 			'docs' => ['Документы','typeClass'=>\app\types\LinkType::class]
         ];
     }
-	
-	
+
+
 	/**
-	 * Возвращает набор контрагентов в договоре
+	 * Возвращает набор документов контрагента
 	 * @return ActiveQuery
 	 * @throws InvalidConfigException
 	 */
@@ -151,9 +152,9 @@ class Partners extends ArmsModel
 			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id'])
 			->orderBy(['date'=>SORT_DESC]);
 	}
-	
+
 	/**
-	 * Возвращает набор контрагентов в договоре
+	 * Возвращает набор договоров контрагента
 	 * @return ActiveQuery
 	 * @throws InvalidConfigException
 	 */
@@ -163,7 +164,7 @@ class Partners extends ArmsModel
 			->viaTable('{{%partners_in_contracts}}', ['partners_id' => 'id'])
 			->where(['like','name',Contracts::$dictionary['contract']]);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -171,8 +172,8 @@ class Partners extends ArmsModel
 	{
 		return $this->hasMany(Services::class, ['partners_id' => 'id']);
 	}
-	
-	
+
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -180,8 +181,8 @@ class Partners extends ArmsModel
 	{
 		return $this->hasMany(Users::class, ['org_id' => 'id']);
 	}
-	
-	
+
+
 	/**
 	 * Возвращает имя для поиска
 	 * @return string
@@ -190,7 +191,7 @@ class Partners extends ArmsModel
 		if (strpos(mb_strtolower($this->uname),mb_strtolower($this->bname))!==false) return $this->uname;
 		return $this->uname.' ('.$this->bname.')';
 	}
-	
+
 	/**
 	 * Возвращает имя для поиска
 	 * @return string
@@ -198,11 +199,11 @@ class Partners extends ArmsModel
 	public function getLongName() {
 		return $this->uname.' ('.$this->bname.')';
 	}
-	
+
 	public function getName() {
 		return $this->bname?$this->bname:$this->uname;
 	}
-	
+
 	public static function fetchAll(){
 		if (is_null(static::$all_items)) {
 			/** @var Partners $tmp */
@@ -255,16 +256,8 @@ class Partners extends ArmsModel
 		asort($names);
 		return static::$names_cache=$names;
 	}
-	
-	public function reverseLinks()
-	{
-		return [
-			$this->services,
-			$this->contracts,
-			$this->users
-		];
-	}
-	
+
+
 	public static function findByAnyName(string $name)
 	{
 		return static::find()
