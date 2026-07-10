@@ -31,7 +31,7 @@ if (!isset($static_view)) $static_view=false;
 						'attribute'=>$attr,
 						'mode'=>'grid'
 					]) ?></td>
-				<td><?= $model->$attr ?></td>
+				<td><?= \app\components\ModelFieldWidget::renderFieldValue($model,$attr) ?></td>
 			</tr>
 		<?php } ?>
 	</table>

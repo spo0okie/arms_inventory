@@ -6,7 +6,7 @@
 use app\components\LinkObjectWidget;
 use app\components\StripedAlertWidget;
 use app\components\TextFieldWidget;
-
+
 use app\components\widgets\page\ModelWidget;
 $deleteable=true; //тут переопределить возможность удаления элемента
 if (!isset($static_view)) $static_view=false;
@@ -57,7 +57,7 @@ if (!isset($static_view)) $static_view=false;
 <div class="d-flex flex-row mt-2 mb-3">
 	<div class="pe-5">
 		<h4>Шлюз</h4>
-		<?= $model->readableRouter; ?>
+		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'readableRouter') ?>
 	</div>
 	<div class="pe-5">
 		<h4>DHCP</h4>

@@ -215,6 +215,7 @@ class Contracts extends ArmsModel
 			'charge' => [
 				'в т.ч. НДС',
 				'hint' => 'Для счетов: величина НДС, входящая в сумму',
+				'typeClass'=>\app\types\MoneyType::class, 'decimals'=>2,
 			],
 			'comment' => [
 				'Комментарий',
@@ -413,7 +414,7 @@ class Contracts extends ArmsModel
 					.'</ul>Сумма при этом должна проставляться только в счетах.<br>'
 					.'Сумма вписывается с учетом НДС',
 				'indexHint' => 'Сумма документа<br />'.QueryHelper::$numberSearchHint,
-				'typeClass'=>\app\types\FloatType::class,
+				'typeClass'=>\app\types\MoneyType::class, 'decimals'=>2,
 			],
 			'users' => ['alias' => 'users_ids'],
 			'users_ids' => [

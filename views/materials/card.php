@@ -11,7 +11,7 @@ use app\components\TextFieldWidget;
 use app\models\Materials;
 use app\models\MaterialsUsages;
 use yii\bootstrap5\Modal;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Materials */
@@ -65,9 +65,9 @@ if (!isset($hide_places)) $hide_places=false;
 
 	<?php if ($model->cost) { ?>
 	<p>
-		<strong>Стоимость:</strong> <?= $model->cost.''.$model->currency->symbol. (
-			$model->charge?(' (в т.ч. НДС: '.$model->charge.$model->currency->symbol.')'):''
-		) ?>
+		<strong>Стоимость:</strong> <?= \app\components\ModelFieldWidget::renderFieldValue($model,'cost') ?><?php
+			if ($model->charge) echo ' (в т.ч. НДС: '.\app\components\ModelFieldWidget::renderFieldValue($model,'charge').')';
+		?>
 	</p>
 	<?php } ?>
 	<br>

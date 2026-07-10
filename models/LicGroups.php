@@ -87,6 +87,14 @@ class LicGroups extends ArmsModel
     public function attributeData()
     {
         return [
+			//вычисляемые счётчики распределения лицензий (тип IntegerType по конвенции *Count);
+			//readOnly — только вывод, в формы/ввод не попадают
+			'totalCount' => ['Всего закуплено','hint'=>'Общее количество закупленных лицензий в группе','readOnly'=>true],
+			'activeCount' => ['Действительных','hint'=>'Количество действительных (не просроченных) лицензий','readOnly'=>true],
+			'directUsedCount' => ['Привязано к типу лицензии','hint'=>'Лицензии, закреплённые прямо за группой (не через закупки)','readOnly'=>true],
+			'itemsUsedCount' => ['Привязано к закупкам','hint'=>'Лицензии, занятые через закупки лицензий','readOnly'=>true],
+			'usedCount' => ['Используется','hint'=>'Общее количество используемых (действительных занятых) лицензий','readOnly'=>true],
+			'freeCount' => ['Свободно','hint'=>'Действительные незанятые лицензии, доступные к распределению','readOnly'=>true],
 			'arms_ids' => [
 				'АРМы, куда распределять лицензии',
 				'hint' => 'Свободные (не назначенные через закупки или ключи) лицензии этого типа будут распределяться на АРМ из списка',
@@ -334,6 +342,11 @@ class LicGroups extends ArmsModel
 		$total=$this->directUsedCount;
 		foreach ($this->licItems as $item) if ($item->active) $total+=$item->usages;
 		return $total;
+	}
+
+	//лицензии, занятые через закупки (не напрямую за группой) = usedCount - directUsedCount
+	public function getItemsUsedCount() {
+		return $this->usedCount - $this->directUsedCount;
 	}
 	
 	public function getFreeCount() {

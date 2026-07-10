@@ -116,6 +116,7 @@ class OrgInet extends ArmsModel
 			'charge' => [
 				'в т.ч. НДС',
 				'hint' => 'Сумма НДС в составе стоимости',
+				'typeClass'=>\app\types\MoneyType::class, 'decimals'=>0, 'currencyPath'=>'service.currency',
 			],
 			'contracts_id' => [
 				'Договор',
@@ -124,6 +125,7 @@ class OrgInet extends ArmsModel
 			'cost' => [
 				'Стоимость',
 				'hint' => 'Стоимость услуги в месяц (планируемая стоимость, если величина плавает)',
+				'typeClass'=>\app\types\MoneyType::class, 'decimals'=>0, 'currencyPath'=>'service.currency',
 			],
 			'history' => [
 				'Заметки',

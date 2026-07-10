@@ -1,48 +1,38 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\DetailView;
-
-use app\components\widgets\page\ModelWidget;
+use app\components\ModelFieldWidget;
+
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
 
 if (!isset($static_view)) $static_view=false;
+
+//общий конфиг вывода: список пользователей инлайн (через запятую, без переносов)
+$userList=['glue'=>', ','lineBr'=>false,'item_options'=>['static_view'=>true]];
+$userOne=['item_options'=>['static_view'=>true]];
 ?>
 <h4>
-	Ответственный: <?= ModelWidget::widget(['model'=>$model->responsibleRecursive,'options'=>['static_view'=>true]]) ?>
+	<?= ModelFieldWidget::renderFieldTitle($model,'responsibleRecursive',tag:'span',labelOverride:'Ответственный') ?>:
+	<?= ModelFieldWidget::renderFieldValue($model,'responsibleRecursive',$userOne) ?>
 </h4>
 <?php if (is_array($model->supportRecursive) && count($model->supportRecursive)) { ?>
 	<p>
-		Поддержка:
-		<?php
-		$users=[];
-		foreach ($model->supportRecursive as $user)
-			$users[]=ModelWidget::widget(['model'=>$user,'options'=>['static_view'=>true]]);
-		echo implode(", ",$users);
-		?>
+		<?= ModelFieldWidget::renderFieldTitle($model,'supportRecursive',tag:'span',labelOverride:'Поддержка') ?>:
+		<?= ModelFieldWidget::renderFieldValue($model,'supportRecursive',$userList) ?>
 	</p>
 	<br />
 <?php }
 if (is_object($model->infrastructureResponsibleRecursive)) { ?>
 	<h4>
-		Отв. за инфраструктуру: <?=
-			ModelWidget::widget(['model'=>$model->infrastructureResponsibleRecursive,'options'=>['static_view'=>true]])
-		?>
+		<?= ModelFieldWidget::renderFieldTitle($model,'infrastructureResponsibleRecursive',tag:'span',labelOverride:'Отв. за инфраструктуру') ?>:
+		<?= ModelFieldWidget::renderFieldValue($model,'infrastructureResponsibleRecursive',$userOne) ?>
 	</h4>
 <?php }
 
 if (is_array($model->infrastructureSupportRecursive) && count($model->infrastructureSupportRecursive)) { ?>
 	<p>
-		Поддержка инфраструктуры:
-		<?php
-		$users=[];
-		foreach ($model->infrastructureSupportRecursive as $user)
-			$users[]=ModelWidget::widget(['model'=>$user,'options'=>['static_view'=>true]]);
-		echo implode(", ",$users);
-		?>
+		<?= ModelFieldWidget::renderFieldTitle($model,'infrastructureSupportRecursive',tag:'span',labelOverride:'Поддержка инфраструктуры') ?>:
+		<?= ModelFieldWidget::renderFieldValue($model,'infrastructureSupportRecursive',$userList) ?>
 	</p>
 	<br />
 <?php }
-
-

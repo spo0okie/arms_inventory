@@ -46,9 +46,9 @@ if (!isset($static_view)) $static_view=false;
 ]); ?>
 
 <?php if ($model->links) { ?>
-	<h4>Ссылки:</h4>
+	<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'links',tag:'h4',labelOverride:'Ссылки:') ?>
 	<p class="mb-4">
-		<?= UrlListWidget::Widget(['list'=>$model->links]) ?>
+		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'links') ?>
 	</p>
 <?php } ?>
 

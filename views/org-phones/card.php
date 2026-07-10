@@ -12,7 +12,7 @@ use app\components\StripedRowWidget;
 use app\components\TextFieldWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgPhones */
@@ -49,9 +49,9 @@ if (!$content_only){ ?>
 		
 		<p>	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'untitledComment') ?> </p>
 		<p>
-			Стоимость: <span class="badge bg-success"><?= number_format((int)$model->cost,0,'',' ').$currency ?></span>
+			Стоимость: <span class="badge bg-success"><?= \app\components\ModelFieldWidget::renderFieldValue($model,'cost') ?></span>
 			<?php if ($model->charge) { ?>
-				(в т.ч. НДС: <span class="small"><?= number_format($model->charge,0,'',' ').$currency ?></span>)
+				(в т.ч. НДС: <span class="small"><?= \app\components\ModelFieldWidget::renderFieldValue($model,'charge') ?></span>)
 			<?php } ?>
 			/мес
 		</p>

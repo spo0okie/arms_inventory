@@ -37,12 +37,11 @@ if (!isset($static_view)) $static_view=false;
 			echo 'Работает';
 	?>
     <p>
-	    <?= ArrayHelper::implode(' / ',[
-			ModelWidget::widget(['model'=>$model->org,'options'=>['static_view'=>true]]),
-			ModelWidget::widget(['model'=>$model->orgStruct,'options'=>['chain'=>true]]),
-			$model->Doljnost
-		]) ?>
-		
+	    <?= \app\components\ChainWidget::widget(['segments'=>[
+			['model'=>$model,'field'=>'org'],
+			['model'=>$model,'field'=>'orgStruct','chain'=>true],
+			['model'=>$model,'field'=>'Doljnost'],
+		]]) ?>
     </p>
 
 	<div class="flex-row d-flex flex-wrap pb-3">

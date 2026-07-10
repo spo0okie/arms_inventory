@@ -12,6 +12,8 @@ namespace app\components;
 
 use app\helpers\ArrayHelper;
 use app\models\base\ArmsModel;
+use app\types\FloatType;
+use app\types\IntegerType;
 use app\types\LinkType;
 use yii\base\Widget;
 use yii\helpers\Html;
@@ -114,8 +116,15 @@ class ModelFieldWidget extends Widget
 		$type=$this->model->getAttributeTypeClass($this->field);
 		if ($type instanceof LinkType) return null;	//ссылка/загрузчик
 
-		if (empty(ArrayHelper::getValue($model,$this->field)))
-			return null;	//пустое значение типом не рендерится
+		//числовой ноль — значимое значение (счётчики: «Свободно: 0»), поэтому
+		//для Integer/Float пустотой считаем только null/'', а не empty()-ноль;
+		//для остальных типов пустота (null/''/[]/'0') типом не рендерится
+		$value=ArrayHelper::getValue($model,$this->field);
+		$isEmpty=($type instanceof IntegerType || $type instanceof FloatType)
+			? ($value===null || $value==='')
+			: empty($value);
+		if ($isEmpty)
+			return null;
 
 		return $type->renderOutput($this->view,$model,$this->field);
 	}
@@ -170,6 +179,29 @@ class ModelFieldWidget extends Widget
 	}
 
 	/**
+	 * Значение атрибута + иконка «?» подсказки, скрытая до включения help-mode
+	 * (AttributeTooltip::icon с onlyHelp=true, класс attr-hint-icon--onlyhelp).
+	 * Для мест свободной вёрстки/цепочек (ChainWidget), где подпись не выводится,
+	 * но атрибут должен оставаться самодокументируемым: в обычном виде вёрстка
+	 * чистая, «?» проступает только в режиме справки. Пустое значение — пустая
+	 * строка (иконка без значения не выводится).
+	 * @param ArmsModel $model
+	 * @param string    $field
+	 * @param array     $config переопределения конфига виджета значения
+	 * @return string
+	 */
+	public static function renderFieldValueHinted($model,$field,$config=[])
+	{
+		$value=static::renderFieldValue($model,$field,$config);
+		if (!strlen($value)) return '';
+		$icon=AttributeTooltip::icon(
+			AttributeTooltip::build($model,$field,AttributeTooltip::MODE_VIEW),
+			true
+		);
+		return $icon==='' ? $value : $value.' '.$icon;
+	}
+
+	/**
 	 * Компактная строка «подпись: значение» для свободной вёрстки карточек.
 	 * Пустое значение даёт пустую строку (подпись без значения не выводится),
 	 * поэтому строки удобно собирать через implode('<br />',array_filter([...])).
@@ -177,13 +209,14 @@ class ModelFieldWidget extends Widget
 	 * @param string    $field
 	 * @param array     $config переопределения конфига виджета значения
 	 * @param string    $tag    тег подписи
+	 * @param string    $labelOverride переопределение текста подписи (тултип-«?» сохраняется)
 	 * @return string
 	 */
-	public static function renderFieldRow($model,$field,$config=[],$tag='span')
+	public static function renderFieldRow($model,$field,$config=[],$tag='span',$labelOverride=null)
 	{
 		$value=static::renderFieldValue($model,$field,$config);
 		if (!strlen($value)) return '';
-		return static::renderFieldTitle($model,$field,null,$tag).': '.$value;
+		return static::renderFieldTitle($model,$field,null,$tag,$labelOverride).': '.$value;
 	}
 
 	/**

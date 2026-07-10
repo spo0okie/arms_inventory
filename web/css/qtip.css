@@ -134,6 +134,13 @@ body.help-mode .attr-hint-icon.qtip-pinned {
 	color: #fd7e14;
 }
 
+/* Скрытая до help-mode иконка «?» (AttributeTooltip::icon($t,true), ChainWidget и
+   прочие «значение + скрытая подсказка»): в обычном виде вёрстка чистая (цепочка
+   «Организация / подразделение / должность» без шума), «?» проступают только когда
+   включён режим справки — тогда видно, что звенья цепочки суть отдельные атрибуты. */
+.attr-hint-icon--onlyhelp { display: none; }
+body.help-mode .attr-hint-icon--onlyhelp { display: inline; }
+
 /* мастер-иконка справки страницы (ссылка с data-panel-target, HintIconWidget):
    FA рисует глиф как svg с fill:currentColor, поэтому цвет ставим на <a> */
 body.help-mode a[data-panel-target] {

@@ -101,11 +101,12 @@ class Materials extends ArmsModel
 			'charge' => [
 				'НДС',
 				'hint'=>'Сумма НДС в составе стоимости',
-				'typeClass'=>\app\types\FloatType::class,
+				'typeClass'=>\app\types\MoneyType::class, 'decimals'=>2,
 			],
 			'cost' => [
 				'Стоимость',
 				'hint'=>'Стоимость этой позиции материалов',
+				'typeClass'=>\app\types\MoneyType::class, 'decimals'=>2,
 			],
 			'comment' => [
 				'Комментарий',

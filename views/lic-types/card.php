@@ -36,8 +36,8 @@ $deleteable=!count($model->licGroups);
 
 <div class="row">
 	<div class="col-md-6">
-		<h4>Ссылки:</h4>
-		<?= UrlListWidget::Widget(['list'=>$model->links]) ?>
+		<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'links',tag:'h4',labelOverride:'Ссылки:') ?>
+		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'links') ?>
 	</div>
 	<div class="col-md-6">
 		<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>

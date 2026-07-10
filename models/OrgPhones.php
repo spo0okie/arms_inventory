@@ -98,8 +98,9 @@ class OrgPhones extends ArmsModel
 	        'cost' => [
 	        	'Стоимость',
 				'hint' => 'Стоимость номера в месяц (планируемая стоимость, если величина плавает)',
+				'typeClass'=>\app\types\MoneyType::class, 'decimals'=>0, 'currencyPath'=>'service.currency',
 			],
-	        'charge' => ['В т.ч. НДС','hint'=>'Сумма НДС в составе стоимости'],
+	        'charge' => ['В т.ч. НДС','hint'=>'Сумма НДС в составе стоимости','typeClass'=>\app\types\MoneyType::class,'decimals'=>0,'currencyPath'=>'service.currency'],
             'comment' => [
 				'Описание',
 				'hint'=>'Любые пояснения о задачах этого номера<br>'

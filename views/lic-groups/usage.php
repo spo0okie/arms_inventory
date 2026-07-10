@@ -15,11 +15,13 @@ if (is_object($model)) {
 
     <h4>Распределение:</h4>
     <p>
-        Всего закуплено лицензий: <?= $model->totalCount ?><br/>
-        Из них действительных: <?= $model->activeCount ?><br/>
-        Привязано к типу лицензии: <?= $model->directUsedCount?><br/>
-        Привязано к закупкам лиц.: <?= $model->usedCount - $model->directUsedCount ?><br/>
-        Свободно: <?= $model->freeCount ?><br/>
+        <?= implode('<br/>',array_filter([
+            \app\components\ModelFieldWidget::renderFieldRow($model,'totalCount'),
+            \app\components\ModelFieldWidget::renderFieldRow($model,'activeCount'),
+            \app\components\ModelFieldWidget::renderFieldRow($model,'directUsedCount'),
+            \app\components\ModelFieldWidget::renderFieldRow($model,'itemsUsedCount'),
+            \app\components\ModelFieldWidget::renderFieldRow($model,'freeCount'),
+        ])) ?>
     </p>
 
 <?php }

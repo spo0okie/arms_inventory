@@ -20,8 +20,8 @@ if (!isset($static_view)) $static_view=false;
 </h1>
 
 <?php
-	echo Html::encode($model->comment);
-	
+	echo \app\components\ModelFieldWidget::renderFieldValue($model,'comment');
+
 	$flags=[];
 	foreach (['is_app','is_ip','is_phone','is_vpn'] as $attr) {
 		if ($model->$attr) {

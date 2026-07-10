@@ -211,7 +211,17 @@ class Users extends ArmsModel implements IdentityInterface
 	public function attributeData()
 	{
 		return array_merge(parent::attributeData(),[
-			'orgStruct' => ['ref'=>\app\models\OrgStruct::class],	//read-only вычисляемая ссылка (категория C)
+			'org' => [
+				'Организация',
+				'hint'=>'Организация (юрлицо), в которой числится сотрудник',
+				//read-only вычисляемая ссылка (категория C): только вывод
+				'ref'=>\app\models\Partners::class,
+			],
+			'orgStruct' => [
+				'Подразделение',
+				'hint'=>'Подразделение оргструктуры, к которому относится сотрудник',
+				'ref'=>\app\models\OrgStruct::class,	//read-only вычисляемая ссылка (категория C)
+			],
 			//search-параметры контроллера (алиасы на реальные атрибуты — тип берётся оттуда)
 			'num' => ['alias'=>'employee_id'],
 			'login' => ['alias'=>'Login'],

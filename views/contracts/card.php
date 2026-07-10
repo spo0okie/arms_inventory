@@ -39,9 +39,9 @@ if (!isset($static_view)) $static_view=false;
 
 <?php if ($model->total) { ?>
 	<h4>
-		Сумма: <?= number_format($model->total,2,'.',' ' ).$model->currency->symbol ?>
+		Сумма: <?= \app\components\ModelFieldWidget::renderFieldValue($model,'total') ?>
 		<?php if ($model->charge){ ?>
-			(в т.ч. НДС: <?= number_format($model->charge,2,'.',' ' ).$model->currency->symbol ?>)
+			(в т.ч. НДС: <?= \app\components\ModelFieldWidget::renderFieldValue($model,'charge') ?>)
 		<?php } ?>
 	</h4>
 <?php } ?>

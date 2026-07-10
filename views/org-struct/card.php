@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\OrgStruct */
@@ -14,11 +14,10 @@ use app\components\widgets\page\ModelWidget;
 </h1>
 
 <?php
-$chain=[];
-if (is_object($model->partner)) {
-	$chain[]=ModelWidget::widget(['model'=>$model->partner,'options'=>['static_view'=>true]]);
-}
-foreach ($model->chain as $item) $chain[]=$item->name;
-echo implode(' → ',$chain);
+//единая цепочка положения: организация (partner) → путь по оргструктуре (self-chain)
+echo \app\components\ChainWidget::widget(['segments'=>[
+	['object'=>$model->partner],
+	['node'=>$model,'chain'=>true],
+]]);
 
 

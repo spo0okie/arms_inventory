@@ -88,16 +88,22 @@ class AttributeTooltip
 	 * web/tooltipster/js/qtip_ajax.js) висят на иконке; статусы цветом —
 	 * web/css/qtip.css (.attr-hint-icon / :hover / .qtip-pinned).
 	 * @param array|null $tooltip результат build(); null — иконки нет
+	 * @param bool $onlyHelp скрытая подача: иконка не видна, проступает только
+	 *   в режиме help-mode (класс attr-hint-icon--onlyhelp, web/css/qtip.css) —
+	 *   для цепочек/значений в свободной вёрстке, где «?» рядом с каждым звеном
+	 *   была бы шумом, но атрибут должен оставаться самодокументируемым.
 	 */
-	public static function icon(?array $tooltip): string
+	public static function icon(?array $tooltip, bool $onlyHelp=false): string
 	{
 		if (!$tooltip) return '';
 		//В тултипах (ttip-действиях) иконку «?» не показываем: тултип внутри
 		//тултипа — шум, а место компактное. По той же логике, что LinkObjectWidget
 		//не делает ссылку на объект на его собственных страницах view/ttip.
 		if (static::inTooltipRender()) return '';
+		$options=static::iconOptions();
+		if ($onlyHelp) Html::addCssClass($options,'attr-hint-icon--onlyhelp');
 		return Html::tag('span',static::iconGlyph(),array_merge(
-			static::iconOptions(),
+			$options,
 			FieldsHelper::toolTipOptions($tooltip['title'],$tooltip['body'])
 		));
 	}

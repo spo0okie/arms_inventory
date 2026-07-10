@@ -31,7 +31,7 @@ DynaGridWidgetAsset::register($this);
 
     <?= $this->render('card',['model'=>$model]) ?>
 	<?php if (strlen($model->notebook??'')) { ?>
-		<h4>Записная книжка:</h4>
+		<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'notebook',tag:'h4',labelOverride:'Записная книжка:') ?>
 		<p>
 			<?= \app\components\ModelFieldWidget::renderFieldValue($model,'notebook') ?>
 		</p>

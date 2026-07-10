@@ -61,9 +61,9 @@ $static_view=false;
 			if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
 				echo $this->render('/scans/thumb',['model'=>$scan,'contracts_id'=>$model->id,'static_view'=>true]);
 			?>
-			<h4>Ссылки:</h4>
+			<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'links',tag:'h4',labelOverride:'Ссылки:') ?>
 			<p class="mb-2">
-			<?= UrlListWidget::Widget(['list'=>$model->links]) ?>
+			<?= \app\components\ModelFieldWidget::renderFieldValue($model,'links') ?>
 			</p>
 			<?= $this->render('/attaches/model-list',compact(['model','static_view'])) ?>
 

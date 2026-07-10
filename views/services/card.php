@@ -71,9 +71,9 @@ if(!$static_view) { ?>
 		</h4>
 		<div class="mb-3">
 		<?php if ($model->sumTotals) { ?>
-		<strong>Стоимость:</strong> <span class="badge bg-success"><?= number_format($model->sumTotals,0,'',' ').' '.$model->currency->symbol ?></span>
+		<strong>Стоимость:</strong> <span class="badge bg-success"><?= ModelFieldWidget::renderFieldValue($model,'sumTotals') ?></span>
 			<?php if ($model->sumCharge){ ?>
-				(в т.ч. НДС: <?= $model->sumCharge.''.$model->currency->symbol ?>)
+				(в т.ч. НДС: <?= ModelFieldWidget::renderFieldValue($model,'sumCharge') ?>)
 			<?php } ?> / мес.<br/>
 		<?php }
 		if (count($model->totalUnpaid)) {
@@ -150,7 +150,7 @@ if(!$static_view) { ?>
 		<div class="mb-3">
 			<?= \app\components\ModelFieldWidget::renderFieldValue($model,'descriptionRecursive') ?>
 		</div>
-		<?= UrlListWidget::Widget(['list'=>$model->linksRecursive]) ?>
+		<?= ModelFieldWidget::renderFieldValue($model,'linksRecursive') ?>
 		<br />
 
 		<?= $this->render('card-support',['model'=>$model,'static_view'=>$static_view]) ?>

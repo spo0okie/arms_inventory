@@ -270,7 +270,7 @@ class Services extends ArmsModel
 			'charge' => [
 				'НДС',
 				'hint' => 'налог',
-				'typeClass' => \app\types\FloatType::class,
+				'typeClass' => \app\types\MoneyType::class, 'decimals'=>0,
 			],
 			'comps_ids' => [
 				'Серверы',
@@ -293,8 +293,11 @@ class Services extends ArmsModel
 			'cost' => [
 				'Стоимость',
 				'hint' => 'Стоимость услуги в месяц. (если понадобится другой период - обращайтесь к разработчику)',
-				'typeClass' => \app\types\FloatType::class,
+				'typeClass' => \app\types\MoneyType::class, 'decimals'=>0,
 			],
+			//вычисляемые (рекурсивные) суммы стоимости/НДС для вывода в карточке
+			'sumTotals' => ['Стоимость','typeClass'=>\app\types\MoneyType::class,'decimals'=>0,'readOnly'=>true],
+			'sumCharge' => ['НДС','typeClass'=>\app\types\MoneyType::class,'decimals'=>0,'readOnly'=>true],
 			'currency_id' => [
 				'Валюта',
 				'hint' => 'Ед. изм. стоим.',
@@ -309,6 +312,13 @@ class Services extends ArmsModel
 			],
 			//read-only вычисляемая ссылка (категория C): обратная сторона depends_ids
 			'dependants' => ['ref'=>Services::class, 'refMulti'=>true],
+			//read-only вычисляемые ссылки (категория C) для наследуемого вывода *Recursive:
+			//responsibleRecursive/supportRecursive/infrastructure*Recursive наследуют эти
+			//метаданные (getAttributeData strip 'Recursive') и рендерятся ModelFieldWidget
+			'responsible' => ['Ответственный','ref'=>Users::class],
+			'support' => ['Поддержка','ref'=>Users::class, 'refMulti'=>true],
+			'infrastructureResponsible' => ['Отв. за инфраструктуру','ref'=>Users::class],
+			'infrastructureSupport' => ['Поддержка инфраструктуры','ref'=>Users::class, 'refMulti'=>true],
 			'description' => [
 				'Краткое описание',
 				'indexLabel' => 'Описание',

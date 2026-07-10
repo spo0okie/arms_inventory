@@ -39,10 +39,10 @@ $techs=$model->techModels;
 	} ?>
 </h1>
 
-<?= Html::encode($model->full_name) ?>
+<?= \app\components\ModelFieldWidget::renderFieldValue($model,'full_name') ?>
 
 <p>
-	<?= Html::encode($model->comment) ?>
+	<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 </p>
 
 <br />
