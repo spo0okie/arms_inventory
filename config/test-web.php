@@ -57,6 +57,14 @@ $config=\yii\helpers\ArrayHelper::merge(require __DIR__ . '/web.php',[
 			'class' => 'yii\debug\Module',
 			// uncomment the following to add your IP if you are not connecting from localhost.
 			//'allowedIPs' => ['127.0.0.1', '::1'],
+			// 'user'-панель на PHP 8.1+ дергает class_exists($this->filterModel) без проверки
+			// на null (yii2-debug UserPanel::init()) — при авторизованном запросе это
+			// deprecation-предупреждение, а т.к. выше error_reporting(E_ALL) не глушит
+			// deprecated, Yii ErrorHandler превращает его в фатальный ErrorException прямо
+			// во время bootstrap приложения (до того как появляется error-страница) — 500
+			// вместо ожидаемого кода доступа. Ловится только на связке PHP 8.1+/CI
+			// (AuthorizationModesCest после логина). Отключаем панель, т.к. она не нужна тестам.
+			'panels' => ['user' => false],
 		],
 	],
     'params' => $testParams,
