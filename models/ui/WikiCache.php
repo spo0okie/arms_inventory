@@ -89,7 +89,7 @@ class WikiCache extends ArmsModel
 	 */
 	public static function filePath($path)
 	{
-		return $_SERVER['DOCUMENT_ROOT']
+		return Yii::getAlias('@app')
 			.'/runtime/wiki_cache/'
 			.str_replace(':', '/', $path)
 			.'.html';

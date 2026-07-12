@@ -61,7 +61,7 @@ class TechStates extends ArmsModel
     public function attributeData()
     {
         return [
-            'id' => 'id',
+            'id' => 'ID',
 			'code' => ['Служебное имя','hint'=>'Машинное имя состояния (латиницей, уникальное)'],
 			'name' => ['Состояние','hint'=>'Название состояния, отображаемое рядом с оборудованием'],
 			'archived' => [

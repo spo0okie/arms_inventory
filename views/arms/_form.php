@@ -64,7 +64,6 @@ if (!isset($modalParent)) $modalParent=null;
 							'allowClear' => false,
 						]
 					]) ?>
-					<?= \app\helpers\FieldsHelper::CheckboxField($form,$model, 'is_server') ?>
 				</div>
 				<div class="col-md-2" >
 					<?= \app\helpers\FieldsHelper::Select2Field($form,$model,'comp_id',[
@@ -97,27 +96,6 @@ if (!isset($modalParent)) $modalParent=null;
 			<?= \app\helpers\FieldsHelper::TextAutoresizeField($form,$model, 'mac',['lines'=>4]) ?>
         </div>
 
-	    <?php /*
- 		ранее считал что у сервера не может быть пользователя
- 		но это в идеальном мире, т.к. в качестве сервера для выполнения каких-либо сервисов
- 		может использоваться и любой пользовательский АРМ
-        $js = <<<JS
-        $("#arms-is_server").on('change',function(){
-        
-            // to submit only if the checkbox is checked otherwise 
-            // you can remove the check and just use the submit statement
-            if($(this).is(':checked')){
-                $("#arms-user_settings, #arms-responsible_settings_block").hide();
-                $("#arms-server_hint_block").show();
-            } else {
-                $("#arms-user_settings, #arms-responsible_settings_block").show();
-                $("#arms-server_hint_block").hide();
-            }
-        });
-		JS;
-
-	    $this->registerJs($js, \yii\web\View::POS_READY);
-	    */?>
     </div>
 	<?php if ($model->isNewRecord) { ?>
         <p>
@@ -167,7 +145,7 @@ if (!isset($modalParent)) $modalParent=null;
 		</div>
 		<div class="col-md-4" >
 			<label class="control-label" >
-				Подсказка для заполнения спеки
+				Подсказка по заполнению спецификации
 			</label>
 			<br />
 			<div id="specs-hint" class="hint-block">
@@ -183,7 +161,7 @@ if (!isset($modalParent)) $modalParent=null;
 			</label>
 			
 			<div id="model-hint" class="hint-block">
-				Эти данные не нужно вносить в индивидуальную спеку:<br />
+				Эти данные не нужно повторять в индивидуальной спецификации:<br />
 				<?php
 				if(is_object($model) && is_object($model->techModel))
 					echo Yii::$app->formatter->asNtext($model->techModel->comment)

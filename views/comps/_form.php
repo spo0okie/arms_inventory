@@ -30,7 +30,7 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-md-4">
 			<?= $form->field($model, 'name') ?>
 		</div>
-		<div class="col-md-4">
+		<div class="col-md-4" data-doc-anchor="sandbox">
 			<?= $form->field($model,  'sandbox_id')->select2() ?>
 		</div>
 	</div>
@@ -86,6 +86,12 @@ if (!isset($modalParent)) $modalParent=null;
 
     <p>
         <span onclick="$('#comps_advanced_settings').toggle()" class="href">Расширенные настройки</span>
+        <?= Html::tag('span','<i class="far fa-question-circle"></i>',array_merge(
+			['class'=>'attr-hint-icon','qtip_pin'=>'1'],
+			\app\helpers\FieldsHelper::toolTipOptions('Расширенные настройки',
+				'Поля под этим блоком заполняются скриптами инвентаризации — '
+				.'ручные правки будут перезаписаны при следующем отчете скрипта.')
+		)) ?>
     </p>
     <div id="comps_advanced_settings" style="display: none">
 		<div class="row">
@@ -111,7 +117,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 
     <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ArmsForm::end(); ?>

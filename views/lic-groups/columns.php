@@ -26,7 +26,7 @@ return [
 	],
 	[
 		'attribute'=>'keysCount',
-		'header'=>'Ключей<br/>исп/всего',
+		'header'=>'Лицензий<br/>исп/всего',
 		'headerOptions'=>['qtip_ttip'=>'Распределённых (используемых) лицензий / всего активных лицензий этого типа'],
 		'format'=>'raw',
 		'value'=>function($item) {

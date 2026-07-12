@@ -1,16 +1,13 @@
 <?php
 
-use yii\helpers\Html;
-use yii\bootstrap5\Modal;
-use kartik\grid\GridView;
+use app\components\ModelFieldWidget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\LicItems */
 
 ?>
-<h3>Статус:</h3>
-<h4><?= $model->status ?></h4>
-(<?= $model->datePart ?>)
+<?= ModelFieldWidget::renderFieldTitle($model,'status',null,'h3') ?>
+<h4><?= ModelFieldWidget::renderFieldValue($model,'status') ?></h4>
 
 <?php if (count($model->arms_ids)) { ?>
 	<br />Привязано к АРМ: <?= count($model->arms_ids) ?>

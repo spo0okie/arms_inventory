@@ -66,7 +66,7 @@ if ($model->parent_id)
 	<?= $form->field($model,'comment')->textAutoresize() ?>
 
     <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
 	<p class="mt-3">

@@ -52,7 +52,7 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-md-6">
 		    <?= $form->field($model,  'comment')->text(['rows' => 6]) ?>
 			<br>
-			<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+			<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
 			
 		</div>
 		<div class="col-md-6 form-text text-muted">

@@ -46,7 +46,7 @@ $tabs[]=[
 		.DynaGridWidget::widget([
 		'header'=>'Установки',
 		'id' => 'soft-comps-list',
-		'columns' => array_merge(include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php', [
+		'columns' => array_merge(include Yii::getAlias('@app').'/views/comps/columns.php', [
 			'softAgreed'=>[
 				'header'=>'В паспорте',
 				'value'=>function($comp) use ($model) {
@@ -71,7 +71,7 @@ $tabs[]=[
 	'content'=>DynaGridWidget::widget([
 		'id' => 'soft-lic-groups-list',
 		'header'=>'Типы лицензий',
-		'columns' => include $_SERVER['DOCUMENT_ROOT'].'/views/lic-groups/columns.php',
+		'columns' => include Yii::getAlias('@app').'/views/lic-groups/columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
 		'dataProvider' => $licProvider,
 		'createButton'=>count($licProvider->models)?('Активных лицензий: '.$keysCount):'',

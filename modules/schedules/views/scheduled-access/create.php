@@ -11,7 +11,7 @@ if ($model->isOverride) {
 	$this->params['breadcrumbs'][] = ['label' => $model->overriding->name, 'url' => ['index']];
 } else {
 	$this->title = 'Новый '.mb_strtolower(\app\models\Acls::$scheduleTitle);
-	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index-acl']];
+	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index']];
 }
 $this->params['breadcrumbs'][] = $this->title;
 ?>

@@ -15,7 +15,7 @@ $this->title = $model->name;
 if (!$acl_mode) {
 	$this->params['breadcrumbs'][] = ['label' => Schedules::$titles, 'url' => ['index']];
 } else {
-	$this->params['breadcrumbs'][] = ['label' => Acls::$scheduleTitles, 'url' => ['index-acl']];
+	$this->params['breadcrumbs'][] = ['label' => Acls::$scheduleTitles, 'url' => ['scheduled-access/index']];
 }
 $this->params['breadcrumbs'][] = $this->title;
 Url::remember();

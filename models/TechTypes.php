@@ -34,8 +34,7 @@ class TechTypes extends ArmsModel
 	{
 		return 'Категории оборудования: классификация моделей с ролями (компьютер/дисплей/ИБП/телефон), префиксами инв. номеров и шаблонами описаний.';
 	}
-	public static $descr='Используемые категории различной техники для удобной группировки';
-	
+
 	/** @inheritdoc   */
 	protected static $syncableFields=[
 		'name',
@@ -82,7 +81,7 @@ class TechTypes extends ArmsModel
 	public function attributeData()
 	{
 		return [
-			'id' => 'id',
+			'id' => 'ID',
 			'code' => [
 				'Код',
 				'hint' => 'Может использоваться впоследствии для отдельных обработчиков событий и генерации CSS классов в формах просмотра и отчетах',

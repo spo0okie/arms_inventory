@@ -10,7 +10,7 @@ $acl_mode=(is_object($model->master) && (count($model->master->acls)));
 if (!$acl_mode)
 	$this->params['breadcrumbs'][] = ['label' => \app\modules\schedules\models\Schedules::$titles, 'url' => ['/schedules/index']];
 else
-	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['/schedules/index-acl']];
+	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['/schedules/scheduled-access/index']];
 
 if (is_object($model->master) && ($model->date)) {
     $this->title = 'Добавить график '.$model->dayFor;

@@ -90,7 +90,7 @@ class AccessTypes extends ArmsModel
 				'typeClass' => \app\types\StringType::class,
 			],
             'notepad' => [
-            	'Зап. книжка',
+            	'Записная книжка',
 				'hint' => 'Тут можно вообще все в деталях описать если нужно',
 				'type' => 'text',
 				'typeClass' => \app\types\TextType::class,
@@ -129,9 +129,9 @@ class AccessTypes extends ArmsModel
 				'Параметры IP по умолчанию',
 				'hint'=>'Если это IP доступ, то какие порты каких IP протоколов он требует<br>'
 					.'Например:<ul>'
-					.'<li>TCP 443 <i>(для HTTPS)</li>'
-					.'<li>UDP 5060,20000-20100 <i>(для SIP)</li>'
-					.'<li>TCP,UDP 53<i>(для DNS)</li>'
+					.'<li>TCP 443 <i>(для HTTPS)</i></li>'
+					.'<li>UDP 5060,20000-20100 <i>(для SIP)</i></li>'
+					.'<li>TCP,UDP 53 <i>(для DNS)</i></li>'
 					.'</ul> Для каждого конкретного предоставления доступа этот параметр может быть изменен. Здесь именно значение по умолчанию',
 				'example'=>'UDP 5060,20000-20100',
 				'typeClass' => \app\types\TextType::class,

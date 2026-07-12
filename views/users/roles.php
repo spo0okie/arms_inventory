@@ -6,6 +6,7 @@
  * Time: 11:58
  */
 
+use app\components\AttributeTooltip;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -13,8 +14,16 @@ use yii\helpers\Html;
 
 $roles= Yii::$app->authManager->getRolesByUser($model->id);
 if ($model->Login || count($roles)) {
+	$hintIcon=AttributeTooltip::icon([
+		'title'=>'Доступ к инвентаризации',
+		'body'=>'Роли доступа к самому приложению инвентаризации (RBAC): определяют, '
+			.'что пользователь может видеть и редактировать здесь.<br>'
+			.'Это не доменные/сетевые доступы — те перечислены в блоке «Имеет доступ к».<hr/>'
+			.'«Сбросить пароль» задаёт локальный пароль приложения: при входе он проверяется '
+			.'в первую очередь, и только если локальный пароль не задан — выполняется проверка через LDAP.',
+	]);
 	?>
-	<h4>Доступ к инвентаризации</h4>
+	<h4>Доступ к инвентаризации<?= $hintIcon?' '.$hintIcon:'' ?></h4>
 	<?php
 	if ($model->Login && (
 					Yii::$app->params['useRBAC']

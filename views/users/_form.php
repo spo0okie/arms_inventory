@@ -119,10 +119,6 @@ if (!isset($modalParent)) $modalParent=null;
 
 
 
-    <div class="form-group mb-3">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-    </div>
-
 	<?= CollapsableCardWidget::widget([
 		'title'=>'Дополнительно',
 		'content'=>implode([
@@ -132,7 +128,11 @@ if (!isset($modalParent)) $modalParent=null;
 		]),
 		'initialCollapse'=>true,
 	])?>
-	
+
+    <div class="form-group mb-3">
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
+    </div>
+
     <?php ArmsForm::end(); ?>
 
 </div>

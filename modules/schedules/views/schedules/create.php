@@ -15,7 +15,7 @@ if ($model->isOverride) {
 	$this->params['breadcrumbs'][] = ['label' => \app\modules\schedules\models\Schedules::$titles, 'url' => ['index']];
 } else {
 	$this->title = 'Новый '.mb_strtolower(\app\models\Acls::$scheduleTitle);
-	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index-acl']];
+	$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['scheduled-access/index']];
 }
 $this->params['breadcrumbs'][] = $this->title;
 ?>

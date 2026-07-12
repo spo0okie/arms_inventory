@@ -42,12 +42,15 @@ if ($ctrl && isset($ctrl->modelClass) && is_subclass_of($ctrl->modelClass,\app\m
 		'hintText'=>'Справка по этой странице',
 	]);
 
-	//инфопанель «Просмотр» на карточке (plans/help-inline.md): только тело,
-	//тогглер — иконка в breadcrumbs выше; пустая секция не рендерит ничего
-	if (($ctrl->action->id??null)==='view') {
+	//инфопанель секции на карточке/формах (plans/help-inline.md): только тело,
+	//тогглер — иконка в breadcrumbs выше; пустая секция не рендерит ничего.
+	//view -> «Просмотр», update -> «Редактирование», create -> «Добавление» —
+	//так все канонические секции модельной MD доносятся до своих страниц
+	$actionSections=['view'=>'Просмотр','update'=>'Редактирование','create'=>'Добавление'];
+	if ($section=$actionSections[$ctrl->action->id??null]??null) {
 		$docsPanel=\app\components\DocsPanelWidget::widget([
 			'model'=>$ctrl->modelClass,
-			'sections'=>['Просмотр'],
+			'sections'=>[$section],
 		]);
 		if ($docsPanel!=='') {
 			$docsPanelBlock=Html::tag('div',$docsPanel,['class'=>'px-5 mb-2']);

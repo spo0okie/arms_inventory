@@ -90,7 +90,7 @@ class AclsController extends ArmsBaseController
     	$schedules_id=$model->schedules_id;
         return $schedules_id?
 			['/scheduled-access/view','id'=>$schedules_id]:
-			['/scheduled-access/index-acl'];
+			['scheduled-access/index'];
     }
 	
 	

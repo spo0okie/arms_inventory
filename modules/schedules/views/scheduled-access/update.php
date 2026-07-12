@@ -16,7 +16,7 @@ if ($model->isOverride) {
 	if (!$acl_mode) {
 		$this->params['breadcrumbs'][] = ['label' => \app\modules\schedules\models\Schedules::$titles, 'url' => ['index']];
 	} else {
-		$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index-acl']];
+		$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['index']];
 	}
 	$this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 	$this->params['breadcrumbs'][] = 'Изменить';

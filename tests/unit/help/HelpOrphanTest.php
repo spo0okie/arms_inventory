@@ -3,11 +3,9 @@
 namespace tests\unit\help;
 
 use app\helpers\DocsHelper;
-use app\models\base\ArmsModel;
 use app\types\AttributeTypeInterface;
 use Codeception\Test\Unit;
 use Yii;
-use yii\helpers\Inflector;
 
 /**
  * Сторож привязки слоя 2 к коду (plans/help-docs.md, этап 4).
@@ -55,10 +53,12 @@ class HelpOrphanTest extends Unit
 
 			if ($tokens[0] === 'models') {
 				//models/<class-id>.md или models/<class-id>/<attr>.md
+				//резолвер общий с DocsController: app\models\*, затем модели модулей
+				//(например scheduled-access -> app\modules\schedules\models\ScheduledAccess)
 				$classId = pathinfo($tokens[1], PATHINFO_FILENAME);
-				$class = 'app\\models\\' . Inflector::id2camel($classId, '-');
-				if (!class_exists($class) || !is_subclass_of($class, ArmsModel::class)) {
-					$orphans[] = "$path: нет модели $class";
+				$class = DocsHelper::findDocClass($classId);
+				if (!$class) {
+					$orphans[] = "$path: нет модели с id '$classId'";
 					continue;
 				}
 				if (count($tokens) === 3) {

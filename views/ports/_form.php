@@ -101,7 +101,7 @@ JS;
 	</div>
 
 	<div class="d-flex flex-row">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success me-auto']) ?>
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success me-auto']) ?>
 		<?= $model->isNewRecord?'':DeleteObjectWidget::widget([
 			'model'=>$model,
 			'hideUndeletable'=>true,

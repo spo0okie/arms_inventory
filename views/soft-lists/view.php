@@ -22,7 +22,7 @@ $renderer=$this;
 		'createButton'=>Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
-		'columns' => include $_SERVER['DOCUMENT_ROOT'].'/views/soft/columns.php',
+		'columns' => include Yii::getAlias('@app').'/views/soft/columns.php',
 		'defaultOrder' => ['descr','comment','hitsCount','compsCount'],
 	]); ?>
 

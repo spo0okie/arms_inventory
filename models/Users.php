@@ -17,7 +17,7 @@ use yii\web\IdentityInterface;
 /**
  * This is the model class for table "users".
  *
- * @property integer $id Табельный номер
+ * @property integer $id Внутренний идентификатор записи
  * @property string $employee_id Табельный номер
  * @property string $Orgeh Подразделение (id)
  * @property string $Orgtx Подразделение
@@ -231,6 +231,8 @@ class Users extends ArmsModel implements IdentityInterface
 			'uvolen' => ['alias'=>'Uvolen'],
 			'arms' => [
 				'АРМ',
+				'indexHint'=>'Закреплённые за сотрудником АРМ:<br>'
+					.'компьютеры из числящегося за ним оборудования',
 				'join'=>['techs.model.type','techs.state']
 			],
 			'acls' => [
@@ -281,7 +283,12 @@ class Users extends ArmsModel implements IdentityInterface
 				'absorb'=>'ifEmpty',
 				'join'=>['netIps.network.segment']
 			],
-			'LastThreeLogins' => 'Входы',
+			'lastThreeLogins' => [
+				'Входы',
+				'viewLabel'=>'Входы в комп',
+				'hint'=>'Журнал входов пользователей на компьютеры, заполняемый скриптами инвентаризации.<br>'
+					.'Показываются последние входы этого сотрудника на 3 разных компьютера',
+			],
 			'lics'=>[
 				'Лицензии',
 				'indexHint'=>'Назначенные пользователю лицензии',
@@ -291,8 +298,65 @@ class Users extends ArmsModel implements IdentityInterface
 				'join'=>['licItems','licGroups','licKeys'],
 			],
 			//read-only вычисляемые ссылки (категория C): только вывод
-			'compsFromTechs' => ['ref'=>\app\models\Comps::class, 'refMulti'=>true],
-			'compsTotal' => ['ref'=>\app\models\Comps::class, 'refMulti'=>true],
+			'compsFromTechs' => [
+				'Привязанные ОС',
+				'hint'=>'Операционные системы, обнаруженные на числящемся за сотрудником оборудовании',
+				'ref'=>\app\models\Comps::class, 'refMulti'=>true,
+			],
+			'comps' => [
+				'Ответственный за ОС',
+				'hint'=>'ОС/ВМ, в которых этот сотрудник явно указан пользователем '
+					.'(имеет смысл для серверов и ВМ, где пользователь ОС отличается от пользователя АРМ)',
+				'ref'=>\app\models\Comps::class, 'refMulti'=>true,
+			],
+			'compsTotal' => [
+				'Ответственный за ОС',
+				'hint'=>'ОС/ВМ в ответственности сотрудника: где он явно указан пользователем ОС, '
+					.'а поскольку сотрудник отвечает за сервисы — также ОС этих сервисов, '
+					.'по которым он определяется ответственным',
+				'ref'=>\app\models\Comps::class, 'refMulti'=>true,
+			],
+			'adminComps' => [
+				'Полномочия администратора',
+				'hint'=>'ОС/ВМ, на которых этому сотруднику (рядовому пользователю) '
+					.'выданы полномочия администратора',
+				'ref'=>\app\models\Comps::class, 'refMulti'=>true,
+			],
+			'services' => [
+				'Ответственный за сервисы',
+				'hint'=>'Сервисы, в которых сотрудник назначен ответственным за работу сервиса '
+					.'/ оказание услуги',
+				'ref'=>\app\models\Services::class, 'refMulti'=>true,
+			],
+			'infrastructureServices' => [
+				'Ответственный за инфраструктуру',
+				'hint'=>'Сервисы, в которых сотрудник назначен ответственным за инфраструктуру '
+					.'(когда ответственность за сервис и за его инфраструктуру разделена)',
+				'ref'=>\app\models\Services::class, 'refMulti'=>true,
+			],
+			'techsHead' => [
+				'Техника подчинённых',
+				'hint'=>'АРМ/оборудование, в паспорте которого сотрудник указан руководителем отдела пользователя',
+				'ref'=>\app\models\Techs::class, 'refMulti'=>true,
+			],
+			'techsIt' => [
+				'Обслуживаемая техника',
+				'hint'=>'АРМ/оборудование, которое сотрудник (как сотрудник службы ИТ) '
+					.'обслуживает на месте установки',
+				'ref'=>\app\models\Techs::class, 'refMulti'=>true,
+			],
+			'techsResponsible' => [
+				'Техника в адм. ответственности',
+				'hint'=>'АРМ/оборудование, за которое сотрудник несёт административную ответственность:'
+					.'<br>ему переданы административные полномочия, и он отвечает '
+					.'за действия этого АРМ/оборудования',
+				'ref'=>\app\models\Techs::class, 'refMulti'=>true,
+			],
+			'contracts' => [
+				'Документы',
+				'hint'=>'Привязанные к сотруднику документы (договоры, акты и т.п.)',
+				'ref'=>\app\models\Contracts::class, 'refMulti'=>true,
+			],
 			//read-only вычисляемое поле (категория C): только вывод
 			'effectivePhone' => [
 				'Эффективный тел.',
@@ -316,6 +380,8 @@ class Users extends ArmsModel implements IdentityInterface
 			'Mobile' => [
 				'Мобильный тел',
 				'hint'=>'Мобильный телефон сотрудника',
+				'indexHint'=>'{same}<br>В списке выводятся вместе рабочий мобильный и личный телефоны '
+					.'(через запятую); поиск ведётся по обоим',
 				'absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class,
 			],
 			'netIps' => ['alias'=>'ips'],
@@ -378,6 +444,7 @@ class Users extends ArmsModel implements IdentityInterface
 			],
 			'techs' => [
 				'Оборудование',
+				'indexHint'=>'Всё АРМ/оборудование, числящееся за сотрудником (он указан пользователем)',
 				'join'=>['techs.model.type','techs.state']
 			],
 			'uid' => ['Идентификатор','hint'=>'Уникальный идентификатор человека.<br>ИНН / СНИЛС / MD5(ИНН) и т.п.','typeClass'=>\app\types\StringType::class],

@@ -59,7 +59,7 @@ if (!isset($modalParent)) $modalParent=null;
 
 	<?= $form->field($model, 'comment_hint') ?>
 	
-	<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+	<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
 	
     <?php ArmsForm::end(); ?>
 

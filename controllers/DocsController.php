@@ -4,9 +4,7 @@ namespace app\controllers;
 
 use app\helpers\DocsHelper;
 use app\helpers\ModelHelper;
-use app\models\base\ArmsModel;
 use Yii;
-use yii\helpers\Inflector;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -83,18 +81,11 @@ class DocsController extends ArmsBaseController
 
 	/**
 	 * Класс модели по kebab-case идентификатору документации:
-	 * сначала app\models, затем модели модулей.
+	 * общий резолвер — {@see DocsHelper::findDocClass()}.
 	 */
 	protected static function findDocClass(string $classId): ?string
 	{
-		$candidate = 'app\\models\\' . Inflector::id2camel($classId, '-');
-		if (class_exists($candidate) && is_subclass_of($candidate, ArmsModel::class)) return $candidate;
-
-		foreach (ModelHelper::getModelClasses() as $class) {
-			if (preg_match('/(History|Search)$/', $class)) continue;
-			if (DocsHelper::modelClassId($class) === $classId) return $class;
-		}
-		return null;
+		return DocsHelper::findDocClass($classId);
 	}
 
 	/**

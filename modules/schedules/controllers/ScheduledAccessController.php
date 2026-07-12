@@ -7,6 +7,7 @@ use app\generation\ModelFactory;
 use app\helpers\StringHelper;
 use app\models\Aces;
 use app\models\Acls;
+use app\modules\schedules\models\ScheduledAccess;
 use app\modules\schedules\models\SchedulesAclSearch;
 use Yii;
 use app\modules\schedules\models\Schedules;
@@ -17,12 +18,23 @@ use yii\web\NotFoundHttpException;
  */
 class ScheduledAccessController extends \app\controllers\ArmsBaseController
 {
-	public $modelClass=Schedules::class;
+	//обёртка над Schedules: те же данные, но своя подача страниц
+	//(titles/modelDescription/справка «Временные доступы»), см. ScheduledAccess
+	public $modelClass=ScheduledAccess::class;
 	public function accessMap()
 	{
-		return array_merge_recursive(parent::accessMap(),[
+		$map=array_merge_recursive(parent::accessMap(),[
 			'view'=>['status']
 		]);
+		//ScheduledAccess — обёртка для подачи страниц, а не отдельная сущность прав:
+		//гранулярные полномочия остаются view-/edit-schedules, как до появления обёртки
+		foreach ([static::PERM_VIEW,static::PERM_EDIT] as $perm) {
+			if (isset($map[$perm.'-scheduled-access'])) {
+				$map[$perm.'-schedules']=$map[$perm.'-scheduled-access'];
+				unset($map[$perm.'-scheduled-access']);
+			}
+		}
+		return $map;
 	}
 
 

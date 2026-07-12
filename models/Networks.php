@@ -125,6 +125,13 @@ class Networks extends ArmsModel
 				'hint' => 'Короткое описание сети',
 				'typeClass'=>\app\types\TextType::class,
 			],
+			'capacity' => [
+				'Ёмкость',
+				'hint'=>'Общее количество адресов в сети (включая адрес сети и широковещательный). '
+					.'Вычисляется из маски сети',
+				'readOnly'=>true,
+				'typeClass'=>\app\types\IntegerType::class,
+			],
 			'dhcp' => ['alias'=>'text_dhcp'],
 			'domain_id' => [
 				'Домен',
@@ -187,6 +194,23 @@ class Networks extends ArmsModel
 				'typeClass'=>\app\types\IpType::class,
 			],
 			'usage' => ['Занято','typeClass'=>\app\types\IntegerType::class],
+			'used' => [
+				'Использовано',
+				'hint'=>'Количество занятых IP адресов этой сети (записей в реестре IP адресов)',
+				'readOnly'=>true,
+				'typeClass'=>\app\types\IntegerType::class,
+			],
+			'usedPercent' => [
+				'Использовано (%)',
+				'hint'=>'Процент занятых адресов от ёмкости сети.<br>'
+					.'Цвет индикатора заполненности:<br>'
+					.'синий — до 15% (сеть почти пустая),<br>'
+					.'зелёный — 16-75% (нормальное заполнение),<br>'
+					.'жёлтый — 76-90% (сеть скоро заполнится),<br>'
+					.'красный — свыше 90% (свободных адресов почти нет)',
+				'readOnly'=>true,
+				'typeClass'=>\app\types\IntegerType::class,
+			],
 			'vlan_id' => [
 				'Vlan',
 				'hint' => 'В каком Vlan находится эта сеть',

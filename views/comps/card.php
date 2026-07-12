@@ -29,7 +29,9 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 		'qtip_side'=>'bottom',
 	]):
 	Html::a($rcIcon,'remotecontrol://'.$model->fqdn,[
-		'qtip_ttip'=>"Удаленное управление {$model->fqdn}",
+		'qtip_ttip'=>"Удаленное управление {$model->fqdn}<br>"
+			.'<a href="/docs/page/admin/integrations/remote-control.md">Как настроить обработчик протокола</a>',
+		'qtip_pin'=>'1',
 		'qtip_side'=>'bottom',
 	]);
 
@@ -125,7 +127,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 <?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
 
 <div class="login_journal">
-	<h4 qtip_ttip="Три последние записи входа пользователей на эту ОС/ВМ из общего журнала входов.">Журнал входов (3 посл)</h4>
+	<h4 qtip_ttip="Журнал входов очень большой, поэтому здесь выводятся только три последние записи входа на эту ОС/ВМ, причём уникальные по пользователям (по одной последней записи на пользователя). Полный журнал — в разделе «Журнал входов».">Журнал входов</h4>
 	<?php
 	$logons=$model->lastThreeLogins;
 	//$logons=$model->logins;

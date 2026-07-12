@@ -119,7 +119,7 @@ $this->registerJs($jsCrop);
 			<?= $form->field($model, 'height')->textInput() ?>
 		</div>
 		<div class="form-group col-2 text-end">
-			<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+			<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
 			<?= Html::tag('span','Cancel', [
 				'class' => 'btn btn-danger',
 				'onClick' => new JsExpression("$('#place-map').show();$('#item-edit').hide();")

@@ -56,7 +56,7 @@ if (!empty($model->router)) $model->text_router=(new PhpIP\IPv4($model->router))
 
 	<?= $form->field($model, 'notepad')->text() ?>
     <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ArmsForm::end(); ?>

@@ -287,7 +287,9 @@ class LoginJournal extends ArmsModel
 			->from(static::tableName())
 			->where(['comps_id'=>$comp_id])
 			->andWhere(['not',['comps_id'=>NULL]])
-			->groupBy('comps_id')
+			//уникальность по пользователям: groupBy('comps_id') при where по comps_id
+			//схлопывал выборку в одну строку вместо $limit последних пользователей
+			->groupBy('users_id')
 			->orderBy(['time'=>SORT_DESC])
 			->limit($limit)
 			->all();

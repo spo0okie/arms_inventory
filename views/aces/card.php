@@ -48,11 +48,11 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 				<span class="text-center divider2-striped">
 					<span class="ace-card p-1">
 						<span class="fas fa-exclamation-triangle"></span>
-						НЕТ ЗАПИСЕЙ
+						НЕТ СУБЪЕКТОВ
 						<span class="fas fa-exclamation-triangle"></span>
 					</span>
 				</span>
-				<span class="row text-center"><small >добавьте записи в этот элемент списка доступа</small></span>
+				<span class="row text-center"><small >в этой записи доступа не указано, кому он предоставляется — добавьте субъектов (пользователей, ОС, IP)</small></span>
 
 			<?php } ?>
 		</div>

@@ -26,7 +26,7 @@ $tabs[]=[
 	'content'=>DynaGridWidget::widget([
 		'id' => 'reqs-comps',
 		'header' => false,
-		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php',
+		'columns' => require Yii::getAlias('@app').'/views/comps/columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
 		'createButton' => Html::a('Добавить', ['comps/create','Comps'=>['sandbox_id'=>$model->id]], [
 			'class' => 'btn btn-success open-in-modal-form',

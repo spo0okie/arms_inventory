@@ -63,7 +63,7 @@ $tabs[]=[
 	'content'=>DynaGridWidget::widget([
 		'id' => 'job-services',
 		'header' => false,
-		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/services/columns.php',
+		'columns' => require Yii::getAlias('@app').'/views/services/columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
 		'dataProvider' => $dataProvider,
 		'model' => new Services()
@@ -76,7 +76,7 @@ $tabs[]=[
 	'content'=>DynaGridWidget::widget([
 		'id' => 'job-comps',
 		'header' => false,
-		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php',
+		'columns' => require Yii::getAlias('@app').'/views/comps/columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
 		'dataProvider' => new ArrayDataProvider(['allModels'=>$model->comps]),
 		'model' => new Comps()
@@ -89,7 +89,7 @@ $tabs[]=[
 	'content'=>DynaGridWidget::widget([
 		'id' => 'job-techs',
 		'header' => false,
-		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/techs/columns.php',
+		'columns' => require Yii::getAlias('@app').'/views/techs/columns.php',
 		//'defaultOrder' => ['name','ip','mac','os','updated_at','arm_id','places_id','raw_version'],
 		'dataProvider' => new ArrayDataProvider(['allModels'=>$model->techs]),
 		'model' => new Techs()

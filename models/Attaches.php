@@ -111,7 +111,7 @@ class Attaches extends ArmsModel
 		if ($this->validate()) {
 			$prefix=($this->id)?$this->id:static::fetchNextId();
 			$this->filename=$prefix.'-'. StringHelper::truncate($this->uploadedFile->baseName,80).'.'.$this->uploadedFile->extension;
-			return $this->uploadedFile->saveAs($_SERVER['DOCUMENT_ROOT'].$this->fullFname);
+			return $this->uploadedFile->saveAs(Yii::getAlias('@app').$this->fullFname);
 		} else {
 			return false;
 		}

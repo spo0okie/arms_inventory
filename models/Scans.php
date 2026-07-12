@@ -78,7 +78,7 @@ class Scans extends ArmsModel
 	public function attributeData()
 	{
 		return array_merge(parent::attributeData(), [
-			'file' => ['Место хранения загруженного файла', 'typeClass' => \app\types\StringType::class],
+			'file' => ['Место хранения загруженного файла', 'indexLabel'=>'Файл', 'typeClass' => \app\types\StringType::class],
 			'arms_id' => ['АРМ', 'hint' => 'АРМ, к которому прикреплён скан'],
 			'techs_id' => [Techs::$titles, 'hint' => 'Оборудование, к которому прикреплён скан'],
 			'contracts_id' => [Contracts::$titles, 'hint' => 'Документ, к которому прикреплён скан'],
@@ -147,7 +147,7 @@ class Scans extends ArmsModel
 			$prefix=($this->id)?$this->id:static::fetchNextId();
 			$this->file=$prefix.'-'. StringHelper::truncate($this->scanFile->baseName,80);
 			$this->format=$this->scanFile->extension;
-			$this->scanFile->saveAs($_SERVER['DOCUMENT_ROOT'].$this->fullFname);
+			$this->scanFile->saveAs(Yii::getAlias('@app').$this->fullFname);
 			return true;
 		} else {
 			return false;
@@ -352,7 +352,7 @@ class Scans extends ArmsModel
 		//return $thumbName;
 		$width=$width?$width:null;
 		$height=$height?$height:null;
-		if (!file_exists($_SERVER['DOCUMENT_ROOT'].$thumbName)) {
+		if (!file_exists(Yii::getAlias('@app').$thumbName)) {
 			if (!$this->fileExists)
 				return static::$NO_ORIG_ERR;
 			$thumbName=self::prepThumb($this->fullFname,$thumbName,$width,$height);
@@ -372,14 +372,14 @@ class Scans extends ArmsModel
 	 * @throws ImagickException
 	 */
 	public static function prepThumb($orig,$thumb,$width,$height){
-		if (!file_exists($_SERVER['DOCUMENT_ROOT'].$thumb)) {
-			if (!file_exists($_SERVER['DOCUMENT_ROOT'].$orig))
+		if (!file_exists(Yii::getAlias('@app').$thumb)) {
+			if (!file_exists(Yii::getAlias('@app').$orig))
 				return static::$NO_ORIG_ERR;
 			
 			$ext=self::cutExtension($orig);
 			$format=self::cutExtension($thumb);
 			try {
-				$im=new Imagick($_SERVER['DOCUMENT_ROOT'] . $orig.($ext=='pdf'?'[0]':''));
+				$im=new Imagick(Yii::getAlias('@app') . $orig.($ext=='pdf'?'[0]':''));
 			} catch (\Exception $e) {
 				return static::$RENDERING_ERR;
 			}
@@ -395,7 +395,7 @@ class Scans extends ArmsModel
 				$im=$bg;
 			}
 			$im->resizeImage($width,$height, Imagick::FILTER_LANCZOS,1);
-			$im->writeimage($_SERVER['DOCUMENT_ROOT'] . $thumb);
+			$im->writeimage(Yii::getAlias('@app') . $thumb);
 			$im->clear();
 			$im->destroy();
 		}
@@ -404,9 +404,9 @@ class Scans extends ArmsModel
 	
 	public function getImageSize() {
 		if (isset($this->attrsCache['imageSize'])) return $this->attrsCache['imageSize'];
-		if (!file_exists($_SERVER['DOCUMENT_ROOT'] . $this->getFullFname())) return null;
+		if (!file_exists(Yii::getAlias('@app') . $this->getFullFname())) return null;
 		try {
-			$im=new Imagick($_SERVER['DOCUMENT_ROOT'] . $this->getFullFname());
+			$im=new Imagick(Yii::getAlias('@app') . $this->getFullFname());
 		} catch (\Exception $e) {
 			return [0,0];
 		}

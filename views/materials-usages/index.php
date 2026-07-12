@@ -16,6 +16,11 @@ $this->title = \app\models\MaterialsUsages::$titles;
 
 ?>
 <div class="materials-usages-index">
+	<div class="alert alert-info py-2">
+		Расход вносится с карточки конкретного материала кнопкой «Использовать»
+		(см. <?= Html::a('ЗиП и Материалы', ['/materials/index']) ?>),
+		поэтому кнопки добавления здесь нет.
+	</div>
 	<?= DynaGridWidget::widget([
 		'id' => 'materials-usages-index',
 		'header' => Html::encode($this->title),

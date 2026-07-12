@@ -56,15 +56,15 @@ if (!isset($static_view)) $static_view=false;
 
 <div class="d-flex flex-row mt-2 mb-3">
 	<div class="pe-5">
-		<h4>Шлюз</h4>
+		<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'readableRouter') ?>
 		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'readableRouter') ?>
 	</div>
 	<div class="pe-5">
-		<h4>DHCP</h4>
+		<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'text_dhcp',null,'h4','DHCP') ?>
 		<?= Yii::$app->formatter->asNtext($model->text_dhcp) ?>
 	</div>
 	<div class="pe-0 flex-fill">
-		<h4>Использовано:</h4>
+		<?= \app\components\ModelFieldWidget::renderCompositeTitle($model,['used','capacity','usedPercent'],'Использовано') ?>
 		<?= $this->render('used',['model'=>$model]) ?>
 	</div>
 </div>

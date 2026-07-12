@@ -19,7 +19,7 @@ $this->title = $model->name;
         <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
+                'confirm' => 'Удалить эту запись?',
                 'method' => 'post',
             ],
         ]) ?>
@@ -31,6 +31,7 @@ $this->title = $model->name;
             ModelFieldWidget::detailAttribute($model,'id'),
             ModelFieldWidget::detailAttribute($model,'code'),
             ModelFieldWidget::detailAttribute($model,'name'),
+            ModelFieldWidget::detailAttribute($model,'archived:boolean'),
             ModelFieldWidget::detailAttribute($model,'descr:ntext'),
         ],
     ]) ?>

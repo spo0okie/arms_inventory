@@ -1,5 +1,6 @@
 <?php
 
+use app\components\AttributeTooltip;
 use app\components\HistoryWidget;
 use app\components\TextFieldWidget;
 use yii\helpers\Html;
@@ -30,6 +31,14 @@ if (!isset($static_view)) $static_view=false;
 						<div class="btn-group " role="group">
 							<span class="btn btn-primary btn-sm" title="ACL с одинаковым набором ACE объединены в группу">
 								<span class="fas fa-layer-group"></span> <?= count($models) ?> ресурсов
+								<?php /* скрытая до режима справки «?» (onlyHelp): вёрстка плотная */ ?>
+								<?= AttributeTooltip::icon([
+									'title'=>'Группа ACL',
+									'body'=>'Несколько ACL с одинаковым набором участников (записей доступа) '
+										.'объединены в одну карточку: участники общие, ресурсов несколько '
+										.'(перечислены ниже).<br>'
+										.'Правки участников и удаление применяются ко всем ресурсам группы.',
+								],true) ?>
 							</span>
 							<?php if (!$static_view) { ?>
 								<?= Html::a('<span class="fas fa-pencil-alt"></span>',

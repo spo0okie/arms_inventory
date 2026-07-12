@@ -21,9 +21,9 @@ if (!isset($static_view)) $static_view=false;
 		]) ?>
     </h1>
 	<?= $model->nosync?'<span class="fas fa-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
-	Дата рождения: <?= \app\components\ModelFieldWidget::renderFieldValue($model,'Bday') ?> <br/>
+	<?= ModelFieldWidget::renderFieldTitle($model,'Bday',null,'span','Дата рождения') ?>: <?= ModelFieldWidget::renderFieldValue($model,'Bday') ?> <br/>
     <?= \app\components\ModelFieldWidget::renderCompositeTitle($model,['employee_id','Persg'],'Табельный №','span') ?>
-	<?= $model->employee_id ?> (<?= $model->Persg ?>)
+	<?= $model->employee_id ?> (<?= \app\models\Users::$WTypes[$model->Persg][1] ?? $model->Persg ?>)
     -
 	<?php
         if ($model->Uvolen) {
@@ -46,19 +46,19 @@ if (!isset($static_view)) $static_view=false;
 
 	<div class="flex-row d-flex flex-wrap pb-3">
 		<span class="pe-4">
-			<span class="h5">Логин в AD: </span><?= \app\components\ModelFieldWidget::renderFieldValue($model,'Login') ?>
+			<span class="h5"><?= ModelFieldWidget::renderFieldTitle($model,'Login',null,'span','Логин в AD') ?>: </span><?= ModelFieldWidget::renderFieldValue($model,'Login') ?>
 		</span>
 		<span>
-			<span class="h5">E-Mail: </span><?= Yii::$app->formatter->asEmail($model->Email) ?>
+			<span class="h5"><?= ModelFieldWidget::renderFieldTitle($model,'Email',null,'span','E-Mail') ?>: </span><?= Yii::$app->formatter->asEmail($model->Email) ?>
 		</span>
 	</div>
 
-    <h4>Телефоны</h4>
+    <?= ModelFieldWidget::renderCompositeTitle($model,['Phone','Mobile','private_phone','work_phone'],'Телефоны') ?>
     <p class="pb-3">
         Внутренний: <?= $this->render('internal-phone',compact('model')) ?><br />
 		Сотовый: <?= $this->render('mobile-phone',['phone'=>$model->Mobile,'static_view'=>$static_view]) ?><br />
 		<?= strlen($model->private_phone??'')?("Личный: ".$this->render('mobile-phone',['phone'=>$model->private_phone,'static_view'=>$static_view])." <br />"):'' ?>
-        Городской: <?= \app\components\ModelFieldWidget::renderFieldValue($model,'work_phone') ?><br />
+        <?= strlen($model->work_phone??'')?('Городской: '.ModelFieldWidget::renderFieldValue($model,'work_phone').'<br />'):'' ?>
     </p>
 
 	<?php echo ModelFieldWidget::widget([
@@ -87,12 +87,16 @@ if (!isset($static_view)) $static_view=false;
 
 	<?= $this->render('/comps/lics_list',['model'=>$model]); ?>
 
-	<?= $this->render('/aces/list',['models'=>$model->aces]); ?>
-	
-	<h4>Входы в комп</h4>
-    <?php if (is_array($model->lastThreeLogins)) foreach ($model->lastThreeLogins as $logon) { ?>
-        <?= $this->render('/login-journal/item-comp',['model'=>$logon]); ?> <br />
-    <?php } ?>
+	<?= $this->render('/aces/list',['models'=>$model->aces,'hintModel'=>$model]); ?>
+
+	<?php
+	$lastLogins=$model->lastThreeLogins;
+	if (is_array($lastLogins) && count($lastLogins)) {
+		echo ModelFieldWidget::renderFieldTitle($model,'lastThreeLogins',null,'h4','Входы в комп');
+		foreach ($lastLogins as $logon)
+			echo $this->render('/login-journal/item-comp',['model'=>$logon]).' <br />';
+	}
+	?>
 
 <?php if (strlen($model->notepad??'')) { ?>
 	<h3>Записная книжка:</h3>

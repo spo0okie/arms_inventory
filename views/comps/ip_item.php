@@ -49,7 +49,9 @@ if (!$static_view) {
 			'remotecontrol://' . $addr,
 			[
 				'class' => 'ip-action',
-				'qtip_ttip' => "Удалённое управление по адресу {$addr}",
+				'qtip_ttip' => "Удалённое управление по адресу {$addr}<br>"
+					.'<a href="/docs/page/admin/integrations/remote-control.md">Как настроить обработчик протокола</a>',
+				'qtip_pin' => '1',
 				'qtip_side' => 'bottom',
 			]
 		);

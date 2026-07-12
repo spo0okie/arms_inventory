@@ -12,7 +12,10 @@ $glue='<br/>';
 return [
 	//['class' => 'yii\grid\SerialColumn'],
 	
+	//фильтры по вычисляемым колонкам в AclsSearch не реализованы,
+	//поэтому у всех колонок 'filter'=>false — чтобы строка фильтра не врала
 	'subjects_nodes'=>[
+		'filter'=>false,
 		'value'=>function($data) use ($glue,$renderer) {
 			if (is_object($data)) return ModelFieldWidget::widget([
 				'models'=>$data->aces,
@@ -32,6 +35,7 @@ return [
 		}
 	],
 	'subjects'=>[
+		'filter'=>false,
 		'value'=>function($data) use ($glue,$renderer) {
 			if (is_object($data)) return ModelFieldWidget::widget([
 				'models'=>$data->aces,
@@ -51,6 +55,7 @@ return [
 		}
 	],
 	'access_types'=>[
+		'filter'=>false,
 		'value'=>function($data) use ($glue,$renderer) {
 			if (is_object($data)) return ModelFieldWidget::widget([
 				'model'=>$data,
@@ -68,6 +73,7 @@ return [
 		}
 	],
 	'schedule'=>[
+		'filter'=>false,
 		'value'=>function($data) use ($renderer,$glue){
 			if (is_object($data) && is_object($data->schedule))
 				return $data->schedule->renderItem($renderer,['static_view'=>false,'modal'=>true]);
@@ -75,6 +81,7 @@ return [
 		}
 	],
 	'resource'=>[
+		'filter'=>false,
 		'value'=>function($data) use ($renderer){
 			if (is_object($data))
 				return ModelWidget::widget(['model'=>$data,'options'=>['static_view'=>false,'modal'=>true]]);
@@ -82,6 +89,7 @@ return [
 		}
 	],
 	'resource_nodes'=>[
+		'filter'=>false,
 		'value'=>function($data) use ($renderer,$glue){
 			if (is_object($data)) return ModelFieldWidget::widget([
 				'model'=>$data,

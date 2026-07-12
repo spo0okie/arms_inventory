@@ -76,7 +76,7 @@ $tabs[]=[
 	'content'=>DynaGridWidget::widget([
 		'id' => 'lic-groups-items',
 		//'header' => false,
-		'columns' => ArrayHelper::filter(require $_SERVER['DOCUMENT_ROOT'].'/views/lic-items/columns.php',[1,2,3]),
+		'columns' => ArrayHelper::filter(require Yii::getAlias('@app').'/views/lic-items/columns.php',[1,2,3]),
 		'dataProvider' => new ArrayDataProvider(['allModels'=>$model->licItems]),
 		'model' => new LicItems(),
 		'createButton' => Html::a('Добавить закупку',['/lic-items/create','LicItems'=>['lic_group_id'=>$model->id]],['class' => 'btn btn-success']),
@@ -90,9 +90,9 @@ $tabs[]=[
 		'id' => 'lic-groups-users',
 		'header' => 'Распределение лицензий по пользователям',
 		'columns' => FieldsHelper::addFieldColumns(
-			require $_SERVER['DOCUMENT_ROOT'].'/views/lic-links/columns.php',
+			require Yii::getAlias('@app').'/views/lic-links/columns.php',
 			'object',
-			require $_SERVER['DOCUMENT_ROOT'].'/views/users/columns.php'
+			require Yii::getAlias('@app').'/views/users/columns.php'
 		),
 		'defaultOrder'=>['object.shortName','comment','created_at','unlink'],
 		'dataProvider' => new ArrayDataProvider(['allModels'=> LicGroupsInUsers::findLinks($model->id),'key'=>'id',]),
@@ -107,9 +107,9 @@ $tabs[]=[
 		'id' => 'lic-groups-comps',
 		'header' => 'Распределение лицензий по операционным системам / виртуальным машинам',
 		'columns' => FieldsHelper::addFieldColumns(
-			require $_SERVER['DOCUMENT_ROOT'].'/views/lic-links/columns.php',
+			require Yii::getAlias('@app').'/views/lic-links/columns.php',
 			'object',
-			require $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php'
+			require Yii::getAlias('@app').'/views/comps/columns.php'
 		),
 		'defaultOrder'=>['object.name','comment','created_at','unlink'],
 		'dataProvider' => new ArrayDataProvider(['allModels'=> LicGroupsInComps::findLinks($model->id),'key'=>'id',]),
@@ -124,9 +124,9 @@ $tabs[]=[
 		'id' => 'lic-groups-techs',
 		'header' => 'Распределение лицензий по рабочим местам',
 		'columns' => FieldsHelper::addFieldColumns(
-			require $_SERVER['DOCUMENT_ROOT'].'/views/lic-links/columns.php',
+			require Yii::getAlias('@app').'/views/lic-links/columns.php',
 			'object',
-			require $_SERVER['DOCUMENT_ROOT'].'/views/techs/columns.php'
+			require Yii::getAlias('@app').'/views/techs/columns.php'
 		),
 		'defaultOrder'=>['object.num','comment','created_at','unlink'],
 		'dataProvider' => new ArrayDataProvider(['allModels'=> LicGroupsInArms::findLinks($model->id),'key'=>'id',]),

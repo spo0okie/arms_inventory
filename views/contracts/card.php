@@ -28,9 +28,10 @@ if (!isset($static_view)) $static_view=false;
 	</h1></div>
 </div>
 
-<?php /* шапка (дата+платёжный №+статус) и сумма (total+НДС+валюта) - композиции
-        нескольких атрибутов, законные исключения из правила ModelFieldWidget */ ?>
-<h4>От: <?= $model->datePart ?>
+<?php /* шапка (дата+платёжный №+статус) и сумма (total+НДС+валюта) - составные блоки:
+        значение собирается кастомной логикой, заголовок - renderCompositeTitle (ui-sources.md §3) */ ?>
+<h4><?= ModelFieldWidget::renderCompositeTitle($model,['date','pay_id','state_id'],'От:','span') ?>
+	<?= $model->datePart ?>
 
 	<?= $model->pay_id?(' // '.Yii::$app->params['docs.pay_id.name'].':'.$model->pay_id):'' ?>
 
@@ -39,7 +40,8 @@ if (!isset($static_view)) $static_view=false;
 
 <?php if ($model->total) { ?>
 	<h4>
-		Сумма: <?= \app\components\ModelFieldWidget::renderFieldValue($model,'total') ?>
+		<?= ModelFieldWidget::renderCompositeTitle($model,['total','charge','currency_id'],'Сумма:','span') ?>
+		<?= \app\components\ModelFieldWidget::renderFieldValue($model,'total') ?>
 		<?php if ($model->charge){ ?>
 			(в т.ч. НДС: <?= \app\components\ModelFieldWidget::renderFieldValue($model,'charge') ?>)
 		<?php } ?>
@@ -56,7 +58,7 @@ if (!isset($static_view)) $static_view=false;
 
 
 <?php if (!$static_view) { ?>
-    <p>
+    <p data-doc-anchor="create-from-doc">
         <?php
 		
         $js = <<<JS
@@ -78,17 +80,16 @@ JS;
         $this->registerJs($js);
 
         ?>
-        Создать
-        <a href="<?= Url::to(['/contracts/create','Contracts[parent_id]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Подчиненный документ</a>
+        На основании этого документа создать:
+        <a href="<?= Url::to(['/contracts/create','Contracts[parent_id]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">подчиненный документ</a>
         //
-		<a href="<?= Url::to(['/techs/create','Techs[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Оборудование/АРМ</a>
+		<a href="<?= Url::to(['/techs/create','Techs[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">оборудование/АРМ</a>
         //
-		<a href="<?= Url::to(['/materials/create','Materials[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Материалы</a>
+		<a href="<?= Url::to(['/materials/create','Materials[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">материалы</a>
         //
-		<a href="<?= Url::to(['/lic-items/create','LicItems[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Лицензию</a>
+		<a href="<?= Url::to(['/lic-items/create','LicItems[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">лицензию</a>
         //
-		<a href="<?= Url::to(['/services/create','Services[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">Услугу</a>
-        :: на основании этого документа
+		<a href="<?= Url::to(['/services/create','Services[contracts_ids][]'=>$model->id])?>" class="open-in-modal-form" data-reload-page-on-submit="1">услугу</a>
     </p>
 <?php } ?>
 

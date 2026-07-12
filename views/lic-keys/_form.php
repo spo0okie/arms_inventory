@@ -70,7 +70,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	<?= $form->field($model, 'comment')->text(['rows' => 4,]) ?>
 
     <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ArmsForm::end(); ?>

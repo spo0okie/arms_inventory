@@ -110,7 +110,7 @@ return [
 		},
 	],
 	'os' => [
-		'label' => 'Софт',
+		'label' => 'ОС / софт',
 		'value' => function ($data) {return $data->os;},
 	],
 	'mac' => [

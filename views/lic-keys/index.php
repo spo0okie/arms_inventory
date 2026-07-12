@@ -19,7 +19,13 @@ $renderer=$this;
 		'id' => 'lic-keys',
 		'header' => Html::encode($this->title),
 		'columns' => include 'columns.php',
-		//'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
+		//кнопки «Добавить» здесь осознанно нет: ключ создаётся из карточки закупки лицензий
+		'createButton' => '<div class="alert alert-info py-1 px-2 mb-0 d-inline-block">'
+			.'<span class="fas fa-info-circle"></span> '
+			.'Ключи добавляются с карточки '
+			.Html::a('закупки лицензий',['/lic-items/index'])
+			.' (кнопка «Добавить ключ»)'
+			.'</div>',
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>

@@ -3,13 +3,14 @@
 use app\components\DynaGridWidget;
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
+use app\components\ModelFieldWidget;
 use app\helpers\FieldsHelper;
 use app\models\LicGroups;
 use app\models\links\LicKeysInArms;
 use app\models\links\LicKeysInComps;
 use app\models\links\LicKeysInUsers;
-use kartik\markdown\Markdown;
 use yii\data\ArrayDataProvider;
+use yii\helpers\Html;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
@@ -40,9 +41,10 @@ $this->params['headerContent']=
 					'hideUndeletable' => false,
 				])
 			.'</h3>'
-			.'<pre>'.$model->key_text.'</pre>'
+			.ModelFieldWidget::renderFieldTitle($model,'key_text',null,'h4')
+			.'<pre>'.Html::encode($model->key_text).'</pre>'
 			.'<hr>'
-			.Markdown::convert($model->comment??'',[])
+			.ModelFieldWidget::renderFieldRow($model,'comment')
 		.'</div>'
 	//.'<div class="me-5 flex-lg-grow-0">'
 	//.'</div>'
@@ -64,12 +66,12 @@ $tabs[]=[
 	'id'=>'users',
 	'label'=>'Привязки к пользователям '.$badge.count($model->users).'</span>',
 	'content'=>DynaGridWidget::widget([
-		'id' => 'lic-groups-users',
+		'id' => 'lic-keys-users',
 		'header' => 'Распределение лицензий по пользователям',
 		'columns' => FieldsHelper::addFieldColumns(
-			require $_SERVER['DOCUMENT_ROOT'].'/views/lic-links/columns.php',
+			require Yii::getAlias('@app').'/views/lic-links/columns.php',
 			'object',
-			require $_SERVER['DOCUMENT_ROOT'].'/views/users/columns.php'
+			require Yii::getAlias('@app').'/views/users/columns.php'
 		),
 		'defaultOrder'=>['object.shortName','comment','created_at','unlink'],
 		'dataProvider' => new ArrayDataProvider(['allModels'=> LicKeysInUsers::findLinks($model->id),'key'=>'id',]),
@@ -81,12 +83,12 @@ $tabs[]=[
 	'id'=>'computers',
 	'label'=>'Привязки к ОС / ВМ '.$badge.count($model->comps).'</span>',
 	'content'=>DynaGridWidget::widget([
-		'id' => 'lic-groups-comps',
+		'id' => 'lic-keys-comps',
 		'header' => 'Распределение лицензий по операционным системам / виртуальным машинам',
 		'columns' => FieldsHelper::addFieldColumns(
-			require $_SERVER['DOCUMENT_ROOT'].'/views/lic-links/columns.php',
+			require Yii::getAlias('@app').'/views/lic-links/columns.php',
 			'object',
-			require $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php'
+			require Yii::getAlias('@app').'/views/comps/columns.php'
 		),
 		'defaultOrder'=>['object.name','comment','created_at','unlink'],
 		'dataProvider' => new ArrayDataProvider(['allModels'=> LicKeysInComps::findLinks($model->id),'key'=>'id',]),
@@ -98,12 +100,12 @@ $tabs[]=[
 	'id'=>'techs',
 	'label'=>'Привязки к АРМ '.$badge.count($model->arms).'</span>',
 	'content'=>DynaGridWidget::widget([
-		'id' => 'lic-groups-techs',
+		'id' => 'lic-keys-techs',
 		'header' => 'Распределение лицензий по рабочим местам',
 		'columns' => FieldsHelper::addFieldColumns(
-			require $_SERVER['DOCUMENT_ROOT'].'/views/lic-links/columns.php',
+			require Yii::getAlias('@app').'/views/lic-links/columns.php',
 			'object',
-			require $_SERVER['DOCUMENT_ROOT'].'/views/techs/columns.php'
+			require Yii::getAlias('@app').'/views/techs/columns.php'
 		),
 		'defaultOrder'=>['object.num','comment','created_at','unlink'],
 		'dataProvider' => new ArrayDataProvider(['allModels'=> LicKeysInArms::findLinks($model->id),'key'=>'id',]),
@@ -113,5 +115,5 @@ $tabs[]=[
 
 $this->params['navTabs']=$tabs;
 $this->params['tabsParams']=[
-	'cookieName'=>'lic-groups-view-tab-'.$model->id,
+	'cookieName'=>'lic-keys-view-tab-'.$model->id,
 ];

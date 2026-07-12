@@ -51,7 +51,9 @@ if (!$html && ($description = $model::modelDescription())) { ?>
 	</tr>
 	</thead>
 	<tbody>
-	<?php foreach (array_keys($model->attributeData()) as $attr) {
+	<?php foreach ($model->attributeData() as $attr=>$data) {
+		//алиасы — не самостоятельные атрибуты, в справочнике дублировали бы цель
+		if (is_array($data) && isset($data['alias'])) continue;
 		try {
 			$label = $model->getAttributeLabel($attr);
 			//смысл + формат типа + переходы на подробные страницы - собирает сборщик

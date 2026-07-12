@@ -144,7 +144,7 @@ class MaintenanceJobs extends ArmsModel
 			],
 			'reqs_ids' => [
 				'Выполняет требования',
-				'hint'=>'Какие требования по регламентному обслуживания выполняет эта операция',
+				'hint'=>'Какие требования по регламентному обслуживанию выполняет эта операция',
 				'placeholder'=>'Никакие не выполняет',
 				'is_inheritable'=>true,
 				'typeClass'=>\app\types\LinkType::class,

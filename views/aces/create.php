@@ -13,7 +13,7 @@ $this->title = "Новый ". Aces::$title;
 //если есть ACL, то отплясываем от него
 if (is_object($model->acl)) {
 	if($model->acl->schedules_id) {
-		$this->params['breadcrumbs'][] = ['label' => Acls::$scheduleTitles, 'url' => ['schedules/index-acl']];
+		$this->params['breadcrumbs'][] = ['label' => Acls::$scheduleTitles, 'url' => ['scheduled-access/index']];
 	 	$this->params['breadcrumbs'][] = ['label' => $model->acl->schedule->name, 'url' => ['schedules/view','id'=>$model->acl->schedules_id]];
  	} else {
 	 	$this->params['breadcrumbs'][] = ['label' => Acls::$titles, 'url' => ['acls/index']];

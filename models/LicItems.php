@@ -51,13 +51,13 @@ class LicItems extends ArmsModel
 {
 	use LicItemsModelCalcFieldsTrait;
 	
-	public static $titles='Закупленные лицензии';
+	public static $titles='Закупки лицензий';
 
 	public static function modelDescription(): string
 	{
 		return 'Закупки лицензий: пачки лицензий с привязкой к документам закупки, количеством и периодом действия.';
 	}
-	public static $title='Закупленные лицензии';
+	public static $title='Закупка лицензий';
 	
 	public $linkComment=null; //комментарий, добавляемый при привязке лицензий
 
@@ -163,7 +163,7 @@ class LicItems extends ArmsModel
 			'comps_ids' => [
 				'ОС, куда распределять лицензии',
 				'hint' => 'На эти ОС будут распределяться свободные (не распределенные через лицензионные ключи) лицензии из этой закупки',
-				'placeholder' => 'Не  закреплено за ОС/ВМ',
+				'placeholder' => 'Не закреплено за ОС/ВМ',
 				'typeClass' => \app\types\LinkType::class,
 			],
 			'count' => [
@@ -183,7 +183,7 @@ class LicItems extends ArmsModel
 			'users_ids' => [
 				'Пользователи, на которых распределять лицензии',
 				'hint' => 'На этих пользователей будут распределяться свободные (не распределенные через лицензионные ключи) лицензии из этой закупки',
-				'placeholder' => 'Не  закреплено за пользователями',
+				'placeholder' => 'Не закреплено за пользователями',
 				'typeClass' => \app\types\LinkType::class,
 			],
 			'lic_group_id' => [
@@ -335,7 +335,7 @@ class LicItems extends ArmsModel
 	{
 		$keys=[];
 		foreach ($this->keys as $key)
-			if (count($key->arms)) $keys[]=$key;
+			if (count($key->arms)||count($key->comps)||count($key->users)) $keys[]=$key;
 		return $keys;
 	}
 	
@@ -383,7 +383,7 @@ class LicItems extends ArmsModel
 			} else $message='бессрочная';
 		} else {
 			if (time()>strtotime($this->active_to)) $message='просроч. с '.$this->active_to;
-			if (time()<strtotime($this->active_from)) $message='начнется '.$this->active_to;
+			if (time()<strtotime($this->active_from)) $message='начнется '.$this->active_from;
 		}
 		return $message.
 			' ['.$this->usages.'/'.$this->count.']';

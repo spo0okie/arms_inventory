@@ -231,7 +231,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 		</div>
 		<div class="col-md-4" >
 			<label class="control-label" >
-				Подсказка для заполнения спеки
+				Подсказка по заполнению спецификации
 			</label>
 			<br />
 			<div id="specs-hint" class="hint-block">
@@ -247,7 +247,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 			</label>
 
 			<div id="model-hint" class="hint-block">
-				Эти данные не нужно вносить в индивидуальную спеку:<br />
+				Эти данные не нужно повторять в индивидуальной спецификации:<br />
 				<?php
 				if(is_object($model) && is_object($model->model))
 					echo Yii::$app->formatter->asNtext($model->model->comment)

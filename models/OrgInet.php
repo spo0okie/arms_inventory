@@ -23,14 +23,12 @@ use Yii;
  * @property string $account
  * @property float $cost
  * @property float $charge
- * @property int $prov_tel_id Услуга связи
  * @property int $places_id Помещение
  * @property int $contracts_id Договор
  * @property int $services_id Услуга связи
  * @property int $networks_id Подсеть	//Deprecated: заменено множественным полем ниже
  * @property int[] $networks_ids Подсети
  *
- * @property ProvTel $provTel
  * @property Contracts $contract
  * @property Places $place
  * @property Services $service
@@ -107,11 +105,11 @@ class OrgInet extends ArmsModel
 		return [
 			'account' => [
 				'Аккаунт / л/с',
-				'hint' => 'Номер лицеового счета, аккаунта иного идентификатора услуги у оператора',
+				'hint' => 'Номер лицевого счета, аккаунта или иного идентификатора услуги у оператора',
 			],
 			'archived' => [
 				'Архивирован',
-				'hint'=>'Если этот ввод интернета уже не используется, лучше его заархивировать.<br /> Он останется в БД для истории, но не будет попадаться на глаза, если явно не попросить'
+				'hint'=>'Если этот ввод интернета уже не используется, лучше его заархивировать.<br /> Он останется в БД для истории, но исчезнет из списков и меню выбора (показать можно переключателем «Архивные»)'
 			],
 			'charge' => [
 				'в т.ч. НДС',
@@ -120,7 +118,7 @@ class OrgInet extends ArmsModel
 			],
 			'contracts_id' => [
 				'Договор',
-				'hint' => 'Договор - основание дял подключения услуги интернет',
+				'hint' => 'Договор - основание для подключения услуги интернет',
 			],
 			'cost' => [
 				'Стоимость',
@@ -169,10 +167,6 @@ class OrgInet extends ArmsModel
 				'hint' => 'Помещение в которое заводится интернет',
 				'placeholder'=>'Укажите площадку/офис, для которого предоставляется интернет'
 			],
-			'prov_tel_id' => [
-				'Оператор связи',
-				'hint' => 'Услуга связи к которой привязан этот ввод',
-			],
 			'services_id' => [
 				'Услуга',
 				'hint' => 'На основании договора должна быть зарегистрирована услуга связи (которая может быть комплексной),<br>'
@@ -186,16 +180,7 @@ class OrgInet extends ArmsModel
 		];
 	}
 
-	
-	
-	/**
-	 * @return \yii\db\ActiveQuery
-	
-	public function getProvTel()
-	{
-		return $this->hasOne(ProvTel::class, ['id' => 'prov_tel_id']);
-	} */
-	
+
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\Html;
 use yii\web\YiiAsset;
 
 /* @var $this yii\web\View */
@@ -16,5 +17,6 @@ YiiAsset::register($this);
 
 ?>
 <div class="acls-view">
+	<h1><?= Html::encode($this->title) ?></h1>
 	<?= $this->render('card',['model'=>$model]) ?>
 </div>

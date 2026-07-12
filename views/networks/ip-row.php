@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-
+
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
@@ -14,22 +14,28 @@ $addr=long2ip($ip);
 $dhcps=$model->dhcpList;
 $default_comment='';
 $class='';
+$rowHint=''; //пояснение цветовой маркировки строки (тултип на строке)
 
 if ($i==0){ //адрес сети
-	$default_comment='Network address';
+	$default_comment='Адрес сети';
 	$class='class="table-warning"';
+	$rowHint='Адрес сети — служебный адрес, узлам не назначается (жёлтая подсветка)';
 } elseif ($i==$model->capacity-1) {
-	$default_comment='Broadcast address';
+	$default_comment='Широковещательный адрес';
 	$class='class="table-warning"';
+	$rowHint='Широковещательный адрес — служебный адрес, узлам не назначается (жёлтая подсветка)';
 } elseif ($model->addr+$i==$model->router) {
-	$default_comment='Default gateway';
+	$default_comment='Шлюз по умолчанию';
 	$class='class="table-success"';
+	$rowHint='Этот адрес указан шлюзом по умолчанию в этой сети (зелёная подсветка)';
 } elseif (is_object($model->firstUnusedIp) && $ip==$model->firstUnusedIp->addr) {
 	$default_comment='Первый свободный адрес';
 	$class='class="table-success"';
+	$rowHint='Первый не занятый адрес сети — его удобно выдать следующему узлу (зелёная подсветка)';
 } elseif (array_search($ip,$dhcps)!==false) {
-	$default_comment='DHCP server';
+	$default_comment='DHCP сервер';
 	$class='class="table-info"';
+	$rowHint='Этот адрес указан DHCP сервером этой сети (синяя подсветка)';
 }
 $rangeName='';
 foreach ($model->rangesList as $range) {
@@ -40,7 +46,7 @@ $isEmpty=isset($model->ipsByAddr[$model->addr+$i])||$class;
 $ip=$model->ipsByAddr[$model->addr+$i]??null;
 ?>
 
-<tr class="<?= $isEmpty?'':'empty-item' ?>" <?= ($isEmpty||$showEmpty)?'':'style="display:none"' ?>>
+<tr class="<?= $isEmpty?'':'empty-item' ?>" <?= ($isEmpty||$showEmpty)?'':'style="display:none"' ?> <?= $rowHint?'qtip_ttip="'.Html::encode($rowHint).'"':'' ?>>
 
 <td <?= $class ?>>
 	<span class="net-ips-item">
@@ -71,7 +77,7 @@ if (is_object($ip)) {
 		?>
 	</td>
 	<td <?= $class ?>>
-		<?= Yii::$app->formatter->asNtext(strlen($ip->comment)?$ip->comment:$default_comment) ?>
+		<?= Yii::$app->formatter->asNtext(strlen($ip->comment??'')?$ip->comment:$default_comment) ?>
 	</td>
 	
 <?php } else { ?>

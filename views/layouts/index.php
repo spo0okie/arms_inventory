@@ -45,7 +45,7 @@ if (isset(Yii::$app->request->get()[$searchClass])) {
 	<?= DynaGridWidget::widget([
 		'id' => $classId.'-index',
 		'header' => Html::encode($this->title),
-		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/'.$classId.'/columns.php',
+		'columns' => require Yii::getAlias('@app').'/views/'.$classId.'/columns.php',
 		'defaultOrder' => $modelClass::$defaultColumns??[],
 		'createButton' => Html::a(
 			$modelClass::$addButtonText??'Добавить',

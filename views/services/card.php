@@ -1,5 +1,6 @@
 <?php
 
+use app\components\AttributeTooltip;
 use app\components\ExpandableCardWidget;
 use app\components\IsArchivedObjectWidget;
 use app\components\IsHistoryObjectWidget;
@@ -80,7 +81,15 @@ if(!$static_view) { ?>
 			$debt=[];
 			foreach ($model->totalUnpaid as $currency=>$total)
 				$debt[]=$total.''.$currency;
-			echo 'Долг (с '.$model->firstUnpaid.'): '.implode(', ',$debt).'<br />';
+			echo 'Долг (с '.$model->firstUnpaid.'): '.implode(', ',$debt).' '
+				.AttributeTooltip::icon([
+					'title'=>'Долг',
+					'body'=>'Сумма неоплаченных платёжных документов по этому сервису/услуге:<br>'
+						.'берутся привязанные документы и все их подчинённые по цепочкам связей; '
+						.'платёжные — те, в которых заполнена «Сумма»; неоплаченные — те, чей статус '
+						.'имеет признак «не оплачен». Суммы складываются отдельно по каждой валюте.<br>'
+						.'<span class="text-muted">Дата в скобках — дата самого раннего неоплаченного документа.</span>',
+				]).'<br />';
 		} ?>
 
 	
@@ -93,8 +102,8 @@ if(!$static_view) { ?>
 					['name'=>$model->providingScheduleRecursive->usageWorkTimeDescription]
 				);
 			if (!$static_view && count($model->providingScheduleRecursive->getServicesArr())>1) { ?>
-				<span onmouseenter="$('#private_schedule').show()" onmouseleave="$('#private_schedule').hide()">
-					<span qtip_ttip="Это расписание используется более чем для одного сервиса. <br> Невозможно добавлять периоды недоступности сервиса">
+				<span data-doc-anchor="individual-schedule" onmouseenter="$('#private_schedule').show()" onmouseleave="$('#private_schedule').hide()">
+					<span qtip_ttip="Это расписание используется более чем для одного сервиса. <br> Невозможно добавлять периоды недоступности сервиса. <br> Наведите, чтобы создать индивидуальное расписание">
 						<span class="fas fa-exclamation-triangle" ></span>
 			    		<?= Html::a('Создать индивидуальное расписание',[
 							'schedules/create',
@@ -112,6 +121,7 @@ if(!$static_view) { ?>
 			'attach_service'=>$model->id,
 		],[
 			'id'=>'private_schedule',
+			'data-doc-anchor'=>'create-schedule',
 			//'style'=>'display:none'
 		]);
 

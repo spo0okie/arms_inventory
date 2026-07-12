@@ -32,9 +32,16 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			<?= ModelWidget::widget(['model'=>$model, 'view'=>'card', 'static_view'=>false]) ?>
 		</div>
 		<div class="col-md-4">
-			<h2>Рабочее место</h2>
-			<?php foreach ($model->techs as $arm) if ($arm->isComputer)
-				echo ModelWidget::widget(['model'=>$arm, 'view'=>'compact', 'no_users'=>true,'no_specs'=>true,'show_archived'=>$show_archived])?>
+			<?php
+			//АРМ сотрудника (компьютеры из закреплённого оборудования); нет АРМ - нет и заголовка
+			$workplaceArms=[];
+			foreach ($model->techs as $arm) if ($arm->isComputer) $workplaceArms[]=$arm;
+			if (count($workplaceArms)) {
+				echo '<h2>Рабочее место</h2>';
+				foreach ($workplaceArms as $arm)
+					echo ModelWidget::widget(['model'=>$arm, 'view'=>'compact', 'no_users'=>true,'no_specs'=>true,'show_archived'=>$show_archived]);
+			}
+			?>
 		</div>
 		<div class="col-md-4">
 			<br/>

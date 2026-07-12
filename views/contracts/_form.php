@@ -149,7 +149,8 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 			'name' => 'Scans[scanFile]',
 			'language' => 'ru',
 			'options' => [
-				'accept' => 'image/*',
+				//поддерживаемые форматы сканов (Scans::$supportedFormats) включают pdf — image/* его отфильтровывал
+				'accept' => 'image/*,.pdf',
 				'multiple' => true,
 				'id' => 'contract_form_scans_input',
 			],

@@ -66,8 +66,8 @@ class AttachesController extends ArmsBaseController
 	 *    (upload без файла не должен материализовать модель).
 	 *
 	 * Почему не проверяем успешную загрузку файла:
-	 * - `saveAs()` пишет по пути `$_SERVER['DOCUMENT_ROOT'].'/web/scans/...'` на диск,
-	 *   что требует корректно настроенного DOCUMENT_ROOT и прав записи в acceptance-окружении.
+	 * - `saveAs()` пишет по пути `Yii::getAlias('@app').'/web/scans/...'` на диск,
+	 *   что требует прав записи в acceptance-окружении.
 	 *   Это перенесено в сценарий отдельного upload-теста, если понадобится.
 	 */
 	public function testCreate(): array
@@ -112,8 +112,8 @@ class AttachesController extends ArmsBaseController
     	$model=$this->findModel($id);
         $model->delete();
 
-        if (file_exists($_SERVER['DOCUMENT_ROOT'].$model->fullFname))
-            unlink($_SERVER['DOCUMENT_ROOT'].$model->fullFname);
+        if (file_exists(Yii::getAlias('@app').$model->fullFname))
+            unlink(Yii::getAlias('@app').$model->fullFname);
 	
 		return $this->redirect(Url::previous());
     }
@@ -125,7 +125,7 @@ class AttachesController extends ArmsBaseController
 	 * Что делает actionDelete:
 	 * - ищет Attaches по GET `id` через findModel() (404 если не найден);
 	 * - выполняет `$model->delete()` — физически удаляет строку в БД;
-	 * - если файл скана существует по пути `$_SERVER['DOCUMENT_ROOT'].fullFname`,
+	 * - если файл скана существует по пути `Yii::getAlias('@app').fullFname`,
 	 *   удаляет его через `unlink()`; если файла нет, ветка молча пропускается;
 	 * - возвращает redirect на `Url::previous()` (HTTP 302).
 	 *

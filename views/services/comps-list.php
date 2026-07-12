@@ -17,8 +17,8 @@ use kartik\editable\Editable;
 //поэтому хак со сменой поведения архивных элементов по умолчанию делаем руками, а не автоматом
 ShowArchivedWidget::$defaultValue=false;
 $static_view=false;
-$compColumns=include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php';
-$techsColumns=include $_SERVER['DOCUMENT_ROOT'].'/views/techs/columns.php';
+$compColumns=include Yii::getAlias('@app').'/views/comps/columns.php';
+$techsColumns=include Yii::getAlias('@app').'/views/techs/columns.php';
 
 $vmCpus=0;
 $vmRam=0;
@@ -192,7 +192,7 @@ $vmRes=[
 		'model' => new Comps(),
 		'panel' => false,
 		'columns' => array_merge(
-			//include $_SERVER['DOCUMENT_ROOT'].'/views/comps/columns.php',
+			//include Yii::getAlias('@app').'/views/comps/columns.php',
 			$vmRes
 		),
 		'defaultOrder' => ['name','ip','mac','services_ids','comment','os','vCpuCores','vRamGb','vHddGb','arm_id','places_id','raw_version'],

@@ -21,7 +21,7 @@ use yii\db\ActiveQuery;
  * @property array    $users_ids Ссылка на пользователей
  * @property string   $key_text Ключ
  * @property string   $keyShort начало и конец ключа (чтобы не палить везде ключ целиком)
- * @property string   $comment Допольнительно
+ * @property string   $comment Дополнительно
  * @property string   $sname
  * @property string   $dname
  * @property LicItems $licItem закупка
@@ -95,7 +95,7 @@ class LicKeys extends ArmsModel
 	{
 		return [
 			'comment' => [
-				'Комментарии',
+				'Комментарий',
 				//был ключ 'comment' вместо 'hint' (опечатка) - подсказка не отображалась
 				'hint' => 'Все что стоит знать об этом ключе кроме информации в остальных полях',
 				'type' => 'text',
@@ -132,7 +132,7 @@ class LicKeys extends ArmsModel
 			],
 			'key_text' => [
 				'Ключ',
-				'hint' => 'Текст ключа / серийный номер / чтобы то ни было, что используется для активации продукта',
+				'hint' => 'Текст ключа / серийный номер / что бы то ни было, что используется для активации продукта',
 				'placeholder' => 'Введите ключ',
 				'typeClass' => \app\types\StringType::class,
 			],

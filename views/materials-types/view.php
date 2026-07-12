@@ -24,7 +24,7 @@ if ($groupBy=='name') {
 	echo DynaGridWidget::widget([
 		'id' => 'materials-types-' . $groupBy . '-groups1',
 		'header' => Html::encode(Materials::$titles),
-		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/materials/groups-columns.php',
+		'columns' => require Yii::getAlias('@app').'/views/materials/groups-columns.php',
 		'defaultOrder' => ['place', 'model', 'rest'],
 		'createButton' => Html::a('Добавить', ['materials/create','Materials'=>['type_id'=>$model->id]], ['class' => 'btn btn-success me-3'])
 			. Html::a('Показать подробно', ['view','groupBy'=>null]+Yii::$app->request->get()),
@@ -35,7 +35,7 @@ if ($groupBy=='name') {
 	echo DynaGridWidget::widget([
 		'id' => 'materials-types-groups',
 		'header' => Html::encode(Materials::$titles),
-		'columns' => require $_SERVER['DOCUMENT_ROOT'].'/views/materials/columns.php',
+		'columns' => require Yii::getAlias('@app').'/views/materials/columns.php',
 		'defaultOrder' => ['place', 'model', 'comment', 'rest'],
 		'createButton' => Html::a('Добавить', ['materials/create','Materials'=>['type_id'=>$model->id]], ['class' => 'btn btn-success me-3'])
 			. Html::a('Группировать по наименованию', ['view','groupBy'=>'name']+Yii::$app->request->get()),

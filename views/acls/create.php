@@ -11,7 +11,7 @@ use yii\web\YiiAsset;
 
 if (!isset($schedule)) $schedule=null;
 
-$this->title = $schedule? "Новый ".mb_strtolower(Acls::$scheduleTitle) : "Новый ".Acls::$title;
+$this->title = $schedule? "Новый ".mb_strtolower(Acls::$scheduleTitle) : "Новый ".mb_strtolower(Acls::$title);
 
 $this->render('breadcrumbs',['model'=>$model,'show_item'=>false]);
 $this->params['breadcrumbs'][] = $this->title;

@@ -206,9 +206,9 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 						&&
 						(//и если у этой модели есть ttip
 							
-							file_exists($_SERVER['DOCUMENT_ROOT'].'/views/'.$classId.'/card.php')
+							file_exists(Yii::getAlias('@app').'/views/'.$classId.'/card.php')
 							||
-							file_exists($_SERVER['DOCUMENT_ROOT'].'/views/'.$classId.'/ttip.php')
+							file_exists(Yii::getAlias('@app').'/views/'.$classId.'/ttip.php')
 						)
 					) {
 						//то строим ссылку

@@ -347,8 +347,8 @@ class ScansController extends ArmsBaseController
         $model->save();
 
         //вместо удаления отвязываем ото всех и сохраняем. Осиротевший скан может понадобиться при работе с журналами
-        //if (file_exists($_SERVER['DOCUMENT_ROOT'].$model->fullFname))
-        //    unlink($_SERVER['DOCUMENT_ROOT'].$model->fullFname);
+        //if (file_exists(Yii::getAlias('@app').$model->fullFname))
+        //    unlink(Yii::getAlias('@app').$model->fullFname);
 
 	    if (Yii::$app->request->isAjax) {
 		    Yii::$app->response->format = Response::FORMAT_JSON;

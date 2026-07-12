@@ -1,5 +1,6 @@
 <?php
 
+use app\components\AttributeTooltip;
 use app\models\Acls;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -40,16 +41,28 @@ ksort($rendered,SORT_STRING|SORT_FLAG_CASE);
 	<div class="d-flex align-items-center justify-content-between">
 		<h2>Доступы</h2>
 		<?php if (!$static_view) { ?>
-			<div class="btn-group btn-group-sm" role="group" title="Как показывать ACL расписания">
-				<a class="btn <?= $grouped?'btn-primary':'btn-outline-primary' ?>" href="<?= Url::current(['group'=>null]) ?>">
-					<span class="fas fa-layer-group"></span> Группировать
-				</a>
-				<a class="btn <?= !$grouped?'btn-primary':'btn-outline-primary' ?>" href="<?= Url::current(['group'=>0]) ?>">
-					<span class="fas fa-list"></span> Детально
-				</a>
+			<div class="d-flex align-items-center">
+				<?= Html::a('Добавить',['/acls/create','Acls[schedules_id]'=>$model->id],['class'=>'btn btn-success btn-sm me-2'])?>
+				<div class="btn-group btn-group-sm" role="group" title="Как показывать ACL расписания">
+					<a class="btn <?= $grouped?'btn-primary':'btn-outline-primary' ?>" href="<?= Url::current(['group'=>null]) ?>">
+						<span class="fas fa-layer-group"></span> Группировать
+					</a>
+					<a class="btn <?= !$grouped?'btn-primary':'btn-outline-primary' ?>" href="<?= Url::current(['group'=>0]) ?>">
+						<span class="fas fa-list"></span> Детально
+					</a>
+				</div>
+				<?php /* скрытая до режима справки «?» (AttributeTooltip::icon onlyHelp):
+					вёрстка плотная, поэтому подсказка проступает только в help-mode */ ?>
+				<?= AttributeTooltip::icon([
+					'title'=>'Группировать / Детально',
+					'body'=>'ACL с одинаковым набором участников (записей доступа) объединяются '
+						.'в одну карточку с несколькими ресурсами; правки участников такой карточки '
+						.'применяются ко всей группе.<br>'
+						.'«Детально» показывает каждый ACL отдельной карточкой '
+						.'с индивидуальным редактированием.',
+				],true) ?>
 			</div>
 		<?php } ?>
 	</div>
 	<?= implode(' ',$rendered)?>
-	<?= Html::a('Добавить',['/acls/create','Acls[schedules_id]'=>$model->id],['class'=>'btn btn-success pull-right'])?>
 </div>

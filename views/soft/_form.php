@@ -29,7 +29,7 @@ $model->addItem($model->add_item);
 			<?= $form->field($model, 'items')->textAutoresize(['rows'=>3]) ?>
 			<?= $form->field($model, 'additional')->textAutoresize(['rows'=>3]) ?>
 
-			<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+			<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
 		</div>
 		<div class="col-md-6">
 			<?= $form->field($model, 'comment') ?>

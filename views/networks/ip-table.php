@@ -1,25 +1,28 @@
 <?php
 
+use app\components\ModelFieldWidget;
 use app\components\UrlParamSwitcherWidget;
+use app\models\NetIps;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Networks */
 
 $showEmpty= Yii::$app->request->get('showEmpty',false);
+$ipModel=new NetIps(); //для подписей колонок (label + «?» с hint атрибута)
 ?>
 <table class="table table-bordered table-sm table-hover net-ips">
 	<tr>
 		<th>
-			#
+			№
 		</th>
 		<th>
-			addr
+			<?= ModelFieldWidget::renderFieldTitle($ipModel,'text_addr',null,'span') ?>
 		</th>
 		<th>
-			Name
+			<?= ModelFieldWidget::renderFieldTitle($ipModel,'name',null,'span') ?>
 		</th>
 		<th>
-			comment
+			<?= ModelFieldWidget::renderFieldTitle($ipModel,'comment',null,'span') ?>
 			<?= UrlParamSwitcherWidget::widget([
 				'cssClass'=>'float-end',
 				'param'=>'showEmpty',

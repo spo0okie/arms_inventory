@@ -2,9 +2,11 @@
 
 namespace app\helpers;
 
+use app\models\base\ArmsModel;
 use kartik\markdown\Markdown;
 use Yii;
 use yii\helpers\Html;
+use yii\helpers\Inflector;
 use yii\helpers\Url;
 
 /**
@@ -340,6 +342,26 @@ class DocsHelper
 		$class = is_object($model) ? get_class($model) : $model;
 		$class = preg_replace('/Search$/', '', $class);
 		return StringHelper::class2Id($class);
+	}
+
+	/**
+	 * Класс модели по kebab-case идентификатору документации: сначала app\models,
+	 * затем модели модулей (например 'scheduled-access' ->
+	 * app\modules\schedules\models\ScheduledAccess). Обратная операция
+	 * к {@see modelClassId()}; общий резолвер для DocsController и сторожей
+	 * документации (HelpOrphanTest).
+	 * @return string|null FQCN наследника ArmsModel либо null
+	 */
+	public static function findDocClass(string $classId): ?string
+	{
+		$candidate = 'app\\models\\' . Inflector::id2camel($classId, '-');
+		if (class_exists($candidate) && is_subclass_of($candidate, ArmsModel::class)) return $candidate;
+
+		foreach (ModelHelper::getModelClasses() as $class) {
+			if (preg_match('/(History|Search)$/', $class)) continue;
+			if (static::modelClassId($class) === $classId) return $class;
+		}
+		return null;
 	}
 
 	/**

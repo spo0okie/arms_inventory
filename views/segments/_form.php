@@ -57,7 +57,7 @@ $defaultCss=[
 	<?= $form->field($model, 'history')->text() ?>
 
     <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ArmsForm::end(); ?>

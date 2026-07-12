@@ -16,7 +16,7 @@ use app\models\Networks;
 //поэтому хак со сменой поведения архивных элементов по умолчанию делаем руками, а не автоматом
 ShowArchivedWidget::$defaultValue=false;
 $static_view=false;
-$columns=include $_SERVER['DOCUMENT_ROOT'].'/views/aces/columns.php';
+$columns=include Yii::getAlias('@app').'/views/aces/columns.php';
 unset($columns['resource_nodes']);
 $renderer=$this;
 $columns['network_hosts']=[

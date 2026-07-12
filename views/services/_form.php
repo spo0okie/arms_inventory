@@ -130,7 +130,7 @@ if (!$model->is_service) $model->is_service=0;
     </div>
 
 	<div class="form-group">
-		<?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+		<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
 	</div>
 	<?= $form->field($model, 'notebook')->text() ?>
 

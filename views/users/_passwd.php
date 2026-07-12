@@ -16,7 +16,7 @@ if (!isset($modalParent)) $modalParent=null;
     <?php $form = ActiveForm::begin(); ?>
 	<?= FieldsHelper::TextInputField($form,$model, 'password') ?>
 	<?= FieldsHelper::TextInputField($form,$model, 'repeatPassword') ?>
-    <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+    <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     <?php ActiveForm::end(); ?>
 
 </div>

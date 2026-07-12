@@ -13,7 +13,7 @@ use yii\helpers\Html;
 Url::remember();
 
 $this->title = 'IPAM';
-$this->params['breadcrumbs'][] = app\models\Networks::$titles;
+$this->params['breadcrumbs'][] = ['label'=>app\models\Networks::$titles,'url'=>['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 

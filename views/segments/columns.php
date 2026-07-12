@@ -19,11 +19,13 @@ return [
 	],
 	'description'=>['format' =>'text'],
 	'services_count'=>[
+		'label'=>'Сервисы',
 		'value'=>function($data) {
 			return Html::a(count($data->services),['segments/view','id'=>$data->id,'tab'=>'services']);
 		}
 	],
 	'networks_count'=>[
+		'label'=>'Сети',
 		'value'=>function($data) {
 			return Html::a(count($data->networks),['segments/view','id'=>$data->id,'tab'=>'networks']);
 		}
