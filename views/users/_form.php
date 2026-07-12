@@ -105,7 +105,7 @@ if (!isset($modalParent)) $modalParent=null;
 			<?= $form->field($model, 'private_phone') ?>
 			
 			
-			<?= $form->field($model, 'manager_id') ?>
+			<?= $form->field($model, 'manager_id')->select2() ?>
 			
 			<?= $form->field($model, 'Uvolen')->checkbox() ?>
 			

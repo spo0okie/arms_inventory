@@ -35,7 +35,8 @@ use yii\web\IdentityInterface;
  * @property string $Bday День рождения
  * @property string $employ_date Дата приема
  * @property string $resign_date Дата увольнения
- * @property string $manager_id Руководитель
+ * @property int $manager_id Руководитель (ссылка на запись сотрудника)
+ * @property Users $manager Непосредственный руководитель
  * @property string $notepad
  * @property string $password
  * @property string $auth_key Идентификатор Куки для авторизации
@@ -156,6 +157,7 @@ class Users extends ArmsModel implements IdentityInterface
 	
 	public $linksSchema=[
 		'org_id'=>									[Partners::class,'users_ids'],
+		'manager_id'=>								Users::class,
 		'netIps_ids' =>								[NetIps::class,'users_ids'],
 		'aces_ids' => 								[Aces::class,'users_ids'],
 		'lic_groups_ids' => 						[LicGroups::class,'users_ids'],
@@ -186,8 +188,9 @@ class Users extends ArmsModel implements IdentityInterface
     {
         return [
 	        [['Ename', 'Persg', 'Uvolen', ], 'required'],
-	        [['Persg', 'Uvolen', 'nosync','org_id'], 'integer'],
-	        [['employee_id', 'Orgeh', 'Bday', 'manager_id','employ_date','resign_date'], 'string', 'max' => 16],
+	        [['Persg', 'Uvolen', 'nosync','org_id','manager_id'], 'integer'],
+	        [['manager_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['manager_id' => 'id']],
+	        [['employee_id', 'Orgeh', 'Bday', 'employ_date','resign_date'], 'string', 'max' => 16],
 	        [['Doljnost', 'Ename', 'Mobile','private_phone','ips','auth_key'], 'string', 'max' => 255],
 			[['notepad'],'safe'],
 	        [['id'], 'unique'],
@@ -373,9 +376,10 @@ class Users extends ArmsModel implements IdentityInterface
 			'logon_ids' => ['absorb'=>false], //вручную переключим
 			'manager_id' => [
 				'Руководитель',
-				'hint'=>'Руководитель сотрудника — идентификатор из кадровой системы '
-					.'(не ссылка на запись этой базы), заполняется синхронизацией',
-				'typeClass'=>\app\types\StringType::class,
+				'hint'=>'Непосредственный руководитель — ссылка на запись сотрудника.<br>'
+					.'Может заполняться вручную или синхронизацией с кадровой системой',
+				'placeholder'=>'Руководитель не указан',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'Mobile' => [
 				'Мобильный тел',
@@ -590,6 +594,16 @@ class Users extends ArmsModel implements IdentityInterface
 	public function getOrg()
 	{
 		return $this->hasOne(Partners::class, ['id'=>'org_id']);
+	}
+
+	/**
+	 * Непосредственный руководитель
+	 * @return ActiveQuery
+	 */
+	public function getManager()
+	{
+		return $this->hasOne(Users::class, ['id'=>'manager_id'])
+			->from(['managers'=>Users::tableName()]);
 	}
 	
 	/**

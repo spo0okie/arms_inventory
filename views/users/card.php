@@ -43,6 +43,12 @@ if (!isset($static_view)) $static_view=false;
 			['model'=>$model,'field'=>'Doljnost'],
 		]]) ?>
     </p>
+	<?php if (is_object($model->manager)) { ?>
+		<p>
+			<?= ModelFieldWidget::renderFieldTitle($model,'manager_id',null,'span') ?>:
+			<?= $model->manager->renderItem($this,['static_view'=>$static_view]) ?>
+		</p>
+	<?php } ?>
 
 	<div class="flex-row d-flex flex-wrap pb-3">
 		<span class="pe-4">
