@@ -87,7 +87,7 @@ use yii\helpers\Url;
  */
 class Contracts extends ArmsModel
 {
-	
+
 	public static $title='Документы';
 	public static $titles='Документы';
 
@@ -96,19 +96,19 @@ class Contracts extends ArmsModel
 		return 'Документы: договоры, счета, накладные, акты и т.п.; связываются в цепочки через основной документ и привязываются к оборудованию, лицензиям и контрагентам.';
 	}
 	public static $noPartnerSuffix='Внутр. документ';
-	
+
 	public static $dictionary=[
 		'contract'=>['договор'],
 		'invoice'=>['счет']
 	];
-	
+
 
 
 	const DELIVERY_NONE=0;
 	const DELIVERY_PAYMENT_WAIT=10;
 	const DELIVERY_INCOMPLETE=20;
 	const DELIVERY_COMPLETE=100;
-	
+
 	public $scanFile;
 
 	private $successors_chain_cache=null;
@@ -122,7 +122,7 @@ class Contracts extends ArmsModel
 	private $recursive_children_cache=null;
 	private $all_children_cache=null;
 	private $first_predecessor_cache=null;
-	
+
 	/**
      * {@inheritdoc}
      */
@@ -130,8 +130,8 @@ class Contracts extends ArmsModel
     {
         return 'contracts';
     }
-	
-	
+
+
 	public $linksSchema=[
 		'state_id' => 		[ContractsStates::class,'contracts_ids'],
 		'currency_id' => 	Currency::class,
@@ -144,7 +144,7 @@ class Contracts extends ArmsModel
 		'materials_ids' =>	[Materials::class,'contracts_ids'],
 		'users_ids' =>		[Users::class,'contracts_ids'],
 	];
-    
+
     /**
      * {@inheritdoc}
      */
@@ -244,6 +244,7 @@ class Contracts extends ArmsModel
 				'indexHint' => 'Статус поставки: все ли ожидаемые материалы,'
 					.'<br>лицензии, оборудования по этому документу поступили'
 					.'<br>(привязаны к документу)',
+				'searchHint'=>'Фильтром можно выбрать только документы с поставками или только без них',
 				'join'=>['techs','materials','licItems'],
 				'typeClass' => \app\types\StringType::class,
 			],
@@ -366,6 +367,7 @@ class Contracts extends ArmsModel
 				'Статус',
 				'hint' => 'Для удобства контроля процессов оплаты.<br>'
 					.'В списке статусов можно создать дополнительные',
+				'searchHint'=>'Для фильтрации выберите интересующий статус',
 				'placeholder' => 'Выберите статус документа',
 				'typeClass'=>\app\types\LinkType::class,
 			],
@@ -412,7 +414,7 @@ class Contracts extends ArmsModel
 			],
 		];
 	}
-	
+
 	/** @var string[] Какие колонки выводить по умолчанию */
 	public static $defaultColumns= [
 		'name',
@@ -421,7 +423,7 @@ class Contracts extends ArmsModel
 		'charge',
 		'attach',
 	];
-	
+
 	public function reverseLinks()
 	{
 		return [
@@ -434,7 +436,7 @@ class Contracts extends ArmsModel
 			//$this->scans, //сканы удаляются при удалении документа
 		];
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -442,7 +444,7 @@ class Contracts extends ArmsModel
 	{
 		return $this->hasOne(Currency::class, ['id' => 'currency_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -450,7 +452,7 @@ class Contracts extends ArmsModel
 	{
 		return $this->hasOne(Contracts::class, ['id' => 'parent_id']);
 	}
-	
+
 	/**
 	 * ищет одного наследника (один уровень наследования + самый молодой)
 	 * @return ActiveQuery
@@ -462,7 +464,7 @@ class Contracts extends ArmsModel
 			->onCondition(['contract_successor.is_successor'=>true])
 			->orderBy(['contract_successor.date'=>SORT_DESC]);
 	}
-	
+
 	/**
 	 * ищет одного наследника (один уровень наследования + самый молодой)
 	 * @return ActiveQuery
@@ -471,7 +473,7 @@ class Contracts extends ArmsModel
 	{
 		return $this->hasMany(Contracts::class, ['parent_id' => 'id']);
 	}
-	
+
 	/**
 	 * Ищет всех непосредственных наследников (один уровень наследования)
 	 * @return ActiveQuery
@@ -509,7 +511,7 @@ class Contracts extends ArmsModel
 		if ($this->is_successor) return $this->parent;
 		return null;
 	}
-	
+
 	/**
 	 * Первый предшественник документа
 	 * (тот, который актуален на текущий момент, а все остальные устарели)
@@ -526,8 +528,8 @@ class Contracts extends ArmsModel
 		}
 		return $this->first_predecessor_cache;
 	}
-	
-	
+
+
 	/**
 	 * Цепь всех наследников
 	 * не привязанных к документу других документов, а по сути версий договоров заменяющих друг друга в разные периоды времени
@@ -540,13 +542,13 @@ class Contracts extends ArmsModel
 		//CACHE
 		if (!is_null($this->successors_chain_cache)) return $this->successors_chain_cache;
 		//---
-		
+
 		//ищем действующего наследника
 		$root=$this->firstPredecessor;
 
 		//составляем цепочку из всех потомков и их потомков
 		$chain=$root->getSuccessorsRecursive();
-		
+
 		//и себя последним
 		$chain[]=$root;
 
@@ -559,13 +561,13 @@ class Contracts extends ArmsModel
 			}
 			return ($a->date<$b->date)?-1:1;
 		});
-		
 
-		
+
+
 		//кэшируем (root принудительно вставляем первым, т.к. бывает что документ наследник идет той же датой)
 		return $this->successors_chain_cache=$chain;
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -579,12 +581,12 @@ class Contracts extends ArmsModel
 				'contract_children.name'=>SORT_DESC,
 			]);
 	}
-	
+
 	public function getChildrenRecursive()
 	{
 		if (!is_null($this->recursive_children_cache))
 			return $this->recursive_children_cache;
-		
+
 		$this->recursive_children_cache=[];
 		foreach ($this->children as $child) {
 			$this->recursive_children_cache[]=$child;
@@ -594,7 +596,7 @@ class Contracts extends ArmsModel
 		ArrayHelper::multisort($this->recursive_children_cache,'date',SORT_DESC);
 		return $this->recursive_children_cache;
 	}
-	
+
 	/**
 	 * Возвращает список всех потомков этого документа и его наследников (новых версий этого же документа)
 	 * только первый уровень
@@ -609,13 +611,13 @@ class Contracts extends ArmsModel
 		ArrayHelper::multisort($children,'date',SORT_DESC);
 		return $children; //ставим себя первым
 	}
-	
+
 	public function getAllChildren()
 	{
 		if (!is_null($this->all_children_cache))
 			return $this->all_children_cache; //CACHE
 		//----
-		
+
 		$docs=[];
 		$firstLevel=$this->chainChildren;
 		foreach ($firstLevel as $child) {
@@ -625,8 +627,8 @@ class Contracts extends ArmsModel
 		}
 		return $this->all_children_cache=$docs;
 	}
-	
-	
+
+
 	/**
 	 * @return OrgInet[]
 	 */
@@ -642,7 +644,7 @@ class Contracts extends ArmsModel
 		}
 		return $this->inets_cache;
 	}
-	
+
 	/**
 	 * @return OrgPhones[]
 	 */
@@ -658,7 +660,7 @@ class Contracts extends ArmsModel
 		}
 		return $this->phones_cache;
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 * @throws InvalidConfigException
@@ -668,7 +670,7 @@ class Contracts extends ArmsModel
 		return $this->hasMany(Services::class, ['id'=>'services_id'])
 			->viaTable('contracts_in_services',['contracts_id' => 'id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 * @throws InvalidConfigException
@@ -678,7 +680,7 @@ class Contracts extends ArmsModel
 		return $this->hasMany(Users::class, ['id'=>'users_id'])
 			->viaTable('users_in_contracts',['contracts_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает набор контрагентов в договоре
 	 * @param bool $userName
@@ -720,7 +722,7 @@ class Contracts extends ArmsModel
 		$name=mb_eregi_replace('(от *)?('.date('d.m.(Y|y)',$date).'|'.date('(Y|y).m.d',$date).') *(г(ода)?)?\.?\s*\-\s*','',$name,'i');
 		return $name;
 	}
-	
+
 	public function getSname($date=true,$self=true,$partner=true,$user=true,$payId=true)
 	{
 		$tokens=[];
@@ -728,10 +730,10 @@ class Contracts extends ArmsModel
 		if ($payId && $this->pay_id) $tokens[]=Yii::$app->params['docs.pay_id.name'].' '.$this->pay_id;
 		if ($self) $tokens[]=$this->selfSname;
 		if ($partner &&	strlen($partner=$this->getPartnersNames($user))) $tokens[]=$partner;
-		
+
 		return implode('-',$tokens);
 	}
-	
+
 	public function getSAttach()
 	{
 		$attaches='';
@@ -740,10 +742,10 @@ class Contracts extends ArmsModel
 		if (count($this->materials)) $attaches.='<span class="fas fa-box-open" title="Привязаны материалы: '.(count($this->materials)).'ед"></span>';
 		if (count($this->licItems)) $attaches.='<span class="fas fa-award" title="Привязаны лицензии: '.(count($this->licItems)).'шт"></span>';
 		if (count($this->services)) $attaches.='<span class="fas fa-cog" title="Привязаны услуги: '.(count($this->services)).'шт"></span>';
-		
+
 		return $attaches;
 	}
-	
+
 	/**
 	 * Поступило материалов по документу (привязано)
 	 * @return mixed
@@ -757,12 +759,12 @@ class Contracts extends ArmsModel
 		}
 		return $this->attrsCache['materialsCount'];
 	}
-	
+
 	public function getTechsCount()
 	{
 		return count($this->techs);
 	}
-	
+
 	/**
 	 * Поступило лицензий по документу (привязано)
 	 * @return mixed
@@ -776,7 +778,7 @@ class Contracts extends ArmsModel
 		}
 		return $this->attrsCache['licsCount'];
 	}
-	
+
 	/**
 	 * Количество недопоставленного оборудования
 	 */
@@ -784,7 +786,7 @@ class Contracts extends ArmsModel
 		if (!$this->techs_delivery) return 0;	//ничего не ждем
 		return max($this->techs_delivery-$this->techsCount,0); //если приехало больше чем хотели, то ничего не ждем
 	}
-	
+
 	/**
 	 * Количество недопоставленных материалов
 	 */
@@ -792,7 +794,7 @@ class Contracts extends ArmsModel
 		if (!$this->materials_delivery) return 0;	//ничего не ждем
 		return max($this->materials_delivery-$this->materialsCount,0);//если приехало больше чем хотели, то ничего не ждем
 	}
-	
+
 	/**
 	 * Количество недопоставленных лицензий
 	 */
@@ -800,7 +802,7 @@ class Contracts extends ArmsModel
 		if (!$this->lics_delivery) return 0;	//ничего не ждем
 		return max($this->lics_delivery-$this->licsCount,0);//если приехало больше чем хотели, то ничего не ждем
 	}
-	
+
 	/**
 	 * Возвращает массив количества недопоставленных объектов вида ['Оборудование: 3шт','Материалы и ЗИП: 7ед']
 	 * @return array|mixed
@@ -810,29 +812,29 @@ class Contracts extends ArmsModel
 		$this->attrsCache['undeliveredDescription']=[];
 		if ($this->undeliveredTechsCount)
 			$this->attrsCache['undeliveredDescription'][]=Techs::$titles.': '.($this->undeliveredTechsCount).'шт';
-		
+
 		if ($this->undeliveredMaterialsCount)
 			$this->attrsCache['undeliveredDescription'][]=Materials::$titles.': '.($this->undeliveredMaterialsCount).'ед';
-		
+
 		if ($this->undeliveredLicsCount)
 			$this->attrsCache['undeliveredDescription'][]=LicItems::$titles.': '.($this->undeliveredLicsCount).'шт';
-		
+
 		return $this->attrsCache['undeliveredDescription'];
 	}
-	
+
 	public function getDeliveryState() {
 		if (!$this->techs_delivery && !$this->materials_delivery && !$this->lics_delivery)
 			return self::DELIVERY_NONE;
-		
+
 		if (!$this->isPaid) return
 			self::DELIVERY_PAYMENT_WAIT;
-		
+
 		if ($this->undeliveredLicsCount+$this->undeliveredMaterialsCount+$this->undeliveredTechsCount)
 			return self::DELIVERY_INCOMPLETE;
-		
+
 		return self::DELIVERY_COMPLETE;
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -881,7 +883,7 @@ class Contracts extends ArmsModel
 			->viaTable('{{%contracts_in_lics}}', ['contracts_id' => 'id']);
 	}
 
-	
+
 	/**
 	 * набор всей техники привязанной к цепочке документов
 	 * @return null|ActiveQuery
@@ -895,7 +897,7 @@ class Contracts extends ArmsModel
 		$chain=[];
 		//перебираем все документы
 		foreach ($this->successorsChain as $item) $chain[]=$item->id;
-		
+
 
 		return $this->hasMany(Techs::class,['id' => 'techs_id'])
 			->viaTable('{{%contracts_in_techs}}', ['contracts_id' => $chain]);
@@ -942,7 +944,7 @@ class Contracts extends ArmsModel
 		//кэшируем результат
 		return $this->phones_chain_cache=$chain;
 	}
-	
+
 	/**
 	 * набор всех лицензий привязанных к цепочке документов
 	 * @return LicItems[]
@@ -951,7 +953,7 @@ class Contracts extends ArmsModel
 	{
 		//пытаемся обратиться к кэшу
 		if (!is_null($this->lics_chain_cache)) return $this->lics_chain_cache;
-		
+
 		$chain=[];
 		//перебираем все документы
 		foreach ($this->successorsChain as $item) {
@@ -963,7 +965,7 @@ class Contracts extends ArmsModel
 		//кэшируем результат
 		return $this->lics_chain_cache=$chain;
 	}
-	
+
 	/**
 	 * набор всех лицензий привязанных к цепочке документов
 	 * @return Services[]
@@ -972,7 +974,7 @@ class Contracts extends ArmsModel
 	{
 		//пытаемся обратиться к кэшу
 		if (!is_null($this->services_chain_cache)) return $this->services_chain_cache;
-		
+
 		$chain=[];
 		//перебираем все документы
 		foreach ($this->successorsChain as $item) {
@@ -984,7 +986,7 @@ class Contracts extends ArmsModel
 		//кэшируем результат
 		return $this->services_chain_cache=$chain;
 	}
-	
+
 	/**
 	 * Возвращает набор контрагентов в договоре
 	 * @return ActiveQuery
@@ -1014,7 +1016,7 @@ class Contracts extends ArmsModel
 	public static function fetchNextId() {
 		return static::find()->max("id")+1;
 	}
-	
+
 	/**
 	 * @param array|string $ids передаем список контрактов
 	 * @param string $form имя формы
@@ -1047,16 +1049,16 @@ class Contracts extends ArmsModel
 		}
 		return $hint;
 	}
-	
+
 	public static function fetchParentHint($ids,$form='') {
-		
+
 		if (!is_array($ids))
 			$ids=explode(',',$ids);
-		
+
 		$hint='Выберите договор / документ-основание';
-		
+
 		if (!count($ids)) return $hint;
-		
+
 		$possibleParents=static::find()
 			->innerJoin('{{%partners_in_contracts}}', '`contracts_id` = `contracts`.`id`')
 			->where(['partners_id'=>$ids,])
@@ -1065,10 +1067,10 @@ class Contracts extends ArmsModel
 			->limit(6)
 			->all();
 			//->prepare(Yii::$app->db->queryBuilder)->createCommand()->rawSql;
-		
+
 		if (!count($possibleParents)) return $hint;
 			//return var_dump($possibleParents);//
-		
+
 		$hintTtip='Быстрый выбор договора как основного документа';
 		$hint="<span title=\"$hintTtip\">Выбрать договор</span>: ";
 		foreach ($possibleParents as $doc) {
@@ -1081,11 +1083,11 @@ class Contracts extends ArmsModel
 			$ttip= Url::to(['/contracts/ttip','id'=>$doc->id]);
 			$hint.="<br /><span class='href' qtip_ajxhrf='$ttip' $js>{$doc->selfSname}</span>";
 		}
-	
+
 		return $hint;
 	}
-	
-	
+
+
 	function getIsUnpaid() {
 		return is_object($this->state)&&$this->state->unpaid;
 	}
@@ -1093,7 +1095,7 @@ class Contracts extends ArmsModel
 	function getIsPaid() {
 		return is_object($this->state)&&$this->state->paid;
 	}
-	
+
 	/**
 	 * Код для подстановки НДС
 	 * @param $model
@@ -1110,14 +1112,14 @@ class Contracts extends ArmsModel
 		<span class="href" onclick="$('#{$model}-{$charge}').val('')">нет</span>
 HTML;
 	}
-	
+
 	/**
 	 * @inheritdoc
 	 */
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
-			
+
 			if (!$this->parent_id) $this->is_successor=0;
 			if ($this->is_successor) {
 				//Если этот документ заменяет предыдущую версию договора,
@@ -1132,5 +1134,5 @@ HTML;
 		}
 		return true;
 	}
-	
+
 }
