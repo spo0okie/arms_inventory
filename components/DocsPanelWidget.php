@@ -30,6 +30,14 @@ class DocsPanelWidget extends Widget
 	 */
 	public $sections=[null,'Список'];
 
+	/**
+	 * @var bool показывать H2-заголовки секций внутри панели. Одиночной
+	 * канонической секции заголовок не нужен (его даёт подача страницы),
+	 * но когда панель собирает несколько секций гайда (как IPAM),
+	 * без заголовков они сливаются в сплошной текст.
+	 */
+	public $headings=false;
+
 	/** @var string ограничение высоты панели (внутренний скролл) */
 	public $maxHeight='60vh';
 
@@ -57,7 +65,7 @@ class DocsPanelWidget extends Widget
 
 		$content='';
 		foreach ($this->sections as $section) {
-			$content.=DocsHelper::renderSection($file,$relPath,$section);
+			$content.=DocsHelper::renderSection($file,$relPath,$section,$this->headings);
 		}
 		if (!strlen(trim($content))) return '';
 

@@ -210,6 +210,17 @@ class DocsHelperTest extends Unit
 
 		//отсутствующая секция
 		$this->assertEquals('', DocsHelper::extractSection(static::SECTIONED_MD, 'Удаление'));
+
+		//withHeading: строка H2 остаётся в теле секции (панель из нескольких секций гайда)
+		$list = DocsHelper::extractSection(static::SECTIONED_MD, 'Список', true);
+		$this->assertStringContainsString('## Список', $list);
+		$this->assertStringContainsString('тело списка', $list);
+		$this->assertStringNotContainsString('## Просмотр', $list);
+
+		//withHeading у преамбулы: H2 нет, а H1 отбрасывается по-прежнему
+		$preamble = DocsHelper::extractSection(static::SECTIONED_MD, null, true);
+		$this->assertStringContainsString('преамбула первая', $preamble);
+		$this->assertStringNotContainsString('Заголовок', $preamble);
 	}
 
 	/**

@@ -165,3 +165,18 @@ body.help-mode .attr-hint-icon:not(.qtip-pinned) {
 @media (prefers-reduced-motion: reduce) {
 	body.help-mode .attr-hint-icon { animation: none; }
 }
+
+/* Инфопанель документации (DocsPanelWidget, headings=true): H2/H3
+   трансклюдированных секций внутри компактной карточки приглушаются
+   до подзаголовков, чтобы не спорить с заголовком самой страницы */
+.docs-panel h2 {
+	font-size: 1.1rem;
+	font-weight: 600;
+	margin: .75rem 0 .4rem;
+}
+
+.docs-panel h3 {
+	font-size: 1rem;
+	font-weight: 600;
+	margin: .5rem 0 .3rem;
+}

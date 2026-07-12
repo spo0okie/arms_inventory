@@ -152,12 +152,14 @@ class DocsHelper
 	 * @param string      $file    абсолютный путь файла
 	 * @param string      $relPath его относительный путь внутри docs/help
 	 * @param string|null $section null - преамбула, иначе точное имя H2-секции
+	 * @param bool        $withHeading оставить строку H2-заголовка в теле секции
+	 *                    (панель из нескольких секций гайда, см. DocsPanelWidget::$headings)
 	 * @return string '' если секции нет
 	 */
-	public static function renderSection(string $file, string $relPath, ?string $section): string
+	public static function renderSection(string $file, string $relPath, ?string $section, bool $withHeading = false): string
 	{
-		return static::renderCached([$file, filemtime($file), 'section', $section], function () use ($file, $relPath, $section) {
-			$content = static::extractSection(file_get_contents($file), $section);
+		return static::renderCached([$file, filemtime($file), 'section', $section, $withHeading], function () use ($file, $relPath, $section, $withHeading) {
+			$content = static::extractSection(file_get_contents($file), $section, $withHeading);
 			if (!strlen(trim($content))) return '';
 			$html = Markdown::convert($content);
 			return static::rewriteHtmlLinks(
@@ -172,9 +174,10 @@ class DocsHelper
 	/**
 	 * Вырезает из MD-текста преамбулу (section=null: всё до первого H2,
 	 * первый H1 отбрасывается) или тело H2-секции с указанным заголовком.
+	 * @param bool $withHeading оставить строку H2-заголовка в теле секции
 	 * @return string '' если секции нет
 	 */
-	public static function extractSection(string $content, ?string $section): string
+	public static function extractSection(string $content, ?string $section, bool $withHeading = false): string
 	{
 		$lines = preg_split('/\R/u', $content);
 		$result = [];
@@ -185,7 +188,10 @@ class DocsHelper
 			if (preg_match('/^##(?!#)\s*(.+?)\s*$/u', $line, $matches)) {
 				if ($collect) break; //секция кончилась
 				$collect = ($section !== null && $matches[1] === $section);
-				continue; //строка заголовка в тело не входит (заголовок даёт подача)
+				//обычно заголовок даёт подача и в тело он не входит,
+				//но панель из нескольких секций просит его явно ($withHeading)
+				if ($collect && $withHeading) $result[] = $line;
+				continue;
 			}
 			if (!$collect) continue;
 			//первый H1 преамбулы отбрасываем (заголовок даёт подача)

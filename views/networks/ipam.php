@@ -88,6 +88,7 @@ echo \app\components\DocsPanelWidget::widget([
 	'path'=>'guides/ipam.md',
 	'panelId'=>'docs-panel-networks',
 	'sections'=>[null,'Раскраска','Куда кликать','Параметры'],
+	'headings'=>true,
 ]);
 
 echo $this->render('ipam-form',compact('baseIp','maxPrefix','minPrefix'));
