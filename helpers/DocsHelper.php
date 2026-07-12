@@ -201,6 +201,11 @@ class DocsHelper
 	/**
 	 * Кэш готового HTML: до изменения файла (в ключе filemtime).
 	 * Без кэш-компонента (тесты хелпера без приложения) - рендер напрямую.
+	 *
+	 * В ключ входит baseUrl запроса: переписанные ссылки содержат префикс
+	 * приложения, а один и тот же файловый кэш могут делить серверы с разными
+	 * префиксами (httpd отдаёт приложение под /web, dev php -S — из корня) —
+	 * без baseUrl в ключе один сервер отдавал бы ссылки другого.
 	 * @param array    $key
 	 * @param callable $render
 	 */
@@ -208,7 +213,10 @@ class DocsHelper
 	{
 		$cache = Yii::$app->cache ?? null;
 		if (!$cache) return $render();
-		return $cache->getOrSet(array_merge(['docsRender'], $key), $render);
+		$baseUrl = Yii::$app->request instanceof \yii\web\Request
+			? Yii::$app->request->baseUrl
+			: '';
+		return $cache->getOrSet(array_merge(['docsRender', $baseUrl], $key), $render);
 	}
 
 	/**

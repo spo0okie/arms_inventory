@@ -30,7 +30,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 	]):
 	Html::a($rcIcon,'remotecontrol://'.$model->fqdn,[
 		'qtip_ttip'=>"Удаленное управление {$model->fqdn}<br>"
-			.'<a href="/docs/page/admin/integrations/remote-control.md">Как настроить обработчик протокола</a>',
+			.'<a href="'.\yii\helpers\Url::to(['/docs/page','path'=>'admin/integrations/remote-control.md']).'">Как настроить обработчик протокола</a>',
 		'qtip_pin'=>'1',
 		'qtip_side'=>'bottom',
 	]);

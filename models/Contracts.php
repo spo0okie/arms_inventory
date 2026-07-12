@@ -398,7 +398,8 @@ class Contracts extends ArmsModel
 				'hint' => 'Сумма к оплате по документу, с учетом НДС.<br>'
 					.'Сумму несут платежные документы (счета); в документы, не предполагающие оплаты '
 					.'(договоры, закрывающие), сумму не вписываем — вместо этого к ним привязываем счета',
-				'indexHint' => 'Сумма документа<br />'.QueryHelper::$numberSearchHint,
+				//searchHint типа сборщик тултипа добавит сам — руками не дописывать
+				'indexHint' => 'Сумма документа',
 				'typeClass'=>\app\types\MoneyType::class, 'decimals'=>2,
 			],
 			'users' => ['alias' => 'users_ids'],

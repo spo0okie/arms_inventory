@@ -23,7 +23,10 @@ use yii\widgets\ActiveForm;
 				'style' => 'width: 150px;']) ?>
 		</div>
 		<div class="p-1">
-			<?= Html::label('Маска:', 'maxPrefix') ?>
+			<?= Html::label('Маска:', 'maxPrefix', [
+				'qtip_ttip' => 'Длина префикса всего отображаемого блока: карта покрывает диапазон'
+					. ' «Адрес сети / Маска». Чем меньше значение, тем больший диапазон адресов охватывает карта.',
+			]) ?>
 			<?= Html::input('number', 'maxPrefix', $maxPrefix, [
 				'id' => 'maxPrefix',
 				'min' => 0,
@@ -33,7 +36,11 @@ use yii\widgets\ActiveForm;
 			]) ?>
 		</div>
 		<div class="p-1">
-			<?= Html::label('Детализация:', 'minPrefix') ?>
+			<?= Html::label('Детализация:', 'minPrefix', [
+				'qtip_ttip' => 'Длина префикса самой мелкой ячейки карты (правая колонка).'
+					. ' Разница с маской задаёт число строк: 2 в степени (детализация − маска).'
+					. ' Сети с более длинным префиксом показываются в ячейках агрегированно (со штриховкой).',
+			]) ?>
 			<?= Html::input('number', 'minPrefix', $minPrefix, [
 				'id' => 'minPrefix',
 				'min' => 0,
@@ -70,8 +77,10 @@ function updateButtonLabel() {
     if (!isNaN(min) && !isNaN(max) && min >= max) {
         const rows = 1 << (min - max);
         info.value = rows + ' строк';
+        info.title = '';
     } else {
-        info.value = '0_о';
+        info.value = 'Маска должна быть короче детализации';
+        info.title = info.value;
     }
 }
 

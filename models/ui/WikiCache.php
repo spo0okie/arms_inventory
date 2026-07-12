@@ -2,6 +2,7 @@
 
 namespace app\models\ui;
 
+use Yii;
 use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
 use yii\db\Exception;

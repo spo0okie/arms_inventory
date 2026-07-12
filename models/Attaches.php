@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Yii;
 use app\models\base\ArmsModel;
 use yii\db\ActiveRecord;
 use app\helpers\StringHelper;

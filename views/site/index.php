@@ -10,7 +10,14 @@ $this->title = 'Инвентаризация';
 	<?= $this->render('_about') ?>
 
 	<div class="search">
-		Поиск по базе данных:<br /><br />
+		Поиск по базе данных: <?= \yii\helpers\Html::tag('span','<i class="far fa-question-circle"></i>',array_merge(
+			['class'=>'attr-hint-icon','qtip_pin'=>'1'],
+			\app\helpers\FieldsHelper::toolTipOptions('Поиск по базе данных',
+				'Поиск объектов по имени: оборудование — по инвентарному номеру, '
+				.'компьютеры и сервисы — по названию, пользователи — по ФИО, '
+				.'документы — по названию, IP адреса — по адресу.<br>'
+				.'Нажмите Enter — откроется список с этим фильтром.')
+		)) ?><br /><br />
 		<p>
 			<?= SearchFieldWidget::widget(['model'=>'Techs','field'=>'num','label'=>'Оборудование:\&gt; ']) ?>
 		</p>

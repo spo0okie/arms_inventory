@@ -96,6 +96,9 @@ $config = [
 				//(/docs/models/techs, /docs/page/models/techs/arm_id.md, /docs/img/...)
 				'docs' => 'docs/index',
 				'docs/models/<class:[\w-]+>' => 'docs/model',
+				//совместимость: ссылка «как в файловой структуре» (…/models/<class>.md)
+				//тоже открывает страницу модели — офлайн-ссылки ведут на настоящие .md
+				'docs/models/<class:[\w-]+>.md' => 'docs/model',
 				[
 					'pattern' => 'docs/page/<path:.+>',
 					'route' => 'docs/page',

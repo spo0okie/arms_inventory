@@ -2,6 +2,7 @@
 
 namespace app\components\Forms;
 
+use Yii;
 use app\components\formInputs\DokuWikiEditor;
 use app\components\formInputs\TextAutoResizeWidget;
 use app\components\Forms\assets\Select2FieldAsset;

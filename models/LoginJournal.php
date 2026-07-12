@@ -43,7 +43,7 @@ class LoginJournal extends ArmsModel
 			.'присылаемые скриптами инвентаризации, с учётом расхождения часов клиента и сервера.';
 	}
 	//public $local_time;
-	
+
 	/**
 	 * Максимальный сдвиг во времени, который все еще квалифицируется как та-же запись
 	 * сдвиг во времени может формироваться из-за коррекции времени события за счет сравнения
@@ -75,7 +75,7 @@ class LoginJournal extends ArmsModel
             [['comps_id'], 'exist', 'skipOnError' => true, 'targetClass' => Comps::class, 'targetAttribute' => ['comps_id' => 'id']],
         ];
     }
-	
+
 	public function getLinksSchema()
 	{
 		return [
@@ -83,7 +83,7 @@ class LoginJournal extends ArmsModel
 			'comps_id' => Comps::class,
 		];
 	}
-	
+
 	/**
      * {@inheritdoc}
      */
@@ -93,10 +93,10 @@ class LoginJournal extends ArmsModel
             'id' => 'ID',
 			'calc_time' => [
 				'Время входа (корр.)',
+				//searchHint типа (DatetimeType) сборщик тултипа добавит сам — руками не дописывать
 				'indexHint'=>'Скорректированное время входа: если в момент получения записи <br>'
 					.'было обнаружено значительное расхождение часов клиента с часами сервера, <br>'
-					.'то время было скорректировано на сдвиг времени между клиентом и сервером <br>'
-					.QueryHelper::$dateSearchHint,
+					.'то время было скорректировано на сдвиг времени между клиентом и сервером',
 				'type'=>'datetime',
 				'typeClass' => \app\types\DatetimeType::class,
 			],
@@ -119,14 +119,19 @@ class LoginJournal extends ArmsModel
 			],
 			'time' => [
 				'Время входа (ориг.)',
+				//searchHint типа (DatetimeType) сборщик тултипа добавит сам — руками не дописывать
 				'indexHint'=>'Исходное время входа: если в момент получения записи <br>'
 					.'было обнаружено значительное расхождение часов клиента с часами сервера, <br>'
-					.'то в этом поле сохраняется оригинальное значение в часах отправителя<br>'
-					.QueryHelper::$dateSearchHint,
+					.'то в этом поле сохраняется оригинальное значение в часах отправителя',
 				'type'=>'datetime',
 				'typeClass'=>DatetimeType::class,
 			],
-			'type' => ['Тип входа','hint'=>'Код типа события входа'],
+			'type' => [
+				'Тип входа',
+				'hint'=>'Как выполнен вход: CON — локальный вход с консоли (за самим компьютером), '
+					.'RDP — подключение к удалённому рабочему столу',
+				'searchHint' => 'Выберите нужный вариант из списка чтобы отфильтровать',
+			],
             'user_login' => [
 				'Логин',
 				'hint'=>'Логин пользователя, выполнившего вход (как пришёл от клиента)',
@@ -179,7 +184,7 @@ class LoginJournal extends ArmsModel
 			return mb_strtolower($tokens[1]).' (пользователь не найден в БД)';
 		}
 	}
-	
+
 	public function getName()
 	{
 		return $this->userDescr.'->'.$this->compName;
@@ -205,11 +210,11 @@ class LoginJournal extends ArmsModel
 		if (!parent::beforeSave($insert)) {
 			return false;
 		}
-		
+
 		if ($insert && empty($this->created_at)) {
 			$this->created_at = gmdate('Y-m-d H:i:s');
 		}
-		
+
 		// Корректировка calc_time (кроме silentSave)
 		if (!$this->doNotChangeAuthor && is_numeric($this->time)) {
 			if ($this->local_time && abs(time() - $this->local_time) > 90) {
@@ -223,18 +228,18 @@ class LoginJournal extends ArmsModel
 				$this->addError('calc_time', 'Unable to add logon event in future');
 				return false;
 			}
-			
+
 			// В любом случае преобразуем time → datetime
 			$this->time = gmdate('Y-m-d H:i:s', $this->time);
 		}
-		
+
 		if (!isset($this->comps_id)) {
 			if (is_object($comp= Comps::findByAnyName($this->comp_name))) {
 				/** @var Comps $comp */
 				$this->comps_id = $comp->id;
 			}
 		}
-		
+
 		if (!isset($this->users_id)) {
 			$user_tokens=explode('\\',$this->user_login);
 			if (count($user_tokens)==2) {
@@ -247,7 +252,7 @@ class LoginJournal extends ArmsModel
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Запрашивает последние уникальные входы пользователя на машины
 	 * @param int $user_id
@@ -273,7 +278,7 @@ class LoginJournal extends ArmsModel
 		if (!is_array($result)) $result=[];
 		return $result;
 	}
-	
+
 	/**
 	 * Запрашивает последние уникальные входы пользователей на машину
 	 * @param int $comp_id
