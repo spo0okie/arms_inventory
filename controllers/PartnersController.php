@@ -48,9 +48,14 @@ class PartnersController extends ArmsBaseController
 	
 		$searchModel = new UsersSearch();
 		$dataProvider = $searchModel->search($params);
-	
+
+		$model=$this->findModel($id);
+		//документы уже выбраны с жадной загрузкой связей — отдаем их в связь модели,
+		//чтобы вкладка "Документы" не перечитывала их из базы
+		$model->populateRelation('docs',$contracts);
+
 		return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
 			'contracts'=>$contracts,
 			'searchModel' => $searchModel,
 			'dataProvider' => $dataProvider,

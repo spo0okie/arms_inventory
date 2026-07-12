@@ -25,6 +25,8 @@ use yii\db\ActiveQuery;
  * @property Contracts[] $invoices
  * @property Services[] $services
  * @property Users[] $users
+ * @property OrgStruct[] $orgStructs
+ * @property Techs[] $techs
  */
 class Partners extends ArmsModel
 {
@@ -136,7 +138,12 @@ class Partners extends ArmsModel
 				'hint' => 'Контактные телефоны тех. поддержки контрагента, выводятся в его карточке',
 				'typeClass'=>\app\types\PhoneType::class,
 			],
-			'docs' => ['Документы','typeClass'=>\app\types\LinkType::class]
+			'docs' => ['Документы','typeClass'=>\app\types\LinkType::class],
+			'services' => [
+				'Услуги',
+				'hint' => 'Услуги, которые оказывает этот контрагент',
+				'typeClass'=>\app\types\LinkType::class,
+			],
         ];
     }
 
@@ -180,6 +187,27 @@ class Partners extends ArmsModel
 	public function getUsers()
 	{
 		return $this->hasMany(Users::class, ['org_id' => 'id']);
+	}
+
+	/**
+	 * Подразделения верхнего уровня орг-структуры контрагента
+	 * @return ActiveQuery
+	 */
+	public function getOrgStructs()
+	{
+		return $this->hasMany(OrgStruct::class, ['org_id' => 'id'])
+			->andWhere(['parent_id' => null])
+			->orderBy(['name' => SORT_ASC]);
+	}
+
+	/**
+	 * Оборудование, закрепленное за контрагентом
+	 * @return ActiveQuery
+	 */
+	public function getTechs()
+	{
+		return $this->hasMany(Techs::class, ['partners_id' => 'id'])
+			->orderBy(['num' => SORT_ASC]);
 	}
 
 
