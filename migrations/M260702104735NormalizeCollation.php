@@ -66,8 +66,20 @@ class M260702104735NormalizeCollation extends ArmsMigration
 			$this->execute('SET FOREIGN_KEY_CHECKS = 1');
 		}
 
-		// Пересоздаём UNIQUE индекс на manufacturers_dict.word после конвертации
+		// Пересоздаём UNIQUE индекс на manufacturers_dict.word после конвертации.
+		// Сперва удаляем дубли, оставляя первое вхождение каждого word.
 		if (in_array('manufacturers_dict', $tables)) {
+			echo "    > remove duplicate words in manufacturers_dict\n";
+			// Удаляем все дубли кроме первого id для каждого word
+			$this->execute(
+				"DELETE FROM `manufacturers_dict`
+				 WHERE id NOT IN (
+					 SELECT MIN(id) FROM (
+						 SELECT MIN(id) as id FROM `manufacturers_dict` GROUP BY `word`
+					 ) t
+				 )"
+			);
+
 			echo "    > recreate unique index on manufacturers_dict.word\n";
 			$this->execute("ALTER TABLE `manufacturers_dict` ADD UNIQUE KEY `word` (`word`)");
 		}
