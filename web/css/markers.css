@@ -23,6 +23,8 @@
 span.marked-item {
 	border-radius: 2px;
 	padding-top: .12em;
+	padding-left: .12em;;
+	padding-right: .2em;;
 }
 
 /* текст и ссылки внутри маркера контрастны его фону, а не фону контекста;
