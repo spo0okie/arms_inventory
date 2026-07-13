@@ -3778,6 +3778,34 @@ $.tooltipster._plugin({
 										width: helper.realSize.width
 									};
 								}
+
+								// LOCAL PATCH (anti-sausage): natural-размер длинного текста —
+								// это одна строка во всю доступную ширину (например 1090x113).
+								// Прежде чем этот размер будет записан в inline width/height,
+								// пережимаем широкие плоские тултипы к пропорции ~16:9:
+								// целевая ширина = sqrt(площадь * 16/9), в пределах 360..640px
+								// и не шире 60% окна. Высоту при новой ширине честно меряет
+								// ruler.constrain. Узкие/высокие тултипы (карточки объектов,
+								// короткие подсказки) не трогаем.
+								if (mode == 'natural' && testResult.size.width > 800) {
+									var asWidth = Math.round(Math.sqrt(
+										testResult.size.width * testResult.size.height * 16 / 9
+									));
+									asWidth = Math.max(360, Math.min(
+										asWidth,
+										640,
+										Math.round(helper.geo.window.size.width * 0.6)
+									));
+									if (asWidth < testResult.size.width - 40) {
+										var asResults = ruler.constrain(asWidth, 100000).measure();
+										if (asResults.size.width > 0 && asResults.size.height > 0) {
+											testResult.size = {
+												height: asResults.size.height,
+												width: asResults.size.width
+											};
+										}
+									}
+								}
 								testResult.outerSize = {
 									height: testResult.size.height + distance.vertical,
 									width: testResult.size.width + distance.horizontal

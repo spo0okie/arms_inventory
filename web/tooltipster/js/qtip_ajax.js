@@ -267,6 +267,9 @@ function attach_qTip(el, force = false) {
 		// размер сразу — поллинговый трекер только зря дёргал reposition и моргал.
 		trackTooltip: false,
 	});
+	// «Колбасу» (inline width вида 1090x113 у длинного текста) лечит LOCAL PATCH
+	// anti-sausage в tooltipster.bundle.js (SideTip.__reposition, natural mode) —
+	// прямо в месте, где сайзер рождает размер перед записью в inline-стили.
 
 	// Pin-поведение (атрибут qtip_pin — вешает AttributeTooltip::icon):
 	// клик по элементу приколачивает тултип — он перестаёт закрываться по
