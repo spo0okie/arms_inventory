@@ -12,12 +12,15 @@ use yii\helpers\Url;
 /* @var $model \app\models\Manufacturers */
 
 if (!isset($static_view)) $static_view=false;
+if (!isset($noDelete)) $noDelete=false;	//noDelete=true отключает не только корзину,
+										//но и расчет обратных ссылок (важно в длинных списках)
 
 if (is_object($model)) {
 	echo ItemObjectWidget::widget([
 		'model'=>$model,
 		'name'=>$model->name,
 		'static'=>$static_view,
+		'noDelete'=>$noDelete,
 		'ttipUrl'=>Url::to(['/manufacturers/ttip','id'=>$model->id]),
 	]);
 } else echo "Отсутствует";

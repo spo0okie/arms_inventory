@@ -51,6 +51,9 @@ class Soft extends ArmsModel
 
 	private static $all_items=null;
 	private static $comps_in_soft=null;
+
+	/** @var null|array Кэш количества обратных ссылок [relation=>[soft_id=>count]] для замочка удаления в списках */
+	private static $reverse_counts=null;
 	public static $disable_cache=false;
 	public static $disable_rescan=false;
 	private $doNotRescan=false;
@@ -221,7 +224,10 @@ class Soft extends ArmsModel
 	 * Количество типов лицензий включающих данное ПО
 	 * @return int
 	 */
-	public function getLicGroupsCount() {return count($this->licGroups);}
+	public function getLicGroupsCount() {
+		if (static::reverseCountsCached()) return static::$reverse_counts['lics'][$this->id]??0;
+		return count($this->licGroups);
+	}
 	
 	/**
 	 * Закупки лицензий этого ПО
@@ -286,6 +292,7 @@ class Soft extends ArmsModel
 	}
 	
 	public function getCompsCount() {
+		if (static::reverseCountsCached()) return static::$reverse_counts['comps'][$this->id]??0;
 		if (static::compsInSoftCached()) {
 			return count(ArrayHelper::getItemsByFields(static::$comps_in_soft,['soft_id'=>$this->id]));
 		}
@@ -306,7 +313,10 @@ class Soft extends ArmsModel
 			->viaTable('{{%soft_hits}}', ['soft_id' => 'id']);
 	}
 	
-	public function getHitsCount() {return count($this->hits);}
+	public function getHitsCount() {
+		if (static::reverseCountsCached()) return static::$reverse_counts['hits'][$this->id]??0;
+		return count($this->hits);
+	}
 	
 	public function getName()
 	{
@@ -575,6 +585,40 @@ class Soft extends ArmsModel
 			->select('*')
 			->from('soft_in_comps')
 			->all();
+	}
+
+	public static function reverseCountsCached() {
+		return !is_null(static::$reverse_counts);
+	}
+
+	/**
+	 * Загрузить кэш количества обратных ссылок
+	 * (страница с сотнями элементов ПО считает ссылки четырьмя запросами
+	 * вместо четырех запросов на каждый элемент)
+	 */
+	public static function cacheReverseCounts() {
+		if (static::reverseCountsCached()) return;
+		static::$reverse_counts=[
+			'lists'=>static::fetchGroupedCount('soft_in_lists','soft_id'),
+			'comps'=>static::fetchGroupedCount('soft_in_comps','soft_id'),
+			'hits'=>static::fetchGroupedCount('soft_hits','soft_id'),
+			'lics'=>static::fetchGroupedCount('soft_in_lics','soft_id'),
+		];
+	}
+
+	/**
+	 * @inheritDoc
+	 * При загруженном кэше {@see cacheReverseCounts()} не загружает связанные объекты,
+	 * а возвращает их количества (набор соответствует обратным ссылкам $linksSchema)
+	 */
+	public function nonDeletableReverseLinks() {
+		if (!static::reverseCountsCached()) return parent::nonDeletableReverseLinks();
+		return [
+			SoftLists::$titles=>static::$reverse_counts['lists'][$this->id]??0,
+			Comps::$titles=>static::$reverse_counts['comps'][$this->id]??0,
+			Comps::$titles.' (обнаружено)'=>static::$reverse_counts['hits'][$this->id]??0,
+			LicGroups::$titles=>static::$reverse_counts['lics'][$this->id]??0,
+		];
 	}
 	
 	/**

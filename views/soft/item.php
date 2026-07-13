@@ -13,6 +13,8 @@ use yii\helpers\Url;
 if (!isset($static_view)) $static_view=false;
 if (!isset($show_vendor)) $show_vendor=false;
 if (!isset($hitlist)) $hitlist=null;
+if (!isset($noDelete)) $noDelete=false;	//noDelete=true отключает не только корзину,
+										//но и расчет обратных ссылок (важно в длинных списках)
 
 
 if (is_object($model)) {
@@ -26,6 +28,7 @@ if (!isset($name)) $name=$model->descr;
 		'model'=>$model,
 		'name'=>$name,
 		'static'=>$static_view,
+		'noDelete'=>$noDelete,
 		'ttipUrl'=>$ttipUrl,
 	]);
 }

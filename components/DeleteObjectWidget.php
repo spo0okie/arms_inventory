@@ -85,7 +85,7 @@ class DeleteObjectWidget extends Widget
 		if (count($this->links)) {
 			foreach ($this->links as $type=>$count) {
 				
-				//передали пачку объектов (в противном случае это должно быть число)
+				//передали пачку объектов (в противном случае это число ссылок или одиночный объект)
 				if (is_array($count)) {
 					$first=reset($count);
 					//если не сделали ключ для наименования объекта - вытаскиваем его из первого объекта
@@ -98,6 +98,8 @@ class DeleteObjectWidget extends Widget
 						elseif ($first->hasProperty('title')) $type=$class::$title;
 					}
 					$count=count($count);
+				} elseif (is_numeric($count)) {
+					$count=(int)$count; //готовое количество ссылок (из кэша обратных ссылок)
 				} else $count=1;
 				
 				if (is_numeric($type)) $type=$this->defaultObjectType;

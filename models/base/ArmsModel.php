@@ -280,6 +280,24 @@ class ArmsModel extends ActiveRecord
 	}
 
 	/**
+	 * Посчитать одним запросом количество строк таблицы, сгруппированных по колонке
+	 * (для кэшей количества обратных ссылок: сколько объектов ссылается на каждый ID)
+	 * @param string $table таблица (обычная или junction)
+	 * @param string $column колонка группировки (обычно ссылка на этот класс)
+	 * @return array [значение колонки => количество строк]
+	 */
+	protected static function fetchGroupedCount(string $table, string $column) {
+		return ArrayHelper::map(
+			(new \yii\db\Query())
+				->select([$column,'cnt'=>'COUNT(*)'])
+				->from($table)
+				->groupBy($column)
+				->all(),
+			$column,'cnt'
+		);
+	}
+
+	/**
 	 * Валидация отсутствия рекурсии при построении ссылок на родителей
 	 * @param string $attribute - аттрибут с id другого объекта
 	 * @param array $params

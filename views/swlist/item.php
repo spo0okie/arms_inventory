@@ -41,10 +41,12 @@ $dev=\app\models\Manufacturers::fetchItem($product->manufacturers_id);
 <tr class="software_item <?= implode(' ',$classes) ?>" <?= $style ?>>
     <td class="os-name"><?= $model->name ?></td>
     <td class="manufacturer">
-        <?= ModelWidget::widget(['model'=>$dev]) ?>
+        <?php /* noDelete: продукт/производитель в этом списке всегда имеет обратные ссылки
+        (он привязан или обнаружен на этой же ОС), корзина тут невозможна - незачем и считать */ ?>
+        <?= ModelWidget::widget(['model'=>$dev,'options'=>['noDelete'=>true]]) ?>
     </td>
     <td class="product">
-		<?= ModelWidget::widget(['model'=>$product,'options'=>['hitlist'=>$hitlist]]) ?>
+		<?= ModelWidget::widget(['model'=>$product,'options'=>['hitlist'=>$hitlist,'noDelete'=>true]]) ?>
     </td>
     <td class="passport_tools">
         <?php
