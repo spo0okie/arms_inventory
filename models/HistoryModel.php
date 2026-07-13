@@ -275,6 +275,132 @@ class HistoryModel extends ArmsModel
 	}
 	
 	/**
+	 * @var HistoryModel|null|false Предыдущая (по id) запись журнала для отображения
+	 * изменений (false - ещё не загружалась). Не пересекается с $previous:
+	 * тот участвует в механике записи журнала и указывает на последнюю запись
+	 * ДО сохранения этой.
+	 */
+	protected $previousRecord=false;
+
+	/**
+	 * Предыдущая (по id) запись журнала этого же объекта - база для отображения
+	 * изменений «старое → новое» в карточке изменений (issue #194)
+	 * @return HistoryModel|null null - это первая запись журнала
+	 */
+	public function getPreviousRecord() {
+		if ($this->previousRecord===false) {
+			$this->previousRecord=isset($this->id)?
+				static::find()
+					->where(['master_id'=>$this->master_id])
+					->andWhere(['<','id',$this->id])
+					->orderBy(['id'=>SORT_DESC])
+					->limit(1)
+					->one()
+				:null;
+		}
+		return $this->previousRecord;
+	}
+
+	/**
+	 * Подсунуть предыдущую запись без запроса
+	 * (при выводе списка карточек соседние записи уже загружены провайдером)
+	 * @param HistoryModel|null $record
+	 */
+	public function setPreviousRecord($record) {
+		$this->previousRecord=$record;
+	}
+
+	/**
+	 * Эта запись - об удалении объекта
+	 * @return bool
+	 */
+	public function isDeletionRecord(): bool {
+		return $this->changed_attributes===static::DELETED_FLAG;
+	}
+
+	/**
+	 * Изменённые атрибуты для отображения в карточке изменений: из changed_attributes,
+	 * только существующие и журналируемые (в старых записях могут остаться имена
+	 * атрибутов из прежних версий схемы таблицы)
+	 * @return string[]
+	 */
+	public function changedAttributesList(): array {
+		if ($this->isDeletionRecord()) return [];
+		$list=[];
+		foreach (ArrayHelper::explode(',',(string)$this->changed_attributes) as $attr) {
+			if (!$this->hasAttribute($attr)) continue;
+			if (!$this->attributeIsJournaling($attr)) continue;
+			$list[]=$attr;
+		}
+		return $list;
+	}
+
+	/**
+	 * Атрибут является множеством значений: его изменения отображаются списками
+	 * выбывших/добавленных значений, а не «старое → новое». Это множественные
+	 * ссылки (_ids), JSON и списки строк
+	 * @param string $attr
+	 * @return bool
+	 */
+	public function attributeIsMultiValue(string $attr): bool {
+		if ($this->attributeIsLink($attr)) return str_ends_with($attr,'_ids');
+		$type=$this->getAttributeTypeClass($attr);
+		return $type instanceof \app\types\JsonType
+			|| $type instanceof \app\types\StringArrayType;
+	}
+
+	/**
+	 * Значение атрибута-множества в виде набора элементов для сравнения:
+	 * множественные ссылки - ID объектов, JSON - элементы «ключ: значение»
+	 * (не распарсился - одно значение целиком), списки строк - строки
+	 * (в журнале они хранятся строкой через запятую, см. simplifyField)
+	 * @param string $attr
+	 * @return array
+	 */
+	public function attributeValueSet(string $attr): array {
+		if ($this->attributeIsLink($attr)) return $this->fetchLinkIds($attr);
+		$value=(string)$this->$attr;
+		if (!strlen($value)) return [];
+		if ($this->getAttributeTypeClass($attr) instanceof \app\types\JsonType) {
+			$decoded=json_decode($value,true);
+			if (!is_array($decoded)) return [$value];
+			$items=[];
+			foreach ($decoded as $key=>$item) {
+				$items[]=$key.': '.(is_scalar($item)?$item:json_encode($item,JSON_UNESCAPED_UNICODE));
+			}
+			return $items;
+		}
+		return ArrayHelper::explode(',',$value);
+	}
+
+	/**
+	 * Разница атрибута-множества с предыдущей записью журнала
+	 * @param string $attr
+	 * @return array ['added'=>[...], 'removed'=>[...]]
+	 */
+	public function attributeSetDiff(string $attr): array {
+		$previous=$this->getPreviousRecord();
+		$old=is_object($previous)?$previous->attributeValueSet($attr):[];
+		$new=$this->attributeValueSet($attr);
+		return [
+			'added'=>array_values(array_diff($new,$old)),
+			'removed'=>array_values(array_diff($old,$new)),
+		];
+	}
+
+	/**
+	 * Загрузить объект-ссылку в состоянии на дату этой записи журнала
+	 * @param string $attr
+	 * @param int    $id
+	 * @return ActiveRecord|null
+	 */
+	public function fetchLinkOnRecordDate(string $attr,$id) {
+		/** @var ArmsModel $class */
+		$class=$this->attributeLinkClass($attr);
+		return $class::fetchJournalRecord($id,$this->updated_at);
+	}
+
+	/**
 	 * Грузит предыдущую запись журнала
 	 */
 	public function loadPrevious() {

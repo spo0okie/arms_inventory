@@ -15,13 +15,17 @@ class DefaultColumn extends DataColumn
 	public function renderDataCell($model, $key, $index)
 	{
 		$cellOptions = $this->fetchContentOptions($model, $key, $index);
-		
+
+		//CSS-класс ячейки забираем до фильтрации: 'class' - не свойство виджета
+		//и отсеется, а он несет подсветку ячейки (table-warning в журнале истории)
+		$cellClass = $cellOptions['class'] ?? '';
+
 		//убираем все свойства, которые не относятся к нашему рендеру
 		$cellOptions = array_filter($cellOptions,
 			fn($key) => property_exists(ModelFieldWidget::class, $key),
 			ARRAY_FILTER_USE_KEY
 		);
-		
+
 		/** @var \app\models\base\ArmsModel $model */
 		return ModelFieldWidget::widget(ArrayHelper::recursiveOverride([
 			'model'=>$model,
@@ -30,13 +34,13 @@ class DefaultColumn extends DataColumn
 				'static_view'=>true,
 			],
 			'card_options'=>[
-				'cardClass' => 'p-1 text-wrap '.($cellOptions['class']??''),
+				'cardClass' => 'p-1 text-wrap '.$cellClass,
 				'outerTag' => 'td',
 			],
 			'show_empty'=>true,
 			'title'=>false
 		],$cellOptions));
-		
+
 	}
 	
 }
