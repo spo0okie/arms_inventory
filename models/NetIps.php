@@ -543,7 +543,8 @@ class NetIps extends ArmsModel
 		}
 	}
 	
-	public static function ipList2long($list) {
+	public static function ipList2long(?string $list) {
+		if (is_null($list) || !strlen(trim($list))) return [];
 		$ips=explode("\n",$list);
 		$longs=[];
 		foreach ($ips as $ip) $longs[]=ip2long($ip);
