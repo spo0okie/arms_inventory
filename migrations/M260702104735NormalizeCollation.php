@@ -43,11 +43,14 @@ class M260702104735NormalizeCollation extends ArmsMigration
 			[':db' => $dbName]
 		)->queryColumn();
 
-		// Удаляем пустые значения, которые могут нарушать UNIQUE constraints.
-		// manufacturers_dict.word не должна содержать пустые строки.
+		// manufacturers_dict.word не должна содержать пустые/NULL/пробельные значения.
+		// Дропим UNIQUE индекс перед очисткой и конвертацией, чтобы не нарушить constraint.
 		if (in_array('manufacturers_dict', $tables)) {
+			echo "    > drop unique index on manufacturers_dict.word\n";
+			$this->execute("ALTER TABLE `manufacturers_dict` DROP INDEX `word`");
+
 			echo "    > cleanup empty values in manufacturers_dict.word\n";
-			$this->execute("DELETE FROM `manufacturers_dict` WHERE `word` = '' OR `word` IS NULL");
+			$this->execute("DELETE FROM `manufacturers_dict` WHERE `word` = '' OR `word` IS NULL OR TRIM(`word`) = ''");
 		}
 
 		// FK-столбцы должны совпадать по коллации с родительскими. На время
@@ -61,6 +64,12 @@ class M260702104735NormalizeCollation extends ArmsMigration
 			}
 		} finally {
 			$this->execute('SET FOREIGN_KEY_CHECKS = 1');
+		}
+
+		// Пересоздаём UNIQUE индекс на manufacturers_dict.word после конвертации
+		if (in_array('manufacturers_dict', $tables)) {
+			echo "    > recreate unique index on manufacturers_dict.word\n";
+			$this->execute("ALTER TABLE `manufacturers_dict` ADD UNIQUE KEY `word` (`word`)");
 		}
 	}
 
