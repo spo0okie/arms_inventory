@@ -43,6 +43,13 @@ class M260702104735NormalizeCollation extends ArmsMigration
 			[':db' => $dbName]
 		)->queryColumn();
 
+		// Удаляем пустые значения, которые могут нарушать UNIQUE constraints.
+		// manufacturers_dict.word не должна содержать пустые строки.
+		if (in_array('manufacturers_dict', $tables)) {
+			echo "    > cleanup empty values in manufacturers_dict.word\n";
+			$this->execute("DELETE FROM `manufacturers_dict` WHERE `word` = '' OR `word` IS NULL");
+		}
+
 		// FK-столбцы должны совпадать по коллации с родительскими. На время
 		// конвертации гасим проверку, иначе промежуточное состояние (ребёнок
 		// сконвертирован, родитель ещё нет) даст ошибку несовместимости FK.
