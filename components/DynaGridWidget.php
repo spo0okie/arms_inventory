@@ -117,7 +117,8 @@ class DynaGridWidget extends DynaGrid
 	}
 	
 	public static function fetchVisibleColumns($id) {
-		if (isset(static::$visibleColumnsCache[$id])) return static::$visibleColumnsCache[$id];
+		//не isset: несохраненный конфиг кэшируется как null, иначе каждый вызов заново читает БД
+		if (array_key_exists($id,static::$visibleColumnsCache)) return static::$visibleColumnsCache[$id];
 		$dynaGridStore = new DynaGridStore([
 				'id' => $id,
 				'moduleId' => Module::MODULE,
