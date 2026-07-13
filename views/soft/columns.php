@@ -11,11 +11,6 @@ use kartik\grid\GridView;
 
 $renderer=$this;
 $manufacturers=\app\models\Manufacturers::fetchNames();
-
-//прогрев кэша количества обратных ссылок: каждая строка грида рисует корзину/замочек
-//и колонки-счетчики (hitsCount/compsCount/licGroupsCount) - без кэша это 4+ запроса на строку
-\app\models\Soft::cacheReverseCounts();
-
 return [
 	'descr'=> [
 		'value'=>function($data) use ($renderer){

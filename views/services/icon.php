@@ -18,9 +18,9 @@ if (is_object($model)) {
 		$jobTitle=$model->is_end_user?
 			\app\models\Services::$user_job_title:
 			\app\models\Services::$tech_job_title;
-		if (count($model->orgInets))
+		if ($model->loaderCount('orgInets') ?? count($model->orgInets))
 			$icon='<span class="fas fa-network-wired service-icon" title="'.$jobTitle.'"></span>';
-		elseif (count($model->orgPhones))
+		elseif ($model->loaderCount('orgPhones') ?? count($model->orgPhones))
 			$icon='<span class="fas fa-phone-alt service-icon" title="'.$jobTitle.'"></span>';
 		else $icon=$model->is_end_user?
 			'<span class="fas fa-broom service-icon" title="'.\app\models\Services::$user_job_title.'"></span>':

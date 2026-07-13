@@ -186,7 +186,7 @@ class TechTypes extends ArmsModel
 	 */
 	public function getTechModelsCount()
 	{
-		return count($this->techModels);
+		return $this->loaderCount('techModels') ?? count($this->techModels);
 	}
 
 

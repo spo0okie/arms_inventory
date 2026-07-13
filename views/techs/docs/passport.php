@@ -9,7 +9,6 @@
 
 
 use app\models\Manufacturers;
-use app\models\ManufacturersDict;
 use app\models\Techs;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -19,10 +18,6 @@ use app\components\widgets\page\ModelWidget;
 Url::remember();
 
 $manufacturers= Manufacturers::fetchNames();
-
-//прогрев кэша словаря: разбор raw_soft ищет производителя по каждой строке отпечатка,
-//без кэша это отдельный запрос на строку
-ManufacturersDict::initCache();
 ?>
 <div class="arm_passport">
 

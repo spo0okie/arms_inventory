@@ -434,11 +434,20 @@ class Schedules extends \app\models\base\ArmsModel
 	
 	
 	/**
-	 * @return ActiveQuery
+	 * Родительское расписание.
+	 *
+	 * НЕСТАНДАРТНО (не hasOne-relation) намеренно - разделяемый экземпляр из общего
+	 * кэша расписаний: рекурсивный подъем по родителям (getDayEntryRecursive и т.п.)
+	 * имеет неограниченную глубину, hasOne давал бы каждому расписанию СВОЮ копию
+	 * родителя и каждый шаг рекурсии от каждой копии был бы отдельным запросом.
+	 * Валидатору рекурсии (validateRecursiveLink, params getLink='parent') нужен
+	 * объект/null - контракт соблюден. Цена: with('parent') невозможен.
+	 * @return Schedules|null
 	 */
 	public function getParent()
 	{
-		return $this->hasOne(Schedules::class, ['id' => 'parent_id']);
+		if (!$this->parent_id) return null;
+		return static::getLoadedItem($this->parent_id,true);
 	}
 	
 	public function getPeriods()
@@ -611,6 +620,9 @@ class Schedules extends \app\models\base\ArmsModel
 				static::updateAll(['compiled_json' => $json], ['id' => $fresh->id]);
 				$fresh->compiled_json = $json;
 				if ($this !== $fresh) $this->compiled_json = $json;
+				//updateAll идет мимо AR-событий - сбрасываем кэш разделяемых экземпляров
+				//(getMaster/getParent) вручную, иначе они отдадут старый compiled_json
+				static::invalidateAllItemsCache();
 			}
 		} finally {
 			$fresh->compiling = false;

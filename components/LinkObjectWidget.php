@@ -29,6 +29,14 @@ class LinkObjectWidget extends Widget
 	public $noPjax=true;
 
 	public $static=false;
+	/**
+	 * @var bool не рисовать корзину/замочек удаления (и не считать обратные ссылки для них).
+	 * Конвенция: в item-вью списковых контекстов передавать true - удаление обычно
+	 * делается со страницы объекта, а не из чужого списка.
+	 * Цена ошибки невелика: nonDeletableReverseLinks() считает ссылки кэшированными
+	 * GROUP BY-запросами (один на класс+связь за весь запрос, см. ArmsModel::loaderCount),
+	 * но true в списках все равно предпочтителен - и по UX, и по запросам.
+	 */
 	public $noDelete=false;
 	public $noUpdate=false;
 	public $noSpaces=false;	//убирать пробелы перед редактированием и корзиной (в monospace выглядит стремно)
@@ -76,8 +84,10 @@ class LinkObjectWidget extends Widget
 			$this->controller= StringHelper::class2Id($this->model->masterClass ?? get_class($this->model));
 		}
 
+		//все маршруты строим абсолютными ('//'): виджет рендерится и внутри модулей
+		//(schedules), где относительный 'comps/ttip' превратился бы в 'schedules/comps/ttip' (404)
 		if (!isset($this->url) && $this->controller && $id) {
-			$this->url=Url::to(['/'.$this->controller.'/view','id'=>$id]);
+			$this->url=Url::to(['//'.$this->controller.'/view','id'=>$id]);
 			$this->samePage=(
 				is_object(Yii::$app->controller)
 				&&
@@ -95,16 +105,16 @@ class LinkObjectWidget extends Widget
 
 		if (!isset($this->ttipUrl) && $this->controller && $id) {
 			$this->ttipUrl=$this->model instanceof HistoryModel?
-				Url::to([$this->controller.'/ttip','id'=>$id,'timestamp'=>$this->model->updated_at]):
-				Url::to([$this->controller.'/ttip','id'=>$id]);
+				Url::to(['//'.$this->controller.'/ttip','id'=>$id,'timestamp'=>$this->model->updated_at]):
+				Url::to(['//'.$this->controller.'/ttip','id'=>$id]);
 		}
 
 		if (!isset($this->updateUrl) && $this->controller && $id) {
-			$this->updateUrl=Url::to([$this->controller.'/update','id'=>$id]);
+			$this->updateUrl=Url::to(['//'.$this->controller.'/update','id'=>$id]);
 		}
 
 		if (!isset($this->deleteUrl) && $this->controller && $id) {
-			$this->deleteUrl=Url::to([$this->controller.'/delete','id'=>$id]);
+			$this->deleteUrl=Url::to(['//'.$this->controller.'/delete','id'=>$id]);
 		}
 
 		try {

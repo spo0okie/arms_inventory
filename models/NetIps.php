@@ -499,7 +499,11 @@ class NetIps extends ArmsModel
 	}
 	
 	public function getArchived() {
-		if (is_object($this->network)) return $this->network->archived;
+		//archived дергается на каждый IP в списках: сеть из общего кэша справочника
+		$network=$this->isRelationPopulated('network')?
+			$this->network:
+			($this->networks_id?Networks::getLoadedItem($this->networks_id,true):null);
+		if (is_object($network)) return $network->archived;
 		return false;
 	}
 	

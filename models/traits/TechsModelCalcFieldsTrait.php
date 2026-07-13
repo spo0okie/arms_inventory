@@ -13,6 +13,7 @@ use app\models\MaintenanceReqs;
 use app\models\Scans;
 use app\models\Services;
 use app\models\Techs;
+use app\models\TechStates;
 use app\models\Users;
 use Yii;
 
@@ -137,7 +138,8 @@ trait TechsModelCalcFieldsTrait
 	
 	public function getServicesCount()
 	{
-		return count($this->services);
+		/** @var Techs $this */
+		return $this->loaderCount('services') ?? count($this->services);
 	}
 	
 	/**
@@ -228,7 +230,12 @@ trait TechsModelCalcFieldsTrait
 	public function getArchived()
 	{
 		/** @var Techs $this */
-		return is_object($this->state)?$this->state->archived:false;
+		//archived дергается на каждый объект в списках: берем состояние из общего кэша
+		//справочника (жадная загрузка через relation остается для populated случая)
+		$state=$this->isRelationPopulated('state')?
+			$this->state:
+			($this->state_id?TechStates::getLoadedItem($this->state_id,true):null);
+		return is_object($state)?$state->archived:false;
 	}
 	
 	public function getFormattedMac() {

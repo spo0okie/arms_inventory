@@ -244,7 +244,7 @@ class TechModels extends ArmsModel
 
 	public function getUsages()
 	{
-		return count($this->techs);
+		return $this->loaderCount('techs') ?? count($this->techs);
 	}
 	
 	public function getPortsList()

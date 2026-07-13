@@ -113,8 +113,10 @@ class ArmsModel extends ActiveRecord
 	protected $attrsCache=[];
 
 
-	/** @var null|array Кэш для загрузки всех элементов через cacheAllItems() */
-	protected static $allItems=null;
+	/** @var array Кэш для загрузки всех элементов через cacheAllItems().
+	 * Ключ - имя класса: static-свойство базового класса ОБЩЕЕ для всех наследников,
+	 * без ключа кэши разных классов затирали бы друг друга */
+	private static $allItems=[];
 
 	/** @var bool при сохранении не менять отметку времени и не менять время обновления */
 	protected $doNotChangeAuthor=false;
@@ -236,7 +238,16 @@ class ArmsModel extends ActiveRecord
 	 * @return bool
 	 */
 	public static function allItemsLoaded() {
-		return !is_null(static::$allItems);
+		return isset(self::$allItems[static::class]);
+	}
+
+	/**
+	 * Положить готовый набор моделей в кэш всех элементов
+	 * (для переопределенных cacheAllItems, например с жадной загрузкой связей)
+	 * @param array $items [id => модель]
+	 */
+	protected static function setAllItems(array $items) {
+		self::$allItems[static::class]=$items;
 	}
 
 	/**
@@ -246,7 +257,7 @@ class ArmsModel extends ActiveRecord
 	 */
 	public static function cacheAllItems() {
 		if (!static::allItemsLoaded())
-			static::$allItems=ArrayHelper::index(static::find()->all(),'id');
+			static::setAllItems(ArrayHelper::index(static::find()->all(),'id'));
 	}
 
 	/**
@@ -260,7 +271,7 @@ class ArmsModel extends ActiveRecord
 	public static function getAllItems($autoload=false) {
 		if (!static::allItemsLoaded() && $autoload)
 			static::cacheAllItems();
-		return static::$allItems;
+		return self::$allItems[static::class]??null;
 	}
 
 	/**
@@ -276,7 +287,50 @@ class ArmsModel extends ActiveRecord
 			else
 				return null;
 		}
-		return isset(static::$allItems[$id])?static::$allItems[$id]:null;
+		return self::$allItems[static::class][$id]??null;
+	}
+
+	/**
+	 * Сбросить кэш всех элементов этого класса
+	 * (вызывается из afterSave/afterDelete, чтобы кэш не отдавал устаревшие данные
+	 * при записи в том же процессе: тесты, конвейеры, POST-экшены)
+	 */
+	public static function invalidateAllItemsCache() {
+		unset(self::$allItems[static::class]);
+	}
+
+	/**
+	 * Сбросить кэши количеств и списков ID ВСЕХ классов.
+	 * Сохранение любой модели может менять количества/привязки у чужих классов
+	 * (junction-строки пишутся при сохранении владельца ссылок, например
+	 * сохранение ОС меняет счетчики её ПО) - точечная инвалидация невозможна,
+	 * а пересборка дешевая (один запрос на ключ при следующем обращении)
+	 */
+	public static function flushCountsCaches() {
+		self::$countsCache=[];
+		self::$idsCache=[];
+	}
+
+	/** @var array Identity map точечно загруженных моделей: [класс][id] => экземпляр.
+	 * У ActiveRecord нет своего identity map: findOne каждый раз создает НОВЫЙ экземпляр,
+	 * а разные ветки рендера одной страницы (findModel карточки, виджеты, колонки гридов)
+	 * независимо резолвят одну и ту же запись - каждая своим SELECT.
+	 * Намеренные повторные чтения write-path ($old/$fresh=static::findOne($this->id)
+	 * перед сохранением) идут через findOne напрямую и этим кэшем не задеваются;
+	 * afterSave/afterDelete точечно инвалидируют запись. */
+	private static $identityMap=[];
+
+	/**
+	 * findOne с identity map: повторный запрос того же id в рамках запроса
+	 * возвращает уже загруженный (разделяемый) экземпляр
+	 * @param int $id
+	 * @return static|null
+	 */
+	public static function findLoaded($id) {
+		if (isset(self::$identityMap[static::class][$id]))
+			return self::$identityMap[static::class][$id];
+		if (is_null($model=static::findOne($id))) return null;
+		return self::$identityMap[static::class][$id]=$model;
 	}
 
 	/**
@@ -295,6 +349,211 @@ class ArmsModel extends ActiveRecord
 				->all(),
 			$column,'cnt'
 		);
+	}
+
+	/** @var array Кэш количеств [класс][ключ] => [id => количество] (живет в рамках запроса) */
+	private static $countsCache=[];
+
+	/** Признак что кэш количеств по ключу загружен */
+	public static function countsCached(string $key) {
+		return isset(self::$countsCache[static::class][$key]);
+	}
+
+	/** Положить готовую карту количеств в кэш */
+	protected static function storeCounts(string $key, array $map) {
+		self::$countsCache[static::class][$key]=$map;
+	}
+
+	/**
+	 * Загрузить (однократно) кэш количеств строк $table, сгруппированных по $column
+	 */
+	public static function cacheCounts(string $key, string $table, string $column) {
+		if (static::countsCached($key)) return;
+		static::storeCounts($key,static::fetchGroupedCount($table,$column));
+	}
+
+	/**
+	 * Количество из кэша по ключу и ID; null если кэш по этому ключу не загружен
+	 * @return int|null
+	 */
+	public static function cachedCount(string $key, $id) {
+		return static::countsCached($key) ? (self::$countsCache[static::class][$key][$id]??0) : null;
+	}
+
+	/**
+	 * Количество связанных объектов relation-загрузчика $loader,
+	 * посчитанное ОДНИМ GROUP BY запросом на класс+загрузчик за весь веб-запрос
+	 * (вместо загрузки всех связанных объектов на каждую модель).
+	 * null - если так посчитать нельзя (нестандартный загрузчик, составная ссылка) и
+	 * вызывающий должен посчитать по-старому через загрузку relation.
+	 * @param string $loader имя relation-геттера (comps, softLists, ...)
+	 * @return int|null
+	 */
+	public function loaderCount(string $loader) {
+		//несохраненная модель: ее связи могут быть заданы виртуально (сеттеры LinkerBehavior)
+		//и в БД их еще нет - только фолбэк вызывающего умеет их прочитать
+		if ($this->isNewRecord) return null;
+		$key='loader:'.$loader;
+		if (!static::countsCached($key)) {
+			if (is_null($map=$this->buildLoaderCountMap($loader))) return null;
+			static::storeCounts($key,$map);
+		}
+		return static::cachedCount($key,$this->id);
+	}
+
+	/** @var array Кэш списков ID связанных объектов [класс][загрузчик] => [id => [id-шники]] */
+	private static $idsCache=[];
+
+	/**
+	 * ID связанных объектов relation-загрузчика $loader,
+	 * собранные ОДНИМ запросом на класс+загрузчик за весь веб-запрос.
+	 * Для мест, которым нужны только id-шники связей (сигнатуры, проверки вхождения):
+	 * атрибуты `*_ids` (LinkerBehavior) для этого загружают модели связи - на каждую
+	 * модель отдельными запросами.
+	 * null - если собрать нельзя (нестандартный загрузчик) - фолбэк на `*_ids`.
+	 * @param string $loader имя relation-геттера
+	 * @return int[]|null
+	 */
+	public function loaderIds(string $loader) {
+		//несохраненная модель: ее связи могут быть заданы виртуально (сеттеры LinkerBehavior)
+		//и в БД их еще нет - только фолбэк вызывающего (`*_ids`) умеет их прочитать
+		if ($this->isNewRecord) return null;
+		if (!isset(self::$idsCache[static::class][$loader])) {
+			if (is_null($map=$this->buildLoaderIdsMap($loader))) return null;
+			self::$idsCache[static::class][$loader]=$map;
+		}
+		return self::$idsCache[static::class][$loader][$this->id]??[];
+	}
+
+	/**
+	 * Карта [id владельца => [id связанных]] для relation-загрузчика
+	 * (junction JOIN target для отсева осиротевших строк, условия связи сохраняются)
+	 * @param string $loader
+	 * @return array|null null если не собрать - нужен фолбэк
+	 */
+	protected function buildLoaderIdsMap(string $loader) {
+		$rel=$this->getRelation($loader,false);
+		if (!$rel instanceof ActiveQuery || !$rel->multiple) return null;
+		try {
+			if ($rel->via) {
+				$via=is_array($rel->via)?$rel->via[1]:$rel->via;
+				if (!empty($via->via)) return null;
+				if (!is_array($via->link) || count($via->link)!=1) return null;
+				if (!is_array($rel->link) || count($rel->link)!=1) return null;
+				$groupCol=array_keys($via->link)[0];
+				$targetPk=array_keys($rel->link)[0];
+				$targetFk=reset($rel->link);
+				$junction=is_array($via->from)?reset($via->from):$via->from;
+				if (!$junction) {
+					/** @var ActiveRecord $viaClass */
+					$viaClass=$via->modelClass??null;
+					if (!$viaClass) return null;
+					$junction=$viaClass::tableName();
+				}
+				/** @var ActiveRecord $targetClass */
+				$targetClass=$rel->modelClass;
+				$target=$targetClass::tableName();
+				if (trim($junction,'{}%')===trim($target,'{}%')) return null;	//self-join не алиасим
+				$q=(new \yii\db\Query())
+					->select(["$junction.$groupCol","$target.$targetPk"])
+					->from($junction)
+					->innerJoin($target,"$target.$targetPk=$junction.$targetFk");
+				if (!empty($via->where)) $q->andWhere($via->where);
+				if (!empty($via->on)) $q->andWhere($via->on);
+				if (!empty($rel->where)) $q->andWhere($rel->where);
+				if (!empty($rel->on)) $q->andWhere($rel->on);
+				$map=[];
+				foreach ($q->all() as $row) $map[$row[$groupCol]][]=$row[$targetPk];
+				return $map;
+			}
+
+			//one-2-many: сам relation-запрос с его условиями
+			if (!is_array($rel->link) || count($rel->link)!=1) return null;
+			$col=array_keys($rel->link)[0];
+			/** @var ActiveRecord $targetClass */
+			$targetClass=$rel->modelClass;
+			$pk=$targetClass::primaryKey()[0]??'id';
+			$q=clone $rel;
+			$q->primaryModel=null;
+			if (!empty($q->on)) { $q->andWhere($q->on); $q->on=null; }
+			$q->select([$col,$pk])->groupBy(null)
+				->orderBy(null)->limit(null)->offset(null);
+			$q->with=null;
+			$q->indexBy=null;
+			$map=[];
+			foreach ($q->asArray()->all() as $row) $map[$row[$col]][]=$row[$pk];
+			return $map;
+		} catch (Throwable $e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Построить карту [id => количество] для relation-загрузчика:
+	 * many-2-many считается по junction-таблице (с JOIN на целевую - в junction бывают
+	 * осиротевшие строки, а загрузка relation их отфильтровывает),
+	 * one-2-many - по запросу самой связи (с сохранением ее условий),
+	 * группировкой по колонке-ссылке.
+	 * @param string $loader
+	 * @return array|null null если сгруппировать нельзя - нужен фолбэк
+	 */
+	protected function buildLoaderCountMap(string $loader) {
+		$rel=$this->getRelation($loader,false);
+		if (!$rel instanceof ActiveQuery || !$rel->multiple) return null;
+
+		try {
+			if ($rel->via) {
+				//many-2-many: junction JOIN target, группировка по ссылке на нас
+				$via=is_array($rel->via)?$rel->via[1]:$rel->via;
+				if (!empty($via->via)) return null;				//многозвенные via - фолбэк
+				if (!is_array($via->link) || count($via->link)!=1) return null;	//составная ссылка
+				if (!is_array($rel->link) || count($rel->link)!=1) return null;
+				$groupCol=array_keys($via->link)[0];			//колонка junction со ссылкой на нас
+				$targetPk=array_keys($rel->link)[0];			//первичный ключ целевой таблицы
+				$targetFk=reset($rel->link);					//колонка junction со ссылкой на целевую
+				$junction=is_array($via->from)?reset($via->from):$via->from;
+				if (!$junction) {
+					/** @var ActiveRecord $viaClass */
+					$viaClass=$via->modelClass??null;			//via('relationName') - junction это модель
+					if (!$viaClass) return null;
+					$junction=$viaClass::tableName();
+				}
+				/** @var ActiveRecord $targetClass */
+				$targetClass=$rel->modelClass;
+				$target=$targetClass::tableName();
+				//таблицы не алиасим, чтобы условия связей с явными именами таблиц продолжали работать;
+				//self-join через junction на саму себя потому не сгруппировать - фолбэк
+				if (trim($junction,'{}%')===trim($target,'{}%')) return null;
+				$q=(new \yii\db\Query())
+					->select(["$junction.$groupCol",'cnt'=>"COUNT(DISTINCT $target.$targetPk)"])
+					->from($junction)
+					->innerJoin($target,"$target.$targetPk=$junction.$targetFk")
+					->groupBy("$junction.$groupCol");
+				//условия junction-запроса и целевой связи (фильтры типа model_class или LIKE по имени)
+				if (!empty($via->where)) $q->andWhere($via->where);
+				if (!empty($via->on)) $q->andWhere($via->on);
+				if (!empty($rel->where)) $q->andWhere($rel->where);
+				if (!empty($rel->on)) $q->andWhere($rel->on);
+				return ArrayHelper::map($q->all(),$groupCol,'cnt');
+			}
+
+			//one-2-many: считаем запросом самой связи с ее условиями
+			if (!is_array($rel->link) || count($rel->link)!=1) return null;	//составная ссылка
+			$col=array_keys($rel->link)[0];
+			$q=clone $rel;
+			$q->primaryModel=null;	//отвязываем от конкретной модели - иначе запрос отфильтруется по ее id
+			if (!empty($q->on)) {	//on-условие при lazy-загрузке работает как where - сохраняем
+				$q->andWhere($q->on);
+				$q->on=null;
+			}
+			$q->select([$col,'cnt'=>'COUNT(*)'])->groupBy($col)
+				->orderBy(null)->limit(null)->offset(null);
+			$q->with=null;
+			$q->indexBy=null;
+			return ArrayHelper::map($q->asArray()->all(),$col,'cnt');
+		} catch (Throwable $e) {
+			return null;	//нестандартный запрос - фолбэк на загрузку relation
+		}
 	}
 
 	/**
@@ -427,6 +686,13 @@ class ArmsModel extends ActiveRecord
 		parent::afterSave($insert, $changedAttributes);
 
 		$this->historyCommit(); //журналирование изменений
+
+		//кэши экземпляров/количеств должны пережить запись согласованно:
+		//кэш всех элементов сбрасываем целиком (могли добавиться/измениться записи),
+		//в identity map точечно убираем эту запись, кэши количеств сбрасываем все
+		static::invalidateAllItemsCache();
+		unset(self::$identityMap[static::class][$this->id]);
+		static::flushCountsCaches();
 	}
 
 	/**
@@ -438,6 +704,10 @@ class ArmsModel extends ActiveRecord
 		parent::afterDelete();
 
 		$this->historyEnd(); //журналирование удаления
+
+		static::invalidateAllItemsCache();
+		unset(self::$identityMap[static::class][$this->id]);
+		static::flushCountsCaches();
 	}
 
 	/**
@@ -942,6 +1212,30 @@ class ArmsModel extends ActiveRecord
 			}
 			throw $e;
 		}
+	}
+
+	/**
+	 * Загрузить связанные модели для вывода гридом: с жадной загрузкой связей,
+	 * нужных отображаемым колонкам (join-аннотации attributeData, как в prepareSearch).
+	 * Для гридов, которые кормятся relation-ом (ArrayDataProvider(['allModels'=>...])),
+	 * а не поисковой моделью - иначе каждая строка грузит свои связи отдельными запросами.
+	 * Результат кладется в relation модели (populateRelation), так что последующие
+	 * обращения к $this->$relation (бейджи вкладок и т.п.) переиспользуют его.
+	 * @param string $relation имя relation-загрузчика ('techs','comps',...)
+	 * @param string|null $gridId id DynaGrid-а - для жадной загрузки только видимых колонок
+	 *   (null - все связи с join-аннотацией)
+	 * @return static[]
+	 */
+	public function relationForGrid(string $relation, string $gridId=null) {
+		$rel=$this->getRelation($relation);
+		$class=$rel->modelClass;
+		/** @var ArmsModel $prototype */
+		$prototype=new $class();
+		$columns=$gridId?\app\components\DynaGridWidget::fetchVisibleAttributes($prototype,$gridId):null;
+		if (count($joins=$prototype->attributesJoins($columns))) $rel->with($joins);
+		$models=$rel->all();
+		$this->populateRelation($relation,$models);
+		return $models;
 	}
 
 	/**

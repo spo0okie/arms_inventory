@@ -279,7 +279,10 @@ class Comps extends ArmsModel
 			],
 			'servicesSupportTeam' => ['ref'=>\app\models\Users::class, 'refMulti'=>true],
 			'backupReqs' => ['ref'=>\app\models\MaintenanceReqs::class, 'refMulti'=>true],
-			'effectiveMaintenanceReqs' => ['ref'=>\app\models\MaintenanceReqs::class, 'refMulti'=>true],
+			'effectiveMaintenanceReqs' => [
+				'ref'=>\app\models\MaintenanceReqs::class, 'refMulti'=>true,
+				'join'=>['maintenanceReqs','services.maintenanceReqs','maintenanceJobs'],
+			],
 			'admins_ids' => [
 				'Предоставлены полномочия администратора',
 				'viewLabel' => 'Полномочия администратора',
@@ -311,6 +314,7 @@ class Comps extends ArmsModel
 				'Статус АРМ',
 				'indexHint'=>'Статус АРМ на котором работает эта ОС',
 				'typeClass'=>\app\types\StringType::class,
+				'join'=>['arm.state.marker'],
 			],
 			'comment' => [
 				'Комментарий',
@@ -354,6 +358,7 @@ class Comps extends ArmsModel
 				//формат заполнения подскажет IpsType (inputHint)
 				'hint' => 'IP адреса сетевых интерфейсов настроенных в ОС',
 				'typeClass'=>\app\types\IpsType::class,
+				'join'=>['netIps.network'],
 			],
 			'ip_ignore' => [
 				'Скрытые (игнорируемые) адреса',
@@ -369,6 +374,7 @@ class Comps extends ArmsModel
 				'hint' => 'Все привязанные лицензии:<br>Типы лицензий, закупки, ключи',
 				'indexHint' => '{same}',
 				'typeClass'=>\app\types\LinkType::class,
+				'join'=>['licItems','licGroups','licKeys'],
 			],
 			'mac' => [
 				'MAC Адрес',
@@ -383,6 +389,7 @@ class Comps extends ArmsModel
 				'indexHint' => '{same}',
 				'placeholder' => 'Отсутствует',
 				'typeClass'=>\app\types\LinkType::class,
+				'join'=>['maintenanceJobs'],
 			],
 			'maintenanceReqs' => ['alias' => 'maintenance_reqs_ids'],
 			'maintenance_reqs_ids' => [
@@ -421,6 +428,7 @@ class Comps extends ArmsModel
 				'indexHint' => 'Помещение, в котором размещено оборудование',
 				'absorb' => 'ifEmpty',
 				'typeClass'=>\app\types\LinkType::class,
+				'join'=>['arm.place'],
 			],
 			'platform_id' => [
 				'Предоставляется услугой',
@@ -463,6 +471,7 @@ class Comps extends ArmsModel
 				'indexHint' => '{same}',
 				'placeholder' => 'Нет сервисов',
 				'typeClass'=>\app\types\LinkType::class,
+				'join'=>['services'],
 			],
 			'softRescans' => [
 				'Ожидается сканирование ПО',
@@ -488,6 +497,7 @@ class Comps extends ArmsModel
 					return 'Использовать пользователя АРМ';
 				},
 				'typeClass'=>\app\types\LinkType::class,
+				'join'=>['arm.user'],
 			],
 			'vCpuCores' => [
 				'vCPU',

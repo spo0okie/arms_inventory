@@ -132,6 +132,7 @@ class ManufacturersDict extends ArmsModel
     }
     
     public static function initCache() {
+    	if (static::$cacheComplete) return;	//повторный вызов не должен перечитывать словарь
     	foreach (static::find()->all() as $item) {
 			/**
 			 * @var $item ManufacturersDict

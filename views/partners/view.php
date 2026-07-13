@@ -82,7 +82,9 @@ $techsColumns=(function() {
 $tabs[]=[
 	'id'=>'techs',
 	'label'=>'Оборудование'
-		.TabsWidget::badgeStart.count($model->techs).TabsWidget::badgeEnd,
+		//relationForGrid: жадная загрузка связей под видимые колонки грида
+		//(join-аннотации attributeData), иначе каждая строка грузит связи отдельными запросами
+		.TabsWidget::badgeStart.count($model->relationForGrid('techs','partners-techs-list')).TabsWidget::badgeEnd,
 	'content'=>DynaGridWidget::widget([
 		'id' => 'partners-techs-list',
 		'header' => false,

@@ -315,32 +315,46 @@ class LicGroups extends ArmsModel
     }
 
     public function getName() {return $this->descr; }
-    
+
+	/**
+	 * Закупки этого типа лицензий из общего кэша LicItems (если он загружен) либо через relation.
+	 * На списковых страницах кэш прогревается один раз (LicItems::cacheAllItems()),
+	 * иначе счетчики закупок грузят закупки отдельным запросом на каждую строку
+	 * @return LicItems[]
+	 */
+	public function getLicItemsCached() {
+		if (LicItems::allItemsLoaded())
+			return \app\helpers\ArrayHelper::getItemsByFields(LicItems::getAllItems(),['lic_group_id'=>$this->id]);
+		return $this->licItems;
+	}
+
 	public function getTotalCount() {
 		$total=0;
-		foreach ($this->licItems as $item) $total+=$item->count;
+		foreach ($this->licItemsCached as $item) $total+=$item->count;
 		return $total;
 	}
 
 	public function getActiveCount() {
 		$total=0;
-		foreach ($this->licItems as $item) if ($item->active) $total+=$item->count;
+		foreach ($this->licItemsCached as $item) if ($item->active) $total+=$item->count;
 		return $total;
 	}
-	
+
 	public function getActiveItemsCount() {
 		$total=0;
-		foreach ($this->licItems as $item) if ($item->active) $total++;
+		foreach ($this->licItemsCached as $item) if ($item->active) $total++;
 		return $total;
 	}
-	
+
 	public function getDirectUsedCount() {
-		return count($this->arms) + count($this->comps) + count($this->users);
+		return ($this->loaderCount('arms') ?? count($this->arms))
+			+ ($this->loaderCount('comps') ?? count($this->comps))
+			+ ($this->loaderCount('users') ?? count($this->users));
 	}
-	
+
 	public function getUsedCount() {
 		$total=$this->directUsedCount;
-		foreach ($this->licItems as $item) if ($item->active) $total+=$item->usages;
+		foreach ($this->licItemsCached as $item) if ($item->active) $total+=$item->usages;
 		return $total;
 	}
 

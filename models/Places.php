@@ -89,9 +89,7 @@ DELIMITER ;
 	private $phones_cache=null;
 	private $children_cache=null;
 	private static $all_items=null;
-	
-	protected static $allItems=null;
-	
+
 	/**
      * @inheritdoc
      */
@@ -410,11 +408,14 @@ DELIMITER ;
 	}
 
 	/**
-	 * Изображение-карту
+	 * Изображение-карта помещения.
+	 * Обычный hasOne вместо исторического findOne: relation кэшируется в экземпляре
+	 * (findOne делал запрос на каждое обращение) и доступен для with('mapImage')
+	 * @return ActiveQuery
 	 */
 	public function getMapImage()
 	{
-		return Scans::findOne($this->map_id);
+		return $this->hasOne(Scans::class, ['id' => 'map_id']);
 	}
 	
 	public function reverseLinks() {

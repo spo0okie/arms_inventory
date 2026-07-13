@@ -522,6 +522,7 @@ class Networks extends ArmsModel
 	 */
 	public function getUsed()
 	{
+		if (!is_null($count=$this->loaderCount('ips'))) return $count;
 		if (is_array($this->ips)) return count($this->ips);
 		return 0;
 	}

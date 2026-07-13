@@ -41,7 +41,9 @@ class PortsSearch extends Ports
     public function search($params)
     {
         $query = Ports::find()
-			->joinWith(['tech','linkTech','linkPort']);
+			//linkPort.tech: ячейка "куда подключен" рендерит порт второй стороны
+			//вместе с его оборудованием - без вложенного join это запрос на строку
+			->joinWith(['tech','linkTech','linkPort.tech']);
 
         // add conditions that should always apply here
 	

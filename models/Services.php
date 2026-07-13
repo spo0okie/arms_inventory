@@ -139,9 +139,7 @@ class Services extends ArmsModel
 	public $parentAttr='parentService';
 	private $sitesRecursiveCache=null;
 	private $placesCache=null;
-	
-	protected static $allItems=null;
-	
+
 	public $linksSchema=[
 		'tags_ids' =>					[Tags::class,'services_ids', 'loader' => 'tags','updater'=>[
 			'viaTableAttributesValue' => [
@@ -939,7 +937,7 @@ class Services extends ArmsModel
 	
 	public static function cacheAllItems() {
 		if (!static::allItemsLoaded())
-			static::$allItems=ArrayHelper::index(
+			static::setAllItems(ArrayHelper::index(
 				static::find()
 				->with([
 					'comps',
@@ -967,7 +965,7 @@ class Services extends ArmsModel
 					'maintenanceReqs'
 					])
 				->all()
-			,'id');
+			,'id'));
 	}
 	
 	/**

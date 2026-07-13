@@ -55,8 +55,10 @@ $tabs[]=[
 HTML,
 ];
 
+//relationForGrid: жадная загрузка связей под видимые колонки грида
+//(join-аннотации attributeData), иначе каждая строка грузит связи отдельными запросами
 //для корректной работы columns надо чтобы была определена переменная
-$dataProvider=new ArrayDataProvider(['allModels'=>$model->services]);
+$dataProvider=new ArrayDataProvider(['allModels'=>$model->relationForGrid('services','job-services')]);
 $tabs[]=[
 	'id'=>'services',
 	'label'=>'Сервисы '.$badge.count($model->services).'</span>',
@@ -72,7 +74,7 @@ $tabs[]=[
 
 $tabs[]=[
 	'id'=>'computers',
-	'label'=>'ОС / ВМ '.$badge.count($model->comps).'</span>',
+	'label'=>'ОС / ВМ '.$badge.count($model->relationForGrid('comps','job-comps')).'</span>',
 	'content'=>DynaGridWidget::widget([
 		'id' => 'job-comps',
 		'header' => false,
@@ -85,7 +87,7 @@ $tabs[]=[
 
 $tabs[]=[
 	'id'=>'techs',
-	'label'=>'Оборудование '.$badge.count($model->techs).'</span>',
+	'label'=>'Оборудование '.$badge.count($model->relationForGrid('techs','job-techs')).'</span>',
 	'content'=>DynaGridWidget::widget([
 		'id' => 'job-techs',
 		'header' => false,

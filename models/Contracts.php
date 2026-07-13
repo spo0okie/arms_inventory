@@ -738,11 +738,15 @@ class Contracts extends ArmsModel
 	public function getSAttach()
 	{
 		$attaches='';
-		if (count($this->children)) $attaches.='<span class="fas fa-paperclip" title="Привязаны документы: '.(count($this->children)).'шт"></span>';
-		if (count($this->techs)) $attaches.='<span class="fas fa-print" title="Привязана техника: '.(count($this->techs)).'шт"></span>';
-		if (count($this->materials)) $attaches.='<span class="fas fa-box-open" title="Привязаны материалы: '.(count($this->materials)).'ед"></span>';
-		if (count($this->licItems)) $attaches.='<span class="fas fa-award" title="Привязаны лицензии: '.(count($this->licItems)).'шт"></span>';
-		if (count($this->services)) $attaches.='<span class="fas fa-cog" title="Привязаны услуги: '.(count($this->services)).'шт"></span>';
+		//количества привязок через кэш количеств (иначе на каждую строку грида грузятся 5 связей)
+		$counts=[];
+		foreach (['children','techs','materials','licItems','services'] as $loader)
+			$counts[$loader]=$this->loaderCount($loader) ?? count($this->$loader);
+		if ($counts['children']) $attaches.='<span class="fas fa-paperclip" title="Привязаны документы: '.$counts['children'].'шт"></span>';
+		if ($counts['techs']) $attaches.='<span class="fas fa-print" title="Привязана техника: '.$counts['techs'].'шт"></span>';
+		if ($counts['materials']) $attaches.='<span class="fas fa-box-open" title="Привязаны материалы: '.$counts['materials'].'ед"></span>';
+		if ($counts['licItems']) $attaches.='<span class="fas fa-award" title="Привязаны лицензии: '.$counts['licItems'].'шт"></span>';
+		if ($counts['services']) $attaches.='<span class="fas fa-cog" title="Привязаны услуги: '.$counts['services'].'шт"></span>';
 
 		return $attaches;
 	}
@@ -763,7 +767,7 @@ class Contracts extends ArmsModel
 
 	public function getTechsCount()
 	{
-		return count($this->techs);
+		return $this->loaderCount('techs') ?? count($this->techs);
 	}
 
 	/**

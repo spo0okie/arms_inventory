@@ -10,6 +10,7 @@ namespace app\models\traits;
 
 
 use app\helpers\ArrayHelper;
+use app\models\AccessTypes;
 use app\models\Aces;
 
 /**
@@ -36,7 +37,8 @@ trait AcesModelCalcFieldsTrait
 	
 	public function getPartners() {
 		/** @var Aces $this */
-		if (!count($this->users_ids)) return [];
+		//проверка "есть ли вообще пользователи" через кэш количеств - не загружая пользователей
+		if (!($this->loaderCount('users') ?? count($this->users_ids))) return [];
 		$partners=[];
 		foreach ($this->users as $user)
 			$partners[$user->org_id]=$user->org;
@@ -46,16 +48,18 @@ trait AcesModelCalcFieldsTrait
 	
 	public function hasIpAccess(){
 		/** @var Aces $this */
-		foreach ($this->accessTypes as $accessType) {
-			if ($accessType->isIpRecursive) return true;
+		foreach ($this->accessLinks as $row) {
+			$accessType=AccessTypes::getLoadedItem($row['access_types_id'],true);
+			if (is_object($accessType) && $accessType->isIpRecursive) return true;
 		}
 		return false;
 	}
-	
+
 	public function hasPhoneAccess(){
 		/** @var Aces $this */
-		foreach ($this->accessTypes as $accessType) {
-			if ($accessType->isTelephonyRecursive) return true;
+		foreach ($this->accessLinks as $row) {
+			$accessType=AccessTypes::getLoadedItem($row['access_types_id'],true);
+			if (is_object($accessType) && $accessType->isTelephonyRecursive) return true;
 		}
 		return false;
 	}

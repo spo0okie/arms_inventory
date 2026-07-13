@@ -266,6 +266,7 @@ class Techs extends ArmsModel
 				'indexHint' => 'Строка оборудования обнаруженного <b>в основной ОС</b><br>'.
 					'Чтобы увидеть оборудование в отформатированном виде - наведите мышку на строку',
 				'typeClass'=>\app\types\JsonType::class,
+				'join'=>['comp'],
 			],
 			'comp_id' => [
 				'label'=>'Основная ОС',
@@ -274,12 +275,14 @@ class Techs extends ArmsModel
 				'indexHint' => 'Поиск ведется <b>только по основной</b> операционной системе.<br>'.
 					'Найти АРМ по неосновной ОС можно через Компьютеры->ОС',
 				'typeClass'=>\app\types\LinkType::class,
+				'join'=>['comp'],
 			],
 			'comp_updated_at' => [
 				'label'=>'Дата обн. ОС',
 				'indexHint' => 'Когда в последний раз обновлялась ОС привязанная к оборудованию',
 				'type'=>'date',
 				'typeClass'=>\app\types\DatetimeType::class,
+				'join'=>['comp'],
 			],
 			'comment' => [
 				'Примечание',
@@ -305,6 +308,7 @@ class Techs extends ArmsModel
 					'</i>',
 				'placeholder' => 'Выберите подразделение',
 				'typeClass'=>\app\types\LinkType::class,
+				'join'=>['department'],
 			],
 			'domain_id' => [
 				'Домен',
@@ -333,6 +337,7 @@ class Techs extends ArmsModel
 					'<br>Как распространенные с сервисов, так и заданные явно. '.
 					'<br>Избыточно предъявленные требования помечаются как "архивные"',
 				'typeClass'=>\app\types\LinkType::class,
+				'join'=>['maintenanceReqs','services.maintenanceReqs','maintenanceJobs'],
 			],
 			'full_length'=>[
 				'Полноразмерный модуль',
@@ -411,6 +416,7 @@ class Techs extends ArmsModel
 				'hint' => 'IP адреса сетевых интерфейсов оборудования.<br>'
 					.'В списках и поиске вместе с ними учитываются адреса привязанной ОС',
 				'typeClass'=>\app\types\IpsType::class,
+				'join'=>['netIps.network','comp.netIps.network'],
 			],
 			'it_staff_id' => [
 				'Сотрудник службы ИТ',
@@ -425,6 +431,7 @@ class Techs extends ArmsModel
 				'hint' => 'Все привязанные лицензии:<br>Типы лицензий, закупки, ключи',
 				'indexHint' => '{same}',
 				'typeClass'=>\app\types\LinkType::class,
+				'join'=>['licItems','licGroups','licKeys'],
 			],
 			'mac' => [
 				'MAC адреса',
@@ -443,6 +450,7 @@ class Techs extends ArmsModel
 				'hint'=>'Какие операции регламентного обслуживания проводятся над этим оборудованием',
 				'indexHint'=>'{same}',
 				'placeholder' => 'Отсутствует',
+				'join'=>['maintenanceJobs'],
 			],
 			'maintenanceJobs'=>['alias'=>'maintenance_jobs_ids'],
 			'maintenance_reqs_ids'=>[
@@ -465,6 +473,7 @@ class Techs extends ArmsModel
 					'Если нужная модель отсутствует в списке, то нужно сначала завести в ее в соотв. категории оборудования',
 				'indexHint' => 'Модель системного блока / ноутбука / сервера<br>'.
 					'Производитель в таблице не выводится, но при поиске учитывается',
+				'join'=>['model.manufacturer','model.type'],
 			],
 			'num' => [
 				'Инвентарный номер',
@@ -482,6 +491,7 @@ class Techs extends ArmsModel
 				'hint' => 'Организация в которую приобретено оборудование / компьютер.<br>'.
 					'Если в инвентаризации сопровождаются несколько организаций и нужно разделять оборудование между ними',
 				'indexHint' => '{same}',
+				'join'=>['partner'],
 			],
 			'phone' => [
 				'Телефон',
@@ -497,6 +507,7 @@ class Techs extends ArmsModel
 					.'указываем фактическое расположение, по возвращении перемещаем обратно',
 				'indexHint' => '{same}',
 				'placeholder' => 'Выберите помещение где находится оборудование',
+				'join'=>['place'],
 			],
 			'responsible_id' => [
 				'label'=>'Адм.Ответственный',
@@ -510,6 +521,7 @@ class Techs extends ArmsModel
 				'hint' => 'Работу каких сервисов обеспечивает это оборудование',
 				'indexHint' => '{same}',
 				'placeholder' => 'Не участвует в работе сервисов',
+				'join'=>['services'],
 			],
 			'sn' => [
 				'Серийный номер',
@@ -532,6 +544,7 @@ class Techs extends ArmsModel
 				'searchHint' => 'Для фильтрации выберите только нужные статусы<br>'.
 					'Можно выбрать несколько из выпадающего списка <br>'.
 					'Позиции выбираются кликом',
+				'join'=>['state.marker'],
 			],
 			'user' => ['alias'=>'user_id'],
 			'user_dep' => [
@@ -539,18 +552,21 @@ class Techs extends ArmsModel
 				'hint' => 'Отдел в котором числится пользователь',
 				'indexHint' => '{same}',
 				'typeClass' => \app\types\StringType::class,
+				'join'=>['user.orgStruct'],
 			],
 			'user_id' => [
 				'Пользователь',
 				'hint' => 'Сотрудник которому установлено',
 				'indexHint' => '{same}',
 				'placeholder' => 'Нет пользователя оборудования/АРМа',
+				'join'=>['user'],
 			],
 			'user_position' => [
 				'Должность',
 				'hint' => 'Должность пользователя АРМ/оборудования',
 				'indexHint' => '{same}',
 				'typeClass' => \app\types\StringType::class,
+				'join'=>['user'],
 			],
 			'uid' => [
 				Yii::$app->params['techs.uidLabel']??'Доп. маркировка',
@@ -786,7 +802,11 @@ class Techs extends ArmsModel
 
 	public function getStateName()
 	{
-		if (is_object($this->state)) return $this->state->name;
+		//состояние из общего кэша справочника (в списках дергается на каждую строку)
+		$state=$this->isRelationPopulated('state')?
+			$this->state:
+			($this->state_id?TechStates::getLoadedItem($this->state_id,true):null);
+		if (is_object($state)) return $state->name;
 		return '';
 	}
 

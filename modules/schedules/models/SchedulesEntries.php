@@ -384,8 +384,26 @@ class SchedulesEntries extends \app\models\base\ArmsModel
 		return strtotime($time);
 	}
 	
+	/**
+	 * Расписание, которому принадлежит запись.
+	 *
+	 * НЕСТАНДАРТНО (не hasOne-relation) намеренно - возвращаем РАЗДЕЛЯЕМЫЙ экземпляр
+	 * из общего кэша расписаний (getLoadedItem с автопрогревом, таблица маленькая):
+	 *  - master дергается на каждую запись по несколько раз (isAcl, рекурсия по дням
+	 *    недели); исторический findOne здесь делал запрос на КАЖДОЕ обращение
+	 *    (21 повторное чтение одной строки на странице расписания);
+	 *  - hasOne-relation кэшировал бы результат в экземпляре, но у каждой записи
+	 *    была бы СВОЯ копия расписания, и рекурсивный подъем parent/override
+	 *    от каждой копии снова шел бы отдельными запросами;
+	 *  - записи бывают виртуальными/клонированными (Schedules::getDateSchedule) -
+	 *    разделяемому экземпляру по schedule_id это безразлично.
+	 * Цена: with('master') невозможен (с findOne было так же); write-path это не
+	 * задевает - там намеренно читают свежую копию через findOne (recompileCascade).
+	 * @return Schedules|null
+	 */
 	public function getMaster() {
-		return Schedules::findOne($this->schedule_id);
+		if (!$this->schedule_id) return null;
+		return Schedules::getLoadedItem($this->schedule_id,true);
 	}
 	
 	/**

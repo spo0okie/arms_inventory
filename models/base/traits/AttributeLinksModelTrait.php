@@ -193,17 +193,27 @@ trait AttributeLinksModelTrait
 	/**
 	 * Возвращает ссылки на объекты ссылающиеся на этот
 	 * по схеме one-to-many и many-to-many
-	 * которые не удаляются автоматически при удалении модели
+	 * которые не удаляются автоматически при удалении модели.
+	 * Нужны виджету удаления только чтобы понять можно ли удалять (и показать количества),
+	 * поэтому где возможно возвращаются не объекты, а их количества [titles => count]
+	 * (один GROUP BY на класс+связь за весь запрос вместо загрузки всех связанных
+	 * объектов на каждый элемент списка, см. ArmsModel::loaderCount)
 	 * @return array
 	 */
 	public function nonDeletableReverseLinks() {
 		$links=[];
 		foreach ($this->getLinksSchema() as $attribute=>$data) {
-			if ($this->attributeIsReverseLink($attribute)) {
-				
-				if (!($data['deletable']??false) && $loader=$this->attributeLinkLoader($attribute)) {
-					$links[]=$this->$loader;
-				};
+			if (!$this->attributeIsReverseLink($attribute)) continue;
+			$data=is_array($data)?$data:[$data];
+			if ($data['deletable']??false) continue;
+			if (!($loader=$this->attributeLinkLoader($attribute))) continue;
+
+			if (!is_null($count=$this->loaderCount($loader))) {
+				$class=$this->attributeLinkClass($attribute);
+				$title=(is_string($class) && property_exists($class,'titles'))?$class::$titles:'Прочее';
+				$links[$title]=($links[$title]??0)+$count;
+			} else {
+				$links[]=$this->$loader;	//фолбэк: составные/нестандартные ссылки грузим как раньше
 			}
 		}
 		return $links;

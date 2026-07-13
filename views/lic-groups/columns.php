@@ -7,6 +7,11 @@ use app\components\ExpandableCardWidget;
 use app\components\gridColumns\ItemColumn;
 
 $renderer=$this;
+
+//прогрев кэшей: счетчики закупок/ключей на каждую строку иначе грузят свои связи отдельно
+\app\models\LicItems::cacheAllItems();
+\app\models\LicKeys::cacheAllItems();
+
 return [
 	//'descr',
 	'descr'=>['class'=> ItemColumn::class,],
@@ -16,11 +21,11 @@ return [
 		'headerOptions'=>['qtip_ttip'=>'Активных (не истёкших) закупок / всего закупок этого типа лицензий'],
 		'format'=>'raw',
 		'value'=>function($item) {
-			return $item->activeItemsCount.'/'.count($item->licItems);
+			return $item->activeItemsCount.'/'.count($item->licItemsCached);
 		},
 		'contentOptions'=>function($item){
 			return [
-				'class'=>count($item->licItems)?($item->activeItemsCount?'table-success':'table-danger'):'alert-gray-striped'
+				'class'=>count($item->licItemsCached)?($item->activeItemsCount?'table-success':'table-danger'):'alert-gray-striped'
 			];
 		},
 	],

@@ -165,11 +165,31 @@ class AccessTypes extends ArmsModel
 		return $this->name;
 	}
 	
+	/** @var null|array Кэш иерархии типов доступа: parent_id => [child_id,...] (грузится один раз на запрос) */
+	private static $hierarchyCache=null;
+
+	/**
+	 * ID дочерних типов доступа из кэша иерархии
+	 * (рекурсивные флаги дергаются на каждый ACE в списках - без кэша это запрос на каждый тип)
+	 * @param int $id
+	 * @return int[]
+	 */
+	protected static function childrenIdsCached($id)
+	{
+		if (is_null(static::$hierarchyCache)) {
+			static::$hierarchyCache=[];
+			foreach ((new \yii\db\Query())->from('access_types_hierarchy')->all() as $row)
+				static::$hierarchyCache[$row['parent_id']][]=$row['child_id'];
+		}
+		return static::$hierarchyCache[$id]??[];
+	}
+
 	public function getFlagRecursive($flag)
 	{
 		if ($this->$flag) return true;
-		foreach ($this->children as $child) {
-			if ($child->getFlagRecursive($flag)) return true;
+		foreach (static::childrenIdsCached($this->id) as $childId) {
+			$child=static::getLoadedItem($childId,true);
+			if (is_object($child) && $child->getFlagRecursive($flag)) return true;
 		}
 		return false;
 	}

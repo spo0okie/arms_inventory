@@ -10,7 +10,6 @@ use app\helpers\FieldsHelper;
 use app\models\Comps;
 use app\models\HwListItem;
 use app\models\Manufacturers;
-use app\models\ManufacturersDict;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use app\components\widgets\page\ModelWidget;
@@ -21,11 +20,6 @@ $this->title = 'ОС '.$domain.'\\'.strtolower($model->name);
 //крошки собираются автоматически в layout (views/layouts/main.php)
 Url::remember();
 $manufacturers= Manufacturers::fetchNames();
-
-//прогрев кэша словаря: разбор raw_soft/железа ищет производителя по каждой строке отпечатка,
-//без кэша это отдельный запрос на строку
-ManufacturersDict::initCache();
-
 $model->swList->sortByName();
 
 $skipMonitors=is_object($model->arm)?($model->arm->monitorsCount):false;

@@ -9,6 +9,7 @@ namespace app\models\traits;
 use app\models\HwList;
 use app\models\HwListItem;
 use app\models\MaintenanceReqs;
+use app\models\Sandboxes;
 use app\models\SwList;
 use app\models\Techs;
 use yii\helpers\ArrayHelper;
@@ -188,7 +189,11 @@ trait CompsModelCalcFieldsTrait
 	
 	public function renderName($fqdn=false)
 	{
-		$suffix=is_object($this->sandbox)?$this->sandbox->suffix:'';
+		//имя рендерится на каждый comps/item: песочница из общего кэша справочника
+		$sandbox=$this->isRelationPopulated('sandbox')?
+			$this->sandbox:
+			($this->sandbox_id?Sandboxes::getLoadedItem($this->sandbox_id,true):null);
+		$suffix=is_object($sandbox)?$sandbox->suffix:'';
 		return ($fqdn?mb_strtolower($this->fqdn):mb_strtoupper($this->name))
 			.$suffix;
 	}
@@ -205,7 +210,8 @@ trait CompsModelCalcFieldsTrait
 	
 	public function getServicesCount()
 	{
-		return count($this->services);
+		/** @var Comps $this */
+		return $this->loaderCount('services') ?? count($this->services);
 	}
 	
 }

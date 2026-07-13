@@ -37,7 +37,7 @@ use yii\helpers\Html;
 class Aces extends ArmsModel
 {
 	use AcesModelCalcFieldsTrait;
-	
+
 	public static $title='Доступ';
 	public static $titles='Доступы';
 
@@ -45,11 +45,11 @@ class Aces extends ArmsModel
 	{
 		return 'Записи доступа (ACE): какие субъекты (пользователи, IP) какой тип доступа получают; группируются в списки доступа (ACL).';
 	}
-	
+
 	public static $noAccessName='нет доступа';
-	
+
 	public $ipParamsStorage;	//ip параметры доступа
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
@@ -62,7 +62,7 @@ class Aces extends ArmsModel
 		'netIps_ids' =>		[NetIps::class,'aces_ids'],
 		'acls_id' =>		[Acls::class,'aces_ids'],
 	];
-	
+
 	public function getLinksSchema()
 	{
 		//дополняем нашу статичную схему связей апдейтером для параметров типов доступа
@@ -78,7 +78,7 @@ class Aces extends ArmsModel
 			]],
 		]);
 	}
-	
+
 	/**
      * {@inheritdoc}
      */
@@ -86,7 +86,7 @@ class Aces extends ArmsModel
     {
         return 'aces';
     }
-	
+
 	public function extraFields()
 	{
 		return array_merge(parent::extraFields(),[
@@ -95,8 +95,8 @@ class Aces extends ArmsModel
 			'acl',
 		]);
 	}
-	
-	
+
+
 	/**
      * {@inheritdoc}
      */
@@ -104,7 +104,7 @@ class Aces extends ArmsModel
     {
         return [
             [['acls_id'], 'integer'],
-			[['acls_id'], 'required'], 
+			[['acls_id'], 'required'],
 			[['comps_ids','users_ids','access_types_ids','netIps_ids','services_ids','networks_ids'], 'each', 'rule'=>['integer']],
 			[['ipParams'], 'each', 'rule'=>['string']],
             [['ips', 'notepad','name'], 'string'],
@@ -126,9 +126,9 @@ class Aces extends ArmsModel
 	public function afterGenerate(GenerationContext $context, array $options = []): void
 	{
 		parent::afterGenerate($context, $options);
-		
+
 	}
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
@@ -204,7 +204,7 @@ class Aces extends ArmsModel
 				'typeClass'=>\app\types\LinkType::class,
 			],
 			'notepad' => [
-				'Записная книжка',
+				'Заметки по этой ACE',
 				'hint' => 'Если есть какие-то заметки, то можно их записать здесь',
 				'typeClass'=>\app\types\TextType::class,
 			],
@@ -219,6 +219,8 @@ class Aces extends ArmsModel
 				'indexHint' => 'К каким узлам ресурса получают доступ субъекты:<br>'
 					.'В случае если доступ предоставляется к сервису, то<br>'
 					.'он автоматически предоставляется и к узлам, на которых сервис крутится',
+				//NB: acl.aces сюда добавлять нельзя - joinWith в prepareSearch упадет
+				//на self-join таблицы aces без алиаса (проверено)
 				'join'=>['acl.service','acl.comp','acl.tech','acl.ip','acl.network',],
 				'typeClass'=>\app\types\StringType::class,
 			],
@@ -264,15 +266,15 @@ class Aces extends ArmsModel
 			],
 		]);
 	}
-	
-	
-	
+
+
+
 	public function getAcl()
 	{
 		return $this->hasOne(Acls::class, ['id' => 'acls_id']);
 	}
-	
-	
+
+
 	/**
 	 * Привязанные пользователи
 	 */
@@ -282,7 +284,7 @@ class Aces extends ArmsModel
 			->from(['users_subjects'=>Users::tableName()])
 			->viaTable('{{%users_in_aces}}', ['aces_id' => 'id']);
 	}
-	
+
 	/**
 	 * Привязанные сервисы
 	 */
@@ -292,7 +294,7 @@ class Aces extends ArmsModel
 			->from(['services_subjects'=>Services::tableName()])
 			->viaTable('{{%services_in_aces}}', ['aces_id' => 'id']);
 	}
-	
+
 	/**
 	 * Привязанные сети
 	 */
@@ -302,7 +304,7 @@ class Aces extends ArmsModel
 			->from(['networks_subjects'=>Networks::tableName()])
 			->viaTable('{{%networks_in_aces}}', ['aces_id' => 'id']);
 	}
-	
+
 	/**
 	 * Привязанные пользователи
 	 */
@@ -312,7 +314,7 @@ class Aces extends ArmsModel
 			->from(['comps_subjects'=>Comps::tableName()])
 			->viaTable('{{%comps_in_aces}}', ['aces_id' => 'id']);
 	}
-	
+
 	/**
 	 * Привязанные пользователи
 	 */
@@ -322,7 +324,7 @@ class Aces extends ArmsModel
 			->from(['ips_subjects'=>NetIps::tableName()])
 			->viaTable('{{%ips_in_aces}}', ['aces_id' => 'id']);
 	}
-	
+
 	/**
 	 * Типы доступа
 	 */
@@ -331,9 +333,9 @@ class Aces extends ArmsModel
 		return $this->hasMany(AccessTypes::class, ['id' => 'access_types_id'])
 			->viaTable('{{%access_in_aces}}', ['aces_id' => 'id']);
 	}
-	
 
-	
+
+
 	/**
 	 * Возвращает список всех элементов
 	 * @return array|mixed|null
@@ -347,18 +349,18 @@ class Aces extends ArmsModel
         return ArrayHelper::map($list, 'id', 'sname');
     }
 
-	
+
 	/**
 	 * @inheritdoc
 	 */
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
-			
+
 			/* взаимодействие с NetIPs */
 			$this->netIps_ids=NetIps::fetchIpIds($this->ips,true);
 			$this->networks_ids=Networks::fetchNetworkIds($this->ips);
-			
+
 			//грузим старые значения записи
 			$old=static::findOne($this->id);
 			if (!is_null($old)) {
@@ -374,8 +376,8 @@ class Aces extends ArmsModel
 		}
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * @inheritdoc
 	 */
@@ -384,39 +386,49 @@ class Aces extends ArmsModel
 		if (!parent::beforeDelete()) {
 			return false;
 		}
-		
+
 		//отрываем IP от удаляемого компа
 		foreach ($this->netIps as $ip) {
 			$ip->detachAce($this->id);
 		}
-		
+
 		return true;
 	}
-	
+
+	/** @var null|array Кэш всей access_in_aces, сгруппированный по aces_id (грузится один раз на запрос) */
+	private static $accessLinksCache=null;
+
+	/**
+	 * Строки access_in_aces этого ACE из общего кэша
+	 * (в списках доступы дергаются на каждую строку - без кэша это запрос на каждый ACE)
+	 * @return array
+	 */
+	public function getAccessLinks() {
+		if (is_null(static::$accessLinksCache)) {
+			static::$accessLinksCache=[];
+			foreach ((new \yii\db\Query())->from('access_in_aces')->all() as $row)
+				static::$accessLinksCache[$row['aces_id']][]=$row;
+		}
+		return static::$accessLinksCache[$this->id]??[];
+	}
+
 	/**
 	 * Получить IP параметры доступов
 	 */
 	public function getIpParams() {
 		if ($this->isNewRecord) return [];
 		if (isset($this->attrsCache['ipParams'])) return $this->attrsCache['ipParams'];
-		$types= ArrayHelper::index($this->accessTypes,'id');
-		$query=Yii::$app->db->createCommand("select * from access_in_aces where aces_id={$this->id}");
-		$data=$query->queryAll();
 		$params=[];
-		foreach ($data as $row) {
-			$ip_params=(string)$row['ip_params'];
-			$type_id=$row['access_types_id'];
-			if (isset($types[$type_id])) {
-				$type=$types[$type_id];
-				if ($type->is_ip) {
-					$params[$type_id]=$ip_params;
-				}
+		foreach ($this->accessLinks as $row) {
+			$type=AccessTypes::getLoadedItem($row['access_types_id'],true);
+			if (is_object($type) && $type->is_ip) {
+				$params[$row['access_types_id']]=(string)$row['ip_params'];
 			}
 		}
-		
+
 		return $this->attrsCache['ipParams']=$params;
 	}
-	
+
 	public function setIpParams($value) {
 		$value=ArrayHelper::recursiveOverride($this->getIpParams(),$value);
 		$this->attrsCache['ipParams']=$value;
@@ -463,15 +475,19 @@ class Aces extends ArmsModel
 			sort($ids);
 			return $ids;
 		};
+		//id-шники берем через loaderIds (один запрос на связь за весь веб-запрос):
+		//сигнатуры считаются для КАЖДОГО ACE страницы, а атрибуты `*_ids` (LinkerBehavior)
+		//грузили бы модели связей отдельными запросами на каждый ACE (~13 запросов/ACE)
+		$ids=fn(string $loader,string $attr)=>$this->loaderIds($loader) ?? $this->$attr;
 		$ipParams=$this->getIpParams();
 		ksort($ipParams);
 		$parts=[
-			'users'    => $norm($this->users_ids),
-			'comps'    => $norm($this->comps_ids),
-			'services' => $norm($this->services_ids),
-			'netips'   => $norm($this->netIps_ids),
-			'networks' => $norm($this->networks_ids),
-			'types'    => $norm($this->access_types_ids),
+			'users'    => $norm($ids('users','users_ids')),
+			'comps'    => $norm($ids('comps','comps_ids')),
+			'services' => $norm($ids('services','services_ids')),
+			'netips'   => $norm($ids('netIps','netIps_ids')),
+			'networks' => $norm($ids('networks','networks_ids')),
+			'types'    => $norm($ids('accessTypes','access_types_ids')),
 			'ipparams' => $ipParams,
 			'comment'  => (string)$this->comment,
 			'notepad'  => (string)$this->notepad,

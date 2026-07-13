@@ -45,10 +45,19 @@ class HistoryWidget extends Widget
 
 		if ($this->model->hasAttribute('updated_by')) {
 			$this->updated_by=$this->model->updated_by;
-			if ($this->updated_by) $this->user=Users::find()
-				->where(['Login'=>$this->updated_by])
-				->one();
+			if ($this->updated_by) $this->user=static::findUserByLogin($this->updated_by);
 		}
+	}
+
+	/** @var array Кэш пользователей по логину: виджет рендерится на каждую карточку страницы,
+	 * и один и тот же автор изменений иначе читался бы из БД на каждый виджет */
+	protected static $usersByLogin=[];
+
+	protected static function findUserByLogin($login) {
+		if (!array_key_exists($login,static::$usersByLogin)) {
+			static::$usersByLogin[$login]=Users::find()->where(['Login'=>$login])->one();
+		}
+		return static::$usersByLogin[$login];
 	}
 	
 	public function run() {

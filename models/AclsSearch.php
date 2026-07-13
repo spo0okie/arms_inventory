@@ -35,16 +35,23 @@ class AclsSearch extends Acls
      * Creates data provider instance with search query applied
      *
      * @param array $params
+     * @param string[]|null $columns отображаемые колонки грида - для жадной загрузки
+     *   их связей (join-аннотации attributeData, см. ArmsModel::prepareSearch)
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params,$columns=null)
     {
         $query = Acls::find();
 
+		//жадная загрузка связей отображаемых колонок: без нее каждый ACL грузит
+		//свои ACE и их субъектов (пользователей/ОС/IP/сети) отдельными запросами
+		if (count($joins=(new Acls())->attributesJoins($columns)))
+			$query->with($joins);
+
         // add conditions that should always apply here
 
-		
+
         $sort=[
 			'defaultOrder' => ['id'=>SORT_ASC],
 			'attributes'=>[

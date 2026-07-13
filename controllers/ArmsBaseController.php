@@ -1226,8 +1226,10 @@ class ArmsBaseController extends Controller
 	{
 		$class=static::findClass($class);
 
-		/** @var $class \app\models\base\ArmsModel */
-		if (($model = ($class)::findOne($id)) !== null) {
+		/** @var $class \app\models\base\ArmsModel
+		 * findLoaded - identity map: разные ветки рендера одной страницы (карточка,
+		 * виджеты, ttip) резолвят одну запись без повторных SELECT */
+		if (($model = ($class)::findLoaded($id)) !== null) {
 			return $model;
 		}
 

@@ -19,6 +19,8 @@ if (is_object($model)) {
 ?>
 <span class="places-item" >
     <?php if (isset($full)) {
+        //прогрев кэша мест: проход по родителям иначе делает запрос на каждое звено цепочки
+        \app\models\Places::cacheAllItems();
         $tokens=[];
         $item=$model;
         do {

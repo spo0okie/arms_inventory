@@ -10,6 +10,7 @@ namespace app\components;
 
 use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
+use app\models\Markers;
 use Yii;
 use yii\helpers\Html;
 
@@ -57,8 +58,16 @@ class ItemObjectWidget extends LinkObjectWidget
 			$this->style=StringHelper::appendToDelimitedString($this->style,';','display:none');
 
 		//маркер: явно переданный, либо автоопределение по свойству/связи marker модели
-		if (is_null($this->marker) && is_object($this->model) && $this->model->canGetProperty('marker'))
-			$this->marker=$this->model->marker;
+		if (is_null($this->marker) && is_object($this->model) && $this->model->canGetProperty('marker')) {
+			//прямая ссылка marker_id резолвится из общего кэша справочника маркеров:
+			//виджет рендерится на каждый item любой страницы, relation означал бы запрос на каждый
+			if ($this->model->hasAttribute('marker_id') && !$this->model->isRelationPopulated('marker')) {
+				$this->marker=$this->model->marker_id?
+					Markers::getLoadedItem($this->model->marker_id,true):null;
+			} else {
+				$this->marker=$this->model->marker;	//вычисляемые маркеры (через state и т.п.)
+			}
+		}
 
 		//маркер задает элементу инлайн CSS-переменные, которые потребляет web/css/markers.css
 		if (is_object($this->marker) && strlen($vars=$this->marker->styleVars))

@@ -136,7 +136,14 @@ class Acls extends ArmsModel
     public function attributeData()
     {
         return array_merge(parent::attributeData(),[
-			'aces' => ['ACEs','indexHint'=>'Access Control Entries <br> (Записи кому предоставляется какой доступ)','typeClass'=>\app\types\LinkType::class],
+			'aces' => [
+				'ACEs',
+				'indexHint'=>'Access Control Entries <br> (Записи кому предоставляется какой доступ)',
+				'typeClass'=>\app\types\LinkType::class,
+				//вместе с типами доступа: нужно сигнатурам группировки ACL
+				//(acesSignature перебирает aces каждого ACL) и карточкам ACE
+				'join'=>['aces.accessTypes'],
+			],
 			//read-only вычисляемые ссылки (категория C): гетерогенные значения
 			//(Comps/Techs/Services/строка-комментарий), потому базовый класс
 			'nodes' => ['ref'=>\app\models\base\ArmsModel::class, 'refMulti'=>true],
@@ -144,6 +151,7 @@ class Acls extends ArmsModel
 				'Ресурс',
 				'indexHint'=>'К какому ресурсу предоставляется доступ',
 				'ref'=>\app\models\base\ArmsModel::class,
+				'join'=>['comp','tech','service','ip','network'],
 			],
 			'accessTypes' => ['ref'=>\app\models\AccessTypes::class, 'refMulti'=>true],
 			//презентационные колонки списка ACL (views/acls/columns.php):
@@ -151,20 +159,25 @@ class Acls extends ArmsModel
 			'subjects' => [
 				'Субъекты',
 				'indexHint'=>'Субъекты доступа: кто получает доступ (по всем записям этого списка доступа)',
+				'join'=>['aces.users','aces.comps','aces.netIps','aces.networks','aces.services'],
 			],
 			'subjects_nodes' => [
 				'Узлы субъектов',
 				'indexHint'=>'Какие узлы субъектов получают доступ:<br>'
 					.'В случае если доступ предоставляется сервису, то<br>'
 					.'он автоматически предоставляется и узлам, на которых сервис крутится',
+				//цепочки до IP: узлы субъектов рисуются с их адресами (show_ips)
+				'join'=>['aces.users.netIps.network','aces.comps.netIps.network','aces.netIps','aces.networks','aces.services'],
 			],
 			'access_types' => [
 				'Типы доступа',
 				'indexHint'=>'Какие типы доступа предоставляются записями этого списка доступа',
+				'join'=>['aces.accessTypes'],
 			],
 			'schedule' => [
 				'Временное ограничение',
 				'indexHint'=>'Временный доступ (расписание), в рамках которого действует этот список доступа',
+				'join'=>['schedule'],
 			],
 			'resource_nodes' => [
 				'Узлы ресурса',
@@ -219,7 +232,7 @@ class Acls extends ArmsModel
 			],
             'notepad' => [
             	'Записная книжка',
-				'hint'=>'Заметки по этому списку доступа',
+				'hint'=>'Заметки по этому ACL',
              	'typeClass'=>\app\types\TextType::class
             ],
         ]);

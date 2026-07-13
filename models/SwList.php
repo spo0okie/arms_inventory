@@ -101,6 +101,10 @@ class SwList {
      */
     public function findDevs()
     {
+        //прогрев словаря производителей: каждая строка отпечатка ищет производителя по написанию,
+        //без кэша это запрос на строку
+        ManufacturersDict::initCache();
+
         //сразу объявляем набор приложений без разработчика (ОС не всегда его отдает)
         if (!isset($this->products_by_dev['no_dev'])) $this->products_by_dev['no_dev'] = [];
 

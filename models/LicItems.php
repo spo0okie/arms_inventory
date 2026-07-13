@@ -329,13 +329,27 @@ class LicItems extends ArmsModel
 	}
 
 	/**
+	 * Ключи этой закупки из общего кэша LicKeys (если он загружен) либо через relation.
+	 * На списковых страницах кэш прогревается один раз (LicKeys::cacheAllItems())
+	 * @return LicKeys[]
+	 */
+	public function getKeysCached()
+	{
+		if (LicKeys::allItemsLoaded())
+			return \app\helpers\ArrayHelper::getItemsByFields(LicKeys::getAllItems(),['lic_items_id'=>$this->id]);
+		return $this->keys;
+	}
+
+	/**
 	 * @return array
 	 */
 	public function getUsedKeys()
 	{
 		$keys=[];
-		foreach ($this->keys as $key)
-			if (count($key->arms)||count($key->comps)||count($key->users)) $keys[]=$key;
+		foreach ($this->keysCached as $key)
+			if (($key->loaderCount('arms') ?? count($key->arms))
+				||($key->loaderCount('comps') ?? count($key->comps))
+				||($key->loaderCount('users') ?? count($key->users))) $keys[]=$key;
 		return $keys;
 	}
 	
@@ -390,7 +404,10 @@ class LicItems extends ArmsModel
 	}
 
 	public function getUsages() {
-		return count($this->arms_ids)+count($this->comps_ids)+count($this->users_ids)+count($this->usedKeys);
+		return ($this->loaderCount('arms') ?? count($this->arms_ids))
+			+($this->loaderCount('comps') ?? count($this->comps_ids))
+			+($this->loaderCount('users') ?? count($this->users_ids))
+			+count($this->usedKeys);
 	}
 
 	public function getUtilization() {

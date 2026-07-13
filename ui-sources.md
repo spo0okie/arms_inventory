@@ -179,6 +179,40 @@ qtip-атрибуты: `qtip_ttip` (контент), `qtip_side`, `qtip_theme`;
 | Тултип колонки (с фильтром) | сборка по §0.1, режим `search` (смысл + поиск + переходы) | `AttributeHintWidget` mode=search |
 | Рендер ячейки | колонка по `gridColumnClass()` типа; для ссылок — `DefaultColumn` | `DynaGridWidget::fetchColumns()` |
 
+### 2.1 Жадная загрузка связей грида (join-аннотации attributeData) — СТАНДАРТ
+
+Каждая колонка грида, обращающаяся к связям модели, обязана объявлять их в
+`attributeData` атрибута ключом **`'join'`** (список relation-путей, включая
+вложенные: `'join'=>['arm.user','netIps.network']`). Иначе каждая строка грида
+загружает свои связи отдельными запросами (N+1).
+
+Потребители аннотаций (собирает `ArmsModel::attributesJoins($columns)` по
+фактически отображаемым колонкам, см. `DynaGridWidget::fetchVisibleAttributes`):
+
+| Сценарий | Инструмент |
+|---|---|
+| Индекс с поисковой моделью | `search($params,$columns)` → `ArmsModel::prepareSearch($columns)`: `$query->with($joins)` + `$filter->joinWith($joins)` (образцы: UsersSearch, AcesSearch, AclsSearch) |
+| Грид, который кормится relation-ом (`ArrayDataProvider(['allModels'=>...])`) | `$model->relationForGrid('techs','<gridId>')` — грузит связь с with() по видимым колонкам и кладет результат в relation (образцы: partners/view, maintenance-jobs/view) |
+| REST | `BaseRestController` — joinWith по запрошенным атрибутам |
+
+Готчи:
+- один список кормит и `with()` (данные), и `joinWith()` (фильтр) — **self-join
+  и алиасы недопустимы** (`acl.aces` у Aces уронит фильтр: «Not unique table/alias»);
+- условные геттеры (не всегда возвращающие ActiveQuery, напр. `Techs::getItStaff`)
+  аннотировать нельзя — `with()` на них падает;
+- счетчики и корзинки/замочки в аннотациях НЕ нуждаются: `ArmsModel::loaderCount()`
+  и `nonDeletableReverseLinks()` считают связи кэшированным GROUP BY (один запрос
+  на класс+связь за весь HTTP-запрос);
+- если нужны только **id-шники** связей (сигнатуры, проверки вхождения) — не `*_ids`
+  (LinkerBehavior загружает модели связи на каждый экземпляр), а
+  `ArmsModel::loaderIds($loader) ?? $this->rel_ids` — один запрос на класс+связь
+  (образец: `Aces::aceSignature()`);
+- мелкие справочники (состояния, песочницы, маркеры, сегменты) в горячем коде
+  резолвить через `Class::getLoadedItem($id,true)` с fast-path
+  `isRelationPopulated()` — сами relation-геттеры не трогать (их использует with());
+- все эти кэши (loaderCount/loaderIds/getLoadedItem/identity map findLoaded)
+  самосогласованы: afterSave/afterDelete их инвалидируют.
+
 ## 3. Карточка объекта (`view`)
 
 Единая точка вывода атрибута — `ModelFieldWidget` (правило unification.md

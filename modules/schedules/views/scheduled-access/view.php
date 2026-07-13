@@ -19,7 +19,10 @@ Url::remember();
 
 $providingServices=$model->providingServices;
 $supportServices=$model->supportServices;
-$acls=$model->acls;
+//relationForGrid: жадная загрузка ACL со связями по join-аннотациям Acls
+//(aces+типы доступа для сигнатур группировки, ресурсы) - иначе каждый ACL
+//грузит свои ACE и ресурс отдельными запросами
+$acls=$model->relationForGrid('acls');
 
 $deleteable=!count($providingServices) && !count($supportServices) ;
 

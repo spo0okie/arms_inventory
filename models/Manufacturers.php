@@ -36,9 +36,6 @@ class Manufacturers extends ArmsModel
     private static $all_items=null;
     private static $names_cache=null;
 
-	/** @var null|array Кэш количества обратных ссылок [relation=>[manufacturers_id=>count]] для замочка удаления в списках */
-	private static $reverse_counts=null;
-
     /** @inheritdoc   */
     protected static $syncableFields=[
 		'name',
@@ -189,38 +186,6 @@ class Manufacturers extends ArmsModel
 			static::fetchAll()[$id]
 			:
 			null;
-	}
-
-	public static function reverseCountsCached() {
-		return !is_null(static::$reverse_counts);
-	}
-
-	/**
-	 * Загрузить кэш количества обратных ссылок
-	 * (страница с десятками производителей считает ссылки тремя запросами
-	 * вместо трех запросов на каждый элемент)
-	 */
-	public static function cacheReverseCounts() {
-		if (static::reverseCountsCached()) return;
-		static::$reverse_counts=[
-			'soft'=>static::fetchGroupedCount('soft','manufacturers_id'),
-			'techModels'=>static::fetchGroupedCount('tech_models','manufacturers_id'),
-			'dict'=>static::fetchGroupedCount('manufacturers_dict','manufacturers_id'),
-		];
-	}
-
-	/**
-	 * @inheritDoc
-	 * При загруженном кэше {@see cacheReverseCounts()} не загружает связанные объекты,
-	 * а возвращает их количества (набор соответствует обратным ссылкам $linksSchema)
-	 */
-	public function nonDeletableReverseLinks() {
-		if (!static::reverseCountsCached()) return parent::nonDeletableReverseLinks();
-		return [
-			Soft::$titles=>static::$reverse_counts['soft'][$this->id]??0,
-			TechModels::$titles=>static::$reverse_counts['techModels'][$this->id]??0,
-			ManufacturersDict::$titles=>static::$reverse_counts['dict'][$this->id]??0,
-		];
 	}
 
 	public static function fetchItems($ids){
