@@ -14,9 +14,13 @@ use app\models\base\ArmsModel;
  * @property string $descr Описание
  * @property boolean $paid Оплачено
  * @property boolean $unpaid Ждет оплаты
+ * @property int $marker_id Цветовой маркер
+ *
+ * @property Markers $marker
  */
 class ContractsStates extends ArmsModel
 {
+	use \app\models\traits\MarkerOwnerTrait;
 
 	public static $title='Состояние док-ов';
 	public static $titles='Состояния док-ов';
@@ -45,6 +49,7 @@ class ContractsStates extends ArmsModel
 
 	public $linksSchema=[
 		'contracts_ids'=>[Contracts::class,'state_id'],
+		'marker_id'=>[Markers::class,'contracts_states_ids'],
 	];
 
     /**
@@ -58,6 +63,7 @@ class ContractsStates extends ArmsModel
 			[['paid','unpaid'],'boolean'],
             [['code'], 'string', 'max' => 64],
             [['name'], 'string', 'max' => 128],
+			[['marker_id'], 'integer'],
             [['code'], 'unique'],
         ];
     }
@@ -73,7 +79,13 @@ class ContractsStates extends ArmsModel
 			],
             'code' => [
             	'код',
-				'hint'=>'используется для CSS раскраски',
+				'hint'=>'Служебное имя состояния'
+					.'<br><i>Устарело: раньше использовалось для CSS раскраски — теперь выбирайте цветовой маркер</i>',
+			],
+			'marker_id' => [
+				'Маркер',
+				'hint'=>'Цветовой маркер состояния документа (заменяет CSS-раскраску по коду)',
+				'placeholder'=>'Без маркера',
 			],
             'name' => [
             	'Состояние',

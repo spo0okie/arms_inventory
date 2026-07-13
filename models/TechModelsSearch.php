@@ -44,7 +44,8 @@ class TechModelsSearch extends TechModels
      */
     public function search($params)
     {
-        $query = TechModels::find()->joinWith(['type','manufacturer']);
+        //type.marker — жадная загрузка цветового маркера категории (issue #141)
+        $query = TechModels::find()->joinWith(['type.marker','manufacturer']);
 
         // add conditions that should always apply here
 

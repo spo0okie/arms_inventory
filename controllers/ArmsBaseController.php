@@ -540,6 +540,9 @@ class ArmsBaseController extends Controller
 
 		} else {
 			$query=($this->modelClass)::find();
+			//жадная загрузка цветового маркера (issue #141): item-рендер каждой
+			//строки списка обращается к $model->marker
+			if ($model->canGetProperty('marker')) $query->with('marker');
 			if ($model->hasAttribute('archived')) {
 				if (!Yii::$app->request->get('showArchived',$this->defaultShowArchived))
 					$query->where(['not',['IFNULL(archived,0)'=>1]]);

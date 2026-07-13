@@ -46,8 +46,9 @@ class NetworksSearch extends Networks
         $query = Networks::find()
 			//->select(['*',''])
 			->joinWith([
-				'segment',
-				'netVlan.netDomain',
+				//.marker — жадная загрузка цветовых маркеров (issue #141)
+				'segment.marker',
+				'netVlan.netDomain.marker',
 			]);
 
         // add conditions that should always apply here

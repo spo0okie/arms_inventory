@@ -15,12 +15,16 @@ use yii\db\ActiveQuery;
  * @property string $description
  * @property string $history
  * @property string $links
+ * @property int $marker_id Цветовой маркер
  * @property Networks $networks
  * @property Services $services
+ * @property Markers $marker
  */
 class Segments extends ArmsModel
 {
-	
+	use \app\models\traits\MarkerOwnerTrait;
+
+
 	static $titles='Сегменты инфраструктуры';
 	static $title='Сегмент инфраструктуры';
 
@@ -45,13 +49,15 @@ class Segments extends ArmsModel
         return [
 			[['name'], 'string', 'max' => 32],
             [['code','description'], 'string', 'max' => 255],
+			[['marker_id'], 'integer'],
 			[['history','links'], 'safe'],
         ];
     }
-	
+
 	public $linksSchema=[
 		'services_ids' =>				[Services::class,'segment_id'],
 		'networks_ids' =>				[Networks::class,'segment_id'],
+		'marker_id' =>					[Markers::class,'segments_ids'],
 	];
 	
 	/**
@@ -61,9 +67,15 @@ class Segments extends ArmsModel
 	{
 		return ArrayHelper::recursiveOverride(parent::attributeData(),[
 			'code' => [
-				'Код CSS',
-				'hint' => 'Название класса CSS для раскраски.',
+				'Код',
+				'hint' => 'Служебное имя сегмента.'
+					.'<br><i>Устарело: раньше использовалось как класс CSS для раскраски — теперь выбирайте цветовой маркер</i>',
 				'typeClass'=>\app\types\StringType::class,
+			],
+			'marker_id' => [
+				'Маркер',
+				'hint' => 'Цветовой маркер сегмента (заменяет CSS-раскраску по коду)',
+				'placeholder' => 'Без маркера',
 			],
 			'description' => [
 				'Короткое описание',
@@ -99,9 +111,7 @@ class Segments extends ArmsModel
 	{
 		return $this->hasMany(Services::class, ['segment_id' => 'id']);
 	}
-	
-	
-	
+
 	public static function fetchNames(){
 		$list= static::find()
 			->select(['id','name'])

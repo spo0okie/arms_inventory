@@ -20,7 +20,7 @@ $name=$model->hostname?$this->render('/domains/hostname',[
 
 
 if (is_object($model->state)) { ?>
-	<span class="unit-status <?= $model->state->code ?> "><?= $model->state->name ?></span>
+	<span class="unit-status <?= $model->state->markerClass($model->state->code) ?> " style="<?= $model->state->markerStyle() ?>"><?= $model->state->name ?></span>
 
 <?php }?>
 

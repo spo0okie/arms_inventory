@@ -2,7 +2,6 @@
 
 use app\components\Forms\ArmsForm;
 use yii\helpers\Html;
-use kartik\color\ColorInput;
 
 /**
  * @var yii\web\View $this
@@ -17,21 +16,8 @@ use kartik\color\ColorInput;
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'color')->widget(ColorInput::class, [
-        'options' => ['placeholder' => '#RRGGBB'],
-        'pluginOptions' => [
-            'showInput' => true,
-            'showInitial' => true,
-            'showPalette' => true,
-            'showSelectionPalette' => true,
-            'preferredFormat' => 'hex',
-            'palette' => [
-                ['#FF0000', '#FF5733', '#FF8C00', '#FFD700', '#FFFF00'],
-                ['#00FF00', '#00FF7F', '#00CED1', '#0000FF', '#4B0082'],
-                ['#8B00FF', '#FF00FF', '#FF1493', '#C71585', '#808080'],
-            ],
-        ],
-    ]) ?>
+    <?php //цветовой пикер подставит ColorType::renderInput ?>
+    <?= $form->field($model, 'color') ?>
 	<?= $form->field($model, 'slug') ?>
 
 

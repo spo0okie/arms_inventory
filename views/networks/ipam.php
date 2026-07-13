@@ -62,6 +62,41 @@ function nestedNetworks(array $nets, int $addr, int $prefix): array {
 }
 
 /**
+ * Раскраска сети в ячейке IPAM:
+ * [ключ группировки, CSS-класс, инлайн-стиль, hex фона (null - неизвестен), цвет текста (null - дефолт)].
+ * Канон (issue #141): из маркера в IPAM берутся фон и контрастный к нему цвет
+ * подписи (рамка не рендерится); легаси CSS-класс по коду сегмента — fallback
+ * (его фактический цвет PHP неизвестен), без того и другого — nocode (белая).
+ */
+function ipamCellPaint(\app\models\Networks $m): array {
+	$marker = $m->segment->marker ?? null;
+	if (is_object($marker))
+		return ['m'.$marker->id, 'marked', '--marker-bg:'.$marker->color, $marker->color, $marker->textColor];
+	if ($m->segmentCode !== '') return [$m->segmentCode, $m->segmentCode, '', null, null];
+	return ['', 'nocode', '', '#FFFFFF', null];
+}
+
+/**
+ * Цвет подписи составной ячейки: контраст к средневзвешенному (по числу
+ * сетей) цвету известных долей подложки. Доли легаси-классов в среднее не
+ * входят; если известных нет вовсе — null (дефолтная белая подпись).
+ * @param array $paints ключ => [класс, стиль, счетчик, hex фона|null, fg|null]
+ */
+function ipamMixTextColor(array $paints): ?string {
+	$r = $g = $b = $w = 0;
+	foreach ($paints as [, , $cnt, $bg]) {
+		if (!$bg) continue;
+		$hex = ltrim($bg, '#');
+		$r += hexdec(substr($hex, 0, 2)) * $cnt;
+		$g += hexdec(substr($hex, 2, 2)) * $cnt;
+		$b += hexdec(substr($hex, 4, 2)) * $cnt;
+		$w += $cnt;
+	}
+	if (!$w) return null;
+	return \app\helpers\ColorHelper::contrastColor(sprintf('#%02X%02X%02X', $r/$w, $g/$w, $b/$w));
+}
+
+/**
  * Тултип со списком вложенных сетей (до 10 + «и ещё M»)
  * @param \app\models\Networks[] $nested
  */
@@ -144,42 +179,56 @@ for ($prefix = $maxPrefix; $prefix <= $minPrefix; $prefix++) {
 			'minPrefix' => min($p + $zoomStep, $zoomMaxDetail),
 		] : null;
 
-		// класс ячейки: точное совпадение — цвет сегмента сети;
-		// агрегат с единственным сегментом — его цвет; со смешанными — вертикальные
+		// раскраска ячейки (ipamCellPaint): точное совпадение — цвет сегмента сети;
+		// агрегат с единственной раскраской — её цвет; со смешанными — вертикальные
 		// полосы цветов всех вложенных сегментов (ширина ~ числу сетей, см. $stripes)
 		$stripes = null;
+		$cellStyle = '';
+		$cellFg = null; //цвет подписи (контраст к фону); null - дефолт (белая с тенью)
 		if ($model) {
-			//сеть без кода сегмента — белая (как и её доля в агрегатах)
-			$cellClass = $model->segmentCode !== '' ? $model->segmentCode : 'nocode';
+			//сеть без маркера и кода сегмента — белая (как и её доля в агрегатах)
+			[, $cellClass, $cellStyle, , $cellFg] = ipamCellPaint($model);
 		} elseif ($nested) {
-			$codes = []; //segmentCode => сколько вложенных сетей ('' = без кода)
-			foreach ($nested as $n) $codes[$n->segmentCode] = ($codes[$n->segmentCode] ?? 0) + 1;
-			if (count($codes) === 1) {
-				$cellClass = key($codes) !== '' ? key($codes) : 'nocode';
+			$paints = []; //ключ раскраски => [класс, стиль, сколько вложенных сетей, hex фона, fg]
+			foreach ($nested as $n) {
+				[$key, $class, $style, $bg, $fg] = ipamCellPaint($n);
+				$paints[$key] = [$class, $style, ($paints[$key][2] ?? 0) + 1, $bg, $fg];
+			}
+			if (count($paints) === 1) {
+				[$cellClass, $cellStyle, , , $cellFg] = reset($paints);
 			} else {
 				$cellClass = 'occupied';
-				$stripes = $codes;
+				$stripes = $paints;
+				$cellFg = ipamMixTextColor($paints);
 			}
 		} else {
 			$cellClass = 'empty';
 		}
 		if ($nested) $cellClass .= ' aggregate';
 
+		//подпись контрастна фону; тень-ореол — противоположна тексту
+		//(тёмный текст — светлый ореол и наоборот), чтобы читалось на пёстрых полосах
+		if ($cellFg) {
+			$shadow = \app\helpers\ColorHelper::contrastColor($cellFg) === '#000000'
+				? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)';
+			$cellStyle .= ($cellStyle ? ';' : '')."--ipam-fg:{$cellFg};--ipam-shadow:{$shadow}";
+		}
+
 		echo Html::beginTag('span', array_filter([
 			'class' => 'ipam-cell ' . $cellClass,
-			'style' => "height: {$heightPx}px;",
+			'style' => "height: {$heightPx}px;".($cellStyle ? $cellStyle.';' : ''),
 			'data-cidr'=>$cidr,
 			'qtip_ttip'=>$nested ? nestedTtip($nested) : null,
 		]));
 
-		//подложка-полосы: по span на сегмент, цвет — из CSS-класса сегмента,
-		//ширина пропорциональна числу вложенных сетей сегмента
+		//подложка-полосы: по span на раскраску (маркер или легаси-класс сегмента),
+		//ширина пропорциональна числу вложенных сетей этой раскраски
 		if ($stripes) {
 			$parts = '';
-			foreach ($stripes as $code => $cnt) {
+			foreach ($stripes as [$class, $style, $cnt]) {
 				$parts .= Html::tag('span', '', [
-					'class' => 'ipam-mix-part ' . ($code !== '' ? $code : 'nocode'),
-					'style' => 'flex-grow:' . $cnt,
+					'class' => 'ipam-mix-part ' . $class,
+					'style' => 'flex-grow:' . $cnt . ($style ? ';'.$style : ''),
 				]);
 			}
 			echo Html::tag('span', $parts, ['class' => 'ipam-mix']);
@@ -247,12 +296,19 @@ $this->registerCss(<<<CSS
 .ipam-mix-part.nocode {
     background-color: #fff;
 }
+/* раскраска маркером сегмента (issue #141): в IPAM используется только фон
+   маркера, рамка/цвет текста не рендерятся (правило деградации) */
+.ipam-cell.marked,
+.ipam-mix-part.marked {
+    background-color: var(--marker-bg);
+}
 .ipam-cell.nocode .cidr-link {
     color: #666;
 }
-/* на светлых/пёстрых подложках белую подпись выручает тёмная обводка */
+/* подпись агрегата: ореол противоположен цвету текста (--ipam-shadow),
+   на пёстрых полосах выручает там, где фон местами совпадает с текстом */
 .ipam-cell.aggregate .cidr-link {
-    text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+    text-shadow: 0 0 3px var(--ipam-shadow, rgba(0, 0, 0, 0.7));
 }
 .ipam-cell.nocode .cidr-link {
     text-shadow: none;
@@ -317,9 +373,11 @@ $this->registerCss(<<<CSS
     background-color: #666;
     text-shadow: white 0 0 2px;
 }
+/* цвет подписи — контраст к фону ячейки (--ipam-fg от маркера/смеси),
+   дефолт — белый (серые occupied/empty, легаси-классы) */
 .cidr-link {
     text-decoration: none;
-    color: #fff;
+    color: var(--ipam-fg, #fff);
     font-size: 11px;
     position: sticky;
     top: 0;
@@ -327,7 +385,7 @@ $this->registerCss(<<<CSS
 }
 
 .cidr-link:hover {
-    color: #fff;
+    color: var(--ipam-fg, #fff);
 }
 
 .fixed-cidr {

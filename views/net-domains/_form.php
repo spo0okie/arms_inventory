@@ -17,11 +17,14 @@ if (!isset($modalParent)) $modalParent=null;
 	]); ?>
 
 	<div class="row">
-		<div class="col-md-6">
+		<div class="col-md-4">
 			<?= $form->field($model, 'name') ?>
 		</div>
-		<div class="col-md-6">
+		<div class="col-md-4">
 			<?= $form->field($model, 'places_id')->select2() ?>
+		</div>
+		<div class="col-md-4">
+			<?= $form->field($model, 'marker_id')->select2() ?>
 		</div>
 	</div>
 

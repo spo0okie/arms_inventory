@@ -46,6 +46,7 @@ class NetIpsSearch extends NetIps
     {
         $searchQuery = NetIps::find()
 		->joinWith(['network.netVlan','network.segment','techs','comps','users']);
+		//(.marker сегмента здесь не нужен: searchQuery только фильтрует, данные грузит $dataQuery ниже)
 
         // add conditions that should always apply here
 
@@ -94,7 +95,8 @@ class NetIpsSearch extends NetIps
 	
 		//делаем with (без Join) объектов для отфильтрованных IPs (это борьба с пагинацией которая несовместима с join)
         $dataQuery=NetIps::find()
-			->with(['network.netVlan','network.segment','techs.state','comps','users']);
+			//.marker — жадная загрузка цветовых маркеров (issue #141)
+			->with(['network.netVlan.netDomain.marker','network.segment.marker','techs.state.marker','comps','users']);
         
         //если фильтруем, то делаем двухходовку
         if ($searchQuery->where) {

@@ -26,6 +26,10 @@ Helper\Database::loadSqlDump(__DIR__ . '/../_data/arms_demo.sql');
 
 Путь: [`tests/_data/arms_demo.sql`](tests/_data/arms_demo.sql) (~646 KB)
 
+Дамп — канонический источник схемы для тестов: **CI миграции не применяет**.
+Появились миграции со схемой — регенерируйте дамп по инструкции
+[`tests/_data/readme.md`](tests/_data/readme.md).
+
 ### Конфигурация MySQL (config/test-web.php)
 
 ```php

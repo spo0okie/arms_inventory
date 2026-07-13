@@ -78,12 +78,13 @@ class CompsSearch extends Comps
 			->joinWith([
 				'arm.place',
 				'arm.user',
-				'arm.state',
+				//.marker состояния/сегмента — жадная загрузка цветовых маркеров (issue #141)
+				'arm.state.marker',
 				'platform',
 				'domain',
 				'soft',
 				'softHits',
-				'netIps.network.segment',
+				'netIps.network.segment.marker',
 				'services.maintenanceReqs',
 				'maintenanceReqs',
 				'sandbox'

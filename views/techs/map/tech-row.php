@@ -36,7 +36,14 @@ $archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
     <td class="attachments <?= $archClass ?>" <?= $archDisplay ?>>
 	    <?= $this->render('/techs/map/item-attachments',['model'=>$model]) ?>
     </td>
-    <td class="item_status <?= strlen($model->stateName)?($model->state->code??''):'' ?> <?= $archClass ?>" <?= $archDisplay ?>>
+    <?php
+	//класс/стиль маркера состояния (легаси CSS-класс по коду — fallback);
+	//display:none архивных вклеивается в тот же style-атрибут
+	$stateClass=strlen($model->stateName)&&is_object($model->state)?$model->state->markerClass($model->state->code):'';
+	$stateStyle=strlen($model->stateName)&&is_object($model->state)?$model->state->markerStyle():'';
+	if ($archDisplay) $stateStyle=trim($stateStyle.';display:none',';');
+	?>
+    <td class="item_status <?= $stateClass ?> <?= $archClass ?>" style="<?= $stateStyle ?>">
         <?= $model->stateName ?>
     </td>
     <td class="item_ip <?= $archClass ?>" <?= $archDisplay ?>>

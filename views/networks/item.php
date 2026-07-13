@@ -12,13 +12,16 @@ if (!isset($no_class)) $no_class=false;
 
 
 if (is_object($model)) {
-	if (!$no_class) $class .= ' ' . $model->segmentCode;
+	//сеть раскрашивается маркером своего сегмента (легаси CSS-класс по коду — fallback)
+	$marker=$no_class?false:($model->segment->marker??false);
+	if (!$no_class && !$marker) $class .= ' ' . $model->segmentCode;
 	if (!isset($name)) $name = $model->sname;
 	if ($icon) $name = '<span class="fas fa-network-wired small"></span>' . $name;
-	
-	
+
+
 	echo ItemObjectWidget::widget([
 		'model' => $model,
+		'marker' => $marker,
 		'archived_class' => 'text-decoration-line-through',
 		'link' => LinkObjectWidget::widget([
 			'model' => $model,
@@ -29,5 +32,5 @@ if (is_object($model)) {
 		]),
 		'item_class'=>$class??''
 	]);
-	
+
 }

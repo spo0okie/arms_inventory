@@ -11,7 +11,8 @@ if (!empty($model)) {
 	echo ItemObjectWidget::widget([
 		'model'=>$model,
 		'name'=>$name,
-		'item_class'=>'net-domains-item text-monospace net-domain-'.$model->name,
+		//легаси CSS-класс по имени — fallback пока домену не назначен маркер
+		'item_class'=>'net-domains-item text-monospace '.($model->marker?'':'net-domain-'.$model->name),
 		'ttipUrl'=>Url::to(['net-domains/ttip','id'=>$model->id]),
 		'updateUrl'=>['net-domains/update','id'=>$model->id,'return'=>'previous'],
 	]);

@@ -1,0 +1,73 @@
+/* ЦВЕТОВЫЕ МАРКЕРЫ (issue #141)
+
+   Элемент получает инлайн CSS-переменные от Markers::getStyleVars():
+     --marker-bg     фон (обязателен, универсальный канал)
+     --marker-fg     цвет текста (автоконтраст к фону или переопределение)
+     --marker-border рамка целиком "1.2pt dashed #rrggbb" (опционально)
+
+   Маркер задает и фон, и цвет текста, поэтому одинаково читается на общем
+   фоне, в темной шапке, в тултипе и карточках — без пер-объектных оверрайдов.
+   Правило деградации: фон рендерят все контексты, рамка отбрасывается там,
+   где ее негде рисовать (уголок unit-status, полоски смешения). */
+
+.marked-item {
+	background-color: var(--marker-bg);
+	color: var(--marker-fg);
+	border: var(--marker-border, none);
+}
+
+/* фон inline-элемента — это content-area шрифта: снизу в него входит зона
+   выносных элементов ("д", "у"), а заглавные упираются в верх — плашка
+   выглядит смещенной вниз. Небольшой padding-top расширяет фон вверх до
+   симметрии; на высоту строки vertical padding инлайна не влияет */
+span.marked-item {
+	border-radius: 2px;
+	padding-top: .12em;
+}
+
+/* текст и ссылки внутри маркера контрастны его фону, а не фону контекста;
+   селекторы с div.nav-header пересиливают правила темной шапки (page-header.css) */
+.marked-item a,
+.marked-item a:hover,
+div.nav-header .marked-item a,
+div.nav-header .marked-item a:hover {
+	color: var(--marker-fg);
+}
+
+/* компактный вариант "уголок" (карточки оборудования): только фон маркера,
+   рамка и цвет текста не применяются */
+span.unit-status.marked-item {
+	background: linear-gradient(45deg, transparent, transparent 15px, var(--marker-bg) 15px);
+	color: inherit;
+	border: none;
+	border-radius: 0;
+}
+
+span.unit-status.marked-item a,
+span.unit-status.marked-item a:hover {
+	color: inherit;
+}
+
+/* превью маркера на типовых фонах (страница просмотра маркера).
+   Цвета подложек здесь не задаются — их дают классы самих контекстов
+   (nav-header, тема tooltipster, users-view/arms-card), чтобы будущие
+   темы оформления перекрашивали и превью */
+.marker-preview-row {
+	display: flex;
+	align-items: center;
+	gap: .5rem;
+	margin-bottom: .5rem;
+}
+
+.marker-preview-label {
+	flex: 0 0 11rem;
+	text-align: right;
+}
+
+.marker-preview-bg {
+	display: inline-block;
+	padding: .5rem 1rem;
+	border-radius: 4px;
+	border: 1px dashed rgba(128, 128, 128, 0.3);
+	min-width: 22rem;
+}

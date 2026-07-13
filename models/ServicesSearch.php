@@ -78,14 +78,15 @@ class ServicesSearch extends Services
 			->joinWith([
 			//->with([
 				'acls',
-				'segment',
+				//.marker — жадная загрузка цветовых маркеров (issue #141)
+				'segment.marker',
 				'orgPhones',
 				//'children', - берем из кэша (cacheAllItems)
 				'depends',
 				'place',
 				'comps',
-				'arms.state',
-				'techs.state',
+				'arms.state.marker',
+				'techs.state.marker',
 				'arms.place',
 				'techs.place',
 				'armPlaces',

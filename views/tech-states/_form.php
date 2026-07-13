@@ -16,11 +16,14 @@ if (!isset($modalParent)) $modalParent=null;
     <?php $form = ArmsForm::begin(['model'=>$model]); ?>
 
 	<div class="row">
-		<div class="col-md-5">
+		<div class="col-md-4">
 			<?= $form->field($model, 'name') ?>
 		</div>
-		<div class="col-md-5">
+		<div class="col-md-3">
 			<?= $form->field($model, 'code') ?>
+		</div>
+		<div class="col-md-3">
+			<?= $form->field($model, 'marker_id')->select2() ?>
 		</div>
 		<div class="col-md-2 mt-3">
 			<br>

@@ -10,7 +10,7 @@ $history=explode("\n",$model->comment??'');
 if (is_object($model)) { ?>
     <span class="contract_state_cell">
     <?php if ($model->state_id) { ?>
-        <span class="contract_state <?= $model->state->code?>" title="<?= $model->state->descr ?>"><?= $model->state->name?></span>
+        <span class="contract_state <?= $model->state->markerClass($model->state->code) ?>" style="<?= $model->state->markerStyle() ?>" title="<?= $model->state->descr ?>"><?= $model->state->name?></span>
     <?php }
     switch ($model->deliveryState) {
 		case Contracts::DELIVERY_COMPLETE:

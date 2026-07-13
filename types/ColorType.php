@@ -24,11 +24,26 @@ class ColorType extends BaseType
 	}
 
 	/**
+	 * Ввод — цветовой пикер с палитрой
 	 * {@inheritdoc}
 	 */
 	public function renderInput(\app\components\Forms\ActiveField $field, array $options = []): mixed
 	{
-		return $field->textInput();
+		return $field->widget(\kartik\color\ColorInput::class, [
+			'options' => ['placeholder' => '#RRGGBB'],
+			'pluginOptions' => [
+				'showInput' => true,
+				'showInitial' => true,
+				'showPalette' => true,
+				'showSelectionPalette' => true,
+				'preferredFormat' => 'hex',
+				'palette' => [
+					['#FF0000', '#FF5733', '#FF8C00', '#FFD700', '#FFFF00'],
+					['#00FF00', '#00FF7F', '#00CED1', '#0000FF', '#4B0082'],
+					['#8B00FF', '#FF00FF', '#FF1493', '#C71585', '#808080'],
+				],
+			],
+		]);
 	}
 
 	/**
@@ -41,39 +56,14 @@ class ColorType extends BaseType
 		$value = $model->$attribute ?? '';
 
 		// Валидация HEX цвета
-		if (preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $value)) {
+		if (\app\helpers\ColorHelper::isValidHex($value)) {
 			return Html::tag('span', Html::encode($value), [
 				'class' => 'badge',
-				'style' => 'background-color: ' . Html::encode($value) . '; color: ' . $this->getContrastColor($value),
+				'style' => 'background-color: ' . Html::encode($value) . '; color: ' . \app\helpers\ColorHelper::contrastColor($value),
 			]);
 		}
 
 		return Html::encode((string)$value);
-	}
-
-	/**
-	 * Получить контрастный цвет для текста на фоне.
-	 * @param string $hexColor HEX цвет фона
-	 * @return string '#000000' или '#FFFFFF'
-	 */
-	private function getContrastColor(string $hexColor): string
-	{
-		// Удаляем # если есть
-		$hexColor = ltrim($hexColor, '#');
-
-		// Расширяем 3-символьный цвет до 6-символьного
-		if (strlen($hexColor) === 3) {
-			$hexColor = $hexColor[0] . $hexColor[0] . $hexColor[1] . $hexColor[1] . $hexColor[2] . $hexColor[2];
-		}
-
-		// Вычисляем яркость (luminance)
-		$r = hexdec(substr($hexColor, 0, 2));
-		$g = hexdec(substr($hexColor, 2, 2));
-		$b = hexdec(substr($hexColor, 4, 2));
-
-		$luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
-
-		return $luminance > 0.5 ? '#000000' : '#FFFFFF';
 	}
 
 	/**

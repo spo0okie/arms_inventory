@@ -13,7 +13,8 @@ use app\components\ItemObjectWidget;
 if (is_object($model)) {
 	echo ItemObjectWidget::widget([
 		'model'=>$model,
-		'item_class'=>'item_status '.(strlen($model->name)?$model->code:''),
+		//легаси CSS-класс по коду — fallback пока состоянию не назначен маркер
+		'item_class'=>'item_status '.($model->marker?'':(strlen($model->name)?$model->code:'')),
 		//статус архивного состояния должен оставаться видимым в карточках (помечается, но не скрывается)
 		'show_archived'=>true,
 		'static'=>$static_view??true,

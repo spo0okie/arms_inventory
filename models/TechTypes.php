@@ -20,12 +20,14 @@ use yii\helpers\ArrayHelper;
  * @property string $comment Комментарий
  * @property string $comment_name override Комментарий
  * @property string $comment_hint override Комментарий hint
+ * @property int $marker_id Цветовой маркер
  *
  * @property TechModels[] $techModels
+ * @property Markers $marker
  */
 class TechTypes extends ArmsModel
 {
-
+	use \app\models\traits\MarkerOwnerTrait;
 
 	public static $title='Категории оборудования';
 	public static $titles='Категории оборудования';
@@ -72,8 +74,13 @@ class TechTypes extends ArmsModel
 	        [['comment_hint'], 'string', 'max' => 128],
 	        [['comment_name'], 'string', 'max' => 32],
 	        [['prefix'], 'string', 'max' => 5,'min'=>2],
+			[['marker_id'], 'integer'],
         ];
     }
+
+	public $linksSchema=[
+		'marker_id'=>[Markers::class,'tech_types_ids'],
+	];
 
 	/**
 	 * {@inheritdoc}
@@ -157,10 +164,14 @@ class TechTypes extends ArmsModel
 			'hide_menu' => [
 				'Не отображать в меню',
 				'Скрыть этот элемент из списка категорий оборудования в главном меню'
-			]
+			],
+			'marker_id' => [
+				'Маркер',
+				'hint' => 'Цветовой маркер категории оборудования',
+				'placeholder' => 'Без маркера',
+			],
 		];
 	}
-
 
 	/**
 	 * @return ActiveQuery

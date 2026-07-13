@@ -63,7 +63,8 @@ class ContractsSearch extends Contracts
 			'successor',
 			'children',
 			'users',
-	        'state',
+			//.marker — жадная загрузка цветового маркера состояния (issue #141)
+	        'state.marker',
         ]);
 	
 		$showUsersInName=true;

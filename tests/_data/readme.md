@@ -1,16 +1,44 @@
-## Обновление БД
- - Загружаем дамп ```mysql -u root -p < tests\_data\arms_demo.sql```
- - Применяем миграции используя консольный конфиг с тестовой БД: ```yii.bat migrate --appconfig=config/test-console-acceptance.php```
+# arms_demo.sql — канонический дамп тестовой БД
 
-## Сохранение дампа БД
-Мы что-то изменили в структуре тестовой БД и хотим сохранить новый дамп.
-- Сохраняем предыдущий дамп: ```rename tests\_data\arms_demo.sql arms_demo.bak```
-- Делаем новый дамп: ```mysqldump -u root -p --routines --events --triggers --add-drop-database --add-drop-table --set-gtid-purged=OFF --databases arms_test_crud > tests\_data\arms_demo.sql```
+**Важно: CI не применяет миграции.** Workflow
+(`.github/workflows/docker-build.yml`) загружает этот дамп как есть и сразу
+гоняет тесты. Поэтому **любая миграция, меняющая схему, обязана
+сопровождаться регенерацией дампа** — иначе CI не увидит новых
+таблиц/колонок. Часть тестов сама перезаливает дамп поверх текущей БД
+(`Helper\Database::loadSqlDump`, например `ApiSchemaResolvableTest`), так что
+локально «домигрированная» БД живёт только до первого такого теста.
+
+## Обновление БД новыми миграциями (локально)
+
+- Поднять MySQL тестовой БД (127.0.0.1:3306, root без пароля; на Windows-dev
+  это WAMP: `C:\wamp\bin\mysql\mysql9.1.0\bin\mysqld.exe --defaults-file=...my.ini`).
+- Загрузить дамп: `mysql -h 127.0.0.1 -u root < tests/_data/arms_demo.sql`
+- Применить миграции консолью с тестовым конфигом:
+  `php tests/bin/yii migrate --interactive=0`
+  (использует `config/test-console.php` → БД `arms_test`)
+
+## Сохранение нового дампа
+
+Схема тестовой БД изменилась (применены новые миграции) — фиксируем:
+
+```bash
+mysqldump -h 127.0.0.1 -u root --databases arms_test \
+  --add-drop-database --routines --skip-dump-date \
+  > tests/_data/arms_demo.sql
+```
+
+- `--skip-dump-date` обязателен — иначе каждый дамп даёт мусорный diff.
+- mysqldump на Windows пишет CRLF, в репозитории дамп хранится с LF —
+  привести: `sed -i 's/\r$//' tests/_data/arms_demo.sql`
+- Проверить diff глазами: кроме ваших таблиц/колонок и таблицы `migration`
+  ничего меняться не должно.
 
 ## Чистка БД
 
+Перед сохранением дампа можно выкинуть неиспользуемый мусор:
+
 ```sql
-USE arms_test_crud;
+USE arms_test;
 DELETE FROM soft s
 WHERE
     NOT EXISTS (SELECT 1 FROM soft_in_lists sil WHERE sil.soft_id = s.id)

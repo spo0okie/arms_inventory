@@ -17,13 +17,16 @@ if (!isset($rendered_comment)) $rendered_comment='';
 //поэтому мы можем передать что мы уже отрисовали относительно IP чтобы не повторяться
 
 if (!empty($model)) {
-	if (!$no_class&&is_object($model->network)) $class.=' '.$model->network->segmentCode;
+	//IP раскрашивается маркером сегмента своей сети (легаси CSS-класс по коду — fallback)
+	$marker=(!$no_class&&is_object($model->network))?($model->network->segment->marker??false):false;
+	if (!$no_class&&is_object($model->network)&&!$marker) $class.=' '.$model->network->segmentCode;
 	if (!isset($name)) $name=$model->getSname($rendered_comment); //убираем из имени IP то что уже отрендерено
 	if ($icon) $name='<span class="fas fa-network-wired small"></span>'.$name;
-	
-	
+
+
 	echo ItemObjectWidget::widget([
 		'model'=>$model,
+		'marker'=>$marker,
 		'item_class'=>$class,
 		'archived_class'=>'text-decoration-line-through',
 		'link'=> LinkObjectWidget::widget([

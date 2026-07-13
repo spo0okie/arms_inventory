@@ -47,7 +47,9 @@ class M260702104735NormalizeCollation extends ArmsMigration
 		// Дропим UNIQUE индекс перед очисткой и конвертацией, чтобы не нарушить constraint.
 		if (in_array('manufacturers_dict', $tables)) {
 			echo "    > drop unique index on manufacturers_dict.word\n";
-			$this->execute("ALTER TABLE `manufacturers_dict` DROP INDEX IF EXISTS `word`");
+			// DROP INDEX IF EXISTS — синтаксис MariaDB, MySQL его не знает;
+			// dropIndexIfExists() работает на обеих (проверка через SHOW INDEX)
+			$this->dropIndexIfExists('word', 'manufacturers_dict');
 
 			echo "    > cleanup empty values in manufacturers_dict.word\n";
 			$this->execute("DELETE FROM `manufacturers_dict` WHERE `word` = '' OR `word` IS NULL OR TRIM(`word`) = ''");

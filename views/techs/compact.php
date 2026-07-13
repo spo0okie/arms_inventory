@@ -17,16 +17,18 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 
 if (is_object($model->state)) {
 	$statusName=$model->stateName;
-	$statusCode=$model->state->code;
+	$statusCode=$model->state->markerClass($model->state->code);
+	$statusStyle=$model->state->markerStyle();
 } else {
 	$statusName='NULL';
 	$statusCode='state_unknown';
+	$statusStyle='';
 }
 
 ?>
 
 <div class="arms-card <?= $model->archived?'archived-item':'' ?>" <?= HtmlHelper::ArchivedStyle($model,$show_archived) ?>>
-	<span class="unit-status <?= $statusCode ?>"><?= $statusName ?></span>
+	<span class="unit-status <?= $statusCode ?>" style="<?= $statusStyle ?>"><?= $statusName ?></span>
     <h3><?=
 		$this->render('/techs/item',[
 			'model'=>$model,

@@ -13,7 +13,7 @@
 //подгружаем все ОС АРМа
 use app\helpers\ArrayHelper;
 use app\models\Techs;
-
+
 use app\components\widgets\page\ModelWidget;
 $comps=$model->comps;
 //если ни одной не нашли, то создаем массив из пустого элемента чтобы вывести данные по АРМ без ОС
@@ -195,8 +195,14 @@ for ($i=0; $i<count($comps); $i++) {
             </td>
 	    <?php }?>
 
-	    <?php if (!$i) { ?>
-            <td class="item_status <?= strlen($model->stateName)?$model->state->code:'' ?> <?= $archClass?>" <?= $archDisplay ?> title="<?= $model->comment ?>" <?= $rowspan ?>><?= $model->stateName ?></td>
+	    <?php if (!$i) {
+			//класс/стиль маркера состояния (легаси CSS-класс по коду — fallback);
+			//display:none архивных вклеивается в тот же style-атрибут
+			$stateClass=strlen($model->stateName)?$model->state->markerClass($model->state->code):'';
+			$stateStyle=strlen($model->stateName)?$model->state->markerStyle():'';
+			if ($archDisplay) $stateStyle=trim($stateStyle.';display:none',';');
+		?>
+            <td class="item_status <?= $stateClass ?> <?= $archClass?>" style="<?= $stateStyle ?>" title="<?= $model->comment ?>" <?= $rowspan ?>><?= $model->stateName ?></td>
 	    <?php }?>
 
         <td class="item_ip <?= $archClass ?>" <?= $archDisplay ?>><?= is_object($comp)?$comp->currentIp:'' ?></td>

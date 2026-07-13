@@ -16,6 +16,7 @@ use app\models\LicTypes;
 use app\models\LoginJournal;
 use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
+use app\models\Markers;
 use app\models\Materials;
 use app\models\MaterialsTypes;
 use app\models\MaterialsUsages;
@@ -189,6 +190,7 @@ echo Nav::widget([
 						['label' => 'Роли', 		'url' => ['/rbac/role']],
 						['label' => 'Правила', 		'url' => ['/rbac/rule']],
 						['label' => 'Разрешения', 	'url' => ['/rbac/permission']],
+						['label' => Markers::$titles, 'url' => ['/markers/index']],
 						['label' => 'Документация API', 	'url' => ['/site/api-doc']],
 					],
 				]:'',

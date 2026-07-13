@@ -14,10 +14,14 @@ use yii\helpers\ArrayHelper;
  * @property string $name
  * @property string $comment
  * @property int $tech_id
+ * @property int $marker_id Цветовой маркер
  * @property Places $place
+ * @property Markers $marker
  */
 class NetDomains extends ArmsModel
 {
+	use \app\models\traits\MarkerOwnerTrait;
+
 	public static $title='L2 Домен';
 	public static $titles='L2 Домены';
 
@@ -41,14 +45,15 @@ class NetDomains extends ArmsModel
     {
         return [
 			[['name'], 'string', 'max' => 255],
-			[['places_id'],'integer'],
+			[['places_id','marker_id'],'integer'],
 			[['comment'], 'safe'],
         ];
     }
-	
+
 	public $linksSchema=[
 		'places_id'=>[Places::class,'net_domains_ids'],
 		'net_vlans_ids'=>[NetVlans::class,'domain_id'],
+		'marker_id'=>[Markers::class,'net_domains_ids'],
 	];
 
     /**
@@ -71,6 +76,11 @@ class NetDomains extends ArmsModel
 				'hint' => 'Все что нужно знать об этом домене, но что не ясно из названия',
 				'type' => 'text',
 				'typeClass' => \app\types\TextType::class,
+			],
+			'marker_id' => [
+				'Маркер',
+				'hint' => 'Цветовой маркер домена (заменяет CSS-раскраску по имени домена)',
+				'placeholder' => 'Без маркера',
 			],
         ];
     }

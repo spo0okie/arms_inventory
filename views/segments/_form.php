@@ -39,6 +39,7 @@ $defaultCss=[
 		<div class="col-md-6">
 			<?= $form->field($model, 'name') ?>
 			<?= $form->field($model, 'code') ?>
+			<?= $form->field($model, 'marker_id')->select2() ?>
 		</div>
 		<div class="col-md-6">
 			<?= $form->field($model,'description') ?>

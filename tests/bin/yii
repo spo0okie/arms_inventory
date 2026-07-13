@@ -14,14 +14,8 @@ defined('YII_ENV') or define('YII_ENV', 'test');
 require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../vendor/yiisoft/yii2/Yii.php';
 
-$config = yii\helpers\ArrayHelper::merge(
-    require __DIR__ . '/../../config/console.php',
-    [
-        'components' => [
-            'db' => require __DIR__ . '/../../config/test_db.php'
-        ]
-    ]
-);
+//test-console.php сам собирает console.php + тестовую БД arms_test
+$config = require __DIR__ . '/../../config/test-console.php';
 
 
 $application = new yii\console\Application($config);

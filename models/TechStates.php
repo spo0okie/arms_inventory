@@ -13,12 +13,16 @@ use Yii;
  * @property string    $code Служебное имя
  * @property string    $name Состояние
  * @property string    $descr Описание
+ * @property int       $marker_id Цветовой маркер
  *
  * @property Techs[]   $techs
+ * @property Markers   $marker
  */
 class TechStates extends ArmsModel
 {
-	
+	use \app\models\traits\MarkerOwnerTrait;
+
+
 	public static $title='Состояния';
 	public static $titles='Состояния';
 	public static $description='Состояния жизненного цикла оборудования и иных сущностей в предприятии';
@@ -51,9 +55,14 @@ class TechStates extends ArmsModel
             [['code'], 'string', 'max' => 64],
             [['name'], 'string', 'max' => 128],
 			[['archived'],'integer'],
+			[['marker_id'],'integer'],
             [['code'], 'unique'],
         ];
     }
+
+	public $linksSchema=[
+		'marker_id'=>[Markers::class,'tech_states_ids'],
+	];
 
     /**
      * {@inheritdoc}
@@ -68,12 +77,16 @@ class TechStates extends ArmsModel
 				'Архивный',
 				'hint'=>'Признак того, что оборудование с этим статусом перенесено в архив',
 				'indexLabel'=>'арх.',
-				
+
 			],
             'descr' => ['Описание','hint'=>'Пояснение, когда применяется это состояние'],
+			'marker_id' => [
+				'Маркер',
+				'hint'=>'Цветовой маркер состояния (заменяет CSS-раскраску по служебному имени)',
+				'placeholder'=>'Без маркера',
+			],
         ];
     }
-
 
 	public static function fetchNames(){
 		$list= static::find()

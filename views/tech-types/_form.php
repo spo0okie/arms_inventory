@@ -19,11 +19,14 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-md-4">
 			<?= $form->field($model, 'name') ?>
 		</div>
-		<div class="col-md-3">
+		<div class="col-md-2">
 			<?= $form->field($model, 'prefix') ?>
 		</div>
-		<div class="col-md-3">
+		<div class="col-md-2">
 			<?= $form->field($model, 'code') ?>
+		</div>
+		<div class="col-md-2">
+			<?= $form->field($model, 'marker_id')->select2() ?>
 		</div>
 		<div class="col-md-2 mt-3">
 			<br>

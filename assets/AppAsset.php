@@ -37,6 +37,7 @@ class AppAsset extends AssetBundle
 		'css/state-colors.css',
 		'css/tables.css',
 		'css/codes.private.css',
+		'css/markers.css',
 		'css/bootstrap.css',
     ];
     public $js = [

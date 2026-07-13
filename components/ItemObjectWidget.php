@@ -30,6 +30,7 @@ class ItemObjectWidget extends LinkObjectWidget
 	public $archived_class='text-muted text-decoration-line-through';	//класс, который добавлять к архивному элементу
 	public $item_class=null;	//класс, который добавлять к элементу для обозначения его модели
 	public $style='';
+	public $marker=null;		//цветовой маркер (Markers) элемента; false - отключить автоопределение по $model->marker
 
 	public function run()
 	{
@@ -51,11 +52,22 @@ class ItemObjectWidget extends LinkObjectWidget
 		
 		//если мы не подменили ссылку, то формируем ее
 		if (!isset($this->link)) $this->link=parent::run();
-		
+
 		if ($this->archived&&!$this->show_archived)
-			StringHelper::appendToDelimitedString($this->style,';','display:none');
-		
-		$cssClass='object-item '. $this->item_class.' '.($this->archived?$this->archived_class:'');
+			$this->style=StringHelper::appendToDelimitedString($this->style,';','display:none');
+
+		//маркер: явно переданный, либо автоопределение по свойству/связи marker модели
+		if (is_null($this->marker) && is_object($this->model) && $this->model->canGetProperty('marker'))
+			$this->marker=$this->model->marker;
+
+		//маркер задает элементу инлайн CSS-переменные, которые потребляет web/css/markers.css
+		if (is_object($this->marker) && strlen($vars=$this->marker->styleVars))
+			$this->style=StringHelper::appendToDelimitedString($this->style,';',$vars);
+
+		$cssClass='object-item '
+			.(is_object($this->marker)?'marked-item ':'')
+			.$this->item_class.' '
+			.($this->archived?$this->archived_class:'');
 		
 		return Html::tag('span',$this->link,[
 			'class'=>$cssClass,

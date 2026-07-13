@@ -188,7 +188,8 @@ class NetworksController extends ArmsBaseController
 		$minPrefix = (int) Yii::$app->request->get('minPrefix', 29);
 		$maxPrefix = (int) Yii::$app->request->get('maxPrefix', 24);
 		
-		$models = Networks::find()->all();
+		//segment.marker — раскраска ячеек карты, жадно (issue #141)
+		$models = Networks::find()->with('segment.marker')->all();
 		return $this->render('ipam', compact('models','baseIp','minPrefix','maxPrefix'));
 	}
 

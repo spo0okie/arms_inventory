@@ -42,7 +42,8 @@ class NetVlansSearch extends NetVlans
     public function search($params)
     {
         $query = NetVlans::find()
-		->joinWith(['netDomain','networks']);
+		//.marker — жадная загрузка цветового маркера домена (issue #141)
+		->joinWith(['netDomain.marker','networks']);
 
         $vlanName='CONCAT(net_vlans.name," (",net_vlans.vlan)';
         // add conditions that should always apply here

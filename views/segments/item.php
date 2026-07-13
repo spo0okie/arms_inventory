@@ -11,7 +11,8 @@ if (!isset($static_view)) $static_view=false;
 if (!empty($model)) {
 	if (!isset($no_class)) {
 		if (!isset($item_class)) {
-			$item_class='segments-item '.$model->code;
+			//легаси CSS-класс по коду — fallback пока сегменту не назначен маркер
+			$item_class='segments-item '.($model->marker?'':$model->code);
 		}
 	} else {
 		$item_class='segments-item';

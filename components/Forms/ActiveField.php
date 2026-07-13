@@ -176,15 +176,24 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 		
 		//ищем на какую модель ссылается атрибут
 		$linkClass=ArrayHelper::remove($options,'linkModel','');
-		
+
 		//если не передали через опции виджета, то смотрим через схему связей модели
 		if (!$linkClass && $this->model instanceof ArmsModel) {
 			$linkClass=$this->model->attributeLinkClass($this->attribute);
 		}
-		
+
+		//выбор цветового маркера: варианты рисуются сразу в целевой раскраске (issue #141)
+		$markersSelect=$linkClass===\app\models\Markers::class;
+
 		if (!isset($options['data']) && $linkClass && method_exists($linkClass, 'fetchNames')) {
 			//если не передали данные, то пробуем получить их из модели
-			$options['data']=$linkClass::fetchNames();
+			if ($markersSelect) {
+				//маркеры вместе со стилями option'ов (data-marker-style)
+				[$options['data'],$optionAttrs]=\app\models\Markers::fetchSelectData();
+				if (count($optionAttrs)) $options['options']['options']=$optionAttrs;
+			} else {
+				$options['data']=$linkClass::fetchNames();
+			}
 		}
 
 		//проверяем есть ли у нас в опциях itemsHintsUrl
@@ -220,17 +229,20 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 		}
 
 		//если надо подтягивать тултипы - регистрируем нужные библиотеки и функции
-		if ($itemsHintsUrl) {
+		if ($itemsHintsUrl || $markersSelect) {
 			Select2FieldAsset::register($this->form->view);
-			
-			$pluginOptions['templateResult']=new JsExpression('function(item){return formatSelect2ItemHint(item,"'.$itemsHintsUrl.'")}');
-			$pluginOptions['templateSelection']=new JsExpression('function(item){return formatSelect2ItemHint(item,"'.$itemsHintsUrl.'")}');
+
+			//маркеры рисуются в целевой раскраске (+хинт), остальные - просто с хинтом
+			$formatter=$markersSelect?'formatSelect2MarkerItem':'formatSelect2ItemHint';
+			$pluginOptions['templateResult']=new JsExpression('function(item){return '.$formatter.'(item,"'.$itemsHintsUrl.'")}');
+			$pluginOptions['templateSelection']=new JsExpression('function(item){return '.$formatter.'(item,"'.$itemsHintsUrl.'")}');
 			$pluginOptions['escapeMarkup']=new JsExpression('function(m) { return m; }');
-			if ($pluginOptions['multiple']??false)
-				$pluginOptions['selectionAdapter']=new JsExpression('jQuery.fn.select2.amd.require("QtippedMultipleSelectionAdapter")');
-			else
-				$pluginOptions['selectionAdapter']=new JsExpression('jQuery.fn.select2.amd.require("QtippedSingleSelectionAdapter")');
-			
+			if ($itemsHintsUrl) {
+				if ($pluginOptions['multiple']??false)
+					$pluginOptions['selectionAdapter']=new JsExpression('jQuery.fn.select2.amd.require("QtippedMultipleSelectionAdapter")');
+				else
+					$pluginOptions['selectionAdapter']=new JsExpression('jQuery.fn.select2.amd.require("QtippedSingleSelectionAdapter")');
+			}
 		}
 		
 		$placeholder='Начните набирать для поиска';

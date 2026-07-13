@@ -19,8 +19,11 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-3">
 			<?= $form->field($model,'code') ?>
 		</div>
-		<div class="col-7">
+		<div class="col-4">
 			<?= $form->field($model,'name') ?>
+		</div>
+		<div class="col-3">
+			<?= $form->field($model,'marker_id')->select2() ?>
 		</div>
 		<div class="col-2 mt-3">
 			<?= $form->field($model,'paid')->checkbox() ?>

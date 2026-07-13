@@ -40,7 +40,9 @@ class SegmentsSearch extends Segments
      */
     public function search($params)
     {
-        $query = Segments::find();
+        $query = Segments::find()
+			//жадная загрузка цветового маркера (issue #141)
+			->with('marker');
 
         // add conditions that should always apply here
 
