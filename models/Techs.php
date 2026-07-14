@@ -1253,8 +1253,11 @@ class Techs extends ArmsModel
 		//Порты которые объявлены в БД конкретно для этого устройства;
 		//жадно тянем цепочку соединений: рендер каждого порта показывает
 		//встречный порт и его оборудование - лениво это по 2-3 запроса на порт.
-		//NB: linkTech сюда добавлять нельзя - эта via-связь при жадной загрузке
-		//перезатирает populated linkPort и ломает вложенный linkPort.tech (проверено)
+		//NB: linkTech (via('linkPort')) сюда добавлять нельзя: жадная загрузка
+		//via('relation')-связи заново популирует linkPort СВЕЖИМИ экземплярами
+		//(ActiveRelationTrait::populateRelation) и вложенный linkPort.tech теряется;
+		//лечится порядком (via-связь первой), но полагаться на него хрупко -
+		//см. ui-sources.md §2.1
 		if (!$this->isRelationPopulated('ports'))
 			$this->populateRelation('ports',
 				$this->getPorts()->with(['linkPort.tech','tech'])->all()

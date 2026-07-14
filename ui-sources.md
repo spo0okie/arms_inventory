@@ -207,9 +207,15 @@ qtip-атрибуты: `qtip_ttip` (контент), `qtip_side`, `qtip_theme`;
   (LinkerBehavior загружает модели связи на каждый экземпляр), а
   `ArmsModel::loaderIds($loader) ?? $this->rel_ids` — один запрос на класс+связь
   (образцы: `Aces::aceSignature()`, колонка «В паспорте» в soft/view);
-- **via-связи в with() опасны для соседних вложенных путей**: `with(['linkPort.tech',
-  'linkTech'])` — via-связь linkTech перезатирает populated linkPort и ломает
-  вложенный tech (проверено на Ports); via-связи в такие списки не включать;
+- **via('relation')-связи в with() перезатирают populated-модели соседних путей**:
+  `with(['linkPort.tech','linkTech'])` — жадная загрузка linkTech (via('linkPort'))
+  заново популирует linkPort СВЕЖИМИ экземплярами без вложенного tech
+  (ActiveRelationTrait::populateRelation:247 вызывает populateRelation via-связи
+  на тех же primary-моделях). Порядок решает: `['linkTech','linkPort.tech']` работает —
+  но в собранных из аннотаций списках порядок не гарантирован, поэтому правило:
+  не аннотировать via('relation')-связь, если рядом есть вложенный путь через её
+  junction-связь. Связи через viaTable() безопасны — они читают junction напрямую
+  (findJunctionRows) и populated-модели не трогают;
 - мелкие справочники (состояния, песочницы, маркеры, сегменты) в горячем коде
   резолвить через `Class::getLoadedItem($id,true)` с fast-path
   `isRelationPopulated()` — сами relation-геттеры не трогать (их использует with());
