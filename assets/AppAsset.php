@@ -39,12 +39,12 @@ class AppAsset extends AssetBundle
 		'css/codes.private.css',
 		'css/markers.css',
 		'css/bootstrap.css',
+		'fontawesome/css/all.min.css',
     ];
     public $js = [
 		'js/scans.js',
 		'js/tools.lib1.js',
 	    'js/jquery.autoResize.js',
-		'js/fontawesome/all.min.js',
     ];
 	public $cssOptions = [];
 	public $jsOptions = [View::POS_HEAD];
