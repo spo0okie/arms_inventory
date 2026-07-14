@@ -367,6 +367,19 @@ class LicItems extends ArmsModel
 	}
 
 	/**
+	 * Количество АРМ, распределенных через ключи
+	 * (через кэши id-шников - не загружая сами АРМы, как это делает getKeyArms)
+	 * @return int
+	 */
+	public function getKeyArmsCount()
+	{
+		$count=0;
+		foreach ($this->keysCached as $key)
+			$count+=count($key->loaderIds('arms') ?? $key->arms_ids);
+		return $count;
+	}
+
+	/**
 	 * Возвращает ИДы АРМов из ключей
 	 * @return array
 	 */

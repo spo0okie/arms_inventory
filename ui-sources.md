@@ -206,7 +206,10 @@ qtip-атрибуты: `qtip_ttip` (контент), `qtip_side`, `qtip_theme`;
 - если нужны только **id-шники** связей (сигнатуры, проверки вхождения) — не `*_ids`
   (LinkerBehavior загружает модели связи на каждый экземпляр), а
   `ArmsModel::loaderIds($loader) ?? $this->rel_ids` — один запрос на класс+связь
-  (образец: `Aces::aceSignature()`);
+  (образцы: `Aces::aceSignature()`, колонка «В паспорте» в soft/view);
+- **via-связи в with() опасны для соседних вложенных путей**: `with(['linkPort.tech',
+  'linkTech'])` — via-связь linkTech перезатирает populated linkPort и ломает
+  вложенный tech (проверено на Ports); via-связи в такие списки не включать;
 - мелкие справочники (состояния, песочницы, маркеры, сегменты) в горячем коде
   резолвить через `Class::getLoadedItem($id,true)` с fast-path
   `isRelationPopulated()` — сами relation-геттеры не трогать (их использует with());

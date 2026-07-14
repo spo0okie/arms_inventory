@@ -103,7 +103,9 @@ $tabs=[];
 
 $tabs[]=[
 	'id'=>'lic-items',
-	'label'=>'Ключи '.$badge.count($model->keys).'</span>',
+	//relationForGrid: жадная загрузка привязок ключей под видимые колонки грида
+	//(join-аннотации attributeData) - иначе каждый ключ грузит arms/comps/users отдельно
+	'label'=>'Ключи '.$badge.count($model->relationForGrid('keys','lic-items-keys')).'</span>',
 	'content'=>DynaGridWidget::widget([
 		'id' => 'lic-items-keys',
 		'header' => 'Лицензионные ключи, полученные в этой закупке',

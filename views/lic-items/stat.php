@@ -9,18 +9,26 @@ use app\components\ModelFieldWidget;
 <?= ModelFieldWidget::renderFieldTitle($model,'status',null,'h3') ?>
 <h4><?= ModelFieldWidget::renderFieldValue($model,'status') ?></h4>
 
-<?php if (count($model->arms_ids)) { ?>
-	<br />Привязано к АРМ: <?= count($model->arms_ids) ?>
+<?php
+//количества через кэши количеств/id-шников (loaderCount/loaderIds):
+//блок рендерится и в тултипах, чтение `*_ids`/relations грузило бы связи по одной
+$armsCount=$model->loaderCount('arms') ?? count($model->arms_ids);
+$compsCount=$model->loaderCount('comps') ?? count($model->comps_ids);
+$usersCount=$model->loaderCount('users') ?? count($model->users_ids);
+$keysCount=$model->loaderCount('keys') ?? count($model->keys);
+?>
+<?php if ($armsCount) { ?>
+	<br />Привязано к АРМ: <?= $armsCount ?>
 <?php } ?>
-<?php if (count($model->comps_ids)) { ?>
-	<br />Привязано к ОС: <?= count($model->comps_ids) ?>
+<?php if ($compsCount) { ?>
+	<br />Привязано к ОС: <?= $compsCount ?>
 <?php } ?>
-<?php if (count($model->users_ids)) { ?>
-	<br />Привязано к Польз: <?= count($model->users_ids) ?>
+<?php if ($usersCount) { ?>
+	<br />Привязано к Польз: <?= $usersCount ?>
 <?php } ?>
-<?php if (count($model->keys)) { ?>
-	<br/>Внесено ключей: <?= count($model->keys) ?>
-	<?php if (count($model->keyArms)) { ?>
+<?php if ($keysCount) { ?>
+	<br/>Внесено ключей: <?= $keysCount ?>
+	<?php if ($model->keyArmsCount) { ?>
 		<br/>Распределено ключей: <?= count($model->usedKeys) ?>
 	<?php }
 }?>

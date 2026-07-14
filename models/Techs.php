@@ -1250,7 +1250,15 @@ class Techs extends ArmsModel
 		//Порты которые должны быть у этой модели оборудования
 		$model_ports=[];
 
-		//Порты которые объявлены в БД конкретно для этого устройства
+		//Порты которые объявлены в БД конкретно для этого устройства;
+		//жадно тянем цепочку соединений: рендер каждого порта показывает
+		//встречный порт и его оборудование - лениво это по 2-3 запроса на порт.
+		//NB: linkTech сюда добавлять нельзя - эта via-связь при жадной загрузке
+		//перезатирает populated linkPort и ломает вложенный linkPort.tech (проверено)
+		if (!$this->isRelationPopulated('ports'))
+			$this->populateRelation('ports',
+				$this->getPorts()->with(['linkPort.tech','tech'])->all()
+			);
 		$custom_ports=$this->ports;
 		if (!is_array($custom_ports)) $custom_ports=[];
 

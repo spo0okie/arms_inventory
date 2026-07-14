@@ -129,6 +129,9 @@ class LicKeys extends ArmsModel
 			'links' => [
 				'Привязки',
 				'typeClass' => \app\types\UrlsType::class,
+				//колонка рендерит привязанные объекты - без жадной загрузки
+				//каждый ключ грузил бы их отдельными запросами
+				'join' => ['arms','comps','users'],
 			],
 			'key_text' => [
 				'Ключ',

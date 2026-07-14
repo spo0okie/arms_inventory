@@ -49,11 +49,16 @@ $tabs[]=[
 		'columns' => array_merge(include Yii::getAlias('@app').'/views/comps/columns.php', [
 			'softAgreed'=>[
 				'header'=>'В паспорте',
+				//id-шники через loaderIds (один запрос на все строки): чтение `soft_ids`
+				//(LinkerBehavior) грузило бы список ПО каждой ОС отдельными запросами;
+				//in_array вместо array_search - позиция 0 давала бы ложное "нет"
 				'value'=>function($comp) use ($model) {
-					return array_search($model->id,$comp->soft_ids)?'да':'нет';
+					/** @var \app\models\Comps $comp */
+					return in_array($model->id,$comp->loaderIds('soft') ?? $comp->soft_ids)?'да':'нет';
 				},
 				'contentOptions'=>function($comp) use ($model,$nonAgreedClass) {
-					return ['class'=>array_search($model->id,$comp->soft_ids)?'table-success':$nonAgreedClass];
+					/** @var \app\models\Comps $comp */
+					return ['class'=>in_array($model->id,$comp->loaderIds('soft') ?? $comp->soft_ids)?'table-success':$nonAgreedClass];
 				},
 			]
 		]),
