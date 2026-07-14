@@ -64,7 +64,7 @@ if (!$model->isNewRecord) $this->registerJs($js,yii\web\View::POS_HEAD);
 				<div class="card-header">Новый временный доступ <small class="text-muted">(создаётся вместе с этим доступом)</small></div>
 				<div class="card-body">
 					<?= $form->field($schedule,'name')->hint(Acls::$scheduleNameHint) ?>
-					<?= $form->field($schedule,'history')->text()->classicHint(Acls::$scheduleHistoryHint) ?>
+					<?= $form->field($schedule,'history')->text(['rows'=>5,'height'=>100])->label(Acls::$scheduleHistoryHint) ?>
 				</div>
 			</div>
 		<?php } ?>
@@ -79,12 +79,12 @@ if (!$model->isNewRecord) $this->registerJs($js,yii\web\View::POS_HEAD);
 					<div class="card-header">Выберите кому и какой предоставляется доступ</div>
 					<div class="card-body">
 						<div id="aces-list">
-							
+
 							<?php foreach ($model->aces as $ace) {
 								echo ModelWidget::widget(['model'=>$ace,'view'=>'card']);
 							}?>
 						</div>
-						
+
 						<?= Html::a('<span class="fas fa-plus"></span>', [
 							'aces/create',
 							'Aces[acls_id]' => $model->id,
@@ -170,8 +170,8 @@ if (!$model->isNewRecord) $this->registerJs($js,yii\web\View::POS_HEAD);
 			<?= $form->field($model, 'notepad')->text(['height'=>100,'rows'=>6]) ?>
 		</div>
 	</div>
-	
-	
+
+
 	<?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
 	<?= Html::Button('Применить',	[
 			'class' => 'btn btn-primary',
@@ -183,4 +183,3 @@ if (!$model->isNewRecord) $this->registerJs($js,yii\web\View::POS_HEAD);
     <?php ArmsForm::end(); ?>
 
 </div>
-
