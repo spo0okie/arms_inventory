@@ -26,7 +26,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	 * @var string Название поля для label
 	 */
 	private $labelText;
-	
+
 	/**
 	 * @var string Подсказка для нашего label
 	 */
@@ -36,7 +36,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	 * @var bool тултип label явно отключен через hint(false)
 	 */
 	private $hintDisabled=false;
-	
+
 	/**
 	 * В отличие от родительского метода тут не происходит рендер
 	 * Только фиксируем (в $this->labelText) какой текст надо использовать для label
@@ -51,18 +51,18 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			$this->enableLabel = false;
 			return $this;
 		}
-		
+
 		if (is_null($label))
 			$this->labelText = $this->model->getAttributeLabel($this->attribute);
 		else
 			$this->labelText = $label;
-		
+
 		$this->enableLabel = true;
 		$this->labelOptions = array_merge($this->labelOptions, $options);
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * В отличие от родительского метода тут не происходит рендер
 	 * Только фиксируем (в $this->parts['{hint}']), какой текст надо использовать для hint
@@ -77,19 +77,19 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			$this->hintDisabled = true;
 			return $this;
 		}
-		
+
 		if (is_null($hint))
 			$this->hintText = $this->model->getAttributeHint($this->attribute);
 		else
 			$this->hintText = $hint;
-		
-		
+
+
 		//Если честно, непонятно что с этим делать. Как-то потом учесть может?
 		$this->hintOptions = array_merge($this->hintOptions, $options);
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Метод, чтобы прикрутить классическую подсказку после input
 	 * @param $hint
@@ -103,7 +103,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 		}
 		return parent::hint($hint,$options);
 	}
-	
+
 	/**
 	 * Это вызывается при рендере input.
 	 * Тут мы всовываем всю магию по засовыванию подсказок в label
@@ -114,7 +114,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 		//если у нас не вызывался метод label() или hint(), то вызываем их
 		if (is_null($this->labelText)) $this->label();
 		if (is_null($this->hintText)) $this->hint();
-		
+
 		//нет label - не рендерим его
 		if (!$this->labelText) {
 			$this->parts['{label}'] = '';
@@ -123,7 +123,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			$this->parts['{endLabel}'] = '';
 			return;
 		}
-		
+
 		$label = $this->labelText;
 		//тултип собирает единый сборщик (ui-sources.md §0.1): смысл + формат типа
 		//+ переходы на подробные страницы. hint(false) отключает тултип целиком.
@@ -139,15 +139,15 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			//сам label остаётся чистым (единая подача - AttributeTooltip::icon)
 			$label .= ' '.AttributeTooltip::icon($tooltip);
 		}
-		
-		
+
+
 		//рендерим части для bootsrap5 шаблона через родительский метод
 		//(они используются только при специальных template)
 		parent::renderLabelParts($label,$this->labelOptions);
 		//Собираем вместе label из bootstrap5 частей, т.к. мы его не рендерили методе label (как сделано у родителя)
 		$this->parts['{label}']=strtr('{beginLabel}{labelTitle}{endLabel}',$this->parts);
 	}
-	
+
 	/**
 	 * Добавляет авторесайз к обычному textarea
 	 * @param $options
@@ -158,7 +158,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 
 		return $this->widget(TextAutoResizeWidget::class,$options);
 	}
-	
+
 
 	/**
 	 * Выводит выпадающий список с возможностью поиска
@@ -173,7 +173,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			'allowClear' => ArrayHelper::remove($options,'allowClear',true),
 			'multiple' => ArrayHelper::remove($options,'multiple', StringHelper::endsWith($this->attribute,'_ids')),
 		],$options['pluginOptions']??[]);
-		
+
 		//ищем на какую модель ссылается атрибут
 		$linkClass=ArrayHelper::remove($options,'linkModel','');
 
@@ -198,12 +198,12 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 
 		//проверяем есть ли у нас в опциях itemsHintsUrl
 		$itemsHintsUrl = ArrayHelper::remove($options, 'itemsHintsUrl', 'auto');
-		
+
 		//если стоит авто (по умолчанию)
 		if ($itemsHintsUrl=='auto') {
 			//по умолчанию мы не знаем как найти подсказки
 			$itemsHintsUrl='';
-			
+
 			//но если у нас есть модель
 			if ($linkClass) {
 				/** @var ArmsBaseController $controller */
@@ -215,7 +215,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 						!in_array('ttip', $controller->disabledActions())
 						&&
 						(//и если у этой модели есть ttip
-							
+
 							file_exists(Yii::getAlias('@app').'/views/'.$classId.'/card.php')
 							||
 							file_exists(Yii::getAlias('@app').'/views/'.$classId.'/ttip.php')
@@ -244,12 +244,12 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 					$pluginOptions['selectionAdapter']=new JsExpression('jQuery.fn.select2.amd.require("QtippedSingleSelectionAdapter")');
 			}
 		}
-		
+
 		$placeholder='Начните набирать для поиска';
 		if ($this->model->hasMethod('getAttributePlaceholder')) {
 			$placeholder=$this->model->getAttributePlaceholder($this->attribute);
 		}
-		
+
 		return $this->widget(Select2::class, ArrayHelper::recursiveOverride([
 			'options'=>[
 				'placeholder'=>$placeholder,
@@ -258,7 +258,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			'pluginOptions' => $pluginOptions,
 		],$options));
 	}
-	
+
 	/**
 	 * Добавлена поддержка placeholder
 	 * @param $options
@@ -270,12 +270,12 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 		if ($this->model->hasMethod('getAttributePlaceholder')) {
 			$placeholder=$this->model->getAttributePlaceholder($this->attribute);
 		}
-		
+
 		return parent::textInput(ArrayHelper::recursiveOverride([
 			'placeholder'=>$placeholder,
 		],$options));
 	}
-	
+
 	/**
 	 * Возвращает тип текстового поля у класса (text/markdown/dokuwiki)
 	 * @param $class
@@ -286,18 +286,18 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	{
 		if (isset(\Yii::$app->params['textFields'][StringHelper::className($class).'.'.$attribute]))
 			return \Yii::$app->params['textFields'][StringHelper::className($class).'.'.$attribute];
-		
+
 		if (StringHelper::endsWith($attribute,'Recursive')) {
 			//если это рекурсивное поле, то смотрим на его базовое поле
 			$baseAttribute=substr($attribute,0,strlen($attribute)-strlen('Recursive'));
 			if (isset(\Yii::$app->params['textFields'][StringHelper::className($class).'.'.$baseAttribute]))
 				return \Yii::$app->params['textFields'][StringHelper::className($class).'.'.$baseAttribute];
 		}
-		
+
 		return \Yii::$app->params['textFields']['default'];
 	}
-	
-	
+
+
 	/**
 	 * Создает поле ввода текста в зависимости от типа
 	 * @param array $options
@@ -313,6 +313,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 				if ($this->model->{$this->attribute}===null) $this->model->{$this->attribute}='';
 				return $this->widget(\app\components\formInputs\MarkdownEditorFix::class,array_merge([
 					'showExport'=>false,
+					'footer'=>false
 				],$options));
 			case 'dokuwiki':
 				ArrayHelper::remove($options,'height');
@@ -322,7 +323,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 				return $this->textAutoresize($options);
 		}
 	}
-	
+
 	public function checkboxList($items,$options=[]): \yii\bootstrap5\ActiveField
 	{
 		$options=array_merge([
@@ -331,14 +332,14 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 		],$options);
 		return parent::checkboxList($items,$options);
 	}
-	
+
 	public function date($options=[])
 	{
 		$placeholder='Введите дату ...';
 		if ($this->model->hasMethod('getAttributePlaceholder')) {
 			$placeholder=$this->model->getAttributePlaceholder($this->attribute);
 		}
-		
+
 		return $this->widget(DateControl::class, ArrayHelper::recursiveOverride([
 			'options' => ['placeholder' => $placeholder],
 			'pluginOptions' => [
@@ -348,14 +349,14 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			],
 		],$options));
 	}
-	
+
 	public function datetime($options=[])
 	{
 		$placeholder='Введите дату/время ...';
 		if ($this->model->hasMethod('getAttributePlaceholder')) {
 			$placeholder=$this->model->getAttributePlaceholder($this->attribute);
 		}
-		
+
 		return $this->widget(DateControl::class, ArrayHelper::recursiveOverride([
 			'options' => [
 				'placeholder' => $placeholder,
@@ -368,22 +369,22 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 			],
 		],$options));
 	}
-	
+
 	public function autoInput()
 	{
 		if ($this->model->hasMethod('attributeIsLink') && $this->model->attributeIsLink($this->attribute)) {
 			return $this->select2();
 		}
-		
+
 		if ($this->model->hasMethod('getAttributeTypeClass')) {
 			//виджет ввода выбирает сам тип атрибута (см. types/*::renderInput)
 			return $this->model->getAttributeTypeClass($this->attribute)->renderInput($this);
 		}
 
 		return $this->textInput();
-		
+
 	}
-	
+
 	public function render($content = null): string
 	{
 		if ($content === null) {
