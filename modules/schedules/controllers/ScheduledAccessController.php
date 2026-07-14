@@ -216,6 +216,35 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 	}
 
 	/**
+	 * Дополняет базовый testTtip сценарием с привязанными ACL: тултип временного доступа
+	 * показывает группы доступов (кому/куда), и эта ветка не покрывается моделями full/empty,
+	 * у которых списков доступа нет.
+	 *
+	 * @return array
+	 */
+	public function testTtip(): array
+	{
+		$scenarios=parent::testTtip();
+
+		//два ACL с одинаковым набором ACE → в тултипе группа ресурсов одним блоком
+		if ($groupedId=$this->buildScheduleWithAces(['общий доступ','общий доступ'])) {
+			$scenarios[]=[
+				'name'     => 'ttip with acls',
+				'GET'      => ['id' => $groupedId],
+				'response' => 200,
+				'assert'   => static function (\AcceptanceTester $I) {
+					$I->seeResponseContains('scheduled-access-ttip');
+					//оба ресурса группы присутствуют в тултипе
+					$I->seeResponseContains('ресурс-1');
+					$I->seeResponseContains('ресурс-2');
+				},
+			];
+		}
+
+		return $scenarios;
+	}
+
+	/**
 	 * Создание нового временного доступа.
 	 *
 	 * Раньше здесь создавалось «пустое» расписание + пустой ACL (который не проходил валидацию
