@@ -1,7 +1,6 @@
 <?php
 
 use app\components\TextFieldWidget;
-use app\components\UrlListWidget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use app\components\widgets\page\ModelWidget;

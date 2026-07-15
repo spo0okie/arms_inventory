@@ -1,7 +1,6 @@
 <?php
 
 use app\components\LinkObjectWidget;
-use app\components\UrlListWidget;
 use kartik\markdown\Markdown;
 use yii\helpers\Html;
 

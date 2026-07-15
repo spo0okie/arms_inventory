@@ -3,7 +3,6 @@
 use app\components\DynaGridWidget;
 use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
-use app\components\UrlListWidget;
 use app\models\TechsSearch;
 use app\models\TechTypes;
 use yii\data\ActiveDataProvider;
