@@ -78,6 +78,7 @@ class LicTypes extends ArmsModel
 				'Ссылки',
 				//формат заполнения подскажет UrlsType (inputHint)
 				'hint' => 'Желательно указать ссылку на описание схемы лицензирования в интернете',
+				'typeClass' => \app\types\UrlsType::class,
 			],
 			'name' => [
 				'Служебное имя',

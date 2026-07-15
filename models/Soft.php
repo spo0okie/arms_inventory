@@ -142,6 +142,12 @@ class Soft extends ArmsModel
 				'type'=>'string',
 				'typeClass'=>\app\types\StringType::class,
 			],
+			'links' => [
+				'Ссылки',
+				//формат заполнения подскажет UrlsType (inputHint)
+				'hint'=>'Ссылки на сайт продукта, документацию и т.п.',
+				'typeClass'=>\app\types\UrlsType::class,
+			],
 			'notepad' => [
 				'Подробное описание',
 				'type'=>'text',
