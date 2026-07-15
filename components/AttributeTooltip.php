@@ -4,6 +4,7 @@ namespace app\components;
 
 use app\helpers\DocsHelper;
 use app\helpers\FieldsHelper;
+use app\helpers\StringHelper;
 use Yii;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
@@ -16,8 +17,10 @@ use yii\helpers\Inflector;
  *  1  смысл («что это»)      — hint/indexHint/viewHint по режиму
  *  1а формат («как вводить») — inputHint() типа, только в form, приглушённо
  *  1б источник значения      — только в view, приглушённо, автоматически из
- *     модели: наследуемый атрибут (задано здесь / унаследовано от
- *     предка-ссылки / не задано) / вычисляемое поле; хранимые колонки
+ *     модели: собирательный атрибут (is_collectable — с потомков) /
+ *     наследуемый атрибут (is_inheritable либо суффикс Recursive;
+ *     задано здесь / унаследовано от предка-ссылки / не задано) /
+ *     вычисляемое поле; хранимые колонки
  *     и ссылочные атрибуты блока не дают
  *  2  поиск («как искать»)   — только в search: явный searchHint attributeData
  *     вытесняет всё; иначе дефолт по типу данных + приглушённый searchHint() типа
@@ -253,9 +256,18 @@ class AttributeTooltip
 	/**
 	 * Блок 1б «источник значения» (только view) — выводится из модели
 	 * автоматически, руками не пишется:
-	 *  - наследуемый атрибут (is_inheritable; алиасы link_id<->getter и
-	 *    <attr>Recursive разрешает getAttributeData) у загруженной записи —
-	 *    задано здесь / унаследовано от предка (ссылкой) / не задано;
+	 *  - собирательный атрибут (is_collectable) — значение собирается
+	 *    с этой записи и её ПОТОМКОВ; проверяется первым, т.к. вытесняет
+	 *    и трактовку суффикса Recursive как наследования (обход в другую
+	 *    сторону), и общую пометку «вычисляемое»;
+	 *  - наследуемый атрибут (is_inheritable в attributeData либо конвенция
+	 *    суффикса <attr>Recursive; алиасы link_id<->getter разрешает
+	 *    getAttributeData) — приоритет над «вычисляемым»: унаследованное
+	 *    значение тоже вычисляется (своё пустое, по цепочке предков дошли
+	 *    до непустого), поэтому наследуемость как более конкретный признак
+	 *    вытесняет общую пометку. У загруженной записи — задано здесь /
+	 *    унаследовано от предка (ссылкой) / не задано; у пустой цепочки
+	 *    наследования нет — общая пометка «наследуемый атрибут»;
 	 *  - хранимая колонка и ссылочные атрибуты (значение по хранимой
 	 *    ссылке) — блока нет (дефолт не шумит);
 	 *  - прочее (нет колонки) — «вычисляемое поле».
@@ -265,23 +277,32 @@ class AttributeTooltip
 	{
 		if (!is_object($model) || !method_exists($model,'hasAttribute')) return null;
 
-		//наследуемый атрибут: где фактически задано значение - интроспекция
-		//конкретной записи, у пустой модели цепочки наследования нет
-		if (!$model->getIsNewRecord()
-			&& method_exists($model,'attributeIsInheritable') && $model->attributeIsInheritable($attr)
-			&& method_exists($model,'findRecursiveAttrNode')
-		) {
-			try {
-				$node=$model->findRecursiveAttrNode($attr);
-				if ($node===$model) return 'наследуемый атрибут: значение задано в этой записи';
-				//предок - стандартным рендером имени объекта (unification.md:
-				//ItemObjectWidget/LinkObjectWidget, samePage-механика)
-				if (is_object($node)) return 'наследуемый атрибут: унаследовано от '
-					.$node->renderItem(Yii::$app->view,['static_view'=>true]);
-				return 'наследуемый атрибут: значение не задано ни здесь, ни у предков';
-			} catch (\Throwable $e) {
-				//цепочка не разрешилась - падаем на общую логику ниже
+		//собирательный атрибут: рекурсия идет не к родителям, а к потомкам -
+		//объявляется явно (is_collectable) и вытесняет трактовку «наследуемый»
+		if (method_exists($model,'attributeIsCollectable') && $model->attributeIsCollectable($attr))
+			return 'собирательный атрибут: значение собирается с этой записи и её потомков';
+
+		//наследуемость: конвенция суффикса Recursive либо флаг is_inheritable
+		$inheritable=StringHelper::endsWith($attr,'Recursive')
+			|| (method_exists($model,'attributeIsInheritable') && $model->attributeIsInheritable($attr));
+
+		if ($inheritable) {
+			//где фактически задано значение - интроспекция конкретной записи,
+			//у пустой модели цепочки наследования нет
+			if (!$model->getIsNewRecord() && method_exists($model,'findRecursiveAttrNode')) {
+				try {
+					$node=$model->findRecursiveAttrNode($attr);
+					if ($node===$model) return 'наследуемый атрибут: значение задано в этой записи';
+					//предок - стандартным рендером имени объекта (unification.md:
+					//ItemObjectWidget/LinkObjectWidget, samePage-механика)
+					if (is_object($node)) return 'наследуемый атрибут: унаследовано от '
+						.$node->renderItem(Yii::$app->view,['static_view'=>true]);
+					return 'наследуемый атрибут: значение не задано ни здесь, ни у предков';
+				} catch (\Throwable $e) {
+					//цепочка не разрешилась - остаётся общая пометка
+				}
 			}
+			return 'наследуемый атрибут';
 		}
 
 		//хранимые колонки и ссылочные атрибуты - самоочевидно, не шумим

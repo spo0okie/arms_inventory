@@ -313,10 +313,12 @@ class Services extends ArmsModel
 			//read-only вычисляемые ссылки (категория C) для наследуемого вывода *Recursive:
 			//responsibleRecursive/supportRecursive/infrastructure*Recursive наследуют эти
 			//метаданные (getAttributeData strip 'Recursive') и рендерятся ModelFieldWidget
-			'responsible' => ['Ответственный','ref'=>Users::class],
-			'support' => ['Поддержка','ref'=>Users::class, 'refMulti'=>true],
-			'infrastructureResponsible' => ['Отв. за инфраструктуру','ref'=>Users::class],
-			'infrastructureSupport' => ['Поддержка инфраструктуры','ref'=>Users::class, 'refMulti'=>true],
+			//is_inheritable дублирует флаг хранимых атрибутов (responsible_id и т.п.):
+			//прямая запись перехватывает getAttributeData раньше alias-резолюции loader->link
+			'responsible' => ['Ответственный','ref'=>Users::class,'is_inheritable'=>true],
+			'support' => ['Поддержка','ref'=>Users::class, 'refMulti'=>true,'is_inheritable'=>true],
+			'infrastructureResponsible' => ['Отв. за инфраструктуру','ref'=>Users::class,'is_inheritable'=>true],
+			'infrastructureSupport' => ['Поддержка инфраструктуры','ref'=>Users::class, 'refMulti'=>true,'is_inheritable'=>true],
 			'description' => [
 				'Краткое описание',
 				'indexLabel' => 'Описание',
@@ -365,6 +367,7 @@ class Services extends ArmsModel
 				'Ссылки',
 				//формат заполнения подскажет UrlsType (inputHint)
 				'hint' => 'Нужно обязательно вставить ссылку на вики страничку описания и, если они есть, на странички входа на сервис и поддержки',
+				'is_inheritable'=>true,	//getLinksRecursive: не заданы - берутся у родителя
 				'typeClass' => \app\types\UrlsType::class,
 			],
 			'maintenance_jobs_ids'=>[
@@ -456,6 +459,37 @@ class Services extends ArmsModel
 				'typeClass' => \app\types\TextType::class,
 			],
 			'sites' => ['Площадки','typeClass' => \app\types\LinkType::class],
+			//собирательные атрибуты (рекурсия к потомкам, не наследование)
+			'childrenRecursive'=>[
+				'Дочерние сервисы (включая потомков)',
+				'hint'=>'Все дочерние сервисы/услуги, включая потомков потомков',
+				'ref'=>Services::class,'refMulti'=>true,
+				'is_collectable'=>true,
+			],
+			'compsRecursive'=>[
+				'Серверы (включая дочерние)',
+				'hint'=>'Серверы, на которых живет этот сервис и его дочерние',
+				'ref'=>Comps::class,'refMulti'=>true,
+				'is_collectable'=>true,
+			],
+			'techsRecursive'=>[
+				'Оборудование (включая дочерние)',
+				'hint'=>'Оборудование, на котором живет этот сервис и его дочерние',
+				'ref'=>Techs::class,'refMulti'=>true,
+				'is_collectable'=>true,
+			],
+			'sitesRecursive'=>[
+				'Площадки (включая дочерние)',
+				'hint'=>'Площадки, на которых представлен этот сервис и его дочерние',
+				'ref'=>Places::class,'refMulti'=>true,
+				'is_collectable'=>true,
+			],
+			'nodesRecursive'=>[
+				'Узлы (включая дочерние)',
+				'hint'=>'Все узлы (серверы и оборудование) этого сервиса и его дочерних',
+				//гетерогенный список (Comps+Techs) - без ref
+				'is_collectable'=>true,
+			],
 			'support_ids' => [
 				'Поддержка',
 				'hint' => 'Дополнительные члены команды по поддержке сервиса/оказанию услуги',

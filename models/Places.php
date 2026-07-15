@@ -193,7 +193,20 @@ DELIMITER ;
 			'comment' => [
 				'type'=>'text',
 				'typeClass'=>\app\types\TextType::class
-			]
+			],
+			//собирательные атрибуты (рекурсия к потомкам, не наследование)
+			'phonesRecursive'=>[
+				'Телефоны (включая вложенные)',
+				'hint'=>'Телефоны этого помещения и всех вложенных в него',
+				'ref'=>OrgPhones::class,'refMulti'=>true,
+				'is_collectable'=>true,
+			],
+			'techsRecursive'=>[
+				'Оборудование (включая вложенные)',
+				'hint'=>'Оборудование этого помещения и всех вложенных в него',
+				'ref'=>Techs::class,'refMulti'=>true,
+				'is_collectable'=>true,
+			],
         ]);
     }
 

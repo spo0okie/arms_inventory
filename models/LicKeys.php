@@ -144,6 +144,12 @@ class LicKeys extends ArmsModel
 				'hint' => 'На каком основании эти лицензии закрепляются за добавленными выше объектами. Чтобы спустя время не было вопросов, а кто и зачем эту лицензию туда выделил (уже существующие привязки не меняются, только новые)',
 				'typeClass' => \app\types\StringType::class,
 			],
+			'serviceRecursive'=>[
+				'Сервис (с учетом закупки)',
+				'hint'=>'Сервис закупки этого ключа (или типа лицензий, если у закупки не задан)',
+				'ref'=>Services::class,
+				'is_inheritable'=>true,	//наследуется через licItem (не через parentAttr)
+			],
 			//search fields
 			'comp_name' => ['Имя компьютера (FQDN или DOMAIN\\hostname)','typeClass'=>\app\types\StringType::class],
 			'user_login' => ['Логин пользователя','typeClass'=>\app\types\StringType::class],

@@ -152,15 +152,49 @@ class AttributeTooltipTest extends Unit
 	}
 
 	/**
-	 * Блок 1б: у незагруженной записи рекурсивная часть опускается -
-	 * остается «вычисляемое поле» (цепочка наследования зависит от объекта).
+	 * Блок 1б: у незагруженной записи интроспекция цепочки опускается
+	 * (зависит от конкретного объекта), но наследуемость имеет приоритет
+	 * над «вычисляемым» - остается общая пометка «наследуемый атрибут».
 	 */
 	public function testViewModeRecursiveOnNewRecord()
 	{
 		$tooltip = AttributeTooltip::build(new Services(), 'segmentRecursive', AttributeTooltip::MODE_VIEW);
 		$this->assertNotNull($tooltip);
-		$this->assertStringContainsString('вычисляемое поле', $tooltip['body']);
+		$this->assertStringContainsString('наследуемый атрибут', $tooltip['body']);
+		$this->assertStringNotContainsString('вычисляемое поле', $tooltip['body']);
 		$this->assertStringNotContainsString('унаследовано', $tooltip['body']);
+	}
+
+	/**
+	 * Блок 1б: суффикс Recursive - самостоятельный признак наследуемости
+	 * (конвенция направления «вверх», как в ArmsModel::__get), is_inheritable
+	 * на базовом атрибуте не обязателен: атрибут аннотируется как наследуемый,
+	 * а не как «вычисляемое поле».
+	 */
+	public function testViewModeRecursiveSuffixConvention()
+	{
+		//синтетический атрибут: метаданных нет вовсе, работает только конвенция суффикса
+		$tooltip = AttributeTooltip::build(new Techs(), 'commentRecursive', AttributeTooltip::MODE_VIEW);
+		$this->assertNotNull($tooltip);
+		$this->assertStringContainsString('наследуемый атрибут', $tooltip['body']);
+		$this->assertStringNotContainsString('вычисляемое поле', $tooltip['body']);
+	}
+
+	/**
+	 * Блок 1б: собирательный атрибут (is_collectable) - рекурсия к ПОТОМКАМ,
+	 * вытесняет и трактовку суффикса Recursive как наследования, и «вычисляемое
+	 * поле». Направление объявляется на самом Recursive-атрибуте
+	 * (сторож RecursiveAttrDirectionTest).
+	 */
+	public function testViewModeCollectableAttribute()
+	{
+		//Places::getPhonesRecursive() собирает телефоны с вложенных помещений
+		$tooltip = AttributeTooltip::build(new \app\models\Places(), 'phonesRecursive', AttributeTooltip::MODE_VIEW);
+		$this->assertNotNull($tooltip);
+		$this->assertStringContainsString('собирательный атрибут', $tooltip['body']);
+		$this->assertStringContainsString('потомков', $tooltip['body']);
+		$this->assertStringNotContainsString('наследуемый', $tooltip['body']);
+		$this->assertStringNotContainsString('вычисляемое поле', $tooltip['body']);
 	}
 
 	/**

@@ -208,6 +208,12 @@ class LicItems extends ArmsModel
 				'placeholder' => is_null($name=$this?->licGroup?->service?->name)?'Не относится ни к какому сервису':($name.' (из типа лиц.)'),
 				'typeClass' => \app\types\LinkType::class,
 			],
+			'serviceRecursive'=>[
+				'Сервис (с учетом типа лицензий)',
+				'hint'=>'Сервис этой закупки, а если не задан - сервис типа лицензий',
+				'ref'=>Services::class,
+				'is_inheritable'=>true,	//наследуется от licGroup (не через parentAttr)
+			],
 			'status' => [
 				'Состояние',
 				'hint' => 'Период действия лицензий закупки (если истёк — с какого числа просрочены) и сколько лицензий распределено из общего количества',

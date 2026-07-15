@@ -66,7 +66,16 @@
  *       'placeholder' => 'Модель ПК не выбрана',
  *
  *       //поле наследуемое (если не задано в этом объекте, то значение берется из родителя)
+ *       //ставится на базовом атрибуте; вариант <attr>Recursive наследует метаданные через суффикс
  *       'is_inheritable'=>true,
+ *
+ *       //поле собирательное: значение собирается с этой записи и её ПОТОМКОВ
+ *       //(направление обхода противоположно is_inheritable). Ставится на самом
+ *       //Recursive-атрибуте (отдельная запись attributeData со своими label/hint),
+ *       //т.к. базовый атрибут - обычная связь и собирательным не является.
+ *       //Для каждого явного get<Attr>Recursive() объявить одно из двух направлений
+ *       //ОБЯЗАТЕЛЬНО (сторож RecursiveAttrDirectionTest)
+ *       'is_collectable'=>true,
  *
  *       //атрибут только для чтения (updated_at, раскрытые ссылки) -> для API документации
  *       'readOnly'=>true,
@@ -94,15 +103,24 @@
  *
  * Рекурсивные атрибуты
  *
- *   Атрибут вида "<attr>Recursive":
+ *   Атрибут вида "<attr>Recursive". КОНВЕНЦИЯ НАПРАВЛЕНИЯ: по умолчанию
+ *   (и всегда - в магическом разрешении ArmsModel::__get) рекурсия идет
+ *   ВВЕРХ к родителям - это наследуемые поля (is_inheritable):
  *   - возвращает значение <attr> из иерархии родителей (parentAttr)
  *   - используется для отображения наследуемых полей, плейсхолдеров и поиска
+ *
+ *   Отдельный случай - явные геттеры get<Attr>Recursive(), собирающие
+ *   значение ВНИЗ с потомков (childrenRecursive, phonesRecursive и т.п.).
+ *   К конвенции *Recursive они относятся деликатно: наследуемыми НЕ являются,
+ *   и такой атрибут ОБЯЗАН объявить в attributeData собственную запись
+ *   с 'is_collectable'=>true (сторож RecursiveAttrDirectionTest).
  *
  *   Основные методы:
  *    - findRecursiveAttr()
  *    - findRecursiveAttrNode()
  *    - getAttributeInheritablePlaceholder()
  *    - renderAttributeToText()
+ *    - attributeIsInheritable() / attributeIsCollectable()
  */
 
 namespace app\models\base\traits;
@@ -225,7 +243,19 @@ trait AttributeDataModelTrait
 	public function attributeIsInheritable($attr) {
 		return $this->getAttributeData($attr)['is_inheritable']??false;
 	}
-	
+
+	/**
+	 * Является ли аттрибут собирательным: значение собирается с этой записи
+	 * и её ПОТОМКОВ (направление обхода противоположно наследуемым is_inheritable).
+	 * Флаг объявляется на самом Recursive-атрибуте (см. докблок трейта).
+	 * @param $attr
+	 * @return false|mixed
+	 * @throws UnknownPropertyException
+	 */
+	public function attributeIsCollectable($attr) {
+		return $this->getAttributeData($attr)['is_collectable']??false;
+	}
+
 	/**
 	 * Является ли аттрибут наследуемым (от объекта родителя)
 	 * @param $attr

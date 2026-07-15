@@ -1192,6 +1192,10 @@ class ArmsModel extends ActiveRecord
 		} catch (UnknownPropertyException $e) {
 			//если мы не нашли свойство
 			//если это рекурсивный аттрибут, и у модели есть ссылка на родителя
+			//КОНВЕНЦИЯ НАПРАВЛЕНИЯ: магический <attr>Recursive всегда ищет ВВЕРХ
+			//к родителям (наследуемые is_inheritable поля); сбор значений ВНИЗ
+			//с потомков магией не разрешается - таким атрибутам нужен явный геттер
+			//и 'is_collectable'=>true в attributeData (сторож RecursiveAttrDirectionTest)
 			if (StringHelper::endsWith($name,'Recursive') && $this->canGetProperty($this->parentAttr)) {
 				//разбираемся к какому атрибуту у нас добавлена рекурсия
 				$plain=StringHelper::removeSuffix($name,'Recursive');

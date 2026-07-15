@@ -206,6 +206,19 @@ class Contracts extends ArmsModel
 					.'приложения, новые редакции)',
 				'ref'=>Contracts::class, 'refMulti'=>true,
 			],
+			//собирательные атрибуты (рекурсия к потомкам, не наследование)
+			'childrenRecursive'=>[
+				'Связанные документы (включая потомков)',
+				'hint'=>'Все документы, для которых этот является основным, включая потомков потомков',
+				'ref'=>Contracts::class,'refMulti'=>true,
+				'is_collectable'=>true,
+			],
+			'successorsRecursive'=>[
+				'Наследники (включая цепочки)',
+				'hint'=>'Все документы-наследники (новые редакции), включая наследников наследников',
+				'ref'=>Contracts::class,'refMulti'=>true,
+				'is_collectable'=>true,
+			],
 			'attach' => [
 				'Связи',
 				'indexHint' => 'Привязанные к документу объекты',

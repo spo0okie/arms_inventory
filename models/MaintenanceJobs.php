@@ -116,6 +116,13 @@ class MaintenanceJobs extends ArmsModel
 					.'входящие в состав этого обслуживания',
 				'typeClass'=>\app\types\LinkType::class,
 			],
+			//собирательный атрибут (рекурсия к потомкам, не наследование)
+			'childrenRecursive'=>[
+				'Дочерние (включая потомков)',
+				'hint'=>'Все дочерние операции обслуживания, включая потомков потомков',
+				'ref'=>MaintenanceJobs::class,'refMulti'=>true,
+				'is_collectable'=>true,
+			],
 			'comps_ids' => [
 				'ОС/ВМ',
 				'hint'=>'Обслуживаемые в рамках этой регламентной операции',
