@@ -96,6 +96,39 @@ class ListTypesDiffTest extends Unit
 	}
 
 	/**
+	 * Пакетный стиль имени (Linux): версия приклеена дефисами и содержит
+	 * буквенно-цифровой суффикс ревизии - тоже опознаётся как обновление
+	 */
+	public function testSoftUpdatedDebianPackageStyle()
+	{
+		$publisher='Debian Python Team <team+python@tracker.debian.org>';
+		$diff=(new SwListType())->diffValues(
+			'{"publisher":"'.addslashes($publisher).'", "name":"python3-jwt-2.6.0-1"}',
+			'{"publisher":"'.addslashes($publisher).'", "name":"python3-jwt-2.10.1-2+deb13u1"}'
+		);
+		$this->assertEquals([],$diff['added']);
+		$this->assertEquals([],$diff['removed']);
+		$this->assertCount(1,$diff['changed']);
+		//общее имя пакета сохранено, сменился только версионный хвост
+		$this->assertStringContainsString('python3-jwt-<del class="text-muted">2.6.0-1</del>',$diff['changed'][0]);
+		$this->assertStringContainsString('&rarr; 2.10.1-2+deb13u1',$diff['changed'][0]);
+	}
+
+	/**
+	 * Пакетный стиль: разные пакеты одного вендора не склеиваются в обновление
+	 */
+	public function testSoftDifferentPackagesAreNotUpdate()
+	{
+		$diff=(new SwListType())->diffValues(
+			'{"publisher":"Debian", "name":"python3-jwt-2.6.0-1"}',
+			'{"publisher":"Debian", "name":"python3-yaml-6.0.1-2"}'
+		);
+		$this->assertCount(1,$diff['added']);
+		$this->assertCount(1,$diff['removed']);
+		$this->assertEquals([],$diff['changed']);
+	}
+
+	/**
 	 * Смена версии в скобках (формат «ICQ (версия N)») тоже опознаётся
 	 */
 	public function testSoftVersionInParentheses()

@@ -96,14 +96,19 @@ class SwListType extends TextType
 	}
 
 	/**
-	 * Ключ опознания «то же ПО, другая версия»: вендор + имя без цифровых
-	 * (версионных) фрагментов. Отличить смену версии от полной замены ПО
-	 * по отпечатку нельзя, поэтому эвристика: совпало всё кроме цифр — версия
+	 * Ключ опознания «то же ПО, другая версия»: вендор + имя без версионных
+	 * фрагментов. Отличить смену версии от полной замены ПО по отпечатку
+	 * нельзя, поэтому эвристика: совпало всё кроме версии — это обновление
 	 */
 	protected static function updateKey(array $item): string
 	{
-		$base=preg_replace('/\d[\d.,_-]*/u','',$item['name']);	//цифровые фрагменты
-		$base=preg_replace('/\(\s*\)/u','',$base);				//опустевшие скобки
+		$base=$item['name'];
+		//хвостовая версия пакетного стиля (python3-jwt-2.10.1-2+deb13u1):
+		//от разделителя и цифры до конца имени, включая буквенно-цифровые
+		//суффиксы ревизий (+deb13u1, ~rc1)
+		$base=preg_replace('/[-_ ]\d[\w.+~:-]*$/u','',$base);
+		$base=preg_replace('/\d[\d.,_-]*/u','',$base);	//цифровые фрагменты внутри имени
+		$base=preg_replace('/\(\s*\)/u','',$base);		//опустевшие скобки
 		$base=trim(preg_replace('/\s+/u',' ',$base));
 		return mb_strtolower(trim($item['publisher'])).'|'.mb_strtolower($base);
 	}
@@ -121,21 +126,25 @@ class SwListType extends TextType
 
 	/**
 	 * HTML обновления ПО: общее начало имени + «хвост старый → хвост новый»,
-	 * чтобы было видно, что сменился только кусок версии
+	 * чтобы было видно, что сменился только кусок версии. Имя режется на
+	 * фрагменты по разделителям (пробел/дефис/подчёркивание), чтобы работали
+	 * и пакетные имена без пробелов (python3-jwt-2.6.0-1)
 	 */
 	protected static function renderUpdate(array $old,array $new): string
 	{
-		$oldWords=preg_split('/\s+/u',trim($old['name']));
-		$newWords=preg_split('/\s+/u',trim($new['name']));
-		//общий префикс по словам; хотя бы одно слово оставляем в хвостах
+		$oldPieces=preg_split('/([-_ \/])/u',trim($old['name']),-1,PREG_SPLIT_DELIM_CAPTURE);
+		$newPieces=preg_split('/([-_ \/])/u',trim($new['name']),-1,PREG_SPLIT_DELIM_CAPTURE);
+		$max=min(count($oldPieces),count($newPieces));
 		$common=0;
-		while ($common<count($oldWords)-1 && $common<count($newWords)-1
-			&& $oldWords[$common]===$newWords[$common]) $common++;
-		$prefix=implode(' ',array_slice($oldWords,0,$common));
-		$oldTail=implode(' ',array_slice($oldWords,$common));
-		$newTail=implode(' ',array_slice($newWords,$common));
+		while ($common<$max && $oldPieces[$common]===$newPieces[$common]) $common++;
+		//общий префикс заканчивается разделителем: хвосты - целые фрагменты,
+		//версию не режем посередине (не «LibreOffice 7.<del>4.1.2</del>»)
+		while ($common>0 && !preg_match('/^[-_ \/]$/u',$oldPieces[$common-1])) $common--;
+		$prefix=implode('',array_slice($oldPieces,0,$common));
+		$oldTail=implode('',array_slice($oldPieces,$common));
+		$newTail=implode('',array_slice($newPieces,$common));
 
-		$html=(strlen($prefix)?Html::encode($prefix).' ':'')
+		$html=Html::encode($prefix)
 			.'<del class="text-muted">'.Html::encode($oldTail).'</del>'
 			.' &rarr; '.Html::encode($newTail);
 		if (strlen(trim($new['publisher'])))
