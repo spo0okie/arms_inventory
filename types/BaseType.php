@@ -44,6 +44,14 @@ abstract class BaseType implements AttributeTypeInterface
 	}
 
 	/**
+	 * Diff двух значений атрибута для карточки изменений журнала истории
+	 * (контракт — см. AttributeTypeInterface::diffValues). Дефолт — null:
+	 * собственного diff-представления нет, потребитель показывает генерик
+	 * («старое → новое» или множества).
+	 */
+	public function diffValues(?string $old, ?string $new): ?array {return null;}
+
+	/**
 	 * Типовая часть подсказки заполнения — «как вводить» (лёгкий слой
 	 * документации, см. ui-sources.md §0.1). Сборщик тултипов подклеивает
 	 * её к смысловой части атрибута в форме. null — типовой части нет.

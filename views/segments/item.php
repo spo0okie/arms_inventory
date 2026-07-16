@@ -12,7 +12,8 @@ if (!empty($model)) {
 	if (!isset($no_class)) {
 		if (!isset($item_class)) {
 			//легаси CSS-класс по коду — fallback пока сегменту не назначен маркер
-			$item_class='segments-item '.($model->marker?'':$model->code);
+			//(?? false: у History-модели связи marker нет — падаем в легаси-класс)
+			$item_class='segments-item '.(($model->marker??false)?'':$model->code);
 		}
 	} else {
 		$item_class='segments-item';

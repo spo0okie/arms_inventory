@@ -12,7 +12,8 @@ if (!empty($model)) {
 		'model'=>$model,
 		'name'=>$name,
 		//легаси CSS-класс по имени — fallback пока домену не назначен маркер
-		'item_class'=>'net-domains-item text-monospace '.($model->marker?'':'net-domain-'.$model->name),
+		//(?? false: у History-модели связи marker нет — падаем в легаси-класс)
+		'item_class'=>'net-domains-item text-monospace '.(($model->marker??false)?'':'net-domain-'.$model->name),
 		'ttipUrl'=>Url::to(['net-domains/ttip','id'=>$model->id]),
 		'updateUrl'=>['net-domains/update','id'=>$model->id,'return'=>'previous'],
 	]);

@@ -65,7 +65,20 @@ $renderSetItems=static function(HistoryModel $record,string $attr,array $items) 
 		<?php foreach ($changed as $attr): ?>
 		<li class="list-group-item">
 			<?= ModelFieldWidget::renderFieldTitle($model->masterInstance,$attr,null,'strong') ?>:
-			<?php if ($model->attributeIsMultiValue($attr)):
+			<?php if (!is_null($typed=$model->attributeTypedDiff($attr))):
+				//типовой diff (отпечатки софта/железа): только изменения
+				$lines=[];
+				foreach ($typed['added'] as $item)
+					$lines[]='<span class="text-success">+</span> '.$item;
+				foreach ($typed['removed'] as $item)
+					$lines[]='<span class="text-danger">−</span> <del class="text-muted">'.$item.'</del>';
+				foreach ($typed['changed'] as $item)
+					$lines[]='<span class="text-primary">±</span> '.$item;
+				echo count($lines)
+					?implode('<br/>',$lines)
+					:'<span class="text-muted">(изменение только форматирования)</span>';
+			?>
+			<?php elseif ($model->attributeIsMultiValue($attr)):
 				$diff=$model->attributeSetDiff($attr); ?>
 				<?php if (count($diff['added'])): ?>
 					<span class="text-success">+</span> <?= $renderSetItems($model,$attr,$diff['added']) ?>

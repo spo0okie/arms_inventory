@@ -4,6 +4,7 @@ namespace app\types;
 
 use app\generation\context\AttributeContext;
 use app\models\base\ArmsModel;
+use yii\helpers\Html;
 use yii\web\View;
 
 class HwListType extends TextType
@@ -11,6 +12,88 @@ class HwListType extends TextType
 	public static function name(): string
 	{
 		return 'hw-list';
+	}
+
+	/**
+	 * Diff отпечатков железа для журнала истории (issue #194): вместо пары
+	 * гигантских JSON — только добавленные и выбывшие элементы отпечатка.
+	 * У железа нет версий, поэтому обновлений (changed) не бывает:
+	 * заменённый элемент — это выбывший + добавленный
+	 */
+	public function diffValues(?string $old, ?string $new): ?array
+	{
+		$oldList=static::parseList($old);
+		$newList=static::parseList($new);
+		if ($oldList===null || $newList===null) return null;
+
+		return [
+			'added'=>array_map([static::class,'renderListItem'],static::listDiff($newList,$oldList)),
+			'removed'=>array_map([static::class,'renderListItem'],static::listDiff($oldList,$newList)),
+			'changed'=>[],
+		];
+	}
+
+	/**
+	 * Разбирает отпечаток железа в список элементов [['type'=>..,'fields'=>[..]],..]
+	 * Реальные отпечатки грязнее канона валидатора (скаляр вместо объекта:
+	 * {"processor":"Intel..."}; типы вне справочника: Monitor) - разбираем
+	 * терпимо, скалярное описание становится единственным полем
+	 * @return array|null null - значение не разбирается как список железа
+	 */
+	public static function parseList(?string $value): ?array
+	{
+		if (!strlen(trim((string)$value))) return [];
+		$items=json_decode('['.$value.']',true);
+		if (!is_array($items)) return null;
+		$list=[];
+		foreach ($items as $item) {
+			if (!is_array($item) || count($item)!==1) return null;
+			$type=array_key_first($item);
+			$payload=$item[$type];
+			$list[]=[
+				'type'=>(string)$type,
+				'fields'=>is_array($payload)?$payload:['value'=>$payload],
+			];
+		}
+		return $list;
+	}
+
+	/**
+	 * Элементы $a, отсутствующие в $b (мультимножество: дубли считаются)
+	 */
+	protected static function listDiff(array $a,array $b): array
+	{
+		$counts=[];
+		foreach ($b as $item) {
+			$key=static::itemKey($item);
+			$counts[$key]=($counts[$key]??0)+1;
+		}
+		$diff=[];
+		foreach ($a as $item) {
+			$key=static::itemKey($item);
+			if (($counts[$key]??0)>0) {$counts[$key]--;continue;}
+			$diff[]=$item;
+		}
+		return $diff;
+	}
+
+	protected static function itemKey(array $item): string
+	{
+		return $item['type'].'|'.json_encode($item['fields'],JSON_UNESCAPED_UNICODE);
+	}
+
+	/**
+	 * HTML элемента отпечатка: «тип: значения полей»
+	 */
+	protected static function renderListItem(array $item): string
+	{
+		$values=[];
+		foreach ($item['fields'] as $value) {
+			if (is_scalar($value) && strlen(trim((string)$value)))
+				$values[]=(string)$value;
+		}
+		return Html::encode($item['type']).': '
+			.'<span class="text-muted">'.Html::encode(implode(', ',$values)).'</span>';
 	}
 
 	/**

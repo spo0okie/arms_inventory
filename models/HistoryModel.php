@@ -389,6 +389,23 @@ class HistoryModel extends ArmsModel
 	}
 
 	/**
+	 * Diff значения атрибута силами его типа (отпечатки софта/железа и т.п.,
+	 * см. AttributeTypeInterface::diffValues): только изменения вместо пары
+	 * полных значений
+	 * @param string $attr
+	 * @return array|null ['added'=>[],'removed'=>[],'changed'=>[]] готовых
+	 * HTML-элементов; null - у типа нет собственного diff-представления
+	 */
+	public function attributeTypedDiff(string $attr): ?array {
+		if ($this->attributeIsLink($attr)) return null;
+		$previous=$this->getPreviousRecord();
+		return $this->getAttributeTypeClass($attr)->diffValues(
+			is_object($previous)?$previous->$attr:null,
+			$this->$attr
+		);
+	}
+
+	/**
 	 * Загрузить объект-ссылку в состоянии на дату этой записи журнала
 	 * @param string $attr
 	 * @param int    $id

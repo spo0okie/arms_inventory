@@ -4,6 +4,7 @@ namespace app\types;
 
 use app\generation\context\AttributeContext;
 use app\models\base\ArmsModel;
+use yii\helpers\Html;
 use yii\web\View;
 
 class SwListType extends TextType
@@ -11,6 +12,135 @@ class SwListType extends TextType
 	public static function name(): string
 	{
 		return 'soft-list';
+	}
+
+	/**
+	 * Разбирает отпечаток софта в список карточек [['publisher'=>..,'name'=>..],..]
+	 * @return array|null null - значение не разбирается как список ПО
+	 */
+	public static function parseList(?string $value): ?array
+	{
+		if (!strlen(trim((string)$value))) return [];
+		$items=json_decode('['.$value.']',true);
+		if (!is_array($items)) return null;
+		$list=[];
+		foreach ($items as $item) {
+			if (!is_array($item) || !isset($item['name'])) return null;
+			$list[]=[
+				'publisher'=>(string)($item['publisher']??''),
+				'name'=>(string)$item['name'],
+			];
+		}
+		return $list;
+	}
+
+	/**
+	 * Diff отпечатков софта для журнала истории (issue #194): вместо пары
+	 * гигантских JSON показываем только изменения — установленное ПО (added),
+	 * удалённое (removed) и обновлённое (changed: вендор и имя с точностью
+	 * до цифровых фрагментов совпали — считаем сменой версии)
+	 */
+	public function diffValues(?string $old, ?string $new): ?array
+	{
+		$oldList=static::parseList($old);
+		$newList=static::parseList($new);
+		if ($oldList===null || $newList===null) return null;
+
+		//мультимножества: одинаковые карточки взаимно сокращаются
+		$removed=static::listDiff($oldList,$newList);
+		$added=static::listDiff($newList,$oldList);
+
+		//спаривание «обновлений»: выбывшая и добавленная карточки одного ПО
+		$changed=[];
+		foreach ($removed as $ri=>$oldItem) {
+			foreach ($added as $ai=>$newItem) {
+				if (static::updateKey($oldItem)!==static::updateKey($newItem)) continue;
+				$changed[]=static::renderUpdate($oldItem,$newItem);
+				unset($removed[$ri],$added[$ai]);
+				break;
+			}
+		}
+
+		return [
+			'added'=>array_map([static::class,'renderListItem'],array_values($added)),
+			'removed'=>array_map([static::class,'renderListItem'],array_values($removed)),
+			'changed'=>$changed,
+		];
+	}
+
+	/**
+	 * Карточки $a, отсутствующие в $b (мультимножество: дубли считаются)
+	 */
+	protected static function listDiff(array $a,array $b): array
+	{
+		$counts=[];
+		foreach ($b as $item) {
+			$key=static::itemKey($item);
+			$counts[$key]=($counts[$key]??0)+1;
+		}
+		$diff=[];
+		foreach ($a as $item) {
+			$key=static::itemKey($item);
+			if (($counts[$key]??0)>0) {$counts[$key]--;continue;}
+			$diff[]=$item;
+		}
+		return $diff;
+	}
+
+	/**
+	 * Ключ точного совпадения карточки ПО
+	 */
+	protected static function itemKey(array $item): string
+	{
+		return mb_strtolower(trim($item['publisher']).'|'.trim($item['name']));
+	}
+
+	/**
+	 * Ключ опознания «то же ПО, другая версия»: вендор + имя без цифровых
+	 * (версионных) фрагментов. Отличить смену версии от полной замены ПО
+	 * по отпечатку нельзя, поэтому эвристика: совпало всё кроме цифр — версия
+	 */
+	protected static function updateKey(array $item): string
+	{
+		$base=preg_replace('/\d[\d.,_-]*/u','',$item['name']);	//цифровые фрагменты
+		$base=preg_replace('/\(\s*\)/u','',$base);				//опустевшие скобки
+		$base=trim(preg_replace('/\s+/u',' ',$base));
+		return mb_strtolower(trim($item['publisher'])).'|'.mb_strtolower($base);
+	}
+
+	/**
+	 * HTML карточки ПО: имя + вендор
+	 */
+	protected static function renderListItem(array $item): string
+	{
+		$html=Html::encode($item['name']);
+		if (strlen(trim($item['publisher'])))
+			$html.=' <span class="text-muted">('.Html::encode($item['publisher']).')</span>';
+		return $html;
+	}
+
+	/**
+	 * HTML обновления ПО: общее начало имени + «хвост старый → хвост новый»,
+	 * чтобы было видно, что сменился только кусок версии
+	 */
+	protected static function renderUpdate(array $old,array $new): string
+	{
+		$oldWords=preg_split('/\s+/u',trim($old['name']));
+		$newWords=preg_split('/\s+/u',trim($new['name']));
+		//общий префикс по словам; хотя бы одно слово оставляем в хвостах
+		$common=0;
+		while ($common<count($oldWords)-1 && $common<count($newWords)-1
+			&& $oldWords[$common]===$newWords[$common]) $common++;
+		$prefix=implode(' ',array_slice($oldWords,0,$common));
+		$oldTail=implode(' ',array_slice($oldWords,$common));
+		$newTail=implode(' ',array_slice($newWords,$common));
+
+		$html=(strlen($prefix)?Html::encode($prefix).' ':'')
+			.'<del class="text-muted">'.Html::encode($oldTail).'</del>'
+			.' &rarr; '.Html::encode($newTail);
+		if (strlen(trim($new['publisher'])))
+			$html.=' <span class="text-muted">('.Html::encode($new['publisher']).')</span>';
+		return $html;
 	}
 
 	/**
