@@ -73,7 +73,7 @@ $this->params['headerContent']=
 		.ModelFieldWidget::widget(['model'=>$model,'field'=>'support', 'item_options'=>['short'=>true]])
 	.'</div>'
 	.'<div class="me-5 flex-lg-shrink-1">'
-		.ModelFieldWidget::widget(['model'=>$model,'field'=>'serviceRecursive','item_options'=>['static_view'=>true]])
+		.ModelFieldWidget::widget(['model'=>$model,'field'=>'serviceEffective','item_options'=>['static_view'=>true]])
 		.$this->render('/attaches/model-list',compact(['model','static_view']))
 	.'</div>'
 	.'<div class="flex-fill flex-lg-shrink-0">'

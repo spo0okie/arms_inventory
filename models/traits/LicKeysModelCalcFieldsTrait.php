@@ -9,18 +9,18 @@ namespace app\models\traits;
 
 trait LicKeysModelCalcFieldsTrait
 {
-	public function getServiceRecursive()
+	public function getServiceEffective()
 	{
-		return $this?->licItem?->serviceRecursive??null;
+		return $this?->licItem?->serviceEffective??null;
 	}
 	public function getResponsible()
 	{
-		return $this?->serviceRecursive?->responsible??null;
+		return $this?->serviceEffective?->responsible??null;
 	}
-	
+
 	public function getSupport()
 	{
-		return $this?->serviceRecursive?->support??null;
+		return $this?->serviceEffective?->support??null;
 	}
 	
 	/**
