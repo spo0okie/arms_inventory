@@ -148,6 +148,7 @@ class LicKeys extends ArmsModel
 				'Сервис (с учетом закупки)',
 				'hint'=>'Сервис закупки этого ключа (или типа лицензий, если у закупки не задан)',
 				'ref'=>Services::class,
+				'typeClass' => \app\types\LinkType::class,	//возвращает объект Services (ссылку)
 				//эффективное значение: тянется через licItem (владелец), НЕ дерево parentAttr,
 				//поэтому нотация *Effective (getServiceEffective), а не *Recursive/is_inheritable
 			],

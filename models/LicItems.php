@@ -208,13 +208,15 @@ class LicItems extends ArmsModel
 				'placeholder' => is_null($name=$this?->licGroup?->service?->name)?'Не относится ни к какому сервису':($name.' (из типа лиц.)'),
 				'typeClass' => \app\types\LinkType::class,
 			],
-			'serviceRecursive'=>[
+			'serviceEffective'=>[
 				'Сервис (с учетом типа лицензий)',
 				'hint'=>'В рамках какого сервиса/услуги производится/сопровождается лицензирование.<br>'
 					.'Нужно для определения ответственного: кто должен следить за актуальностью лицензии<br>'
 					.'Если не задан - наследуется из типа лицензий',
 				'ref'=>Services::class,
-				'is_inheritable'=>true,	//наследуется от licGroup (не через parentAttr)
+				'typeClass' => \app\types\LinkType::class,	//возвращает объект Services (ссылку)
+				//эффективное значение: своё поле, иначе владелец (licGroup) - НЕ дерево parentAttr,
+				//поэтому нотация *Effective (getServiceEffective), а не *Recursive/is_inheritable
 			],
 			'status' => [
 				'Состояние',
