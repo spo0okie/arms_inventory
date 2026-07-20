@@ -214,6 +214,7 @@ class Techs extends ArmsModel
 			'effectiveUser',
 			'fqdn',
 			'manufacturer',
+			'responsible',
 			'servicesResponsible',
 			'servicesSupportTeam',
 			'site',
