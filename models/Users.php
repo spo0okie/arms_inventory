@@ -597,6 +597,40 @@ class Users extends ArmsModel implements IdentityInterface
 	}
 
 	/**
+	 * Сканы (фото/изображения), прикреплённые к сотруднику
+	 * @return ActiveQuery
+	 */
+	public function getScans()
+	{
+		return $this->hasMany(Scans::class, ['users_id'=>'id']);
+	}
+
+	/**
+	 * Фотографии сотрудника — сканы-изображения, отсортированные от новых к старым
+	 * (последнее по дате — первым, аналогия с аватаром в мессенджерах). PDF и прочие
+	 * не-изображения сюда не попадают.
+	 * @return Scans[]
+	 */
+	public function getPhotos()
+	{
+		if (isset($this->attrsCache['photos'])) return $this->attrsCache['photos'];
+		$photos=[];
+		foreach ($this->scans as $scan) if ($scan->isImage) $photos[]=$scan;
+		usort($photos, static fn($a,$b) => $b->fileDate <=> $a->fileDate);
+		return $this->attrsCache['photos']=$photos;
+	}
+
+	/**
+	 * Портрет сотрудника — последнее по дате изображение (или null, если фото нет).
+	 * Именно его SAPsync выгружает в PERSONAL_PHOTO Bitrix.
+	 * @return Scans|null
+	 */
+	public function getPhoto()
+	{
+		return $this->photos[0] ?? null;
+	}
+
+	/**
 	 * Непосредственный руководитель
 	 * @return ActiveQuery
 	 */

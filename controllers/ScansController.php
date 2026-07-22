@@ -344,6 +344,7 @@ class ScansController extends ArmsBaseController
 		$model->arms_id=null;
 		$model->techs_id=null;
 		$model->soft_id=null;
+		$model->users_id=null;
         $model->save();
 
         //вместо удаления отвязываем ото всех и сохраняем. Осиротевший скан может понадобиться при работе с журналами

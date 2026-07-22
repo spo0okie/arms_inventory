@@ -5,6 +5,7 @@
 
 
 //use kartik\nav\NavX;
+use app\models\Absences;
 use app\models\AccessTypes;
 use app\models\Aces;
 use app\models\Acls;
@@ -99,6 +100,7 @@ NavBar::begin([
 				'items' => [
 					['label' => Places::$titles, 'items'=>$places, 'class'=>'dropdown-menu dropdown-submenu'],
 					['label' => Users::$titles, 'url' => ['/users/index']],
+					['label' => Absences::$titles, 'url' => ['/absences/index']],
 					Yii::$app->params['departments.enable']?['label' => Departments::$titles, 'url' => ['/departments/index']]:'',
 					['label' => OrgPhones::$titles, 'url' => ['/org-phones/index']],
 					['label' => OrgInet::$titles, 'url' => ['/org-inet/index']],

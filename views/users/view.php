@@ -28,10 +28,10 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
 		</span>
 	<div class="row">
-		<div class="col-md-4">
+		<div class="col-md-5 ps-0">
 			<?= ModelWidget::widget(['model'=>$model, 'view'=>'card', 'static_view'=>false]) ?>
 		</div>
-		<div class="col-md-4">
+		<div class="col-md-4 ps-0">
 			<?php
 			//АРМ сотрудника (компьютеры из закреплённого оборудования); нет АРМ - нет и заголовка
 			$workplaceArms=[];
@@ -43,10 +43,10 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			}
 			?>
 		</div>
-		<div class="col-md-4">
+		<div class="col-md-3 p-0">
 			<br/>
 			<?php
-			
+
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'services',
 				'label' => 'Ответственный за сервисы:',
@@ -62,7 +62,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
-			
+
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => $compsField,
 				'label' => 'Ответственный за ОС:',
@@ -70,7 +70,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
-			
+
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'adminComps',
 				'label' => 'Выданы полномочия администратора:',
@@ -78,7 +78,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
-			
+
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'techsHead',
 				'label' => 'АРМ/оборудование числящиеся за подчиненными:',
@@ -86,7 +86,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
-			
+
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'techsIt',
 				'label' => 'Обслуживаемое сотрудником оборудование:',
@@ -94,7 +94,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
-			
+
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'techsResponsible',
 				'label' => 'АРМ/оборудование в ответственности:',
@@ -102,10 +102,10 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> false,
 			]);
-			
+
 			$materials=[];
 			foreach ($model->materials as $material) if ($material->rest>0) $materials[]=$material;
-			
+
 			echo ListObjectsWidget::widget([
 				'models' => $materials,
 				'title' => 'Ответственный за материалы:',
@@ -118,16 +118,16 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 				'card_options' => ['cardClass' => 'mb-3'],
 				'lineBr'=> true,
 			]);
-			
+
 			echo ModelFieldWidget::widget([
 				'model' => $model, 'field' => 'contracts',
 				'label' => 'Документы:',
 				'item_options' => ['static_view' => $static_view, 'user'=>false ],
 				'card_options' => ['cardClass' => 'mb-3'],
 			]);
-			
+
 			?>
-			
+
 			<?= $this->render('/attaches/model-list',['model'=>$model, 'static_view'=>$static_view]) ?>
 
 			<?= Users::isAdmin()?ModelWidget::widget(['model'=>$model, 'view'=>'roles', 'options'=>['static_view'=>false]]):'' ?>

@@ -10,13 +10,27 @@ use yii\web\UploadedFile;
 
 class ScansController extends BaseRestController
 {
-	
+
 	public $modelClass='app\models\Scans';
-	
-	
+
+	/**
+	 * Поля поиска (search/filter). SAPsync тянет фото сотрудника через
+	 * GET /api/scans?users_id=… и выбирает портрет как последний по fileDate
+	 * (отдельного флага портрета нет). Остальные владельцы — по образцу.
+	 * @var array
+	 */
+	public static array $searchFields=[
+		'id',
+		'users_id' => 'users_id',
+		'contracts_id' => 'contracts_id',
+		'techs_id' => 'techs_id',
+		'arms_id' => 'arms_id',
+	];
+
+
 	/**
 	 * Принимает загруженный файл скана и сохраняет его в БД и на диск.
-	 * Ожидает multipart/form-data с файлом scanFile и опциональным contracts_id.
+	 * Ожидает multipart/form-data с файлом scanFile и опциональными contracts_id/users_id.
 	 * Последовательно выполняет валидацию, загрузку файла (upload()) и сохранение модели.
 	 * При ошибке на любом этапе возвращает массив ошибок или JSON-строку с ошибкой.
 	 * При успехе возвращает созданную модель Scans.
@@ -24,6 +38,7 @@ class ScansController extends BaseRestController
 	 * POST-параметры:
 	 *   scanFile      — файл скана (multipart upload)
 	 *   contracts_id  — int, ID контракта для привязки (опционально)
+	 *   users_id      — int, ID сотрудника для привязки фото (опционально)
 	 *
 	 * @return mixed  Модель Scans при успехе, массив ошибок или строка с ошибкой при неудаче
 	 */
@@ -32,6 +47,7 @@ class ScansController extends BaseRestController
 		$model = new Scans();
 		$model->scanFile = UploadedFile::getInstanceByName('scanFile');
 		$model->contracts_id = Yii::$app->request->post('contracts_id');
+		$model->users_id = Yii::$app->request->post('users_id');
 		if (!$model->validate()) return $model->getErrors();
 		if (!$model->upload()) return '{"error":"upload err"}';
 		if (!$model->save(false)) return '{"error":"model saving error"}';

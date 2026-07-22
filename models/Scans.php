@@ -88,6 +88,7 @@ class Scans extends ArmsModel
 			'lic_types_id' => [LicTypes::$titles, 'hint' => 'Схема лицензирования, к которой прикреплён скан'],
 			'lic_items_id' => [LicItems::$titles, 'hint' => 'Закупка лицензий, к которой прикреплён скан'],
 			'soft_id' => ['Программный продукт', 'hint' => 'Программный продукт, к которому прикреплён скан'],
+			'users_id' => ['Сотрудник', 'hint' => 'Сотрудник, к которому прикреплён скан (фото). Портрет для выгрузки — последнее по дате изображение'],
 			'format' => ['typeClass' => \app\types\StringType::class],
 			'fileSize' => ['typeClass' => \app\types\IntegerType::class],
 			'fileDate' => ['typeClass' => \app\types\IntegerType::class],
@@ -119,6 +120,7 @@ class Scans extends ArmsModel
 				'arms_id',
 				'techs_id',
 				'soft_id',
+				'users_id',
 			], 'integer'],
 	        [['scanFile'], 'file', 'skipOnEmpty' => false, 'extensions' => static::$supportedFormats, 'on' => 'create'],
         ];
@@ -522,6 +524,26 @@ class Scans extends ArmsModel
 	public function getLicItem()
 	{
 		return $this->hasOne(LicItems::class, ['id' => 'lic_items_id']);
+	}
+
+	/**
+	 * Возвращает сотрудника, к которому прикреплён этот скан (фото)
+	 */
+	public function getUser()
+	{
+		return $this->hasOne(Users::class, ['id' => 'users_id']);
+	}
+
+	/** @var string[] форматы, считающиеся изображением (фото), — под портрет и галерею */
+	public static $imageFormats = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff'];
+
+	/**
+	 * Признак того, что скан — изображение (а не, например, PDF-документ)
+	 * @return bool
+	 */
+	public function getIsImage()
+	{
+		return in_array(strtolower($this->format ?? ''), static::$imageFormats, true);
 	}
 	
 	/**

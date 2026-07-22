@@ -11,45 +11,50 @@ use app\components\widgets\page\ModelWidget;
 if (!isset($static_view)) $static_view=false;
 
 ?>
-    <h1>
-		<?= app\components\LinkObjectWidget::widget([
-			'model'=>$model,
-			'static'=>$static_view,
-			'confirmMessage' => 'Действительно удалить этого пользователя?',
-			'undeletableMessage'=>'Нельзя удалить этого пользователя,'.
-				'<br> т.к. к нему привязаны другие объекты',
-		]) ?>
-    </h1>
-	<?= $model->nosync?'<span class="fas fa-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
-	<?= ModelFieldWidget::renderFieldTitle($model,'Bday',null,'span','Дата рождения') ?>: <?= ModelFieldWidget::renderFieldValue($model,'Bday') ?> <br/>
-    <?= \app\components\ModelFieldWidget::renderCompositeTitle($model,['employee_id','Persg'],'Табельный №','span') ?>
-	<?= $model->employee_id ?> (<?= \app\models\Users::$WTypes[$model->Persg][1] ?? $model->Persg ?>)
-    -
-	<?php
-        if ($model->Uvolen) {
-            if (strlen($model->resign_date??''))
-                echo 'Уволен с '.$model->resign_date;
-            else
-                echo 'Уволен';
-	    } elseif (strlen($model->employ_date??''))
-			echo 'Работает с '.$model->employ_date;
-	    else
-			echo 'Работает';
-	?>
-    <p>
-	    <?= \app\components\ChainWidget::widget(['segments'=>[
-			['model'=>$model,'field'=>'org'],
-			['model'=>$model,'field'=>'orgStruct','chain'=>true],
-			['model'=>$model,'field'=>'Doljnost'],
-		]]) ?>
-    </p>
-	<?php if (is_object($model->manager)) { ?>
-		<p>
-			<?= ModelFieldWidget::renderFieldTitle($model,'manager_id',null,'span') ?>:
-			<?= $model->manager->renderItem($this,['static_view'=>$static_view]) ?>
-		</p>
-	<?php } ?>
+    <div class="flex-row d-flex pb-3">
 
+	    <?= $this->render('_photos', ['model'=>$model, 'static_view'=>$static_view]) ?>
+	    <div class="ps-3">
+		    <h2>
+				<?= app\components\LinkObjectWidget::widget([
+					'model'=>$model,
+					'static'=>$static_view,
+					'confirmMessage' => 'Действительно удалить этого пользователя?',
+					'undeletableMessage'=>'Нельзя удалить этого пользователя,'.
+						'<br> т.к. к нему привязаны другие объекты',
+				]) ?>
+		    </h2>
+			<?= $model->nosync?'<span class="fas fa-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
+			<?= ModelFieldWidget::renderFieldTitle($model,'Bday',null,'span','Дата рождения') ?>: <?= ModelFieldWidget::renderFieldValue($model,'Bday') ?> <br/>
+		    <?= \app\components\ModelFieldWidget::renderCompositeTitle($model,['employee_id','Persg'],'Табельный №','span') ?>
+			<?= $model->employee_id ?> (<?= \app\models\Users::$WTypes[$model->Persg][1] ?? $model->Persg ?>)
+		    -
+			<?php
+		        if ($model->Uvolen) {
+		            if (strlen($model->resign_date??''))
+		                echo 'Уволен с '.$model->resign_date;
+		            else
+		                echo 'Уволен';
+			    } elseif (strlen($model->employ_date??''))
+					echo 'Работает с '.$model->employ_date;
+			    else
+					echo 'Работает';
+			?>
+		    <p class="m-0">
+			    <?= \app\components\ChainWidget::widget(['segments'=>[
+					['model'=>$model,'field'=>'org'],
+					['model'=>$model,'field'=>'orgStruct','chain'=>true],
+					['model'=>$model,'field'=>'Doljnost'],
+				]]) ?>
+		    </p>
+			<?php if (is_object($model->manager)) { ?>
+				<p class="m-0">
+					<?= ModelFieldWidget::renderFieldTitle($model,'manager_id',null,'span') ?>:
+					<?= $model->manager->renderItem($this,['static_view'=>$static_view]) ?>
+				</p>
+			<?php } ?>
+	    </div>
+    </div>
 	<div class="flex-row d-flex flex-wrap pb-3">
 		<span class="pe-4">
 			<span class="h5"><?= ModelFieldWidget::renderFieldTitle($model,'Login',null,'span','Логин в AD') ?>: </span><?= ModelFieldWidget::renderFieldValue($model,'Login') ?>
@@ -60,7 +65,7 @@ if (!isset($static_view)) $static_view=false;
 	</div>
 
     <?= ModelFieldWidget::renderCompositeTitle($model,['Phone','Mobile','private_phone','work_phone'],'Телефоны') ?>
-    <p class="pb-3">
+    <p class="mb-3">
         Внутренний: <?= $this->render('internal-phone',compact('model')) ?><br />
 		Сотовый: <?= $this->render('mobile-phone',['phone'=>$model->Mobile,'static_view'=>$static_view]) ?><br />
 		<?= strlen($model->private_phone??'')?("Личный: ".$this->render('mobile-phone',['phone'=>$model->private_phone,'static_view'=>$static_view])." <br />"):'' ?>
@@ -71,7 +76,7 @@ if (!isset($static_view)) $static_view=false;
 		'model' => $model, 'field' => 'compsFromTechs',
 		'label' => 'Привязанные ОС:',
 		'item_options' => ['static_view' => true, 'class'=>'text-nowrap','rc'=>true],
-		'card_options' => ['cardClass' => 'mb-3'],
+		//'card_options' => ['cardClass' => 'mb-3'],
 		'lineBr'=> $static_view,
 	]) ?>
 
@@ -79,7 +84,7 @@ if (!isset($static_view)) $static_view=false;
 		'model' => $model, 'field' => 'netIps',
 		'label' => 'Закрепленные IP:',
 		'item_options' => ['static_view' => $static_view, 'class'=>'text-nowrap'],
-		'card_options' => ['cardClass' => 'mb-3'],
+		//'card_options' => ['cardClass' => 'mb-3'],
 		'lineBr'=> $static_view,
 	]) ?>
 
@@ -87,7 +92,7 @@ if (!isset($static_view)) $static_view=false;
 		'model' => $model, 'field' => 'techs',
 		'label' => 'АРМ/Оборудование числящиеся за сотрудником:',
 		'item_options' => ['static_view' => $static_view, ],
-		'card_options' => ['cardClass' => 'mb-3'],
+		//'card_options' => ['cardClass' => 'mb-3'],
 		'lineBr'=> false,
 	]) ?>
 
@@ -111,5 +116,3 @@ if (!isset($static_view)) $static_view=false;
 	</p>
 	<br />
 <?php }
-
-

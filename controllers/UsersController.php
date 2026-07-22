@@ -21,7 +21,44 @@ class UsersController extends ArmsBaseController
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			'view'=>['item-by-login'],
+			'edit'=>['uploads'],
 		]);
+	}
+
+	/**
+	 * Страница загрузки/редактирования фотографий сотрудника.
+	 *
+	 * Рендерит форму загрузки изображений (kartik FileInput), привязывающую
+	 * загружаемые сканы к сотруднику через users_id (по образцу Places/uploads).
+	 * Портрет для выгрузки в Bitrix определяется как последнее по дате изображение.
+	 *
+	 * GET-параметры:
+	 * @param int $id ID сотрудника (Users)
+	 *
+	 * @return string
+	 * @throws NotFoundHttpException если сотрудник не найден
+	 */
+	public function actionUploads(int $id)
+	{
+		return $this->render('uploads', [
+			'model' => $this->findModel($id),
+		]);
+	}
+
+	/**
+	 * Acceptance-данные для {@see actionUploads()}: страница открывается без
+	 * предзагруженных фото — достаточно существующего сотрудника (getTestData()['full']).
+	 *
+	 * @return array
+	 */
+	public function testUploads(): array
+	{
+		$testData = $this->getTestData();
+		return [[
+			'name' => 'uploads page',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => 200,
+		]];
 	}
 	
 
