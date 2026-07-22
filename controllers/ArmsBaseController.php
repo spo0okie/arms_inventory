@@ -184,8 +184,84 @@ class ArmsBaseController extends Controller
 			//данные для теста валидации модели
 			static::$testDataCache[$class]['validate']=		ModelFactory::create($class,['empty'=>true]);
 			static::$testDataCache[$class]['validate-data']=ModelFactory::create($class,['save'=>false]);
+			//сценарий наследования: пустой ребёнок (наследуемые поля не заданы) при
+			//заполненном предке. Только так исполняется ветка "своё пусто -> тянем у
+			//предка" (renderAttributeToText / getAttributeInheritablePlaceholder),
+			//которую заполненная и одиночная пустая модели не покрывают.
+			//'inherited'      - сохранённый ребёнок (для GET-рендера формы, ActiveField),
+			//'inherited-data' - несохранённый ребёнок (POST в actionValidate/actionCreate).
+			[$inherited,$inheritedData]=$this->buildInheritedTestData($class);
+			static::$testDataCache[$class]['inherited']=		$inherited;
+			static::$testDataCache[$class]['inherited-data']=	$inheritedData;
 		}
 		return static::$testDataCache[$class];
+	}
+
+	/**
+	 * Строит тестовые данные для сценария наследования: пустого «ребёнка», у которого
+	 * наследуемые атрибуты не заданы, а ссылка на предка ({@see ArmsModel::$parentAttr})
+	 * указывает на полностью заполненного «предка» (роль 'full'). Возвращает пару
+	 * [сохранённый ребёнок, несохранённый ребёнок] либо [null,null], если модель не
+	 * наследуемая или не умеет резолвить предка (плоская сущность — сценарий неприменим).
+	 *
+	 * @param string $class
+	 * @return array{0: ArmsModel|null, 1: ArmsModel|null}
+	 */
+	protected function buildInheritedTestData(string $class): array
+	{
+		$probe=new $class();
+
+		//есть ли вообще наследуемые атрибуты
+		$hasInheritable=false;
+		foreach ($probe->attributeData() as $data) {
+			if (is_array($data) && !empty($data['is_inheritable'])) { $hasInheritable=true; break; }
+		}
+		if (!$hasInheritable) return [null,null];
+
+		//через какой хранимый атрибут выставляется ссылка на предка (FK loader-а parentAttr)
+		$parentAttr=$probe->parentAttr;
+		if (!$probe->canGetProperty($parentAttr)) return [null,null];
+		$parentFk=$probe->attributeIsLoader($parentAttr);   //напр. parentService -> parent_id
+		if (!$parentFk) return [null,null];
+
+		//предок - уже созданная полностью заполненная модель того же класса
+		$parent=static::$testDataCache[$class]['full']??null;
+		if (!is_object($parent)) return [null,null];
+		$parentId=$parent->getPrimaryKey();
+
+		try {
+			//сохранённый ребёнок - для GET-рендера формы (ActiveField -> getAttributePlaceholder)
+			$inherited=ModelFactory::create($class,['empty'=>true,'save'=>false]);
+			$inherited->$parentFk=$parentId;
+			$inherited->save(false);
+
+			//несохранённый ребёнок - как POST-данные (actionValidate/actionCreate)
+			$inheritedData=ModelFactory::create($class,['empty'=>true,'save'=>false]);
+			$inheritedData->$parentFk=$parentId;
+		} catch (\Throwable $e) {
+			//не удалось собрать иерархию - сценарий пропускаем, а не роняем весь провайдер
+			return [null,null];
+		}
+
+		return [$inherited,$inheritedData];
+	}
+
+	/**
+	 * POST-тело формы для модели в том виде, в каком его ждёт {@see \yii\base\Model::load()}:
+	 * атрибуты обёрнуты под именем формы ({@see \yii\base\Model::formName()}). Без обёртки
+	 * плоский массив от {@see ModelHelper::fillForm()} НЕ загружается (load() возвращает false),
+	 * и POST-сценарий валидации/создания/обновления оказывается холостым — модель остаётся
+	 * пустой, присланные данные игнорируются. Если formName() пустой (редкие модели вроде
+	 * ScheduledAccess) — данные и правда плоские, обёртка не нужна.
+	 *
+	 * @param ArmsModel $model
+	 * @return array
+	 */
+	protected function formPost(ArmsModel $model): array
+	{
+		$data=ModelHelper::fillForm($model);
+		$name=$model->formName();
+		return $name===''?$data:[$name=>$data];
 	}
 
 	/**
@@ -710,10 +786,14 @@ class ArmsBaseController extends Controller
 		$testData=$this->getTestData();
 		$full=	$testData['full'];
 		$empty=	$testData['empty'];
-		return [
+		$scenarios=[
 			['name' => 'item full',  'GET' => ['id' => $full->id],  'response' => 200,],
 			['name' => 'item empty', 'GET' => ['id' => $empty->id], 'response' => 200,],
 		];
+		if (is_object($testData['inherited']??null)) {
+			$scenarios[]=['name' => 'item inherited empty child','GET' => ['id' => $testData['inherited']->id],'response' => 200,];
+		}
+		return $scenarios;
 	}
 
 	/**
@@ -769,7 +849,7 @@ class ArmsBaseController extends Controller
 		$full=	$testData['full'];
 		$empty=	$testData['empty'];
 		$emptyName=$empty->getName();
-		return [
+		$scenarios=[
 			[
 				'name' => 'item by name full',
 				'GET' => ['name' => $full->getName()],
@@ -781,6 +861,16 @@ class ArmsBaseController extends Controller
 				'reason' => 'empty model has no name',
 			],
 		];
+		if (is_object($testData['inherited']??null)) {
+			$inheritedName=$testData['inherited']->getName();
+			$scenarios[]=[
+				'name' => 'item by name inherited empty child',
+				'GET' => ['name' => $inheritedName],
+				'skip' => empty($inheritedName),
+				'reason' => 'inherited model has no name',
+			];
+		}
+		return $scenarios;
 	}
 
 	/**
@@ -841,10 +931,14 @@ class ArmsBaseController extends Controller
 		$testData=$this->getTestData();
 		$full=	$testData['full'];
 		$empty=	$testData['empty'];
-		return [
+		$scenarios=[
 			['name' => 'ttip full',	 'GET' => ['id' => $full->id],	'response' => 200,],
 			['name' => 'ttip empty', 'GET' => ['id' => $empty->id], 'response' => 200,],
 		];
+		if (is_object($testData['inherited']??null)) {
+			$scenarios[]=['name' => 'ttip inherited empty child','GET' => ['id' => $testData['inherited']->id],'response' => 200,];
+		}
+		return $scenarios;
 	}
 
 	/**
@@ -891,10 +985,14 @@ class ArmsBaseController extends Controller
 		$testData=$this->getTestData();
 		$full=	$testData['full'];
 		$empty=	$testData['empty'];
-		return [
+		$scenarios=[
 			['name' => 'view full',	 'GET' => ['id' => $full->id],	'response' => 200,],
 			['name' => 'view empty', 'GET' => ['id' => $empty->id],'response' => 200,],
 		];
+		if (is_object($testData['inherited']??null)) {
+			$scenarios[]=['name' => 'view inherited empty child','GET' => ['id' => $testData['inherited']->id],'response' => 200,];
+		}
+		return $scenarios;
 	}
 
     /**
@@ -954,10 +1052,17 @@ class ArmsBaseController extends Controller
 		$testData=$this->getTestData();
 		$model=$testData['update'];
 		$data=$testData['validate-data'];
-		return [
-			['name' => 'validate new','POST' => ModelHelper::fillForm($data)],
-			['name' => 'validate existing','POST' => ModelHelper::fillForm($data),'GET' => ['id' => $model->id],],
+		$scenarios=[
+			['name' => 'validate new','POST' => $this->formPost($data)],
+			['name' => 'validate existing','POST' => $this->formPost($data),'GET' => ['id' => $model->id],],
 		];
+		//наследуемые поля пусты, предок задан - валидация должна пережить вычисление
+		//наследуемых плейсхолдеров (getDynamicPlaceholders -> renderAttributeToText)
+		if (is_object($testData['inherited-data']??null)) {
+			$scenarios[]=['name' => 'validate inherited empty child',
+				'POST' => $this->formPost($testData['inherited-data'])];
+		}
+		return $scenarios;
 	}
 
 	/**
@@ -1045,14 +1150,24 @@ class ArmsBaseController extends Controller
 	{
 		$testData=$this->getTestData();
 		$model=$testData['create'];
-		return [
+		$scenarios=[
 			['name' => 'form load'],
 			[
 				'name' => 'form post',
-				'POST'=>ModelHelper::fillForm($model),
+				'POST'=>$this->formPost($model),
 				'response' => [200,302],
 			],
 		];
+		//создание с пустыми наследуемыми полями при заданном предке - тот же
+		//наследуемый путь, но через actionCreate (load -> save/re-render формы)
+		if (is_object($testData['inherited-data']??null)) {
+			$scenarios[]=[
+				'name' => 'form post inherited empty child',
+				'POST'=>$this->formPost($testData['inherited-data']),
+				'response' => [200,302],
+			];
+		}
+		return $scenarios;
 	}
 
 
@@ -1126,15 +1241,29 @@ class ArmsBaseController extends Controller
 		$testData=$this->getTestData();
 		$update=$testData['update'];
 		$updateData=$testData['update-data'];
-		return [
+		$scenarios=[
 			['name' => 'form open','GET' => ['id' => $update->id]],
 			[
 				'name' => 'data post',
 				'GET' => ['id' => $update->id],
-				'POST' => ModelHelper::fillForm($updateData),
+				'POST' => $this->formPost($updateData),
 				'response' => [200,302],
 			]
 		];
+		//рендер формы наследуемого ребёнка: ActiveField дёргает getAttributePlaceholder
+		//на каждое поле - тот же наследуемый путь, что и в валидации, но при отрисовке
+		if (is_object($testData['inherited']??null)) {
+			$scenarios[]=['name' => 'form open inherited empty child',
+				'GET' => ['id' => $testData['inherited']->id]];
+			//и POST обновления наследуемого ребёнка (load пустых наследуемых + re-render)
+			$scenarios[]=[
+				'name' => 'data post inherited empty child',
+				'GET' => ['id' => $testData['inherited']->id],
+				'POST' => $this->formPost($testData['inherited']),
+				'response' => [200,302],
+			];
+		}
+		return $scenarios;
 	}
 
 

@@ -793,11 +793,15 @@ trait AttributeDataModelTrait
 			if (is_array($value)) {
 				$model=reset($value);
 				if (is_object($model)) {
-					return implode($glue,ArrayHelper::getArrayField($value,'name'));
+					return implode($glue,ArrayHelper::getArrayField($value,$name));
 				} else
 					return implode($glue,$value);
-			} else
-				return (string)($this->$attr);
+			} elseif (is_object($value))
+				//одиночный объект (computed ref/loader без refMulti, например Services::responsible):
+				//берём его имя, а не (string)$object — у моделей нет __toString и это валит форму
+				return (string)ArrayHelper::getField($value,$name,'');
+			else
+				return (string)$value;
 		}
 	}
 	
