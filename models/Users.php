@@ -193,7 +193,6 @@ class Users extends ArmsModel implements IdentityInterface
 	        [['employee_id', 'Orgeh', 'Bday', 'employ_date','resign_date'], 'string', 'max' => 16],
 	        [['Doljnost', 'Ename', 'Mobile','private_phone','ips','auth_key'], 'string', 'max' => 255],
 			[['notepad'],'safe'],
-	        [['id'], 'unique'],
 	        [['Email','uid'], 'string', 'max' => 64],
 	        [['Login', 'Phone', 'work_phone'], 'string', 'max' => 32],
 			['Login', function ($attribute, $params, $validator) {

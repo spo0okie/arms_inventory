@@ -583,7 +583,7 @@ class BaseRestController extends ActiveController
 			'name' => 'create valid',
 			'method' => 'POST',
 			'route' => '{controller}',
-			'body' => $data['create-data']->attributes,
+			'body' => $this->bodyAttributes($data['create-data']),
 			'response' => [200, 201],
 		]];
 	}
@@ -598,9 +598,23 @@ class BaseRestController extends ActiveController
 			'name' => 'update existing',
 			'method' => 'PUT',
 			'route' => '{controller}/' . $data['update']->id,
-			'body' => $data['update-data']->attributes,
+			'body' => $this->bodyAttributes($data['update-data']),
 			'response' => [200, 204],
 		]];
+	}
+
+	/**
+	 * Атрибуты модели для тела REST create/update БЕЗ первичного ключа.
+	 * PK не входит в пейлоад: при create его назначает БД, при update он берётся из URL.
+	 * Иначе присланный в теле id несохранённой модели (=null) обнуляет первичный ключ
+	 * на load() и роняет save() (см. Users::afterSave -> absorbUser -> null id).
+	 *
+	 * @param \app\models\base\ArmsModel $model
+	 * @return array
+	 */
+	protected function bodyAttributes(\app\models\base\ArmsModel $model): array
+	{
+		return array_diff_key($model->attributes, array_flip($model::primaryKey()));
 	}
 
 	/**
