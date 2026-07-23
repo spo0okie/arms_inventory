@@ -857,13 +857,6 @@ class Comps extends ArmsModel
 		return array_values($team);
 	}
 
-	public static function fetchNames(){
-		$list= static::find()
-			->select(['id','name'])
-			->all();
-		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
-	}
-
 	/**
 	 * @param Comps $comp
 	 * @throws Throwable
