@@ -7,6 +7,7 @@ use app\models\Domains;
 use Throwable;
 use Yii;
 use app\models\Comps;
+use app\models\Sandboxes;
 use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\db\StaleObjectException;
@@ -264,7 +265,32 @@ class CompsController extends ArmsBaseController
 	}
 
 	/**
-	 * Найти ОС по имени DOMAIN\computer, computer.domain.local или отдельно передав домен
+	 * Песочницы, суффикс которых стоит на конце введённого имени —
+	 * кандидаты для WYSIWYG-поиска клона по отображаемому имени {@see Comps::renderName()}.
+	 * Более длинные суффиксы первыми: интерпретация '1C_TEST' специфичнее 'TEST'
+	 * @param string $name
+	 * @return Sandboxes[]
+	 */
+	protected static function sandboxSuffixMatches(string $name) {
+		$matches=[];
+		foreach (Sandboxes::getAllItems(true) as $sandbox) {
+			/** @var Sandboxes $sandbox */
+			$len=mb_strlen($sandbox->suffix??'');
+			if (!$len || mb_strlen($name)<=$len) continue;
+			if (mb_strtolower(mb_substr($name,-$len))===mb_strtolower($sandbox->suffix))
+				$matches[]=$sandbox;
+		}
+		usort($matches,fn($a,$b)=>mb_strlen($b->suffix)-mb_strlen($a->suffix));
+		return $matches;
+	}
+
+	/**
+	 * Найти ОС по имени DOMAIN\computer, computer.domain.local или отдельно передав домен.
+	 * Имя резолвится WYSIWYG — так, как оно отображается ({@see Comps::renderName()}):
+	 *  1. имя как введено — продуктивная ОС (без песочницы);
+	 *  2. имя с суффиксом песочницы на конце — клон в этой песочнице
+	 *     (суффикс срезается до разбора домена: в FQDN-форме он стоит после домена);
+	 *  3. имя как введено без учёта песочницы — легаси-фоллбек для клона без продуктива.
 	 * @param string      $name
 	 * @param null|string $domain
 	 * @param null|string $ip
@@ -272,26 +298,41 @@ class CompsController extends ArmsBaseController
 	 * @throws NotFoundHttpException|BadRequestHttpException
 	 */
 	public static function searchModel(string $name, $domain=null, $ip=null){
-		
-		$query= Comps::find();
-		$notFoundDescription=static::nameFilter($query, $name, $domain);
-		
-		//добавляем фильтрацию по IP если он есть
-		if (!is_null($ip)) {
-			//если передано несколько адресов (через пробел)
-			$query->andFilterWhere(['or like','ip',explode(' ',trim($ip))]);
-			$notFoundDescription.=" with IP $ip";
+
+		//интерпретации введённого имени: [имя для поиска, условие по песочнице]
+		$attempts=[[$name,['sandbox_id'=>null]]];
+		foreach (static::sandboxSuffixMatches($name) as $sandbox) {
+			$attempts[]=[mb_substr($name,0,-mb_strlen($sandbox->suffix)),['sandbox_id'=>$sandbox->id]];
 		}
-		
-		$notFoundDescription.=" not found";
-		
-		
-		$model = $query->one();
-		
-		if ($model === null)
-			throw new NotFoundHttpException($notFoundDescription);
-		
-		return $model;
+		$attempts[]=[$name,null];
+
+		$notFoundDescription=null;
+		foreach ($attempts as [$tryName,$sandboxCondition]) {
+			$query= Comps::find();
+			try {
+				$description=static::nameFilter($query, $tryName, $domain);
+			} catch (NotFoundHttpException $e) {
+				//домен этой интерпретации не найден (например суффикс в FQDN-форме) - пробуем следующую
+				$notFoundDescription=$notFoundDescription??$e->getMessage();
+				continue;
+			}
+
+			//добавляем фильтрацию по IP если он есть
+			if (!is_null($ip)) {
+				//если передано несколько адресов (через пробел)
+				$query->andFilterWhere(['or like','ip',explode(' ',trim($ip))]);
+				$description.=" with IP $ip";
+			}
+
+			//andWhere а не andFilterWhere: условие ['sandbox_id'=>null] должно дать IS NULL, а не отброситься
+			if (!is_null($sandboxCondition)) $query->andWhere($sandboxCondition);
+
+			$notFoundDescription=$notFoundDescription??($description." not found");
+
+			if (!is_null($model=$query->one())) return $model;
+		}
+
+		throw new NotFoundHttpException($notFoundDescription);
 	}
 
 	/**
