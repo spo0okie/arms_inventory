@@ -145,6 +145,11 @@ class Scans extends ArmsModel
 	 */
 	public function upload()
 	{
+		if (!is_object($this->scanFile)) {
+			//вне сценария 'create' валидация scanFile не проверяет, сюда можно попасть с null
+			$this->addError('scanFile', 'Файл не был получен сервером');
+			return false;
+		}
 		if ($this->validate()) {
 			$prefix=($this->id)?$this->id:static::fetchNextId();
 			$this->file=$prefix.'-'. StringHelper::truncate($this->scanFile->baseName,80);

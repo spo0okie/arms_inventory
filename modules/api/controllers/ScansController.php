@@ -44,7 +44,7 @@ class ScansController extends BaseRestController
 	 */
 	public function actionUpload()
 	{
-		$model = new Scans();
+		$model = new Scans(['scenario' => 'create']);
 		$model->scanFile = UploadedFile::getInstanceByName('scanFile');
 		$model->contracts_id = Yii::$app->request->post('contracts_id');
 		$model->users_id = Yii::$app->request->post('users_id');
