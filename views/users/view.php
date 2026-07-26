@@ -3,6 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\Users */
 
+use app\components\HistoryWidget;
 use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
@@ -24,8 +25,10 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 
 ?>
 <div class="users-view">
-		<span class="float-end">
+		<span class="float-end text-end">
 			<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
+			<br/>
+			<small class="opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
 		</span>
 	<div class="row">
 		<div class="col-md-5 ps-0">
