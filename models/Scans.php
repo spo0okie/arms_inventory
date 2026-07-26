@@ -328,7 +328,9 @@ class Scans extends ArmsModel
 		//var_dump($parts);
 		$w=$width?$width:'';
 		$h=$height?$height:'';
-		return '/web/scans/thumbs/'.$parts['basename']."_thumb_{$w}x{$h}.".self::formThumbFormat($parts['extension']);
+		//_fit_ (а не _thumb_): суффикс сменён при переходе на bestfit-вписывание,
+		//чтобы не подхватывались старые искажённые миниатюры из кэша
+		return '/web/scans/thumbs/'.$parts['basename']."_fit_{$w}x{$h}.".self::formThumbFormat($parts['extension']);
 	}
 	
 	/**
@@ -401,7 +403,9 @@ class Scans extends ArmsModel
 				$bg->flattenImages();
 				$im=$bg;
 			}
-			$im->resizeImage($width,$height, Imagick::FILTER_LANCZOS,1);
+			//bestfit: вписываем в рамку WxH с сохранением пропорций
+			//(без него изображение растягивается ровно в WxH и искажается)
+			$im->resizeImage($width,$height, Imagick::FILTER_LANCZOS,1,true);
 			$im->writeimage(Yii::getAlias('@app') . $thumb);
 			$im->clear();
 			$im->destroy();
@@ -439,14 +443,14 @@ class Scans extends ArmsModel
 	{
 		$w=static::$idxThumbSizes[0];
 		$h=static::$idxThumbSizes[1];
-		return static::prepThumb('/web/scans/pdf_file.png',"/web/scans/thumbs/pdf_file_thumb_{$w}x{$h}.png",$w,$h);
+		return static::prepThumb('/web/scans/pdf_file.png',"/web/scans/thumbs/pdf_file_fit_{$w}x{$h}.png",$w,$h);
 	}
 
 	public static function noThumb()
 	{
 		$w=static::$idxThumbSizes[0];
 		$h=static::$idxThumbSizes[1];
-		return static::prepThumb('/web/scans/no_file.png',"/web/scans/thumbs/no_file_thumb_{$w}x{$h}.png",$w,$h);
+		return static::prepThumb('/web/scans/no_file.png',"/web/scans/thumbs/no_file_fit_{$w}x{$h}.png",$w,$h);
 	}
 	
 	/**

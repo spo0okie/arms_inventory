@@ -20,25 +20,25 @@ $carouselId = $modalId . '-carousel';
 ?>
 <div class="user-photos d-flex flex-column align-items-center flex-shrink-0">
 
-	<div class="position-relative flex-shrink-0" style="width:128px;height:128px;">
+	<div class="position-relative flex-shrink-0" style="width:128px;height:160px;">
 		<?php if (count($photos)) { ?>
 			<a href="#" data-bs-toggle="modal" data-bs-target="#<?= $modalId ?>"
 			   class="user-photo-avatar" title="Фотографии сотрудника (<?= count($photos) ?>)">
 				<?= Html::img($photos[0]->thumbUrl, [
-					'class' => 'img-thumbnail rounded-circle',
-					'style' => 'width:128px;height:128px;object-fit:cover;',
+					'class' => 'img-thumbnail rounded',
+					'style' => 'width:128px;height:160px;object-fit:contain;',
 					'alt' => Html::encode($model->Ename),
 				]) ?>
 			</a>
 		<?php } else { ?>
-			<span class="text-muted d-block" style="width:128px;height:128px;" title="Фотографий нет">
-				<i class="fas fa-user-circle fa-9x opacity-25 w-100"></i>
+			<span class="text-muted d-flex align-items-center justify-content-center" style="width:128px;height:160px;" title="Фотографий нет">
+				<i class="fas fa-user-circle fa-9x opacity-25"></i>
 			</span>
 		<?php } ?>
 		<?php if (!$static_view) { ?>
 			<?= Html::a('<i class="fas fa-pencil-alt"></i>', ['uploads', 'id' => $model->id], [
 				'class' => 'position-absolute',
-				'style' => 'bottom:4px;right:4px;padding:0;',
+				'style' => 'bottom:4px;right:8px;padding:0;',
 				'qtip_ttip' => 'Загрузить/изменить фотографии сотрудника',
 			]) ?>
 		<?php } ?>
