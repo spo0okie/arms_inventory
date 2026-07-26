@@ -96,6 +96,8 @@ class Users extends ArmsModel implements IdentityInterface
 	}
 	
 	private $tokens_cache=null; //имя разбитое на токены
+
+	private $absorbing=false; //идёт поглощение дубля (защита от рекурсии afterSave->absorbUser->save->afterSave)
 	
 	
 	/** Тип трудоустройства
@@ -998,10 +1000,10 @@ class Users extends ArmsModel implements IdentityInterface
 	 * @throws Exception
 	 */
 	public function absorbUser(Users $user) {
-		
+
 		$user->Login='';
 		$this->absorbModel($user);
-		
+
 		//журнал огромный и по одной записи менять это гемор
 		LoginJournal::updateAll(['users_id'=>$this->id],['users_id'=>$user->id]);
 
@@ -1012,7 +1014,15 @@ class Users extends ArmsModel implements IdentityInterface
 			}
 			Yii::$app->authManager->revokeAll($user->id);
 		}
-		$this->save();
+		//если поглощение не изменило жертву (нечего было отбирать), она по-прежнему
+		//совпадает с нами по uid/Ename — save() ниже сработает afterSave, тот снова
+		//найдет ту же жертву и уйдет в бесконечную рекурсию. Флаг рвет этот цикл.
+		$this->absorbing=true;
+		try {
+			$this->save();
+		} finally {
+			$this->absorbing=false;
+		}
 	}
 	
 	public function beforeSave($insert)
@@ -1031,9 +1041,18 @@ class Users extends ArmsModel implements IdentityInterface
 		
 		//если uid нет, или этот уволен, то ничего не проверяем
 		if (!$this->uid) return;
-		
+
 		//если этот уволен то тоже ничего не проверяем
 		if ($this->Uvolen) return;
+
+		//мы сохраняемся из absorbUser - дубль уже поглощается, повторный поиск не нужен
+		if ($this->absorbing) return;
+
+		//пустой логин - не ключ: он "совпадет" с пустым логином любой другой записи
+		//того же человека, а несколько записей на человека легальны (разные
+		//трудоустройства, см. контракт SAPsync). Слияние имеет смысл только
+		//вокруг реального логина (переезд логина при повторном приеме)
+		if (!strlen((string)$this->Login)) return;
 
 		//в зависимости от параметра использования ФИО ориентируемся только на ИНН или еще на ФИО
 		$uidFilter=Yii::$app->params['user.name_as_uid.enable']?
