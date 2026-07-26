@@ -7,7 +7,6 @@ use app\models\Domains;
 use Throwable;
 use Yii;
 use app\models\Comps;
-use app\models\Sandboxes;
 use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\db\StaleObjectException;
@@ -265,28 +264,9 @@ class CompsController extends ArmsBaseController
 	}
 
 	/**
-	 * Песочницы, суффикс которых стоит на конце введённого имени —
-	 * кандидаты для WYSIWYG-поиска клона по отображаемому имени {@see Comps::renderName()}.
-	 * Более длинные суффиксы первыми: интерпретация '1C_TEST' специфичнее 'TEST'
-	 * @param string $name
-	 * @return Sandboxes[]
-	 */
-	protected static function sandboxSuffixMatches(string $name) {
-		$matches=[];
-		foreach (Sandboxes::getAllItems(true) as $sandbox) {
-			/** @var Sandboxes $sandbox */
-			$len=mb_strlen($sandbox->suffix??'');
-			if (!$len || mb_strlen($name)<=$len) continue;
-			if (mb_strtolower(mb_substr($name,-$len))===mb_strtolower($sandbox->suffix))
-				$matches[]=$sandbox;
-		}
-		usort($matches,fn($a,$b)=>mb_strlen($b->suffix)-mb_strlen($a->suffix));
-		return $matches;
-	}
-
-	/**
 	 * Найти ОС по имени DOMAIN\computer, computer.domain.local или отдельно передав домен.
-	 * Имя резолвится WYSIWYG — так, как оно отображается ({@see Comps::renderName()}):
+	 * Имя резолвится WYSIWYG — так, как оно отображается ({@see Comps::renderName()}),
+	 * в порядке приоритета {@see Comps::nameInterpretations()}:
 	 *  1. имя как введено — продуктивная ОС (без песочницы);
 	 *  2. имя с суффиксом песочницы на конце — клон в этой песочнице
 	 *     (суффикс срезается до разбора домена: в FQDN-форме он стоит после домена);
@@ -299,15 +279,8 @@ class CompsController extends ArmsBaseController
 	 */
 	public static function searchModel(string $name, $domain=null, $ip=null){
 
-		//интерпретации введённого имени: [имя для поиска, условие по песочнице]
-		$attempts=[[$name,['sandbox_id'=>null]]];
-		foreach (static::sandboxSuffixMatches($name) as $sandbox) {
-			$attempts[]=[mb_substr($name,0,-mb_strlen($sandbox->suffix)),['sandbox_id'=>$sandbox->id]];
-		}
-		$attempts[]=[$name,null];
-
 		$notFoundDescription=null;
-		foreach ($attempts as [$tryName,$sandboxCondition]) {
+		foreach (Comps::nameInterpretations($name) as [$tryName,$sandboxCondition]) {
 			$query= Comps::find();
 			try {
 				$description=static::nameFilter($query, $tryName, $domain);

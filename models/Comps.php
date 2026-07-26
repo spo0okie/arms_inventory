@@ -660,22 +660,73 @@ class Comps extends ArmsModel
 	}
 
 	/**
+	 * Песочницы, суффикс которых стоит на конце введённого имени —
+	 * кандидаты для WYSIWYG-поиска клона по отображаемому имени {@see renderName()}.
+	 * Более длинные суффиксы первыми: интерпретация '1C_TEST' специфичнее 'TEST'
+	 * @param string $name
+	 * @return Sandboxes[]
+	 */
+	public static function sandboxSuffixMatches(string $name) {
+		$matches=[];
+		foreach (Sandboxes::getAllItems(true) as $sandbox) {
+			/** @var Sandboxes $sandbox */
+			$len=mb_strlen($sandbox->suffix??'');
+			if (!$len || mb_strlen($name)<=$len) continue;
+			if (mb_strtolower(mb_substr($name,-$len))===mb_strtolower($sandbox->suffix))
+				$matches[]=$sandbox;
+		}
+		usort($matches,fn($a,$b)=>mb_strlen($b->suffix)-mb_strlen($a->suffix));
+		return $matches;
+	}
+
+	/**
+	 * WYSIWYG-интерпретации введённого имени ОС — так, как оно отображается
+	 * ({@see renderName()}), в порядке приоритета:
+	 *  1. имя как введено + продуктив (sandbox_id IS NULL);
+	 *  2. имя без суффикса песочницы + клон в этой песочнице
+	 *     (суффикс срезается до разбора домена: в FQDN-форме он стоит после домена);
+	 *  3. имя как введено без учёта песочницы — легаси-фоллбек для клона без продуктива.
+	 * @param string $name
+	 * @return array [[имя для поиска, условие по sandbox_id (null - не фильтровать)],...]
+	 */
+	public static function nameInterpretations(string $name): array {
+		$attempts=[[$name,['sandbox_id'=>null]]];
+		foreach (static::sandboxSuffixMatches($name) as $sandbox) {
+			$attempts[]=[mb_substr($name,0,-mb_strlen($sandbox->suffix)),['sandbox_id'=>$sandbox->id]];
+		}
+		$attempts[]=[$name,null];
+		return $attempts;
+	}
+
+	/**
 	 * Найти комп по полному имени (Domain\comp или comp.domain.local)
+	 * Имя резолвится WYSIWYG с учётом песочниц ({@see nameInterpretations()})
 	 * @param        $name
 	 * @param string $defaultDomain домен который присвоить ОС, если не найден домен в $name
 	 * @return ActiveRecord|Comps|null|false
 	 * @noinspection PhpUnusedLocalVariableInspection
 	 */
 	public static function findByAnyName($name,$defaultDomain='') {
-		$nameParse=Domains::fetchFromCompName($name,$defaultDomain);
-		if (!is_array($nameParse)) return false;	//ошибка формата имени компа
-		[$domain_id,$compName,$domainName]=$nameParse;
-		if (is_null($domain_id)) return null;		//не найден домен => не найден комп в этом домене
+		$notFound=null;
+		foreach (static::nameInterpretations($name) as $i=>[$tryName,$sandboxCondition]) {
+			$nameParse=Domains::fetchFromCompName($tryName,$defaultDomain);
+			if (!is_array($nameParse)) {		//ошибка формата имени компа
+				if ($i===0) $notFound=false;	//для имени как введено сохраняем прежнюю семантику ответа
+				continue;
+			}
+			[$domain_id,$compName,$domainName]=$nameParse;
+			if (is_null($domain_id)) continue;	//не найден домен этой интерпретации (например суффикс в FQDN-форме)
 
-		$filter=['LOWER(name)'=>strtolower($compName)];
-		if ($domain_id!==false) $filter['domain_id']=$domain_id;
+			$filter=['LOWER(name)'=>strtolower($compName)];
+			if ($domain_id!==false) $filter['domain_id']=$domain_id;
 
-		return static::find()->where($filter)->one();
+			$query=static::find()->where($filter);
+			//andWhere а не andFilterWhere: условие ['sandbox_id'=>null] должно дать IS NULL, а не отброситься
+			if (!is_null($sandboxCondition)) $query->andWhere($sandboxCondition);
+
+			if (is_object($model=$query->one())) return $model;
+		}
+		return $notFound;
 	}
 
 	public function getLastThreeLogins() {
