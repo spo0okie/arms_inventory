@@ -4247,7 +4247,28 @@ $.tooltipster._plugin({
 			
 			// append the tooltip HTML element to its parent
 			self.__instance._$tooltip.appendTo(self.__instance.option('parent'));
-			
+
+			// LOCAL PATCH (positioned-parent): расчёт координат выше предполагает,
+			// что родитель тултипа находится в точке (0,0) документа (см. коммент
+			// про originParentOffset). Если же родитель спозиционирован и смещён —
+			// например body в DokuWiki-шаблоне bootstrap3 имеет
+			// {position:relative; margin-top:85px} — containing block абсолютного
+			// тултипа сдвинут относительно документа, и тултип рендерится с
+			// постоянным сдвигом (наезжает на origin). Меряем фактическое положение
+			// после вставки и компенсируем дельту; при родителе в (0,0) поправка
+			// нулевая, так что для обычных страниц это no-op.
+			if (!helper.geo.origin.fixedLineage) {
+				var actualRect = self.__instance._$tooltip[0].getBoundingClientRect();
+				var parentDeltaLeft = (actualRect.left + helper.geo.window.scroll.left) - finalResult.coord.left;
+				var parentDeltaTop = (actualRect.top + helper.geo.window.scroll.top) - finalResult.coord.top;
+				if (Math.abs(parentDeltaLeft) > 0.5 || Math.abs(parentDeltaTop) > 0.5) {
+					self.__instance._$tooltip.css({
+						left: finalResult.coord.left - parentDeltaLeft,
+						top: finalResult.coord.top - parentDeltaTop
+					});
+				}
+			}
+
 			self.__instance._trigger({
 				type: 'repositioned',
 				event: event,

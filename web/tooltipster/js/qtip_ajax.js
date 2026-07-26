@@ -215,15 +215,23 @@ function attach_qTip(el, force = false) {
 					if (st.destroyed || !st.open) return;
 					// RAF×2 — даём браузеру довести layout (шрифты/последний reflow),
 					// затем reposition по финальной геометрии и убираем "усадку".
+					// В окружениях с заторможенным RAF (фоновая вкладка, свёрнутое
+					// окно, headless) параллельно тикает setTimeout: финализация
+					// идемпотентна — срабатывает тот путь, который первый.
+					let done = false;
+					let run = function () {
+						if (done) return;
+						let st2 = instance.status();
+						if (st2.destroyed || !st2.open) return;
+						done = true;
+						instance.reposition();
+						let finalTip = instance.elementTooltip();
+						if (finalTip) finalTip.classList.remove("qtip-settling");
+					};
 					requestAnimationFrame(function () {
-						requestAnimationFrame(function () {
-							let st2 = instance.status();
-							if (st2.destroyed || !st2.open) return;
-							instance.reposition();
-							let finalTip = instance.elementTooltip();
-							if (finalTip) finalTip.classList.remove("qtip-settling");
-						});
+						requestAnimationFrame(run);
 					});
+					setTimeout(run, 150);
 				};
 
 				if (waitImgs.length === 0) finish();
