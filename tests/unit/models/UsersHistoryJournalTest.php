@@ -94,6 +94,23 @@ class UsersHistoryJournalTest extends Unit
 	}
 
 	/**
+	 * Журнальная запись должна уметь называть себя так же, как сотрудник:
+	 * снимок из журнала (fetchJournalRecord) рисуется теми же вьюхами
+	 * (views/users/item.php -> LinkObjectWidget), что и живой сотрудник.
+	 */
+	public function testJournalRecordHasName()
+	{
+		$user = $this->makeUser(['employee_id' => '99990013', 'Ename' => 'Именов Имя Именович']);
+
+		/** @var UsersHistory $last */
+		$last = UsersHistory::find()->where(['master_id' => $user->id])->orderBy(['id' => SORT_DESC])->one();
+		$this->assertInstanceOf(UsersHistory::class, $last);
+		$this->assertEquals($user->name, $last->name);
+		$this->assertEquals($user->shortName, $last->shortName);
+		$this->assertEquals('Именов И. И.', $last->shortName);
+	}
+
+	/**
 	 * Секреты не журналируются: их колонок нет в users_history,
 	 * смена пароля не оставляет следов в журнале.
 	 */

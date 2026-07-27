@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\traits\UsersModelNamesTrait;
+
 /**
  * Журнал изменений сотрудников (зеркало таблицы users_history).
  *
@@ -16,7 +18,10 @@ namespace app\models;
  *
  * UsersModelCalcFieldsTrait сюда сознательно НЕ прикрепляется: его
  * единственное calc-поле effectivePhone считается по связи techs,
- * которой у журнальной записи нет.
+ * которой у журнальной записи нет. А вот имя (UsersModelNamesTrait)
+ * журнальной записи необходимо: по нему рисуются ссылки на сотрудника
+ * в карточках изменений других сущностей (fetchJournalRecord отдаёт
+ * снимок из журнала, и views/users/item.php требует name/shortName).
  *
  * @property int $id
  * @property int|null $master_id
@@ -45,9 +50,16 @@ namespace app\models;
  * @property string|null $updated_at
  * @property string|null $updated_by
  * @property string|null $updated_comment
+ * @property string $name Полное имя (Ename)
+ * @property string $shortName Сокращенные И.О.
+ * @property string $ln Last Name
+ * @property string $fn First Name
+ * @property string $mn Middle Name
  */
 class UsersHistory extends HistoryModel
 {
+	use UsersModelNamesTrait;
+
 	public static $title = 'Изменение сотрудника';
 	public static $titles = 'Изменения сотрудников';
 

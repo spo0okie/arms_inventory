@@ -5,6 +5,7 @@ namespace app\models;
 use app\helpers\QueryHelper;
 use app\models\base\ArmsModel;
 use app\models\traits\UsersModelCalcFieldsTrait;
+use app\models\traits\UsersModelNamesTrait;
 use app\modules\schedules\models\Schedules;
 use Exception;
 use Yii;
@@ -80,6 +81,7 @@ use yii\web\IdentityInterface;
 class Users extends ArmsModel implements IdentityInterface
 {
 	use UsersModelCalcFieldsTrait;
+	use UsersModelNamesTrait;
 
 	public static $users=[];
 	public static $working_cache=null;
@@ -95,8 +97,6 @@ class Users extends ArmsModel implements IdentityInterface
 			.'Обычно заполняются синхронизацией с кадровой системой.';
 	}
 	
-	private $tokens_cache=null; //имя разбитое на токены
-
 	private $absorbing=false; //идёт поглощение дубля (защита от рекурсии afterSave->absorbUser->save->afterSave)
 	
 	
@@ -770,11 +770,6 @@ class Users extends ArmsModel implements IdentityInterface
         return null;
     }
     
-    public function getName() {
-    	return $this->Ename;
-	}
-
-
     /**
      * @inheritdoc
      */
@@ -783,7 +778,6 @@ class Users extends ArmsModel implements IdentityInterface
         return $this->id;
     }
 
-	public function getFullName() {return $this->Ename;}
 	public function getStructName() {return is_object($dep=$this->orgStruct)?$dep->name:null;}
 	public function getStruct_id() {return $this->Orgeh;}
 	public function getLogin() {return $this->Login;}
@@ -926,55 +920,6 @@ class Users extends ArmsModel implements IdentityInterface
 			->orderBy('id desc')
 			->one();
 
-	}
-	
-	/**
-	 * Get First Name
-	 * @return array
-	 */
-	public function getTokens() {
-		if (!is_null($this->tokens_cache)) return $this->tokens_cache;
-		return $this->tokens_cache=explode(' ',$this->Ename);
-	}
-	
-	/**
-	 * Get Last Name
-	 * @return string
-	 */
-	public function getLn() {
-		if (!count($tokens=$this->getTokens())) return '';
-		return $tokens[0];
-	}
-
-	
-	/**
-	 * Get First Name
-	 * @return string
-	 */
-	public function getFn() {
-		if (count($tokens=$this->getTokens())<2) return '';
-		return $tokens[1];
-	}
-	
-	/**
-	 * Get First Name
-	 * @return string
-	 */
-	public function getMn() {
-		if (count($tokens=$this->getTokens())<3) return '';
-		return $tokens[2];
-	}
-	
-	/**
-	 * Get First Name
-	 * @return string
-	 */
-	public function getShortName() {
-		if (($count=count($tokens=$this->getTokens()))<2) return $this->Ename;
-		for ($i=1;$i<$count;$i++) {
-			$tokens[$i]=mb_substr($tokens[$i],0,1).'.';
-		}
-		return implode(' ',$tokens);
 	}
 	
 	/**
