@@ -984,10 +984,7 @@ class Users extends ArmsModel implements IdentityInterface
 	{
 		parent::afterSave($insert, $changedAttributes);
 		
-		//если uid нет, или этот уволен, то ничего не проверяем
-		if (!$this->uid) return;
-
-		//если этот уволен то тоже ничего не проверяем
+		//если этот уволен то ничего не проверяем
 		if ($this->Uvolen) return;
 
 		//мы сохраняемся из absorbUser - дубль уже поглощается, повторный поиск не нужен
@@ -999,10 +996,21 @@ class Users extends ArmsModel implements IdentityInterface
 		//вокруг реального логина (переезд логина при повторном приеме)
 		if (!strlen((string)$this->Login)) return;
 
-		//в зависимости от параметра использования ФИО ориентируемся только на ИНН или еще на ФИО
-		$uidFilter=Yii::$app->params['user.name_as_uid.enable']?
-		['or',['uid'=>$this->uid],['Ename'=>$this->Ename]]:
-		['uid'=>$this->uid];
+		//ключ, по которому опознаем человека: ИНН, а если его нет - полное ФИО
+		//(последнее только когда это разрешено параметром user.name_as_uid.enable)
+		//пустой uid ключом быть не может: под него подпадут все записи без ИНН
+		$nameAsUid=!empty(Yii::$app->params['user.name_as_uid.enable']);
+		if (strlen((string)$this->uid)) {
+			//в зависимости от параметра использования ФИО ориентируемся только на ИНН или еще на ФИО
+			$uidFilter=$nameAsUid?
+				['or',['uid'=>$this->uid],['Ename'=>$this->Ename]]:
+				['uid'=>$this->uid];
+		} elseif ($nameAsUid && strlen((string)$this->Ename)) {
+			$uidFilter=['Ename'=>$this->Ename];
+		} else {
+			//опознавать человека не по чему
+			return;
+		}
 
 		//ищем нет ли таких же пользователей с таким же логином и uid
 		$exist=static::find()
