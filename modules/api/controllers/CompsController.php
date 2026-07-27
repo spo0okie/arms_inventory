@@ -13,14 +13,14 @@ use OpenApi\Attributes as OA;
 
 class CompsController extends BaseRestController
 {
-	
+
 	public function accessMap(): array
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			'update-comps'=>['push']
 		]);
 	}
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
@@ -31,15 +31,15 @@ class CompsController extends BaseRestController
 		$behaviors['verbFilter']['actions']['update']=['POST','PUT','PATCH'];
 		return $behaviors;
 	}
-	
+
 	public $modelClass='app\models\Comps';
-	
+
 	public static array $searchFields=[
 		'name'=>'name',
 		'ip'=>'ip',
 		'mac'=>'mac',
 	];
-	
+
 	/**
 	 * Возвращает единственную запись компьютера, найденную по имени, домену или IP.
 	 * Если передан `name` — делегирует в CompsController::searchModel() (поиск по hostname/FQDN).
@@ -56,7 +56,7 @@ class CompsController extends BaseRestController
 		if ($name) return \app\controllers\CompsController::searchModel($name,$domain,$ip);
 		return parent::actionSearch();
 	}
-	
+
 	/**
 	 * Возвращает отфильтрованный список компьютеров через CompsSearch.
 	 * Поддерживает параметр `showArchived` для включения архивных записей.
@@ -75,7 +75,7 @@ class CompsController extends BaseRestController
 		$params = Yii::$app->request->queryParams;
 		return $searchModel->search($params);
     }
-	
+
 	#[OA\Post(
 		path: "/web/api/{controller}/push",
 		summary: "Обновить (если в теле передан ID) или создать новый элемент ОС (если ID не заполнен)",
@@ -120,17 +120,16 @@ class CompsController extends BaseRestController
     public function actionPush() {
     	/** @var Comps $loader */
 		$loader = new $this->modelClass();
-	
+
 		//грузим переданные данные
 		if (!$loader->load(Yii::$app->getRequest()->getBodyParams(),'')) {
 			throw new BadRequestHttpException("Error loading posted data");
 		}
-		
+
 		//передали ID?
-		if ($loader->id) {
-			return $this->runAction('update',['id'=>$loader->id]);
-		}
-		
+		$id = Yii::$app->request->getBodyParam('id');
+		if ($id && Comps::findOne($id)) return $this->runAction('update',['id'=>$id]);
+
 		$search=Comps::findByAnyName($loader->name,'workgroup');
 		if (is_object($search)&&$search->id) {
 			return $this->runAction('update',['id'=>$search->id]);
