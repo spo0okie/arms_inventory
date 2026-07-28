@@ -48,6 +48,7 @@ class Absences extends ArmsModel
 	 */
 	public static $types = [
 		'VACATION' => 'отпуск ежегодный',
+		'VACATION_PLAN' => 'отпуск запланированный',
 		'ASSIGNMENT' => 'командировка',
 		'LEAVESICK' => 'больничный',
 		'LEAVEMATERNITY' => 'отпуск декретный',
