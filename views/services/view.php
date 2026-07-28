@@ -92,7 +92,8 @@ $tabs[]=TabsWidget::asyncDynagridPropertyTab($model,'acls', $showArchived,
 	filter: ['services_resource_ids'=>array_merge($parents_ids,$children_ids)],
 	linkClass: 'aces',
 	staticContent: Html::a('Добавить входящий доступ',[
-		'/acls/create','Acls'=>['services_id'=>$model->id]
+		//форма создания ACL групповая: ресурсы — мультиселекты *_ids
+		'/acls/create','Acls'=>['services_ids'=>[$model->id]]
 	],[
 		'class'=>'badge text-bg-success m-0 open-in-modal-form',
 		'data-reload-page-on-submit'=>1

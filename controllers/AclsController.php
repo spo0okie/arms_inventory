@@ -270,6 +270,12 @@ class AclsController extends ArmsBaseController
 
 		//первичное отображение формы (GET-предзаполнение)
 		$model->load(Yii::$app->request->get());
+		//форма создания групповая (ресурсы — мультиселекты *_ids), но ссылки могут
+		//предзаполнять одиночный ресурс Acls[*_id] — переносим его в мультиселект,
+		//иначе предзаполнение не видно в форме
+		foreach (static::GROUP_RESOURCE_MAP as $plural=>$single) {
+			if (!empty($model->$single) && empty($model->$plural)) $model->$plural=[$model->$single];
+		}
 		$ace->load(Yii::$app->request->get());
 		if ($schedule) $schedule->load(Yii::$app->request->get());
 		return $this->defaultRender('create', compact('model','ace','schedule'));
