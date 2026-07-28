@@ -23,6 +23,9 @@ class UsersController extends BaseRestController
 	{
 		return array_merge_recursive(parent::accessMap(),[
 			ArmsBaseController::PERM_AUTHENTICATED=>['whoami'],
+			//migrate меняет данные, поэтому пускаем по тем же правам, что create/update/delete:
+			//глобальное edit (роли editor/admin) либо точечное update-users
+			ArmsBaseController::PERM_EDIT=>['migrate'],
 			'update-users'=>['migrate'],
 		]);
 	}
