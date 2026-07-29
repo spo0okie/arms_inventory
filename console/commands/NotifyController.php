@@ -96,6 +96,9 @@ class NotifyController extends Controller
 	 *         //PHP-фильтр после SQL-выборки: для ВЫЧИСЛЯЕМЫХ признаков (deliveryState
 	 *         //и т.п.), которые не выразить в condition; callable($model): bool
 	 *         'filter' => null,
+	 *         //дополнительные получатели ПОВЕРХ автосписка ответственных:
+	 *         //массив из id/Login/E-Mail (см. Notifier::findUsers) либо callable($model):Users[]
+	 *         'extraRecipients' => null,
 	 *         'subject' => 'Документ «{name}» завис в статусе «Новый»',
 	 *         'body' => null,        //null = subject + ссылка; строка с {name}/{id}; callable($model):string
 	 *         'repeat' => '3 days',  //повторное письмо не чаще; null = однократно
@@ -131,6 +134,11 @@ class NotifyController extends Controller
 
 			$repeatSeconds = empty($rule['repeat']) ? null : static::interval2seconds($rule['repeat']);
 
+			//статичный список доп. получателей резолвим один раз на правило,
+			//callable-вариант вычисляется на каждый объект (внутри цикла)
+			$extra = $rule['extraRecipients'] ?? null;
+			$extraStatic = is_array($extra) ? Notifier::findUsers($extra) : [];
+
 			foreach ($query->all() as $model) {
 				if (!$model instanceof NotifyRecipientsInterface) {
 					$this->stderr("правило $ruleKey: $class не реализует NotifyRecipientsInterface\n");
@@ -139,9 +147,18 @@ class NotifyController extends Controller
 				//вычисляемые признаки проверяются в PHP - после SQL-выборки
 				if (isset($rule['filter']) && !call_user_func($rule['filter'], $model)) continue;
 				$eventKey = "watch:$ruleKey:{$model->id}";
+				//получатели = ответственные объекта + дополнительные из правила (без дублей)
+				$recipients = array_merge(
+					$model->getNotifyRecipients(),
+					$extraStatic,
+					is_callable($extra) ? (array)call_user_func($extra, $model) : []
+				);
+				$unique = [];
+				foreach ($recipients as $user)
+					if ($user instanceof \app\models\Users) $unique[$user->id] = $user;
 				//письмо уже уходило (и не пришло время повтора) - молчим;
 				//неотправленные записи не в счёт: enqueue их просто освежит
-				$users = array_filter($model->getNotifyRecipients(),
+				$users = array_filter($unique,
 					fn($user) => !Notifications::wasSent($user->id, $eventKey, $repeatSeconds));
 				if (!count($users)) continue;
 

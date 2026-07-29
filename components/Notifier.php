@@ -60,6 +60,36 @@ class Notifier extends Component
 	}
 
 	/**
+	 * Разрешает список "адресатов из конфига" в объекты Users.
+	 * Элемент списка: объект Users, id (число) либо строка - Login или E-Mail.
+	 * Среди дублей (например, уволенный и действующий с одним логином)
+	 * предпочитается неуволенный. Ненайденные адресаты пишутся в warning-лог
+	 * и пропускаются - опечатка в конфиге не должна ронять прогон.
+	 *
+	 * @param array $specs
+	 * @return Users[]
+	 */
+	public static function findUsers(array $specs): array
+	{
+		$found = [];
+		foreach ($specs as $spec) {
+			if ($spec instanceof Users) {
+				$found[] = $spec;
+				continue;
+			}
+			$user = is_numeric($spec)
+				? Users::findOne((int)$spec)
+				: Users::find()
+					->where(['or', ['Login' => $spec], ['Email' => $spec]])
+					->orderBy(['Uvolen' => SORT_ASC, 'id' => SORT_DESC])
+					->one();
+			if ($user) $found[] = $user;
+			else Yii::warning("Notifier::findUsers: получатель '$spec' не найден", 'notify');
+		}
+		return $found;
+	}
+
+	/**
 	 * Абсолютная ссылка на страницу объекта для письма.
 	 * @param \yii\db\ActiveRecord $model
 	 */

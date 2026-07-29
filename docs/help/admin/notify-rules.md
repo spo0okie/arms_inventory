@@ -95,11 +95,19 @@
     'filter' => fn($doc) => $doc->deliveryState === \app\models\Contracts::DELIVERY_INCOMPLETE,
     'age' => '1 week',
     'subject' => 'Документ «{name}» оплачен, но поставка не оприходована',
-    //в теле полезно перечислить, чего именно не хватает
-    'body' => fn($doc) => '<p>Документ «' . \yii\helpers\Html::encode($doc->name)
-        . '» оплачен, но не всё оприходовано: '
-        . \yii\helpers\Html::encode(implode('; ', $doc->undeliveredDescription)) . '</p>'
-        . \app\components\Notifier::modelLinksFooter($doc),
+    //в теле перечисляем, чего именно не хватает, и даём ссылки на документ
+    'body' => function ($doc) {
+        $undelivered = array_map(
+            fn($line) => \yii\helpers\Html::encode($line),
+            $doc->undeliveredDescription
+        );
+        return '<p>Документ <b>«' . \yii\helpers\Html::encode($doc->name) . '»</b> оплачен, '
+            . 'но по нему оприходовано не всё:</p>'
+            . '<ul><li>' . implode('</li><li>', $undelivered) . '</li></ul>'
+            . '<p>Если поставка уже пришла — привяжите полученное к документу, '
+            . 'и напоминания прекратятся.</p>'
+            . \app\components\Notifier::modelLinksFooter($doc);
+    },
     'repeat' => '1 week',
 ],
 ```
@@ -136,6 +144,24 @@
 Уволенные и сотрудники без e-mail отбрасываются автоматически. Чтобы
 сторожить другую сущность, её модель должна реализовать этот интерфейс
 (одна связь + одна строка кода) — это уже доработка, а не конфигурация.
+
+### Дополнительные получатели (`extraRecipients`)
+
+Если письма правила должен получать кто-то сверх автосписка ответственных
+(типовой случай — руководитель хочет копии всех подобных напоминаний),
+добавьте в правило ключ `extraRecipients`:
+
+```php
+'extraRecipients' => ['ivanov-ii'],          //логин...
+'extraRecipients' => ['boss@example.com'],   //...или e-mail...
+'extraRecipients' => [42],                   //...или id сотрудника; можно вперемешку
+'extraRecipients' => fn($doc) => [...],      //callable($model): Users[] - если состав зависит от объекта
+```
+
+Дополнительные получатели **добавляются** к ответственным, дубли схлопываются,
+фильтр «уволен/без почты» и интервал `repeat` действуют на них так же
+(повтор отсчитывается каждому получателю отдельно). Адресат с опечаткой
+не роняет прогон — он пропускается с записью в warning-лог приложения.
 
 ## Тексты (`subject`, `body`)
 

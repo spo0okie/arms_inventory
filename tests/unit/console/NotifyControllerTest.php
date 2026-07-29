@@ -198,6 +198,41 @@ class NotifyControllerTest extends Unit
 	}
 
 	/**
+	 * watch: extraRecipients добавляет получателей поверх автосписка
+	 * ответственных - без дублей; ненайденный адресат молча пропускается.
+	 */
+	public function testWatchExtraRecipients()
+	{
+		$contract = Contracts::find()->one();
+		Yii::$app->db->createCommand()->insert('users_in_contracts', [
+			'contracts_id' => $contract->id, 'users_id' => $this->user->id,
+		])->execute();
+
+		$boss = new Users(['Ename' => 'Тест Руководитель', 'Email' => 'boss@test.local', 'Login' => 'test-boss', 'Uvolen' => 0]);
+		$this->assertTrue($boss->save(false));
+
+		Yii::$app->params['notifyRules'] = [
+			'extra-test' => [
+				'class' => Contracts::class,
+				'condition' => ['contracts.id' => $contract->id],
+				'subject' => 'доп-получатели «{name}»',
+				//руководитель по логину + сам ответственный (дубль) + опечатка
+				'extraRecipients' => ['test-boss', $this->user->id, 'no-such-user@nowhere'],
+			],
+		];
+		$this->controller()->actionWatch();
+
+		$eventKey = "watch:extra-test:{$contract->id}";
+		$recipients = Notifications::find()->where(['event_key' => $eventKey])
+			->select('user_id')->column();
+		sort($recipients);
+		$expected = [$this->user->id, $boss->id];
+		sort($expected);
+		$this->assertEquals($expected, array_map('intval', $recipients),
+			'ответственный + руководитель, дубль схлопнут, опечатка пропущена');
+	}
+
+	/**
 	 * cleanup удаляет только давно отправленные: свежеотправленные - память
 	 * для repeat, неотправленные - ещё очередь.
 	 */
