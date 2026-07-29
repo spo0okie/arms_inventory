@@ -71,12 +71,17 @@ $config = [
             'errorAction' => 'site/error',
         ],
         'mailer' => [
-            'class' => 'yii\swiftmailer\Mailer',
-            // send all mails to a file by default. You have to set
-            // 'useFileTransport' to false and configure a transport
-            // for the mailer to send real emails.
-            'useFileTransport' => true,
+            'class' => 'yii\symfonymailer\Mailer',
+	        //по умолчанию письма складываются в runtime/mail;
+	        //для реальной отправки в params-local.php задать mailer.useFileTransport=false и mailer.transport
+	        'useFileTransport' => $params['mailer.useFileTransport'] ?? true,
+	        'transport' => $params['mailer.transport'] ?? ['scheme' => 'smtp', 'host' => 'localhost', 'port' => 25],
+	        'messageConfig' => ['from' => $params['mailer.from'] ?: $params['adminEmail']],
         ],
+	    //постановка оповещений в outbox (plans/notifications.md)
+	    'notifier' => [
+		    'class' => 'app\components\Notifier',
+	    ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [

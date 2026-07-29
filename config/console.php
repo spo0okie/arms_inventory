@@ -32,6 +32,17 @@ $config = [
 	    'authManager' => [
 		    'class' => 'yii\rbac\DbManager',
 	    ],
+	    //отправку почты (notify/send) делает именно консоль, поэтому мейлер нужен и здесь
+	    'mailer' => [
+		    'class' => 'yii\symfonymailer\Mailer',
+		    'useFileTransport' => $params['mailer.useFileTransport'] ?? true,
+		    'transport' => $params['mailer.transport'] ?? ['scheme' => 'smtp', 'host' => 'localhost', 'port' => 25],
+		    'messageConfig' => ['from' => $params['mailer.from'] ?: $params['adminEmail']],
+	    ],
+	    //постановка оповещений в outbox (plans/notifications.md)
+	    'notifier' => [
+		    'class' => 'app\components\Notifier',
+	    ],
 		'errorHandler'=>[
 			'class'=>'app\console\ErrorHandler',
 		],

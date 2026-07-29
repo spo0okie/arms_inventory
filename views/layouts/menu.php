@@ -23,6 +23,7 @@ use app\models\MaterialsTypes;
 use app\models\MaterialsUsages;
 use app\models\NetDomains;
 use app\models\NetIps;
+use app\models\Notifications;
 use app\models\NetVlans;
 use app\models\Networks;
 use app\models\OrgInet;
@@ -193,6 +194,7 @@ echo Nav::widget([
 						['label' => 'Правила', 		'url' => ['/rbac/rule']],
 						['label' => 'Разрешения', 	'url' => ['/rbac/permission']],
 						['label' => Markers::$titles, 'url' => ['/markers/index']],
+						['label' => Notifications::$titles, 'url' => ['/notifications/index']],
 						['label' => 'Документация API', 	'url' => ['/site/api-doc']],
 					],
 				]:'',

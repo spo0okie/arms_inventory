@@ -85,7 +85,7 @@ use yii\helpers\Url;
  * @property Users[]     $users
  * @property ContractsStates $state Статус
  */
-class Contracts extends ArmsModel
+class Contracts extends ArmsModel implements NotifyRecipientsInterface
 {
 
 	public static $title='Документы';
@@ -183,8 +183,24 @@ class Contracts extends ArmsModel
 					'users_ids' => 'users',
 					'children_ids' => 'children', //one-2-many
 				]
-			]
+			],
+			//оповещение ответственных о смене статуса документа (issue #64)
+			[
+				'class' => \app\components\AttributeChangeNotifyBehavior::class,
+				'attributes' => ['state_id'],
+				//точечное отключение (notify/watch-правила продолжают работать)
+				'enabled' => fn() => Yii::$app->params['notify.docs.state.enable'] ?? true,
+			],
 		];
+	}
+
+	/**
+	 * Получатели оповещений по документу — привязанные сотрудники
+	 * {@inheritdoc}
+	 */
+	public function getNotifyRecipients(): array
+	{
+		return is_array($this->users) ? $this->users : [];
 	}
 
 	/**
@@ -227,7 +243,11 @@ class Contracts extends ArmsModel
 			],
 			'charge' => [
 				'в т.ч. НДС',
-				'hint' => 'Для счетов: величина НДС, входящая в сумму',
+				'hint' => 'Для счетов: величина НДС, входящая в сумму<ul>'
+					.'<li>Можно внести величину самостоятельно <br><i>(удобно когда не все позиции документа облагаются НДС)</i></li>'
+					.'<li>Можно использовать кнопки расчета от суммы документа снизу</li>'
+					.'</ul>',
+				'indexHint' => 'Для счетов: величина НДС, входящая в сумму',
 				'typeClass'=>\app\types\MoneyType::class, 'decimals'=>2,
 			],
 			'comment' => [

@@ -71,4 +71,23 @@ return [
 	
 	'llm.openai.key'=>'',
 	'llm.openai.proxy'=>'',
+
+	//механизм e-mail-оповещений (plans/notifications.md): мастер-рубильник.
+	//Выключен (по умолчанию) - события (смена статуса документа) и правила notifyRules
+	//НЕ ставят письма в очередь notifications: без настроенных SMTP и cron очередь
+	//росла бы вечно. Включать вместе с настройкой mailer.* и cron notify/send.
+	'notify.enable'=>false,
+	//точечный выключатель событийных оповещений о смене статуса документа:
+	//false = статусные письма не ставятся, но правила notifyRules (notify/watch)
+	//продолжают работать. Действует только при включённом notify.enable.
+	'notify.docs.state.enable'=>true,
+
+	//отправка почты (механизм оповещений, plans/notifications.md)
+	'mailer.useFileTransport'=>true,	//true = складывать письма в runtime/mail вместо реальной отправки
+	'mailer.transport'=>['scheme'=>'smtp','host'=>'localhost','port'=>25],
+	'mailer.from'=>'',					//адрес отправителя; пусто = adminEmail
+	'web.hostInfo'=>'',					//базовый URL приложения для абсолютных ссылок в письмах (http://arms.example.com)
+
+	//правила оповещений о "залежавшихся" документах для notify/watch (примеры в plans/notifications.md)
+	'notifyRules'=>[],
 ];
