@@ -51,7 +51,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	    'options' => ['enctype' => 'multipart/form-data'],
         'action' => $model->isNewRecord? Url::to(['contracts/create']): Url::to(['contracts/update','id'=>$model->id]),
     ]); ?>
-	
+
 	<?= Yii::$app->params['docs.name.instruction']?:'' ?>
 
 	<div class="row">
@@ -110,10 +110,10 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 		<div class="col-md-1">
 			<?= $form->field($model, 'currency_id')->select2(['allowClear' => false]) ?>
 		</div>
-		<div class="col-md-3">
+		<div class="col-md-2">
 			<?= $form->field($model, 'total') ?>
 		</div>
-		<div class="col-md-1">
+		<div class="col-md-2">
 			<?= $form->field($model, 'charge')
 				->classicHint(Contracts::chargeCalcHtml('contracts','total','charge'))
 			?>
@@ -140,7 +140,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
             'key'=>$scan->id
         ];
 	}
-	
+
 	//var_dump($scans);
 	//var_dump($preview);
 
@@ -186,7 +186,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 
 	<?= $form->field($model, 'techs_ids')->select2() ?>
 	<?= $form->field($model, 'lics_ids')->select2() ?>
-	
+
 	<?= $form->field($model, 'services_ids')->select2() ?>
 
 	<?= $form->field($model,'comment')->text(['rows' => 4,]) ?>
@@ -229,4 +229,3 @@ $this->registerJs($js);
 		]) ?>
     </div>
 </div>
-

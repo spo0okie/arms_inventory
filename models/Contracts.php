@@ -1123,12 +1123,17 @@ class Contracts extends ArmsModel
 	 */
 	public static function chargeCalcHtml($model,$total,$charge) {
 		//строка подсчета НДС в поле $charge из значения в поле $total в ActiveForm
+
+		$values=[18,20,22];
+		$output=[];
+		foreach ($values as $value) {
+			$multiplier=$value/100;
+			$divider=1+$multiplier;
+			$output[]="<span class='href' onclick=\"$('#{$model}-{$charge}').val(($('#{$model}-{$total}').val()/{$divider}*{$multiplier}).toFixed(2))\">{$value}%</span>";
+		}
+		$output[]="<span class='href' onclick=\"$('#{$model}-{$charge}').val('')\">нет</span>";
 		/** @noinspection JSJQueryEfficiency */
-		return <<<HTML
-		<span class="href" onclick="$('#{$model}-{$charge}').val(($('#{$model}-{$total}').val()/1.2*0.2).toFixed(2))">20%</span>
-		/
-		<span class="href" onclick="$('#{$model}-{$charge}').val('')">нет</span>
-HTML;
+		return implode(' / ',$output);
 	}
 
 	/**
