@@ -379,6 +379,38 @@ class DocsHelper
 	}
 
 	/**
+	 * Атрибуты модели для автотаблицы «Атрибуты» страницы /docs/models/<class>.
+	 *
+	 * attributeData() наследует дефолтные записи ArmsModel (code, notepad, links,
+	 * archived...) даже когда у таблицы конкретной модели таких колонок нет —
+	 * в справочник атрибутов они попадать не должны. Атрибут остаётся, если:
+	 *  - это реальная колонка таблицы модели (hasAttribute), либо
+	 *  - модель объявила/переопределила запись сама (запись отличается от
+	 *    дефолта ArmsModel) — вычисляемые поля, связи, загрузчики.
+	 * Алиасы — не самостоятельные атрибуты, отбрасываются.
+	 * @param ArmsModel $model пустой экземпляр модели
+	 * @return array отфильтрованный attributeData [attr => data]
+	 */
+	public static function modelDocAttributes(ArmsModel $model): array
+	{
+		//дефолтный набор ArmsModel в обход переопределения конкретной модели
+		try {
+			$base = (new \ReflectionMethod(ArmsModel::class, 'attributeData'))->invoke($model);
+		} catch (\ReflectionException $e) {
+			$base = [];
+		}
+
+		$result = [];
+		foreach ($model->attributeData() as $attr => $data) {
+			if (is_array($data) && isset($data['alias'])) continue;
+			//унаследованный дефолт (не переопределён моделью) без реальной колонки
+			if (isset($base[$attr]) && $base[$attr] === $data && !$model->hasAttribute($attr)) continue;
+			$result[$attr] = $data;
+		}
+		return $result;
+	}
+
+	/**
 	 * Ссылки на второй слой документации (блок «переходы» тултипа атрибута,
 	 * см. ui-sources.md §0.1): раздельные подписанные переходы на страницу
 	 * атрибута (models/<class-id>/<attr>.md) и на страницу типа (types/<type>.md) —
