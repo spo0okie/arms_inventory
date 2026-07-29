@@ -14,10 +14,10 @@ $this->params['layout-container'] = 'container-fluid';
 //крошки собираются автоматически в layout (views/layouts/main.php)
 $renderer=$this;
 $filter= Html::tag('span','Отфильтровать:',['class'=>'btn']).
-	Html::a('счета',['index','ContractsSearch[fullname]'=>'счет'],['class'=>'btn btn-default']).' // '.
-	Html::a('ТТН',['index','ContractsSearch[fullname]'=>'ттн'],['class'=>'btn btn-default']).' // '.
-	Html::a('УПД',['index','ContractsSearch[fullname]'=>'упд'],['class'=>'btn btn-default']).' // '.
-	Html::a('договоры',['index','ContractsSearch[fullname]'=>'договор'],['class'=>'btn btn-default']);
+	Html::a('счета',['index','ContractsSearch[name]'=>'счет'],['class'=>'btn btn-default']).' // '.
+	Html::a('ТТН',['index','ContractsSearch[name]'=>'ттн'],['class'=>'btn btn-default']).' // '.
+	Html::a('УПД',['index','ContractsSearch[name]'=>'упд'],['class'=>'btn btn-default']).' // '.
+	Html::a('договоры',['index','ContractsSearch[name]'=>'договор'],['class'=>'btn btn-default']);
 
 $gridId='contracts-index';
 ?>
