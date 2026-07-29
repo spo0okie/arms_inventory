@@ -124,5 +124,12 @@ class ContractsStates extends ArmsModel
 			->all();
 	}
 
+	public static function fetchNames(){
+		$list=static::find()
+			->orderBy(['name'=>SORT_ASC])
+			->all();
+		return \yii\helpers\ArrayHelper::map($list, 'id', 'sname');
+	}
+
 
 }
