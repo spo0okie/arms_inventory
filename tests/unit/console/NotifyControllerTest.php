@@ -166,6 +166,38 @@ class NotifyControllerTest extends Unit
 	}
 
 	/**
+	 * watch: PHP-фильтр по вычисляемым признакам применяется после SQL-выборки —
+	 * непрошедший фильтр объект не порождает письма, прошедший — порождает.
+	 */
+	public function testWatchFilterCallable()
+	{
+		$contract = Contracts::find()->one();
+		Yii::$app->db->createCommand()->insert('users_in_contracts', [
+			'contracts_id' => $contract->id, 'users_id' => $this->user->id,
+		])->execute();
+
+		$rule = [
+			'class' => Contracts::class,
+			'condition' => ['contracts.id' => $contract->id],
+			'subject' => 'фильтр-тест «{name}»',
+		];
+
+		//фильтр отклоняет - тишина
+		Yii::$app->params['notifyRules'] = ['filter-test' => $rule + ['filter' => fn($model) => false]];
+		$this->controller()->actionWatch();
+		$this->assertEquals(0,
+			Notifications::find()->where(['event_key' => "watch:filter-test:{$contract->id}"])->count());
+
+		//фильтр пропускает (и видит настоящую модель) - письмо в очереди
+		Yii::$app->params['notifyRules'] = ['filter-test' => $rule + [
+			'filter' => fn($model) => $model instanceof Contracts && $model->id == $contract->id,
+		]];
+		$this->controller()->actionWatch();
+		$this->assertEquals(1,
+			Notifications::find()->where(['event_key' => "watch:filter-test:{$contract->id}"])->count());
+	}
+
+	/**
 	 * cleanup удаляет только давно отправленные: свежеотправленные - память
 	 * для repeat, неотправленные - ещё очередь.
 	 */

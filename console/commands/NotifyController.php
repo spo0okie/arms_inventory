@@ -93,6 +93,9 @@ class NotifyController extends Controller
 	 *         //условие выборки: массив для andWhere() либо callable(ActiveQuery):ActiveQuery
 	 *         'condition' => ['state_id' => 1],
 	 *         'age' => '1 day',      //не менялся дольше (по updated_at); null = без ограничения
+	 *         //PHP-фильтр после SQL-выборки: для ВЫЧИСЛЯЕМЫХ признаков (deliveryState
+	 *         //и т.п.), которые не выразить в condition; callable($model): bool
+	 *         'filter' => null,
 	 *         'subject' => 'Документ «{name}» завис в статусе «Новый»',
 	 *         'body' => null,        //null = subject + ссылка; строка с {name}/{id}; callable($model):string
 	 *         'repeat' => '3 days',  //повторное письмо не чаще; null = однократно
@@ -133,6 +136,8 @@ class NotifyController extends Controller
 					$this->stderr("правило $ruleKey: $class не реализует NotifyRecipientsInterface\n");
 					break;
 				}
+				//вычисляемые признаки проверяются в PHP - после SQL-выборки
+				if (isset($rule['filter']) && !call_user_func($rule['filter'], $model)) continue;
 				$eventKey = "watch:$ruleKey:{$model->id}";
 				//письмо уже уходило (и не пришло время повтора) - молчим;
 				//неотправленные записи не в счёт: enqueue их просто освежит
