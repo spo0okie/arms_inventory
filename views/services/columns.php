@@ -62,7 +62,12 @@ if ((count($totalComps)+count($totalTechs))>10)
 return [
 	'name' => [
 		'value' => function ($data) {
-			$name=ModelWidget::widget(['model'=>$data,'options'=>['noDelete'=>true,'icon'=>true]]);
+			$name=ModelWidget::widget(['model'=>$data,'options'=>[
+				'noDelete'=>true,
+				'icon'=>true,
+				//если родитель показан в дереве выше, откусываем его имя/альяс из начала имени
+				'crop_parent'=>(bool)$data->treeDepth,
+			]]);
 			if ($data->treeDepth || count((array)$data->treeChildren)) {
 				return TableTreePrefixWidget::widget([
 						'prefix'=>$data->treePrefix,
