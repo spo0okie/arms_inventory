@@ -647,8 +647,37 @@ class Techs extends ArmsModel
 			['installed_id',function ($attribute){
 				$this->validateRecursiveLink($attribute, $params=['getLink'=>'installation']);
 			}],
+			[['arms_id','installed_id'],function ($attribute){
+				$this->validateEffectiveChain($attribute);
+			}],
         ];
     }
+
+	/**
+	 * Валидация совмещенной цепочки "установлено в"/"входит в АРМ" на отсутствие колец.
+	 * validateRecursiveLink() проверяет каждое поле по отдельности и не ловит
+	 * кросс-кольцо (A.installed_id=B при B.arms_id=A), а именно по совмещенной
+	 * цепочке идет getEffectiveUser(): installation, а при её отсутствии arm.
+	 * @param string $attribute атрибут, которому писать ошибку
+	 */
+	public function validateEffectiveChain($attribute)
+	{
+		if (empty($this->$attribute)) return;
+		$visited=[];
+		if ($this->id) $visited[$this->id]=true;
+		//первый шаг из значений самой модели (могут быть еще не сохранены), дальше по БД
+		$nextId=$this->installed_id?:$this->arms_id;
+		while ($nextId) {
+			if (isset($visited[$nextId])) {
+				$this->addError($attribute,'Цепочка "установлено в"/"входит в АРМ" зацикливается: оборудование через эти связи возвращается само к себе');
+				return;
+			}
+			$visited[$nextId]=true;
+			$next=static::findOne($nextId);
+			if (!is_object($next)) return;
+			$nextId=$next->installed_id?:$next->arms_id;
+		}
+	}
 
 
 	/**

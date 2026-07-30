@@ -248,14 +248,24 @@ trait TechsModelCalcFieldsTrait
 	 *  - сначала ищет явно заданного пользователя
 	 *  - потом проверяет если оборудование установленно в другое оборудование, то передает запрос на него
 	 *  - потом проверяет если оборудование является частью АРМа, то передает запрос на арм
-	 * @return \app\models\Users
+	 * Цепочка обходится итеративно с учетом посещенных id: кольцо в данных
+	 * (A установлено в B, а B входит в АРМ A) раскручивало рекурсию вечно -
+	 * каждый виток грузил свежие экземпляры моделей и relation-кэш не спасал
+	 * @return \app\models\Users|null
 	 */
 	public function getEffectiveUser()
 	{
-		if (is_object($this->user)) return $this->user;
-		if (is_object($this->installation)) return $this->installation->effectiveUser;
-		if (is_object($this->arm)) return $this->arm->effectiveUser;
-		return null;
+		/** @var Techs $current */
+		$current=$this;
+		$visited=[];
+		while (true) {
+			if (is_object($current->user)) return $current->user;
+			if (isset($visited[$current->id])) return null; //кольцо связей - выходим
+			$visited[$current->id]=true;
+			if (is_object($current->installation)) {$current=$current->installation; continue;}
+			if (is_object($current->arm)) {$current=$current->arm; continue;}
+			return null;
+		}
 	}
 	
 	/**

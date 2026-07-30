@@ -340,11 +340,15 @@ trait ServicesModelCalcFieldsTrait
 					
 					//убираем альяс из начала имени (откусываем в качестве имени правый набор слов после альяса)
 					$tokens = array_slice($tokens, count($aliasTokens));
-					
+
 					//если теперь в начале имени стоит разделитель, его бы убрать
-					if (array_search($tokens[0], $dividers) !== false)
+					if (count($tokens) && array_search($tokens[0], $dividers) !== false)
 						array_shift($tokens);
-					
+
+					//если от имени ничего не осталось (имя совпало с альясом родителя целиком)
+					//лучше оставить имя как есть, чем показать пустоту
+					if (!count($tokens)) break;
+
 					$name = implode(' ', $tokens);
 					break;
 				}
