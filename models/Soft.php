@@ -536,8 +536,11 @@ class Soft extends ArmsModel
 					$queue->save();
 				}
 			} else {
-				//моментальный
-				foreach ($comps as $comp) $comp->silentSave();
+				//моментальный: raw_soft компа не меняется, поэтому скан надо форсировать
+				foreach ($comps as $comp) {
+					$comp->forceRescan=true;
+					$comp->silentSave();
+				}
 			}
 		}
 	}

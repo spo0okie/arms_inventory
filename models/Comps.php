@@ -108,6 +108,14 @@ class Comps extends ArmsModel
 	}
     private $hwList_obj=null;
     private $swList_obj=null;
+
+	/** @var bool форсировать синхронный рескан ПО при сохранении
+	 * (выставляют консольные comps/rescan и comps/resave) */
+	public $forceRescan=false;
+	/** @var bool рескан ПО требуется (изменился отпечаток/паспорт), вычисляется в beforeSave */
+	private $rescanNeeded=false;
+	/** @var bool рескан ПО реально выполнен в этом цикле сохранения */
+	private $rescanPerformed=false;
     private $ip_cache=null;
 	private $ip_ignore_cache=null;
 	private $ip_filtered_cache=null;
@@ -931,8 +939,24 @@ class Comps extends ArmsModel
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
-			if (!Soft::$disable_rescan) //если только автообновление привязок не блокировано
-			$this->softHits_ids=array_keys($this->swList->items);
+			/* Распознавание ПО (softHits_ids из raw_soft+soft_ids) нужно только когда
+			   менялся отпечаток софта или паспортное ПО; рядовое сохранение записи
+			   (правка полей руками, пуш с неизменным отпечатком) скан не запускает.
+			   В режиме soft.deferred_rescan скан не выполняется даже при изменениях —
+			   afterSave поставит задание в CompsRescanQueue, отработает cron comps/rescan
+			   (он форсирует скан через $forceRescan). */
+			$this->rescanNeeded=!Soft::$disable_rescan && (
+				$this->forceRescan
+				|| $this->isAttributeChanged('raw_soft')
+				|| $this->attributeLinkIsDirty('soft_ids')
+			);
+			$this->rescanPerformed=false;
+			if ($this->rescanNeeded
+				&& (!\Yii::$app->params['soft.deferred_rescan'] || $this->forceRescan)
+			) {
+				$this->softHits_ids=array_keys($this->swList->items);
+				$this->rescanPerformed=true;
+			}
 
 			/* взаимодействие с NetIPs: в реестр адресов (а значит и в сегменты/сети
 			   и в пропагацию поиска оборудования) попадают только НЕ игнорируемые
@@ -1018,7 +1042,15 @@ class Comps extends ArmsModel
 	public function afterSave($insert,$changedAttributes)
 	{
 		parent::afterSave($insert,$changedAttributes);
-		foreach ($this->softRescans as $queue) $queue->delete();
+		if ($this->rescanPerformed) {
+			//скан выполнен - все ранее запланированные задания на рескан отработаны
+			foreach ($this->softRescans as $queue) $queue->delete();
+		} elseif ($this->rescanNeeded) {
+			//скан требовался, но отложен - ставим задание на полный рескан (soft_id=null)
+			if (!CompsRescanQueue::find()->where(['comps_id'=>$this->id,'soft_id'=>null])->exists()) {
+				(new CompsRescanQueue(['comps_id'=>$this->id]))->save();
+			}
+		}
 		//если в новом арме не назначена основная ОС, то назначим эту
 		if (!is_null($this->arm_id)) {
 			if (is_object($arm=$this->arm)) {

@@ -248,6 +248,20 @@ trait AttributeLinksModelTrait
 	}
 	
 	/**
+	 * Присваивалось ли значение аттрибуту-ссылке в этом цикле сохранения
+	 * (LinkerBehavior хранит присвоенные значения до saveRelations)
+	 * @param string $attr
+	 * @return bool
+	 */
+	public function attributeLinkIsDirty(string $attr): bool {
+		foreach ($this->getBehaviors() as $behavior) {
+			if ($behavior instanceof LinkerBehavior && $behavior->hasDirtyValueOfAttribute($attr))
+				return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Является ли аттрибут загрузчиком для ссылки
 	 * в linksClasses должно быть проставлено на какой класс ссылка
 	 * @param string $loader

@@ -74,6 +74,9 @@ class CompsController extends Controller
 	{
 		foreach (Comps::find()->all() as $comp) {
 			/** @var Comps $comp */
+			//пересчёт полей должен включать и рескан ПО, иначе в отложенном
+			//режиме (soft.deferred_rescan) save() скан пропустит
+			$comp->forceRescan=true;
 			$comp->silentSave();
 		}
 		
@@ -103,6 +106,9 @@ class CompsController extends Controller
 			$comp=Comps::findOne($item->comps_id);
 			if (is_object($comp)) {
 				echo $comp->fqdn."\n";
+				//обработчик очереди обязан сканировать синхронно: без форса
+				//в отложенном режиме скан отложился бы снова и очередь зациклилась
+				$comp->forceRescan=true;
 				$comp->silentSave();
 			} else {
 				echo $item->comp_id." missing \n";

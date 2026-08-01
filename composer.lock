@@ -4014,12 +4014,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/spo0okie/yii2-grid.git",
-                "reference": "89486911f0b493c55485d0d5f33e4bbcd2e57701"
+                "reference": "a992d3be1c7913ed84ceea2853f94cde00258a90"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spo0okie/yii2-grid/zipball/89486911f0b493c55485d0d5f33e4bbcd2e57701",
-                "reference": "89486911f0b493c55485d0d5f33e4bbcd2e57701",
+                "url": "https://api.github.com/repos/spo0okie/yii2-grid/zipball/a992d3be1c7913ed84ceea2853f94cde00258a90",
+                "reference": "a992d3be1c7913ed84ceea2853f94cde00258a90",
                 "shasum": ""
             },
             "require": {
@@ -4069,7 +4069,7 @@
                     "url": "https://opencollective.com/yii2-grid"
                 }
             ],
-            "time": "2023-11-07T05:39:49+00:00"
+            "time": "2026-07-31T17:00:31+00:00"
         },
         {
             "name": "spo0okie/yii2-modal-ajax",
@@ -9912,30 +9912,31 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "yiisoft/yii2-bootstrap5": 20,
-        "kartik-v/yii2-widget-datepicker": 20,
-        "kartik-v/yii2-widget-datetimepicker": 20,
+        "doctrine/annotations": 20,
+        "guzzlehttp/guzzle": 20,
+        "guzzlehttp/psr7": 20,
         "kartik-v/yii2-bootstrap5-dropdown": 20,
-        "kartik-v/yii2-widget-typeahead": 20,
-        "kartik-v/yii2-widget-fileinput": 20,
-        "kartik-v/yii2-widget-depdrop": 20,
+        "kartik-v/yii2-datecontrol": 20,
+        "kartik-v/yii2-dynagrid": 20,
+        "kartik-v/yii2-editable": 20,
+        "kartik-v/yii2-markdown": 20,
         "kartik-v/yii2-nav-x": 20,
         "kartik-v/yii2-tabs-x": 20,
-        "kartik-v/yii2-dynagrid": 20,
-        "kartik-v/yii2-markdown": 20,
-        "kartik-v/yii2-datecontrol": 20,
-        "kartik-v/yii2-editable": 20,
-        "kartik-v/yii2-widget-select2": 20,
         "kartik-v/yii2-widget-colorinput": 20,
-        "voskobovich/yii2-linker-behavior": 20,
+        "kartik-v/yii2-widget-datepicker": 20,
+        "kartik-v/yii2-widget-datetimepicker": 20,
+        "kartik-v/yii2-widget-depdrop": 20,
+        "kartik-v/yii2-widget-fileinput": 20,
+        "kartik-v/yii2-widget-select2": 20,
+        "kartik-v/yii2-widget-typeahead": 20,
+        "openai-php/client": 20,
         "spo0okie/yii2-grid": 20,
         "spo0okie/yii2-modal-ajax": 20,
         "spo0okie/yii2-rbac-plus": 20,
         "thomaspark/bootswatch": 20,
-        "doctrine/annotations": 20,
-        "openai-php/client": 20,
-        "guzzlehttp/guzzle": 20,
-        "guzzlehttp/psr7": 20
+        "voskobovich/yii2-linker-behavior": 20,
+        "yiisoft/yii2-bootstrap5": 20,
+        "yiisoft/yii2-symfonymailer": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
@@ -9946,6 +9947,6 @@
         "ext-imagick": "*",
         "ext-intl": "*"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
 }

@@ -10,7 +10,7 @@ use app\models\base\ArmsModel;
  *
  * @property int $id
  * @property int $comps_id
- * @property int $soft_id
+ * @property int|null $soft_id null = полный рескан (изменился отпечаток/паспорт ОС)
  * @property string|null $updated_at
  * @property string|null $updated_by
  * @property string sname
@@ -46,8 +46,8 @@ class CompsRescanQueue extends ArmsModel
     public function rules()
     {
         return [
-            [['updated_at', 'updated_by'], 'default', 'value' => null],
-            [['comps_id', 'soft_id'], 'required'],
+            [['updated_at', 'updated_by', 'soft_id'], 'default', 'value' => null],
+            [['comps_id'], 'required'],
             [['comps_id', 'soft_id'], 'integer'],
             [['updated_at'], 'safe'],
             [['updated_by'], 'string', 'max' => 32],
@@ -67,7 +67,8 @@ class CompsRescanQueue extends ArmsModel
 			],
 			'soft_id' => [
 				'ПО',
-				'hint' => 'Программный продукт, из-за которого запланирован рескан',
+				'hint' => 'Программный продукт, из-за которого запланирован рескан. '
+					.'Пусто — полный рескан из-за изменения отпечатка софта/паспорта самой ОС',
 				'indexHint' => 'Программное обеспечение, которое инициировало повторное сканирование',
 			],
 			'updated_by' => [
