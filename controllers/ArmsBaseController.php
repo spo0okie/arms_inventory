@@ -97,6 +97,9 @@ use yii\web\UnauthorizedHttpException;
  *  - actionValidate() — Ajax-валидация модели (ArmsForm + SCENARIO_VALIDATION);
  *  - actionCreate()/actionUpdate() — автоподключение ArmsFormAsset,
  *    JSON-ответы для REST-клиентов;
+ *  - actionCopy() — «создать по образцу»: create-форма, предзаполненная
+ *    атрибутами образца (ArmsModel::copyPrefillAttributes; кнопка-иконка
+ *    в заголовке страницы объекта — LinkObjectWidget/CopyObjectWidget);
  *
  * Поведение по умолчанию:
  * -----------------------

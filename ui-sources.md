@@ -167,6 +167,8 @@ qtip-атрибуты: `qtip_ttip` (контент), `qtip_side`, `qtip_theme`;
 | Placeholder | `attributeData: placeholder` (+ наследуемые значения для `is_inheritable`) | `getAttributePlaceholder()` |
 | Виджет ввода | явный вызов в `_form.php` (`->select2()`, `->text()`, …) → `autoInput()` → `renderInput()` типа | `ActiveField::render()/autoInput()` |
 | Классическая подсказка под полем | `attributeData: classicHint` | `ActiveField::classicHint()` |
+| Пикер типов доступа | общий партиал (фильтр, инпуты IP-параметров, создание нового типа в модалке), параметризован моделью/атрибутами: формы ACE и сервиса; card-обвязку с label атрибута рисует сам (`card`/`label`) | `views/access-types/_picker.php` |
+| Создание связанного объекта из формы | ссылка `a.open-in-modal-form` на штатный `{controller}/create` + хук `data-call-on-submit="jsFunc"` — именованная JS-функция получает ответ сервера (модель JSON в обёртке `[[model]]`) без перезагрузки страницы | `views/layouts/main.php` (ModalAjax, EVENT_MODAL_SUBMIT) |
 
 ## 2. Список объектов (`index`, DynaGrid)
 
@@ -240,6 +242,15 @@ qtip-атрибуты: `qtip_ttip` (контент), `qtip_side`, `qtip_theme`;
 | Значение-ссылка (link/loader/`ref`) | объектный путь: `renderItem()` каждого объекта (правило «имя объекта — всегда renderItem») | `ModelFieldWidget` → `ListObjectsWidget` |
 | Пустое значение | рендер типа НЕ вызывается; подача пустоты — `show_empty`/`message_on_empty` (по умолчанию карточка/строка скрыта) | `ModelFieldWidget`/`ListObjectsWidget` |
 | Вкладки/блоки wiki | поле `links` объекта — **пользовательский контент**, не документация | `TabsWidget::addWikiLinks()`, `WikiPageWidget` |
+
+**Шапка карточки** (имя объекта + иконки действий) — `LinkObjectWidget`:
+на странице самого объекта (samePage) ссылка вырождается в текст, рядом
+карандаш (`UpdateObjectWidget`), иконка «Создать копию» (`CopyObjectWidget` →
+`{controller}/copy` — create-форма, предзаполненная образцом,
+`ArmsModel::copyPrefillAttributes()`; рисуется только на samePage и только
+если контроллер поддерживает копию — `copySupported()`; контроллерам за
+URL-алиасами модулей, недоступным автоопределению, кнопка включается явно
+опцией `showCopy`) и корзинка/замочек (`DeleteObjectWidget`).
 
 **Нестандартная подпись блока** (напр. «Участвует в работе сервисов:» для
 поля `services`) задаётся параметром `label`, а НЕ `title`: `title`-строка

@@ -222,7 +222,7 @@ if(!$static_view) { ?>
 
 		<?= ModelFieldWidget::widget([
 			'model' => $model, 'field' => 'defaultAccessTypes',
-			'label'=>'Типы доступа по умолчанию:',
+			'label'=>'Стандартные типы доступа:',
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
