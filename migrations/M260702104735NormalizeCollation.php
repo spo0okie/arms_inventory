@@ -83,8 +83,42 @@ class M260702104735NormalizeCollation extends ArmsMigration
 			);
 
 			echo "    > recreate unique index on manufacturers_dict.word\n";
-			$this->execute("ALTER TABLE `manufacturers_dict` ADD UNIQUE KEY `word` (`word`)");
+			// varchar(255) в utf8mb4 — это 1020 байт. В InnoDB с ROW_FORMAT=COMPACT
+			// (типично для таблиц из старых дампов) индексируемая колонка ограничена
+			// 767 байтами → ошибка 1709. convertTableToCollation() уже пытался поднять
+			// формат до DYNAMIC; если сервер этого не умеет — индексируем префикс.
+			try {
+				$this->execute("ALTER TABLE `manufacturers_dict` ADD UNIQUE KEY `word` (`word`)");
+			} catch (\yii\db\Exception $e) {
+				if (!$this->isKeyTooLongError($e)) throw $e;
+				$prefix = static::SHORT_KEY_PREFIX;
+				echo "    > колонка не влезает в лимит ключа, индексируем первые $prefix символов\n";
+				// По префиксу могут совпасть слова, различающиеся дальше $prefix-го
+				// символа — дочищаем, иначе UNIQUE не создастся (ошибка 1062).
+				$this->execute(
+					"DELETE FROM `manufacturers_dict`
+					 WHERE id NOT IN (
+						 SELECT id FROM (
+							 SELECT MIN(id) as id FROM `manufacturers_dict` GROUP BY LEFT(`word`, $prefix)
+						 ) t
+					 )"
+				);
+				$this->execute("ALTER TABLE `manufacturers_dict` ADD UNIQUE KEY `word` (`word`($prefix))");
+			}
 		}
+	}
+
+	/**
+	 * Ошибка "ключ слишком длинный": 1709 (InnoDB, лимит колонки 767 байт)
+	 * или 1071 (общий лимит длины ключа).
+	 *
+	 * @param \yii\db\Exception $e
+	 * @return bool
+	 */
+	protected function isKeyTooLongError($e)
+	{
+		$code = $e->errorInfo[1] ?? null;
+		return in_array($code, [1071, 1709]);
 	}
 
 	public function down()
