@@ -27,6 +27,20 @@ class ArmsMigration extends Migration
 	const COLLATION = 'utf8mb4_unicode_ci';
 
 	/**
+	 * Формат строк InnoDB, при котором индекс по varchar(255) utf8mb4 (1020 байт)
+	 * помещается в лимит: DYNAMIC/COMPRESSED дают 3072 байта, COMPACT/REDUNDANT —
+	 * только 767 (ошибка 1709 "Index column size too large"). Старые дампы часто
+	 * несут ROW_FORMAT=COMPACT явно, и ALTER его сохраняет.
+	 */
+	const ROW_FORMAT = 'DYNAMIC';
+
+	/**
+	 * Максимальная длина префикса utf8mb4-строки, помещающаяся в 767 байт —
+	 * запасной вариант для индекса, если поднять ROW_FORMAT не удалось.
+	 */
+	const SHORT_KEY_PREFIX = 191;
+
+	/**
 	 * Достраивает опции CREATE TABLE до стандарта проекта (InnoDB + utf8mb4 +
 	 * utf8mb4_unicode_ci). Явно заданные значения не перетираются.
 	 *
@@ -73,9 +87,46 @@ class ArmsMigration extends Migration
 	public function convertTableToCollation($table)
 	{
 		$this->convertTableToInnoDb($table);
+		$this->convertTableToDynamicRowFormat($table);
 		$this->db->createCommand(
 			"ALTER TABLE `$table` CONVERT TO CHARACTER SET " . static::CHARSET . " COLLATE " . static::COLLATION
 		)->execute();
+	}
+
+	/**
+	 * Поднимает формат строк InnoDB до DYNAMIC, если таблица лежит в COMPACT или
+	 * REDUNDANT (типично для таблиц из старых дампов, где ROW_FORMAT записан явно).
+	 *
+	 * Зачем: в COMPACT/REDUNDANT индексируемая колонка ограничена 767 байтами, а
+	 * varchar(255) в utf8mb4 занимает 1020 — любой UNIQUE/KEY по такой колонке
+	 * падает с ошибкой 1709 "Index column size too large". В DYNAMIC лимит 3072.
+	 *
+	 * Не критично: на серверах без поддержки DYNAMIC (MySQL 5.6 с форматом файлов
+	 * Antelope) ALTER молча оставит COMPACT либо бросит ошибку — в обоих случаях
+	 * миграция продолжается, а вызывающий код должен уметь откатиться на префиксный
+	 * индекс (см. SHORT_KEY_PREFIX).
+	 *
+	 * @param string $table Имя таблицы
+	 * @return bool Удалось ли получить формат DYNAMIC/COMPRESSED
+	 * @noinspection SqlResolve
+	 */
+	public function convertTableToDynamicRowFormat($table)
+	{
+		$isRoomy = function () use ($table) {
+			$status = $this->getTableStatus($table);
+			return in_array(strtolower($status['Row_format'] ?? ''), ['dynamic', 'compressed']);
+		};
+
+		if ($isRoomy()) return true;
+
+		try {
+			$this->db->createCommand("ALTER TABLE `$table` ROW_FORMAT=" . static::ROW_FORMAT)->execute();
+		} catch (\Throwable $e) {
+			echo "    > не удалось поднять ROW_FORMAT у $table: " . $e->getMessage() . "\n";
+			return false;
+		}
+
+		return $isRoomy();
 	}
 
 	/**
