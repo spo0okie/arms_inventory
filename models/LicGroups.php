@@ -24,6 +24,7 @@ use yii\db\ActiveQuery;
  * @property string $descr Описание
  * @property string $comment Комментарий
  * @property string     $created_at Время создания
+ * @property string     $created_by Автор создания
  * @property int        $totalCount общее количество лицензий
  * @property int        $activeCount общее количество активных лицензий (не просроченных)
  * @property int        $directUsedCount количество лицензий привязанных прямо к группе (не через закупки)
@@ -75,7 +76,7 @@ class LicGroups extends ArmsModel
             [['lic_types_id', 'descr'], 'required'],
 	        [['soft_ids','arms_ids','comps_ids','users_ids'], 'each', 'rule'=>['integer']],
             [['lic_types_id','services_id'], 'integer'],
-            [['created_at','comment','linkComment'], 'safe'],
+            [['created_at','created_by','comment','linkComment'], 'safe'],
             [['descr',], 'string', 'max' => 255],
 	        [['lic_types_id'], 'exist', 'skipOnError' => true, 'targetClass' => LicTypes::class, 'targetAttribute' => ['lic_types_id' => 'id']],
         ];
@@ -115,7 +116,15 @@ class LicGroups extends ArmsModel
 			],
             'created_at' => [
             	'Время создания',
+				'hint' => 'Дата/время создания объекта в БД',
+				'readOnly' => true,
 				'typeClass' => \app\types\DatetimeType::class,
+			],
+			'created_by' => [
+				'Автор',
+				'hint' => 'Учетная запись, создавшая объект в БД',
+				'readOnly' => true,
+				'typeClass' => \app\types\StringType::class,
 			],
 			'descr' => [
 				'Описание',

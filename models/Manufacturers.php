@@ -14,6 +14,7 @@ use yii\helpers\ArrayHelper;
  * @property string $full_name Полное название
  * @property string $comment Комментарий
  * @property string $created_at Время создания
+ * @property string $created_by Автор создания
  *
  * @property ManufacturersDict[] $manufacturersDicts
  * @property ManufacturersDict[] $dict
@@ -71,7 +72,7 @@ class Manufacturers extends ArmsModel
     {
         return [
             [['name'], 'required'],
-            [['created_at'], 'safe'],
+            [['created_at','created_by'], 'safe'],
             [['name'], 'string', 'max' => 128],
             [['full_name', 'comment'], 'string', 'max' => 255],
             [['name'], 'unique'],
@@ -85,7 +86,8 @@ class Manufacturers extends ArmsModel
     {
         return [
 			'comment' => ['Комментарий','hint'=>'Дополнительная информация о производителе (кто такой, чем знаменит и т.д.)','typeClass'=>\app\types\TextType::class],
-			'created_at' => ['Время создания','typeClass'=>\app\types\DatetimeType::class],
+			'created_at' => ['Время создания','hint'=>'Дата/время создания объекта в БД','readOnly'=>true,'typeClass'=>\app\types\DatetimeType::class],
+			'created_by' => ['Автор','hint'=>'Учетная запись, создавшая объект в БД','readOnly'=>true,'typeClass'=>\app\types\StringType::class],
 			'full_name' => ['Полное название','hint'=>'Полное название производителя для исключения совпадений','typeClass'=>\app\types\StringType::class],
 			'id' => ['Идентификатор','typeClass'=>\app\types\IntegerType::class],
 			'name' => ['Название','hint'=>'Короткое обозначение производителя для отображения в списках','typeClass'=>\app\types\StringType::class],

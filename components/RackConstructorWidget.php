@@ -36,7 +36,13 @@ class RackConstructorWidget extends Widget
 		$layout=$this->layout=$this->attr.'_layout';
 		
 		if (is_object($this->model) && $this->model->$layout) {
-			$this->rack=new RackWidget(json_decode($this->model->$layout,true));
+			$config=json_decode($this->model->$layout,true);
+			if (is_array($config)) {
+				//неизвестные ключи в сохранённом JSON отбрасываем: посторонние данные
+				//в *_layout не должны ронять форму (Widget-конструктор кидает
+				//UnknownPropertyException на любой лишний ключ)
+				$this->rack=new RackWidget(array_intersect_key($config,get_class_vars(RackWidget::class)));
+			}
 		}
 		
 		$this->rackDefault=new RackWidget(json_decode('{

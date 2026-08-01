@@ -114,6 +114,18 @@ if (!$model->is_service) $model->is_service=0;
 			<?= $form->field($model,'support_ids')->select2() ?>
 			<?= $form->field($model,'infrastructure_support_ids')->select2() ?>
 			<?= $form->field($model,'depends_ids')->select2() ?>
+			<?/*общий пикер типов доступа (как в форме ACE): фильтр, создание нового
+			типа в модалке, инпуты IP-параметров; карточку с заголовком рисует сам;
+			режим override - значение инпута только переопределение для этого
+			сервиса, дефолт типа в placeholder*/?>
+			<?= $this->render('/access-types/_picker',[
+				'form'=>$form,
+				'model'=>$model,
+				'attribute'=>'default_access_types_ids',
+				'paramsAttribute'=>'defaultIpParams',
+				'paramsOverride'=>true,
+				'card'=>false,
+			]) ?>
 			<?= $form->field($model,'comps_ids')->select2() ?>
 			<?= $form->field($model,'techs_ids')->select2() ?>
 			<div class="row">

@@ -41,6 +41,9 @@ YiiAsset::register($this);
 						'static'=>$static_view,
 						'hideUndeletable'=>false,
 						'controller'=>'scheduled-access', //кастомный контроллер для расписаний доступа
+						//глубокая копия временного доступа (повторить служебку/применить шаблон);
+						//контроллер за URL-алиасом модуля — автоопределение недоступно
+						'showCopy'=>true,
 					])
 				]) ?>&nbsp;
 			</h1>

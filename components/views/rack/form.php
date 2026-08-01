@@ -50,8 +50,16 @@ use yii\helpers\Html;
 	<div class="col-md-6 card p-2" >
 		<div class="card-title">Просмотр</div>
 		<div class="card-body" id="preview-<?= $layout ?>">
-			<?= strlen($model->$layout??'')?
-				\app\components\RackWidget::widget(json_decode($model->$layout,true)):
+			<?php
+			//неизвестные ключи в сохранённом JSON отбрасываем: посторонние данные
+			//в *_layout не должны ронять форму (см. RackConstructorWidget::init)
+			$layoutConfig=strlen($model->$layout??'')?json_decode($model->$layout,true):null;
+			?>
+			<?= is_array($layoutConfig)?
+				\app\components\RackWidget::widget(array_intersect_key(
+					$layoutConfig,
+					get_class_vars(\app\components\RackWidget::class)
+				)):
 				Html::tag('div','Отсутствует конфигурация корзины',[
 					'class'=>'alert alert-striped'
 				]);

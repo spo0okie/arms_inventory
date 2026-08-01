@@ -109,16 +109,18 @@ use yii\db\ActiveQuery;
  * @property MaintenanceReqs $backupReqs
  * @property MaintenanceReqs $otherReqs
  * @property MaintenanceJobs $maintenanceJobs
-
+ * @property int[] $default_access_types_ids
+ * @property AccessTypes[] $defaultAccessTypes
+ * @property string[] $defaultIpParams
  */
 class Services extends ArmsModel
 {
 	use ServicesModelCalcFieldsTrait, AclsFieldTrait, TaggableTrait;
-	
+
 	public $treeChildren=null;
 	public $treeDepth=null;
 	public $treePrefix=null;
-	
+
 	public static $titles='Сервисы/услуги';
 
 	public static function modelDescription(): string
@@ -131,11 +133,11 @@ class Services extends ArmsModel
 	public static $tech_service_title='Служебный сервис';
 	public static $user_job_title='Услуга для пользователей';
 	public static $tech_job_title='Услуга';
-	
+
 	public static $job_title='Услуга';
 	public static $service_title='Сервис';
-	
-	
+
+
 	public $parentAttr='parentService';
 	private $sitesRecursiveCache=null;
 	private $placesCache=null;
@@ -158,12 +160,13 @@ class Services extends ArmsModel
 		'contracts_ids' => 				[Contracts::class,'services_ids'],
 		'acls_ids' => 					[Acls::class,'services_id'],
 		'aces_ids' => 					[Aces::class,'services_ids'],
+		'default_access_types_ids' =>	[AccessTypes::class,'default_services_ids'],
 		'children_ids' =>				[Services::class,'parent_id','loader'=>'children'],
 		'org_inets_ids'=>				[OrgInet::class,'services_id'],
 		'org_phones_ids'=>				[OrgPhones::class,'services_id'],
 		'lic_groups'=>					[LicGroups::class,'services_id'],
 		'lic_items'=>					[LicItems::class,'services_id'],
-		
+
 		'responsible_id' =>				[Users::class,'services_ids'],
 		'infrastructure_user_id' =>		[Users::class,'infrastructure_services_ids','loader'=>'infrastructureResponsible'],
 		'providing_schedule_id' =>		[Schedules::class,'providing_services_ids'],
@@ -174,7 +177,26 @@ class Services extends ArmsModel
 		'places_id' =>					[Places::class,'services_ids'],
 		'currency_id' =>				Currency::class,
 	];
-	
+
+	public function getLinksSchema()
+	{
+		//дополняем статичную схему связей апдейтером ip-параметров дефолтных типов доступа
+		//(колонка ip_params в junction default_access_in_services) - по образцу Aces
+		return ArrayHelper::recursiveOverride($this->linksSchema,[
+			'default_access_types_ids' => ['updater'=>[
+				'viaTableAttributesValue' => [
+					'ip_params' => function($updater, $relatedPk) {
+						$service = $updater->getBehavior()->owner;
+						/** @var Services $service */
+						$value=$service->getDefaultIpParams()[$relatedPk]??null;
+						//пустая строка = «переопределения нет» (действует ip_params_def типа)
+						return strlen($value??'')?$value:null;
+					},
+				]
+			]],
+		]);
+	}
+
 
 	public function extraFields()
 	{
@@ -196,7 +218,7 @@ class Services extends ArmsModel
 			'techs'
 		];
 	}
-	
+
 	/**
      * {@inheritdoc}
      */
@@ -214,7 +236,8 @@ class Services extends ArmsModel
 			[['cost','charge'], 'number'],
 			[['currency_id'],'default','value'=>1],
             [['name', 'description', 'is_end_user'], 'required'],
-	        [['tags_ids','depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids','maintenance_reqs_ids','maintenance_jobs_ids'], 'each', 'rule'=>['integer']],
+	        [['tags_ids','depends_ids','comps_ids','support_ids','infrastructure_support_ids','techs_ids','contracts_ids','maintenance_reqs_ids','maintenance_jobs_ids','default_access_types_ids'], 'each', 'rule'=>['integer']],
+			[['defaultIpParams'], 'each', 'rule'=>['string']],
 	        [['description', 'notebook','links'], 'string'],
 			[['vm_cores','vm_ram','vm_hdd','places_id','partners_id','places_id','archived','currency_id','weight'],'integer'],
 			[['weight'],'default', 'value' => '100'],
@@ -301,6 +324,23 @@ class Services extends ArmsModel
 				'hint' => 'Ед. изм. стоим.',
 				'placeholder' => 'RUR',
 				'typeClass' => \app\types\LinkType::class,
+			],
+			'defaultAccessTypes' => ['alias'=>'default_access_types_ids'],
+			'default_access_types_ids' => [
+				'Стандартные типы доступа',
+				'hint' => 'Стандартные доступы/протоколы, которые предоставляет этот сервис потребителям'
+					.'<br>Предзаполняют типы в формах предоставления доступа, когда ресурсом выбран этот сервис;'
+					.' в каждом конкретном доступе набор можно поменять вручную'
+					.'<br>У IP-типов можно переопределить сетевые параметры для этого сервиса'
+					.' (например HTTPS на нестандартном порту — "TCP 8140")',
+				'placeholder' => 'Выберите типы доступа',
+				'typeClass' => \app\types\LinkType::class,
+			],
+			'defaultIpParams' => [
+				'IP параметры типов доступа по умолчанию',
+				'hint' => 'Служебный атрибут для записи переопределений сетевых параметров в junction-таблицу (по образцу Aces::ipParams)',
+				'type' => 'string[]',
+				'typeClass' => \app\types\StringArrayType::class,
 			],
 			'depends_ids' => [
 				'Зависит от сервисов/услуг',
@@ -565,8 +605,8 @@ class Services extends ArmsModel
 
         ]);
     }
-    
-	
+
+
 	/*public function reverseLinks()
 	{
 		return [
@@ -581,7 +621,7 @@ class Services extends ArmsModel
 			$this->orgPhones
 		];
 	}*/
-	
+
 	/**
 	 * Возвращает все варианты написания/названия сервиса
 	 */
@@ -589,8 +629,8 @@ class Services extends ArmsModel
 	{
 		return array_merge([$this->name],StringHelper::explode($this->search_text,"\n",true,true));
 	}
-	
-	
+
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -606,7 +646,7 @@ class Services extends ArmsModel
 	{
 		return $this->hasOne(Partners::class, ['id' => 'partners_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -615,7 +655,7 @@ class Services extends ArmsModel
 		return $this->hasOne(Schedules::class, ['id' => 'support_schedule_id'])
 			->from(['support_schedule'=>Schedules::tableName()]);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -624,7 +664,7 @@ class Services extends ArmsModel
 		return $this->hasOne(Schedules::class, ['id' => 'providing_schedule_id'])
 			->from(['providing_schedule'=>Schedules::tableName()]);
 	}
-	
+
 	/**
 	 * @return Segments|ActiveQuery
 	 */
@@ -635,7 +675,7 @@ class Services extends ArmsModel
 		if (static::allItemsLoaded()) return static::getLoadedItem($this->parent_id);
 		return $this->hasOne(Services::class, ['id' => 'parent_id']);
 	}
-	
+
 	/**
 	 * Непосредственные потомки
 	 * @return Services[]|ActiveQuery
@@ -650,7 +690,7 @@ class Services extends ArmsModel
 		return $this->hasMany(Services::class, ['parent_id' => 'id'])
 			->from(['service_children'=>self::tableName()]);
 	}
-	
+
 	/**
 	 * Все потомки (включая потомков потомков)
 	 * @return Services[]|ActiveQuery
@@ -664,8 +704,8 @@ class Services extends ArmsModel
 		}
 		return $result;
 	}
-	
-	
+
+
 	/**
 	 * @return ActiveQuery
 	 * @noinspection PhpUnusedFunctionInspection
@@ -675,7 +715,7 @@ class Services extends ArmsModel
 		return $this->hasOne(Users::class, ['id' => 'infrastructure_user_id'])
 			->from(['infrastructure_responsible'=>Users::tableName()]);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -684,7 +724,7 @@ class Services extends ArmsModel
 		return $this->hasOne(Users::class, ['id' => 'responsible_id'])
 			->from(['responsible'=>Users::tableName()]);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -693,8 +733,8 @@ class Services extends ArmsModel
 		return $this->hasOne(Segments::class, ['id' => 'segment_id'])
 			->from(['services_segment'=>Segments::tableName()]);
 	}
-	
-	
+
+
 	/**
 	 * Возвращает сервисы от которых зависит этот сервис
 	 */
@@ -704,8 +744,8 @@ class Services extends ArmsModel
 			->from(['service_depend'=>Services::tableName()])
 			->viaTable('{{%services_depends}}', ['service_id' => 'id']);
 	}
-	
-	
+
+
 	/**
 	 * Возвращает команду техподдержки
 	 */
@@ -715,8 +755,8 @@ class Services extends ArmsModel
 			->from(['support'=>Users::tableName()])
 			->viaTable('{{%users_in_services}}', ['service_id' => 'id']);
 	}
-	
-	
+
+
 	/**
 	 * Возвращает команду поддержки инфраструктуры
 	 */
@@ -726,7 +766,7 @@ class Services extends ArmsModel
 			->from(['infrastructure_support'=>Users::tableName()])
 			->viaTable('{{%users_in_svc_infrastructure}}', ['services_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает документы привязанные к сервису
 	 */
@@ -736,7 +776,7 @@ class Services extends ArmsModel
 			->from(['service_contracts'=>Contracts::tableName()])
 			->viaTable('{{%contracts_in_services}}', ['services_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает сервисы зависимые от этого сервиса
 	 */
@@ -746,7 +786,7 @@ class Services extends ArmsModel
 			->from(['dependant_services'=>Services::tableName()])
 			->viaTable('{{%services_depends}}', ['depends_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает серверы на которых живет этот сервис
 	 */
@@ -762,7 +802,7 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(LicGroups::class, ['services_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает закрепленные на компе лицензии
 	 */
@@ -770,7 +810,7 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(LicItems::class, ['services_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает серверы на которых живет этот сервис
 	 */
@@ -785,7 +825,7 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(Techs::class, ['management_service_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает серверы на которых живет этот сервис
 	 */
@@ -794,7 +834,7 @@ class Services extends ArmsModel
 		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
 			->viaTable('comps_in_services', ['services_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает ос которые предоставляются этой услугой
 	 */
@@ -802,15 +842,15 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(Comps::class, ['platform_id' => 'id']);
 	}
-	
-	
+
+
 	public function getArms()
 	{
 		return $this->hasMany(Techs::class, ['id' => 'arm_id'])
 			->from(['arms'=>Techs::tableName()])
 			->via('comps');
 	}
-	
+
 	public function getMaintenanceReqs()
 	{
 		return $this->hasMany(MaintenanceReqs::class, ['id' => 'reqs_id'])
@@ -823,40 +863,40 @@ class Services extends ArmsModel
 			->viaTable('maintenance_jobs_in_services', ['services_id' => 'id']);
 	}
 
-	
+
 	public function getPlace()
 	{
 		return $this->hasOne(Places::class, ['id' => 'places_id']);
 	}
-	
+
 	public function getArmPlaces()
 	{
 		return $this->hasMany(Places::class, ['id' => 'places_id'])
 			->from(['places_in_svc_arms'=>Places::tableName()])
 			->via('arms');
 	}
-	
+
 	public function getTechPlaces()
 	{
 		return $this->hasMany(Places::class, ['id' => 'places_id'])
 			->from(['places_in_svc_techs'=>Places::tableName()])
 			->via('techs');
 	}
-	
+
 	public function getInetsPlaces()
 	{
 		return $this->hasMany(Places::class, ['id' => 'places_id'])
 			->from(['places_in_svc_inets'=>Places::tableName()])
 			->via('orgInets');
 	}
-	
+
 	public function getPhonesPlaces()
 	{
 		return $this->hasMany(Places::class, ['id' => 'places_id'])
 			->from(['places_in_svc_phones'=>Places::tableName()])
 			->via('orgPhones');
 	}
-	
+
 	public function getPlaces() {
 		if (is_null($this->placesCache)) {
 			if (Places::allItemsLoaded()) {
@@ -881,7 +921,7 @@ class Services extends ArmsModel
 		}
 		return $this->placesCache;
 	}
-	
+
 	public function getSites(){
 		$sites=[];
 		foreach ($this->places as $place) {
@@ -901,11 +941,11 @@ class Services extends ArmsModel
 		foreach ($this->children as $service)
 			foreach ($service->sitesRecursive as $site)
 				$sites[$site->id]=$site;
-		
+
 		return $this->sitesRecursiveCache = $sites;
 	}
 
-	
+
 	/**
 	 * Проверяет что этот сервис косвенно входит в сервис с ID serviceID
 	 * @param $serviceID
@@ -916,8 +956,8 @@ class Services extends ArmsModel
 		if (is_object($this->parentService)) return $this->parentService->inService($serviceID);
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Привязанные сервисы
 	 */
@@ -927,6 +967,45 @@ class Services extends ArmsModel
 			->from(['services_aces'=>Aces::tableName()])
 			->viaTable('{{%services_in_aces}}', ['services_id' => 'id']);
 	}
+
+	/**
+	 * Типы доступа по умолчанию: предзаполняют галочки в форме ACE,
+	 * когда ресурсом выбран этот сервис (issue #204)
+	 * @return ActiveQuery
+	 */
+	public function getDefaultAccessTypes()
+	{
+		return $this->hasMany(AccessTypes::class, ['id' => 'access_types_id'])
+			->viaTable('{{%default_access_in_services}}', ['services_id' => 'id']);
+	}
+
+	/**
+	 * IP-параметры дефолтных типов доступа этого сервиса:
+	 * [access_types_id => 'TCP 8140', ...] — переопределение ip_params_def типа
+	 * для этого сервиса (например HTTPS на нестандартном порту).
+	 * Хранятся в колонке ip_params junction-таблицы (по образцу Aces::getIpParams).
+	 * @return array
+	 */
+	public function getDefaultIpParams()
+	{
+		if (isset($this->attrsCache['defaultIpParams'])) return $this->attrsCache['defaultIpParams'];
+		if ($this->isNewRecord) return [];
+		$params=[];
+		$rows=(new \yii\db\Query())->from('default_access_in_services')
+			->where(['services_id'=>$this->id])->all();
+		foreach ($rows as $row) {
+			$type=AccessTypes::getLoadedItem($row['access_types_id'],true);
+			if (is_object($type) && $type->is_ip && strlen($row['ip_params']??'')) {
+				$params[$row['access_types_id']]=(string)$row['ip_params'];
+			}
+		}
+		return $this->attrsCache['defaultIpParams']=$params;
+	}
+
+	public function setDefaultIpParams($value) {
+		$value=\app\helpers\ArrayHelper::recursiveOverride($this->getDefaultIpParams(),$value);
+		$this->attrsCache['defaultIpParams']=$value;
+	}
 	/**
 	 * @return ActiveQuery
 	 */
@@ -934,7 +1013,7 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(Acls::class, ['services_id' => 'id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -942,7 +1021,7 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(OrgInet::class, ['services_id' => 'id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -950,10 +1029,10 @@ class Services extends ArmsModel
 	{
 		return $this->hasMany(OrgPhones::class, ['services_id' => 'id']);
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * @return array
 	 */
@@ -963,7 +1042,7 @@ class Services extends ArmsModel
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}
-	
+
 	/**
 	 * @return array
 	 */
@@ -975,7 +1054,7 @@ class Services extends ArmsModel
 			->all();
 		return \yii\helpers\ArrayHelper::map($list, 'id', 'name');
 	}
-	
+
 	public static function cacheAllItems() {
 		if (!static::allItemsLoaded())
 			static::setAllItems(ArrayHelper::index(
@@ -1008,7 +1087,7 @@ class Services extends ArmsModel
 				->all()
 			,'id'));
 	}
-	
+
 	/**
 	 * Возвращает ответственного за инфраструктуру исходя из пачки сервисов на узле
 	 * @param      $services
@@ -1022,7 +1101,7 @@ class Services extends ArmsModel
 			$rating=[];
 			/** @var $service Services */
 			foreach ($services as $service) if(!$service->archived) {
-				
+
 				$responsible=null;
 				//сначала проверяем ответственного за инфраструктуру
 				//(либо если он игнорируется то проверяем ответственного за сервисы, но только для "весомых" сервисов
@@ -1032,7 +1111,7 @@ class Services extends ArmsModel
 				} elseif (is_object($service->responsibleRecursive)) {
 					$responsible=$service->responsibleRecursive;
 				}
-				
+
 				if (is_object($responsible)) {
 					$responsible_id=$responsible->id;
 					if (!isset($rating[$responsible_id])) {
@@ -1046,9 +1125,9 @@ class Services extends ArmsModel
 		}
 		return null;
 	}
-	
-	
-	
+
+
+
 	public static function supportTeamFrom($services,$ignoreIS=false) {
 		$team=[];
 		if (is_array($services) && count($services)) {
@@ -1065,7 +1144,7 @@ class Services extends ArmsModel
 						$weightLimit<$service->weight	//он превышен
 					)
 				) {
-					
+
 					$responsible=null;
 					//сначала проверяем ответственного за инфраструктуру
 					if (!$ignoreIS && is_object($service->infrastructureResponsibleRecursive)) {
@@ -1076,8 +1155,8 @@ class Services extends ArmsModel
 					}
 					//ответственные за сервисы на машине
 					if (is_object($responsible)) $team[$responsible->id]=$responsible;
-					
-					
+
+
 					$support=[];
 					//сначала проверяем ответственного за инфраструктуру
 					if (!$ignoreIS && count($service->infrastructureSupportRecursive)) {
@@ -1098,7 +1177,7 @@ class Services extends ArmsModel
 		}
 		return $team;
 	}
-	
+
 	/**
 	 * Моделирует поддержку сервиса (смотрит кто его поддерживает и моделирует отсутствие сотрудников)
 	 * @param $dismissed array кого нет
@@ -1110,12 +1189,12 @@ class Services extends ArmsModel
 			$responsible_id=$this->responsibleRecursive->id;
 			$support_ids[$responsible_id]=$responsible_id;
 		} else $support_ids=[];
-		
+
 		foreach ($this->supportRecursive as $user) if (is_object($user)) {
 			$user_id=$user->id;
 			$support_ids[$user_id]=$user_id;
 		}
 		return array_diff($support_ids,$dismissed);
 	}
-	
+
 }

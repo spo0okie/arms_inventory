@@ -16,6 +16,7 @@ use voskobovich\linker\updaters\ManyToManySmartUpdater;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Exception;
 use yii\db\StaleObjectException;
 
 /**
@@ -922,13 +923,24 @@ class Comps extends ArmsModel
 	 * @throws StaleObjectException
 	 */
 	public function absorbComp(Comps $comp) {
+		//всё поглощение атомарно: любой сбой откатывает и перенос ссылок, и удаление клона
+		$transaction=static::getDb()->beginTransaction();
+		try {
+			//журнал огромный и по одной записи менять это гемор
+			LoginJournal::updateAll(['comps_id'=>$this->id],['comps_id'=>$comp->id]);
 
-		//журнал огромный и по одной записи менять это гемор
-		LoginJournal::updateAll(['comps_id'=>$this->id],['comps_id'=>$comp->id]);
+			//поглощаем все поля и ссылки переданной ОС и удаляем ее
+			$this->absorbModel($comp,true);
 
-		//поглощаем все поля и ссылки переданной ОС и удаляем ее
-		$this->absorbModel($comp,true);
-		$this->save();
+			//легаси-запись может не проходить текущую валидацию - поглощение это срывать не должно
+			if (!$this->save() && !$this->save(false))
+				throw new Exception('Не удалось сохранить поглотившую ОС: '.print_r($this->errors,true));
+
+			$transaction->commit();
+		} catch (Throwable $e) {
+			$transaction->rollBack();
+			throw $e;
+		}
 	}
 
 

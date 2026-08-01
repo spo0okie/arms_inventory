@@ -417,8 +417,10 @@ class Aces extends ArmsModel
 	 * Получить IP параметры доступов
 	 */
 	public function getIpParams() {
-		if ($this->isNewRecord) return [];
+		//кэш (setIpParams) проверяем раньше isNewRecord: предзаполнение дефолтами
+		//сервиса выставляет параметры и на новой (несохранённой) записи
 		if (isset($this->attrsCache['ipParams'])) return $this->attrsCache['ipParams'];
+		if ($this->isNewRecord) return [];
 		$params=[];
 		foreach ($this->accessLinks as $row) {
 			$type=AccessTypes::getLoadedItem($row['access_types_id'],true);

@@ -287,11 +287,11 @@ class ArmsBaseController extends Controller
 			//чтение всего для полномочий view
 			self::PERM_VIEW=>['index','view','search','ttip','item-by-name','item','async-grid'],
 			//редактирование всего для полномочий edit
-			self::PERM_EDIT=>['create','update','delete','validate','unlink','editable'],
+			self::PERM_EDIT=>['create','copy','update','delete','validate','unlink','editable'],
 			//чтение объектов этого класса для полномочий view-$class
 			self::PERM_VIEW.'-'.$class=>['index','view','search','ttip','item-by-name','item','async-grid'],
 			//редактирование объектов этого класса для полномочий edit-$class
-			self::PERM_EDIT.'-'.$class=>['create','update','delete','validate','unlink'],
+			self::PERM_EDIT.'-'.$class=>['create','copy','update','delete','validate','unlink'],
 			//анонимный доступ по умолчанию ничего не разрешает
 			self::PERM_ANONYMOUS=>[],
 			//авторизованный доступ без явных полномочий по умолчанию ничего не разрешает
@@ -1170,6 +1170,110 @@ class ArmsBaseController extends Controller
 		return $scenarios;
 	}
 
+
+	/**
+	 * Создание копии существующей модели («создать по образцу»,
+	 * plans/access-defaults-and-copy.md).
+	 *
+	 * Поведение:
+	 *  - GET: рендерит штатную форму создания, предзаполненную атрибутами образца
+	 *    (см. {@see ArmsModel::copyPrefillAttributes()}: без PK, readOnly-атрибутов,
+	 *    обратных ссылок и пер-модельных исключений `$dontCopyAttrs`).
+	 *  - POST: сабмит формы копии — это обычное создание, делегируется {@see actionCreate()}
+	 *    (форма отправляется на текущий URL `copy?id=N`).
+	 *  - Если у контроллера кастомный actionCreate (create-вьюха с дополнительными
+	 *    моделями), а copy-хуки не переопределены ({@see copySupported()}) —
+	 *    перенаправляет на обычный create без предзаполнения.
+	 *
+	 * GET-параметры:
+	 *  - `id` (int, обязательный) — первичный ключ модели-образца.
+	 *
+	 * @param int $id первичный ключ модели-образца
+	 * @return string|\yii\web\Response
+	 * @throws NotFoundHttpException если образец не найден
+	 */
+	public function actionCopy(int $id)
+	{
+		if (Yii::$app->request->isPost) {
+			//сабмит формы копии — это обычное создание
+			return $this->actionCreate();
+		}
+		if (!$this->copySupported()) {
+			return $this->redirect(['create']);
+		}
+		$this->view->registerAssetBundle(ArmsFormAsset::class);
+		$source=$this->findModel($id);
+		/** @var ArmsModel $model */
+		$model=new $this->modelClass();
+		$model->copyPrefillFrom($source);
+		$view=is_file($this->getViewPath().DIRECTORY_SEPARATOR.'create.php')?
+			'create':'/layouts/create';
+		return $this->defaultRender($view,$this->copyViewParams($model));
+	}
+
+	/**
+	 * Параметры create-вьюхи при рендере формы копии. Контроллеры, чья create-вьюха
+	 * ожидает дополнительные модели, переопределяют этот метод (и тем самым включают
+	 * поддержку копирования при кастомном actionCreate, см. {@see copySupported()}).
+	 *
+	 * @param ArmsModel $model предзаполненная (несохранённая) копия
+	 * @return array параметры для render()
+	 */
+	public function copyViewParams(ArmsModel $model): array
+	{
+		return ['model'=>$model];
+	}
+
+	/**
+	 * Поддерживает ли контроллер копирование «по образцу».
+	 *
+	 * Базовый actionCopy рендерит create-вьюху с одним параметром `model`. Если
+	 * actionCreate переопределён (вьюха скорее всего ожидает дополнительные модели),
+	 * копирование поддерживается только когда контроллер переопределил
+	 * {@see copyViewParams()} или {@see actionCopy()} под свою вьюху.
+	 * Отключённые create/copy ({@see disabledActions()}) выключают копирование.
+	 *
+	 * @return bool
+	 */
+	public function copySupported(): bool
+	{
+		$disabled=$this->disabledActions();
+		if (in_array('copy',$disabled) || in_array('create',$disabled)) return false;
+		try {
+			$baseCreate=(new \ReflectionMethod($this,'actionCreate'))
+				->getDeclaringClass()->getName()===self::class;
+			$customCopy=(new \ReflectionMethod($this,'copyViewParams'))
+					->getDeclaringClass()->getName()!==self::class
+				|| (new \ReflectionMethod($this,'actionCopy'))
+					->getDeclaringClass()->getName()!==self::class;
+		} catch (\ReflectionException $e) {
+			return false;
+		}
+		return $baseCreate || $customCopy;
+	}
+
+	/**
+	 * Тест для {@see actionCopy()}: открытие формы копии полностью заполненной модели.
+	 *
+	 * Сценарий: GET id={full->id}. Ожидаемый ответ: 200 (форма с предзаполнением)
+	 * или 302 (редирект на create).
+	 *
+	 * Контроллеры без модели, без поддержки копирования ({@see copySupported()})
+	 * или без генерируемой full-модели сценариев не дают.
+	 *
+	 * @return array тестовые сценарии для acceptance-тестирования
+	 */
+	public function testCopy(): array
+	{
+		if (!$this->modelClass || !$this->copySupported()) return [];
+		$testData=$this->getTestData();
+		if (!is_object($testData['full']??null)) return [];
+		return [[
+			'name' => 'form load',
+			'GET' => ['id' => $testData['full']->id],
+			'response' => [200,302],
+		]];
+	}
 
 	/**
      * Отображает форму редактирования существующей модели и обрабатывает её отправку.

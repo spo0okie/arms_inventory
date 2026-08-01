@@ -1089,9 +1089,11 @@ class ArmsModel extends ActiveRecord
 			//если их нужно отбирать
 			if ($this->attributeIsAbsorbable($attribute)) {
 				//отбираем
-				if ($this->attributeIsReverseLink($attribute))
-					$model->attributeReverseLinkRedirect($attribute,$this->id);
-				else
+				if ($this->attributeIsReverseLink($attribute)) {
+					if (!$model->attributeReverseLinkRedirect($attribute,$this->id))
+						throw new Exception('Не удалось перенаправить ссылки '.$attribute
+							.' с '.$model->uuid().' на '.$this->uuid());
+				} else
 					$this->$attribute=$model->$attribute;
 			}
 		}
@@ -1109,9 +1111,63 @@ class ArmsModel extends ActiveRecord
 		}
 
 		if ($delete) {	//если надо удалить ограбленного - удаляем
-			$model->delete();
+			if ($model->delete()===false)
+				throw new Exception('Не удалось удалить поглощаемый объект '.$model->uuid());
 		} else {		//иначе сохраняем его в обомжелом виде
-			$model->save();
+			//легаси-запись может не проходить текущую валидацию - поглощение это срывать не должно
+			if (!$model->save() && !$model->save(false))
+				throw new Exception('Не удалось сохранить поглощаемый объект '.$model->uuid()
+					.': '.print_r($model->errors,true));
+		}
+	}
+
+	/**
+	 * @var string[] Атрибуты, которые не переносятся при создании копии («по образцу»):
+	 * уникальные/инвентарные значения (инв. номер, серийник и т.п.), задаются моделями
+	 * @see copyPrefillAttributes()
+	 */
+	public $dontCopyAttrs=[];
+
+	/**
+	 * Атрибуты, переносимые в копию модели («создать по образцу»,
+	 * plans/access-defaults-and-copy.md): safe-атрибуты дефолтного сценария
+	 * без первичного ключа, readOnly-атрибутов, обратных ссылок (детей копия
+	 * не забирает) и пер-модельных исключений {@see $dontCopyAttrs}.
+	 *
+	 * @return string[]
+	 */
+	public function copyPrefillAttributes(): array
+	{
+		$pk=static::primaryKey();
+		$attrs=[];
+		foreach ($this->safeAttributes() as $attr) {
+			if (in_array($attr,$pk)) continue;
+			if (in_array($attr,$this->dontCopyAttrs)) continue;
+			//safe-правило может упоминать атрибут, которого у модели нет
+			//(легаси от генерации моделей: колонку из rules() потеряли/не создали) - читать его нельзя
+			if (!$this->hasAttribute($attr) && !$this->canGetProperty($attr)) continue;
+			if ($this->getAttributeIsReadOnly($attr)) continue;
+			//*_ids-атрибут, обратная сторона которого — одиночная ссылка (*_id),
+			//перечисляет детей (one-to-many): копия чужих детей не забирает.
+			//Симметричные m2m (обратная сторона тоже *_ids) — прямые связи, переносятся.
+			if (str_ends_with($attr,'_ids')
+				&& is_string($reverse=$this->attributeReverseLink($attr))
+				&& str_ends_with($reverse,'_id')) continue;
+			$attrs[]=$attr;
+		}
+		return $attrs;
+	}
+
+	/**
+	 * Переносит в эту (новую) модель атрибуты образца по списку
+	 * {@see copyPrefillAttributes()} образца.
+	 *
+	 * @param ArmsModel $source модель-образец
+	 */
+	public function copyPrefillFrom(ArmsModel $source): void
+	{
+		foreach ($source->copyPrefillAttributes() as $attr) {
+			$this->$attr=$source->$attr;
 		}
 	}
 

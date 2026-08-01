@@ -46,6 +46,67 @@ JS;
 //в форме группового создания ресурсы выбираются мультиселектами и взаимоисключение не нужно
 if (!$model->isNewRecord) $this->registerJs($js,yii\web\View::POS_HEAD);
 
+$defaultTypesUrl=Url::to(['/services/default-access-types']);
+/** @noinspection JSUnusedLocalSymbols */
+$defaultsJs= <<<JS
+/*
+ * Дефолтные типы доступа выбранных сервисов-ресурсов (issue #204):
+ * при изменении мультиселекта сервисов галочки типов доступа предзаполняются
+ * объединением дефолтов выбранных сервисов. Типы, которые пользователь щёлкал
+ * руками, не трогаем; авто-выставленные снимаются при выпадении из дефолтов.
+ */
+let serviceDefaultTypes=[];	//текущие авто-выставленные (id строками)
+let userTouchedTypes={};	//типы, которые пользователь щёлкал руками
+
+$(document).on('change','input[name="Aces[access_types_ids][]"]',function(){
+	userTouchedTypes[String($(this).val())]=true;
+});
+
+//typesMap: { access_types_id: {ip_params: строка-переопределение | null}, ... }
+function applyServiceDefaultAccessTypes(typesMap) {
+	typesMap=typesMap||{};
+	let defaults=Object.keys(typesMap).map(String);
+	//снимаем прежние авто-галочки, выпавшие из дефолтов (заблокированные дочерние не трогаем)
+	serviceDefaultTypes.forEach(function(id){
+		if (defaults.indexOf(id)<0 && !userTouchedTypes[id]) {
+			$('input[name="Aces[access_types_ids][]"][value='+id+']:not(:disabled)').prop('checked',false);
+		}
+	});
+	defaults.forEach(function(id){
+		if (!userTouchedTypes[id]) {
+			$('input[name="Aces[access_types_ids][]"][value='+id+']').prop('checked',true);
+			//сервисное переопределение сетевых параметров (например HTTPS на порту 8140):
+			//создаём инпут параметров с ним раньше, чем updateAccessTypes подтянет
+			//дефолт типа (ensureAccessTypeParamInput существующий инпут не трогает)
+			let p=typesMap[id] && typesMap[id].ip_params;
+			if (p) ensureAccessTypeParamInput(id,{default_param:p});
+		}
+	});
+	serviceDefaultTypes=defaults;
+	updateAccessTypes();
+}
+
+function fetchServiceDefaultAccessTypes() {
+	let ids=$('select#acls-services_ids').val()||[];
+	if (!ids.length) {
+		applyServiceDefaultAccessTypes({});
+		return;
+	}
+	$.getJSON('{$defaultTypesUrl}',{ids:ids},applyServiceDefaultAccessTypes);
+}
+
+$(document).on('change','select#acls-services_ids',fetchServiceDefaultAccessTypes);
+JS;
+if ($model->isNewRecord) {
+	$this->registerJs($defaultsJs,yii\web\View::POS_HEAD);
+	//предзаполнение сервисов из GET (ссылки «создать доступ» со страницы сервиса):
+	//применяем дефолты сразу при открытии, но только если галочки ещё не выставлены
+	//(POST-перерисовка после ошибок валидации восстанавливает выбор пользователя)
+	$this->registerJs(
+		'if (!$(\'input[name="Aces[access_types_ids][]"]:checked\').length) fetchServiceDefaultAccessTypes();'
+	);
+}
+
 ?>
 
 <div class="acls-form">

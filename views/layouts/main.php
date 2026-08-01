@@ -272,7 +272,15 @@ function(event, data, status, xhr, selector) {
 		if (selector.attr('data-click-on-submit')) {
 			$(selector.attr('data-click-on-submit')).click();
 		}
-		
+
+		//generic-хук: вызвать именованную JS-функцию с ответом сервера
+		//(AJAX create/update возвращает модель JSON - см. готчу двойной обёртки [[model]]);
+		//используется пикером типов доступа (views/access-types/_picker.php)
+		if (selector.attr('data-call-on-submit')) {
+			let callOnSubmit=window[selector.attr('data-call-on-submit')];
+			if (typeof callOnSubmit==='function') callOnSubmit(data);
+		}
+
 		if (selector.attr('data-reload-page-on-submit')) {
 		    console.log('reloading page')
 			window.location.reload();

@@ -59,8 +59,69 @@ class ServicesController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'view'=>['index-by-users','index-tree','children-tree','card','card-support','card-maintenance-reqs','json-preview','os-list','aces-list','acls-list'],
+			'view'=>['index-by-users','index-tree','children-tree','card','card-support','card-maintenance-reqs','json-preview','os-list','aces-list','acls-list','default-access-types'],
 		]);
+	}
+
+	/**
+	 * Возвращает JSON-карту типов доступа по умолчанию для перечисленных сервисов
+	 * (объединение по всем сервисам): { access_types_id: {"ip_params": "TCP 8140"|null}, ... }.
+	 * ip_params — сервисное переопределение сетевых параметров типа (если задано);
+	 * при выборе нескольких сервисов с разными параметрами одного типа берётся первое.
+	 *
+	 * Используется формой группового создания ACL (views/acls/_form2.php): при выборе
+	 * сервисов-ресурсов предзаполняются галочки типов доступа (issue #204).
+	 *
+	 * @param array $ids Список ID сервисов
+	 * @return array JSON-объект {id: {ip_params: string|null}}
+	 */
+	public function actionDefaultAccessTypes(array $ids)
+	{
+		Yii::$app->response->format=Response::FORMAT_JSON;
+		$types=[];
+		foreach (Services::findAll(['id'=>$ids]) as $service) {
+			$ipParams=$service->defaultIpParams;
+			foreach ($service->defaultAccessTypes as $type) {
+				if (!isset($types[$type->id])) {
+					$types[$type->id]=['ip_params'=>$ipParams[$type->id]??null];
+				} elseif (empty($types[$type->id]['ip_params']) && isset($ipParams[$type->id])) {
+					$types[$type->id]['ip_params']=$ipParams[$type->id];
+				}
+			}
+		}
+		return $types?:new \stdClass();	//пустой результат - объект {}, а не []
+	}
+
+	/**
+	 * Тест для {@see actionDefaultAccessTypes()}: сервис с назначенными дефолтными
+	 * типами доступа возвращает их ID; сервис без дефолтов — пустой массив.
+	 */
+	public function testDefaultAccessTypes(): array
+	{
+		$testData=$this->getTestData();
+		/** @var Services $full */
+		$full=$testData['full'];
+		$empty=$testData['empty'];
+
+		return [
+			[
+				'name' => 'full and empty services',
+				'GET' => ['ids' => [$full->id,$empty->id]],
+				'response' => 200,
+				'assert' => static function (\AcceptanceTester $I) use ($full) {
+					//у full-модели генератор заполняет все ссылки, включая дефолтные типы доступа
+					$expected=array_map(
+						static fn($type)=>(int)$type->id,
+						$full->defaultAccessTypes
+					);
+					sort($expected);
+					//ответ - карта {id: {ip_params: ...}}, сверяем набор ключей
+					$got=array_map('intval',array_keys(json_decode($I->grabPageSource(),true)?:[]));
+					sort($got);
+					\PHPUnit\Framework\Assert::assertEquals($expected,$got);
+				},
+			],
+		];
 	}
 	
 	/**

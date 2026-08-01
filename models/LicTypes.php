@@ -15,6 +15,7 @@ use yii\db\ActiveQuery;
  * @property string $comment Комментарий
  * @property string $links Ссылки
  * @property string $created_at Время создания
+ * @property string $created_by Автор создания
  *
  * @property LicGroups[] $licGroups Группы лицензий по этой схеме
  */
@@ -48,7 +49,7 @@ class LicTypes extends ArmsModel
     {
         return [
             [['descr', 'comment'], 'required'],
-            [['created_at','links'], 'safe'],
+            [['created_at','created_by','links'], 'safe'],
             [['name'], 'string', 'max' => 32],
             [['descr'], 'string', 'max' => 128],
             [['name'], 'unique'],
@@ -69,6 +70,15 @@ class LicTypes extends ArmsModel
 			],
 			'created_at' => [
 				'Время создания',
+				'hint' => 'Дата/время создания объекта в БД',
+				'readOnly' => true,
+				'typeClass' => \app\types\DatetimeType::class,
+			],
+			'created_by' => [
+				'Автор',
+				'hint' => 'Учетная запись, создавшая объект в БД',
+				'readOnly' => true,
+				'typeClass' => \app\types\StringType::class,
 			],
 			'descr' => [
 				'Название',

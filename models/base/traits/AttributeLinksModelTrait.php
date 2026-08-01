@@ -358,30 +358,35 @@ trait AttributeLinksModelTrait
 	 */
 	public function attributeLinkRedirect(string $attr, int $old_id, int $new_id) {
 		if (is_array($this->$attr)) {	//если поле - массив ссылок
-			$this->$attr=array_merge(array_diff($this->$attr,[$old_id]),[$new_id]);
+			//array_unique: объект мог уже ссылаться на new_id - дубль в списке не нужен
+			$this->$attr=array_values(array_unique(array_merge(array_diff($this->$attr,[$old_id]),[$new_id])));
 		} else {
 			$this->$attr=$new_id;
 		}
-		return $this->save();
+		//легаси-запись может не проходить текущую валидацию - ссылка из-за этого теряться не должна
+		return $this->save() || $this->save(false);
 	}
-	
+
 	/**
 	 * Перенаправить атрибут обратную-ссылку с себя на другой объект
 	 * Например если какие-то ACL ссылаются на меня, то в этих ссылках поменять себя на другой объект
 	 * @param string $attr Атрибут, который надо перенаправить
 	 * @param int $new_id
+	 * @return bool все ли ссылающиеся объекты удалось перенаправить
 	 */
 	public function attributeReverseLinkRedirect(string $attr, int $new_id) {
 		$loader=$this->attributeLinkLoader($attr);			//как нам загрузить объекты ссылающиеся на нас
 		$reverseLink=$this->attributeReverseLink($attr);	//в каком поле у этих объектов ссылка на нас
 		$linkingObjects=$this->$loader;						//грузим все объекты
+		$result=true;
 		foreach ($linkingObjects as $object) {
 			/** @var \app\models\base\ArmsModel $object */
 			//перенаправляем там нужный аттрибут на новый ID
-			$object->attributeLinkRedirect($reverseLink,$this->id,$new_id);
+			$result=$object->attributeLinkRedirect($reverseLink,$this->id,$new_id)&&$result;
 		}
+		return $result;
 	}
-	
+
 	/**
 	 * Добавляет к родительским extra-fields поля-ссылки
 	 * @return string[]

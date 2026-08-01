@@ -130,6 +130,10 @@ class Techs extends ArmsModel
 	public $renderedInFrontRack=[];	//позиции в передней корзине где уже отрендерилось
 	public $renderedInBackRack=[];	//то же самое в задней корзине
 
+	//уникальные/индивидуальные атрибуты экземпляра в копию «по образцу» не переносятся
+	//(инвентарные/серийные номера, сетевая идентичность)
+	public $dontCopyAttrs=['num','inv_num','sn','uid','ip','mac','hostname'];
+
 	public static $title='Оборудование';
 	public static $titles='Оборудование';
 	public static $armsTitle='АРМ';

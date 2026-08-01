@@ -219,6 +219,13 @@ if(!$static_view) { ?>
 			'item_options'=>['static_view'=>$static_view,],
 			'card_options'=>['cardClass'=>'mb-3'],
 		]) ?>
+
+		<?= ModelFieldWidget::widget([
+			'model' => $model, 'field' => 'defaultAccessTypes',
+			'label'=>'Типы доступа по умолчанию:',
+			'item_options'=>['static_view'=>$static_view,],
+			'card_options'=>['cardClass'=>'mb-3'],
+		]) ?>
 		
 		<?php /* ModelFieldWidget::widget([
 			'model'=>$model, 'field'=>'incomingConnections',

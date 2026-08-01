@@ -245,6 +245,128 @@ class ScheduledAccessController extends \app\controllers\ArmsBaseController
 	}
 
 	/**
+	 * Глубокая копия временного доступа («повторить служебку» / применить шаблон,
+	 * plans/access-defaults-and-copy.md, итерация 3).
+	 *
+	 * GET: форма — название/заметки нового доступа (предзаполнены образцом) и
+	 * необязательная подмена субъектов (пользователей). POST: в одной транзакции
+	 * создаются копия расписания, всех его ACL (ресурсы + notepad) и всех ACE
+	 * (через {@see Aces::copyContentTo()}). Если в форме выбраны пользователи —
+	 * в каждой скопированной ACE субъекты-пользователи заменяются на них,
+	 * а персональные IP-субъекты образца очищаются. Периоды действия образца
+	 * не копируются — новые периоды задаются на странице нового доступа.
+	 *
+	 * Сценарий шаблонов: временный доступ-образец без реальных субъектов
+	 * (заглушка в comment ACE) + копия с подменой субъектов.
+	 *
+	 * @param int $id id временного доступа-образца
+	 * @return mixed
+	 * @throws NotFoundHttpException
+	 */
+	public function actionCopy(int $id)
+	{
+		/** @var Schedules $source */
+		$source=$this->findModel($id);
+		$model=new ScheduledAccess();
+		$model->copyPrefillFrom($source);
+		$ace=new Aces();	//носитель поля подмены субъектов (Aces[users_ids])
+
+		if ($model->load(Yii::$app->request->post())) {
+			$ace->load(Yii::$app->request->post());
+			$replaceUsers=array_filter((array)($ace->users_ids?:[]));
+
+			$transaction=Yii::$app->db->beginTransaction();
+			try {
+				if (!$model->save()) {
+					throw new \RuntimeException('Не удалось сохранить временный доступ');
+				}
+				foreach ($source->acls as $srcAcl) {
+					$acl=new Acls();
+					$acl->schedules_id=$model->id;
+					$acl->notepad=$srcAcl->notepad;
+					foreach (['services_id','comps_id','techs_id','ips_id','networks_id','comment'] as $field) {
+						$acl->$field=$srcAcl->$field;
+					}
+					if (!$acl->save()) {
+						throw new \RuntimeException('Не удалось скопировать ACL '.$srcAcl->sname);
+					}
+					foreach ($srcAcl->aces as $srcAce) {
+						$newAce=new Aces();
+						$srcAce->copyContentTo($newAce);
+						$newAce->acls_id=$acl->id;
+						if ($replaceUsers) {
+							//подмена субъектов: доступ получают указанные в форме пользователи,
+							//персональные IP прежних субъектов не переносятся
+							$newAce->users_ids=$replaceUsers;
+							$newAce->ips='';
+						}
+						if (!$newAce->save()) {
+							throw new \RuntimeException('Не удалось скопировать запись доступа');
+						}
+					}
+				}
+				$transaction->commit();
+				return $this->redirect(['view','id'=>$model->id]);
+			} catch (\Throwable $e) {
+				$transaction->rollBack();
+				Yii::$app->session->setFlash('error',$e->getMessage());
+			}
+		}
+
+		return $this->render('copy',[
+			'model'=>$model,
+			'source'=>$source,
+			'ace'=>$ace,
+		]);
+	}
+
+	/**
+	 * Тест для {@see actionCopy()}: форма копии и глубокое копирование.
+	 *
+	 * Сценарии:
+	 *  1. 'form load' — GET id образца с ACL/ACE: форма открывается (200).
+	 *  2. 'copy post' — POST с новым названием без подмены субъектов:
+	 *     создаётся расписание с тем же числом ACL и содержимым ACE (302),
+	 *     проверяется ассертом по БД.
+	 *
+	 * @return array
+	 */
+	public function testCopy(): array
+	{
+		$sourceId=$this->buildScheduleWithAces(['копия доступ-1','копия доступ-2']);
+		if (!$sourceId) return parent::testCopy();
+
+		return [
+			[
+				'name' => 'form load',
+				'GET' => ['id' => $sourceId],
+				'response' => 200,
+			],
+			[
+				'name' => 'copy post',
+				'GET' => ['id' => $sourceId],
+				'POST' => ['Schedules' => ['name' => 'копия временного доступа #204']],
+				'response' => [200,302],
+				'assert' => static function (\AcceptanceTester $I) {
+					$copy=Schedules::find()->where(['name'=>'копия временного доступа #204'])->one();
+					\PHPUnit\Framework\Assert::assertNotNull($copy,'Копия временного доступа должна создаться');
+					$acls=Acls::find()->where(['schedules_id'=>$copy->id])->all();
+					\PHPUnit\Framework\Assert::assertCount(2,$acls,'Должны скопироваться оба ACL образца');
+					$aceComments=[];
+					foreach ($acls as $acl) {
+						foreach ($acl->aces as $ace) $aceComments[]=$ace->comment;
+					}
+					sort($aceComments);
+					\PHPUnit\Framework\Assert::assertEquals(
+						['копия доступ-1','копия доступ-2'],$aceComments,
+						'Содержимое ACE должно скопироваться'
+					);
+				},
+			],
+		];
+	}
+
+	/**
 	 * Создание нового временного доступа.
 	 *
 	 * Раньше здесь создавалось «пустое» расписание + пустой ACL (который не проходил валидацию

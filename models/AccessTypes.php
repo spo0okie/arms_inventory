@@ -24,6 +24,8 @@ use yii\helpers\ArrayHelper;
  * @property boolean $isIpRecursive
  * @property boolean $isTelephonyRecursive
  * @property AccessTypes[] $children
+ * @property int[] $default_services_ids
+ * @property Services[] $defaultServices
  */
 class AccessTypes extends ArmsModel
 {
@@ -57,16 +59,17 @@ class AccessTypes extends ArmsModel
 			[['children_ids'], 'each', 'rule'=>['integer']],
         ];
     }
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
 	public $linksSchema=[
 		'children_ids' => [AccessTypes::class,'loader'=>'children'],
 		'aces_ids' => [Aces::class,'access_types_ids'],
+		'default_services_ids' => [Services::class,'default_access_types_ids'],
 	];
- 
-	
+
+
     /**
      * {@inheritdoc}
      */
@@ -76,7 +79,12 @@ class AccessTypes extends ArmsModel
 			'aces_ids' => [
 				'ACEs',
 				'hint' => 'Перечисляет ACEs, в которых используется этот тип доступа',
-				
+
+			],
+			'default_services_ids' => [
+				'Тип по умолчанию для сервисов',
+				'hint' => 'Сервисы, у которых этот тип доступа указан как тип доступа по умолчанию',
+				'typeClass' => \app\types\LinkType::class,
 			],
             'name' => [
             	'Название',
@@ -147,11 +155,11 @@ class AccessTypes extends ArmsModel
 					.'<li>TCP,UDP 53 <i>(для DNS)</i></li>'
 					.'</ul> Для каждого конкретного предоставления доступа этот параметр может быть изменен. Здесь именно значение по умолчанию',
 				'example'=>'UDP 5060,20000-20100',
-				'typeClass' => \app\types\TextType::class,
+				'typeClass' => \app\types\StringType::class,
 			]
         ]);
     }
-	
+
 	/**
 	 * Возвращает набор контрагентов в договоре
 	 * @return ActiveQuery
@@ -170,6 +178,16 @@ class AccessTypes extends ArmsModel
 	}
 
 	/**
+	 * Сервисы, у которых этот тип доступа — тип по умолчанию
+	 * @return ActiveQuery
+	 */
+	public function getDefaultServices()
+	{
+		return $this->hasMany(Services::class, ['id' => 'services_id'])
+			->viaTable('{{%default_access_in_services}}', ['access_types_id' => 'id']);
+	}
+
+	/**
 	 * Name for search
 	 * @return string
 	 */
@@ -177,7 +195,7 @@ class AccessTypes extends ArmsModel
 	{
 		return $this->name;
 	}
-	
+
 	/** @var null|array Кэш иерархии типов доступа: parent_id => [child_id,...] (грузится один раз на запрос) */
 	private static $hierarchyCache=null;
 
@@ -206,17 +224,17 @@ class AccessTypes extends ArmsModel
 		}
 		return false;
 	}
-	
+
 	public function getIsTelephonyRecursive()
 	{
 		return $this->getFlagRecursive('is_phone');
 	}
-	
+
 	public function getIsIpRecursive()
 	{
 		return $this->getFlagRecursive('is_ip');
 	}
-	
+
 	/**
 	 * Возвращает список всех элементов
 	 * @return array|mixed|null
@@ -229,7 +247,7 @@ class AccessTypes extends ArmsModel
             ->all();
         return ArrayHelper::map($list, 'id', 'sname');
     }
-	
+
 	/**
 	 * Задача, получить на вход $accessTypes_ids выбранные в форме как список доступов в рамках ACE
 	 * Вернуть список accessTypes в котором могут
@@ -255,7 +273,7 @@ class AccessTypes extends ArmsModel
 				static::addTypeInBundle($formData,$accessType);
 				$formData[$type_id]->optional=1;
 			}
-			
+
 			foreach ($accessType->children as $child) {
 				static::addTypeInBundle($formData,$child);
 				$formData[$child->id]->optional=0;
@@ -263,7 +281,7 @@ class AccessTypes extends ArmsModel
 		}
 		return $formData;
 	}
-	
+
 	/**
 	 * Добавляет в массив types тип type для вывода методом выше
 	 * @param $types
