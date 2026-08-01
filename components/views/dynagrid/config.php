@@ -81,7 +81,7 @@ $modalClass::begin($modalOpts);
 			'options' => [
 				'data-pjax' => false,
 			],
-			'action'=>isset($this->params['grid-settings-action'])?Url::to($this->params['grid-settings-action']):null
+			'action'=>isset($this->params['grid-settings-action'])?Url::to($this->params['grid-settings-action']):''
 		]); ?>
 		
 		<?php
