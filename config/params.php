@@ -60,7 +60,13 @@ return [
 	'services.no_backup.warn'=>true,	//ругаться если у сервиса не объявлены требования на бэкап
 	
 	'soft.deferred_rescan'=>false,
-	
+
+	//файл масок фильтра выгрузки нераспознанного софта (yii soft-raw/export):
+	//по regexp-маске на строку (семантика как у выражений продуктов, без учёта регистра),
+	//применяется к издателю и имени карточки отпечатка; # - комментарий.
+	//пример: config/soft-export-filter.example
+	'soft.export_filter'=>'',
+
 	'sms.enable'=>false,
 	
 	'ipamRanges'=>[
