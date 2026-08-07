@@ -443,6 +443,34 @@ if (Yii::$app->user->can('edit-comps')) {
 
 ## Интеграции
 
+### 0. Механизм интеграций с внешними ИС
+
+Подключаемые провайдеры интеграций (Zabbix, телефония, SMS, ...):
+живые панели данных и действия во внешних системах из карточек объектов.
+Архитектура и контракт — [plans/integrations-contract.md](plans/integrations-contract.md).
+
+- [`components/integrations/IntegrationProvider.php`](components/integrations/IntegrationProvider.php) — контракт провайдера
+- [`components/integrations/IntegrationsRegistry.php`](components/integrations/IntegrationsRegistry.php) — реестр (строится из `params['integrations']`)
+- [`controllers/IntegrationsController.php`](controllers/IntegrationsController.php) — proxy-контроллер панелей и действий
+- [`components/integrations/PanelsWidget.php`](components/integrations/PanelsWidget.php) — блок интеграций в карточке объекта
+- [`components/integrations/AttributeActionsWidget.php`](components/integrations/AttributeActionsWidget.php) — действия у атрибута (иконка SMS у телефона)
+- [`models/IntegrationsLog.php`](models/IntegrationsLog.php) — журнал выполненных действий
+- Провайдеры: [`components/integrations/providers/`](components/integrations/providers) (реализован SMS)
+
+Включение — на инстансе в `params-local.php`:
+
+```php
+'integrations' => [
+    'sms' => [
+        'class' => \app\components\integrations\providers\SmsProvider::class,
+        'url' => 'https://sms-gw.local/send?phone={phone}&text={text}',
+    ],
+],
+```
+
+RBAC-права (`integration-<id>`, `integration-<id>-<action>`) создаются
+командой `yii rbac/init` по реестру включённых провайдеров.
+
 ### 1. LDAP/Active Directory
 
 Аутентификация через [`edvlerblog/yii2-adldap-module`](https://github.com/edvlerblog/yii2-adldap-module):

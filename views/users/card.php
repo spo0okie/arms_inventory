@@ -67,8 +67,8 @@ if (!isset($static_view)) $static_view=false;
     <?= ModelFieldWidget::renderCompositeTitle($model,['Phone','Mobile','private_phone','work_phone'],'Телефоны') ?>
     <p class="mb-3">
         Внутренний: <?= $this->render('internal-phone',compact('model')) ?><br />
-		Сотовый: <?= $this->render('mobile-phone',['phone'=>$model->Mobile,'static_view'=>$static_view]) ?><br />
-		<?= strlen($model->private_phone??'')?("Личный: ".$this->render('mobile-phone',['phone'=>$model->private_phone,'static_view'=>$static_view])." <br />"):'' ?>
+		Сотовый: <?= $this->render('mobile-phone',['phone'=>$model->Mobile,'static_view'=>$static_view,'model'=>$model,'attribute'=>'Mobile']) ?><br />
+		<?= strlen($model->private_phone??'')?("Личный: ".$this->render('mobile-phone',['phone'=>$model->private_phone,'static_view'=>$static_view,'model'=>$model,'attribute'=>'private_phone'])." <br />"):'' ?>
         <?= strlen($model->work_phone??'')?('Городской: '.ModelFieldWidget::renderFieldValue($model,'work_phone').'<br />'):'' ?>
     </p>
 

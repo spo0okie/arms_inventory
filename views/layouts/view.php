@@ -19,4 +19,5 @@ YiiAsset::register($this);
 ?>
 <div class="<?= $classId ?>-view">
 	<?= $this->render('/'.$classId.'/card',['model'=>$model,'static_view'=>false]) ?>
+	<?= \app\components\integrations\PanelsWidget::widget(['model'=>$model]) ?>
 </div>

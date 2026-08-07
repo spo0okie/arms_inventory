@@ -33,6 +33,7 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 	<div class="row">
 		<div class="col-md-5 ps-0">
 			<?= ModelWidget::widget(['model'=>$model, 'view'=>'card', 'static_view'=>false]) ?>
+			<?= \app\components\integrations\PanelsWidget::widget(['model'=>$model]) ?>
 		</div>
 		<div class="col-md-4 ps-0">
 			<?php

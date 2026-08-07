@@ -67,8 +67,18 @@ return [
 	//пример: config/soft-export-filter.example
 	'soft.export_filter'=>'',
 
-	'sms.enable'=>false,
-	
+	//интеграции с внешними ИС (plans/integrations-contract.md).
+	//Инстанс включает свои в params-local.php; ключ = id провайдера,
+	//'class' = класс провайдера, остальное - его конфиг. Пример:
+	//'integrations'=>[
+	//	'sms'=>[
+	//		'class'=>\app\components\integrations\providers\SmsProvider::class,
+	//		'url'=>'https://sms-gw.local/send?phone={phone}&text={text}',
+	//	],
+	//],
+	//(бывший sms.enable/sms.url: отправка SMS теперь провайдер 'sms')
+	'integrations'=>[],
+
 	'ipamRanges'=>[
 		['baseIp'=>'10.0.0.0','maxPrefix'=>8,'minPrefix'=>16],
 		['baseIp'=>'192.168.0.0','maxPrefix'=>16,'minPrefix'=>24],

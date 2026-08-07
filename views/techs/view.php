@@ -24,6 +24,7 @@ $archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 	<div class="row">
 		<div class="col-md-6">
 			<?= ModelWidget::widget(['model'=>$model, 'view'=>'card', 'options'=>['static_view'=>false, 'no_model'=>true]]) ?>
+			<?= \app\components\integrations\PanelsWidget::widget(['model'=>$model]) ?>
 		</div>
 		<div class="col-md-6">
 			<div class="float-end text-end">

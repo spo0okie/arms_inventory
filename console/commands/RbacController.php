@@ -8,6 +8,7 @@
 
 namespace app\console\commands;
 
+use app\components\integrations\IntegrationsRegistry;
 use app\console\ConsoleException;
 use app\models\Users;
 use yii\console\Controller;
@@ -24,9 +25,11 @@ use yii\console\Controller;
 class RbacController extends Controller
 {
 	/**
-	 * Инициализирует базовую роль RBAC — создаёт роль «admin» в authManager.
-	 *
-	 * Выполняется один раз при первоначальной настройке системы.
+	 * Инициализирует базовую роль RBAC — создаёт роль «admin» в authManager —
+	 * и права включённых интеграций (plans/integrations-contract.md §4):
+	 * integration-<id> на просмотр панелей и integration-<id>-<action> на
+	 * каждое действие. Повторный запуск безопасен: существующие роли/права
+	 * не пересоздаются.
 	 *
 	 * Использование: yii rbac/init
 	 *
@@ -35,10 +38,27 @@ class RbacController extends Controller
 	public function actionInit()
 	{
 		$authManager = \Yii::$app->authManager;
-		
+
 		// Create roles
-		$admin=$authManager->createRole('admin');
-		$authManager->add($admin);
+		if (!is_object($authManager->getRole('admin'))) {
+			$admin=$authManager->createRole('admin');
+			$authManager->add($admin);
+		}
+
+		//права включённых интеграций (по реестру)
+		foreach (IntegrationsRegistry::providers() as $provider) {
+			$names=['integration-'.$provider->id];
+			foreach ($provider->actions(null) as $actionId=>$descriptor) {
+				$names[]='integration-'.$provider->id.'-'.$actionId;
+			}
+			foreach ($names as $name) {
+				if (is_object($authManager->getPermission($name))) continue;
+				$permission=$authManager->createPermission($name);
+				$permission->description=$provider->getTitle();
+				$authManager->add($permission);
+				echo "permission $name created\n";
+			}
+		}
 	}
 	
 	/**

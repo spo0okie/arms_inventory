@@ -13,4 +13,5 @@ $this->title = $model->sname;
 ?>
 <div class="net-ips-view">
 	<?= $this->render('card',['model'=>$model]) ?>
+	<?= \app\components\integrations\PanelsWidget::widget(['model'=>$model]) ?>
 </div>

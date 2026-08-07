@@ -75,6 +75,7 @@ foreach ($model->swList->items as $item) {
 <div class="comps-view row">
 	<div class="col-md-6">
 		<?= $this->render('card',['model'=>$model,'ips_glue'=>'<br/>']) ?>
+		<?= \app\components\integrations\PanelsWidget::widget(['model'=>$model]) ?>
 
 		<div class="hardware_settings">
 			<?= ModelFieldWidget::renderCompositeTitle($model,['raw_hw','exclude_hw'],'Железо') ?>
