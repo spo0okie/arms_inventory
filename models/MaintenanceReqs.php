@@ -19,6 +19,7 @@ use yii\db\ActiveQuery;
  * @property int|null $spread_techs
  * @property int|null $is_backup
  * @property string|null $links
+ * @property string|null $external_links
  * @property string|null $updated_at
  * @property string|null $updated_by
  * @property string sname
@@ -80,7 +81,7 @@ class MaintenanceReqs extends ArmsModel
 			[['name', ], 'unique'],
             [['spread_comps', 'spread_techs','is_backup','archived'], 'integer'],
             [['links'], 'string'],
-            [['updated_at', 'updated_by'], 'safe'],
+            [['updated_at', 'updated_by', 'external_links'], 'safe'],
             [['name'], 'string', 'max' => 255],
             [['description'], 'string'],
 			//[['comps_ids'],'each', 'rule'=>['integer']],

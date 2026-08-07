@@ -35,6 +35,7 @@ use app\components\formInputs\DokuWikiEditor;
 			<?= $form->field($model, 'schedules_id')->select2() ?>
 			<?= $form->field($model, 'reqs_ids')->select2() ?>
 			<?= $form->field($model, 'links')->textAutoresize(['rows'=>2]) ?>
+			<?= $form->field($model, 'external_links')->textAutoresize(['rows'=>4]) ?>
 		</div>
 	</div>
 	<?= $form->field($model, 'services_ids')->select2() ?>

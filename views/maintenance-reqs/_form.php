@@ -25,6 +25,7 @@ use yii\bootstrap5\Html;
 		<div class="col-8">
 			<?= $form->field($model, 'description')->text(['height'=>140,'rows'=>10]) ?>
 			<?= $form->field($model, 'links')->textAutoresize() ?>
+			<?= $form->field($model, 'external_links')->textAutoresize(['rows'=>4]) ?>
 		</div>
 	</div>
 	

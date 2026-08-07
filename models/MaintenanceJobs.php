@@ -22,6 +22,7 @@ use yii\db\ActiveQuery;
  * @property int|null $services_id
  * @property int|null $parent_id
  * @property string|null $links
+ * @property string|null $external_links
  * @property string|null $changed_at
  * @property int|null $changed_by
  * @property string sname
@@ -91,6 +92,7 @@ class MaintenanceJobs extends ArmsModel
 			[['schedules_id', 'services_id','archived'], 'integer'],
 			[['comps_ids', 'services_ids', 'techs_ids', 'reqs_ids'], 'each','rule'=>['integer']],
             [['links'], 'string'],
+			[['external_links'], 'safe'],
 			[['parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => MaintenanceJobs::class, 'targetAttribute' => ['parent_id' => 'id']],
 			[['parent_id'], 'validateRecursiveLink', 'params'=>['getLink' => 'parent']],
         ];
