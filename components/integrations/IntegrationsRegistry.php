@@ -2,6 +2,7 @@
 
 namespace app\components\integrations;
 
+use app\controllers\ArmsBaseController;
 use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
 use app\models\IntegrationsLog;
@@ -10,7 +11,7 @@ use yii\base\DynamicModel;
 use yii\base\Model;
 
 /**
- * Реестр провайдеров интеграций (plans/integrations-contract.md §1, §2.2).
+ * Реестр провайдеров интеграций (docs/dev/integrations.md).
  *
  * Строится из params['integrations'] (инстанс включает свои интеграции в
  * params-local.php). Провайдер попадает в реестр только если у него есть
@@ -67,29 +68,47 @@ class IntegrationsRegistry
 
 	/**
 	 * Может ли текущий пользователь видеть панели провайдера.
-	 * RBAC включён: право integration-<id>; выключен — по общим правилам
-	 * просмотра инстанса (authorizedView), см. контракт §4.
+	 * Панель = «просмотр»: доступ по той же модели, что и view-действия
+	 * ядра (params useRBAC/authorizedView, docs/help/admin/setup.md).
 	 */
 	public static function userCanView(IntegrationProvider $provider): bool
 	{
-		if (!Yii::$app->has('user')) return false;
-		if (empty(Yii::$app->params['useRBAC'])) {
-			if (Yii::$app->params['authorizedView'] ?? false) return !Yii::$app->user->isGuest;
-			return true;
-		}
-		return Yii::$app->user->can('integration-'.$provider->id);
+		return static::checkAccess(ArmsBaseController::PERM_VIEW.'-integration-'.$provider->id);
 	}
 
 	/**
 	 * Может ли текущий пользователь выполнить действие провайдера.
-	 * RBAC включён: право integration-<id>-<action>; выключен — действия
-	 * доступны любому авторизованному, см. контракт §4.
+	 * Действие = «изменение»: доступ по той же модели, что и edit-действия
+	 * ядра (docs/help/admin/setup.md). Право
+	 * edit-integration-<id>-<action> создаётся rbac/init.
 	 */
 	public static function userCanRun(IntegrationProvider $provider, string $actionId): bool
 	{
+		return static::checkAccess(ArmsBaseController::PERM_EDIT.'-integration-'.$provider->id.'-'.$actionId);
+	}
+
+	/**
+	 * Проверка доступа к интеграции ровно по модели авторизации ядра.
+	 * Имя права начинается с view-/edit-, чтобы
+	 * {@see ArmsBaseController::customizeAccessPermission()} применил к нему
+	 * те же правила, что и к обычным операциям (единый источник правды:
+	 * при useRBAC=false — открытость/аутентификация по authorizedView; при
+	 * useRBAC=true просмотр открыт всем, если authorizedView выключен).
+	 */
+	protected static function checkAccess(string $permission): bool
+	{
 		if (!Yii::$app->has('user')) return false;
-		if (empty(Yii::$app->params['useRBAC'])) return !Yii::$app->user->isGuest;
-		return Yii::$app->user->can('integration-'.$provider->id.'-'.$actionId);
+
+		switch (ArmsBaseController::customizeAccessPermission($permission)) {
+			case ArmsBaseController::PERM_EVERYONE:
+				return true;
+			case ArmsBaseController::PERM_AUTHENTICATED:
+				return !Yii::$app->user->isGuest;
+			case ArmsBaseController::PERM_ANONYMOUS:
+				return false;
+			default:
+				return Yii::$app->user->can($permission);
+		}
 	}
 
 	/**
@@ -131,18 +150,30 @@ class IntegrationsRegistry
 	 * Выполнение действия с уже собранной и провалидированной формой
 	 * (путь proxy-контроллера). Журналирует итог и при успехе, и при
 	 * ошибке; ошибка провайдера (исключение) — тоже штатный итог.
+	 *
+	 * Запись журнала открывается ДО вызова провайдера: на время выполнения
+	 * её id доступен провайдеру в $provider->activeLogId — составные
+	 * действия передают его как parentLogId вложенных вызовов (§2.2).
 	 */
 	public static function runActionForm(IntegrationProvider $provider, string $actionId, ?ArmsModel $model,
 		Model $form, ?array $credentials = null, ?int $parentLogId = null): ActionResult
 	{
+		$logId = IntegrationsLog::open($provider->id, $actionId, $model,
+			$credentials['login'] ?? null, $parentLogId);
+
+		$previousLogId = $provider->activeLogId;
+		$provider->activeLogId = $logId;
 		try {
 			$result = $provider->runAction($actionId, $model, $form, $credentials);
 		} catch (\Throwable $e) {
 			Yii::error("Integration {$provider->id}/$actionId failed: ".$e->getMessage(), __METHOD__);
 			$result = ActionResult::error('Ошибка выполнения: '.$e->getMessage());
+		} finally {
+			$provider->activeLogId = $previousLogId;
 		}
-		$result->logId = IntegrationsLog::write($provider->id, $actionId, $model, $result,
-			$credentials['login'] ?? null, $parentLogId);
+
+		IntegrationsLog::close($logId, $result);
+		$result->logId = $logId;
 		return $result;
 	}
 

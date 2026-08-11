@@ -57,7 +57,6 @@
 	"kartik-v/yii2-widget-select2": "dev-master",
     "kartik-v/yii2-widget-colorinput": "dev-master",
     "voskobovich/yii2-linker-behavior": "dev-master",
-    "edvlerblog/yii2-adldap-module": "^6.0.0",
     "spo0okie/yii2-grid": "dev-patch-1",
     "spo0okie/yii2-modal-ajax": "@dev",
 	"spo0okie/yii2-rbac-plus": "dev-master",
@@ -69,7 +68,8 @@
     "openai-php/client": "dev-main",
     "guzzlehttp/guzzle": "7.9.x-dev",
     "guzzlehttp/psr7": "2.7.x-dev",
-    "yiisoft/yii2-symfonymailer": "^3.0@dev"
+    "yiisoft/yii2-symfonymailer": "^3.0@dev",
+    "directorytree/ldaprecord": "^3.0"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.0.0",

@@ -4,7 +4,7 @@ namespace app\components\integrations;
 
 /**
  * Результат выполнения действия интеграции
- * (plans/integrations-contract.md §2).
+ * (docs/dev/integrations.md).
  *
  * Возвращается из {@see IntegrationProvider::runAction()}. Всё что попадает
  * в message/logParams пишется в журнал integrations_log — секретов

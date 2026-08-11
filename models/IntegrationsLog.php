@@ -8,7 +8,7 @@ use Yii;
 
 /**
  * Журнал действий интеграций с внешними ИС
- * (plans/integrations-contract.md §6).
+ * (docs/dev/integrations.md).
  *
  * Пишется реестром интеграций ({@see \app\components\integrations\IntegrationsRegistry::runActionForm()})
  * на каждое выполненное действие. Секреты сюда попадать не должны:
@@ -121,19 +121,22 @@ class IntegrationsLog extends ArmsModel
 	}
 
 	/**
-	 * Записывает итог выполнения действия. Ошибка записи журнала не должна
-	 * ронять само действие: пишем в лог приложения и возвращаем null.
+	 * Открывает запись журнала ДО выполнения действия (result='run').
+	 * Так составные действия (§2.2 контракта) получают id записи-инициатора
+	 * для parent_id вложенных вызовов ещё во время выполнения; а действие,
+	 * убившее процесс, остаётся в журнале со статусом run.
+	 * Ошибка записи журнала не должна ронять само действие: пишем в лог
+	 * приложения и возвращаем null.
 	 *
 	 * @param string $provider id провайдера
 	 * @param string $action id действия
-	 * @param ArmsModel|null $model объект над которым выполнено (null для standalone)
-	 * @param ActionResult $result итог выполнения
+	 * @param ArmsModel|null $model объект действия (null для standalone)
 	 * @param string|null $extLogin исполнитель во внешней ИС (L2+), без пароля
 	 * @param int|null $parentId запись-инициатор (вложенные вызовы)
-	 * @return int|null id созданной записи (для parent_id вложенных вызовов)
+	 * @return int|null id созданной записи
 	 */
-	public static function write(string $provider, string $action, ?ArmsModel $model,
-		ActionResult $result, ?string $extLogin = null, ?int $parentId = null): ?int
+	public static function open(string $provider, string $action, ?ArmsModel $model,
+		?string $extLogin = null, ?int $parentId = null): ?int
 	{
 		try {
 			$log = new static();
@@ -145,15 +148,45 @@ class IntegrationsLog extends ArmsModel
 			$log->object_id = is_object($model) ? $model->id : null;
 			$log->parent_id = $parentId;
 			$log->ext_login = $extLogin;
+			$log->result = 'run';
+			$log->save(false);
+			return $log->id;
+		} catch (\Throwable $e) {
+			Yii::error("IntegrationsLog::open($provider/$action) failed: ".$e->getMessage(), __METHOD__);
+			return null;
+		}
+	}
+
+	/**
+	 * Закрывает запись журнала итогом выполнения (пара к {@see open()})
+	 */
+	public static function close(?int $id, ActionResult $result): void
+	{
+		if (is_null($id)) return;
+		try {
+			$log = static::findOne($id);
+			if (!$log) return;
 			$log->params = count($result->logParams) ?
 				mb_substr(json_encode($result->logParams, JSON_UNESCAPED_UNICODE), 0, 1024) : null;
 			$log->result = $result->ok ? 'ok' : 'error';
 			$log->message = mb_substr($result->message, 0, 255);
 			$log->save(false);
-			return $log->id;
 		} catch (\Throwable $e) {
-			Yii::error("IntegrationsLog::write($provider/$action) failed: ".$e->getMessage(), __METHOD__);
-			return null;
+			Yii::error("IntegrationsLog::close($id) failed: ".$e->getMessage(), __METHOD__);
 		}
+	}
+
+	/**
+	 * Открыть и сразу закрыть запись одним итогом (короткий путь для
+	 * случаев, когда действие не выполнялось: например, не прошла
+	 * валидация параметров)
+	 * @return int|null id записи
+	 */
+	public static function write(string $provider, string $action, ?ArmsModel $model,
+		ActionResult $result, ?string $extLogin = null, ?int $parentId = null): ?int
+	{
+		$id = static::open($provider, $action, $model, $extLogin, $parentId);
+		static::close($id, $result);
+		return $id;
 	}
 }

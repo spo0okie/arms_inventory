@@ -7,7 +7,7 @@ use app\models\base\traits\AttributeDataModelTrait;
 
 /**
  * Форма параметров действия sms/send (перенос models/ui/SmsForm при
- * выносе SMS в механизм интеграций, plans/integrations-drafts.md §1).
+ * выносе SMS в механизм интеграций, docs/dev/integrations.md).
  * Сама отправка — в {@see SmsProvider::runAction()}.
  *
  * @property string $phone номер куда отправлять

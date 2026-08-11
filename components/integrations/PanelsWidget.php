@@ -10,7 +10,7 @@ use yii\helpers\Url;
 
 /**
  * Блок «Интеграции» в карточке объекта
- * (plans/integrations-contract.md §3.1, §7).
+ * (docs/dev/integrations.md).
  *
  * Обходит реестр (включён + настроен + RBAC + appliesTo) и для каждой
  * панели каждого подошедшего провайдера выводит контейнер с содержимым
@@ -84,11 +84,18 @@ class PanelsWidget extends Widget
 			: '<div class="spinner-border spinner-border-sm" role="status">'
 				.'<span class="visually-hidden">Loading...</span></div>';
 
+		/* карточка
 		$html = '<div class="card mb-2 integration-panel">'
 			.'<div class="card-header py-1"><small>'.Html::encode($title).'</small></div>'
 			.'<div class="card-body py-2" id="'.$containerId.'"'
 				.($fresh ? '' : ' style="opacity:.5"')
 			.'>'.$body.'</div></div>';
+		 */
+
+		$html = '<h4>'.Html::encode($title).'</h4>'
+			.'<div class="mb-3" id="'.$containerId.'"'
+				.($fresh ? '' : ' style="opacity:.5"')
+			.'>'.$body.'</div>';
 
 		if (!$fresh) {
 			$url = Url::to(['/integrations/panel', 'provider' => $provider->id, 'panel' => $panelId,

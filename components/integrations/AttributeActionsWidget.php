@@ -9,7 +9,7 @@ use yii\helpers\Html;
 
 /**
  * Инлайн-действия интеграций рядом со значением атрибута
- * (plans/integrations-contract.md §7.2). Пример: иконка отправки SMS
+ * (docs/dev/integrations.md). Пример: иконка отправки SMS
  * рядом с номером телефона пользователя.
  *
  * Виджет generic: спрашивает у реестра attributeActions() всех

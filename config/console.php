@@ -10,6 +10,7 @@ $db = ArrayHelper::merge(
 	require __DIR__ . '/db.php',
 	require __DIR__ . '/db-local.php'
 );
+$ldap = require __DIR__ . '/ldap.php';
 
 $config = [
     'id' => 'basic-console',
@@ -29,6 +30,7 @@ $config = [
             ],
         ],
         'db' => $db,
+	    'ldap' => $ldap,
 	    'authManager' => [
 		    'class' => 'yii\rbac\DbManager',
 	    ],

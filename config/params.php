@@ -67,7 +67,7 @@ return [
 	//пример: config/soft-export-filter.example
 	'soft.export_filter'=>'',
 
-	//интеграции с внешними ИС (plans/integrations-contract.md).
+	//интеграции с внешними ИС (docs/dev/integrations.md).
 	//Инстанс включает свои в params-local.php; ключ = id провайдера,
 	//'class' = класс провайдера, остальное - его конфиг. Пример:
 	//'integrations'=>[

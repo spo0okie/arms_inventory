@@ -5,7 +5,7 @@ use app\migrations\arms\ArmsMigration;
 
 /**
  * Журнал действий интеграций с внешними ИС
- * (plans/integrations-contract.md §6).
+ * (docs/dev/integrations.md).
  *
  * Каждое выполненное действие (L2/L2+) пишется сюда и при успехе, и при
  * ошибке. Вложенные вызовы (композиция провайдеров, §2.2 контракта)

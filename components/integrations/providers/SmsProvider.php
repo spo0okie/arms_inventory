@@ -10,7 +10,7 @@ use yii\base\Model;
 
 /**
  * Отправка SMS через шлюз с URL-шаблоном — эталонная интеграция
- * механизма (plans/integrations-drafts.md §1, перенос вшитого
+ * механизма (docs/dev/integrations.md, перенос вшитого
  * SmsController/SmsForm).
  *
  * Конфиг (params-local.php):

@@ -445,9 +445,10 @@ if (Yii::$app->user->can('edit-comps')) {
 
 ### 0. Механизм интеграций с внешними ИС
 
-Подключаемые провайдеры интеграций (Zabbix, телефония, SMS, ...):
+Подключаемые провайдеры интеграций (Zabbix, телефония, SMS, AD, ...):
 живые панели данных и действия во внешних системах из карточек объектов.
-Архитектура и контракт — [plans/integrations-contract.md](plans/integrations-contract.md).
+Архитектура и контракт для разработчиков — [docs/dev/integrations.md](docs/dev/integrations.md);
+включение на инстансе — [docs/help/admin/integrations/providers.md](docs/help/admin/integrations/providers.md).
 
 - [`components/integrations/IntegrationProvider.php`](components/integrations/IntegrationProvider.php) — контракт провайдера
 - [`components/integrations/IntegrationsRegistry.php`](components/integrations/IntegrationsRegistry.php) — реестр (строится из `params['integrations']`)
@@ -455,7 +456,15 @@ if (Yii::$app->user->can('edit-comps')) {
 - [`components/integrations/PanelsWidget.php`](components/integrations/PanelsWidget.php) — блок интеграций в карточке объекта
 - [`components/integrations/AttributeActionsWidget.php`](components/integrations/AttributeActionsWidget.php) — действия у атрибута (иконка SMS у телефона)
 - [`models/IntegrationsLog.php`](models/IntegrationsLog.php) — журнал выполненных действий
-- Провайдеры: [`components/integrations/providers/`](components/integrations/providers) (реализован SMS)
+- Провайдеры: [`components/integrations/providers/`](components/integrations/providers):
+  - `SmsProvider` — отправка SMS (иконки у телефонов + standalone-форма);
+  - `HttpTemplateProvider` — декларативный: интеграция «одна панель по
+    одному GET» описывается целиком конфигом (первый клиент — панель
+    телефонии ast22-phones, шаблон `providers/views/pbx/status.php`);
+  - `AdUserProvider` — панель-справка ActiveDirectory о сотруднике
+    (поверх ldap-компонента);
+  - `AdPasswordResetProvider` — именной сброс пароля AD (L2+: личные
+    креды исполнителя; пароль доставляется через SMS-провайдера)
 
 Включение — на инстансе в `params-local.php`:
 
@@ -468,25 +477,45 @@ if (Yii::$app->user->can('edit-comps')) {
 ],
 ```
 
-RBAC-права (`integration-<id>`, `integration-<id>-<action>`) создаются
-командой `yii rbac/init` по реестру включённых провайдеров.
+RBAC-права (`view-integration-<id>`, `edit-integration-<id>-<action>`)
+создаются командой `yii rbac/init` по реестру включённых провайдеров.
+Доступ следует модели авторизации ядра (`useRBAC`/`authorizedView`):
+панель = просмотр, действие = изменение.
 
 ### 1. LDAP/Active Directory
 
-Аутентификация через [`edvlerblog/yii2-adldap-module`](https://github.com/edvlerblog/yii2-adldap-module):
+Доступ к AD инкапсулирован в компоненте
+[`app\components\ldap\LdapService`](components/ldap/LdapService.php)
+(поверх [`directorytree/ldaprecord`](https://ldaprecord.com); миграция с
+заброшенного adldap2 — 2026-08). Это **единственная** точка приложения,
+знающая о LDAP-библиотеке: аутентификация ([`Users::validatePassword`](models/Users.php))
+и интеграции AD ([`AdUserProvider`](components/integrations/providers/AdUserProvider.php),
+[`AdPasswordResetProvider`](components/integrations/providers/AdPasswordResetProvider.php))
+ходят в AD только через `Yii::$app->ldap`.
+
+Настройка — `config/ldap.php` (файл в `.gitignore`, секреты не в репозитории;
+пример структуры — ниже):
 
 ```php
 'ldap' => [
-    'providers' => [
-        'default' => [
-            'hosts' => ['dc.example.com'],
-            'base_dn' => 'DC=example,DC=com',
-            'username' => 'ldap_user',
-            'password' => 'password',
-        ],
+    'class' => \app\components\ldap\LdapService::class,
+    'connection' => [
+        'hosts' => ['dc.example.com'],
+        'port' => 636,
+        'base_dn' => 'DC=example,DC=com',
+        'account_suffix' => '@example.com',
+        'username' => 'svc_ldap@example.com',
+        'password' => 'secret',
+        'use_ssl' => true,   //порт 636 = LDAPS
     ],
 ],
 ```
+
+Диагностика против живого DC: `yii ldap/ping`, `yii ldap/account <login>`,
+`yii ldap/auth <login> <password>`
+([`LdapController`](console/commands/LdapController.php)).
+Соединение ленивое: недоступность DC не роняет обращение к компоненту
+500-й — `validatePassword` ловит сбой и показывает «служба недоступна».
 
 ### 2. OpenAI API
 

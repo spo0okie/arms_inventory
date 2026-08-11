@@ -26,10 +26,10 @@ class RbacController extends Controller
 {
 	/**
 	 * Инициализирует базовую роль RBAC — создаёт роль «admin» в authManager —
-	 * и права включённых интеграций (plans/integrations-contract.md §4):
-	 * integration-<id> на просмотр панелей и integration-<id>-<action> на
-	 * каждое действие. Повторный запуск безопасен: существующие роли/права
-	 * не пересоздаются.
+	 * и права включённых интеграций (docs/dev/integrations.md):
+	 * view-integration-<id> на просмотр панелей и
+	 * edit-integration-<id>-<action> на каждое действие. Повторный запуск
+	 * безопасен: существующие роли/права не пересоздаются.
 	 *
 	 * Использование: yii rbac/init
 	 *
@@ -45,11 +45,13 @@ class RbacController extends Controller
 			$authManager->add($admin);
 		}
 
-		//права включённых интеграций (по реестру)
+		//права включённых интеграций (по реестру). Префиксы view-/edit-
+		//нужны, чтобы права следовали той же модели авторизации, что и
+		//обычные операции (см. IntegrationsRegistry::checkAccess).
 		foreach (IntegrationsRegistry::providers() as $provider) {
-			$names=['integration-'.$provider->id];
+			$names=['view-integration-'.$provider->id];
 			foreach ($provider->actions(null) as $actionId=>$descriptor) {
-				$names[]='integration-'.$provider->id.'-'.$actionId;
+				$names[]='edit-integration-'.$provider->id.'-'.$actionId;
 			}
 			foreach ($names as $name) {
 				if (is_object($authManager->getPermission($name))) continue;

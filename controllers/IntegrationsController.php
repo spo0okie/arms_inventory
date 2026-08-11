@@ -15,14 +15,15 @@ use yii\web\UnauthorizedHttpException;
 
 /**
  * Proxy-контроллер механизма интеграций
- * (plans/integrations-contract.md §3) — единственная точка входа для
+ * (docs/dev/integrations.md) — единственная точка входа для
  * панелей чтения (L1) и действий (L2/L2+) всех провайдеров.
  *
  * Доступ: на уровне маршрутизации оба действия открыты (PERM_EVERYONE),
  * т.к. права адресные и зависят от параметров запроса
- * (integration-<provider>, integration-<provider>-<action>) — проверка
- * выполняется внутри действий через IntegrationsRegistry::userCan*()
- * с учётом выключенного useRBAC (контракт §4).
+ * (view-integration-<provider>, edit-integration-<provider>-<action>) —
+ * проверка выполняется внутри действий через
+ * IntegrationsRegistry::userCanView()/userCanRun(), которые следуют модели
+ * авторизации ядра (useRBAC/authorizedView, docs/help/admin/setup.md).
  */
 class IntegrationsController extends ArmsBaseController
 {
@@ -220,10 +221,11 @@ class IntegrationsController extends ArmsBaseController
 	/**
 	 * Acceptance test data for Action.
 	 *
-	 * Тесты ходят анонимно (useRBAC=false в тестовой среде), а действия
-	 * при выключенном RBAC доступны только авторизованным (контракт §4) —
-	 * поэтому штатные сценарии ожидают 401; сама отправка проверяется
-	 * unit-тестами SmsProvider.
+	 * Тестовая среда — полностью открытый режим (useRBAC=false,
+	 * authorizedView=false): действия доступны всем, включая гостя, как и
+	 * обычные правки (docs/help/admin/setup.md). Поэтому форма и POST
+	 * отдают 200; неизвестный провайдер — 404. Проверяются маршрутизация и
+	 * доступ; сама отправка (data://-шлюз) — unit-тестами SmsProvider.
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -236,12 +238,12 @@ class IntegrationsController extends ArmsBaseController
 				'response' => 404,
 			],
 			[
-				'name' => 'guest-form-denied',
+				'name' => 'open-mode-form',
 				'GET' => ['provider' => 'sms', 'action' => 'send'],
-				'response' => 401,
+				'response' => 200,
 			],
 			[
-				'name' => 'guest-post-denied',
+				'name' => 'open-mode-post',
 				'GET' => ['provider' => 'sms', 'action' => 'send'],
 				'POST' => [
 					'SmsSendForm' => [
@@ -249,7 +251,7 @@ class IntegrationsController extends ArmsBaseController
 						'text' => 'Acceptance message',
 					],
 				],
-				'response' => 401,
+				'response' => 200,
 			],
 		];
 	}

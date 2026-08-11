@@ -6,7 +6,7 @@ use Yii;
 
 /**
  * Файловый кэш отрендеренных панелей интеграций
- * (plans/integrations-contract.md §5).
+ * (docs/dev/integrations.md).
  *
  * Файл на ФС: runtime/integrations_cache/<provider>/<panel>/<hash>.html.
  * Валидность не хранится — схема всегда «показать что есть → обновить»:

@@ -15,7 +15,7 @@ use Codeception\Test\Unit;
 use Yii;
 
 /**
- * Тесты механизма интеграций (plans/integrations-contract.md) на эталонном
+ * Тесты механизма интеграций (docs/dev/integrations.md) на эталонном
  * провайдере SMS: построение реестра из params, применимость и prefill,
  * выполнение действия с журналированием (шлюз имитируется data://-URL,
  * в сеть тесты не ходят), доступ при выключенном RBAC.
@@ -210,20 +210,78 @@ class IntegrationsSmsTest extends Unit
 	}
 
 	/**
-	 * Доступ при выключенном RBAC (контракт §4): панели — по правилам
-	 * просмотра инстанса (у тестового инстанса открыт всем), действия —
-	 * только авторизованным (гостю запрещено)
+	 * Доступ следует модели авторизации ядра (docs/help/admin/setup.md).
+	 * Тестовое окружение — полностью открытый режим (useRBAC=false,
+	 * authorizedView=false): и просмотр панелей, и действия доступны всем,
+	 * включая гостя — ровно как обычные view/edit в этом режиме.
 	 */
-	public function testAccessWithoutRbac()
+	public function testAccessFollowsCoreModel()
 	{
 		$this->setupSms('data://text/plain,OK');
 		$provider = IntegrationsRegistry::provider('sms');
 
 		$this->assertFalse((bool)(Yii::$app->params['useRBAC'] ?? false), 'тест рассчитан на useRBAC=false');
+		$this->assertFalse((bool)(Yii::$app->params['authorizedView'] ?? false), 'тест рассчитан на authorizedView=false');
 		$this->assertTrue(Yii::$app->user->isGuest, 'тест рассчитан на гостя');
 
+		//полностью открытый режим: всё доступно всем (как «всем можно всё»)
 		$this->assertTrue(IntegrationsRegistry::userCanView($provider));
-		$this->assertFalse(IntegrationsRegistry::userCanRun($provider, 'send'));
+		$this->assertTrue(IntegrationsRegistry::userCanRun($provider, 'send'));
+	}
+
+	/**
+	 * Доступ к интеграциям следует таблице setup.md по всем комбинациям
+	 * authorizedView/useRBAC. Панель = «просмотр», действие = «изменение».
+	 * (RBAC-права провайдеру не выданы, поэтому под useRBAC=true проверки
+	 * по праву дают false — как у обычной операции без назначенного права.)
+	 */
+	public function testAccessMatrixAllModes()
+	{
+		$this->setupSms('data://text/plain,OK');
+		$provider = IntegrationsRegistry::provider('sms');
+
+		$origRbac = Yii::$app->params['useRBAC'] ?? false;
+		$origView = Yii::$app->params['authorizedView'] ?? false;
+
+		$user = new Users(['Ename' => 'Матрица', 'Login' => 'matrix.user']);
+		$this->assertTrue($user->save(false));
+
+		//проверка (view, run) для гостя и для вошедшего в заданном режиме
+		$probe = function () use ($provider) {
+			return [
+				'view' => IntegrationsRegistry::userCanView($provider),
+				'run' => IntegrationsRegistry::userCanRun($provider, 'send'),
+			];
+		};
+
+		try {
+			// authorizedView=false, useRBAC=false — всем всё
+			Yii::$app->params['useRBAC'] = false;
+			Yii::$app->params['authorizedView'] = false;
+			$this->assertSame(['view' => true, 'run' => true], $probe(), 'открытый режим, гость');
+
+			// authorizedView=true, useRBAC=false — только вошедшим
+			Yii::$app->params['authorizedView'] = true;
+			$this->assertSame(['view' => false, 'run' => false], $probe(), 'нужна аутентификация, гость');
+			Yii::$app->user->login($user);
+			$this->assertSame(['view' => true, 'run' => true], $probe(), 'нужна аутентификация, вошедший');
+			Yii::$app->user->logout();
+
+			// authorizedView=false, useRBAC=true — просмотр всем, действие по праву
+			Yii::$app->params['useRBAC'] = true;
+			Yii::$app->params['authorizedView'] = false;
+			$this->assertSame(['view' => true, 'run' => false], $probe(), 'RBAC, просмотр открыт, гость');
+
+			// authorizedView=true, useRBAC=true — всё по праву (не выдано => false)
+			Yii::$app->params['authorizedView'] = true;
+			Yii::$app->user->login($user);
+			$this->assertSame(['view' => false, 'run' => false], $probe(), 'RBAC полный, без прав');
+			Yii::$app->user->logout();
+		} finally {
+			Yii::$app->params['useRBAC'] = $origRbac;
+			Yii::$app->params['authorizedView'] = $origView;
+			if (!Yii::$app->user->isGuest) Yii::$app->user->logout();
+		}
 	}
 
 	/** Валидация формы: нормализация номера и ограничения длины */
@@ -244,9 +302,9 @@ class IntegrationsSmsTest extends Unit
 	}
 
 	/**
-	 * Рендер иконки у атрибута авторизованным пользователем: ссылка на
-	 * /integrations/action с prefill номера в имени формы; гостю иконка
-	 * не рендерится (RBAC выключен => действия только авторизованным)
+	 * Рендер иконки у атрибута: ссылка на /integrations/action с prefill
+	 * номера в имени формы. В тестовом (полностью открытом) режиме
+	 * действие доступно, поэтому иконка рендерится.
 	 */
 	public function testAttributeActionsWidgetRender()
 	{
@@ -255,19 +313,9 @@ class IntegrationsSmsTest extends Unit
 		$user = new Users(['Ename' => 'Тест Виджет', 'Mobile' => '79991234567']);
 		$this->assertTrue($user->save(false));
 
-		//гость - иконки нет
-		$this->assertSame('', AttributeActionsWidget::widget([
+		$html = AttributeActionsWidget::widget([
 			'model' => $user, 'attribute' => 'Mobile', 'value' => '79991234567',
-		]));
-
-		Yii::$app->user->login($user);
-		try {
-			$html = AttributeActionsWidget::widget([
-				'model' => $user, 'attribute' => 'Mobile', 'value' => '79991234567',
-			]);
-		} finally {
-			Yii::$app->user->logout();
-		}
+		]);
 
 		$this->assertStringContainsString('integrations%2Faction', urlencode($html));
 		$this->assertStringContainsString('provider=sms', $html);

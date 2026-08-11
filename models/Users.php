@@ -803,25 +803,52 @@ class Users extends ArmsModel implements IdentityInterface
 		$this->password = $password ? password_hash($password, PASSWORD_BCRYPT) : null;
 	}
 
+	/**
+	 * @var bool признак того, что последняя проверка пароля не удалась
+	 * из-за НЕДОСТУПНОСТИ службы аутентификации (LDAP/AD), а не из-за
+	 * неверного пароля. Транзиентное поле (не колонка БД). Позволяет
+	 * форме входа показать «служба недоступна» вместо «неверный пароль».
+	 */
+	public $authServiceError = false;
+
     /**
      * Validates password.
      * If the user has a local password hash — verifies against it.
      * Otherwise falls back to LDAP.
+     *
+     * Сбой LDAP (недоступен контроллер домена, таймаут, ошибка bind
+     * сервисной учётки) НЕ должен ронять запрос 500-й: он логируется,
+     * помечается в {@see $authServiceError} и трактуется как «пароль не
+     * подтверждён» (return false). Вызывающие получают безопасный false;
+     * форма входа по флагу показывает корректное сообщение.
      *
      * @param string $password password to validate
      * @return bool if password provided is valid for current user
      */
     public function validatePassword(string $password): bool
     {
+		$this->authServiceError = false;
+
+		//локальный пароль (если задан) проверяем без обращения к LDAP
 		if (!empty($this->password)) {
 			return password_verify($password, $this->password);
 		}
 
-		if (isset(Yii::$app->ldap)) {
-			return Yii::$app->ldap->auth()->attempt($this->Login, $password);
+		//нечем аутентифицировать: нет логина AD или не настроен LDAP
+		if (empty($this->Login) || !Yii::$app->has('ldap')) {
+			return false;
 		}
 
-		return false;
+		try {
+			return Yii::$app->ldap->authenticate($this->Login, $password);
+		} catch (\Throwable $e) {
+			//недоступность/ошибка LDAP не должна ронять запрос 500-й:
+			//логируем и сообщаем вызывающему через authServiceError, что
+			//это сбой службы, а не неверный пароль
+			Yii::warning("LDAP auth error for '{$this->Login}': ".$e->getMessage(), 'ldap');
+			$this->authServiceError = true;
+			return false;
+		}
     }
 
     /**

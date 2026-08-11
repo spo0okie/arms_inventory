@@ -62,30 +62,37 @@
 ```php
 <?php
 return [
-    'class'=>'Edvlerblog\Adldap2\Adldap2Wrapper',
-    'providers'=> [
-        'default'=>[
-            'autoconnect'=>true,
-            'config'=>[
-                'port'      => 636,
-                //'port'      => 389,
-                'hosts'    => ['dc1.domain.local','dc2.domain.local'],
-                'account_suffix' =>  '@domain.local',
-                'base_dn' => "DC=domain,DC=local",
-                //под кем подключиться к АД (подойдет любой пользователь. права админа не нужны)
-                'username' => 'inventory@domain.local',
-                'password' => 'SuperSecretPassword1!',
-                'use_ssl'   => true,
-                'use_tls'   => true,
-                'custom_options'   => [
-                    // See: http://php.net/ldap_set_option
-                    LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER
-                ],
-            ],
+    'class' => \app\components\ldap\LdapService::class,
+    'connection' => [
+        'port'           => 636,        // 636 = LDAPS (use_ssl); для 389 см. ниже
+        'hosts'          => ['dc1.domain.local', 'dc2.domain.local'],
+        'account_suffix' => '@domain.local',
+        'base_dn'        => 'DC=domain,DC=local',
+        // под кем подключаться к AD (подойдёт любой пользователь, права админа не нужны)
+        'username'       => 'inventory@domain.local',
+        'password'       => 'SuperSecretPassword1!',
+        'use_ssl'        => true,       // LDAPS на 636
+        'use_tls'        => false,      // STARTTLS на 389 (взаимоисключающе с use_ssl)
+        'timeout'        => 5,
+        'options'        => [
+            LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER,
         ],
     ],
 ];
 ```
+
+Доступ к AD реализован компонентом `app\components\ldap\LdapService`
+(поверх `directorytree/ldaprecord`). Проверить настройку против живого
+контроллера домена:
+
+```bash
+php yii ldap/ping                     # доступность DC и bind сервисной учётки
+php yii ldap/account <login>          # справка об учётке (OU, срок пароля, статус)
+php yii ldap/auth <login> <password>  # проверка логина/пароля
+```
+
+Недоступность DC не роняет вход 500-й ошибкой: на странице входа будет
+сообщение «Служба аутентификации временно недоступна».
 
 ### Быстрый старт
 

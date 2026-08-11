@@ -48,7 +48,9 @@ class LoginForm extends Model
             $user = $this->getUser();
 
             if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError($attribute, 'Incorrect username or password.');
+                $this->addError($attribute, ($user && $user->authServiceError)
+                    ? 'Служба аутентификации временно недоступна, попробуйте позже'
+                    : 'Incorrect username or password.');
             }
         }
     }
@@ -72,8 +74,10 @@ class LoginForm extends Model
 	    	//var_dump(\Yii::$app->user);
 			return \Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
 		} else {
-			//$this->addError('username', 'Incorrect username or password.');
-			$this->addError('password', 'Incorrect username or password.');
+			//отличаем недоступность службы аутентификации от неверного пароля
+			$this->addError('password', $user->authServiceError
+				? 'Служба аутентификации временно недоступна, попробуйте позже'
+				: 'Incorrect username or password.');
 		}
 	    
         return false;

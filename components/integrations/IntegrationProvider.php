@@ -10,7 +10,7 @@ use yii\base\NotSupportedException;
 /**
  * Базовый класс провайдера интеграции с внешней ИС.
  *
- * Контракт зафиксирован в plans/integrations-contract.md (§2):
+ * Контракт зафиксирован в docs/dev/integrations.md:
  * провайдер описывает применимость к объектам ARMS, привязку к внешней ИС,
  * панели чтения (L1) и действия (L2/L2+). Вся обвязка (реестр, proxy,
  * виджеты, кэш, RBAC, журнал) — общая, см. {@see IntegrationsRegistry},
@@ -30,7 +30,7 @@ abstract class IntegrationProvider
 	/** таймаут сетевых операций по умолчанию, сек */
 	const DEFAULT_TIMEOUT = 5;
 
-	/** уровни действий (plans/integrations.md §4) */
+	/** уровни действий (docs/dev/integrations.md) */
 	const LEVEL_NORMAL = 'L2';		//от сервисной учетки, RBAC + журнал
 	const LEVEL_PERSONAL = 'L2+';	//именное: личные креды внешней ИС на один запрос
 
@@ -39,6 +39,14 @@ abstract class IntegrationProvider
 
 	/** @var array конфиг из params['integrations'][<id>], задает реестр */
 	public array $config = [];
+
+	/**
+	 * @var int|null id записи журнала ТЕКУЩЕГО выполняемого действия;
+	 * заполняется реестром на время runAction(). Составные действия
+	 * передают его как parentLogId вложенных вызовов
+	 * IntegrationsRegistry::runAction() (композиция, §2.2 контракта)
+	 */
+	public ?int $activeLogId = null;
 
 	/** Название для заголовков панелей/прав/журнала */
 	abstract public function getTitle(): string;
