@@ -82,7 +82,7 @@ if (is_object($model->state)) { ?>
 </div>
 
 
-<div class="d-flex flex-row mb-3">
+<div class="d-flex flex-row">
 	<div class="pe-5">
 		<h4>Место установки и сотрудники:</h4>
 		<p>
@@ -125,7 +125,12 @@ if (is_object($model->state)) { ?>
 	</div>
 	<?php }	?>
 	<div class="pe-5 mb-3">
-		<?= $this->render('attached/files',['model'=>$model,'static_view'=>$static_view]) ?>
+		<?=  $this->render('/attaches/model-list',[
+			'model'=>$model,
+			'link'=>'techs_id',
+			'static_view'=>$static_view,
+			'cardClass'=>'p-0 m-0'
+		]); ?>
 	</div>
 </div>
 

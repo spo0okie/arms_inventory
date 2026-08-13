@@ -7,27 +7,61 @@
  */
 
 /** @var yii\web\View $this */
-/** @var Techs $model */
+/** @var app\models\Attaches $model */
 
 use app\models\Attaches;
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
 
 if (!isset($static_view)) $static_view=false;
 if (!isset($link)) $link=$model::tableName().'_id';
+if (!isset($active)) $active=false;
+if (!isset($cardClass)) $cardClass='';
+
+$switchCode=<<<JS
+	$('#add-attaches-form-button, #add-attaches-form-form').toggle();
+	return false;
+JS;
 
 $attaches=$this->render('list',['models'=>$model->attaches]);
-if ($attaches) $attaches.='<br />';
+
+if (!$static_view) $attaches.=Html::a('Загрузить','#',[
+	'onclick'=>$switchCode,
+	'id'=>'add-attaches-form-button',
+	'style'=>$active?'display:none':null,
+]);
 
 ?>
-<h4>Файлы:</h4>
-<p><?= $attaches ?>
-	<?php if (!$static_view) {
-		//моздаем кнопочку добавления к продукту и открываем модальную форму выбора продукта
-		echo $this->render('@app/views/attaches/_inline_form',[
-			'model'=>new Attaches(),
-			'link'=>$link,
-			'linkModel'=>$model,
-		]);
-		
-	} ?>
-</p>
 
+<h4>Файлы:</h4>
+<p class="<?= $cardClass ?>"><?= $attaches ?></p>
+
+<?php
+
+if (!$static_view) {
+	$attach= new Attaches();
+	?>
+
+	<div class="add-attaches-form text-center" id="add-attaches-form-form" <?= !$active?'style="display:none"':'' ?>>
+
+	    <?php $form = ActiveForm::begin(['action'=>[
+			'attaches/create',
+			'return'=>'previous',
+			'Attaches['.$link.']'=>$model->id
+		]]); ?>
+
+		<div class="input-group">
+			<?= $form->field($attach, 'uploadedFile')->fileInput(['class'=>'form-control'])->label(false) ?>
+			<div class="input-group-append">
+				<?= Html::submitButton('Загрузить', ['class' => 'btn btn-success']) ?>
+			</div>
+			<div class="input-group-append">
+				<?= Html::Button('Отмена', ['class' => 'btn btn-danger','onclick'=>$switchCode]) ?>
+			</div>
+		</div>
+
+	    <?php ActiveForm::end(); ?>
+
+	</div>
+
+<?php }
