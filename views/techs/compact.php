@@ -74,9 +74,7 @@ if (is_object($model->state)) {
 		<br />
 	<?php } ?>
 
-	<br />
-
-	<h4>Привязанные ОС:</h4>
+	<h4 class="mt-2">Привязанные ОС:</h4>
 	<div class="data-block tree-level-2">
 		<?php if (is_array($comps=$model->comps) && count ($comps)) {
 			foreach ($model->sortedComps as $comp) { ?>

@@ -101,7 +101,7 @@ if (!isset($static_view)) $static_view=false;
 	<?= $this->render('/aces/list',['models'=>$model->aces,'hintModel'=>$model]); ?>
 
 	<?php if (is_array($lastLogins=$model->lastThreeLogins) && count($lastLogins)) { ?>
-		<?= ModelFieldWidget::renderFieldTitle($model,'lastThreeLogins',null,'h4','Входы в комп') ?>
+		<?= ModelFieldWidget::renderFieldTitle($model,'lastThreeLogins') ?>
 		<p class="mb-3">
 		 <?php foreach ($lastLogins as $logon)
 			echo $this->render('/login-journal/item-comp',['model'=>$logon,'suffix'=>' <br />']); ?>

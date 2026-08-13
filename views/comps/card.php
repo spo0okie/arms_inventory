@@ -76,24 +76,25 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 	echo $rows?($rows.'<br />'):''; ?>
 	<?= ModelFieldWidget::renderFieldValue($model,'comment') ?>
 </div>
-<div class="d-flex flex-row flex-wrap mb-3">
+
+<div class="d-flex flex-row flex-wrap">
 	<?php if (is_object($model->platform)) {?>
 		<div class="pe-5">
-			<?= ModelFieldWidget::renderFieldTitle($model,'platform_id') ?>
-			<p>
-				<?= ModelFieldWidget::renderFieldValue($model,'platform_id',['item_options'=>['static_view'=>$static_view]]) ?>
-			</p>
+			<?= ModelFieldWidget::widget([
+			'model'=>$model,
+			'field'=>'platform_id',
+			['item_options'=>['static_view'=>$static_view]]
+		]) ?>
 		</div>
 	<?php } elseif (!$no_arm) { ?>
 		<div class="pe-5">
-			<?= ModelFieldWidget::renderFieldTitle($model,'arm_id') ?>
-			<p>
-				<?= ModelFieldWidget::renderFieldValue($model,'arm_id',[
-					'item_options'=>['static_view'=>$static_view],
-					'show_empty'=>true,
-					'message_on_empty'=>'не назначен',
-				]) ?>
-			</p>
+			<?= ModelFieldWidget::widget([
+				'model'=>$model,
+				'field'=>'arm_id',
+				'item_options'=>['static_view'=>$static_view],
+				'show_empty'=>true,
+				'message_on_empty'=>'не назначен',
+			]) ?>
 		</div>
 	<?php } ?>
 	<?= $this->render('ips_list',['model'=>$model,'static_view'=>$static_view,'glue'=>$ips_glue]) ?>
@@ -126,16 +127,14 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 <?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
 
-<div class="login_journal">
-	<h4 qtip_ttip="Журнал входов очень большой, поэтому здесь выводятся только три последние записи входа на эту ОС/ВМ, причём уникальные по пользователям (по одной последней записи на пользователя). Полный журнал — в разделе «Журнал входов».">Журнал входов</h4>
-	<?php
-	$logons=$model->lastThreeLogins;
-	//$logons=$model->logins;
-	if (is_array($logons) && count($logons)) {
-		$items=[];
-		foreach ($logons as $logon) {
-			echo $this->render('/login-journal/item-user',['model'=>$logon]).'<br />';
-		}
-	}?>
-</div>
+<?php if (is_array($lastLogins=$model->lastThreeLogins) && count($lastLogins)) { ?>
+	<div>
+		<?= ModelFieldWidget::renderFieldTitle($model,'lastThreeLogins') ?>
+		<p class="mb-3">
+		 <?php foreach ($lastLogins as $logon)
+			echo $this->render('/login-journal/item-user',['model'=>$logon,'suffix'=>' <br />']); ?>
+		</p>
+	</div>
+<?php }	?>
+
 <?php }

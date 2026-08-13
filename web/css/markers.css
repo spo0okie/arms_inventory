@@ -29,6 +29,7 @@ span.marked-item {
 
 /* текст и ссылки внутри маркера контрастны его фону, а не фону контекста;
    селекторы с div.nav-header пересиливают правила темной шапки (page-header.css) */
+.object-item.marked-item a,
 .marked-item a,
 .marked-item a:hover,
 div.nav-header .marked-item a,
