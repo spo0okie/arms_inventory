@@ -284,6 +284,62 @@ class IntegrationsSmsTest extends Unit
 		}
 	}
 
+	/**
+	 * Под useRBAC=true доступ даёт адресное право ЛИБО глобальный зонтик
+	 * view/edit — как у обычных операций ядра. Пользователю достаточно
+	 * глобального edit для действий и view для панелей; отдельно
+	 * integration-права раздавать не нужно.
+	 */
+	public function testGlobalUmbrellaGrantsUnderRbac()
+	{
+		$this->setupSms('data://text/plain,OK');
+		$provider = IntegrationsRegistry::provider('sms');
+
+		$origRbac = Yii::$app->params['useRBAC'] ?? false;
+		$origView = Yii::$app->params['authorizedView'] ?? false;
+		$origUser = Yii::$app->get('user');
+
+		//заглушка компонента user с управляемым набором прав
+		$stub = new class(['identityClass' => Users::class]) extends \yii\web\User {
+			public array $granted = [];
+			public function getIsGuest($checkSession = true) { return false; }
+			public function can($permissionName, $params = [], $allowCaching = true) {
+				return in_array($permissionName, $this->granted, true);
+			}
+		};
+
+		try {
+			//полный RBAC: и панель, и действие идут по праву (не по открытости)
+			Yii::$app->params['useRBAC'] = true;
+			Yii::$app->params['authorizedView'] = true;
+			Yii::$app->set('user', $stub);
+
+			//только глобальный edit — действия доступны, панели нет
+			$stub->granted = ['edit'];
+			$this->assertTrue(IntegrationsRegistry::userCanRun($provider, 'send'), 'глобальный edit -> действие');
+			$this->assertFalse(IntegrationsRegistry::userCanView($provider), 'edit не даёт панель');
+
+			//только глобальный view — панели доступны, действия нет
+			$stub->granted = ['view'];
+			$this->assertTrue(IntegrationsRegistry::userCanView($provider), 'глобальный view -> панель');
+			$this->assertFalse(IntegrationsRegistry::userCanRun($provider, 'send'), 'view не даёт действие');
+
+			//оба глобальных — и панель, и действие (сценарий с прода)
+			$stub->granted = ['view', 'edit'];
+			$this->assertTrue(IntegrationsRegistry::userCanView($provider));
+			$this->assertTrue(IntegrationsRegistry::userCanRun($provider, 'send'));
+
+			//адресное право по-прежнему работает без глобальных
+			$stub->granted = ['edit-integration-sms-send'];
+			$this->assertTrue(IntegrationsRegistry::userCanRun($provider, 'send'), 'адресное право');
+			$this->assertFalse(IntegrationsRegistry::userCanView($provider), 'адресное на действие не даёт панель');
+		} finally {
+			Yii::$app->set('user', $origUser);
+			Yii::$app->params['useRBAC'] = $origRbac;
+			Yii::$app->params['authorizedView'] = $origView;
+		}
+	}
+
 	/** Валидация формы: нормализация номера и ограничения длины */
 	public function testSendFormValidation()
 	{

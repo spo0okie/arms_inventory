@@ -94,6 +94,14 @@ class IntegrationsRegistry
 	 * те же правила, что и к обычным операциям (единый источник правды:
 	 * при useRBAC=false — открытость/аутентификация по authorizedView; при
 	 * useRBAC=true просмотр открыт всем, если authorizedView выключен).
+	 *
+	 * При useRBAC=true доступ даёт адресное право (view-integration-<id> /
+	 * edit-integration-<id>-<action>) ЛИБО глобальный «зонтик» view/edit —
+	 * ровно как в {@see ArmsBaseController::buildAccessRules()}, где на
+	 * каждое действие заводится и правило под глобальное право, и под
+	 * адресное. Поэтому пользователю с глобальным edit доступны все
+	 * действия интеграций, с view — все панели (отдельно раздавать
+	 * integration-права не требуется).
 	 */
 	protected static function checkAccess(string $permission): bool
 	{
@@ -107,7 +115,9 @@ class IntegrationsRegistry
 			case ArmsBaseController::PERM_ANONYMOUS:
 				return false;
 			default:
-				return Yii::$app->user->can($permission);
+				//адресное право ИЛИ глобальный зонтик (view / edit)
+				$umbrella = explode('-', $permission, 2)[0];
+				return Yii::$app->user->can($permission) || Yii::$app->user->can($umbrella);
 		}
 	}
 

@@ -176,9 +176,15 @@ URL/заголовке. Сложнее — полноценный класс. О
 
 - **Доступ**: следует ровно модели авторизации ядра
   (`params` useRBAC/authorizedView, docs/help/admin/setup.md) — панель =
-  «просмотр», действие = «изменение». Права `view-integration-<id>` и
-  `edit-integration-<id>-<action>` создаёт `yii rbac/init` обходом
-  реестра; префиксы view-/edit- заставляют
+  «просмотр», действие = «изменение». При `useRBAC=true` доступ даёт
+  адресное право (`view-integration-<id>` / `edit-integration-<id>-<action>`,
+  создаёт `yii rbac/init`) **ЛИБО глобальный зонтик** `view`/`edit` —
+  ровно как в `ArmsBaseController::buildAccessRules()`, где на каждое
+  действие заводятся правила и под глобальное, и под адресное право.
+  Поэтому пользователю с глобальным `edit` доступны все действия
+  интеграций, с `view` — все панели; адресные права нужны лишь для
+  тонкой раздачи (например, только SMS хелпдеску без глобального edit).
+  Префиксы view-/edit- заставляют
   `ArmsBaseController::customizeAccessPermission()` применить к ним те же
   правила, что и к обычным операциям (единый источник правды —
   `IntegrationsRegistry::checkAccess()`). Так в полностью открытом режиме
