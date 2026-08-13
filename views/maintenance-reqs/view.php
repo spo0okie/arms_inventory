@@ -1,11 +1,10 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
-use app\components\ShowArchivedWidget;
 use app\components\TabsWidget;
+use app\components\widgets\page\CornerWidget;
 use app\components\TextFieldWidget;
 use app\models\Comps;
 use app\models\MaintenanceJobs;
@@ -49,11 +48,7 @@ $this->params['headerContent']=
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'includedBy'])
 		.'</div>'
 		.'<div class="flex-fill flex-lg-shrink-0">'
-			.'<div class="float-end text-end">'
-				.'<small class="opacity-75 ">'.HistoryWidget::widget(['model'=>$model]).'</small>'
-				.'<br>'
-				.ShowArchivedWidget::widget()
-			.'</div>'
+			.CornerWidget::widget(['model'=>$model,'archivedOptions'=>['reload'=>true]])
 			.ModelFieldWidget::widget(['model'=>$model,'field'=>'links'])
 			.$this->render('/attaches/model-list',['model'=>$model,'static_view'=>false])
 		.'</div>'

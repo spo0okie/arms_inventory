@@ -3,11 +3,10 @@
 /* @var $this yii\web\View */
 /* @var $model app\models\Users */
 
-use app\components\HistoryWidget;
 use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;
-use app\components\ShowArchivedWidget;
 use app\models\Users;
+use app\components\widgets\page\CornerWidget;
 use app\components\widgets\page\ModelWidget;
 use yii\helpers\Url;
 
@@ -25,17 +24,12 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 
 ?>
 <div class="users-view">
-		<span class="float-end text-end">
-			<?= ShowArchivedWidget::widget(['reload'=>false]) ?>
-			<br/>
-			<small class="opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
-		</span>
 	<div class="row">
-		<div class="col-md-5 ps-0">
+		<div class="col-md-5">
 			<?= ModelWidget::widget(['model'=>$model, 'view'=>'card', 'static_view'=>false]) ?>
 			<?= \app\components\integrations\PanelsWidget::widget(['model'=>$model]) ?>
 		</div>
-		<div class="col-md-4 ps-0">
+		<div class="col-md-4">
 			<?php
 			//АРМ сотрудника (компьютеры из закреплённого оборудования); нет АРМ - нет и заголовка
 			$workplaceArms=[];
@@ -47,8 +41,8 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 			}
 			?>
 		</div>
-		<div class="col-md-3 p-0">
-			<br/>
+		<div class="col-md-3">
+			<?= CornerWidget::widget(['model'=>$model]) ?>
 			<?php
 
 			echo ModelFieldWidget::widget([
@@ -139,3 +133,4 @@ if (!isset($show_archived)) $show_archived=Yii::$app->request->get('showArchived
 		</div>
 	</div>
 </div>
+

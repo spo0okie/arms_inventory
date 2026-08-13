@@ -4,11 +4,9 @@ use app\components\AttributeTooltip;
 use app\components\ExpandableCardWidget;
 use app\components\IsArchivedObjectWidget;
 use app\components\IsHistoryObjectWidget;
-use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;
-use app\components\ShowArchivedWidget;
 use app\components\StripedAlertWidget;
 use app\components\TagsWidget;
 use app\components\TextFieldWidget;
@@ -18,6 +16,7 @@ use yii\helpers\Html;
 
 
 
+use app\components\widgets\page\CornerWidget;
 use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Services */
@@ -33,15 +32,12 @@ $contracts=$model->contracts;
 
 
 echo IsArchivedObjectWidget::widget(['model'=>$model]);
-if(!$static_view) { ?>
-<span class="float-end text-end">
-
+if(!$static_view) {
+	CornerWidget::begin(['model'=>$model,'archivedOptions'=>['reload'=>true]]) ?>
 	<span class="me-3"><?= TagsWidget::widget(['model'=>$model]) ?></span>
-	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
-	<br />
-	<?= ShowArchivedWidget::widget(['reload'=>true]) ?>
-</span>
-<?php } ?>
+<?php
+	CornerWidget::end();
+} ?>
 <?= IsHistoryObjectWidget::widget(['model'=>$model]) ?>
 
 

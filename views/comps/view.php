@@ -3,7 +3,6 @@
 /** @var yii\web\View $this */
 /** @var app\models\Comps $model */
 
-use app\components\HistoryWidget;
 use app\components\ModelFieldWidget;
 use app\components\ShowArchivedWidget;
 use app\helpers\FieldsHelper;
@@ -12,6 +11,7 @@ use app\models\HwListItem;
 use app\models\Manufacturers;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use app\components\widgets\page\CornerWidget;
 use app\components\widgets\page\ModelWidget;
 
 $domain = is_object($model->domain)?$model->domain->name:'- не в домене - ';
@@ -51,7 +51,6 @@ foreach ($model->swList->items as $item) {
 
 	$absorbTitle='Связать (поглотить) клона с этой ОС: недостающие свойства, привязки '
 		.'(связанные объекты) и журнал входов клона перейдут к этой ОС. Сам клон будет удалён';
-	$archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 
 	//qtip-подсказки категорий согласования софта (см. docs/help/models/comps/raw_soft.md
 	//и docs/help/guides/arm-passport.md)
@@ -113,11 +112,7 @@ foreach ($model->swList->items as $item) {
 
 	</div>
 	<div class="col-md-6">
-		<div class="text-end">
-			<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
-			<br />
-			<?= $archWidget ?>
-		</div>
+		<?= CornerWidget::widget(['model'=>$model]) ?>
 		<div class="software_settings">
 			<?= ModelFieldWidget::renderCompositeTitle($model,['raw_soft','soft_ids'],'Софт','h3') ?>
 			<?php

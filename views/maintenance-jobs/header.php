@@ -1,11 +1,10 @@
 <?php
 
-use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
 use app\components\ModelFieldWidget;
-use app\components\ShowArchivedWidget;
 use app\components\StripedAlertWidget;
 use app\components\TextFieldWidget;
+use app\components\widgets\page\CornerWidget;
 use app\components\widgets\page\ModelWidget;
 use yii\helpers\Html;
 use kartik\markdown\Markdown;
@@ -15,10 +14,6 @@ use kartik\markdown\Markdown;
 ?>
 
 <div class="d-flex flex-wrap flex-row-reverse">
-	<div class="ms-5 d-flex">
-		<div class="text-end opacity-75 small"><?= HistoryWidget::widget(['model'=>$model]) ?></div>
-		<div class="text-end ms-5"><?= ShowArchivedWidget::widget() ?></div>
-	</div>
 	<div class="d-flex flex-fill flex-row flex-nowrap">
 		<div class="me-5">
 			<h1>
@@ -52,7 +47,8 @@ use kartik\markdown\Markdown;
 			</div>
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'reqsRecursive']) ?>
 		</div>
-		<div>
+		<div class="flex-fill">
+			<?= CornerWidget::widget(['model'=>$model,'archivedOptions'=>['reload'=>true]]) ?>
 			<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'links']) ?>
 			<?= $this->render('/attaches/model-list',['model'=>$model,'static_view'=>false]) ?>
 		</div>

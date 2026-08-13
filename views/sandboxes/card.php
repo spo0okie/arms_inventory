@@ -1,10 +1,10 @@
 <?php
 
-use app\components\HistoryWidget;
 use app\components\IsArchivedObjectWidget;
 use app\components\ModelFieldWidget;
 use app\components\LinkObjectWidget;
 use app\components\TextFieldWidget;
+use app\components\widgets\page\CornerWidget;
 
 
 /* @var $this yii\web\View */
@@ -18,7 +18,7 @@ if (!isset($static_view)) $static_view=false;
 <?= IsArchivedObjectWidget::widget(['model'=>$model]) ?>
 
 <?php if(!$static_view) { ?>
-	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
+	<?= CornerWidget::widget(['model'=>$model,'archived'=>false]) ?>
 <?php } ?>
 
 <h1>

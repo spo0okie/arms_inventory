@@ -1,8 +1,7 @@
 <?php
 
-use app\components\HistoryWidget;
-use app\components\ShowArchivedWidget;
 use app\components\TabsWidget;
+use app\components\widgets\page\CornerWidget;
 use app\components\widgets\page\ModelWidget;
 use app\models\Segments;
 use kartik\markdown\Markdown;
@@ -27,23 +26,13 @@ $segmentLines=count(explode("\n",trim($model->history??'')));
 $segmentCompact=$segmentLines<=Yii::$app->params['networkInlineDescriptionLimit'];
 
 
-if ($model->history && $segmentCompact) {
-	$this->params['headerContent'] = '<div class="mx-4 pb-2">'
-		. '<span class="float-end text-end">'
-			.'<small class="opacity-75">'.HistoryWidget::widget(['model'=>$model]).'</small><br>'
-			.ShowArchivedWidget::widget()
-		.'</span>'
-		.ModelWidget::widget(['model' => $model,'view'=>'card'])
-		.'</div>';
-} else {
-	$this->params['headerContent'] = '<div class="mx-4 pb-2">'
-		. '<span class="float-end text-end">'
-			.'<small class="opacity-75">'.HistoryWidget::widget(['model'=>$model]).'</small><br>'
-			.ShowArchivedWidget::widget()
-		.'</span>'
-		.ModelWidget::widget(['model' => $model,'view'=>'header-compact'])
-		.'</div>';
-}
+$this->params['headerContent'] = '<div class="mx-4 pb-2">'
+	.CornerWidget::widget(['model'=>$model,'archivedOptions'=>['reload'=>true]])
+	.ModelWidget::widget([
+		'model' => $model,
+		'view'=>($model->history && $segmentCompact)?'card':'header-compact'
+	])
+	.'</div>';
 
 
 

@@ -1,8 +1,8 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\HistoryWidget;
 use app\components\TabsWidget;
+use app\components\widgets\page\CornerWidget;
 use app\components\TextFieldWidget;
 use kartik\markdown\Markdown;
 use yii\helpers\Url;
@@ -59,9 +59,7 @@ $this->params['headerContent'] =
 			$this->params['headerContent']
 			.= '</div>'
 		.'<div class="pe-0 text-nowrap">'
-				.'<span class="float-end text-end">'
-				.'<small class="opacity-75">'.HistoryWidget::widget(['model'=>$model]).'</small><br>'
-				.'</span>'
+			.CornerWidget::widget(['model'=>$model,'archived'=>false])
 			.$this->render('calc',['model'=>$model])
 		.'</div>'
 	.'</div>';

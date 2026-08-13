@@ -1,8 +1,8 @@
 <?php
 
 use app\components\DynaGridWidget;
-use app\components\HistoryWidget;
 use app\components\LinkObjectWidget;
+use app\components\widgets\page\CornerWidget;
 use app\models\TechsSearch;
 use app\models\TechTypes;
 use yii\data\ActiveDataProvider;
@@ -25,15 +25,12 @@ $this->params['breadcrumbs'][] = $this->title;
 $static_view=false;
 ?>
 <div class="tech-models-view">
-<div class="float-end text-end">
-	<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
+<?php CornerWidget::begin(['model'=>$model,'archived'=>false]) ?>
 	<h1><?= Html::a('<i class="fas fa-images"></i>',['uploads','id'=>$model->id],[
-		'class'=>'float-end',
 		'qtip_ttip'=>'Редактировать изображения/фото этой модели оборудования',
 		'qtip_side'=>'top'
 	]) ?></h1>
-
-</div>
+<?php CornerWidget::end() ?>
     <h1>
 		<?= LinkObjectWidget::widget([
 			'model'=>$model->type,

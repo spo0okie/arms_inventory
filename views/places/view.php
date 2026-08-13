@@ -1,7 +1,7 @@
 <?php
 
 use app\components\LinkObjectWidget;
-use app\components\ShowArchivedWidget;
+use app\components\widgets\page\CornerWidget;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -18,16 +18,14 @@ include 'breadcrumbs.php';
 ?>
 <div class="places-view">
 	<div class="d-flex flex-row-reverse flex-wrap">
-		<div class="float-end text-end">
+		<?php CornerWidget::begin(['model'=>$model]) ?>
 			<h1>
 				<?= Html::a('<i class="fas fa-images"></i>',['uploads','id'=>$model->id],[
-					'class'=>'float-end',
 					'qtip_ttip'=>'Редактировать изображения/фото этого помещения',
 					'qtip_side'=>'top'
 				])?>
 			</h1>
-			<span class="float-end p-2"><?= ShowArchivedWidget::widget(['reload' => false]) ?></span>
-		</div>
+		<?php CornerWidget::end() ?>
 		<div class="flex-fill flex-row flex-wrap d-flex justify-content-end">
 			<?php if (is_array($scans=$model->scans)&&count($scans))
 				foreach ($scans as $scan)

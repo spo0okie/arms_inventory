@@ -1,0 +1,5 @@
+.page-corner-widget {position:absolute; top:0; right:0;}
+
+/* режим "не влезли": блок становится обычной строкой в месте своего положения в DOM;
+   flex-basis - на случай flex-родителя, чтобы блок занял собственный ряд */
+.page-corner-widget.own-row {position:static; display:block; flex-basis:100%;}

@@ -1,12 +1,11 @@
 <?php
 
-use app\components\HistoryWidget;
 use app\components\IsArchivedObjectWidget;
-use app\components\ShowArchivedWidget;
 use app\models\Ports;
 use app\models\Techs;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use app\components\widgets\page\CornerWidget;
 use app\components\widgets\page\ModelWidget;
 
 /* @var $this yii\web\View */
@@ -16,7 +15,6 @@ Url::remember();
 
 $this->title = $model->num;
 //крошки собираются автоматически в layout (views/layouts/main.php)
-$archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 
 ?>
 <div class="techs-view">
@@ -27,10 +25,7 @@ $archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 			<?= \app\components\integrations\PanelsWidget::widget(['model'=>$model]) ?>
 		</div>
 		<div class="col-md-6">
-			<div class="float-end text-end">
-				<div class="text-end">
-					<small class="float-end opacity-75"><?= HistoryWidget::widget(['model'=>$model]) ?></small>
-				</div>
+			<?php CornerWidget::begin(['model'=>$model]) ?>
 				<h1 class="text-end">
 					<?php if ($model->isComputer) foreach (Yii::$app->params['arms.docs'] as $doc=>$params) if (is_array($params)) {
 						echo Html::a($params['icon']??'<i class="fas fa-file"></i>',['docs','id'=>$model->id,'doc'=>$doc],[
@@ -50,12 +45,8 @@ $archWidget=ShowArchivedWidget::widget(['reload'=>false]);
 						'qtip_ttip'=>'Редактировать изображения/фото этого оборудования',
 						'qtip_side'=>'top'
 					]) ?>
-					
 				</h1>
-				<div class="text-end">
-					<?= $archWidget ?>
-				</div>
-			</div>
+			<?php CornerWidget::end() ?>
 			<div>
 				<?php if (is_array($scans=$model->scans)&&count($scans)) foreach ($scans as $scan)
 					echo ModelWidget::widget(['model'=>$scan, 'view'=>'thumb', 'options'=>['static_view'=>true]]);
