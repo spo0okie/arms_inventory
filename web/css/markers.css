@@ -40,7 +40,7 @@ div.nav-header .marked-item a:hover {
    рамка и цвет текста не применяются */
 span.unit-status.marked-item {
 	background: linear-gradient(45deg, transparent, transparent 15px, var(--marker-bg) 15px);
-	color: inherit;
+	color: var(--marker-fg);
 	border: none;
 	border-radius: 0;
 }

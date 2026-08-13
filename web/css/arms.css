@@ -43,7 +43,7 @@ div.arms-card span.net-ips-item a:hover {color: yellow}
 
 /* ярлычок статуса */
 div.arms-card span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0 12pt 0 0;}
-span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0; color: white}
+span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0}
 
 div.arms-card span.it-staff {
     width: 100%;
