@@ -79,7 +79,7 @@ if ($web && $subId !== null) {
 }
 
 ?>
-<div class="d-flex justify-content-between align-items-center">
+<div class="d-flex align-items-center">
 	<span>
 		<span class="badge <?= $badge[0] ?>"><?= $badge[1] ?></span>
 		<span class="ms-1">
@@ -90,7 +90,7 @@ if ($web && $subId !== null) {
 		</span>
 	</span>
 	<?php if ($webUrl) { ?>
-		<small><?= Html::a('в телефонии <i class="fas fa-external-link-alt"></i>', $webUrl,
+		<small class="ms-2"><?= Html::a('<i class="fas fa-external-link-alt"></i>', $webUrl,
 			['target' => '_blank', 'rel' => 'noopener']) ?></small>
 	<?php } ?>
 </div>
