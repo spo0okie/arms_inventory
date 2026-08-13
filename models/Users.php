@@ -96,10 +96,10 @@ class Users extends ArmsModel implements IdentityInterface
 			.'лицензиям, IP адресам и доступам. '
 			.'Обычно заполняются синхронизацией с кадровой системой.';
 	}
-	
+
 	private $absorbing=false; //идёт поглощение дубля (защита от рекурсии afterSave->absorbUser->save->afterSave)
-	
-	
+
+
 	/** Тип трудоустройства
 	 * 1 - В штате,
 	 * 2 - Совместители внутрен,
@@ -127,14 +127,14 @@ class Users extends ArmsModel implements IdentityInterface
     {
         return 'users';
     }
-	
+
 	public function fields()
 	{
 		$fields = parent::fields();
-		
+
 		// remove fields that contain sensitive information
 		unset($fields['auth_key'], $fields['password'], $fields['access_token']);
-		
+
 		return $fields;
 	}
 
@@ -156,7 +156,7 @@ class Users extends ArmsModel implements IdentityInterface
 			'effectivePhone',
 		]);
 	}
-	
+
 	public $linksSchema=[
 		'org_id'=>									[Partners::class,'users_ids'],
 		'manager_id'=>								Users::class,
@@ -179,8 +179,8 @@ class Users extends ArmsModel implements IdentityInterface
 		'materials_ids' =>							[Materials::class,'it_staff_id'],
 		'logons_ids' =>								[LoginJournal::class,'users_id'],
 	];
- 
-	
+
+
 
 	/**
      * @inheritdoc
@@ -233,6 +233,12 @@ class Users extends ArmsModel implements IdentityInterface
 			'num' => ['alias'=>'employee_id'],
 			'login' => ['alias'=>'Login'],
 			'uvolen' => ['alias'=>'Uvolen'],
+			'adminComps' => [
+				'Полномочия администратора',
+				'hint'=>'ОС/ВМ, на которых этому сотруднику (рядовому пользователю) '
+					.'выданы полномочия администратора',
+				'ref'=>\app\models\Comps::class, 'refMulti'=>true,
+			],
 			'arms' => [
 				'АРМ',
 				'indexHint'=>'Закреплённые за сотрудником АРМ:<br>'
@@ -318,12 +324,6 @@ class Users extends ArmsModel implements IdentityInterface
 				'hint'=>'ОС/ВМ в ответственности сотрудника: где он явно указан пользователем ОС, '
 					.'а поскольку сотрудник отвечает за сервисы — также ОС этих сервисов, '
 					.'по которым он определяется ответственным',
-				'ref'=>\app\models\Comps::class, 'refMulti'=>true,
-			],
-			'adminComps' => [
-				'Полномочия администратора',
-				'hint'=>'ОС/ВМ, на которых этому сотруднику (рядовому пользователю) '
-					.'выданы полномочия администратора',
 				'ref'=>\app\models\Comps::class, 'refMulti'=>true,
 			],
 			'services' => [
@@ -472,8 +472,8 @@ class Users extends ArmsModel implements IdentityInterface
 			'password'=>['absorb'=>'ifEmpty','typeClass'=>\app\types\StringType::class],
 		]);
 	}
-	
-	
+
+
 	/**
 	 * Возвращает привязанные элементы доступа
 	 * @return ActiveQuery
@@ -484,20 +484,20 @@ class Users extends ArmsModel implements IdentityInterface
 		return $this->hasMany(Aces::class, ['id' => 'aces_id'])->from(['users_aces'=>Aces::tableName()])
 			->viaTable('{{%users_in_aces}}', ['users_id' => 'id']);
 	}
-	
+
 	public function getAcls()
 	{
 		return $this->hasMany(Acls::class, ['id'=>'acls_id'])->from(['users_acls'=>Acls::tableName()])
 			->via('aces');
 	}
-	
+
 	public function getScheduledAccess()
 	{
 		return $this->hasMany(Schedules::class, ['id'=>'schedules_id'])->from(['users_scheduled_access'=>Schedules::tableName()])
 			->via('acls');
 	}
-	
-	
+
+
 	/**
      * @return ActiveQuery
      */
@@ -513,9 +513,9 @@ class Users extends ArmsModel implements IdentityInterface
     {
         return $this->hasMany(Techs::class, ['head_id' => 'id']);
     }
-	
-	
-	
+
+
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -523,8 +523,8 @@ class Users extends ArmsModel implements IdentityInterface
 	{
 		return $this->hasMany(Techs::class, ['user_id' => 'id']);
 	}
-	
-	
+
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -532,7 +532,7 @@ class Users extends ArmsModel implements IdentityInterface
 	{
 		return $this->hasMany(Techs::class, ['it_staff_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает закрепленное на компе ПО
 	 */
@@ -541,7 +541,7 @@ class Users extends ArmsModel implements IdentityInterface
 		return $this->hasMany(Contracts::class, ['id' => 'contracts_id'])
 			->viaTable('{{%users_in_contracts}}', ['users_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает закрепленное на компе ПО
 	 */
@@ -550,7 +550,7 @@ class Users extends ArmsModel implements IdentityInterface
 		return $this->hasMany(LicGroups::class, ['id' => 'lic_groups_id'])
 			->viaTable('{{%lic_groups_in_users}}', ['users_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает закрепленное на компе ПО
 	 */
@@ -559,7 +559,7 @@ class Users extends ArmsModel implements IdentityInterface
 		return $this->hasMany(LicItems::class, ['id' => 'lic_items_id'])
 			->viaTable('{{%lic_items_in_users}}', ['users_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает закрепленное на компе ПО
 	 */
@@ -568,11 +568,11 @@ class Users extends ArmsModel implements IdentityInterface
 		return $this->hasMany(LicKeys::class, ['id' => 'lic_keys_id'])
 			->viaTable('{{%lic_keys_in_users}}', ['users_id' => 'id']);
 	}
-	
+
 	public function getLics() {
 		return array_merge($this->licGroups,$this->licItems,$this->licKeys);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -588,7 +588,7 @@ class Users extends ArmsModel implements IdentityInterface
 	{
 		return $this->hasOne(OrgStruct::class, ['hr_id'=>'Orgeh','org_id'=>'org_id']);
 	}
-	
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -640,7 +640,7 @@ class Users extends ArmsModel implements IdentityInterface
 		return $this->hasOne(Users::class, ['id'=>'manager_id'])
 			->from(['managers'=>Users::tableName()]);
 	}
-	
+
 	/**
 	 * Возвращает IP адреса
 	 */
@@ -649,8 +649,8 @@ class Users extends ArmsModel implements IdentityInterface
 		return $this->hasMany(NetIps::class, ['id' => 'ips_id'])->from(['users_ip'=>NetIps::tableName()])
 			->viaTable('{{%ips_in_users}}', ['users_id' => 'id']);
 	}
-	
-	
+
+
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
 	 * @return ActiveQuery
@@ -659,7 +659,7 @@ class Users extends ArmsModel implements IdentityInterface
 	{
 		return $this->hasMany(Services::class, ['responsible_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
 	 * @return ActiveQuery
@@ -671,7 +671,7 @@ class Users extends ArmsModel implements IdentityInterface
 			->from(['support_services'=>Services::tableName()])
 			->viaTable('{{%users_in_services}}', ['user_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
 	 * @return ActiveQuery
@@ -681,7 +681,7 @@ class Users extends ArmsModel implements IdentityInterface
 		return $this->hasMany(Services::class, ['infrastructure_user_id'=>'id'])
 			->from(['infrastructure_services'=>Services::tableName()]);
 	}
-	
+
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
 	 * @return ActiveQuery
@@ -693,7 +693,7 @@ class Users extends ArmsModel implements IdentityInterface
 			->from(['support_infrastructure_services'=>Services::tableName()])
 			->viaTable('{{%users_in_svc_infrastructure}}', ['users_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает компы, за которые отвечает пользователь (явно через прямое назначение)
 	 * @return Comps[]
@@ -707,7 +707,7 @@ class Users extends ArmsModel implements IdentityInterface
 					$result[$comp->id]=$comp;
 		return $result;
 	}
-	
+
 	public function getCompsTotal() {
 		$result=[];
 		foreach ($this->comps as $comp)
@@ -716,7 +716,7 @@ class Users extends ArmsModel implements IdentityInterface
 			$result[$comp->id]=$comp;
 		return $result;
 	}
-	
+
 	public function getCompsFromTechs()
 	{
 		$result=[];
@@ -725,8 +725,8 @@ class Users extends ArmsModel implements IdentityInterface
 				$result[$comp->id]=$comp;
 		return $result;
 	}
-	
-	
+
+
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
 	 * @return ActiveQuery
@@ -735,7 +735,7 @@ class Users extends ArmsModel implements IdentityInterface
 	{
 		return $this->hasMany(Comps::class, ['user_id' => 'id']);
 	}
-	
+
 	/**
 	 * Возвращает сервисы, за которые отвечает пользователь
 	 * @return ActiveQuery
@@ -745,14 +745,14 @@ class Users extends ArmsModel implements IdentityInterface
 		return $this->hasMany(Comps::class, ['id' => 'comps_id'])
 			->viaTable('{{%admins_in_comps}}', ['users_id' => 'id']);
 	}
-	
+
 	/**
      * @inheritdoc
      */
     public static function findIdentity($id)
     {
 	    return static::findOne(['id' => $id]);
-	
+
 	    //return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
     }
 
@@ -769,7 +769,7 @@ class Users extends ArmsModel implements IdentityInterface
 
         return null;
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -797,7 +797,7 @@ class Users extends ArmsModel implements IdentityInterface
     {
         return $authKey===$this->authKey;
     }
-	
+
 	public function setPassword(?string $password): void
 	{
 		$this->password = $password ? password_hash($password, PASSWORD_BCRYPT) : null;
@@ -868,7 +868,7 @@ class Users extends ArmsModel implements IdentityInterface
 
         return ArrayHelper::map($query->all(), $keyField, $valueField);
     }
-	
+
 	/**
 	 * Возвращает список не уволенных сотрудников
 	 * @param null $current если передан, то возвращает еще этого, независимо от состояния уволен или нет
@@ -889,7 +889,7 @@ class Users extends ArmsModel implements IdentityInterface
     	if (!is_null(static::$names_cache)) return static::$names_cache;
 	    return static::$names_cache=static::listItems();
     }
-	
+
 	/**
 	 * Finds user by login
 	 * @param $login
@@ -902,7 +902,7 @@ class Users extends ArmsModel implements IdentityInterface
 			->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])
 			->one();
 	}
-	
+
 	/**
 	 * Finds user by Name
 	 * @param string $name
@@ -914,7 +914,7 @@ class Users extends ArmsModel implements IdentityInterface
 			->orderBy(['Uvolen'=>'ASC','id'=>'DESC'])
 			->one();
 	}
-	
+
 	/**
 	 * Универсальная процедура поиска объекта по имени
 	 * @param string $name
@@ -932,11 +932,11 @@ class Users extends ArmsModel implements IdentityInterface
 			->andWhere(['!=','comps_id','NULL'])
 			->orderBy('id desc')->one();
 	}
-	
+
 	public function getLogons() {
 		return $this->hasMany(LoginJournal::class,['users_id'=>'id']);
 	}
-	
+
 	public function getLastThreeLogins() {
 		return LoginJournal::fetchUniqComps($this->id);
 	}
@@ -948,7 +948,7 @@ class Users extends ArmsModel implements IdentityInterface
 			->one();
 
 	}
-	
+
 	/**
 	 * @return bool
 	 */
@@ -966,7 +966,7 @@ class Users extends ArmsModel implements IdentityInterface
 			Yii::$app->user->can('view')
 		);
 	}
-	
+
 	/**
 	 * @param $user Users
 	 * @throws Exception
@@ -996,7 +996,7 @@ class Users extends ArmsModel implements IdentityInterface
 			$this->absorbing=false;
 		}
 	}
-	
+
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
@@ -1006,11 +1006,11 @@ class Users extends ArmsModel implements IdentityInterface
 		}
 		return false;
 	}
-	
+
 	public function afterSave($insert, $changedAttributes)
 	{
 		parent::afterSave($insert, $changedAttributes);
-		
+
 		//если этот уволен то ничего не проверяем
 		if ($this->Uvolen) return;
 
@@ -1045,16 +1045,16 @@ class Users extends ArmsModel implements IdentityInterface
 			->andWhere($uidFilter)
 			->andWhere(['not',['id'=>$this->id]])
 			->all();
-		
+
 		if (is_array($exist) && count($exist)) foreach ($exist as $user) {
 			/** @var $user Users */
 			//если найденный пользователь уволен, а этот нет
 			$this->absorbUser($user);
 		}
 	}
-	
+
 	public function getIsArchived() {
 		return $this->Uvolen;
 	}
-	
+
 }
