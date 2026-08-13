@@ -103,14 +103,36 @@ class SmsProvider extends IntegrationProvider
 		$logParams = ['phone' => $form->phone];
 
 		if (is_null($response) || $response === '') {
-			return ActionResult::error('SMS-шлюз недоступен', $logParams);
+			return ActionResult::error('SMS-шлюз недоступен (пустой ответ)', $logParams);
 		}
-		return ActionResult::success($response, $logParams);
+
+		//шлюз отвечает 200 и на отказ (NO_MESSAGE_GIVEN, EXECUTION_ERROR,
+		//BINARY_NOT_FOUND...), поэтому непустой ответ != успех: разбираем текст
+		$answer = trim($response);
+		if (!$this->isSuccessResponse($answer)) {
+			return ActionResult::error('SMS не отправлено, ответ шлюза: '.$answer, $logParams);
+		}
+		return ActionResult::success('ответ шлюза: '.$answer, $logParams);
 	}
 
 	public function renderActionForm(string $actionId, Model $form, $activeForm): string
 	{
 		return $this->renderView('send-form', ['form' => $form, 'activeForm' => $activeForm]);
+	}
+
+	/**
+	 * Успешен ли ответ шлюза. По умолчанию ответ считается успешным, если
+	 * НЕ содержит типовых маркеров отказа (ERROR, FAIL, NOT_FOUND,
+	 * NO_MESSAGE_GIVEN, NO_SEND_ADDR_GIVEN, DENIED). Шлюз с другим
+	 * форматом ответа задаётся конфигом:
+	 *   'successPattern' => '/^OK\b/i'   //regexp: совпал => успех
+	 */
+	public function isSuccessResponse(string $answer): bool
+	{
+		if (!empty($this->config['successPattern'])) {
+			return (bool)preg_match($this->config['successPattern'], $answer);
+		}
+		return !preg_match('/(error|fail|not_found|no_message|no_send_addr|denied|invalid)/i', $answer);
 	}
 
 	/** URL запроса к шлюзу из шаблона конфига */

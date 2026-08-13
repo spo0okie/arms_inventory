@@ -102,10 +102,17 @@ class AdProvidersTest extends Unit
 			}
 
 			protected function ldapResetPassword(string $targetLogin, string $password,
-				bool $unlock, array $credentials): void
+				bool $unlock, array $credentials): array
 			{
 				if ($this->ldapFails) throw new \RuntimeException('нет прав на сброс');
 				$this->resetCalls[] = compact('targetLogin', 'password', 'unlock', 'credentials');
+				//как настоящий LdapService: подтверждение смены отметки пароля
+				return [
+					'dn' => 'CN=Test,DC=corp,DC=local',
+					'pwd_last_set_before' => 1700000000,
+					'pwd_last_set_after' => 1800000000,
+					'unlocked' => $unlock,
+				];
 			}
 		};
 		$provider->id = 'ad-reset';

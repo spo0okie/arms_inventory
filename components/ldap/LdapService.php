@@ -73,8 +73,10 @@ class LdapService extends Component
 
 		/** @var AdUser|null $user */
 		$user = AdUser::on(static::CONN_SERVICE)
-			//вычисляемый атрибут срока пароля по умолчанию не отдаётся
-			->select(['*', 'msds-userpasswordexpirytimecomputed'])
+			//вычисляемые атрибуты по умолчанию не отдаются, запрашиваем явно:
+			//срок пароля и computed-UAC (в нём достоверные биты блокировки и
+			//просроченности пароля)
+			->select(['*', 'msds-userpasswordexpirytimecomputed', 'msds-user-account-control-computed'])
 			->where('samaccountname', '=', $login)
 			->first();
 		if (!is_object($user)) return null;
@@ -88,10 +90,19 @@ class LdapService extends Component
 		$uac = (int)$first('useraccountcontrol');
 		$pwdLastSet = $first('pwdlastset');
 
+		//msDS-User-Account-Control-Computed: AD вычисляет его на лету, там
+		//ДОСТОВЕРНЫЕ признаки блокировки и просроченного пароля. Сырой
+		//lockoutTime для этого не годится: после истечения окна блокировки
+		//AD не обнуляет его, и учётка выглядела бы вечно заблокированной.
+		$computed = (int)$first('msds-user-account-control-computed');
+		$lockedBit = 0x10;         //UF_LOCKOUT
+		$pwdExpiredBit = 0x800000; //UF_PASSWORD_EXPIRED
+
 		return [
 			'dn' => $user->getDn(),
 			'enabled' => !($uac & 0x2), //ACCOUNTDISABLE
-			'locked' => (int)$first('lockouttime') > 0,
+			'locked' => (bool)($computed & $lockedBit),
+			'password_expired' => (bool)($computed & $pwdExpiredBit),
 			'password_last_set' => $this->winTimeToUnix($pwdLastSet),
 			'password_expires' => $this->winTimeOrNever($first('msds-userpasswordexpirytimecomputed')),
 			'must_change_password' => (string)$pwdLastSet === '0',
@@ -154,14 +165,18 @@ class LdapService extends Component
 	 * @throws \Throwable
 	 */
 	public function resetPassword(string $targetLogin, string $newPassword, bool $unlock,
-		string $execLogin, string $execPassword): void
+		string $execLogin, string $execPassword): array
 	{
-		$this->withExecutor($execLogin, $execPassword, function (string $name) use ($targetLogin, $newPassword, $unlock) {
+		return $this->withExecutor($execLogin, $execPassword, function (string $name) use ($targetLogin, $newPassword, $unlock) {
 			/** @var AdUser|null $user */
 			$user = AdUser::on($name)->where('samaccountname', '=', $targetLogin)->first();
 			if (!is_object($user)) {
 				throw new \RuntimeException("Учётка $targetLogin не найдена в AD");
 			}
+
+			$dn = $user->getDn();
+			//отметка смены пароля ДО операции — по ней подтвердим факт смены
+			$before = $user->getAttributes()['pwdlastset'][0] ?? null;
 
 			//LdapRecord кодирует пароль в unicodePwd (HasPassword,
 			//passwordAttribute='unicodepwd'); строка = сброс админом.
@@ -171,6 +186,27 @@ class LdapService extends Component
 			//пишем сырым значением в обход windows-int-каста
 			if ($unlock) $user->setRawAttribute('lockouttime', '0');
 			$user->save();
+
+			//ПОДТВЕРЖДЕНИЕ: перечитываем учётку и убеждаемся, что отметка
+			//смены пароля обновилась. Без этого «успех» ничем не обеспечен —
+			//AD мог принять запрос, но не изменить пароль.
+			/** @var AdUser|null $fresh */
+			$fresh = AdUser::on($name)->where('samaccountname', '=', $targetLogin)->first();
+			$after = is_object($fresh) ? ($fresh->getAttributes()['pwdlastset'][0] ?? null) : null;
+
+			if ((string)$after === (string)$before) {
+				throw new \RuntimeException(
+					'AD принял запрос, но отметка смены пароля (pwdLastSet) не изменилась — '
+					.'пароль НЕ сброшен (проверьте права исполнителя и политику паролей)'
+				);
+			}
+
+			return [
+				'dn' => $dn,
+				'pwd_last_set_before' => $this->winTimeToUnix($before),
+				'pwd_last_set_after' => $this->winTimeToUnix($after),
+				'unlocked' => $unlock,
+			];
 		});
 	}
 

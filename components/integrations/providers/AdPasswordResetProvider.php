@@ -165,22 +165,76 @@ class AdPasswordResetProvider extends IntegrationProvider
 
 		//шаг 2: запись пароля в AD от имени исполнителя (+ опц. разблокировка)
 		try {
-			$this->ldapResetPassword($targetLogin, $password, $unlock, $credentials);
+			$adInfo = $this->ldapResetPassword($targetLogin, $password, $unlock, $credentials);
 		} catch (\Throwable $e) {
 			Yii::warning("AD password reset for $targetLogin failed: ".$e->getMessage(), __METHOD__);
-			return ActionResult::error(
+			$result = ActionResult::error(
 				'SMS отправлено, но пароль в AD НЕ изменён: '.$e->getMessage()
 				.'. Повторите сброс - пользователю придет новое SMS.',
 				$logParams
 			);
+			$result->html = $this->renderReport($model, $phone, $targetLogin, $credentials['login'],
+				$sms, null, $e->getMessage(), $unlock);
+			return $result;
 		}
 
-		return ActionResult::success(
+		$result = ActionResult::success(
 			"Пароль сброшен и отправлен по SMS на $phone"
 			.($unlock ? ', учётка разблокирована' : '')
 			.'. Пароль знает только пользователь.',
 			$logParams
 		);
+		$result->html = $this->renderReport($model, $phone, $targetLogin, $credentials['login'],
+			$sms, $adInfo, null, $unlock);
+		return $result;
+	}
+
+	/**
+	 * Развёрнутый отчёт о выполнении для модалки: что сделано на каждом
+	 * шаге, что ответил SMS-шлюз и чем подтверждена смена пароля в AD.
+	 * Пароль в отчёт не попадает.
+	 *
+	 * @param ActionResult $sms итог шага отправки SMS
+	 * @param array|null $adInfo итог записи в AD (null = шаг не выполнен)
+	 * @param string|null $adError текст ошибки AD (если шаг провалился)
+	 */
+	protected function renderReport(?ArmsModel $model, string $phone, string $targetLogin,
+		string $execLogin, ActionResult $sms, ?array $adInfo, ?string $adError, bool $unlock): string
+	{
+		$e = static fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+		$time = static fn($ts) => $ts ? Yii::$app->formatter->asDatetime($ts, 'php:d.m.Y H:i:s') : '—';
+		$ok = static fn(bool $good) => $good
+			? '<span class="badge bg-success">выполнено</span>'
+			: '<span class="badge bg-danger">не выполнено</span>';
+
+		$rows = [];
+		$rows[] = ['Учётная запись', $e($targetLogin).($adInfo['dn'] ?? null ? ' <small class="text-secondary">'.$e($adInfo['dn']).'</small>' : '')];
+		$rows[] = ['Исполнитель в AD', $e($execLogin)];
+		$rows[] = ['Проверка прав', $ok(true).' <small class="text-secondary">креды верны, право на сброс есть</small>'];
+		$rows[] = ['Отправка SMS', $ok($sms->ok).' на '.$e($phone)
+			.'<br><small class="text-secondary">'.$e($sms->message).'</small>'];
+
+		if ($adInfo) {
+			$rows[] = ['Смена пароля в AD', $ok(true)
+				.'<br><small class="text-secondary">отметка смены пароля (pwdLastSet): '
+				.$e($time($adInfo['pwd_last_set_before'])).' → <b>'.$e($time($adInfo['pwd_last_set_after'])).'</b></small>'];
+			if ($unlock) $rows[] = ['Разблокировка', $ok(true)];
+		} else {
+			$rows[] = ['Смена пароля в AD', $ok(false)
+				.'<br><small class="text-danger">'.$e($adError).'</small>'];
+		}
+
+		$html = '<table class="table table-sm w-auto">';
+		foreach ($rows as [$label, $value]) {
+			$html .= '<tr><td class="text-secondary pe-3 align-top">'.$label.'</td><td>'.$value.'</td></tr>';
+		}
+		$html .= '</table>';
+
+		$html .= '<p class="text-secondary mb-0"><small>Пароль отправлен только пользователю по SMS '
+			.'и нигде не сохраняется. Если SMS не дошло — повторите сброс, придёт новый пароль. '
+			.'Панель AD в карточке обновляется с задержкой (кэш), актуальные данные — по кнопке обновления страницы.</small></p>';
+
+		return $html;
 	}
 
 	/**
@@ -265,9 +319,9 @@ class AdPasswordResetProvider extends IntegrationProvider
 	 * @throws \Throwable при ошибке бинда/записи (нет прав, политика паролей...)
 	 */
 	protected function ldapResetPassword(string $targetLogin, string $password,
-		bool $unlock, array $credentials): void
+		bool $unlock, array $credentials): array
 	{
-		Yii::$app->ldap->resetPassword(
+		return Yii::$app->ldap->resetPassword(
 			$targetLogin,
 			$password,
 			$unlock,

@@ -22,11 +22,14 @@ $date = static function ($value) use ($formatter) {
 	return $formatter->asDatetime($value, 'php:d.m.Y H:i');
 };
 
-//статус: отключена > заблокирована > активна
+//статус: отключена > заблокирована > пароль просрочен > активна
+//(блокировка и просроченность - из вычисляемого AD признака, см. LdapService)
 if (!$account['enabled']) {
 	$badge = ['bg-secondary', 'отключена'];
-} elseif ($account['locked']) {
+} elseif (!empty($account['locked'])) {
 	$badge = ['bg-danger', 'заблокирована'];
+} elseif (!empty($account['password_expired'])) {
+	$badge = ['bg-warning text-dark', 'пароль просрочен'];
 } else {
 	$badge = ['bg-success', 'активна'];
 }

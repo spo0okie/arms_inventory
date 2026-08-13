@@ -139,7 +139,8 @@ class IntegrationsSmsTest extends Unit
 		]);
 
 		$this->assertTrue($result->ok);
-		$this->assertSame('SENT-42', $result->message);
+		//в сообщении виден ответ шлюза (нужно для разбора «почему не дошло»)
+		$this->assertStringContainsString('SENT-42', $result->message);
 		$this->assertNotNull($result->logId);
 
 		$log = IntegrationsLog::findOne($result->logId);
@@ -150,6 +151,44 @@ class IntegrationsSmsTest extends Unit
 		$this->assertStringContainsString('79991234567', $log->params);
 		$this->assertStringNotContainsString('секретный', $log->params);
 		$this->assertStringNotContainsString('секретный', (string)$log->message);
+	}
+
+	/**
+	 * Шлюз отвечает 200 и на отказ (NO_MESSAGE_GIVEN, EXECUTION_ERROR...) —
+	 * это ОШИБКА, а не успех: иначе «SMS отправлено», а сообщение не дошло.
+	 */
+	public function testGatewayErrorAnswerIsFailure()
+	{
+		foreach (['NO_MESSAGE_GIVEN', 'EXECUTION_ERROR: no device', 'BINARY_NOT_FOUND'] as $answer) {
+			$this->setupSms('data://text/plain,'.rawurlencode($answer));
+
+			$result = IntegrationsRegistry::runAction('sms', 'send', null, [
+				'phone' => '79991234567', 'text' => 'test',
+			]);
+
+			$this->assertFalse($result->ok, "ответ '$answer' должен считаться ошибкой");
+			$this->assertStringContainsString($answer, $result->message, 'ответ шлюза виден в отчёте');
+		}
+	}
+
+	/** Формат ответа шлюза настраивается: successPattern из конфига */
+	public function testGatewaySuccessPatternConfigurable()
+	{
+		Yii::$app->params['integrations'] = ['sms' => [
+			'class' => SmsProvider::class,
+			'url' => 'data://text/plain,OK%3A%20sent',
+			'successPattern' => '/^OK\b/i',
+		]];
+		IntegrationsRegistry::reset();
+
+		$this->assertTrue(IntegrationsRegistry::runAction('sms', 'send', null,
+			['phone' => '79991234567', 'text' => 'test'])->ok);
+
+		//ответ не совпал с шаблоном успеха => ошибка
+		Yii::$app->params['integrations']['sms']['url'] = 'data://text/plain,QUEUED';
+		IntegrationsRegistry::reset();
+		$this->assertFalse(IntegrationsRegistry::runAction('sms', 'send', null,
+			['phone' => '79991234567', 'text' => 'test'])->ok);
 	}
 
 	/** Пустой ответ шлюза = ошибка, журналируется с result=error */
