@@ -77,25 +77,35 @@ class AdProvidersTest extends Unit
 	}
 
 	/**
-	 * Провайдер сброса с подменённой записью в LDAP
-	 * @param bool $ldapFails имитировать отказ AD
+	 * Провайдер сброса с подменёнными LDAP-операциями (сеть не трогаем).
+	 * @param bool $ldapFails имитировать отказ записи в AD (шаг 2)
+	 * @param bool $verifyFails имитировать провал предпроверки (шаг 0)
 	 */
-	private function makeResetProvider(bool $ldapFails = false): AdPasswordResetProvider
+	private function makeResetProvider(bool $ldapFails = false, bool $verifyFails = false): AdPasswordResetProvider
 	{
-		$provider = new class($ldapFails) extends AdPasswordResetProvider {
+		$provider = new class($ldapFails, $verifyFails) extends AdPasswordResetProvider {
 			public bool $ldapFails;
+			public bool $verifyFails;
+			public array $verifyCalls = [];
 			public array $resetCalls = [];
 
-			public function __construct(bool $ldapFails)
+			public function __construct(bool $ldapFails, bool $verifyFails)
 			{
 				$this->ldapFails = $ldapFails;
+				$this->verifyFails = $verifyFails;
+			}
+
+			protected function ldapVerify(string $targetLogin, array $credentials): void
+			{
+				$this->verifyCalls[] = compact('targetLogin', 'credentials');
+				if ($this->verifyFails) throw new \RuntimeException('нет прав на сброс пароля этого пользователя');
 			}
 
 			protected function ldapResetPassword(string $targetLogin, string $password,
-				bool $mustChange, array $credentials): void
+				bool $unlock, array $credentials): void
 			{
 				if ($this->ldapFails) throw new \RuntimeException('нет прав на сброс');
-				$this->resetCalls[] = compact('targetLogin', 'password', 'mustChange', 'credentials');
+				$this->resetCalls[] = compact('targetLogin', 'password', 'unlock', 'credentials');
 			}
 		};
 		$provider->id = 'ad-reset';
@@ -193,7 +203,7 @@ class AdProvidersTest extends Unit
 	{
 		$user = $this->makeUser();
 		$provider = $this->makeResetProvider();
-		$form = new AdPasswordResetForm(['password' => '', 'mustChange' => true]);
+		$form = new AdPasswordResetForm(['pronounceable' => true, 'length' => 14, 'unlock' => true]);
 		$this->assertTrue($form->validate());
 
 		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
@@ -201,15 +211,20 @@ class AdProvidersTest extends Unit
 
 		$this->assertTrue($result->ok, $result->message);
 		$this->assertStringContainsString('79991234567', $result->message);
+		$this->assertStringContainsString('разблокирована', $result->message);
 
-		//LDAP вызван с валидным сгенерированным паролем от имени исполнителя
+		//предпроверка (шаг 0) вызвана перед записью
+		$this->assertCount(1, $provider->verifyCalls);
+		$this->assertSame('test.ad', $provider->verifyCalls[0]['targetLogin']);
+
+		//LDAP вызван со сгенерированным паролем заданной длины, unlock передан
 		$this->assertCount(1, $provider->resetCalls);
 		$call = $provider->resetCalls[0];
 		$this->assertSame('test.ad', $call['targetLogin']);
-		$this->assertTrue($call['mustChange']);
+		$this->assertTrue($call['unlock']);
 		$this->assertSame('executor', $call['credentials']['login']);
 		$password = $call['password'];
-		$this->assertSame(AdPasswordResetProvider::GEN_LENGTH, strlen($password));
+		$this->assertSame(14, strlen($password), 'пароль запрошенной длины');
 
 		//журнал: запись сброса + связанная запись SMS
 		$parent = IntegrationsLog::findOne($result->logId);
@@ -227,6 +242,26 @@ class AdProvidersTest extends Unit
 					"пароль в журнале ($log->provider/$log->action.$field)");
 			}
 		}
+	}
+
+	/**
+	 * Провал предпроверки (шаг 0: неверные креды исполнителя или нет прав)
+	 * = останов ДО SMS: пароль не отправляется и в AD не пишется
+	 */
+	public function testResetStopsWhenVerifyFails()
+	{
+		$user = $this->makeUser();
+		$provider = $this->makeResetProvider(false, true); //verifyFails
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+			$user, new AdPasswordResetForm(), ['login' => 'executor', 'password' => 'wrong']);
+
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('SMS не отправлено', $result->message);
+		$this->assertCount(1, $provider->verifyCalls, 'предпроверка вызвана');
+		$this->assertCount(0, $provider->resetCalls, 'записи в AD нет');
+		//SMS не отправлялось - связанной записи журнала нет
+		$this->assertNull(IntegrationsLog::findOne(['parent_id' => $result->logId]), 'SMS не отправлялось');
 	}
 
 	/** Неудача SMS = останов: запись в AD не выполняется */
@@ -292,18 +327,42 @@ class AdProvidersTest extends Unit
 		$this->assertCount(0, $provider->resetCalls);
 	}
 
-	/** Генератор паролей: длина, все классы символов, без неоднозначных */
-	public function testGeneratePassword()
+	/**
+	 * Полностью случайный пароль (снята галка «произносимый»): все классы
+	 * символов, без неоднозначных, запрошенной длины
+	 */
+	public function testRandomPassword()
 	{
 		$provider = new AdPasswordResetProvider();
-		for ($i = 0; $i < 20; $i++) {
-			$password = $provider->generatePassword();
-			$this->assertSame(AdPasswordResetProvider::GEN_LENGTH, strlen($password));
+		foreach ([12, 20, 32] as $length) {
+			$password = $provider->randomPassword($length);
+			$this->assertSame($length, strlen($password));
 			$this->assertMatchesRegularExpression('/[A-Z]/', $password);
 			$this->assertMatchesRegularExpression('/[a-z]/', $password);
 			$this->assertMatchesRegularExpression('/[0-9]/', $password);
+			$this->assertMatchesRegularExpression('/[!@#$%*()\-_+=?]/', $password, 'спецсимвол');
 			$this->assertDoesNotMatchRegularExpression('/[0O1lI]/', $password);
 		}
+	}
+
+	/**
+	 * Выбор типа пароля через форму: pronounceable=false даёт случайный
+	 * (в нём есть спецсимвол; произносимый по политике тоже, но проверяем
+	 * что рендерится именно случайный тип)
+	 */
+	public function testRandomPasswordViaForm()
+	{
+		$user = $this->makeUser();
+		$provider = $this->makeResetProvider();
+		$form = new AdPasswordResetForm(['pronounceable' => false, 'length' => 16, 'unlock' => false]);
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+			$user, $form, ['login' => 'executor', 'password' => 'x']);
+
+		$this->assertTrue($result->ok, $result->message);
+		$this->assertStringNotContainsString('разблокирована', $result->message);
+		$this->assertSame(16, strlen($provider->resetCalls[0]['password']));
+		$this->assertFalse($provider->resetCalls[0]['unlock']);
 	}
 
 	/** Дескриптор действия: именной уровень (L2+), не standalone */
@@ -315,11 +374,17 @@ class AdProvidersTest extends Unit
 		$this->assertSame(AdPasswordResetForm::class, $descriptor['form']);
 	}
 
-	/** Форма: пустой пароль допустим (генерация), короткий - нет */
+	/** Форма: длина не короче политики; дефолты pronounceable=on, unlock=off */
 	public function testResetFormValidation()
 	{
-		$this->assertTrue((new AdPasswordResetForm(['password' => '']))->validate());
-		$this->assertTrue((new AdPasswordResetForm(['password' => 'LongEnough42']))->validate());
-		$this->assertFalse((new AdPasswordResetForm(['password' => 'short']))->validate());
+		$form = new AdPasswordResetForm();
+		$this->assertTrue($form->validate());
+		$this->assertTrue((bool)$form->pronounceable, 'по умолчанию произносимый');
+		$this->assertFalse((bool)$form->unlock, 'по умолчанию без разблокировки');
+		$this->assertSame(AdPasswordResetForm::MIN_LENGTH, $form->length);
+
+		$this->assertTrue((new AdPasswordResetForm(['length' => 20]))->validate());
+		$this->assertFalse((new AdPasswordResetForm(['length' => 8]))->validate(), 'короче политики');
+		$this->assertFalse((new AdPasswordResetForm(['length' => 999]))->validate(), 'длиннее максимума');
 	}
 }

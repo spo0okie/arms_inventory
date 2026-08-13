@@ -82,4 +82,25 @@ class LdapController extends Controller
 		$this->stdout($ok ? "OK: креды верны\n" : "FAIL: неверный логин/пароль\n");
 		return $ok ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
 	}
+
+	/**
+	 * НЕДЕСТРУКТИВНАЯ проверка: может ли исполнитель сбросить пароль цели
+	 * (валидность кредов + право по allowedAttributesEffective). В AD
+	 * ничего не пишет. Та же проверка, что делает сброс пароля шагом 0.
+	 * @param string $targetLogin чью учётку проверяем
+	 * @param string $execLogin логин исполнителя
+	 * @param string $execPassword пароль исполнителя
+	 * @return int
+	 */
+	public function actionCanReset($targetLogin, $execLogin, $execPassword)
+	{
+		try {
+			Yii::$app->ldap->verifyResetPermission($targetLogin, $execLogin, $execPassword);
+		} catch (\Throwable $e) {
+			$this->stdout("FAIL: ".$e->getMessage()."\n");
+			return ExitCode::UNSPECIFIED_ERROR;
+		}
+		$this->stdout("OK: креды верны и есть право сбросить пароль '$targetLogin'\n");
+		return ExitCode::OK;
+	}
 }

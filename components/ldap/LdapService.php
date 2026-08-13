@@ -101,6 +101,45 @@ class LdapService extends Component
 	}
 
 	/**
+	 * НЕДЕСТРУКТИВНАЯ предпроверка перед сбросом пароля: валидны ли креды
+	 * исполнителя и достаточно ли у него прав сбросить пароль ИМЕННО этому
+	 * пользователю. Не пишет в AD (только bind + чтение), поэтому не
+	 * создаёт шум в аудите. Вызывать ДО отправки SMS: снимает сценарии
+	 * «SMS ушло, а пароль не сменился» (опечатка в пароле исполнителя;
+	 * верный пароль, но учётка без прав записи в AD).
+	 *
+	 * Право на сброс определяется через конструируемый атрибут
+	 * allowedAttributesEffective: AD вычисляет его для читающего
+	 * (забиндившегося) пользователя — если в списке есть unicodePwd, у
+	 * исполнителя есть право сменить пароль цели. Если AD не вернул список
+	 * (не поддерживается/недоступен) — ограничиваемся проверкой кредов,
+	 * не блокируя (сам сброс всё равно проверит права по факту).
+	 *
+	 * @throws \Throwable неверные креды / нет прав / цель не найдена / DC недоступен
+	 */
+	public function verifyResetPermission(string $targetLogin, string $execLogin, string $execPassword): void
+	{
+		$this->withExecutor($execLogin, $execPassword, function (string $name) use ($targetLogin) {
+			/** @var AdUser|null $user */
+			$user = AdUser::on($name)
+				->where('samaccountname', '=', $targetLogin)
+				->select(['allowedattributeseffective'])
+				->first();
+			if (!is_object($user)) {
+				throw new \RuntimeException("Учётка $targetLogin не найдена в AD");
+			}
+
+			$allowed = array_map('strtolower', $user->getAttributes()['allowedattributeseffective'] ?? []);
+			//список посчитан, но unicodePwd в нём нет => прав на сброс нет
+			if (!empty($allowed) && !in_array('unicodepwd', $allowed, true)) {
+				throw new \RuntimeException(
+					"у учётной записи $execLogin нет права сбрасывать пароль этого пользователя"
+				);
+			}
+		});
+	}
+
+	/**
 	 * Сбросить пароль пользователя в AD ОТ ИМЕНИ исполнителя (L2+).
 	 * Отдельное соединение под личными кредами: и проверка их валидности,
 	 * и присутствие исполнителя в логах AD. Требует SSL/TLS (наш конфиг
@@ -109,24 +148,15 @@ class LdapService extends Component
 	 *
 	 * @param string $targetLogin sAMAccountName чьей учётке меняем пароль
 	 * @param string $newPassword новый пароль
-	 * @param bool $mustChange потребовать смену при следующем входе
+	 * @param bool $unlock заодно разблокировать учётку (lockoutTime=0)
 	 * @param string $execLogin логин исполнителя
 	 * @param string $execPassword пароль исполнителя
 	 * @throws \Throwable
 	 */
-	public function resetPassword(string $targetLogin, string $newPassword, bool $mustChange,
+	public function resetPassword(string $targetLogin, string $newPassword, bool $unlock,
 		string $execLogin, string $execPassword): void
 	{
-		$name = 'arms-reset-'.md5($execLogin);
-		$config = $this->connectionConfig();
-		$config['username'] = $this->bindName($execLogin);
-		$config['password'] = $execPassword;
-
-		$connection = new Connection($config);
-		$connection->connect(); //бросит при неверных кредах/недоступности
-		Container::addConnection($connection, $name);
-
-		try {
+		$this->withExecutor($execLogin, $execPassword, function (string $name) use ($targetLogin, $newPassword, $unlock) {
 			/** @var AdUser|null $user */
 			$user = AdUser::on($name)->where('samaccountname', '=', $targetLogin)->first();
 			if (!is_object($user)) {
@@ -137,10 +167,34 @@ class LdapService extends Component
 			//passwordAttribute='unicodepwd'); строка = сброс админом.
 			//Требует защищённого соединения (assertSecureConnection).
 			$user->password = $newPassword;
-			//0 в pwdlastset = «сменить пароль при следующем входе»;
+			//разблокировка = lockoutTime в 0 (AD допускает только сброс в 0);
 			//пишем сырым значением в обход windows-int-каста
-			if ($mustChange) $user->setRawAttribute('pwdlastset', '0');
+			if ($unlock) $user->setRawAttribute('lockouttime', '0');
 			$user->save();
+		});
+	}
+
+	/**
+	 * Выполнить операцию под отдельным соединением, забинженным личными
+	 * кредами исполнителя (проверка кредов + исполнитель в логах AD).
+	 * Соединение регистрируется в Container под временным именем и
+	 * гарантированно снимается после.
+	 * @param callable $fn function(string $connectionName): mixed
+	 * @throws \Throwable connect() бросает при неверных кредах/недоступности
+	 */
+	protected function withExecutor(string $execLogin, string $execPassword, callable $fn)
+	{
+		$name = 'arms-exec-'.md5($execLogin);
+		$config = $this->connectionConfig();
+		$config['username'] = $this->bindName($execLogin);
+		$config['password'] = $execPassword;
+
+		$connection = new Connection($config);
+		$connection->connect(); //бросит при неверных кредах/недоступности
+		Container::addConnection($connection, $name);
+
+		try {
+			return $fn($name);
 		} finally {
 			Container::getInstance()->removeConnection($name);
 		}

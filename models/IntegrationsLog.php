@@ -106,7 +106,7 @@ class IntegrationsLog extends ArmsModel
 			],
 			'result' => [
 				'Результат',
-				'hint' => 'ok - выполнено, error - не выполнено',
+				'hint' => 'run - выполняется (или прервано на середине), ok - выполнено, error - не выполнено',
 			],
 			'message' => [
 				'Сообщение',
@@ -115,9 +115,47 @@ class IntegrationsLog extends ArmsModel
 		];
 	}
 
+	/**
+	 * У журнала нет колонки name — подписью служит «интеграция/действие #id».
+	 * Нужно для заголовка страницы просмотра (layouts/view) и renderItem.
+	 */
+	public function getName()
+	{
+		return $this->providerTitle().' / '.$this->action.' #'.$this->id;
+	}
+
 	public function getUser()
 	{
 		return $this->hasOne(Users::class, ['id' => 'users_id']);
+	}
+
+	/** Запись-инициатор (для шага составного действия) */
+	public function getParent()
+	{
+		return $this->hasOne(IntegrationsLog::class, ['id' => 'parent_id']);
+	}
+
+	/** Вложенные шаги, вызванные этим действием (композиция) */
+	public function getChildren()
+	{
+		return $this->hasMany(IntegrationsLog::class, ['parent_id' => 'id'])->orderBy(['id' => SORT_ASC]);
+	}
+
+	/** Человекочитаемое название провайдера из реестра (или его id, если выключен) */
+	public function providerTitle(): string
+	{
+		$provider = \app\components\integrations\IntegrationsRegistry::provider($this->provider);
+		return $provider ? $provider->getTitle() : (string)$this->provider;
+	}
+
+	/**
+	 * Маршрут на объект действия (class + object_id) для ссылки в журнале,
+	 * либо null (standalone-действие или неизвестный класс)
+	 */
+	public function objectRoute(): ?array
+	{
+		if (empty($this->class) || empty($this->object_id) || !class_exists($this->class)) return null;
+		return ['/'.\app\helpers\StringHelper::class2Id($this->class).'/view', 'id' => $this->object_id];
 	}
 
 	/**

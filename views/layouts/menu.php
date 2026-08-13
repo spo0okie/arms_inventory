@@ -14,6 +14,7 @@ use app\models\ContractsStates;
 use app\models\Departments;
 use app\models\LicGroups;
 use app\models\LicTypes;
+use app\models\IntegrationsLog;
 use app\models\LoginJournal;
 use app\models\MaintenanceJobs;
 use app\models\MaintenanceReqs;
@@ -194,6 +195,7 @@ echo Nav::widget([
 						['label' => 'Разрешения', 	'url' => ['/rbac/permission']],
 						['label' => Markers::$titles, 'url' => ['/markers/index']],
 						['label' => Notifications::$titles, 'url' => ['/notifications/index']],
+						['label' => IntegrationsLog::$titles, 'url' => ['/integrations-log/index']],
 						['label' => 'Документация API', 	'url' => ['/site/api-doc']],
 					],
 				]:'',

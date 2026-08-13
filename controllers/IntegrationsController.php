@@ -78,8 +78,13 @@ class IntegrationsController extends ArmsBaseController
 			$html = $providerObj->renderPanel($panel, $model);
 		} catch (\Throwable $e) {
 			Yii::warning("Integration panel {$providerObj->id}/$panel failed: ".$e->getMessage(), __METHOD__);
+			//в debug-режиме показываем причину прямо в панели (помощь при
+			//настройке); на проде — нейтральная заглушка, детали в логе
+			$detail = YII_DEBUG
+				? ': '.Html::encode($e->getMessage())
+				: ': недоступно';
 			return '<span class="text-secondary opacity-75">'
-				.Html::encode($providerObj->getTitle()).': недоступно</span>';
+				.Html::encode($providerObj->getTitle()).$detail.'</span>';
 		}
 		if (!is_null($binding)) PanelsCache::store($providerObj->id, $panel, $binding, $html);
 		return $html;

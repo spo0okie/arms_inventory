@@ -5,6 +5,7 @@ namespace app\components\integrations\providers;
 use app\components\integrations\ActionResult;
 use app\components\integrations\IntegrationProvider;
 use app\components\integrations\IntegrationsRegistry;
+use app\components\PronounceablePasswordGenerator;
 use app\helpers\ArrayHelper;
 use app\models\base\ArmsModel;
 use app\models\Users;
@@ -14,17 +15,28 @@ use yii\base\Model;
 /**
  * Сброс пароля пользователя в AD (docs/dev/integrations.md).
  *
+ * Цель — снять с админов рутину «я не могу войти, помогите» без похода в
+ * PowerShell: пароль генерируется автоматически (по умолчанию
+ * «произносимый» — проще продиктовать), соответствует парольной политике,
+ * отправляется пользователю по SMS и НЕ показывается администратору
+ * (поэтому и «требовать смену» не нужно — пароль знает только пользователь).
+ * Опционально — разблокировка учётки.
+ *
  * Именное действие (L2+): выполняется от имени ЛИЧНОЙ учётки исполнителя,
  * введённой в форме действия (ядро запрашивает её само, §3.3 контракта);
  * у учётки должно быть делегированное право Reset Password. Сервисной
  * учёткой пароли не сбрасываются — ИБ видит в логах AD живого исполнителя.
  *
  * Композиция с SMS (§2.2 контракта), порядок принципиален:
- *  1. сгенерировать (или взять из формы) пароль;
+ *  0. НЕДЕСТРУКТИВНО проверить креды исполнителя и его право на сброс
+ *     (bind + чтение allowedAttributesEffective, без записи в AD) —
+ *     чтобы не отправить SMS впустую при опечатке в пароле или учётке
+ *     без прав;
+ *  1. сгенерировать пароль;
  *  2. отправить его пользователю через SMS-провайдера;
  *     неудача = останов, пароль в AD не меняется — пользователь не
  *     останется с паролем, который ему не доставлен;
- *  3. записать пароль в AD от имени исполнителя.
+ *  3. записать пароль в AD от имени исполнителя (+ опц. разблокировка).
  * Пароль не попадает ни в журнал, ни в ответ исполнителю.
  *
  * Конфиг (params-local.php):
@@ -33,7 +45,7 @@ use yii\base\Model;
  *     'ad-reset' => [
  *         'class' => \app\components\integrations\providers\AdPasswordResetProvider::class,
  *         //'sms' => 'sms',        //id SMS-провайдера для отправки пароля
- *         //'provider' => 'default', //имя провайдера в компоненте ldap
+ *         //'defaultLength' => 12, //длина пароля по умолчанию в форме
  *         //'smsText' => 'Ваш новый пароль: {password}',
  *     ],
  * ],
@@ -43,11 +55,11 @@ class AdPasswordResetProvider extends IntegrationProvider
 {
 	const ACTION = 'reset-password';
 
-	/** символы генератора паролей (без визуально неоднозначных 0O1lI) */
-	const GEN_UPPER = 'ABCDEFGHJKMNPQRSTUVWXYZ';
-	const GEN_LOWER = 'abcdefghjkmnpqrstuvwxyz';
-	const GEN_DIGIT = '23456789';
-	const GEN_LENGTH = 12;
+	/** символы случайного генератора (без визуально неоднозначных 0O1lI) */
+	const RND_UPPER = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+	const RND_LOWER = 'abcdefghijkmnpqrstuvwxyz';
+	const RND_DIGIT = '23456789';
+	const RND_SPECIAL = '!@#$%*()-_+=?';
 
 	public function getTitle(): string
 	{
@@ -82,6 +94,8 @@ class AdPasswordResetProvider extends IntegrationProvider
 				'icon' => 'fas fa-key',
 				'level' => static::LEVEL_PERSONAL,
 				'form' => AdPasswordResetForm::class,
+				//длина по умолчанию из конфига инстанса (если задана)
+				'prefill' => ['length' => (int)($this->config['defaultLength'] ?? AdPasswordResetForm::MIN_LENGTH)],
 			],
 		];
 	}
@@ -101,7 +115,12 @@ class AdPasswordResetProvider extends IntegrationProvider
 		}
 
 		$targetLogin = $this->binding($model);
-		$logParams = ['login' => $targetLogin, 'mustChange' => (bool)$form->mustChange];
+		$pronounceable = (bool)$form->pronounceable;
+		$length = max(AdPasswordResetForm::MIN_LENGTH, (int)$form->length);
+		$unlock = (bool)$form->unlock;
+		//пароль в журнал НЕ пишем - только характеристики действия
+		$logParams = ['login' => $targetLogin, 'pronounceable' => $pronounceable,
+			'length' => $length, 'unlock' => $unlock];
 
 		//куда доставлять пароль: первый мобильный номер сотрудника
 		$phone = trim(ArrayHelper::explode(',', $model->Mobile ?? '')[0] ?? '');
@@ -109,8 +128,21 @@ class AdPasswordResetProvider extends IntegrationProvider
 			return ActionResult::error('У сотрудника не заполнен мобильный номер - пароль некуда отправить', $logParams);
 		}
 
-		$password = trim((string)$form->password);
-		if ($password === '') $password = $this->generatePassword();
+		//шаг 0: НЕДЕСТРУКТИВНАЯ предпроверка ДО SMS - валидны ли креды
+		//исполнителя и есть ли у него право сброса. Снимает сценарии
+		//«SMS ушло, а пароль не сменился». Без записи в AD (bind + чтение).
+		try {
+			$this->ldapVerify($targetLogin, $credentials);
+		} catch (\Throwable $e) {
+			return ActionResult::error(
+				'Сброс не выполнен (SMS не отправлено): '.$e->getMessage(),
+				$logParams
+			);
+		}
+
+		$password = $pronounceable
+			? (new PronounceablePasswordGenerator($length))->generate()
+			: $this->randomPassword($length);
 
 		//шаг 1: SMS с паролем ДО записи в AD; неудача = останов
 		$smsText = str_replace(
@@ -125,9 +157,9 @@ class AdPasswordResetProvider extends IntegrationProvider
 			return ActionResult::error('Пароль НЕ изменён: не удалось отправить SMS ('.$sms->message.')', $logParams);
 		}
 
-		//шаг 2: запись пароля в AD от имени исполнителя
+		//шаг 2: запись пароля в AD от имени исполнителя (+ опц. разблокировка)
 		try {
-			$this->ldapResetPassword($targetLogin, $password, (bool)$form->mustChange, $credentials);
+			$this->ldapResetPassword($targetLogin, $password, $unlock, $credentials);
 		} catch (\Throwable $e) {
 			Yii::warning("AD password reset for $targetLogin failed: ".$e->getMessage(), __METHOD__);
 			return ActionResult::error(
@@ -138,10 +170,35 @@ class AdPasswordResetProvider extends IntegrationProvider
 		}
 
 		return ActionResult::success(
-			"Пароль сброшен и отправлен SMS на $phone"
-			.($form->mustChange ? ', при входе потребуется смена' : ''),
+			"Пароль сброшен и отправлен по SMS на $phone"
+			.($unlock ? ', учётка разблокирована' : '')
+			.'. Пароль знает только пользователь.',
 			$logParams
 		);
+	}
+
+	/**
+	 * Поля формы: тип пароля (произносимый/случайный), длина, разблокировка.
+	 * Ручного ввода пароля нет - он генерируется и не показывается админу.
+	 */
+	public function renderActionForm(string $actionId, Model $form, $activeForm): string
+	{
+	    $html = '<div class="row">';
+		$html .= '<div class="col-6">';
+		$html .= (string)$activeForm->field($form, 'length')->textInput([
+			'type' => 'number',
+			'min' => AdPasswordResetForm::MIN_LENGTH,
+			'max' => AdPasswordResetForm::MAX_LENGTH,
+		]);
+		$html .= '</div>';
+		$html .= '<div class="col-6">';
+		$html .= (string)$activeForm->field($form, 'pronounceable')->checkbox();
+		$html .= (string)$activeForm->field($form, 'unlock')->checkbox();
+		$html .= '</div>';
+		$html .= '</div>';
+		$html .= '<p class="text-secondary">Будет сгенерирован пароль и отправлен пользователю '
+			.'по SMS. Администратор пароль не видит.</p>';
+		return $html;
 	}
 
 	/** id SMS-провайдера для отправки пароля (зависимость, §2.2) */
@@ -151,23 +208,44 @@ class AdPasswordResetProvider extends IntegrationProvider
 	}
 
 	/**
-	 * Генерация пароля: длина GEN_LENGTH, гарантированно есть верхний
-	 * и нижний регистр и цифра (AD complexity), без неоднозначных символов
+	 * Полностью случайный пароль заданной длины: гарантированно есть все
+	 * классы (верхний/нижний регистр, цифра, спецсимвол — AD complexity),
+	 * без визуально неоднозначных символов
 	 */
-	public function generatePassword(): string
+	public function randomPassword(int $length): string
 	{
-		$sets = [static::GEN_UPPER, static::GEN_LOWER, static::GEN_DIGIT];
+		$length = max(AdPasswordResetForm::MIN_LENGTH, $length);
+		$sets = [static::RND_UPPER, static::RND_LOWER, static::RND_DIGIT, static::RND_SPECIAL];
 		$all = implode('', $sets);
 
 		$chars = [];
 		foreach ($sets as $set) { //по одному из каждого класса
 			$chars[] = $set[random_int(0, strlen($set) - 1)];
 		}
-		while (count($chars) < static::GEN_LENGTH) {
+		while (count($chars) < $length) {
 			$chars[] = $all[random_int(0, strlen($all) - 1)];
 		}
-		shuffle($chars);
+		//перемешиваем криптостойко (shuffle не CSPRNG)
+		for ($i = count($chars) - 1; $i > 0; $i--) {
+			$j = random_int(0, $i);
+			[$chars[$i], $chars[$j]] = [$chars[$j], $chars[$i]];
+		}
 		return implode('', $chars);
+	}
+
+	/**
+	 * НЕДЕСТРУКТИВНАЯ предпроверка кредов и прав исполнителя (шаг 0).
+	 * Делегирует LdapService. Вынесено в отдельный метод: тесты подменяют
+	 * его, не трогая LDAP.
+	 * @throws \Throwable неверные креды / нет прав / цель не найдена / DC недоступен
+	 */
+	protected function ldapVerify(string $targetLogin, array $credentials): void
+	{
+		Yii::$app->ldap->verifyResetPermission(
+			$targetLogin,
+			$credentials['login'],
+			$credentials['password']
+		);
 	}
 
 	/**
@@ -181,12 +259,12 @@ class AdPasswordResetProvider extends IntegrationProvider
 	 * @throws \Throwable при ошибке бинда/записи (нет прав, политика паролей...)
 	 */
 	protected function ldapResetPassword(string $targetLogin, string $password,
-		bool $mustChange, array $credentials): void
+		bool $unlock, array $credentials): void
 	{
 		Yii::$app->ldap->resetPassword(
 			$targetLogin,
 			$password,
-			$mustChange,
+			$unlock,
 			$credentials['login'],
 			$credentials['password']
 		);

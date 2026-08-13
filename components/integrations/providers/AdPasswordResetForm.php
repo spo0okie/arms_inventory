@@ -6,41 +6,61 @@ use app\models\base\ArmsModel;
 use app\models\base\traits\AttributeDataModelTrait;
 
 /**
- * Форма параметров действия ad-reset/reset-password
- * (docs/dev/integrations.md)
+ * Форма действия ad-reset/reset-password (docs/dev/integrations.md).
  *
- * @property string $password новый пароль (пусто = сгенерировать)
- * @property bool $mustChange потребовать смену пароля при входе
+ * Цель — заменить поход в PowerShell на одну кнопку: пароль всегда
+ * генерируется автоматически и НЕ показывается администратору (его
+ * узнаёт только пользователь из SMS), поэтому ручного ввода пароля и
+ * галочки «требовать смену» здесь нет. Настраиваются только: тип пароля
+ * (произносимый/случайный), длина и разблокировка учётки.
+ *
+ * @property bool $pronounceable произносимый пароль (проще продиктовать)
+ * @property int $length длина пароля (символов)
+ * @property bool $unlock разблокировать учётку заодно
  */
 class AdPasswordResetForm extends ArmsModel
 {
 	use AttributeDataModelTrait;
 
-	public $password;
-	public $mustChange = true;
+	/** минимум по парольной политике */
+	const MIN_LENGTH = 12;
+	const MAX_LENGTH = 64;
+
+	public $pronounceable = true;
+	public $length = self::MIN_LENGTH;
+	public $unlock = false;
 
 	public function rules()
 	{
 		return [
-			['password', 'trim'],
-			['password', 'string', 'min' => 8, 'max' => 64,
-				'tooShort' => 'Не короче 8 символов (или оставьте пустым для генерации)'],
-			['mustChange', 'boolean'],
-			['mustChange', 'default', 'value' => true],
+			[['pronounceable', 'unlock'], 'boolean'],
+			['pronounceable', 'default', 'value' => true],
+			['unlock', 'default', 'value' => false],
+			['length', 'default', 'value' => self::MIN_LENGTH],
+			['length', 'integer', 'min' => self::MIN_LENGTH, 'max' => self::MAX_LENGTH,
+				'tooSmall' => 'Не короче '.self::MIN_LENGTH.' символов (парольная политика)',
+				'tooBig' => 'Не длиннее '.self::MAX_LENGTH.' символов',
+			],
 		];
 	}
 
 	public function attributeData()
 	{
 		return [
-			'password' => [
-				'Новый пароль',
-				'hint' => 'Оставьте пустым - пароль будет сгенерирован автоматически. '
-					.'В журнал пароль не попадает в любом случае.',
+			'length' => [
+				'Длина пароля',
+				'hint' => 'Число символов (минимум '.self::MIN_LENGTH.' по парольной политике). '
+					.'Можно увеличить.',
 			],
-			'mustChange' => [
-				'Сменить пароль при входе',
-				'hint' => 'Потребовать у пользователя смену пароля при первом входе',
+			'pronounceable' => [
+				'Произносимый пароль',
+				'hint' => 'Собирается из слогов - его проще продиктовать и ввести. '
+					.'Снимите галочку для полностью случайного пароля (надёжнее, но труднее вводить).',
+			],
+			'unlock' => [
+				'Разблокировать учётку',
+				'hint' => 'Заодно снять блокировку учётной записи (если она заблокирована '
+					.'из-за неудачных попыток входа).',
 			],
 		];
 	}

@@ -22,9 +22,18 @@ use Yii;
  *         'appliesTo' => ['model' => \app\models\Techs::class, 'attribute' => 'isVoipPhone'],
  *         //ключ привязки: шаблон из атрибутов модели
  *         'binding' => '{phone}',
- *         //запрос: {binding} + любые {атрибуты} модели
+ *         //запрос: backend-URL телефонии (достижимый с сервера ARMS),
+ *         //{binding} + любые {атрибуты} модели
  *         'request' => 'https://phones.local/api/v1/subscribers/status?extension={binding}',
  *         'headers' => ['Authorization' => 'Bearer <token сервисной учетки>'],
+ *         //таймаут запроса, сек (по умолчанию 5; телефония с медленным AMI
+ *         //может отвечать дольше - поднимите при необходимости)
+ *         'timeout' => 10,
+ *         //ссылка на абонента в Web-UI телефонии (БРАУЗЕРНЫЙ URL - может
+ *         //отличаться от request, напр. localhost вместо имени контейнера):
+ *         'web' => 'https://phones.local',
+ *         //путь абонента в Web-UI ({id} = subscriber.id из ответа):
+ *         'webSubscriber' => '/subscriber/view?id={id}',
  *         //панель: заголовок, ttl кэша и view-файл рендера ответа
  *         'panel' => [
  *             'title' => 'Телефония',
@@ -133,10 +142,24 @@ class HttpTemplateProvider extends IntegrationProvider
 		]);
 
 		$response = @file_get_contents($url, false, $context);
-		if ($response === false) throw new \RuntimeException("Request failed: $url");
+		if ($response === false) throw new \RuntimeException("запрос не выполнен: $url");
+
+		//код ответа из заголовков (file_get_contents кладёт их в $http_response_header)
+		$httpCode = null;
+		if (isset($http_response_header[0]) && preg_match('~\s(\d{3})\s~', $http_response_header[0], $m)) {
+			$httpCode = (int)$m[1];
+		}
+		if ($httpCode !== null && $httpCode >= 400) {
+			throw new \RuntimeException("внешняя ИС вернула HTTP $httpCode");
+		}
 
 		$data = json_decode($response, true);
-		if (!is_array($data)) throw new \RuntimeException('Response is not a valid JSON object');
+		if (!is_array($data)) {
+			//показываем начало тела - сразу видно, что пришло вместо JSON
+			//(HTML-страница ошибки, PHP-notice перед JSON и т.п.)
+			$snippet = trim(mb_substr($response, 0, 200));
+			throw new \RuntimeException('ответ не является JSON-объектом; начало ответа: '.$snippet);
+		}
 		return $data;
 	}
 

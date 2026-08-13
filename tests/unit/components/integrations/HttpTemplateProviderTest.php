@@ -136,17 +136,19 @@ class HttpTemplateProviderTest extends Unit
 
 	/**
 	 * Шаблон панели телефонии (providers/views/pbx/status.php) на ответе
-	 * ast22-phones: статус-бейдж, контакт с user-agent, дублирование вызова
+	 * ast22-phones: прогрессивный бейдж, 4 лампочки, IP+модель из контакта,
+	 * кнопка Web-UI, дублирование вызова
 	 */
 	public function testPbxTemplate()
 	{
 		$response = [
 			'success' => true,
 			'data' => [
-				'subscriber' => ['extension' => '1001'],
+				'subscriber' => ['id' => 7, 'extension' => '1001'],
 				'status' => [
 					'extension' => '1001',
 					'configured' => true,
+					'loaded' => true,
 					'registered' => true,
 					'online' => true,
 					'device_state' => 'Not in use',
@@ -166,6 +168,7 @@ class HttpTemplateProviderTest extends Unit
 		$provider = $this->makeProvider([
 			'binding' => '{Mobile}',
 			'request' => $this->jsonUrl($response),
+			'web' => 'https://phones.local',
 			'panel' => [
 				'title' => 'Телефония',
 				'template' => '@app/components/integrations/providers/views/pbx/status.php',
@@ -176,11 +179,46 @@ class HttpTemplateProviderTest extends Unit
 		//поэтому Users с Mobile здесь достаточно
 		$html = $provider->renderPanel(HttpTemplateProvider::PANEL, new Users(['Mobile' => '1001']));
 
-		$this->assertStringContainsString('онлайн', $html);
-		$this->assertStringContainsString('sip:1001@10.0.0.5:5060', $html);
-		$this->assertStringContainsString('Yealink SIP-T31G', $html);
-		$this->assertStringContainsString('555', $html);
+		$this->assertStringContainsString('онлайн', $html);           //прогрессивный бейдж
+		$this->assertStringContainsString('10.0.0.5', $html);          //IP из contact URI
+		$this->assertStringContainsString('Yealink SIP-T31G', $html);  //модель
+		$this->assertStringContainsString('Онлайн (qualify)', $html);  //подпись лампочки
+		$this->assertStringContainsString('phones.local/subscriber/view?id=7', $html); //кнопка Web-UI
+		$this->assertStringContainsString('555', $html);               //переадресация
 		$this->assertStringContainsString('Рабочее время', $html);
+	}
+
+	/**
+	 * Прогрессивный бейдж останавливается на первой недостигнутой ступени:
+	 * есть в БД и Asterisk, но не зарегистрирован
+	 */
+	public function testPbxTemplateProgressiveBadge()
+	{
+		$response = [
+			'success' => true,
+			'data' => [
+				'subscriber' => ['id' => 3, 'extension' => '200'],
+				'status' => [
+					'configured' => true,
+					'loaded' => true,
+					'registered' => false,
+					'online' => false,
+					'contacts' => [],
+				],
+				'call_duplications' => [],
+			],
+		];
+
+		$provider = $this->makeProvider([
+			'binding' => '{Mobile}',
+			'request' => $this->jsonUrl($response),
+			'panel' => ['template' => '@app/components/integrations/providers/views/pbx/status.php'],
+		]);
+
+		$html = $provider->renderPanel(HttpTemplateProvider::PANEL, new Users(['Mobile' => '200']));
+		$this->assertStringContainsString('не зарегистрирован', $html);
+		//web не задан - кнопки Web-UI нет
+		$this->assertStringNotContainsString('subscriber/view', $html);
 	}
 
 	/** Через реестр: панель объявлена, ttl из конфига панели */
