@@ -23,8 +23,14 @@ class AuthorizationModesCest
 	protected $testPasswd;
     protected $testComp;
 	protected $testTech;
-	
+
 	protected $testParams='/config/params-test.php';
+
+	//исходное содержимое params-test.php и его массив: overrideParams() пишет
+	//поверх этих дефолтов, а не вместо них (иначе теряются остальные тестовые
+	//параметры - integrations, notify.enable, ...), restore - байт-в-байт
+	protected static $originalParamsContent = null;
+	protected static $originalParams = null;
  
 	private function addRole($roleName)
 	{
@@ -106,7 +112,18 @@ class AuthorizationModesCest
 	
 	private function overrideParams($params=[])
 	{
-		file_put_contents(Yii::getAlias('@app').$this->testParams, '<?php return '.var_export($params, true).';');
+		$path = Yii::getAlias('@app').$this->testParams;
+		if (static::$originalParamsContent === null) {
+			static::$originalParamsContent = file_get_contents($path);
+			static::$originalParams = require $path;
+		}
+		if (empty($params)) {
+			//восстановление исходника как есть
+			file_put_contents($path, static::$originalParamsContent);
+			return;
+		}
+		file_put_contents($path, '<?php return '
+			.var_export(array_merge(static::$originalParams, $params), true).';');
 	}
     
     public function _after(AcceptanceTester $I)
