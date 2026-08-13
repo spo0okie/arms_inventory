@@ -1,4 +1,4 @@
-.page-corner-widget {position:absolute; top:0; right:0;}
+.page-corner-widget {position:absolute; top:0; right:12px;}
 
 /* режим "не влезли": блок становится обычной строкой в месте своего положения в DOM;
    flex-basis - на случай flex-родителя, чтобы блок занял собственный ряд */
