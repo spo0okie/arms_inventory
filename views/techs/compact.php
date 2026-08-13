@@ -85,7 +85,8 @@ if (is_object($model->state)) {
 					'no_arm'=>true,
 					'no_abbr'=>true,
 					'ips_glue'=>' \\ ',
-				]) ?></div>
+				]) ?>
+					<?= \app\components\integrations\PanelsWidget::widget(['model'=>$comp,'compact'=>true]) ?></div>
 			<?php } } else { ?>
 			отсутствуют
 		<?php }?>

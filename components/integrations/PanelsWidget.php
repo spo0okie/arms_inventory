@@ -30,6 +30,14 @@ class PanelsWidget extends Widget
 	/** @var ArmsModel|null объект, карточка которого рендерится */
 	public ?ArmsModel $model = null;
 
+	/**
+	 * @var bool компактный режим - для встраивания в списки вложенных
+	 * объектов (ОС внутри АРМ в карточке сотрудника): мелкая подпись
+	 * вместо заголовка и без кнопок действий (действия с журналом -
+	 * на карточке самого объекта)
+	 */
+	public bool $compact = false;
+
 	public function run()
 	{
 		if (!is_object($this->model) || $this->model->isNewRecord) return '';
@@ -46,6 +54,8 @@ class PanelsWidget extends Widget
 			foreach ($provider->panels($model) as $panelId => $descriptor) {
 				$panelsHtml .= $this->renderPanel($provider, $panelId, $descriptor, $binding, $classId);
 			}
+
+			if ($this->compact) continue; //кнопки действий - только на карточке объекта
 
 			foreach ($provider->actions($model) as $actionId => $descriptor) {
 				if (($descriptor['showInPanel'] ?? true) === false) continue;
@@ -92,8 +102,10 @@ class PanelsWidget extends Widget
 			.'>'.$body.'</div></div>';
 		 */
 
-		$html = '<h4>'.Html::encode($title).'</h4>'
-			.'<div class="mb-3" id="'.$containerId.'"'
+		$html = ($this->compact
+				? '<small class="text-secondary">'.Html::encode($title).'</small>'
+				: '<h4>'.Html::encode($title).'</h4>')
+			.'<div class="'.($this->compact ? 'mb-2' : 'mb-3').'" id="'.$containerId.'"'
 				.($fresh ? '' : ' style="opacity:.5"')
 			.'>'.$body.'</div>';
 
