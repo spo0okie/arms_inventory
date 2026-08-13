@@ -55,6 +55,11 @@
 	'sms' => [
 		'class' => \app\components\integrations\providers\SmsProvider::class,
 		'url' => 'https://sms-gw.local/send?phone={phone}&text={text}',
+		// Шлюз часто отвечает 200 и при отказе, поэтому ответ разбирается:
+		// по умолчанию отказом считается ответ с маркерами ERROR, FAIL,
+		// NOT_FOUND, NO_MESSAGE_GIVEN, DENIED, INVALID. Если у вашего шлюза
+		// другой формат - задайте regexp успешного ответа:
+		//'successPattern' => '/^OK\b/i',
 	],
 
 	// Панель телефонии в карточке VoIP-телефона: прогрессивный статус
@@ -92,6 +97,10 @@
 	// не требует
 	'ad' => [
 		'class' => \app\components\integrations\providers\AdUserProvider::class,
+		// AD опрашивается при каждом открытии карточки (устаревший статус
+		// учётки недопустим). Задайте cacheTtl в секундах, только если
+		// контроллер домена далеко и панель заметно тормозит:
+		//'cacheTtl' => 300,
 	],
 
 	// Сброс пароля AD: именное действие - исполнитель вводит СВОИ

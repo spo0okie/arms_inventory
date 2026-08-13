@@ -22,7 +22,7 @@ use Yii;
  * 'integrations' => [
  *     'ad' => [
  *         'class' => \app\components\integrations\providers\AdUserProvider::class,
- *         //'cacheTtl' => 300,
+ *         //'cacheTtl' => 0, //сек; 0 = запрашивать AD при каждом открытии
  *     ],
  * ],
  * ```
@@ -58,7 +58,12 @@ class AdUserProvider extends IntegrationProvider
 		return [
 			static::PANEL => [
 				'title' => $this->getTitle(),
-				'ttl' => $this->config['cacheTtl'] ?? 300, //данные меняются редко
+				//0 = обновлять при каждом открытии карточки: AD рядом и
+				//отвечает быстро, а показывать устаревший статус учётки
+				//(особенно сразу после сброса пароля) нельзя. Кэш-файл
+				//остаётся - он нужен для мгновенной отрисовки и как
+				//запасной вариант, если контроллер домена недоступен
+				'ttl' => $this->config['cacheTtl'] ?? 0,
 			],
 		];
 	}
