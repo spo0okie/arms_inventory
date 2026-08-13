@@ -298,19 +298,36 @@ class AdProvidersTest extends Unit
 		$this->assertSame('ok', $child->result);
 	}
 
-	/** Без мобильного номера сброс не выполняется (пароль некуда доставить) */
-	public function testResetRequiresMobile()
+	/** Ни один телефон не заполнен - сброс не выполняется (некуда доставить) */
+	public function testResetRequiresPhone()
 	{
-		$user = $this->makeUser(['Mobile' => '']);
+		$user = $this->makeUser(['Mobile' => '', 'private_phone' => '']);
 		$provider = $this->makeResetProvider();
 
 		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
 			$user, new AdPasswordResetForm(), ['login' => 'executor', 'password' => 'x']);
 
 		$this->assertFalse($result->ok);
-		$this->assertStringContainsString('мобильный номер', $result->message);
+		$this->assertStringContainsString('телефон', $result->message);
 		$this->assertCount(0, $provider->resetCalls);
 		$this->assertNull(IntegrationsLog::findOne(['parent_id' => $result->logId]), 'SMS не отправлялось');
+	}
+
+	/**
+	 * Мобильный пуст, но заполнен личный телефон - пароль доставляется на
+	 * него (те же поля, что у SMS-провайдера: Mobile -> private_phone)
+	 */
+	public function testResetFallsBackToPrivatePhone()
+	{
+		$user = $this->makeUser(['Mobile' => '', 'private_phone' => '79997654321']);
+		$provider = $this->makeResetProvider();
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+			$user, new AdPasswordResetForm(), ['login' => 'executor', 'password' => 'x']);
+
+		$this->assertTrue($result->ok, $result->message);
+		$this->assertStringContainsString('79997654321', $result->message, 'доставка на личный телефон');
+		$this->assertCount(1, $provider->resetCalls);
 	}
 
 	/** Серверный вызов без кредов исполнителя отклоняется (L2+) */

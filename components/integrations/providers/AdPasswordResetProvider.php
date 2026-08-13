@@ -122,10 +122,16 @@ class AdPasswordResetProvider extends IntegrationProvider
 		$logParams = ['login' => $targetLogin, 'pronounceable' => $pronounceable,
 			'length' => $length, 'unlock' => $unlock];
 
-		//куда доставлять пароль: первый мобильный номер сотрудника
-		$phone = trim(ArrayHelper::explode(',', $model->Mobile ?? '')[0] ?? '');
+		//куда доставлять пароль: первый заполненный телефон сотрудника,
+		//те же поля, что SMS-провайдер считает мобильными (Mobile, затем
+		//private_phone) - единый источник правды
+		$phone = '';
+		foreach (SmsProvider::PHONE_ATTRIBUTES as $attribute) {
+			$candidate = trim(ArrayHelper::explode(',', $model->$attribute ?? '')[0] ?? '');
+			if ($candidate !== '') { $phone = $candidate; break; }
+		}
 		if ($phone === '') {
-			return ActionResult::error('У сотрудника не заполнен мобильный номер - пароль некуда отправить', $logParams);
+			return ActionResult::error('У сотрудника не заполнен мобильный/личный телефон - пароль некуда отправить', $logParams);
 		}
 
 		//шаг 0: НЕДЕСТРУКТИВНАЯ предпроверка ДО SMS - валидны ли креды
