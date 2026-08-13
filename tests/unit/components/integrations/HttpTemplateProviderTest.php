@@ -189,6 +189,45 @@ class HttpTemplateProviderTest extends Unit
 	}
 
 	/**
+	 * Кнопка Web-UI появляется и БЕЗ конфига 'web' — база берётся из хоста
+	 * 'request' (частый случай: браузер и backend на одном адресе).
+	 */
+	public function testPbxWebButtonDerivedFromRequest()
+	{
+		$response = [
+			'success' => true,
+			'data' => [
+				'subscriber' => ['id' => 7, 'extension' => '1001'],
+				'status' => ['configured' => true, 'loaded' => true, 'registered' => true,
+					'online' => true, 'contacts' => []],
+				'call_duplications' => [],
+			],
+		];
+
+		//fetch подменён: request с реальным хостом (для вывода web),
+		//данные возвращаются без обращения к сети
+		$provider = new class($response) extends HttpTemplateProvider {
+			private array $mock;
+			public function __construct(array $mock) { $this->mock = $mock; }
+			protected function fetch(string $binding, \app\models\base\ArmsModel $model): array
+			{
+				return $this->mock;
+			}
+		};
+		$provider->id = 'pbx';
+		$provider->config = [
+			'appliesTo' => ['model' => Users::class],
+			'binding' => '{Mobile}',
+			'request' => 'http://phones.local:8080/api/v1/subscribers/status?extension={binding}',
+			//'web' НЕ задан — база должна вывестись из request
+			'panel' => ['template' => '@app/components/integrations/providers/views/pbx/status.php'],
+		];
+
+		$html = $provider->renderPanel(HttpTemplateProvider::PANEL, new Users(['Mobile' => '1001']));
+		$this->assertStringContainsString('http://phones.local:8080/subscriber/view?id=7', $html);
+	}
+
+	/**
 	 * Прогрессивный бейдж останавливается на первой недостигнутой ступени:
 	 * есть в БД и Asterisk, но не зарегистрирован
 	 */

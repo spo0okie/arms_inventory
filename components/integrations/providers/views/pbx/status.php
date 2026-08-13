@@ -61,8 +61,16 @@ foreach ($status['contacts'] ?? [] as $contact) {
 	break;
 }
 
-//ссылка на абонента в Web-UI телефонии (браузерный URL, настраивается)
+//ссылка на абонента в Web-UI телефонии. База — из конфига 'web'
+//(браузерный URL); если не задан, берём хост из 'request' (частый случай:
+//браузер и backend ходят на один адрес). Кнопка появляется без доп. конфига.
 $web = $provider->config['web'] ?? null;
+if (!$web && !empty($provider->config['request'])
+	//берём scheme://host:port из request регуляркой: parse_url спотыкается
+	//о плейсхолдеры {binding}, ещё не подставленные в шаблоне request
+	&& preg_match('~^(https?://[^/]+)~i', $provider->config['request'], $m)) {
+	$web = $m[1];
+}
 $subId = $subscriber['id'] ?? null;
 $webUrl = null;
 if ($web && $subId !== null) {
