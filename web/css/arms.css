@@ -16,6 +16,9 @@ div.users-view div.arms-card {
 div.arms-card .mb-3,
 div.arms-card p {margin-bottom: 0.6rem !important;}
 
+div.arms-card div.tree-level-2 div.progress {margin: 0; padding: 0;}
+div.arms-card div.tree-level-2 div.progress div.progress-bar {margin-top: 1px; margin-bottom: 1px; padding: 0;}
+
 div.arms-card span.arms-item,
 div.arms-card span.techs-item {font-family: 'Stencil', Helvetica, sans-serif; font-size: 112%}
 div.arms-card h3 {font-weight: bold; font-size: 42px; padding: 10pt 0 0 20pt;}

@@ -17,20 +17,27 @@ use Yii;
  */
 class PanelsCache
 {
-	/** Путь файла кэша (привязка хэшируется: IP/DN в имя файла не годятся) */
-	public static function path(string $providerId, string $panelId, string $binding): string
+	/**
+	 * Путь файла кэша (привязка хэшируется: IP/DN в имя файла не годятся).
+	 * Компактный рендер той же панели - отдельный файл: HTML у режимов
+	 * разный, а привязка одна.
+	 */
+	public static function path(string $providerId, string $panelId, string $binding,
+		bool $compact = false): string
 	{
 		return Yii::getAlias('@app').'/runtime/integrations_cache/'
-			.basename($providerId).'/'.basename($panelId).'/'.md5($binding).'.html';
+			.basename($providerId).'/'.basename($panelId).'/'
+			.md5($binding).($compact ? '.compact' : '').'.html';
 	}
 
 	/**
 	 * Содержимое кэша и его возраст
 	 * @return array|null ['html'=>string, 'age'=>int сек] либо null если кэша нет
 	 */
-	public static function fetch(string $providerId, string $panelId, string $binding): ?array
+	public static function fetch(string $providerId, string $panelId, string $binding,
+		bool $compact = false): ?array
 	{
-		$path = static::path($providerId, $panelId, $binding);
+		$path = static::path($providerId, $panelId, $binding, $compact);
 		if (!is_file($path)) return null;
 		$html = @file_get_contents($path);
 		if ($html === false) return null;
@@ -38,9 +45,10 @@ class PanelsCache
 	}
 
 	/** Атомарная запись (tmp + rename): ошибка рендера кэш не трогает */
-	public static function store(string $providerId, string $panelId, string $binding, string $html): void
+	public static function store(string $providerId, string $panelId, string $binding, string $html,
+		bool $compact = false): void
 	{
-		$path = static::path($providerId, $panelId, $binding);
+		$path = static::path($providerId, $panelId, $binding, $compact);
 		$dir = dirname($path);
 		if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
 			Yii::warning("Can't create cache dir $dir", __METHOD__);

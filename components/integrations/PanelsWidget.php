@@ -87,7 +87,8 @@ class PanelsWidget extends Widget
 		$containerId = 'integration-'.$provider->id.'-'.$panelId.'-'.$classId.'-'.$model->id;
 		$title = $descriptor['title'] ?? $provider->getTitle();
 
-		$cached = is_null($binding) ? null : PanelsCache::fetch($provider->id, $panelId, $binding);
+		$cached = is_null($binding) ? null
+			: PanelsCache::fetch($provider->id, $panelId, $binding, $this->compact);
 		$fresh = $cached && $cached['age'] <= $provider->panelTtl($panelId, $model);
 
 		$body = $cached ? $cached['html']
@@ -102,16 +103,15 @@ class PanelsWidget extends Widget
 			.'>'.$body.'</div></div>';
 		 */
 
-		$html = ($this->compact
-				? '<small class="text-secondary">'.Html::encode($title).'</small>'
-				: '<h4>'.Html::encode($title).'</h4>')
+		$html = ('<h4>'.Html::encode($title).'</h4>')
 			.'<div class="'.($this->compact ? 'mb-2' : 'mb-3').'" id="'.$containerId.'"'
 				.($fresh ? '' : ' style="opacity:.5"')
 			.'>'.$body.'</div>';
 
 		if (!$fresh) {
 			$url = Url::to(['/integrations/panel', 'provider' => $provider->id, 'panel' => $panelId,
-				'class' => $classId, 'id' => $model->id]);
+				'class' => $classId, 'id' => $model->id]
+				+ ($this->compact ? ['compact' => 1] : []));
 			$html .= '<script>$.get('.json_encode($url).', function(data) {'
 				.'$("#'.$containerId.'").html(data).css("opacity","");'
 				.'});</script>';

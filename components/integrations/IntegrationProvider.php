@@ -41,6 +41,14 @@ abstract class IntegrationProvider
 	public array $config = [];
 
 	/**
+	 * @var bool панель рисуется в компактном режиме (вложенный список -
+	 * ОС внутри АРМ в карточке сотрудника). Ставит proxy-контроллер по
+	 * параметру запроса, во view приходит как $compact (см. renderView()).
+	 * Кэш панели ведётся отдельно на каждый режим.
+	 */
+	public bool $compact = false;
+
+	/**
 	 * @var int|null id записи журнала ТЕКУЩЕГО выполняемого действия;
 	 * заполняется реестром на время runAction(). Составные действия
 	 * передают его как parentLogId вложенных вызовов
@@ -158,13 +166,17 @@ abstract class IntegrationProvider
 
 	/**
 	 * Рендер view-файла провайдера
-	 * (components/integrations/providers/views/<id>/<view>.php)
+	 * (components/integrations/providers/views/<id>/<view>.php).
+	 *
+	 * Во view всегда приходит $compact - панель рисуется во вложенном
+	 * списке (ОС внутри АРМ) и должна быть плотнее; провайдеру для этого
+	 * ничего делать не нужно.
 	 */
 	public function renderView(string $view, array $params = []): string
 	{
 		return Yii::$app->view->render(
 			'@app/components/integrations/providers/views/'.$this->id.'/'.$view,
-			$params
+			array_merge(['compact' => $this->compact], $params)
 		);
 	}
 

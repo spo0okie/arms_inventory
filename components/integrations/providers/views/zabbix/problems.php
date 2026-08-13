@@ -14,6 +14,7 @@ use yii\helpers\Html;
 /* @var $urls array ссылки на разделы Zabbix (L0), пусто если web не задан */
 /* @var $model \app\models\base\ArmsModel */
 /* @var $provider \app\components\integrations\providers\ZabbixProvider */
+/* @var $compact bool панель рисуется во вложенном списке - нужно плотнее */
 
 if ($notFound) {
 	echo '<span class="text-secondary opacity-75">узел не найден в Zabbix</span>';
@@ -53,13 +54,22 @@ $percentText = static function (float $percent): string {
 //строка «подпись + полоса загрузки»
 $loadBar = static function (string $label, float $percent) use ($loadClass, $percentText) {
 	$width = max(2, $percent); //иначе при 0% не видно самой полосы
-	return '<div class="d-flex align-items-center mt-1">'
+	return '<div class="d-flex align-items-center">'
 		.'<small class="text-secondary text-truncate pe-2" style="width:7em" title="'.Html::encode($label).'">'
 			.Html::encode($label).'</small>'
-		.'<div class="progress flex-grow-1" style="height:1rem;max-width:22rem">'
+		.'<div class="progress flex-grow-1" style="max-width:22rem">'
 			.'<div class="progress-bar '.$loadClass($percent).'" role="progressbar" '
 				.'style="width:'.$width.'%">'.$percentText($percent).'</div>'
 		.'</div></div>';
+};
+
+//отступ между метриками: в карточке объекта просторнее, во вложенном
+//списке (ОС внутри АРМ) плотнее - там места мало
+$metricPad = $compact ? 'pe-3' : 'pe-4';
+
+//строка «подпись + значение» (убрал бары, сильно ярко - отвлекают)
+$loadBar = static function (string $label, float $percent) use ($percentText, $metricPad) {
+	return '<span class="'.$metricPad.'">'.Html::encode($label).' '.$percentText($percent).'</span>';
 };
 
 //состояние узла: выключенный мониторинг важнее доступности - у него
@@ -85,7 +95,8 @@ $links = [
 ];
 
 ?>
-<div class="d-flex align-items-center mb-1">
+
+<div class="d-flex align-items-center mb-0 mt-0">
 	<span>
 		<?php if ($stateBadge) { ?>
 			<span class="badge <?= $stateBadge[0] ?>" title="<?= Html::encode($stateBadge[2]) ?>"><?= $stateBadge[1] ?></span>
@@ -115,24 +126,26 @@ if (!empty($metrics)) {
 	$clock = $metrics['clock'] ?? null;
 	if (!is_null($clock)) {
 		$stale = (time() - $clock) > $provider->staleAfter();
-		echo '<div><small class="'.($stale ? 'text-warning' : 'text-secondary').'"'
-			.' title="'.Html::encode($formatter->asDatetime($clock, 'php:d.m.Y H:i:s')).'">'
-			.($stale ? '<i class="fas fa-exclamation-triangle"></i> данные устарели: ' : 'данные: ')
+		echo '<small class="'.($stale ? 'text-warning' : 'text-secondary').'"'
+			.' title="Когда данные получены мониторингом Zabbix: '.Html::encode($formatter->asDatetime($clock, 'php:d.m.Y H:i:s')).'">'
+			.($stale ? '<i class="fas fa-exclamation-triangle"></i> данные устарели: ' : 'данные актуальны на: ')
 			.Html::encode($formatter->asRelativeTime($clock))
-			.'</small></div>';
+			.'</small>';
 	} elseif (!empty($metrics['candidates'])) {
 		//item'ы есть, а значений нет - сбор данных прекращён
-		echo '<div><small class="text-warning"><i class="fas fa-exclamation-triangle"></i> '
-			.'данные не поступали более суток</small></div>';
+		echo '<small class="text-warning"><i class="fas fa-exclamation-triangle"></i> '
+			.'данные не поступали более суток</small>';
 	}
 
 	//метрики: показываем только те, что нашлись в шаблоне узла
+	echo '<div class="d-flex align-items-center mt-0 pt-0">';
 	if (!is_null($metrics['uptime'] ?? null)) { ?>
-		<div><small><span class="text-secondary">Аптайм:</span> <?= $uptimeText($metrics['uptime']) ?></small></div>
+		<span class="<?= $metricPad ?>">Аптайм: <?= $uptimeText($metrics['uptime']) ?></span>
 	<?php }
 	if (!is_null($metrics['cpu'] ?? null)) echo $loadBar('CPU', $metrics['cpu']);
 	if (!is_null($metrics['ram'] ?? null)) echo $loadBar('Память', $metrics['ram']);
-	foreach ($metrics['disks'] ?? [] as $disk) echo $loadBar($disk['name'], $disk['used']);
+	foreach ($metrics['disks'] ?? [] as $disk) echo $loadBar('Диск '.$disk['name'], $disk['used']);
+	echo '</div>'; //строка метрик закончилась - иначе проблемы уедут в неё же
 	if (count($problems)) echo '<hr class="my-2">';
 }
 ?>

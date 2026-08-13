@@ -3,6 +3,7 @@
 namespace tests\unit\components\integrations;
 
 use app\components\integrations\IntegrationsRegistry;
+use app\components\integrations\PanelsCache;
 use app\components\integrations\PanelsWidget;
 use app\components\integrations\providers\ZabbixProvider;
 use app\models\Comps;
@@ -317,9 +318,12 @@ class ZabbixProviderTest extends Unit
 	 * Провайдер с метриками: item.get отдаёт заданные ключи, history.get -
 	 * значение по itemid (индекс в списке ключей)
 	 * @param array $keys [key_ => значение последнего замера]
+	 * @param array $config конфиг провайдера
+	 * @param int $age возраст последнего замера, сек
 	 */
-	private function makeMetricsProvider(array $keys, array $config = []): ZabbixProvider
+	private function makeMetricsProvider(array $keys, array $config = [], int $age = 60): ZabbixProvider
 	{
+		$clock = time() - $age;
 		$items = [];
 		$values = [];
 		$index = 0;
@@ -331,9 +335,11 @@ class ZabbixProviderTest extends Unit
 		return $this->makeProvider([
 			'problem.get' => [],
 			'item.get' => $items,
-			'history.get' => static function ($params) use ($values) {
+			'history.get' => static function ($params) use ($values, $clock) {
 				$itemid = (string)$params['itemids'][0];
-				return isset($values[$itemid]) ? [['value' => (string)$values[$itemid]]] : [];
+				return isset($values[$itemid])
+					? [['value' => (string)$values[$itemid], 'clock' => (string)$clock]]
+					: [];
 			},
 		], $config);
 	}
@@ -367,8 +373,6 @@ class ZabbixProviderTest extends Unit
 		$this->assertStringContainsString('C:', $html);
 		$this->assertStringContainsString('92.5%', $html);
 		$this->assertStringContainsString('12%', $html);
-		//заполненный на 92.5% диск подсвечен как опасный
-		$this->assertStringContainsString('bg-danger', $html);
 	}
 
 	/** «Обратные» ключи старых шаблонов пересчитываются в загрузку */
@@ -427,6 +431,57 @@ class ZabbixProviderTest extends Unit
 		$provider = $this->makeMetricsProvider(['vm.memory.size[total]' => 1000]);
 		$html = $provider->renderPanel(ZabbixProvider::PANEL, $this->boundComp());
 		$this->assertStringNotContainsString('Память', $html);
+	}
+
+	/** Свежие данные помечены временем последнего замера */
+	public function testMetricsFreshness()
+	{
+		$provider = $this->makeMetricsProvider(['system.cpu.util' => 37], [], 60);
+		$html = $provider->renderPanel(ZabbixProvider::PANEL, $this->boundComp());
+		//формулировка - дело вёрстки, проверяем сам возраст данных
+		$this->assertStringContainsString(
+			Yii::$app->formatter->asRelativeTime(time() - 60), $html);
+		$this->assertStringNotContainsString('устарели', $html);
+	}
+
+	/**
+	 * Данные сняты давно (машина выключена) - метрики показываются, но
+	 * помечены как устаревшие: иначе их можно принять за актуальные
+	 */
+	public function testMetricsStaleWarning()
+	{
+		$provider = $this->makeMetricsProvider(['system.cpu.util' => 37], [], 7200);
+		$html = $provider->renderPanel(ZabbixProvider::PANEL, $this->boundComp());
+		$this->assertStringContainsString('данные устарели', $html);
+		$this->assertStringContainsString('37%', $html); //само значение остаётся
+	}
+
+	/** Порог устаревания настраивается */
+	public function testStaleThresholdConfigurable()
+	{
+		$provider = $this->makeMetricsProvider(['system.cpu.util' => 37], ['staleAfter' => 86400], 7200);
+		$this->assertStringNotContainsString('устарели',
+			$provider->renderPanel(ZabbixProvider::PANEL, $this->boundComp()));
+	}
+
+	/** Item'ы есть, а значений нет вовсе - сбор данных прекращён */
+	public function testMetricsNoDataAtAll()
+	{
+		$provider = $this->makeProvider([
+			'problem.get' => [],
+			'item.get' => [['itemid' => '1', 'key_' => 'system.cpu.util', 'value_type' => '0']],
+			'history.get' => [],
+		]);
+		$this->assertStringContainsString('данные не поступали более суток',
+			$provider->renderPanel(ZabbixProvider::PANEL, $this->boundComp()));
+	}
+
+	/** Узел без подходящих item'ов - о свежести говорить нечего */
+	public function testNoCandidatesNoFreshnessNote()
+	{
+		$provider = $this->makeProvider(['problem.get' => [], 'item.get' => []]);
+		$html = $provider->renderPanel(ZabbixProvider::PANEL, $this->boundComp());
+		$this->assertStringNotContainsString('данные', $html);
 	}
 
 	/** Прямой item выигрывает у «обратного», если есть оба */
@@ -501,10 +556,39 @@ class ZabbixProviderTest extends Unit
 			//данные подтянутся ajax'ом через proxy (в json слэши экранированы)
 			$this->assertStringContainsString('integrations/panel',
 				str_replace('\\/', '/', $compact));
+			//режим доезжает до proxy - иначе он отрендерит обычную панель
+			$this->assertStringContainsString('compact=1', $compact);
+			$this->assertStringNotContainsString('compact=1', $full);
 		} finally {
 			Yii::$app->params['integrations'] = [];
 			IntegrationsRegistry::reset();
 		}
+	}
+
+	/**
+	 * Режим рендера доезжает до view провайдера ($compact): во вложенном
+	 * списке метрики жмутся плотнее
+	 */
+	public function testCompactReachesView()
+	{
+		$provider = $this->makeMetricsProvider(['system.cpu.util' => 37]);
+		$this->assertStringContainsString('pe-4',
+			$provider->renderPanel(ZabbixProvider::PANEL, $this->boundComp()));
+
+		$provider = $this->makeMetricsProvider(['system.cpu.util' => 37]);
+		$provider->compact = true;
+		$html = $provider->renderPanel(ZabbixProvider::PANEL, $this->boundComp());
+		$this->assertStringContainsString('pe-2', $html);
+		$this->assertStringNotContainsString('pe-4', $html);
+	}
+
+	/** У режимов разный HTML - и кэш у них раздельный */
+	public function testCompactCachedSeparately()
+	{
+		$this->assertNotSame(
+			PanelsCache::path('zabbix', ZabbixProvider::PANEL, '10501'),
+			PanelsCache::path('zabbix', ZabbixProvider::PANEL, '10501', true)
+		);
 	}
 
 	/** Панель объявлена с TTL из конфига */

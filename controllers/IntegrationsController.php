@@ -49,7 +49,9 @@ class IntegrationsController extends ArmsBaseController
 	 *   provider (string) — id провайдера;
 	 *   panel (string)    — id панели;
 	 *   class (string)    — kebab-case класс объекта (users, techs, ...);
-	 *   id (int)          — id объекта.
+	 *   id (int)          — id объекта;
+	 *   compact (int)     — 1, если панель рисуется во вложенном списке
+	 *                       (плотнее; кэшируется отдельно от обычной).
 	 *
 	 * Отдаёт готовый HTML панели: свежий кэш как есть, иначе рендер
 	 * провайдера с сохранением в кэш. Ошибка рендера не перетирает кэш
@@ -58,7 +60,7 @@ class IntegrationsController extends ArmsBaseController
 	 * @return string HTML панели
 	 * @throws NotFoundHttpException
 	 */
-	public function actionPanel(string $provider, string $panel, string $class, $id)
+	public function actionPanel(string $provider, string $panel, string $class, $id, $compact = 0)
 	{
 		$providerObj = $this->findProvider($provider);
 		$model = $this->findIntegrationModel($providerObj, $class, $id);
@@ -66,11 +68,13 @@ class IntegrationsController extends ArmsBaseController
 		if (!isset($providerObj->panels($model)[$panel]))
 			throw new NotFoundHttpException("Panel '$panel' not found");
 
+		//режим рендера доезжает до view провайдера через renderView()
+		$providerObj->compact = (bool)$compact;
 		$binding = $providerObj->binding($model);
 
 		//пока ajax летел, кэш мог успеть стать свежим - не рендерим зря
 		if (!is_null($binding)
-			&& ($cached = PanelsCache::fetch($providerObj->id, $panel, $binding))
+			&& ($cached = PanelsCache::fetch($providerObj->id, $panel, $binding, $providerObj->compact))
 			&& $cached['age'] <= $providerObj->panelTtl($panel, $model)
 		) return $cached['html'];
 
@@ -86,7 +90,8 @@ class IntegrationsController extends ArmsBaseController
 			return '<span class="text-secondary opacity-75">'
 				.Html::encode($providerObj->getTitle()).$detail.'</span>';
 		}
-		if (!is_null($binding)) PanelsCache::store($providerObj->id, $panel, $binding, $html);
+		if (!is_null($binding))
+			PanelsCache::store($providerObj->id, $panel, $binding, $html, $providerObj->compact);
 		return $html;
 	}
 
