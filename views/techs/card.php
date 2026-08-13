@@ -180,5 +180,4 @@ if (is_object($model->state)) { ?>
     } ?>
 </p>
 
-<?= ModelFieldWidget::renderFieldTitle($model,'history') ?>
-<?= ModelFieldWidget::renderFieldValue($model,'history') ?><br />
+<?= ModelFieldWidget::widget(['model'=>$model,'field'=>'history']) ?>
