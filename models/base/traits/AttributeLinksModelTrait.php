@@ -262,6 +262,49 @@ trait AttributeLinksModelTrait
 	}
 
 	/**
+	 * Реально ли изменился аттрибут-ссылка в этом цикле сохранения.
+	 * Просто dirty-признака (attributeLinkIsDirty) недостаточно: LinkerBehavior
+	 * помечает аттрибут dirty при любом присваивании не сравнивая значений,
+	 * а EachValidator (правила вида [['x_ids'],'each',...]) при валидации
+	 * перечитывает и переприсваивает аттрибут, поэтому после validate()
+	 * все *_ids с each-правилом всегда dirty даже без реальных изменений.
+	 * Здесь присвоенный набор id сравнивается с сохранённым в БД.
+	 * @param string $attr
+	 * @return bool
+	 */
+	public function attributeLinkChanged(string $attr): bool {
+		foreach ($this->getBehaviors() as $behavior) {
+			if (!$behavior instanceof LinkerBehavior || !$behavior->hasDirtyValueOfAttribute($attr))
+				continue;
+			$new=static::linkIdsNormalize($behavior->getDirtyValueOfAttribute($attr));
+			if ($this->isNewRecord) return count($new)>0;
+			//если старый набор не достать - считаем изменённым (как вело себя attributeLinkIsDirty)
+			if (!($loader=$this->attributeLinkLoader($attr))) return true;
+			$relation=$this->getRelation($loader);
+			/** @var \yii\db\ActiveRecord $class */
+			$class=$relation->modelClass;
+			$old=static::linkIdsNormalize($relation->select($class::primaryKey())->column());
+			return $new!==$old;
+		}
+		return false;
+	}
+
+	/**
+	 * Нормализация набора id ссылок для сравнения (int, без пустых/дублей, по возрастанию)
+	 * @param mixed $ids
+	 * @return int[]
+	 */
+	protected static function linkIdsNormalize($ids): array {
+		$result=[];
+		foreach (is_array($ids)?$ids:[$ids] as $id) {
+			if ($id===null || $id==='') continue;
+			$result[(int)$id]=(int)$id;
+		}
+		sort($result);
+		return $result;
+	}
+
+	/**
 	 * Является ли аттрибут загрузчиком для ссылки
 	 * в linksClasses должно быть проставлено на какой класс ссылка
 	 * @param string $loader

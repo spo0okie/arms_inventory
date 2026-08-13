@@ -209,4 +209,57 @@ class CompsRescanDeferTest extends Unit
 		$this->assertCount(1, static::fullRescanQueue($comp),
 			'правка паспорта (soft_ids) должна ставить задание рескана');
 	}
+
+	/**
+	 * Отложенный режим: сохранение С валидацией без изменения паспорта не должно
+	 * ставить заданий. Регрессия: EachValidator переприсваивает soft_ids при
+	 * validate(), LinkerBehavior помечает атрибут dirty без сравнения значений -
+	 * любой валидируемый save (в т.ч. REST PUT одного external_links от
+	 * zabbix-синхронизации) ставил холостой полный рескан.
+	 */
+	public function testDeferredModeValidatedSaveWithoutPassportChangeDoesNotQueue()
+	{
+		Yii::$app->params['soft.deferred_rescan'] = true;
+
+		$soft = $this->makeSoft('RescanTestPkg');
+		$comp = $this->makeComp(null);
+
+		//заполняем паспорт (реальное изменение - задание ставится штатно) и чистим очередь
+		$comp = Comps::findOne($comp->id);
+		$comp->soft_ids = [$soft->id];
+		$this->assertTrue($comp->save(false), print_r($comp->errors, true));
+		foreach (CompsRescanQueue::find()->where(['comps_id' => $comp->id])->all() as $queue) {
+			$queue->delete();
+		}
+
+		//сохранение с валидацией без правки паспорта (кейс PUT external_links)
+		$comp = Comps::findOne($comp->id);
+		$comp->comment = 'правка не связанная с паспортом';
+		$this->assertTrue($comp->save(), print_r($comp->errors, true));
+		$this->assertCount(0, static::fullRescanQueue($comp),
+			'валидируемое сохранение без изменения паспорта не должно ставить заданий');
+
+		//присваивание того же набора (эхо всего объекта в PUT) - тоже не изменение
+		$comp = Comps::findOne($comp->id);
+		$comp->soft_ids = [(string)$soft->id];
+		$this->assertTrue($comp->save(), print_r($comp->errors, true));
+		$this->assertCount(0, static::fullRescanQueue($comp),
+			'присваивание неизменившегося набора soft_ids не должно ставить заданий');
+
+		//а реальное изменение набора - ставит
+		$soft2 = new Soft();
+		$soft2->setAttributes([
+			'manufacturers_id' => $soft->manufacturers_id,
+			'descr' => 'rescan-test-product-2',
+			'items' => 'RescanTestPkg2',
+			'additional' => '',
+		], false);
+		$this->assertTrue($soft2->save(false), print_r($soft2->errors, true));
+
+		$comp = Comps::findOne($comp->id);
+		$comp->soft_ids = [$soft->id, $soft2->id];
+		$this->assertTrue($comp->save(), print_r($comp->errors, true));
+		$this->assertCount(1, static::fullRescanQueue($comp),
+			'реальное изменение паспорта должно ставить задание рескана');
+	}
 }

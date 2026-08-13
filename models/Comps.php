@@ -960,13 +960,16 @@ class Comps extends ArmsModel
 			/* Распознавание ПО (softHits_ids из raw_soft+soft_ids) нужно только когда
 			   менялся отпечаток софта или паспортное ПО; рядовое сохранение записи
 			   (правка полей руками, пуш с неизменным отпечатком) скан не запускает.
+			   soft_ids проверяется по значению (attributeLinkChanged), а не по dirty-флагу:
+			   EachValidator переприсваивает *_ids при validate(), так что после любого
+			   сохранения с валидацией soft_ids всегда dirty даже без реальных изменений.
 			   В режиме soft.deferred_rescan скан не выполняется даже при изменениях —
 			   afterSave поставит задание в CompsRescanQueue, отработает cron comps/rescan
 			   (он форсирует скан через $forceRescan). */
 			$this->rescanNeeded=!Soft::$disable_rescan && (
 				$this->forceRescan
 				|| $this->isAttributeChanged('raw_soft')
-				|| $this->attributeLinkIsDirty('soft_ids')
+				|| $this->attributeLinkChanged('soft_ids')
 			);
 			$this->rescanPerformed=false;
 			if ($this->rescanNeeded
