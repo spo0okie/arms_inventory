@@ -17,9 +17,10 @@ $acesContent=[];
 foreach ($aces as $ace) {
 	$acesContent[]=$this->render('/aces/tdrow',['model'=>$ace]);
 }
+//ACE загружается штатным load(), поэтому параметр именованный (Aces[acls_id]), не плоский
 $acesContent[]=
 '<td colspan="2">'.
-	\yii\helpers\Html::a('Добавить доступ',['aces/create','acls_id'=>$model->id],['class'=>'btn btn-success']).
+	\yii\helpers\Html::a('Добавить доступ',['aces/create','Aces[acls_id]'=>$model->id],['class'=>'btn btn-success']).
 '</td>';
 
 ?>

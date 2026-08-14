@@ -20,6 +20,11 @@ use yii\helpers\Url;
 if (!isset($modalParent)) $modalParent=null;
 if (!isset($schedule)) $schedule=null;
 
+/*
+ * NB: оба скрипта ниже регистрируются в <head>, вне ready-обертки Yii, поэтому обращаемся
+ * к jQuery по полному имени (глобальный `$` может быть занят посторонним скриптом,
+ * см. комментарий в views/access-types/_picker.php)
+ */
 /** @noinspection JSUnusedLocalSymbolsInspection */
 /** @noinspection JSUnusedLocalSymbols */
 $js= <<<JS
@@ -30,12 +35,12 @@ ipInput="select#acls-ips_id";
 netInput="select#acls-networks_id";
 srvInput="select#acls-services_id";
 function onInputUpdate(input) {
-    //console.log("clearing not "+input+": "+$(input).val())
-    if ($(input).val()) {
+    //console.log("clearing not "+input+": "+jQuery(input).val())
+    if (jQuery(input).val()) {
         [commentInput,compInput,techInput,ipInput,srvInput,netInput].forEach(item => {
             if (item !== input) {
                 //console.log("clearing "+item)
-            	$(item).val("").trigger("change");
+            	jQuery(item).val("").trigger("change");
             }
         })
 	}
@@ -58,8 +63,8 @@ $defaultsJs= <<<JS
 let serviceDefaultTypes=[];	//текущие авто-выставленные (id строками)
 let userTouchedTypes={};	//типы, которые пользователь щёлкал руками
 
-$(document).on('change','input[name="Aces[access_types_ids][]"]',function(){
-	userTouchedTypes[String($(this).val())]=true;
+jQuery(document).on('change','input[name="Aces[access_types_ids][]"]',function(){
+	userTouchedTypes[String(jQuery(this).val())]=true;
 });
 
 //typesMap: { access_types_id: {ip_params: строка-переопределение | null}, ... }
@@ -69,12 +74,12 @@ function applyServiceDefaultAccessTypes(typesMap) {
 	//снимаем прежние авто-галочки, выпавшие из дефолтов (заблокированные дочерние не трогаем)
 	serviceDefaultTypes.forEach(function(id){
 		if (defaults.indexOf(id)<0 && !userTouchedTypes[id]) {
-			$('input[name="Aces[access_types_ids][]"][value='+id+']:not(:disabled)').prop('checked',false);
+			jQuery('input[name="Aces[access_types_ids][]"][value='+id+']:not(:disabled)').prop('checked',false);
 		}
 	});
 	defaults.forEach(function(id){
 		if (!userTouchedTypes[id]) {
-			$('input[name="Aces[access_types_ids][]"][value='+id+']').prop('checked',true);
+			jQuery('input[name="Aces[access_types_ids][]"][value='+id+']').prop('checked',true);
 			//сервисное переопределение сетевых параметров (например HTTPS на порту 8140):
 			//создаём инпут параметров с ним раньше, чем updateAccessTypes подтянет
 			//дефолт типа (ensureAccessTypeParamInput существующий инпут не трогает)
@@ -87,15 +92,15 @@ function applyServiceDefaultAccessTypes(typesMap) {
 }
 
 function fetchServiceDefaultAccessTypes() {
-	let ids=$('select#acls-services_ids').val()||[];
+	let ids=jQuery('select#acls-services_ids').val()||[];
 	if (!ids.length) {
 		applyServiceDefaultAccessTypes({});
 		return;
 	}
-	$.getJSON('{$defaultTypesUrl}',{ids:ids},applyServiceDefaultAccessTypes);
+	jQuery.getJSON('{$defaultTypesUrl}',{ids:ids},applyServiceDefaultAccessTypes);
 }
 
-$(document).on('change','select#acls-services_ids',fetchServiceDefaultAccessTypes);
+jQuery(document).on('change','select#acls-services_ids',fetchServiceDefaultAccessTypes);
 JS;
 if ($model->isNewRecord) {
 	$this->registerJs($defaultsJs,yii\web\View::POS_HEAD);

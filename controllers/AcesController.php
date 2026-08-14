@@ -38,10 +38,13 @@ class AcesController extends ArmsBaseController
     }
 
 	/**
-	 * Создаёт ACE (и при необходимости ACL) из общей формы ACL+ACE.
+	 * Создаёт ACE в заданном ACL.
 	 *
-	 * Для POST-вызова ожидаются валидные данные для моделей Aces и Acls.
-	 * При успешной валидации обеих моделей создаются записи и выполняется redirect.
+	 * ACE живет только внутри ACL, поэтому ACL-контекст (`Aces[acls_id]`) обязателен.
+	 * Если его нет (например, кнопка «Добавить» в списке доступов), то создавать надо
+	 * не только запись доступа, но и сам ACL с ресурсом — этот запрос передается
+	 * {@see AclsController::actionCreate()}, который умеет создавать ACL (в том числе
+	 * несколько сразу, по одному на выбранный ресурс) вместе с общим ACE.
 	 *
 	 * @return mixed
 	 */
@@ -50,9 +53,13 @@ class AcesController extends ArmsBaseController
 		$this->view->registerAssetBundle(ArmsFormAsset::class);
 		/** @var Aces $model */
 		$model = new $this->modelClass();
-		$acl = new Acls();
 		$model->load(Yii::$app->request->get());
-		$acl->load(Yii::$app->request->get());
+
+		//форма без ACL-контекста постится на этот же URL, поэтому ACL ищем и в POST
+		if (empty($model->acls_id) && empty(Yii::$app->request->post('Aces')['acls_id'] ?? null)) {
+			return Yii::$app->runAction('acls/create');
+		}
+
 		//дефолтные типы доступа сервиса-ресурса предзаполняют галочки нового ACE (issue #204);
 		//POST-данные формы (включая пустой checkboxList) перекрывают предзаполнение ниже
 		if (empty($model->access_types_ids)
@@ -64,25 +71,12 @@ class AcesController extends ArmsBaseController
 			//сервисные переопределения сетевых параметров (HTTPS на нестандартном порту и т.п.)
 			if ($params=$service->defaultIpParams) $model->setIpParams($params);
 		}
-		if ($model->load(Yii::$app->request->post())){
-			if($model->validate()) {
-				if ($acl->load(Yii::$app->request->post())){
-					if($acl->validate()) {
-						$acl->save();
-						$acl->refresh();
-						$model->acls_id=$model->id;
-						$model->save();
-						return $this->defaultReturn($this->routeOnUpdate($model), [$model]);
-					} else {
-						return $this->defaultRender('create', ['model' => $model,'acl'=>$acl]);
-					}
-				}
-				$model->save();
-				return $this->defaultReturn($this->routeOnUpdate($model), [$model]);
-			}
+
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			return $this->defaultReturn($this->routeOnUpdate($model), [$model]);
 		}
 
-		return $this->defaultRender('create', ['model' => $model,'acl'=>$acl]);
+		return $this->defaultRender('create', ['model' => $model]);
 	}
 
 	/**

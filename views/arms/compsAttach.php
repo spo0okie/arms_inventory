@@ -1,7 +1,9 @@
 <?php
+//скрипт живет в <head>, вне ready-обертки Yii: обращаемся к jQuery по полному имени,
+//глобальный `$` там не гарантирован (см. views/access-types/_picker.php)
 $script = <<<JS
     function attachCompToArm(comp_id,arm_id) {
-        $.ajax({
+        jQuery.ajax({
             url: '/web/comps/update?id='+comp_id,
             type: 'POST',
              data: { 'Comps[arm_id]' : arm_id },
@@ -9,8 +11,8 @@ $script = <<<JS
                 console.log(data[0].id+' -> '+data[0].arm_id);
                  if (typeof data[0].id != 'undefined'){
                      if (data[0].arm_id == arm_id) {
-                         $('#arms-comp_id').append('<option value="'+data[0].id+'">'+data[0].name+'</option>');
-                         $('#comp-attach-selector'+data[0].id).hide();
+                         jQuery('#arms-comp_id').append('<option value="'+data[0].id+'">'+data[0].name+'</option>');
+                         jQuery('#comp-attach-selector'+data[0].id).hide();
                      }
                  }
              }

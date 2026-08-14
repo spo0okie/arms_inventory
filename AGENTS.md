@@ -76,6 +76,8 @@ tests/      → Codeception
 - Следовать существующим паттернам наследования
 - Использовать `Yii::$app->` для доступа к компонентам
 - Сохранять структуру файлов Views (`index`, `view`, `_form`, `item`, `ttip`)
+- В JS вне ready-обёртки Yii (`POS_HEAD`/`POS_END`, тела функций для `onchange`/`onclick`)
+  обращаться к `jQuery`, а не к глобальному `$` (см. `standards.md`, «Стандарты Views»)
 - Документировать REST API через `@OA\` аннотации
 
 **DONT:**

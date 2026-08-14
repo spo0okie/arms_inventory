@@ -185,6 +185,39 @@ views/{model-name}/
 └── columns.php        # Определение колонок для Grid -> index
 ```
 
+### JS во views: вне ready-обёртки обращаемся к `jQuery`, а не к `$` — СТАНДАРТ
+
+Yii оборачивает только `POS_READY`-скрипты в `jQuery(function ($) {…})`, где `$` —
+параметр обёртки и всегда сам jQuery. Весь остальной наш JS (`registerJs(…, POS_HEAD)`
+и `POS_END`, тела функций, вызываемых из inline-обработчиков `onchange`/`onclick`,
+файлы бандлов) выполняется в **глобальной** области, где `$` нам не принадлежит:
+его может занять сторонний скрипт (расширение браузера, инжект корпоративного
+фильтра трафика на HTTPS-странице, `noConflict()` чужой библиотеки).
+
+Правило:
+
+```php
+//ПРАВИЛЬНО: registerJs(..., POS_HEAD) — обращение к jQuery по полному имени
+$js= <<<JS
+function updateAccessTypes() {
+	jQuery('input[name="'+accessTypesCheckName+'"]:checked').each(…);
+	jQuery.ajax({…});
+}
+JS;
+$this->registerJs($js, View::POS_HEAD);
+
+//ПРАВИЛЬНО: POS_READY (по умолчанию) — здесь `$` даёт сама обёртка Yii
+$this->registerJs('if (!$(\'input:checked\').length) updateAccessTypes();');
+```
+
+Цена нарушения — не косметическая: все `POS_READY`-скрипты страницы склеены в **один**
+ready-колбэк, поэтому `TypeError: $ is not a function` в любой вызванной оттуда функции
+обрывает инициализацию всей страницы (select2, ActiveForm, тултипы) — форма просто
+перестаёт работать. Проявляется выборочно (на одном стенде есть, на другом нет),
+поэтому и ловится плохо: см. [`views/access-types/_picker.php`](views/access-types/_picker.php).
+
+Локальные JS-переменные вида `let $item = jQuery(el)` правилом не затрагиваются —
+это обычные идентификаторы.
 
 ## Changelog поддержка
 

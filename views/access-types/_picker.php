@@ -53,6 +53,12 @@ $overrideFlag=$paramsOverride?1:0;
  * которые должны быть выбраны (могут добавиться дочерние от комплексных - они блокируются от снятия),
  * а также параметры IP-типов для генерации инпутов
  */
+/*
+ * NB: код регистрируется в <head> и живет вне ready-обертки Yii (jQuery(function($){...})),
+ * поэтому обращаемся к jQuery по полному имени, а не через глобальный `$`: на его месте
+ * может оказаться что угодно (сторонние/инжектированные на страницу скрипты, noConflict),
+ * и тогда вся ready-цепочка страницы падает с «$ is not a function» - форма перестает работать
+ */
 /** @noinspection JSUnusedLocalSymbols */
 $js= <<<JS
 //параметризация пикера (имена инпутов зависят от модели-владельца)
@@ -63,8 +69,8 @@ accessTypesParamsOverride={$overrideFlag};
 
 //поднимает выбранные типы в топ (flex order), тогглит видимость инпутов IP-параметров, обновляет фильтр
 function markAccessTypesSelection() {
-	$('div.access-type-item').each(function(i,el){
-		let \$item=$(el);
+	jQuery('div.access-type-item').each(function(i,el){
+		let \$item=jQuery(el);
 		let checked=\$item.find('input[type=checkbox]').prop('checked');
 		\$item.toggleClass('order-0 w-100 selected',checked).toggleClass('order-1',!checked);
 		\$item.find('div.access-type-param').toggleClass('d-none',!checked);
@@ -74,10 +80,10 @@ function markAccessTypesSelection() {
 
 //фильтр списка по подстроке названия (выбранные видны всегда)
 function filterAccessTypes() {
-	let q=$('input#access-types-filter').val().toLowerCase().trim();
+	let q=jQuery('input#access-types-filter').val().toLowerCase().trim();
 	let total=0,shown=0;
-	$('div.access-type-item').each(function(i,el){
-		let \$item=$(el);
+	jQuery('div.access-type-item').each(function(i,el){
+		let \$item=jQuery(el);
 		total++;
 		let visible=!q
 			|| String(\$item.attr('data-name')).indexOf(q)>=0
@@ -85,7 +91,7 @@ function filterAccessTypes() {
 		\$item.toggleClass('d-none',!visible);
 		if (visible) shown++;
 	});
-	let \$count=$('span#access-types-filter-count');
+	let \$count=jQuery('span#access-types-filter-count');
 	if (shown<total) {
 		\$count.text(shown+' / '+total).removeClass('d-none');
 	} else {
@@ -95,15 +101,15 @@ function filterAccessTypes() {
 
 //создает (если еще нет) инпут IP-параметров внутри строки типа type_id
 function ensureAccessTypeParamInput(type_id,type) {
-	let \$item=$('div.access-type-item[data-type-id="'+type_id+'"]');
+	let \$item=jQuery('div.access-type-item[data-type-id="'+type_id+'"]');
 	if (!\$item.length || \$item.find('div.access-type-param').length) return;
-	let \$group=$('<div class="access-type-param input-group input-group-sm ms-3 flex-grow-1 w-auto"></div>')
+	let \$group=jQuery('<div class="access-type-param input-group input-group-sm ms-3 flex-grow-1 w-auto"></div>')
 		.attr('id','access_type_'+type_id+'_param');
-	\$group.append($('<span class="input-group-text"></span>')
+	\$group.append(jQuery('<span class="input-group-text"></span>')
 		.attr('id','access_type_'+type_id+'_param_label')
 		.text('IP параметры'));
 	let def=type.hasOwnProperty('default_param')?type.default_param:'';
-	let \$input=$('<input type="text" class="form-control">')
+	let \$input=jQuery('<input type="text" class="form-control">')
 		.attr('name',accessTypesParamPrefix+'['+type_id+']')
 		.attr('aria-describedby','access_type_'+type_id+'_param_label');
 	//режим override (сервис): дефолт типа - в placeholder, значение только если переопределено
@@ -116,22 +122,22 @@ function ensureAccessTypeParamInput(type_id,type) {
 function updateAccessTypes() {
 	//сбрасываем прежние авто-добавленные дочерние типы (disabled == выставлен автоматически),
 	//актуальные снова выставит ответ сервера
-	$('input[name="'+accessTypesCheckName+'"]:disabled').prop('disabled',false).prop('checked',false);
+	jQuery('input[name="'+accessTypesCheckName+'"]:disabled').prop('disabled',false).prop('checked',false);
 	let get_params=[];
 	//получаем список выбранных типов
-	$('input[name="'+accessTypesCheckName+'"]:checked').each(function(i,el){
-		get_params.push('access_types_ids[]='+$(el).val());
+	jQuery('input[name="'+accessTypesCheckName+'"]:checked').each(function(i,el){
+		get_params.push('access_types_ids[]='+jQuery(el).val());
 	});
 	markAccessTypesSelection();
 	if (!get_params.length) return;
 	//передаем в контроллер с типами доступа
-	$.ajax({
+	jQuery.ajax({
 		url:'{$bundleUrl}?'+get_params.join('&'),
 		success: function (data) {
 			for (let i in data) if (data.hasOwnProperty(i)) {
 				let type=data[i];
 				if (type.hasOwnProperty('optional')) {
-					$('input[name="'+accessTypesCheckName+'"][value='+i+']')
+					jQuery('input[name="'+accessTypesCheckName+'"][value='+i+']')
 						.prop('checked',true)
 						.prop('disabled',!(type.optional));
 				}
@@ -144,7 +150,7 @@ function updateAccessTypes() {
 
 //добавляет в список чекбокс нового (созданного через модалку) типа доступа
 function addAccessTypeItem(model) {
-	let \$item=$($('template#access-type-item-template').html());
+	let \$item=jQuery(jQuery('template#access-type-item-template').html());
 	let inputId='picker-access-type-'+model.id;
 	\$item.attr('data-type-id',model.id)
 		.attr('data-name',String(model.name||'').toLowerCase())
@@ -155,13 +161,13 @@ function addAccessTypeItem(model) {
 	\$item.find('label').attr('for',inputId).text(model.name);
 	//вставляем по алфавиту
 	let inserted=false;
-	$('div#'+accessTypesListId+' div.access-type-item').each(function(i,el){
-		if (!inserted && $(el).attr('data-name')>\$item.attr('data-name')) {
-			\$item.insertBefore($(el));
+	jQuery('div#'+accessTypesListId+' div.access-type-item').each(function(i,el){
+		if (!inserted && jQuery(el).attr('data-name')>\$item.attr('data-name')) {
+			\$item.insertBefore(jQuery(el));
 			inserted=true;
 		}
 	});
-	if (!inserted) $('div#'+accessTypesListId).append(\$item);
+	if (!inserted) jQuery('div#'+accessTypesListId).append(\$item);
 }
 
 //приемник модалки создания типа доступа (data-call-on-submit):
@@ -177,7 +183,7 @@ function accessTypePickerCreated(data) {
 	if (!model || !model.id) return;
 	//если тип с таким именем уже в списке (защита от дублей) - просто отмечаем
 	let lower=String(model.name||'').toLowerCase();
-	let \$existing=$('div.access-type-item').filter(function(){return $(this).attr('data-name')===lower;});
+	let \$existing=jQuery('div.access-type-item').filter(function(){return jQuery(this).attr('data-name')===lower;});
 	if (\$existing.length) {
 		\$existing.find('input[type=checkbox]').prop('checked',true);
 	} else {

@@ -40,22 +40,24 @@ class UrlParamSwitcherWidget extends Widget
 		
 		$newPageUrl=Url::current([$this->param=>!$this->state]);
 		$reload=$this->reload?'true':'false';
+		//скрипт живет в <head>, вне ready-обертки Yii: обращаемся к jQuery по полному имени,
+		//глобальный `$` там не гарантирован (см. views/access-types/_picker.php)
 		$js=<<<JS
 	function on{$this->param}SelectorChange(selector) {
 		if ($reload) {
 		    window.location.href='$newPageUrl';
-		    $(selector).attr('disabled',1);
-		    $(selector).parent().attr('qtip_ttip','Загрузка...');
-		    attach_qTip($(selector).parent(),true);
-			$(selector).parent().tooltipster('show');
+		    jQuery(selector).attr('disabled',1);
+		    jQuery(selector).parent().attr('qtip_ttip','Загрузка...');
+		    attach_qTip(jQuery(selector).parent(),true);
+			jQuery(selector).parent().tooltipster('show');
 		} else {
 			let url=new URL(window.location.href);
 			url.searchParams.set('{$this->param}', selector.checked?1:0);
 			window.history.pushState({},'',url.href);
-		    $(selector).parent().attr('qtip_ttip',selector.checked?'{$this->hintOff}':'{$this->hintOn}');
-		    attach_qTip($(selector).parent(),true);
+		    jQuery(selector).parent().attr('qtip_ttip',selector.checked?'{$this->hintOff}':'{$this->hintOn}');
+		    attach_qTip(jQuery(selector).parent(),true);
 		}
-		$(selector).parent().tooltipster('show');
+		jQuery(selector).parent().tooltipster('show');
 	}
 JS;
 		$this->view->registerJs($js,$this->view::POS_HEAD);

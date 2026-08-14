@@ -6,7 +6,6 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Aces */
-/* @var $acl app\models\Acls */
 
 $this->title = "Новый ". Aces::$title;
 
@@ -27,13 +26,8 @@ if (is_object($model->acl)) {
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= is_object($model->acl)?
-		$this->render('_form', [
-        'model' => $model,
-    	]):
-		$this->render('/acls/_form2', [
-			'model' => $acl,'ace'=>$model
-		])
-	?>
+	<?php //форма только самой ACE: ACL-контекст гарантирован контроллером
+		//(создание ACE без ACL уходит в acls/create) ?>
+    <?= $this->render('_form', ['model' => $model]) ?>
 
 </div>
