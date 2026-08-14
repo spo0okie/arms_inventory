@@ -4,7 +4,9 @@ namespace app\components\ldap;
 
 use LdapRecord\Connection;
 use LdapRecord\Container;
+use LdapRecord\Models\ActiveDirectory\Computer as AdComputer;
 use LdapRecord\Models\ActiveDirectory\User as AdUser;
+use LdapRecord\Models\Attributes\DistinguishedName;
 use Yii;
 use yii\base\Component;
 
@@ -109,6 +111,79 @@ class LdapService extends Component
 			'last_logon' => $this->winTimeToUnix($first('lastlogontimestamp')),
 			'account_expires' => $this->winTimeOrNever($first('accountexpires'), true),
 		];
+	}
+
+	/**
+	 * Справка об учётке КОМПЬЮТЕРА в AD (для панели AdComputerProvider):
+	 * где он лежит в дереве и в каких группах состоит.
+	 *
+	 * Ищем по sAMAccountName (у компьютеров это «ИМЯ$»), с запасным
+	 * поиском по cn - бывает, что имя объекта разошлось с учётной записью.
+	 * Имя из инвентаризации может прийти FQDN'ом, берём короткую часть.
+	 *
+	 * @return array|null null = компьютер не найден; иначе:
+	 *   dn, path (контейнеры сверху вниз), domain, groups[{name,dn}],
+	 *   enabled(bool), os, dns_name, last_logon(unix ts|null), description
+	 * @throws \LdapRecord\LdapRecordException при недоступности сервера
+	 */
+	public function computerInfo(string $name): ?array
+	{
+		$this->serviceConnection(); //регистрируем соединение для AdComputer::on()
+
+		$short = explode('.', trim($name))[0];
+		if ($short === '') return null;
+
+		//memberOf запрашиваем явно: это обратная ссылка, и не всякий
+		//сервер отдаёт её в ответ на «*»
+		$query = static fn() => AdComputer::on(static::CONN_SERVICE)->select(['*', 'memberof']);
+
+		/** @var AdComputer|null $computer */
+		$computer = $query()->where('samaccountname', '=', $short.'$')->first();
+		if (!is_object($computer)) $computer = $query()->where('cn', '=', $short)->first();
+		if (!is_object($computer)) return null;
+
+		$raw = $computer->getAttributes();
+		$first = static fn(string $key) => $raw[$key][0] ?? null;
+
+		$groups = [];
+		foreach ($raw['memberof'] ?? [] as $groupDn) {
+			$groups[] = ['name' => (new DistinguishedName($groupDn))->name() ?: $groupDn, 'dn' => $groupDn];
+		}
+		usort($groups, static fn($a, $b) => strnatcasecmp($a['name'], $b['name']));
+
+		[$path, $domain] = $this->dnPath($computer->getDn());
+
+		return [
+			'dn' => $computer->getDn(),
+			'path' => $path,
+			'domain' => $domain,
+			'groups' => $groups,
+			'enabled' => !((int)$first('useraccountcontrol') & 0x2), //ACCOUNTDISABLE
+			'os' => trim(($first('operatingsystem') ?? '').' '.($first('operatingsystemversion') ?? '')),
+			'dns_name' => $first('dnshostname'),
+			'last_logon' => $this->winTimeToUnix($first('lastlogontimestamp')),
+			'description' => $first('description'),
+		];
+	}
+
+	/**
+	 * Разбор DN на путь в дереве: контейнеры сверху вниз и домен.
+	 * Первый RDN - сам объект, его пропускаем; DC-части складываются
+	 * в имя домена.
+	 * @return array [string[] контейнеры, string домен]
+	 */
+	protected function dnPath(string $dn): array
+	{
+		$containers = [];
+		$domain = [];
+		$components = (new DistinguishedName($dn))->multi();
+		array_shift($components); //сам объект
+
+		foreach ($components as [$attribute, $value]) {
+			if (strtolower($attribute) === 'dc') $domain[] = $value;
+			else $containers[] = $value;
+		}
+		return [array_reverse($containers), implode('.', $domain)];
 	}
 
 	/**

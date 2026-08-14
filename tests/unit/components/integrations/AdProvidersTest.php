@@ -3,10 +3,12 @@
 namespace tests\unit\components\integrations;
 
 use app\components\integrations\IntegrationsRegistry;
+use app\components\integrations\providers\AdComputerProvider;
 use app\components\integrations\providers\AdPasswordResetForm;
 use app\components\integrations\providers\AdPasswordResetProvider;
 use app\components\integrations\providers\AdUserProvider;
 use app\components\integrations\providers\SmsProvider;
+use app\models\Comps;
 use app\models\IntegrationsLog;
 use app\models\Techs;
 use app\models\Users;
@@ -197,6 +199,132 @@ class AdProvidersTest extends Unit
 		$html = $this->makeAdProvider(null)
 			->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'ghost']));
 		$this->assertStringContainsString('не найдена', $html);
+	}
+
+	// ==================== AdComputerProvider (справка о компьютере) ====================
+
+	/** Провайдер справки о компьютере с подменённым LDAP-запросом */
+	private function makeAdCompProvider(?array $computer): AdComputerProvider
+	{
+		$provider = new class($computer) extends AdComputerProvider {
+			public ?array $mockComputer;
+			public array $fetchedNames = [];
+
+			public function __construct(?array $computer)
+			{
+				$this->mockComputer = $computer;
+			}
+
+			protected function fetchComputer(string $name): ?array
+			{
+				$this->fetchedNames[] = $name;
+				return $this->mockComputer;
+			}
+		};
+		$provider->id = 'ad-comp';
+		$provider->config = [];
+		return $provider;
+	}
+
+	/**
+	 * Применимость: ОС с именем, по умолчанию только Windows (иначе каждая
+	 * карточка Linux-машины давала бы напрасный запрос в AD)
+	 */
+	public function testAdCompAppliesToAndBinding()
+	{
+		$provider = $this->makeAdCompProvider(null);
+
+		$windows = new Comps(['name' => ' PC-01 ', 'os' => 'Windows 10 Pro']);
+		$this->assertTrue($provider->appliesTo($windows));
+		$this->assertSame('pc-01', $provider->binding($windows));
+
+		$this->assertFalse($provider->appliesTo(new Comps(['name' => 'srv', 'os' => 'Debian 12'])));
+		$this->assertFalse($provider->appliesTo(new Comps(['os' => 'Windows 10'])));
+		$this->assertFalse($provider->appliesTo(new Users(['Login' => 'x'])));
+
+		//настройкой можно опрашивать и не-Windows
+		$provider->config = ['windowsOnly' => false];
+		$this->assertTrue($provider->appliesTo(new Comps(['name' => 'srv', 'os' => 'Debian 12'])));
+	}
+
+	/** Рендер панели: путь в дереве сверху вниз и группы */
+	public function testAdCompPanelRender()
+	{
+		$provider = $this->makeAdCompProvider([
+			'dn' => 'CN=PC-01,OU=Бухгалтерия,OU=Офис,DC=corp,DC=local',
+			'path' => ['Офис', 'Бухгалтерия'],
+			'domain' => 'corp.local',
+			'groups' => [
+				['name' => 'GPO-Office', 'dn' => 'CN=GPO-Office,OU=Groups,DC=corp,DC=local'],
+				['name' => 'SCCM-Clients', 'dn' => 'CN=SCCM-Clients,OU=Groups,DC=corp,DC=local'],
+			],
+			'enabled' => true,
+			'os' => 'Windows 10 Pro 10.0 (19045)',
+			'dns_name' => 'pc-01.corp.local',
+			'last_logon' => mktime(9, 30, 0, 2, 1, 2026),
+			'description' => null,
+		]);
+
+		$html = $provider->renderPanel(AdComputerProvider::PANEL, new Comps(['name' => 'PC-01', 'os' => 'Windows 10']));
+
+		//путь: домен, затем контейнеры сверху вниз
+		$this->assertTrue(strpos($html, 'corp.local') < strpos($html, 'Офис'));
+		$this->assertTrue(strpos($html, 'Офис') < strpos($html, 'Бухгалтерия'));
+		$this->assertStringContainsString('GPO-Office', $html);
+		$this->assertStringContainsString('SCCM-Clients', $html);
+		//полный DN - в подсказке
+		$this->assertStringContainsString('CN=PC-01,OU=', $html);
+		$this->assertStringNotContainsString('отключена', $html);
+		$this->assertSame(['pc-01'], $provider->fetchedNames);
+	}
+
+	/** Отключённая учётка компьютера и отсутствие групп */
+	public function testAdCompPanelRenderDisabledWithoutGroups()
+	{
+		$provider = $this->makeAdCompProvider([
+			'dn' => 'CN=OLD,CN=Computers,DC=corp,DC=local',
+			'path' => ['Computers'],
+			'domain' => 'corp.local',
+			'groups' => [],
+			'enabled' => false,
+			'os' => '',
+			'dns_name' => null,
+			'last_logon' => null,
+			'description' => null,
+		]);
+
+		$html = $provider->renderPanel(AdComputerProvider::PANEL, new Comps(['name' => 'OLD', 'os' => 'Windows 7']));
+		$this->assertStringContainsString('учётка отключена', $html);
+		$this->assertStringContainsString('Групп нет', $html);
+	}
+
+	/** Компьютер не найден в AD */
+	public function testAdCompPanelRenderNotFound()
+	{
+		$html = $this->makeAdCompProvider(null)
+			->renderPanel(AdComputerProvider::PANEL, new Comps(['name' => 'ghost', 'os' => 'Windows 10']));
+		$this->assertStringContainsString('не найдена в AD', $html);
+	}
+
+	/** Компактный режим доезжает до view панели компьютера */
+	public function testAdCompPanelCompact()
+	{
+		$computer = [
+			'dn' => 'CN=PC-01,OU=Офис,DC=corp,DC=local',
+			'path' => ['Офис'], 'domain' => 'corp.local', 'groups' => [],
+			'enabled' => true, 'os' => '', 'dns_name' => null,
+			'last_logon' => null, 'description' => null,
+		];
+		$model = new Comps(['name' => 'PC-01', 'os' => 'Windows 10']);
+
+		$provider = $this->makeAdCompProvider($computer);
+		$this->assertStringContainsString('pe-4', $provider->renderPanel(AdComputerProvider::PANEL, $model));
+
+		$provider = $this->makeAdCompProvider($computer);
+		$provider->compact = true;
+		$html = $provider->renderPanel(AdComputerProvider::PANEL, $model);
+		$this->assertStringContainsString('pe-2', $html);
+		$this->assertStringNotContainsString('pe-4', $html);
 	}
 
 	// ==================== AdPasswordResetProvider (сброс пароля) ====================

@@ -14,6 +14,7 @@ use yii\console\ExitCode;
  * Использование:
  *   yii ldap/ping                     проверить доступность DC и bind сервисной учётки
  *   yii ldap/account <login>          показать справку об учётке AD (как в панели)
+ *   yii ldap/computer <имя>           путь в дереве и группы компьютера
  *   yii ldap/auth <login> <password>  проверить логин/пароль (bind под пользователем)
  */
 class LdapController extends Controller
@@ -62,6 +63,38 @@ class LdapController extends Controller
 			}
 			$this->stdout(str_pad($key, 22).': '.$value."\n");
 		}
+		return ExitCode::OK;
+	}
+
+	/**
+	 * Справка об учётке компьютера (те же данные, что в панели
+	 * AdComputerProvider): путь в дереве AD и группы.
+	 * @param string $name имя компьютера (можно FQDN)
+	 * @return int
+	 */
+	public function actionComputer($name)
+	{
+		try {
+			$info = Yii::$app->ldap->computerInfo($name);
+		} catch (\Throwable $e) {
+			$this->stderr('ERROR: '.$e->getMessage()."\n");
+			return ExitCode::UNSPECIFIED_ERROR;
+		}
+		if (is_null($info)) {
+			$this->stdout("Компьютер '$name' не найден в AD\n");
+			return ExitCode::OK;
+		}
+
+		$this->stdout(str_pad('dn', 14).': '.$info['dn']."\n");
+		$this->stdout(str_pad('путь', 14).': '
+			.implode(' > ', array_merge([$info['domain']], $info['path']))."\n");
+		$this->stdout(str_pad('включена', 14).': '.($info['enabled'] ? 'да' : 'нет')."\n");
+		$this->stdout(str_pad('ОС', 14).': '.$info['os']."\n");
+		$this->stdout(str_pad('dns', 14).': '.$info['dns_name']."\n");
+		$this->stdout(str_pad('последний вход', 14).': '
+			.($info['last_logon'] ? date('Y-m-d H:i:s', $info['last_logon']) : '-')."\n");
+		$this->stdout(str_pad('группы', 14).': '.count($info['groups'])."\n");
+		foreach ($info['groups'] as $group) $this->stdout('  - '.$group['name'].'  ('.$group['dn'].")\n");
 		return ExitCode::OK;
 	}
 
