@@ -41,7 +41,8 @@ if (!$account['enabled']) {
 		<span class="badge bg-warning text-dark">требуется смена пароля</span>
 	<?php } ?>
 </div>
-<div class="mt-1"><small class="text-secondary" title="distinguishedName"><?= Html::encode($account['dn']) ?></small></div>
+<div class="mt-1"><?= $this->render('@app/components/integrations/providers/views/ad-common/dn-path',
+	['entry' => $account]) ?></div>
 <div class="mt-1"><small>
 	<span class="text-secondary">Пароль изменён:</span> <?= $date($account['password_last_set']) ?>
 	<span class="text-secondary ms-2">истекает:</span> <?= $date($account['password_expires']) ?>

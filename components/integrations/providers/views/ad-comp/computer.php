@@ -17,35 +17,21 @@ if (is_null($computer)) {
 	return;
 }
 
-$pad = $compact ? 'pe-2' : 'pe-4';
-
-//путь в дереве: домен › контейнеры сверху вниз (полный DN - в подсказке)
-$path = array_merge(
-	array_filter([$computer['domain'] ?? '']),
-	$computer['path'] ?? []
-);
-
 ?>
-<div class="d-flex align-items-center">
-	<div class="<?= $pad ?>">
-		<?php if (!$computer['enabled']) { ?>
-			<span class="badge bg-secondary">учётка отключена</span>
-		<?php } ?>
-		<span class="text-secondary" title="distinguishedName: <?= Html::encode($computer['dn']) ?>">
-			<?= implode(' <span class="text-secondary">&rsaquo;</span> ', array_map('yii\helpers\Html::encode', $path)) ?>
-		</span>
-	</div>
-</div>
-<div class="mt-1">
+<?php if (!$computer['enabled']) { ?>
+	<div><span class="badge bg-secondary">учётка отключена</span></div>
+<?php } ?>
+<div><?= $this->render('@app/components/integrations/providers/views/ad-common/dn-path',
+	['entry' => $computer]) ?></div>
+<div class="<?= $compact ? 'mt-0' : 'mt-1' ?>"><small>
 	<?php if (count($computer['groups'])) { ?>
 		<span class="text-secondary">Группы:</span>
 		<?php foreach ($computer['groups'] as $group) { ?>
 			<span class="badge bg-light text-dark border" title="<?= Html::encode($group['dn']) ?>"><?= Html::encode($group['name']) ?></span>
 		<?php } ?>
 	<?php } else { ?>
-		<span class="text-secondary">Групп нет</span>
-		<span class="text-secondary opacity-75" title="Первичная группа (обычно «Компьютеры домена») в memberOf не входит">
-			<i class="fas fa-question-circle"></i>
+		<span class="text-secondary" title="Первичная группа («Компьютеры домена») и вложенные группы в memberOf не входят">
+			групп нет
 		</span>
 	<?php } ?>
-</div>
+</small></div>

@@ -89,6 +89,43 @@ class LdapServiceTest extends Unit
 		$this->assertSame($unix, $this->call($s, 'winTimeOrNever', (string)$filetime, false));
 	}
 
+	/**
+	 * Путь по дереву из DN: контейнеры сверху вниз, DC-части - в домен.
+	 * Кириллица обязана читаться: ldap_explode_dn (на нём построен разбор
+	 * DN в ldaprecord) отдаёт не-ASCII побайтово в hex.
+	 */
+	public function testDnPath()
+	{
+		$s = $this->service();
+
+		[$path, $domain] = $this->call($s, 'dnPath',
+			'CN=Test,OU=\D0\A7\D0\B5\D0\BB\D1\8F\D0\B1\D0\B8\D0\BD\D1\81\D0\BA,'
+			.'OU=\D0\9A\D0\BE\D0\BC\D0\BF\D1\8C\D1\8E\D1\82\D0\B5\D1\80\D1\8B,'
+			.'DC=azimuth,DC=holding,DC=local');
+
+		//сверху вниз: сначала верхний контейнер
+		$this->assertSame(['Компьютеры', 'Челябинск'], $path);
+		$this->assertSame('azimuth.holding.local', $domain);
+
+		//ASCII-путь не портится, сам объект в путь не попадает
+		[$path, $domain] = $this->call($s, 'dnPath', 'CN=PC-01,CN=Computers,DC=corp,DC=local');
+		$this->assertSame(['Computers'], $path);
+		$this->assertSame('corp.local', $domain);
+	}
+
+	/** Экранирование спецсимволов в RDN снимается */
+	public function testUnescapeDnValue()
+	{
+		$s = $this->service();
+
+		$this->assertSame('Отдел ИТ', $this->call($s, 'unescapeDnValue',
+			'\D0\9E\D1\82\D0\B4\D0\B5\D0\BB \D0\98\D0\A2'));
+		//запятая в имени контейнера экранируется слэшем
+		$this->assertSame('Иванов, И.И.', $this->call($s, 'unescapeDnValue',
+			'\D0\98\D0\B2\D0\B0\D0\BD\D0\BE\D0\B2\, \D0\98.\D0\98.'));
+		$this->assertSame('Computers', $this->call($s, 'unescapeDnValue', 'Computers'));
+	}
+
 	/** Конфиг соединения приводится к терминам LdapRecord с дефолтами */
 	public function testConnectionConfigDefaults()
 	{

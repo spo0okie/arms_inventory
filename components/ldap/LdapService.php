@@ -64,7 +64,9 @@ class LdapService extends Component
 	/**
 	 * Справка об учётке AD (для панели AdUserProvider), нормализованная.
 	 * @return array|null null = учётка не найдена; иначе:
-	 *   dn, enabled(bool), locked(bool), password_last_set(unix ts|null),
+	 *   dn, path (контейнеры сверху вниз), domain — см. {@see placement()},
+	 *   а также enabled(bool), locked(bool),
+	 *   password_last_set(unix ts|null),
 	 *   password_expires(unix ts|null|'never'), must_change_password(bool),
 	 *   last_logon(unix ts|null), account_expires(unix ts|null|'never')
 	 * @throws \LdapRecord\LdapRecordException при недоступности сервера
@@ -100,8 +102,7 @@ class LdapService extends Component
 		$lockedBit = 0x10;         //UF_LOCKOUT
 		$pwdExpiredBit = 0x800000; //UF_PASSWORD_EXPIRED
 
-		return [
-			'dn' => $user->getDn(),
+		return $this->placement($user->getDn()) + [
 			'enabled' => !($uac & 0x2), //ACCOUNTDISABLE
 			'locked' => (bool)($computed & $lockedBit),
 			'password_expired' => (bool)($computed & $pwdExpiredBit),
@@ -145,25 +146,47 @@ class LdapService extends Component
 		$raw = $computer->getAttributes();
 		$first = static fn(string $key) => $raw[$key][0] ?? null;
 
-		$groups = [];
-		foreach ($raw['memberof'] ?? [] as $groupDn) {
-			$groups[] = ['name' => (new DistinguishedName($groupDn))->name() ?: $groupDn, 'dn' => $groupDn];
-		}
-		usort($groups, static fn($a, $b) => strnatcasecmp($a['name'], $b['name']));
-
-		[$path, $domain] = $this->dnPath($computer->getDn());
-
-		return [
-			'dn' => $computer->getDn(),
-			'path' => $path,
-			'domain' => $domain,
-			'groups' => $groups,
+		return $this->placement($computer->getDn()) + [
+			'groups' => $this->groupsOf($raw),
 			'enabled' => !((int)$first('useraccountcontrol') & 0x2), //ACCOUNTDISABLE
 			'os' => trim(($first('operatingsystem') ?? '').' '.($first('operatingsystemversion') ?? '')),
 			'dns_name' => $first('dnshostname'),
 			'last_logon' => $this->winTimeToUnix($first('lastlogontimestamp')),
 			'description' => $first('description'),
 		];
+	}
+
+	/**
+	 * Размещение объекта в каталоге: DN и разобранный путь по дереву.
+	 * Общее для учёток пользователей и компьютеров — и панели показывают
+	 * его одинаково (views/ad-common/dn-path.php).
+	 *
+	 * @return array ['dn'=>string, 'path'=>string[] контейнеры сверху
+	 *   вниз, 'domain'=>string]
+	 */
+	protected function placement(string $dn): array
+	{
+		[$path, $domain] = $this->dnPath($dn);
+		return ['dn' => $dn, 'path' => $path, 'domain' => $domain];
+	}
+
+	/**
+	 * Группы объекта из memberOf, отсортированные по имени.
+	 * Только ПРЯМЫЕ членства: memberOf не содержит ни вложенных групп,
+	 * ни первичной («Пользователи/Компьютеры домена»).
+	 *
+	 * @param array $raw сырые атрибуты объекта
+	 * @return array [['name'=>string, 'dn'=>string], ...]
+	 */
+	protected function groupsOf(array $raw): array
+	{
+		$groups = [];
+		foreach ($raw['memberof'] ?? [] as $groupDn) {
+			$name = $this->unescapeDnValue((string)(new DistinguishedName($groupDn))->name());
+			$groups[] = ['name' => $name !== '' ? $name : $groupDn, 'dn' => $groupDn];
+		}
+		usort($groups, static fn($a, $b) => strnatcasecmp($a['name'], $b['name']));
+		return $groups;
 	}
 
 	/**
@@ -180,10 +203,28 @@ class LdapService extends Component
 		array_shift($components); //сам объект
 
 		foreach ($components as [$attribute, $value]) {
+			$value = $this->unescapeDnValue($value);
 			if (strtolower($attribute) === 'dc') $domain[] = $value;
 			else $containers[] = $value;
 		}
 		return [array_reverse($containers), implode('.', $domain)];
+	}
+
+	/**
+	 * Значение RDN в человеческий вид: ldap_explode_dn (на нём построен
+	 * разбор DN в ldaprecord) отдаёт всё не-ASCII побайтово в hex -
+	 * «OU=Челябинск» приходит как «OU=\D0\A7\D0\B5...». Собираем байты
+	 * обратно в UTF-8; одиночные экранирования спецсимволов (\, \+ и
+	 * т.п.) просто теряют слэш.
+	 */
+	protected function unescapeDnValue(string $value): string
+	{
+		$value = preg_replace_callback(
+			'/\\\\([0-9A-Fa-f]{2})/',
+			static fn(array $m) => chr(hexdec($m[1])),
+			$value
+		);
+		return preg_replace('/\\\\(.)/', '$1', $value);
 	}
 
 	/**
