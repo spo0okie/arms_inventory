@@ -57,8 +57,13 @@ if (isset(Yii::$app->request->get()[$searchClass])) {
 		).$additionalCreateButton,
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel??null,
+		//тумблер архивных показываем ровно там, где контроллер их реально фильтрует
+		//(ArmsBaseController::archivedSearchInit) - в том числе когда колонки archived
+		//у модели нет, а архивность вычисляется (доступы: архивный ресурс/субъекты,
+		//истекшее расписание). Иначе фильтр работает скрытно и записи молча пропадают
 		'toolButton'=> $additionalToolButton
-			.(($model->hasAttribute('archived')&&is_object($searchModel??null))?	//если у нас есть атрибут "архивный" и фильтр
+			.((is_object($searchModel??null)
+				&& ($searchModel->hasAttribute('archived') || $searchModel->canSetProperty('archived')))?
 			'<span class="p-2">'. ShowArchivedWidget::widget([			//то отображаем виджет
 				'labelBadgeBg'=>$filtered?'bg-danger':'bg-secondary',
 				'labelBadge'=>$switchArchivedDelta,

@@ -270,6 +270,45 @@ class Aces extends ArmsModel
 
 
 
+	/**
+	 * SQL-условие «у записи доступа остались живые субъекты»: есть хоть один
+	 * неархивный субъект ЛИБО объектных субъектов нет вовсе (запись описана текстом
+	 * в «Прочее» - архивироваться нечему).
+	 *
+	 * Условие самодостаточно: коррелированные подзапросы по aces.id не зависят от
+	 * того, какие связи заджойнены в запросе (набор join-ов в списках плавает
+	 * от видимых колонок). PHP-двойник - AcesModelCalcFieldsTrait::getArchived().
+	 *
+	 * @return array условие для ActiveQuery::andWhere()
+	 */
+	public static function aliveSubjectsCondition(): array
+	{
+		//[таблица субъектов, junction-таблица, ключ junction, условие «субъект жив»]
+		$subjects=[
+			[Users::tableName(),	'users_in_aces',	'users_id',		'COALESCE(users.Uvolen,0)=0'],
+			[Comps::tableName(),	'comps_in_aces',	'comps_id',		'COALESCE(comps.archived,0)=0'],
+			[Services::tableName(),	'services_in_aces',	'services_id',	'COALESCE(services.archived,0)=0'],
+			[Networks::tableName(),	'networks_in_aces',	'networks_id',	'COALESCE(networks.archived,0)=0'],
+			//у IP-адреса своей архивности нет - она у сети, которой адрес принадлежит
+			[NetIps::tableName(),	'ips_in_aces',		'ips_id',		'COALESCE(ip_networks.archived,0)=0'],
+		];
+
+		$any=['or'];	//есть хоть какой-то объектный субъект
+		$alive=['or'];	//есть хоть один живой субъект
+		foreach ($subjects as [$table,$junction,$key,$aliveWhere]) {
+			$query=(new \yii\db\Query())
+				->from($junction)
+				->innerJoin($table,$table.'.id='.$junction.'.'.$key)
+				->where($junction.'.aces_id=aces.id');
+			if ($table===NetIps::tableName())
+				$query->leftJoin(Networks::tableName().' ip_networks','ip_networks.id='.$table.'.networks_id');
+			$any[]=['exists',$query];
+			$alive[]=['exists',(clone $query)->andWhere($aliveWhere)];
+		}
+
+		return ['or',$alive,['not',$any]];
+	}
+
 	public function getAcl()
 	{
 		return $this->hasOne(Acls::class, ['id' => 'acls_id']);

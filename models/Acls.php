@@ -154,8 +154,9 @@ class Acls extends ArmsModel
 				'join'=>['comp','tech','service','ip','network'],
 			],
 			'accessTypes' => ['ref'=>\app\models\AccessTypes::class, 'refMulti'=>true],
-			//презентационные колонки списка ACL (views/acls/columns.php):
-			//значения собирают закрытые value-callback'и, здесь только подписи/подсказки
+			//презентационные колонки списка ACL (views/acls/columns.php): значения
+			//агрегируются по ACE этого ACL (ModelFieldWidget с models=>$model->aces),
+			//здесь - подписи/подсказки и join-аннотации для жадной загрузки
 			'subjects' => [
 				'Субъекты',
 				'indexHint'=>'Субъекты доступа: кто получает доступ (по всем записям этого списка доступа)',
@@ -237,6 +238,58 @@ class Acls extends ArmsModel
             ],
         ]);
     }
+
+	/**
+	 * Связи-ресурсы для JOIN-а в поисковых запросах. Цепочки нужны там, где
+	 * архивность ресурса вычисляется: у оборудования она в состоянии
+	 * (tech_states.archived), у IP-адреса - в его сети.
+	 *
+	 * @param string $prefix префикс пути для запросов от других моделей ('acl.' от Aces)
+	 * @return string[]
+	 */
+	public static function resourceJoins(string $prefix=''): array
+	{
+		return array_map(
+			static function($relation) use ($prefix) {return $prefix.$relation;},
+			['comp','tech.state','service','ip.network','network']
+		);
+	}
+
+	/**
+	 * SQL-условие «ресурс списка доступа не в архиве»: доступ к списанному
+	 * оборудованию, архивной ОС/сервису/сети мертв независимо от того, кому он выдан.
+	 * Требует JOIN-а связей {@see resourceJoins()} - алиасы берутся из них
+	 * (у ресурсных связей они заданы явно в relation-методах, у сети IP-адреса
+	 * алиаса нет, поэтому она приезжает под именем таблицы).
+	 * PHP-двойник - AclsModelCalcFieldsTrait::getArchived().
+	 *
+	 * @return array условие для ActiveQuery::andWhere()
+	 */
+	public static function aliveResourceCondition(): array
+	{
+		return ['and',
+			'COALESCE(comps_resources.archived,0)=0',		//ОС
+			'COALESCE(services_resources.archived,0)=0',	//сервис
+			'COALESCE(networks_resources.archived,0)=0',	//сеть
+			'COALESCE(tech_states.archived,0)=0',			//оборудование - через состояние
+			'COALESCE(networks.archived,0)=0',				//IP-адрес - через свою сеть
+		];
+	}
+
+	/**
+	 * SQL-условие «временные рамки списка доступа не истекли». ACL без расписания
+	 * бессрочен, у остальных правило общее с временными доступами.
+	 * Требует JOIN-а связи schedule (для ACE - 'acl.schedule').
+	 *
+	 * @return array условие для ActiveQuery::andWhere()
+	 */
+	public static function activeScheduleCondition(): array
+	{
+		return ['or',
+			[static::tableName().'.schedules_id' => null],
+			Schedules::activeCondition(),
+		];
+	}
 
 	public function getSchedule() {
 		return $this->hasOne(Schedules::class, ['id' => 'schedules_id']);

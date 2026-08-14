@@ -863,6 +863,69 @@ class Schedules extends \app\models\base\ArmsModel
 	}
 
 	/**
+	 * SQL-условие «расписание действует на сегодня» для запросов, в которых таблица
+	 * расписаний присутствует под алиасом $alias.
+	 *
+	 * Действует = есть накрывающий сегодняшний день рабочий период И нет накрывающего
+	 * нерабочего. Единый источник правила для всех списков, где истекшее расписание
+	 * означает архивность: временные доступы (SchedulesAclSearch), записи доступа
+	 * (AcesSearch) и списки доступа (AclsSearch).
+	 * PHP-двойник - {@see isActiveOnDate()}.
+	 *
+	 * @param string $alias алиас таблицы расписаний в запросе
+	 * @return array условие для ActiveQuery::andWhere()
+	 */
+	public static function activeCondition(string $alias='schedules'): array
+	{
+		$today=date('Y-m-d');
+		//периоды, накрывающие сегодняшний день (открытая граница = накрывает)
+		$covering=static function(string $sub,int $isWork) use ($alias,$today) {
+			return (new \yii\db\Query())
+				->from(SchedulesEntries::tableName().' '.$sub)
+				->where($sub.'.schedule_id = '.$alias.'.id')
+				->andWhere([$sub.'.is_work' => $isWork])
+				->andWhere(['or',
+					[$sub.'.date'=>null],
+					['<=', $sub.'.date', $today]
+				])
+				->andWhere(['or',
+					[$sub.'.date_end'=>null],
+					['>=', $sub.'.date_end', $today]
+				]);
+		};
+
+		return ['and',
+			['exists', $covering('sp1',1)],
+			['not exists', $covering('sp2',0)],
+		];
+	}
+
+	/**
+	 * Действует ли расписание на указанную дату (по умолчанию - сегодня).
+	 *
+	 * PHP-двойник {@see activeCondition()}: правило то же (есть накрывающий рабочий
+	 * период и нет накрывающего нерабочего), поэтому вычисленная в PHP архивность
+	 * доступа совпадает с тем, что отфильтровал SQL. Как и в SQL, участвуют ВСЕ
+	 * записи расписания, а не только периоды.
+	 *
+	 * @param string|null $date дата в формате Y-m-d
+	 * @return bool
+	 */
+	public function isActiveOnDate($date=null): bool
+	{
+		$date=$date??date('Y-m-d');
+		$active=false;
+		foreach ($this->entries as $entry) {
+			//накрывает ли запись эту дату (пустая граница - открытая)
+			if (!empty($entry->date) && $entry->date>$date) continue;
+			if (!empty($entry->date_end) && $entry->date_end<$date) continue;
+			if (!$entry->is_work) return false;	//накрывающий нерабочий период отменяет доступ
+			$active=true;
+		}
+		return $active;
+	}
+
+	/**
 	 * Попадание дата/время в рабочий интервал.
 	 * Возвращает int 0|1, правая граница интервала ВКЛЮЧЕНА (legacy-семантика).
 	 * Реализован поверх CompiledScheduleHelper.

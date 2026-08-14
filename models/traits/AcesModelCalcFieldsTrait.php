@@ -12,6 +12,7 @@ namespace app\models\traits;
 use app\helpers\ArrayHelper;
 use app\models\AccessTypes;
 use app\models\Aces;
+use app\models\Users;
 
 /**
  * @package app\models\traits
@@ -122,8 +123,48 @@ trait AcesModelCalcFieldsTrait
 		
 	}
 	
+	/**
+	 * Архивность записи доступа.
+	 *
+	 * Наследуется от списка доступа (архивный ресурс либо истекшее расписание -
+	 * доступ к мертвому ресурсу мертв независимо от субъектов) и наступает своя,
+	 * когда ВСЕ субъекты записи ушли в архив: пока жив хоть один субъект, доступ
+	 * действует. Запись без объектных субъектов (только текстовое «Прочее»)
+	 * архивной не считается - архивироваться нечему.
+	 * SQL-двойник - {@see Aces::aliveSubjectsCondition()} (см. AcesSearch).
+	 *
+	 * @return bool
+	 */
 	public function getArchived() {
-		return false;
+		/** @var Aces $this */
+		if (isset($this->attrsCache['archived'])) return $this->attrsCache['archived'];
+
+		if (is_object($this->acl) && $this->acl->archived)
+			return $this->attrsCache['archived']=true;
+
+		$subjects=$this->subjects;
+		if (!count($subjects)) return $this->attrsCache['archived']=false;
+
+		foreach ($subjects as $subject)
+			if (!static::subjectIsArchived($subject))
+				return $this->attrsCache['archived']=false;
+
+		return $this->attrsCache['archived']=true;
+	}
+
+	/**
+	 * Ушел ли субъект доступа в архив: у сотрудника архив - это увольнение,
+	 * у остальных объектов - собственный или вычисляемый признак archived.
+	 * Текстовый субъект («Прочее») объектом не является и в архив не уходит.
+	 *
+	 * @param mixed $subject элемент списка {@see getSubjects()}
+	 * @return bool
+	 */
+	public static function subjectIsArchived($subject): bool
+	{
+		if (!is_object($subject)) return false;
+		if ($subject instanceof Users) return (bool)$subject->Uvolen;
+		return $subject->canBeArchived && (bool)$subject->archived;
 	}
 	
 }

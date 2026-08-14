@@ -13,6 +13,7 @@ namespace app\models\traits;
 use app\helpers\ArrayHelper;
 use app\models\Acls;
 use app\models\Places;
+use app\modules\schedules\models\Schedules;
 
 /**
  * @package app\models\traits
@@ -148,7 +149,8 @@ trait AclsModelCalcFieldsTrait
 	 */
 	public function getNodes()
 	{
-		if (strlen($this->comment))
+		//comment у ACL с объектным ресурсом пустой (NULL) - strlen(null) на PHP 8.4 депрекейт
+		if (strlen($this->comment??''))
 			return [$this->comment];
 		
 		if (($this->comps_id) and is_object($this->comp))
@@ -175,7 +177,8 @@ trait AclsModelCalcFieldsTrait
 	 */
 	public function getResource()
 	{
-		if (strlen($this->comment))
+		//comment у ACL с объектным ресурсом пустой (NULL) - strlen(null) на PHP 8.4 депрекейт
+		if (strlen($this->comment??''))
 			return $this->comment;
 		
 		if (($this->comps_id) and is_object($this->comp))
@@ -196,6 +199,40 @@ trait AclsModelCalcFieldsTrait
 		return null;
 	}
 	
+	/**
+	 * Архивность списка доступа.
+	 *
+	 * Доступ мертв, если мертв его ресурс (списанное оборудование, архивная
+	 * ОС/сервис/сеть, адрес в архивной сети) либо истекло расписание временного
+	 * доступа. Текстовый ресурс («Другое») в архив уйти не может - за ним нет объекта.
+	 * SQL-двойник - {@see Acls::aliveResourceCondition()} и
+	 * {@see Acls::activeScheduleCondition()} (см. AclsSearch/AcesSearch).
+	 *
+	 * @return bool
+	 */
+	public function getArchived()
+	{
+		/** @var Acls $this */
+		if (isset($this->attrsCache['archived'])) return $this->attrsCache['archived'];
+
+		//у Techs/NetIps архивность своя вычисляемая (состояние/сеть), у остальных - колонка
+		$resource=$this->resource;
+		if (is_object($resource) && $resource->canBeArchived && $resource->archived)
+			return $this->attrsCache['archived']=true;
+
+		if ($this->schedules_id) {
+			//расписание дергается на каждый ACL в списках: берем из общего кэша
+			//справочника, иначе relation грузит его отдельным запросом на каждый ACL
+			$schedule=$this->isRelationPopulated('schedule')?
+				$this->schedule:
+				Schedules::getLoadedItem($this->schedules_id,true);
+			if (is_object($schedule) && !$schedule->isActiveOnDate())
+				return $this->attrsCache['archived']=true;
+		}
+
+		return $this->attrsCache['archived']=false;
+	}
+
 	public function hasIpAccess(){
 		/** @var Acls $this */
 		foreach ($this->aces as $ace) {
