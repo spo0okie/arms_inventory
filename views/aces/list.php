@@ -3,22 +3,28 @@
 /* @var $this yii\web\View */
 /* @var $models app\models\Aces[] */
 /* @var $hintModel \app\models\base\ArmsModel модель-владелец списка: даёт тултип-«?» заголовка (атрибут acls) */
+/* @var $static_view bool */
 
+use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;
-use app\components\widgets\page\ModelWidget;
 
-if (is_array($models) && count($models)) {
-	echo isset($hintModel) && is_object($hintModel)
-		? ModelFieldWidget::renderFieldTitle($hintModel,'acls',null,'h4','Имеет доступ к:')
-		: '<h4>Имеет доступ к:</h4>';
-	foreach ($models as $model) {
-		if (is_object($model->acl) && is_object($model->acl->schedule)) {
-			echo ModelWidget::widget(['model'=>$model->acl->schedule, 'options'=>['static_view' => true]]) . ': ';
-		}
-		echo ModelWidget::widget(['model'=>$model->acl]);
-		echo '<br />';
-	}
-	echo '<br />';
-}
+if (!isset($static_view)) $static_view=false;
+//не полагаемся на ShowArchivedWidget::$defaultValue: тогглер (CornerWidget) на
+//страницах карточек рендерится ПОЗЖЕ этого блока, и дефолт еще не переключен
+//в «скрывать» — архивные строки вместо скрытия оставались бы зачеркнутыми
+if (!isset($show_archived)) $show_archived=(bool)Yii::$app->request->get('showArchived',false);
 
-
+//сводки «куда и какой доступ»: [расписание:] ресурс — типы доступа: пояснение
+//(см. aces/summary.php); архивные записи скрываются/зачеркиваются поэлементно
+echo ListObjectsWidget::widget([
+	'models'=>$models,
+	'itemViewPath'=>'/aces/summary',
+	'item_options'=>['show'=>'resource','static_view'=>$static_view],
+	'show_archived'=>$show_archived,
+	'title'=>isset($hintModel) && is_object($hintModel)
+		? ModelFieldWidget::fieldTitle($hintModel,'acls',null,'Имеет доступ к:')[0]
+		: 'Имеет доступ к:',
+	'glue'=>'<br />',
+	'lineBr'=>false,
+	'card_options'=>['cardClass'=>'mb-3'],
+]);

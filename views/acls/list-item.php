@@ -1,32 +1,43 @@
 <?php
 
-
 /* @var $this yii\web\View */
 /* @var $model app\models\Acls */
+/* @var $static_view bool */
+/* @var $show_archived bool|null */
 
 use app\components\ItemObjectWidget;
+use app\components\ListObjectsWidget;
+use app\components\UpdateObjectWidget;
 use app\components\widgets\page\ModelWidget;
 
-$header=is_object($model->schedule)?
-	ModelWidget::widget(['model'=>$model->schedule, 'options'=>['static_view'=>true]]).':'
-	:
-	'Доступ к '. ModelWidget::widget(['model'=>$model]).':';
+if (!isset($static_view)) $static_view=false;
+if (!isset($show_archived)) $show_archived=null;
 
-$content="<h5>$header</h5>";
-		
-$items=[];
-foreach ($model->aces as $ace)
-	$items[]=$this->render('/aces/objects',['model'=>$ace,'glue'=>'']);
-	
-$content.='<div class="px-1">'.implode(' ',$items).'</div>';
+//заголовок отвечает «когда/на каком основании» (мы на карточке самого ресурса,
+//повторять «Доступ к <ресурс>» смысла нет); карандаш — правка самого ACL
+$header=(is_object($model->schedule)?
+	ModelWidget::widget(['model'=>$model->schedule, 'options'=>['static_view'=>true]]):
+	'Постоянный доступ').':';
+if (!$static_view) $header.=' '.UpdateObjectWidget::widget(['model'=>$model]);
 
-if (is_object($model->schedule)) {
-	$inactive=!$model->schedule->isWorkTime(date('Y-m-d'),date('H:i:s'));
-} else $inactive=false;
+//записи доступа: субъекты — типы доступа: пояснение (см. aces/summary.php)
+$content='<h5>'.$header.'</h5>'
+	.'<div class="px-1">'
+	.ListObjectsWidget::widget([
+		'models'=>$model->aces,
+		'itemViewPath'=>'/aces/summary',
+		'item_options'=>['show'=>'subjects','static_view'=>$static_view],
+		'show_archived'=>$show_archived,	//иначе внутренний виджет заново возьмет дефолт
+		'title'=>false,
+		'card'=>false,
+		'lineBr'=>false,
+		'glue'=>'<br />',
+	])
+	.'</div>';
 
+//архивность (истекшее расписание, архивный ресурс) виджет возьмет из модели
 echo ItemObjectWidget::widget([
 	'model'=>$model,
 	'link'=>$content,
-	'archived'=>$inactive
+	'show_archived'=>$show_archived,
 ]);
-
