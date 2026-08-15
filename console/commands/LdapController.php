@@ -57,6 +57,9 @@ class LdapController extends Controller
 			return ExitCode::OK;
 		}
 		foreach ($info as $key => $value) {
+			//путь по дереву разобран в массив - печатаем как в ldap/computer
+			if ($key === 'path') $value = implode(' > ', array_merge([$info['domain']], $value));
+			if ($key === 'domain') continue; //уже показан в составе пути
 			if (is_bool($value)) $value = $value ? 'да' : 'нет';
 			if (is_int($value) && in_array($key, ['password_last_set', 'password_expires', 'last_logon', 'account_expires'], true)) {
 				$value = date('Y-m-d H:i:s', $value)." ($value)";

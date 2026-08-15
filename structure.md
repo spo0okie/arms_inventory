@@ -461,10 +461,12 @@ if (Yii::$app->user->can('edit-comps')) {
   - `HttpTemplateProvider` — декларативный: интеграция «одна панель по
     одному GET» описывается целиком конфигом (первый клиент — панель
     телефонии ast22-phones, шаблон `providers/views/pbx/status.php`);
-  - `AdUserProvider` — панель-справка ActiveDirectory о сотруднике
-    (поверх ldap-компонента);
-  - `AdPasswordResetProvider` — именной сброс пароля AD (L2+: личные
-    креды исполнителя; пароль доставляется через SMS-провайдера)
+  - `AdUserProvider` — учётка ActiveDirectory сотрудника (поверх
+    ldap-компонента): панель-справка + именной сброс пароля (L2+: личные
+    креды исполнителя; пароль доставляется через SMS-провайдера, кнопка —
+    внутри панели, только у найденной в AD учётки);
+  - `AdComputerProvider` — панель-справка ActiveDirectory об ОС: путь
+    учётки компьютера в дереве (DN) и его группы;
 
 Включение — на инстансе в `params-local.php`:
 
@@ -490,7 +492,7 @@ RBAC-права (`view-integration-<id>`, `edit-integration-<id>-<action>`)
 заброшенного adldap2 — 2026-08). Это **единственная** точка приложения,
 знающая о LDAP-библиотеке: аутентификация ([`Users::validatePassword`](models/Users.php))
 и интеграции AD ([`AdUserProvider`](components/integrations/providers/AdUserProvider.php),
-[`AdPasswordResetProvider`](components/integrations/providers/AdPasswordResetProvider.php))
+[`AdComputerProvider`](components/integrations/providers/AdComputerProvider.php))
 ходят в AD только через `Yii::$app->ldap`.
 
 Настройка — `config/ldap.php` (файл в `.gitignore`, секреты не в репозитории;

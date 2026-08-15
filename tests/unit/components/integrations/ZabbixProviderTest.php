@@ -531,7 +531,8 @@ class ZabbixProviderTest extends Unit
 
 	/**
 	 * Компактный режим виджета - для вложенных списков (ОС внутри АРМ в
-	 * карточке сотрудника): без заголовка h4 и без кнопок действий.
+	 * карточке сотрудника): заголовок остаётся, контейнер плотнее (mb-2),
+	 * кнопки действий не выводятся.
 	 * Виджет в любом режиме в Zabbix не ходит - только кэш + ajax.
 	 */
 	public function testPanelsWidgetCompact()
@@ -552,7 +553,10 @@ class ZabbixProviderTest extends Unit
 			$compact = PanelsWidget::widget(['model' => $comp, 'compact' => true]);
 
 			$this->assertStringContainsString('<h4>', $full);
-			$this->assertStringNotContainsString('<h4>', $compact);
+			$this->assertStringContainsString('<h4>', $compact); //заголовок остаётся и в компакте
+			//компакт отличается плотностью контейнера
+			$this->assertStringContainsString('class="mb-3"', $full);
+			$this->assertStringContainsString('class="mb-2"', $compact);
 			//данные подтянутся ajax'ом через proxy (в json слэши экранированы)
 			$this->assertStringContainsString('integrations/panel',
 				str_replace('\\/', '/', $compact));
@@ -567,7 +571,7 @@ class ZabbixProviderTest extends Unit
 
 	/**
 	 * Режим рендера доезжает до view провайдера ($compact): во вложенном
-	 * списке метрики жмутся плотнее
+	 * списке метрики жмутся плотнее (pe-3 вместо pe-4)
 	 */
 	public function testCompactReachesView()
 	{
@@ -578,7 +582,7 @@ class ZabbixProviderTest extends Unit
 		$provider = $this->makeMetricsProvider(['system.cpu.util' => 37]);
 		$provider->compact = true;
 		$html = $provider->renderPanel(ZabbixProvider::PANEL, $this->boundComp());
-		$this->assertStringContainsString('pe-2', $html);
+		$this->assertStringContainsString('pe-3', $html);
 		$this->assertStringNotContainsString('pe-4', $html);
 	}
 

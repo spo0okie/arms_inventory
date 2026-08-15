@@ -32,9 +32,9 @@ class PanelsWidget extends Widget
 
 	/**
 	 * @var bool компактный режим - для встраивания в списки вложенных
-	 * объектов (ОС внутри АРМ в карточке сотрудника): мелкая подпись
-	 * вместо заголовка и без кнопок действий (действия с журналом -
-	 * на карточке самого объекта)
+	 * объектов (ОС внутри АРМ в карточке сотрудника): плотнее отступы
+	 * и без кнопок действий (действия с журналом - на карточке самого
+	 * объекта)
 	 */
 	public bool $compact = false;
 
@@ -64,7 +64,7 @@ class PanelsWidget extends Widget
 					(empty($descriptor['icon']) ? '' : '<i class="'.$descriptor['icon'].'"></i> ')
 						.Html::encode($descriptor['title'] ?? $actionId),
 					IntegrationsRegistry::actionUrl($provider, $actionId, $descriptor, $model),
-					['class' => 'btn btn-sm btn-outline-secondary me-2 open-in-modal-form']
+					['class' => 'btn btn-sm btn-secondary me-2 open-in-modal-form']
 				);
 			}
 		}

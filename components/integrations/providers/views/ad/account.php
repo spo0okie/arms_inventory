@@ -1,15 +1,20 @@
 <?php
 /**
  * Панель «ActiveDirectory» карточки сотрудника: рендер нормализованных
- * атрибутов учётки из AdUserProvider::fetchAccount()
+ * атрибутов учётки из AdUserProvider::fetchAccount() + кнопка сброса
+ * пароля (только у найденной учётки; L0-ссылка, одинаковая для всех -
+ * кэш панелей общий, доступ к действию проверяет сервер)
  */
 
 use yii\helpers\Html;
 
 /* @var $account array|null см. AdUserProvider::fetchAccount() */
 /* @var $model \app\models\Users */
+/* @var $resetUrl string|null URL формы сброса пароля (null = действие недоступно) */
+/* @var $compact bool вложенный список - без кнопок действий */
 
 if (is_null($account)) {
+	//учётки нет - сброс пароля не предлагаем
 	echo '<span class="text-secondary opacity-75">учётка '
 		.Html::encode($model->Login).' не найдена в AD</span>';
 	return;
@@ -53,3 +58,7 @@ if (!$account['enabled']) {
 		<span class="text-secondary ms-2">учётка истекает:</span> <?= $date($account['account_expires']) ?>
 	<?php } ?>
 </small></div>
+<?php if (!$compact && !empty($resetUrl)) { ?>
+<div class="mt-2"><?= Html::a('<i class="fas fa-key"></i> Сбросить пароль', $resetUrl,
+	['class' => 'btn btn-sm btn-secondary open-in-modal-form']) ?></div>
+<?php } ?>

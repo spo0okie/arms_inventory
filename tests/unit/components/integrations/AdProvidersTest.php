@@ -5,7 +5,6 @@ namespace tests\unit\components\integrations;
 use app\components\integrations\IntegrationsRegistry;
 use app\components\integrations\providers\AdComputerProvider;
 use app\components\integrations\providers\AdPasswordResetForm;
-use app\components\integrations\providers\AdPasswordResetProvider;
 use app\components\integrations\providers\AdUserProvider;
 use app\components\integrations\providers\SmsProvider;
 use app\models\Comps;
@@ -17,7 +16,8 @@ use Yii;
 
 /**
  * Тесты интеграций ActiveDirectory (docs/dev/integrations.md):
- * панель-справка о учётке и именной сброс пароля с композицией через SMS.
+ * панель-справка о учётке с кнопкой сброса и именной сброс пароля с
+ * композицией через SMS (всё - один провайдер AdUserProvider).
  * LDAP подменяется подклассами (fetchAccount/ldapResetPassword), SMS -
  * настоящий провайдер с data://-шлюзом, журнал - настоящая БД
  * (транзакция с откатом). В сеть и в AD тесты не ходят.
@@ -79,13 +79,13 @@ class AdProvidersTest extends Unit
 	}
 
 	/**
-	 * Провайдер сброса с подменёнными LDAP-операциями (сеть не трогаем).
+	 * Провайдер с подменёнными LDAP-операциями сброса (сеть не трогаем).
 	 * @param bool $ldapFails имитировать отказ записи в AD (шаг 2)
 	 * @param bool $verifyFails имитировать провал предпроверки (шаг 0)
 	 */
-	private function makeResetProvider(bool $ldapFails = false, bool $verifyFails = false): AdPasswordResetProvider
+	private function makeResetProvider(bool $ldapFails = false, bool $verifyFails = false): AdUserProvider
 	{
-		$provider = new class($ldapFails, $verifyFails) extends AdPasswordResetProvider {
+		$provider = new class($ldapFails, $verifyFails) extends AdUserProvider {
 			public bool $ldapFails;
 			public bool $verifyFails;
 			public array $verifyCalls = [];
@@ -117,7 +117,7 @@ class AdProvidersTest extends Unit
 				];
 			}
 		};
-		$provider->id = 'ad-reset';
+		$provider->id = 'ad';
 		$provider->config = [];
 		return $provider;
 	}
@@ -148,11 +148,13 @@ class AdProvidersTest extends Unit
 		$this->assertFalse($provider->appliesTo(new Techs()));
 	}
 
-	/** Рендер панели: статус, смена/истечение пароля, DN, last logon */
+	/** Рендер панели: статус, смена/истечение пароля, путь в дереве, last logon */
 	public function testAdPanelRender()
 	{
 		$provider = $this->makeAdProvider([
 			'dn' => 'CN=Тест АД,OU=IT,DC=corp,DC=local',
+			'path' => ['IT'],
+			'domain' => 'corp.local',
 			'enabled' => true,
 			'locked' => false,
 			'password_last_set' => mktime(12, 0, 0, 1, 15, 2026),
@@ -165,7 +167,11 @@ class AdProvidersTest extends Unit
 		$html = $provider->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'test.ad']));
 
 		$this->assertStringContainsString('активна', $html);
-		$this->assertStringContainsString('OU=IT,DC=corp,DC=local', $html);
+		//путь по дереву - тот же рендер, что и в панели компьютера;
+		//порядок «домен › контейнеры» проверяем по видимому пути: strpos по
+		//всему HTML ловил бы OU= внутри DN-подсказки (title стоит раньше)
+		$this->assertStringContainsString('corp.local &rsaquo; IT', $html);
+		$this->assertStringContainsString('CN=Тест АД,OU=IT,DC=corp,DC=local', $html); //полный DN в подсказке
 		$this->assertStringContainsString('15.01.2026', $html);
 		$this->assertStringContainsString('15.04.2026', $html);
 		$this->assertStringContainsString('01.02.2026', $html);
@@ -178,6 +184,8 @@ class AdProvidersTest extends Unit
 	{
 		$provider = $this->makeAdProvider([
 			'dn' => 'CN=X,DC=corp,DC=local',
+			'path' => [],
+			'domain' => 'corp.local',
 			'enabled' => true,
 			'locked' => true,
 			'password_last_set' => null,
@@ -199,6 +207,43 @@ class AdProvidersTest extends Unit
 		$html = $this->makeAdProvider(null)
 			->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'ghost']));
 		$this->assertStringContainsString('не найдена', $html);
+	}
+
+	/**
+	 * Кнопка сброса пароля живёт внутри панели: есть только у найденной
+	 * в AD учётки (несуществующей сброс не предлагается), одинакова для
+	 * всех пользователей (кэш панелей общий, доступ проверяет сервер);
+	 * в компактном режиме и без SMS-провайдера кнопки нет
+	 */
+	public function testAdPanelResetButton()
+	{
+		$account = [
+			'dn' => 'CN=X,DC=corp,DC=local', 'path' => [], 'domain' => 'corp.local',
+			'enabled' => true, 'locked' => false, 'password_last_set' => null,
+			'password_expires' => 'never', 'must_change_password' => false,
+			'last_logon' => null, 'account_expires' => 'never',
+		];
+		$model = new Users(['Login' => 'test.ad']);
+
+		//учётка найдена + SMS настроен (в _before) = кнопка есть
+		$html = $this->makeAdProvider($account)->renderPanel(AdUserProvider::PANEL, $model);
+		$this->assertStringContainsString('Сбросить пароль', $html);
+		$this->assertStringContainsString('open-in-modal-form', $html, 'открывается в модалке');
+
+		//учётка не найдена - сброс не предлагается (исходный симптом слияния)
+		$html = $this->makeAdProvider(null)->renderPanel(AdUserProvider::PANEL, $model);
+		$this->assertStringNotContainsString('Сбросить пароль', $html);
+
+		//компактный режим (вложенные списки) - без кнопок действий
+		$provider = $this->makeAdProvider($account);
+		$provider->compact = true;
+		$this->assertStringNotContainsString('Сбросить пароль',
+			$provider->renderPanel(AdUserProvider::PANEL, $model));
+
+		//без SMS-провайдера действия нет - нет и кнопки
+		Yii::$app->params['integrations'] = [];
+		$html = $this->makeAdProvider($account)->renderPanel(AdUserProvider::PANEL, $model);
+		$this->assertStringNotContainsString('Сбросить пароль', $html);
 	}
 
 	// ==================== AdComputerProvider (справка о компьютере) ====================
@@ -267,9 +312,9 @@ class AdProvidersTest extends Unit
 
 		$html = $provider->renderPanel(AdComputerProvider::PANEL, new Comps(['name' => 'PC-01', 'os' => 'Windows 10']));
 
-		//путь: домен, затем контейнеры сверху вниз
-		$this->assertTrue(strpos($html, 'corp.local') < strpos($html, 'Офис'));
-		$this->assertTrue(strpos($html, 'Офис') < strpos($html, 'Бухгалтерия'));
+		//путь: домен, затем контейнеры сверху вниз - по видимому пути
+		//(strpos по всему HTML ловил бы OU= внутри DN-подсказки)
+		$this->assertStringContainsString('corp.local &rsaquo; Офис &rsaquo; Бухгалтерия', $html);
 		$this->assertStringContainsString('GPO-Office', $html);
 		$this->assertStringContainsString('SCCM-Clients', $html);
 		//полный DN - в подсказке
@@ -295,7 +340,7 @@ class AdProvidersTest extends Unit
 
 		$html = $provider->renderPanel(AdComputerProvider::PANEL, new Comps(['name' => 'OLD', 'os' => 'Windows 7']));
 		$this->assertStringContainsString('учётка отключена', $html);
-		$this->assertStringContainsString('Групп нет', $html);
+		$this->assertStringContainsString('групп нет', $html);
 	}
 
 	/** Компьютер не найден в AD */
@@ -318,16 +363,43 @@ class AdProvidersTest extends Unit
 		$model = new Comps(['name' => 'PC-01', 'os' => 'Windows 10']);
 
 		$provider = $this->makeAdCompProvider($computer);
-		$this->assertStringContainsString('pe-4', $provider->renderPanel(AdComputerProvider::PANEL, $model));
+		$this->assertStringContainsString('mt-1', $provider->renderPanel(AdComputerProvider::PANEL, $model));
 
 		$provider = $this->makeAdCompProvider($computer);
 		$provider->compact = true;
 		$html = $provider->renderPanel(AdComputerProvider::PANEL, $model);
-		$this->assertStringContainsString('pe-2', $html);
-		$this->assertStringNotContainsString('pe-4', $html);
+		$this->assertStringContainsString('mt-0', $html);
+		$this->assertStringNotContainsString('mt-1', $html);
 	}
 
-	// ==================== AdPasswordResetProvider (сброс пароля) ====================
+	/**
+	 * Один и тот же DN в панелях сотрудника и компьютера рисуется
+	 * одинаково (общий шаблон ad-common/dn-path)
+	 */
+	public function testDnRenderedSameForUserAndComputer()
+	{
+		$dn = 'CN=X,OU=Челябинск,DC=corp,DC=local';
+		$placement = ['dn' => $dn, 'path' => ['Челябинск'], 'domain' => 'corp.local'];
+
+		$userHtml = $this->makeAdProvider($placement + [
+			'enabled' => true, 'locked' => false, 'password_last_set' => null,
+			'password_expires' => 'never', 'must_change_password' => false,
+			'last_logon' => null, 'account_expires' => 'never',
+		])->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'x']));
+
+		$compHtml = $this->makeAdCompProvider($placement + [
+			'groups' => [], 'enabled' => true, 'os' => '', 'dns_name' => null,
+			'last_logon' => null, 'description' => null,
+		])->renderPanel(AdComputerProvider::PANEL, new Comps(['name' => 'X', 'os' => 'Windows 10']));
+
+		$path = '<small class="text-secondary" title="distinguishedName: '.$dn.'">';
+		$this->assertStringContainsString($path, $userHtml);
+		$this->assertStringContainsString($path, $compHtml);
+		$this->assertStringContainsString('corp.local &rsaquo; Челябинск', $userHtml);
+		$this->assertStringContainsString('corp.local &rsaquo; Челябинск', $compHtml);
+	}
+
+	// ==================== Сброс пароля (действие reset-password) ====================
 
 	/**
 	 * Полный успешный сценарий через реестр: SMS отправлено ДО записи в AD,
@@ -341,7 +413,7 @@ class AdProvidersTest extends Unit
 		$form = new AdPasswordResetForm(['pronounceable' => true, 'length' => 14, 'unlock' => true]);
 		$this->assertTrue($form->validate());
 
-		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION,
 			$user, $form, ['login' => 'executor', 'password' => 'executor-secret']);
 
 		$this->assertTrue($result->ok, $result->message);
@@ -388,7 +460,7 @@ class AdProvidersTest extends Unit
 		$user = $this->makeUser();
 		$provider = $this->makeResetProvider(false, true); //verifyFails
 
-		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION,
 			$user, new AdPasswordResetForm(), ['login' => 'executor', 'password' => 'wrong']);
 
 		$this->assertFalse($result->ok);
@@ -409,7 +481,7 @@ class AdProvidersTest extends Unit
 		$user = $this->makeUser();
 		$provider = $this->makeResetProvider();
 
-		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION,
 			$user, new AdPasswordResetForm(), ['login' => 'executor', 'password' => 'x']);
 
 		$this->assertFalse($result->ok);
@@ -423,7 +495,7 @@ class AdProvidersTest extends Unit
 		$user = $this->makeUser();
 		$provider = $this->makeResetProvider(true);
 
-		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION,
 			$user, new AdPasswordResetForm(), ['login' => 'executor', 'password' => 'x']);
 
 		$this->assertFalse($result->ok);
@@ -439,7 +511,7 @@ class AdProvidersTest extends Unit
 		$user = $this->makeUser(['Mobile' => '', 'private_phone' => '']);
 		$provider = $this->makeResetProvider();
 
-		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION,
 			$user, new AdPasswordResetForm(), ['login' => 'executor', 'password' => 'x']);
 
 		$this->assertFalse($result->ok);
@@ -457,7 +529,7 @@ class AdProvidersTest extends Unit
 		$user = $this->makeUser(['Mobile' => '', 'private_phone' => '79997654321']);
 		$provider = $this->makeResetProvider();
 
-		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION,
 			$user, new AdPasswordResetForm(), ['login' => 'executor', 'password' => 'x']);
 
 		$this->assertTrue($result->ok, $result->message);
@@ -471,7 +543,7 @@ class AdProvidersTest extends Unit
 		$user = $this->makeUser();
 		$provider = $this->makeResetProvider();
 
-		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION,
 			$user, new AdPasswordResetForm(), null);
 
 		$this->assertFalse($result->ok);
@@ -485,7 +557,7 @@ class AdProvidersTest extends Unit
 	 */
 	public function testRandomPassword()
 	{
-		$provider = new AdPasswordResetProvider();
+		$provider = new AdUserProvider();
 		foreach ([12, 20, 32] as $length) {
 			$password = $provider->randomPassword($length);
 			$this->assertSame($length, strlen($password));
@@ -508,7 +580,7 @@ class AdProvidersTest extends Unit
 		$provider = $this->makeResetProvider();
 		$form = new AdPasswordResetForm(['pronounceable' => false, 'length' => 16, 'unlock' => false]);
 
-		$result = IntegrationsRegistry::runActionForm($provider, AdPasswordResetProvider::ACTION,
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION,
 			$user, $form, ['login' => 'executor', 'password' => 'x']);
 
 		$this->assertTrue($result->ok, $result->message);
@@ -517,13 +589,27 @@ class AdProvidersTest extends Unit
 		$this->assertFalse($provider->resetCalls[0]['unlock']);
 	}
 
-	/** Дескриптор действия: именной уровень (L2+), не standalone */
+	/**
+	 * Дескриптор действия: именной уровень (L2+), не standalone; кнопка
+	 * живёт внутри панели (showInPanel=false - общий блок не дублирует)
+	 */
 	public function testResetActionDescriptor()
 	{
-		$descriptor = (new AdPasswordResetProvider())->actions(null)[AdPasswordResetProvider::ACTION];
-		$this->assertSame(AdPasswordResetProvider::LEVEL_PERSONAL, $descriptor['level']);
+		$descriptor = (new AdUserProvider())->actions(null)[AdUserProvider::ACTION];
+		$this->assertSame(AdUserProvider::LEVEL_PERSONAL, $descriptor['level']);
 		$this->assertArrayNotHasKey('standalone', $descriptor);
 		$this->assertSame(AdPasswordResetForm::class, $descriptor['form']);
+		$this->assertFalse($descriptor['showInPanel']);
+	}
+
+	/**
+	 * Без настроенного SMS-провайдера действия сброса нет (панель при этом
+	 * работает - зависимость от SMS переехала из isConfigured в actions)
+	 */
+	public function testResetActionRequiresSms()
+	{
+		Yii::$app->params['integrations'] = []; //нет sms
+		$this->assertSame([], (new AdUserProvider())->actions(null));
 	}
 
 	/** Форма: длина не короче политики; дефолты pronounceable=on, unlock=off */

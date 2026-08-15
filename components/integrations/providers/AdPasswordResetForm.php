@@ -6,7 +6,8 @@ use app\models\base\ArmsModel;
 use app\models\base\traits\AttributeDataModelTrait;
 
 /**
- * Форма действия ad-reset/reset-password (docs/dev/integrations.md).
+ * Форма действия сброса пароля AD — ad/reset-password
+ * (docs/dev/integrations.md, {@see AdUserProvider}).
  *
  * Цель — заменить поход в PowerShell на одну кнопку: пароль всегда
  * генерируется автоматически и НЕ показывается администратору (его
