@@ -218,7 +218,42 @@ trait AttributeLinksModelTrait
 		}
 		return $links;
 	}
-	
+
+	/**
+	 * Удаляет строки junction-таблиц всех many-to-many (viaTable) связей этой модели.
+	 *
+	 * LinkerBehavior обслуживает junction-таблицы только на insert/update
+	 * (EVENT_AFTER_INSERT/UPDATE), а FK на junction-таблицах в проекте нет
+	 * (M251221163631ClearFk) — без явной очистки строки сиротеют при delete().
+	 *
+	 * Чистятся только связи, ключующиеся первичным ключом ЭТОЙ модели:
+	 * заимствованные цепочки (viaTable по чужому ключу, как OrgInet->contracts
+	 * через services_id) и via('relation')-связи (промежуточные записи там —
+	 * полноценные модели) не трогаем.
+	 */
+	public function deleteJunctionRows(): void
+	{
+		$cleaned=[];
+		foreach ($this->getLinksSchema() as $attribute=>$data) {
+			if (!StringHelper::endsWith($attribute,'_ids')) continue;
+			if (!($loader=$this->attributeLinkLoader($attribute))) continue;
+			if (!($relation=$this->getRelation($loader,false))) continue;
+			if (!($relation->via instanceof \yii\db\ActiveQuery)) continue;
+			$via=$relation->via;
+			$table=is_array($via->from)?reset($via->from):$via->from;
+			if (!is_string($table) || !is_array($via->link)) continue;
+			if (array_values($via->link)!==static::primaryKey()) continue;
+			//две ссылки могут смотреть в одну junction-таблицу одним ключом - не чистим дважды
+			$key=$table.'|'.implode(',',array_keys($via->link));
+			if (isset($cleaned[$key])) continue;
+			$cleaned[$key]=true;
+			$condition=[];
+			foreach ($via->link as $junctionColumn=>$ownAttribute)
+				$condition[$junctionColumn]=$this->getAttribute($ownAttribute);
+			static::getDb()->createCommand()->delete($table,$condition)->execute();
+		}
+	}
+
 	/**
 	 * Загрузить связанный объект
 	 * @param $attr

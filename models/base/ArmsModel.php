@@ -705,6 +705,10 @@ class ArmsModel extends ActiveRecord
 
 		$this->historyEnd(); //журналирование удаления
 
+		//junction-строки many-to-many связей чистим ПОСЛЕ журналирования,
+		//чтобы запись об удалении успела зафиксировать ссылки
+		$this->deleteJunctionRows();
+
 		static::invalidateAllItemsCache();
 		unset(self::$identityMap[static::class][$this->id]);
 		static::flushCountsCaches();
