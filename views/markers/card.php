@@ -48,7 +48,8 @@ use yii\helpers\Html;
 			['Тёмная карточка', 'users-view', 'arms-card'],
 		];
 	?>
-		<h4 class="mt-3">Примеры отображения</h4>
+		<?php //data-doc-anchor: цель подсветки из документации (docs/help/models/markers.md) ?>
+		<h4 class="mt-3" data-doc-anchor="marker-preview">Примеры отображения</h4>
 		<div class="marker-preview">
 			<?php //подложки и обертки — div: контексты в CSS объявлены элементно (div.nav-header, div.users-view div.arms-card) ?>
 			<?php foreach ($scenarios as [$label, $outerClass, $bgClass]) { ?>

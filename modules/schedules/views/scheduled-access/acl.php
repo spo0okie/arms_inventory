@@ -43,7 +43,8 @@ ksort($rendered,SORT_STRING|SORT_FLAG_CASE);
 		<?php if (!$static_view) { ?>
 			<div class="d-flex align-items-center">
 				<?= Html::a('Добавить',['/acls/create','Acls[schedules_id]'=>$model->id],['class'=>'btn btn-success btn-sm me-2'])?>
-				<div class="btn-group btn-group-sm" role="group" title="Как показывать ACL расписания">
+				<?php /* data-doc-anchor: цель подсветки из документации (scheduled-access.md) */ ?>
+				<div class="btn-group btn-group-sm" role="group" title="Как показывать ACL расписания" data-doc-anchor="group-detail-toggle">
 					<a class="btn <?= $grouped?'btn-primary':'btn-outline-primary' ?>" href="<?= Url::current(['group'=>null]) ?>">
 						<span class="fas fa-layer-group"></span> Группировать
 					</a>

@@ -13,7 +13,8 @@ if (is_object($model)) {
 	
 ?>
 
-    <h4>Распределение:</h4>
+    <?php //data-doc-anchor: цель подсветки из документации (docs/help/models/lic-groups.md) ?>
+    <h4 data-doc-anchor="usage">Распределение:</h4>
     <p>
         <?= implode('<br/>',array_filter([
             \app\components\ModelFieldWidget::renderFieldRow($model,'totalCount'),

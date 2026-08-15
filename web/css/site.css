@@ -119,14 +119,15 @@ a {text-decoration: none;}
    а подсвечивают элемент на этой же странице — маркируем их пунктиром и прицелом,
    чтобы читатель заранее отличал их от обычных ссылок, уводящих со страницы */
 a[href^="#doc-anchor:"], a[href^="#doc-select:"] {text-decoration: none; border-bottom: 1px dashed; color:chocolate}
+/* подключение fa-crosshairs - иконки прицела. отключил, т.к. сильно загромождало документ
 a[href^="#doc-anchor:"]::after, a[href^="#doc-select:"]::after {
-	content: "\f05b"; /* fa-crosshairs */
+	content: "\f05b";
 	font-family: "Font Awesome 5 Free";
 	font-weight: 900;
 	font-size: .75em;
 	margin-left: .2em;
 	opacity: .65;
-}
+}*/
 /* временная подсветка элемента, на который указала ссылка из встроенной документации,
    и цели якоря внутри самой документации (заголовок секции, строка атрибута) */
 .doc-anchor-highlight {animation: doc-anchor-pulse 2.2s ease-out; border-radius: 4px;}

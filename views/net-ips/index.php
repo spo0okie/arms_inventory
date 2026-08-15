@@ -33,7 +33,8 @@ $renderer=$this;
 	]) ;
 	
 	if (is_object($networkProvider)) {
-		echo '<h4 class="mt-4 mb-2">Адрес не найден, но есть подходящая сеть</h4>';
+		//data-doc-anchor: цель подсветки из документации (docs/help/models/net-ips.md)
+		echo '<h4 class="mt-4 mb-2" data-doc-anchor="matching-network">Адрес не найден, но есть подходящая сеть</h4>';
 		echo $this->render('/networks/table', ['dataProvider'=>$networkProvider, 'searchModel'=>null]);
 	}
 	yii\widgets\Pjax::end();

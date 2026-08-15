@@ -11,7 +11,8 @@ if (!isset($static_view)) $static_view=false;
 
 ?>
 
-	<table class="table table-bordered table-striped table-sm table-hover">
+	<?php /* data-doc-anchor: цель подсветки из документации (docs/help/models/networks.md) */ ?>
+	<table class="table table-bordered table-striped table-sm table-hover" data-doc-anchor="net-calc">
 		<tr>
 			<th>Имя</th>
 			<th>Значение</th>

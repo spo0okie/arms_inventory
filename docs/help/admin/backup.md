@@ -10,7 +10,7 @@ composer install
 
 Главное не потерять:
 
-- локальные конфиги инсталляции: **config/params-local.php**, **config/db-local.php**, **config/web-local.php**, **config/ldap.php**
+- локальные [конфиги инсталляции](setup.md): **config/params-local.php**, **config/db-local.php**, **config/web-local.php**, **config/ldap.php**
 - загруженные пользователями файлы (сканы документов): **web/scans**
 
 Чтобы потом восстановиться - просто переписываем файловую структуру на место и восстанавливаем БД.

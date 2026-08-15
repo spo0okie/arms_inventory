@@ -24,7 +24,8 @@ if (!isset($static_view)) $static_view=false;
 						'<br> т.к. к нему привязаны другие объекты',
 				]) ?>
 		    </h2>
-			<?= $model->nosync?'<span class="fas fa-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
+			<?php /* data-doc-anchor: цель подсветки из документации (docs/help/models/users.md) */ ?>
+			<?= $model->nosync?'<span class="fas fa-lock" data-doc-anchor="nosync-lock" title="Синхронизация с внешней БД сотрудников отключена"></span>':'' ?>
 			<?= ModelFieldWidget::renderFieldTitle($model,'Bday',null,'span','Дата рождения') ?>: <?= ModelFieldWidget::renderFieldValue($model,'Bday') ?> <br/>
 		    <?= \app\components\ModelFieldWidget::renderCompositeTitle($model,['employee_id','Persg'],'Табельный №','span') ?>
 			<?= $model->employee_id ?> (<?= \app\models\Users::$WTypes[$model->Persg][1] ?? $model->Persg ?>)
