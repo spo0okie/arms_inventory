@@ -109,12 +109,38 @@ a {text-decoration: none;}
 .comp-ip-item .ip-action {display: none;}
 .comp-ip-item:hover .ip-action {display: inline-block;}
 .comp-ip-item .ip-action + .ip-action {margin-left: .25em;}
-/* временная подсветка элемента, на который указала ссылка из встроенной документации */
+/* цель якоря в документации: секция страницы или строка справочника атрибутов
+   (models/<class>.md#attr-<имя>) — не прижимаем к краю окна при переходе... */
+.docs-page :target, .docs-panel :target, .docs-attributes tr:target {scroll-margin-top: 1rem;}
+/* ...и оставляем строку атрибута подкрашенной после того, как подсветка отыграла:
+   в длинной таблице иначе не видно, на какой строке ты стоишь */
+.docs-attributes tr:target > td {background-color: rgba(255,193,7,.25);}
+/* ссылки-подсветки из документации (#doc-anchor:/#doc-select:) никуда не ведут,
+   а подсвечивают элемент на этой же странице — маркируем их пунктиром и прицелом,
+   чтобы читатель заранее отличал их от обычных ссылок, уводящих со страницы */
+a[href^="#doc-anchor:"], a[href^="#doc-select:"] {text-decoration: none; border-bottom: 1px dashed; color:chocolate}
+a[href^="#doc-anchor:"]::after, a[href^="#doc-select:"]::after {
+	content: "\f05b"; /* fa-crosshairs */
+	font-family: "Font Awesome 5 Free";
+	font-weight: 900;
+	font-size: .75em;
+	margin-left: .2em;
+	opacity: .65;
+}
+/* временная подсветка элемента, на который указала ссылка из встроенной документации,
+   и цели якоря внутри самой документации (заголовок секции, строка атрибута) */
 .doc-anchor-highlight {animation: doc-anchor-pulse 2.2s ease-out; border-radius: 4px;}
 @keyframes doc-anchor-pulse {
 	0%   {box-shadow: 0 0 0 .2rem rgba(255,193,7,.9); background-color: rgba(255,193,7,.30);}
 	60%  {box-shadow: 0 0 0 .2rem rgba(255,193,7,.5); background-color: rgba(255,193,7,.12);}
 	100% {box-shadow: 0 0 0 .2rem rgba(255,193,7,0);  background-color: transparent;}
+}
+/* у строки таблицы со схлопнутыми границами box-shadow не рисуется — ей только фон */
+tr.doc-anchor-highlight {animation-name: doc-anchor-pulse-bg;}
+@keyframes doc-anchor-pulse-bg {
+	0%   {background-color: rgba(255,193,7,.55);}
+	60%  {background-color: rgba(255,193,7,.25);}
+	100% {background-color: transparent;}
 }
 
 

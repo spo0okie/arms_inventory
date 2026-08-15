@@ -85,7 +85,7 @@ if (!isset($modalParent)) $modalParent=null;
 	<?= $form->field($model,  'comment')->text(['rows'=>2]) ?>
 
     <p>
-        <span onclick="$('#comps_advanced_settings').toggle()" class="href">Расширенные настройки</span>
+        <span onclick="$('#comps_advanced_settings').toggle()" class="href" data-doc-anchor="advanced-settings">Расширенные настройки</span>
         <?= Html::tag('span','<i class="far fa-question-circle"></i>',array_merge(
 			['class'=>'attr-hint-icon','qtip_pin'=>'1'],
 			\app\helpers\FieldsHelper::toolTipOptions('Расширенные настройки',

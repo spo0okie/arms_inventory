@@ -22,13 +22,16 @@ $fqdn=mb_strtolower($model->fqdn);
 
 
 $rcIcon=Html::tag('i','',['class'=>"fas fa-sign-in-alt"]);
+//data-doc-anchor: цели подсветки из документации (docs/help/models/comps.md)
 $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible)?
 	Html::tag('span',$rcIcon,[
 		'class'=>'text-muted',
+		'data-doc-anchor'=>'remote-control',
 		'qtip_ttip'=>'Сетевой доступ к ОС/ВМ отсутствует, т.к. она находится в изолированном окружении/песочнице',
 		'qtip_side'=>'bottom',
 	]):
 	Html::a($rcIcon,'remotecontrol://'.$model->fqdn,[
+		'data-doc-anchor'=>'remote-control',
 		'qtip_ttip'=>"Удаленное управление {$model->fqdn}<br>"
 			.'<a href="'.\yii\helpers\Url::to(['/docs/page','path'=>'admin/integrations/remote-control.md']).'">Как настроить обработчик протокола</a>',
 		'qtip_pin'=>'1',
@@ -38,7 +41,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 	if ($model instanceof HistoryModel) {
 		echo IsHistoryObjectWidget::widget(['model'=>$model]);
 	} else { ?>
-		<span class="unit-status <?= $model->updatedRenderClass ?> href" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()" qtip_ttip="Давность последних данных от скрипта инвентаризации.<br>Цвет: до часа — ярко-голубой, до суток — бледно-голубой, до недели — зелёный, до месяца — жёлтый, свыше — красный.<br>Клик — дата обновления и версия скрипта."><?= $model->updatedText ?></span>
+		<span class="unit-status <?= $model->updatedRenderClass ?> href" data-doc-anchor="updated-age" onclick="$('#comp<?= $model->id ?>-updated-info').toggle()" qtip_ttip="Давность последних данных от скрипта инвентаризации.<br>Цвет: до часа — ярко-голубой, до суток — бледно-голубой, до недели — зелёный, до месяца — жёлтый, свыше — красный.<br>Клик — дата обновления и версия скрипта."><?= $model->updatedText ?></span>
 		<br />
 	<?php } ?>
 	<?= IsArchivedObjectWidget::widget(['model'=>$model]) ?>
@@ -77,7 +80,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 	<?= ModelFieldWidget::renderFieldValue($model,'comment') ?>
 </div>
 
-<div class="d-flex flex-row flex-wrap">
+<div class="d-flex flex-row flex-wrap" data-doc-anchor="bindings">
 	<?php if (is_object($model->platform)) {?>
 		<div class="pe-5">
 			<?= ModelFieldWidget::widget([
@@ -102,7 +105,7 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 </div>
 
 	<?php if (count($model->services)||count($model->effectiveMaintenanceReqs)||count($model->maintenanceJobs)) { ?>
-		<div class="d-flex flex-row flex-wrap">
+		<div class="d-flex flex-row flex-wrap" data-doc-anchor="services-maintenance">
 			<?= ModelFieldWidget::widget([
 				'model'=>$model,
 				'field'=>'services',
@@ -124,11 +127,13 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 		</div>
 	<?php } ?>
 
-<?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
-<?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
+<div data-doc-anchor="access">
+	<?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
+	<?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
+</div>
 
 <?php if (is_array($lastLogins=$model->lastThreeLogins) && count($lastLogins)) { ?>
-	<div>
+	<div data-doc-anchor="login-journal">
 		<?= ModelFieldWidget::renderFieldTitle($model,'lastThreeLogins') ?>
 		<p class="mb-3">
 		 <?php foreach ($lastLogins as $logon)

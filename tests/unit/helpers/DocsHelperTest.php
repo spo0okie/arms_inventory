@@ -141,6 +141,31 @@ class DocsHelperTest extends Unit
 	}
 
 	/**
+	 * Ссылка с якорем атрибута (models/<class-id>.md#attr-<имя>) ведёт на
+	 * страницу сущности - якорь живёт в её справочнике атрибутов, а не в MD.
+	 * Прочие якоря той же страницы остаются ссылкой на MD.
+	 */
+	public function testRewriteHtmlLinksAttributeAnchor()
+	{
+		$urlBuilder = function ($action, $relPath, $anchor) {
+			return "[$action:$relPath]$anchor";
+		};
+
+		$html = '<a href="contracts.md#attr-parent_id">атрибут</a>'
+			. ' <a href="../models/comps.md#attr-name">атрибут соседа</a>'
+			. ' <a href="contracts.md#добавление">секция</a>'
+			. ' <a href="contracts/name.md#attr-name">страница атрибута</a>';
+
+		$this->assertEquals(
+			'<a href="[model:contracts]#attr-parent_id">атрибут</a>'
+			. ' <a href="[model:comps]#attr-name">атрибут соседа</a>'
+			. ' <a href="[page:models/contracts.md]#добавление">секция</a>'
+			. ' <a href="[page:models/contracts/name.md]#attr-name">страница атрибута</a>',
+			DocsHelper::rewriteHtmlLinks($html, 'models', $urlBuilder)
+		);
+	}
+
+	/**
 	 * Абсолютные URL, якоря, mailto и выходящие за корень ссылки не трогаем.
 	 */
 	public function testRewriteHtmlLinksUntouched()
@@ -238,6 +263,51 @@ class DocsHelperTest extends Unit
 		$this->assertStringContainsString('models%2Fother.md', urlencode(urldecode($preamble)));
 
 		$this->assertEquals('', DocsHelper::renderSection($file, 'models/sectioned.md', 'Удаление'));
+	}
+
+	/**
+	 * Slug заголовка совпадает с тем, что генерирует GitHub: только так одна
+	 * и та же ссылка с якорем работает и на GitHub, и в приложении.
+	 */
+	public function testHeadingId()
+	{
+		$cases = [
+			'Добавление' => 'добавление',
+			'Индив. спеки' => 'индив-спеки',
+			'Вычисляемые признаки (filter)' => 'вычисляемые-признаки-filter',
+			'Использование/расход материалов' => 'использованиерасход-материалов',
+			'  Настройки  генератора  ' => 'настройки-генератора',
+			'Основной документ parent_id' => 'основной-документ-parent_id',
+			'???' => '',
+		];
+
+		foreach ($cases as $heading => $expected) {
+			$this->assertEquals($expected, DocsHelper::headingId($heading), "заголовок '$heading'");
+		}
+	}
+
+	/**
+	 * Якоря заголовков в готовом HTML: id из текста заголовка, свой id автора
+	 * приоритетнее, дубликаты разводятся суффиксом.
+	 */
+	public function testAddHeadingIds()
+	{
+		$html = DocsHelper::addHeadingIds(
+			'<h1>Модели оборудования</h1>'
+			. '<h2>Добавление</h2>'
+			. '<h3 class="x" id="свой">Добавление</h3>'
+			. '<h2>Добавление</h2>'
+			. '<h2>Ссылка на <a href="x">модель</a></h2>'
+		);
+
+		$this->assertStringContainsString('<h1 id="модели-оборудования">', $html);
+		$this->assertStringContainsString('<h2 id="добавление">', $html);
+		//свой id не перебиваем, класс не теряем
+		$this->assertStringContainsString('<h3 class="x" id="свой">', $html);
+		//повтор того же заголовка - с суффиксом
+		$this->assertStringContainsString('<h2 id="добавление-1">', $html);
+		//разметка внутри заголовка в slug не попадает, подпись ссылки - попадает
+		$this->assertStringContainsString('<h2 id="ссылка-на-модель">', $html);
 	}
 
 	/**

@@ -29,6 +29,13 @@ class DocsHelper
 	const IMG_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'];
 
 	/**
+	 * Версия рендера MD->HTML, входит в ключ кэша {@see renderCached()}:
+	 * поднимать при изменении способа рендера (иначе кэш отдаёт старый HTML
+	 * для неизменившегося файла).
+	 */
+	const RENDER_VERSION = 2;
+
+	/**
 	 * Нормализует относительный путь страницы: прямые слэши, без ведущего /,
 	 * схлопывает '.' и '..'. Выход за корень ('..' сверх меры) => null.
 	 * @param string $path
@@ -138,7 +145,7 @@ class DocsHelper
 		return static::renderCached([$file, filemtime($file), $stripTitle], function () use ($file, $stripTitle, $relPath) {
 			$content = file_get_contents($file);
 			if ($stripTitle) $content = preg_replace('/^#\s+.*\R/u', '', $content, 1);
-			$html = Markdown::convert($content);
+			$html = static::convertMarkdown($content);
 			return static::rewriteHtmlLinks($html, static::relDir($relPath));
 		});
 	}
@@ -161,7 +168,7 @@ class DocsHelper
 		return static::renderCached([$file, filemtime($file), 'section', $section, $withHeading], function () use ($file, $relPath, $section, $withHeading) {
 			$content = static::extractSection(file_get_contents($file), $section, $withHeading);
 			if (!strlen(trim($content))) return '';
-			$html = Markdown::convert($content);
+			$html = static::convertMarkdown($content);
 			return static::rewriteHtmlLinks(
 				$html,
 				static::relDir($relPath),
@@ -169,6 +176,71 @@ class DocsHelper
 				'class="open-in-modal-form"'
 			);
 		});
+	}
+
+	/**
+	 * MD -> HTML с якорями на заголовках: id секции = slug её текста, как это
+	 * делает GitHub. Без этого ссылка вида `page.md#добавление` работает только
+	 * на GitHub, а в приложении ведёт в начало страницы (Michelf сам id
+	 * заголовкам не проставляет).
+	 */
+	protected static function convertMarkdown(string $content): string
+	{
+		return static::addHeadingIds(Markdown::convert($content));
+	}
+
+	/**
+	 * Проставляет id заголовкам готового HTML (см. {@see headingId()}).
+	 *
+	 * Постобработкой, а не штатным `header_id_func` Michelf: на PHP 8.4 тот
+	 * путь падает депрекейтом (doExtraAttributes передаёт null в preg_match_all,
+	 * когда у заголовка нет блока `{...}`). Заодно тут доступен уже
+	 * отрендеренный текст заголовка - без остатков MD-разметки.
+	 *
+	 * Свой id заголовка (`{#id}`) приоритетнее сгенерированного, дубликаты
+	 * разводятся суффиксом -1, -2 (тоже как GitHub).
+	 */
+	public static function addHeadingIds(string $html): string
+	{
+		$pattern = '~<h([1-6])(\s[^>]*)?>(.*?)</h\1>~su';
+
+		//сначала занимаем id, проставленные автором явно
+		$used = [];
+		if (preg_match_all($pattern, $html, $matches, PREG_SET_ORDER)) {
+			foreach ($matches as $match) {
+				if (preg_match('~\bid=["\']([^"\']+)["\']~u', $match[2] ?? '', $id))
+					$used[$id[1]] = 1;
+			}
+		}
+
+		return preg_replace_callback($pattern, function ($match) use (&$used) {
+			[$full, $level, $attrs, $inner] = $match + [2 => '', 3 => ''];
+			if (preg_match('~\bid=["\']~u', $attrs)) return $full;
+
+			$id = static::headingId(html_entity_decode(strip_tags($inner), ENT_QUOTES, 'UTF-8'));
+			if ($id === '') return $full; //нечего слагифицировать - заголовок без якоря
+
+			$count = $used[$id] ?? 0;
+			$used[$id] = $count + 1;
+			if ($count) $id .= "-$count";
+
+			return "<h$level$attrs id=\"" . Html::encode($id) . "\">$inner</h$level>";
+		}, $html);
+	}
+
+	/**
+	 * Slug заголовка по правилам GitHub: нижний регистр, выброшены все символы
+	 * кроме букв/цифр/подчёркивания/пробела/дефиса, пробелы -> дефисы.
+	 * Так якоря совпадают с теми, что GitHub генерирует для тех же страниц,
+	 * и одна и та же ссылка работает в обоих местах чтения документации.
+	 * @param string $text текст заголовка (уже без разметки: подпись ссылки,
+	 *                     содержимое эмфазиса - да, сами символы разметки - нет)
+	 */
+	public static function headingId(string $text): string
+	{
+		$text = mb_strtolower(trim($text), 'UTF-8');
+		$text = preg_replace('/[^\p{L}\p{N}_\s-]+/u', '', $text);
+		return preg_replace('/\s+/u', '-', trim($text));
 	}
 
 	/**
@@ -208,6 +280,10 @@ class DocsHelper
 	 * Кэш готового HTML: до изменения файла (в ключе filemtime).
 	 * Без кэш-компонента (тесты хелпера без приложения) - рендер напрямую.
 	 *
+	 * В ключе есть и версия рендера (RENDER_VERSION): содержимое файла не
+	 * меняется, когда меняется способ его рендера (якоря заголовков, разметка
+	 * ссылок) — без версии обновление кода отдавало бы старый HTML из кэша.
+	 *
 	 * В ключ входит baseUrl запроса: переписанные ссылки содержат префикс
 	 * приложения, а один и тот же файловый кэш могут делить серверы с разными
 	 * префиксами (httpd отдаёт приложение под /web, dev php -S — из корня) —
@@ -222,7 +298,7 @@ class DocsHelper
 		$baseUrl = Yii::$app->request instanceof \yii\web\Request
 			? Yii::$app->request->baseUrl
 			: '';
-		return $cache->getOrSet(array_merge(['docsRender', $baseUrl], $key), $render);
+		return $cache->getOrSet(array_merge(['docsRender', static::RENDER_VERSION, $baseUrl], $key), $render);
 	}
 
 	/**
@@ -240,14 +316,16 @@ class DocsHelper
 	 * @param string        $html
 	 * @param string        $pageDir     каталог текущей страницы внутри docs/help
 	 * @param callable|null $urlBuilder  fn(string $action, string $relPath, string $anchor): string
-	 *                                   (для тестов без Yii-приложения)
+	 *                                   ($relPath для action='model' - class-id сущности;
+	 *                                   для тестов без Yii-приложения)
 	 * @param string        $mdLinkExtra дополнительные HTML-атрибуты ссылкам на MD-страницы
 	 *                                   (например 'class="open-in-modal-form"' для инфоблоков)
 	 */
 	public static function rewriteHtmlLinks(string $html, string $pageDir, ?callable $urlBuilder = null, string $mdLinkExtra = ''): string
 	{
 		$urlBuilder = $urlBuilder ?? function (string $action, string $relPath, string $anchor) {
-			return Url::to(["/docs/$action", 'path' => $relPath]) . $anchor;
+			$param = $action === 'model' ? 'class' : 'path';
+			return Url::to(["/docs/$action", $param => $relPath]) . $anchor;
 		};
 
 		return preg_replace_callback(
@@ -269,9 +347,15 @@ class DocsHelper
 				if ($relPath === null) return $full; //ссылка за пределы документации - оставляем как есть
 
 				$ext = strtolower(pathinfo($relPath, PATHINFO_EXTENSION));
-				if ($ext === 'md')
+				if ($ext === 'md') {
+					//ссылка на атрибут сущности ведёт туда, где якорь существует -
+					//на страницу сущности со справочником атрибутов, а не на голый MD
+					if (($classId = static::attributeAnchorClassId($relPath, $anchor)) !== null)
+						return ($mdLinkExtra ? $mdLinkExtra . ' ' : '')
+							. $attr . '="' . $urlBuilder('model', $classId, $anchor) . '"';
 					return ($mdLinkExtra ? $mdLinkExtra . ' ' : '')
 						. $attr . '="' . $urlBuilder('page', $relPath, $anchor) . '"';
+				}
 				if (in_array($ext, static::IMG_EXTENSIONS, true))
 					return $attr . '="' . $urlBuilder('img', $relPath, '') . '"';
 
@@ -279,6 +363,29 @@ class DocsHelper
 			},
 			$html
 		);
+	}
+
+	/**
+	 * Префикс якоря атрибута в справочнике атрибутов страницы сущности
+	 * (views/docs/model.php): id="attr-<имя атрибута>". Ссылаются на него
+	 * из любой страницы документации - models/<class-id>.md#attr-<имя>.
+	 */
+	const ATTR_ANCHOR_PREFIX = 'attr-';
+
+	/**
+	 * Опознаёт ссылку на атрибут сущности: цель - страница модели
+	 * (models/<class-id>.md), якорь - '#attr-<имя атрибута>'.
+	 * Такие якоря живут не в MD, а в справочнике атрибутов страницы сущности
+	 * (/docs/model), поэтому ссылку надо вести туда.
+	 * @param string $relPath относительный путь цели внутри docs/help
+	 * @param string $anchor  якорь вместе с '#' ('' если якоря нет)
+	 * @return string|null class-id сущности либо null (не ссылка на атрибут)
+	 */
+	public static function attributeAnchorClassId(string $relPath, string $anchor): ?string
+	{
+		if (strpos($anchor, '#' . static::ATTR_ANCHOR_PREFIX) !== 0) return null;
+		if (!preg_match('~^models/([^/]+)\.md$~u', $relPath, $matches)) return null;
+		return $matches[1];
 	}
 
 	/** @var array|null карта страниц на время запроса [relPath=>absPath] */

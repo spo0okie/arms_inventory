@@ -153,37 +153,97 @@ $this->beginPage() ?>
 </script>
 
 <?php /* Подсветка элемента интерфейса по клику на ссылку из встроенной документации.
-   Автор дока связывает строку описания с элементом по ключу: в MD — обычной ссылкой
-   [текст](#doc-anchor:КЛЮЧ) (её href переживает рендер, DocsHelper::rewriteHtmlLinks
-   не трогает якоря) или raw-HTML <a data-doc-anchor="КЛЮЧ">; на самом элементе —
-   атрибут data-doc-anchor="КЛЮЧ". Клик по ссылке скроллит к элементу и подсвечивает
-   его на пару секунд (.doc-anchor-highlight, site.css). Если элемента на странице нет
-   — ссылка ведёт себя как обычная. Отдельный vanilla-<script> по тем же причинам, что
-   и тогглер справки выше (независимое исполнение, делегирование без DOM-ready). */ ?>
+   Автор дока связывает строку описания с элементом двумя способами:
+   - по ключу: в MD — обычной ссылкой [текст](#doc-anchor:КЛЮЧ) (её href переживает
+     рендер, DocsHelper::rewriteHtmlLinks не трогает якоря) или raw-HTML
+     <a data-doc-anchor="КЛЮЧ">; на самом элементе — атрибут data-doc-anchor="КЛЮЧ";
+   - селектором: [текст](<#doc-select:СЕЛЕКТОР>) — без меток на элементах, цели ищутся
+     CSS/jQuery-селектором (все совпадения). Для стабильных библиотечных элементов
+     (заголовки сортировки, строка фильтров GridView), которые размечать руками
+     расточительно. Правила выбора селекторов — docs/help/README.md.
+   Клик по ссылке скроллит к цели и подсвечивает её на пару секунд
+   (.doc-anchor-highlight, site.css). Если целей на странице нет — ссылка ведёт себя
+   как обычная. Отдельный vanilla-<script> по тем же причинам, что и тогглер справки
+   выше (независимое исполнение, делегирование без DOM-ready). */ ?>
 <script>
 (function(){
-	var PREFIX='#doc-anchor:';
-	function keyOf(a){
-		if(a.hasAttribute('data-doc-anchor')) return a.getAttribute('data-doc-anchor');
-		var href=a.getAttribute('href')||'';
-		return href.indexOf(PREFIX)===0 ? decodeURIComponent(href.slice(PREFIX.length)) : null;
-	}
+	var ANCHOR='#doc-anchor:', SELECT='#doc-select:';
 	function inDocs(el){ return !!(el.closest && el.closest('.docs-panel,.docs-page,.modal')); }
+	//все цели ссылки: по ключу data-doc-anchor либо по селектору (#doc-select:)
+	function targetsOf(a){
+		var href=a.getAttribute('href')||'';
+		if(a.hasAttribute('data-doc-anchor') || href.indexOf(ANCHOR)===0){
+			var k=a.hasAttribute('data-doc-anchor')
+				? a.getAttribute('data-doc-anchor')
+				: decodeURIComponent(href.slice(ANCHOR.length));
+			if(!k) return [];
+			var esc=(window.CSS&&CSS.escape)?CSS.escape(k):k.replace(/["\\]/g,'\\$&');
+			return document.querySelectorAll('[data-doc-anchor="'+esc+'"]');
+		}
+		if(href.indexOf(SELECT)===0){
+			var sel=decodeURIComponent(href.slice(SELECT.length));
+			try{
+				//jQuery даёт расширенные селекторы, но ТОЛЬКО формой .find():
+				//$(строка) трактует '<' как HTML и создаёт элементы (инъекция)
+				return window.jQuery
+					? window.jQuery(document).find(sel).toArray()
+					: document.querySelectorAll(sel);
+			}catch(_){ return []; } //невалидный селектор - целей нет
+		}
+		return [];
+	}
 	document.addEventListener('click',function(e){
-		var a=e.target.closest && e.target.closest('a[href^="'+PREFIX+'"], a[data-doc-anchor]');
+		var a=e.target.closest && e.target.closest(
+			'a[href^="'+ANCHOR+'"], a[href^="'+SELECT+'"], a[data-doc-anchor]');
 		if(!a) return;
-		var k=keyOf(a); if(!k) return;
-		var esc=(window.CSS&&CSS.escape)?CSS.escape(k):k.replace(/["\\]/g,'\\$&');
-		var list=document.querySelectorAll('[data-doc-anchor="'+esc+'"]'), target=null;
-		//цель — элемент с тем же ключом, но не сама ссылка и не внутри документации
-		for(var i=0;i<list.length;i++){ if(list[i]!==a && !inDocs(list[i])){ target=list[i]; break; } }
-		if(!target) return;
+		var list=targetsOf(a), targets=[];
+		//цели — элементы вне документации и не сама ссылка
+		for(var i=0;i<list.length;i++){ if(list[i]!==a && !inDocs(list[i])) targets.push(list[i]); }
+		if(!targets.length) return;
 		e.preventDefault();
+		if(targets[0].scrollIntoView) targets[0].scrollIntoView({behavior:'smooth',block:'center'});
+		targets.forEach(function(t){
+			t.classList.remove('doc-anchor-highlight');
+			void t.offsetWidth; //рестарт CSS-анимации при повторном клике
+			t.classList.add('doc-anchor-highlight');
+		});
+		window.setTimeout(function(){
+			targets.forEach(function(t){ t.classList.remove('doc-anchor-highlight'); });
+		},2200);
+	});
+})();
+</script>
+
+<?php /* Обратное направление той же подсветки: ссылка привела не НА элемент интерфейса,
+   а В документацию — на секцию страницы (якорь заголовка, DocsHelper::headingId) или
+   на строку справочника атрибутов (#attr-<имя>, views/docs/model.php). Подсвечиваем
+   цель тем же .doc-anchor-highlight, чтобы читатель видел, куда его привели: на длинной
+   странице заголовок сам по себе теряется. Работает и при заходе по ссылке с якорем
+   (DOMContentLoaded), и при переходе внутри страницы (hashchange + клик по ссылке
+   с тем же якорем, на который hashchange уже не приходит). */ ?>
+<script>
+(function(){
+	var DOCS='.docs-page,.docs-panel,.docs-attributes', TIMER=null;
+	function highlight(hash){
+		//#doc-anchor:/#doc-select: - не якоря документа, их разбирает скрипт выше
+		if(!hash || hash.length<2 || hash.indexOf('#doc-anchor:')===0 || hash.indexOf('#doc-select:')===0) return;
+		var target;
+		try{ target=document.getElementById(decodeURIComponent(hash.slice(1))); }catch(_){ return; }
+		//подсвечиваем только цели внутри документации: якоря вкладок и прочих
+		//виджетов приложения к этому механизму отношения не имеют
+		if(!target || !(target.closest && target.closest(DOCS))) return;
 		if(target.scrollIntoView) target.scrollIntoView({behavior:'smooth',block:'center'});
 		target.classList.remove('doc-anchor-highlight');
-		void target.offsetWidth; //рестарт CSS-анимации при повторном клике
+		void target.offsetWidth; //рестарт CSS-анимации при повторном переходе
 		target.classList.add('doc-anchor-highlight');
-		window.setTimeout(function(){ target.classList.remove('doc-anchor-highlight'); },2200);
+		window.clearTimeout(TIMER);
+		TIMER=window.setTimeout(function(){ target.classList.remove('doc-anchor-highlight'); },2200);
+	}
+	document.addEventListener('DOMContentLoaded',function(){ highlight(window.location.hash); });
+	window.addEventListener('hashchange',function(){ highlight(window.location.hash); });
+	document.addEventListener('click',function(e){
+		var a=e.target.closest && e.target.closest('a[href^="#"]');
+		if(a && a.closest(DOCS)) highlight(a.getAttribute('href'));
 	});
 })();
 </script>

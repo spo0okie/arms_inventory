@@ -76,7 +76,8 @@ foreach ($model->swList->items as $item) {
 		<?= $this->render('card',['model'=>$model,'ips_glue'=>'<br/>']) ?>
 		<?= \app\components\integrations\PanelsWidget::widget(['model'=>$model]) ?>
 
-		<div class="hardware_settings">
+		<?php /* data-doc-anchor: цели подсветки из документации (docs/help/models/comps.md) */ ?>
+		<div class="hardware_settings" data-doc-anchor="hardware">
 			<?= ModelFieldWidget::renderCompositeTitle($model,['raw_hw','exclude_hw'],'Железо') ?>
 			<table><?php
 				foreach ($model->getHardArray() as $item) if (!$item->globIgnored()){
@@ -92,7 +93,7 @@ foreach ($model->swList->items as $item) {
 				} ?>
 			</table>
 		</div>
-		<div class="dupes">
+		<div class="dupes" data-doc-anchor="dupes">
 			<?php if (count($model->dupes)) { ?>
 				<?= Html::tag('h3','Подозрение на дубликаты в БД',FieldsHelper::toolTipOptions(
 					'Подозрение на дубликаты в БД',
@@ -113,7 +114,7 @@ foreach ($model->swList->items as $item) {
 	</div>
 	<div class="col-md-6">
 		<?= CornerWidget::widget(['model'=>$model]) ?>
-		<div class="software_settings">
+		<div class="software_settings" data-doc-anchor="software">
 			<?= ModelFieldWidget::renderCompositeTitle($model,['raw_soft','soft_ids'],'Софт','h3') ?>
 			<?php
 			echo ModelFieldWidget::widget([

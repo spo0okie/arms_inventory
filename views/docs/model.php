@@ -44,7 +44,7 @@ if (!$html && ($description = $model::modelDescription())) { ?>
 <?php } ?>
 
 <h4 class="mt-4">Атрибуты</h4>
-<table class="table table-sm table-striped">
+<table class="table table-sm table-striped docs-attributes">
 	<thead>
 	<tr>
 		<th>Атрибут</th>
@@ -65,10 +65,16 @@ if (!$html && ($description = $model::modelDescription())) { ?>
 			$tooltip = null;
 		}
 		?>
-		<tr>
+		<?php $anchor = DocsHelper::ATTR_ANCHOR_PREFIX . $attr; ?>
+		<tr id="<?= Html::encode($anchor) ?>">
 			<td>
 				<?= Html::encode($label) ?>
-				<div class="text-muted small"><?= Html::encode($attr) ?></div>
+				<?php //латинское имя атрибута - оно же самоссылка на якорь строки:
+				//так виден и копируется адрес, по которому на атрибут ссылаются
+				//из документации (models/<class-id>.md#attr-<имя>) ?>
+				<div class="small">
+					<?= Html::a(Html::encode($attr), '#' . $anchor, ['class' => 'text-muted']) ?>
+				</div>
 			</td>
 			<td>
 				<?= $tooltip['body'] ?? '' ?>
