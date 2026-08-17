@@ -1,21 +1,50 @@
 
-/* РАСКРАСКА ВОЗРАСТА ИНФОРМАЦИИ ОБ ОС */
-td.arm_hostname.hour_fresh {background-color: lightskyblue}
-td.arm_hostname.day_fresh {background-color: lightblue}
-td.arm_hostname.week_fresh {background-color: lightgreen}
-td.arm_hostname.month_fresh {background-color: lightgoldenrodyellow}
-td.arm_hostname.over_month_fresh {background-color: lightpink}
+/* РАСКРАСКА ВОЗРАСТА ИНФОРМАЦИИ ОБ ОС
 
-span.unit-status.hour_fresh {background: linear-gradient(45deg,transparent,transparent 15px, dodgerblue 15px)}
-span.unit-status.day_fresh {background: linear-gradient(45deg,transparent,transparent 15px, limegreen 15px)}
-span.unit-status.week_fresh {background: linear-gradient(45deg,transparent,transparent 15px, darkkhaki 15px)}
-span.unit-status.month_fresh {background: linear-gradient(45deg,transparent,transparent 15px, darkorange 15px)}
-span.unit-status.over_month_fresh {background: linear-gradient(45deg,transparent,transparent 15px, indianred 15px)}
+   Шкала свежести — "от синего (свежее) к красному (устарело)". Точные
+   оттенки в темах разные, и это нормально: легенда живёт в indexHint
+   атрибута Comps.name и красится этими же классами, поэтому всегда
+   показывает фактические цвета текущей темы.
+
+   Два канала на токенах:
+     --fresh-*        фон ячейки списка;
+     --fresh-*-strong ярлычок-уголок (unit-status).
+   Дефолты ниже — СВЕТЛАЯ тема: исторические цвета, к ним привыкли — не
+   менять до завершения обкатки тем. Тёмная тема переопределяет токены
+   глубокими оттенками палитры Yeti (themes.css). */
+:root {
+	--fresh-hour: lightskyblue;
+	--fresh-day: lightblue;
+	--fresh-week: lightgreen;
+	--fresh-month: lightgoldenrodyellow;
+	--fresh-over: lightpink;
+	--fresh-hour-strong: dodgerblue;
+	--fresh-day-strong: limegreen;
+	--fresh-week-strong: darkkhaki;
+	--fresh-month-strong: darkorange;
+	--fresh-over-strong: indianred;
+}
+
+/* в таблице */
+td.arm_hostname.hour_fresh {background-color: var(--fresh-hour)}
+td.arm_hostname.day_fresh {background-color: var(--fresh-day)}
+td.arm_hostname.week_fresh {background-color: var(--fresh-week)}
+td.arm_hostname.month_fresh {background-color: var(--fresh-month)}
+td.arm_hostname.over_month_fresh {background-color: var(--fresh-over)}
+
+/* ярлычки в просмотре */
+span.unit-status.hour_fresh {background: linear-gradient(45deg,transparent,transparent 15px, var(--fresh-hour-strong) 15px)}
+span.unit-status.day_fresh {background: linear-gradient(45deg,transparent,transparent 15px, var(--fresh-day-strong) 15px)}
+span.unit-status.week_fresh {background: linear-gradient(45deg,transparent,transparent 15px, var(--fresh-week-strong) 15px)}
+span.unit-status.month_fresh {background: linear-gradient(45deg,transparent,transparent 15px, var(--fresh-month-strong) 15px)}
+span.unit-status.over_month_fresh {background: linear-gradient(45deg,transparent,transparent 15px, var(--fresh-over-strong) 15px)}
 
 
 /* СЕРВЕР */
 
-table.places-arms-container td.server {background-image: url(/web/img/diagonal-noise.png)}
+/* диагональная штриховка сервера: токены --map-hatch* объявлены в arm-map.css,
+   тёмная тема переопределяет цвет штриха в themes.css */
+table.places-arms-container td.server {background-image: var(--map-hatch-image)}
 
 
 /* РАСКРАСКА Ответственных за сервисы */

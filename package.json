@@ -1,0 +1,16 @@
+{
+  "name": "arms-css",
+  "private": true,
+  "description": "Сборка бутстрап-слоя CSS (plans/themes.md): Bootstrap SCSS берётся из vendor/twbs/bootstrap (версию пинит composer), тема Bootswatch Yeti + наши отличия — scss/",
+  "scripts": {
+    "css": "sass --no-source-map --style=expanded scss/custom.scss web/css/custom.css",
+    "css-watch": "sass --watch --no-source-map --style=expanded scss/custom.scss web/css/custom.css"
+  },
+  "devDependencies": {
+    "bootswatch": "^5.3.8",
+    "sass": "^1.80.0"
+  },
+  "overrides": {
+    "chokidar": "^4.0.0"
+  }
+}

@@ -2,12 +2,38 @@
 
 /***************************
     КАРТА РАБОЧИХ МЕСТ
+
+   Раскраска — на токенах --map-*: дефолты ниже — СВЕТЛАЯ тема
+   (исторические цвета ещё с гугл-таблицы учёта, к ним привыкли — не
+   менять до завершения обкатки тем). Тёмная тема переопределяет токены
+   глубокими оттенками тех же смысловых hue (themes.css), чтобы типы
+   оборудования узнавались: принтеры серые, телефония зелёная, сеть
+   пурпурная, WiFi синий, NAS бирюзовый, шапка площадки жёлтая.
 ****************************/
+:root {
+	--map-room-hdr: yellow;       /* шапка площадки/помещения 1 уровня */
+	--map-cabinet: white;         /* ячейка номера кабинета */
+	--map-whitespace: white;      /* пустое место в кабинете */
+	--map-border: darkgray;       /* сетка таблицы АРМов */
+	--map-printer: lightgrey;     /* печатное оборудование */
+	--map-voip: #ccffcc;          /* телефония */
+	--map-net: plum;              /* сетевое (свитчи/роутеры) */
+	--map-wifi: lightskyblue;     /* WiFi */
+	--map-nas: darkturquoise;     /* NAS */
+	--map-srv: white;             /* сервер в стойке (rack-unit) */
+	/* цвет диагональной штриховки серверов/NAS (см. --map-hatch-image):
+	   тёмные штрихи на светлых фонах; тёмная тема даёт светлые (themes.css) */
+	--map-hatch: rgba(0,0,0,.16);
+	/* сама штриховка: CSS-полосы вместо картинки diagonal-noise.png —
+	   картинка была едва различима и не умела подстраиваться под тему */
+	--map-hatch-image: repeating-linear-gradient(45deg,
+		var(--map-hatch) 0 2px, transparent 2px 7px);
+}
 
 /*Шапка помещения 1 уровня*/
 div.places-container-hdr-depth0
 {
-    background-color: yellow;
+    background-color: var(--map-room-hdr);
 }
 
 div.places-container-hdr-depth1
@@ -43,8 +69,8 @@ table.places-arms-container
 
 /* ячейка названия кабинета */
 table.places-arms-container td.places-arms-cabinet {
-    background-color: white;
-    border: solid 1px darkgray;
+    background-color: var(--map-cabinet);
+    border: solid 1px var(--map-border);
     border-right: none;
     text-overflow: clip;
     overflow: hidden;
@@ -55,7 +81,7 @@ table.places-arms-container td {
     text-overflow: clip;
     overflow: hidden;
     white-space: nowrap;
-    border: solid 1px darkgray;
+    border: solid 1px var(--map-border);
 }
 
 table.places-arms-container col.arms_cabinet    {width: 50px;}
@@ -92,42 +118,42 @@ table.places-arms-container tr.tech_mfu_bw_a4,
 table.places-arms-container tr.tech_mfu_bw_a3,
 table.places-arms-container tr.tech_mfu_color_a4,
 table.places-arms-container tr.tech_mfu_color_a3
-{background-color: lightgrey}
+{background-color: var(--map-printer)}
 
 
 td.arm_uphone.tech_voip_phone,
 table.places-arms-container tr.tech_voip_gw,
 table.places-arms-container tr.tech_voip_phone,
 td.rack-unit.tech_voip_gw
-{background-color: #ccffcc}
+{background-color: var(--map-voip)}
 
 table.places-arms-container tr.tech_net_switch,
 table.places-arms-container tr.tech_net_router,
 td.rack-unit.tech_net_router,
 td.rack-unit.tech_net_switch
-{background-color: plum}
+{background-color: var(--map-net)}
 
 table.places-arms-container tr.tech_wifi_ap,
 table.places-arms-container tr.tech_wifi_router,
 td.rack-unit.tech_wifi_router,
 td.rack-unit.tech_wifi_ap
-{background-color: lightskyblue}
+{background-color: var(--map-wifi)}
 
 table.places-arms-container tr.tech_nas,
 td.rack-unit.tech_nas
 {
-    background-color: DarkTurquoise;
-    background-image: url(/web/img/diagonal-noise.png)
+    background-color: var(--map-nas);
+    background-image: var(--map-hatch-image);
 }
 
 td.rack-unit.tech_srv
 {
-    background-color: white;
-    background-image: url(/web/img/diagonal-noise.png)
+    background-color: var(--map-srv);
+    background-image: var(--map-hatch-image);
 }
 
 table.places-arms-container td.tech_whitespace {
-    background-color: white;
+    background-color: var(--map-whitespace);
 }
 
 

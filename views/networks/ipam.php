@@ -283,18 +283,25 @@ $this->registerCss(<<<CSS
     align-items: center;
     text-align: center;
 }
+/* служебные цвета вне маркеров — на токенах --ipam-* : фолбэки ниже =
+   светлая тема (этот CSS регистрируется ПОСЛЕ themes.css, поэтому дефолты
+   не в :root, а фолбэками var()); тёмные значения задаёт themes.css */
 .ipam-cell.empty {
-    background-color: #aaa;
+    background-color: var(--ipam-empty, #aaa);
     color: white;
 }
 .ipam-cell.occupied {
-    background-color: #8a8f98;
+    background-color: var(--ipam-occupied, #8a8f98);
     color: white;
 }
-/* занято сетями без кода сегмента — белый (как сама такая сеть) */
+/* занято сетями без кода сегмента — белый (как сама такая сеть).
+   ГОТЧА: ipamCellPaint()/ipamMixTextColor() считают контраст подписи
+   смешанных ячеек на СЕРВЕРЕ от светлого #FFFFFF (HTML одинаков для
+   обеих тем) — в тёмной теме доля nocode в смеси искажает средний цвет;
+   выручает ореол --ipam-shadow */
 .ipam-cell.nocode,
 .ipam-mix-part.nocode {
-    background-color: #fff;
+    background-color: var(--ipam-nocode, #fff);
 }
 /* раскраска маркером сегмента (issue #141): в IPAM используется только фон
    маркера, рамка/цвет текста не рендерятся (правило деградации) */
@@ -303,7 +310,7 @@ $this->registerCss(<<<CSS
     background-color: var(--marker-bg);
 }
 .ipam-cell.nocode .cidr-link {
-    color: #666;
+    color: var(--ipam-nocode-fg, #666);
 }
 /* подпись агрегата: ореол противоположен цвету текста (--ipam-shadow),
    на пёстрых полосах выручает там, где фон местами совпадает с текстом */
@@ -370,7 +377,7 @@ $this->registerCss(<<<CSS
     background: rgba(0, 0, 0, 0.6);
 }
 .ipam-cell.empty:hover {
-    background-color: #666;
+    background-color: var(--ipam-empty-hover, #666);
     text-shadow: white 0 0 2px;
 }
 /* цвет подписи — контраст к фону ячейки (--ipam-fg от маркера/смеси),

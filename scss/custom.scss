@@ -1,23 +1,13 @@
-$font-family-base: "Helvetica Neue", Helvetica, Arial, sans-serif;
-$font-size-base: .9rem;
-$gray-800: #1A2931;
-$gray-700: #214553;
-$gray-600: #597182;
-$gray-500: #7C8995;
+// Бутстрап-слой ARMS (plans/themes.md, итерация 2). Сборка: npm run css
+// (dart-sass, см. package.json) -> web/css/custom.css.
+//
+// База: Bootstrap SCSS из vendor/twbs/bootstrap (версию пинит composer,
+// сейчас 5.3.x — с цветовыми режимами data-bs-theme) + тема Bootswatch Yeti
+// (npm) + наши отличия. Порядок важен: наши переменные идут ДО йетиных —
+// у Yeti всё под !default, побеждает первое определение.
 
-$dropdown-item-padding-y: .1em;
-
-@import "../vendor/thomaspark/bootswatch/dist/Yeti/variables";
-@import "../vendor/bower-asset/bootstrap/scss/bootstrap";
-@import "../vendor/thomaspark/bootswatch/dist/Yeti/bootswatch";
-
-.dropdown-item {
-  padding-top: .6rem;
-  padding-bottom: .5rem;
-}
-
-// @import "Flatly/variables";
-// @import "Flatly/bootswatch";
-
-/* render test */
-
+@import "arms-variables";
+@import "../node_modules/bootswatch/dist/yeti/variables";
+@import "../vendor/twbs/bootstrap/scss/bootstrap";
+@import "../node_modules/bootswatch/dist/yeti/bootswatch";
+@import "arms-overrides";

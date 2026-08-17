@@ -109,6 +109,7 @@ $this->beginPage() ?>
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
 <head>
+	<?= $this->render('theme-init') /* тема до CSS — иначе мигнёт светлым */ ?>
 	<meta charset="<?= Yii::$app->charset ?>">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -220,18 +221,25 @@ $this->beginPage() ?>
    цель тем же .doc-anchor-highlight, чтобы читатель видел, куда его привели: на длинной
    странице заголовок сам по себе теряется. Работает и при заходе по ссылке с якорем
    (DOMContentLoaded), и при переходе внутри страницы (hashchange + клик по ссылке
-   с тем же якорем, на который hashchange уже не приходит). */ ?>
+   с тем же якорем, на который hashchange уже не приходит).
+   Внутристраничные переходы едут плавно сами (custom.css: scroll-behavior на :root),
+   а при заходе С ДРУГОЙ страницы браузер открывает документ сразу на якоре — без
+   движения непонятно, куда попал. Поэтому загрузку с якорем документации начинаем
+   с верха страницы (мгновенно, до отрисовки анимаций) и плавно едем к цели —
+   видно, что цель ниже начала документа. */ ?>
 <script>
 (function(){
 	var DOCS='.docs-page,.docs-panel,.docs-attributes', TIMER=null;
-	function highlight(hash){
+	function targetOf(hash){
 		//#doc-anchor:/#doc-select: - не якоря документа, их разбирает скрипт выше
-		if(!hash || hash.length<2 || hash.indexOf('#doc-anchor:')===0 || hash.indexOf('#doc-select:')===0) return;
+		if(!hash || hash.length<2 || hash.indexOf('#doc-anchor:')===0 || hash.indexOf('#doc-select:')===0) return null;
 		var target;
-		try{ target=document.getElementById(decodeURIComponent(hash.slice(1))); }catch(_){ return; }
+		try{ target=document.getElementById(decodeURIComponent(hash.slice(1))); }catch(_){ return null; }
 		//подсвечиваем только цели внутри документации: якоря вкладок и прочих
 		//виджетов приложения к этому механизму отношения не имеют
-		if(!target || !(target.closest && target.closest(DOCS))) return;
+		return (target && target.closest && target.closest(DOCS)) ? target : null;
+	}
+	function highlight(target){
 		if(target.scrollIntoView) target.scrollIntoView({behavior:'smooth',block:'center'});
 		target.classList.remove('doc-anchor-highlight');
 		void target.offsetWidth; //рестарт CSS-анимации при повторном переходе
@@ -239,11 +247,30 @@ $this->beginPage() ?>
 		window.clearTimeout(TIMER);
 		TIMER=window.setTimeout(function(){ target.classList.remove('doc-anchor-highlight'); },2200);
 	}
-	document.addEventListener('DOMContentLoaded',function(){ highlight(window.location.hash); });
-	window.addEventListener('hashchange',function(){ highlight(window.location.hash); });
+	document.addEventListener('DOMContentLoaded',function(){
+		var target=targetOf(window.location.hash);
+		if(!target) return;
+		//мгновенно в начало (не 'auto': оно взяло бы smooth из CSS и поехало вверх)
+		try{ window.scrollTo({top:0,behavior:'instant'}); }catch(_){ window.scrollTo(0,0); }
+		highlight(target);
+		//страховка: если плавный скролл не отработал (свернутое окно, экзотика) -
+		//доехать мгновенно, чтобы читатель не остался на верху страницы без цели
+		window.setTimeout(function(){
+			var r=target.getBoundingClientRect();
+			if(r.bottom<0 || r.top>window.innerHeight)
+				try{ target.scrollIntoView({behavior:'instant',block:'center'}); }
+				catch(_){ target.scrollIntoView(); }
+		},1000);
+	});
+	window.addEventListener('hashchange',function(){
+		var target=targetOf(window.location.hash);
+		if(target) highlight(target);
+	});
 	document.addEventListener('click',function(e){
 		var a=e.target.closest && e.target.closest('a[href^="#"]');
-		if(a && a.closest(DOCS)) highlight(a.getAttribute('href'));
+		if(!a || !(a.closest && a.closest(DOCS))) return;
+		var target=targetOf(a.getAttribute('href'));
+		if(target) highlight(target);
 	});
 })();
 </script>

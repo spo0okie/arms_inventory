@@ -1,0 +1,329 @@
+/* ТЕМЫ ОФОРМЛЕНИЯ (plans/themes.md)
+
+   Механизм: data-bs-theme="<тема>" на <html> (ставит theme-init.php до
+   отрисовки), тема = набор CSS-переменных. Бутстрап-слой обеих тем целиком
+   даёт сборка web/css/custom.css (scss/: Bootstrap 5.3 + Yeti + наша палитра,
+   тёмные значения — $*-dark в scss/_arms-variables.scss). Здесь — только то,
+   чего бутстрап не покрывает: прикладные стили и сторонние виджеты.
+   Новая тема = новый блок [data-bs-theme="имя"] + пункт меню в menu.php.
+
+   Файл подключается в AppAsset ПОСЛЕДНИМ — его правила должны перебивать
+   и custom.css, и остальные прикладные файлы.
+
+   Вся тёмная тема — под @media screen: печать (паспорта АРМ, сканы,
+   наклейки) всегда светлая.
+
+   Токены слоя приложения (сине-серая гамма тёмной шапки page-header.css —
+   значения согласованы с $*-dark в scss/_arms-variables.scss):
+     --arms-surface     поверхности: футер, тултипы  (= $body-secondary-bg-dark)
+     --arms-surface-2   приподнятое: поля select2, ховеры (= $body-tertiary-bg-dark)
+     --arms-border      основные границы             (= $border-color-dark)
+     --arms-muted       второстепенный текст */
+
+@media screen {
+
+[data-bs-theme=dark] {
+	--arms-surface: #243039;
+	--arms-surface-2: #2c3a46;
+	--arms-border: #3b4a57;
+	--arms-muted: #8496a1;
+}
+
+/* ===== ТОЧЕЧНЫЕ ДОВОДКИ БУТСТРАПА ===== */
+
+/* модалка ModalAjax навешивает text-black на весь контейнер (main.php) —
+   в тёмной теме это чёрный текст на тёмном, возвращаем цвет темы */
+[data-bs-theme=dark] .modal.text-black {
+	color: var(--bs-body-color) !important;
+}
+
+/* светло-серые кнопки ($secondary=$light=#eee) бутстрап в тёмном режиме не
+   перекрашивает — тулбары гридов слепили бы; делаем тёмно-серыми */
+[data-bs-theme=dark] .btn-secondary,
+[data-bs-theme=dark] .btn-light {
+	--bs-btn-color: #ebeced;
+	--bs-btn-bg: var(--arms-border);
+	--bs-btn-border-color: #46566a;
+	--bs-btn-hover-color: #fff;
+	--bs-btn-hover-bg: #46566a;
+	--bs-btn-hover-border-color: #52647a;
+	--bs-btn-active-color: #fff;
+	--bs-btn-active-bg: #46566a;
+	--bs-btn-active-border-color: #52647a;
+	--bs-btn-disabled-color: var(--arms-muted);
+	--bs-btn-disabled-bg: var(--arms-surface-2);
+	--bs-btn-disabled-border-color: var(--arms-border);
+	/* прямым свойством: Yeti задаёт border-color поверх переменных */
+	border-color: var(--bs-btn-border-color);
+}
+
+/* декоративная светлая рамка (тулбары гридов: btn-light border-secondary) —
+   в тёмной теме приглушаем; !important — им же дерётся сама утилита */
+[data-bs-theme=dark] .border-secondary {
+	border-color: #46566a !important;
+}
+
+/* Yeti красит .text-secondary в $gray-700 (#214553, тёмно-синий,
+   !important) — на тёмном фоне невидим; возвращаем вторичный цвет темы */
+[data-bs-theme=dark] .text-secondary {
+	color: var(--bs-secondary-color) !important;
+}
+
+/* шапка панели DynaGrid/kartik-гридов (bg-light text-dark) — большое светлое
+   пятно на каждом списке; перекрашиваем в поверхность темы. Сами утилиты
+   bg-light/text-dark глобально не трогаем */
+[data-bs-theme=dark] .card-header.bg-light {
+	background-color: var(--arms-surface-2) !important;
+}
+[data-bs-theme=dark] .card-header.bg-light.text-dark,
+[data-bs-theme=dark] .card-header.bg-light .text-dark {
+	color: var(--bs-body-color) !important;
+}
+
+/* цветные ячейки таблиц (table-info/success/...): фон остаётся насыщенным
+   светлотемным (Yeti, $table-bg-scale:0%), а ссылки/муты внутри получили бы
+   светлые цвета тёмной темы — нечитаемо; белые ссылки как у tables.css */
+[data-bs-theme=dark] .table-primary a,
+[data-bs-theme=dark] .table-info a,
+[data-bs-theme=dark] .table-success a,
+[data-bs-theme=dark] .table-warning a,
+[data-bs-theme=dark] .table-danger a {
+	color: #fff;
+}
+[data-bs-theme=dark] .table-primary .text-muted,
+[data-bs-theme=dark] .table-info .text-muted,
+[data-bs-theme=dark] .table-success .text-muted,
+[data-bs-theme=dark] .table-warning .text-muted,
+[data-bs-theme=dark] .table-danger .text-muted {
+	color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* плашка состояния документа (bg-success/... + унаследованный цвет текста):
+   в светлой текст #222 — фиксируем его же в тёмной, фон плашки не меняется */
+[data-bs-theme=dark] span.contract_state {
+	color: #222;
+}
+
+/* kartik-грид красит шапку/подвал таблицы светлым ГРАДИЕНТОМ (kv-grid.css,
+   background-image — не color!), перекрываем целиком */
+[data-bs-theme=dark] .kv-table-header,
+[data-bs-theme=dark] .kv-table-footer {
+	background: var(--arms-surface-2);
+}
+
+/* светлая шапка таблиц (kartik-гриды) — тоже не переключается сама */
+[data-bs-theme=dark] .table-light {
+	--bs-table-color: var(--bs-body-color);
+	--bs-table-bg: var(--arms-surface-2);
+	--bs-table-border-color: var(--arms-border);
+}
+
+/* подложка прогрессбара: в светлой исторически #ccc ($progress-bg),
+   компонентная переменная тёмным режимом сама не переключается */
+[data-bs-theme=dark] .progress {
+	--bs-progress-bg: var(--bs-tertiary-bg);
+}
+
+/* ===== СЛОЙ ПРИЛОЖЕНИЯ ===== */
+
+[data-bs-theme=dark] .footer {
+	background-color: var(--arms-surface);
+	border-top-color: var(--arms-border);
+}
+
+[data-bs-theme=dark] .error-summary {
+	color: #e8a8a3;
+	background: #3a2422;
+	border-left-color: #7a3b33;
+}
+
+/* исключённое железо: lightgrey на тёмном — почти основной текст, глушим */
+[data-bs-theme=dark] .hardware_item.excluded {
+	color: var(--arms-muted);
+}
+
+[data-bs-theme=dark] .grayed-out {
+	color: var(--arms-muted);
+}
+[data-bs-theme=dark] .grayed-out:hover {
+	color: #ebeced;
+}
+
+/* .disabled-item в светлой красится --bs-gray-700 (тёмно-синий) — на тёмном
+   фоне нечитаемо; сами --bs-gray-* не трогаем (они одинаковы в обеих темах) */
+[data-bs-theme=dark] .disabled-item,
+[data-bs-theme=dark] .disabled-item a {
+	color: var(--arms-muted);
+}
+
+/* линии дерева в таблицах (tables.css: #333) */
+[data-bs-theme=dark] .table-tree-h-line,
+[data-bs-theme=dark] .table-tree-v-line {
+	background: var(--arms-muted);
+}
+
+/* шкала свежести ОС (state-colors.css): в тёмной теме — градиент
+   "синий (свежее) → красный (устарело)": ячейки глубокими оттенками hue
+   палитры Yeti (текст остаётся светлым), уголки — насыщенными цветами
+   палитры; светлая тема живёт на исторических цветах (дефолты токенов) */
+[data-bs-theme=dark] {
+	--fresh-hour: #0f4a63;
+	--fresh-day: #24485a;
+	--fresh-week: #1e4531;
+	--fresh-month: #4d3a10;
+	--fresh-over: #54211a;
+	--fresh-hour-strong: #008cba;
+	--fresh-day-strong: #5bc0de;
+	--fresh-week-strong: #43ac6a;
+	--fresh-month-strong: #e99002;
+	--fresh-over-strong: #f04124;
+}
+/* сервисные статусы (state-colors.css): пастельные фоны — тексту в них
+   в тёмной теме нужен тёмный цвет (иначе светлое-на-светлом) */
+[data-bs-theme=dark] td.col_serviceUser.col_responsible,
+[data-bs-theme=dark] td.col_serviceUser.col_support,
+[data-bs-theme=dark] td.col_serviceUser.col_missing,
+[data-bs-theme=dark] td.col_serviceSum.status_OK,
+[data-bs-theme=dark] td.col_serviceSum.status_Warning,
+[data-bs-theme=dark] td.col_serviceSum.status_Alert {
+	color: #222;
+}
+
+/* карта рабочих мест (arm-map.css, токены --map-*): тёмная палитра —
+   глубокие оттенки тех же смысловых hue, что и светлые исторические цвета,
+   чтобы типы оборудования узнавались (принтеры серые, телефония зелёная,
+   сеть пурпурная, WiFi синий, NAS бирюзовый, шапка площадки жёлтая);
+   обычные АРМ-строки прозрачны — их фон даёт страница, текст обычный
+   светлый, маркеры и шкала свежести работают своими токенами */
+[data-bs-theme=dark] {
+	--map-room-hdr: #4a3d14;
+	--map-cabinet: var(--arms-surface-2);
+	--map-whitespace: var(--bs-body-bg);
+	--map-border: #46566a;
+	--map-printer: #333f49;
+	--map-voip: #1e4531;
+	--map-net: #43304d;
+	--map-wifi: #0f4a63;
+	--map-nas: #14494d;
+	--map-srv: var(--arms-surface-2);
+	/* штриховка серверов/NAS: на тёмных фонах штрихи светлые; яркость
+	   держим фактурой (~9% белого), а не «полосами» — иначе рябит */
+	--map-hatch: rgba(255,255,255,.09);
+}
+
+/* IPAM (инлайн-CSS в views/networks/ipam.php, фолбэки var() = светлая):
+   служебные ячейки вне маркеров — в тёмной приглушаем: свободное место
+   темнее занятого, «сеть без сегмента» остаётся самой светлой (её сигнал —
+   выделяться), но не белой. Маркерные ячейки цветов не меняют */
+[data-bs-theme=dark] {
+	--ipam-empty: #2a343d;
+	--ipam-empty-hover: #3c4a57;
+	--ipam-occupied: #4a5866;
+	--ipam-nocode: #8f9aa5;
+	--ipam-nocode-fg: #1d242c;
+}
+
+/* ===== ВИДЖЕТЫ ===== */
+
+/* недельные блоки расписаний (schedules.css): светло-бирюзовый/оливковый
+   фон с белым текстом — в тёмной теме перекрашиваем в поверхности темы,
+   сохраняя разницу «расписание/моделирование» оттенком */
+[data-bs-theme=dark] div.schedule-item-block {
+	background-color: #2c4247;
+}
+[data-bs-theme=dark] div.schedule-item-block div.schedule-item-edit {
+	background-color: #24363a;
+}
+[data-bs-theme=dark] div.schedule-next-days-modeling {
+	background-color: #35422e;
+}
+[data-bs-theme=dark] div.schedule-next-days-modeling table {
+	background-color: transparent;
+}
+
+/* markdown-редактор kartik (kv-markdown.css): тулбар/подвал/поле/превью
+   захардкожены светлыми */
+[data-bs-theme=dark] .kv-md-editor > .kv-md-header,
+[data-bs-theme=dark] .kv-md-editor .kv-md-footer {
+	background: var(--arms-surface-2);
+}
+[data-bs-theme=dark] .kv-md-editor textarea {
+	background: var(--bs-body-bg);
+	color: var(--bs-body-color);
+}
+[data-bs-theme=dark] .kv-md-editor textarea:focus {
+	background: var(--bs-body-bg);
+}
+[data-bs-theme=dark] .kv-md-editor > .kv-md-preview {
+	background: var(--bs-body-bg);
+}
+
+/* select2 (kartik, тема krajee-bs5): светлая тема захардкожена в его CSS */
+[data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection {
+	color: var(--bs-body-color);
+	background-color: var(--bs-body-bg);
+	border-color: var(--arms-border);
+}
+[data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection__rendered,
+[data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection__placeholder {
+	color: var(--bs-body-color);
+}
+[data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection--multiple .select2-selection__choice {
+	color: var(--bs-body-color);
+	background-color: var(--arms-surface);
+	border-color: var(--arms-border);
+}
+[data-bs-theme=dark] .select2-dropdown {
+	color: var(--bs-body-color);
+	background-color: var(--arms-surface);
+	border-color: var(--arms-border);
+}
+[data-bs-theme=dark] .select2-search__field,
+[data-bs-theme=dark] .select2-container--krajee-bs5 .select2-search--dropdown .select2-search__field {
+	color: var(--bs-body-color);
+	background-color: var(--arms-surface-2);
+	border-color: var(--arms-border);
+}
+[data-bs-theme=dark] .select2-results__option[aria-selected=true]:not(.select2-results__option--highlighted) {
+	background-color: var(--arms-surface-2);
+	color: var(--bs-body-color);
+}
+
+/* tooltipster, тема shadow (карточки объектов, подсказки заголовков):
+   белый бокс с тенью — на тёмном тень не видна, поэтому приподнятая
+   поверхность + явная рамка; стрелка-треугольник красится в цвет бокса
+   (рамку она повторить не может — приемлемо) */
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow .tooltipster-box {
+	background: var(--arms-surface-2);
+	border: 1px solid #4a5b6b;
+}
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow .tooltipster-content {
+	color: var(--bs-body-color);
+}
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-top .tooltipster-arrow-border {border-top-color: var(--arms-surface-2)}
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-bottom .tooltipster-arrow-border {border-bottom-color: var(--arms-surface-2)}
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-left .tooltipster-arrow-border {border-left-color: var(--arms-surface-2)}
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-right .tooltipster-arrow-border {border-right-color: var(--arms-surface-2)}
+
+/* hint-вариант (в светлой — жёлтый, tooltip-yellow.css): в тёмной жёлтый
+   не к месту — тёмный teal в тон primary (#008cba) и сине-серой гаммы
+   шапки; от серых тултипов карточек хинт отличается оттенком */
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow .tooltipster-box {
+	background: #071619;
+	border-color: #16424d;
+}
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow .tooltipster-content {
+	color: #a3b5b9;
+}
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow.tooltipster-top .tooltipster-arrow-border {border-top-color: #16424d}
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow.tooltipster-bottom .tooltipster-arrow-border {border-bottom-color: #16424d}
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow.tooltipster-left .tooltipster-arrow-border {border-left-color: #16424d}
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-yellow.tooltipster-right .tooltipster-arrow-border {border-right-color: #16424d}
+
+/* infobox-вариант (карточка объекта внутри тултипа): его собственный #555
+   на тёмной поверхности нечитаем */
+[data-bs-theme=dark] .tooltipster-sidetip.tooltipster-shadow.tooltipster-shadow-infobox .tooltipster-content {
+	color: var(--bs-body-color);
+}
+
+} /* @media screen */

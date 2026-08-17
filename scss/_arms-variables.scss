@@ -1,0 +1,44 @@
+// Отличия ARMS от стоковой темы Bootswatch Yeti (plans/themes.md, итерация 2).
+// Палитра восстановлена из старой 5.2-сборки custom.css (её :root-блока):
+// всё остальное совпадало с Yeti дословно.
+//
+// Порядок в custom.scss важен: этот файл идёт ПЕРВЫМ — здесь значения без
+// !default, поэтому они побеждают йетины/бутстраповские !default.
+
+// сине-серая гамма вместо нейтральных серых Yeti (500-800)
+$gray-500: #7c8995;
+$gray-600: #597182;
+$gray-700: #214553;
+$gray-800: #1a2931;
+$gray-900: #222;
+
+// Yeti берёт $dark: $gray-800, старая сборка — #222
+$dark: $gray-900;
+
+// тело набрано Helvetica (кегль мельче стокового), Open Sans из
+// $font-family-sans-serif нигде не применяется — веб-шрифт Yeti с Google
+// Fonts не грузим вовсе: без внешних запросов, все шрифты инсталляции
+// локальные (web/fonts, web/fontawesome)
+$web-font-path: false;
+$font-family-base: "Helvetica Neue", Helvetica, Arial, sans-serif;
+$font-size-base: .9rem;
+
+// старая сборка: подложка прогрессбара $gray-400 (в 5.3 дефолт сменился
+// на var(--bs-secondary-bg))
+$progress-bg: #ccc;
+
+// в 5.3 фон таблиц стал непрозрачным (var(--bs-body-bg)) — это белые ячейки
+// в тёмной шапке (page-header.css) и затёртые цветные ячейки (state-colors,
+// маркеры, IPAM); возвращаем прозрачность как в 5.2 — фон даёт контекст
+$table-bg: transparent;
+
+// ===== ТЁМНАЯ ТЕМА =====
+// Сине-серая гамма существующей тёмной шапки (page-header.css: #25333d /
+// #3b4a57 / #99abb1), чтобы шапка, navbar и контент были одной температуры.
+// Остальные *-dark значения бутстрап выводит сам из этих и из $gray-*.
+$body-bg-dark: #1b242c;
+$body-color-dark: #b8c4cb;
+$body-secondary-bg-dark: #243039;
+$body-tertiary-bg-dark: #2c3a46;
+$border-color-dark: #3b4a57;
+$link-color-dark: #4db8dc;

@@ -1,0 +1,8 @@
+// Локальные правки ARMS поверх темы Yeti (перенос из хвоста старой
+// 5.2-сборки custom.css — там это было дописано руками после _bootswatch)
+
+// компактнее йетиных .75rem/.75rem
+.dropdown-item {
+	padding-top: .6rem;
+	padding-bottom: .5rem;
+}

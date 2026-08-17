@@ -20,7 +20,11 @@
 	var nodes = document.querySelectorAll('div.mermaid');
 	if (!nodes.length) return;
 
-	mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' });
+	//тема диаграмм по теме приложения (theme-init.php ставит data-bs-theme до
+	//отрисовки); при переключении темы на лету уже отрисованные диаграммы не
+	//перекрашиваются - перерисуются при следующей загрузке страницы
+	var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+	mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
 
 	function render(el) {
 		if (el.getAttribute('data-processed')) return;

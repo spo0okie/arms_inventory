@@ -184,6 +184,22 @@ echo Nav::widget([
 				'url' => ['/docs/index'],
 				'linkOptions'=>['title'=>'Документация'],
 			],
+			//переключатель темы оформления (plans/themes.md): выбор хранится и
+			//применяется на клиенте (theme-init.php), сюда только пункты меню;
+			//активный пункт помечает JS — серверный HTML одинаков для кэша
+			['label' => '<i class="fas fa-adjust"></i>',
+				'encode'=>false,
+				'dropdownOptions' => ['class'=>'dropdown-menu-end'],
+				'linkOptions'=>['title'=>'Тема оформления'],
+				'items' => [
+					['label' => '<i class="fas fa-sun fa-fw"></i> Светлая', 'encode'=>false,
+						'url'=>'#', 'linkOptions'=>['data'=>['set-theme'=>'light']]],
+					['label' => '<i class="fas fa-moon fa-fw"></i> Тёмная', 'encode'=>false,
+						'url'=>'#', 'linkOptions'=>['data'=>['set-theme'=>'dark']]],
+					['label' => '<i class="fas fa-desktop fa-fw"></i> Как в системе', 'encode'=>false,
+						'url'=>'#', 'linkOptions'=>['data'=>['set-theme'=>'auto']]],
+				],
+			],
 			Users::isAdmin()?
 				['label' => '<i class="fa fa-cog"></i>',
 					'encode'=>false,

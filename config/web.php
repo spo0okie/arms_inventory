@@ -28,12 +28,21 @@ $config = [
     ],
     'components' => [
 		'assetManager' => [
+			//кэш-бастер: ?v=<mtime> у ассетов — иначе после деплоя браузеры
+			//держат старые CSS/JS (проявилось на пересборке custom.css)
+			'appendTimestamp' => true,
 			'bundles' => [
 				'yii\web\JqueryAsset' => [
 					'jsOptions' => [ 'position' => View::POS_HEAD ],
 				],
 				'kartik\select2\Select2Asset' => [
 					'jsOptions' => [ 'position' => View::POS_HEAD ],
+				],
+				//дистовый bootstrap.css не подключаем: бутстрап-слой целиком
+				//даёт наша сборка web/css/custom.css (scss/, plans/themes.md) —
+				//иначе бутстрап грузится дважды (дист + тема поверх)
+				'yii\bootstrap5\BootstrapAsset' => [
+					'css' => [],
 				],
 			]
 		],

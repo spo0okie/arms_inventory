@@ -40,6 +40,9 @@ class AppAsset extends AssetBundle
 		'css/markers.css',
 		'css/bootstrap.css',
 		'fontawesome/css/all.min.css',
+		//темы оформления (plans/themes.md) — строго последним: его правила
+		//должны перебивать и custom.css (5.2-сборку), и прикладные файлы
+		'css/themes.css',
     ];
     public $js = [
 		'js/scans.js',

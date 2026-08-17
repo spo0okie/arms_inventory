@@ -11,6 +11,7 @@ $this->beginPage();
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
 <head>
+    <?= $this->render('theme-init') /* тема до CSS — иначе мигнёт светлым */ ?>
     <meta charset="<?= Yii::$app->charset ?>">
     <?= Html::csrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
