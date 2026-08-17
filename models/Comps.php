@@ -591,13 +591,33 @@ class Comps extends ArmsModel
 	}
 
 	/**
+	 * Подозрения на записи-двойники этой ОС — живые записи с тем же именем
+	 * в том же окружении ({@see dupeIds()} — то же правило для всего списка).
+	 * Архивная ОС дублей не имеет: архив хранится ради истории и в поиске
+	 * двойников не участвует ни одной из сторон.
 	 * @return ActiveQuery
 	 */
 	public function getDupes()
 	{
-		return $this->hasmany(Comps::class, ['name' => 'name'])
+		$query = $this->hasmany(Comps::class, ['name' => 'name'])
 			->where(['not',['id'=>$this->id]])
-			->andWhere(['sandbox_id'=>$this->sandbox_id]);
+			->andWhere(['sandbox_id'=>$this->sandbox_id])
+			->andWhere(static::notArchivedCondition());
+
+		if ($this->archived) $query->andWhere('0=1');
+
+		return $query;
+	}
+
+	/**
+	 * Условие «запись не в архиве» для поиска дублей.
+	 * IFNULL: comps.archived nullable, а `NOT (archived=1)` на NULL даёт NULL
+	 * и молча выбросил бы неархивную запись из выборки.
+	 * @return array
+	 */
+	protected static function notArchivedCondition(): array
+	{
+		return ['not',['IFNULL(archived,0)'=>1]];
 	}
 
 	/**
@@ -608,6 +628,8 @@ class Comps extends ArmsModel
 	 * клон продуктива в песочнице намеренно носит то же имя (уникальный ключ
 	 * domain_id+name+sandbox_id, отображаемое имя различается суффиксом песочницы)
 	 * и дублем не является — в этом смысл изоляции песочниц.
+	 * Архивные записи не учитываются вовсе: они не попадают в список и не делают
+	 * дублем живого тёзку.
 	 * Та же логика, что и у {@see getDupes()} для отдельной ОС.
 	 *
 	 * @return int[]
@@ -617,6 +639,7 @@ class Comps extends ArmsModel
 		$groups = (new Query())
 			->select(['GROUP_CONCAT(id) ids','name','sandbox_id','COUNT(*) c'])
 			->from(static::tableName())
+			->where(static::notArchivedCondition())
 			->groupBy(['name','sandbox_id'])	//NULL-песочницы (продуктив) MySQL сгруппирует в одну группу
 			->having('c > 1')
 			->all();
