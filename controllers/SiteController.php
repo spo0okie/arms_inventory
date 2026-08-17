@@ -16,7 +16,7 @@ require_once Yii::getAlias('@app/swagger/swagger.php');
 
 class SiteController extends ArmsBaseController
 {
-	
+
 	/**
 	 * Returns acceptance test data map.
 	 */
@@ -29,8 +29,8 @@ class SiteController extends ArmsBaseController
 		return [
 			ArmsBaseController::PERM_AUTHENTICATED => ['logout'],
 			ArmsBaseController::PERM_EVERYONE => ['login','error'],
-			'view' => ['index','wiki'],
-			'admin' => ['api-doc','api-json','app-info','password-set'],
+			'view' => ['api-doc','api-json','app-info','index','wiki'],
+			'admin' => ['password-set'],
 		];
 	}
 
@@ -62,7 +62,7 @@ class SiteController extends ArmsBaseController
 			],
         ];
     }
-	
+
 	public function disabledActions()
 	{
 		return ['create','update','delete','item','item-by-name','ttip','validate','view','rack-test'];
@@ -296,7 +296,7 @@ class SiteController extends ArmsBaseController
 			return self::skipScenario('default', 'no users available in acceptance db dump');
 		}
 		$newPassword='Test1234';
-		
+
 		return [[
 			'name' => 'form open',
 			'GET' => ['id' => $userId],
