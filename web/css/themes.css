@@ -80,6 +80,13 @@
 	color: var(--bs-body-color) !important;
 }
 
+/* нейтральные плашки bg-secondary (группы AD-панели и т.п.) — в тёмной белые
+   блоки; перекрашиваем в поверхность темы (!important — против утилит) */
+[data-bs-theme=dark] .badge.bg-secondary {
+	background-color: var(--arms-surface-2) !important;
+	color: var(--bs-body-color) !important;
+}
+
 /* цветные ячейки таблиц (table-info/success/...): фон остаётся насыщенным
    светлотемным (Yeti, $table-bg-scale:0%), а ссылки/муты внутри получили бы
    светлые цвета тёмной темы — нечитаемо; белые ссылки как у tables.css */
@@ -167,9 +174,9 @@
    палитры Yeti (текст остаётся светлым), уголки — насыщенными цветами
    палитры; светлая тема живёт на исторических цветах (дефолты токенов) */
 [data-bs-theme=dark] {
-	--fresh-hour: #0f4a63;
+	--fresh-hour: #0f3a88;
 	--fresh-day: #24485a;
-	--fresh-week: #1e4531;
+	--fresh-week: #1e5531;
 	--fresh-month: #4d3a10;
 	--fresh-over: #54211a;
 	--fresh-hour-strong: #008cba;
@@ -177,6 +184,14 @@
 	--fresh-week-strong: #43ac6a;
 	--fresh-month-strong: #e99002;
 	--fresh-over-strong: #f04124;
+}
+/* текст ярлычков свежести: на светлых ступенях шкалы (голубой/зелёный/
+   жёлтый) унаследованный светлый текст тёмной темы нечитаем — тёмный;
+   насыщенно-тёмным hour/over светлый текст остаётся */
+[data-bs-theme=dark] span.unit-status.day_fresh,
+[data-bs-theme=dark] span.unit-status.week_fresh,
+[data-bs-theme=dark] span.unit-status.month_fresh {
+	color: #1b242c;
 }
 /* сервисные статусы (state-colors.css): пастельные фоны — тексту в них
    в тёмной теме нужен тёмный цвет (иначе светлое-на-светлом) */

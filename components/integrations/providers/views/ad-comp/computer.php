@@ -27,7 +27,7 @@ if (is_null($computer)) {
 	<?php if (count($computer['groups'])) { ?>
 		<span class="text-secondary">Группы:</span>
 		<?php foreach ($computer['groups'] as $group) { ?>
-			<span class="badge bg-light text-dark border" title="<?= Html::encode($group['dn']) ?>"><?= Html::encode($group['name']) ?></span>
+			<span class="badge bg-secondary" title="<?= Html::encode($group['dn']) ?>"><?= Html::encode($group['name']) ?></span>
 		<?php } ?>
 	<?php } else { ?>
 		<span class="text-secondary" title="Первичная группа («Компьютеры домена») и вложенные группы в memberOf не входят">
