@@ -7,6 +7,9 @@
 div.users-view div.arms-card {
     background-color: slategray;
     border-radius: 2pt 12pt 2pt 12pt;
+    /* правый верхний и левый нижний — срез 45° в тон ярлычкам
+       (corner-shape: Chromium 139+; без поддержки остаётся скругление) */
+    corner-shape: round bevel round bevel;
     color: whitesmoke;
     font-family: 'Roboto Condensed', sans-serif;
     margin-bottom: 5px;
@@ -48,7 +51,7 @@ div.arms-card span.net-ips-item a {color: white; font-family: 'Roboto Condensed'
 div.arms-card span.net-ips-item a:hover {color: yellow}
 
 /* ярлычок статуса */
-div.arms-card span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0 12pt 0 0;}
+div.arms-card span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0 12pt 0 0; corner-shape: round bevel round round;}
 span.unit-status {float: right; width: 30%; text-align: center; border-radius: 0}
 
 div.arms-card span.it-staff {
@@ -59,15 +62,17 @@ div.arms-card span.it-staff {
     padding-bottom:2pt;
 }
 
+/* разделители «вырезают» карточку цветом фона страницы — поэтому не white,
+   а var(--bs-body-bg): в светлой это тот же белый, в тёмной — тёмный фон */
 div.arms-card span.divider1 {
     display: block; width: 100%; height: 10pt; margin: 2pt 0; padding: 0;
-    background: linear-gradient(to right, white ,white 1%,transparent 1%,transparent 99%,white 99%);
+    background: linear-gradient(to right, var(--bs-body-bg), var(--bs-body-bg) 1%,transparent 1%,transparent 99%, var(--bs-body-bg) 99%);
 }
 
 span.divider2-striped,
 div.arms-card span.divider2 {
     display: block; width: 100%; height: 15pt; margin: 2pt 0; padding: 0;
-    background: repeating-linear-gradient(120deg, transparent,transparent 5px,white 6px, white 10px, transparent 11px);
+    background: repeating-linear-gradient(120deg, transparent,transparent 5px, var(--bs-body-bg) 6px, var(--bs-body-bg) 10px, transparent 11px);
 }
 
 /* блок в рамочке */

@@ -223,6 +223,24 @@
 	--ipam-nocode-fg: #1d242c;
 }
 
+/* компактная карточка АРМ (arms.css, страница сотрудника): slategray-бирка
+   в тёмной теме слишком светлая — приглушаем всю палитру, сохраняя
+   иерархию «карточка < вложенная ОС < ховер»; текст whitesmoke и жёлтый
+   ховер ссылок остаются — это её фирменный вид. Разделители режут карточку
+   цветом var(--bs-body-bg) и перекрашиваются сами */
+[data-bs-theme=dark] div.users-view div.arms-card {
+	background-color: #3f4c57;
+}
+[data-bs-theme=dark] div.arms-card div.tree-level-2 div.comps-card {
+	background-color: #4a5964;
+}
+[data-bs-theme=dark] div.arms-card span.clickable:hover {
+	background-color: #576873;
+}
+[data-bs-theme=dark] div.arms-card div.data-block {
+	border-color: var(--arms-muted);
+}
+
 /* ===== ВИДЖЕТЫ ===== */
 
 /* недельные блоки расписаний (schedules.css): светло-бирюзовый/оливковый
