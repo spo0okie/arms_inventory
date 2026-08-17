@@ -80,11 +80,19 @@
 	color: var(--bs-body-color) !important;
 }
 
-/* нейтральные плашки bg-secondary (группы AD-панели и т.п.) — в тёмной белые
-   блоки; перекрашиваем в поверхность темы (!important — против утилит) */
-[data-bs-theme=dark] .badge.bg-secondary {
+/* нейтральные плашки bg-secondary/bg-light (группы AD-панели и т.п.) — в
+   тёмной белые блоки; перекрашиваем в поверхность темы (!important —
+   против утилит) */
+[data-bs-theme=dark] .badge.bg-secondary,
+[data-bs-theme=dark] .badge.bg-light {
 	background-color: var(--arms-surface-2) !important;
 	color: var(--bs-body-color) !important;
+}
+
+/* панели-группировки на формах (card bg-light: ACL/ACE и т.п.) — светлые
+   блоки в тёмной; поверхность темы */
+[data-bs-theme=dark] .card.bg-light {
+	background-color: var(--arms-surface) !important;
 }
 
 /* цветные ячейки таблиц (table-info/success/...): фон остаётся насыщенным
@@ -256,6 +264,43 @@
 	border-color: var(--arms-muted);
 }
 
+/* карточки доступов (acl.css): светло-серая подложка ACL и серые
+   ACE-блоки — в тёмной вся лесенка приглушается с сохранением иерархии
+   «подложка < ACE-карточка > блок доступа > кнопки»; белый текст ACE
+   остаётся */
+[data-bs-theme=dark] span.acl-card,
+[data-bs-theme=dark] div.acl-card {
+	background-color: #26313b;
+}
+[data-bs-theme=dark] span.ace-card,
+[data-bs-theme=dark] div.ace-card {
+	background-color: #3d4a57;
+}
+[data-bs-theme=dark] div.ace-access-card {
+	background-color: #333f4b;
+}
+[data-bs-theme=dark] button.ace-access-buttons,
+[data-bs-theme=dark] a.ace-access-buttons {
+	background-color: #28323c;
+}
+[data-bs-theme=dark] button.ace-access-buttons:hover,
+[data-bs-theme=dark] a.ace-access-buttons:hover {
+	background-color: #46566a;
+}
+[data-bs-theme=dark] table.acls-table,
+[data-bs-theme=dark] table.acls-table td,
+[data-bs-theme=dark] table.acls-table th {
+	border-color: var(--arms-border);
+}
+
+/* штрихованные плашки периодов доступа и т.п. (bootstrap.css:
+   alert-striped/bg-*-striped) — их #666 на тёмных полосах нечитаем */
+[data-bs-theme=dark] .alert-striped,
+[data-bs-theme=dark] .bg-red-striped,
+[data-bs-theme=dark] .bg-green-striped {
+	color: var(--bs-body-color);
+}
+
 /* ===== ВИДЖЕТЫ ===== */
 
 /* недельные блоки расписаний (schedules.css): светло-бирюзовый/оливковый
@@ -300,6 +345,22 @@
 [data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection__rendered,
 [data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection__placeholder {
 	color: var(--bs-body-color);
+}
+/* стрелка одиночного селекта — SVG с тёмным штрихом, свой светлый */
+[data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection--single {
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23b8c4cb' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+/* крестики очистки и удаления чипсов: чёрные с белой тенью (стиль старого
+   bootstrap close) — в тёмной светлые и без тени */
+[data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection__clear,
+[data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection--multiple .select2-selection__choice__remove {
+	color: var(--bs-body-color);
+	text-shadow: none;
+	opacity: 0.7;
+}
+[data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection__clear:hover,
+[data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection--multiple .select2-selection__choice__remove:hover {
+	opacity: 1;
 }
 [data-bs-theme=dark] .select2-container--krajee-bs5 .select2-selection--multiple .select2-selection__choice {
 	color: var(--bs-body-color);
