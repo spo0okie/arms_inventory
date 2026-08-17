@@ -17,6 +17,7 @@ use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Exception;
+use yii\db\Query;
 use yii\db\StaleObjectException;
 
 /**
@@ -597,6 +598,32 @@ class Comps extends ArmsModel
 		return $this->hasmany(Comps::class, ['name' => 'name'])
 			->where(['not',['id'=>$this->id]])
 			->andWhere(['sandbox_id'=>$this->sandbox_id]);
+	}
+
+	/**
+	 * Id всех ОС, у которых имя не уникально внутри своего окружения —
+	 * подозрения на записи-двойники (список /comps/dupes).
+	 *
+	 * Дубли ищутся в пределах одного окружения (sandbox_id), а не по всей таблице:
+	 * клон продуктива в песочнице намеренно носит то же имя (уникальный ключ
+	 * domain_id+name+sandbox_id, отображаемое имя различается суффиксом песочницы)
+	 * и дублем не является — в этом смысл изоляции песочниц.
+	 * Та же логика, что и у {@see getDupes()} для отдельной ОС.
+	 *
+	 * @return int[]
+	 */
+	public static function dupeIds(): array
+	{
+		$groups = (new Query())
+			->select(['GROUP_CONCAT(id) ids','name','sandbox_id','COUNT(*) c'])
+			->from(static::tableName())
+			->groupBy(['name','sandbox_id'])	//NULL-песочницы (продуктив) MySQL сгруппирует в одну группу
+			->having('c > 1')
+			->all();
+
+		$ids=[];
+		foreach ($groups as $item) foreach (explode(',',$item['ids']) as $id) $ids[]=(int)$id;
+		return $ids;
 	}
 
 

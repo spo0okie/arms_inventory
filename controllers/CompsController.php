@@ -8,7 +8,6 @@ use Throwable;
 use Yii;
 use app\models\Comps;
 use yii\db\ActiveRecord;
-use yii\db\Query;
 use yii\db\StaleObjectException;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -36,8 +35,10 @@ class CompsController extends ArmsBaseController
     /**
      * Отображает список дублирующихся ПК (компьютеров).
      *
-     * Дублями считаются записи, у которых поле name встречается в таблице comps
-     * более одного раза. Список строится через CompsSearch с фильтром по ids.
+     * Дублями считаются записи, у которых поле name встречается более одного раза
+     * внутри одного окружения ({@see Comps::dupeIds()}): клоны в песочницах
+     * намеренно носят имя продуктива и дублями не считаются.
+     * Список строится через CompsSearch с фильтром по ids.
      * Если дублей нет — возвращает пустой набор (ids=[-1]).
      *
      * GET-параметры: отсутствуют.
@@ -46,16 +47,9 @@ class CompsController extends ArmsBaseController
      */
     public function actionDupes()
     {
-		$dupes = (new Query())
-			->select(['GROUP_CONCAT(id) ids','name','COUNT(*) c'])
-			->from('comps')
-			->groupBy(['name'])
-			->having('c > 1')
-			->all();
-		$ids=[];
-		foreach ($dupes as $item) $ids=array_merge($ids , explode(',',$item['ids']));
+		$ids=Comps::dupeIds();
 		if (!count($ids)) $ids=[-1];
-	
+
 		// add conditions that should always apply here
 	
 		$searchModel=new CompsSearch();
@@ -72,8 +66,9 @@ class CompsController extends ArmsBaseController
 	 * Acceptance test data for actionDupes.
 	 *
 	 * Что делает actionDupes:
-	 * - выполняет агрегирующий SQL-запрос по `comps.name` и ищет записи, у которых
-	 *   одинаковый `name` встречается более одного раза;
+	 * - выполняет агрегирующий SQL-запрос по `comps.name`+`comps.sandbox_id` и ищет
+	 *   записи, у которых одинаковый `name` встречается более одного раза внутри
+	 *   одного окружения (клоны в песочницах дублями не считаются);
 	 * - собирает найденные id в один массив и передаёт их в `CompsSearch` через
 	 *   фильтр `ids`;
 	 * - если дублей нет, ids=[-1] (пустой набор), и страница всё равно рендерится
@@ -84,9 +79,11 @@ class CompsController extends ArmsBaseController
 	 *    умолчанию после загрузки acceptance-дампа) action должен отдавать
 	 *    HTTP 200 и корректно рендерить пустой список поверх CompsSearch.
 	 * 2) Сценарий `with duplicates`: после создания двух записей Comps с одинаковым
-	 *    `name` action попадает в ветку, где в выборку подставляются реальные id
-	 *    из агрегации `GROUP BY name HAVING COUNT(*) > 1`; страница также должна
+	 *    `name` и одним и тем же `sandbox_id` action попадает в ветку, где в выборку
+	 *    подставляются реальные id из агрегации
+	 *    `GROUP BY name, sandbox_id HAVING COUNT(*) > 1`; страница также должна
 	 *    отдавать HTTP 200.
+	 *    (Отбор самих дублей — предмет unit-теста CompsDupesSandboxTest.)
 	 *
 	 * Почему этого достаточно для acceptance-контракта:
 	 * - задача теста на этом уровне — подтвердить, что маршрут `/comps/dupes`
@@ -97,9 +94,9 @@ class CompsController extends ArmsBaseController
 	 *
 	 * Особенность подготовки дублей:
 	 * - две модели Comps создаются через `ModelFactory::create(..., ['empty' => true])`,
-	 *   затем у второй модели `name` принудительно выравнивается под первую
-	 *   через `silentSave()`, чтобы не проходить бизнес-валидации формы и
-	 *   гарантированно получить две записи с одинаковым `name` в БД.
+	 *   затем у второй модели `name` и `sandbox_id` принудительно выравниваются под
+	 *   первую через `silentSave()`, чтобы не проходить бизнес-валидации формы и
+	 *   гарантированно получить две записи-дубля в одном окружении.
 	 */
 	public function testDupes(): array
 	{
@@ -112,8 +109,9 @@ class CompsController extends ArmsBaseController
 		try {
 			$first = \app\generation\ModelFactory::create(Comps::class, ['empty' => true]);
 			$second = \app\generation\ModelFactory::create(Comps::class, ['empty' => true]);
-			// Принудительно выравниваем name, чтобы получить пару дублей в БД.
+			// Принудительно выравниваем name и окружение, чтобы получить пару дублей в БД.
 			$second->name = $first->name;
+			$second->sandbox_id = $first->sandbox_id;
 			$second->silentSave();
 
 			$scenarios[] = [
