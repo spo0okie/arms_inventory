@@ -20,7 +20,7 @@ $config = [
     'name' => 'Инвентаризация',
 	'language' => 'ru-RU',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'slowRequestLogger'],
 	'timeZone' => 'Asia/Yekaterinburg', // : Yii::$app->user->identity->timeZone ,//->php_name,
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
@@ -91,13 +91,26 @@ $config = [
 	    'notifier' => [
 		    'class' => 'app\components\Notifier',
 	    ],
+	    //журнал медленных запросов -> runtime/logs/perf.log (docs/dev/perf-monitoring.md)
+	    'slowRequestLogger' => [
+		    'class' => 'app\components\SlowRequestLogger',
+		    'threshold' => $params['perf.slow_request_seconds'] ?? 3,
+	    ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
+	                'except' => ['perf'], //медленные запросы идут в свой файл, в app.log не дублируются
                 ],
+	            [//журнал медленных запросов: отдельный файл, чтобы Zabbix следил за ним logrt-итемом
+		            'class' => 'yii\log\FileTarget',
+		            'logFile' => '@runtime/logs/perf.log',
+		            'categories' => ['perf'],
+		            'levels' => ['warning'],
+		            'logVars' => [], //только сама строка, без дампа $_SERVER/$_GET
+	            ],
             ],
         ],
         'db' => $db,

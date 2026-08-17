@@ -76,6 +76,7 @@ arms/
 ├── tests/               # Тесты (Codeception)
 ├── views/               # Представления (View)
 ├── web/                 # Публичная директория (document root)
+├── zabbix/              # Шаблон Zabbix для мониторинга инсталляции ARMS
 ├── composer.json        # Зависимости PHP
 └── yii                  # Консольная точка входа
 ```

@@ -106,4 +106,11 @@ return [
 
 	//правила оповещений о "залежавшихся" документах для notify/watch (примеры в plans/notifications.md)
 	'notifyRules'=>[],
+
+	//мониторинг производительности (docs/help/admin/monitoring.md)
+	//порог журнала медленных запросов (runtime/logs/perf.log), сек; 0 = выключить
+	'perf.slow_request_seconds'=>3,
+	//access-лог(и) Apache для отчёта yii perf/report: список масок через запятую,
+	//.gz читается прозрачно (маска захватывает ротированные куски - лишние дни отсекает фильтр по дате)
+	'perf.access_log'=>'/var/log/apache2/inventory.http_access.log*',
 ];

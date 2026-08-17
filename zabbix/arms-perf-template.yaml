@@ -1,0 +1,76 @@
+zabbix_export:
+  version: '6.0'
+  date: '2026-08-17T00:00:00Z'
+  groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates/Applications
+  templates:
+    - uuid: 3f1c6ba8a5d94dc0a1e07b52c40f6b21
+      template: 'ARMS perf monitoring'
+      name: 'ARMS perf monitoring'
+      description: |
+        Мониторинг производительности ARMS (docs/help/admin/monitoring.md).
+
+        Два лог-итема (активный агент) + триггеры с порогом чувствительности:
+        - медленные запросы из runtime/logs/perf.log (пишет компонент SlowRequestLogger);
+        - HTTP 5xx из access-лога Apache.
+
+        Требования на хосте:
+        - zabbix-agent с активными проверками (ServerActive=, Hostname= совпадает с именем хоста в Zabbix);
+        - у агента есть право чтения обоих логов (apache-логи обычно root:adm - добавить пользователя
+          zabbix в группу adm; runtime/logs должен быть доступен на чтение);
+        - пути к логам при необходимости переопределить макросами на хосте.
+      groups:
+        - name: Templates/Applications
+      macros:
+        - macro: '{$ARMS.ACCESS_LOG}'
+          value: '/var/log/apache2/inventory\.http_access\.log.*'
+          description: 'regexp-маска access-лога Apache (logrt: ротированные куски подхватываются)'
+        - macro: '{$ARMS.PERF_LOG}'
+          value: '/var/www/arms/runtime/logs/perf\.log.*'
+          description: 'regexp-маска журнала медленных запросов приложения'
+        - macro: '{$ARMS.SLOW.MAXCOUNT}'
+          value: '5'
+          description: 'порог чувствительности: медленных запросов за 5 минут для срабатывания'
+        - macro: '{$ARMS.5XX.MAXCOUNT}'
+          value: '5'
+          description: 'порог чувствительности: ответов 5xx за 5 минут для срабатывания'
+      items:
+        - uuid: 9c2b1a447d1e4f6f8a35c60217d90b44
+          name: 'ARMS: журнал медленных запросов'
+          type: ZABBIX_ACTIVE
+          key: 'logrt["{$ARMS.PERF_LOG}","slow request",,,skip]'
+          delay: 1m
+          history: 7d
+          trends: '0'
+          value_type: LOG
+          description: 'Строки slow request из runtime/logs/perf.log: каждая строка - запрос дольше порога params[perf.slow_request_seconds]. skip - при подключении шаблона старые строки не считаются.'
+          tags:
+            - tag: component
+              value: application
+          triggers:
+            - uuid: 5b8f2c90de114aa2b0c4f1d6a8e37c02
+              expression: 'count(/ARMS perf monitoring/logrt["{$ARMS.PERF_LOG}","slow request",,,skip],5m)>={$ARMS.SLOW.MAXCOUNT}'
+              name: 'ARMS: медленные запросы ({$ARMS.SLOW.MAXCOUNT}+ за 5 минут)'
+              priority: WARNING
+              description: 'Страницы отдаются дольше порога. Маршруты и пользователи видны в последних значениях итема; разбор инцидента - docs/help/admin/monitoring.md.'
+              manual_close: 'YES'
+        - uuid: 1e77ab30f5c845d3b2960dd4c17aef58
+          name: 'ARMS: HTTP 5xx в access-логе'
+          type: ZABBIX_ACTIVE
+          key: 'logrt["{$ARMS.ACCESS_LOG}","\" 5[0-9][0-9] \"",,,skip]'
+          delay: 1m
+          history: 7d
+          trends: '0'
+          value_type: LOG
+          description: 'Строки access-лога Apache с кодом ответа 5xx (регэксп по полю статуса между кавычкой запроса и размером ответа).'
+          tags:
+            - tag: component
+              value: application
+          triggers:
+            - uuid: 84d0ce12ab3f47e6a91b5c78e0f21d93
+              expression: 'count(/ARMS perf monitoring/logrt["{$ARMS.ACCESS_LOG}","\" 5[0-9][0-9] \"",,,skip],5m)>={$ARMS.5XX.MAXCOUNT}'
+              name: 'ARMS: ошибки 5xx ({$ARMS.5XX.MAXCOUNT}+ за 5 минут)'
+              priority: WARNING
+              description: 'Приложение отвечает ошибками. Конкретные URL - в последних значениях итема; стектрейсы - в runtime/logs/app.log на хосте.'
+              manual_close: 'YES'
