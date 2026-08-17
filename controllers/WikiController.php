@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\helpers\StringHelper;
 use app\helpers\WikiHelper;
+use app\helpers\WikiLinksScanner;
 use app\models\ui\WikiCache;
 use app\models\Users;
 use Yii;
@@ -23,6 +24,10 @@ class WikiController extends Controller
 				'page',
 				'render-field',
 				'invalidate-page',
+			],
+			//отчет по всей инвентаризации сразу (в обход прав на отдельные модели)
+			'admin'=>[
+				'interwiki',
 			],
 		];
 	}
@@ -133,6 +138,42 @@ class WikiController extends Controller
 		return $parsed;
 	}
 	
+	/**
+	 * Отчет по интервики-ссылкам инвентаризации.
+	 *
+	 * Сканирует все атрибуты всех моделей, у которых включен рендер через
+	 * DokuWiki (params['textFields'], см. WikiLinksScanner::dokuwikiAttributes()),
+	 * и собирает из них интервики-ссылки вида [[shortcut>страница]], группируя
+	 * по shortcut и странице. Учитываются не только сами поля, но и тексты
+	 * страниц wiki, включенных в поле через {{page>...}} / {{section>...}}
+	 * (плагин include) - рекурсивно, до depth уровней.
+	 *
+	 * GET-параметры:
+	 * @param int $includes 1 - идти за включениями {{page>...}} (по умолчанию),
+	 *                      0 - сканировать только сами поля (без запросов к wiki)
+	 * @param int $depth    предельная глубина обхода включений
+	 *
+	 * @return string HTML отчета
+	 */
+	public function actionInterwiki($includes=1,$depth=3)
+	{
+		$scanner=new WikiLinksScanner();
+		$scanner->followIncludes=(bool)$includes;
+		$scanner->maxIncludeDepth=(int)$depth;
+
+		$attributes=WikiLinksScanner::dokuwikiAttributes();
+		$groups=$scanner->scan($attributes);
+
+		return $this->render('interwiki',[
+			'groups'=>$groups,
+			'attributes'=>$attributes,
+			'totals'=>$scanner->getTotals(),
+			'failures'=>$scanner->getFailures(),
+			'followIncludes'=>$scanner->followIncludes,
+			'depth'=>$scanner->maxIncludeDepth,
+		]);
+	}
+
 	/**
 	 * Помечает кэш страницы wiki как устаревший (valid=0).
 	 * Инвалидирует как саму страницу, так и все страницы, которые

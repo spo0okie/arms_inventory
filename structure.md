@@ -180,6 +180,11 @@ arms/
 - [`DateTimeHelper`](helpers/DateTimeHelper.php) - работа с датами
 - [`RestHelper`](helpers/RestHelper.php) - помощник для REST API запросов
 - [`WikiHelper`](helpers/WikiHelper.php) - парсинг Wiki-разметки
+- [`WikiLinksScanner`](helpers/WikiLinksScanner.php) - сканер интервики-ссылок
+  `[[shortcut>страница]]` во всех полях с рендером через DokuWiki (включая
+  тексты страниц, подключенных через `{{page>...}}`); отчет отдает
+  [`WikiController::actionInterwiki()`](controllers/WikiController.php),
+  описание - в [docs/help/admin/integrations/dokuwiki.md](docs/help/admin/integrations/dokuwiki.md)
 - [`QueryHelper`](helpers/QueryHelper.php) - построение SQL-запросов
 - [`FieldsHelper`](helpers/FieldsHelper.php) - работа с полями моделей
 - [`MacsHelper`](helpers/MacsHelper.php) - работа с MAC-адресами

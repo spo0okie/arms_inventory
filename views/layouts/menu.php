@@ -213,6 +213,9 @@ echo Nav::widget([
 						['label' => Notifications::$titles, 'url' => ['/notifications/index']],
 						['label' => IntegrationsLog::$titles, 'url' => ['/integrations-log/index']],
 						['label' => 'Документация API', 	'url' => ['/site/api-doc']],
+						//отчет по ссылкам инвентаризации во внешнюю wiki - только когда wiki подключена
+						empty(Yii::$app->params['wikiUrl'])?'':
+							['label' => 'Интервики-ссылки', 'url' => ['/wiki/interwiki']],
 					],
 				]:'',
 			Yii::$app->user->isGuest ?
