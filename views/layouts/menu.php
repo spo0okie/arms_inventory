@@ -215,7 +215,7 @@ echo Nav::widget([
 						['label' => 'Документация API', 	'url' => ['/site/api-doc']],
 						//отчет по ссылкам инвентаризации во внешнюю wiki - только когда wiki подключена
 						empty(Yii::$app->params['wikiUrl'])?'':
-							['label' => 'Интервики-ссылки', 'url' => ['/wiki/interwiki']],
+							['label' => 'Ссылки в wiki', 'url' => ['/wiki/links']],
 					],
 				]:'',
 			Yii::$app->user->isGuest ?

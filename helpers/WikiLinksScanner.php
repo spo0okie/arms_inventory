@@ -3,44 +3,77 @@
 namespace app\helpers;
 
 use app\components\Forms\ActiveField;
+use app\components\UrlListWidget;
 use app\models\base\ArmsModel;
 use app\models\ui\WikiCache;
 use app\types\TextType;
+use app\types\UrlsType;
+use Yii;
 
 /**
- * Сканер интервики-ссылок в текстовых полях инвентаризации
- * (страница /web/wiki/interwiki, интеграция — docs/help/admin/integrations/dokuwiki.md).
+ * Сканер ссылок инвентаризации во внешнюю wiki (страница /web/wiki/links,
+ * интеграция - docs/help/admin/integrations/dokuwiki.md).
  *
- * Что сканируется:
- *  - все атрибуты всех моделей, у которых тип TextType и включен рендер через
- *    DokuWiki (params['textFields'], разрешается через ActiveField::textFieldType,
- *    т.е. учитывается и 'default'=>'dokuwiki');
- *  - тексты страниц wiki, включенных в такое поле директивами плагина include
- *    ({{page>...}} / {{section>...}}) - рекурсивно, до maxIncludeDepth уровней.
- *    Списки включений извлекает WikiCache::extractDependencies() - тот же код,
- *    что ведет учет зависимостей кэша, поэтому синтаксис понимается одинаково.
+ * Задача: показать обратные ссылки, которых не видит сама wiki. Встроенный
+ * механизм DokuWiki "Ссылки сюда" учитывает только ссылки внутри wiki, а
+ * инвентаризация ссылается на ее страницы из своих данных - и об этих ссылках
+ * wiki не знает.
  *
- * Что считается интервики-ссылкой: ссылка [[shortcut>страница|подпись]], где
- * shortcut - буквы/цифры/точки (так же, как определяет сам парсер DokuWiki).
+ * Где ищем:
+ *  - поля с разметкой DokuWiki: атрибуты типа TextType, у которых включен
+ *    рендер через dokuwiki (params['textFields'], разрешается через
+ *    ActiveField::textFieldType, т.е. учитывается и 'default'=>'dokuwiki');
+ *  - поля-ссылки: атрибуты типа UrlsType (списки URL, обычно links);
+ *  - тексты страниц wiki, включенных в поле с разметкой директивами плагина
+ *    include ({{page>...}} / {{section>...}}) - рекурсивно, до maxIncludeDepth
+ *    уровней. Списки включений извлекает WikiCache::extractDependencies() -
+ *    тот же код, что ведет учет зависимостей кэша.
+ *
+ * Что находим (вид ссылки - kind у каждого места использования):
+ *  - KIND_LINK    - вики-ссылка [[namespace:страница]] в поле с разметкой;
+ *  - KIND_INCLUDE - включение страницы {{page>namespace:страница}};
+ *  - KIND_URL     - URL на страницу этой wiki (в поле-ссылках либо в тексте);
+ *  - интервики-ссылки [[shortcut>страница]] ведут в ДРУГИЕ wiki, поэтому
+ *    собираются отдельным списком (getInterwiki()).
  *
  * Использование:
  * ```php
  * $scanner=new WikiLinksScanner();
- * $groups=$scanner->scan();               //сгруппированный результат
- * $totals=$scanner->getTotals();          //счетчики
- * $failures=$scanner->getFailures();      //страницы wiki, которые не отдались
+ * $scanner->scan();
+ * $pages=$scanner->getWikiPages();      //страницы этой wiki + кто ссылается
+ * $other=$scanner->getInterwiki();      //интервики-ссылки по shortcut
+ * $totals=$scanner->getTotals();
+ * $failures=$scanner->getFailures();    //страницы wiki, которые не отдались
  * ```
  *
- * Разбор ссылок и группировка - чистые статические функции (без БД и без wiki),
- * покрыты юнит-тестами tests/unit/helpers/WikiLinksScannerTest.php.
+ * Разбор ссылок, URL и группировка - чистые статические функции (без БД и без
+ * wiki), покрыты юнит-тестами tests/unit/helpers/WikiLinksScannerTest.php.
  */
 class WikiLinksScanner
 {
+	/** вики-ссылка [[namespace:страница]] в поле с разметкой */
+	const KIND_LINK='link';
+	/** включение страницы {{page>...}} / {{section>...}} */
+	const KIND_INCLUDE='include';
+	/** URL на страницу этой wiki (поле-ссылок либо внешняя ссылка в тексте) */
+	const KIND_URL='url';
+
 	/** @var int предельная глубина обхода включений {{page>...}} (защита от глубоких деревьев) */
 	public $maxIncludeDepth=3;
 
 	/** @var bool следовать ли за включениями страниц wiki (выключение экономит запросы к wiki) */
 	public $followIncludes=true;
+
+	/**
+	 * @var bool учитывать ли находки ВНУТРИ включенных страниц. Это ссылки
+	 * самой wiki (их видно и во встроенном "Ссылки сюда"), но через включение
+	 * они попадают на страницу объекта инвентаризации, поэтому по умолчанию
+	 * учитываются - с пометкой цепочки включений.
+	 */
+	public $includeNested=true;
+
+	/** @var string|null база URL wiki (по умолчанию params['wikiUrl']) */
+	public $wikiUrl=null;
 
 	/**
 	 * @var callable|null чем получать исходный текст страницы wiki: function(string $page): ?string
@@ -49,32 +82,48 @@ class WikiLinksScanner
 	public $pageFetcher=null;
 
 	/** @var array кэш исходников страниц wiki за прогон: страница => текст|null */
-	protected $pages=[];
+	protected $pageTexts=[];
 
 	/** @var array страницы wiki, которые не удалось получить: страница => откуда включена */
 	protected $failures=[];
 
+	/** @var array ссылки на страницы ЭТОЙ wiki: страница => ['page','count','kinds','usages'] */
+	protected $refs=[];
+
+	/** @var array плоский список интервики-ссылок (в другие wiki) */
+	protected $interwiki=[];
+
+	/** @var array объекты, в которых что-то нашлось: 'класс:id' => true */
+	protected $objects=[];
+
 	/** @var array сквозные счетчики (см. getTotals()) */
 	protected $totals=[
-		'classes'=>0,		//моделей с dokuwiki-атрибутами
-		'attributes'=>0,	//просканировано атрибутов
-		'objects'=>0,		//объектов, в чьих полях нашлась хоть одна интервики-ссылка
-		'texts'=>0,			//полей с потенциальной разметкой (прошли фильтр запроса)
-		'links'=>0,			//всего найдено интервики-ссылок
-		'includes'=>0,		//всего загружено включенных страниц wiki
+		'classes'=>0,			//сущностей с просканированными полями
+		'attributes'=>0,		//полей с разметкой DokuWiki просканировано
+		'urlAttributes'=>0,		//полей-списков ссылок просканировано
+		'texts'=>0,				//полей с разметкой, где есть ссылка или включение
+		'urlFields'=>0,			//полей-ссылок, где есть адрес wiki
+		'objects'=>0,			//объектов, из которых есть хоть одна ссылка в wiki
+		'refs'=>0,				//всего ссылок на страницы этой wiki
+		'pages'=>0,				//уникальных страниц этой wiki
+		'nested'=>0,			//из них найдено внутри включенных страниц
+		'interwiki'=>0,			//интервики-ссылок (в другие wiki)
+		'fetched'=>0,			//загружено страниц wiki при обходе включений
 	];
 
 	/**
-	 * Разбирает интервики-ссылки в тексте DokuWiki.
-	 *
-	 * Интервики-ссылка - [[shortcut>страница|подпись]]: shortcut состоит из букв,
-	 * цифр и точек (правило самого DokuWiki), поэтому обычные внутренние
-	 * ([[namespace:page]]) и внешние (http://...) ссылки сюда не попадают.
+	 * Разбирает и классифицирует ссылки [[...]] в тексте DokuWiki.
+	 * Порядок проверок повторяет парсер DokuWiki, поэтому виды ссылок
+	 * определяются так же, как их увидит сама wiki.
 	 *
 	 * @param string $text текст с разметкой
-	 * @return array список ['shortcut','target','title','raw']
+	 * @return array список ['kind','link','shortcut','target','title','raw'], где kind:
+	 *   interwiki - [[shortcut>страница]] (ссылка в другую wiki),
+	 *   internal  - [[namespace:страница]] (страница этой wiki),
+	 *   external  - [[http://...]], share - [[\\server\share]],
+	 *   email     - [[user@example.com]], anchor - [[#секция]]
 	 */
-	public static function parseInterwikiLinks(string $text): array
+	public static function parseLinks(string $text): array
 	{
 		$links=[];
 		if ($text==='') return $links;
@@ -85,30 +134,133 @@ class WikiLinksScanner
 
 		foreach ($matches as $match) {
 			$link=trim($match[1]);
-			//правило DokuWiki: shortcut - [a-zA-Z0-9.]+ перед '>'
-			if (!preg_match('/^([a-zA-Z0-9.]+)>(.*)$/us', $link, $tokens)) continue;
-			$links[]=[
-				'shortcut'=>$tokens[1],
-				'target'=>trim($tokens[2]),
+			$entry=[
+				'kind'=>'internal',
+				'link'=>$link,
+				'shortcut'=>'',
+				'target'=>$link,
 				'title'=>isset($match[2])?trim($match[2]):'',
 				'raw'=>$match[0],
 			];
+
+			if (preg_match('/^([a-zA-Z0-9.]+)>(.*)$/us', $link, $tokens)) {
+				//правило DokuWiki: shortcut - [a-zA-Z0-9.]+ перед '>'
+				$entry['kind']='interwiki';
+				$entry['shortcut']=$tokens[1];
+				$entry['target']=trim($tokens[2]);
+			} elseif (preg_match('#^\\\\\\\\[^\\\\]+?\\\\#u', $link)) {
+				$entry['kind']='share';			//\\server\share
+			} elseif (preg_match('#^([a-z0-9\-.+]+?)://#i', $link)) {
+				$entry['kind']='external';		//http://, https://, ftp://...
+			} elseif (preg_match('/^[^\s@]+@[^\s@]+\.[^\s@]+$/u', $link)) {
+				$entry['kind']='email';
+			} elseif ($link==='' || $link[0]==='#') {
+				$entry['kind']='anchor';		//секция этой же страницы
+			}
+
+			$links[]=$entry;
 		}
 
 		return $links;
 	}
 
 	/**
+	 * Только интервики-ссылки [[shortcut>страница]] (см. parseLinks())
+	 * @param string $text
+	 * @return array список ['shortcut','target','title','raw']
+	 */
+	public static function parseInterwikiLinks(string $text): array
+	{
+		$links=[];
+		foreach (static::parseLinks($text) as $link) {
+			if ($link['kind']!=='interwiki') continue;
+			$links[]=[
+				'shortcut'=>$link['shortcut'],
+				'target'=>$link['target'],
+				'title'=>$link['title'],
+				'raw'=>$link['raw'],
+			];
+		}
+		return $links;
+	}
+
+	/**
+	 * Превращает URL в идентификатор страницы wiki.
+	 * Понимает и "?id=namespace:страница", и человекочитаемые пути
+	 * ("/namespace:страница" и "/namespace/страница").
+	 *
+	 * @param string $url     проверяемый URL
+	 * @param string $wikiUrl база URL wiki (params['wikiUrl'])
+	 * @return string|null null - URL не ведет в эту wiki (или ведет не на страницу)
+	 */
+	public static function urlToWikiPage(string $url, string $wikiUrl): ?string
+	{
+		$url=trim($url);
+		$wikiUrl=trim($wikiUrl);
+		if ($url==='' || $wikiUrl==='') return null;
+
+		$base=rtrim($wikiUrl,'/').'/';
+		if (stripos($url,$base)!==0) return null;
+
+		$rest=substr($url,strlen($base));
+		$rest=preg_replace('/#.*$/','',$rest);		//якорь секции - не часть id
+
+		if (preg_match('/(?:^|[?&])id=([^&]*)/',$rest,$tokens)) {
+			//doku.php?id=namespace:страница (в т.ч. с do=edit и прочими параметрами)
+			$page=urldecode($tokens[1]);
+		} else {
+			$rest=preg_replace('/\?.*$/','',$rest);
+			//служебные адреса (медиа, скрипты) страницами не являются
+			if (preg_match('#^(lib|_media|_detail|_export)(/|$)#',$rest)) return null;
+			$page=urldecode(trim($rest,'/'));
+			//doku.php без параметров - стартовая страница
+			if ($page==='doku.php') $page='';
+		}
+
+		$page=trim(str_replace('/',':',$page),': ');
+		//корень wiki - стартовая страница ('start' - имя по умолчанию в DokuWiki)
+		if ($page==='') $page='start';
+
+		return $page;
+	}
+
+	/**
 	 * Возвращает атрибуты моделей, которые рендерятся через DokuWiki.
 	 *
 	 * Проверяются только реальные колонки таблицы (их можно прочитать запросом)
-	 * с типом TextType. Модели без таблицы и атрибуты с невыводимым типом
-	 * пропускаются.
+	 * ровно типа TextType: наследники (urls, json, macs...) рендерятся своим
+	 * типом и разметку DokuWiki не отдают.
 	 *
 	 * @param array|null $modelClasses список классов (по умолчанию все модели ARMS)
 	 * @return array FQCN модели => список атрибутов
 	 */
 	public static function dokuwikiAttributes(?array $modelClasses=null): array
+	{
+		return static::attributesOfType($modelClasses,function($class,$attribute,$type) {
+			return get_class($type)===TextType::class
+				&& ActiveField::textFieldType($class,$attribute)==='dokuwiki';
+		});
+	}
+
+	/**
+	 * Возвращает атрибуты-списки ссылок (UrlsType) всех моделей
+	 * @param array|null $modelClasses список классов (по умолчанию все модели ARMS)
+	 * @return array FQCN модели => список атрибутов
+	 */
+	public static function urlAttributes(?array $modelClasses=null): array
+	{
+		return static::attributesOfType($modelClasses,function($class,$attribute,$type) {
+			return $type instanceof UrlsType;
+		});
+	}
+
+	/**
+	 * Перебирает колонки всех моделей и отбирает подходящие под фильтр
+	 * @param array|null $modelClasses список классов (по умолчанию все модели ARMS)
+	 * @param callable   $filter       function($class,$attribute,$type): bool
+	 * @return array FQCN модели => список атрибутов
+	 */
+	protected static function attributesOfType(?array $modelClasses, callable $filter): array
 	{
 		if ($modelClasses===null) $modelClasses=ModelHelper::getModelClasses();
 
@@ -125,10 +277,9 @@ class WikiLinksScanner
 				try {
 					$type=$model->getAttributeTypeClass($attribute);
 				} catch (\Throwable $e) {
-					continue;	//тип не выводится - это не текстовое поле с разметкой
+					continue;	//тип не выводится - это вычисляемое поле
 				}
-				if (!$type instanceof TextType) continue;
-				if (ActiveField::textFieldType($class,$attribute)!=='dokuwiki') continue;
+				if (!$filter($class,$attribute,$type)) continue;
 				$result[$class][]=$attribute;
 			}
 		}
@@ -137,20 +288,36 @@ class WikiLinksScanner
 	}
 
 	/**
-	 * Сканирует инвентаризацию и возвращает сгруппированный результат.
+	 * Сканирует инвентаризацию. Результат забирается геттерами
+	 * getWikiPages() / getInterwiki() / getTotals() / getFailures().
 	 *
-	 * @param array|null $attributes что сканировать: FQCN => список атрибутов
-	 *                               (по умолчанию dokuwikiAttributes())
-	 * @return array результат группировки (см. group())
+	 * @param array|null $attributes    поля с разметкой: FQCN => атрибуты (по умолчанию dokuwikiAttributes())
+	 * @param array|null $urlAttributes поля-ссылки: FQCN => атрибуты (по умолчанию urlAttributes())
+	 * @return void
 	 */
-	public function scan(?array $attributes=null): array
+	public function scan(?array $attributes=null, ?array $urlAttributes=null): void
 	{
 		if ($attributes===null) $attributes=static::dokuwikiAttributes();
+		if ($urlAttributes===null) $urlAttributes=static::urlAttributes();
 
-		$usages=[];
-		$objects=[];
-		$this->totals['classes']=count($attributes);
+		$this->totals['classes']=count(array_unique(array_merge(
+			array_keys($attributes),array_keys($urlAttributes)
+		)));
 
+		$this->scanTextAttributes($attributes);
+		$this->scanUrlAttributes($urlAttributes);
+
+		$this->totals['objects']=count($this->objects);
+		$this->totals['pages']=count($this->refs);
+		$this->totals['interwiki']=count($this->interwiki);
+	}
+
+	/**
+	 * Поля с разметкой DokuWiki: вики-ссылки, включения и URL на wiki в тексте
+	 * @param array $attributes FQCN => список атрибутов
+	 */
+	protected function scanTextAttributes(array $attributes): void
+	{
 		foreach ($attributes as $class=>$classAttributes) {
 			/** @var ArmsModel $class */
 			foreach ($classAttributes as $attribute) {
@@ -168,35 +335,71 @@ class WikiLinksScanner
 					$text=(string)$model->$attribute;
 					if ($text==='') continue;
 					$this->totals['texts']++;
-					$found=$this->scanText($text,[
+					$this->scanText($text,[
 						'class'=>$class,
 						'id'=>$model->id,
 						'model'=>$model,
 						'attribute'=>$attribute,
 					]);
-					if (!count($found)) continue;
-					$objects[$class.':'.$model->id]=true;
-					$usages=array_merge($usages,$found);
 				}
 			}
 		}
-
-		$this->totals['objects']=count($objects);
-		$this->totals['links']=count($usages);
-
-		return static::group($usages);
 	}
 
 	/**
-	 * Ищет интервики-ссылки в одном тексте: и в нем самом, и во всех страницах
+	 * Поля-списки ссылок: адреса, ведущие на страницы этой wiki
+	 * @param array $urlAttributes FQCN => список атрибутов
+	 */
+	protected function scanUrlAttributes(array $urlAttributes): void
+	{
+		$wikiUrl=$this->getWikiUrl();
+		if ($wikiUrl==='') return;	//wiki не подключена - искать нечего
+
+		foreach ($urlAttributes as $class=>$classAttributes) {
+			/** @var ArmsModel $class */
+			foreach ($classAttributes as $attribute) {
+				$this->totals['urlAttributes']++;
+				$models=$class::find()
+					->where(['like',$attribute,$wikiUrl])
+					->all();
+
+				foreach ($models as $model) {
+					$value=(string)$model->$attribute;
+					if ($value==='') continue;
+					$context=[
+						'class'=>$class,
+						'id'=>$model->id,
+						'model'=>$model,
+						'attribute'=>$attribute,
+					];
+					$found=0;
+					foreach (explode("\n",$value) as $line) {
+						$line=trim($line);
+						if ($line==='') continue;
+						$item=UrlListWidget::parseListItem($line);
+						$page=static::urlToWikiPage($item['url'],$wikiUrl);
+						if ($page===null) continue;
+						$this->registerRef($page,static::KIND_URL,[],$context,[
+							'title'=>$item['descr']==$item['url']?'':$item['descr'],
+							'raw'=>$item['url'],
+						]);
+						$found++;
+					}
+					if ($found) $this->totals['urlFields']++;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Разбирает один текст с разметкой: ссылки в нем самом и во всех страницах
 	 * wiki, включенных в него через {{page>...}} / {{section>...}} (рекурсивно).
 	 *
-	 * @param string $text  текст поля
-	 * @param array  $context общие данные источника (class,id,model,attribute)
-	 * @return array список ссылок, к каждой добавлены данные источника и цепочка
-	 *               включений 'via' (пустая - ссылка лежит в самом поле)
+	 * @param string $text    текст поля
+	 * @param array  $context данные источника (class,id,model,attribute)
+	 * @return int сколько ссылок зарегистрировано
 	 */
-	public function scanText(string $text, array $context=[]): array
+	public function scanText(string $text, array $context=[]): int
 	{
 		$visited=[];
 		return $this->walk($text,'',[],$visited,$context);
@@ -205,25 +408,59 @@ class WikiLinksScanner
 	/**
 	 * Рекурсивный обход текста и его включений
 	 * @param string $text     текст очередной страницы/поля
-	 * @param string $page     путь страницы wiki (для относительных включений; '' - поле объекта)
+	 * @param string $page     путь страницы wiki (для относительных ссылок; '' - поле объекта)
 	 * @param array  $via      цепочка включений, по которой мы сюда пришли
 	 * @param array  $visited  уже посещенные в этой ветке страницы (защита от циклов)
-	 * @param array  $context  общие данные источника
-	 * @return array
+	 * @param array  $context  данные источника
+	 * @return int
 	 */
-	protected function walk(string $text, string $page, array $via, array &$visited, array $context): array
+	protected function walk(string $text, string $page, array $via, array &$visited, array $context): int
 	{
-		$found=[];
-		foreach (static::parseInterwikiLinks($text) as $link) {
-			$found[]=array_merge($context,$link,['via'=>$via]);
+		$count=0;
+
+		foreach (static::parseLinks($text) as $link) {
+			switch ($link['kind']) {
+				case 'interwiki':
+					//ссылка в чужую wiki - в отдельный список
+					if (!$this->countable($via)) break;
+					$this->interwiki[]=array_merge($context,[
+						'shortcut'=>$link['shortcut'],
+						'target'=>$link['target'],
+						'title'=>$link['title'],
+						'raw'=>$link['raw'],
+						'via'=>$via,
+					]);
+					$count++;
+					break;
+
+				case 'internal':
+					$target=static::stripAnchor($link['target']);
+					if ($target==='') break;
+					$id=WikiCache::absLinkPath($target,$page);
+					if ($id==='') break;
+					$count+=$this->registerRef($id,static::KIND_LINK,$via,$context,$link);
+					break;
+
+				case 'external':
+					//внешняя ссылка может вести в эту же wiki (полным URL)
+					$id=static::urlToWikiPage($link['target'],$this->getWikiUrl());
+					if ($id===null) break;
+					$count+=$this->registerRef($id,static::KIND_URL,$via,$context,$link);
+					break;
+			}
 		}
 
-		if (!$this->followIncludes) return $found;
-		if (count($via)>=$this->maxIncludeDepth) return $found;
+		if (!$this->followIncludes) return $count;
+		if (count($via)>=$this->maxIncludeDepth) return $count;
 
 		foreach (WikiCache::extractDependencies($text,$page) as $included) {
 			if (isset($visited[$included])) continue;	//цикл включений либо повтор
 			$visited[$included]=true;
+
+			//само включение - тоже ссылка инвентаризации на страницу wiki
+			$count+=$this->registerRef($included,static::KIND_INCLUDE,$via,$context,[
+				'raw'=>'{{page>'.$included.'}}',
+			]);
 
 			$includedText=$this->fetchPage($included);
 			if ($includedText===null) {
@@ -234,16 +471,70 @@ class WikiLinksScanner
 				continue;
 			}
 
-			$found=array_merge($found,$this->walk(
+			$count+=$this->walk(
 				$includedText,
 				$included,
 				array_merge($via,[$included]),
 				$visited,
 				$context
-			));
+			);
 		}
 
-		return $found;
+		return $count;
+	}
+
+	/**
+	 * Запоминает ссылку инвентаризации на страницу этой wiki
+	 * @param string $page    страница wiki
+	 * @param string $kind    вид ссылки (KIND_*)
+	 * @param array  $via     цепочка включений (пустая - ссылка в самом поле объекта)
+	 * @param array  $context данные источника (class,id,model,attribute)
+	 * @param array  $link    данные ссылки: title, raw
+	 * @return int 1 - ссылка учтена, 0 - пропущена (находка внутри включения при includeNested=false)
+	 */
+	protected function registerRef(string $page, string $kind, array $via, array $context, array $link=[]): int
+	{
+		if (!$this->countable($via)) return 0;
+
+		if (!isset($this->refs[$page]))
+			$this->refs[$page]=['page'=>$page,'count'=>0,'kinds'=>[],'usages'=>[]];
+
+		$this->refs[$page]['count']++;
+		$this->refs[$page]['kinds'][$kind]=($this->refs[$page]['kinds'][$kind]??0)+1;
+		$this->refs[$page]['usages'][]=array_merge($context,[
+			'kind'=>$kind,
+			'title'=>$link['title']??'',
+			'raw'=>$link['raw']??'',
+			'via'=>$via,
+		]);
+
+		$this->totals['refs']++;
+		if (count($via)) $this->totals['nested']++;
+		if (isset($context['class'],$context['id']))
+			$this->objects[$context['class'].':'.$context['id']]=true;
+
+		return 1;
+	}
+
+	/**
+	 * Учитывать ли находку с такой цепочкой включений
+	 * @param array $via
+	 * @return bool
+	 */
+	protected function countable(array $via): bool
+	{
+		return $this->includeNested || !count($via);
+	}
+
+	/**
+	 * Отрезает якорь секции и параметры от цели ссылки
+	 * @param string $target
+	 * @return string
+	 */
+	public static function stripAnchor(string $target): string
+	{
+		$target=preg_replace('/[#?].*$/u','',$target);
+		return trim($target);
 	}
 
 	/**
@@ -253,7 +544,7 @@ class WikiLinksScanner
 	 */
 	protected function fetchPage(string $page): ?string
 	{
-		if (array_key_exists($page,$this->pages)) return $this->pages[$page];
+		if (array_key_exists($page,$this->pageTexts)) return $this->pageTexts[$page];
 
 		$fetcher=$this->pageFetcher;
 		if (is_callable($fetcher)) {
@@ -263,20 +554,53 @@ class WikiLinksScanner
 		}
 
 		//JSON-RPC отдает false при ошибке и пустую строку для несуществующей страницы
-		if ($text===false || $text===null || !is_string($text)) return $this->pages[$page]=null;
+		if (!is_string($text) || trim($text)==='') return $this->pageTexts[$page]=null;
 
-		$this->totals['includes']++;
-		return $this->pages[$page]=$text;
+		$this->totals['fetched']++;
+		return $this->pageTexts[$page]=$text;
 	}
 
 	/**
-	 * Группирует плоский список найденных ссылок:
+	 * База URL подключенной wiki
+	 * @return string
+	 */
+	public function getWikiUrl(): string
+	{
+		if ($this->wikiUrl!==null) return $this->wikiUrl;
+		return (string)(Yii::$app->params['wikiUrl']??'');
+	}
+
+	/**
+	 * Страницы этой wiki, на которые ссылается инвентаризация.
+	 * Отсортировано по количеству ссылок (по убыванию), затем по имени.
+	 * @return array страница => ['page','count','kinds','usages']
+	 */
+	public function getWikiPages(): array
+	{
+		$refs=$this->refs;
+		uasort($refs,function($a,$b) {
+			return ($b['count']<=>$a['count'])?:strnatcasecmp($a['page'],$b['page']);
+		});
+		return $refs;
+	}
+
+	/**
+	 * Интервики-ссылки (в другие wiki), сгруппированные по shortcut
+	 * @return array см. group()
+	 */
+	public function getInterwiki(): array
+	{
+		return static::group($this->interwiki);
+	}
+
+	/**
+	 * Группирует плоский список интервики-ссылок:
 	 * shortcut => ['shortcut','count','targets'=>[страница => ['target','count','usages']]]
 	 *
 	 * Группы отсортированы по количеству ссылок (по убыванию), страницы внутри
 	 * группы - по алфавиту.
 	 *
-	 * @param array $usages плоский список (см. walk())
+	 * @param array $usages плоский список
 	 * @return array
 	 */
 	public static function group(array $usages): array
@@ -309,7 +633,7 @@ class WikiLinksScanner
 	}
 
 	/**
-	 * Счетчики прогона: classes, attributes, objects, texts, links, includes
+	 * Счетчики прогона (см. объявление $totals)
 	 * @return array
 	 */
 	public function getTotals(): array
@@ -318,7 +642,8 @@ class WikiLinksScanner
 	}
 
 	/**
-	 * Страницы wiki, которые не удалось получить: страница => откуда включена
+	 * Страницы wiki, которые не удалось получить при обходе включений:
+	 * страница => откуда включена
 	 * @return array
 	 */
 	public function getFailures(): array

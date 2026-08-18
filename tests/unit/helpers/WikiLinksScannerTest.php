@@ -6,11 +6,12 @@ use app\helpers\WikiLinksScanner;
 use Codeception\Test\Unit;
 
 /**
- * Тесты сканера интервики-ссылок ({@see WikiLinksScanner}, страница
- * /web/wiki/interwiki, docs/help/admin/integrations/dokuwiki.md).
+ * Тесты сканера ссылок инвентаризации в wiki ({@see WikiLinksScanner},
+ * страница /web/wiki/links, docs/help/admin/integrations/dokuwiki.md).
  *
- * Проверяются чистые части сканера (без БД): разбор ссылок, обход включений
- * {{page>...}} с подменённым загрузчиком страниц и группировка результата.
+ * Проверяются чистые части сканера (без БД): классификация ссылок DokuWiki,
+ * разбор URL страниц wiki, обход включений {{page>...}} с подменённым
+ * загрузчиком страниц и группировка интервики-ссылок.
  */
 class WikiLinksScannerTest extends Unit
 {
@@ -18,6 +19,34 @@ class WikiLinksScannerTest extends Unit
 	 * @var \UnitTester
 	 */
 	protected $tester;
+
+	/** сканер с фиксированным адресом wiki и без сети */
+	protected function scanner(array $pages=[]): WikiLinksScanner
+	{
+		$scanner=new WikiLinksScanner();
+		$scanner->wikiUrl='https://wiki.example.local/';
+		$scanner->pageFetcher=function($page) use ($pages) {
+			return $pages[$page]??false;
+		};
+		return $scanner;
+	}
+
+	/** виды ссылок определяются так же, как их видит парсер DokuWiki */
+	public function testParseLinksClassification()
+	{
+		$links=WikiLinksScanner::parseLinks(
+			'[[services:inventory|инвентаризация]] [[wp>DokuWiki]] [[https://example.com]] '
+			.'[[\\\\server\\share\\file]] [[admin@example.com]] [[#секция]] [[.:соседняя]]'
+		);
+
+		$this->assertEquals(
+			['internal','interwiki','external','share','email','anchor','internal'],
+			array_column($links,'kind')
+		);
+		$this->assertEquals('services:inventory',$links[0]['target']);
+		$this->assertEquals('инвентаризация',$links[0]['title']);
+		$this->assertEquals('wp',$links[1]['shortcut']);
+	}
 
 	/** интервики-ссылка распознаётся с подписью и без, shortcut может содержать точку */
 	public function testParseInterwikiLinks()
@@ -38,19 +67,7 @@ class WikiLinksScannerTest extends Unit
 		$this->assertEquals('карта города',$links[1]['title']);
 	}
 
-	/** внутренние, внешние ссылки и медиа/включения интервики не являются */
-	public function testParseIgnoresNonInterwiki()
-	{
-		$links=WikiLinksScanner::parseInterwikiLinks(
-			'[[namespace:page]] [[http://example.com|сайт]] [[.:relative]] '
-			.'{{page>docs:common}} {{wiki:image.png}} [[#section]] '
-			.'[[some page > другая]]'
-		);
-
-		$this->assertSame([],$links);
-	}
-
-	/** якорь секции остаётся частью цели ссылки (страница + #секция) */
+	/** якорь секции остаётся частью цели интервики-ссылки (страница + #секция) */
 	public function testParseKeepsSectionAnchor()
 	{
 		$links=WikiLinksScanner::parseInterwikiLinks('[[doku>syntax#internal|синтаксис]]');
@@ -60,123 +77,174 @@ class WikiLinksScannerTest extends Unit
 		$this->assertEquals('syntax#internal',$links[0]['target']);
 	}
 
-	/** ссылки собираются и из страниц, включённых через {{page>...}} - рекурсивно */
-	public function testScanTextFollowsIncludes()
+	/** URL страницы wiki распознаётся во всех употребимых формах */
+	public function testUrlToWikiPage()
 	{
-		$scanner=new WikiLinksScanner();
-		$scanner->pageFetcher=function($page) {
-			$pages=[
-				//относительное включение .deeper от страницы docs:common -> docs:deeper
-				'docs:common'=>'Общее описание [[wp>Общая]] {{page>.deeper}}',
-				'docs:deeper'=>'Подробности [[doku>syntax]]',
-			];
-			return $pages[$page]??false;
-		};
+		$wiki='https://wiki.example.local/';
 
-		$found=$scanner->scanText(
-			'Поле объекта [[wp>Локальная]] {{page>docs:common}}',
-			['attribute'=>'notepad']
+		//классический адрес и адрес с дополнительными параметрами/якорем
+		$this->assertEquals('net:vlans',
+			WikiLinksScanner::urlToWikiPage($wiki.'doku.php?id=net:vlans',$wiki));
+		$this->assertEquals('net:vlans',
+			WikiLinksScanner::urlToWikiPage($wiki.'doku.php?id=net:vlans&do=edit#схема',$wiki));
+
+		//человекочитаемые адреса (rewrite): через двоеточие и через слэш
+		$this->assertEquals('net:vlans',
+			WikiLinksScanner::urlToWikiPage($wiki.'net:vlans',$wiki));
+		$this->assertEquals('net:vlans',
+			WikiLinksScanner::urlToWikiPage($wiki.'net/vlans',$wiki));
+
+		//кириллица в адресе приезжает раскодированной
+		$this->assertEquals('сети:влан',
+			WikiLinksScanner::urlToWikiPage($wiki.'doku.php?id='.rawurlencode('сети:влан'),$wiki));
+
+		//корень wiki - стартовая страница
+		$this->assertEquals('start',WikiLinksScanner::urlToWikiPage($wiki,$wiki));
+
+		//чужой адрес и служебные пути страницами не являются
+		$this->assertNull(WikiLinksScanner::urlToWikiPage('https://example.com/page',$wiki));
+		$this->assertNull(WikiLinksScanner::urlToWikiPage($wiki.'lib/exe/fetch.php?media=x.png',$wiki));
+	}
+
+	/** в поле собираются вики-ссылки, включения и URL на страницы wiki */
+	public function testScanTextCollectsWikiRefs()
+	{
+		$scanner=$this->scanner(['docs:common'=>'Внутри [[docs:deeper]]']);
+
+		$scanner->scanText(
+			'Регламент [[services:inventory|инвентаризация]], '
+			.'сети [[https://wiki.example.local/doku.php?id=net:vlans]] '
+			.'{{page>docs:common}}',
+			['class'=>'app\models\Services','id'=>5,'attribute'=>'notepad']
 		);
 
-		$targets=array_column($found,'target');
-		$this->assertEquals(['Локальная','Общая','syntax'],$targets);
+		$pages=$scanner->getWikiPages();
+		$this->assertEquals(
+			['docs:common','docs:deeper','net:vlans','services:inventory'],
+			array_keys($pages)
+		);
 
-		//цепочка включений: ссылка из поля - без via, из вложенных страниц - с via
-		$this->assertSame([],$found[0]['via']);
-		$this->assertSame(['docs:common'],$found[1]['via']);
-		$this->assertSame(['docs:common','docs:deeper'],$found[2]['via']);
+		//вид ссылки различается: обычная, включение, адрес
+		$this->assertEquals([WikiLinksScanner::KIND_LINK=>1],$pages['services:inventory']['kinds']);
+		$this->assertEquals([WikiLinksScanner::KIND_INCLUDE=>1],$pages['docs:common']['kinds']);
+		$this->assertEquals([WikiLinksScanner::KIND_URL=>1],$pages['net:vlans']['kinds']);
 
-		//контекст источника доезжает до каждой ссылки
-		$this->assertEquals('notepad',$found[2]['attribute']);
+		//ссылка со страницы, втянутой включением, помечена цепочкой
+		$this->assertSame(['docs:common'],$pages['docs:deeper']['usages'][0]['via']);
+		$this->assertSame([],$pages['services:inventory']['usages'][0]['via']);
 
-		$this->assertEquals(2,$scanner->getTotals()['includes']);
-		$this->assertSame([],$scanner->getFailures());
+		//контекст источника доезжает до каждой находки
+		$this->assertEquals('notepad',$pages['docs:deeper']['usages'][0]['attribute']);
+		$this->assertEquals('инвентаризация',$pages['services:inventory']['usages'][0]['title']);
+
+		$totals=$scanner->getTotals();
+		$this->assertEquals(4,$totals['refs']);
+		$this->assertEquals(1,$totals['nested']);
+	}
+
+	/** относительные ссылки внутри включённой страницы разрешаются от неё самой */
+	public function testRelativeLinksResolveFromIncludedPage()
+	{
+		$scanner=$this->scanner(['docs:common'=>'Рядом [[.соседняя]]']);
+
+		$scanner->scanText('{{page>docs:common}}');
+
+		$this->assertArrayHasKey('docs:соседняя',$scanner->getWikiPages());
+	}
+
+	/** includeNested=false - только то, что написано в самой инвентаризации */
+	public function testNestedFindingsCanBeSkipped()
+	{
+		$scanner=$this->scanner(['docs:common'=>'Внутри [[docs:deeper]]']);
+		$scanner->includeNested=false;
+
+		$scanner->scanText('[[services:inventory]] {{page>docs:common}}');
+
+		//включение написано в поле (учитывается), ссылка внутри страницы - нет
+		$this->assertEquals(
+			['docs:common','services:inventory'],
+			array_keys($scanner->getWikiPages())
+		);
+		$this->assertEquals(0,$scanner->getTotals()['nested']);
 	}
 
 	/** followIncludes=false - только само поле, без запросов к wiki */
 	public function testScanTextWithoutIncludes()
 	{
 		$scanner=new WikiLinksScanner();
+		$scanner->wikiUrl='https://wiki.example.local/';
 		$scanner->followIncludes=false;
 		$scanner->pageFetcher=function($page) {
 			$this->fail('При followIncludes=false страницы wiki запрашиваться не должны');
 		};
 
-		$found=$scanner->scanText('[[wp>Локальная]] {{page>docs:common}}');
+		$scanner->scanText('[[services:inventory]] {{page>docs:common}}');
 
-		$this->assertCount(1,$found);
-		$this->assertEquals('Локальная',$found[0]['target']);
+		$this->assertEquals(['services:inventory'],array_keys($scanner->getWikiPages()));
 	}
 
 	/** глубина обхода ограничена maxIncludeDepth */
 	public function testScanTextRespectsDepthLimit()
 	{
-		$scanner=new WikiLinksScanner();
+		$scanner=$this->scanner([
+			'level:one'=>'[[first:page]] {{page>level:two}}',
+			'level:two'=>'[[second:page]]',
+		]);
 		$scanner->maxIncludeDepth=1;
-		$scanner->pageFetcher=function($page) {
-			$pages=[
-				'level:one'=>'[[wp>Первая]] {{page>level:two}}',
-				'level:two'=>'[[wp>Вторая]]',
-			];
-			return $pages[$page]??false;
-		};
 
-		$found=$scanner->scanText('{{page>level:one}}');
+		$scanner->scanText('{{page>level:one}}');
 
-		$this->assertEquals(['Первая'],array_column($found,'target'));
+		//вложенное включение уже не раскрывается
+		$this->assertEquals(['first:page','level:one'],array_keys($scanner->getWikiPages()));
 	}
 
 	/** циклические включения не роняют обход */
 	public function testScanTextSurvivesIncludeCycle()
 	{
-		$scanner=new WikiLinksScanner();
-		$scanner->pageFetcher=function($page) {
-			$pages=[
-				'a:page'=>'[[wp>A]] {{page>b:page}}',
-				'b:page'=>'[[wp>B]] {{page>a:page}}',
-			];
-			return $pages[$page]??false;
-		};
+		$scanner=$this->scanner([
+			'a:page'=>'[[link:a]] {{page>b:page}}',
+			'b:page'=>'[[link:b]] {{page>a:page}}',
+		]);
 
-		$found=$scanner->scanText('{{page>a:page}}');
+		$scanner->scanText('{{page>a:page}}');
 
-		$this->assertEquals(['A','B'],array_column($found,'target'));
+		$this->assertEquals(
+			['a:page','b:page','link:a','link:b'],
+			array_keys($scanner->getWikiPages())
+		);
 	}
 
-	/** недоступная страница не теряется молча, а попадает в список ошибок */
+	/** недоступная страница: включение учтено, а сама страница попала в список ошибок */
 	public function testScanTextRecordsUnreachablePage()
 	{
-		$scanner=new WikiLinksScanner();
-		$scanner->pageFetcher=function($page) { return false; };
+		$scanner=$this->scanner();	//любую страницу wiki "не отдаёт"
 
-		$found=$scanner->scanText('[[wp>Локальная]] {{page>docs:missing}}',[
+		$scanner->scanText('{{page>docs:missing}}',[
 			'class'=>'app\models\Comps','id'=>7,'attribute'=>'notepad',
 		]);
 
-		$this->assertCount(1,$found);
+		$this->assertArrayHasKey('docs:missing',$scanner->getWikiPages());
 		$this->assertArrayHasKey('docs:missing',$scanner->getFailures());
 		$this->assertStringContainsString('notepad',$scanner->getFailures()['docs:missing']);
 	}
 
-	/** группировка: по shortcut и странице, группы по убыванию количества ссылок */
-	public function testGroup()
+	/** интервики-ссылки идут отдельным списком и группируются по shortcut */
+	public function testInterwikiGrouping()
 	{
-		$usages=[
-			['shortcut'=>'wp','target'=>'Бета','title'=>'','raw'=>'','via'=>[]],
-			['shortcut'=>'doku','target'=>'syntax','title'=>'','raw'=>'','via'=>[]],
-			['shortcut'=>'wp','target'=>'Альфа','title'=>'','raw'=>'','via'=>[]],
-			['shortcut'=>'wp','target'=>'Альфа','title'=>'вторая','raw'=>'','via'=>[]],
-		];
+		$scanner=$this->scanner();
 
-		$groups=WikiLinksScanner::group($usages);
+		$scanner->scanText('[[wp>Бета]] [[doku>syntax]] [[wp>Альфа]] [[wp>Альфа|вторая]]');
 
+		//в страницы этой wiki интервики не попадают
+		$this->assertSame([],$scanner->getWikiPages());
+
+		$groups=$scanner->getInterwiki();
 		//группы отсортированы по количеству ссылок (wp - 3, doku - 1)
 		$this->assertEquals(['wp','doku'],array_keys($groups));
 		$this->assertEquals(3,$groups['wp']['count']);
 		//страницы внутри группы - по алфавиту
 		$this->assertEquals(['Альфа','Бета'],array_keys($groups['wp']['targets']));
 		$this->assertEquals(2,$groups['wp']['targets']['Альфа']['count']);
-		$this->assertCount(2,$groups['wp']['targets']['Альфа']['usages']);
 		$this->assertEquals('вторая',$groups['wp']['targets']['Альфа']['usages'][1]['title']);
 	}
 }

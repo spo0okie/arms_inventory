@@ -27,7 +27,7 @@ class WikiController extends Controller
 			],
 			//отчет по всей инвентаризации сразу (в обход прав на отдельные модели)
 			'admin'=>[
-				'interwiki',
+				'links',
 			],
 		];
 	}
@@ -139,37 +139,47 @@ class WikiController extends Controller
 	}
 	
 	/**
-	 * Отчет по интервики-ссылкам инвентаризации.
+	 * Отчет "куда инвентаризация ссылается в wiki" - обратные ссылки, которых
+	 * не видит сама wiki (ее "Ссылки сюда" знает только про ссылки внутри wiki).
 	 *
-	 * Сканирует все атрибуты всех моделей, у которых включен рендер через
-	 * DokuWiki (params['textFields'], см. WikiLinksScanner::dokuwikiAttributes()),
-	 * и собирает из них интервики-ссылки вида [[shortcut>страница]], группируя
-	 * по shortcut и странице. Учитываются не только сами поля, но и тексты
-	 * страниц wiki, включенных в поле через {{page>...}} / {{section>...}}
-	 * (плагин include) - рекурсивно, до depth уровней.
+	 * Сканируются (см. WikiLinksScanner):
+	 *  - поля с разметкой DokuWiki (params['textFields']) - вики-ссылки
+	 *    [[namespace:страница]], включения {{page>...}} и URL на wiki в тексте;
+	 *  - поля-списки ссылок (UrlsType, обычно links) - адреса страниц wiki;
+	 *  - тексты включенных страниц wiki - рекурсивно, до depth уровней.
+	 * Интервики-ссылки [[shortcut>страница]] ведут в другие wiki и показываются
+	 * отдельным списком.
 	 *
 	 * GET-параметры:
 	 * @param int $includes 1 - идти за включениями {{page>...}} (по умолчанию),
 	 *                      0 - сканировать только сами поля (без запросов к wiki)
+	 * @param int $nested   1 - учитывать ссылки внутри включенных страниц (по умолчанию),
+	 *                      0 - только то, что написано в самой инвентаризации
 	 * @param int $depth    предельная глубина обхода включений
 	 *
 	 * @return string HTML отчета
 	 */
-	public function actionInterwiki($includes=1,$depth=3)
+	public function actionLinks($includes=1,$nested=1,$depth=3)
 	{
 		$scanner=new WikiLinksScanner();
 		$scanner->followIncludes=(bool)$includes;
+		$scanner->includeNested=(bool)$nested;
 		$scanner->maxIncludeDepth=(int)$depth;
 
 		$attributes=WikiLinksScanner::dokuwikiAttributes();
-		$groups=$scanner->scan($attributes);
+		$urlAttributes=WikiLinksScanner::urlAttributes();
+		$scanner->scan($attributes,$urlAttributes);
 
-		return $this->render('interwiki',[
-			'groups'=>$groups,
+		return $this->render('links',[
+			'pages'=>$scanner->getWikiPages(),
+			'interwiki'=>$scanner->getInterwiki(),
 			'attributes'=>$attributes,
+			'urlAttributes'=>$urlAttributes,
 			'totals'=>$scanner->getTotals(),
 			'failures'=>$scanner->getFailures(),
+			'wikiUrl'=>$scanner->getWikiUrl(),
 			'followIncludes'=>$scanner->followIncludes,
+			'includeNested'=>$scanner->includeNested,
 			'depth'=>$scanner->maxIncludeDepth,
 		]);
 	}
