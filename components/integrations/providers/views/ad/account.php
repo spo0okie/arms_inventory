@@ -1,22 +1,34 @@
 <?php
 /**
  * Панель «ActiveDirectory» карточки сотрудника: рендер нормализованных
- * атрибутов учётки из AdUserProvider::fetchAccount() + кнопка сброса
- * пароля (только у найденной учётки; L0-ссылка, одинаковая для всех -
- * кэш панелей общий, доступ к действию проверяет сервер)
+ * атрибутов учётки из AdUserProvider::fetchAccount() + кнопки действий
+ * по живому состоянию учётки (сброс пароля - у найденной, создание - у
+ * ненайденной, восстановление - у уволенной). Кнопки - L0-ссылки,
+ * одинаковые для всех (кэш панелей общий), доступ к действию проверяет
+ * сервер при открытии формы.
  */
 
 use yii\helpers\Html;
 
 /* @var $account array|null см. AdUserProvider::fetchAccount() */
 /* @var $model \app\models\Users */
+/* @var $dismissed bool учётка отключена и лежит в контейнере уволенных */
 /* @var $resetUrl string|null URL формы сброса пароля (null = действие недоступно) */
+/* @var $createUrl string|null URL формы создания учётки (null = недоступно) */
+/* @var $restoreUrl string|null URL формы восстановления учётки (null = недоступно) */
 /* @var $compact bool вложенный список - без кнопок действий */
 
 if (is_null($account)) {
-	//учётки нет - сброс пароля не предлагаем
-	echo '<span class="text-secondary opacity-75">учётка '
-		.Html::encode($model->Login).' не найдена в AD</span>';
+	//учётки нет: показываем причину и (не в compact) кнопку создания
+	echo '<span class="text-secondary opacity-75">'
+		.(empty($model->Login)
+			? 'логин AD не задан - учётной записи нет'
+			: 'учётка '.Html::encode($model->Login).' не найдена в AD')
+		.'</span>';
+	if (!$compact && !empty($createUrl)) {
+		echo '<div class="mt-2">'.Html::a('<i class="fas fa-user-plus"></i> Создать учётную запись',
+			$createUrl, ['class' => 'btn btn-sm btn-secondary open-in-modal-form']).'</div>';
+	}
 	return;
 }
 
@@ -42,6 +54,9 @@ if (!$account['enabled']) {
 ?>
 <div>
 	Учетная запись: <span class="badge <?= $badge[0] ?>"><?= $badge[1] ?></span>
+	<?php if ($dismissed) { ?>
+		<span class="badge bg-dark">в уволенных</span>
+	<?php } ?>
 	<?php if ($account['must_change_password']) { ?>
 		<span class="badge bg-warning text-dark">требуется смена пароля</span>
 	<?php } ?>
@@ -60,5 +75,9 @@ if (!$account['enabled']) {
 </small></div>
 <?php if (!$compact && !empty($resetUrl)) { ?>
 <div class="mt-2"><?= Html::a('<i class="fas fa-key"></i> Сбросить пароль', $resetUrl,
+	['class' => 'btn btn-sm btn-secondary open-in-modal-form']) ?></div>
+<?php } ?>
+<?php if (!$compact && !empty($restoreUrl)) { ?>
+<div class="mt-2"><?= Html::a('<i class="fas fa-user-check"></i> Восстановить учётную запись', $restoreUrl,
 	['class' => 'btn btn-sm btn-secondary open-in-modal-form']) ?></div>
 <?php } ?>

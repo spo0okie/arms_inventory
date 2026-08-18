@@ -5,8 +5,11 @@ namespace app\components\ldap;
 use LdapRecord\Connection;
 use LdapRecord\Container;
 use LdapRecord\Models\ActiveDirectory\Computer as AdComputer;
+use LdapRecord\Models\ActiveDirectory\Group as AdGroup;
+use LdapRecord\Models\ActiveDirectory\OrganizationalUnit as AdOu;
 use LdapRecord\Models\ActiveDirectory\User as AdUser;
 use LdapRecord\Models\Attributes\DistinguishedName;
+use LdapRecord\Models\Entry;
 use Yii;
 use yii\base\Component;
 
@@ -228,6 +231,142 @@ class LdapService extends Component
 	}
 
 	/**
+	 * DN на компоненты RDN. Запятые внутри значений экранированы слэшем и
+	 * разделителями не считаются; пробелы вокруг разделителей игнорируются.
+	 * @return string[]
+	 */
+	protected static function dnComponents(string $dn): array
+	{
+		$dn = trim($dn);
+		if ($dn === '') return [];
+		return array_map('trim', preg_split('/(?<!\\\\),/', $dn) ?: []);
+	}
+
+	/**
+	 * Родительский контейнер объекта (DN без первого RDN)
+	 */
+	public static function parentDn(string $dn): string
+	{
+		$components = static::dnComponents($dn);
+		array_shift($components);
+		return implode(',', $components);
+	}
+
+	/**
+	 * Равенство DN без учёта регистра (mb-aware: strcasecmp не сворачивает
+	 * кириллицу в именах OU) и пробелов у разделителей
+	 */
+	public static function dnEquals(string $a, string $b): bool
+	{
+		return mb_strtolower(implode(',', static::dnComponents($a)))
+			=== mb_strtolower(implode(',', static::dnComponents($b)));
+	}
+
+	/**
+	 * Лежит ли DN внутри поддерева $base (сравнение покомпонентное,
+	 * без учёта регистра). Нужна интеграциям AD: проверить, что выбранное
+	 * подразделение/группа не вышли за настроенный корень, и что учётка
+	 * действительно в контейнере уволенных.
+	 * @param bool $orEqual true - сам $base тоже считается подходящим
+	 */
+	public static function dnIsUnder(string $dn, string $base, bool $orEqual = false): bool
+	{
+		$dnParts = static::dnComponents($dn);
+		$baseParts = static::dnComponents($base);
+		if (!count($baseParts) || count($dnParts) < count($baseParts)) return false;
+		if (!$orEqual && count($dnParts) === count($baseParts)) return false;
+		$tail = array_slice($dnParts, -count($baseParts));
+		return static::dnEquals(implode(',', $tail), implode(',', $baseParts));
+	}
+
+	/**
+	 * Перенос DN из одного корня в другой с сохранением относительного
+	 * пути: увольнение (usr_dismiss.ps1) зеркалит путь учётки из рабочего
+	 * корня в корень уволенных - восстановление вычисляет обратное зеркало.
+	 * @return string|null null = $dn не лежит под $fromBase
+	 */
+	public static function relocateDn(string $dn, string $fromBase, string $toBase): ?string
+	{
+		if (!static::dnIsUnder($dn, $fromBase, true)) return null;
+		$dnParts = static::dnComponents($dn);
+		$prefix = array_slice($dnParts, 0, count($dnParts) - count(static::dnComponents($fromBase)));
+		return implode(',', array_merge($prefix, static::dnComponents($toBase)));
+	}
+
+	/**
+	 * Подразделения (OU) поддерева $rootDn, отсортированные как дерево
+	 * (родитель прежде детей) - для селекта в форме создания учётки.
+	 * Сам $rootDn попадает в список первым (если он OU).
+	 * @return array [['dn'=>string, 'name'=>string, 'depth'=>int], ...]
+	 *   depth 0 = сам корень
+	 * @throws \LdapRecord\LdapRecordException при недоступности сервера
+	 */
+	public function ouList(string $rootDn): array
+	{
+		$this->serviceConnection();
+
+		$rootDepth = count(static::dnComponents($rootDn));
+		$items = [];
+		/** @var AdOu $ou */
+		foreach (AdOu::on(static::CONN_SERVICE)->in($rootDn)->paginate(1000) as $ou) {
+			$dn = $ou->getDn();
+			$components = static::dnComponents($dn);
+			//имена контейнеров от корня вниз (для сортировки деревом)
+			$relative = [];
+			foreach (array_reverse(array_slice($components, 0, max(0, count($components) - $rootDepth))) as $component) {
+				$relative[] = $this->unescapeDnValue(preg_replace('/^[^=]+=/', '', $component));
+			}
+			$name = count($relative)
+				? end($relative)
+				: $this->unescapeDnValue((string)(new DistinguishedName($dn))->name());
+			$items[] = [
+				'dn' => $dn,
+				'name' => $name,
+				'depth' => count($relative),
+				//\x01 < любого печатного символа: родитель всегда прежде детей
+				'sort' => implode("\x01", array_map('mb_strtolower', $relative)),
+			];
+		}
+		usort($items, static fn($a, $b) => strnatcasecmp($a['sort'], $b['sort']));
+		return array_map(static fn($item) => array_diff_key($item, ['sort' => 1]), $items);
+	}
+
+	/**
+	 * Группы безопасности поддерева $rootDn (null = весь каталог),
+	 * отсортированные по имени - для мультиселекта в форме создания учётки.
+	 * @return array [['name'=>string, 'dn'=>string], ...]
+	 * @throws \LdapRecord\LdapRecordException при недоступности сервера
+	 */
+	public function groupList(?string $rootDn = null): array
+	{
+		$this->serviceConnection();
+
+		$query = AdGroup::on(static::CONN_SERVICE)->select(['cn']);
+		if (!empty($rootDn)) $query->in($rootDn);
+
+		$groups = [];
+		foreach ($query->paginate(1000) as $group) {
+			$dn = $group->getDn();
+			$name = $this->unescapeDnValue((string)(new DistinguishedName($dn))->name());
+			$groups[] = ['name' => $name !== '' ? $name : $dn, 'dn' => $dn];
+		}
+		usort($groups, static fn($a, $b) => strnatcasecmp($a['name'], $b['name']));
+		return $groups;
+	}
+
+	/**
+	 * Свободен ли логин (sAMAccountName) в каталоге
+	 * @throws \LdapRecord\LdapRecordException при недоступности сервера
+	 */
+	public function loginIsFree(string $login): bool
+	{
+		$this->serviceConnection();
+		return !is_object(
+			AdUser::on(static::CONN_SERVICE)->where('samaccountname', '=', $login)->first()
+		);
+	}
+
+	/**
 	 * НЕДЕСТРУКТИВНАЯ предпроверка перед сбросом пароля: валидны ли креды
 	 * исполнителя и достаточно ли у него прав сбросить пароль ИМЕННО этому
 	 * пользователю. Не пишет в AD (только bind + чтение), поэтому не
@@ -246,7 +385,29 @@ class LdapService extends Component
 	 */
 	public function verifyResetPermission(string $targetLogin, string $execLogin, string $execPassword): void
 	{
-		$this->withExecutor($execLogin, $execPassword, function (string $name) use ($targetLogin) {
+		$this->verifyWriteAttributes($targetLogin,
+			['unicodepwd' => 'сбрасывать пароль этого пользователя'],
+			$execLogin, $execPassword);
+	}
+
+	/**
+	 * НЕДЕСТРУКТИВНАЯ предпроверка: валидны ли креды исполнителя и есть ли
+	 * у него право записи перечисленных атрибутов ИМЕННО этой учётки
+	 * (bind + чтение allowedAttributesEffective, без записи в AD).
+	 * Обобщение {@see verifyResetPermission()}: восстановлению учётки нужны
+	 * и unicodePwd (пароль), и userAccountControl (включение).
+	 *
+	 * Если AD не вернул список (не поддерживается/недоступен) —
+	 * ограничиваемся проверкой кредов, не блокируя: сама запись всё равно
+	 * проверит права по факту.
+	 *
+	 * @param array $attributes [ldap-атрибут => человекочитаемое право]
+	 * @throws \Throwable неверные креды / нет прав / цель не найдена / DC недоступен
+	 */
+	public function verifyWriteAttributes(string $targetLogin, array $attributes,
+		string $execLogin, string $execPassword): void
+	{
+		$this->withExecutor($execLogin, $execPassword, function (string $name) use ($targetLogin, $attributes, $execLogin) {
 			/** @var AdUser|null $user */
 			$user = AdUser::on($name)
 				->where('samaccountname', '=', $targetLogin)
@@ -257,12 +418,224 @@ class LdapService extends Component
 			}
 
 			$allowed = array_map('strtolower', $user->getAttributes()['allowedattributeseffective'] ?? []);
-			//список посчитан, но unicodePwd в нём нет => прав на сброс нет
-			if (!empty($allowed) && !in_array('unicodepwd', $allowed, true)) {
+			if (empty($allowed)) return; //AD не отдал список - права проверит сама запись
+
+			$missing = [];
+			foreach ($attributes as $attribute => $description) {
+				if (!in_array(strtolower($attribute), $allowed, true)) $missing[] = $description;
+			}
+			if ($missing) {
 				throw new \RuntimeException(
-					"у учётной записи $execLogin нет права сбрасывать пароль этого пользователя"
+					"у учётной записи $execLogin нет права ".implode('; ', $missing)
 				);
 			}
+		});
+	}
+
+	/**
+	 * НЕДЕСТРУКТИВНАЯ предпроверка перед созданием учётки: валидны ли креды
+	 * исполнителя, есть ли у него право создавать пользователей в выбранном
+	 * OU (конструируемый атрибут allowedChildClassesEffective, AD вычисляет
+	 * его для забиндившегося) и пополнять выбранные группы (member в
+	 * allowedAttributesEffective групп). Без записи в AD.
+	 *
+	 * @param string $ouDn куда создаём
+	 * @param string[] $groupDns группы, в которые планируется включить
+	 * @throws \Throwable неверные креды / нет прав / OU или группа не найдены
+	 */
+	public function verifyCreatePermission(string $ouDn, array $groupDns,
+		string $execLogin, string $execPassword): void
+	{
+		$this->withExecutor($execLogin, $execPassword, function (string $name) use ($ouDn, $groupDns, $execLogin) {
+			$ou = Entry::on($name)->select(['allowedchildclasseseffective'])->find($ouDn);
+			if (!is_object($ou)) {
+				throw new \RuntimeException("Подразделение $ouDn не найдено (или нет доступа)");
+			}
+			$classes = array_map('strtolower', $ou->getAttributes()['allowedchildclasseseffective'] ?? []);
+			//список посчитан, но класса user в нём нет => права создавать нет
+			if (!empty($classes) && !in_array('user', $classes, true)) {
+				throw new \RuntimeException(
+					"у учётной записи $execLogin нет права создавать пользователей в $ouDn"
+				);
+			}
+
+			foreach ($groupDns as $groupDn) {
+				$group = Entry::on($name)->select(['allowedattributeseffective'])->find($groupDn);
+				if (!is_object($group)) {
+					throw new \RuntimeException("Группа $groupDn не найдена (или нет доступа)");
+				}
+				$allowed = array_map('strtolower', $group->getAttributes()['allowedattributeseffective'] ?? []);
+				if (!empty($allowed) && !in_array('member', $allowed, true)) {
+					throw new \RuntimeException(
+						"у учётной записи $execLogin нет права добавлять участников в группу $groupDn"
+					);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Создать учётку пользователя в AD ОТ ИМЕНИ исполнителя (L2+).
+	 * Порядок операций продиктован AD: объект создаётся сразу с паролем
+	 * (unicodePwd на создании требует LDAPS - наш конфиг такой), затем
+	 * включается отдельной записью (включить учётку без пароля, прошедшего
+	 * политику, AD не даст), затем добавляется в группы (запись идёт в
+	 * атрибут member САМИХ групп). Неудача включения/групп не откатывает
+	 * создание - возвращается честный пооперационный отчёт.
+	 *
+	 * @param array $attrs атрибуты: samaccountname (обязателен), cn,
+	 *   displayname, givenname, sn, title, upnSuffix (null = account_suffix)
+	 * @param string $ouDn куда создаём
+	 * @param string[] $groupDns группы (DN), в которые включить
+	 * @return array ['dn', 'enabled'(bool), 'enable_error'(?string),
+	 *   'groups'(имена добавленных), 'group_errors'(string[])]
+	 * @throws \Throwable само создание не удалось (логин занят, нет прав,
+	 *   политика паролей, недоступность)
+	 */
+	public function createAccount(array $attrs, string $ouDn, array $groupDns, string $password,
+		string $execLogin, string $execPassword): array
+	{
+		return $this->withExecutor($execLogin, $execPassword, function (string $name) use ($attrs, $ouDn, $groupDns, $password) {
+			$login = (string)$attrs['samaccountname'];
+			if (is_object(AdUser::on($name)->where('samaccountname', '=', $login)->first())) {
+				throw new \RuntimeException("Учётка $login уже существует в AD");
+			}
+
+			$suffix = $attrs['upnSuffix'] ?? ($this->connection['account_suffix'] ?? '');
+			if ($suffix !== '' && $suffix[0] !== '@') $suffix = '@'.$suffix;
+
+			/** @var AdUser $user */
+			$user = (new AdUser)->setConnection($name)->inside($ouDn);
+			$user->cn = $attrs['cn'] ?? $login;
+			$user->samaccountname = $login;
+			$user->userprincipalname = $suffix !== '' ? $login.$suffix : $login;
+			foreach (['displayname', 'givenname', 'sn', 'title'] as $attribute) {
+				if (!empty($attrs[$attribute])) $user->$attribute = $attrs[$attribute];
+			}
+			$user->password = $password; //unicodePwd, требует защищённого соединения
+			$user->save();
+
+			//включение отдельной операцией: пароль уже установлен
+			$enableError = null;
+			try {
+				$user->useraccountcontrol = 512; //NORMAL_ACCOUNT
+				$user->save();
+			} catch (\Throwable $e) {
+				$enableError = $e->getMessage();
+			}
+
+			$groups = [];
+			$groupErrors = [];
+			foreach ($groupDns as $groupDn) {
+				$groupName = $this->unescapeDnValue((string)(new DistinguishedName($groupDn))->name());
+				if ($groupName === '') $groupName = $groupDn;
+				try {
+					/** @var AdGroup|null $group */
+					$group = AdGroup::on($name)->find($groupDn);
+					if (!is_object($group)) throw new \RuntimeException('группа не найдена');
+					$group->members()->attach($user);
+					$groups[] = $groupName;
+				} catch (\Throwable $e) {
+					$groupErrors[] = $groupName.': '.$e->getMessage();
+				}
+			}
+
+			//ПОДТВЕРЖДЕНИЕ: перечитываем созданную учётку
+			/** @var AdUser|null $fresh */
+			$fresh = AdUser::on($name)->where('samaccountname', '=', $login)->first();
+			if (!is_object($fresh)) {
+				throw new \RuntimeException('AD принял запрос, но созданная учётка не найдена при перечитывании');
+			}
+			$uac = (int)($fresh->getAttributes()['useraccountcontrol'][0] ?? 0);
+
+			return [
+				'dn' => $fresh->getDn(),
+				'enabled' => !($uac & 0x2),
+				'enable_error' => $enableError,
+				'groups' => $groups,
+				'group_errors' => $groupErrors,
+			];
+		});
+	}
+
+	/**
+	 * Восстановить уволенную учётку ОТ ИМЕНИ исполнителя (L2+): новый
+	 * пароль + включение (+опц. разблокировка) одной записью, затем
+	 * перемещение в рабочее подразделение. Пароль ставится ПЕРВЫМ и
+	 * подтверждается по pwdLastSet (как в {@see resetPassword()});
+	 * неудача перемещения не откатывает включение - возвращается в
+	 * move_error для честного отчёта (учётка уже рабочая, перенести можно
+	 * руками).
+	 *
+	 * @param string $targetLogin sAMAccountName восстанавливаемой учётки
+	 * @param string $newParentDn целевое подразделение (должно существовать)
+	 * @return array ['dn_before', 'dn_after', 'pwd_last_set_before',
+	 *   'pwd_last_set_after', 'enabled'(bool), 'unlocked'(bool),
+	 *   'move_error'(?string)]
+	 * @throws \Throwable пароль/включение не удались (нет прав, политика
+	 *   паролей, цель не найдена, целевое OU не существует, недоступность)
+	 */
+	public function restoreAccount(string $targetLogin, string $newParentDn, string $password,
+		bool $unlock, string $execLogin, string $execPassword): array
+	{
+		return $this->withExecutor($execLogin, $execPassword, function (string $name) use ($targetLogin, $newParentDn, $password, $unlock) {
+			/** @var AdUser|null $user */
+			$user = AdUser::on($name)->where('samaccountname', '=', $targetLogin)->first();
+			if (!is_object($user)) {
+				throw new \RuntimeException("Учётка $targetLogin не найдена в AD");
+			}
+
+			$dnBefore = $user->getDn();
+			$before = $user->getAttributes()['pwdlastset'][0] ?? null;
+			$uac = (int)($user->getAttributes()['useraccountcontrol'][0] ?? 0);
+
+			//целевое подразделение должно существовать ДО каких-либо записей
+			if (!is_object(Entry::on($name)->find($newParentDn))) {
+				throw new \RuntimeException("Целевое подразделение $newParentDn не найдено в AD");
+			}
+
+			//пароль + включение (+разблокировка) одной операцией
+			$user->password = $password;
+			$user->useraccountcontrol = $uac & ~0x2; //снимаем ACCOUNTDISABLE
+			if ($unlock) $user->setRawAttribute('lockouttime', '0');
+			$user->save();
+
+			//перемещение в рабочее дерево - после включения: если оно
+			//сорвётся, учётка уже рабочая (перенести можно и руками)
+			$moveError = null;
+			try {
+				if (!static::dnEquals(static::parentDn($dnBefore), $newParentDn)) {
+					$user->move($newParentDn);
+				}
+			} catch (\Throwable $e) {
+				$moveError = $e->getMessage();
+			}
+
+			//ПОДТВЕРЖДЕНИЕ: перечитываем и проверяем смену пароля и включение
+			/** @var AdUser|null $fresh */
+			$fresh = AdUser::on($name)->where('samaccountname', '=', $targetLogin)->first();
+			if (!is_object($fresh)) {
+				throw new \RuntimeException('AD принял запрос, но учётка не найдена при перечитывании');
+			}
+			$freshRaw = $fresh->getAttributes();
+			$after = $freshRaw['pwdlastset'][0] ?? null;
+			if ((string)$after === (string)$before) {
+				throw new \RuntimeException(
+					'AD принял запрос, но отметка смены пароля (pwdLastSet) не изменилась — '
+					.'пароль НЕ установлен (проверьте права исполнителя и политику паролей)'
+				);
+			}
+			$freshUac = (int)($freshRaw['useraccountcontrol'][0] ?? 0);
+
+			return [
+				'dn_before' => $dnBefore,
+				'dn_after' => $fresh->getDn(),
+				'pwd_last_set_before' => $this->winTimeToUnix($before),
+				'pwd_last_set_after' => $this->winTimeToUnix($after),
+				'enabled' => !($freshUac & 0x2),
+				'unlocked' => $unlock,
+				'move_error' => $moveError,
+			];
 		});
 	}
 

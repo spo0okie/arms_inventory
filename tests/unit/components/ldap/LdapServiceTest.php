@@ -126,6 +126,59 @@ class LdapServiceTest extends Unit
 		$this->assertSame('Computers', $this->call($s, 'unescapeDnValue', 'Computers'));
 	}
 
+	/**
+	 * dnIsUnder: принадлежность поддереву без учёта регистра и пробелов
+	 * у разделителей; сам корень - только с orEqual
+	 */
+	public function testDnIsUnder()
+	{
+		$base = 'OU=Пользователи,DC=corp,DC=local';
+
+		$this->assertTrue(LdapService::dnIsUnder('CN=Иванов, OU=IT,OU=Пользователи,DC=corp,DC=local', $base));
+		$this->assertTrue(LdapService::dnIsUnder('CN=X,ou=пользователи,dc=CORP,dc=local', $base), 'регистр не важен');
+
+		//сам корень - не «под» корнем, если не разрешено явно
+		$this->assertFalse(LdapService::dnIsUnder($base, $base));
+		$this->assertTrue(LdapService::dnIsUnder($base, $base, true));
+
+		//чужое дерево и частичное совпадение имени OU
+		$this->assertFalse(LdapService::dnIsUnder('CN=X,OU=Уволенные,DC=corp,DC=local', $base));
+		$this->assertFalse(LdapService::dnIsUnder('CN=X,OU=НеПользователи,DC=corp,DC=local', $base),
+			'сравнение покомпонентное, не подстрокой');
+		$this->assertFalse(LdapService::dnIsUnder('CN=X,DC=corp,DC=local', ''));
+	}
+
+	/**
+	 * relocateDn: восстановление вычисляет зеркальный путь увольнения -
+	 * подпуть OU сохраняется, корень меняется (usr_dismiss.ps1 наоборот)
+	 */
+	public function testRelocateDn()
+	{
+		$work = 'OU=Пользователи,DC=corp,DC=local';
+		$fired = 'OU=Уволенные,DC=corp,DC=local';
+
+		//подпуть сохраняется
+		$this->assertSame(
+			'OU=IT,OU=Офис,OU=Пользователи,DC=corp,DC=local',
+			LdapService::relocateDn('OU=IT,OU=Офис,OU=Уволенные,DC=corp,DC=local', $fired, $work)
+		);
+		//объект прямо в корне
+		$this->assertSame(
+			'CN=Иванов,OU=Пользователи,DC=corp,DC=local',
+			LdapService::relocateDn('CN=Иванов,OU=Уволенные,DC=corp,DC=local', $fired, $work)
+		);
+		//вне исходного корня - null
+		$this->assertNull(LdapService::relocateDn('CN=X,OU=Другое,DC=corp,DC=local', $fired, $work));
+	}
+
+	/** parentDn: DN без первого RDN (экранированные запятые не режут DN) */
+	public function testParentDn()
+	{
+		$this->assertSame('OU=IT,DC=corp,DC=local',
+			LdapService::parentDn('CN=Иванов\, И.И.,OU=IT,DC=corp,DC=local'));
+		$this->assertSame('DC=corp,DC=local', LdapService::parentDn('OU=IT,DC=corp,DC=local'));
+	}
+
 	/** Конфиг соединения приводится к терминам LdapRecord с дефолтами */
 	public function testConnectionConfigDefaults()
 	{

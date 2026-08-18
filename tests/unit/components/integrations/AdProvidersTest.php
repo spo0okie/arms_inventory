@@ -4,7 +4,9 @@ namespace tests\unit\components\integrations;
 
 use app\components\integrations\IntegrationsRegistry;
 use app\components\integrations\providers\AdComputerProvider;
+use app\components\integrations\providers\AdCreateAccountForm;
 use app\components\integrations\providers\AdPasswordResetForm;
+use app\components\integrations\providers\AdRestoreAccountForm;
 use app\components\integrations\providers\AdUserProvider;
 use app\components\integrations\providers\SmsProvider;
 use app\models\Comps;
@@ -624,5 +626,493 @@ class AdProvidersTest extends Unit
 		$this->assertTrue((new AdPasswordResetForm(['length' => 20]))->validate());
 		$this->assertFalse((new AdPasswordResetForm(['length' => 8]))->validate(), 'короче политики');
 		$this->assertFalse((new AdPasswordResetForm(['length' => 999]))->validate(), 'длиннее максимума');
+	}
+
+	// ==================== создание и восстановление учётки ====================
+
+	const USERS_OU = 'OU=Staff,DC=corp,DC=local';
+	const FIRED_OU = 'OU=Fired,DC=corp,DC=local';
+
+	/**
+	 * Провайдер с подменёнными LDAP-операциями создания/восстановления.
+	 * $mock: account (для fetchAccount), verifyFails, loginBusy,
+	 * createFails, restoreFails
+	 */
+	private function makeManageProvider(array $mock = []): AdUserProvider
+	{
+		$provider = new class($mock) extends AdUserProvider {
+			public array $mock;
+			public array $calls = [];
+
+			public function __construct(array $mock)
+			{
+				$this->mock = $mock;
+			}
+
+			protected function fetchAccount(string $login): ?array
+			{
+				$this->calls['fetch'][] = $login;
+				return $this->mock['account'] ?? null;
+			}
+
+			protected function ldapVerifyCreate(string $ouDn, array $groupDns, array $credentials): void
+			{
+				$this->calls['verifyCreate'][] = compact('ouDn', 'groupDns');
+				if (!empty($this->mock['verifyFails'])) throw new \RuntimeException('нет права создавать пользователей');
+			}
+
+			protected function ldapLoginIsFree(string $login): bool
+			{
+				$this->calls['loginFree'][] = $login;
+				if (isset($this->mock['busyLogins']))
+					return !in_array($login, $this->mock['busyLogins'], true);
+				return empty($this->mock['loginBusy']);
+			}
+
+			/** доступ к protected pickFreeLogin для тестов регламента коллизий */
+			public function pickFree(string $login): ?string
+			{
+				return $this->pickFreeLogin($login);
+			}
+
+			protected function ldapCreateAccount(array $attrs, string $ouDn, array $groupDns,
+				string $password, array $credentials): array
+			{
+				if (!empty($this->mock['createFails'])) throw new \RuntimeException('отказ создания');
+				$this->calls['create'][] = compact('attrs', 'ouDn', 'groupDns', 'password');
+				return ['dn' => 'CN='.$attrs['cn'].','.$ouDn, 'enabled' => true,
+					'enable_error' => null, 'groups' => ['G1'], 'group_errors' => []];
+			}
+
+			protected function ldapVerifyManage(string $targetLogin, array $credentials): void
+			{
+				$this->calls['verifyManage'][] = $targetLogin;
+				if (!empty($this->mock['verifyFails'])) throw new \RuntimeException('нет права включать учётку');
+			}
+
+			protected function ldapRestoreAccount(string $targetLogin, string $newParentDn,
+				string $password, bool $unlock, array $credentials): array
+			{
+				if (!empty($this->mock['restoreFails'])) throw new \RuntimeException('отказ восстановления');
+				$this->calls['restore'][] = compact('targetLogin', 'newParentDn', 'password', 'unlock');
+				return ['dn_before' => 'CN=X,OU=IT,'.AdProvidersTest::FIRED_OU,
+					'dn_after' => 'CN=X,'.$newParentDn,
+					'pwd_last_set_before' => 1700000000, 'pwd_last_set_after' => 1800000000,
+					'enabled' => true, 'unlocked' => $unlock, 'move_error' => null];
+			}
+		};
+		$provider->id = 'ad';
+		$provider->config = [
+			'usersOu' => static::USERS_OU,
+			'dismissedOu' => static::FIRED_OU,
+		];
+		return $provider;
+	}
+
+	/** учётка в контейнере уволенных: отключена, лежит под dismissedOu */
+	private function firedAccount(): array
+	{
+		return [
+			'dn' => 'CN=Тест АД,OU=IT,'.static::FIRED_OU,
+			'path' => ['Fired', 'IT'], 'domain' => 'corp.local',
+			'enabled' => false, 'locked' => false, 'password_expired' => false,
+			'password_last_set' => null, 'password_expires' => 'never',
+			'must_change_password' => false, 'last_logon' => null, 'account_expires' => 'never',
+		];
+	}
+
+	/**
+	 * Дескрипторы действий: создание появляется при sms+usersOu,
+	 * восстановление - при sms+usersOu+dismissedOu; оба именные (L2+),
+	 * кнопки живут в панели
+	 */
+	public function testManageActionsDescriptors()
+	{
+		//без usersOu - только сброс
+		$provider = new AdUserProvider();
+		$this->assertArrayNotHasKey(AdUserProvider::ACTION_CREATE, $provider->actions(null));
+
+		//usersOu без dismissedOu - создание есть, восстановления нет
+		$provider = new AdUserProvider();
+		$provider->config = ['usersOu' => static::USERS_OU];
+		$actions = $provider->actions(null);
+		$this->assertArrayHasKey(AdUserProvider::ACTION_CREATE, $actions);
+		$this->assertArrayNotHasKey(AdUserProvider::ACTION_RESTORE, $actions);
+
+		//полный конфиг - все три действия
+		$provider = $this->makeManageProvider();
+		$actions = $provider->actions(null);
+		foreach ([AdUserProvider::ACTION_CREATE, AdUserProvider::ACTION_RESTORE] as $actionId) {
+			$this->assertSame(AdUserProvider::LEVEL_PERSONAL, $actions[$actionId]['level']);
+			$this->assertFalse($actions[$actionId]['showInPanel']);
+		}
+		$this->assertSame(AdCreateAccountForm::class, $actions[AdUserProvider::ACTION_CREATE]['form']);
+		$this->assertSame(AdRestoreAccountForm::class, $actions[AdUserProvider::ACTION_RESTORE]['form']);
+
+		//без SMS-провайдера действий нет вовсе
+		Yii::$app->params['integrations'] = [];
+		$this->assertSame([], $this->makeManageProvider()->actions(null));
+	}
+
+	/**
+	 * Предложение логина по регламенту сквозных учёток: «фамилия.и»
+	 * транслитом, не более 12 знаков (SAP); не влезло - обрезка с конца,
+	 * разделительная точка обрезается обязательно
+	 */
+	public function testSuggestLogin()
+	{
+		$this->assertSame('ivanov.i', AdUserProvider::suggestLogin(new Users(['Ename' => 'Иванов Иван Иванович'])));
+		$this->assertSame('schukin.yu', AdUserProvider::suggestLogin(new Users(['Ename' => 'Щукин Юрий Ефимович'])));
+		$this->assertSame('petrov', AdUserProvider::suggestLogin(new Users(['Ename' => 'Петров'])), 'без имени - только фамилия');
+		$this->assertSame('', AdUserProvider::suggestLogin(new Users(['Ename' => ''])));
+		//существующий логин возвращается как есть (нормализованный)
+		$this->assertSame('custom.login', AdUserProvider::suggestLogin(new Users(['Login' => ' Custom.Login ', 'Ename' => 'Иванов Иван'])));
+
+		//примеры из регламента: обрезка до 12 с обязательным срезом точки
+		$this->assertSame('popandopolo',
+			AdUserProvider::suggestLogin(new Users(['Ename' => 'Попандополо Евстафий'])),
+			'13 симв «popandopolo.e» -> срез до 12 + обязательный срез точки = 11');
+		$this->assertSame('cherezzaborn',
+			AdUserProvider::suggestLogin(new Users(['Ename' => 'Череззаборногузадерищенко Иван'])),
+			'фамилия длиннее лимита - просто срез до 12');
+	}
+
+	/**
+	 * Коллизии логинов по регламенту: «фамилия.и#», где # - номер
+	 * однофамильца (с 2); суффикс влезает в лимит 12 за счёт ужатия базы
+	 */
+	public function testPickFreeLogin()
+	{
+		//smirnov.a занят -> второй однофамилец smirnov.a2
+		$provider = $this->makeManageProvider(['busyLogins' => ['smirnov.a']]);
+		$this->assertSame('smirnov.a2', $provider->pickFree('smirnov.a'));
+
+		//popandopolo и однофамильцы 2..6 заняты -> popandopolo7 (ровно 12)
+		$busy = ['popandopolo'];
+		for ($n = 2; $n <= 6; $n++) $busy[] = 'popandopolo'.$n;
+		$provider = $this->makeManageProvider(['busyLogins' => $busy]);
+		$this->assertSame('popandopolo7', $provider->pickFree('popandopolo'));
+
+		//cherezzaborn: под двузначный номер база ужимается до 10 -> cherezzabo15
+		$busy = ['cherezzaborn'];
+		for ($n = 2; $n <= 9; $n++) $busy[] = 'cherezzabor'.$n;   //однозначные: база 11
+		for ($n = 10; $n <= 14; $n++) $busy[] = 'cherezzabo'.$n;  //двузначные: база 10
+		$provider = $this->makeManageProvider(['busyLogins' => $busy]);
+		$this->assertSame('cherezzabo15', $provider->pickFree('cherezzaborn'));
+
+		//крайняя точка после ужатия базы обрезается («и» уходит вместе с ней)
+		$provider = $this->makeManageProvider(['busyLogins' => ['abcdefghij.k']]);
+		$this->assertSame('abcdefghij2', $provider->pickFree('abcdefghij.k'));
+	}
+
+	/**
+	 * Применимость расширяется на сотрудника БЕЗ логина, только когда
+	 * настроено создание и сотрудник не уволен
+	 */
+	public function testAppliesToWithoutLogin()
+	{
+		//создание настроено (sms из _before + usersOu)
+		$provider = $this->makeManageProvider();
+		$this->assertTrue($provider->appliesTo(new Users()));
+		$this->assertFalse($provider->appliesTo(new Users(['Uvolen' => 1])), 'уволенному без логина панель не нужна');
+		$this->assertTrue($provider->appliesTo(new Users(['Uvolen' => 1, 'Login' => 'x'])), 'с логином - всегда (справка)');
+
+		//создание не настроено - как раньше: только с логином
+		$provider = $this->makeAdProvider(null);
+		$this->assertFalse($provider->appliesTo(new Users()));
+	}
+
+	/**
+	 * Полный успешный сценарий создания: недеструктивная предпроверка,
+	 * SMS ДО записи, создание с атрибутами из карточки, логин записан в
+	 * карточку, пароль не попал в журнал
+	 */
+	public function testCreateSuccessFlow()
+	{
+		$user = $this->makeUser(['Login' => '', 'Ename' => 'Иванов Иван Иванович', 'Doljnost' => 'Инженер']);
+		$provider = $this->makeManageProvider();
+		$form = new AdCreateAccountForm(['login' => 'ivanov.i', 'ou' => 'OU=IT,'.static::USERS_OU,
+			'groups' => ['CN=G1,OU=Groups,DC=corp,DC=local'], 'length' => 14]);
+		$this->assertTrue($form->validate(), implode('; ', $form->getErrorSummary(true)));
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_CREATE,
+			$user, $form, ['login' => 'executor', 'password' => 'executor-secret']);
+
+		$this->assertTrue($result->ok, $result->message);
+		$this->assertStringContainsString('создана и включена', $result->message);
+
+		//предпроверка вызвана с выбранными OU и группами
+		$this->assertCount(1, $provider->calls['verifyCreate']);
+		$this->assertSame('OU=IT,'.static::USERS_OU, $provider->calls['verifyCreate'][0]['ouDn']);
+
+		//создание: атрибуты из карточки, пароль запрошенной длины
+		$call = $provider->calls['create'][0];
+		$this->assertSame('ivanov.i', $call['attrs']['samaccountname']);
+		$this->assertSame('Иванов Иван Иванович', $call['attrs']['cn']);
+		$this->assertSame('Иванов', $call['attrs']['sn']);
+		$this->assertSame('Иван Иванович', $call['attrs']['givenname']);
+		$this->assertSame('Инженер', $call['attrs']['title']);
+		$this->assertSame(14, strlen($call['password']));
+
+		//логин записан в карточку сотрудника
+		$this->assertSame('ivanov.i', Users::findOne($user->id)->Login);
+
+		//журнал: SMS-шаг связан, пароль не попал ни в одну запись
+		$parent = IntegrationsLog::findOne($result->logId);
+		$this->assertSame('ok', $parent->result);
+		$child = IntegrationsLog::findOne(['parent_id' => $parent->id]);
+		$this->assertSame('sms', $child->provider);
+		foreach (IntegrationsLog::find()->all() as $log) {
+			foreach (['params', 'message'] as $field) {
+				$this->assertStringNotContainsString($call['password'], (string)$log->$field);
+			}
+		}
+	}
+
+	/** Провал предпроверки создания = останов ДО SMS, ничего не создаётся */
+	public function testCreateStopsWhenVerifyFails()
+	{
+		$user = $this->makeUser(['Login' => '']);
+		$provider = $this->makeManageProvider(['verifyFails' => true]);
+		$form = new AdCreateAccountForm(['login' => 'test.new', 'ou' => static::USERS_OU]);
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_CREATE,
+			$user, $form, ['login' => 'executor', 'password' => 'wrong']);
+
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('SMS не отправлено', $result->message);
+		$this->assertArrayNotHasKey('create', $provider->calls);
+		$this->assertNull(IntegrationsLog::findOne(['parent_id' => $result->logId]), 'SMS не отправлялось');
+	}
+
+	/** Неудача SMS = останов: учётка не создаётся */
+	public function testCreateStopsWhenSmsFails()
+	{
+		Yii::$app->params['integrations']['sms']['url'] = 'data://text/plain,';
+		IntegrationsRegistry::reset();
+
+		$user = $this->makeUser(['Login' => '']);
+		$provider = $this->makeManageProvider();
+		$form = new AdCreateAccountForm(['login' => 'test.new', 'ou' => static::USERS_OU]);
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_CREATE,
+			$user, $form, ['login' => 'executor', 'password' => 'x']);
+
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('НЕ создана', $result->message);
+		$this->assertArrayNotHasKey('create', $provider->calls);
+	}
+
+	/** Отказ AD после успешного SMS: честное сообщение, логин НЕ записан */
+	public function testCreateLdapFailureAfterSms()
+	{
+		$user = $this->makeUser(['Login' => '']);
+		$provider = $this->makeManageProvider(['createFails' => true]);
+		$form = new AdCreateAccountForm(['login' => 'test.new', 'ou' => static::USERS_OU]);
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_CREATE,
+			$user, $form, ['login' => 'executor', 'password' => 'x']);
+
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('SMS отправлено, но учётка в AD НЕ создана', $result->message);
+		$this->assertSame('', Users::findOne($user->id)->Login, 'логин не записан');
+		//SMS-шаг при этом в журнале успешен
+		$this->assertSame('ok', IntegrationsLog::findOne(['parent_id' => $result->logId])->result);
+	}
+
+	/** Занятый логин отсекается предпроверкой до SMS */
+	public function testCreateRejectsBusyLogin()
+	{
+		$user = $this->makeUser(['Login' => '']);
+		$provider = $this->makeManageProvider(['loginBusy' => true]);
+		$form = new AdCreateAccountForm(['login' => 'test.new', 'ou' => static::USERS_OU]);
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_CREATE,
+			$user, $form, ['login' => 'executor', 'password' => 'x']);
+
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('уже существует', $result->message);
+		$this->assertNull(IntegrationsLog::findOne(['parent_id' => $result->logId]), 'SMS не отправлялось');
+	}
+
+	/** OU вне настроенного корня отклоняется до любых обращений к AD */
+	public function testCreateRejectsForeignOu()
+	{
+		$user = $this->makeUser(['Login' => '']);
+		$provider = $this->makeManageProvider();
+		$form = new AdCreateAccountForm(['login' => 'test.new', 'ou' => 'OU=Admins,DC=corp,DC=local']);
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_CREATE,
+			$user, $form, ['login' => 'executor', 'password' => 'x']);
+
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('вне разрешённого корня', $result->message);
+		$this->assertArrayNotHasKey('verifyCreate', $provider->calls);
+	}
+
+	/** Уволенному в инвентаризации сотруднику учётка не создаётся */
+	public function testCreateRejectsArchived()
+	{
+		$user = $this->makeUser(['Login' => '', 'Uvolen' => 1]);
+		$provider = $this->makeManageProvider();
+		$form = new AdCreateAccountForm(['login' => 'test.new', 'ou' => static::USERS_OU]);
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_CREATE,
+			$user, $form, ['login' => 'executor', 'password' => 'x']);
+
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('уволен', $result->message);
+		$this->assertArrayNotHasKey('verifyCreate', $provider->calls);
+	}
+
+	/**
+	 * Полный успешный сценарий восстановления: состояние перепроверено
+	 * (отключена + в контейнере уволенных), SMS ДО записи, восстановление
+	 * с целевым OU и разблокировкой
+	 */
+	public function testRestoreSuccessFlow()
+	{
+		$user = $this->makeUser();
+		$provider = $this->makeManageProvider(['account' => $this->firedAccount()]);
+		$form = new AdRestoreAccountForm(['ou' => 'OU=IT,'.static::USERS_OU, 'unlock' => true, 'length' => 15]);
+		$this->assertTrue($form->validate(), implode('; ', $form->getErrorSummary(true)));
+
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_RESTORE,
+			$user, $form, ['login' => 'executor', 'password' => 'executor-secret']);
+
+		$this->assertTrue($result->ok, $result->message);
+		$this->assertStringContainsString('включена и возвращена', $result->message);
+
+		//предпроверка прав вызвана до записи
+		$this->assertSame(['test.ad'], $provider->calls['verifyManage']);
+
+		//восстановление: цель, OU, разблокировка, пароль запрошенной длины
+		$call = $provider->calls['restore'][0];
+		$this->assertSame('test.ad', $call['targetLogin']);
+		$this->assertSame('OU=IT,'.static::USERS_OU, $call['newParentDn']);
+		$this->assertTrue($call['unlock']);
+		$this->assertSame(15, strlen($call['password']));
+
+		//журнал: SMS-шаг связан, пароль не попал в журнал
+		$child = IntegrationsLog::findOne(['parent_id' => $result->logId]);
+		$this->assertSame('sms', $child->provider);
+		foreach (IntegrationsLog::find()->all() as $log) {
+			$this->assertStringNotContainsString($call['password'], (string)$log->params);
+		}
+	}
+
+	/**
+	 * Восстановление отклоняет неподходящие состояния: учётки нет,
+	 * учётка включена, учётка отключена не в контейнере уволенных
+	 */
+	public function testRestoreRejectsWrongState()
+	{
+		$user = $this->makeUser();
+		$form = new AdRestoreAccountForm(['ou' => static::USERS_OU]);
+		$credentials = ['login' => 'executor', 'password' => 'x'];
+
+		//учётки нет
+		$provider = $this->makeManageProvider(['account' => null]);
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_RESTORE, $user, $form, $credentials);
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('не найдена', $result->message);
+
+		//учётка включена
+		$provider = $this->makeManageProvider(['account' => ['enabled' => true, 'dn' => 'CN=X,'.static::USERS_OU] + $this->firedAccount()]);
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_RESTORE, $user, $form, $credentials);
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('не требуется', $result->message);
+
+		//отключена, но не в контейнере уволенных
+		$provider = $this->makeManageProvider(['account' => ['dn' => 'CN=X,OU=IT,'.static::USERS_OU] + $this->firedAccount()]);
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_RESTORE, $user, $form, $credentials);
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('не в контейнере уволенных', $result->message);
+		$this->assertArrayNotHasKey('restore', $provider->calls);
+	}
+
+	/**
+	 * Кнопка создания живёт внутри панели: у активного сотрудника без
+	 * учётки в AD (в т.ч. вовсе без логина); уволенному и в compact не
+	 * предлагается
+	 */
+	public function testPanelCreateButton()
+	{
+		//логин задан, но учётки в AD нет
+		$html = $this->makeManageProvider(['account' => null])
+			->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'ghost']));
+		$this->assertStringContainsString('не найдена', $html);
+		$this->assertStringContainsString('Создать учётную запись', $html);
+		$this->assertStringContainsString('create-account', $html);
+
+		//логина нет вовсе - панель объясняет и предлагает создать
+		$html = $this->makeManageProvider(['account' => null])
+			->renderPanel(AdUserProvider::PANEL, new Users(['Ename' => 'Иванов Иван']));
+		$this->assertStringContainsString('логин AD не задан', $html);
+		$this->assertStringContainsString('Создать учётную запись', $html);
+		$this->assertStringContainsString('ivanov.i', $html, 'предложенный логин в prefill кнопки');
+
+		//уволенному не предлагается
+		$html = $this->makeManageProvider(['account' => null])
+			->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'ghost', 'Uvolen' => 1]));
+		$this->assertStringNotContainsString('Создать', $html);
+
+		//compact - без кнопок
+		$provider = $this->makeManageProvider(['account' => null]);
+		$provider->compact = true;
+		$this->assertStringNotContainsString('Создать',
+			$provider->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'ghost'])));
+
+		//создание не настроено (нет usersOu) - кнопки нет
+		$html = $this->makeAdProvider(null)->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'ghost']));
+		$this->assertStringNotContainsString('Создать', $html);
+	}
+
+	/**
+	 * Кнопка восстановления - только у отключённой учётки в контейнере
+	 * уволенных; сброс пароля ей не предлагается; целевое OU в prefill -
+	 * зеркало пути увольнения
+	 */
+	public function testPanelRestoreButton()
+	{
+		$model = new Users(['Login' => 'test.ad']);
+
+		$html = $this->makeManageProvider(['account' => $this->firedAccount()])
+			->renderPanel(AdUserProvider::PANEL, $model);
+		$this->assertStringContainsString('в уволенных', $html);
+		$this->assertStringContainsString('Восстановить учётную запись', $html);
+		$this->assertStringNotContainsString('Сбросить пароль', $html, 'отключённой уволенной учётке сброс не предлагается');
+		//зеркальный путь: OU=IT,OU=Fired -> OU=IT,OU=Staff (urlencoded в prefill)
+		$this->assertStringContainsString(urlencode('OU=IT,'.static::USERS_OU), $html);
+
+		//отключена, но не в уволенных - восстановления нет, сброс есть
+		$html = $this->makeManageProvider(['account' => ['dn' => 'CN=X,OU=IT,'.static::USERS_OU] + $this->firedAccount()])
+			->renderPanel(AdUserProvider::PANEL, $model);
+		$this->assertStringNotContainsString('Восстановить', $html);
+		$this->assertStringContainsString('Сбросить пароль', $html);
+
+		//уволенному сотруднику восстановление не предлагается
+		$html = $this->makeManageProvider(['account' => $this->firedAccount()])
+			->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'test.ad', 'Uvolen' => 1]));
+		$this->assertStringNotContainsString('Восстановить', $html);
+	}
+
+	/** Формы: обязательность логина/OU, нормализация и формат логина */
+	public function testManageFormsValidation()
+	{
+		$this->assertFalse((new AdCreateAccountForm())->validate(), 'логин и OU обязательны');
+		$this->assertTrue((new AdCreateAccountForm(['login' => 'Ivanov.I ', 'ou' => static::USERS_OU]))->validate());
+
+		$form = new AdCreateAccountForm(['login' => ' Ivanov.I ', 'ou' => static::USERS_OU]);
+		$form->validate();
+		$this->assertSame('ivanov.i', $form->login, 'логин нормализуется');
+
+		$this->assertFalse((new AdCreateAccountForm(['login' => 'иванов', 'ou' => static::USERS_OU]))->validate(), 'только латиница');
+		$this->assertFalse((new AdCreateAccountForm(['login' => '1abc', 'ou' => static::USERS_OU]))->validate(), 'с буквы');
+		$this->assertTrue((new AdCreateAccountForm(['login' => str_repeat('a', 12), 'ou' => static::USERS_OU]))->validate(), '12 символов - предел');
+		$this->assertFalse((new AdCreateAccountForm(['login' => str_repeat('a', 13), 'ou' => static::USERS_OU]))->validate(), 'не более 12 символов (SAP)');
+
+		$this->assertFalse((new AdRestoreAccountForm())->validate(), 'OU обязателен');
+		$this->assertTrue((new AdRestoreAccountForm(['ou' => static::USERS_OU]))->validate());
 	}
 }

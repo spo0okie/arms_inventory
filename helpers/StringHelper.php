@@ -6,7 +6,28 @@ use yii\helpers\BaseStringHelper;
 use yii\helpers\Inflector;
 
 class StringHelper extends BaseStringHelper {
-	
+
+	/** транслитерация кириллицы в латиницу (админская конвенция, не ГОСТ) */
+	const TRANSLIT_RU = [
+		'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e',
+		'ё' => 'e', 'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'i', 'к' => 'k',
+		'л' => 'l', 'м' => 'm', 'н' => 'n', 'о' => 'o', 'п' => 'p', 'р' => 'r',
+		'с' => 's', 'т' => 't', 'у' => 'u', 'ф' => 'f', 'х' => 'h', 'ц' => 'c',
+		'ч' => 'ch', 'ш' => 'sh', 'щ' => 'sch', 'ъ' => '', 'ы' => 'y', 'ь' => '',
+		'э' => 'e', 'ю' => 'yu', 'я' => 'ya',
+	];
+
+	/**
+	 * Транслитерация в нижний регистр латиницы: кириллица по таблице
+	 * TRANSLIT_RU (ъ/ь отбрасываются), остальные символы просто приводятся
+	 * к нижнему регистру. Используется генерацией логинов AD
+	 * (AdUserProvider::suggestLogin) - «Щукин» -> «schukin».
+	 */
+	public static function translit(string $text): string
+	{
+		return strtr(mb_strtolower($text), static::TRANSLIT_RU);
+	}
+
 	/**
 	 * Формирует имя класса контроллера на основе имени класса модели.
 	 * Поддерживает как приложение (app\models\Foo -> app\controllers\FooController),
