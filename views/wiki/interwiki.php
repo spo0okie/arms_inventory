@@ -37,6 +37,7 @@ $classTitle=function($class) {
 	инвентаризации с разметкой DokuWiki. Учитывается и содержимое страниц wiki,
 	включенных в поле через <code>{{page&gt;...}}</code> / <code>{{section&gt;...}}</code>
 	(плагин include) - такие ссылки помечены цепочкой включений.
+	<?= Html::a('Подробнее об интеграции',['/docs/page','path'=>'admin/integrations/dokuwiki.md']) ?>.
 </p>
 
 <p>
@@ -137,11 +138,14 @@ foreach ($groups as $group) { ?>
 						/** @var ArmsModel $model */
 						$model=$usage['model'];
 						$attribute=$usage['attribute'];
+						//имя объекта может быть и колонкой, и вычисляемым (или отсутствовать вовсе)
+						try { $name=$model->name; } catch (\Throwable $e) { $name=null; }
+						if (!strlen((string)$name)) $name='#'.$usage['id'];
 						?>
 						<div>
 							<?= ItemObjectWidget::widget([
 								'model'=>$model,
-								'name'=>$model->hasAttribute('name')?$model->name:('#'.$usage['id']),
+								'name'=>$name,
 								'noUpdate'=>true,
 								'noDelete'=>true,
 								'show_archived'=>true,
