@@ -16,9 +16,4 @@ class TechStatesController extends ArmsBaseController
 {
 	public $modelClass='\app\models\TechStates';
 	public $defaultShowArchived=true;
-	
-	public function disabledActions()
-	{
-		return ['ttip'];
-	}
 }

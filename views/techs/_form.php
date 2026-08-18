@@ -208,6 +208,7 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
         <div class="col-md-2" >
 			<?= FieldsHelper::Select2Field($form, $model, 'state_id', [
 				'data' => TechStates::fetchNames(),
+				'hintModel'=>'TechStates',
 				'options' => ['placeholder' => 'Выберите состояние оборудования',],
 				'pluginOptions' => [
 					'dropdownParent' => $modalParent,
