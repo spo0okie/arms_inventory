@@ -137,7 +137,11 @@ class ZabbixSyncProviderTest extends Unit
 
 		$this->assertStringContainsString('будет добавлен в мониторинг', $html);
 		$this->assertStringContainsString('bg-success', $html);
-		//краткий журнал: имя набора и описание совпавшего правила
+		//бейдж - кнопка, открывающая модальное окно с журналом
+		$this->assertStringContainsString('data-bs-toggle="modal"', $html);
+		$this->assertStringContainsString('data-bs-target="#zabbix-sync-modal-comps-42"', $html);
+		$this->assertStringContainsString('modal fade', $html);
+		//краткий журнал (в модалке): имя набора и описание совпавшего правила
 		$this->assertStringContainsString('Поддерживаемые ОС', $html);
 		$this->assertStringContainsString('Windows серверы', $html);
 		//запрошен именно этот узел
@@ -150,9 +154,9 @@ class ZabbixSyncProviderTest extends Unit
 		$provider = $this->makeProvider($this->sampleReport());
 		$html = $provider->renderPanel(ZabbixSyncProvider::PANEL, $this->comp());
 
-		//сворачиваемый блок «подробно»
+		//сворачиваемый блок «подробно» внутри модалки
 		$this->assertStringContainsString('подробно', $html);
-		$this->assertStringContainsString('collapse', $html);
+		$this->assertStringContainsString('data-bs-toggle="collapse"', $html);
 		//пропущенное правило: условия и несработавшее условие
 		$this->assertStringContainsString('type=comps, OS=Linux', $html);
 		$this->assertStringContainsString('не прошло условие', $html);
@@ -193,7 +197,7 @@ class ZabbixSyncProviderTest extends Unit
 		$this->assertStringContainsString('bg-warning', $html);
 	}
 
-	/** Компактный режим (вложенные списки): только бейдж, без журнала */
+	/** Компактный режим (вложенные списки): только бейдж, без модалки и журнала */
 	public function testRenderPanelCompact()
 	{
 		$provider = $this->makeProvider($this->sampleReport());
@@ -201,6 +205,7 @@ class ZabbixSyncProviderTest extends Unit
 		$html = $provider->renderPanel(ZabbixSyncProvider::PANEL, $this->comp());
 
 		$this->assertStringContainsString('будет добавлен в мониторинг', $html);
+		$this->assertStringNotContainsString('modal', $html);
 		$this->assertStringNotContainsString('подробно', $html);
 		$this->assertStringNotContainsString('Поддерживаемые ОС', $html);
 	}
