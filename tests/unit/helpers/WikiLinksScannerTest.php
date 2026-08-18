@@ -20,11 +20,17 @@ class WikiLinksScannerTest extends Unit
 	 */
 	protected $tester;
 
-	/** сканер с фиксированным адресом wiki и без сети */
+	/**
+	 * Сканер с фиксированным адресом wiki и без сети.
+	 * includeNested включен: тесты обхода включений проверяют именно находки
+	 * внутри включенных страниц (в бою флаг по умолчанию выключен -
+	 * см. testNestedFindingsSkippedByDefault).
+	 */
 	protected function scanner(array $pages=[]): WikiLinksScanner
 	{
 		$scanner=new WikiLinksScanner();
 		$scanner->wikiUrl='https://wiki.example.local/';
+		$scanner->includeNested=true;
 		$scanner->pageFetcher=function($page) use ($pages) {
 			return $pages[$page]??false;
 		};
@@ -152,11 +158,16 @@ class WikiLinksScannerTest extends Unit
 		$this->assertArrayHasKey('docs:соседняя',$scanner->getWikiPages());
 	}
 
-	/** includeNested=false - только то, что написано в самой инвентаризации */
-	public function testNestedFindingsCanBeSkipped()
+	/**
+	 * По умолчанию находки внутри включенных страниц не учитываются: это ссылки
+	 * самой wiki, и одна такая размножилась бы на все объекты, которые втягивают
+	 * страницу-шаблон (сотни одинаковых строк в отчете вместо одной ссылки).
+	 */
+	public function testNestedFindingsSkippedByDefault()
 	{
 		$scanner=$this->scanner(['docs:common'=>'Внутри [[docs:deeper]]']);
-		$scanner->includeNested=false;
+		$scanner->includeNested=(new WikiLinksScanner())->includeNested;	//значение по умолчанию
+		$this->assertFalse($scanner->includeNested);
 
 		$scanner->scanText('[[services:inventory]] {{page>docs:common}}');
 

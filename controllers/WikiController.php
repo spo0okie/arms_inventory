@@ -153,13 +153,15 @@ class WikiController extends Controller
 	 * GET-параметры:
 	 * @param int $includes 1 - идти за включениями {{page>...}} (по умолчанию),
 	 *                      0 - сканировать только сами поля (без запросов к wiki)
-	 * @param int $nested   1 - учитывать ссылки внутри включенных страниц (по умолчанию),
-	 *                      0 - только то, что написано в самой инвентаризации
+	 * @param int $nested   0 - только то, что написано в самой инвентаризации (по умолчанию),
+	 *                      1 - учитывать и ссылки внутри включенных страниц (это ссылки
+	 *                      самой wiki: одна такая размножается на все объекты, которые
+	 *                      втягивают страницу-шаблон)
 	 * @param int $depth    предельная глубина обхода включений
 	 *
 	 * @return string HTML отчета
 	 */
-	public function actionLinks($includes=1,$nested=1,$depth=3)
+	public function actionLinks($includes=1,$nested=0,$depth=3)
 	{
 		$scanner=new WikiLinksScanner();
 		$scanner->followIncludes=(bool)$includes;

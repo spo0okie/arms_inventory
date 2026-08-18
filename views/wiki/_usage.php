@@ -48,13 +48,8 @@ catch (\Throwable $e) { $attributeLabel=$attribute; }
 	<?php if (isset($usage['kind']) && isset($kindLabels[$usage['kind']])) { ?>
 		<span class="badge bg-secondary"><?= Html::encode($kindLabels[$usage['kind']]) ?></span>
 	<?php } ?>
-	<?php if (count($usage['via']??[])) { ?>
-		<span class="text-muted small">
-			через <?php foreach ($usage['via'] as $via) { ?>
-				<code>{{page&gt;<?= Html::encode($via) ?>}}</code>
-			<?php } ?>
-		</span>
-	<?php } ?>
+	<?php /* цепочку включений показывает список мест (_usages.php) - общей строкой
+		на всю группу, а не у каждого объекта */ ?>
 	<?php if (($usage['title']??'')!=='') { ?>
 		<span class="text-muted small">подпись: <?= Html::encode($usage['title']) ?></span>
 	<?php } ?>

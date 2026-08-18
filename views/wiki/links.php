@@ -87,14 +87,18 @@ $pageUrl=function($page) use ($wikiUrl) {
 			['links','includes'=>(int)$followIncludes,'nested'=>0,'depth'=>$depth],
 			['class'=>'btn btn-sm btn-outline-secondary']) ?>
 		<span class="text-muted small">
-			сейчас учитываются и ссылки внутри включенных страниц
-			(глубина обхода: <?= (int)$depth ?>)
+			сейчас учтены и ссылки, написанные внутри включённых страниц: это ссылки
+			самой wiki, и одна такая попадает в отчёт по разу на каждый объект,
+			который втягивает страницу (глубина обхода: <?= (int)$depth ?>)
 		</span>
 	<?php } else { ?>
-		<?= Html::a('Учитывать ссылки внутри включенных страниц',
+		<?= Html::a('Учитывать и ссылки внутри включённых страниц',
 			['links','includes'=>(int)$followIncludes,'nested'=>1,'depth'=>$depth],
 			['class'=>'btn btn-sm btn-outline-secondary']) ?>
-		<span class="text-muted small">сейчас учтено только то, что написано в самой инвентаризации</span>
+		<span class="text-muted small">
+			сейчас учтено только то, что написано в самой инвентаризации;
+			из включённых страниц учитывается сам факт включения
+		</span>
 	<?php } ?>
 </p>
 
@@ -188,11 +192,21 @@ if (!count($pages)) {
 							<?= Html::encode($kindLabels[$kind]??$kind) ?>: <?= (int)$count ?>&nbsp;
 						<?php } ?>
 					</div>
+					<?php
+					//сколько ссылок пришло не из инвентаризации, а из текста включенных страниц
+					$nestedCount=count(array_filter($page['usages'],function($usage) {
+						return count($usage['via']??[]);
+					}));
+					if ($nestedCount) { ?>
+						<div class="text-muted small">из них через включения: <?= $nestedCount ?></div>
+					<?php } ?>
 				</td>
 				<td class="text-end"><?= (int)$page['count'] ?></td>
 				<td>
-					<?php foreach ($page['usages'] as $usage)
-						echo $this->render('_usage',['usage'=>$usage,'kindLabels'=>$kindLabels]); ?>
+					<?= $this->render('_usages',[
+						'usages'=>$page['usages'],
+						'kindLabels'=>$kindLabels,
+					]) ?>
 				</td>
 			</tr>
 		<?php } ?>
@@ -224,8 +238,10 @@ if (!count($interwiki)) return;
 				<td><code><?= Html::encode($target['target']) ?></code></td>
 				<td class="text-end"><?= (int)$target['count'] ?></td>
 				<td>
-					<?php foreach ($target['usages'] as $usage)
-						echo $this->render('_usage',['usage'=>$usage,'kindLabels'=>$kindLabels]); ?>
+					<?= $this->render('_usages',[
+						'usages'=>$target['usages'],
+						'kindLabels'=>$kindLabels,
+					]) ?>
 				</td>
 			</tr>
 		<?php } ?>
