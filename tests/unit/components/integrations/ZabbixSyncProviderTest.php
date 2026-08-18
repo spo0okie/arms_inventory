@@ -218,6 +218,69 @@ class ZabbixSyncProviderTest extends Unit
 		$provider->renderPanel(ZabbixSyncProvider::PANEL, $this->comp());
 	}
 
+	/**
+	 * Провайдер с подменённым HTTP-транспортом (fetchExplain настоящий):
+	 * для проверки разбора ответа
+	 */
+	private function makeHttpProvider(string $body, int $status): ZabbixSyncProvider
+	{
+		$provider = new class([$body, $status]) extends ZabbixSyncProvider {
+			public array $response;
+
+			public function __construct(array $response)
+			{
+				$this->response = $response;
+			}
+
+			protected function httpGet(string $url): array
+			{
+				return $this->response;
+			}
+		};
+		$provider->id = 'zabbix-sync';
+		$provider->config = ['url' => 'https://synchost/explain.php', 'token' => 't'];
+		return $provider;
+	}
+
+	/**
+	 * Не-JSON ответ (HTML от Apache при 403/404) — в сообщении об ошибке
+	 * виден HTTP-код и начало ответа: иначе по заглушке панели не понять,
+	 * кто именно ответил
+	 */
+	public function testNonJsonResponseShowsStatusAndSnippet()
+	{
+		$provider = $this->makeHttpProvider(
+			'<html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1></body></html>', 403);
+		try {
+			$provider->renderPanel(ZabbixSyncProvider::PANEL, $this->comp());
+			$this->fail('ожидалось исключение');
+		} catch (\RuntimeException $e) {
+			$this->assertStringContainsString('HTTP 403', $e->getMessage());
+			$this->assertStringContainsString('Forbidden', $e->getMessage());
+			$this->assertStringNotContainsString('<html>', $e->getMessage()); //теги вычищены
+		}
+	}
+
+	/** JSON с ключом error (ответ самого explain.php) показывается как есть */
+	public function testExplainErrorPassedThrough()
+	{
+		$provider = $this->makeHttpProvider('{"error":"invalid token"}', 403);
+		try {
+			$provider->renderPanel(ZabbixSyncProvider::PANEL, $this->comp());
+			$this->fail('ожидалось исключение');
+		} catch (\RuntimeException $e) {
+			$this->assertStringContainsString('invalid token', $e->getMessage());
+		}
+	}
+
+	/** Корректный JSON через настоящий fetchExplain разбирается */
+	public function testHttpProviderParsesReport()
+	{
+		$provider = $this->makeHttpProvider(json_encode($this->sampleReport()), 200);
+		$html = $provider->renderPanel(ZabbixSyncProvider::PANEL, $this->comp());
+		$this->assertStringContainsString('будет добавлен в мониторинг', $html);
+	}
+
 	/** TTL по умолчанию 0: вердикт дешёвый, обновляем при каждом открытии карточки */
 	public function testPanelTtlDefaultZero()
 	{

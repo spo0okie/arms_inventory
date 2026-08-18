@@ -104,10 +104,11 @@ class ZabbixSyncProvider extends IntegrationProvider
 	}
 
 	/**
-	 * Запрос к explain.php скрипта синхронизации. Вынесен отдельным
-	 * методом: тесты подменяют его, не трогая сеть.
+	 * Запрос к explain.php скрипта синхронизации.
 	 * @return array отчет explain (verdict/errors/status/sets/actions)
-	 * @throws \RuntimeException при ошибке транспорта/ответа (ловит ядро)
+	 * @throws \RuntimeException при ошибке транспорта/ответа (ловит ядро);
+	 *   в сообщение попадает HTTP-код и начало не-JSON ответа — иначе по
+	 *   заглушке панели не понять, кто ответил (Apache 403, HTML и т.п.)
 	 */
 	protected function fetchExplain(string $class, int $id): array
 	{
@@ -116,6 +117,28 @@ class ZabbixSyncProvider extends IntegrationProvider
 			.'&id='.$id
 			.'&token='.urlencode($this->config['token']);
 
+		[$response, $status] = $this->httpGet($url);
+
+		$data = json_decode($response, true);
+		if (!is_array($data)) {
+			//не-JSON: скорее всего ответил не explain.php, а веб-сервер
+			//(403 по Require ip, 404 по Alias, HTML-заглушка прокси...)
+			$snippet = trim(mb_substr(preg_replace('/\s+/', ' ', strip_tags($response)), 0, 160));
+			throw new \RuntimeException(
+				"Некорректный ответ сервиса синхронизации (HTTP $status): ".($snippet ?: 'пустой ответ'));
+		}
+		if (isset($data['error'])) throw new \RuntimeException('Сервис синхронизации: '.$data['error']);
+		if (!isset($data['verdict'])) throw new \RuntimeException("Некорректный ответ сервиса синхронизации (HTTP $status): нет verdict");
+		return $data;
+	}
+
+	/**
+	 * HTTP GET. Вынесен отдельным методом: тесты подменяют его, не трогая сеть.
+	 * @return array [string тело, int HTTP-код (0 если не распознан)]
+	 * @throws \RuntimeException при ошибке транспорта (ловит ядро)
+	 */
+	protected function httpGet(string $url): array
+	{
 		$context = stream_context_create([
 			'http' => [
 				'timeout' => $this->timeout(),
@@ -130,10 +153,10 @@ class ZabbixSyncProvider extends IntegrationProvider
 		$response = @file_get_contents($url, false, $context);
 		if ($response === false) throw new \RuntimeException('Сервис синхронизации Zabbix недоступен');
 
-		$data = json_decode($response, true);
-		if (!is_array($data)) throw new \RuntimeException('Некорректный ответ сервиса синхронизации');
-		if (isset($data['error'])) throw new \RuntimeException('Сервис синхронизации: '.$data['error']);
-		if (!isset($data['verdict'])) throw new \RuntimeException('Некорректный ответ сервиса синхронизации (нет verdict)');
-		return $data;
+		$status = 0;
+		if (isset($http_response_header[0]) && preg_match('#^HTTP/\S+\s+(\d+)#', $http_response_header[0], $m)) {
+			$status = (int)$m[1];
+		}
+		return [$response, $status];
 	}
 }
