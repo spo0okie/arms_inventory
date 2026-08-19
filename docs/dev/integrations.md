@@ -201,6 +201,18 @@ model-зависимые значения prefill (предложенный ло
   `parentLogId` вложенных вызовов; закрывается итогом после. Побочный
   плюс — действие, уронившее процесс, остаётся в журнале со статусом run.
 
+Композиция распространяется и на **панели**: провайдер может встроить
+чужую панель в свою — взять соседа из реестра
+(`IntegrationsRegistry::provider($id)`) и позвать его `renderPanel()`
+прямо из своего `renderPanel()` (это единственное разрешённое место —
+внешние вызовы только там), пробросив `$this->compact`. Правила:
+провайдер-хозяин прячет свою карточку (`panels()` возвращает `[]` по
+конфиг-флагу), чтобы содержимое не двоилось; ошибки каждой половины
+ловятся раздельно (упавшая ИС одной половины не прячет другую, заглушка —
+в стиле ядра §3.1); композитный HTML кэшируется целиком под ключом
+панели-обёртки с её TTL. Пример — `zabbix-sync` + `zabbix` (флаг
+`embedded` в конфиге `zabbix`, см. таблицу провайдеров).
+
 ## 6. RBAC, журнал, встраивание в UI
 
 - **Доступ**: следует ровно модели авторизации ядра
@@ -251,8 +263,8 @@ model-зависимые значения prefill (предложенный ло
 | pbx | `HttpTemplateProvider` | L1-панель | `Techs` с `isVoipPhone` и номером | ast22-phones REST (`/api/v1/subscribers/status`) |
 | ad | `AdUserProvider` | L1-панель (справка о учётке) + L2+-действия: сброс пароля, создание учётки, восстановление после увольнения (композиция с sms, кнопки внутри панели по живому состоянию учётки) | `Users` с логином AD (создание — и без логина: активный сотрудник при настроенном `usersOu`) | `LdapService` (ldaprecord); запись — LDAPS-bind под кредами исполнителя |
 | ad-comp | `AdComputerProvider` | L1-панель (путь в дереве + группы) | `Comps` с именем (по умолчанию Windows) | `LdapService::computerInfo()` |
-| zabbix | `ZabbixProvider` | L1-панель (активные проблемы) + L0-ссылка | `Comps` и `Techs` | Zabbix JSON-RPC 7.x |
-| zabbix-sync | `ZabbixSyncProvider` | L1-панель («Постановка на мониторинг»: вердикт + журнал правил) | `Comps` и `Techs` | explain.php скрипта [arms.zabbix](https://github.com/spo0okie/arms_zabbix) (GET, JSON, токен) |
+| zabbix | `ZabbixProvider` | L1-панель (активные проблемы) + L0-ссылка; с `'embedded' => true` своей карточки нет — содержимое встраивает zabbix-sync | `Comps` и `Techs` | Zabbix JSON-RPC 7.x |
+| zabbix-sync | `ZabbixSyncProvider` | L1-панель («Постановка на мониторинг»: вердикт + журнал правил; при embedded-провайдере zabbix — под вердиктом его живой блок, когда узел на мониторинге или имеет привязку hostid) | `Comps` и `Techs` | explain.php скрипта [arms.zabbix](https://github.com/spo0okie/arms_zabbix) (GET, JSON, токен) |
 
 Конкретные конфиги включения — в
 [docs/help/admin/integrations/providers.md](../help/admin/integrations/providers.md).

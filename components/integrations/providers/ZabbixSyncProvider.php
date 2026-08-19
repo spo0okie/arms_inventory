@@ -3,9 +3,12 @@
 namespace app\components\integrations\providers;
 
 use app\components\integrations\IntegrationProvider;
+use app\components\integrations\IntegrationsRegistry;
 use app\models\Comps;
 use app\models\base\ArmsModel;
 use app\models\Techs;
+use Yii;
+use yii\helpers\Html;
 
 /**
  * Панель «Постановка на мониторинг» в карточке ОС/оборудования:
@@ -20,8 +23,15 @@ use app\models\Techs;
  * «подробно». Имена наборов/правил приходят из rules.priv.php, если
  * там заданы (иначе set#N/rule#M).
  *
- * В Zabbix панель не ходит вовсе; в инвентори explain.php делает один GET.
- * Ничего никуда не пишет.
+ * В Zabbix панель сама не ходит вовсе; в инвентори explain.php делает
+ * один GET. Ничего никуда не пишет.
+ *
+ * Композиция с провайдером zabbix: если в конфиге провайдера zabbix
+ * выставлен 'embedded' => true, его отдельная карточка исчезает, а живое
+ * состояние узла (проблемы/метрики/ссылки) рисуется здесь же, под
+ * вердиктом — когда узел на мониторинге или реально заведён в Zabbix
+ * (есть привязка hostid). Одна карточка вместо двух и никакого
+ * «узел не найден» у узлов, которым в Zabbix быть не положено.
  *
  * Конфиг (params-local.php), ключ обязан быть 'zabbix-sync' (от него
  * зависит путь view-файлов):
@@ -34,6 +44,8 @@ use app\models\Techs;
  *         //'title' => 'Постановка на мониторинг',
  *         //'cacheTtl' => 0, //0 = обновлять при каждом открытии карточки (кэш - буфер отрисовки)
  *         //'timeout' => 5,
+ *         //'zabbix' => 'zabbix', //id провайдера Zabbix для встраивания
+ *         //  (само встраивание включает 'embedded' => true в ЕГО конфиге)
  *     ],
  * ],
  * ```
@@ -89,12 +101,83 @@ class ZabbixSyncProvider extends IntegrationProvider
 
 	public function renderPanel(string $panelId, ArmsModel $model): string
 	{
-		$report = $this->fetchExplain($this->explainClass($model), (int)$model->id);
-		return $this->renderView('verdict', [
+		$zabbix = $this->embeddedZabbix();
+
+		try {
+			$report = $this->fetchExplain($this->explainClass($model), (int)$model->id);
+		} catch (\Throwable $e) {
+			//без встроенной Zabbix-части падение explain роняет панель целиком
+			//(ядро покажет заглушку); с ней половины деградируют независимо:
+			//живое состояние узла ценно и без вердикта
+			if (!$zabbix || !$this->shouldEmbedZabbix(null, $model, $zabbix)) throw $e;
+			return $this->unavailableNote($this->getTitle(), $e)
+				.$this->renderEmbedded($zabbix, $model);
+		}
+
+		$html = $this->renderView('verdict', [
 			'report' => $report,
 			'model' => $model,
 			'provider' => $this,
 		]);
+		if ($zabbix && $this->shouldEmbedZabbix($report, $model, $zabbix)) {
+			$html .= $this->renderEmbedded($zabbix, $model);
+		}
+		return $html;
+	}
+
+	/**
+	 * Провайдер Zabbix, чью панель встраиваем под вердиктом (композиция,
+	 * расширение §2.2 контракта на панели). Включается одним
+	 * переключателем — 'embedded' => true в конфиге провайдера zabbix:
+	 * он же прячет его отдельную карточку, чтобы содержимое не двоилось.
+	 * Id провайдера можно переопределить ключом 'zabbix' своего конфига.
+	 */
+	protected function embeddedZabbix(): ?ZabbixProvider
+	{
+		$provider = IntegrationsRegistry::provider($this->config['zabbix'] ?? 'zabbix');
+		return ($provider instanceof ZabbixProvider && $provider->isEmbedded()) ? $provider : null;
+	}
+
+	/**
+	 * Рисовать ли Zabbix-блок: узел на мониторинге по вердикту либо реально
+	 * заведён в Zabbix — есть привязка hostid (в т.ч. заведён вручную, мимо
+	 * правил синка). При вердикте add узла ещё нет — бейдж говорит сам за
+	 * себя; при негативных вердиктах без привязки показывать нечего (и
+	 * пропадает дублирующее «узел не найден в Zabbix»).
+	 * @param array|null $report отчёт explain (null - не получен)
+	 */
+	protected function shouldEmbedZabbix(?array $report, ArmsModel $model, ZabbixProvider $zabbix): bool
+	{
+		if (!$zabbix->appliesTo($model)) return false;
+		if (($report['verdict'] ?? null) === 'monitored') return true;
+		return !is_null($zabbix->binding($model));
+	}
+
+	/**
+	 * Zabbix-блок под вердиктом. Ошибки ловятся здесь: упавший Zabbix не
+	 * прячет вердикт (и наоборот — см. renderPanel)
+	 */
+	protected function renderEmbedded(ZabbixProvider $zabbix, ArmsModel $model): string
+	{
+		$zabbix->compact = $this->compact;
+		try {
+			$html = $zabbix->renderPanel(ZabbixProvider::PANEL, $model);
+		} catch (\Throwable $e) {
+			$html = $this->unavailableNote($zabbix->getTitle(), $e);
+		}
+		return '<div class="mt-1">'.$html.'</div>';
+	}
+
+	/**
+	 * Заглушка недоступной половины панели — как у ядра (§3.1): в debug с
+	 * причиной, на проде нейтральная; детали всегда в логе
+	 */
+	protected function unavailableNote(string $title, \Throwable $e): string
+	{
+		Yii::warning("Integration panel {$this->id}: '$title' failed: ".$e->getMessage(), __METHOD__);
+		return '<div class="text-secondary opacity-75">'
+			.Html::encode($title.(YII_DEBUG ? ': '.$e->getMessage() : ': недоступно'))
+			.'</div>';
 	}
 
 	/** Класс узла в терминах инвентори/синхронизации */

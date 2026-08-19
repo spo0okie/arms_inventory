@@ -601,4 +601,25 @@ class ZabbixProviderTest extends Unit
 		$provider = $this->makeProvider([], ['cacheTtl' => 45]);
 		$this->assertSame(45, $provider->panelTtl(ZabbixProvider::PANEL, new Comps()));
 	}
+
+	/**
+	 * Встроенный режим ('embedded' => true): своей карточки нет - её
+	 * содержимое рисует панель zabbix-sync; сам renderPanel при этом
+	 * работает (композиция зовёт его напрямую)
+	 */
+	public function testEmbeddedHidesOwnPanel()
+	{
+		$provider = $this->makeProvider();
+		$this->assertFalse($provider->isEmbedded());
+		$this->assertArrayHasKey(ZabbixProvider::PANEL, $provider->panels(new Comps()));
+
+		$embedded = $this->makeProvider([], ['embedded' => true]);
+		$this->assertTrue($embedded->isEmbedded());
+		$this->assertSame([], $embedded->panels(new Comps()));
+
+		$comp = new Comps(['name' => 'SRV1']);
+		$comp->external_links = json_encode(['Zabbix.hostid' => '10501']);
+		$html = $embedded->renderPanel(ZabbixProvider::PANEL, $comp);
+		$this->assertStringContainsString('проблем нет', $html);
+	}
 }

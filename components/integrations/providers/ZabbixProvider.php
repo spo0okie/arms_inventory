@@ -35,6 +35,8 @@ use Yii;
  *         //'metrics' => false, //не показывать аптайм/CPU/память/диски
  *         //'staleAfter' => 600, //с какого возраста данных писать «устарели»
  *         //'cacheTtl' => 60,
+ *         //'embedded' => true, //спрятать отдельную карточку: содержимое
+ *         //  встроит панель «Постановка на мониторинг» ({@see ZabbixSyncProvider})
  *     ],
  * ],
  * ```
@@ -90,8 +92,21 @@ class ZabbixProvider extends IntegrationProvider
 		return $hostid ? (string)$hostid : null;
 	}
 
+	/**
+	 * Встроенный режим: своей карточки у провайдера нет, его содержимое
+	 * рисует панель «Постановка на мониторинг» под своим вердиктом
+	 * ({@see ZabbixSyncProvider}). Один переключатель на обе стороны:
+	 * он же включает встраивание у zabbix-sync.
+	 */
+	public function isEmbedded(): bool
+	{
+		return !empty($this->config['embedded']);
+	}
+
 	public function panels(ArmsModel $model): array
 	{
+		//встроенный режим: карточки нет, zabbix-sync зовёт renderPanel() напрямую
+		if ($this->isEmbedded()) return [];
 		return [
 			static::PANEL => [
 				'title' => $this->getTitle(),
