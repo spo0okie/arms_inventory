@@ -1114,7 +1114,7 @@ class AdUserProvider extends IntegrationProvider
 	{
 		$items = [];
 		foreach ($this->ldapOuList() as $ou) {
-			$items[$ou['dn']] = str_repeat('— ', $ou['depth']).$ou['name'];
+			$items[$ou['dn']] = str_repeat('• ', $ou['depth']).$ou['name'];
 		}
 		return $items;
 	}
