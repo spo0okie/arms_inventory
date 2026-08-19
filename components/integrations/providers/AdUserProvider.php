@@ -8,6 +8,7 @@ use app\components\integrations\IntegrationsRegistry;
 use app\components\ldap\LdapService;
 use app\components\PronounceablePasswordGenerator;
 use app\helpers\ArrayHelper;
+use app\helpers\FieldsHelper;
 use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
 use app\models\Users;
@@ -1033,8 +1034,20 @@ class AdUserProvider extends IntegrationProvider
 		$html .= (string)$activeForm->field($form, 'login')->textInput(['maxlength' => static::LOGIN_MAX]);
 		$html .= (string)$activeForm->field($form, 'ou')
 			->dropDownList($ouItems, ['prompt' => '- выберите подразделение -']);
-		$html .= (string)$activeForm->field($form, 'groups')->listBox($groupItems,
-			['multiple' => true, 'size' => min(12, max(4, count($groupItems)))]);
+		//группы - select2: список большой, без поиска неудобно (ajax не
+		//нужен - данные уже загружены); dropdownParent обязателен в
+		//модалке, см. IntegrationProvider::$modalParent
+		$html .= (string)FieldsHelper::Select2Field($activeForm, $form, 'groups', [
+			'data' => $groupItems,
+			'options' => [
+				'placeholder' => 'Начните набирать для поиска групп',
+				'multiple' => true,
+			],
+			'pluginOptions' => array_filter([
+				'multiple' => true,
+				'dropdownParent' => $this->modalParent,
+			]),
+		]);
 		$html .= $this->renderPasswordFields($form, $activeForm, false);
 		$html .= '<p class="text-secondary">Учётная запись будет создана и включена, пароль '
 			.'сгенерирован и отправлен пользователю по SMS. Администратор пароль не видит.</p>';

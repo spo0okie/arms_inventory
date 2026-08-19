@@ -33,6 +33,7 @@ $title = $descriptor['title'] ?? $provider->getTitle();
 		'enableClientValidation' => false,
 	]); ?>
 
+	<?php $provider->modalParent = $modalParent; //для select2 dropdownParent в формах провайдера ?>
 	<?= $provider->renderActionForm($actionId, $form, $activeForm) ?>
 
 	<?php if ($isPersonal) { ?>

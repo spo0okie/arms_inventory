@@ -49,6 +49,16 @@ abstract class IntegrationProvider
 	public bool $compact = false;
 
 	/**
+	 * @var string|null селектор модалки, в которой рендерится форма
+	 * действия (обычно '#modal_form_loader'); ставит view action-form
+	 * перед вызовом renderActionForm(). Нужен виджетам с выпадающими
+	 * списками (select2 dropdownParent): дропдаун, прикреплённый к body,
+	 * не работает внутри bootstrap-модалки (фокус-ловушка). null = форма
+	 * рендерится не в модалке.
+	 */
+	public ?string $modalParent = null;
+
+	/**
 	 * @var int|null id записи журнала ТЕКУЩЕГО выполняемого действия;
 	 * заполняется реестром на время runAction(). Составные действия
 	 * передают его как parentLogId вложенных вызовов
