@@ -829,7 +829,8 @@ class AdProvidersTest extends Unit
 	 */
 	public function testCreateSuccessFlow()
 	{
-		$user = $this->makeUser(['Login' => '', 'Ename' => 'Иванов Иван Иванович', 'Doljnost' => 'Инженер']);
+		$user = $this->makeUser(['Login' => '', 'Ename' => 'Иванов Иван Иванович', 'Doljnost' => 'Инженер',
+			'employee_id' => '00123', 'uid' => '744912345678', 'Email' => 'ivanov.i@corp.local']);
 		$provider = $this->makeManageProvider();
 		$form = new AdCreateAccountForm(['login' => 'ivanov.i', 'ou' => 'OU=IT,'.static::USERS_OU,
 			'groups' => ['CN=G1,OU=Groups,DC=corp,DC=local'], 'length' => 14]);
@@ -852,6 +853,12 @@ class AdProvidersTest extends Unit
 		$this->assertSame('Иванов', $call['attrs']['sn']);
 		$this->assertSame('Иван Иванович', $call['attrs']['givenname']);
 		$this->assertSame('Инженер', $call['attrs']['title']);
+		//поля схемы синхронизации inventory-to-ad.ps1 - чтобы первый же
+		//прогон не переписал созданную учётку
+		$this->assertSame('00123', $call['attrs']['employeeid'], 'табельный (EmployeeID)');
+		$this->assertSame('744912345678', $call['attrs']['admindescription'], 'ИНН/uid (adminDescription)');
+		$this->assertSame('ivanov.i@corp.local', $call['attrs']['mail']);
+		$this->assertSame('+7(999)123-4567', $call['attrs']['mobile'], 'мобильный в формате синхронизации');
 		$this->assertSame(14, strlen($call['password']));
 
 		//логин записан в карточку сотрудника
@@ -1160,6 +1167,25 @@ class AdProvidersTest extends Unit
 		$this->assertTrue($result->ok, $result->message);
 		$this->assertSame('OU=Подрядчики,OU=External,DC=azimuth,DC=local',
 			$restorer->calls['restore'][0]['newParentDn']);
+	}
+
+	/**
+	 * Формат телефонов - 1:1 как correctMobile/correctPhonesList скрипта
+	 * синхронизации (lib_funcs.ps1): иначе прогон синхронизации
+	 * переформатирует mobile созданной учётки
+	 */
+	public function testSyncPhoneFormat()
+	{
+		$this->assertSame('+7(912)345-6789', AdUserProvider::syncPhoneFormat('79123456789'));
+		$this->assertSame('+7(912)345-6789', AdUserProvider::syncPhoneFormat('89123456789'), '8 -> 7');
+		$this->assertSame('+7(912)345-6789', AdUserProvider::syncPhoneFormat('+7 912 345-67-89'), 'пробелы/тире/плюс вычищаются');
+		$this->assertSame('+7(912)345-6789', AdUserProvider::syncPhoneFormat('7(912)3456789'), 'скобки уже на месте');
+		$this->assertSame('123', AdUserProvider::syncPhoneFormat('123'), 'короткие как есть');
+		$this->assertSame('+375291234567', AdUserProvider::syncPhoneFormat('810375291234567'), 'международный набор через 810');
+
+		//список: каждый нормализуется, сборка через запятую
+		$this->assertSame('+7(912)345-6789,+7(999)123-4567',
+			AdUserProvider::syncPhonesFormat('89123456789, 79991234567'));
 	}
 
 	/** Формы: обязательность логина/OU, нормализация и формат логина */

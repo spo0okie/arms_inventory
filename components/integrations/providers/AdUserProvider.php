@@ -457,23 +457,98 @@ class AdUserProvider extends IntegrationProvider
 	}
 
 	/**
-	 * Атрибуты создаваемой учётки из карточки сотрудника: ФИО «Фамилия Имя
-	 * Отчество» раскладывается в sn/givenName, должность - в title.
+	 * Атрибуты создаваемой учётки из карточки сотрудника — СТРОГО по схеме
+	 * скрипта синхронизации inventory-to-ad.ps1: учётка, созданная отсюда,
+	 * не должна отличаться от той, что синхронизация считает правильной
+	 * (иначе первый же прогон перепишет поля). Соответствие:
+	 *   cn/name/displayName <- Ename; sn <- ln; givenName <- fn+' '+mn
+	 *   (разбор ФИО - те же геттеры UsersModelNamesTrait);
+	 *   title <- Doljnost (лимит 128); department <- orgStruct.name (64);
+	 *   company <- org.uname; adminDescription <- uid (ИНН);
+	 *   employeeNumber <- org_id; employeeID <- employee_id (табельный);
+	 *   mail <- Email; mobile <- Mobile в формате синхронизации
+	 *   ({@see syncPhonesFormat()}); pager <- effectivePhone (внутренний
+	 *   номер, тот же источник, что у phones/search-by-user).
+	 * telephoneNumber синхронизация из инвентаризации не ведёт - не пишем.
 	 * upnSuffix доопределит LdapService (account_suffix ldap-компонента).
 	 */
 	protected function accountAttributes(Users $model, string $login): array
 	{
 		$fio = trim((string)$model->Ename);
-		$tokens = preg_split('/\s+/', $fio, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+		$givenName = trim($model->fn.' '.$model->mn);
+		$nullable = static fn(?string $value) => ($value = trim((string)$value)) !== '' ? $value : null;
 		return [
 			'samaccountname' => $login,
 			'cn' => $fio !== '' ? $fio : $login,
 			'displayname' => $fio !== '' ? $fio : null,
-			'sn' => $tokens[0] ?? null,
-			'givenname' => count($tokens) > 1 ? implode(' ', array_slice($tokens, 1)) : null,
-			'title' => trim((string)$model->Doljnost) !== '' ? trim((string)$model->Doljnost) : null,
+			'sn' => $nullable($model->ln),
+			'givenname' => $nullable($givenName),
+			'title' => $nullable(mb_substr(trim((string)$model->Doljnost), 0, 128)),
+			'department' => $nullable(mb_substr(trim((string)($model->orgStruct->name ?? '')), 0, 64)),
+			'company' => $nullable($model->org->uname ?? null),
+			'admindescription' => $nullable($model->uid),
+			'employeenumber' => $nullable((string)$model->org_id),
+			'employeeid' => $nullable($model->employee_id),
+			'mail' => $nullable($model->Email),
+			'mobile' => $nullable(static::syncPhonesFormat((string)$model->Mobile)),
+			'pager' => $nullable($model->effectivePhone),
 			'upnSuffix' => $this->config['upnSuffix'] ?? null,
 		];
+	}
+
+	/**
+	 * Список мобильных в формате скрипта синхронизации (correctPhonesList
+	 * из lib_funcs.ps1): каждый номер нормализуется, список собирается
+	 * через запятую с обрезкой невлезающего в лимит поля mobile (64)
+	 */
+	public static function syncPhonesFormat(string $phones): string
+	{
+		$out = [];
+		foreach (explode(',', $phones) as $number) {
+			$number = static::syncPhoneFormat($number);
+			if (strlen(implode(',', $out)) + strlen($number) < 63) $out[] = $number;
+		}
+		return implode(',', $out);
+	}
+
+	/**
+	 * Один номер в формате скрипта синхронизации (correctMobile из
+	 * lib_funcs.ps1): «+7(912)345-6789». Логика воспроизведена 1:1, чтобы
+	 * синхронизация не переформатировала номер после создания учётки
+	 */
+	public static function syncPhoneFormat(string $number): string
+	{
+		if (mb_strlen($number) <= 3) return $number;
+
+		$number = str_replace([' ', '-', '.', '+'], '', $number);
+
+		//810375... -> 375... (международный набор через 810)
+		$digitsOnly = static fn(string $n) => str_replace(['(', ')'], '', $n);
+		if (substr($number, 0, 3) === '810' && strlen($digitsOnly($number)) > 11) {
+			$number = substr($number, 3);
+		}
+
+		if (strlen($digitsOnly($number)) === 11) {
+			//8XXX -> 7XXX
+			if ($number[0] === '8') $number = '7'.substr($number, 1);
+
+			//скобки вокруг кода города, если их нет или они не на месте
+			$leftBracket = strpos($number, '(');
+			$rightBracket = strpos($number, ')');
+			if ($leftBracket === false || $leftBracket === 0
+				|| $rightBracket === false || $rightBracket === 0
+				|| $rightBracket < $leftBracket
+			) {
+				$number = $digitsOnly($number);
+				$number = $number[0].'('.substr($number, 1, 3).')'.substr($number, 4);
+				$rightBracket = strpos($number, ')');
+			}
+
+			//тире после третьей цифры за скобкой
+			$number = substr($number, 0, $rightBracket + 4).'-'.substr($number, $rightBracket + 4);
+		}
+
+		return '+'.$number;
 	}
 
 	// ==================== восстановление учётки ====================

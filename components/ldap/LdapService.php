@@ -484,7 +484,11 @@ class LdapService extends Component
 	 * создание - возвращается честный пооперационный отчёт.
 	 *
 	 * @param array $attrs атрибуты: samaccountname (обязателен), cn,
-	 *   displayname, givenname, sn, title, upnSuffix (null = account_suffix)
+	 *   displayname, givenname, sn, title, department, company, mail,
+	 *   mobile, pager, employeeid, employeenumber, admindescription,
+	 *   upnSuffix (null = account_suffix); состав повторяет схему полей
+	 *   скрипта синхронизации inventory-to-ad.ps1 (см.
+	 *   AdUserProvider::accountAttributes())
 	 * @param string $ouDn куда создаём
 	 * @param string[] $groupDns группы (DN), в которые включить
 	 * @return array ['dn', 'enabled'(bool), 'enable_error'(?string),
@@ -509,11 +513,18 @@ class LdapService extends Component
 			$user->cn = $attrs['cn'] ?? $login;
 			$user->samaccountname = $login;
 			$user->userprincipalname = $suffix !== '' ? $login.$suffix : $login;
-			foreach (['displayname', 'givenname', 'sn', 'title'] as $attribute) {
+			foreach (['displayname', 'givenname', 'sn', 'title', 'department', 'company',
+				'mail', 'mobile', 'pager', 'employeeid', 'employeenumber', 'admindescription'] as $attribute) {
 				if (!empty($attrs[$attribute])) $user->$attribute = $attrs[$attribute];
 			}
 			$user->password = $password; //unicodePwd, требует защищённого соединения
 			$user->save();
+
+			//перечитать из каталога ДО включения: AD сам выставил созданной
+			//учётке userAccountControl (546 = disabled+passwd_notreqd), а
+			//модель в памяти об этом не знает - без refresh() запись ниже
+			//уйдёт как ADD вместо REPLACE и упадёт с «Type or value exists»
+			$user->refresh();
 
 			//включение отдельной операцией: пароль уже установлен
 			$enableError = null;
