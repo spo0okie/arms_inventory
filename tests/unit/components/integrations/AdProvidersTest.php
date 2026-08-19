@@ -638,7 +638,7 @@ class AdProvidersTest extends Unit
 	 * $mock: account (для fetchAccount), verifyFails, loginBusy,
 	 * createFails, restoreFails
 	 */
-	private function makeManageProvider(array $mock = []): AdUserProvider
+	private function makeManageProvider(array $mock = [], ?array $config = null): AdUserProvider
 	{
 		$provider = new class($mock) extends AdUserProvider {
 			public array $mock;
@@ -702,7 +702,7 @@ class AdProvidersTest extends Unit
 			}
 		};
 		$provider->id = 'ad';
-		$provider->config = [
+		$provider->config = $config ?? [
 			'usersOu' => static::USERS_OU,
 			'dismissedOu' => static::FIRED_OU,
 		];
@@ -946,7 +946,7 @@ class AdProvidersTest extends Unit
 			$user, $form, ['login' => 'executor', 'password' => 'x']);
 
 		$this->assertFalse($result->ok);
-		$this->assertStringContainsString('вне разрешённого корня', $result->message);
+		$this->assertStringContainsString('вне разрешённых корней', $result->message);
 		$this->assertArrayNotHasKey('verifyCreate', $provider->calls);
 	}
 
@@ -1095,6 +1095,71 @@ class AdProvidersTest extends Unit
 		$html = $this->makeManageProvider(['account' => $this->firedAccount()])
 			->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'test.ad', 'Uvolen' => 1]));
 		$this->assertStringNotContainsString('Восстановить', $html);
+	}
+
+	/**
+	 * Пары корней «рабочий ↔ уволенные» (ouPairs, зеркало конфига
+	 * $inventory2ad_sync скрипта увольнения): создание доступно во всех
+	 * users-корнях, восстановление зеркалит и проверяется СТРОГО в
+	 * рамках своей пары - без угадывания
+	 */
+	public function testOuPairs()
+	{
+		$pairs = ['ouPairs' => [
+			['users' => 'OU=Пользователи,DC=azimuth,DC=local',
+				'dismissed' => 'OU=Азимут,OU=Уволенные,DC=azimuth,DC=local'],
+			['users' => 'OU=External,DC=azimuth,DC=local',
+				'dismissed' => 'OU=External,OU=Уволенные,DC=azimuth,DC=local'],
+		]];
+		$credentials = ['login' => 'executor', 'password' => 'x'];
+
+		//оба действия доступны
+		$actions = $this->makeManageProvider([], $pairs)->actions(null);
+		$this->assertArrayHasKey(AdUserProvider::ACTION_CREATE, $actions);
+		$this->assertArrayHasKey(AdUserProvider::ACTION_RESTORE, $actions);
+
+		//создание: OU под вторым корнем (контрагенты) проходит
+		$user = $this->makeUser(['Login' => '']);
+		$provider = $this->makeManageProvider([], $pairs);
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_CREATE, $user,
+			new AdCreateAccountForm(['login' => 'test.new', 'ou' => 'OU=Подрядчики,OU=External,DC=azimuth,DC=local']),
+			$credentials);
+		$this->assertTrue($result->ok, $result->message);
+
+		//вне обоих корней - отказ
+		$provider = $this->makeManageProvider([], $pairs);
+		$result = IntegrationsRegistry::runActionForm($provider, AdUserProvider::ACTION_CREATE, $user,
+			new AdCreateAccountForm(['login' => 'test.new2', 'ou' => 'OU=Admins,DC=azimuth,DC=local']),
+			$credentials);
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('вне разрешённых корней', $result->message);
+
+		//панель уволенного контрагента: зеркало строго в External-корень
+		//своей пары (не в первый корень)
+		$account = $this->firedAccount();
+		$account['dn'] = 'CN=Тест АД,OU=Подрядчики,OU=External,OU=Уволенные,DC=azimuth,DC=local';
+		$html = $this->makeManageProvider(['account' => $account], $pairs)
+			->renderPanel(AdUserProvider::PANEL, new Users(['Login' => 'test.ad']));
+		$this->assertStringContainsString('Восстановить учётную запись', $html);
+		$this->assertStringContainsString(urlencode('OU=Подрядчики,OU=External,DC=azimuth,DC=local'), $html);
+
+		//восстановление в OU чужой пары отклоняется
+		$restorer = $this->makeManageProvider(['account' => $account], $pairs);
+		$result = IntegrationsRegistry::runActionForm($restorer, AdUserProvider::ACTION_RESTORE,
+			$this->makeUser(),
+			new AdRestoreAccountForm(['ou' => 'OU=Пользователи,DC=azimuth,DC=local']), $credentials);
+		$this->assertFalse($result->ok);
+		$this->assertStringContainsString('вне корня учёток этой пары', $result->message);
+		$this->assertArrayNotHasKey('restore', $restorer->calls);
+
+		//в свой корень - проходит
+		$restorer = $this->makeManageProvider(['account' => $account], $pairs);
+		$result = IntegrationsRegistry::runActionForm($restorer, AdUserProvider::ACTION_RESTORE,
+			$this->makeUser(),
+			new AdRestoreAccountForm(['ou' => 'OU=Подрядчики,OU=External,DC=azimuth,DC=local']), $credentials);
+		$this->assertTrue($result->ok, $result->message);
+		$this->assertSame('OU=Подрядчики,OU=External,DC=azimuth,DC=local',
+			$restorer->calls['restore'][0]['newParentDn']);
 	}
 
 	/** Формы: обязательность логина/OU, нормализация и формат логина */

@@ -79,7 +79,15 @@ use yii\helpers\Url;
  *         //'sms' => 'sms',        //id SMS-провайдера для отправки пароля
  *         //'defaultLength' => 12, //длина пароля по умолчанию в форме
  *         //'smsText' => 'Ваш новый пароль: {password}',
- *         //создание и восстановление учёток:
+ *         //создание и восстановление учёток - пары корней «рабочий ↔
+ *         //уволенные», строго как у скрипта увольнения ($inventory2ad_sync):
+ *         //'ouPairs' => [
+ *         //    ['users' => 'OU=Пользователи,DC=corp,DC=local',
+ *         //     'dismissed' => 'OU=Азимут,OU=Уволенные,DC=corp,DC=local'],
+ *         //    ['users' => 'OU=External,DC=corp,DC=local',
+ *         //     'dismissed' => 'OU=External,OU=Уволенные,DC=corp,DC=local'],
+ *         //],
+ *         //одна пара может быть задана и legacy-скалярами:
  *         //'usersOu' => 'OU=Пользователи,DC=corp,DC=local', //корень рабочих учёток (включает создание)
  *         //'dismissedOu' => 'OU=Уволенные,DC=corp,DC=local', //корень уволенных (включает восстановление)
  *         //'groupsOu' => 'OU=Группы,DC=corp,DC=local', //где искать группы для формы (null = весь каталог)
@@ -164,11 +172,10 @@ class AdUserProvider extends IntegrationProvider
 		$actions = $this->actions($model);
 
 		//«уволенная» учётка: отключена И лежит в контейнере уволенных
-		//(usr_dismiss.ps1); отключённой другим способом восстановление
-		//не предлагается - там причина отключения неизвестна
-		$dismissedOu = $this->dismissedOu();
-		$dismissed = $account && !$account['enabled'] && $dismissedOu
-			&& LdapService::dnIsUnder($account['dn'], $dismissedOu);
+		//одной из пар (usr_dismiss.ps1); отключённой другим способом
+		//восстановление не предлагается - причина отключения неизвестна
+		$dismissedPair = $account ? $this->dismissedPairFor($account['dn']) : null;
+		$dismissed = $account && !$account['enabled'] && $dismissedPair !== null;
 
 		//кнопки действий внутри панели: L0-ссылки, одинаковые для всех
 		//(кэш панелей общий на инстанс), доступ проверяет сервер при
@@ -186,10 +193,11 @@ class AdUserProvider extends IntegrationProvider
 		$restoreUrl = null;
 		if ($dismissed && !$model->getIsArchived() && isset($actions[static::ACTION_RESTORE])) {
 			$descriptor = $actions[static::ACTION_RESTORE];
-			//целевое OU - зеркало пути увольнения: usr_dismiss.ps1 переносит
-			//учётку в тот же подпуть под корнем уволенных
-			$target = LdapService::relocateDn(
-				LdapService::parentDn($account['dn']), $dismissedOu, (string)$this->usersOu());
+			//целевое OU - строгое зеркало пути увольнения В РАМКАХ СВОЕЙ
+			//пары: увольнение переносило учётку users-корень -> dismissed-
+			//корень с сохранением подпути, восстановление - ровно обратно
+			$target = LdapService::relocateDn(LdapService::parentDn($account['dn']),
+				$dismissedPair['dismissed'], $dismissedPair['users']);
 			if ($target) $descriptor['prefill']['ou'] = $target;
 			$restoreUrl = Url::to(IntegrationsRegistry::actionUrl(
 				$this, static::ACTION_RESTORE, $descriptor, $model));
@@ -228,7 +236,7 @@ class AdUserProvider extends IntegrationProvider
 			],
 		];
 
-		if ($this->usersOu()) {
+		if (count($this->usersOus())) {
 			$actions[static::ACTION_CREATE] = [
 				'title' => 'Создать учётную запись в AD',
 				'icon' => 'fas fa-user-plus',
@@ -241,7 +249,7 @@ class AdUserProvider extends IntegrationProvider
 					+ ($model instanceof Users ? ['login' => static::suggestLogin($model)] : []),
 				'showInPanel' => false,
 			];
-			if ($this->dismissedOu()) {
+			if ($this->restoreConfigured()) {
 				$actions[static::ACTION_RESTORE] = [
 					'title' => 'Восстановить учётную запись в AD',
 					'icon' => 'fas fa-user-check',
@@ -367,9 +375,9 @@ class AdUserProvider extends IntegrationProvider
 		//выбранные контейнеры не должны выйти за настроенные корни (форма
 		//шлёт DN текстом - серверная проверка обязательна); реальная граница
 		//полномочий - делегированные права самого исполнителя в AD
-		$usersOu = $this->usersOu();
-		if (!$usersOu || !LdapService::dnIsUnder($ou, $usersOu, true)) {
-			return ActionResult::error("Подразделение '$ou' вне разрешённого корня учёток ($usersOu)", $logParams);
+		if (!$this->inUsersOus($ou)) {
+			return ActionResult::error("Подразделение '$ou' вне разрешённых корней учёток ("
+				.implode('; ', $this->usersOus()).')', $logParams);
 		}
 		$groupsOu = $this->groupsOu();
 		if ($groupsOu) foreach ($groups as $groupDn) {
@@ -487,13 +495,8 @@ class AdUserProvider extends IntegrationProvider
 			return ActionResult::error('Сотрудник уволен в инвентаризации - восстановление учётки недоступно', $logParams);
 		}
 
-		$usersOu = $this->usersOu();
-		$dismissedOu = $this->dismissedOu();
-		if (!$usersOu || !$dismissedOu) {
-			return ActionResult::error('Восстановление не настроено (usersOu/dismissedOu)', $logParams);
-		}
-		if (!LdapService::dnIsUnder($ou, $usersOu, true)) {
-			return ActionResult::error("Подразделение '$ou' вне разрешённого корня учёток ($usersOu)", $logParams);
+		if (!$this->restoreConfigured()) {
+			return ActionResult::error('Восстановление не настроено (пары корней ouPairs/usersOu+dismissedOu)', $logParams);
 		}
 
 		//состояние учётки перепроверяется на сервере (кнопка в панели -
@@ -509,10 +512,18 @@ class AdUserProvider extends IntegrationProvider
 		if ($account['enabled']) {
 			return ActionResult::error("Учётка $targetLogin включена - восстановление не требуется", $logParams);
 		}
-		if (!LdapService::dnIsUnder($account['dn'], $dismissedOu)) {
+		$pair = $this->dismissedPairFor($account['dn']);
+		if (!$pair) {
 			return ActionResult::error(
-				"Учётка $targetLogin отключена, но лежит не в контейнере уволенных ($dismissedOu) - "
+				"Учётка $targetLogin отключена, но лежит не в контейнере уволенных - "
 				.'она отключена другим способом, разберитесь вручную',
+				$logParams
+			);
+		}
+		//восстановление - строго в рамках своей пары увольнения
+		if (!LdapService::dnIsUnder($ou, $pair['users'], true)) {
+			return ActionResult::error(
+				"Подразделение '$ou' вне корня учёток этой пары увольнения ({$pair['users']})",
 				$logParams
 			);
 		}
@@ -630,18 +641,75 @@ class AdUserProvider extends IntegrationProvider
 		return !empty(Yii::$app->params['integrations'][$this->smsProviderId()]);
 	}
 
-	/** корень рабочих учёток (включает действие создания) */
-	protected function usersOu(): ?string
+	/**
+	 * Пары корней «рабочие учётки ↔ их уволенные» — строгое соответствие
+	 * конфигу скрипта увольнения ($inventory2ad_sync в ad-usermanagement:
+	 * u_OUDN/f_OUDN): увольнение переносит учётку из users-корня пары в
+	 * dismissed-корень той же пары с сохранением подпути, восстановление
+	 * зеркалит строго обратно — в рамках СВОЕЙ пары, без угадывания.
+	 *
+	 * Конфиг: 'ouPairs' => [['users' => DN, 'dismissed' => DN], ...];
+	 * legacy-вариант 'usersOu'/'dismissedOu' (по строке) = одна пара.
+	 * Пара без dismissed допустима: создание работает, восстановления нет.
+	 *
+	 * @return array [['users' => string, 'dismissed' => ?string], ...]
+	 */
+	protected function ouPairs(): array
 	{
-		$ou = trim((string)($this->config['usersOu'] ?? ''));
-		return $ou === '' ? null : $ou;
+		$pairs = [];
+		foreach ((array)($this->config['ouPairs'] ?? []) as $pair) {
+			$users = trim((string)($pair['users'] ?? ''));
+			if ($users === '') continue;
+			$dismissed = trim((string)($pair['dismissed'] ?? ''));
+			$pairs[] = ['users' => $users, 'dismissed' => $dismissed === '' ? null : $dismissed];
+		}
+		if (!count($pairs)) { //legacy-скаляры одной парой
+			$users = trim((string)($this->config['usersOu'] ?? ''));
+			$dismissed = trim((string)($this->config['dismissedOu'] ?? ''));
+			if ($users !== '') {
+				$pairs[] = ['users' => $users, 'dismissed' => $dismissed === '' ? null : $dismissed];
+			}
+		}
+		return $pairs;
 	}
 
-	/** корень уволенных учёток (включает действие восстановления) */
-	protected function dismissedOu(): ?string
+	/**
+	 * Корни рабочих учёток из пар (для дерева OU формы создания и проверок)
+	 * @return string[]
+	 */
+	protected function usersOus(): array
 	{
-		$ou = trim((string)($this->config['dismissedOu'] ?? ''));
-		return $ou === '' ? null : $ou;
+		return array_column($this->ouPairs(), 'users');
+	}
+
+	/** лежит ли DN под одним из корней рабочих учёток (или равен ему) */
+	protected function inUsersOus(string $dn): bool
+	{
+		foreach ($this->usersOus() as $root) {
+			if (LdapService::dnIsUnder($dn, $root, true)) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Пара, в чей контейнер уволенных попадает DN (null = ни в чей —
+	 * учётка отключена не увольнением)
+	 */
+	protected function dismissedPairFor(string $dn): ?array
+	{
+		foreach ($this->ouPairs() as $pair) {
+			if ($pair['dismissed'] && LdapService::dnIsUnder($dn, $pair['dismissed'])) return $pair;
+		}
+		return null;
+	}
+
+	/** настроено ли восстановление (есть хотя бы одна пара с dismissed) */
+	protected function restoreConfigured(): bool
+	{
+		foreach ($this->ouPairs() as $pair) {
+			if ($pair['dismissed']) return true;
+		}
+		return false;
 	}
 
 	/** корень поиска групп для формы создания (null = весь каталог) */
@@ -654,7 +722,7 @@ class AdUserProvider extends IntegrationProvider
 	/** настроено ли создание учёток (для appliesTo - дёшево, без сети) */
 	protected function createConfigured(): bool
 	{
-		return $this->smsConfigured() && $this->usersOu() !== null;
+		return $this->smsConfigured() && count($this->usersOus()) > 0;
 	}
 
 	// ==================== генерация логина ====================
@@ -1176,14 +1244,18 @@ class AdUserProvider extends IntegrationProvider
 	}
 
 	/**
-	 * Дерево OU под usersOu для селекта формы (сервисной учёткой).
-	 * Тесты подменяют.
+	 * Деревья OU под всеми корнями usersOu для селекта формы (сервисной
+	 * учёткой); каждый корень - своё поддерево с depth 0. Тесты подменяют.
 	 * @return array см. {@see \app\components\ldap\LdapService::ouList()}
 	 * @throws \Throwable при недоступности LDAP
 	 */
 	protected function ldapOuList(): array
 	{
-		return Yii::$app->ldap->ouList((string)$this->usersOu());
+		$items = [];
+		foreach ($this->usersOus() as $root) {
+			$items = array_merge($items, Yii::$app->ldap->ouList($root));
+		}
+		return $items;
 	}
 
 	/**
