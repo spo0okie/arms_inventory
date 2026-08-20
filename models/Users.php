@@ -55,6 +55,10 @@ use yii\web\IdentityInterface;
  * @property array $lic_items_ids Массив ID привязанных закупок лицензий
  * @property array $lic_keys_ids Массив ID привязанных лицензионных ключей
  * @property Aces[]      $aces
+ * @property Absences[] $absences
+ * @property Absences[] $pendingAbsences
+ * @property Absences[] $currentAbsences
+ * @property Absences[] $futureAbsences
  * @property Comps[]     $comps
  * @property Comps[]     $adminComps
  * @property Comps[]     $compsFromServices
@@ -356,6 +360,24 @@ class Users extends ArmsModel implements IdentityInterface
 					.'за действия этого АРМ/оборудования',
 				'ref'=>\app\models\Techs::class, 'refMulti'=>true,
 			],
+			'absences' => [
+				'Отсутствия',
+				'hint'=>'Отпуска, больничные, командировки и прочие отсутствия сотрудника за всё время. '
+					.'Записи приходят из кадровых систем (SAP/1С) или заводятся вручную',
+				'ref'=>\app\models\Absences::class, 'refMulti'=>true,
+			],
+			'currentAbsences' => [
+				'Отсутствует сейчас',
+				'hint'=>'Отсутствия, период которых включает сегодняшний день: '
+					.'сотрудника прямо сейчас нет на рабочем месте',
+				'ref'=>\app\models\Absences::class, 'refMulti'=>true,
+			],
+			'futureAbsences' => [
+				'Предстоящие отсутствия',
+				'hint'=>'Отсутствия, которые ещё не начались: запланированные отпуска, '
+					.'командировки и т.п.',
+				'ref'=>\app\models\Absences::class, 'refMulti'=>true,
+			],
 			'contracts' => [
 				'Документы',
 				'hint'=>'Привязанные к сотруднику документы (договоры, акты и т.п.)',
@@ -495,6 +517,60 @@ class Users extends ArmsModel implements IdentityInterface
 	{
 		return $this->hasMany(Schedules::class, ['id'=>'schedules_id'])->from(['users_scheduled_access'=>Schedules::tableName()])
 			->via('acls');
+	}
+
+
+	/**
+	 * Отсутствия сотрудника (отпуска, больничные, командировки) — все, включая прошедшие.
+	 * Порядок — от ранних к поздним, чтобы списки на карточке шли по календарю.
+	 * @return ActiveQuery
+	 */
+	public function getAbsences()
+	{
+		return $this->hasMany(Absences::class, ['user_id'=>'id'])
+			->orderBy(['date_from'=>SORT_ASC,'date_to'=>SORT_ASC]);
+	}
+
+	/**
+	 * Отсутствия, которые ещё не закончились: идущие сейчас и предстоящие.
+	 * Фильтруется в PHP по уже загруженной связи — карточка сотрудника показывает
+	 * оба списка (текущий и будущий), и делать под них два отдельных запроса незачем.
+	 * @return Absences[]
+	 */
+	public function getPendingAbsences()
+	{
+		if (isset($this->attrsCache['pendingAbsences'])) return $this->attrsCache['pendingAbsences'];
+		$today=date('Y-m-d');
+		$pending=[];
+		foreach ($this->absences as $absence)
+			if (($absence->date_to??'')>=$today) $pending[]=$absence;
+		return $this->attrsCache['pendingAbsences']=$pending;
+	}
+
+	/**
+	 * Отсутствия, идущие прямо сейчас (сегодня попадает в период).
+	 * @return Absences[]
+	 */
+	public function getCurrentAbsences()
+	{
+		$today=date('Y-m-d');
+		$current=[];
+		foreach ($this->pendingAbsences as $absence)
+			if (($absence->date_from??'')<=$today) $current[]=$absence;
+		return $current;
+	}
+
+	/**
+	 * Отсутствия, которые ещё не начались.
+	 * @return Absences[]
+	 */
+	public function getFutureAbsences()
+	{
+		$today=date('Y-m-d');
+		$future=[];
+		foreach ($this->pendingAbsences as $absence)
+			if (($absence->date_from??'')>$today) $future[]=$absence;
+		return $future;
 	}
 
 

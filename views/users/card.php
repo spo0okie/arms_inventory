@@ -56,6 +56,17 @@ if (!isset($static_view)) $static_view=false;
 			<?php } ?>
 	    </div>
     </div>
+	<?php
+	//статус присутствия сотрудника: сначала идущие сейчас отсутствия, следом запланированные.
+	//Пустые списки блоков не рисуют (show_empty=false), прошедшие отсутствия на карточку
+	//не выводятся - их полная история есть в разделе «Отсутствия»
+	foreach (['currentAbsences','futureAbsences'] as $absencesField)
+		echo ModelFieldWidget::widget([
+			'model' => $model, 'field' => $absencesField,
+			'item_options' => ['static_view' => $static_view, 'no_user' => true],
+		]);
+	?>
+
 	<div class="flex-row d-flex flex-wrap pb-3">
 		<span class="pe-4">
 			<span class="h5"><?= ModelFieldWidget::renderFieldTitle($model,'Login',null,'span','Логин в AD') ?>: </span><?= ModelFieldWidget::renderFieldValue($model,'Login') ?>

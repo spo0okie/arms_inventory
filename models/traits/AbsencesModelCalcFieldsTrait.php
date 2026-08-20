@@ -38,6 +38,31 @@ trait AbsencesModelCalcFieldsTrait
 	}
 
 	/**
+	 * Подпись БЕЗ имени сотрудника: «отпуск ежегодный: 01.01.2026 – 10.01.2026».
+	 * Нужна там, где сотрудник уже известен из контекста (список отсутствий
+	 * на его же карточке) — повторять фамилию в каждой строке незачем.
+	 * @return string
+	 */
+	public function getShortName()
+	{
+		$type = Absences::$types[$this->type] ?? ($this->type ?: 'отсутствие');
+		$period = $this->getPeriodLabel();
+		return $period !== '' ? $type . ': ' . $period : $type;
+	}
+
+	/**
+	 * Идёт ли отсутствие прямо сейчас: сегодняшний день попадает в период
+	 * (границы включительно). Пустые даты — не «сейчас».
+	 * @return bool
+	 */
+	public function getIsCurrent()
+	{
+		$today = date('Y-m-d');
+		return ($this->date_from ?? '') !== '' && ($this->date_to ?? '') !== ''
+			&& $this->date_from <= $today && $this->date_to >= $today;
+	}
+
+	/**
 	 * Имя сотрудника через связь user, если она доступна (мастер-модель), иначе ''.
 	 * @return string
 	 */
