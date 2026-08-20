@@ -150,6 +150,9 @@ class Networks extends ArmsModel
 				'hint' => 'Короткое понятное название' . static::$latinNameHint,
 				'typeClass'=>\app\types\StringType::class,
 			],
+			//параметр неточного (LIKE) поиска REST API /api/networks?name-like=...
+			//объявлен здесь, чтобы резолвер типов видел его как строку (см. NetworksController::$searchFields)
+			'name-like' => ['alias'=>'name'],
 			'notepad' => [
 				'Подробно',
 				'hint' => 'Подробное описание сети',
@@ -225,6 +228,33 @@ class Networks extends ArmsModel
 			],
 			'segment' => ['alias'=>'segments_id'],
 		]);
+	}
+	
+	/**
+	 * Дополнительные поля для REST API (?expand=...).
+	 * В самой таблице адреса лежат числами (addr/mask/router/dhcp), поэтому
+	 * читаемые представления и вычисляемые характеристики сети отдаются по запросу.
+	 * Тяжёлые обходы (comps/techs/firstUnusedIp) сюда намеренно не включены.
+	 * @return array
+	 */
+	public function extraFields()
+	{
+		$extra=[
+			'readableNetworkIp',
+			'readableNetMask',
+			'readableWildcard',
+			'readableBroadcastIp',
+			'readableFirstIp',
+			'readableLastIp',
+			'readableRouter',
+			'readableDhcp',
+			'capacity',
+			'maxHosts',
+			'used',
+			'usedPercent',
+			'segment',
+		];
+		return array_merge(parent::extraFields(),array_combine($extra,$extra));
 	}
 	
 	public function getPlace()
