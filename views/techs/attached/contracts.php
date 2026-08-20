@@ -43,7 +43,7 @@ if (!isset($static_view)) $static_view=false;
             $('#contracts-link-form').on('beforeSubmit', function(){
                 console.log($('input[name=contracts_id]').val());
                 $.ajax({
-                    url: '/web/contracts/link-tech',
+                    url: armsUrlBase+'/contracts/link-tech',
                     type: 'GET',
                     data: {
                         techs_id: {$model->id},

@@ -38,7 +38,7 @@ $jsCrop=
 		let \$mapEditSelector=jQuery('#edit-map');
 		
 		\$mapEditSelector.CropSelectJs({
-  			imageSrc: '{$mapImage->fullFname}',
+  			imageSrc: '{$mapImage->url}',
   			animatedBorder: false,
   			imgWidth: $imgWidth,
   			imgHeight: $imgHeight,

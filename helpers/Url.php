@@ -23,6 +23,22 @@ class Url extends \yii\helpers\BaseUrl {
 	}
 	
 	/**
+	 * Префикс, с которого начинаются все pretty-URL приложения.
+	 *
+	 * Нужен клиентскому JS: статические .js-файлы не могут звать Url::to(), а
+	 * писать в них адреса вида '/scans/delete' нельзя - префикс зависит от того,
+	 * как приложение опубликовано ('' при каноническом DocumentRoot=web,
+	 * '/web' у старых установок, '/index-test.php' в acceptance-тестах).
+	 * Значение отдаётся в JS переменной armsUrlBase ({@see \app\assets\AppAsset}).
+	 *
+	 * @return string префикс без завершающего слэша ('' | '/web' | '/index-test.php')
+	 */
+	public static function appBase() {
+		$manager=\Yii::$app->urlManager;
+		return rtrim($manager->showScriptName?$manager->getScriptUrl():$manager->getBaseUrl(),'/');
+	}
+	
+	/**
 	 * Возвращает имя сервера из url
 	 * @param $url
 	 * @return mixed|string

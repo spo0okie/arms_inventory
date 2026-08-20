@@ -55,7 +55,7 @@ $('#btn-generate').on('click', function() {
 
     $(this).prop('disabled', true).text('Генерация...');
 
-    $.post('/web/soft/generate-description', {manufacturer, name})
+    $.post(armsUrlBase+'/soft/generate-description', {manufacturer, name})
         .done(function(resp) {
             if (resp.error) {
                 alert(resp.error);

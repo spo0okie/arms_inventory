@@ -21,7 +21,7 @@ $js = <<<JS
 function fetchContractsFromPartners(){
         let partners=$("#contracts-partners_ids").val();
         console.log(partners);
-        $.ajax({url: "/web/contracts/hint-parent?form=contracts&ids="+partners})
+        $.ajax({url: armsUrlBase+"/contracts/hint-parent?form=contracts&ids="+partners})
             .done(function(data){
             	$("#parent_id-hint").html(data);
             })
@@ -135,7 +135,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 	    $preview[]=$scan->thumbUrl;
 	    $config[]=(object)[
             'caption'=>$scan->noidxFname,
-            'downloadUrl'=>$scan->fullFname,
+            'downloadUrl'=>$scan->url,
             'size'=>$scan->fileSize,
             'key'=>$scan->id
         ];

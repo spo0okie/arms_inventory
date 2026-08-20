@@ -59,7 +59,7 @@ $carouselId = $modalId . '-carousel';
 						<div class="carousel-inner">
 							<?php foreach ($photos as $i => $scan) { ?>
 								<div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
-									<?= Html::img($scan->fileExists ? $scan->fullFname : Scans::noThumb(), [
+									<?= Html::img($scan->fileExists ? $scan->url : Scans::noThumb(), [
 										'class' => 'd-block w-100',
 										'style' => 'max-height:70vh;object-fit:contain;',
 										'alt' => Html::encode($scan->name),

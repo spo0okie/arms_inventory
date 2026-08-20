@@ -89,7 +89,7 @@ $tabs[]=[
 		</div>
 		<script>
 			$(document).ready(function() {
-				$.get("/web/networks/incoming-connections-list?id={$model->id}", function(data) {
+				$.get(armsUrlBase+"/networks/incoming-connections-list?id={$model->id}", function(data) {
 				    jQuery("#incomingConnectionsList").hide().html(data);
 				    setTimeout(function (){jQuery("#incomingConnectionsList").fadeToggle();ExpandableCardInitAll();},500)
 				})

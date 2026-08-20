@@ -9,7 +9,7 @@ if (!isset($static_view)) $static_view = false;
 
 echo ItemObjectWidget::widget([
 	'model'=>$model,
-	'url'=>$model->fullFname,
+	'url'=>$model->url,
 	'hrefOptions'=>['target'=>'_blank'],
 	'namePrefix'=>'<i class="fas fa-file-download"></i> ',
 	'noUpdate'=>true,

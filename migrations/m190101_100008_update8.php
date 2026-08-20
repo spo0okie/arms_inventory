@@ -79,6 +79,7 @@ class m190101_100008_update8 extends Migration
 			UPDATE `techs` SET it_staff_id=(SELECT id FROM `users` WHERE `users`.`employee_id`=`techs`.`it_staff_id` limit 1);
 
 			COMMIT;
+			SET AUTOCOMMIT = 1;
 			SET FOREIGN_KEY_CHECKS=1;
 SQL;
 		$this->execute($sql);
@@ -139,6 +140,7 @@ SQL;
 			UPDATE `users` SET users.`id`=`employee_id`;
 
 			COMMIT;
+			SET AUTOCOMMIT = 1;
 			SET FOREIGN_KEY_CHECKS=1;
 SQL;
 		$this->execute($sql);

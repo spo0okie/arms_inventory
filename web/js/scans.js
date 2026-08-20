@@ -8,7 +8,7 @@ String.prototype.replaceAt=function(index, replacement) {
 //удаление скана из БД и плитки из просмотра
 function scansDeleteConfirm(scans_id,contracts_id) {
     if (confirm("Удалить этот скан? Операция необратима!")) $.ajax({
-        url: '/web/scans/delete?id='+scans_id+"&contracts_id="+contracts_id,
+        url: armsUrlBase+'/scans/delete?id='+scans_id+"&contracts_id="+contracts_id,
         type: 'POST',
         success: function(data) {
             //если запрос отработался
@@ -129,7 +129,7 @@ function contractFromApplyChanges(data){
     if (data.error === 'OK') {
         //если все сохранилось хорошо
         //экшн формы теперь обновление созданной модели, а не создание новой
-        yiiform.attr('action', '/web/contracts/update?id=' + data.model.id);
+        yiiform.attr('action', armsUrlBase+'/contracts/update?id=' + data.model.id);
         //сохраняем ИД созданной модели для обработчиков завершения редактирования
         $('#contract_form_model_id').val(data.model.id);
 
@@ -168,7 +168,7 @@ function contractFromApplyChanges(data){
 
 function contractFormGotoViewOnSave() {
     //console.log('going view '+$('#contract_form_model_id').val());
-    let new_url=window.location.protocol+'//'+window.location.host+'/web/contracts/view?id='+$('#contract_form_model_id').val()
+    let new_url=window.location.protocol+'//'+window.location.host+armsUrlBase+'/contracts/view?id='+$('#contract_form_model_id').val()
     window.location=new_url;
 }
 

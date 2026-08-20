@@ -54,7 +54,7 @@ $tabs=[];
 $showArchived = ShowArchivedWidget::isOn();
 
 $tabs[]=TabsWidget::asyncDynagridTab('serviceChildren','services-index','Состав сервиса',
-	"/web/services/children-tree?id=$model->id&showArchived=$showArchived",
+	Url::to(['/services/children-tree','id'=>$model->id,'showArchived'=>$showArchived]),
 	Html::a('Добавить субсервис',[
 		'create','Services'=>['parent_id'=>$model->id]
 	],[
@@ -63,11 +63,11 @@ $tabs[]=TabsWidget::asyncDynagridTab('serviceChildren','services-index','Сос�
 );
 
 $tabs[]=TabsWidget::asyncDynagridTab('serviceComps','services-comps-index','Оборудование и ОС',
-	"/web/services/os-list?id={$model->id}&showArchived={$showArchived}"
+	Url::to(['/services/os-list','id'=>$model->id,'showArchived'=>$showArchived])
 );
 /*
 $tabs[]=TabsWidget::asyncDynagridTab('serviceAces','service-aces-list', 'Доступ отсюда',
-	"/web/services/aces-list?id={$model->id}&showArchived={$showArchived}",
+	Url::to(['/services/aces-list','id'=>$model->id,'showArchived'=>$showArchived]),
 	Html::a('Добавить исходящий доступ',[
 		'/acls/create','Aces'=>['services_ids'=>[$model->id]]
 	],[

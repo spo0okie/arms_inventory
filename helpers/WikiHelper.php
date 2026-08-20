@@ -2,6 +2,7 @@
 
 namespace app\helpers;
 
+use yii\helpers\Url;
 use Yii;
 
 class WikiHelper
@@ -137,9 +138,12 @@ class WikiHelper
 		$html = str_replace('href=\'/','href=\'' . $wikiUrl , $html);
 		$html = str_replace('src="/',  'src="' . $wikiUrl , $html);
 		$html = str_replace('src=\'/', 'src=\'' . $wikiUrl , $html);
+		//плагин вики оставляет в html ссылку на свой ajax, а тултип рисуем мы сами:
+		//подменяем ее адресом нашего эндпоинта. Префикс берем у приложения - в адресах
+		//он был '/web' только из-за старой схемы публикации (docs/help/admin/install.md)
 		$html = preg_replace_callback('|qtip_ajxhrf="/lib/exe/ajax.php\?call=inventory&action=ttip&data=([^"]+)"|',
 			function($matches) {
-				return 'qtip_ajxhrf="/web'.urldecode($matches[1]).'"';
+				return 'qtip_ajxhrf="'.Url::appBase().urldecode($matches[1]).'"';
 			}, $html);
 		
 		return $html;

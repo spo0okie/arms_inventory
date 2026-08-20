@@ -43,7 +43,7 @@ $this->registerJs($js);
 			$preview[]=$scan->thumbUrl;
 			$config[]=(object)[
 				'caption'=>$scan->noidxFname,
-				'downloadUrl'=>$scan->fullFname,
+				'downloadUrl'=>$scan->url,
 				'size'=>$scan->fileSize,
 				'key'=>$scan->id
 			];

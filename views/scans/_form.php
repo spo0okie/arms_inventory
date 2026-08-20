@@ -26,7 +26,7 @@ $js = <<<JS
     	}
     	if (!id) return;
     	$.ajax({
-        url: '/web/scans/thumb?id='+id+"&link="+link+"&link_id="+link_id,
+        url: armsUrlBase+'/scans/thumb?id='+id+"&link="+link+"&link_id="+link_id,
         type: 'POST',
         success: function(data) {
             //если запрос отработался
@@ -64,7 +64,7 @@ $this->registerJs($js);
 		$preview[]=$scan->thumbUrl;
 		$config[]=(object)[
 			'caption'=>$scan->noidxFname,
-			'downloadUrl'=>$scan->fullFname,
+			'downloadUrl'=>$scan->url,
 			'size'=>$scan->fileSize,
 			'key'=>$scan->id
 		];

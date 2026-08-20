@@ -7,6 +7,7 @@
 
 namespace app\assets;
 
+use yii\helpers\Url;
 use yii\web\AssetBundle;
 use yii\web\View;
 
@@ -59,4 +60,19 @@ class AppAsset extends AssetBundle
 		'app\assets\TooltipsterAsset',
 		'app\components\assets\ExpandableCardWidgetAsset'
     ];
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * Заодно отдаём клиентскому JS префикс адресов приложения: статические
+	 * скрипты (js/scans.js, js-файлы виджетов) не могут звать Url::to(), а
+	 * зашитый в них '/web/...' — наследие старой схемы публикации, при
+	 * каноническом DocumentRoot=web он указывал бы в никуда
+	 * (docs/help/admin/install.md, {@see \yii\helpers\Url::appBase()}).
+	 */
+	public function registerAssetFiles($view)
+	{
+		$view->registerJsVar('armsUrlBase',Url::appBase());
+		parent::registerAssetFiles($view);
+	}
 }

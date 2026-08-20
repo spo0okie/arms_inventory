@@ -8,6 +8,6 @@
 
 - Импорт пользователей и оргструктуры из внешних кадровых ИС (SAP, 1C) через <https://github.com/spo0okie/SAP-Inventory-sync> (подробнее: [синхронизация пользователей](../user-sync.md))
 - Синхронизация пользовательских данных с Active Directory через <https://github.com/spo0okie/AD-Inventory-sync> (подробнее: [синхронизация с АД](ad-sync.md))
-- Поиск ФИО сотрудника по номеру внутреннего телефона через REST API (`/web/api/phones/search-by-num?num=...`) - используется для CallerID в телефонии, пример: <https://github.com/spo0okie/ast-lite/blob/master/scripts/callerid.sh>
+- Поиск ФИО сотрудника по номеру внутреннего телефона через REST API (`/api/phones/search-by-num?num=...`) - используется для CallerID в телефонии, пример: <https://github.com/spo0okie/ast-lite/blob/master/scripts/callerid.sh>
 - Сопоставление виртуальных машин VMWare с инвентаризацией внешним PowerCLI-скриптом (подробнее: [интеграция с VMWare](vmware.md))
 - Просмотр страниц [DokuWiki/Confluence](dokuwiki.md) прямо в карточках объектов

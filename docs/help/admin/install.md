@@ -52,12 +52,25 @@ GRANT ALL PRIVILEGES ON arms.* TO 'arms-user'@'localhost' IDENTIFIED BY 'secret-
 
 ### Файловая структура
 
-Клонируем содержимое git-репозитория в папку, которая будет корнем сайта (DocumentRoot веб-сервера — именно корень проекта, а не подпапка `web`: лежащий в корне `.htaccess` сам переписывает запросы в `web/`).
+Клонируем содержимое git-репозитория в папку проекта (например **/var/www/arms**).
 
 ```bash
 git clone https://github.com/spo0okie/arms_inventory.git .
 chmod 755 ./yii
 ```
+
+> **Корнем сайта (DocumentRoot) должна быть подпапка `web` проекта**, а не сам проект:
+> `/var/www/arms/web`. Наружу тогда смотрит только то, что и должно быть доступно
+> браузеру, а код, конфиги с паролями (`config/db-local.php`) и `runtime` остаются
+> вне корня сайта. Адреса при такой публикации выглядят как
+> `https://inventory.domain.local/techs/index`.
+>
+> Инсталляции, развернутые по прежней редакции этой инструкции, публиковались иначе - DocumentRoot указывал
+> на корень проекта, а лежащий там `.htaccess` переписывал запросы в `web/`. Из-за этого
+> во всех адресах присутствовал лишний токен: `https://inventory.domain.local/web/techs/index`.
+> Такие адреса продолжают работать и на новой публикации (см. [Адреса приложения](#адреса-приложения)),
+> так что перенастраивать интеграции разом не требуется. Порядок перехода описан
+> в инструкции по [обновлению](update.md#переход-на-адреса-без-web).
 
 Это установит все уникальные для этого проекта файлы, но не используемые им сторонние модули, которые поддерживаются другими разработчиками.
 
@@ -174,7 +187,7 @@ return [
 
 ### Apache
 
-Должен быть включен модуль `rewrite`, а для каталога проекта разрешен `AllowOverride All` — иначе не сработает `.htaccess`, который переписывает запросы в `web/`.
+Должен быть включен модуль `rewrite`, а для каталога `web` разрешен `AllowOverride All` — иначе не сработает `web/.htaccess`, который отдает pretty-URL в `index.php`.
 
 Пример файла apache2
 
@@ -182,9 +195,10 @@ return [
 <VirtualHost *:443>
   ServerName inventory.domain.local
 
-  DocumentRoot "/var/www/arms"
+  #корень сайта - подпапка web проекта, а не сам проект
+  DocumentRoot "/var/www/arms/web"
 
-  <Directory "/var/www/arms">
+  <Directory "/var/www/arms/web">
     Options -Indexes +Includes
     AllowOverride All
     Require all granted
@@ -202,6 +216,56 @@ return [
 </VirtualHost>
 ```
 
+### Адреса приложения
+
+При каноническом DocumentRoot (`<проект>/web`) приложение живет на чистых адресах:
+
+| Что | Адрес |
+|---|---|
+| интерфейс | `https://inventory.domain.local/techs/index` |
+| REST API | `https://inventory.domain.local/api/users` |
+| статика | `https://inventory.domain.local/css/custom.css` |
+
+**Старые адреса с `/web/` продолжают работать** - `https://inventory.domain.local/web/api/users`
+обслуживается ровно тем же кодом, что и `/api/users`. Сделано это для инсталляций, выросших
+из прежней схемы публикации: перенастроить разом все интеграции (скрипты синхронизации,
+телефонию, плагин wiki, закладки сотрудников, ссылки в самой wiki) невозможно.
+
+Как это устроено:
+
+- `web/.htaccess` срезает префикс на уровне веб-сервера, поэтому по старому адресу отдается
+  и статика (`/web/css/custom.css`);
+- `app\components\Request` срезает тот же префикс из пути запроса, иначе роутер искал бы
+  несуществующий контроллер `web`.
+
+Совместимость работает **без редиректа**: метод запроса и тело сохраняются, поэтому
+POST/PUT-интеграции не ломаются. При этом сами страницы всегда рисуют канонические ссылки,
+так что открытая по старому адресу страница «вылечивается» после первого же перехода.
+
+Когда все интеграции переведены на чистые адреса, слой совместимости можно выключить -
+в **config/web-local.php**:
+
+```php
+<?php
+return [
+    'components' => [
+        //старые адреса /web/... начнут отдавать 404
+        'request' => ['legacyPathPrefix' => null],
+    ],
+];
+```
+
+> Если веб-сервер не apache, `.htaccess` не читается, и оба правила надо перенести в его конфиг.
+> Для nginx это выглядит так:
+> ```nginx
+> root /var/www/arms/web;
+> #совместимость со старой схемой публикации
+> rewrite ^/web/(.*)$ /$1 last;
+> location / {
+>     try_files $uri $uri/ /index.php$is_args$args;
+> }
+> ```
+
 ### Импорт данных
 
 Из демо БД, чтобы вручную не заводить кучу оборудования, ПО, производителей и т.п.
@@ -212,7 +276,7 @@ return [
 (а также категории оборудования и производители)
 
 ```bash
-./yii sync/tech-models https://inventory.reviakin.net/web/api guest guest1
+./yii sync/tech-models https://inventory.reviakin.net/api guest guest1
 ```
 
 #### Списки ПО
@@ -220,13 +284,13 @@ return [
 (а также само ПО и производители)
 
 ```bash
-./yii sync/soft-lists https://inventory.reviakin.net/web/api guest guest1
+./yii sync/soft-lists https://inventory.reviakin.net/api guest guest1
 ```
 
 #### Типы лицензий
 
 ```bash
-./yii sync/lic-groups https://inventory.reviakin.net/web/api guest guest1
+./yii sync/lic-groups https://inventory.reviakin.net/api guest guest1
 ```
 
 ### Дальше

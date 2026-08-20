@@ -42,7 +42,7 @@ class PhonesController extends BaseRestController
 
 
 	#[OA\Get(
-		path: "/web/api/phones/search-by-num",
+		path: "/api/phones/search-by-num",
 		summary: "Поиск пользователя по внутреннему номеру телефона",
 		parameters: [new OA\Parameter(
 			name: "num",
@@ -118,7 +118,7 @@ class PhonesController extends BaseRestController
 
 
 	#[OA\Get(
-		path: "/web/api/phones/filter-by-num",
+		path: "/api/phones/filter-by-num",
 		summary: "Поиск имени пользователя по внутреннему номеру телефона",
 		parameters: [new OA\Parameter(
 			name: "num",
@@ -196,7 +196,7 @@ class PhonesController extends BaseRestController
 	}
 
 	#[OA\Get(
-		path: "/web/api/{controller}/search-by-user",
+		path: "/api/{controller}/search-by-user",
 		summary: "Поиск внутреннего номера телефона по ID или логину пользователя",
 		parameters: [
 			new OA\Parameter(

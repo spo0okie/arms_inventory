@@ -94,7 +94,7 @@ function previewRackConfFor(attr) {
     let strData=$('#techmodels-'+attr).val();
     $.ajax({
         type: "POST",
-        url: "/web/tech-models/render-rack",
+        url: armsUrlBase+"/tech-models/render-rack",
         data: {config:strData}
     }).done(function(preview) {
         $('#preview-'+attr).html(preview);

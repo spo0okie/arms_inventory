@@ -1,3 +1,9 @@
+# LEGACY. Этот файл нужен только установкам, где DocumentRoot всё ещё указывает
+# на корень проекта: именно из-за такой публикации в адреса приложения попал
+# лишний токен /web/. Канон - DocumentRoot=<проект>/web (docs/help/admin/install.md),
+# при нём корневой .htaccess не читается вовсе, а старые адреса с /web/
+# обслуживает связка web/.htaccess + app\components\Request.
+
 <IfModule mod_rewrite.c>
     Options +FollowSymlinks
     RewriteEngine On

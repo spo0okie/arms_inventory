@@ -60,7 +60,7 @@ docker compose up
 > ```
 
 ```bash
-docker exec -it "arms-arms-app-1" php yii sync/tech-models https://inventory.reviakin.net/web/api guest guest1
+docker exec -it "arms-arms-app-1" php yii sync/tech-models https://inventory.reviakin.net/api guest guest1
 ```
 
 #### Списки ПО
@@ -68,13 +68,13 @@ docker exec -it "arms-arms-app-1" php yii sync/tech-models https://inventory.rev
 (а также само ПО и производители)
 
 ```bash
-docker exec -it "arms-arms-app-1" php yii sync/soft-lists https://inventory.reviakin.net/web/api guest guest1
+docker exec -it "arms-arms-app-1" php yii sync/soft-lists https://inventory.reviakin.net/api guest guest1
 ```
 
 #### Типы лицензий
 
 ```bash
-docker exec -it "arms-arms-app-1" php yii sync/lic-groups https://inventory.reviakin.net/web/api guest guest1
+docker exec -it "arms-arms-app-1" php yii sync/lic-groups https://inventory.reviakin.net/api guest guest1
 ```
 
 ### Дальше

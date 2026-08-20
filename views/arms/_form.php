@@ -115,7 +115,7 @@ if (!isset($modalParent)) $modalParent=null;
         //меняем подсказку описания модели в при смене типа оборудования
         function techSwitchDescr(){
             model_id=$("#arms-model_id").val();
-            $.ajax({url: "/web/tech-models/hint-template?id="+model_id})
+            $.ajax({url: armsUrlBase+"/tech-models/hint-template?id="+model_id})
                 .done(function(data) {
                 	if (data=="'.\app\models\TechModels::$no_specs_hint.'") {
                 		$("#arms-specs_settings").hide();
@@ -125,7 +125,7 @@ if (!isset($modalParent)) $modalParent=null;
                 	}
 				})
                 .fail(function () {console.log("Ошибка получения данных!")});
-            $.ajax({url: "/web/tech-models/hint-description?id="+model_id})
+            $.ajax({url: armsUrlBase+"/tech-models/hint-description?id="+model_id})
                 .done(function(data) {$("#model-hint").html(data);})
                 .fail(function () {console.log("Ошибка получения данных!")});
         }';

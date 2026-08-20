@@ -4,7 +4,7 @@
 $script = <<<JS
     function attachCompToArm(comp_id,arm_id) {
         jQuery.ajax({
-            url: '/web/comps/update?id='+comp_id,
+            url: armsUrlBase+'/comps/update?id='+comp_id,
             type: 'POST',
              data: { 'Comps[arm_id]' : arm_id },
              success: function(data) {

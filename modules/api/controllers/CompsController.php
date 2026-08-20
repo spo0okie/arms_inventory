@@ -77,7 +77,7 @@ class CompsController extends BaseRestController
     }
 
 	#[OA\Post(
-		path: "/web/api/{controller}/push",
+		path: "/api/{controller}/push",
 		summary: "Обновить (если в теле передан ID) или создать новый элемент ОС (если ID не заполнен)",
 		requestBody: new OA\RequestBody(
 			required: true,

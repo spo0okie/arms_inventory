@@ -68,7 +68,7 @@ if (!isset($static_view)) $static_view=false;
                 $('#arms-form').on('beforeSubmit', function(){
                     var data = $(this).serialize();
                     $.ajax({
-                        url: '/web/arms/create',
+                        url: armsUrlBase+'/arms/create',
                         type: 'POST',
                         data: data,
                         success: function(){window.location.reload();},

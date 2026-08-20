@@ -71,7 +71,7 @@ class UsersController extends BaseRestController
 	}
 
 	#[OA\Post(
-		path: "/web/api/users/migrate",
+		path: "/api/users/migrate",
 		summary: "Перенести связи и атрибуты одной кадровой записи сотрудника на другую",
 		parameters: [
 			new OA\Parameter(

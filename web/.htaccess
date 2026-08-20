@@ -1,6 +1,16 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Совместимость со старой схемой публикации (DocumentRoot указывал на корень
+    # проекта, .htaccess из корня переписывал запросы сюда, и токен web оседал во
+    # всех адресах). Интеграции до сих пор ходят на /web/..., поэтому срезаем
+    # префикс прозрачно, без редиректа: статика (/web/css/custom.css) отдаётся
+    # с диска, остальное уходит в index.php, а app\components\Request убирает
+    # тот же префикс из pathInfo для маршрутизации.
+    RewriteRule ^web/?$ index.php [L]
+    RewriteRule ^web/(.+)$ $1
+
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . index.php
-</IfModule> 
+</IfModule>

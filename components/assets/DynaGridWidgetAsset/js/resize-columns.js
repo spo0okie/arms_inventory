@@ -26,7 +26,7 @@ function persistResizeColumn(key,val) {
     if (debug) console.log('SET',table,column,userId,val);
 
     $.ajax({
-        url: "/web/ui-tables-cols/set"+
+        url: armsUrlBase+"/ui-tables-cols/set"+
             "?table="+table+
             "&column="+column+
             "&user="+userId+

@@ -18,7 +18,7 @@ $js = '
     function fetchArmsFromDocs(){
         id=$("#lickeys-lic_items_id").val();
         console.log(id);
-        $.ajax({url: "/web/lic-items/hint-arms?form=lickeys&id="+id})
+        $.ajax({url: armsUrlBase+"/lic-items/hint-arms?form=lickeys&id="+id})
             .done(function(data) {$("#arms_id-hint").html(data);})
             .fail(function () {console.log("Ошибка получения данных!")});
         }';

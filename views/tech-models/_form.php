@@ -65,7 +65,7 @@ if (Yii::$app->request->get('return'))
         //меняем подсказку описания модели в при смене типа оборудования
         function techSwitchDescr(){
             techType=$("#techmodels-type_id").val();
-            $.ajax({url: "/web/tech-types/hint-template?id="+techType})
+            $.ajax({url: armsUrlBase+"/tech-types/hint-template?id="+techType})
                 .done(function(data) {$("#comment-hint").html(data);})
                 .fail(function () {console.log("Ошибка получения данных!")});
             }';
@@ -176,7 +176,7 @@ $('#btn-generate').on('click', function() {
 
     $(this).prop('disabled', true).text('Генерация...');
 
-    $.post('/web/tech-models/generate-description', {manufacturer, type, name})
+    $.post(armsUrlBase+'/tech-models/generate-description', {manufacturer, type, name})
         .done(function(resp) {
             if (resp.error) {
                 alert(resp.error);

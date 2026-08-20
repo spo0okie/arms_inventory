@@ -55,7 +55,7 @@ $js =  /** @lang JavaScript */ <<<JS
     function fetchArmsFromDocs(){
         let docs=$("#techs-contracts_ids").val();
         //console.log(docs);
-        $.ajax({url: "/web/contracts/hint-arms?form=techs&ids="+docs})
+        $.ajax({url: armsUrlBase+"/contracts/hint-arms?form=techs&ids="+docs})
         .done(function(data) {
             $("#arms_id-hint").html(data);
         })
@@ -67,7 +67,7 @@ $js =  /** @lang JavaScript */ <<<JS
         let model_id=$("#techs-model_id").val();
         //console.log(model_id);
 
-        $.ajax({url: "/web/tech-models/hint-comment?id="+model_id})
+        $.ajax({url: armsUrlBase+"/tech-models/hint-comment?id="+model_id})
         .done(function(data) {
             //подача единая: тултип висит на иконке «?», label чистый;
             //старую иконку гасим, новую (с новым контентом) подхватит attachAllTTips
@@ -79,7 +79,7 @@ $js =  /** @lang JavaScript */ <<<JS
         })
         .fail(function () {console.log("Ошибка получения данных!")});
 
-		$.ajax({url: "/web/tech-models/hint-template?id="+model_id})
+		$.ajax({url: armsUrlBase+"/tech-models/hint-template?id="+model_id})
 			.done(function(data) {
 				if (data==="$no_specs_hint") {
 					$("#techs-specs_settings").hide();
@@ -90,7 +90,7 @@ $js =  /** @lang JavaScript */ <<<JS
 			})
 			.fail(function () {console.log("Ошибка получения данных!")});
 
-		$.ajax({url: "/web/tech-models/hint-description?id="+model_id})
+		$.ajax({url: armsUrlBase+"/tech-models/hint-description?id="+model_id})
 			.done(function(data) {
 				$("#model-hint").html(data);
 			})
@@ -104,7 +104,7 @@ $this->registerJs($js, yii\web\View::POS_BEGIN);
 $formInvNumJs = /** @lang JavaScript */ <<<JS
 	$('#techs-model_id, #techs-places_id, #techs-arms_id, #techs-installed_id, #techs-partners_id').on('change', function(){
 		$.ajax({
-			url: '/web/techs/inv-num?model_id='+
+			url: armsUrlBase+'/techs/inv-num?model_id='+
 			$('#techs-model_id').val()
 			+'&place_id='+
 			$('#techs-places_id').val()

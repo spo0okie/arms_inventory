@@ -85,7 +85,7 @@ class NetworksController extends BaseRestController
 	 * @throws NotFoundHttpException если ни одна сеть не содержит этот адрес
 	 */
 	#[OA\Get(
-		path: "/web/api/{controller}/by-ip",
+		path: "/api/{controller}/by-ip",
 		summary: "Найти сеть, которой принадлежит указанный IP-адрес",
 		parameters: [
 			new OA\Parameter(

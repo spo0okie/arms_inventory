@@ -46,7 +46,7 @@ $tabs[]=[
 		</div>
 		<script>
 			$(document).ready(function() {
-				$.get("/web/maintenance-jobs/children-tree?id={$model->id}", function(data) {
+				$.get(armsUrlBase+"/maintenance-jobs/children-tree?id={$model->id}", function(data) {
 				    jQuery("#mainenanceChildrenTree").hide().html(data);
 				    setTimeout(function (){jQuery("#mainenanceChildrenTree").fadeToggle();ExpandableCardInitAll();},500)
 				})

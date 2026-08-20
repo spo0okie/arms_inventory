@@ -57,7 +57,7 @@ class WikiTextWidget extends Widget
 		//если данные требуют обновления - добавляем скрипт обновления контент-блока
 		if (!$emptyData && ($outdated || !$cache->valid)) $content.='<script>
 			$.get(
-				"/web/wiki/render-field?class='.urlencode($class).'&id='.$this->model->id.'&field='.$this->field.'",
+				armsUrlBase+"/wiki/render-field?class='.urlencode($class).'&id='.$this->model->id.'&field='.$this->field.'",
 				function(data) {
 					$("#'.$id.'").html(data);
 					'.(DokuWikiAsset::$dokuWikiInit).'

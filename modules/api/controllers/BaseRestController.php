@@ -159,7 +159,7 @@ class BaseRestController extends ActiveController
 	
 	
 	#[OA\Get(
-		path: "/web/api/{controller}/search",
+		path: "/api/{controller}/search",
 		summary: "Поиск одного объекта по набору полей.",
 		parameters: [
 			new OA\Parameter(
@@ -210,7 +210,7 @@ class BaseRestController extends ActiveController
 	}
 	
 	#[OA\Get(
-		path: "/web/api/{controller}/filter",
+		path: "/api/{controller}/filter",
 		summary: "Поиск нескольких объектов по набору полей.",
 		parameters: [
 			new OA\Parameter(
@@ -276,7 +276,7 @@ class BaseRestController extends ActiveController
 	}
 	
 	#[OA\Get(
-		path: "/web/api/{controller}/",
+		path: "/api/{controller}/",
 		summary: "Список всех элементов",
 		parameters: [
 			new OA\Parameter(name: "{expand}"),
@@ -314,7 +314,7 @@ class BaseRestController extends ActiveController
 	}
 	
 	#[OA\Get(
-		path: "/web/api/{controller}/{id}",
+		path: "/api/{controller}/{id}",
 		summary: "Прочитать элемент по ID",
 		parameters: [
 			new OA\Parameter(
@@ -356,7 +356,7 @@ class BaseRestController extends ActiveController
 	}
 	
 	#[OA\Post(
-		path: "/web/api/{controller}/",
+		path: "/api/{controller}/",
 		summary: "Создать новый элемент",
 		requestBody: new OA\RequestBody(
 			required: true,
@@ -394,7 +394,7 @@ class BaseRestController extends ActiveController
 	}
 	
 	#[OA\Put(
-		path: "/web/api/{controller}/{id}",
+		path: "/api/{controller}/{id}",
 		summary: "Обновить элемент с указанным ID",
 		requestBody: new OA\RequestBody(
 			required: true,
@@ -443,7 +443,7 @@ class BaseRestController extends ActiveController
 	}
 	
 	#[OA\Delete(
-		path: "/web/api/{controller}/{id}",
+		path: "/api/{controller}/{id}",
 		summary: "Удалить элемент с указанным ID",
 		responses: [
 			new OA\Response(response: 204, description: "OK"),

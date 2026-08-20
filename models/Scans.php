@@ -30,6 +30,7 @@ use app\helpers\StringHelper;
  * @property string $shortFname
  * @property string $noidxFname
  * @property string $fullFname
+ * @property string $url
  * @property string $fsFname
  * @property boolean $fileExists
  * @property int $fileSize
@@ -49,6 +50,18 @@ class Scans extends ArmsModel
 	 */
 	public static string $NO_ORIG_ERR='err_no_orig';
 	public static string $RENDERING_ERR='err_rendering';
+	
+	/**
+	 * Каталог веб-корня внутри проекта.
+	 *
+	 * Пути файлов сканов хранятся относительно корня ПРОЕКТА (/web/scans/...):
+	 * по ним идет и работа с файловой системой (@app + путь), и раздача браузеру.
+	 * Совпадали эти две строки только пока приложение публиковалось из корня
+	 * проекта - тогда baseUrl и был '/web'. При канонической публикации
+	 * (DocumentRoot=<проект>/web, docs/help/admin/install.md) адрес файла надо
+	 * получать через {@see webUrl()}, а путь в ФС - как и раньше, @app + путь.
+	 */
+	const WEB_ROOT_DIR='/web';
 	
 	public static $supportedFormats=['png','jpg','jpeg','pdf','gif','bmp','tiff',];
 	public $scanFile;
@@ -233,7 +246,28 @@ class Scans extends ArmsModel
 	 * @return string
 	 */
 	public function getFullFname(){
-		return '/web/scans/'.$this->file.'.'.$this->format;
+		return self::WEB_ROOT_DIR.'/scans/'.$this->file.'.'.$this->format;
+	}
+	
+	/**
+	 * Переводит путь файла внутри проекта в адрес для браузера.
+	 * Строки-ошибки ($NO_ORIG_ERR и т.п.) пропускает как есть.
+	 * @param string $path путь вида /web/scans/xxx.jpg
+	 * @return string
+	 */
+	public static function webUrl($path){
+		if (strncmp($path,self::WEB_ROOT_DIR.'/',strlen(self::WEB_ROOT_DIR)+1)!==0) return $path;
+		$request=Yii::$app->getRequest();
+		$base=($request instanceof \yii\web\Request)?$request->getBaseUrl():'';
+		return $base.substr($path,strlen(self::WEB_ROOT_DIR));
+	}
+	
+	/**
+	 * Возвращает адрес оригинала файла для браузера
+	 * @return string
+	 */
+	public function getUrl(){
+		return static::webUrl($this->fullFname);
 	}
 
 	/**
@@ -330,7 +364,7 @@ class Scans extends ArmsModel
 		$h=$height?$height:'';
 		//_fit_ (а не _thumb_): суффикс сменён при переходе на bestfit-вписывание,
 		//чтобы не подхватывались старые искажённые миниатюры из кэша
-		return '/web/scans/thumbs/'.$parts['basename']."_fit_{$w}x{$h}.".self::formThumbFormat($parts['extension']);
+		return self::WEB_ROOT_DIR.'/scans/thumbs/'.$parts['basename']."_fit_{$w}x{$h}.".self::formThumbFormat($parts['extension']);
 	}
 	
 	/**
@@ -367,7 +401,8 @@ class Scans extends ArmsModel
 			$thumbName=self::prepThumb($this->fullFname,$thumbName,$width,$height);
 		}
 
-		return $thumbName;
+		//наружу отдаем адрес: результат уходит в img/href, а не в файловые функции
+		return static::webUrl($thumbName);
 	}
 	
 	/**
@@ -443,14 +478,14 @@ class Scans extends ArmsModel
 	{
 		$w=static::$idxThumbSizes[0];
 		$h=static::$idxThumbSizes[1];
-		return static::prepThumb('/web/scans/pdf_file.png',"/web/scans/thumbs/pdf_file_fit_{$w}x{$h}.png",$w,$h);
+		return static::webUrl(static::prepThumb(self::WEB_ROOT_DIR.'/scans/pdf_file.png',self::WEB_ROOT_DIR."/scans/thumbs/pdf_file_fit_{$w}x{$h}.png",$w,$h));
 	}
 
 	public static function noThumb()
 	{
 		$w=static::$idxThumbSizes[0];
 		$h=static::$idxThumbSizes[1];
-		return static::prepThumb('/web/scans/no_file.png',"/web/scans/thumbs/no_file_fit_{$w}x{$h}.png",$w,$h);
+		return static::webUrl(static::prepThumb(self::WEB_ROOT_DIR.'/scans/no_file.png',self::WEB_ROOT_DIR."/scans/thumbs/no_file_fit_{$w}x{$h}.png",$w,$h));
 	}
 	
 	/**

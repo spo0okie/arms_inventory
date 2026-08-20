@@ -47,6 +47,9 @@ $config = [
 			]
 		],
         'request' => [
+	        //совместимость со старой схемой публикации: адреса вида /web/api/...
+	        //обслуживаются наравне с каноническими (components/Request.php)
+	        'class' => 'app\components\Request',
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'pfvenO-s_B_jDeOjN-uM2tJ1eh_TVzyb',
 			'parsers' => [

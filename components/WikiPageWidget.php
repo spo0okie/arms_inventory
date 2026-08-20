@@ -77,7 +77,7 @@ class WikiPageWidget extends Widget
 			</div>
 			<script>
 				$.get(
-                    "/web/wiki/page?pageName='.$pageName.'",
+                    armsUrlBase+"/wiki/page?pageName='.$pageName.'",
                     function(data) {
                     	$("#'.$id.'").html(data);
                     	'.(DokuWikiAsset::$dokuWikiInit).'
@@ -92,7 +92,7 @@ class WikiPageWidget extends Widget
 			$pageName=substr($url,strlen(Yii::$app->params['confluenceUrl'].WikiHelper::$confluencePage));
 			
 			return '<div id="'.$id.'"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>'.
-				'<script>$.get("/web/wiki/page?api=confluence&pageName='.$pageName.'", function(data) {$("#'.$id.'").html(data);})</script>';
+				'<script>$.get(armsUrlBase+"/wiki/page?api=confluence&pageName='.$pageName.'", function(data) {$("#'.$id.'").html(data);})</script>';
 			
 		}
 		

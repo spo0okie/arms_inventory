@@ -11,7 +11,7 @@ use app\types\UrlsType;
 use Yii;
 
 /**
- * Сканер ссылок инвентаризации во внешнюю wiki (страница /web/wiki/links,
+ * Сканер ссылок инвентаризации во внешнюю wiki (страница /wiki/links,
  * интеграция - docs/help/admin/integrations/dokuwiki.md).
  *
  * Задача: показать обратные ссылки, которых не видит сама wiki. Встроенный

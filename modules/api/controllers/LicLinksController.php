@@ -122,7 +122,7 @@ class LicLinksController extends BaseRestController
 	}
 	
 	#[OA\Get(
-		path: "/web/api/{controller}/search",
+		path: "/api/{controller}/search",
 		summary: "Поиск привязки лицензии к объекту.",
 		parameters: [
 			new OA\Parameter(
@@ -214,7 +214,7 @@ class LicLinksController extends BaseRestController
 
 
 	#[OA\Get(
-		path: "/web/api/{controller}/filter",
+		path: "/api/{controller}/filter",
 		summary: "Фильтрация привязок лицензий к объекту.",
 		parameters: [
 			new OA\Parameter(

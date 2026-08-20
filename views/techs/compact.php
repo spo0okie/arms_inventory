@@ -53,7 +53,7 @@ if (is_object($model->state)) {
 		<?php if (strlen($model->comment)) { ?>
 			<div class="col-md-6">
 				<div class="comment-block" >
-					<img class="exclamation-sign" src="/web/img/exclamation-mark.svg" alt="WARNING"/><br/>
+					<img class="exclamation-sign" src="<?= Yii::$app->request->baseUrl ?>/img/exclamation-mark.svg" alt="WARNING"/><br/>
 					<?= ModelFieldWidget::renderFieldValue($model,'comment') ?>
 				</div>
 			</div>

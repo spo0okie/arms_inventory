@@ -23,6 +23,7 @@ use yii\web\UploadedFile;
  * @property int|null $schedules_id
  * @property string|null $filename
  * @property string|null $fullFname
+ * @property string|null $url
  * @property UploadedFile $uploadedFile
  */
 class Attaches extends ArmsModel
@@ -119,11 +120,22 @@ class Attaches extends ArmsModel
 	}
 	
 	/**
-	 * Возвращает путь к оригиналу файла
+	 * Возвращает путь к оригиналу файла ОТНОСИТЕЛЬНО КОРНЯ ПРОЕКТА
+	 * (для файловых операций: @app + этот путь). Для браузера нужен {@see getUrl()}.
 	 * @return string
 	 */
 	public function getFullFname(){
-		return '/web/scans/'.$this->filename;
+		return Scans::WEB_ROOT_DIR.'/scans/'.$this->filename;
+	}
+	
+	/**
+	 * Возвращает адрес файла для браузера. Отличается от fullFname на префикс
+	 * публикации: файлы вложений лежат в том же web/scans, что и сканы, поэтому
+	 * перевод пути в адрес берем оттуда ({@see Scans::webUrl()}).
+	 * @return string
+	 */
+	public function getUrl(){
+		return Scans::webUrl($this->fullFname);
 	}
 	
 	public function getName() {

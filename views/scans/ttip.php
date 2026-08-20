@@ -12,6 +12,6 @@ use yii\helpers\Html;
 if (is_object($model) && $model->fileExists)
 	echo Html::a(
 		Html::img((strtolower($model->format) == 'pdf') ? (Scans::pdfThumb()) : $model->idxThumb),
-		$model->fullFname,
+		$model->url,
 		['class'=>'scans-ttip']
 	);

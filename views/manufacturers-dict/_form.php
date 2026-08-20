@@ -57,7 +57,7 @@ if (!isset($modalParent)) $modalParent=null;
     $('#manufacturers-form').on('beforeSubmit', function(){
         var data = $(this).serialize();
         $.ajax({
-            url: '/web/manufacturers/create',
+            url: armsUrlBase+'/manufacturers/create',
             headers: {
     			Accept: "application/json; charset=utf-8"
 			},

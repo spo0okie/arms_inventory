@@ -7,7 +7,7 @@ use Codeception\Test\Unit;
 
 /**
  * Тесты сканера ссылок инвентаризации в wiki ({@see WikiLinksScanner},
- * страница /web/wiki/links, docs/help/admin/integrations/dokuwiki.md).
+ * страница /wiki/links, docs/help/admin/integrations/dokuwiki.md).
  *
  * Проверяются чистые части сканера (без БД): классификация ссылок DokuWiki,
  * разбор URL страниц wiki, обход включений {{page>...}} с подменённым

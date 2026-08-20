@@ -29,7 +29,7 @@ if (!isset($static_view)) $static_view=false;
 				default => Html::a(
 					Html::img($model->idxThumb,
 						['title' => $hint]),
-					$model->fullFname
+					$model->url
 				),
 			};
         }

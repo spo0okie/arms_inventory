@@ -44,7 +44,7 @@ if (!isset($link)) $link=$model::tableName().'_ids';
             $('#contracts-link-form').on('beforeSubmit', function(){
                 console.log($('input[name=contracts_id]').val());
                 $.ajax({
-                    url: '/web/contracts/link',
+                    url: armsUrlBase+'/contracts/link',
                     type: 'GET',
                     data: {
                         model_id: {$model->id},

@@ -16,7 +16,7 @@ $js = '
     function fetchArmsFromDocs(){
         docs=$("#licitems-contracts_ids").val();
         console.log(docs);
-        $.ajax({url: "/web/contracts/hint-arms?form=licitems&ids="+docs})
+        $.ajax({url: armsUrlBase+"/contracts/hint-arms?form=licitems&ids="+docs})
             .done(function(data) {$("#arms_id-hint").html(data);})
             .fail(function () {console.log("Ошибка получения данных!")});
         }';
