@@ -30,6 +30,14 @@ abstract class IntegrationProvider
 	/** таймаут сетевых операций по умолчанию, сек */
 	const DEFAULT_TIMEOUT = 5;
 
+	/** TTL кэша ячейки грида по умолчанию, сек (короче панельного:
+	 * ячейки батчатся, но список открывают чаще карточки) */
+	const DEFAULT_CELL_TTL = 30;
+
+	/** нижняя граница TTL ячейки: F5-долбёжка списка не должна долбить
+	 * внешнюю ИС даже при ttl=0 в конфиге */
+	const MIN_CELL_TTL = 15;
+
 	/** уровни действий (docs/dev/integrations.md) */
 	const LEVEL_NORMAL = 'L2';		//от сервисной учетки, RBAC + журнал
 	const LEVEL_PERSONAL = 'L2+';	//именное: личные креды внешней ИС на один запрос
@@ -108,6 +116,51 @@ abstract class IntegrationProvider
 	public function renderPanel(string $panelId, ArmsModel $model): string
 	{
 		throw new NotSupportedException("Provider {$this->id} has no panels");
+	}
+
+	/**
+	 * Колонки провайдера для гридов сущности (списочный режим, §5 «Колонки в списках»).
+	 * Дёшево, без внешних вызовов: вызывается при построении каждого
+	 * грида. $modelClass может быть search-наследником — проверять через
+	 * is_a($modelClass, Comps::class, true), а не строгим сравнением.
+	 * @return array [columnId => [
+	 *   'title' => string, // заголовок колонки (по умолчанию getTitle())
+	 *   'hint'  => string, // подсказка к заголовку (опционально)
+	 *   'ttl'   => int,    // свежесть кэша ячейки, сек (см. cellTtl())
+	 * ]]
+	 */
+	public function gridColumns(string $modelClass): array
+	{
+		return [];
+	}
+
+	/**
+	 * Наполнить ячейки колонки для пачки моделей — ЕДИНСТВЕННОЕ место
+	 * внешних вызовов списочного режима: одна пачка = один поход во
+	 * внешнюю ИС (батч обязателен, построчных фолбэков через
+	 * renderPanel() ядро не делает). Вызывается только из proxy
+	 * ({@see CellsBatch}); модели уже отфильтрованы по appliesTo(),
+	 * непустой binding() и непротухшему кэшу.
+	 *
+	 * Отсутствие id модели в ответе = пустая ячейка (не кэшируется).
+	 * Исключение ловит ядро (заглушка «недоступно», кэш не трогается).
+	 *
+	 * @param ArmsModel[] $models
+	 * @return array [model_id => html]
+	 * @throws NotSupportedException
+	 */
+	public function renderCells(string $columnId, array $models): array
+	{
+		throw new NotSupportedException("Provider {$this->id} has no grid columns");
+	}
+
+	/**
+	 * Ячейка применимой, но не привязанной строки. Рендерится ядром при
+	 * выводе грида (внешние вызовы запрещены — как appliesTo/binding).
+	 */
+	public function renderUnboundCell(string $columnId, ArmsModel $model): string
+	{
+		return '<span class="text-secondary opacity-75" title="нет привязки">&mdash;</span>';
 	}
 
 	/**
@@ -201,5 +254,17 @@ abstract class IntegrationProvider
 	{
 		$panel = $this->panels($model)[$panelId] ?? [];
 		return (int)($panel['ttl'] ?? $this->config['cacheTtl'] ?? 60);
+	}
+
+	/**
+	 * TTL кэша ячейки грида, сек (колонка > конфиг cellTtl > 30),
+	 * но не ниже MIN_CELL_TTL: «обновлять всегда» для списков не
+	 * предусмотрено — F5 списка не должен долбить внешнюю ИС
+	 */
+	public function cellTtl(string $columnId, string $modelClass): int
+	{
+		$descriptor = $this->gridColumns($modelClass)[$columnId] ?? [];
+		$ttl = (int)($descriptor['ttl'] ?? $this->config['cellTtl'] ?? static::DEFAULT_CELL_TTL);
+		return max($ttl, static::MIN_CELL_TTL);
 	}
 }

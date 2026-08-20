@@ -4,6 +4,7 @@ namespace app\components;
 use app\components\assets\DynaGridWidgetAsset;
 use app\components\gridColumns\DefaultColumn;
 use app\components\gridColumns\ItemColumn;
+use app\components\integrations\IntegrationsRegistry;
 use app\helpers\ArrayHelper;
 use app\models\base\ArmsModel;
 use app\models\ui\UiTablesCols;
@@ -278,6 +279,21 @@ JS;
 	}
 	
 	/**
+	 * Класс сущности грида для gridColumns() провайдеров: грид обычно
+	 * строится по search-модели (CompsSearch) — поднимаемся к базовому
+	 * классу, чтобы провайдеры и кэши работали с каноническим именем
+	 */
+	protected function integrationModelClass(): string
+	{
+		$class = get_class($this->model);
+		while (str_ends_with($class, 'Search')
+			&& ($parent = get_parent_class($class))
+			&& is_subclass_of($parent, ArmsModel::class)
+		) $class = $parent;
+		return $class;
+	}
+
+	/**
 	 * Проставляет ключи там где колонка определена без ключа
 	 * @param $columns
 	 * @return array
@@ -372,9 +388,17 @@ JS;
 	public function prepareColumns() {
 		//порядок колонок по умолчанию
 		$defaultOrder=$this->defaultOrder;
-		
+
 		//переопределяем вводный массив, если колонка задана как просто значение массива с именем атрибута
 		$columns=$this->setColumnKeys($this->columns);
+
+		//колонки интеграций (docs/dev/integrations.md §5 «Колонки в списках»): generic-врезка,
+		//views/*/columns.php о них не знают. Вне defaultOrder и с
+		//visible=false => скрыты по умолчанию, включаются персонализацией.
+		//+= не перекрывает одноимённую колонку, объявленную самим гридом
+		if ($this->model instanceof ArmsModel) {
+			$columns += IntegrationsRegistry::gridColumnConfigs($this->integrationModelClass());
+		}
 		
 		$prepared=[];
 		//кладем видимые колонки

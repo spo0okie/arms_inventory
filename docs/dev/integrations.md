@@ -65,7 +65,10 @@ proxy, виджеты, кэш, RBAC, журнал) написано один р�
 | `IntegrationsController` | `controllers/IntegrationsController.php` | Proxy: `/integrations/panel` и `/integrations/action` |
 | `PanelsWidget` | `components/integrations/PanelsWidget.php` | Блок интеграций в карточке объекта |
 | `AttributeActionsWidget` | `components/integrations/AttributeActionsWidget.php` | Действия-иконки у атрибута (SMS у телефона) |
-| `PanelsCache` | `components/integrations/PanelsCache.php` | Файловый кэш панелей (`runtime/integrations_cache/`) |
+| `CellColumn` | `components/integrations/CellColumn.php` | Колонка интеграции в гриде (списочный режим §5 «Колонки в списках») |
+| `CellsBatch` | `components/integrations/CellsBatch.php` | Батч-наполнение ячеек: кэш + один renderCells() на страницу |
+| `IntegrationCellsAsset` | `components/assets/IntegrationCellsAsset.php` | JS: один POST `/integrations/cells` на (грид × провайдер × колонка) |
+| `PanelsCache` | `components/integrations/PanelsCache.php` | Файловый кэш панелей и ячеек (`runtime/integrations_cache/`) |
 | `ActionResult` | `components/integrations/ActionResult.php` | Результат действия (ok/HTML/logParams) |
 | `IntegrationsLog` | `models/IntegrationsLog.php` | Журнал действий (таблица `integrations_log`) |
 
@@ -100,6 +103,17 @@ proxy, виджеты, кэш, RBAC, журнал) написано один р�
 - `panels($model)` — L1-панели `[panelId => ['title','ttl']]`;
 - `renderPanel($panelId,$model)` — сходить во внешнюю ИС, вернуть готовый
   **HTML** (вызывается только из proxy, никогда при рендере страницы);
+- `gridColumns($modelClass)` — колонки для гридов сущности (списочный
+  режим §5 «Колонки в списках») `[columnId => ['title','hint','ttl']]`; **обязана быть
+  дешёвой** (вызывается при построении каждого грида); `$modelClass`
+  может быть search-наследником — проверять `is_a(..., true)`;
+- `renderCells($columnId,$models)` — наполнить ячейки для **пачки**
+  моделей одним походом во внешнюю ИС, вернуть `[id => html]`
+  (вызывается только из proxy; батч обязателен — построчных фолбэков
+  через `renderPanel()` ядро не делает);
+- `renderUnboundCell($columnId,$model)` — ячейка применимой, но не
+  привязанной строки (рендерится при выводе грида, внешние вызовы
+  запрещены; по умолчанию приглушённое «—»);
 - `actions($model)` — L2/L2+ действия (`level`, `form`, `standalone`,
   `showInPanel`, `prefill`);
 - `attributeActions($model,$attr,$value)` — действия-иконки у атрибута;
@@ -153,6 +167,51 @@ URL/заголовке. Сложнее — полноценный класс. О
 одинаковая для всех, ни данных, ни полномочий в ней нет, а доступ к
 самому действию проверяет сервер при открытии формы и при выполнении
 (RBAC на отрисовку не влияет; пользователь без права получит 403).
+
+### Колонки в списках — батч на страницу грида
+
+Списочный режим: провайдер добавляет в гриды сущностей живые колонки
+(доступность узла из Zabbix в списке ОС). Единица режима — **колонка,
+а не панель в строке**: страница грида на 100 строк наполняется одним
+запросом, и батч доходит до транспорта во внешнюю ИС (иначе 100
+запросов просто переехали бы с браузера на backend).
+
+1. Колонки в грид дописывает `DynaGridWidget::prepareColumns()`
+   generic-врезкой (`IntegrationsRegistry::gridColumnConfigs()`:
+   включён + настроен + RBAC + `gridColumns()` непуст) — view-файлы
+   гридов об интеграциях не знают. Колонки **скрыты по умолчанию**,
+   пользователь включает через персонализацию DynaGrid: живые колонки
+   дороги, opt-in — это фича. Скрытая колонка не стоит ничего.
+2. Рендер строки (`CellColumn` → `CellsBatch::renderGridCell()`) — как
+   у панелей: только построчный кэш, свежий как есть, протухший
+   приглушённо, без обращений к внешним ИС. Протухшие/пустые ячейки
+   помечаются data-атрибутами.
+3. Скрипт (`IntegrationCellsAsset`) собирает помеченные ячейки по
+   (провайдер, колонка, класс) и шлёт **один** `POST /integrations/cells`
+   со списком id на группу (POST — сотня id не лезет в query string).
+4. Proxy (`CellsBatch::render()`): RBAC один раз → модели одним
+   `findAll()` → по строкам дёшево (`appliesTo()`/`binding()`/кэш) →
+   по всем протухшим **один** `renderCells()` → построчная запись в
+   кэш → JSON `{id: html}`. Ошибка внешней ИС — заглушка в ячейках,
+   кэш не перетирается (§3.1).
+
+Кэш ячеек построчный (ключ — binding, слот `cell-<columnId>` в роли
+panelId), а не постраничный: состав страницы зависит от фильтров и
+пагинации — постраничный ключ никогда бы не совпал, а построчный
+переживает листание. Ячейка — третий вид рендера после full/compact:
+бейдж в одну строку, правило «HTML одинаков для всех зрителей»
+наследуется, L0-ссылки в ячейке допустимы (как кнопки в панелях).
+
+TTL ячейки (`cellTtl()`: колонка > конфиг `cellTtl` > 30 сек) имеет
+нижнюю границу 15 сек — «обновлять всегда» для списков не
+предусмотрено, F5-долбёжка списка не должна долбить внешнюю ИС.
+
+Отличия от карточного режима, о которых стоит помнить провайдеру:
+- разовые «поиски привязки для отображения» (как `searchHostid()` по
+  именам) в списке недопустимы — это снова N запросов; непривязанные
+  строки получают `renderUnboundCell()`;
+- экспорт грида (Excel/CSV) у kartik клиентский — выгружается то, что
+  видно: наполненные ячейки после загрузки, текст заглушек до неё.
 
 ### Действие L2
 
@@ -270,7 +329,7 @@ bootstrap-модалке. Селектор модалки ядро кладёт 
 | pbx | `HttpTemplateProvider` | L1-панель | `Techs` с `isVoipPhone` и номером | ast22-phones REST (`/api/v1/subscribers/status`) |
 | ad | `AdUserProvider` | L1-панель (справка о учётке) + L2+-действия: сброс пароля, создание учётки, восстановление после увольнения (композиция с sms, кнопки внутри панели по живому состоянию учётки) | `Users` с логином AD (создание — и без логина: активный сотрудник при настроенном `usersOu`) | `LdapService` (ldaprecord); запись — LDAPS-bind под кредами исполнителя |
 | ad-comp | `AdComputerProvider` | L1-панель (путь в дереве + группы) | `Comps` с именем (по умолчанию Windows) | `LdapService::computerInfo()` |
-| zabbix | `ZabbixProvider` | L1-панель (активные проблемы) + L0-ссылка; с `'embedded' => true` своей карточки нет — содержимое встраивает zabbix-sync | `Comps` и `Techs` | Zabbix JSON-RPC 7.x |
+| zabbix | `ZabbixProvider` | L1-панель (активные проблемы) + L0-ссылка + колонка гридов «доступность + аптайм» (§5 «Колонки в списках», 2 вызова API на страницу); с `'embedded' => true` своей карточки нет — содержимое встраивает zabbix-sync | `Comps` и `Techs` | Zabbix JSON-RPC 7.x |
 | zabbix-sync | `ZabbixSyncProvider` | L1-панель («Постановка на мониторинг»: вердикт + журнал правил; при embedded-провайдере zabbix — под вердиктом его живой блок, когда узел на мониторинге или имеет привязку hostid) | `Comps` и `Techs` | explain.php скрипта [arms.zabbix](https://github.com/spo0okie/arms_zabbix) (GET, JSON, токен) |
 
 Конкретные конфиги включения — в

@@ -14,6 +14,10 @@ use Yii;
  * активные проблемы (сработавшие триггеры) и ссылка на узел в
  * веб-интерфейсе Zabbix.
  *
+ * Плюс колонка «доступность + аптайм» в списках ОС/оборудования
+ * (списочный режим, §5 «Колонки в списках»): два вызова API на страницу
+ * грида любого размера, включается пользователем в персонализации.
+ *
  * Привязка объекта к узлу Zabbix — через hostid в external_links
  * (`Zabbix.hostid`). Постоянную привязку ведёт скрипт синхронизации
  * arms.zabbix (двусторонний: при заведении узла в Zabbix пишет hostid
@@ -35,6 +39,7 @@ use Yii;
  *         //'metrics' => false, //не показывать аптайм/CPU/память/диски
  *         //'staleAfter' => 600, //с какого возраста данных писать «устарели»
  *         //'cacheTtl' => 60,
+ *         //'cellTtl' => 30, //свежесть ячеек колонки в списках (мин. 15)
  *         //'embedded' => true, //спрятать отдельную карточку: содержимое
  *         //  встроит панель «Постановка на мониторинг» ({@see ZabbixSyncProvider})
  *     ],
@@ -44,6 +49,9 @@ use Yii;
 class ZabbixProvider extends IntegrationProvider
 {
 	const PANEL = 'problems';
+
+	/** колонка гридов «доступность + аптайм» (списочный режим) */
+	const COLUMN_AVAILABILITY = 'availability';
 
 	/** метка external_links, под которой хранится hostid (см. arms.zabbix) */
 	const HOSTID_KEY = 'Zabbix.hostid';
@@ -113,6 +121,73 @@ class ZabbixProvider extends IntegrationProvider
 				'ttl' => $this->config['cacheTtl'] ?? 60,
 			],
 		];
+	}
+
+	/**
+	 * Колонка «доступность + аптайм» в гридах ОС/оборудования (списочный
+	 * режим, docs/dev/integrations.md §5 «Колонки в списках»)
+	 */
+	public function gridColumns(string $modelClass): array
+	{
+		if (!is_a($modelClass, Comps::class, true) && !is_a($modelClass, Techs::class, true))
+			return [];
+		return [
+			static::COLUMN_AVAILABILITY => [
+				'title' => $this->getTitle(),
+				'hint' => 'Доступность узла и аптайм из Zabbix. '
+					.'Показывается для объектов с привязкой к узлу Zabbix '
+					.'(её ведёт синхронизация arms.zabbix).',
+			],
+		];
+	}
+
+	/**
+	 * Ячейки «доступность + аптайм» для пачки объектов: ДВА вызова API на
+	 * страницу любого размера — host.get (состояние узлов) + item.get
+	 * (аптаймы по lastvalue). Поиска непривязанных узлов по именам здесь
+	 * нет (в отличие от карточки): это снова N запросов — непривязанные
+	 * строки получают renderUnboundCell() ядром.
+	 */
+	public function renderCells(string $columnId, array $models): array
+	{
+		if ($columnId !== static::COLUMN_AVAILABILITY)
+			throw new \yii\base\NotSupportedException("Unknown grid column '$columnId'");
+
+		//hostid => модели: два объекта могут делить одну привязку
+		$byHost = [];
+		foreach ($models as $model) {
+			$hostid = $this->binding($model);
+			if (is_null($hostid)) continue; //ядро таких не присылает, но не падаем
+			$byHost[$hostid][] = $model;
+		}
+		if (!count($byHost)) return [];
+
+		$hostids = array_map('strval', array_keys($byHost));
+		$states = $this->fetchHostStates($hostids);
+
+		//аптайм — «мягкий» блок, как метрики в карточке: его недоступность
+		//(нет права на item'ы, нестандартный шаблон) не роняет колонку
+		$uptimes = [];
+		if (($this->config['metrics'] ?? true) !== false) {
+			try {
+				$uptimes = $this->fetchUptimes($hostids);
+			} catch (\Throwable $e) {
+				Yii::warning("Zabbix uptimes failed: ".$e->getMessage(), __METHOD__);
+			}
+		}
+
+		$cells = [];
+		foreach ($byHost as $hostid => $hostModels) {
+			$hostid = (string)$hostid;
+			$html = $this->renderView('cell-availability', [
+				'state' => $states[$hostid] ?? null, //null = узла нет в Zabbix
+				'uptime' => $uptimes[$hostid] ?? null,
+				'staleAfter' => $this->staleAfter(),
+				'url' => $this->hostUrls($hostid)['dashboard'] ?? null,
+			]);
+			foreach ($hostModels as $model) $cells[$model->id] = $html;
+		}
+		return $cells;
 	}
 
 	public function renderPanel(string $panelId, ArmsModel $model): string
@@ -484,9 +559,21 @@ class ZabbixProvider extends IntegrationProvider
 	 */
 	protected function fetchHostState(string $hostid): ?array
 	{
+		return $this->fetchHostStates([$hostid])[$hostid] ?? null;
+	}
+
+	/**
+	 * Состояния ПАЧКИ узлов одним host.get (списочный режим): семантика
+	 * та же, что у карточки, — карточка и ячейка не должны разъезжаться.
+	 * @param string[] $hostids
+	 * @return array [hostid => состояние] (см. hostState()); узлов,
+	 *   не найденных в Zabbix, в ответе нет
+	 */
+	protected function fetchHostStates(array $hostids): array
+	{
 		$params = [
 			'output' => ['hostid', 'host', 'name', 'status', 'active_available'],
-			'hostids' => [$hostid],
+			'hostids' => array_values($hostids),
 			'selectInterfaces' => ['available'],
 		];
 		try {
@@ -495,9 +582,22 @@ class ZabbixProvider extends IntegrationProvider
 			$params['output'] = ['hostid', 'host', 'name', 'status'];
 			$hosts = $this->zabbixCall('host.get', $params);
 		}
-		if (empty($hosts[0])) return null;
-		$host = $hosts[0];
 
+		$states = [];
+		foreach ($hosts ?? [] as $host) {
+			if (!isset($host['hostid'])) continue;
+			$states[(string)$host['hostid']] = $this->hostState($host);
+		}
+		return $states;
+	}
+
+	/**
+	 * Нормализация состояния узла из строки ответа host.get —
+	 * единая для карточки и ячейки грида (см. класс-комментарий
+	 * fetchHostState о семантике доступности)
+	 */
+	protected function hostState(array $host): array
+	{
 		$channels = [];
 		foreach ($host['interfaces'] ?? [] as $interface) $channels[] = (int)($interface['available'] ?? 0);
 		if (isset($host['active_available'])) $channels[] = (int)$host['active_available'];
@@ -511,6 +611,39 @@ class ZabbixProvider extends IntegrationProvider
 			'availability' => $availability,
 			'name' => (string)($host['name'] ?? $host['host'] ?? ''),
 		];
+	}
+
+	/**
+	 * Аптаймы пачки узлов ОДНИМ item.get: lastvalue/lastclock вместо
+	 * history.get по каждому item (карточка ходит в историю ради общего
+	 * времени снятия метрик; ячейке достаточно последнего значения).
+	 * search по key_ — подстрочный, поэтому кандидаты дополнительно
+	 * фильтруются через classifyItem() (ровно system.uptime).
+	 * @param string[] $hostids
+	 * @return array [hostid => ['uptime'=>сек, 'clock'=>unix ts]];
+	 *   узлов без данных в ответе нет
+	 */
+	protected function fetchUptimes(array $hostids): array
+	{
+		$items = $this->zabbixCall('item.get', [
+			'output' => ['hostid', 'key_', 'lastvalue', 'lastclock'],
+			'hostids' => array_values($hostids),
+			'search' => ['key_' => 'system.uptime'],
+			'monitored' => true,
+		]) ?? [];
+
+		$uptimes = [];
+		foreach ($items as $item) {
+			$parsed = $this->classifyItem((string)($item['key_'] ?? ''));
+			if (($parsed['metric'] ?? null) !== 'uptime') continue;
+			$clock = (int)($item['lastclock'] ?? 0);
+			if (!$clock) continue; //значений ещё не было
+			$hostid = (string)($item['hostid'] ?? '');
+			//дубли ключа на узле - берём самый свежий замер
+			if (isset($uptimes[$hostid]) && $uptimes[$hostid]['clock'] >= $clock) continue;
+			$uptimes[$hostid] = ['uptime' => (int)(float)($item['lastvalue'] ?? 0), 'clock' => $clock];
+		}
+		return $uptimes;
 	}
 
 	/**

@@ -602,6 +602,150 @@ class ZabbixProviderTest extends Unit
 		$this->assertSame(45, $provider->panelTtl(ZabbixProvider::PANEL, new Comps()));
 	}
 
+	/** ОС/оборудование с привязкой к hostid */
+	private function boundModel(string $class, int $id, string $hostid): \app\models\base\ArmsModel
+	{
+		/** @var Comps|Techs $model */
+		$model = new $class();
+		$model->id = $id;
+		$model->external_links = json_encode(['Zabbix.hostid' => $hostid]);
+		return $model;
+	}
+
+	/** Колонка гридов объявлена для ОС/оборудования (и их search-моделей), для чужих классов - нет */
+	public function testGridColumns()
+	{
+		$provider = $this->makeProvider();
+		$this->assertArrayHasKey(ZabbixProvider::COLUMN_AVAILABILITY, $provider->gridColumns(Comps::class));
+		$this->assertArrayHasKey(ZabbixProvider::COLUMN_AVAILABILITY, $provider->gridColumns(Techs::class));
+		$this->assertArrayHasKey(ZabbixProvider::COLUMN_AVAILABILITY,
+			$provider->gridColumns(\app\models\CompsSearch::class), 'search-наследник тоже подходит');
+		$this->assertSame([], $provider->gridColumns(Users::class));
+	}
+
+	/**
+	 * Батч-контракт: на пачку любого размера ровно ДВА вызова API
+	 * (host.get состояний + item.get аптаймов), ячейки разложены по
+	 * строкам, поиска по именам нет
+	 */
+	public function testRenderCellsTwoApiCalls()
+	{
+		$now = time();
+		$provider = $this->makeProvider([
+			'host.get' => [
+				['hostid' => '101', 'status' => '0', 'interfaces' => [['available' => '1']]],
+				['hostid' => '102', 'status' => '0', 'interfaces' => [['available' => '2']]],
+				['hostid' => '103', 'status' => '1', 'interfaces' => []],
+			],
+			'item.get' => [
+				['hostid' => '101', 'key_' => 'system.uptime',
+					'lastvalue' => (string)(86400 * 14 + 3600 * 3), 'lastclock' => (string)$now],
+				//чужой ключ с подстрокой system.uptime не должен пролезть
+				['hostid' => '102', 'key_' => 'custom.system.uptime.check',
+					'lastvalue' => '1', 'lastclock' => (string)$now],
+			],
+		], ['web' => 'https://zabbix.local/zabbix']);
+
+		$models = [
+			$this->boundModel(Comps::class, 1, '101'),
+			$this->boundModel(Comps::class, 2, '102'),
+			$this->boundModel(Techs::class, 3, '103'),
+			$this->boundModel(Comps::class, 4, '999'), //в Zabbix узла нет
+		];
+		$cells = $provider->renderCells(ZabbixProvider::COLUMN_AVAILABILITY, $models);
+
+		$methods = array_column($provider->calls, 'method');
+		$this->assertSame(['host.get', 'item.get'], $methods, 'ровно два вызова API на пачку');
+		//всем вызовам ушла вся пачка hostid'ов, поиска по именам (filter) нет
+		foreach ($provider->calls as $call) {
+			$this->assertSame(['101', '102', '103', '999'], $call['params']['hostids']);
+			$this->assertArrayNotHasKey('filter', $call['params']);
+		}
+
+		$this->assertStringContainsString('доступен', $cells[1]);
+		$this->assertStringContainsString('14д 3ч', $cells[1]);
+		$this->assertStringContainsString('host.dashboard.view', $cells[1]); //L0-ссылка
+		$this->assertStringContainsString('недоступен', $cells[2]);
+		$this->assertStringNotContainsString('14д', $cells[2], 'чужой ключ не распознан как аптайм');
+		$this->assertStringContainsString('не мониторится', $cells[3]);
+		$this->assertStringContainsString('нет в Zabbix', $cells[4]);
+	}
+
+	/** Устаревший замер аптайма (машина выключена) в ячейке не показывается */
+	public function testRenderCellsStaleUptimeHidden()
+	{
+		$provider = $this->makeProvider([
+			'host.get' => [['hostid' => '101', 'status' => '0', 'interfaces' => [['available' => '2']]]],
+			'item.get' => [['hostid' => '101', 'key_' => 'system.uptime',
+				'lastvalue' => '86400', 'lastclock' => (string)(time() - 7200)]],
+		]);
+		$cells = $provider->renderCells(ZabbixProvider::COLUMN_AVAILABILITY,
+			[$this->boundModel(Comps::class, 1, '101')]);
+		$this->assertStringContainsString('недоступен', $cells[1]);
+		$this->assertStringNotContainsString('1д', $cells[1]);
+	}
+
+	/** Сбой чтения аптаймов не роняет колонку: доступность остаётся */
+	public function testRenderCellsUptimeFailureKeepsAvailability()
+	{
+		$provider = $this->makeProvider([
+			'host.get' => [['hostid' => '101', 'status' => '0', 'interfaces' => [['available' => '1']]]],
+			'item.get' => static function () { throw new \RuntimeException('no permissions'); },
+		]);
+		$cells = $provider->renderCells(ZabbixProvider::COLUMN_AVAILABILITY,
+			[$this->boundModel(Comps::class, 1, '101')]);
+		$this->assertStringContainsString('доступен', $cells[1]);
+	}
+
+	/** metrics=false отключает и аптайм в ячейках (item.get не зовётся) */
+	public function testRenderCellsMetricsDisabled()
+	{
+		$now = time();
+		$provider = $this->makeProvider([
+			'host.get' => [['hostid' => '101', 'status' => '0', 'interfaces' => [['available' => '1']]]],
+			'item.get' => [['hostid' => '101', 'key_' => 'system.uptime',
+				'lastvalue' => '86400', 'lastclock' => (string)$now]],
+		], ['metrics' => false]);
+		$cells = $provider->renderCells(ZabbixProvider::COLUMN_AVAILABILITY,
+			[$this->boundModel(Comps::class, 1, '101')]);
+		$this->assertStringContainsString('доступен', $cells[1]);
+		$this->assertNotContains('item.get', array_column($provider->calls, 'method'));
+	}
+
+	/**
+	 * active_available в батче: мягкий повтор без поля для старых API -
+	 * как в карточке (единая семантика fetchHostStates)
+	 */
+	public function testRenderCellsFallbackForOldApi()
+	{
+		$provider = $this->makeProvider([
+			'host.get' => static function ($params) {
+				if (in_array('active_available', $params['output'], true))
+					throw new \RuntimeException('Zabbix API: Invalid parameter "/output/4"');
+				return [['hostid' => '101', 'status' => '0', 'interfaces' => [['available' => '1']]]];
+			},
+			'item.get' => [],
+		]);
+		$cells = $provider->renderCells(ZabbixProvider::COLUMN_AVAILABILITY,
+			[$this->boundModel(Comps::class, 1, '101')]);
+		$this->assertStringContainsString('доступен', $cells[1]);
+	}
+
+	/** Два объекта с одной привязкой делят одну ячейку (и один запрос) */
+	public function testRenderCellsSharedBinding()
+	{
+		$provider = $this->makeProvider([
+			'host.get' => [['hostid' => '101', 'status' => '0', 'interfaces' => [['available' => '1']]]],
+			'item.get' => [],
+		]);
+		$cells = $provider->renderCells(ZabbixProvider::COLUMN_AVAILABILITY, [
+			$this->boundModel(Comps::class, 1, '101'),
+			$this->boundModel(Comps::class, 2, '101'),
+		]);
+		$this->assertSame($cells[1], $cells[2]);
+		$this->assertSame(['101'], $provider->calls[0]['params']['hostids']);
+	}
+
 	/**
 	 * Встроенный режим ('embedded' => true): своей карточки нет - её
 	 * содержимое рисует панель zabbix-sync; сам renderPanel при этом

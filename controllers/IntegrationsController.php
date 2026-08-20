@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\integrations\CellsBatch;
 use app\components\integrations\IntegrationProvider;
 use app\components\integrations\IntegrationsRegistry;
 use app\components\integrations\PanelsCache;
@@ -11,6 +12,7 @@ use Yii;
 use yii\helpers\Html;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 
 /**
@@ -39,7 +41,7 @@ class IntegrationsController extends ArmsBaseController
 	public function accessMap()
 	{
 		//адресная проверка прав - внутри действий (см. класс-комментарий)
-		return [ArmsBaseController::PERM_EVERYONE => ['panel', 'action']];
+		return [ArmsBaseController::PERM_EVERYONE => ['panel', 'action', 'cells']];
 	}
 
 	/**
@@ -93,6 +95,53 @@ class IntegrationsController extends ArmsBaseController
 		if (!is_null($binding))
 			PanelsCache::store($providerObj->id, $panel, $binding, $html, $providerObj->compact);
 		return $html;
+	}
+
+	/**
+	 * Батч-наполнение ячеек колонки интеграции (списочный режим, §5 «Колонки в списках»):
+	 * ajax-запрос скрипта {@see \app\components\assets\IntegrationCellsAsset}
+	 * — ОДИН на (грид × провайдер × колонка), а не по запросу на строку.
+	 *
+	 * POST (GET-фолбэк для маршрутизации/тестов; боевой транспорт — POST,
+	 * сотня id не лезет в query string):
+	 *   provider (string) — id провайдера;
+	 *   column (string)   — id колонки (ключ gridColumns() провайдера);
+	 *   class (string)    — kebab-case класс объектов (comps, techs, ...);
+	 *   ids (int[])       — id строк грида с протухшим кэшем.
+	 *
+	 * Поток — {@see CellsBatch::render()}: свежий кэш как есть, остальные
+	 * одним renderCells() провайдера. Ошибка внешней ИС не перетирает кэш
+	 * и возвращает заглушку в ячейках (контракт §3.1).
+	 *
+	 * @return array JSON [model_id => html]
+	 * @throws NotFoundHttpException
+	 */
+	public function actionCells()
+	{
+		$request = Yii::$app->request;
+		$providerId = (string)$request->post('provider', $request->get('provider', ''));
+		$column = (string)$request->post('column', $request->get('column', ''));
+		$classId = (string)$request->post('class', $request->get('class', ''));
+
+		$provider = $this->findProvider($providerId);
+		if (!IntegrationsRegistry::userCanView($provider)) $this->denyAccess();
+
+		$class = DocsHelper::findDocClass($classId);
+		if (!$class) throw new NotFoundHttpException("Class '$classId' not found");
+		if (!isset($provider->gridColumns($class)[$column]))
+			throw new NotFoundHttpException("Grid column '$column' not found");
+
+		//страница грида — максимум сотни строк; кап отсекает абьюз ручными
+		//запросами (батч провайдера не обязан переваривать произвольный объём)
+		$ids = array_slice((array)$request->post('ids', []), 0, 500);
+		$ids = array_filter(array_map('intval', $ids));
+
+		Yii::$app->response->format = Response::FORMAT_JSON;
+		if (!count($ids)) return [];
+
+		/** @var ArmsModel[] $models */
+		$models = $class::findAll(['id' => $ids]);
+		return CellsBatch::render($provider, $column, $class, $models);
 	}
 
 	/**
@@ -223,6 +272,36 @@ class IntegrationsController extends ArmsBaseController
 			[
 				'name' => 'no-such-panel',
 				'GET' => ['provider' => 'sms', 'panel' => 'no-such-panel', 'class' => 'users', 'id' => 1],
+				'response' => 404,
+			],
+		];
+	}
+
+	/**
+	 * Acceptance test data for Cells.
+	 *
+	 * Внешние ИС в тестовой среде недоступны, gridColumns() у настроенного
+	 * sms-провайдера нет — проверяются маршрутизация и коды отказов
+	 * (как в testPanel()).
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function testCells(): array
+	{
+		return [
+			[
+				'name' => 'unknown-provider',
+				'GET' => ['provider' => 'no-such-provider', 'column' => 'x', 'class' => 'comps'],
+				'response' => 404,
+			],
+			[
+				'name' => 'no-such-column',
+				'GET' => ['provider' => 'sms', 'column' => 'no-such-column', 'class' => 'users'],
+				'response' => 404,
+			],
+			[
+				'name' => 'unknown-class',
+				'GET' => ['provider' => 'sms', 'column' => 'x', 'class' => 'no-such-class'],
 				'response' => 404,
 			],
 		];

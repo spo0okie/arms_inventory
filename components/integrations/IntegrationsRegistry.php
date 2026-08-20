@@ -122,6 +122,40 @@ class IntegrationsRegistry
 	}
 
 	/**
+	 * Конфиги колонок интеграций для грида сущности (списочный режим,
+	 * §5 «Колонки в списках»): обход реестра (включён + настроен + RBAC + есть колонки для
+	 * класса) — как PanelsWidget, но для гридов. Дописывает
+	 * {@see \app\components\DynaGridWidget::prepareColumns()}; ключ
+	 * колонки — стабильный attribute (dynagrid хранит видимость по нему).
+	 *
+	 * $modelClass может быть search-наследником (грид строится по
+	 * filterModel) — контракт gridColumns() требует от провайдера
+	 * проверки через is_a(..., true).
+	 *
+	 * @return array [attributeKey => конфиг колонки CellColumn]
+	 */
+	public static function gridColumnConfigs(string $modelClass): array
+	{
+		$columns = [];
+		foreach (static::providers() as $provider) {
+			if (!static::userCanView($provider)) continue;
+			foreach ($provider->gridColumns($modelClass) as $columnId => $descriptor) {
+				$columns['integration-'.$provider->id.'-'.$columnId] = [
+					'class' => CellColumn::class,
+					'provider' => $provider,
+					'columnId' => $columnId,
+					'label' => $descriptor['title'] ?? $provider->getTitle(),
+					'hint' => $descriptor['hint'] ?? null,
+					//живые колонки дороги: по умолчанию скрыты, пользователь
+					//включает через персонализацию DynaGrid
+					'visible' => false,
+				];
+			}
+		}
+		return $columns;
+	}
+
+	/**
 	 * Серверное выполнение действия по сырым параметрам (композиция §2.2):
 	 * строит и валидирует форму, дальше runActionForm(). RBAC здесь НЕ
 	 * проверяется — полномочия даёт право на инициирующее действие
