@@ -1,11 +1,16 @@
 <?php
 namespace app\migrations;
-use yii\db\Migration;
+use app\migrations\arms\ArmsMigration;
 
 /**
  * Разделение на несколько организаций
+ *
+ * Наследуется от ArmsMigration: перенумерация ID идёт одним мультистейтментом, а PDO
+ * проверяет результат только первого стейтмента - ошибки остальных без
+ * ArmsMigration::execute() молча теряются (plans/bugs20260820.md, сторож
+ * tests/unit/db/MigrationSqlHygieneTest).
  */
-class m190101_100008_update8 extends Migration
+class m190101_100008_update8 extends ArmsMigration
 {
 	/**
 	 * {@inheritdoc}

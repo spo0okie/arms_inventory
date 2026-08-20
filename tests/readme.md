@@ -92,14 +92,14 @@ php vendor/bin/codecept run --coverage
 | Файл | Назначение |
 |------|------------|
 | [`codeception.yml`](codeception.yml) | Основная конфигурация Codeception |
-| [`config/test-web.php`](config/test-web.php) | Конфигурация для веб-тестов (acceptance, functional, rest) |
-| [`config/test-console.php`](config/test-console.php) | Конфигурация для консольных тестов (unit, migrations) |
+| [`config/test-web.php`](config/test-web.php) | Конфигурация веб-приложения: acceptance, functional, rest **и unit** (unit-тесты гоняют web-приложение из CLI — см. §7) |
+| [`config/test-console.php`](config/test-console.php) | Конфигурация консольного приложения (suite `migrations`, `tests/bin/yii`) |
 
 ### Suite конфигурации
 
 | Suite | Конфигурация | Применение |
 |-------|--------------|------------|
-| unit | [`unit.suite.yml`](unit.suite.yml) | `config/test-console.php` |
+| unit | [`unit.suite.yml`](unit.suite.yml) | `config/test-web.php` |
 | functional | [`functional.suite.yml`](functional.suite.yml) | `config/test-web.php` |
 | acceptance | [`acceptance.suite.yml`](acceptance.suite.yml) | `config/test-web.php` |
 | acceptance-extra | [`acceptance-extra.suite.yml`](acceptance-extra.suite.yml) | `config/test-web.php` |
@@ -173,3 +173,51 @@ php vendor/bin/codecept run --coverage
 | Rest | [`_support/Helper/Rest.php`](_support/Helper/Rest.php) | Хелпер для REST API тестов |
 | Migrations | [`_support/Helper/Migrations.php`](_support/Helper/Migrations.php) | Хелпер для миграций |
 | ModelData | [`_support/Helper/ModelData.php`](_support/Helper/ModelData.php) | Генерация тестовых данных моделей |
+
+---
+
+## 7. Подводные камни
+
+### Сессия в unit-тестах: `Yii::$app->user->login()` падает только в полном прогоне
+
+Unit-suite поднимает **веб**-приложение (`config/test-web.php`) в CLI-процессе, поэтому
+`Yii::$app->user` — обычный `yii\web\User` с сессией. `login()` через `switchIdentity()`
+открывает PHP-сессию → `session_set_cookie_params()`, а в CLI это работает лишь пока
+ничего не выведено в stdout. В полном прогоне вывод предыдущих тестов уже сделал
+`headers_sent() = true`, и PHP выдаёт варнинг
+
+```text
+[Warning] session_set_cookie_params(): Session cookie parameters cannot be changed
+after headers have already been sent at vendor/yiisoft/yii2/web/Session.php:425
+```
+
+который `error_reporting(E_ALL)` (см. §4) превращает в ошибку теста.
+
+Коварство в том, что **при запуске одного класса тест зелёный** — вывода ещё нет.
+Выглядит как флак, воспроизводится только через `codecept run unit` целиком.
+
+Лечение — отключить сессию у компонента `user` на время теста, тогда от
+`login()/logout()` остаётся ровно `setIdentity()` (смена текущего пользователя
+в памяти — обычно только это тесту и нужно):
+
+```php
+protected function _before()
+{
+    $this->originalEnableSession = Yii::$app->user->enableSession;
+    Yii::$app->user->enableSession = false;
+}
+
+protected function _after()
+{
+    Yii::$app->user->enableSession = $this->originalEnableSession;
+}
+```
+
+Готовый пример — [`unit/components/integrations/IntegrationsSmsTest.php`](unit/components/integrations/IntegrationsSmsTest.php).
+
+Мокать сессию в `config/test-web.php` **нельзя**: этот конфиг общий с
+[`web/index-test.php`](../web/index-test.php) и acceptance/rest, где сессия настоящая
+и нужна для логина.
+
+Проверки `Yii::$app->user->isGuest` сессию не трогают (`renewAuthStatus()` смотрит
+`getHasSessionId()`, которого в CLI нет) — падает именно `login()`.

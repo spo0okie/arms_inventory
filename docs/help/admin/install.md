@@ -42,6 +42,15 @@ apt install php php-mbstring php-ldap php-xml php-mysql php-gd php-intl php-gmp 
    innodb_strict_mode = OFF;
    innodb_large_prefix = true
    ```
+4. Если на сервере БД включен бинарный лог (у mysql:8 - по умолчанию), создание хранимых
+   функций требует привилегии `SUPER`, которой у пользователя приложения нет. Миграции
+   создают рекурсивные функции (`getplacepath`, `getplacetop`, `getServiceSegment`), без
+   которых страницы с местами и сервисами падают с 500-й, поэтому серверу нужна настройка:
+   ```ini
+   [mysqld]
+   log_bin_trust_function_creators = 1
+   ```
+   Альтернатива - выдать пользователю `SUPER` на время миграций (менее удобно и не более безопасно).
 
 *Пример создания БД достаточной для работы*
 

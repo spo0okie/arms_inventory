@@ -2,14 +2,19 @@
 
 namespace app\migrations;
 
-use yii\db\Migration;
+use app\migrations\arms\ArmsMigration;
 
 
 /**
  * Создание БД первой версии (редакция Азимут)
  * Class m191123_164814_initial
+ *
+ * Наследуется от ArmsMigration: вся схема первой версии создаётся одним мультистейтментом, а PDO
+ * проверяет результат только первого стейтмента - ошибки остальных без
+ * ArmsMigration::execute() молча теряются (plans/bugs20260820.md, сторож
+ * tests/unit/db/MigrationSqlHygieneTest).
  */
-class m180101_010101_initial extends Migration
+class m180101_010101_initial extends ArmsMigration
 {
 	/**
 	 * {@inheritdoc}

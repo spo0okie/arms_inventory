@@ -33,10 +33,21 @@ class IntegrationsSmsTest extends Unit
 	/** @var array исходные params для восстановления */
 	private $originalIntegrations;
 
+	/** @var bool исходное user::enableSession для восстановления */
+	private $originalEnableSession;
+
 	protected function _before()
 	{
 		$this->transaction = Yii::$app->db->beginTransaction();
 		$this->originalIntegrations = Yii::$app->params['integrations'] ?? [];
+		//login()/logout() ниже нужны только чтобы сменить текущего пользователя
+		//в памяти, но yii\web\User::switchIdentity() по пути открывает PHP-сессию,
+		//а в CLI-прогоне вывод предыдущих тестов уже сделал headers_sent()=true =>
+		//session_set_cookie_params() роняет варнинг (виден только в полном прогоне
+		//suite, при запуске одного класса вывода ещё нет). enableSession=false
+		//оставляет от login() ровно setIdentity() - больше этим тестам не нужно.
+		$this->originalEnableSession = Yii::$app->user->enableSession;
+		Yii::$app->user->enableSession = false;
 		IntegrationsRegistry::reset();
 	}
 
@@ -46,6 +57,7 @@ class IntegrationsSmsTest extends Unit
 			$this->transaction->rollBack();
 		}
 		Yii::$app->params['integrations'] = $this->originalIntegrations;
+		Yii::$app->user->enableSession = $this->originalEnableSession;
 		IntegrationsRegistry::reset();
 	}
 

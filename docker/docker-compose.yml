@@ -30,6 +30,14 @@ services:
   arms-db:
     image: mysql:8.0
     restart: always
+    # Намеренное послабление, без него установка не работает: у mysql:8 бинлог включён
+    # по умолчанию, а в этом режиме CREATE FUNCTION/PROCEDURE требует привилегии SUPER,
+    # которой у пользователя приложения (arms-user) нет и быть не должно. Миграции
+    # создают рекурсивные функции getplacepath/getplacetop/getServiceSegment (без них
+    # 500-я на первом же экране с местами), поэтому создание routines доверяем обычным
+    # пользователям. Риск ограничен: в контейнер ходит только приложение.
+    # То же самое нужно и в docker-compose.yml репозитория arms-docker.
+    command: --log-bin-trust-function-creators=1
     environment:
       # вообще он нафиг не нужон, но это mandatory параметр судя по доке
       MYSQL_ROOT_PASSWORD: please_change_me_ASAP

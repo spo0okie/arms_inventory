@@ -2,12 +2,17 @@
 
 namespace app\migrations;
 
-use yii\db\Migration;
+use app\migrations\arms\ArmsMigration;
 
 /**
  * Class M231109084405FixAutoincrement
+ *
+ * Наследуется от ArmsMigration: `set @max_id=...; update ...` шлётся одной строкой, а PDO
+ * проверяет результат только первого стейтмента - ошибки остальных без
+ * ArmsMigration::execute() молча теряются (plans/bugs20260820.md, сторож
+ * tests/unit/db/MigrationSqlHygieneTest).
  */
-class M231109084405FixAutoincrement extends Migration
+class M231109084405FixAutoincrement extends ArmsMigration
 {
 	/**
 	 * {@inheritdoc}

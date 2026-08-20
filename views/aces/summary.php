@@ -21,10 +21,13 @@ use app\components\widgets\page\ModelWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Aces */
 /* @var $show string перспектива: 'resource'|'subjects' */
+/* @var $show_schedule bool выводить ли расписание префиксом строки (false, когда
+ *      строки уже сгруппированы под заголовком-расписанием, см. aces/list.php) */
 /* @var $static_view bool */
 /* @var $show_archived bool|null */
 
 if (!isset($show)) $show='resource';
+if (!isset($show_schedule)) $show_schedule=true;
 if (!isset($static_view)) $static_view=false;
 if (!isset($show_archived)) $show_archived=null;
 
@@ -33,7 +36,7 @@ $parts=[];
 if ($show==='resource') {
 	if (is_object($acl=$model->acl)) {
 		$resource='';
-		if (is_object($acl->schedule))
+		if ($show_schedule && is_object($acl->schedule))
 			$resource.=ModelWidget::widget(['model'=>$acl->schedule,'options'=>['static_view'=>true]]).': ';
 		$resource.=ModelWidget::widget(['model'=>$acl,'options'=>['static_view'=>$static_view]]);
 		$parts[]=$resource;

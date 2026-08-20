@@ -4,6 +4,7 @@ namespace app\migrations\arms;
 
 use app\helpers\ArrayHelper;
 use yii\db\Migration;
+use yii\helpers\StringHelper;
 
 /**
  * Базовый класс для миграций ARMS
@@ -39,6 +40,67 @@ class ArmsMigration extends Migration
 	 * запасной вариант для индекса, если поднять ROW_FORMAT не удалось.
 	 */
 	const SHORT_KEY_PREFIX = 191;
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * Дочитывает результаты всех стейтментов запроса, а не только первого.
+	 *
+	 * Зачем: PDO для MySQL по умолчанию эмулирует prepare, поэтому строку с несколькими
+	 * стейтментами ('SET ...; CREATE FUNCTION ...') отправляет одним запросом, а результат
+	 * читает только у первого. Ошибка второго и последующих остается в непрочитанном
+	 * rowset'е и до приложения не доходит: миграция рапортует об успехе, а объект БД
+	 * не создан. Так на mysql:8 без log_bin_trust_function_creators потерялась ошибка 1419
+	 * на CREATE FUNCTION getplacepath — миграции "прошли", а первый же экран с местами
+	 * упал 500-й (plans/bugs20260820.md).
+	 *
+	 * Мультистейтменты в миграциях допустимы только через этот класс — стережёт
+	 * tests/unit/db/MigrationSqlHygieneTest.
+	 *
+	 * @param string $sql
+	 * @param array $params
+	 * @throws \yii\db\Exception
+	 * @see \tests\unit\db\ArmsMigrationExecuteTest
+	 */
+	public function execute($sql, $params = [])
+	{
+		$sqlOutput = $sql;
+		if ($this->maxSqlOutputLength !== null) {
+			$sqlOutput = StringHelper::truncate($sql, $this->maxSqlOutputLength, '[... hidden]');
+		}
+
+		$time = $this->beginCommand("execute SQL: $sqlOutput");
+		$command = $this->db->createCommand($sql)->bindValues($params);
+		$command->execute();
+		$this->drainRowsets($command, $sqlOutput);
+		$this->endCommand($time);
+	}
+
+	/**
+	 * Дочитывает оставшиеся наборы результатов, чтобы ошибки хвостовых стейтментов
+	 * всплыли исключением, а не потерялись.
+	 *
+	 * @param \yii\db\Command $command выполненная команда
+	 * @param string $sqlOutput запрос для сообщения об ошибке
+	 * @throws \yii\db\Exception
+	 */
+	protected function drainRowsets($command, $sqlOutput)
+	{
+		$statement = $command->pdoStatement;
+		if (!($statement instanceof \PDOStatement)) return;
+
+		try {
+			while ($statement->nextRowset()) {}
+		} catch (\PDOException $e) {
+			//в сообщении PDO нет самого запроса - без него непонятно, что именно упало
+			throw new \yii\db\Exception(
+				'Ошибка в одном из стейтментов запроса: ' . $e->getMessage() . "\nSQL: " . $sqlOutput,
+				$e->errorInfo,
+				$e->getCode(),
+				$e
+			);
+		}
+	}
 
 	/**
 	 * Достраивает опции CREATE TABLE до стандарта проекта (InnoDB + utf8mb4 +

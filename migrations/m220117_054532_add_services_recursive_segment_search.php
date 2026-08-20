@@ -1,11 +1,16 @@
 <?php
 namespace app\migrations;
-use yii\db\Migration;
+use app\migrations\arms\ArmsMigration;
 
 /**
  * Class m220117_054532_add_services_recursive_segment_search
+ *
+ * Наследуется от ArmsMigration: процедура и функция создаются одной строкой, а PDO
+ * проверяет результат только первого стейтмента - ошибки остальных без
+ * ArmsMigration::execute() молча теряются (plans/bugs20260820.md, сторож
+ * tests/unit/db/MigrationSqlHygieneTest).
  */
-class m220117_054532_add_services_recursive_segment_search extends Migration
+class m220117_054532_add_services_recursive_segment_search extends ArmsMigration
 {
 	/**
 	 * {@inheritdoc}

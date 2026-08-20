@@ -1,11 +1,16 @@
 <?php
 namespace app\migrations;
-use yii\db\Migration;
+use app\migrations\arms\ArmsMigration;
 
 /**
  * Class m191103_203015_add_procedures_for_places
+ *
+ * Наследуется от ArmsMigration: процедуры создаются вместе с SET NAMES одной строкой, а PDO
+ * проверяет результат только первого стейтмента - ошибки остальных без
+ * ArmsMigration::execute() молча теряются (plans/bugs20260820.md, сторож
+ * tests/unit/db/MigrationSqlHygieneTest).
  */
-class m191103_203015_add_procedures_for_places extends Migration
+class m191103_203015_add_procedures_for_places extends ArmsMigration
 
 {
 	static $drop= <<<SQL
