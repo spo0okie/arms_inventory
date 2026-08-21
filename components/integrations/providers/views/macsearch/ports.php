@@ -22,12 +22,17 @@ use yii\helpers\Html;
 
 $containerId = 'macsearch-'.substr(md5(implode(',', array_column($results, 'mac')).($refreshUrl ?? '')), 0, 12);
 
-//коммутатор ссылкой на карточку (id пришёл из нашего же запроса)
+//коммутатор ссылкой на карточку (id пришёл из нашего же запроса); адрес
+//показываем, только если объект почему-то не нашёлся
 $switchLink = static function ($row) use ($switches) {
 	$tech = $switches[$row['target'] ?? null] ?? null;
 	if (is_object($tech)) return ModelWidget::widget(['model' => $tech, 'options' => ['static_view' => true]]);
 	return Html::encode($row['host'] ?? '');
 };
+
+//сколько неопрошенных показывать списком: если не отвечает вся площадка,
+//портянка на два экрана не нужна
+$failedLimit = 10;
 
 ?>
 <div id="<?= $containerId ?>">
@@ -98,11 +103,30 @@ $switchLink = static function ($row) use ($switches) {
 		<?php } ?>
 
 		<?php if (!$compact && $failed) { ?>
-			<div class="text-secondary opacity-75 small"><?=
-				'не опрошены коммутаторы ('.count($failed)
-					.(empty($stats['requested']) ? '' : ' из '.(int)$stats['requested']).'): '
-				.Html::encode(implode(', ', array_slice(array_column($failed, 'host'), 0, 5)))
-					.(count($failed) > 5 ? '…' : '') ?></div>
+			<?php /* неопрошенные - такие же объекты инвентаризации, как найденные:
+			       к ним надо уметь перейти и починить. Рядом причина одной
+			       строкой, полный текст ошибки - в подсказке */ ?>
+			<div class="text-secondary small">
+				не опрошены (<?= count($failed) ?><?=
+					empty($stats['requested']) ? '' : ' из '.(int)$stats['requested'] ?>):
+			</div>
+			<table class="table table-sm w-auto mb-1 text-secondary">
+				<tbody>
+				<?php foreach (array_slice($failed, 0, $failedLimit) as $failure) { ?>
+					<tr>
+						<td><?= $switchLink($failure) ?></td>
+						<td<?= empty($failure['detail']) ? ''
+							: ' title="'.Html::encode($failure['detail']).'"' ?>><?=
+							Html::encode($failure['error'] ?? 'причина не указана') ?></td>
+					</tr>
+				<?php } ?>
+				</tbody>
+			</table>
+			<?php if (count($failed) > $failedLimit) { ?>
+				<div class="text-secondary opacity-75 small">
+					…и ещё <?= count($failed) - $failedLimit ?>
+				</div>
+			<?php } ?>
 		<?php } ?>
 	</div>
 <?php } ?>

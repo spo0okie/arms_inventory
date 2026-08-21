@@ -448,6 +448,34 @@ class MacSearchProviderTest extends Unit
 		$this->assertStringContainsString('10.50.2.99', $html);
 	}
 
+	/**
+	 * Неопрошенные коммутаторы — такие же объекты инвентаризации, как найденные:
+	 * ссылка на карточку, рядом причина, полный текст ошибки — в подсказке
+	 */
+	public function testRenderUnreachableAsObjects()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$provider = $this->makeProvider([$this->response($this->payload([], [
+			'errors' => [[
+				'target' => $switch->id, 'host' => '10.50.2.16',
+				'error' => 'нет TCP-соединения (порт закрыт или хост недоступен)',
+				'detail' => 'TCP connection to device failed. Device settings: cisco_ios 10.50.2.16:22',
+			]],
+			'targets' => ['requested' => 1, 'answered' => 0, 'failed' => 1],
+		]))]);
+
+		$targets = $provider->targets();      // наполняет карту коммутаторов для ссылок
+		$html = $provider->renderResults($provider->search(['001122334455'], $targets));
+
+		$this->assertStringContainsString('не опрошены (1 из 1)', $html);
+		//коммутатор показан объектом, а не голым адресом
+		$this->assertStringContainsString('techs/view', $html);
+		$this->assertStringContainsString($switch->name, $html);
+		$this->assertStringContainsString('нет TCP-соединения', $html);
+		//подробности netmiko - в подсказке, а не в строке списка
+		$this->assertStringContainsString('Device settings', $html);
+	}
+
 	/** Опрос ещё идёт: сообщение и самоперезапрос блока */
 	public function testRenderPending()
 	{
