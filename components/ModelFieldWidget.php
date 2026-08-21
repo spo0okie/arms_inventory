@@ -126,7 +126,9 @@ class ModelFieldWidget extends Widget
 		if ($isEmpty)
 			return null;
 
-		return $type->renderOutput($this->view,$model,$this->field);
+		//item_options доезжают до типа: рендер значения зависит от режима
+		//(static_view - печать/тултип/список: без интерактивных элементов)
+		return $type->renderOutput($this->view,$model,$this->field,(array)$this->item_options);
 	}
 
 	/**

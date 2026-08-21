@@ -2,12 +2,13 @@
 
 namespace app\types;
 
+use app\components\MacSearchWidget;
 use app\generation\context\AttributeContext;
 use app\helpers\ArrayHelper;
 use app\helpers\MacsHelper;
 use app\models\base\ArmsModel;
 use app\models\Techs;
-use Yii;
+use yii\helpers\Html;
 use yii\web\View;
 
 class MacsType extends TextType
@@ -21,12 +22,34 @@ class MacsType extends TextType
 	 * Форматированный многострочный вывод: каждый адрес/диапазон на своей
 	 * строке в каноническом виде (AA:BB:CC:DD:EE:FF). Работает и от сырого
 	 * значения (mac), и от уже форматированного (formattedMac).
+	 *
+	 * Рядом с каждым одиночным адресом — иконка поиска (issue #218,
+	 * {@see MacSearchWidget}): поиск это функциональность самого адреса,
+	 * поэтому живёт на его типе и одинаков везде, где адрес показывается
+	 * (ОС, оборудование, любой mac-атрибут). Диапазоны (issue #120) иконку
+	 * не получают: искать можно конкретный адрес.
+	 *
+	 * $options['search'] => false - вывести значения без иконок (списки,
+	 * печать, тултипы: там иконка была бы шумом, а в списках ту же задачу
+	 * решает фильтр колонки).
 	 */
 	public function renderOutput(View $view, ArmsModel $model, string $attribute, array $options = []): mixed
 	{
-		return Yii::$app->formatter->asNtext(
-			Techs::formatMacs(ArrayHelper::getValue($model,$attribute))
-		);
+		$value=(string)ArrayHelper::getValue($model,$attribute);
+		//в статичном режиме (печать, тултипы, вложенные списки) иконка не нужна:
+		//там нет интерактива, а тултип внутри тултипа ещё и не работает
+		$search=$options['search'] ?? !($options['static_view'] ?? false);
+
+		$items=[];
+		foreach (explode("\n",$value) as $line) {
+			$text=Techs::formatMacs($line);
+			if (!strlen($text)) continue;
+
+			$items[]=Html::tag('span',Html::encode($text),['class'=>'mac_address'])
+				.($search?MacSearchWidget::widget(['model'=>$model,'mac'=>$line]):'');
+		}
+
+		return implode('<br />',$items);
 	}
 
 	/**

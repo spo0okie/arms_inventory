@@ -98,6 +98,9 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 				'show_empty'=>true,
 				'message_on_empty'=>'не назначен',
 			]) ?>
+			<?php /* АРМ не назначен, но MAC есть - предложим найденное по нему
+			       оборудование (issue #218) */ ?>
+			<?= $this->render('arm-suggestion',['model'=>$model,'static_view'=>$static_view]) ?>
 		</div>
 	<?php } ?>
 	<?= $this->render('ips_list',['model'=>$model,'static_view'=>$static_view,'glue'=>$ips_glue]) ?>

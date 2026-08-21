@@ -51,12 +51,9 @@ if (count($activeIps) || count($ignoredIps)) {
 
 <div class="pe-5">
 	<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'mac') ?>
-	<?php /* значения - ссылками на поиск по MAC (функциональность, не просто вывод значения) */ ?>
-	<p><?php
-		$output=[];
-		foreach (explode("\n",$model->formattedMac) as $mac) {
-			$output[]= Html::a($mac,['comps/index','CompsSearch[mac]'=>$mac]);
-		}
-		echo implode($glue,$output);
-	?></p>
+	<?php /* рядом с адресом - иконка поиска по MAC (функциональность, а не просто
+	       вывод значения). Рендер живёт на типе атрибута (MacsType), поэтому ОС и
+	       оборудование показывают адреса одинаково - issue #218 */ ?>
+	<p><?= \app\components\ModelFieldWidget::renderFieldValue($model,'mac',
+		['item_options'=>['static_view'=>$static_view]]) ?></p>
 </div>

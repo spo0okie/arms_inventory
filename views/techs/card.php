@@ -109,7 +109,10 @@ if (is_object($model->state)) { ?>
 	<div class="pe-5 mb-3">
 		<?= ModelFieldWidget::renderFieldTitle($model,'mac') ?>
 		<p class="mb-0">
-			<?= ModelFieldWidget::renderFieldValue($model,'mac') ?>
+			<?php /* режим доезжает до типа: в статичном рендере (печать, тултип)
+			       иконка поиска по MAC не выводится - issue #218 */ ?>
+			<?= ModelFieldWidget::renderFieldValue($model,'mac',
+				['item_options'=>['static_view'=>$static_view]]) ?>
 		</p>
 	</div>
 

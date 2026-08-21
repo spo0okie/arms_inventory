@@ -99,7 +99,11 @@ abstract class IntegrationProvider
 	 * Панели чтения (L1) для карточки объекта.
 	 * @return array [panelId => [
 	 *   'title' => string,
-	 *   'ttl' => int, // свежесть кэша, сек (default 60)
+	 *   'ttl' => int,   // свежесть кэша, сек (default 60)
+	 *   'auto' => bool, // default true; false = в карточке автоматически не
+	 *                   // рисуется (PanelsWidget её пропускает), но остаётся
+	 *                   // доступной через proxy - для дорогих запросов,
+	 *                   // которые запускают по действию пользователя
 	 * ]]
 	 */
 	public function panels(ArmsModel $model): array

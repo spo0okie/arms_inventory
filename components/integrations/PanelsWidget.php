@@ -52,6 +52,11 @@ class PanelsWidget extends Widget
 
 			$binding = $provider->binding($model);
 			foreach ($provider->panels($model) as $panelId => $descriptor) {
+				//'auto' => false: панель существует (её отдаёт proxy), но в
+				//карточке сама не появляется - её открывают по действию
+				//пользователя. Так живут дорогие запросы, которые незачем
+				//делать при каждом открытии карточки (опрос коммутаторов)
+				if (($descriptor['auto'] ?? true) === false) continue;
 				$panelsHtml .= $this->renderPanel($provider, $panelId, $descriptor, $binding, $classId);
 			}
 

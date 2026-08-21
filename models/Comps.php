@@ -395,8 +395,10 @@ class Comps extends ArmsModel
 			'mac' => [
 				'MAC Адрес(а)',
 				//формат заполнения/поиска подскажет MacsType (inputHint/searchHint)
-				'hint' => 'MAC адреса сетевых интерфейсов настроенных в ОС',
-				'indexHint' => 'MAC адреса сетевых интерфейсов настроенных в ОС',
+				'hint' => 'MAC адреса сетевых интерфейсов настроенных в ОС.<br>'
+					.'Иконка поиска рядом с адресом ищет его среди оборудования, '
+					.'среди ОС и на портах коммутаторов',
+				'indexHint' => '{same}',
 				'typeClass'=>\app\types\MacsType::class,
 			],
 			'maintenance_jobs_ids' => [
@@ -555,6 +557,34 @@ class Comps extends ArmsModel
 	public function getArm()
 	{
 		return $this->hasOne(Techs::class, ['id' => 'arm_id']);
+	}
+
+	/**
+	 * Оборудование с теми же MAC-адресами — кандидаты в АРМ этой ОС
+	 * (issue #218): ОС без привязанного АРМ, но с MAC, скорее всего стоит
+	 * на железе, у которого этот адрес записан. Карточка предлагает
+	 * привязку, решение остаётся за человеком.
+	 *
+	 * Не getter: это не атрибут и не связь модели, а разовый поиск для
+	 * карточки. Считается только у ОС без АРМ (иначе пустой массив, без
+	 * запроса), диапазоны адресов не участвуют — сопоставляем конкретные.
+	 *
+	 * @param int $limit сколько кандидатов показывать
+	 * @return Techs[]
+	 */
+	public function macArmCandidates(int $limit=5): array
+	{
+		if ($this->arm_id || !strlen((string)$this->mac)) return [];
+
+		$condition=['or'];
+		foreach (explode("\n",$this->mac) as $line) {
+			$mac=preg_replace('/[^0-9a-f]/', '', mb_strtolower($line));
+			if (strlen($mac)!==12 || hexdec($mac)===0) continue;
+			$condition[]=['like','techs.mac',$mac];
+		}
+		if (count($condition)<2) return [];
+
+		return Techs::find()->where($condition)->limit($limit)->all();
 	}
 
 	/**
