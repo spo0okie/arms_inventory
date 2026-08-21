@@ -1,0 +1,66 @@
+# Что НЕ попадает в образ приложения.
+#
+# Контекст сборки - корень репозитория (см. docker/Dockerfile: `COPY . /var/www/arms`),
+# поэтому без этого файла в образ уезжают история git, тесты, node_modules и локальные
+# артефакты разработчика - десятки-сотни мегабайт, которые в контейнере никому не нужны.
+#
+# Осторожно:
+#  - каталог docker/ исключать нельзя: из него COPY-ятся конфиги apache/php и run.sh;
+#  - docs/ нужен в образе - это пользовательская документация, её отдаёт DocsController;
+#  - composer.lock нужен: он трекается, и `composer install` в образе ставит по нему;
+#  - у каталогов, которые приложение считает существующими (web/assets, web/scans,
+#    runtime), исключается только содержимое - keeper-файлы оставлены, иначе каталог
+#    не попадёт в образ (AssetManager падает с "The directory does not exist").
+
+# --- история и настройки репозитория ---
+.git
+.gitignore
+.gitattributes
+.github
+.gitlab-ci.yml
+
+# --- настройки IDE и вспомогательных инструментов ---
+.idea
+.vscode
+.claude
+.kilocode
+
+# --- тесты: образ ставится с --no-dev, гонять их там всё равно нечем ---
+# (** обязателен: docker матчит шаблон по всему относительному пути, а не по имени, как
+#  git - без ** правило поймает только каталог верхнего уровня, а modules/*/tests не поймает)
+**/tests
+codeception.yml
+test*.bat
+
+# --- внутренняя документация разработки (в отличие от docs/) ---
+plans
+AGENTS.md
+standards.md
+structure.md
+ui-sources.md
+unification.md
+
+# --- сборочные каталоги и локальные артефакты ---
+# node_modules есть не только в корне: 42 МБ прячется в modules/schedules/compile/lib/js
+**/node_modules
+vendor
+**/*.log
+
+runtime/*
+!runtime/.gitignore
+
+web/assets/*
+!web/assets/.gitignore
+
+# сканы пользователей: в контейнере сюда монтируется том, в образе нужны только заглушки
+web/scans/*
+!web/scans/.htaccess
+!web/scans/no_file.png
+!web/scans/pdf_file.png
+
+# composer.phar от старой ручной сборки - Dockerfile теперь качает свой
+docker/composer
+
+# --- локальные утилиты разработчика ---
+cloud*.cmd
+yii.bat

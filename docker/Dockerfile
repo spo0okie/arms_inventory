@@ -48,9 +48,9 @@ COPY docker/prod/index.php /var/www/arms/web/index.php
 # Установка зависимостей
 WORKDIR /var/www/arms
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/var/www/arms --filename=composer.phar
-# composer.lock в репозитории нет (gitignored) -> composer выполняет update и обращается
-# к GitHub API за dev-master/vcs-пакетами. Без токена это упирается в rate-limit и падает с
-# "Could not authenticate against github.com". Токен берём из BuildKit-секрета composer_auth
+# composer ходит в GitHub API за vcs-пакетами (в т.ч. форками dev-master). Без токена это
+# упирается в rate-limit и падает с "Could not authenticate against github.com".
+# Токен берём из BuildKit-секрета composer_auth
 # (содержимое = auth.json), кладём в writable COMPOSER_HOME (домашний /var/www у www-data
 # не записываемый -> иначе "Cannot create cache directory").
 RUN --mount=type=secret,id=composer_auth \
