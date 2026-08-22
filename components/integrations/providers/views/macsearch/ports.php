@@ -64,6 +64,12 @@ $failedLimit = 10;
 				<?= Html::encode($data['error'] ?? 'ошибка сервиса') ?></span>
 		<?php } elseif (!count($rows)) { ?>
 			<span class="text-secondary opacity-75">&mdash; не найден на портах коммутаторов</span>
+			<?php /* «не найден» и «не поняли ответ железки» выглядят одинаково -
+			       улики сервиса объясняют, что именно случилось */ ?>
+			<?= $this->render('_diagnostics', [
+				'diagnostics' => $data['diagnostics'] ?? [],
+				'switches' => $switches,
+			]) ?>
 		<?php } else { ?>
 			<table class="table table-sm w-auto mb-1">
 				<thead>

@@ -62,6 +62,10 @@ $macCell = static function (array $item) {
 		<?= Html::encode($failure['error'] ?? 'причина не указана') ?></span>
 <?php } elseif (!count($ports)) { ?>
 	<span class="text-secondary opacity-75">таблица MAC пуста: коммутатор не видит ни одного адреса</span>
+	<?= $this->render('_diagnostics', [
+		'diagnostics' => $data['diagnostics'] ?? [],
+		'switches' => [$tech->id => $tech],
+	]) ?>
 <?php } else { ?>
 	<table class="table table-sm w-auto mb-1">
 		<thead>

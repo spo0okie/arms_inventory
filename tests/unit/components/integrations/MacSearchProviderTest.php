@@ -517,6 +517,36 @@ class MacSearchProviderTest extends Unit
 		$this->assertStringContainsString('Gi1/0/12', $html);
 	}
 
+	/**
+	 * Пустой результат с уликами сервиса: «не найден» и «не поняли ответ
+	 * железки» выглядят одинаково, поэтому диагностику видно в панели —
+	 * её можно скопировать в задачу
+	 */
+	public function testRenderDiagnostics()
+	{
+		$provider = $this->makeProvider();
+		$html = $provider->renderResults([['mac' => '001122334455', 'error' => null,
+			'data' => $this->payload([], ['diagnostics' => [[
+				'target' => 907, 'host' => '172.16.9.10', 'mode' => 'lookup',
+				'commands' => ['show fdb mac_address 00-11-22-33-44-55'],
+				'matched' => 0, 'output_chars' => 61,
+				'output_head' => 'Command: show fdb mac_address 00-11-22-33-44-55 Fail!',
+				'dropped_sample' => ['Fail!'],
+				'verdict' => 'ответ не разобран (неизвестный формат либо отказ учётки)',
+			]]])]]);
+
+		$this->assertStringContainsString('не найден на портах', $html);
+		$this->assertStringContainsString('почему пусто', $html);
+		$this->assertStringContainsString('ответ не разобран', $html);
+		//сырой ответ железки - главное свидетельство, он должен быть виден целиком
+		$this->assertStringContainsString('Fail!', $html);
+
+		//без улик блока нет: обычный «не найден» ничем не обрастает
+		$this->assertStringNotContainsString('почему пусто',
+			$provider->renderResults([['mac' => '001122334455', 'error' => null,
+				'data' => $this->payload([])]]));
+	}
+
 	// --- панель коммутатора «Что подключено к портам» ---------------------
 
 	/** Строка таблицы MAC, как её отдаёт сервис в режиме table */
