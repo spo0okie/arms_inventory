@@ -52,11 +52,22 @@ class PanelsWidget extends Widget
 
 			$binding = $provider->binding($model);
 			foreach ($provider->panels($model) as $panelId => $descriptor) {
+				$auto = $descriptor['auto'] ?? true;
+
 				//'auto' => false: панель существует (её отдаёт proxy), но в
 				//карточке сама не появляется - её открывают по действию
 				//пользователя. Так живут дорогие запросы, которые незачем
 				//делать при каждом открытии карточки (опрос коммутаторов)
-				if (($descriptor['auto'] ?? true) === false) continue;
+				if ($auto === false) continue;
+
+				//'auto' => 'button': тот же дорогой запрос, но точка входа
+				//нужна в самой карточке - рисуем кнопку, а панель грузим по клику
+				if ($auto === 'button') {
+					$panelsHtml .= $this->renderButtonPanel($provider, $panelId, $descriptor,
+						$binding, $classId);
+					continue;
+				}
+
 				$panelsHtml .= $this->renderPanel($provider, $panelId, $descriptor, $binding, $classId);
 			}
 
@@ -78,6 +89,42 @@ class PanelsWidget extends Widget
 		return '<div class="integrations-block">'
 			.$panelsHtml
 			.($buttonsHtml === '' ? '' : '<div class="integrations-actions mt-1 mb-2">'.$buttonsHtml.'</div>')
+			.'</div>';
+	}
+
+	/**
+	 * Панель по кнопке ('auto' => 'button'): дорогой запрос, которому всё же
+	 * нужна точка входа в карточке.
+	 *
+	 * Свежий результат из кэша показываем сразу — он уже оплачен, и прятать
+	 * его за кнопкой незачем. Нет или протух — рисуем кнопку, которая грузит
+	 * панель тем же proxy-запросом.
+	 */
+	protected function renderButtonPanel(IntegrationProvider $provider, string $panelId,
+		array $descriptor, ?string $binding, string $classId): string
+	{
+		$model = $this->model;
+		$cached = is_null($binding) ? null
+			: PanelsCache::fetch($provider->id, $panelId, $binding, $this->compact);
+		if ($cached && $cached['age'] <= $provider->panelTtl($panelId, $model)) {
+			return $this->renderPanel($provider, $panelId, $descriptor, $binding, $classId);
+		}
+
+		$containerId = 'integration-'.$provider->id.'-'.$panelId.'-'.$classId.'-'.$model->id;
+		$title = $descriptor['title'] ?? $provider->getTitle();
+		$url = Url::to(['/integrations/panel', 'provider' => $provider->id, 'panel' => $panelId,
+			'class' => $classId, 'id' => $model->id]
+			+ ($this->compact ? ['compact' => 1] : []));
+
+		return ('<h4>'.Html::encode($title).'</h4>')
+			.'<div class="'.($this->compact ? 'mb-2' : 'mb-3').'" id="'.$containerId.'">'
+			.Html::button(Html::encode($descriptor['button'] ?? 'Загрузить'), [
+				'class' => 'btn btn-sm btn-secondary',
+				'onclick' => '$(this).prop("disabled",true)'
+					.'.html("<span class=\'spinner-border spinner-border-sm\'></span> опрос…");'
+					.'$.get('.json_encode($url).', function(data) {'
+					.'$("#'.$containerId.'").html(data);});',
+			])
 			.'</div>';
 	}
 

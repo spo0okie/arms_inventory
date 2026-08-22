@@ -66,8 +66,11 @@ use yii\helpers\Url;
  */
 class MacSearchProvider extends IntegrationProvider
 {
-	/** id единственной панели провайдера */
+	/** id панели «Порт коммутатора» (где виден адрес объекта) */
 	const PANEL = 'ports';
+
+	/** id панели «Что за портами» в карточке самого коммутатора */
+	const PANEL_SWITCH = 'switch';
 
 	/** область опроса: площадка объекта / все коммутаторы */
 	const SCOPE_PLACE = 'place';
@@ -93,6 +96,13 @@ class MacSearchProvider extends IntegrationProvider
 
 	/** ttl панели по умолчанию, сек (у сервиса свой кэш той же длины) */
 	const DEFAULT_TTL = 600;
+
+	/**
+	 * С какого числа адресов на порту считаем его транзитным (за портом сеть,
+	 * а не устройство). Два-три адреса — штатное дело: телефон с ПК за ним,
+	 * виртуалки, свитч под столом. Знание из `ports` эту оценку перебивает.
+	 */
+	const DEFAULT_TRANSIT_FROM = 4;
 
 	/** @var Techs[] опрошенные коммутаторы (id => модель) — для рендера ссылок */
 	protected array $switches = [];
@@ -123,28 +133,75 @@ class MacSearchProvider extends IntegrationProvider
 		$macs = $this->requestedMacs($model);
 		//область опроса тоже в ключе: «площадка объекта» и «все площадки» -
 		//разные результаты, смешивать их в кэше нельзя
-		return $macs ? implode(',', $macs).'@'.$this->requestedScope() : null;
+		$key = $macs ? implode(',', $macs).'@'.$this->requestedScope() : null;
+
+		//у коммутатора есть вторая панель («что за портами»), и ключуется она
+		//самой железкой: собственный MAC у коммутатора записан далеко не всегда
+		if ($this->isSwitch($model)) $key = 'tech'.$model->id.($key ? '|'.$key : '');
+
+		return $key;
 	}
 
 	/**
-	 * Панель есть, но сама в карточке не рисуется ('auto' => false): опрос
-	 * коммутаторов — дорогая операция, запускать её при каждом открытии
-	 * карточки незачем. Панель открывают по клику иконки рядом с адресом
-	 * ({@see \app\components\MacSearchWidget}) через тот же proxy.
+	 * Панели провайдера.
+	 *
+	 * «Порт коммутатора» есть всегда, но сама в карточке не рисуется
+	 * ('auto' => false): опрос коммутаторов — дорогая операция, запускать её
+	 * при каждом открытии карточки незачем. Её открывают по клику иконки
+	 * рядом с адресом ({@see \app\components\MacSearchWidget}) через proxy.
+	 *
+	 * «Что за портами» появляется только в карточке самого коммутатора и
+	 * рисуется кнопкой ('auto' => 'button'): точка входа в карточке нужна, а
+	 * снимать таблицу MAC при каждом открытии — нет.
 	 */
 	public function panels(ArmsModel $model): array
 	{
-		return [
+		$panels = [
 			static::PANEL => [
 				'title' => $this->getTitle(),
 				'ttl' => $this->config['cacheTtl'] ?? static::DEFAULT_TTL,
 				'auto' => (bool)($this->config['autoPanel'] ?? false),
 			],
 		];
+
+		if ($this->isSwitch($model)) {
+			$panels[static::PANEL_SWITCH] = [
+				'title' => 'Что подключено к портам',
+				'ttl' => $this->config['cacheTtl'] ?? static::DEFAULT_TTL,
+				'auto' => 'button',
+				'button' => 'Опросить порты',
+			];
+		}
+
+		return $panels;
+	}
+
+	/**
+	 * Этот объект — коммутатор, который мы умеем опрашивать?
+	 * (тип модели из switchTypes, есть IP, не архивный)
+	 */
+	public function isSwitch(ArmsModel $model): bool
+	{
+		if (!static::isSwitchable($model)) return false;
+		/** @var Techs $model */
+		if (!static::firstIp($model->ip)) return false;
+		if (is_object($model->state) && $model->state->archived) return false;
+
+		$types = $this->config['switchTypes'] ?? static::DEFAULT_SWITCH_TYPES;
+		$type = is_object($model->model) ? $model->model->type : null;
+		return is_object($type) && in_array($type->code, $types, true);
+	}
+
+	/** Оборудование ли это вообще (дешёвая проверка до обращений к связям) */
+	protected static function isSwitchable(ArmsModel $model): bool
+	{
+		return $model instanceof Techs && !$model->isNewRecord;
 	}
 
 	public function renderPanel(string $panelId, ArmsModel $model): string
 	{
+		if ($panelId === static::PANEL_SWITCH) return $this->renderSwitchPanel($model);
+
 		$attempt = (int)Yii::$app->request->get('attempt', 0);
 		$macs = $this->requestedMacs($model);
 		$targets = $this->targetsFor($model);
@@ -160,6 +217,160 @@ class MacSearchProvider extends IntegrationProvider
 			$html = Html::tag('h1', Html::encode($title)).$html;
 		}
 		return $html;
+	}
+
+	/**
+	 * Панель «Что за портами» в карточке коммутатора: снимаем с него таблицу
+	 * MAC целиком (mode=table) и раскладываем по портам.
+	 *
+	 * Опрашивается ровно одна железка — та, чью карточку открыли: спрашивать
+	 * площадку ради одной таблицы незачем.
+	 */
+	public function renderSwitchPanel(ArmsModel $model): string
+	{
+		/** @var Techs $model */
+		$attempt = (int)Yii::$app->request->get('attempt', 0);
+		$target = $this->describeTarget($model);
+		if (!$target) return '<span class="text-secondary opacity-75">'
+			.'у коммутатора не указан IP-адрес — опрашивать нечего</span>';
+
+		$data = null;
+		$error = null;
+		try {
+			$data = $this->fetch(null, [$target], 'table');
+			$data['rows'] = $this->annotateUplinks($data['rows'] ?? []);
+		} catch (\Throwable $e) {
+			$error = $e->getMessage();
+		}
+
+		$results = [['mac' => null, 'data' => $data, 'error' => $error]];
+		return $this->renderView('switch', [
+			'ports' => $this->switchPorts($data['rows'] ?? []),
+			'data' => $data,
+			'error' => $error,
+			'refreshUrl' => $this->refreshUrl($model, $results, $attempt, static::PANEL_SWITCH),
+			'provider' => $this,
+			'tech' => $model,
+		]);
+	}
+
+	/**
+	 * Строки таблицы MAC -> порты коммутатора: что за каждым портом.
+	 *
+	 * Классификация тут только по числу адресов и связям портов; кто именно
+	 * стоит за портом, решает сопоставление адресов с объектами
+	 * ({@see resolveMacs()}) — оно идёт отдельно и одним запросом на всю
+	 * таблицу, а не по строке.
+	 *
+	 * @return array [['port'=>string,'vlans'=>string[],'macs'=>[['mac'=>string,'objects'=>ArmsModel[]]],
+	 *   'count'=>int,'uplink'=>bool,'uplink_peer'=>string,'transit'=>bool], ...]
+	 */
+	public function switchPorts(array $rows): array
+	{
+		$objects = $this->resolveMacs(array_column($rows, 'mac'));
+		$transitFrom = (int)($this->config['transitFrom'] ?? static::DEFAULT_TRANSIT_FROM);
+
+		$ports = [];
+		foreach ($rows as $row) {
+			$name = (string)($row['port'] ?? '');
+			if ($name === '') continue;
+
+			if (!isset($ports[$name])) $ports[$name] = [
+				'port' => $name,
+				'vlans' => [],
+				'macs' => [],
+				'count' => 0,
+				'uplink' => !empty($row['uplink']),
+				'uplink_peer' => $row['uplink_peer'] ?? '',
+			];
+
+			$mac = static::hexMac($row['mac'] ?? '');
+			if ($mac && !isset($ports[$name]['macs'][$mac])) {
+				$ports[$name]['macs'][$mac] = ['mac' => $mac, 'objects' => $objects[$mac] ?? []];
+			}
+
+			$vlan = (string)($row['vlan'] ?? '');
+			if ($vlan !== '' && !in_array($vlan, $ports[$name]['vlans'], true)) {
+				$ports[$name]['vlans'][] = $vlan;
+			}
+
+			//сервис считает адреса на порту сам (port_macs), но у него это
+			//число по одной железке - если его нет, считаем по строкам
+			$ports[$name]['count'] = max($ports[$name]['count'],
+				(int)($row['port_macs'] ?? 0), count($ports[$name]['macs']));
+		}
+
+		foreach ($ports as &$port) {
+			$port['macs'] = array_values($port['macs']);
+			//за портом сеть, а не устройство: либо так сказали связи портов,
+			//либо адресов слишком много для «устройство + телефон + виртуалки»
+			$port['transit'] = $port['uplink'] || $port['count'] >= $transitFrom;
+		}
+		unset($port);
+
+		uasort($ports, fn($one, $other) =>
+			strnatcasecmp(static::portKey($one['port']), static::portKey($other['port']))
+				?: strnatcasecmp($one['port'], $other['port']));
+
+		return array_values($ports);
+	}
+
+	/**
+	 * Адреса -> объекты инвентаризации, одним запросом на пачку.
+	 *
+	 * Адрес пишут то на железе, то на его ОС, поэтому ищем в обоих. Диапазоны
+	 * адресов (issue #120) сюда не попадают: в таблице коммутатора адреса
+	 * всегда конкретные, а вхождение в диапазон — отдельный (дорогой) запрос,
+	 * он понадобится при опознании соседей.
+	 *
+	 * @param string[] $macs адреса в любом виде
+	 * @return array [12hex => ArmsModel[]]
+	 */
+	public function resolveMacs(array $macs): array
+	{
+		$needles = [];
+		foreach ($macs as $mac) {
+			$hex = static::hexMac($mac);
+			if ($hex && !in_array($hex, $needles, true)) $needles[] = $hex;
+		}
+		if (!$needles) return [];
+
+		$found = [];
+		//чанками: условие с сотней LIKE - это один проход по таблице, а сотня
+		//отдельных запросов - сто проходов (индекса по подстроке всё равно нет)
+		foreach (array_chunk($needles, 100) as $chunk) {
+			foreach ([Techs::class, Comps::class] as $class) {
+				$condition = ['or'];
+				foreach ($chunk as $hex) $condition[] = ['like', 'mac', $hex];
+
+				/** @var ArmsModel $item */
+				foreach ($class::find()->where($condition)->all() as $item) {
+					foreach (static::hexMacs($item->mac) as $hex) {
+						if (!in_array($hex, $chunk, true)) continue;
+						$found[$hex][] = $item;
+					}
+				}
+			}
+		}
+		return $found;
+	}
+
+	/** Адрес в 12 hex ('' — это не полный адрес) */
+	public static function hexMac(?string $value): string
+	{
+		$hex = preg_replace('/[^0-9a-f]/', '', mb_strtolower((string)$value));
+		return strlen($hex) === 12 && hexdec($hex) > 0 ? $hex : '';
+	}
+
+	/** Все одиночные адреса многострочного поля (диапазоны пропускаем) */
+	public static function hexMacs(?string $value): array
+	{
+		$macs = [];
+		foreach (explode("\n", (string)$value) as $line) {
+			$hex = static::hexMac($line);
+			if ($hex && !in_array($hex, $macs, true)) $macs[] = $hex;
+		}
+		return $macs;
 	}
 
 	/**
@@ -262,19 +473,33 @@ class MacSearchProvider extends IntegrationProvider
 		$this->switches = [];
 		foreach ($query->all() as $tech) {
 			/** @var Techs $tech */
-			$ip = static::firstIp($tech->ip);
-			if (!$ip) continue;    //в поле адреса что-то есть, но не IP
-
-			$this->switches[$tech->id] = $tech;
-			$targets[] = [
-				'id' => $tech->id,
-				'host' => $ip,
-				'vendor' => is_object($tech->model) && is_object($tech->model->manufacturer)
-					? $tech->model->manufacturer->name : '',
-				'model' => is_object($tech->model) ? $tech->model->name : '',
-			];
+			$target = $this->describeTarget($tech);
+			if (!$target) continue;    //в поле адреса что-то есть, но не IP
+			$targets[] = $target;
 		}
 		return $targets;
+	}
+
+	/**
+	 * Одна цель для сервиса: адрес, вендор и модель, как их знает
+	 * инвентаризация (сопоставление «модель → драйвер» живёт в сервисе).
+	 * Заодно запоминает железку для рендера ссылок в результатах.
+	 *
+	 * @return array|null null — у железки нет адреса, опрашивать нечего
+	 */
+	public function describeTarget(Techs $tech): ?array
+	{
+		$ip = static::firstIp($tech->ip);
+		if (!$ip) return null;
+
+		$this->switches[$tech->id] = $tech;
+		return [
+			'id' => $tech->id,
+			'host' => $ip,
+			'vendor' => is_object($tech->model) && is_object($tech->model->manufacturer)
+				? $tech->model->manufacturer->name : '',
+			'model' => is_object($tech->model) ? $tech->model->name : '',
+		];
 	}
 
 	/** Опрошенные коммутаторы (id => Techs) — рендер ссылок в результатах */
@@ -466,14 +691,15 @@ class MacSearchProvider extends IntegrationProvider
 	 * URL самоперезапроса панели, пока сервис опрашивает (null — не нужен
 	 * или попытки исчерпаны).
 	 */
-	protected function refreshUrl(ArmsModel $model, array $results, int $attempt): ?string
+	protected function refreshUrl(ArmsModel $model, array $results, int $attempt,
+		string $panel = self::PANEL): ?string
 	{
 		if (!$this->isPending($results)) return null;
 		if ($attempt + 1 >= (int)($this->config['maxAttempts'] ?? static::DEFAULT_MAX_ATTEMPTS)) return null;
 
 		return Url::to(['/integrations/panel',
 			'provider' => $this->id,
-			'panel' => static::PANEL,
+			'panel' => $panel,
 			'class' => StringHelper::class2Id(get_class($model)),
 			'id' => $model->id,
 			'attempt' => $attempt + 1,
@@ -482,18 +708,21 @@ class MacSearchProvider extends IntegrationProvider
 
 	/**
 	 * Запрос опроса к сервису.
-	 * @param string $mac нормализованный адрес (12 hex)
+	 * @param string|null $mac нормализованный адрес (12 hex); null — режимам
+	 *   table/neighbors адрес не нужен, они снимают с железки всё
 	 * @param array $targets цели опроса
+	 * @param string $mode режим сервиса: lookup / table / neighbors
 	 * @return array ответ сервиса (status/rows/errors/targets/...)
 	 * @throws \RuntimeException при ошибке транспорта/ответа
 	 */
-	protected function fetch(string $mac, array $targets): array
+	protected function fetch(?string $mac, array $targets, string $mode = 'lookup'): array
 	{
 		$payload = [
-			'mac' => $mac,
 			'targets' => $targets,
+			'mode' => $mode,
 			'wait' => (int)($this->config['wait'] ?? static::DEFAULT_WAIT),
 		];
+		if (!is_null($mac)) $payload['mac'] = $mac;
 
 		[$response, $status] = $this->httpPost(
 			rtrim($this->config['url'], '/').'/api/search',

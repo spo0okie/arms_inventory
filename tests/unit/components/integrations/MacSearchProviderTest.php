@@ -516,4 +516,178 @@ class MacSearchProviderTest extends Unit
 		$this->assertContains('10.50.2.16', array_column($provider->requests[0]['body']['targets'], 'host'));
 		$this->assertStringContainsString('Gi1/0/12', $html);
 	}
+
+	// --- панель коммутатора «Что подключено к портам» ---------------------
+
+	/** Строка таблицы MAC, как её отдаёт сервис в режиме table */
+	private function tableRow(int $target, string $mac, string $port, array $extra = []): array
+	{
+		return array_merge([
+			'target' => $target, 'host' => '10.50.2.16', 'driver' => 'cisco_ios',
+			'mac' => $mac, 'vlan' => '120', 'port' => $port, 'port_macs' => 1,
+		], $extra);
+	}
+
+	/** Вторая панель есть только у коммутатора и только кнопкой */
+	public function testSwitchPanelOnlyForSwitches()
+	{
+		$provider = $this->makeProvider();
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+
+		$panels = $provider->panels($switch);
+		$this->assertArrayHasKey(MacSearchProvider::PANEL_SWITCH, $panels);
+		//дорогой опрос не должен уходить сам при открытии карточки
+		$this->assertSame('button', $panels[MacSearchProvider::PANEL_SWITCH]['auto']);
+
+		//у ОС портов нет, у коммутатора без адреса опрашивать нечего
+		$this->assertArrayNotHasKey(MacSearchProvider::PANEL_SWITCH,
+			$provider->panels($this->comp()));
+		$this->assertArrayNotHasKey(MacSearchProvider::PANEL_SWITCH,
+			$provider->panels($this->makeSwitch(['ip' => ''])));
+	}
+
+	/** Ключ кэша коммутатора — сама железка: своего MAC у него может не быть */
+	public function testSwitchBindingWithoutMac()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$binding = $this->makeProvider()->binding($switch);
+
+		$this->assertNotNull($binding);
+		$this->assertStringContainsString('tech'.$switch->id, $binding);
+	}
+
+	/** Опрашивается одна железка и в режиме table (без адреса) */
+	public function testSwitchPanelAsksForWholeTable()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$provider = $this->makeProvider([$this->response($this->payload(
+			[$this->tableRow($switch->id, '00:11:22:33:44:55', 'Gi1/0/12')], ['mode' => 'table']))]);
+
+		$provider->renderSwitchPanel($switch);
+
+		$body = $provider->requests[0]['body'];
+		$this->assertSame('table', $body['mode']);
+		$this->assertArrayNotHasKey('mac', $body);
+		//спрашивать площадку ради одной таблицы незачем
+		$this->assertCount(1, $body['targets']);
+		$this->assertSame('10.50.2.16', $body['targets'][0]['host']);
+	}
+
+	/** Раскладка таблицы по портам: устройство, телефон с ПК, транзит */
+	public function testSwitchPortsGrouping()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$rows = [
+			$this->tableRow($switch->id, '00:11:22:33:44:55', 'Gi1/0/1'),
+			//телефон и ПК за ним: два адреса на порту, разные VLAN
+			$this->tableRow($switch->id, '00:11:22:33:44:60', 'Gi1/0/7',
+				['vlan' => '150', 'port_macs' => 2]),
+			$this->tableRow($switch->id, '00:11:22:33:44:61', 'Gi1/0/7', ['port_macs' => 2]),
+			//за портом сеть
+			$this->tableRow($switch->id, '00:11:22:33:44:70', 'Gi1/0/48', ['port_macs' => 37]),
+		];
+
+		$ports = $this->makeProvider()->switchPorts($rows);
+
+		$this->assertSame(['Gi1/0/1', 'Gi1/0/7', 'Gi1/0/48'], array_column($ports, 'port'));
+		$this->assertFalse($ports[0]['transit']);
+		//два адреса - ещё не транзит: это штатное рабочее место с телефоном
+		$this->assertFalse($ports[1]['transit']);
+		$this->assertCount(2, $ports[1]['macs']);
+		$this->assertSame(['150', '120'], $ports[1]['vlans']);
+		$this->assertTrue($ports[2]['transit']);
+		$this->assertSame(37, $ports[2]['count']);
+	}
+
+	/** Связь портов перебивает счёт адресов: транзит даже с одним адресом */
+	public function testSwitchPortsTrustPortLinks()
+	{
+		$access = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$core = $this->makeSwitch(['ip' => '10.50.2.1']);
+
+		$uplink = new Ports();
+		$uplink->setAttributes(['techs_id' => $access->id, 'name' => 'Gi1/0/48', 'comment' => ''], false);
+		$this->assertTrue($uplink->save(false));
+		$corePort = new Ports();
+		$corePort->setAttributes(['techs_id' => $core->id, 'name' => 'Gi1/0/1',
+			'link_ports_id' => $uplink->id, 'comment' => ''], false);
+		$this->assertTrue($corePort->save(false));
+		$uplink->link_ports_id = $corePort->id;
+		$this->assertTrue($uplink->save(false));
+
+		$provider = $this->makeProvider();
+		$rows = $provider->annotateUplinks([
+			$this->tableRow($access->id, '00:11:22:33:44:55', 'Gi1/0/48'),
+		]);
+		$ports = $provider->switchPorts($rows);
+
+		$this->assertTrue($ports[0]['uplink']);
+		$this->assertTrue($ports[0]['transit']);
+		$this->assertSame($core->name, $ports[0]['uplink_peer']);
+	}
+
+	/** Адреса таблицы -> объекты инвентаризации (железо и ОС, одним запросом) */
+	public function testResolveMacs()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+
+		$arm = new Techs();
+		$arm->setAttributes(['model_id' => $switch->model_id, 'num' => 'ARM-'.uniqid(),
+			'mac' => '001122334455', 'history' => ''], false);
+		$this->assertTrue($arm->save(false));
+
+		$comp = new Comps();
+		$comp->setAttributes(['name' => 'OS-'.uniqid(), 'mac' => "0011223344aa\n0011223344bb"], false);
+		$this->assertTrue($comp->save(false));
+
+		$found = $this->makeProvider()->resolveMacs([
+			'00:11:22:33:44:55', '00-11-22-33-44-bb', '00:00:00:00:00:99', 'мусор',
+		]);
+
+		$this->assertSame([$arm->id], array_map(fn($item) => $item->id, $found['001122334455']));
+		//адрес записан на ОС - объект всё равно находится
+		$this->assertSame([$comp->id], array_map(fn($item) => $item->id, $found['0011223344bb']));
+		$this->assertArrayNotHasKey('000000000099', $found);
+	}
+
+	/** Рендер панели: порт, объект за ним ссылкой и пометка транзита */
+	public function testRenderSwitchPanel()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+
+		$arm = new Techs();
+		//короткий номер: длинное имя виджет объекта подрезает при выводе
+		$arm->setAttributes(['model_id' => $switch->model_id, 'num' => 'ARM-PORT12',
+			'mac' => '001122334455', 'history' => ''], false);
+		$this->assertTrue($arm->save(false));
+
+		$provider = $this->makeProvider([$this->response($this->payload([
+			$this->tableRow($switch->id, '00:11:22:33:44:55', 'Gi1/0/12'),
+			$this->tableRow($switch->id, '00:aa:bb:cc:dd:ee', 'Gi1/0/48', ['port_macs' => 37]),
+		], ['mode' => 'table']))]);
+
+		$html = $provider->renderSwitchPanel($switch);
+
+		$this->assertStringContainsString('Gi1/0/12', $html);
+		//объект за портом - ссылкой на карточку, а не адресом
+		$this->assertStringContainsString($arm->name, $html);
+		$this->assertStringContainsString('адресов: 37', $html);
+	}
+
+	/** Неопрошенный коммутатор: причина видна прямо в панели */
+	public function testRenderSwitchPanelUnreachable()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$provider = $this->makeProvider([$this->response($this->payload([], [
+			'mode' => 'table',
+			'targets' => ['requested' => 1, 'answered' => 0, 'failed' => 1],
+			'errors' => [['target' => $switch->id, 'host' => '10.50.2.16',
+				'error' => 'нет TCP-соединения (порт закрыт или хост недоступен)',
+				'detail' => 'TCP connection to device failed']],
+		]))]);
+
+		$html = $provider->renderSwitchPanel($switch);
+		$this->assertStringContainsString('нет TCP-соединения', $html);
+		$this->assertStringContainsString('TCP connection to device failed', $html);
+	}
 }

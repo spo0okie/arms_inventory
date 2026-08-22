@@ -100,10 +100,14 @@ abstract class IntegrationProvider
 	 * @return array [panelId => [
 	 *   'title' => string,
 	 *   'ttl' => int,   // свежесть кэша, сек (default 60)
-	 *   'auto' => bool, // default true; false = в карточке автоматически не
-	 *                   // рисуется (PanelsWidget её пропускает), но остаётся
+	 *   'auto' => bool|string, // default true; false = в карточке автоматически
+	 *                   // не рисуется (PanelsWidget её пропускает), но остаётся
 	 *                   // доступной через proxy - для дорогих запросов,
-	 *                   // которые запускают по действию пользователя
+	 *                   // которые запускают по действию пользователя;
+	 *                   // 'button' = тот же дорогой запрос, но точка входа
+	 *                   // рисуется в карточке кнопкой (свежий кэш при этом
+	 *                   // показывается сразу, без нажатия)
+	 *   'button' => string, // подпись кнопки для 'auto' => 'button'
 	 * ]]
 	 */
 	public function panels(ArmsModel $model): array
