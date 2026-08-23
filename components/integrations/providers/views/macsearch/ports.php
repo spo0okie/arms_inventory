@@ -87,7 +87,7 @@ $failedLimit = 10;
 						<td>
 							<?= Html::encode($row['port'] ?? '') ?>
 							<?php if (!empty($row['uplink'])) { ?>
-								<span class="badge bg-secondary" title="<?= Html::encode(
+								<span class="badge bg-secondary" qtip_ttip="<?= Html::encode(
 									'Порт связан с другим коммутатором'
 									.(empty($row['uplink_peer']) ? '' : ': '.$row['uplink_peer'])
 									.' — устройство видно через него транзитом') ?>">транзит</span>
@@ -96,7 +96,7 @@ $failedLimit = 10;
 								<?php /* два-три адреса на порту - штатное дело (телефон бриджом
 								       с ПК во втором порту, виртуалки, свитч под столом), так что
 								       это справка, а не признак транзита */ ?>
-								<span class="text-secondary small" title="<?= Html::encode(
+								<span class="text-secondary small" qtip_ttip="<?= Html::encode(
 									'Штатно: IP-телефон с включённым в него ПК, виртуальные машины, '
 									.'неуправляемый коммутатор. Транзит определяется связями портов, '
 									.'а не числом адресов') ?>">(адресов на порту: <?= (int)$row['port_macs'] ?>)</span>
@@ -122,7 +122,7 @@ $failedLimit = 10;
 					<tr>
 						<td><?= $switchLink($failure) ?></td>
 						<td<?= empty($failure['detail']) ? ''
-							: ' title="'.Html::encode($failure['detail']).'"' ?>><?=
+							: ' qtip_ttip="'.Html::encode($failure['detail']).'"' ?>><?=
 							Html::encode($failure['error'] ?? 'причина не указана') ?></td>
 					</tr>
 				<?php } ?>

@@ -116,7 +116,7 @@ class PortsMapWidget extends Widget
 		return Html::tag('span', Html::encode($label), [
 			'class' => 'ports-map-slot border rounded text-center small '.$class,
 			'style' => 'width:2.2em;line-height:1.6em;cursor:default',
-			'title' => $hint,
+			'qtip_ttip' => $hint,
 			'data-port' => $name,
 		]);
 	}

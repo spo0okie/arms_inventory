@@ -37,7 +37,7 @@ elseif ($failure) $trouble = 'коммутатор не опрошен: '.($fail
 	</div>
 <?php } elseif ($trouble) { ?>
 	<div class="text-secondary opacity-75 mb-1"<?= empty($failure['detail']) ? ''
-		: ' title="'.Html::encode($failure['detail']).'"' ?>><?= Html::encode($trouble) ?></div>
+		: ' qtip_ttip="'.Html::encode($failure['detail']).'"' ?>><?= Html::encode($trouble) ?></div>
 <?php } ?>
 
 <?php /* путь алиасом, а не '/techs/...': вид рендерится не из контроллера

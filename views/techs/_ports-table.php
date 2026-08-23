@@ -457,7 +457,7 @@ foreach ($rows as $port) if (count($port['proposals'] ?? []) === 1) $acceptable+
 					.'">нет на корпусе</span>';
 				//ни записи, ни адресов: «свободен» сказать нельзя - кабель может быть
 				//воткнут, а та сторона выключена. Линка нет - вот что известно
-				elseif ($verdict === 'free') echo '<span class="text-secondary opacity-75" title="'
+				elseif ($verdict === 'free') echo '<span class="text-secondary opacity-75" qtip_ttip="'
 					.Html::encode('Ничего не записано, и адресов на порту не видно. Это не значит, что порт '
 					.'свободен: кабель может быть воткнут, а устройство выключено').'">линка нет</span>';
 				elseif ($verdict === 'disabled') echo '<span class="text-secondary opacity-75">'
