@@ -18,7 +18,7 @@ use yii\helpers\Html;
  * меняются, а корпус нет).
  *
  * Состояния портов приходят из опроса ({@see MacSearchProvider::switchPorts()}):
- * занят, свободен, транзит, выключен, расхождение. Без опроса карта тоже
+ * занят, линка нет, транзит, выключен, расхождение. Без опроса карта тоже
  * рисуется — просто без раскраски: даже пустая, она показывает раскладку.
  */
 class PortsMapWidget extends Widget
@@ -48,7 +48,7 @@ class PortsMapWidget extends Widget
 		'added' => ['slot-added', 'обнаружено оборудование'],
 		'transit' => ['slot-transit', 'за портом сеть'],
 		'disabled' => ['slot-disabled', 'выключен на коммутаторе'],
-		'free' => ['', 'свободен'],
+		'free' => ['', 'линка нет'],
 	];
 
 	public function run()

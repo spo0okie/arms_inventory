@@ -122,13 +122,15 @@ $containerId = 'techs-ports-'.$model->id;
 $reload = Url::to(['/integrations/panel', 'provider' => 'macsearch', 'panel' => 'switch',
 	'class' => 'techs', 'id' => $model->id, 'refresh' => 1]);
 
-/** Порт на той стороне: один - подставляем, несколько - селект, пусто - целиком */
+/** Порт на той стороне: один - подставляем, несколько - селект, пусто - без порта */
 $peerPick = static function (array $peers, string $field, int $index): array {
 	if (count($peers) === 1) {
 		return [Html::encode($peers[0]['name']), [
 			$field => $peers[0]['id'], $field.'_name' => $peers[0]['id'] ? '' : $peers[0]['name']]];
 	}
-	if (!count($peers)) return ['<span class="text-secondary">целиком</span>', []];
+	//портов у устройства не объявлено - оно привязывается без порта, и в
+	//строке это просто устройство, без «Порт …:»
+	if (!count($peers)) return ['', []];
 
 	//в связи участвуют две стороны, и гадать, в какой разъём воткнут кабель,
 	//мы не имеем права - выбирает человек
@@ -171,8 +173,8 @@ $proposalLine = static function (array $port, array $proposal, int $index) use (
 		[$peerHtml, $fields] = $peerPick($peers, 'peer', $index);
 	}
 	$data += $fields;
-	$line = Ports::$port_prefix.$peerHtml.': '.ModelWidget::widget(['model' => $device,
-		'options' => ['static_view' => true]]);
+	$line = (strlen($peerHtml) ? Ports::$port_prefix.$peerHtml.': ' : '')
+		.ModelWidget::widget(['model' => $device, 'options' => ['static_view' => true]]);
 	$title = 'Привязать '.$device->name;
 
 	if (is_array($proposal['chain'] ?? null)) {
@@ -185,8 +187,8 @@ $proposalLine = static function (array $port, array $proposal, int $index) use (
 		$data += $leafFields;
 		$line .= ' : '.Ports::$port_prefix.'<span class="port-scan-via" data-proposal="'.$index.'">'
 			.Html::encode($chain['via']['name']).'</span> → '
-			.Ports::$port_prefix.$leafHtml.': '.ModelWidget::widget(['model' => $chain['leaf'],
-				'options' => ['static_view' => true]]);
+			.(strlen($leafHtml) ? Ports::$port_prefix.$leafHtml.': ' : '')
+			.ModelWidget::widget(['model' => $chain['leaf'], 'options' => ['static_view' => true]]);
 		$title = 'Привязать '.$device->name.', а за ним - '.$chain['leaf']->name;
 	}
 
@@ -407,7 +409,11 @@ foreach ($rows as $port) if (count($port['proposals'] ?? []) === 1) $acceptable+
 					.'qtip_ttip="'.Html::encode('Интерфейс существует только в настройках '
 					.'коммутатора: агрегат, VLAN-интерфейс, loopback - розетки для него нет')
 					.'">нет на корпусе</span>';
-				elseif ($verdict === 'free') echo '<span class="text-secondary opacity-75">свободен</span>';
+				//ни записи, ни адресов: «свободен» сказать нельзя - кабель может быть
+				//воткнут, а та сторона выключена. Линка нет - вот что известно
+				elseif ($verdict === 'free') echo '<span class="text-secondary opacity-75" title="'
+					.Html::encode('Ничего не записано, и адресов на порту не видно. Это не значит, что порт '
+					.'свободен: кабель может быть воткнут, а устройство выключено').'">линка нет</span>';
 				elseif ($verdict === 'disabled') echo '<span class="text-secondary opacity-75">'
 					.'выключен на коммутаторе</span>';
 				//подпись состояния и находки - разными строками
@@ -489,7 +495,7 @@ foreach ($rows as $port) if (count($port['proposals'] ?? []) === 1) $acceptable+
 		<?php if ($acceptable > 1) { ?>
 			<?php /* "убрать" разом не даём: снятие связи опаснее привязки, и
 			       каждое подтверждается отдельно */ ?>
-			<?= Html::button('Принять все находки ('.$acceptable.')', [
+			<?= Html::button('Добавить однозначные совпадения ('.$acceptable.')', [
 				'class' => 'btn btn-sm btn-outline-success ms-2',
 				'qtip_ttip' => 'Привязать всё обнаруженное. Снятие связей разом не '
 					.'выполняется: каждое подтверждается отдельно',

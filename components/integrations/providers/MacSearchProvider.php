@@ -604,7 +604,7 @@ class MacSearchProvider extends IntegrationProvider
 	 *
 	 * Одно устройство — одно предложение. Два устройства — самый частый
 	 * случай «телефон с ПК за ним», и узнаём мы только вырожденную схему: у
-	 * одного РОВНО два порта (мост), у другого РОВНО один (лист) — тогда
+	 * одного РОВНО два порта (мост), у другого один либо ни одного (лист) — тогда
 	 * вопроса «кто за кем» нет вовсе, есть только «какими портами», и
 	 * предлагаем цепочку «порт → телефон (Internet) ; телефон (PC) → ПК
 	 * (eth)». Какой порт моста смотрит в коммутатор — подсказка по именам
@@ -635,7 +635,10 @@ class MacSearchProvider extends IntegrationProvider
 		//считаем по объявлению коммутатора, а не по свободным
 		$declared = fn(array $item) => count($item['device']->portsTemplate);
 		$bridges = array_filter($proposals, fn($item) => $declared($item) === 2 && count($item['peers']) === 2);
-		$leaves = array_filter($proposals, fn($item) => $declared($item) === 1 && count($item['peers']) === 1);
+		//лист - устройство с одним портом либо вовсе без объявленных портов:
+		//тогда оно привязывается без порта, и схема от этого не теряется
+		$leaves = array_filter($proposals, fn($item) => $declared($item) === 0
+			|| $declared($item) === 1 && count($item['peers']) === 1);
 		if (count($bridges) !== 1 || count($leaves) !== 1) return $proposals;
 
 		$bridge = reset($bridges);

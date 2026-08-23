@@ -1021,6 +1021,16 @@ sw");
 		], $switch);
 		$this->assertSame(['sw', 'pc'], array_column($ports[0]['proposals'][0]['peers'], 'name'));
 
+		//лист без объявленных портов - тоже лист: привязывается без порта
+		$bare = $this->makeDevice($switch, '001122334404', 'PC-BARE', '');
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:01', 'Gi1/0/7', ['port_macs' => 2]),
+			$this->tableRow($switch->id, '00:11:22:33:44:04', 'Gi1/0/7', ['port_macs' => 2]),
+		], $switch);
+		$this->assertCount(1, $ports[0]['proposals']);
+		$this->assertSame($bare->id, $ports[0]['proposals'][0]['chain']['leaf']->id);
+		$this->assertSame([], $ports[0]['proposals'][0]['chain']['leaf_peers']);
+
 		//два устройства с двумя портами: кто мост - неизвестно, значит список
 		$pc->model->ports = "eth0
 eth1";
