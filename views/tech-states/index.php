@@ -11,6 +11,17 @@ $this->title = \app\models\TechStates::$title;
 //крошки собираются автоматически в layout (views/layouts/main.php)
 
 $renderer=$this;
+
+//колонка-флажок: только отображение, без id (иначе дубли id на нескольких колонках)
+$checkboxColumn=function($attribute) {
+	return [
+		'attribute'=>$attribute,
+		'format'=>'raw',
+		'value'=>function($data) use ($attribute) {
+			return '<input class="form-check-input" type="checkbox" disabled '.($data->$attribute?'checked':'').'>';
+		}
+	];
+};
 ?>
 <div class="tech-states-index">
 
@@ -37,13 +48,8 @@ $renderer=$this;
 						]);
 				}
 			],
-			[
-				'attribute'=>'archived',
-				'format'=>'raw',
-				'value'=>function($data) use ($renderer) {
-					return '<input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" disabled '.($data->archived?'checked':'').'>';
-				}
-			],
+			$checkboxColumn('archived'),
+			$checkboxColumn('operating'),
             'descr:ntext',
         ],
     ]); ?>

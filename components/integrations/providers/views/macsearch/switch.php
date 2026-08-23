@@ -46,7 +46,8 @@ elseif ($failure) $trouble = 'коммутатор не опрошен: '.($fail
 	//паспорт передаём отдельно: в таблице порты идут в объявленном порядке, а
 	//«назвать порты как на коммутаторе» должно взять и порядок коммутатора тоже
 	'passport' => $data['ports'] ?? [],
-	'transitFrom' => $provider->transitFrom()]) ?>
+	'transitFrom' => $provider->transitFrom(),
+	'scanStamp' => $provider->scanStamp($data)]) ?>
 
 <?php if (!$trouble && $status !== 'pending') { ?>
 	<?php /* сырые данные - свёрнутыми: на основной таблице они мозолят глаза,

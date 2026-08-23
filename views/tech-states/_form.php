@@ -28,6 +28,7 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-md-2 mt-3">
 			<br>
 			<?= $form->field($model, 'archived')->checkbox() ?>
+			<?= $form->field($model, 'operating')->checkbox() ?>
 		</div>
 	</div>
 	

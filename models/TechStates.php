@@ -10,6 +10,7 @@ use Yii;
  *
  * @property int       $id id
  * @property bool      $archived статус архивации
+ * @property bool      $operating оборудование в работе
  * @property string    $code Служебное имя
  * @property string    $name Состояние
  * @property string    $descr Описание
@@ -55,6 +56,7 @@ class TechStates extends ArmsModel
             [['code'], 'string', 'max' => 64],
             [['name'], 'string', 'max' => 128],
 			[['archived'],'integer'],
+			[['operating'],'integer'],
 			[['marker_id'],'integer'],
             [['code'], 'unique'],
         ];
@@ -78,6 +80,12 @@ class TechStates extends ArmsModel
 				'hint'=>'Признак того, что оборудование с этим статусом перенесено в архив',
 				'indexLabel'=>'арх.',
 
+			],
+			'operating' => [
+				'В работе',
+				'hint'=>'Признак того, что оборудование с этим статусом эксплуатируется '
+					.'(в отличие от согласованного, складского, сломанного и т.п.)',
+				'indexLabel'=>'в раб.',
 			],
             'descr' => ['Описание','hint'=>'Пояснение, когда применяется это состояние'],
 			'marker_id' => [

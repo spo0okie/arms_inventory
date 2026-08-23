@@ -134,6 +134,12 @@ $failedLimit = 10;
 				</div>
 			<?php } ?>
 		<?php } ?>
+
+		<?php if (!$compact && is_array($data) && ($data['status'] ?? null) === 'done') { ?>
+			<?php /* откуда ответ и когда снят: «почему так быстро / почему старое»
+			       без этого не разобрать - слоёв кэша на пути несколько */ ?>
+			<div class="text-secondary opacity-75 small"><?= Html::encode($provider->scanStamp($data)) ?></div>
+		<?php } ?>
 	</div>
 <?php } ?>
 

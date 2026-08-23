@@ -223,6 +223,23 @@ class MacSearchProvider extends IntegrationProvider
 		return $this->isSwitchType($model);
 	}
 
+	/**
+	 * Отметка опроса для панели: «сформировано за N c, когда».
+	 *
+	 * Берётся из самих данных (started_at/duration сервиса), а не из времени
+	 * рендера: увидел через 40 секунд тот же штамп - значит, это тот же ответ,
+	 * и неважно, какой из слоёв его вернул (кэш панели, кэш сервиса,
+	 * присоединение к идущему опросу). Кэш сервиса помечается явно.
+	 */
+	public function scanStamp(?array $data): string
+	{
+		if (!is_array($data) || ($data['status'] ?? null) !== 'done') return '';
+		$stamp = 'сформировано за '.(float)($data['duration'] ?? 0).' c';
+		if (!empty($data['started_at'])) $stamp .= ', '.$data['started_at'];
+		if (!empty($data['cached'])) $stamp .= ' (ответ из кэша сервиса)';
+		return $stamp;
+	}
+
 	/** С какого числа адресов порт считается транзитным (конфиг transitFrom) */
 	public function transitFrom(): int
 	{

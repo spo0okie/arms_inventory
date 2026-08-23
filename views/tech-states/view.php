@@ -32,6 +32,7 @@ $this->title = $model->name;
             ModelFieldWidget::detailAttribute($model,'code'),
             ModelFieldWidget::detailAttribute($model,'name'),
             ModelFieldWidget::detailAttribute($model,'archived:boolean'),
+            ModelFieldWidget::detailAttribute($model,'operating:boolean'),
             ModelFieldWidget::detailAttribute($model,'descr:ntext'),
         ],
     ]) ?>

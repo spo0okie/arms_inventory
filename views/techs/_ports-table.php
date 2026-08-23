@@ -25,11 +25,13 @@ use yii\helpers\Url;
 /* @var $ports array|null результат опроса {@see MacSearchProvider::switchPorts()} */
 /* @var $passport array|null паспорт портов с коммутатора (её собственный порядок) */
 /* @var $transitFrom int с какого числа адресов порт считается транзитным */
+/* @var $scanStamp string|null отметка опроса «сформировано за N c, когда» из самих данных */
 /* @var $this yii\web\View */
 
 if (!isset($ports)) $ports = null;
 if (!isset($passport)) $passport = [];
 if (!isset($transitFrom)) $transitFrom = 4;
+if (!isset($scanStamp)) $scanStamp = null;
 
 //без опроса рисуем объявленные порты как раньше
 $rows = $ports;
@@ -506,16 +508,18 @@ foreach ($rows as $port) if (count($port['proposals'] ?? []) === 1) $acceptable+
 </table>
 
 <?php if (!is_null($ports)) { ?>
-	<?php /* итог опроса: сколько расхождений и когда снимали данные. Без
-	       отметки времени непонятно, почему устройство "не отозвалось" -
-	       может, его выключили пять минут назад, а может, таблица вчерашняя */ ?>
+	<?php /* итог опроса: сколько расхождений и когда снимали данные. Отметка
+	       времени - из самих данных опроса, а не время рендера: так видно и
+	       «устройство выключили пять минут назад», и «это тот же ответ, что
+	       40 секунд назад» - откуда бы он ни пришёл (кэш панели, кэш сервиса,
+	       присоединение к идущему опросу) */ ?>
 	<div class="text-secondary small mb-2">
 		<?php if ($offered) { ?>
 			расхождений: <?= $offered ?>.
 		<?php } else { ?>
 			расхождений нет.
 		<?php } ?>
-		опрошено в <?= date('H:i') ?>
+		<?= Html::encode((string)$scanStamp) ?>
 
 		<?php if ($adoptable) { ?>
 			<?php /* коммутатор знает свои порты лучше, чем модельный шаблон: за
