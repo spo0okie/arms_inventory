@@ -24,7 +24,7 @@ foreach ($diagnostics as $notes) {
 	if (!empty($notes['commands'])) $lines[] = 'команды: '.implode(' | ', $notes['commands']);
 	$lines[] = 'разобрано строк: '.(int)($notes['matched'] ?? 0)
 		.', символов в ответе: '.(int)($notes['output_chars'] ?? 0)
-		.(empty($notes['zero_marker']) ? '' : ', железка сообщила «0 записей»');
+		.(empty($notes['zero_marker']) ? '' : ', коммутатор сообщила «0 записей»');
 	if (!empty($notes['dropped_sample'])) {
 		$lines[] = 'не разобрано: '.implode(' / ', $notes['dropped_sample']);
 	}

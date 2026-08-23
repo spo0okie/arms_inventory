@@ -1,6 +1,8 @@
 <?php
 
+use app\components\CollapsableCardWidget;
 use app\components\Forms\ArmsForm;
+use app\components\PortsGroupWidget;
 use app\helpers\FieldsHelper;
 use app\models\Contracts;
 use app\models\Partners;
@@ -373,6 +375,43 @@ if ($model->isNewRecord) $this->registerJs($formInvNumJs,yii\web\View::POS_LOAD)
 	])?>
 
 
+
+	<?php /* объявление портов этого устройства: имена расходятся с модельными
+	       после стекирования (Gi0/13 -> Gi2/0/13) и на MikroTik, где порты
+	       переименовывают руками. Пусто - действуют порты модели */ ?>
+	<?php
+	//переименование по позициям по умолчанию включено, но снимается само, как
+	//только число строк меняется: это уже не переименование, а сдвиг списка.
+	//Число строк «до» - у действующего объявления (своего либо модельного)
+	if (!$model->isNewRecord) {
+		$model->rename_ports = true;
+		PortsGroupWidget::registerRenameGuard($this, Html::getInputId($model, 'ports_override'),
+			Html::getInputId($model, 'rename_ports'), count($model->portsTemplate));
+	}
+	?>
+	<div class="card p-2 mb-2 bg-secondary">
+	<?= CollapsableCardWidget::widget([
+		'openedTitle'=>'<i class="far fa-minus-square"></i> '.$model->getAttributeLabel('ports_override'),
+		'closedTitle'=>'<i class="far fa-plus-square"></i> '.$model->getAttributeLabel('ports_override'),
+		'initialCollapse'=>!strlen(trim((string)$model->ports_override)),
+		'content'=>'<div class="card-body"><div class="row">'
+			.'<div class="col-md-8">'
+			.$form->field($model, 'ports_override')->textarea(['rows' => 12])
+			.($model->isNewRecord ? '' : $form->field($model, 'rename_ports')->checkbox())
+			.'</div><div class="col-md-4">'
+			.PortsGroupWidget::widget([
+				'fieldId' => Html::getInputId($model, 'ports_override'),
+				'prefill' => $model->isNewRecord || !is_object($model->model) ? [] : [
+					'Заполнить портами модели' => implode("\n", array_map(
+						fn($name, $comment) => trim($name.' '.$comment),
+						array_keys($model->model->portsList),
+						array_values($model->model->portsList)
+					)),
+				],
+			])
+			.'</div></div></div>',
+	]); ?>
+	</div>
 
 	<?=  $form->field($model,'url')->textAutoresize(['rows' => 2,]) ?>
 

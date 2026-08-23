@@ -23,8 +23,163 @@ class PortsController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'edit'=>['port-list',],
+			'edit'=>['port-list','scan-apply',],
 		]);
+	}
+
+	/**
+	 * Применить находку опроса коммутатора к порту (plans/network-map.md, 3.4).
+	 *
+	 * Опрос показывает расхождение между записанным и увиденным, а это
+	 * действие переносит увиденное в инвентаризацию: привязать обнаруженное
+	 * оборудование, заменить им записанное или снять связь.
+	 *
+	 * Связь всегда идёт порт-в-порт: `peer` задаёт порт на той стороне (id
+	 * существующего либо имя для создания), а без него оборудование
+	 * привязывается «целиком» - к безымянному порту, который заведёт
+	 * {@see Ports::beforeSave()}. Встречную связь и отвязку прежнего соседа
+	 * модель делает сама.
+	 *
+	 * Кроме связей, опрос приносит два факта о самом коммутаторе: как он собрал
+	 * порты в группы и как она их называет. Оба переносятся тем же действием -
+	 * это ровно то же «увиденное вместо записанного», только без второй стороны.
+	 *
+	 * POST:
+	 * - tech (int)    - id коммутатора, чей порт правим (коммутатор);
+	 * - port (string) - имя порта;
+	 * - do (string)   - attach (привязать/заменить), chain (привязать
+	 *                   устройство и за ним ещё одно: телефон и ПК за ним),
+	 *                   detach (снять связь), aggregate (пометить группу) либо
+	 *                   names (взять имена портов с коммутатора);
+	 * - device (int)      - id обнаруженного оборудования (для attach/chain);
+	 * - peer (int)        - id существующего порта на той стороне;
+	 * - peer_name (string)- имя порта, который надо там создать;
+	 * - via / via_name    - порт устройства, из которого идёт кабель дальше
+	 *                       (для chain; PC-порт телефона);
+	 * - leaf (int)        - id устройства за ним (ПК);
+	 * - leaf_peer / leaf_peer_name - порт на этом устройстве;
+	 * - aggregate (string)- имя группы (для aggregate);
+	 * - members (string)  - имена портов группы через перевод строки;
+	 * - names (string)    - имена портов коммутатора по порядку, через перевод строки.
+	 *
+	 * id и имя - разные параметры намеренно: порт вполне может называться «5»,
+	 * и по одному значению «5» было бы не разобрать, это id или имя.
+	 *
+	 * @return array JSON-ответ {status: ok|error, error?: string}
+	 */
+	public function actionScanApply()
+	{
+		Yii::$app->response->format = Response::FORMAT_JSON;
+		$request = Yii::$app->request;
+
+		$switch = Techs::findOne((int)$request->post('tech'));
+		if (!is_object($switch)) return ['status' => 'error', 'error' => 'не найдено оборудование'];
+
+		//действия над коммутатором целиком - до разбора имени порта: порта у них нет
+		if ($request->post('do') === 'aggregate') return $this->applyAggregate($switch, $request);
+		if ($request->post('do') === 'names') return $this->applyNames($switch, $request);
+
+		$name = trim((string)$request->post('port'));
+		if (!strlen($name)) return ['status' => 'error', 'error' => 'не указан порт'];
+
+		$port = Ports::forTech($switch, $name);
+
+		if ($request->post('do') === 'detach') {
+			$port->dropLink();
+			return ['status' => 'ok'];
+		}
+
+		$device = Techs::findOne((int)$request->post('device'));
+		if (!is_object($device))
+			return ['status' => 'error', 'error' => 'не указано оборудование'];
+
+		$peerId = (int)$request->post('peer');
+		$peerName = trim((string)$request->post('peer_name'));
+
+		$port->link_techs_id = $device->id;
+		//есть id - берём готовый порт, есть имя - создаём, нет ничего -
+		//привязываем к устройству целиком (безымянный порт заведёт модель)
+		$port->link_ports_id = $peerId ?: (strlen($peerName) ? 'create:'.$peerName : null);
+
+		if (!$port->save() && !$port->isNewRecord && count($port->errors)) {
+			return ['status' => 'error', 'error' => implode('; ', $port->firstErrors)];
+		}
+		if ($request->post('do') !== 'chain') return ['status' => 'ok'];
+
+		//второе звено: из порта моста (PC-порт телефона) - в лист (ПК). Это
+		//такая же связь порт-в-порт, только обе стороны не коммутатор
+		$leaf = Techs::findOne((int)$request->post('leaf'));
+		if (!is_object($leaf)) return ['status' => 'error', 'error' => 'не указано устройство за мостом'];
+
+		$viaId = (int)$request->post('via');
+		$viaName = trim((string)$request->post('via_name'));
+		$via = $viaId ? Ports::findOne($viaId) : (strlen($viaName) ? Ports::forTech($device, $viaName) : null);
+		if (!is_object($via) || (int)$via->techs_id !== (int)$device->id)
+			return ['status' => 'error', 'error' => 'не указан порт моста'];
+
+		$leafPeerId = (int)$request->post('leaf_peer');
+		$leafPeerName = trim((string)$request->post('leaf_peer_name'));
+		$via->link_techs_id = $leaf->id;
+		$via->link_ports_id = $leafPeerId ?: (strlen($leafPeerName) ? 'create:'.$leafPeerName : null);
+		if (!$via->save() && !$via->isNewRecord && count($via->errors)) {
+			return ['status' => 'error', 'error' => implode('; ', $via->firstErrors)];
+		}
+		return ['status' => 'ok'];
+	}
+
+	/**
+	 * Пометить порты ярлыком группы так, как её собрал коммутатор.
+	 *
+	 * Группа - ярлык на нескольких портах, а не порт: связи у членов свои,
+	 * меняется только поле `aggr`. Помечаем всех членов сразу - по одному
+	 * ярлык смысла не имеет.
+	 *
+	 * @return array JSON-ответ
+	 */
+	protected function applyAggregate(Techs $switch, $request): array
+	{
+		$aggregate = trim((string)$request->post('aggregate'));
+		$members = array_filter(array_map('trim',
+			preg_split('~[\r\n]+~', (string)$request->post('members'))));
+
+		if (!strlen($aggregate) || !count($members))
+			return ['status' => 'error', 'error' => 'не указан агрегат'];
+
+		foreach ($members as $member) {
+			$port = Ports::forTech($switch, $member);
+			$port->aggr = $aggregate;
+			if (!$port->save() && count($port->errors))
+				return ['status' => 'error', 'error' => implode('; ', $port->firstErrors)];
+		}
+		return ['status' => 'ok'];
+	}
+
+	/**
+	 * Назвать порты так, как их называет сам коммутатор.
+	 *
+	 * Имена портов - свойство экземпляра, а не модели оборудования: стек
+	 * перенумеровывает порты, MikroTik позволяет переименовать интерфейсы, и
+	 * модельные Ge0/1..24 после этого фантомы. Заведённые строки переезжают
+	 * за своими позициями ({@see Techs::renamePortsByPosition()}): за именем
+	 * стоит кабель, и он никуда не делся.
+	 *
+	 * @return array JSON-ответ
+	 */
+	protected function applyNames(Techs $switch, $request): array
+	{
+		$names = array_filter(array_map('trim',
+			preg_split('~[\r\n]+~', (string)$request->post('names'))));
+		if (!count($names)) return ['status' => 'error', 'error' => 'не переданы имена портов'];
+
+		$switch->ports_override = implode("\n", $names);
+		//смысл кнопки - те же розетки под именами коммутатора, так что заведённые
+		//порты переезжают за позициями без вопросов (в форме это выбор)
+		$switch->rename_ports = true;
+		//без валидации: имена портов к остальной карточке отношения не имеют,
+		//а спотыкаться о её застарелые огрехи это действие не должно
+		if (!$switch->save(false)) return ['status' => 'error', 'error' => 'не удалось сохранить'];
+
+		return ['status' => 'ok'];
 	}
 
 	/**

@@ -62,7 +62,8 @@ class IntegrationsController extends ArmsBaseController
 	 * @return string HTML панели
 	 * @throws NotFoundHttpException
 	 */
-	public function actionPanel(string $provider, string $panel, string $class, $id, $compact = 0)
+	public function actionPanel(string $provider, string $panel, string $class, $id,
+		$compact = 0, $refresh = 0)
 	{
 		$providerObj = $this->findProvider($provider);
 		$model = $this->findIntegrationModel($providerObj, $class, $id);
@@ -74,13 +75,16 @@ class IntegrationsController extends ArmsBaseController
 		$providerObj->compact = (bool)$compact;
 		$binding = $providerObj->binding($model);
 
-		//пока ajax летел, кэш мог успеть стать свежим - не рендерим зря
-		if (!is_null($binding)
+		//пока ajax летел, кэш мог успеть стать свежим - не рендерим зря.
+		//refresh=1 просят, когда изменились наши собственные данные и панель
+		//обязана пересобраться (в macsearch - после правки связей портов)
+		if (!$refresh && !is_null($binding)
 			&& ($cached = PanelsCache::fetch($providerObj->id, $panel, $binding, $providerObj->compact))
 			&& $cached['age'] <= $providerObj->panelTtl($panel, $model)
 		) return $cached['html'];
 
 		try {
+			$providerObj->cacheable = true;
 			$html = $providerObj->renderPanel($panel, $model);
 		} catch (\Throwable $e) {
 			Yii::warning("Integration panel {$providerObj->id}/$panel failed: ".$e->getMessage(), __METHOD__);
@@ -92,7 +96,8 @@ class IntegrationsController extends ArmsBaseController
 			return '<span class="text-secondary opacity-75">'
 				.Html::encode($providerObj->getTitle()).$detail.'</span>';
 		}
-		if (!is_null($binding))
+		//состояние («идёт опрос», «недоступно») - не результат, в кэш не кладём
+		if (!is_null($binding) && $providerObj->cacheable)
 			PanelsCache::store($providerObj->id, $panel, $binding, $html, $providerObj->compact);
 		return $html;
 	}

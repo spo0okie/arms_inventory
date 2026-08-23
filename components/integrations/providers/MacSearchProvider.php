@@ -3,6 +3,7 @@
 namespace app\components\integrations\providers;
 
 use app\components\integrations\IntegrationProvider;
+use app\helpers\MacsHelper;
 use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
 use app\models\Comps;
@@ -31,7 +32,7 @@ use yii\helpers\Url;
  * - аплинки отсеиваются здесь же, по связям портов ({@see Ports}): порт,
  *   связанный с портом другого коммутатора, — транзитный.
  *
- * Обход занимает секунды, но железка может тормозить: сервис отвечает либо
+ * Обход занимает секунды, но коммутатор может тормозить: сервис отвечает либо
  * результатом, либо `status=pending`, и тогда панель перезапрашивает себя
  * сама ({@see refreshUrl()}), пока не дождётся или не исчерпает попытки.
  *
@@ -50,6 +51,10 @@ use yii\helpers\Url;
  *         //'switchTypes' => ['net_switch'], //коды типов оборудования (TechTypes.code),
  *         //                       //которые опрашиваем; напр. + 'net_router'
  *         //'maxTargets' => 200,   //предел целей в одном запросе (есть и у сервиса)
+ *         //'transitFrom' => 4,    //с какого числа адресов порт считается транзитным
+ *         //'bridgeToSwitchPorts' => ['internet','lan','switch','sw'], //как на устройствах-мостах
+ *         //                       //(телефон с ПК за ним) зовётся порт к коммутатору
+ *         //'bridgeToDevicePorts' => ['pc','comp'], //...и порт к устройству за мостом
  *         //'maxMacs' => 3,        //сколько адресов объекта искать
  *         //'includeLinked' => true, //брать и адреса привязанной ОС/АРМ
  *         //'wait' => 25,          //сколько сервис держит запрос до ответа pending
@@ -104,8 +109,30 @@ class MacSearchProvider extends IntegrationProvider
 	 */
 	const DEFAULT_TRANSIT_FROM = 4;
 
+	/**
+	 * Как на устройствах-мостах (телефон с ПК за ним) обычно подписаны порты:
+	 * к коммутатору и к устройству за мостом. Только подсказка для раскладки
+	 * цепочки — выбор за человеком, в строке предложения порт переключается.
+	 * Имена с корпуса SPA525G: Internet/LAN/SW к коммутатору, PC дальше.
+	 */
+	const DEFAULT_BRIDGE_TO_SWITCH_PORTS = ['internet', 'lan', 'switch', 'sw'];
+	const DEFAULT_BRIDGE_TO_DEVICE_PORTS = ['pc', 'comp'];
+
+	/**
+	 * Имена агрегированных каналов: Po1, BAGG1, Port-channel1, ae0, Lag2.
+	 * Это не физический порт, и сопоставлять его с розеткой нельзя — иначе
+	 * `Po1` выдаст себя за «порт 1» (числовой хвост у них одинаковый).
+	 */
+	const AGGREGATE_RE = '~^(po|port-?channel|bagg|bridge-aggregation|ae|lag)\\d+$~i';
+
 	/** @var Techs[] опрошенные коммутаторы (id => модель) — для рендера ссылок */
 	protected array $switches = [];
+
+	/** @var array паспорт портов последнего опроса: имя порта => данные */
+	protected array $passport = [];
+
+	/** @var array соседи последнего опроса: имя порта => записи */
+	protected array $neighbors = [];
 
 	public function getTitle(): string
 	{
@@ -136,7 +163,7 @@ class MacSearchProvider extends IntegrationProvider
 		$key = $macs ? implode(',', $macs).'@'.$this->requestedScope() : null;
 
 		//у коммутатора есть вторая панель («что за портами»), и ключуется она
-		//самой железкой: собственный MAC у коммутатора записан далеко не всегда
+		//самим коммутатором: собственный MAC у коммутатора записан далеко не всегда
 		if ($this->isSwitch($model)) $key = 'tech'.$model->id.($key ? '|'.$key : '');
 
 		return $key;
@@ -165,10 +192,13 @@ class MacSearchProvider extends IntegrationProvider
 		];
 
 		if ($this->isSwitch($model)) {
+			//'auto' => false: панель не рисуется общим блоком интеграций - её
+			//зовёт поимённо блок «Сетевые порты» карточки и подменяет ею свою
+			//таблицу. Таблица портов одна, и владелец у неё карточка
 			$panels[static::PANEL_SWITCH] = [
 				'title' => 'Что подключено к портам',
 				'ttl' => $this->config['cacheTtl'] ?? static::DEFAULT_TTL,
-				'auto' => 'button',
+				'auto' => false,
 				'button' => 'Опросить порты',
 			];
 		}
@@ -187,8 +217,20 @@ class MacSearchProvider extends IntegrationProvider
 		if (!static::firstIp($model->ip)) return false;
 		if (is_object($model->state) && $model->state->archived) return false;
 
+		return $this->isSwitchType($model);
+	}
+
+	/** С какого числа адресов порт считается транзитным (конфиг transitFrom) */
+	public function transitFrom(): int
+	{
+		return (int)($this->config['transitFrom'] ?? static::DEFAULT_TRANSIT_FROM);
+	}
+
+	/** Тип модели из switchTypes - коммутатор, за которой стоит сеть, а не он сам */
+	public function isSwitchType(Techs $tech): bool
+	{
 		$types = $this->config['switchTypes'] ?? static::DEFAULT_SWITCH_TYPES;
-		$type = is_object($model->model) ? $model->model->type : null;
+		$type = is_object($tech->model) ? $tech->model->type : null;
 		return is_object($type) && in_array($type->code, $types, true);
 	}
 
@@ -206,6 +248,7 @@ class MacSearchProvider extends IntegrationProvider
 		$macs = $this->requestedMacs($model);
 		$targets = $this->targetsFor($model);
 		$results = $this->search($macs, $targets);
+		$this->cacheable = !$this->isPending($results);
 
 		$html = $this->renderResults($results, $this->refreshUrl($model, $results, $attempt));
 
@@ -223,7 +266,7 @@ class MacSearchProvider extends IntegrationProvider
 	 * Панель «Что за портами» в карточке коммутатора: снимаем с него таблицу
 	 * MAC целиком (mode=table) и раскладываем по портам.
 	 *
-	 * Опрашивается ровно одна железка — та, чью карточку открыли: спрашивать
+	 * Опрашивается ровно один коммутатор — тот, чью карточку открыли: спрашивать
 	 * площадку ради одной таблицы незачем.
 	 */
 	public function renderSwitchPanel(ArmsModel $model): string
@@ -244,8 +287,12 @@ class MacSearchProvider extends IntegrationProvider
 		}
 
 		$results = [['mac' => null, 'data' => $data, 'error' => $error]];
+		//спиннер и ошибка - состояние, а не результат: в кэш им нельзя
+		$this->cacheable = !$error && !$this->isPending($results)
+			&& ($data['status'] ?? '') !== 'error' && empty($data['errors']);
 		return $this->renderView('switch', [
-			'ports' => $this->switchPorts($data['rows'] ?? []),
+			'ports' => $this->switchPorts($data['rows'] ?? [], $model,
+				$data['ports'] ?? [], $data['neighbors'] ?? []),
 			'data' => $data,
 			'error' => $error,
 			'refreshUrl' => $this->refreshUrl($model, $results, $attempt, static::PANEL_SWITCH),
@@ -262,27 +309,50 @@ class MacSearchProvider extends IntegrationProvider
 	 * ({@see resolveMacs()}) — оно идёт отдельно и одним запросом на всю
 	 * таблицу, а не по строке.
 	 *
+	 * Порядок и состав портов берутся из объявления коммутатора
+	 * ({@see Techs::getPortsTemplate()}): по имени порядок не восстановить, а
+	 * инженеру в серверной нужен не только занятый порт, но и свободный —
+	 * без объявления «порт пустой» и «порта не существует» неразличимы.
+	 *
+	 * Порт несёт и то, что записано в инвентаризации (строка `ports` и
+	 * закреплённая за ней устройство), и то, что увидел опрос, и вердикт их
+	 * сравнения ({@see verdict()}) — рисовать дифф по этому уже механика.
+	 *
+	 * @param Techs|null $tech коммутатор (null — порядок по числовому хвосту
+	 *   имени и только те порты, на которых что-то нашлось)
+	 * @param array $passport паспорт портов с коммутатора: описание, состояние,
+	 *   настроенные VLAN, членство в агрегате (необязателен)
+	 * @param array $neighbors соседи по LLDP/CDP (необязательны)
 	 * @return array [['port'=>string,'vlans'=>string[],'macs'=>[['mac'=>string,'objects'=>ArmsModel[]]],
-	 *   'count'=>int,'uplink'=>bool,'uplink_peer'=>string,'transit'=>bool], ...]
+	 *   'count'=>int,'uplink'=>bool,'uplink_peer'=>string,'transit'=>bool,
+	 *   'comment'=>string,'declared'=>bool,'link'=>Ports|null,'linked'=>Techs|null,
+	 *   'found'=>Techs[],'verdict'=>string], ...]
 	 */
-	public function switchPorts(array $rows): array
+	public function switchPorts(array $rows, ?Techs $tech = null, array $passport = [],
+		array $neighbors = []): array
 	{
+		$declared = is_object($tech) ? $tech->portsList : [];
+		$this->passport = [];
+		foreach ($passport as $port) {
+			if (!empty($port['name'])) $this->passport[(string)$port['name']] = $port;
+		}
+		$this->neighbors = [];
+		foreach ($neighbors as $neighbor) {
+			if (!empty($neighbor['port'])) $this->neighbors[(string)$neighbor['port']][] = $neighbor;
+		}
 		$objects = $this->resolveMacs(array_column($rows, 'mac'));
-		$transitFrom = (int)($this->config['transitFrom'] ?? static::DEFAULT_TRANSIT_FROM);
+		$transitFrom = $this->transitFrom();
 
 		$ports = [];
 		foreach ($rows as $row) {
 			$name = (string)($row['port'] ?? '');
 			if ($name === '') continue;
 
-			if (!isset($ports[$name])) $ports[$name] = [
-				'port' => $name,
-				'vlans' => [],
-				'macs' => [],
-				'count' => 0,
-				'uplink' => !empty($row['uplink']),
-				'uplink_peer' => $row['uplink_peer'] ?? '',
-			];
+			if (!isset($ports[$name])) $ports[$name] = static::emptyPort($name);
+			$ports[$name]['uplink'] = $ports[$name]['uplink'] || !empty($row['uplink']);
+			if (empty($ports[$name]['uplink_peer'])) {
+				$ports[$name]['uplink_peer'] = $row['uplink_peer'] ?? '';
+			}
 
 			$mac = static::hexMac($row['mac'] ?? '');
 			if ($mac && !isset($ports[$name]['macs'][$mac])) {
@@ -295,28 +365,505 @@ class MacSearchProvider extends IntegrationProvider
 			}
 
 			//сервис считает адреса на порту сам (port_macs), но у него это
-			//число по одной железке - если его нет, считаем по строкам
+			//число по одном коммутаторе - если его нет, считаем по строкам
 			$ports[$name]['count'] = max($ports[$name]['count'],
 				(int)($row['port_macs'] ?? 0), count($ports[$name]['macs']));
 		}
 
-		foreach ($ports as &$port) {
+		//порт может быть известен только из паспорта или от соседа - адресов на
+		//нём нет, но показать его надо: свободная розетка и линк до соседа
+		//видны именно так
+		foreach (array_merge(array_keys($this->passport), array_keys($this->neighbors)) as $name) {
+			if (!isset($ports[(string)$name])) $ports[(string)$name] = static::emptyPort((string)$name);
+		}
+
+		//таблицу MAC коммутатор ведёт на агрегате (Po1), а не на его портах:
+		//раскладываем адреса по членам группы, чтобы у каждой розетки было
+		//видно, что за ней. Членов знает паспорт (aggregate у порта)
+		$members = [];
+		foreach ($this->passport as $name => $item) {
+			if (!empty($item['aggregate'])) $members[(string)$item['aggregate']][] = (string)$name;
+		}
+		foreach ($members as $aggregate => $names) {
+			if (!isset($ports[$aggregate])) continue;
+			foreach ($names as $name) {
+				if (!isset($ports[$name])) $ports[$name] = static::emptyPort($name);
+				foreach ($ports[$aggregate]['macs'] as $mac => $item) $ports[$name]['macs'][$mac] = $item;
+				foreach ($ports[$aggregate]['vlans'] as $vlan) {
+					if (!in_array($vlan, $ports[$name]['vlans'], true)) $ports[$name]['vlans'][] = $vlan;
+				}
+				$ports[$name]['count'] = max($ports[$name]['count'], $ports[$aggregate]['count']);
+				$ports[$name]['uplink'] = $ports[$name]['uplink'] || $ports[$aggregate]['uplink'];
+				if (!strlen($ports[$name]['uplink_peer'])) $ports[$name]['uplink_peer'] = $ports[$aggregate]['uplink_peer'];
+			}
+		}
+
+		foreach ($ports as $name => &$port) {
 			$port['macs'] = array_values($port['macs']);
+			$port['physical'] = $this->isPhysical((string)$name);
 			//за портом сеть, а не устройство: либо так сказали связи портов,
 			//либо адресов слишком много для «устройство + телефон + виртуалки»
 			$port['transit'] = $port['uplink'] || $port['count'] >= $transitFrom;
 		}
 		unset($port);
 
-		uasort($ports, fn($one, $other) =>
-			strnatcasecmp(static::portKey($one['port']), static::portKey($other['port']))
-				?: strnatcasecmp($one['port'], $other['port']));
+		//интерфейсы без розетки (сам агрегат, Vlan120, Loopback0) в таблице
+		//портов не нужны: воткнуть в них нечего, а на 48-портовом коммутаторе их
+		//ещё с десяток. Убираем те, что ничего не знают либо уже всё отдали
+		//членам; агрегат без паспорта (SSH-коммутатор без SNMP) остаётся - иначе
+		//адреса за ним пропали бы из таблицы. Сырые данные по всем - в
+		//свёрнутом блоке. Объявленные в инвентаризации имена показываем всегда
+		$declaredNames = array_map('strval', array_keys($declared));
+		foreach ($ports as $name => $port) {
+			if ($port['physical'] || in_array((string)$name, $declaredNames, true)) continue;
+			if (!count($port['macs']) || isset($members[(string)$name])) unset($ports[$name]);
+		}
 
-		return array_values($ports);
+		if (!$declared && $this->passport) {
+			//объявления в инвентаризации нет, но коммутатор рассказал о себе сама -
+			//берём её список портов: он в аппаратном порядке (по ifIndex)
+			$ordered = [];
+			foreach ($this->passport as $name => $port) {
+				//интерфейсы без розетки, которые выше уже выкинуты, заново не заводим
+				if (!isset($ports[(string)$name]) && !$this->isPhysical((string)$name)) continue;
+				$found = static::matchPort((string)$name, $ports);
+				$entry = is_null($found) ? static::emptyPort((string)$name) : $ports[$found];
+				$entry['port'] = (string)$name;
+				$entry['real'] = (string)$name;
+				$ordered[] = $entry;
+				if (!is_null($found)) unset($ports[$found]);
+			}
+			foreach ($ports as $port) $ordered[] = $port;
+			return array_map([$this, 'annotatePort'], $ordered);
+		}
+
+		if (!$declared) {
+			//коммутатор ничего про себя не объявил - остаётся порядок по номеру
+			uasort($ports, fn($one, $other) =>
+				strnatcasecmp(static::portKey($one['port']), static::portKey($other['port']))
+					?: strnatcasecmp($one['port'], $other['port']));
+			foreach ($ports as &$port) $port['real'] = $port['port'];
+			unset($port);
+			return array_map([$this, 'annotatePort'], array_values($ports));
+		}
+
+		//объявленные порты идут в объявленном порядке, включая свободные
+		$ordered = [];
+		foreach ($declared as $name => $declaration) {
+			//имена портов бывают числовыми - PHP делает такие ключи массива int
+			$name = (string)$name;
+			$found = static::matchPort($name, $ports);
+			$port = is_null($found) ? static::emptyPort($name) : $ports[$found];
+			//показываем объявленное имя: оно с корпуса, а не из вывода коммутатора.
+			//Настоящее имя запоминаем: инвентаризация зовёт розетку Ge0/23, а
+			//коммутатор - Gi1/0/47, и паспорт с соседями лежат под её именем
+			$port['real'] = is_null($found) ? '' : (string)$found;
+			$port['port'] = $name;
+			$port['comment'] = (string)($declaration['port_comment'] ?? '');
+			$port['link'] = $declaration['port_link'] ?? null;
+			$port['declared'] = true;
+			$ordered[] = $port;
+			if (!is_null($found)) unset($ports[$found]);
+		}
+
+		//порты, которых в объявлении нет (агрегаты Po1/BAGG1, забытые модули) -
+		//в конец: это находка, а не мусор
+		foreach ($ports as $port) {
+			$port['real'] = $port['port'];
+			$ordered[] = $port;
+		}
+
+		return array_map([$this, 'annotatePort'], $ordered);
 	}
 
 	/**
-	 * Адреса -> объекты инвентаризации, одним запросом на пачку.
+	 * Сравнение записанного с найденным по одному порту.
+	 *
+	 * Вердикты: ok (нашли то, что записано), replaced (вместо записанного
+	 * другое известное), foreign (записанное молчит, но адреса на порту есть и
+	 * они не опознаны), quiet (на порту вообще нет адресов), added (записано
+	 * пусто, нашлось известное), seen (адреса есть, объектов с ними нет),
+	 * free (пусто и там и там), transit (за портом сеть), unknown (опроса не
+	 * было).
+	 *
+	 * Отдельно про «пропало»: такого вердикта НЕТ и предлагать «убрать с
+	 * порта» не из чего. Порт без адресов — это и «устройство убрали», и
+	 * «устройство выключено», и «оно молчало дольше времени старения записи»;
+	 * различить их можно только по состоянию линка, а оно приедет вместе с
+	 * паспортом портов. Предлагать стереть правильную запись на основании
+	 * тишины нельзя: на коммутаторе с десятком спящих серверов это десяток
+	 * предложений испортить данные.
+	 */
+	protected function annotatePort(array $port): array
+	{
+		$port = $this->applyPassport($port);
+		$port['neighbors'] = $this->neighbors[$port['real']] ?? $this->neighbors[$port['port']] ?? [];
+		$port['linked'] = static::linkedDevice($port['link'] ?? null);
+		$port['found'] = static::foundDevices($port['macs']);
+
+		//сосед по LLDP - куда более веский факт, чем адреса за портом: коммутатор
+		//прямо говорит, кто на том конце кабеля и в какой он розетке
+		$neighbor = $this->neighborDevice($port);
+		if (is_object($neighbor['device'] ?? null)) {
+			$port['found'] = [$neighbor['device']];
+			$port['neighbor_port'] = $neighbor['port'];
+		}
+
+		$port['verdict'] = static::verdict($port);
+		$port['proposals'] = in_array($port['verdict'], ['added', 'replaced'], true)
+			? $this->proposals($port) : [];
+		return $port;
+	}
+
+	/**
+	 * Сосед этого порта, опознанный в инвентаризации.
+	 *
+	 * Ищем по адресу (в том числе внутри диапазонов: производитель выделяет
+	 * устройству блок адресов, и порт соседа попадает в него), затем по имени —
+	 * инвентарному номеру или hostname.
+	 *
+	 * @return array ['device' => Techs|null, 'port' => string имя порта соседа]
+	 */
+	protected function neighborDevice(array $port): array
+	{
+		foreach ($port['neighbors'] as $neighbor) {
+			$device = null;
+			$mac = static::hexMac($neighbor['remote_mac'] ?? '');
+			if ($mac) {
+				foreach ($this->resolveMacs([$mac])[$mac] ?? [] as $object) {
+					$device = static::deviceOf($object);
+					if (is_object($device)) break;
+				}
+				//адрес соседа может лежать внутри записанного диапазона
+				if (!is_object($device)) $device = static::deviceByMacRange($mac);
+			}
+
+			$name = trim((string)($neighbor['remote_name'] ?? ''));
+			if (!is_object($device) && strlen($name)) $device = static::deviceByName($name);
+
+			if (is_object($device)) {
+				return ['device' => $device, 'port' => (string)($neighbor['remote_port'] ?? '')];
+			}
+		}
+		return ['device' => null, 'port' => ''];
+	}
+
+	/** Устройство, у которой искомый адрес попадает в записанный диапазон (issue #120) */
+	protected static function deviceByMacRange(string $hex): ?Techs
+	{
+		$condition = MacsHelper::rangeMemberCondition(['techs.mac'], $hex);
+		if (!$condition) return null;
+
+		$tech = Techs::find()->where($condition)->limit(1)->one();
+		return is_object($tech) ? $tech : null;
+	}
+
+	/** Устройство по имени соседа: инвентарный номер либо hostname */
+	protected static function deviceByName(string $name): ?Techs
+	{
+		//LLDP печатает то короткое имя, то FQDN - домен отбрасываем
+		$short = explode('.', $name)[0];
+		$tech = Techs::find()
+			->where(['or', ['techs.num' => $name], ['techs.hostname' => $name],
+				['techs.num' => $short], ['techs.hostname' => $short]])
+			->limit(1)->one();
+		return is_object($tech) ? $tech : null;
+	}
+
+	/**
+	 * Паспорт порта поверх находок: описание с коммутатора, состояние, VLAN,
+	 * членство в агрегате.
+	 *
+	 * Настроенные VLAN важнее замеченных: из таблицы MAC видно только те, где
+	 * был трафик, и транк с двадцатью VLAN покажет два.
+	 */
+	protected function applyPassport(array $port): array
+	{
+		$found = $this->passport[$port['real']] ?? $this->passport[$port['port']] ?? null;
+		if (!$found) return $port;
+
+		$port['description'] = (string)($found['description'] ?? '');
+		$port['admin'] = (string)($found['admin'] ?? '');
+		$port['oper'] = (string)($found['oper'] ?? '');
+		$port['speed'] = (int)($found['speed'] ?? 0);
+		$port['aggregate'] = (string)($found['aggregate'] ?? '');
+
+		if (!empty($found['vlans'])) {
+			$port['vlans'] = [];
+			foreach ($found['vlans'] as $vlan) {
+				$port['vlans'][] = ['vlan' => (string)$vlan['vlan'],
+					'untagged' => !empty($vlan['untagged'])];
+			}
+			$port['vlans_configured'] = true;
+		}
+		return $port;
+	}
+
+	/**
+	 * Что предложить привязать к порту, когда за ним нашлось оборудование.
+	 *
+	 * Одно устройство — одно предложение. Два устройства — самый частый
+	 * случай «телефон с ПК за ним», и узнаём мы только вырожденную схему: у
+	 * одного РОВНО два порта (мост), у другого РОВНО один (лист) — тогда
+	 * вопроса «кто за кем» нет вовсе, есть только «какими портами», и
+	 * предлагаем цепочку «порт → телефон (Internet) ; телефон (PC) → ПК
+	 * (eth)». Какой порт моста смотрит в коммутатор — подсказка по именам
+	 * из конфига, в строке предложения он переключается. Всё остальное —
+	 * список предложений «привязать X», схему решает человек.
+	 *
+	 * @return array [['device'=>Techs,'peers'=>[...],'chain'=>null|[
+	 *   'via'=>['id'=>int|null,'name'=>string], 'leaf'=>Techs, 'leaf_peers'=>[...]]], ...]
+	 */
+	protected function proposals(array $port): array
+	{
+		$found = $port['found'];
+		$prefer = (string)($port['neighbor_port'] ?? '');
+		$neighborDevice = strlen($prefer) && count($found) ? $found[0] : null;
+
+		$proposals = [];
+		foreach ($found as $device) {
+			$proposals[] = [
+				'device' => $device,
+				'peers' => static::peerPorts($device, is_object($neighborDevice)
+					&& $neighborDevice->id === $device->id ? $prefer : ''),
+				'chain' => null,
+			];
+		}
+		if (count($proposals) !== 2) return $proposals;
+
+		//вырожденная схема: ровно два порта у моста, ровно один у листа -
+		//считаем по объявлению коммутатора, а не по свободным
+		$declared = fn(array $item) => count($item['device']->portsTemplate);
+		$bridges = array_filter($proposals, fn($item) => $declared($item) === 2 && count($item['peers']) === 2);
+		$leaves = array_filter($proposals, fn($item) => $declared($item) === 1 && count($item['peers']) === 1);
+		if (count($bridges) !== 1 || count($leaves) !== 1) return $proposals;
+
+		$bridge = reset($bridges);
+		$leaf = reset($leaves);
+
+		//какой порт моста смотрит в коммутатор - подсказка по именам из конфига,
+		//иначе первый. Оба порта остаются в peers: в строке предложения это
+		//переключатель, второй порт автоматически уходит к листу
+		$peers = $bridge['peers'];
+		$toSwitch = static::pickPeer($peers, $this->config['bridgeToSwitchPorts']
+			?? static::DEFAULT_BRIDGE_TO_SWITCH_PORTS);
+		if (is_null($toSwitch)) {
+			$toDevice = static::pickPeer($peers, $this->config['bridgeToDevicePorts']
+				?? static::DEFAULT_BRIDGE_TO_DEVICE_PORTS);
+			$toSwitch = is_array($toDevice) && $toDevice['name'] === $peers[0]['name'] ? $peers[1] : $peers[0];
+		}
+		$toLeaf = $peers[0]['name'] === $toSwitch['name'] ? $peers[1] : $peers[0];
+
+		return [[
+			'device' => $bridge['device'],
+			'peers' => [$toSwitch, $toLeaf],
+			'chain' => ['via' => $toLeaf, 'leaf' => $leaf['device'], 'leaf_peers' => $leaf['peers']],
+		]];
+	}
+
+	/** Первый порт из списка, чьё имя совпадает с одним из названных (без регистра) */
+	protected static function pickPeer(array $peers, array $names): ?array
+	{
+		$names = array_map('mb_strtolower', $names);
+		foreach ($peers as $peer) {
+			if (in_array(mb_strtolower(trim($peer['name'])), $names, true)) return $peer;
+		}
+		return null;
+	}
+
+	/**
+	 * Свободные порты найденного устройства — кандидаты на «ту сторону» связи.
+	 *
+	 * @return array [['id'=>int|null,'name'=>string], ...]; id пуст, если порт
+	 *   только объявлен моделью и строки под него ещё нет (создастся при связи)
+	 */
+	protected static function peerPorts(Techs $device, string $prefer = ''): array
+	{
+		//сосед сам сказал, каким портом он смотрит на нас - гадать не нужно
+		if (strlen($prefer)) {
+			$port = Ports::find()->where(['techs_id' => $device->id, 'name' => $prefer])->one();
+			return [['id' => is_object($port) ? (int)$port->id : null, 'name' => $prefer]];
+		}
+
+		$peers = [];
+		foreach ($device->portsList as $item) {
+			$link = $item['port_link'] ?? null;
+			//занятый порт в кандидаты не берём: перецеплять чужую связь молча нельзя
+			if (is_object($link) && !empty($link->link_ports_id)) continue;
+			$peers[] = [
+				'id' => is_object($link) ? (int)$link->id : null,
+				'name' => (string)$item['port_name'],
+			];
+		}
+		return $peers;
+	}
+
+	/** Устройство, закреплённая за портом в инвентаризации */
+	protected static function linkedDevice($link): ?Techs
+	{
+		if (!is_object($link)) return null;
+		if (is_object($link->linkPort) && is_object($link->linkPort->tech)) return $link->linkPort->tech;
+		return is_object($link->linkTech) ? $link->linkTech : null;
+	}
+
+	/**
+	 * Найденные за портом устройства (без дублей).
+	 *
+	 * Адрес пишут и на ОС — тогда за портом стоит её АРМ: порт соединяется с
+	 * железом, а не с операционной системой.
+	 */
+	protected static function foundDevices(array $macs): array
+	{
+		$devices = [];
+		foreach ($macs as $item) {
+			foreach ($item['objects'] as $object) {
+				$tech = static::deviceOf($object);
+				if (is_object($tech) && !isset($devices[$tech->id])) $devices[$tech->id] = $tech;
+			}
+		}
+		return array_values($devices);
+	}
+
+	/** Объект инвентаризации -> устройство (у ОС это её АРМ) */
+	protected static function deviceOf(ArmsModel $object): ?Techs
+	{
+		if ($object instanceof Techs) return $object;
+		if ($object instanceof Comps && is_object($object->arm)) return $object->arm;
+		return null;
+	}
+
+	/** Вердикт по порту {@see annotatePort()} */
+	protected static function verdict(array $port): string
+	{
+		//сосед опознан: связь коммутатор-коммутатор важнее счёта адресов за портом
+		$neighbor = count($port['found']) && !empty($port['neighbor_port'] ?? '');
+		if (!$neighbor && !empty($port['transit'])) return 'transit';
+
+		//порт выключен администратором: воткнуть в него нельзя, и это не «свободен»
+		if (($port['admin'] ?? '') === 'down' && !count($port['macs'])
+			&& !is_object($port['linked'] ?? null)) return 'disabled';
+
+		$linked = $port['linked'];
+		$found = $port['found'];
+
+		if (is_object($linked)) {
+			foreach ($found as $device) if ($device->id === $linked->id) return 'ok';
+			//на порту другое известное устройство - вот это уже факт
+			if (count($found)) return 'replaced';
+			//адреса есть, но чьи - неизвестно: может быть вторая сетевая того
+			//же сервера, которой нет в инвентаризации
+			return count($port['macs']) ? 'foreign' : 'quiet';
+		}
+		if (count($found)) return 'added';
+
+		//адрес или сосед на порту есть, а кто это - в инвентаризации не
+		//записано: порт занят, и называть его свободным нельзя
+		return count($port['macs']) || count($port['neighbors']) ? 'seen' : 'free';
+	}
+
+	/**
+	 * Какой из найденных портов соответствует объявленному имени.
+	 *
+	 * Одну и ту же розетку коммутатор и инвентаризация называют по-разному:
+	 * `Gi1/0/12`, `GigabitEthernet1/0/12`, `12`. Сравниваем по убыванию
+	 * строгости — точное имя, затем «числовой хвост» ({@see portKey()}), затем
+	 * просто номер, — и каждый раз требуем единственного кандидата.
+	 *
+	 * Ослабление до номера допустимо потому, что это ПОКАЗ: ошибиться можно
+	 * только тем, что занятый порт нарисуется свободным, а находка уедет в
+	 * конец списка — и то и другое видно глазом. Для записи связей правило
+	 * строже (plans/network-map.md, этап 3.3).
+	 *
+	 * @param array $ports ещё не разобранные найденные порты (имя => данные)
+	 * @return string|null имя найденного порта
+	 */
+	protected static function matchPort(string $name, array $ports): ?string
+	{
+		$candidates = [
+			fn($found) => (string)$found === $name,
+			//дальше сравнение приблизительное, и агрегат в него не пускаем:
+			//у Po1 тот же числовой хвост, что у порта 1
+			fn($found) => !static::isAggregate((string)$found)
+				&& static::portKey((string)$found) === static::portKey($name),
+			fn($found) => !static::isAggregate((string)$found)
+				&& static::portNumber((string)$found) !== ''
+				&& static::portNumber((string)$found) === static::portNumber($name),
+		];
+
+		foreach ($candidates as $matches) {
+			$found = array_keys(array_filter($ports, $matches, ARRAY_FILTER_USE_KEY));
+			if (count($found) !== 1) continue;    //ноль или неоднозначно - пробуем слабее
+			return $found[0];
+		}
+		return null;
+	}
+
+	/** Имя похоже на агрегированный канал, а не на физический порт? */
+	public static function isAggregate(string $name): bool
+	{
+		return (bool)preg_match(static::AGGREGATE_RE, trim($name));
+	}
+
+	/**
+	 * Розетка ли это на корпусе.
+	 *
+	 * Коммутатор говорит это типом интерфейса (ifType 6 - ethernetCsmacd): всё
+	 * остальное - агрегат (161), VLAN-интерфейс (53), loopback (24) - на
+	 * корпусе не существует. Сервис постарше типа не присылает, паспорта
+	 * может не быть вовсе - тогда судим по имени: известные имена пачек и
+	 * интерфейсов Vlan/Loopback/Null.
+	 */
+	public function isPhysical(string $name): bool
+	{
+		$item = $this->passport[$name] ?? null;
+		if (is_array($item) && isset($item['type'])) return (int)$item['type'] === 6;
+		if (static::isAggregate($name)) return false;
+		return !preg_match('~^(vlan|vl|loopback|lo|null|tunnel|nve|bvi|irb)\s*\d*$~i', trim($name));
+	}
+
+	/** Номер порта: последнее число имени ('' — числа нет) */
+	public static function portNumber(string $name): string
+	{
+		return preg_match('~(\d+)\s*$~', $name, $found) ? $found[1] : '';
+	}
+
+	/** Заготовка порта без находок (свободный либо ещё не наполненный) */
+	protected static function emptyPort(string $name): array
+	{
+		return [
+			'port' => $name,
+			//как порт зовётся на самом коммутаторе: показываем-то мы объявленное имя
+			//(оно с корпуса), но паспорт, соседи и «взять имена» ходят по этому
+			'real' => '',
+			'vlans' => [],
+			'macs' => [],
+			'count' => 0,
+			'uplink' => false,
+			'uplink_peer' => '',
+			'transit' => false,
+			'comment' => '',
+			'declared' => false,
+			'link' => null,
+			'linked' => null,
+			'found' => [],
+			'proposals' => [],
+			'neighbors' => [],
+			'neighbor_port' => '',
+			'description' => '',
+			'admin' => '',
+			'oper' => '',
+			'speed' => 0,
+			'aggregate' => '',
+			'vlans_configured' => false,
+			//розетка на корпусе, а не Vlan120/Po1/Loopback0: коммутатор говорит это
+			//типом интерфейса (ifType 6), а без паспорта судим по имени
+			'physical' => true,
+			'verdict' => 'free',
+		];
+	}
+
+	/**
+	 * Адреса -> объекты инвентаризации, одним запросом на группу.
 	 *
 	 * Адрес пишут то на железе, то на его ОС, поэтому ищем в обоих. Диапазоны
 	 * адресов (issue #120) сюда не попадают: в таблице коммутатора адреса
@@ -440,7 +987,7 @@ class MacSearchProvider extends IntegrationProvider
 	 * Область опроса: площадка объекта или все коммутаторы.
 	 *
 	 * Запрос (пункт меню у адреса) перекрывает умолчание конфига: обычно
-	 * ищут там, где стоит объект, но железку могли и перевезти — тогда
+	 * ищут там, где стоит объект, но устройство могли и перевезти — тогда
 	 * нужен опрос по всем площадкам.
 	 */
 	public function requestedScope(): string
@@ -483,9 +1030,9 @@ class MacSearchProvider extends IntegrationProvider
 	/**
 	 * Одна цель для сервиса: адрес, вендор и модель, как их знает
 	 * инвентаризация (сопоставление «модель → драйвер» живёт в сервисе).
-	 * Заодно запоминает железку для рендера ссылок в результатах.
+	 * Заодно запоминает коммутатор для рендера ссылок в результатах.
 	 *
-	 * @return array|null null — у железки нет адреса, опрашивать нечего
+	 * @return array|null null — у коммутатора нет адреса, опрашивать нечего
 	 */
 	public function describeTarget(Techs $tech): ?array
 	{
@@ -631,7 +1178,7 @@ class MacSearchProvider extends IntegrationProvider
 	 * найденный порт связан с портом другого коммутатора, устройство через
 	 * него видно транзитом, а подключено в другом месте.
 	 *
-	 * Имена портов на железке и в инвентаризации пишут по-разному
+	 * Имена портов на коммутаторе и в инвентаризации пишут по-разному
 	 * (Gi1/0/12, GigabitEthernet1/0/12, ge1/0/12), поэтому сравниваем по
 	 * «числовому хвосту» имени.
 	 */
@@ -646,8 +1193,11 @@ class MacSearchProvider extends IntegrationProvider
 		foreach ($ports as $port) {
 			if (!$port->link_ports_id || !is_object($port->linkPort)) continue;
 			$peer = $port->linkPort->tech;
-			$linked[$port->techs_id][static::portKey($port->name)] =
-				is_object($peer) ? $peer->name : '';
+			//транзит - это когда за портом ДРУГОЙ КОММУТАТОР: сервер или СХД
+			//на том конце кабеля - не сеть, а то самое устройство, которое и
+			//должно быть видно на порту
+			if (!is_object($peer) || !$this->isSwitchType($peer)) continue;
+			$linked[$port->techs_id][static::portKey($port->name)] = $peer->name;
 		}
 
 		foreach ($rows as &$row) {
@@ -709,7 +1259,7 @@ class MacSearchProvider extends IntegrationProvider
 	/**
 	 * Запрос опроса к сервису.
 	 * @param string|null $mac нормализованный адрес (12 hex); null — режимам
-	 *   table/neighbors адрес не нужен, они снимают с железки всё
+	 *   table/neighbors адрес не нужен, они снимают с коммутатора всё
 	 * @param array $targets цели опроса
 	 * @param string $mode режим сервиса: lookup / table / neighbors
 	 * @return array ответ сервиса (status/rows/errors/targets/...)

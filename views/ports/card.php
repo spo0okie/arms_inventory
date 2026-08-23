@@ -20,7 +20,7 @@ if (is_object($model->linkPort)) {
 			<td></td>
 			<td>
 				<svg width="80" height="40" xmlns="http://www.w3.org/2000/svg">
-					<path d="M0 40 l20 -20 l60 0"  fill="transparent" stroke="black" stroke-width="1%"/>
+					<path d="M0 40 l20 -20 l60 0"  fill="transparent" stroke="currentColor" stroke-width="1%"/>
 				</svg>
 				<?= \app\components\ModelFieldWidget::renderFieldValue($model,'comment') ?>
 			</td>
@@ -34,9 +34,9 @@ if (is_object($model->linkPort)) {
 			</td>
 			<td rowspan="3">
 				<svg width="50" height="100" xmlns="http://www.w3.org/2000/svg">
-					<circle cx="0" cy="50" r="40"  fill="transparent" stroke="black" stroke-width="3%"/>
-					<circle cx="0" cy="10" r="3"  fill="black" stroke="black"/>
-					<circle cx="0" cy="90" r="3"  fill="black" stroke="black"/>
+					<circle cx="0" cy="50" r="40"  fill="transparent" stroke="currentColor" stroke-width="3%"/>
+					<circle cx="0" cy="10" r="3"  fill="currentColor" stroke="currentColor"/>
+					<circle cx="0" cy="90" r="3"  fill="currentColor" stroke="currentColor"/>
 				</svg>
 			</td>
 		</tr>
@@ -57,7 +57,7 @@ if (is_object($model->linkPort)) {
 				<td></td>
 				<td>
 					<svg width="80" height="40" xmlns="http://www.w3.org/2000/svg">
-						<path d="M0 0 l20 20 l60 0"  fill="transparent" stroke="black" stroke-width="1%"/>
+						<path d="M0 0 l20 20 l60 0"  fill="transparent" stroke="currentColor" stroke-width="1%"/>
 					</svg>
 					<?= \app\components\ModelFieldWidget::renderFieldValue($model->linkPort,'comment') ?>
 				</td>

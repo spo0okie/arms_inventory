@@ -49,25 +49,50 @@ JS;
     <?php $form = ArmsForm::begin([
 		'model'=>$model
 	]); ?>
-	
+
 	<?= $form->field($model, 'techs_id')->hiddenInput()->label(false)->hint(false); ?>
-	
-	<?php if (strlen($model->name??'') && (!$model->hasErrors('name'))) { ?>
-		<?= $form->field($model, 'name')->hiddenInput()->label(false)->hint(false); ?>
-		<?= $form->field($model, 'comment') ?>
-	<?php } else { ?>
-		<div class="row">
-			<div class="col-md-3">
-				<?= $form->field($model, 'name') ?>
-			</div>
-			<div class="col-md-9">
+	<?= $form->field($model, 'name')->hiddenInput()->label(false)->hint(false); ?>
+
+	<div class="row">
+		<div class="col-10">
+			<?php if (strlen($model->name??'') && (!$model->hasErrors('name'))) { ?>
 				<?= $form->field($model, 'comment') ?>
-			</div>
+			<?php } else { ?>
+				<div class="row">
+					<div class="col-md-3">
+						<?= $form->field($model, 'name') ?>
+					</div>
+					<div class="col-md-9">
+						<?= $form->field($model, 'comment') ?>
+					</div>
+				</div>
+			<?php } ?>
 		</div>
-	<?php } ?>
+		<div class="col-2">
+			<?php
+			//имена пачек, уже объявленных на этом устройстве: второй порт Po1
+			//вписывают выбором, а не по памяти. Список - подсказка, ввод
+			//текстовый (tags): группа - ярлык, а не порт
+			$aggregates = [];
+			if (is_object($model->tech)) {
+				foreach ($model->tech->ports as $port) {
+					if (strlen((string)$port->aggr)) $aggregates[$port->aggr] = $port->aggr;
+				}
+			}
+			if (strlen((string)$model->aggr)) $aggregates[$model->aggr] = $model->aggr;
+			?>
+			<?= $form->field($model, 'aggr')->select2([
+				'data' => $aggregates,
+				'options' => ['placeholder' => $model->getAttributeLabel('aggr')],
+				'pluginOptions' => ['allowClear' => true, 'tags' => true],
+			]) ?>
+		</div>
+	</div>
+
+
 
 	<h3>Соединено с</h3>
-	
+
 	<div class="row">
 		<div id="link_to_tech" class="col-md-8">
 			<?=	$form->field($model, 'link_techs_id')->select2([
@@ -97,7 +122,7 @@ JS;
 				]
 			]) ?>
 		</div>
-		
+
 	</div>
 
 	<div class="d-flex flex-row">

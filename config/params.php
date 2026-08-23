@@ -34,6 +34,7 @@ return [
 	
 	'networkDescribeSegment'=>'auto',
 	'networkInlineDescriptionLimit'=>20,
+	'ports.mapMinPorts'=>4,			//карта портов на корпусе рисуется от стольких портов: у устройства с одним-двумя она бессмысленна
 	
 	'departments.enable'=>false,
 	

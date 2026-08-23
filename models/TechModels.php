@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\console\commands\SyncController;
 use app\generation\context\GenerationContext;
+use app\helpers\PortsHelper;
 use app\models\base\ArmsModel;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
@@ -33,6 +34,9 @@ use yii\helpers\ArrayHelper;
  * @property string        $comment Комментарий
  * @property string        $ports Порты
  * @property array         $portsList Порты
+ * @property string        $ports_layout Раскладка портов на корпусе
+ * @property bool          $rename_ports Переименовать порты экземпляров по позициям (виртуальный, форма)
+ * @property array         $portsLayout Раскладка портов на корпусе
  *
  * @property TechTypes     $type
  * @property Techs[]       $techs
@@ -70,6 +74,7 @@ class TechModels extends ArmsModel
 		'comment',
 		'individual_specs',
 		'ports',
+		'ports_layout',
 		'front_rack_layout',
 		'contain_front_rack',
 		'back_rack_layout',
@@ -113,7 +118,8 @@ class TechModels extends ArmsModel
 	        [['type_id', 'manufacturers_id', 'name', 'comment'], 'required'],
 			[['type_id', 'manufacturers_id', 'individual_specs', 'scans_id'], 'integer'],
 			[['contain_front_rack', 'contain_back_rack', 'front_rack_two_sided', 'back_rack_two_sided'], 'boolean'],
-	        [['links', 'comment','ports'], 'string'],
+	        [['links', 'comment','ports','ports_layout'], 'string'],
+			[['rename_ports'], 'boolean'],
 	        [['name'], 'string', 'max' => 128],
 	        [['short'], 'string', 'max' => 24],
 	        [['name'], 'unique'],
@@ -184,6 +190,31 @@ class TechModels extends ArmsModel
 			'manufacturers_id' => ['Производитель','hint' => 'Производитель этой модели оборудования','typeClass'=>\app\types\LinkType::class],
 			'name' => ['Наименование','hint' => 'Наименование модели (включая комплектацию, если бывают разные) достаточное для точной идентификации при закупке (имя производителя писать не надо)','typeClass'=>\app\types\StringType::class],
 			'ports' => ['Сетевые порты на устройстве','hint' => 'Список Ethernet портов на устройстве, по строке на порт. Первое слово в строке - наименование порта (1/WAN/Lan_1/management), остальные слова - комментарий к порту','typeClass'=>\app\types\TextType::class],
+			'rename_ports' => [
+				'Переименовать порты оборудования этой модели по позициям',
+				'hint' => 'У всех экземпляров модели без своего списка «Порты фактически» '
+					.'заведённые порты получат новые имена по своему месту в списке: '
+					.'второй порт останется вторым, как бы он теперь ни назывался. Нужно, '
+					.'когда порты переименовали (были 1-48, стали Gi0/1-48). НЕ нужно, когда '
+					.'список сдвинули — добавили в начало CON или Management: тогда связи '
+					.'первого порта переехали бы на него',
+			],
+			'ports_layout' => [
+				'Раскладка портов на корпусе',
+				'hint' => 'Как порты расположены на передней панели — чтобы карточка '
+					.'могла нарисовать карту портов, а инженер понимал, где физически '
+					.'находится порт.<br>'
+					.'Строка = блок портов: <b>&lt;столбцов&gt;x&lt;рядов&gt; '
+					.'[направление] [подпись]</b>; 12x2 — сетка 12 на 2, то есть 24 порта '
+					.'в два ряда, просто 4 — один ряд. Направление <b>вниз</b> (по умолчанию) — '
+					.'первый порт сверху слева, второй под ним; <b>вправо</b> — сначала '
+					.'весь верхний ряд.<br>'
+					.'Например, для 24-портового коммутатора с четырьмя SFP:<br>'
+					.'<code>12x2 вниз Основные<br>4 SFP</code><br>'
+					.'Блоки съедают порты в том порядке, в каком те объявлены выше. '
+					.'Пусто — карта не рисуется, всё остальное работает как обычно',
+				'typeClass'=>\app\types\TextType::class,
+			],
 			'short' => ['Короткое имя','hint' => 'Короткое название для вывода в плотных списках','typeClass'=>\app\types\StringType::class],
 			'type_id' => ['Тип оборудования','hint' => 'К какому типу оборудования относится эта модель','placeholder' => 'Выберите тип оборудования','typeClass'=>\app\types\LinkType::class],
 			'type'=>['alias'=>'type_id'],
@@ -247,21 +278,25 @@ class TechModels extends ArmsModel
 		return $this->loaderCount('techs') ?? count($this->techs);
 	}
 	
+	/**
+	 * Геометрия корпуса: блоки портов {@see PortsHelper::parseLayout()}.
+	 *
+	 * Свойство модели, а не экземпляра: передняя панель у всех экземпляров
+	 * одна и та же, меняются только имена портов.
+	 */
+	public function getPortsLayout()
+	{
+		return PortsHelper::parseLayout($this->ports_layout);
+	}
+
+	/**
+	 * Порты модели в объявленном порядке: [имя => комментарий].
+	 * Формат общий с объявлением конкретного устройства ({@see Techs::$ports_override}),
+	 * поэтому разбор живёт в хелпере.
+	 */
 	public function getPortsList()
 	{
-		if(!count($ports=explode("\n",$this->ports??''))) return [];
-		$model_ports=[];
-		foreach ($ports as $port) {
-			$tokens=explode(' ',$port);
-			
-			//вытаскиваем первое слово
-			$port_name=trim($tokens[0]);
-			unset ($tokens[0]);
-			
-			//остальные слова - комментарий
-			if (strlen($port_name)) $model_ports[(string)$port_name]=trim(implode(' ',$tokens));
-		}
-		return $model_ports;
+		return PortsHelper::parseList($this->ports);
 	}
 	
 	public function getPortComment($port) {
@@ -456,6 +491,34 @@ class TechModels extends ArmsModel
 		];
 	}
 	
+	/**
+	 * @var bool при смене списка портов переименовать заведённые порты
+	 * экземпляров по позициям. Не атрибут БД: решение на один save(), и
+	 * принимает его человек в форме (см. {@see Techs::$rename_ports})
+	 */
+	public $rename_ports = false;
+
+	/**
+	 * @inheritdoc
+	 *
+	 * Переименование объявления тянет за собой порты экземпляров - по явному
+	 * выбору: действие массовое, на все экземпляры модели. Экземпляры со своим
+	 * списком «Порты фактически» не трогаем: модельные имена у них фантомы.
+	 */
+	public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+
+		if ($insert || !$this->rename_ports || !array_key_exists('ports', $changedAttributes)) return;
+
+		$oldNames = array_keys(PortsHelper::parseList((string)$changedAttributes['ports']));
+		$newNames = array_keys($this->portsList);
+		foreach ($this->techs as $tech) {
+			if (strlen(trim((string)$tech->ports_override))) continue;
+			$tech->renamePortsByPosition($oldNames, $newNames);
+		}
+	}
+
 	/**
 	 * @inheritdoc
 	 */

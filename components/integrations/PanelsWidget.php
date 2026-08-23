@@ -38,6 +38,21 @@ class PanelsWidget extends Widget
 	 */
 	public bool $compact = false;
 
+	/**
+	 * @var string|null вывести только эту панель: 'провайдер' либо
+	 * 'провайдер/панель'. Нужно, когда панель встраивается не в общий блок
+	 * интеграций, а в свой раздел карточки
+	 */
+	public ?string $only = null;
+
+	/**
+	 * @var string|null id контейнера НА СТРАНИЦЕ, содержимое которого панель
+	 * заменяет собой (вместо собственного контейнера). Так панель обогащает
+	 * готовый блок карточки, а не рисует рядом вторую его копию: у таблицы
+	 * портов коммутатора владелец — карточка, опрос лишь дополняет её
+	 */
+	public ?string $target = null;
+
 	public function run()
 	{
 		if (!is_object($this->model) || $this->model->isNewRecord) return '';
@@ -50,9 +65,15 @@ class PanelsWidget extends Widget
 			if (!IntegrationsRegistry::userCanView($provider)) continue;
 			if (!$provider->appliesTo($model)) continue;
 
+			if (!$this->wanted($provider->id)) continue;
+
 			$binding = $provider->binding($model);
 			foreach ($provider->panels($model) as $panelId => $descriptor) {
-				$auto = $descriptor['auto'] ?? true;
+				if (!$this->wanted($provider->id, $panelId)) continue;
+
+				//панель, запрошенную поимённо, рисуем независимо от auto: её
+				//позвал конкретный блок карточки, значит она там и нужна
+				$auto = $this->explicit() ? 'button' : ($descriptor['auto'] ?? true);
 
 				//'auto' => false: панель существует (её отдаёт proxy), но в
 				//карточке сама не появляется - её открывают по действию
@@ -71,7 +92,8 @@ class PanelsWidget extends Widget
 				$panelsHtml .= $this->renderPanel($provider, $panelId, $descriptor, $binding, $classId);
 			}
 
-			if ($this->compact) continue; //кнопки действий - только на карточке объекта
+			//встроенная панель - только она сама, без кнопок действий провайдера
+			if ($this->compact || $this->target || $this->only) continue;
 
 			foreach ($provider->actions($model) as $actionId => $descriptor) {
 				if (($descriptor['showInPanel'] ?? true) === false) continue;
@@ -92,6 +114,21 @@ class PanelsWidget extends Widget
 			.'</div>';
 	}
 
+	/** Панель запрошена поимённо ('провайдер/панель'), а не по провайдеру? */
+	protected function explicit(): bool
+	{
+		return $this->only && strpos($this->only, '/') !== false;
+	}
+
+	/** Эту панель просили вывести? ($only: 'провайдер' либо 'провайдер/панель') */
+	protected function wanted(string $providerId, ?string $panelId = null): bool
+	{
+		if (!$this->only) return true;
+		[$wantedProvider, $wantedPanel] = array_pad(explode('/', $this->only, 2), 2, null);
+		if ($wantedProvider !== $providerId) return false;
+		return is_null($panelId) || is_null($wantedPanel) || $wantedPanel === $panelId;
+	}
+
 	/**
 	 * Панель по кнопке ('auto' => 'button'): дорогой запрос, которому всё же
 	 * нужна точка входа в карточке.
@@ -106,26 +143,77 @@ class PanelsWidget extends Widget
 		$model = $this->model;
 		$cached = is_null($binding) ? null
 			: PanelsCache::fetch($provider->id, $panelId, $binding, $this->compact);
-		if ($cached && $cached['age'] <= $provider->panelTtl($panelId, $model)) {
+		$fresh = $cached && $cached['age'] <= $provider->panelTtl($panelId, $model);
+		if ($fresh && !$this->target) {
 			return $this->renderPanel($provider, $panelId, $descriptor, $binding, $classId);
 		}
 
-		$containerId = 'integration-'.$provider->id.'-'.$panelId.'-'.$classId.'-'.$model->id;
+		$containerId = $this->target
+			?: 'integration-'.$provider->id.'-'.$panelId.'-'.$classId.'-'.$model->id;
 		$title = $descriptor['title'] ?? $provider->getTitle();
 		$url = Url::to(['/integrations/panel', 'provider' => $provider->id, 'panel' => $panelId,
 			'class' => $classId, 'id' => $model->id]
 			+ ($this->compact ? ['compact' => 1] : []));
 
+		static::registerLoader($this->view);
+		$button = Html::button(Html::encode($descriptor['button'] ?? 'Загрузить'), [
+			'class' => 'btn btn-sm btn-secondary',
+			'data-panel-url' => $url,
+			'data-panel-target' => $containerId,
+			'onclick' => 'integrationPanelLoad(this)',
+		]);
+
+		//панель целится в готовый блок карточки: выводим только кнопку, а
+		//свежий результат сразу вкладываем в тот блок (он уже оплачен)
+		if ($this->target) {
+			return $button.(!$fresh ? '' : '<script>$(function(){$("#'.$containerId.'").html('
+				.json_encode($cached['html']).');});</script>');
+		}
+
 		return ('<h4>'.Html::encode($title).'</h4>')
 			.'<div class="'.($this->compact ? 'mb-2' : 'mb-3').'" id="'.$containerId.'">'
-			.Html::button(Html::encode($descriptor['button'] ?? 'Загрузить'), [
-				'class' => 'btn btn-sm btn-secondary',
-				'onclick' => '$(this).prop("disabled",true)'
-					.'.html("<span class=\'spinner-border spinner-border-sm\'></span> опрос…");'
-					.'$.get('.json_encode($url).', function(data) {'
-					.'$("#'.$containerId.'").html(data);});',
-			])
+			.$button
 			.'</div>';
+	}
+
+	/**
+	 * Загрузчик панели по кнопке.
+	 *
+	 * Отдельной функцией, а не инлайном в onclick, ровно из-за обработки
+	 * неудачи: опрос внешней ИС занимает секунды и вполне может не
+	 * состояться, а спиннер, который крутится до конца времён, — худший из
+	 * возможных ответов: человек не знает ни что случилось, ни как повторить.
+	 * Поэтому кнопка возвращается в исходное состояние, а причина пишется
+	 * прямо в контейнер панели.
+	 */
+	public static function registerLoader($view): void
+	{
+		$view->registerJs(<<<'JS'
+window.integrationPanelLoad = function (button) {
+	var element = $(button), label = element.html(),
+		container = $('#' + element.data('panel-target'));
+
+	element.prop('disabled', true)
+		.html('<span class="spinner-border spinner-border-sm"></span> опрос…');
+
+	$.ajax({url: element.data('panel-url'), timeout: 120000})
+		.done(function (data) {
+			container.html(data);
+			//кнопка живёт вне контейнера (target-режим) и сама не обновится:
+			//возвращаем подпись, иначе спиннер на ней крутится вечно
+			element.prop('disabled', false).html(label);
+		})
+		.fail(function (xhr, status) {
+			var reason = status === 'timeout'
+				? 'опрос не уложился в 2 минуты'
+				: (xhr.status ? 'сервер ответил ' + xhr.status : 'нет ответа от сервера');
+			element.prop('disabled', false).html(label);
+			container.prepend($('<div class="alert alert-warning py-1 px-2 small"></div>')
+				.text('Опрос не состоялся: ' + reason + '. Можно повторить.'));
+		});
+};
+JS
+		, \yii\web\View::POS_END, 'integration-panel-load');
 	}
 
 	/**

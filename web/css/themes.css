@@ -421,3 +421,14 @@
 }
 
 } /* @media screen */
+
+/* карта портов (PortsMapWidget): занятый - приподнятая поверхность со светлым
+   номером, подсветки - глубокие оттенки тех же hue, что и в таблице */
+[data-bs-theme=dark] .ports-map-slot.slot-ok       {--ports-slot-bg: #4a5b6b; --ports-slot-fg: #f8f9fa; --ports-slot-border: #6c8094}
+[data-bs-theme=dark] .ports-map-slot.slot-seen     {--ports-slot-bg: #2c3a47; --ports-slot-fg: #dee2e6}
+[data-bs-theme=dark] .ports-map-slot.slot-foreign,
+[data-bs-theme=dark] .ports-map-slot.slot-quiet    {--ports-slot-bg: #4d3a06; --ports-slot-fg: #ffda6a; --ports-slot-border: #997404}
+[data-bs-theme=dark] .ports-map-slot.slot-replaced,
+[data-bs-theme=dark] .ports-map-slot.slot-added    {--ports-slot-bg: #0f3d2a; --ports-slot-fg: #75b798; --ports-slot-border: #146c43}
+[data-bs-theme=dark] .ports-map-slot.slot-transit  {--ports-slot-bg: #343a40; --ports-slot-fg: #ced4da}
+[data-bs-theme=dark] .ports-map-slot.slot-disabled {--ports-slot-bg: #1f262d; --ports-slot-fg: #6c757d}

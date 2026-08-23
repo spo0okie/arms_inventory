@@ -107,3 +107,19 @@ div.arms-card div.tree-level-2.network-link-add {width:20px; height: 20px; text-
 span.mac_address {
     font-family: monospace;
 }
+
+/* Карта портов на корпусе (PortsMapWidget): состояние слота - токен, дефолт
+   светлой темы здесь, тёмные значения в themes.css (конвенция docs/dev/themes.md §2.3) */
+.ports-map-slot {
+	background: var(--ports-slot-bg, transparent);
+	color: var(--ports-slot-fg, inherit);
+	border-color: var(--ports-slot-border, var(--bs-border-color)) !important;
+}
+.ports-map-slot.slot-ok       {--ports-slot-bg: #6c757d; --ports-slot-fg: #fff; --ports-slot-border: #6c757d}
+.ports-map-slot.slot-seen     {--ports-slot-bg: #dee2e6; --ports-slot-fg: #212529}
+.ports-map-slot.slot-foreign,
+.ports-map-slot.slot-quiet    {--ports-slot-bg: #fff3cd; --ports-slot-fg: #664d03; --ports-slot-border: #ffc107}
+.ports-map-slot.slot-replaced,
+.ports-map-slot.slot-added    {--ports-slot-bg: #d1e7dd; --ports-slot-fg: #0a3622; --ports-slot-border: #198754}
+.ports-map-slot.slot-transit  {--ports-slot-bg: #ced4da; --ports-slot-fg: #212529}
+.ports-map-slot.slot-disabled {--ports-slot-bg: #e9ecef; --ports-slot-fg: #6c757d}

@@ -1,57 +1,61 @@
 <?php
 /**
- * Вывод портов устройства
- * User: aareviakin
- * Date: 01.03.2021
- * Time: 20:49
+ * Блок «Сетевые порты» карточки устройства.
+ *
+ * Таблица здесь одна и её владелец — карточка. Опрос коммутатора
+ * (интеграция macsearch) не рисует рядом вторую таблицу, а заменяет
+ * содержимое этого же блока обогащённой версией: где записанное совпало с
+ * найденным, где разошлось и что предлагается сделать
+ * (plans/network-map.md, этап 3.4).
  */
 
 /* @var \app\models\Techs $model */
 /* @var $this yii\web\View */
 
-if (!is_object($model->model) || !is_array($model->model->portsList) || !count($model->model->portsList)) { ?>
+$containerId = 'techs-ports-'.$model->id;
+
+//порты объявляет модель оборудования, но у экземпляра имена могут отличаться
+//(стек, переименование на MikroTik) - тогда действует его «порты фактически»
+if (!count($model->portsTemplate)) { ?>
 	<div class="alert alert-striped">
 		У этой модели оборудования нет сетевых портов.
-		Если это неверно - <?= \yii\helpers\Html::a('отредактируйте модель оборудования.',[
+		Если это неверно - <?= \yii\helpers\Html::a('отредактируйте модель оборудования',[
 			'/tech-models/update',
 			'id'=>$model->model_id,
 			'return'=>'previous'
 		]) ?>
+		или объявите порты этого устройства в поле
+		<?= \yii\helpers\Html::a('«Порты фактически»',[
+			'/techs/update',
+			'id'=>$model->id,
+			'return'=>'previous'
+		]) ?>.
 	</div>
 	<br/>
 <?php }
 
 if (count($model->portsList)) { ?>
-
-	<table class="table table-striped">
-		<tr>
-			<th>
-				Порт
-			</th>
-			<th>
-				Пояснение
-			</th>
-			<th colspan="3">
-				Соединение с
-			</th>
-		</tr>
-
-		<?php foreach ($model->portsList as $port) {
-			$port['model']=$model;
-			echo $this->render('port-row',$port);
-		}?>
-	</table>
+	<div id="<?= $containerId ?>">
+		<?= $this->render('_ports-table', ['model' => $model, 'ports' => null]) ?>
+	</div>
 <?php }
 
+//кнопка опроса появляется только у коммутатора с настроенной интеграцией;
+//результат ложится в контейнер выше, а не рядом с ним
+echo \app\components\integrations\PanelsWidget::widget([
+	'model' => $model,
+	'only' => 'macsearch/switch',
+	'target' => $containerId,
+]);
 
-echo \yii\helpers\Html::a(
+echo ' '.\yii\helpers\Html::a(
 	'Добавить нестандартный порт',
 	[
 		'/ports/create',
 		'Ports[techs_id]'=>$model->id,
 		'return'=>'previous'
 	],[
-		'class'=>'btn btn-info',
+		'class'=>'btn btn-sm btn-info',
 		'title' => 'Стандартные порты редактируются в модели оборудования'
 	]
 ) ?>

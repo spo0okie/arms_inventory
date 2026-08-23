@@ -16,24 +16,7 @@ use yii\helpers\Url;
 /* @var $form yii\widgets\ActiveForm */
 if (!isset($modalParent)) $modalParent=null;
 
-$addPorts=<<<JS
-for (
-    let i = $('#port_min').val();
-    i <= $('#port_max').val();
-    i++
-) {
-    if ($('#techmodels-ports').val().length>0) {
-	    $('#techmodels-ports').val(
-    	    $('#techmodels-ports').val() + "\\n" + $('#port_prefix').val() + i
-		)
-    } else {
-    	$('#techmodels-ports').val(
-	        $('#port_prefix').val() + i
-		)
-    }
-}
 
-JS;
 
 $formAction=$model->isNewRecord?
 	['tech-models/create']:

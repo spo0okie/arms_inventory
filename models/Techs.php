@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\helpers\ArrayHelper;
 use app\helpers\MacsHelper;
+use app\helpers\PortsHelper;
 use app\helpers\QueryHelper;
 use app\models\base\ArmsModel;
 use app\models\traits\AclsFieldTrait;
@@ -62,6 +63,9 @@ use yii\db\ActiveQuery;
  * @property boolean $installed_back Установлено с обратной стороны
  * @property array $contracts_ids Список документов
  * @property array $net_ips_ids Список IP
+ * @property string $ports_override Порты фактически
+ * @property bool $rename_ports Переименовать заведённые порты по позициям (виртуальный, форма)
+ * @property array $portsTemplate Объявленные порты устройства (оверрайд либо модель)
  * @property array $portsList
  * @property array $ddPortsList
  *
@@ -133,6 +137,15 @@ class Techs extends ArmsModel
 	//уникальные/индивидуальные атрибуты экземпляра в копию «по образцу» не переносятся
 	//(инвентарные/серийные номера, сетевая идентичность)
 	public $dontCopyAttrs=['num','inv_num','sn','uid','ip','mac','hostname'];
+
+	/**
+	 * @var bool при смене объявления портов переименовать заведённые строки по
+	 * позициям ({@see renamePortsByPosition()}). Не атрибут БД: это решение на
+	 * один save(), и принимает его человек в форме. По умолчанию НЕТ: если в
+	 * начало списка добавили CON-порт, сдвиг переименований зацепил бы на
+	 * него связи первого порта
+	 */
+	public $rename_ports = false;
 
 	public static $title='Оборудование';
 	public static $titles='Оборудование';
@@ -356,6 +369,24 @@ class Techs extends ArmsModel
 					.'Выводится в паспорте АРМ',
 				'placeholder' => 'Не закреплено за отделом',
 				'typeClass'=>\app\types\LinkType::class,
+			],
+			'rename_ports' => [
+				'Переименовать заведённые порты по позициям',
+				'hint' => 'Порты, у которых уже есть связи или комментарии, получат новые '
+					.'имена по своему месту в списке: второй порт останется вторым, как бы '
+					.'он теперь ни назывался. Нужно, когда порты переименовали (были 1-48, '
+					.'стали Gi0/1-48). НЕ нужно, когда список сдвинули — добавили в начало '
+					.'CON или Management: тогда связи первого порта переехали бы на него',
+			],
+			'ports_override' => [
+				'Порты фактически',
+				'hint' => 'Порты именно этого устройства, если они отличаются от портов его модели: '
+					.'после стекирования Gi0/13 становится Gi2/0/13, на MikroTik порты '
+					.'переименовывают руками.<br>'
+					.'Строка = порт, порядок строк = порядок портов на корпусе; после имени '
+					.'можно дописать комментарий («сгорел», «в патч-панель 3»).<br>'
+					.'Пусто — действуют порты модели; заполнено — действует только этот список',
+				'typeClass'=>\app\types\TextType::class,
 			],
 			'history' => [
 				'Записная книжка',
@@ -615,6 +646,8 @@ class Techs extends ArmsModel
 	        [['contracts_ids','lic_items_ids','lic_groups_ids','lic_keys_ids','maintenance_reqs_ids','maintenance_jobs_ids','services_ids'], 'each', 'rule'=>['integer']],
 
 			[['url', 'comment','updated_at','history','hw','specs','external_links'], 'safe'],
+			[['ports_override'], 'string'],
+			[['rename_ports'], 'boolean'],
 			[['inv_num', 'sn','installed_pos','installed_pos_end'], 'string', 'max' => 128],
 
 			[['ip','mac'], 'string', 'max' => 768],
@@ -1282,6 +1315,75 @@ class Techs extends ArmsModel
 	/**
 	 * Возвращает массив портов (фактически объявленных или потенциально возможных исходя из модели оборудования)
 	 */
+	/**
+	 * Объявленные порты устройства: [имя => комментарий] в порядке объявления.
+	 *
+	 * Пусто в ports_override - действует шаблон модели (обычный случай).
+	 * Заполнен - действует ТОЛЬКО он: у устройства, которому перенумеровали порты
+	 * (стек) или переименовали интерфейсы (MikroTik), модельные имена - фантомы,
+	 * и показывать их рядом с настоящими нельзя.
+	 */
+	public function getPortsTemplate()
+	{
+		if (strlen(trim((string)$this->ports_override)))
+			return PortsHelper::parseList($this->ports_override);
+
+		return is_object($this->model) ? $this->model->portsList : [];
+	}
+
+	/**
+	 * Переименовать заведённые порты вслед за переименованием объявленных.
+	 *
+	 * Порт в инвентаризации - это розетка, а не строка текста: за именем
+	 * стоит кабель, который никуда не делся. Когда у устройства меняется
+	 * НАЗВАНИЕ портов (стек перенумеровал Ge0/1 в Gi1/0/1, MikroTik переименовал
+	 * интерфейсы), второй порт остаётся вторым, и записи должны переехать за
+	 * своими позициями. Иначе они выпадают из объявленного списка и оседают
+	 * в его хвосте - именно так порты и начинают идти вразнобой.
+	 *
+	 * Переименование делается напрямую в БД: это чистая смена ярлыка, и
+	 * прогонять её через save() нельзя - порт без связи и без комментария
+	 * удаляет там себя сам ({@see Ports::beforeSave()}).
+	 *
+	 * Столкновений имён не боимся: переименовываем в два прохода через
+	 * временные имена, иначе Gi1/0/1 -> Gi1/0/2 упёрся бы в уникальность.
+	 *
+	 * @param array $oldNames объявленные имена ДО изменения, по порядку
+	 * @param array $newNames объявленные имена ПОСЛЕ, по порядку
+	 * @return array выполненные переименования [['from'=>..,'to'=>..], ...]
+	 */
+	public function renamePortsByPosition(array $oldNames, array $newNames): array
+	{
+		$oldNames = array_values($oldNames);
+		$newNames = array_values($newNames);
+
+		//позиция -> новое имя; хвост укоротившегося списка не трогаем: порт,
+		//которого в объявлении больше нет, остаётся как есть - и виден в конце
+		$map = [];
+		foreach ($oldNames as $index => $old) {
+			if (!isset($newNames[$index])) break;
+			if ((string)$old !== (string)$newNames[$index]) $map[(string)$old] = (string)$newNames[$index];
+		}
+		if (!count($map)) return [];
+
+		$renames = [];
+		foreach (Ports::find()->where(['techs_id' => $this->id])->all() as $port) {
+			if (!isset($map[(string)$port->name])) continue;
+			$renames[] = ['id' => $port->id, 'from' => (string)$port->name,
+				'to' => $map[(string)$port->name]];
+		}
+		if (!count($renames)) return [];
+
+		foreach ($renames as $rename)
+			Ports::updateAll(['name' => '~'.$rename['id']], ['id' => $rename['id']]);
+		foreach ($renames as $rename)
+			Ports::updateAll(['name' => $rename['to']], ['id' => $rename['id']]);
+
+		$this->populateRelation('ports', []);   //список портов устарел
+		unset($this->ports);
+		return $renames;
+	}
+
 	public function getPortsList()
 	{
 		//Порты которые должны быть у этой модели оборудования
@@ -1302,10 +1404,10 @@ class Techs extends ArmsModel
 		$custom_ports=$this->ports;
 		if (!is_array($custom_ports)) $custom_ports=[];
 
-		//если корректно пришита модель оборудования и у модели есть набор портов
-		if (is_object($this->model) && count($this->model->portsList)) {
+		//если у устройства есть объявленный набор портов (свой либо модельный)
+		if (count($template=$this->portsTemplate)) {
 			//перебираем распарсеные порты
-			foreach ($this->model->portsList as $port_name=>$port_comment) {
+			foreach ($template as $port_name=>$port_comment) {
 				//ищем есть ли порт-объект к этому порту
 				$port_link=null;
 				foreach ($custom_ports as $i=>$custom_port) if ($custom_port->name == $port_name) {
@@ -1316,7 +1418,11 @@ class Techs extends ArmsModel
 			}
 		}
 
-		//если какие-то порты не ушли через список выше - добавляем их в конец
+		//если какие-то порты не ушли через список выше - добавляем их в конец.
+		//Порядок объявления им взять неоткуда, поэтому сортируем по имени: по
+		//порядку создания записей (Gi1/0/48 завели раньше Gi1/0/47) список
+		//выглядит просто перепутанным
+		usort($custom_ports, fn($one, $other) => strnatcasecmp($one->name, $other->name));
 		foreach ($custom_ports as $port) {
 			$model_ports[$port->name]=[
 				'port_name'=>$port->name,
@@ -1491,6 +1597,18 @@ class Techs extends ArmsModel
 	public function afterSave($insert, $changedAttributes)
 	{
 		parent::afterSave($insert, $changedAttributes);
+
+		//устройству переобъявили порты - заведённые строки переезжают за своими
+		//позициями (см. renamePortsByPosition), если человек так решил
+		if (!$insert && $this->rename_ports && array_key_exists('ports_override', $changedAttributes)) {
+			$was = (string)$changedAttributes['ports_override'];
+			$this->renamePortsByPosition(
+				array_keys(strlen(trim($was))
+					? PortsHelper::parseList($was)
+					: (is_object($this->model) ? $this->model->portsList : [])),
+				array_keys($this->portsTemplate)
+			);
+		}
 
 		//если изменились поля которые наследуются для оборудования входящего в АРМ ($armInheritance)
 		$updateArmInheritance=false;

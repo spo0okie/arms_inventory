@@ -228,7 +228,7 @@ class MacSearchProviderTest extends Unit
 
 	/**
 	 * Область опроса выбирается пунктом меню: по умолчанию площадка объекта,
-	 * но железку могли перевезти — тогда «по всем площадкам». Разные области
+	 * но устройство могли перевезти — тогда «по всем площадкам». Разные области
 	 * не должны смешиваться в кэше, поэтому область входит в привязку.
 	 */
 	public function testScopeFromRequest()
@@ -393,7 +393,7 @@ class MacSearchProviderTest extends Unit
 		$this->assertTrue($uplink->save(false));
 
 		$rows = $this->makeProvider()->annotateUplinks([
-			//порт железка назвала иначе, чем инвентаризация - сопоставляем по номеру
+			//порт коммутатор назвал иначе, чем инвентаризация - сопоставляем по номеру
 			['target' => $access->id, 'port' => 'GigabitEthernet1/0/48', 'vlan' => '1'],
 			['target' => $access->id, 'port' => 'Gi1/0/12', 'vlan' => '120'],
 		]);
@@ -519,7 +519,7 @@ class MacSearchProviderTest extends Unit
 
 	/**
 	 * Пустой результат с уликами сервиса: «не найден» и «не поняли ответ
-	 * железки» выглядят одинаково, поэтому диагностику видно в панели —
+	 * коммутатора» выглядят одинаково, поэтому диагностику видно в панели —
 	 * её можно скопировать в задачу
 	 */
 	public function testRenderDiagnostics()
@@ -538,7 +538,7 @@ class MacSearchProviderTest extends Unit
 		$this->assertStringContainsString('не найден на портах', $html);
 		$this->assertStringContainsString('почему пусто', $html);
 		$this->assertStringContainsString('ответ не разобран', $html);
-		//сырой ответ железки - главное свидетельство, он должен быть виден целиком
+		//сырой ответ коммутатора - главное свидетельство, он должен быть виден целиком
 		$this->assertStringContainsString('Fail!', $html);
 
 		//без улик блока нет: обычный «не найден» ничем не обрастает
@@ -566,8 +566,10 @@ class MacSearchProviderTest extends Unit
 
 		$panels = $provider->panels($switch);
 		$this->assertArrayHasKey(MacSearchProvider::PANEL_SWITCH, $panels);
-		//дорогой опрос не должен уходить сам при открытии карточки
-		$this->assertSame('button', $panels[MacSearchProvider::PANEL_SWITCH]['auto']);
+		//сама панель нигде не рисуется: её зовёт поимённо блок «Сетевые порты»
+		//и подменяет ею свою таблицу (таблица портов в карточке одна)
+		$this->assertFalse($panels[MacSearchProvider::PANEL_SWITCH]['auto']);
+		$this->assertSame('Опросить порты', $panels[MacSearchProvider::PANEL_SWITCH]['button']);
 
 		//у ОС портов нет, у коммутатора без адреса опрашивать нечего
 		$this->assertArrayNotHasKey(MacSearchProvider::PANEL_SWITCH,
@@ -576,7 +578,7 @@ class MacSearchProviderTest extends Unit
 			$provider->panels($this->makeSwitch(['ip' => ''])));
 	}
 
-	/** Ключ кэша коммутатора — сама железка: своего MAC у него может не быть */
+	/** Ключ кэша коммутатора — сам коммутатор: своего MAC у него может не быть */
 	public function testSwitchBindingWithoutMac()
 	{
 		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
@@ -586,7 +588,7 @@ class MacSearchProviderTest extends Unit
 		$this->assertStringContainsString('tech'.$switch->id, $binding);
 	}
 
-	/** Опрашивается одна железка и в режиме table (без адреса) */
+	/** Опрашивается один коммутатор и в режиме table (без адреса) */
 	public function testSwitchPanelAsksForWholeTable()
 	{
 		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
@@ -656,6 +658,397 @@ class MacSearchProviderTest extends Unit
 		$this->assertSame($core->name, $ports[0]['uplink_peer']);
 	}
 
+	/**
+	 * Объявленные порты задают и порядок, и состав: инженеру нужен не только
+	 * занятый порт, но и свободный — «куда воткнуть»
+	 */
+	public function testSwitchPortsFollowDeclaredLayout()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		//коммутатор называет порты по-своему (Gi1/0/2), объявление - по-корпусному (2)
+		$switch->model->ports = "1\n2 в патч-панель\n3\n4";
+		$this->assertTrue($switch->model->save(false));
+		$switch->refresh();
+
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:55', 'Gi1/0/3'),
+			$this->tableRow($switch->id, '00:11:22:33:44:56', 'Gi1/0/1'),
+			//порта Po1 в объявлении нет - это находка, а не мусор
+			$this->tableRow($switch->id, '00:11:22:33:44:57', 'Po1'),
+		], $switch);
+
+		//объявленный порядок, а не сортировка по номеру и не порядок ответа
+		$this->assertSame(['1', '2', '3', '4', 'Po1'], array_column($ports, 'port'));
+		//свободные розетки видно: без объявления их вообще не было бы в выдаче
+		$this->assertSame([false, true, false, true, false],
+			array_map(fn($port) => !count($port['macs']), $ports));
+		//комментарий объявления доезжает до панели
+		$this->assertSame('в патч-панель', $ports[1]['comment']);
+		$this->assertTrue($ports[0]['declared']);
+		$this->assertFalse($ports[4]['declared']);
+	}
+
+	/** Без объявления - прежнее поведение: только найденные порты, по номеру */
+	public function testSwitchPortsWithoutLayout()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:55', 'Gi1/0/10'),
+			$this->tableRow($switch->id, '00:11:22:33:44:56', 'Gi1/0/2'),
+		], $switch);
+
+		$this->assertSame(['Gi1/0/2', 'Gi1/0/10'], array_column($ports, 'port'));
+	}
+
+	/**
+	 * Порт коммутатора, соединённый с портом другого устройства.
+	 *
+	 * В `ports` есть только link_ports_id: связь всегда идёт порт-в-порт, а
+	 * «оборудование на той стороне» вычисляется через встречный порт.
+	 */
+	private function linkPort(Techs $switch, string $name, ?Techs $peer = null): Ports
+	{
+		$port = new Ports();
+		$port->setAttributes(['techs_id' => $switch->id, 'name' => $name, 'comment' => ''], false);
+		$this->assertTrue($port->save(false));
+		if (!is_object($peer)) return $port;
+
+		$peerPort = new Ports();
+		$peerPort->setAttributes(['techs_id' => $peer->id, 'name' => 'eth0',
+			'link_ports_id' => $port->id, 'comment' => ''], false);
+		$this->assertTrue($peerPort->save(false));
+
+		$port->link_ports_id = $peerPort->id;
+		$this->assertTrue($port->save(false));
+		return $port;
+	}
+
+	/** Устройство с адресом (то, что должно найтись за портом) */
+	private function makeDevice(Techs $switch, string $mac, string $num, ?string $ports = null): Techs
+	{
+		$modelId = $switch->model_id;
+		//своя модель с объявленными портами: у телефона их два, у ПК один
+		if (!is_null($ports)) {
+			$model = new TechModels();
+			$model->setAttributes(['name' => 'Модель '.uniqid(),
+				'manufacturers_id' => $switch->model->manufacturers_id, 'ports' => $ports,
+				'comment' => ''], false);
+			$this->assertTrue($model->save(false));
+			$modelId = $model->id;
+		}
+		$tech = new Techs();
+		$tech->setAttributes(['model_id' => $modelId, 'num' => $num,
+			'mac' => $mac, 'history' => ''], false);
+		$this->assertTrue($tech->save(false));
+		$tech->refresh();
+		return $tech;
+	}
+
+	/**
+	 * Вердикты диффа: что записано против того, что видно на порту.
+	 *
+	 * Главное здесь - отсутствие вердикта «пропало»: порт без адресов значит
+	 * и «убрали», и «выключено», и «молчит дольше старения записи», а стирать
+	 * правильную запись по такому основанию нельзя.
+	 */
+	public function testPortVerdicts()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->ports_override = "1\n2\n3\n4\n5\n6";
+		$this->assertTrue($switch->save(false));
+		$switch->refresh();
+
+		$server = $this->makeDevice($switch, '001122334455', 'SRV-OK');
+		$other = $this->makeDevice($switch, '001122334466', 'SRV-OTHER');
+
+		$this->linkPort($switch, '1', $server);      // найдём его же
+		$this->linkPort($switch, '2', $server);      // найдём другого
+		$this->linkPort($switch, '3', $server);      // адреса чужие
+		$this->linkPort($switch, '4', $server);      // тишина
+		//порт 5 не записан, но на нём найдётся известное железо
+		//порт 6 не записан, и адрес на нём неизвестен
+
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:55', '1'),
+			$this->tableRow($switch->id, '00:11:22:33:44:66', '2'),
+			$this->tableRow($switch->id, '00:aa:bb:cc:dd:01', '3'),
+			$this->tableRow($switch->id, '00:11:22:33:44:66', '5'),
+			$this->tableRow($switch->id, '00:aa:bb:cc:dd:02', '6'),
+		], $switch);
+
+		$verdicts = array_combine(array_column($ports, 'port'), array_column($ports, 'verdict'));
+		$this->assertSame([
+			'1' => 'ok',        // нашли то, что записано
+			'2' => 'replaced',  // на порту другое известное железо
+			'3' => 'foreign',   // адреса есть, но чьи - неизвестно
+			'4' => 'quiet',     // адресов нет вовсе: не повод стирать запись
+			'5' => 'added',     // записано пусто, найдено известное
+			'6' => 'seen',      // адрес есть, объекта с ним нет
+		], $verdicts);
+
+		//у «заменить» видно, на что менять
+		$replaced = $ports[1];
+		$this->assertSame([$other->id], array_map(fn($tech) => $tech->id, $replaced['found']));
+		$this->assertSame($server->id, $replaced['linked']->id);
+	}
+
+	/** Адрес записан на ОС - за портом стоит её АРМ, а не сама ОС */
+	public function testFoundDeviceForOsAddress()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$arm = $this->makeDevice($switch, '', 'ARM-OS');
+
+		$comp = new Comps();
+		$comp->setAttributes(['name' => 'OS-'.uniqid(), 'mac' => '0011223344cc',
+			'arm_id' => $arm->id], false);
+		$this->assertTrue($comp->save(false));
+
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:cc', 'Gi1/0/5'),
+		], $switch);
+
+		$this->assertSame('added', $ports[0]['verdict']);
+		$this->assertSame([$arm->id], array_map(fn($tech) => $tech->id, $ports[0]['found']));
+	}
+
+	/** Запись паспорта порта, как её отдаёт сервис */
+	private function passportPort(string $name, array $extra = []): array
+	{
+		return array_merge([
+			'name' => $name, 'description' => '', 'admin' => 'up', 'oper' => 'up',
+			'speed' => 1000, 'aggregate' => '', 'vlans' => [],
+		], $extra);
+	}
+
+	/**
+	 * Паспорт портов: описание с коммутатора, настроенные VLAN и «выключен»
+	 * вместо «свободен»
+	 */
+	public function testPassportEnrichesPorts()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->ports_override = "Gi1/0/1\nGi1/0/2";
+		$this->assertTrue($switch->save(false));
+		$switch->refresh();
+
+		$ports = $this->makeProvider()->switchPorts([], $switch, [
+			$this->passportPort('Gi1/0/1', ['description' => 'to core',
+				'vlans' => [['vlan' => 120, 'untagged' => true],
+					['vlan' => 150, 'untagged' => false]]]),
+			$this->passportPort('Gi1/0/2', ['admin' => 'down', 'oper' => 'down']),
+		]);
+
+		$this->assertSame('to core', $ports[0]['description']);
+		//VLAN настроенные, а не «где замечен трафик»
+		$this->assertTrue($ports[0]['vlans_configured']);
+		$this->assertSame(['120', '150'], array_column($ports[0]['vlans'], 'vlan'));
+		$this->assertTrue($ports[0]['vlans'][0]['untagged']);
+		//выключенный порт - не свободный: воткнуть в него нельзя
+		$this->assertSame('disabled', $ports[1]['verdict']);
+	}
+
+	/**
+	 * Инвентаризация и коммутатор зовут одну розетку по-разному.
+	 *
+	 * Показываем объявленное имя (оно с корпуса), но паспорт и соседей ищем
+	 * по имени коммутатора - иначе описание порта и VLAN просто не доедут, а
+	 * «взять имена портов» будет нечего брать.
+	 */
+	public function testRealNameKeptAlongsideDeclared()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->ports_override = "Ge0/1\nGe0/2";
+		$this->assertTrue($switch->save(false));
+		$switch->refresh();
+
+		$ports = $this->makeProvider()->switchPorts([], $switch, [
+			$this->passportPort('Gi1/0/1', ['description' => 'to core']),
+			$this->passportPort('Gi1/0/2'),
+		]);
+
+		//в таблице - имя с корпуса, под ним - имя коммутатора
+		$this->assertSame('Ge0/1', $ports[0]['port']);
+		$this->assertSame('Gi1/0/1', $ports[0]['real']);
+		//и описание доехало, хотя имена разные
+		$this->assertSame('to core', $ports[0]['description']);
+	}
+
+	/**
+	 * Интерфейсы без розетки в таблице портов не показываются.
+	 *
+	 * Сам агрегат, VLAN-интерфейс, loopback коммутатор перечисляет наравне с
+	 * портами, но воткнуть в них нечего, а на 48-портовом коммутаторе их ещё с
+	 * десяток. Отличает их тип интерфейса (ifType 6 - ethernetCsmacd), без
+	 * него - имя. Объявленное в инвентаризации имя показывается всегда.
+	 */
+	public function testVirtualInterfacesLeftOut()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->ports_override = 'Gi1/0/1';
+		$this->assertTrue($switch->save(false));
+		$switch->refresh();
+
+		$ports = $this->makeProvider()->switchPorts([], $switch, [
+			$this->passportPort('Gi1/0/1', ['type' => 6]),
+			$this->passportPort('Po1', ['type' => 161]),
+			$this->passportPort('Vlan120', ['type' => 53]),
+		]);
+		$this->assertSame(['Gi1/0/1'], array_column($ports, 'port'));
+
+		//сервис постарше типа не присылает - тогда судим по имени
+		$older = $this->makeProvider()->switchPorts([], $switch, [
+			$this->passportPort('Gi1/0/1'),
+			$this->passportPort('Po1'),
+			$this->passportPort('Vlan1'),
+			$this->passportPort('Gi1/0/2'),
+		]);
+		$this->assertSame(['Gi1/0/1', 'Gi1/0/2'], array_column($older, 'port'));
+
+		//коммутатор без объявленных портов: список берётся из паспорта - и там
+		//те же правила, иначе Po1 и Vlan1 возвращаются с чёрного хода
+		$bare = $this->makeSwitch(['ip' => '10.50.2.17']);
+		$bare->model->ports = '';
+		$this->assertTrue($bare->model->save(false));
+		$bare->refresh();
+		$fromPassport = $this->makeProvider()->switchPorts([], $bare, [
+			$this->passportPort('Gi1/0/1', ['type' => 6]),
+			$this->passportPort('Po1', ['type' => 161]),
+			$this->passportPort('mgmt0', ['type' => 6]),
+			$this->passportPort('Vlan1', ['type' => 53]),
+		]);
+		$this->assertSame(['Gi1/0/1', 'mgmt0'], array_column($fromPassport, 'port'));
+	}
+
+	/**
+	 * Адреса с агрегата ложатся на его порты.
+	 *
+	 * Таблицу MAC коммутатор ведёт на Po1, а не на Gi1/0/47: без раскладки по
+	 * членам обе розетки группы выглядели бы пустыми, а строка Po1 - занятой,
+	 * хотя воткнуть в неё нечего. Группа при этом - ярлык, а не вердикт:
+	 * каждый член сравнивается с записанным как обычный порт.
+	 */
+	public function testAggregateMacsSpreadToMembers()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->ports_override = "Gi1/0/47\nGi1/0/48";
+		$this->assertTrue($switch->save(false));
+		$switch->refresh();
+
+		$server = $this->makeDevice($switch, '001122334455', 'SRV');
+
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:55', 'Po1'),
+		], $switch, [
+			$this->passportPort('Gi1/0/47', ['type' => 6, 'aggregate' => 'Po1']),
+			$this->passportPort('Gi1/0/48', ['type' => 6, 'aggregate' => 'Po1']),
+			$this->passportPort('Po1', ['type' => 161]),
+		]);
+
+		$this->assertSame(['Gi1/0/47', 'Gi1/0/48'], array_column($ports, 'port'));
+		foreach ($ports as $port) {
+			$this->assertSame('Po1', $port['aggregate']);
+			$this->assertSame([$server->id], array_map(fn($device) => $device->id, $port['found']));
+			//записано пусто, найдено известное - обычное предложение привязать
+			$this->assertSame('added', $port['verdict']);
+		}
+	}
+
+	/** Опознанный сосед по LLDP становится предложением связи */
+	public function testNeighborBecomesLinkOffer()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->ports_override = 'Gi1/0/48';
+		$this->assertTrue($switch->save(false));
+		$switch->refresh();
+
+		$core = $this->makeSwitch(['ip' => '10.50.2.1', 'mac' => '00aabbccddee']);
+
+		$ports = $this->makeProvider()->switchPorts([
+			//за портом сеть: без соседа это был бы просто «транзит»
+			$this->tableRow($switch->id, '00:11:22:33:44:55', 'Gi1/0/48', ['port_macs' => 37]),
+		], $switch, [], [[
+			'target' => $switch->id, 'port' => 'Gi1/0/48', 'protocol' => 'lldp',
+			'remote_mac' => '00:aa:bb:cc:dd:ee', 'remote_port' => 'Gi1/0/1',
+			'remote_name' => 'sw-core',
+		]]);
+
+		//сосед - факт с коммутатора, он важнее счёта адресов
+		$this->assertSame('added', $ports[0]['verdict']);
+		$this->assertSame([$core->id], array_map(fn($tech) => $tech->id, $ports[0]['found']));
+		//порт на той стороне сосед назвал сам - гадать не нужно
+		$this->assertCount(1, $ports[0]['proposals']);
+		$this->assertSame([['id' => null, 'name' => 'Gi1/0/1']], $ports[0]['proposals'][0]['peers']);
+		$this->assertNull($ports[0]['proposals'][0]['chain']);
+	}
+
+	/**
+	 * Телефон с ПК за ним: у одного найденного два порта (может быть мостом),
+	 * у другого один - предлагаем цепочку «порт → телефон ; телефон → ПК».
+	 * Когда мостом может быть любое, схему не выдумываем - список кандидатов.
+	 */
+	public function testPhoneWithPcBecomesChain()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->ports_override = 'Gi1/0/7';
+		$this->assertTrue($switch->save(false));
+		$switch->refresh();
+
+		$phone = $this->makeDevice($switch, '001122334401', 'TEL', "Internet
+PC");
+		$pc = $this->makeDevice($switch, '001122334402', 'PC', 'eth');
+
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:01', 'Gi1/0/7', ['port_macs' => 2]),
+			$this->tableRow($switch->id, '00:11:22:33:44:02', 'Gi1/0/7', ['port_macs' => 2]),
+		], $switch);
+
+		$this->assertCount(1, $ports[0]['proposals'], 'одна цепочка, а не два кандидата');
+		$proposal = $ports[0]['proposals'][0];
+		$this->assertSame($phone->id, $proposal['device']->id);
+		//оба порта моста остаются в предложении: какой смотрит в коммутатор -
+		//переключатель, Internet лишь подсказан первым
+		$this->assertSame(['Internet', 'PC'], array_column($proposal['peers'], 'name'));
+		$this->assertSame('PC', $proposal['chain']['via']['name']);
+		$this->assertSame($pc->id, $proposal['chain']['leaf']->id);
+		$this->assertSame('eth', $proposal['chain']['leaf_peers'][0]['name']);
+
+		//имена портов к коммутатору настраиваются: у этого вендора это «sw»
+		$custom = $this->makeDevice($switch, '001122334403', 'TEL2', "pc
+sw");
+		$ports = $this->makeProvider([], ['bridgeToSwitchPorts' => ['sw']])->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:03', 'Gi1/0/7', ['port_macs' => 2]),
+			$this->tableRow($switch->id, '00:11:22:33:44:02', 'Gi1/0/7', ['port_macs' => 2]),
+		], $switch);
+		$this->assertSame(['sw', 'pc'], array_column($ports[0]['proposals'][0]['peers'], 'name'));
+
+		//два устройства с двумя портами: кто мост - неизвестно, значит список
+		$pc->model->ports = "eth0
+eth1";
+		$this->assertTrue($pc->model->save(false));
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:01', 'Gi1/0/7', ['port_macs' => 2]),
+			$this->tableRow($switch->id, '00:11:22:33:44:02', 'Gi1/0/7', ['port_macs' => 2]),
+		], $switch);
+		$this->assertCount(2, $ports[0]['proposals']);
+		$this->assertNull($ports[0]['proposals'][0]['chain']);
+	}
+
+	/** Сосед опознаётся и по имени, когда адрес не записан */
+	public function testNeighborByName()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$core = $this->makeSwitch(['ip' => '10.50.2.1', 'hostname' => 'sw-core-1']);
+
+		$ports = $this->makeProvider()->switchPorts([], $switch, [], [[
+			'target' => $switch->id, 'port' => 'Gi1/0/48', 'protocol' => 'cdp',
+			'remote_mac' => '', 'remote_port' => 'Gi0/1',
+			//CDP печатает FQDN - домен отбрасываем
+			'remote_name' => 'sw-core-1.local',
+		]]);
+
+		$this->assertSame([$core->id], array_map(fn($tech) => $tech->id, $ports[0]['found']));
+	}
+
 	/** Адреса таблицы -> объекты инвентаризации (железо и ОС, одним запросом) */
 	public function testResolveMacs()
 	{
@@ -701,7 +1094,10 @@ class MacSearchProviderTest extends Unit
 		$this->assertStringContainsString('Gi1/0/12', $html);
 		//объект за портом - ссылкой на карточку, а не адресом
 		$this->assertStringContainsString($arm->name, $html);
-		$this->assertStringContainsString('адресов: 37', $html);
+		//порт с сетью за ним помечен транзитом, а не списком из 37 предложений
+		$this->assertStringContainsString('транзит', $html);
+		//сырые данные с коммутатора - свёрнутым блоком под таблицей
+		$this->assertStringContainsString('показать данные с коммутатора', $html);
 	}
 
 	/** Неопрошенный коммутатор: причина видна прямо в панели */
