@@ -80,7 +80,7 @@ class IntegrationsController extends ArmsBaseController
 		//обязана пересобраться (в macsearch - после правки связей портов)
 		if (!$refresh && !is_null($binding)
 			&& ($cached = PanelsCache::fetch($providerObj->id, $panel, $binding, $providerObj->compact))
-			&& $cached['age'] <= $providerObj->panelTtl($panel, $model)
+			&& PanelsCache::fresh($cached, $providerObj->panelTtl($panel, $model))
 		) return $cached['html'];
 
 		try {

@@ -44,6 +44,18 @@ class PanelsCache
 		return ['html' => $html, 'age' => max(0, time() - filemtime($path))];
 	}
 
+	/**
+	 * Годится ли закэшированная панель при таком ttl.
+	 *
+	 * ttl = 0 значит «кэша нет», а не «годится ноль секунд»: сравнение
+	 * age <= ttl пропускало запись, сделанную в ту же секунду, и человек с
+	 * cacheTtl => 0 всё равно получал старый ответ при быстром повторе.
+	 */
+	public static function fresh(?array $cached, int $ttl): bool
+	{
+		return is_array($cached) && $ttl > 0 && $cached['age'] <= $ttl;
+	}
+
 	/** Атомарная запись (tmp + rename): ошибка рендера кэш не трогает */
 	public static function store(string $providerId, string $panelId, string $binding, string $html,
 		bool $compact = false): void

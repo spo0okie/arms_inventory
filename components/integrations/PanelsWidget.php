@@ -143,7 +143,7 @@ class PanelsWidget extends Widget
 		$model = $this->model;
 		$cached = is_null($binding) ? null
 			: PanelsCache::fetch($provider->id, $panelId, $binding, $this->compact);
-		$fresh = $cached && $cached['age'] <= $provider->panelTtl($panelId, $model);
+		$fresh = PanelsCache::fresh($cached, $provider->panelTtl($panelId, $model));
 		if ($fresh && !$this->target) {
 			return $this->renderPanel($provider, $panelId, $descriptor, $binding, $classId);
 		}
@@ -229,7 +229,7 @@ JS
 
 		$cached = is_null($binding) ? null
 			: PanelsCache::fetch($provider->id, $panelId, $binding, $this->compact);
-		$fresh = $cached && $cached['age'] <= $provider->panelTtl($panelId, $model);
+		$fresh = PanelsCache::fresh($cached, $provider->panelTtl($panelId, $model));
 
 		$body = $cached ? $cached['html']
 			: '<div class="spinner-border spinner-border-sm" role="status">'
