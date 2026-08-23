@@ -101,7 +101,9 @@ foreach ($rows as $port) {
 	}
 	if ($real !== (string)$port['port']) $renames[] = $port['port'].' → '.$real;
 }
-if (!count($renames)) $adoptable = false;
+//переименовывать нечего - кнопка не нужна; но у устройства без объявленных
+//портов вообще взять имена с коммутатора - единственный способ их объявить
+if (!count($renames) && count($model->portsTemplate)) $adoptable = false;
 
 //имена и ПОРЯДОК берём из паспорта: он идёт по ifIndex, то есть по железу, а
 //строки таблицы уже разложены по объявленному порядку инвентаризации
