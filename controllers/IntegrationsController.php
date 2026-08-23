@@ -78,10 +78,16 @@ class IntegrationsController extends ArmsBaseController
 		//пока ajax летел, кэш мог успеть стать свежим - не рендерим зря.
 		//refresh=1 просят, когда изменились наши собственные данные и панель
 		//обязана пересобраться (в macsearch - после правки связей портов)
-		if (!$refresh && !is_null($binding)
-			&& ($cached = PanelsCache::fetch($providerObj->id, $panel, $binding, $providerObj->compact))
-			&& PanelsCache::fresh($cached, $providerObj->panelTtl($panel, $model))
-		) return $cached['html'];
+		//откуда ответ - в заголовке: «почему так быстро / почему старое» иначе
+		//не разобрать, слоёв кэша на пути несколько (панель, сервис, сам коммутатор)
+		$ttl = $providerObj->panelTtl($panel, $model);
+		$cached = $refresh || is_null($binding) ? null
+			: PanelsCache::fetch($providerObj->id, $panel, $binding, $providerObj->compact);
+		if (PanelsCache::fresh($cached, $ttl)) {
+			Yii::$app->response->headers->set('X-Panel-Cache', 'hit; age='.$cached['age'].'; ttl='.$ttl);
+			return $cached['html'];
+		}
+		Yii::$app->response->headers->set('X-Panel-Cache', 'miss; ttl='.$ttl);
 
 		try {
 			$providerObj->cacheable = true;
