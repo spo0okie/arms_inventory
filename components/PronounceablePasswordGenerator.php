@@ -152,7 +152,7 @@ class PronounceablePasswordGenerator
 			//одна цифра: с некоторой вероятностью (не в начале)
 			if ($requested & self::INCLUDE_NUMBER) {
 				if (!$isFirst && $this->rnd(10) < 3) {
-					if (strlen($result) + 1 > $this->length) $result = substr($result, 0, -1);
+					if (strlen($result) + 1 > $this->length) $this->dropLast($result, $str, $requested);
 					$result .= (string)$this->rnd(10);
 					$requested &= ~self::INCLUDE_NUMBER;
 					$isFirst = true;
@@ -165,7 +165,7 @@ class PronounceablePasswordGenerator
 			//один спецсимвол: аналогично
 			if ($requested & self::INCLUDE_SPECIAL) {
 				if (!$isFirst && $this->rnd(10) < 3) {
-					if (strlen($result) + 1 > $this->length) $result = substr($result, 0, -1);
+					if (strlen($result) + 1 > $this->length) $this->dropLast($result, $str, $requested);
 					$result .= self::SPECIALS[$this->rnd(strlen(self::SPECIALS))];
 					$requested &= ~self::INCLUDE_SPECIAL;
 					$isFirst = true;
@@ -194,4 +194,23 @@ class PronounceablePasswordGenerator
 
 		return $result;
 	}
+	/**
+	 * Снять с конца последний добавленный слог целиком.
+	 *
+	 * Когда для обязательной цифры/спецсимвола не хватает длины, места надо
+	 * освободить ровно на слог: обрубок «qu» -> «q» ломает произносимость,
+	 * ради которой этот генератор и существует.
+	 *
+	 * @param string $result собранный пароль (меняется)
+	 * @param string $last   последний добавленный слог
+	 * @param int    $requested флаги обязательных символов (меняются)
+	 */
+	private function dropLast(string &$result, string $last, int &$requested): void
+	{
+		$result = substr($result, 0, -strlen($last));
+
+		//заглавная могла уехать вместе со слогом - тогда её надо поставить снова
+		if ($last !== lcfirst($last)) $requested |= self::INCLUDE_CAPITAL;
+	}
+
 }
