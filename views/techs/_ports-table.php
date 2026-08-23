@@ -117,24 +117,43 @@ foreach ($passport as $item) {
 if (!count($scannedNames)) $adoptable = false;
 
 /**
- * Продолжение записанной связи через двухпортовый мост (телефон с ПК за ним):
- * « : Порт PC → Порт eth: ПК». Мост - устройство ровно с двумя объявленными
- * портами; второй его порт, если связан дальше, и есть продолжение. Так
- * записанное читается той же строкой, что и предложение опроса
+ * Узел на той стороне записанной связи: «Порт X: Устройство», а у порта
+ * без имени (устройство привязано без порта) - просто «Устройство».
+ * Один рендер на все хопы: первый и последующие выглядят одинаково.
  */
-$chainTail = static function (Ports $peer): string {
-	$bridge = $peer->tech;
-	if (!is_object($bridge) || count($bridge->portsTemplate) !== 2) return '';
-
-	foreach ($bridge->ports as $other) {
-		if ($other->id == $peer->id || !is_object($other->linkPort)) continue;
-		$far = $other->linkPort;
-		$farName = strlen((string)$far->name) ? Ports::$port_prefix.Html::encode($far->name).': ' : '';
-		return ' : '.Ports::$port_prefix.Html::encode($other->name).' → '.$farName
-			.(is_object($far->tech) ? ModelWidget::widget(['model' => $far->tech,
-				'options' => ['static_view' => true]]) : '');
+$hop = function (Ports $peer): string {
+	if (strlen((string)$peer->name)) {
+		return $this->render('/ports/item', ['model' => $peer, 'include_tech' => true, 'reverse' => true]);
 	}
-	return '';
+	return is_object($peer->tech)
+		? ModelWidget::widget(['model' => $peer->tech, 'options' => ['static_view' => true]]) : '';
+};
+
+/**
+ * Записанная связь целиком: первый хоп, а если на той стороне устройство
+ * ровно с двумя объявленными портами и второй его порт тоже связан - следующий
+ * хоп тем же рендером, через « : Порт Y → ». Так телефон с ПК за ним читается
+ * одной строкой, как и предложение опроса.
+ */
+$chain = static function (Ports $peer) use ($hop): string {
+	$html = $hop($peer);
+	$seen = [$peer->id => true];
+	while (true) {
+		$bridge = $peer->tech;
+		if (!is_object($bridge) || count($bridge->portsTemplate) !== 2) break;
+		$next = null;
+		foreach ($bridge->ports as $other) {
+			if ($other->id == $peer->id || !is_object($other->linkPort)) continue;
+			$next = $other;
+			break;
+		}
+		//второй порт не связан либо цепочка закольцевалась
+		if (is_null($next) || isset($seen[$next->linkPort->id])) break;
+		$html .= ' : '.Ports::$port_prefix.Html::encode($next->name).' → '.$hop($next->linkPort);
+		$peer = $next->linkPort;
+		$seen[$peer->id] = true;
+	}
+	return $html;
 };
 
 //после действия перезапрашиваем панель: вердикты пересчитываются на свежих
@@ -411,8 +430,7 @@ foreach ($rows as $port) if (count($port['proposals'] ?? []) === 1) $acceptable+
 			<td><span class="fas fa-exchange-alt"></span></td>
 			<td><?= Html::encode((string)$link->linkPort->comment) ?></td>
 			<td>
-				<span<?= $outdated ?>><?= $this->render('/ports/item', ['model' => $link->linkPort,
-					'include_tech' => true, 'reverse' => true]) ?><?= $chainTail($link->linkPort) ?></span>
+				<span<?= $outdated ?>><?= $chain($link->linkPort) ?></span>
 				<?= $extra ?>
 			</td>
 		<?php } elseif (is_object($link) && is_object($link->linkTech)) { ?>

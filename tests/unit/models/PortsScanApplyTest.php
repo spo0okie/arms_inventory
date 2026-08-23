@@ -84,6 +84,37 @@ class PortsScanApplyTest extends Unit
 		$this->assertNull(Ports::findOne($port->id), 'без ярлыка, связи и комментария порт не нужен');
 	}
 
+	/**
+	 * Привязка к устройству без порта заводит безымянный встречный порт.
+	 *
+	 * Так задумано с самого начала (подсказка поля «Порт на устройстве»), но
+	 * правило required для name этот порт не пропускало, и связь молча не
+	 * записывалась.
+	 */
+	public function testAttachWithoutPeerPort()
+	{
+		$switch = $this->makeTech('SW', 'Gi1/0/1');
+		$printer = $this->makeTech('PRN');
+
+		$port = Ports::forTech($switch, 'Gi1/0/1');
+		$port->link_techs_id = $printer->id;
+		$port->link_ports_id = null;
+		$this->assertTrue($port->save(), implode('; ', $port->firstErrors));
+
+		$port->refresh();
+		$this->assertNotEmpty($port->link_ports_id);
+		$this->assertSame('', (string)$port->linkPort->name, 'встречный порт без имени');
+		$this->assertSame($printer->id, $port->linkPort->techs_id);
+		$this->assertSame($port->id, (int)$port->linkPort->link_ports_id, 'связь парная');
+
+		//снятие связи: порт без комментария удаляет себя сам, и безымянный
+		//сосед не должен остаться с ссылкой на несуществующую строку
+		$peerId = (int)$port->link_ports_id;
+		$port->dropLink();
+		$this->assertNull(Ports::findOne($port->id));
+		$this->assertNull(Ports::findOne($peerId), 'безымянный порт-сирота удалён вместе со связью');
+	}
+
 	/** Порт устройства: существующая строка либо новая (строки ленивые) */
 	public function testForTech()
 	{

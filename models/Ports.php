@@ -143,7 +143,8 @@ class Ports extends ArmsModel
 
 	public function getTemplateComment()
 	{
-		if (is_object($this->tech))
+		//у безымянного порта (устройство привязано без порта) шаблона нет
+		if (is_object($this->tech) && strlen((string)$this->name))
 			return $this->tech->getModelPortComment($this->name);
 
 		return null;
@@ -256,6 +257,10 @@ class Ports extends ArmsModel
 		if (empty($this->link_ports_id)) return true;
 
 		$this->link_ports_id = null;
+		//link_techs_id - виртуальное поле, оно могло остаться в памяти от
+		//привязки: с ним beforeSave() завёл бы безымянный порт на той стороне
+		//и связал заново вместо того, чтобы отпустить
+		$this->link_techs_id = null;
 		$this->save(false);
 		return true;
 	}
@@ -305,7 +310,11 @@ class Ports extends ArmsModel
 					&& !strlen((string)$this->aggr)) {
 					//мы вообще ни к чему не привязываемся и у нас даже комментария нет
 					if (!$insert) {
-						//если это обновление (не вставка)
+						//если это обновление (не вставка): прежде чем исчезнуть, снимаем
+						//встречную ссылку - link_ports_id уже обнулён, и beforeDelete()
+						//соседа не увидит; иначе на той стороне остаётся порт,
+						//соединённый с несуществующей строкой
+						$this->releasePeer((int)$this->getOldAttribute('link_ports_id'));
 						$this->delete();
 						//ну и такое мы не сохраняем. Привязок нет, комментариев нет. А что сохранять то?
 						return false;
@@ -320,7 +329,15 @@ class Ports extends ArmsModel
 			}
 
 			if (is_object($reversePort)) {
-				$reversePort->save();
+				//безымянный встречный порт («привязать к устройству без порта»)
+				//правило required для name не пройдёт - а он именно такой по
+				//замыслу: валидировать ему нечего, кроме techs_id, который мы
+				//сами и поставили
+				if (!$reversePort->save(strlen((string)$reversePort->name) > 0)) {
+					$this->addError('link_ports_id', 'Не удалось завести порт на той стороне: '
+						.implode('; ', $reversePort->firstErrors));
+					return false;
+				}
 				$reversePort->refresh();
 				$this->link_ports_id=$reversePort->id;
 			}
@@ -348,17 +365,29 @@ class Ports extends ArmsModel
 	public function beforeDelete()
 	{
 		if (!parent::beforeDelete()) return false;
-
-		$peer = $this->linkPort;
-		if (is_object($peer) && (int)$peer->link_ports_id === (int)$this->id) {
-			$peer->link_ports_id = null;
-			//пустой порт-сирота не нужен: он появился только ради этой связи
-			if (!strlen(trim((string)$peer->name)) && !strlen(trim((string)$peer->comment)))
-				$peer->delete();
-			else
-				$peer->save(false);
-		}
+		$this->releasePeer((int)$this->link_ports_id);
 		return true;
+	}
+
+	/**
+	 * Снять встречную ссылку с порта на той стороне (если она на нас).
+	 * Пустой порт-сирота при этом удаляется: он появился только ради связи.
+	 */
+	protected function releasePeer(int $peerId): void
+	{
+		if (!$peerId) return;
+		$peer = static::findOne($peerId);
+		if (!is_object($peer) || (int)$peer->link_ports_id !== (int)$this->id) return;
+
+		//ссылку снимаем в памяти ДО удаления: beforeDelete() соседа смотрит на
+		//неё и иначе вернулся бы к нам - по кругу
+		$peer->link_ports_id = null;
+		//без связи, комментария и группы порт не нужен (так же решил бы и
+		//beforeSave), а save(false) тут запустил бы тот же круг через самоудаление
+		if (!strlen(trim((string)$peer->comment)) && !strlen((string)$peer->aggr))
+			$peer->delete();
+		else
+			$peer->save(false);
 	}
 
 	public function afterSave($insert, $changedAttributes)
