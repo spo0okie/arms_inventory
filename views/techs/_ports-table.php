@@ -116,6 +116,27 @@ foreach ($passport as $item) {
 }
 if (!count($scannedNames)) $adoptable = false;
 
+/**
+ * Продолжение записанной связи через двухпортовый мост (телефон с ПК за ним):
+ * « : Порт PC → Порт eth: ПК». Мост - устройство ровно с двумя объявленными
+ * портами; второй его порт, если связан дальше, и есть продолжение. Так
+ * записанное читается той же строкой, что и предложение опроса
+ */
+$chainTail = static function (Ports $peer): string {
+	$bridge = $peer->tech;
+	if (!is_object($bridge) || count($bridge->portsTemplate) !== 2) return '';
+
+	foreach ($bridge->ports as $other) {
+		if ($other->id == $peer->id || !is_object($other->linkPort)) continue;
+		$far = $other->linkPort;
+		$farName = strlen((string)$far->name) ? Ports::$port_prefix.Html::encode($far->name).': ' : '';
+		return ' : '.Ports::$port_prefix.Html::encode($other->name).' → '.$farName
+			.(is_object($far->tech) ? ModelWidget::widget(['model' => $far->tech,
+				'options' => ['static_view' => true]]) : '');
+	}
+	return '';
+};
+
 //после действия перезапрашиваем панель: вердикты пересчитываются на свежих
 //данных инвентаризации, а сам опрос берётся из кэша сервиса
 $containerId = 'techs-ports-'.$model->id;
@@ -391,7 +412,7 @@ foreach ($rows as $port) if (count($port['proposals'] ?? []) === 1) $acceptable+
 			<td><?= Html::encode((string)$link->linkPort->comment) ?></td>
 			<td>
 				<span<?= $outdated ?>><?= $this->render('/ports/item', ['model' => $link->linkPort,
-					'include_tech' => true, 'reverse' => true]) ?></span>
+					'include_tech' => true, 'reverse' => true]) ?><?= $chainTail($link->linkPort) ?></span>
 				<?= $extra ?>
 			</td>
 		<?php } elseif (is_object($link) && is_object($link->linkTech)) { ?>
