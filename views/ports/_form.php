@@ -83,7 +83,7 @@ JS;
 			?>
 			<?= $form->field($model, 'aggr')->select2([
 				'data' => $aggregates,
-				'options' => ['placeholder' => $model->getAttributeLabel('aggr')],
+				'options' => ['placeholder' => 'нет'],
 				'pluginOptions' => ['allowClear' => true, 'tags' => true],
 			]) ?>
 		</div>

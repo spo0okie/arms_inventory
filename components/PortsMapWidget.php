@@ -48,6 +48,7 @@ class PortsMapWidget extends Widget
 		'added' => ['slot-added', 'обнаружено оборудование'],
 		'transit' => ['slot-transit', 'за портом сеть'],
 		'disabled' => ['slot-disabled', 'выключен на коммутаторе'],
+		'self' => ['slot-self', 'за портом виден сам коммутатор'],
 		'free' => ['', 'линка нет'],
 	];
 

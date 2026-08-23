@@ -123,3 +123,4 @@ span.mac_address {
 .ports-map-slot.slot-added    {--ports-slot-bg: #d1e7dd; --ports-slot-fg: #0a3622; --ports-slot-border: #198754}
 .ports-map-slot.slot-transit  {--ports-slot-bg: #ced4da; --ports-slot-fg: #212529}
 .ports-map-slot.slot-disabled {--ports-slot-bg: #e9ecef; --ports-slot-fg: #6c757d}
+.ports-map-slot.slot-self     {--ports-slot-bg: #fff3cd; --ports-slot-fg: #664d03; --ports-slot-border: #ffc107}

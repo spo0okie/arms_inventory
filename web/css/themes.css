@@ -432,3 +432,4 @@
 [data-bs-theme=dark] .ports-map-slot.slot-added    {--ports-slot-bg: #0f3d2a; --ports-slot-fg: #75b798; --ports-slot-border: #146c43}
 [data-bs-theme=dark] .ports-map-slot.slot-transit  {--ports-slot-bg: #343a40; --ports-slot-fg: #ced4da}
 [data-bs-theme=dark] .ports-map-slot.slot-disabled {--ports-slot-bg: #1f262d; --ports-slot-fg: #6c757d}
+[data-bs-theme=dark] .ports-map-slot.slot-self     {--ports-slot-bg: #4d3a06; --ports-slot-fg: #ffda6a; --ports-slot-border: #997404}

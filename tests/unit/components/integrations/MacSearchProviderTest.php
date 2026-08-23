@@ -953,6 +953,33 @@ class MacSearchProviderTest extends Unit
 		}
 	}
 
+	/**
+	 * За портом виден сам коммутатор (служебный порт CPU у D-Link, петля):
+	 * предлагать связь с самим собой нельзя - это предупреждение, а не находка
+	 */
+	public function testOwnAddressIsWarningNotOffer()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16', 'mac' => '00aabbccdd01']);
+		$switch->ports_override = "Gi1/0/1\nCPU";
+		$this->assertTrue($switch->save(false));
+		$switch->refresh();
+		$server = $this->makeDevice($switch, '001122334455', 'SRV');
+
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:aa:bb:cc:dd:01', 'CPU'),
+			//на обычном порту свой адрес рядом с чужим: чужой - находка, свой - нет
+			$this->tableRow($switch->id, '00:aa:bb:cc:dd:01', 'Gi1/0/1', ['port_macs' => 2]),
+			$this->tableRow($switch->id, '00:11:22:33:44:55', 'Gi1/0/1', ['port_macs' => 2]),
+		], $switch);
+		$byName = array_column($ports, null, 'port');
+
+		$this->assertSame('self', $byName['CPU']['verdict']);
+		$this->assertSame([], $byName['CPU']['proposals']);
+		$this->assertTrue($byName['Gi1/0/1']['self']);
+		$this->assertSame([$server->id], array_map(fn($d) => $d->id, $byName['Gi1/0/1']['found']));
+		$this->assertSame('added', $byName['Gi1/0/1']['verdict']);
+	}
+
 	/** Опознанный сосед по LLDP становится предложением связи */
 	public function testNeighborBecomesLinkOffer()
 	{
@@ -1030,6 +1057,43 @@ sw");
 		$this->assertCount(1, $ports[0]['proposals']);
 		$this->assertSame($bare->id, $ports[0]['proposals'][0]['chain']['leaf']->id);
 		$this->assertSame([], $ports[0]['proposals'][0]['chain']['leaf_peers']);
+
+		//записанное сошлось, но рядом нашлось второе - цепочка поверх записи:
+		//телефон уже на порту, за ним обнаружился ПК
+		$recorded = Ports::forTech($switch, 'Gi1/0/7');
+		$recorded->link_techs_id = $phone->id;
+		$recorded->link_ports_id = 'create:Internet';
+		$this->assertTrue($recorded->save(), implode('; ', $recorded->firstErrors));
+		$switch->refresh();
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:01', 'Gi1/0/7', ['port_macs' => 2]),
+			$this->tableRow($switch->id, '00:11:22:33:44:02', 'Gi1/0/7', ['port_macs' => 2]),
+		], $switch);
+		$this->assertSame('ok', $ports[0]['verdict'], 'записанное на месте');
+		$this->assertCount(1, $ports[0]['proposals']);
+		$proposal = $ports[0]['proposals'][0];
+		$this->assertSame($phone->id, $proposal['device']->id);
+		//порт моста к нам - тот, которым он уже записан, а не подсказка по именам
+		$this->assertSame('Internet', $proposal['peers'][0]['name']);
+		$this->assertNotEmpty($proposal['peers'][0]['id']);
+		$this->assertSame($pc->id, $proposal['chain']['leaf']->id);
+
+		//наоборот: записан ПК, а телефон воткнули между ним и коммутатором -
+		//порт ПК, которым он смотрит на нас, остаётся портом листа
+		$recorded->link_techs_id = $pc->id;
+		$recorded->link_ports_id = 'create:eth';
+		$this->assertTrue($recorded->save(), implode('; ', $recorded->firstErrors));
+		$switch->refresh();
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:01', 'Gi1/0/7', ['port_macs' => 2]),
+			$this->tableRow($switch->id, '00:11:22:33:44:02', 'Gi1/0/7', ['port_macs' => 2]),
+		], $switch);
+		$this->assertSame('ok', $ports[0]['verdict']);
+		$this->assertCount(1, $ports[0]['proposals']);
+		$this->assertSame($phone->id, $ports[0]['proposals'][0]['device']->id);
+		$this->assertSame('eth', $ports[0]['proposals'][0]['chain']['leaf_peers'][0]['name']);
+		$recorded->dropLink();
+		$switch->refresh();
 
 		//два устройства с двумя портами: кто мост - неизвестно, значит список
 		$pc->model->ports = "eth0

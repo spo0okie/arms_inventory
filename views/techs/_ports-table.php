@@ -52,6 +52,8 @@ if (is_null($rows)) {
 //пометки диффа: галочка - подтверждение, кнопка - предложение действия
 $marks = [
 	'ok' => ['fas fa-check text-secondary', 'Найдено то, что записано'],
+	'self' => ['fas fa-exclamation text-warning', 'За портом виден адрес самого коммутатора: '
+		.'это служебный порт (CPU) либо петля. Связь коммутатора с самим собой записать нельзя'],
 ];
 
 //предложения: иконка, подсказка, что делать (do), нужно ли подтверждение
@@ -232,7 +234,10 @@ $proposalLine = static function (array $port, array $proposal, int $index) use (
 		$title = 'Привязать '.$device->name.', а за ним - '.$chain['leaf']->name;
 	}
 
-	$icon = $port['verdict'] === 'replaced' ? 'fas fa-redo' : 'fas fa-plus';
+	//цепочка - это «связать»: плюс обещал бы добавление, а тут записанное
+	//может остаться на месте, меняется схема соединения
+	$icon = is_array($proposal['chain'] ?? null) ? 'fas fa-link'
+		: ($port['verdict'] === 'replaced' ? 'fas fa-redo' : 'fas fa-plus');
 	$button = Html::button('<i class="'.$icon.' text-success"></i>', [
 		'class' => 'btn btn-sm btn-link p-0 d-block',
 		'qtip_ttip' => $title.($port['verdict'] === 'replaced' ? ' вместо записанного' : ''),
@@ -465,7 +470,7 @@ foreach ($rows as $port) if (count($port['proposals'] ?? []) === 1) $acceptable+
 			<?php if ($verdict === 'disabled') { ?>
 				<span class="text-secondary small" qtip_ttip="<?= Html::encode(
 					'Порт выключен администратором на самом коммутаторе') ?>">выключен</span>
-			<?php } elseif (isset($marks[$verdict])) { ?>
+			<?php } elseif (isset($marks[$verdict]) && !count($buttons)) { ?>
 				<?php [$icon, $hint] = $marks[$verdict]; ?>
 				<i class="<?= $icon ?>" qtip_ttip="<?= Html::encode($hint) ?>"></i>
 			<?php } elseif (count($buttons)) { ?>

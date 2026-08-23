@@ -119,6 +119,13 @@ class PortsController extends ArmsBaseController
 
 		$leafPeerId = (int)$request->post('leaf_peer');
 		$leafPeerName = trim((string)$request->post('leaf_peer_name'));
+		//первое звено могло отцепить лист от нашего порта, и его безымянный
+		//порт при этом удалился - тогда заводим заново по имени либо без порта
+		if ($leafPeerId && !is_object($leafPeer = Ports::findOne($leafPeerId))) {
+			$leafPeerId = 0;
+		} elseif ($leafPeerId && !strlen((string)$leafPeer->name)) {
+			$leafPeerName = '';
+		}
 		$via->link_techs_id = $leaf->id;
 		$via->link_ports_id = $leafPeerId ?: (strlen($leafPeerName) ? 'create:'.$leafPeerName : null);
 		if (!$via->save() && !$via->isNewRecord && count($via->errors)) {

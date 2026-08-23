@@ -134,6 +134,9 @@ class MacSearchProvider extends IntegrationProvider
 	/** @var array соседи последнего опроса: имя порта => записи */
 	protected array $neighbors = [];
 
+	/** @var Techs|null коммутатор, чьи порты раскладываем ({@see switchPorts()}) */
+	protected ?Techs $scanned = null;
+
 	public function getTitle(): string
 	{
 		return $this->config['title'] ?? 'Порт коммутатора';
@@ -337,6 +340,7 @@ class MacSearchProvider extends IntegrationProvider
 			if (!empty($port['name'])) $this->passport[(string)$port['name']] = $port;
 		}
 		$this->neighbors = [];
+		$this->scanned = $tech;
 		foreach ($neighbors as $neighbor) {
 			if (!empty($neighbor['port'])) $this->neighbors[(string)$neighbor['port']][] = $neighbor;
 		}
@@ -483,7 +487,8 @@ class MacSearchProvider extends IntegrationProvider
 	 * другое известное), foreign (записанное молчит, но адреса на порту есть и
 	 * они не опознаны), quiet (на порту вообще нет адресов), added (записано
 	 * пусто, нашлось известное), seen (адреса есть, объектов с ними нет),
-	 * free (пусто и там и там), transit (за портом сеть), unknown (опроса не
+	 * free (пусто и там и там), transit (за портом сеть), self (за портом
+	 * виден сам коммутатор - служебный порт или петля), unknown (опроса не
 	 * было).
 	 *
 	 * Отдельно про «пропало»: такого вердикта НЕТ и предлагать «убрать с
@@ -501,6 +506,17 @@ class MacSearchProvider extends IntegrationProvider
 		$port['linked'] = static::linkedDevice($port['link'] ?? null);
 		$port['found'] = static::foundDevices($port['macs']);
 
+		//за портом виден адрес самого коммутатора: так бывает на служебном
+		//порту (CPU у D-Link) и при петле. Предлагать связь коммутатора с самим
+		//собой нельзя - это не находка, а предупреждение
+		$port['self'] = false;
+		if (is_object($this->scanned)) {
+			$others = array_values(array_filter($port['found'],
+				fn(Techs $device) => (int)$device->id !== (int)$this->scanned->id));
+			$port['self'] = count($others) !== count($port['found']);
+			$port['found'] = $others;
+		}
+
 		//сосед по LLDP - куда более веский факт, чем адреса за портом: коммутатор
 		//прямо говорит, кто на том конце кабеля и в какой он розетке
 		$neighbor = $this->neighborDevice($port);
@@ -510,8 +526,16 @@ class MacSearchProvider extends IntegrationProvider
 		}
 
 		$port['verdict'] = static::verdict($port);
-		$port['proposals'] = in_array($port['verdict'], ['added', 'replaced'], true)
-			? $this->proposals($port) : [];
+		//предложения: записано пусто или другое - всегда; записанное сошлось, но
+		//рядом нашлось ещё одно - только если из них складывается цепочка
+		//(телефон воткнули между коммутатором и ПК, или ПК - за телефон)
+		$port['proposals'] = [];
+		if (in_array($port['verdict'], ['added', 'replaced'], true)) {
+			$port['proposals'] = $this->proposals($port);
+		} elseif ($port['verdict'] === 'ok' && count($port['found']) === 2) {
+			$chain = $this->proposals($port);
+			if (count($chain) === 1 && is_array($chain[0]['chain'])) $port['proposals'] = $chain;
+		}
 		return $port;
 	}
 
@@ -620,14 +644,20 @@ class MacSearchProvider extends IntegrationProvider
 		$prefer = (string)($port['neighbor_port'] ?? '');
 		$neighborDevice = strlen($prefer) && count($found) ? $found[0] : null;
 
+		//порт записанного устройства, которым оно уже смотрит на нас: занятые
+		//порты из кандидатов исключаются, а этот - наш же, он и должен остаться
+		$current = is_object($port['link'] ?? null) && is_object($port['link']->linkPort)
+			? $port['link']->linkPort : null;
+
 		$proposals = [];
 		foreach ($found as $device) {
-			$proposals[] = [
-				'device' => $device,
-				'peers' => static::peerPorts($device, is_object($neighborDevice)
-					&& $neighborDevice->id === $device->id ? $prefer : ''),
-				'chain' => null,
-			];
+			$peers = static::peerPorts($device, is_object($neighborDevice)
+				&& $neighborDevice->id === $device->id ? $prefer : '');
+			if (is_object($current) && (int)$current->techs_id === (int)$device->id
+				&& !in_array((string)$current->name, array_column($peers, 'name'), true)) {
+				array_unshift($peers, ['id' => (int)$current->id, 'name' => (string)$current->name]);
+			}
+			$proposals[] = ['device' => $device, 'peers' => $peers, 'chain' => null];
 		}
 		if (count($proposals) !== 2) return $proposals;
 
@@ -648,7 +678,10 @@ class MacSearchProvider extends IntegrationProvider
 		//иначе первый. Оба порта остаются в peers: в строке предложения это
 		//переключатель, второй порт автоматически уходит к листу
 		$peers = $bridge['peers'];
-		$toSwitch = static::pickPeer($peers, $this->config['bridgeToSwitchPorts']
+		//мост уже записан на этом порту - его порт к нам известен точно
+		$toSwitch = is_object($current) && (int)$current->techs_id === (int)$bridge['device']->id
+			? ['id' => (int)$current->id, 'name' => (string)$current->name] : null;
+		if (is_null($toSwitch)) $toSwitch = static::pickPeer($peers, $this->config['bridgeToSwitchPorts']
 			?? static::DEFAULT_BRIDGE_TO_SWITCH_PORTS);
 		if (is_null($toSwitch)) {
 			$toDevice = static::pickPeer($peers, $this->config['bridgeToDevicePorts']
@@ -749,6 +782,10 @@ class MacSearchProvider extends IntegrationProvider
 		$linked = $port['linked'];
 		$found = $port['found'];
 
+		//за портом только сам коммутатор и ничего не записано - отдельный вердикт:
+		//ни «свободен», ни «привязать» тут не подходят
+		if (!empty($port['self']) && !count($found) && !is_object($linked)) return 'self';
+
 		if (is_object($linked)) {
 			foreach ($found as $device) if ($device->id === $linked->id) return 'ok';
 			//на порту другое известное устройство - вот это уже факт
@@ -821,7 +858,8 @@ class MacSearchProvider extends IntegrationProvider
 		$item = $this->passport[$name] ?? null;
 		if (is_array($item) && isset($item['type'])) return (int)$item['type'] === 6;
 		if (static::isAggregate($name)) return false;
-		return !preg_match('~^(vlan|vl|loopback|lo|null|tunnel|nve|bvi|irb)\s*\d*$~i', trim($name));
+		//cpu - служебный «порт» процессора коммутатора (D-Link): розетки нет
+		return !preg_match('~^(vlan|vl|loopback|lo|null|tunnel|nve|bvi|irb|cpu)\s*\d*$~i', trim($name));
 	}
 
 	/** Номер порта: последнее число имени ('' — числа нет) */
@@ -861,6 +899,8 @@ class MacSearchProvider extends IntegrationProvider
 			//розетка на корпусе, а не Vlan120/Po1/Loopback0: коммутатор говорит это
 			//типом интерфейса (ifType 6), а без паспорта судим по имени
 			'physical' => true,
+			//за портом виден адрес самого коммутатора ({@see annotatePort()})
+			'self' => false,
 			'verdict' => 'free',
 		];
 	}
