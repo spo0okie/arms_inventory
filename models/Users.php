@@ -57,8 +57,7 @@ use yii\web\IdentityInterface;
  * @property Aces[]      $aces
  * @property Absences[] $absences
  * @property Absences[] $pendingAbsences
- * @property Absences[] $currentAbsences
- * @property Absences[] $futureAbsences
+ * @property bool        $isAbsent
  * @property Comps[]     $comps
  * @property Comps[]     $adminComps
  * @property Comps[]     $compsFromServices
@@ -366,17 +365,18 @@ class Users extends ArmsModel implements IdentityInterface
 					.'Записи приходят из кадровых систем (SAP/1С) или заводятся вручную',
 				'ref'=>\app\models\Absences::class, 'refMulti'=>true,
 			],
-			'currentAbsences' => [
-				'Отсутствует сейчас',
-				'hint'=>'Отсутствия, период которых включает сегодняшний день: '
-					.'сотрудника прямо сейчас нет на рабочем месте',
+			'pendingAbsences' => [
+				'Отсутствия',
+				'hint'=>'Актуальные отсутствия сотрудника - те, которые ещё не закончились: '
+					.'идущие прямо сейчас и запланированные. Полная история, включая прошедшие, '
+					.'живёт в разделе «Отсутствия»',
 				'ref'=>\app\models\Absences::class, 'refMulti'=>true,
 			],
-			'futureAbsences' => [
-				'Предстоящие отсутствия',
-				'hint'=>'Отсутствия, которые ещё не начались: запланированные отпуска, '
-					.'командировки и т.п.',
-				'ref'=>\app\models\Absences::class, 'refMulti'=>true,
+			'isAbsent' => [
+				'Отсутствует',
+				'hint'=>'Сотрудника сейчас нет на рабочем месте: <br>'
+					.'сегодняшний день попадает в период одного из его отсутствий',
+				'typeClass'=>\app\types\BooleanType::class,
 			],
 			'contracts' => [
 				'Документы',
@@ -534,7 +534,7 @@ class Users extends ArmsModel implements IdentityInterface
 	/**
 	 * Отсутствия, которые ещё не закончились: идущие сейчас и предстоящие.
 	 * Фильтруется в PHP по уже загруженной связи — карточка сотрудника показывает
-	 * оба списка (текущий и будущий), и делать под них два отдельных запроса незачем.
+	 * их одним списком, и делать под него отдельный запрос незачем.
 	 * @return Absences[]
 	 */
 	public function getPendingAbsences()
@@ -548,29 +548,15 @@ class Users extends ArmsModel implements IdentityInterface
 	}
 
 	/**
-	 * Отсутствия, идущие прямо сейчас (сегодня попадает в период).
-	 * @return Absences[]
+	 * Отсутствует ли сотрудник прямо сейчас: сегодняшний день попадает
+	 * в период одного из его отсутствий (границы включительно).
+	 * @return bool
 	 */
-	public function getCurrentAbsences()
+	public function getIsAbsent()
 	{
-		$today=date('Y-m-d');
-		$current=[];
 		foreach ($this->pendingAbsences as $absence)
-			if (($absence->date_from??'')<=$today) $current[]=$absence;
-		return $current;
-	}
-
-	/**
-	 * Отсутствия, которые ещё не начались.
-	 * @return Absences[]
-	 */
-	public function getFutureAbsences()
-	{
-		$today=date('Y-m-d');
-		$future=[];
-		foreach ($this->pendingAbsences as $absence)
-			if (($absence->date_from??'')>$today) $future[]=$absence;
-		return $future;
+			if ($absence->isCurrent) return true;
+		return false;
 	}
 
 

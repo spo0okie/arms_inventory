@@ -8,10 +8,10 @@ use Codeception\Test\Unit;
 use Yii;
 
 /**
- * Отсутствия на карточке сотрудника: Users::currentAbsences / futureAbsences.
+ * Отсутствия на карточке сотрудника: Users::pendingAbsences / isAbsent.
  *
- * Карточка показывает только то, что ещё актуально — идущее сейчас отсутствие
- * и запланированные; прошедшие отсутствия туда не попадают (их полная история
+ * Карточка показывает одним списком только то, что ещё актуально — идущие сейчас
+ * отсутствия и запланированные; прошедшие туда не попадают (их полная история
  * есть в разделе «Отсутствия»). Границы периода включительны: день выхода
  * на работу — уже присутствие, а последний день отпуска — ещё отсутствие.
  *
@@ -76,7 +76,7 @@ class UsersAbsencesTest extends Unit
 		return array_map(static fn(Absences $absence) => (int)$absence->id, array_values($absences));
 	}
 
-	public function testCurrentAndFutureAbsencesSplit()
+	public function testPendingAbsencesGoInOneList()
 	{
 		$user = $this->makeUser();
 
@@ -85,14 +85,27 @@ class UsersAbsencesTest extends Unit
 		$soon = $this->makeAbsence($user, 'ASSIGNMENT', 5, 7);
 		$later = $this->makeAbsence($user, 'VACATION_PLAN', 30, 40);
 
-		$this->assertSame([$current->id], $this->ids($user->currentAbsences),
-			'сейчас идёт только одно отсутствие');
-		$this->assertSame([$soon->id, $later->id], $this->ids($user->futureAbsences),
-			'предстоящие идут по календарю, от ближайшего');
 		$this->assertSame([$current->id, $soon->id, $later->id], $this->ids($user->pendingAbsences),
-			'прошедшее отсутствие на карточку не попадает');
+			'идущее сейчас и предстоящие идут одним списком по календарю, прошедшее в него не попадает');
 		$this->assertContains($past->id, $this->ids($user->absences),
 			'в полном списке прошедшее отсутствие остаётся');
+		$this->assertTrue($user->isAbsent, 'сотрудник сейчас в отпуске');
+	}
+
+	/**
+	 * isAbsent - только про сегодняшний день: запланированный отпуск сотрудника
+	 * с рабочего места не убирает
+	 */
+	public function testIsAbsentIgnoresFutureAbsences()
+	{
+		$user = $this->makeUser();
+		$this->assertFalse($user->isAbsent, 'без отсутствий сотрудник на месте');
+
+		$this->makeAbsence($user, 'VACATION_PLAN', 10, 20);
+		//перечитываем сотрудника: attrsCache со списком отсутствий живёт до конца жизни модели
+		$user = Users::findOne($user->id);
+		$this->assertNotEmpty($user->pendingAbsences, 'предстоящий отпуск на карточке виден');
+		$this->assertFalse($user->isAbsent, 'но на рабочем месте сотрудник пока есть');
 	}
 
 	/**
@@ -107,8 +120,9 @@ class UsersAbsencesTest extends Unit
 		$startsToday = $this->makeAbsence($user, 'ASSIGNMENT', 0, 2);
 		$endedYesterday = $this->makeAbsence($user, 'LEAVESICK', -5, -1);
 
-		$this->assertSame([$endsToday->id, $startsToday->id], $this->ids($user->currentAbsences));
+		$this->assertSame([$endsToday->id, $startsToday->id], $this->ids($user->pendingAbsences));
 		$this->assertNotContains($endedYesterday->id, $this->ids($user->pendingAbsences));
+		$this->assertTrue($user->isAbsent, 'последний день отпуска - ещё отсутствие');
 	}
 
 	/**

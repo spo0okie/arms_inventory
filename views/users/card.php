@@ -1,6 +1,7 @@
 <?php
 
 use app\components\ModelFieldWidget;
+use app\components\StripedAlertWidget;
 use app\helpers\ArrayHelper;
 use kartik\markdown\Markdown;
 
@@ -11,6 +12,11 @@ use app\components\widgets\page\ModelWidget;
 if (!isset($static_view)) $static_view=false;
 
 ?>
+	<?php
+	//сотрудника нет на рабочем месте - предупреждаем так же, как об архивной ОС:
+	//полосатый alert над карточкой, сами отсутствия перечислены ниже, под должностью
+	if ($model->isAbsent) echo StripedAlertWidget::widget(['title'=>'ОТСУТСТВУЕТ НА РАБОЧЕМ МЕСТЕ']);
+	?>
     <div class="flex-row d-flex mb-3">
 
 	    <?= $this->render('_photos', ['model'=>$model, 'static_view'=>$static_view]) ?>
@@ -55,14 +61,13 @@ if (!isset($static_view)) $static_view=false;
 				</p>
 			<?php } ?>
 			<?php
-			//статус присутствия сотрудника: сначала идущие сейчас отсутствия, следом запланированные.
-			//Пустые списки блоков не рисуют (show_empty=false), прошедшие отсутствия на карточку
-			//не выводятся - их полная история есть в разделе «Отсутствия»
-			foreach (['currentAbsences','futureAbsences'] as $absencesField)
-				echo ModelFieldWidget::widget([
-					'model' => $model, 'field' => $absencesField,
-					'item_options' => ['no_user' => true],
-				]);
+			//актуальные отсутствия сотрудника одним списком - идущие сейчас и предстоящие,
+			//по календарю. Пустой список блока не рисует (show_empty=false), прошедшие
+			//отсутствия на карточку не выводятся - их полная история есть в разделе «Отсутствия»
+			echo ModelFieldWidget::widget([
+				'model' => $model, 'field' => 'pendingAbsences',
+				'item_options' => ['no_user' => true],
+			]);
 			?>
 	    </div>
     </div>
