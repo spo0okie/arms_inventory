@@ -24,7 +24,7 @@ $options = [
 	'nameSuffix' => $suffix ?? '',
 	//конвенция item-вью: удаление делается со страницы объекта, а не из чужого списка
 	'noDelete' => !($show_delete ?? false),
-	'static' => $static_view ?? false,
+	'static' => $static_view ?? true,
 ];
 if (isset($class)) $options['item_class'] = $class;
 if (isset($show_archived)) $options['show_archived'] = $show_archived;
