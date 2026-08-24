@@ -119,6 +119,12 @@ class MacSearchProvider extends IntegrationProvider
 	const DEFAULT_BRIDGE_TO_DEVICE_PORTS = ['pc', 'comp'];
 
 	/**
+	 * Соседи по LLDP/CDP, которых карта сети не считает кандидатами в
+	 * коммутаторы: IP-телефоны (SEP/SIP + MAC у Cisco, «IP Phone» в имени).
+	 */
+	const DEFAULT_NEIGHBOR_IGNORE = '~(?i)\bip.?phone\b|^s[ei]p[0-9a-f]{8,}~';
+
+	/**
 	 * Имена агрегированных каналов: Po1, BAGG1, Port-channel1, ae0, Lag2.
 	 * Это не физический порт, и сопоставлять его с розеткой нельзя — иначе
 	 * `Po1` выдаст себя за «порт 1» (числовой хвост у них одинаковый).
@@ -225,7 +231,9 @@ class MacSearchProvider extends IntegrationProvider
 		if (!static::isSwitchable($model)) return false;
 		/** @var Techs $model */
 		if (!static::firstIp($model->ip)) return false;
-		if (is_object($model->state) && $model->state->archived) return false;
+		//неработающий (склад, ремонт, списание) не опрашивается - его статус
+		//главнее того, что железо, возможно, ещё отвечает
+		if (is_object($model->state) && !$model->state->operating) return false;
 
 		return $this->isSwitchType($model);
 	}
@@ -633,6 +641,21 @@ class MacSearchProvider extends IntegrationProvider
 			}
 		}
 		return ['device' => null, 'port' => ''];
+	}
+
+	/**
+	 * Сосед, который заведомо не коммутатор: IP-телефоны и прочие ботва LLDP.
+	 *
+	 * Карта сети ищет незаписанные КОММУТАТОРЫ, а телефоны объявляют себя
+	 * именами вида SEP<MAC>/SIP<MAC>/«Cisco IP Phone …» - и на площадке их
+	 * сотни. Шаблон настраивается (neighborIgnore в конфиге провайдера).
+	 */
+	public function isIgnoredNeighbor(array $neighbor): bool
+	{
+		$pattern = $this->config['neighborIgnore'] ?? static::DEFAULT_NEIGHBOR_IGNORE;
+		if (!strlen((string)$pattern)) return false;
+		$name = trim((string)($neighbor['remote_name'] ?? ''));
+		return strlen($name) && preg_match($pattern, $name);
 	}
 
 	/**
@@ -1202,8 +1225,9 @@ class MacSearchProvider extends IntegrationProvider
 		$query = Techs::find()
 			->joinWith(['model.type', 'model.manufacturer', 'state'], true)
 			->where(['tech_types.code' => $this->config['switchTypes'] ?? static::DEFAULT_SWITCH_TYPES])
-			//архивные (списанные) коммутаторы опрашивать бессмысленно
-			->andWhere(['or', ['tech_states.archived' => 0], ['tech_states.archived' => null]])
+			//опрашиваем только работающее: у статуса флаг operating (склад,
+			//ремонт, списание - не цели). Без статуса - считаем работающим
+			->andWhere(['or', ['tech_states.operating' => 1], ['techs.state_id' => null]])
 			->andWhere(['not', ['techs.ip' => null]])
 			->andWhere(['<>', 'techs.ip', ''])
 			->limit((int)($this->config['maxTargets'] ?? static::DEFAULT_MAX_TARGETS));
@@ -1253,7 +1277,7 @@ class MacSearchProvider extends IntegrationProvider
 		$query = Techs::find()
 			->joinWith(['model.type', 'state'], true)
 			->where(['tech_types.code' => $this->config['switchTypes'] ?? static::DEFAULT_SWITCH_TYPES])
-			->andWhere(['or', ['tech_states.archived' => 0], ['tech_states.archived' => null]])
+			->andWhere(['or', ['tech_states.operating' => 1], ['techs.state_id' => null]])
 			->andWhere(['like', 'techs.ip', $ip])
 			->andWhere(['<>', 'techs.id', $tech->id]);
 		foreach ($query->all() as $candidate) {

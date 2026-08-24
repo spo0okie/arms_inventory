@@ -155,10 +155,15 @@ class NetworkMapTest extends Unit
 
 		$this->assertStringContainsString('subgraph p'.$room->id, $text);
 		$this->assertStringContainsString($room->name, $text);
-		$this->assertMatchesRegularExpression('~subgraph[^e]+n'.$inRoom->id.'\[.*end~s', $text);
+		//позиции: узел помещения - между subgraph и end, узел с корня - вне рамки
+		$sub = strpos($text, 'subgraph p'.$room->id);
+		$end = strpos($text, 'end', $sub);
+		$inside = strpos($text, 'n'.$inRoom->id.'["');
+		$outside = strpos($text, 'n'.$core->id.'["');
+		$this->assertTrue($sub < $inside && $inside < $end, 'узел помещения в рамке');
 		//узел на корне площадки остаётся вне рамок: рамка вокруг всей площадки
 		//ничего не говорит
-		$this->assertDoesNotMatchRegularExpression('~subgraph.*n'.$core->id.'\[.*?end~s', $text);
+		$this->assertFalse($sub < $outside && $outside < $end, 'узел с корня вне рамки');
 		//без флага рамок нет вовсе
 		$map->groupByPlace = false;
 		$this->assertStringNotContainsString('subgraph', $map->mermaid());
@@ -228,6 +233,69 @@ class NetworkMapTest extends Unit
 		$found = $map2->overlay['found'][0];
 		$this->assertNotNull($found['conflict_remote']);
 		$this->assertSame($core->id, (int)$found['conflict_remote']->techs_id);
+	}
+
+	/**
+	 * На карте и в целях - только работающее: у статуса флаг operating.
+	 * Оборудование без статуса считается работающим (не знаем - не выкидываем).
+	 */
+	public function testOperatingFilter()
+	{
+		$site = $this->makeSite();
+		$working = $this->makeSwitch($site, '10.60.0.1', 'Gi1/0/1');
+		$stored = $this->makeSwitch($site, '10.60.0.2', 'Gi1/0/1',
+			['state_id' => \app\models\TechStates::find()
+				->where(['operating' => 0])->select('id')->scalar()]);
+		$this->assertNotEmpty($stored->state_id, 'в дампе нужен статус без operating');
+
+		$map = new NetworkMap($site);
+		$this->assertSame([$working->id], array_keys($map->nodes), 'складское - не узел карты');
+
+		$provider = new MacSearchProvider(['id' => 'macsearch',
+			'config' => ['url' => 'http://x', 'token' => 't']]);
+		$targets = $provider->targets([$site->id]);
+		$this->assertSame([$working->id], array_column($targets, 'id'), 'складское - не цель опроса');
+	}
+
+	/**
+	 * Шум сверки: телефоны отсеиваются шаблоном, записи без имени и адреса -
+	 * как безличные, повторы одного соседа схлопываются со счётчиком. Все
+	 * фильтры считаются, а не молчат.
+	 */
+	public function testOverlayNoise()
+	{
+		$site = $this->makeSite();
+		$core = $this->makeSwitch($site, '10.60.0.1', "Gi1/0/1\nGi1/0/2");
+
+		$provider = new MacSearchProvider(['id' => 'macsearch',
+			'config' => ['url' => 'http://x', 'token' => 't']]);
+		$map = new NetworkMap($site);
+		$rows = [
+			//телефоны: Cisco SEP<MAC>, SIP<MAC>, «IP Phone» в имени
+			['target' => $core->id, 'port' => 'Gi1/0/1', 'remote_mac' => '',
+				'remote_name' => 'SEP00DA55B88A3B', 'remote_port' => 'Port 1', 'protocol' => 'cdp'],
+			['target' => $core->id, 'port' => 'Gi1/0/1', 'remote_mac' => '',
+				'remote_name' => 'Cisco IP Phone SPA504G', 'remote_port' => '00da.55b8.8a3b', 'protocol' => 'lldp'],
+			//безличная запись - чинить не по чему
+			['target' => $core->id, 'port' => 'Gi1/0/2', 'remote_mac' => '',
+				'remote_name' => '', 'remote_port' => '', 'protocol' => 'lldp'],
+			//один сосед три раза (timeMark старых прошивок)
+			['target' => $core->id, 'port' => 'Gi1/0/2', 'remote_mac' => '',
+				'remote_name' => 'sw-lost', 'remote_port' => 'Gi0/1', 'protocol' => 'lldp'],
+			['target' => $core->id, 'port' => 'Gi1/0/2', 'remote_mac' => '',
+				'remote_name' => 'sw-lost', 'remote_port' => 'Gi0/1', 'protocol' => 'lldp'],
+			['target' => $core->id, 'port' => 'Gi1/0/2', 'remote_mac' => '',
+				'remote_name' => 'sw-lost', 'remote_port' => 'Gi0/1', 'protocol' => 'lldp'],
+		];
+		$map->overlay(['status' => 'done', 'rows' => $rows, 'errors' => []], $provider);
+
+		$o = $map->overlay;
+		$this->assertSame(2, $o['ignored']);
+		$this->assertSame(1, $o['noise']);
+		$this->assertCount(1, $o['unknown']);
+		$this->assertSame(3, $o['unknown'][0]['count']);
+		//на схеме один узел «?», а не по узлу на запись
+		$this->assertSame(1, substr_count($map->mermaid(), '(["? '));
 	}
 
 	/** Имя порта по LLDP -> объявленный порт: точное, ключ, иначе кандидаты */

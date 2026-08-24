@@ -48,7 +48,15 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 		не видно: <?= count($overlay['unseen']) ?>,
 		найдено незаписанных: <?= count($overlay['found']) ?>,
 		неопознанных соседей: <?= count($overlay['unknown']) ?><?php
-		if (count($overlay['failed'])) { ?>, не ответили: <?= count($overlay['failed']) ?><?php } ?>
+		if (count($overlay['failed'])) { ?>, не ответили: <?= count($overlay['failed']) ?><?php }
+		//фильтры не молчат: сколько строк убрано как телефоны и как пустые
+		//LLDP-записи - видно, что карта не «потеряла» их втихую
+		if (!empty($overlay['ignored'])) { ?>,
+			<span qtip_ttip="IP-телефоны и прочие соседи, отфильтрованные шаблоном neighborIgnore">
+				телефонов отсеяно: <?= (int)$overlay['ignored'] ?></span><?php }
+		if (!empty($overlay['noise'])) { ?>,
+			<span qtip_ttip="Записи LLDP без имени и адреса — чинить не по чему, обычно это застарелые строки таблицы">
+				пустых записей: <?= (int)$overlay['noise'] ?></span><?php } ?>
 	</div>
 <?php } ?>
 
@@ -119,14 +127,25 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 					<td><?= $this->render('/ports/item', ['model' => $link['peer']]) ?></td>
 					<td><?= $device($link['peer']->tech) ?></td>
 					<td class="text-secondary"><?= Html::encode($edge['aggr']) ?></td>
-					<td><?php if (is_array($overlay)) {
+					<td class="text-nowrap"><?php if (is_array($overlay)) {
 						if (isset($overlay['confirmed'][$key])) { ?>
 							<i class="fas fa-check text-secondary" qtip_ttip="Коммутаторы видят друг друга по LLDP/CDP"></i>
 						<?php } elseif (isset($overlay['unseen'][$key])) { ?>
 							<i class="fas fa-exclamation text-warning" qtip_ttip="<?= Html::encode(
 								'Связь записана, но по LLDP/CDP её не видно ни с одной из ответивших сторон: '
-								.'порт выключен, LLDP отключён или кабель переставили. Снимать связь по '
-								.'одному этому признаку нельзя - проверьте в карточке коммутатора') ?>"></i>
+								.'порт выключен, LLDP отключён или кабель переставили') ?>"></i>
+							<?php /* починка карты руками: снять неподтверждённую связь можно
+							       прямо отсюда - с тем же предупреждением, что в карточке */ ?>
+							<?= Html::button('<i class="fas fa-times text-danger"></i>', [
+								'class' => 'btn btn-sm btn-link p-0',
+								'qtip_ttip' => 'Снять связь '.$link['port']->tech->name.' '.$link['port']->name
+									.' ↔ '.$link['peer']->tech->name.' '.$link['peer']->name,
+								'data-scan' => json_encode(['tech' => $link['port']->techs_id,
+									'port' => $link['port']->name, 'do' => 'detach']),
+								'data-confirm' => 'По LLDP связь не видна, но коммутатор может быть просто '
+									.'выключен, а LLDP - отключён. Точно снять связь?',
+								'onclick' => 'mapScanApply(this)',
+							]) ?>
 						<?php } else { ?>
 							<span class="text-secondary small" qtip_ttip="Ни одна из сторон не ответила на опрос">—</span>
 						<?php } } ?></td>
@@ -146,9 +165,12 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 <?php if (is_array($overlay) && count($overlay['unknown'])) { ?>
 	<h4>Неопознанные соседи</h4>
 	<div class="text-secondary small mb-1">
-		коммутатор видит соседа, а в инвентаризации такого нет (ни по адресу, ни по
-		имени, ни по IP): незаписанное устройство — заведите его, и при следующей
-		сверке связь предложится
+		коммутатор видит соседа, а в инвентаризации такой не опознан — ни по
+		адресу, ни по имени, ни по IP. Как чинить: если это коммутатор из
+		инвентаризации — впишите имя из колонки «кто на той стороне» в hostname
+		его карточки (или адрес в поле IP), и следующая сверка его опознает;
+		если устройства в инвентаризации нет — заведите его. Телефоны сюда не
+		попадают (отсеиваются шаблоном), записи без имени и адреса — тоже
 	</div>
 	<table class="table table-sm w-auto">
 		<tbody>
@@ -163,6 +185,10 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 					<?php } ?>
 					<?php if (!empty($row['remote_port'])) { ?>
 						<span class="text-secondary small">порт <?= Html::encode($row['remote_port']) ?></span>
+					<?php } ?>
+					<?php if (($unknown['count'] ?? 1) > 1) { ?>
+						<span class="text-secondary small" qtip_ttip="<?= Html::encode(
+							'Столько записей об этом соседе в таблице LLDP; показана одна') ?>">×<?= (int)$unknown['count'] ?></span>
 					<?php } ?>
 				</td>
 				<td class="text-secondary small"><?= Html::encode($row['protocol'] ?? '') ?></td>

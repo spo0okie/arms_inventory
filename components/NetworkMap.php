@@ -48,6 +48,9 @@ class NetworkMap
 	/** @var bool сгруппировать узлы по помещениям (mermaid subgraph) */
 	public bool $groupByPlace = false;
 
+	/** сколько неопознанных соседей рисовать на схеме (остальные - в таблице) */
+	const UNKNOWN_ON_DIAGRAM = 12;
+
 	/** @var int[] id техники => id узла */
 	protected array $nodeOf = [];
 
@@ -99,7 +102,9 @@ class NetworkMap
 			->joinWith(['model.type', 'state'], true)
 			->with(['ports.linkPort.tech.model.type', 'ports.linkPort.tech.state'])
 			->where(['tech_types.code' => static::switchTypes()])
-			->andWhere(['or', ['tech_states.archived' => 0], ['tech_states.archived' => null]])
+			//на карте только работающее: у статуса флаг operating; без статуса -
+			//считаем работающим
+			->andWhere(['or', ['tech_states.operating' => 1], ['techs.state_id' => null]])
 			->andWhere(['techs.places_id' => $placeIds])
 			->orderBy('techs.id')
 			->all();
@@ -204,9 +209,32 @@ class NetworkMap
 			if (!is_object($local) || $localPort === '') continue;
 			$overlay['answered'][$local->id] = true;
 
+			//телефоны и прочая ботва LLDP - не кандидаты в коммутаторы: считаем,
+			//но не показываем (счётчик в шапке, чтобы фильтр не был молчаливым)
+			if ($provider->isIgnoredNeighbor($row)) {
+				$overlay['ignored'] = ($overlay['ignored'] ?? 0) + 1;
+				continue;
+			}
+
 			$remote = $provider->identifyNeighbor($row);
 			if (!is_object($remote)) {
-				$overlay['unknown'][] = ['a' => $local, 'port' => $localPort, 'row' => $row];
+				$name = trim((string)($row['remote_name'] ?? ''));
+				$mac = trim((string)($row['remote_mac'] ?? ''));
+				//запись без какой-либо личности (ни имени, ни адреса) чинить не
+				//по чему: это застарелые/пустые строки LLDP-таблиц, только шум
+				if ($name === '' && $mac === '') {
+					$overlay['noise'] = ($overlay['noise'] ?? 0) + 1;
+					continue;
+				}
+				//одного соседа коммутатор повторяет по разу на запись таблицы -
+				//схлопываем по (порт, кто): человеку нужен факт, а не тираж
+				$key = $local->id.'|'.$localPort.'|'.mb_strtolower($name ?: $mac);
+				if (isset($overlay['unknown'][$key])) {
+					$overlay['unknown'][$key]['count']++;
+					continue;
+				}
+				$overlay['unknown'][$key] = ['a' => $local, 'port' => $localPort,
+					'row' => $row, 'count' => 1];
 				continue;
 			}
 			if (!isset($this->nodeOf[$remote->id])) {
@@ -262,6 +290,7 @@ class NetworkMap
 			if ($aAnswered || $bAnswered) $overlay['unseen'][$key] = true;
 		}
 
+		$overlay['unknown'] = array_values($overlay['unknown']);
 		$this->overlay = $overlay;
 	}
 
@@ -350,15 +379,27 @@ class NetworkMap
 				$styles[] = '  linkStyle '.$index.' stroke:#198754,stroke-width:3px';
 				$index++;
 			}
-			$unknownId = 0;
+			//неопознанные - узлом на ИМЯ соседа, не на строку: один сосед виден
+			//нескольким коммутаторам, и это должен быть один «?». Больше
+			//дюжины не рисуем - схема не резиновая, полный список в таблице
+			$unknownNodes = [];
+			$skipped = 0;
 			foreach ($this->overlay['unknown'] as $unknown) {
 				$row = $unknown['row'];
 				$name = trim((string)($row['remote_name'] ?? '')) ?: (string)($row['remote_mac'] ?? '?');
-				$lines[] = '  u'.(++$unknownId).'(["? '.static::quote($name).'"])';
+				$nodeKey = mb_strtolower($name);
+				if (!isset($unknownNodes[$nodeKey])) {
+					if (count($unknownNodes) >= static::UNKNOWN_ON_DIAGRAM) { $skipped++; continue; }
+					$unknownNodes[$nodeKey] = 'u'.(count($unknownNodes) + 1);
+					$lines[] = '  '.$unknownNodes[$nodeKey].'(["? '.static::quote($name).'"])';
+				}
 				$lines[] = '  n'.$this->nodeOf[$unknown['a']->id].' -.-|"'.static::quote(
-					$unknown['port'].' — '.($row['remote_port'] ?? '')).'"| u'.$unknownId;
+					$unknown['port'].' — '.($row['remote_port'] ?? '')).'"| '.$unknownNodes[$nodeKey];
 				$styles[] = '  linkStyle '.$index.' stroke:#6c757d,stroke-dasharray:3';
 				$index++;
+			}
+			if ($skipped) {
+				$lines[] = '  uMore(["… ещё '.$skipped.' неопознанных — список под схемой"])';
 			}
 		}
 		return implode("\n", array_merge($lines, $styles));
