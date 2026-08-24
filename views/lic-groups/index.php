@@ -19,7 +19,6 @@ $renderer=$this;
 		'header' => Html::encode($this->title),
 		'columns' => include 'columns.php',
 		'createButton' => Html::a('Добавить', ['create'], ['class' => 'btn btn-success']),
-		'hintButton' => \app\components\HintIconWidget::widget(['model'=>'\app\models\LicGroups','cssClass'=>'btn']),
 		'dataProvider' => $dataProvider,
 		'filterModel' => $searchModel,
 	]) ?>
