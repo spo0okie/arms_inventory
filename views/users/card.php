@@ -11,7 +11,7 @@ use app\components\widgets\page\ModelWidget;
 if (!isset($static_view)) $static_view=false;
 
 ?>
-    <div class="flex-row d-flex pb-3">
+    <div class="flex-row d-flex mb-3">
 
 	    <?= $this->render('_photos', ['model'=>$model, 'static_view'=>$static_view]) ?>
 	    <div class="ps-3">
