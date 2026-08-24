@@ -61,7 +61,7 @@ if (!isset($static_view)) $static_view=false;
 			foreach (['currentAbsences','futureAbsences'] as $absencesField)
 				echo ModelFieldWidget::widget([
 					'model' => $model, 'field' => $absencesField,
-					'item_options' => ['static_view' => $static_view, 'no_user' => true],
+					'item_options' => ['no_user' => true],
 				]);
 			?>
 	    </div>
