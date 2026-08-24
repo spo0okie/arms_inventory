@@ -75,7 +75,9 @@ class PortsMapWidget extends Widget
 			$html .= $this->renderBlock($block, $states);
 		}
 
-		return '<div class="ports-map d-flex flex-row flex-wrap align-items-end gap-3 mb-2">'
+		//без переноса блоков: корпус - одна горизонтальная лента, длинная
+		//прокручивается (overflow в arms.css), а не ломается на этажи
+		return '<div class="ports-map d-flex flex-row flex-nowrap align-items-end gap-3 mb-2">'
 			.$html.'</div>';
 	}
 

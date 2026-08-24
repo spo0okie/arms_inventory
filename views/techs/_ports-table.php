@@ -32,6 +32,7 @@ if (!isset($ports)) $ports = null;
 if (!isset($passport)) $passport = [];
 if (!isset($transitFrom)) $transitFrom = 4;
 if (!isset($scanStamp)) $scanStamp = null;
+if (!isset($foreignNames)) $foreignNames = [];
 
 //без опроса рисуем объявленные порты как раньше
 $rows = $ports;
@@ -113,6 +114,8 @@ $scannedNames = [];
 foreach ($passport as $item) {
 	$name = (string)($item['name'] ?? '');
 	if (!strlen($name)) continue;
+	//порт соседа по стеку - не наш: у него своя карточка и своё объявление
+	if (in_array($name, $foreignNames, true)) continue;
 	//на корпусе существуют только розетки: ifType 6 (ethernetCsmacd). Агрегат,
 	//Vlan-интерфейс и loopback портами объявлять нельзя
 	if (isset($item['type'])

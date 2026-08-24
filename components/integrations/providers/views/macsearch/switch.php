@@ -17,6 +17,8 @@ use yii\helpers\Html;
 /* @var $refreshUrl string|null URL самоперезапроса панели, пока идёт опрос */
 /* @var $tech Techs коммутатор, чью карточку открыли */
 /* @var $provider \app\components\integrations\providers\MacSearchProvider */
+/* @var $stack \app\models\Techs[] члены стека (пусто - коммутатор одиночный) */
+/* @var $foreignNames string[] имена портов, объявленные у соседей по стеку */
 
 $status = $data['status'] ?? null;
 
@@ -30,6 +32,25 @@ elseif ($status === 'error') $trouble = 'опрос не выполнен: '.($d
 elseif ($failure) $trouble = 'коммутатор не опрошен: '.($failure['error'] ?? 'причина не указана');
 
 ?>
+<?php if (!empty($stack)) { ?>
+	<?php /* стек выводится, а не хранится: общий IP на одной площадке. Человеку
+	       важно видеть, что порты тут - доля одного члена, а остальные - у
+	       соседей; карточки соседей - ссылками */ ?>
+	<div class="text-secondary small mb-1">
+		стек (общий IP): <?php
+		$links = [];
+		foreach ($stack as $member) {
+			$links[] = $member->id === $tech->id
+				? '<b>'.Html::encode($member->name).'</b>'
+				: \app\components\widgets\page\ModelWidget::widget(['model' => $member,
+					'options' => ['static_view' => true]]);
+		}
+		echo implode(', ', $links); ?>
+		— показаны порты этого члена<?= $stack[0]->id === $tech->id
+			? ' и те, что не удалось отнести ни к кому (он первый по id)' : '' ?>
+	</div>
+<?php } ?>
+
 <?php if ($status === 'pending') { ?>
 	<div class="text-secondary mb-1">
 		<span class="spinner-border spinner-border-sm" role="status"></span>
@@ -47,6 +68,7 @@ elseif ($failure) $trouble = 'коммутатор не опрошен: '.($fail
 	//«назвать порты как на коммутаторе» должно взять и порядок коммутатора тоже
 	'passport' => $data['ports'] ?? [],
 	'transitFrom' => $provider->transitFrom(),
+	'foreignNames' => $foreignNames ?? [],
 	'scanStamp' => $provider->scanStamp($data)]) ?>
 
 <?php if (!$trouble && $status !== 'pending') { ?>

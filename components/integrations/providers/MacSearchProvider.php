@@ -137,6 +137,13 @@ class MacSearchProvider extends IntegrationProvider
 	/** @var Techs|null коммутатор, чьи порты раскладываем ({@see switchPorts()}) */
 	protected ?Techs $scanned = null;
 
+	/**
+	 * @var array стеки по id цели: id представителя => Techs[] члены (по id).
+	 * Заполняется при сборе целей ({@see targets()}, {@see stackOf()}) и
+	 * нужна раскладке результата ({@see attributeStack()})
+	 */
+	protected array $stacks = [];
+
 	public function getTitle(): string
 	{
 		return $this->config['title'] ?? 'Порт коммутатора';
@@ -297,11 +304,19 @@ class MacSearchProvider extends IntegrationProvider
 		if (!$target) return '<span class="text-secondary opacity-75">'
 			.'у коммутатора не указан IP-адрес — опрашивать нечего</span>';
 
+		//карточка члена стека: опрос идёт по общему IP и возвращает весь стек,
+		//а показать надо только порты этого члена. Остальное - его соседям по
+		//стеку, неприкаянное - представителю
+		$members = $this->stackOf($model);
+		$this->stacks = [$model->id => $members];
+		foreach ($members as $member) $this->switches[$member->id] = $member;
+
 		$data = null;
 		$error = null;
 		try {
 			$data = $this->fetch(null, [$target], 'table');
-			$data['rows'] = $this->annotateUplinks($data['rows'] ?? []);
+			$data['rows'] = $this->annotateUplinks($this->attributeStack($data['rows'] ?? []));
+			if (count($members) > 1) $data = $this->stackSlice($data, $model, $members);
 		} catch (\Throwable $e) {
 			$error = $e->getMessage();
 		}
@@ -318,7 +333,48 @@ class MacSearchProvider extends IntegrationProvider
 			'refreshUrl' => $this->refreshUrl($model, $results, $attempt, static::PANEL_SWITCH),
 			'provider' => $this,
 			'tech' => $model,
+			'stack' => count($members) > 1 ? $members : [],
+			//имена, объявленные у соседей по стеку: «взять имена с коммутатора»
+			//для этого члена их брать не должен
+			'foreignNames' => count($members) > 1 ? static::foreignNames($model, $members) : [],
 		]);
+	}
+
+	/**
+	 * Доля одного члена стека в общем ответе: строки MAC с его id, паспорт и
+	 * соседи по портам, которые принадлежат ему ({@see portOwner()});
+	 * неприкаянные порты - представителю (первому по id).
+	 * @param Techs[] $members
+	 */
+	protected function stackSlice(array $data, Techs $member, array $members): array
+	{
+		$representative = $members[0]->id === $member->id;
+		$mine = function (string $port) use ($member, $members, $representative): bool {
+			$owner = static::portOwner($port, $members);
+			return is_object($owner) ? $owner->id === $member->id : $representative;
+		};
+
+		$data['rows'] = array_values(array_filter($data['rows'] ?? [],
+			fn($row) => (int)($row['target'] ?? 0) === (int)$member->id));
+		$data['ports'] = array_values(array_filter($data['ports'] ?? [],
+			fn($item) => $mine((string)($item['name'] ?? ''))));
+		$data['neighbors'] = array_values(array_filter($data['neighbors'] ?? [],
+			fn($item) => $mine((string)($item['port'] ?? ''))));
+		return $data;
+	}
+
+	/**
+	 * Имена портов, объявленные у других членов стека.
+	 * @param Techs[] $members
+	 */
+	public static function foreignNames(Techs $member, array $members): array
+	{
+		$names = [];
+		foreach ($members as $other) {
+			if ($other->id === $member->id) continue;
+			foreach (array_keys($other->portsTemplate) as $name) $names[(string)$name] = true;
+		}
+		return array_keys($names);
 	}
 
 	/**
@@ -526,10 +582,13 @@ class MacSearchProvider extends IntegrationProvider
 		//за портом виден адрес самого коммутатора: так бывает на служебном
 		//порту (CPU у D-Link) и при петле. Предлагать связь коммутатора с самим
 		//собой нельзя - это не находка, а предупреждение
+		//Сосед по стеку - тот же коммутатор: его адрес за портом тоже «свой»
 		$port['self'] = false;
 		if (is_object($this->scanned)) {
+			$selfIds = array_map(fn(Techs $member) => (int)$member->id,
+				$this->stacks[$this->scanned->id] ?? [$this->scanned]);
 			$others = array_values(array_filter($port['found'],
-				fn(Techs $device) => (int)$device->id !== (int)$this->scanned->id));
+				fn(Techs $device) => !in_array((int)$device->id, $selfIds, true)));
 			$port['self'] = count($others) !== count($port['found']);
 			$port['found'] = $others;
 		}
@@ -568,25 +627,100 @@ class MacSearchProvider extends IntegrationProvider
 	protected function neighborDevice(array $port): array
 	{
 		foreach ($port['neighbors'] as $neighbor) {
-			$device = null;
-			$mac = static::hexMac($neighbor['remote_mac'] ?? '');
-			if ($mac) {
-				foreach ($this->resolveMacs([$mac])[$mac] ?? [] as $object) {
-					$device = static::deviceOf($object);
-					if (is_object($device)) break;
-				}
-				//адрес соседа может лежать внутри записанного диапазона
-				if (!is_object($device)) $device = static::deviceByMacRange($mac);
-			}
-
-			$name = trim((string)($neighbor['remote_name'] ?? ''));
-			if (!is_object($device) && strlen($name)) $device = static::deviceByName($name);
-
+			$device = $this->identifyNeighbor($neighbor);
 			if (is_object($device)) {
 				return ['device' => $device, 'port' => (string)($neighbor['remote_port'] ?? '')];
 			}
 		}
 		return ['device' => null, 'port' => ''];
+	}
+
+	/**
+	 * Кто этот сосед в инвентаризации: по адресу (и внутри диапазонов), по
+	 * имени (инвентарный номер, hostname, с доменом и без), по IP (sysName у
+	 * некоторых железок - адрес управления). Не опознан - null: это находка
+	 * «незаписанный коммутатор», а не мусор.
+	 */
+	public function identifyNeighbor(array $neighbor): ?Techs
+	{
+		$device = null;
+		$mac = static::hexMac($neighbor['remote_mac'] ?? '');
+		if ($mac) {
+			foreach ($this->resolveMacs([$mac])[$mac] ?? [] as $object) {
+				$device = static::deviceOf($object);
+				if (is_object($device)) break;
+			}
+			//адрес соседа может лежать внутри записанного диапазона
+			if (!is_object($device)) $device = static::deviceByMacRange($mac);
+		}
+
+		$name = trim((string)($neighbor['remote_name'] ?? ''));
+		if (!is_object($device) && strlen($name)) $device = static::deviceByName($name);
+		if (!is_object($device) && strlen($name) && static::firstIp($name) === $name) {
+			$device = static::deviceByIp($name);
+		}
+		return $device;
+	}
+
+	/** Коммутатор по IP управления (первый адрес в поле) */
+	protected static function deviceByIp(string $ip): ?Techs
+	{
+		foreach (Techs::find()->where(['like', 'techs.ip', $ip])->all() as $tech) {
+			/** @var Techs $tech */
+			if (static::firstIp($tech->ip) === $ip) return $tech;
+		}
+		return null;
+	}
+
+	/**
+	 * Соседи всех коммутаторов площадки (mode=neighbors) — для карты сети.
+	 * Строки разложены по членам стеков. Ответ сервиса как есть (status /
+	 * rows / errors / targets), чтобы вызывающий видел pending и неопрошенных.
+	 *
+	 * @throws \RuntimeException сервис недоступен / ответил ошибкой
+	 */
+	public function siteNeighbors(int $siteId): array
+	{
+		$targets = $this->targets(static::placeSubtree($siteId));
+		if (!$targets) return ['status' => 'done', 'rows' => [], 'errors' => [], 'targets' => []];
+		$data = $this->fetch(null, $targets, 'neighbors');
+		$data['rows'] = $this->attributeStack($data['rows'] ?? []);
+		return $data;
+	}
+
+	/**
+	 * Имя порта, как его назвал сосед по LLDP, -> объявленный порт устройства.
+	 *
+	 * Правило для ЗАПИСИ связи строже, чем для показа: точное имя, затем
+	 * единственное совпадение по ключу, иначе - человеку (кандидаты списком).
+	 * Автосоздание по неоднозначному ключу запрещено: `portKey()` не различает
+	 * Gi1/0/1 и Te1/0/1. Портов не объявлено - связь без порта.
+	 *
+	 * @return array ['id'=>int|null,'name'=>string|null,'candidates'=>[['id','name'],...]]
+	 *   name null при пустом объявлении; candidates непусты только при неоднозначности
+	 */
+	public static function resolvePortName(Techs $device, string $lldpName): array
+	{
+		$declared = [];
+		foreach ($device->portsList as $item) {
+			$link = $item['port_link'] ?? null;
+			$declared[(string)$item['port_name']] = is_object($link) ? (int)$link->id : null;
+		}
+		if (!count($declared)) return ['id' => null, 'name' => null, 'candidates' => []];
+
+		$lldpName = trim($lldpName);
+		if (array_key_exists($lldpName, $declared)) {    //значение null - порт без строки
+			return ['id' => $declared[$lldpName], 'name' => $lldpName, 'candidates' => []];
+		}
+		$byKey = array_filter(array_keys($declared), fn($name) =>
+			!static::isAggregate((string)$name) && static::portKey((string)$name) === static::portKey($lldpName));
+		if (count($byKey) === 1) {
+			$name = (string)reset($byKey);
+			return ['id' => $declared[$name], 'name' => $name, 'candidates' => []];
+		}
+		$candidates = [];
+		foreach ($declared as $name => $id) $candidates[] = ['id' => $id, 'name' => (string)$name];
+		return ['id' => null, 'name' => null, 'candidates' => $candidates];
 	}
 
 	/** Устройство, у которой искомый адрес попадает в записанный диапазон (issue #120) */
@@ -1076,15 +1210,105 @@ class MacSearchProvider extends IntegrationProvider
 
 		if (!is_null($placeIds)) $query->andWhere(['techs.places_id' => $placeIds]);
 
-		$targets = [];
-		$this->switches = [];
+		//стек - конфигурное состояние, а не инвентарная единица: у членов свои
+		//карточки и номера, а management-IP один. Цель опроса - одна на стек
+		//(представитель - член с наименьшим id), иначе сервис схлопывает N
+		//целей по host и весь результат прилипает к первой попавшейся.
+		//Ограничение площадкой обязательно: одинаковые адреса в филиалах - норма
+		$groups = [];
 		foreach ($query->all() as $tech) {
 			/** @var Techs $tech */
-			$target = $this->describeTarget($tech);
-			if (!$target) continue;    //в поле адреса что-то есть, но не IP
+			$ip = static::firstIp($tech->ip);
+			if (!$ip) continue;    //в поле адреса что-то есть, но не IP
+			$groups[static::siteOf($tech).'|'.$ip][] = $tech;
+		}
+
+		$targets = [];
+		$this->switches = [];
+		$this->stacks = [];
+		foreach ($groups as $members) {
+			usort($members, fn(Techs $one, Techs $other) => $one->id <=> $other->id);
+			foreach ($members as $member) $this->switches[$member->id] = $member;
+			$target = $this->describeTarget($members[0]);
+			if (!$target) continue;
+			$this->stacks[$members[0]->id] = $members;
 			$targets[] = $target;
 		}
 		return $targets;
+	}
+
+	/**
+	 * Члены стека, в котором состоит коммутатор: тот же тип, та же площадка,
+	 * тот же management-IP, не архивные; по id. Одиночка - стек из одного.
+	 *
+	 * @return Techs[]
+	 */
+	public function stackOf(Techs $tech): array
+	{
+		$ip = static::firstIp($tech->ip);
+		if (!$ip) return [$tech];
+		$site = static::siteOf($tech);
+
+		$members = [$tech->id => $tech];
+		$query = Techs::find()
+			->joinWith(['model.type', 'state'], true)
+			->where(['tech_types.code' => $this->config['switchTypes'] ?? static::DEFAULT_SWITCH_TYPES])
+			->andWhere(['or', ['tech_states.archived' => 0], ['tech_states.archived' => null]])
+			->andWhere(['like', 'techs.ip', $ip])
+			->andWhere(['<>', 'techs.id', $tech->id]);
+		foreach ($query->all() as $candidate) {
+			/** @var Techs $candidate */
+			if (static::firstIp($candidate->ip) !== $ip || static::siteOf($candidate) !== $site) continue;
+			$members[$candidate->id] = $candidate;
+		}
+		ksort($members);
+		return array_values($members);
+	}
+
+	/**
+	 * Разложить строки результата по членам стека.
+	 *
+	 * Сервис вернул всё под id цели (представителя); порт принадлежит тому
+	 * члену, в чьём объявлении он есть - точное имя, затем ключ, и только
+	 * при единственном совпадении. Не нашлось ни у кого (или нашлось у
+	 * нескольких - члены с одинаковыми модельными именами без своих
+	 * «портов фактически») - строка остаётся на представителе с пометкой.
+	 * Никаких догадок по диапазонам MAC.
+	 */
+	public function attributeStack(array $rows): array
+	{
+		foreach ($rows as &$row) {
+			$members = $this->stacks[$row['target'] ?? 0] ?? null;
+			if (!$members || count($members) < 2) continue;
+			$owner = static::portOwner((string)($row['port'] ?? ''), $members);
+			$row['target'] = is_object($owner) ? $owner->id : $members[0]->id;
+			if (!is_object($owner)) $row['stack_unassigned'] = true;
+		}
+		return $rows;
+	}
+
+	/**
+	 * Какому члену стека принадлежит порт: по объявленным именам, точное ->
+	 * ключ, и каждый раз - единственный кандидат.
+	 * @param Techs[] $members
+	 */
+	public static function portOwner(string $name, array $members): ?Techs
+	{
+		if ($name === '') return null;
+		foreach ([
+			fn(string $declared) => $declared === $name,
+			fn(string $declared) => !static::isAggregate($declared)
+				&& static::portKey($declared) === static::portKey($name),
+		] as $matches) {
+			$owners = [];
+			foreach ($members as $member) {
+				foreach (array_keys($member->portsTemplate) as $declared) {
+					if ($matches((string)$declared)) { $owners[$member->id] = $member; break; }
+				}
+			}
+			if (count($owners) === 1) return reset($owners);
+		}
+		return null;
 	}
 
 	/**
@@ -1219,7 +1443,9 @@ class MacSearchProvider extends IntegrationProvider
 		foreach ($macs as $mac) {
 			try {
 				$data = $this->fetch($mac, $targets);
-				$data['rows'] = $this->annotateUplinks($data['rows'] ?? []);
+				//сначала раскладываем по членам стека, потом метим транзит: связи
+				//портов лежат у конкретного члена, а не у представителя
+				$data['rows'] = $this->annotateUplinks($this->attributeStack($data['rows'] ?? []));
 				$results[] = ['mac' => $mac, 'data' => $data, 'error' => null];
 			} catch (\Throwable $e) {
 				$lastError = $e;

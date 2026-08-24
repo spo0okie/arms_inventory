@@ -82,7 +82,14 @@ $failedLimit = 10;
 				<tbody>
 				<?php foreach ($rows as $row) { ?>
 					<tr<?= empty($row['uplink']) ? '' : ' class="text-secondary"' ?>>
-						<td><?= $switchLink($row) ?></td>
+						<td><?= $switchLink($row) ?><?php if (!empty($row['stack_unassigned'])) { ?>
+							<?php /* стек: порт не нашёлся в объявлениях членов - строка
+							       показана на представителе, а не на владельце порта */ ?>
+							<span class="text-warning" qtip_ttip="<?= Html::encode(
+								'Коммутатор в стеке (общий IP), а этот порт не объявлен ни у одного '
+								.'из членов - показан на первом по id. Объявите порты членов стека '
+								.'в «Портах фактически», и строка встанет на место') ?>">?</span>
+						<?php } ?></td>
 						<td><?= Html::encode($row['vlan'] ?? '') ?></td>
 						<td>
 							<?= Html::encode($row['port'] ?? '') ?>

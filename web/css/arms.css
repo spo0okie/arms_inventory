@@ -110,6 +110,13 @@ span.mac_address {
 
 /* Карта портов на корпусе (PortsMapWidget): состояние слота - токен, дефолт
    светлой темы здесь, тёмные значения в themes.css (конвенция docs/dev/themes.md §2.3) */
+.ports-map {
+	/* корпус не переносится на следующую строку - длинный прокручивается */
+	overflow-x: auto;
+}
+.ports-map-slot {
+	flex: 0 0 auto;
+}
 .ports-map-slot {
 	background: var(--ports-slot-bg, transparent);
 	color: var(--ports-slot-fg, inherit);

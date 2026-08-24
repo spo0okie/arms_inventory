@@ -281,6 +281,84 @@ class MacSearchProviderTest extends Unit
 		$this->assertNotEmpty($targets[0]['model']);
 	}
 
+	/**
+	 * Стек (plans/network-map.md, 3.0.4): члены с общим management-IP на одной
+	 * площадке - одна цель опроса (представитель - первый по id), а результат
+	 * раскладывается по членам по их объявленным портам. Одинаковый IP в
+	 * другом филиале - другой стек.
+	 */
+	public function testStackIsOneTargetAndRowsSpreadByPorts()
+	{
+		$place = $this->makePlace();
+		$first = $this->makeSwitch(['ip' => '10.50.2.16', 'places_id' => $place->id]);
+		$second = $this->makeSwitch(['ip' => "10.50.2.16
+10.50.2.17", 'places_id' => $place->id]);
+		$elsewhere = $this->makeSwitch(['ip' => '10.50.2.16', 'places_id' => $this->makePlace()->id]);
+		$first->ports_override = "Gi1/0/1
+Gi1/0/2";
+		$second->ports_override = "Gi2/0/1
+Gi2/0/2";
+		$this->assertTrue($first->save(false) && $second->save(false));
+		$first->refresh();
+		$second->refresh();
+
+		$provider = $this->makeProvider();
+		$targets = $provider->targets([$place->id, $elsewhere->places_id]);
+		$this->assertSame([$first->id, $elsewhere->id], array_column($targets, 'id'));
+		//оба члена известны как коммутаторы - ссылки в результате настоящие
+		$this->assertArrayHasKey($second->id, $provider->switches());
+
+		$rows = $provider->attributeStack([
+			$this->tableRow($first->id, '00:11:22:33:44:01', 'Gi1/0/2'),
+			$this->tableRow($first->id, '00:11:22:33:44:02', 'Gi2/0/1'),
+			//порта нет ни у кого: остаётся на представителе с пометкой
+			$this->tableRow($first->id, '00:11:22:33:44:03', 'Gi3/0/7'),
+			$this->tableRow($elsewhere->id, '00:11:22:33:44:04', 'Gi2/0/1'),
+		]);
+		$this->assertSame([$first->id, $second->id, $first->id, $elsewhere->id],
+			array_column($rows, 'target'));
+		$this->assertTrue($rows[2]['stack_unassigned']);
+		$this->assertArrayNotHasKey('stack_unassigned', $rows[1]);
+
+		//члены с одинаковыми именами (оба по модельному шаблону Gi1/0/x)
+		//неразличимы - порт остаётся на представителе, без догадок
+		$second->ports_override = "Gi1/0/1
+Gi1/0/2";
+		$this->assertTrue($second->save(false));
+		$second->refresh();
+		$this->assertNull(MacSearchProvider::portOwner('Gi1/0/1', [$first, $second]));
+	}
+
+	/** Карточка члена стека показывает только его порты */
+	public function testStackMemberPanelShowsOwnPorts()
+	{
+		$place = $this->makePlace();
+		$first = $this->makeSwitch(['ip' => '10.50.2.16', 'places_id' => $place->id]);
+		$second = $this->makeSwitch(['ip' => '10.50.2.16', 'places_id' => $place->id]);
+		$first->ports_override = "Gi1/0/1
+Gi1/0/2";
+		$second->ports_override = "Gi2/0/1
+Gi2/0/2";
+		$this->assertTrue($first->save(false) && $second->save(false));
+		$first->refresh();
+		$second->refresh();
+
+		$payload = $this->payload([
+			$this->tableRow($second->id, '00:11:22:33:44:01', 'Gi1/0/2'),
+			$this->tableRow($second->id, '00:11:22:33:44:02', 'Gi2/0/1'),
+		], ['mode' => 'table', 'ports' => [
+			['name' => 'Gi1/0/1', 'type' => 6, 'description' => 'first-only'],
+			['name' => 'Gi2/0/1', 'type' => 6, 'description' => 'second-only'],
+		]]);
+
+		$html = $this->makeProvider([$this->response($payload)])->renderSwitchPanel($second);
+		$this->assertStringContainsString('стек', $html);
+		$this->assertStringContainsString('second-only', $html);
+		$this->assertStringNotContainsString('first-only', $html);
+		//порты соседа не предлагаются как «взять имена»
+		$this->assertStringNotContainsString('Gi1\/0\/1', $html);
+	}
+
 	/** Область опроса: площадка объекта — вся её ветка помещений */
 	public function testTargetsByObjectSite()
 	{
