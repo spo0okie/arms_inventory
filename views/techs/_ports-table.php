@@ -132,7 +132,7 @@ if (!count($scannedNames)) $adoptable = false;
  */
 $hop = function (Ports $peer): string {
 	if (strlen((string)$peer->name)) {
-		return $this->render('/ports/item', ['model' => $peer, 'include_tech' => true, 'reverse' => true]);
+		return $this->render('@app/views/ports/item', ['model' => $peer, 'include_tech' => true, 'reverse' => true]);
 	}
 	return is_object($peer->tech)
 		? ModelWidget::widget(['model' => $peer->tech, 'options' => ['static_view' => true]]) : '';
@@ -309,7 +309,7 @@ foreach ($rows as $port) if (count($port['proposals'] ?? []) === 1) $acceptable+
 	<tr>
 		<td>
 			<?= is_object($link)
-				? $this->render('/ports/item', ['model' => $link, 'return' => 'previous', 'modal' => true])
+				? $this->render('@app/views/ports/item', ['model' => $link, 'return' => 'previous', 'modal' => true])
 				: Html::a(Ports::$port_prefix.$port['port'], ['/ports/create',
 					'return' => 'previous',
 					'Ports[name]' => $port['port'],

@@ -334,12 +334,18 @@ class MacSearchProvider extends IntegrationProvider
 		//спиннер и ошибка - состояние, а не результат: в кэш им нельзя
 		$this->cacheable = !$error && !$this->isPending($results)
 			&& ($data['status'] ?? '') !== 'error' && empty($data['errors']);
+		//вердикты по записанным связям («не отозвалось», «линка нет») - только
+		//по полному успешному ответу: сбойные или недособранные данные
+		//валидными не являются, помечать по ним связи под снятие нельзя
+		$scanOk = !$error && ($data['status'] ?? '') === 'done' && empty($data['errors']);
 		return $this->renderView('switch', [
-			'ports' => $this->switchPorts($data['rows'] ?? [], $model,
-				$data['ports'] ?? [], $data['neighbors'] ?? []),
+			//null, а не пустой слой: таблица рисуется как без опроса вовсе
+			'ports' => $scanOk ? $this->switchPorts($data['rows'] ?? [], $model,
+				$data['ports'] ?? [], $data['neighbors'] ?? []) : null,
+			'scanOk' => $scanOk,
 			//визитка приходит одна на цель (стек опрашивается по общему IP);
 			//показывается как есть, сверка с карточками - за ответственным
-			'identity' => ($data['identity'] ?? [])[0] ?? [],
+			'identity' => $scanOk ? (($data['identity'] ?? [])[0] ?? []) : [],
 			'data' => $data,
 			'error' => $error,
 			'refreshUrl' => $this->refreshUrl($model, $results, $attempt, static::PANEL_SWITCH),

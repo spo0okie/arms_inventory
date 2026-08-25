@@ -21,6 +21,7 @@ use yii\helpers\Html;
 /* @var $foreignNames string[] имена портов, объявленные у соседей по стеку */
 /* @var $identity array визитка: sysname/sysdescr/location/base_mac/units
  *      (пусто - устройство о себе не рассказало) */
+/* @var $scanOk bool опрос завершился полным успехом (слой сверки валиден) */
 
 $status = $data['status'] ?? null;
 
@@ -114,13 +115,16 @@ elseif ($failure) $trouble = 'коммутатор не опрошен: '.($fail
 
 <?php /* путь алиасом, а не '/techs/...': вид рендерится не из контроллера
        techs, а из proxy интеграций - относительный путь там не резолвится */ ?>
+<?php /* без успешного опроса ($ports = null) таблица рисуется ровно как в
+       карточке: вердикты о записанных связях по сбойным или недособранным
+       данным не выносятся */ ?>
 <?= $this->render('@app/views/techs/_ports-table', ['model' => $tech, 'ports' => $ports,
 	//паспорт передаём отдельно: в таблице порты идут в объявленном порядке, а
 	//«назвать порты как на коммутаторе» должно взять и порядок коммутатора тоже
-	'passport' => $data['ports'] ?? [],
+	'passport' => $scanOk ? ($data['ports'] ?? []) : null,
 	'transitFrom' => $provider->transitFrom(),
 	'foreignNames' => $foreignNames ?? [],
-	'scanStamp' => $provider->scanStamp($data)]) ?>
+	'scanStamp' => $scanOk ? $provider->scanStamp($data) : null]) ?>
 
 <?php if (!$trouble && $status !== 'pending') { ?>
 	<?php /* сырые данные - свёрнутыми: на основной таблице они мозолят глаза,

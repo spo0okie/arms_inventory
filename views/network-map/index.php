@@ -95,15 +95,23 @@ $scanUrl = is_object($site)
 			var button = $('#network-map-scan'), label = button.data('label') || button.html();
 			button.data('label', label).prop('disabled', true)
 				.html('<span class="spinner-border spinner-border-sm"></span> опрос…');
+			//диагностика - на странице, а не в alert: окно закрыл - и разбираться не по чему
+			var trouble = function (text) {
+				$('#network-map-trouble').remove();
+				$('<div id="network-map-trouble" class="alert alert-warning py-2 my-2"></div>')
+					.text(text).prependTo('#network-map-body');
+			};
 			$.ajax({url: <?= json_encode($scanUrl) ?> + '&attempt=' + attempt + (reuse ? '&reuse=1' : ''),
 				timeout: 120000})
 				.done(function (data, status, xhr) {
 					var json = typeof data === 'object' ? data : null;
 					if (json && json.status === 'pending') {
 						if (json.more) return setTimeout(function () { networkMapScan(json.attempt); }, 15000);
-						alert('Опрос не уложился в отведённое время, попробуйте позже');
+						trouble('Опрос не уложился в отведённое число попыток (' + json.attempt + '). '
+							+ 'Сервис должен укладываться в свой scan.deadline - кто тормозит, '
+							+ 'видно в его журнале по строкам «полный опрос занял».');
 					} else if (json && json.status === 'error') {
-						alert('Сверка не выполнена: ' + json.error);
+						trouble('Сверка не выполнена: ' + json.error);
 					} else {
 						$('#network-map-body').html(data);
 						networkMapRender();
@@ -111,7 +119,7 @@ $scanUrl = is_object($site)
 					button.prop('disabled', false).html(label);
 				})
 				.fail(function (xhr, status) {
-					alert('Сверка не выполнена: ' + (xhr.status ? 'сервер ответил ' + xhr.status : 'нет ответа'));
+					trouble('Сверка не выполнена: ' + (xhr.status ? 'сервер ответил ' + xhr.status : 'нет ответа'));
 					button.prop('disabled', false).html(label);
 				});
 		};

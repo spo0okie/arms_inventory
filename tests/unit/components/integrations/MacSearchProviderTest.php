@@ -1303,4 +1303,37 @@ eth1";
 		$this->assertStringContainsString('нет TCP-соединения', $html);
 		$this->assertStringContainsString('TCP connection to device failed', $html);
 	}
+
+	/** Сбойный опрос не выносит вердиктов: записанные связи не помечаются под снятие */
+	public function testFailedScanDrawsNoVerdicts()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16', 'ports_override' => "Gi1/0/1
+Gi1/0/2"]);
+		$arm = new Techs();
+		$arm->setAttributes(['model_id' => $switch->model_id, 'num' => 'ARM-LINKED',
+			'history' => ''], false);
+		$this->assertTrue($arm->save(false));
+		//записанная связь Gi1/0/1 <-> порт АРМа
+		$mine = new \app\models\Ports(['techs_id' => $switch->id, 'name' => 'Gi1/0/1', 'comment' => '']);
+		$this->assertTrue($mine->save(false));
+		$his = new \app\models\Ports(['techs_id' => $arm->id, 'name' => 'eth0', 'comment' => '']);
+		$this->assertTrue($his->save(false));
+		$mine->link_ports_id = $his->id;
+		$this->assertTrue($mine->save(false));
+
+		$provider = $this->makeProvider([$this->response($this->payload([], [
+			'mode' => 'table',
+			'targets' => ['requested' => 1, 'answered' => 0, 'failed' => 1],
+			'errors' => [['target' => $switch->id, 'host' => '10.50.2.16',
+				'error' => 'не уложился в срок опроса (240 с)']],
+		]))]);
+		$html = $provider->renderSwitchPanel($switch);
+
+		//причина видна, а слоя сверки нет: таблица как в карточке без опроса
+		$this->assertStringContainsString('не уложился в срок опроса', $html);
+		$this->assertStringNotContainsString('линка нет', $html);
+		$this->assertStringNotContainsString('не отозвалось', $html);
+		//связь по-прежнему показана как записанная, без пометок
+		$this->assertStringContainsString('ARM-LINKED', $html);
+	}
 }
