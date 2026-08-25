@@ -117,12 +117,7 @@ class NetworkMapController extends ArmsBaseController
 
 		if (($data['status'] ?? null) === 'pending') {
 			Yii::$app->response->format = Response::FORMAT_JSON;
-			//сверка площадки заведомо дольше точечного поиска: попыток должно
-			//хватить на scan.deadline сервиса (по нему опрос гарантированно
-			//завершится - целиком либо частично, с перечнем неуспевших).
-			//Цикл попытки ~40 с (wait 25 + пауза 15): 8 попыток ~ 320 с > 240
-			$limit = (int)($provider->config['mapMaxAttempts'] ?? max(8,
-				(int)($provider->config['maxAttempts'] ?? MacSearchProvider::DEFAULT_MAX_ATTEMPTS)));
+			$limit = $provider->fullPollAttempts();
 			return ['status' => 'pending', 'attempt' => $attempt + 1, 'more' => $attempt + 1 < $limit];
 		}
 		if (($data['status'] ?? null) !== 'done') {

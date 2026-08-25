@@ -56,7 +56,8 @@ elseif ($failure) $trouble = 'коммутатор не опрошен: '.($fail
 <?php if ($status === 'pending') { ?>
 	<div class="text-secondary mb-1">
 		<span class="spinner-border spinner-border-sm" role="status"></span>
-		&mdash; идёт опрос коммутатора<?= $refreshUrl ? '' : ', откройте карточку позже' ?>
+		&mdash; идёт опрос коммутатора<?= $refreshUrl ? ''
+			: ' — в отведённое время не уложился, обновите панель для нового опроса' ?>
 	</div>
 <?php } elseif ($trouble) { ?>
 	<div class="text-secondary opacity-75 mb-1"<?= empty($failure['detail']) ? ''

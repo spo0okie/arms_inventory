@@ -57,7 +57,8 @@ $failedLimit = 10;
 		<?php } elseif (($data['status'] ?? null) === 'pending') { ?>
 			<span class="text-secondary">
 				<span class="spinner-border spinner-border-sm" role="status"></span>
-				&mdash; идёт опрос коммутаторов<?= $refreshUrl ? '' : ', откройте карточку позже' ?>
+				&mdash; идёт опрос коммутаторов<?= $refreshUrl ? ''
+				: ' — в отведённое время не уложился, откройте карточку позже' ?>
 			</span>
 		<?php } elseif (($data['status'] ?? null) === 'error') { ?>
 			<span class="text-secondary opacity-75">&mdash; опрос не выполнен:

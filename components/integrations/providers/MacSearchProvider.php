@@ -1588,11 +1588,27 @@ class MacSearchProvider extends IntegrationProvider
 	 * URL самоперезапроса панели, пока сервис опрашивает (null — не нужен
 	 * или попытки исчерпаны).
 	 */
+	/**
+	 * Сколько попыток ждать полный опрос (панель коммутатора, сверка карты).
+	 *
+	 * Полный опрос заведомо дольше точечного поиска, но конечен: сервис
+	 * ограничен своим scan.deadline (по умолчанию 240 с) и по нему отдаёт
+	 * собранное с перечнем неуспевших. Попыток должно хватать до дедлайна:
+	 * цикл ~40 с (wait 25 + пауза 15), 8 попыток ~ 320 с > 240
+	 */
+	public function fullPollAttempts(): int
+	{
+		return (int)($this->config['mapMaxAttempts'] ?? max(8,
+			(int)($this->config['maxAttempts'] ?? static::DEFAULT_MAX_ATTEMPTS)));
+	}
+
 	protected function refreshUrl(ArmsModel $model, array $results, int $attempt,
 		string $panel = self::PANEL): ?string
 	{
 		if (!$this->isPending($results)) return null;
-		if ($attempt + 1 >= (int)($this->config['maxAttempts'] ?? static::DEFAULT_MAX_ATTEMPTS)) return null;
+		$limit = $panel === static::PANEL_SWITCH ? $this->fullPollAttempts()
+			: (int)($this->config['maxAttempts'] ?? static::DEFAULT_MAX_ATTEMPTS);
+		if ($attempt + 1 >= $limit) return null;
 
 		return Url::to(['/integrations/panel',
 			'provider' => $this->id,
