@@ -205,7 +205,7 @@ class NetworkMapTest extends Unit
 		$row = fn(Techs $from, string $port, string $remoteIp, string $remotePort) => [
 			'target' => $from->id, 'port' => $port, 'remote_mac' => '', 'remote_name' => $remoteIp,
 			'remote_port' => $remotePort, 'protocol' => 'lldp'];
-		$map->overlay(['status' => 'done', 'rows' => [
+		$map->overlay(['status' => 'done', 'neighbors' => [
 			$row($core, 'Gi1/0/1', '10.60.0.2', 'GigabitEthernet1/0/47'),   //имя в другой нотации
 			$row($edge, 'Gi1/0/47', '10.60.0.1', 'Gi1/0/1'),                 //та же связь с той стороны
 			//новая: core Gi1/0/3 <-> edge Gi1/0/48, но Gi1/0/48 у edge... свободен
@@ -227,7 +227,7 @@ class NetworkMapTest extends Unit
 		//конфликт на стороне соседа: edge Gi1/0/47 уже записан на core Gi1/0/1,
 		//а LLDP говорит, что туда воткнут core Gi1/0/3
 		$map2 = new NetworkMap($site);
-		$map2->overlay(['status' => 'done', 'rows' => [
+		$map2->overlay(['status' => 'done', 'neighbors' => [
 			$row($core, 'Gi1/0/3', '10.60.0.2', 'Gi1/0/47'),
 		], 'errors' => []], $provider);
 		$found = $map2->overlay['found'][0];
@@ -302,7 +302,7 @@ class NetworkMapTest extends Unit
 			['target' => $core->id, 'port' => 'Gi1/0/2', 'remote_mac' => '',
 				'remote_name' => 'sw-lost', 'remote_port' => 'Gi0/1', 'protocol' => 'lldp'],
 		];
-		$map->overlay(['status' => 'done', 'rows' => $rows, 'errors' => []], $provider);
+		$map->overlay(['status' => 'done', 'neighbors' => $rows, 'errors' => []], $provider);
 
 		//опознанный коммутатор ДРУГОЙ площадки - находка с кнопкой (аплинк
 		//между площадками), а не наблюдение; опознанный телефон - счётчик
@@ -317,7 +317,7 @@ class NetworkMapTest extends Unit
 		$this->assertTrue($phone->save(false));
 
 		$map2 = new NetworkMap($site);
-		$map2->overlay(['status' => 'done', 'rows' => [
+		$map2->overlay(['status' => 'done', 'neighbors' => [
 			['target' => $core->id, 'port' => 'Gi1/0/1', 'remote_mac' => '',
 				'remote_name' => '10.60.9.9', 'remote_port' => 'Gi1/0/1', 'protocol' => 'lldp'],
 			['target' => $core->id, 'port' => 'Gi1/0/2', 'remote_mac' => '00:da:55:b8:8a:3b',
@@ -330,6 +330,29 @@ class NetworkMapTest extends Unit
 		$this->assertCount(1, $cross);
 		$this->assertSame($elsewhere->id, $cross[0]['b']->id);
 		$this->assertSame(1, $map2->overlay['endpoints'] ?? 0, 'телефон из инвентаризации - счётчик');
+
+		//telephone главнее bridge: телефон с ПК-портом честно объявляет bridge
+		$map3 = new NetworkMap($site);
+		$map3->overlay(['status' => 'done', 'neighbors' => [
+			['target' => $core->id, 'port' => 'Gi1/0/1', 'remote_mac' => '',
+				'remote_name' => 'whatever', 'remote_port' => '1',
+				'remote_caps' => 'bridge,telephone', 'protocol' => 'lldp'],
+		], 'errors' => []], $provider);
+		$this->assertSame(1, $map3->overlay['ignored'] ?? 0);
+		$this->assertCount(0, $map3->overlay['unknown']);
+
+		//FDB-фильтр: LLDP-сосед не опознан, но за портом ровно один адрес, он
+		//опознан и это не коммутатор - не кандидат (сценарий владельца)
+		$map4 = new NetworkMap($site);
+		$map4->overlay(['status' => 'done', 'neighbors' => [
+			['target' => $core->id, 'port' => 'GigabitEthernet1/0/2', 'remote_mac' => '',
+				'remote_name' => 'no-caps-neighbor', 'remote_port' => '1', 'protocol' => 'cdp'],
+		], 'rows' => [
+			//FDB пишет порт в другой нотации - сопоставление по ключу
+			['target' => $core->id, 'port' => 'Gi1/0/2', 'mac' => '00:da:55:b8:8a:3b'],
+		], 'errors' => []], $provider);
+		$this->assertSame(1, $map4->overlay['endpoints'] ?? 0);
+		$this->assertCount(0, $map4->overlay['unknown']);
 
 		$o = $map->overlay;
 		$this->assertSame(3, $o['ignored']);
@@ -353,5 +376,63 @@ class NetworkMapTest extends Unit
 		$this->assertCount(3, $ambiguous['candidates']);
 		//точное имя побеждает ключ
 		$this->assertSame('Te1/0/1', MacSearchProvider::resolvePortName($switch, 'Te1/0/1')['name']);
+
+		//смарты объявляют порты голыми числами: «GigabitEthernet1/0/8» из CDP
+		//находит объявленный «8» по последнему числу - если он один такой
+		$smart = $this->makeSwitch($site, '10.60.0.2', "1\n2\n8\n28");
+		$this->assertSame('8', MacSearchProvider::resolvePortName($smart, 'GigabitEthernet1/0/8')['name']);
+		//28 против 8: хвост у 1/0/28 - «28», единственный
+		$this->assertSame('28', MacSearchProvider::resolvePortName($smart, 'GigabitEthernet1/0/28')['name']);
+	}
+
+	/**
+	 * Порт соседа, который не разобрать по имени, разбирается по обратной
+	 * стороне LLDP (сосед свой порт называет своим именем) и по его FDB
+	 * (за каким портом виден MAC нашего коммутатора).
+	 */
+	public function testPeerPortFromReverseAndFdb()
+	{
+		$site = $this->makeSite();
+		$core = $this->makeSwitch($site, '10.60.0.1', 'Gi1/0/20', ['mac' => '00aabbcc0001']);
+		//у смарта объявлены и «8», и «18»: номерной шаг для «...1/0/8» ещё
+		//работает, а вот совсем чужое имя - нет
+		$smart = $this->makeSwitch($site, '10.60.0.2', "8\n18");
+
+		$provider = new MacSearchProvider(['id' => 'macsearch',
+			'config' => ['url' => 'http://x', 'token' => 't']]);
+		$row = fn(Techs $from, string $port, string $remote, string $remotePort) => [
+			'target' => $from->id, 'port' => $port, 'remote_mac' => '',
+			'remote_name' => $remote, 'remote_port' => $remotePort, 'protocol' => 'cdp'];
+
+		//сосед опознаётся по ЛЮБОМУ адресу устройства, не только первому:
+		//у ядра адресов семь, LLDP представляется каким захочет
+		$multi = $this->makeSwitch($site, "10.60.0.7
+10.60.0.77", 'Gi1/0/1');
+		$mapIp = new NetworkMap($site);
+		$mapIp->overlay(['status' => 'done', 'neighbors' => [
+			$row($core, 'Gi1/0/20', '10.60.0.77', 'Gi1/0/1'),
+		], 'errors' => []], $provider);
+		$this->assertCount(1, $mapIp->overlay['found']);
+		$this->assertSame($multi->id, $mapIp->overlay['found'][0]['b']->id);
+
+		//обратная сторона: smart сам говорит «мой порт 8 видит core»
+		$map = new NetworkMap($site);
+		$map->overlay(['status' => 'done', 'neighbors' => [
+			$row($core, 'Gi1/0/20', '10.60.0.2', 'Port No 8 of unit'),   //не разобрать
+			$row($smart, '8', '10.60.0.1', 'Gi1/0/20'),
+		], 'errors' => []], $provider);
+		$this->assertCount(1, $map->overlay['found']);
+		$this->assertSame('8', $map->overlay['found'][0]['peer']['name'] ?? null);
+
+		//FDB: обратной записи нет, но за портом 18 смарта виден MAC core
+		$map2 = new NetworkMap($site);
+		$map2->overlay(['status' => 'done', 'neighbors' => [
+			$row($core, 'Gi1/0/20', '10.60.0.2', 'weird-port-name'),
+		], 'rows' => [
+			['target' => $smart->id, 'port' => '18', 'mac' => '00:aa:bb:cc:00:01'],
+			['target' => $smart->id, 'port' => '8', 'mac' => '00:99:88:77:66:55'],
+		], 'errors' => []], $provider);
+		$this->assertCount(1, $map2->overlay['found']);
+		$this->assertSame('18', $map2->overlay['found'][0]['peer']['name'] ?? null);
 	}
 }

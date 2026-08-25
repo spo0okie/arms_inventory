@@ -201,11 +201,23 @@ class NetworkMap
 	 * но не предлагается к удалению: «не видно» - это и выключен, и LLDP
 	 * отключён, и перенесли. Решает человек.
 	 *
-	 * @param array $data ответ сервиса mode=neighbors (rows/errors), строки
-	 *   уже разложены по членам стеков
+	 * @param array $data ответ сервиса mode=table (neighbors + rows/errors),
+	 *   строки уже разложены по членам стеков
 	 */
 	public function overlay(array $data, MacSearchProvider $provider): void
 	{
+		//таблицы MAC - второй фильтр для неопознанных соседей: за портом один
+		//адрес, он опознан в инвентаризации и это не коммутатор - значит,
+		//LLDP-сосед на этом порту не коммутатор (телефоны и точки доступа
+		//любят объявлять bridge). Ключ - (устройство, ключ имени порта):
+		//FDB и LLDP пишут имя порта в разных нотациях
+		$fdb = [];
+		foreach ($data['rows'] ?? [] as $row) {
+			$key = (int)($row['target'] ?? 0).'|'.MacSearchProvider::portKey((string)($row['port'] ?? ''));
+			$mac = MacSearchProvider::hexMac($row['mac'] ?? '');
+			if ($mac) $fdb[$key][$mac] = true;
+		}
+
 		$overlay = ['confirmed' => [], 'unseen' => [], 'found' => [], 'unknown' => [],
 			'crosssite' => [], 'outside' => [], 'failed' => $data['errors'] ?? [], 'answered' => []];
 
@@ -223,8 +235,20 @@ class NetworkMap
 			$recorded[static::endKey($link['port'])] = ['edge' => null, 'port' => $link['port'], 'peer' => $link['peer']];
 		}
 
+		//обратный индекс LLDP: сосед свою сторону линка называет СВОИМ именем
+		//порта - оно почти всегда сопоставляется точно, в отличие от того, как
+		//этот же порт назвал первый коммутатор
+		$reverse = [];
+		foreach ($data['neighbors'] ?? [] as $row) {
+			$local = $this->tech((int)($row['target'] ?? 0));
+			$localPort = trim((string)($row['port'] ?? ''));
+			if (!is_object($local) || $localPort === '') continue;
+			$remote = $provider->identifyNeighbor($row);
+			if (is_object($remote)) $reverse[$remote->id][$local->id][$localPort] = true;
+		}
+
 		$seenPairs = [];
-		foreach ($data['rows'] ?? [] as $row) {
+		foreach ($data['neighbors'] ?? [] as $row) {
 			$local = $this->tech((int)($row['target'] ?? 0));
 			$localPort = trim((string)($row['port'] ?? ''));
 			if (!is_object($local) || $localPort === '') continue;
@@ -238,6 +262,20 @@ class NetworkMap
 			}
 
 			$remote = $provider->identifyNeighbor($row);
+
+			//сосед не опознан по LLDP-полям - спрашиваем таблицу MAC его порта
+			if (!is_object($remote)) {
+				$macs = $fdb[$local->id.'|'.MacSearchProvider::portKey($localPort)] ?? [];
+				if (count($macs) === 1) {
+					$device = $provider->identifyNeighbor(['remote_mac' => array_key_first($macs)]);
+					if (is_object($device) && !static::isSwitchModel($device)) {
+						//за портом ровно одно устройство, и оно не коммутатор
+						$overlay['endpoints'] = ($overlay['endpoints'] ?? 0) + 1;
+						continue;
+					}
+				}
+			}
+
 			if (!is_object($remote)) {
 				$name = trim((string)($row['remote_name'] ?? ''));
 				$mac = trim((string)($row['remote_mac'] ?? ''));
@@ -268,9 +306,23 @@ class NetworkMap
 			if (isset($this->nodeOf[$remote->id])
 				&& $this->nodeOf[$remote->id] === $this->nodeOf[$local->id]) continue;    //внутри стека
 
-			//имя порта, как его сообщил сосед, -> объявленный порт соседа
+			//порт соседа: лесенка от точного к косвенному, на каждом шаге -
+			//единственный кандидат. 1) имя, как его сообщил сосед; 2) как этот
+			//порт называет САМ сосед в своей LLDP-записи об этой же связи;
+			//3) за каким портом соседа его FDB видит адреса нашего коммутатора
 			$remotePort = trim((string)($row['remote_port'] ?? ''));
 			$resolved = MacSearchProvider::resolvePortName($remote, $remotePort);
+			if (is_null($resolved['name'])) {
+				$back = array_keys($reverse[$local->id][$remote->id] ?? []);
+				if (count($back) === 1) {
+					$byBack = MacSearchProvider::resolvePortName($remote, (string)$back[0]);
+					if (!is_null($byBack['name'])) $resolved = $byBack;
+				}
+			}
+			if (is_null($resolved['name'])) {
+				$byFdb = $this->resolveByFdb($remote, $local, $fdb);
+				if (!is_null($byFdb)) $resolved = $byFdb;
+			}
 			$localResolved = MacSearchProvider::resolvePortName($local, $localPort);
 			$localName = $localResolved['name'] ?? $localPort;
 
@@ -332,6 +384,39 @@ class NetworkMap
 
 		$overlay['unknown'] = array_values($overlay['unknown']);
 		$this->overlay = $overlay;
+	}
+
+	/**
+	 * Порт соседа по его же таблице MAC: за каким портом $remote видны
+	 * адреса $local (поле MAC карточки и членов её стека). Ровно один порт -
+	 * это он; несколько или ноль - не угадываем.
+	 * @return array|null формат resolvePortName
+	 */
+	protected function resolveByFdb(Techs $remote, Techs $local, array $fdb): ?array
+	{
+		$macs = [];
+		foreach ($this->nodes[$this->nodeOf[$local->id] ?? -1]['members'] ?? [$local] as $member) {
+			foreach (MacSearchProvider::hexMacs($member->mac) as $mac) $macs[$mac] = true;
+		}
+		if (!count($macs)) return null;
+
+		$ports = [];
+		$prefix = $remote->id.'|';
+		foreach ($fdb as $key => $seen) {
+			if (strpos((string)$key, $prefix) !== 0) continue;
+			if (array_intersect_key($macs, $seen)) $ports[substr((string)$key, strlen($prefix))] = true;
+		}
+		if (count($ports) !== 1) return null;
+
+		//ключ порта из FDB -> объявленное имя, тем же правилом единственности
+		$portKey = (string)array_key_first($ports);
+		foreach ($remote->portsList as $item) {
+			if (MacSearchProvider::portKey((string)$item['port_name']) === $portKey) {
+				$resolved = MacSearchProvider::resolvePortName($remote, (string)$item['port_name']);
+				return is_null($resolved['name']) ? null : $resolved;
+			}
+		}
+		return null;
 	}
 
 	/** Ключ конца связи: устройство + имя порта */

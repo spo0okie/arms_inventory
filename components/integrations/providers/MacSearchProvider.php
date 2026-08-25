@@ -657,6 +657,9 @@ class MacSearchProvider extends IntegrationProvider
 	{
 		$caps = trim((string)($neighbor['remote_caps'] ?? ''));
 		if (strlen($caps)) {
+			//телефон с ПК-портом честно объявляет и bridge (он им и работает),
+			//поэтому telephone главнее: телефон - это телефон
+			if (preg_match('~telephone~', $caps)) return true;
 			return !preg_match('~bridge|router~', $caps);
 		}
 		$pattern = $this->config['neighborIgnore'] ?? static::DEFAULT_NEIGHBOR_IGNORE;
@@ -692,29 +695,41 @@ class MacSearchProvider extends IntegrationProvider
 		return $device;
 	}
 
-	/** Коммутатор по IP управления (первый адрес в поле) */
+	/**
+	 * Устройство по любому из его адресов.
+	 *
+	 * Устройство - это НАБОР адресов (у ядра их семь), и LLDP может
+	 * представиться любым из них, не обязательно первым. Тот же принцип, что
+	 * у device aliases в NetDisco: сосед опознаётся по любому алиасу.
+	 */
 	protected static function deviceByIp(string $ip): ?Techs
 	{
 		foreach (Techs::find()->where(['like', 'techs.ip', $ip])->all() as $tech) {
 			/** @var Techs $tech */
-			if (static::firstIp($tech->ip) === $ip) return $tech;
+			foreach (preg_split('~\s+~', trim((string)$tech->ip)) as $candidate) {
+				if (static::firstIp($candidate) === $ip) return $tech;
+			}
 		}
 		return null;
 	}
 
 	/**
-	 * Соседи всех коммутаторов площадки (mode=neighbors) — для карты сети.
+	 * Полный опрос площадки для карты сети: mode=table — соседи (LLDP/CDP) и
+	 * таблицы MAC одним заходом. FDB тут не для показа, а для второго
+	 * фильтра: за портом один адрес, он опознан и это не коммутатор — LLDP-
+	 * сосед на этом порту точно не коммутатор, как бы себя ни называл.
 	 * Строки разложены по членам стеков. Ответ сервиса как есть (status /
-	 * rows / errors / targets), чтобы вызывающий видел pending и неопрошенных.
+	 * rows / neighbors / errors), чтобы вызывающий видел pending и неопрошенных.
 	 *
 	 * @throws \RuntimeException сервис недоступен / ответил ошибкой
 	 */
 	public function siteNeighbors(int $siteId): array
 	{
 		$targets = $this->targets(static::placeSubtree($siteId));
-		if (!$targets) return ['status' => 'done', 'rows' => [], 'errors' => [], 'targets' => []];
-		$data = $this->fetch(null, $targets, 'neighbors');
+		if (!$targets) return ['status' => 'done', 'rows' => [], 'neighbors' => [], 'errors' => [], 'targets' => []];
+		$data = $this->fetch(null, $targets, 'table');
 		$data['rows'] = $this->attributeStack($data['rows'] ?? []);
+		$data['neighbors'] = $this->attributeStack($data['neighbors'] ?? []);
 		return $data;
 	}
 
@@ -747,6 +762,18 @@ class MacSearchProvider extends IntegrationProvider
 		if (count($byKey) === 1) {
 			$name = (string)reset($byKey);
 			return ['id' => $declared[$name], 'name' => $name, 'candidates' => []];
+		}
+		//последний числовой хвост: «GigabitEthernet1/0/8» против объявленных
+		//«1..28» у смартов. Требование единственности снимает коллизию
+		//Gi1/0/8 против Te1/0/8: оба объявлены - решает человек
+		$number = static::portNumber($lldpName);
+		if ($number !== '') {
+			$byNumber = array_filter(array_keys($declared), fn($name) =>
+				!static::isAggregate((string)$name) && static::portNumber((string)$name) === $number);
+			if (count($byNumber) === 1) {
+				$name = (string)reset($byNumber);
+				return ['id' => $declared[$name], 'name' => $name, 'candidates' => []];
+			}
 		}
 		$candidates = [];
 		foreach ($declared as $name => $id) $candidates[] = ['id' => $id, 'name' => (string)$name];
