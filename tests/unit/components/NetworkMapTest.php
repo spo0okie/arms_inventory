@@ -435,4 +435,58 @@ class NetworkMapTest extends Unit
 		$this->assertCount(1, $map2->overlay['found']);
 		$this->assertSame('18', $map2->overlay['found'][0]['peer']['name'] ?? null);
 	}
+
+	/**
+	 * LLDP молчит (выключен из коробки), но таблицы MAC сняты: карта считает
+	 * «немых», строит направления «за каким портом чьи адреса» и рисует
+	 * взаимно-однозначные пары кандидатами в прямой линк.
+	 */
+	public function testFdbDirectionsWhenLldpSilent()
+	{
+		$site = $this->makeSite();
+		$one = $this->makeSwitch($site, '10.60.0.1', "Gi1/0/1\nGi1/0/24", ['mac' => '00aabbcc0001']);
+		$two = $this->makeSwitch($site, '10.60.0.2', "1\n25", ['mac' => '00aabbcc0002']);
+		$three = $this->makeSwitch($site, '10.60.0.3', "1\n2", ['mac' => '00aabbcc0003']);
+
+		$provider = new MacSearchProvider(['id' => 'macsearch',
+			'config' => ['url' => 'http://x', 'token' => 't']]);
+		$map = new NetworkMap($site);
+		$map->overlay(['status' => 'done', 'neighbors' => [], 'rows' => [
+			//взаимная однозначность: Gi1/0/24 первого видит ТОЛЬКО второго,
+			//порт 25 второго видит ТОЛЬКО первого
+			['target' => $one->id, 'port' => 'Gi1/0/24', 'mac' => '00:aa:bb:cc:00:02'],
+			['target' => $two->id, 'port' => '25', 'mac' => '00:aa:bb:cc:00:01'],
+			//а порт 1 второго - транзит: за ним и первый, и третий
+			['target' => $two->id, 'port' => '1', 'mac' => '00:aa:bb:cc:00:01'],
+			['target' => $two->id, 'port' => '1', 'mac' => '00:aa:bb:cc:00:03'],
+		], 'errors' => []], $provider);
+		$overlay = $map->overlay;
+
+		//LLDP не сообщил никто, хотя таблицы отдали все трое... нет: третий
+		//строк не отдал - немыми числятся только отдавшие таблицу
+		$silent = array_map(fn($tech) => $tech->id, $overlay['silent']);
+		sort($silent);
+		$this->assertSame([$one->id, $two->id], $silent);
+
+		//кандидат ровно один - взаимно-однозначная пара, транзит не в счёт
+		$this->assertCount(1, $overlay['fdbfound']);
+		$found = $overlay['fdbfound'][0];
+		$pair = [$found['a']->id => $found['aport'], $found['b']->id => $found['bport']];
+		$this->assertSame(['Gi1/0/24', '25'], [$pair[$one->id], $pair[$two->id]]);
+
+		//направления: порт 1 второго смотрит в сторону обоих
+		$byPort = [];
+		foreach ($overlay['directions'] as $direction) {
+			$byPort[$direction['tech']->id.'|'.$direction['port']] = $direction;
+		}
+		$transit = $byPort[$two->id.'|1'] ?? null;
+		$this->assertNotNull($transit);
+		$this->assertFalse($transit['unique']);
+		$this->assertCount(2, $transit['nodes']);
+
+		//взаимно-однозначная пара - на схеме, синим пунктиром с пометкой MAC
+		$mermaid = $map->mermaid();
+		$this->assertStringContainsString('MAC: Gi1/0/24 — 25', $mermaid);
+		$this->assertStringContainsString('stroke:#0d6efd', $mermaid);
+	}
 }

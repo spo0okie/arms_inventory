@@ -391,8 +391,101 @@ class NetworkMap
 			if ($aAnswered || $bAnswered) $overlay['unseen'][$key] = true;
 		}
 
+		//LLDP на половине парка выключен из коробки, и тогда соседств нет,
+		//хотя коммутатор честно отдал таблицу MAC. Молчать об этом нельзя:
+		//«соседей не сообщил» - главная причина пустой карты, и лечится она
+		//включением LLDP, а не разглядыванием сканера
+		$polled = [];
+		foreach ($data['rows'] ?? [] as $row) $polled[(int)($row['target'] ?? 0)] = true;
+		$overlay['silent'] = [];
+		foreach (array_keys($polled) as $techId) {
+			$tech = $this->tech($techId);
+			if (is_object($tech) && !isset($overlay['answered'][$techId])) $overlay['silent'][] = $tech;
+		}
+
+		$this->fdbDirections($fdb, $overlay);
+
 		$overlay['unknown'] = array_values($overlay['unknown']);
 		$this->overlay = $overlay;
+	}
+
+	/**
+	 * Направления по таблицам MAC: за каким портом видны адреса других
+	 * коммутаторов площадки.
+	 *
+	 * Это ответ на «как они соединены», когда LLDP молчит. Направление - не
+	 * звено (между А и Б может стоять неуправляемая коробка), поэтому в
+	 * записи не предлагается. Но взаимно-однозначная пара - порт А видит
+	 * ТОЛЬКО Б, а порт Б видит ТОЛЬКО А - сильный кандидат в прямой линк:
+	 * такие рисуются на схеме пунктиром с пометкой MAC.
+	 */
+	protected function fdbDirections(array $fdb, array &$overlay): void
+	{
+		//чей адрес: hex MAC -> узел карты (по полю MAC всех членов узла)
+		$macNode = [];
+		foreach ($this->nodes as $nodeId => $node) {
+			foreach ($node['members'] as $member) {
+				foreach (MacSearchProvider::hexMacs($member->mac) as $mac) $macNode[$mac] = $nodeId;
+			}
+		}
+
+		$directions = [];    //techId|portKey -> [nodeId => true]
+		foreach ($fdb as $key => $macs) {
+			$techId = (int)strtok((string)$key, '|');
+			$myNode = $this->nodeOf[$techId] ?? null;
+			if (is_null($myNode)) continue;
+			foreach ($macs as $mac => $seen) {
+				$nodeId = $macNode[$mac] ?? null;
+				if (!is_null($nodeId) && $nodeId !== $myNode) $directions[$key][$nodeId] = true;
+			}
+		}
+
+		$overlay['directions'] = [];
+		$uniquePort = [];    //myNode|peerNode -> сторона кандидата
+		foreach ($directions as $key => $nodes) {
+			[$techId, $portKey] = explode('|', (string)$key, 2);
+			$tech = $this->tech((int)$techId);
+			if (!is_object($tech)) continue;
+			$resolved = MacSearchProvider::resolvePortName($tech, $portKey);
+			$port = $resolved['name'] ?? $portKey;
+			$overlay['directions'][] = ['tech' => $tech, 'port' => $port,
+				'nodes' => array_map(fn($id) => $this->nodes[$id]['name'], array_keys($nodes)),
+				'unique' => count($nodes) === 1];
+			if (count($nodes) === 1) {
+				$uniquePort[$this->nodeOf[$tech->id].'|'.array_key_first($nodes)] =
+					['tech' => $tech, 'port' => $port];
+			}
+		}
+
+		$overlay['fdbfound'] = [];
+		foreach ($uniquePort as $pair => $side) {
+			[$a, $b] = array_map('intval', explode('|', (string)$pair));
+			if ($a >= $b) continue;    //одна пара - один кандидат
+			$back = $uniquePort[$b.'|'.$a] ?? null;
+			if (is_null($back)) continue;
+
+			//уже записанное или найденное по LLDP кандидатом не дублируем
+			$known = false;
+			foreach ($this->edges as $edge) {
+				if (min($edge['a'], $edge['b']) === $a && max($edge['a'], $edge['b']) === $b) {
+					$known = true;
+					break;
+				}
+			}
+			foreach ($overlay['found'] as $found) {
+				$fa = $this->nodeOf[$found['a']->id] ?? null;
+				$fb = $this->nodeOf[$found['b']->id] ?? null;
+				if (!is_null($fa) && !is_null($fb)
+					&& min($fa, $fb) === $a && max($fa, $fb) === $b) {
+					$known = true;
+					break;
+				}
+			}
+			if (!$known) {
+				$overlay['fdbfound'][] = ['a' => $side['tech'], 'aport' => $side['port'],
+					'b' => $back['tech'], 'bport' => $back['port']];
+			}
+		}
 	}
 
 	/**
@@ -517,6 +610,16 @@ class NetworkMap
 				$lines[] = '  n'.$this->nodeOf[$found['a']->id].' -.-|"'.static::quote($label).'"| n'
 					.$this->nodeOf[$found['b']->id];
 				$styles[] = '  linkStyle '.$index.' stroke:#198754,stroke-width:3px';
+				$index++;
+			}
+			//кандидаты по таблицам MAC ({@see fdbDirections()}): взаимная
+			//однозначность - почти наверняка прямой линк, но записывается
+			//только руками (между портами может стоять неуправляемая коробка)
+			foreach ($this->overlay['fdbfound'] ?? [] as $found) {
+				$label = 'MAC: '.$found['aport'].' — '.$found['bport'];
+				$lines[] = '  n'.$this->nodeOf[$found['a']->id].' -.-|"'.static::quote($label).'"| n'
+					.$this->nodeOf[$found['b']->id];
+				$styles[] = '  linkStyle '.$index.' stroke:#0d6efd,stroke-width:2px,stroke-dasharray:6';
 				$index++;
 			}
 			//неопознанные - узлом на ИМЯ соседа, не на строку: один сосед виден

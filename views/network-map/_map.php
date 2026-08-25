@@ -85,7 +85,13 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 				оконечных устройств: <?= (int)$overlay['endpoints'] ?></span><?php }
 		if (!empty($overlay['confirmed_outside'])) { ?>,
 			<span qtip_ttip="Записанные аплинки на коммутаторы других площадок, подтверждённые сверкой">
-				подтверждено аплинков: <?= (int)$overlay['confirmed_outside'] ?></span><?php } ?>
+				подтверждено аплинков: <?= (int)$overlay['confirmed_outside'] ?></span><?php }
+		if (count($overlay['silent'] ?? [])) { ?>,
+			<span class="text-warning" qtip_ttip="Коммутаторы ответили таблицей MAC, но не сообщили ни одного
+					LLDP/CDP-соседа: скорее всего протокол обнаружения на них выключен (у смартов - из
+					коробки). Включите LLDP - и связи между ними появятся на карте сами: <?=
+					Html::encode(implode(', ', array_map(fn($tech) => $tech->name, $overlay['silent']))) ?>">
+				без LLDP-соседей: <?= count($overlay['silent']) ?></span><?php } ?>
 	</div>
 <?php } ?>
 
@@ -98,6 +104,8 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 	<b>сплошная линия</b> — записано в инвентаризации<?php if (is_array($overlay)) { ?>
 		(<span class="text-warning">жёлтая</span> — записано, но сверка не видит);
 		<span style="color:#198754"><b>зелёный пунктир</b></span> — найдено сверкой, не записано;
+		<span style="color:#0d6efd"><b>синий пунктир «MAC»</b></span> — вероятный линк по таблицам MAC
+		(LLDP молчит, записывается только руками);
 		<b>серый пунктир и «?»</b> — неопознанный сосед<?php } ?>;
 	<span class="text-danger">красная рамка</span> — связь закреплена за неработающим
 	(статус без флага «в работе»): либо снять связь, либо поправить статус
@@ -225,6 +233,50 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 		сетью» → записать найденное), из карточек коммутаторов («Опросить порты»)
 		либо руками в форме порта.
 	</div>
+<?php } ?>
+
+<?php if (is_array($overlay) && (count($overlay['fdbfound'] ?? []) || count($overlay['directions'] ?? []))) { ?>
+	<h4>Как соединены — по таблицам MAC</h4>
+	<div class="text-secondary small mb-1">
+		направление, а не звено: за портом видны адреса другого коммутатора, но между ними
+		может стоять неуправляемая коробка — поэтому запись только руками, в форме порта.
+		Взаимно-однозначные пары (порт А видит только Б, порт Б — только А) — почти наверняка
+		прямой линк, они же синим пунктиром на схеме
+	</div>
+	<?php if (count($overlay['fdbfound'] ?? [])) { ?>
+		<table class="table table-sm table-striped w-auto">
+			<tbody>
+			<?php foreach ($overlay['fdbfound'] as $found) { ?>
+				<tr>
+					<td><?= $device($found['a']) ?></td>
+					<td><?= Ports::$port_prefix.Html::encode($found['aport']) ?></td>
+					<td><i class="fas fa-exchange-alt text-primary"
+						qtip_ttip="Взаимно-однозначно по таблицам MAC обеих сторон"></i></td>
+					<td><?= Ports::$port_prefix.Html::encode($found['bport']) ?></td>
+					<td><?= $device($found['b']) ?></td>
+				</tr>
+			<?php } ?>
+			</tbody>
+		</table>
+	<?php } ?>
+	<?php if (count($overlay['directions'] ?? [])) { ?>
+		<details class="small mb-3">
+			<summary class="text-secondary">все направления (<?= count($overlay['directions']) ?> портов)</summary>
+			<table class="table table-sm w-auto mt-1">
+				<tbody>
+				<?php foreach ($overlay['directions'] as $direction) { ?>
+					<tr>
+						<td><?= $device($direction['tech']) ?></td>
+						<td><?= Ports::$port_prefix.Html::encode($direction['port']) ?></td>
+						<td class="text-secondary">→ в эту сторону:</td>
+						<td<?= $direction['unique'] ? ' class="fw-bold"' : '' ?>><?=
+							Html::encode(implode(', ', $direction['nodes'])) ?></td>
+					</tr>
+				<?php } ?>
+				</tbody>
+			</table>
+		</details>
+	<?php } ?>
 <?php } ?>
 
 <?php if (is_array($overlay) && count($overlay['unknown'])) { ?>
