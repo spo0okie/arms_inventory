@@ -12,6 +12,7 @@
  */
 
 use app\components\assets\MermaidAsset;
+use app\components\integrations\providers\MacSearchProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -89,8 +90,12 @@ $scanUrl = is_object($site)
 		<?= $this->render('_map', ['map' => $map, 'site' => $site, 'provider' => $provider, 'scanStamp' => null]) ?>
 	</div>
 
+	<?php $tableWait = is_object($provider)
+		? (int)($provider->config['tableWait'] ?? MacSearchProvider::DEFAULT_TABLE_WAIT)
+		: MacSearchProvider::DEFAULT_TABLE_WAIT; ?>
 	<script>
-		//сверка: pending - ждём и перезапрашиваем (сервис присоединяет к идущему опросу)
+		//сверка: один синхронный запрос, сервис держит его до готовности либо
+		//своего дедлайна; не уложился - ошибка с диагностикой на странице
 		window.networkMapScan = function (reuse) {
 			var button = $('#network-map-scan'), label = button.data('label') || button.html();
 			button.data('label', label).prop('disabled', true)
@@ -104,8 +109,7 @@ $scanUrl = is_object($site)
 			<?php /* один синхронный запрос: сервер держит его до готовности либо
 			       дедлайна сервиса, запас поверх tableWait - на передачу ответа */ ?>
 			$.ajax({url: <?= json_encode($scanUrl) ?> + (reuse ? '&reuse=1' : ''),
-				timeout: <?= ((int)($provider->config['tableWait']
-					?? pp\components\integrations\providers\MacSearchProvider::DEFAULT_TABLE_WAIT) + 60) * 1000 ?>})
+				timeout: <?= ($tableWait + 60) * 1000 ?>})
 				.done(function (data, status, xhr) {
 					var json = typeof data === 'object' ? data : null;
 					if (json && json.status === 'error') {
