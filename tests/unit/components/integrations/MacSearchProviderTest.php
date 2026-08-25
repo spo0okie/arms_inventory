@@ -62,7 +62,7 @@ class MacSearchProviderTest extends Unit
 				$this->responses = $responses;
 			}
 
-			protected function httpPost(string $url, string $body): array
+			protected function httpPost(string $url, string $body, ?int $timeout = null): array
 			{
 				$this->requests[] = ['url' => $url, 'body' => json_decode($body, true)];
 				$response = array_shift($this->responses);

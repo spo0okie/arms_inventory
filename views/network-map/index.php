@@ -69,7 +69,7 @@ $scanUrl = is_object($site)
 		<?php if ($provider && count($map->nodes)) { ?>
 			<div class="col-auto">
 				<?= Html::button('Сверить с сетью', ['class' => 'btn btn-sm btn-secondary',
-					'id' => 'network-map-scan', 'onclick' => 'networkMapScan(0)',
+					'id' => 'network-map-scan', 'onclick' => 'networkMapScan()',
 					'qtip_ttip' => 'Опросить соседей по LLDP/CDP у всех коммутаторов площадки и '
 						.'наложить на карту: что подтверждено, чего не видно, что найдено и не записано']) ?>
 			</div>
@@ -91,7 +91,7 @@ $scanUrl = is_object($site)
 
 	<script>
 		//сверка: pending - ждём и перезапрашиваем (сервис присоединяет к идущему опросу)
-		window.networkMapScan = function (attempt, reuse) {
+		window.networkMapScan = function (reuse) {
 			var button = $('#network-map-scan'), label = button.data('label') || button.html();
 			button.data('label', label).prop('disabled', true)
 				.html('<span class="spinner-border spinner-border-sm"></span> опрос…');
@@ -101,16 +101,14 @@ $scanUrl = is_object($site)
 				$('<div id="network-map-trouble" class="alert alert-warning py-2 my-2"></div>')
 					.text(text).prependTo('#network-map-body');
 			};
-			$.ajax({url: <?= json_encode($scanUrl) ?> + '&attempt=' + attempt + (reuse ? '&reuse=1' : ''),
-				timeout: 120000})
+			<?php /* один синхронный запрос: сервер держит его до готовности либо
+			       дедлайна сервиса, запас поверх tableWait - на передачу ответа */ ?>
+			$.ajax({url: <?= json_encode($scanUrl) ?> + (reuse ? '&reuse=1' : ''),
+				timeout: <?= ((int)($provider->config['tableWait']
+					?? pp\components\integrations\providers\MacSearchProvider::DEFAULT_TABLE_WAIT) + 60) * 1000 ?>})
 				.done(function (data, status, xhr) {
 					var json = typeof data === 'object' ? data : null;
-					if (json && json.status === 'pending') {
-						if (json.more) return setTimeout(function () { networkMapScan(json.attempt); }, 15000);
-						trouble('Опрос не уложился в отведённое число попыток (' + json.attempt + '). '
-							+ 'Сервис должен укладываться в свой scan.deadline - кто тормозит, '
-							+ 'видно в его журнале по строкам «полный опрос занял».');
-					} else if (json && json.status === 'error') {
+					if (json && json.status === 'error') {
 						trouble('Сверка не выполнена: ' + json.error);
 					} else {
 						$('#network-map-body').html(data);
@@ -139,7 +137,7 @@ $scanUrl = is_object($site)
 					element.prop('disabled', false);
 				}
 				//карта пересобирается с последним опросом, площадку заново не дёргаем
-				if (done) done(); else networkMapScan(0, 1);
+				if (done) done(); else networkMapScan(1);
 			}, 'json');
 		};
 
@@ -158,7 +156,7 @@ $scanUrl = is_object($site)
 					return;
 				}
 				if (answer.warning) alert(answer.warning);
-				networkMapScan(0, 1);
+				networkMapScan(1);
 			}, 'json');
 		};
 
@@ -168,7 +166,7 @@ $scanUrl = is_object($site)
 			if (!buttons.length || !confirm('Записать связей: ' + buttons.length + '?')) return;
 			var next = function () {
 				var current = buttons.shift();
-				if (!current) return networkMapScan(0, 1);
+				if (!current) return networkMapScan(1);
 				mapScanApply(current, true, next);
 			};
 			next();

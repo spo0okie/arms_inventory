@@ -99,6 +99,12 @@ class MacSearchProvider extends IntegrationProvider
 	/** таймаут HTTP по умолчанию: заведомо больше DEFAULT_WAIT */
 	const DEFAULT_TIMEOUT = 30;
 
+	/** сек ожидания полного опроса (mode=table): один синхронный запрос без
+	 * повторных заходов, значение обязано покрывать scan.deadline сервиса.
+	 * Цели опрашиваются параллельно, так что deadline - бюджет одного
+	 * худшего коммутатора, а не площадки: 120 покрывает дефолтные 90 */
+	const DEFAULT_TABLE_WAIT = 120;
+
 	/** ttl панели по умолчанию, сек (у сервиса свой кэш той же длины) */
 	const DEFAULT_TTL = 600;
 
@@ -324,6 +330,14 @@ class MacSearchProvider extends IntegrationProvider
 		$error = null;
 		try {
 			$data = $this->fetch(null, [$target], 'table');
+			//синхронная модель: pending = не уложились в tableWait, и это
+			//ошибка с диагностикой, а не повод перезапрашивать панель
+			if (($data['status'] ?? null) === 'pending') {
+				$data = null;
+				throw new \RuntimeException('опрос не уложился в отведённое время: '
+					.'tableWait интеграции должен покрывать scan.deadline сервиса; '
+					.'кто тормозит - в журнале сервиса, строки «полный опрос занял»');
+			}
 			$data['rows'] = $this->annotateUplinks($this->attributeStack($data['rows'] ?? []));
 			if (count($members) > 1) $data = $this->stackSlice($data, $model, $members);
 		} catch (\Throwable $e) {
@@ -1594,27 +1608,11 @@ class MacSearchProvider extends IntegrationProvider
 	 * URL самоперезапроса панели, пока сервис опрашивает (null — не нужен
 	 * или попытки исчерпаны).
 	 */
-	/**
-	 * Сколько попыток ждать полный опрос (панель коммутатора, сверка карты).
-	 *
-	 * Полный опрос заведомо дольше точечного поиска, но конечен: сервис
-	 * ограничен своим scan.deadline (по умолчанию 240 с) и по нему отдаёт
-	 * собранное с перечнем неуспевших. Попыток должно хватать до дедлайна:
-	 * цикл ~40 с (wait 25 + пауза 15), 8 попыток ~ 320 с > 240
-	 */
-	public function fullPollAttempts(): int
-	{
-		return (int)($this->config['mapMaxAttempts'] ?? max(8,
-			(int)($this->config['maxAttempts'] ?? static::DEFAULT_MAX_ATTEMPTS)));
-	}
-
 	protected function refreshUrl(ArmsModel $model, array $results, int $attempt,
 		string $panel = self::PANEL): ?string
 	{
 		if (!$this->isPending($results)) return null;
-		$limit = $panel === static::PANEL_SWITCH ? $this->fullPollAttempts()
-			: (int)($this->config['maxAttempts'] ?? static::DEFAULT_MAX_ATTEMPTS);
-		if ($attempt + 1 >= $limit) return null;
+		if ($attempt + 1 >= (int)($this->config['maxAttempts'] ?? static::DEFAULT_MAX_ATTEMPTS)) return null;
 
 		return Url::to(['/integrations/panel',
 			'provider' => $this->id,
@@ -1636,16 +1634,25 @@ class MacSearchProvider extends IntegrationProvider
 	 */
 	protected function fetch(?string $mac, array $targets, string $mode = 'lookup'): array
 	{
+		//полный опрос - синхронный и stateless для клиента: один запрос,
+		//сервис держит его до готовности либо своего scan.deadline (по нему
+		//вернётся собранное с перечнем неуспевших). Никаких повторных заходов
+		//и id задач: tableWait обязан покрывать deadline, иначе придёт
+		//pending, и вызывающий обязан трактовать его как «не уложился»
+		$wait = $mode === 'lookup'
+			? (int)($this->config['wait'] ?? static::DEFAULT_WAIT)
+			: (int)($this->config['tableWait'] ?? static::DEFAULT_TABLE_WAIT);
 		$payload = [
 			'targets' => $targets,
 			'mode' => $mode,
-			'wait' => (int)($this->config['wait'] ?? static::DEFAULT_WAIT),
+			'wait' => $wait,
 		];
 		if (!is_null($mac)) $payload['mac'] = $mac;
 
 		[$response, $status] = $this->httpPost(
 			rtrim($this->config['url'], '/').'/api/search',
-			json_encode($payload, JSON_UNESCAPED_UNICODE)
+			json_encode($payload, JSON_UNESCAPED_UNICODE),
+			max($this->timeout(), $wait + 30)
 		);
 
 		$data = json_decode($response, true);
@@ -1670,12 +1677,12 @@ class MacSearchProvider extends IntegrationProvider
 	 * @return array [string тело, int HTTP-код (0 если не распознан)]
 	 * @throws \RuntimeException при ошибке транспорта (ловит ядро)
 	 */
-	protected function httpPost(string $url, string $body): array
+	protected function httpPost(string $url, string $body, ?int $timeout = null): array
 	{
 		$context = stream_context_create([
 			'http' => [
 				'method' => 'POST',
-				'timeout' => $this->timeout(),
+				'timeout' => $timeout ?? $this->timeout(),
 				'header' => "Content-Type: application/json\r\n"
 					.'Authorization: Bearer '.$this->config['token']."\r\n",
 				'content' => $body,

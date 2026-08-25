@@ -77,10 +77,10 @@ class NetworkMapController extends ArmsBaseController
 	 *
 	 * Один POST в сервис со всеми целями площадки (веер на его стороне),
 	 * результат - слой поверх записанных рёбер ({@see NetworkMap::overlay()}).
-	 * Ничего не хранится: опрос по кнопке, 20–70 коммутаторов укладываются в
-	 * десятки секунд, а пока сервис работает - ответ pending, и страница
-	 * перезапрашивает сама (тот же опрос по тому же ключу присоединяется к
-	 * идущему, а не запускает второй).
+	 * Запрос синхронный: сервис держит его до готовности либо своего
+	 * scan.deadline, по которому возвращает собранное с перечнем неуспевших.
+	 * Никаких id задач и повторных попыток: не уложились - ошибка с
+	 * диагностикой, тайминги согласуются конфигами (tableWait > deadline).
 	 *
 	 * Последний результат держится в кэше приложения недолго
 	 * ({@see LAST_SCAN_TTL}): после записи одной связи карта пересобирается
@@ -88,11 +88,11 @@ class NetworkMapController extends ArmsBaseController
 	 * одной галочки. Это не хранение результатов - штамп опроса на экране
 	 * говорит, насколько данные свежие.
 	 *
-	 * GET: place (int), attempt (int) - номер попытки при pending,
-	 *   reuse (int) - взять последний опрос из кэша, если он ещё есть.
-	 * Ответ: HTML карты со слоем либо JSON {status: pending|error}.
+	 * GET: place (int), reuse (int) - взять последний опрос из кэша, если он
+	 *   ещё есть.
+	 * Ответ: HTML карты со слоем либо JSON {status: error}.
 	 */
-	public function actionScan(int $place, int $attempt = 0, int $reuse = 0, int $rooms = 0)
+	public function actionScan(int $place, int $reuse = 0, int $rooms = 0)
 	{
 		$site = Places::findOne($place);
 		if (!is_object($site)) throw new NotFoundHttpException('Площадка не найдена');
@@ -115,10 +115,15 @@ class NetworkMapController extends ArmsBaseController
 			if (($data['status'] ?? null) === 'done') Yii::$app->cache->set($cacheKey, $data, static::LAST_SCAN_TTL);
 		}
 
+		//синхронная модель: один запрос, сервис держит его до готовности либо
+		//своего scan.deadline (по нему придёт собранное с перечнем неуспевших).
+		//pending = не уложились в tableWait - это ошибка с диагностикой, а не
+		//повод опрашивать повторно: никаких id задач и попыток
 		if (($data['status'] ?? null) === 'pending') {
 			Yii::$app->response->format = Response::FORMAT_JSON;
-			$limit = $provider->fullPollAttempts();
-			return ['status' => 'pending', 'attempt' => $attempt + 1, 'more' => $attempt + 1 < $limit];
+			return ['status' => 'error', 'error' => 'опрос не уложился в отведённое время: '
+				.'tableWait интеграции должен покрывать scan.deadline сервиса; '
+				.'кто тормозит - в журнале сервиса, строки «полный опрос занял»'];
 		}
 		if (($data['status'] ?? null) !== 'done') {
 			Yii::$app->response->format = Response::FORMAT_JSON;
