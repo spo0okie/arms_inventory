@@ -219,7 +219,15 @@ class NetworkMap
 		}
 
 		$overlay = ['confirmed' => [], 'unseen' => [], 'found' => [], 'unknown' => [],
-			'crosssite' => [], 'outside' => [], 'failed' => $data['errors'] ?? [], 'answered' => []];
+			'crosssite' => [], 'outside' => [], 'failed' => $data['errors'] ?? [], 'answered' => [],
+			//сырые размеры ответа сервиса: по нулям в итогах должно быть видно,
+			//какое звено пустое - опрос, соседства или их сопоставление с картой
+			'stats' => [
+				'requested' => (int)($data['stats']['requested'] ?? 0),
+				'answered' => (int)($data['stats']['answered'] ?? 0),
+				'neighbors' => count($data['neighbors'] ?? []),
+				'rows' => count($data['rows'] ?? []),
+			]];
 
 		//записанные связи по ключу (устройство, имя порта) с обеих сторон
 		$recorded = [];

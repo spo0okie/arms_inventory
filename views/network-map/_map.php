@@ -61,6 +61,12 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 <?php if (is_array($overlay)) { ?>
 	<div class="text-secondary small mb-2">
 		<?= Html::encode((string)$scanStamp) ?>;
+		<span qtip_ttip="Сырой ответ сервиса: сколько коммутаторов опрашивалось и сколько
+				LLDP/CDP-соседств и строк таблиц MAC они вернули. Если итоги ниже по нулям,
+				отсюда видно, какое звено пустое">
+			опрошено: <?= (int)($overlay['stats']['answered'] ?? 0) ?>/<?= (int)($overlay['stats']['requested'] ?? 0) ?>,
+			соседств: <?= (int)($overlay['stats']['neighbors'] ?? 0) ?>,
+			строк MAC: <?= (int)($overlay['stats']['rows'] ?? 0) ?></span>;
 		подтверждено: <?= count($overlay['confirmed']) ?>,
 		не видно: <?= count($overlay['unseen']) ?>,
 		найдено незаписанных: <?= count($overlay['found']) ?>,
