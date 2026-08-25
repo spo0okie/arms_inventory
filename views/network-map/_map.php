@@ -19,6 +19,19 @@ $overlay = $map->overlay;
 $switches = [];
 foreach ($map->nodes as $node) foreach ($node['members'] as $member) $switches[$member->id] = $member;
 
+//кандидаты для «это коммутатор…»: все коммутаторы инвентаризации - сосед
+//может оказаться и с другой площадки (записан не там или переехал)
+$assignable = [];
+if (is_array($overlay) && count($overlay['unknown'])) {
+	foreach (\app\models\Techs::find()
+		->joinWith(['model.type', 'state'], true)
+		->where(['tech_types.code' => \app\components\NetworkMap::switchTypes()])
+		->andWhere(['or', ['tech_states.archived' => 0], ['tech_states.archived' => null]])
+		->orderBy('techs.num')->all() as $candidate) {
+		$assignable[$candidate->id] = $candidate->name;
+	}
+}
+
 /** Коммутатор ссылкой */
 $device = fn($tech) => ModelWidget::widget(['model' => $tech, 'options' => ['static_view' => true]]);
 
@@ -56,12 +69,28 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 				телефонов отсеяно: <?= (int)$overlay['ignored'] ?></span><?php }
 		if (!empty($overlay['noise'])) { ?>,
 			<span qtip_ttip="Записи LLDP без имени и адреса — чинить не по чему, обычно это застарелые строки таблицы">
-				пустых записей: <?= (int)$overlay['noise'] ?></span><?php } ?>
+				пустых записей: <?= (int)$overlay['noise'] ?></span><?php }
+		if (!empty($overlay['endpoints'])) { ?>,
+			<span qtip_ttip="Опознанные телефоны/ПК/серверы за портами — они видны в карточках коммутаторов, карта их не рисует">
+				оконечных устройств: <?= (int)$overlay['endpoints'] ?></span><?php }
+		if (!empty($overlay['confirmed_outside'])) { ?>,
+			<span qtip_ttip="Записанные аплинки на коммутаторы других площадок, подтверждённые сверкой">
+				подтверждено аплинков: <?= (int)$overlay['confirmed_outside'] ?></span><?php } ?>
 	</div>
 <?php } ?>
 
-<div class="border rounded p-2 mb-3" style="overflow:auto">
+<div class="border rounded p-2 mb-2" style="overflow:auto">
 	<div id="network-map-diagram" class="mermaid"><?= Html::encode($map->mermaid()) ?></div>
+</div>
+<?php /* легенда: карта обязана отвечать на вопрос «это уже записано или это
+       находка?» с одного взгляда, без чтения таблиц */ ?>
+<div class="text-secondary small mb-3">
+	<b>сплошная линия</b> — записано в инвентаризации<?php if (is_array($overlay)) { ?>
+		(<span class="text-warning">жёлтая</span> — записано, но сверка не видит);
+		<span style="color:#198754"><b>зелёный пунктир</b></span> — найдено сверкой, не записано;
+		<b>серый пунктир и «?»</b> — неопознанный сосед<?php } ?>;
+	<span class="text-danger">красная рамка</span> — связь закреплена за неработающим
+	(статус без флага «в работе»): либо снять связь, либо поправить статус
 </div>
 
 <?php if (is_array($overlay) && count($overlay['found'])) { ?>
@@ -120,13 +149,39 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 		<tbody>
 		<?php foreach ($map->edges as $key => $edge) { ?>
 			<?php foreach ($edge['links'] as $link) { ?>
-				<tr>
+				<?php
+				//связь, закреплённая за неработающим, - ошибка документации:
+				//либо статус врёт, либо связь пора снять
+				$dead = [];
+				foreach ([$link['port']->tech, $link['peer']->tech] as $side) {
+					if (is_object($side) && is_object($side->state) && !$side->state->operating)
+						$dead[] = $side;
+				}
+				?>
+				<tr<?= count($dead) ? ' class="table-warning"' : '' ?>>
 					<td><?= $device($link['port']->tech) ?></td>
 					<td><?= $this->render('/ports/item', ['model' => $link['port']]) ?></td>
 					<td class="text-secondary"><span class="fas fa-exchange-alt"></span></td>
 					<td><?= $this->render('/ports/item', ['model' => $link['peer']]) ?></td>
 					<td><?= $device($link['peer']->tech) ?></td>
-					<td class="text-secondary"><?= Html::encode($edge['aggr']) ?></td>
+					<td class="text-secondary"><?= Html::encode($edge['aggr']) ?>
+						<?php foreach ($dead as $side) { ?>
+							<?php /* снять можно тут же - или починить статус в карточке */ ?>
+							<span class="text-danger small" qtip_ttip="<?= Html::encode(
+								'Связь закреплена, а '.$side->name.' в статусе «'.$side->state->name
+								.'» (не в работе): либо статус врёт, либо связь пора снять') ?>">⚠ <?=
+								Html::encode($side->state->name) ?></span>
+							<?= Html::button('<i class="fas fa-times text-danger"></i>', [
+								'class' => 'btn btn-sm btn-link p-0',
+								'qtip_ttip' => 'Снять связь с неработающим '.$side->name,
+								'data-scan' => json_encode(['tech' => $link['port']->techs_id,
+									'port' => $link['port']->name, 'do' => 'detach']),
+								'data-confirm' => $side->name.' в статусе «'.$side->state->name
+									.'». Снять записанную связь?',
+								'onclick' => 'mapScanApply(this)',
+							]) ?>
+						<?php } ?>
+					</td>
 					<td class="text-nowrap"><?php if (is_array($overlay)) {
 						if (isset($overlay['confirmed'][$key])) { ?>
 							<i class="fas fa-check text-secondary" qtip_ttip="Коммутаторы видят друг друга по LLDP/CDP"></i>
@@ -192,6 +247,24 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 					<?php } ?>
 				</td>
 				<td class="text-secondary small"><?= Html::encode($row['protocol'] ?? '') ?></td>
+				<td>
+					<?php /* починка не покидая страницы: выбрать карточку - и то,
+					       чем сосед представился, допишется в неё (имя в пустой
+					       hostname, адрес в MAC). Следующая сверка опознает */ ?>
+					<select class="form-select form-select-sm d-inline-block w-auto py-0 map-assign-tech">
+						<option value="">это коммутатор…</option>
+						<?php foreach ($assignable as $id => $label) { ?>
+							<option value="<?= $id ?>"><?= Html::encode($label) ?></option>
+						<?php } ?>
+					</select>
+					<?= Html::button('<i class="fas fa-link text-success"></i>', [
+						'class' => 'btn btn-sm btn-link p-0',
+						'qtip_ttip' => 'Дописать имя/адрес этого соседа в выбранную карточку и сверить заново',
+						'data-assign' => json_encode(['name' => trim((string)($row['remote_name'] ?? '')),
+							'mac' => (string)($row['remote_mac'] ?? '')]),
+						'onclick' => 'mapAssign(this)',
+					]) ?>
+				</td>
 			</tr>
 		<?php } ?>
 		</tbody>

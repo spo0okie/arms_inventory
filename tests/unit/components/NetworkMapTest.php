@@ -249,7 +249,17 @@ class NetworkMapTest extends Unit
 		$this->assertNotEmpty($stored->state_id, 'в дампе нужен статус без operating');
 
 		$map = new NetworkMap($site);
-		$this->assertSame([$working->id], array_keys($map->nodes), 'складское - не узел карты');
+		$this->assertSame([$working->id], array_keys($map->nodes), 'складское без связей - не узел карты');
+
+		//а вот неработающее СО СВЯЗЯМИ обязано остаться на карте с пометкой:
+		//связь закреплена, статус нерабочий - кто-то из них врёт, и эту
+		//ошибку видно только с карты
+		$this->link($working, 'Gi1/0/1', $stored, 'Gi1/0/1');
+		$again = new NetworkMap($site);
+		$this->assertArrayHasKey($stored->id, $again->nodes, 'сломанное со связями видно');
+		$this->assertFalse($again->nodes[$stored->id]['operating']);
+		$this->assertCount(1, $again->edges);
+		$this->assertStringContainsString('stroke:#dc3545', $again->mermaid());
 
 		$provider = new MacSearchProvider(['id' => 'macsearch',
 			'config' => ['url' => 'http://x', 'token' => 't']]);
@@ -288,6 +298,33 @@ class NetworkMapTest extends Unit
 				'remote_name' => 'sw-lost', 'remote_port' => 'Gi0/1', 'protocol' => 'lldp'],
 		];
 		$map->overlay(['status' => 'done', 'rows' => $rows, 'errors' => []], $provider);
+
+		//опознанный коммутатор ДРУГОЙ площадки - находка с кнопкой (аплинк
+		//между площадками), а не наблюдение; опознанный телефон - счётчик
+		$elsewhere = $this->makeSwitch($this->makeSite(), '10.60.9.9', 'Gi1/0/1');
+		$phone = new Techs();
+		$phoneModel = new TechModels();
+		$phoneModel->setAttributes(['name' => 'Телефон '.uniqid(),
+			'manufacturers_id' => $this->model->manufacturers_id, 'ports' => '', 'comment' => ''], false);
+		$this->assertTrue($phoneModel->save(false));
+		$phone->setAttributes(['model_id' => $phoneModel->id, 'num' => 'ТЕЛ-'.uniqid(),
+			'mac' => '00da55b88a3b', 'history' => ''], false);
+		$this->assertTrue($phone->save(false));
+
+		$map2 = new NetworkMap($site);
+		$map2->overlay(['status' => 'done', 'rows' => [
+			['target' => $core->id, 'port' => 'Gi1/0/1', 'remote_mac' => '',
+				'remote_name' => '10.60.9.9', 'remote_port' => 'Gi1/0/1', 'protocol' => 'lldp'],
+			['target' => $core->id, 'port' => 'Gi1/0/2', 'remote_mac' => '00:da:55:b8:8a:3b',
+				'remote_name' => '', 'remote_port' => '1', 'protocol' => 'lldp'],
+		], 'errors' => []], $provider);
+		$found = $map2->overlay['found'];
+		$this->assertCount(1, $found, 'коммутатор чужой площадки - предложение записать');
+		$this->assertSame($elsewhere->id, $found[0]['b']->id);
+		$this->assertTrue($found[0]['external']);
+		$this->assertSame(1, $map2->overlay['endpoints'] ?? 0, 'телефон из инвентаризации - счётчик');
+		//внешний узел на схеме есть, связь зелёным пунктиром
+		$this->assertStringContainsString('x'.$elsewhere->id, $map2->mermaid());
 
 		$o = $map->overlay;
 		$this->assertSame(2, $o['ignored']);

@@ -98,22 +98,35 @@ class NetworkMap
 	{
 		$placeIds = MacSearchProvider::placeSubtree($this->site->id);
 		/** @var Techs[] $switches */
-		$switches = Techs::find()
+		/** @var Techs[] $all */
+		$all = Techs::find()
 			->joinWith(['model.type', 'state'], true)
 			->with(['ports.linkPort.tech.model.type', 'ports.linkPort.tech.state'])
 			->where(['tech_types.code' => static::switchTypes()])
-			//на карте только работающее: у статуса флаг operating; без статуса -
-			//считаем работающим
-			->andWhere(['or', ['tech_states.operating' => 1], ['techs.state_id' => null]])
+			->andWhere(['or', ['tech_states.archived' => 0], ['tech_states.archived' => null]])
 			->andWhere(['techs.places_id' => $placeIds])
 			->orderBy('techs.id')
 			->all();
 
-		//стеки: общий первый IP -> один узел
+		//неработающий (сломан, склад) коммутатор БЕЗ связей карте не нужен, а
+		//вот со связями - нужен обязательно: раз связи закреплены, а статус
+		//нерабочий, кто-то из них врёт, и с карты эту ошибку видно, а из
+		//небытия - нет. Такой узел помечается, но не опрашивается
+		$switches = [];
+		foreach ($all as $switch) {
+			$operating = !is_object($switch->state) || $switch->state->operating;
+			$linked = false;
+			foreach ($switch->ports as $port) if ($port->link_ports_id) { $linked = true; break; }
+			if ($operating || $linked) $switches[] = $switch;
+		}
+
+		//стеки: общий первый IP -> один узел; неработающие в стек не входят -
+		//они сами по себе и с собственной пометкой
 		$groups = [];
 		foreach ($switches as $switch) {
 			$ip = MacSearchProvider::firstIp($switch->ip);
-			$groups[$ip ? 'ip:'.$ip : 'tech:'.$switch->id][] = $switch;
+			$operating = !is_object($switch->state) || $switch->state->operating;
+			$groups[$operating && $ip ? 'ip:'.$ip : 'tech:'.$switch->id][] = $switch;
 		}
 		foreach ($groups as $members) {
 			$node = [
@@ -125,6 +138,9 @@ class NetworkMap
 				//помещение узла - для группировки на схеме
 				'place_id' => $members[0]->places_id,
 				'place' => is_object($members[0]->place) ? $members[0]->place->name : '',
+				//неработающий узел (сломан, склад) рисуется с пометкой статуса
+				'operating' => !is_object($members[0]->state) || $members[0]->state->operating,
+				'state' => is_object($members[0]->state) ? $members[0]->state->name : '',
 			];
 			foreach ($members as $member) {
 				$this->nodeOf[$member->id] = $node['id'];
@@ -237,11 +253,15 @@ class NetworkMap
 					'row' => $row, 'count' => 1];
 				continue;
 			}
-			if (!isset($this->nodeOf[$remote->id])) {
-				$overlay['outside'][] = ['a' => $local, 'port' => $localPort, 'b' => $remote, 'row' => $row];
+			//опознанное оконечное устройство (телефон, ПК, сервер) - не тема
+			//карты коммутаторов: считаем, но не перечисляем, его место в
+			//карточке коммутатора
+			if (!static::isSwitchModel($remote)) {
+				$overlay['endpoints'] = ($overlay['endpoints'] ?? 0) + 1;
 				continue;
 			}
-			if ($this->nodeOf[$remote->id] === $this->nodeOf[$local->id]) continue;    //внутри стека
+			if (isset($this->nodeOf[$remote->id])
+				&& $this->nodeOf[$remote->id] === $this->nodeOf[$local->id]) continue;    //внутри стека
 
 			//имя порта, как его сообщил сосед, -> объявленный порт соседа
 			$remotePort = trim((string)($row['remote_port'] ?? ''));
@@ -254,11 +274,18 @@ class NetworkMap
 			if (isset($seenPairs[$pair])) continue;
 			$seenPairs[$pair] = true;
 
+			//коммутатор другой площадки: связь такая же записываемая - это
+			//аплинк между площадками, найденный сверкой
+			$external = !isset($this->nodeOf[$remote->id]);
+
 			//записано ли это ребро: смотрим с локальной стороны
 			$known = $recorded[$local->id.'|'.$localName] ?? null;
 			if (is_object($known['peer'] ?? null) && (int)$known['peer']->techs_id === (int)$remote->id
 				&& (is_null($resolved['name']) || (string)$known['peer']->name === (string)$resolved['name'])) {
-				$overlay['confirmed'][$known['edge']] = true;
+				//аплинк на другую площадку записан и подтверждён - ребра на
+				//схеме у него нет (та сторона вне карты), считаем отдельно
+				if (is_null($known['edge'])) $overlay['confirmed_outside'] = ($overlay['confirmed_outside'] ?? 0) + 1;
+				else $overlay['confirmed'][$known['edge']] = true;
 				continue;
 			}
 
@@ -272,7 +299,7 @@ class NetworkMap
 				? $knownRemote['peer'] : null;
 
 			$overlay['found'][] = [
-				'a' => $local, 'port' => $localName,
+				'a' => $local, 'port' => $localName, 'external' => $external,
 				'b' => $remote, 'peer' => $resolved, 'lldp_port' => $remotePort,
 				//записано что-то другое (с нашей стороны или со стороны соседа) -
 				//показываем, что именно, и предложение превращается в замену
@@ -350,7 +377,13 @@ class NetworkMap
 			foreach ($nodes as $node) {
 				$label = $node['name'].($node['ports']
 					? '<br/><small>'.$node['used'].' / '.$node['ports'].'</small>' : '');
+				//статус в подписи: связь со «Сломан» - ошибка документации, и
+				//она должна бросаться в глаза
+				if (!$node['operating']) $label .= '<br/><small>⚠ '.$node['state'].'</small>';
 				$lines[] = '  n'.$node['id'].'["'.static::quote($label).'"]';
+				if (!$node['operating']) {
+					$lines[] = '  style n'.$node['id'].' stroke:#dc3545,stroke-width:2px,stroke-dasharray:4';
+				}
 			}
 			if ($placeId) $lines[] = '  end';
 		}
@@ -372,10 +405,24 @@ class NetworkMap
 		}
 
 		if (is_array($this->overlay)) {
+			$externals = [];
 			foreach ($this->overlay['found'] as $found) {
 				$label = $found['port'].' — '.($found['peer']['name'] ?? $found['lldp_port']);
-				$lines[] = '  n'.$this->nodeOf[$found['a']->id].' -.-|"'.static::quote($label).'"| n'
-					.$this->nodeOf[$found['b']->id];
+				//сосед-коммутатор другой площадки на карте не живёт - рисуем
+				//внешним узлом (пунктирная рамка), связь записывается так же
+				$b = $this->nodeOf[$found['b']->id] ?? null;
+				if (is_null($b)) {
+					$b = 'x'.$found['b']->id;
+					if (!isset($externals[$b])) {
+						$externals[$b] = true;
+						$lines[] = '  '.$b.'["'.static::quote($found['b']->name).'"]';
+						$lines[] = '  style '.$b.' stroke-dasharray:4';
+						$lines[] = '  click '.$b.' "'.Url::to(['/techs/view', 'id' => $found['b']->id]).'"';
+					}
+					$lines[] = '  n'.$this->nodeOf[$found['a']->id].' -.-|"'.static::quote($label).'"| '.$b;
+				} else {
+					$lines[] = '  n'.$this->nodeOf[$found['a']->id].' -.-|"'.static::quote($label).'"| n'.$b;
+				}
 				$styles[] = '  linkStyle '.$index.' stroke:#198754,stroke-width:3px';
 				$index++;
 			}

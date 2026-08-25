@@ -29,6 +29,8 @@ class NetworkMapController extends ArmsBaseController
 	{
 		return [
 			static::PERM_VIEW => ['index', 'scan'],
+			//сопоставление пишет в карточку оборудования - это правка данных
+			static::PERM_EDIT => ['assign'],
 		];
 	}
 
@@ -128,6 +130,89 @@ class NetworkMapController extends ArmsBaseController
 		$map->overlay($data, $provider);
 		return $this->renderAjax('_map', ['map' => $map, 'site' => $site, 'provider' => $provider,
 			'scanStamp' => $provider->scanStamp($data)]);
+	}
+
+	/**
+	 * Сопоставить неопознанного соседа с карточкой коммутатора.
+	 *
+	 * Сверка опознаёт соседей по hostname/имени/адресу; когда коммутатор в
+	 * инвентаризации есть, но эти поля пусты, чинить надо карточку - и делать
+	 * это не покидая карты. Дописываем то, чем сосед представился: имя - в
+	 * пустой hostname, адрес - в список MAC (если его там нет). Ничего не
+	 * перезаписываем: заполненный чужим именем hostname - повод разобраться
+	 * руками, а не молча затереть.
+	 *
+	 * POST: tech (int) - карточка; name (string) - имя из LLDP; mac (string).
+	 * @return array JSON {status: ok|error, error?}
+	 */
+	public function actionAssign()
+	{
+		Yii::$app->response->format = Response::FORMAT_JSON;
+		$request = Yii::$app->request;
+
+		$tech = \app\models\Techs::findOne((int)$request->post('tech'));
+		if (!is_object($tech)) return ['status' => 'error', 'error' => 'не выбрано оборудование'];
+
+		$name = trim((string)$request->post('name'));
+		//LLDP печатает то короткое имя, то FQDN - в hostname пишем как есть,
+		//опознание умеет отбрасывать домен
+		$mac = trim((string)$request->post('mac'));
+
+		$written = [];
+		$warning = '';
+
+		if (strlen($name)) {
+			if (strlen(trim((string)$tech->hostname))) {
+				$warning = 'hostname уже заполнен ('.$tech->hostname.') - имя не трогаю';
+			} else {
+				//hostname без домена не проходит валидацию, а LLDP домен сообщает
+				//не всегда: короткому имени подставляем домен по умолчанию - та
+				//же конвенция, что у новых записей (params['domains.default']).
+				//Домена нет ни у карточки, ни в справочнике - имя не пишем, а
+				//говорим почему: молча записать невалидное хуже
+				$domainId = $tech->domain_id;
+				if (!$domainId && strpos($name, '.') === false) {
+					$domainId = \app\models\Domains::findByName(
+						(string)(Yii::$app->params['domains.default'] ?? ''));
+				}
+				if ($domainId || strpos($name, '.') !== false) {
+					$tech->domain_id = $domainId ?: $tech->domain_id;
+					$tech->hostname = $name;
+					$written[] = 'hostname';
+				} else {
+					$warning = 'имя не записать: у карточки нет домена, а домен по умолчанию «'
+						.(Yii::$app->params['domains.default'] ?? '')
+						.'» не заведён - впишите hostname в карточку руками';
+				}
+			}
+		}
+		if (strlen($mac)) {
+			$hex = MacSearchProvider::hexMac($mac);
+			if ($hex && strpos(strtolower((string)$tech->mac), strtolower($hex)) === false) {
+				$tech->mac = trim((string)$tech->mac."\n".$mac);
+				$written[] = 'MAC';
+			}
+		}
+		if (!count($written)) {
+			return ['status' => 'error', 'error' => $warning
+				?: 'соседу нечем представиться (нет ни имени, ни адреса)'];
+		}
+		if (!$tech->save()) {
+			//имя не прошло валидацию (домен из FQDN не заведён и т.п.) - но
+			//MAC записать всё ещё можно: лучше полшага, чем отказ целиком
+			if (in_array('hostname', $written, true) && count($written) > 1) {
+				$error = implode('; ', $tech->firstErrors);
+				$tech->refresh();
+				$hex = MacSearchProvider::hexMac($mac);
+				$tech->mac = trim((string)$tech->mac."\n".$mac);
+				if ($tech->save()) {
+					return ['status' => 'ok', 'written' => ['MAC'],
+						'warning' => 'имя не записалось ('.$error.'), записан только MAC'];
+				}
+			}
+			return ['status' => 'error', 'error' => implode('; ', $tech->firstErrors)];
+		}
+		return ['status' => 'ok', 'written' => $written, 'warning' => $warning];
 	}
 
 	/** Провайдер macsearch, если интеграция включена и доступна пользователю */

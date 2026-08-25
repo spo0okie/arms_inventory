@@ -135,6 +135,25 @@ $scanUrl = is_object($site)
 			}, 'json');
 		};
 
+		//сопоставление неопознанного соседа с карточкой: дописать имя/адрес и
+		//пересверить (опрос из кэша, площадка заново не дёргается)
+		window.mapAssign = function (button) {
+			var element = $(button), data = element.data('assign');
+			var select = element.closest('td').find('.map-assign-tech');
+			data.tech = select.val();
+			if (!data.tech) { alert('Выберите, какой это коммутатор'); return; }
+			element.prop('disabled', true);
+			$.post(<?= json_encode(Url::to(['/network-map/assign'])) ?>, data, function (answer) {
+				if (answer.status !== 'ok') {
+					alert(answer.error || 'не получилось');
+					element.prop('disabled', false);
+					return;
+				}
+				if (answer.warning) alert(answer.warning);
+				networkMapScan(0, 1);
+			}, 'json');
+		};
+
 		//всё однозначное разом; спорное (селект, замена записанного) - поштучно
 		window.mapScanAcceptAll = function () {
 			var buttons = $('#network-map-body').find('button.map-scan-accept').toArray();
