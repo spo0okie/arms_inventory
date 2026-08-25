@@ -19,14 +19,18 @@ $overlay = $map->overlay;
 $switches = [];
 foreach ($map->nodes as $node) foreach ($node['members'] as $member) $switches[$member->id] = $member;
 
-//кандидаты для «это коммутатор…»: все коммутаторы инвентаризации - сосед
-//может оказаться и с другой площадки (записан не там или переехал)
+//кандидаты для «это коммутатор…»: коммутаторы ЭТОЙ площадки - карту
+//строим её, и сосед за портом её коммутатора почти наверняка стоит тут же.
+//Коммутатор другой площадки в неопознанные и не попадёт: он либо опознан
+//(наблюдение «соседи с других площадок»), либо его надо сначала завести
 $assignable = [];
 if (is_array($overlay) && count($overlay['unknown'])) {
+	$placeIds = \app\components\integrations\providers\MacSearchProvider::placeSubtree($site->id);
 	foreach (\app\models\Techs::find()
 		->joinWith(['model.type', 'state'], true)
 		->where(['tech_types.code' => \app\components\NetworkMap::switchTypes()])
 		->andWhere(['or', ['tech_states.archived' => 0], ['tech_states.archived' => null]])
+		->andWhere(['techs.places_id' => $placeIds])
 		->orderBy('techs.num')->all() as $candidate) {
 		$assignable[$candidate->id] = $candidate->name;
 	}
@@ -265,6 +269,29 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 						'onclick' => 'mapAssign(this)',
 					]) ?>
 				</td>
+			</tr>
+		<?php } ?>
+		</tbody>
+	</table>
+<?php } ?>
+
+<?php if (is_array($overlay) && count($overlay['crosssite'] ?? [])) { ?>
+	<h4>Видны коммутаторы других площадок</h4>
+	<div class="text-secondary small mb-1">
+		наблюдение, не предложение: LLDP видит соседа и сквозь L2-туннель между
+		площадками, а туннель — не кабель. Если это настоящий физический линк
+		между площадками — запишите его руками в форме порта
+	</div>
+	<table class="table table-sm w-auto">
+		<tbody>
+		<?php foreach ($overlay['crosssite'] as $item) { ?>
+			<tr>
+				<td><?= $device($item['a']) ?></td>
+				<td><?= Ports::$port_prefix.Html::encode($item['port']) ?></td>
+				<td class="text-secondary"><span class="fas fa-exchange-alt"></span></td>
+				<td><?= $device($item['b']) ?> <span class="text-secondary small">порт
+					<?= Html::encode($item['row']['remote_port'] ?? '') ?></span></td>
+				<td class="text-secondary small"><?= Html::encode($item['row']['protocol'] ?? '') ?></td>
 			</tr>
 		<?php } ?>
 		</tbody>

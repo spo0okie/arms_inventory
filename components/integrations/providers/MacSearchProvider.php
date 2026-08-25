@@ -122,7 +122,8 @@ class MacSearchProvider extends IntegrationProvider
 	 * Соседи по LLDP/CDP, которых карта сети не считает кандидатами в
 	 * коммутаторы: IP-телефоны (SEP/SIP + MAC у Cisco, «IP Phone» в имени).
 	 */
-	const DEFAULT_NEIGHBOR_IGNORE = '~(?i)\bip.?phone\b|^s[ei]p[0-9a-f]{8,}~';
+	const DEFAULT_NEIGHBOR_IGNORE =
+		'~(?i)\bip.?phone\b|^s[ei]p[-_]?[0-9a-f]{8,}|^sip[-_]|[0-9a-f]{12}$~';
 
 	/**
 	 * Имена агрегированных каналов: Po1, BAGG1, Port-channel1, ae0, Lag2.
@@ -644,14 +645,20 @@ class MacSearchProvider extends IntegrationProvider
 	}
 
 	/**
-	 * Сосед, который заведомо не коммутатор: IP-телефоны и прочие ботва LLDP.
+	 * Сосед, который заведомо не коммутатор, - карте сети не кандидат.
 	 *
-	 * Карта сети ищет незаписанные КОММУТАТОРЫ, а телефоны объявляют себя
-	 * именами вида SEP<MAC>/SIP<MAC>/«Cisco IP Phone …» - и на площадке их
-	 * сотни. Шаблон настраивается (neighborIgnore в конфиге провайдера).
+	 * Главный признак - LLDP system capabilities (`remote_caps`): сосед сам
+	 * говорит, кем работает. Всё, что не bridge и не router (телефоны,
+	 * станции, точки доступа), отфильтровывается. Соседям без capabilities
+	 * (CDP без поля, старые прошивки) остаётся фолбэк по имени - телефоны
+	 * объявляют себя SEP<MAC>/SIP<MAC>/«IP Phone» (шаблон neighborIgnore).
 	 */
 	public function isIgnoredNeighbor(array $neighbor): bool
 	{
+		$caps = trim((string)($neighbor['remote_caps'] ?? ''));
+		if (strlen($caps)) {
+			return !preg_match('~bridge|router~', $caps);
+		}
 		$pattern = $this->config['neighborIgnore'] ?? static::DEFAULT_NEIGHBOR_IGNORE;
 		if (!strlen((string)$pattern)) return false;
 		$name = trim((string)($neighbor['remote_name'] ?? ''));

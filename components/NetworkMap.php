@@ -62,6 +62,11 @@ class NetworkMap
 	 *  found      - связи, которые LLDP видит, а записи нет: предложения записать,
 	 *               [['a'=>Techs,'port'=>string,'b'=>Techs,'peer'=>[...resolvePortName],
 	 *                 'conflict'=>Ports|null, 'protocol'=>string]];
+	 *  crosssite  - виден коммутатор ДРУГОЙ площадки: наблюдение без кнопки.
+	 *               Записывать такое как кабель в общем случае неправильно -
+	 *               LLDP видит и сквозь L2-туннель (VPN между площадками), а
+	 *               туннель не проводка. Настоящий межплощадочный кабель
+	 *               записывается руками в форме порта;
 	 *  unknown    - сосед не опознан в инвентаризации: незаписанный коммутатор;
 	 *  outside    - сосед опознан, но не на карте (не коммутатор / другая площадка);
 	 *  failed     - коммутаторы, которые не ответили (строки errors сервиса);
@@ -202,7 +207,7 @@ class NetworkMap
 	public function overlay(array $data, MacSearchProvider $provider): void
 	{
 		$overlay = ['confirmed' => [], 'unseen' => [], 'found' => [], 'unknown' => [],
-			'outside' => [], 'failed' => $data['errors'] ?? [], 'answered' => []];
+			'crosssite' => [], 'outside' => [], 'failed' => $data['errors'] ?? [], 'answered' => []];
 
 		//записанные связи по ключу (устройство, имя порта) с обеих сторон
 		$recorded = [];
@@ -274,8 +279,10 @@ class NetworkMap
 			if (isset($seenPairs[$pair])) continue;
 			$seenPairs[$pair] = true;
 
-			//коммутатор другой площадки: связь такая же записываемая - это
-			//аплинк между площадками, найденный сверкой
+			//коммутатор ДРУГОЙ площадки - наблюдение, а не предложение: LLDP
+			//видит и сквозь L2-туннель между площадками, и зафиксировать такое
+			//как кабель было бы враньём. Уже записанное (настоящий кабель,
+			//внесённый руками) при этом подтверждается как обычно
 			$external = !isset($this->nodeOf[$remote->id]);
 
 			//записано ли это ребро: смотрим с локальной стороны
@@ -286,6 +293,12 @@ class NetworkMap
 				//схеме у него нет (та сторона вне карты), считаем отдельно
 				if (is_null($known['edge'])) $overlay['confirmed_outside'] = ($overlay['confirmed_outside'] ?? 0) + 1;
 				else $overlay['confirmed'][$known['edge']] = true;
+				continue;
+			}
+
+			if ($external) {
+				$overlay['crosssite'][] = ['a' => $local, 'port' => $localName,
+					'b' => $remote, 'row' => $row];
 				continue;
 			}
 
@@ -405,24 +418,10 @@ class NetworkMap
 		}
 
 		if (is_array($this->overlay)) {
-			$externals = [];
 			foreach ($this->overlay['found'] as $found) {
 				$label = $found['port'].' — '.($found['peer']['name'] ?? $found['lldp_port']);
-				//сосед-коммутатор другой площадки на карте не живёт - рисуем
-				//внешним узлом (пунктирная рамка), связь записывается так же
-				$b = $this->nodeOf[$found['b']->id] ?? null;
-				if (is_null($b)) {
-					$b = 'x'.$found['b']->id;
-					if (!isset($externals[$b])) {
-						$externals[$b] = true;
-						$lines[] = '  '.$b.'["'.static::quote($found['b']->name).'"]';
-						$lines[] = '  style '.$b.' stroke-dasharray:4';
-						$lines[] = '  click '.$b.' "'.Url::to(['/techs/view', 'id' => $found['b']->id]).'"';
-					}
-					$lines[] = '  n'.$this->nodeOf[$found['a']->id].' -.-|"'.static::quote($label).'"| '.$b;
-				} else {
-					$lines[] = '  n'.$this->nodeOf[$found['a']->id].' -.-|"'.static::quote($label).'"| n'.$b;
-				}
+				$lines[] = '  n'.$this->nodeOf[$found['a']->id].' -.-|"'.static::quote($label).'"| n'
+					.$this->nodeOf[$found['b']->id];
 				$styles[] = '  linkStyle '.$index.' stroke:#198754,stroke-width:3px';
 				$index++;
 			}

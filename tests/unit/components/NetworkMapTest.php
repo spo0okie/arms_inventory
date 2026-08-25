@@ -281,6 +281,11 @@ class NetworkMapTest extends Unit
 			'config' => ['url' => 'http://x', 'token' => 't']]);
 		$map = new NetworkMap($site);
 		$rows = [
+			//capabilities главнее имени: «не bridge/router» отсеивается, каким
+			//бы нейтральным ни было имя; bridge остаётся, как бы ни назывался
+			['target' => $core->id, 'port' => 'Gi1/0/1', 'remote_mac' => '',
+				'remote_name' => 'innocuous-name', 'remote_port' => '1',
+				'remote_caps' => 'telephone,station', 'protocol' => 'lldp'],
 			//телефоны: Cisco SEP<MAC>, SIP<MAC>, «IP Phone» в имени
 			['target' => $core->id, 'port' => 'Gi1/0/1', 'remote_mac' => '',
 				'remote_name' => 'SEP00DA55B88A3B', 'remote_port' => 'Port 1', 'protocol' => 'cdp'],
@@ -318,16 +323,16 @@ class NetworkMapTest extends Unit
 			['target' => $core->id, 'port' => 'Gi1/0/2', 'remote_mac' => '00:da:55:b8:8a:3b',
 				'remote_name' => '', 'remote_port' => '1', 'protocol' => 'lldp'],
 		], 'errors' => []], $provider);
-		$found = $map2->overlay['found'];
-		$this->assertCount(1, $found, 'коммутатор чужой площадки - предложение записать');
-		$this->assertSame($elsewhere->id, $found[0]['b']->id);
-		$this->assertTrue($found[0]['external']);
+		//коммутатор ДРУГОЙ площадки - наблюдение, не предложение: LLDP видит
+		//и сквозь L2-туннель между площадками, туннель - не кабель
+		$this->assertCount(0, $map2->overlay['found']);
+		$cross = $map2->overlay['crosssite'];
+		$this->assertCount(1, $cross);
+		$this->assertSame($elsewhere->id, $cross[0]['b']->id);
 		$this->assertSame(1, $map2->overlay['endpoints'] ?? 0, 'телефон из инвентаризации - счётчик');
-		//внешний узел на схеме есть, связь зелёным пунктиром
-		$this->assertStringContainsString('x'.$elsewhere->id, $map2->mermaid());
 
 		$o = $map->overlay;
-		$this->assertSame(2, $o['ignored']);
+		$this->assertSame(3, $o['ignored']);
 		$this->assertSame(1, $o['noise']);
 		$this->assertCount(1, $o['unknown']);
 		$this->assertSame(3, $o['unknown'][0]['count']);
