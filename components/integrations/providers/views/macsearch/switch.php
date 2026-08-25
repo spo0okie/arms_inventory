@@ -19,8 +19,8 @@ use yii\helpers\Html;
 /* @var $provider \app\components\integrations\providers\MacSearchProvider */
 /* @var $stack \app\models\Techs[] члены стека (пусто - коммутатор одиночный) */
 /* @var $foreignNames string[] имена портов, объявленные у соседей по стеку */
-/* @var $identityReport array сверка визитки с инвентаризацией
- *      {@see MacSearchProvider::identityReport()} (пусто - визитки нет) */
+/* @var $identity array визитка: sysname/sysdescr/location/base_mac/units
+ *      (пусто - устройство о себе не рассказало) */
 
 $status = $data['status'] ?? null;
 
@@ -63,31 +63,39 @@ elseif ($failure) $trouble = 'коммутатор не опрошен: '.($fail
 		: ' qtip_ttip="'.Html::encode($failure['detail']).'"' ?>><?= Html::encode($trouble) ?></div>
 <?php } ?>
 
-<?php if (!empty($identityReport)) { ?>
-	<?php /* визитка: то, что коммутатор говорит о себе, против того, что
-	       записано в инвентаризации. Расхождение - признак коллизии
-	       (перепутанные карточки, задвоенный IP), и его должно быть видно
-	       сразу, а не после раскопок в сырых данных */ ?>
+<?php if (!empty($identity)) { ?>
+	<?php /* визитка: то, что устройство говорит о себе само, - как есть, без
+	       выводов. Сверять с карточкой (серийник, MAC, имя) будет человек:
+	       ему для этого достаточно видеть обе стороны рядом */ ?>
 	<div class="small mb-2">
-		<span class="text-secondary">коммутатор о себе (сверка с инвентаризацией):</span>
+		<span class="text-secondary">коммутатор о себе:</span>
 		<table class="table table-sm table-borderless w-auto mb-0 small">
-			<?php foreach ($identityReport as $row) { ?>
-				<tr<?= $row['ok'] === false ? ' class="table-warning"' : '' ?>>
-					<td class="text-secondary pe-2"><?= Html::encode($row['label']) ?></td>
-					<td class="pe-2" style="max-width:30em; overflow-wrap:anywhere"><?= Html::encode($row['device']) ?></td>
-					<td class="pe-2 text-nowrap">
-						<?php if ($row['ok'] === true) { ?>
-							<i class="fas fa-check text-success"></i>
-						<?php } elseif ($row['ok'] === false) { ?>
-							<i class="fas fa-exclamation-triangle text-danger"></i>
-						<?php } ?>
-						<?php if ($row['inventory'] !== '' && $row['ok'] !== true) { ?>
-							<span qtip_ttip="Что записано в инвентаризации">
-								<?= Html::encode($row['inventory']) ?></span>
-						<?php } ?>
-					</td>
-					<td class="text-secondary"><?= Html::encode($row['note']) ?></td>
-				</tr>
+			<?php if (!empty($identity['sysname'])) { ?>
+				<tr><td class="text-secondary pe-2">имя (sysName)</td>
+					<td><?= Html::encode($identity['sysname']) ?></td></tr>
+			<?php } ?>
+			<?php if (!empty($identity['base_mac'])) { ?>
+				<tr><td class="text-secondary pe-2">базовый MAC</td>
+					<td><?= Html::encode($identity['base_mac']) ?></td></tr>
+			<?php } ?>
+			<?php foreach ($identity['units'] ?? [] as $unit) {
+				if (empty($unit['serial'])) continue;
+				$name = trim((string)($unit['name'] ?? '')) ?: (string)($unit['class'] ?? '');
+				$extra = array_filter([$unit['model'] ?? '',
+					empty($unit['sw']) ? '' : 'ПО '.$unit['sw']]); ?>
+				<tr><td class="text-secondary pe-2">серийный номер<?=
+					$name !== '' ? ' '.Html::encode($name) : '' ?></td>
+					<td><?= Html::encode($unit['serial'])
+						.(count($extra) ? ' <span class="text-secondary">('
+							.Html::encode(implode(', ', $extra)).')</span>' : '') ?></td></tr>
+			<?php } ?>
+			<?php if (!empty($identity['sysdescr'])) { ?>
+				<tr><td class="text-secondary pe-2">о себе (sysDescr)</td>
+					<td style="max-width:40em; overflow-wrap:anywhere"><?= Html::encode($identity['sysdescr']) ?></td></tr>
+			<?php } ?>
+			<?php if (!empty($identity['location'])) { ?>
+				<tr><td class="text-secondary pe-2">расположение (sysLocation)</td>
+					<td><?= Html::encode($identity['location']) ?></td></tr>
 			<?php } ?>
 		</table>
 	</div>
