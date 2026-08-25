@@ -19,6 +19,8 @@ use yii\helpers\Html;
 /* @var $provider \app\components\integrations\providers\MacSearchProvider */
 /* @var $stack \app\models\Techs[] члены стека (пусто - коммутатор одиночный) */
 /* @var $foreignNames string[] имена портов, объявленные у соседей по стеку */
+/* @var $identityReport array сверка визитки с инвентаризацией
+ *      {@see MacSearchProvider::identityReport()} (пусто - визитки нет) */
 
 $status = $data['status'] ?? null;
 
@@ -59,6 +61,36 @@ elseif ($failure) $trouble = 'коммутатор не опрошен: '.($fail
 <?php } elseif ($trouble) { ?>
 	<div class="text-secondary opacity-75 mb-1"<?= empty($failure['detail']) ? ''
 		: ' qtip_ttip="'.Html::encode($failure['detail']).'"' ?>><?= Html::encode($trouble) ?></div>
+<?php } ?>
+
+<?php if (!empty($identityReport)) { ?>
+	<?php /* визитка: то, что коммутатор говорит о себе, против того, что
+	       записано в инвентаризации. Расхождение - признак коллизии
+	       (перепутанные карточки, задвоенный IP), и его должно быть видно
+	       сразу, а не после раскопок в сырых данных */ ?>
+	<div class="small mb-2">
+		<span class="text-secondary">коммутатор о себе (сверка с инвентаризацией):</span>
+		<table class="table table-sm table-borderless w-auto mb-0 small">
+			<?php foreach ($identityReport as $row) { ?>
+				<tr<?= $row['ok'] === false ? ' class="table-warning"' : '' ?>>
+					<td class="text-secondary pe-2"><?= Html::encode($row['label']) ?></td>
+					<td class="pe-2" style="max-width:30em; overflow-wrap:anywhere"><?= Html::encode($row['device']) ?></td>
+					<td class="pe-2 text-nowrap">
+						<?php if ($row['ok'] === true) { ?>
+							<i class="fas fa-check text-success"></i>
+						<?php } elseif ($row['ok'] === false) { ?>
+							<i class="fas fa-exclamation-triangle text-danger"></i>
+						<?php } ?>
+						<?php if ($row['inventory'] !== '' && $row['ok'] !== true) { ?>
+							<span qtip_ttip="Что записано в инвентаризации">
+								<?= Html::encode($row['inventory']) ?></span>
+						<?php } ?>
+					</td>
+					<td class="text-secondary"><?= Html::encode($row['note']) ?></td>
+				</tr>
+			<?php } ?>
+		</table>
+	</div>
 <?php } ?>
 
 <?php /* путь алиасом, а не '/techs/...': вид рендерится не из контроллера

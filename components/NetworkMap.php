@@ -222,9 +222,10 @@ class NetworkMap
 			'crosssite' => [], 'outside' => [], 'failed' => $data['errors'] ?? [], 'answered' => [],
 			//сырые размеры ответа сервиса: по нулям в итогах должно быть видно,
 			//какое звено пустое - опрос, соседства или их сопоставление с картой
+			//в HTTP-ответе сервиса счётчики опроса лежат в ключе targets
 			'stats' => [
-				'requested' => (int)($data['stats']['requested'] ?? 0),
-				'answered' => (int)($data['stats']['answered'] ?? 0),
+				'requested' => (int)($data['targets']['requested'] ?? 0),
+				'answered' => (int)($data['targets']['answered'] ?? 0),
 				'neighbors' => count($data['neighbors'] ?? []),
 				'rows' => count($data['rows'] ?? []),
 			]];

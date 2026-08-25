@@ -334,9 +334,13 @@ class MacSearchProvider extends IntegrationProvider
 		//спиннер и ошибка - состояние, а не результат: в кэш им нельзя
 		$this->cacheable = !$error && !$this->isPending($results)
 			&& ($data['status'] ?? '') !== 'error' && empty($data['errors']);
+		//визитка приходит одна на цель (стек опрашивается по общему IP), а
+		//сверяется со всеми карточками стека - у кого какой юнит и серийник
+		$card = ($data['identity'] ?? [])[0] ?? [];
 		return $this->renderView('switch', [
 			'ports' => $this->switchPorts($data['rows'] ?? [], $model,
 				$data['ports'] ?? [], $data['neighbors'] ?? []),
+			'identityReport' => count($card) ? $this->identityReport($card, $members) : [],
 			'data' => $data,
 			'error' => $error,
 			'refreshUrl' => $this->refreshUrl($model, $results, $attempt, static::PANEL_SWITCH),
@@ -370,6 +374,158 @@ class MacSearchProvider extends IntegrationProvider
 		$data['neighbors'] = array_values(array_filter($data['neighbors'] ?? [],
 			fn($item) => $mine((string)($item['port'] ?? ''))));
 		return $data;
+	}
+
+	/**
+	 * Сверка визитки коммутатора (identity из ответа сервиса) с инвентаризацией.
+	 *
+	 * Инвентаризация утверждает «этот IP — вот эта карточка»; визитка — то, что
+	 * устройство говорит о себе само (sysName, серийники юнитов, базовый MAC,
+	 * модель). Расхождение — признак коллизии: перепутанные карточки,
+	 * задвоенный IP, переставленный без учёта коммутатор.
+	 *
+	 * @param array $card визитка: sysname/sysdescr/location/base_mac/units
+	 * @param Techs[] $members члены стека (одиночка — массив из одного): у
+	 *   стека один management-IP, поэтому серийники юнитов сверяются со ВСЕМИ
+	 *   карточками, а не только с открытой
+	 * @return array строки [['label','device','inventory','ok','note'],...];
+	 *   ok: true — совпало, false — расхождение, null — справочно (не с чем
+	 *   сверять либо сущность в инвентаризации не ведётся, как БП)
+	 */
+	public function identityReport(array $card, array $members): array
+	{
+		$report = [];
+		$norm = fn(?string $value) => preg_replace('/[^a-z0-9]/', '', mb_strtolower((string)$value));
+		$label = fn(?string $name) => mb_strtolower(explode('.', trim((string)$name))[0]);
+
+		if (strlen($sysname = trim((string)($card['sysname'] ?? '')))) {
+			$hostnames = array_filter(array_map(fn(Techs $member) => trim((string)$member->hostname), $members));
+			$match = null;
+			foreach ($members as $member) {
+				if ($label($member->hostname) !== '' && $label($member->hostname) === $label($sysname)) {
+					$match = $member;
+					break;
+				}
+			}
+			$report[] = ['label' => 'имя (sysName)', 'device' => $sysname,
+				'inventory' => implode(', ', $hostnames),
+				'ok' => count($hostnames) ? is_object($match) : null,
+				'note' => is_object($match) ? 'совпадает с hostname '.$match->name
+					: (count($hostnames) ? 'не совпадает с hostname карточки'
+						: 'в карточке hostname не заполнен — сверить не с чем')];
+		}
+
+		if (strlen($mac = static::hexMac($card['base_mac'] ?? ''))) {
+			$owner = null;
+			foreach ($members as $member) {
+				if (in_array($mac, static::hexMacs($member->mac), true)) {
+					$owner = $member;
+					break;
+				}
+			}
+			//чужая карточка с этим адресом - и есть коллизия: ищем той же
+			//лесенкой, что соседей (точный адрес, затем диапазоны)
+			if (!is_object($owner)) {
+				foreach ($this->resolveMacs([$mac])[$mac] ?? [] as $object) {
+					$found = static::deviceOf($object);
+					if (is_object($found)) {
+						$owner = $found;
+						break;
+					}
+				}
+			}
+			if (!is_object($owner)) $owner = static::deviceByMacRange($mac);
+			$known = is_object($owner) && in_array($owner->id, array_map(fn(Techs $m) => $m->id, $members), true);
+			$report[] = ['label' => 'базовый MAC', 'device' => (string)$card['base_mac'],
+				'inventory' => is_object($owner) ? trim((string)$owner->mac) : '',
+				'ok' => is_object($owner) ? $known : false,
+				'note' => $known ? 'записан у '.$owner->name
+					: (is_object($owner) ? 'записан у ДРУГОЙ карточки: '.$owner->name
+						: 'в поле MAC карточки не записан')];
+		}
+
+		foreach ($card['units'] ?? [] as $unit) {
+			$serial = trim((string)($unit['serial'] ?? ''));
+			if ($serial === '') continue;
+			$owner = null;
+			foreach ($members as $member) {
+				if (mb_strtolower(trim((string)$member->sn)) === mb_strtolower($serial)) {
+					$owner = $member;
+					break;
+				}
+			}
+			//учётная единица - корпус/юнит стека; модули и БП в карточках
+			//оборудования отдельно не числятся, их серийники - справка
+			$chassis = in_array((string)($unit['class'] ?? ''), ['chassis', 'stack', ''], true);
+			$name = trim((string)($unit['name'] ?? '')) ?: (string)($unit['class'] ?? '');
+			$device = $serial.(empty($unit['model']) ? '' : ' ('.$unit['model']
+				.(empty($unit['sw']) ? '' : ', ПО '.$unit['sw']).')');
+			$report[] = ['label' => 'серийный номер'.($name !== '' ? ' '.$name : ''),
+				'device' => $device,
+				'inventory' => is_object($owner) ? (string)$owner->sn : '',
+				'ok' => is_object($owner) ? true : ($chassis ? false : null),
+				'note' => is_object($owner) ? 'совпадает с '.$owner->name
+					: ($chassis ? 'ни у одной карточки '.(count($members) > 1 ? 'стека ' : '')
+						.'такого серийника нет' : 'модуль/БП — в карточках не сверяется')];
+		}
+
+		//обратная сторона: серийники карточек, которых устройство не показало
+		if (count($card['units'] ?? [])) {
+			$shown = array_map(fn($unit) => mb_strtolower(trim((string)($unit['serial'] ?? ''))),
+				$card['units']);
+			$missing = [];
+			foreach ($members as $member) {
+				$sn = trim((string)$member->sn);
+				if ($sn !== '' && !in_array(mb_strtolower($sn), $shown, true)) {
+					$missing[] = $member->name.': '.$sn;
+				}
+			}
+			if (count($missing)) {
+				$report[] = ['label' => 'серийники в карточках', 'device' => '',
+					'inventory' => implode('; ', $missing), 'ok' => false,
+					'note' => 'записаны в инвентаризации, но коммутатор их не показал'];
+			}
+		}
+
+		$deviceModel = '';
+		foreach ($card['units'] ?? [] as $unit) {
+			if (!empty($unit['model'])) {
+				$deviceModel = (string)$unit['model'];
+				break;
+			}
+		}
+		if ($deviceModel !== '') {
+			$models = [];
+			$match = false;
+			foreach ($members as $member) {
+				$name = is_object($member->model) ? trim((string)$member->model->name) : '';
+				if ($name === '') continue;
+				$models[$name] = true;
+				//нестрогое вхождение: «DGS-1210-52» против «D-Link DGS-1210-52/ME»
+				$one = $norm($name);
+				$two = $norm($deviceModel);
+				if ($one !== '' && $two !== ''
+					&& (str_contains($one, $two) || str_contains($two, $one))) $match = true;
+			}
+			$report[] = ['label' => 'модель', 'device' => $deviceModel,
+				'inventory' => implode(', ', array_keys($models)),
+				'ok' => count($models) ? $match : null,
+				'note' => $match ? 'совпадает' : (count($models)
+					? 'не похожа на модель карточки' : 'модель в карточке не указана')];
+		}
+
+		if (strlen($descr = trim((string)($card['sysdescr'] ?? '')))) {
+			$report[] = ['label' => 'о себе (sysDescr)', 'device' => $descr,
+				'inventory' => '', 'ok' => null, 'note' => ''];
+		}
+		if (strlen($location = trim((string)($card['location'] ?? '')))) {
+			$places = array_filter(array_map(fn(Techs $member) =>
+				is_object($member->place) ? (string)$member->place->name : '', $members));
+			$report[] = ['label' => 'расположение (sysLocation)', 'device' => $location,
+				'inventory' => implode(', ', array_unique($places)), 'ok' => null,
+				'note' => 'что записано на самом коммутаторе — для сверки глазами'];
+		}
+		return $report;
 	}
 
 	/**

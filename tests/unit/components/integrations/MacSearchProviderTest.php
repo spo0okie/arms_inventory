@@ -1252,6 +1252,104 @@ eth1";
 		$this->assertStringContainsString('показать данные с коммутатора', $html);
 	}
 
+	// --- визитка: сверка того, что коммутатор говорит о себе, с карточками ---
+
+	/** Полное совпадение: имя, серийник, MAC и модель подтверждены */
+	public function testIdentityReportAllMatch()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16', 'hostname' => 'chl-kom-5',
+			'sn' => 'QBC123', 'mac' => "00:aa:bb:cc:00:01
+00:aa:bb:cc:00:99"]);
+
+		$report = $this->makeProvider()->identityReport([
+			'sysname' => 'CHL-KOM-5.corp.local',
+			'base_mac' => '00aabbcc0001',
+			'units' => [['class' => 'chassis', 'name' => 'Unit 1', 'serial' => 'qbc123',
+				'model' => $switch->model->name, 'sw' => '1.0.42']],
+			'sysdescr' => 'Fake OS 1.0',
+		], [$switch]);
+
+		$byLabel = [];
+		foreach ($report as $row) $byLabel[$row['label']] = $row;
+		//sysName сверяется по короткому имени, без домена и регистра
+		$this->assertTrue($byLabel['имя (sysName)']['ok']);
+		$this->assertTrue($byLabel['базовый MAC']['ok']);
+		//серийник - без учёта регистра
+		$this->assertTrue($byLabel['серийный номер Unit 1']['ok']);
+		$this->assertTrue($byLabel['модель']['ok']);
+		//sysDescr - справка, не вердикт
+		$this->assertNull($byLabel['о себе (sysDescr)']['ok']);
+		//все серийники карточки показаны - строки «не показал» нет
+		$this->assertArrayNotHasKey('серийники в карточках', $byLabel);
+	}
+
+	/** Коллизия: устройство называет чужой серийник и чужой MAC */
+	public function testIdentityReportCollision()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16', 'sn' => 'REAL-111']);
+		$other = $this->makeSwitch(['ip' => '10.50.2.17', 'mac' => '00:99:88:77:66:55']);
+
+		$report = $this->makeProvider()->identityReport([
+			'base_mac' => '00:99:88:77:66:55',
+			'units' => [['class' => 'chassis', 'serial' => 'ALIEN-222']],
+		], [$switch]);
+
+		$byLabel = [];
+		foreach ($report as $row) $byLabel[$row['label']] = $row;
+		//MAC найден, но у другой карточки - это и есть коллизия
+		$this->assertFalse($byLabel['базовый MAC']['ok']);
+		$this->assertStringContainsString($other->name, $byLabel['базовый MAC']['note']);
+		//серийник корпуса не найден вовсе
+		$this->assertFalse($byLabel['серийный номер chassis']['ok']);
+		//а записанный в карточке серийник устройство не показало
+		$this->assertFalse($byLabel['серийники в карточках']['ok']);
+		$this->assertStringContainsString('REAL-111', $byLabel['серийники в карточках']['inventory']);
+	}
+
+	/** Стек: серийники юнитов раскладываются по карточкам членов; БП - справка */
+	public function testIdentityReportStack()
+	{
+		$one = $this->makeSwitch(['ip' => '10.50.2.16', 'sn' => 'UNIT-A']);
+		$two = $this->makeSwitch(['ip' => '10.50.2.16', 'sn' => 'UNIT-B']);
+
+		$report = $this->makeProvider()->identityReport(['units' => [
+			['class' => 'chassis', 'name' => 'Unit 1', 'serial' => 'UNIT-A'],
+			['class' => 'chassis', 'name' => 'Unit 2', 'serial' => 'UNIT-B'],
+			['class' => 'powerSupply', 'name' => 'PSU 1', 'serial' => 'PSU-111'],
+		]], [$one, $two]);
+
+		$byLabel = [];
+		foreach ($report as $row) $byLabel[$row['label']] = $row;
+		$this->assertTrue($byLabel['серийный номер Unit 1']['ok']);
+		$this->assertStringContainsString($one->name, $byLabel['серийный номер Unit 1']['note']);
+		$this->assertTrue($byLabel['серийный номер Unit 2']['ok']);
+		$this->assertStringContainsString($two->name, $byLabel['серийный номер Unit 2']['note']);
+		//БП в карточках не числится - не вердикт, а справка
+		$this->assertNull($byLabel['серийный номер PSU 1']['ok']);
+	}
+
+	/** Визитка в панели опроса: блок сверки виден, расхождение подсвечено */
+	public function testRenderSwitchPanelShowsIdentity()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16', 'sn' => 'REAL-111']);
+
+		$payload = $this->payload([
+			$this->tableRow($switch->id, '00:11:22:33:44:55', 'Gi1/0/12'),
+		], ['mode' => 'table']);
+		$payload['identity'] = [['target' => $switch->id, 'host' => '10.50.2.16',
+			'sysname' => 'sw-somewhere',
+			'units' => [['class' => 'chassis', 'serial' => 'ALIEN-222']]]];
+		$provider = $this->makeProvider([$this->response($payload)]);
+
+		$html = $provider->renderSwitchPanel($switch);
+
+		$this->assertStringContainsString('коммутатор о себе', $html);
+		$this->assertStringContainsString('ALIEN-222', $html);
+		//расхождение названо, инвентаризационное значение рядом
+		$this->assertStringContainsString('такого серийника нет', $html);
+		$this->assertStringContainsString('REAL-111', $html);
+	}
+
 	/** Неопрошенный коммутатор: причина видна прямо в панели */
 	public function testRenderSwitchPanelUnreachable()
 	{
