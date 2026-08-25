@@ -1250,6 +1250,8 @@ eth1";
 		$this->assertStringContainsString('транзит', $html);
 		//сырые данные с коммутатора - свёрнутым блоком под таблицей
 		$this->assertStringContainsString('показать данные с коммутатора', $html);
+		//SNMP-данных нет совсем - панель говорит про community, а не молчит
+		$this->assertStringContainsString('проверьте, задан ли community', $html);
 	}
 
 	/** Визитка в панели опроса: данные устройства показаны как есть, без сверки */
@@ -1281,6 +1283,8 @@ eth1";
 		$this->assertStringContainsString('FS-2400, ПО 1.0.42', $html);
 		$this->assertStringContainsString('PSU-1', $html);
 		$this->assertStringContainsString('Fake OS 1.0', $html);
+		//визитка есть - подсказка про community не нужна
+		$this->assertStringNotContainsString('community', $html);
 	}
 
 	/** Неопрошенный коммутатор: причина видна прямо в панели */
