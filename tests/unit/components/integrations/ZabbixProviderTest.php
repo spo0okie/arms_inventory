@@ -96,9 +96,10 @@ class ZabbixProviderTest extends Unit
 	{
 		$provider = $this->makeProvider([
 			'problem.get' => [
-				['name' => 'High CPU', 'severity' => '4', 'clock' => (string)mktime(10, 0, 0, 2, 1, 2026)],
-				['name' => 'Disk low', 'severity' => '2', 'clock' => (string)mktime(9, 0, 0, 2, 1, 2026)],
+				['name' => 'High CPU', 'severity' => '4', 'clock' => (string)mktime(10, 0, 0, 2, 1, 2026), 'objectid' => '111'],
+				['name' => 'Disk low', 'severity' => '2', 'clock' => (string)mktime(9, 0, 0, 2, 1, 2026), 'objectid' => '222'],
 			],
+			'trigger.get' => [['triggerid' => '111'], ['triggerid' => '222']],
 		], ['web' => 'https://zabbix.local/zabbix']);
 
 		$comp = new Comps(['name' => 'SRV1']);
@@ -227,10 +228,11 @@ class ZabbixProviderTest extends Unit
 		$new = mktime(12, 0, 0, 2, 1, 2026);
 		$provider = $this->makeProvider([
 			'problem.get' => [
-				['name' => 'Warn old', 'severity' => '2', 'clock' => (string)$old],
-				['name' => 'Crit', 'severity' => '5', 'clock' => (string)$old],
-				['name' => 'Warn new', 'severity' => '2', 'clock' => (string)$new],
+				['name' => 'Warn old', 'severity' => '2', 'clock' => (string)$old, 'objectid' => '1'],
+				['name' => 'Crit', 'severity' => '5', 'clock' => (string)$old, 'objectid' => '2'],
+				['name' => 'Warn new', 'severity' => '2', 'clock' => (string)$new, 'objectid' => '3'],
 			],
+			'trigger.get' => [['triggerid' => '1'], ['triggerid' => '2'], ['triggerid' => '3']],
 		]);
 		$comp = new Comps();
 		$comp->external_links = json_encode(['Zabbix.hostid' => '10501']);
@@ -247,7 +249,37 @@ class ZabbixProviderTest extends Unit
 		$this->assertTrue($order[0] < $order[1] && $order[1] < $order[2], 'порядок: важность, затем свежесть');
 	}
 
-	/** Нет проблем — панель показывает OK */
+	/**
+	 * Проблемы отключённых триггеров скрываются, как в веб-интерфейсе
+	 * Zabbix: problem.get отдаёт их, но trigger.get monitored=true такой
+	 * триггер не возвращает
+	 */
+	public function testDisabledTriggerProblemsHidden()
+	{
+		$provider = $this->makeProvider([
+			'problem.get' => [
+				['name' => 'Live problem', 'severity' => '4', 'clock' => '1770000000', 'objectid' => '111'],
+				['name' => 'Disabled trigger problem', 'severity' => '5', 'clock' => '1770000000', 'objectid' => '222'],
+			],
+			'trigger.get' => [['triggerid' => '111']], //222 отключён - monitored его не вернул
+		]);
+		$comp = new Comps();
+		$comp->external_links = json_encode(['Zabbix.hostid' => '10501']);
+
+		$html = $provider->renderPanel(ZabbixProvider::PANEL, $comp);
+
+		$this->assertStringContainsString('Live problem', $html);
+		$this->assertStringNotContainsString('Disabled trigger problem', $html);
+
+		//живость триггеров запрошена ровно по проблемам и с фильтром monitored
+		$triggerGet = null;
+		foreach ($provider->calls as $call) if ($call['method'] === 'trigger.get') $triggerGet = $call;
+		$this->assertNotNull($triggerGet);
+		$this->assertEqualsCanonicalizing(['111', '222'], $triggerGet['params']['triggerids']);
+		$this->assertTrue($triggerGet['params']['monitored']);
+	}
+
+	/** Нет проблем — панель показывает OK (и триггеры проверять не по чему) */
 	public function testRenderPanelNoProblems()
 	{
 		$provider = $this->makeProvider(['problem.get' => []]);
@@ -257,6 +289,8 @@ class ZabbixProviderTest extends Unit
 		$html = $provider->renderPanel(ZabbixProvider::PANEL, $comp);
 		$this->assertStringContainsString('OK', $html);
 		$this->assertStringContainsString('проблем нет', $html);
+		//без проблем и запроса живости триггеров нет
+		$this->assertNotContains('trigger.get', array_column($provider->calls, 'method'));
 	}
 
 	/**
@@ -513,7 +547,8 @@ class ZabbixProviderTest extends Unit
 	public function testMetricsFailureKeepsProblems()
 	{
 		$provider = $this->makeProvider([
-			'problem.get' => [['name' => 'High CPU', 'severity' => '4', 'clock' => '1770000000']],
+			'problem.get' => [['name' => 'High CPU', 'severity' => '4', 'clock' => '1770000000', 'objectid' => '111']],
+			'trigger.get' => [['triggerid' => '111']],
 			'item.get' => static function () { throw new \RuntimeException('no permissions for history'); },
 		]);
 		$html = $provider->renderPanel(ZabbixProvider::PANEL, $this->boundComp());

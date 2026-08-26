@@ -278,20 +278,38 @@ class ZabbixProvider extends IntegrationProvider
 	 * Сортировка своя, а не API: problem.get принимает в sortfield только
 	 * eventid (иначе «Invalid parameter "/sortfield/1"»).
 	 *
+	 * problem.get отдаёт и проблемы ОТКЛЮЧЁННЫХ триггеров, а веб-интерфейс
+	 * Zabbix такие скрывает - делаем как он: оставляем только проблемы
+	 * триггеров, живых по trigger.get monitored=true (триггер включён,
+	 * его item и узел наблюдаются).
+	 *
 	 * @return array[] [{name, severity (int), severity_name, since (unix ts)}]
 	 */
 	protected function fetchProblems(string $hostid): array
 	{
 		$raw = $this->zabbixCall('problem.get', [
-			'output' => ['name', 'severity', 'clock'],
+			'output' => ['name', 'severity', 'clock', 'objectid'], //objectid = triggerid
 			'hostids' => [$hostid],
 			'recent' => false, //только незакрытые
 			'sortfield' => 'eventid',
 			'sortorder' => 'DESC',
-		]);
+		]) ?? [];
+
+		$triggerIds = array_values(array_unique(array_filter(array_column($raw, 'objectid'))));
+		$enabled = [];
+		if ($triggerIds) {
+			foreach ($this->zabbixCall('trigger.get', [
+				'output' => ['triggerid'],
+				'triggerids' => $triggerIds,
+				'monitored' => true,
+			]) ?? [] as $trigger) {
+				$enabled[(string)$trigger['triggerid']] = true;
+			}
+		}
 
 		$problems = [];
-		foreach ($raw ?? [] as $event) {
+		foreach ($raw as $event) {
+			if (!isset($enabled[(string)($event['objectid'] ?? '')])) continue;
 			$severity = (int)($event['severity'] ?? 0);
 			$problems[] = [
 				'name' => (string)($event['name'] ?? ''),
