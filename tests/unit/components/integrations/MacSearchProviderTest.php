@@ -743,8 +743,7 @@ Gi2/0/2";
 	public function testSwitchPortsFollowDeclaredLayout()
 	{
 		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
-		//коммутатор называет порты по-своему (Gi1/0/2), объявление - по-корпусному (2)
-		$switch->model->ports = "1\n2 в патч-панель\n3\n4";
+		$switch->model->ports = "Gi1/0/1\nGi1/0/2 в патч-панель\nGi1/0/3\nGi1/0/4";
 		$this->assertTrue($switch->model->save(false));
 		$switch->refresh();
 
@@ -756,7 +755,8 @@ Gi2/0/2";
 		], $switch);
 
 		//объявленный порядок, а не сортировка по номеру и не порядок ответа
-		$this->assertSame(['1', '2', '3', '4', 'Po1'], array_column($ports, 'port'));
+		$this->assertSame(['Gi1/0/1', 'Gi1/0/2', 'Gi1/0/3', 'Gi1/0/4', 'Po1'],
+			array_column($ports, 'port'));
 		//свободные розетки видно: без объявления их вообще не было бы в выдаче
 		$this->assertSame([false, true, false, true, false],
 			array_map(fn($port) => !count($port['macs']), $ports));
@@ -764,6 +764,32 @@ Gi2/0/2";
 		$this->assertSame('в патч-панель', $ports[1]['comment']);
 		$this->assertTrue($ports[0]['declared']);
 		$this->assertFalse($ports[4]['declared']);
+	}
+
+	/**
+	 * Сопоставление объявленного с реальным - ТОЛЬКО по точному имени.
+	 *
+	 * Конвенция владельца: имена в модели обязаны совпадать с именами
+	 * железки. Раньше «1» тихо матчился с «Gi1/0/1» по номеру, и кривое
+	 * объявление маскировалось наполовину; теперь несопоставленные порты
+	 * вылезают отдельными строками - ошибка видна целиком и лечится кнопкой
+	 * «взять имена с коммутатора».
+	 */
+	public function testSwitchPortsMatchDeclaredOnlyExactly()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->model->ports = "1\n2";
+		$this->assertTrue($switch->model->save(false));
+		$switch->refresh();
+
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:55', 'Gi1/0/1'),
+			$this->tableRow($switch->id, '00:11:22:33:44:56', 'Gi1/0/2'),
+		], $switch);
+
+		//объявленные пустые, реальные - хвостом: рассинхрон виден целиком
+		$this->assertSame(['1', '2', 'Gi1/0/1', 'Gi1/0/2'], array_column($ports, 'port'));
+		$this->assertSame([0, 0, 1, 1], array_map(fn($port) => count($port['macs']), $ports));
 	}
 
 	/** Без объявления - прежнее поведение: только найденные порты, по номеру */
@@ -935,6 +961,28 @@ Gi2/0/2";
 	public function testRealNameKeptAlongsideDeclared()
 	{
 		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->ports_override = "Gi1/0/1\nGi1/0/2";
+		$this->assertTrue($switch->save(false));
+		$switch->refresh();
+
+		$ports = $this->makeProvider()->switchPorts([], $switch, [
+			$this->passportPort('Gi1/0/1', ['description' => 'to core']),
+			$this->passportPort('Gi1/0/2'),
+		]);
+
+		//объявление по конвенции совпадает с именами железки - паспорт доехал
+		$this->assertSame('Gi1/0/1', $ports[0]['port']);
+		$this->assertSame('Gi1/0/1', $ports[0]['real']);
+		$this->assertSame('to core', $ports[0]['description']);
+	}
+
+	/**
+	 * Рассинхрон объявления с железкой не «склеивается» приблизительно:
+	 * паспорт чужих имён остаётся при реальных портах, объявленные - пустые.
+	 */
+	public function testMismatchedDeclarationIsNotGlued()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
 		$switch->ports_override = "Ge0/1\nGe0/2";
 		$this->assertTrue($switch->save(false));
 		$switch->refresh();
@@ -944,11 +992,12 @@ Gi2/0/2";
 			$this->passportPort('Gi1/0/2'),
 		]);
 
-		//в таблице - имя с корпуса, под ним - имя коммутатора
-		$this->assertSame('Ge0/1', $ports[0]['port']);
-		$this->assertSame('Gi1/0/1', $ports[0]['real']);
-		//и описание доехало, хотя имена разные
-		$this->assertSame('to core', $ports[0]['description']);
+		$byName = [];
+		foreach ($ports as $port) $byName[$port['port']] = $port;
+		//объявленный порт без паспорта: имён коммутатор про него не говорил
+		$this->assertSame('', (string)$byName['Ge0/1']['real']);
+		//реальные порты вылезли отдельно, паспорт при них
+		$this->assertSame('to core', $byName['Gi1/0/1']['description']);
 	}
 
 	/**

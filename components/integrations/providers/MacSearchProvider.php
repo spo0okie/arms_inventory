@@ -633,6 +633,19 @@ class MacSearchProvider extends IntegrationProvider
 			$port['neighbor_port'] = $neighbor['port'];
 		}
 
+		//сосед, опознанный в уже показанное на порту устройство, - не отдельная
+		//строка: телефон честно виден и в FDB, и в LLDP, и в CDP, но человеку
+		//это один узел, а не три
+		$visible = array_map(fn(Techs $device) => (int)$device->id, $port['found']);
+		if (is_object($port['linked'])) $visible[] = (int)$port['linked']->id;
+		if (count($visible)) {
+			$port['neighbors'] = array_values(array_filter($port['neighbors'],
+				function ($item) use ($visible) {
+					$device = $this->identifyNeighbor($item);
+					return !(is_object($device) && in_array((int)$device->id, $visible, true));
+				}));
+		}
+
 		$port['verdict'] = static::verdict($port);
 		//предложения: записано пусто или другое - всегда; записанное сошлось, но
 		//рядом нашлось ещё одно - только если из них складывается цепочка
@@ -661,7 +674,11 @@ class MacSearchProvider extends IntegrationProvider
 		foreach ($port['neighbors'] as $neighbor) {
 			$device = $this->identifyNeighbor($neighbor);
 			if (is_object($device)) {
-				return ['device' => $device, 'port' => (string)($neighbor['remote_port'] ?? '')];
+				//Port ID соседа часто равен его же MAC (конечные устройства):
+				//это не имя розетки, и порт с именем-маком заводить нельзя
+				$remote = (string)($neighbor['remote_port'] ?? '');
+				if (static::hexMac($remote) !== '') $remote = '';
+				return ['device' => $device, 'port' => $remote];
 			}
 		}
 		return ['device' => null, 'port' => ''];
@@ -701,21 +718,36 @@ class MacSearchProvider extends IntegrationProvider
 	{
 		$device = null;
 		$mac = static::hexMac($neighbor['remote_mac'] ?? '');
-		if ($mac) {
-			foreach ($this->resolveMacs([$mac])[$mac] ?? [] as $object) {
-				$device = static::deviceOf($object);
-				if (is_object($device)) break;
-			}
-			//адрес соседа может лежать внутри записанного диапазона
-			if (!is_object($device)) $device = static::deviceByMacRange($mac);
-		}
-
 		$name = trim((string)($neighbor['remote_name'] ?? ''));
+		//MAC зашивают и в имя: «SIP00DA55B88A3B», «... SPA504G 00da.55b8.8a3b» -
+		//это та же точная примета, что и chassis id
+		$macs = array_values(array_unique(array_filter([$mac, static::hexMacInText($name)])));
+
+		foreach ($macs as $exact) {
+			foreach ($this->resolveMacs([$exact])[$exact] ?? [] as $object) {
+				$device = static::deviceOf($object);
+				if (is_object($device)) break 2;
+			}
+		}
 		if (!is_object($device) && strlen($name)) $device = static::deviceByName($name);
 		if (!is_object($device) && strlen($name) && static::firstIp($name) === $name) {
 			$device = static::deviceByIp($name);
 		}
+		//диапазон - СЛАБЕЙШАЯ примета, потому идёт после имени: широкий
+		//диапазон в чужой карточке накрывает посторонние адреса, и опознание
+		//по нему против прямого LLDP-имени уже предлагало заменить верную
+		//запись коммутатором другой площадки
+		if (!is_object($device) && $mac) $device = static::deviceByMacRange($mac);
 		return $device;
+	}
+
+	/** Первый MAC, зашитый в строку: точечная, парная или сплошная запись */
+	public static function hexMacInText(?string $text): string
+	{
+		if (!preg_match('/([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}'
+			.'|(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}'
+			.'|[0-9a-f]{12})/i', (string)$text, $found)) return '';
+		return static::hexMac($found[1]);
 	}
 
 	/**
@@ -1037,36 +1069,20 @@ class MacSearchProvider extends IntegrationProvider
 	 *
 	 * Одну и ту же розетку коммутатор и инвентаризация называют по-разному:
 	 * `Gi1/0/12`, `GigabitEthernet1/0/12`, `12`. Сравниваем по убыванию
-	 * строгости — точное имя, затем «числовой хвост» ({@see portKey()}), затем
-	 * просто номер, — и каждый раз требуем единственного кандидата.
-	 *
-	 * Ослабление до номера допустимо потому, что это ПОКАЗ: ошибиться можно
-	 * только тем, что занятый порт нарисуется свободным, а находка уедет в
-	 * конец списка — и то и другое видно глазом. Для записи связей правило
-	 * строже (plans/network-map.md, этап 3.3).
+	 * строгости — было «точное имя → числовой хвост → номер», и это
+	 * маскировало ошибки объявления: модель с портами «1..24» наполовину
+	 * склеивалась с реальными «Gi1/0/1..28», и рассинхрон выглядел как
+	 * четыре лишних порта вместо двадцати восьми. Конвенция владельца:
+	 * имена в модели обязаны совпадать с именами железки (кнопка «взять
+	 * имена с коммутатора»), несовпадение не подгоняется - несопоставленные
+	 * порты вылезают отдельными строками, и ошибка очевидна целиком.
 	 *
 	 * @param array $ports ещё не разобранные найденные порты (имя => данные)
 	 * @return string|null имя найденного порта
 	 */
 	protected static function matchPort(string $name, array $ports): ?string
 	{
-		$candidates = [
-			fn($found) => (string)$found === $name,
-			//дальше сравнение приблизительное, и агрегат в него не пускаем:
-			//у Po1 тот же числовой хвост, что у порта 1
-			fn($found) => !static::isAggregate((string)$found)
-				&& static::portKey((string)$found) === static::portKey($name),
-			fn($found) => !static::isAggregate((string)$found)
-				&& static::portNumber((string)$found) !== ''
-				&& static::portNumber((string)$found) === static::portNumber($name),
-		];
-
-		foreach ($candidates as $matches) {
-			$found = array_keys(array_filter($ports, $matches, ARRAY_FILTER_USE_KEY));
-			if (count($found) !== 1) continue;    //ноль или неоднозначно - пробуем слабее
-			return $found[0];
-		}
-		return null;
+		return array_key_exists($name, $ports) ? $name : null;
 	}
 
 	/** Имя похоже на агрегированный канал, а не на физический порт? */

@@ -88,26 +88,6 @@ foreach ($rows as $port) {
 		$aggregateOffers++;
 }
 
-//как порты называет сам коммутатор. Имена портов - свойство экземпляра, а не
-//модели: стек перенумеровывает порты, MikroTik позволяет переименовать
-//интерфейсы, и модельные Ge0/1..24 после этого фантомы
-$renames = [];
-$adoptable = !is_null($ports);
-foreach ($rows as $port) {
-	if (!($port['physical'] ?? true)) continue;
-	$real = (string)($port['real'] ?? '');
-	//объявленный порт, о котором коммутатор не сказал ничего: взять имена
-	//нельзя - список получился бы короче, чем корпус
-	if (!strlen($real)) {
-		if (!empty($port['declared'])) $adoptable = false;
-		continue;
-	}
-	if ($real !== (string)$port['port']) $renames[] = $port['port'].' → '.$real;
-}
-//переименовывать нечего - кнопка не нужна; но у устройства без объявленных
-//портов вообще взять имена с коммутатора - единственный способ их объявить
-if (!count($renames) && count($model->portsTemplate)) $adoptable = false;
-
 //имена и ПОРЯДОК берём из паспорта: он идёт по ifIndex, то есть по железу, а
 //строки таблицы уже разложены по объявленному порядку инвентаризации
 $scannedNames = [];
@@ -123,7 +103,27 @@ foreach ($passport as $item) {
 		: MacSearchProvider::isAggregate($name)) continue;
 	$scannedNames[] = $name;
 }
-if (!count($scannedNames)) $adoptable = false;
+//«взять имена» - главный инструмент починки рассинхрона объявления с
+//железкой (сопоставление имён строгое, кривое объявление видно целиком),
+//поэтому кнопка живёт от ПАСПОРТА, а не от того, что удалось сопоставить.
+//Нельзя брать лишь когда паспорт короче объявленного корпуса (список стал
+//бы меньше числа розеток) или когда брать нечего/незачем
+$declaredNames = [];
+foreach ($rows as $port) {
+	if (($port['physical'] ?? true) && !empty($port['declared'])) $declaredNames[] = (string)$port['port'];
+}
+$adoptable = !is_null($ports) && count($scannedNames) > 0
+	&& count($scannedNames) >= count($declaredNames);
+//записи переезжают по позициям - предупреждение показывает, что во что
+$renames = [];
+foreach ($declaredNames as $index => $declared) {
+	if (($scannedNames[$index] ?? '') !== '' && $scannedNames[$index] !== $declared) {
+		$renames[] = $declared.' → '.$scannedNames[$index];
+	}
+}
+//переименовывать нечего - кнопка не нужна; но у устройства без объявленных
+//портов вообще взять имена с коммутатора - единственный способ их объявить
+if (!count($renames) && count($model->portsTemplate) && count($declaredNames)) $adoptable = false;
 
 /**
  * Узел на той стороне записанной связи: «Порт X: Устройство», а у порта
@@ -481,9 +481,10 @@ foreach ($rows as $port) if (count($port['proposals'] ?? []) === 1) $acceptable+
 				<?php [$icon, $hint] = $marks[$verdict]; ?>
 				<i class="<?= $icon ?>" qtip_ttip="<?= Html::encode($hint) ?>"></i>
 			<?php } elseif (count($buttons)) { ?>
-				<?php /* одно предложение принимается и разом; из нескольких
-				       выбирает человек, и "принять все" их не трогает */ ?>
-				<div class="<?= count($buttons) === 1 ? 'port-scan-accept' : '' ?>"><?= implode('', $buttons) ?></div>
+				<?php /* одно предложение на ПУСТОМ порту принимается и разом; из
+				       нескольких выбирает человек, а замену записанного «принять
+				       все» не трогает - это снятие плюс привязка */ ?>
+				<div class="<?= count($buttons) === 1 && $verdict === 'added' ? 'port-scan-accept' : '' ?>"><?= implode('', $buttons) ?></div>
 			<?php } elseif (isset($offers[$verdict])) { ?>
 				<?= $offer($port, $offers[$verdict]) ?>
 			<?php } elseif ($verdict === 'transit') { ?>

@@ -1227,22 +1227,40 @@ class Techs extends ArmsModel
 	}
 
 
+	/**
+	 * Канонический вывод списка адресов: в каждой строке либо адрес
+	 * AA:BB:CC:DD:EE:FF, либо диапазон «начало - конец» (issue #120).
+	 *
+	 * Разделители внутри адреса не важны, поэтому строка сначала вычищается до
+	 * hex. Ровно 24 hex - это пара адресов (та же однозначность, что и в
+	 * {@see \app\helpers\MacsHelper::fixList()}, где диапазон и хранится как
+	 * «12hex-12hex»): склеивать их в один «адрес» из двенадцати октетов нельзя -
+	 * получается строка, по которой не видно, что это два конца диапазона.
+	 */
 	public static function formatMacs($raw,$glue="\n") {
 
-		$macs=explode("\n",$raw);
+		$macs=explode("\n",$raw??'');
 		$formatted=[];
-		foreach ($macs as $k=>$mac) if ($mac) {
+		foreach ($macs as $mac) if ($mac) {
 			$rawMac=preg_replace('/[^0-9A-F]/', '', mb_strtoupper($mac));
-			$macTokens=[];
-			for ($i=0;$i<mb_strlen($rawMac);$i++){
-				if (!isset($macTokens[(int)($i/2)])) $macTokens[(int)($i/2)]='';
-				$macTokens[(int)($i/2)].=mb_substr($rawMac,$i,1);
-			}
-			$formatted[]=implode(':',$macTokens);
-			//$macs[$k]=
+			if (!mb_strlen($rawMac)) continue;
+
+			$formatted[]=mb_strlen($rawMac)===24
+				?static::formatMac(mb_substr($rawMac,0,12)).' - '.static::formatMac(mb_substr($rawMac,12,12))
+				:static::formatMac($rawMac);
 		}
 
 		return implode($glue,$formatted);
+	}
+
+	/** Один адрес (уже вычищенный до hex) октетами через двоеточие */
+	protected static function formatMac($hex) {
+		$macTokens=[];
+		for ($i=0;$i<mb_strlen($hex);$i++){
+			if (!isset($macTokens[(int)($i/2)])) $macTokens[(int)($i/2)]='';
+			$macTokens[(int)($i/2)].=mb_substr($hex,$i,1);
+		}
+		return implode(':',$macTokens);
 	}
 
 
