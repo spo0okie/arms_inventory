@@ -239,14 +239,21 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 	<h4>Как соединены — по таблицам MAC</h4>
 	<div class="text-secondary small mb-1">
 		направление, а не звено: за портом видны адреса другого коммутатора, но между ними
-		может стоять неуправляемая коробка — поэтому запись только руками, в форме порта.
-		Взаимно-однозначные пары (порт А видит только Б, порт Б — только А) — почти наверняка
-		прямой линк, они же синим пунктиром на схеме
+		может стоять неуправляемая коробка. Взаимно-однозначные пары (порт А видит только Б,
+		порт Б — только А) — почти наверняка прямой линк: они синим пунктиром на схеме, и
+		только у них есть кнопка записи. Остальные направления — подсказка для ручной
+		записи в форме порта, с явным указанием обоих портов
 	</div>
 	<?php if (count($overlay['fdbfound'] ?? [])) { ?>
 		<table class="table table-sm table-striped w-auto">
 			<tbody>
-			<?php foreach ($overlay['fdbfound'] as $found) { ?>
+			<?php foreach ($overlay['fdbfound'] as $found) {
+				//оба порта известны - запись порт↔порт, как у LLDP-находок,
+				//только по явной кнопке: решение о «это кабель» за человеком
+				$data = ['tech' => $found['a']->id, 'port' => $found['aport'], 'do' => 'attach',
+					'device' => $found['b']->id]
+					+ ($found['bport_id'] ? ['peer' => $found['bport_id']] : ['peer_name' => $found['bport']]);
+				?>
 				<tr>
 					<td><?= $device($found['a']) ?></td>
 					<td><?= Ports::$port_prefix.Html::encode($found['aport']) ?></td>
@@ -254,6 +261,14 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 						qtip_ttip="Взаимно-однозначно по таблицам MAC обеих сторон"></i></td>
 					<td><?= Ports::$port_prefix.Html::encode($found['bport']) ?></td>
 					<td><?= $device($found['b']) ?></td>
+					<td><?= Html::button('<i class="fas fa-link text-success"></i>', [
+						'class' => 'btn btn-sm btn-link p-0',
+						'qtip_ttip' => 'Записать связь '.$found['a']->name.' '.$found['aport']
+							.' ↔ '.$found['bport'].' '.$found['b']->name
+							.'. По таблицам MAC это направление, а не звено: убедитесь, что между портами нет неуправляемой коробки',
+						'data-scan' => json_encode($data),
+						'onclick' => 'mapScanApply(this)',
+					]) ?></td>
 				</tr>
 			<?php } ?>
 			</tbody>
@@ -261,7 +276,7 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 	<?php } ?>
 	<?php if (count($overlay['directions'] ?? [])) { ?>
 		<details class="small mb-3">
-			<summary class="text-secondary">все направления (<?= count($overlay['directions']) ?> портов)</summary>
+			<summary class="text-secondary">дополнительные направления (<?= count($overlay['directions']) ?> портов)</summary>
 			<table class="table table-sm w-auto mt-1">
 				<tbody>
 				<?php foreach ($overlay['directions'] as $direction) { ?>
@@ -270,7 +285,12 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 						<td><?= Ports::$port_prefix.Html::encode($direction['port']) ?></td>
 						<td class="text-secondary">→ в эту сторону:</td>
 						<td<?= $direction['unique'] ? ' class="fw-bold"' : '' ?>><?=
-							Html::encode(implode(', ', $direction['nodes'])) ?></td>
+							implode(', ', array_map(fn($peer) => Html::encode($peer['name']),
+								$direction['peers'])) ?></td>
+						<?php /* кнопки нет сознательно: порт той стороны по MAC
+						       не определён, а связь между коммутаторами без
+						       порта - неправильная запись. Руками, с явными
+						       портами, в форме порта */ ?>
 					</tr>
 				<?php } ?>
 				</tbody>

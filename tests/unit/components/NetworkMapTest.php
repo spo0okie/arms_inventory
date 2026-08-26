@@ -447,6 +447,8 @@ class NetworkMapTest extends Unit
 		$one = $this->makeSwitch($site, '10.60.0.1', "Gi1/0/1\nGi1/0/24", ['mac' => '00aabbcc0001']);
 		$two = $this->makeSwitch($site, '10.60.0.2', "1\n25", ['mac' => '00aabbcc0002']);
 		$three = $this->makeSwitch($site, '10.60.0.3', "1\n2", ['mac' => '00aabbcc0003']);
+		//в карточке четвёртого MAC не записан: его выдаёт только визитка
+		$four = $this->makeSwitch($site, '10.60.0.4', "1\n2");
 
 		$provider = new MacSearchProvider(['id' => 'macsearch',
 			'config' => ['url' => 'http://x', 'token' => 't']]);
@@ -459,6 +461,10 @@ class NetworkMapTest extends Unit
 			//а порт 1 второго - транзит: за ним и первый, и третий
 			['target' => $two->id, 'port' => '1', 'mac' => '00:aa:bb:cc:00:01'],
 			['target' => $two->id, 'port' => '1', 'mac' => '00:aa:bb:cc:00:03'],
+			//base MAC четвёртого в карточке отсутствует - опознание по визитке
+			['target' => $one->id, 'port' => 'Gi1/0/1', 'mac' => '00:aa:bb:cc:00:04'],
+		], 'identity' => [
+			['target' => $four->id, 'base_mac' => '00:aa:bb:cc:00:04'],
 		], 'errors' => []], $provider);
 		$overlay = $map->overlay;
 
@@ -474,15 +480,24 @@ class NetworkMapTest extends Unit
 		$pair = [$found['a']->id => $found['aport'], $found['b']->id => $found['bport']];
 		$this->assertSame(['Gi1/0/24', '25'], [$pair[$one->id], $pair[$two->id]]);
 
-		//направления: порт 1 второго смотрит в сторону обоих
+		//дополнительные направления: порт 1 второго смотрит в сторону обоих,
+		//а стороны двустороннего кандидата в списке НЕ повторяются
 		$byPort = [];
 		foreach ($overlay['directions'] as $direction) {
 			$byPort[$direction['tech']->id.'|'.$direction['port']] = $direction;
 		}
+		$this->assertArrayNotHasKey($one->id.'|Gi1/0/24', $byPort);
+		$this->assertArrayNotHasKey($two->id.'|25', $byPort);
 		$transit = $byPort[$two->id.'|1'] ?? null;
 		$this->assertNotNull($transit);
 		$this->assertFalse($transit['unique']);
-		$this->assertCount(2, $transit['nodes']);
+		$this->assertCount(2, $transit['peers']);
+		$this->assertInstanceOf(Techs::class, $transit['peers'][0]['tech']);
+
+		//четвёртый опознан по base MAC из визитки, а не по полю карточки
+		$viaIdentity = $byPort[$one->id.'|Gi1/0/1'] ?? null;
+		$this->assertNotNull($viaIdentity);
+		$this->assertSame($four->id, $viaIdentity['peers'][0]['tech']->id);
 
 		//взаимно-однозначная пара - на схеме, синим пунктиром с пометкой MAC
 		$mermaid = $map->mermaid();

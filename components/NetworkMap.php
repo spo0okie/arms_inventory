@@ -403,7 +403,7 @@ class NetworkMap
 			if (is_object($tech) && !isset($overlay['answered'][$techId])) $overlay['silent'][] = $tech;
 		}
 
-		$this->fdbDirections($fdb, $overlay);
+		$this->fdbDirections($fdb, $data, $recorded, $overlay);
 
 		$overlay['unknown'] = array_values($overlay['unknown']);
 		$this->overlay = $overlay;
@@ -419,14 +419,23 @@ class NetworkMap
 	 * ТОЛЬКО Б, а порт Б видит ТОЛЬКО А - сильный кандидат в прямой линк:
 	 * такие рисуются на схеме пунктиром с пометкой MAC.
 	 */
-	protected function fdbDirections(array $fdb, array &$overlay): void
+	protected function fdbDirections(array $fdb, array $data, array $recorded, array &$overlay): void
 	{
-		//чей адрес: hex MAC -> узел карты (по полю MAC всех членов узла)
+		//чей адрес: hex MAC -> узел карты. Поле MAC карточек - лишь одна из
+		//примет: в чужих FDB коммутатор светится фактическим base MAC моста
+		//(у стека - мастера), который в карточке может отличаться или
+		//отсутствовать. Он приходит в визитке этого же опроса - берём его
 		$macNode = [];
 		foreach ($this->nodes as $nodeId => $node) {
 			foreach ($node['members'] as $member) {
 				foreach (MacSearchProvider::hexMacs($member->mac) as $mac) $macNode[$mac] = $nodeId;
 			}
+		}
+
+		foreach ($data['identity'] ?? [] as $card) {
+			$tech = $this->tech((int)($card['target'] ?? 0));
+			$mac = MacSearchProvider::hexMac($card['base_mac'] ?? '');
+			if (is_object($tech) && $mac !== '') $macNode[$mac] = $this->nodeOf[$tech->id];
 		}
 
 		$directions = [];    //techId|portKey -> [nodeId => true]
@@ -448,12 +457,15 @@ class NetworkMap
 			if (!is_object($tech)) continue;
 			$resolved = MacSearchProvider::resolvePortName($tech, $portKey);
 			$port = $resolved['name'] ?? $portKey;
+			//той стороне нужны и имя узла (показ), и карточка (запись руками)
+			$peers = array_map(fn($id) => ['name' => $this->nodes[$id]['name'],
+				'tech' => $this->nodes[$id]['members'][0]], array_keys($nodes));
 			$overlay['directions'][] = ['tech' => $tech, 'port' => $port,
-				'nodes' => array_map(fn($id) => $this->nodes[$id]['name'], array_keys($nodes)),
+				'port_id' => $resolved['id'] ?? null, 'peers' => $peers,
 				'unique' => count($nodes) === 1];
 			if (count($nodes) === 1) {
 				$uniquePort[$this->nodeOf[$tech->id].'|'.array_key_first($nodes)] =
-					['tech' => $tech, 'port' => $port];
+					['tech' => $tech, 'port' => $port, 'port_id' => $resolved['id'] ?? null];
 			}
 		}
 
@@ -483,9 +495,30 @@ class NetworkMap
 			}
 			if (!$known) {
 				$overlay['fdbfound'][] = ['a' => $side['tech'], 'aport' => $side['port'],
-					'b' => $back['tech'], 'bport' => $back['port']];
+					'aport_id' => $side['port_id'],
+					'b' => $back['tech'], 'bport' => $back['port'],
+					'bport_id' => $back['port_id']];
 			}
 		}
+
+		//дополнительные направления не повторяют показанное выше: стороны
+		//двусторонних кандидатов и однозначные строки, подтверждающие
+		//записанную связь на тот же узел, из списка уходят
+		$shown = [];
+		foreach ($overlay['fdbfound'] as $found) {
+			$shown[$found['a']->id.'|'.$found['aport']] = true;
+			$shown[$found['b']->id.'|'.$found['bport']] = true;
+		}
+		$overlay['directions'] = array_values(array_filter($overlay['directions'],
+			function ($direction) use ($shown, $recorded) {
+				$key = $direction['tech']->id.'|'.$direction['port'];
+				if (isset($shown[$key])) return false;
+				if (!$direction['unique']) return true;
+				$known = $recorded[$key] ?? null;
+				return !(is_object($known['peer'] ?? null) && is_object($known['peer']->tech)
+					&& ($this->nodeOf[$known['peer']->tech->id] ?? null)
+						=== ($this->nodeOf[$direction['peers'][0]['tech']->id] ?? -1));
+			}));
 	}
 
 	/**
