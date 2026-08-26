@@ -23,11 +23,12 @@ class MacsType extends TextType
 	 * строке в каноническом виде (AA:BB:CC:DD:EE:FF). Работает и от сырого
 	 * значения (mac), и от уже форматированного (formattedMac).
 	 *
-	 * Рядом с каждым одиночным адресом — иконка поиска (issue #218,
+	 * Рядом с каждым адресом — иконка поиска (issue #218,
 	 * {@see MacSearchWidget}): поиск это функциональность самого адреса,
 	 * поэтому живёт на его типе и одинаков везде, где адрес показывается
-	 * (ОС, оборудование, любой mac-атрибут). Диапазоны (issue #120) иконку
-	 * не получают: искать можно конкретный адрес.
+	 * (ОС, оборудование, любой mac-атрибут). У диапазона (issue #120) иконка
+	 * своя у каждой границы: искать умеем только конкретный адрес, а границы
+	 * диапазона — как раз конкретные адреса.
 	 *
 	 * $options['search'] => false - вывести значения без иконок (списки,
 	 * печать, тултипы: там иконка была бы шумом, а в списках ту же задачу
@@ -42,14 +43,35 @@ class MacsType extends TextType
 
 		$items=[];
 		foreach (explode("\n",$value) as $line) {
-			$text=Techs::formatMacs($line);
-			if (!strlen($text)) continue;
+			$rendered=[];
+			foreach (static::searchable($line) as $part) {
+				$text=Techs::formatMacs($part);
+				if (!strlen($text)) continue;
 
-			$items[]=Html::tag('span',Html::encode($text),['class'=>'mac_address'])
-				.($search?MacSearchWidget::widget(['model'=>$model,'mac'=>$line]):'');
+				$rendered[]=Html::tag('span',Html::encode($text),['class'=>'mac_address'])
+					.($search?MacSearchWidget::widget(['model'=>$model,'mac'=>$part]):'');
+			}
+			if (count($rendered)) $items[]=implode(' - ',$rendered);
 		}
 
 		return implode('<br />',$items);
+	}
+
+	/**
+	 * Строка значения, разложенная на адреса, которые имеет смысл искать:
+	 * одиночный адрес остаётся собой, диапазон (24 hex, issue #120) — это две
+	 * его границы. Разбор тот же, что и в
+	 * {@see \app\helpers\MacsHelper::fixList()}: разделители внутри адреса не
+	 * важны, а 24 hex однозначно означают пару «начало-конец».
+	 *
+	 * @param string $line строка значения атрибута
+	 * @return string[] адреса в том порядке, в каком их показывать
+	 */
+	protected static function searchable(string $line): array
+	{
+		$hex=preg_replace('/[^0-9a-f]/', '', mb_strtolower($line));
+		if (strlen($hex)===24) return [substr($hex,0,12),substr($hex,12,12)];
+		return [$line];
 	}
 
 	/**

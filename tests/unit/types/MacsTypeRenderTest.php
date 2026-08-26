@@ -70,15 +70,36 @@ class MacsTypeRenderTest extends Unit
 	}
 
 	/**
-	 * Диапазон адресов (issue #120) иконки не получает: и в списках, и на
-	 * портах ищется конкретный адрес
+	 * Диапазон адресов (issue #120) показывается двумя границами, а не одной
+	 * склейкой из двенадцати октетов, и у каждой границы своя иконка: искать
+	 * умеем конкретный адрес, а границы — как раз конкретные адреса
 	 */
-	public function testRangeHasNoIcon()
+	public function testRangeShowsBothBounds()
 	{
 		$html = $this->render(new Comps(['mac' => '001122334400-0011223344ff']));
 
-		$this->assertStringNotContainsString('mac-search-icon', $html);
-		$this->assertNotEmpty(trim(strip_tags($html)));
+		$this->assertStringContainsString('00:11:22:33:44:00', $html);
+		$this->assertStringContainsString('00:11:22:33:44:FF', $html);
+		//именно две границы, а не «адрес» 00:11:22:33:44:00:00:11:22:33:44:FF
+		$this->assertStringNotContainsString('00:11:22:33:44:00:00', $html);
+		$this->assertSame(2, substr_count($html, 'mac-search-icon'));
+	}
+
+	/** Список без иконок диапазон тоже разделяет на границы */
+	public function testRangeStaticView()
+	{
+		$html = (new MacsType())->renderOutput(new View(),
+			new Comps(['mac' => '001122334400-0011223344ff']), 'mac', ['search' => false]);
+
+		$this->assertSame('<span class="mac_address">00:11:22:33:44:00</span>'
+			.' - <span class="mac_address">00:11:22:33:44:FF</span>', $html);
+	}
+
+	/** Тот же диапазон в списковом форматировании (колонки, печать, тултипы) */
+	public function testRangeFormattedForLists()
+	{
+		$this->assertSame('00:11:22:33:44:00 - 00:11:22:33:44:FF',
+			Techs::formatMacs('001122334400-0011223344ff'));
 	}
 
 	/** Пустое значение — пустой вывод */
