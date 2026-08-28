@@ -283,23 +283,23 @@ function attach_qTip(el, force = false) {
 	// клик по элементу приколачивает тултип — он перестаёт закрываться по
 	// mouseout; повторный клик отпускает. Статус виден по классу qtip-pinned
 	// (цвета — web/css/qtip.css).
-	if (typeof el.attr("qtip_pin") !== "undefined") {
+	//
+	// Работает ТОЛЬКО на span.attr-hint-icon — на иконке-подсказке "?", у
+	// которой нет своего действия по клику. На любом другом элементе pin
+	// съедал бы его собственный клик (так, например, переставали работать
+	// ссылки remotecontrol:// на странице ОС), поэтому qtip_pin там просто
+	// игнорируется.
+	if (typeof el.attr("qtip_pin") !== "undefined" && el.is("span.attr-hint-icon")) {
 		let instance = el.tooltipster("instance");
 		instance.on("close", function (event) {
 			// event.stop() отменяет закрытие (см. _close в tooltipster.bundle.js)
 			if (el.hasClass("qtip-pinned")) event.stop();
 		});
-		// Ссылка с реальным href (не "#") обязана остаться рабочей: pin только
-		// оставляет тултип открытым (чтобы дотянуться до ссылки внутри него),
-		// но не отменяет переход — иначе умирают, например, значки
-		// remotecontrol:// на странице ОС (views/comps/card.php, views/comps/ip_item.php).
-		let pinHref = (el.is("a") ? el.attr("href") : "") || "";
-		let pinIsLink = pinHref !== "" && pinHref.charAt(0) !== "#";
 		// namespace + off: при переинициализации (force) не плодим обработчики
 		el.off("click.qtipPin").on("click.qtipPin", function (e) {
 			// иконка живёт внутри label поля или ссылки сортировки колонки —
 			// клик не должен фокусировать input или дёргать сортировку
-			if (!pinIsLink) e.preventDefault();
+			e.preventDefault();
 			e.stopPropagation();
 			if (el.toggleClass("qtip-pinned").hasClass("qtip-pinned")) {
 				instance.open();
