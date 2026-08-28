@@ -289,11 +289,17 @@ function attach_qTip(el, force = false) {
 			// event.stop() отменяет закрытие (см. _close в tooltipster.bundle.js)
 			if (el.hasClass("qtip-pinned")) event.stop();
 		});
+		// Ссылка с реальным href (не "#") обязана остаться рабочей: pin только
+		// оставляет тултип открытым (чтобы дотянуться до ссылки внутри него),
+		// но не отменяет переход — иначе умирают, например, значки
+		// remotecontrol:// на странице ОС (views/comps/card.php, views/comps/ip_item.php).
+		let pinHref = (el.is("a") ? el.attr("href") : "") || "";
+		let pinIsLink = pinHref !== "" && pinHref.charAt(0) !== "#";
 		// namespace + off: при переинициализации (force) не плодим обработчики
 		el.off("click.qtipPin").on("click.qtipPin", function (e) {
 			// иконка живёт внутри label поля или ссылки сортировки колонки —
 			// клик не должен фокусировать input или дёргать сортировку
-			e.preventDefault();
+			if (!pinIsLink) e.preventDefault();
 			e.stopPropagation();
 			if (el.toggleClass("qtip-pinned").hasClass("qtip-pinned")) {
 				instance.open();
