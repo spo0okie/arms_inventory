@@ -67,6 +67,24 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 			опрошено: <?= (int)($overlay['stats']['answered'] ?? 0) ?>/<?= (int)($overlay['stats']['requested'] ?? 0) ?>,
 			соседств: <?= (int)($overlay['stats']['neighbors'] ?? 0) ?>,
 			строк MAC: <?= (int)($overlay['stats']['rows'] ?? 0) ?></span>;
+		<?php if (is_array($overlay['sweep'] ?? null)) { $sweepReport = $overlay['sweep'];
+			//прогрев просили - отчитаться обязаны: сколько прогрели или почему нет
+			if (!empty($sweepReport['skipped'])) { ?>
+				<span class="text-warning" qtip_ttip="Прогрев ARP/FDB (ping-sweep) не выполнялся">
+					прогрев: <?= Html::encode($sweepReport['skipped']) ?></span>;
+			<?php } else { ?>
+				<span qtip_ttip="<?= Html::encode('Прогрев ARP/FDB перед опросом: ping-sweep подсетей площадки ('
+					.implode(', ', $sweepReport['networks'] ?? []).') с хоста сервиса. Кадры ответов прошли через '
+					.'коммутаторы - таблицы MAC стали плотнее.'
+					.(count($sweepReport['rejected'] ?? []) ? ' Отклонено: '.implode('; ', array_map(
+						fn($r) => trim(($r['network'] ?? '').' - '.($r['error'] ?? '')), $sweepReport['rejected'])) : '')
+					.(!empty($sweepReport['skipped_hosts']) ? ' Не успели в отведённое время: '
+						.(int)$sweepReport['skipped_hosts'].' адресов.' : '')) ?>">
+					прогрето: <?= (int)($sweepReport['alive'] ?? 0) ?>/<?= (int)($sweepReport['hosts'] ?? 0)
+					?> адресов за <?= (float)($sweepReport['duration'] ?? 0) ?> c<?php
+					if (count($sweepReport['rejected'] ?? [])) { ?> <span class="text-warning">(отклонено
+						сетей: <?= count($sweepReport['rejected']) ?>)</span><?php } ?></span>;
+			<?php } } ?>
 		подтверждено: <?= count($overlay['confirmed']) ?>,
 		не видно: <?= count($overlay['unseen']) ?>,
 		найдено незаписанных: <?= count($overlay['found']) ?>,

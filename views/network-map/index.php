@@ -74,6 +74,17 @@ $scanUrl = is_object($site)
 					'qtip_ttip' => 'Опросить соседей по LLDP/CDP у всех коммутаторов площадки и '
 						.'наложить на карту: что подтверждено, чего не видно, что найдено и не записано']) ?>
 			</div>
+			<div class="col-auto form-check">
+				<?php /* активное вмешательство в сеть - только по явной галочке,
+				       по умолчанию выключено (галочка не запоминается) */ ?>
+				<?= Html::checkbox('sweep', false, ['class' => 'form-check-input', 'value' => 1,
+					'id' => 'network-map-sweep']) ?>
+				<label class="form-check-label" for="network-map-sweep"
+					qtip_ttip="Перед опросом прогреть таблицы MAC: сервис пропингует подсети площадки
+						(из IPAM), ответы живых хостов пройдут через коммутаторы, и FDB станут плотными -
+						«как соединены» по таблицам MAC покажет больше. Это активное вмешательство в сеть
+						(веер ICMP), поэтому по умолчанию выключено">прогреть сеть (ping-sweep)</label>
+			</div>
 		<?php } ?>
 	<?php } ?>
 </form>
@@ -107,8 +118,11 @@ $scanUrl = is_object($site)
 					.text(text).prependTo('#network-map-body');
 			};
 			<?php /* один синхронный запрос: сервер держит его до готовности либо
-			       дедлайна сервиса, запас поверх tableWait - на передачу ответа */ ?>
-			$.ajax({url: <?= json_encode($scanUrl) ?> + (reuse ? '&reuse=1' : ''),
+			       дедлайна сервиса, запас поверх tableWait - на передачу ответа.
+			       Прогрев (sweep) - только у нового опроса: пересборка из кэша
+			       (reuse) сеть не трогает по определению */ ?>
+			var sweep = !reuse && $('#network-map-sweep').prop('checked') ? '&sweep=1' : '';
+			$.ajax({url: <?= json_encode($scanUrl) ?> + (reuse ? '&reuse=1' : '') + sweep,
 				timeout: <?= ($tableWait + 60) * 1000 ?>})
 				.done(function (data, status, xhr) {
 					var json = typeof data === 'object' ? data : null;

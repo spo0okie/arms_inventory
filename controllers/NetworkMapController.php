@@ -89,10 +89,12 @@ class NetworkMapController extends ArmsBaseController
 	 * говорит, насколько данные свежие.
 	 *
 	 * GET: place (int), reuse (int) - взять последний опрос из кэша, если он
-	 *   ещё есть.
+	 *   ещё есть; sweep (int) - прогреть подсети площадки (ping-sweep на
+	 *   стороне сервиса) перед опросом: FDB становятся плотными, но это
+	 *   активное вмешательство в сеть - только по явной галочке.
 	 * Ответ: HTML карты со слоем либо JSON {status: error}.
 	 */
-	public function actionScan(int $place, int $reuse = 0, int $rooms = 0)
+	public function actionScan(int $place, int $reuse = 0, int $rooms = 0, int $sweep = 0)
 	{
 		$site = Places::findOne($place);
 		if (!is_object($site)) throw new NotFoundHttpException('Площадка не найдена');
@@ -106,11 +108,17 @@ class NetworkMapController extends ArmsBaseController
 		$cacheKey = ['network-map-scan', $site->id];
 		$data = $reuse ? Yii::$app->cache->get($cacheKey) : false;
 		if (!is_array($data)) {
+			//что прогревать, знает IPAM; пустой список - не ошибка, но и не
+			//молчание: человек просил прогрев, надо сказать, почему его не было
+			$networks = $sweep ? MacSearchProvider::siteNetworks($site->id) : [];
 			try {
-				$data = $provider->siteNeighbors($site->id);
+				$data = $provider->siteNeighbors($site->id, $networks);
 			} catch (\Throwable $e) {
 				Yii::$app->response->format = Response::FORMAT_JSON;
 				return ['status' => 'error', 'error' => $e->getMessage()];
+			}
+			if ($sweep && !count($networks) && !isset($data['sweep'])) {
+				$data['sweep'] = ['skipped' => 'в IPAM не записано сетей этой площадки - прогревать нечего'];
 			}
 			if (($data['status'] ?? null) === 'done') Yii::$app->cache->set($cacheKey, $data, static::LAST_SCAN_TTL);
 		}

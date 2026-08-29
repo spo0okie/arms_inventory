@@ -218,11 +218,15 @@ class NetworkMapTest extends Unit
 				'driver' => 'cisco_ios', 'cli' => ['available' => true, 'capabilities' => []],
 				'snmp' => ['available' => null, 'note' => 'community не задан',
 					'capabilities' => []]]],
+			//отчёт прогрева (ping-sweep) - тоже как есть
+			'sweep' => ['networks' => ['10.60.0.0/24'], 'rejected' => [],
+				'hosts' => 254, 'alive' => 40, 'skipped_hosts' => 0, 'duration' => 4.2],
 		], $provider);
 
 		$o = $map->overlay;
 		$this->assertCount(1, $o['capabilities']);
 		$this->assertSame($core->id, $o['capabilities'][0]['target']);
+		$this->assertSame(40, $o['sweep']['alive']);
 		$this->assertCount(1, $o['confirmed']);
 		$this->assertCount(1, $o['unseen'], 'core-third записано, но third про core молчит');
 		$this->assertCount(1, $o['found'], 'связь с двух сторон - одна находка');

@@ -666,6 +666,46 @@ Gi2/0/2";
 		$this->assertStringContainsString('tech'.$switch->id, $binding);
 	}
 
+	/** Прогрев (ping-sweep) уходит в запрос только по явной просьбе */
+	public function testSiteNeighborsSendsSweepNetworks()
+	{
+		$place = $this->makePlace();
+		$this->makeSwitch(['ip' => '10.50.2.16', 'places_id' => $place->id]);
+
+		$provider = $this->makeProvider([$this->response($this->payload([], ['mode' => 'table']))]);
+		$provider->siteNeighbors($place->id, ['10.50.2.0/24']);
+		$this->assertSame(['10.50.2.0/24'], $provider->requests[0]['body']['sweep']);
+
+		//без просьбы ключа sweep в теле нет вовсе: активное вмешательство
+		//не должно включаться само
+		$provider = $this->makeProvider([$this->response($this->payload([], ['mode' => 'table']))]);
+		$provider->siteNeighbors($place->id);
+		$this->assertArrayNotHasKey('sweep', $provider->requests[0]['body']);
+	}
+
+	/** Подсети прогрева - из IPAM: сети площадки через VLAN и сетевой домен */
+	public function testSiteNetworksFromIpam()
+	{
+		$place = $this->makePlace();
+		$domain = new \app\models\NetDomains();
+		$domain->setAttributes(['name' => 'dom-'.uniqid(), 'places_id' => $place->id], false);
+		$this->assertTrue($domain->save(false));
+		$vlan = new \app\models\NetVlans();
+		$vlan->setAttributes(['name' => 'vl-sweep', 'vlan' => 3120, 'domain_id' => $domain->id], false);
+		$this->assertTrue($vlan->save(false));
+
+		$network = new \app\models\Networks();
+		$network->setAttributes(['text_addr' => '10.50.2.0/24', 'vlan_id' => $vlan->id], false);
+		$this->assertTrue($network->save(false));
+		//архивная сеть в прогрев не идёт
+		$archived = new \app\models\Networks();
+		$archived->setAttributes(['text_addr' => '10.50.3.0/24', 'vlan_id' => $vlan->id,
+			'archived' => 1], false);
+		$this->assertTrue($archived->save(false));
+
+		$this->assertSame(['10.50.2.0/24'], MacSearchProvider::siteNetworks($place->id));
+	}
+
 	/** Опрашивается один коммутатор и в режиме table (без адреса) */
 	public function testSwitchPanelAsksForWholeTable()
 	{

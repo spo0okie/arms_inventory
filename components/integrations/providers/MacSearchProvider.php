@@ -796,16 +796,38 @@ class MacSearchProvider extends IntegrationProvider
 	 * Строки разложены по членам стеков. Ответ сервиса как есть (status /
 	 * rows / neighbors / errors), чтобы вызывающий видел pending и неопрошенных.
 	 *
+	 * @param array $sweep CIDR-подсети для прогрева ARP/FDB перед опросом
+	 *   (ping-sweep на стороне сервиса) - активное вмешательство, только по
+	 *   явной просьбе; пусто - без прогрева
 	 * @throws \RuntimeException сервис недоступен / ответил ошибкой
 	 */
-	public function siteNeighbors(int $siteId): array
+	public function siteNeighbors(int $siteId, array $sweep = []): array
 	{
 		$targets = $this->targets(static::placeSubtree($siteId));
 		if (!$targets) return ['status' => 'done', 'rows' => [], 'neighbors' => [], 'errors' => [], 'targets' => []];
-		$data = $this->fetch(null, $targets, 'table');
+		$data = $this->fetch(null, $targets, 'table', count($sweep) ? ['sweep' => array_values($sweep)] : []);
 		$data['rows'] = $this->attributeStack($data['rows'] ?? []);
 		$data['neighbors'] = $this->attributeStack($data['neighbors'] ?? []);
 		return $data;
+	}
+
+	/**
+	 * Подсети площадки для прогрева: адреса сетей IPAM (Networks) по ветке
+	 * помещений. Сервис ничего не придумывает сам - что прогревать, говорит
+	 * инвентаризация, а она знает сети через VLAN → сетевой домен → площадка.
+	 * Не попавшие в allowlist сервиса подсети он отклонит поимённо в отчёте.
+	 *
+	 * @return string[] CIDR-строки (пусто - в IPAM сетей площадки нет)
+	 */
+	public static function siteNetworks(int $siteId): array
+	{
+		$rows = \app\models\Networks::find()->alias('networks')
+			->joinWith('netVlan', false)
+			->innerJoin('net_domains', 'net_domains.id = net_vlans.domain_id')
+			->where(['net_domains.places_id' => static::placeSubtree($siteId)])
+			->andWhere(['or', ['networks.archived' => 0], ['networks.archived' => null]])
+			->select(['networks.text_addr'])->column();
+		return array_values(array_unique(array_filter(array_map('trim', $rows))));
 	}
 
 	/**
@@ -1665,10 +1687,13 @@ class MacSearchProvider extends IntegrationProvider
 	 *   table/neighbors адрес не нужен, они снимают с коммутатора всё
 	 * @param array $targets цели опроса
 	 * @param string $mode режим сервиса: lookup / table / neighbors
+	 * @param array $extra дополнительные поля тела запроса (например, sweep -
+	 *   подсети прогрева ARP/FDB перед опросом)
 	 * @return array ответ сервиса (status/rows/errors/targets/...)
 	 * @throws \RuntimeException при ошибке транспорта/ответа
 	 */
-	protected function fetch(?string $mac, array $targets, string $mode = 'lookup'): array
+	protected function fetch(?string $mac, array $targets, string $mode = 'lookup',
+		array $extra = []): array
 	{
 		//полный опрос - синхронный и stateless для клиента: один запрос,
 		//сервис держит его до готовности либо своего scan.deadline (по нему
@@ -1682,7 +1707,7 @@ class MacSearchProvider extends IntegrationProvider
 			'targets' => $targets,
 			'mode' => $mode,
 			'wait' => $wait,
-		];
+		] + $extra;
 		if (!is_null($mac)) $payload['mac'] = $mac;
 
 		[$response, $status] = $this->httpPost(
