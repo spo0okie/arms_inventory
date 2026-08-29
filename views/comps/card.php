@@ -34,7 +34,6 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 		'data-doc-anchor'=>'remote-control',
 		'qtip_ttip'=>"Удаленное управление {$model->fqdn}<br>"
 			.'<a href="'.\yii\helpers\Url::to(['/docs/page','path'=>'admin/integrations/remote-control.md']).'">Как настроить обработчик протокола</a>',
-		'qtip_pin'=>'1',
 		'qtip_side'=>'bottom',
 	]);
 
@@ -84,10 +83,10 @@ $remoteControl=(is_object($model->sandbox)&&!$model->sandbox->network_accessible
 	<?php if (is_object($model->platform)) {?>
 		<div class="pe-5">
 			<?= ModelFieldWidget::widget([
-			'model'=>$model,
-			'field'=>'platform_id',
-			['item_options'=>['static_view'=>$static_view]]
-		]) ?>
+				'model'=>$model,
+				'field'=>'platform_id',
+				'item_options'=>['static_view'=>$static_view],
+			]) ?>
 		</div>
 	<?php } elseif (!$no_arm) { ?>
 		<div class="pe-5">

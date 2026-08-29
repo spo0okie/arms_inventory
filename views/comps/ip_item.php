@@ -51,7 +51,6 @@ if (!$static_view) {
 				'class' => 'ip-action',
 				'qtip_ttip' => "Удалённое управление по адресу {$addr}<br>"
 					.'<a href="'.\yii\helpers\Url::to(['/docs/page','path'=>'admin/integrations/remote-control.md']).'">Как настроить обработчик протокола</a>',
-				'qtip_pin' => '1',
 				'qtip_side' => 'bottom',
 			]
 		);
