@@ -245,6 +245,17 @@ class NetworkMapController extends ArmsBaseController
 		];
 	}
 
+	/**
+	 * Acceptance: запись связи - POST с JSON-ответом; без выбранного
+	 * оборудования отвечает ошибкой в теле, а не падает
+	 */
+	public function testAssign(): array
+	{
+		return [
+			['name' => 'default', 'POST' => [], 'response' => 200],
+		];
+	}
+
 	/** Acceptance: без настроенной интеграции сверка отвечает JSON с ошибкой, а не падает */
 	public function testScan(): array
 	{

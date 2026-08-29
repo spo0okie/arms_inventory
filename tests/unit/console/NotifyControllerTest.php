@@ -33,6 +33,11 @@ class NotifyControllerTest extends Unit
 	protected function _before()
 	{
 		$this->transaction = Yii::$app->db->beginTransaction();
+		//тесты считают письма в очереди и получателей документа, а демо-БД
+		//приходит с наполненными notifications и users_in_contracts
+		//(tests/_data/demo-seed) - чистим их в своей транзакции, откат в _after вернёт
+		Notifications::deleteAll();
+		Yii::$app->db->createCommand()->delete('users_in_contracts')->execute();
 		$this->user = Users::find()
 			->where(['not', ['Email' => null]])->andWhere(['<>', 'Email', ''])->andWhere(['Uvolen' => 0])
 			->one();

@@ -977,6 +977,44 @@ Gi2/0/2";
 	}
 
 	/**
+	 * Сосед, повторяющий уже показанное устройство, не рисуется отдельной
+	 * строкой: телефон честно виден в FDB, LLDP и CDP, но человеку это один
+	 * узел. CDP телефонов кладёт MAC в Port ID - опознаём и по нему.
+	 */
+	public function testNeighborDuplicatingVisibleDeviceIsHidden()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->model->ports = "Gi1/0/10";
+		$this->assertTrue($switch->model->save(false));
+		$switch->refresh();
+
+		$phone = new Techs();
+		$phone->setAttributes(['model_id' => $switch->model_id, 'num' => 'TEL-10',
+			'mac' => '00da55b88a3b', 'history' => ''], false);
+		$this->assertTrue($phone->save(false));
+
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:da:55:b8:8a:3b', 'Gi1/0/10'),
+		], $switch, [], [
+			//CDP: имя без адреса, MAC - в Port ID
+			['target' => $switch->id, 'port' => 'Gi1/0/10', 'remote_mac' => '',
+				'remote_name' => 'Cisco IP Phone SPA504G',
+				'remote_port' => '00da.55b8.8a3b', 'protocol' => 'cdp'],
+			//LLDP: MAC зашит в имя
+			['target' => $switch->id, 'port' => 'Gi1/0/10', 'remote_mac' => '',
+				'remote_name' => 'SIP00DA55B88A3B', 'remote_port' => 'Port 1',
+				'protocol' => 'lldp'],
+		]);
+
+		//устройство найдено по FDB, обе соседские строки - его же дубли
+		$this->assertSame([$phone->id], array_map(fn($device) => $device->id,
+			$ports[0]['found']));
+		$this->assertSame([], $ports[0]['neighbors']);
+		//Port ID-МАК именем порта не становится, а LLDP-имя розетки - да
+		$this->assertNotSame('00da.55b8.8a3b', $ports[0]['neighbor_port'] ?? '');
+	}
+
+	/**
 	 * Рассинхрон объявления с железкой не «склеивается» приблизительно:
 	 * паспорт чужих имён остаётся при реальных портах, объявленные - пустые.
 	 */
@@ -1334,6 +1372,46 @@ eth1";
 		$this->assertStringContainsString('Fake OS 1.0', $html);
 		//визитка есть - подсказка про community не нужна
 		$this->assertStringNotContainsString('community', $html);
+	}
+
+	/** Диагностика возможностей в панели: команды, права и «LLDP включён» видны */
+	public function testRenderSwitchPanelShowsCapabilities()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+
+		$payload = $this->payload([
+			$this->tableRow($switch->id, '00:11:22:33:44:55', 'Gi1/0/12'),
+		], ['mode' => 'table']);
+		$payload['capabilities'] = [[
+			'target' => $switch->id, 'host' => '10.50.2.16', 'driver' => 'cisco_ios',
+			'cli' => ['available' => true, 'capabilities' => [
+				'fdb' => ['status' => 'ok', 'rows' => 120, 'commands' => ['show mac address-table']],
+				'neighbors' => ['status' => 'ok', 'rows' => 2, 'lldp_enabled' => true,
+					'commands' => ['show lldp neighbors detail', 'show cdp neighbors detail']],
+				//на команду не хватило прав - это должно быть видно явно
+				'arp' => ['status' => 'denied', 'commands' => ['show ip arp'],
+					'note' => 'коммутатор отверг команду: % Invalid input detected'],
+				'lag' => ['status' => 'ok', 'commands' => ['show etherchannel summary']],
+				'interfaces' => ['status' => 'empty', 'commands' => ['show interfaces status']],
+			]],
+			'snmp' => ['available' => false, 'note' => 'коммутатор не ответил по SNMP',
+				'capabilities' => [
+					'interfaces' => ['status' => 'error', 'note' => 'коммутатор не ответил по SNMP',
+						'commands' => ['SNMP IF-MIB: ifName/ifDescr, статусы, скорость']],
+				]],
+		]];
+		$provider = $this->makeProvider([$this->response($payload)]);
+
+		$html = $provider->renderSwitchPanel($switch);
+
+		$this->assertStringContainsString('диагностика опроса', $html);
+		$this->assertStringContainsString('show mac address-table', $html);
+		//отказ по правам - свой значок и ответ коммутатора в подсказке
+		$this->assertStringContainsString('fa-ban', $html);
+		$this->assertStringContainsString('отверг команду', $html);
+		$this->assertStringContainsString('LLDP включён', $html);
+		//недоступный транспорт назван с причиной
+		$this->assertStringContainsString('не ответил по SNMP', $html);
 	}
 
 	/** Неопрошенный коммутатор: причина видна прямо в панели */

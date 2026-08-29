@@ -262,6 +262,23 @@ class MacSearchProvider extends IntegrationProvider
 		return $stamp;
 	}
 
+	/**
+	 * Таблица «Диагностика опроса»: по каждой цели - что она отдаёт по CLI и
+	 * по SNMP (сервисный ключ capabilities). Пустой отчёт - пустая строка,
+	 * чтобы вызывающие не проверяли наличие ключа сами.
+	 *
+	 * @param array $capabilities ключ capabilities ответа сервиса
+	 * @param Techs[] $switches опрошенные коммутаторы (id => модель) для ссылок
+	 */
+	public function renderCapabilities(?array $capabilities, array $switches = []): string
+	{
+		if (!is_array($capabilities) || !count($capabilities)) return '';
+		return $this->renderView('capabilities', [
+			'capabilities' => $capabilities,
+			'switches' => $switches,
+		]);
+	}
+
 	/** С какого числа адресов порт считается транзитным (конфиг transitFrom) */
 	public function transitFrom(): int
 	{
@@ -719,9 +736,12 @@ class MacSearchProvider extends IntegrationProvider
 		$device = null;
 		$mac = static::hexMac($neighbor['remote_mac'] ?? '');
 		$name = trim((string)($neighbor['remote_name'] ?? ''));
-		//MAC зашивают и в имя: «SIP00DA55B88A3B», «... SPA504G 00da.55b8.8a3b» -
-		//это та же точная примета, что и chassis id
-		$macs = array_values(array_unique(array_filter([$mac, static::hexMacInText($name)])));
+		//MAC зашивают и в имя («SIP00DA55B88A3B»), и в Port ID (CDP телефонов
+		//отдаёт там адрес вместо имени розетки) - это та же точная примета,
+		//что и chassis id
+		$macs = array_values(array_unique(array_filter([$mac,
+			static::hexMacInText($name),
+			static::hexMacInText((string)($neighbor['remote_port'] ?? ''))])));
 
 		foreach ($macs as $exact) {
 			foreach ($this->resolveMacs([$exact])[$exact] ?? [] as $object) {

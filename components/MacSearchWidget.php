@@ -60,7 +60,6 @@ class MacSearchWidget extends Widget
 
 		return ' '.Html::tag('span', '<i class="fas fa-search"></i>', [
 			'class' => 'mac-search-icon text-secondary',
-			'qtip_pin' => 1,
 			'qtip_side' => 'top,bottom,right,left',
 			'qtip_theme' => 'tooltipster-shadow tooltipster-shadow-infobox',
 			'qtip_ttip' => '<div class="card"><div class="card-header">Поиск по MAC</div>'

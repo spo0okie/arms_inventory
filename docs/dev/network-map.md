@@ -284,6 +284,16 @@ flowchart LR
 - Везде учитывается `tech_states.operating`: цели опроса, кнопка в карточке,
   узлы карты и члены стеков — только работающее (без статуса — считается
   работающим).
+- **Диагностика опроса** (ключ `capabilities` ответа сервиса): по каждой цели —
+  доступность CLI и SNMP с причинами и по каждой возможности (FDB, соседи с
+  признаком «LLDP включён», ARP, агрегация, порты; по SNMP — IF-MIB, LAG,
+  VLAN, визитка, FDB, LLDP-MIB, ARP) команда/ветка MIB и статус, включая
+  явный «⛔ отказ» (нет прав / команда отвергнута). Сервис строит отчёт и для
+  сбойных целей (SSH умер — SNMP пробуется, и наоборот). Рисуется свёрнутой
+  таблицей на карте и в карточке коммутатора
+  (`MacSearchProvider::renderCapabilities()`, вьюха `macsearch/capabilities`).
+  Туда же сервис отдаёт данные ARP (`arp`, source: cli/snmp) — пока только
+  доезжают до клиента, применение (MAC→IP, OUI) — отдельным шагом.
 
 ## 6. Панель «Порт коммутатора» у объекта
 
@@ -323,7 +333,7 @@ flowchart LR
 | Файл | Роль |
 |---|---|
 | `components/integrations/providers/MacSearchProvider.php` | цели, стеки, опрос, раскладка по портам, вердикты, предложения |
-| `components/integrations/providers/views/macsearch/{switch,ports,_raw,_diagnostics}.php` | панели, сырой дамп, диагностика |
+| `components/integrations/providers/views/macsearch/{switch,ports,_raw,_diagnostics,capabilities}.php` | панели, сырой дамп, диагностика пустых ответов, диагностика возможностей CLI/SNMP |
 | `views/techs/_ports-table.php` | единая таблица портов (карточка + слой опроса), JS действий |
 | `views/techs/ports.php` | блок «Сетевые порты»: контейнер + кнопка |
 | `controllers/PortsController.php` | `actionScanApply` |

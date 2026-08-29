@@ -212,9 +212,17 @@ class NetworkMapTest extends Unit
 			$row($core, 'Gi1/0/3', '10.60.0.2', 'Gi1/0/48'),
 			//неопознанный сосед
 			$row($third, 'Gi1/0/1', 'sw-unknown', 'Gi0/1'),
-		], 'errors' => []], $provider);
+		], 'errors' => [],
+			//диагностика возможностей отдаётся вьюхе как есть
+			'capabilities' => [['target' => $core->id, 'host' => '10.60.0.1',
+				'driver' => 'cisco_ios', 'cli' => ['available' => true, 'capabilities' => []],
+				'snmp' => ['available' => null, 'note' => 'community не задан',
+					'capabilities' => []]]],
+		], $provider);
 
 		$o = $map->overlay;
+		$this->assertCount(1, $o['capabilities']);
+		$this->assertSame($core->id, $o['capabilities'][0]['target']);
 		$this->assertCount(1, $o['confirmed']);
 		$this->assertCount(1, $o['unseen'], 'core-third записано, но third про core молчит');
 		$this->assertCount(1, $o['found'], 'связь с двух сторон - одна находка');

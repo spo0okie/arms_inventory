@@ -410,6 +410,20 @@ $peerPick = static function (array $resolved, string $field, int $index) {
 	</table>
 <?php } ?>
 
+<?php /* по каждому коммутатору: доступен ли CLI/SNMP (и почему нет) и что
+       именно он отдаёт - FDB, соседи (включён ли LLDP), ARP, агрегация,
+       порты - с командами и явным «нет прав». Ответ на «почему карта
+       неполная», когда счётчиков шапки мало */ ?>
+<?php $capabilitiesHtml = (is_array($overlay) && is_object($provider))
+	? $provider->renderCapabilities($overlay['capabilities'] ?? [], $switches) : ''; ?>
+<?php if ($capabilitiesHtml !== '') { ?>
+	<details class="small mb-3">
+		<summary class="text-secondary">Диагностика опроса: что отдаёт каждый коммутатор
+			(<?= count($overlay['capabilities']) ?>)</summary>
+		<?= $capabilitiesHtml ?>
+	</details>
+<?php } ?>
+
 <?php if (count($map->outside)) { ?>
 	<h4>Аплинки на другие площадки</h4>
 	<div class="text-secondary small mb-1">

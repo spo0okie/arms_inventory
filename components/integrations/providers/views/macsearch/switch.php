@@ -136,6 +136,21 @@ elseif ($failure) $trouble = 'коммутатор не опрошен: '.($fail
 	</details>
 <?php } ?>
 
+<?php /* что коммутатор отдаёт по CLI и по SNMP (команды, права, LLDP) - в
+       отличие от блока выше, диагностика есть и у сбойного опроса: SSH умер,
+       а SNMP жив (или наоборот) - отсюда это видно */ ?>
+<?php $capabilitiesHtml = is_array($data)
+	? $provider->renderCapabilities($data['capabilities'] ?? [],
+		count($stack ?? []) ? array_combine(array_map(fn($member) => $member->id, $stack), $stack)
+			: [$tech->id => $tech])
+	: ''; ?>
+<?php if ($capabilitiesHtml !== '') { ?>
+	<details class="text-secondary small mb-2">
+		<summary>диагностика опроса: что отдаёт коммутатор (CLI/SNMP)</summary>
+		<?= $capabilitiesHtml ?>
+	</details>
+<?php } ?>
+
 <?= $this->render('_diagnostics', [
 	'diagnostics' => $data['diagnostics'] ?? [],
 	'switches' => [$tech->id => $tech],
