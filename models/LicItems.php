@@ -199,7 +199,7 @@ class LicItems extends ArmsModel
 				'type' => 'string',
 				'typeClass' => \app\types\StringType::class,
 			],
-			'responsible' => ['Ответственный','Кто отвечает за эту лицензию','typeClass'=>\app\types\StringType::class],
+			'responsible' => ['Ответственный','Кто отвечает за эту лицензию','ref'=>\app\models\Users::class],
 			'services_id' => [
 				'Относится к сервису',
 				'hint'=>'В рамках какого сервиса/услуги производится/сопровождается лицензирование.<br>'
@@ -223,7 +223,7 @@ class LicItems extends ArmsModel
 				'hint' => 'Период действия лицензий закупки (если истёк — с какого числа просрочены) и сколько лицензий распределено из общего количества',
 				'typeClass' => \app\types\StringType::class,
 			],
-			'support' => ['Поддержка','Команда замещающая ответственного на время его отсутствия','typeClass'=>\app\types\StringType::class],
+			'support' => ['Поддержка','Команда замещающая ответственного на время его отсутствия','ref'=>\app\models\Users::class,'refMulti'=>true],
 			//search fields
 			'comp_name' => ['Имя компьютера (FQDN или DOMAIN\\hostname)','typeClass'=>\app\types\StringType::class],
 			'user_login' => ['Логин пользователя','typeClass'=>\app\types\StringType::class],

@@ -64,13 +64,13 @@ if (
 					if ($master->id==$model->id) {    //если это то же самое
 						$tokens[] = 'Основное';        //говорим что основное
 					} elseif ($master->isOverride) {    //если это период с другим расписанием
-						if (strlen(trim($master->description)))
+						if (strlen(trim((string)$master->description)))
 							$tokens[] = $master->description;    //выводим пояснение к периоду
 					} else							//если другое расписание
 						$tokens[]=$master->name;	//его имя
 				}
 				//если есть день недели
-				if (strlen(trim($day['day']->comment)))
+				if (strlen(trim((string)$day['day']->comment)))
 					$tokens[]=$day['day']->comment;
 				
 				if (count($tokens)) $source[]=implode(' ',$tokens);

@@ -143,7 +143,7 @@ class LicGroups extends ArmsModel
 				'type' => 'string',
 				'typeClass' => \app\types\StringType::class,
 			],
-			'responsible' => ['Ответственный','Кто отвечает за эту лицензию','typeClass'=>\app\types\StringType::class],
+			'responsible' => ['Ответственный','Кто отвечает за эту лицензию','ref'=>\app\models\Users::class],
 			'services_id' => [
 				'Относится к сервису',
 				'hint'=>'В рамках какого сервиса/услуги производится/сопровождается лицензирование.<br>'
@@ -159,7 +159,7 @@ class LicGroups extends ArmsModel
 				'typeClass' => \app\types\LinkType::class,
 			],
 			'soft'=>['alias'=>'soft_ids'],
-			'support' => ['Поддержка','Команда замещающая ответственного на время его отсутствия','typeClass'=>\app\types\StringType::class],
+			'support' => ['Поддержка','Команда замещающая ответственного на время его отсутствия','ref'=>\app\models\Users::class,'refMulti'=>true],
 			'users_ids' => [
 				'Пользователи, на которых распределять лицензии',
 				'hint' => 'Свободные (не назначенные через закупки или ключи) лицензии этого типа будут распределяться на Пользователей из списка',
