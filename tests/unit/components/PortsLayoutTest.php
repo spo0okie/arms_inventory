@@ -2,6 +2,7 @@
 
 namespace tests\unit\components;
 
+use app\components\PortsLayoutWidget;
 use app\components\PortsMapWidget;
 use app\helpers\PortsHelper;
 use app\models\Manufacturers;
@@ -141,5 +142,81 @@ class PortsLayoutTest extends Unit
 		$this->assertTrue($model->save(false));
 		$tech->refresh();
 		$this->assertSame('', PortsMapWidget::widget(['model' => $tech]));
+	}
+
+	/** Коммутатор с корпусом на 8 портов в два ряда */
+	private function makeSwitch(string $layout = '4x2 вниз Основные', int $ports = 8): Techs
+	{
+		$manufacturer = new Manufacturers();
+		$manufacturer->setAttributes(['name' => 'Вендор '.uniqid(), 'comment' => ''], false);
+		$this->assertTrue($manufacturer->save(false));
+
+		$model = new TechModels();
+		$model->setAttributes(['name' => 'Модель '.uniqid(), 'manufacturers_id' => $manufacturer->id,
+			'ports' => implode("\n", $this->names($ports)), 'ports_layout' => $layout,
+			'comment' => ''], false);
+		$this->assertTrue($model->save(false));
+
+		$tech = new Techs();
+		$tech->setAttributes(['model_id' => $model->id, 'num' => 'SW-'.uniqid(),
+			'history' => ''], false);
+		$this->assertTrue($tech->save(false));
+		$tech->refresh();
+		return $tech;
+	}
+
+	/**
+	 * Раскладка предлагается только для стандартного корпуса: описанного и в
+	 * один-два ряда. У трёхрядного гадать, какой ряд «верхний», не из чего
+	 */
+	public function testLayoutAvailability()
+	{
+		$this->assertTrue(PortsLayoutWidget::available($this->makeSwitch()));
+		$this->assertTrue(PortsLayoutWidget::available($this->makeSwitch('8 SFP', 8)));
+		$this->assertFalse(PortsLayoutWidget::available($this->makeSwitch('4x3 Основные', 12)));
+		//корпус не описан - раскладывать нечего, и это не ошибка
+		$this->assertFalse(PortsLayoutWidget::available($this->makeSwitch('', 8)));
+		$this->assertFalse(PortsLayoutWidget::available(null));
+	}
+
+	/**
+	 * Пояснения стоят колонками: у верхнего ряда - над ним, у нижнего - под.
+	 * Данные те же, что в таблице, но внутри колонки идут одной строкой:
+	 * перенос увёл бы вторую строку вбок, за пределы своего порта.
+	 */
+	public function testLayoutPutsCellsAroundRows()
+	{
+		$tech = $this->makeSwitch();
+		$rows = [];
+		foreach (array_keys($tech->portsTemplate) as $name) {
+			$rows[] = ['port' => $name, 'comment' => 'патч-панель '.$name, 'link' => null,
+				'linked' => null, 'found' => [], 'macs' => [], 'vlans' => ['7'],
+				'count' => 0, 'transit' => false, 'uplink' => false, 'uplink_peer' => '',
+				'verdict' => 'free', 'declared' => true, 'neighbors' => [],
+				'description' => '', 'aggregate' => '', 'vlans_configured' => false];
+		}
+
+		$html = PortsLayoutWidget::widget(['model' => $tech, 'rows' => $rows, 'scanned' => true]);
+
+		$this->assertStringContainsString('ports-layout-block', $html);
+		$this->assertStringContainsString('--ports-layout-columns:4', $html);
+		//ряд пояснений сверху, ряд снизу - и ровно по одной колонке на порт
+		$this->assertSame(4, substr_count($html, 'ports-layout-cell up'));
+		$this->assertSame(4, substr_count($html, 'ports-layout-cell down'));
+		//номер ряда розеток - в классе: строку в общей сетке задаёт стиль,
+		//иначе однорядный блок съехал бы вверх относительно двухрядного
+		$this->assertSame(4, substr_count($html, 'ports-layout-row-1'));
+		$this->assertSame(4, substr_count($html, 'ports-layout-row-2'));
+		$this->assertSame(8, substr_count($html, 'ports-map-slot'));
+		//в колонке те же данные, что и в строке таблицы
+		$this->assertStringContainsString('патч-панель Gi1/0/1', $html);
+		$this->assertStringContainsString('линка нет', $html);
+		$this->assertStringContainsString('VLAN 7', $html);
+		//перенос строки внутри колонки заменён разделителем
+		$this->assertStringNotContainsString('<br>', $html);
+
+		//нестандартный корпус - только таблица, виджет молчит
+		$this->assertSame('', PortsLayoutWidget::widget([
+			'model' => $this->makeSwitch('4x3 Основные', 12), 'rows' => $rows]));
 	}
 }

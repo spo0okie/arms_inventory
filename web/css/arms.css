@@ -131,3 +131,120 @@ span.mac_address {
 .ports-map-slot.slot-transit  {--ports-slot-bg: #ced4da; --ports-slot-fg: #212529}
 .ports-map-slot.slot-disabled {--ports-slot-bg: #e9ecef; --ports-slot-fg: #6c757d}
 .ports-map-slot.slot-self     {--ports-slot-bg: #fff3cd; --ports-slot-fg: #664d03; --ports-slot-border: #ffc107}
+
+/* Раскладка портов (PortsLayoutWidget): строка таблицы, поставленная на попа
+   над своей розеткой. Слоты и пояснения лежат в ОДНОЙ сетке с фиксированной
+   шириной колонки - только так подпись гарантированно указывает на свой порт,
+   а не на соседний. Раскраска слотов - та же, что у карты портов */
+.ports-layout {
+	/* лента корпусов: строки (пояснения - ряд - ряд - пояснения - подпись)
+	   ОБЩИЕ для всех блоков через subgrid, иначе блоки встают на разной
+	   высоте и панель читается как две разные железки. Не влезло по ширине -
+	   прокручивается, а не ломается на этажи */
+	display: none;
+	grid-auto-flow: column;
+	grid-auto-columns: max-content;
+	grid-template-rows: auto auto auto auto auto;
+	align-items: end;
+	gap: 0 1rem;
+	overflow-x: auto;
+}
+/* режим выбран кнопкой на блоке портов: раскладка вместо таблицы и карты.
+   !important - у карты портов бутстраповский .d-flex, он иначе побеждает */
+.ports-view-layout .ports-layout { display: grid; }
+.ports-view-layout .ports-classic,
+.ports-view-layout .ports-map { display: none !important; }
+
+.ports-layout-block {
+	display: grid;
+	grid-row: 1 / -1;
+	grid-template-rows: subgrid;
+	grid-template-columns: repeat(var(--ports-layout-columns, 24), var(--ports-layout-slot, 2.8em));
+	gap: 2px;
+}
+/* каждая часть знает свою строку общей сетки: у однорядного блока (SFP)
+   розетки встают в ту же строку, что верхний ряд двухрядного */
+.ports-layout-cell.up { grid-row: 1; }
+.ports-layout-row-1 { grid-row: 2; }
+.ports-layout-row-2 { grid-row: 3; }
+.ports-layout-cell.down { grid-row: 4; }
+.ports-layout-title { grid-row: 5; grid-column: 1 / -1; }
+
+.ports-layout-slot {
+	width: 100%;
+	line-height: 1.8em;
+	align-self: center;
+}
+/* пояснение читается при наклоне головы к своей половине корпуса: у верхнего
+   ряда снизу вверх, у нижнего сверху вниз - и в обоих случаях НАЧАЛО текста
+   стоит у розетки, к которой оно относится. Флексом текст центруется по
+   ширине колонки: колонка узкая, и подпись, прижатая к краю, указывала бы
+   на соседнюю розетку */
+.ports-layout-cell {
+	display: flex;
+	writing-mode: vertical-rl;
+	align-items: center;
+	font-size: .8rem;
+	line-height: 1.15;
+}
+.ports-layout-cell.up {
+	transform: rotate(180deg);
+	justify-content: flex-start;
+}
+.ports-layout-cell.down { justify-content: flex-start; }
+/* выноска к розетке: длинное тире в начале колонки. В вертикальном письме оно
+   встаёт чёрточкой вдоль колонки - подпись отходит от своего порта линией, а
+   не прижимается к нему вплотную. В подсказке ячейки его нет: это оформление */
+.ports-layout-text::before {
+	content: '— ';
+	color: var(--bs-secondary-color, #6c757d);
+}
+.ports-layout-text {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	/* колонка не растёт бесконечно: длинная цепочка связей растянула бы панель
+	   на два экрана. Что не поместилось - в подсказке ячейки и в таблице */
+	max-height: 34em;
+}
+/* кнопки, иконки и значки внутри повёрнутой колонки остаются горизонтальными:
+   их читают глазами, а не поворотом головы */
+.ports-layout-cell button,
+.ports-layout-cell select,
+.ports-layout-cell .badge,
+.ports-layout-cell i { writing-mode: horizontal-tb; }
+.ports-layout-cell.up button,
+.ports-layout-cell.up .badge,
+.ports-layout-cell.up i { transform: rotate(180deg); }
+/* «Ёлочкой»: подпись доворачивается на 45° вокруг ТОЧКИ У РОЗЕТКИ - начала
+   строки (у верхнего ряда это низ колонки, у нижнего верх). Ячейку крутить
+   нельзя: её собственный разворот на 180° уже переносит начало строки к
+   розетке, и второй поворот вокруг того же угла увёл бы подпись прочь.
+   Под 45° строка разбирается заметно быстрее, чем под 90°, но занимает больше
+   места вбок. transform не меняет раскладку, поэтому строки сетки сохраняют
+   прежнюю высоту - это запас, а не наложение */
+.ports-layout-diagonal .ports-layout-cell .ports-layout-text {
+	transform-origin: 50% 0;
+}
+.ports-layout-diagonal .ports-layout-cell.up .ports-layout-text {
+	transform: rotate(45deg);
+}
+.ports-layout-diagonal .ports-layout-cell.down .ports-layout-text {
+	transform: rotate(-45deg);
+}
+/* иконки и кнопки в довёрнутой подписи доворачиваются обратно */
+.ports-layout-diagonal .ports-layout-cell.up button,
+.ports-layout-diagonal .ports-layout-cell.up .badge,
+.ports-layout-diagonal .ports-layout-cell.up i { transform: rotate(135deg); }
+.ports-layout-diagonal .ports-layout-cell.down button,
+.ports-layout-diagonal .ports-layout-cell.down .badge,
+.ports-layout-diagonal .ports-layout-cell.down i { transform: rotate(45deg); }
+/* довёрнутые подписи вылезают вбок за последнюю колонку - оставляем им место */
+.ports-layout-diagonal { padding-right: 12em; }
+
+/* галочка «ёлочкой» имеет смысл только в раскладке */
+.ports-layout-diagonal-toggle { display: none; }
+.ports-view-layout .ports-layout-diagonal-toggle { display: inline-flex; }
+
+/* кнопка предложения в таблице блочная (плюс под плюсом), в колонке - строчная */
+.ports-layout-cell button.d-block { display: inline-block !important; }

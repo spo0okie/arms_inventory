@@ -53,8 +53,19 @@ $this->title = $model->num;
 				?>
 			</div>
 			<?= ModelWidget::widget(['model'=>$model, 'view'=>'model', 'options'=>[]]) ?>
-			<h4><?= Ports::$titles ?></h4>
-			<?= ModelWidget::widget(['model'=>$model, 'view'=>'ports', 'options'=>['static_view'=>false]]) ?>
+			<?php /* заголовок и порты - одна секция: в режиме раскладки она
+			       переезжает под колонки целиком, иначе заголовок остался бы
+			       висеть над пустым местом */ ?>
+			<div id="techs-ports-section-<?= $model->id ?>">
+				<h4><?= Ports::$titles ?></h4>
+				<?= ModelWidget::widget(['model'=>$model, 'view'=>'ports', 'options'=>['static_view'=>false]]) ?>
+			</div>
 		</div>
 	</div>
+	<?php /* место для раскладки портов: корпус на 48 розеток с пояснениями над
+	       каждой в половину карточки не помещается, поэтому по кнопке блок
+	       портов переезжает сюда - под обе колонки. Пустой div тут ничего не
+	       стоит, а альтернатива (переносить блок вниз всегда) поменяла бы
+	       привычный вид карточки всему оборудованию с портами */ ?>
+	<div class="row"><div class="col-12" id="techs-ports-wide-<?= $model->id ?>"></div></div>
 </div>

@@ -186,6 +186,33 @@ class NetworkMapTest extends Unit
 	}
 
 	/**
+	 * Сосед-стек: LLDP называет мастера (chassis-id и sysName у стека общие),
+	 * а кабель воткнут в конкретный юнит. Находка должна лечь на того члена,
+	 * у которого объявлен названный порт, иначе связь запишется не туда - и
+	 * на несуществующий порт мастера
+	 */
+	public function testStackNeighborLandsOnMember()
+	{
+		$site = $this->makeSite();
+		$first = $this->makeSwitch($site, '10.60.0.1', "Gi1/0/1\nGi1/0/2",
+			['hostname' => 'sw-stack-master']);
+		$second = $this->makeSwitch($site, '10.60.0.1', "Gi2/0/1\nGi2/0/2");
+		$edge = $this->makeSwitch($site, '10.60.0.2', 'Gi1/0/48');
+
+		$provider = new MacSearchProvider(['id' => 'macsearch', 'config' => ['url' => 'http://x', 'token' => 't']]);
+		$map = new NetworkMap($site);
+		$map->overlay(['status' => 'done', 'neighbors' => [
+			['target' => $edge->id, 'port' => 'Gi1/0/48', 'remote_mac' => '',
+				'remote_name' => $first->hostname, 'remote_port' => 'Gi2/0/1', 'protocol' => 'lldp'],
+		], 'errors' => []], $provider);
+
+		$found = $map->overlay['found'];
+		$this->assertCount(1, $found);
+		$this->assertSame($second->id, $found[0]['b']->id, 'сосед уточнён до члена стека');
+		$this->assertSame('Gi2/0/1', $found[0]['peer']['name']);
+	}
+
+	/**
 	 * Слой сверки: подтверждённое, невидимое, найденное (с конфликтом на
 	 * стороне соседа), неопознанное. LLDP симметричен - одна связь с двух
 	 * сторон считается один раз.

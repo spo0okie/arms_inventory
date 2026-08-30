@@ -157,6 +157,13 @@ class MacSearchProvider extends IntegrationProvider
 	 */
 	protected array $stacks = [];
 
+	/**
+	 * @var array состав стека по id ЛЮБОГО его члена: id => Techs[].
+	 * Опознание соседей ({@see stackMemberFor()}) спрашивает про чужие стеки
+	 * тоже, и по многу раз - это их память на запрос
+	 */
+	protected array $stackCache = [];
+
 	public function getTitle(): string
 	{
 		return $this->config['title'] ?? 'Порт коммутатора';
@@ -339,7 +346,7 @@ class MacSearchProvider extends IntegrationProvider
 		//карточка члена стека: опрос идёт по общему IP и возвращает весь стек,
 		//а показать надо только порты этого члена. Остальное - его соседям по
 		//стеку, неприкаянное - представителю
-		$members = $this->stackOf($model);
+		$members = $this->rememberStack($this->stackOf($model));
 		$this->stacks = [$model->id => $members];
 		foreach ($members as $member) $this->switches[$member->id] = $member;
 
@@ -646,8 +653,18 @@ class MacSearchProvider extends IntegrationProvider
 		//прямо говорит, кто на том конце кабеля и в какой он розетке
 		$neighbor = $this->neighborDevice($port);
 		if (is_object($neighbor['device'] ?? null)) {
-			$port['found'] = [$neighbor['device']];
-			$port['neighbor_port'] = $neighbor['port'];
+			//сосед опознан в САМ этот коммутатор - петля либо служебный порт.
+			//Тот же запрет, что и для адреса за портом, но проверять его надо
+			//и здесь: находка по LLDP приходит после фильтра адресов и своим
+			//видом «нашлось оборудование» переписала бы предупреждение
+			//предложением связи с самим собой - да ещё и на порт, которого у
+			//него нет (имя пришло от соседа по стеку, привязка завела бы фантом)
+			if (is_object($this->scanned) && (int)$neighbor['device']->id === (int)$this->scanned->id) {
+				$port['self'] = true;
+			} else {
+				$port['found'] = [$neighbor['device']];
+				$port['neighbor_port'] = $neighbor['port'];
+			}
 		}
 
 		//сосед, опознанный в уже показанное на порту устройство, - не отдельная
@@ -730,6 +747,9 @@ class MacSearchProvider extends IntegrationProvider
 	 * имени (инвентарный номер, hostname, с доменом и без), по IP (sysName у
 	 * некоторых железок - адрес управления). Не опознан - null: это находка
 	 * «незаписанный коммутатор», а не мусор.
+	 *
+	 * Опознанный стек уточняется до члена ({@see stackMemberFor()}): все
+	 * приметы у стека общие, а кабель воткнут в конкретный юнит.
 	 */
 	public function identifyNeighbor(array $neighbor): ?Techs
 	{
@@ -758,7 +778,56 @@ class MacSearchProvider extends IntegrationProvider
 		//по нему против прямого LLDP-имени уже предлагало заменить верную
 		//запись коммутатором другой площадки
 		if (!is_object($device) && $mac) $device = static::deviceByMacRange($mac);
-		return $device;
+		if (!is_object($device)) return null;
+		return $this->stackMemberFor($device, (string)($neighbor['remote_port'] ?? ''));
+	}
+
+	/**
+	 * Какой член стека объявил себя этим соседом.
+	 *
+	 * Стек представляется одним chassis-id (MAC мастера) и одним sysName, так
+	 * что любое опознание по примете приводит к мастеру - а кабель воткнут в
+	 * конкретный юнит. Разводит их имя удалённого порта: `XGE2/0/49` объявлен
+	 * у второго члена, и сосед - он. Тот же {@see portOwner()}, что раскладывает
+	 * по стеку наши собственные порты, только для дальнего конца.
+	 *
+	 * Не разошлось (имена членов не разведены, порт не объявлен ни у кого,
+	 * Port ID - это MAC) - остаётся опознанный: догадок не строим.
+	 */
+	public function stackMemberFor(Techs $device, string $remotePort): Techs
+	{
+		$remotePort = trim($remotePort);
+		if ($remotePort === '' || static::hexMac($remotePort) !== '') return $device;
+
+		$members = $this->stackMembers($device);
+		if (count($members) < 2) return $device;
+
+		$owner = static::portOwner($remotePort, $members);
+		return is_object($owner) ? $owner : $device;
+	}
+
+	/**
+	 * Члены стека устройства с памятью на запрос: опознание соседей идёт по
+	 * каждой записи LLDP (а на площадке их сотни), и ходить в базу за одним и
+	 * тем же стеком нельзя.
+	 * @return Techs[]
+	 */
+	protected function stackMembers(Techs $device): array
+	{
+		$id = (int)$device->id;
+		if (isset($this->stackCache[$id])) return $this->stackCache[$id];
+		return $this->rememberStack($this->stackOf($device));
+	}
+
+	/**
+	 * Запомнить состав стека за каждым его членом.
+	 * @param Techs[] $members
+	 * @return Techs[] они же
+	 */
+	protected function rememberStack(array $members): array
+	{
+		foreach ($members as $member) $this->stackCache[(int)$member->id] = $members;
+		return $members;
 	}
 
 	/** Первый MAC, зашитый в строку: точечная, парная или сплошная запись */
@@ -1368,6 +1437,9 @@ class MacSearchProvider extends IntegrationProvider
 		foreach ($groups as $members) {
 			usort($members, fn(Techs $one, Techs $other) => $one->id <=> $other->id);
 			foreach ($members as $member) $this->switches[$member->id] = $member;
+			//состав известен ещё до опроса - опознанию соседей ходить за ним
+			//в базу не нужно (у сверки площадки таких обращений сотни)
+			$this->rememberStack($members);
 			$target = $this->describeTarget($members[0]);
 			if (!$target) continue;
 			$this->stacks[$members[0]->id] = $members;

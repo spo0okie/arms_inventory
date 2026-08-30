@@ -1214,6 +1214,78 @@ Gi2/0/2";
 	}
 
 	/**
+	 * Сосед-стек уточняется до члена по имени удалённого порта.
+	 *
+	 * Стек объявляет себя одним chassis-id и одним sysName, поэтому опознание
+	 * по примете всегда приводит к мастеру - а кабель воткнут во второй юнит.
+	 * Без уточнения интерлинк стека выглядел как связь мастера с самим собой
+	 * на порт, которого у него нет.
+	 */
+	public function testStackNeighborResolvesToMemberByRemotePort()
+	{
+		$place = $this->makePlace();
+		$first = $this->makeSwitch(['ip' => '10.50.2.16', 'places_id' => $place->id,
+			'mac' => '00aabbccdd11', 'hostname' => 'sw-stack-master']);
+		$second = $this->makeSwitch(['ip' => '10.50.2.16', 'places_id' => $place->id]);
+		$first->ports_override = "XGE1/0/49\nXGE1/0/50";
+		$second->ports_override = "XGE2/0/49\nXGE2/0/50";
+		$this->assertTrue($first->save(false) && $second->save(false));
+		$first->refresh();
+		$second->refresh();
+
+		//сосед представился мастером: и MAC, и имя у стека общие
+		$neighbor = [
+			'target' => $first->id, 'port' => 'XGE1/0/49', 'protocol' => 'lldp',
+			'remote_mac' => '00:aa:bb:cc:dd:11', 'remote_name' => $first->hostname,
+			'remote_port' => 'XGE2/0/49',
+		];
+
+		$ports = $this->makeProvider()->switchPorts([], $first, [], [$neighbor]);
+		$byName = array_column($ports, null, 'port');
+
+		//порт объявлен у второго члена - он и есть сосед
+		$this->assertSame([$second->id],
+			array_map(fn($tech) => $tech->id, $byName['XGE1/0/49']['found']));
+		$this->assertSame('added', $byName['XGE1/0/49']['verdict']);
+		$this->assertCount(1, $byName['XGE1/0/49']['proposals']);
+		$this->assertSame($second->id, $byName['XGE1/0/49']['proposals'][0]['device']->id);
+		$this->assertSame([['id' => null, 'name' => 'XGE2/0/49']],
+			$byName['XGE1/0/49']['proposals'][0]['peers']);
+		$this->assertFalse($byName['XGE1/0/49']['self']);
+	}
+
+	/**
+	 * Сосед, опознанный в сам этот коммутатор (порты членов стека не разведены,
+	 * петля, служебный порт), - предупреждение, а не предложение: связи с самим
+	 * собой не бывает, а «порт на той стороне» из LLDP завёл бы порт-фантом
+	 */
+	public function testNeighborResolvedToItselfIsWarningNotOffer()
+	{
+		$place = $this->makePlace();
+		$first = $this->makeSwitch(['ip' => '10.50.2.16', 'places_id' => $place->id,
+			'mac' => '00aabbccdd21']);
+		//второй член объявлен модельными именами - от первого неотличим
+		$second = $this->makeSwitch(['ip' => '10.50.2.16', 'places_id' => $place->id]);
+		$first->ports_override = "XGE1/0/49\nXGE1/0/50";
+		$second->ports_override = "XGE1/0/49\nXGE1/0/50";
+		$this->assertTrue($first->save(false) && $second->save(false));
+		$first->refresh();
+		$second->refresh();
+
+		$ports = $this->makeProvider()->switchPorts([], $first, [], [[
+			'target' => $first->id, 'port' => 'XGE1/0/49', 'protocol' => 'lldp',
+			'remote_mac' => '00:aa:bb:cc:dd:21', 'remote_name' => '',
+			'remote_port' => 'XGE2/0/49',
+		]]);
+		$byName = array_column($ports, null, 'port');
+
+		$this->assertTrue($byName['XGE1/0/49']['self']);
+		$this->assertSame([], $byName['XGE1/0/49']['found']);
+		$this->assertSame([], $byName['XGE1/0/49']['proposals']);
+		$this->assertSame('self', $byName['XGE1/0/49']['verdict']);
+	}
+
+	/**
 	 * Телефон с ПК за ним: у одного найденного два порта (может быть мостом),
 	 * у другого один - предлагаем цепочку «порт → телефон ; телефон → ПК».
 	 * Когда мостом может быть любое, схему не выдумываем - список кандидатов.
