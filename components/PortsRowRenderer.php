@@ -66,13 +66,6 @@ class PortsRowRenderer
 	/** @var int сколько групп коммутатор собрал, а инвентаризация об этом не знает */
 	protected int $aggregateOffers = 0;
 
-	/**
-	 * @var string чем разделяются строки внутри куска. Таблица ставит перенос,
-	 * раскладка корпуса - точку: там кусок лежит в повёрнутой колонке шириной в
-	 * один порт, и вторая строка ушла бы вбок, за пределы своего слота
-	 */
-	public string $break = '<br>';
-
 	public function __construct(Techs $model, array $rows, bool $scanned, int $transitFrom = 4)
 	{
 		$this->model = $model;
@@ -88,12 +81,6 @@ class PortsRowRenderer
 			if (!is_object($port['link'] ?? null)
 				|| (string)$port['link']->aggr !== (string)$port['aggregate']) $this->aggregateOffers++;
 		}
-	}
-
-	/** Сколько ярлыков групп предлагается проставить */
-	public function aggregateOffers(): int
-	{
-		return $this->aggregateOffers;
 	}
 
 	/**
@@ -135,7 +122,6 @@ class PortsRowRenderer
 	 *   'connection' => ['mode' => 'port'|'tech'|'none', 'comment' => подпись
 	 *      порта той стороны, 'body' => что на порту: записанное и находки],
 	 *   'action' => последняя колонка: галочка, кнопки предложений, «транзит»,
-	 *   'accept' => можно ли принять это предложение разом (одно, на пустом порту),
 	 * ]
 	 */
 	public function parts(array $port): array
@@ -148,7 +134,6 @@ class PortsRowRenderer
 			'comment' => $this->commentCell($port),
 			'connection' => $this->connectionCell($port, $body, $extraLines),
 			'action' => $this->actionCell($port, $buttons),
-			'accept' => count($buttons) === 1 && $port['verdict'] === 'added',
 		];
 	}
 
@@ -178,7 +163,7 @@ class PortsRowRenderer
 			$names[] = is_array($vlan) && $vlan['untagged']
 				? '<b>'.Html::encode($number).'</b>' : Html::encode($number);
 		}
-		return $html.$this->break.'<small class="text-secondary opacity-75" qtip_ttip="'
+		return $html.'<br><small class="text-secondary opacity-75" qtip_ttip="'
 			.Html::encode($port['vlans_configured']
 				? 'VLAN, настроенные на порту (жирным - нетегированный)'
 				: 'VLAN, в которых на этом порту замечены адреса')
@@ -234,7 +219,7 @@ class PortsRowRenderer
 		//но человеку полезно. Наш комментарий не трогаем и дополнять им не
 		//предлагаем: это две разные записи об одном порте, и сводить их вправе
 		//только человек
-		return $html.$this->break.'<small class="text-secondary opacity-75" qtip_ttip="'
+		return $html.'<br><small class="text-secondary opacity-75" qtip_ttip="'
 			.Html::encode('Описание порта на самом коммутаторе').'">'
 			.Html::encode($port['description']).'</small>';
 	}
@@ -295,8 +280,8 @@ class PortsRowRenderer
 
 		//в занятой ячейке находки идут новой строкой под записанным, в пустой -
 		//начинают её собой
-		$extraLines = implode($this->break, $extra);
-		return [strlen($extraLines) ? $this->break.$extraLines : '', $buttons, $extraLines];
+		$extraLines = implode('<br>', $extra);
+		return [strlen($extraLines) ? '<br>'.$extraLines : '', $buttons, $extraLines];
 	}
 
 	/**
@@ -343,7 +328,7 @@ class PortsRowRenderer
 			$html = '<span class="text-secondary opacity-75">выключен на коммутаторе</span>';
 		}
 		//подпись состояния и находки - разными строками
-		if (in_array($verdict, ['free', 'disabled'], true) && strlen($extraLines)) $html .= $this->break;
+		if (in_array($verdict, ['free', 'disabled'], true) && strlen($extraLines)) $html .= '<br>';
 		return ['mode' => 'none', 'comment' => '', 'body' => $html.$extraLines];
 	}
 

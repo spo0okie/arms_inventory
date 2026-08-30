@@ -108,15 +108,8 @@ span.mac_address {
     font-family: monospace;
 }
 
-/* Карта портов на корпусе (PortsMapWidget): состояние слота - токен, дефолт
-   светлой темы здесь, тёмные значения в themes.css (конвенция docs/dev/themes.md §2.3) */
-.ports-map {
-	/* корпус не переносится на следующую строку - длинный прокручивается */
-	overflow-x: auto;
-}
-.ports-map-slot {
-	flex: 0 0 auto;
-}
+/* Розетки корпуса в раскладке портов: состояние слота - токен, дефолт светлой
+   темы здесь, тёмные значения в themes.css (конвенция docs/dev/themes.md §2.3) */
 .ports-map-slot {
 	background: var(--ports-slot-bg, transparent);
 	color: var(--ports-slot-fg, inherit);
@@ -133,9 +126,9 @@ span.mac_address {
 .ports-map-slot.slot-self     {--ports-slot-bg: #fff3cd; --ports-slot-fg: #664d03; --ports-slot-border: #ffc107}
 
 /* Раскладка портов (PortsLayoutWidget): строка таблицы, поставленная на попа
-   над своей розеткой. Слоты и пояснения лежат в ОДНОЙ сетке с фиксированной
-   шириной колонки - только так подпись гарантированно указывает на свой порт,
-   а не на соседний. Раскраска слотов - та же, что у карты портов */
+   над своей розеткой. Розетки и подписи лежат в ОДНОЙ сетке - только так
+   подпись гарантированно указывает на свой порт, а не на соседний; ширину
+   колонки задаёт сам виджет переменной --ports-layout-slot, по своим данным */
 .ports-layout {
 	/* лента корпусов: строки (пояснения - ряд - ряд - пояснения - подпись)
 	   ОБЩИЕ для всех блоков через subgrid, иначе блоки встают на разной
@@ -149,11 +142,9 @@ span.mac_address {
 	gap: 0 1rem;
 	overflow-x: auto;
 }
-/* режим выбран кнопкой на блоке портов: раскладка вместо таблицы и карты.
-   !important - у карты портов бутстраповский .d-flex, он иначе побеждает */
+/* режим выбран кнопкой на блоке портов: раскладка вместо таблицы */
 .ports-view-layout .ports-layout { display: grid; }
-.ports-view-layout .ports-classic,
-.ports-view-layout .ports-map { display: none !important; }
+.ports-view-layout .ports-classic { display: none; }
 
 .ports-layout-block {
 	display: grid;
@@ -193,7 +184,7 @@ span.mac_address {
 	   а не имя порта */
 	align-items: safe center;
 	font-size: .8rem;
-	line-height: 1.15;
+	line-height: 1.0;
 	/* строки ячейки ложатся рядом (в вертикальном письме новая строка идёт
 	   вбок) - в ширину колонки их входит три; что не влезло, читается в
 	   подсказке ячейки и целиком в таблице */
@@ -215,10 +206,10 @@ span.mac_address {
 .ports-layout-text {
 	white-space: nowrap;
 	overflow: hidden;
-	text-overflow: ellipsis;
+	/*text-overflow: ellipsis;*/
 	/* колонка не растёт бесконечно: длинная цепочка связей растянула бы панель
 	   на два экрана. Что не поместилось - в подсказке ячейки и в таблице */
-	max-height: 34em;
+	/*max-height: 34em;*/
 }
 /* значки и пометки поворачиваются ВМЕСТЕ с подписью - горизонтальная плашка
    посреди повёрнутой колонки рвёт строку и растаскивает соседей. Исключение -
@@ -229,14 +220,7 @@ span.mac_address {
 	font-weight: normal;
 }
 .ports-layout-cell i,
-.ports-layout-cell select { writing-mode: horizontal-tb; }
-/* «Ёлочкой»: подпись доворачивается на 45° вокруг ТОЧКИ У РОЗЕТКИ - начала
-   строки (у верхнего ряда это низ колонки, у нижнего верх). Ячейку крутить
-   нельзя: её собственный разворот на 180° уже переносит начало строки к
-   розетке, и второй поворот вокруг того же угла увёл бы подпись прочь.
-   Под 45° строка разбирается заметно быстрее, чем под 90°, но занимает больше
-   места вбок. transform не меняет раскладку, поэтому строки сетки сохраняют
-   прежнюю высоту - это запас, а не наложение */
+.ports-layout-cell select { transform: rotate(90deg);}
 /* кусок подписи = ячейка строки таблицы: идут они друг за другом ВДОЛЬ
    колонки, а своя вторая строка (VLAN под портом, находки под связью)
    разворачивается вбок - поэтому inline-block, а не общий поток */
@@ -245,26 +229,22 @@ span.mac_address {
 	margin-inline-end: .7em;
 	vertical-align: top;
 }
-/* вторая строка куска (VLAN под именем порта, находки под связью) ложится
-   рядом в обоих видах - «ёлочка» отличается только наклоном подписи */
-.ports-layout-joint { display: none; }
-
-.ports-layout-diagonal .ports-layout-cell {
+.ports-view-diagonal .ports-layout-cell {
 	/* довёрнутая подпись и так уходит вбок от своей колонки - обрезать её по
 	   ширине колонки значило бы оставить от неё одно слово */
 	overflow: visible;
 }
-.ports-layout-diagonal .ports-layout-cell .ports-layout-text {
+.ports-view-diagonal .ports-layout-cell .ports-layout-text {
 	transform-origin: 50% 0;
 }
-.ports-layout-diagonal .ports-layout-cell.up .ports-layout-text {
+.ports-view-diagonal .ports-layout-cell.up .ports-layout-text {
 	transform: rotate(45deg);
 }
-.ports-layout-diagonal .ports-layout-cell.down .ports-layout-text {
+.ports-view-diagonal .ports-layout-cell.down .ports-layout-text {
 	transform: rotate(-45deg);
 }
 /* довёрнутые подписи вылезают вбок за последнюю колонку - оставляем им место */
-.ports-layout-diagonal { padding-right: 12em; }
+.ports-view-diagonal .ports-layout { padding-right: 12em; }
 
 /* галочка «ёлочкой» имеет смысл только в раскладке */
 .ports-layout-diagonal-toggle { display: none; }

@@ -174,12 +174,10 @@ class PortsLayoutTest extends Unit
 		$this->assertStringContainsString('VLAN 7', $html);
 		//розетки раскрашены состоянием опроса (раньше это делала карта портов)
 		$this->assertStringContainsString('ports-map-slot', $html);
-		//каждая ячейка строки таблицы - свой кусок колонки, её вторая строка
-		//(VLAN под именем порта) остаётся переносом; рядом с ним запасной
-		//разделитель - его показывает «ёлочка», где строки схлопываются
+		//каждая ячейка строки таблицы - свой кусок колонки, а её вторая строка
+		//(VLAN под именем порта) остаётся переносом и уходит вбок
 		$this->assertStringContainsString('ports-layout-part', $html);
 		$this->assertStringContainsString('<br>', $html);
-		$this->assertStringContainsString('ports-layout-joint', $html);
 		//ширину колонки диктуют сами подписи
 		$this->assertMatchesRegularExpression('~--ports-layout-slot:[\d.]+em~', $html);
 

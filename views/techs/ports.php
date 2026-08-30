@@ -119,10 +119,12 @@ if ($layoutAvailable) echo ' '.\yii\helpers\Html::tag('label',
 	//куда возвращать: место в карточке запоминаем до первого переезда
 	var home = moving.parentNode, after = moving.nextSibling;
 
-	//«ёлочка» живёт отдельным флажком: это оформление подписей внутри раскладки
+	//«ёлочка» живёт отдельным флажком: это оформление подписей внутри раскладки.
+	//Класс - на внешнем блоке, рядом с режимом вида: сама раскладка лежит
+	//ВНУТРИ контейнера, который опрос перерисовывает целиком, и класс на ней
+	//после сканирования портов пропадал
 	function diagonal(on){
-		var layout = block.querySelector('.ports-layout');
-		if (layout) layout.classList.toggle('ports-layout-diagonal', on);
+		block.classList.toggle('ports-view-diagonal', on);
 		var check = block.querySelector('[data-ports-diagonal]');
 		if (check) check.checked = on;
 		try { localStorage.setItem(key + ':diagonal', on ? 'on' : 'off'); } catch(_) {}

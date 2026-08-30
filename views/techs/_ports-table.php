@@ -106,7 +106,7 @@ $reload = Url::to(['/integrations/panel', 'provider' => 'macsearch', 'panel' => 
 <?= \app\components\PortsLayoutWidget::widget([
 	'model' => $model,
 	'rows' => $rows,
-	'renderer' => new PortsRowRenderer($model, $rows, !is_null($ports), $transitFrom),
+	'renderer' => $renderer,
 ]) ?>
 
 <?php
