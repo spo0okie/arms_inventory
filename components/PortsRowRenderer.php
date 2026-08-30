@@ -155,19 +155,41 @@ class PortsRowRenderer
 
 		//настроенные VLAN приходят с коммутатора (паспорт портов); если паспорта
 		//нет - показываем те, где замечен трафик, и говорим об этом в подсказке.
-		//Нетегированный выделен
+		//Нетегированный выделен. У каждого номера - своя подсказка «что это за
+		//сеть» из инвентаризации (VLAN → L2-домен → сети), чтобы не ходить в IPAM
+		$hints = $this->vlanHints();
 		$names = [];
 		foreach ($port['vlans'] as $vlan) {
 			//паспорт даёт структуру, таблица MAC - просто номер
 			$number = is_array($vlan) ? $vlan['vlan'] : $vlan;
-			$names[] = is_array($vlan) && $vlan['untagged']
+			$label = is_array($vlan) && $vlan['untagged']
 				? '<b>'.Html::encode($number).'</b>' : Html::encode($number);
+			$hint = $hints[(int)$number] ?? '';
+			$names[] = $hint === '' ? $label
+				: '<span qtip_ttip="'.Html::encode('VLAN '.$number.': '.$hint).'">'.$label.'</span>';
 		}
 		return $html.'<br><small class="text-secondary opacity-75" qtip_ttip="'
 			.Html::encode($port['vlans_configured']
 				? 'VLAN, настроенные на порту (жирным - нетегированный)'
 				: 'VLAN, в которых на этом порту замечены адреса')
 			.'">VLAN '.implode(', ', $names).'</small>';
+	}
+
+	/** @var array|null [номер VLAN => подсказка]: имя и сети из инвентаризации */
+	private $vlanHintsCache = null;
+
+	/**
+	 * Подсказки VLAN площадки коммутатора (лениво, один запрос на панель).
+	 * Сети привязаны к площадке цепочкой сеть → VLAN → L2-домен → помещение -
+	 * берём домены поддерева площадки, на которой стоит коммутатор.
+	 */
+	protected function vlanHints(): array
+	{
+		if (!is_null($this->vlanHintsCache)) return $this->vlanHintsCache;
+		$place = $this->model->place ?? null;
+		if (!is_object($place)) return $this->vlanHintsCache = [];
+		return $this->vlanHintsCache = \app\models\NetVlans::hintsForPlaces(
+			\app\components\integrations\providers\MacSearchProvider::placeSubtree((int)$place->top->id));
 	}
 
 	/** Группа портов: записанная, замеченная коммутатором, кнопка ярлыка */
@@ -250,6 +272,17 @@ class PortsRowRenderer
 			foreach ($port['found'] as $device) {
 				$seen[] = ModelWidget::widget(['model' => $device, 'options' => ['static_view' => true]]);
 			}
+			//ОС без оборудования - в общем списке находок, не отдельной секцией.
+			//Единственное отличие от находки-оборудования: привязать нельзя
+			//(порт соединяется с железом) - поэтому без кнопки, а починка
+			//(указать АРМ в карточке ОС) - в подсказке
+			foreach ($port['found_os'] ?? [] as $os) {
+				$seen[] = '<span qtip_ttip="'.Html::encode('Это ОС: оборудование у неё '
+					.'не указано, поэтому привязать порт нельзя. Укажите у ОС её АРМ, '
+					.'и следующий опрос предложит связь').'">'
+					.ModelWidget::widget(['model' => $os, 'options' => ['static_view' => true]])
+					.'</span>';
+			}
 			//адрес, за которым в инвентаризации никого: показываем как есть -
 			//может пригодиться, а прятать факт незачем
 			foreach ($port['macs'] as $item) {
@@ -260,22 +293,6 @@ class PortsRowRenderer
 			}
 			if (count($seen)) $extra[] = '<small class="text-secondary">на порту видно:</small> '
 				.implode(', ', $seen);
-		}
-
-		//адрес записан на ОС, у которой не указано оборудование: показать надо
-		//(инвентаризация её знает), а привязывать не к чему - порт соединяется
-		//с железом. Кнопки нет сознательно: починка - указать АРМ в карточке ОС
-		if (count($port['found_os'] ?? [])) {
-			$oses = [];
-			foreach ($port['found_os'] as $os) {
-				$oses[] = '<span qtip_ttip="'.Html::encode('Адрес на порту записан на эту ОС, '
-					.'но у неё не указано оборудование - привязывать порт не к чему. '
-					.'Укажите у ОС её АРМ, и следующий опрос предложит связь').'">'
-					.ModelWidget::widget(['model' => $os, 'options' => ['static_view' => true]])
-					.'</span>';
-			}
-			$extra[] = '<small class="text-secondary">ОС без оборудования:</small> '
-				.implode(', ', $oses);
 		}
 
 		//сосед по LLDP/CDP - факт с коммутатора, а не догадка по адресам: именно он

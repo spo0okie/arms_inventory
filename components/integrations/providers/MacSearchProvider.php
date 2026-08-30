@@ -696,7 +696,13 @@ class MacSearchProvider extends IntegrationProvider
 		if (in_array($port['verdict'], ['ok', 'replaced', 'added'], true)) {
 			foreach ($port['found'] as $device) $visible[] = (int)$device->id;
 		}
-		$osVisible = array_map(fn(Comps $os) => (int)$os->id, $port['found_os']);
+		//ОС из found_os видны в «на порту видно» только при этих вердиктах без
+		//предложений (зеркало findings() рендера) - в остальных случаях сосед,
+		//опознанный в такую ОС, остаётся строкой, иначе факт пропадёт
+		$osShown = !count($port['proposals'])
+			&& in_array($port['verdict'], ['replaced', 'added', 'foreign', 'seen'], true);
+		$osVisible = $osShown
+			? array_map(fn(Comps $os) => (int)$os->id, $port['found_os']) : [];
 		$rest = [];
 		foreach ($port['neighbors'] as $item) {
 			$device = $this->identifyNeighbor($item);
@@ -852,10 +858,16 @@ class MacSearchProvider extends IntegrationProvider
 		return $members;
 	}
 
-	/** Первый MAC, зашитый в строку: точечная, парная или сплошная запись */
+	/**
+	 * Первый MAC, зашитый в строку: четвёрки через точку или дефис (Cisco
+	 * ec1d.8b5f.7bfd, Comware 10ff-e024-8f7d), пары через двоеточие/дефис,
+	 * сплошная запись. Единая точка разбора примет: LLDP/CDP пишут адрес в
+	 * имя и Port ID в нотации своей прошивки, и непонятое написание = молча
+	 * потерянная примета (прод: Port ID 10ff-e024-8f7d не опознавался)
+	 */
 	public static function hexMacInText(?string $text): string
 	{
-		if (!preg_match('/([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}'
+		if (!preg_match('/([0-9a-f]{4}[.\-][0-9a-f]{4}[.\-][0-9a-f]{4}'
 			.'|(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}'
 			.'|[0-9a-f]{12})/i', (string)$text, $found)) return '';
 		return static::hexMac($found[1]);

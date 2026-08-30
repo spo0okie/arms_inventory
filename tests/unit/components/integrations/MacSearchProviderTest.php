@@ -816,10 +816,89 @@ Gi2/0/2";
 
 		$html = $provider->renderSwitchPanel($switch);
 
-		$this->assertStringContainsString('ОС без оборудования', $html);
+		//ОС - в общем списке находок «на порту видно», не отдельной секцией
+		$this->assertStringContainsString('на порту видно', $html);
 		$this->assertStringContainsString('PC-ORF2', $html);
+		$this->assertStringContainsString('привязать порт нельзя', $html);
+		$this->assertStringNotContainsString('ОС без оборудования', $html);
 		//кнопок привязки у такой находки нет (сам селектор класса в JS есть всегда)
 		$this->assertStringNotContainsString('p-0 port-scan-accept', $html);
+	}
+
+	/**
+	 * Порт ID у станций и телефонов - их MAC, и вендоры пишут его каждый в
+	 * своей нотации: Comware - четвёрками через дефис (10ff-e024-8f7d).
+	 * Непонятое написание = молча потерянная примета (прод: CHL-120 и телефон
+	 * SPA504G оставались «голыми» строками при записанных адресах)
+	 */
+	public function testNeighborIdentifiedByDashQuadPortId()
+	{
+		$this->assertSame('10ffe0248f7d',
+			MacSearchProvider::hexMacInText('CHL-120 10ff-e024-8f7d'));
+		$this->assertSame('ec1d8b5f7bfd',
+			MacSearchProvider::hexMacInText('ec1d-8b5f-7bfd'));
+
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->model->ports = "GE1/0/22";
+		$this->assertTrue($switch->model->save(false));
+		$switch->refresh();
+
+		//станция: MAC записан на ОС, ОС привязана к АРМу
+		$arm = new Techs();
+		$arm->setAttributes(['model_id' => $switch->model_id, 'num' => 'ARM-Q120',
+			'history' => ''], false);
+		$this->assertTrue($arm->save(false));
+		$os = new Comps();
+		$os->setAttributes(['name' => 'CHL-Q120', 'mac' => '10ffe0248f7d',
+			'arm_id' => $arm->id], false);
+		$this->assertTrue($os->save(false));
+		//телефон: MAC записан сразу на оборудовании
+		$phone = new Techs();
+		$phone->setAttributes(['model_id' => $switch->model_id, 'num' => 'TEL-Q28',
+			'mac' => 'ec1d8b5f7bfd', 'history' => ''], false);
+		$this->assertTrue($phone->save(false));
+
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:88', 'GE1/0/22', ['port_macs' => 9]),
+		], $switch, [], [
+			['target' => $switch->id, 'port' => 'GE1/0/22', 'remote_mac' => '',
+				'remote_name' => 'CHL-Q120', 'remote_port' => '10ff-e024-8f7d', 'protocol' => 'lldp'],
+			['target' => $switch->id, 'port' => 'GE1/0/22', 'remote_mac' => '',
+				'remote_name' => 'Cisco IP Phone SPA504G', 'remote_port' => 'ec1d-8b5f-7bfd',
+				'protocol' => 'cdp'],
+		]);
+
+		$this->assertSame('transit', $ports[0]['verdict']);
+		$devices = array_map(fn($item) => $item['device']->id ?? null, $ports[0]['neighbors']);
+		$this->assertContains($arm->id, $devices, 'станция опознана через ОС в её АРМ');
+		$this->assertContains($phone->id, $devices, 'телефон опознан по MAC оборудования');
+	}
+
+	/** У номеров VLAN - подсказки «что это за сеть» из инвентаризации */
+	public function testVlanHintsFromInventory()
+	{
+		$place = $this->makePlace();
+		$domain = new \app\models\NetDomains();
+		$domain->setAttributes(['name' => 'dom-vh-'.uniqid(), 'places_id' => $place->id], false);
+		$this->assertTrue($domain->save(false));
+		$vlan = new \app\models\NetVlans();
+		$vlan->setAttributes(['name' => 'Офисная сеть', 'vlan' => 6,
+			'domain_id' => $domain->id], false);
+		$this->assertTrue($vlan->save(false));
+		$network = new \app\models\Networks();
+		$network->setAttributes(['text_addr' => '10.50.6.0/24', 'name' => 'Офис ЧЛБ',
+			'vlan_id' => $vlan->id], false);
+		$this->assertTrue($network->save(false));
+
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16', 'places_id' => $place->id]);
+		$provider = $this->makeProvider([$this->response($this->payload([
+			$this->tableRow($switch->id, '00:11:22:33:44:99', 'Gi1/0/5', ['vlan' => '6']),
+		], ['mode' => 'table']))]);
+
+		$html = $provider->renderSwitchPanel($switch);
+
+		$this->assertStringContainsString('VLAN 6: Офисная сеть', $html);
+		$this->assertStringContainsString('10.50.6.0/24 (Офис ЧЛБ)', $html);
 	}
 
 	/**

@@ -162,6 +162,40 @@ class NetVlans extends ArmsModel
 	}
 
 	/**
+	 * Подсказки по номерам VLAN для помещений: имя VLAN и его сети.
+	 *
+	 * Нужны там, где VLAN показан голым номером (таблица портов коммутатора):
+	 * что это за сеть, инвентаризация знает через объявленную цепочку
+	 * сеть → VLAN → L2-домен → помещение. Один номер может жить в нескольких
+	 * доменах площадки - тогда описания склеиваются.
+	 *
+	 * @param int[] $placeIds помещения (обычно поддерево площадки)
+	 * @return array [номер VLAN => текст подсказки]
+	 */
+	public static function hintsForPlaces(array $placeIds): array
+	{
+		if (!count($placeIds)) return [];
+		$hints = [];
+		/** @var static $vlan */
+		foreach (static::find()
+			->joinWith('netDomain', false, 'INNER JOIN')
+			->where(['net_domains.places_id' => $placeIds])
+			->with('networks')->all() as $vlan) {
+			$parts = array_filter([trim((string)$vlan->name)]);
+			foreach ($vlan->networks as $network) {
+				if (!empty($network->archived)) continue;
+				$parts[] = trim($network->text_addr.' '
+					.($network->name ? '('.$network->name.')' : ''));
+			}
+			if (!count($parts)) continue;
+			$text = implode(', ', $parts);
+			$known = $hints[(int)$vlan->vlan] ?? '';
+			$hints[(int)$vlan->vlan] = $known === '' ? $text : $known.'; '.$text;
+		}
+		return $hints;
+	}
+
+	/**
 	 * Search name
 	 * @return string
 	 */
