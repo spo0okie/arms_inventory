@@ -683,27 +683,51 @@ Gi2/0/2";
 		$this->assertArrayNotHasKey('sweep', $provider->requests[0]['body']);
 	}
 
-	/** Подсети прогрева - из IPAM: сети площадки через VLAN и сетевой домен */
-	public function testSiteNetworksFromIpam()
+	/**
+	 * Сети прогрева - объявленной цепочкой сеть → VLAN → L2-домен → помещение.
+	 * Своей привязки сети к площадке нет: домен коммутации стоит в помещении,
+	 * а помещения площадки - её поддерево, поэтому домен в серверной внутри
+	 * площадки обязан находиться так же, как домен на её корне.
+	 */
+	public function testSiteNetworksFromDeclaredChain()
 	{
-		$place = $this->makePlace();
-		$domain = new \app\models\NetDomains();
-		$domain->setAttributes(['name' => 'dom-'.uniqid(), 'places_id' => $place->id], false);
-		$this->assertTrue($domain->save(false));
-		$vlan = new \app\models\NetVlans();
-		$vlan->setAttributes(['name' => 'vl-sweep', 'vlan' => 3120, 'domain_id' => $domain->id], false);
-		$this->assertTrue($vlan->save(false));
+		$site = $this->makePlace();
+		$room = $this->makePlace($site->id);
+		$foreign = $this->makePlace();      //чужая площадка - её сети не наши
 
-		$network = new \app\models\Networks();
-		$network->setAttributes(['text_addr' => '10.50.2.0/24', 'vlan_id' => $vlan->id], false);
-		$this->assertTrue($network->save(false));
-		//архивная сеть в прогрев не идёт
-		$archived = new \app\models\Networks();
-		$archived->setAttributes(['text_addr' => '10.50.3.0/24', 'vlan_id' => $vlan->id,
-			'archived' => 1], false);
-		$this->assertTrue($archived->save(false));
+		$networks = function (Places $place, string $addr, array $attrs = []) {
+			$domain = new \app\models\NetDomains();
+			$domain->setAttributes(['name' => 'dom-'.uniqid(), 'places_id' => $place->id], false);
+			$this->assertTrue($domain->save(false));
+			$vlan = new \app\models\NetVlans();
+			$vlan->setAttributes(['name' => 'vl-'.uniqid(), 'vlan' => random_int(100, 4000),
+				'domain_id' => $domain->id], false);
+			$this->assertTrue($vlan->save(false));
+			$network = new \app\models\Networks();
+			$network->setAttributes(array_merge(['text_addr' => $addr,
+				'vlan_id' => $vlan->id], $attrs), false);
+			$this->assertTrue($network->save(false));
+			return $network;
+		};
 
-		$this->assertSame(['10.50.2.0/24'], MacSearchProvider::siteNetworks($place->id));
+		$networks($room, '10.50.2.0/24');                   //домен в серверной площадки
+		$networks($site, '10.50.4.0/24');                   //домен на корне площадки
+		$networks($room, '10.50.3.0/24', ['archived' => 1]); //архивная - не прогреваем
+		$networks($foreign, '10.90.0.0/24');                //чужая площадка
+
+		$found = MacSearchProvider::siteNetworks($site->id);
+		sort($found);
+		$this->assertSame(['10.50.2.0/24', '10.50.4.0/24'], $found);
+
+		//VLAN без домена (домен не заполнен) в цепочку не попадает и запрос
+		//не ломает: INNER JOIN отсекает такие сети молча
+		$orphanVlan = new \app\models\NetVlans();
+		$orphanVlan->setAttributes(['name' => 'vl-orphan', 'vlan' => 4090], false);
+		$this->assertTrue($orphanVlan->save(false));
+		$orphan = new \app\models\Networks();
+		$orphan->setAttributes(['text_addr' => '10.99.0.0/24', 'vlan_id' => $orphanVlan->id], false);
+		$this->assertTrue($orphan->save(false));
+		$this->assertNotContains('10.99.0.0/24', MacSearchProvider::siteNetworks($site->id));
 	}
 
 	/** Опрашивается один коммутатор и в режиме table (без адреса) */

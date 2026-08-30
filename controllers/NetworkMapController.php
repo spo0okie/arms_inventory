@@ -108,8 +108,10 @@ class NetworkMapController extends ArmsBaseController
 		$cacheKey = ['network-map-scan', $site->id];
 		$data = $reuse ? Yii::$app->cache->get($cacheKey) : false;
 		if (!is_array($data)) {
-			//что прогревать, знает IPAM; пустой список - не ошибка, но и не
-			//молчание: человек просил прогрев, надо сказать, почему его не было
+			//что прогревать, говорит инвентаризация: сети площадки по
+			//объявленной цепочке сеть → VLAN → L2-домен → помещение. Пустой
+			//список - не ошибка, но и не молчание: человек просил прогрев,
+			//надо сказать, почему его не было
 			$networks = $sweep ? MacSearchProvider::siteNetworks($site->id) : [];
 			try {
 				$data = $provider->siteNeighbors($site->id, $networks);
@@ -118,7 +120,8 @@ class NetworkMapController extends ArmsBaseController
 				return ['status' => 'error', 'error' => $e->getMessage()];
 			}
 			if ($sweep && !count($networks) && !isset($data['sweep'])) {
-				$data['sweep'] = ['skipped' => 'в IPAM не записано сетей этой площадки - прогревать нечего'];
+				$data['sweep'] = ['skipped' => 'сетей этой площадки не записано '
+					.'(сеть → VLAN → L2-домен → помещение) - прогревать нечего'];
 			}
 			if (($data['status'] ?? null) === 'done') Yii::$app->cache->set($cacheKey, $data, static::LAST_SCAN_TTL);
 		}

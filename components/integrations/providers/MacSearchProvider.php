@@ -7,6 +7,7 @@ use app\helpers\MacsHelper;
 use app\helpers\StringHelper;
 use app\models\base\ArmsModel;
 use app\models\Comps;
+use app\models\Networks;
 use app\models\Places;
 use app\models\Ports;
 use app\models\Techs;
@@ -881,18 +882,20 @@ class MacSearchProvider extends IntegrationProvider
 	}
 
 	/**
-	 * Подсети площадки для прогрева: адреса сетей IPAM (Networks) по ветке
-	 * помещений. Сервис ничего не придумывает сам - что прогревать, говорит
-	 * инвентаризация, а она знает сети через VLAN → сетевой домен → площадка.
-	 * Не попавшие в allowlist сервиса подсети он отклонит поимённо в отчёте.
+	 * Сети площадки для прогрева - объявленной цепочкой связей
+	 * сеть → VLAN → L2-домен → помещение.
 	 *
-	 * @return string[] CIDR-строки (пусто - в IPAM сетей площадки нет)
+	 * Своей привязки сети к площадке нет и заводить её незачем: домен
+	 * коммутации уже стоит в помещении, а помещения площадки - её поддерево.
+	 * Сервис ничего не придумывает сам: что прогревать, говорит инвентаризация;
+	 * подсети вне его allowlist он отклонит поимённо в отчёте.
+	 *
+	 * @return string[] CIDR-строки (пусто - сетей этой площадки не записано)
 	 */
 	public static function siteNetworks(int $siteId): array
 	{
-		$rows = \app\models\Networks::find()->alias('networks')
-			->joinWith('netVlan', false)
-			->innerJoin('net_domains', 'net_domains.id = net_vlans.domain_id')
+		$rows = Networks::find()
+			->joinWith('netVlan.netDomain', false, 'INNER JOIN')
 			->where(['net_domains.places_id' => static::placeSubtree($siteId)])
 			->andWhere(['or', ['networks.archived' => 0], ['networks.archived' => null]])
 			->select(['networks.text_addr'])->column();
