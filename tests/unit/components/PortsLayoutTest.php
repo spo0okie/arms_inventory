@@ -212,8 +212,10 @@ class PortsLayoutTest extends Unit
 		$this->assertStringContainsString('патч-панель Gi1/0/1', $html);
 		$this->assertStringContainsString('линка нет', $html);
 		$this->assertStringContainsString('VLAN 7', $html);
-		//строки как в таблице: перенос остаётся, а рядом с ним запасной
+		//каждая ячейка строки таблицы - свой кусок колонки, её вторая строка
+		//(VLAN под именем порта) остаётся переносом; рядом с ним запасной
 		//разделитель - его показывает «ёлочка», где строки схлопываются
+		$this->assertStringContainsString('ports-layout-part', $html);
 		$this->assertStringContainsString('<br>', $html);
 		$this->assertStringContainsString('ports-layout-joint', $html);
 		//ширину колонки диктуют сами подписи
