@@ -82,7 +82,7 @@ dot1dBaseBridgeAddress), `units` — записи ENTITY-MIB с непустым
 | Где | Что | Зачем |
 |---|---|---|
 | `tech_models.ports` | объявление портов модели: строка = порт, порядок = физический | порядок и состав розеток |
-| `tech_models.ports_layout` | геометрия корпуса: `<столбцов>x<рядов> [вниз\|вправо] [подпись]`, строка = блок | карта портов (`PortsMapWidget`) |
+| `tech_models.ports_layout` | геометрия корпуса: `<столбцов>x<рядов> [вниз\|вправо] [подпись]`, строка = блок | раскладка портов (`PortsLayoutWidget`) |
 | `techs.ports_override` | порты **экземпляра** — тот же формат; заполнен → действует только он | стек перенумеровал порты, MikroTik переименовал интерфейсы: модельные имена — фантомы |
 | `ports.aggr` | ярлык группы (`Po1`, `BAGG1`) на каждом её порту | видеть, какие порты работают как один; раскладывать адреса с агрегата по его портам |
 | `ports.link_ports_id` | связь **порт↔порт**, парная (`afterSave` ведёт встречную) | `link_techs_id` — виртуальное поле формы; «без порта» = безымянный встречный порт |
@@ -202,6 +202,13 @@ flowchart LR
 или под ней (нижний). Факты одни, поэтому и рендер один: разъехаться им
 нельзя.
 
+Корпус рисует только раскладка: карта портов над таблицей (`PortsMapWidget`)
+удалена — она показывала то же самое, и две панели подряд читались как разные
+устройства. Раскраска розеток по вердиктам переехала в
+`PortsLayoutWidget::STATES`, токены `--ports-slot-*` остались прежними.
+Подсказок у розеток и колонок нет намеренно: всё, что они говорили, написано
+рядом с розеткой в её же колонке, а всплывающий блок закрывал соседние.
+
 Раскладка (кнопка «Раскладка портов») рисуется рядом с таблицей, внутри
 того же контейнера, и показывается вместо неё классом `ports-view-layout`
 на внешнем блоке — кнопка и класс живут СНАРУЖИ контейнера, поэтому опрос,
@@ -242,9 +249,12 @@ localStorage (`portsLayout:diagonal`), применяется после пер�
 ячейки и целиком в таблице.
 
 Готчи вида: пометки, значки и кнопки поворачиваются вместе с подписью (и
-`.badge` остаётся залитым, как в таблице); «ёлочка» вторую строку схлопывает (`br { display: none }`), и
+`.badge` остаётся залитым, как в таблице), а ИКОНКИ - нет: галочка или плюс,
+положенные на бок, перестают читаться как галочка и плюс; вторую строку умеет
+схлопывать (`br { display: none }`), и
 вместо них показывается заранее выведенный разделитель
-`.ports-layout-joint`; класс `port-scan-accept` в раскладке не ставится, а
+`.ports-layout-joint` (в самой «ёлочке» строки остаются — разделитель ждёт
+своего часа); класс `port-scan-accept` в раскладке не ставится, а
 «принять однозначные разом» ищет кнопки только в `.ports-classic` — иначе
 каждая находка применилась бы дважды.
 
@@ -425,6 +435,6 @@ localStorage (`portsLayout:diagonal`), применяется после пер�
 | `controllers/PortsController.php` | `actionScanApply` |
 | `controllers/NetworkMapController.php`, `components/NetworkMap.php`, `views/network-map/` | карта сети площадки и сверка |
 | `models/Ports.php`, `models/Techs.php`, `models/TechModels.php` | `aggr`, `ports_override`/`rename_ports`, `ports_layout` |
-| `helpers/PortsHelper.php`, `components/PortsMapWidget.php`, `components/PortsGroupWidget.php` | разбор объявлений, карта, редактор списка и сторож флажка |
+| `helpers/PortsHelper.php`, `components/PortsGroupWidget.php` | разбор объявлений, редактор списка и сторож флажка |
 | `components/PortsRowRenderer.php`, `components/PortsLayoutWidget.php` | содержимое строки о порте (общее для обоих видов) и раскладка корпуса |
 | `tests/unit/components/integrations/MacSearchProviderTest.php`, `tests/unit/models/{PortsScanApplyTest,TechsPortsTemplateTest}.php`, `tests/unit/components/PortsLayoutTest.php` | тесты |

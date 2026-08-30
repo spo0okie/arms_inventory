@@ -30,6 +30,26 @@ use yii\helpers\Html;
  */
 class PortsLayoutWidget extends Widget
 {
+	/**
+	 * Как выглядит розетка в каждом состоянии: класс рамки и подпись состояния.
+	 * Занятый порт закрашен, свободный пуст, спорный обведён - раскраска
+	 * повторяет пометки таблицы, чтобы не заводить второй язык.
+	 */
+	const STATES = [
+		'ok' => ['slot-ok', 'подключено то, что записано'],
+		//без опроса слот не красим: пустая заливка значит «не знаем», а не «занят»
+		'unknown' => ['', 'опроса не было'],
+		'seen' => ['slot-seen', 'на порту есть адреса, объект не опознан'],
+		'foreign' => ['slot-foreign', 'записанное не отозвалось'],
+		'quiet' => ['slot-quiet', 'адресов не видно'],
+		'replaced' => ['slot-replaced', 'на порту другое оборудование'],
+		'added' => ['slot-added', 'обнаружено оборудование'],
+		'transit' => ['slot-transit', 'за портом сеть'],
+		'disabled' => ['slot-disabled', 'выключен на коммутаторе'],
+		'self' => ['slot-self', 'за портом виден сам коммутатор'],
+		'free' => ['', 'линка нет'],
+	];
+
 	/** @var Techs|null устройство, чью панель рисуем */
 	public ?Techs $model = null;
 
@@ -166,11 +186,12 @@ class PortsLayoutWidget extends Widget
 			}
 			$port = $byName[(string)$name] ?? null;
 			$verdict = $port['verdict'] ?? 'unknown';
-			[$class, $state] = PortsMapWidget::STATES[$verdict] ?? PortsMapWidget::STATES['unknown'];
+			[$class] = static::STATES[$verdict] ?? static::STATES['unknown'];
+			//без подсказки: всё, что она говорила, стоит рядом с розеткой в её
+			//же колонке - а всплывающий блок закрывал соседние подписи
 			$html .= Html::tag('span', Html::encode(PortsHelper::slotLabel((string)$name)), [
 				'class' => 'ports-layout-slot'.$rowClass
 					.' ports-map-slot border rounded text-center small '.$class,
-				'qtip_ttip' => $name.': '.$state,
 				'data-port' => $name,
 			]);
 		}
@@ -225,26 +246,17 @@ class PortsLayoutWidget extends Widget
 			//между кусками - отступ (стилем), как промежуток между колонками
 			//таблицы: точка тут лишняя, куски и так читаются по отдельности
 			$content = implode('', $pieces);
-			//подсказка - тот же текст без разметки и в одну строку: пометки-иконки
-			//в ней превратились бы в пустоту между разделителями
-			$plain = [];
-			foreach ($pieces as $piece) {
-				$text = trim(preg_replace('~\s+~u', ' ', html_entity_decode(
-					strip_tags(preg_replace('~<br\s*/?>~i', ' · ', $piece)), ENT_QUOTES, 'UTF-8')));
-				if (strlen($text)) $plain[] = $text;
-			}
 			//класса port-scan-accept тут нет намеренно: «принять однозначные
 			//разом» собирает кнопки по таблице, и вторая их копия в раскладке
 			//применила бы каждую находку дважды
 			//текст отдельным узлом: ячейка центрирует его по ширине колонки
 			//(подпись обязана стоять ровно над своей розеткой), а он сам
-			//отвечает за обрезку слишком длинного
+			//отвечает за обрезку слишком длинного. Подсказки нет намеренно:
+			//всё, что она показала бы, и так написано рядом с розеткой, а
+			//всплывающий блок закрывал соседние колонки
 			$html .= Html::tag('div', Html::tag('span', $content, ['class' => 'ports-layout-text']), [
 				'class' => 'ports-layout-cell '.$side,
 				'data-port' => $name,
-				//колонка ограничена по длине - что не поместилось, читается
-				//в подсказке (и целиком - в таблице)
-				'qtip_ttip' => implode(' · ', $plain),
 			]);
 		}
 		return $html;

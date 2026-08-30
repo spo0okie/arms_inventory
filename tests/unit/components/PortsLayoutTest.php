@@ -3,7 +3,6 @@
 namespace tests\unit\components;
 
 use app\components\PortsLayoutWidget;
-use app\components\PortsMapWidget;
 use app\helpers\PortsHelper;
 use app\models\Manufacturers;
 use app\models\TechModels;
@@ -105,45 +104,6 @@ class PortsLayoutTest extends Unit
 		$this->assertSame('upl', PortsHelper::slotLabel('uplink'));
 	}
 
-	/** Карта рисуется по геометрии модели и именам экземпляра */
-	public function testWidgetRendersMap()
-	{
-		$manufacturer = new Manufacturers();
-		$manufacturer->setAttributes(['name' => 'Вендор '.uniqid(), 'comment' => ''], false);
-		$this->assertTrue($manufacturer->save(false));
-
-		$model = new TechModels();
-		$model->setAttributes(['name' => 'Модель '.uniqid(), 'manufacturers_id' => $manufacturer->id,
-			'ports' => implode("\n", $this->names(8)), 'ports_layout' => '4x2 вниз Основные',
-			'comment' => ''], false);
-		$this->assertTrue($model->save(false));
-
-		$tech = new Techs();
-		$tech->setAttributes(['model_id' => $model->id, 'num' => 'SW-'.uniqid(),
-			'history' => ''], false);
-		$this->assertTrue($tech->save(false));
-		$tech->refresh();
-
-		$html = PortsMapWidget::widget(['model' => $tech, 'ports' => [
-			['port' => 'Gi1/0/1', 'verdict' => 'free', 'linked' => null, 'found' => [],
-				'description' => ''],
-			['port' => 'Gi1/0/2', 'verdict' => 'disabled', 'linked' => null, 'found' => [],
-				'description' => 'reserved'],
-		]]);
-
-		$this->assertStringContainsString('ports-map', $html);
-		$this->assertStringContainsString('Основные', $html);
-		//состояние порта видно прямо на карте, а подробности - в подсказке
-		$this->assertStringContainsString('выключен на коммутаторе', $html);
-		$this->assertStringContainsString('reserved', $html);
-
-		//у устройства без описанного корпуса карты нет - и это не ошибка
-		$model->ports_layout = '';
-		$this->assertTrue($model->save(false));
-		$tech->refresh();
-		$this->assertSame('', PortsMapWidget::widget(['model' => $tech]));
-	}
-
 	/** Коммутатор с корпусом на 8 портов в два ряда */
 	private function makeSwitch(string $layout = '4x2 вниз Основные', int $ports = 8): Techs
 	{
@@ -181,8 +141,8 @@ class PortsLayoutTest extends Unit
 
 	/**
 	 * Пояснения стоят колонками: у верхнего ряда - над ним, у нижнего - под.
-	 * Данные те же, что в таблице, но внутри колонки идут одной строкой:
-	 * перенос увёл бы вторую строку вбок, за пределы своего порта.
+	 * Данные те же, что в таблице: каждая её ячейка - свой кусок колонки, а
+	 * вторая строка ячейки уходит вбок. Раскраска розеток - по вердиктам.
 	 */
 	public function testLayoutPutsCellsAroundRows()
 	{
@@ -212,6 +172,8 @@ class PortsLayoutTest extends Unit
 		$this->assertStringContainsString('патч-панель Gi1/0/1', $html);
 		$this->assertStringContainsString('линка нет', $html);
 		$this->assertStringContainsString('VLAN 7', $html);
+		//розетки раскрашены состоянием опроса (раньше это делала карта портов)
+		$this->assertStringContainsString('ports-map-slot', $html);
 		//каждая ячейка строки таблицы - свой кусок колонки, её вторая строка
 		//(VLAN под именем порта) остаётся переносом; рядом с ним запасной
 		//разделитель - его показывает «ёлочка», где строки схлопываются
