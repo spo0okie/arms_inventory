@@ -48,6 +48,29 @@ class PortsLayoutWidget extends Widget
 	/** @var string|null id контейнера (по умолчанию - от id устройства) */
 	public ?string $containerId = null;
 
+	/** @var int[] сколько строк вышло в каждой подписи (по ним - ширина колонки) */
+	protected array $lines = [];
+
+	/** Потолок: подпись длиннее просто не поместится в колонку, останется в подсказке */
+	const MAX_LINES = 6;
+
+	/**
+	 * Ширина колонки в em - по САМИМ данным: колонка должна вместить типовую
+	 * подпись целиком, иначе половина их обрезана. Считаем не по самой длинной,
+	 * а по девятому дециля: один порт с цепочкой из трёх устройств иначе
+	 * растянул бы весь корпус, и розетки разъехались бы на пол-экрана.
+	 * Строка подписи - примерно 0.95em, плюс поля; уже номера порта не бывает.
+	 */
+	protected function columnWidth(): float
+	{
+		if (!count($this->lines)) return 2.6;
+
+		$lines = $this->lines;
+		sort($lines);
+		$typical = $lines[(int)floor((count($lines) - 1) * 0.9)];
+		return max(2.6, round(min($typical, static::MAX_LINES) * 0.95 + 0.5, 2));
+	}
+
 	/**
 	 * Годится ли устройство для раскладки: описан корпус, портов достаточно,
 	 * и все его блоки - в один-два ряда.
@@ -73,21 +96,24 @@ class PortsLayoutWidget extends Widget
 
 		$renderer = $this->renderer
 			?: new PortsRowRenderer($this->model, $this->rows, $this->scanned, $this->transitFrom);
-		//в повёрнутой колонке шириной в один порт вторая строка ушла бы вбок:
-		//внутри ячейки всё идёт одной строкой через разделитель
-		$renderer->break = ' · ';
 
 		//строка о порте по его имени: раскладка и таблица говорят об одном и том же
 		$byName = [];
 		foreach ($this->rows as $port) $byName[(string)$port['port']] = $port;
 
+		$this->lines = [];
 		$html = '';
 		foreach ($blocks as $block) $html .= $this->renderBlock($block, $byName, $renderer);
 
 		$id = $this->containerId ?: 'techs-ports-layout-'.$this->model->id;
 		//корпус - одна горизонтальная лента: не влезло по ширине - прокручивается,
 		//а не ломается на этажи, иначе подписи перестанут указывать на свой порт
-		return Html::tag('div', $html, ['class' => 'ports-layout', 'id' => $id]);
+		return Html::tag('div', $html, ['class' => 'ports-layout', 'id' => $id,
+			//ширину колонки диктуют САМИ данные: строки ячейки ложатся рядом, и
+			//колонка обязана вместить самую многострочную из них. Иначе либо
+			//половина подписей обрезана (узкая колонка), либо корпус растянут
+			//впустую (широкая)
+			'style' => '--ports-layout-slot:'.$this->columnWidth().'em']);
 	}
 
 	/**
@@ -182,13 +208,23 @@ class PortsLayoutWidget extends Widget
 				$connection['body'],
 			], fn($piece) => strlen(trim((string)$piece)));
 
-			$content = implode(' · ', $pieces);
-			//подсказка - тот же текст без разметки: пометки-иконки в ней
-			//превратились бы в пустоту между разделителями
+			//строки как в таблице: у порта своя, у пояснения своя, у соединения
+			//своя. В колонке они ложатся рядом (в вертикальном письме новая
+			//строка идёт вбок), и данные выводятся плотнее, чем одной длинной
+			//лентой - большинству портов хватает двух-трёх коротких строк
+			$content = implode('<br>', $pieces);
+			$this->lines[] = preg_match_all('~<br\s*/?>~i', $content) + 1;
+			//у каждого переноса свой запасной разделитель: «ёлочка» строки
+			//схлопывает (довёрнутая вторая строка легла бы на соседнюю подпись)
+			//и показывает вместо них точку - решает это стиль, не рендер
+			$content = preg_replace('~<br\s*/?>~i',
+				'<br><span class="ports-layout-joint"> · </span>', $content);
+			//подсказка - тот же текст без разметки и в одну строку: пометки-иконки
+			//в ней превратились бы в пустоту между разделителями
 			$plain = [];
 			foreach ($pieces as $piece) {
-				$text = trim(preg_replace('~\s+~u', ' ',
-					html_entity_decode(strip_tags($piece), ENT_QUOTES, 'UTF-8')));
+				$text = trim(preg_replace('~\s+~u', ' ', html_entity_decode(
+					strip_tags(preg_replace('~<br\s*/?>~i', ' · ', $piece)), ENT_QUOTES, 'UTF-8')));
 				if (strlen($text)) $plain[] = $text;
 			}
 			//класса port-scan-accept тут нет намеренно: «принять однозначные

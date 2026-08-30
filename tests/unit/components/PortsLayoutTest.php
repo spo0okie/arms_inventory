@@ -212,8 +212,12 @@ class PortsLayoutTest extends Unit
 		$this->assertStringContainsString('патч-панель Gi1/0/1', $html);
 		$this->assertStringContainsString('линка нет', $html);
 		$this->assertStringContainsString('VLAN 7', $html);
-		//перенос строки внутри колонки заменён разделителем
-		$this->assertStringNotContainsString('<br>', $html);
+		//строки как в таблице: перенос остаётся, а рядом с ним запасной
+		//разделитель - его показывает «ёлочка», где строки схлопываются
+		$this->assertStringContainsString('<br>', $html);
+		$this->assertStringContainsString('ports-layout-joint', $html);
+		//ширину колонки диктуют сами подписи
+		$this->assertMatchesRegularExpression('~--ports-layout-slot:[\d.]+em~', $html);
 
 		//нестандартный корпус - только таблица, виджет молчит
 		$this->assertSame('', PortsLayoutWidget::widget([

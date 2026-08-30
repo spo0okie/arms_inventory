@@ -159,7 +159,7 @@ span.mac_address {
 	display: grid;
 	grid-row: 1 / -1;
 	grid-template-rows: subgrid;
-	grid-template-columns: repeat(var(--ports-layout-columns, 24), var(--ports-layout-slot, 2.8em));
+	grid-template-columns: repeat(var(--ports-layout-columns, 24), var(--ports-layout-slot, 3.6em));
 	gap: 2px;
 }
 /* каждая часть знает свою строку общей сетки: у однорядного блока (SFP)
@@ -171,7 +171,12 @@ span.mac_address {
 .ports-layout-title { grid-row: 5; grid-column: 1 / -1; }
 
 .ports-layout-slot {
+	/* розетка не растягивается на всю колонку: колонка бывает широкой (её
+	   размер диктуют подписи), а корпус с розетками в палец шириной перестаёт
+	   быть похож на корпус */
 	width: 100%;
+	max-width: 3.2em;
+	justify-self: center;
 	line-height: 1.8em;
 	align-self: center;
 }
@@ -183,9 +188,17 @@ span.mac_address {
 .ports-layout-cell {
 	display: flex;
 	writing-mode: vertical-rl;
-	align-items: center;
+	/* safe: пока строки влезают в колонку - по центру над своей розеткой; как
+	   только перестали - прижимаются к началу, чтобы обрезалось лишнее с конца,
+	   а не имя порта */
+	align-items: safe center;
 	font-size: .8rem;
 	line-height: 1.15;
+	/* строки ячейки ложатся рядом (в вертикальном письме новая строка идёт
+	   вбок) - в ширину колонки их входит три; что не влезло, читается в
+	   подсказке ячейки и целиком в таблице */
+	width: 100%;
+	overflow: hidden;
 }
 .ports-layout-cell.up {
 	transform: rotate(180deg);
@@ -207,15 +220,18 @@ span.mac_address {
 	   на два экрана. Что не поместилось - в подсказке ячейки и в таблице */
 	max-height: 34em;
 }
-/* кнопки, иконки и значки внутри повёрнутой колонки остаются горизонтальными:
-   их читают глазами, а не поворотом головы */
-.ports-layout-cell button,
-.ports-layout-cell select,
-.ports-layout-cell .badge,
-.ports-layout-cell i { writing-mode: horizontal-tb; }
-.ports-layout-cell.up button,
-.ports-layout-cell.up .badge,
-.ports-layout-cell.up i { transform: rotate(180deg); }
+/* пометки, значки и кнопки поворачиваются ВМЕСТЕ с подписью: горизонтальный
+   значок посреди повёрнутой колонки рвёт строку и растаскивает соседей */
+.ports-layout-cell .badge {
+	/* в колонке значок - слово в строке, а не залитая плашка: повёрнутая
+	   заливка перекрывает соседние строки и читается хуже самого слова */
+	background: transparent !important;
+	color: var(--bs-secondary-color, #6c757d);
+	padding: 0;
+	font-weight: normal;
+	font-size: 1em;
+}
+.ports-layout-cell select { writing-mode: horizontal-tb; }
 /* «Ёлочкой»: подпись доворачивается на 45° вокруг ТОЧКИ У РОЗЕТКИ - начала
    строки (у верхнего ряда это низ колонки, у нижнего верх). Ячейку крутить
    нельзя: её собственный разворот на 180° уже переносит начало строки к
@@ -223,6 +239,18 @@ span.mac_address {
    Под 45° строка разбирается заметно быстрее, чем под 90°, но занимает больше
    места вбок. transform не меняет раскладку, поэтому строки сетки сохраняют
    прежнюю высоту - это запас, а не наложение */
+/* строки ячейки: в обычной раскладке они ложатся рядом (перенос работает),
+   в «ёлочке» схлопываются в одну через точку - довёрнутая вторая строка
+   легла бы поверх подписи соседнего порта */
+.ports-layout-joint { display: none; }
+.ports-layout-diagonal .ports-layout-text br { display: none; }
+.ports-layout-diagonal .ports-layout-joint { display: inline; }
+
+.ports-layout-diagonal .ports-layout-cell {
+	/* довёрнутая подпись и так уходит вбок от своей колонки - обрезать её по
+	   ширине колонки значило бы оставить от неё одно слово */
+	overflow: visible;
+}
 .ports-layout-diagonal .ports-layout-cell .ports-layout-text {
 	transform-origin: 50% 0;
 }
@@ -232,13 +260,6 @@ span.mac_address {
 .ports-layout-diagonal .ports-layout-cell.down .ports-layout-text {
 	transform: rotate(-45deg);
 }
-/* иконки и кнопки в довёрнутой подписи доворачиваются обратно */
-.ports-layout-diagonal .ports-layout-cell.up button,
-.ports-layout-diagonal .ports-layout-cell.up .badge,
-.ports-layout-diagonal .ports-layout-cell.up i { transform: rotate(135deg); }
-.ports-layout-diagonal .ports-layout-cell.down button,
-.ports-layout-diagonal .ports-layout-cell.down .badge,
-.ports-layout-diagonal .ports-layout-cell.down i { transform: rotate(45deg); }
 /* довёрнутые подписи вылезают вбок за последнюю колонку - оставляем им место */
 .ports-layout-diagonal { padding-right: 12em; }
 
