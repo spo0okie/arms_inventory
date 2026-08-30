@@ -262,16 +262,45 @@ class PortsRowRenderer
 				.implode(', ', $seen);
 		}
 
+		//адрес записан на ОС, у которой не указано оборудование: показать надо
+		//(инвентаризация её знает), а привязывать не к чему - порт соединяется
+		//с железом. Кнопки нет сознательно: починка - указать АРМ в карточке ОС
+		if (count($port['found_os'] ?? [])) {
+			$oses = [];
+			foreach ($port['found_os'] as $os) {
+				$oses[] = '<span qtip_ttip="'.Html::encode('Адрес на порту записан на эту ОС, '
+					.'но у неё не указано оборудование - привязывать порт не к чему. '
+					.'Укажите у ОС её АРМ, и следующий опрос предложит связь').'">'
+					.ModelWidget::widget(['model' => $os, 'options' => ['static_view' => true]])
+					.'</span>';
+			}
+			$extra[] = '<small class="text-secondary">ОС без оборудования:</small> '
+				.implode(', ', $oses);
+		}
+
 		//сосед по LLDP/CDP - факт с коммутатора, а не догадка по адресам: именно он
 		//и есть настоящая связь коммутатор-коммутатор
 		if (count($port['neighbors'])) {
 			$seenNeighbors = [];
 			foreach ($port['neighbors'] as $neighbor) {
 				$title = trim(($neighbor['remote_name'] ?? '').' '.($neighbor['remote_port'] ?? ''));
-				$seenNeighbors[] = '<span qtip_ttip="'.Html::encode(
-					'Протокол: '.($neighbor['protocol'] ?? '?')
-					.($neighbor['remote_mac'] ? ', адрес '.$neighbor['remote_mac'] : '')
-					).'">'.Html::encode($title ?: ($neighbor['remote_mac'] ?? '?')).'</span>';
+				$ttip = 'Протокол: '.($neighbor['protocol'] ?? '?')
+					.($neighbor['remote_mac'] ? ', адрес '.$neighbor['remote_mac'] : '');
+				//опознанный сосед - карточкой, а чем он представился - в
+				//подсказке: голое имя/MAC, когда объект в инвентаризации есть,
+				//прячет факт (адрес бывает записан на ОС, а не на самом АРМе)
+				$object = $neighbor['device'] ?? $neighbor['os'] ?? null;
+				if (is_object($object)) {
+					$ttip .= ($title !== '' ? ', представился: '.$title : '')
+						.(isset($neighbor['os'])
+							? '; адрес записан на ОС, у которой не указано оборудование' : '');
+					$seenNeighbors[] = '<span qtip_ttip="'.Html::encode($ttip).'">'
+						.ModelWidget::widget(['model' => $object, 'options' => ['static_view' => true]])
+						.'</span>';
+					continue;
+				}
+				$seenNeighbors[] = '<span qtip_ttip="'.Html::encode($ttip).'">'
+					.Html::encode($title ?: ($neighbor['remote_mac'] ?? '?')).'</span>';
 			}
 			$extra[] = '<small class="text-secondary">сосед'
 				.(count($port['neighbors']) > 1 ? 'и' : '').':</small> '

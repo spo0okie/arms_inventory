@@ -287,6 +287,19 @@ class NetworkMap
 						$overlay['endpoints'] = ($overlay['endpoints'] ?? 0) + 1;
 						continue;
 					}
+					//адрес записан на ОС без оборудования: не все MAC из ОС
+					//проставлены на карточках АРМ, поэтому ищем и среди ОС -
+					//это заведомо оконечное устройство, а не «неопознанный»
+					if (!is_object($device)
+						&& is_object($provider->orphanOsByMac((string)array_key_first($macs)))) {
+						$overlay['endpoints'] = ($overlay['endpoints'] ?? 0) + 1;
+						continue;
+					}
+				}
+				//сосед сам представился адресом, записанным на непривязанную ОС
+				if (is_object($provider->orphanOsByMac((string)($row['remote_mac'] ?? '')))) {
+					$overlay['endpoints'] = ($overlay['endpoints'] ?? 0) + 1;
+					continue;
 				}
 			}
 

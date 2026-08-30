@@ -275,6 +275,43 @@ class NetworkMapTest extends Unit
 	}
 
 	/**
+	 * Адреса, записанные на ОС без оборудования, - не «неопознанные соседи»:
+	 * не все MAC из ОС проставлены на карточках АРМ, поэтому сверка ищет и
+	 * среди ОС. Такая находка - заведомо оконечное устройство: счётчик, а не
+	 * строка с предложением «это коммутатор…»
+	 */
+	public function testOrphanOsNeighborCountsAsEndpoint()
+	{
+		$site = $this->makeSite();
+		$core = $this->makeSwitch($site, '10.60.0.1', "Gi1/0/1\nGi1/0/2");
+
+		$osA = new \app\models\Comps();
+		$osA->setAttributes(['name' => 'PC-MAP-A', 'mac' => '00aabbccdd31'], false);
+		$this->assertTrue($osA->save(false));
+		$osB = new \app\models\Comps();
+		$osB->setAttributes(['name' => 'PC-MAP-B', 'mac' => '00aabbccdd32'], false);
+		$this->assertTrue($osB->save(false));
+
+		$provider = new MacSearchProvider(['id' => 'macsearch', 'config' => ['url' => 'http://x', 'token' => 't']]);
+		$map = new NetworkMap($site);
+		$map->overlay(['status' => 'done',
+			'neighbors' => [
+				//сосед без адреса: за портом по FDB ровно один MAC - ОС без АРМа
+				['target' => $core->id, 'port' => 'Gi1/0/1', 'remote_mac' => '',
+					'remote_name' => 'host-behind-port', 'remote_port' => '', 'protocol' => 'lldp'],
+				//сосед сам представился адресом непривязанной ОС
+				['target' => $core->id, 'port' => 'Gi1/0/2', 'remote_mac' => '00:aa:bb:cc:dd:32',
+					'remote_name' => '', 'remote_port' => '', 'protocol' => 'lldp'],
+			],
+			'rows' => [['target' => $core->id, 'port' => 'Gi1/0/1', 'mac' => '00:aa:bb:cc:dd:31']],
+			'errors' => []], $provider);
+
+		$o = $map->overlay;
+		$this->assertSame(2, $o['endpoints'] ?? 0);
+		$this->assertCount(0, $o['unknown']);
+	}
+
+	/**
 	 * На карте и в целях - только работающее: у статуса флаг operating.
 	 * Оборудование без статуса считается работающим (не знаем - не выкидываем).
 	 */

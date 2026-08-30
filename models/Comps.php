@@ -1044,6 +1044,12 @@ class Comps extends ArmsModel
 	public function beforeSave($insert)
 	{
 		if (parent::beforeSave($insert)) {
+			//стандарт хранения MAC - строки голого hex (MacsHelper::fixList),
+			//на него рассчитан поиск (LIKE по подстроке). Фильтр валидации
+			//save(false) обходит, а так пишут агенты - поэтому нормализация
+			//живёт здесь, как у Techs: мимо beforeSave не пишет никто
+			$this->mac=MacsHelper::fixList($this->mac);
+
 			/* Распознавание ПО (softHits_ids из raw_soft+soft_ids) нужно только когда
 			   менялся отпечаток софта или паспортное ПО; рядовое сохранение записи
 			   (правка полей руками, пуш с неизменным отпечатком) скан не запускает.

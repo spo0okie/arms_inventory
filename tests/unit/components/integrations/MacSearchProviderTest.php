@@ -773,6 +773,143 @@ Gi2/0/2";
 		$this->assertSame(37, $ports[2]['count']);
 	}
 
+	/**
+	 * Не все MAC, обнаруженные агентом в ОС, проставлены на карточке АРМа -
+	 * ищем и среди ОС. Привязанная ОС резолвится в свой АРМ (это уже было),
+	 * а ОС БЕЗ оборудования показывается отдельно и без кнопки привязки:
+	 * порт соединяется с железом, привязывать не к чему
+	 */
+	public function testOrphanOsShownWithoutAttach()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->model->ports = "Gi1/0/11";
+		$this->assertTrue($switch->model->save(false));
+		$switch->refresh();
+
+		$os = new Comps();
+		$os->setAttributes(['name' => 'PC-ORF1', 'mac' => '00aabbccdd11'], false);
+		$this->assertTrue($os->save(false));
+
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:aa:bb:cc:dd:11', 'Gi1/0/11'),
+		], $switch);
+
+		//устройства нет, предложений нет - но ОС видна
+		$this->assertSame([], $ports[0]['found']);
+		$this->assertSame([], $ports[0]['proposals']);
+		$this->assertSame([$os->id], array_map(fn($item) => $item->id, $ports[0]['found_os']));
+		$this->assertSame('seen', $ports[0]['verdict']);
+	}
+
+	/** Рендер находки-ОС: имя видно, кнопки привязки нет */
+	public function testRenderSwitchPanelShowsOrphanOs()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+
+		$os = new Comps();
+		$os->setAttributes(['name' => 'PC-ORF2', 'mac' => '00aabbccdd22'], false);
+		$this->assertTrue($os->save(false));
+
+		$provider = $this->makeProvider([$this->response($this->payload([
+			$this->tableRow($switch->id, '00:aa:bb:cc:dd:22', 'Gi1/0/12'),
+		], ['mode' => 'table']))]);
+
+		$html = $provider->renderSwitchPanel($switch);
+
+		$this->assertStringContainsString('ОС без оборудования', $html);
+		$this->assertStringContainsString('PC-ORF2', $html);
+		//кнопок привязки у такой находки нет (сам селектор класса в JS есть всегда)
+		$this->assertStringNotContainsString('p-0 port-scan-accept', $html);
+	}
+
+	/**
+	 * Искомый адрес принимается в любом написании (hexMac нормализует), а
+	 * ХРАНЕНИЕ - по стандарту: строки голого hex (нормализует beforeSave,
+	 * сторож MacStorageStandardTest), поэтому поиск - одним написанием
+	 */
+	public function testResolveMacsAcceptsAnySpellingOfNeedle()
+	{
+		$os = new Comps();
+		$os->setAttributes(['name' => 'PC-FMT1',
+			'mac' => "d8bbc18b7eb6\n001a2b3c4d5e"], false);
+		$this->assertTrue($os->save(false));
+
+		$found = $this->makeProvider()->resolveMacs(['d8bb-c18b-7eb6', '00:1A:2B:3C:4D:5E']);
+
+		foreach (['d8bbc18b7eb6', '001a2b3c4d5e'] as $hex) {
+			$this->assertSame([$os->id], array_map(fn($item) => $item->id, $found[$hex] ?? []),
+				'не найден адрес '.$hex);
+		}
+	}
+
+	/**
+	 * Голый MAC в строке «соседи» при записанном адресе - спрятанный факт:
+	 * сосед, чей адрес записан на ОС привязанного АРМа, опознаётся в АРМ и
+	 * рисуется карточкой. На транзитном порту такой сосед НЕ скрывается
+	 * дедупом: found там не показывается, скрыть - значит потерять факт.
+	 * Адрес нарочно подан как пишут агенты - его нормализует beforeSave
+	 */
+	public function testNeighborResolvedThroughOsRendersAsCard()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+		$switch->model->ports = "GE1/0/21";
+		$this->assertTrue($switch->model->save(false));
+		$switch->refresh();
+
+		$arm = new Techs();
+		$arm->setAttributes(['model_id' => $switch->model_id, 'num' => 'ARM-NB1',
+			'history' => ''], false);
+		$this->assertTrue($arm->save(false));
+		//адрес обнаружен агентом в ОС и на карточку АРМа не проставлен;
+		//хранится в «сыром» виде - как пишут агенты
+		$os = new Comps();
+		$os->setAttributes(['name' => 'PC-NB1', 'mac' => 'D8-BB-C1-8B-7E-B6',
+			'arm_id' => $arm->id], false);
+		$this->assertTrue($os->save(false));
+
+		$neighbors = [['target' => $switch->id, 'port' => 'GE1/0/21',
+			'remote_mac' => 'd8bb-c18b-7eb6', 'remote_name' => '', 'remote_port' => '',
+			'protocol' => 'lldp']];
+		$ports = $this->makeProvider()->switchPorts([
+			$this->tableRow($switch->id, '00:11:22:33:44:77', 'GE1/0/21', ['port_macs' => 9]),
+		], $switch, [], $neighbors);
+
+		$this->assertSame('transit', $ports[0]['verdict']);
+		$this->assertCount(1, $ports[0]['neighbors'], 'сосед транзитного порта не скрыт');
+		$this->assertSame($arm->id, $ports[0]['neighbors'][0]['device']->id ?? null);
+
+		//в рендере сосед - карточкой, «чем представился» уезжает в подсказку
+		$payload = $this->payload([
+			$this->tableRow($switch->id, '00:11:22:33:44:77', 'GE1/0/21', ['port_macs' => 9]),
+		], ['mode' => 'table']);
+		$payload['neighbors'] = $neighbors;
+		$html = $this->makeProvider([$this->response($payload)])->renderSwitchPanel($switch);
+		//карточка АРМа ссылкой в строке «сосед», а не голый MAC
+		$this->assertStringContainsString('techs/view?id='.$arm->id, $html);
+	}
+
+	/** Сосед с адресом непривязанной ОС - тоже опознаётся (ссылкой, без кнопок) */
+	public function testNeighborResolvedIntoOrphanOs()
+	{
+		$switch = $this->makeSwitch(['ip' => '10.50.2.16']);
+
+		$os = new Comps();
+		$os->setAttributes(['name' => 'PC-NB2', 'mac' => '00aabbccdd44'], false);
+		$this->assertTrue($os->save(false));
+
+		$ports = $this->makeProvider()->switchPorts([], $switch, [], [
+			['target' => $switch->id, 'port' => 'GE1/0/22',
+				'remote_mac' => '00:aa:bb:cc:dd:44', 'remote_name' => '', 'remote_port' => '',
+				'protocol' => 'lldp'],
+		]);
+
+		$port = null;
+		foreach ($ports as $item) if ($item['port'] === 'GE1/0/22') $port = $item;
+		$this->assertNotNull($port);
+		$this->assertSame($os->id, $port['neighbors'][0]['os']->id ?? null);
+		$this->assertSame([], $port['found']);
+	}
+
 	/** Связь портов перебивает счёт адресов: транзит даже с одним адресом */
 	public function testSwitchPortsTrustPortLinks()
 	{

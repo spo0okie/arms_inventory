@@ -459,7 +459,8 @@ class MacSearchProvider extends IntegrationProvider
 	 * @return array [['port'=>string,'vlans'=>string[],'macs'=>[['mac'=>string,'objects'=>ArmsModel[]]],
 	 *   'count'=>int,'uplink'=>bool,'uplink_peer'=>string,'transit'=>bool,
 	 *   'comment'=>string,'declared'=>bool,'link'=>Ports|null,'linked'=>Techs|null,
-	 *   'found'=>Techs[],'verdict'=>string], ...]
+	 *   'found'=>Techs[],'found_os'=>Comps[] (ОС без оборудования - показать, не привязывать),
+	 *   'verdict'=>string], ...]
 	 */
 	public function switchPorts(array $rows, ?Techs $tech = null, array $passport = [],
 		array $neighbors = []): array
@@ -635,6 +636,10 @@ class MacSearchProvider extends IntegrationProvider
 		$port['neighbors'] = $this->neighbors[$port['real']] ?? $this->neighbors[$port['port']] ?? [];
 		$port['linked'] = static::linkedDevice($port['link'] ?? null);
 		$port['found'] = static::foundDevices($port['macs']);
+		//адрес, записанный только на ОС без оборудования: показать её надо
+		//(факт из инвентаризации), а привязывать не к чему - порт соединяется
+		//с железом. Починка - указать АРМ в карточке ОС
+		$port['found_os'] = static::foundOrphanOs($port['macs']);
 
 		//за портом виден адрес самого коммутатора: так бывает на служебном
 		//порту (CPU у D-Link) и при петле. Предлагать связь коммутатора с самим
@@ -668,19 +673,6 @@ class MacSearchProvider extends IntegrationProvider
 			}
 		}
 
-		//сосед, опознанный в уже показанное на порту устройство, - не отдельная
-		//строка: телефон честно виден и в FDB, и в LLDP, и в CDP, но человеку
-		//это один узел, а не три
-		$visible = array_map(fn(Techs $device) => (int)$device->id, $port['found']);
-		if (is_object($port['linked'])) $visible[] = (int)$port['linked']->id;
-		if (count($visible)) {
-			$port['neighbors'] = array_values(array_filter($port['neighbors'],
-				function ($item) use ($visible) {
-					$device = $this->identifyNeighbor($item);
-					return !(is_object($device) && in_array((int)$device->id, $visible, true));
-				}));
-		}
-
 		$port['verdict'] = static::verdict($port);
 		//предложения: записано пусто или другое - всегда; записанное сошлось, но
 		//рядом нашлось ещё одно - только если из них складывается цепочка
@@ -692,6 +684,35 @@ class MacSearchProvider extends IntegrationProvider
 			$chain = $this->proposals($port);
 			if (count($chain) === 1 && is_array($chain[0]['chain'])) $port['proposals'] = $chain;
 		}
+
+		//каждый оставшийся сосед опознаётся в объект инвентаризации: голый MAC
+		//в строке «соседи», когда адрес записан (в т.ч. на ОС), - спрятанный
+		//факт. Сосед, опознанный в уже ПОКАЗАННОЕ устройство, - не отдельная
+		//строка (телефон честно виден и в FDB, и в LLDP, и в CDP, но человеку
+		//это один узел); показанное - это записанное и найденное тех вердиктов,
+		//где найденное рисуется: на транзитном порту found не показывается, и
+		//скрывать опознанного в него соседа значило бы потерять факт
+		$visible = is_object($port['linked']) ? [(int)$port['linked']->id] : [];
+		if (in_array($port['verdict'], ['ok', 'replaced', 'added'], true)) {
+			foreach ($port['found'] as $device) $visible[] = (int)$device->id;
+		}
+		$osVisible = array_map(fn(Comps $os) => (int)$os->id, $port['found_os']);
+		$rest = [];
+		foreach ($port['neighbors'] as $item) {
+			$device = $this->identifyNeighbor($item);
+			if (is_object($device)) {
+				if (in_array((int)$device->id, $visible, true)) continue;
+				$item['device'] = $device;
+			} else {
+				$os = $this->orphanOsByMac((string)($item['remote_mac'] ?? ''));
+				if (is_object($os)) {
+					if (in_array((int)$os->id, $osVisible, true)) continue;
+					$item['os'] = $os;
+				}
+			}
+			$rest[] = $item;
+		}
+		$port['neighbors'] = $rest;
 		return $port;
 	}
 
@@ -1145,6 +1166,41 @@ class MacSearchProvider extends IntegrationProvider
 		return null;
 	}
 
+	/**
+	 * ОС без оборудования среди владельцев адресов (без дублей).
+	 *
+	 * Не все MAC, обнаруженные агентом в ОС, проставлены на карточке АРМа -
+	 * поэтому искать надо и среди ОС. Привязанная ОС резолвится в свой АРМ
+	 * ({@see deviceOf()}) и попадает в found; непривязанной привязывать порт
+	 * не к чему - её показывают отдельно и без кнопок.
+	 */
+	protected static function foundOrphanOs(array $macs): array
+	{
+		$oses = [];
+		foreach ($macs as $item) {
+			foreach ($item['objects'] as $object) {
+				if ($object instanceof Comps && !is_object(static::deviceOf($object))
+					&& !isset($oses[$object->id])) $oses[$object->id] = $object;
+			}
+		}
+		return array_values($oses);
+	}
+
+	/**
+	 * Адрес записан на ОС без оборудования? Такая находка - не «неизвестно
+	 * кто»: это заведомо оконечное устройство (карта сети её не рисует), и
+	 * шумом «неопознанный сосед» ей быть незачем.
+	 */
+	public function orphanOsByMac(string $mac): ?Comps
+	{
+		$hex = static::hexMac($mac);
+		if ($hex === '') return null;
+		foreach ($this->resolveMacs([$hex])[$hex] ?? [] as $object) {
+			if ($object instanceof Comps && !is_object(static::deviceOf($object))) return $object;
+		}
+		return null;
+	}
+
 	/** Вердикт по порту {@see annotatePort()} */
 	protected static function verdict(array $port): string
 	{
@@ -1288,7 +1344,10 @@ class MacSearchProvider extends IntegrationProvider
 
 		$found = [];
 		//чанками: условие с сотней LIKE - это один проход по таблице, а сотня
-		//отдельных запросов - сто проходов (индекса по подстроке всё равно нет)
+		//отдельных запросов - сто проходов (индекса по подстрок всё равно нет).
+		//Стандарт хранения: строки голого hex в нижнем регистре
+		//(MacsHelper::fixList, его держит beforeSave обеих моделей) - искать
+		//другие написания незачем
 		foreach (array_chunk($needles, 100) as $chunk) {
 			foreach ([Techs::class, Comps::class] as $class) {
 				$condition = ['or'];
