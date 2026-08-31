@@ -31,34 +31,37 @@ trait TechsModelCalcFieldsTrait
 	{
 		/** @var Techs $this */
 		$reqs=[];
-		
+
 		foreach ($this->maintenanceReqs as $maintenanceReq) {
 			$reqs[$maintenanceReq->id]=$maintenanceReq;
 		}
-		
+
 		foreach ($this->services as $service) {
 			foreach ($service->maintenanceReqsRecursive as $maintenanceReq) {
 				$reqs[$maintenanceReq->id]=$maintenanceReq;
 			}
 		}
-		
+
 		$reqs=ArrayHelper::findByField($reqs,'spread_techs',1);
-		
+
 		return MaintenanceReqs::filterEffective($reqs);
 	}
-	
+
 	public function getName() {
 		/** @var Techs $this */
+		//если использование hostname отключено то отдаем инвентарник
+		if (!(Yii::$app->params['techs.hostname.asName']??false)) return $this->num;
+		//иначе смотрим что у нас есть
 		return $this->hostname?$this->hostname:$this->num;
 	}
-	
-	
+
+
 	public function getFqdn()
 	{
 		if (!$this->hostname) return '';
 		return strtolower(is_object($this->domain)?$this->hostname.'.'.$this->domain->fqdn:$this->hostname);
 	}
-	
+
 	/**
 	 * Возвращает набор сканов в договоре
 	 */
@@ -67,14 +70,14 @@ trait TechsModelCalcFieldsTrait
 		/** @var Techs $this */
 		//ищем собственную картинку
 		if ($this->scans_id && is_object($scan=Scans::find()->where(['id' => $this->scans_id ])->one())) return $scan;
-		
+
 		//ищем картинку от модели
 		if (is_object($this->model)) return $this->model->preview;
-		
+
 		//сдаемся
 		return null;
 	}
-	
+
 	/**
 	 * @return Users
 	 */
@@ -82,10 +85,10 @@ trait TechsModelCalcFieldsTrait
 	{
 		/** @var Techs $this */
 		if (is_object($user=Services::responsibleFrom($this->services))) return $user;
-		
+
 		return $this->itStaff;
 	}
-	
+
 	/**
 	 * @return Users
 	 */
@@ -93,10 +96,10 @@ trait TechsModelCalcFieldsTrait
 	{
 		/** @var Techs $this */
 		if (is_object($user=Services::responsibleFrom($this->services,true))) return $user;
-		
+
 		return $this->itStaff;
 	}
-	
+
 	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
 	 * @return Users[]
@@ -109,15 +112,15 @@ trait TechsModelCalcFieldsTrait
 			(count($this->services)||!Yii::$app->params['techs.managementService.enable'])?
 				$this->services:
 				[$this->managementService]);
-		
+
 		//убираем из команды ответственного за ОС
 		if (is_object($responsible=$this->responsible)) {
 			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
 		}
-		
+
 		return array_values($team);
 	}
-	
+
 	/**
 	 * Возвращает группу пользователей ответственный + поддержка всех сервисов на компе
 	 * @return Users[]
@@ -127,21 +130,21 @@ trait TechsModelCalcFieldsTrait
 	{
 		/** @var Techs $this */
 		$team=Services::supportTeamFrom($this->services,true);
-		
+
 		//убираем из команды ответственного за ОС
 		if (is_object($responsible=$this->servicesResponsible)) {
 			if (isset($team[$responsible->id])) unset($team[$responsible->id]);
 		}
-		
+
 		return array_values($team);
 	}
-	
+
 	public function getServicesCount()
 	{
 		/** @var Techs $this */
 		return $this->loaderCount('services') ?? count($this->services);
 	}
-	
+
 	/**
 	 * Возвращает название поля комментарий
 	 */
@@ -156,32 +159,32 @@ trait TechsModelCalcFieldsTrait
 		}
 		return $this->getAttributeLabel('comment');
 	}
-	
-	
+
+
 	public function getIsComputer() {
 		/** @var Techs $this */
 		if (isset($this->attrsCache['isComputer'])) return $this->attrsCache['isComputer'];
 		return $this->model->type->is_computer??false;
 	}
-	
+
 	public function getIsVoipPhone() {
 		/** @var Techs $this */
 		if (isset($this->attrsCache['isVoipPhone'])) return $this->attrsCache['isVoipPhone'];
 		return $this->model->type->is_phone??false;
 	}
-	
+
 	public function getIsUps() {
 		/** @var Techs $this */
 		if (isset($this->attrsCache['isUps'])) return $this->attrsCache['isUps'];
 		return $this->model->type->is_ups??false;
 	}
-	
+
 	public function getIsMonitor() {
 		/** @var Techs $this */
 		if (isset($this->attrsCache['isMonitor'])) return $this->attrsCache['isMonitor'];
 		return $this->model->type->is_display??false;
 	}
-	
+
 	/**
 	 * @return array
 	 */
@@ -192,7 +195,7 @@ trait TechsModelCalcFieldsTrait
 		foreach ($this->armTechs as $tech) if ($tech->isVoipPhone) $this->attrsCache['voipPhones'][]=$tech;
 		return $this->attrsCache['voipPhones'];
 	}
-	
+
 	/**
 	 * @return array
 	 */
@@ -203,7 +206,7 @@ trait TechsModelCalcFieldsTrait
 		foreach ($this->armTechs as $tech) if ($tech->isUps) $this->attrsCache['ups'][]=$tech;
 		return $this->attrsCache['ups'];
 	}
-	
+
 	/**
 	 * @return array
 	 */
@@ -214,19 +217,19 @@ trait TechsModelCalcFieldsTrait
 		foreach ($this->armTechs as $tech) if ($tech->isMonitor) $this->attrsCache['monitors'][]=$tech;
 		return $this->attrsCache['monitors'];
 	}
-	
+
 	public function getArmTechsCount(){
 		return count($this->armTechs);
 	}
-	
+
 	public function getVoipPhonesCount(){
 		return count($this->voipPhones);
 	}
-	
+
 	public function getMonitorsCount(){
 		return count($this->monitors);
 	}
-	
+
 	public function getArchived()
 	{
 		/** @var Techs $this */
@@ -237,12 +240,12 @@ trait TechsModelCalcFieldsTrait
 			($this->state_id?TechStates::getLoadedItem($this->state_id,true):null);
 		return is_object($state)?$state->archived:false;
 	}
-	
+
 	public function getFormattedMac() {
 		/** @var Techs $this */
 		return Techs::formatMacs($this->mac);
 	}
-	
+
 	/**
 	 * Возвращает эффективного пользователя для оборудования
 	 *  - сначала ищет явно заданного пользователя
@@ -267,7 +270,7 @@ trait TechsModelCalcFieldsTrait
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Возвращает комментарий порта из шаблона модели
 	 * @param string $port
@@ -280,14 +283,14 @@ trait TechsModelCalcFieldsTrait
 		else
 			return null;
 	}
-	
-	
+
+
 	public function getUpdatedRenderClass(){
 		if (is_object($this->comp)) {
 			return $this->comp->updatedRenderClass;
 		} else return '';
 	}
-	
+
 	/**
 	 * Получить соединения
 	 * @param string $direction направление соединений incoming / outgoing
@@ -299,15 +302,15 @@ trait TechsModelCalcFieldsTrait
 		$directAttr=$direction.'Connections';
 		$nodeAttr=$nodeSide.'Techs';
 		$cacheAttr=$directAttr.'Effective';
-		
+
 		if (isset($this->attrsCache[$cacheAttr])) return $this->attrsCache[$cacheAttr];
 		/** @var Techs $this */
 		$connections=[];
-		
+
 		//выбираем прямые соединения
 		foreach ($this->$directAttr as $connection)
 			$connections[$connection->id]=$connection;
-		
+
 		//выбираем сервисы где не объявлены компы
 		foreach ($this->services as $service) {
 			foreach ($service->$directAttr as $connection) {
@@ -317,9 +320,9 @@ trait TechsModelCalcFieldsTrait
 			}
 		}
 		return $this->attrsCache[$cacheAttr]=$connections;
-		
+
 	}
-	
+
 	/**
 	 * Получить входящие соединения
 	 * @return array|mixed
@@ -327,7 +330,7 @@ trait TechsModelCalcFieldsTrait
 	public function getIncomingConnectionsEffective() {
 		return $this->getEffectiveConnections('incoming','target');
 	}
-	
+
 	/**
 	 * Получить входящие соединения
 	 * @return array|mixed
@@ -335,5 +338,5 @@ trait TechsModelCalcFieldsTrait
 	public function getOutgoingConnectionsEffective() {
 		return $this->getEffectiveConnections('outgoing','initiator');
 	}
-	
+
 }
