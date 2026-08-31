@@ -7,13 +7,13 @@ use app\components\UrlListWidget;
 use app\helpers\ArrayHelper;
 
 use app\components\widgets\page\ModelWidget;
-/* @var $this yii\web\View */
-/* @var $model app\models\Techs */
+/** @var yii\web\View $this */
+/** @var app\models\Techs $model */
 $model_id=$model->id;
 if (!isset($static_view)) $static_view=false;
 if (!isset($no_model)) $no_model=false; //не выводить инфу о модели оборудования
 
-$name=$model->hostname?$this->render('/domains/hostname',[
+$name=((Yii::$app->params['techs.hostname.asName']??true)&&$model->hostname)?$this->render('/domains/hostname',[
 	'model'=>$model,
 	'hostname'=>$model->hostname,
 ]):$model->num;

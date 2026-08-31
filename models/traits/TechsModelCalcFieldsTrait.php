@@ -50,7 +50,7 @@ trait TechsModelCalcFieldsTrait
 	public function getName() {
 		/** @var Techs $this */
 		//если использование hostname отключено то отдаем инвентарник
-		if (!(Yii::$app->params['techs.hostname.asName']??false)) return $this->num;
+		if (!(Yii::$app->params['techs.hostname.asName']??true)) return $this->num;
 		//иначе смотрим что у нас есть
 		return $this->hostname?$this->hostname:$this->num;
 	}
