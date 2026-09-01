@@ -57,6 +57,41 @@ trait CompsModelCalcFieldsTrait
 		return $this->exclude_hw=implode("\n",array_diff($this->getExcludeHwArray(),[$item]));
 	}
 
+	/**
+	 * Строки отпечатков ПО (raw_soft) и железа (raw_hw) в человекочитаемом виде.
+	 * Нужны для перепроверки текстового фильтра на стороне PHP
+	 * (вывод найденных поиском строк в ячейке "ОС / софт" списка ОС)
+	 * @return string[]
+	 */
+	public function getRawSearchLines()
+	{
+		$lines=[];
+
+		$soft=json_decode('['.($this->raw_soft??'').']',true);
+		if (is_array($soft)) foreach ($soft as $item) {
+			if (!is_array($item)) continue;
+			$name=trim((string)($item['name']??''));
+			$publisher=trim((string)($item['publisher']??''));
+			if (!strlen($name) && !strlen($publisher)) continue;
+			$lines[]=$name.(strlen($publisher)?' ('.$publisher.')':'');
+		}
+
+		//NULL-символы в raw_hw бывают (см. HwList::loadRaw)
+		$hw=json_decode('['.str_replace("\0",'',$this->raw_hw??'').']',true);
+		if (is_array($hw)) foreach ($hw as $items) {
+			if (!is_array($items)) continue;
+			foreach ($items as $type=>$item) {
+				$tokens=[];
+				foreach (is_array($item)?$item:[$item] as $value)
+					if (is_scalar($value) && strlen(trim((string)$value)))
+						$tokens[]=trim((string)$value);
+				if (count($tokens)) $lines[]=$type.': '.implode(' ',$tokens);
+			}
+		}
+
+		return $lines;
+	}
+
 	public function getCpuCoresCount() {
 		return $this->hwList->getCpuCoresCount();
 	}

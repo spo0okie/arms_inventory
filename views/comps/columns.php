@@ -14,7 +14,9 @@ use app\components\ExpandableCardWidget;
 use app\components\ListObjectsWidget;
 use app\components\ModelFieldWidget;
 use app\helpers\ArrayHelper;
+use app\helpers\QueryHelper;
 use app\models\Comps;
+use app\models\CompsSearch;
 use app\models\Manufacturers;
 use app\models\Techs;
 use yii\helpers\Html;
@@ -25,6 +27,14 @@ use app\components\widgets\page\ModelWidget;
 if(!isset($static_view))$static_view=false;
 $renderer = $this;
 $manufacturers= Manufacturers::fetchNames();
+
+//фильтр "ОС / софт" ищет по os|raw_soft|raw_hw (CompsSearch); если он заполнен,
+//готовим PHP-зеркало этого поиска, чтобы показать в ячейке именно найденные строки отпечатков.
+//В контекстах без фильтра (карточки soft/lic-*/maintenance-*) ячейка рендерится по классике
+$osFilter=($searchModel??null) instanceof CompsSearch ? trim((string)($searchModel->os??'')) : '';
+$osMatcher=strlen($osFilter) && QueryHelper::hasPositiveTokens($osFilter)
+	? QueryHelper::stringMatcher($osFilter)
+	: null;
 $armsColumns=include __DIR__.'/../techs/columns.php';
 $armStatus=$armsColumns['state_id'];
 return [
@@ -110,7 +120,17 @@ return [
 	],
 	'os' => [
 		'label' => 'ОС / софт',
-		'value' => function ($data) {return $data->os;},
+		'value' => function ($data) use ($osMatcher) {
+			$os=$data->os;
+			//при заполненном фильтре показываем строки отпечатков, в которые он попал;
+			//если попаданий нет (совпадение было в самом os или поперек JSON-синтаксиса) - классика
+			if (!is_null($osMatcher) && count($found=array_unique(array_filter($data->rawSearchLines,$osMatcher)))) {
+				return ExpandableCardWidget::widget([
+					'content'=>implode('<br />',array_map([Html::class,'encode'],$found))
+				]);
+			}
+			return $os;
+		},
 	],
 	'mac' => [
 		'value'=>function ($data) {return ExpandableCardWidget::widget([

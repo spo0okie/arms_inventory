@@ -200,6 +200,111 @@ class QueryHelper
 	}
 	
 	/**
+	 * Преобразует LIKE-шаблон (% и _ как подстановки) в регулярное выражение
+	 * @param $pattern string
+	 * @return string
+	 */
+	private static function likePatternToRegex($pattern) {
+		//preg_quote не экранирует % и _, поэтому после него их можно заменить на regex-подстановки
+		return '/^'.str_replace(['%','_'],['.*','.'],preg_quote($pattern,'/')).'$/uis';
+	}
+
+	/**
+	 * Обработка строчного токена в PHP-предикат (зеркало likeToken для проверки на стороне PHP)
+	 * @param $token string токен поиска
+	 * @param $param mixed не используется (сигнатура для tokenizeString)
+	 * @return \Closure fn(string $subject):bool
+	 */
+	static function matchToken($token,$param) {
+		if (!strlen($token)) return function($subject){return true;};
+		$negate=false;
+		$tokenParse=true;
+		if (strpos($token,'!')===0 || $token==='-') {
+			$negate=true;
+			if ($token=='-') {
+				$token='%_%';
+				$tokenParse=false;
+			} else
+				$token=trim(substr($token,1));
+		}
+
+		if ($token==='*') {
+			$token='%_%';
+			$tokenParse=false;
+		}
+
+		if ($tokenParse) {
+			if (strpos($token,'^')===0) {
+				$token=substr($token,1);
+			} else $token='%'.$token;
+
+			if (strpos($token,'$')===strlen($token)-1) {
+				$token=substr($token,0,strlen($token)-1);
+			} else $token=$token.'%';
+		}
+
+		$regex=static::likePatternToRegex(static::macroStringToUnescape($token));
+		return function($subject) use ($regex,$negate) {
+			$match=(bool)preg_match($regex,(string)$subject);
+			return $negate ? !$match : $match;
+		};
+	}
+
+	/**
+	 * Сворачивает дерево предикатов от tokenizeString в один предикат
+	 * @param $tree \Closure|array \Closure или [AND|OR,\Closure,...]
+	 * @return \Closure fn(string $subject):bool
+	 */
+	private static function compileMatchTree($tree) {
+		if ($tree instanceof \Closure) return $tree;
+		$operator=array_shift($tree);
+		return function($subject) use ($operator,$tree) {
+			foreach ($tree as $matcher) {
+				if ($operator==='AND') {
+					if (!$matcher($subject)) return false;
+				} else {
+					if ($matcher($subject)) return true;
+				}
+			}
+			return $operator==='AND';
+		};
+	}
+
+	/**
+	 * Компилирует строку поиска в PHP-предикат fn(string):bool по той же грамматике,
+	 * что и querySearchString (&, |, !, ^, $, *, -, экранирование через \).
+	 * Нужен, когда совпадение отобранных SQL-запросом строк надо перепроверить на
+	 * стороне PHP (например, показать найденные фильтром строки отпечатка в ячейке грида).
+	 * Отличие от SQL: регистр сравнивается через mb-регистр без нюансов collation (е≠ё и т.п.)
+	 * @param $string string строка поиска
+	 * @return \Closure fn(string $subject):bool
+	 */
+	public static function stringMatcher($string) {
+		return static::compileMatchTree(
+			static::tokenizeString($string??'',null,[static::class,'matchToken'])
+		);
+	}
+
+	/**
+	 * Есть ли в строке поиска хоть один позитивный токен (не отрицание и не подстановка).
+	 * Матчер по чисто негативному запросу (вроде "!chrome") совпадает почти с любой строкой -
+	 * для подсветки найденного такой фильтр бесполезен
+	 * @param $string string строка поиска
+	 * @return bool
+	 */
+	public static function hasPositiveTokens($string) {
+		$string=static::escapedStringToMacro($string??'');
+		foreach (preg_split('/[&|]/',$string) as $token) {
+			$token=trim($token);
+			if (!strlen($token)) continue;
+			if ($token==='-' || $token==='*') continue;
+			if (strpos($token,'!')===0) continue;
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * @param $param string|array параметр по которому ищем,
 	 * 					можно передавать выражение ['or','responsible.Ename','support.Ename']
 	 * @param $string string значение которое должны принять параметры
