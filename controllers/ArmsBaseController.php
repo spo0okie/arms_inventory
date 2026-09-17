@@ -99,7 +99,7 @@ use yii\web\UnauthorizedHttpException;
  *    JSON-ответы для REST-клиентов;
  *  - actionCopy() — «создать по образцу»: create-форма, предзаполненная
  *    атрибутами образца (ArmsModel::copyPrefillAttributes; кнопка-иконка
- *    в заголовке страницы объекта — LinkObjectWidget/CopyObjectWidget);
+ *    в заголовке формы редактирования — CopyObjectWidget);
  *
  * Поведение по умолчанию:
  * -----------------------

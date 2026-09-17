@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = 'Изменить';
 ?>
 <div class="users-update">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><?= Html::encode($this->title) ?><?= \app\components\CopyObjectWidget::widget(['model'=>$model]) ?></h1>
     <h3>Табельный номер:<?= $model->employee_id ?></h3>
 
     <?= $this->render('_form', [

@@ -10,7 +10,7 @@ $this->title = 'Редактирование: '.$model->descr;
 ?>
 <div class="lic-types-update">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><?= Html::encode($this->title) ?><?= \app\components\CopyObjectWidget::widget(['model'=>$model]) ?></h1>
 
     <?= $this->render('_form', [
         'model' => $model,

@@ -134,8 +134,8 @@ RDP к терминалам + HTTPS к порталу + ВКС и т.п. Issue #
   (дети one-to-many); симметричные m2m переносятся (ArmsModel::copyPrefillAttributes);
 - `copySupported()`: при кастомном actionCreate копия включается переопределением
   `copyViewParams()`/`actionCopy()`, иначе GET copy редиректит на create;
-- кнопка (CopyObjectWidget) рендерится LinkObjectWidget только на странице самого
-  объекта (samePage); для контроллеров за URL-алиасами модулей — явный `showCopy`;
+- кнопка (CopyObjectWidget) рендерится в H1 формы редактирования (update.php) и
+  сама проверяет copySupported() текущего контроллера (перенесена из просмотра, #221);
 - `testCopy()` в базовом контроллере с guard'ами (нет modelClass / нет full-модели /
   копия не поддерживается → сценариев нет).
 

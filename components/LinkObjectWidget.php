@@ -39,13 +39,6 @@ class LinkObjectWidget extends Widget
 	 */
 	public $noDelete=false;
 	public $noUpdate=false;
-	/**
-	 * @var bool|null показывать ли кнопку «Создать копию» (только на странице самого объекта).
-	 * null — автоопределение по контроллеру (ArmsBaseController::copySupported());
-	 * контроллеры за URL-алиасами модулей (scheduled-access) автоопределению недоступны —
-	 * там кнопка включается явно (true).
-	 */
-	public $showCopy=null;
 	public $noSpaces=false;	//убирать пробелы перед редактированием и корзиной (в monospace выглядит стремно)
 	public $modal=false;	//редактировать в модальном окне
 
@@ -178,20 +171,6 @@ class LinkObjectWidget extends Widget
 				]);
 		} else $deleteObject='';
 
-		//кнопка «Создать копию» — только в заголовке страницы самого объекта (samePage),
-		//чтобы не засорять списки; контроллеры без поддержки копии её не получают
-		$copyObject='';
-		if ($this->samePage && !$this->static && !$this->noUpdate && $this->itemId
-			&& ($this->showCopy ?? $this->copySupported())) {
-			$copyObject=$space.CopyObjectWidget::widget([
-				'model'=>$this->model,
-				'url'=>Url::to(['//'.$this->controller.'/copy','id'=>$this->itemId]),
-				'options'=>array_merge($this->hrefOptions,[
-					'data'=>$this->noPjax?['pjax'=>0]:[],
-				]),
-			]);
-		}
-
 		//если мы уже на этой странице, то не делаем ссылки
 		return (
 				$this->samePage?
@@ -211,24 +190,6 @@ class LinkObjectWidget extends Widget
 						]),
 					])
 				:''
-			).$copyObject.$deleteObject;
-	}
-
-	/**
-	 * Поддерживает ли контроллер объекта копирование «по образцу»
-	 * (см. ArmsBaseController::copySupported())
-	 * @return bool
-	 */
-	protected function copySupported(): bool
-	{
-		try {
-			$result=Yii::$app->createController($this->controller.'/copy');
-		} catch (\Throwable $e) {
-			return false;
-		}
-		if (!is_array($result)) return false;
-		[$controller,]=$result;
-		return $controller instanceof \app\controllers\ArmsBaseController
-			&& $controller->copySupported();
+			).$deleteObject;
 	}
 }

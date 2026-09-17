@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = 'Редактирование';
 ?>
 <div class="materials-usages-update">
 
-    <h2><?= Html::encode($this->title) ?></h2>
+    <h2><?= Html::encode($this->title) ?><?= \app\components\CopyObjectWidget::widget(['model'=>$model]) ?></h2>
 
     <?= $this->render('_form', [
         'model' => $model,

@@ -24,7 +24,7 @@ if ($model->isOverride) {
 ?>
 <div class="schedules-update">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><?= Html::encode($this->title) ?><?= $model->isOverride?'':\app\components\CopyObjectWidget::widget(['model'=>$model]) ?></h1>
 
     <?= $this->render($model->isOverride?'_form_override':'_form', [
         'model' => $model,
