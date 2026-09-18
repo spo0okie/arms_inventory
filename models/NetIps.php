@@ -148,6 +148,18 @@ class NetIps extends ArmsModel
 				'hint'=>'ОС, оборудование и пользователи, у которых этот адрес указан в поле IP',
 				'typeClass'=>\app\types\StringType::class,
 			],
+			'forwardsIn' => [
+				'Доступен снаружи как',
+				'hint'=>'Пробросы на этот адрес и на узлы, к которым он привязан: записи доступа с типом '
+					.'«проброс», где ресурс — этот адрес или его узел, а субъект — адрес входа',
+				'ref'=>\app\models\Aces::class, 'refMulti'=>true,
+			],
+			'forwardsOut' => [
+				'Пробрасывается на',
+				'hint'=>'Пробросы с этого адреса: записи доступа с типом «проброс», где этот адрес — '
+					.'субъект (адрес входа), а ресурс — узел назначения или его адрес',
+				'ref'=>\app\models\Aces::class, 'refMulti'=>true,
+			],
 			'dnsNames' => [
 				'DNS-имена',
 				'hint'=>'DNS-имена, указывающие на этот адрес (помимо hostname узлов, к которым он привязан)',
@@ -259,6 +271,33 @@ class NetIps extends ArmsModel
 	public function getAcls()
 	{
 		return $this->hasMany(Acls::class, ['ips_id' => 'id']);
+	}
+
+	/**
+	 * Входящие пробросы: на этот адрес и на узлы, к которым он привязан
+	 * (plans/access-chains.md, итерация 2)
+	 * @return Aces[]
+	 */
+	public function getForwardsIn()
+	{
+		if (isset($this->attrsCache['forwardsIn'])) return $this->attrsCache['forwardsIn'];
+		if ($this->isNewRecord) return [];
+		return $this->attrsCache['forwardsIn']=Aces::findForwardsTo(
+			ArrayHelper::getColumn($this->comps,'id'),
+			ArrayHelper::getColumn($this->techs,'id'),
+			[$this->id]
+		);
+	}
+
+	/**
+	 * Исходящие пробросы: этот адрес — адрес входа
+	 * @return Aces[]
+	 */
+	public function getForwardsOut()
+	{
+		if (isset($this->attrsCache['forwardsOut'])) return $this->attrsCache['forwardsOut'];
+		if ($this->isNewRecord) return [];
+		return $this->attrsCache['forwardsOut']=Aces::findForwardsFrom([$this->id]);
 	}
 
 	/**

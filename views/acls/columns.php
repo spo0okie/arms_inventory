@@ -66,6 +66,20 @@ return [
 			return '';
 		}
 	],
+	//транзит: маршруты, проходящие через записи этого списка доступа
+	'transit'=>[
+		'value'=>function($data) use ($renderer,$glue){
+			$aces=array_filter($data->aces,static function($ace){return $ace->hasTransit;});
+			if (!count($aces)) return '';
+			$routes=[];
+			foreach (\app\models\Aces::routesOf($aces) as $aceRoutes) $routes=array_merge($routes,$aceRoutes);
+			return $renderer->render('/aces/routes',[
+				'routes'=>$routes,
+				'current'=>\yii\helpers\ArrayHelper::getColumn($aces,'id'),
+				'glue'=>$glue,
+			]);
+		},
+	],
 	'resource_nodes'=>[
 		'contentOptions'=>function($data) use ($glue){ return [
 			'field'=>'nodes',

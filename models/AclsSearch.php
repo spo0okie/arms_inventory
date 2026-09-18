@@ -119,12 +119,13 @@ class AclsSearch extends Acls
 		}
 
 		if (strlen((string)$this->subjects)) {
-			$filter->joinWith(['aces.users','aces.comps','aces.services','aces.netIps','aces.networks']);
+			$filter->joinWith(['aces.users','aces.comps','aces.services','aces.netIps','aces.networks','aces.segments']);
 			$filter->andFilterWhere(['or',
 				QueryHelper::querySearchString('users_subjects.Ename', $this->subjects),
 				QueryHelper::querySearchString('comps_subjects.name', $this->subjects),
 				QueryHelper::querySearchString('services_subjects.name', $this->subjects),
 				QueryHelper::querySearchString('networks_subjects.text_addr', $this->subjects),
+				QueryHelper::querySearchString('segments_subjects.name', $this->subjects),
 				QueryHelper::querySearchString('ips_subjects.text_addr', $this->subjects),
 				//текстовый субъект («Прочее» в ACE) - тоже субъект доступа
 				QueryHelper::querySearchString('aces.comment', $this->subjects),
@@ -132,12 +133,13 @@ class AclsSearch extends Acls
 		}
 
 		if (strlen((string)$this->resource)) {
-			$filter->joinWith(['comp','tech','service','ip','network']);
+			$filter->joinWith(['comp','tech','service','ip','network','segment']);
 			$filter->andFilterWhere(['or',
 				QueryHelper::querySearchString('comps_resources.name', $this->resource),
 				QueryHelper::querySearchString('techs_resources.num', $this->resource),
 				QueryHelper::querySearchString('services_resources.name', $this->resource),
 				QueryHelper::querySearchString('networks_resources.text_addr', $this->resource),
+				QueryHelper::querySearchString('segments_resources.name', $this->resource),
 				QueryHelper::querySearchString('ips_resources.text_addr', $this->resource),
 				//текстовый ресурс («Другое») - тоже ресурс
 				QueryHelper::querySearchString($table.'.comment', $this->resource),

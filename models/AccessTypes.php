@@ -21,6 +21,8 @@ use yii\helpers\ArrayHelper;
  * @property boolean $is_ip
  * @property boolean $is_phone
  * @property boolean $is_vpn
+ * @property boolean $is_forward
+ * @property boolean $isForwardRecursive
  * @property boolean $isIpRecursive
  * @property boolean $isTelephonyRecursive
  * @property AccessTypes[] $children
@@ -54,7 +56,7 @@ class AccessTypes extends ArmsModel
         return [
 			[['notepad','ip_params_def'], 'string'],
             [['code', 'name'], 'string', 'max' => 64],
-			[['is_app','is_ip','is_phone','is_vpn'],'integer'],
+			[['is_app','is_ip','is_phone','is_vpn','is_forward'],'integer'],
             [['comment'], 'string', 'max' => 255],
 			[['children_ids'], 'each', 'rule'=>['integer']],
         ];
@@ -146,6 +148,22 @@ class AccessTypes extends ArmsModel
 				'hint' => 'Признак что этот доступ предоставляет возможность удаленного VPN подключения',
 				'typeClass' => \app\types\BooleanType::class,
 			],
+			'is_forward'=>[
+				'Проброс (форвард)',
+				'hint' => 'Признак, что этот тип описывает проброс/транзит соединения (NAT, реверс-прокси, туннель), '
+					.'а не доступ к самому ресурсу.<br>'
+					.'В записи доступа с таким типом субъект — адрес входа (белый IP), ресурс — узел назначения '
+					.'или его адрес, сетевые параметры — вида <b>TCP 443->8443</b> (порт входа -> порт назначения; '
+					.'без стрелки порт не меняется).<br>'
+					.'Такие записи показываются у узла, его адресов и DNS-имён как «доступен снаружи»',
+				'typeClass' => \app\types\BooleanType::class,
+			],
+			'isForwardRecursive'=>[
+				'Проброс (включая дочерние)',
+				'hint'=>'Описывает ли этот тип доступа (или любой из включенных в него) проброс соединения',
+				'is_collectable'=>true,
+				'typeClass' => \app\types\BooleanType::class,
+			],
 			'ip_params_def'=>[
 				'Параметры IP по умолчанию',
 				'hint'=>'Если это IP доступ, то какие порты каких IP протоколов он требует<br>'
@@ -153,6 +171,7 @@ class AccessTypes extends ArmsModel
 					.'<li>TCP 443 <i>(для HTTPS)</i></li>'
 					.'<li>UDP 5060,20000-20100 <i>(для SIP)</i></li>'
 					.'<li>TCP,UDP 53 <i>(для DNS)</i></li>'
+					.'<li>TCP 443->8443 <i>(для проброса: порт входа -> порт назначения)</i></li>'
 					.'</ul> Для каждого конкретного предоставления доступа этот параметр может быть изменен. Здесь именно значение по умолчанию',
 				'example'=>'UDP 5060,20000-20100',
 				'typeClass' => \app\types\StringType::class,
@@ -233,6 +252,43 @@ class AccessTypes extends ArmsModel
 	public function getIsIpRecursive()
 	{
 		return $this->getFlagRecursive('is_ip');
+	}
+
+	public function getIsForwardRecursive()
+	{
+		return $this->getFlagRecursive('is_forward');
+	}
+
+	/** @var null|int[] кэш ID форвард-типов (на запрос) */
+	private static $forwardTypeIdsCache=null;
+
+	/**
+	 * ID всех типов доступа, описывающих проброс (сами с флагом is_forward либо
+	 * включающие такой тип). Выборки пробросов узла/адреса дергаются на каждую
+	 * карточку — список типов считаем один раз на запрос из общего кэша справочника.
+	 * @return int[]
+	 */
+	public static function forwardTypeIds(): array
+	{
+		if (is_null(static::$forwardTypeIdsCache)) {
+			static::$forwardTypeIdsCache=[];
+			foreach (static::getAllItems(true) as $type) {
+				/** @var AccessTypes $type */
+				if ($type->isForwardRecursive) static::$forwardTypeIdsCache[]=(int)$type->id;
+			}
+		}
+		return static::$forwardTypeIdsCache;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 * Состав форвард-типов кэшируется статически — сбрасываем вместе с кэшем справочника
+	 */
+	public static function invalidateAllItemsCache()
+	{
+		static::$forwardTypeIdsCache=null;
+		static::$hierarchyCache=null;
+		parent::invalidateAllItemsCache();
 	}
 
 	/**

@@ -111,5 +111,14 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 			<?=  \app\components\ModelFieldWidget::renderFieldValue($model,'notepad') ?>
 		</div>
 	<?php } ?>
+	<?php if ($model->hasTransit) { ?>
+		<div class="p-1 small border-top ace-transit">
+			<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'transit',null,'span') ?>:<br />
+			<?= $this->render('/aces/routes',[
+				'routes'=>Aces::routesOf([$model])[$model->id]??[],
+				'current'=>$model->id,
+			]) ?>
+		</div>
+	<?php } ?>
 
 </div>

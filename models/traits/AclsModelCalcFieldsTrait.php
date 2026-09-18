@@ -100,6 +100,8 @@ trait AclsModelCalcFieldsTrait
 			$this->attrsCache['segments']=$this->tech->segments;
 		} elseif (is_object($this->service)) {
 			$this->attrsCache['segments']=[$this->service->segmentRecursive];
+		} elseif (is_object($this->segment)) {
+			$this->attrsCache['segments']=[$this->segment];
 		} else {
 			$this->attrsCache['segments']=[];
 		}
@@ -136,6 +138,10 @@ trait AclsModelCalcFieldsTrait
 			$this->attrsCache['sname']=$this->service->name;
 		elseif (($this->ips_id) and is_object($this->ip))
 			$this->attrsCache['sname']=$this->ip->sname;
+		elseif (($this->networks_id) and is_object($this->network))
+			$this->attrsCache['sname']=$this->network->sname;
+		elseif (($this->segments_id) and is_object($this->segment))
+			$this->attrsCache['sname']=$this->segment->name;
 		else
 			$this->attrsCache['sname']=Acls::$emptyComment;
 		
@@ -167,6 +173,10 @@ trait AclsModelCalcFieldsTrait
 		
 		if (($this->networks_id) and is_object($this->network))
 			return [$this->network];
+
+		//сегмент: объект доступа — сегмент, узлы доступа — его подсети и узлы его сервисов
+		if (($this->segments_id) and is_object($this->segment))
+			return array_values($this->segment->accessNodes);
 		
 		return [];
 	}
@@ -195,6 +205,9 @@ trait AclsModelCalcFieldsTrait
 		
 		if (($this->networks_id) and is_object($this->network))
 			return $this->network;
+
+		if (($this->segments_id) and is_object($this->segment))
+			return $this->segment;
 		
 		return null;
 	}

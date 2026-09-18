@@ -28,21 +28,24 @@ if (!isset($modalParent)) $modalParent=null;
 			<?= $form->field($model, 'ip_params_def') ?>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-md-3">
+	<div class="d-flex justify-content-evenly">
+		<div>
 			<?= $form->field($model,  'is_app') ?>
 		</div>
-		<div class="col-md-3">
+		<div>
 			<?= $form->field($model,  'is_ip') ?>
 		</div>
-		<div class="col-md-3">
+		<div>
 			<?= $form->field($model, 'is_phone') ?>
 		</div>
-		<div class="col-md-3">
+		<div>
 			<?= $form->field($model, 'is_vpn') ?>
 		</div>
+		<div>
+			<?= $form->field($model, 'is_forward') ?>
+		</div>
 	</div>
-	
+
 	<?= $form->field($model,  'comment') ?>
 
 	<?= $form->field($model, 'children_ids') ?>

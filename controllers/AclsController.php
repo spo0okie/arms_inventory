@@ -97,7 +97,7 @@ class AclsController extends ArmsBaseController
 	/**
 	 * Одиночные ресурсные атрибуты ACL (один ресурс на ACL).
 	 */
-	const RESOURCE_FIELDS = ['comps_id','techs_id','ips_id','networks_id','services_id'];
+	const RESOURCE_FIELDS = ['comps_id','techs_id','ips_id','networks_id','segments_id','services_id'];
 
 	/**
 	 * Соответствие групповых мультиселект-полей (массивы *_ids формы) одиночным ресурсам ACL.
@@ -107,6 +107,7 @@ class AclsController extends ArmsBaseController
 		'techs_ids'    => 'techs_id',
 		'ips_ids'      => 'ips_id',
 		'networks_ids' => 'networks_id',
+		'segments_ids' => 'segments_id',
 		'services_ids' => 'services_id',
 	];
 

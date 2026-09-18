@@ -54,6 +54,11 @@ if (!isset($static_view)) $static_view = false;
 		echo Html::tag('p', ModelFieldWidget::renderFieldTitle($model, 'netIps') . ': '
 			. Html::tag('span', 'ни на что не указывает', ['class' => 'opacity-75']));
 	}
+
+	//цепочка имя → адрес → проброс → узел: куда на самом деле ведёт имя
+	echo $this->render('/aces/forwards', [
+		'models' => $model->forwardsOut, 'owner' => $model, 'attribute' => 'forwardsOut', 'static_view' => $static_view,
+	]);
 	?>
 
 </div>

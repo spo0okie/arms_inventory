@@ -179,6 +179,12 @@ class DnsNames extends ArmsModel
 				'hint' => 'Адреса, на которые указывает имя, с узлами, к которым они привязаны',
 				'typeClass' => \app\types\LinkType::class,
 			],
+			'forwardsOut' => [
+				'Пробрасывается на',
+				'hint' => 'Куда ведут адреса этого имени: пробросы (записи доступа с типом «проброс»), '
+					. 'у которых адрес входа — один из адресов имени. Так видна цепочка имя → адрес → узел',
+				'ref' => Aces::class, 'refMulti' => true,
+			],
 			'comment' => [
 				'Комментарий',
 				'hint' => 'Всё, что нужно знать об имени: зачем заведено, кем обслуживается, когда убрать',
@@ -204,6 +210,18 @@ class DnsNames extends ArmsModel
 	{
 		return $this->hasMany(NetIps::class, ['id' => 'ips_id'])->from(['dns_names_ips' => NetIps::tableName()])
 			->viaTable('{{%dns_names_in_ips}}', ['dns_names_id' => 'id']);
+	}
+
+	/**
+	 * Пробросы с адресов этого имени: цепочка имя → адрес входа → узел назначения
+	 * (plans/access-chains.md, итерация 2)
+	 * @return Aces[]
+	 */
+	public function getForwardsOut()
+	{
+		if (isset($this->attrsCache['forwardsOut'])) return $this->attrsCache['forwardsOut'];
+		if ($this->isNewRecord) return [];
+		return $this->attrsCache['forwardsOut'] = Aces::findForwardsFrom(ArrayHelper::getColumn($this->netIps, 'id'));
 	}
 
 	/**

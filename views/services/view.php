@@ -103,6 +103,10 @@ $tabs[]=TabsWidget::asyncDynagridPropertyTab($model,'acls', $showArchived,
 
 TabsWidget::addWikiLinks($tabs,$model->linksRecursive);
 
+//уровень показа доступов во вкладках исходящих/входящих: информационный (субъекты,
+//ресурс, маршрут) либо сетевой (узлы и адреса) — plans/access-chains.md, итерация 3
+echo \app\components\AccessLevelSwitchWidget::widget();
+
 echo TabsWidget::widget([
 	'items'=>$tabs,
 	'cookieName'=>'services-view-tab-'.$model->id,

@@ -137,6 +137,7 @@ NavBar::begin([
 					['label' => NetVlans::$titles, 'url' => ['/net-vlans/index']],
 					['label' => NetDomains::$titles, 'url' => ['/net-domains/index']],
 					['label' => Segments::$titles, 'url' => ['/segments/index']],
+					['label' => 'Матрица сегментов', 'url' => ['/segments/matrix']],
 					['label' => 'Карта сети', 'url' => ['/network-map/index']],
 				],$ipams)
 			],

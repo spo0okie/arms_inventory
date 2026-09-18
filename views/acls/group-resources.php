@@ -59,6 +59,7 @@ YiiAsset::register($this);
 						<?= $form->field($model, 'techs_ids')->select2(['data'=>Techs::fetchNames()])->label('Оборудование') ?>
 						<?= $form->field($model, 'ips_ids')->select2(['data'=>NetIps::fetchNames()])->label('IP адреса') ?>
 						<?= $form->field($model, 'networks_ids')->select2(['data'=>Networks::fetchNames()])->label('IP сети') ?>
+						<?= $form->field($model, 'segments_ids')->select2(['data'=>\app\models\Segments::fetchNames()])->label('Сегменты') ?>
 						<?= $form->field($model, 'services_ids')->select2(['data'=>Services::fetchNames()])->label('Сервисы') ?>
 						<?= $form->field($model, 'comment')->textInput(['maxlength' => true])->label('Другое (несколько описаний — через запятую)') ?>
 					</div>

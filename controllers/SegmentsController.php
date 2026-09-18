@@ -24,7 +24,7 @@ class SegmentsController extends ArmsBaseController
 	public function accessMap()
 	{
 		return array_merge_recursive(parent::accessMap(),[
-			'view'=>['list'],
+			'view'=>['list','matrix'],
 		]);
 	}
 	
@@ -76,6 +76,44 @@ class SegmentsController extends ArmsBaseController
 			'response' => 200,
 		]];
 	}
+	/**
+	 * Матрица межсегментного доступа (issue #220): сегменты-субъекты × сегменты-ресурсы.
+	 *
+	 * В ячейке — записи доступа, у которых ресурсом ACL обозначен сегмент, а субъектом —
+	 * тоже сегмент (см. Segments::accessMatrix()). Доступы, нацеленные на конкретные
+	 * узлы/сервисы/сети сегмента, и доступы с несегментным субъектом в матрицу не входят:
+	 * они видны на странице сегмента и во входящих соединениях сети.
+	 *
+	 * GET-параметры:
+	 * - showArchived (bool, опционально): если true — включает архивные сегменты
+	 *
+	 * @return mixed
+	 */
+	public function actionMatrix()
+	{
+		$query=Segments::find()->orderBy(['name'=>SORT_ASC]);
+		if (!Yii::$app->request->get('showArchived',false))
+			$query->where(['not',['IFNULL(archived,0)'=>1]]);
+
+		return $this->render('matrix', [
+			'segments' => $query->all(),
+			'matrix' => Segments::accessMatrix(),
+		]);
+	}
+
+	/**
+	 * Acceptance test data for actionMatrix: страница открывается без параметров.
+	 * @return array
+	 */
+	public function testMatrix(): array
+	{
+		return [[
+			'name' => 'default',
+			'GET' => [],
+			'response' => 200,
+		]];
+	}
+
     /**
      * Отображает страницу сегмента с привязанными сетями и сервисами.
      *

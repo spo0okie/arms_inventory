@@ -57,6 +57,14 @@ if (is_array($model->dnsNames) && count($model->dnsNames)) {
 
 ?>
 
+<?php /* пробросы: куда ведёт этот адрес как адрес входа и как он сам доступен снаружи */ ?>
+<?= $this->render('/aces/forwards',[
+	'models'=>$model->forwardsOut,'owner'=>$model,'attribute'=>'forwardsOut','static_view'=>$static_view,
+]) ?>
+<?= $this->render('/aces/forwards',[
+	'models'=>$model->forwardsIn,'owner'=>$model,'attribute'=>'forwardsIn','static_view'=>$static_view,
+]) ?>
+
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
 <?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
 

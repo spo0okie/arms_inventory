@@ -33,11 +33,12 @@ compInput="select#acls-comps_id";
 techInput="select#acls-techs_id";
 ipInput="select#acls-ips_id";
 netInput="select#acls-networks_id";
+segInput="select#acls-segments_id";
 srvInput="select#acls-services_id";
 function onInputUpdate(input) {
     //console.log("clearing not "+input+": "+jQuery(input).val())
     if (jQuery(input).val()) {
-        [commentInput,compInput,techInput,ipInput,srvInput,netInput].forEach(item => {
+        [commentInput,compInput,techInput,ipInput,srvInput,netInput,segInput].forEach(item => {
             if (item !== input) {
                 //console.log("clearing "+item)
             	jQuery(item).val("").trigger("change");
@@ -180,6 +181,7 @@ if ($model->isNewRecord) {
 						<?= $form->field($model, 'techs_ids')->select2(['data'=>Techs::fetchNames()])->label('Оборудование') ?>
 						<?= $form->field($model, 'ips_ids')->select2(['data'=>NetIps::fetchNames()])->label('IP адреса') ?>
 						<?= $form->field($model, 'networks_ids')->select2(['data'=>Networks::fetchNames()])->label('IP сети') ?>
+						<?= $form->field($model, 'segments_ids')->select2(['data'=>\app\models\Segments::fetchNames()])->label('Сегменты') ?>
 						<?= $form->field($model, 'services_ids')->select2(['data'=>Services::fetchNames()])->label('Сервисы') ?>
 						<?= $form->field($model, 'comment')->textInput(['maxlength' => true])->label('Другое (описание)') ?>
 					</div>
@@ -211,6 +213,11 @@ if ($model->isNewRecord) {
 									'active'=>(bool)$model->networks_id
 								],
 								[
+									'label'=>'Сегмент',
+									'content'=>$form->field($model, 'segments_id')->select2(['options'=>['onchange' => 'onInputUpdate(segInput)']]),
+									'active'=>(bool)$model->segments_id
+								],
+								[
 									'label'=>'Сервис',
 									'content'=>$form->field($model, 'services_id')->select2(['options'=>['onchange' => 'onInputUpdate(srvInput)']]),
 									'active'=>(bool)$model->services_id
@@ -221,7 +228,7 @@ if ($model->isNewRecord) {
 										'maxlength' => true,
 										'onchange'=>'onInputUpdate(commentInput)'
 									]),
-									'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->ips_id||$model->networks_id)
+									'active'=>!($model->services_id||$model->comps_id||$model->techs_id||$model->ips_id||$model->networks_id||$model->segments_id)
 								],
 							],
 							'position'=>TabsX::POS_ABOVE,

@@ -18,3 +18,8 @@ if (!isset($static_view)) $static_view=false;
 
 <?= ModelFieldWidget::renderFieldValue($model,'netIps',['glue'=>'<br />']) ?>
 
+<?php /* пробросы снаружи на это оборудование и его адреса — общий вью с ОС и IP */ ?>
+<?= $this->render('/aces/forwards',[
+	'models'=>$model->forwardsIn,'owner'=>$model,'attribute'=>'forwardsIn','static_view'=>$static_view,
+]) ?>
+

@@ -25,6 +25,8 @@ if (!isset($modalParent)) $modalParent=null;
 
 					<?= $form->field($model, 'services_ids')->select2() ?>
 
+					<?= $form->field($model, 'segments_ids')->select2() ?>
+
 					<?= $form->field($model,'ips')->textAutoresize(['rows' => 1]) ?>
 
 					<?= $form->field($model, 'comment') ?>
@@ -52,6 +54,16 @@ if (!isset($modalParent)) $modalParent=null;
 			]) ?>
 			<hr />
 			<?= $form->field($model, 'notepad')->text(['height'=>100,'rows'=>6]) ?>
+			<?php /* транзит: соседние хопы маршрута. Кандидаты подбираются по посреднику
+			       (ресурс этой записи — для следующих, её субъекты — для предыдущих), поэтому
+			       у записи без ресурса/субъектов список пуст до первого сохранения */ ?>
+			<div class="card bg-light mt-3">
+				<div class="card-header">Транзит (маршрут из нескольких хопов)</div>
+				<div class="card-body">
+					<?= $form->field($model, 'prev_aces_ids')->select2(['data' => $model->prevCandidates()]) ?>
+					<?= $form->field($model, 'next_aces_ids')->select2(['data' => $model->nextCandidates()]) ?>
+				</div>
+			</div>
 		</div>
 		<?= $form->field($model,"acls_id")->hiddenInput()->label(false)->hint(false) ?>
 	</div>

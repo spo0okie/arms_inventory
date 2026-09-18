@@ -70,6 +70,31 @@ $tabs[]=[
 ];
 
 
+//доступы сегмента: входящие — ACL с ресурсом «этот сегмент» (все их записи, включая
+//несегментных субъектов — матрица их игнорирует), исходящие — ACE с субъектом «этот сегмент»
+$showArchived=(bool)Yii::$app->request->get('showArchived',false);
+$tabs[]=TabsWidget::asyncDynagridPropertyTab($model,'acls',$showArchived,
+	filter: ['segments_resource_ids'=>[$model->id]],
+	linkClass: 'aces',
+	staticContent: \yii\helpers\Html::a('Добавить входящий доступ',[
+		'/acls/create','Acls'=>['segments_ids'=>[$model->id]]
+	],[
+		'class'=>'badge text-bg-success m-0 open-in-modal-form',
+		'data-reload-page-on-submit'=>1
+	])
+);
+$tabs[]=TabsWidget::asyncDynagridPropertyTab($model,'aces',$showArchived,
+	filter: ['segments_subject_ids'=>[$model->id]],
+	linkClass: 'aces',
+	staticContent: \yii\helpers\Html::a('Добавить исходящий доступ',[
+		'/acls/create','Aces'=>['segments_ids'=>[$model->id]]
+	],[
+		'class'=>'badge text-bg-success m-0 open-in-modal-form',
+		'data-reload-page-on-submit'=>1
+	])
+	.' '.\yii\helpers\Html::a('Матрица межсегментного доступа',['/segments/matrix'],['class'=>'badge text-bg-secondary m-0'])
+);
+
 TabsWidget::addWikiLinks($tabs,$model->links);	//добавляем из вики
 
 $this->params['navTabs']=$tabs;

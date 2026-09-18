@@ -268,6 +268,13 @@ class Techs extends ArmsModel
 				'ref'=>\app\models\Users::class, 'refMulti'=>true,
 			],
 			'servicesSupportTeam' => ['ref'=>\app\models\Users::class, 'refMulti'=>true],
+			'forwardsIn' => [
+				'Доступен снаружи',
+				'hint'=>'Пробросы на этот узел и его адреса: записи доступа с типом «проброс», '
+					.'где субъект — адрес входа (белый IP), а ресурс — узел или его адрес.<br>'
+					.'Заводятся как обычный доступ к узлу с типом доступа, помеченным «Проброс (форвард)»',
+				'ref'=>\app\models\Aces::class, 'refMulti'=>true,
+			],
 			'backupReqs' => ['ref'=>\app\models\MaintenanceReqs::class, 'refMulti'=>true],
 			//admResponsible - загрузчик responsible_id ("Адм.Ответственный"); ранее алиас
 			//указывал на 'responsible' (ответственный техобслуживания) - это другое поле
@@ -1327,6 +1334,19 @@ class Techs extends ArmsModel
 	public function getAcls()
 	{
 		return $this->hasMany(Acls::class, ['techs_id' => 'id']);
+	}
+
+	/**
+	 * Входящие пробросы: записи доступа с форвард-типом на этот узел или его адреса
+	 * (plans/access-chains.md, итерация 2)
+	 * @return Aces[]
+	 */
+	public function getForwardsIn()
+	{
+		if (isset($this->attrsCache['forwardsIn'])) return $this->attrsCache['forwardsIn'];
+		if ($this->isNewRecord) return [];
+		$ips=\yii\helpers\ArrayHelper::getColumn($this->netIps,'id');
+		return $this->attrsCache['forwardsIn']=Aces::findForwardsTo([],[$this->id],$ips);
 	}
 
 

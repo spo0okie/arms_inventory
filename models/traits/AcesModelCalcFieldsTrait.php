@@ -56,6 +56,42 @@ trait AcesModelCalcFieldsTrait
 		return false;
 	}
 
+	/**
+	 * Описывает ли запись проброс соединения (хотя бы один тип доступа — форвард)
+	 * @return bool
+	 */
+	public function hasForwardAccess(){
+		/** @var Aces $this */
+		if (!is_array($this->accessTypes)) return false;
+		foreach ($this->accessTypes as $accessType) {
+			if (is_object($accessType) && $accessType->isForwardRecursive) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Правила проброса этой записи: по одному на каждый форвард-тип доступа.
+	 * Параметры берутся из ip_params записи (фолбэк — параметры типа по умолчанию)
+	 * и раскладываются на вход/назначение: «TCP 443->8443».
+	 * @return array [['type'=>AccessTypes, 'params'=>string, 'ext'=>string, 'int'=>string], ...]
+	 */
+	public function getForwardRules(): array {
+		/** @var Aces $this */
+		if (isset($this->attrsCache['forwardRules'])) return $this->attrsCache['forwardRules'];
+		$rules=[];
+		if (is_array($this->accessTypes)) {
+			$ipParams=$this->hasMethod('getIpParams')?$this->getIpParams():[];
+			foreach ($this->accessTypes as $accessType) {
+				if (!is_object($accessType) || !$accessType->isForwardRecursive) continue;
+				$params=trim((string)($ipParams[$accessType->id]??''));
+				if ($params==='') $params=trim((string)$accessType->ip_params_def);
+				[$ext,$int]=Aces::parseForwardParams($params);
+				$rules[]=['type'=>$accessType,'params'=>$params,'ext'=>$ext,'int'=>$int];
+			}
+		}
+		return $this->attrsCache['forwardRules']=$rules;
+	}
+
 	public function hasPhoneAccess(){
 		/** @var Aces $this */
 		foreach ($this->accessLinks as $row) {
@@ -93,6 +129,8 @@ trait AcesModelCalcFieldsTrait
 			$this->attrsCache['subjects'][$subject->uuid()] = $subject;
 		foreach ($this->networks as $subject)
 			$this->attrsCache['subjects'][$subject->uuid()] = $subject;
+		foreach ($this->segments as $subject)
+			$this->attrsCache['subjects'][$subject->uuid()] = $subject;
 		if ($this->comment)
 			$this->attrsCache['subjects'][$this->comment] = $this->comment;
 		return $this->attrsCache['subjects'];
@@ -114,6 +152,12 @@ trait AcesModelCalcFieldsTrait
 			$this->attrsCache['nodes'][$subject->uuid()] = $subject;
 		foreach ($this->networks as $subject)
 			$this->attrsCache['nodes'][$subject->uuid()] = $subject;
+		//сегмент разворачивается в свои подсети и узлы своих сервисов
+		foreach ($this->segments as $segment)
+			$this->attrsCache['nodes']=ArrayHelper::recursiveOverride(
+				$this->attrsCache['nodes'],
+				$segment->accessNodes
+			);
 		foreach ($this->services as $service)
 			$this->attrsCache['nodes']=ArrayHelper::recursiveOverride(
 				$this->attrsCache['nodes'],

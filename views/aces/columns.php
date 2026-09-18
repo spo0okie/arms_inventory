@@ -65,6 +65,17 @@ return [
 			return '';
 		}
 	],
+	//транзит: полные маршруты, в которых участвует запись (пусто — один хоп)
+	'transit'=>[
+		'value'=>function($data) use ($renderer,$glue){
+			if (!$data->hasTransit) return '';
+			return $renderer->render('/aces/routes',[
+				'routes'=>\app\models\Aces::routesOf([$data])[$data->id]??[],
+				'current'=>$data->id,
+				'glue'=>$glue,
+			]);
+		},
+	],
 	'resource_nodes'=>[
 		'contentOptions'=>function($data) use ($glue){ return [
 			'model'=>$data->acl,

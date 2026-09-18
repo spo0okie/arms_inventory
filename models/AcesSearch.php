@@ -19,6 +19,9 @@ class AcesSearch extends Aces
 	
 	public $services_subject_ids;
 	public $services_resource_ids;
+	//сегмент как субъект ACE / как ресурс ACL (вкладки доступов на странице сегмента)
+	public $segments_subject_ids;
+	public $segments_resource_ids;
 	
     /**
      * {@inheritdoc}
@@ -34,7 +37,9 @@ class AcesSearch extends Aces
 				'subjects',
 				'name',
 				'services_subject_ids',
-				'services_resource_ids'
+				'services_resource_ids',
+				'segments_subject_ids',
+				'segments_resource_ids',
 			], 'safe'],
 			[['ids'],'each','rule'=>['integer']]
         ];
@@ -87,6 +92,17 @@ class AcesSearch extends Aces
             'updated_at' => $this->updated_at,
         ]);
 		
+		//сегментные фильтры — подзапросами: не зависят от того, какие связи заджойнены
+		//под видимые колонки (см. prepareSearch)
+		if (!empty($this->segments_subject_ids)) {
+			$filter->andWhere(['aces.id'=>(new \yii\db\Query())->select('aces_id')
+				->from('segments_in_aces')->where(['segments_id'=>$this->segments_subject_ids])]);
+		}
+		if (!empty($this->segments_resource_ids)) {
+			$filter->andWhere(['aces.acls_id'=>(new \yii\db\Query())->select('id')
+				->from('acls')->where(['segments_id'=>$this->segments_resource_ids])]);
+		}
+
 		//архивная запись доступа - это доступ, которым уже некому или незачем пользоваться:
 		//истекло расписание, ушел в архив ресурс ACL либо кончились живые субъекты
 		if (!($this->archived ?? false)) {
@@ -102,6 +118,7 @@ class AcesSearch extends Aces
 				QueryHelper::querySearchString('comps_subjects.name', $this->subjects),
 				QueryHelper::querySearchString('services_subjects.name', $this->subjects),
 				QueryHelper::querySearchString('networks_subjects.text_addr', $this->subjects),
+				QueryHelper::querySearchString('segments_subjects.name', $this->subjects),
 				QueryHelper::querySearchString('ips_subjects.text_addr', $this->subjects),
 			])
 			->andFilterWhere(['or',
@@ -109,6 +126,7 @@ class AcesSearch extends Aces
 				QueryHelper::querySearchString('comps_resources.name', $this->resource),
 				QueryHelper::querySearchString('services_resources.name', $this->resource),
 				QueryHelper::querySearchString('networks_resources.text_addr', $this->resource),
+				QueryHelper::querySearchString('segments_resources.name', $this->resource),
 				QueryHelper::querySearchString('ips_resources.text_addr', $this->resource),
 			])
 			->andFilterWhere(QueryHelper::querySearchString('aces.name', $this->name))

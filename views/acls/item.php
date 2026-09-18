@@ -29,6 +29,8 @@ if (!empty($model)) {
 		echo ModelWidget::widget(['model'=>$model->ip,'options'=>['static_view'=>true]]).$update;
 	elseif (($model->networks_id) and is_object($model->network))
 		echo ModelWidget::widget(['model'=>$model->network,'options'=>['static_view'=>true]]).$update;
+	elseif (($model->segments_id) and is_object($model->segment))
+		echo ModelWidget::widget(['model'=>$model->segment,'options'=>['static_view'=>true]]).$update;
 	else {
 		echo ItemObjectWidget::widget([
 			'model'=>$model,

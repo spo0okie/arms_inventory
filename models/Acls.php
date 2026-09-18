@@ -19,6 +19,7 @@ use yii\helpers\ArrayHelper;
  * @property int $ips_id
  * @property int $comps_id
  * @property int $techs_id
+ * @property int $segments_id сегмент инфраструктуры как ресурс
  * @property string $comment
  * @property string $notepad
  * @property string sname
@@ -28,6 +29,7 @@ use yii\helpers\ArrayHelper;
  * @property Techs		$tech
  * @property NetIps		$ip
  * @property Networks	$network
+ * @property Segments	$segment сегмент-ресурс (не путать с вычисляемым segments — сегментами, где расположен ресурс)
  * @property Services	$service
  * @property Aces[]		$aces
  * @property AccessTypes[] $accessTypes
@@ -75,6 +77,7 @@ class Acls extends ArmsModel
 	public $techs_ids;
 	public $ips_ids;
 	public $networks_ids;
+	public $segments_ids;
 	public $services_ids;
 
 	public $linksSchema=[
@@ -85,6 +88,7 @@ class Acls extends ArmsModel
 		'ips_id'=>[NetIps::class,'acls_ids'],
 		'comps_id'=>[Comps::class,'acls_ids'],
 		'techs_id'=>[Techs::class,'acls_ids'],
+		'segments_id'=>[Segments::class,'acls_ids'],
 	];
 
     /**
@@ -112,19 +116,19 @@ class Acls extends ArmsModel
             [['notepad'], 'string'],
             [['comment'], 'string', 'max' => 255],
 			//одиночный сценарий (обычный ACL): ровно один ресурс из одиночных полей либо comment
-			[['schedules_id', 'services_id', 'ips_id', 'comps_id', 'techs_id','networks_id'], 'integer'],
-			[['services_id', 'ips_id', 'comps_id', 'techs_id','networks_id','comment'],
+			[['schedules_id', 'services_id', 'ips_id', 'comps_id', 'techs_id','networks_id','segments_id'], 'integer'],
+			[['services_id', 'ips_id', 'comps_id', 'techs_id','networks_id','segments_id','comment'],
 				'validateRequireOneOf',
 				'skipOnEmpty' => false,
-				'params'=>['attrs'=>['services_id', 'ips_id', 'comps_id', 'techs_id','networks_id','comment']],
+				'params'=>['attrs'=>['services_id', 'ips_id', 'comps_id', 'techs_id','networks_id','segments_id','comment']],
 				'except' => self::SCENARIO_GROUP,
 			],
 			//групповой сценарий: ресурсы — массивы *_ids (мультиселект), хотя бы один из них либо comment
-			[['comps_ids','techs_ids','ips_ids','networks_ids','services_ids'], 'each', 'rule'=>['integer'], 'on'=>self::SCENARIO_GROUP],
-			[['comps_ids','techs_ids','ips_ids','networks_ids','services_ids','comment'],
+			[['comps_ids','techs_ids','ips_ids','networks_ids','segments_ids','services_ids'], 'each', 'rule'=>['integer'], 'on'=>self::SCENARIO_GROUP],
+			[['comps_ids','techs_ids','ips_ids','networks_ids','segments_ids','services_ids','comment'],
 				'validateRequireOneOf',
 				'skipOnEmpty' => false,
-				'params'=>['attrs'=>['comps_ids','techs_ids','ips_ids','networks_ids','services_ids','comment']],
+				'params'=>['attrs'=>['comps_ids','techs_ids','ips_ids','networks_ids','segments_ids','services_ids','comment']],
 				'on' => self::SCENARIO_GROUP,
 			],
         ];
@@ -151,7 +155,7 @@ class Acls extends ArmsModel
 				'Ресурс',
 				'indexHint'=>'К какому ресурсу предоставляется доступ',
 				'ref'=>\app\models\base\ArmsModel::class,
-				'join'=>['comp','tech','service','ip','network'],
+				'join'=>['comp','tech','service','ip','network','segment'],
 			],
 			'accessTypes' => ['ref'=>\app\models\AccessTypes::class, 'refMulti'=>true],
 			//презентационные колонки списка ACL (views/acls/columns.php): значения
@@ -175,6 +179,14 @@ class Acls extends ArmsModel
 				'indexHint'=>'Какие типы доступа предоставляются записями этого списка доступа',
 				'join'=>['aces.accessTypes'],
 			],
+			'transit' => [
+				'Маршрут',
+				'indexHint'=>'Транзитные маршруты, проходящие через записи этого списка доступа: от первого субъекта '
+					.'через посредников до конечного ресурса (по указателям «следующие/предыдущие хопы» записей).<br>'
+					.'Пусто — все соединения сюда не транзитные (один хоп)',
+				'typeClass'=>\app\types\StringType::class,
+				'readOnly'=>true,
+			],
 			'schedule' => [
 				'Временное ограничение',
 				'indexHint'=>'Временный доступ (расписание), в рамках которого действует этот список доступа',
@@ -191,6 +203,7 @@ class Acls extends ArmsModel
 			'techs_ids' => ['alias'=>'techs_id'],
 			'ips_ids' => ['alias'=>'ips_id'],
 			'networks_ids' => ['alias'=>'networks_id'],
+			'segments_ids' => ['alias'=>'segments_id'],
 			'services_ids' => ['alias'=>'services_id'],
 			'comment' => ['Описание','Описание ресурса к которому предоставляется доступ (просто текст без привязки к объекту БД)','typeClass'=>\app\types\TextType::class],
 			'comps_id' => [
@@ -225,6 +238,13 @@ class Acls extends ArmsModel
 				'placeholder'=>'Выберите IP сеть',
 				'typeClass'=>\app\types\LinkType::class,
 			],
+			'segments_id' => [
+				'Сегмент',
+				'Сегмент инфраструктуры, к которому предоставляется доступ: ко всем его сетям и сервисам сразу.<br>'
+					.'Доступы «сегмент → сегмент» складываются в матрицу межсегментного доступа',
+				'placeholder'=>'Выберите сегмент',
+				'typeClass'=>\app\types\LinkType::class,
+			],
             'techs_id' => [
 				'Оборудование',
 				'Оборудование к которому предоставляется доступ',
@@ -251,7 +271,7 @@ class Acls extends ArmsModel
 	{
 		return array_map(
 			static function($relation) use ($prefix) {return $prefix.$relation;},
-			['comp','tech.state','service','ip.network','network']
+			['comp','tech.state','service','ip.network','network','segment']
 		);
 	}
 
@@ -271,6 +291,7 @@ class Acls extends ArmsModel
 			'COALESCE(comps_resources.archived,0)=0',		//ОС
 			'COALESCE(services_resources.archived,0)=0',	//сервис
 			'COALESCE(networks_resources.archived,0)=0',	//сеть
+			'COALESCE(segments_resources.archived,0)=0',	//сегмент
 			'COALESCE(tech_states.archived,0)=0',			//оборудование - через состояние
 			'COALESCE(networks.archived,0)=0',				//IP-адрес - через свою сеть
 		];
@@ -317,6 +338,14 @@ class Acls extends ArmsModel
 	public function getNetwork() {
 		return $this->hasOne(Networks::class, ['id' => 'networks_id'])
 			->from(['networks_resources'=>Networks::tableName()]);
+	}
+
+	/**
+	 * Сегмент-ресурс
+	 */
+	public function getSegment() {
+		return $this->hasOne(Segments::class, ['id' => 'segments_id'])
+			->from(['segments_resources'=>Segments::tableName()]);
 	}
 
 	public function getAces() {

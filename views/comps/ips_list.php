@@ -49,6 +49,11 @@ if (count($activeIps) || count($ignoredIps)) {
 }
 ?>
 
+<?php /* пробросы снаружи на эту ОС и её адреса — общий вью с оборудованием и IP */ ?>
+<?= $this->render('/aces/forwards',[
+	'models'=>$model->forwardsIn,'owner'=>$model,'attribute'=>'forwardsIn','static_view'=>$static_view,
+]) ?>
+
 <div class="pe-5">
 	<?= \app\components\ModelFieldWidget::renderFieldTitle($model,'mac') ?>
 	<?php /* рядом с адресом - иконка поиска по MAC (функциональность, а не просто
