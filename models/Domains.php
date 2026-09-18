@@ -13,6 +13,9 @@ use yii\helpers\ArrayHelper;
  * @property string $name Имя
  * @property string $fqdn FQDN
  * @property string $comment Комментарий
+ * @property Comps[] $comps
+ * @property Techs[] $techs
+ * @property DnsNames[] $dnsNames
  *
  */
 class Domains extends ArmsModel
@@ -51,6 +54,7 @@ class Domains extends ArmsModel
 	public $linksSchema=[
 		'comps_ids'=>[Comps::class,'domain_id'],
 		'techs_ids'=>[Techs::class,'domain_id'],
+		'dns_names_ids'=>[DnsNames::class,'domain_id'],
 	];
 
     /**
@@ -85,6 +89,46 @@ class Domains extends ArmsModel
 	public function getTechs()
 	{
 		return $this->hasMany(Techs::class,['domain_id'=>'id']);
+	}
+
+	/**
+	 * DNS-имена, заведённые в этой зоне (помимо hostname ОС и оборудования)
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getDnsNames()
+	{
+		return $this->hasMany(DnsNames::class,['domain_id'=>'id']);
+	}
+
+	/**
+	 * Раскладывает полное DNS-имя на зону и имя в зоне по суффиксу fqdn заведённых
+	 * зон: из всех зон, чей fqdn совпадает с хвостом имени (или с именем целиком —
+	 * apex), берётся самая длинная. Регистр не важен. Зоны — из общего кэша
+	 * справочника: разбор дёргается на каждый ввод и на каждый поиск по имени.
+	 *
+	 * @param string $fqdn полное имя без завершающей точки
+	 * @return array [Domains|null зона, string имя в зоне ('' — apex)]
+	 */
+	public static function splitFqdn(string $fqdn): array
+	{
+		$fqdn=mb_strtolower(trim($fqdn,'.'));
+		if ($fqdn==='') return [null,''];
+		$best=null;
+		$bestLen=-1;
+		foreach (static::getAllItems(true) as $domain) {
+			$zone=mb_strtolower(trim((string)$domain->fqdn,'.'));
+			if ($zone==='') continue;
+			$isApex=$fqdn===$zone;
+			$isSuffix=!$isApex && str_ends_with($fqdn,'.'.$zone);
+			if (($isApex||$isSuffix) && mb_strlen($zone)>$bestLen) {
+				$best=$domain;
+				$bestLen=mb_strlen($zone);
+			}
+		}
+		if (is_null($best)) return [null,$fqdn];
+		$zone=mb_strtolower(trim((string)$best->fqdn,'.'));
+		$host=$fqdn===$zone?'':mb_substr($fqdn,0,mb_strlen($fqdn)-mb_strlen($zone)-1);
+		return [$best,$host];
 	}
 
 

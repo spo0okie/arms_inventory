@@ -29,6 +29,8 @@ use yii\validators\IpValidator;
  * @property int[] $comps_ids
  * @property int[] $techs_ids
  * @property int[] $aces_ids
+ * @property int[] $dns_names_ids
+ * @property DnsNames[] $dnsNames
  * @property Techs[] $techs
  * @property Networks $network
  * @property Segments $segment
@@ -100,6 +102,7 @@ class NetIps extends ArmsModel
 					'techs_ids' => 'techs',
 					'aces_ids' => 'aces',
 					'users_ids' => 'users',
+					'dns_names_ids' => 'dnsNames',
 				]
 			]
 		];
@@ -144,6 +147,11 @@ class NetIps extends ArmsModel
 				'Прикреплено к',
 				'hint'=>'ОС, оборудование и пользователи, у которых этот адрес указан в поле IP',
 				'typeClass'=>\app\types\StringType::class,
+			],
+			'dnsNames' => [
+				'DNS-имена',
+				'hint'=>'DNS-имена, указывающие на этот адрес (помимо hostname узлов, к которым он привязан)',
+				'typeClass'=>\app\types\LinkType::class,
 			],
 			'text_addr' => [
 				'Адрес',
@@ -252,6 +260,16 @@ class NetIps extends ArmsModel
 	{
 		return $this->hasMany(Acls::class, ['ips_id' => 'id']);
 	}
+
+	/**
+	 * DNS-имена, указывающие на этот адрес
+	 * @return ActiveQuery
+	 */
+	public function getDnsNames()
+	{
+		return $this->hasMany(DnsNames::class, ['id' => 'dns_names_id'])->from(['ip_dns_names'=>DnsNames::tableName()])
+			->viaTable('{{%dns_names_in_ips}}', ['ips_id' => 'id']);
+	}
 	
 	public function getPlace()
 	{
@@ -330,6 +348,25 @@ class NetIps extends ArmsModel
 	}
 	
 	/**
+	 * Отвязать DNS-имя от этого IP и удалить IP если к нему более ничего не привязано
+	 * @param $dns_name_id
+	 * @throws Throwable
+	 * @throws StaleObjectException
+	 */
+	public function detachDnsName($dns_name_id)
+	{
+		if (is_array($names=$this->dns_names_ids)) {
+			if (($key = array_search($dns_name_id, $names)) !== false) {
+				unset($names[$key]);
+				$this->dns_names_ids=$names;
+				$this->save();
+			}
+		}
+
+		$this->deleteIfEmpty();
+	}
+
+	/**
 	 * Удаляет IP если к нему ничего не привязано и нет комментария
 	 * @throws Throwable
 	 * @throws StaleObjectException
@@ -358,6 +395,10 @@ class NetIps extends ArmsModel
 				!is_array($this->acls)	//у него нет привязанных ACLs
 				||						//или
 				count($this->acls)==0	//привязано 0
+			) && (						//и
+				!is_array($this->dnsNames)	//на него не указывают DNS-имена
+				||							//или
+				count($this->dnsNames)==0	//указывает 0
 			) && (						//и
 				empty($this->name)		//имени нет
 			) && (						//и

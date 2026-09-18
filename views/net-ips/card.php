@@ -47,6 +47,14 @@ if (count($objects)) echo '<h4>'
 	.\app\components\ModelFieldWidget::renderCompositeTitle($model,['comps','techs','users'],'Привязан к','span')
 	.': '.implode(', ',$objects).'</h4><br />';
 
+//DNS-имена, указывающие на адрес (помимо hostname узлов выше)
+if (is_array($model->dnsNames) && count($model->dnsNames)) {
+	$names=[];
+	foreach ($model->dnsNames as $dnsName) $names[]=ModelWidget::widget(['model'=>$dnsName,'options'=>['static_view'=>true]]);
+	echo '<h4>'.\app\components\ModelFieldWidget::renderFieldTitle($model,'dnsNames',null,'span')
+		.': '.implode(', ',$names).'</h4><br />';
+}
+
 ?>
 
 <?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>

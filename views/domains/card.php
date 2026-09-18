@@ -16,3 +16,6 @@ use app\components\ModelFieldWidget;
 </h1>
 <?= ModelFieldWidget::widget(['model'=>$model,'field'=>'fqdn']) ?>
 <?= ModelFieldWidget::widget(['model'=>$model,'field'=>'comment']) ?>
+<?php /* карта зоны — только на странице: в тултипе (static_view) список имён
+       домена лишний и дорогой */
+if (!$static_view) echo $this->render('zone',['model'=>$model,'static_view'=>$static_view]); ?>

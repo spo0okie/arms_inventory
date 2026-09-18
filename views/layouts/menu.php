@@ -22,6 +22,7 @@ use app\models\Markers;
 use app\models\Materials;
 use app\models\MaterialsTypes;
 use app\models\MaterialsUsages;
+use app\models\DnsNames;
 use app\models\NetDomains;
 use app\models\NetIps;
 use app\models\Notifications;
@@ -144,6 +145,7 @@ NavBar::begin([
 					['label' => 'АРМы', 'url' => ['/techs/arms']],
 					['label' => 'ОС', 'url' => ['/comps/index']],
 					['label' => 'Домены', 'url' => ['/domains/index']],
+					['label' => DnsNames::$titles, 'url' => ['/dns-names/index']],
 					['label' => Sandboxes::$titles, 'url' => ['/sandboxes/index']],
 					['label' => LoginJournal::$title, 'url' => ['/login-journal/index']],
 					['label' => 'Дубликаты', 'url' => ['/comps/dupes?sort=name']],
