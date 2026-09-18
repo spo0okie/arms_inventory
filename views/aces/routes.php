@@ -65,7 +65,13 @@ foreach ($routes as $hops) {
 		}
 
 		$resource = is_object($hop->acl) ? $hop->acl->resource : null;
-		$segment = ' ' . $warning . $arrow
+		//проброшенный хоп (NAT, реверс-прокси) помечаем: на нём субъект - адрес входа
+		$forward = $hop->is_forward ? Html::tag('span', '', [
+			'class' => 'fas fa-random small opacity-75 me-1',
+			'qtip_ttip' => 'Проброс соединения (NAT, реверс-прокси)',
+		]) : '';
+
+		$segment = ' ' . $warning . $arrow . $forward
 			. (count($labels) ? Html::tag('span', implode(', ', $labels), ['class' => 'small text-monospace opacity-75 me-1']) : '')
 			. $renderObject($resource);
 

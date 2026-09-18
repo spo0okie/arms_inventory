@@ -18,7 +18,7 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-md-6">
 			<div class="card bg-light">
 				<div class="card-header">Кому предоставляется доступ</div>
-				<div class="card-body">
+				<div class="card-body pb-0">
 					<?= $form->field($model,'users_ids')->select2(['data' => Users::fetchWorking()]) ?>
 
 					<?= $form->field($model, 'comps_ids')->select2() ?>
@@ -39,7 +39,7 @@ if (!isset($modalParent)) $modalParent=null;
 		<div class="col-md-6">
 			<div class="card bg-light mb-3">
 				<div class="card-header">Зачем предоставляется доступ</div>
-				<div class="card-body">
+				<div class="card-body pb-0">
 					<?= $form->field($model,'name');?>
 				</div>
 			</div>
@@ -51,19 +51,21 @@ if (!isset($modalParent)) $modalParent=null;
 				'attribute'=>'access_types_ids',
 				'paramsAttribute'=>'ipParams',
 				'label'=>'Какой этим объектам предоставляется доступ',
+				/* проброс - свойство записи (хопа), а не типа доступа: типы остаются обычными,
+			       в их сетевых параметрах пишется "порт входа -> порт назначения" */
+				'footer'=>$form->field($model, 'is_forward'),
 			]) ?>
-			<hr />
-			<?= $form->field($model, 'notepad')->text(['height'=>100,'rows'=>6]) ?>
 			<?php /* транзит: соседние хопы маршрута. Кандидаты подбираются по посреднику
 			       (ресурс этой записи — для следующих, её субъекты — для предыдущих), поэтому
 			       у записи без ресурса/субъектов список пуст до первого сохранения */ ?>
-			<div class="card bg-light mt-3">
+			<div class="card bg-light mb-3">
 				<div class="card-header">Транзит (маршрут из нескольких хопов)</div>
-				<div class="card-body">
+				<div class="card-body pb-0">
 					<?= $form->field($model, 'prev_aces_ids')->select2(['data' => $model->prevCandidates()]) ?>
 					<?= $form->field($model, 'next_aces_ids')->select2(['data' => $model->nextCandidates()]) ?>
 				</div>
 			</div>
+			<?= $form->field($model, 'notepad')->text(['height'=>100,'rows'=>6]) ?>
 		</div>
 		<?= $form->field($model,"acls_id")->hiddenInput()->label(false)->hint(false) ?>
 	</div>

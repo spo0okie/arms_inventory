@@ -57,38 +57,38 @@ trait AcesModelCalcFieldsTrait
 	}
 
 	/**
-	 * Описывает ли запись проброс соединения (хотя бы один тип доступа — форвард)
+	 * Описывает ли запись проброс соединения. Признак — на самой записи (хопе), а не на
+	 * типе доступа: проброс ортогонален протоколу, типы остаются обычными (HTTPS, RDP…).
 	 * @return bool
 	 */
 	public function hasForwardAccess(){
 		/** @var Aces $this */
-		if (!is_array($this->accessTypes)) return false;
-		foreach ($this->accessTypes as $accessType) {
-			if (is_object($accessType) && $accessType->isForwardRecursive) return true;
-		}
-		return false;
+		return (bool)$this->is_forward;
 	}
 
 	/**
-	 * Правила проброса этой записи: по одному на каждый форвард-тип доступа.
+	 * Правила проброса этой записи: по одному на каждый сетевой (IP) тип доступа.
 	 * Параметры берутся из ip_params записи (фолбэк — параметры типа по умолчанию)
-	 * и раскладываются на вход/назначение: «TCP 443->8443».
-	 * @return array [['type'=>AccessTypes, 'params'=>string, 'ext'=>string, 'int'=>string], ...]
+	 * и раскладываются на вход/назначение: «TCP 443->8443». Запись-проброс без
+	 * сетевых типов даёт одно правило без параметров — проброс всё равно должен быть виден.
+	 * @return array [['type'=>AccessTypes|null, 'params'=>string, 'ext'=>string, 'int'=>string], ...]
 	 */
 	public function getForwardRules(): array {
 		/** @var Aces $this */
 		if (isset($this->attrsCache['forwardRules'])) return $this->attrsCache['forwardRules'];
+		if (!$this->hasForwardAccess()) return $this->attrsCache['forwardRules']=[];
 		$rules=[];
 		if (is_array($this->accessTypes)) {
 			$ipParams=$this->hasMethod('getIpParams')?$this->getIpParams():[];
 			foreach ($this->accessTypes as $accessType) {
-				if (!is_object($accessType) || !$accessType->isForwardRecursive) continue;
+				if (!is_object($accessType) || !$accessType->is_ip) continue;
 				$params=trim((string)($ipParams[$accessType->id]??''));
 				if ($params==='') $params=trim((string)$accessType->ip_params_def);
 				[$ext,$int]=Aces::parseForwardParams($params);
 				$rules[]=['type'=>$accessType,'params'=>$params,'ext'=>$ext,'int'=>$int];
 			}
 		}
+		if (!count($rules)) $rules[]=['type'=>null,'params'=>'','ext'=>'','int'=>''];
 		return $this->attrsCache['forwardRules']=$rules;
 	}
 

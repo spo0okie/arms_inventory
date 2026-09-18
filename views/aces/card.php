@@ -57,7 +57,12 @@ if (!count($accessTypes)) $accessTypes[]= Aces::$noAccessName;
 			<?php } ?>
 		</div>
 		<div class="col-md-4 ace-access-card d-flex flex-column pt-2 pull-right">
-			<div class="text-center text-white"><?= implode(', ',$accessTypes) ?></div>
+			<div class="text-center text-white">
+				<?php if ($model->is_forward) { ?>
+					<span class="fas fa-random me-1" qtip_ttip="Проброс соединения (NAT, реверс-прокси): субъект - адрес входа, ресурс - узел назначения"></span>
+				<?php } ?>
+				<?= implode(', ',$accessTypes) ?>
+			</div>
 			<?php if (!$static_view) { ?>
 				<div class="row mt-auto g-0">
 					<div class="btn-group" role="group">

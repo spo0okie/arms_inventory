@@ -23,13 +23,13 @@ if (!isset($static_view)) $static_view=false;
 	echo \app\components\ModelFieldWidget::renderFieldValue($model,'comment');
 
 	$flags=[];
-	foreach (['is_app','is_ip','is_phone','is_vpn','is_forward'] as $attr) {
+	foreach (['is_app','is_ip','is_phone','is_vpn'] as $attr) {
 		if ($model->$attr) {
 			$flags[]='<li>'.$model->getAttributeLabel($attr).'</li>';
 		}
 	}
 	if (count($flags)) {
-		echo \app\components\ModelFieldWidget::renderCompositeTitle($model,['is_app','is_ip','is_phone','is_vpn','is_forward'],'Категории','h5');
+		echo \app\components\ModelFieldWidget::renderCompositeTitle($model,['is_app','is_ip','is_phone','is_vpn'],'Категории','h5');
 		echo '<ul>'.implode($flags).'</ul>';
 	}
 

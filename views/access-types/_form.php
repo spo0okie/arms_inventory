@@ -41,9 +41,6 @@ if (!isset($modalParent)) $modalParent=null;
 		<div>
 			<?= $form->field($model, 'is_vpn') ?>
 		</div>
-		<div>
-			<?= $form->field($model, 'is_forward') ?>
-		</div>
 	</div>
 
 	<?= $form->field($model,  'comment') ?>

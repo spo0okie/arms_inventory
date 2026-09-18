@@ -18,6 +18,7 @@ use yii\helpers\Html;
  * @property string $comment
  * @property string $notepad
  * @property string $sname
+ * @property bool $is_forward запись описывает проброс соединения (NAT, реверс-прокси), а не доступ субъекта
  * @property Acls	$acl
  * @property Users[]	$users
  * @property Departments[]	$departments
@@ -118,6 +119,7 @@ class Aces extends ArmsModel
 			[['acls_id'], 'required'],
 			[['comps_ids','users_ids','access_types_ids','netIps_ids','services_ids','networks_ids','segments_ids'], 'each', 'rule'=>['integer']],
 			[['ipParams'], 'each', 'rule'=>['string']],
+			[['is_forward'], 'boolean'],
 			[['next_aces_ids','prev_aces_ids'], 'each', 'rule'=>['integer']],
 			//сторож циклов: маршрут не должен возвращаться в пройденный хоп
 			['next_aces_ids',function ($attribute){
@@ -223,6 +225,17 @@ class Aces extends ArmsModel
 					.'Если в ips указана отсутствующая в БД сеть, то она выбрасывается из поля ips',
 				'typeClass'=>\app\types\LinkType::class,
 			],
+			'is_forward' => [
+				'Проброс (NAT, реверс-прокси)',
+				'hint' => 'Запись описывает не доступ субъекта к ресурсу, а проброс соединения: '
+					.'субъект — адрес входа (белый IP), ресурс списка доступа — узел назначения или его адрес.<br>'
+					.'Типы доступа — обычные (HTTPS, RDP…), в сетевых параметрах — <b>порт входа -> порт назначения</b>, '
+					.'например <b>TCP 443->8443</b>; без стрелки порт не меняется.<br>'
+					.'Такие записи показываются у узла, его адресов и DNS-имён как «доступен снаружи»',
+				'indexLabel' => 'Проброс',
+				'indexHint' => 'Запись описывает проброс соединения (NAT, реверс-прокси), а не доступ субъекта к ресурсу',
+				'typeClass'=>\app\types\BooleanType::class,
+			],
 			'next_aces_ids' => [
 				'Следующие хопы',
 				'hint' => 'Транзит: куда соединение уходит дальше. Если ресурс этой записи — посредник '
@@ -254,7 +267,9 @@ class Aces extends ArmsModel
 			],
 			'notepad' => [
 				'Заметки по этой ACE',
-				'hint' => 'Если есть какие-то заметки, то можно их записать здесь',
+				'hint' => 'Это заметки к Access Entry - записи доступа. Их у одной ACL может быть несколько.'
+					.'<br>Если есть какие-то заметки по этому субъкту(ам), типу доступа(ов),'
+					.'<br>то можно их записать здесь.',
 				'typeClass'=>\app\types\TextType::class,
 			],
 			'resource' => [
@@ -825,7 +840,7 @@ class Aces extends ArmsModel
 	const FORWARDS_WITH=['acl.comp','acl.tech.state','acl.ip.network','acl.ip.comps','acl.ip.techs','netIps.network','netIps.dnsNames','accessTypes'];
 
 	/**
-	 * Входящие пробросы: записи доступа с форвард-типом, у которых ресурс ACL — один
+	 * Входящие пробросы: записи доступа с признаком проброса, у которых ресурс ACL — один
 	 * из переданных узлов или адресов («доступен снаружи»). Архивные (истёкшее
 	 * расписание, мёртвый ресурс/субъекты) отбрасываются.
 	 *
@@ -836,8 +851,6 @@ class Aces extends ArmsModel
 	 */
 	public static function findForwardsTo(array $compsIds=[], array $techsIds=[], array $ipsIds=[]): array
 	{
-		$typeIds=AccessTypes::forwardTypeIds();
-		if (!count($typeIds)) return [];
 		$resource=['or'];
 		if (count($compsIds)) $resource[]=['acls.comps_id'=>$compsIds];
 		if (count($techsIds)) $resource[]=['acls.techs_id'=>$techsIds];
@@ -847,8 +860,7 @@ class Aces extends ArmsModel
 		return static::filterAliveForwards(
 			static::find()
 				->innerJoin('acls','acls.id=aces.acls_id')
-				->innerJoin('access_in_aces forward_types','forward_types.aces_id=aces.id')
-				->where(['forward_types.access_types_id'=>$typeIds])
+				->where(['aces.is_forward'=>1])
 				->andWhere($resource)
 				->with(static::FORWARDS_WITH)
 				->distinct()
@@ -857,21 +869,19 @@ class Aces extends ArmsModel
 	}
 
 	/**
-	 * Исходящие пробросы: записи доступа с форвард-типом, у которых субъект — один
+	 * Исходящие пробросы: записи доступа с признаком проброса, у которых субъект — один
 	 * из переданных адресов («пробрасывается на»).
 	 * @param int[] $ipsIds адреса входа
 	 * @return Aces[]
 	 */
 	public static function findForwardsFrom(array $ipsIds): array
 	{
-		$typeIds=AccessTypes::forwardTypeIds();
-		if (!count($typeIds) || !count($ipsIds)) return [];
+		if (!count($ipsIds)) return [];
 
 		return static::filterAliveForwards(
 			static::find()
 				->innerJoin('ips_in_aces forward_ips','forward_ips.aces_id=aces.id')
-				->innerJoin('access_in_aces forward_types','forward_types.aces_id=aces.id')
-				->where(['forward_types.access_types_id'=>$typeIds])
+				->where(['aces.is_forward'=>1])
 				->andWhere(['forward_ips.ips_id'=>$ipsIds])
 				->with(static::FORWARDS_WITH)
 				->distinct()
@@ -949,6 +959,7 @@ class Aces extends ArmsModel
 		$target->comps_ids=$this->comps_ids ?: [];
 		$target->services_ids=$this->services_ids ?: [];
 		$target->segments_ids=$this->segments_ids ?: [];
+		$target->is_forward=$this->is_forward;
 		$target->access_types_ids=$this->access_types_ids ?: [];
 		$ipParams=$this->getIpParams();
 		if ($ipParams) $target->setIpParams($ipParams);
@@ -986,6 +997,7 @@ class Aces extends ArmsModel
 			'segments' => $norm($ids('segments','segments_ids')),
 			'types'    => $norm($ids('accessTypes','access_types_ids')),
 			'ipparams' => $ipParams,
+			'forward'  => (int)(bool)$this->is_forward,
 			'comment'  => (string)$this->comment,
 			'notepad'  => (string)$this->notepad,
 		];

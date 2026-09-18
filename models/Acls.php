@@ -252,8 +252,8 @@ class Acls extends ArmsModel
 				'typeClass'=>\app\types\LinkType::class,
 			],
             'notepad' => [
-            	'Записная книжка',
-				'hint'=>'Заметки по этому ACL',
+            	'Заметки по этому ACL',
+				'hint'=>'Заметки по ACL в отличие от ACE общие для всех субъектов и типов доступа.',
              	'typeClass'=>\app\types\TextType::class
             ],
         ]);

@@ -35,6 +35,7 @@ use yii\web\View;
 if (!isset($paramsOverride)) $paramsOverride=false;
 if (!isset($card)) $card=true;
 if (!isset($label)) $label=null;
+if (!isset($footer)) $footer='';
 
 $accessTypesAll=AccessTypes::find()->orderBy(['name'=>SORT_ASC])->all();
 $accessTypesById=ArrayHelper::index($accessTypesAll,'id');
@@ -286,12 +287,14 @@ if ($card) { ?>
 				$model,$attribute,AttributeTooltip::MODE_FORM
 			)) ?>
 		</div>
-		<div class="card-body">
+		<div class="card-body pb-0">
 			<?= $picker ?>
+			<?= $footer ?>
 		</div>
 	</div>
 	<?= $template ?>
 <?php } else { ?>
 	<?= $picker ?>
+	<?= $footer ?>
 	<?= $template ?>
 <?php } ?>

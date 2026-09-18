@@ -129,7 +129,7 @@ if ($model->isNewRecord) {
 			?>
 			<div class="card bg-light mb-3">
 				<div class="card-header">Новый временный доступ <small class="text-muted">(создаётся вместе с этим доступом)</small></div>
-				<div class="card-body">
+				<div class="card-body pb-0">
 					<?= $form->field($schedule,'name')->hint(Acls::$scheduleNameHint) ?>
 					<?= $form->field($schedule,'history')->text(['rows'=>5,'height'=>100])->label(Acls::$scheduleHistoryHint) ?>
 				</div>
@@ -142,9 +142,9 @@ if ($model->isNewRecord) {
 			<?php if ($model->isNewRecord) {
 				echo $this->render('/aces/_form_layout', ['model' => $ace,'form'=>$form]);
 			} else { ?>
-				<div class="card bg-light">
+				<div class="card bg-light mb-3">
 					<div class="card-header">Выберите кому и какой предоставляется доступ</div>
-					<div class="card-body">
+					<div class="card-body pb-0">
 						<div id="aces-list">
 
 							<?php foreach ($model->aces as $ace) {
@@ -168,11 +168,11 @@ if ($model->isNewRecord) {
 		</div>
 		<div class="<?= $model->isNewRecord?'col-md-4':'col-md-6' ?>">
 			<?php if ($model->isNewRecord) { ?>
-				<div class="card bg-light">
+				<div class="card bg-light mb-3">
 					<div class="card-header">Выберите ресурсы, к которым предоставляется доступ<br>
 						<small class="text-muted">можно выбрать несколько ресурсов разных типов — на каждый будет создан отдельный доступ с одинаковым набором ACE</small>
 					</div>
-					<div class="card-body">
+					<div class="card-body pb-0">
 						<?php
 						//Групповые поля выбора ресурсов — массивы *_ids (мультиселект). Валидация
 						//«хотя бы один ресурс» работает корректно (attrIsEmpty для *_ids понимает массивы).
@@ -187,9 +187,9 @@ if ($model->isNewRecord) {
 					</div>
 				</div>
 			<?php } else { ?>
-				<div class="card bg-light">
+				<div class="card bg-light mb-3">
 					<div class="card-header">Выберите <b>один</b> ресурс к которому предоставляется доступ</div>
-					<div class="card-body">
+					<div class="card-body pb-0">
 						<?= TabsX::widget([
 							'items'=>[
 								[

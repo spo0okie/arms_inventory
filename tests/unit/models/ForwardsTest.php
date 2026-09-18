@@ -4,6 +4,7 @@ namespace tests\unit\models;
 
 use app\models\AccessTypes;
 use app\models\Aces;
+use app\models\Acls;
 use app\models\Comps;
 use app\models\DnsNames;
 use app\models\NetIps;
@@ -12,13 +13,15 @@ use Yii;
 
 /**
  * Пробросы (NAT) через записи доступа (plans/access-chains.md, итерация 2):
- * форвард — обычный ACE с типом доступа, помеченным is_forward; субъект — адрес
- * входа, ресурс ACL — узел назначения или его адрес, параметры «TCP 443->8443».
+ * форвард — обычный ACE с признаком aces.is_forward; субъект — адрес входа, ресурс
+ * ACL — узел назначения или его адрес, параметры «TCP 443->8443». Признак живёт на
+ * записи (хопе), а не на типе доступа: типы остаются обычными (HTTPS, Ovpn), копии
+ * «HTTPS forward» не нужны.
  *
  * Опора на демо-данные (tests/_data/demo-seed/11-forwards.sql):
- *   ACE 9100: 55.66.77.81 (ip 26) → ОС MSK-PROXY (34), TCP 443->8443
- *   ACE 9101: 55.66.77.81 (ip 26) → адрес 10.0.0.2 (ip 30, ОС MSK-OVPN 20), UDP 1194
- *   ACE 9102: 66.77.88.98 (ip 24) → адрес 10.0.0.1 (ip 31, ОС chl-ovpn), UDP 1194
+ *   ACE 9100: 55.66.77.81 (ip 26) → ОС MSK-PROXY (34), HTTPS TCP 443->8443
+ *   ACE 9101: 55.66.77.81 (ip 26) → адрес 10.0.0.2 (ip 30, ОС MSK-OVPN 20), Ovpn UDP 1194
+ *   ACE 9102: 66.77.88.98 (ip 24) → адрес 10.0.0.1 (ip 31, ОС chl-ovpn), Ovpn UDP 1194
  * и имена этапа 10: vpn.taburetka.ru (9004) → оба белых адреса.
  *
  * Данные создаются в транзакции и откатываются (unit-suite без cleanup).
@@ -82,21 +85,48 @@ class ForwardsTest extends Unit
 		$this->assertSame([], $plain->forwardRules);
 	}
 
-	// --- тип доступа --------------------------------------------------------
+	// --- признак на записи, а не на типе --------------------------------------
 
-	public function testForwardFlagIsCollectedFromChildTypes()
+	public function testForwardIsPropertyOfAceNotOfAccessType()
 	{
-		$this->assertContains(9100, AccessTypes::forwardTypeIds());
+		//тот же обычный тип HTTPS (9001), тот же субъект-адрес — обычный доступ, не проброс
+		$acl = new Acls(['comps_id' => 16]);
+		$this->assertTrue($acl->save(), print_r($acl->errors, true));
+		$ace = new Aces(['acls_id' => $acl->id, 'ips' => '55.66.77.81', 'name' => 'партнёр ходит на узел']);
+		$ace->access_types_ids = [9001];
+		$ace->setIpParams([9001 => 'TCP 443->8443']);
+		$this->assertTrue($ace->save(), print_r($ace->errors, true));
 
-		//комплексный тип, включающий проброс, — тоже форвард-тип
-		$bundle = new AccessTypes(['code' => 'fwd-bundle', 'name' => 'Публикация (комплект)']);
-		$bundle->children_ids = [9100];
-		$this->assertTrue($bundle->save(), print_r($bundle->errors, true));
-		AccessTypes::invalidateAllItemsCache();
+		$this->assertSame([], Comps::findOne(16)->forwardsIn, 'без признака запись — обычный доступ, даже со стрелкой в параметрах');
+		$this->assertNotContains((int)$ace->id, $this->ids(NetIps::findOne(26)->forwardsOut));
 
-		$this->assertFalse((bool)$bundle->is_forward, 'собственный флаг не выставлен');
-		$this->assertContains((int)$bundle->id, AccessTypes::forwardTypeIds(), 'но проброс включён через дочерний тип');
-		$this->assertNotContains(9001, AccessTypes::forwardTypeIds(), 'HTTPS — не проброс');
+		//ставим признак — та же запись с тем же типом становится пробросом
+		$ace = Aces::findOne($ace->id);
+		$ace->is_forward = 1;
+		$this->assertTrue($ace->save(), print_r($ace->errors, true));
+		$this->assertSame([(int)$ace->id], $this->ids(Comps::findOne(16)->forwardsIn));
+		$this->assertContains((int)$ace->id, $this->ids(NetIps::findOne(26)->forwardsOut));
+	}
+
+	public function testForwardWithoutIpTypesIsStillVisible()
+	{
+		//проброс, у которого типы без сетевых параметров (или их нет вовсе), даёт одно правило без портов
+		$ace = Aces::findOne(9100);
+		Yii::$app->db->createCommand()->delete('access_in_aces', ['aces_id' => 9100])->execute();
+		$ace = Aces::findOne(9100);
+		$rules = $ace->forwardRules;
+		$this->assertCount(1, $rules);
+		$this->assertSame('', $rules[0]['ext']);
+		$this->assertNull($rules[0]['type']);
+	}
+
+	public function testForwardFlagIsPartOfAceSignature()
+	{
+		//групповые ACL сравнивают записи по сигнатуре: проброс и обычный доступ — разные записи
+		$ace = Aces::findOne(9100);
+		$asForward = $ace->aceSignature();
+		$ace->is_forward = 0;
+		$this->assertNotSame($asForward, $ace->aceSignature());
 	}
 
 	// --- выборки пробросов --------------------------------------------------
@@ -141,11 +171,9 @@ class ForwardsTest extends Unit
 		$this->assertSame([9101], $this->ids(Aces::findForwardsFrom([26])));
 	}
 
-	public function testNoForwardTypesMeansNoQueriesAndNoForwards()
+	public function testNoFlaggedAcesMeansNoForwards()
 	{
-		Yii::$app->db->createCommand()->update('access_types', ['is_forward' => 0])->execute();
-		AccessTypes::invalidateAllItemsCache();
-		$this->assertSame([], AccessTypes::forwardTypeIds());
+		Yii::$app->db->createCommand()->update('aces', ['is_forward' => 0])->execute();
 		$this->assertSame([], Aces::findForwardsFrom([26]));
 		$this->assertSame([], Aces::findForwardsTo([34], [], [30]));
 	}
