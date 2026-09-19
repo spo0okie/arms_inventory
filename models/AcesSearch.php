@@ -22,6 +22,11 @@ class AcesSearch extends Aces
 	//сегмент как субъект ACE / как ресурс ACL (вкладки доступов на странице сегмента)
 	public $segments_subject_ids;
 	public $segments_resource_ids;
+	//адрес как субъект ACE / как ресурс ACL (вкладки доступов на странице IP) — сетевой
+	//взгляд: сам адрес ИЛИ узлы, к которым он привязан (субъекты — ОС и пользователи,
+	//ресурсы — ОС и оборудование): доступ узла = доступ всех его адресов
+	public $ips_subject_ids;
+	public $ips_resource_ids;
 	
     /**
      * {@inheritdoc}
@@ -40,6 +45,8 @@ class AcesSearch extends Aces
 				'services_resource_ids',
 				'segments_subject_ids',
 				'segments_resource_ids',
+				'ips_subject_ids',
+				'ips_resource_ids',
 			], 'safe'],
 			[['ids'],'each','rule'=>['integer']]
         ];
@@ -102,6 +109,26 @@ class AcesSearch extends Aces
 			$filter->andWhere(['aces.acls_id'=>(new \yii\db\Query())->select('id')
 				->from('acls')->where(['segments_id'=>$this->segments_resource_ids])]);
 		}
+		if (!empty($this->ips_subject_ids)) {
+			$ips=$this->ips_subject_ids;
+			$filter->andWhere(['or',
+				['aces.id'=>(new \yii\db\Query())->select('aces_id')
+					->from('ips_in_aces')->where(['ips_id'=>$ips])],
+				['aces.id'=>(new \yii\db\Query())->select('aces_id')
+					->from('comps_in_aces')->where(['comps_id'=>static::ipsNodesQuery('ips_in_comps','comps_id',$ips)])],
+				['aces.id'=>(new \yii\db\Query())->select('aces_id')
+					->from('users_in_aces')->where(['users_id'=>static::ipsNodesQuery('ips_in_users','users_id',$ips)])],
+			]);
+		}
+		if (!empty($this->ips_resource_ids)) {
+			$ips=$this->ips_resource_ids;
+			$filter->andWhere(['aces.acls_id'=>(new \yii\db\Query())->select('id')
+				->from('acls')->where(['or',
+					['ips_id'=>$ips],
+					['comps_id'=>static::ipsNodesQuery('ips_in_comps','comps_id',$ips)],
+					['techs_id'=>static::ipsNodesQuery('ips_in_techs','techs_id',$ips)],
+				])]);
+		}
 
 		//архивная запись доступа - это доступ, которым уже некому или незачем пользоваться:
 		//истекло расписание, ушел в архив ресурс ACL либо кончились живые субъекты
@@ -139,4 +166,16 @@ class AcesSearch extends Aces
 
         return $dataProvider;
     }
+
+	/**
+	 * Подзапрос id узлов (ОС/оборудования/пользователей), к которым привязаны адреса
+	 * @param string $junction ips_in_comps | ips_in_techs | ips_in_users
+	 * @param string $key      comps_id | techs_id | users_id
+	 * @param int[]  $ips      net_ips.id
+	 * @return \yii\db\Query
+	 */
+	protected static function ipsNodesQuery(string $junction, string $key, $ips): \yii\db\Query
+	{
+		return (new \yii\db\Query())->select($key)->from($junction)->where(['ips_id'=>$ips]);
+	}
 }

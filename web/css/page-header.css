@@ -15,6 +15,10 @@ div.nav-header a:hover {color: white;}
 div.nav-header .breadcrumb{
     border-top: #3b4a57 1pt solid;
     border-bottom: #3b4a57 1pt solid;
+    /* шапка тёмная в любой теме, а --bs-secondary-color в светлой теме тёмный —
+       разделители и последняя (active) крошка иначе тёмное на тёмном */
+    --bs-breadcrumb-divider-color: #99abb1;
+    --bs-breadcrumb-item-active-color: #ebeced;
 }
 
 /* иконка справки страницы — последний элемент ленты breadcrumbs, прижатый

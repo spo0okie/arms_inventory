@@ -335,7 +335,7 @@ function(event, data, status, xhr, selector) {
 			let h1=$(this).find('h1');
 			if (h1.length) {
 				let title=h1[0].innerHTML;
-				$('h5.modal-title#modal_form_loader-label').html(title);
+				$(this).find('.modal-title').first().html(title);
 				h1.slice(0).remove();
 			}
 	    }
@@ -391,59 +391,79 @@ function(event, data, status, xhr, selector) {
 }
 TXT;
 
-echo ModalAjax::widget([
-	'id' => 'modal_form_loader',
-	'bootstrapVersion' => ModalAjax::BOOTSTRAP_VERSION_5,
-	'header' => 'Правка',
+/*
+ * Модалок две: клик по ссылке open-in-modal-form делает окну modal('toggle'), поэтому ссылка
+ * ВНУТРИ уже открытой модалки (напр. «+» пикера типов доступа в форме ACE) на том же окне
+ * закрывала бы его вместо открытия формы. Ссылки из основной модалки открываются во вложенной
+ * (поверх основной, без собственного backdrop - затемнение в site.css)
+ */
+$modalLoaders=[
+	'modal_form_loader'=>'a.open-in-modal-form:not(.modal a)',
+	'modal_form_loader_nested'=>'#modal_form_loader a.open-in-modal-form',
+];
+foreach ($modalLoaders as $modalLoaderId=>$modalLoaderSelector) {
+	echo ModalAjax::widget([
+		'id' => $modalLoaderId,
+		'bootstrapVersion' => ModalAjax::BOOTSTRAP_VERSION_5,
+		'header' => 'Правка',
 
-	'selector' => 'a.open-in-modal-form',
-	'ajaxSubmit' => true, // Submit the contained form as ajax, true by default
-	'size' => ModalAjax::SIZE_EXTRA_LARGE,
-	'options' => ['class' => 'header-secondary text-black text-left',],
-	'clientOptions'=>['backdrop'=> 'static',],
-	'autoClose' => true,
-	'events'=>[
-		ModalAjax::EVENT_MODAL_SHOW => new JsExpression("
-			function(event, data, status, xhr, selector) {
-				selector.addClass('modal-open');
-				let h1=$(this).find('h1');
-				if (h1.length) {
-					let title=h1[0].innerHTML;
-					$('h5.modal-title#modal_form_loader-label').html(title);
-					h1.slice(0).remove();
+		'selector' => $modalLoaderSelector,
+		'ajaxSubmit' => true, // Submit the contained form as ajax, true by default
+		'size' => ModalAjax::SIZE_EXTRA_LARGE,
+		'options' => ['class' => 'header-secondary text-black text-left',],
+		'clientOptions'=>['backdrop'=> $modalLoaderId==='modal_form_loader'?'static':false,],
+		'autoClose' => true,
+		'events'=>[
+			ModalAjax::EVENT_MODAL_SHOW => new JsExpression("
+				function(event, data, status, xhr, selector) {
+					selector.addClass('modal-open');
+					let h1=$(this).find('h1');
+					if (h1.length) {
+						let title=h1[0].innerHTML;
+						$(this).find('.modal-title').first().html(title);
+						h1.slice(0).remove();
+					}
 				}
-			}
-		"),
-		ModalAjax::EVENT_MODAL_SHOW_COMPLETE => new JsExpression("
-            function(event, xhr, textStatus) {
-                if (xhr.status == 403) {
-                	$('div#modal_form_loader').addClass('border-danger');
-                	$('div#modal_form_loader div.modal-header').addClass('card-header bg-danger');
-                	$('h5.modal-title#modal_form_loader-label').html('Error');
-                	$('div#modal_form_loader div.modal-body').html('Доступ к этой операции отсутствует');
-                }
-            }
-		"),
-		ModalAjax::EVENT_BEFORE_SUBMIT => new JsExpression("
-			function(event, data, status, xhr, selector) {
-				let \$disable=$(this).find('div.disable-on-submit');
-				if (\$disable.length) {
-					\$disable.find('*').attr('disabled',1);
+			"),
+			ModalAjax::EVENT_MODAL_SHOW_COMPLETE => new JsExpression("
+	            function(event, xhr, textStatus) {
+	                if (xhr.status == 403) {
+	                	$(this).addClass('border-danger');
+	                	$(this).find('div.modal-header').addClass('card-header bg-danger');
+	                	$(this).find('.modal-title').first().html('Error');
+	                	$(this).find('div.modal-body').html('Доступ к этой операции отсутствует');
+	                }
+	            }
+			"),
+			ModalAjax::EVENT_BEFORE_SUBMIT => new JsExpression("
+				function(event, data, status, xhr, selector) {
+					let \$disable=$(this).find('div.disable-on-submit');
+					if (\$disable.length) {
+						\$disable.find('*').attr('disabled',1);
+					}
+					let \$spinnerButtons=$(this).find('button.spinner-on-submit');
+					if (\$spinnerButtons.length) {
+						\$spinnerButtons.append(' <span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>');
+					}
 				}
-				let \$spinnerButtons=$(this).find('button.spinner-on-submit');
-				if (\$spinnerButtons.length) {
-					\$spinnerButtons.append(' <span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>');
-				}
-			}
-		"),
-		ModalAjax::EVENT_MODAL_SUBMIT => new JsExpression($js),
-		//ModalAjax::EVENT_MODAL_SUBMIT_COMPLETE => new \yii\web\JsExpression($js3),
-	],
-]);
+			"),
+			ModalAjax::EVENT_MODAL_SUBMIT => new JsExpression($js),
+			//ModalAjax::EVENT_MODAL_SUBMIT_COMPLETE => new \yii\web\JsExpression($js3),
+		],
+	]);
+	//ModalAjax регистрирует цепочку jQuery(...).on(...) без завершающей «;», а следующий скрипт
+	//(инициализация очередной модалки) начинается со скобки - без разделителя JS склеит их в вызов функции
+	$this->registerJs(';',View::POS_READY,'modal-loader-separator-'.$modalLoaderId);
+}
 
 $this->endBody();
 
 $js = <<<JS
+//закрытие вложенной модалки снимает с body класс modal-open, хотя основная еще открыта - возвращаем
+jQuery('#modal_form_loader_nested').on('hidden.bs.modal',function(){
+	if (jQuery('.modal.show').length) jQuery('body').addClass('modal-open');
+});
+
 //$('.modal').removeAttr('tabindex'); //иначе не будет работать поиск в виджетах Select2
 
 //более универсальный фикс

@@ -52,6 +52,7 @@ class AccessTypes extends ArmsModel
     public function rules()
     {
         return [
+			[['name'], 'required'],
 			[['notepad','ip_params_def'], 'string'],
             [['code', 'name'], 'string', 'max' => 64],
 			[['is_app','is_ip','is_phone','is_vpn'],'integer'],

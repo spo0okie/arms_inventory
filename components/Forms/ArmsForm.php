@@ -49,14 +49,25 @@ class ArmsForm extends ActiveForm
 		$view->registerJs("jQuery('#$id').on('ajaxComplete', armsFormAjaxComplete);");
 	}
 
+	//выданные за запрос авто-id форм (защита от дублей: две формы одной модели на странице)
+	protected static $usedIds=[];
+
 	public function init(): void
 	{
-		parent::init();
-
 		//если модель есть, а класса нет, вытаскиваем класс
 		if (isset($this->model) && !isset($this->modelClass)) {
 			$this->modelClass=get_class($this->model);
 		}
+
+		//осмысленный id формы вместо авто-счетчика виджетов (w0, w1...): форма, подгруженная
+		//AJAX-ом в модалку, получала тот же w0, что и виджет на самой странице -> дубль id в DOM,
+		//yiiActiveForm (AJAX-валидация) инициализировался не на той форме.
+		//NB: задавать ДО parent::init() - тот сам проставит options[id] авто-значением
+		if (isset($this->modelClass) && !isset($this->options['id'])) {
+			$this->options['id']=static::uniqueFormId($this->modelClass,$this->model);
+		}
+
+		parent::init();
 
 		//прописываем URL валидации
 		if (isset($this->modelClass) && !isset($this->validationUrl)) {
@@ -65,13 +76,27 @@ class ArmsForm extends ActiveForm
 		}
 
 		if (!$this->validationUrl) $this->enableAjaxValidation=false;
+	}
 
-		if (isset($this->modelClass) && !isset($this->options['id'])) {
-			$this->options['id']=StringHelper::class2Id($this->modelClass);
-			if (isset($this->model)) $this->options['id'].='-'.$this->model->id;
-			$this->options['id'].='-form';
-		}
-
+	/**
+	 * Уникальный в пределах DOM id формы модели: <model-id>[-<id записи>]-form[-modal][-N]
+	 * @param string $modelClass
+	 * @param ArmsModel|null $model
+	 * @return string
+	 */
+	protected static function uniqueFormId($modelClass,$model=null)
+	{
+		$id=StringHelper::class2Id($modelClass);
+		if (is_object($model) && !empty($model->id)) $id.='-'.$model->id;
+		$id.='-form';
+		//форма, подгружаемая AJAX-ом (в модалку), не должна совпасть с формой той же модели на странице
+		$request=\Yii::$app->request;
+		if ($request instanceof \yii\web\Request && $request->isAjax) $id.='-modal';
+		//вторая и далее формы той же модели в одном ответе
+		$base=$id;
+		for ($i=2; isset(static::$usedIds[$id]); $i++) $id=$base.'-'.$i;
+		static::$usedIds[$id]=true;
+		return $id;
 	}
 
 	/**

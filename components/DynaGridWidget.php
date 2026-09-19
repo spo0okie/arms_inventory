@@ -328,6 +328,13 @@ JS;
 		
 		//задаем класс колонки по умолчанию
 		$data=ArrayHelper::setTreeDefaultValue($data,['contentOptions','class'],$attr.'_col');
+
+		//тот же класс — ячейке строки фильтров: иначе CSS, прячущий колонку по td.<attr>_col
+		//(AccessLevelSwitchWidget), оставляет её фильтр и шапка съезжает относительно данных.
+		//Дописываем, а не по умолчанию: у колонки могут быть свои filterOptions['class']
+		$filterClass=(string)($data['filterOptions']['class']??'');
+		if (!preg_match('/(^|\s)'.preg_quote($attr.'_col','/').'(\s|$)/',$filterClass))
+			$data['filterOptions']['class']=trim($filterClass.' '.$attr.'_col');
 		
 		//создаем ID колонки по умолчанию для resizable-columns
 		$colId=str_replace('-','_',$data['attribute']);

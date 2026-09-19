@@ -10,6 +10,7 @@ use app\components\ListObjectsWidget;
 use app\components\ShowArchivedWidget;
 use app\models\Aces;
 use app\models\Comps;
+use app\models\NetIps;
 use app\models\Networks;
 
 //эта страничка вызывается из другой, где есть этот виджет,
@@ -26,6 +27,13 @@ $columns['network_hosts']=[
 				$hosts=[];
 				foreach ($nodes as $node) {
 					/** @var Comps $node */
+					//ресурс ACL — сам адрес: узел и есть адрес, своих netIps у него нет
+					if ($node instanceof NetIps) {
+						if ($node->isIn($model)) $hosts[]=$node->renderItem($renderer,['static_view'=>true]);
+						continue;
+					}
+					//ресурс-комментарий (строка) и сети (ресурс-сеть/сегмент) — не хосты
+					if (!is_object($node) || !$node->canGetProperty('netIps')) continue;
 					if (count($ips=$node->netIps)) {
 						foreach ($ips as $ip) {
 							if ($ip->isIn($model)) {
@@ -53,6 +61,9 @@ $columns['network_hosts']=[
 
 ?>
 <div class="network-aces-index">
+	<?php //уровень показа доступов: вкладка подгружается AJAX-ом, поэтому виджет — здесь,
+	//над своим гридом (network_hosts — сетевая колонка, см. AccessLevelSwitchWidget::NET_COLUMNS) ?>
+	<?= \app\components\AccessLevelSwitchWidget::widget() ?>
 	<?= DynaGridWidget::widget([
 		'id' => 'network-connections-list',
 		'pageUrl'=>['/services/view','id'=>$model->id],

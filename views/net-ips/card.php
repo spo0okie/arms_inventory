@@ -47,12 +47,18 @@ if (count($objects)) echo '<h4>'
 	.\app\components\ModelFieldWidget::renderCompositeTitle($model,['comps','techs','users'],'Привязан к','span')
 	.': '.implode(', ',$objects).'</h4><br />';
 
-//DNS-имена, указывающие на адрес (помимо hostname узлов выше)
-if (is_array($model->dnsNames) && count($model->dnsNames)) {
-	$names=[];
-	foreach ($model->dnsNames as $dnsName) $names[]=ModelWidget::widget(['model'=>$dnsName,'options'=>['static_view'=>true]]);
+//DNS-имена, указывающие на адрес (помимо hostname узлов выше); кнопка — одна форма
+//«выбери заведённое или введи новое»: привязывает либо создаёт с привязкой
+$names=[];
+if (is_array($model->dnsNames)) foreach ($model->dnsNames as $dnsName)
+	$names[]=ModelWidget::widget(['model'=>$dnsName,'options'=>['static_view'=>true]]);
+$dnsButton=$static_view?'':Html::a('<i class="fas fa-plus"></i> DNS-имя',
+	['/dns-names/attach-ip','ips_id'=>$model->id],
+	['class'=>'badge text-bg-success open-in-modal-form','data-reload-page-on-submit'=>1,
+		'title'=>'Привязать заведённое DNS-имя или создать новое с этим адресом']);
+if (count($names) || $dnsButton) {
 	echo '<h4>'.\app\components\ModelFieldWidget::renderFieldTitle($model,'dnsNames',null,'span')
-		.': '.implode(', ',$names).'</h4><br />';
+		.': '.implode(', ',$names).' '.$dnsButton.'</h4><br />';
 }
 
 ?>
@@ -65,14 +71,13 @@ if (is_array($model->dnsNames) && count($model->dnsNames)) {
 	'models'=>$model->forwardsIn,'owner'=>$model,'attribute'=>'forwardsIn','static_view'=>$static_view,
 ]) ?>
 
-<?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
-<?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
-
-<?php if (is_object($model->network)) { ?>
-<hr>
-<h4>Сеть:</h4>
-<?= ModelWidget::widget(['model'=>$model->network,'view'=>'card']) ?>
-
+<?php //на странице адреса доступы — вкладками, сеть — справа в шапке (view.php);
+//здесь (тултип) — списками и компактной сводкой сети
+if (!($header??false)) { ?>
+	<?= $this->render('/acls/list',['models'=>$model->acls,'static_view'=>$static_view]) ?>
+	<?= $this->render('/aces/list',['models'=>$model->aces,'static_view'=>$static_view]) ?>
+	<?php if (is_object($model->network)) { ?>
+		<hr>
+		<?= $this->render('network',['model'=>$model]) ?>
+	<?php } ?>
 <?php }
-
-

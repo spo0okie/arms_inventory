@@ -298,3 +298,10 @@ li.muted-tab {
     opacity: 0.5;
     filter: grayscale(100%);
 }
+
+
+/* вложенная модалка (форма из формы, layouts/main.php): поверх основной, затемнение основной вместо backdrop */
+#modal_form_loader_nested {
+    --bs-modal-zindex: 1065;
+    background-color: rgba(var(--bs-black-rgb), .5);
+}

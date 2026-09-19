@@ -190,6 +190,29 @@ class PortsController extends ArmsBaseController
 	}
 
 	/**
+	 * Acceptance-сценарии для actionScanApply().
+	 * Только немутирующие ветки (ранний выход с ошибкой в JSON): запись связей
+	 * порт-в-порт проверяется модельными тестами, а здесь - доступность action
+	 * и стабильный ответ на неполный запрос.
+	 * @return array
+	 */
+	public function testScanApply(): array
+	{
+		$scenarios=[[
+			'name' => 'unknown switch',
+			'POST' => ['tech' => 0],
+			'response' => 200,
+		]];
+		$techId = (int)Techs::find()->select('id')->scalar();
+		if ($techId > 0) $scenarios[]=[
+			'name' => 'switch without port name',
+			'POST' => ['tech' => $techId, 'do' => 'attach', 'port' => ''],
+			'response' => 200,
+		];
+		return $scenarios;
+	}
+
+	/**
 	 * Создаёт новый порт, делегируя выполнение в actionUpdate(null).
 	 *
 	 * POST-параметры (через Ports::load):
