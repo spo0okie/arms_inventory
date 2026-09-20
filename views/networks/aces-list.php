@@ -21,6 +21,7 @@ $columns=include Yii::getAlias('@app').'/views/aces/columns.php';
 unset($columns['resource_nodes']);
 $renderer=$this;
 $columns['network_hosts']=[
+	'label'=>'Узлы ресурса в сети',
 	'value'=>function($data) use ($renderer,$model){
 		if (is_object($acl=$data->acl)) {
 			if (count($nodes=$acl->nodes)) {
@@ -66,7 +67,8 @@ $columns['network_hosts']=[
 	<?= \app\components\AccessLevelSwitchWidget::widget() ?>
 	<?= DynaGridWidget::widget([
 		'id' => 'network-connections-list',
-		'pageUrl'=>['/services/view','id'=>$model->id],
+		//настройки таблицы постятся сюда и ловятся DynaGridWidget::handleSave в networks/view.php
+		'pageUrl'=>['/networks/view','id'=>$model->id],
 		'model' => new Aces(),
 		'panel' => false,
 		'columns' => $columns,

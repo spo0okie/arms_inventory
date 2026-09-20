@@ -7,7 +7,7 @@ use yii\db\Query;
 
 /**
  * Признак проброса переезжает с типа доступа на запись доступа:
- * access_types.is_forward → aces.is_forward (plans/access-chains.md, итерация 2, правка по обкатке).
+ * access_types.is_forward → aces.is_forward (docs/dev/access-chains.md, §3).
  *
  * Флаг на типе заставлял заводить копию каждого типа доступа («HTTPS» → «HTTPS forward»,
  * «RDP» → «RDP forward»…): проброс — ось, ортогональная протоколу, и перемножать их в

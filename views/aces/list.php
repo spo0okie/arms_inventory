@@ -4,6 +4,8 @@
 /* @var $models app\models\Aces[] */
 /* @var $hintModel \app\models\base\ArmsModel модель-владелец списка: даёт тултип-«?» заголовка (атрибут acls) */
 /* @var $static_view bool */
+/* @var $addUrl array|null маршрут создания исходящего доступа (с предзаполненным субъектом):
+   даёт кнопку (+) в заголовке и показывает карточку даже при пустом списке */
 
 use app\components\ExpandableCardWidget;
 use app\components\ItemObjectWidget;
@@ -19,7 +21,15 @@ if (!isset($static_view)) $static_view=false;
 //страницах карточек рендерится ПОЗЖЕ этого блока, и дефолт еще не переключен
 //в «скрывать» — архивные строки вместо скрытия оставались бы зачеркнутыми
 if (!isset($show_archived)) $show_archived=(bool)Yii::$app->request->get('showArchived',false);
+$addButton=(!$static_view && !empty($addUrl))?
+	' '.Html::a('<i class="fas fa-plus-circle"></i>',$addUrl,[
+		'class'=>'open-in-modal-form',
+		'data-reload-page-on-submit'=>1,
+		'qtip_ttip'=>'Добавить исходящий доступ',
+	]):'';
 
+$content='';
+$allArchived=true;
 if (is_array($models) && count($models)) {
 
 	//группируем по расписанию ACL: имя временного доступа (обычно длинное) выводится
@@ -36,8 +46,6 @@ if (is_array($models) && count($models)) {
 		$groups[$sid]['aces'][]=$ace;
 	}
 
-	$content='';
-	$allArchived=true;
 	foreach ($groups as $group) {
 		//группа скрывается/зачеркивается целиком (вместе с заголовком),
 		//когда все её записи архивные
@@ -68,16 +76,21 @@ if (is_array($models) && count($models)) {
 			'show_archived'=>$show_archived,
 		]);
 	}
+}
 
+if ($content || $addButton) {
 	[$title]=isset($hintModel)&&is_object($hintModel)?
 		ModelFieldWidget::fieldTitle($hintModel,'acls',null,'Имеет доступ к:'):
 		['Имеет доступ к:'];
 
+	//заголовок уходит в архивные вместе со всеми записями — но не когда в нём кнопка
+	//добавления: добавить доступ можно и тому, у кого все прежние доступы в архиве
+	$headerArchived=$content && $allArchived && !$addButton;
 	echo ExpandableCardWidget::widget([
 		'cardClass'=>'mb-3 line-nobr',
-		'content'=>Html::tag('h4',$title,[
-				'class'=>$allArchived?ShowArchivedWidget::$itemClass:'',
-				'style'=>HtmlHelper::ArchivedDisplay($allArchived,$show_archived),
+		'content'=>Html::tag('h4',$title.$addButton,[
+				'class'=>$headerArchived?ShowArchivedWidget::$itemClass:'',
+				'style'=>HtmlHelper::ArchivedDisplay($headerArchived,$show_archived),
 			]).$content,
 	]);
 }

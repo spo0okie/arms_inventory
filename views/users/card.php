@@ -115,7 +115,13 @@ if (!isset($static_view)) $static_view=false;
 
 	<?= $this->render('/comps/lics_list',['model'=>$model]); ?>
 
-	<?= $this->render('/aces/list',['models'=>$model->aces,'hintModel'=>$model]); ?>
+	<?= $this->render('/aces/list',[
+		'models'=>$model->aces,
+		'hintModel'=>$model,
+		'static_view'=>$static_view,
+		//(+) в заголовке: форма доступа с сотрудником-субъектом
+		'addUrl'=>['/acls/create','Aces'=>['users_ids'=>[$model->id]]],
+	]); ?>
 
 	<?php if (is_array($lastLogins=$model->lastThreeLogins) && count($lastLogins)) { ?>
 		<?= ModelFieldWidget::renderFieldTitle($model,'lastThreeLogins') ?>

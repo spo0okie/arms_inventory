@@ -1,5 +1,5 @@
 -- Демо-данные, этап 10: DNS-имена и карта зоны (см. tests/_data/readme.md,
--- plans/access-chains.md, итерация 1).
+-- docs/dev/access-chains.md, §2).
 --
 -- Внешняя зона taburetka.ru: имена на белых адресах DMZ (MSK-WWW, MSK-NS) и на
 -- шлюзах (msk-gw, chl-gw) — то, чего в инвентаризации по hostname узлов не видно.

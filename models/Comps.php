@@ -860,7 +860,7 @@ class Comps extends ArmsModel
 
 	/**
 	 * Входящие пробросы: записи доступа с форвард-типом на этот узел или его адреса
-	 * (plans/access-chains.md, итерация 2)
+	 * (docs/dev/access-chains.md, §3)
 	 * @return Aces[]
 	 */
 	public function getForwardsIn()

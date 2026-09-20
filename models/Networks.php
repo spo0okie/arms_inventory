@@ -355,7 +355,7 @@ class Networks extends ArmsModel
 		$this->attrsCache['incomingAcesEffective']=$this->getIncomingAces();
 
 		//доступы к сегменту этой сети — доступы и в саму сеть (сегмент разворачивается
-		//в свои подсети, plans/access-chains.md итерация 4)
+		//в свои подсети, docs/dev/access-chains.md, §6)
 		if (is_object($this->segment)) {
 			$this->attrsCache['incomingAcesEffective']=ArrayHelper::recursiveOverride(
 				$this->attrsCache['incomingAcesEffective'],

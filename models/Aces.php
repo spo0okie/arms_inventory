@@ -69,7 +69,7 @@ class Aces extends ArmsModel
 		'segments_ids' =>	[Segments::class,'aces_ids'],
 		'netIps_ids' =>		[NetIps::class,'aces_ids'],
 		'acls_id' =>		[Acls::class,'aces_ids'],
-		//транзит (plans/access-chains.md, итерация 3): обе стороны одной junction-таблицы;
+		//транзит (docs/dev/access-chains.md, §4): обе стороны одной junction-таблицы;
 		//связь — документация маршрута, удалению записи не мешает
 		'next_aces_ids' =>	[Aces::class,'prev_aces_ids','loader'=>'nextAces','deletable'=>true],
 		'prev_aces_ids' =>	[Aces::class,'next_aces_ids','loader'=>'prevAces','deletable'=>true],

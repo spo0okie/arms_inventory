@@ -6,7 +6,7 @@ use app\migrations\arms\ArmsMigration;
 
 /**
  * Флаг access_types.is_forward — тип доступа описывает проброс/транзит
- * (plans/access-chains.md, итерация 2).
+ * (docs/dev/access-chains.md, §3).
  *
  * NAT-проброс документируется тем же механизмом, что и остальные связи, — ACE:
  * субъект — адрес входа (белый IP), ресурс ACL — узел назначения или его серый IP,

@@ -7,7 +7,7 @@ use Codeception\Test\Unit;
 use Yii;
 
 /**
- * Транзит межсервисных связей (plans/access-chains.md, итерация 3): указатель
+ * Транзит межсервисных связей (docs/dev/access-chains.md, §4): указатель
  * «следующий хоп» между записями доступа, сторож циклов, сборка маршрутов.
  *
  * Опора на демо-данные (tests/_data/demo-seed/12-transit.sql):

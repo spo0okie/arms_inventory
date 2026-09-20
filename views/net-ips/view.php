@@ -24,7 +24,7 @@ $this->params['headerContent'] =
 		.'<div class="col-md-4">'
 			.CornerWidget::widget(['model'=>$model,'archivedOptions'=>['reload'=>true]])
 			.$this->render('network',['model'=>$model])
-			//уровень показа доступов во вкладках ниже (plans/access-chains.md, итерация 3)
+			//уровень показа доступов во вкладках ниже (docs/dev/access-chains.md, §5)
 			.'<div class="mt-3">'.AccessLevelSwitchWidget::widget().'</div>'
 		.'</div>'
 	.'</div>';

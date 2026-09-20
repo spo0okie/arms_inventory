@@ -9,7 +9,7 @@ use voskobovich\linker\LinkerBehavior;
 use yii\db\ActiveQuery;
 
 /**
- * DNS-имя: «имя в зоне → набор IP» (plans/access-chains.md, итерация 1).
+ * DNS-имя: «имя в зоне → набор IP» (docs/dev/access-chains.md, §2).
  *
  * Дополняет hostname узлов, которые остаются каноническими именами
  * ([[Comps::$name]]/[[Techs::$hostname]] + домен): здесь живёт то, чего у узла
@@ -214,7 +214,7 @@ class DnsNames extends ArmsModel
 
 	/**
 	 * Пробросы с адресов этого имени: цепочка имя → адрес входа → узел назначения
-	 * (plans/access-chains.md, итерация 2)
+	 * (docs/dev/access-chains.md, §3)
 	 * @return Aces[]
 	 */
 	public function getForwardsOut()

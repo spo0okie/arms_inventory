@@ -75,11 +75,11 @@ $tabs[]=[
 	'content'=>$this->render('ip-table',['model'=>$model]),
 ];
 
-DynaGridWidget::handleSave('service-connections-list');
+DynaGridWidget::handleSave('network-connections-list');
 
 $tabs[]=[
 	'id'=>'incomingConnections',
-	'label'=>'Вх. соединения <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#service-connections-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
+	'label'=>'Вх. соединения <i title="настройки таблицы" data-bs-toggle="modal" data-bs-target="#network-connections-list-grid-modal" class="small fas fa-wrench fa-fw"></i>',
 	'content'=><<<HTML
 		<div id="incomingConnectionsList">
 		

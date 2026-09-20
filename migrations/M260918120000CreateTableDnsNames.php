@@ -6,7 +6,7 @@ use app\migrations\arms\ArmsMigration;
 
 /**
  * Создание таблиц dns_names, dns_names_history и junction dns_names_in_ips —
- * DNS-имена, дополняющие hostname узлов (plans/access-chains.md, итерация 1).
+ * DNS-имена, дополняющие hostname узлов (docs/dev/access-chains.md, §2).
  *
  * DNS-имя = «имя в зоне → набор IP». Зона — существующий справочник domains
  * (он и так DNS-зона: NetBIOS-имя + fqdn). Hostname ОС/оборудования никуда не

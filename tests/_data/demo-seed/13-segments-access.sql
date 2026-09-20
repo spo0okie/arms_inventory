@@ -1,5 +1,5 @@
 -- Демо-данные, этап 13: сегменты в списках доступа и матрица межсегментного доступа
--- (см. tests/_data/readme.md, plans/access-chains.md итерация 4, issue #220).
+-- (см. tests/_data/readme.md, docs/dev/access-chains.md, §6, issue #220).
 --
 -- Сегмент как ресурс ACL (acls.segments_id) — доступ ко всем сетям и сервисам сегмента;
 -- сегмент как субъект ACE (segments_in_aces) — доступ из всех сетей/сервисов сегмента.

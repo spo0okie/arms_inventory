@@ -5,7 +5,7 @@ namespace app\migrations;
 use app\migrations\arms\ArmsMigration;
 
 /**
- * Сегмент инфраструктуры в списках доступа (plans/access-chains.md, итерация 4; issue #220):
+ * Сегмент инфраструктуры в списках доступа (docs/dev/access-chains.md, §6; issue #220):
  *  - acls.segments_id — сегмент как РЕСУРС ACL (доступ ко всем сетям и сервисам сегмента),
  *    зеркало networks_id;
  *  - segments_in_aces — сегмент как СУБЪЕКТ ACE (доступ из всех сетей/сервисов сегмента),

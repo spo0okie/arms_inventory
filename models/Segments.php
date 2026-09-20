@@ -60,7 +60,7 @@ class Segments extends ArmsModel
 		'services_ids' =>				[Services::class,'segment_id'],
 		'networks_ids' =>				[Networks::class,'segment_id'],
 		'marker_id' =>					[Markers::class,'segments_ids'],
-		//сегмент в списках доступа (plans/access-chains.md, итерация 4): ресурс ACL и субъект ACE
+		//сегмент в списках доступа (docs/dev/access-chains.md, §6): ресурс ACL и субъект ACE
 		'acls_ids' =>					[Acls::class,'segments_id'],
 		'aces_ids' =>					[Aces::class,'segments_ids'],
 	];

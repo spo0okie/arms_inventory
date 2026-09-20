@@ -287,7 +287,7 @@ class NetIps extends ArmsModel
 
 	/**
 	 * Входящие пробросы: на этот адрес и на узлы, к которым он привязан
-	 * (plans/access-chains.md, итерация 2)
+	 * (docs/dev/access-chains.md, §3)
 	 * @return Aces[]
 	 */
 	public function getForwardsIn()

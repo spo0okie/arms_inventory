@@ -12,7 +12,7 @@ use Yii;
 
 /**
  * Сегмент в списках доступа и матрица межсегментного доступа
- * (plans/access-chains.md, итерация 4; issue #220).
+ * (docs/dev/access-chains.md, §6; issue #220).
  *
  * Опора на демо-данные (tests/_data/demo-seed/13-segments-access.sql):
  *   ACL 9300 → сегмент 6 «Сеть серверов»: ACE 9300 (сегмент 1), 9301 (сегмент 8),
