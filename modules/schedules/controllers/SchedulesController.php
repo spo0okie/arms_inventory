@@ -2,7 +2,6 @@
 
 namespace app\modules\schedules\controllers;
 
-use app\helpers\StringHelper;
 use app\models\MaintenanceJobs;
 use app\modules\schedules\models\SchedulesEntries;
 use app\models\Services;
@@ -86,9 +85,10 @@ class SchedulesController extends \app\controllers\ArmsBaseController
 
 	/**
 	 * Создаёт новое расписание работы.
-	 * Поддерживает предзаполнение имени через GET-параметры привязки:
+	 * GET-параметры привязки задают объект, к которому расписание будет привязано
+	 * после сохранения (такое расписание по умолчанию индивидуальное — без имени):
 	 * - `attach_service`   — привязка к сервису (providing_schedule_id)
-	 * - `support_service`  — привязка к поддержке сервиса
+	 * - `support_service`  — привязка к поддержке сервиса (support_schedule_id)
 	 * - `attach_job`       — привязка к задаче обслуживания (MaintenanceJobs)
 	 * - `override_id`      — создание override-расписания для указанного ID
 	 * Если задано `defaultItemSchedule` — создаёт начальную запись расписания (SchedulesEntries).
@@ -113,22 +113,17 @@ class SchedulesController extends \app\controllers\ArmsBaseController
 		$job=null;
 		$item=null;
 
-		//
+		//расписание, создаваемое со страницы владельца, по умолчанию индивидуальное:
+		//имя не предзаполняем (issue #139). Пустое имя = расписание принадлежит этому
+		//объекту, в общий список и в выбор не попадает, удаляется вместе с ним;
+		//как оно называется в интерфейсе - считает Schedules::generateName()/displayName.
+		//Чтобы сделать расписание общим, пользователь вписывает имя сам (подсказка у поля).
 		if (Yii::$app->request->get('attach_service')) {
 			$service= Services::findOne(Yii::$app->request->get('attach_service'));
-			if (is_object($service)) {
-				$model->name= Schedules::$title.' работы '.StringHelper::mb_lcfirst($service->name);
-			}
 		} elseif (Yii::$app->request->get('support_service')) {
 			$support_service= Services::findOne(Yii::$app->request->get('support_service'));
-			if (is_object($support_service)) {
-				$model->name= Schedules::$title.' поддержки '.StringHelper::mb_lcfirst($support_service->name);
-			}
 		} elseif (Yii::$app->request->get('attach_job')) {
 			$job= MaintenanceJobs::findOne(Yii::$app->request->get('attach_job'));
-			if (is_object($job)) {
-				$model->name= Schedules::$title.' '.StringHelper::mb_lcfirst($job->name);
-			}
 		}
 
 		$model->load(Yii::$app->request->get());
@@ -155,7 +150,7 @@ class SchedulesController extends \app\controllers\ArmsBaseController
 					$service->save();
 					return $this->defaultReturn(['services/view', 'id' => $service->id],[$model]);
 				} elseif (is_object($support_service)) { //или поддержку сервиса
-					$support_service->providing_schedule_id = $model->id;
+					$support_service->support_schedule_id = $model->id;
 					$support_service->save();
 					return $this->defaultReturn(['services/view', 'id' => $support_service->id],[$model]);
 				} elseif (is_object($job)) { //или поддержку сервиса

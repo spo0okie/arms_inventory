@@ -901,7 +901,7 @@ class ArmsModel extends ActiveRecord
 	 * @param null   		$empty			что вернуть если ничего не нашли
 	 * @return mixed|null
 	 */
-	public function findRecursiveAttr(string $simpleAttr, string $recursiveAttr=null, $parent=null, $empty=null) {
+	public function findRecursiveAttr(string $simpleAttr, ?string $recursiveAttr=null, $parent=null, $empty=null) {
 		//ищем в кэше
 		if (isset($this->recursiveCache[$simpleAttr]))
 			return $this->recursiveCache[$simpleAttr];
@@ -1290,7 +1290,7 @@ class ArmsModel extends ActiveRecord
 	 *   (null - все связи с join-аннотацией)
 	 * @return static[]
 	 */
-	public function relationForGrid(string $relation, string $gridId=null) {
+	public function relationForGrid(string $relation, ?string $gridId=null) {
 		$rel=$this->getRelation($relation);
 		$class=$rel->modelClass;
 		/** @var ArmsModel $prototype */

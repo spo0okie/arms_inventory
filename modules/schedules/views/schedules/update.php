@@ -12,13 +12,13 @@ if ($model->isOverride) {
 	$this->params['breadcrumbs'][] = ['label' => $model->overriding->name, 'url' => ['index']];
 } else {
 
-	$this->title = 'Изменить '.mb_strtolower(\app\modules\schedules\models\Schedules::$title).': ' . $model->name;
+	$this->title = 'Изменить '.mb_strtolower(\app\modules\schedules\models\Schedules::$title).': ' . $model->displayName;
 	if (!$acl_mode) {
 		$this->params['breadcrumbs'][] = ['label' => \app\modules\schedules\models\Schedules::$titles, 'url' => ['index']];
 	} else {
 		$this->params['breadcrumbs'][] = ['label' => \app\models\Acls::$scheduleTitles, 'url' => ['scheduled-access/index']];
 	}
-	$this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
+	$this->params['breadcrumbs'][] = ['label' => $model->displayName, 'url' => ['view', 'id' => $model->id]];
 	$this->params['breadcrumbs'][] = 'Изменить';
 }
 ?>

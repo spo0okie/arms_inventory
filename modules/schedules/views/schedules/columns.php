@@ -19,7 +19,9 @@ return [
 		'attribute'=>'name',
 		'format'=>'raw',
 		'value'=>function($data) {
-			return Html::a($data->name,['view','id'=>$data->id]);
+			//у индивидуальных расписаний своего имени нет - показываем вычисленное
+			//по владельцу (issue #139), иначе строка была бы пустой и некликабельной
+			return Html::a($data->displayName,['view','id'=>$data->id]);
 		}
 	],
 

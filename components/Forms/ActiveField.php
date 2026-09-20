@@ -109,7 +109,7 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	 * Тут мы всовываем всю магию по засовыванию подсказок в label
 	 * @return $this
 	 */
-	protected function renderLabelParts(string $label = null, array $options = []):void
+	protected function renderLabelParts(?string $label = null, array $options = []):void
 	{
 		//если у нас не вызывался метод label() или hint(), то вызываем их
 		if (is_null($this->labelText)) $this->label();

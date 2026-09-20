@@ -170,7 +170,7 @@ class IntegrationsController extends ArmsBaseController
 	 * @return string HTML формы или результата
 	 * @throws NotFoundHttpException
 	 */
-	public function actionAction(string $provider, string $action, string $class = null, $id = null)
+	public function actionAction(string $provider, string $action, ?string $class = null, $id = null)
 	{
 		$providerObj = $this->findProvider($provider);
 		$model = ($class !== null && $id !== null) ?

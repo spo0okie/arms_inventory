@@ -11,7 +11,7 @@ use yii\web\YiiAsset;
 $acl_mode=(count($model->acls));
 if (!isset($static_view)) $static_view=false;
 
-$this->title = $model->name;
+$this->title = $model->displayName;
 if (!$acl_mode) {
 	$this->params['breadcrumbs'][] = ['label' => Schedules::$titles, 'url' => ['index']];
 } else {

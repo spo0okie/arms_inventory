@@ -181,12 +181,12 @@ class LicLinksController extends BaseRestController
 	 * @throws NotFoundHttpException если объект по имени не найден
 	 */
 	public function actionSearch(
-		int $productId=null,
-		string $objectType=null,
-		string $licenseType=null,
-		int $objId=null,
-		string $objName=null,
-		int $licId=null
+		?int $productId=null,
+		?string $objectType=null,
+		?string $licenseType=null,
+		?int $objId=null,
+		?string $objName=null,
+		?int $licId=null
 	): ActiveRecord|null {
 		//return $productId;
 		
@@ -274,12 +274,12 @@ class LicLinksController extends BaseRestController
 	 * @throws NotFoundHttpException если объект по имени не найден
 	 */
 	public function actionFilter(
-		int $productId=null,
-		string $objectType=null,
-		string $licenseType=null,
-		int $objId=null,
-		string $objName=null,
-		int $licId=null
+		?int $productId=null,
+		?string $objectType=null,
+		?string $licenseType=null,
+		?int $objId=null,
+		?string $objName=null,
+		?int $licId=null
 	): BaseDataProvider {
 		//return $productId;
 		

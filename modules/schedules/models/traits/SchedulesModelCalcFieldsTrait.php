@@ -24,6 +24,8 @@ use yii\data\ArrayDataProvider;
  * @property Acls[]                       $acls
  * @property \app\models\base\ArmsModel[] $usedBy
  * @property boolean                      $isPrivate
+ * @property string                       $generatedName
+ * @property string                       $displayName
  * @property Services[]                   $services
  * @property boolean                      isAcl
  * @property boolean                      isOverride
@@ -417,14 +419,53 @@ trait SchedulesModelCalcFieldsTrait
 	}
 	
 	/**
+	 * Индивидуальное (личное) расписание - расписание без названия (issue #139).
+	 *
+	 * Такое расписание принадлежит ровно одному объекту-владельцу: оно не попадает
+	 * ни в общий список расписаний, ни в выпадающие списки выбора ({@see Schedules::fetchNames()}),
+	 * а потеряв владельца - удаляется ({@see Schedules::gc()}).
 	 * @return bool
 	 */
 	public function getIsPrivate() {
-		if (!isset($this->attrsCache['isPrivate'])) {
-			$this->attrsCache['isPrivate']=(count($this->usedBy)==1);
+		return !strlen(trim((string)$this->name));
+	}
+
+	/**
+	 * Имя, вычисленное по объекту-владельцу («Расписание работы такого-то сервиса»).
+	 *
+	 * Нужно индивидуальным расписаниям: у них своего имени нет, но в служебных
+	 * списках и заголовках их надо как-то называть. Формула общая с предзаполнением
+	 * формы создания - {@see Schedules::generateName()}.
+	 * @return string
+	 */
+	public function getGeneratedName() {
+		if (isset($this->attrsCache['generatedName'])) return $this->attrsCache['generatedName'];
+
+		$this->attrsCache['generatedName']='';
+		//History-записи связей владельцев не имеют - там имя вычислять не из чего
+		if (!method_exists($this,'getProvidingServices')) return '';
+
+		foreach ([
+			'providing'	=> 'providingServices',
+			'support'	=> 'supportServices',
+			'job'		=> 'maintenanceJobs',
+		] as $mode=>$link) {
+			foreach ($this->$link as $owner) {
+				return $this->attrsCache['generatedName']=Schedules::generateName($owner,$mode);
+			}
 		}
-		
-		return $this->attrsCache['isPrivate'];
+
+		return $this->attrsCache['generatedName'];
+	}
+
+	/**
+	 * Как назвать расписание в интерфейсе: свое имя, а у индивидуального (безымянного) -
+	 * вычисленное по владельцу, либо (если владельца уже нет) описание графика работы.
+	 * @return string
+	 */
+	public function getDisplayName() {
+		if (!$this->isPrivate) return $this->name;
+		return $this->generatedName?:$this->workTimeDescription;
 	}
 	
 	

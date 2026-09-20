@@ -41,7 +41,7 @@ class SoftController extends ArmsBaseController
 	 * @return string HTML partial tooltip
 	 * @throws NotFoundHttpException если ПО не найдено
 	 */
-	public function actionTtip(int $id, string $hitlist=null)
+	public function actionTtip(int $id, ?string $hitlist=null)
 	{
 		return $this->renderPartial('ttip', [
 			'model' => $this->findModel($id),
@@ -134,7 +134,7 @@ class SoftController extends ArmsBaseController
 	 * @param int|null $manufacturers_id ID производителя для фильтрации (опционально)
 	 * @return string HTML формы выбора ПО
 	 */
-	public function actionSelectUpdate(string $name, int $manufacturers_id=null)
+	public function actionSelectUpdate(string $name, ?int $manufacturers_id=null)
 	{
 		if (!is_null($manufacturers_id))
 			//для случаев, если производитель определен, выводим его продукты (только названия самих продуктов)

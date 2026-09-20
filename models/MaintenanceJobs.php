@@ -5,6 +5,7 @@ namespace app\models;
 use app\helpers\ArrayHelper;
 use app\models\base\ArmsModel;
 use app\models\traits\MaintenanceJobsModelCalcFieldsTrait;
+use app\modules\schedules\components\ScheduleOwnerBehavior;
 use app\modules\schedules\models\Schedules;
 use app\models\ui\WikiCache;
 use voskobovich\linker\LinkerBehavior;
@@ -78,7 +79,22 @@ class MaintenanceJobs extends ArmsModel
 		'schedules_id' => Schedules::class,
 		'parent_id' => MaintenanceJobs::class,
 	];
-    
+
+	/**
+	 * Помимо many-2-many связей базовой модели - поведение владельца расписания
+	 * (инвариант и сборка мусора индивидуальных расписаний, issue #139)
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return array_merge(parent::behaviors(),[
+			[
+				'class' => ScheduleOwnerBehavior::class,
+				'attributes' => ['schedules_id'],
+			],
+		]);
+	}
+
 	/**
      * {@inheritdoc}
      */

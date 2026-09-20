@@ -224,11 +224,11 @@ class LicLinks extends ArmsModel
 	}
 	
 	public static function findProductLicenses(
-		int $productId=null,
-		string $objectType=null,
-		string $licenseType=null,
-		int $objId=null,
-		int $licId=null
+		?int $productId=null,
+		?string $objectType=null,
+		?string $licenseType=null,
+		?int $objId=null,
+		?int $licId=null
 	) {
 		//среди каких типов объектов будем искать (переданный тип или все)
 		//пользователь, АРМ, ОС

@@ -123,6 +123,30 @@ cd modules/schedules/compile/lib/js && npx jest
 | `testOverrideSaveRecompilesParent` | сохранение override-расписания триггерит компиляцию родителя |
 | `testCascadeRecompilesChildrenNonOverrides` | каскад по `parent_id` обновляет потомков |
 
+### `tests/unit/modules/schedules/IndividualSchedulesTest.php` — индивидуальные расписания
+
+Покрывает канон безымянных расписаний (issue #139, см. [README модуля](../README.md#индивидуальные-безымянные-расписания)).
+
+| Тест | Что проверяет |
+| ---- | ------------- |
+| `testUnnamedScheduleIsPrivate` | признак «индивидуальное» = пустое имя |
+| `testIndividualScheduleIsNotOfferedForSelection` | `fetchNames()` (все select2 расписаний) не отдаёт безымянные |
+| `testDisplayNameGeneratedFromOwner` | `displayName` безымянного вычисляется по владельцу |
+| `testOwnerDeletionRemovesIndividualSchedule` | удаление владельца уносит индивидуальное расписание |
+| `testOwnerDeletionKeepsNamedSchedule` | именованное остаётся в общем пуле |
+| `testSwitchingOwnerToAnotherScheduleRemovesOrphan` | переключение владельца на другое расписание удаляет осиротевшее |
+| `testScheduleWithOtherOwnersSurvives` | gc считает фактические ссылки, а не «владелец отвязался» |
+| `testCannotDropNameWhenScheduleIsShared` | нельзя убрать имя у расписания с несколькими владельцами |
+| `testCannotDropNameWhenScheduleHasChildren` | нельзя убрать имя у расписания с дочерними |
+| `testCannotLinkToForeignIndividualSchedule` | нельзя сослаться на чужое индивидуальное расписание (REST/консоль) |
+| `testDeleteCascadesEntries` | записи расписания удаляются вместе с ним (FK в БД нет) |
+
+### `tests/unit/modules/schedules/ScheduleOwnersGuardTest.php` — сторож владельцев
+
+| Тест | Что проверяет |
+| ---- | ------------- |
+| `testEveryScheduleLinkIsCoveredByBehavior` | каждая ссылка на `Schedules` прикрыта `ScheduleOwnerBehavior` (иначе индивидуальное расписание молча осиротеет) |
+
 ### `modules/schedules/tests/unit/SchedulesTest.php` — каркасные unit-тесты модели
 
 37 тестов на:

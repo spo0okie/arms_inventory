@@ -48,7 +48,7 @@ class LoginJournalController extends BaseRestController
 	 *
 	 * @return LoginJournal|ActiveRecord|null
 	 */
-    public function actionSearch(string $user_login=null, string $comp_name=null, string $time=null, int $type=0, $local_time=null):ActiveRecord|null
+    public function actionSearch(?string $user_login=null, ?string $comp_name=null, ?string $time=null, int $type=0, $local_time=null):ActiveRecord|null
 	{
     	//если вместе с отметкой времени входа в ПК передана текущая отметка времени
 		// - корректируем ее на сдвиг текущего времени ПК относительно текущего времени сервера

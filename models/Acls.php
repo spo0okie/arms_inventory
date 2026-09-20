@@ -6,6 +6,7 @@ namespace app\models;
 
 use app\models\base\ArmsModel;
 use app\models\traits\AclsModelCalcFieldsTrait;
+use app\modules\schedules\components\ScheduleOwnerBehavior;
 use app\modules\schedules\models\Schedules;
 use yii\helpers\ArrayHelper;
 
@@ -90,6 +91,23 @@ class Acls extends ArmsModel
 		'techs_id'=>[Techs::class,'acls_ids'],
 		'segments_id'=>[Segments::class,'acls_ids'],
 	];
+
+	/**
+	 * Помимо many-2-many связей базовой модели - поведение владельца расписания
+	 * (issue #139). exclusive: расписание временного доступа создается вместе
+	 * с доступом, делится между всеми его ACL и удаляется с последним из них.
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return array_merge(parent::behaviors(),[
+			[
+				'class' => ScheduleOwnerBehavior::class,
+				'attributes' => ['schedules_id'],
+				'exclusive' => true,
+			],
+		]);
+	}
 
     /**
      * {@inheritdoc}

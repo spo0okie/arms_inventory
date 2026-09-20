@@ -329,7 +329,7 @@ class ScansController extends ArmsBaseController
 	 * @throws Throwable
 	 * @throws StaleObjectException
 	 */
-    public function actionDelete(int $id=null)
+    public function actionDelete(?int $id=null)
     {
     	if (is_null($id)) $id=Yii::$app->request->post('key');
     	

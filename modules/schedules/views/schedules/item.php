@@ -18,10 +18,9 @@ if (!isset($empty)) $empty='- расписание отсутствует -';
 
 if (!empty($model)) {
 	if (!isset($name)) {
-		$name=$model->name;
+		//displayName: у индивидуального (безымянного) расписания - имя по владельцу (issue #139)
+		$name=$model->displayName;
 	} elseif ($name=='schedule') {
-		$name=$model->getWorkTimeDescription();
-	} elseif ($name=='private-schedule' && $model->isPrivate) {
 		$name=$model->getWorkTimeDescription();
 	}
 	

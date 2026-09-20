@@ -2,6 +2,7 @@
 
 namespace app\modules\schedules\models;
 
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\helpers\StringHelper;
@@ -11,6 +12,13 @@ use app\helpers\StringHelper;
  */
 class SchedulesSearch extends Schedules
 {
+	/**
+	 * @var bool|null показывать индивидуальные (безымянные) расписания (issue #139).
+	 * null - брать из запроса (тумблер «Индивидуальные» в списке). Это служебный
+	 * режим: обычно индивидуальные расписания смотрят со страницы их владельца.
+	 */
+	public $showIndividual=null;
+
     /**
      * {@inheritdoc}
      */
@@ -43,7 +51,12 @@ class SchedulesSearch extends Schedules
 		$query = Schedules::find()
 			->joinWith(['providingServices','acls','entries'])
 			->where(['acls.schedules_id'=>null,'schedules.override_id'=>null]);
-	
+
+		//индивидуальные (безымянные) расписания живут на страницах своих владельцев,
+		//в общий список попадают только по явному требованию (тумблер «Индивидуальные»)
+		if (!($this->showIndividual??Yii::$app->request->get('showIndividual',false)))
+			$query->andWhere(['<>','schedules.name','']);
+
 		// add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([

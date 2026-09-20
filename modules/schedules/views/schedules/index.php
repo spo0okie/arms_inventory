@@ -1,6 +1,7 @@
 <?php
 
 use app\components\DynaGridWidget;
+use app\components\UrlParamSwitcherWidget;
 use app\modules\schedules\models\Schedules;
 use yii\helpers\Html;
 
@@ -18,7 +19,15 @@ $this->title = Schedules::$titles;
         'header' => $this->title,
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-        'createButton' => Html::a('Новое', ['create'], ['class' => 'btn btn-success']),
+        'createButton' => Html::a('Новое', ['create'], ['class' => 'btn btn-success'])
+			//служебный режим: индивидуальные (безымянные) расписания обычно смотрят
+			//со страницы владельца, тут - чтобы увидеть их все одним списком (issue #139)
+			.' // '.UrlParamSwitcherWidget::widget([
+				'param'=>'showIndividual',
+				'label'=>'Индивидуальные',
+				'hintOn'=>'Показать индивидуальные расписания (без названия, принадлежащие одному объекту)',
+				'hintOff'=>'Скрыть индивидуальные расписания',
+			]),
         'columns' => require __DIR__.'/columns.php',
     ]); ?>
 

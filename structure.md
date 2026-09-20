@@ -212,6 +212,7 @@ CLI-команды для административных задач:
 - [`UsersController`](console/commands/UsersController.php) - управление пользователями
 - [`RbacController`](console/commands/RbacController.php) - управление правами доступа
 - [`OrgStructController`](console/commands/OrgStructController.php) - работа с оргструктурой
+- [`SchedulesController`](console/commands/SchedulesController.php) - обслуживание расписаний (индивидуальные/безымянные)
 
 **Использование:**
 

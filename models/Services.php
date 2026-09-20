@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\helpers\ArrayHelper;
 use app\models\base\ArmsModel;
+use app\modules\schedules\components\ScheduleOwnerBehavior;
 use app\modules\schedules\models\Schedules;
 use app\helpers\QueryHelper;
 use app\helpers\StringHelper;
@@ -177,6 +178,21 @@ class Services extends ArmsModel
 		'places_id' =>					[Places::class,'services_ids'],
 		'currency_id' =>				Currency::class,
 	];
+
+	/**
+	 * Помимо many-2-many связей базовой модели - поведение владельца расписания
+	 * (инвариант и сборка мусора индивидуальных расписаний, issue #139)
+	 * @return array
+	 */
+	public function behaviors()
+	{
+		return array_merge(parent::behaviors(),[
+			[
+				'class' => ScheduleOwnerBehavior::class,
+				'attributes' => ['providing_schedule_id','support_schedule_id'],
+			],
+		]);
+	}
 
 	public function getLinksSchema()
 	{

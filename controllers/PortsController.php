@@ -239,7 +239,7 @@ class PortsController extends ArmsBaseController
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate(int $id=null)
+    public function actionUpdate(?int $id=null)
     {
         $model = is_null($id)?
 			$model=new Ports():
