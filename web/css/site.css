@@ -279,6 +279,7 @@ div.site-index div.search span.search-group input {
     min-width: 450px; !important;
 }
 
+.showIndividual-switcher-widget,
 .showChildren-switcher-widget,
 .showArchived-switcher-widget {display: inline-block;}
 
