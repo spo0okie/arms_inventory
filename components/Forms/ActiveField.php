@@ -14,6 +14,7 @@ use app\models\base\ArmsModel;
 use kartik\datecontrol\DateControl;
 use kartik\markdown\MarkdownEditor;
 use kartik\select2\Select2;
+use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\JsExpression;
 
@@ -167,6 +168,35 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 	 * @return ActiveField
 	 * @throws \yii\base\InvalidConfigException
 	 */
+	/**
+	 * Дополняет варианты выбора текущим значением поля.
+	 *
+	 * fetchNames() отвечает на вопрос «что можно выбрать ЗАНОВО» и вправе отсекать
+	 * объекты (индивидуальные расписания - issue #139 и т.п.). Но уже выбранное
+	 * значение обязано остаться среди вариантов: select2 без соответствующего option
+	 * рисует поле пустым, и сохранение формы молча обнуляет ссылку (а для
+	 * индивидуального расписания это еще и удаление его сборщиком мусора).
+	 *
+	 * @param array $data варианты [id => имя]
+	 * @param string $linkClass класс объектов, на которые ссылается поле
+	 * @param mixed $value текущее значение (id или массив id для *_ids)
+	 * @return array
+	 */
+	public static function withCurrentValues(array $data, string $linkClass, $value): array
+	{
+		$missing=[];
+		foreach ((array)$value as $id) {
+			if (is_scalar($id) && strlen((string)$id) && !array_key_exists($id,$data)) $missing[]=$id;
+		}
+		if (!$missing) return $data;
+
+		$pk=$linkClass::primaryKey()[0];
+		foreach ($linkClass::find()->where([$linkClass::tableName().'.'.$pk=>$missing])->all() as $item) {
+			$data[$item->$pk]=$item->sname;
+		}
+		return $data;
+	}
+
 	public function select2($options=[]) {
 		//задаем параметры select2 по умолчанию, также допускаем передачу их через опции (а не через pluginOptions)
 		$pluginOptions=array_merge([
@@ -192,7 +222,11 @@ class ActiveField extends \yii\bootstrap5\ActiveField
 				[$options['data'],$optionAttrs]=\app\models\Markers::fetchSelectData();
 				if (count($optionAttrs)) $options['options']['options']=$optionAttrs;
 			} else {
-				$options['data']=$linkClass::fetchNames();
+				$options['data']=static::withCurrentValues(
+					$linkClass::fetchNames(),
+					$linkClass,
+					Html::getAttributeValue($this->model,$this->attribute)
+				);
 			}
 		}
 

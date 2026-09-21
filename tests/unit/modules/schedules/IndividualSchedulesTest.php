@@ -2,6 +2,7 @@
 
 namespace tests\unit\modules\schedules;
 
+use app\components\Forms\ActiveField;
 use app\models\MaintenanceJobs;
 use app\models\Services;
 use app\modules\schedules\models\Schedules;
@@ -93,6 +94,32 @@ class IndividualSchedulesTest extends Unit
 
 		$named=$this->schedule('Свое имя (#139)');
 		$this->assertSame('Свое имя (#139)',$named->displayName,'Именованное — своим именем');
+	}
+
+	/**
+	 * Регресс: расписание сервиса сделали индивидуальным (стерли имя), открыли форму
+	 * сервиса - select2 строится из fetchNames(), где безымянных нет, поле рисовалось
+	 * пустым, и сохранение формы обнуляло ссылку (а gc удалял расписание).
+	 * Текущее значение поля обязано оставаться среди вариантов - с именем по владельцу.
+	 */
+	public function testOwnerFormKeepsItsIndividualSchedule(): void
+	{
+		$schedule=$this->schedule('Было общим (#139)');
+		$service=$this->service('Телефония (#139)',['providing_schedule_id'=>$schedule->id]);
+
+		$schedule->name='';
+		$this->assertTrue($schedule->save(),'Имя единственного владельца стирается');
+
+		$data=ActiveField::withCurrentValues(
+			Schedules::fetchNames(),
+			Schedules::class,
+			$service->providing_schedule_id
+		);
+		$this->assertArrayHasKey($schedule->id,$data,'Свое индивидуальное расписание есть в вариантах формы владельца');
+		$this->assertSame('Расписание работы телефония (#139)',$data[$schedule->id],'и подписано именем по владельцу');
+
+		$foreign=ActiveField::withCurrentValues(Schedules::fetchNames(),Schedules::class,null);
+		$this->assertArrayNotHasKey($schedule->id,$foreign,'В чужих формах его по-прежнему нет');
 	}
 
 	public function testOwnerDeletionRemovesIndividualSchedule(): void

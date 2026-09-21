@@ -8,7 +8,11 @@
     # с диска, остальное уходит в index.php, а app\components\Request убирает
     # тот же префикс из pathInfo для маршрутизации.
     RewriteRule ^web/?$ index.php [L]
-    RewriteRule ^web/(.+)$ $1
+    # [L] обязателен: без него проверка -f ниже идёт в том же проходе по пути
+    # вместе с PATH_INFO (index-test.php/site/index - не файл), и запрос уходил
+    # в index.php вместо указанной точки входа. С [L] Apache делает повторный
+    # проход по уже срезанному адресу и корректно отделяет PATH_INFO
+    RewriteRule ^web/(.+)$ $1 [L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d

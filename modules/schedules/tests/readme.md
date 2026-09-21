@@ -132,6 +132,7 @@ cd modules/schedules/compile/lib/js && npx jest
 | `testUnnamedScheduleIsPrivate` | признак «индивидуальное» = пустое имя |
 | `testIndividualScheduleIsNotOfferedForSelection` | `fetchNames()` (все select2 расписаний) не отдаёт безымянные |
 | `testDisplayNameGeneratedFromOwner` | `displayName` безымянного вычисляется по владельцу |
+| `testOwnerFormKeepsItsIndividualSchedule` | **регресс:** в форме владельца его индивидуальное расписание остаётся выбранным (иначе сохранение обнуляло ссылку и gc удалял расписание); в чужих формах его нет |
 | `testOwnerDeletionRemovesIndividualSchedule` | удаление владельца уносит индивидуальное расписание |
 | `testOwnerDeletionKeepsNamedSchedule` | именованное остаётся в общем пуле |
 | `testSwitchingOwnerToAnotherScheduleRemovesOrphan` | переключение владельца на другое расписание удаляет осиротевшее |

@@ -748,6 +748,17 @@ class Schedules extends \app\models\base\ArmsModel
 	}
 
 	/**
+	 * Имя для выпадающих списков: у индивидуального (безымянного) расписания
+	 * своего имени нет - иначе в форме владельца оно стало бы пустым option'ом
+	 * ({@see \app\components\Forms\ActiveField::withCurrentValues()}).
+	 * @return string
+	 */
+	public function getSname()
+	{
+		return $this->displayName;
+	}
+
+	/**
 	 * Шаблонное имя расписания, построенное по объекту-владельцу.
 	 *
 	 * Единый источник формулы для трех потребителей:

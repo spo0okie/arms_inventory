@@ -250,6 +250,7 @@ ScheduleRuntimeAsset::register($this);
 | Механизм | Где | Что делает |
 | -------- | --- | ---------- |
 | `Schedules::fetchNames()` | [models/Schedules.php](models/Schedules.php) | единственная точка, из которой строятся все выпадающие списки расписаний ([`ActiveField::select2()`](../../components/Forms/ActiveField.php)). Отсекает безымянные — и тем делает их недостижимыми из UI |
+| [`ActiveField::withCurrentValues()`](../../components/Forms/ActiveField.php) | `select2()` любого поля-ссылки | обратная сторона `fetchNames`: **уже выбранное** значение всегда остаётся среди вариантов (подписано `sname` = `displayName`). Без этого форма владельца рисовала поле пустым, и её сохранение обнуляло ссылку — а gc удалял расписание |
 | `Schedules::validateIndividual()` | [models/Schedules.php](models/Schedules.php) | не даёт убрать имя у расписания, у которого есть дочерние или больше одного владельца |
 | [`ScheduleOwnerBehavior`](components/ScheduleOwnerBehavior.php) | вешается на владельцев | не даёт сослаться на **чужое** индивидуальное расписание (REST/консоль ставят ссылку числом, мимо формы) и зовёт сборщик мусора, отпуская расписание |
 | `Schedules::gc()` | [models/Schedules.php](models/Schedules.php) | удаляет расписание, оставшееся без владельцев, если оно индивидуальное |
