@@ -213,6 +213,47 @@ class IndividualSchedulesTest extends Unit
 		$this->assertArrayHasKey('schedules_id',$intruder->errors);
 	}
 
+	/**
+	 * Регресс: родителя с наследниками удаляли (UI показывал корзину, модель не возражала) -
+	 * запрет держался лишь случайно на entries_ids, пока записи не стали удаляемыми.
+	 */
+	public function testParentWithChildrenCannotBeDeleted(): void
+	{
+		$parent=$this->schedule('Родитель (#139)');
+		$child=new Schedules(['name'=>'Наследник (#139)','parent_id'=>$parent->id]);
+		$this->assertTrue($child->save());
+		$this->schedules[]=$child->id;
+
+		$fresh=Schedules::findOne($parent->id);
+		$this->assertGreaterThan(0,array_sum($fresh->nonDeletableReverseLinks()),'Кнопка удаления родителя заблокирована');
+		$this->assertFalse($fresh->delete(),'Модель не дает удалить родителя ни одним путем');
+		$this->assertNotNull(Schedules::findOne($parent->id));
+	}
+
+	/**
+	 * Наследник удаленного родителя (parent_id висит - FK в БД нет) не роняет страницу
+	 * и удаляется штатно.
+	 */
+	public function testChildOfMissingParentWorksAndDeletes(): void
+	{
+		$parent=$this->schedule('Удаляемый родитель (#139)');
+		$child=new Schedules(['name'=>'Сирота-наследник (#139)','parent_id'=>$parent->id]);
+		$this->assertTrue($child->save());
+		$this->schedules[]=$child->id;
+		//имитируем прод: родителя удалили в обход запрета
+		Schedules::deleteAll(['id'=>$parent->id]);
+
+		$orphan=Schedules::findOne($child->id);
+		$this->assertNull($orphan->parent);
+		$this->assertSame([$orphan->id],array_keys($orphan->parentsChain),'Цепочка обрывается на самом расписании');
+		$orphan->findExceptions(0);	//то, что падало на странице (7days.php)
+
+		//виджет удаления суммирует количества по типам связей (нулевые тоже приходят)
+		$this->assertSame(0,array_sum($orphan->nonDeletableReverseLinks()),'Наследник без своих связей удаляем');
+		$this->assertNotFalse($orphan->delete());
+		$this->assertNull(Schedules::findOne($child->id));
+	}
+
 	public function testDeleteCascadesEntries(): void
 	{
 		$schedule=$this->schedule('С записями (#139)');

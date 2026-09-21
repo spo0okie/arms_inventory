@@ -254,7 +254,13 @@ ScheduleRuntimeAsset::register($this);
 | `Schedules::validateIndividual()` | [models/Schedules.php](models/Schedules.php) | не даёт убрать имя у расписания, у которого есть дочерние или больше одного владельца |
 | [`ScheduleOwnerBehavior`](components/ScheduleOwnerBehavior.php) | вешается на владельцев | не даёт сослаться на **чужое** индивидуальное расписание (REST/консоль ставят ссылку числом, мимо формы) и зовёт сборщик мусора, отпуская расписание |
 | `Schedules::gc()` | [models/Schedules.php](models/Schedules.php) | удаляет расписание, оставшееся без владельцев, если оно индивидуальное |
-| `Schedules::beforeDelete()` | [models/Schedules.php](models/Schedules.php) | каскадом удаляет записи, перекрытия и ACL (FK в БД выпилены — каскад держится только на коде) |
+| `Schedules::beforeDelete()` | [models/Schedules.php](models/Schedules.php) | отказывает, если от расписания наследуются дочерние (любой путь удаления: UI, REST, консоль); иначе каскадом удаляет записи, перекрытия и ACL (FK в БД выпилены — каскад держится только на коде). В UI тот же запрет — обратная связь `children_ids` (loader `childSchedules`, без перекрытий) в `linksSchema` |
+
+> **Готча.** Раньше родителя с наследниками не давали удалить лишь случайно: блокировали
+> его же записи (`entries_ids`). Когда записи стали частью расписания (`deletable`), замок
+> пропал — отсюда явная связь `children_ids`. Если `parent_id` всё же указывает на
+> несуществующее расписание, цепочка предков обрывается на самом расписании
+> (`getParentsChain`), а карточка показывает предупреждение «родитель не найден».
 
 Владельцев ровно четыре ссылки: `services.providing_schedule_id`,
 `services.support_schedule_id`, `maintenance_jobs.schedules_id`, `acls.schedules_id`.

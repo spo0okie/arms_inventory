@@ -97,6 +97,9 @@ class Schedules extends \app\models\base\ArmsModel
 		'support_services_ids' => 	[\app\models\Services::class,'support_schedule_id'],
 		'maintenance_jobs_ids' => 	[\app\models\MaintenanceJobs::class,'schedules_id'],
 		'overrides_ids' => 			[Schedules::class,'override_id','deletable'=>true],
+		//дочерние расписания наследуют график родителя - удалять родителя при их наличии
+		//нельзя (раньше удаление блокировалось лишь случайно, записями entries_ids)
+		'children_ids' =>			[Schedules::class,'parent_id','loader'=>'childSchedules'],
 	];
 
 	/**
@@ -524,6 +527,18 @@ class Schedules extends \app\models\base\ArmsModel
 	}
 	
 	/**
+	 * Дочерние расписания (наследники по parent_id) без перекрытий - relation-версия
+	 * getChildrenNonOverrides() для linksSchema: по ней считается запрет удаления
+	 * (nonDeletableReverseLinks/loaderCount - одним GROUP BY на весь запрос).
+	 * @return ActiveQuery
+	 */
+	public function getChildSchedules()
+	{
+		return $this->hasMany(Schedules::class, ['parent_id' => 'id'])
+			->andOnCondition(['override_id'=>null]);
+	}
+
+	/**
 	 * Возвращает потомков, которые не являются перекрытиями
 	 * @return Schedules[]
 	 */
@@ -610,6 +625,13 @@ class Schedules extends \app\models\base\ArmsModel
 	 */
 	public function beforeDelete()
 	{
+		//родителя с наследниками не удаляем никаким путем (UI, REST, консоль):
+		//наследники потеряли бы график, а страница наследника - родителя
+		if (static::find()->where(['parent_id'=>$this->id,'override_id'=>null])->exists()) {
+			$this->addError('id','Нельзя удалить расписание, от которого наследуются дочерние расписания');
+			return false;
+		}
+
 		//метка для gc: пока расписание удаляется, его же нельзя удалять повторно
 		//(каскад по ACL зовет ScheduleOwnerBehavior, а тот - Schedules::gc())
 		static::$deleting[$this->id]=true;

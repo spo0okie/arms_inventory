@@ -140,6 +140,8 @@ cd modules/schedules/compile/lib/js && npx jest
 | `testCannotDropNameWhenScheduleIsShared` | нельзя убрать имя у расписания с несколькими владельцами |
 | `testCannotDropNameWhenScheduleHasChildren` | нельзя убрать имя у расписания с дочерними |
 | `testCannotLinkToForeignIndividualSchedule` | нельзя сослаться на чужое индивидуальное расписание (REST/консоль) |
+| `testParentWithChildrenCannotBeDeleted` | **регресс:** родителя с наследниками нельзя удалить (кнопка заблокирована, модель отказывает) |
+| `testChildOfMissingParentWorksAndDeletes` | наследник удалённого родителя не роняет страницу и удаляется штатно |
 | `testDeleteCascadesEntries` | записи расписания удаляются вместе с ним (FK в БД нет) |
 
 ### `tests/unit/modules/schedules/ScheduleOwnersGuardTest.php` — сторож владельцев

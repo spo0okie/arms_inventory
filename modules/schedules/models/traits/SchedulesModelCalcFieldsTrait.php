@@ -136,10 +136,13 @@ trait SchedulesModelCalcFieldsTrait
 		if (isset($chain[$this->id])) return $chain;
 		//добавляем себя в цепочку
 		$chain[$this->id]=$this;
-		//если у нас есть родитель
-		return $this->parent_id?
-			$this->parent->getParentsChain($chain):  //- передаем ему эстафету
-			$chain; //возвращаем текущую цепочку
+		//если у нас есть родитель - передаем ему эстафету, иначе возвращаем текущую цепочку.
+		//parent_id может указывать на удаленное расписание (FK в БД нет) - тогда цепочка
+		//обрывается на нас, а не роняет страницу
+		$parent=$this->parent_id?$this->parent:null;
+		return is_object($parent)?
+			$parent->getParentsChain($chain):
+			$chain;
 	}
 	public function getAcePartners() {
 		if (!is_array($this->acls)) return [];
