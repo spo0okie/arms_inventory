@@ -54,10 +54,11 @@ class PlacesController extends ArmsBaseController
 	/**
 	 * Отображает карту АРМов: все помещения с полной загрузкой связанного оборудования.
 	 *
-	 * Тяжёлый запрос: выполняет joinWith по множеству отношений (phones, inets,
+	 * Жадная загрузка через with() (отдельный IN-запрос на отношение; НЕ joinWith —
+	 * JOIN нескольких hasMany даёт декартово произведение строк) по отношениям (phones, inets,
 	 * techs с вложенными comp/domain/services/licKeys/licItems/licGroups/contracts/
 	 * state/model/manufacturer/user, materials с type/children/usages).
-	 * Рекомендуется кэшировать или ограничивать на больших инсталляциях.
+	 * Отношения без условий в WHERE — JOIN не нужен.
 	 *
 	 * GET-параметры:
 	 * - showArchived (bool, опционально): если true — включает архивные объекты
@@ -69,7 +70,7 @@ class PlacesController extends ArmsBaseController
 		ManufacturersDict::initCache();
 		return $this->render('armmap', [
 			'models' => Places::find()
-				->joinWith([
+				->with([
 					'phones',
 					'inets',
 					'techs.comp.domain',
@@ -158,7 +159,7 @@ class PlacesController extends ArmsBaseController
     /**
      * Отображает страницу помещения с полной загрузкой связанного оборудования.
      *
-     * Выполняет тяжёлый joinWith по всем связанным отношениям (phones, inets,
+     * Жадно загружает через with() (не joinWith — см. actionArmmap) все связанные отношения (phones, inets,
      * techs с вложенными comp/domain/services/sandbox/licKeys/licItems/licGroups/
      * contracts/state/model/manufacturer/user, materials с type/children/usages).
      *
@@ -176,7 +177,7 @@ class PlacesController extends ArmsBaseController
             'model' => $this->findModel($id),
 			'show_archived'=> Yii::$app->request->get('showArchived',false),
 	        'models' => Places::find()
-				->joinWith([
+				->with([
 					'phones',
 					'inets',
 					'techs.comp.domain',
