@@ -22,4 +22,4 @@ $this->title = 'Новый документ';
 </div>
 <?php
 //регистрируем обработчик "после сохранения" по умолчанию - перейти на страничку просмотра
-$this->registerJs("$('#contracts-edit-form').on('afterSubmit',function() {contractFormGotoViewOnSave();})");
+$this->registerJs("$('#contracts-edit-form').on('afterSubmit',function() {contractFormGotoViewOnSave();});");

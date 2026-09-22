@@ -195,7 +195,7 @@ function accessTypePickerCreated(data) {
 JS;
 $this->registerJs($js, View::POS_HEAD);
 //вызываем нашу функцию после загрузки формы, т.к. может быть нужно поотключать некоторые чекбоксы если они дочерние доступы
-$this->registerJs('updateAccessTypes()');
+$this->registerJs('updateAccessTypes();');
 
 //фильтр и кнопка создания встраиваются в template поля между label и списком,
 //чтобы заголовок поля был над всем пикером
