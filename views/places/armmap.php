@@ -1,6 +1,6 @@
 <?php
 
-
+use app\components\ShowArchivedWidget;
 
 /* @var $this yii\web\View */
 /* @var $models \app\models\Places */
@@ -11,8 +11,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
 if (!isset($show_archived)) $show_archived=true;
 
-echo $this->render('hdr_create_obj');
 ?>
+<div class="d-flex flex-wrap align-items-center justify-content-between">
+	<div><?= $this->render('hdr_create_obj') ?></div>
+	<?php //тогглер без перезагрузки: строки архивных ОС и rowspan ячеек АРМ переключаются на клиенте
+	// (ShowArchivedWidget::$scriptOn/$scriptOff, techs/map/arm-row) ?>
+	<div class="p-2"><?= ShowArchivedWidget::widget(['reload'=>false,'state'=>(bool)$show_archived]) ?></div>
+</div>
 
 <div class="places-index">
 
