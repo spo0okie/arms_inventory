@@ -63,7 +63,8 @@ class ArmsForm extends ActiveForm
 		//AJAX-ом в модалку, получала тот же w0, что и виджет на самой странице -> дубль id в DOM,
 		//yiiActiveForm (AJAX-валидация) инициализировался не на той форме.
 		//NB: задавать ДО parent::init() - тот сам проставит options[id] авто-значением
-		if (isset($this->modelClass) && !isset($this->options['id'])) {
+		//явно заданный id виджета ('id'=>'...') уважаем - parent::init() возьмет его в options[id]
+		if (isset($this->modelClass) && !isset($this->options['id']) && $this->getId(false)===null) {
 			$this->options['id']=static::uniqueFormId($this->modelClass,$this->model);
 		}
 
