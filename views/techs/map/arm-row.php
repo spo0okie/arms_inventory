@@ -16,6 +16,9 @@ use app\models\Techs;
 
 use app\components\widgets\page\ModelWidget;
 $comps=$model->comps;
+//живые ОС вперёд (внутри групп HW/VM — порядок ignore_hw сохраняем, на нём держится rowspanPhys):
+//архивные строки скрываются целиком <tr>, а первая строка несёт ячейки уровня АРМ и скрываться не должна
+usort($comps,fn($a,$b)=>[(int)$a->ignore_hw,(int)$a->archived]<=>[(int)$b->ignore_hw,(int)$b->archived]);
 //если ни одной не нашли, то создаем массив из пустого элемента чтобы вывести данные по АРМ без ОС
 if (!count($comps)) $comps=[0=>null];
 
@@ -69,11 +72,26 @@ $is_server=(bool)(count($compsServices));
  */
 
 //поехали!
+/*
+ * Архивность: ячейки уровня АРМ (с rowspan) скрываются только по архивности самого АРМ.
+ * Архивная ОС живого АРМ: не первая строка — скрываем весь <tr>; первая — только содержимое
+ * её ячеек (hostname/сервисы/IP/VM). Прятать сами <td> нельзя: ячейка с display:none выпадает
+ * из сетки таблицы, и соседние ячейки съезжают под чужие колонки.
+ */
+$archClass=($model->archived?'archived-item':'').' '.($is_server?'server':'');
+$archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
+$archHidden=$model->archived&&!$show_archived;
+
 for ($i=0; $i<count($comps); $i++) {
-	$archClass=($model->archived?'archived-item':'').' '.($is_server?'server':'');
-	$archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
-    $comp=$comps[$i]; ?>
-    <tr>
+    $comp=$comps[$i];
+	$compArchived=is_object($comp)&&$comp->archived&&!$model->archived;
+	$trArchived=$compArchived&&$i;
+	//обёртка содержимого ячеек архивной ОС в первой строке
+	$compWrap=fn(string $html)=>($compArchived&&!$trArchived)
+		?'<span class="archived-item" '.($show_archived?'':'style="display:none"').'>'.$html.'</span>'
+		:$html;
+	?>
+    <tr <?= $trArchived?('class="archived-item"'.($show_archived?'':' style="display:none"')):'' ?>>
 	
 		<?php //в самой первой строчке нужно вставить в начале колонку кабинета/помещения.
 		// вставить надо только один раз, т.к. у нее rowspan=0 и она идет сквозняком до конца таблицы
@@ -90,12 +108,8 @@ for ($i=0; $i<count($comps); $i++) {
 	    
 	    <?php //если у нас есть ОС, то зададим ячейке класс свежести данных об этой ОС
 	    	$age_class=is_object($comp)?$comp->updatedRenderClass:'';
-			//клас архивации пересматриваем с учетом архивации ОС
-			$archClass=((is_object($comp)&&$comp->archived || $model->archived)?'archived-item':'').' '.($is_server?'server':'');
-			$archDisplay=((is_object($comp)&&$comp->archived || $model->archived)&&!$show_archived)?'style="display:none"':'';
-	
 		?>
-        <td class="arm_hostname <?= $age_class ?> <?= $archClass ?>" <?=$archDisplay ?>><?= is_object($comp)?ModelWidget::widget(['model'=>$comp]):'' ?></td>
+        <td class="arm_hostname <?= $age_class ?> <?= $archClass ?>" <?=$archDisplay ?>><?= is_object($comp)?$compWrap(ModelWidget::widget(['model'=>$comp])):'' ?></td>
 
 		
         <?php if (count($model->compsServices)) {
@@ -115,7 +129,7 @@ for ($i=0; $i<count($comps); $i++) {
 				$services[]='<span class="grayed-out href"><span class="fas fa-comment small"></span> '.$comp->comment.'</span>';
 	
 			?>
-            <td colspan="2" class="arm_services <?= $archClass ?> " <?= $archDisplay ?>><?= implode(' ',$services); ?></td>
+            <td colspan="2" class="arm_services <?= $archClass ?> " <?= $archDisplay ?>><?= $compWrap(implode(' ',$services)); ?></td>
         <?php } else if (!$i) { ?>
 
             <td class="arm_uname <?= $archClass ?>" <?= $archDisplay ?> <?= $rowspan ?>>
@@ -147,7 +161,7 @@ for ($i=0; $i<count($comps); $i++) {
 			</td>
         <?php }} else { ?>
 			<td class="arm_model <?= $archClass ?>" <?= $archDisplay ?>>
-				<abbr title="Virtual Machine">VM</abbr>
+				<?= $compWrap('<abbr title="Virtual Machine">VM</abbr>') ?>
 			</td>
 		<?php } ?>
 
@@ -185,7 +199,7 @@ for ($i=0; $i<count($comps); $i++) {
 			<?php }
 	    } else { ?>
 			<td class="hardware <?= $archClass ?>" <?= $archDisplay ?>>
-				<?= $this->render('/hwlist/shortlist',['model'=>$comp->hwList,'vm'=>true,'comp_id'=>$comp->id]) ?>
+				<?= $compWrap($this->render('/hwlist/shortlist',['model'=>$comp->hwList,'vm'=>true,'comp_id'=>$comp->id])) ?>
 			</td>
 		<?php } ?>
 
@@ -200,12 +214,12 @@ for ($i=0; $i<count($comps); $i++) {
 			//display:none архивных вклеивается в тот же style-атрибут
 			$stateClass=strlen($model->stateName)?$model->state->markerClass($model->state->code):'';
 			$stateStyle=strlen($model->stateName)?$model->state->markerStyle():'';
-			if ($archDisplay) $stateStyle=trim($stateStyle.';display:none',';');
+			if ($archHidden) $stateStyle=trim($stateStyle.';display:none',';');
 		?>
             <td class="item_status <?= $stateClass ?> <?= $archClass?>" style="<?= $stateStyle ?>" title="<?= $model->comment ?>" <?= $rowspan ?>><?= $model->stateName ?></td>
 	    <?php }?>
 
-        <td class="item_ip <?= $archClass ?>" <?= $archDisplay ?>><?= is_object($comp)?$comp->currentIp:'' ?></td>
+        <td class="item_ip <?= $archClass ?>" <?= $archDisplay ?>><?= is_object($comp)?$compWrap((string)$comp->currentIp):'' ?></td>
 
         <?php if (!$i) { ?>
             <td class="item_invnum <?= $archClass ?>" <?= $archDisplay ?><?= $rowspan ?>>
