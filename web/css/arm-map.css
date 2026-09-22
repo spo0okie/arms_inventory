@@ -21,13 +21,15 @@
 	--map-wifi: lightskyblue;     /* WiFi */
 	--map-nas: darkturquoise;     /* NAS */
 	--map-srv: white;             /* сервер в стойке (rack-unit) */
-	/* цвет диагональной штриховки серверов/NAS (см. --map-hatch-image):
-	   тёмные штрихи на светлых фонах; тёмная тема даёт светлые (themes.css) */
-	--map-hatch: rgba(0,0,0,.16);
-	/* сама штриховка: CSS-полосы вместо картинки diagonal-noise.png —
-	   картинка была едва различима и не умела подстраиваться под тему */
-	--map-hatch-image: repeating-linear-gradient(45deg,
-		var(--map-hatch) 0 2px, transparent 2px 7px);
+	/* диагональная штриховка серверов/NAS: SVG-тайл 8×8 с попиксельной
+	   диагональю толщиной ровно 1px (градиент на 45° сглаживается и даёт
+	   полосы «плавающей» толщины). Цвет в data-URI не берётся из var(),
+	   поэтому тёмная тема переопределяет весь токен (themes.css) —
+	   тёмные штрихи на светлых фонах, светлые на тёмных */
+	--map-hatch-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' %3E%3Cpath fill='black' fill-opacity='.10' d='M0 0h1v1h-1zM1 1h1v1h-1zM2 2h1v1h-1zM3 3h1v1h-1zM4 4h1v1h-1zM5 5h1v1h-1zM6 6h1v1h-1zM7 7h1v1h-1z'/%3E%3C/svg%3E");
+	/* штриховку применять ВМЕСТЕ с background-attachment: fixed — узор
+	   привязан к окну, а не к ячейке, поэтому соседние серверные ячейки
+	   образуют одно полотно без сдвига полос на границах */
 }
 
 /*Шапка помещения 1 уровня*/
@@ -144,12 +146,14 @@ td.rack-unit.tech_nas
 {
     background-color: var(--map-nas);
     background-image: var(--map-hatch-image);
+    background-attachment: fixed;
 }
 
 td.rack-unit.tech_srv
 {
     background-color: var(--map-srv);
     background-image: var(--map-hatch-image);
+    background-attachment: fixed;
 }
 
 table.places-arms-container td.tech_whitespace {

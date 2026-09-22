@@ -42,9 +42,9 @@ span.unit-status.over_month_fresh {background: linear-gradient(45deg,transparent
 
 /* СЕРВЕР */
 
-/* диагональная штриховка сервера: токены --map-hatch* объявлены в arm-map.css,
-   тёмная тема переопределяет цвет штриха в themes.css */
-table.places-arms-container td.server {background-image: var(--map-hatch-image)}
+/* диагональная штриховка сервера: токен --map-hatch-image объявлен в arm-map.css,
+   тёмная тема переопределяет его в themes.css */
+table.places-arms-container td.server {background-image: var(--map-hatch-image); background-attachment: fixed}
 
 
 /* РАСКРАСКА Ответственных за сервисы */
