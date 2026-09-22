@@ -14,10 +14,11 @@
 use app\helpers\ArrayHelper;
 use app\models\Techs;
 
+use app\components\ShowArchivedWidget;
 use app\components\widgets\page\ModelWidget;
 $comps=$model->comps;
 //живые ОС вперёд (внутри групп HW/VM — порядок ignore_hw сохраняем, на нём держится rowspanPhys):
-//архивные строки скрываются целиком <tr>, а первая строка несёт ячейки уровня АРМ и скрываться не должна
+//архивные строки сворачиваются целиком <tr>, а первая строка несёт ячейки уровня АРМ и скрываться не должна
 usort($comps,fn($a,$b)=>[(int)$a->ignore_hw,(int)$a->archived]<=>[(int)$b->ignore_hw,(int)$b->archived]);
 //если ни одной не нашли, то создаем массив из пустого элемента чтобы вывести данные по АРМ без ОС
 if (!count($comps)) $comps=[0=>null];
@@ -74,9 +75,11 @@ $is_server=(bool)(count($compsServices));
 //поехали!
 /*
  * Архивность: ячейки уровня АРМ (с rowspan) скрываются только по архивности самого АРМ.
- * Архивная ОС живого АРМ: не первая строка — скрываем весь <tr>; первая — только содержимое
- * её ячеек (hostname/сервисы/IP/VM). Прятать сами <td> нельзя: ячейка с display:none выпадает
- * из сетки таблицы, и соседние ячейки съезжают под чужие колонки.
+ * Архивная ОС живого АРМ: не первая строка — сворачиваем весь <tr> через visibility:collapse
+ * (НЕ display:none: такая строка выпадает из сетки, и rowspan-ячейки АРМ съедают строки
+ * следующего АРМ — см. ShowArchivedWidget::$rowClass); первая строка — только содержимое
+ * её ячеек (hostname/сервисы/IP/VM). Прятать сами <td> тоже нельзя: ячейка с display:none
+ * выпадает из сетки, и соседние ячейки съезжают под чужие колонки.
  */
 $archClass=($model->archived?'archived-item':'').' '.($is_server?'server':'');
 $archDisplay=($model->archived&&!$show_archived)?'style="display:none"':'';
@@ -91,7 +94,7 @@ for ($i=0; $i<count($comps); $i++) {
 		?'<span class="archived-item" '.($show_archived?'':'style="display:none"').'>'.$html.'</span>'
 		:$html;
 	?>
-    <tr <?= $trArchived?('class="archived-item"'.($show_archived?'':' style="display:none"')):'' ?>>
+    <tr <?= $trArchived?('class="'.ShowArchivedWidget::$rowClass.'"'.($show_archived?'':' style="visibility:collapse"')):'' ?>>
 	
 		<?php //в самой первой строчке нужно вставить в начале колонку кабинета/помещения.
 		// вставить надо только один раз, т.к. у нее rowspan=0 и она идет сквозняком до конца таблицы

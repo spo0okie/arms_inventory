@@ -20,6 +20,14 @@ class ShowArchivedWidget extends UrlParamSwitcherWidget
 	 */
 	public static $defaultValue=true;
 	public static $itemClass='archived-item';
+	/*
+	 * Архивная строка таблицы, через которую проходят rowspan-ячейки соседних строк.
+	 * display:none выкидывает <tr> из сетки, и rowspan «доедает» строки следующей записи
+	 * (карта рабочих мест разъезжается лесенкой). Такие строки сворачиваем через
+	 * visibility:collapse — строка исчезает, сетка остаётся. Класс НЕ archived-item,
+	 * чтобы .show()/.hide() не навешивал на <tr> display.
+	 */
+	public static $rowClass='archived-row';
 	public static $defaultParam='showArchived';
 	
 	public static function archivedClass($model,$attr='archived') {
@@ -41,12 +49,14 @@ class ShowArchivedWidget extends UrlParamSwitcherWidget
 	public $label='Архивные';
 	public $scriptOn=<<<JS
 	$('.archived-item').show();
+	$('.archived-row').css('visibility','');
 	if (typeof ExpandableCardOversizeCheck === 'function') {
 		$('.expandable-card-outer').each(function (index,item){ExpandableCardOversizeCheck(item)});
 	}
 JS;
 	public $scriptOff=<<<JS
 	$('.archived-item').hide();
+	$('.archived-row').css('visibility','collapse');
 	if (typeof ExpandableCardOversizeCheck === 'function') {
 		$('.expandable-card-outer').each(function (index,item){ExpandableCardOversizeCheck(item)});
 	}
